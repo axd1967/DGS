@@ -23,6 +23,14 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-01-26 juga
+
+   * opponents.php, status.php, users.php, waiting_room.php:
+   - fix add_tablehead()-defaults for "hideable, but not sortable" columns:
+     - users, opponents: Rank info, Open for matches
+     - status: sgf
+     - waiting-room: comment, time-limit
+
 2009-01-25 juga
 
    * include/classlib_profile.php (SearchProfile.handle_action),
