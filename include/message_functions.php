@@ -564,6 +564,9 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 {
+   $AdjHandicap = 0;
+   $MinHandicap = 0;
+   $MaxHandicap = MAX_HANDICAP;
    extract($game_row);
    $is_my_game = ( $game_row['other_id'] == $player_row['ID'] );
 
