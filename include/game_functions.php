@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -154,6 +154,25 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       error('mysql_insert_move',"add_time_opponent.insert_move($gid)");
 
    return $add_hours; // success (no-error)
+}
+
+// returns adjusted handicap within limits, also checking for valid limits
+function adjust_handicap( $handicap, $adj_handicap, $min_handicap, $max_handicap )
+{
+   // assure valid limits
+   $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
+   $max_handicap = ( $max_handicap < 0 ) ? MAX_HANDICAP : min( MAX_HANDICAP, $max_handicap );
+
+   // adjust
+   if( $adj_handicap )
+      $handicap += $adj_handicap;
+
+   if( $handicap < $min_handicap )
+      $handicap = $min_handicap;
+   elseif( $handicap > $max_handicap )
+      $handicap = $max_handicap;
+
+   return $handicap;
 }
 
 ?>
