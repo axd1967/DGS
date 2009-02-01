@@ -89,6 +89,8 @@ define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
 define('CACHE_FOLDER', 'temp/');
 
 
+// Global parameters to configure behaviour for features of your DGS-server:
+
 // Define access keys
 // - keep empty with value '' to define no access key
 // - keys 0..9 are reserved for bottom page-links
@@ -122,9 +124,6 @@ define('ACCKEY_ACT_FILT_RESET',  'z');
 // access keys for specific pages
 define('ACCKEYP_GAME_COMMENT',   '');
 
-
-// Global Config for Features on DGS
-
 // Allow JavaScript for some convenience-functionality
 define('ALLOW_JAVASCRIPT', true);
 
@@ -133,6 +132,11 @@ define('ALLOW_QUOTING', false);
 
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
+
+// Games-list: Configuring number of (starting) chars from private game-notes
+// as Notes-column in status-game-list and my-games-list
+// - set to 0 to disable
+define('LIST_GAMENOTE_LEN', 20);
 
 // IP-blocklist: user with these IPs are blocked
 // Syntax: '127.0.0.1' (=ip), '127.0.0.1/32' (=subnet), '/^127\.0\.0\.1$/' (=regex)

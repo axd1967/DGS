@@ -98,7 +98,6 @@ $max_links_in_main_menu=5;
 //-----
 //Tables - lists
 define('LIST_ROWS_MODULO', 4); //at least 1
-define('LIST_GAMENOTE_LEN', 20); //set 0 to disable => impact the show_game page
 
 define('MAXROWS_PER_PAGE_DEFAULT', 20);
 define('MAXROWS_PER_PAGE_PROFILE', 50);
