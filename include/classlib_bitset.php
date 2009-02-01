@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/utilities.php' );
+
  /* Author: Jens-Uwe Gaspar */
 
 
@@ -56,11 +58,11 @@ define('BITSET_MAXSIZE', (2 * BITSET_EXPORT_INTBITS));
   *    $b->get_hex_format();
   *    $b->get_db_set('b');
   *
-  * NOTE: GMP is not used for implementation, since it needs PHP5.1 for Windows-platforms.
-  *       Can later be replaced using GMP-library.
+  * NOTE: GMP is not used for implementation, since it needs PHP5.1 for Windows-platforms
+  *       and still supports PHP4. Can later use GMP-library.
   *
   * NOTE: BitSet-operations return 0 if bit-number is out-of-range.
-  * NOTE: Maximum bit-pos is 62 (see const BITSET_MAXSIZE).
+  * NOTE: Maximum bit-pos is: see const BITSET_MAXSIZE
   */
 class BitSet
 {
@@ -260,10 +262,7 @@ class BitSet
       // assure valid values for spos, epos; and spos <= epos
       if( $spos < 1 ) $spos = 1;
       if( $epos > BITSET_MAXSIZE ) $epos = BITSET_MAXSIZE;
-      if( $spos > $epos )
-      {//swap
-         $tmp = $spos; $spos = $epos; $epos = $tmp;
-      }
+      if( $spos > $epos ) swap( $spos, $epos );
       if( ($epos - $spos + 1) > 30 )
          return -1;
 
@@ -288,10 +287,7 @@ class BitSet
    function _set_intval_range( $spos, $epos, $int_val )
    {
       // assure valid values for spos, epos; and spos <= epos
-      if( $spos > $epos )
-      {//swap
-         $tmp = $spos; $spos = $epos; $epos = $tmp;
-      }
+      if( $spos > $epos ) swap( $spos, $epos );
       if( $spos < 1 )
          return false;
       if( $epos > BITSET_MAXSIZE ) // ignore irrelvant bits
