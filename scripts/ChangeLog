@@ -25,6 +25,15 @@ ChangeLog
 
 2009-02-01 juga
 
+   * show_games.php, status.php:
+   - load Notes-data only if column shown for user to reduce server-load for page
+     avoiding additional outer-join on GamesNotes-table
+   - changed table-column-id for Notes-column: 32 -> 15 (was unused)
+
+   * include/config.php, include/std_functions.php:
+   - moved LIST_GAMENOTE_LEN from std_functions.php to config.php controlling
+     Notes-column for some games-lists
+
    * include/std_classes.php:
    - removed $TranslateGroups (no translation-texts)
    - adjust EMPTY_SQL_QUERY with mysql5 now to DUAL-table-feature
