@@ -14,7 +14,7 @@ quick INFO:
    Code Cleanup, New Features
 
 2009-01-01 juga
-   Forum, New-Game/Waiting-Room, Wishlist-items, Code Cleanup
+   Forum, Wishlist-items, Code Cleanup
 
 -----
 quick TODO:
@@ -22,6 +22,23 @@ quick TODO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2009-02-01 juga
+
+   * add_to_waitingroom.php, waiting_room.php, NEWS,
+     include/make_game.php (create_game, adjust_handicap),
+     include/message_functions.php (game_settings_form, game_info_table,
+       build_adjust_handicap),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added new-game options for waiting-room with adjustment and min/max-limitation
+     of handicap stones
+-----------
+-- game-handicap adjustment & min/max-limits
+ALTER TABLE `Waitingroom`
+   ADD `AdjHandicap` tinyint signed NOT NULL default '0' AFTER `Handicaptype`,
+   ADD `MinHandicap` tinyint signed NOT NULL default '0' AFTER `AdjHandicap`,
+   ADD `MaxHandicap` tinyint signed NOT NULL default '127' AFTER `MinHandicap` ;
+-----------
 
 2009-01-26 juga
 
