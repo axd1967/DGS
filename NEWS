@@ -108,7 +108,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Changed default for empty subject: ??? -> (no subject)
 
    * Users:
-      * Added third activity-level (<image star3.gif><image star3.gif><image star3.gif>)
+      * Added third activity-level:
+        high activity (<image star.gif><image star.gif><image star.gif>), medium activity (<image star2.gif><image star2.gif>), low activity (<image star3.gif>)
       * Introducing JavaScript management in profile setting
       * Initial Rating: removed converting of NNGS-rank/rating
 
