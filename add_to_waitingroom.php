@@ -92,6 +92,7 @@ require_once( "include/rating.php" );
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range');
 
+   // handicap adjustment
    $adj_handicap = (int)@$_POST['adj_handicap'];
    if( abs($adj_handicap) > MAX_HANDICAP )
       $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
@@ -101,6 +102,10 @@ require_once( "include/rating.php" );
    $max_handicap = (int)@$_POST['max_handicap'];
    if( $max_handicap > MAX_HANDICAP )
       $max_handicap = -1; // don't save potentially changeable "default"
+
+   if( $max_handicap >= 0 && $min_handicap > $max_handicap )
+      swap( $min_handicap, $max_handicap );
+
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
 
