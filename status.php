@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ require_once( "include/message_functions.php" );
 $ThePage = new Page('Status');
 
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -119,14 +120,20 @@ $ThePage = new Page('Status');
 { // show games
    $uid = $my_id;
 
-   $show_notes= (LIST_GAMENOTE_LEN>0);
-
    $gtable->add_or_del_column();
+
+   // NOTE: check after add_or_del_column()-call
+   // only activate if column shown for user to reduce server-load for page
+   // avoiding additional outer-join on GamesNotes-table !!
+   $show_notes = (LIST_GAMENOTE_LEN>0);
+   $load_notes = ($show_notes && $gtable->is_column_displayed(15) );
+
+   // NOTE: mostly same col-IDs used as in show_games-page (except for IDs: 10)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
-      $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
+      $gtable->add_tablehead(15, T_('Notes#header'), '', 0, 'X_Note-');
    $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
    $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
    $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
@@ -152,14 +159,16 @@ $ThePage = new Page('Status');
       //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
       .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
       .",Clock.Ticks" //always my clock because always my turn (status page)
-      .(!$show_notes ?'': ",Gnt.Notes AS X_Note" )
+      .(!$load_notes ? '': ",Gnt.Notes AS X_Note" )
       ." FROM (Games,Players AS opponent)"
-      .(!$show_notes ?'': " LEFT JOIN GamesNotes AS Gnt ON Gnt.gid=Games.ID"
+      .(!$load_notes ? '': " LEFT JOIN GamesNotes AS Gnt ON Gnt.gid=Games.ID"
          ." AND Gnt.player=IF(White_ID=$uid,'W','B')" )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
       ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"
       ."$order$limit";
+
+   if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'status.find_games');
@@ -189,12 +198,12 @@ $ThePage = new Page('Status');
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[ 4] = "<A href=\"userinfo.php?uid=$pid\">" .
                $Handle . "</a>";
-         if( $show_notes && $gtable->Is_Column_Displayed[32] )
+         if( $load_notes && $gtable->Is_Column_Displayed[15] )
          { //keep the first line up to LIST_GAMENOTE_LEN chars
             $X_Note= trim( substr(
                preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
                , 0, LIST_GAMENOTE_LEN) );
-            $grow_strings[32] = make_html_safe($X_Note);
+            $grow_strings[15] = make_html_safe($X_Note);
          }
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = echo_rating($Rating,true,$pid);
