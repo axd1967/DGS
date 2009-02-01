@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,12 +17,14 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Common";
-
  /* Author: Jens-Uwe Gaspar */
 
+// NOTE: don't use translation-texts in this file
+
+
 // used as valid query with an empty result, since mysql4.1 use -> 'SELECT 1 FROM DUAL'
-define('EMPTY_SQL_QUERY', 'SELECT 1 FROM Forums WHERE 1=0');
+//define('EMPTY_SQL_QUERY', 'SELECT 1 FROM Forums WHERE 1=0');
+define('EMPTY_SQL_QUERY', 'SELECT 1 FROM DUAL');
 
 
 
