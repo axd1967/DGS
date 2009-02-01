@@ -25,8 +25,33 @@ ChangeLog
 
 2009-02-01 juga
 
+   * include/std_classes.php:
+   - removed $TranslateGroups (no translation-texts)
+   - adjust EMPTY_SQL_QUERY with mysql5 now to DUAL-table-feature
+
+   * include/classlib_bitset.php (BitSet._get_intval_range, ~._set_intval_range),
+     include/filter.php (FilterRating.parse_value),
+     include/filter_parser.php (BasicParser.swap_range_start_end):
+   - used swap()-func, moved into utilities.php
+
+   * include/std_functions.php (mod, modf, swap, array_combine, array_bsearch,
+       array_value_to_key_and_value, map_to_string, array_bsearch,
+       activity_string, RGBA, limit),
+     include/utilities.php (mod, modf, swap, array_combine, array_bsearch,
+       array_value_to_key_and_value, map_to_string, limit),
+     NEWS:
+   - moved DGS-unrelated functions to separate include-file utilities.php and added more doc
+   - changed colors for activity-levels:
+     arranged activity-stars like traffic-light, keeping green as highest activity-level
+     in order to reduce GUI-"change"
+   - deprecated nsq_addslashes()
+
+   * add_to_waitingroom.php:
+   - fixed bug for handicap-adjustment: swap min/max-handicap if max>min
+
    * add_to_waitingroom.php, waiting_room.php, NEWS,
-     include/make_game.php (create_game, adjust_handicap),
+     include/game_functions.php (adjust_handicap),
+     include/make_game.php (create_game),
      include/message_functions.php (game_settings_form, game_info_table,
        build_adjust_handicap),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
