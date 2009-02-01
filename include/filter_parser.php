@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -24,6 +24,7 @@ $TranslateGroups[] = "Common";
 require_once( "include/quick_common.php" );
 require_once( "include/filter_functions.php" );
 require_once( "include/tokenizer.php" );
+require_once( 'include/utilities.php' );
 
  /*!
   * \file filter_parser.php
@@ -283,9 +284,7 @@ class BasicParser
     * signature: void swap_range_start_end()
     */
    function swap_range_start_end() {
-      $tmp = $this->p_start;
-      $this->p_start = $this->p_end;
-      $this->p_end = $tmp;
+      swap( $this->p_start, $this->p_end );
    }
 } // end of 'BasicParser'
 

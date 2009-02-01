@@ -2203,11 +2203,7 @@ class FilterRating extends Filter
       }
 
       if( $tp->handle_reverse_range(true) ) // forced swap
-      { // swap orig start & end too
-         $tmp = $orig_pstart;
-         $orig_pstart = $orig_pend;
-         $orig_pend = $tmp;
-      }
+         swap( $orig_pstart, $orig_pend ); // swap orig start & end too
       $this->copy_parsed($tp);
 
       // adjust rank-range and used operations
