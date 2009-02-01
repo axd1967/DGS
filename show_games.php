@@ -109,8 +109,6 @@ $ThePage = new Page('GamesList');
       else
          $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_OTHER;
    }
-   $show_notes= (LIST_GAMENOTE_LEN>0
-         && !$observe && !$all && $is_mine); //FU+RU subset
 
    $restrict_games = '';
    if( RESTRICT_SHOW_GAMES_ALL && $all )
@@ -220,6 +218,13 @@ $ThePage = new Page('GamesList');
    }
    $gtable->add_external_parameters( $extparam, true ); // also for hiddens
 
+   // NOTE: check after add_or_del_column()-call
+   // only activate if column shown for user to reduce server-load for page
+   // avoiding additional outer-join on GamesNotes-table !!
+   $show_notes = (LIST_GAMENOTE_LEN>0
+         && !$observe && !$all && $is_mine); // FU+RU subset
+   $load_notes = ($show_notes && $gtable->is_column_displayed(15) );
+
 /*****
  * Views-pages identification:
  *   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
@@ -291,7 +296,7 @@ $ThePage = new Page('GamesList');
  * 12:    --- unused ---
  * 13:    FU+FA [Lastchanged] (End date), OB+RU+RA [Lastchanged] (Last move)
  * 14:    [Rated AS X_Rated] (Rated) -> fname=rated
- * 15:    --- unused ---
+ * 15: >  FU+RU [Notes AS X_Note] (Notes)
  * 16: >  FU+RU [Rating AS X_Rating] (User-Rating)
  * 17: >  OB+FA+RA (Black-Name)
  * 18: >  OB+FA+RA (Black-Handle)
@@ -308,7 +313,6 @@ $ThePage = new Page('GamesList');
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
- * 32: >  FU+RU [Notes AS X_Note] (Notes)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -317,7 +321,7 @@ $ThePage = new Page('GamesList');
    if( !$observe && !$all ) //FU+RU ?UNION
    {
       if( $show_notes )
-         $gtable->add_tablehead(32, T_('Notes#header'), '', 0, 'X_Note-');
+         $gtable->add_tablehead(15, T_('Notes#header'), '', 0, 'X_Note-');
    }
 
    if( $observe )
@@ -491,7 +495,7 @@ $ThePage = new Page('GamesList');
          "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color" );
       $qsql->add_part( SQLP_FROM, 'Games', 'Players' );
 
-      if( $show_notes ) //FU+RU ?UNION
+      if( $load_notes ) //FU+RU ?UNION
       {
          $qsql->add_part( SQLP_FIELDS, "Gnt.Notes AS X_Note" );
          $qsql->add_part( SQLP_FROM,
@@ -632,12 +636,12 @@ $ThePage = new Page('GamesList');
       }
       else //FU+RU ?UNION
       {
-         if( $show_notes && $gtable->Is_Column_Displayed[32] )
+         if( $load_notes && $gtable->Is_Column_Displayed[15] )
          { //keep the first line up to LIST_GAMENOTE_LEN chars
             $X_Note= trim( substr(
                preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
                , 0, LIST_GAMENOTE_LEN) );
-            $grow_strings[32] = make_html_safe($X_Note);
+            $grow_strings[15] = make_html_safe($X_Note);
          }
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
