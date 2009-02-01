@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,7 @@ $TranslateGroups[] = "Messages";
 
 require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
+require_once( 'include/game_functions.php' );
 
 define('INVITE_HANDI_CONV',-1);
 define('INVITE_HANDI_PROPER',-2);
@@ -81,6 +82,9 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Komi_m = 6.5;
    $Komi_n = 6.5;
    $Komi_d = 6.5;
+   $AdjustHandicap = 0;
+   $MinHandicap = 0;
+   $MaxHandicap = MAX_HANDICAP;
    $Maintime = 1;
    $MaintimeUnit = 'months';
    $Byotype = 'FIS';
@@ -117,6 +121,13 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          $Komi_n = (float)$gid['komi_n'];
       if( isset($gid['komi_d']) )
          $Komi_d = (float)$gid['komi_d'];
+
+      if( isset($gid['adj_handicap']) )
+         $AdjustHandicap = (int)$gid['adj_handicap'];
+      if( isset($gid['min_handicap']) )
+         $MinHandicap = (int)$gid['min_handicap'];
+      if( isset($gid['max_handicap']) )
+         $MaxHandicap = min( MAX_HANDICAP, max( 0, (int)$gid['max_handicap'] ));
 
       if( isset($gid['byoyomitype']) )
          $Byotype = (string)$gid['byoyomitype'];
@@ -354,10 +365,27 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                            'TEXT', sptext(T_('Komi'),1),
                            'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
 
+   if( $formstyle == 'waitingroom' )
+   {
+      $adj_handi_stones = array();
+      $HSTART = max(5, (int)(MAX_HANDICAP/3));
+      for( $bs = -$HSTART; $bs <= $HSTART; $bs++ )
+         $adj_handi_stones[$bs] = ($bs <= 0) ? $bs : "+$bs";
+      $adj_handi_stones[0] = '&nbsp;0';
+      $mform->add_row( array( 'SPACE' ) );
+      $mform->add_row( array( 'DESCRIPTION', T_('Handicap stones'),
+                              'TEXT', sptext(T_('Adjust by')),
+                              'SELECTBOX', 'adj_handicap', 1, $adj_handi_stones, $AdjustHandicap, false,
+                              'TEXT', '&nbsp;&nbsp;' . sptext(T_('Min.')),
+                              'SELECTBOX', 'min_handicap', 1, $handi_stones, $MinHandicap, false,
+                              'TEXT', '&nbsp;'. sptext(T_('Max.')),
+                              'SELECTBOX', 'max_handicap', 1, $handi_stones, $MaxHandicap, false,
+                              ));
+   }
+
    if( ENA_STDHANDICAP )
    $mform->add_row( array( 'DESCRIPTION', T_('Standard placement'),
                            'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap ) );
-
 
 
    $value_array=array( 'hours' => T_('hours'),
@@ -537,6 +565,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 {
    extract($game_row);
+   $is_my_game = ( $game_row['other_id'] == $player_row['ID'] );
 
    if( $tablestyle == 'waitingroom' )
    {
@@ -588,6 +617,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          $haverating = !$calculated;
    }
 
+   $is_calc_handitype = ( $Handitype == 'proper' || $Handitype == 'conv' );
 
    $itable= new Table_info('game'); //==> ID='gameInfos'
 
@@ -703,6 +733,19 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          break;
    }
 
+   if( $tablestyle == 'waitingroom' && $is_calc_handitype )
+   {
+      $adj_handi_str = build_adjust_handicap(
+            $AdjHandicap, $MinHandicap, $MaxHandicap, T_('H#adjust_handicap') );
+      if( $adj_handi_str != NO_VALUE )
+      {
+         $itable->add_sinfo(
+                   T_('Handicap adjustment')
+                  , $adj_handi_str
+                  );
+      }
+   }
+
    if( ENA_STDHANDICAP )
    {
          $itable->add_sinfo(
@@ -755,9 +798,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    }
 
    if( $calculated && $haverating && $goodrating &&
-       ( $game_row['other_id'] != $player_row['ID'] //not my game
-       || $tablestyle != 'waitingroom'
-       ) )
+       ( !$is_my_game || $tablestyle != 'waitingroom' ) )
    {
          // compute the probable game settings
 
@@ -776,6 +817,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             $infoHandicap = $Handicap; $infoKomi = $Komi; $info_i_am_black = 0;
          }
 
+         $infoHandicap_old = $infoHandicap;
+         if( $is_calc_handitype )
+            $infoHandicap = adjust_handicap( $infoHandicap, $AdjHandicap, $MinHandicap, $MaxHandicap );
+         $adj_handi_str = ( $infoHandicap != $infoHandicap_old )
+            ? sprintf( T_('adjusted from %d'), $infoHandicap_old )
+            : '';
+
          $colortxt = 'class=InTextStone';
          if( $Handitype == 'double' )
          {
@@ -793,7 +841,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             $colortxt = get_colortext_probable( $info_i_am_black );
          }
 
-         $itable->add_scaption( ( $Handitype == 'proper' || $Handitype == 'conv' )
+         $itable->add_scaption( $is_calc_handitype
             ? T_('Probable game settings')
             : T_('Game settings') );
 
@@ -803,7 +851,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                   ) );
          $itable->add_sinfo(
                    T_('Handicap')
-                  ,$infoHandicap
+                  ,$infoHandicap . ($adj_handi_str ? "&nbsp;&nbsp;($adj_handi_str)" : '' )
                   );
          $itable->add_sinfo(
                    T_('Komi')
@@ -814,10 +862,25 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    $itable->echo_table();
 }
 
+// output (with optional parts): prefix +/-adj [min,max]
+function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $prefix='' )
+{
+   $out = array();
+   if( $adj_handicap )
+      $out[] = ($adj_handicap > 0 ? '+' : '') . $adj_handicap;
+   if( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
+      $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );
+
+   if( count($out) )
+      return $prefix . implode(' ',$out);
+   else
+      return NO_VALUE;
+}
+
 function build_suggestion_shortinfo( $suggest_result )
 {
    list( $handi, $komi, $iamblack ) = $suggest_result;
-   $info = sprintf( T_('... would probably be Color %s for you with Handicap %s, Komi %.1f'),
+   $info = sprintf( T_('... would probably be Color %1$s for you with Handicap %2$s, Komi %3$.1f'),
       get_colortext_probable( $iamblack ), $handi, $komi );
    return $info;
 }

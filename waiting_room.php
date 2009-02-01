@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -264,7 +264,13 @@ require_once( "include/classlib_profile.php" );
                   $wrtable->warning_cell_attb( T_('No initial rating'), true);
          }
          if( $wrtable->Is_Column_Displayed[14] )
-            $wrow_strings[14] = ($calculated ? NO_VALUE : $Handicap);
+         {
+            if( $calculated )
+               $wrow_strings[14] = build_adjust_handicap(
+                  $AdjHandicap, $MinHandicap, $MaxHandicap, T_('H#adjust_handicap') );
+            else
+               $wrow_strings[14] = $Handicap;
+         }
          if( $wrtable->Is_Column_Displayed[ 6] )
             $wrow_strings[ 6] = ($calculated ? NO_VALUE : $Komi);
          if( $wrtable->Is_Column_Displayed[ 7] )

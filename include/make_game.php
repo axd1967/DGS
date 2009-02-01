@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 //$TranslateGroups[] = "Game";
+
+require_once( 'include/game_functions.php' );
 
 
 //always return a valide game ID from the database, else call error()
@@ -109,7 +111,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       break;
 
       default: //always available even if waiting room or unrated
-         $handicap_type = 'nigiri'; 
+         $handicap_type = 'nigiri';
       case 'nigiri':
       {
          $tomove = INVITE_HANDI_NIGIRI;
@@ -241,6 +243,13 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
    $game_info_row['Rated'] = ( $rated ? 'Y' : 'N' );
 
+   // adjust handicap (Adj/Min/MaxHandicap may be unset)
+   $handicap = adjust_handicap( (int)$game_info_row['Handicap'],
+      (int)@$game_info_row['AdjHandicap'],
+      (int)@$game_info_row['MinHandicap'],
+      ( isset($game_info_row['MaxHandicap']) ? (int)$game_info_row['MaxHandicap'] : -1 ));
+   $game_info_row['Handicap'] = $handicap; // write back
+
    $stdhandicap = $game_info_row['StdHandicap'];
    $moves = $game_info_row['Handicap'];
    if( $stdhandicap != 'Y' || !standard_handicap_is_possible($size, $moves ) )
@@ -248,8 +257,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    if( ENA_STDHANDICAP&2 && $stdhandicap == 'Y' && $moves > 1 )
       $skip_handicap_validation = true;
-   else 
-      $skip_handicap_validation = false; 
+   else
+      $skip_handicap_validation = false;
 
 
    if( $skip_handicap_validation )
@@ -277,7 +286,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Lastchanged=FROM_UNIXTIME($NOW), " .
       "Starttime=FROM_UNIXTIME($NOW), " .
       "Size=$size, " .
-      "Handicap=" . $game_info_row["Handicap"] . ", " .
+      "Handicap=$handicap, " .
       "Komi=" . $game_info_row["Komi"] . ", " .
       "Maintime=" . $game_info_row["Maintime"] . ", " .
       "Byotype='" . $game_info_row["Byotype"] . "', " .
@@ -305,20 +314,21 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
          or error('mysql_query_failed','create_game.insert');
       $gid = mysql_insert_id();
    }
-   
+
    if( $gid <= 0 )
       error('internal_error','create_game.gameID='.$gid);
 
    //ENA_STDHANDICAP:
    // both b1 and b2 set is not fully handled (error if incomplete pattern)
    if( $skip_handicap_validation )
-      if( !make_standard_placement_of_handicap_stones(
-                        $size, $game_info_row['Handicap'], $gid) )
+   {
+      if( !make_standard_placement_of_handicap_stones($size, $handicap, $gid) )
       {
          //error because it's too late to have a manual placement
          //as the game is already initialized for the white play
          error('internal_error','create_game.std_handicap.gameID='.$gid);
       }
+   }
 
    return $gid;
 } //create_game

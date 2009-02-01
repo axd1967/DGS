@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -77,7 +77,7 @@ require_once( "include/rating.php" );
       break;
       */
       default: //always available even if waiting room or unrated
-         $handicap_type = 'nigiri'; 
+         $handicap_type = 'nigiri';
       case 'nigiri':
       {
          $handicap = 0;
@@ -91,6 +91,16 @@ require_once( "include/rating.php" );
 
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range');
+
+   $adj_handicap = (int)@$_POST['adj_handicap'];
+   if( abs($adj_handicap) > MAX_HANDICAP )
+      $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
+
+   $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$_POST['min_handicap'] ));
+
+   $max_handicap = (int)@$_POST['max_handicap'];
+   if( $max_handicap > MAX_HANDICAP )
+      $max_handicap = -1; // don't save potentially changeable "default"
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
 
@@ -165,6 +175,9 @@ require_once( "include/rating.php" );
       "Komi=ROUND(2*($komi))/2, " .
       "Handicap=$handicap, " .
       "Handicaptype='$handicap_type', " .
+      "AdjHandicap=$adj_handicap, " .
+      "MinHandicap=$min_handicap, " .
+      ($max_handicap < 0 ? '' : "MaxHandicap=$max_handicap, " ) .
       "Maintime=$hours, " .
       "Byotype='$byoyomitype', " .
       "Byotime=$byohours, " .

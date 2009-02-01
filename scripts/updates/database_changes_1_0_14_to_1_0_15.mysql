@@ -123,3 +123,10 @@ CREATE TABLE Profiles (
 ) ENGINE=MyISAM ;
 
 
+-- game-handicap adjustment & min/max-limits
+ALTER TABLE `Waitingroom`
+   ADD `AdjHandicap` tinyint signed NOT NULL default '0' AFTER `Handicaptype`,
+   ADD `MinHandicap` tinyint signed NOT NULL default '0' AFTER `AdjHandicap`,
+   ADD `MaxHandicap` tinyint signed NOT NULL default '127' AFTER `MinHandicap` ;
+
+
