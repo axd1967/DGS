@@ -108,6 +108,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Changed default for empty subject: ??? -> (no subject)
 
    * Users:
+      * Added user-type:
+         * Admin can mark user as Professional, Teacher and Robot
+         * Can be searched on users and opponents page
+         * Shown in user info, waiting room (on users name), on users and opponents page
       * Added third activity-level:
         high activity (<image star.gif><image star.gif><image star.gif>), medium activity (<image star2.gif><image star2.gif>), low activity (<image star3.gif>)
       * Introducing JavaScript management in profile setting
@@ -126,6 +130,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Docs:
       * Added site-map page into main menu
       * Added link to statistics page on docs and site-map page
+      * Added other credits on peoples page
       * News: added table of contents
 
    * More use of CSS
