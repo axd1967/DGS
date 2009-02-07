@@ -23,6 +23,33 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-07 juga
+
+   * people.php:
+   - added new section (other credits) to fulfill license-requirements
+     for some used icons of Mark James' silk icons collection
+
+   * include/std_functions.php (build_usertype_text),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     admin_users.php, list_contacts.php, opponents.php, userinfo.php, users.php,
+     waiting_room.php, NEWS:
+   - added searchable user-type together with new icons to mark user
+     as professional, teacher, robot, (team)
+   - show iconographic user-type in contact-list and waiting-room
+-----------
+copy /images/robot.gif
+copy /images/team.gif
+copy /images/professional.gif
+copy /images/teacher.gif
+
+-- user-type characteristics: bot, teacher, pro, etc.
+ALTER TABLE `Players`
+   ADD `Type` smallint(5) unsigned NOT NULL default '0' AFTER `ID` ;
+ALTER TABLE `Players`
+   ADD INDEX `Type` (`Type`) ;
+-----------
+
 2009-02-01 juga
 
    * show_games.php, status.php:
