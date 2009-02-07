@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ $TranslateGroups[] = "Docs";
 require_once( "include/std_functions.php" );
 $ThePage = new Page('People');
 
-function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='')
+function add_contributor_link( $text=false, $link, $extra='')
 {
    static $started = false;
    static $c = 0;
@@ -52,14 +52,26 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
    }
 
    echo "<tr class=$class><td class=Rubric>$text</td>\n"
-      . "<td class=People>"
-      . user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, '', $uref, $name, $handle)
-      . "</td><td class=Extra>"
+      . "<td class=People>$link</td>"
+      . "<td class=Extra>"
       . ( $extra ? "<span>[$extra]</span>" : '' )
       . "</td></tr>\n";
 
    return $c;
 }
+
+function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='' )
+{
+   $ulink = user_reference( ( $uref > '' ? REF_LINK : 0 ), 1, '', $uref, $name, $handle);
+   add_contributor_link( $text, $ulink, $extra );
+}
+
+function build_icon( $icon_name, $text )
+{
+   global $base_path;
+   return image( "{$base_path}images/$icon_name", $text, $text );
+}
+
 
 
 {
@@ -232,6 +244,22 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
          $first = '';
       }
    }
+
+   add_contributor();
+
+   //---------
+   section( 'Other credits', T_('Other credits'));
+
+   $images_str = // image + originating icon-name from silk-collection
+        build_icon('professional.gif', sprintf( T_('Professional from [%s]'), 'user_suite + wand'))
+      . build_icon('teacher.gif', sprintf( T_('Teacher from [%s]'), 'user_comment'))
+      . build_icon('robot.gif', sprintf( T_('Robot from [%s]'), 'computer'))
+      . build_icon('team.gif', sprintf( T_('Team from [%s]'), 'group'))
+      ;
+   add_contributor_link(
+      sprintf( T_('Taken and modified 4 icons from Mark James\' silk icons '
+                . 'collection (version 1.3): %s'), $images_str ),
+      anchor('http://www.famfamfam.com/archive/silk-icons-thats-your-lot/') );
 
    add_contributor();
 
