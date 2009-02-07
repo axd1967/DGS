@@ -105,6 +105,7 @@ require_once( "include/classlib_profile.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead(33, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
+   $ctable->add_tablehead(12, T_('Type#header'), 'Enum', 0, 'P.Type+');
    $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
    $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
@@ -149,7 +150,7 @@ require_once( "include/classlib_profile.php" );
    // build SQL-query
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
-      'P.Name', 'P.Handle', 'P.Country', 'P.Rating2',
+      'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.Rating2',
       'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccessU',
       'C.cid', 'C.SystemFlags', 'C.UserFlags', 'C.Notes',
       'C.Created', 'C.Lastchanged',
@@ -210,6 +211,8 @@ require_once( "include/classlib_profile.php" );
       if( $ctable->Is_Column_Displayed[ 1] )
          $crow_strings[ 1] = "<A href=\"userinfo.php?uid=$cid\">" .
             make_html_safe($row['Name']) . "</A>";
+      if( $ctable->Is_Column_Displayed[12] )
+         $crow_strings[12] = build_usertype_text(@$row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
       if( $ctable->Is_Column_Displayed[ 2] )
          $crow_strings[ 2] = "<A href=\"userinfo.php?uid=$cid\">" .
             $row['Handle'] . "</A>";

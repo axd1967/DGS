@@ -121,7 +121,7 @@ require_once( "include/classlib_profile.php" );
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', TABLE_NO_HIDE, 'Handicaptype+');
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    /** TODO: the handicap stones info could be merged in the Komi column,
-    * [ BUT better to keep them separate to be able to filter on them
+    * [ BUT maybe better to keep them separate to be able to filter on them
     *   AND being more flexible for later handicap-enhancements !! ]
     * with the standard placement... something like: "%d H + %d K (S)"
     * where:
@@ -155,6 +155,7 @@ require_once( "include/classlib_profile.php" );
       'Players.ID AS other_id',
       'Players.Handle AS other_handle',
       'Players.Name AS other_name',
+      'Players.Type AS other_type',
       'Players.Country AS other_country',
       'Players.Rating2 AS other_rating',
       'Players.RatingStatus AS other_ratingstatus' );
@@ -241,7 +242,11 @@ require_once( "include/classlib_profile.php" );
             $wrow_strings[33] = $wrtable->button_TD_anchor(
                                  $baseURL."info=$ID#joingameForm", T_('Info'));
          if( $wrtable->Is_Column_Displayed[ 1] )
-            $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
+         {
+            $usertype = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
+            $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '')
+               . ( $usertype != '' ? '&nbsp;&nbsp;'.$usertype : '' );
+         }
          if( $wrtable->Is_Column_Displayed[ 2] )
             $wrow_strings[ 2] = user_reference( REF_LINK, 1, '', $other_id, $other_handle, '');
          if( $wrtable->Is_Column_Displayed[15] )
