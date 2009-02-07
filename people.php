@@ -257,7 +257,7 @@ function build_icon( $icon_name, $text )
       . build_icon('team.gif', sprintf( T_('Team from [%s]'), 'group'))
       ;
    add_contributor_link(
-      sprintf( T_('Taken and modified 4 icons from Mark James\' silk icons '
+      sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
                 . 'collection (version 1.3): %s'), $images_str ),
       anchor('http://www.famfamfam.com/archive/silk-icons-thats-your-lot/') );
 
