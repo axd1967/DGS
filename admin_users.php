@@ -54,6 +54,7 @@ require_once( "include/form_functions.php" );
 
    // note: '*' marks field that may have changed while editing (because of cron-jobs)
    $attributes_edit = array( // fieldnames => type[*][:width,maxlen]|(regex)
+      'Type'            => 'mask',
       'Handle'          => 'text',
       'Name'            => 'text',
       'VaultCnt'        => 'int*',
@@ -79,6 +80,12 @@ require_once( "include/form_functions.php" );
         implode(',', array_keys($attributes_edit)) . ','
       . implode(',', $attributes_show);
 
+   $arr_mask_type = array( // bitmask for Type: maskval => [ fieldname, opt-text, descr ]
+      USERTYPE_PRO      => array( 'fl_utype1', 'PRO',       T_('Professional') ),
+      USERTYPE_TEACHER  => array( 'fl_utype2', 'TEACHER',   T_('Teacher') ),
+      USERTYPE_ROBOT    => array( 'fl_utype3', 'ROBOT',     T_('Robot') ),
+      //USERTYPE_TEAM     => array( 'fl_utype4', 'TEAM',      T_('Team') ),
+   );
    $arr_mask_admopts = array( // bitmask for AdminOptions: maskval => [ fieldname, opt-text, descr ]
       //ADMOPT_BYPASS_IP_BLOCK  => array( 'fl_admopt1', 'BYPASS_IP_BLOCK', T_('Bypass IP-Block') ),
       ADMOPT_DENY_LOGIN       => array( 'fl_admopt2', 'DENY_LOGIN',     T_('Deny login') ),
@@ -93,6 +100,16 @@ require_once( "include/form_functions.php" );
    $fvalues = array();
    foreach( $attributes_edit as $field => $type )
       $fvalues[$field] = ( $uid ) ? trim(get_request_arg("f_$field", '')) : '';
+
+   $bitmask = 0;
+   foreach( $arr_mask_type as $maskval => $arr )
+   {
+      $flagname = $arr[0];
+      $fvalues[$flagname] = ( $uid ) ? trim(get_request_arg($flagname, '')) : '';
+      if( $fvalues[$flagname] )
+         $bitmask |= $maskval;
+   }
+   $fvalues['Type'] = ( $uid ) ? $bitmask : '';
 
    $bitmask = 0;
    foreach( $arr_mask_admopts as $maskval => $arr )
@@ -185,11 +202,16 @@ require_once( "include/form_functions.php" );
                'SELECTBOX',   $fname, 1, $type, $fval, false,
                'TEXT',        sprintf(' [%s]', @$urow[$field]) ));
          }
-         elseif( $type === 'mask' && $field === 'AdminOptions' )
+         elseif( $type === 'mask' && ($field === 'Type' || $field === 'AdminOptions') )
          { // bitmask -> checkboxes
+            if( $field === 'Type' )
+               $arr_src = $arr_mask_type;
+            elseif( $field === 'AdminOptions' )
+               $arr_src = $arr_mask_admopts;
+
             $fval = ( (string)$fvalues[$field] != '' ) ? $fvalues[$field] : @$urow[$field];
             $arr_formrow = array( 'DESCRIPTION', $field, 'TEXT', sprintf('[0x%x]', $fval+0) );
-            foreach( $arr_mask_admopts as $maskval => $arr )
+            foreach( $arr_src as $maskval => $arr )
             {
                list( $flagname, $opttext, $descr) = $arr;
                array_push( $arr_formrow,
@@ -295,6 +317,14 @@ function update_user( $uid, $user, $fv )
    if( !preg_match( "/^[YNM]$/", $fv['MayPostOnForum'] ) )
       return 'Bad value for MayPostOnForum-field (must be one of [Y,N,M])';
 
+   global $arr_mask_type;
+   $bitmaskall = 0;
+   foreach( $arr_mask_type as $maskval => $arr )
+      $bitmaskall |= $maskval;
+   $chk_bitmask = (int)($fv['Type']+0) & ~$bitmaskall;
+   if( $chk_bitmask != 0 )
+      return sprintf( 'Unknown bit-mask value [0x%x] used for Type-field', $chk_bitmask );
+
    global $arr_mask_admopts;
    $bitmaskall = 0;
    foreach( $arr_mask_admopts as $maskval => $arr )
@@ -323,13 +353,18 @@ function update_user( $uid, $user, $fv )
          $arr_sql[] = "$field='".mysql_addslashes($fv[$field])."'";
 
       // create diffs for admin-log
-      if( $type == 'mask' && $field == 'AdminOptions' )
+      if( $type === 'mask' && ($field === 'Type' || $field === 'AdminOptions') )
       {
+         if( $field === 'Type' )
+            $arr_src = $arr_mask_type;
+         elseif( $field === 'AdminOptions' )
+            $arr_src = $arr_mask_admopts;
+
          $optdiff = array();
-         foreach( $arr_mask_admopts as $maskval => $arr )
+         foreach( $arr_src as $maskval => $arr )
          {
-            $old = (@$row['AdminOptions'] & $maskval);
-            $new = ($fv['AdminOptions'] & $maskval);
+            $old = (@$row[$field] & $maskval);
+            $new = ($fv[$field] & $maskval);
             if( $old != $new )
                $optdiff[] = (( $old && !$new ) ? '-' : '+') . $arr[1];
          }

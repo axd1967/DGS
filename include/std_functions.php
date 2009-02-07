@@ -247,6 +247,17 @@ define('ADMINGROUP_EXECUTIVE', (ADMIN_DEVELOPER|ADMIN_PASSWORD|ADMIN_FORUM|ADMIN
 
 
 //-----
+// user-type characteristics
+define('USERTYPE_UNSET',   0x0000); // default
+define('USERTYPE_PRO',     0x0001); // professional
+define('USERTYPE_TEACHER', 0x0002); // offers lessons (free or paid)
+define('USERTYPE_ROBOT',   0x0004);
+define('USERTYPE_TEAM',    0x0008); // unused so far
+//-----
+define('ARG_USERTYPE_NO_TEXT', 'none');
+
+
+//-----
 define("FOLDER_NONE", -1);
 define("FOLDER_ALL_RECEIVED", 0);
 //Valid folders must be > FOLDER_ALL_RECEIVED
@@ -268,6 +279,46 @@ define('FORUMFLAG_POSTVIEW_AUTOREAD', 0x04); // viewing marks thread as read //T
 define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
 //-----
 
+
+// param $short: true, false, ARG_USERTYPE_NO_TEXT (no text)
+function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
+{
+   global $base_path;
+   $out = array();
+   if( $usertype & USERTYPE_PRO )
+   {
+      $text = T_('Professional');
+      $tmp = ($img) ? image( "{$base_path}images/professional.gif", $text, $text ) : '';
+      if( $short !== ARG_USERTYPE_NO_TEXT )
+         $tmp .= ($img ? ' ' : '') . ($short ? T_('Pro#utype_short') : $text);
+      $out[] = $tmp;
+   }
+   if( $usertype & USERTYPE_TEACHER )
+   {
+      $text = T_('Teacher');
+      $tmp = ($img) ? image( "{$base_path}images/teacher.gif", $text, $text ) : '';
+      if( $short !== ARG_USERTYPE_NO_TEXT )
+         $tmp .= ($img ? ' ' : '') . ($short ? T_('Teacher#utype_short') : $text);
+      $out[] = $tmp;
+   }
+   if( $usertype & USERTYPE_ROBOT )
+   {
+      $text = T_('Robot');
+      $tmp = ($img) ? image( "{$base_path}images/robot.gif", $text, $text ) : '';
+      if( $short !== ARG_USERTYPE_NO_TEXT )
+         $tmp .= ($img ? ' ' : '') . ($short ? T_('Bot#utype_short') : $text);
+      $out[] = $tmp;
+   }
+   if( $usertype & USERTYPE_TEAM )
+   {
+      $text = T_('Team');
+      $tmp = ($img) ? image( "{$base_path}images/team.gif", $text, $text ) : '';
+      if( $short !== ARG_USERTYPE_NO_TEXT )
+         $tmp .= ($img ? ' ' : '') . ($short ? T_('Team#utype_short') : $text);
+      $out[] = $tmp;
+   }
+   return implode( $sep, $out );
+}
 
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
 {
@@ -2843,8 +2894,9 @@ function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
    return $str.'>';
 }
 
-function anchor( $href, $text, $title='', $attbs='')
+function anchor( $href, $text=null, $title='', $attbs='')
 {
+   if( is_null($text) ) $text = $href;
    $str = "<a href=\"$href\"";
    if( is_array($attbs) )
    {

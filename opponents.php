@@ -87,6 +87,16 @@ $ARR_DBFIELDKEYS = array(
    if( $opp && !isset($players[$opp]) )
       error('unknown_user', "opponents.load_opponent($opp)");
 
+   // config for usertype-filter
+   $query_usertype = 'Type>0 AND (Type & %d)';
+   $usertypes_array = array(
+         T_('All')      => '',
+         T_('Special')  => 'Type>0',
+         T_('Pro')      => sprintf( $query_usertype, USERTYPE_PRO),
+         T_('Teacher')  => sprintf( $query_usertype, USERTYPE_TEACHER),
+         T_('Robot')    => sprintf( $query_usertype, USERTYPE_ROBOT),
+         //T_('Team')     => sprintf( $query_usertype, USERTYPE_TEAM),
+         );
 
    $page = "opponents.php?";
 
@@ -144,6 +154,7 @@ $ARR_DBFIELDKEYS = array(
          array( FC_HIDE => 1 ));
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
+   $ufilter->add_filter(18, 'Selection', $usertypes_array, true );
    $ufilter->init(); // parse current value from _GET
 
    // init table
@@ -172,6 +183,7 @@ $ARR_DBFIELDKEYS = array(
    // table: use same table-IDs as in users.php(!)
    $utable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
    $utable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
    $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');
@@ -372,8 +384,7 @@ $ARR_DBFIELDKEYS = array(
          $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
       if( $utable->Is_Column_Displayed[ 3] )
-         $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" .
-            $row['Handle'] . "</A>";
+         $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
       if( $utable->Is_Column_Displayed[16] )
       {
          $cntr = @$row['Country'];
@@ -420,6 +431,8 @@ $ARR_DBFIELDKEYS = array(
          $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
          $urow_strings[15] = $lastmove;
       }
+      if( $utable->Is_Column_Displayed[18] )
+         $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
 
       $utable->add_row( $urow_strings );
    }

@@ -46,6 +46,17 @@ require_once( "include/classlib_profile.php" );
    // observers of game
    $observe_gid = (int)get_request_arg('observe');
 
+   // config for usertype-filter
+   $query_usertype = 'Type>0 AND (Type & %d)';
+   $usertypes_array = array(
+         T_('All')      => '',
+         T_('Special')  => 'Type>0',
+         T_('Pro')      => sprintf( $query_usertype, USERTYPE_PRO),
+         T_('Teacher')  => sprintf( $query_usertype, USERTYPE_TEACHER),
+         T_('Robot')    => sprintf( $query_usertype, USERTYPE_ROBOT),
+         //T_('Team')     => sprintf( $query_usertype, USERTYPE_TEAM),
+         );
+
    // init search profile
    $profile_type = ($observe_gid) ? PROFTYPE_FILTER_OBSERVERS : PROFTYPE_FILTER_USERS;
    $search_profile = new SearchProfile( $uid, $profile_type );
@@ -84,6 +95,7 @@ require_once( "include/classlib_profile.php" );
          array( FC_HIDE => 1 ));
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
+   $ufilter->add_filter(18, 'Selection', $usertypes_array, true );
    $f_active =& $ufilter->get_filter(13);
 
    $ufilter->init(); // parse current value from _GET
@@ -102,6 +114,7 @@ require_once( "include/classlib_profile.php" );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in opponents.php(!)
    $utable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
    $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');
@@ -178,8 +191,7 @@ require_once( "include/classlib_profile.php" );
          $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
       if( $utable->Is_Column_Displayed[3] )
-         $urow_strings[3] = "<A href=\"userinfo.php?uid=$ID\">" .
-            $row['Handle'] . "</A>";
+         $urow_strings[3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
       if( $utable->Is_Column_Displayed[16] )
       {
          $cntr = @$row['Country'];
@@ -226,6 +238,8 @@ require_once( "include/classlib_profile.php" );
          $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
          $urow_strings[15] = $lastmove;
       }
+      if( $utable->Is_Column_Displayed[18] )
+         $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
 
       $utable->add_row( $urow_strings );
    }

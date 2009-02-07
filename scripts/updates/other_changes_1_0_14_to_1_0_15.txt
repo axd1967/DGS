@@ -13,15 +13,25 @@
 copy /images/favicon.ico into the root folder
 -----------
 
+-----------
 copy /images/star3.gif
+-----------
 
+-----------
 // added images for thread-post-list navigation
-copy images/f_bottom.png
-copy images/f_firstanswer.png
-copy images/f_nextanswer.png
-copy images/f_nextparent.png
-copy images/f_prevanswer.png
-copy images/f_prevparent.png
-copy images/f_top.png
+copy /images/f_bottom.png
+copy /images/f_firstanswer.png
+copy /images/f_nextanswer.png
+copy /images/f_nextparent.png
+copy /images/f_prevanswer.png
+copy /images/f_prevparent.png
+copy /images/f_top.png
+-----------
 
+-----------
+copy /images/professional.gif
+copy /images/robot.gif
+copy /images/teacher.gif
+copy /images/team.gif
+-----------
 

@@ -130,3 +130,9 @@ ALTER TABLE `Waitingroom`
    ADD `MaxHandicap` tinyint signed NOT NULL default '127' AFTER `MinHandicap` ;
 
 
+-- user-type characteristics: bot, teacher, pro, etc.
+ALTER TABLE `Players`
+   ADD `Type` smallint(5) unsigned NOT NULL default '0' AFTER `ID` ;
+ALTER TABLE `Players`
+   ADD INDEX `Type` (`Type`) ;
+

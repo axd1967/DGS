@@ -120,6 +120,13 @@ $ThePage = new Page('UserInfo');
 
       $itable= new Table_info('user');
 
+      if( @$row['Type'] )
+      {
+         $itable->add_row( array(
+                  'sname' => T_('Type'),
+                  'sinfo' => build_usertype_text(@$row['Type']),
+                  ) );
+      }
       $itable->add_row( array(
                'sname' => T_('Name'),
                'sinfo' => $name_safe,
