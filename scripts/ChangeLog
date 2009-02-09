@@ -23,6 +23,15 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-09 juga
+
+   * include/std_functions.php (activity_string),
+     opponents.php, userinfo.php, users.php, NEWS:
+   - reverted activity-level (Eriks wish)
+     - higher activity shouldn't encourage more activity,
+       two levels are enough
+     - can use user-type to mark robots now
+
 2009-02-07 juga
 
    * people.php:
