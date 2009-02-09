@@ -111,7 +111,6 @@ $ActivityForMove = 10*$ActivityForHit;
 
 $ActiveLevel1 = $ActivityForMove + 2*$ActivityForHit; //a "move sequence" value
 $ActiveLevel2 = 15*$ActiveLevel1;
-$ActiveLevel3 = 50*$ActiveLevel2;
 $ActivityMax = 0x7FFF0000-$ActivityForMove;
 
 define('MAX_START_RATING', 2600); //6 dan
@@ -2475,12 +2474,10 @@ function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
 
 function activity_string( $act_lvl)
 {
-   // arrange as a traffic-light
    switch( (int)$act_lvl )
    {
-      case 1: $img= 'star3.gif'; break; // red
-      case 2: $img= 'star2.gif'; break; // orange
-      case 3: $img= 'star.gif'; break;  // green
+      case 1: $img= 'star2.gif'; break; // orange
+      case 2: $img= 'star.gif'; break;  // green
       default: return '&nbsp;';
    }
    global $base_path;

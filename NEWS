@@ -112,8 +112,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Admin can mark user as Professional, Teacher and Robot
          * Can be searched on users and opponents page
          * Shown in user info, waiting room (on users name), on users and opponents page
-      * Added third activity-level:
-        high activity (<image star.gif><image star.gif><image star.gif>), medium activity (<image star2.gif><image star2.gif>), low activity (<image star3.gif>)
       * Introducing JavaScript management in profile setting
       * Initial Rating: removed converting of NNGS-rank/rating
 

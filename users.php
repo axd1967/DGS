@@ -140,7 +140,7 @@ require_once( "include/classlib_profile.php" );
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'P.*', 'P.Rank AS Rankinfo',
-      "IF(P.Activity>$ActiveLevel2,2+(P.Activity>$ActiveLevel3),P.Activity>$ActiveLevel1) AS ActivityLevel",
+      "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',

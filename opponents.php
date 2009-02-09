@@ -72,7 +72,7 @@ $ARR_DBFIELDKEYS = array(
    // who are player (uid) and opponent (opp) ?
    $players = array(); // uid => ( Players.field => value )
    $query = "SELECT ID,Handle,Name,Country,Open,Rank,Rating2"
-      . ",IF(Activity>$ActiveLevel2,2+(Activity>$ActiveLevel3),Activity>$ActiveLevel1) AS ActivityLevel"
+      . ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel"
       . ",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS LastaccessU"
       . ",IFNULL(UNIX_TIMESTAMP(LastMove),0) AS LastMoveU"
       . " FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
@@ -260,7 +260,7 @@ $ARR_DBFIELDKEYS = array(
 
    $uqsql->add_part( SQLP_FIELDS,
       'P.*', 'P.Rank AS Rankinfo',
-      "IF(P.Activity>$ActiveLevel2,2+(P.Activity>$ActiveLevel3),P.Activity>$ActiveLevel1) AS ActivityLevel",
+      "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',

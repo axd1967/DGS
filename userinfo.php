@@ -47,7 +47,7 @@ $ThePage = new Page('UserInfo');
 
    $row = mysql_single_fetch( 'userinfo.find',
       "SELECT *"
-      .",IF(Activity>$ActiveLevel2,2+(Activity>$ActiveLevel3),Activity>$ActiveLevel1) AS ActivityLevel"
+      .",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel"
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
       .",IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS X_Registerdate"
