@@ -251,10 +251,10 @@ function build_icon( $icon_name, $text )
    section( 'Other credits', T_('Other credits'));
 
    $images_str = // image + originating icon-name from silk-collection
-        build_icon('professional.gif', sprintf( T_('Professional from [%s]'), 'user_suite + wand'))
-      . build_icon('teacher.gif', sprintf( T_('Teacher from [%s]'), 'user_comment'))
-      . build_icon('robot.gif', sprintf( T_('Robot from [%s]'), 'computer'))
-      . build_icon('team.gif', sprintf( T_('Team from [%s]'), 'group'))
+        build_icon('professional.gif', sprintf( T_('Professional created from [%s]'), 'user_suite + wand'))
+      . build_icon('teacher.gif', sprintf( T_('Teacher created from [%s]'), 'user_comment'))
+      . build_icon('robot.gif', sprintf( T_('Robot created from [%s]'), 'computer'))
+      . build_icon('team.gif', sprintf( T_('Team created from [%s]'), 'group'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
