@@ -324,7 +324,7 @@ require_once( "include/form_functions.php" );
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
                             $ReplyTo, $flow,
-                            $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' or $Replied=='M'),
+                            $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
          game_info_table( 'invite', $msg_row, $player_row, $iamrated);
