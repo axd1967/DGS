@@ -30,13 +30,23 @@ $ThePage = new Page('GameInfo');
 
 
 // Status: enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED')
+// -> INVITED, RUNNING, FINISHED
 function build_game_status( $status )
 {
    return ( $status === 'INVITED' || $status === 'FINISHED' ) ? $status : 'RUNNING';
 }
 
+function build_rating_diff( $rating_diff )
+{
+   if( isset($rating_diff) )
+      return ( $rating_diff > 0 ? '+' : '' ) . sprintf( "%0.2f", $rating_diff / 100 );
+   else
+      return '';
+}
+
 
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -56,9 +66,11 @@ function build_game_status( $status )
    $qsql->add_part( SQLP_FIELDS,
       'Games.*',
       'BP.Name AS Black_Name', 'BP.Handle AS Black_Handle',
-         'BP.Rating2 AS Black_Rating', 'BP.OnVacation AS Black_OnVacation',
+      'BP.Rating2 AS Black_Rating', 'BP.OnVacation AS Black_OnVacation',
       'WP.Name AS White_Name', 'WP.Handle AS White_Handle',
-         'WP.Rating2 AS White_Rating', 'WP.OnVacation AS White_OnVacation',
+      'WP.Rating2 AS White_Rating', 'WP.OnVacation AS White_OnVacation',
+      'BRL.RatingDiff AS Black_RatingDiff',
+      'WRL.RatingDiff AS White_RatingDiff',
       'UNIX_TIMESTAMP(Starttime) AS X_Starttime',
       'UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated"
@@ -66,12 +78,14 @@ function build_game_status( $status )
    $qsql->add_part( SQLP_FROM,
       'Games',
       'INNER JOIN Players AS BP ON BP.ID=Games.Black_ID',
-      'INNER JOIN Players AS WP ON WP.ID=Games.White_ID' );
+      'INNER JOIN Players AS WP ON WP.ID=Games.White_ID',
+      'LEFT JOIN Ratinglog AS BRL ON BRL.gid=Games.ID AND BRL.uid=Games.Black_ID',
+      'LEFT JOIN Ratinglog AS WRL ON WRL.gid=Games.ID AND WRL.uid=Games.White_ID' );
    $qsql->add_part( SQLP_WHERE,
       'Games.ID='.$gid );
+   $query = $qsql->get_select() . ' LIMIT 1';
 
-   $grow = mysql_single_fetch( "gameinfo.find($gid)",
-      $qsql->get_select() . ' LIMIT 1' );
+   $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
    if( !$grow )
       error('unknown_game', "gameinfo($gid)");
 
@@ -207,6 +221,18 @@ function build_game_status( $status )
                   echo_rating( @$grow['White_End_Rating']),
                ),
             ));
+
+      if( $grow['X_Rated'] === 'Y' &&
+            ( isset($grow['Black_RatingDiff']) || isset($grow['White_RatingDiff']) ))
+      {
+         $itable->add_row( array(
+               'sname' => T_('Rating diff'),
+               'sinfo' => array(
+                     build_rating_diff( @$grow['Black_RatingDiff'] ),
+                     build_rating_diff( @$grow['White_RatingDiff'] ),
+                  ),
+               ));
+      }
    }
    $itable_str_opponents = $itable->make_table();
    unset($itable);
@@ -278,6 +304,8 @@ function build_game_status( $status )
 
    $title = T_('Game information');
    start_page( $title, true, $logged_in, $player_row );
+
+   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title</h3>\n";
 
    echo "<table><tr valign=\"top\">",
