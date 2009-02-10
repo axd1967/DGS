@@ -25,6 +25,9 @@ ChangeLog
 
 2009-02-10 juga
 
+   * gameinfo.php:
+   - added opponents rating diff for finished game
+
    * gameinfo.php, game.php, skins/dragon/screen.css,
      include/table_infos.php (Table_info, ~.add_row, ~.add_info, ~.add_sinfo,
        ~.check_cols, ~.make_tablerow, ~.add_cell),
