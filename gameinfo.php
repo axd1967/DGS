@@ -104,63 +104,31 @@ function build_rating_diff( $rating_diff )
    // build table-info: game settings
 
    $itable = new Table_info('game');
-   $itable->add_row( array( 'caption' => T_('Game settings') ));
-   $itable->add_row( array(
-         'sname' => T_('Game ID'),
-         'sinfo' => anchor( "{$base_path}game.php?gid=$gid", "#$gid" ),
-         ));
+   $itable->add_caption( T_('Game settings') );
+   $itable->add_sinfo( T_('Game ID'), anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) );
    if( $is_my_game && $grow['mid'] > 0 )
    {
-      $itable->add_row( array(
-            'sname' => T_('Message'),
-            'sinfo' => anchor( "{$base_path}message.php?mode=ShowMessage".URI_AMP.'mid='.$grow['mid'],
-                               T_('Show invitation') ),
-            ));
+      $itable->add_sinfo(
+            T_('Message'),
+            anchor( "{$base_path}message.php?mode=ShowMessage".URI_AMP.'mid='.$grow['mid'],
+                    T_('Show invitation') )
+         );
    }
-   $itable->add_row( array(
-         'sname' => T_('Status'),
-         'sinfo' => $arr_status[$status] .
-                    ( $is_admin ? " (<span class=\"DebugInfo\">{$grow['Status']}</span>)" : ''),
-         ));
+   $itable->add_sinfo(
+         T_('Status'),
+         $arr_status[$status]
+            . ( $is_admin ? " (<span class=\"DebugInfo\">{$grow['Status']}</span>)" : '')
+      );
    if( $game_finished )
-   {
-      $itable->add_row( array(
-            'sname' => T_('Score'),
-            'sinfo' => score2text(@$grow['Score'], false),
-            ));
-   }
-   $itable->add_row( array(
-         'sname' => T_('Start time'),
-         'sinfo' => date(DATE_FMT3, @$grow['X_Starttime'] ),
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Lastchanged'),
-         'sinfo' => date(DATE_FMT3, @$grow['X_Lastchanged'] ),
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Size'),
-         'sinfo' => $grow['Size'],
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Handicap'),
-         'sinfo' => $grow['Handicap'],
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Komi'),
-         'sinfo' => $grow['Komi'],
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Rated'),
-         'sinfo' => yesno($grow['X_Rated']),
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Weekend Clock'),
-         'sinfo' => yesno($grow['WeekendClock']),
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Standard Handicap'),
-         'sinfo' => yesno($grow['StdHandicap']),
-         ));
+      $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false));
+   $itable->add_sinfo( T_('Start time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
+   $itable->add_sinfo( T_('Lastchanged'), date(DATE_FMT3, @$grow['X_Lastchanged']) );
+   $itable->add_sinfo( T_('Size'),        $grow['Size'] );
+   $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
+   $itable->add_sinfo( T_('Komi'),        $grow['Komi'] );
+   $itable->add_sinfo( T_('Rated'),       yesno($grow['X_Rated']) );
+   $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) );
+   $itable->add_sinfo( T_('Standard Handicap'), yesno($grow['StdHandicap']) );
    $itable_str_game = $itable->make_table();
    unset($itable);
 
@@ -169,68 +137,59 @@ function build_rating_diff( $rating_diff )
    // build table-info: opponents
 
    $itable = new Table_info('opponents');
-   $itable->add_row( array( 'caption' => T_('Opponents') ));
-   $itable->add_row( array(
-         'iattb' => 'class=Colors',
-         'sname' => T_('Color'),
-         'sinfo' => array(
-               image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
-               image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
-            ),
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Player'),
-         'sinfo' => array(
-               user_reference( REF_LINK, 1, '', @$grow['Black_ID'],
-                  @$grow['Black_Name'], @$grow['Black_Handle'] ),
-               user_reference( REF_LINK, 1, '', @$grow['White_ID'],
-                  @$grow['White_Name'], @$grow['White_Handle'] ),
-            ),
+   $itable->add_caption( T_('Opponents') );
+   $itable->add_sinfo(
+         T_('Color'),
+         array(
+            image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
+            image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
+         ),
+         'class=Colors' );
+   $itable->add_sinfo(
+         T_('Player'),
+         array(
+            user_reference( REF_LINK, 1, '', @$grow['Black_ID'], @$grow['Black_Name'], @$grow['Black_Handle'] ),
+            user_reference( REF_LINK, 1, '', @$grow['White_ID'], @$grow['White_Name'], @$grow['White_Handle'] ),
          ));
    if( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
    {
-      $itable->add_row( array(
-            'nattb' => 'class=OnVacation',
-            'sname' => T_('On vacation'),
-            'sinfo' => array(
+      $itable->add_sinfo(
+            T_('On vacation'),
+            array(
                   echo_onvacation(@$grow['Black_OnVacation']),
                   echo_onvacation(@$grow['White_OnVacation']),
-               ),
-            ));
+            ),
+            '', 'class=OnVacation' );
    }
-   $itable->add_row( array(
-         'sname' => T_('Current rating'),
-         'sinfo' => array(
-               echo_rating( @$grow['Black_Rating'], true, $grow['Black_ID'] ),
-               echo_rating( @$grow['White_Rating'], true, $grow['White_ID'] ),
-            ),
+   $itable->add_sinfo(
+         T_('Current rating'),
+         array(
+            echo_rating( @$grow['Black_Rating'], true, $grow['Black_ID'] ),
+            echo_rating( @$grow['White_Rating'], true, $grow['White_ID'] ),
          ));
-   $itable->add_row( array(
-         'sname' => T_('Start rating'),
-         'sinfo' => array(
-               echo_rating( @$grow['Black_Start_Rating']),
-               echo_rating( @$grow['White_Start_Rating']),
-            ),
+   $itable->add_sinfo(
+         T_('Start rating'),
+         array(
+            echo_rating( @$grow['Black_Start_Rating']),
+            echo_rating( @$grow['White_Start_Rating']),
          ));
    if( $game_finished )
    {
-      $itable->add_row( array(
-            'sname' => T_('End rating'),
-            'sinfo' => array(
-                  echo_rating( @$grow['Black_End_Rating']),
-                  echo_rating( @$grow['White_End_Rating']),
-               ),
+      $itable->add_sinfo(
+            T_('End rating'),
+            array(
+               echo_rating( @$grow['Black_End_Rating']),
+               echo_rating( @$grow['White_End_Rating']),
             ));
 
       if( $grow['X_Rated'] === 'Y' &&
             ( isset($grow['Black_RatingDiff']) || isset($grow['White_RatingDiff']) ))
       {
-         $itable->add_row( array(
-               'sname' => T_('Rating diff'),
-               'sinfo' => array(
-                     build_rating_diff( @$grow['Black_RatingDiff'] ),
-                     build_rating_diff( @$grow['White_RatingDiff'] ),
-                  ),
+         $itable->add_sinfo(
+               T_('Rating diff'),
+               array(
+                  build_rating_diff( @$grow['Black_RatingDiff'] ),
+                  build_rating_diff( @$grow['White_RatingDiff'] ),
                ));
       }
    }
@@ -243,49 +202,45 @@ function build_rating_diff( $rating_diff )
 
    $short = true; // use short-time?
    $itable = new Table_info('time');
-   $itable->add_row( array( 'caption' => T_('Remaining time and Time settings') ));
-   $itable->add_row( array(
-         'iattb' => 'class=Colors',
-         'sname' => T_('Color'),
-         'sinfo' => array(
-               T_('Game setting'),
-               image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
-               image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
-            ),
+   $itable->add_caption( T_('Remaining time and Time settings') );
+   $itable->add_sinfo(
+         T_('Color'),
+         array(
+            T_('Game setting'),
+            image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
+            image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
+         ),
+         'class=Colors' );
+   $itable->add_sinfo(
+         T_('Time system'),
+         array(
+            echo_byotype($grow['Byotype']),
+            '&nbsp;',
+            '&nbsp;',
          ));
-   $itable->add_row( array(
-         'sname' => T_('Time system'),
-         'sinfo' => array(
-               echo_byotype($grow['Byotype']),
-               '&nbsp;',
-               '&nbsp;',
-            ),
-         ));
-   $itable->add_row( array(
-         'sname' => T_('Main time'),
-         'sinfo' => array(
-               echo_time($grow['Maintime'], false, false&&$short),
-               echo_time($grow['Black_Maintime'], false, $short),
-               echo_time($grow['White_Maintime'], false, $short),
-            ),
+   $itable->add_sinfo(
+         T_('Main time'),
+         array(
+            echo_time($grow['Maintime'], false, false&&$short),
+            echo_time($grow['Black_Maintime'], false, $short),
+            echo_time($grow['White_Maintime'], false, $short),
          ));
    $game_extratime = echo_time_limit( -1, $grow['Byotype'],
          $grow['Byotime'], $grow['Byoperiods'], false, $short, false );
-   $itable->add_row( array(
-         'sname' => T_('Extra time'),
-         'sinfo' => array(
-               echo_time_limit( -1, $grow['Byotype'],
-                     $grow['Byotime'], $grow['Byoperiods'], false, false&&$short, false ),
-               (( $grow['Black_Maintime'] > 0 )
-                  ? $game_extratime
-                  : echo_time_limit( -1, $grow['Byotype'], $grow['Black_Byotime'],
-                        $grow['Black_Byoperiods'], false, $short, false )
-               ),
-               (( $grow['White_Maintime'] > 0 )
-                  ? $game_extratime
-                  : echo_time_limit( -1, $grow['Byotype'], $grow['White_Byotime'],
-                        $grow['White_Byoperiods'], false, $short, false )
-               ),
+   $itable->add_sinfo(
+         T_('Extra time'),
+         array(
+            echo_time_limit( -1, $grow['Byotype'],
+                  $grow['Byotime'], $grow['Byoperiods'], false, false&&$short, false ),
+            (( $grow['Black_Maintime'] > 0 )
+               ? $game_extratime
+               : echo_time_limit( -1, $grow['Byotype'], $grow['Black_Byotime'],
+                     $grow['Black_Byoperiods'], false, $short, false )
+            ),
+            (( $grow['White_Maintime'] > 0 )
+               ? $game_extratime
+               : echo_time_limit( -1, $grow['Byotype'], $grow['White_Byotime'],
+                     $grow['White_Byoperiods'], false, $short, false )
             ),
          ));
    if( $is_admin )

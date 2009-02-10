@@ -121,100 +121,36 @@ $ThePage = new Page('UserInfo');
       $itable= new Table_info('user');
 
       if( @$row['Type'] )
-      {
-         $itable->add_row( array(
-                  'sname' => T_('Type'),
-                  'sinfo' => build_usertype_text(@$row['Type']),
-                  ) );
-      }
-      $itable->add_row( array(
-               'sname' => T_('Name'),
-               'sinfo' => $name_safe,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Userid'),
-               'sinfo' => $handle_safe,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Country'),
-               'sinfo' => $cntrn,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Time zone'),
-               'sinfo' => $row['Timezone'] . " [GMT$user_gmt_offset]",
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('User local time'),
-               'sinfo' => $user_localtime
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Night Start'),
-               'sinfo' => sprintf('%02d:00', $row['Nightstart']),
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Open for matches?'),
-               'sinfo' => make_html_safe(@$row['Open'],INFO_HTML),
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Activity'),
-               'sinfo' => $activity,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Rating'),
-               'sinfo' => echo_rating(@$row['Rating2'],true,$row['ID']),
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Rank info'),
-               'sinfo' => make_html_safe(@$row['Rank'],INFO_HTML),
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Registration date'),
-               'sinfo' => $registerdate,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Last access'),
-               'sinfo' => $lastaccess,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Last move'),
-               'sinfo' => $lastmove,
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Vacation days left'),
-               'sinfo' => echo_day(floor($row["VacationDays"])),
-               ) );
+         $itable->add_sinfo( T_('Type'), build_usertype_text(@$row['Type']) );
+      $itable->add_sinfo( T_('Name'),    $name_safe );
+      $itable->add_sinfo( T_('Userid'),  $handle_safe );
+      $itable->add_sinfo( T_('Country'), $cntrn );
+
+      $itable->add_sinfo( T_('Time zone'),       $row['Timezone'] . " [GMT$user_gmt_offset]" );
+      $itable->add_sinfo( T_('User local time'), $user_localtime );
+      $itable->add_sinfo( T_('Night Start'),     sprintf('%02d:00', $row['Nightstart']) );
+
+      $itable->add_sinfo( T_('Open for matches?'), make_html_safe(@$row['Open'],INFO_HTML) );
+      $itable->add_sinfo( T_('Activity'),  $activity );
+      $itable->add_sinfo( T_('Rating'),    echo_rating(@$row['Rating2'],true,$row['ID']) );
+      $itable->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
+
+      $itable->add_sinfo( T_('Registration date'), $registerdate );
+      $itable->add_sinfo( T_('Last access'), $lastaccess );
+      $itable->add_sinfo( T_('Last move'),   $lastmove );
+      $itable->add_sinfo( T_('Vacation days left'), echo_day(floor($row["VacationDays"])) );
       if( $row['OnVacation'] > 0 )
       {
-         $itable->add_row( array(
-                  'nattb' => 'class=OnVacation',
-                  'sname' => T_('On vacation'),
-                  'sinfo' => echo_onvacation($row['OnVacation']),
-                  ) );
+         $itable->add_sinfo(
+               T_('On vacation'), echo_onvacation($row['OnVacation']),
+               '', 'class=OnVacation' );
       }
-      $itable->add_row( array(
-               'sname' => anchor( $run_link, T_('Running games')),
-               'sinfo' => $row['Running'],
-               ) );
-      $itable->add_row( array(
-               'sname' => anchor( $fin_link, T_('Finished games')),
-               'sinfo' => $row['Finished'],
-               ) );
-      $itable->add_row( array(
-               'sname' => anchor( $rat_link, T_('Rated games')),
-               'sinfo' => $row['RatedGames'],
-               ) );
-      $itable->add_row( array(
-               'sname' => anchor( $won_link, T_('Won games')),
-               'sinfo' => $row['Won'],
-               ) );
-      $itable->add_row( array(
-               'sname' => anchor( $los_link, T_('Lost games')),
-               'sinfo' => $row['Lost'],
-               ) );
-      $itable->add_row( array(
-               'sname' => T_('Percent'),
-               'sinfo' => $percent,
-               ) );
+      $itable->add_sinfo( anchor( $run_link, T_('Running games')),  $row['Running'] );
+      $itable->add_sinfo( anchor( $fin_link, T_('Finished games')), $row['Finished'] );
+      $itable->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
+      $itable->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
+      $itable->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
+      $itable->add_sinfo( T_('Percent'), $percent );
       if( $is_admin )
       { // show player clock
          $itable->add_row( array(
@@ -253,10 +189,9 @@ $ThePage = new Page('UserInfo');
             else
                $cat = $tmp;
          }
-         $itable->add_sinfo( $cat
+         $itable->add_sinfo( $cat,
                   //don't use add_info() to avoid the INFO_HTML here:
-                  ,make_html_safe($row['Text'], true)
-                  );
+                  make_html_safe($row['Text'], true) );
       }
 
       $itable->echo_table();
