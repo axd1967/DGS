@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/std_classes.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
@@ -355,7 +356,7 @@ $ARR_DBFIELDKEYS = array(
    $title3 = sprintf( $opp_for,   $tmp, echo_rating( @$players[$uid]['Rating2'], true, $uid ) );
 
    start_page( $title1, true, $logged_in, $player_row,
-               $utable->button_style($player_row['Button']) );
+               button_style($player_row['Button']) );
    if( $DEBUG_SQL )
    {
       if( isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
@@ -376,7 +377,7 @@ $ARR_DBFIELDKEYS = array(
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[33] )
-         $urow_strings[33] = $utable->button_TD_anchor(
+         $urow_strings[33] = button_TD_anchor(
             "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID", T_('Info'));
       if( $utable->Is_Column_Displayed[ 1] )
          $urow_strings[ 1] = "<A href=\"userinfo.php?uid=$ID\">$ID</A>";

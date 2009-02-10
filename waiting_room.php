@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/std_classes.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
@@ -209,7 +210,7 @@ require_once( "include/classlib_profile.php" );
       $title = T_("All waiting games");
 
    start_page($title, true, $logged_in, $player_row,
-               $wrtable->button_style($player_row['Button']) );
+               button_style($player_row['Button']) );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
@@ -231,8 +232,7 @@ require_once( "include/classlib_profile.php" );
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[33] )
-            $wrow_strings[33] = $wrtable->button_TD_anchor(
-                                 $baseURL."info=$ID#joingameForm", T_('Info'));
+            $wrow_strings[33] = button_TD_anchor( $baseURL."info=$ID#joingameForm", T_('Info'));
          if( $wrtable->Is_Column_Displayed[ 1] )
             $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
          if( $wrtable->Is_Column_Displayed[ 2] )
@@ -254,7 +254,7 @@ require_once( "include/classlib_profile.php" );
             $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
             if( !$haverating )
                $wrow_strings[ 5]['attbs']=
-                  $wrtable->warning_cell_attb( T_('No initial rating'), true);
+                  warning_cell_attb( T_('No initial rating'), true);
          }
          if( $wrtable->Is_Column_Displayed[14] )
          {
@@ -275,7 +275,7 @@ require_once( "include/classlib_profile.php" );
                echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) );
             if( !$goodrating )
                $wrow_strings[ 8]['attbs']=
-                  $wrtable->warning_cell_attb( T_('Out of range'), true);
+                  warning_cell_attb( T_('Out of range'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
             $wrow_strings[ 9] =

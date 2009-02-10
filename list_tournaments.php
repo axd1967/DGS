@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  /* The code in this file is written by Ragnar Ouchterlony */
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/tournament.php" );
@@ -40,7 +41,7 @@ require_once( "include/tournament.php" );
    $result = mysql_query( "SELECT ID, State, Name FROM Tournament" );
 
    start_page(T_("Tournaments"), true, $logged_in, $player_row,
-               $table->button_style($player_row['Button']) );
+               button_style($player_row['Button']) );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('ID'), 'Button', 0, 'ID+');
@@ -75,7 +76,7 @@ require_once( "include/tournament.php" );
          while( $partrow = mysql_fetch_array( $partresult ) )
             $participants[]= $partrow['pid'];
 
-         $row_strings[1] = $table->button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
+         $row_strings[1] = button_TD_anchor( "show_tournament.php?tid=$ID", $ID);
          $row_strings[2] = array(
             'attbs' => array( 'bgcolor' => $state_colors[ $State ]),
             'text' => $TourState_Strings[ $State ]
