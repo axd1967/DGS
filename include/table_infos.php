@@ -55,10 +55,12 @@ class Table_info
     *
     *    sname     = the "HTML safe" left cellule text.
     *    sinfo     = the "HTML safe" right cellule text.
+    *                Specify an array of values for multiple columns.
     *    name      = the unsafe left cellule text (will be healed).
     *    info      = the unsafe right cellule text (will be healed).
-    *    nattbs    = the attributs of left cellule.
-    *    iattbs    = the attributs of right cellule.
+    *                Specify an array of values for multiple columns.
+    *    nattb     = the attributs of left cellule.
+    *    iattb     = the attributs of right cellule.
     *
     *    scaption  = the "HTML safe" extended cellule text.
     *    caption   = the unsafe extended cellule text (will be healed).
@@ -66,14 +68,18 @@ class Table_info
     */
    var $Tablerows;
 
+   /*! \brief Number of columns (dependent on info/sinfo). */
+   var $Columns;
+
+
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
    function Table_info( $_tableid)
    {
       $this->Tablerows = array();
-
       $this->Id = $_tableid;
+      $this->Columns = 2;
    }
 
    /*! \brief Add a row to be displayed.
@@ -82,6 +88,9 @@ class Table_info
    function add_row( $row_array )
    {
       $this->Tablerows[]= $row_array;
+
+      $this->check_cols( @$row_array['sinfo'] );
+      $this->check_cols( @$row_array['info'] );
    }
 
    /*! \brief Add an caption row to be displayed.
@@ -120,6 +129,7 @@ class Table_info
             'iattb' => ( !$warningtitle ? '' :
                   $this->warning_cell_attb( $warningtitle) )
             );
+      $this->check_cols( $info );
    }
 
    /*! \brief Add an info row to be displayed.
@@ -134,6 +144,14 @@ class Table_info
             'iattb' => ( !$warningtitle ? '' :
                   $this->warning_cell_attb( $warningtitle) )
             );
+      $this->check_cols( $sinfo );
+   }
+
+   /*! \brief Checks if passed arg is array, and adjust column-count accordingly if needed. */
+   function check_cols( $arr )
+   {
+      if( is_array($arr) )
+         $this->Columns = max( $this->Columns, count($arr) + 1 );
    }
 
    /*! \brief Create a string of the table. */
@@ -206,7 +224,7 @@ class Table_info
          )
       {
          $string.= $this->add_cell( $tablerow,
-            'caption', 'scaption', 'cattb', '<th colspan=2$>', '</th>');
+            'caption', 'scaption', 'cattb', '<th colspan='.($this->Columns).'$>', '</th>');
       }
       else
       {
@@ -221,19 +239,39 @@ class Table_info
       return $string;
    }
 
+   // Adds table-cell(s): one cell if $unsafe or $safe are non-arrays, multi-cells on arrays
+   // param $unsafe: has prio over $safe
+   // param $attbs: char '$' replaced with $start
    function add_cell( $tablerow, $unsafe, $safe, $attbs, $start, $stop, $arymrg=NULL)
    {
       $attbs = @$tablerow[$attbs];
       if( isset($arymrg) )
          $attbs = attb_merge( $arymrg, attb_parse($attbs));
       $attbs = attb_build( @$attbs);
+      $start_str = str_replace('$',$attbs,$start);
 
+      $out = array();
       if( isset($tablerow[$unsafe]) )
-         $str = make_html_safe( $tablerow[$unsafe], INFO_HTML);
-      else
-         $str = @$tablerow[$safe];
-
-      return str_replace('$',$attbs,$start).$str.$stop;
+      {
+         if( is_array($tablerow[$unsafe]) )
+         {
+            foreach( $tablerow[$unsafe] as $colval )
+               $out[] = $start_str . make_html_safe($colval,INFO_HTML) . $stop;
+         }
+         else
+            $out[] = $start_str . make_html_safe($tablerow[$unsafe],INFO_HTML) . $stop;
+      }
+      elseif( isset($tablerow[$safe]) )
+      {
+         if( is_array($tablerow[$safe]) )
+         {
+            foreach( $tablerow[$safe] as $colval )
+               $out[] = $start_str . $colval . $stop;
+         }
+         else
+            $out[] = $start_str . $tablerow[$safe] . $stop;
+      }
+      return implode('', $out);
    }
 
 } //class Table_info
