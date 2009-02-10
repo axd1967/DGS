@@ -23,6 +23,19 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-10 juga
+
+   * gameinfo.php, game.php, skins/dragon/screen.css,
+     include/table_infos.php (Table_info, ~.add_row, ~.add_info, ~.add_sinfo,
+       ~.check_cols, ~.make_tablerow, ~.add_cell),
+     people.php, NEWS:
+   - added game info page and two links from game-page (info.gif + bottom-link)
+   - added info-icon to show for opening game-info page (taken from silk icons)
+   - Table_info: added handling for multiple-columns (>2)
+-----------
+copy /images/info.gif
+-----------
+
 2009-02-09 juga
 
    * include/std_functions.php (activity_string),
