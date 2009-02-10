@@ -56,7 +56,7 @@ function init_standard_folders()
 
 
 // Prints game setting form used by message.php and waiting_room.php
-// param arr_ratings:
+// param map_ratings:
 //    if set, contain map with keys (rating1, rating2) ->
 //    then add probable game-settings for conventional/proper-handicap-type
 function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
