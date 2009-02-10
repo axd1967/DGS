@@ -284,6 +284,11 @@ General instructions for developers:
    This can be processed faster by PHP.
 
 
+----------------- PHP: Faster String output with echo
+
+   Echo can work faster, if output strings are concattenated
+   using ',' (arg separator) instead of '.' (string concat).
+
 -----------------
 
 
