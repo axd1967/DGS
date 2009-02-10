@@ -229,6 +229,28 @@ require_once( "include/form_functions.php" );
 
    }
 
+
+   // prepare to show conv/proper-handitype-suggestions
+   $map_ratings = NULL;
+   if( $submode === 'Dispute' || $submode === 'Invite' )
+   {
+      if( $show_suggestions && $iamrated && $default_uhandle != $player_row['Handle'] )
+      {
+         $other_row = mysql_single_fetch( 'message.invite_suggest.'.$submode,
+            'SELECT Rating2, RatingStatus FROM Players ' .
+            'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
+         if( $other_row )
+         {
+            $other_rating = (int)@$other_row['Rating2'];
+            if( @$other_row['RatingStatus'] && is_numeric($other_rating) && $other_rating >= MIN_RATING )
+            {// other is rated
+               $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
+            }
+         }
+      }
+   }
+
+
    start_page("Message - $submode", true, $logged_in, $player_row );
 
    echo "<center>\n";
@@ -366,9 +388,9 @@ require_once( "include/form_functions.php" );
                             null, null, null, false, $rx_term);
 
          if( $preview )
-            game_settings_form($message_form, 'dispute', $iamrated, 'redraw', @$_POST);
+            game_settings_form($message_form, 'dispute', $iamrated, 'redraw', @$_POST, $map_ratings);
          else
-            game_settings_form($message_form, 'dispute', $iamrated, $my_id, $Game_ID);
+            game_settings_form($message_form, 'dispute', $iamrated, $my_id, $Game_ID, $map_ratings);
 
          $message_form->add_row( array(
                'HEADER', T_('Dispute settings'),
@@ -394,23 +416,6 @@ require_once( "include/form_functions.php" );
 
       case 'Invite':
       {
-         // prepare to show conv/proper-handitype-suggestions
-         $map_ratings = NULL;
-         if( $show_suggestions && $iamrated && $default_uhandle != $player_row['Handle'] )
-         {
-            $other_row = mysql_single_fetch( 'message.invite_suggest',
-               'SELECT Rating2, RatingStatus FROM Players ' .
-               'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
-            if( $other_row )
-            {
-               $other_rating = (int)@$other_row['Rating2'];
-               if( @$other_row['RatingStatus'] && is_numeric($other_rating) && $other_rating >= MIN_RATING )
-               {// other is rated
-                  $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
-               }
-            }
-         }
-
          if( $preview )
             game_settings_form($message_form, 'invite', $iamrated, 'redraw', @$_POST, $map_ratings);
          else
