@@ -41,12 +41,14 @@ $info_box = '<br>When translating you should keep in mind the following things:
        display in the normal page because of additional constraints of the normal page.
   <li> If a translated word is the same as in english, leave it blank and click
        the \'untranslated\' box to the right.
+  <li> If you need to know the context of a phrase to translate (where it appears on DGS),
+       you can ask in the translator forum for help.
   <li> In some places there is a percent-character followed by some characters.
        This is a special place where the program might put some data in.
        <br>
        Example: \'with %s extra per move\' might be displayed as \'with 2 hours extra per move\'.
        <br>
-       If you want to change order of these you can use \'%1$s\' to place to make
+       If you want to change the order of these you can use \'%1$s\' to place to make
        sure that you get the first argument and \'%2$s\' for the second etc.
        <br>
        <a href="http://www.php.net/manual/en/function.sprintf.php">You can read more here</a>
@@ -58,7 +60,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
   <li> If you want to change the html code in some way in the translation, keep in mind
        that the code shall conform to the standard layout of Dragon.
        <br>
-       To not introduce unwanted html elements, use
+       Do not introduce unwanted html elements, use
        &amp;lt; instead of &lt;, &amp;gt; instead of &gt; and &amp;amp; instead of &amp;,
        if you need to display those characters in your translated string.
   <li> Inside your messages, posts and some other places of DGS, you may use our private
@@ -81,8 +83,8 @@ $info_box = '<br>When translating you should keep in mind the following things:
        this means a second word with the same spelling, so just ignore the #2 part when
        translating. This is necessary since in some languages \'to\' is translated differently
        depending on the context (e.g. \'bis\' or \'an\' in german).
-       Some words may end with #short. Often used in tables, they have to be translated
-       with the shorter abbreviation of the word.
+       Some words may end with #short or other suffixes after the \'#\'-char.
+       Often used in tables, they have to be translated with the shorter abbreviation of the word.
        For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
        \'h\', as you can see them in the \'Time remaining\' column of the status page
        (e.g. \'12d 8h\').
