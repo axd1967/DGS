@@ -25,6 +25,15 @@ ChangeLog
 
 2009-02-10 juga
 
+   * message.php:
+   - added handicap-suggestion also for dispute-view of invitation
+
+   * scripts/README.developers:
+   - note about faster echo()-output
+
+   * translate.php:
+   - adjusted readme-first text: fixed typos, more details
+
    * gameinfo.php:
    - added opponents rating diff for finished game
 
@@ -247,7 +256,7 @@ CREATE TABLE Profiles (
 
    * message.php, NEWS, skins/dragon/screen.css,
      include/message_functions.php (game_settings_form,
-       build_probable_game_setting_shortinfo, get_colortext_probable):
+       build_suggestion_shortinfo, get_colortext_probable):
    - from wishlist for invites:
      added color/handicap/komi-suggestion for conventional & proper type
    - fixed text-TODO using "probable" only for conv/proper-type
