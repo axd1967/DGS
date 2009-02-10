@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/rating.php" );
@@ -557,7 +558,7 @@ $ThePage = new Page('GamesList');
 
 
    start_page( $title1, true, $logged_in, $player_row,
-               $gtable->button_style($player_row['Button']) );
+               button_style($player_row['Button']) );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title2</h3>\n";
@@ -592,7 +593,7 @@ $ThePage = new Page('GamesList');
 
       $grow_strings = array();
       if( $gtable->Is_Column_Displayed[1] )
-         $grow_strings[1] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
+         $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">"
             . T_('sgf') . "</A>";
