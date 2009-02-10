@@ -107,17 +107,18 @@ require_once( "include/classlib_profile.php" );
    $wrtable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   /**
+    * Keep the UserType/Type/Handicap#headerwr to allow the translators
+    * to solve a local language ambiguity.
+    **/
    $wrtable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
+   $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'other_type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'other_name+');
    $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'other_handle+');
    $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'other_country+');
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'other_rating-');
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
-   /**
-    * keep the Type#headerwr and Handicap#headerwr to allow the
-    * translators to solve a local language ambiguity.
-    **/
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', TABLE_NO_HIDE, 'Handicaptype+');
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    /** TODO: the handicap stones info could be merged in the Komi column,
@@ -242,11 +243,7 @@ require_once( "include/classlib_profile.php" );
             $wrow_strings[33] = $wrtable->button_TD_anchor(
                                  $baseURL."info=$ID#joingameForm", T_('Info'));
          if( $wrtable->Is_Column_Displayed[ 1] )
-         {
-            $usertype = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
-            $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '')
-               . ( $usertype != '' ? '&nbsp;&nbsp;'.$usertype : '' );
-         }
+            $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
          if( $wrtable->Is_Column_Displayed[ 2] )
             $wrow_strings[ 2] = user_reference( REF_LINK, 1, '', $other_id, $other_handle, '');
          if( $wrtable->Is_Column_Displayed[15] )
@@ -298,8 +295,12 @@ require_once( "include/classlib_profile.php" );
          if( $wrtable->Is_Column_Displayed[12] )
             $wrow_strings[12] = yesno( $WeekendClock);
          if( ENA_STDHANDICAP )
+         {
             if( $wrtable->Is_Column_Displayed[13] )
                $wrow_strings[13] = yesno( $StdHandicap);
+         }
+         if( $wrtable->Is_Column_Displayed[16] )
+            $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
 
          $wrtable->add_row( $wrow_strings );
       }
