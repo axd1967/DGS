@@ -12,6 +12,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Resign game on opponents turn
       * Preview game message (access-key [v]=Preview)
       * Added "Notes" column on My-Games list
+      * Added game info page (<image info.gif> and bottom link)
 
    * Game settings:
       * Waiting room: added adjustment and min/max-limitation of handicap stones
