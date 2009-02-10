@@ -255,10 +255,12 @@ function build_icon( $icon_name, $text )
       . build_icon('teacher.gif', sprintf( T_('Teacher created from [%s]'), 'user_comment'))
       . build_icon('robot.gif', sprintf( T_('Robot created from [%s]'), 'computer'))
       . build_icon('team.gif', sprintf( T_('Team created from [%s]'), 'group'))
+      . build_icon('info.gif', sprintf( T_('Information created from [%s]'), 'info'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
-                . 'collection (version 1.3): %s'), $images_str ),
+                . 'collection (version 1.3) under '
+                . 'Creative Commons Attribution 2.5 License: %s'), $images_str ),
       anchor('http://www.famfamfam.com/archive/silk-icons-thats-your-lot/') );
 
    add_contributor();
