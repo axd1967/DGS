@@ -23,7 +23,36 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-11 juga
+
+   * include/message_functions.php (game_info_table),
+     include/table_infos.php (Table_info.add_info, ~.add_sinfo, ~.warning_cell_attb),
+     gameinfo.php, userinfo.php, status.php:
+   - changed Table_info::add_info/sinfo()-signature:
+     replaced warning_cell_attb with iattb+nattb-args
+   - replaced Table_info->add_row() with add_sinfo() if possible
+
+   * include/gui_functions.php (button_style, button_TD_anchor,
+       button_TD_width_insert, warning_cell_attb),
+     include/table_columns.php (button_style, button_TD_anchor,
+       button_TD_width_insert, warning_cell_attb),
+     list_tournaments.php, opponents.php, status.php, show_games.php, waiting_room.php:
+   - code cleanup (removed code redundancy),
+     moved some static GUI-funcs to include/gui_functions.php:
+     button_style, button_TD_anchor, button_TD_width_insert, warning_cell_attb
+
 2009-02-10 juga
+
+   * include/message_functions.php (build_adjust_handicap, game_info_table),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     waiting_room.php:
+   - merged "showing" of handicap and std-placement, but kept separate column
+     on StdPlacement for filtering on it, to let user choose what to use
+   - simplified handicap-adjustment output-format (removed 'H'-prefix),
+     moved NO_VALUE-formatting to caller
+
+   * waiting_room.php:
+   - added separate column for user-type
 
    * links.php:
    - corrected outdated links
