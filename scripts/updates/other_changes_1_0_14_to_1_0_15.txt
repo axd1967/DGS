@@ -7,15 +7,12 @@
  mkdir /tmp/persistent/dragongoserver/temp/
  chmod 775 /tmp/persistent/dragongoserver/temp/
  ln -s -d /tmp/persistent/dragongoserver/temp /home/groups/d/dr/dragongoserver/htdocs/temp
------------
 
 -----------
 copy /images/favicon.ico into the root folder
------------
 
 -----------
 copy /images/star3.gif
------------
 
 -----------
 // added images for thread-post-list navigation
@@ -26,12 +23,14 @@ copy /images/f_nextparent.png
 copy /images/f_prevanswer.png
 copy /images/f_prevparent.png
 copy /images/f_top.png
------------
 
 -----------
 copy /images/professional.gif
 copy /images/robot.gif
 copy /images/teacher.gif
 copy /images/team.gif
+
 -----------
+# add english translation for all '#...'-texts, escpecially in waiting-room
+# revert 'Handicap#headerwr': remove abbreviation for waiting-room
 

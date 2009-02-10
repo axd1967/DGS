@@ -107,10 +107,7 @@ require_once( "include/classlib_profile.php" );
    $wrtable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   /**
-    * Keep the UserType/Type/Handicap#headerwr to allow the translators
-    * to solve a local language ambiguity.
-    **/
+   // NOTE: Keep the headers "..#headerwr" to allow translators to solve local language ambiguities
    $wrtable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'other_type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'other_name+');
@@ -121,21 +118,15 @@ require_once( "include/classlib_profile.php" );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', TABLE_NO_HIDE, 'Handicaptype+');
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
-   /** TODO: the handicap stones info could be merged in the Komi column,
-    * [ BUT maybe better to keep them separate to be able to filter on them
-    *   AND being more flexible for later handicap-enhancements !! ]
-    * with the standard placement... something like: "%d H + %d K (S)"
-    * where:
-    *   H=Tr$['Handicap stones#short']
-    *   K=Tr$['Komi#short']
-    *   S=Tr$['Standard placement#short']
-    **/
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Rating range#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
    $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames+');
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
    $wrtable->add_tablehead(12, T_('Weekend Clock#header'), '', 0, 'WeekendClock-');
+   // NOTE: User can choose:
+   // View "merged" "Handicap + StdPlacement (in Handicap column),
+   // but has separate column on StdPlacement for filtering on it:
    if( ENA_STDHANDICAP )
       $wrtable->add_tablehead(13, T_('Standard placement#header'), '', 0, 'StdHandicap-');
 
@@ -267,11 +258,12 @@ require_once( "include/classlib_profile.php" );
          }
          if( $wrtable->Is_Column_Displayed[14] )
          {
-            if( $calculated )
-               $wrow_strings[14] = build_adjust_handicap(
-                  $AdjHandicap, $MinHandicap, $MaxHandicap, T_('H#adjust_handicap') );
-            else
-               $wrow_strings[14] = $Handicap;
+            $h_str = ( $calculated )
+               ? build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap )
+               : $Handicap;
+            if( ENA_STDHANDICAP && ($StdHandicap === 'Y') && $h_str )
+               $h_str .= ' ' . T_('(Standard placement)#handicap_tablewr');
+            $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
          if( $wrtable->Is_Column_Displayed[ 6] )
             $wrow_strings[ 6] = ($calculated ? NO_VALUE : $Komi);

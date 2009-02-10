@@ -444,7 +444,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
 
    return $allowed;
-}
+} // end of 'game_settings_form'
 
 
 define('FLOW_ANSWER'  ,0x1);
@@ -559,7 +559,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    }
 
    echo "</table>\n";
-}
+} // end of 'message_info_table'
 
 
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
@@ -737,9 +737,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle == 'waitingroom' && $is_calc_handitype )
    {
-      $adj_handi_str = build_adjust_handicap(
-            $AdjHandicap, $MinHandicap, $MaxHandicap, T_('H#adjust_handicap') );
-      if( $adj_handi_str != NO_VALUE )
+      $adj_handi_str = build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap );
+      if( $adj_handi_str != '' )
       {
          $itable->add_sinfo(
                    T_('Handicap adjustment')
@@ -862,10 +861,11 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    } //Probable settings
 
    $itable->echo_table();
-}
+} // end of 'game_info_table'
 
-// output (with optional parts): prefix +/-adj [min,max]
-function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $prefix='' )
+// output (with optional parts): prefix +/-adj [min,max] suffix
+// returns '' if no handicap; caller must format empty to NO_VALUE for example
+function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $prefix='', $suffix='' )
 {
    $out = array();
    if( $adj_handicap )
@@ -874,9 +874,9 @@ function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $pr
       $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );
 
    if( count($out) )
-      return $prefix . implode(' ',$out);
+      return $prefix . implode(' ',$out) . $suffix;
    else
-      return NO_VALUE;
+      return '';
 }
 
 function build_suggestion_shortinfo( $suggest_result )
