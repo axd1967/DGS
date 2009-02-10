@@ -652,6 +652,7 @@ function get_alt_arg( $n1, $n2)
    if( $may_play || $validation_step ) //should be "from status page" as the nextgame option
    {
       $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."nextskip=t";
+      $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
 
    if( !$validation_step )
@@ -704,6 +705,8 @@ function get_alt_arg( $n1, $n2)
 
       if( $has_observers )
          $menu_array[T_('Show observers')] = "users.php?observe=$gid";
+
+      $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
 
    end_page(@$menu_array);
@@ -932,6 +935,8 @@ function draw_add_time( $game_row )
 
 function draw_game_info(&$game_row, &$board)
 {
+   global $base_path;
+
    echo '<table class=GameInfos>' . "\n";
 
    $cols = 4;
@@ -999,8 +1004,13 @@ function draw_game_info(&$game_row, &$board)
 
    //game rows
    $sep = ',&nbsp;&nbsp;&nbsp;';
+   $ginfo_str = T_('Game information');
    echo '<tr id="gameRules">' . "\n";
-   echo "<td colspan=\"" . $cols . "\">" . T_('Rules') . ': ';
+   echo '<td class=Color>'
+      . anchor( "gameinfo.php?gid={$game_row['ID']}",
+            image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone') )
+      . "</td>\n";
+   echo "<td colspan=\"" . ($cols-1) . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];
    echo $sep . T_('Rated game') . ': ' .

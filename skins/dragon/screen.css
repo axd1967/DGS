@@ -1150,6 +1150,10 @@ table.Infos .Highlight {
    background: #ffd070;
 }
 
+table.Infos td.Colors {
+   text-align: center;
+}
+
 
 /* ------------------------- */
 /* search and filter highlights */
