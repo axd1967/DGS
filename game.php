@@ -652,7 +652,6 @@ function get_alt_arg( $n1, $n2)
    if( $may_play || $validation_step ) //should be "from status page" as the nextgame option
    {
       $menu_array[T_('Skip to next game')] = "confirm.php?gid=$gid".URI_AMP."nextskip=t";
-      $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
 
    if( !$validation_step )
@@ -705,9 +704,9 @@ function get_alt_arg( $n1, $n2)
 
       if( $has_observers )
          $menu_array[T_('Show observers')] = "users.php?observe=$gid";
-
-      $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
+
+   $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
 
    end_page(@$menu_array);
 }
