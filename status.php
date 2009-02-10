@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
 require_once( "include/table_columns.php" );
@@ -52,7 +53,7 @@ $ThePage = new Page('Status');
    $gtable = new Table( 'game', "status.php", "GamesColumns", '', $table_mode );
 
    start_page(T_('Status'), true, $logged_in, $player_row,
-               $gtable->button_style($player_row['Button']) );
+               button_style($player_row['Button']) );
 
    section( 'Status',
       sprintf( T_('Status for %1$s: %2$s'),
@@ -65,15 +66,13 @@ $ThePage = new Page('Status');
    {
       $itable= new Table_info('user');
 
-      $itable->add_row( array(
-            'sname' => anchor( "edit_vacation.php", T_('Vacation days left')),
-            'sinfo' => echo_day(floor($player_row["VacationDays"])),
-            ) );
-      $itable->add_row( array(
-            'nattb' => 'class=OnVacation',
-            'sname' => anchor( "edit_vacation.php", T_('On vacation')),
-            'sinfo' => echo_onvacation($player_row['OnVacation']),
-            ) );
+      $itable->add_sinfo(
+            anchor( "edit_vacation.php", T_('Vacation days left') ),
+            echo_day( floor($player_row["VacationDays"])) );
+      $itable->add_sinfo(
+            anchor( "edit_vacation.php", T_('On vacation') ),
+            echo_onvacation($player_row['OnVacation']),
+            '', 'class=OnVacation' );
 
       $itable->echo_table();
       unset($itable);
@@ -189,7 +188,7 @@ $ThePage = new Page('Status');
 
          $grow_strings = array();
          //if( $gtable->Is_Column_Displayed[0] )
-            $grow_strings[ 1] = $gtable->button_TD_anchor( "game.php?gid=$ID", $ID);
+            $grow_strings[ 1] = button_TD_anchor( "game.php?gid=$ID", $ID);
          if( $gtable->Is_Column_Displayed[2] )
             $grow_strings[ 2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
          if( $gtable->Is_Column_Displayed[3] )

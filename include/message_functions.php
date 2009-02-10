@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Messages";
 
 
+require_once( 'include/gui_functions.php' );
 require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( 'include/game_functions.php' );
@@ -627,76 +628,40 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( $tablestyle == 'waitingroom' )
    {
       $itable->add_scaption(T_('Info'));
-
+      $itable->add_sinfo( T_('Number of games'), $nrGames );
       $itable->add_sinfo(
-                T_('Number of games')
-               ,$nrGames
-               );
-
-      $itable->add_row( array(
-               'sname' => T_('Player'),
-               'sinfo' => user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle),
-               ) );
+            T_('Player'),
+            user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) );
    }
 
-   $itable->add_row( array(
-            'sname' => T_('Rating'),
-            'sinfo' => echo_rating($other_rating,true,$other_id),
-            ) );
-
-   $itable->add_sinfo(
-             T_('Size')
-            , $Size
-            );
+   $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+   $itable->add_sinfo( T_('Size'), $Size );
 
    switch( (string)$Handitype )
    {
       case 'conv': // Conventional handicap
-         $itable->add_row( array(
-                  'sname' => T_('Type'),
-                  'sinfo' => T_('Conventional handicap (komi 0.5 if not even)'),
-                  'iattb' => ( $haverating ? ''
-                    : $itable->warning_cell_attb( T_('No initial rating'))
-                    ),
-                  ) );
+         $itable->add_sinfo(
+                  T_('Type'), T_('Conventional handicap (komi 0.5 if not even)'),
+                  ( $haverating ? '' : warning_cell_attb( T_('No initial rating')) ) );
          break;
 
       case 'proper': // Proper handicap
-         $itable->add_row( array(
-                  'sname' => T_('Type'),
-                  'sinfo' => T_('Proper handicap'),
-                  'iattb' => ( $haverating ? ''
-                    : $itable->warning_cell_attb( T_('No initial rating'))
-                    ),
-                  ) );
+         $itable->add_sinfo(
+                  T_('Type'), T_('Proper handicap'),
+                  ( $haverating ? '' : warning_cell_attb( T_('No initial rating')) ) );
          break;
 
       case 'nigiri': // Nigiri
          //'nigiri' => T_('Even game with nigiri'),
-         $itable->add_sinfo(
-                   T_('Type')
-                  , T_('Even game with nigiri') //T_('Nigiri')
-                  );
-         $itable->add_sinfo(
-                   T_('Komi')
-                  , $Komi
-                  );
+         $itable->add_sinfo( T_('Type'), T_('Even game with nigiri') ); //T('Nigiri')
+         $itable->add_sinfo( T_('Komi'), $Komi );
          break;
 
       case 'double': // Double game
          //'double' => T_('Double game') );
-         $itable->add_sinfo(
-                   T_('Type')
-                  , T_('Double game')
-                  );
-         $itable->add_sinfo(
-                   T_('Handicap')
-                  , $Handicap
-                  );
-         $itable->add_sinfo(
-                   T_('Komi')
-                  , $Komi
-                  );
+         $itable->add_sinfo( T_('Type'),     T_('Double game') );
+         $itable->add_sinfo( T_('Handicap'), $Handicap );
+         $itable->add_sinfo( T_('Komi'),     $Komi );
          break;
 
       default: // 'manual'
@@ -720,18 +685,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                       ;
          }
 
-         $itable->add_sinfo(
-                   T_('Colors')
-                  , $colortxt
-                  );
-         $itable->add_sinfo(
-                   T_('Handicap')
-                  , $Handicap
-                  );
-         $itable->add_sinfo(
-                   T_('Komi')
-                  , $Komi
-                  );
+         $itable->add_sinfo( T_('Colors'),   $colortxt );
+         $itable->add_sinfo( T_('Handicap'), $Handicap );
+         $itable->add_sinfo( T_('Komi'),     $Komi );
          break;
    }
 
@@ -739,55 +695,29 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    {
       $adj_handi_str = build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap );
       if( $adj_handi_str != '' )
-      {
-         $itable->add_sinfo(
-                   T_('Handicap adjustment')
-                  , $adj_handi_str
-                  );
-      }
+         $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
    }
 
    if( ENA_STDHANDICAP )
-   {
-      $itable->add_sinfo(
-                T_('Standard placement')
-               , yesno( $StdHandicap)
-               );
-   }
+      $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
    if( $tablestyle == 'waitingroom' )
    {
       $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
-      $itable->add_row( array(
-               'sname' => T_('Rating range'),
-               'sinfo' => $Ratinglimit,
-               'iattb' => ( $goodrating ? ''
-                 : $itable->warning_cell_attb( T_('Out of range'))
-                 ),
-               ) );
+      $itable->add_sinfo(
+            T_('Rating range'), $Ratinglimit,
+            ( $goodrating ? '' : warning_cell_attb( T_('Out of range')) ) );
    }
 
+   $itable->add_sinfo( T_('Main time'), echo_time($Maintime) );
    $itable->add_sinfo(
-             T_('Main time')
-            , echo_time($Maintime)
-            );
-   $itable->add_sinfo(
-             echo_byotype($Byotype)
-            , echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods
-                                 , false, false, false)
-            );
+         echo_byotype($Byotype),
+         echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods , false, false, false) );
 
-   $itable->add_row( array(
-            'sname' => T_('Rated game'),
-            'sinfo' => yesno( $Rated),
-            'iattb' => ( $iamrated || $Rated != 'Y' ? ''
-              : $itable->warning_cell_attb( T_('No initial rating'))
-              ),
-            ) );
    $itable->add_sinfo(
-             T_('Clock runs on weekends')
-            , yesno( $WeekendClock)
-            );
+         T_('Rated game'), yesno( $Rated),
+         ( $iamrated || $Rated != 'Y' ? '' : warning_cell_attb( T_('No initial rating')) ) );
+   $itable->add_sinfo( T_('Clock runs on weekends'), yesno( $WeekendClock) );
 
    if( $tablestyle == 'waitingroom' )
    {
@@ -815,7 +745,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       }
       else
       {
-         $infoHandicap = $Handicap; $infoKomi = $Komi; $info_i_am_black = 0;
+         $infoHandicap = $Handicap;
+         $infoKomi = $Komi;
+         $info_i_am_black = 0;
       }
 
       $infoHandicap_old = $infoHandicap;
@@ -842,22 +774,14 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          $colortxt = get_colortext_probable( $info_i_am_black );
       }
 
-      $itable->add_scaption( $is_calc_handitype
-         ? T_('Probable game settings')
-         : T_('Game settings') );
+      $itable->add_scaption(
+         ($is_calc_handitype) ? T_('Probable game settings') : T_('Game settings') );
 
-      $itable->add_row( array(
-               'sname' => T_('Color'),
-               'sinfo' => $colortxt,
-               ) );
+      $itable->add_sinfo( T_('Color'), $colortxt );
       $itable->add_sinfo(
-                T_('Handicap')
-               ,$infoHandicap . ($adj_handi_str ? "&nbsp;&nbsp;($adj_handi_str)" : '' )
-               );
-      $itable->add_sinfo(
-                T_('Komi')
-               ,sprintf("%.1f",$infoKomi)
-               );
+            T_('Handicap'),
+            $infoHandicap . ($adj_handi_str ? "&nbsp;&nbsp;($adj_handi_str)" : '' ) );
+      $itable->add_sinfo( T_('Komi'),  sprintf("%.1f",$infoKomi) );
    } //Probable settings
 
    $itable->echo_table();

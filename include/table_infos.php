@@ -31,8 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * \brief Class to ease the creation of info tables.
  */
-
-
 class Table_info
 {
    /*! \privatesection */
@@ -79,7 +77,7 @@ class Table_info
    {
       $this->Tablerows = array();
       $this->Id = $_tableid;
-      $this->Columns = 2;
+      $this->Columns = 2; // default column-width
    }
 
    /*! \brief Add a row to be displayed.
@@ -121,13 +119,13 @@ class Table_info
     *  assuming that the strings are not yet "HTML safe"
     * \see $Tablerows
     */
-   function add_info( $name='', $info='', $warningtitle='')
+   function add_info( $name='', $info='', $iattb='', $nattb='' )
    {
       $this->Tablerows[]= array(
             'name' => $name,
             'info' => $info,
-            'iattb' => ( !$warningtitle ? '' :
-                  $this->warning_cell_attb( $warningtitle) )
+            'iattb' => $iattb,
+            'nattb' => $nattb,
             );
       $this->check_cols( $info );
    }
@@ -136,13 +134,13 @@ class Table_info
     *  assuming that the strings ARE "HTML safe"
     * \see $Tablerows
     */
-   function add_sinfo( $sname='', $sinfo='', $warningtitle='')
+   function add_sinfo( $sname='', $sinfo='', $iattb='', $nattb='' )
    {
       $this->Tablerows[]= array(
             'sname' => $sname,
             'sinfo' => $sinfo,
-            'iattb' => ( !$warningtitle ? '' :
-                  $this->warning_cell_attb( $warningtitle) )
+            'iattb' => $iattb,
+            'nattb' => $nattb,
             );
       $this->check_cols( $sinfo );
    }
@@ -186,14 +184,6 @@ class Table_info
    function echo_table()
    {
       echo $this->make_table();
-   }
-
-   /*! \brief Return the attributs of a warning cellule. */
-   function warning_cell_attb( $title='')
-   {
-      $str= ' class=Warning';
-      if( $title ) $str.= ' title=' . attb_quote($title);
-      return $str;
    }
 
    /*! \privatesection */
