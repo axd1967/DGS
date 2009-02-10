@@ -25,6 +25,10 @@ ChangeLog
 
 2009-02-10 juga
 
+   * links.php:
+   - corrected outdated links
+   - added gosensations.com
+
    * message.php:
    - added handicap-suggestion also for dispute-view of invitation
 
