@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,6 @@ require_once( "features/vote/lib_votes.php" );
       error('not_logged_in');
 
    $my_id = (int)$player_row['ID'];
-   $is_admin = Feature::is_admin();
 
    $page = 'list_votes.php?';
 
@@ -90,7 +89,6 @@ require_once( "features/vote/lib_votes.php" );
 
    $title = T_('Feature vote list');
    start_page( $title, true, $logged_in, $player_row );
-   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_vfilter->get_select()) ."<br>";
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";

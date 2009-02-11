@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ $TranslateGroups[] = "Common";
 
 chdir("../../");
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
@@ -40,7 +41,7 @@ require_once( "features/vote/lib_votes.php" );
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
-   $is_admin = Feature::is_admin();
+   $is_super_admin = Feature::is_super_admin();
 
    $page = 'list_features.php?';
 
@@ -53,13 +54,13 @@ require_once( "features/vote/lib_votes.php" );
    $search_profile->handle_action();
 
    // table filters
-   $ffilter->add_filter( 1, 'Numeric', 'FL.ID', true );
+   $ffilter->add_filter( 1, 'Numeric', 'FL.ID', true, array( FC_SIZE => 8 ));
    $ffilter->add_filter( 2, 'Selection',     # filter on status
             array( T_('All#filterfeat') => '',
                    T_('New#filterfeat')  => "FL.Status='".FEATSTAT_NEW."'",
                    T_('Unvoted#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."') AND ISNULL(FV.fid)",
                    T_('Voted#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."') AND FV.fid>0",
-                   T_('Vote#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."')",
+                   T_('Vote#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."')", // FC_DEFAULT
                    T_('Work#filterfeat') => "FL.Status='".FEATSTAT_WORK."'",
                    T_('Done#filterfeat') => "FL.Status='".FEATSTAT_DONE."'",
                    T_('NACK#filterfeat') => "FL.Status='".FEATSTAT_NACK."'" ),
@@ -67,7 +68,7 @@ require_once( "features/vote/lib_votes.php" );
    $filter_subject =&
       $ffilter->add_filter( 3, 'Text', 'FL.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
-   if( $is_admin )
+   if( $is_super_admin )
       $ffilter->add_filter( 4, 'Numeric', 'FL.Editor_ID', true, array( FC_SIZE => 8 ) );
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
@@ -78,10 +79,10 @@ require_once( "features/vote/lib_votes.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ftable->add_tablehead(33, T_('Actions#header'),     'Image', TABLE_NO_HIDE, ''); // static
-   $ftable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID-');
+   $ftable->add_tablehead( 1, T_('ID#header'),          'Button', TABLE_NO_HIDE, 'FL.ID-');
    $ftable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
    $ftable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
-   if( $is_admin )
+   if( $is_super_admin )
       $ftable->add_tablehead( 4, T_('Editor#header'),   'User', 0, 'FL.Editor_ID+');
    $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'FL.Created+');
    $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
@@ -102,8 +103,8 @@ require_once( "features/vote/lib_votes.php" );
    $show_rows = $ftable->compute_show_rows(mysql_num_rows($result));
 
    $title = T_('Feature list');
-   start_page( $title, true, $logged_in, $player_row );
-   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ffilter->get_select()) ."<br>";
+   start_page( $title, true, $logged_in, $player_row,
+               button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";
@@ -158,13 +159,13 @@ require_once( "features/vote/lib_votes.php" );
       if( $ftable->Is_Column_Displayed[1] )
       {
          $url = "{$base_path}features/vote/vote_feature.php?fid=$ID".URI_AMP.'view=1';
-         $frow_strings[1] = "<A HREF=\"$url\">$ID</A>";
+         $frow_strings[1] = button_TD_anchor( $url, $ID);
       }
       if( $ftable->Is_Column_Displayed[2] )
          $frow_strings[2] = $feature->status;
       if( $ftable->Is_Column_Displayed[3] )
          $frow_strings[3] = make_html_safe( $feature->subject, false, $rx_term);
-      if( $is_admin && $ftable->Is_Column_Displayed[4] )
+      if( $is_super_admin && $ftable->Is_Column_Displayed[4] )
          $frow_strings[4] = user_reference( REF_LINK, 1, '', $feature->editor );
       if( $ftable->Is_Column_Displayed[5] )
          $frow_strings[5] = ($feature->created > 0 ? date(DATEFMT_FEATLIST, $feature->created) : '' );

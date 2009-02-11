@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -35,7 +35,7 @@ require_once( "features/vote/lib_votes.php" );
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
-   $is_admin = Feature::is_admin();
+   $is_super_admin = Feature::is_super_admin();
 
 /* Actual REQUEST calls used:
      (no args)             : add new feature
@@ -82,7 +82,7 @@ require_once( "features/vote/lib_votes.php" );
    // insert/update feature-object with values from edit-form if no error
    if( @$_REQUEST['feature_save'] )
    {
-      if( $is_admin )
+      if( $is_super_admin )
          $feature->set_status( $new_status );
       $feature->set_subject( get_request_arg('subject') );
       $feature->set_description( get_request_arg('description') );
@@ -111,13 +111,13 @@ require_once( "features/vote/lib_votes.php" );
    $arr_status = array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status );
-   if( $is_admin )
+   if( $is_super_admin )
    {
       // status-change
       $status_values = array(
-         FEATSTAT_NEW  => T_('New (feature check, then choose ACK or NACK)'),
-         FEATSTAT_NACK => T_('NACK (feature not accepted)'),
-         FEATSTAT_ACK  => T_('ACK (feature accepted, can be voted)'),
+         FEATSTAT_NEW  => T_('New  (check feature, then choose ACK or NACK)'),
+         FEATSTAT_NACK => T_('NACK (feature rejected)'),
+         FEATSTAT_ACK  => T_('ACK  (feature accepted, can be voted)'),
          FEATSTAT_WORK => T_('Work (feature in work, can be voted'),
          FEATSTAT_DONE => T_('Done (feature implemented)'),
       );
@@ -126,7 +126,7 @@ require_once( "features/vote/lib_votes.php" );
          'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
    }
    $fform->add_row( $arr_status );
-   if( $is_admin )
+   if( $is_super_admin )
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Editor'),

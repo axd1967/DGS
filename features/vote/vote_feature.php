@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -34,8 +34,6 @@ require_once( "features/vote/lib_votes.php" );
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
-
-   $is_admin = Feature::is_admin();
 
 /* Actual REQUEST calls used:
      view=1&fid=             : view existing feature (for description)
@@ -99,7 +97,7 @@ require_once( "features/vote/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status ));
-   if( $is_admin )
+   if( Feature::is_super_admin() )
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Editor'),
