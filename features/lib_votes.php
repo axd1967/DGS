@@ -20,11 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 // feature.status
-define('FEATSTAT_NEW',  'NEW');  // newly added, needs ACK to be voteable
-define('FEATSTAT_NACK', 'NACK'); // will not be done
-define('FEATSTAT_ACK',  'ACK');  // ready to be voted
-define('FEATSTAT_WORK', 'WORK'); // can be voted, though already in work by developers
-define('FEATSTAT_DONE', 'DONE'); // feature implemented
+define('FEATSTAT_NEW',  'NEW');  // newly added, can be voted or rejected (NACK)
+define('FEATSTAT_WORK', 'WORK'); // in work by developers
+define('FEATSTAT_DONE', 'DONE'); // feature implemented, but unreleased
+define('FEATSTAT_LIVE', 'LIVE'); // feature released on production-server
+define('FEATSTAT_NACK', 'NACK'); // feature rejected (will not be done)
 
 // featurevote.points
 define('FEATVOTE_MAXPOINTS', 5);
@@ -33,6 +33,12 @@ define('FEATVOTE_MAXPOINTS', 5);
 define('DATEFMT_FEATLIST', 'Y-m-d');
 define('DATEFMT_VOTELIST', 'Y-m-d');
 define('DATEFMT_FEATURE',  'Y-m-d&\n\b\s\p;H:i');
+
+// conditions on user to allow voting
+define('VOTE_MIN_RATEDGAMES', 5); // #games
+define('VOTE_MIN_MOVES', 500); // #moves
+define('VOTE_MIN_DAYS_LASTMOVED', 30); // #days
+
 
  /*!
   * \class Feature
@@ -79,7 +85,7 @@ class Feature
    /*! \brief Sets valid status */
    function set_status( $status )
    {
-      if( !preg_match( "/^(NEW|NACK|ACK|WORK|DONE)$/", $status ) )
+      if( !preg_match( "/^(NEW|WORK|DONE|LIVE|NACK)$/", $status ) )
          error('invalid_status', "feature.set_status($status)");
 
       $this->status = $status;
@@ -106,58 +112,36 @@ class Feature
          $this->subject = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($subject) );
    }
 
-   /*!
-    * \brief Returns true, if specified user is allowed to edit this feature (ACK or WORK status).
-    *        Not allowed for invalid user, guest or non-current user.
-    */
-   function allow_vote( $uid )
+   /*! \brief Returns true, if feature can be voted on (NEW status); no user-specific checks. */
+   function allow_vote()
    {
-      if( !Feature::allow_voting() )
-         return false;
-
-      // not allowed for invalid user, guest or not current user
-      global $player_row;
-      $my_id = (int)@$player_row['ID'];
-      if( !is_numeric($uid) || $uid != $my_id || $uid <= GUESTS_ID_MAX )
-         return false;
-
-      return (bool) ( $this->status == FEATSTAT_ACK || $this->status == FEATSTAT_WORK );
+      return (bool) ( $this->status == FEATSTAT_NEW );
    }
 
    /*!
-    * \brief Returns true, if specified user is allowed to edit this feature (not in WORK or DONE status).
-    *        Not allowed for invalid user or guest. Always allowed for admin.
-    * \see allow_user_edit()
+    * \brief Returns true, if current (admin) user is allowed to edit this feature (NEW status).
+    *        Always allowed for super-admin.
     */
-   function allow_edit( $uid )
+   function allow_edit()
    {
-      if( !Feature::allow_voting() ) // not even for admin
-         return false;
-
-      if( Feature::is_super_admin() )
+      if( Feature::is_super_admin() ) // super-admin can always edit
          return true;
-      if( !Feature::allow_user_edit( $uid ) )
+      if( !Feature::is_admin() ) // only admin can edit
          return false;
 
-      $allow_edit_status = (bool) ( $this->status != FEATSTAT_WORK && $this->status != FEATSTAT_DONE );
-      return (bool) ( $this->editor == $uid && $allow_edit_status );
+      return (bool) ( $this->status == FEATSTAT_NEW );
    }
 
 
    /*!
     * \brief Updates current Feature-data into database (may replace existing feature
-    *        and set lastchanged=NOW).
+    *        and set editor=current-user and lastchanged=NOW).
     */
    function update_feature()
    {
-      global $NOW;
+      global $player_row, $NOW;
+      $this->editor = @$player_row['ID'];
       $this->lastchanged = $NOW;
-
-      $result = mysql_query("SELECT ID FROM Players WHERE ID={$this->editor} LIMIT 1")
-         or error('mysql_query_failed', "feature.find_user({$this->editor})");
-      if( !$result || mysql_num_rows($result) != 1 )
-         error('unknown_user', "feature.find_user2({$this->editor})");
-      mysql_free_result($result);
 
       $update_query = 'REPLACE INTO FeatureList SET'
          . ' ID=' . (int)$this->id
@@ -172,14 +156,30 @@ class Feature
          or error('mysql_query_failed', "feature.update_feature({$this->id},{$this->subject})");
    }
 
-   /*! \brief Deletes current Feature from database. */
+   /*! \brief Returns true, if delete-feature allowed (checks constraints). */
+   function can_delete_feature()
+   {
+      // check if there are votes for this feature to delete
+      $result = mysql_query("SELECT fid FROM FeatureVote WHERE fid={$this->id} LIMIT 1")
+         or error('mysql_query_failed', "feature.check_delete_feature({$this->id})");
+      $cnt_votes = ( $result ) ? mysql_num_rows($result) : 0;
+      mysql_free_result($result);
+
+      return ( $cnt_votes <= 0 );
+   }
+
+   /*! \brief Deletes current Feature from database if no votes found (only as super-admin). */
    function delete_feature()
    {
-      ## TODO: only delete if no votes existing, or cascading delete
-      $delete_query = "DELETE FROM FeatureList "
-         . "WHERE ID='{$this->id}' LIMIT 1";
+      if( !Feature::is_super_admin() )
+         error('feature_edit_not_allowed', "feature.delete_feature({$this->id})");
+
+      if( !$this->can_delete_feature() )
+         error('constraint_votes_delete_feature', "feature.delete_feature({$this->id})");
+
+      $delete_query = "DELETE FROM FeatureList WHERE ID='{$this->id}' LIMIT 1";
       $result = mysql_query( $delete_query )
-         or error('mysql_query_failed', 'feature.delete_feature');
+         or error('mysql_query_failed', "feature.delete_feature({$this->id})");
    }
 
 
@@ -196,7 +196,7 @@ class Feature
 
    /*!
     * \brief Updates current FeatureVote-data into database (may replace existing featurevote
-    *        and set lastchanged=NOW).
+    *        and sets IP and lastchanged=NOW).
     */
    function update_vote( $voter, $points )
    {
@@ -205,7 +205,7 @@ class Feature
       else
          $this->featurevote->set_points( $points );
 
-//error_log("F.update_vote: " . $this->to_string());
+      //error_log("F.update_vote: " . $this->to_string());
       $this->featurevote->update_vote();
    }
 
@@ -232,47 +232,58 @@ class Feature
    function is_admin( $superadmin=false )
    {
       global $player_row;
-      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : ADMINGROUP_EXECUTIVE;
+      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : (ADMINGROUP_EXECUTIVE|ADMIN_DEVELOPER);
       $is_admin = (bool) ( @$player_row['admin_level'] & $chk_adminlevel );
       //return false; // for easy testing
       return $is_admin;
    }
 
-   /*!
-    * \brief Returns true, if current player has super-admin-rights for feature-functionality.
-    */
+   /*! \brief Returns true, if current player has super-admin-rights for feature-functionality. */
    function is_super_admin()
    {
       return Feature::is_admin(true);
    }
 
-   /*! \brief Returns true, if current user is allowed to participate in voting (add/edit/vote features). */
-   function allow_voting()
+   /*! \brief Returns array used for filter on status for feature/votes-list. */
+   function build_filter_selection_status( $fname )
    {
-      global $player_row;
-      // TODO: check number of moves, number of games, not-blocked from voting, etc ...?
-      //return false; // for easy testing
-      return true;
+      return array(
+         T_('All#filtervote')      => '',
+         T_('New#filtervote')      => "$fname='".FEATSTAT_NEW."'",
+         T_('Open#filtervote')     => "$fname IN ('".FEATSTAT_NEW."','".FEATSTAT_WORK."','".FEATSTAT_DONE."')",
+         T_('In Work#filtervote')  => "$fname='".FEATSTAT_WORK."'",
+         T_('Done#filtervote')     => "$fname='".FEATSTAT_DONE."'",
+         T_('Online#filtervote')   => "$fname='".FEATSTAT_LIVE."'",
+         T_('Rejected#filtervote') => "$fname='".FEATSTAT_NACK."'",
+      );
    }
 
    /*!
-    * \brief Returns true, if specified user is allowed to edit a feature (check on user).
-    *        Not allowed for invalid user or guest. Always allowed for admin.
+    * \brief Returns null if current user ($player_row) is allowed to participate in voting;
+    *        otherwise return deny-reason.
     */
-   function allow_user_edit( $uid )
+   function allow_vote_check()
    {
-      if( !Feature::allow_voting() )
-         return false;
+      global $player_row, $NOW;
 
-      // not allowed for invalid user or guest
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-         return false;
+      if( @$player_row['ID'] <= GUESTS_ID_MAX )
+         return T_('Voting is not allowed for guest user.');
 
-      global $player_row;
-      if( $uid != (int)@$player_row['ID'] && !Feature::is_super_admin() )
-         return false;
-      else
-         return true;
+      if( @$player_row['AdminOptions'] & ADMOPT_DENY_VOTE )
+         return T_('Voting on features has been denied.');
+
+      // minimum 5 finished+rated games, 500 moves, moved within 30 days
+      if( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
+            || @$player_row['Moves'] < VOTE_MIN_MOVES
+            || ($NOW - @$player_row['X_LastMove']) > VOTE_MIN_DAYS_LASTMOVED * 86400 )
+      {
+         return sprintf( T_('You have to finish %1$s rated games, make at least %2$s moves '
+                           .'and actively play in games during the last %3$s days.'),
+                         VOTE_MIN_RATEDGAMES, VOTE_MIN_MOVES, VOTE_MIN_DAYS_LASTMOVED );
+      }
+
+      //return 'testing'; // for easy testing
+      return null;
    }
 
    /*!
@@ -349,7 +360,6 @@ class Feature
       return Feature::new_from_row( $row );
    }
 
-
 } // end of 'Feature'
 
 
@@ -391,7 +401,7 @@ class FeatureVote
    /*! \brief Sets valid points (<0,0,>0). */
    function set_points( $points )
    {
-      if( !is_numeric($points) || $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
+      if( !is_numeric($points) || abs($points) > FEATVOTE_MAXPOINTS )
          error('invalid_status', "featurevote.set_points($points)");
 
       $this->points = $points;
