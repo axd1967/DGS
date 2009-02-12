@@ -68,10 +68,11 @@ function button_style( $button_nr=0)
 /*!
  * \brief Return the cell part of a button with anchor.
  */
-function button_TD_anchor( $href, $text='')
+function button_TD_anchor( $href, $text='', $title='' )
 {
    //return "\n  <td class=Button><a class=Button href=\"$href\">$text</a></td>";
-   return "<a class=Button href=\"$href\">$text</a>";
+   $titlestr = ($title != '') ? " title=\"$title\"" : '';
+   return "<a class=Button href=\"$href\"$titlestr>$text</a>";
 }
 
 /*!
