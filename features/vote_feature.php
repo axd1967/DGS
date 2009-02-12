@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-chdir("../../");
+chdir('../');
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
-require_once( "features/vote/lib_votes.php" );
+require_once( "features/lib_votes.php" );
 
 {
    connect2mysql();
@@ -78,7 +78,7 @@ require_once( "features/vote/lib_votes.php" );
    if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit )
    {
       $feature->update_vote( $my_id, $points );
-      jump_to("features/vote/vote_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature vote saved!')) );
+      jump_to("features/vote_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature vote saved!')) );
    }
 
    $page = 'vote_feature.php';
@@ -151,10 +151,10 @@ require_once( "features/vote/lib_votes.php" );
    $fform->echo_string();
    echo "</CENTER><BR>\n";
 
-   $menu_array[T_('Show features')] = "features/vote/list_features.php";
+   $menu_array[T_('Show features')] = "features/list_features.php";
    if( Feature::allow_user_edit( $my_id ) )
-      $menu_array[T_('Add new feature')] = "features/vote/edit_feature.php";
-   $menu_array[ T_('Show votes') ] = "features/vote/list_votes.php";
+      $menu_array[T_('Add new feature')] = "features/edit_feature.php";
+   $menu_array[ T_('Show votes') ] = "features/list_votes.php";
 
    end_page(@$menu_array);
 }

@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-chdir("../../");
+chdir('../');
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
-require_once( "features/vote/lib_votes.php" );
+require_once( "features/lib_votes.php" );
 
 
 {
@@ -102,7 +102,7 @@ require_once( "features/vote/lib_votes.php" );
       $frow_strings = array();
       if( $vtable->Is_Column_Displayed[1] )
       {
-         $url = "{$base_path}features/vote/vote_feature.php?fid=$ID";
+         $url = "{$base_path}features/vote_feature.php?fid=$ID";
          if( !$feature->allow_vote( $my_id ) )
             $url .= URI_AMP.'view=1';
          $frow_strings[1] = "<A HREF=\"$url\">$ID</A>";
@@ -132,7 +132,7 @@ require_once( "features/vote/lib_votes.php" );
    // end of table
 
    $menu_array = array(
-      T_('Show features') => "features/vote/list_features.php",
+      T_('Show features') => "features/list_features.php",
       );
 
    end_page(@$menu_array);

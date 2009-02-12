@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-chdir("../../");
+chdir('../');
 require_once( "include/std_functions.php" );
 require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
-require_once( "features/vote/lib_votes.php" );
+require_once( "features/lib_votes.php" );
 
 
 {
@@ -158,7 +158,7 @@ require_once( "features/vote/lib_votes.php" );
       }
       if( $ftable->Is_Column_Displayed[1] )
       {
-         $url = "{$base_path}features/vote/vote_feature.php?fid=$ID".URI_AMP.'view=1';
+         $url = "{$base_path}features/vote_feature.php?fid=$ID".URI_AMP.'view=1';
          $frow_strings[1] = button_TD_anchor( $url, $ID);
       }
       if( $ftable->Is_Column_Displayed[2] )
@@ -189,8 +189,8 @@ require_once( "features/vote/lib_votes.php" );
 
    $menu_array = array();
    if( Feature::allow_user_edit( $my_id ) )
-      $menu_array[ T_('Add new feature') ] = "features/vote/edit_feature.php";
-   $menu_array[ T_('Show votes') ] = "features/vote/list_votes.php";
+      $menu_array[ T_('Add new feature') ] = "features/edit_feature.php";
+   $menu_array[ T_('Show votes') ] = "features/list_votes.php";
 
    end_page(@$menu_array);
 }

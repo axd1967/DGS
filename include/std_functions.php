@@ -447,7 +447,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
-      $menu->add( 5,1, array( T_('Vote'), 'features/vote/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+      $menu->add( 5,1, array( T_('Vote'), 'features/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
 
       $tools_array = array(); //$url => array($img,$alt,$title)
       switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )

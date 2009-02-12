@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-chdir("../../");
+chdir('../');
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
-require_once( "features/vote/lib_votes.php" );
+require_once( "features/lib_votes.php" );
 
 {
    connect2mysql();
@@ -47,7 +47,7 @@ require_once( "features/vote/lib_votes.php" );
 */
 
    if( @$_REQUEST['feature_cancel'] ) // cancel delete
-      jump_to("features/vote/list_features.php");
+      jump_to("features/list_features.php");
 
    $fid = get_request_arg('fid'); //feature-ID
    if( $fid < 0 )
@@ -74,7 +74,7 @@ require_once( "features/vote/lib_votes.php" );
    if( $fid && @$_REQUEST['feature_delete'] && @$_REQUEST['confirm'] )
    {
       $feature->delete_feature();
-      jump_to("features/vote/list_features.php?sysmsg=". urlencode(T_('Feature removed!')) );
+      jump_to("features/list_features.php?sysmsg=". urlencode(T_('Feature removed!')) );
    }
 
    $new_status = get_request_arg('new_status');
@@ -91,7 +91,7 @@ require_once( "features/vote/lib_votes.php" );
       {
          $feature->update_feature();
          // if new feature added, add next; if edit feature, edit again
-         jump_to("features/vote/edit_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature saved!')) );
+         jump_to("features/edit_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature saved!')) );
       }
    }
 
@@ -188,9 +188,9 @@ require_once( "features/vote/lib_votes.php" );
    $fform->echo_string();
    echo "</CENTER><BR>\n";
 
-   $menu_array[T_('Show features')] = "features/vote/list_features.php";
+   $menu_array[T_('Show features')] = "features/list_features.php";
    if( Feature::allow_user_edit( $my_id ) )
-      $menu_array[ T_('Add new feature') ] = "features/vote/edit_feature.php";
+      $menu_array[ T_('Add new feature') ] = "features/edit_feature.php";
 
    end_page(@$menu_array);
 }
