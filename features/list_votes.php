@@ -31,12 +31,11 @@ require_once( "features/vote/lib_votes.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
 
-   $my_id = $player_row['ID'];
-   $is_admin = (bool) ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
+   $my_id = (int)$player_row['ID'];
+   $is_admin = Feature::is_admin();
 
    $page = 'list_votes.php?';
 
@@ -54,26 +53,27 @@ require_once( "features/vote/lib_votes.php" );
    $vfilter->init(); // parse current value from _GET
 
    $vtable = new Table( 'votes', $page );
-   $vtable->set_default_sort( 'sumPoints', 1);
    $vtable->register_filter( $vfilter );
    $vtable->add_or_del_column();
 
+
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $vtable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID+');
+   $vtable->add_tablehead( 2, T_('Type#header'),        '', 0, 'FL.Status+');
+   $vtable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
+   $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
+   $vtable->add_tablehead( 9, T_('Points#header'),      'Number', 0, 'sumPoints-');
+   $vtable->add_tablehead(10, T_('#Votes#header'),      'Number', 0, 'countVotes-');
+   $vtable->add_tablehead(11, T_('#Y#header'),          'Number', 0, 'countYes-');
+   $vtable->add_tablehead(12, T_('#N#header'),          'Number', 0, 'countNo-');
+
+   $vtable->set_default_sort(9);
    $order = $vtable->current_order_string();
    $limit = $vtable->current_limit_string();
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $vtable->add_tablehead( 1, T_('ID#header'), 'FL.ID', 0, 0, 'ID');
-   $vtable->add_tablehead( 2, T_('Type#header'), '', 0, 0, '');
-   $vtable->add_tablehead( 3, T_('Subject#header'), 'FL.Subject', 0, 0, '');
-   $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'FL.Lastchanged', 0, 0, 'Date');
-   $vtable->add_tablehead( 9, T_('Points#header'), 'sumPoints', 1, 0, '');
-   $vtable->add_tablehead(10, T_('#Votes#header'), 'countVotes', 1, 0, '');
-   $vtable->add_tablehead(11, T_('#Y#header'), 'countYes', 1, 0, '');
-   $vtable->add_tablehead(12, T_('#N#header'), 'countNo', 1, 0, '');
-
    // build SQL-query
    $qsql = FeatureVote::build_query_featurevote_list( $vtable );
-   $query = $qsql->get_select() . " ORDER BY $order $limit";
+   $query = $qsql->get_select() . "$order $limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'votelist.find_data');
