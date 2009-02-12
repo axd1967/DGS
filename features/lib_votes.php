@@ -369,13 +369,15 @@ class FeatureVote
    var $points;
    /*! \brief Date when feature has been last updated (unix-time). */
    var $lastchanged;
+   /*! \brief IP of voter. */
+   var $ip;
 
 
    /*!
     * \brief Constructs Feature-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $id may be 0 to add a new feature
     */
-   function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0 )
+   function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0, $ip='' )
    {
       if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
          error('invalid_user', "featurevote.FeatureVote($id,$voter)");
@@ -383,6 +385,7 @@ class FeatureVote
       $this->voter = (int) $voter;
       $this->set_points( $points );
       $this->lastchanged = (int) $lastchanged;
+      $this->ip = $ip;
    }
 
    /*! \brief Sets valid points (<0,0,>0). */
@@ -402,19 +405,21 @@ class FeatureVote
 
 
    /*!
-    * \brief Updates current FeatureVote-data into database (may replace existing featurevote
-    *        and set lastchanged=NOW).
+    * \brief Updates current FeatureVote-data into database (may replace existing featurevote,
+    *        set lastchanged=NOW and IP of voter).
     */
    function update_vote()
    {
       global $NOW;
       $this->lastchanged = $NOW;
+      $this->ip = (string)@$_SERVER['REMOTE_ADDR'];
 
       $update_query = 'REPLACE INTO FeatureVote SET'
          . ' fid=' . (int)$this->fid
          . ', Voter_ID=' . (int)$this->voter
          . ', Points=' . (int)$this->points
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
+         . ", IP='{$this->ip}'"
          ;
       $result = mysql_query( $update_query )
          or error('mysql_query_failed', "feature.update_vote({$this->fid},{$this->voter},{$this->points})");
@@ -427,7 +432,8 @@ class FeatureVote
       return "FeatureVote(fid={$this->fid}): "
          . "voter=[{$this->voter}], "
          . "points=[{$this->points}], "
-         . "lastchanged=[{$this->lastchanged}]";
+         . "lastchanged=[{$this->lastchanged}], "
+         . "ip=[{$this->ip}]";
    }
 
 
@@ -439,7 +445,8 @@ class FeatureVote
       if( !is_numeric($points) )
          return sprintf( T_('points [%s] must be numeric'), $points );
       if( $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
-         return sprintf( T_('points [%s] must be in range [%s,%s]'), $points, -FEATVOTE_MAXPOINTS, FEATVOTE_MAXPOINTS );
+         return sprintf( T_('points [%1$s] must be in range [%2$s,%3$s]'),
+                         $points, -FEATVOTE_MAXPOINTS, FEATVOTE_MAXPOINTS );
       return null;
    }
 
@@ -473,7 +480,8 @@ class FeatureVote
    {
       return array(
          'FV.fid', 'FV.Voter_ID', 'FV.Points',
-         'IFNULL(UNIX_TIMESTAMP(FV.Lastchanged),0) AS FVLastchangedU'
+         'IFNULL(UNIX_TIMESTAMP(FV.Lastchanged),0) AS FVLastchangedU',
+         'FV.IP',
       );
    }
 
@@ -483,7 +491,7 @@ class FeatureVote
     */
    function new_featurevote( $fid, $voter, $points )
    {
-      // fid=set, voter=$voter, points=$points, lastchanged
+      // fid=set, voter=$voter, points=$points, lastchanged, ip
       $fvote = new FeatureVote( $fid, $voter, $points );
       $fvote->voter = $voter;
       return $fvote;
@@ -498,7 +506,7 @@ class FeatureVote
       if( $row['fid'] != 0 )
       {
          $fvote = new FeatureVote(
-               $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'] );
+               $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'], $row['IP'] );
       }
       else
          $fvote = null;
@@ -522,7 +530,6 @@ class FeatureVote
 
       return FeatureVote::new_from_row( $row );
    }
-
 
 } // end of 'FeatureVote'
 
