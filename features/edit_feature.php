@@ -97,10 +97,7 @@ require_once( "features/lib_votes.php" );
 
 
    $page = 'edit_feature.php';
-   if( $fid )
-      $title = T_('Feature add');
-   else
-      $title = T_('Feature update');
+   $title = ( $fid ) ? T_('Feature update') : T_('Feature add');
 
    $fform = new Form( 'feature', $page, FORM_POST );
 
