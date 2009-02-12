@@ -757,6 +757,24 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case('constraint_votes_delete_feature'):
+      {
+         echo T_("Sorry, feature can't be deleted because of existing votes for feature.");
+      }
+      break;
+
+      case('feature_edit_not_allowed'):
+      {
+         echo T_("Sorry, you are not allowed to add, edit or delete features.");
+      }
+      break;
+
+      case('feature_edit_bad_status'):
+      {
+         echo T_("Sorry, you are not allowed to edit feature on that status.");
+      }
+      break;
+
       //case('assert'):
       //case('internal_error'):
       default:
