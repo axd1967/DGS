@@ -35,7 +35,10 @@ require_once( "features/vote/lib_votes.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   $my_id = $player_row['ID'];
+   $my_id = (int)@$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest');
+
    $is_admin = Feature::is_admin();
 
    $page = 'list_features.php?';
@@ -62,28 +65,28 @@ require_once( "features/vote/lib_votes.php" );
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
 
    $ftable = new Table( 'features', $page );
-   $ftable->set_default_sort( 'ID', 0);
    $ftable->register_filter( $ffilter );
    $ftable->add_or_del_column();
 
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $ftable->add_tablehead(33, T_('Actions#header'),     'Image', TABLE_NO_HIDE, ''); // static
+   $ftable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID+');
+   $ftable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
+   $ftable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
+   if ( $is_admin )
+      $ftable->add_tablehead( 4, T_('Editor#header'),   'User', 0, 'FL.Editor_ID+');
+   $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'FL.Created+');
+   $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
+   $ftable->add_tablehead( 7, T_('My Vote#header'),     'Number', 0, 'FV.Points-');
+   $ftable->add_tablehead( 8, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
+
+   $ftable->set_default_sort( 1); //on FeatureList.ID
    $order = $ftable->current_order_string();
    $limit = $ftable->current_limit_string();
 
-   // add_tablehead($nr, $descr, $sort='', $desc_def=0, $undeletable=0, $attbs=null)
-   $ftable->add_tablehead( 0, T_('Actions#header'), null, 0, 1, 'Image'); // static
-   $ftable->add_tablehead( 1, T_('ID#header'), 'FL.ID', 0, 0, 'ID');
-   $ftable->add_tablehead( 2, T_('Status#header'), 'FL.Status', 0, 0, '');
-   $ftable->add_tablehead( 3, T_('Subject#header'), 'FL.Subject', 0, 0, '');
-   if ( $is_admin )
-      $ftable->add_tablehead( 4, T_('Editor#header'), '', 0, 0, 'User');
-   $ftable->add_tablehead( 5, T_('Created#header'), 'FL.Created', 0, 0, 'Date');
-   $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'FL.Lastchanged', 0, 0, 'Date');
-   $ftable->add_tablehead( 7, T_('My Vote#header'), 'FV.Points', 0, 0, 'Date');
-   $ftable->add_tablehead( 8, T_('Lastvoted#header'), 'FV.Lastchanged', 0, 0, 'Date');
-
    // build SQL-query
    $qsql = Feature::build_query_feature_list( $ftable, $my_id );
-   $query = $qsql->get_select() . " ORDER BY $order $limit";
+   $query = $qsql->get_select() . "$order $limit";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed', 'featurelist.find_data');
@@ -104,7 +107,7 @@ require_once( "features/vote/lib_votes.php" );
       $ID = $feature->id;
 
       $frow_strings = array();
-      if( $ftable->Is_Column_Displayed[0] )
+      if( $ftable->Is_Column_Displayed[33] )
       {
          $links = '';
          $linkspc = "<img src='{$base_path}images/dot.gif' width=17 height=17 alt=''>";
@@ -142,7 +145,7 @@ require_once( "features/vote/lib_votes.php" );
          else
             $links .= $linkspc;
 
-         $frow_strings[0] = $links;
+         $frow_strings[33] = $links;
       }
       if( $ftable->Is_Column_Displayed[1] )
       {
