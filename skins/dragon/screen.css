@@ -372,6 +372,9 @@ img.MinWidth {
    height: 0px;
 }
 
+span.ErrorMsg {
+   color: darkred;
+}
 
 
 /* ************************* */
