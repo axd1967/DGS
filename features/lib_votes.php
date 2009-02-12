@@ -156,7 +156,7 @@ class Feature
 
       $result = mysql_query("SELECT ID FROM Players WHERE ID={$this->editor} LIMIT 1")
          or error('mysql_query_failed', "feature.find_user({$this->editor})");
-      if ( !$result or mysql_num_rows($result) != 1 )
+      if ( !$result || mysql_num_rows($result) != 1 )
          error('unknown_user', "feature.find_user2({$this->editor})");
       mysql_free_result($result);
 
