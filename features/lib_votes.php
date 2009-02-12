@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-
 // feature.status
 define('FEATSTAT_NEW',  'NEW');  // newly added, needs ACK to be voteable
 define('FEATSTAT_NACK', 'NACK'); // will not be done
@@ -119,7 +118,8 @@ class Feature
 
       // not allowed for invalid user, guest or not current user
       global $player_row;
-      if ( !is_numeric($uid) || $uid != @$player_row['ID'] || @$player_row['Handle'] == 'guest' )
+      $my_id = (int)@$player_row['ID'];
+      if ( !is_numeric($uid) || $uid != $my_id || $uid <= GUESTS_ID_MAX )
          return false;
 
       return (bool) ( $this->status == FEATSTAT_ACK || $this->status == FEATSTAT_WORK );
@@ -206,7 +206,7 @@ class Feature
       else
          $this->featurevote->set_points( $points );
 
-error_log("F.update_vote: " . $this->to_string());
+//error_log("F.update_vote: " . $this->to_string());
       $this->featurevote->update_vote();
    }
 
@@ -254,12 +254,14 @@ error_log("F.update_vote: " . $this->to_string());
          return false;
 
       // not allowed for invalid user or guest
+      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+         return false;
+
       global $player_row;
-      if ( !is_numeric($uid) || $uid == 1 )
+      if ( $uid != (int)@$player_row['ID'] && !Feature::is_admin() )
          return false;
-      if ( $uid != @$player_row['ID'] && !Feature::is_admin() )
-         return false;
-      return true;
+      else
+         return true;
    }
 
    /*!
