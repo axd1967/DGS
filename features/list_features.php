@@ -38,10 +38,13 @@ require_once( "features/lib_votes.php" );
       error('not_logged_in');
 
    $my_id = (int)@$player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+   //TODO: check that guests can view features & votes
+   //if( $my_id <= GUESTS_ID_MAX )
+      //error('not_allowed_for_guest');
 
    $is_super_admin = Feature::is_super_admin();
+   $user_vote_reason = Feature::allow_vote_check(); //TODO
+   $user_can_vote = is_null($user_vote_reason);
 
    $page = 'list_features.php?';
 
@@ -56,20 +59,19 @@ require_once( "features/lib_votes.php" );
    // table filters
    $ffilter->add_filter( 1, 'Numeric', 'FL.ID', true, array( FC_SIZE => 8 ));
    $ffilter->add_filter( 2, 'Selection',     # filter on status
-            array( T_('All#filterfeat') => '',
-                   T_('New#filterfeat')  => "FL.Status='".FEATSTAT_NEW."'",
-                   T_('Unvoted#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."') AND ISNULL(FV.fid)",
-                   T_('Voted#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."') AND FV.fid>0",
-                   T_('Vote#filterfeat') => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."')", // FC_DEFAULT
-                   T_('Work#filterfeat') => "FL.Status='".FEATSTAT_WORK."'",
-                   T_('Done#filterfeat') => "FL.Status='".FEATSTAT_DONE."'",
-                   T_('NACK#filterfeat') => "FL.Status='".FEATSTAT_NACK."'" ),
-            true, array( FC_DEFAULT => 4 ));
+         Feature::build_filter_selection_status('FL.Status'),
+         true, array( FC_DEFAULT => 1 )); // def=0..
    $filter_subject =&
       $ffilter->add_filter( 3, 'Text', 'FL.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
-   if( $is_super_admin )
-      $ffilter->add_filter( 4, 'Numeric', 'FL.Editor_ID', true, array( FC_SIZE => 8 ) );
+   $ffilter->add_filter( 6, 'RelativeDate', 'FL.Lastchanged', true,
+         array( FC_TIME_UNITS => FRDTU_ALL|FRDTU_ABS ));
+   $ffilter->add_filter( 7, 'Selection',     # filter on user-voted-state
+         array( T_('All#filterfeat')      => '',
+                T_('Unvoted#filterfeat')  => "ISNULL(FV.fid)", // FC_DEFAULT
+                T_('Voted#filterfeat')    => "FV.fid>0",
+         ),
+         true, array( FC_DEFAULT => 1 )); // def=0..
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
 
@@ -78,16 +80,17 @@ require_once( "features/lib_votes.php" );
    $ftable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $ftable->add_tablehead(33, T_('Actions#header'),     'Image', TABLE_NO_HIDE, ''); // static
-   $ftable->add_tablehead( 1, T_('ID#header'),          'Button', TABLE_NO_HIDE, 'FL.ID-');
+   //TODO: re-org col-IDs
+   $ftable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'FL.ID+'); // static
+   $ftable->add_tablehead(33, T_(''),                   'Image', TABLE_NO_HIDE, '');
    $ftable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
    $ftable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
+   $ftable->add_tablehead( 7, T_('My Vote#header'),     'Number', 0, 'FV.Points-');
+   $ftable->add_tablehead( 8, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
    if( $is_super_admin )
       $ftable->add_tablehead( 4, T_('Editor#header'),   'User', 0, 'FL.Editor_ID+');
    $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'FL.Created+');
    $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
-   $ftable->add_tablehead( 7, T_('My Vote#header'),     'Number', 0, 'FV.Points-');
-   $ftable->add_tablehead( 8, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
 
    $ftable->set_default_sort( 1); //on FeatureList.ID
    $order = $ftable->current_order_string();
@@ -114,52 +117,20 @@ require_once( "features/lib_votes.php" );
       $feature = Feature::new_from_row($row);
       $fvote   = FeatureVote::new_from_row($row);
       $ID = $feature->id;
+      $allow_vote = ( $user_can_vote && $feature->allow_vote() );
 
       $frow_strings = array();
-      if( $ftable->Is_Column_Displayed[33] )
+      if( $ftable->Is_Column_Displayed[ 1] )
       {
-         $links = '';
-         $linkspc = "<img src='{$base_path}images/dot.gif' width=17 height=17 alt=''>";
-         $allow_edit = $feature->allow_edit( $my_id );
-
-         // vote
-         if( $feature->allow_vote( $my_id ) )
-         {
-            $links .= anchor( "vote_feature.php?fid=$ID",
-                  image( "{$base_path}17/wx.gif", 'V'),
-                  T_('Vote feature'), 'class=ButIcon');
-         }
-         else
-            $links .= $linkspc;
-
-         // edit
-         $links .= '&nbsp;';
-         if( $allow_edit )
-         {
-            $links .= anchor( "edit_feature.php?fid=$ID",
-                  image( "{$base_path}images/edit.gif", 'E'),
-                  T_('Edit feature'), 'class=ButIcon');
-         }
-         else
-            $links .= $linkspc;
-
-         // delete
-         $links .= '&nbsp;';
-         if( $allow_edit )
-         {
-            $links .= anchor( "edit_feature.php?fid=$ID".URI_AMP.'feature_delete=1',
-                  image( "{$base_path}images/trashcan.gif", 'X'),
-                  T_('Remove feature'), 'class=ButIcon');
-         }
-         else
-            $links .= $linkspc;
-
-         $frow_strings[33] = $links;
+         $url = "{$base_path}features/vote_feature.php?fid=$ID";
+         $frow_strings[1] = button_TD_anchor( $url, $ID,
+               ( $allow_vote ? T_('Vote') : T_('View vote') ));
       }
-      if( $ftable->Is_Column_Displayed[1] )
+      if( $feature->allow_edit() && $ftable->Is_Column_Displayed[33] ) // Edit-Action
       {
-         $url = "{$base_path}features/vote_feature.php?fid=$ID".URI_AMP.'view=1';
-         $frow_strings[1] = button_TD_anchor( $url, $ID);
+         $frow_strings[33] = anchor( "edit_feature.php?fid=$ID",
+               image( "{$base_path}images/edit.gif", 'E'),
+               T_('Edit feature'), 'class=ButIcon');
       }
       if( $ftable->Is_Column_Displayed[2] )
          $frow_strings[2] = $feature->status;
@@ -170,8 +141,7 @@ require_once( "features/lib_votes.php" );
       if( $ftable->Is_Column_Displayed[5] )
          $frow_strings[5] = ($feature->created > 0 ? date(DATEFMT_FEATLIST, $feature->created) : '' );
       if( $ftable->Is_Column_Displayed[6] )
-         $frow_strings[6] = ($feature->lastchanged > 0 ? date(DATEFMT_FEATLIST, $feature->lastchanged) : '' );
-
+         $frow_strings[6] = ($feature->lastchanged > 0 ? date(DATE_FMT2, $feature->lastchanged) : '' );
       if( !is_null($fvote) )
       {
          if( $ftable->Is_Column_Displayed[7] )
@@ -188,9 +158,9 @@ require_once( "features/lib_votes.php" );
    // end of table
 
    $menu_array = array();
-   if( Feature::allow_user_edit( $my_id ) )
-      $menu_array[ T_('Add new feature') ] = "features/edit_feature.php";
-   $menu_array[ T_('Show votes') ] = "features/list_votes.php";
+   $menu_array[T_('Show votes')]    = "features/list_votes.php";
+   if( Feature::is_admin() )
+      $menu_array[T_('Add new feature')] = "features/edit_feature.php";
 
    end_page(@$menu_array);
 }
