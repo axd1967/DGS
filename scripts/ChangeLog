@@ -13,8 +13,8 @@ quick INFO:
 2007-12-23 rodival
    Code Cleanup, New Features
 
-2009-01-01 juga
-   Forum, Wishlist-items, Code Cleanup
+2009-02-11 juga
+   Tournaments, Forum, Wishlist-items, Code Cleanup
 
 -----
 quick TODO:
@@ -23,7 +23,87 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-12 juga
+
+   * features/lib_votes.php (FeatureList, FeatureVote, build_filter_selection_status),
+     features/edit_feature.php, features/list_features.php,
+     features/list_votes.php, features/vote_feature.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     include/gui_functions.php (button_TD_anchor), include/quick_common.php,
+     error.php, skins/dragon/screen.css:
+   - changed feature-lifecycle (status): NEW > NACK|WORK > DONE > LIVE
+     - NEW  = new feature, can be vote upon
+     - NACK = rejected feature
+     - WORK = feature implementation started
+     - DONE = feature implemented, not released yet
+     - LIVE = feature released and online
+   - changes access rights on features:
+     - feature-edit/add/delete only allowed for admins (executive- or developer-role)
+     - feature-edit only allowed on NEW-status, except for super-admin (developer-role)
+     - feature-delete only allowed for super-admin (developer-role)
+     - added check on user to allow voting: min rated-games/moves/last-moved
+     - added admin-option DENY_VOTE to forbid user to vote on features
+     - allowed guest-user to view all features, but forbid to vote
+     - added view of vote-points if voting not allowed
+   - feature-delete:
+     - added vote-constraint: feature-delete only allowed if no votes existing
+     - cancel feature-delete leads to feature-edit
+   - changes for feature-voting:
+     - replaced actions-column with button to view/vote (Vote-ID) and admin edit-column
+     - added feature-actions as bottom-links:
+       show feature-/votes-list, add/edit/delete feature
+     - added error-codes for feature-voting
+     - replaced <font>-tag with CSS for error-message
+     - moved redundant func to build filter-selection for status-field into lib_votes.php
+-----------
+ALTER TABLE `FeatureList`
+   CHANGE Status Status enum('NEW','WORK','DONE','LIVE','NACK') NOT NULL DEFAULT 'NEW' ;
+ALTER TABLE `FeatureList`
+   DROP INDEX Editor_ID ;
+-----------
+
+   * include/std_functions.php (is_logged_in):
+   - read X_LastMove as unix-timestamp from Players-row for feature-voting
+
+   * include/gui_functions.php (button_TD_anchor):
+   - added optional link-title
+
+   * userinfo.php:
+   - added convenience-link "Admin user" for admins to edit-user attributes
+
+   * admin_show_users.php, admin_users.php, include/quick_common.php:
+   - added admin-option DENY_VOTE to forbid user to vote on features
+
+   * features/edit_feature.php:
+   - fixed title (mixed up add/update-mode)
+
+   * features/vote_feature.php:
+   - vote-point-selector: show positive points first
+   - aligned save-vote submit-button
+   - bugfixes (null-object-checks)
+
+   * features/lib_votes.php (FeatureVote),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - save Voter-IP on voting
+-----------
+ALTER TABLE `FeatureVote`
+   ADD `IP` varchar(16) NOT NULL default '' ;
+-----------
+
+   * features/edit_feature.php, features/lib_votes.php,
+     features/list_features.php, features/list_votes.php,
+     features/vote_feature.php, include/std_functions.php (start_page):
+   - moved feature-voting from 'features/vote/' into parent sub-dir 'features/'
+
 2009-02-11 juga
+
+   * features/vote/lib_votes.php (Feature.is_admin, ~.is_super_admin, ~.allow_user_edit),
+     features/vote/edit_feature.php, features/vote/list_features.php,
+     features/vote/list_votes.php, features/vote/vote_feature.php:
+   - differ two admin-roles: feature-admin + feature-super-admin with more rights:
+     super-admin is allowed to edit all
+   - used cell-button on feature-id
+   - adjusted status-texts description
 
    * include/message_functions.php (game_info_table),
      include/table_infos.php (Table_info.add_info, ~.add_sinfo, ~.warning_cell_attb),
@@ -36,6 +116,7 @@ ChangeLog
        button_TD_width_insert, warning_cell_attb),
      include/table_columns.php (button_style, button_TD_anchor,
        button_TD_width_insert, warning_cell_attb),
+     include/table_infos.php (Table_info.warning_cell_attb),
      list_tournaments.php, opponents.php, status.php, show_games.php, waiting_room.php:
    - code cleanup (removed code redundancy),
      moved some static GUI-funcs to include/gui_functions.php:
@@ -963,6 +1044,11 @@ UPDATE Forums,
 -- add Posts.Hits
 ALTER TABLE `Posts`
    ADD `Hits` int(11) NOT NULL default '0' AFTER `PostsInThread` ;
+UPDATE Posts,
+   (SELECT ID, COUNT(*) AS X_Count
+       FROM Posts WHERE Thread_ID>0 AND PosIndex>''
+       GROUP BY Thread_ID HAVING X_Count>0) as TMP
+   SET Posts.Hits=TMP.X_Count WHERE Posts.ID=TMP.ID ;
 -----------
 
    * forum/search.php:
