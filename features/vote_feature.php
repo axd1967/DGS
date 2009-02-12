@@ -55,7 +55,7 @@ require_once( "features/lib_votes.php" );
    }
 
    // load feature + vote
-   $feature = null;
+   $feature = $fvote = null;
    if( $fid )
    {
       $feature = Feature::load_feature( $fid );
@@ -109,7 +109,7 @@ require_once( "features/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Lastchanged'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
-   if( $allow_vote_edit && $fvote->lastchanged > 0 )
+   if( $allow_vote_edit && !is_null($fvote) && $fvote->lastchanged > 0 )
    {
       $fform->add_row( array(
          'DESCRIPTION',  T_('Lastvoted'),
@@ -129,17 +129,18 @@ require_once( "features/lib_votes.php" );
    if( $allow_vote_edit )
    {
       $vote_values = array();
-      for( $i = -FEATVOTE_MAXPOINTS; $i <= FEATVOTE_MAXPOINTS; $i++)
+      for( $i = +FEATVOTE_MAXPOINTS; $i >= -FEATVOTE_MAXPOINTS; $i--)
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
-      $vote_values['0'] = "=0";
+      $vote_values['0'] = '=0';
+
       $fform->add_row( array(
          'DESCRIPTION', T_('Vote'),
          'SELECTBOX',   'points', 1, $vote_values, $points, false,
          'TEXT',        T_('points#feature') . ' (' . T_('0=neutral, <0=not wanted, >0=wanted feature') . ')' ));
       $fform->add_row( array(
+         'TAB', 'CELL', 1, '', // align submit-button
          'SUBMITBUTTON', 'vote_save', T_('Save vote'),
          ));
-
       $fform->add_hidden( 'fid', $fid );
    }
 
