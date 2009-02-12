@@ -58,6 +58,7 @@ $ThePage = new Page('UserInfo');
    if( !$row )
       error('unknown_user');
    $uid = (int)$row['ID'];
+   $user_handle = $row['Handle'];
    $hide_bio = (@$row['AdminOptions'] & ADMOPT_HIDE_BIO);
 
    // load bio
@@ -239,6 +240,11 @@ $ThePage = new Page('UserInfo');
       }
    }
 
+   if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
+   {
+      $menu_array[T_('Admin user')] =
+         'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle);
+   }
 
    end_page(@$menu_array);
 }
