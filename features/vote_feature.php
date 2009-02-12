@@ -32,8 +32,9 @@ require_once( "features/lib_votes.php" );
       error('not_logged_in');
 
    $my_id = (int)@$player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+   //TODO: check that guests can view features & votes
+   //if( $my_id <= GUESTS_ID_MAX )
+      //error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
      view=1&fid=             : view existing feature (for description)
@@ -69,8 +70,9 @@ require_once( "features/lib_votes.php" );
    if( is_null($feature) )
       error('unknown_object', "featurevote.no_featureid($fid)");
 
-   $allow_voting    = Feature::allow_voting(); // user pre-conditions: if false no view of user-vote (only feature-description)
-   $allow_vote_edit = $feature->allow_vote( $my_id ); // user allowed to edit vote
+   // check user pre-conditions
+   $user_vote_reason = Feature::allow_vote_check(); //TODO
+   $allow_vote_edit = is_null($user_vote_reason) && $feature->allow_vote();
    if( $viewmode )
       $allow_vote_edit = false;
 
@@ -82,18 +84,14 @@ require_once( "features/lib_votes.php" );
    }
 
    $page = 'vote_feature.php';
-   if( $allow_vote_edit )
-      $title = T_('Feature vote');
-   else
-      $title = T_('Feature view');
-
+   $title = ( $allow_vote_edit ) ? T_('Feature vote') : T_('Feature vote view');
 
    $fform = new Form( 'featurevote', $page, FORM_POST );
 
    // edit feature vote
    $fform->add_row( array(
       'DESCRIPTION',  T_('ID'),
-      'TEXT',         ($fid ? $fid : '-') ));
+      'TEXT',         ($fid ? $fid : NO_VALUE) ));
    $fform->add_row( array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status ));
@@ -124,7 +122,9 @@ require_once( "features/lib_votes.php" );
       'TEXT',        $feature->description ));
 
    if( !is_null($errormsg) )
-      $fform->add_row( array( 'TAB', 'TEXT', '<font color=darkred>' . $errormsg . '</font>' ));
+      $fform->add_row( array(
+         'DESCRIPTION', T_('Error'),
+         'TEXT',        '<span class="ErrorMsg">' . $errormsg . '</span>' ));
 
    if( $allow_vote_edit )
    {
@@ -143,6 +143,16 @@ require_once( "features/lib_votes.php" );
          ));
       $fform->add_hidden( 'fid', $fid );
    }
+   else
+   {// only view
+      $point_str = ( is_numeric($points) )
+         ? sprintf( T_('%s points#feature'), ($points > 0 ? '+' : '') . $points )
+         : sprintf( T_('%s (no vote)'), NO_VALUE );
+      $fform->add_row( array(
+         'DESCRIPTION', T_('Vote'),
+         'TEXT',        $point_str,
+         ));
+   }
 
 
    start_page( $title, true, $logged_in, $player_row );
@@ -152,10 +162,15 @@ require_once( "features/lib_votes.php" );
    $fform->echo_string();
    echo "</CENTER><BR>\n";
 
+   $menu_array = array();
    $menu_array[T_('Show features')] = "features/list_features.php";
-   if( Feature::allow_user_edit( $my_id ) )
+   $menu_array[T_('Show votes')]    = "features/list_votes.php";
+   if( Feature::is_admin() )
+   {
       $menu_array[T_('Add new feature')] = "features/edit_feature.php";
-   $menu_array[ T_('Show votes') ] = "features/list_votes.php";
+      if( $fid > 0 && $feature->allow_edit() )
+         $menu_array[T_('Edit this feature')] = "features/edit_feature.php?fid=$fid";
+   }
 
    end_page(@$menu_array);
 }
