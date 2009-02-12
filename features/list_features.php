@@ -23,6 +23,7 @@ chdir("../../");
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
+require_once( "include/classlib_profile.php" );
 require_once( "features/vote/lib_votes.php" );
 
 
@@ -43,8 +44,15 @@ require_once( "features/vote/lib_votes.php" );
 
    $page = 'list_features.php?';
 
+   // init search profile
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_FEATURES );
+   $ffilter = new SearchFilter( '', $search_profile );
+   //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
+   $ftable = new Table( 'features', $page );
+   $ftable->set_profile_handler( $search_profile );
+   $search_profile->handle_action();
+
    // table filters
-   $ffilter = new SearchFilter();
    $ffilter->add_filter( 1, 'Numeric', 'FL.ID', true );
    $ffilter->add_filter( 2, 'Selection',     # filter on status
             array( T_('All#filterfeat') => '',
@@ -64,7 +72,7 @@ require_once( "features/vote/lib_votes.php" );
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
 
-   $ftable = new Table( 'features', $page );
+   // init table
    $ftable->register_filter( $ffilter );
    $ftable->add_or_del_column();
 
