@@ -2161,6 +2161,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
           .",Adminlevel+0 AS admin_level"
           .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
+          .',UNIX_TIMESTAMP(LastMove) AS X_LastMove'
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
    $result = mysql_query( $query )
