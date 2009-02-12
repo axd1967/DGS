@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -134,7 +134,7 @@ class Feature
       if( !Feature::allow_voting() ) // not even for admin
          return false;
 
-      if( Feature::is_admin() )
+      if( Feature::is_super_admin() )
          return true;
       if( !Feature::allow_user_edit( $uid ) )
          return false;
@@ -225,13 +225,25 @@ class Feature
 
    // ---------- Static Class functions ----------------------------
 
-   /*! \brief Returns true, if current player has admin-rights for feature-functionality. */
-   function is_admin()
+   /*!
+    * \brief Returns true, if current player has admin-rights for feature-functionality.
+    * \param $superadmin true=superadmin has ALL rights, false=feature-admin has add-rights
+    */
+   function is_admin( $superadmin=false )
    {
       global $player_row;
-      $is_admin = (bool) ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
+      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : ADMINGROUP_EXECUTIVE;
+      $is_admin = (bool) ( @$player_row['admin_level'] & $chk_adminlevel );
       //return false; // for easy testing
       return $is_admin;
+   }
+
+   /*!
+    * \brief Returns true, if current player has super-admin-rights for feature-functionality.
+    */
+   function is_super_admin()
+   {
+      return Feature::is_admin(true);
    }
 
    /*! \brief Returns true, if current user is allowed to participate in voting (add/edit/vote features). */
@@ -257,7 +269,7 @@ class Feature
          return false;
 
       global $player_row;
-      if( $uid != (int)@$player_row['ID'] && !Feature::is_admin() )
+      if( $uid != (int)@$player_row['ID'] && !Feature::is_super_admin() )
          return false;
       else
          return true;
