@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -59,6 +59,7 @@ require_once( "include/table_columns.php" );
       //ADMOPT_BYPASS_IP_BLOCK  => array( 'BYPASS_IP_BLOCK', T_('Bypass IP-Block to allow login for accidentally blocked user') ),
       ADMOPT_DENY_LOGIN       => array( 'DENY_LOGIN',    T_('Deny login (user can not use site)') ),
       ADMOPT_DENY_EDIT_BIO    => array( 'DENY_EDIT_BIO', T_('Deny edit bio (user can not edit bio)') ),
+      ADMOPT_DENY_VOTE        => array( 'DENY_VOTE',     T_('Deny voting (user can not vote on features)') ),
       ADMOPT_HIDE_BIO         => array( 'HIDE_BIO',      T_('Hide bio (users bio is hidden)') ),
       ADMOPT_SHOW_TIME        => array( 'SHOW_TIME',     T_('Show "time needed" for page-requests (in bottom bar)') ),
       ADMOPT_FGROUP_ADMIN     => array( 'FGR_ADMIN',     T_('View ADMIN-forums (which are normally hidden)') ),

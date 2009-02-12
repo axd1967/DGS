@@ -37,6 +37,7 @@ define('ADMOPT_SHOW_TIME',       0x040); // shows time in page bottom bar
 define('ADMOPT_HIDE_BIO',        0x080); // hide user bio
 define('ADMOPT_FGROUP_ADMIN',    0x100); // user can see ADMIN-forums
 define('ADMOPT_FGROUP_DEV',      0x200); // user can see DEV-forums
+define('ADMOPT_DENY_VOTE',       0x400); // deny: voting on features
 
 
 function setTZ( $tz='GMT')
