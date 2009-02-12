@@ -46,32 +46,32 @@ require_once( "features/vote/lib_votes.php" );
      feature_cancel        : cancel remove-confirmation
 */
 
-   if ( @$_REQUEST['feature_cancel'] ) // cancel delete
+   if( @$_REQUEST['feature_cancel'] ) // cancel delete
       jump_to("features/vote/list_features.php");
 
    $fid = get_request_arg('fid'); //feature-ID
-   if ( $fid < 0 )
+   if( $fid < 0 )
       $fid = 0;
 
    // error-check on feature to save
    $errormsg = null;
-   if ( @$_REQUEST['feature_save'] )
+   if( @$_REQUEST['feature_save'] )
    {
-      if ( strlen(trim(get_request_arg('subject'))) == 0 )
+      if( strlen(trim(get_request_arg('subject'))) == 0 )
          $errormsg = '('.T_('Missing subject of feature').')';
    }
 
    $feature = null;
-   if ( is_null($errormsg) && $fid )
+   if( is_null($errormsg) && $fid )
       $feature = Feature::load_feature( $fid ); // existing feature ?
-   if ( is_null($feature) )
+   if( is_null($feature) )
       $feature = Feature::new_feature( $my_id, $fid ); // new feature
 
    // check access right of user
-   if ( !$feature->allow_edit( $my_id ) )
+   if( !$feature->allow_edit( $my_id ) )
       error('action_not_allowed', "edit_feature.feature($fid,$my_id)");
 
-   if ( $fid && @$_REQUEST['feature_delete'] && @$_REQUEST['confirm'] )
+   if( $fid && @$_REQUEST['feature_delete'] && @$_REQUEST['confirm'] )
    {
       $feature->delete_feature();
       jump_to("features/vote/list_features.php?sysmsg=". urlencode(T_('Feature removed!')) );
@@ -80,14 +80,14 @@ require_once( "features/vote/lib_votes.php" );
    $new_status = get_request_arg('new_status');
 
    // insert/update feature-object with values from edit-form if no error
-   if ( @$_REQUEST['feature_save'] )
+   if( @$_REQUEST['feature_save'] )
    {
-      if ( $is_admin )
+      if( $is_admin )
          $feature->set_status( $new_status );
       $feature->set_subject( get_request_arg('subject') );
       $feature->set_description( get_request_arg('description') );
 
-      if ( is_null($errormsg) )
+      if( is_null($errormsg) )
       {
          $feature->update_feature();
          // if new feature added, add next; if edit feature, edit again
@@ -97,7 +97,7 @@ require_once( "features/vote/lib_votes.php" );
 
 
    $page = 'edit_feature.php';
-   if ( $fid )
+   if( $fid )
       $title = T_('Feature add');
    else
       $title = T_('Feature update');
@@ -111,7 +111,7 @@ require_once( "features/vote/lib_votes.php" );
    $arr_status = array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status );
-   if ( $is_admin )
+   if( $is_admin )
    {
       // status-change
       $status_values = array(
@@ -126,7 +126,7 @@ require_once( "features/vote/lib_votes.php" );
          'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
    }
    $fform->add_row( $arr_status );
-   if ( $is_admin )
+   if( $is_admin )
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Editor'),
@@ -135,18 +135,18 @@ require_once( "features/vote/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Created'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->created) ));
-   if ( $feature->lastchanged )
+   if( $feature->lastchanged )
    {
       $fform->add_row( array(
          'DESCRIPTION',  T_('Lastchanged'),
          'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
    }
 
-   if ( !is_null($errormsg) )
+   if( !is_null($errormsg) )
       $fform->add_row( array( 'TAB', 'TEXT', '<font color=darkred>' . $errormsg . '</font>' ));
 
 
-   if ( @$_REQUEST['feature_delete'] ) // delete
+   if( @$_REQUEST['feature_delete'] ) // delete
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Subject'),
@@ -189,7 +189,7 @@ require_once( "features/vote/lib_votes.php" );
    echo "</CENTER><BR>\n";
 
    $menu_array[T_('Show features')] = "features/vote/list_features.php";
-   if ( Feature::allow_user_edit( $my_id ) )
+   if( Feature::allow_user_edit( $my_id ) )
       $menu_array[ T_('Add new feature') ] = "features/vote/edit_feature.php";
 
    end_page(@$menu_array);
