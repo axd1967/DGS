@@ -59,6 +59,11 @@ UPDATE Forums,
 -- add Posts.Hits
 ALTER TABLE `Posts`
    ADD `Hits` int(11) NOT NULL default '0' AFTER `PostsInThread` ;
+UPDATE Posts,
+   (SELECT ID, COUNT(*) AS X_Count
+       FROM Posts WHERE Thread_ID>0 AND PosIndex>''
+       GROUP BY Thread_ID HAVING X_Count>0) as TMP
+   SET Posts.Hits=TMP.X_Count WHERE Posts.ID=TMP.ID ;
 
 
 -- add Posts.Updated for NEW-handling
@@ -135,4 +140,16 @@ ALTER TABLE `Players`
    ADD `Type` smallint(5) unsigned NOT NULL default '0' AFTER `ID` ;
 ALTER TABLE `Players`
    ADD INDEX `Type` (`Type`) ;
+
+
+-- Feature-voting: Voter-IP
+ALTER TABLE `FeatureVote`
+   ADD `IP` varchar(16) NOT NULL default '' ;
+
+
+-- Feature-voting: refactoring
+ALTER TABLE `FeatureList`
+   CHANGE Status Status enum('NEW','WORK','DONE','LIVE','NACK') NOT NULL DEFAULT 'NEW' ;
+ALTER TABLE `FeatureList`
+   DROP INDEX Editor_ID ;
 
