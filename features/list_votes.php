@@ -21,6 +21,7 @@ $TranslateGroups[] = "Common";
 
 chdir('../');
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
@@ -36,6 +37,8 @@ require_once( "features/lib_votes.php" );
       error('not_logged_in');
 
    $my_id = (int)$player_row['ID'];
+   $user_vote_reason = Feature::allow_vote_check();
+   $user_can_vote = is_null($user_vote_reason);
 
    $page = 'list_votes.php?';
 
@@ -48,31 +51,27 @@ require_once( "features/lib_votes.php" );
    $search_profile->handle_action();
 
    // table filters
-   $vfilter->add_filter( 1, 'Numeric',   'FL.ID', true );
-   $vfilter->add_filter( 2, 'Selection',     # filter on status
-            array( T_('Todo#filtervote')  => "FL.Status IN ('".FEATSTAT_ACK."','".FEATSTAT_WORK."')", // default
-                   T_('Acked#filtervote') => "FL.Status='".FEATSTAT_ACK."'",
-                   T_('Work#filtervote')  => "FL.Status='".FEATSTAT_WORK."'",
-                   T_('Done#filtervote')  => "FL.Status='".FEATSTAT_DONE."'" ),
-            true, array( FC_DEFAULT => 0 ) );
+   $vfilter->add_filter( 1, 'Numeric',   'FL.ID', true, array( FC_SIZE => 8 ));
+   $vfilter->add_filter( 2, 'Selection', # filter on status
+         Feature::build_filter_selection_status('FL.Status'),
+         true, array( FC_DEFAULT => 2 )); // def=0..
    $vfilter->add_filter( 3, 'Text',      'FL.Subject', true,
-      array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
+         array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
    $vfilter->init(); // parse current value from _GET
 
    // init table
    $vtable->register_filter( $vfilter );
    $vtable->add_or_del_column();
 
-
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $vtable->add_tablehead( 1, T_('ID#header'),          'ID', 0, 'FL.ID-');
+   $vtable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'FL.ID+');
    $vtable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
    $vtable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
-   $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
    $vtable->add_tablehead( 9, T_('Points#header'),      'Number', 0, 'sumPoints-');
    $vtable->add_tablehead(10, T_('#Votes#header'),      'Number', 0, 'countVotes-');
    $vtable->add_tablehead(11, T_('#Y#header'),          'Number', 0, 'countYes-');
    $vtable->add_tablehead(12, T_('#N#header'),          'Number', 0, 'countNo-');
+   $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
 
    $vtable->set_default_sort(9);
    $order = $vtable->current_order_string();
@@ -88,7 +87,8 @@ require_once( "features/lib_votes.php" );
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
 
    $title = T_('Feature vote list');
-   start_page( $title, true, $logged_in, $player_row );
+   start_page( $title, true, $logged_in, $player_row,
+               button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";
@@ -98,14 +98,14 @@ require_once( "features/lib_votes.php" );
    {
       $feature = Feature::new_from_row($row);
       $ID = $feature->id;
+      $allow_vote = ( $user_can_vote && $feature->allow_vote() );
 
       $frow_strings = array();
-      if( $vtable->Is_Column_Displayed[1] )
+      if( $vtable->Is_Column_Displayed[ 1] )
       {
          $url = "{$base_path}features/vote_feature.php?fid=$ID";
-         if( !$feature->allow_vote( $my_id ) )
-            $url .= URI_AMP.'view=1';
-         $frow_strings[1] = "<A HREF=\"$url\">$ID</A>";
+         $frow_strings[1] = button_TD_anchor( $url, $ID,
+               ( $allow_vote ? T_('Vote') : T_('View vote') ));
       }
       if( $vtable->Is_Column_Displayed[2] )
          $frow_strings[2] = $feature->status;
@@ -131,9 +131,10 @@ require_once( "features/lib_votes.php" );
 
    // end of table
 
-   $menu_array = array(
-      T_('Show features') => "features/list_features.php",
-      );
+   $menu_array = array();
+   $menu_array[T_('Show features')] = "features/list_features.php";
+   if( Feature::is_admin() )
+      $menu_array[T_('Add new feature')] = "features/edit_feature.php";
 
    end_page(@$menu_array);
 }
