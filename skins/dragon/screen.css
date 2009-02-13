@@ -900,6 +900,10 @@ table.Table td.Number {
    text-align: right; /* left */
 }
 
+table.Table td.NumberC {
+   text-align: center;
+}
+
 table.Table td.Image {
    text-align: center;
 }
@@ -2636,6 +2640,10 @@ form#adminuserForm td span.LegendDescr {
 
 table#adminsTable td span.Flags {
    font-size: 80%;
+}
+
+table#adminsTable, table#faqlogTable, table#errorlogTable td {
+   vertical-align: top;
 }
 
 
