@@ -23,6 +23,35 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-13 juga
+
+   * include/config.php, include/std_functions.php (start_page), error.php, NEWS,
+     features/lib_votes.php (build_feature_notes, echo_feature_notes, allow_vote_check),
+     features/list_features.php, features/list_votes.php,
+     features/edit_feature.php, features/vote_feature.php:
+   - completed feature-voting and feature-management:
+     - added config-switch ALLOW_FEATURE_VOTE in config.php to switch feature-voting on/off
+     - added feature-notes with status-legend and some small help
+     - bugfixes, minor layouting
+
+   * include/filterlib_mysqlmatch.php:
+   - splitted over-long string-const MYSQL_MATCH_STOPWORDS after each 1000 chars
+
+   * skins/dragon/screen.css:
+   - admin-pages: use top vertical-alignment on admin-tables:
+     user-attributes, FAQ-log, error-log
+
+   * features/list_features.php, features/list_votes.php,
+     include/table_columns.php (add_tablehead),
+     skins/dragon/screen.css:
+   - votes: added search-filters on SumPoints and CountVotes
+   - layout: show own user-vote as centered number
+   - re-organized & sync'ed table-column-IDs for feature-/vote-list
+
+   * features/edit_feature.php:
+   - added preview for feature-edit
+   - bugfix showing HTML-un-encoded description in textarea
+
 2009-02-12 juga
 
    * features/lib_votes.php (FeatureList, FeatureVote, build_filter_selection_status),
