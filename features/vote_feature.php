@@ -32,9 +32,6 @@ require_once( "features/lib_votes.php" );
       error('not_logged_in');
 
    $my_id = (int)@$player_row['ID'];
-   //TODO: check that guests can view features & votes
-   //if( $my_id <= GUESTS_ID_MAX )
-      //error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
      view=1&fid=             : view existing feature (for description)
