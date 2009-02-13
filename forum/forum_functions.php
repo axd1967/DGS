@@ -17,6 +17,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*!
+ * \file forum_functions.php
+ *
+ * \brief Functions for forum management.
+ */
+
 $TranslateGroups[] = "Forum"; //local use
 
 require_once( "include/std_functions.php" );
