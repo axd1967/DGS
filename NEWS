@@ -68,7 +68,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
             * User can mark single posts as read: 'mark read'-link on new post
             * User can mark all posts as read: 'mark all read'-link
 
-   * Voting on features
+   * Feature-Voting, managing feature status
 
 
    Code improvements:
