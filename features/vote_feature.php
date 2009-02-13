@@ -30,6 +30,8 @@ require_once( "features/lib_votes.php" );
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in');
+   if( !ALLOW_FEATURE_VOTE )
+      error('feature_disabled', 'feature_vote(vote)');
 
    $my_id = (int)@$player_row['ID'];
 
@@ -68,7 +70,7 @@ require_once( "features/lib_votes.php" );
       error('unknown_object', "featurevote.no_featureid($fid)");
 
    // check user pre-conditions
-   $user_vote_reason = Feature::allow_vote_check(); //TODO
+   $user_vote_reason = Feature::allow_vote_check();
    $allow_vote_edit = is_null($user_vote_reason) && $feature->allow_vote();
    if( $viewmode )
       $allow_vote_edit = false;

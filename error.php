@@ -400,6 +400,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case('feature_disabled'):
+      {
+         echo T_("Sorry, this feature has been disabled on this server.");
+      }
+      break;
+
       case("not_your_turn"):
       {
          echo T_("Sorry, it's not your turn.");

@@ -130,6 +130,9 @@ define('ALLOW_JAVASCRIPT', true);
 // Forum: 'Quote' works as 'Reply', but inits textbox with previous post in <quote>-tags
 define('ALLOW_QUOTING', false);
 
+// Feature-voting: no voting-stuff shown/accessible if disabled
+define('ALLOW_FEATURE_VOTE', true);
+
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
 
