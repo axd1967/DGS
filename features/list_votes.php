@@ -52,11 +52,13 @@ require_once( "features/lib_votes.php" );
 
    // table filters
    $vfilter->add_filter( 1, 'Numeric',   'FL.ID', true, array( FC_SIZE => 8 ));
-   $vfilter->add_filter( 2, 'Selection', # filter on status
+   $vfilter->add_filter( 3, 'Selection', # filter on status
          Feature::build_filter_selection_status('FL.Status'),
          true, array( FC_DEFAULT => 2 )); // def=0..
-   $vfilter->add_filter( 3, 'Text',      'FL.Subject', true,
+   $vfilter->add_filter( 4, 'Text',      'FL.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
+   $vfilter->add_filter(10, 'Numeric',   'sumPoints', true, array( FC_ADD_HAVING => 1 ));
+   $vfilter->add_filter(11, 'Numeric',   'countVotes', true, array( FC_ADD_HAVING => 1 ));
    $vfilter->init(); // parse current value from _GET
 
    // init table
@@ -64,16 +66,17 @@ require_once( "features/lib_votes.php" );
    $vtable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   // NOTE: col-IDs in sync with list_features.php
    $vtable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'FL.ID+');
-   $vtable->add_tablehead( 2, T_('Status#header'),      'Enum', 0, 'FL.Status+');
-   $vtable->add_tablehead( 3, T_('Subject#header'),     '', 0, 'FL.Subject+');
-   $vtable->add_tablehead( 9, T_('Points#header'),      'Number', 0, 'sumPoints-');
-   $vtable->add_tablehead(10, T_('#Votes#header'),      'Number', 0, 'countVotes-');
-   $vtable->add_tablehead(11, T_('#Y#header'),          'Number', 0, 'countYes-');
-   $vtable->add_tablehead(12, T_('#N#header'),          'Number', 0, 'countNo-');
+   $vtable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'FL.Status+');
+   $vtable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'FL.Subject+');
+   $vtable->add_tablehead(10, T_('Points#header'),      'Number', 0, 'sumPoints-');
+   $vtable->add_tablehead(11, T_('#Votes#header'),      'Number', 0, 'countVotes-');
+   $vtable->add_tablehead(12, T_('#Y#header'),          'Number', 0, 'countYes-');
+   $vtable->add_tablehead(13, T_('#N#header'),          'Number', 0, 'countNo-');
    $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
 
-   $vtable->set_default_sort(9);
+   $vtable->set_default_sort(10); //on sumPoints
    $order = $vtable->current_order_string();
    $limit = $vtable->current_limit_string();
 
@@ -107,22 +110,22 @@ require_once( "features/lib_votes.php" );
          $frow_strings[1] = button_TD_anchor( $url, $ID,
                ( $allow_vote ? T_('Vote') : T_('View vote') ));
       }
-      if( $vtable->Is_Column_Displayed[2] )
-         $frow_strings[2] = $feature->status;
       if( $vtable->Is_Column_Displayed[3] )
-         $frow_strings[3] = make_html_safe($feature->subject);
+         $frow_strings[3] = $feature->status;
+      if( $vtable->Is_Column_Displayed[4] )
+         $frow_strings[4] = make_html_safe($feature->subject, SUBJECT_HTML);
       if( $vtable->Is_Column_Displayed[6] )
          $frow_strings[6] = ($feature->lastchanged > 0 ? date(DATEFMT_VOTELIST, $feature->lastchanged) : '' );
 
       // FeatureVote-fields
-      if( $vtable->Is_Column_Displayed[9] )
-         $frow_strings[9] = $row['sumPoints'];
       if( $vtable->Is_Column_Displayed[10] )
-         $frow_strings[10] = $row['countVotes'];
+         $frow_strings[10] = $row['sumPoints'];
       if( $vtable->Is_Column_Displayed[11] )
-         $frow_strings[11] = $row['countYes'];
+         $frow_strings[11] = $row['countVotes'];
       if( $vtable->Is_Column_Displayed[12] )
-         $frow_strings[12] = $row['countNo'];
+         $frow_strings[12] = $row['countYes'];
+      if( $vtable->Is_Column_Displayed[13] )
+         $frow_strings[13] = $row['countNo'];
 
       $vtable->add_row( $frow_strings );
    }
