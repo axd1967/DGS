@@ -32,6 +32,9 @@ require_once( "features/lib_votes.php" );
    if( !$logged_in )
       error('not_logged_in');
 
+   if( !ALLOW_FEATURE_VOTE )
+      error('feature_disabled', 'feature_vote(edit)');
+
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
@@ -126,15 +129,6 @@ require_once( "features/lib_votes.php" );
       // status-change
       $status_values = array_value_to_key_and_value(
             array( FEATSTAT_NEW , FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ) );
-      /* TODO doc
-      $status_values = array(
-         FEATSTAT_NEW  => FEATSTAT_NEW  . T_('(new feature, can be voted upon)'),
-         FEATSTAT_WORK => FEATSTAT_WORK . T_('(feature implementation started by developer)'),
-         FEATSTAT_DONE => FEATSTAT_DONE . T_('(feature implemented and tested, yet unreleased)'),
-         FEATSTAT_LIVE => FEATSTAT_LIVE . T_('(feature released and online)'),
-         FEATSTAT_NACK => FEATSTAT_NACK . T_('(feature rejected = not acknowledged)'),
-      );
-      */
       array_push( $arr_status,
          'TEXT', '&nbsp;-&gt;&nbsp;',
          'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
@@ -208,8 +202,9 @@ require_once( "features/lib_votes.php" );
          ));
 
       $fform->add_row( array(
-         'TAB',
+         'TAB', 'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 'feature_preview', T_('Preview'),
+         'TEXT', '&nbsp;&nbsp;&nbsp;',
          'SUBMITBUTTON', 'feature_save', T_('Save feature'),
          ));
    }
@@ -220,9 +215,14 @@ require_once( "features/lib_votes.php" );
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   echo "<CENTER>\n";
    $fform->echo_string();
-   echo "</CENTER><BR>\n";
+
+   $notes = Feature::build_feature_notes( null, false );
+   if( Feature::is_admin() )
+      array_unshift( $notes,
+         T_('Add related URLs using &lt;home&gt;-tag or &lt;http://...&gt; in description.'),
+         T_('Add reason and properly adjust description on status changes.') );
+   Feature::echo_feature_notes( 'featurenotesTable', $notes );
 
    $menu_array = array();
    $menu_array[T_('Show features')] = "features/list_features.php";
