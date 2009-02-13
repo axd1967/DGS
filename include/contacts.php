@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,13 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 
- /*!
-  * \class Contact
-  *
-  * \brief Class to handle contact-list for user with system and user categories,
-  *        like "deny game", "friend" etc.
-  */
-
 // TODO: discuss system-flags with Erik(!), then implement actions defined for CSYSFLAGS !!
 // system-flags (bitmask for database): 16bit
 define('CSYSFLAG_WAITINGROOM'    ,0x0001); // hide my games in waiting-room from contact
@@ -43,7 +36,12 @@ define('CUSERFLAG_ADMIN',   0x00000020); // contact is member of admin-crew
 define('CUSERFLAG_TROLL',   0x00000040); // contact is a troll
 define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (allow special search on notes)
 
-
+/*!
+ * \class Contact
+ *
+ * \brief Class to handle contact-list for user with system and user categories,
+ *        like "deny game", "friend" etc.
+ */
 class Contact
 {
    /*! \brief That's me. */
