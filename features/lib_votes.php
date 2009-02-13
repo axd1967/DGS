@@ -17,6 +17,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*!
+ * \file lib_votes.php
+ *
+ * \brief Functions for feature-voting.
+ */
+
 $TranslateGroups[] = "Common";
 
 // feature.status
@@ -258,6 +264,66 @@ class Feature
       );
    }
 
+   /*! \brief Returns array with notes about feature-voting. */
+   function build_feature_notes( $deny_reason=null, $intro=true )
+   {
+      $notes = array();
+      if( !is_null($deny_reason) )
+      {
+         $notes[] = sprintf( '<color darkred><b>%s:</b></color> %s',
+               T_('Voting restricted'), $deny_reason );
+         $notes[] = null; // empty line
+      }
+
+      if( $intro )
+      {
+         $notes[] = T_('Feature or improvement suggestions are to be discussed in the '
+                     . '<home forum/index.php>forums</home> first.');
+         $notes[] = T_('Features can only be added to this list by one of the DGS executives.');
+      }
+
+      $notes[] = null; // empty line
+      $notes[] = sprintf(
+            T_('Feature status:<ul>'
+               . '<li>%1$s = new feature (can be voted upon)'."\n" // NEW
+               . ($intro ?
+                 '<li>%9$s = show %1$s + %2$s'."\n" : '' ) // Open
+               . '<li>%2$s = %3$s = feature implementation started by developer'."\n" // WORK
+               . '<li>%4$s = feature implemented (and tested), but not released yet'."\n" // DONE
+               . '<li>%5$s = %6$s = feature released and online'."\n" // LIVE
+               . '<li>%7$s = %8$s = feature rejected'."\n" // NACK
+               . '</ul>'),
+            FEATSTAT_NEW,
+            FEATSTAT_WORK, T_('In Work#filtervote'),
+            FEATSTAT_DONE,
+            FEATSTAT_LIVE, T_('Online#filtervote'),
+            FEATSTAT_NACK, T_('Rejected#filtervote'),
+            T_('Open#filtervote')
+         );
+      return $notes;
+   }
+
+   /*! \brief Prints feature-notes in formatted table if there are notes. */
+   function echo_feature_notes( $table_id, $notes )
+   {
+      if( !is_array($notes) || count($notes) == 0 )
+         return;
+
+      echo "<br><br>\n",
+         "<table id=\"{$table_id}\">\n",
+         "<tr><th>" . T_('Feature notes') . "</th></tr>\n",
+         "<tr><td><ul>";
+      foreach( $notes as $note )
+      {
+         if( is_null($note) || (string)$note === '' )
+            echo "<p></p>\n";
+         else
+            echo "  <li>" . make_htmL_safe($note, 'line') . "\n";
+      }
+      echo "</ul>\n",
+         "</td></tr></table>\n";
+   }
+
    /*!
     * \brief Returns null if current user ($player_row) is allowed to participate in voting;
     *        otherwise return deny-reason.
@@ -277,8 +343,9 @@ class Feature
             || @$player_row['Moves'] < VOTE_MIN_MOVES
             || ($NOW - @$player_row['X_LastMove']) > VOTE_MIN_DAYS_LASTMOVED * 86400 )
       {
-         return sprintf( T_('You have to finish %1$s rated games, make at least %2$s moves '
-                           .'and actively play in games during the last %3$s days.'),
+         return sprintf( T_('To be able to vote you have to finish %1$s rated games, '."\n"
+                           . 'make at least %2$s moves and '
+                           . 'actively play in games during the last %3$s days.'),
                          VOTE_MIN_RATEDGAMES, VOTE_MIN_MOVES, VOTE_MIN_DAYS_LASTMOVED );
       }
 

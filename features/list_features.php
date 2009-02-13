@@ -36,11 +36,13 @@ require_once( "features/lib_votes.php" );
 
    if( !$logged_in )
       error('not_logged_in');
+   if( !ALLOW_FEATURE_VOTE )
+      error('feature_disabled', 'feature_vote(list_features)');
 
    $my_id = (int)@$player_row['ID'];
 
    $is_super_admin = Feature::is_super_admin();
-   $user_vote_reason = Feature::allow_vote_check(); //TODO
+   $user_vote_reason = Feature::allow_vote_check();
    $user_can_vote = is_null($user_vote_reason);
 
    $page = 'list_features.php?';
@@ -154,8 +156,11 @@ require_once( "features/lib_votes.php" );
 
    // end of table
 
+   $notes = Feature::build_feature_notes( $user_vote_reason );
+   Feature::echo_feature_notes( 'featurenotesTable', $notes );
+
    $menu_array = array();
-   $menu_array[T_('Show votes')]    = "features/list_votes.php";
+   $menu_array[T_('Show votes')] = "features/list_votes.php";
    if( Feature::is_admin() )
       $menu_array[T_('Add new feature')] = "features/edit_feature.php";
 
