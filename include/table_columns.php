@@ -269,12 +269,15 @@ class Table
       $this->Use_Show_Rows = (bool)$use;
    }
 
-   /*!@brief Add a tablehead.
+   /*!
+    * @brief Adds a tablehead.
     * @param $nr must be >0 but if higher than 32, the column will be static
     * @param $attbs must be an array of attributs or a class-name for the column (td-element)
     *    default: no attributs or class (i.e. class "Text" left-aligned)
     *    Other known classes defined in CSS, most used are:
-    *      ID, User, Date, Enum, Number, Image, Button, Mark, MsgDir, Folder, Rating, Sgf, '' (=default)
+    *      ID, User, Date, Enum, Number, NumberC, Image, Button, Mark, MsgDir,
+    *      Folder, Rating, Sgf, '' (=default)
+    *
     * @param $mode is a combination of TABLE_NO_HIDE and TABLE_NO_SORT
     *    default: TABLE_NO_HIDE|TABLE_NO_SORT
     * @param $sort_xtend is the alias used as default to sort the column
