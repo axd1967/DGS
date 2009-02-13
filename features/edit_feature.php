@@ -40,12 +40,11 @@ require_once( "features/lib_votes.php" );
 
    $is_super_admin = Feature::is_super_admin();
 
-//TODO save "raw" data (not HTML-encoded)
-//TODO preview
 /* Actual REQUEST calls used:
      (no args)             : add new feature
      fid=                  : edit new or existing feature
      feature_save&fid=     : update (replace) feature in database
+     feature_preview&fid=  : preview for update feature
      feature_delete&fid=   : remove feature (need confirm)
      feature_delete&confirm=1&fid= : remove feature (confirmed)
      feature_cancel        : cancel remove-confirmation
@@ -60,7 +59,7 @@ require_once( "features/lib_votes.php" );
 
    // error-check on feature to save
    $errormsg = null;
-   if( @$_REQUEST['feature_save'] )
+   if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
    {
       if( strlen(trim(get_request_arg('subject'))) == 0 )
          $errormsg = '('.T_('Missing subject of feature').')';
@@ -86,15 +85,16 @@ require_once( "features/lib_votes.php" );
    $new_status = get_request_arg('new_status');
 
    // insert/update feature-object with values from edit-form if no error
-   if( @$_REQUEST['feature_save'] )
+   if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
    {
-      if( $is_super_admin )
-         $feature->set_status( $new_status );
       $feature->set_subject( get_request_arg('subject') );
       $feature->set_description( get_request_arg('description') );
 
-      if( is_null($errormsg) )
+      if( !@$_REQUEST['feature_preview'] && is_null($errormsg) )
       {
+         if( $is_super_admin )
+            $feature->set_status( $new_status );
+
          $feature->update_feature();
          // if new feature added, add next; if edit feature, edit again
          jump_to("features/edit_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature saved!')) );
@@ -195,11 +195,21 @@ require_once( "features/lib_votes.php" );
          ));
       $fform->add_row( array(
          'DESCRIPTION', T_('Description'),
-         'TEXTAREA',    'description', 70, 10, textarea_safe($feature->description),
+         'TEXTAREA',    'description', 70, 10, $feature->description,
+         ));
+
+      $fform->add_row( array(
+         'DESCRIPTION', T_('Preview'),
+         'TEXT',        make_html_safe($feature->subject, SUBJECT_HTML),
+         ));
+      $fform->add_row( array(
+         'TAB',
+         'TEXT',        $feature->description,
          ));
 
       $fform->add_row( array(
          'TAB',
+         'SUBMITBUTTON', 'feature_preview', T_('Preview'),
          'SUBMITBUTTON', 'feature_save', T_('Save feature'),
          ));
    }
