@@ -88,7 +88,6 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          jump_to($uri,0);
       }
    }
-   db_close();
 
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
@@ -789,6 +788,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
    }
+   db_close();
 
    $mysqlerror = get_request_arg('mysqlerror');
    if( $mysqlerror )
