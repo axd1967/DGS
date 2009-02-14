@@ -175,6 +175,7 @@ define('FC_LABEL', 'label');
 /*!
  * \brief Sets default-value(s) for filter to be used.
  * note: for format see specific Filter-doc (can be scalar or array)
+ * note: filter with FC_DEFAULT but not shown is still used to build query(!)
  * default: none
  */
 define('FC_DEFAULT', 'default');
@@ -2332,6 +2333,8 @@ class FilterRating extends Filter
   * \class FilterDate
   * \brief Filter for absolute dates (and timestamp) allowing exact value and
   *        range value; SearchFilter-Type: Date.
+  * <p>Note: db-field must be a SQL-date-field, * not a UNIX_TIMESTAMP(SQL-date-field).
+  *
   * <p>GUI: text input-box
   *
   * <p>Allowed Syntax:
@@ -2349,7 +2352,6 @@ class FilterRating extends Filter
 class FilterDate extends Filter
 {
    /*! \brief Constructs Date-Filter. */
-   /* dbfield must be a SQL-date-field, not a UNIX_TIMESTAMP(SQL-date-field) */
    function FilterDate($name, $dbfield, $config)
    {
       static $_default_config = array( FC_SIZE => 16 );
@@ -2450,6 +2452,8 @@ class FilterDate extends Filter
   * \class FilterRelativeDate
   * \brief Filter for relative and absolute dates allowing exact value and
   *        range value for absolute date-spec; SearchFilter-Type: RelativeDate.
+  * <p>Note: db-field must be a SQL-date-field, * not a UNIX_TIMESTAMP(SQL-date-field).
+  *
   * <p>GUI: text input-box +
   *         selectbox to choose for absolute-mode or time-unit for relative-date
   *
@@ -2517,7 +2521,6 @@ class FilterRelativeDate extends Filter
    var $range_mode;
 
    /*! \brief Constructs RelativeDate-Filter. */
-   /* dbfield must be a SQL-date-field, not a UNIX_TIMESTAMP(SQL-date-field) */
    function FilterRelativeDate($name, $dbfield, $config)
    {
       static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL );
