@@ -350,7 +350,8 @@ function update_user( $uid, $user, $fv )
    global $attributes_edit;
    foreach( $attributes_edit as $field => $type )
    {
-      if( (string)$fv[$field] != '' )
+      $hasdiff = ( strcmp( @$row[$field], $fv[$field] ) != 0 );
+      if( $hasdiff )
          $arr_sql[] = "$field='".mysql_addslashes($fv[$field])."'";
 
       // create diffs for admin-log
@@ -373,7 +374,7 @@ function update_user( $uid, $user, $fv )
             $arrdiff[] = sprintf( '%s[%s]', $field, implode(' ', $optdiff) );
       }
       else {
-         if( strcmp( @$row[$field], $fv[$field] ) != 0 )
+         if( $hasdiff )
             $arrdiff[] = sprintf( '%s[%s]>[%s]', $field, @$row[$field], $fv[$field] );
       }
    }
