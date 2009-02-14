@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ require_once( "include/config-local.php" );
 
 //because we will use MySQL, this will help to
 //complete the *multiple queries* transactions.
-//@ignore_user_abort(true); //see connect2mysql
+//@ignore_user_abort(true); //moved to connect2mysql(), also see jump_to()
 
 // fetch-types for mysql_single_fetch-function
 //   PHP has funcs: mysql_fetch_(array|assoc|field|lengths|object|row)
@@ -36,7 +36,7 @@ function jump_to($uri, $absolute=false)
 {
    $uri= str_replace( URI_AMP, URI_AMP_IN, $uri);
    session_write_close();
-   @ignore_user_abort(false);
+   //@ignore_user_abort(false);
    if( connection_aborted() )
       exit;
    //header('HTTP/1.1 303 REDIRECT');
@@ -114,14 +114,16 @@ function admin_log( $uid, $handle, $err)
                   .", Handle='".mysql_addslashes($handle)."'"
                   .", Message='".mysql_addslashes($err)."'"
                   .", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
+   $result = mysql_query($query)
+      or error('mysql_query_failed','connect2mysql.admin_log');
 
-   return ( mysql_query( $query )
-            or error('mysql_query_failed','connect2mysql.admin_log') );
+   return $result;
 }
 
 function db_close()
 {
    global $dbcnx;
+   //error_log("db_close with dbcnx=$dbcnx");
    if( $dbcnx ) // $dbcnx is a resource
       @mysql_close( $dbcnx);
    $dbcnx= 0;
@@ -131,9 +133,10 @@ function connect2mysql($no_errors=false)
 {
    global $dbcnx;
 
-   //$oiua= ignore_user_abort(false);
-   @ignore_user_abort(false);
-   $i = 6; //retry count
+   // user can stop the output, but not the script
+   $old_ignore = @ignore_user_abort(true);
+
+   $i = 3; //retry count
    do
    {
       $dbcnx = @mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD);
@@ -142,7 +145,7 @@ function connect2mysql($no_errors=false)
       //max_user_connections: Error: 1203 SQLSTATE: 42000 (ER_TOO_MANY_USER_CONNECTIONS)
       if( mysql_errno() != 1203 )
          break;
-      usleep(1000000); //delay useconds
+      usleep(1000000); //delay in ms
    } while(--$i >= 0);
 
    if( !$dbcnx )
@@ -162,8 +165,9 @@ function connect2mysql($no_errors=false)
       //TODO: error() with no err_log()
       error($err);
    }
-   //ignore_user_abort($oiua);
-   @ignore_user_abort(true);
+
+   @ignore_user_abort((bool)$old_ignore);
+   //error_log("connect2mysql($no_errors): dbcnx=$dbcnx on attempt #".(4-$i)."/3");
 
    return false;
 }
