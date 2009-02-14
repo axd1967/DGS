@@ -182,8 +182,7 @@ $ARR_DBFIELDKEYS = array(
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in users.php(!)
-   $utable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
-   $utable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
@@ -376,11 +375,9 @@ $ARR_DBFIELDKEYS = array(
       $ID = $row['ID'];
 
       $urow_strings = array();
-      if( $utable->Is_Column_Displayed[33] )
-         $urow_strings[33] = button_TD_anchor(
-            "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID", T_('Info'));
       if( $utable->Is_Column_Displayed[ 1] )
-         $urow_strings[ 1] = "<A href=\"userinfo.php?uid=$ID\">$ID</A>";
+         $urow_strings[ 1] = button_TD_anchor(
+            "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID", $ID );
       if( $utable->Is_Column_Displayed[ 2] )
          $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
