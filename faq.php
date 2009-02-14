@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -46,7 +46,7 @@ require_once( "include/form_functions.php" );
 
    // parse search terms
    $is_search = @$_REQUEST['search'];
-   $qterm = get_request_arg('qterm', '');
+   $qterm = trim(get_request_arg('qterm', ''));
    $orig = ( get_request_arg('orig', '') ) ? 1 : 0;
    $err_search = '';
    $rx_term = '';
@@ -59,21 +59,23 @@ require_once( "include/form_functions.php" );
    }
 
    // search form
-   //TODO align form-content left-aligned, input-elems-titles would be NTH
    $faq_form = new Form( 'faq', $faq_url, FORM_GET );
    $faq_form->add_row( array(
       'DESCRIPTION',    T_('Search Terms#FAQ'),
-      'TEXTINPUT',      'qterm', 30, -1, $qterm,
+      'TEXTINPUTX',     'qterm', 30, -1, $qterm,
+                        array( 'title' => T_('Syntax[FAQ]: any words or characters (min. length 2)') ),
       'SUBMITBUTTONX',  'search', T_('Search'),
                         array( 'accesskey' => ACCKEY_ACT_FILT_SEARCH ),
-      'TEXT',           ' ' . sprintf( T_('using language (%s)#FAQ'), $arr_languages[$lang] ),
+      'TEXT',           ' ' . sprintf( T_('in language (%s)#FAQ'), $arr_languages[$lang] ),
       ));
    if( $err_search )
       $faq_form->add_row( array( 'TAB', 'TEXT', "<span class=ErrMsg>($err_search)</span>" ));
    $faq_form->add_row( array(
       'TAB',
-      'CHECKBOX', 'orig', 1, T_('search only in original (english) FAQ'), $orig ));
-   echo "</td></tr><tr><td>\n";
+      'CHECKBOX', 'orig', 1, T_('search only in original english FAQ (in case of untranslated entries)'), $orig ));
+
+   //TODO align form-content left-aligned
+   echo "</td></tr><tr><td class=\"FAQsearch\">\n";
    $faq_form->echo_string(1);
 
    $cat = @$_GET['cat'];
@@ -81,16 +83,21 @@ require_once( "include/form_functions.php" );
 
    if( $is_search )
    { // show matching faq-entries
-      // read whole FAQ from DB, then match on file-read translations
-      $result = mysql_query(
+      // NOTES:
+      // - read whole FAQ from DB, then match on translations read from file.
+      // - read data from file can be cached //TODO
+      // - as long as no UTF8 for all languages in the DB, db-search is unreliable.
+
+      $query =
          "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
-         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
-      or error('mysql_query_failed', 'faq.search_entries');
+         "ORDER BY CatOrder,ParentOrder,entry.SortOrder";
+      $result = mysql_query($query)
+         or error('mysql_query_failed', 'faq.search_entries');
 
       $found_entries = 0;
       if( mysql_num_rows($result) > 0 )
@@ -191,7 +198,7 @@ require_once( "include/form_functions.php" );
          "SELECT entry.*, Question.Text AS Q, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
-         "WHERE parent.ID=entry.Parent$faqhide AND Question.ID=entry.Question " .
+         "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
             "AND entry.Level<3 AND entry.Level>0 " .
          "ORDER BY CatOrder,entry.Level,entry.SortOrder")
          or error('mysql_query_failed', 'faq.find_titles');
