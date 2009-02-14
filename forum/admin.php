@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 chdir('..');
 require_once( "forum/forum_functions.php" );
-require_once( "include/faq_functions.php" ); //for TD_button()
+require_once( "include/gui_functions.php" );
 
 $ThePage = new Page('ForumAdmin');
 

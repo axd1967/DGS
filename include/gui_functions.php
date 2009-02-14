@@ -86,4 +86,14 @@ function button_TD_width_insert( $width=false)
    return insert_width( $width );
 }
 
+function TD_button( $title, $href, $isrc, $ialt)
+{
+   //image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
+   $str = image( $isrc, $ialt, $title);
+   //anchor( $href, $text, $title='', $attbs='')
+   $str = anchor( $href, $str);
+   $str = "<td class=Button>$str</td>\n";
+   return $str;
+}
+
 ?>

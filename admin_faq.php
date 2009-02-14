@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // translations removed for this page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
+require_once( "include/gui_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
@@ -340,7 +341,7 @@ $info_box = '<ul>
                            'HIDDEN', 'type', $action,
                            'HIDDEN', 'preview', 1,
                            'HIDDEN', 'qterm', textarea_safe($sql_term),
-                           'SUBMITBUTTONX', 'do_edit', 'Save entry', 
+                           'SUBMITBUTTONX', 'do_edit', 'Save entry',
                               array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                            'SUBMITBUTTONX', 'edit', 'Preview',
                               array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
