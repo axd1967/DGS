@@ -317,6 +317,8 @@ $ThePage = new Page('GamesList');
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
+   //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( !$observe && !$all ) //FU+RU ?UNION

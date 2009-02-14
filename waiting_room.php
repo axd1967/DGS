@@ -109,6 +109,9 @@ require_once( "include/classlib_profile.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: Keep the headers "..#headerwr" to allow translators to solve local language ambiguities
+   // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
+   //       for the "static" filtering(!) of: Handicap/RatingRange + show-all/suitable-games;
+   //       also see named-filters
    $wrtable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'other_type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'other_name+');

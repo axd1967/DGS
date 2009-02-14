@@ -182,6 +182,8 @@ $ARR_DBFIELDKEYS = array(
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in users.php(!)
+   // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
+   //       for the "static" filtering(!) of: Activity; also see named-filters
    $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
