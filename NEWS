@@ -114,6 +114,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Admin can mark user as Professional, Teacher and Robot
          * Can be searched on users and opponents page
          * Shown in user info, waiting room, on users and opponents page
+      * Used button-image for ID-column for users and opponents page
+
+   * User Profile:
       * Introducing JavaScript management in profile setting
       * Initial Rating: removed converting of NNGS-rank/rating
 
