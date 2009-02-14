@@ -159,6 +159,10 @@ instructions is important and must not be changed:
    $filter->add_filter( id2, type2, dbfield2, active2, config2);
    $filter->init();   # parse values from URL into filters
 
+   # set different access-keys (defaults see include/config.php)
+   # after calling init-function
+   #$filter->set_access_keys( 'e', 'z' );
+
    # add filters to Table
    $table = new Table(...);
    $table->register_filter( $filter );
@@ -200,6 +204,9 @@ at the code-examples):
    - FilterScore          - score-values
    - FilterRatingDiff     - double-values representing rating-difference
    - FilterCheckboxArray  - selection of multiple checkboxes
+
+FilterDate and FilterRelativeDate are relying on SQL-date-fields and not on
+a converted UNIX_TIMESTAMP()-converted db-field.
 
 # ----- standard syntax for numerics and texts
 
@@ -666,6 +673,12 @@ developers of DGS. When refering to "see examples", the example-files
 "code_examples/filter_example.php" and "code_examples/filter_example.php2"
 are meant. More documentation you will also find in the sources,
 see section (2) Classes and Files.
+
+* Can I check if the filters have been freshly initialized without having
+  started a "Search" yet ?
+
+  Yes. See "include/filter.php" function "is_init()" and "is_reset()".
+  Example in "show_games.php", see game-restriction RESTRICT_SHOW_GAMES_ALL.
 
 * What filter can be used to search for negative numeric values ?
 
