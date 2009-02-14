@@ -192,20 +192,24 @@ require_once( "features/lib_votes.php" );
          'TEXTAREA',    'description', 70, 10, $feature->description,
          ));
 
-      $fform->add_row( array(
-         'DESCRIPTION', T_('Preview'),
-         'TEXT',        make_html_safe($feature->subject, SUBJECT_HTML),
-         ));
-      $fform->add_row( array(
-         'TAB',
-         'TEXT',        $feature->description,
-         ));
+      if( @$_REQUEST['feature_preview']
+            || ($feature->subject . $feature->description != '') )
+      {
+         $fform->add_row( array(
+            'DESCRIPTION', T_('Preview'),
+            'TEXT', $feature->subject,
+            ));
+         $fform->add_row( array(
+            'TAB',
+            'TEXT', $feature->description,
+            ));
+      }
 
       $fform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'feature_preview', T_('Preview'),
-         'TEXT', '&nbsp;&nbsp;&nbsp;',
          'SUBMITBUTTON', 'feature_save', T_('Save feature'),
+         'TEXT', '&nbsp;&nbsp;&nbsp;',
+         'SUBMITBUTTON', 'feature_preview', T_('Preview'),
          ));
    }
 
