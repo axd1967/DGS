@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( "include/gui_functions.php" );
 require_once( "include/std_classes.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
@@ -113,7 +114,7 @@ require_once( "include/classlib_profile.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in opponents.php(!)
-   $utable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
@@ -173,7 +174,8 @@ require_once( "include/classlib_profile.php" );
    }
 
 
-   start_page( $title, true, $logged_in, $player_row );
+   start_page( $title, true, $logged_in, $player_row,
+               button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ufilter->get_select()) ."<br>";
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
@@ -186,7 +188,7 @@ require_once( "include/classlib_profile.php" );
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[1] )
-         $urow_strings[1] = "<A href=\"userinfo.php?uid=$ID\">$ID</A>";
+         $urow_strings[1] = button_TD_anchor( "userinfo.php?uid=$uid", $ID );
       if( $utable->Is_Column_Displayed[2] )
          $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
