@@ -19,16 +19,19 @@ Last versions used by Dragon Live Server:
 
 
 
-1) Download:
+1) Download sources and images:
 
 Either from cvs:
 (( CAUTION: Recently, sourceforge.net disable the anonymous use of cvs.
-   You must register yourself. Read the SourceForge documentations. ))
+   You must register yourself. Read the SourceForge documentations.
+   Though start with trying it first anonymously.))
+
+Best to create an empty directory to checkout the sources.
 
 > cd /path/to/the/directory/where/you/want/dragon/to/be
 > cvs -d:pserver:anonymous@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver login
 > cvs -z3 -d:pserver:anonymous@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver co DragonGoServer
-> mv DragonGoServer/* DragonGoServer/.[a-z]* .
+> mv -i DragonGoServer/* DragonGoServer/.[a-z]* .
 > rmdir DragonGoServer
 
 or download a cvs snapshot from <http://www.dragongoserver.net/snapshot.php>
@@ -88,7 +91,7 @@ by manually setting his Adminlevel field to -1 in the Players table.
 
 > mysql -D dragondb
 
-mysql> UPDATE Players SET Adminlevel=-1 WHERE Handle='usernick';
+mysql> UPDATE Players SET Adminlevel=-1 WHERE Handle='adminusernick';
 
 Then, this user will be able to manage the other admins.
 ))
@@ -99,7 +102,8 @@ Then, this user will be able to manage the other admins.
 4) Adjust config of software and adjust file permissions:
 
 * Copy config-template and adjust for local configuration and
-  adjust 'include/config-local.php' to your environment.
+  adjust 'include/config-local.php' to your environment
+  and needed set of DGS-features.
 
 > cp include/config.php include/config-local.php
 
@@ -119,11 +123,21 @@ Find out which group your webserver is using (e.g. www-data).
   chmod 775 temp
   su -c 'chgrp www-data temp'
 
-* To create translations take a sidestep and read
-  scripts/README.translations
+* Eventually you need to adjust the used timezone.
+  This can be done by creating a file in the dragon-root:
+
+     filename:              timeadjust.php
+     content (for example): <?php $timeadjust = ...; ?>
+
+  This file is read by the PHP-include 'include/quick_common.php'
+  and the unit for the variable $timeadjust is seconds.
+  It's added to form the "current timestamp" ($NOW).
+
+* You need to create translations, so take a sidestep to read and execute
+  the directives in 'scripts/README.translations'
 
 * If you want to adjust the source-code, please have a look to the
-  notes in scripts/README.developers
+  notes in 'scripts/README.developers'
 
 * PHP config:
 
@@ -201,6 +215,9 @@ Check and adjust defines in 'include/graph.php':
 
 
 
-7) Complain in the support forum at dragon <http://www.dragongoserver.net> if it doesn't
-   work.
+7) If you have problems you can ask for help in Support forum
+   at dragon <http://www.dragongoserver.net>
+
+   If you are successful and have a running Dragon server,
+   we would appreciate a note in the dragon forums as well.
 
