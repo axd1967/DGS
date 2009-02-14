@@ -23,6 +23,69 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-14 juga
+
+   * include/filter.php (FilterDate, FilterRelativeDate),
+     opponents.php, show_games.php, users.php, waiting_room.php,
+     scripts/README.translations, specs/filters.txt:
+   - added some docs and notes
+
+   * forum/admin_show_forumlog.php:
+   - cleanup: remove setting of filter-access-keys (are set per default)
+
+   * include/connect2mysql.php (connect2mysql),
+     include/config.php:
+   - moved consts DB_CONNECT_RETRY_COUNT, DB_CONNECT_RETRY_SLEEP_MS
+     from connect2mysql() into config.php
+   - bugfix: don't sleep on last db-connect retry-loop
+
+   * opponents.php, NEWS:
+   - replaced repeating "Info"-column with ID-column (one column less)
+
+   * users.php:
+   - used button on ID-column (same as on opponents-page)
+
+   * include/std_functions.php (end_page),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     admin_admins.php, admin_show_users.php:
+   - removed ADMIN_TIME (has been replaced by ADMOPT_SHOW_TIME in previous release)
+-----------
+UPDATE Players SET Adminlevel=Adminlevel & ~0x10 WHERE Adminlevel > 0 ;
+-----------
+
+   * include/gui_functions.php (TD_button), include/faq_functions.php (TD_button),
+     admin_faq.php, forum/admin.php:
+   - moved TD_button() from include/faq_functions.php to include/gui_functions.php
+
+   * faq.php, include/faq_functions.php (build_regex_term):
+   - trim search-term (must not contain spaces around terms, otherwise regex drives havoc)
+   - added search-syntax for input-box with search-term
+
+   * include/form_functions.php (create_string_func_textinput,
+       create_string_func_textinputx, print_insert_text_input,
+       print_insert_submit_buttonx, parse_input_standard_attributes):
+   - added TEXTINPUTX-type to allow to specify additional attributes
+   - put redundant parsing of standard-attributes into separate func
+
+   * features/edit_feature.php:
+   - show preview only if something to show
+   - switched position of save and preview like on other DGS-pages
+
+   * INSTALL:
+   - added note about timeadjust.php and some clarifications
+
+   * admin_users.php:
+   - bugfix: be able to clear textual fields like AdminNote/BlockReason
+
+   * error.php:
+   - bugfix after merge:
+     placement of db-close (needed connection for writing admin_log)
+
+   * include/connect2mysql.php (connect2mysql):
+   - reduced db-connect retry-count: 6 -> 2 (enough for a user to wait for)
+   - fixed usage of ignore_user_abort
+   - adjusted comments
+
 2009-02-13 juga
 
    * include/config.php, include/std_functions.php (start_page), error.php, NEWS,
