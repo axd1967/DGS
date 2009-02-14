@@ -52,7 +52,6 @@ require_once( "include/table_columns.php" );
       ADMIN_FAQ            => array( 'FAQ_EDITOR',       T_('Can edit FAQ') ),
       ADMIN_SKINNER        => array( 'SKINNER',          T_('Can choose CSS-skin (experimental)') ),
       ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       T_('Can translate texts') ),
-      ADMIN_TIME           => array( 'TIME',             T_('Can see time-needed of page-requests (in bottom bar)') ),
    );
 
    $ARR_ADMOPTS = array( // maskval => [ bit-text, descr ]

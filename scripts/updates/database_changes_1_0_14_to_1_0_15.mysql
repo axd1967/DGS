@@ -153,3 +153,7 @@ ALTER TABLE `FeatureList`
 ALTER TABLE `FeatureList`
    DROP INDEX Editor_ID ;
 
+
+-- removed ADMIN_TIME-role (has been replaced with admin-option)
+UPDATE Players SET Adminlevel=Adminlevel & ~0x10 WHERE Adminlevel > 0 ;
+

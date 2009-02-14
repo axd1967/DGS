@@ -162,6 +162,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Removed translations from the admin pages
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
+      * removed ADMIN_TIME admin-level (replaced by admin-option)
 
 
    Server config:

@@ -234,7 +234,7 @@ define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
 define("ADMIN_SUPERADMIN",0x08);
-define("ADMIN_TIME",0x10);
+//define('',0x10);  // can be reused, has been replaced by ADMOPT_SHOW_TIME
 define("ADMIN_ADD_ADMIN",0x20);
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
@@ -542,8 +542,7 @@ function end_page( $menu_array=NULL )
         . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)
         . "</span>";
 
-   if( !$printable && ((@$player_row['admin_level'] & ADMIN_TIME)
-                       || (@$player_row['AdminOptions'] & ADMOPT_SHOW_TIME)) )
+   if( !$printable && (@$player_row['AdminOptions'] & ADMOPT_SHOW_TIME) )
       echo "<br><span class=PageLapse>"
         . T_('Page created in') . ' <span id="pageLapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
@@ -555,7 +554,7 @@ function end_page( $menu_array=NULL )
    {
       echo "\n  <td class=LoginBox>";
 
-      if( (@$player_row['admin_level'] & ~ADMIN_TIME) && !$printable )
+      if( @$player_row['admin_level'] && !$printable )
          echo "<a href=\"{$base_path}admin.php\">",
             T_('Admin'), "</a>&nbsp;&nbsp;&nbsp;";
 

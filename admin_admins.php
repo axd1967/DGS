@@ -45,7 +45,6 @@ require_once( "include/table_columns.php" );
                         'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
                         'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
                         'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
-                        'TIME'   => array( ADMIN_TIME, /*T_*/('Time')),
                       );
 
 // Make sure all previous admins gets into the Admin array
