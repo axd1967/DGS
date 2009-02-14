@@ -42,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   * <ul>
   * <li> Description
   * <li> Textinput
+  * <li> TextinputX     --- with attributes
   * <li> Password
   * <li> Hidden
   * <li> Textarea
@@ -275,6 +276,12 @@ class Form
                                   'SpanAllColumns' => false,
                                   'Attbs'   => array('class'=>'FormText') ),
          'TEXTINPUT'    => array( 'NumArgs' => 4,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Attbs'   => array('class'=>'FormTextinput') ),
+         'TEXTINPUTX'   => array( 'NumArgs' => 5,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
@@ -956,7 +963,17 @@ class Form
     */
    function create_string_func_textinput( &$result, $args )
    {
-      $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3] );
+      $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3], '' );
+   }
+
+   /*!
+    * \brief Function for making textinput string in the standard form
+    * with additional attributes
+    * \internal
+    */
+   function create_string_func_textinputx( &$result, $args )
+   {
+      $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3], $args[4] );
    }
 
    /*!
@@ -1213,8 +1230,9 @@ class Form
     * \param $size          The size of the text input box.
     * \param $maxlength     How many characters it is allowed to enter; not set if <0.
     * \param $initial_value Text that appears initially in the input box.
+    * \param $attbs         optional attributes
     */
-   function print_insert_text_input( $name, $size, $maxlength, $initial_value )
+   function print_insert_text_input( $name, $size, $maxlength, $initial_value, $attbs='' )
    {
       if( $this->make_texts_safe )
          $initial_value = textarea_safe($initial_value);
@@ -1223,6 +1241,7 @@ class Form
          . $this->get_input_attbs() . " size=\"$size\"";
       if( $maxlength >= 0 )
          $str .= " maxlength=\"$maxlength\"";
+      $str .= Form::parse_input_standard_attributes( $attbs, 'type|name|value|size|maxlength' );
       $str .= ">";
       return $str;
    }
@@ -1384,32 +1403,7 @@ class Form
     */
    function print_insert_submit_buttonx( $name, $text, $attbs )
    {
-      $str = '';
-      if( is_array($attbs=attb_parse($attbs)) )
-      {
-         if( isset($attbs['title']) )
-         {
-            $title = trim($attbs['title']);
-            unset($attbs['title']);
-         }
-         else
-            $title = '';
-         if( isset($attbs['accesskey']) )
-         {
-            $xkey = trim($attbs['accesskey']);
-            unset($attbs['accesskey']);
-            if( (string)$xkey != '' ) // can be '0'
-            {
-               $xkey = substr($xkey,0,1);
-               $title.= " [&amp;$xkey]";
-               $str.= ' accesskey='.attb_quote($xkey);
-            }
-         }
-         if( $title )
-            $str.= ' title='.attb_quote($title);
-
-         $str.= attb_build($attbs);
-      }
+      $str = Form::parse_input_standard_attributes($attbs);
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
          $this->get_input_attbs() . $str . ">";
    }
@@ -1480,6 +1474,52 @@ class Form
       }
       return $prefix . T_('Warning#filter') . ': '
          . make_html_safe( $msg ) . $suffix;
+   }
+
+   /*!
+    * \brief (static) Parses standard attributes: title, accesskey and
+    *        return all as attribute string ready to be used within form element.
+    * \param $attbs attributes (string or array)
+    */
+   function parse_input_standard_attributes( $attbs, $rx_skipattr='' )
+   {
+      $str = '';
+      $attbs = attb_parse($attbs);
+      if( is_array($attbs) )
+      {
+         if( isset($attbs['title']) )
+         {
+            $title = trim($attbs['title']);
+            unset($attbs['title']);
+         }
+         else
+            $title = '';
+         if( $title )
+            $str .= ' title='.attb_quote($title);
+
+         if( isset($attbs['accesskey']) )
+         {
+            $xkey = trim($attbs['accesskey']);
+            unset($attbs['accesskey']);
+            if( (string)$xkey != '' ) // can be '0'
+            {
+               $xkey = substr($xkey,0,1);
+               $title .= " [&amp;$xkey]";
+               $str .= ' accesskey='.attb_quote($xkey);
+            }
+         }
+
+         // skip some attributes
+         if( $rx_skipattr )
+         {
+            foreach( $attbs as $akey => $aval )
+               if( !preg_match( "/^($rx_skipattr)$/i", $akey ) )
+                  unset($attbs[$akey]);
+         }
+
+         $str .= attb_build($attbs);
+      }
+      return $str;
    }
 
    /*!
