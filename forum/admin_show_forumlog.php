@@ -63,7 +63,6 @@ require_once( "forum/forum_functions.php" );
       $flfilter->add_filter( 5, 'Text', 'FL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $flfilter->init(); // parse current value from _GET
-   $flfilter->set_accesskeys('x', 'e');
 
    $fltable = new Table( 'forumlog', $page, '' );
    $fltable->register_filter( $flfilter );
