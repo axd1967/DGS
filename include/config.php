@@ -78,6 +78,12 @@ define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
 //     e.g. 1 = only select games younger than one day
 define('RESTRICT_SHOW_GAMES_ALL', 1);
 
+// Number of attempts to retry connecting to database (see connect2mysql())
+// WARNING: needs PHP5 for Windows-Server because of usleep()
+// - 0 = no retries (only one connect-try)
+define('DB_CONNECT_RETRY_COUNT', 2);
+define('DB_CONNECT_RETRY_SLEEP_MS', 1000); // [ms]
+
 define('URI_AMP_IN','&'); //see ini_get('arg_separator.input')
 //URI_AMP at '&amp;' work even if arg_separator.output is set to '&'
 define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
