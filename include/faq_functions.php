@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -93,16 +93,6 @@ function search_faq_match_terms( $Qtext, $Atext, $rx_term )
    return false;
 }
 
-function TD_button( $title, $href, $isrc, $ialt)
-{
-   //image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
-   $str = image( $isrc, $ialt, $title);
-   //anchor( $href, $text, $title='', $attbs='')
-   $str = anchor( $href, $str);
-   $str = "<td class=Button>$str</td>\n";
-   return $str;
-}
-
 // returns error-message, or '' if query-terms are ok to be searched for
 function check_faq_search_terms( $query_terms )
 {
@@ -124,7 +114,7 @@ function check_faq_search_terms( $query_terms )
 // - otherwise no special characters
 function build_regex_term( $query_term )
 {
-   $regex = preg_quote( $query_term );
+   $regex = preg_quote( trim($query_term) );
    $regex = preg_replace( "/\s+/", '|', $regex );
    return ( (string)$regex != '' ) ? "($regex)" : '';
 }
