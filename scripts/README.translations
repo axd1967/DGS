@@ -1,6 +1,12 @@
 To scan PHP files and recover Groups+Pages,
 run (need the ADMIN_DATABASE privilege):
 
+# NOTE:
+# keep in mind, that translation-text discovery only works correctly,
+# if T_('')-call is correct. There must be NO space between the [')] or [")].
+# Example: T_('text-with-space' ) is not discovered as translation-text(!)
+
+
 > update_translation_pages.php
 then, after checking:
 > update_translation_pages.php?do_it=1
