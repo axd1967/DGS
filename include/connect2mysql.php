@@ -136,17 +136,19 @@ function connect2mysql($no_errors=false)
    // user can stop the output, but not the script
    $old_ignore = @ignore_user_abort(true);
 
-   $i = 3; //retry count
-   do
+   $retry = DB_CONNECT_RETRY_COUNT; //retry count = $retry+1 attempts to connect
+   for(;;)
    {
       $dbcnx = @mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD);
-      if( $dbcnx )
-         break;
+      if( $dbcnx ) break; // got connection
+      if( --$retry < 0 ) break; // retry count reached (don't sleep on last loop)
+
       //max_user_connections: Error: 1203 SQLSTATE: 42000 (ER_TOO_MANY_USER_CONNECTIONS)
-      if( mysql_errno() != 1203 )
-         break;
-      usleep(1000000); //delay in ms
-   } while(--$i >= 0);
+      if( mysql_errno() != 1203 ) break;
+
+      //delay in micro-secs, needs PHP5 for Win-server
+      usleep(1000 * DB_CONNECT_RETRY_SLEEP_MS);
+   }
 
    if( !$dbcnx )
    {
