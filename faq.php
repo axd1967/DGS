@@ -104,6 +104,7 @@ require_once( "include/form_functions.php" );
       {
          echo "</td></tr><tr><td class=FAQsearch>\n";
 
+         //TODO: <hr> missing sometimes over a section
          echo faq_item_html( 0);
          $outbuf = '';
          $cntmatch = 0; // count of matches for level1-section
