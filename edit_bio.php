@@ -188,7 +188,7 @@ function find_category_box_text($cat)
       }
    }
 
-   $menu_array[T_('Show/edit userinfo')] = "userinfo.php?uid=$my_id";
+   $menu_array[T_('Show userinfo')] = "userinfo.php?uid=$my_id";
 
    if( !$editorder )
    {

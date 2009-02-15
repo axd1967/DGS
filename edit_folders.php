@@ -262,7 +262,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $menu_array = array(
          T_('Message list') => 'list_messages.php',
-         T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
+         T_('Show userinfo') => "userinfo.php?uid=$my_id",
       );
 
    end_page(@$menu_array);

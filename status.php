@@ -280,7 +280,7 @@ $ThePage = new Page('Status');
 
 
 
-   $menu_array = array( T_('Show/edit userinfo') => "userinfo.php?uid=$my_id",
+   $menu_array = array( T_('Show userinfo') => "userinfo.php?uid=$my_id",
                         T_('Show my running games') => "show_games.php?uid=$my_id",
                         T_('Show my finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",
                         T_('Show games I\'m observing') => "show_games.php?observe=1" );
