@@ -134,10 +134,10 @@ function build_rating_diff( $rating_diff )
 
 
    // ------------------------
-   // build table-info: opponents
+   // build table-info: players
 
-   $itable = new Table_info('opponents');
-   $itable->add_caption( T_('Opponents') );
+   $itable = new Table_info('players');
+   $itable->add_caption( T_('Players') );
    $itable->add_sinfo(
          T_('Color'),
          array(
@@ -193,7 +193,7 @@ function build_rating_diff( $rating_diff )
                ));
       }
    }
-   $itable_str_opponents = $itable->make_table();
+   $itable_str_players = $itable->make_table();
    unset($itable);
 
 
@@ -264,7 +264,7 @@ function build_rating_diff( $rating_diff )
    echo "<h3 class=Header>$title</h3>\n";
 
    echo "<table><tr valign=\"top\">",
-      "<td>$itable_str_game<br>$itable_str_opponents</td>",
+      "<td>$itable_str_game<br>$itable_str_players</td>",
       "<td>$itable_str_time</td>",
       "</tr></table>\n";
 
