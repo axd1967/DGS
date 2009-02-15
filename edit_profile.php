@@ -258,7 +258,7 @@ require_once( "include/form_functions.php" );
                                  ) );
 
    if( ALLOW_JAVASCRIPT )
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Allow JScript'),
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Enable JavaScript'),
                                   'CHECKBOX', 'jsenable', 1, '', ($boardcoords & JAVASCRIPT_ENABLED) ) );
 
 
