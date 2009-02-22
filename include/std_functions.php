@@ -137,6 +137,7 @@ $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
 $cookie_pref_rows = array(
        'SkinName',
+       'UserFlags',
        'MenuDirection', 'Button',
        'TableMaxRows',
        'Stonesize', 'Woodcolor', 'Boardcoords',
@@ -215,6 +216,13 @@ define('MAX_MOVENUMBERS', 500);
 define("KO", 0x01);
 
 //-----
+// UserFlags (also stored in cookie)
+define('USERFLAG_JAVASCRIPT_ENABLED', 0x001);
+//-----
+
+
+//-----
+// Boardcoords
 define('COORD_LEFT',0x001);
 define('COORD_UP',0x002);
 define('COORD_RIGHT',0x004);
@@ -223,7 +231,6 @@ define('SMOOTH_EDGE',0x010);
 define('COORD_OVER',0x020);
 define('COORD_SGFOVER',0x040);
 define('NUMBER_OVER',0x080);
-define('JAVASCRIPT_ENABLED',0x100);
 //-----
 
 
@@ -319,6 +326,13 @@ function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
    return implode( $sep, $out );
 }
 
+// returns true if JavaScript allowed and current Player has it enabled
+function is_javascript_enabled()
+{
+   global $player_row;
+   return ( ALLOW_JAVASCRIPT && (@$player_row['UserFlags'] & USERFLAG_JAVASCRIPT_ENABLED) );
+}
+
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
 {
    global $base_path, $encoding_used, $printable;
@@ -373,8 +387,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
 
-   global $player_row;
-   if( ALLOW_JAVASCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) )
+   if( is_javascript_enabled() )
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
    if( is_a($ThePage, 'HTMLPage') )

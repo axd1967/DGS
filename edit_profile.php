@@ -201,6 +201,7 @@ require_once( "include/form_functions.php" );
    else
       $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
 
+   $userflags = (int)$player_row['UserFlags'];
    $boardcoords = (int)$player_row['Boardcoords'];
 
    //--- Followings may be browser settings ---
@@ -259,7 +260,7 @@ require_once( "include/form_functions.php" );
 
    if( ALLOW_JAVASCRIPT )
    $profile_form->add_row( array( 'DESCRIPTION', T_('Enable JavaScript'),
-                                  'CHECKBOX', 'jsenable', 1, '', ($boardcoords & JAVASCRIPT_ENABLED) ) );
+                                  'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
 
 
 

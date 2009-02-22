@@ -82,6 +82,7 @@ Ou    Country              | char(2)                                     | NO   
 
 # Fields for GUI-config:
 
+Z     UserFlags            | int(11)                                     | NO   | 0
 Z     SkinName             | varchar(32)                                 | NO   |
 Z     MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
 Z     Button               | int(11)                                     | NO   | 0

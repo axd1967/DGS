@@ -65,8 +65,10 @@ require_once( "include/rating.php" );
                 + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
                 + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
                 + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
+
+   $userflags = 0;
    if( ALLOW_JAVASCRIPT )
-   $boardcoords+= ( @$_GET['jsenable'] ? JAVASCRIPT_ENABLED : 0 );
+      $userflags |= ( @$_GET['jsenable'] ? USERFLAG_JAVASCRIPT_ENABLED : 0 );
 
    $movenumbers = (int)@$_GET['movenumbers'];
    $movemodulo = (int)@$_GET['movemodulo'];
@@ -106,6 +108,7 @@ require_once( "include/rating.php" );
    if( @$_GET['locally'] == 1 )
    {
       // adjust $cookie_pref_rows too
+      $cookie_prefs['UserFlags'] = $userflags;
       $cookie_prefs['Stonesize'] = (int)@$_GET['stonesize'];
       $cookie_prefs['Woodcolor'] = (int)@$_GET['woodcolor'];
       $cookie_prefs['Boardcoords'] = $boardcoords;
@@ -128,6 +131,7 @@ require_once( "include/rating.php" );
    else
    {
       $query .=
+         "UserFlags=$userflags, " .
          "Stonesize=" . (int)@$_GET['stonesize'] . ", " .
          "Woodcolor=" . (int)@$_GET['woodcolor'] . ", " .
          "Boardcoords=$boardcoords, " .

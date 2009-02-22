@@ -826,7 +826,7 @@ function draw_moves( $gid, $move, $handicap )
 
    // add selectbox to show specific move
    echo "<SELECT name=\"gotomove\" size=\"1\"";
-   if( ALLOW_JAVASCRIPT && (@$player_row['Boardcoords'] & JAVASCRIPT_ENABLED) )
+   if( is_javascript_enabled() )
    {
       echo " onchange=\"javascript:this.form['movechange'].click();\"";
    }
