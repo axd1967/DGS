@@ -23,6 +23,41 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-22 juga
+
+   * specs/db/table-Players.txt:
+   - doc about Players-table + split-info
+
+   * quick_status.php, NEWS:
+   - synced with changes in release-branch DGS-stable-200712
+     - added column with time-remaining
+
+   * code_examples/check_times.php:
+   - various time-format outputs
+
+   * donation.php:
+   - redirect donate-button to thank-you forum post if disabled
+
+   * include/config.php, include/std_functions.php (start_page),
+     donation.php, donation_success.php, skins/dragon/screen.css,
+     docs.php, site_map.php, NEWS:
+   - synced with changes in release-branch DGS-stable-200712
+     - added donation and donation thank-you page redirecting from and to PayPal,
+       text mainly written by Erik
+     - added config-switch ENABLE_DONATIONS to enable donation links
+       on site-map, docs and status-page
+       to forum-thank-you (needs adjustment for DGS-clones)
+     - added donate-tool below main-menu linked to new donation-page
+     - show only on status-page
+-----------
+copy /images/donate.gif
+-----------
+
+2009-02-15 juga
+
+   * edit_bio.php, edit_folders.php, status.php, gameinfo.php:
+   - adjusted some texts (show userinfo, Opponents -> Players)
+
 2009-02-14 juga
 
    * include/filter.php (FilterDate, FilterRelativeDate),
@@ -2176,6 +2211,9 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 # History:
 2008-12-14: release of DGS 1.0.14
 2009-01-04: bug fix update (by JUG) as DGS 1.0.14.b
+2009-02-15: update (added PayPal-donation-page) as DGS 1.0.14.c
+2009-02-21: bug fix update (by JUG) as DGS 1.0.14.d (opponents)
+2009-02-22: bug fix update (by JUG) as DGS 1.0.14.e
 
 2008-12-14 juga
 
