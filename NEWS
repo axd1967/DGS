@@ -211,7 +211,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    Minor changes:
 
    * Forum pages:
-      * Moderate edited posts if moderation normally needed
       * Show note for guest-user on reply-textbox about writing posts
 
    * Increased size of bio and message text boxes
