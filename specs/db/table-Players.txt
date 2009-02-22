@@ -1,0 +1,151 @@
+###
+### Description of mysql table:  Players, ConfigBoard, ConfigPages
+###
+
+Here you'll find some infos about the players fields and players configuration.
+Players is the table containing ALL information and configuration for a player.
+The Players-table is always read at start of a page into a global
+variable $player_row to have user-specific details available in page.
+
+- Configuration parameters for the DGS-GUI will be split from the Players table
+  when they are not always needed (to reduce data to load from db).
+
+
+# => split 'Z'-configs into main-Players-table, because used everywhere
+# => new tables: [Z] into ConfigGlobal, [G] into ConfigBoard, [1/2] into ConfigPages
+#    ConfigXYZ: User_ID, ProfileName VC(32) (Profile later possible)
+
+-------------------------------------------------
+## Categorization for Fields of Players-table:
+
+# Players:
+# - O = viewable by others
+# - u = can be modified by user
+# - A = can be modified by admin
+# - S = under system control ("regularly" updated)
+# - = = set once by system
+# - Z = GUI-config: used for all pages
+# - G = GUI-config: used for game-page (board)
+# - 1 = used for one page, 2 = for two, etc.
+
+# Fields for user-management:
+
+Cat | fieldname            | db-type                                     | NULL | Default
+----+----------------------+---------------------------------------------+------+--------------------
+O=    ID                   | int(11)                                     | NO   | NULL
+O A   Handle               | varchar(16)                                 | NO   |
+ u    Password             | varchar(41)                                 | NO   |
+ uA   Newpassword          | varchar(41)                                 | NO   |
+ S    Sessioncode          | varchar(41)                                 | NO   |
+ S    Sessionexpire        | datetime                                    | YES  | NULL
+OS    Lastaccess           | datetime                                    | YES  | NULL
+OS    LastMove             | datetime                                    | YES  | NULL
+O=    Registerdate         | date                                        | YES  | NULL
+ S    Hits                 | int(11)                                     | NO   | 0
+ SA   VaultCnt             | smallint(5) unsigned                        | NO   | 0
+ SA   VaultTime            | datetime                                    | NO   | 0000-00-00 00:00:00
+ S    Moves                | int(11)                                     | YES  | 0
+OS    Activity             | int(11)                                     | NO   | 15000
+OuA   Name                 | varchar(40)                                 | NO   |
+ u    Email                | varchar(80)                                 | YES  | NULL
+Ou    Rank                 | varchar(40)                                 | YES  | NULL
+ u    SendEmail            | set('ON','MOVE','BOARD','MESSAGE')          | NO   |
+ u    Notify               | enum('NONE','NEXT','NOW','DONE')            | NO   | NONE
+  A   Adminlevel           | int(11)                                     | NO   | 0
+  A   AdminOptions         | int(11) unsigned                            | NO   | 0
+  A   AdminNote            | varchar(100)                                | NO   |
+  A   MayPostOnForum       | enum('N','Y','M')                           | NO   | Y
+Ou    Timezone             | varchar(40)                                 | NO   | GMT
+ u    Nightstart           | int(11)                                     | NO   | 22
+ S    ClockUsed            | int(11)                                     | NO   | 22
+ S    ClockChanged         | enum('N','Y')                               | NO   | Y
+ S    Rating               | double                                      | YES  | NULL
+OS    Rating2              | double                                      | YES  | NULL
+ S    RatingMin            | double                                      | YES  | NULL
+ S    RatingMax            | double                                      | YES  | NULL
+ S    InitialRating        | double                                      | YES  | NULL
+ S    RatingStatus         | enum('INIT','RATED')                        | YES  | NULL
+Ou    Open                 | varchar(40)                                 | NO   |
+ u    Lang                 | varchar(20)                                 | NO   | C
+OSA   VacationDays         | double                                      | NO   | 14
+OSA   OnVacation           | double                                      | NO   | 0
+OS    Running              | int(11)                                     | NO   | 0
+OS    Finished             | int(11)                                     | NO   | 0
+OS    RatedGames           | int(11)                                     | NO   | 0
+OS    Won                  | int(11)                                     | NO   | 0
+OS    Lost                 | int(11)                                     | NO   | 0
+  A   Translator           | varchar(80)                                 | NO   |
+ S    IP                   | varchar(16)                                 | NO   |
+ S    Browser              | varchar(100)                                | NO   |
+Ou    Country              | char(2)                                     | NO   |
+  A   BlockReason          | text                                        | NO   | NULL
+
+# Fields for GUI-config:
+
+Z     SkinName             | varchar(32)                                 | NO   |
+Z     MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
+Z     Button               | int(11)                                     | NO   | 0
+Z     TableMaxRows         | smallint(5) unsigned                        | NO   | 20
+ G    Stonesize            | tinyint(3) unsigned                         | NO   | 25
+ G    Woodcolor            | int(11)                                     | NO   | 1
+ G    Boardcoords          | int(11)                                     | NO   | 31
+ G    MoveNumbers          | smallint(5) unsigned                        | NO   | 0
+ G    MoveModulo           | smallint(5) unsigned                        | NO   | 0
+ G    NotesSmallHeight     | tinyint(3) unsigned                         | NO   | 25
+ G    NotesSmallWidth      | tinyint(3) unsigned                         | NO   | 30
+ G    NotesSmallMode       | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
+ G    NotesLargeHeight     | tinyint(3) unsigned                         | NO   | 25
+ G    NotesLargeWidth      | tinyint(3) unsigned                         | NO   | 30
+ G    NotesLargeMode       | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
+ G    NotesCutoff          | tinyint(3) unsigned                         | NO   | 13
+ 1    StatusFolders        | varchar(40)                                 | NO   |
+ 1    ForumFlags           | tinyint(3) unsigned                         | NO   | 8
+ 2    UsersColumns         | int(11)                                     | NO   | -1
+ 1    GamesColumns         | int(11)                                     | NO   | -1
+ 1    RunningGamesColumns  | int(11)                                     | NO   | -1
+ 1    FinishedGamesColumns | int(11)                                     | NO   | -1
+ 1    ObservedGamesColumns | int(11)                                     | NO   | -1
+ 1    TournamentsColumns   | int(11)                                     | NO   | -1
+ 1    WaitingroomColumns   | int(11)                                     | NO   | -1
+ 1    ContactColumns       | int(11)                                     | NO   | -1
+
+
+-------------------------------------------------
+# Description of fields:
+
+TABLE Players:
+   ID int(11) NOT NULL auto_increment, -- numerical user-id 'uid'
+   Handle varchar(16) NOT NULL default '', -- textual user-handle
+   Password varchar(41) default NULL, -- crypted password, created with mysql password('password')
+   Lastaccess datetime default NULL, -- on every viewing of a page on DGS, this is updated to the current-time
+   LastMove datetime default NULL, -- updated to current-time when players moves in a game
+   Registerdate date default NULL, -- datetime when user first created the account on DGS
+   Hits int(11) default '0', -- value increased by one, when visiting or reload a page (is_logged_in-check)
+   Moves int(11) default '0', -- counter for made moves
+   Activity double NOT NULL default '15', -- acitivity points, certain activities on the server adds to this (page-visit, making-move); value is decreased by cron-scripts (half-time)
+   Name varchar(40) NOT NULL default '', -- full name of player
+   Email varchar(80) default NULL, -- email of player
+   Rank varchar(40) default NULL, -- textual rank-information (free text, no meaning for rating)
+   Stonesize tinyint(3) unsigned NOT NULL default '25', -- CONF: stone-size used to select images ??
+   Adminlevel int(11) NOT NULL default '0', -- bit-mask for different admin-tasks, -1=full-fledged-admin
+   Rating2 double default NULL, -- current rating (EGF-rating in range 100 - ), used for calculations to start game
+   RatingMin double default NULL, -- minimal rating (for rating-graph), + ??
+   RatingMax double default NULL, -- maximum rating (for rating-graph), + ??
+   RatingStatus enum('INIT','RATED') default NULL, -- INIT=no-rating-set, RATED=rating-set
+   UsersColumns int(10) unsigned NOT NULL default '62', -- bit-mask representing shown columns for page 'users.php'
+   GamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'status.php'
+   RunningGamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'show_games.php' (running-games)
+   FinishedGamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'show_games.php' (finished-games)
+   ObservedGamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'show_games.php' (observed-games)
+   TournamentsColumns int(10) unsigned NOT NULL default '62', -- bit-mask representing shown columns, (unused)
+   WaitingroomColumns int(10) unsigned NOT NULL default '253', -- bit-mask representing shown columns for page 'waiting_room.php'
+   Running int(11) NOT NULL default '0', -- number of running games for player
+   Finished int(11) NOT NULL default '0', -- number of finished games for player
+   RatedGames int(11) NOT NULL default '0', -- number of finished rated games for player
+   Won int(11) NOT NULL default '0', -- number of won games for player
+   Lost int(11) NOT NULL default '0', -- number of lost games for player
+   Country char(2) default NULL, -- CONF: country for player, for codes see 'include/countries.php'
+   SkinName varchar(32) NOT NULL default '', -- CONF: used skin for CSS
+   PRIMARY KEY  (ID),
+   UNIQUE KEY Handle (Handle),
+
