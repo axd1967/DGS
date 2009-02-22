@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
+require_once( "include/translation_functions.php" );
+require_once( "include/time_functions.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -173,12 +175,17 @@ else
    // Games to play?
 
    $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+0 AS Color, " .
-       "UNIX_TIMESTAMP(Lastchanged) as date, " .
+       "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
+       "Maintime, Byotype, Byotime, Byoperiods, " .
+       "White_Maintime, White_Byotime, White_Byoperiods, " .
+       "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
+       "LastTicks, Clock.Ticks, " . //always my clock because always my turn (status page)
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
-       "FROM Games,Players AS opponent " .
-       "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
-         "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       "ORDER BY LastChanged DESC, Games.ID";
+       "FROM Games " .
+         "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$my_id) " .
+         "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
+       "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME . " " .
+       "ORDER BY Games.LastChanged DESC, Games.ID";
 
    $result = mysql_query( $query )
       or error('mysql_query_failed','quick_status.find_games');
@@ -187,12 +194,30 @@ else
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      //game.ID, opponent.handle, player.color, Lastmove.date
-      echo "'G', {$row['ID']}, '" . slashed(@$row['oHandle']) .
-      //echo "'G', {$row['ID']}, '" . slashed(@$row['oName']) .
-         "', '" . $clrs{@$row['Color']} . "', '" .
-         date($datfmt, @$row['date']) . "'\n";
+
+      // calculate time-remaining
+      $is_white = (int)@$row['Color'];
+      $my_Maintime   = ( $is_white ? $row['White_Maintime'] : $row['Black_Maintime'] );
+      $my_Byotime    = ( $is_white ? $row['White_Byotime'] : $row['Black_Byotime'] );
+      $my_Byoperiods = ( $is_white ? $row['White_Byoperiods'] : $row['Black_Byoperiods'] );
+
+      //if( !(($Color+1) & 2) ) //is it my turn? (always set in status page)
+      $hours = ticks_to_hours($row['Ticks'] - $row['LastTicks']);
+
+      time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
+                     $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'], false);
+
+      $time_remaining =
+         echo_time_remaining( $my_Maintime, $row['Byotype'], $my_Byotime,
+                     $my_Byoperiods, $row['Byotime'], true, true, true);
+      $time_remaining = str_replace( "&nbsp;", ' ', $time_remaining );
+
+      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining
+      echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s'\n",
+                    'G', $row['ID'], slashed(@$row['oHandle']), $clrs{@$row['Color']},
+                    date($datfmt, @$row['date']), $time_remaining );
    }
+   mysql_free_result($result);
 
 
    if( $nothing_found )
