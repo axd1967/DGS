@@ -147,6 +147,9 @@ define('FORUM_WEEKS_NEW_END', 12);
 // - set to 0 to disable
 define('LIST_GAMENOTE_LEN', 20);
 
+// enable donation-links
+define('ENABLE_DONATIONS', false);
+
 // IP-blocklist: user with these IPs are blocked
 // Syntax: '127.0.0.1' (=ip), '127.0.0.1/32' (=subnet), '/^127\.0\.0\.1$/' (=regex)
 // Check Config with: scripts/check_block_ip.php

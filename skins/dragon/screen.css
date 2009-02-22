@@ -1640,6 +1640,11 @@ body.News table#pageLayout td#pageBody span.ReleaseTitle {
    color: darkred;
 }
 
+body.Donation table#pageLayout td#pageBody div.Section table {
+   border: 0px solid red;
+   width: 60%;
+}
+
 
 /* ------------------------- */
 /* translations page */

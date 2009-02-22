@@ -179,6 +179,8 @@ function item($text, $link='', $working=true, $last=false)
       { $item_level++;
          item(T_('Introduction'), "introduction.php", true);
          item(T_('Terms of Service - Rules of Conduct and Privacy Policy'), "policy.php", true);
+         if( ENABLE_DONATIONS )
+            item(T_('Donation'), 'donation.php', true);
          item(T_('News, Release notes'), "news.php", true);
          item(T_('Site map'), "site_map.php", true);
          item(T_('FAQ'), "faq.php", true);

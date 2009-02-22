@@ -455,6 +455,13 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'status.php':
+            if( ENABLE_DONATIONS )
+            {
+               $tools_array['donation.php'] = array(
+                  $base_path.'images/donate.gif',
+                  T_('Donate'), T_('Support DGS with a donation') );
+            }
+
             $tools_array['rss/status.php'] =
                array( $base_path.'images/rss-icon.png',
                       'RSS',

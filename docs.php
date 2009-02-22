@@ -34,6 +34,8 @@ $ThePage = new Page('Docs');
 
    add_link_page_link('introduction.php', T_('Introduction to Dragon'), T_('Getting started'));
    add_link_page_link('policy.php', T_('Terms of Service'), T_('Rules of Conduct and Privacy Policy'));
+   if( ENABLE_DONATIONS )
+      add_link_page_link('donation.php', T_('Donation'), T_('Support DGS with a donation'));
    add_link_page_link("news.php", T_('News'), T_('Release notes'));
    add_link_page_link('site_map.php', T_('Site map'), T_('Page structure of site'));
    add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
