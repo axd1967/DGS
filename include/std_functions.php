@@ -136,14 +136,21 @@ $buttoncolors = array('white','white','white','white',
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
 $cookie_pref_rows = array(
-       'SkinName',
+       // global config (from Players-table):
        'UserFlags',
-       'MenuDirection', 'Button',
+       'Button',
        'TableMaxRows',
+       'MenuDirection',
+       'SkinName',
+       // board config (from ConfigBoard-table):
+       // NOTE: place also all prefs from ConfigBoard-table in players_row,
+       //       but manage with ConfigBoard-class; see is_logged_in()
+       // NOTE: also add in ConfigBoard::load_config_board()
        'Stonesize', 'Woodcolor', 'Boardcoords',
-       'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode', 'NotesCutoff',
-       'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
        'MoveNumbers', 'MoveModulo',
+       'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
+       'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode',
+       'NotesCutoff',
        );
 
 $vacation_min_days = 2;
@@ -222,19 +229,6 @@ define('USERFLAG_JAVASCRIPT_ENABLED', 0x001);
 
 
 //-----
-// Boardcoords
-define('COORD_LEFT',0x001);
-define('COORD_UP',0x002);
-define('COORD_RIGHT',0x004);
-define('COORD_DOWN',0x008);
-define('SMOOTH_EDGE',0x010);
-define('COORD_OVER',0x020);
-define('COORD_SGFOVER',0x040);
-define('NUMBER_OVER',0x080);
-//-----
-
-
-//-----
 // admin-roles
 // NOTE: also adjust admin_show_users.php on adding new roles
 define("ADMIN_TRANSLATORS",0x01);
@@ -274,15 +268,6 @@ define("FOLDER_DELETED", 4);
 define("FOLDER_SENT", 5);
 //User folders must be >= USER_FOLDERS
 define("USER_FOLDERS", 6);
-//-----
-
-
-//-----
-// sync with legal-check in toggle_forum_flags-func
-define('FORUMFLAG_FORUM_SHOWAUTHOR',  0x01); // last-post author
-define('FORUMFLAG_THREAD_SHOWAUTHOR', 0x02);
-define('FORUMFLAG_POSTVIEW_AUTOREAD', 0x04); // viewing marks thread as read //TODO (not implemented yet)
-define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
 //-----
 
 
