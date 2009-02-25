@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( 'include/quick_common.php' );
 require_once( "include/std_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
 
 define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
@@ -100,6 +101,8 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
    if( mysql_affected_rows() != 1 )
       error("mysql_insert_player");
 
+   ConfigPages::insert_default( $new_id );
+   ConfigBoard::insert_default( $new_id );
 
    set_login_cookie( $uhandle, $code );
 
