@@ -66,7 +66,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
          }
          echo "\n</tr>";
       }
-      echo "<tr class=\"Row$c\" ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n"
+      echo "<tr class=\"Row$c\" ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
       foreach( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
