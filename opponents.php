@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userconfig.php' );
 
 
 $ARR_DBFIELDKEYS = array(
@@ -45,7 +46,6 @@ $ARR_DBFIELDKEYS = array(
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
 
@@ -68,6 +68,8 @@ $ARR_DBFIELDKEYS = array(
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
    }
+
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_OPPONENTS );
 
 
    // who are player (uid) and opponent (opp) ?
@@ -110,7 +112,7 @@ $ARR_DBFIELDKEYS = array(
    $usfilter = new SearchFilter( 's', $search_profile );
    $ufilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'active' ); // named-filters FC_FNAME
-   $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable = new Table( 'user', $page, $cfg_tblcols );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
