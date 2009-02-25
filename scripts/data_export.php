@@ -300,6 +300,8 @@ function get_tables( $database)
    case 'init':
      $tables = array (
          'Players',
+         'ConfigBoard',
+         'ConfigPages',
          'Games',
          'GamesNotes',
          'Bio',
@@ -332,10 +334,13 @@ function get_tables( $database)
          'Forums',
          'Posts',
          'Forumreads',
+         'ForumRead',
          'GoDiagrams',
          'FAQ',
          'FAQlog',
          'Clock',
+         'FeatureList',
+         'FeatureVote',
 
       );
       break;
@@ -406,7 +411,7 @@ case 'DGS':{
 //$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
 $defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
 $defs_aft['Players']['Rating2'] = 'Rating';
-$defs_bef['Players']['StatusFolders'] = 'Running';
+$defs_bef['ConfigPages']['StatusFolders'] = 'Running';
 $defs_aft['Waitingroom']['Handicap'] = 'Komi';
 } break;
 } //FRIENDLY_SHORT_NAME
