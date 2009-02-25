@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Forum";
 
 chdir('..');
+require_once( 'include/classlib_userconfig.php' );
 require_once( 'forum/forum_functions.php' );
 require_once( 'forum/post.php' );
 
@@ -63,6 +64,7 @@ function revision_history( $display_forum, $post_id )
    if( !$logged_in )
       error("not_logged_in");
    $my_id = $player_row['ID'];
+   $cfg_pages = ConfigPages::load_config_pages($my_id);
 
    $reply = @$_REQUEST['reply']+0;
    $forum_id = @$_REQUEST['forum']+0;
@@ -76,11 +78,11 @@ function revision_history( $display_forum, $post_id )
    $toggle_baseurl = "read.php?forum=$forum_id"
       . URI_AMP."thread=$thread"
       . ( $rx_term != '' ? URI_AMP."xterm=$rx_term" : '');
-   if( toggle_forum_flags($my_id, $toggleflag) )
+   if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
    {
       jump_to( 'forum/'.$toggle_baseurl );
    }
-   $show_overview = ( $player_row['ForumFlags'] & FORUMFLAG_POSTVIEW_OVERVIEW );
+   $show_overview = ( $cfg_pages->get_forum_flags() & FORUMFLAG_POSTVIEW_OVERVIEW );
 
    $arg_moderator = get_request_arg('moderator');
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, $arg_moderator );
@@ -96,9 +98,13 @@ function revision_history( $display_forum, $post_id )
    if( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum');
 
+   // for GoDiagrams
+   $cfg_board = null;
+   // if( $preview || isset($_POST['post']) ) $cfg_board = ConfigBoard::load_config_board($my_id);
+
    if( isset($_POST['post']) )
    {
-      $msg = post_message($player_row, $forum->options, $thread);
+      $msg = post_message($player_row, $cfg_board, $forum->options, $thread);
       if( is_numeric( $msg) && $msg>0 )
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
             . "#$msg");
@@ -121,7 +127,7 @@ function revision_history( $display_forum, $post_id )
       $preview_Text = trim(get_request_arg('Text'));
       if( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
-//      $preview_GoDiagrams = create_godiagrams($preview_Text);
+//      $preview_GoDiagrams = create_godiagrams($preview_Text, $cfg_board);
    }
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
@@ -264,7 +270,7 @@ function revision_history( $display_forum, $post_id )
       else
          $postClass = 'Normal';
 
-//      $GoDiagrams = find_godiagrams($Text);
+//      $GoDiagrams = find_godiagrams($Text, $cfg_board);
 
       // draw current post
       $post_reference =
