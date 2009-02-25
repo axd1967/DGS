@@ -157,6 +157,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
      needs migration of bitmasks in DB; changed table-field-numbers of
      - Games.Weekendclock: #12 -> #24
      - Players.LastAccess: #15 -> #25
+     - Game-Notes: @#32    #32 -> #15
 
    * Changes for FAQ-editors:
 
