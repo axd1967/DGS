@@ -31,15 +31,17 @@ require_once( "include/contacts.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userconfig.php' );
 
 {
    #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
+   $my_id = $player_row['ID'];
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_WAITINGROOM );
 
    //short descriptions for table
    $handi_array = array( 'conv'   => T_('Conventional'),
@@ -54,7 +56,6 @@ require_once( "include/classlib_profile.php" );
    foreach( $handi_array as $fval => $fkey )
       $handi_filter_array[$fkey] = "Handicaptype='$fval'";
 
-   $my_id = $player_row['ID'];
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
@@ -70,7 +71,7 @@ require_once( "include/classlib_profile.php" );
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_WAITINGROOM );
    $wrfilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'handi|good' ); // named-filters FC_FNAME
-   $wrtable = new Table( 'waitingroom', $page, "WaitingroomColumns" );
+   $wrtable = new Table( 'waitingroom', $page, $cfg_tblcols );
    $wrtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 

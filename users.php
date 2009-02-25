@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -29,18 +29,18 @@ require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userconfig.php' );
 
 {
    #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
-
    $uid = $player_row['ID'];
    //$user = $player_row['Handle'];
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_USERS );
 
    $page = "users.php?";
 
@@ -63,7 +63,7 @@ require_once( "include/classlib_profile.php" );
    $search_profile = new SearchProfile( $uid, $profile_type );
    $ufilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'name|user|active' ); // named-filters FC_FNAME
-   $utable = new Table( 'user', $page, 'UsersColumns' );
+   $utable = new Table( 'user', $page, $cfg_tblcols );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
