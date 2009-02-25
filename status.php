@@ -25,6 +25,8 @@ require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
+
 $ThePage = new Page('Status');
 
 {
@@ -32,11 +34,11 @@ $ThePage = new Page('Status');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
-
    $my_id = $player_row['ID'];
+   $cfg_pages = ConfigPages::load_config_pages( $my_id, CFGCOLS_STATUS_GAMES );
+   $cfg_tblcols = $cfg_pages->get_table_columns();
 
    //check if the player's clock need an adjustment from/to summertime
    if( $player_row['ClockChanged'] != 'Y' &&
@@ -50,7 +52,7 @@ $ThePage = new Page('Status');
 
    // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
-   $gtable = new Table( 'game', "status.php", "GamesColumns", '', $table_mode );
+   $gtable = new Table( 'game', "status.php", $cfg_tblcols, '', $table_mode );
 
    start_page(T_('Status'), true, $logged_in, $player_row,
                button_style($player_row['Button']) );
@@ -95,8 +97,9 @@ $ThePage = new Page('Status');
    $order = $mtable->current_order_string(/*'date+'*/);
    $limit = ' LIMIT 20'; //$mtable->current_limit_string();
 
-   $folderstring = $player_row['StatusFolders'] .
-      (empty($player_row['StatusFolders']) ? '' : ',') . FOLDER_NEW . ',' . FOLDER_REPLY;
+   $status_folders = $cfg_pages->get_status_folders();
+   $folderstring = $status_folders . (empty($status_folders) ? '' : ',')
+      . FOLDER_NEW . ',' . FOLDER_REPLY;
 
    list( $result ) = message_list_query($my_id, $folderstring, $order, $limit);
    if( @mysql_num_rows($result) > 0 )
