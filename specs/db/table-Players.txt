@@ -80,35 +80,50 @@ OS    Lost                 | int(11)                                     | NO   
 Ou    Country              | char(2)                                     | NO   |
   A   BlockReason          | text                                        | NO   | NULL
 
-# Fields for GUI-config:
+# Fields for (global) GUI-config in Players-table:
 
 Z     UserFlags            | int(11)                                     | NO   | 0
 Z     SkinName             | varchar(32)                                 | NO   |
 Z     MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
-Z     Button               | int(11)                                     | NO   | 0
 Z     TableMaxRows         | smallint(5) unsigned                        | NO   | 20
- G    Stonesize            | tinyint(3) unsigned                         | NO   | 25
- G    Woodcolor            | int(11)                                     | NO   | 1
- G    Boardcoords          | int(11)                                     | NO   | 31
- G    MoveNumbers          | smallint(5) unsigned                        | NO   | 0
- G    MoveModulo           | smallint(5) unsigned                        | NO   | 0
- G    NotesSmallHeight     | tinyint(3) unsigned                         | NO   | 25
- G    NotesSmallWidth      | tinyint(3) unsigned                         | NO   | 30
- G    NotesSmallMode       | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
- G    NotesLargeHeight     | tinyint(3) unsigned                         | NO   | 25
- G    NotesLargeWidth      | tinyint(3) unsigned                         | NO   | 30
- G    NotesLargeMode       | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
- G    NotesCutoff          | tinyint(3) unsigned                         | NO   | 13
- 1    StatusFolders        | varchar(40)                                 | NO   |
- 1    ForumFlags           | tinyint(3) unsigned                         | NO   | 8
- 2    UsersColumns         | int(11)                                     | NO   | -1
- 1    GamesColumns         | int(11)                                     | NO   | -1
- 1    RunningGamesColumns  | int(11)                                     | NO   | -1
- 1    FinishedGamesColumns | int(11)                                     | NO   | -1
- 1    ObservedGamesColumns | int(11)                                     | NO   | -1
- 1    TournamentsColumns   | int(11)                                     | NO   | -1
- 1    WaitingroomColumns   | int(11)                                     | NO   | -1
- 1    ContactColumns       | int(11)                                     | NO   | -1
+Z     Button               | int(11)                                     | NO   | 0
+
+# Fields for board-related GUI-config in ConfigBoard-table:
+
+ G    Stonesize        | tinyint(3) unsigned                         | NO   | 25
+ G    Woodcolor        | int(11)                                     | NO   | 1
+ G    Boardcoords      | int(11)                                     | NO   | 31
+ G    MoveNumbers      | smallint(5) unsigned                        | NO   | 0
+ G    MoveModulo       | smallint(5) unsigned                        | NO   | 0
+ G    NotesSmallHeight | tinyint(3) unsigned                         | NO   | 25
+ G    NotesSmallWidth  | tinyint(3) unsigned                         | NO   | 30
+ G    NotesSmallMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
+ G    NotesLargeHeight | tinyint(3) unsigned                         | NO   | 25
+ G    NotesLargeWidth  | tinyint(3) unsigned                         | NO   | 30
+ G    NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
+ G    NotesCutoff      | tinyint(3) unsigned                         | NO   | 13
+
+
+# Fields for pages-related GUI-config in ConfigPages-table:
+
+ 1    StatusFolders             | varchar(40)         | NO   |
+ 1    ForumFlags                | tinyint(3) unsigned | NO   | 8
+ 1    ColumnsStatusGames        | int(11)             | NO   | -1
+ 1    ColumnsWaitingroom        | int(11)             | NO   | -1
+ 1    ColumnsUsers              | int(11)             | NO   | -1
+ 1    ColumnsOpponents          | int(11)             | NO   | -1
+ 1    ColumnsContacts           | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningAll    | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningAll2   | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningUser   | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningUser2  | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedAll   | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedAll2  | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedUser  | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedUser2 | int(11)             | NO   | -1
+ 1    ColumnsGamesObserved      | int(11)             | NO   | -1
+ 1    ColumnsGamesObserved2     | int(11)             | NO   | -1
+ 1    ColumnsTournaments        | int(11)             | NO   | -1
 
 
 -------------------------------------------------
@@ -127,26 +142,23 @@ TABLE Players:
    Name varchar(40) NOT NULL default '', -- full name of player
    Email varchar(80) default NULL, -- email of player
    Rank varchar(40) default NULL, -- textual rank-information (free text, no meaning for rating)
-   Stonesize tinyint(3) unsigned NOT NULL default '25', -- CONF: stone-size used to select images ??
    Adminlevel int(11) NOT NULL default '0', -- bit-mask for different admin-tasks, -1=full-fledged-admin
    Rating2 double default NULL, -- current rating (EGF-rating in range 100 - ), used for calculations to start game
    RatingMin double default NULL, -- minimal rating (for rating-graph), + ??
    RatingMax double default NULL, -- maximum rating (for rating-graph), + ??
    RatingStatus enum('INIT','RATED') default NULL, -- INIT=no-rating-set, RATED=rating-set
-   UsersColumns int(10) unsigned NOT NULL default '62', -- bit-mask representing shown columns for page 'users.php'
-   GamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'status.php'
-   RunningGamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'show_games.php' (running-games)
-   FinishedGamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'show_games.php' (finished-games)
-   ObservedGamesColumns int(10) unsigned NOT NULL default '593910', -- bit-mask representing shown columns for page 'show_games.php' (observed-games)
-   TournamentsColumns int(10) unsigned NOT NULL default '62', -- bit-mask representing shown columns, (unused)
-   WaitingroomColumns int(10) unsigned NOT NULL default '253', -- bit-mask representing shown columns for page 'waiting_room.php'
    Running int(11) NOT NULL default '0', -- number of running games for player
    Finished int(11) NOT NULL default '0', -- number of finished games for player
    RatedGames int(11) NOT NULL default '0', -- number of finished rated games for player
    Won int(11) NOT NULL default '0', -- number of won games for player
    Lost int(11) NOT NULL default '0', -- number of lost games for player
    Country char(2) default NULL, -- CONF: country for player, for codes see 'include/countries.php'
+
+TABLE ConfigBoard:
+   Stonesize tinyint(3) unsigned NOT NULL default '25', -- CONF: stone-size used to select images ??
    SkinName varchar(32) NOT NULL default '', -- CONF: used skin for CSS
-   PRIMARY KEY  (ID),
-   UNIQUE KEY Handle (Handle),
+
+TABLE ConfigPages:
+   ColumnsUsers int(11) signed NOT NULL default '-1', -- bit-mask representing shown columns for page 'users.php'
+   ColumnsStatusGames int(11) signed NOT NULL default '-1', -- bit-mask representing shown columns for page 'status.php'
 
