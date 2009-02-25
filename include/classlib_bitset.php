@@ -290,7 +290,7 @@ class BitSet
       if( $spos > $epos ) swap( $spos, $epos );
       if( $spos < 1 )
          return false;
-      if( $epos > BITSET_MAXSIZE ) // ignore irrelvant bits
+      if( $epos > BITSET_MAXSIZE ) // ignore irrelevant bits
          $epos = BITSET_MAXSIZE;
       if( ($epos - $spos + 1) > 30 )
          return false;
@@ -313,8 +313,8 @@ class BitSet
 
    /*!
     * \brief Returns non-null BitSet read from (low-end first(!)) int-array
-    *        with given bits-per-int (<31); ignore bits non-fitting bits;
-    *        expect positive int-values.
+    *        with given bits-per-int (<31); expect positive int-values
+    *        (sign-bit of negative-values is inverted and not-fitting bits will be ignored).
     */
    function read_from_int_array( $arr_ints, $bits_per_int=BITSET_EXPORT_INTBITS )
    {
@@ -331,9 +331,11 @@ class BitSet
       $s_bitpos = 1;
       foreach( $arr_ints as $int_val )
       {
-         if( $int_val < 0 ) continue;
+         // ignore not relevant bits
+         if( $int_val < 0 )
+            $int_val ^= 0x80000000; // invert sign-bit
+         $int_val &= $maskbits_intval;
 
-         $int_val &= $maskbits_intval; // ignore not relevant bits
          if( $int_val )
          {
             $e_bitpos = $s_bitpos + $bits_per_int - 1;

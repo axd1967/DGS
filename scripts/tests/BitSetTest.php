@@ -245,8 +245,10 @@ class BitSetTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( array( 45054,0,0 ), $bitset->_get_store() );
       $bitset = BitSet::read_from_int_array( array( 1,1, 255 ) ); // too many items
       $this->assertEquals( array( 1,64,0 ), $bitset->_get_store() );
-      $bitset = BitSet::read_from_int_array( array( 1, -1 ) ); // val < 0
-      $this->assertEquals( array( 1,0,0 ), $bitset->_get_store() );
+      $bitset = BitSet::read_from_int_array( array( -1, 0 ) ); // val < 0
+      $this->assertEquals( array( 16777215,63,0 ), $bitset->_get_store() );
+      $bitset = BitSet::read_from_int_array( array( -1, 3 ) ); // val < 0 (former -1)
+      $this->assertEquals( array( 16777215,255,0 ), $bitset->_get_store() );
    }
 
    /** Test static read_from_bin(). */
