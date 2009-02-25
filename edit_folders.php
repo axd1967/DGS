@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
 require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
@@ -76,18 +77,17 @@ function make_folder_form_row(&$form, $name, $nr,
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
-
    $my_id = $player_row['ID'];
+   $cfg_pages = ConfigPages::load_config_pages($my_id);
 
    init_standard_folders();
    $folders = get_folders($my_id);
    $max_folder = array_reduce(array_keys($folders), "max", USER_FOLDERS-1);
 
-   $statusfolders = empty($player_row['StatusFolders']) ? array() :
-      explode( ',', $player_row['StatusFolders'] );
+   $cfg_statusfolders = $cfg_pages->get_status_folders();
+   $statusfolders = empty($cfg_statusfolders) ? array() : explode( ',', $cfg_statusfolders);
    $old_statusfolders = $statusfolders;
 
    $sysmsg = '';
@@ -204,9 +204,8 @@ function make_folder_form_row(&$form, $name, $nr,
    asort($statusfolders);
    if( $statusfolders != $old_statusfolders )
    {
-      mysql_query("UPDATE Players SET StatusFolders='" .
-                  implode(',',$statusfolders) . "' WHERE ID=$my_id LIMIT 1")
-         or error('mysql_query_failed', 'edit_folders.statusfolders');
+      $cfg_pages->set_status_folders( implode(',', $statusfolders) );
+      $cfg_pages->update_status_folders();
 
       if( !$sysmsg )
          $sysmsg = T_('Folders adjusted!');
@@ -223,7 +222,7 @@ function make_folder_form_row(&$form, $name, $nr,
    echo "<center>\n";
 
    $form = new Form( 'folderform', 'edit_folders.php', FORM_POST );
-   $form->max_nr_columns = 11; 
+   $form->max_nr_columns = 11;
 
    $form->add_row( array( 'HEADER', T_('Edit message folders') ) );
 
@@ -249,7 +248,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
 
 
-   $form->add_row( array( 
+   $form->add_row( array(
 //                          'HIDDEN', 'sysmsg', T_('Folders adjusted!'),
 //                          'SUBMITBUTTON', 'action_preview" accesskey="'.ACCKEY_ACT_PREVIEW.', T_('Preview'),
                           'SUBMITBUTTONX', 'action', T_('Update'),
