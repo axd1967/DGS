@@ -289,6 +289,17 @@ General instructions for developers:
    Echo can work faster, if output strings are concattenated
    using ',' (arg separator) instead of '.' (string concat).
 
------------------
+----------------- PHP: 32-bit integers
 
+   Management of Table-column-sets has been replaced with two integer-values,
+   because DGS needed more than 32 fields (classes BitSet, ConfigTableColumns).
+
+   But handling of 32-bit integers requires special handling in PHP:
+   Take notice, that 0x80000000 is negative in PHP(!)
+   Database fields storing such values must be signed: INT(11) NOT NULL
+
+   Here a former code-snipplet (from include/table_columns.php#add_or_del_column-func):
+   http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/table_columns.php?revision=1.116&view=markup#l_624
+
+-----------------
 
