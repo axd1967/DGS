@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,13 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/classlib_userconfig.php' );
 require_once( "include/coords.php" );
 
 class GoDiagram
 {
+   var $cfg_board;
+
    var $Size;
 
    var $Left;
@@ -32,14 +35,20 @@ class GoDiagram
 
 
 
-   function GoDiagram( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19, $_Data = null)
+   function GoDiagram( $cfg_board, $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19, $_Data = null)
       {
+         $this->cfg_board = null;
          $this->set_geometry($_Size, $_Left, $_Right, $_Down, $_Up);
          if( !empty($_Data ) )
             $this->set_data($_Data);
          else
             $this->clear_data();
       }
+
+   function set_config_board( $cfg_board )
+   {
+      $this->cfg_board = $cfg_board;
+   }
 
    function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19 )
       {
@@ -129,8 +138,8 @@ class GoDiagram
          global $player_row, $base_path, $woodbgcolors;
 
          $string = '';
-         $woodcolor = $player_row['Woodcolor'];
-         $stonesize = $player_row['Stonesize'];
+         $woodcolor = $this->cfg_board->get_wood_color();
+         $stonesize = $this->cfg_board->get_stone_size();
 
          $data_rows = explode(';', $this->Data);
 
@@ -165,8 +174,14 @@ class GoDiagram
          return $string;
       }
 
-   function echo_editor($nr, $woodcolor, $stonesize)
+   function echo_editor($nr)
       {
+         $stonesize = $cfg_board->get_stone_size();
+         if( empty($stonesize) ) $stonesize = 25;
+
+         $woodcolor = $cfg_board->get_wood_color();
+         if( empty($woodcolor) ) $woodcolor = 1;
+
          return '<script language="JavaScript" type="text/javascript">' . "\n" .
             "goeditor($nr, {$this->Size}, {$this->Left}, {$this->Right}, {$this->Down}, $this->Up, $stonesize, $woodcolor, 1);\n" .
             "enter_data($nr, '{$this->Data}');\n" .
@@ -175,21 +190,22 @@ class GoDiagram
             '<input type="hidden" name="data'.$nr.'" value="">' . "\n";
       }
 
-}
+} // end of 'GoDiagram'
 
 
+// extract-value from goban-tag: <goban name=str ...>
 function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
 {
    preg_match("/$name=([-\w]+)/i", $string, $matches);
    return limit( $matches[1], $minimum, $maximum, $default );
 }
 
-function callback($matches)
+function callback_echo_board($matches)
 {
    global $callback_diagrams, $callback_diag_nr;
 
-   if( isset($callback_diagrams[$matches[1]]) 
-     && is_object($callback_diagrams[$matches[1]]) 
+   if( isset($callback_diagrams[$matches[1]])
+     && is_object($callback_diagrams[$matches[1]])
      && method_exists($callback_diagrams[$matches[1]], 'echo_board')
      )
       return $callback_diagrams[$matches[1]]->echo_board();
@@ -203,10 +219,10 @@ function replace_goban_tags_with_boards($text, $diagrams)
 
    $callback_diag_nr = 0;
    $callback_diagrams = $diagrams;
-   return preg_replace_callback('/<goban id=(\d+)>/i', 'callback', $text);
+   return preg_replace_callback('/<goban id=(\d+)>/i', 'callback_echo_board', $text);
 }
 
-function create_godiagrams(&$text)
+function create_godiagrams( &$text, $cfg_board )
 {
    global $NOW;
 
@@ -234,7 +250,7 @@ function create_godiagrams(&$text)
             if( @mysql_num_rows($result) == 1 )
             {
                $row = mysql_fetch_array( $result );
-               $diagrams[$ID] = new GoDiagram();
+               $diagrams[$ID] = new GoDiagram( $cfg_board );
                $diagrams[$ID]->set_values_from_database_row($row);
             }
          }
@@ -250,7 +266,7 @@ function create_godiagrams(&$text)
             }
             else
             {
-               $diag = new GoDiagram();
+               $diag = new GoDiagram( $cfg_board );
                $diag->set_values_from_goban_tag($m);
             }
 
@@ -297,9 +313,9 @@ function create_godiagrams(&$text)
       }
 
    return $diagrams;
-}
+} // create_godiagrams
 
-function find_godiagrams($text)
+function find_godiagrams($text, $cfg_board)
 {
    $diagrams = array();
    if( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
@@ -318,7 +334,7 @@ function find_godiagrams($text)
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      $diagrams[$row['ID']] = new GoDiagram();
+      $diagrams[$row['ID']] = new GoDiagram( $cfg_board );
       $diagrams[$row['ID']]->set_values_from_database_row($row);
    }
 
@@ -328,21 +344,9 @@ function find_godiagrams($text)
 
 function draw_editors($GoDiagrams)
 {
-   global $player_row;
-
-   $stonesize = $player_row['Stonesize'];
-   if( empty($stonesize) ) $stonesize = 25;
-
-   $woodcolor = $player_row['Woodcolor'];
-   if( empty($woodcolor) ) $woodcolor = 1;
-
    $string = '';
-
    foreach( $GoDiagrams as $nr => $diagram )
-      {
-         $string .= $diagram->echo_editor($nr, $woodcolor, $stonesize);
-      }
-
+      $string .= $diagram->echo_editor($nr);
    return $string;
 }
 
