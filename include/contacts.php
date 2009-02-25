@@ -59,8 +59,9 @@ class Contact
    /*! \brief User-customized note about contact (max 255 chars, linefeeds allowed). */
    var $note;
 
-   /*! Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time.
-    *  $cid may be 0 to add a new contact
+   /*!
+    * \brief Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time.
+    *        $cid may be 0 to add a new contact
     */
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
