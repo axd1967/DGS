@@ -161,8 +161,16 @@ UPDATE Players SET Adminlevel=Adminlevel & ~0x10 WHERE Adminlevel > 0 ;
 -- global user profile flags (in preparation to split Players-table)
 ALTER TABLE `Players`
    ADD `UserFlags` int(11) NOT NULL default '0' ;
+
 -- move JavaScript-flags from Boardcoords into UserFlags
 UPDATE Players SET UserFlags=IF(Boardcoords & 0x100,1,0) ;
 UPDATE Players SET Boardcoords=Boardcoords & ~0x100 ;
 
+
+-- group (global) user-profile fields in Players-table
+ALTER TABLE `Players`
+   CHANGE Button Button int(11) NOT NULL default '0' AFTER UserFlags,
+   CHANGE TableMaxRows TableMaxRows smallint(5) unsigned NOT NULL default '20'  AFTER UserFlags,
+   CHANGE MenuDirection MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL' AFTER UserFlags,
+   CHANGE SkinName SkinName varchar(32) NOT NULL default '' AFTER UserFlags ;
 
