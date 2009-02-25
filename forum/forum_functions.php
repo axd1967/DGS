@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -149,18 +149,6 @@ function load_forum_id( $thread )
 
    $row = mysql_fetch_array($result);
    return @$row['Forum_ID'];
-}
-
-// returns 1 if toggle was needed; 0 otherwise
-function toggle_forum_flags( $uid, $flag )
-{
-   if( $flag > 0 && $flag < 0x10 )
-   {
-      db_query( "toggle_forum_flags.toggle_flag($uid,$flag)",
-         "UPDATE Players SET ForumFlags=ForumFlags ^ $flag WHERE ID='$uid' LIMIT 1" );
-      return 1;
-   }
-   return 0;
 }
 
 // show list with posts on pending-approval (used on status-page)
@@ -799,7 +787,7 @@ class DisplayForum
          if( $this->is_moderator ) // hide/show/approve/reject-link
          {
             $modurl_fmt = '<a class=Highlight href="'.$thread_url
-               . URI_AMP."modpid=$ID".URI_AMP."modact=%s#$ID\">[ %s ]</a>";
+               . URI_AMP."modpid=$ID".URI_AMP."modact=%s#$pid\">[ %s ]</a>";
             if( $post->is_pending_approval() )
             {
                echo sprintf( $modurl_fmt, 'approve',  T_('Approve') ),
