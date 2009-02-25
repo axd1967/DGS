@@ -174,3 +174,122 @@ ALTER TABLE `Players`
    CHANGE MenuDirection MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL' AFTER UserFlags,
    CHANGE SkinName SkinName varchar(32) NOT NULL default '' AFTER UserFlags ;
 
+
+-- split Players-table into GUI-related config-tables (board-related)
+CREATE TABLE ConfigBoard (
+   User_ID int(11) NOT NULL DEFAULT '0',
+   Stonesize tinyint(3) unsigned NOT NULL default '25',
+   Woodcolor int(11) NOT NULL default '1',
+   Boardcoords int(11) NOT NULL default '31',
+   MoveNumbers smallint(5) unsigned NOT NULL default '0',
+   MoveModulo smallint(5) unsigned NOT NULL default '0',
+   NotesSmallHeight tinyint(3) unsigned NOT NULL default '25',
+   NotesSmallWidth tinyint(3) unsigned NOT NULL default '30',
+   NotesSmallMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
+   NotesLargeHeight tinyint(3) unsigned NOT NULL default '25',
+   NotesLargeWidth tinyint(3) unsigned NOT NULL default '30',
+   NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
+   NotesCutoff tinyint(3) unsigned NOT NULL default '13',
+   PRIMARY KEY (User_ID)
+) ENGINE=MyISAM;
+
+-- create ConfigBoard-entries for all players and drop copied columns
+INSERT INTO ConfigBoard
+   (User_ID,Stonesize,Woodcolor,Boardcoords,MoveNumbers,MoveModulo,
+   NotesSmallHeight,NotesSmallWidth,NotesSmallMode,NotesLargeHeight,
+   NotesLargeWidth,NotesLargeMode,NotesCutoff)
+   SELECT ID,Stonesize,Woodcolor,Boardcoords,MoveNumbers,MoveModulo,
+      NotesSmallHeight,NotesSmallWidth,NotesSmallMode,NotesLargeHeight,
+      NotesLargeWidth,NotesLargeMode,NotesCutoff
+   FROM Players ;
+
+-- drop copied columns (ConfigBoard)
+ALTER TABLE Players
+   DROP COLUMN Stonesize,
+   DROP COLUMN Woodcolor,
+   DROP COLUMN Boardcoords,
+   DROP COLUMN MoveNumbers,
+   DROP COLUMN MoveModulo,
+   DROP COLUMN NotesSmallHeight,
+   DROP COLUMN NotesSmallWidth,
+   DROP COLUMN NotesSmallMode,
+   DROP COLUMN NotesLargeHeight,
+   DROP COLUMN NotesLargeWidth,
+   DROP COLUMN NotesLargeMode,
+   DROP COLUMN NotesCutoff ;
+
+-- split Players-table into GUI-related config-tables (related to other pages)
+CREATE TABLE ConfigPages (
+   User_ID int(11) NOT NULL DEFAULT '0',
+   StatusFolders varchar(40) NOT NULL default '',
+   ForumFlags tinyint(3) unsigned NOT NULL default '8',
+   ColumnsStatusGames int(11) NOT NULL default '-1',
+   ColumnsWaitingroom int(11) NOT NULL default '-1',
+   ColumnsUsers int(11) NOT NULL default '-1',
+   ColumnsOpponents int(11) NOT NULL default '-1',
+   ColumnsContacts int(11) NOT NULL default '-1',
+   ColumnsGamesRunningAll int(11) NOT NULL default '-1',
+   ColumnsGamesRunningAll2 int(11) NOT NULL default '-1',
+   ColumnsGamesRunningUser int(11) NOT NULL default '-1',
+   ColumnsGamesRunningUser2 int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedAll int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedAll2 int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedUser int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedUser2 int(11) NOT NULL default '-1',
+   ColumnsGamesObserved int(11) NOT NULL default '-1',
+   ColumnsGamesObserved2 int(11) NOT NULL default '-1',
+   ColumnsTournaments int(11) NOT NULL default '-1',
+   PRIMARY KEY (User_ID)
+) ENGINE=MyISAM;
+
+-- create ConfigPages-entries for all players and drop copied columns (migration-split)
+INSERT INTO ConfigPages
+   (User_ID,StatusFolders,ForumFlags,
+   ColumnsStatusGames,ColumnsWaitingroom,
+   ColumnsUsers,ColumnsOpponents,ColumnsContacts,
+   ColumnsGamesRunningAll,
+   ColumnsGamesRunningAll2,
+   ColumnsGamesRunningUser,
+   ColumnsGamesRunningUser2,
+   ColumnsGamesFinishedAll,
+   ColumnsGamesFinishedAll2,
+   ColumnsGamesFinishedUser,
+   ColumnsGamesFinishedUser2,
+   ColumnsGamesObserved,
+   ColumnsGamesObserved2,
+   ColumnsTournaments)
+   SELECT
+      ID,StatusFolders,ForumFlags,
+      GamesColumns,
+      WaitingroomColumns,
+      UsersColumns,
+      UsersColumns,
+      ContactColumns,
+      0x3fffffff & RunningGamesColumns,
+      0x3ffffffc | ((RunningGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & RunningGamesColumns,
+      0x3ffffffc | ((RunningGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & FinishedGamesColumns,
+      0x3ffffffc | ((FinishedGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & FinishedGamesColumns,
+      0x3ffffffc | ((FinishedGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & ObservedGamesColumns,
+      0x3ffffffc | ((ObservedGamesColumns& 0x3fffffff) >> 30),
+      TournamentsColumns
+   FROM Players ;
+
+-- TODO: migrate Games fields: #12->24, #15->25, +#32, #32->15
+
+-- drop copied columns (ConfigPages)
+ALTER TABLE Players
+   DROP COLUMN StatusFolders,
+   DROP COLUMN ForumFlags,
+   DROP COLUMN GamesColumns,
+   DROP COLUMN WaitingroomColumns,
+   DROP COLUMN UsersColumns,
+   DROP COLUMN ContactColumns,
+   DROP COLUMN RunningGamesColumns,
+   DROP COLUMN FinishedGamesColumns,
+   DROP COLUMN ObservedGamesColumns,
+   DROP COLUMN TournamentsColumns ;
+
