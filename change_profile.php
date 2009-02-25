@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
 require_once( "include/countries.php" );  //translations useless here, but init needed for the keys
 require_once( "include/rating.php" );
 
@@ -29,10 +30,8 @@ require_once( "include/rating.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
-
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
@@ -43,6 +42,8 @@ require_once( "include/rating.php" );
    $email = trim(get_request_arg('email'));
    if( $email )
       verify_email( 'change_profile', $email);
+
+   $cfg_board = ConfigBoard::load_config_board( $player_row['ID'] );
 
    $sendemail = '';
    $emailnotify = (int)@$_GET['emailnotify'];
@@ -127,29 +128,32 @@ require_once( "include/rating.php" );
       $cookie_prefs['TableMaxRows'] = $tablemaxrows;
 
       set_cookie_prefs($player_row);
+      $save_config_board = false;
    }
    else
    {
       $query .=
          "UserFlags=$userflags, " .
-         "Stonesize=" . (int)@$_GET['stonesize'] . ", " .
-         "Woodcolor=" . (int)@$_GET['woodcolor'] . ", " .
-         "Boardcoords=$boardcoords, " .
-         "MoveNumbers=$movenumbers, " .
-         "MoveModulo=$movemodulo, " .
          "MenuDirection='$menudirection', " .
          "Button=" . (int)@$_GET['button'] . ", " .
-         "NotesSmallHeight=" . (int)@$_GET['notessmallheight'] . ", " .
-         "NotesSmallWidth=" . (int)@$_GET['notessmallwidth'] . ", " .
-         "NotesSmallMode='$notessmallmode', " .
-         "NotesLargeHeight=" . (int)@$_GET['noteslargeheight'] . ", " .
-         "NotesLargeWidth=" . (int)@$_GET['noteslargewidth'] . ", " .
-         "NotesLargeMode='$noteslargemode', " .
-         "NotesCutoff=" . (int)@$_GET['notescutoff'] . ", " .
          "SkinName='" . mysql_addslashes($skinname) . "', " .
          "TableMaxRows=$tablemaxrows, ";
 
+      $cfg_board->set_stone_size( (int)@$_GET['stonesize'] );
+      $cfg_board->set_wood_color( (int)@$_GET['woodcolor'] );
+      $cfg_board->set_board_coords( $boardcoords );
+      $cfg_board->set_move_numbers( $movenumbers );
+      $cfg_board->set_move_modulo( $movemodulo );
+      $cfg_board->set_notes_height( CFGBOARD_NOTES_SMALL, (int)@$_GET['notessmallheight'] );
+      $cfg_board->set_notes_width( CFGBOARD_NOTES_SMALL, (int)@$_GET['notessmallwidth'] );
+      $cfg_board->set_notes_mode( CFGBOARD_NOTES_SMALL, $notessmallmode );
+      $cfg_board->set_notes_height( CFGBOARD_NOTES_LARGE, (int)@$_GET['noteslargeheight'] );
+      $cfg_board->set_notes_width( CFGBOARD_NOTES_LARGE, (int)@$_GET['noteslargewidth'] );
+      $cfg_board->set_notes_mode( CFGBOARD_NOTES_LARGE, $noteslargemode );
+      $cfg_board->set_notes_cutoff( (int)@$_GET['notescutoff'] );
+
       set_cookie_prefs($player_row, true);
+      $save_config_board = true;
    }
 
 
@@ -203,8 +207,13 @@ require_once( "include/rating.php" );
        "Nightstart=" . $nightstart .
        " WHERE ID=" . $player_row['ID'] . " LIMIT 1";
 
+   // table (Players)
    mysql_query( $query )
       or error('mysql_query_failed','change_profile');
+
+   // table (ConfigBoard)
+   if( $save_config_board )
+      $cfg_board->update_all();
 
    $msg = urlencode(T_('Profile updated!'));
 

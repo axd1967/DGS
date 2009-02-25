@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
 require_once( "include/timezones.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
@@ -32,10 +33,11 @@ require_once( "include/form_functions.php" );
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
-
+   $logged_in = who_is_logged($player_row);
    if( !$logged_in )
       error('not_logged_in');
+   $my_id = $player_row['ID'];
+   $cfg_board = ConfigBoard::load_config_board($my_id);
 
    $button_nr = $player_row['Button'];
 
@@ -201,9 +203,6 @@ require_once( "include/form_functions.php" );
    else
       $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
 
-   $userflags = (int)$player_row['UserFlags'];
-   $boardcoords = (int)$player_row['Boardcoords'];
-
    //--- Followings may be browser settings ---
 
    $profile_form->add_row( array( 'SPACE' ) );
@@ -259,8 +258,12 @@ require_once( "include/form_functions.php" );
                                  ) );
 
    if( ALLOW_JAVASCRIPT )
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Enable JavaScript'),
-                                  'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
+   {
+      $userflags = (int)$player_row['UserFlags'];
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Enable JavaScript'),
+            'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
+   }
 
 
 
@@ -268,11 +271,13 @@ require_once( "include/form_functions.php" );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
                                   'SELECTBOX', 'stonesize', 1, $stonesizes,
-                                    $player_row["Stonesize"], false ) );
+                                    $cfg_board->get_stone_size(), false ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
                                   'RADIOBUTTONS', 'woodcolor', $woodcolors,
-                                    $player_row["Woodcolor"] ) );
+                                    $cfg_board->get_wood_color() ) );
+
+   $boardcoords = $cfg_board->get_board_coords();
 
    $row= array( 'DESCRIPTION', T_('Coordinate sides'),
          'CHECKBOX', 'coordsleft', 1, sptext(T_('Left'),2), ($boardcoords & COORD_LEFT),
@@ -290,10 +295,10 @@ require_once( "include/form_functions.php" );
    if( ENA_MOVENUMBERS )
    {
    $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
-                                  'TEXTINPUT', 'movenumbers', 4, 4, $player_row['MoveNumbers'],
+                                  'TEXTINPUT', 'movenumbers', 4, 4, $cfg_board->get_move_numbers(),
                                   'CHECKBOX', 'movemodulo', 100,
                                     sptext(T_('Don\'t use numbers above 100'),2),
-                                    ($player_row['MoveModulo']>0 ?1 :0),
+                                    ( ($cfg_board->get_move_modulo() > 0) ?1 :0),
                                   'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($boardcoords & NUMBER_OVER),
                                 ) );
    }
@@ -308,17 +313,23 @@ require_once( "include/form_functions.php" );
    {
       $ltyp = strtolower($typ) ;
       if( $ltyp == 'small' )
+      {
+         $cfg_type = CFGBOARD_NOTES_SMALL;
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_('Small boards') . ':</b>',
                'TAB',
             ) );
+      }
       else
+      {
+         $cfg_type = CFGBOARD_NOTES_LARGE;
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_("Large boards from") . ':</b>',
-               'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $player_row["NotesCutoff"], false,
+               'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $cfg_board->get_notes_cutoff(), false,
             ) );
+      }
 
-      $notesmode = $player_row["Notes{$typ}Mode"];
+      $notesmode = $cfg_board->get_notes_mode( $cfg_type );
       $noteshide = substr( $notesmode, -3) == 'OFF';
       if( $noteshide )
          $notesmode = substr( $notesmode, 0, -3);
@@ -334,9 +345,9 @@ require_once( "include/form_functions.php" );
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Size'),
                'TEXT', sptext(T_('Height')),
-               'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $player_row["Notes{$typ}Height"], false,
+               'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $cfg_board->get_notes_height($cfg_type), false,
                'TEXT', sptext(T_('Width'),1),
-               'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $player_row["Notes{$typ}Width"], false,
+               'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $cfg_board->get_notes_width($cfg_type), false,
             ) );
    }
 
@@ -352,7 +363,7 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( array( 'TAB',
                                   'CHECKBOX', 'locally', 1,
                                   sptext(T_('Change appearences for this browser only')),
-                                  safe_getcookie("prefs".$player_row['ID'])>'' ));
+                                  safe_getcookie("prefs".$my_id) > '' ));
 
    $profile_form->add_row( array( 'HR' ) );
 
