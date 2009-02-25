@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -29,21 +29,17 @@ require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
 require_once( "include/contacts.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userconfig.php' );
 
 {
    #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
-
    $my_id = (int)@$player_row['ID'];
-/* allowed to list... an empty list
-   if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
-*/
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_CONTACTS );
 
    //TODO: init in Contact-class
    Contact::load_globals();
@@ -68,7 +64,7 @@ require_once( "include/classlib_profile.php" );
    $scfilter = new SearchFilter( 's', $search_profile );
    $cfilter = new SearchFilter( '', $search_profile );
    //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $ctable = new Table( 'contact', $page, 'ContactColumns', 'contact' );
+   $ctable = new Table( 'contact', $page, $cfg_tblcols, 'contact' );
    $ctable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
