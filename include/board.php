@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/classlib_userconfig.php' );
 require_once( "include/coords.php" );
 
 define('EDGE_SIZE', 10);
-define('COORD_MASK', COORD_UP+COORD_RIGHT+COORD_DOWN+COORD_LEFT);
 
 
 class Board
@@ -310,27 +310,16 @@ class Board
    }
 
 
-   function set_style( &$player_row)
+   function set_style( $cfg_board )
    {
-      if( isset($player_row['Boardcoords']) && is_numeric($player_row['Boardcoords'])
-        //&& $player_row['Boardcoords'] >= 0 && $player_row['Boardcoords'] <= 0xFF
-        )
-         $this->coord_borders = $player_row['Boardcoords'];
+      $board_coords = $cfg_board->get_board_coords();
+      if( is_numeric($board_coords) )
+         $this->coord_borders = $board_coords;
       else
          $this->coord_borders = -1;
 
-      if( isset($player_row['Stonesize']) &&
-          $player_row['Stonesize'] >= 5 && $player_row['Stonesize'] <= 50 )
-         $this->stone_size = $player_row['Stonesize'];
-      else
-         $this->stone_size = 25;
-
-      if( isset($player_row['Woodcolor']) &&
-           ( $player_row['Woodcolor'] >= 1 && $player_row['Woodcolor'] <= 5
-          || $player_row['Woodcolor'] >= 11 && $player_row['Woodcolor'] <= 15 ) )
-         $this->woodcolor = $player_row['Woodcolor'];
-      else
-         $this->woodcolor = 1;
+      $this->stone_size = $cfg_board->get_stone_size();
+      $this->woodcolor = $cfg_board->get_wood_color();
    }
 
 
@@ -1141,4 +1130,5 @@ class Board
 
 
 } //class Board
+
 ?>
