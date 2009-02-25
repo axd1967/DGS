@@ -23,7 +23,206 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-25 juga
+
+   * include/classlib_userconfig.php (ConfigBoard, ConfigPages, ConfigTableColumns),
+     include/classlib_bitset.php (read_from_int_array), scripts/tests/BitSetTest.php,
+     include/std_functions.php ($cookie_pref_rows),
+     include/table_columns.php (TableColumns, ~.is_column_displayed, ~.add_or_del_column),
+     include/GoDiagram.php (GoDiagram, echo_board, echo_editor, create_godiagrams, draw_editors),
+     include/board.php (Board.set_style),
+     forum/forum_functions.php (toggle_forum_flags),
+     forum/post.php (post_message),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Players.txt,
+     scripts/data_export.php,
+     scripts/README.developers,
+     forum/index.php, forum/list.php, forum/read.php,
+     do_registration.php, change_profile.php, edit_profile.php, edit_folders.php,
+     status.php, waiting_room.php, users.php, opponents.php, list_contacts.php,
+     show_games.php, game.php:
+   - split Players-table into GUI-related config-tables
+     - ConfigBoard-table with board-related GUI-config
+       - cookie-prefs passing to ConfigBoard-handling via global var $player_row
+         read in std_funcs.is_logged_in()
+     - ConfigPages-table with (other) pages-related GUI-config mostly special
+       to one single page like table-column-set
+   - bugfix BitSet-class: added handling of negative-values: erase highest 2 bits + fixed phpunit-test
+   - added PHP-experience with 32-bit (signed) integers to scripts/README.developers
+   - for user-registration inserted defaults for splitted GUI-config-tables
+   - load ConfigBoard/ConfigPages-table only when needed
+     - use ConfigBoard-class to load/save board-related GUI-configs for ConfigBoard-table
+     - use ConfigPages-class to load/save board-related GUI-configs for ConfigPages-table
+
+   - added class ConfigTableColumns to handle persistence of table-column-set
+     with more than 32 columns stored in bits using BitSet-class
+     - writing 30 bits in one int(32)-dbfield to avoid any "signed int"-effect
+     - added 2nd int(11)-signed dbfield to handle >32 table-columns,
+       can be easily extended to more than 60 bits if needed
+     - renamed and migrated data for db-fields for shown table-columns
+       XyzColumns -> ColumnsXyz[2]
+     - added own table-column-sets for
+       - opponents page (copied data from users column-set)
+       - splitted running/finished games into two sets: all + user running/finished games
+-----------
+-- split Players-table into GUI-related config-tables (board-related)
+CREATE TABLE ConfigBoard (
+   User_ID int(11) NOT NULL DEFAULT '0',
+   Stonesize tinyint(3) unsigned NOT NULL default '25',
+   Woodcolor int(11) NOT NULL default '1',
+   Boardcoords int(11) NOT NULL default '31',
+   MoveNumbers smallint(5) unsigned NOT NULL default '0',
+   MoveModulo smallint(5) unsigned NOT NULL default '0',
+   NotesSmallHeight tinyint(3) unsigned NOT NULL default '25',
+   NotesSmallWidth tinyint(3) unsigned NOT NULL default '30',
+   NotesSmallMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
+   NotesLargeHeight tinyint(3) unsigned NOT NULL default '25',
+   NotesLargeWidth tinyint(3) unsigned NOT NULL default '30',
+   NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
+   NotesCutoff tinyint(3) unsigned NOT NULL default '13',
+   PRIMARY KEY (User_ID)
+) ENGINE=MyISAM;
+
+-- create ConfigBoard-entries for all players and drop copied columns
+INSERT INTO ConfigBoard
+   (User_ID,Stonesize,Woodcolor,Boardcoords,MoveNumbers,MoveModulo,
+   NotesSmallHeight,NotesSmallWidth,NotesSmallMode,NotesLargeHeight,
+   NotesLargeWidth,NotesLargeMode,NotesCutoff)
+   SELECT ID,Stonesize,Woodcolor,Boardcoords,MoveNumbers,MoveModulo,
+      NotesSmallHeight,NotesSmallWidth,NotesSmallMode,NotesLargeHeight,
+      NotesLargeWidth,NotesLargeMode,NotesCutoff
+   FROM Players ;
+
+-- drop copied columns (ConfigBoard)
+ALTER TABLE Players
+   DROP COLUMN Stonesize,
+   DROP COLUMN Woodcolor,
+   DROP COLUMN Boardcoords,
+   DROP COLUMN MoveNumbers,
+   DROP COLUMN MoveModulo,
+   DROP COLUMN NotesSmallHeight,
+   DROP COLUMN NotesSmallWidth,
+   DROP COLUMN NotesSmallMode,
+   DROP COLUMN NotesLargeHeight,
+   DROP COLUMN NotesLargeWidth,
+   DROP COLUMN NotesLargeMode,
+   DROP COLUMN NotesCutoff ;
+
+-- split Players-table into GUI-related config-tables (related to other pages)
+CREATE TABLE ConfigPages (
+   User_ID int(11) NOT NULL DEFAULT '0',
+   StatusFolders varchar(40) NOT NULL default '',
+   ForumFlags tinyint(3) unsigned NOT NULL default '8',
+   ColumnsStatusGames int(11) NOT NULL default '-1',
+   ColumnsWaitingroom int(11) NOT NULL default '-1',
+   ColumnsUsers int(11) NOT NULL default '-1',
+   ColumnsOpponents int(11) NOT NULL default '-1',
+   ColumnsContacts int(11) NOT NULL default '-1',
+   ColumnsGamesRunningAll int(11) NOT NULL default '-1',
+   ColumnsGamesRunningAll2 int(11) NOT NULL default '-1',
+   ColumnsGamesRunningUser int(11) NOT NULL default '-1',
+   ColumnsGamesRunningUser2 int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedAll int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedAll2 int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedUser int(11) NOT NULL default '-1',
+   ColumnsGamesFinishedUser2 int(11) NOT NULL default '-1',
+   ColumnsGamesObserved int(11) NOT NULL default '-1',
+   ColumnsGamesObserved2 int(11) NOT NULL default '-1',
+   ColumnsTournaments int(11) NOT NULL default '-1',
+   PRIMARY KEY (User_ID)
+) ENGINE=MyISAM;
+
+-- create ConfigPages-entries for all players and drop copied columns (migration-split)
+INSERT INTO ConfigPages
+   (User_ID,StatusFolders,ForumFlags,
+   ColumnsStatusGames,ColumnsWaitingroom,
+   ColumnsUsers,ColumnsOpponents,ColumnsContacts,
+   ColumnsGamesRunningAll,
+   ColumnsGamesRunningAll2,
+   ColumnsGamesRunningUser,
+   ColumnsGamesRunningUser2,
+   ColumnsGamesFinishedAll,
+   ColumnsGamesFinishedAll2,
+   ColumnsGamesFinishedUser,
+   ColumnsGamesFinishedUser2,
+   ColumnsGamesObserved,
+   ColumnsGamesObserved2,
+   ColumnsTournaments)
+   SELECT
+      ID,StatusFolders,ForumFlags,
+      GamesColumns,
+      WaitingroomColumns,
+      UsersColumns,
+      UsersColumns,
+      ContactColumns,
+      0x3fffffff & RunningGamesColumns,
+      0x3ffffffc | ((RunningGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & RunningGamesColumns,
+      0x3ffffffc | ((RunningGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & FinishedGamesColumns,
+      0x3ffffffc | ((FinishedGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & FinishedGamesColumns,
+      0x3ffffffc | ((FinishedGamesColumns & 0x3fffffff) >> 30),
+      0x3fffffff & ObservedGamesColumns,
+      0x3ffffffc | ((ObservedGamesColumns& 0x3fffffff) >> 30),
+      TournamentsColumns
+   FROM Players ;
+
+-- drop copied columns (ConfigPages)
+ALTER TABLE Players
+   DROP COLUMN StatusFolders,
+   DROP COLUMN ForumFlags,
+   DROP COLUMN GamesColumns,
+   DROP COLUMN WaitingroomColumns,
+   DROP COLUMN UsersColumns,
+   DROP COLUMN ContactColumns,
+   DROP COLUMN RunningGamesColumns,
+   DROP COLUMN FinishedGamesColumns,
+   DROP COLUMN ObservedGamesColumns,
+   DROP COLUMN TournamentsColumns ;
+-----------
+
+   * forum/forum_functions.php (display_posts_pending_approval):
+   - bugfix: used wrong ID for post-id in URL-building
+
+   * forum/index.php:
+   - bugfix: make toggleflag-URL-arg more injection-secure
+
+   * code_examples/filter_example2.php, include/contacts.php,
+     scripts/data_export.php, scripts/player_consistency.php, NEWS:
+   - minor changes/fixes, added docs
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - Players-table: grouped global GUI-related configs, moved to table-end,
+     in preparation for clearer table-structure and split
+-----------
+-- group (global) user-profile fields in Players-table
+ALTER TABLE `Players`
+   CHANGE Button Button int(11) NOT NULL default '0' AFTER UserFlags,
+   CHANGE TableMaxRows TableMaxRows smallint(5) unsigned NOT NULL default '20'  AFTER UserFlags,
+   CHANGE MenuDirection MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL' AFTER UserFlags,
+   CHANGE SkinName SkinName varchar(32) NOT NULL default '' AFTER UserFlags ;
+-----------
+
 2009-02-22 juga
+
+   * include/std_functions.php (is_javascript_enabled, start_html),
+     include/table_columns.php (Table),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     change_profile.php, edit_profile.php, game.php, scripts/data_report.php,
+     specs/db/table-Players.txt:
+   - moved JavaScript-enabling configuration from Players.Boardcoords
+     to UserFlags field in preparation to split Players-table
+     - added helper-func is_javascript_enabled()
+     - JAVASCRIPT_ENABLED -> USERFLAG_JAVASCRIPT_ENABLED
+-----------
+-- global user profile flags (in preparation to split Players-table)
+ALTER TABLE `Players`
+   ADD `UserFlags` int(11) NOT NULL default '0' ;
+-- move JavaScript-flags from Boardcoords into UserFlags
+UPDATE Players SET UserFlags=IF(Boardcoords & 0x100,1,0) ;
+UPDATE Players SET Boardcoords=Boardcoords & ~0x100 ;
+-----------
 
    * specs/db/table-Players.txt:
    - doc about Players-table + split-info
