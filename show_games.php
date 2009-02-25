@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,8 @@ require_once( "include/form_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userconfig.php' );
+
 $ThePage = new Page('GamesList');
 
 {
@@ -33,10 +35,8 @@ $ThePage = new Page('GamesList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error("not_logged_in");
-
    $my_id = $player_row['ID'];
 
    $observe = isset($_GET['observe']);
@@ -82,14 +82,14 @@ $ThePage = new Page('GamesList');
    if( $observe )
    {
       $tableid = 'observed';
-      $column_set_name = "ObservedGamesColumns";
+      $column_set_name = CFGCOLS_GAMES_OBSERVED;
       $fprefix = 'o';
       $profile_type = PROFTYPE_FILTER_GAMES_OBSERVED;
    }
    else if( $finished )
    {
       $tableid = 'finished';
-      $column_set_name = "FinishedGamesColumns";
+      $column_set_name = ($all) ? CFGCOLS_GAMES_FINISHED_ALL : CFGCOLS_GAMES_FINISHED_USER;
       $fprefix = 'f';
       if( $all )
          $profile_type = PROFTYPE_FILTER_GAMES_FINISHED_ALL;
@@ -101,7 +101,7 @@ $ThePage = new Page('GamesList');
    else if( $running )
    {
       $tableid = 'running';
-      $column_set_name = "RunningGamesColumns";
+      $column_set_name = ($all) ? CFGCOLS_GAMES_RUNNING_ALL : CFGCOLS_GAMES_RUNNING_USER;
       $fprefix = 'r';
       if( $all )
          $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_ALL;
@@ -111,6 +111,9 @@ $ThePage = new Page('GamesList');
          $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_OTHER;
    }
 
+   // load table-columns
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
+
    $restrict_games = '';
    if( RESTRICT_SHOW_GAMES_ALL && $all )
       $restrict_games = ($finished) ? min(30, 5*RESTRICT_SHOW_GAMES_ALL) : RESTRICT_SHOW_GAMES_ALL;
@@ -119,7 +122,7 @@ $ThePage = new Page('GamesList');
    $search_profile = new SearchProfile( $my_id, $profile_type );
    $gfilter = new SearchFilter( $fprefix, $search_profile );
    $search_profile->register_regex_save_args( 'rated|won' ); // named-filters FC_FNAME
-   $gtable = new Table( $tableid, $page, $column_set_name );
+   $gtable = new Table( $tableid, $page, $cfg_tblcols );
    $gtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -253,15 +256,11 @@ $ThePage = new Page('GamesList');
  *
  * Players (OB+FA+RA) AS white, AS black - (FU+RU) AS Players(+UNION):
  *   ID, Handle, Password, Newpassword, Sessioncode, Sessionexpire, Lastaccess, LastMove,
- *   Registerdate, Hits, VaultCnt, VaultTime, Moves, Activity, Name, Email, Rank, Stonesize,
+ *   Registerdate, Hits, VaultCnt, VaultTime, Moves, Activity, Name, Email, Rank,
  *   SendEmail, Notify, MenuDirection, Adminlevel, Timezone, Nightstart, ClockUsed, ClockChanged,
  *   Rating, RatingMin, RatingMax, Rating2, InitialRating, RatingStatus, Open, Lang,
- *   VacationDays, OnVacation, SkinName, Woodcolor, Boardcoords, MoveNumbers, MoveModulo, Button,
- *   UsersColumns, GamesColumns, RunningGamesColumns, FinishedGamesColumns, ObservedGamesColumns,
- *   TournamentsColumns, WaitingroomColumns,  ContactColumns, Running, Finished, RatedGames,
- *   Won, Lost, Translator, StatusFolders, IP, Browser, Country, NotesSmallHeight, NotesSmallWidth,
- *   NotesSmallMode, NotesLargeHeight, NotesLargeWidth, NotesLargeMode, NotesCutoff,
- *   MayPostOnForum, TableMaxRows
+ *   VacationDays, OnVacation, Button, Running, Finished, RatedGames,
+ *   Won, Lost, Translator, IP, Browser, Country, MayPostOnForum, TableMaxRows
  *
  * Observers (OB) AS Obs:
  *   ID, uid, gid
@@ -278,9 +277,11 @@ $ThePage = new Page('GamesList');
  * - '> ' indicates a column not common to all views, usage given for specific views
  * - When a column number is shared between two fields, they must be displayed
  *   inside different (not intersecting) "hide/show columns" groups i.e.:
- *   - (OB)    => ObservedGamesColumns
- *   - (FU+FA) => FinishedGamesColumns
- *   - (RU+RA) => RunningGamesColumns
+ *   - (OB) => ColumnsGamesObserved
+ *   - (FA) => ColumnsGamesFinishedAll
+ *   - (FU) => ColumnsGamesFinishedUser
+ *   - (RA) => ColumnsGamesRunningAll
+ *   - (RU) => ColumnsGamesRunningUser
  *
  * no: description of displayed info
  *  1:    ID
