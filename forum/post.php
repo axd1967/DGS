@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum"; //local use
 
+require_once( 'include/classlib_userconfig.php' );
 require_once( 'forum/forum_functions.php' );
 
 
@@ -36,7 +37,7 @@ function hit_thread( $thread )
  * \brief Saves post-message for use-cases U06/U07/U08/U09
  * \see specs/forums.txt
  */
-function post_message($player_row, $forum_opts, &$thread)
+function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 {
    global $NOW, $order_str;
 
@@ -58,7 +59,7 @@ function post_message($player_row, $forum_opts, &$thread)
    $Subject = trim(get_request_arg('Subject'));
    if( $Subject == '' )
       $Subject = UNKNOWN_VALUE;
-//   $GoDiagrams = create_godiagrams($Text);
+//   $GoDiagrams = create_godiagrams($Text, $cfg_board);
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
