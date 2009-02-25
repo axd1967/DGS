@@ -33,6 +33,7 @@ if( @$_REQUEST['nextgame']
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
 require_once( "include/game_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/board.php" );
@@ -81,14 +82,16 @@ function get_alt_arg( $n1, $n2)
       error('unknown_game');
 
    $logged_in = who_is_logged( $player_row);
-
-//    if( !$logged_in )
-//       error('not_logged_in');
-
    if( $logged_in )
+   {
       $my_id = $player_row['ID'];
+      $cfg_board = ConfigBoard::load_config_board($my_id);
+   }
    else
+   {// for quick-suite
       $my_id = 0;
+      $cfg_board = new ConfigBoard($my_id); // use defaults
+   }
 
 
    $query= "SELECT Games.*, " .
@@ -433,18 +436,10 @@ function get_alt_arg( $n1, $n2)
          $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
       }
 
-      if( $Size >= $player_row["NotesCutoff"] )
-      {
-        $notesheight = $player_row["NotesLargeHeight"];
-        $noteswidth = $player_row["NotesLargeWidth"];
-        $notesmode = $player_row["NotesLargeMode"];
-      }
-      else
-      {
-        $notesheight = $player_row["NotesSmallHeight"];
-        $noteswidth = $player_row["NotesSmallWidth"];
-        $notesmode = $player_row["NotesSmallMode"];
-      }
+      $cfgsize_notes = $cfg_board->get_cfgsize_notes( $Size );
+      $notesheight = $cfg_board->get_notes_height( $cfgsize_notes );
+      $noteswidth = $cfg_board->get_notes_width( $cfgsize_notes );
+      $notesmode = $cfg_board->get_notes_mode( $cfgsize_notes );
       if( isset($_REQUEST['notesmode']) )
          $notesmode= strtoupper($_REQUEST['notesmode']);
 
@@ -502,7 +497,7 @@ function get_alt_arg( $n1, $n2)
 
    if( ENA_MOVENUMBERS )
    {
-      $movenumbers= (int)@$player_row['MoveNumbers'];
+      $movenumbers = $cfg_board->get_move_numbers();
       if( isset($_REQUEST['movenumbers']) )
          $movenumbers= (int)$_REQUEST['movenumbers'];
    }
@@ -510,7 +505,7 @@ function get_alt_arg( $n1, $n2)
       $movenumbers= 0;
 
    if( $logged_in )
-      $TheBoard->set_style( $player_row);
+      $TheBoard->set_style( $cfg_board );
 
 
    $title = T_("Game") ." #$gid,$move";
@@ -527,7 +522,7 @@ function get_alt_arg( $n1, $n2)
 
    if( $movenumbers>0 )
    {
-      $tmp= (int)@$player_row['MoveModulo'];
+      $tmp = $cfg_board->get_move_modulo();
       if( $tmp >= 0 )
       {
          $TheBoard->move_marks( $move-$movenumbers, $move, $tmp);
