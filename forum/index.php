@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Forum";
 
 chdir('..');
+require_once( 'include/classlib_userconfig.php' );
 require_once( 'forum/forum_functions.php' );
 
 $ThePage = new Page('ForumsList');
@@ -31,15 +32,16 @@ $ThePage = new Page('ForumsList');
    if( !$logged_in )
       error('not_logged_in');
    $my_id = $player_row['ID'];
+   $cfg_pages = ConfigPages::load_config_pages($my_id);
 
    // toggle forumflag
-   $toggleflag = @$_REQUEST['toggleflag'] + 0;
+   $toggleflag = (int)@$_REQUEST['toggleflag'] + 0;
    $toggle_baseurl = 'index.php';
-   if( toggle_forum_flags($my_id, $toggleflag) )
+   if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
    {
       jump_to( 'forum/'.$toggle_baseurl );
    }
-   $show_lp_author = ( $player_row['ForumFlags'] & FORUMFLAG_FORUM_SHOWAUTHOR );
+   $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_FORUM_SHOWAUTHOR );
 
    $f_opts = new ForumOptions( $player_row );
    $show_fopts = (@$player_row['admin_level'] & ADMINGROUP_EXECUTIVE);
