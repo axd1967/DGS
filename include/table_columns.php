@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
+require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/gui_functions.php' );
 require_once( "include/form_functions.php" );
 require_once( "include/filter.php" );
@@ -35,9 +36,6 @@ require_once( "include/filter.php" );
  *
  * \brief Class to ease the creation of standard tables.
  */
-
-//0x80000000 is negative in PHP. So the database field holding the Column_sets must be signed: INT(11) NOT NULL
-define('ALL_COLUMNS', 0xffffffff); //=4294967295 = full 32 bits integer
 
 //caution: provide enough "images/sort$i$c.gif" images $i:[1..n] $c:[a,d]
 define('TABLE_MAX_SORT', 2); // 0 to disable the table sorts
@@ -78,11 +76,11 @@ class Table
 
    /*! \brief The page used in links within this table. */
    var $Page;
-   /*! \brief Which columns in the set that is visible. */
-   var $Column_set;
-   /*! \brief The column of the Player table in the database to use as column_set.
-    * \see $Column_set */
-   var $Player_Column_set_name;
+   /*!
+    * \brief ConfigTableColumns-object with column-name and bitset of the
+    *        ConfigPages-table in the database to use as column-set for this table.
+    */
+   var $CfgTableCols;
    /*! \brief The columns that has been removed. */
    var $Removed_Columns;
    /*! \brief The number of columns displayed, known after make_tablehead() */
@@ -141,8 +139,8 @@ class Table
    var $Rows_Per_Page;
    /*! \brief true, if number of rows to show should be configurable (otherwise use Players.TableMaxRows). */
    var $Use_Show_Rows;
-   /*! \brief true to use JScript features. */
-   var $Jscript;
+   /*! \brief true to use JavaScript features. */
+   var $JavaScript;
 
    /*!
     * \brief array of objects with external request-parameters,
@@ -174,8 +172,7 @@ class Table
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_tableid, $_page, $_player_column_set_name=''
-                  , $_prefix='', $_mode=0)
+   function Table( $_tableid, $_page, $cfg_tblcols=null, $_prefix='', $_mode=0 )
    {
       global $player_row;
 
@@ -202,20 +199,17 @@ class Table
       else
          $this->Page = $_page . URI_AMP; //end_sep
 
-      if( !empty($_player_column_set_name)
-         && is_string($_player_column_set_name)
+      if( !is_null($cfg_tblcols) && is_a($cfg_tblcols,'ConfigTableColumns')
          && !($this->Mode & TABLE_NO_HIDE) )
       {
-         $this->Player_Column_set_name = $_player_column_set_name;
-         $this->Column_set = ALL_COLUMNS;
-         if( isset($player_row[ $_player_column_set_name ]) )
-            $this->Column_set &= $player_row[ $_player_column_set_name ];
+         $this->CfgTableCols = $cfg_tblcols;
       }
       else
       {
          $this->Mode|= TABLE_NO_HIDE;
-         $this->Player_Column_set_name = '';
-         $this->Column_set = ALL_COLUMNS;
+         $bitset = new BitSet();
+         $bitset->reset(1); // set all-bits
+         $this->CfgTableCols = new ConfigTableColumns( $player_row['ID'], '', $bitset );
       }
 
       //{ N.B.: only used for folder transparency but CSS incompatible
@@ -232,7 +226,7 @@ class Table
       $this->Last_Page = true;
       $this->Use_Show_Rows = true;
       $this->Rows_Per_Page = $player_row['TableMaxRows'];
-      $this->Jscript = is_javascript_enabled();
+      $this->JavaScript = is_javascript_enabled();
 
       // filter-stuff
       $this->ext_req_params = array();
@@ -357,11 +351,12 @@ class Table
    function is_column_displayed( $nr )
    {
       if( $nr < 1 ) return 0;
-      if( $nr > 32 ) return 1;
-      $mask = (1 << ($nr-1));
-      if( !($mask & ALL_COLUMNS) ) return 1;
+      if( $nr > 32 ) return 1; // treated as static
+
       if( (TABLE_NO_HIDE & @$this->Tableheads[$nr]['Mode']) ) return 1;
-      return ($mask & $this->Column_set);
+
+      $bitset = $this->CfgTableCols->get_bitset();
+      return $bitset->get_bit($nr);
    }
 
    /*!
@@ -575,7 +570,7 @@ class Table
       // handle show-rows
       $this->handle_show_rows();
 
-      // handle column-visibility (+ adjust filters)
+      // handle column-visibility (+ adjust filters); add/del can be array
       $adds = $this->get_arg('add');
       if( empty($adds) )
          $adds = array();
@@ -587,19 +582,20 @@ class Table
       elseif( !is_array($dels) )
          $dels = array($dels);
 
-      $newset = $this->Column_set;
+      $bitset =& $this->CfgTableCols->get_bitset();
+      $old_bithex = $bitset->get_hex_format();
       foreach( $adds as $add )
       {
          $add = (int)$add;
          if( $add > 0 && $add <= 32 ) // add col
          {
-            $newset |= (1 << ($add-1));
+            $bitset->set_bit( $add );
             $this->Filters->reset_filter($add);
             $this->Filters->set_active($add, true);
          }
          elseif( $add < 0 ) // add all cols
          {
-            $newset = ALL_COLUMNS;
+            $bitset->reset(1); // set all bits
             $this->Filters->reset_filters( GETFILTER_ALL );
             $this->Filters->setall_active(true);
          }
@@ -609,41 +605,26 @@ class Table
          $del = (int)$del;
          if( $del > 0 && $del <= 32 ) // del col
          {
-            $newset &= ~(1 << ($del-1));
+            $bitset->set_bit( $del, 0 );
             $this->Filters->reset_filter($del);
             $this->Filters->set_active($del, false);
          }
          elseif( $del < 0 ) // del all cols
          {
-            $newset = 0;
+            $bitset->reset(0);
             $this->Filters->reset_filters( GETFILTER_ALL );
             $this->Filters->setall_active(false);
          }
       }
 
-      global $player_row;
-      $uid = (int)@$player_row['ID'];
-      /*
-       * Here, depending of the previous calculus, either $newset or
-       *  $this->Column_set can be signed (int) or signed (float)
-       *  and so covering the whole [-0x80000000,0xffffffff] interval.
-       * Cares are needed especially for the write in the database
-       *  as a value>0x7fffffff can't be recorded in a SIGNED INT field
-       *  while a value<0 can't be recorded in an UNSIGNED INT field
-       */
-      $newset &= ALL_COLUMNS; //and reset it to the (signed) integer type
-      if( $uid > 0 && !empty($this->Player_Column_set_name)
-         && (($newset ^ $this->Column_set) & ALL_COLUMNS ) )
+      // save changes into database in ConfigPages-table
+      if( $this->CfgTableCols->has_col_name() )
       {
-         $player_row[ $this->Player_Column_set_name ] =
-         $this->Column_set = $newset;
-         //note: the column field must be a SIGNED INT
-         $query = "UPDATE Players SET " . $this->Player_Column_set_name
-            ."=$newset WHERE ID=$uid LIMIT 1";
-
-         mysql_query($query)
-            or error('mysql_query_failed','Table.add_or_del_column');
+         $new_bithex = $bitset->get_hex_format();
+         if( $old_bithex != $new_bithex )
+            $this->CfgTableCols->update_config();
       }
+
    } //add_or_del_column
 
    /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element or else cookie or players-row). */
@@ -1046,7 +1027,7 @@ class Table
          $rclass = $tablerow['class'];
       }
 
-      if( $this->Jscript )
+      if( $this->JavaScript )
          $string = "\n <tr class=\"$rclass\" ondblclick=\"toggle_class(this,'$rclass','Hil$rclass')\">";
       else
          $string = "\n <tr class=\"$rclass\">";
