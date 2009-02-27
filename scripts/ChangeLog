@@ -23,6 +23,27 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-27 juga
+
+   * list_contacts.php:
+   - bugfix: handle ambiguous column-name Players/Contacts.UserFlags
+
+   * opponents.php, skins/dragon/screen.css, NEWS:
+   - added CSS to highlight sum-row/column in game-stats for opponents
+
+   * include/table_columns.php (add_external_parameters),
+     list_contacts.php, opponents.php, search_messages.php:
+   - make use_hidden-option explicit (no default) for add_external_parameters()
+   - bugfix: fix usage add_external_parameters(.., use_hidden) after recent signature-change
+
+   * users.php:
+   - bugfix for loading ConfigTableColumns for my-userid
+
+   * forum/search.php:
+   - bugfixes:
+     - show forum-name in forum-filter selection
+     - fix query on visible forums
+
 2009-02-25 juga
 
    * include/classlib_userconfig.php (ConfigBoard, ConfigPages, ConfigTableColumns),
