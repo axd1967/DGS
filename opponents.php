@@ -179,8 +179,8 @@ $ARR_DBFIELDKEYS = array(
    $usform->attach_table( $page_vars ); // for page-vars as hiddens in form
 
    // attach external URL-parameters from static filter and page-vars for table-links
-   $utable->add_external_parameters( $usfilter->get_req_params() );
-   $utable->add_external_parameters( $page_vars );
+   $utable->add_external_parameters( $usfilter->get_req_params(), false );
+   $utable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // table: use same table-IDs as in users.php(!)
@@ -597,10 +597,12 @@ function print_players_table( $p, $uid, $opp )
 function print_stats_table( $p, $B, $W, $fin )
 {
 
-   $rowpatt   = "  <tr> <td class=Rubric>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  </tr>\n";
-   $rowpatt2  = "  <tr> <td class=Rubric>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  </tr>\n";
-   #$rowpatt   = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  </tr>\n";
-   #$rowpatt2  = "  <tr> <td nowrap=\"1\"><b>%s</b></td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  </tr>\n";
+   $rowpatt   = "  <tr %s> <td class=Rubric>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2 class=\"Sum\">%s</td>  </tr>\n";
+   $rowpatt2  = "  <tr %s> <td class=Rubric>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td>%s</td>  <td class=\"Sum\">%s</td>  <td class=\"Sum\">%s</td>  </tr>\n";
+   #$rowpatt   = "  <tr %s> <td nowrap=\"1\"><b>%s</b></td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  <td colspan=2>%s</td>  </tr>\n";
+   #$rowpatt2  = "  <tr %s> <td nowrap=\"1\"><b>%s</b></td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  <td width=30>%s</td>  </tr>\n";
+   $trclass_sum = 'class="Sum Number"';
+   $trclass_num = 'class="Number"';
 
    $r = "<table id=gameStats class=Infos>\n";
    //TODO; review it:
@@ -611,7 +613,7 @@ function print_stats_table( $p, $B, $W, $fin )
    $r .= "    <th class=Rubric>" . T_('Players color') .":</th>\n";
    $r .= "    <th colspan=2><img src=\"17/b.gif\" alt=\"as-black\"></th>\n";
    $r .= "    <th colspan=2><img src=\"17/w.gif\" alt=\"as-white\"></th>\n";
-   $r .= "    <th colspan=2>" . T_('Sum') . "</th>\n";
+   $r .= "    <th colspan=2 class=Sum>" . T_('Sum') . "</th>\n";
    $r .= "  </tr>\n";
 
    $cnt_games  = $B['cntGames'] + $W['cntGames'];
@@ -624,11 +626,14 @@ function print_stats_table( $p, $B, $W, $fin )
       $ratio = ( $cnt_games == 0) ? 0 : round( 100 * ( $won_games + $jigo_games/2 ) / $cnt_games );
       $ratio_black = ( $B['cntGames'] == 0) ? 0 : round( 100 * ( $B['cntWon'] + $B['cntJigo']/2 ) / $B['cntGames'] );
       $ratio_white = ( $W['cntGames'] == 0) ? 0 : round( 100 * ( $W['cntWon'] + $W['cntJigo']/2 ) / $W['cntGames'] );
-      $r .= sprintf( $rowpatt, T_('Win-Ratio on #Games'), $ratio_black.'%', $ratio_white.'%', $ratio.'%' );
+      $r .= sprintf( $rowpatt,
+         $trclass_num, T_('Win-Ratio on #Games'),
+         $ratio_black.'%', $ratio_white.'%', $ratio.'%' );
    }
 
    // stats: total games
-   $r .= sprintf( $rowpatt, T_('#Games'),
+   $r .= sprintf( $rowpatt,
+      $trclass_num, T_('#Games'),
       $B['cntGames'],
       $W['cntGames'],
       $cnt_games );
@@ -636,36 +641,43 @@ function print_stats_table( $p, $B, $W, $fin )
    if( $fin )
    {
       // stats: won + lost games
-      $r .= sprintf( $rowpatt2, T_('#Games won : lost'),
+      $r .= sprintf( $rowpatt2,
+         $trclass_sum, T_('#Games won : lost'),
          $B['cntWon'], $B['cntLost'],
          $W['cntWon'], $W['cntLost'],
          ($won_games), ($B['cntLost'] + $W['cntLost']) );
-      $r .= sprintf( $rowpatt2, T_('#Games won : lost by Score'),
+      $r .= sprintf( $rowpatt2,
+         $trclass_num, T_('#Games won : lost by Score'),
          $B['cntWonScore'], $B['cntLostScore'],
          $W['cntWonScore'], $W['cntLostScore'],
          ($B['cntWonScore'] + $W['cntWonScore']), ($B['cntLostScore'] + $W['cntLostScore']) );
-      $r .= sprintf( $rowpatt2, T_('#Games won : lost by Resignation'),
+      $r .= sprintf( $rowpatt2,
+         $trclass_num, T_('#Games won : lost by Resignation'),
          $B['cntWonResign'], $B['cntLostResign'],
          $W['cntWonResign'], $W['cntLostResign'],
          ($B['cntWonResign'] + $W['cntWonResign']), ($B['cntLostResign'] + $W['cntLostResign']) );
-      $r .= sprintf( $rowpatt2, T_('#Games won : lost by Time'),
+      $r .= sprintf( $rowpatt2,
+         $trclass_num, T_('#Games won : lost by Time'),
          $B['cntWonTime'], $B['cntLostTime'],
          $W['cntWonTime'], $W['cntLostTime'],
          ($B['cntWonTime'] + $W['cntWonTime']), ($B['cntLostTime'] + $W['cntLostTime']) );
 
       // stats: jigo
-      $r .= sprintf( $rowpatt, T_('#Games with Jigo'),
+      $r .= sprintf( $rowpatt,
+         $trclass_num, T_('#Games with Jigo'),
          $B['cntJigo'],
          $W['cntJigo'],
          $B['cntJigo'] + $W['cntJigo'] );
    }
 
    // stats: handicap-games
-   $r .= sprintf( $rowpatt, T_('#Games with handicap'),
+   $r .= sprintf( $rowpatt,
+      $trclass_num, T_('#Games with handicap'),
       $B['cntHandicap'],
       $W['cntHandicap'],
       $B['cntHandicap'] + $W['cntHandicap'] );
-   $r .= sprintf( $rowpatt, T_('Maximum handicap'),
+   $r .= sprintf( $rowpatt,
+      $trclass_num, T_('Maximum handicap'),
       $B['maxHandicap'],
       $W['maxHandicap'],
       max($B['maxHandicap'], $W['maxHandicap']) );
