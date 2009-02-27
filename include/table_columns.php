@@ -1324,7 +1324,7 @@ class Table
     * \param use_hidden true, if parameters should be included into table-hiddens; default is false
     *        state is stored in $rp-structure
     */
-   function add_external_parameters( $rp, $use_hidden = false )
+   function add_external_parameters( $rp, $use_hidden )
    {
       if( is_object($rp) && method_exists($rp, 'get_hiddens') && method_exists($rp, 'get_url_parts') )
       {
