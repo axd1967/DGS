@@ -69,9 +69,9 @@ require_once( 'include/classlib_userconfig.php' );
    $search_profile->handle_action();
 
    // static filters on flags
-   $scfilter->add_filter( 1, 'CheckboxArray', 'SystemFlags', true,
+   $scfilter->add_filter( 1, 'CheckboxArray', 'C.SystemFlags', true,
          array( FC_SIZE => 1, FC_BITMASK => 1, FC_MULTIPLE => $arr_chk_sysflags ) );
-   $scfilter->add_filter( 2, 'CheckboxArray', 'UserFlags', true,
+   $scfilter->add_filter( 2, 'CheckboxArray', 'C.UserFlags', true,
          array( FC_SIZE => 2, FC_BITMASK => 1, FC_MULTIPLE => $arr_chk_userflags ) );
    $scfilter->init(); // parse current value from _GET
 
@@ -125,7 +125,7 @@ require_once( 'include/classlib_userconfig.php' );
 
    // attach external URL-parameters to table (for links)
    $extparam = $scfilter->get_req_params();
-   $ctable->add_external_parameters( $extparam );
+   $ctable->add_external_parameters( $extparam, false );
 
    $cform->set_area(1);
    $cform->add_row( array(
@@ -148,7 +148,7 @@ require_once( 'include/classlib_userconfig.php' );
    $qsql->add_part( SQLP_FIELDS,
       'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.Rating2',
       'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccessU',
-      'C.cid', 'C.SystemFlags', 'C.UserFlags', 'C.Notes',
+      'C.cid', 'C.SystemFlags', 'C.UserFlags AS ContactsUserFlags', 'C.Notes',
       'C.Created', 'C.Lastchanged',
       'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS createdU',
       'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS lastchangedU' );
@@ -234,7 +234,7 @@ require_once( 'include/classlib_userconfig.php' );
       }
       if( $ctable->Is_Column_Displayed[ 7] )
       {
-         $str = Contact::format_user_flags($row['UserFlags'], ',<br>');
+         $str = Contact::format_user_flags($row['ContactsUserFlags'], ',<br>');
          $crow_strings[ 7] = ($str == '' ? NO_VALUE : $str);
       }
       if( $ctable->Is_Column_Displayed[ 8] )
