@@ -136,7 +136,7 @@ require_once( "include/classlib_profile.php" );
 
    // attach external URL-parameters to table (for links)
    $extparam = $smfilter->get_req_params();
-   $mtable->add_external_parameters( $extparam );
+   $mtable->add_external_parameters( $extparam, false );
 
    $smform->add_row( array(
          'ROW', 'SelectFolders',
