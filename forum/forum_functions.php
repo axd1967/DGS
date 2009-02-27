@@ -1116,7 +1116,8 @@ class Forum
    }
 
    /*!
-    * \brief Returns array of partial Forum-objects with id and name set.
+    * \brief Returns array of partial Forum-objects (only those visible to a player)
+    *        with name => id entries.
     * param forum_opts is object ForumOptions($player_row), load all forum names if omitted
     */
    function load_forum_names( $forum_opts )
