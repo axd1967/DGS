@@ -40,7 +40,7 @@ require_once( 'include/classlib_userconfig.php' );
       error('not_logged_in');
    $uid = $player_row['ID'];
    //$user = $player_row['Handle'];
-   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_USERS );
+   $cfg_tblcols = ConfigTableColumns::load_config( $uid, CFGCOLS_USERS );
 
    $page = "users.php?";
 
