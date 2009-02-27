@@ -123,7 +123,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Initial Rating: removed converting of NNGS-rank/rating
 
    * Filters:
-      * Changed access keys for filter-search: [e]=Search, [z]=Reset
+      * Replaced Filter-Reset with selection to clear, reset, load/save fields
+      * Changed access keys for filter-search: [e]=Search (, [z]=Reset )
       * Added warning-message for stopwords-warning of mysql-match-search
         (mainly for forum-search)
       * Added tooltips for submit buttons
