@@ -1483,13 +1483,27 @@ table#gameFilter {
    margin-bottom: 1em;
 }
 
+table#gameFilter td.Description {
+   text-align: left;
+}
 
 table#gameStats th.Rubric {
    text-align: right;
 }
 
-table#gameFilter td.Description {
+table#gameStats tr.Sum,
+table#gameStats th.Sum,
+table#gameStats td.Sum {
+   background: #e0e8ff; /* light blue, complementary to background */
+}
+
+table#gameStats tr.Number td.Rubric,
+table#gameStats td.Rubric {
    text-align: left;
+}
+
+table#gameStats tr.Number td {
+   text-align: right;
 }
 
 
