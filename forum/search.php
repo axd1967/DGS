@@ -44,10 +44,10 @@ define('MODERATOR_SEARCH', 0);
 
    // build forum-array for filter: ( Name => Forum_ID )
    $f_opts = new ForumOptions( $player_row );
-   $arr_fnames = Forum::load_forum_names( $f_opts ); // id => name
+   $arr_fnames = Forum::load_forum_names( $f_opts ); // name => id
    $farr_vis = array_values($arr_fnames); // IDs of visible forums
    $arr_forum = array( T_('All#forum') => '' );
-   foreach( $arr_fnames as $id => $name )
+   foreach( $arr_fnames as $name => $id )
       $arr_forum[$name] = 'Posts.Forum_ID=' . $id;
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator );
@@ -177,7 +177,10 @@ define('MODERATOR_SEARCH', 0);
       if( !MODERATOR_SEARCH )
          $qsql->add_part( SQLP_WHERE, "P.Approved='Y'" );
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
-      // restrict query on visible forums
+
+      // restrict query on "visible" forums (matching admin-options)
+      $qsql->add_part( SQLP_FROM,
+         'INNER JOIN Forums ON Forums.ID=P.Forum_ID' );
       $qsql->add_part( SQLP_WHERE,
          'Forums.ID IN ('.implode(',', $farr_vis).')' );
 
