@@ -37,16 +37,6 @@ $FWRN2 = '</strong>';
 
 
 /*!
- * \brief Returns bitmask for specified filter_id
- * signature: int filter_id2mask(int filter_id)
- * \internal
- */
-function filter_id2mask( $id )
-{
-   return (1 << ($id - 1));
-}
-
-/*!
  * \brief Creates default TokenizerConfig taking global consts into account
  * \param $quotetype if null, default is used
  * note: defaults are: quote-type=QUOTETYPE_QUOTE, separator=-, quote-chars='', escape-chars=\\

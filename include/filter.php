@@ -342,11 +342,11 @@ class SearchFilter
          error('invalid_filter', "filter.add_filter.bad_type($id,$type)"); // type non-empty
       if( !is_numeric($id) )
          error('invalid_filter', "filter.add_filter.bad_filter_id($id)");
-      if( $id < 1 || $id > 32 )
-         error('invalid_filter', "filter.add_filter.filter_id_out_of_range($id)"); // 1..32
+      if( $id < 1 || $id > BITSET_MAXSIZE )
+         error('invalid_filter', "filter.add_filter.filter_id_out_of_range($id)");
       if( isset($this->Filters[$id]) )
          error('invalid_filter', "filter.add_filter.unique_filter_id($id)");
-      if( count($this->Filters) == 32 )
+      if( count($this->Filters) > BITSET_MAXSIZE )
          error('invalid_filter', "filter.add_filter.full");
 
       $filter_class = 'Filter' . $type;
@@ -375,7 +375,8 @@ class SearchFilter
       $arr_keys = $this->get_filter_keys(GETFILTER_ALL);
       $is_init  = (bool)( $this->get_saved_arg(FNAME_INIT) );
       $is_reset = (bool)( $this->get_arg(FFORM_RESET_ACTION) != '' );
-      $act_set  = (int) $this->get_saved_arg(FNAME_ACTIVE_SET);
+      $act_set  = $this->get_saved_arg(FNAME_ACTIVE_SET); // hex-str for BitSet
+      $bitset_active = BitSet::read_from_hex($act_set);
 
       // handle reset or clear induced by profile-handler
       $need_clear = false;
@@ -402,10 +403,7 @@ class SearchFilter
          {
             // parse active-set
             if( $this->is_init )
-            {
-               $mask = filter_id2mask($id);
-               $filter->set_active($act_set & $mask);
-            }
+               $filter->set_active( $bitset_active->get_bit($id) );
 
             // parse values if active and not a reset
             if( $filter->is_active() )
@@ -820,14 +818,14 @@ class SearchFilter
       return ( isset($filter) ) ? $filter->is_active() : false;
    }
 
-   /*! \brief Returns bitmask for filters in active-state. */
+   /*! \brief Returns BitSet for filters in active-state. */
    function get_active_set()
    {
-      $mask = 0;
+      $bitset = new BitSet();
       $arr = $this->get_filter_keys(GETFILTER_ACTIVE);
       foreach( $arr as $id )
-         $mask |= filter_id2mask($id);
-      return $mask;
+         $bitset->set_bit($id);
+      return $bitset;
    }
 
    /*! \brief Toggles active-state for speficied filter. */
@@ -906,8 +904,9 @@ class SearchFilter
 
       // add other vars
       $arr = array();
+      $bitset_active = $this->get_active_set();
       $arr[FNAME_INIT] = '1'; // already initialized
-      $arr[FNAME_ACTIVE_SET] = $this->get_active_set();
+      $arr[FNAME_ACTIVE_SET] = $bitset_active->get_hex_format();
       $arr[FNAME_HASHCODE] = $this->hashcode(); // to check, if filter-values have changed
       foreach( $arr as $key => $value )
       {
