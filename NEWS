@@ -3,7 +3,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Games, Forum, #TODO)
+#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Games, Forum)
 
    New features and Major changes:
 
@@ -19,24 +19,33 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Waiting room: additionally show standard-placement (S) in Handicap-column
       * Invitation: added indication of color, handicap & komi
         for conventional & proper handicap-type
-      * Changed default for Standard Handicap Placement: ON
-      * Changed default for Time settings: Fischer time with 30d + 1d
+      * Changed default for Standard Handicap Placement to: ON
+      * Changed default for Time settings to: Fischer time with 30d + 1d
 
-   * User info:
+   * <home show_games.php>Games lists</home>:
+      * <home show_games.php?observe=all>Show all observed games</home> with own search-profile and column set,
+        show number of observing users ("#Observers"-column) and
+        show if my games are observed ("Mine"-column)
+      * Added columns with start-rating, end-rating and rating-diff
+        of opponents counterpart-user for user-running and user-finished view
+      * Added column with link to new game info page
+      * Show Weekendclock for all view-modes
+
+   * <home userinfo.php>User info</home>:
       * Show a users timezone, local time and night start
 
    * Searching capabilities:
-      * Added search on FAQ
+      * Added <home faq.php>search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
          * users, opponents, waiting room, search messages, contacts, features, votes
          * observers of a game, observed games
          * all/my/other finished and running games
 
-   * Status page:
+   * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
       * Added "Notes" column on games list
 
-   * Forum pages reworked:
+   * <home forum/index.php>Forum pages reworked</home>:
       * Show number of NEW posts
       * Changed time range for outdated forum posts from 4 to 12 weeks
       * Changed time range for old NEW posts from 2 to 4 weeks
@@ -69,33 +78,16 @@ Copyright (C) 2001-2009  Erik Ouchterlony
             * User can mark single posts as read: 'mark read'-link on new post
             * User can mark all posts as read: 'mark all read'-link
 
-   * Feature-Voting including feature status management
-
-
-   Code improvements:
-
-   * Improvements of database queries
-      * Users: faster Activity handling
-
-   * Introduction of a cache management for some pages and graphics
-
-   * Optimized translations
-   * Code cleanup
-   * Hide some sensible server infos
+   * <home features/list_features.php>Feature-Voting</home> including feature status management
 
 
    Minor changes:
 
    * Games:
       * <home show_games.php>Games list</home>:
-         * Show Weekendclock for all list-modes
-         * Show link to new game info page
          * Adjusted page title and bottom menu links
          * Adjusted hint-text of colors-image for other users
-         * Show all observed games with own search-profile and column set,
-           show number of observing users,
-           show if my games are observed
-      * Replaced "Show my observed games" -> "Show games I'm observing"
+      * Replaced "Show my observed games" -> "Games I'm observing"
       * &lt;game&gt; markup: Changed char used for move-number in game reference
 
       * Game SGF Download:
@@ -111,23 +103,23 @@ Copyright (C) 2001-2009  Erik Ouchterlony
            fixing possible bug on large boards
          * Mark handicap-setup in view-moves list
          * Added access key [x]='Next Game', [v]=Preview
-         * Game page: show OnVacation of user in red
+         * Show OnVacation of user in red
 
    * Quick Status: Added time-remaining column
 
-   * Messages:
+   * <home list_messages.php>Messages</home>:
       * Added option to stay in folder after moving messages
       * Changed default for empty subject: ??? -> (no subject)
 
-   * Users:
+   * <home users.php>Users</home>:
       * Added user-type:
          * Admin can mark user as Professional, Teacher and Robot
          * Can be searched on users and opponents page
          * Shown in user info, waiting room, on users and opponents page
       * Used button-image for ID-column for users and opponents page
-      * Opponents page: highlight sum-rows and -columns
+      * <home opponents.php>Opponents page</home>: highlight sum-rows and -columns
 
-   * User Profile:
+   * <home edit_profile.php>User Profile</home>:
       * Introducing JavaScript management in profile setting
       * Initial Rating: removed converting of NNGS-rank/rating
 
@@ -142,19 +134,31 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Used clearer header for column ID
       * Changed default sort-direction for ID
 
-   * Docs:
+   * <home docs.php>Docs</home>:
       * Added site-map page into main menu
       * Added link to statistics page on docs and site-map page
-      * Added other credits on peoples page
+      * Added other credits on <home people.php>peoples page</home>
       * News: added table of contents
-      * Links: added gosensations.com, corrected outdated links
+      * <home links.php>Links</home>: added gosensations.com, corrected outdated links
 
    * More use of CSS
 
 
+   Code improvements:
+
+   * Improvements of database queries
+      * Users: faster Activity handling
+
+   * Introduction of a cache management for some pages and graphics
+
+   * Optimized translations
+   * Code cleanup
+   * Hide some sensible server infos
+
+
    Administrative changes:
 
-   * Added donation page (deactivated after target reached)
+   * Added <home donation.php>donation page</home> (deactivated when target reached)
 
    * Statistics page:
       * Restrict the 'loadavg'-stats to admins view
@@ -208,12 +212,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Added <home policy.php>Dragon Go Server policy</home>
 
 
-   Code improvements:
-
-   * Optimized some database queries and added indexes:
-      * Speed up full game list by default restriction on Last move
-
-
    Minor changes:
 
    * Forum pages:
@@ -221,9 +219,15 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Increased size of bio and message text boxes
 
-   * People page:
+   * <home people.php>People page</home>:
       * Changed main FAQ editor
       * Added list of forum moderators
+
+
+   Code improvements:
+
+   * Optimized some database queries and added indexes:
+      * Speed up full game list by default restriction on Last move
 
 
    Administrative changes:
@@ -267,7 +271,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Highlight search terms within some texts for
         messages, forum posts, contact notes
 
-   * Contact list of other users
+   * <home list_contacts.php>Contact list</home> of other users:
       * Protect games in waiting room, Reject messages or Reject invitations
       * User categorization
       * Private notes on user
@@ -275,16 +279,16 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Games:
       * Show observers of a running game
-      * Add time for opponent
+      * Add time for opponent on game page
       * Added hover-text on colors column for my running games
       * Viewing move with auto-select on combobox (need JavaScript)
       * Show game-id and current move-number in page-title
 
-   * Waiting room:
+   * <home waiting_room.php>Waiting room</home>:
       * added country of player, minor changes and fixes
       * changed some columns: renamed Handicap to Type, added Handicap
 
-   * User info:
+   * <home userinfo.php>User info</home>:
       * Order of bio infos can be changed,
         Used wider textarea-field for input
       * Changed percent calculus to take jigo into account for rated games
@@ -293,7 +297,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
       * Rating graph can now be displayed by time or by number of games
 
-   * Users:
+   * <home users.php>Users</home>:
       * show my opponents and game statistics for two players,
         link on userinfo and users page
 
@@ -313,6 +317,29 @@ Copyright (C) 2001-2009  Erik Ouchterlony
         in new window
 
 
+   Minor changes:
+
+   * Narrowed bottom links centered on each page
+
+   * Links opening in a new window are showed olive-colored
+
+   * Provided links to user and message on messages page
+     like on search messages page
+
+   * <home forum/index.php>Forum pages</home>:
+      * Forum threads: Added link to return to first 'new'
+      * <home forum/search.php>Forum search</home>: Added selection for number of hits to show
+        (not using saved TableMaxRows)
+      * Forum posts: Subject shown as link for easier copy&paste
+        of a post-reference
+
+   * Cleanup of links, site-map page
+
+   * Updated flags: Lesotho, removed obsolete 'Serbia and Montenegro (Yugoslavia)'
+
+   * Added rating histogram on statistics page
+
+
    Code improvements:
 
    * Optimized some database queries and added indexes:
@@ -326,36 +353,13 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Improved consistency checks
 
 
-   Minor changes:
-
-   * Narrowed bottom links centered on each page
-
-   * Links opening in a new window are showed olive-colored
-
-   * Provided links to user and message on messages page
-     like on search messages page
-
-   * Forum pages:
-      * Forum threads: Added link to return to first 'new'
-      * Forum search: Added selection for number of hits to show
-        (not using saved TableMaxRows)
-      * Forum posts: Subject shown as link for easier copy&paste
-        of a post-reference
-
-   * Cleanup of links, site-map page
-
-   * Updated flags: Lesotho, removed obsolete 'Serbia and Montenegro (Yugoslavia)'
-
-   * Added rating histogram on statistics page
-
-
    Administrative changes:
 
-   * Replaced license: GPLv2 to Affero GPLv3 (19-Nov-2007)
+   * Replaced <home licence.php>license</home>: GPLv2 to Affero GPLv3 (19-Nov-2007)
 
    * Added this news page with <home news.php>Release notes</home>
 
-   * Solved problems with frozen clocks
+   * Solved problems with frozen clocks (placed real cron on remote server)
 
    * Changes for FAQ-editors and Translators:
       * Moved 'Translate' into bottom bar, visible for translators only
@@ -403,7 +407,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    New features and Major changes:
 
-   * New forum system
+   * New forum system:
       * Editable posts, Previewing, Moderation
       * Search page
       * Indication for new posts
@@ -627,7 +631,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
 #release DGS_1_0_2 [2001-Nov-11] - DGS 1.0.2  (Rating system)
 
-   * Own rating system: Algorithm borrowed from the european rating system <http://www.european-go.org/rating/gor.html>,
+   * Own rating system: Algorithm borrowed from the european rating system <http://www.eurogofed.org/rating/>,
      and it's relative strength is also the same as the european, so that, e.g. the IYT go guild rank is one stone stronger.
 
 
