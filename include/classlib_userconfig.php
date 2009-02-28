@@ -504,6 +504,8 @@ class ConfigTableColumns
    var $user_id;
    var $col_name; // ''=unset, don't save
    var $bitset;
+   /*! \brief Maximum number of bits, that can be stored for column; BITSET_MAXSIZE if no column given. */
+   var $maxsize;
 
    /*! \brief Constructs ConfigTableColumns-object with specified arguments. */
    function ConfigTableColumns( $user_id, $col_name, $bitset )
@@ -515,6 +517,10 @@ class ConfigTableColumns
       if( $col_name != '' && !isset($SIZECONFIG_CFGCOLS[$col_name]) )
          error('invalid_args', "ConfigTableColumns.check.col_name($col_name)");
       $this->col_name = $col_name;
+
+      $this->maxsize  = ( $this->col_name != '' )
+         ? $SIZECONFIG_CFGCOLS[$col_name] * BITSET_EXPORT_INTBITS
+         : BITSET_MAXSIZE;
 
       $this->set_bitset( $bitset );
    }
@@ -532,6 +538,12 @@ class ConfigTableColumns
    function has_col_name()
    {
       return !empty($this->col_name);
+   }
+
+   /*! \brief Returns maximum number of storeable bits for current column-set. */
+   function get_maxsize()
+   {
+      return $this->maxsize;
    }
 
    function &get_bitset()
