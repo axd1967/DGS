@@ -1108,7 +1108,7 @@ function message_list_head( &$mtable, $current_folder
 
    $mtable->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
    list($ico,$alt) = $msg_icones[0];
-   $mtable->add_tablehead(33, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
+   $mtable->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
    $mtable->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'date-');
    if( !$no_mark )
       $mtable->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
@@ -1199,7 +1199,7 @@ function message_list_body( &$mtable, $result, $show_rows
 
       list($ico,$alt) = $msg_icones[$row['flow']];
       $str = image( $ico, $alt, $tits[$row['flow']]);
-      $mrow_strings[33] = "$showmsg_start$str$showmsg_end";
+      $mrow_strings[ 8] = "$showmsg_start$str$showmsg_end";
 
       $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
