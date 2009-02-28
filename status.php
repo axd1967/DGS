@@ -130,12 +130,12 @@ $ThePage = new Page('Status');
    $show_notes = (LIST_GAMENOTE_LEN>0);
    $load_notes = ($show_notes && $gtable->is_column_displayed(15) );
 
-   // NOTE: mostly same col-IDs used as in show_games-page (except for IDs: 10)
+   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
-      $gtable->add_tablehead(15, T_('Notes#header'), '', 0, 'X_Note-');
+      $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
    $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
    $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
    $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
