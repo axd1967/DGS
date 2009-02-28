@@ -100,7 +100,7 @@ require_once( 'include/classlib_userconfig.php' );
    $ctable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $ctable->add_tablehead(33, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
+   $ctable->add_tablehead( 9, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
    $ctable->add_tablehead(12, T_('Type#header'), 'Enum', 0, 'P.Type+');
    $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
@@ -188,7 +188,7 @@ require_once( 'include/classlib_userconfig.php' );
       $crow_strings = array();
       $cid = $row['cid'];
 
-      if( $ctable->Is_Column_Displayed[33] )
+      if( $ctable->Is_Column_Displayed[ 9] )
       {
          $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
                image( 'images/send.gif', 'M'),
@@ -202,7 +202,7 @@ require_once( 'include/classlib_userconfig.php' );
          $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1",
                image( 'images/trashcan.gif', 'X'),
                T_('Remove contact'), 'class=ButIcon');
-         $crow_strings[33] = $links;
+         $crow_strings[ 9] = $links;
       }
       if( $ctable->Is_Column_Displayed[ 1] )
          $crow_strings[ 1] = "<A href=\"userinfo.php?uid=$cid\">" .
