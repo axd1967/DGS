@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
+require_once( 'include/classlib_bitset.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/gui_functions.php' );
 require_once( "include/form_functions.php" );
@@ -264,7 +265,8 @@ class Table
 
    /*!
     * @brief Adds a tablehead.
-    * @param $nr must be >0 but if higher than 32, the column will be static
+    * @param $nr must be >0 but if higher than BITSET_MAXSIZE or the maxsize of
+    *    Table-given ConfigTableColumns, the column will be static
     * @param $attbs must be an array of attributs or a class-name for the column (td-element)
     *    default: no attributs or class (i.e. class "Text" left-aligned)
     *    Other known classes defined in CSS, most used are:
@@ -347,13 +349,16 @@ class Table
       $this->Sort = $s;
    } //set_default_sort
 
-   /*! \brief Check if column is displayed. */
+   /*! \brief Returns 1=true, if column is displayed; 0=false otherwise. */
    function is_column_displayed( $nr )
    {
-      if( $nr < 1 ) return 0;
-      if( $nr > 32 ) return 1; // treated as static
+      if( $nr < 1 )
+         return 0;
+      if( $nr > $this->CfgTableCols->get_maxsize() )
+         return 1; // treated as static
 
-      if( (TABLE_NO_HIDE & @$this->Tableheads[$nr]['Mode']) ) return 1;
+      if( (TABLE_NO_HIDE & @$this->Tableheads[$nr]['Mode']) )
+         return 1; // column configured as static
 
       $bitset = $this->CfgTableCols->get_bitset();
       return $bitset->get_bit($nr);
@@ -583,11 +588,12 @@ class Table
          $dels = array($dels);
 
       $bitset =& $this->CfgTableCols->get_bitset();
+      $max_bits = $this->CfgTableCols->get_maxsize();
       $old_bithex = $bitset->get_hex_format();
       foreach( $adds as $add )
       {
          $add = (int)$add;
-         if( $add > 0 && $add <= 32 ) // add col
+         if( $add > 0 && $add <= $max_bits ) // add col
          {
             $bitset->set_bit( $add );
             $this->Filters->reset_filter($add);
@@ -603,7 +609,7 @@ class Table
       foreach( $dels as $del )
       {
          $del = (int)$del;
-         if( $del > 0 && $del <= 32 ) // del col
+         if( $del > 0 && $del <= $max_bits ) // del col
          {
             $bitset->set_bit( $del, 0 );
             $this->Filters->reset_filter($del);
