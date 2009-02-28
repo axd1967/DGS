@@ -34,3 +34,5 @@ copy /images/team.gif
 # add english translation for all '#...'-texts, escpecially in waiting-room
 # revert 'Handicap#headerwr': remove abbreviation for waiting-room
 
+# adjust english translation for all '%#header%'
+
