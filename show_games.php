@@ -76,6 +76,7 @@ $ThePage = new Page('GamesList');
       }
    }
    $is_mine = ($my_id == $uid); // my games-list
+   $is_other = ( $uid > 0 && !$is_mine );
    $running = !$observe && !$finished;
 
    $page = 'show_games.php?';
@@ -137,10 +138,12 @@ $ThePage = new Page('GamesList');
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
          array( FC_SIZE => 4 ));
+   $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
    $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true, // Games
          array( FC_DEFAULT => $restrict_games ));
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
+
    if( !$observe && !$all ) //FU+RU
    {
       $gfilter->add_filter( 3, 'Text',   'Name',   true);
@@ -158,8 +161,7 @@ $ThePage = new Page('GamesList');
             true);
       $gfilter->add_filter(23, 'Rating', 'startRating', true,
             array( FC_ADD_HAVING => 1 ));
-      $gfilter->add_filter(24, 'BoolSelect', 'Weekendclock', true);
-      $gfilter->add_filter(25, 'RelativeDate', 'Players.Lastaccess', true); // Players
+      $gfilter->add_filter(15, 'RelativeDate', 'Players.Lastaccess', true); // Players
    }
    if( $finished ) //FU+FA
    {
@@ -227,7 +229,7 @@ $ThePage = new Page('GamesList');
    // avoiding additional outer-join on GamesNotes-table !!
    $show_notes = (LIST_GAMENOTE_LEN>0
          && !$observe && !$all && $is_mine); // FU+RU subset
-   $load_notes = ($show_notes && $gtable->is_column_displayed(15) );
+   $load_notes = ($show_notes && $gtable->is_column_displayed(33) );
 
 /*****
  * Views-pages identification:
@@ -295,10 +297,10 @@ $ThePage = new Page('GamesList');
  *  9:    Moves
  * 10: >  FU+FA [Score] (Score)
  * 11: >  FU [User-Score AS X_Score] (Win-graphic) -> fname=won
- * 12:    --- unused ---
+ * 12:    Weekendclock
  * 13:    FU+FA [Lastchanged] (End date), OB+RU+RA [Lastchanged] (Last move)
  * 14:    [Rated AS X_Rated] (Rated) -> fname=rated
- * 15: >  FU+RU [Notes AS X_Note] (Notes)
+ * 15: >  RU (Opponents-LastAccess)
  * 16: >  FU+RU [Rating AS X_Rating] (User-Rating)
  * 17: >  OB+FA+RA (Black-Name)
  * 18: >  OB+FA+RA (Black-Handle)
@@ -315,17 +317,20 @@ $ThePage = new Page('GamesList');
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
+ * 32:    (Link to game-info page)
+ * 33: >  FU+RU [Notes AS X_Note] (Notes)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead(32, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT); // game-info
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( !$observe && !$all ) //FU+RU ?UNION
    {
       if( $show_notes )
-         $gtable->add_tablehead(15, T_('Notes#header'), '', 0, 'X_Note-');
+         $gtable->add_tablehead(33, T_('Notes#header'), '', 0, 'X_Note-');
    }
 
    if( $observe )
@@ -424,10 +429,11 @@ $ThePage = new Page('GamesList');
       $gtable->add_tablehead(13, T_('Last move#header'), 'Date', $table_mode13, 'Lastchanged-');
       if( !$all ) //RU ?UNION
       {
-         $gtable->add_tablehead(25, T_('Opponents Last Access#header'), 'Date', 0, 'Lastaccess-');
-         $gtable->add_tablehead(24, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
+         $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Date', 0, 'Lastaccess-');
       }
    }
+   $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
+
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
    $order = $gtable->current_order_string('ID-');
    $limit = $gtable->current_limit_string();
@@ -543,10 +549,14 @@ $ThePage = new Page('GamesList');
    $result = db_query( 'show_games.find_games', $query);
    db_close();
 
-   if( $observe || $all) //OB+FA+RA
+   if( $observe ) //OB
    {
-      $title1 = $title2 = ( $observe ? T_('Observed games') :
-                            ( $finished ? T_('Finished games') : T_('Running games') ) );
+      $title1 = $title2 = T_('My observing games');
+   }
+   elseif( $all) //FA+RA
+   {
+      $title1 = $title2 = ( $finished )
+         ? T_('All finished games') : T_('All running games');
    }
    else //FU+RU
    {
@@ -577,12 +587,13 @@ $ThePage = new Page('GamesList');
 
    // hover-texts for colors-column
    // (don't add 'w' and 'b', or else need to show in status.php too)
-   $arr_titles_colors = array(
-      'w_w' => T_('You have White, White to move#hover'),
-      'w_b' => T_('You have White, Black to move#hover'),
-      'b_w' => T_('You have Black, White to move#hover'),
-      'b_b' => T_('You have Black, Black to move#hover'),
+   $arr_titles_colors = array( // %s=user-handle
+      'w_w' => T_('%s has White, White to move#hover'),
+      'w_b' => T_('%s has White, Black to move#hover'),
+      'b_w' => T_('%s has Black, White to move#hover'),
+      'b_b' => T_('%s has Black, Black to move#hover'),
    );
+   $ginfo_str = T_('Game information');
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
 
@@ -597,9 +608,11 @@ $ThePage = new Page('GamesList');
       $grow_strings = array();
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
+      if( $gtable->Is_Column_Displayed[32] )
+         $grow_strings[32] = anchor( 'gameinfo.php?gid='.$ID,
+            image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone'));
       if( $gtable->Is_Column_Displayed[2] )
-         $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">"
-            . T_('sgf') . "</A>";
+         $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
 
       if( $observe || $all ) //OB+FA+RA
       {
@@ -640,12 +653,12 @@ $ThePage = new Page('GamesList');
       }
       else //FU+RU ?UNION
       {
-         if( $load_notes && $gtable->Is_Column_Displayed[15] )
+         if( $load_notes && $gtable->Is_Column_Displayed[33] )
          { //keep the first line up to LIST_GAMENOTE_LEN chars
             $X_Note= trim( substr(
                preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
                , 0, LIST_GAMENOTE_LEN) );
-            $grow_strings[15] = make_html_safe($X_Note);
+            $grow_strings[33] = make_html_safe($X_Note);
          }
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<A href=\"userinfo.php?uid=$pid\">" .
@@ -666,9 +679,8 @@ $ThePage = new Page('GamesList');
                   $colors.= '_b';
             }
             $hover_title = ( isset($arr_titles_colors[$colors]) )
-               ? " title=\"" . $arr_titles_colors[$colors] . "\"" : '';
-            $grow_strings[5] = "<img src=\"17/$colors.gif\" "
-               . "alt=\"$colors\"$hover_title>";
+               ? sprintf( $arr_titles_colors[$colors], $Handle ) : '';
+            $grow_strings[5] = image( "17/$colors.gif", $colors, $hover_title );
          }
          if( $gtable->Is_Column_Displayed[23] )
             $grow_strings[23] = echo_rating($startRating,true,$pid);
@@ -697,10 +709,8 @@ $ThePage = new Page('GamesList');
          }
          else //RU
          {
-            if( $gtable->Is_Column_Displayed[24] )
-               $grow_strings[24] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
-            if( $gtable->Is_Column_Displayed[25] )
-               $grow_strings[25] = date(DATE_FMT, $X_Lastaccess);
+            if( $gtable->Is_Column_Displayed[15] )
+               $grow_strings[15] = date(DATE_FMT, $X_Lastaccess);
          }
       } //else //OB
 
@@ -712,6 +722,8 @@ $ThePage = new Page('GamesList');
          $grow_strings[8] = $Komi;
       if( $gtable->Is_Column_Displayed[9] )
          $grow_strings[9] = $Moves;
+      if( $gtable->Is_Column_Displayed[12] )
+         $grow_strings[12] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
       if( $gtable->Is_Column_Displayed[13] )
          $grow_strings[13] = date(DATE_FMT, $X_Lastchanged);
       if( $gtable->Is_Column_Displayed[14] )
@@ -729,46 +741,43 @@ $ThePage = new Page('GamesList');
       mysql_free_result($result);
    $gtable->echo_table();
 
-   $menu_array = array();
+   // build bottom menu
+   // (use more detailed link-texts to show where you are and where you can go)
 
-   if( !$all && $uid > 0 && $uid != $my_id ) //FU+RU
+   $menu_array = array();
+   $row_str = $gtable->current_rows_string();
+   $need_my_games = $all || $is_other;
+
+   if( $is_other ) //RU+FU (other)
    {
-      $menu_array[T_('User info')] = "userinfo.php?uid=$uid";
+      if( !$running )
+         $menu_array[T_('Show users running games')] = $page."uid=$uid".URI_AMP.$row_str;
+      if( !$finished )
+         $menu_array[T_('Show users finished games')] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
+   }
+
+   if( $is_mine || $need_my_games ) //RU+FU (mine)
+   {
+      if( $need_my_games || !$running )
+         $menu_array[T_('Show my running games')] = $page."uid=$my_id".URI_AMP.$row_str;
+      if( $need_my_games || !$finished )
+         $menu_array[T_('Show my finished games')] = $page."uid=$my_id".URI_AMP."finished=1".URI_AMP.$row_str;
+   }
+
+   //RA+FA (all)
+   if( !$all || !$running )
+      $menu_array[T_('Show all running games')]  = $page."uid=all".URI_AMP.$row_str;
+   if( !$all || !$finished )
+      $menu_array[T_('Show all finished games')] = $page."uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
+
+   if( !$observe ) //RU+RA+FU+FA
+      $menu_array[T_('Show games I\'m observing')] = $page."observe=1".URI_AMP.$row_str;
+
+   if( $is_other ) //RU+FU (viewing games from other user)
+   {
+      $menu_array[T_('Show userinfo')] = "userinfo.php?uid=$uid";
       $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$uid";
    }
-
-   $row_str = $gtable->current_rows_string();
-
-   // use more detailed link-texts to show where you are and where you can go
-   if( !$running ) //OB+FU+FA
-   {
-      // where am I ?
-      if( $my_id == $uid ) //OB+FU (my games)
-         $menukey = T_('Show my running games');
-      else if( $all ) //FA
-         $menukey = T_('Show all running games');
-      else //FU (other user)
-         $menukey = T_('Show running games');
-      $menu_array[$menukey] = $page."uid=$uid".URI_AMP.$row_str;
-   }
-   if( !$finished ) //OB+RU+RA
-   {
-      // where am I ?
-      if( $my_id == $uid ) //OB+RU (my games)
-         $menukey = T_('Show my finished games');
-      else if( $all ) //RA
-         $menukey = T_('Show all finished games');
-      else //RU (other user)
-         $menukey = T_('Show finished games');
-      $menu_array[$menukey] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
-   }
-   if( $observe ) //OB
-   { // allow back navigation to all-games (with potentially shared URL-vars)
-      $menu_array[T_('Show all running games')]  = $page."uid=all".URI_AMP.$row_str;
-      $menu_array[T_('Show all finished games')] = $page."uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
-   }
-   else //FU+RU+FA+RA
-      $menu_array[T_('Show games I\'m observing')] = $page."observe=1".URI_AMP.$row_str;
 
    end_page(@$menu_array);
 }
