@@ -11,7 +11,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
       * Preview game message (access-key [v]=Preview)
-      * Added game info page (<image info.gif>)
+      * Added game info page (<image info.gif>),
+        added access to invitation message for game
       * Added "Notes" column on My-Games list
 
    * Game settings:
@@ -38,7 +39,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added <home faq.php>search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
          * users, opponents, waiting room, search messages, contacts, features, votes
-         * observers of a game, observed games
+         * observers of a game, my/all observed games
          * all/my/other finished and running games
 
    * <home status.php>Status page</home>:
@@ -166,7 +167,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Changed handling of some URL-arguments to reduce risk of SQL-injections
    * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
-     (Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick)
 
    * Changes for FAQ-editors:
 
