@@ -278,8 +278,6 @@ INSERT INTO ConfigPages
       TournamentsColumns
    FROM Players ;
 
--- TODO: migrate Games fields: #12->24, #15->25, +#32, #32->15
-
 -- drop copied columns (ConfigPages)
 ALTER TABLE Players
    DROP COLUMN StatusFolders,
