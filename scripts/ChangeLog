@@ -23,6 +23,42 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-02-28 juga
+
+   * show_games.php, NEWS, scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - Table-class can now handle >32 columns, so
+     - show weekendclock for all list-modes
+     - added game-info as column-id #32 linked to game-info-page
+
+   * show_games.php:
+   - minor adjustments (with some layouting/cleanup)
+     - show links to all possible game-modes in bottom menu and changed order
+     - adjusted page/section title to reflect page-mode
+     - adjusted image-alt text for color-image
+
+   * show_games.php, list_contacts.php, status.php, waiting_room.php,
+     include/message_functions.php (message_list_head, message_list_body),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - Table-class can now handle >32 columns, so changed column-IDs:
+     - show-games-page: reverted column-ids to avoid data migration for
+       - game-notes:   #15 -> #33
+       - last-access:  #15 -> #25 -> back to #15
+       - weekendclock: #12 -> #24 -> back to #12
+     - contact-list:  moved column-id #33 -> #9  for static Actions-header
+     - status-page:   moved column-id #15 -> #12 for Notes-column
+     - waiting-room:  moved column-id #33 -> #17 for static Info-column
+     - message-lists: moved column-id #33 -> #8  for static Message-flow-column
+
+   * include/table_columns.php (is_column_displayed, add_or_del_column),
+     include/filter.php (SearchFilter.add_filter, ~.init, ~.get_active_set, ~.get_url_parts),
+     include/filter_functions.php (filter_id2mask),
+     include/classlib_userconfig.php (ConfigTableColumns.get_maxsize):
+   - enhanced Table- and Filter-classes to handle >32 columns
+     using BitSet/ConfigTableColumns-class
+
+   * include/classlib_profile.php (SearchProfile.handle_action):
+   - bugfix: check for existing profile on deleting profile
+
 2009-02-27 juga
 
    * list_contacts.php:
