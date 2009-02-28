@@ -25,15 +25,38 @@ ChangeLog
 
 2009-02-28 juga
 
+   * status.php:
+   - shortened bottom menu link texts to save space (in sync with show-games-page)
+
+   * include/classlib_profile.php, include/classlib_userconfig.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     show_games.php, site_map.php, NEWS:
+   - added view-mode to show all observed games with own profile and column-set
+     - show "#Observed"-column with number of observing users
+     - show "Mine"-column if my games are observed
+   - shortened bottom menu link texts to save space
+-----------
+-- added games-list view for [all observed games]
+ALTER TABLE `ConfigPages`
+   ADD ColumnsGamesObservedAll2 int(11) NOT NULL default '-1' AFTER `ColumnsGamesObserved2`,
+   ADD ColumnsGamesObservedAll int(11) NOT NULL default '-1' AFTER `ColumnsGamesObserved2` ;
+-----------
+
+   * include/classlib_userconfig.php (ConfigBoard.load_config_board):
+   - bugfix: read values from cookies only if there are some
+
+   * ratinggraph.php:
+   - fixed link-text (can be other user): "Show my finished games" -> "Show finished games"
+
    * show_games.php, NEWS, scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
    - Table-class can now handle >32 columns, so
-     - show weekendclock for all list-modes
+     - show weekendclock for all views
      - added game-info as column-id #32 linked to game-info-page
 
    * show_games.php:
    - minor adjustments (with some layouting/cleanup)
-     - show links to all possible game-modes in bottom menu and changed order
-     - adjusted page/section title to reflect page-mode
+     - show links to all possible game-list-views in bottom menu and changed order
+     - adjusted page/section title to reflect current view-mode
      - adjusted image-alt text for color-image
 
    * show_games.php, list_contacts.php, status.php, waiting_room.php,
