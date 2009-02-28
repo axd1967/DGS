@@ -164,6 +164,8 @@ $ThePage = new Page('GamesList');
             true);
       $gfilter->add_filter(23, 'Rating', 'oppStartRating', true,
             array( FC_ADD_HAVING => 1 ));
+      $gfilter->add_filter(36, 'Rating', 'userStartRating', true,
+            array( FC_ADD_HAVING => 1 ));
       $gfilter->add_filter(15, 'RelativeDate', 'Opp.Lastaccess', true); // Players
    }
    if( $finished ) //FU+FA
@@ -196,6 +198,11 @@ $ThePage = new Page('GamesList');
          $gfilter->add_filter(24, 'Rating', 'oppEndRating', true,
                array( FC_ADD_HAVING => 1 ));
          $gfilter->add_filter(25, 'RatingDiff', 'oppRlog.RatingDiff', true);
+         $gfilter->add_filter(36, 'Rating', 'userStartRating', true,
+               array( FC_ADD_HAVING => 1 ));
+         $gfilter->add_filter(37, 'Rating', 'userEndRating', true,
+               array( FC_ADD_HAVING => 1 ));
+         $gfilter->add_filter(38, 'RatingDiff', 'userRlog.RatingDiff', true);
       }
    }
    if( $observe || $all ) //OB+FA+RA
@@ -240,6 +247,7 @@ $ThePage = new Page('GamesList');
    $show_notes = (LIST_GAMENOTE_LEN>0
          && !$observe && !$all && $is_mine); // FU+RU subset
    $load_notes = ($show_notes && $gtable->is_column_displayed(33) );
+   $load_user_ratingdiff = $gtable->is_column_displayed(38);
 
 /*****
  * Views-pages identification:
@@ -393,6 +401,9 @@ $ThePage = new Page('GamesList');
          $gtable->add_tablehead(24, T_('End rating#header'), 'Rating', 0, 'oppEndRating-');
          $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'oppRating-');
          $gtable->add_tablehead(25, T_('Rating diff#header'), 'Number', 0, 'oppRatingDiff-');
+         $gtable->add_tablehead(36, T_('User Start rating#header'), 'Rating', 0, 'userStartRating-');
+         $gtable->add_tablehead(37, T_('User End rating#header'), 'Rating', 0, 'userEndRating-');
+         $gtable->add_tablehead(38, T_('User Rating diff#header'), 'Number', 0, 'userRatingDiff-');
          $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
       }
    }
@@ -415,6 +426,7 @@ $ThePage = new Page('GamesList');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'oppHandle+');
          $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'oppRating-');
+         $gtable->add_tablehead(36, T_('User Start rating#header'), 'Rating', 0, 'userStartRating-');
          $gtable->add_tablehead( 5, T_('Colors#header'), 'Image', 0, 'X_Color+');
       }
    }
@@ -458,7 +470,10 @@ $ThePage = new Page('GamesList');
    }
    $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
 
-   $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
+   if( $observe_all )
+      $gtable->set_default_sort( 34, 13 ); //on ObsCount,Lastchanged
+   else
+      $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
    $order = $gtable->current_order_string('ID-');
    $limit = $gtable->current_limit_string();
 
@@ -535,6 +550,8 @@ $ThePage = new Page('GamesList');
          'Opp.ID AS oppID',
          'Opp.Rating2 AS oppRating',
          "IF(Black_ID=$uid, Games.White_Start_Rating, Games.Black_Start_Rating) AS oppStartRating",
+         "IF(Black_ID=$uid, Games.Black_Start_Rating, Games.White_Start_Rating) AS userStartRating",
+         "IF(Black_ID=$uid, $uid, White_ID) AS userID",
          'UNIX_TIMESTAMP(Opp.Lastaccess) AS oppLastaccess',
          //extra bits of Color are for sorting purposes
          //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
@@ -554,10 +571,19 @@ $ThePage = new Page('GamesList');
          $qsql->add_part( SQLP_FIELDS,
             "IF(Black_ID=$uid, -Score, Score) AS X_Score",
             "IF(Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS oppEndRating",
+            "IF(White_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS userEndRating",
             'oppRlog.RatingDiff AS oppRatingDiff' );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=Games.ID AND oppRlog.uid=$uid" );
          $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
+
+         if( $load_user_ratingdiff )
+         {
+            $qsql->add_part( SQLP_FIELDS,
+               'userRlog.RatingDiff AS userRatingDiff' );
+            $qsql->add_part( SQLP_FROM,
+               "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=Games.ID AND userRlog.uid=White_ID+Black_ID-$uid" );
+         }
       }
       else if( $running ) //RU ?UNION
       {
@@ -731,6 +757,8 @@ $ThePage = new Page('GamesList');
             $grow_strings[23] = echo_rating($oppStartRating,true,$oppID);
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = echo_rating($oppRating,true,$oppID);
+         if( $gtable->Is_Column_Displayed[36] )
+            $grow_strings[36] = echo_rating($userStartRating,true,$userID);
 
          if( $finished ) //FU
          {
@@ -751,6 +779,14 @@ $ThePage = new Page('GamesList');
                if( isset($oppRatingDiff) )
                   $grow_strings[25] = ( $oppRatingDiff > 0 ? '+' : '' )
                      . sprintf( "%0.2f", $oppRatingDiff / 100 );
+            }
+            if( $gtable->Is_Column_Displayed[37] )
+               $grow_strings[37] = echo_rating($userEndRating,true,$userID);
+            if( $gtable->Is_Column_Displayed[38] )
+            {
+               if( isset($userRatingDiff) )
+                  $grow_strings[38] = ( $userRatingDiff > 0 ? '+' : '' )
+                     . sprintf( "%0.2f", $userRatingDiff / 100 );
             }
          }
          else //RU
