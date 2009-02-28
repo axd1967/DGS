@@ -87,23 +87,28 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    Minor changes:
 
    * Games:
-      * Game info: show OnVacation in red
+      * <home show_games.php>Games list</home>:
+         * Show Weekendclock for all list-modes
+         * Show link to new game info page
+         * Adjusted page title and bottom menu links
+         * Adjusted hint-text of colors-image for other users
       * Replaced "Show my observed games" -> "Show games I'm observing"
       * &lt;game&gt; markup: Changed char used for move-number in game reference
 
-   * SGF Download:
-      * Included private game notes
-      * Included PASS-moves
-      * Used 3rd PASS-move as node for scoring for better RESUME-handling
-      * Removed node-text for pass/scoring-steps (viewer-problems)
-      * Added URL-arg 'no_cache' to disable cache
+      * Game SGF Download:
+         * Included private game notes
+         * Included PASS-moves
+         * Used 3rd PASS-move as node for scoring for better RESUME-handling
+         * Removed node-text for pass/scoring-steps (viewer-problems)
+         * Added URL-arg 'no_cache' to disable cache
 
-   * Game page:
-      * Show SGF-move-number near view-moves list
-      * "move"-selectbox (view-moves list) contains only subset of moves
-        fixing possible bug on large boards
-      * Mark handicap-setup in view-moves list
-      * Added access key [x]='Next Game', [v]=Preview
+      * Game page:
+         * Show SGF-move-number near view-moves list
+         * "move"-selectbox (view-moves list) contains only subset of moves
+           fixing possible bug on large boards
+         * Mark handicap-setup in view-moves list
+         * Added access key [x]='Next Game', [v]=Preview
+         * Game page: show OnVacation of user in red
 
    * Quick Status: Added time-remaining column
 
@@ -155,11 +160,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Changed handling of some URL-arguments to reduce risk of SQL-injections
    * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
      (Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick)
-   * Games list: Modified columns; (keep entry up to release)   #TODO
-     needs migration of bitmasks in DB; changed table-field-numbers of
-     - Games.Weekendclock: #12 -> #24
-     - Players.LastAccess: #15 -> #25
-     - Game-Notes: @#32    #32 -> #15
 
    * Changes for FAQ-editors:
 
@@ -462,7 +462,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added game columns: your color, rated, time remaining
 
    * Games list:
-      * Save different sets of columns for running / finished / observed games
+      * Save different column-sets for my/all running, my/all finished, observed games
       * Added score for finished games
       * Added weekend clock for own running games
       * Added your color for own finished games
