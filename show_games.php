@@ -39,9 +39,12 @@ $ThePage = new Page('GamesList');
       error("not_logged_in");
    $my_id = $player_row['ID'];
 
-   $observe = isset($_GET['observe']);
-   if( $observe ) //OB
+   $observe = @$_GET['observe']; // all | user (only my_id)
+   $observe_all = false;
+   if( $observe ) //OB=OU+OA
    {
+      $observe = ( is_numeric($observe) && $observe == $my_id ) ? $observe : 'all';
+      $observe_all = !is_numeric($observe); //OA
       $finished = false; //by definition
       $uid = $my_id; //by definition
       $all = false;
@@ -83,9 +86,9 @@ $ThePage = new Page('GamesList');
    if( $observe )
    {
       $tableid = 'observed';
-      $column_set_name = CFGCOLS_GAMES_OBSERVED;
+      $column_set_name = ($observe_all) ? CFGCOLS_GAMES_OBSERVED_ALL : CFGCOLS_GAMES_OBSERVED;
       $fprefix = 'o';
-      $profile_type = PROFTYPE_FILTER_GAMES_OBSERVED;
+      $profile_type = ($observe_all) ? PROFTYPE_FILTER_GAMES_OBSERVED_ALL : PROFTYPE_FILTER_GAMES_OBSERVED;
    }
    else if( $finished )
    {
@@ -206,6 +209,13 @@ $ThePage = new Page('GamesList');
       $gfilter->add_filter(22, 'Rating', 'white.Rating2', true);
       $gfilter->add_filter(29, 'Rating', 'Games.White_Start_Rating', true);
    }
+   if( $observe_all ) //OA
+   {
+      $gfilter->add_filter(34, 'Numeric', 'X_ObsCount', true,
+            array( FC_SIZE => 3, FC_ADD_HAVING => 1 ));
+      $gfilter->add_filter(35, 'BoolSelect', 'X_MeObserved', true,
+            array( FC_ADD_HAVING => 1 ));
+   }
    $gfilter->init(); // parse current value from _GET
 
    // init table
@@ -215,7 +225,7 @@ $ThePage = new Page('GamesList');
    // attach external URL-parameters to table
    $extparam = new RequestParameters();
    if( $observe )
-      $extparam->add_entry( 'observe', 1 );
+      $extparam->add_entry( 'observe', $observe );
    else
    {
       $extparam->add_entry( 'uid', $uid );
@@ -233,12 +243,15 @@ $ThePage = new Page('GamesList');
 
 /*****
  * Views-pages identification:
- *   views: OB=observe, FU=finished-user, FA=finished-all, RU=running-user, RA=running-all
+ *   views:
+ *   - OB=OU+OA=observe (splitted in OU=user-observes, OA=observed-all)
+ *   - FU=finished-user, FA=finished-all
+ *   - RU=running-user, RA=running-all
  *
  *****
  * Database-columns FROM:
  * Notes:
- * - Games fields are all SELECTed and the from should stay without table prefix!
+ * - Games fields are all SELECTed and the FROM should stay without table prefix!
  * - Table prefix for the fields is needed when the SELECTed fields have a naming-clash.
  *   Then a prefix is needed in the FROM-clause and the field needs an alias, which is
  *   unique amongst all selected fields.
@@ -279,7 +292,8 @@ $ThePage = new Page('GamesList');
  * - '> ' indicates a column not common to all views, usage given for specific views
  * - When a column number is shared between two fields, they must be displayed
  *   inside different (not intersecting) "hide/show columns" groups i.e.:
- *   - (OB) => ColumnsGamesObserved
+ *   - (OU) => ColumnsGamesObserved
+ *   - (OA) => ColumnsGamesObservedAll
  *   - (FA) => ColumnsGamesFinishedAll
  *   - (FU) => ColumnsGamesFinishedUser
  *   - (RA) => ColumnsGamesRunningAll
@@ -319,6 +333,8 @@ $ThePage = new Page('GamesList');
  * 31: >  FA (White-RatingDiff)
  * 32:    (Link to game-info page)
  * 33: >  FU+RU [Notes AS X_Note] (Notes)
+ * 34: >  OA [X_ObsCount] (Observer-count)
+ * 35: >  OA [X_MeObserved] (My-Games-observed?)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -327,6 +343,11 @@ $ThePage = new Page('GamesList');
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead(32, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT); // game-info
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
+   if( $observe_all )
+   {
+      $gtable->add_tablehead(34, T_('#Observers#header'), 'NumberC', 0, 'X_ObsCount-');
+      $gtable->add_tablehead(35, T_('Mine#header'), '', 0, 'X_MeObserved-');
+   }
    if( !$observe && !$all ) //FU+RU ?UNION
    {
       if( $show_notes )
@@ -459,8 +480,20 @@ $ThePage = new Page('GamesList');
          'INNER JOIN Games ON Games.ID=Obs.gid',
          'INNER JOIN Players AS white ON white.ID=White_ID',
          'INNER JOIN Players AS black ON black.ID=Black_ID' );
-      $qsql->add_part( SQLP_WHERE,
-         'Obs.uid=' . $my_id );
+
+      if( $observe_all ) //OA
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'COUNT(Obs.uid) AS X_ObsCount',
+            "IF(Games.Black_ID=$my_id OR Games.White_ID=$my_id,'Y','N') AS X_MeObserved" );
+         $qsql->add_part( SQLP_GROUP,
+            'Obs.gid' );
+      }
+      else //OU
+      {
+         $qsql->add_part( SQLP_WHERE,
+            'Obs.uid=' . $my_id );
+      }
    }
    else if( $all ) //FA+RA
    {
@@ -551,7 +584,8 @@ $ThePage = new Page('GamesList');
 
    if( $observe ) //OB
    {
-      $title1 = $title2 = T_('My observing games');
+      $title1 = $title2 = ( $observe_all )
+         ? T_('All observed games') : T_('Games I\'m observing');
    }
    elseif( $all) //FA+RA
    {
@@ -613,6 +647,13 @@ $ThePage = new Page('GamesList');
             image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone'));
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
+      if( $observe_all )
+      {
+         if( $gtable->Is_Column_Displayed[34] )
+            $grow_strings[34] = $X_ObsCount;
+         if( $gtable->Is_Column_Displayed[35] )
+            $grow_strings[35] = ($X_MeObserved == 'N' ? T_('No') : T_('Yes') );
+      }
 
       if( $observe || $all ) //OB+FA+RA
       {
@@ -751,27 +792,29 @@ $ThePage = new Page('GamesList');
    if( $is_other ) //RU+FU (other)
    {
       if( !$running )
-         $menu_array[T_('Show users running games')] = $page."uid=$uid".URI_AMP.$row_str;
+         $menu_array[T_('Users running games')] = $page."uid=$uid".URI_AMP.$row_str;
       if( !$finished )
-         $menu_array[T_('Show users finished games')] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
+         $menu_array[T_('Users finished games')] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
    }
 
    if( $is_mine || $need_my_games ) //RU+FU (mine)
    {
       if( $need_my_games || !$running )
-         $menu_array[T_('Show my running games')] = $page."uid=$my_id".URI_AMP.$row_str;
+         $menu_array[T_('My running games')] = $page."uid=$my_id".URI_AMP.$row_str;
       if( $need_my_games || !$finished )
-         $menu_array[T_('Show my finished games')] = $page."uid=$my_id".URI_AMP."finished=1".URI_AMP.$row_str;
+         $menu_array[T_('My finished games')] = $page."uid=$my_id".URI_AMP."finished=1".URI_AMP.$row_str;
    }
 
    //RA+FA (all)
    if( !$all || !$running )
-      $menu_array[T_('Show all running games')]  = $page."uid=all".URI_AMP.$row_str;
+      $menu_array[T_('All running games')]  = $page."uid=all".URI_AMP.$row_str;
    if( !$all || !$finished )
-      $menu_array[T_('Show all finished games')] = $page."uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
+      $menu_array[T_('All finished games')] = $page."uid=all".URI_AMP."finished=1".URI_AMP.$row_str;
 
-   if( !$observe ) //RU+RA+FU+FA
-      $menu_array[T_('Show games I\'m observing')] = $page."observe=1".URI_AMP.$row_str;
+   if( $observe_all || !$observe ) //OA+RU+RA+FU+FA
+      $menu_array[T_('Games I\'m observing')] = $page."observe=$my_id".URI_AMP.$row_str;
+   if( !$observe_all || !$observe ) //OU+RU+RA+FU+FA
+      $menu_array[T_('All observed games')] = $page."observe=all".URI_AMP.$row_str;
 
    if( $is_other ) //RU+FU (viewing games from other user)
    {

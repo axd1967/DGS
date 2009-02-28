@@ -291,3 +291,10 @@ ALTER TABLE Players
    DROP COLUMN ObservedGamesColumns,
    DROP COLUMN TournamentsColumns ;
 
+
+-- added games-list mode for [all observed games]
+ALTER TABLE `ConfigPages`
+   ADD ColumnsGamesObservedAll2 int(11) NOT NULL default '-1' AFTER `ColumnsGamesObserved2`,
+   ADD ColumnsGamesObservedAll int(11) NOT NULL default '-1' AFTER `ColumnsGamesObserved2` ;
+
+

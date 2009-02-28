@@ -258,7 +258,8 @@ class ConfigBoard
 
       // read values from cookies if logged in
       global $player_row;
-      $cookie_row = ( isset($player_row['Handle']) ) ? $player_row : $row;
+      $cookie_row = ( isset($player_row['Handle']) && isset($player_row['Stonesize']) )
+         ? $player_row : $row;
 
       $config = new ConfigBoard(
             $row['User_ID'],
@@ -320,6 +321,7 @@ define('CFGCOLS_GAMES_RUNNING_USER',   'ColumnsGamesRunningUser');
 define('CFGCOLS_GAMES_FINISHED_ALL',   'ColumnsGamesFinishedAll');
 define('CFGCOLS_GAMES_FINISHED_USER',  'ColumnsGamesFinishedUser');
 define('CFGCOLS_GAMES_OBSERVED',       'ColumnsGamesObserved');
+define('CFGCOLS_GAMES_OBSERVED_ALL',   'ColumnsGamesObservedAll');
 define('CFGCOLS_TOURNAMENTS',          'ColumnsTournaments');
 // col_name => number of ints in DB (needed for writing)
 $SIZECONFIG_CFGCOLS = array(
@@ -333,6 +335,7 @@ $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_GAMES_FINISHED_ALL    => 2, // >30 bit
    CFGCOLS_GAMES_FINISHED_USER   => 2, // >30 bit
    CFGCOLS_GAMES_OBSERVED        => 2, // >30 bit
+   CFGCOLS_GAMES_OBSERVED_ALL    => 2, // >30 bit
    CFGCOLS_TOURNAMENTS           => 1,
    );
 

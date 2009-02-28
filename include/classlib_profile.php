@@ -45,8 +45,9 @@ define('PROFTYPE_FILTER_OPPONENTS_MY', 15);
 define('PROFTYPE_FILTER_OPPONENTS_OTHER', 16);
 define('PROFTYPE_FILTER_FEATURES', 17);
 define('PROFTYPE_FILTER_VOTES', 18);
+define('PROFTYPE_FILTER_GAMES_OBSERVED_ALL', 19);
 // adjust if adding one
-define('MAX_PROFTYPE', 18);
+define('MAX_PROFTYPE', 19);
 
 define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 
