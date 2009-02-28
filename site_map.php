@@ -93,7 +93,8 @@ function item($text, $link='', $working=true, $last=false)
          { $item_level++;
             item(T_('Add time for opponent'), "game.php", false);
             item(T_('Download SGF of game'), "sgf.php", false);
-            item(T_('Show observers'), "users.php", false, true);
+            item(T_('Show observers'), "users.php", false);
+            item(T_('Show game info'), "gameinfo.php", false, true);
          } $item_level--;
       } $item_level--;
 
@@ -153,11 +154,16 @@ function item($text, $link='', $working=true, $last=false)
 
       item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
       { $item_level++;
-         item(T_('Show all running games'), "show_games.php?uid=all", true);
-         item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
+         item(T_('Show users running games'), "show_games.php", false);
+         item(T_('Show users finished games'), "show_games.php?finished=1", false);
          item(T_('Show my running games'), "show_games.php?uid=$id", true);
          item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show games I\'m observing'), "show_games.php?observe=1", true, true);
+         item(T_('Show all running games'), "show_games.php?uid=all", true);
+         item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
+         item(T_('Show games I\'m observing'), "show_games.php?observe=$id", true);
+         item(T_('Show all observed games'), "show_games.php?observe=all", true);
+         item(T_('Show userinfo'), "userinfo.php?uid=$id", false);
+         item(T_('Invite user'), "message.php?mode=Invite", false, true);
       } $item_level--;
 
       item(T_('Forum'), "forum/index.php", true);
