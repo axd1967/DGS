@@ -128,9 +128,9 @@ $ThePage = new Page('Status');
    // only activate if column shown for user to reduce server-load for page
    // avoiding additional outer-join on GamesNotes-table !!
    $show_notes = (LIST_GAMENOTE_LEN>0);
-   $load_notes = ($show_notes && $gtable->is_column_displayed(15) );
+   $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
 
-   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 15) + <=30(!)
+   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 12) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
@@ -200,12 +200,12 @@ $ThePage = new Page('Status');
          if( $gtable->Is_Column_Displayed[4] )
             $grow_strings[ 4] = "<A href=\"userinfo.php?uid=$pid\">" .
                $Handle . "</a>";
-         if( $load_notes && $gtable->Is_Column_Displayed[15] )
+         if( $load_notes && $gtable->Is_Column_Displayed[12] )
          { //keep the first line up to LIST_GAMENOTE_LEN chars
             $X_Note= trim( substr(
                preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
                , 0, LIST_GAMENOTE_LEN) );
-            $grow_strings[15] = make_html_safe($X_Note);
+            $grow_strings[12] = make_html_safe($X_Note);
          }
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = echo_rating($Rating,true,$pid);
