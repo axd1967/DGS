@@ -25,6 +25,24 @@ ChangeLog
 
 2009-02-28 juga
 
+   * NEWS:
+   - restructured (swapped code-improvements with minor-changes)
+   - added more links to changed-feature page, corrected links
+
+   * include/filter.php:
+   - bugfix: added include for constant BITSET_MAXSIZE
+
+   * show_games.php, NEWS:
+   - added columns start-rating, end-rating and rating-diff of opponents
+     counterpart-user for user-running/finished view
+   - changed different default-sort for observe-all view to Observer-count
+
+   * show_games.php:
+   - renamd all SQL-fields & vars for user-running/finished view
+     with prefix 'opp' in preparation of adding some user-specific fields
+   - changed texts of color-filter (not always my-user-view):
+     replaced "i'm/my" -> "user"
+
    * status.php:
    - shortened bottom menu link texts to save space (in sync with show-games-page)
 
