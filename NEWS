@@ -92,6 +92,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Show link to new game info page
          * Adjusted page title and bottom menu links
          * Adjusted hint-text of colors-image for other users
+         * Show all observed games with own search-profile and column set,
+           show number of observing users,
+           show if my games are observed
       * Replaced "Show my observed games" -> "Show games I'm observing"
       * &lt;game&gt; markup: Changed char used for move-number in game reference
 
