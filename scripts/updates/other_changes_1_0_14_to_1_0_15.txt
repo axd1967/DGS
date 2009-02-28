@@ -36,3 +36,8 @@ copy /images/team.gif
 
 # adjust english translation for all '%#header%'
 
+-----------
+# Adjust FAQ for observing own-games-trick:
+# - modified '&toggleobserve=' behaviour to avoid toggling on page refresh,
+#   Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick
+
