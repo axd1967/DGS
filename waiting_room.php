@@ -113,7 +113,7 @@ require_once( 'include/classlib_userconfig.php' );
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Handicap/RatingRange + show-all/suitable-games;
    //       also see named-filters
-   $wrtable->add_tablehead(33, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
+   $wrtable->add_tablehead(17, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'other_type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'other_name+');
    $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'other_handle+');
@@ -235,8 +235,8 @@ require_once( 'include/classlib_userconfig.php' );
          $Comment = make_html_safe($Comment, INFO_HTML);
 
          $wrow_strings = array();
-         if( $wrtable->Is_Column_Displayed[33] )
-            $wrow_strings[33] = button_TD_anchor( $baseURL."info=$ID#joingameForm", T_('Info'));
+         if( $wrtable->Is_Column_Displayed[17] )
+            $wrow_strings[17] = button_TD_anchor( $baseURL."info=$ID#joingameForm", T_('Info'));
          if( $wrtable->Is_Column_Displayed[ 1] )
             $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $other_id, $other_name, '');
          if( $wrtable->Is_Column_Displayed[ 2] )
