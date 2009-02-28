@@ -479,7 +479,8 @@ class SearchProfile
             break;
 
          case SPROF_DEL_PROFILE:    // delete profile(s) for user
-            $this->profile->delete_all_profiles( $this->user_id, $this->profile_type );
+            if( !is_null($this->profile) )
+               $this->profile->delete_all_profiles( $this->user_id, $this->profile_type );
             $this->load_profile();
             break;
 
