@@ -100,11 +100,12 @@ define('CACHE_FOLDER', 'temp/');
 // Define access keys
 // - keep empty with value '' to define no access key
 // - keys 0..9 are reserved for bottom page-links
-// - unused keys: ahjklny
+// - unused keys: ahjkny
 
 // access keys always visible in menus
 define('ACCKEY_MENU_STATUS',     's');
 define('ACCKEY_MENU_WAITROOM',   'r');
+define('ACCKEY_MENU_TOURNAMENT', 't');
 define('ACCKEY_MENU_USERINFO',   'p');
 define('ACCKEY_MENU_MESSAGES',   'b');
 define('ACCKEY_MENU_SENDMSG',    'm');
@@ -116,7 +117,7 @@ define('ACCKEY_MENU_FORUMS',     'f');
 define('ACCKEY_MENU_FAQ',        'q');
 define('ACCKEY_MENU_DOCS',       'd');
 define('ACCKEY_MENU_VOTE',       'v');
-define('ACCKEY_MENU_TRANSLATE',  't');
+define('ACCKEY_MENU_TRANSLATE',  'l');
 define('ACCKEY_MENU_LOGOUT',     'o');
 
 // access keys for general actions
