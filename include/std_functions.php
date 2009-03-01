@@ -430,7 +430,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
       $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
       $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
-      $menu->add( 1,3, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
+      $menu->add( 1,3, array( T_('Tournaments'),  'tournaments/list.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
+      $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
       $menu->add( 2,1, array( T_('Messages'),     'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )));
       $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
