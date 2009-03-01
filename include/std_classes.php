@@ -686,7 +686,7 @@ class ListIterator
       $idx = 1;
       foreach( $this->Items as $item )
          $arr[] = sprintf( "Item.%d=[%s]", $idx++,
-            ( method_exists($item, 'to_string') ? $item->to_string() : $item ));
+            ( method_exists($item, 'to_string') ? $item->to_string() : print_r($item,true) ));
       return "ListIterator({$this->Name}): " . implode(', ', $arr);
    }
 
