@@ -1,0 +1,64 @@
+###
+### Description of mysql tables:  Tournament
+###
+
+Here you'll find some infos about all the tournament tables.
+
+Legend:
+   - T  = Tournament
+   - TD = Tournament Director
+   - TP = Tournament Participant (registered player)
+
+-------------------------------------------------
+## --- Tournament ---
+
+ Field       | Type                                           | Default
+-------------+------------------------------------------------+---------------------
+ ID          | int(11)                                        | NULL
+ Scope       | enum('DRAGON','PUBLIC','PRIVATE')              | PUBLIC
+ Type        | enum('ROUNDROBIN')                             | ROUNDROBIN
+ Title       | varchar(255)                                   |
+ Description | text                                           | NULL
+ Owner_ID    | int(11)                                        | 0
+ Status      | enum('ADM','NEW','REG','PAIR','PLAY','CLOSED') | NEW
+ Created     | datetime                                       | 0000-00-00 00:00:00
+ Lastchanged | datetime                                       | 0000-00-00 00:00:00
+ StartTime   | datetime                                       | 0000-00-00 00:00:00
+ EndTime     | datetime                                       | 0000-00-00 00:00:00
+
+## Fields:
+
+* Scope :
+   - DRAGON = tournament sponsored by Dragon-server, official Dragon tourney,
+     can only be "started" by DGS-admins
+   - PUBLIC = public tournament, can be created by every DGS-user, open to everyone
+   - PRIVATE = private tournament, registration only with token or by TD-invitation
+
+* Type : Tournament-type
+   - ROUNDROBIN = TPs playing in pooled rounds
+   - future: LADDER = TP can "climb" up ladder (=KING-OF-THE-HILL)
+   - future: LEAGUE = Team-tournaments
+
+* Title : name of the T
+
+* Description : description of the T
+
+* Owner_ID : Players.ID of the T-creator
+
+* Status : current process-state of the T
+   - ADM = reserved state (to migrate old Ts)
+   - NEW = freshly created T (needs setup)
+   - REG = registration-period can start
+   - PAIR = pairing for next round starts
+   - PLAY = pairing finished, games are started automatically,
+     TPs play until all games are finished
+   - CLOSED = T finished
+
+* Created : date of creation of T
+
+* Lastchanged : date of last-update of T (on Status, Name, Description, Start/EndTime)
+
+* StartTime : official start-date of T (informal)
+
+* EndTime : datetime when T closed, T can be changed afterwards still by TDs
+
