@@ -298,3 +298,28 @@ ALTER TABLE `ConfigPages`
    ADD ColumnsGamesObservedAll int(11) NOT NULL default '-1' AFTER `ColumnsGamesObserved2` ;
 
 
+-- manage Tournaments
+CREATE TABLE Tournament (
+   ID int(11) NOT NULL auto_increment,
+   Scope enum('DRAGON','PUBLIC','PRIVATE') NOT NULL default 'PUBLIC',
+   Type enum('ROUNDROBIN') NOT NULL default 'ROUNDROBIN',
+   Title varchar(255) NOT NULL default '',
+   Description text NOT NULL,
+   Owner_ID int(11) NOT NULL default '0',
+   Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED') NOT NULL default 'NEW',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   StartTime datetime NOT NULL default '0000-00-00 00:00:00',
+   EndTime datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (ID),
+   KEY Status (Status),
+   KEY StartTime (StartTime)
+) ENGINE=MyISAM;
+
+-- table-column-set for tournament-list
+ALTER TABLE ConfigPages
+   CHANGE ColumnsTournaments ColumnsTournamentList int(11) NOT NULL default '-1' ;
+UPDATE ConfigPages
+   SET ColumnsTournamentList=-1 ;
+
+
