@@ -322,7 +322,7 @@ define('CFGCOLS_GAMES_FINISHED_ALL',   'ColumnsGamesFinishedAll');
 define('CFGCOLS_GAMES_FINISHED_USER',  'ColumnsGamesFinishedUser');
 define('CFGCOLS_GAMES_OBSERVED',       'ColumnsGamesObserved');
 define('CFGCOLS_GAMES_OBSERVED_ALL',   'ColumnsGamesObservedAll');
-define('CFGCOLS_TOURNAMENTS',          'ColumnsTournaments');
+define('CFGCOLS_TOURNAMENT_LIST',      'ColumnsTournamentList');
 // col_name => number of ints in DB (needed for writing)
 $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_STATUS_GAMES          => 1,
@@ -336,7 +336,7 @@ $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_GAMES_FINISHED_USER   => 2, // >30 bit
    CFGCOLS_GAMES_OBSERVED        => 2, // >30 bit
    CFGCOLS_GAMES_OBSERVED_ALL    => 2, // >30 bit
-   CFGCOLS_TOURNAMENTS           => 1,
+   CFGCOLS_TOURNAMENT_LIST       => 1,
    );
 
 class ConfigPages
