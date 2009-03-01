@@ -53,6 +53,11 @@ require_once( 'tournaments/include/tournament.php' );
    foreach( Tournament::getStatusText() as $status => $text )
       $status_filter_array[$text] = "T.Status='$status'";
 
+   $owner_filter_array = array(
+         T_('All') => '',
+         T_('Mine#T_owner') => "T.Owner_ID=$my_id",
+      );
+
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_LIST );
    $tfilter = new SearchFilter( '', $search_profile );
@@ -65,6 +70,7 @@ require_once( 'tournaments/include/tournament.php' );
    $tfilter->add_filter( 2, 'Selection', $scope_filter_array, true );
    $tfilter->add_filter( 3, 'Selection', $type_filter_array, true );
    $tfilter->add_filter( 4, 'Selection', $status_filter_array, true );
+   $tfilter->add_filter( 6, 'Selection', $owner_filter_array, true );
    $tfilter->add_filter( 8, 'RelativeDate', 'T.StartTime', true,
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ));
    $tfilter->init();
@@ -90,6 +96,9 @@ require_once( 'tournaments/include/tournament.php' );
          $ttable->get_query(),
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );
+   if( !Tournament::isAdmin() )
+      $iterator->addQuerySQLMerge(
+         new QuerySQL( SQLP_WHERE, "T.Status<>'".TOURNEY_STATUS_ADMIN."'" ));
    $iterator = Tournament::load_tournaments( $iterator );
 
 
