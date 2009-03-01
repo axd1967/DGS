@@ -23,6 +23,63 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-03-01 juga
+
+   * tournaments/include/tournament.php (Tournament),
+     tournaments/list.php, tournaments/index.php,
+     include/classlib_profile.php, include/classlib_userconfig.php,
+     include/config.php, include/std_functions.php (start_page),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - started Tournament-management in tournaments/-subdir
+     - added Tournament-list page with search-profile and own table-column-set,
+       index-page redirects to tournament-list page
+     - added link to Tournament-list page into main-menu with access-key [t],
+       replaced access-key of Translate [t] -> [l]
+     - added table Tournament and class to manage tournaments
+     - ConfigPages: added table-column-set for tournament-list
+-----------
+-- manage Tournaments
+CREATE TABLE Tournament (
+   ID int(11) NOT NULL auto_increment,
+   Scope enum('DRAGON','PUBLIC','PRIVATE') NOT NULL default 'PUBLIC',
+   Type enum('ROUNDROBIN') NOT NULL default 'ROUNDROBIN',
+   Title varchar(255) NOT NULL default '',
+   Description text NOT NULL,
+   Owner_ID int(11) NOT NULL default '0',
+   Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED') NOT NULL default 'NEW',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   StartTime datetime NOT NULL default '0000-00-00 00:00:00',
+   EndTime datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (ID),
+   KEY Status (Status),
+   KEY StartTime (StartTime)
+) ENGINE=MyISAM;
+
+-- table-column-set for tournament-list
+ALTER TABLE ConfigPages
+   CHANGE ColumnsTournaments ColumnsTournamentList int(11) NOT NULL default '-1' ;
+UPDATE ConfigPages
+   SET ColumnsTournamentList=-1 ;
+-----------
+
+   * include/std_classes.php (ListIterator, WhereClause):
+   - added ListIterator-class to help iterating over lists and keep track of query
+   - cleanup: removed WhereClause-class (not needed)
+
+   * new_tournament.php, list_tournaments.php, show_tournament.php, create_tournament.php,
+     include/tournament.php, include/tournament_round.php,
+     include/tournamenttypes/index.php, include/tournamenttypes/macmahon.php,
+     include/tournamenttypes/all_types.php,
+     init-tournaments.mysql:
+   - removed old tournament-stuff (will be replaced),
+     including previously added DDL
+
+   * init-tournaments.mysql:
+   - added DDL needed for old tournament-stuff to have it for one revision in CVS,
+     exported from Dragon on SourceForget.NET
+
 2009-02-28 juga
 
    * NEWS:
