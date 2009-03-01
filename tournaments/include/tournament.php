@@ -266,7 +266,7 @@ class Tournament
       {
          global $player_row;
          $arr = array();
-         if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
+         if( Tournament::isAdmin() )
             $arr[TOURNEY_STATUS_ADMIN] = T_('Admin#T_status');
          $arr[TOURNEY_STATUS_NEW]      = T_('New#T_status');
          $arr[TOURNEY_STATUS_REGISTER] = T_('Register#T_status');
@@ -281,6 +281,13 @@ class Tournament
       if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS'][$status]) )
          error('invalid_args', "Tournament.getStatusText($status)");
       return $ARR_GLOBALS_TOURNAMENT['STATUS'][$status];
+   }
+
+   /*! \brief Returns true for tournament-admin. */
+   function isAdmin()
+   {
+      global $player_row;
+      return ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
    }
 
 } // end of 'Tournament'
