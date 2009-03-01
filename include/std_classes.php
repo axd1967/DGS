@@ -29,106 +29,6 @@ define('EMPTY_SQL_QUERY', 'SELECT 1 FROM DUAL');
 
 
  /*!
-  * \class WhereClause
-  *
-  * \brief Class to build where-clauses by AND'ing, OR'ing and merging WhereClauses
-  * \see QuerySQL
-  *
-  * Example:
-  *    $wc = new WhereClause();
-  *    $wc->add('a=1');
-  *    $wc->add('b=2');
-  *    $wc->embrace();    // $wc->get_where_clause(false) = '(a=1 AND b=2)'
-  *    $wc->add('c=3', 'or');
-  *    $wc2 = new WhereClause('OR');
-  *    $wc2->add('d>7');
-  *    $wc2->add('e<5');  // $wc2->get_where_clause(false) = '(a=1 AND b=2)'
-  *    $wc->add( $wc2 );
-  *    $wc->set_operator( 'or' );
-  *    $wc->add('f=0');
-  *    $wc->get_where_clause() = 'WHERE ((a=1 AND b=2) OR c=3) AND (d>7 OR e<5) OR f=0'
-  */
-class WhereClause
-{
-   /*! \brief array of parts ( clauses and operators ). */
-   var $parts;
-   /*! \brief currently used operator, e.g. OR or AND */
-   var $operator;
-
-   /*! \brief Constructs WhereClause( [string operator] ). */
-   function WhereClause( $_operator = 'AND' )
-   {
-      $this->parts = array();
-      $this->set_operator( $_operator );
-   }
-
-   /*! \brief Returns true, if WhereClause contains at least one part. */
-   function has_clause()
-   {
-      return ( count($this->parts) > 0 );
-   }
-
-   /*! \brief Set current operator-string (not checked if valid); it's used to concat clauses. */
-   function set_operator( $_operator )
-   {
-      $this->operator = $this->make_operator($_operator);
-   }
-
-   /*! \internal */
-   function make_operator( $operator )
-   {
-      return ' ' . strtoupper(trim($operator)) . ' ';
-   }
-
-   /*!
-    * \brief adding non-empty clauses with specified operator or with current if none given.
-    * signature: add( WhereClause|string, [string operator] );
-    * param $operator optional, not checked
-    * note: embrace current clauses with '(..)' if merging with WhereClause
-    */
-   function add( $clause, $operator = null)
-   {
-      if( is_a( $clause, "WhereClause" ))
-      { // append other WhereClause
-         $merge_clause = $clause->get_where_clause( false );
-         if( $merge_clause )
-         {
-            $this->embrace();
-            $this->add( "({$merge_clause})", $operator );
-         }
-      }
-      elseif( $clause )
-      { // append clause-part
-         $op = ( is_null($operator) ) ? $this->operator : $this->make_operator( $operator );
-         if( $this->has_clause() )
-            $this->parts[]= $op;
-         $this->parts[]= $clause;
-      }
-   }
-
-   /*!
-    * \brief Returns where-clause.
-    * \param $inc_where optional arg, if false, keyword 'WHERE' is not returned as prefix.
-    */
-   function get_where_clause( $inc_where = true )
-   {
-      if( $this->has_clause() )
-         return ($inc_where ? 'WHERE ' : '') . implode(' ', $this->parts);
-      else
-         return '';
-   }
-
-   /*! \brief embrace current clause-parts in this object with '(..)'. */
-   function embrace()
-   {
-      $clause = $this->get_where_clause( false );
-      $this->parts = array( "($clause)" );
-   }
-} // end of 'WhereClause'
-
-
-
- /*!
   * \class RequestParameters
   *
   * \brief Class to store request-parameters, which can be attached to Table- or Form-class.
@@ -629,5 +529,167 @@ class QuerySQL
       return "QuerySQL: " . implode(', ', $arr);
    }
 } // end of 'QuerySQL'
+
+
+
+ /*!
+  * \class ListIterator
+  *
+  * \brief Class to help with iterating over lists, especially loaded from database.
+  *
+  * \note Also help to keep track and build query, supportive for debugging query
+  */
+class ListIterator
+{
+   /*! \brief Name of list-iterator (type of items). */
+   var $Name;
+
+   /*! \brief main QuerySQL | null */
+   var $QuerySQL;
+   /*! \brief List of QuerySQL to be merged into main QuerySQL. */
+   var $QuerySQLMerge;
+   /*! \brief optional order string to be appended to query. */
+   var $QueryOrder;
+   /*! \brief optional limit string to be appended to query. */
+   var $QueryLimit;
+
+   /*! \brief (internal) QuerySQL built from merging QuerySQL with list of QuerySQLMerge. */
+   var $MergedQuerySQL;
+   /*! \brief query-string for db-query (for debugging). */
+   var $Query;
+
+   /*! \brief Number of rows resulting from db-query. */
+   var $ResultRows;
+   /*! \brief List of objects read from db-query. */
+   var $Items;
+
+   /*!
+    * \brief Constructs ListIterator with name
+    * \param $qsql will be added as merge-QuerySQL
+    */
+   function ListIterator( $name, $qsql=null, $order='', $limit='' )
+   {
+      $this->Name = $name;
+      $this->QuerySQL = new QuerySQL();
+      $this->QuerySQLMerge = array();
+      $this->addQuerySQLMerge( $qsql );
+      $this->QueryOrder = $order;
+      $this->QueryLimit = $limit;
+
+      $this->MergedQuerySQL = null;
+      $this->Query = '';
+      $this->ResultRows = -1; // not queried yet
+      $this->clearItems();
+   }
+
+   /*! \brief Sets main QuerySQL. */
+   function setQuerySQL( $qsql=null )
+   {
+      if( !is_null($qsql) && !is_a($qsql, 'QuerySQL') )
+         error('invalid_args', 'ListIterator.setQuerySQL');
+      $this->QuerySQL = $qsql;
+   }
+
+   /*! \brief Adds QuerySQL for merging. */
+   function addQuerySQLMerge( $qsql=null )
+   {
+      if( !is_null($qsql) )
+      {
+         if( !is_a($qsql, 'QuerySQL') )
+            error('invalid_args', 'ListIterator.addQuerySQLMerge');
+         $this->QuerySQLMerge[] = $qsql;
+      }
+   }
+
+   /*! \brief Sets ORDER-string appended to resulting query built from merging QuerySQLs. */
+   function setQueryOrder( $order='' )
+   {
+      $this->QueryOrder = $order;
+   }
+
+   /*! \brief Sets LIMIT-string appended to resulting query built from merging QuerySQLs. */
+   function setQueryLimit( $limit='' )
+   {
+      $this->QueryLimit = $limit;
+   }
+
+   /*!
+    * \brief Sets SQL-query-string (built from main and merge-list QuerySQLs,
+    *        order and limit query-parts). Should contain the final query used
+    *        to query database.
+    */
+   function setQuery( $query_str )
+   {
+      $this->Query = $query_str;
+   }
+
+   /*! \brief Sets number of rows from resulting db-query. */
+   function setResultRows( $result_rows )
+   {
+      $this->ResultRows = $result_rows;
+   }
+
+   /*!
+    * \brief Builds SQL-query from main QuerySQL and merge-list of QuerySQLs,
+    *        appending optional order and limit query parts.
+    * \note Sets QuerySQL if unset.
+    * \note Sets MergedQuerySQL and Query with finalized SQL-query-string.
+    */
+   function buildQuery()
+   {
+      if( is_null($this->QuerySQL) )
+         $this->QuerySQL = new QuerySQL();
+
+      // merge all QuerySQLs
+      $merged_qsql = $this->QuerySQL;
+      foreach( $this->QuerySQLMerge as $m_qsql )
+         $merged_qsql->merge( $m_qsql );
+      $this->MergedQuerySQL = $merged_qsql;
+
+      $query = $merged_qsql->get_select() . $this->QueryOrder . $this->QueryLimit;
+      $this->setQuery( $query );
+      return $query;
+   }
+
+   /*! \brief Clears list of items in this list-iterator. */
+   function clearItems()
+   {
+      $this->Items = array();
+   }
+
+   /*! \brief Adds item to item-list. */
+   function addItem( $item )
+   {
+      $this->Items[] = $item;
+   }
+
+   /*! \brief Returns each() from items-list of this ListIterator. */
+   function getListIterator()
+   {
+      return each( $this->Items );
+   }
+
+   /*! \brief Returns String-representation of this object. */
+   function to_string()
+   {
+      $arr = array();
+      if( !is_null($this->QuerySQL) )
+         $arr[] = "QuerySQL={" . $this->QuerySQL->to_string() . '}';
+      $idx = 1;
+      foreach( $this->QuerySQLMerge as $qsql )
+         $arr[] = sprintf( "QuerySQLMerge.%d=[%s]", $idx++, $qsql->to_string() );
+      $arr[] = "QueryOrder=[{$this->QueryOrder}]";
+      $arr[] = "QueryLimit=[{$this->QueryLimit}]";
+      $arr[] = "Query=[{$this->Query}]";
+      $arr[] = "ResultRows=[{$this->ResultRows}]";
+      $arr[] = '#Items=[' . count($this->Items) . ']';
+      $idx = 1;
+      foreach( $this->Items as $item )
+         $arr[] = sprintf( "Item.%d=[%s]", $idx++,
+            ( method_exists($item, 'to_string') ? $item->to_string() : $item ));
+      return "ListIterator({$this->Name}): " . implode(', ', $arr);
+   }
+
+} // end of 'ListIterator'
 
 ?>
