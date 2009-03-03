@@ -22,23 +22,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = 'Tournament';
 
 require_once( 'include/std_classes.php' );
+require_once( 'tournaments/include/tournament_director.php' );
 
-/*!
- * \file tournament.php
- *
- * \brief Functions for handling tournaments: tables Tournament
- */
+ /*!
+  * \file tournament.php
+  *
+  * \brief Functions for handling tournaments: tables Tournament
+  */
 
+
+define('TOURNEY_DATEFMT',    'YYYY-MM-DD hh:mm' ); // user-input for parsing
+define('DATEFMT_TOURNAMENT', 'Y-m-d H:i'); // for output
 
 
  /*!
   * \class Tournament
   *
   * \brief Class to manage Tournament-table
-  *
-  * Examples:
-  *    $cfg->insert_default_config_board( $user_id );
-  *    $cfg = ConfigBoard::load_config_board( $user_id );
   */
 
 define('TOURNEY_SCOPE_DRAGON',  'DRAGON');
@@ -76,7 +76,7 @@ class Tournament
    var $EndTime;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function Tournament( $id, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_ROUND_ROBIN,
+   function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_ROUND_ROBIN,
                         $title='', $description='', $owner_id=0, $owner_handle='',
                         $status=TOURNEY_STATUS_NEW, $created=0, $lastchanged=0,
                         $starttime=0, $endtime=0 )
@@ -93,6 +93,11 @@ class Tournament
       $this->Lastchanged = (int)$lastchanged;
       $this->StartTime = (int)$starttime;
       $this->EndTime = (int)$endtime;
+   }
+
+   function to_string()
+   {
+      return print_r( $this, true );
    }
 
    function setScope( $scope )
@@ -116,9 +121,37 @@ class Tournament
       $this->Status = $status;
    }
 
+   /*! \brief Inserts or updates tournment in database. */
+   function persist()
+   {
+      if( $this->ID > 0 )
+         $success = $this->update();
+      else
+         $success = $this->insert();
+      return $success;
+   }
+
+   /*! \brief Builds query-part for persistance (insert or update). */
+   function build_persist_query_part( $withCreated )
+   {
+      // Scope/Type/Status are checked
+      return  " Scope='{$this->Scope}'"
+            . ",Type='{$this->Type}'"
+            . ",Title='" . mysql_addslashes($this->Title) . "'"
+            . ",Description='" . mysql_addslashes($this->Description) . "'"
+            . ",Owner_ID='{$this->Owner_ID}'"
+            . ",Status='{$this->Status}'"
+            . ( $withCreated ? ",Created=FROM_UNIXTIME({$this->Created})" : '' )
+            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
+            . ",StartTime=FROM_UNIXTIME({$this->StartTime})"
+            . ( $this->EndTime > 0 ? ",EndTime=FROM_UNIXTIME({$this->EndTime})" : '' )
+         ;
+   }
+
    /*!
     * \brief Inserts Tournament-entry.
     * \note sets Created=NOW, Lastchanged=NOW, StartTime=NOW
+    * \note sets ID to inserted Tournament.ID
     */
    function insert()
    {
@@ -127,19 +160,13 @@ class Tournament
       $this->Lastchanged = $NOW;
       $this->StartTime = $NOW;
 
-      db_query( "Tournament::insert({$this->ID})",
+      $result = db_query( "Tournament::insert({$this->ID})",
             "INSERT INTO Tournament SET "
-            . " Scope='{$this->Scope}'"
-            . ",Type='{$this->Type}'"
-            . ",Title='{$this->Title}'"
-            . ",Description='{$this->Description}'"
-            . ",Owner_ID='{$this->Owner_ID}'"
-            . ",Status='{$this->Status}'"
-            . ",Created=FROM_UNIXTIME({$this->Created})"
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",StartTime=FROM_UNIXTIME({$this->StartTime})"
-            . ",EndTime=FROM_UNIXTIME({$this->EndTime})"
+            . $this->build_persist_query_part(true)
          );
+      if( $result )
+         $this->ID = mysql_insert_id();
+      return $result;
    }
 
    /*!
@@ -151,23 +178,69 @@ class Tournament
       global $NOW;
       $this->Lastchanged = $NOW;
 
-      db_query( "Tournament::update({$this->ID})",
+      $result = db_query( "Tournament::update({$this->ID})",
             "UPDATE Tournament SET "
-            . " Scope='{$this->Scope}'"
-            . ",Type='{$this->Type}'"
-            . ",Title='{$this->Title}'"
-            . ",Description='{$this->Description}'"
-            . ",Owner_ID='{$this->Owner_ID}'"
-            . ",Status='{$this->Status}'"
-            //. ",Created=FROM_UNIXTIME({$this->Created})"
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",StartTime=FROM_UNIXTIME({$this->StartTime})"
-            . ",EndTime=FROM_UNIXTIME({$this->EndTime})"
+            . $this->build_persist_query_part(false /*-Created*/)
             . " WHERE ID='{$this->ID}' LIMIT 1"
          );
+      return $result;
+   }
+
+   /*! \brief Returns true if given user can edit tournament. */
+   function allow_edit_tournaments( $uid )
+   {
+      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
+         return false;
+
+      // logged-in admin is allowed anything
+      if( Tournament::isAdmin() )
+         return true;
+
+      // edit allowed for T-owner or TD
+      if( $this->Owner_ID == $uid || TournamentDirector::isTournamentDirector($this->ID, $uid) )
+         return true;
+
+      return false;
+   }
+
+   /*!
+    * \brief Returns true if given user can edit tournament directors.
+    * \param $withNewDelete true to check, if user is also allowed to create and delete directors.
+    */
+   function allow_edit_directors( $uid, $withNewDelete=false )
+   {
+      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
+         return false;
+
+      if( $withNewDelete )
+      {// only admin or owner can create/delete TDs
+         return Tournament::isAdmin() || ( $this->Owner_ID == $uid );
+      }
+      else
+      {// same checks to edit-only of TDs as for Ts
+         return $this->allow_edit_tournaments( $uid );
+      }
    }
 
    // ------------ static functions ----------------------------
+
+   /*! \brief Returns db-fields to be used for query of Tournament-object. */
+   function build_query_sql()
+   {
+      // Tournament: ID,Scope,Type,Title,Description,Owner_ID,Status,Created,Lastchanged,StartTime,EndTime
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS,
+         'T.*',
+         'UNIX_TIMESTAMP(T.Created) AS X_Created',
+         'UNIX_TIMESTAMP(T.Lastchanged) AS X_Lastchanged',
+         'UNIX_TIMESTAMP(T.StartTime) AS X_StartTime',
+         'UNIX_TIMESTAMP(T.EndTime) AS X_EndTime',
+         'Owner.Handle AS X_OwnerHandle' );
+      $qsql->add_part( SQLP_FROM,
+         'Tournament AS T',
+         'INNER JOIN Players AS Owner ON Owner.ID=T.Owner_ID' );
+      return $qsql;
+   }
 
    /*! \brief Returns Tournament-object created from specified (db-)row. */
    function new_from_row( $row )
@@ -189,21 +262,27 @@ class Tournament
       return $tournament;
    }
 
+   /*! \brief Loads and returns Tournament-object for given tournament-ID; NULL if nothing found. */
+   function load_tournament( $tid )
+   {
+      $result = NULL;
+      if( $tid > 0 )
+      {
+         $qsql = Tournament::build_query_sql();
+         $qsql->add_part( SQLP_WHERE, "T.ID='$tid'" );
+         $qsql->add_part( SQLP_LIMIT, '1' );
+
+         $row = mysql_single_fetch( "Tournament.load_tournament($tid)", $qsql->get_select() );
+         if( $row )
+            $result = Tournament::new_from_row( $row );
+      }
+      return $result;
+   }
+
    /*! \brief Returns enhanced (passed) ListIterator with Tournament-objects. */
    function load_tournaments( $iterator )
    {
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'T.*',
-         'UNIX_TIMESTAMP(T.Created) AS X_Created',
-         'UNIX_TIMESTAMP(T.Lastchanged) AS X_Lastchanged',
-         'UNIX_TIMESTAMP(T.StartTime) AS X_StartTime',
-         'UNIX_TIMESTAMP(T.EndTime) AS X_EndTime',
-         'Owner.Handle AS X_OwnerHandle' );
-      $qsql->add_part( SQLP_FROM,
-         'Tournament AS T',
-         'INNER JOIN Players AS Owner ON Owner.ID=T.Owner_ID' );
-
+      $qsql = Tournament::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "Tournament.load_tournaments", $query );
@@ -287,7 +366,37 @@ class Tournament
    function isAdmin()
    {
       global $player_row;
+      //TODO: add own ADMIN_TOURNAMENT (tournament-admin)
       return ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
+   }
+
+   /*! \brief Returns true if given user can create a new tournament. */
+   function allow_create( $uid )
+   {
+      return ( $uid > GUESTS_ID_MAX ); // anyone can create Ts except guests
+   }
+
+   /*!
+    * \brief Parses given date-string (expect format TOURNEY_DATEFMT)
+    *        into UNIX-timestamp; or return error-string.
+    *        Returns 0 if no date-string given.
+    */
+   function parseDate( $msg, $date_str )
+   {
+      $result = 0;
+      $date_str = trim($date_str);
+      if( $date_str != '' )
+      {
+         if( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
+         {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5
+            list(, $year, $month, $day, $hour, $min ) = $matches;
+            $result = mktime( 0+$hour, 0+$min, 0, 0+$month, 0+$day, 0+$year );
+         }
+         else
+            $result = sprintf( T_('Dateformat of [%s] is wrong, expected [%s] for [%s]'),
+               $date_str, TOURNEY_DATEFMT, $msg );
+      }
+      return $result;
    }
 
 } // end of 'Tournament'
