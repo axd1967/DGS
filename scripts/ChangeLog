@@ -23,7 +23,70 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-03-03 juga
+
+   * site_map.php:
+   - added Tournaments-pages (list/view/edit)
+   - added TournamentDirectors-pages (list/edit)
+
+   * tournaments/include/tournament.php (Tournament, ~.to_string, ~.persist,
+       ~.build_persist_query_part, ~.insert, ~.update, ~.allow_edit_tournaments,
+       ~.allow_edit_directors, ~.build_query_sql, ~.load_tournament,
+       ~.load_tournaments, ~.allow_create, ~.parseDate),
+     tournaments/include/tournament_director.php (TournamentDirector),
+     tournaments/list_tournaments.php, tournaments/edit_tournament.php,
+     tournaments/view_tournament.php,
+     tournaments/list_directors.php, tournaments/edit_director.php,
+     include/classlib_profile.php, include/gui_functions.php,
+     error.php, skins/dragon/screen.css,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - Changes to manage tournaments
+     - create and edit tournaments
+     - started page to view tournament
+     - check if user is allowed to create/edit tournament
+   - added management of tournament-directors
+     - added table TournamentDirector and class to manage tournament-directors
+     - create/delete/edit tournament-directors for a tournament
+     - view list of tournament-directors of a tournament with search-profile
+     - check if user is allowed to create/delete or edit tournament-directors
+   - bugfixes, adjusted texts, added CSS
+-----------
+-- manage Tournament-Directors
+CREATE TABLE TournamentDirector (
+   tid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Comment varchar(255) NOT NULL default '',
+   PRIMARY KEY (tid,uid)
+) ENGINE=MyISAM;
+-----------
+
+   * features/lib_votes.php (Feature.set_description),
+     features/edit_feature.php, features/list_features.php, features/list_votes.php:
+   - bugfix: format feature-subject/description with (intended) correct make_html_safe()-args
+   - minor text-adjustments for empty-values
+
+   * error.php:
+   - cleanup: remove unused errors and old tournament-errors
+
+   * users.php:
+   - bugfix: correct ID-button-link to right user-info
+
+   * include/std_functions.php (start_page),
+     tournaments/index.php, tournaments/list_tournaments.php:
+   - renamed tournaments/list.php -> ~/list_tournaments.php
+
+2009-03-02 juga
+
+   * tournaments/list_tournaments.php, tournaments/list.php:
+   - renamed list.php -> list_tournaments.php
+
 2009-03-01 juga
+
+   * tournaments/include/tournament.php (Tournament.getStatusText, ~.isAdmin),
+     tournaments/list.php:
+   - added filter on tournament-owner: show all or my tournaments
+   - show tournaments on admin-status only to developer-admins
 
    * tournaments/include/tournament.php (Tournament),
      tournaments/list.php, tournaments/index.php,
