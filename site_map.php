@@ -100,6 +100,22 @@ function item($text, $link='', $working=true, $last=false)
 
       item(T_('Waiting room'), "waiting_room.php", true);
 
+      item(T_('Tournaments'), "tournaments/list_tournaments.php", true);
+      { $item_level++;
+         item(T_('Add new tournament'), "tournaments/edit_tournament.php", true);
+         item(T_('View tournament'), "tournaments/view_tournament.php", false, true);
+         { $item_level++;
+            item(T_('Tournament directors'), "tournaments/list_directors.php", false);
+            { $item_level++;
+               item(T_('Send a message'), "message.php?mode=NewMessage", false);
+               item(T_('Add tournament director'), "tournaments/edit_directors.php", false);
+               item(T_('Edit tournament director'), "tournaments/edit_directors.php", false);
+               item(T_('Remove tournament director'), "tournaments/edit_directors.php?td_delete=1", false, true);
+            } $item_level--;
+            item(T_('Edit this tournament'), "tournaments/view_tournament.php", false, true);
+         } $item_level--;
+      } $item_level--;
+
       item(T_('My user info'), "userinfo.php?uid=$id", true);
       { $item_level++;
          item(T_('Show my rating graph'), "ratinggraph.php?uid=$id", true);
