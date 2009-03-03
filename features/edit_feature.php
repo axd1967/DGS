@@ -21,6 +21,7 @@ $TranslateGroups[] = "Common";
 
 chdir('../');
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( 'include/utilities.php' );
 require_once( "include/form_functions.php" );
 require_once( "features/lib_votes.php" );
@@ -120,7 +121,7 @@ require_once( "features/lib_votes.php" );
    // edit feature
    $fform->add_row( array(
       'DESCRIPTION',  T_('ID'),
-      'TEXT',         ($fid ? $fid : '-') ));
+      'TEXT',         ($fid ? $fid : NO_VALUE) ));
    $arr_status = array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status );
@@ -197,18 +198,18 @@ require_once( "features/lib_votes.php" );
       {
          $fform->add_row( array(
             'DESCRIPTION', T_('Preview'),
-            'TEXT', $feature->subject,
+            'TEXT', make_html_safe( $feature->subject, true ),
             ));
          $fform->add_row( array(
             'TAB',
-            'TEXT', $feature->description,
+            'TEXT', make_html_safe( $feature->description, true),
             ));
       }
 
       $fform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 'feature_save', T_('Save feature'),
-         'TEXT', '&nbsp;&nbsp;&nbsp;',
+         'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'feature_preview', T_('Preview'),
          ));
    }

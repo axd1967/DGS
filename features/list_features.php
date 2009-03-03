@@ -134,7 +134,7 @@ require_once( "features/lib_votes.php" );
       if( $ftable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
       if( $ftable->Is_Column_Displayed[4] )
-         $frow_strings[4] = make_html_safe( $feature->subject, SUBJECT_HTML, $rx_term);
+         $frow_strings[4] = make_html_safe( $feature->subject, true, $rx_term);
       if( $is_super_admin && $ftable->Is_Column_Displayed[7] )
          $frow_strings[7] = user_reference( REF_LINK, 1, '', $feature->editor );
       if( $ftable->Is_Column_Displayed[5] )

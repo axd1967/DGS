@@ -103,19 +103,19 @@ class Feature
       if( is_null($description) )
          $this->description = '';
       else
-         $this->description = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($description) );
+         $this->description = preg_replace( "/(\r\n|\n|\r)/s", "\n", trim($description) );
    }
 
    /*!
     * \brief Sets subject after doing some replacements
-    *        (remove double-LFs, remove starting/trailing whitespaces).
+    *        (remove double-LFs, remove starting/trailing whitespaces and LFs).
     */
    function set_subject( $subject )
    {
       if( is_null($subject) )
          $this->subject = '';
       else
-         $this->subject = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($subject) );
+         $this->subject = preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) );
    }
 
    /*! \brief Returns true, if feature can be voted on (NEW status); no user-specific checks. */

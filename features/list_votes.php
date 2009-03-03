@@ -115,7 +115,7 @@ require_once( "features/lib_votes.php" );
       if( $vtable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
       if( $vtable->Is_Column_Displayed[4] )
-         $frow_strings[4] = make_html_safe($feature->subject, SUBJECT_HTML);
+         $frow_strings[4] = make_html_safe($feature->subject, true);
       if( $vtable->Is_Column_Displayed[6] )
          $frow_strings[6] = ($feature->lastchanged > 0 ? date(DATEFMT_VOTELIST, $feature->lastchanged) : '' );
 
