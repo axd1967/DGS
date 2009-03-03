@@ -47,8 +47,9 @@ define('PROFTYPE_FILTER_FEATURES', 17);
 define('PROFTYPE_FILTER_VOTES', 18);
 define('PROFTYPE_FILTER_GAMES_OBSERVED_ALL', 19);
 define('PROFTYPE_FILTER_TOURNAMENT_LIST', 20);
+define('PROFTYPE_FILTER_TOURNAMENT_DIRECTOR_LIST', 21);
 // adjust if adding one
-define('MAX_PROFTYPE', 20);
+define('MAX_PROFTYPE', 21);
 
 define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 
