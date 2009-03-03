@@ -2517,6 +2517,20 @@ form#tableFSFForm td.Description {
 
 
 /* ------------------------- */
+/* Tournaments pages */
+/* ------------------------- */
+
+span.EditNote {
+   font-size: 80%;
+}
+
+body.Tournament table#pageLayout td#pageBody div.Section {
+   width: 70%;
+   text-align: left;
+}
+
+
+/* ------------------------- */
 /* FAQ pages */
 /* ------------------------- */
 
