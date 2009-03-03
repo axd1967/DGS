@@ -190,7 +190,7 @@ require_once( 'include/classlib_userconfig.php' );
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[1] )
-         $urow_strings[1] = button_TD_anchor( "userinfo.php?uid=$uid", $ID );
+         $urow_strings[1] = button_TD_anchor( "userinfo.php?uid=$ID", $ID );
       if( $utable->Is_Column_Displayed[2] )
          $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
