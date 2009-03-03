@@ -28,6 +28,8 @@ require_once( 'include/classlib_profile.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'tournaments/include/tournament.php' );
 
+$ThePage = new Page('TournamentList');
+
 {
    #$DEBUG_SQL = true;
    connect2mysql();
@@ -38,7 +40,7 @@ require_once( 'tournaments/include/tournament.php' );
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_LIST );
 
-   $page = "list.php?";
+   $page = "list_tournaments.php?";
 
    // config for filters
    $scope_filter_array = array( T_('All') => '' );
@@ -102,7 +104,7 @@ require_once( 'tournaments/include/tournament.php' );
    $iterator = Tournament::load_tournaments( $iterator );
 
 
-   $title = T_('Tournament list');
+   $title = T_('Tournaments');
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
@@ -143,7 +145,8 @@ require_once( 'tournaments/include/tournament.php' );
 
 
    $menu_array = array();
-   $menu_array[T_('Create tournament')] = 'tournaments/edit_tournament.php';
+   if( Tournament::allow_create($my_id) )
+      $menu_array[T_('Add new tournament')] = 'tournaments/edit_tournament.php';
 
    end_page(@$menu_array);
 }
