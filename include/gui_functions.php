@@ -20,12 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/std_functions.php' );
 
 
-
 /*!
  * \file gui_functions.php
  *
  * \brief Collection of GUI-related functions.
  */
+
+
+if( !defined('SMALL_SPACING') )
+   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+if( !defined('MINI_SPACING') )
+   define('MINI_SPACING', '&nbsp;');
 
 
 /*!
