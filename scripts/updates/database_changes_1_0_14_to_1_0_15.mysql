@@ -322,4 +322,12 @@ ALTER TABLE ConfigPages
 UPDATE ConfigPages
    SET ColumnsTournamentList=-1 ;
 
+-- manage Tournament-Directors
+CREATE TABLE TournamentDirector (
+   tid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Comment varchar(255) NOT NULL default '',
+   PRIMARY KEY (tid,uid)
+) ENGINE=MyISAM;
+
 

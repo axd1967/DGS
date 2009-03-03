@@ -9,7 +9,17 @@ Legend:
    - TD = Tournament Director
    - TP = Tournament Participant (registered player)
 
--------------------------------------------------
+Important Notes:
+   - Guests can't perform "writing" operations for Ts
+   - Admin can edit all Ts,
+   - Admin can set T-status to 'ADM', e.g. for migrations or archiving
+   - Admin can set T-status at any time to any status
+   - Admin and T-owner can add, delete & edit all TDs of a T
+   - All TDs can edit their T
+   - All TDs can edit all TDs of their T
+
+
+###########################################################################
 ## --- Tournament ---
 
  Field       | Type                                           | Default
@@ -61,4 +71,21 @@ Legend:
 * StartTime : official start-date of T (informal)
 
 * EndTime : datetime when T closed, T can be changed afterwards still by TDs
+
+
+###########################################################################
+## --- TournamentDirector ---
+
+ Field   | Type         | Default
+---------+--------------+--------
+ tid     | int(11)      | NULL
+ uid     | int(11)      | NULL
+ Comment | varchar(255) |
+
+## Fields:
+
+* tid, uid : primary key of this table
+   - Existing DB-entry makes User [uid] a TD for T [tid]
+
+* Comment : comment about TD, may be empty
 
