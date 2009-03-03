@@ -658,14 +658,6 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
-/*
-      case('admin_already_translated'):
-      {
-         echo T_//("Sorry, this entry is already translated, so I cannot make it untranslatable.");
-      }
-      break;
-*/
-
       case("adminlevel_too_low"):
       {
         echo T_("Sorry, this page is solely for users with administrative tasks.");
@@ -690,53 +682,31 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
-      case("no_specified_user"):
-      {
-        echo T_("Sorry, you must specify a user.");
-      }
-      break;
 
-      case("unknown_organizer"):
-      {
-        echo T_("Sorry, one or more users in the organizer list couldn't be found.");
-      }
-      break;
-
-      case("mysql_insert_tournament"):
-      {
-        echo T_("Sorry, the tournament creation in the mysql database failed.");
-      }
-      break;
-
-      case("strange_tournament_id"):
-      {
-        echo T_("Sorry, a correct tournament id is required.");
-      }
-      break;
-
-      case("no_such_tournament"):
+      case('unknown_tournament'):
       {
         echo T_("Sorry, I couldn't find the given tournament.");
       }
       break;
 
-      case("remove_form_tournament_failed"):
+      case('tournament_edit_not_allowed'):
       {
-        echo T_("Sorry, something went wrong when removing you from the tournament.");
+         echo T_("Sorry, you are not allowed to add or edit a tournament.");
       }
       break;
 
-      case("add_form_tournament_failed"):
+      case('tournament_director_edit_not_allowed'):
       {
-        echo T_("Sorry, something went wrong when adding you to the tournament.");
+         echo T_("Sorry, you are not allowed to add, edit or delete a tournament director.");
       }
       break;
 
-      case("could_not_start_tournament"):
+      case('tournament_director_new_del_not_allowed'):
       {
-        echo T_("Sorry, something went wrong when trying start a tournament.");
+         echo T_("Sorry, you are not allowed to add or delete a tournament director.");
       }
       break;
+
 
       case("folder_not_found"):
       {
