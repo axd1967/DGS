@@ -373,7 +373,19 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
 
    if( is_javascript_enabled() )
+   {
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
+
+      if( ALLOW_GOBAN_EDITOR )
+         echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goban_editor.js\"></script>";
+
+      if( ALLOW_GO_DIAGRAMS )
+      {
+         echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
+         $version = 1;
+         //echo "\n<script language=\"JavaScript\" type=\"text/javascript\"> version=$version; </script>"; //TODO
+      }
+   }
 
    if( is_a($ThePage, 'HTMLPage') )
       $tmp = $ThePage->getCSSclass(); //may be multiple, i.e. 'Games Running'
@@ -402,9 +414,6 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
 
-//    echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
-//    echo "\n<script language=\"JavaScript1.4\" type=\"text/javascript\"> version=1; </script>";
-
    if( !$printable )
    {
    echo "\n\n<table id=\"pageHead\">"
@@ -428,9 +437,11 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+      // NOTE: row-number can be skipped, only for ordering
       $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
       $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
-      $menu->add( 1,3, array( T_('Tournaments'),  'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
+      if( ALLOW_TOURNAMENTS )
+         $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
       $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
       $menu->add( 2,1, array( T_('Messages'),     'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )));
@@ -446,9 +457,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
-      $r = 1;
       if( ALLOW_FEATURE_VOTE )
-         $menu->add( 5,$r++, array( T_('Vote'), 'features/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+         $menu->add( 5,1 array( T_('Vote'), 'features/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+      if( ALLOW_GOBAN_EDITOR )
+         $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
       $tools_array = array(); //$url => array($img,$alt,$title)
       switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
@@ -1335,7 +1347,7 @@ function add_line_breaks( $str)
   // ** keep a '|' at both ends (or empty):
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|color|';
 $html_code_closed['line'] = '|home|a'.$html_code_closed['cell'];
-$html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote'.$html_code_closed['line'];
+$html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
 $html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
 //$html_code_closed['faq'] = ''; //no closed check
 $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
@@ -1345,9 +1357,9 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
-   .'goban|mailto|https?|news|game_?|user_?|send_?|image';
+   .'goban|mailto|https?|news|game_?|tourney_?|user_?|send_?|image';
 $html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
-   .'goban|mailto|https?|news|ftp|game_?|user_?|send_?|image';
+   .'goban|mailto|https?|news|ftp|game_?|tourney_?|user_?|send_?|image';
 $html_code['faq'] = '\w+|/\w+'; //all not empty words
 
 
@@ -1643,6 +1655,11 @@ $html_safe_preg = array(
  '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT.'/ise'
   => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
+
+//<tourney tid> => show tournament
+ '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
+  => "tournament_reference(('\\1'?".REF_LINK_BLANK.":0)+"
+                        .REF_LINK_ALLOWED.",1,'',\\2)",
 
 //<user uid> or <user =uhandle> =>show user info
 //<send uid> or <send =uhandle> =>send a message to user
@@ -2562,6 +2579,51 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    return $whitename;
 }
 
+// format: Tournament #n [title]
+function tournament_reference( $link, $safe_it, $class, $tid )
+{
+   global $base_path;
+
+   $tid = (int)$tid;
+   $legal = ( $tid > 0 );
+   if( $legal )
+   {
+      $query = "SELECT Title FROM Tournament WHERE ID='$tid' LIMIT 1";
+      if( $row = mysql_single_fetch( "tournament_reference.find_tournament($tid)", $query ) )
+      {
+         $title = trim(@$row['Title']);
+         $safe_it = true;
+      }
+      else
+         $legal = 0;
+   }
+
+   $tourney = sprintf( T_('Tournament #%s [%s]'),
+                       $tid, ( $legal ? $title : T_('???#tournament') ));
+   if( $safe_it )
+      $tourney = make_html_safe($tourney);
+
+   if( $link && $legal )
+   {
+      $url = $base_path."tournaments/view_tournament.php?tid=$tid";
+      $url = 'A href="' . $url . '"';
+      if( $link & REF_LINK_BLANK )
+         $url .= ' target="_blank"';
+      $class = 'Tournament'.$class;
+      if( $class )
+        $url .= " class=$class";
+      if( $link & REF_LINK_ALLOWED )
+      {
+         $url = str_replace('"', ALLOWED_QUOT, $url);
+         $tourney = ALLOWED_LT.$url.ALLOWED_GT.$tourney.ALLOWED_LT."/A".ALLOWED_GT ;
+      }
+      else
+         $tourney = "<$url>$tourney</A>";
+   }
+
+   return $tourney;
+}
+
 function send_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
    if( is_numeric($link) ) //not owned reference
@@ -2862,7 +2924,14 @@ function attb_build( $attbs)
       {
          if( $key == 'colspan' && $val < 2 )
             continue;
-         $str.= ' '.$key.'='.attb_quote($val);
+         $str .= ' '.$key.'=';
+
+         // don't quote values of JavaScript-attributes
+         //if( preg_match( "/^(on((dbl)?click|mouse(down|up|over|move)|key(press|down|up)))$/i", $key ) )
+         if( strncasecmp($key,'on',2) == 0 ) // begins with 'on'
+            $str .= "\"$val\"";
+         else
+            $str .= attb_quote($val);
       }
       return $str;
    }
