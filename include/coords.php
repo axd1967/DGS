@@ -73,14 +73,27 @@ $hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
 $hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
 //$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
 
-function is_hoshi($x, $y, $sz)
+function is_hoshi($x, $y, $sz, $szy=null)
 {
-  global $hoshi_pos, $hoshi_dist;
+   global $hoshi_pos, $hoshi_dist;
+   if( is_null($szy) ) $szy = $sz;
 
-   $hd= $hoshi_dist[$sz];
-   if( $h = $x*2+1 == $sz ? 1 : ( $x == $hd-1 || $x == $sz-$hd ? 2 : 0 ) )
-       $h*= $y*2+1 == $sz ? 1 : ( $y == $hd-1 || $y == $sz-$hd ? 2 : 0 ) ;
-   return $hoshi_pos[$sz] & $h;
+   if( $sz == $szy )
+   {
+      $hd = $hoshi_dist[$sz];
+      if( $h  = ( ($x*2+1 == $sz) ? 1 : ( ($x == $hd-1 || $x == $sz-$hd) ? 2 : 0 ) ) )
+          $h *=   ($y*2+1 == $sz) ? 1 : ( ($y == $hd-1 || $y == $sz-$hd) ? 2 : 0 );
+      return $hoshi_pos[$sz] & $h;
+   }
+   else
+   {
+      $szx = $sz;
+      $hdx = $hoshi_dist[$szx];
+      $hdy = $hoshi_dist[$szy];
+      $hx = ($x*2+1 == $szx) ? 1 : ( ($x == $hdx-1 || $x == $szx-$hdx) ? 2 : 0 );
+      $hy = ($y*2+1 == $szy) ? 1 : ( ($y == $hdy-1 || $y == $szy-$hdy) ? 2 : 0 );
+      return ($hoshi_pos[$szx] & $hx) && ($hoshi_pos[$szy] & $hy);
+   }
 }
 
 ?>
