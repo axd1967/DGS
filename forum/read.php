@@ -99,8 +99,10 @@ function revision_history( $display_forum, $post_id )
       error('forbidden_forum');
 
    // for GoDiagrams
+   $preview = isset($_POST['preview']);
    $cfg_board = null;
-   // if( $preview || isset($_POST['post']) ) $cfg_board = ConfigBoard::load_config_board($my_id);
+//   if( ALLOW_GO_DIAGRAMS && ( $preview || isset($_POST['post']) ) )
+//      $cfg_board = ConfigBoard::load_config_board($my_id);
 
    if( isset($_POST['post']) )
    {
@@ -119,18 +121,20 @@ function revision_history( $display_forum, $post_id )
    if( $markread != '' )
       $FR->mark_read( $markread );
 
-   $preview = isset($_POST['preview']);
    $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
+   $preview_GoDiagrams = NULL;
    if( $preview )
    {
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
       if( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
-//      $preview_GoDiagrams = create_godiagrams($preview_Text, $cfg_board);
+//      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
+//         $preview_GoDiagrams = create_godiagrams($preview_Text, $cfg_board);
    }
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
+   $disp_forum->setConfigBoard( $cfg_board );
    $disp_forum->set_rx_term( $rx_term );
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
@@ -185,7 +189,9 @@ function revision_history( $display_forum, $post_id )
    );
 
    $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
-   start_page($title, true, $logged_in, $player_row);
+   $style_str = (is_null($cfg_board))
+      ? '' : GobanWriterGfxBoard::style_string( $cfg_board->get_stone_size() );
+   start_page($title, true, $logged_in, $player_row, $style_str );
    echo "<h3 class=Header>$title</h3>\n";
 
    $disp_forum->print_moderation_note('99%');
@@ -270,11 +276,11 @@ function revision_history( $display_forum, $post_id )
       else
          $postClass = 'Normal';
 
-//      $GoDiagrams = find_godiagrams($Text, $cfg_board);
-
       // draw current post
-      $post_reference =
-         $disp_forum->draw_post($postClass, $post, $is_my_post, NULL /*$GoDiagrams*/ );
+      $GoDiagrams = NULL;
+//      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
+//         $GoDiagrams = find_godiagrams($post->text, $cfg_board);
+      $post_reference = $disp_forum->draw_post($postClass, $post, $is_my_post, $GoDiagrams );
 
       // preview of new or existing post (within existing thread)
       $pvw_post = $post; // copy for preview/edit
@@ -284,8 +290,8 @@ function revision_history( $display_forum, $post_id )
 
          $pvw_post->subject = $preview_Subject;
          $pvw_post->text = $preview_Text;
-//         $GoDiagrams = $preview_GoDiagrams;
-         $disp_forum->draw_post('Preview', $pvw_post, false, NULL /*$GoDiagrams*/ );
+         $GoDiagrams = $preview_GoDiagrams;
+         $disp_forum->draw_post('Preview', $pvw_post, false, $GoDiagrams );
       }
 
       // input-form for reply/edit-post
@@ -298,10 +304,10 @@ function revision_history( $display_forum, $post_id )
                $pvw_post_text = "<quote>$post_reference\n\n$pvw_post_text</quote>\n";
             else
                $pvw_post_text = '';
-//            $GoDiagrams = null;
+            $GoDiagrams = null;
          }
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-         $disp_forum->forum_message_box($postClass, $pid, NULL /*$GoDiagrams*/,
+         $disp_forum->forum_message_box($postClass, $pid, $GoDiagrams,
             $pvw_post->subject, $pvw_post_text);
          echo "</td></tr>\n";
       }
@@ -313,17 +319,17 @@ function revision_history( $display_forum, $post_id )
    {
       $disp_forum->change_depth( $disp_forum->cur_depth + 1 );
       $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
-//      $GoDiagrams = $preview_GoDiagrams;
-      $disp_forum->draw_post('Preview', $post, false, NULL /*$GoDiagrams*/ );
+      $GoDiagrams = $preview_GoDiagrams;
+      $disp_forum->draw_post('Preview', $post, false, $GoDiagrams );
 
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-      $disp_forum->forum_message_box('Preview', $thread, NULL /*$GoDiagrams*/,
+      $disp_forum->forum_message_box('Preview', $thread, $GoDiagrams,
          $post->subject, $post->text );
       echo "</td></tr>\n";
    }
 
    // footer: reply-form (only for a NEW THREAD or if ONE post existing)
-   if( ($is_empty_thread || $cnt_replies == 1) && !$preview && !$disp_forum->is_moderator )
+   if( ($is_empty_thread || $cnt_replies == 1) && !($edit > 0) && !$preview && !$disp_forum->is_moderator )
    {
       $disp_forum->change_depth( 1 );
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
@@ -335,7 +341,6 @@ function revision_history( $display_forum, $post_id )
 
    $disp_forum->change_depth( -1 );
    $disp_forum->forum_end_table();
-
 
    // use-cases U03: increase thread-hits show thread-"activity"
    if( !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
