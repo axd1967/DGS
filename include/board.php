@@ -20,7 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/coords.php" );
 
-define('EDGE_SIZE', 10);
+if( !defined('EDGE_SIZE') )
+   define('EDGE_SIZE', 10);
 
 
 class Board
@@ -323,6 +324,7 @@ class Board
    }
 
 
+   // keep in sync with GobanHandlerGfxBoard
    function style_string()
    {
       $stone_size = $this->stone_size;
@@ -343,6 +345,7 @@ class Board
    }
 
 
+   // keep in sync with GobanHandlerGfxBoard
    function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
                             $coord_left, $coord_right )
    {
@@ -367,6 +370,7 @@ class Board
    }
 
 
+   // keep in sync with GobanHandlerGfxBoard
    function draw_edge_row( $edge_start, $edge_coord,
                            $border_start, $border_imgs, $border_rem )
    {
@@ -394,6 +398,7 @@ class Board
    }
 
 
+   // keep in sync with GobanHandlerGfxBoard
    function draw_board( $may_play=false, $action='', $stonestring='')
    {
       global $woodbgcolors;
