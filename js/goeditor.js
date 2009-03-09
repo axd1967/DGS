@@ -117,29 +117,29 @@ function init(nr)
 */
 function show_goban(nr)
 {
-  var x, y, fig;
-  var stonesz = stonesize[nr];
-  var woodstring = ( woodcolor[nr] > 10
-                    ? 'bgcolor=' + woodbgcolors[woodcolor[nr] - 10]
-                    : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"');
+   var x, y, fig;
+   var stonesz = stonesize[nr];
+   var woodstring = ( woodcolor[nr] > 10
+         ? 'bgcolor=' + woodbgcolors[woodcolor[nr] - 10]
+         : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"');
 
-  document.write('<table border=0 cellpadding=0 cellspacing=0 '+woodstring+' align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
-  for( y=starty[nr]; y<endy[nr]; y++)
-  {
-     document.write('<tr>');
-     for( x=startx[nr]; x<endx[nr]; x++ )
-     {
-        fig = get_empty_image(x, y, size[nr]);
+   document.write('<table border=0 cellpadding=0 cellspacing=0 '+woodstring+' align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
+   for( y=starty[nr]; y<endy[nr]; y++)
+   {
+      document.write('<tr>');
+      for( x=startx[nr]; x<endx[nr]; x++ )
+      {
+         fig = get_empty_image(x, y, size[nr]);
 
-        if( version == 1 )
-           document.write ('<td><img name="pos'+nr+'_'+x+'_'+y+'" src="'+path+stonesz+'/'+fig+'.'+img+'" onClick="click('+nr+','+x+','+y+')">');
-        else
-           document.write ('<td><a href="javascript:click('+nr+','+x+','+y+');"><img name="pos'+nr+'_'+x+'_'+y+'" border=0 src="'+path+stonesz+'/'+fig+'.'+img+'" width='+stonesz+' height='+stonesz+'></a>');
-     }
-     document.write('</tr>');
-  }
+         if( version == 1 )
+            document.write ('<td><img name="pos'+nr+'_'+x+'_'+y+'" src="'+path+stonesz+'/'+fig+'.'+img+'" onClick="click('+nr+','+x+','+y+')">');
+         else
+            document.write ('<td><a href="javascript:click('+nr+','+x+','+y+');"><img name="pos'+nr+'_'+x+'_'+y+'" border=0 src="'+path+stonesz+'/'+fig+'.'+img+'" width='+stonesz+' height='+stonesz+'></a>');
+      }
+      document.write('</tr>');
+   }
 
-  document.write('</table></td></tr></table>');
+   document.write('</table></td></tr></table>');
 }
 
 function change_mode(nr, new_mode)
@@ -276,8 +276,7 @@ function has_liberty(nr, start_x, start_y, remove)
 }
 
 
-/* Handler for clicking on the grid
-*/
+/* Handler for clicking on the grid */
 function click(nr,x,y)
 {
    if( x < 0 || y < 0 || x >= size[nr] || y >= size[nr] ||
@@ -535,8 +534,7 @@ function get_empty_image(x, y, sz)
    return fig;
 }
 
-/* Function to change an image
-*/
+/* Function to change an image */
 function set_image(nr, x, y)
 {
    var prefix = col[goban[nr][x][y]];
@@ -626,7 +624,6 @@ function change_goban(nr, x, y, val)
 {
    var m = mark[nr][x][y];
 
-
    push_history(nr, ['g', x, y, goban[nr][x][y], val]);
    goban[nr][x][y] = val;
    if( (val > 0 && (m.charAt(0) == 'l')) ||
@@ -661,7 +658,6 @@ function refresh(nr)
          set_image(nr, x, y);
       }
    }
-
 }
 
 function enter_data(nr, data)
@@ -712,3 +708,4 @@ function goeditor(nr, sz, start_x, end_x, start_y, end_y, stonesz, wood_color, b
    show_editor_buttons(nr);
    document.write("</td></tr></table></center>");
 }
+
