@@ -28,7 +28,8 @@ $TranslateGroups[] = "Forum"; //local use
 require_once( "include/std_functions.php" );
 require_once( 'include/std_classes.php' );
 require_once( "include/form_functions.php" );
-//require_once( "include/GoDiagram.php" );
+require_once( 'include/classlib_goban.php' );
+//if( ALLOW_GO_DIAGRAMS ) require_once( "include/GoDiagram.php" );
 
 
 define('NEW_LEVEL1', 4*7 *24*3600);  // four weeks (also see SECS_NEW_END)
@@ -233,6 +234,7 @@ class DisplayForum
    var $show_score; // used for forum-search
    /*! \brief rx-terms (optionally array) that are to be highlighted in text. */
    var $rx_term;
+   var $ConfigBoard;
 
    // consts
    var $max_rows;
@@ -258,6 +260,7 @@ class DisplayForum
       $this->cur_depth = -1;
       $this->show_score = false;
       $this->rx_term = '';
+      $this->ConfigBoard = null;
 
       $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
@@ -275,6 +278,11 @@ class DisplayForum
          $this->rx_term = '';
       else
          $this->rx_term = $rx_term;
+   }
+
+   function setConfigBoard( $cfg_board )
+   {
+      $this->ConfigBoard = $cfg_board;
    }
 
    function print_moderation_note( $width )
@@ -492,7 +500,8 @@ class DisplayForum
          && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0 )
             $Subject = "RE: " . $Subject;
 
-      $form = new Form( 'messageform', "read.php#preview", FORM_POST );
+      $msg_form = 'messageform';
+      $form = new Form( $msg_form, "read.php#preview", FORM_POST );
       if( @$player_row['ID'] <= GUESTS_ID_MAX )
       {
          $form->add_row( array(
@@ -511,26 +520,24 @@ class DisplayForum
       $form->add_row( array(
             'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ));
 
-      /*
-      if( isset($GoDiagrams) )
-         $str = draw_editors($GoDiagrams);
+      $arr_dump_diagrams = array();
+/*
+      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
+      {
+         $diagrams_str = draw_editors($GoDiagrams);
+         if( !empty($diagrams_str) )
+         {
+            $form->add_row( array( 'OWNHTML', "<td colspan=2>$diagrams_str</td>" ));
+            $arr_dump_diagrams = array( 'onClick' => "dump_all_data('$msg_form');" );
+         }
+      }
+*/
 
-      if( !empty($str) )
-      {
-         $form->add_row( array( 'OWNHTML', '<td colspan=2>' . $str . '</td>'));
-         $form->add_row( array( 'OWNHTML', '<td colspan=2 align="center">' .
-               //review accesskey:
-               '<input type="submit" name="post" accesskey="'.ACCKEY_ACT_EXECUTE.'" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Post') . " \">\n" .
-               '<input type="submit" name="preview" accesskey="'.ACCKEY_ACT_PREVIEW.'" onClick="dump_all_data(\'messageform\');" value=" ' . T_('Preview') . " \">\n" .
-               "</td>\n" ));
-      }
-      else
-      */
-      {
-         $form->add_row( array(
-               'SUBMITBUTTONX', 'post',    ' ' . T_('Post') . ' ',    array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
-               'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ', array( 'accesskey' => ACCKEY_ACT_PREVIEW ) ));
-      }
+      $form->add_row( array(
+            'SUBMITBUTTONX', 'post', ' ' . T_('Post') . ' ',
+                  array( 'accesskey' => ACCKEY_ACT_EXECUTE ) + $arr_dump_diagrams,
+            'SUBMITBUTTONX', 'preview', ' ' . T_('Preview') . ' ',
+                  array( 'accesskey' => ACCKEY_ACT_PREVIEW ) + $arr_dump_diagrams ));
 
       $form->echo_string(1);
    }
@@ -635,7 +642,9 @@ class DisplayForum
       // highlight terms in Subject/Text
       $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
       $txt = make_html_safe( $post->text, true, $this->rx_term );
-//      $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
+//      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
+//         $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
+      $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
 
       if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
