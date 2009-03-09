@@ -292,6 +292,9 @@ require_once( "include/form_functions.php" );
       );
    $profile_form->add_row( $row);
 
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
+         'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
+
    if( ENA_MOVENUMBERS )
    {
    $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
