@@ -23,6 +23,103 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-03-09 juga
+
+   * goban_editor.php,
+     include/std_functions.php (start_html, start_page),
+     js/goban_editor.js,
+     skins/dragon/screen.css:
+   - added playing ground "goban_editor.php" for new Goban-editor using
+     manual-edit and/or JavaScript-based editor, but also included
+     old go-diagram-editor which is JavaScript-based too
+   - added config-switch ALLOW_GOBAN_EDITOR to activate new Goban-editor
+   - included JavaScript-file "js/goban_editor.js" into page
+     if activated by ALLOW_GOBAN_EDITOR
+
+   * forum/forum_functions.php (DisplayForum, ~.setConfigBoard,
+       ~.forum_message_box, ~.draw_post):
+   - added <igoban>-tag for "inline"-goban go-board
+
+   * include/classlib_goban.php (Goban, MarkupHandlerGoban),
+     include/goban_handler_gfx.php,
+     include/goban_handler_sl.php:
+   - added Goban-class as container to manage go-board with different
+     input/output-formats
+   - added MarkupHandlerGoban-class to handle <igoban>-tag with "inline"-goban
+   - added GobanHandler for Goban-object to output as graphical-oriented board
+   - added GobanHandler for reading/parsing the "Sensei's Library" goban-format
+
+   * include/coords.php (is_hoshi):
+   - enhanced method to be able to check for hoshi on non-square boards
+
+   * include/board.php (Board):
+   - added defined-check on EDGE_SIZE-definition (copied in other files to avoid include)
+   - added comments for graphical board-output to "keep-in-sync"
+
+   * include/GoDiagram.php (GoDiagram, ~.set_values_from_goban_tag, ~.echo_board,
+       ~.echo_editor, extract_value, create_godiagrams),
+     forum/forum_functions.php (DisplayForum, ~.setConfigBoard,
+       ~.forum_message_box, ~.draw_post),
+     forum/post.php (post_message), forum/read.php:
+   - basic bugfixes and minor changes to bring Go-Diagrams to work for others developers
+     - changed var cfg_board -> ConfigBoard, fixed usage
+     - fixed default-handling of extract_value()-func and parsing <goban>-tag
+     - fixed parsing of goban-'view' attribute
+     - fixed parsing and checking of goban-'left/right/down/up' attributes
+     - fixed base_path for go_editor.js
+     - fixed handling of "altered" go-diagrams
+   - allow to activate usage of Go-Diagrams
+     - added config-switch ALLOW_GO_DIAGRAMS to activate old Go-Diagrams
+     - included JavaScript "js/goeditor.js" into page if activated by ALLOW_GO_DIAGRAMS
+
+   * js/goeditor.js (change_mode, show_button, dump_data, goeditor),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - basic bugfixes and minor changes to bring Go-Diagrams to work
+     - fixed base_path handling
+     - fixed missing images (to mark selected/unselected tool) using added bl.gif and existing dot.gif
+     - added some comments, TODOs
+     - replaced string-keyword
+-----------
+copy /images/blue.gif
+-----------
+
+   * forum/read.php:
+   - bugfix: don't show preview on editing forum-post
+
+   * include/std_functions.php (start_page, tournament_reference, attb_build):
+   - added check on config-switch ALLOW_TOURNAMENTS to activate Tournaments
+     in main-menu
+   - added <tourney>-tag to reference tournaments
+   - added <igoban>-tag for "inline"-goban go-board
+   - attb_build: don't quote values of JavaScript-attributes "on...", e.g. onClick
+
+   * include/utilities.php (extract_regex_value):
+   - added method to extract attribute-string parsed with regex
+
+   * tournaments/edit_director.php, tournaments/edit_tournament.php,
+     tournaments/list_directors.php, tournaments/list_tournaments.php,
+     tournaments/view_tournament.php:
+   - added check on config-switch ALLOW_TOURNAMENTS to activate Tournaments
+
+   * include/config.php:
+   - added config-switches
+     - ALLOW_GOBAN_EDITOR to activate new Goban-Editor, switched OFF by default
+     - ALLOW_GO_DIAGRAMS to activate old Go-Diagrams, switched OFF by default
+     - ALLOW_TOURNAMENTS to activate Tournaments, switched OFF by default
+
+   * scripts/update_translation_pages.php, scripts/README.translations,
+     tournaments/include/tournament.php, tournaments/include/tournament_director.php,
+     tournaments/edit_tournament.php, tournaments/list_directors.php,
+     tournaments/list_tournaments.php, tournaments/view_tournament.php,
+     features/edit_feature.php:
+   - added notes how to add new Translation-group
+   - fixed adding of new Translation-groups for features and tournaments
+   - used own translation-group for Features and Tournaments (fixed quoting: ' -> ")
+
+   * edit_profile.php:
+   - re-added profile for smooth-board-edge,
+     seems it has been accidentally removed around 2008-06-06
+
 2009-03-03 juga
 
    * site_map.php:
