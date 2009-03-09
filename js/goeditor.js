@@ -1,6 +1,6 @@
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony
+Copyright (C) 2001-2009  Erik Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 var number_of_gobans = 0;
 var goban_numbers = [];
-var version = 0;
+var version = 2; // 1 = image without "visible" links (cursor doesn't change), <>1 = image with link
 
 var goban = [];
 var mark = [];
@@ -54,6 +54,11 @@ var current_index = [];
 
 var img = 'gif';
 var path = '';
+
+// images used to mark selected/unselected tool
+// TODO replace using CSS, see change_mode() & show_button()
+var bl_img = 'blue.gif'; // blue-pixel
+var gr_img = 'dot.gif';  // transparent-pixel
 
 var letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -146,31 +151,33 @@ function change_mode(nr, new_mode)
 
       return;
    }
-   document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/gr.png';
-   document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/gr.png';
-   document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/gr.png';
-   document.images[current_mode[nr]+'_'+nr+'_4'].src = path+'images/gr.png';
+
+   //TODO use CSS (changing class-name) to select/unselect current tool
+   document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/'+gr_img;
+   document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/'+gr_img;
+   document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/'+gr_img;
+   document.images[current_mode[nr]+'_'+nr+'_4'].src = path+'images/'+gr_img;
    current_mode[nr] = new_mode;
-   document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/bl.png';
-   document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/bl.png';
-   document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/bl.png';
-   document.images[current_mode[nr]+'_'+nr+'_4'].src = path+'images/bl.png';
+   document.images[current_mode[nr]+'_'+nr+'_1'].src = path+'images/'+bl_img;
+   document.images[current_mode[nr]+'_'+nr+'_2'].src = path+'images/'+bl_img;
+   document.images[current_mode[nr]+'_'+nr+'_3'].src = path+'images/'+bl_img;
+   document.images[current_mode[nr]+'_'+nr+'_4'].src = path+'images/'+bl_img;
 }
 
 function show_button(nr, button_mode, button_function, image, alt, width, height, border, on)
 {
-  var stonesz = stonesize[nr];
-  document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
-   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'\"></td></tr>');
-   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'"></td>');
+   var stonesz = stonesize[nr];
+   document.write('<table border=0 cellpadding=0 cellspacing=0 align=center valign=center bgcolor=#fdd69b>');
+   document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="'+path+'images/'+(on ? bl_img : gr_img)+'\"></td></tr>');
+   document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="'+path+'images/'+(on ? bl_img : gr_img)+'"></td>');
 
    if( version == 1 )
       document.write('<td width='+width+' height='+height+' align=center><img border=0 name="'+button_mode+'_'+nr+'" src="'+path+image+'" onClick="'+button_function+'('+nr+',\''+button_mode+'\')"></td>');
    else
       document.write('<td width='+width+' height='+height+' align=center><a href="javascript:'+button_function+'('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+path+image+'"></a></td>');
 
-   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr>');
-   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="'+path+'images/'+(on ? 'bl.' : 'gr.')+img+'"></td></tr></table>');
+   document.write('<td align=right><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_3" src="'+path+'images/'+(on ? bl_img : gr_img)+'"></td></tr>');
+   document.writeln('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_4" src="'+path+'images/'+(on ? bl_img : gr_img)+'"></td></tr></table>');
 }
 
 
@@ -483,14 +490,14 @@ function redo(nr, mode)
 function dump_data(nr, formname)
 {
    var x,y;
-   var string = '';
+   var str = '';
    var separator = '';
 
    for(y=starty[nr]; y<endy[nr]; y++)
    {
       for(x=startx[nr]; x<endx[nr]; x++)
       {
-         string += separator + col[goban[nr][x][y]] + mark[nr][x][y];
+         str += separator + col[goban[nr][x][y]] + mark[nr][x][y];
          separator = ',';
       }
       separator = ';';
@@ -499,7 +506,7 @@ function dump_data(nr, formname)
    //      size[nr] +','+ (startx[nr]+1) +','+ endx[nr] + ','+ (starty[nr]+1) +','+ endy[nr];
    document.forms[formname].elements['altered'+nr].value =
        ( move_history[nr].length > 0 ? 'Y' : 'N' );
-   document.forms[formname].elements['data'+nr].value = string;
+   document.forms[formname].elements['data'+nr].value = str;
 }
 
 function dump_all_data(formname)
@@ -685,9 +692,9 @@ function enter_data(nr, data)
 
 /* Main function
 */
-function goeditor(nr, sz, start_x, end_x, start_y, end_y, stonesz, wood_color, subdir)
+function goeditor(nr, sz, start_x, end_x, start_y, end_y, stonesz, wood_color, basepath)
 {
-   path = ( subdir ? '../' : '' );
+   path = basepath;
 
    size[nr] = sz;
    stonesize[nr] = stonesz;

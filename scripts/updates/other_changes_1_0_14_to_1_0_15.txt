@@ -41,3 +41,6 @@ copy /images/team.gif
 # - modified '&toggleobserve=' behaviour to avoid toggling on page refresh,
 #   Former value '1' -> y&n: needs FAQ-adjustment for observing own-games-trick
 
+-----------
+copy /images/blue.gif
+
