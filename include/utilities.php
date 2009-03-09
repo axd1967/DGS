@@ -178,4 +178,16 @@ function limit( $val, $minimum, $maximum, $default )
    return $val;
 }
 
+/*!
+ * \brief Extracts and returns value from attributes-string (no spaces allowed in rxname): rxname=rxvalue ...
+ * \return NULL if no match found
+ */
+function extract_regex_value( $string, $rxname, $rxvalue="[-\w]+" )
+{
+   if( preg_match( "/\s+($rxname)=($rxvalue)/i", $string, $matches) )
+      return $matches[2];
+   else
+      return null;
+}
+
 ?>
