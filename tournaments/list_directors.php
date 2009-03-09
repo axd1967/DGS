@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = 'Tournament';
+$TranslateGroups[] = "Tournament";
 
 chdir('..');
 require_once( 'include/std_functions.php' );
@@ -39,6 +39,8 @@ $ThePage = new Page('TournamentDirectorList');
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in');
+   if( !ALLOW_TOURNAMENTS )
+      error('feature_disabled', 'Tournament.list_directors');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];

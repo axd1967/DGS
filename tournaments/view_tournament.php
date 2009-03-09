@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = 'Tournament';
+$TranslateGroups[] = "Tournament";
 
 chdir('..');
 require_once( 'include/std_functions.php' );
@@ -33,6 +33,8 @@ $ThePage = new Page('Tournament');
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in');
+   if( !ALLOW_TOURNAMENTS )
+      error('feature_disabled', 'Tournament.view_tournament');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];
@@ -53,10 +55,15 @@ $ThePage = new Page('Tournament');
 
    echo
       make_html_safe($tourney->Description, true),
+      "<br>\n",
       T_('Last changed date'), date(DATEFMT_TOURNAMENT, $tourney->Lastchanged),
+      "<br>\n",
       T_('Start time'), date(DATEFMT_TOURNAMENT, $tourney->StartTime),
+      "<br>\n",
       T_('End time'), date(DATEFMT_TOURNAMENT, $tourney->EndTime),
+      "<br>\n",
       T_('Type'), Tournament::getTypeText($tourney->Type),
+      "<br>\n",
       T_('Status'), Tournament::getStatusText($tourney->Status),
       "\n";
 
