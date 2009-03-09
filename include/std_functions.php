@@ -458,7 +458,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
       if( ALLOW_FEATURE_VOTE )
-         $menu->add( 5,1 array( T_('Vote'), 'features/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+         $menu->add( 5,1, array( T_('Vote'), 'features/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
       if( ALLOW_GOBAN_EDITOR )
          $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
