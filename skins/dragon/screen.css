@@ -1737,6 +1737,34 @@ form#selectgroupForm table.FormClass td.FormHeader h3.Header {
 
 
 /* ------------------------- */
+/* Goban editor */
+/* ------------------------- */
+
+body.GobanEdit img.ToolOff {
+   vertical-align: middle;
+   border-color: #F7F5E3; /* sync with body background */
+   border-style: solid;
+   border-width: 1px;
+   padding: 2px;
+}
+
+body.GobanEdit img.ToolOn {
+   vertical-align: middle;
+   border-color: #683888;
+   border-style: solid;
+   border-width: 1px;
+   padding: 2px;
+}
+
+/* form debug */
+body.GobanEdit td.FormClassC {
+   border-color: green;
+   border-width: 1px;
+}
+/* end form debug */
+
+
+/* ------------------------- */
 /* board page */
 /* ------------------------- */
 
