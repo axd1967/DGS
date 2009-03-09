@@ -58,7 +58,7 @@ var path = '';
 // images used to mark selected/unselected tool
 // TODO replace using CSS, see change_mode() & show_button()
 var bl_img = 'blue.gif'; // blue-pixel
-var gr_img = 'dot.gif';  // transparent-pixel
+var gr_img = 'grey.gif'; // transparent-pixel
 
 var letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
