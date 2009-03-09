@@ -134,6 +134,15 @@ define('ACCKEYP_GAME_COMMENT',   '');
 // Allow JavaScript for some convenience-functionality
 define('ALLOW_JAVASCRIPT', true);
 
+// Allow usage of tournaments
+define('ALLOW_TOURNAMENTS', false);
+
+// Allow usage of GoDiagrams (only working with JavaScript)
+define('ALLOW_GO_DIAGRAMS', false);
+
+// Allow usage of Goban-Editor
+define('ALLOW_GOBAN_EDITOR', false);
+
 // Forum: 'Quote' works as 'Reply', but inits textbox with previous post in <quote>-tags
 define('ALLOW_QUOTING', false);
 
