@@ -22,7 +22,7 @@ require_once( "include/coords.php" );
 
 class GoDiagram
 {
-   var $cfg_board;
+   var $ConfigBoard;
 
    var $Size;
 
@@ -33,22 +33,17 @@ class GoDiagram
 
    var $Data;
 
-
-
    function GoDiagram( $cfg_board, $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19, $_Data = null)
       {
-         $this->cfg_board = null;
+         global $player_row;
+         $this->ConfigBoard = (is_null($cfg_board)) ? new ConfigBoard($player_row['ID']) : $cfg_board;
+
          $this->set_geometry($_Size, $_Left, $_Right, $_Down, $_Up);
          if( !empty($_Data ) )
             $this->set_data($_Data);
          else
             $this->clear_data();
       }
-
-   function set_config_board( $cfg_board )
-   {
-      $this->cfg_board = $cfg_board;
-   }
 
    function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19 )
       {
@@ -87,31 +82,34 @@ class GoDiagram
 
    function set_values_from_goban_tag( $s )
       {
-         $this->Size = extract_value($s, 'size', 2, MAX_BOARD_SIZE, $this->Size);
+         $size = extract_value($s, 'size', 2, MAX_BOARD_SIZE, $this->Size);
+         $this->Size = $size;
          $this->set_geometry($this->Size);
 
-         $view = strtolower(extract_value($s, 'view'));
+         $view = extract_value($s, 'view');
          if(isset($view))
          {
-            list($dl,$ur) = split('-', $view);
-            list($l,$d) = board2number_coords($dl, $this->Size);
-            list($r,$u) = board2number_coords($ur, $this->Size);
+            list($dl,$ur) = explode('-', strtolower($view));
+            list($l,$d) = board2number_coords($dl, $size);
+            list($r,$u) = board2number_coords($ur, $size);
          }
          else
          {
-            $l = extract_value($s, 'left', 1, $this->Size);
-            $r = extract_value($s, 'right', 1, $this->Size);
-            $u = extract_value($s, 'down', 1, $this->Size);
-            $d = extract_value($s, 'up', 1, $this->Size);
+            $l = extract_value($s, 'left',  1, $size - 1, 1);
+            $r = extract_value($s, 'right', 2, $size, $size);
+            $u = extract_value($s, 'down',  1, $size - 1, 1);
+            $d = extract_value($s, 'up',    2, $size, $size);
          }
 
          if( $l > $r ) swap($l, $r);
          if( $u < $d ) swap($u, $d);
 
-         $this->Left = 1 + limit($l, 0, $this->Size-2, $this->Left-1);
-         $this->Right = 1 + limit($r, $l, $this->Size-1, $this->Right-1);
-         $this->Down = 1 + limit($d, 0, $this->Size-2, $this->Down-1);
-         $this->Up = 1 + limit($u, $d, $this->Size-1, $this->Up-1);
+         //FIXME: why restricting within existing view-box ? -> used set_geometry() now
+         $this->set_geometry( $this->Size, $l, $r, $d, $u );
+         //$this->Left = 1 + limit($l, 0, $size-2, $this->Left-1);
+         //$this->Right = 1 + limit($r, $l, $size-1, $this->Right-1);
+         //$this->Down = 1 + limit($d, 0, $size-2, $this->Down-1);
+         //$this->Up = 1 + limit($u, $d, $size-1, $this->Up-1);
 
          if( empty($this->Data) )
             $this->clear_data();
@@ -138,8 +136,8 @@ class GoDiagram
          global $player_row, $base_path, $woodbgcolors;
 
          $string = '';
-         $woodcolor = $this->cfg_board->get_wood_color();
-         $stonesize = $this->cfg_board->get_stone_size();
+         $woodcolor = $this->ConfigBoard->get_wood_color();
+         $stonesize = $this->ConfigBoard->get_stone_size();
 
          $data_rows = explode(';', $this->Data);
 
@@ -176,14 +174,15 @@ class GoDiagram
 
    function echo_editor($nr)
       {
-         $stonesize = $cfg_board->get_stone_size();
+         $stonesize = $this->ConfigBoard->get_stone_size();
          if( empty($stonesize) ) $stonesize = 25;
 
-         $woodcolor = $cfg_board->get_wood_color();
+         $woodcolor = $this->ConfigBoard->get_wood_color();
          if( empty($woodcolor) ) $woodcolor = 1;
 
+         global $base_path;
          return '<script language="JavaScript" type="text/javascript">' . "\n" .
-            "goeditor($nr, {$this->Size}, {$this->Left}, {$this->Right}, {$this->Down}, $this->Up, $stonesize, $woodcolor, 1);\n" .
+            "goeditor($nr, {$this->Size}, {$this->Left}, {$this->Right}, {$this->Down}, $this->Up, $stonesize, $woodcolor, '$base_path');\n" .
             "enter_data($nr, '{$this->Data}');\n" .
             "</script>\n" .
             '<input type="hidden" name="altered'.$nr.'" value="">' .
@@ -196,8 +195,10 @@ class GoDiagram
 // extract-value from goban-tag: <goban name=str ...>
 function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
 {
-   preg_match("/$name=([-\w]+)/i", $string, $matches);
-   return limit( $matches[1], $minimum, $maximum, $default );
+   if( preg_match( "/ $name=([-\w]+)/i", $string, $matches) )
+      return limit( $matches[1], $minimum, $maximum, $default );
+   else
+      return $default;
 }
 
 function callback_echo_board($matches)
@@ -239,10 +240,10 @@ function create_godiagrams( &$text, $cfg_board )
    foreach( $matches[1] as $m )
       {
          $ID = extract_value($m, 'id' );
-         $altered = $_REQUEST["altered$ID"];
+         $altered = @$_REQUEST["altered$ID"];
          $save_data = false;
 
-         if( $ID > 0 )
+         if( isset($ID) && $ID > 0 )
          {
             $result = mysql_query("SELECT * FROM GoDiagrams WHERE ID=$ID")
                or error('mysql_query_failed', 'godiagram.create_godiagrams.find');
@@ -323,10 +324,9 @@ function find_godiagrams($text, $cfg_board)
 
    $diagram_IDs = array();
    foreach( $matches[1] as $ID )
-      {
-         if( $ID > 0 )
-            $diagram_IDs[]= $ID;
-      }
+   {
+      if( $ID > 0 ) $diagram_IDs[]= $ID;
+   }
 
    $result = mysql_query("SELECT * FROM GoDiagrams " .
                          "WHERE ID IN(" . implode(',',$diagram_IDs) .")")
