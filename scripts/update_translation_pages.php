@@ -103,9 +103,12 @@ function find_php_files( )
 {
    $directories = array( ''
          , 'include/'
+         , 'features/'
          , 'forum/'
          , 'translations/'
          , 'rss/'
+         , 'tournaments/'
+         , 'tournaments/include/'
          , 'wap/'
          );
 
