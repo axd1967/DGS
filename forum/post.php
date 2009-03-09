@@ -59,7 +59,8 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    $Subject = trim(get_request_arg('Subject'));
    if( $Subject == '' )
       $Subject = UNKNOWN_VALUE;
-//   $GoDiagrams = create_godiagrams($Text, $cfg_board);
+//   $allow_go_diagrams = ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() );
+//   if( $allow_go_diagrams) $GoDiagrams = create_godiagrams($Text, $cfg_board);
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
@@ -202,7 +203,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
          hit_thread( $Thread_ID );
       }
 
-//   save_diagrams($GoDiagrams);
+//      if( $allow_go_diagrams) save_diagrams($GoDiagrams);
 
       $flog_actsuffix = ( $Thread_ID == $New_ID ) ? ':new_thread' : ':reply';
       if( $moderated )
