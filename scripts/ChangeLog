@@ -93,7 +93,6 @@ copy /images/grey.gif
 
    * include/std_functions.php (start_page, tournament_reference, attb_build):
    - added check on config-switch ALLOW_TOURNAMENTS to activate Tournaments
-     in main-menu
    - added <tourney>-tag to reference tournaments
    - added <igoban>-tag for "inline"-goban go-board
    - attb_build: don't quote values of JavaScript-attributes "on...", e.g. onClick
@@ -103,7 +102,7 @@ copy /images/grey.gif
 
    * tournaments/edit_director.php, tournaments/edit_tournament.php,
      tournaments/list_directors.php, tournaments/list_tournaments.php,
-     tournaments/view_tournament.php:
+     tournaments/view_tournament.php, site_map.php:
    - added check on config-switch ALLOW_TOURNAMENTS to activate Tournaments
 
    * include/config.php:
