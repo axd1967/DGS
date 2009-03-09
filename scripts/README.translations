@@ -6,6 +6,17 @@ run (need the ADMIN_DATABASE privilege):
 # if T_('')-call is correct. There must be NO space between the [')] or [")].
 # Example: T_('text-with-space' ) is not discovered as translation-text(!)
 
+# NOTE:
+# When adding new sub-directories with PHP-files, you must add the new
+# you must add them in the find_php_files()-function in the scripts
+# 'scripts/update_translation_pages.php'
+# Afterwards the 'update_translation_pages.php'-script needs to be run
+# at least two times to find all new groups and new pages.
+
+# NOTE: The translate-group in the files MUST be enclosed within
+# the '"' double-quotes; otherwise they are not found by the
+# 'update_translation_pages'-script.
+
 
 > update_translation_pages.php
 then, after checking:
