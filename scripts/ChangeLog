@@ -25,6 +25,10 @@ ChangeLog
 
 2009-03-09 juga
 
+   * js/goeditor.js:
+   - used original pictures (found on SourceForge.net) for active/inactive tool,
+     renamed original bl/gr.gif -> blue/grey.gif
+
    * goban_editor.php,
      include/std_functions.php (start_html, start_page),
      js/goban_editor.js,
@@ -81,6 +85,7 @@ ChangeLog
      - replaced string-keyword
 -----------
 copy /images/blue.gif
+copy /images/grey.gif
 -----------
 
    * forum/read.php:
