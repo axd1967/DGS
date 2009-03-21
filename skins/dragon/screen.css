@@ -232,6 +232,14 @@ a.userblack {
    color: black;
 }
 
+h2.Header {
+   color: #800000;
+   font-weight: bold;
+   text-align: center;
+   padding: 3px;
+   margin: 1em 0px;
+}
+
 h3.Header .Ref,
 h3.Header .Send,
 h3.Header .User,
@@ -2550,6 +2558,17 @@ form#tableFSFForm td.Description {
 
 span.EditNote {
    font-size: 80%;
+}
+
+a.TAdmin {
+   font-style: italic;
+   background: #e0e8ff; /* light blue, complementary to background */
+}
+
+span.TUserStatus {
+   font-weight: bold;
+   text-decoration: none;
+   background: #e0e8ff; /* light blue, complementary to background */
 }
 
 body.Tournament table#pageLayout td#pageBody div.Section {
