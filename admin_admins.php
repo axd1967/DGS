@@ -23,36 +23,34 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/table_columns.php" );
 
-//TODO layouting
-
 {
-  connect2mysql();
+   connect2mysql();
 
-  $logged_in = who_is_logged( $player_row);
-  if( !$logged_in )
-    error('not_logged_in');
-  $my_id = $player_row['ID'];
+   $logged_in = who_is_logged( $player_row);
+   if( !$logged_in )
+      error('not_logged_in');
+   $my_id = $player_row['ID'];
 
-  // only SUPERADMIN can manage admins
-  $player_level = (int)@$player_row['admin_level']; //local modifications
-  if( !($player_level & ADMIN_SUPERADMIN) )
-    error('adminlevel_too_low');
+   // only SUPERADMIN can manage admins
+   $player_level = (int)@$player_row['admin_level']; //local modifications
+   if( !($player_level & ADMIN_SUPERADMIN) )
+      error('adminlevel_too_low');
 
-  $admin_tasks = array( // admin-level-id => arr( admin-bitmask, admin-text )
-                        'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),
-                        'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
-                        'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
-                        'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
-                        'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
-                        'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
-                        'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
-                        'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
-                        'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
-                      );
+   $admin_tasks = array( // admin-level-id => arr( admin-bitmask, admin-text )
+         'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),
+         'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
+         'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
+         'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
+         'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
+         'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
+         'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
+         'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
+         'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
+      );
 
-// Make sure all previous admins gets into the Admin array
-  $result = db_query( 'admin_admins.find_admins',
-      "SELECT ID, Adminlevel+0 AS admin_level FROM Players WHERE Adminlevel > 0" );
+   // Make sure all previous admins gets into the Admin array
+   $result = db_query( 'admin_admins.find_admins',
+         "SELECT ID, Adminlevel+0 AS admin_level FROM Players WHERE Adminlevel > 0" );
    while( $row = mysql_fetch_array($result) )
    {
       $uid = $row['ID'];
@@ -71,64 +69,64 @@ require_once( "include/table_columns.php" );
      update=&...&newadmin=handle&<aid>_new=.. : add new admin with uid='new'
 */
 
-  if( @$_REQUEST['update'] )
-  {
-     // update admin-levels? -> Admin[uid] = new admin-levels
-     $Admin['new'] = 0;
-     foreach( $_POST as $item => $value )
-     {
-        if( $value != 'Y' )
-           continue;
+   if( @$_REQUEST['update'] )
+   {
+      // update admin-levels? -> Admin[uid] = new admin-levels
+      $Admin['new'] = 0;
+      foreach( $_POST as $item => $value )
+      {
+         if( $value != 'Y' )
+            continue;
 
-        // uid = Players.ID | 'new'
-        list($type, $uid) = explode('_', $item, 2);
-        $amask = (int)@$admin_tasks[$type][0];
-        if( $amask == 0 || ($uid !== 'new' && $uid <= GUESTS_ID_MAX) )
-           error('bad_data', "admin_admins.update($uid,$type,$amask)");
+         // uid = Players.ID | 'new'
+         list($type, $uid) = explode('_', $item, 2);
+         $amask = (int)@$admin_tasks[$type][0];
+         if( $amask == 0 || ($uid !== 'new' && $uid <= GUESTS_ID_MAX) )
+            error('bad_data', "admin_admins.update($uid,$type,$amask)");
 
-        $Admin[$uid] |= $amask;
-     }
+         $Admin[$uid] |= $amask;
+      }
 
-     // add new admin?
-     $newadmin= get_request_arg('newadmin');
-     if( $Admin['new'] != 0 && !empty($newadmin))
-     {
-        $row = mysql_fetch_row( "admin_admins.find_new_admin($newadmin)",
-            "SELECT ID,Adminlevel+0 AS admin_level FROM Players " .
-                  "WHERE Handle='".mysql_addslashes($newadmin)."' LIMIT 1" );
-        if( !$row )
-           error('unknown_user', "admin_admin.check.user($newadmin)");
-        if( $row["admin_level"] != 0 )
-           error('new_admin_already_admin');
+      // add new admin?
+      $newadmin= get_request_arg('newadmin');
+      if( $Admin['new'] != 0 && !empty($newadmin))
+      {
+         $row = mysql_fetch_row( "admin_admins.find_new_admin($newadmin)",
+               "SELECT ID,Adminlevel+0 AS admin_level FROM Players "
+               . "WHERE Handle='".mysql_addslashes($newadmin)."' LIMIT 1" );
+         if( !$row )
+            error('unknown_user', "admin_admin.check.user($newadmin)");
+         if( $row["admin_level"] != 0 )
+            error('new_admin_already_admin');
 
-        $uid = $row['ID'];
-        $AdminOldLevel[$uid] = 0;
-        $Admin[$uid] = $Admin['new'];
-     }
-     unset($Admin['new']);
+         $uid = $row['ID'];
+         $AdminOldLevel[$uid] = 0;
+         $Admin[$uid] = $Admin['new'];
+      }
+      unset($Admin['new']);
 
-     // update admin-levels
-     foreach( $Admin as $uid => $adm_level )
-     {
-        $adm_level = (int)$adm_level;
-        if( $adm_level != $AdminOldLevel[$uid] )
-        {
-           admin_log( $my_id, @$player_row['Handle'],
-                sprintf("grants %s from 0x%x to 0x%x.", (string)$uid, $AdminOldLevel[$uid], $adm_level) );
+      // update admin-levels
+      foreach( $Admin as $uid => $adm_level )
+      {
+         $adm_level = (int)$adm_level;
+         if( $adm_level != $AdminOldLevel[$uid] )
+         {
+            admin_log( $my_id, @$player_row['Handle'],
+               sprintf("grants %s from 0x%x to 0x%x.", (string)$uid, $AdminOldLevel[$uid], $adm_level) );
 
-           db_query( "admin_admins.update_admin($my_id,$uid,$adm_level)",
+            db_query( "admin_admins.update_admin($my_id,$uid,$adm_level)",
                "UPDATE Players SET Adminlevel=$adm_level WHERE ID=$uid LIMIT 1" );
-        }
-     }
+         }
+      }
 
-     $player_level = (int)$Admin[$my_id];
-  } //update
+      $player_level = (int)$Admin[$my_id];
+   } //update
 
 
    // reload admin-users with Handle,Name and changed admin-levels
    $result = db_query( 'admin_admins.find_admins2',
-      "SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
-      "WHERE Adminlevel > 0 ORDER BY ID" );
+         "SELECT ID, Handle, Name, Adminlevel+0 AS admin_level FROM Players " .
+         "WHERE Adminlevel > 0 ORDER BY ID" );
 
    $atable = new Table( 'admin', '', '', '', TABLE_NO_SIZE );
 
@@ -167,7 +165,7 @@ require_once( "include/table_columns.php" );
          $arow_strings[1]= "<A href=\"userinfo.php?uid=$uid\">$uid</A>";
          $arow_strings[2]= "<A href=\"userinfo.php?uid=$uid\">" . $row["Handle"] . "</A>";
          $arow_strings[3]= "<A href=\"userinfo.php?uid=$uid\">" .
-            make_html_safe($row["Name"]) . "</A>";
+               make_html_safe($row["Name"]) . "</A>";
       }
       else
       {
@@ -176,8 +174,7 @@ require_once( "include/table_columns.php" );
          $arow_strings[1]= array(
             'attbs' => array( 'colspan' => $col, 'class'=>'nowrap'),
             'text' => /*T_*/('New admin') . ": "
-               . '<input type="text" name="newadmin"'
-               . ' value="" size="16" maxlength="16">',
+               . '<input type="text" name="newadmin" value="" size="16" maxlength="16">',
             );
          $level = 0;
       }
