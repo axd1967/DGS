@@ -755,6 +755,11 @@ see section (2) Classes and Files.
        $where = $fq->get_part( SQLP_WHERE ); ...
     }
 
+* Can I add an arbitrary SQL-part when a filter is set ?
+
+  Yes. See filter-config FC_QUERYSQL to merge additional QuerySQL when a filter
+  is set.
+
 * Can I add a SQL-part using the HAVING-clause instead of the WHERE-clause ?
 
   Yes. See filter-config FC_ADD_HAVING and/or use the QuerySQL-class.

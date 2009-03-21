@@ -142,6 +142,12 @@ define('FC_SUBSTRING', 'substring');
 define('FC_TIME_UNITS', 'time_units');
 
 /*!
+ * \brief Additionally QuerySQL-object to be merged if filter is set.
+ * value: QuerySQL
+ */
+define('FC_QUERYSQL', 'querysql');
+
+/*!
  * \brief Groups filters together by OR'ing the queries of filters with the same group-name.
  * values: string group_name
  */
@@ -612,6 +618,10 @@ class SearchFilter
          $fquery = $filter->get_query(); // use copy
          if( is_null($fquery) ) // no query
             continue;
+
+         $merge_qsql = $filter->get_config(FC_QUERYSQL); // merge query
+         if( is_a($merge_qsql, 'QuerySQL') )
+            $fquery->merge( $merge_qsql );
 
          $groupname = $filter->get_config(FC_GROUP_SQL_OR);
          if( $groupname == '' )
