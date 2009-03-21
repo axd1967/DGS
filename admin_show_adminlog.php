@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * PURPOSE:
  * Show admins (Adminlevel>0) and administrated users (AdminOptions>0),
- * needs ADMIN_DEVELOPER/PASSWORD/FORUM or /FAQ rights
+ * needs ADMIN_DEVELOPER rights
  */
 
 $TranslateGroups[] = "Admin";

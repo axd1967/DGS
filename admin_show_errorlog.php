@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * PURPOSE:
  * Show admins (Adminlevel>0) and administrated users (AdminOptions>0),
- * needs ADMIN_DEVELOPER/PASSWORD/FORUM or /FAQ rights
+ * needs ADMIN_DEVELOPER rights
  */
 
 $TranslateGroups[] = "Admin";
