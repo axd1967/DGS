@@ -24,7 +24,7 @@ Important Notes:
 
  Field       | Type                                           | Default
 -------------+------------------------------------------------+---------------------
- ID          | int(11)                                        | NULL
+ ID          | int(11)                                        | NULL, auto_increment
  Scope       | enum('DRAGON','PUBLIC','PRIVATE')              | PUBLIC
  Type        | enum('ROUNDROBIN')                             | ROUNDROBIN
  Title       | varchar(255)                                   |
@@ -87,5 +87,60 @@ Important Notes:
 * tid, uid : primary key of this table
    - Existing DB-entry makes User [uid] a TD for T [tid]
 
-* Comment : comment about TD, may be empty
+* Comment : public comment about TD, may be empty
+
+
+###########################################################################
+## --- TournamentParticipant ---
+
+ Field       | Type                              | Default
+-------------+-----------------------------------+---------------------
+ ID          | int(11)                           | NULL, auto_increment
+ tid         | int(11)                           | NULL
+ uid         | int(11)                           | NULL
+ Status      | enum('APPLY','REGISTER','INVITE') | APPLY
+ Flags       | smallint(5) unsigned              | 0
+ Rating      | double                            | -9999
+ StartRound  | tinyint(3) unsigned               | 1
+ AuthToken   | varchar(32)                       |
+ Created     | datetime                          | 0000-00-00 00:00:00
+ Lastchanged | datetime                          | 0000-00-00 00:00:00
+ Comment     | varchar(60)                       |
+ Notes       | text                              | NULL
+
+## Fields:
+
+* tid, uid : tournament-ID and user-id, that registers
+   - Existing DB-entry makes User [uid] a candidate for participating in the T [tid]
+   - User can register himself on non-private Ts
+   - User can be invited by TD
+
+* Status :
+   - APPLY = user applied for T, but needs to be verified by TD,
+     TD can approve or reject application of user
+   - REGISTER = user is registered, can be unregistered by user or TD
+   - INVITE = user is invited, user need to approve or reject invitation
+
+* Flags :
+   - additional properties of registered user:
+      - INVITED (by TD)
+      - VERIFIED (by TD)
+      - INVITE_ACK (by user after invitation)
+      - APPLY_ACK (by TD after verifying application)
+      - future: LOCK (user blocked/locked by TD for arbitrary reason)
+
+* Rating : ...
+
+* StartRound : ...
+
+* AuthToken : ...
+
+* Created : date of initial application/registration/invitation for T
+
+* Lastchanged : date of last-update on TP
+
+* Comment : ...
+
+* Notes : ...
+
 
