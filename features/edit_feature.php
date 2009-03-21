@@ -227,7 +227,7 @@ require_once( "features/lib_votes.php" );
       array_unshift( $notes,
          T_('Add related URLs using &lt;home&gt;-tag or &lt;http://...&gt; in description.'),
          T_('Add reason and properly adjust description on status changes.') );
-   Feature::echo_feature_notes( 'featurenotesTable', $notes );
+   echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
 
    $menu_array = array();
    $menu_array[T_('Show features')] = "features/list_features.php";

@@ -157,7 +157,8 @@ require_once( "features/lib_votes.php" );
    // end of table
 
    $notes = Feature::build_feature_notes( $user_vote_reason );
-   Feature::echo_feature_notes( 'featurenotesTable', $notes );
+   echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
+
 
    $menu_array = array();
    $menu_array[T_('Show votes')] = "features/list_votes.php";

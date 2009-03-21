@@ -280,12 +280,13 @@ class Feature
          $notes[] = T_('Feature or improvement suggestions are to be discussed in the '
                      . '<home forum/index.php>forums</home> first.');
          $notes[] = T_('Features can only be added to this list by one of the DGS executives.');
+         $notes[] = null; // empty line
       }
 
-      $notes[] = null; // empty line
       $notes[] = sprintf(
             T_('Feature status:<ul>'
                . '<li>%1$s = new feature (can be voted upon)'."\n" // NEW
+               //TODO: bugfix, that cond-expr doesn't work here, b/c it "disturbs" the T_(..)
                . ($intro ?
                  '<li>%9$s = show %1$s + %2$s'."\n" : '' ) // Open
                . '<li>%2$s = %3$s = feature implementation started by developer'."\n" // WORK
@@ -301,27 +302,6 @@ class Feature
             T_('Open#filtervote')
          );
       return $notes;
-   }
-
-   /*! \brief Prints feature-notes in formatted table if there are notes. */
-   function echo_feature_notes( $table_id, $notes )
-   {
-      if( !is_array($notes) || count($notes) == 0 )
-         return;
-
-      echo "<br><br>\n",
-         "<table id=\"{$table_id}\">\n",
-         "<tr><th>" . T_('Feature notes') . "</th></tr>\n",
-         "<tr><td><ul>";
-      foreach( $notes as $note )
-      {
-         if( is_null($note) || (string)$note === '' )
-            echo "<p></p>\n";
-         else
-            echo "  <li>" . make_htmL_safe($note, 'line') . "\n";
-      }
-      echo "</ul>\n",
-         "</td></tr></table>\n";
    }
 
    /*!

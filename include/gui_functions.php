@@ -101,4 +101,25 @@ function TD_button( $title, $href, $isrc, $ialt)
    return $str;
 }
 
+/*! \brief Prints notes in formatted table if there are notes. */
+function echo_notes( $table_id, $title, $notes )
+{
+   if( !is_array($notes) || count($notes) == 0 )
+      return;
+
+   echo "<br><br>\n",
+      "<table id=\"{$table_id}\">\n",
+      "<tr><th>" . make_html_safe($title, 'line') . "</th></tr>\n",
+      "<tr><td><ul>";
+   foreach( $notes as $note )
+   {
+      if( is_null($note) || (string)$note === '' )
+         echo "<p></p>\n";
+      else
+         echo "  <li>" . make_htmL_safe($note, 'line') . "\n";
+   }
+   echo "</ul>\n",
+      "</td></tr></table>\n";
+}
+
 ?>
