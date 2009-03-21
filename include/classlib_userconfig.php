@@ -226,17 +226,17 @@ class ConfigBoard
       ConfigPages::_check_user_id( $this->user_id, 'ConfigBoard::update_all');
 
       $update_query = 'UPDATE ConfigBoard SET'
-         . ', Stonesize=' . $this->stone_size
+         . '  Stonesize=' . $this->stone_size
          . ', Woodcolor=' . $this->wood_color
          . ', Boardcoords=' . $this->board_coords
          . ', MoveNumbers=' . $this->move_numbers
          . ', MoveModulo=' . $this->move_modulo
          . ', NotesSmallHeight=' . $this->get_notes_height(CFGBOARD_NOTES_SMALL)
          . ', NotesSmallWidth=' . $this->get_notes_width(CFGBOARD_NOTES_SMALL)
-         . ', NotesSmallMode=' . $this->get_notes_mode(CFGBOARD_NOTES_SMALL)
+         . ", NotesSmallMode='" . mysql_addslashes($this->get_notes_mode(CFGBOARD_NOTES_SMALL)) . "'"
          . ', NotesLargeHeight=' . $this->get_notes_height(CFGBOARD_NOTES_LARGE)
          . ', NotesLargeWidth=' . $this->get_notes_width(CFGBOARD_NOTES_LARGE)
-         . ', NotesLargeMode=' . $this->get_notes_mode(CFGBOARD_NOTES_LARGE)
+         . ", NotesLargeMode='" . mysql_addslashes($this->get_notes_mode(CFGBOARD_NOTES_LARGE)) . "'"
          . ', NotesCutoff=' . $this->notes_cutoff
          . " WHERE User_ID='{$this->user_id}' LIMIT 1";
          ;
@@ -311,32 +311,34 @@ define('FORUMFLAG_POSTVIEW_AUTOREAD', 0x04); // viewing marks thread as read //T
 define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
 
 // Table column-sets (db-fieldname-prefix for ConfigPages-table for BitSet-handling)
-define('CFGCOLS_STATUS_GAMES',         'ColumnsStatusGames');
-define('CFGCOLS_WAITINGROOM',          'ColumnsWaitingroom');
-define('CFGCOLS_USERS',                'ColumnsUsers');
-define('CFGCOLS_OPPONENTS',            'ColumnsOpponents');
-define('CFGCOLS_CONTACTS',             'ColumnsContacts');
-define('CFGCOLS_GAMES_RUNNING_ALL',    'ColumnsGamesRunningAll');
-define('CFGCOLS_GAMES_RUNNING_USER',   'ColumnsGamesRunningUser');
-define('CFGCOLS_GAMES_FINISHED_ALL',   'ColumnsGamesFinishedAll');
-define('CFGCOLS_GAMES_FINISHED_USER',  'ColumnsGamesFinishedUser');
-define('CFGCOLS_GAMES_OBSERVED',       'ColumnsGamesObserved');
-define('CFGCOLS_GAMES_OBSERVED_ALL',   'ColumnsGamesObservedAll');
-define('CFGCOLS_TOURNAMENT_LIST',      'ColumnsTournamentList');
+define('CFGCOLS_STATUS_GAMES',            'ColumnsStatusGames');
+define('CFGCOLS_WAITINGROOM',             'ColumnsWaitingroom');
+define('CFGCOLS_USERS',                   'ColumnsUsers');
+define('CFGCOLS_OPPONENTS',               'ColumnsOpponents');
+define('CFGCOLS_CONTACTS',                'ColumnsContacts');
+define('CFGCOLS_GAMES_RUNNING_ALL',       'ColumnsGamesRunningAll');
+define('CFGCOLS_GAMES_RUNNING_USER',      'ColumnsGamesRunningUser');
+define('CFGCOLS_GAMES_FINISHED_ALL',      'ColumnsGamesFinishedAll');
+define('CFGCOLS_GAMES_FINISHED_USER',     'ColumnsGamesFinishedUser');
+define('CFGCOLS_GAMES_OBSERVED',          'ColumnsGamesObserved');
+define('CFGCOLS_GAMES_OBSERVED_ALL',      'ColumnsGamesObservedAll');
+define('CFGCOLS_TOURNAMENTS',             'ColumnsTournaments');
+define('CFGCOLS_TOURNAMENT_PARTICIPANTS', 'ColumnsTournamentParticipants');
 // col_name => number of ints in DB (needed for writing)
 $SIZECONFIG_CFGCOLS = array(
-   CFGCOLS_STATUS_GAMES          => 1,
-   CFGCOLS_WAITINGROOM           => 1,
-   CFGCOLS_USERS                 => 1,
-   CFGCOLS_OPPONENTS             => 1,
-   CFGCOLS_CONTACTS              => 1,
-   CFGCOLS_GAMES_RUNNING_ALL     => 2, // >30 bit
-   CFGCOLS_GAMES_RUNNING_USER    => 2, // >30 bit
-   CFGCOLS_GAMES_FINISHED_ALL    => 2, // >30 bit
-   CFGCOLS_GAMES_FINISHED_USER   => 2, // >30 bit
-   CFGCOLS_GAMES_OBSERVED        => 2, // >30 bit
-   CFGCOLS_GAMES_OBSERVED_ALL    => 2, // >30 bit
-   CFGCOLS_TOURNAMENT_LIST       => 1,
+   CFGCOLS_STATUS_GAMES             => 1,
+   CFGCOLS_WAITINGROOM              => 1,
+   CFGCOLS_USERS                    => 1,
+   CFGCOLS_OPPONENTS                => 1,
+   CFGCOLS_CONTACTS                 => 1,
+   CFGCOLS_GAMES_RUNNING_ALL        => 2, // >30 bit
+   CFGCOLS_GAMES_RUNNING_USER       => 2, // >30 bit
+   CFGCOLS_GAMES_FINISHED_ALL       => 2, // >30 bit
+   CFGCOLS_GAMES_FINISHED_USER      => 2, // >30 bit
+   CFGCOLS_GAMES_OBSERVED           => 2, // >30 bit
+   CFGCOLS_GAMES_OBSERVED_ALL       => 2, // >30 bit
+   CFGCOLS_TOURNAMENTS              => 1,
+   CFGCOLS_TOURNAMENT_PARTICIPANTS  => 1,
    );
 
 class ConfigPages
