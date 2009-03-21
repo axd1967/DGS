@@ -40,7 +40,7 @@ $ThePage = new Page('TournamentList');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.list_tournaments');
    $my_id = $player_row['ID'];
-   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_LIST );
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENTS );
 
    $page = "list_tournaments.php?";
 
@@ -62,12 +62,38 @@ $ThePage = new Page('TournamentList');
          T_('Mine#T_owner') => "T.Owner_ID=$my_id",
       );
 
+   if( Tournament::isAdmin() )
+      $where_scope = "1=1"; // admin can see all scopes (incl. private)
+   else
+      $where_scope = sprintf( "T.Scope IN ('%s','%s')", TOURNEY_SCOPE_DRAGON, TOURNEY_SCOPE_PUBLIC );
+
+
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_LIST );
+   $tsfilter = new SearchFilter( 's', $search_profile );
    $tfilter = new SearchFilter( '', $search_profile );
    $ttable = new Table( 'tournament', $page, $cfg_tblcols );
    $ttable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
+
+   // static filters
+   $tsfilter->add_filter( 1, 'Text', 'TPP.Handle', true, array(
+            FC_QUERYSQL => new QuerySQL(
+               SQLP_FROM,
+                  'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID',
+                  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid',
+               SQLP_WHERE,
+                  $where_scope ),
+            FC_SIZE => 12 ));
+   $tsfilter->add_filter( 2, 'Text', 'TDP.Handle', true, array(
+            FC_QUERYSQL => new QuerySQL(
+               SQLP_FROM,
+                  'INNER JOIN TournamentDirector AS TD ON TD.tid=T.ID',
+                  'INNER JOIN Players AS TDP ON TDP.ID=TD.uid',
+               SQLP_WHERE,
+                  $where_scope ),
+            FC_SIZE => 12 ));
+   $tsfilter->init();
 
    // table filters
    $tfilter->add_filter( 1, 'Numeric', 'T.ID', true);
@@ -83,6 +109,16 @@ $ThePage = new Page('TournamentList');
    $ttable->register_filter( $tfilter );
    $ttable->add_or_del_column();
 
+   // External-Form
+   $tform = new Form( $ttable->Prefix, $page, FORM_GET, false);
+   $tform->set_layout( FLAYOUT_GLOBAL, '1' );
+   $tform->set_config( FEC_EXTERNAL_FORM, true );
+   $ttable->set_externalform( $tform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form
+   $tform->attach_table( $tsfilter ); // attach manage-filter as hiddens (static) to ext-form
+
+   // attach external URL-parameters from static filter
+   $ttable->add_external_parameters( $tsfilter->get_req_params(), false );
+
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ttable->add_tablehead( 1, T_('ID#headert'), 'Button', TABLE_NO_HIDE, 'ID-');
    $ttable->add_tablehead( 2, T_('Scope#headert'), 'Enum', 0, 'Scope+');
@@ -96,8 +132,13 @@ $ThePage = new Page('TournamentList');
 
    $ttable->set_default_sort( 1 ); //on ID
 
+   // build SQL-query (for tournament-table)
+   $query_tsfilter = $tsfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
+   $tqsql = $ttable->get_query(); // clause-parts for filter
+   $tqsql->merge( $query_tsfilter );
+
    $iterator = new ListIterator( 'Tournaments',
-         $ttable->get_query(),
+         $tqsql,
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );
    if( !Tournament::isAdmin() )
@@ -113,6 +154,18 @@ $ThePage = new Page('TournamentList');
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
+   // form for static filters
+   $tform->set_area( 1 );
+   $tform->set_layout( FLAYOUT_AREACONF, 1,
+      array( 'title' => T_('Search tournaments by user roles'), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Participating user'),
+         'FILTER',      $tsfilter, 1,
+         'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament director'),
+         'FILTER',      $tsfilter, 2,
+         'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
 
    $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
    while( ($show_rows-- > 0) && list(,$tourney) = $iterator->getListIterator() )
@@ -142,11 +195,17 @@ $ThePage = new Page('TournamentList');
       $ttable->add_row( $row_str );
    }
 
-   // print table
-   echo $ttable->make_table();
+   // print static-filter & table
+   echo "\n",
+      $tform->print_start_default(),
+      $ttable->make_table(),
+      "<br>\n",
+      $tform->get_form_string(), // static form
+      $tform->print_end();
 
 
    $menu_array = array();
+   $menu_array[T_('Show all tournaments')] = 'tournaments/list_tournaments.php';
    if( Tournament::allow_create($my_id) )
       $menu_array[T_('Add new tournament')] = 'tournaments/edit_tournament.php';
 
