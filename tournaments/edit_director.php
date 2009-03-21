@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -119,8 +119,7 @@ $ThePage = new Page('TournamentDirectorEdit');
    }
 
    // check + parse edit-form
-   $read = ( @$_REQUEST['td_save'] || @$_REQUEST['td_preview'] ); // read-URL-vars
-   if( @$_REQUEST['td_save'] || @$_REQUEST['td_preview'] )
+   if( @$_REQUEST['td_save'] || @$_REQUEST['td_preview'] ) // read URL-vars
    {
       $director->Comment = trim(get_request_arg('comment'));
    }
@@ -226,11 +225,11 @@ $ThePage = new Page('TournamentDirectorEdit');
 
 
    $menu_array = array();
-   $menu_array[T_('Tournaments')] = "tournaments/list_tournaments.php";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
    if( $allow_new_del_TD )
-      $menu_array[T_('Add tournament director')] = "tournaments/edit_director.php?tid=$tid";
+      $menu_array[T_('Add tournament director')] =
+         array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }
