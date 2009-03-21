@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once( 'include/std_classes.php' );
+require_once( 'include/classlib_user.php' );
 
  /*!
   * \file tournament_director.php
@@ -35,27 +36,20 @@ require_once( 'include/std_classes.php' );
   *
   * \brief Class to manage TournamentDirector-table
   */
-
 class TournamentDirector
 {
    var $tid;
    var $uid;
    var $Comment;
-   var $Name;
-   var $Handle;
-   var $Rating;
-   var $Lastaccess;
+   var $User; // User-object
 
-   /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function TournamentDirector( $tid=0, $uid=0, $comment='', $name='', $handle='', $rating=0, $lastaccess=0 )
+   /*! \brief Constructs TournamentDirector-object with specified arguments. */
+   function TournamentDirector( $tid=0, $uid=0, $comment='', $user=NULL )
    {
       $this->tid = (int)$tid;
       $this->uid = (int)$uid;
       $this->Comment = $comment;
-      $this->Name = $name;
-      $this->Handle = $handle;
-      $this->Rating = $rating;
-      $this->Lastaccess = (int)$lastaccess;
+      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
    }
 
    /*! \brief Inserts or updates TournmentDirector in database. */
@@ -135,10 +129,7 @@ class TournamentDirector
             @$row['uid'],
             @$row['Comment'],
             // from Players
-            @$row['Name'],
-            @$row['Handle'],
-            @$row['Rating2'],
-            @$row['X_Lastaccess']
+            User::new_from_row( $row )
          );
       return $director;
    }
