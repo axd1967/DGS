@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once( 'include/std_classes.php' );
+require_once( 'include/std_functions.php' ); // for ADMIN_TOURNAMENT
 require_once( 'tournaments/include/tournament_director.php' );
 
  /*!
@@ -121,7 +122,7 @@ class Tournament
       $this->Status = $status;
    }
 
-   /*! \brief Inserts or updates tournment in database. */
+   /*! \brief Inserts or updates tournament in database. */
    function persist()
    {
       if( $this->ID > 0 )
@@ -220,6 +221,24 @@ class Tournament
       {// same checks to edit-only of TDs as for Ts
          return $this->allow_edit_tournaments( $uid );
       }
+   }
+
+   /*! \brief Returns empty error-array if given user can register to tournament. */
+   function allow_register( $uid, $ignore_status=false )
+   {
+      global $player_row;
+      $errors = array();
+      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
+         return $errors + array( T_('Guest-users are not allowed to register in tournaments.') );
+
+      //TODO check T-status (must be REG)
+      if( !$ignore_status )
+      {
+      }
+
+      //TODO check against T-props
+
+      return $errors;
    }
 
    // ------------ static functions ----------------------------
@@ -343,7 +362,6 @@ class Tournament
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS']) )
       {
-         global $player_row;
          $arr = array();
          if( Tournament::isAdmin() )
             $arr[TOURNEY_STATUS_ADMIN] = T_('Admin#T_status');
@@ -351,7 +369,7 @@ class Tournament
          $arr[TOURNEY_STATUS_REGISTER] = T_('Register#T_status');
          $arr[TOURNEY_STATUS_PAIR]     = T_('Pair#T_status');
          $arr[TOURNEY_STATUS_PLAY]     = T_('Play#T_status');
-         $arr[TOURNEY_STATUS_CLOSED]   = T_('Closed#T_status');
+         $arr[TOURNEY_STATUS_CLOSED]   = T_('Finished#T_status');
          $ARR_GLOBALS_TOURNAMENT['STATUS'] = $arr;
       }
 
@@ -366,8 +384,7 @@ class Tournament
    function isAdmin()
    {
       global $player_row;
-      //TODO: add own ADMIN_TOURNAMENT (tournament-admin)
-      return ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
+      return ( @$player_row['admin_level'] & ADMIN_TOURNAMENT );
    }
 
    /*! \brief Returns true if given user can create a new tournament. */
@@ -397,6 +414,31 @@ class Tournament
                $date_str, TOURNEY_DATEFMT, $msg );
       }
       return $result;
+   }
+
+   /*! \brief Returns array with notes about creating/editing tournament. */
+   function build_notes( $intro=true )
+   {
+      $notes = array();
+      //$notes[] = null; // empty line
+
+      $notes[] = sprintf(
+            T_('Tournament status:<ul>'
+               . '<li>%1$s = hidden, archived tournaments managed by tournament admin'."\n" // admin
+               . '<li>%2$s = initial setup phase for tournament (adding infos and rules)'."\n" // new
+               . '<li>%3$s = registration phase for tournament (users can register or be invited)'."\n" // reg
+               . '<li>%4$s = pairing phase, preparing and setting up games for tournament'."\n" // pair
+               . '<li>%5$s = tournament games are started, participants are playing'."\n" // play
+               . '<li>%6$s = results are announced, tournament is finished'."\n" // closed
+               . '</ul>'),
+            Tournament::getStatusText(TOURNEY_STATUS_ADMIN),
+            Tournament::getStatusText(TOURNEY_STATUS_NEW),
+            Tournament::getStatusText(TOURNEY_STATUS_REGISTER),
+            Tournament::getStatusText(TOURNEY_STATUS_PAIR),
+            Tournament::getStatusText(TOURNEY_STATUS_PLAY),
+            Tournament::getStatusText(TOURNEY_STATUS_CLOSED)
+         );
+      return $notes;
    }
 
 } // end of 'Tournament'
