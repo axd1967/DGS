@@ -109,8 +109,10 @@ $ThePage = new Page('TournamentDirectorList');
       if( $tdtable->Is_Column_Displayed[1] )
       {
          $msg_subj = urlencode( sprintf( T_('[Tournament #%d]'), $tid ));
-         $msg_text = urlencode( sprintf( T_('Request for tournament [%s]:'),
-               "<home tournaments/view_tournament.php?tid=$tid>{$tourney->Title}</home>" ));
+         $msg_text = urlencode( sprintf(
+            T_("Request for %s:\n\nEdit subject and text to match your request "
+               . "but please keep the reference to the tournament.#tourney"),
+            "<tourney $tid>" ));
          $links  = anchor( $base_path."message.php?mode=NewMessage".URI_AMP
                      . "uid=$uid".URI_AMP."subject=$msg_subj".URI_AMP."message=$msg_text",
                image( $base_path.'images/send.gif', 'M'),
@@ -133,11 +135,11 @@ $ThePage = new Page('TournamentDirectorList');
          $row_str[1] = $links;
       }
       if( $tdtable->Is_Column_Displayed[2] )
-         $row_str[2] = user_reference( REF_LINK, 1, '', $uid, $director->Name, $director->Handle );
+         $row_str[2] = user_reference( REF_LINK, 1, '', $uid, $director->User->Name, $director->User->Handle );
       if( $tdtable->Is_Column_Displayed[3] )
-         $row_str[3] = echo_rating( $director->Rating, true, $uid );
+         $row_str[3] = echo_rating( $director->User->Rating, true, $uid );
       if( $tdtable->Is_Column_Displayed[4] )
-         $row_str[4] = ($director->Lastaccess > 0) ? date(DATE_FMT2, $director->Lastaccess) : '';
+         $row_str[4] = ($director->User->Lastaccess > 0) ? date(DATE_FMT2, $director->User->Lastaccess) : '';
       if( $tdtable->Is_Column_Displayed[5] )
          $row_str[5] = make_html_safe( $director->Comment, true );
 
@@ -149,10 +151,10 @@ $ThePage = new Page('TournamentDirectorList');
 
 
    $menu_array = array();
-   $menu_array[T_('Tournaments')] = "tournaments/list_tournaments.php";
    $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
    if( $allow_new_del )
-      $menu_array[T_('Add tournament director')] = "tournaments/edit_director.php?tid=$tid";
+      $menu_array[T_('Add tournament director')] =
+         array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }
