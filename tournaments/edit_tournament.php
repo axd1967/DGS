@@ -56,6 +56,8 @@ $ThePage = new Page('TournamentEdit');
 
    // create/edit allowed?
    $is_admin = Tournament::isAdmin();
+   $allow_edit_tourney = false;
+   $allow_new_del_TD = false;
    if( is_null($tourney) )
    {
       if( !Tournament::allow_create($my_id) )
@@ -69,6 +71,8 @@ $ThePage = new Page('TournamentEdit');
    {
       if( !$tourney->allow_edit_tournaments($my_id) )
          error('tournament_edit_not_allowed', "edit_tournament.edit_tournament($tid,$my_id)");
+      $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+      $allow_new_del_TD = $tourney->allow_edit_directors($my_id, true);
    }
 
    // init
@@ -132,14 +136,19 @@ $ThePage = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Type'),
          'SELECTBOX',   'type', 1, Tournament::getTypeText(), $tourney->Type, false ));
+   //TODO: Type can ONLY be changed on NEW-Status(!)
+   //TODO: Status can NOT be changed to NEW if T has been started (PLAY)
    if( $is_admin || $tid ) // only admin can edit status on T-creation
       $tform->add_row( array(
             'DESCRIPTION', T_('Status'),
             'SELECTBOX',   'status', 1, $arr_status, $tourney->Status, false ));
    else
+   {
+      $tform->add_hidden( 'status', TOURNEY_STATUS_NEW );
       $tform->add_row( array(
             'DESCRIPTION', T_('Status'),
             'TEXT',        $arr_status[TOURNEY_STATUS_NEW] ));
+   }
 
    if( !is_null($errorlist) )
    {
@@ -147,8 +156,8 @@ $ThePage = new Page('TournamentEdit');
             'DESCRIPTION', T_('Error'),
             'TEXT',        '<span class="ErrorMsg">'
                   . T_('There are some errors, so Tournament can\'t be saved:') . "<br>\n"
-                  . '(' . implode("),<br>\n(", $errorlist)
-                  . ')</span>' ));
+                  . '* ' . implode(",<br>\n* ", $errorlist)
+                  . '</span>' ));
    }
 
    $tform->add_row( array(
@@ -157,15 +166,6 @@ $ThePage = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Description'),
          'TEXTAREA',    'descr', 70, 15, $tourney->Description ));
-   if( @$_REQUEST['t_preview'] || $tourney->Title . $tourney->Description != '' )
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Preview'),
-            'TEXT', make_html_safe( $tourney->Title, true ) ));
-      $tform->add_row( array(
-            'TAB',
-            'TEXT', make_html_safe( $tourney->Description, true ) ));
-   }
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
@@ -173,6 +173,16 @@ $ThePage = new Page('TournamentEdit');
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_preview', T_('Preview'),
       ));
+
+   if( @$_REQUEST['t_preview'] || $tourney->Title . $tourney->Description != '' )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Preview Title'),
+            'TEXT', make_html_safe( $tourney->Title, true ) ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Preview Description'),
+            'TEXT', make_html_safe( $tourney->Description, true ) ));
+   }
 
 
    $tform->add_hidden( 'tid', $tid );
@@ -185,10 +195,18 @@ $ThePage = new Page('TournamentEdit');
    $tform->echo_string();
    echo "</CENTER><BR>\n";
 
+   $notes = Tournament::build_notes();
+   echo_notes( 'edittournamentnotesTable', T_('Tournament notes'), $notes );
+
    $menu_array = array();
-   $menu_array[T_('Tournaments')] = "tournaments/list_tournaments.php";
    if( $tid )
       $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   if( $allow_new_del_TD )
+      $menu_array[T_('Add tournament director')] =
+         array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
+   if( $allow_edit_tourney )
+      $menu_array[T_('Invite user')] =
+         array( 'url' => "tournaments/invite.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
 
    end_page(@$menu_array);
 }
