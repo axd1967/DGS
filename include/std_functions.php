@@ -234,15 +234,15 @@ define('USERFLAG_JAVASCRIPT_ENABLED', 0x001);
 define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
-define("ADMIN_SUPERADMIN",0x08);
-//define('',0x10);  // can be reused, has been replaced by ADMOPT_SHOW_TIME
-define("ADMIN_ADD_ADMIN",0x20);
+define("ADMIN_SUPERADMIN",0x08); // manage admins (add, edit, delete)
+define('ADMIN_TOURNAMENT',0x10);
+//define(''",0x20); // can be reused, was ADMIN_ADD_ADMIN
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
 define('ADMIN_DEVELOPER',0x100);
 define('ADMIN_SKINNER',0x200);
 // admin groups
-define('ADMINGROUP_EXECUTIVE', (ADMIN_DEVELOPER|ADMIN_PASSWORD|ADMIN_FORUM|ADMIN_FAQ) );
+define('ADMINGROUP_EXECUTIVE', (ADMIN_FAQ|ADMIN_FORUM|ADMIN_TOURNAMENT|ADMIN_PASSWORD|ADMIN_DEVELOPER));
 //-----
 
 
@@ -639,8 +639,9 @@ function grab_output_end( $filename='')
 // make bottom page-links
 //   supported formats in $menu_array:
 //    linktext  => URL
+//    linktext  => array( 'url' => URL, attb1 => val1, ... )
 //    dummytext => Form-object
-function make_menu($menu_array)
+function make_menu($menu_array, $with_accesskeys=true)
 {
    global $base_path, $max_links_in_main_menu;
 
@@ -670,11 +671,20 @@ function make_menu($menu_array)
       if( is_a($link, 'Form') )
          echo $link->echo_string();
       else
-         echo anchor( "$base_path$link"
-                    , $text
-                    , ''
-                    , array( 'accesskey' => $i % 10 )
-                    );
+      {
+         $attbs = array();
+         if( $with_accesskeys )
+            $attbs['accesskey'] = $i % 10;
+         if( is_array($link) )
+         {
+            $url = $link['url'];
+            unset( $link['url'] );
+            $attbs += $link;
+         }
+         else
+            $url = $link;
+         echo anchor( "$base_path$url", $text, '', $attbs );
+      }
       echo '</td>';
 
       $cumwidth += $width;
@@ -2187,6 +2197,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
           .",Adminlevel+0 AS admin_level"
           .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
           .',UNIX_TIMESTAMP(LastMove) AS X_LastMove'
+          .',UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess'
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
    $result = mysql_query( $query )
