@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * PURPOSE:
  * Show admins (Adminlevel>0) and administrated users (AdminOptions>0),
- * needs ADMIN_DEVELOPER/PASSWORD/FORUM or /FAQ rights
+ * needs ADMINGROUP_EXECUTIVE rights
  */
 
 $TranslateGroups[] = "Admin";
@@ -43,11 +43,11 @@ require_once( "include/table_columns.php" );
    $page = 'admin_show_users.php';
 
    $ARR_ADMLEVELS = array( // maskval => [ bit-text, descr ]
-      ADMIN_SUPERADMIN     => array( 'SUPERADMIN',       T_('Can manage admins') ),
-      ADMIN_ADD_ADMIN      => array( 'ADD_ADMIN',        T_('Can add new admins') ),
+      ADMIN_SUPERADMIN     => array( 'SUPERADMIN',       T_('Can manage admins (add, edit, delete)') ),
       ADMIN_DATABASE       => array( 'DATABASE',         T_('Can execute special server scripts') ),
       ADMIN_DEVELOPER      => array( 'DEVELOPER',        T_('Can see more admin info, manage forums, edit user attributes') ),
       ADMIN_PASSWORD       => array( 'PASSWORD',         T_('Can create and send new passwords') ),
+      ADMIN_TOURNAMENT     => array( 'TOURNAMENT',       T_('Can administrate tournaments') ),
       ADMIN_FORUM          => array( 'MODERATOR',        T_('Can moderate forum (approve, reject, show, hide posts)') ),
       ADMIN_FAQ            => array( 'FAQ_EDITOR',       T_('Can edit FAQ') ),
       ADMIN_SKINNER        => array( 'SKINNER',          T_('Can choose CSS-skin (experimental)') ),

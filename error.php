@@ -666,7 +666,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("admin_no_longer_admin_admin"):
       {
-         echo T_("Hmm, you seem to try to revoke your abillity to edit the admin staff.");
+         echo T_("Hmm, you seem to try to revoke your abillity to edit the admin staff. Only another super-admin can do that for you.");
       }
       break;
 
@@ -691,19 +691,25 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('tournament_edit_not_allowed'):
       {
-         echo T_("Sorry, you are not allowed to add or edit a tournament.");
+         echo T_("Sorry, you are not allowed to add or edit this tournament.");
       }
       break;
 
       case('tournament_director_edit_not_allowed'):
       {
-         echo T_("Sorry, you are not allowed to add, edit or delete a tournament director.");
+         echo T_("Sorry, you are not allowed to add, edit or delete a tournament director for this tournament.");
       }
       break;
 
       case('tournament_director_new_del_not_allowed'):
       {
-         echo T_("Sorry, you are not allowed to add or delete a tournament director.");
+         echo T_("Sorry, you are not allowed to add or delete a tournament director for this tournament.");
+      }
+      break;
+
+      case('tournament_register_not_allowed'):
+      {
+         echo T_("Sorry, you are not allowed to register to this tournament.");
       }
       break;
 
