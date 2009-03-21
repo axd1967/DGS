@@ -114,7 +114,9 @@ function item($text, $link='', $working=true, $last=false)
                item(T_('Edit tournament director'), "tournaments/edit_directors.php", false);
                item(T_('Remove tournament director'), "tournaments/edit_directors.php?td_delete=1", false, true);
             } $item_level--;
-            item(T_('Edit this tournament'), "tournaments/view_tournament.php", false, true);
+            item(T_('Manage this tournament'), "tournaments/edit_tournament.php", false, false);
+            item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
+            item(T_('Registration'), "tournaments/register.php", false, true);
          } $item_level--;
       } $item_level--;
       }
