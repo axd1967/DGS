@@ -79,11 +79,12 @@ $ThePage = new Page('TournamentEdit');
    $arr_scopes = Tournament::getScopeText();
    if( !$is_admin )
       unset($arr_scopes[TOURNEY_SCOPE_DRAGON]); // only admin can set Dragon-scope
-   unset($arr_scopes[TOURNEY_SCOPE_PRIVATE]); //TODO not supported yet
+   unset($arr_scopes[TOURNEY_SCOPE_PRIVATE]); //TODO(later) not supported yet
 
-   $arr_status = Tournament::getStatusText();
    if( !$is_admin && !$tid ) // only admin can edit status on T-creation
-      $arr_status = array( TOURNEY_STATUS_NEW => $arr_status[TOURNEY_STATUS_NEW] );
+      $arr_status = array( TOURNEY_STATUS_NEW => Tournament::getStatusText(TOURNEY_STATUS_NEW) );
+   else
+      $arr_status = Tournament::getStatusText();
 
    // check + parse edit-form
    $errorlist = parse_edit_form( $tourney );

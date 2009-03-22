@@ -363,8 +363,7 @@ class Tournament
       if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS']) )
       {
          $arr = array();
-         if( Tournament::isAdmin() )
-            $arr[TOURNEY_STATUS_ADMIN] = T_('Admin#T_status');
+         $arr[TOURNEY_STATUS_ADMIN]    = T_('Admin#T_status');
          $arr[TOURNEY_STATUS_NEW]      = T_('New#T_status');
          $arr[TOURNEY_STATUS_REGISTER] = T_('Register#T_status');
          $arr[TOURNEY_STATUS_PAIR]     = T_('Pair#T_status');
@@ -374,7 +373,12 @@ class Tournament
       }
 
       if( is_null($status) )
-         return $ARR_GLOBALS_TOURNAMENT['STATUS'];
+      {
+         $arrout = array() + $ARR_GLOBALS_TOURNAMENT['STATUS'];
+         if( !Tournament::isAdmin() )
+            unset($arrout[TOURNEY_STATUS_ADMIN]);
+         return $arrout;
+      }
       if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS'][$status]) )
          error('invalid_args', "Tournament.getStatusText($status)");
       return $ARR_GLOBALS_TOURNAMENT['STATUS'][$status];
