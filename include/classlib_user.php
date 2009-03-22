@@ -74,7 +74,7 @@ class User
    function to_string()
    {
       return "User(ID={$this->ID}):"
-         . ", Name=[{$this->Name}]"
+         . "  Name=[{$this->Name}]"
          . ", Handle=[{$this->Handle}]"
          . sprintf( " Type=[0x%x]", $this->Type )
          . ", Lastaccess=[{$this->Lastaccess}]"
