@@ -28,6 +28,7 @@ $TranslateGroups[] = "Forum"; //local use
 require_once( "include/std_functions.php" );
 require_once( 'include/std_classes.php' );
 require_once( "include/form_functions.php" );
+require_once( 'include/classlib_user.php' );
 require_once( 'include/classlib_goban.php' );
 //if( ALLOW_GO_DIAGRAMS ) require_once( "include/GoDiagram.php" );
 
@@ -1001,6 +1002,7 @@ class Forum
          $thread = ForumPost::new_from_row( $row ); // Post
          $thread->last_post =
             new ForumPost( $thread->last_post_id, $this->id, $thread->thread_id,
+               //TODO use User-class
                new ForumUser( $row['LPAuthor_ID'], $row['LPAuthor_Name'], $row['LPAuthor_Handle'] ) );
          $thread->count_new = ($row['FR_NeedUpdate']) ? -1 : @$row['FR_NewCount'] + 0;
 
