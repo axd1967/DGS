@@ -3,9 +3,15 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Games, Forum)
+#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Tournaments, Games, Forum)
 
    New features and Major changes:
+
+   * <home tournaments/list.php>Tournaments</home>:
+      * Added Round-Robin Tournaments
+      * Added Tournament-list page into main menu (access-key [t])
+      * Added Tournament scopes: Dragon (official Dragon tournaments), Public
+      * Added basic Tournament Registration for users
 
    * Games:
       * Delete game on opponents turn (within first 10 moves)
@@ -81,6 +87,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home features/list_features.php>Feature-Voting</home> including feature status management
 
+   * Markup tags:
+      * Added markup-tag &lt;tourney id> showing link to tournament-page
+      * &lt;game> markup: Changed char used for move-number in game reference
+
 
    Minor changes:
 
@@ -89,7 +99,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Adjusted page title and bottom menu links
          * Adjusted hint-text of colors-image for other users
       * Replaced "Show my observed games" -> "Games I'm observing"
-      * &lt;game&gt; markup: Changed char used for move-number in game reference
 
       * Game SGF Download:
          * Included private game notes
@@ -172,6 +181,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Changes for Translators:
       * Added comments to clarify the translation process
+      * Changed access-key of Translate-link from [t] to [l]
       * Added the 'N'=Native pseudo-language to browser settings section
       * Displaying the group-names
 
@@ -179,6 +189,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Removed translations from the admin pages
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
+      * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
+      * Added tournament-admin
       * removed ADMIN_TIME admin-level (replaced by admin-option)
 
 
@@ -191,6 +203,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * ALLOW_QUOTING, ALLOW_JAVASCRIPT, ALLOW_FEATURE_VOTE
       * Definition of all access keys
       * Forum NEW config
+      * Added config-switch for ALLOW_GO_DIAGRAMS (needs JavaScript)
+      * Added config-switch for ALLOW_GOBAN_EDITOR
+      * Added config-switch for ALLOW_TOURNAMENTS
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
