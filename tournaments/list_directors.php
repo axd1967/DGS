@@ -135,7 +135,7 @@ $ThePage = new Page('TournamentDirectorList');
          $row_str[1] = $links;
       }
       if( $tdtable->Is_Column_Displayed[2] )
-         $row_str[2] = $director->User->user_reference(); //TODO doesn't work WITH link ??
+         $row_str[2] = $director->User->user_reference();
       if( $tdtable->Is_Column_Displayed[3] )
          $row_str[3] = echo_rating( $director->User->Rating, true, $uid );
       if( $tdtable->Is_Column_Displayed[4] )

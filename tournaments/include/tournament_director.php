@@ -110,8 +110,9 @@ class TournamentDirector
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'TD.*',
-         'TDPL.Name', 'TDPL.Handle', 'TDPL.Rating2',
-         'UNIX_TIMESTAMP(TDPL.Lastaccess) AS X_Lastaccess' );
+         'TDPL.ID AS TDPL_ID', 'TDPL.Name AS TDPL_Name',
+         'TDPL.Handle AS TDPL_Handle', 'TDPL.Rating2 AS TDPL_Rating2',
+         'UNIX_TIMESTAMP(TDPL.Lastaccess) AS TDPL_X_Lastaccess' );
       $qsql->add_part( SQLP_FROM,
          'TournamentDirector AS TD',
          'INNER JOIN Players AS TDPL ON TDPL.ID=TD.uid' );
@@ -129,7 +130,7 @@ class TournamentDirector
             @$row['uid'],
             @$row['Comment'],
             // from Players
-            User::new_from_row( $row )
+            User::new_from_row( $row, 'TDPL_' )
          );
       return $director;
    }
