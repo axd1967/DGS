@@ -54,7 +54,7 @@ $ThePage = new Page('TournamentDirectorList');
    $page = "list_directors.php?";
 
    // init search profile
-   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_DIRECTOR_LIST );
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_DIRECTORS );
    $tdfilter = new SearchFilter( '', $search_profile );
    $tdtable = new Table( 'tournament', $page, null );
    $tdtable->set_profile_handler( $search_profile );
@@ -135,7 +135,7 @@ $ThePage = new Page('TournamentDirectorList');
          $row_str[1] = $links;
       }
       if( $tdtable->Is_Column_Displayed[2] )
-         $row_str[2] = user_reference( REF_LINK, 1, '', $uid, $director->User->Name, $director->User->Handle );
+         $row_str[2] = $director->User->user_reference(); //TODO doesn't work WITH link ??
       if( $tdtable->Is_Column_Displayed[3] )
          $row_str[3] = echo_rating( $director->User->Rating, true, $uid );
       if( $tdtable->Is_Column_Displayed[4] )

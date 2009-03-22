@@ -68,7 +68,7 @@ $ThePage = new Page('TournamentParticipantList');
       );
 
    // init search profile
-   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_PARTICIPANT_LIST );
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_PARTICIPANTS );
    $tpfilter = new SearchFilter( '', $search_profile );
    $tptable = new Table( 'tournament', $page, $cfg_tblcols );
    $tptable->set_profile_handler( $search_profile );

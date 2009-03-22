@@ -69,7 +69,7 @@ $ThePage = new Page('TournamentList');
 
 
    // init search profile
-   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_LIST );
+   $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
    $tsfilter = new SearchFilter( 's', $search_profile );
    $tfilter = new SearchFilter( '', $search_profile );
    $ttable = new Table( 'tournament', $page, $cfg_tblcols );
