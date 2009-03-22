@@ -23,6 +23,139 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-03-22 juga
+
+   * include/classlib_profile.php, tournaments/list_directors.php,
+     tournaments/list_participants.php, tournaments/list_tournaments.php:
+   - renamed tournament-profile-consts: .._LIST -> ..S, e.g.
+     PROFTYPE_FILTER_TOURNAMENT_LIST -> PROFTYPE_FILTER_TOURNAMENTS
+
+   * NEWS:
+   - tournaments (round-robin, list, scopes, registration, <tourney>-markup)
+   - admin-roles (ADMIN_TOURNAMENT), server-configuration
+
+2009-03-21 juga
+
+   * tournaments/list_tournaments.php:
+   - added role-search for participating user and tournament director
+   - added link to return to show ALL tournaments
+
+   * tournaments/edit_director.php,
+     skins/dragon/screen.css,
+     tournaments/edit_tournament.php,
+     tournaments/list_directors.php,
+     tournaments/view_tournament.php:
+   - added checks, if tournament-editing is allowed
+   - added checks, if adding/deleting tournament directors is allowed
+   - mark admin-bottom-links with CSS
+   - removed Tournaments-link from bottom-menu
+   - separate preview for edit-tournament: title and description
+
+   * tournaments/list_directors.php:
+   - adjust text for sending user-message
+   - introduced User-class to be used for Players-table-related data
+
+   * tournaments/view_tournament.php:
+   - added basic registration for tournament participants
+     - show number of completed registrations
+     - show number of registrations on other stati for admins/TDs only
+     - show a users registration status
+   - added general information section common to all tournaments,
+     cleaned up section with tournament-title and description
+   - added own set with "bottom"-links for each page-section
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     tournaments/include/tournament.php (Tournament.allow_register),
+     include/classlib_profile.php,
+     tournaments/list_participants.php,
+     tournaments/register.php,
+     tournaments/view_tournament.php,
+     skins/dragon/screen.css,
+     error.php, site_map.php:
+   - added basic registration for tournament participants
+     - list of participants of a tournament
+     - tournament registration page for users
+   - added CSS for tournament-view, registration
+-----------
+-- manage Tournament-Participants
+CREATE TABLE TournamentParticipant (
+   ID int(11) NOT NULL auto_increment,
+   tid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Status enum('APPLY','REGISTER','INVITE') NOT NULL default 'APPLY',
+   Flags smallint(5) unsigned NOT NULL default '0',
+   Rating double NOT NULL default '-9999',
+   StartRound tinyint(3) unsigned NOT NULL default '1',
+   AuthToken varchar(32) NOT NULL default '',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Comment varchar(60) NOT NULL default '',
+   Notes text NOT NULL,
+   PRIMARY KEY (ID),
+   KEY tid (tid),
+   KEY uid (uid)
+) ENGINE=MyISAM;
+-----------
+
+   * include/gui_functions.php (echo_notes),
+     features/lib_votes.php (Feature.build_feature_notes),
+     features/edit_feature.php, features/list_features.php,
+     tournaments/include/tournament.php (Tournament.build_notes, ~.getStatusText)
+     tournaments/edit_tournament.php:
+   - generalized Feature::echo_feature_notes()-func into echo_notes()-func
+   - added tournament notes with status-legend
+
+   * admin_admins.php, admin_show_users.php, error.php,
+     tournaments/include/tournament.php (Tournament.allow_register),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added admin-role for tournament-admin: ADMIN_TOURNAMENT,
+     replaced ADMIN_DEVELOPER with tournament-admin
+   - removed admin-role ADMIN_ADD_ADMIN,
+     one admin-role SUPERADMIN is enough to manage admins (add new and edit)
+   - SUPERADMIN can't remove SUPERADMIN-flag for himself
+   - minor changes (cleanup, comments, simplified URL-args)
+-----------
+-- removed ADMIN_ADD_ADMIN-role (has been merged with ADMIN_SUPERADMIN-role)
+UPDATE Players SET Adminlevel=Adminlevel & ~0x20 WHERE Adminlevel > 0 ;
+-----------
+
+   * include/filter.php (SearchFilter.get_query),
+     specs/filters.txt:
+   - added filter-option FC_QUERYSQL to add arbitrary QuerySQL
+     to filter-query if filter-value set
+
+   * include/std_functions.php (make_menu, is_logged_in):
+   - changed admin-roles:
+     - added tournament-admin ADMIN_TOURNAMENT, added in executives-group
+     - removed ADMIN_ADD_ADMIN, merged into admin-role SUPERADMIN
+   - make_menu: added arg to disable access-key in links,
+     link-values can be arrays with additional attributes for <a>-tag
+   - is_logged_in: addded Lastaccess in $player_row
+
+   * include/classlib_user.php (User),
+     tournaments/include/tournament_director.php (TournamentDirector):
+   - added User-class to represent some basic Players-table related data
+
+   * include/classlib_userconfig.php (ConfigBoard.update_all),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - fixed query for ConfigBoard-update (missed quotes, fixed query-syntax)
+   - undo rename of table-column-set: ColumnsTournamentList -> ColumnsTournaments
+   - added table-column-set for tournament-participant-list: ColumnsTournamentParticipants
+-----------
+-- undo rename of table-column-set for tournament-list
+ALTER TABLE ConfigPages
+   CHANGE ColumnsTournamentList ColumnsTournaments int(11) NOT NULL default '-1' ;
+
+-- table-column-set for tournament-participant-list
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentParticipants int(11) NOT NULL default '-1' ;
+-----------
+
+   * site_map.php, status.php:
+   - fixed URL for games i'm observing
+
 2009-03-09 juga
 
    * js/goeditor.js:
