@@ -93,7 +93,7 @@ class User
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Returns User-object created from specified (db-)row and given table-prefix (including '_' within alias-prefix). */
+   /*! \brief Returns User-object created from specified (db-)row and given table-prefix. */
    function new_from_row( $row, $prefix='' )
    {
       $user = new User(

@@ -38,7 +38,7 @@ $ThePage = new Page('TournamentRegistration');
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.register');
-   //TODO maybe later: check for DENY_TOURNEY_REGISTER for NEW-reg, allow edits (?)
+   //TODO(later maybe): check for DENY_TOURNEY_REGISTER for NEW-reg, allow edits (?)
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
