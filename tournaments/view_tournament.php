@@ -128,7 +128,7 @@ $ThePage = new Page('Tournament');
       "<br>\n",
       ( ($reg_user_info)
             ? sprintf( '%s%s<span class="TUserStatus">%s</span>',
-                       T_('Your Registration status:'), SMALL_SPACING, $reg_user_info )
+                       T_('Registration status:'), SMALL_SPACING, $reg_user_info )
             : '' ),
       "\n";
 
