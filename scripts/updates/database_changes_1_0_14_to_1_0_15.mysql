@@ -331,3 +331,36 @@ CREATE TABLE TournamentDirector (
 ) ENGINE=MyISAM;
 
 
+-- undo rename of table-column-set for tournament-list
+ALTER TABLE ConfigPages
+   CHANGE ColumnsTournamentList ColumnsTournaments int(11) NOT NULL default '-1' ;
+
+-- table-column-set for tournament-participant-list
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentParticipants int(11) NOT NULL default '-1' ;
+
+
+-- removed ADMIN_ADD_ADMIN-role (has been merged with ADMIN_SUPERADMIN-role)
+UPDATE Players SET Adminlevel=Adminlevel & ~0x20 WHERE Adminlevel > 0 ;
+
+
+-- manage Tournament-Participants
+CREATE TABLE TournamentParticipant (
+   ID int(11) NOT NULL auto_increment,
+   tid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Status enum('APPLY','REGISTER','INVITE') NOT NULL default 'APPLY',
+   Flags smallint(5) unsigned NOT NULL default '0',
+   Rating double NOT NULL default '-9999',
+   StartRound tinyint(3) unsigned NOT NULL default '1',
+   AuthToken varchar(32) NOT NULL default '',
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Comment varchar(60) NOT NULL default '',
+   Notes text NOT NULL,
+   PRIMARY KEY (ID),
+   KEY tid (tid),
+   KEY uid (uid)
+) ENGINE=MyISAM;
+
+
