@@ -23,6 +23,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Game settings:
       * Waiting room: added adjustment and min/max-limitation of handicap stones
+      * Waiting room: added (optional) minimum number of rated finished games
       * Waiting room: additionally show standard-placement (S) in Handicap-column
       * Invitation: added indication of color, handicap & komi
         for conventional & proper handicap-type

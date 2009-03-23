@@ -25,6 +25,21 @@ ChangeLog
 
 2009-03-23 juga
 
+   * add_to_waitingroom.php, waiting_room.php,
+     include/message_functions.php (game_info_table),
+     include/rating.php (echo_rating),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - WaitingRoom: added (optional) minimum number of rated finished games
+-----------
+-- add required number of finished rated games
+ALTER TABLE `Waitingroom`
+   ADD `MinRatedGames` smallint NOT NULL default '0' AFTER `Ratingmax` ;
+-----------
+
+   * features/lib_votes.php (Feature.build_feature_notes),
+     tournaments/view_tournament.php:
+   - fixes translation-texts
+
    * NEWS:
    - tournaments (registration-edit for TDs, invite-handling)
    - added rating-type conversion: added KGS-rank, added DGS-rating
