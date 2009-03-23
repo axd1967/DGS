@@ -107,6 +107,9 @@ Important Notes:
  Lastchanged | datetime                          | 0000-00-00 00:00:00
  Comment     | varchar(60)                       |
  Notes       | text                              | NULL
+ UserMessage  | text                             | NULL
+ AdminMessage | text                             | NULL
+
 
 ## Fields:
 
@@ -133,14 +136,17 @@ Important Notes:
 
 * StartRound : ...
 
-* AuthToken : ...
+* AuthToken : ... not used, could be used to send out mass-invitations with "password"
 
 * Created : date of initial application/registration/invitation for T
 
 * Lastchanged : date of last-update on TP
 
-* Comment : ...
+* Comment : public comment from user
 
-* Notes : ...
+* Notes : private notes for TDs about user
 
+* UserMessage : private message from user to TD
+
+* AdminMessage : private message from TD to user
 
