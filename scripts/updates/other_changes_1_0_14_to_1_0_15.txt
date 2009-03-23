@@ -36,6 +36,8 @@ copy /images/team.gif
 
 # adjust english translation for all '%#header%'
 
+# shorten '#'-texts for tournaments, esp. '%#tmsg'
+
 -----------
 # Adjust FAQ for observing own-games-trick:
 # - modified '&toggleobserve=' behaviour to avoid toggling on page refresh,
