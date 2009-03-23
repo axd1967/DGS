@@ -57,6 +57,7 @@ require_once( 'include/classlib_userconfig.php' );
       $handi_filter_array[$fkey] = "Handicaptype='$fval'";
 
    $my_rating = $player_row['Rating2'];
+   $my_rated_games = (int)$player_row['RatedGames'];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $idinfo = (int)@$_GET['info'];
@@ -84,7 +85,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrfilter->add_filter( 6, 'Numeric',   'Komi', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 7, 'Numeric',   'Size', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 8, 'Boolean',
-         new QuerySQL( SQLP_HAVING, 'goodrating' ),
+         new QuerySQL( SQLP_HAVING, 'goodrating', 'goodmingames' ),
          true,
          array( FC_FNAME => 'good', FC_LABEL => T_('Only suitable'), FC_STATIC => 1, FC_DEFAULT => 1 ));
    $wrfilter->add_filter( 9, 'Selection',
@@ -124,7 +125,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', TABLE_NO_HIDE, 'Handicaptype+');
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
-   $wrtable->add_tablehead( 8, T_('Rating range#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
+   $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
    $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames+');
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
@@ -162,6 +163,7 @@ require_once( 'include/classlib_userconfig.php' );
 // if( $MustBeRated != 'Y' )         $goodrating = true;
 // else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
 // else                              $goodrating = false;
+// $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
 
    $calculated = "(W.Handicaptype='conv' OR W.Handicaptype='proper')";
    if( $iamrated )
@@ -176,11 +178,13 @@ require_once( 'include/classlib_userconfig.php' );
       $haverating = "NOT $calculated";
       $goodrating = "IF(W.MustBeRated='Y',0,1)";
    }
+   $goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
 
    $qsql->add_part( SQLP_FIELDS,
       "$calculated AS calculated",
       "$haverating AS haverating",
-      "$goodrating AS goodrating" );
+      "$goodrating AS goodrating",
+      "$goodmingames AS goodmingames" );
    $qsql->add_part( SQLP_FROM,
       'Waitingroom AS W',
       'INNER JOIN Players ON W.uid=Players.ID' );
@@ -207,7 +211,7 @@ require_once( 'include/classlib_userconfig.php' );
    if( $f_handi->get_value() == 1 )
       $arr_suitable[]= T_('Handicap-Type');
    if( $f_range->get_value() )
-      $arr_suitable[]= T_('Rating range');
+      $arr_suitable[]= T_('Rating range, min-games restriction');
    if( count($arr_suitable) > 0 )
       $title = T_("Suitable waiting games") . ' (' . implode(', ', $arr_suitable) . ')';
    else
@@ -227,7 +231,7 @@ require_once( 'include/classlib_userconfig.php' );
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $other_rating = NULL;
-         extract($row); //including $calculated, $haverating and $goodrating
+         extract($row); //including $calculated, $haverating, $goodrating, $goodmingames
 
          if( $idinfo == (int)$ID )
             $info_row = $row;
@@ -276,8 +280,8 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[ 8] )
          {
             $wrow_strings[ 8] = array('text' =>
-               echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax) );
-            if( !$goodrating )
+               echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames, true) );
+            if( !$goodrating || !$goodmingames )
                $wrow_strings[ 8]['attbs']=
                   warning_cell_attb( T_('Out of range'), true);
          }
@@ -329,19 +333,29 @@ require_once( 'include/classlib_userconfig.php' );
 }
 
 
-function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax)
+function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames, $short=false)
 {
-   if( $MustBeRated != 'Y' )
-      return NO_VALUE;
+   $out = array();
 
-   // +/-50 reverse the inflation from add_to_waitingroom.php
-   $r1 = echo_rating($Ratingmin+50,false);
-   $r2 = echo_rating($Ratingmax-50,false);
-   if( $r1 == $r2 )
-      $Ratinglimit = sprintf( T_('%s only'), $r1);
-   else
-      $Ratinglimit = $r1 . ' - ' . $r2;
-   return $Ratinglimit;
+   if( $MustBeRated == 'Y')
+   {
+      // +/-50 reverse the inflation from add_to_waitingroom.php
+      $r1 = echo_rating( $Ratingmin + 50, false, 0, false, $short );
+      $r2 = echo_rating( $Ratingmax - 50, false, 0, false, $short );
+      if( $r1 == $r2 )
+         $Ratinglimit = sprintf( T_('%s only'), $r1);
+      else
+         $Ratinglimit = $r1 . ' - ' . $r2;
+      $out[] = $Ratinglimit;
+   }
+
+   if( $MinRatedGames > 0 )
+   {
+      $str = ($short) ? T_('Rated Games[%s]#short') : T_('Rated Games[%s]');
+      $out[] = sprintf( $str, $MinRatedGames );
+   }
+
+   return ( count($out) ? implode(', ', $out) : NO_VALUE );
 }
 
 
@@ -378,6 +392,9 @@ function add_new_game_form( $form_id, $iamrated)
                                   'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
                                   'TEXT', sptext(T_('and')),
                                   'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated finished games'),
+                                  'TEXTINPUT', 'min_rated_games', 5, 5, '',
+                                  'TEXT', MINI_SPACING . T_('(optional)'), ));
 
 
    $addgame_form->add_row( array( 'SPACE' ) );
@@ -407,7 +424,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
             'SUBMITBUTTON', 'deletebut', T_('Delete'),
          ) );
    }
-   else if( $game_row['haverating'] && $game_row['goodrating'] )
+   else if( $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames'] )
    {
       $game_form->add_row( array(
             'DESCRIPTION', T_('Reply'),

@@ -615,6 +615,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             break;
       }
       $goodrating = 1;
+      $goodmingames = 1;
       if( $iamrated )
          $haverating = 1;
       else
@@ -703,10 +704,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle == 'waitingroom' )
    {
-      $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax);
+      $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames);
       $itable->add_sinfo(
             T_('Rating range'), $Ratinglimit,
-            ( $goodrating ? '' : warning_cell_attb( T_('Out of range')) ) );
+            ( ($goodrating && $goodmingames) ? '' : warning_cell_attb( T_('Out of range')) ) );
    }
 
    $itable->add_sinfo( T_('Main time'), echo_time($Maintime) );
@@ -728,7 +729,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                ) );
    }
 
-   if( $calculated && $haverating && $goodrating &&
+   if( $calculated && $haverating && $goodrating && $goodmingames &&
        ( !$is_my_game || $tablestyle != 'waitingroom' ) )
    {
       // compute the probable game settings

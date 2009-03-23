@@ -378,3 +378,8 @@ ALTER TABLE ConfigPages
    ADD ColumnsTDTournamentParticipants int(11) NOT NULL default '-1' ;
 
 
+-- add required number of finished rated games
+ALTER TABLE `Waitingroom`
+   ADD `MinRatedGames` smallint NOT NULL default '0' AFTER `Ratingmax` ;
+
+

@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once( "include/std_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( "include/rating.php" );
+require_once( 'include/utilities.php' );
 //Useless: $ThePage = new Page('...');
 
 {
@@ -172,6 +173,9 @@ require_once( "include/rating.php" );
       $rating1 -= 50;
    }
 
+   $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 10000, 0 );
+
+
    $query = "INSERT INTO Waitingroom SET " .
       "uid=" . $player_row['ID'] . ', ' .
       "nrGames=$nrGames, " .
@@ -193,6 +197,7 @@ require_once( "include/rating.php" );
       "MustBeRated='$MustBeRated', " .
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
+      "MinRatedGames=$min_rated_games, " .
       "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
 
    db_query( 'add_to_waitingroom.insert', $query );

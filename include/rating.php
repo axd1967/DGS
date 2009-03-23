@@ -598,7 +598,7 @@ function is_valid_rating( $dgs_rating, $check_min=true )
       return false;
 }
 
-function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false)
+function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false, $short=false)
 {
    if( !is_valid_rating($rating) )
       return '';
@@ -612,11 +612,11 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    $string = '';
    if( $rank_val > 20.5 )
    {
-      $string .= ( $rank_val - 20 ) . $spc . $T_('dan');
+      $string .= ( $rank_val - 20 ) . ($short ? $T_('dan#short') : $spc . $T_('dan'));
    }
    else
    {
-      $string .= ( 21 - $rank_val ) . $spc . $T_('kyu');
+      $string .= ( 21 - $rank_val ) . ($short ? $T_('kyu#short') : $spc . $T_('kyu'));
    }
 
    if( $show_percent )
