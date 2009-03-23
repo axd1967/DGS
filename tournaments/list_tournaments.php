@@ -72,12 +72,14 @@ $ThePage = new Page('TournamentList');
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
    $tsfilter = new SearchFilter( 's', $search_profile );
    $tfilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'user' ); // named-filters FC_FNAME
    $ttable = new Table( 'tournament', $page, $cfg_tblcols );
    $ttable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
    // static filters
    $tsfilter->add_filter( 1, 'Text', 'TPP.Handle', true, array(
+            FC_FNAME => 'user',
             FC_QUERYSQL => new QuerySQL(
                SQLP_FROM,
                   'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID',
@@ -168,8 +170,9 @@ $ThePage = new Page('TournamentList');
          'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
 
    $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
-   while( ($show_rows-- > 0) && list(,$tourney) = $iterator->getListIterator() )
+   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
+      list( $tourney, $orow ) = $arr_item;
       $ID = $tourney->ID;
       $row_str = array();
 
