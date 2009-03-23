@@ -169,7 +169,7 @@ class TournamentDirector
       while( $row = mysql_fetch_array( $result ) )
       {
          $director = TournamentDirector::new_from_row( $row );
-         $iterator->addItem( $director );
+         $iterator->addItem( $director, $row );
       }
       mysql_free_result($result);
 

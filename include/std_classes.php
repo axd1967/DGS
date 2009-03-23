@@ -560,7 +560,7 @@ class ListIterator
 
    /*! \brief Number of rows resulting from db-query. */
    var $ResultRows;
-   /*! \brief List of objects read from db-query. */
+   /*! \brief List of array with objects and original row read from db-query: array( array( Obj, row), ...). */
    var $Items;
 
    /*!
@@ -658,9 +658,9 @@ class ListIterator
    }
 
    /*! \brief Adds item to item-list. */
-   function addItem( $item )
+   function addItem( $item, $row )
    {
-      $this->Items[] = $item;
+      $this->Items[] = array( $item, $row );
    }
 
    /*! \brief Returns each() from items-list of this ListIterator. */
@@ -684,9 +684,12 @@ class ListIterator
       $arr[] = "ResultRows=[{$this->ResultRows}]";
       $arr[] = '#Items=[' . count($this->Items) . ']';
       $idx = 1;
-      foreach( $this->Items as $item )
+      foreach( $this->Items as $arr_item )
+      {
+         list( $item, $row ) = $arr_item;
          $arr[] = sprintf( "Item.%d=[%s]", $idx++,
             ( method_exists($item, 'to_string') ? $item->to_string() : print_r($item,true) ));
+      }
       return "ListIterator({$this->Name}): " . implode(', ', $arr);
    }
 

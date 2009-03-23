@@ -311,7 +311,7 @@ class Tournament
       while( $row = mysql_fetch_array( $result ) )
       {
          $tourney = Tournament::new_from_row( $row );
-         $iterator->addItem( $tourney );
+         $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 

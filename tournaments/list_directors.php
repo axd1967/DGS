@@ -100,8 +100,9 @@ $ThePage = new Page('TournamentDirectorList');
 
 
    $show_rows = $tdtable->compute_show_rows( $iterator->ResultRows );
-   while( ($show_rows-- > 0) && list(,$director) = $iterator->getListIterator() )
+   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
+      list( $director, $orow ) = $arr_item;
       $uid = $director->uid;
       $row_str = array();
 
