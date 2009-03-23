@@ -23,7 +23,94 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-03-23 juga
+
+   * NEWS:
+   - tournaments (registration-edit for TDs, invite-handling)
+   - added rating-type conversion: added KGS-rank, added DGS-rating
+   - status page: open tournament-application, "My tournaments"-link
+
+   * status.php, include/classlib_userconfig.php,
+     tournaments/list_tournaments.php, tournaments/list_participants.php:
+   - show open tournament-application of user
+   - added bottom-menu-link to users tournament-list as "My tournaments"
+   - added table-column-set ColumnsStatusTournaments:
+     tournaments-list on status page
+   - added table-column-set ColumnsTDTournamentParticipants:
+     tournament-participants-list for TDs
+-----------
+-- table-column-set for status-tournaments-list
+ALTER TABLE ConfigPages
+   ADD ColumnsStatusTournaments int(11) NOT NULL default '-1' AFTER `ColumnsStatusGames`;
+
+-- table-column-set for tournament-participant-list for TD
+ALTER TABLE ConfigPages
+   ADD ColumnsTDTournamentParticipants int(11) NOT NULL default '-1' ;
+-----------
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant,
+       ~.setStatus, ~.has_rating, ~.to_string, ~.build_persist_query_part),
+     tournaments/edit_participant.php, tournaments/edit_tournament.php,
+     tournaments/view_tournament.php, tournaments/register.php,
+     site_map.php, skins/dragon/screen.css,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/table-Tournaments.txt:
+   - added admin/tournament-director (TD) registration-edit on tournament-participants
+     - edit customized rating and starting round
+     - change user registration-status between: unset, APPLY, REGISTER, INVITE
+     - added UserMessage, AdminMessage
+   - added invitation-handling for user and TDs
+     - approve invite or decline invite (leading to edit-invite)
+     - renamed bottom-links 'Invite user' -> 'Edit participants'
+   - registration:
+     - added TP-flags: invited, ack-invite, ack-apply
+     - don't show changeable fields when on invite-status or deleting user
+   - minor changes (CSS, status-texts, notes)
+-----------
+-- added message-texts for talk between TD and participant-user
+ALTER TABLE TournamentParticipant
+   ADD UserMessage text NOT NULL,
+   ADD AdminMessage text NOT NULL ;
+-----------
+
+   * tournaments/list_participants.php:
+   - changed table-columns:
+     - made registration-id optional
+     - show status also for normal-user (hideable)
+     - show current user rating if no tourney-rating set
+     - replaced Notes-column with column indicating presence of Notes/User-/AdminMessage,
+       removed notes-filter
+   - minor changes, bugfixes
+
+   * include/std_classes.php (ListIterator.addItem, ~.to_string),
+     tournaments/include/tournament.php (Tournament.load_tournaments),
+     tournaments/include/tournament_director.php (TournamentDirector.load_tournament_directors),
+     tournaments/list_directors.php, tournaments/list_participants.php,
+     tournaments/list_tournaments.php:
+   - ListIterator: changed item-content to store original database-row for item
+
+   * include/rating.php (is_valid_rating, echo_rating, getRatingTypes, convert_to_rating),
+     change_profile.php, edit_profile.php:
+   - moved rating-conversion-types into include/rating.php
+   - added rating-types:
+     - added 'kgs' with interpolation-table from http://senseis.xmp.net/?RankWorldwideComparison
+     - added 'dragonrating' expecting ELO-rating, renamed 'dragonrating' -> 'dragonrank'
+   - bugfixes, enhancements, minor changes
+
+   * include/classlib_user.php (User, ~.to_string, ~.build_query_sql,
+       ~.new_from_row, ~.load_user_query, ~.load_user, ~.load_user_by_handle):
+   - added reading of Players.RatingStatus, added funcs to load user
+
 2009-03-22 juga
+
+   * tournaments/include/tournament.php (Tournament.getStatusText),
+     tournaments/edit_tournament.php:
+   - bugfix: get statustext for ADM also for non-admin
+
+   * tournaments/include/tournament_director.php (TournamentDirector.build_query_sql),
+     tournaments/list_directors.php:
+   - fixed user-ref-link for tournament-directors-list (needed to read Players.ID)
 
    * include/classlib_profile.php, tournaments/list_directors.php,
      tournaments/list_participants.php, tournaments/list_tournaments.php:
