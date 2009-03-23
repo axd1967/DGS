@@ -283,12 +283,14 @@ class Feature
          $notes[] = null; // empty line
       }
 
+      $intro_open_str = ($intro) // Open
+         ? sprintf( T_('<li>%3$s = show %1$s + %2$s'."\n"),
+                    T_('Open#filtervote'), FEATSTAT_NEW, FEATSTAT_WORK )
+         : '';
       $notes[] = sprintf(
             T_('Feature status:<ul>'
                . '<li>%1$s = new feature (can be voted upon)'."\n" // NEW
-               //TODO: bugfix, that cond-expr doesn't work here, b/c it "disturbs" the T_(..)
-               . ($intro ?
-                 '<li>%9$s = show %1$s + %2$s'."\n" : '' ) // Open
+               . '%9$s' // Open (may be empty)
                . '<li>%2$s = %3$s = feature implementation started by developer'."\n" // WORK
                . '<li>%4$s = feature implemented (and tested), but not released yet'."\n" // DONE
                . '<li>%5$s = %6$s = feature released and online'."\n" // LIVE
@@ -299,7 +301,7 @@ class Feature
             FEATSTAT_DONE,
             FEATSTAT_LIVE, T_('Online#filtervote'),
             FEATSTAT_NACK, T_('Rejected#filtervote'),
-            T_('Open#filtervote')
+            $intro_open_str
          );
       return $notes;
    }
