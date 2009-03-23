@@ -25,7 +25,15 @@ $IGS_TABLE = array(
    array( 'KEY' =>  200, 'VAL' =>  500 ),
    array( 'KEY' =>  900, 'VAL' => 1000 ),
    array( 'KEY' => 1500, 'VAL' => 1500 ),
-   array( 'KEY' => 2400, 'VAL' => 2400 ),
+   array( 'KEY' => 2400, 'VAL' => 2400 ), // 4d
+);
+
+// table for interpolating rating
+$KGS_TABLE = array(
+   array( 'KEY' =>  400, 'VAL' =>    0 ),
+   array( 'KEY' => 1300, 'VAL' => 1100 ), // 8k
+   array( 'KEY' => 2000, 'VAL' => 1900 ), // 1k
+   array( 'KEY' => 2700, 'VAL' => 2600 ), // 7d -> 6d
 );
 
 $A_TABLE = array(
@@ -581,10 +589,19 @@ function update_rating_glicko($gid, $check_done=true)
    return 0; //rated game
 } //update_rating_glicko
 
+// returns true, if given DGS-rating is valid
+function is_valid_rating( $dgs_rating, $check_min=true )
+{
+   if( isset($dgs_rating) && is_numeric($dgs_rating) && abs($dgs_rating) < OUT_OF_RATING )
+      return ( $check_min ) ? ( $dgs_rating >= MIN_RATING ) : true;
+   else
+      return false;
+}
 
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false)
 {
-   if( !isset($rating) || !is_numeric($rating) || $rating < MIN_RATING ) return '';
+   if( !is_valid_rating($rating) )
+      return '';
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
@@ -610,7 +627,8 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    if( $graph_uid > 0 )
    {
-      $string = "<a class=Rating href=\"ratinggraph.php?uid=$graph_uid\">"
+      global $base_path;
+      $string = "<a class=Rating href=\"{$base_path}ratinggraph.php?uid=$graph_uid\">"
                . $string . '</a>';
    }
    return $string;
@@ -663,13 +681,33 @@ function get_rating_at($uid, $date)
    return -OUT_OF_RATING; //not ranked
 }
 
+// for converting ranks, see convert_to_rating()-func
+function getRatingTypes()
+{
+   return array(
+      'dragonrank'   => T_('Dragon rank#ratingtype'),
+      'dragonrating' => T_('Dragon rating#ratingtype'),
+      'eurorank'     => T_('Euro rank (EGF)#ratingtype'),
+      'eurorating'   => T_('Euro rating (EGF)#ratingtype'),
+      'aga'          => T_('AGA rank#ratingtype'),
+      'agarating'    => T_('AGA rating#ratingtype'),
+      'kgs'          => T_('KGS rank#ratingtype'),
+      'igs'          => T_('IGS rank#ratingtype'),
+      //'igsrating' => T_('IGS rating#ratingtype'),
+      'iytgg'        => T_('IYT rank#ratingtype'),
+      'japan'        => T_('Japanese rank#ratingtype'),
+      'china'        => T_('Chinese rank#ratingtype'),
+      'korea'        => T_('Korean rank#ratingtype'),
+   );
+}
 
-//May rise an error
+
+// May rise an error if not said otherwise (except for bad ranktype) returning an out-of-range-rating then
 // check RATING_PATTERN for syntax, this func must be kept synchron with read_rating-func
-function convert_to_rating($string, $type)
+function convert_to_rating($string, $type, $no_error=false)
 {
    $rating = -OUT_OF_RATING;
-   if( empty($string) )
+   if( (string)$string == '' )
       return $rating;
 
    $string = strtolower($string);
@@ -690,9 +728,15 @@ function convert_to_rating($string, $type)
    $needrank = true; // true if rating-type needs rank; false=need-rating
    switch( (string)$type )
    {
-      case 'dragonrating':
+      case 'dragonrank':
          if( $kyu > 0 )
             $rating = read_rating($string);
+      break;
+
+      case 'dragonrating':
+         $needrank = false;
+         if( $kyu <= 0 )
+            $rating = $val;
       break;
 
       case 'eurorating':
@@ -757,6 +801,18 @@ function convert_to_rating($string, $type)
          }
       break;
 
+      case 'kgs': // rank
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != -OUT_OF_RATING )
+            {
+               global $KGS_TABLE;
+               $rating = table_interpolate($rating, $KGS_TABLE, true);
+            }
+         }
+      break;
+
       case 'japan':
          if( $kyu > 0 )
          {
@@ -791,8 +847,10 @@ function convert_to_rating($string, $type)
 
    if( $rating == -OUT_OF_RATING )
    {
+      if( $no_error )
+         return $rating;
       error($needrank ? 'rank_not_rating' : 'rating_not_rank'
-            , "type:$type str:$string val:$val kyu:$kyu");
+         , "type:$type str:$string val:$val kyu:$kyu");
    }
 
    //valid rating, so ends with a limited bound corrections, else error
@@ -805,6 +863,8 @@ function convert_to_rating($string, $type)
    if( $rating >= MIN_RATING && $rating <= MAX_START_RATING )
       return $rating;
 
+   if( $no_error )
+      return $rating;
    error('rating_out_of_range');
    return -OUT_OF_RATING;
 }
