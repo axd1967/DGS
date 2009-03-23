@@ -116,7 +116,8 @@ function item($text, $link='', $working=true, $last=false)
             } $item_level--;
             item(T_('Manage this tournament'), "tournaments/edit_tournament.php", false, false);
             item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
-            item(T_('Registration'), "tournaments/register.php", false, true);
+            item(T_('Registration'), "tournaments/register.php", false, false);
+            item(T_('Edit participants'), "tournaments/edit_participant.php", false, true);
          } $item_level--;
       } $item_level--;
       }
