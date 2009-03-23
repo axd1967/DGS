@@ -142,8 +142,8 @@ $ThePage = new Page('Tournament');
       $sectmenu[$reg_user_str] = "tournaments/register.php?tid=$tid"; # for user
 
    if( $allow_edit_tourney )
-      $sectmenu[T_('Invite user')] =
-         array( 'url' => "tournaments/invite.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
+      $sectmenu[T_('Edit participants')] =
+         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
 
    make_menu( $sectmenu, false);
 

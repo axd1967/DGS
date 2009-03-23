@@ -137,8 +137,8 @@ $ThePage = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Type'),
          'SELECTBOX',   'type', 1, Tournament::getTypeText(), $tourney->Type, false ));
-   //TODO: Type can ONLY be changed on NEW-Status(!)
-   //TODO: Status can NOT be changed to NEW if T has been started (PLAY)
+   //TODO: Type can ONLY be changed when T no registrations there yet
+   //TODO: Status can NOT be changed to NEW if T has been started (PLAY) !?
    if( $is_admin || $tid ) // only admin can edit status on T-creation
       $tform->add_row( array(
             'DESCRIPTION', T_('Status'),
@@ -206,8 +206,8 @@ $ThePage = new Page('TournamentEdit');
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
    if( $allow_edit_tourney )
-      $menu_array[T_('Invite user')] =
-         array( 'url' => "tournaments/invite.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
+      $menu_array[T_('Edit participants')] =
+         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
 
    end_page(@$menu_array);
 }
