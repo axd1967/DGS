@@ -42,11 +42,9 @@ define('TP_STATUS_REGISTER',  'REGISTER');
 define('TP_STATUS_INVITE',    'INVITE');
 define('CHECK_TP_STATUS', 'APPLY|REGISTER|INVITE');
 
-//TODO needed?
-define('TP_FLAGS_INVITED',    0x0001); // invited by TD
-define('TP_FLAGS_VERIFIED',   0x0002); // user-application verified by TD
-define('TP_FLAGS_ACK_INVITE', 0x0004); // invite by TD approved by user
-define('TP_FLAGS_ACK_APPLY',  0x0008); // application by user approved by TD
+define('TP_FLAGS_INVITED',       0x0001); // invited by TD
+define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
+define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
 
 // lazy-init in TournamentParticipant::get..Text()-funcs
 $ARR_GLOBALS_TOURNAMENT_PARTICIPANT = array();
@@ -66,11 +64,13 @@ class TournamentParticipant
    var $Lastchanged;
    var $Comment;
    var $Notes;
+   var $UserMessage;
+   var $AdminMessage;
 
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
-   function TournamentParticipant( $id=0, $tid=0, $uid=0, $user=NULL, $status=TP_STATUS_APPLY, $flags=0,
+   function TournamentParticipant( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
                   $rating=NULL, $start_round=1, $auth_token='', $created=0,
-                  $lastchanged=0, $comment='', $notes='' )
+                  $lastchanged=0, $comment='', $notes='', $user_message='', $admin_message='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -85,11 +85,13 @@ class TournamentParticipant
       $this->Lastchanged = (int)$lastchanged;
       $this->Comment = $comment;
       $this->Notes = $notes;
+      $this->UserMessage = $user_message;
+      $this->AdminMessage = $admin_message;
    }
 
    function setStatus( $status )
    {
-      if( !preg_match( "/^(".CHECK_TP_STATUS.")$/", $status ) )
+      if( !is_null($status) && !preg_match( "/^(".CHECK_TP_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentParticipant.setStatus($status)");
       $this->Status = $status;
    }
@@ -102,9 +104,24 @@ class TournamentParticipant
          $this->Rating = limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
    }
 
+   function hasRating()
+   {
+      return (abs($this->Rating) < OUT_OF_RATING);
+   }
+
    function setStartRound( $start_round )
    {
       $this->StartRound = limit( (int)$start_round, 1, 255, 1 );
+   }
+
+   /*! \brief Returns true, if customized tournament rating is needed for this participant. */
+   function needTournamentRating()
+   {
+      $ratingStatus = $this->User->RatingStatus;
+      if( $ratingStatus == 'INIT' || $ratingStatus == 'RATED' ) // user has rating
+         return false;
+      else // unrated user
+         return true;
    }
 
    function to_string()
@@ -122,6 +139,8 @@ class TournamentParticipant
             . ", Lastchanged=[{$this->Lastchanged}]"
             . ", Comment=[{$this->Comment}]"
             . ", Notes=[{$this->Notes}]"
+            . ", UserMessage=[{$this->UserMessage}]"
+            . ", AdminMessage=[{$this->AdminMessage}]"
          ;
    }
 
@@ -138,7 +157,10 @@ class TournamentParticipant
    /*! \brief Builds query-part for persistance (insert or update). */
    function build_persist_query_part( $withCreated )
    {
-      // Status/Rating/StartRound are checked
+      // Rating/StartRound are checked
+      if( is_null($this->Status) )
+         error('invalid_args', 'TournamentParticipant.build_persist_query_part.check.status(null)');
+
       return  " tid='{$this->tid}'"
             . ",uid='{$this->uid}'"
             . ",Status='{$this->Status}'"
@@ -150,6 +172,8 @@ class TournamentParticipant
             . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
             . ",Comment='" . mysql_addslashes($this->Comment) . "'"
             . ",Notes='" . mysql_addslashes($this->Notes) . "'"
+            . ",UserMessage='" . mysql_addslashes($this->UserMessage) . "'"
+            . ",AdminMessage='" . mysql_addslashes($this->AdminMessage) . "'"
          ;
    }
 
@@ -233,7 +257,7 @@ class TournamentParticipant
          'TP.*',
          'UNIX_TIMESTAMP(TP.Created) AS X_Created',
          'UNIX_TIMESTAMP(TP.Lastchanged) AS X_Lastchanged',
-         'TPP.Name', 'TPP.Handle', 'TPP.Country', 'TPP.Rating2',
+         'TPP.Name', 'TPP.Handle', 'TPP.Country', 'TPP.Rating2', 'TPP.RatingStatus',
          'UNIX_TIMESTAMP(TPP.Lastaccess) AS X_Lastaccess' );
       $qsql->add_part( SQLP_FROM,
          'TournamentParticipant AS TP',
@@ -258,7 +282,9 @@ class TournamentParticipant
             @$row['X_Created'],
             @$row['X_Lastchanged'],
             @$row['Comment'],
-            @$row['Notes']
+            @$row['Notes'],
+            @$row['UserMessage'],
+            @$row['AdminMessage']
          );
       return $tp;
    }
@@ -327,7 +353,7 @@ class TournamentParticipant
       while( $row = mysql_fetch_array( $result ) )
       {
          $tourney = TournamentParticipant::new_from_row( $row );
-         $iterator->addItem( $tourney );
+         $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
@@ -348,9 +374,9 @@ class TournamentParticipant
 
          $arr = array();
          $arr['']                 = T_('You are not registered for this tournament.');
-         $arr[TP_STATUS_APPLY]    = T_('Your application for this tournament needs to be verified by a tournament director.');
+         $arr[TP_STATUS_APPLY]    = T_('Your registration needs to be verified by a tournament director.');
          $arr[TP_STATUS_REGISTER] = T_('You are registered for this tournament.');
-         $arr[TP_STATUS_INVITE]   = T_('Your invitation by a tournament director needs your verification.');
+         $arr[TP_STATUS_INVITE]   = T_('The invitation for this tournament needs your verification.');
          $ARR_GLOBALS_TOURNAMENT_PARTICIPANT['STATUS_INFO'] = $arr;
       }
 
@@ -384,6 +410,9 @@ class TournamentParticipant
       if( !isset($ARR_GLOBALS_TOURNAMENT_PARTICIPANT['FLAGS']) )
       {
          $arr = array();
+         $arr[TP_FLAGS_INVITED]     = T_('Invited#TP_flag');
+         $arr[TP_FLAGS_ACK_INVITE]  = T_('ACK-Invite#TP_flag');
+         $arr[TP_FLAGS_ACK_APPLY]   = T_('ACK-Apply#TP_flag');
          $ARR_GLOBALS_TOURNAMENT_PARTICIPANT['FLAGS'] = $arr;
       }
       else
@@ -412,6 +441,14 @@ class TournamentParticipant
       {
          $notes[] = T_('Questions and support requests regarding this tournament '
                      . 'can be directed to the tournament directors.');
+         $notes[] = null; // empty line
+
+         $notes[] = T_('You will need a custom rating when you don\'t have a DGS-rating yet or '
+               .  "if you don't want to start with your DGS-rating.\n");
+         $notes[] = T_('If you enter a non-default starting round or a custom rating, '
+               . "your application needs to be verified by a tournament director.\n"
+               . 'Therefore please add your reasoning for the changes in the user-message '
+               . 'box to accellerate the registration process.');
          $notes[] = null; // empty line
       }
 
