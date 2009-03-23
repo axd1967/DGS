@@ -2560,6 +2560,11 @@ span.EditNote {
    font-size: 80%;
 }
 
+span.TWarning {
+   font-size: 90%;
+   color: darkred;
+}
+
 a.TAdmin {
    font-style: italic;
    background: #e0e8ff; /* light blue, complementary to background */
