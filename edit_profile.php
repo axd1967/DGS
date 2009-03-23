@@ -44,18 +44,6 @@ require_once( "include/form_functions.php" );
    if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
       $button_nr = 0;
 
-   $ratings = array( 'dragonrating' => 'dragonrating',
-                     'eurorank' => 'eurorank',
-                     'eurorating' => 'eurorating',
-                     'aga' => 'aga',
-                     'agarating' => 'agarating',
-                     'igs' => 'igs',
-//                  'igsrating' => 'igsrating',
-                     'iytgg' => 'iytgg',
-                     'japan' => 'japan',
-                     'china' => 'china',
-                     'korea' => 'korea' );
-
    $notify_mess = array( 0 => T_('Off'),
                          1 => T_('Notify only'),
                          2 => T_('Moves and messages'),
@@ -144,10 +132,8 @@ require_once( "include/form_functions.php" );
    if( $player_row['RatingStatus'] != 'RATED' )
    {
       $row= array('DESCRIPTION', T_('Rating'),
-                  'TEXTINPUT', 'rating', 16, 16,
-                  echo_rating($player_row['Rating2'],2,0,1),
-                  'SELECTBOX', 'ratingtype', 1, $ratings,
-                  'dragonrating', false,
+                  'TEXTINPUT', 'rating', 16, 16, echo_rating($player_row['Rating2'],2,0,1),
+                  'SELECTBOX', 'ratingtype', 1, getRatingTypes(), 'dragonrank', false,
                   );
       if( !@$player_row['RatingStatus'] )
          array_push( $row,

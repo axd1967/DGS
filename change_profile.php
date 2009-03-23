@@ -180,7 +180,7 @@ require_once( "include/rating.php" );
 
    if( $player_row["RatingStatus"] != 'RATED'
       && (is_numeric($newrating) && $newrating >= MIN_RATING)
-      && ( $ratingtype != 'dragonrating'
+      && ( $ratingtype != 'dragonrank'
          || !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
          || abs($newrating - $oldrating) > 0.005 ) )
    {
