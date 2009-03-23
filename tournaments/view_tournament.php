@@ -63,7 +63,7 @@ $ThePage = new Page('Tournament');
          sprintf( T_('This page contains all necessary information and links to participate in the tournament. '
                   . 'There are different sections with a <home %1$s>description of the tournament</home>, '
                   . 'the used <home %2$s>rulesets</home>, <home %3$s>registration information</home> '
-                  . 'and the <home %4$s>tournament results</home>.' ),
+                  . 'and the <home %4$s>tournament results</home>.'),
             $page_tourney.'#title',
             $page_tourney.'#rules',
             $page_tourney.'#registration',
