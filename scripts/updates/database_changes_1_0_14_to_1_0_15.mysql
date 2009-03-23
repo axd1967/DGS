@@ -364,3 +364,17 @@ CREATE TABLE TournamentParticipant (
 ) ENGINE=MyISAM;
 
 
+-- added message-texts for talk between TD and participant-user
+ALTER TABLE TournamentParticipant
+   ADD UserMessage text NOT NULL,
+   ADD AdminMessage text NOT NULL ;
+
+-- table-column-set for status-tournaments-list
+ALTER TABLE ConfigPages
+   ADD ColumnsStatusTournaments int(11) NOT NULL default '-1' AFTER `ColumnsStatusGames`;
+
+-- table-column-set for tournament-participant-list for TD
+ALTER TABLE ConfigPages
+   ADD ColumnsTDTournamentParticipants int(11) NOT NULL default '-1' ;
+
+
