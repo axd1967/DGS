@@ -312,6 +312,7 @@ define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
 
 // Table column-sets (db-fieldname-prefix for ConfigPages-table for BitSet-handling)
 define('CFGCOLS_STATUS_GAMES',            'ColumnsStatusGames');
+define('CFGCOLS_STATUS_TOURNAMENTS',      'ColumnsStatusTournaments');
 define('CFGCOLS_WAITINGROOM',             'ColumnsWaitingroom');
 define('CFGCOLS_USERS',                   'ColumnsUsers');
 define('CFGCOLS_OPPONENTS',               'ColumnsOpponents');
@@ -324,9 +325,11 @@ define('CFGCOLS_GAMES_OBSERVED',          'ColumnsGamesObserved');
 define('CFGCOLS_GAMES_OBSERVED_ALL',      'ColumnsGamesObservedAll');
 define('CFGCOLS_TOURNAMENTS',             'ColumnsTournaments');
 define('CFGCOLS_TOURNAMENT_PARTICIPANTS', 'ColumnsTournamentParticipants');
+define('CFGCOLS_TD_TOURNAMENT_PARTICIPANTS', 'ColumnsTDTournamentParticipants');
 // col_name => number of ints in DB (needed for writing)
 $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_STATUS_GAMES             => 1,
+   CFGCOLS_STATUS_TOURNAMENTS       => 1,
    CFGCOLS_WAITINGROOM              => 1,
    CFGCOLS_USERS                    => 1,
    CFGCOLS_OPPONENTS                => 1,
@@ -339,6 +342,7 @@ $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_GAMES_OBSERVED_ALL       => 2, // >30 bit
    CFGCOLS_TOURNAMENTS              => 1,
    CFGCOLS_TOURNAMENT_PARTICIPANTS  => 1,
+   CFGCOLS_TD_TOURNAMENT_PARTICIPANTS  => 1,
    );
 
 class ConfigPages
