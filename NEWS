@@ -8,10 +8,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    New features and Major changes:
 
    * <home tournaments/list.php>Tournaments</home>:
-      * Added Round-Robin Tournaments
-      * Added Tournament-list page into main menu (access-key [t])
-      * Added Tournament scopes: Dragon (official Dragon tournaments), Public
-      * Added basic Tournament Registration for users
+      * Added Tournaments-link into main menu (access-key [t])
+      * Added Round-Robin Tournaments with public scopes:
+        Dragon (official Dragon tournaments), Public
+      * Added Tournament Registration: Apply, Register, Invite
 
    * Games:
       * Delete game on opponents turn (within first 10 moves)
@@ -50,6 +50,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
+      * Show open tournament applications of user
+      * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list
 
    * <home forum/index.php>Forum pages reworked</home>:
@@ -132,6 +134,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * <home edit_profile.php>User Profile</home>:
       * Introducing JavaScript management in profile setting
       * Initial Rating: removed converting of NNGS-rank/rating
+      * Initial Rating: added KGS-rank and DGS-rating conversion
 
    * Filters:
       * Replaced Filter-Reset with selection to clear, reset, load/save fields
