@@ -51,9 +51,10 @@ $ThePage = new Page('TournamentParticipantList');
       error('unknown_tournament', "list_participants.find_tournament($tid)");
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
-   $cfg_tblcols = ($allow_edit_tourney) // use user-config only for normal user
-      ? NULL // full column-view
-      : ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_PARTICIPANTS );
+
+   // TD has different view of table-column-set
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id,
+         ($allow_edit_tourney) ? CFGCOLS_TD_TOURNAMENT_PARTICIPANTS : CFGCOLS_TOURNAMENT_PARTICIPANTS );
 
    $page = "list_participants.php?";
 
@@ -61,11 +62,6 @@ $ThePage = new Page('TournamentParticipantList');
    $status_filter_array = array( T_('All') => '' );
    foreach( TournamentParticipant::getStatusText() as $status => $text )
       $status_filter_array[$text] = "TP.Status='$status'";
-
-   $notes_filter_array = array(
-         T_('All') => '',
-         T_('Has Note#T_reg') => "TP.Notes<>''",
-      );
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_PARTICIPANTS );
@@ -88,8 +84,6 @@ $ThePage = new Page('TournamentParticipantList');
    $tpfilter->add_filter(12, 'RelativeDate', 'TP.Created', true,
          array( FC_TIME_UNITS => FRDTU_ALL|FRDTU_ABS ));
    $tpfilter->add_filter(13, 'RelativeDate', 'TP.Lastchanged', true);
-   if( $allow_edit_tourney )
-      $tpfilter->add_filter(14, 'Selection', $notes_filter_array, true);
    $tpfilter->init();
 
    // init table
@@ -109,18 +103,16 @@ $ThePage = new Page('TournamentParticipantList');
    $tptable->add_tablehead( 4, T_('Country#T_reg'), 'Image', 0, 'Country+');
    $tptable->add_tablehead( 5, T_('Current Rating#T_reg'), 'Rating', 0, 'Rating2-');
    $tptable->add_tablehead( 6, T_('Comment#T_reg'), null, TABLE_NO_SORT);
-   $tptable->add_tablehead( 7, T_('Reg ID#T_reg'), 'Number', TABLE_NO_HIDE, 'ID+');
+   $tptable->add_tablehead( 7, T_('Reg ID#T_reg'), 'Number', 0, 'ID+');
+   $tptable->add_tablehead( 8, T_('Status#T_reg'), 'Enum', ($allow_edit_tourney ? TABLE_NO_HIDE : 0), 'Status+');
    if( $allow_edit_tourney )
-   {
-      $tptable->add_tablehead( 8, T_('Status#T_reg'), 'Enum', TABLE_NO_HIDE, 'Status+');
       $tptable->add_tablehead( 9, T_('Flags#T_reg'), 'Enum', 0, 'Flags+');
-   }
    $tptable->add_tablehead(10, T_('Round#T_reg'), 'Number', 0, 'StartRound-');
-   $tptable->add_tablehead(11, T_('Tourney Rating#T_reg'), 'Rating', 0, 'Rating-');
+   $tptable->add_tablehead(11, T_('Tournament Rating#T_reg'), 'Rating', 0, 'Rating-');
    $tptable->add_tablehead(12, T_('Registered#T_reg'), 'Date', 0, 'Created+');
    $tptable->add_tablehead(13, T_('Updated#T_reg'), 'Date', 0, 'Lastchanged-');
    if( $allow_edit_tourney )
-      $tptable->add_tablehead(14, T_('Notes#T_reg'), '', TABLE_NO_SORT);
+      $tptable->add_tablehead(14, T_('Messages#T_reg'), 'Enum', TABLE_NO_SORT);
 
    $tptable->set_default_sort( 7 ); //on Reg-ID
 
@@ -142,8 +134,9 @@ $ThePage = new Page('TournamentParticipantList');
 
 
    $show_rows = $tptable->compute_show_rows( $iterator->ResultRows );
-   while( ($show_rows-- > 0) && list(,$tp) = $iterator->getListIterator() )
+   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
+      list( $tp, $orow ) = $arr_item;
       $rid = $tp->ID; // reg-id
       $uid = $tp->uid;
       $row_str = array();
@@ -160,7 +153,7 @@ $ThePage = new Page('TournamentParticipantList');
                T_('Send a message'), 'class=ButIcon');
 
          $links .= SMALL_SPACING;
-         $links .= anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."rid=$rid",
+         $links .= anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."rid=$rid",
                image( $base_path.'images/edit.gif', 'E'),
                T_('Edit user registration'), 'class=ButIcon');
 
@@ -185,20 +178,31 @@ $ThePage = new Page('TournamentParticipantList');
          $row_str[ 6] = $tp->Comment;
       if( $tptable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = $rid;
-      if( $allow_edit_tourney && $tptable->Is_Column_Displayed[ 8] )
+      if( $tptable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = TournamentParticipant::getStatusText( $tp->Status );
       if( $allow_edit_tourney && $tptable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = TournamentParticipant::getFlagsText( $tp->Flags );
       if( $tptable->Is_Column_Displayed[10] )
          $row_str[10] = $tp->StartRound;
       if( $tptable->Is_Column_Displayed[11] )
-         $row_str[11] = echo_rating($tp->Rating, true, $uid);
+      {
+         $rating_str = echo_rating($tp->Rating, true, $uid);
+         if( $rating_str == '' )
+            $rating_str = echo_rating( $tp->User->Rating, true, $uid);
+         $row_str[11] = $rating_str;
+      }
       if( $tptable->Is_Column_Displayed[12] )
          $row_str[12] = ($tp->Created > 0) ? date(DATE_FMT2, $tp->Created) : '';
       if( $tptable->Is_Column_Displayed[13] )
          $row_str[13] = ($tp->Lastchanged > 0) ? date(DATE_FMT2, $tp->Lastchanged) : '';
       if( $allow_edit_tourney && $tptable->Is_Column_Displayed[14] )
-         $row_str[14] = ($tp->Notes != '') ? make_html_safe( substr($tp->Notes,0,40).'...', true ) : '';
+      {
+         $msgs = array();
+         if( (string)$tp->Notes != '' ) $msgs[] = T_('Notes#tmsg');
+         if( (string)$tp->UserMessage != '' ) $msgs[] = T_('UserMsg#tmsg');
+         if( (string)$tp->AdminMessage != '' ) $msgs[] = T_('AdmMsg#tmsg');
+         $row_str[14] = implode(', ', $msgs);
+      }
 
       $tptable->add_row( $row_str );
    }
