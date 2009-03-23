@@ -43,9 +43,11 @@ class User
    var $Lastaccess;
    var $Country;
    var $Rating;
+   var $RatingStatus;
 
    /*! \brief Constructs a ForumUser with specified args. */
-   function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL )
+   function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
+                  $rating_status='' )
    {
       $this->ID = (int)$id;
       $this->Name = (string)$name;
@@ -54,6 +56,7 @@ class User
       $this->Lastaccess = (int)$lastaccess;
       $this->Country = (string)$country;
       $this->setRating( $rating );
+      $this->RatingStatus = $rating_status;
    }
 
    function setRating( $rating )
@@ -80,6 +83,7 @@ class User
          . ", Lastaccess=[{$this->Lastaccess}]"
          . ", Country=[{$this->Country}]"
          . ", Rating=[{$this->Rating}]"
+         . ", RatingStatus=[{$this->RatingStatus}]"
          ;
    }
 
@@ -93,6 +97,26 @@ class User
 
    // ------------ static functions ----------------------------
 
+   /*! \brief Returns db-fields to be used for query of User-object. */
+   function build_query_sql()
+   {
+      // Players (all fields): ID,Type,Handle,Password,Newpassword,Sessioncode,
+      //    Sessionexpire,Lastaccess,LastMove,Registerdate,Hits,VaultCnt,VaultTime,
+      //    Moves,Activity,Name,Email,Rank,SendEmail,Notify,Adminlevel,AdminOptions,
+      //    AdminNote,MayPostOnForum,Timezone,Nightstart,ClockUsed,ClockChanged,Rating,
+      //    Rating2,RatingMin,RatingMax,InitialRating,RatingStatus,Open,Lang,VacationDays,
+      //    OnVacation,Running,Finished,RatedGames,Won,Lost,Translator,IP,Browser,Country,
+      //    BlockReason,UserFlags,SkinName,MenuDirection,TableMaxRows,Button
+
+      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS,
+         'P.*',
+         'UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess' );
+      $qsql->add_part( SQLP_FROM, 'Players AS P' );
+      return $qsql;
+   }
+
    /*! \brief Returns User-object created from specified (db-)row and given table-prefix. */
    function new_from_row( $row, $prefix='' )
    {
@@ -104,9 +128,53 @@ class User
             @$row[$prefix.'Type'],
             @$row[$prefix.'X_Lastaccess'],
             @$row[$prefix.'Country'],
-            @$row[$prefix.'Rating2']
+            @$row[$prefix.'Rating2'],
+            @$row[$prefix.'RatingStatus']
          );
       return $user;
+   }
+
+   /*! \brief Loads and returns User-object for given additional query; NULL if nothing found. */
+   function load_user_query( $query, $dbgmsg=NULL )
+   {
+      $result = NULL;
+      if( is_a($query, 'QuerySQL') )
+      {
+         $qsql = User::build_query_sql();
+         $qsql->merge( $query );
+         $qsql->add_part( SQLP_LIMIT, '1' );
+
+         if( is_nulL($dbgmsg) )
+            $dbgmsg = "User.load_user_query()";
+         $row = mysql_single_fetch( $dbgmsg, $qsql->get_select() );
+         if( $row )
+            $result = User::new_from_row( $row );
+      }
+      return $result;
+   }
+
+   /*! \brief Loads and returns User-object for given user-ID; NULL if nothing found. */
+   function load_user( $uid )
+   {
+      $result = NULL;
+      if( $uid > 0 )
+      {
+         $query_part = new QuerySQL( SQLP_WHERE, sprintf( "P.ID='%s'", $uid ) );
+         $result = User::load_user_query( $query_part, "User.load_user($uid)" );
+      }
+      return $result;
+   }
+
+   /*! \brief Loads and returns User-object for given user-Handle; NULL if nothing found. */
+   function load_user_by_handle( $handle )
+   {
+      $result = NULL;
+      if( (string)$handle != '' )
+      {
+         $query_part = new QuerySQL( SQLP_WHERE, sprintf( "P.Handle='%s'", mysql_addslashes($handle) ));
+         $result = User::load_user_query( $query_part, "User.load_user_by_handle($handle)" );
+      }
+      return $result;
    }
 
 } // end of 'User'
