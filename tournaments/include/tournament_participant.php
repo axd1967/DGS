@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once( 'include/utilities.php' );
 require_once( 'include/std_classes.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 
  /*!
   * \file tournament_participant.php
@@ -98,10 +99,7 @@ class TournamentParticipant
 
    function setRating( $rating )
    {
-      if( is_null($rating) || $rating <= -OUT_OF_RATING || $rating >= OUT_OF_RATING )
-         $this->Rating = -OUT_OF_RATING;
-      else
-         $this->Rating = limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
+      $this->Rating = TournamentUtils::normalizeRating( $rating );
    }
 
    function hasRating()

@@ -26,6 +26,7 @@ require_once( 'include/table_columns.php' );
 require_once( 'include/filter.php' );
 require_once( 'include/classlib_profile.php' );
 require_once( 'include/classlib_userconfig.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 
 $ThePage = new Page('TournamentList');
@@ -62,7 +63,7 @@ $ThePage = new Page('TournamentList');
          T_('Mine#T_owner') => "T.Owner_ID=$my_id",
       );
 
-   if( Tournament::isAdmin() )
+   if( TournamentUtils::isAdmin() )
       $where_scope = "1=1"; // admin can see all scopes (incl. private)
    else
       $where_scope = sprintf( "T.Scope IN ('%s','%s')", TOURNEY_SCOPE_DRAGON, TOURNEY_SCOPE_PUBLIC );
@@ -143,7 +144,7 @@ $ThePage = new Page('TournamentList');
          $tqsql,
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );
-   if( !Tournament::isAdmin() )
+   if( !TournamentUtils::isAdmin() )
       $iterator->addQuerySQLMerge(
          new QuerySQL( SQLP_WHERE, "T.Status<>'".TOURNEY_STATUS_ADMIN."'" ));
    $iterator = Tournament::load_tournaments( $iterator );

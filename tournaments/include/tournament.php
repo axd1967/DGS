@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once( 'include/std_classes.php' );
 require_once( 'include/std_functions.php' ); // for ADMIN_TOURNAMENT
+require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament_director.php' );
 
  /*!
@@ -30,10 +31,6 @@ require_once( 'tournaments/include/tournament_director.php' );
   *
   * \brief Functions for handling tournaments: tables Tournament
   */
-
-
-define('TOURNEY_DATEFMT',    'YYYY-MM-DD hh:mm' ); // user-input for parsing
-define('DATEFMT_TOURNAMENT', 'Y-m-d H:i'); // for output
 
 
  /*!
@@ -194,7 +191,7 @@ class Tournament
          return false;
 
       // logged-in admin is allowed anything
-      if( Tournament::isAdmin() )
+      if( TournamentUtils::isAdmin() )
          return true;
 
       // edit allowed for T-owner or TD
@@ -215,7 +212,7 @@ class Tournament
 
       if( $withNewDelete )
       {// only admin or owner can create/delete TDs
-         return Tournament::isAdmin() || ( $this->Owner_ID == $uid );
+         return TournamentUtils::isAdmin() || ( $this->Owner_ID == $uid );
       }
       else
       {// same checks to edit-only of TDs as for Ts
@@ -375,7 +372,7 @@ class Tournament
       if( is_null($status) )
       {
          $arrout = array() + $ARR_GLOBALS_TOURNAMENT['STATUS'];
-         if( !Tournament::isAdmin() )
+         if( !TournamentUtils::isAdmin() )
             unset($arrout[TOURNEY_STATUS_ADMIN]);
          return $arrout;
       }
@@ -384,40 +381,10 @@ class Tournament
       return $ARR_GLOBALS_TOURNAMENT['STATUS'][$status];
    }
 
-   /*! \brief Returns true for tournament-admin. */
-   function isAdmin()
-   {
-      global $player_row;
-      return ( @$player_row['admin_level'] & ADMIN_TOURNAMENT );
-   }
-
    /*! \brief Returns true if given user can create a new tournament. */
    function allow_create( $uid )
    {
       return ( $uid > GUESTS_ID_MAX ); // anyone can create Ts except guests
-   }
-
-   /*!
-    * \brief Parses given date-string (expect format TOURNEY_DATEFMT)
-    *        into UNIX-timestamp; or return error-string.
-    *        Returns 0 if no date-string given.
-    */
-   function parseDate( $msg, $date_str )
-   {
-      $result = 0;
-      $date_str = trim($date_str);
-      if( $date_str != '' )
-      {
-         if( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
-         {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5
-            list(, $year, $month, $day, $hour, $min ) = $matches;
-            $result = mktime( 0+$hour, 0+$min, 0, 0+$month, 0+$day, 0+$year );
-         }
-         else
-            $result = sprintf( T_('Dateformat of [%s] is wrong, expected [%s] for [%s]'),
-               $date_str, TOURNEY_DATEFMT, $msg );
-      }
-      return $result;
    }
 
    /*! \brief Returns array with notes about creating/editing tournament. */

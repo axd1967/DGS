@@ -23,6 +23,7 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 
 $ThePage = new Page('TournamentEdit');
@@ -55,7 +56,7 @@ $ThePage = new Page('TournamentEdit');
       $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
 
    // create/edit allowed?
-   $is_admin = Tournament::isAdmin();
+   $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = false;
    $allow_new_del_TD = false;
    if( is_null($tourney) )
@@ -255,7 +256,7 @@ function parse_edit_form( &$tourney )
    $new_value = trim(get_request_arg('start_time'));
    if( $read )
    {
-      $parsed_value = Tournament::parseDate( T_('Start time of tournament'), $new_value );
+      $parsed_value = TournamentUtils::parseDate( T_('Start time of tournament'), $new_value );
       if( is_numeric($parsed_value) )
          $tourney->StartTime = $parsed_value;
       else
