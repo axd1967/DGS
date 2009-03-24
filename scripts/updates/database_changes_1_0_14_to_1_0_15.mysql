@@ -383,3 +383,22 @@ ALTER TABLE `Waitingroom`
    ADD `MinRatedGames` smallint NOT NULL default '0' AFTER `Ratingmax` ;
 
 
+-- manage Tournament-Properties with restrictions for register-phase
+CREATE TABLE TournamentProperties (
+   tid int(11) NOT NULL,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Notes text NOT NULL,
+   MinParticipants smallint NOT NULL default '0',
+   MaxParticipants smallint NOT NULL default '0',
+   RatingUseMode enum('COPY_CUSTOM','CURR_FIX','COPY_FIX','ENTER_FIX') NOT NULL default 'COPY_CUSTOM',
+   RegisterEndTime datetime NOT NULL default '0000-00-00 00:00:00',
+   UserMinRating double NOT NULL default '-9999',
+   UserMaxRating double NOT NULL default '-9999',
+   UserRated enum('N','Y') NOT NULL default 'N',
+   UserMinGamesFinished smallint NOT NULL default '0',
+   UserMinGamesRated smallint NOT NULL default '0',
+   UserMinMoves int NOT NULL default '0',
+   PRIMARY KEY (tid)
+) ENGINE=MyISAM;
+
+

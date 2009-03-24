@@ -150,3 +150,62 @@ Important Notes:
 
 * AdminMessage : private message from TD to user
 
+
+###########################################################################
+## --- TournamentProperties ---
+
+ Field                | Type                                                  | Default
+----------------------+-------------------------------------------------------+---------------------
+ tid                  | int(11)                                               | NULL
+ Lastchanged          | datetime                                              | 0000-00-00 00:00:00
+ Notes                | text                                                  | NULL
+ MinParticipants      | smallint(6)                                           | 0
+ MaxParticipants      | smallint(6)                                           | 0
+ RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX','ENTER_FIX') | COPY_CUSTOM
+ RegisterEndTime      | datetime                                              | 0000-00-00 00:00:00
+ UserMinRating        | double                                                | -9999
+ UserMaxRating        | double                                                | -9999
+ UserRated            | enum('N','Y')                                         | N
+ UserMinGamesFinished | smallint(6)                                           | 0
+ UserMinGamesRated    | smallint(6)                                           | 0
+ UserMinMoves         | int(11)                                               | 0
+
+
+## Fields:
+
+* tid : tournament-ID
+
+* Lastchanged : update of table-entry
+
+* Notes : additional Notes to be shown for registration-section
+
+* MinParticipants, MaxParticipants : minimum / maximum number of TPs
+   - 0 = no limits
+
+* RatingUseMode : mode to handle tournament-rating on registration (and tournament playing)
+   - COPY_CUSTOM = copies existing user-rating for T-rating,
+     but allow user to overwrite it (customizable)
+   - CURR_FIX = always use current DGS-rating during T,
+     no customization of rating allowed by TD or user
+   - COPY_FIX = copies exising user-rating for T-rating,
+     can't be changed afterwards by user (fix = not customizable)
+   - ENTER_FIX = T-rating must be entered on registration by user,
+     can't be changed afterwards by user (fix = not customizable)
+
+* RegisterEndTime : datetime for end of registration-phase
+
+* UserMinRating, UserMaxRating : minimum / maximum rating of TPs
+   - -9999 = not limited
+
+* UserRated :
+   - Y = user must have a rating on registering
+   - N = user need no rating on registering
+
+* UserMinGamesFinished, UserMinGamesRated :
+   - minimum number of finished / rated-finished games of TPs
+   - 0 = no limits
+
+* UserMinMoves : minimum number of moves made by TPs
+   - 0 = no limits
+
+
