@@ -211,7 +211,7 @@ require_once( 'include/classlib_userconfig.php' );
    if( $f_handi->get_value() == 1 )
       $arr_suitable[]= T_('Handicap-Type');
    if( $f_range->get_value() )
-      $arr_suitable[]= T_('Rating range, min-games restriction');
+      $arr_suitable[]= T_('Rating range, Rated games');
    if( count($arr_suitable) > 0 )
       $title = T_("Suitable waiting games") . ' (' . implode(', ', $arr_suitable) . ')';
    else
@@ -392,7 +392,7 @@ function add_new_game_form( $form_id, $iamrated)
                                   'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
                                   'TEXT', sptext(T_('and')),
                                   'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated finished games'),
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Minimum number of rated finished games'),
                                   'TEXTINPUT', 'min_rated_games', 5, 5, '',
                                   'TEXT', MINI_SPACING . T_('(optional)'), ));
 
