@@ -193,9 +193,7 @@ $ThePage = new Page('TournamentEdit');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   echo "<CENTER>\n";
    $tform->echo_string();
-   echo "</CENTER><BR>\n";
 
    $notes = Tournament::build_notes();
    echo_notes( 'edittournamentnotesTable', T_('Tournament notes'), $notes );
@@ -206,9 +204,13 @@ $ThePage = new Page('TournamentEdit');
    if( $allow_new_del_TD )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
-   if( $allow_edit_tourney )
+   if( $allow_edit_tourney ) # for TD
+   {
+      $menu_array[T_('Edit properties')] =
+         array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Edit participants')] =
-         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
+         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' );
+   }
 
    end_page(@$menu_array);
 }
