@@ -369,23 +369,12 @@ function add_new_game_form( $form_id, $iamrated)
 
    for($i=1; $i<=10; $i++)
       $vals["$i"] = "$i";
-
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                                   'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
    game_settings_form($addgame_form, 'waitingroom', $iamrated);
 
-   $rating_array = array();
-
-   $s = ' ' . T_('dan');
-   for($i=9; $i>0; $i--)
-      $rating_array["$i dan"] = $i . $s;
-
-   $s = ' ' . T_('kyu');
-   for($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
-      $rating_array["$i kyu"] = $i . $s;
-
-
+   $rating_array = getRatingArray();
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
                                   'CHECKBOX', 'must_be_rated', 'Y', "", false,
                                   'TEXT', sptext(T_('If yes, rating between'),1),
