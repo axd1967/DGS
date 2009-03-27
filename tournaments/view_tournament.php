@@ -23,8 +23,10 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
+require_once( 'tournaments/include/tournament_properties.php' );
 
 $ThePage = new Page('Tournament');
 
@@ -42,6 +44,8 @@ $ThePage = new Page('Tournament');
    $tourney = Tournament::load_tournament( $tid );
    if( is_null($tourney) )
       error('unknown_tournament', "view_tournament.find_tournament($tid)");
+
+   $tprops = TournamentProperties::load_tournament_properties( $tid );
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
@@ -105,6 +109,54 @@ $ThePage = new Page('Tournament');
 
    echo "<hr>\n", '<a name="registration">', "\n";
    section( 'tournament', T_('Registration#T_view') );
+
+   if( !is_null($tprops) )
+   {
+      $arr_tprops = array();
+
+      // limit register end-time
+      if( $tprops->RegisterEndTime )
+         $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]'),
+               ( $tpr->RegisterEndTime ? date(DATEFMT_TOURNAMENT, $tpr->RegisterEndTime) : '') );
+
+      // limit participants
+      if( $tprops->MinParticipants > 0 && $tprops->MaxParticipants > 0 )
+         $arr_tprops[] = sprintf( T_('Tournament needs: min. %s and max. %s participants'),
+               $tprops->MinParticipants, $tprops->MaxParticipants );
+      elseif( $tprops->MinParticipants > 0 )
+         $arr_tprops[] = sprintf( T_('Tournament needs: min. %s participants'),
+               $tprops->MinParticipants );
+      elseif( $tprops->MaxParticipants > 0 )
+         $arr_tprops[] = sprintf( T_('Tournament needs: max. %s participants'),
+               $tprops->MaxParticipants );
+
+      // use-rating-mode, limit user-rating
+      $arr_tprops[] = TournamentProperties::getRatingUseModeText( $tprops->RatingUseMode, false );
+      if( $tprops->UserRated )
+         $arr_tprops[] = sprintf( T_('User rating must be between [%s - %s].'),
+               echo_rating( $tprops->UserMinRating, false ),
+               echo_rating( $tprops->UserMaxRating, false ));
+
+      // limit games-number
+      if( $tprops->UserMinGamesFinished > 0 )
+         $arr_tprops[] = sprintf( T_('User must have at least %s finished games.'),
+               $tprops->UserMinGamesFinished );
+      if( $tprops->UserMinGamesRated > 0 )
+         $arr_tprops[] = sprintf( T_('User must have at least %s rated finished games.'),
+               $tprops->UserMinGamesRated );
+
+      // limit moves-number
+      if( $tprops->UserMinMoves > 0 )
+         $arr_tprops[] = sprintf( T_('User must have at least %s moves.'),
+               $tprops->UserMinMoves );
+
+      if( count($arr_tprops) )
+         echo T_('To register for this tournament the following criteria must match:'),
+              '<ul><li>', implode("\n<li>", $arr_tprops), "</ul>\n";
+      echo ( $tprops->Notes != '' ? make_html_safe($tprops->Notes, true) . "<br><br>\n" : '');
+   }
+
+
    $cnt_status = ($allow_edit_tourney) ? NULL : TP_STATUS_REGISTER;
    $tp_counts = TournamentParticipant::count_tournament_participants( $tid, $cnt_status );
    $td_view = "<br>\n";

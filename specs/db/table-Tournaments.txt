@@ -158,7 +158,6 @@ Important Notes:
 ----------------------+-------------------------------------------------------+---------------------
  tid                  | int(11)                                               | NULL
  Lastchanged          | datetime                                              | 0000-00-00 00:00:00
- Notes                | text                                                  | NULL
  MinParticipants      | smallint(6)                                           | 0
  MaxParticipants      | smallint(6)                                           | 0
  RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX','ENTER_FIX') | COPY_CUSTOM
@@ -169,6 +168,7 @@ Important Notes:
  UserMinGamesFinished | smallint(6)                                           | 0
  UserMinGamesRated    | smallint(6)                                           | 0
  UserMinMoves         | int(11)                                               | 0
+ Notes                | text                                                  | NULL
 
 
 ## Fields:
@@ -176,8 +176,6 @@ Important Notes:
 * tid : tournament-ID
 
 * Lastchanged : update of table-entry
-
-* Notes : additional Notes to be shown for registration-section
 
 * MinParticipants, MaxParticipants : minimum / maximum number of TPs
    - 0 = no limits
@@ -196,6 +194,7 @@ Important Notes:
 
 * UserMinRating, UserMaxRating : minimum / maximum rating of TPs
    - -9999 = not limited
+   - is not used, if UserRated='N'
 
 * UserRated :
    - Y = user must have a rating on registering
@@ -207,5 +206,7 @@ Important Notes:
 
 * UserMinMoves : minimum number of moves made by TPs
    - 0 = no limits
+
+* Notes : additional Notes to be shown for registration-section
 
 
