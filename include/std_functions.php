@@ -116,6 +116,7 @@ $ActivityMax = 0x7FFF0000-$ActivityForMove;
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
 define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
+define('RATING_9DAN', 2900); //9 dan (selectable max-rating)
 
 //Allow the "by number of games" graphic (as well as "by date of games").
 define('GRAPH_RATING_BY_NUM_ENABLED', true);
