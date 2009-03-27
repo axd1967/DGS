@@ -598,6 +598,19 @@ function is_valid_rating( $dgs_rating, $check_min=true )
       return false;
 }
 
+// 30k .. 9d, used for selectboxes
+function getRatingArray()
+{
+   $rating_array = array();
+   $s = ' ' . T_('dan');
+   for($i=9; $i>0; $i--)
+      $rating_array["$i dan"] = $i . $s;
+   $s = ' ' . T_('kyu');
+   for($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
+      $rating_array["$i kyu"] = $i . $s;
+   return $rating_array;
+}
+
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false, $short=false)
 {
    if( !is_valid_rating($rating) )
