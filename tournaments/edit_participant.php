@@ -139,7 +139,7 @@ $ThePage = new Page('TournamentEditParticipant');
    if( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] || $is_delete ) // read URL-vars
    {
       $tp->setStatus( get_request_arg('status', TP_STATUS_APPLY) );
-      if( strcmp($old_status, $tp->Status) ) $edits[] = 'Status';
+      if( strcmp($old_status, $tp->Status) ) $edits[] = T_('Status#edits');
 
       if( $tp->Status == TP_STATUS_INVITE )
       {
@@ -153,19 +153,19 @@ $ThePage = new Page('TournamentEditParticipant');
          $tp->Rating = $custom_rating;
       if( get_request_arg('del_rating') )
          $tp->Rating = -OUT_OF_RATING;
-      if( $old_rating != $tp->Rating ) $edits[] = 'Rating';
+      if( $old_rating != $tp->Rating ) $edits[] = T_('Rating#edits');
 
       $start_round = trim(get_request_arg('start_round'));
       if( $start_round != '' && is_numeric($start_round) ) //TODO check round
          $tp->StartRound = $start_round;
-      if( $old_start_round != $tp->StartRound ) $edits[] = 'Round';
+      if( $old_start_round != $tp->StartRound ) $edits[] = T_('Round#edits');
 
       $tmp = trim(get_request_arg('admin_notes'));
-      if( strcmp($tp->Notes, $tmp) ) $edits[] = 'Notes';
+      if( strcmp($tp->Notes, $tmp) ) $edits[] = T_('Notes#edits');
       $tp->Notes = $tmp;
 
       $tmp = trim(get_request_arg('admin_message'));
-      if( strcmp($tp->AdminMessage, $tmp) ) $edits[] = 'AdminMessage';
+      if( strcmp($tp->AdminMessage, $tmp) ) $edits[] = T_('AdminMessage#edits');
       $tp->AdminMessage = $tmp;
    }
 
