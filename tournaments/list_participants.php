@@ -116,8 +116,6 @@ $ThePage = new Page('TournamentParticipantList');
 
    $tptable->set_default_sort( 7 ); //on Reg-ID
 
-   //TODO is restrictions on Status=(REG,APPLY) needed for normal user ?
-
    $iterator = new ListIterator( 'TournamentParticipants',
          $tptable->get_query(),
          $tptable->current_order_string(),
