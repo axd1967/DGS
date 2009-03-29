@@ -125,12 +125,12 @@ $ThePage = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Start time'),
          'TEXTINPUT',   'start_time', 20, 20,
-               ( ($tourney->StartTime) ? date(DATEFMT_TOURNAMENT, $tourney->StartTime) : $start_time), '',
+                        TournamentUtils::formatDate($tourney->StartTime, $start_time), '',
          'TEXT',  '&nbsp;<span class="EditNote">'
                      . sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT ) . '</span>' ));
    $tform->add_row( array(
          'DESCRIPTION', T_('End time'),
-         'TEXT',        ( ($tourney->EndTime) ? date(DATEFMT_TOURNAMENT, $tourney->EndTime) : NO_VALUE ) ));
+         'TEXT',        TournamentUtils::formatDate($tourney->EndTime, NO_VALUE) ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Scope'),
@@ -138,8 +138,8 @@ $ThePage = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Type'),
          'SELECTBOX',   'type', 1, Tournament::getTypeText(), $tourney->Type, false ));
-   //TODO: Type can ONLY be changed when T no registrations there yet
-   //TODO: Status can NOT be changed to NEW if T has been started (PLAY) !?
+   //TODO Type can ONLY be changed when T has no registrations
+   //TODO Status can NOT be changed to NEW if T has been started (PLAY) !? -> why not, but makes things more complex
    if( $is_admin || $tid ) // only admin can edit status on T-creation
       $tform->add_row( array(
             'DESCRIPTION', T_('Status'),

@@ -52,6 +52,10 @@ class TournamentUtils
       return ( @$player_row['admin_level'] & ADMIN_TOURNAMENT );
    }
 
+   function formatDate( $date, $defval='', $datefmt=DATEFMT_TOURNAMENT )
+   {
+      return ($date) ? date($datefmt, $date) : $defval;
+   }
 
    /*!
     * \brief Parses given date-string (expect format TOURNEY_DATEFMT)
