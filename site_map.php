@@ -81,14 +81,15 @@ function item($text, $link='', $working=true, $last=false)
 
    item(T_('Welcome page'), "index.php", true);
    { $item_level++;
+      item(T_('Introduction'), "introduction.php", true);
       item(T_('Status'), "status.php", true);
       { $item_level++;
          item(T_('My user info'), "userinfo.php?uid=$id", true);
-         item(T_('Show my running games'), "show_games.php?uid=$id", true);
-         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show games I\'m observing'), "show_games.php?observe=$id", true);
-
-         item(T_('Show message'), "message.php?mode=ShowMessage", false);
+         item(T_('My running games'), "show_games.php?uid=$id", true);
+         item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
+         item(T_('My tournaments'), "tournaments/list_tournaments.php?user=".urlencode($player_row['Handle']), true);
+         item(T_('Show messages'), "message.php?mode=ShowMessage", false);
          item(T_('Show game (follow id)'), "game.php", false, true);
          { $item_level++;
             item(T_('Add time for opponent'), "game.php", false);
@@ -99,6 +100,9 @@ function item($text, $link='', $working=true, $last=false)
       } $item_level--;
 
       item(T_('Waiting room'), "waiting_room.php", true);
+      { $item_level++;
+         item(T_('Add new game'), "new_game.php", true, true);
+      } $item_level--;
 
       if( ALLOW_TOURNAMENTS )
       {
@@ -114,7 +118,12 @@ function item($text, $link='', $working=true, $last=false)
                item(T_('Edit tournament director'), "tournaments/edit_directors.php", false);
                item(T_('Remove tournament director'), "tournaments/edit_directors.php?td_delete=1", false, true);
             } $item_level--;
-            item(T_('Manage this tournament'), "tournaments/edit_tournament.php", false, false);
+            item(T_('Manage this tournament'), "tournaments/edit_tournament.php", false);
+            { $item_level++;
+               item(T_('Add tournament director'), "tournaments/edit_directors.php", false);
+               item(T_('Edit properties'), "tournaments/edit_properties.php", false);
+               item(T_('Edit participants'), "tournaments/edit_participant.php", false, true);
+            } $item_level--;
             item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
             item(T_('Registration'), "tournaments/register.php", false, false);
             item(T_('Edit participants'), "tournaments/edit_participant.php", false, true);
@@ -124,12 +133,12 @@ function item($text, $link='', $working=true, $last=false)
 
       item(T_('My user info'), "userinfo.php?uid=$id", true);
       { $item_level++;
-         item(T_('Show my rating graph'), "ratinggraph.php?uid=$id", true);
-         item(T_('Show my running games'), "show_games.php?uid=$id", true);
-         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show my rated games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1", true);
-         item(T_('Show my won games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=1", true);
-         item(T_('Show my lost games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=2", true);
+         item(T_('My rating graph'), "ratinggraph.php?uid=$id", true);
+         item(T_('My running games'), "show_games.php?uid=$id", true);
+         item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('My rated games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1", true);
+         item(T_('My won games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=1", true);
+         item(T_('My lost games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=2", true);
          item(T_('Edit profile'), "edit_profile.php", true);
          item(T_('Edit biographical info'), "edit_bio.php", true);
          item(T_('Change password'), "edit_password.php", true);
@@ -147,6 +156,12 @@ function item($text, $link='', $working=true, $last=false)
             item(T_('Search messages'), "search_messages.php", true);
             item(T_('Edit folders'), "edit_folders.php", true, true);
          } $item_level--;
+      } $item_level--;
+
+      item(T_('New game'), "new_game.php", true);
+      { $item_level++;
+         item(T_('Waiting room'), "waiting_room.php", true);
+         item(T_('Invite'), "message.php?mode=Invite", true, true);
       } $item_level--;
 
       item(T_('Users'), "users.php", true);
@@ -176,15 +191,15 @@ function item($text, $link='', $working=true, $last=false)
 
       item(T_('Games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
       { $item_level++;
-         item(T_('Show users running games'), "show_games.php", false);
-         item(T_('Show users finished games'), "show_games.php?finished=1", false);
-         item(T_('Show my running games'), "show_games.php?uid=$id", true);
-         item(T_('Show my finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('Show all running games'), "show_games.php?uid=all", true);
-         item(T_('Show all finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
-         item(T_('Show games I\'m observing'), "show_games.php?observe=$id", true);
-         item(T_('Show all observed games'), "show_games.php?observe=all", true);
-         item(T_('Show userinfo'), "userinfo.php?uid=$id", false);
+         item(T_('Users running games'), "show_games.php", false);
+         item(T_('Users finished games'), "show_games.php?finished=1", false);
+         item(T_('My running games'), "show_games.php?uid=$id", true);
+         item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('All running games'), "show_games.php?uid=all", true);
+         item(T_('All finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
+         item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
+         item(T_('All observed games'), "show_games.php?observe=all", true);
+         item(T_('Show user info'), "userinfo.php?uid=$id", false);
          item(T_('Invite user'), "message.php?mode=Invite", false, true);
       } $item_level--;
 
@@ -198,12 +213,11 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Search forums'), "forum/search.php", true, true);
       } $item_level--;
 
-      if( @$player_row['Translator'] )
-         item(T_('Translate'), "translate.php", true);
+      item(T_('FAQ'), "faq.php", true);
 
-      item(T_('Statistics'), "statistics.php", true);
+      item(T_('Site map'), "site_map.php", true);
 
-      item(T_('Documentation'), "docs.php", true, true);
+      item(T_('Documentation'), "docs.php", true);
       { $item_level++;
          item(T_('Introduction'), "introduction.php", true);
          item(T_('Terms of Service - Rules of Conduct and Privacy Policy'), "policy.php", true);
@@ -215,9 +229,18 @@ function item($text, $link='', $working=true, $last=false)
          //item(T_//('Goodies'), "goodies/index.php", true); // not a DGS-feature
          item(T_('Links'), "links.php", true);
          item(T_('People'), "people.php", true);
+         item(T_('Statistics'), "statistics.php", true);
          item(T_('Todo list'), "todo.php", true);
          item(T_('License'), "licence.php", true, true);
       } $item_level--;
+
+      if( @$player_row['admin_level'] )
+         item(T_('Admin'), "admin.php", true);
+      if( @$player_row['Translator'] )
+         item(T_('Translate'), "translate.php", true);
+
+      item(T_('Logout'), "index.php?logout=t", true, true);
+
    } $item_level--;
 
    echo "</table>\n";
