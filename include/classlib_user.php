@@ -44,10 +44,12 @@ class User
    var $Country;
    var $Rating;
    var $RatingStatus;
+   var $GamesRated;
+   var $GamesFinished;
 
    /*! \brief Constructs a ForumUser with specified args. */
    function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
-                  $rating_status='' )
+                  $rating_status='', $games_rated=0, $games_finished=0 )
    {
       $this->ID = (int)$id;
       $this->Name = (string)$name;
@@ -57,11 +59,13 @@ class User
       $this->Country = (string)$country;
       $this->setRating( $rating );
       $this->RatingStatus = $rating_status;
+      $this->GamesRated = (int)$games_rated;
+      $this->GamesFinished = (int)$games_finished;
    }
 
    function setRating( $rating )
    {
-      if( is_null($rating) || $rating <= -OUT_OF_RATING || $rating >= OUT_OF_RATING )
+      if( is_null($rating) || !is_numeric($rating) || abs($rating) >= OUT_OF_RATING )
          $this->Rating = -OUT_OF_RATING;
       else
          $this->Rating = limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
@@ -71,6 +75,26 @@ class User
    function is_set()
    {
       return ( is_numeric($this->ID) && $this->ID > 0 );
+   }
+
+   /*! \brief Returns true, if user has set and valid rating. */
+   function hasRating()
+   {
+      if( $this->RatingStatus == 'INIT' || $this->RatingStatus == 'RATED' ) // user has rating
+         return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
+      else
+         return false;
+   }
+
+   /*! \brief Returns true, if user-rating falls inbetween given rating range (+/- 50%). */
+   function matchRating( $min, $max, $fix=false )
+   {
+      if( !$fix )
+      {
+         $min = limit( $min - 50, MIN_RATING, OUT_OF_RATING-1, $min );
+         $max = limit( $max + 50, MIN_RATING, OUT_OF_RATING-1, $max );
+      }
+      return ( $min <= $this->Rating ) && ( $this->Rating <= $max );
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
@@ -84,6 +108,8 @@ class User
          . ", Country=[{$this->Country}]"
          . ", Rating=[{$this->Rating}]"
          . ", RatingStatus=[{$this->RatingStatus}]"
+         . ", GamesRated=[{$this->GamesRated}]"
+         . ", GamesFinished=[{$this->GamesFinished}]"
          ;
    }
 
@@ -108,7 +134,7 @@ class User
       //    OnVacation,Running,Finished,RatedGames,Won,Lost,Translator,IP,Browser,Country,
       //    BlockReason,UserFlags,SkinName,MenuDirection,TableMaxRows,Button
 
-      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus
+      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus,RatedGames,Finished
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'P.*',
@@ -129,7 +155,9 @@ class User
             @$row[$prefix.'X_Lastaccess'],
             @$row[$prefix.'Country'],
             @$row[$prefix.'Rating2'],
-            @$row[$prefix.'RatingStatus']
+            @$row[$prefix.'RatingStatus'],
+            @$row[$prefix.'RatedGames'],
+            @$row[$prefix.'Finished']
          );
       return $user;
    }
