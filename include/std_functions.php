@@ -448,6 +448,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 2,1, array( T_('Messages'),     'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )));
       $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
       $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )));
+      $menu->add( 2,4, array( T_('New Game'),     'new_game.php',                array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
 
       $menu->add( 3,1, array( T_('Users'),    'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )));
       $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
