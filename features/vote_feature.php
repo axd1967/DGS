@@ -166,9 +166,11 @@ require_once( "features/lib_votes.php" );
    $menu_array[T_('Show votes')]    = "features/list_votes.php";
    if( Feature::is_admin() )
    {
-      $menu_array[T_('Add new feature')] = "features/edit_feature.php";
+      $menu_array[T_('Add new feature')] =
+         array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
       if( $fid > 0 && $feature->allow_edit() )
-         $menu_array[T_('Edit this feature')] = "features/edit_feature.php?fid=$fid";
+         $menu_array[T_('Edit this feature')] =
+            array( 'url' => "features/edit_feature.php?fid=$fid", 'class' => 'AdminLink' );
    }
 
    end_page(@$menu_array);

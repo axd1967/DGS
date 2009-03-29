@@ -163,7 +163,8 @@ require_once( "features/lib_votes.php" );
    $menu_array = array();
    $menu_array[T_('Show votes')] = "features/list_votes.php";
    if( Feature::is_admin() )
-      $menu_array[T_('Add new feature')] = "features/edit_feature.php";
+      $menu_array[T_('Add new feature')] =
+         array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }

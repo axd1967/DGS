@@ -123,7 +123,8 @@ $ThePage = new Page('ForumsList');
 
    $menu_array = array();
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
-      $menu_array[T_('Show forum log')] = 'forum/admin_show_forumlog.php';
+      $menu_array[T_('Show forum log')] =
+         array( 'url' => 'forum/admin_show_forumlog.php', 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }
