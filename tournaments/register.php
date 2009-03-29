@@ -100,6 +100,7 @@ $ThePage = new Page('TournamentRegistration');
    $is_invite = ( $tp->Status == TP_STATUS_INVITE );
 
    // check + parse edit-form
+   //TODO use same method as in edit_properties.php (error, edits, vars, parsing)
    $errors = array();
    $allow_register = true;
    if( $tp->ID == 0 && count($reg_errors) ) // error only if new-reg by user
