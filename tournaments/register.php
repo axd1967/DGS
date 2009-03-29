@@ -26,6 +26,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
+require_once( 'tournaments/include/tournament_properties.php' );
 
 $ThePage = new Page('TournamentRegistration');
 
@@ -45,16 +46,15 @@ $ThePage = new Page('TournamentRegistration');
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used (TD=tournament-director)
-//TODO update
      tid=                           : current user registers for tournament
-     tid=&rid=                      : edit existing registration by user
+     tid=&rid=                      : current user edits existing registration
      tp_preview&tid=&rid=           : preview for T-registration-save
      tp_save&tid=&rid=              : update registration in database
      tp_delete&tid=&rid=            : remove registration (need confirm)
      tp_delete&confirm=1&tid=&rid=  : remove registration (confirmed)
      tp_cancel&tid=&rid=            : cancel remove-confirmation
-     tp_ack_invite
-     tp_edit_invite
+     tp_ack_invite&tid=             : approve invitation by TD
+     tp_edit_invite&tid=            : reject invitation by TD, transforming to user-apply
 */
 
    //TODO check: delete only allowed during reg-period (T.Status='REG')
@@ -72,6 +72,10 @@ $ThePage = new Page('TournamentRegistration');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.register.find_tournament($tid)");
 
+   $tprops = TournamentProperties::load_tournament_properties( $tid );
+   if( is_null($tprops) )
+      $tprops = new TournamentProperties($tid);
+
    // existing application ? (check matching tid & uid if loaded by rid)
    $tp = TournamentParticipant::load_tournament_participant( $tid, $my_id, $rid, true, true );
    if( is_null($tp) )
@@ -82,10 +86,8 @@ $ThePage = new Page('TournamentRegistration');
    // register/edit allowed?
    $reg_errors = $tourney->allow_register($my_id);
    if( count($reg_errors) )
-   {
-      //TODO output errors, don't jump to error-page
       error('tournament_register_not_allowed', "Tournament.register($tid,$my_id)");
-   }
+   $reg_errors = $tprops->checkUserRegistration( $tourney, $my_id );
 
    $is_delete = (bool)( @$_REQUEST['tp_delete'] );
    if( $rid && $is_delete && @$_REQUEST['confirm'] )
@@ -98,7 +100,13 @@ $ThePage = new Page('TournamentRegistration');
    $is_invite = ( $tp->Status == TP_STATUS_INVITE );
 
    // check + parse edit-form
-   $errors = NULL;
+   $errors = array();
+   $allow_register = true;
+   if( $tp->ID == 0 && count($reg_errors) ) // error only if new-reg by user
+   {
+      $errors[] = T_('Registration restrictions disallow you to register.');
+      $allow_register = false;
+   }
 
    $val_custom_rating = trim(get_request_arg('custom_rating'));
    if( !$is_invite && (string)$val_custom_rating != '' )
@@ -160,7 +168,7 @@ $ThePage = new Page('TournamentRegistration');
 
 
    // persist TP in database
-   if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && is_null($errors) )
+   if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
    {
       $tp->persist(); // insert or update
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
@@ -205,12 +213,22 @@ $ThePage = new Page('TournamentRegistration');
          'DESCRIPTION', T_('Status'),
          'TEXT',        ($rid ? TournamentParticipant::getStatusText($tp->Status, true) : NO_VALUE)
                         . "<br>\n<span class=\"TUserStatus\">$reg_user_info</span>", ));
+
+   if( count($errors) )
+   {
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('Error'),
+            'TEXT',        '<span class="ErrorMsg">'
+                  . T_('There are some errors, so registration can\'t be saved:') . "<br>\n"
+                  . '* ' . implode(",<br>\n* ", $errors)
+                  . '</span>' ));
+   }
    $tpform->add_empty_row();
 
    $tpform->add_row( array(
          'DESCRIPTION', T_('Current Rating'),
          'TEXT',        ( $current_rating ? $current_rating : NO_VALUE), ));
-   if( !$is_invite && !$is_delete )
+   if( $allow_register && !$is_invite && !$is_delete )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Custom Rating'),
@@ -226,10 +244,11 @@ $ThePage = new Page('TournamentRegistration');
             'TEXT',        echo_rating( $tp->Rating, true, $my_id ), ));
    $tpform->add_empty_row();
 
-   $tpform->add_row( array(
-         'DESCRIPTION', T_('Start Round'),
-         'TEXT',        $tp->StartRound, ));
-   if( !$is_invite && !$is_delete )
+   if( $allow_register )
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('Start Round'),
+            'TEXT',        $tp->StartRound, ));
+   if( $allow_register && !$is_invite && !$is_delete )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Custom Start Round'),
@@ -237,7 +256,7 @@ $ThePage = new Page('TournamentRegistration');
    }
    $tpform->add_empty_row();
 
-   if( !$is_delete )
+   if( $allow_register && !$is_delete )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Public User Comment'),
@@ -260,7 +279,7 @@ $ThePage = new Page('TournamentRegistration');
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tp_cancel', T_('Cancel') ));
    }
-   else
+   else if( $allow_register )
    {
       $rowarr = array( 'TAB', 'CELL', 1, '', ); // align submit-buttons
       if( $is_invite )
@@ -287,6 +306,14 @@ $ThePage = new Page('TournamentRegistration');
 
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
+
+   if( count($reg_errors) )
+   {
+      section( 'restriction', T_('Registration restrictions') );
+      echo_notes( 'registerrestrictionsTable',
+         T_('You are not eligible to register for this tournament:'), $reg_errors, false );
+      echo "<center><hr class=Inline></center>\n";
+   }
 
    $tpform->echo_string();
 

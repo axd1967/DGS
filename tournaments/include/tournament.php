@@ -73,6 +73,10 @@ class Tournament
    var $StartTime;
    var $EndTime;
 
+   // non-DB vars
+
+   var $TP_Counts;
+
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_ROUND_ROBIN,
                         $title='', $description='', $owner_id=0, $owner_handle='',
@@ -91,6 +95,8 @@ class Tournament
       $this->Lastchanged = (int)$lastchanged;
       $this->StartTime = (int)$starttime;
       $this->EndTime = (int)$endtime;
+      // non-DB
+      $this->TP_Counts = NULL;
    }
 
    function to_string()
@@ -117,6 +123,11 @@ class Tournament
       if( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
          error('invalid_args', "Tournament.setStatus($status)");
       $this->Status = $status;
+   }
+
+   function setTP_Counts( $arr )
+   {
+      $this->TP_Counts = array_merge( array(), $arr );
    }
 
    /*! \brief Inserts or updates tournament in database. */
@@ -220,20 +231,16 @@ class Tournament
       }
    }
 
-   /*! \brief Returns empty error-array if given user can register to tournament. */
+   /*!
+    * \brief Returns empty error-array if given user can register to tournament;
+    * \note Tournament-properties are separately checked.
+    */
    function allow_register( $uid, $ignore_status=false )
    {
       global $player_row;
       $errors = array();
       if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
          return $errors + array( T_('Guest-users are not allowed to register in tournaments.') );
-
-      //TODO check T-status (must be REG)
-      if( !$ignore_status )
-      {
-      }
-
-      //TODO check against T-props
 
       return $errors;
    }

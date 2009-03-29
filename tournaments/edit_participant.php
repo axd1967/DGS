@@ -26,6 +26,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
+require_once( 'tournaments/include/tournament_properties.php' );
 
 $ThePage = new Page('TournamentEditParticipant');
 
@@ -105,6 +106,22 @@ $ThePage = new Page('TournamentEditParticipant');
          $userhandle = $user->Handle;
    }
 
+   // check for guest-user
+   if( $uid != 0 && $uid <= GUESTS_ID_MAX )
+      jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."sysmsg="
+            . urlencode( T_('Guest users can not be edited, please choose another user!') ));
+
+   // user eligible?
+   if( !is_null($user) )
+   {
+      $tprops = TournamentProperties::load_tournament_properties( $tid );
+      if( is_null($tprops) )
+         $tprops = new TournamentProperties($tid);
+
+      $reg_errors = $tprops->checkUserRegistration( $tourney, $user );
+   }
+   else
+      $reg_errors = array();
 
    // existing application ?
    $tp = TournamentParticipant::load_tournament_participant( $tid, $uid );
@@ -148,6 +165,8 @@ $ThePage = new Page('TournamentEditParticipant');
       }
       if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER )
          $tp->Flags |= TP_FLAGS_ACK_APPLY;
+      if( count($reg_errors) ) // violate registration restrictions
+         $tp->Flags |= TP_FLAGS_VIOLATE;
 
       if( $val_custom_rating != '' && (string)$custom_rating != '' )
          $tp->Rating = $custom_rating;
@@ -169,7 +188,7 @@ $ThePage = new Page('TournamentEditParticipant');
       $tp->AdminMessage = $tmp;
    }
 
-   if( $rid && $is_delete  && @$_REQUEST['confirm'] )
+   if( $rid && $is_delete && @$_REQUEST['confirm'] )
    {
       TournamentParticipant::delete_tournament_participant( $tid, $rid );
 
@@ -219,7 +238,20 @@ $ThePage = new Page('TournamentEditParticipant');
          'TEXTINPUT',      'showuser', 16, 16, $userhandle, '',
          'SUBMITBUTTON',   'tp_showuser_handle', T_('Show User by Handle'),
          'SUBMITBUTTON',   'tp_showuser_uid', T_('Show User by ID'), ));
+
+   if( count($reg_errors) )
+   {
+      $restrictions = '<span class="TWarning"><hr>';
+      $restrictions .= T_('<b>Registration restrictions</b> for this tournament and this user:');
+      $restrictions .= "<ul>";
+      foreach( $reg_errors as $err )
+         $restrictions .= "<li>" . make_html_safe($err, 'line') . "\n";
+      $restrictions .= "</ul><hr></span>\n";
+      $tpform->add_row( array(
+            'OWNHTML', "<td colspan=2>$restrictions</td>" ));
+   }
    $tpform->add_empty_row();
+
    if( !is_null($user) )
       $tpform->add_row( array(
             'DESCRIPTION', T_('User'),
