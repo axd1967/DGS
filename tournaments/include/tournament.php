@@ -72,6 +72,8 @@ class Tournament
    var $Lastchanged;
    var $StartTime;
    var $EndTime;
+   var $Rounds;
+   var $CurrentRound;
 
    // non-DB vars
 
@@ -81,7 +83,7 @@ class Tournament
    function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_ROUND_ROBIN,
                         $title='', $description='', $owner_id=0, $owner_handle='',
                         $status=TOURNEY_STATUS_NEW, $created=0, $lastchanged=0,
-                        $starttime=0, $endtime=0 )
+                        $starttime=0, $endtime=0, $rounds=1, $current_round=1 )
    {
       $this->ID = (int)$id;
       $this->setScope( $scope );
@@ -95,6 +97,8 @@ class Tournament
       $this->Lastchanged = (int)$lastchanged;
       $this->StartTime = (int)$starttime;
       $this->EndTime = (int)$endtime;
+      $this->Rounds = (int)$rounds;
+      $this->CurrentRound = (int)$current_round;
       // non-DB
       $this->TP_Counts = NULL;
    }
@@ -123,6 +127,24 @@ class Tournament
       if( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
          error('invalid_args', "Tournament.setStatus($status)");
       $this->Status = $status;
+   }
+
+   // current-round / rounds|*
+   function formatRound( $short=false )
+   {
+      $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
+      if( $short )
+         return $this->CurrentRound . ' / ' . $rounds_str;
+      else
+         return sprintf( T_('%s of %s rounds'), $this->CurrentRound, $rounds_str );
+   }
+
+   function getRoundLimitText()
+   {
+      if( $this->Rounds > 0 )
+         return sprintf( T_('(max. %s rounds)'), $this->Rounds );
+      else
+         return T_('(unlimited rounds)#Trounds');
    }
 
    function setTP_Counts( $arr )
@@ -154,6 +176,8 @@ class Tournament
             . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
             . ",StartTime=FROM_UNIXTIME({$this->StartTime})"
             . ( $this->EndTime > 0 ? ",EndTime=FROM_UNIXTIME({$this->EndTime})" : '' )
+            . ",Rounds='{$this->Rounds}'"
+            . ",CurrentRound='{$this->CurrentRound}'"
          ;
    }
 
@@ -280,7 +304,9 @@ class Tournament
             @$row['X_Created'],
             @$row['X_Lastchanged'],
             @$row['X_StartTime'],
-            @$row['X_EndTime']
+            @$row['X_EndTime'],
+            @$row['Rounds'],
+            @$row['CurrentRound']
          );
       return $tournament;
    }

@@ -175,8 +175,13 @@ $ThePage = new Page('TournamentEditParticipant');
       if( $old_rating != $tp->Rating ) $edits[] = T_('Rating#edits');
 
       $start_round = trim(get_request_arg('start_round'));
-      if( $start_round != '' && is_numeric($start_round) ) //TODO check round
+      if( $start_round != '' && is_numeric($start_round) )
+      {
+         // check round
+         if( $tourney->Rounds > 0 && $start_round > $tourney->Rounds )
+            $start_round = $tourney->Rounds;
          $tp->StartRound = $start_round;
+      }
       if( $old_start_round != $tp->StartRound ) $edits[] = T_('Round#edits');
 
       $tmp = trim(get_request_arg('admin_notes'));
@@ -319,7 +324,8 @@ $ThePage = new Page('TournamentEditParticipant');
       if( !$is_delete )
          $tpform->add_row( array(
                'DESCRIPTION', T_('Custom Start Round'),
-               'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '', ));
+               'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '',
+               'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
       $tpform->add_empty_row();
 
       $tpform->add_row( array(

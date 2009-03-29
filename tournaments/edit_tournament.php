@@ -168,6 +168,12 @@ $ThePage = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Description'),
          'TEXTAREA',    'descr', 70, 15, $tourney->Description ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament rounds'),
+         'TEXTINPUT',   'rounds', 5, 5, $tourney->Rounds, '' ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Current tournament round'),
+         'TEXTINPUT',   'current_round', 5, 5, $tourney->CurrentRound, '' ));
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
@@ -263,6 +269,21 @@ function parse_edit_form( &$tourney )
          $tourney->StartTime = $parsed_value;
       else
          $errors[] = $parsed_value;
+   }
+
+   $new_value = (int)trim(get_request_arg('rounds'));
+   if( $read && is_numeric($new_value) && $new_value >= 0 )
+      $tourney->Rounds = $new_value;
+   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN && $tourney->Rounds <= 0 )
+      $errors[] = T_('Round-Robin tournament should have at least one round.');
+
+   $new_value = (int)trim(get_request_arg('current_round'));
+   if( $read && is_numeric($new_value) && $new_value >= 0 )
+      $tourney->CurrentRound = $new_value;
+   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   {
+      if( $tourney->CurrentRound <= 0 || $tourney->CurrentRound > $tourney->Rounds )
+         $errors[] = sprintf( T_('Round-Robin tournament round must be in range [1-%s].'), $tourney->Rounds );
    }
 
    return (count($errors)) ? $errors : NULL;

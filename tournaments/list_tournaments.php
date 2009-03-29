@@ -128,6 +128,7 @@ $ThePage = new Page('TournamentList');
    $ttable->add_tablehead( 3, T_('Type#headert'), 'Enum', 0, 'Type+');
    $ttable->add_tablehead( 4, T_('Status#headert'), 'Enum', 0, 'Status+');
    $ttable->add_tablehead( 5, T_('Title#headert'), '', TABLE_NO_HIDE, 'Title+');
+   $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
    $ttable->add_tablehead( 6, T_('Owner#headert'), 'User', 0, 'X_OwnerHandle+');
    $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
@@ -195,6 +196,8 @@ $ThePage = new Page('TournamentList');
          $row_str[ 8] = ($tourney->StartTime > 0) ? date(DATE_FMT2, $tourney->StartTime) : '';
       if( $ttable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = ($tourney->EndTime > 0) ? date(DATE_FMT2, $tourney->EndTime) : '';
+      if( $ttable->Is_Column_Displayed[10] )
+         $row_str[10] = $tourney->formatRound(true);
 
       $ttable->add_row( $row_str );
    }

@@ -108,6 +108,7 @@ $ThePage = new Page('Tournament');
    echo "<hr>\n", '<a name="rules">', "\n";
    section( 'tournament', T_('Rules#T_view') );
    echo
+      sprintf( T_('Tournament Round: %s'), $tourney->formatRound() ), "<br>\n",
       "[TODO] Show Ruleset", //TODO
       "\n";
 

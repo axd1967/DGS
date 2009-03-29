@@ -25,6 +25,20 @@ ChangeLog
 
 2009-03-29 juga
 
+   * tournaments/include/tournament.php (Tournament, ~.formatRound, ~.getRoundLimitText,
+       ~.build_persist_query_part, ~.new_from_row),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/table-Tournaments.txt,
+     tournaments/edit_participant.php, tournaments/edit_tournament.php,
+     tournaments/list_tournaments.php, tournaments/register.php,
+     tournaments/view_tournament.php:
+   - added handling of Tournament-rounds in Tournament-table: Rounds, CurrentRound
+-----------
+-- added tournament-rounds
+ALTER TABLE Tournament
+   ADD Rounds int(11) NOT NULL default '1',
+   ADD CurrentRound int(11) NOT NULL default '1' ;
+-----------
+
    * tournaments/include/tournament_properties.php (TournamentProperties,
        ~.checkUserRegistration, ~._load_user, ~.build_query_sql),
      tournaments/include/tournament_participant.php (

@@ -132,10 +132,16 @@ $ThePage = new Page('TournamentRegistration');
       }
 
       $start_round = trim(get_request_arg('start_round'));
-      if( $start_round != '' && is_numeric($start_round) ) //TODO check round
+      if( $start_round != '' && is_numeric($start_round) )
       {
-         $tp->StartRound = $start_round;
-         $tp->Status = TP_STATUS_APPLY;
+         // check round
+         if( $tourney->Rounds > 0 && $start_round > $tourney->Rounds )
+            $start_round = $tourney->Rounds;
+         if( $tp->StartRound != $start_round )
+         {
+            $tp->StartRound = $start_round;
+            $tp->Status = TP_STATUS_APPLY;
+         }
       }
    }
 
@@ -252,7 +258,8 @@ $ThePage = new Page('TournamentRegistration');
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Custom Start Round'),
-            'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '', ));
+            'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '',
+            'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
    }
    $tpform->add_empty_row();
 

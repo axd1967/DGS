@@ -401,3 +401,9 @@ CREATE TABLE TournamentProperties (
 ) ENGINE=MyISAM;
 
 
+-- added tournament-rounds
+ALTER TABLE Tournament
+   ADD Rounds int(11) NOT NULL default '1',
+   ADD CurrentRound int(11) NOT NULL default '1' ;
+
+
