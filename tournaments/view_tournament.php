@@ -24,6 +24,7 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
@@ -44,10 +45,15 @@ $ThePage = new Page('Tournament');
    $tourney = Tournament::load_tournament( $tid );
    if( is_null($tourney) )
       error('unknown_tournament', "view_tournament.find_tournament($tid)");
+   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+
+   // TP-count
+   $tp_counts = TournamentParticipant::count_tournament_participants( $tid );
+   $tourney->setTP_Counts($tp_counts);
+   $tp_count_all = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
+   unset($tp_counts[TPCOUNT_STATUS_ALL]);
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
-
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
    $page_tourney = "tournaments/view_tournament.php?tid=$tid";
@@ -117,18 +123,16 @@ $ThePage = new Page('Tournament');
       // limit register end-time
       if( $tprops->RegisterEndTime )
          $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]'),
-               ( $tpr->RegisterEndTime ? date(DATEFMT_TOURNAMENT, $tpr->RegisterEndTime) : '') );
+               TournamentUtils::formatDate($tprops->RegisterEndTime) );
 
       // limit participants
       if( $tprops->MinParticipants > 0 && $tprops->MaxParticipants > 0 )
          $arr_tprops[] = sprintf( T_('Tournament needs: min. %s and max. %s participants'),
                $tprops->MinParticipants, $tprops->MaxParticipants );
       elseif( $tprops->MinParticipants > 0 )
-         $arr_tprops[] = sprintf( T_('Tournament needs: min. %s participants'),
-               $tprops->MinParticipants );
+         $arr_tprops[] = sprintf( T_('Tournament needs: min. %s participants'), $tprops->MinParticipants );
       elseif( $tprops->MaxParticipants > 0 )
-         $arr_tprops[] = sprintf( T_('Tournament needs: max. %s participants'),
-               $tprops->MaxParticipants );
+         $arr_tprops[] = sprintf( T_('Tournament needs: max. %s participants'), $tprops->MaxParticipants );
 
       // use-rating-mode, limit user-rating
       $arr_tprops[] = TournamentProperties::getRatingUseModeText( $tprops->RatingUseMode, false );
@@ -145,11 +149,6 @@ $ThePage = new Page('Tournament');
          $arr_tprops[] = sprintf( T_('User must have at least %s rated finished games.'),
                $tprops->UserMinGamesRated );
 
-      // limit moves-number
-      if( $tprops->UserMinMoves > 0 )
-         $arr_tprops[] = sprintf( T_('User must have at least %s moves.'),
-               $tprops->UserMinMoves );
-
       if( count($arr_tprops) )
          echo T_('To register for this tournament the following criteria must match:'),
               '<ul><li>', implode("\n<li>", $arr_tprops), "</ul>\n";
@@ -157,26 +156,23 @@ $ThePage = new Page('Tournament');
    }
 
 
-   $cnt_status = ($allow_edit_tourney) ? NULL : TP_STATUS_REGISTER;
-   $tp_counts = TournamentParticipant::count_tournament_participants( $tid, $cnt_status );
-   $td_view = "<br>\n";
-   if( $allow_edit_tourney && @$tp_counts[TP_STATUS_REGISTER] != $tp_counts['*'])
+   $tpcnt_view = "<br>\n<ul>";
+   foreach( $tp_counts as $t_status => $cnt )
    {
-      $td_view .= "<ul>";
-      foreach( $tp_counts as $t_status => $cnt )
-         if( $t_status != '*' )
-            $td_view .= "  <li>" . sprintf( T_('Status [%s] : %d users'), $t_status, $cnt ) . "\n";
-      $td_view .= "</ul>\n";
+      $tpcnt_view .= "  <li>" .
+         sprintf( T_('%3d users on status [%s]'),
+                  $cnt, TournamentParticipant::getStatusText($t_status) )
+         . "\n";
    }
-   $cnt_participants = (int)@$tp_counts[TP_STATUS_REGISTER];
+   $tpcnt_view .= "</ul>\n";
 
    $reg_user_status = TournamentParticipant::isTournamentParticipant( $tid, $my_id );
    $reg_user_info = ( count($tourney->allow_register($my_id, true)) )
       ? '' : TournamentParticipant::getStatusText( $reg_user_status, false, true );
 
    echo "\n",
-      sprintf( T_('Complete registrations for this tournament: %s user(s)'), $cnt_participants ),
-      $td_view,
+      sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),
+      $tpcnt_view,
       "<br>\n",
       ( ($reg_user_info)
             ? sprintf( '%s%s<span class="TUserStatus">%s</span>',
