@@ -22,7 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once( 'include/std_classes.php' );
+require_once( 'include/classlib_user.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
+require_once( 'tournaments/include/tournament.php' );
 
  /*!
   * \file tournament_properties.php
@@ -60,14 +62,13 @@ class TournamentProperties
    var $UserRated;
    var $UserMinGamesFinished;
    var $UserMinGamesRated;
-   var $UserMinMoves;
 
    /*! \brief Constructs TournamentProperties-object with specified arguments. */
    function TournamentProperties(
          $tid=0, $lastchanged=0, $notes='',
          $min_participants=2, $max_participants=0, $rating_use_mode=TPROP_RUMODE_COPY_CUSTOM,
          $reg_end_time=0, $user_min_rating=MIN_RATING, $user_max_rating=RATING_9DAN, $user_rated=false,
-         $user_min_games_finished=0, $user_min_games_rated=0, $user_min_moves=0 )
+         $user_min_games_finished=0, $user_min_games_rated=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -81,7 +82,6 @@ class TournamentProperties
       $this->UserRated = (bool)$user_rated;
       $this->UserMinGamesFinished = (int)$user_min_games_finished;
       $this->UserMinGamesRated = (int)$user_min_games_rated;
-      $this->UserMinMoves = (int)$user_min_moves;
    }
 
    function setRatingUseMode( $use_mode )
@@ -115,7 +115,6 @@ class TournamentProperties
             . ", UserRated=[{$this->UserRated}]"
             . ", UserMinGamesFinished=[{$this->UserMinGamesFinished}]"
             . ", UserMinGamesRated=[{$this->UserMinGamesRated}]"
-            . ", UserMinMoves=[{$this->UserMinMoves}]"
          ;
    }
 
@@ -142,7 +141,6 @@ class TournamentProperties
             . sprintf( ",UserRated='%s'", ($this->UserRated ? 'Y' : 'N') )
             . ",UserMinGamesFinished='{$this->UserMinGamesFinished}'"
             . ",UserMinGamesRated='{$this->UserMinGamesRated}'"
-            . ",UserMinMoves='{$this->UserMinMoves}'"
          ;
    }
 
@@ -179,6 +177,93 @@ class TournamentProperties
       return $result;
    }
 
+   /*!
+    * \brief Checks potential registration by given user and returns non-null
+    *        list of matching criteria, that disallow registration.
+    * \param $tourney Tournament with set TP_Counts (loaded if not set)
+    * \param $user User-object or user-id
+    */
+   function checkUserRegistration( $tourney, $user )
+   {
+      global $NOW;
+      $errors = array();
+      //TODO(later) non-strict -> apply to TD, add add-text-warning; workaround now: TP asks TD for invite
+
+      // check T-status (must be REG)
+      if( $tourney->Status != TOURNEY_STATUS_REGISTER )
+         $errors[] = T_('Tournament is not in registration phase.');
+
+      // limit register end-time
+      if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
+         $errors[] = sprintf( T_('Registration phase ended on [%s].'),
+               TournamentUtils::formatDate( $this->RegisterEndTime ) );
+
+      // limit participants
+      if( $this->MaxParticipants > 0 )
+      {
+         if( is_null($tourney->TP_Counts) )
+            $tourney->setTP_Counts( TournamentParticipant::count_tournament_participants( $this->tid ) );
+
+         if( (int)@$tourney->TP_Counts[TPCOUNT_STATUS_ALL] >= $this->MaxParticipants )
+            $errors[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
+               $this->MaxParticipants );
+      }
+
+      // ----- user-specific checks -----
+
+      // use-rating-mode
+      if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
+      {// need user-rating
+         $this->_load_user( $user );
+         if( !$user->hasRating() )
+            $errors[] = T_('User has no Dragon rating, which is needed for tournament rating mode: ')
+               . "\n" . TournamentProperties::getRatingUseModeText( $this->RatingUseMode, false );
+      }
+
+      // limit user-rating
+      if( $this->UserRated )
+      {
+         $this->_load_user( $user );
+         if( !$user->hasRating() )
+            $errors[] = T_('User has no Dragon rating, which is required for this tournament.');
+         elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
+            $errors[] = sprintf( T_('User rating [%s] does not match the required rating range [%s - %s].'),
+               echo_rating( $user->Rating ),
+               echo_rating( $this->UserMinRating, false ),
+               echo_rating( $this->UserMaxRating, false ) );
+      }
+
+      // limit games-number
+      if( $this->UserMinGamesFinished > 0 )
+      {
+         $this->_load_user( $user );
+         if( $user->GamesFinished < $this->UserMinGamesFinished )
+            $errors[] = sprintf( T_('User must have at least %s finished games, but has only %s.'),
+               $this->UserMinGamesFinished, $user->GamesFinished );
+      }
+      if( $this->UserMinGamesRated > 0 )
+      {
+         $this->_load_user( $user );
+         if( $user->GamesRated < $this->UserMinGamesRated )
+            $errors[] = sprintf( T_('User must have at least %s rated finished games, but has only %s.'),
+               $this->UserMinGamesRated, $user->GamesRated );
+      }
+
+      return $errors;
+   }// checkUser
+
+   /*! \brief (internally) loads User-object if user is only user-id. */
+   function _load_user( &$user )
+   {
+      if( !is_a($user, 'User') )
+      {
+         if( !is_numeric($user) )
+            error('invalid_args', "TournamentProperties._load_user($user)");
+         $user = User::load_user( (int)$user );
+      }
+   }
+
+
    // ------------ static functions ----------------------------
 
    /*! \brief Deletes TournamentProperties-entry for given tournament-id. */
@@ -194,7 +279,7 @@ class TournamentProperties
    {
       // TournamentProperties: tid,Lastchanged,Notes,MinParticipants,MaxParticipants,
       //     RatingUseMode,RegisterEndTime,UserMinRating,UserMaxRating,UserRated,
-      //     UserMinGamesFinished,UserMinGamesRated,UserMinMoves
+      //     UserMinGamesFinished,UserMinGamesRated
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'TPR.*',
@@ -224,8 +309,7 @@ class TournamentProperties
             @$row['UserMaxRating'],
             ( @$row['UserRated'] == 'Y' ),
             @$row['UserMinGamesFinished'],
-            @$row['UserMinGamesRated'],
-            @$row['UserMinMoves']
+            @$row['UserMinGamesRated']
          );
       return $tp;
    }
