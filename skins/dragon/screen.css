@@ -329,7 +329,7 @@ span.FormWarning {
    width: auto;
    height: auto;
    border: 2px solid #ff0000;
-   background: lime;
+   background: #bcffab; /* light green */
    overflow: visible; /* hidden visible scroll auto */
    margin: 0px;
    float: left;
@@ -342,7 +342,7 @@ span.FormWarning {
    width: 10px;
    height: 10px;
    border: 2px solid #00ff00;
-   background: lime;
+   background: #bcffab; /* light green */
    overflow: hidden; /* hidden visible scroll auto */
    margin: 0px;
 /*
@@ -354,7 +354,7 @@ span.FormWarning {
 
 .DebugInfo {
    border: 0px solid #ff0000;
-   background: lime;
+   background: #bcffab; /* light green */
    margin: 0px;
    padding: 0px;
 }
@@ -382,6 +382,11 @@ img.MinWidth {
 
 span.ErrorMsg {
    color: darkred;
+}
+
+.AdminLink {
+   font-style: italic;
+   background: #bcffab; /* light green */
 }
 
 

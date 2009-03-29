@@ -244,7 +244,8 @@ $ThePage = new Page('UserInfo');
    if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
    {
       $menu_array[T_('Admin user')] =
-         'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle);
+         array( 'url' => 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle),
+                'class' => 'AdminLink' );
    }
 
    end_page(@$menu_array);
