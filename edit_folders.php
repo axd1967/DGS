@@ -260,7 +260,7 @@ function make_folder_form_row(&$form, $name, $nr,
    echo "</center>\n";
 
    $menu_array = array(
-         T_('Message list') => 'list_messages.php',
+         T_('Show messages') => 'list_messages.php',
          T_('Show userinfo') => "userinfo.php?uid=$my_id",
       );
 
