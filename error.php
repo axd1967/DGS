@@ -92,7 +92,14 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
 
-   //TODO: also output label-string with error-msg !? at least for admins ...
+   // output error-log ID
+   $errorlog_id = get_request_arg('eid');
+   if( $errorlog_id )
+      echo " [ERRLOG{$errorlog_id}]: ";
+
+   // written if set, can be resetted to NULL on certain errors to avoid publishing sensitive data
+   $debugmsg = get_request_arg('debugmsg');
+
    switch( (string)$err )
    {
       case("early_pass"):
@@ -266,6 +273,14 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       {
          //an email address validity function should never be treated as definitive
          echo T_("Sorry, the email given does not seem to be a valid address. Please, verify your spelling or try another one.");
+         $debugmsg = NULL; // contains email
+      }
+      break;
+
+      case('mail_failure'):
+      {
+         echo T_("Sorry, an error occured during sending of the email.");
+         $debugmsg = NULL; // contains email
       }
       break;
 
@@ -764,6 +779,10 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
    }
+
+   // also output detailed debug-msg
+   if( !is_null($debugmsg) && (string)$debugmsg != '' )
+      echo " [$debugmsg]";
    db_close();
 
    $mysqlerror = get_request_arg('mysqlerror');
