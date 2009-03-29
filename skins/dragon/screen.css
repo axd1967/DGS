@@ -77,6 +77,11 @@ hr {
    border-width: 0px;
 }
 
+hr.Inline {
+   width: 70%;
+   height: 1px;
+}
+
 pre {
    display: block;
    width: 100%;
