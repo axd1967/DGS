@@ -23,6 +23,35 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-03-29 juga
+
+   * waiting_room.php, NEWS:
+   - simplified "suitable" games restrictions
+   - added notes about suitable games
+
+   * new_game.php (add_new_game_form), waiting_room.php (add_new_game_form),
+     include/config.php, include/std_functions.php (start_page), NEWS:
+   - splitted new-game form from waiting-room into separate new-game page
+   - added new-game page in main-menu with access-key [n]
+
+   * site_map.php:
+   - added intro, tournaments (mine, management), new-game, site-map, logout
+   - changed pos of: statistics, Admin/Translate-link
+   - shortened/adjusted texts for bottom-link
+
+   * edit_folders.php, status.php:
+   - shortened/adjusted texts for bottom-link
+
+   * userinfo.php, skins/dragon/screen.css:
+   - use CSS for admin-links with lighter green
+
+   * features/lib_votes.php (Feature.build_feature_notes):
+   - removed user vote-restriction on user-moves (can't be seen everywhere on DGS pages)
+   - fixed notes-text
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.build_notes):
+   - fixed text
+
 2009-03-27 juga
 
    * include/rating.php (getRatingArray),
