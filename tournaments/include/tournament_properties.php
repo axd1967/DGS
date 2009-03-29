@@ -264,7 +264,7 @@ class TournamentProperties
          $arr = array();
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is used for registration, but can be changed afterwards.');
          $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Dragon user rating will be used during whole tournament.');
-         $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is used for registration and can\'t be changed afterwards by user.');
+         $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is used for registration and can not be changed afterwards by user.');
          $arr[TPROP_RUMODE_ENTER_FIX]   = T_('Tournament rating must be manually entered on registration.');
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_SHORT'] = $arr;
       }
