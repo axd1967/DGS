@@ -167,7 +167,6 @@ Important Notes:
  UserRated            | enum('N','Y')                                         | N
  UserMinGamesFinished | smallint(6)                                           | 0
  UserMinGamesRated    | smallint(6)                                           | 0
- UserMinMoves         | int(11)                                               | 0
  Notes                | text                                                  | NULL
 
 
@@ -202,9 +201,6 @@ Important Notes:
 
 * UserMinGamesFinished, UserMinGamesRated :
    - minimum number of finished / rated-finished games of TPs
-   - 0 = no limits
-
-* UserMinMoves : minimum number of moves made by TPs
    - 0 = no limits
 
 * Notes : additional Notes to be shown for registration-section

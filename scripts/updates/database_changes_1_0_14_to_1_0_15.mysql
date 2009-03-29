@@ -396,7 +396,6 @@ CREATE TABLE TournamentProperties (
    UserRated enum('N','Y') NOT NULL default 'N',
    UserMinGamesFinished smallint NOT NULL default '0',
    UserMinGamesRated smallint NOT NULL default '0',
-   UserMinMoves int NOT NULL default '0',
    Notes text NOT NULL,
    PRIMARY KEY (tid)
 ) ENGINE=MyISAM;

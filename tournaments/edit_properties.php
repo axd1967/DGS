@@ -142,9 +142,6 @@ $ThePage = new Page('TournamentPropertiesEdit');
          'TAB',
          'TEXTINPUT',   'min_games_rated', 5, 5, $vars['min_games_rated'], '',
          'TEXT',        MINI_SPACING . T_('(rated only)'), ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Minimum moves'),
-         'TEXTINPUT',   'min_moves', 7, 7, $vars['min_moves'], '', ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Notes'),
@@ -199,7 +196,7 @@ function parse_edit_form( &$tpr, $not_saved )
 
    // read from props or set defaults
    $vars = array(
-      'reg_end_time'       => ( $tpr->RegisterEndTime ? date(DATEFMT_TOURNAMENT, $tpr->RegisterEndTime) : ''),
+      'reg_end_time'       => TournamentUtils::formatDate($tpr->RegisterEndTime),
       'min_participants'   => $tpr->MinParticipants,
       'max_participants'   => $tpr->MaxParticipants,
       'rating_use_mode'    => $tpr->RatingUseMode,
@@ -208,7 +205,6 @@ function parse_edit_form( &$tpr, $not_saved )
       'user_max_rating'    => echo_rating( $tpr->UserMaxRating, false, 0, true, false ),
       'min_games_finished' => $tpr->UserMinGamesFinished,
       'min_games_rated'    => $tpr->UserMinGamesRated,
-      'min_moves'          => $tpr->UserMinMoves,
       'notes'              => $tpr->Notes,
    );
 
@@ -260,16 +256,10 @@ function parse_edit_form( &$tpr, $not_saved )
       else
          $errors[] = T_('Expecting positive number of rated finished games');
 
-      $new_value = $vars['min_moves'];
-      if( isNumberOrEmpty($new_value) )
-         $tpr->UserMinMoves = limit( $new_value, 0, 99999, 0 );
-      else
-         $errors[] = T_('Expecting positive number of moves');
-
       $tpr->Notes = $vars['notes'];
 
       // reformat
-      $vars['reg_end_time'] = ( $tpr->RegisterEndTime ? date(DATEFMT_TOURNAMENT, $tpr->RegisterEndTime) : '');
+      $vars['reg_end_time'] = TournamentUtils::formatDate($tpr->RegisterEndTime);
       $vars['user_min_rating'] = echo_rating( $tpr->UserMinRating, false, 0, true, false );
       $vars['user_max_rating'] = echo_rating( $tpr->UserMaxRating, false, 0, true, false );
 
@@ -283,7 +273,6 @@ function parse_edit_form( &$tpr, $not_saved )
       if( $old_vals['user_max_rating'] != $tpr->UserMaxRating ) $edits[] = T_('User-Rating#edits');
       if( $old_vals['min_games_finished'] != $tpr->UserMinGamesFinished ) $edits[] = T_('User-Games#edits');
       if( $old_vals['min_games_rated'] != $tpr->UserMinGamesRated ) $edits[] = T_('User-Games#edits');
-      if( $old_vals['min_moves'] != $tpr->UserMinMoves ) $edits[] = T_('User-Moves#edits');
       if( $old_vals['notes'] != $tpr->Notes ) $edits[] = T_('Notes#edits');
    }
 
