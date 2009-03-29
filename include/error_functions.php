@@ -121,7 +121,10 @@ class Errors
          if( $this->log_errors && !$warn )
             list( $err, $uri)= err_log( $handle, $err, $debugmsg);
          else
+         {
             $uri = "error.php?err=" . urlencode($err);
+            if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
+         }
 
          if( $this->mode == ERROR_MODE_COLLECT )
          {
@@ -178,6 +181,8 @@ function err_log( $handle, $err, $debugmsg=NULL)
       connect2mysql(true);
 
    $uri = "error.php?err=" . urlencode($err);
+   if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
+
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
    $errorlog_query = "INSERT INTO Errorlog SET"
                      ." Handle='".mysql_addslashes($handle)."'"
@@ -206,7 +211,10 @@ function err_log( $handle, $err, $debugmsg=NULL)
    }
 
    if( $dbcnx )
-      @mysql_query( $errorlog_query );
+   {
+      if( @mysql_query( $errorlog_query ) !== false )
+         $uri .= URI_AMP."eid=" . mysql_insert_id();
+   }
 
    return array( $err, $uri);
 }
