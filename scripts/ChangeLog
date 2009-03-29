@@ -31,7 +31,7 @@ ChangeLog
    - output debug-message except if containing sensitive-data
    - added missing error-code 'mail_failure'
 
-   * tournaments/list_participants.php:
+   * tournaments/list_participants.php, NEWS:
    - show table row-number
 
    * include/table_columns.php (Table, ~.add_tablehead, ~.is_column_displayed,

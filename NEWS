@@ -151,6 +151,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Table Lists:
       * Used clearer header for column ID
       * Changed default sort-direction for ID
+      * Can show row-number, e.g. on Tournament participants list
 
    * <home docs.php>Docs</home>:
       * Added site-map page into main menu
