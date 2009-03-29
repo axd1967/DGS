@@ -18,13 +18,16 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Resign game on opponents turn
       * Preview game message (access-key [v]=Preview)
       * Added game info page (<image info.gif>),
-        added access to invitation message for game
-      * Added "Notes" column on My-Games list
+        added access to initial invitation message for game
+      * Added "Notes" column on My-Games list showing part of private game notes
 
    * Game settings:
-      * Waiting room: added adjustment and min/max-limitation of handicap stones
-      * Waiting room: added (optional) minimum number of rated finished games
+      * Waiting room: separated adding of new game on <home new_game.php>new-game page</home>,
+        added <home new_game.php>New game</home> into main-menu (access-key [n])
       * Waiting room: additionally show standard-placement (S) in Handicap-column
+      * Waiting room: changed filter for "suitable" waiting games, added notes
+      * New Game: added adjustment and min/max-limitation of handicap stones
+      * New Game: added (optional) minimum number of rated finished games
       * Invitation: added indication of color, handicap & komi
         for conventional & proper handicap-type
       * Changed default for Standard Handicap Placement to: ON
@@ -45,7 +48,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
-         * users, opponents, waiting room, search messages, contacts, features, votes
+         * users, opponents, waiting room, search messages, contacts,
+           features, votes, tournaments
          * observers of a game, my/all observed games
          * all/my/other finished and running games
 
