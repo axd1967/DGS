@@ -25,6 +25,20 @@ ChangeLog
 
 2009-03-29 juga
 
+   * include/error_functions.php (Error.add_error, err_log),
+     error.php:
+   - output Erroglog-ID as [ERRLOG123] for easier debugging and error-location
+   - output debug-message except if containing sensitive-data
+   - added missing error-code 'mail_failure'
+
+   * tournaments/list_participants.php:
+   - show table row-number
+
+   * include/table_columns.php (Table, ~.add_tablehead, ~.is_column_displayed,
+       ~.add_row, ~.make_table, ~.add_or_del_column, ~.make_tablehead,
+       ~.parse_table_attbs, ~.make_table_filter, ~.make_tablerow, ~.build_cell_rownum):
+   - added Table-config TABLE_ROW_NUM (on column-id #0) to show row-number on each row-line
+
    * waiting_room.php, NEWS:
    - simplified "suitable" games restrictions
    - added notes about suitable games
