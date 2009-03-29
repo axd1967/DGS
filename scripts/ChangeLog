@@ -25,8 +25,43 @@ ChangeLog
 
 2009-03-29 juga
 
-   * include/error_functions.php (Error.add_error, err_log),
-     error.php:
+   * tournaments/include/tournament_properties.php (TournamentProperties,
+       ~.checkUserRegistration, ~._load_user, ~.build_query_sql),
+     tournaments/include/tournament_participant.php (
+       TournamentParticipant.count_tournament_participants, ~.build_query_sql, ~.getFlagsText),
+     tournaments/include/tournament.php (Tournament, ~.allow_register),
+     include/classlib_user.php (User, ~.setRating, ~.hasRating, ~.matchRating,
+       ~.to_string, ~.new_from_row),
+     include/gui_functions.php (echo_notes),
+     tournaments/edit_participant.php, tournaments/register.php,
+     tournaments/view_tournament.php, skins/dragon/screen.css, NEWS:
+   - check user for tournament-registration restrictions
+     - show registration restrictions for selected player
+     - disallow registration for user, but allow for TD
+     - mark user-registration with VIOLATE-flag if violated registration-restrictions by TD
+   - User-class: added loading of PlayerGames-fields RatedGames, Finished for rated- and finished games
+
+   * tournaments/view_tournament.php:
+   - show registration restrictions in registration-section
+   - show all registration-status of TPs
+
+   * tournaments/include/tournament_properties.php (TournamentProperties,
+       ~.checkUserRegistration, ~._load_user, ~.build_query_sql),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/table-Tournaments.txt,
+     tournaments/edit_properties.php, tournaments/view_tournament.php:
+   - removed TournamentProperties.UserMinMoves: user can't see it, so bad to control
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.formatDate),
+     tournaments/edit_tournament.php, tournaments/list_participants.php,
+     tournaments/view_tournament.php:
+   - moved date-formatting into TournamentUtils
+   - minor cleanup
+
+   * features/edit_feature.php, features/list_features.php,
+     features/vote_feature.php, forum/index.php, NEWS:
+   - marked admin bottom-links with CSS
+
+   * include/error_functions.php (Error.add_error, err_log), error.php, NEWS:
    - output Erroglog-ID as [ERRLOG123] for easier debugging and error-location
    - output debug-message except if containing sensitive-data
    - added missing error-code 'mail_failure'
@@ -114,7 +149,6 @@ CREATE TABLE TournamentProperties (
    UserRated enum('N','Y') NOT NULL default 'N',
    UserMinGamesFinished smallint NOT NULL default '0',
    UserMinGamesRated smallint NOT NULL default '0',
-   UserMinMoves int NOT NULL default '0',
    Notes text NOT NULL,
    PRIMARY KEY (tid)
 ) ENGINE=MyISAM;
