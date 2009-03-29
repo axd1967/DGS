@@ -41,8 +41,7 @@ define('DATEFMT_VOTELIST', 'Y-m-d');
 define('DATEFMT_FEATURE',  'Y-m-d&\n\b\s\p;H:i');
 
 // conditions on user to allow voting
-define('VOTE_MIN_RATEDGAMES', 5); // #games
-define('VOTE_MIN_MOVES', 500); // #moves
+define('VOTE_MIN_RATEDGAMES', 10); // #games
 define('VOTE_MIN_DAYS_LASTMOVED', 30); // #days
 
 
@@ -284,7 +283,7 @@ class Feature
       }
 
       $intro_open_str = ($intro) // Open
-         ? sprintf( T_('<li>%3$s = show %1$s + %2$s'."\n"),
+         ? sprintf( T_('<li>%1$s = show %2$s + %3$s'."\n"),
                     T_('Open#filtervote'), FEATSTAT_NEW, FEATSTAT_WORK )
          : '';
       $notes[] = sprintf(
@@ -322,13 +321,11 @@ class Feature
 
       // minimum 5 finished+rated games, 500 moves, moved within 30 days
       if( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
-            || @$player_row['Moves'] < VOTE_MIN_MOVES
             || ($NOW - @$player_row['X_LastMove']) > VOTE_MIN_DAYS_LASTMOVED * 86400 )
       {
-         return sprintf( T_('To be able to vote you have to finish %1$s rated games, '."\n"
-                           . 'make at least %2$s moves and '
-                           . 'actively play in games during the last %3$s days.'),
-                         VOTE_MIN_RATEDGAMES, VOTE_MIN_MOVES, VOTE_MIN_DAYS_LASTMOVED );
+         return sprintf( T_('To be able to vote you have to finish %s rated games and '."\n"
+                           . 'actively play in games during the last %s days.'),
+                         VOTE_MIN_RATEDGAMES, VOTE_MIN_DAYS_LASTMOVED );
       }
 
       //return 'testing'; // for easy testing
