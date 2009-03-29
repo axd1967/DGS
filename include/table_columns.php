@@ -45,6 +45,7 @@ define('TABLE_NO_SORT', 0x01); //disable the sort options (except set_default_so
 define('TABLE_NO_HIDE', 0x02); //disable the add_or_del_column options
 define('TABLE_NO_PAGE', 0x04); //disable next_prev_links options
 define('TABLE_NO_SIZE', 0x08); //disable the re-sizing (static number of rows) (see use_show_rows)
+define('TABLE_ROW_NUM',  0x10); //show row-number on each line
 
 define('CHAR_SHOWFILTER', '+');
 
@@ -242,6 +243,9 @@ class Table
          FCONF_EXTERNAL_SUBMITS   => false,
       );
       $this->cache_curr_filter = array();
+
+      if( $this->Mode & TABLE_ROW_NUM )
+         $this->add_tablehead( 0, T_('##table'), 'Number', TABLE_ROW_NUM|TABLE_NO_SORT|TABLE_NO_HIDE );
    } //Table
 
    /*! \brief Sets external form for this table, $form is passed as reference */
@@ -266,7 +270,8 @@ class Table
    /*!
     * @brief Adds a tablehead.
     * @param $nr must be >0 but if higher than BITSET_MAXSIZE or the maxsize of
-    *    Table-given ConfigTableColumns, the column will be static
+    *    Table-given ConfigTableColumns, the column will be static.
+    *    $nr=0 is reserved for row-number, but can be equipped with additional attributes (see also add_row)
     * @param $attbs must be an array of attributs or a class-name for the column (td-element)
     *    default: no attributs or class (i.e. class "Text" left-aligned)
     *    Other known classes defined in CSS, most used are:
@@ -287,7 +292,7 @@ class Table
    {
       if( $this->Head_closed )
          error('assert', "Table.add_tablehead.closed($nr)");
-      if( $nr <= 0 )
+      if( $nr < 0 || ( $nr == 0 && !($this->Mode & TABLE_ROW_NUM) ) )
          error('assert', "Table.add_tablehead.bad_col_nr($nr)");
       if( !is_array($attbs) )
       {
@@ -311,7 +316,7 @@ class Table
                 'attbs' => $attbs );
 
       $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
-      if( $this->UseFilters ) // fix filter-visibility (especially for static cols)
+      if( $nr > 0 && $this->UseFilters ) // fix filter-visibility (especially for static cols)
          $this->Filters->set_visible($nr, $visible);
    } //add_tablehead
 
@@ -352,6 +357,8 @@ class Table
    /*! \brief Returns 1=true, if column is displayed; 0=false otherwise. */
    function is_column_displayed( $nr )
    {
+      if( $nr == 0 && ($this->Mode & TABLE_ROW_NUM) )
+         return 1;
       if( $nr < 1 )
          return 0;
       if( $nr > $this->CfgTableCols->get_maxsize() )
@@ -366,6 +373,8 @@ class Table
 
    /*!
     * \brief Add a row to be displayed.
+    *        Texts for column #0 (with row-number TABLE_ROW_NUM-mode)
+    *        can be formatted differently: %1$s is replaced with row-number.
     * \see $Tablerows
     */
    function add_row( $row_array )
@@ -401,10 +410,12 @@ class Table
       if( count($this->Tablerows)>0 )
       {
          $c=0;
+         $row_num = $this->From_Row; // current start-row-num
          foreach( $this->Tablerows as $trow )
          {
+            $row_num++;
             $c=($c % LIST_ROWS_MODULO)+1;
-            $table_rows .= $this->make_tablerow( $trow, "Row$c" );
+            $table_rows .= $this->make_tablerow( $trow, $row_num, "Row$c" );
          }
       }
 
@@ -567,7 +578,10 @@ class Table
    function add_or_del_column()
    {
       if( ($i = count($this->Tableheads)) )
-         error('assert', "Table.add_or_del_column.past_head_start($i)");
+      {
+         if( $i > 1 || !isset($this->Tableheads[0]) || !($this->Mode & TABLE_ROW_NUM) )
+            error('assert', "Table.add_or_del_column.past_head_start($i)");
+      }
 
       // handle filter-visibility
       $this->Filters->add_or_del_filter();
@@ -814,7 +828,7 @@ class Table
       //if( !$this->Head_closed )
       //   error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
       $nr = (int)@$tablehead['Nr'];
-      if( $nr < 1 )
+      if( $nr < 0 || ($nr == 0 && !($this->Mode && TABLE_ROW_NUM)) )
          return '';
 
       if( !$this->Is_Column_Displayed[$nr] )
@@ -825,29 +839,14 @@ class Table
 
       $this->Shown_Columns++;
       $mode = $this->Mode | (int)@$tablehead['Mode'];
+      if( $nr == 0 )
+         $mode = ($mode | TABLE_ROW_NUM | TABLE_NO_HIDE) & ~TABLE_NO_SORT;
 
       $curColId = $this->Prefix.'Col'.$nr;
       $string = "\n  <th id=\"$curColId\" scope=col";
 
       $width = -1;
-      if( isset($tablehead['attbs']) )
-      {
-         $attbs =& $tablehead['attbs'];
-         if( is_array($attbs) )
-         {
-            $string .= attb_build($attbs);
-
-            if( is_numeric( strpos((string)@$attbs['class'],'Button')) )
-            {
-               $width = max($width, BUTTON_WIDTH);
-            }
-            if( isset($attbs['width']) )
-            {
-               $width = max($width, (int)$attbs['width']);
-               unset( $attbs['width']);
-            }
-         }
-      }
+      $string .= Table::parse_table_attbs( $tablehead, $width );
       $string .= '><div>'; //<th> end bracket
 
       if( $width >= 0 )
@@ -888,7 +887,7 @@ class Table
 
          // add from_row, if filter-value is empty,
          //   or else has a value but has an error (then removing of filter or column doesn't change the page)
-         if( $this->UseFilters )
+         if( $this->UseFilters && $nr > 0 )
          {
             $filter = $this->Filters->get_filter($nr);
             if( isset($filter) && ( $filter->is_empty() ^ $filter->has_error() ) )
@@ -932,6 +931,30 @@ class Table
       return $string;
    }
 
+   function parse_table_attbs( &$arr, &$width )
+   {
+      $string = '';
+      if( isset($arr['attbs']) )
+      {
+         $attbs =& $arr['attbs'];
+         if( is_array($attbs) )
+         {
+            $string .= attb_build($attbs);
+
+            if( is_numeric( strpos((string)@$attbs['class'],'Button')) )
+            {
+               $width = max($width, BUTTON_WIDTH);
+            }
+            if( isset($attbs['width']) )
+            {
+               $width = max($width, (int)$attbs['width']);
+               unset( $attbs['width']);
+            }
+         }
+      }
+      return $string;
+   }
+
    /*!
     * \brief Returns html for filter of passed TableHead
     * \internal
@@ -940,6 +963,8 @@ class Table
    {
       // get filter for column
       $fid = $thead['Nr']; // keep as sep var
+      if( $fid == 0 ) // row-num
+         return "\n  <td></td>";
       $filter =& $this->Filters->get_filter($fid); // need ref for update
 
       // check, if column displayed
@@ -1026,7 +1051,7 @@ class Table
       }
    //}
 
-   function make_tablerow( $tablerow, $rclass='Row1' )
+   function make_tablerow( $tablerow, $row_num, $rclass='Row1' )
    {
       if( isset($tablerow['class']) )
       {
@@ -1044,7 +1069,10 @@ class Table
          $nr = $thead['Nr'];
          if( $this->Is_Column_Displayed[$nr] && --$colspan<=0 )
          {
-            $cell= @$tablerow[$nr];
+            $cell = @$tablerow[$nr];
+            if( $nr == 0 ) // col with row-number
+               $this->build_cell_rownum( $cell, $row_num );
+
             if( is_array($cell) )
             {
                $text= (string)@$cell['owntd'];
@@ -1076,6 +1104,22 @@ class Table
       return $string;
    }
 
+   // build cell with table row-number, expecting
+   // - array( 'owntd' => .., 'text' => .., 'attbs' => .. )
+   // - text with '%s' or empty text
+   function build_cell_rownum( &$cell, $row_num )
+   {
+      if( is_array($cell) )
+      {
+         $cellfmt = ( isset($cell['text']) ) ? $cell['text'] : '%s.';
+         $cell['text'] = sprintf( $cellfmt, $row_num );
+      }
+      else
+      {
+         $cellfmt = ( isset($cell) ) ? $cell : '%s.';
+         $cell = sprintf( $cellfmt, $row_num );
+      }
+   }
 
    /*! \brief Add next and prev links. */
    /*
