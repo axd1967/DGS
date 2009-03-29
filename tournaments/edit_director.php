@@ -119,6 +119,7 @@ $ThePage = new Page('TournamentDirectorEdit');
    }
 
    // check + parse edit-form
+   //TODO use same method as in edit_properties.php (error, edits, vars, parsing)
    if( @$_REQUEST['td_save'] || @$_REQUEST['td_preview'] ) // read URL-vars
    {
       $director->Comment = trim(get_request_arg('comment'));

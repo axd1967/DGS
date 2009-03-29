@@ -88,6 +88,7 @@ $ThePage = new Page('TournamentEdit');
       $arr_status = Tournament::getStatusText();
 
    // check + parse edit-form
+   //TODO use same method as in edit_properties.php (error, edits, vars, parsing)
    $errorlist = parse_edit_form( $tourney );
 
    // save tournament-object with values from edit-form

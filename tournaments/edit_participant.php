@@ -136,6 +136,7 @@ $ThePage = new Page('TournamentEditParticipant');
 
 
    // check + parse edit-form
+   //TODO use same method as in edit_properties.php (error, edits, vars, parsing)
    $val_custom_rating = trim(get_request_arg('custom_rating'));
    $custom_rating_str = '';
    if( (string)$val_custom_rating != '' )
