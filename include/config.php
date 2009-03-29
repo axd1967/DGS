@@ -100,7 +100,7 @@ define('CACHE_FOLDER', 'temp/');
 // Define access keys
 // - keep empty with value '' to define no access key
 // - keys 0..9 are reserved for bottom page-links
-// - unused keys: ahjkny
+// - unused keys: ahjky
 
 // access keys always visible in menus
 define('ACCKEY_MENU_STATUS',     's');
@@ -110,6 +110,7 @@ define('ACCKEY_MENU_USERINFO',   'p');
 define('ACCKEY_MENU_MESSAGES',   'b');
 define('ACCKEY_MENU_SENDMSG',    'm');
 define('ACCKEY_MENU_INVITE',     'i');
+define('ACCKEY_MENU_NEWGAME',    'n');
 define('ACCKEY_MENU_USERS',      'u');
 define('ACCKEY_MENU_CONTACTS',   'c');
 define('ACCKEY_MENU_GAMES',      'g');
