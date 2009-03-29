@@ -42,10 +42,12 @@ define('TP_STATUS_APPLY',     'APPLY');
 define('TP_STATUS_REGISTER',  'REGISTER');
 define('TP_STATUS_INVITE',    'INVITE');
 define('CHECK_TP_STATUS', 'APPLY|REGISTER|INVITE');
+define('TPCOUNT_STATUS_ALL',  '*');
 
 define('TP_FLAGS_INVITED',       0x0001); // invited by TD
 define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
 define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
+define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
 
 // lazy-init in TournamentParticipant::get..Text()-funcs
 $ARR_GLOBALS_TOURNAMENT_PARTICIPANT = array();
@@ -234,7 +236,7 @@ class TournamentParticipant
          $sum += $cnt;
       }
       mysql_free_result($result);
-      $out['*'] = $sum;
+      $out[TPCOUNT_STATUS_ALL] = $sum;
       return $out;
    }
 
@@ -256,6 +258,7 @@ class TournamentParticipant
          'UNIX_TIMESTAMP(TP.Created) AS X_Created',
          'UNIX_TIMESTAMP(TP.Lastchanged) AS X_Lastchanged',
          'TPP.Name', 'TPP.Handle', 'TPP.Country', 'TPP.Rating2', 'TPP.RatingStatus',
+         'TPP.RatedGames', 'TPP.Finished',
          'UNIX_TIMESTAMP(TPP.Lastaccess) AS X_Lastaccess' );
       $qsql->add_part( SQLP_FROM,
          'TournamentParticipant AS TP',
@@ -411,6 +414,7 @@ class TournamentParticipant
          $arr[TP_FLAGS_INVITED]     = T_('Invited#TP_flag');
          $arr[TP_FLAGS_ACK_INVITE]  = T_('ACK-Invite#TP_flag');
          $arr[TP_FLAGS_ACK_APPLY]   = T_('ACK-Apply#TP_flag');
+         $arr[TP_FLAGS_VIOLATE]     = T_('REG-Violate#TP_flag');
          $ARR_GLOBALS_TOURNAMENT_PARTICIPANT['FLAGS'] = $arr;
       }
       else
