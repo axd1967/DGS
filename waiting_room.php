@@ -305,7 +305,7 @@ require_once( 'include/classlib_userconfig.php' );
             T_('Number of rated finished games#wroom'),
          );
       $notes = array();
-      $notes[] = T_('A waiting game is <b>suitable</b> when you match the requested game restrictions on:')
+      $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
             . "\n* " . implode(",\n* ", $restrictions);
       echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
    }
