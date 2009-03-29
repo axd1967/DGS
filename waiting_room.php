@@ -50,9 +50,7 @@ require_once( 'include/classlib_userconfig.php' );
                          'double' => T_('Double game') );
 
    // config for handicap-filter
-   $handi_filter_array = array(
-         T_('All') => '',
-         T_('Suitable') => new QuerySQL(SQLP_HAVING, 'haverating') );
+   $handi_filter_array = array( T_('All') => '' );
    foreach( $handi_array as $fval => $fkey )
       $handi_filter_array[$fkey] = "Handicaptype='$fval'";
 
@@ -71,7 +69,7 @@ require_once( 'include/classlib_userconfig.php' );
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_WAITINGROOM );
    $wrfilter = new SearchFilter( '', $search_profile );
-   $search_profile->register_regex_save_args( 'handi|good' ); // named-filters FC_FNAME
+   $search_profile->register_regex_save_args( 'good' ); // named-filters FC_FNAME
    $wrtable = new Table( 'waitingroom', $page, $cfg_tblcols );
    $wrtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
@@ -80,12 +78,11 @@ require_once( 'include/classlib_userconfig.php' );
    $wrfilter->add_filter( 1, 'Text',      'Players.Name', true);
    $wrfilter->add_filter( 2, 'Text',      'Players.Handle', true);
    $wrfilter->add_filter( 3, 'Rating',    'Players.Rating2', true);
-   $wrfilter->add_filter( 5, 'Selection', $handi_filter_array, true,
-         array( FC_FNAME => 'handi', FC_STATIC => 1, FC_DEFAULT => 1 ) );
+   $wrfilter->add_filter( 5, 'Selection', $handi_filter_array, true);
    $wrfilter->add_filter( 6, 'Numeric',   'Komi', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 7, 'Numeric',   'Size', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 8, 'Boolean',
-         new QuerySQL( SQLP_HAVING, 'goodrating', 'goodmingames' ),
+         new QuerySQL( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating' ),
          true,
          array( FC_FNAME => 'good', FC_LABEL => T_('Only suitable'), FC_STATIC => 1, FC_DEFAULT => 1 ));
    $wrfilter->add_filter( 9, 'Selection',
@@ -101,7 +98,6 @@ require_once( 'include/classlib_userconfig.php' );
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
    $wrfilter->init();
-   $f_handi =& $wrfilter->get_filter(5);
    $f_range =& $wrfilter->get_filter(8);
 
 
@@ -122,7 +118,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'other_rating-');
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
-   $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', TABLE_NO_HIDE, 'Handicaptype+');
+   $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
@@ -207,15 +203,10 @@ require_once( 'include/classlib_userconfig.php' );
       or error('mysql_query_failed', 'waiting_room.find_waiters');
 
 
-   $arr_suitable = array();
-   if( $f_handi->get_value() == 1 )
-      $arr_suitable[]= T_('Handicap-Type');
    if( $f_range->get_value() )
-      $arr_suitable[]= T_('Rating range, Rated games');
-   if( count($arr_suitable) > 0 )
-      $title = T_("Suitable waiting games") . ' (' . implode(', ', $arr_suitable) . ')';
+      $title = T_('Suitable waiting games');
    else
-      $title = T_("All waiting games");
+      $title = T_('All waiting games');
 
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
@@ -307,27 +298,30 @@ require_once( 'include/classlib_userconfig.php' );
 
       // print table
       echo $wrtable->make_table();
+
+      $restrictions = array(
+            T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
+            T_('Rating range (user rating must be between the requested rating range)#wroom'),
+            T_('Number of rated finished games#wroom'),
+         );
+      $notes = array();
+      $notes[] = T_('A waiting game is <b>suitable</b> when you match the requested game restrictions on:')
+            . "\n* " . implode(",\n* ", $restrictions);
+      echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
    }
    else
       echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
    mysql_free_result($result);
 
 
-   $form_id = 'addgame'; //==> ID='addgameForm'
    if( $idinfo && is_array($info_row) )
-   {
-      add_old_game_form( 'joingame', $info_row, $iamrated); //==> ID='joingameForm'
-
-      $menu_array[T_('Add new game')] = clean_url($baseURL) . '#'.$form_id.'Form' ;
-   }
-   else
-      add_new_game_form( $form_id, $iamrated); //==> ID='addgameForm'
+      add_old_game_form( 'joingame', $info_row, $iamrated);
 
 
-   $menu_array[T_('Show all games')] =
-      $baseURLMenu.'handi=0'.URI_AMP.'good=0';
-   $menu_array[T_('Show all suitable games')] =
-      $baseURLMenu.'handi=1'.URI_AMP.'good=1';
+   $menu_array = array();
+   $menu_array[T_('Add new game')] = 'new_game.php';
+   $menu_array[T_('Show all waiting games')] = $baseURLMenu.'good=0';
+   $menu_array[T_('Show suitable games only')] = $baseURLMenu.'good=1';
 
    end_page(@$menu_array);
 }
@@ -358,43 +352,6 @@ function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames,
    return ( count($out) ? implode(', ', $out) : NO_VALUE );
 }
 
-
-function add_new_game_form( $form_id, $iamrated)
-{
-   $addgame_form = new Form( $form_id, 'add_to_waitingroom.php', FORM_POST );
-
-   $addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
-
-   $vals = array();
-
-   for($i=1; $i<=10; $i++)
-      $vals["$i"] = "$i";
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
-                                  'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
-
-   game_settings_form($addgame_form, 'waitingroom', $iamrated);
-
-   $rating_array = getRatingArray();
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
-                                  'CHECKBOX', 'must_be_rated', 'Y', "", false,
-                                  'TEXT', sptext(T_('If yes, rating between'),1),
-                                  'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
-                                  'TEXT', sptext(T_('and')),
-                                  'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Minimum number of rated finished games'),
-                                  'TEXTINPUT', 'min_rated_games', 5, 5, '',
-                                  'TEXT', MINI_SPACING . T_('(optional)'), ));
-
-
-   $addgame_form->add_row( array( 'SPACE' ) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Comment'),
-                                  'TEXTINPUT', 'comment', 40, 40, "" ) );
-
-   $addgame_form->add_row( array( 'SPACE' ) );
-   $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
-
-   $addgame_form->echo_string(1);
-}
 
 function add_old_game_form( $form_id, $game_row, $iamrated)
 {
