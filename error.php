@@ -92,13 +92,23 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
 
-   // output error-log ID
+   // prep output of error-log ID
    $errorlog_id = get_request_arg('eid');
    if( $errorlog_id )
-      echo " [ERRLOG{$errorlog_id}]: ";
+      $errorlog_id = " [ERRLOG{$errorlog_id}]: ";
 
    // written if set, can be resetted to NULL on certain errors to avoid publishing sensitive data
    $debugmsg = get_request_arg('debugmsg');
+
+
+   // NOTE:
+   // - When adding a new error-code, add output of errolog_id if it is helpful
+   //   to know the Errorlog.ID to identify a problem.
+   //   Having a ID releaves support of searching in big Errorlog-table.
+   // - It's not always useful to log errorlog_id,
+   //   e.g. not for errors indicating a false behaviour of a user
+
+   //TODO handle syntax-checks defined in here on edit-pages without redirect to error-page
 
    switch( (string)$err )
    {
@@ -134,6 +144,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("invalid_action"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("This type of action is either unknown or can't be used in this state of the game.");
       }
       break;
@@ -158,6 +169,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("game_delete_invitation"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Delete game failed. This is problably not a problem.");
       }
       break;
@@ -183,24 +195,28 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("move_problem"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("An error occurred for this move. Usually it works if you try again, otherwise please contact the support.");
       }
       break;
 
       case("mysql_connect_failed"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Connection to database failed. Please wait a few minutes and test again.");
       }
       break;
 
       case("mysql_insert_message"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, the additon of the message to the database seems to have failed.");
       }
       break;
 
       case("mysql_insert_game"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, the additon of the game to the database seems to have failed.");
       }
       break;
@@ -208,6 +224,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       case("mysql_insert_move"):
       case("mysql_update_game"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("The insertion of the move into the database seems to have failed. " .
             "This may or may not be a problem, please return to the game to see " .
             "if the move has been registered.");
@@ -216,6 +233,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("mysql_insert_player"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("The insertion of your data into the database seems to have failed. " .
                  "If you can't log in, please try once more and, if this fails, contact the support.");
       }
@@ -223,25 +241,22 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("mysql_query_failed"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Database query failed. Please wait a few minutes and try again. ");
       }
       break;
 
       case("mysql_select_db_failed"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Couldn't select the database. Please wait a few minutes and try again. ");
       }
       break;
 
       case("mysql_start_game"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, couldn't start the game. Please wait a few minutes and try again.");
-      }
-      break;
-
-      case("mysql_update_player"):
-      {
-         echo T_("Sorry, couldn't update player data. Please wait a few minutes and try again.");
       }
       break;
 
@@ -254,12 +269,6 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       case("newpassword_already_sent"):
       {
          echo T_("A new password has already been sent to this user, please use that password instead of sending another one.");
-      }
-      break;
-
-      case("no_action"):
-      {
-         echo T_("Nothing to be done?");
       }
       break;
 
@@ -279,14 +288,9 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('mail_failure'):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, an error occured during sending of the email.");
          $debugmsg = NULL; // contains email
-      }
-      break;
-
-      case("no_game_nr"):
-      {
-         echo T_("Sorry, I need a game number to know what game to show.");
       }
       break;
 
@@ -298,7 +302,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("no_uid"):
       {
-         echo T_("Sorry, I need to known for which user to show the data.");
+         echo T_("Sorry, I need to know for which user to show the data.");
       }
       break;
 
@@ -316,7 +320,8 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('ip_blocked_guest_login'):
       {
-        echo T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.'),
+         if( $errorlog_id ) echo $errorlog_id;
+         echo T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.'),
             "<br><br>\n",
             sprintf( T_('If you think the IP block is not intended for you, please register your account with our <a href="%s">alternative registration page</a>.'),
                "{$HOSTBASE}register.php" );
@@ -325,7 +330,8 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('ip_blocked_register'):
       {
-        echo T_('Sorry, you are not allowed to register a new account. The IP address you are using has been blocked by the admins.'),
+         if( $errorlog_id ) echo $errorlog_id;
+         echo T_('Sorry, you are not allowed to register a new account. The IP address you are using has been blocked by the admins.'),
             "<br><br>\n",
             '<form action="do_registration_blocked.php" method="post">',
             T_('To register a new account despite the IP-block, a user account can be created by an admin.'),
@@ -416,6 +422,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('feature_disabled'):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, this feature has been disabled on this server.");
       }
       break;
@@ -434,6 +441,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("page_not_found"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_('Page not found. Please contact the server administrators and inform them of the time the error occurred, and anything you might have done that may have caused the error.');
          //echo '<br>('.@$_SERVER['REDIRECT_STATUS'].': '.@$_SERVER['REDIRECT_URL'].' / '.getcwd().')';
       }
@@ -522,6 +530,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("unknown_parent_post"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Hmm, this message seems to be a reply to a non-existing post.");
       }
       break;
@@ -529,6 +538,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("unknown_message"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, I couldn't find the message you wanted to show.");
       }
       break;
@@ -542,6 +552,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('user_mismatch'):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, the logged user seems to have changed during the operation.");
       }
       break;
@@ -572,6 +583,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("value_out_of_range"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Couldn't extrapolate value in function interpolate");
       }
       break;
@@ -631,7 +643,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       break;
 
       case("value_not_numeric"):
-      {
+      {//TODO unused, but could be useful, so not deleted
         echo T_("Sorry, you wrote a non-numeric value on a numeric field.");
       }
       break;
@@ -657,31 +669,14 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case("couldnt_update_translation"):
       {
-        echo T_("Sorry, something went wrong when trying to insert the new translations into the database.");
-      }
-      break;
-
-      case("couldnt_make_backup"):
-      {
-        echo T_("Sorry, I was unable to make a backup of the old translation, aborting. Please contact the support.");
-      }
-      break;
-
-      case("couldnt_open_transl_file"):
-      {
-        echo T_("Sorry, I was unable to open a file for writing. Please contact the support.");
+         if( $errorlog_id ) echo $errorlog_id;
+         echo T_("Sorry, something went wrong when trying to insert the new translations into the database.");
       }
       break;
 
       case("adminlevel_too_low"):
       {
         echo T_("Sorry, this page is solely for users with administrative tasks.");
-      }
-      break;
-
-      case("admin_no_longer_admin_admin"):
-      {
-         echo T_("Hmm, you seem to try to revoke your abillity to edit the admin staff. Only another super-admin can do that for you.");
       }
       break;
 
@@ -724,37 +719,35 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
       case('tournament_register_not_allowed'):
       {
-         echo T_("Sorry, you are not allowed to register to this tournament.");
+         echo T_("Sorry, you are not allowed to register for this tournament.");
       }
       break;
 
 
       case("folder_not_found"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, couldn't find the specified message folder.");
-      }
-      break;
-
-      case("not_a_player"):
-      {
-         echo T_("Sorry, you're not a player in this game.");
       }
       break;
 
       case("invalid_filter"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, there's a configuration problem with a search-filter.");
       }
       break;
 
       case("invalid_args"):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, invalid arguments used.");
       }
       break;
 
       case('constraint_votes_delete_feature'):
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Sorry, feature can't be deleted because of existing votes for feature.");
       }
       break;
@@ -775,10 +768,11 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       //case('internal_error'):
       default:
       {
+         if( $errorlog_id ) echo $errorlog_id;
          echo T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.")." ($err)";
       }
       break;
-   }
+   } // end-switch
 
    // also output detailed debug-msg
    if( !is_null($debugmsg) && (string)$debugmsg != '' )
