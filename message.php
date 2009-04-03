@@ -388,9 +388,9 @@ require_once( "include/form_functions.php" );
                             null, null, null, false, $rx_term);
 
          if( $preview )
-            game_settings_form($message_form, 'dispute', $iamrated, 'redraw', @$_POST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, $iamrated, 'redraw', @$_POST, $map_ratings);
          else
-            game_settings_form($message_form, 'dispute', $iamrated, $my_id, $Game_ID, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, $iamrated, $my_id, $Game_ID, $map_ratings);
 
          $message_form->add_row( array(
                'HEADER', T_('Dispute settings'),
@@ -417,9 +417,9 @@ require_once( "include/form_functions.php" );
       case 'Invite':
       {
          if( $preview )
-            game_settings_form($message_form, 'invite', $iamrated, 'redraw', @$_POST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, $iamrated, 'redraw', @$_POST, $map_ratings);
          else
-            game_settings_form($message_form, 'invite', $iamrated, null, null, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, $iamrated, null, null, $map_ratings);
 
          $message_form->add_row( array(
                'HEADER', T_('Invitation message'),

@@ -66,7 +66,7 @@ function add_new_game_form( $form_id, $iamrated)
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                                   'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
-   game_settings_form($addgame_form, 'waitingroom', $iamrated);
+   game_settings_form($addgame_form, GSET_WAITINGROOM, $iamrated);
 
    $rating_array = getRatingArray();
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
