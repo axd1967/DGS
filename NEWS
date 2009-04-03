@@ -198,12 +198,14 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Displaying the group-names
 
    * Changes for Admins:
-      * Removed translations from the admin pages
+      * Added Adminlog entries for admin user changes, login and login-denied
+      * Added filters for showing Errorlog
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
-      * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Added tournament-admin
-      * removed ADMIN_TIME admin-level (replaced by admin-option)
+      * Removed translations from the admin pages
+      * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
+      * Removed ADMIN_TIME admin-level (replaced by admin-option)
       * Different CSS-layout for most admin-actions
 
 
