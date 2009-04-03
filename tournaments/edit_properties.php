@@ -44,7 +44,6 @@ $ThePage = new Page('TournamentPropertiesEdit');
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
-     (no args)           : add new tournament properties
      tid=                : add new or edit tournament properties
      tp_preview&tid=     : preview for tournament-properties-save
      tp_save&tid=        : update (replace) tournament-properties in database
@@ -91,7 +90,8 @@ $ThePage = new Page('TournamentPropertiesEdit');
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
-         'TEXT',        anchor( "view_tournament.php?tid=$tid", $tid ), ));
+         'TEXT',        anchor( "view_tournament.php?tid=$tid", $tid ),
+         'TEXT',        SMALL_SPACING . '[' . make_html_safe( $tourney->Title, true ) . ']', ));
    if( $tprops->Lastchanged )
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed date'),
