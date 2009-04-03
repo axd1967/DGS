@@ -384,6 +384,8 @@ $ThePage = new Page('TournamentEditParticipant');
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Manage this tournament')] =
+         array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }
