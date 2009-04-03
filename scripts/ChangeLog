@@ -23,6 +23,73 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-04-04 juga
+
+   * admin_show_errorlog.php, NEWS:
+   - added filters on Errorlog: ID, Date, IP
+
+2009-04-03 juga
+
+   * include/message_functions.php (game_settings_form),
+     tournaments/include/tournament_rules.php (TournamentRules),
+     tournaments/edit_rules.php, tournaments/edit_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - added creating and editing of (single) tournament-ruleset
+   - adjusted game-settings-form for editing Tournemant-rules (GSET_TOURNAMENT),
+     - supported settings are: size, handicap-types (conventional/proper/even),
+       handicap-adjustment & handicap-placement, time-settings, weekendclock
+       and rated
+     - added consts GSET_MSG_DISPUTE/INVITE/WAITINGROOM/TOURNAMENT
+-----------
+-- added tournament-rules with game-settings
+CREATE TABLE TournamentRules (
+   ID int(11) NOT NULL auto_increment,
+   tid int(11) NOT NULL,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Flags smallint(5) unsigned NOT NULL default '0',
+   Size int(11) NOT NULL default '19',
+   Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE') NOT NULL default 'CONV',
+   Handicap int(11) NOT NULL default '0',
+   Komi decimal(6,1) NOT NULL default '6.5',
+   AdjHandicap tinyint signed NOT NULL default '0',
+   MinHandicap tinyint signed NOT NULL default '0',
+   MaxHandicap tinyint signed NOT NULL default '127',
+   StdHandicap enum('N','Y') NOT NULL default 'N',
+   Maintime int(11) NOT NULL default '0',
+   Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+   Byotime int(11) NOT NULL default '0',
+   Byoperiods int(11) NOT NULL default '0',
+   WeekendClock enum('N','Y') NOT NULL default 'Y',
+   Rated enum('N','Y') NOT NULL default 'N',
+   Notes text NOT NULL,
+   PRIMARY KEY (ID),
+   KEY tid (tid)
+) ENGINE=MyISAM;
+-----------
+
+   * message.php, new_game.php:
+   - replaced strings with consts GSET_MSG_DISPUTE/INVITE/WAITINGROOM
+
+   * error.php:
+   - show debug-messages with sensitive data (db-message) only for admin user
+
+   * tournaments/edit_participant.php:
+   - added "Manage tournament" bottom-link
+
+   * tournaments/edit_properties.php:
+   - added tournament-title
+
+   * tournaments/edit_tournament.php:
+   - changed page-title to "Tournament Management"
+
+2009-04-01 juga
+
+   * error.php:
+   - output Errorlog.ID only on "irregular" errors where useful
+   - removed unused error-codes: mysql_update_player, no_action, no_game_nr, not_a_player,
+     couldnt_make_backup, couldnt_open_transl_file, admin_no_longer_admin_admin
+
 2009-03-29 juga
 
    * tournaments/include/tournament.php (Tournament, ~.formatRound, ~.getRoundLimitText,
