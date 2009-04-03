@@ -100,7 +100,7 @@ $ThePage = new Page('TournamentEdit');
    }
 
    $page = "edit_tournament.php";
-   $title = T_('Tournament edit');
+   $title = T_('Tournament Management');
 
 
    // ---------- Tournament EDIT form ------------------------------
@@ -215,6 +215,8 @@ $ThePage = new Page('TournamentEdit');
    {
       $menu_array[T_('Edit properties')] =
          array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' );
+      $menu_array[T_('Edit rules')] =
+         array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Edit participants')] =
          array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' );
    }
