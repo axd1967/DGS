@@ -28,6 +28,7 @@ require_once( "include/std_functions.php" );
 
    $BlockReason = '';
    $userid = '???';
+   $is_admin = false;
    if( $dbcnx )
    {
       $tmp= $TheErrors->set_mode(ERROR_MODE_COLLECT);
@@ -38,6 +39,7 @@ require_once( "include/std_functions.php" );
       {
          $userid = @$player_row['Handle'];
          $BlockReason = @$player_row['BlockReason'];
+         $is_admin = ( @$player_row['admin_level'] & ADMINGROUP_EXECUTIVE );
       }
    }
    else
@@ -243,6 +245,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       {
          if( $errorlog_id ) echo $errorlog_id;
          echo T_("Database query failed. Please wait a few minutes and try again. ");
+         if( !$is_admin ) $debugmsg = NULL; // contains DB-query
       }
       break;
 
@@ -774,9 +777,6 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       break;
    } // end-switch
 
-   // also output detailed debug-msg
-   if( !is_null($debugmsg) && (string)$debugmsg != '' )
-      echo " [$debugmsg]";
    db_close();
 
    $mysqlerror = get_request_arg('mysqlerror');
@@ -788,6 +788,10 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          $mysqlerror);
       echo "<p>MySQL error: ".basic_safe($mysqlerror)."</p>";
    }
+
+   // also output detailed debug-msg
+   if( !is_null($debugmsg) && (string)$debugmsg != '' )
+      echo "<p>Error details: [$debugmsg]</p>";
 
    echo '<p></p>';
    end_page();
