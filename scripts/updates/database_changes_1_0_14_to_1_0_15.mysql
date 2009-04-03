@@ -407,3 +407,28 @@ ALTER TABLE Tournament
    ADD CurrentRound int(11) NOT NULL default '1' ;
 
 
+-- added tournament-rules with game-settings
+CREATE TABLE TournamentRules (
+   ID int(11) NOT NULL auto_increment,
+   tid int(11) NOT NULL,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Flags smallint(5) unsigned NOT NULL default '0',
+   Size int(11) NOT NULL default '19',
+   Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE') NOT NULL default 'CONV',
+   Handicap int(11) NOT NULL default '0',
+   Komi decimal(6,1) NOT NULL default '6.5',
+   AdjHandicap tinyint signed NOT NULL default '0',
+   MinHandicap tinyint signed NOT NULL default '0',
+   MaxHandicap tinyint signed NOT NULL default '127',
+   StdHandicap enum('N','Y') NOT NULL default 'N',
+   Maintime int(11) NOT NULL default '0',
+   Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+   Byotime int(11) NOT NULL default '0',
+   Byoperiods int(11) NOT NULL default '0',
+   WeekendClock enum('N','Y') NOT NULL default 'Y',
+   Rated enum('N','Y') NOT NULL default 'N',
+   Notes text NOT NULL,
+   PRIMARY KEY (ID),
+   KEY tid (tid)
+) ENGINE=MyISAM;
+

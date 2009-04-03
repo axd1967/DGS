@@ -13,6 +13,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
         Dragon (official Dragon tournaments), Public
       * Added Tournament Registration: Apply, Register, Invite
       * Added Properties for registration restrictions on tournament and players
+      * Added Ruleset for setting up games of tournament
 
    * Games:
       * Delete game on opponents turn (within first 10 moves)

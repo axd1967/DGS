@@ -22,6 +22,10 @@ Important Notes:
 ###########################################################################
 ## --- Tournament ---
 
+Description:
+   Tournament-management-data with scope, type, status, owner, dates
+   and description.
+
  Field        | Type                                           | Default
 --------------+------------------------------------------------+---------------------
  ID           | int(11)                                        | NULL, auto_increment
@@ -75,11 +79,14 @@ Important Notes:
 
 * EndTime : datetime when T closed, T can be changed afterwards still by TDs
 
-* Rounds / CurrentRound : number of rounds, current round-number of T
+* Rounds, CurrentRound : number of rounds, current round-number of T
 
 
 ###########################################################################
 ## --- TournamentDirector ---
+
+Description:
+   List of TDs for tournament with additional comment about TD.
 
  Field   | Type         | Default
 ---------+--------------+--------
@@ -98,22 +105,26 @@ Important Notes:
 ###########################################################################
 ## --- TournamentParticipant ---
 
- Field       | Type                              | Default
--------------+-----------------------------------+---------------------
- ID          | int(11)                           | NULL, auto_increment
- tid         | int(11)                           | NULL
- uid         | int(11)                           | NULL
- Status      | enum('APPLY','REGISTER','INVITE') | APPLY
- Flags       | smallint(5) unsigned              | 0
- Rating      | double                            | -9999
- StartRound  | tinyint(3) unsigned               | 1
- AuthToken   | varchar(32)                       |
- Created     | datetime                          | 0000-00-00 00:00:00
- Lastchanged | datetime                          | 0000-00-00 00:00:00
- Comment     | varchar(60)                       |
- Notes       | text                              | NULL
- UserMessage  | text                             | NULL
- AdminMessage | text                             | NULL
+Description:
+   list with TPs of tournament and user-specific tournament data
+
+
+ Field        | Type                              | Default
+--------------+-----------------------------------+---------------------
+ ID           | int(11)                           | NULL, auto_increment
+ tid          | int(11)                           | NULL
+ uid          | int(11)                           | NULL
+ Status       | enum('APPLY','REGISTER','INVITE') | APPLY
+ Flags        | smallint(5) unsigned              | 0
+ Rating       | double                            | -9999
+ StartRound   | tinyint(3) unsigned               | 1
+ AuthToken    | varchar(32)                       |
+ Created      | datetime                          | 0000-00-00 00:00:00
+ Lastchanged  | datetime                          | 0000-00-00 00:00:00
+ Comment      | varchar(60)                       |
+ Notes        | text                              | NULL
+ UserMessage  | text                              | NULL
+ AdminMessage | text                              | NULL
 
 
 ## Fields:
@@ -137,9 +148,9 @@ Important Notes:
       - APPLY_ACK (by TD after verifying application)
       - future: LOCK (user blocked/locked by TD for arbitrary reason)
 
-* Rating : ...
+* Rating : Rating used for T, depends on TournamentProperties.RatingUseMode
 
-* StartRound : ...
+* StartRound : Round user wants to start in for T
 
 * AuthToken : ... not used, could be used to send out mass-invitations with "password"
 
@@ -158,6 +169,9 @@ Important Notes:
 
 ###########################################################################
 ## --- TournamentProperties ---
+
+Description:
+   List of properties of a tournament, that influences registration process.
 
  Field                | Type                                                  | Default
 ----------------------+-------------------------------------------------------+---------------------
@@ -210,4 +224,73 @@ Important Notes:
 
 * Notes : additional Notes to be shown for registration-section
 
+
+###########################################################################
+## --- TournamentRules ---
+
+Description:
+   Game settings for tournament.
+
+ Field        | Type                                    | Default
+--------------+-----------------------------------------+---------------------
+ ID           | int(11)                                 | NULL
+ tid          | int(11)                                 | NULL
+ Lastchanged  | datetime                                | 0000-00-00 00:00:00
+ Flags        | smallint(5) unsigned                    | 0
+ Size         | int(11)                                 | 19
+ Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE') | CONV
+ Handicap     | int(11)                                 | 0
+ Komi         | decimal(6,1)                            | 6.5
+ AdjHandicap  | tinyint(4)                              | 0
+ MinHandicap  | tinyint(4)                              | 0
+ MaxHandicap  | tinyint(4)                              | 127
+ StdHandicap  | enum('N','Y')                           | N
+ Maintime     | int(11)                                 | 0
+ Byotype      | enum('JAP','CAN','FIS')                 | JAP
+ Byotime      | int(11)                                 | 0
+ Byoperiods   | int(11)                                 | 0
+ WeekendClock | enum('N','Y')                           | Y
+ Rated        | enum('N','Y')                           | N
+ Notes        | text                                    | NULL
+
+## Fields:
+
+* tid : tournament-ID
+
+* Lastchanged : update of table-entry
+
+* Flags : not-used
+
+* Size : board-size in range 5..25
+
+* Handicaptype :
+   - CONV = conventional handicap
+   - PROPER = proper handicap
+   - NIGIRI = even game with nigiri
+   - DOUBLE = double game (not supported yet)
+   - in relation to Waitingroom-table noted enums in upper-case
+
+* Handicap : number of handicap stones
+
+* Komi : komi
+
+* AdjHandicap, MinHandicap, MaxHandicap :
+   - Handicap-stone adjustment after applying handicap-type
+   - like in waiting-room but with less settings
+
+* StdHandicap : standard-placement of handicap-stones
+   - Y = use standard-placement
+   - N = otherwise
+
+* Maintime, Byotype, Byotime, Byoperiods :
+
+* WeekendClock :
+   - Y = use weekend-clock
+   - N = otherwise
+
+* Rated :
+   - Y = games played in T do adjust rating of TPs, need rated user
+   - N = otherwise
+
+* Notes : additional Notes to be shown for tournament-rules
 
