@@ -27,8 +27,10 @@ $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
+require_once( "include/filter.php" );
 
 {
+   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -42,31 +44,51 @@ require_once( "include/table_columns.php" );
    // init
    $page = 'admin_show_errorlog.php';
 
-   start_page(T_('Show error log'), true, $logged_in, $player_row);
-
-   section( 'errorlog', T_('Error log') );
+   // table filters
+   $elfilter = new SearchFilter();
+   $elfilter->add_filter( 1, 'Numeric', 'EL.ID', true);
+   $elfilter->add_filter( 3, 'RelativeDate', 'EL.Date', true,
+      array( FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL, FC_SIZE => 10 ));
+   if( $show_ip )
+      $elfilter->add_filter( 7, 'Text', 'EL.IP', true,
+         array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
+   $elfilter->init(); // parse current value from _GET
 
    $atable = new Table( 'errorlog', $page, '' );
+   $atable->register_filter( $elfilter );
    $atable->add_or_del_column();
-   $limit = $atable->current_limit_string();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead( 1, T_('ID#header'), 'ID');
+   $atable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'EL.ID-');
    $atable->add_tablehead( 2, T_('User#header'), 'User');
-   $atable->add_tablehead( 3, T_('Time#header'), 'Date');
+   $atable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'EL.Date-');
    $atable->add_tablehead( 4, T_('Message#header'));
    $atable->add_tablehead( 5, T_('DB error#header'));
    $atable->add_tablehead( 6, T_('Debug info#header'));
    if( $show_ip )
       $atable->add_tablehead( 7, T_('IP#header'));
 
-   $result = mysql_query(
-         'SELECT EL.*, ' .
-            'IFNULL(UNIX_TIMESTAMP(EL.Date),0) AS X_Date, ' .
-            'PUser.ID AS PUser_ID, PUser.Name AS PUser_Name, PUser.Handle AS PUser_Handle ' .
-         'FROM Errorlog AS EL ' .
-            'LEFT JOIN Players AS PUser ON PUser.Handle=EL.Handle '.
-         'ORDER BY ID DESC ' . $limit )
+   $atable->set_default_sort( 1); // on ID
+   $order = $atable->current_order_string();
+   $limit = $atable->current_limit_string();
+
+   // build SQL-query
+   $qsql = new QuerySQL();
+   $qsql->add_part( SQLP_FIELDS,
+      'EL.*',
+      'IFNULL(UNIX_TIMESTAMP(EL.Date),0) AS X_Date',
+      'PUser.ID AS PUser_ID',
+      'PUser.Name AS PUser_Name',
+      'PUser.Handle AS PUser_Handle' );
+   $qsql->add_part( SQLP_FROM,
+      'Errorlog AS EL',
+      'LEFT JOIN Players AS PUser ON PUser.Handle=EL.Handle' );
+
+   $query_elfilter = $atable->get_query(); // clause-parts for filter
+   $qsql->merge( $query_elfilter );
+   $query = $qsql->get_select() . " $order $limit";
+
+   $result = mysql_query( $query )
       or error('mysql_query_failed', 'admin_show_errorlog.find_data');
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
@@ -96,6 +118,11 @@ require_once( "include/table_columns.php" );
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
+
+   start_page(T_('Show error log'), true, $logged_in, $player_row);
+   section( 'errorlog', T_('Error log') );
+   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_elfilter->get_select()) ."<br>";
+   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    $atable->echo_table();
 
