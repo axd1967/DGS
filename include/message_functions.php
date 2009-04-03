@@ -30,6 +30,13 @@ define('INVITE_HANDI_PROPER',-2);
 define('INVITE_HANDI_NIGIRI',-3);
 define('INVITE_HANDI_DOUBLE',-4);
 
+// game-settings form-style defs
+define('GSET_WAITINGROOM', 'waitingroom');
+define('GSET_TOURNAMENT',  'tournament');
+define('GSET_MSG_INVITE',  'invite');
+define('GSET_MSG_DISPUTE', 'dispute');
+define('CHECK_GSET', 'waitingroom|tournament|invite|dispute');
+
 $MSG_TYPES = array( // keep them untranslated{!)
    'NORMAL'     => 'Normal',
    'INVITATION' => 'Invitation',
@@ -56,24 +63,33 @@ function init_standard_folders()
 }
 
 
-// Prints game setting form used by message.php and waiting_room.php
-// param map_ratings:
-//    if set, contain map with keys (rating1, rating2) ->
-//    then add probable game-settings for conventional/proper-handicap-type
+/*!
+ * \brief Prints game setting form for some pages.
+ * \param $formstyle:
+ *     invite | dispute = for message.php
+ *     waitingroom = for waiting_room.php
+ *     tournament  = for tournaments/edit_rules.php
+ * \param $map_ratings:
+ *     if set, contain map with keys (rating1, rating2) ->
+ *     then add probable game-settings for conventional/proper-handicap-type
+ * \param $my_ID user-id for dispute, then $gid is game-id;
+ *        my_ID='redraw' and $gid then is the $_POST[] of the form asking preview
+ */
 function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
 {
 
-   if( $formstyle != 'dispute' &&  $formstyle != 'waitingroom' )
-       $formstyle = 'invite';
+   if( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
+       $formstyle = GSET_MSG_INVITE;
+   $is_formstyle_msg = ( $formstyle == GSET_MSG_INVITE || $formstyle == GSET_MSG_DISPUTE );
 
    $allowed = true;
 
 
-   // Default values: ('invite' or 'waitingroom')
+   // Default values: (GSET_MSG_INVITE or GSET_WAITINGROOM)
    $Size = 19;
    if( $iamrated )
       $Handitype = 'conv';
-   else if( $formstyle != 'waitingroom' )
+   else if( $is_formstyle_msg )
       $Handitype = 'manual';
    else
       $Handitype = 'nigiri';
@@ -172,8 +188,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                  " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
                  " AND Players.ID=White_ID+Black_ID-$my_ID" .
                  " AND Status='INVITED'" ;
-      $game_row= mysql_single_fetch( 'game_settings_form',
-                                     $query );
+      $game_row= mysql_single_fetch( 'game_settings_form', $query );
       if( !$game_row )
          error('unknown_game','game_settings_form');
 
@@ -269,8 +284,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       case 'double':
       case 'nigiri':
          break;
-      case 'manual': //not allowed in waiting room
-         if( $formstyle != 'waitingroom' )
+      case 'manual': //not allowed in waitingroom/tournament
+         if( $is_formstyle_msg )
             break;
       default: //always available even if waiting room or unrated
          $Handitype = 'nigiri';
@@ -319,16 +334,16 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                               'RADIOBUTTONS', 'handicap_type', array('proper'=>''), $Handitype,
                               'TEXT', $sugg_prop ));
    }
-   else if( $formstyle=='dispute' && $Handitype=='conv' )
-   {
+   else if( $formstyle == GSET_MSG_DISPUTE && $Handitype == 'conv' )
+   {// user-unrated
       $mform->add_row( array( 'DESCRIPTION', $trc,
                               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
       $Handitype = 'manual';
       $allowed = false;
    }
-   else if( $formstyle=='dispute' && $Handitype=='proper' )
-   {
+   else if( $formstyle == GSET_MSG_DISPUTE && $Handitype == 'proper' )
+   {// user-unrated
       $mform->add_row( array( 'DESCRIPTION', $trp, //T_//('No initial rating')
                               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                             ));
@@ -337,7 +352,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
 
 
-   if( $formstyle != 'waitingroom' )
+   if( $is_formstyle_msg )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Manual setting'),
                               'RADIOBUTTONS', 'handicap_type', array('manual'=>''), $Handitype,
@@ -359,14 +374,17 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                            'TEXT', sptext(T_('Komi'),1),
                            'TEXTINPUT', 'komi_n', 5, 5, $Komi_n ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
-                           'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
-                           'TEXT', sptext(T_('Handicap'),1),
-                           'SELECTBOX', 'handicap_d', 1, $handi_stones, $Handicap_d, false,
-                           'TEXT', sptext(T_('Komi'),1),
-                           'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
+   if( $formstyle != GSET_TOURNAMENT )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Double game'),
+                              'RADIOBUTTONS', 'handicap_type', array('double'=>''), $Handitype,
+                              'TEXT', sptext(T_('Handicap'),1),
+                              'SELECTBOX', 'handicap_d', 1, $handi_stones, $Handicap_d, false,
+                              'TEXT', sptext(T_('Komi'),1),
+                              'TEXTINPUT', 'komi_d', 5, 5, $Komi_d ) );
+   }
 
-   if( $formstyle == 'waitingroom' )
+   if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
    {
       $adj_handi_stones = array();
       $HSTART = max(5, (int)(MAX_HANDICAP/3));
@@ -435,8 +453,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
                               'CHECKBOX', 'rated', 'Y', "", $Rated ) );
    }
-   else if( $formstyle=='dispute' && $Rated )
-   {
+   else if( $formstyle == GSET_MSG_DISPUTE && $Rated )
+   {// user unrated
       $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
                               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
                               //'HIDDEN', 'rated', '',
