@@ -369,8 +369,9 @@ if( ALLOW_TOURNAMENTS )
          T_('My running games') => "show_games.php?uid=$my_id",
          T_('My finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",
          T_('Games I\'m observing') => "show_games.php?observe=$my_id",
-         T_('My tournaments') => "tournaments/list_tournaments.php?user=".urlencode($player_row['Handle']),
       );
+   if( ALLOW_TOURNAMENTS )
+      $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?user=".urlencode($player_row['Handle']);
 
    end_page(@$menu_array);
 
