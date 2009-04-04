@@ -25,6 +25,9 @@ ChangeLog
 
 2009-04-04 juga
 
+   * status.php:
+   - fix: check ALLOW_TOURNAMENTS-config for "My tournaments"-link
+
    * tournaments/view_tournament.php, skins/dragon/screen.css:
    - added CSS for Table_info for Game-rules and tournament status
    - adjusted output of tournament game-rules
