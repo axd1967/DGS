@@ -25,6 +25,42 @@ ChangeLog
 
 2009-04-04 juga
 
+   * tournaments/view_tournament.php, skins/dragon/screen.css:
+   - added CSS for Table_info for Game-rules and tournament status
+   - adjusted output of tournament game-rules
+
+   * tournaments/view_tournament.php:
+   - added Tournament-status with current round, number of rounds,
+     current tournament-status, registration status of user)
+
+   * tournaments/include/tournament.php (Tournament.allow_create),
+     tournaments/list_tournaments.php:
+   - allow only tournament-admin to create new tournaments,
+     this is in preparation for a release longing to support the official
+     Dragon-tournament but with an "uncomplete" tournament-feature
+
+   * tournaments/include/tournament_rules.php (
+       TournamentRules.build_persist_query_part, ~.needsCalculatedHandicap,
+       ~.needsCalculatedKomi, ~.getHandicaptypeText),
+     tournaments/view_tournament.php:
+   - show ruleset with current tournament round and game-related settings
+
+   * include/table_infos.php (Table_info.make_table),
+     include/message_functions.php (game_info_table),
+     skins/dragon/screen.css:
+   - renamed Table_info CSS-table-id suffix: Infos -> TableInfos
+     to avoid "clash" with other CSS-id 'GameInfos'
+
+   * waiting_room.php:
+   - hide notes-section if showing game-info
+
+   * include/std_functions.php, skins/dragon/screen.css, NEWS:
+   - link-markup with optional text
+   - added own CSS-class 'linkmarkup' for link-markup with normal layout at first
+
+   * tournaments/list_participants.php:
+   - added link to edit-participants
+
    * admin_show_errorlog.php, NEWS:
    - added filters on Errorlog: ID, Date, IP
 
@@ -38,8 +74,7 @@ ChangeLog
    - added creating and editing of (single) tournament-ruleset
    - adjusted game-settings-form for editing Tournemant-rules (GSET_TOURNAMENT),
      - supported settings are: size, handicap-types (conventional/proper/even),
-       handicap-adjustment & handicap-placement, time-settings, weekendclock
-       and rated
+       handicap-adjustment, handicap-placement, time-settings, weekendclock, rated
      - added consts GSET_MSG_DISPUTE/INVITE/WAITINGROOM/TOURNAMENT
 -----------
 -- added tournament-rules with game-settings
