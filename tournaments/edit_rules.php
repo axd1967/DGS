@@ -100,6 +100,7 @@ $ThePage = new Page('TournamentRulesEdit');
 
    game_settings_form( $trform, GSET_TOURNAMENT, true/*$iamrated*/, 'redraw', $vars );
    //TODO(later) T-rule setup-all-manual later
+   //TODO(later) add settings to forbid vacation
 
    $trform->add_empty_row();
    $trform->add_row( array(
@@ -146,6 +147,8 @@ function parse_edit_form( &$trule )
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] );
+
+   //TODO fix edits on time-settings: together with defaults doesn't work right
 
    // read from DB or set defaults
    $vars = array();
