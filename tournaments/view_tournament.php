@@ -106,6 +106,25 @@ $ThePage = new Page('Tournament');
       make_html_safe($tourney->Description, true),
       "\n";
 
+   // --------------- Status --------------------
+
+   echo "<hr>\n", '<a name="result">', "\n";
+   section( 'tournament', T_('Tournament Status#T_view') );
+
+   $reg_user_status = TournamentParticipant::isTournamentParticipant( $tid, $my_id );
+   $reg_user_info = ( count($tourney->allow_register($my_id, true)) )
+      ? '' : TournamentParticipant::getStatusText( $reg_user_status, false, true );
+
+   $itable = new Table_info('tstatus');
+   $itable->add_sinfo( T_('Current Tournament Status:'), $tourney->getStatusText($tourney->Status) );
+   $itable->add_sinfo( T_('Current Tournament Round:'), $tourney->formatRound() );
+   if( $reg_user_info )
+      $itable->add_sinfo( T_('Registration status:'),
+         sprintf( '<span class="TUserStatus">%s</span>', $reg_user_info ));
+
+   echo $itable->make_table();
+
+
    // --------------- Rules -----------------------------------------
 
    echo "<hr>\n", '<a name="rules">', "\n";
@@ -130,32 +149,32 @@ $ThePage = new Page('Tournament');
       $itable->add_sinfo( T_('Handicap Type:#trules'),
             TournamentRules::getHandicaptypeText($trule->Handicaptype) );
       $itable->add_sinfo( T_('Handicap:#trules'),
-         sprintf( T_('%s stones, %s komi#trules_handi'),
-            ( $trule->needsCalculatedHandicap() ? T_('(calculated)#trules_handi') : $trule->Handicap ),
-            ( $trule->needsCalculatedKomi()     ? T_('(calculated)#trules_handi') : $trule->Komi ) ));
+         ( $trule->needsCalculatedHandicap()
+               ? T_('calculated stones#trules_handi')
+               : sprintf( T_('%s stones#trules_handi'), $trule->Handicap) )
+         . ', ' .
+         ( $trule->needsCalculatedKomi()
+               ? T_('calculated komi#trules_handi')
+               : sprintf( T_('%s komi#trules_handi'), $trule->Komi) ));
       $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'),
             ( count($adj_handi) ? implode(', ', $adj_handi) : '' ));
       if( ENA_STDHANDICAP )
          $itable->add_sinfo( T_('Standard placement:#trules_handi'), yesno($trule->StdHandicap) );
       $itable->add_sinfo( T_('Main time:#trules'), echo_time($trule->Maintime)
             . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)#trules') : '' ));
-      $itable->add_sinfo(
-         echo_byotype($trule->Byotype) . ':',
-         ( ($trule->Byotime == 0)
-            ? T_('no extra time#trules')
-            : echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods , false, false, false)) );
+      if( $trule->Byotime > 0 )
+         $itable->add_sinfo(
+            echo_byotype($trule->Byotype) . ':',
+            echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods , false, false, false) );
       $itable->add_sinfo( T_('Clock runs on weekends:#trules'), yesno($trule->WeekendClock) );
       $itable->add_sinfo( T_('Rated:#trules'), yesno($trule->Rated) );
 
-      echo ( ( $trule->Notes != '') ? make_html_safe( $trule->Notes, true ) : '' ),
-         "<br><br>\n",
-         T_('The following ruleset is used for all rounds in this tournament:'),
+      if( $trule->Notes != '')
+         echo make_html_safe( $trule->Notes, true ), "<br><br>\n";
+      echo T_('The following ruleset is used for all rounds in this tournament:'),
          $itable->make_table(),
          "<br>\n";
    }
-
-   echo sprintf( T_('Current Tournament Round: %s'), $tourney->formatRound() ),
-      "<br><br>\n";
 
 
    // --------------- Registration ----------------------------------
@@ -202,7 +221,7 @@ $ThePage = new Page('Tournament');
       echo ( $tprops->Notes != '' ? make_html_safe($tprops->Notes, true) . "<br><br>\n" : '');
    }
 
-
+   // number of registered users
    $tpcnt_view = "<br>\n<ul>";
    foreach( $tp_counts as $t_status => $cnt )
    {
@@ -213,19 +232,8 @@ $ThePage = new Page('Tournament');
    }
    $tpcnt_view .= "</ul>\n";
 
-   $reg_user_status = TournamentParticipant::isTournamentParticipant( $tid, $my_id );
-   $reg_user_info = ( count($tourney->allow_register($my_id, true)) )
-      ? '' : TournamentParticipant::getStatusText( $reg_user_status, false, true );
-
-   echo "\n",
-      sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),
-      $tpcnt_view,
-      "<br>\n",
-      ( ($reg_user_info)
-            ? sprintf( '%s%s<span class="TUserStatus">%s</span>',
-                       T_('Registration status:'), SMALL_SPACING, $reg_user_info )
-            : '' ),
-      "\n";
+   echo sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),
+      $tpcnt_view;
 
    // ------------- Section Menu
 
