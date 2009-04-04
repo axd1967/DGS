@@ -214,6 +214,9 @@ $ThePage = new Page('TournamentParticipantList');
    $reg_user_str = TournamentParticipant::getLinkTextRegistration( $tourney, $my_id );
    if( $reg_user_str )
       $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
+   if( $allow_edit_tourney )
+      $menu_array[T_('Edit participants')] =
+         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
 
    end_page(@$menu_array);
 }
