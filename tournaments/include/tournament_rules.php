@@ -36,6 +36,12 @@ require_once( 'include/std_classes.php' );
   * \brief Class to manage TournamentRules-table with games-related tournament-settings
   */
 
+define('TRULE_HANDITYPE_CONV', 'CONV');
+define('TRULE_HANDITYPE_PROPER', 'PROPER');
+define('TRULE_HANDITYPE_NIGIRI', 'NIGIRI');
+//define('TRULE_HANDITYPE_DOUBLE', 'DOUBLE');
+define('CHECK_TRULE_HANDITYPE', 'CONV|PROPER|NIGIRI');
+
 //TODO(later) Flags
 //define('TR_FLAGS_MANUAL',  0x0001); // TD setups T-games manually (H/K, what else?)
 
@@ -133,7 +139,7 @@ class TournamentRules
    function build_persist_query_part()
    {
       // Handicaptype/Byotype
-      if( !preg_match( "/^(CONV|PROPER|NIGIRI|DOUBLE)$/", $this->Handicaptype ) )
+      if( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
          error('invalid_args', "TournamentRules.build_persist_query_part.check.Handicaptype({$this->tid},{$this->Handicaptype})");
       if( !preg_match( "/^(JAP|CAN|FIS)$/", $this->Byotype ) )
          error('invalid_args', "TournamentRules.build_persist_query_part.check.Byotype({$this->tid},{$this->Byotype})");
@@ -342,8 +348,24 @@ class TournamentRules
       $this->Byoperiods = $byoperiods;
       $this->WeekendClock = (bool)$weekendclock;
       $this->Rated = (bool)$rated;
-   }//convertTournamentRules_to_EditForm
+   } //convertTournamentRules_to_EditForm
 
+   /*! \brief Returns true, if handicap needs to be calculated for this ruleset. */
+   function needsCalculatedHandicap()
+   {
+      return ( $this->Handicaptype == TRULE_HANDITYPE_CONV    // calc
+            || $this->Handicaptype == TRULE_HANDITYPE_PROPER  // calc
+            || $this->Handicaptype == TRULE_HANDITYPE_NIGIRI  // no handicap
+         );
+   }
+
+   /*! \brief Returns true, if komi needs to be calculated for this ruleset. */
+   function needsCalculatedKomi()
+   {
+      return ( $this->Handicaptype == TRULE_HANDITYPE_CONV    // calc
+            || $this->Handicaptype == TRULE_HANDITYPE_PROPER  // calc
+         );
+   }
 
    // ------------ static functions ----------------------------
 
@@ -457,6 +479,28 @@ class TournamentRules
       foreach( $arr as $flagmask => $flagtext )
          if( $flags & $flagmask ) $out[] = $flagtext;
       return implode(', ', $out);
+   }
+
+   /*! \brief Returns type-text. */
+   function getHandicaptypeText( $type )
+   {
+      // lazy-init of texts
+      $key = 'HANDICAPTYPE';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key]) )
+      {
+         $arr = array();
+         $arr[TRULE_HANDITYPE_CONV]   = T_('Conventional handicap#TR_handitype');
+         $arr[TRULE_HANDITYPE_PROPER] = T_('Proper handicap#TR_handitype');
+         $arr[TRULE_HANDITYPE_NIGIRI] = T_('Even game with nigiri#TR_handitype');
+         //$arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game#TR_handitype');
+         $ARR_GLOBALS_TOURNAMENT_RULES[$key] = $arr;
+      }
+
+      if( is_null($type) )
+         return $ARR_GLOBALS_TOURNAMENT_RULES[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key][$type]) )
+         error('invalid_args', "TournamentRules.getHandicaptypeText($type)");
+      return $ARR_GLOBALS_TOURNAMENT_RULES[$key][$type];
    }
 
 } // end of 'TournamentRules'
