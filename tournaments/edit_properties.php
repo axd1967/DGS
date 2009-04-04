@@ -179,7 +179,7 @@ $ThePage = new Page('TournamentPropertiesEdit');
    $menu_array = array();
    $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Manage this tournament')] =
-         array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' );
+         array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }

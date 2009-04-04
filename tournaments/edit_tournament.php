@@ -58,7 +58,6 @@ $ThePage = new Page('TournamentEdit');
    // create/edit allowed?
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = false;
-   $allow_new_del_TD = false;
    if( is_null($tourney) )
    {
       if( !Tournament::allow_create($my_id) )
@@ -73,7 +72,6 @@ $ThePage = new Page('TournamentEdit');
       if( !$tourney->allow_edit_tournaments($my_id) )
          error('tournament_edit_not_allowed', "edit_tournament.edit_tournament($tid,$my_id)");
       $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
-      $allow_new_del_TD = $tourney->allow_edit_directors($my_id, true);
    }
 
    // init
@@ -100,7 +98,7 @@ $ThePage = new Page('TournamentEdit');
    }
 
    $page = "edit_tournament.php";
-   $title = T_('Tournament Management');
+   $title = T_('Tournament Editor');
 
 
    // ---------- Tournament EDIT form ------------------------------
@@ -208,18 +206,9 @@ $ThePage = new Page('TournamentEdit');
    $menu_array = array();
    if( $tid )
       $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_new_del_TD )
-      $menu_array[T_('Add tournament director')] =
-         array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
    if( $allow_edit_tourney ) # for TD
-   {
-      $menu_array[T_('Edit properties')] =
-         array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' );
-      $menu_array[T_('Edit rules')] =
-         array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' );
-      $menu_array[T_('Edit participants')] =
-         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' );
-   }
+      $menu_array[T_('Manage this tournament')] =
+         array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }
@@ -290,6 +279,6 @@ function parse_edit_form( &$tourney )
    }
 
    return (count($errors)) ? $errors : NULL;
-}
+} //parse_edit_form
 
 ?>
