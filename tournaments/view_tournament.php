@@ -23,11 +23,13 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'include/table_infos.php' );
 require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
+require_once( 'tournaments/include/tournament_rules.php' );
 
 $ThePage = new Page('Tournament');
 
@@ -54,6 +56,7 @@ $ThePage = new Page('Tournament');
    unset($tp_counts[TPCOUNT_STATUS_ALL]);
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
+   $trule  = TournamentRules::load_tournament_rule( $tid );
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
    $page_tourney = "tournaments/view_tournament.php?tid=$tid";
@@ -107,10 +110,53 @@ $ThePage = new Page('Tournament');
 
    echo "<hr>\n", '<a name="rules">', "\n";
    section( 'tournament', T_('Rules#T_view') );
-   echo
-      sprintf( T_('Tournament Round: %s'), $tourney->formatRound() ), "<br>\n",
-      "[TODO] Show Ruleset", //TODO
-      "\n";
+
+   if( !is_null($trule) )
+   {
+      $adj_handi = array();
+      if( $trule->AdjHandicap )
+         $adj_handi[] = sprintf( T_('adjusted by %s stones#trules_handi'),
+               ( $trule->AdjHandicap > 0 ? '+' : '') . $trule->AdjHandicap );
+      if( $trule->MinHandicap > 0 && $trule->MaxHandicap < MAX_HANDICAP )
+         $adj_handi[] = sprintf( T_('limited by min. %s and max. %s stones#trules_handi'),
+               $trule->MinHandicap, min( MAX_HANDICAP, $trule->MaxHandicap) );
+      elseif( $trule->MinHandicap > 0 )
+         $adj_handi[] = sprintf( T_('limited by min. %s stones#trules_handi'), $trule->MinHandicap );
+      elseif( $trule->MaxHandicap < MAX_HANDICAP )
+         $adj_handi[] = sprintf( T_('limited by max. %s stones#trules_handi'), $trule->MaxHandicap );
+
+      $itable = new Table_info('gamerules');
+      $itable->add_sinfo( T_('Board Size:#trules'), $trule->Size .' x '. $trule->Size );
+      $itable->add_sinfo( T_('Handicap Type:#trules'),
+            TournamentRules::getHandicaptypeText($trule->Handicaptype) );
+      $itable->add_sinfo( T_('Handicap:#trules'),
+         sprintf( T_('%s stones, %s komi#trules_handi'),
+            ( $trule->needsCalculatedHandicap() ? T_('(calculated)#trules_handi') : $trule->Handicap ),
+            ( $trule->needsCalculatedKomi()     ? T_('(calculated)#trules_handi') : $trule->Komi ) ));
+      $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'),
+            ( count($adj_handi) ? implode(', ', $adj_handi) : '' ));
+      if( ENA_STDHANDICAP )
+         $itable->add_sinfo( T_('Standard placement:#trules_handi'), yesno($trule->StdHandicap) );
+      $itable->add_sinfo( T_('Main time:#trules'), echo_time($trule->Maintime)
+            . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)#trules') : '' ));
+      $itable->add_sinfo(
+         echo_byotype($trule->Byotype) . ':',
+         ( ($trule->Byotime == 0)
+            ? T_('no extra time#trules')
+            : echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods , false, false, false)) );
+      $itable->add_sinfo( T_('Clock runs on weekends:#trules'), yesno($trule->WeekendClock) );
+      $itable->add_sinfo( T_('Rated:#trules'), yesno($trule->Rated) );
+
+      echo ( ( $trule->Notes != '') ? make_html_safe( $trule->Notes, true ) : '' ),
+         "<br><br>\n",
+         T_('The following ruleset is used for all rounds in this tournament:'),
+         $itable->make_table(),
+         "<br>\n";
+   }
+
+   echo sprintf( T_('Current Tournament Round: %s'), $tourney->formatRound() ),
+      "<br><br>\n";
+
 
    // --------------- Registration ----------------------------------
 
