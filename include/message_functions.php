@@ -642,7 +642,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    $is_calc_handitype = ( $Handitype == 'proper' || $Handitype == 'conv' );
 
-   $itable= new Table_info('game'); //==> ID='gameInfos'
+   $itable = new Table_info('game'); //==> ID='gameTableInfos'
 
    if( $tablestyle == 'waitingroom' )
    {

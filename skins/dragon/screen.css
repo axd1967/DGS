@@ -2796,7 +2796,7 @@ table.EditProfilButtons td.button {
  must left the links in the right column natural
 */
 /*
-table#bioInfos a {
+table#bioTableInfos a {
    color: default;
 }
 */
@@ -2805,15 +2805,15 @@ form#bioformForm td {
    vertical-align: top;
 }
 
-table#biomoveInfos td {
+table#biomoveTableInfos td {
    vertical-align: top;
 }
 
-table#biomoveInfos div {
+table#biomoveTableInfos div {
    margin: 0px;
 }
 
-table#biomoveInfos img {
+table#biomoveTableInfos img {
    width: 12px;
    height: 12px;
    border: 0px solid black;

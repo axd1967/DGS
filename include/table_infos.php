@@ -158,7 +158,7 @@ class Table_info
       /* Start of the table */
 
       $tattbs = attb_build($tattbs);
-      $string = "<table id='{$this->Id}Infos'$tattbs>\n";
+      $string = "<table id='{$this->Id}TableInfos'$tattbs>\n";
       $string.= "<colgroup><col class=ColRubric><col class=ColInfo></colgroup>\n";
 
       /* Make table rows */
