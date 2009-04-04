@@ -1659,9 +1659,10 @@ $html_safe_preg = array(
                         ."\\2".ALLOWED_LT."/a".ALLOWED_GT,
 
 //<http://...>, <https://...>, <news://...>, <ftp://...>
- '%'.ALLOWED_LT."((http:|https:|news:|ftp:)//[^`\\n\\s]+)".ALLOWED_GT.'%is'
-  => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT
-                        ."\\1".ALLOWED_LT."/a".ALLOWED_GT,
+ '%'.ALLOWED_LT."((http:|https:|news:|ftp:)//[^`'\\r\\n\\s]+?)(?:\s+\|([^'\\r\\n]+?))?".ALLOWED_GT.'%ise'
+  => '"'.ALLOWED_LT.'a href='.ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.'"'
+         . " . ( strlen(trim('\\3')) ? '\\3' : '\\1' ) . "
+         . '"'.ALLOWED_LT."/a".ALLOWED_GT.'"',
 
 //<game gid[,move]> =>show game
  '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT.'/ise'

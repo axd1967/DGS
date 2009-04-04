@@ -97,6 +97,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * <home features/list_features.php>Feature-Voting</home> including feature status management
 
    * Markup tags:
+      * Enhanced link markup with optional text: &lt;http://url.net |link text>
       * Added markup-tag &lt;tourney id> showing link to tournament-page
       * &lt;game> markup: Changed char used for move-number in game reference
 
