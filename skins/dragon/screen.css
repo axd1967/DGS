@@ -2595,6 +2595,40 @@ body.Tournament table#pageLayout td#pageBody div.Section {
    text-align: left;
 }
 
+table#gamerulesTableInfos {
+   border: 0px solid blue;
+   border-spacing: 0px;
+   border-collapse: separate;
+   border-style: hidden;
+   margin: 10px auto auto 40px;
+   empty-cells: show;
+}
+
+table#gamerulesTableInfos td {
+   border: 0px solid blue;
+   margin: 0px;
+   padding: 2px;
+}
+
+table#gamerulesTableInfos td.Rubric {
+   font-weight: normal;
+}
+
+table#tstatusTableInfos {
+   border: 0px solid blue;
+   border-spacing: 0px;
+   border-collapse: separate;
+   border-style: hidden;
+   margin: auto auto 10px auto;
+   empty-cells: show;
+}
+
+table#tstatusTableInfos td {
+   border: 0px solid blue;
+   margin: 0px;
+   padding: 3px;
+}
+
 
 /* ------------------------- */
 /* FAQ pages */
