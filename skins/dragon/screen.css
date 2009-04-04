@@ -158,6 +158,10 @@ a[target] /*, a[target="new"], a[target="_blank"]*/
    color: olive;
 }
 
+a.linkmarkup {
+   text-decoration: underline;
+}
+
 .TextBrowsers {
    display: none;
 }

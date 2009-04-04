@@ -1660,8 +1660,9 @@ $html_safe_preg = array(
 
 //<http://...>, <https://...>, <news://...>, <ftp://...>
  '%'.ALLOWED_LT."((http:|https:|news:|ftp:)//[^`'\\r\\n\\s]+?)(?:\s+\|([^'\\r\\n]+?))?".ALLOWED_GT.'%ise'
-  => '"'.ALLOWED_LT.'a href='.ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.'"'
-         . " . ( strlen(trim('\\3')) ? '\\3' : '\\1' ) . "
+  => '"'.ALLOWED_LT.'a class='.ALLOWED_QUOT.'linkmarkup'.ALLOWED_QUOT
+         . ' href='.ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.'"'
+         . ".( strlen(trim('\\3')) ? '\\3' : '\\1' )."
          . '"'.ALLOWED_LT."/a".ALLOWED_GT.'"',
 
 //<game gid[,move]> =>show game
