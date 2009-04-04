@@ -2580,6 +2580,7 @@ span.TWarning {
 }
 
 a.TAdmin {
+   color: blue;
    font-style: italic;
    background: #e0e8ff; /* light blue, complementary to background */
 }
@@ -2627,6 +2628,20 @@ table#tstatusTableInfos td {
    border: 0px solid blue;
    margin: 0px;
    padding: 3px;
+}
+
+ul.TAdminLinks {
+   line-height: 1.4em;
+}
+
+ul.TAdminLinks li {
+   margin: 0.2em auto 0.6em;
+}
+
+ul.SubList {
+   margin: 0.2em auto 0.4em;
+   line-height: 1em;
+   font-size: smaller;
 }
 
 

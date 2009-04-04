@@ -54,7 +54,6 @@ $ThePage = new Page('TournamentManage');
    $is_admin = TournamentUtils::isAdmin();
    if( !$tourney->allow_edit_tournaments($my_id) )
       error('tournament_edit_not_allowed', "manage_tournament.edit_tournament($tid,$my_id)");
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    $allow_new_del_TD = $tourney->allow_edit_directors($my_id, true);
 
    // init
@@ -73,10 +72,6 @@ $ThePage = new Page('TournamentManage');
    $tform->add_row( array(
          'DESCRIPTION', T_('Owner'),
          'TEXT',        ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, '', $tourney->Owner_ID ) : NO_VALUE ) ));
-   if( $tourney->Created )
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Creation date'),
-            'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
    if( $tourney->Lastchanged )
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed date'),
@@ -94,28 +89,53 @@ $ThePage = new Page('TournamentManage');
 
    $tform->echo_string();
 
+   echo '<table><tr><td>', "<hr>\n",
+      '<ul class="TAdminLinks">',
+         '<li>', make_menu_link( T_('Edit tournament'), array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' )),
+                 subList( array( T_('Change status, title, description, rounds'),
+                                 T_('Scope and Type can be changed as long as registration has not started') )),
+                 "</li>\n",
+         '<li>', ( $allow_new_del_TD
+                     ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))
+                     : T_('Add tournament director') ),
+                 subList( array( T_('Adding new tournament director (allowed only for Tournament Owner)') )),
+                 "</li>\n",
+         '<li>', make_menu_link( T_('Tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
+                 subList( array( T_('Show list of tournament directors') )),
+                 "</li>\n",
+         '<li>', make_menu_link( T_('Edit properties'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
+                 subList( array( T_('Change properties for registration'),
+                                 T_('Tournament-related: min./max. participants, rating use mode'),
+                                 T_('User-related: user rating range, min. (rated) finished games') )),
+                 "</li>\n",
+         '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
+                 subList( array( T_('Change game-settings: board size, handicap-settings, time-settings, rated, notes') )),
+                 "</li>\n",
+         '<li>', make_menu_link( T_('Edit participants'), array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' )),
+                 subList( array( T_('Manage registration of users: Invite user, Approve or reject application, Remove registration'),
+                                 T_('Change status, start round, read message from user and answer with admin message') )),
+                 "</li>\n",
+         '<li>', make_menu_link( T_('Tournament participants'), "tournaments/list_participants.php?tid=$tid" ),
+                 subList( array( T_('Show list of tournament participants') )),
+                 "</li>\n",
+      '</ul>',
+      '</tr></td></table>',
+      "\n";
+
    $menu_array = array();
    if( $tid )
       $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_new_del_TD )
-      $menu_array[T_('Add tournament director')] =
-         array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
-   else
-      $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
-   if( $allow_edit_tourney ) # for TD
-   {
-      $menu_array[T_('Manage this tournament')] = // for page-refresh
-         array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
-      $menu_array[T_('Edit tournament')] =
-         array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' );
-      $menu_array[T_('Edit properties')] =
-         array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' );
-      $menu_array[T_('Edit rules')] =
-         array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' );
-      $menu_array[T_('Edit participants')] =
-         array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' );
-   }
+   $menu_array[T_('Manage this tournament')] =
+      array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
+}
+
+function subList( $arr, $class='SubList' )
+{
+   if( count($arr) == 0 )
+      return '';
+   $class_str = ($class != '') ? " class=\"$class\"" : '';
+   return "<ul{$class_str}><li>" . implode("</li>\n<li>", $arr) . "</li></ul>\n";
 }
 ?>
