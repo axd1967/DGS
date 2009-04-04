@@ -25,6 +25,19 @@ ChangeLog
 
 2009-04-04 juga
 
+   * include/std_functions.php (make_menu, make_menu_link),
+     tournaments/manage_tournament.php, skins/dragon/screen.css, NEWS:
+   - listed management-operations with descriptions and admin-links
+
+   * site_map.php:
+   - added tournament-rules, tournament-manager
+
+   * tournaments/manage_tournament.php, tournaments/edit_tournament.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php,
+     tournaments/edit_rules.php, tournaments/view_tournament.php:
+   - added separate page for tournament management with all admin-links
+     and important info
+
    * status.php:
    - fix: check ALLOW_TOURNAMENTS-config for "My tournaments"-link
 
