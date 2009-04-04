@@ -673,26 +673,34 @@ function make_menu($menu_array, $with_accesskeys=true)
       if( is_a($link, 'Form') )
          echo $link->echo_string();
       else
-      {
-         $attbs = array();
-         if( $with_accesskeys )
-            $attbs['accesskey'] = $i % 10;
-         if( is_array($link) )
-         {
-            $url = $link['url'];
-            unset( $link['url'] );
-            $attbs += $link;
-         }
-         else
-            $url = $link;
-         echo anchor( "$base_path$url", $text, '', $attbs );
-      }
+         echo make_menu_link( $text, $link, $i % 10 );
       echo '</td>';
 
       $cumwidth += $width;
    }
 
    echo "\n </tr>\n</table>\n";
+}
+
+// array( 'url' => URL, attb1 => val1, ... ) => <a href=...>text</a>
+// accesskey will be overwritten by optional accesskey in link-array
+function make_menu_link( $text, $link, $accesskey='' )
+{
+   global $base_path;
+
+   $attbs = array();
+   if( (string)$accesskey != '' )
+      $attbs['accesskey'] = $accesskey;
+   if( is_array($link) )
+   {
+      $url = $link['url'];
+      unset( $link['url'] );
+      $attbs += $link;
+   }
+   else
+      $url = $link;
+
+   return anchor( $base_path . $url, $text, '', $attbs );
 }
 
 function make_menu_horizontal($menu)
