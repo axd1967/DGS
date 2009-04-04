@@ -299,15 +299,18 @@ require_once( 'include/classlib_userconfig.php' );
       // print table
       echo $wrtable->make_table();
 
-      $restrictions = array(
-            T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
-            T_('Rating range (user rating must be between the requested rating range)#wroom'),
-            T_('Number of rated finished games#wroom'),
-         );
-      $notes = array();
-      $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
-            . "\n* " . implode(",\n* ", $restrictions);
-      echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
+      if( !( $idinfo && is_array($info_row) ))
+      {
+         $restrictions = array(
+               T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
+               T_('Rating range (user rating must be between the requested rating range)#wroom'),
+               T_('Number of rated finished games#wroom'),
+            );
+         $notes = array();
+         $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
+               . "\n* " . implode(",\n* ", $restrictions);
+         echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
+      }
    }
    else
       echo '<p></p>&nbsp;<p></p>' . T_('Seems to be empty at the moment.');
