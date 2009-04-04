@@ -213,8 +213,9 @@ $ThePage = new Page('TournamentList');
 
    $menu_array = array();
    $menu_array[T_('Show all tournaments')] = 'tournaments/list_tournaments.php';
-   if( Tournament::allow_create($my_id) )
-      $menu_array[T_('Add new tournament')] = 'tournaments/edit_tournament.php';
+   if( TournamentUtils::isAdmin() )
+      $menu_array[T_('Add new tournament')] =
+         array( 'url' => 'tournaments/edit_tournament.php', 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }

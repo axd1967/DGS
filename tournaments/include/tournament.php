@@ -417,7 +417,15 @@ class Tournament
    /*! \brief Returns true if given user can create a new tournament. */
    function allow_create( $uid )
    {
-      return ( $uid > GUESTS_ID_MAX ); // anyone can create Ts except guests
+      if( $uid <= GUESTS_ID_MAX )
+         return false;
+
+      //TODO(later) remove this to allow T-create for normal users
+      if( !TournamentUtils::isAdmin() )
+         return false;
+
+      // anyone can create Ts except guests
+      return true;
    }
 
    /*! \brief Returns array with notes about creating/editing tournament. */
