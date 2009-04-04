@@ -106,6 +106,8 @@ $ThePage = new Page('TournamentManage');
    {
       $menu_array[T_('Manage this tournament')] = // for page-refresh
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
+      $menu_array[T_('Edit tournament')] =
+         array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Edit properties')] =
          array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Edit rules')] =
