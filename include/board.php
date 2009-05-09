@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/coords.php" );
+require_once( 'include/classlib_game.php' );
 
 if( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);
@@ -987,10 +988,9 @@ class Board
       }
    } //mark_territory
 
-   function create_territories_and_score( )
+   function fill_game_score( &$game_score )
    {
-      // mark territories
-
+      // mark territory
       for( $x=0; $x<$this->size; $x++)
       {
          for( $y=0; $y<$this->size; $y++)
@@ -1003,36 +1003,30 @@ class Board
       }
 
       // count
-
-      $score = 0;
+      $counts = array(
+         DAME  => 0,
+         BLACK => 0, BLACK_DEAD => 0, BLACK_TERRITORY => 0,
+         WHITE => 0, WHITE_DEAD => 0, WHITE_TERRITORY => 0,
+      );
 
       for( $x=0; $x<$this->size; $x++)
       {
          for( $y=0; $y<$this->size; $y++)
          {
-            switch( @$this->array[$x][$y] & ~FLAG_NOCLICK )
-            {
-               case BLACK_TERRITORY:
-                  $score --;
-               break;
-
-               case WHITE_TERRITORY:
-                  $score ++;
-               break;
-
-               case BLACK_DEAD:
-                  $score += 2;
-               break;
-
-               case WHITE_DEAD:
-                  $score -= 2;
-               break;
-            }
+            # 0=NONE, 1=BLACK, 2=WHITE, 4=DAME, 5=BLACK_TERRITORY, 6=WHITE_TERRITORY, 9=BLACK_DEAD, 10=WHITE_DEAD
+            $mark = ( @$this->array[$x][$y] & ~FLAG_NOCLICK );
+            if( isset($counts[$mark]) )
+               $counts[$mark]++;
          }
       }
 
-      return $score;
-   } //create_territories_and_score
+      // fill
+      $game_score->set_stones_all( $counts[BLACK], $counts[WHITE] );
+      $game_score->set_dead_stones_all( $counts[BLACK_DEAD], $counts[WHITE_DEAD] );
+      $game_score->set_territory_all( $counts[BLACK_TERRITORY], $counts[WHITE_TERRITORY] );
+      $game_score->set_dame( $counts[DAME] );
+      //error_log($game_score->to_string());
+   } //fill_game_score
 
 
    function toggle_marked_area( $x, $y, &$marked, $companion_groups=true )
