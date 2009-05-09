@@ -23,6 +23,21 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-05-10 juga
+
+   * include/classlib_game.php (GameScore),
+     include/board.php (Board.fill_game_score, ~.create_territories_and_score),
+     include/move.php (check_remove),
+     confirm.php, game.php (draw_score_box), skins/dragon/screen.css, NEWS:
+   - added scoring information on game-page
+     - show score-box in scoring step and for finished games handling
+       to left of game-board with scoring data (dame, stone, dead-stones,
+       territory, prisoners, komi, handicap) if needed for scoring mode
+     - prepare for handling territory and area scoring
+     - refactored check_remove() returning GameScore-object
+       encapsulating score-calculation
+   - fixed extra-info-table images (adding alternative-text) on game-page
+
 2009-04-04 juga
 
    * include/std_functions.php (make_menu, make_menu_link),
