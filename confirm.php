@@ -411,8 +411,8 @@ This is why:
             error('invalid_action',"confirm.done.$Status");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
-         check_remove( $TheBoard);
-//ajusted globals by check_remove(): $score, $stonestring;
+         $game_score = check_remove( $TheBoard); //ajusted globals: $stonestring
+         $score = $game_score->calculate_score();
 
          $l = strlen( $stonestring );
 

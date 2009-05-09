@@ -22,6 +22,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Preview game message (access-key [v]=Preview)
       * Added game info page (<image info.gif>),
         added access to initial invitation message for game
+      * Show scoring information in scoring step and for finished games
       * Added "Notes" column on My-Games list showing part of private game notes
 
    * Game settings:
@@ -52,7 +53,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added <home faq.php>search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
          * users, opponents, waiting room, search messages, contacts,
-           features, votes, tournaments
+           feature-votes, tournaments
          * observers of a game, my/all observed games
          * all/my/other finished and running games
 

@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 //$TranslateGroups[] = "Game";
+
+require_once( 'include/classlib_game.php' );
 
 
 //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
@@ -196,7 +198,7 @@ function check_remove( &$board, $coord=false )
 
       foreach( $marked as $sub )
       {
-         list($colnr,$rownr) = $sub; 
+         list($colnr,$rownr) = $sub;
          if( !isset( $stonearray[$colnr][$rownr] ) )
             $stonearray[$colnr][$rownr] = true;
          else
@@ -213,8 +215,12 @@ function check_remove( &$board, $coord=false )
       }
    }
 
-   global $score, $Komi, $White_Prisoners, $Black_Prisoners;
-   $score = $board->create_territories_and_score();
-   $score += $White_Prisoners - $Black_Prisoners + $Komi;
-}
+   global $Handicap, $Komi, $White_Prisoners, $Black_Prisoners;
+   $game_score = new GameScore( GSMODE_TERRITORY_SCORING, $Handicap, $Komi );
+   $game_score->set_prisoners_all( $Black_Prisoners,  $White_Prisoners );
+   $board->fill_game_score( $game_score );
+
+   return $game_score;
+} //check_remove
+
 ?>

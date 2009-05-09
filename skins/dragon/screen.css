@@ -1949,6 +1949,31 @@ table.Captures img {
 }
 
 
+table.Scoring {
+   background: #f7f5ff;
+   border: 1px solid #0c41c9;
+   border-width: 1px;
+   border-spacing: 0px;
+   margin: 4px;
+   font-size: 80%;
+}
+
+table.Scoring th,
+table.Scoring tr.Header td,
+table.Scoring td {
+   text-align: center;
+   border: 1px solid #0c41c9;
+}
+
+table.Scoring tr td.Header {
+   text-align: left;
+}
+table.Scoring tr td.HeaderSum {
+   text-align: left;
+   font-weight: bold;
+}
+
+
 td.GameNotesRight {
    vertical-align: middle;
    text-align: left;
