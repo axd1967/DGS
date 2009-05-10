@@ -25,6 +25,11 @@ ChangeLog
 
 2009-05-10 juga
 
+   * bookmark.php, include/std_functions.php (start_page):
+   - added bookmarks in top-bar with 3 requested useful queries
+     - latest forum posts
+     - players & opponents "online"
+
    * include/classlib_game.php (GameScore),
      include/board.php (Board.fill_game_score, ~.create_territories_and_score),
      include/move.php (check_remove),
