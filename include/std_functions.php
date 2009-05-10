@@ -417,21 +417,38 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
-   echo "\n\n<table id=\"pageHead\">"
-      . "\n <tr>"
-      . "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">"
-        . FRIENDLY_LONG_NAME."</A></td>";
+      // forum for bookmark (around table for formatting)
+      echo '<form name="bookmarkForm" action="'.$base_path.'bookmark.php" method="GET">';
 
-   echo "\n  <td class='LoginBox'>";
+      echo "\n\n<table id=\"pageHead\">",
+         "\n <tr>",
+         "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">",
+         FRIENDLY_LONG_NAME."</A>";
 
-   if( $logged_in && !$is_down )
-      echo T_("Logged in as") . ": <A id=\"loggedId\" href=\"{$base_path}status.php\">"
-           . $player_row["Handle"] . "</A>";
-   else
-      echo T_("Not logged in");
+      // bookmarks
+      echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
+         '<select name="jumpto" size="1"',
+               ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
+            '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
+            '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
+            '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
+            '<option value="S3">' . T_('Users online#bookmark') . '</option>',
+         '</select>',
+         '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
+         ;
 
-   echo "</td>"
-      . "\n </tr>\n</table>\n";
+      echo "</td>";
+      echo "\n  <td class='LoginBox'>";
+
+      if( $logged_in && !$is_down )
+         echo T_("Logged in as"),
+            ": <A id=\"loggedId\" href=\"{$base_path}status.php\">", $player_row["Handle"], '</A>';
+      else
+         echo T_("Not logged in");
+
+      echo "</td>",
+         "\n </tr>\n</table>\n",
+         '</form>';
    }
 
    if( !$printable )
