@@ -425,17 +425,20 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">",
          FRIENDLY_LONG_NAME."</A>";
 
-      // bookmarks
-      echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
-         '<select name="jumpto" size="1"',
-               ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
-            '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
-            '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
-            '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
-            '<option value="S3">' . T_('Users online#bookmark') . '</option>',
-         '</select>',
-         '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
-         ;
+      // show bookmarks
+      if( $logged_in )
+      {
+         echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
+            '<select name="jumpto" size="1"',
+                  ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
+               '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
+               '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
+               '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
+               '<option value="S3">' . T_('Users online#bookmark') . '</option>',
+            '</select>',
+            '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
+            ;
+      }
 
       echo "</td>";
       echo "\n  <td class='LoginBox'>";
