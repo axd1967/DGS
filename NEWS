@@ -57,6 +57,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * observers of a game, my/all observed games
          * all/my/other finished and running games
 
+   * Navigation:
+      * Added system bookmarks in top dragon bar
+      * Added <home site_map.php>site-map page</home> into main menu
+
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
       * Show open tournament applications of user
@@ -159,7 +163,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Can show row-number, e.g. on Tournament participants list
 
    * <home docs.php>Docs</home>:
-      * Added site-map page into main menu
       * Added link to statistics page on docs and site-map page
       * Added other credits on <home people.php>peoples page</home>
       * News: added table of contents
