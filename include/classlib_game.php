@@ -175,14 +175,11 @@ class GameScore
       {
          $score_black = $this->territory[GSCOL_BLACK]
                         + $this->prisoners[GSCOL_BLACK]
-                        + 2 * $this->dead_stones[GSCOL_WHITE];
-
+                        - 2 * $this->dead_stones[GSCOL_BLACK];
          $score_white = $this->territory[GSCOL_WHITE]
                         + $this->prisoners[GSCOL_WHITE]
-                        + 2 * $this->dead_stones[GSCOL_BLACK]
+                        - 2 * $this->dead_stones[GSCOL_WHITE]
                         + $this->komi;
-
-         $score = $score_white - $score_black;
       }
       else //if( $mode == GSMODE_AREA_SCORING )
       {
@@ -195,9 +192,8 @@ class GameScore
                         + $this->dead_stones[GSCOL_BLACK]
                         + $this->territory[GSCOL_WHITE]
                         + $this->komi;
-
-         $score = $score_white - $score_black;
       }
+      $score = $score_white - $score_black;
 
       if( $fill_scoring_info )
       {
@@ -214,7 +210,9 @@ class GameScore
             $gscol_rev = ( $gscol == GSCOL_BLACK ) ? GSCOL_WHITE : GSCOL_BLACK;
             $arr = array(
                'stones'      => sprintf( ( $isArea ? '+%s' : '(%s)' ), $this->stones[$gscol] ),
-               'dead_stones' => sprintf( ( $isArea ? '+%s' : '+2*%s' ), $this->dead_stones[$gscol_rev] ),
+               'dead_stones' => ( $isArea )
+                  ? sprintf( '(%s)<br>+%s', $this->dead_stones[$gscol], $this->dead_stones[$gscol_rev] )
+                  : sprintf( '-2*%s', $this->dead_stones[$gscol] ),
                'prisoners'   => sprintf( ( $isArea ? '(%s)' : '+%s' ), $this->prisoners[$gscol] ),
                'territory'   => sprintf( '+%s', $this->territory[$gscol] ),
             );
@@ -224,8 +222,10 @@ class GameScore
          $map['skip_dame'] = $map['skip_stones'] = !$isArea;
          $map['skip_prisoners'] = $isArea;
 
-         $map[GSCOL_BLACK]['extra'] = ( $isArea ) ? sprintf( '-%s %s', $this->handicap, T_('(H)#scoring') ) : '';
-         $map[GSCOL_WHITE]['extra'] = sprintf( '+%s %s', $this->komi, T_('(K)#scoring') );
+         $map[GSCOL_BLACK]['extra'] = ( $isArea && $this->handicap > 0 )
+            ? sprintf( '-%s %s', $this->handicap, T_('(H)#scoring') ) : '';
+         $map[GSCOL_WHITE]['extra'] = ( $this->komi != 0.0 )
+            ? sprintf( '+%s %s', $this->komi, T_('(K)#scoring') ) : '';
          $map[GSCOL_BLACK]['score'] = $score_black;
          $map[GSCOL_WHITE]['score'] = $score_white;
 

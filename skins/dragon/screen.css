@@ -1961,6 +1961,7 @@ table.Scoring {
 table.Scoring th,
 table.Scoring tr.Header td,
 table.Scoring td {
+   vertical-align: top;
    text-align: center;
    border: 1px solid #0c41c9;
 }
