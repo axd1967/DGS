@@ -24,6 +24,7 @@ require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( "include/countries.php" );
 require_once( "include/contacts.php" );
+require_once( "include/classlib_userpicture.php" );
 
 $ThePage = new Page('UserInfo');
 
@@ -167,13 +168,35 @@ $ThePage = new Page('UserInfo');
    } //User infos
 
 
+   if( USERPIC_FOLDER != '' )
+   {//User Picture
+      echo '<a name="pic">';
+      if( is_null($bio_result) )
+      {//User picture hidden by admin (together with bio)
+         if( $count_bio > 0 )
+            echo '<p></p><h3 class=Header>' . T_('User picture (hidden)') . "</h3>\n";
+      }
+      else
+      {
+         list( $tmp,$tmp,$tmp, $pic_url, $pic_exists ) = UserPicture::getPicturePath($row);
+         if( $pic_exists && $pic_url )
+         {
+            $pic_title = sprintf( T_('Picture of user [%s]'), $user_handle);
+            echo '<p></p><h3 class="Header">' . T_('User picture') . "</h3>\n",
+               image( $pic_url, $pic_title, $pic_title );
+         }
+      }
+   }//User Picture
+
+
+   echo '<a name="bio">';
    if( is_null($bio_result) )
    {//Bio infos hidden by admin
       if( $count_bio > 0 )
          echo '<p></p><h3 class=Header>' . T_('Biographical info (hidden)') . "</h3>\n";
    }
    elseif( $count_bio > 0 )
-   {//Bio infos
+   {//Bio infos + User picture
       echo '<p></p><h3 class=Header>' . T_('Biographical info') . "</h3>\n";
 
       $itable= new Table_info('bio');
@@ -205,10 +228,13 @@ $ThePage = new Page('UserInfo');
 
    if( $my_info )
    {
-      $menu_array = array( T_('Edit profile') => 'edit_profile.php',
-                           T_('Change password') => 'edit_password.php',
-                           T_('Edit bio') => 'edit_bio.php',
-                           T_('Edit message folders') => 'edit_folders.php' );
+      $menu_array = array();
+      $menu_array[T_('Edit profile')] = 'edit_profile.php';
+      $menu_array[T_('Change password')] = 'edit_password.php';
+      $menu_array[T_('Edit bio')] = 'edit_bio.php';
+      if( USERPIC_FOLDER != '' )
+         $menu_array[T_('Edit picture')] = 'edit_picture.php';
+      $menu_array[T_('Edit message folders')] = 'edit_folders.php';
 
       $days_left = floor($player_row['VacationDays']);
       $minimum_days = 7 - floor($player_row['OnVacation']);

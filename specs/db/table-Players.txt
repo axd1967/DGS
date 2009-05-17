@@ -87,6 +87,7 @@ Z     SkinName             | varchar(32)                                 | NO   
 Z     MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
 Z     TableMaxRows         | smallint(5) unsigned                        | NO   | 20
 Z     Button               | int(11)                                     | NO   | 0
+Z     UserPicture          | varchar(48)                                 | NO   |
 
 # Fields for board-related GUI-config in ConfigBoard-table:
 

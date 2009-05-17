@@ -432,3 +432,8 @@ CREATE TABLE TournamentRules (
    KEY tid (tid)
 ) ENGINE=MyISAM;
 
+
+-- added user-picture
+ALTER TABLE Players
+   ADD UserPicture varchar(48) NOT NULL default '' ;
+
