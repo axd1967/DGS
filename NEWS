@@ -48,6 +48,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home userinfo.php>User info</home>:
       * Show a users timezone, local time and night start
+      * Added <home userinfo.php#pic>user picture</home> on user-info page
+         * Added page to <home edit_picture.php>edit user picture</home>
+         * Supported image-types: GIF, JPEG, PNG
 
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>
@@ -204,11 +207,12 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Displaying the group-names
 
    * Changes for Admins:
+      * Added tournament-admin
       * Added Adminlog entries for admin user changes, login and login-denied
       * Added filters for showing Errorlog
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
-      * Added tournament-admin
+      * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
       * Removed translations from the admin pages
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
