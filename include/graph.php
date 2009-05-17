@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -39,20 +39,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * TTF_HEIGHT:
  *  adjust it to match the embedded font height
  */
-   define('TTF_PATH', '/var/lib/defoma/fontconfig.d/F/%s.ttf'); // Font path
-   define('TTF_NAME', 'FreeSans-Medium'); //Font name
-   define('TTF_HEIGHT', 10); //Font height
+define('TTF_PATH', '/var/lib/defoma/fontconfig.d/F/%s.ttf'); // Font path
+define('TTF_NAME', 'FreeSans-Medium'); //Font name
+define('TTF_HEIGHT', 10); //Font height
 
 //if( function_exists('imagefilledarc') && defined('IMG_ARC_PIE') )
-   define('GD2_ARC',function_exists('imagefilledarc') && defined('IMG_ARC_PIE'));
+define('GD2_ARC',function_exists('imagefilledarc') && defined('IMG_ARC_PIE'));
 
 if( !defined('M_2PI') )
    define('M_2PI', 2*M_PI);
 
-   //For IMG_COLOR_STYLED alignment = count of imagesetstyle() arrays.
-   define('DASH_MODULO',6); //see setdash()
+//For IMG_COLOR_STYLED alignment = count of imagesetstyle() arrays.
+define('DASH_MODULO',6); //see setdash()
 
-   define('PIE_SHADOW_FACTOR', .70);
+define('PIE_SHADOW_FACTOR', .70);
 
 
    /*! \publicsection */
@@ -286,7 +286,6 @@ function image_passthru( $filename, $modified=null, $expire=null)
  *
  * \brief Class to ease the creation of graphics.
  */
-
 class Graph
 {
    /*! \privatesection */
@@ -942,6 +941,7 @@ class Graph
    /*! \privatesection */
 
 } //class Graph
+
 
 
    /*! \privatesection */
