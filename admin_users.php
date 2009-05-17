@@ -89,9 +89,9 @@ require_once( "include/form_functions.php" );
    $arr_mask_admopts = array( // bitmask for AdminOptions: maskval => [ fieldname, opt-text, descr ]
       //ADMOPT_BYPASS_IP_BLOCK  => array( 'fl_admopt1', 'BYPASS_IP_BLOCK', T_('Bypass IP-Block') ),
       ADMOPT_DENY_LOGIN       => array( 'fl_admopt2', 'DENY_LOGIN',     T_('Deny login') ),
-      ADMOPT_DENY_EDIT_BIO    => array( 'fl_admopt3', 'DENY_EDIT_BIO',  T_('Deny edit bio') ),
+      ADMOPT_DENY_EDIT_BIO    => array( 'fl_admopt3', 'DENY_EDIT_BIO',  T_('Deny edit bio and user picture') ),
       ADMOPT_DENY_VOTE        => array( 'fl_admopt4', 'DENY_VOTE',      T_('Deny vote') ),
-      ADMOPT_HIDE_BIO         => array( 'fl_admopt5', 'HIDE_BIO',       T_('Hide bio') ),
+      ADMOPT_HIDE_BIO         => array( 'fl_admopt5', 'HIDE_BIO',       T_('Hide bio and user picture') ),
       ADMOPT_SHOW_TIME        => array( 'fl_admopt6', 'SHOW_TIME',      T_('Show time') ),
       ADMOPT_FGROUP_ADMIN     => array( 'fl_admopt7', 'FGR_ADMIN',      T_('View ADMIN-forums') ),
       ADMOPT_FGROUP_DEV       => array( 'fl_admopt8', 'FGR_DEV',        T_('View DEV-forums') ),
