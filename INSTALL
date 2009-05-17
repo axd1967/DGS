@@ -123,6 +123,18 @@ Find out which group your webserver is using (e.g. www-data).
   chmod 775 temp
   su -c 'chgrp www-data temp'
 
+* Create a directory to store user-pictures with write-access by the webserver.
+  You can create a sub-directory in the document-root or use an alias /userpic
+  pointing to a folder to store images. Adjust USERPIC_FOLDER in the local
+  config-file.
+
+  # Example using CACHE_FOLDER from above as storage:
+  # (assert that URL-part '/userpic' points to USERPIC_FOLDER-directory
+  mkdir temp/userpic
+  ln -s temp/userpic .
+  su -c 'chgrp www-data temp/userpic'
+  su -c 'chmod g+ws temp/userpic'
+
 * Eventually you need to adjust the used timezone.
   This can be done by creating a file in the dragon-root:
 
