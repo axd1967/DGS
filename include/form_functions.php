@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* The code in this file is written by Ragnar Ouchterlony */
 
+require_once( 'include/std_functions.php' );
+
  /*!
   * \file form_functions.php
   *
@@ -51,6 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   * <li> Checkbox
   * <li> Submitbutton
   * <li> SubmitbuttonX
+  * <li> File           --- File-Upload
   * <li> Text
   * <li> Header  --- Creates a header line.
   * <li> Chapter --- Creates a chapter line.
@@ -165,6 +168,8 @@ class Form
    var $method;
    /*! \brief The form class, default 'FormClass'. */
    var $fclass;
+   /*! \brief Additional form-attributes, default (). */
+   var $form_attributes;
    /*! \brief Additional config for the form (with influence to layouting form-elements). */
    var $config;
 
@@ -225,6 +230,7 @@ class Form
       $this->action = $action_page;
       $this->method = $method;
       $this->fclass = $class;
+      $this->form_attributes = array();
       $this->config = array();
       $this->echo_form_start_now = $echo_form_start_now;
 
@@ -341,6 +347,12 @@ class Form
                                   'EndTD'   => false,
                                   'SpanAllColumns' => true,
                                   'Attbs'   => array('class'=>'FormSubmitbutton') ),
+         'FILE'         => array( 'NumArgs' => 5,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => true,
+                                  'Attbs'   => array('class'=>'FormFileUpload') ),
          'SPACE'        => array( 'NumArgs' => 0,
                                   'NewTD'   => false,
                                   'StartTD' => false,
@@ -407,6 +419,19 @@ class Form
          echo $this->print_start_default();
    } //Form
 
+
+   /*! \brief Sets additional form-attributes. */
+   function set_form_attributes( $attributes )
+   {
+      assert( is_array($attributes) && !is_null($attributes) );
+      $this->form_attributes = $attributes;
+   }
+
+   /*! \brief Adds additional form-attribute. */
+   function add_form_attribute( $key, $value )
+   {
+      $this->form_attributes[$key] = $value;
+   }
 
    /*! \brief add additional form-config. */
    function set_config( $name, $value )
@@ -667,13 +692,6 @@ class Form
          return $rootformstr;
       }
 
-      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now )
-         $rootformstr .= $this->print_start_default();
-
-      $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
-      $table_attbs = $this->get_form_attbs( $table_attbs);
-      $rootformstr .= "<TABLE $table_attbs>\n"; //form table
-
       ksort($this->rows);
 
       // prepare area-grouping
@@ -787,6 +805,14 @@ class Form
             $area_rows[$curr_area] .= $formstr;
          }
       }
+
+      // start default-form here because above loop may add additional form-attributes
+      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now )
+         $rootformstr .= $this->print_start_default();
+
+      $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
+      $table_attbs = $this->get_form_attbs( $table_attbs);
+      $rootformstr .= "<TABLE $table_attbs>\n"; //form table
 
       // build area-groups
       if( $has_layout )
@@ -1060,6 +1086,16 @@ class Form
    }
 
    /*!
+    * \brief Function for making file-upload string in the standard form
+    * \internal
+    */
+   function create_string_func_file( &$result, $args )
+   {
+      $this->add_form_attribute( 'enctype', 'multipart/form-data' );
+      $result .= $this->print_insert_file( $args[0], $args[1], $args[2], $args[3], $args[4] );
+   }
+
+   /*!
     * \brief Function for making vertical space string in the standard form
     * \internal
     */
@@ -1158,21 +1194,29 @@ class Form
     * \param $name        The name of the form, might be useful for scripting.
     * \param $action_page The page to access when submitting.
     * \param $method      FORM_GET or FORM_POST (GET means in url and POST hidden).
+    * \param $attributes  key-value array with additional form-attributes; or null
     * \param $class       CSS-class, default FormClass
     */
-   function print_start( $name, $action_page, $method, $class='FormClass' )
+   function print_start( $name, $action_page, $method, $attributes=null, $class='FormClass' )
    {
       assert( $method == FORM_GET || $method == FORM_POST );
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
+      $attrib_str = '';
+      if( is_array($attributes) )
+      {
+         foreach( $attributes as $key => $value )
+            $attrib_str .= sprintf( ' %s="%s"', $key, $value );
+      }
+
       return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
-         " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\">";
+         " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\"$attrib_str>";
    }
 
    function print_start_default()
    {
       return $this->print_start( $this->name, $this->action
-            , $this->method, $this->fclass);
+            , $this->method, $this->form_attributes, $this->fclass);
    }
 
    /*!
@@ -1406,6 +1450,44 @@ class Form
       $str = Form::parse_input_standard_attributes($attbs);
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
          $this->get_input_attbs() . $str . ">";
+   }
+
+   /*!
+    * \brief This will insert a file-upload input-box in a standard form.
+    *
+    * NOTE:
+    * - If you are build your own form using this function,
+    *   you will need 'enctype="multipart/form-data"' as form-attribute
+    *   to bring the file-upload correctly to work.
+    * - This is done automatically if added to this Forum with add_row(..).
+    * - Also this does not work automatically if Form is constructed
+    *   with $echo_form_start_now=true.
+    *
+    * \param $name     The field name that will be used as the variable name
+    *                  in the GET or POST.
+    * \param $size     field-box size
+    * \param $maxlenth maximum length of uploaded file (not implemented by most browser),
+    *                  0 to use no maxlength (=default)
+    * \param $accept   what MIME-types are accepted (not implemented by most browser),
+    *                  e.g. 'image/*', 'text/*' (default is '')
+    * \param $with_maxsize if true, add hidden with name MAX_FILE_SIZE directly
+    *                  before file-upload according to
+    *                  http://de2.php.net/manual/en/features.file-upload.post-method.php
+    */
+   function print_insert_file( $name, $size, $maxlength=0, $accept='', $with_maxsize=false )
+   {
+      $result = '';
+      $str = '';
+      if( $maxlength > 0 )
+      {
+         $str .= sprintf( ' maxlength="%s"', $maxlength );
+         if( $with_maxsize )
+            $result .= Form::print_insert_hidden_input( 'MAX_FILE_SIZE', $maxlength );
+      }
+      if( $accept != '' )
+         $str .= sprintf( ' accept="%s"', $accept );
+      $result .= "<INPUT type=\"file\" name=\"$name\" size=\"$size\"" . $str . ">";
+      return $result;
    }
 
    /*!
