@@ -93,6 +93,11 @@ class TournamentUtils
          return limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
    }
 
+   function isNumberOrEmpty( $value )
+   {
+      return ((string)$value == '') || preg_match( "/^\d+$/", $value );
+   }
+
 } // end of 'TournamentUtils'
 
 ?>

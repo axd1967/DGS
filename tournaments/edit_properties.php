@@ -228,13 +228,13 @@ function parse_edit_form( &$tpr, $not_saved )
          $errors[] = $parsed_value;
 
       $new_value = $vars['min_participants'];
-      if( isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tpr->MinParticipants = limit( $new_value, 0, 99999, 0 );
       else
          $errors[] = T_('Expecting positive number for minimum participants');
 
       $new_value = $vars['max_participants'];
-      if( isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tpr->MaxParticipants = limit( $new_value, 0, 99999, 0 );
       else
          $errors[] = T_('Expecting positive number for maximum participants');
@@ -245,13 +245,13 @@ function parse_edit_form( &$tpr, $not_saved )
       $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
 
       $new_value = $vars['min_games_finished'];
-      if( isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tpr->UserMinGamesFinished = limit( $new_value, 0, 9999, 0 );
       else
          $errors[] = T_('Expecting positive number of finished games');
 
       $new_value = $vars['min_games_rated'];
-      if( isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tpr->UserMinGamesRated = limit( $new_value, 0, 9999, 0 );
       else
          $errors[] = T_('Expecting positive number of rated finished games');
@@ -289,10 +289,5 @@ function parse_edit_form( &$tpr, $not_saved )
    }
 
    return array( $vars, array_unique($edits), ( count($errors) ? $errors : NULL ) );
-}
-
-function isNumberOrEmpty( $value )
-{
-   return ((string)$value == '') || preg_match( "/^\d+$/", $value );
 }
 ?>
