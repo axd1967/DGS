@@ -430,6 +430,19 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case('upload_miss_temp_folder'):
+      {
+         // Introduced in PHP 4.3.10 and PHP 5.0.3
+         echo T_("Sorry, missing a temporary folder to upload files. Please contact the administrators.");
+      }
+      break;
+
+      case('upload_failed'):
+      {
+         echo T_("Sorry, the file upload failed.");
+      }
+      break;
+
       case("not_your_turn"):
       {
          echo T_("Sorry, it's not your turn.");
@@ -723,6 +736,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       case('tournament_register_not_allowed'):
       {
          echo T_("Sorry, you are not allowed to register for this tournament.");
+      }
+      break;
+
+      case('tournament_miss_rules'):
+      {
+         echo T_("Sorry, missing configured rules-set for this tournament.");
       }
       break;
 
