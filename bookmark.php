@@ -37,6 +37,8 @@ require_once( "include/std_functions.php" );
       'S2' => 'opponents.php?ssf4=1&sf14=10&sf14tu=64&sort1=X_Lastaccess&desc1=1',
       // users "online" during the last 5 mins
       'S3' => 'users.php?sf14=5&sf14tu=64&sort1=P.Lastaccess&active=0',
+      // shortcut to editing profile
+      'S4' => 'edit_profile.php',
    );
 
    // get and check args

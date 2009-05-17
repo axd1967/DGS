@@ -435,6 +435,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
                '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
                '<option value="S3">' . T_('Users online#bookmark') . '</option>',
+               '<option value="S4">' . T_('Edit profile#bookmark') . '</option>',
             '</select>',
             '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
             ;
