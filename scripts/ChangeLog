@@ -23,10 +23,54 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-05-17 juga
+
+   * admin_show_users.php, admin_users.php:
+   - enhanced admin-options DENY_HIDE_BIO and DENY_EDIT_BIO to restrict
+     user-picture too
+
+   * include/classlib_upload.php (ImageFileUpload),
+     include/classlib_userpicture.php (UserPicture),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Players.txt,
+     include/config.php, INSTALL,
+     edit_picture.php, error.php, userinfo.php, NEWS:
+   - added user-picture on user-info page (support for GIF, JPEG, PNG)
+   - added page to add or remove user-picture
+   - restricted filesize and image dimensions
+   - added config for USERPIC_FOLDER to store uploaded user-pictures,
+     only use if USERPIC_FOLDER-config set
+-----------
+-- added user-picture
+ALTER TABLE Players
+   ADD UserPicture varchar(48) NOT NULL default '' ;
+-----------
+
+   * include/form_functions.php (Form, ~.set_form_attributes, ~.add_form_attribute,
+       ~.create_form_string, ~.create_string_func_file, ~.print_start,
+       ~.print_start_default, ~.print_insert_file):
+   - needed for user-picture file-upload:
+     - added neccessary form-attributes and form-element for FILE-upload-inputbox
+     - enhanced signature of print_start(_default) with additional form-attributes,
+       create_form_string: changed order of building form-string
+
+   * tournaments/edit_properties.php (isNumberOrEmpty),
+     tournaments/include/tournament_utils.php (TournamentUtils.isNumberOrEmpty):
+   - cleanup: moved isNumberOrEmpty() to TournamentUtils::isNumberOrEmpty()
+
+   * tournaments/edit_director.php, tournaments/list_directors.php:
+   - added link to manage tournament
+
+   * error.php:
+   - added tournament-rules errors: tournament_miss_rules
+
+   * include/std_functions.php (start_page), bookmark.php:
+   - added system-bookmark to edit-profile as shortcut
+
 2009-05-10 juga
 
-   * bookmark.php, include/std_functions.php (start_page):
-   - added bookmarks in top-bar with 3 requested useful queries
+   * bookmark.php, include/std_functions.php (start_page), NEWS:
+   - added bookmarks in top-bar with 3 most requested queries
      - latest forum posts
      - players & opponents "online"
 
