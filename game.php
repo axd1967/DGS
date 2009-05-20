@@ -1172,7 +1172,7 @@ function draw_score_box( $game_score )
    echo sprintf( $fmtline3, 'Header', T_('Extra#scoring'),
                $score_info[GSCOL_BLACK]['extra'],
                $score_info[GSCOL_WHITE]['extra'] ),
-      sprintf( $fmtline3, 'HeaderSum', T_('Scores#scoring'),
+      sprintf( $fmtline3, 'HeaderSum', T_('Score#scoring'),
                $score_info[GSCOL_BLACK]['score'],
                $score_info[GSCOL_WHITE]['score'] ),
       sprintf( $fmtline2, 'HeaderSum', T_('Difference#scoring'), $score_info['score'] ),
