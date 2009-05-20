@@ -233,7 +233,7 @@ $ThePage = new Page('UserInfo');
       $menu_array[T_('Change password')] = 'edit_password.php';
       $menu_array[T_('Edit bio')] = 'edit_bio.php';
       if( USERPIC_FOLDER != '' )
-         $menu_array[T_('Edit picture')] = 'edit_picture.php';
+         $menu_array[T_('Edit user picture')] = 'edit_picture.php';
       $menu_array[T_('Edit message folders')] = 'edit_folders.php';
 
       $days_left = floor($player_row['VacationDays']);
