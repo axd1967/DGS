@@ -90,6 +90,8 @@ class ImageFileUpload
    var $image_x;
    var $image_y;
    var $image;
+   /*! \brief true, if image needs resizing to fit save-limits. */
+   var $need_resize; // true, if image too large
 
    /*!
     * \brief Constructs ImageFileUpload-object initializing vars with sizes and performing
@@ -117,6 +119,7 @@ class ImageFileUpload
       $this->image_mimetype = '';
       $this->image_x = 0;
       $this->image_y = 0;
+      $this->need_resize = false;
 
       // general check
       $this->checkFileUploadError( $arr_file['error'] );
@@ -176,7 +179,7 @@ class ImageFileUpload
             break;
       }
 
-      // check file-size
+      // check file-size (max. upload-size)
       $filesize = filesize($this->file_src_tmpfile);
       if( $errorcode != UPLOAD_ERR_FORM_SIZE && $this->max_upload_size > 0
             && $filesize > $this->max_upload_size )
@@ -186,6 +189,11 @@ class ImageFileUpload
                $this->file_src_clientfile, $this->max_upload_size );
       }
 
+      // check file-size (max. store-size)
+      $this->need_resize = false;
+      if( $this->max_bytes > 0 && $filesize > $this->max_bytes )
+         $this->need_resize = true;
+
       if( $this->has_error() )
          $this->is_uploaded = false;
    }
@@ -194,6 +202,7 @@ class ImageFileUpload
     * \brief Checks image-properties of uploaded file, that is check image-type
     *        against expected image-types and check image dimensions (width and height).
     * \param expected_imagetypes array with allowed IMAGETYPE_...
+    * \note Sets this->need_resize/image_x/image_y/image_type
     * \return true if no error; false otherwise (this->errors filled accordingly)
     */
    function checkImageFileUpload( $expected_imagetypes )
@@ -223,11 +232,17 @@ class ImageFileUpload
 
       // check image dimensions
       if( $this->max_x > 0 && $this->image_x > $this->max_x )
+      {
          $this->errors[] = sprintf( T_('The width [%s] of the uploaded image-file [%s] exceeds the limit of [%s pixels].'),
                $this->image_x, $this->file_src_clientfile, $this->max_x );
+         $this->need_resize = true;
+      }
       if( $this->max_y > 0 && $this->image_y > $this->max_y )
+      {
          $this->errors[] = sprintf( T_('The height [%s] of the uploaded image-file [%s] exceeds the limit of [%s pixels].'),
-               $this->image_y, $this->file_src_clientfile, $this->may_y );
+               $this->image_y, $this->file_src_clientfile, $this->max_y );
+         $this->need_resize = true;
+      }
 
       return !$this->has_error();
    }
@@ -246,20 +261,163 @@ class ImageFileUpload
     * \param path_dest absolute server-pathname (with filename) to store image to
     * \return true on success; false on error (this->errors filled accordingly)
     */
-   function uploadImageFile( $path_dest )
+   function uploadImageFile( $path_dest, $size_factor=1.0 )
    {
       if( !$this->is_uploaded || $this->has_error() )
          return false;
 
-      // no conversion needed, just store image
       $success = false;
-      if( move_uploaded_file($this->file_src_tmpfile, $path_dest) )
-         $success = true;
+      if( $size_factor == 1.0 )
+      {
+         // no conversion needed, just store image
+         if( move_uploaded_file($this->file_src_tmpfile, $path_dest) )
+            $success = true;
+         else
+            $this->errors[] = sprintf( T_('The uploaded file [%s] can not be stored.'),
+                  $this->file_src_clientfile );
+      }
       else
-         $this->errors[] = sprintf( T_('The uploaded file [%s] can not be stored.'),
-               $this->file_src_clientfile );
+      {
+         $success = $this->resizeImage($size_factor);
+         if( $success )
+            $success = $this->writeImage($path_dest);
+      }
 
       return $success;
+   }
+
+   /*! \brief Loads image from temp-file as GD-image, store data in this->image and dimensions in this->image_x/y. */
+   function loadImage()
+   {
+      switch( $this->image_type )
+      {
+         case IMAGETYPE_GIF:
+            $this->image = @imagecreatefromgif($this->file_src_tmpfile);
+            break;
+         case IMAGETYPE_JPEG:
+            $this->image = @imagecreatefromjpeg($this->file_src_tmpfile);
+            break;
+         case IMAGETYPE_PNG:
+            $this->image = @imagecreatefrompng($this->file_src_tmpfile);
+            break;
+         default:
+            error('upload_failed', "ImageFileUpload.loadImage({$this->image_type})");
+            break;
+      }
+
+      // get image-infos
+      $this->image_x = imagesx($this->image);
+      $this->image_y = imagesy($this->image);
+
+      return !$this->has_error();
+   }
+
+   function newImage( $width, $height )
+   {
+      $image_new = imagecreate($width, $height);
+      return $image_new;
+   }
+
+   /*!
+    * \brief Resize uploaded image with given size-factor.
+    * \param size_factor <1.0 shrink, >1.0 enlarge
+    */
+   function resizeImage( $size_factor )
+   {
+      if( $size_factor == 1 )
+         error('invalid_args', "ImageFileUpload.resizeImage.check($size_factor)");
+
+      $this->loadImage();
+
+      // calc new size
+      $newx = round($size_factor * $this->image_x);
+      $newy = round($size_factor * $this->image_y);
+
+      // check new-image dimensions
+      $this->need_resize = false;
+      if( $newx < 2 ) $newx = 2;
+      if( $newy < 2 ) $newy = 2;
+      if( $newx > $this->max_x )
+      {
+         $this->errors[] = sprintf( T_('The width [%s] of the resized image [%s] exceeds the limit of [%s pixels].'),
+               $newx, $this->file_src_clientfile, $this->max_x );
+         $this->need_resize = true;
+      }
+      if( $newy > $this->max_y )
+      {
+         $this->errors[] = sprintf( T_('The height [%s] of the resized image [%s] exceeds the limit of [%s pixels].'),
+               $newy, $this->file_src_clientfile, $this->max_y );
+         $this->need_resize = true;
+      }
+      if( $this->need_resize )
+         return false;
+
+      // create new image + resize (NOTE: "resampling" needs GDv2)
+      $image_resized = imagecreate($newx, $newy); // may depend on image-type
+      $success = imagecopyresampled($image_resized, $this->image, 0,0, 0,0,
+                                    $newx,$newy, $this->image_x,$this->image_y);
+
+      // cleanup
+      if( $success )
+      {
+         $src_image = $this->image;
+         $this->image = $image_resized;
+         $this->image_x = imagesx($this->image);
+         $this->image_y = imagesy($this->image);
+         imagedestroy($src_image);
+      }
+      else
+      {
+         imagedestroy($image_resized);
+      }
+
+      return $success;
+   }
+
+   /*!
+    * \brief Writes this->image to given path and filename.
+    * \note image-file will be removed, if image-file still too large (after resizing).
+    */
+   function writeImage( $path_dest_image )
+   {
+      switch( $this->image_type )
+      {
+         case IMAGETYPE_GIF:
+            $success = @imagegif($this->image, $path_dest_image);
+            break;
+         case IMAGETYPE_JPEG:
+            $success = @imagejpeg($this->image, $path_dest_image);
+            break;
+         case IMAGETYPE_PNG:
+            //TODO ??
+            //needed? imagealphablending($image_resized, false);
+            //needed? imagesavealpha($image_resized, true);
+            $success = @imagepng($this->image, $path_dest_image);
+            break;
+         default:
+            error('upload_failed', "ImageFileUpload.writeImage({$this->image_type})");
+            $success = false;
+            break;
+      }
+      if( !$success )
+         return false;
+
+      // check new filesize (max. save-size)
+      $this->need_resize = false;
+      $filesize = @filesize($path_dest_image);
+      if( $this->max_bytes > 0 && $filesize > $this->max_bytes )
+      {
+         $this->errors[] = sprintf( T_('The resized image [%s] exceeds the max.'
+               . 'file size of [%s bytes] for storage.'),
+               $this->file_src_clientfile, $this->max_bytes );
+         $this->need_resize = true;
+      }
+
+      // cleanup (remove file if too large for storage)
+      if( $this->need_resize && file_exists($path_dest_image) )
+         @unlink($path_dest_image);
+
+      return !$this->has_error();
    }
 
    /*! \brief Cleans up GD-resource and temp-file. */
@@ -313,32 +471,4 @@ class ImageFileUpload
    }
 
 } // end of 'ImageFileUpload'
-
-/*
-   ### future: resizing
-
-   // if conversion wanted, load as gd-image;
-   $image = @imagecreatefromjpeg($path_image);
-   $image = @imagecreatefrompng($path_image);
-   $image = @imagecreatefromgif($path_image);
-   $x/y = imagesx/y($image);
-
-   // calc new dimensions + check, create new image + resize
-   // x/y min. 2
-   $image_resized = imagecreate($newx, $newy); // may depend on image-type
-   // expect GDv2
-   $success = imagecopyresampled($image_resized, $image, 0,0, 0,0, $newx,$newy, $x,$y);
-
-   // write image (JPEG)
-   $success = @imagejpeg($image_resized, $path_new [, $jpeg_qual]); // JPEG
-
-   // write image (PNG)
-   //needed? imagealphablending($image_resized, false);
-   //needed? imagesavealpha($image_resized, true);
-   $success = @imagepng($image_resized, $path_new);
-
-   // write image (GIF)
-   $success = @imagegif($image_resized, $path_new);
-
-*/
 ?>
