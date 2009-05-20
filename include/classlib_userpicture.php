@@ -34,8 +34,7 @@ require_once( 'include/classlib_upload.php' );
  * \brief Class to handle user-pictures.
  */
 
-define('USERPIC_MAXSIZE_UPLOAD', 100000); // 100KB, may be resized
-define('USERPIC_MAXSIZE_SAVE', 30000); // max. 30KB stored, may need resizing
+define('USERPIC_MAXSIZE_UPLOAD', 30*1024); // max. 30KB stored, keep factor of 1024
 define('USERPIC_MAX_X', 800); // pixels
 define('USERPIC_MAX_Y', 800); // pixels
 

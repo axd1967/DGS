@@ -43,9 +43,9 @@ require_once( 'include/gui_functions.php' );
       error('edit_bio_denied');
 
 /* Actual REQUEST calls used:
-     (no args)                           : add/edit user picture
-     pic_save&file_userpic=&size_factor= : replace user picture in file-system
-     pic_delete                          : remove user picture
+     (no args)              : add/edit user picture
+     pic_save&file_userpic= : replace user picture in file-system
+     pic_delete             : remove user picture
 */
 
    // delete picture
@@ -55,9 +55,6 @@ require_once( 'include/gui_functions.php' );
       jump_to("edit_picture.php?sysmsg=". urlencode(T_('User picture removed!')) );
    }
 
-   // init
-   $size_factor = get_request_arg('size_factor', 1); // with default
-
    // upload, check and save picture
    $errors = null;
    $upload = null;
@@ -65,15 +62,14 @@ require_once( 'include/gui_functions.php' );
    {
       // update picture and db with values from edit-form
       $upload = new ImageFileUpload( $_FILES['file_userpic'],
-            USERPIC_MAXSIZE_UPLOAD, USERPIC_MAXSIZE_SAVE,
-            USERPIC_MAX_X, USERPIC_MAX_Y );
+            USERPIC_MAXSIZE_UPLOAD, USERPIC_MAX_X, USERPIC_MAX_Y );
       if( $upload->is_uploaded && !$upload->has_error() )
       {
          $pic_ext = $upload->determineFileExtension();
          list( $path_dest, $_picdir, $pic_file, $_picurl, $_picexists, $cache_suffix )
             = UserPicture::getPicturePath( $my_id, $pic_ext, false);
 
-         if( $upload->uploadImageFile($path_dest, $size_factor) )
+         if( $upload->uploadImageFile($path_dest) )
          {
             @$upload->cleanup();
             UserPicture::update_picture($pic_file, $cache_suffix);
@@ -108,10 +104,6 @@ require_once( 'include/gui_functions.php' );
    $pform->add_row( array(
       'DESCRIPTION', T_('Upload picture'),
       'FILE',        'file_userpic', 40, USERPIC_MAXSIZE_UPLOAD, 'image/*', true ));
-   $pform->add_row( array(
-      'DESCRIPTION', T_('Size factor'),
-      'TEXTINPUT',   'size_factor', 5, 5, $size_factor,
-      'TEXT',        MINI_SPACING . T_('(Format: 0.5 = halve, 1 = no change, 2 = double)') ));
 
    if( $errors )
    {
@@ -147,12 +139,7 @@ require_once( 'include/gui_functions.php' );
 
    $notes = array();
    $notes[] = sprintf( T_('Limits on uploaded image-file: max. %s x %s pixels and max. %s KB'),
-      USERPIC_MAX_X, USERPIC_MAX_Y, ROUND(10*USERPIC_MAXSIZE_SAVE/1024)/10 );
-   $notes[] = sprintf( T_('Images up to %s KB can be resized to stay within the limits.'),
-      ROUND(10*USERPIC_MAXSIZE_UPLOAD/1024)/10 );
-   $notes[] = T_('Resizing is only possible on newly uploaded image.');
-   $notes[] = T_("Specify a size-factor to resize image: >1.0 to enlarge, <1.0 to shrink.\n"
-      . "Examples: 0.1 = shrink to 10% of original x/y-size, 2 = double size");
+      USERPIC_MAX_X, USERPIC_MAX_Y, ROUND(10*USERPIC_MAXSIZE_UPLOAD/1024)/10 );
    echo_notes( 'edituserpic', T_('User picture notes'), $notes );
 
    end_page();
