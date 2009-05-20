@@ -142,6 +142,7 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('My lost games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=2", true);
          item(T_('Edit profile'), "edit_profile.php", true);
          item(T_('Edit biographical info'), "edit_bio.php", true);
+         item(T_('Edit user picture'), "edit_picture.php", true);
          item(T_('Change password'), "edit_password.php", true);
          item(T_('Edit vacation'), "edit_vacation.php", true);
          item(T_('Show my opponents'), "opponents.php", true, true);
