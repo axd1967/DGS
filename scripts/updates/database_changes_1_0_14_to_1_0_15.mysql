@@ -437,3 +437,9 @@ CREATE TABLE TournamentRules (
 ALTER TABLE Players
    ADD UserPicture varchar(48) NOT NULL default '' ;
 
+
+-- allow longer Feature-subject
+ALTER TABLE FeatureList
+   CHANGE Subject Subject varchar(255) NOT NULL ;
+
+
