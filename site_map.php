@@ -236,6 +236,16 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('License'), "licence.php", true, true);
       } $item_level--;
 
+      if( ALLOW_FEATURE_VOTE )
+      {
+         item(T_('Vote'), "features/list_votes.php", true);
+         { $item_level++;
+            item(T_('Show feature votes'), "features/list_votes.php", true);
+            item(T_('Vote on features'), "features/list_features.php", true);
+            item(T_('Vote on feature'), "features/vote_feature.php", false, true);
+         } $item_level--;
+      }
+
       if( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);
       if( @$player_row['Translator'] )
