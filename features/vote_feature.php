@@ -162,8 +162,8 @@ require_once( "features/lib_votes.php" );
    echo "</CENTER><BR>\n";
 
    $menu_array = array();
-   $menu_array[T_('Show features')] = "features/list_features.php";
-   $menu_array[T_('Show votes')]    = "features/list_votes.php";
+   $menu_array[T_('Vote on features')] = "features/list_features.php";
+   $menu_array[T_('Show feature votes')] = "features/list_votes.php";
    if( Feature::is_admin() )
    {
       $menu_array[T_('Add new feature')] =
