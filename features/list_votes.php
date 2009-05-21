@@ -76,7 +76,6 @@ require_once( "features/lib_votes.php" );
    $vtable->add_tablehead(11, T_('#Votes#header'),      'Number', 0, 'countVotes-');
    $vtable->add_tablehead(12, T_('#Y#header'),          'Number', 0, 'countYes-');
    $vtable->add_tablehead(13, T_('#N#header'),          'Number', 0, 'countNo-');
-   $vtable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
 
    $vtable->set_default_sort(10); //on sumPoints
    $order = $vtable->current_order_string();
@@ -91,7 +90,7 @@ require_once( "features/lib_votes.php" );
 
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
 
-   $title = T_('Feature vote list');
+   $title = T_('Voted feature list');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
@@ -115,9 +114,7 @@ require_once( "features/lib_votes.php" );
       if( $vtable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
       if( $vtable->Is_Column_Displayed[4] )
-         $frow_strings[4] = make_html_safe($feature->subject, true);
-      if( $vtable->Is_Column_Displayed[6] )
-         $frow_strings[6] = ($feature->lastchanged > 0 ? date(DATEFMT_VOTELIST, $feature->lastchanged) : '' );
+         $frow_strings[4] = make_html_safe( wordwrap($feature->subject, 60), true);
 
       // FeatureVote-fields
       if( $vtable->Is_Column_Displayed[10] )
@@ -137,9 +134,10 @@ require_once( "features/lib_votes.php" );
    // end of table
 
    $menu_array = array();
-   $menu_array[T_('Show features')] = "features/list_features.php";
+   $menu_array[T_('Vote on features')] = "features/list_features.php";
    if( Feature::is_admin() )
-      $menu_array[T_('Add new feature')] = "features/edit_feature.php";
+      $menu_array[T_('Add new feature')] =
+         array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }
