@@ -71,6 +71,7 @@ $NOW = time() + (int)$timeadjust;
 define('DATE_FMT', 'Y-m-d H:i');
 define('DATE_FMT2', 'Y-m-d&\n\b\s\p;H:i');
 define('DATE_FMT3', 'Y-m-d&\n\b\s\p;H:i:s');
+define('DATE_FMT4', 'YmdHis');
 define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
 
 define('SESSION_DURATION', 3600*12*61); // 1 month
