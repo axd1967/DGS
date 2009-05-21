@@ -90,7 +90,7 @@ require_once( "features/lib_votes.php" );
 
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
 
-   $title = T_('Voted feature list');
+   $title = T_('Feature vote list');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
