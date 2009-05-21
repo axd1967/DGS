@@ -25,6 +25,12 @@ ChangeLog
 
 2009-05-21 juga
 
+   * include/std_functions.php, admin_admins.php, admin_show_users.php,
+     features/lib_votes.php (Feature.delete_feature, ~.is_admin),
+     features/edit_feature.php, NEWS:
+   - added voting-admin (ADMIN_VOTE) as admin-executive
+   - allow feature-deletion & editor-showing to voting-admin
+
    * include/std_functions.php (start_page, make_menu_horizontal, make_menu_vertical):
    - allowed multi-texts in std-menu
    - changed Vote-link referring to feature-vote-results
