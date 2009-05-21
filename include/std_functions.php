@@ -124,6 +124,7 @@ define('GRAPH_RATING_MIN_INTERVAL', 2*31*24*3600);
 // see also CACHE_FOLDER in config.php
 define('CACHE_EXPIRE_GRAPH', 24*3600); //1 day
 
+define('MENU_MULTI_SEP', ' / ');
 
 define('BUTTON_WIDTH', 96);
 $button_max = 11;
@@ -460,6 +461,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
       // NOTE: row-number can be skipped, only for ordering
+      // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..)
       $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
       $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
       if( ALLOW_TOURNAMENTS )
@@ -481,7 +483,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
       if( ALLOW_FEATURE_VOTE )
-         $menu->add( 5,1, array( T_('Vote'), 'features/list_features.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+         $menu->add( 5,1, array( T_('Vote'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
       if( ALLOW_GOBAN_EDITOR )
          $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
@@ -754,12 +756,26 @@ function make_menu_horizontal($menu)
    {
       for( $col=1; $col <= $cols; $col++ )
       {
-         // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
          $menuitem = $menu->get_entry( $col, $row );
-         if( !is_null($menuitem) )
+         if( !is_null($menuitem) ) // matrix-point unset
          {
-            @list( $text, $link, $attbs ) = $menuitem;
-            $content = anchor( $base_path.$link, $text, '', $attbs);
+            if( is_array($menuitem[0]) )
+            {
+               // object = arr( arr( itemtext, itemlink, arr( accesskey/class => value )), ...) for multi-items
+               $content = '';
+               foreach( $menuitem as $mitem )
+               {
+                  @list( $text, $link, $attbs ) = $mitem;
+                  if( $content != '' ) $content .= MENU_MULTI_SEP;
+                  $content .= anchor( $base_path.$link, $text, '', $attbs);
+               }
+            }
+            else
+            {
+               // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+               @list( $text, $link, $attbs ) = $menuitem;
+               $content = anchor( $base_path.$link, $text, '', $attbs);
+            }
          }
          else
             $content = '';
@@ -816,9 +832,24 @@ function make_menu_vertical($menu)
       $menuitems = $menu->get_y_entries( $x );
       foreach( $menuitems as $menuitem )
       {
-         // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
-         @list( $text, $link, $attbs ) = $menuitem;
-         echo anchor( $base_path.$link, $text, '', $attbs);
+         if( is_array($menuitem[0]) )
+         {
+            // object = arr( arr( itemtext, itemlink, arr( accesskey/class => value )), ...) for multi-items
+            $is_first = true;
+            foreach( $menuitem as $mitem )
+            {
+               @list( $text, $link, $attbs ) = $mitem;
+               if( !$is_first ) echo MENU_MULTI_SEP;
+               $is_first = false;
+               echo anchor( $base_path.$link, $text, '', $attbs);
+            }
+         }
+         else
+         {
+            // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+            @list( $text, $link, $attbs ) = $menuitem;
+            echo anchor( $base_path.$link, $text, '', $attbs);
+         }
          echo '<br>';
       }
    }
