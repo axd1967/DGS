@@ -102,7 +102,7 @@ require_once( "features/lib_votes.php" );
 
    $show_rows = $ftable->compute_show_rows(mysql_num_rows($result));
 
-   $title = T_('Feature list');
+   $title = T_('Features to vote on');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
