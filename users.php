@@ -64,7 +64,7 @@ require_once( 'include/classlib_userpicture.php' );
    $search_profile = new SearchProfile( $uid, $profile_type );
    $ufilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'name|user|active' ); // named-filters FC_FNAME
-   $utable = new Table( 'user', $page, $cfg_tblcols );
+   $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROW_NUM );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
