@@ -8,7 +8,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    New features and Major changes:
 
    * <home tournaments/list.php>Tournaments</home>:
-      * Added Tournaments-link into main menu (access-key [t])
+      * Added Tournaments-link into main-menu (access-key [t])
       * Added Round-Robin Tournaments with public scopes:
         Dragon (official Dragon tournaments), Public
       * Added page to manage tournament
@@ -63,7 +63,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Navigation:
       * Added system bookmarks in top dragon bar
-      * Added <home site_map.php>site-map page</home> into main menu
+      * Added <home site_map.php>site-map page</home> into main-menu
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
@@ -104,7 +104,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
             * User can mark single posts as read: 'mark read'-link on new post
             * User can mark all posts as read: 'mark all read'-link
 
-   * <home features/list_features.php>Feature-Voting</home> including feature status management
+   * <home features/list_features.php>Voting on features</home> including feature status management
+      * <home features/list_votes.php>Show features votes</home>, added as Vote-link in main-menu
 
    * Markup tags:
       * Enhanced link markup with optional text: &lt;http://url.net |link text>
@@ -518,7 +519,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
         ("your color in the game" over "color to play")
 
    * Added access keys for
-      * Main menu items
+      * Main-menu items
       * Some form buttons
       * Page bottom links (1-9)
 
