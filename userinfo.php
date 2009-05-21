@@ -179,12 +179,9 @@ $ThePage = new Page('UserInfo');
       else
       {
          list( $tmp,$tmp,$tmp, $pic_url, $pic_exists ) = UserPicture::getPicturePath($row);
-         if( $pic_exists && $pic_url )
-         {
-            $pic_title = sprintf( T_('Picture of user [%s]'), $user_handle);
+         if( $pic_exists )
             echo '<p></p><h3 class="Header">' . T_('User picture') . "</h3>\n",
-               image( $pic_url, $pic_title, $pic_title );
-         }
+               UserPicture::getImageHtml( $user_handle, false, $row['UserPicture'], -1 );
       }
    }//User Picture
 

@@ -88,7 +88,8 @@ require_once( 'include/gui_functions.php' );
    $img_info_str = '';
    if( $pic_exists )
    {
-      $curr_picture_str = image( $pic_url, sprintf( 'Picture of user [%s]', $player_row['Handle'] ));
+      $curr_picture_str = UserPicture::getImageHtml(
+         $player_row['Handle'], false, $player_row['UserPicture'], -1 );
       $img_info = ImageFileUpload::getImageInfo($pic_path);
       $img_info_str = sprintf( T_('[ Dimensions: %s x %s, Size: %s KB ]'),
             $img_info['x'], $img_info['y'], $img_info['size_kb'] ) . "<br><br>\n";
