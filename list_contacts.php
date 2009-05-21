@@ -30,6 +30,7 @@ require_once( "include/filterlib_country.php" );
 require_once( "include/contacts.php" );
 require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/classlib_userpicture.php' );
 
 {
    #$DEBUG_SQL = true;
@@ -102,6 +103,8 @@ require_once( 'include/classlib_userconfig.php' );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead( 9, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
    $ctable->add_tablehead(12, T_('Type#header'), 'Enum', 0, 'P.Type+');
+   $ctable->add_tablehead(13, new TableHead( T_('User picture#header'),
+      'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'P.UserPicture+' );
    $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
    $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
@@ -146,7 +149,7 @@ require_once( 'include/classlib_userconfig.php' );
    // build SQL-query
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
-      'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.Rating2',
+      'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.Rating2', 'P.UserPicture',
       'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccessU',
       'C.cid', 'C.SystemFlags', 'C.UserFlags AS ContactsUserFlags', 'C.Notes',
       'C.Created', 'C.Lastchanged',
@@ -209,6 +212,8 @@ require_once( 'include/classlib_userconfig.php' );
             make_html_safe($row['Name']) . "</A>";
       if( $ctable->Is_Column_Displayed[12] )
          $crow_strings[12] = build_usertype_text(@$row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
+      if( @$row['UserPicture'] && $ctable->Is_Column_Displayed[13] )
+         $crow_strings[13] = UserPicture::getImageHtml( @$row['Handle'], true );
       if( $ctable->Is_Column_Displayed[ 2] )
          $crow_strings[ 2] = "<A href=\"userinfo.php?uid=$cid\">" .
             $row['Handle'] . "</A>";
@@ -223,10 +228,7 @@ require_once( 'include/classlib_userconfig.php' );
       if( $ctable->Is_Column_Displayed[ 4] )
          $crow_strings[ 4] = echo_rating(@$row['Rating2'],true,$cid);
       if( $ctable->Is_Column_Displayed[ 5] )
-      {
-         $crow_strings[ 5] =
-            ($row['lastaccessU']>0 ? date(DATE_FMT2, $row['lastaccessU']) : '');
-      }
+         $crow_strings[ 5] = ($row['lastaccessU']>0 ? date(DATE_FMT2, $row['lastaccessU']) : '');
       if( $ctable->Is_Column_Displayed[ 6] )
       {
          $str = Contact::format_system_flags($row['SystemFlags'], ',<br>');

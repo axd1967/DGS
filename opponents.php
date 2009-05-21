@@ -30,6 +30,7 @@ require_once( "include/filter.php" );
 require_once( "include/filterlib_country.php" );
 require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/classlib_userpicture.php' );
 
 
 $ARR_DBFIELDKEYS = array(
@@ -158,6 +159,7 @@ $ARR_DBFIELDKEYS = array(
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,
          array( FC_SIZE => 4 ));
    $ufilter->add_filter(18, 'Selection', $usertypes_array, true );
+   $ufilter->add_filter(19, 'Boolean', "P.UserPicture", true );
    $ufilter->init(); // parse current value from _GET
 
    // init table
@@ -188,6 +190,8 @@ $ARR_DBFIELDKEYS = array(
    //       for the "static" filtering(!) of: Activity; also see named-filters
    $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
+   $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
+      'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'UserPicture+' );
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
    $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');
@@ -435,6 +439,8 @@ $ARR_DBFIELDKEYS = array(
       }
       if( $utable->Is_Column_Displayed[18] )
          $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
+      if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
+         $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
 
       $utable->add_row( $urow_strings );
    }

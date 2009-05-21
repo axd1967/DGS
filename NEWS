@@ -49,8 +49,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * <home userinfo.php>User info</home>:
       * Show a users timezone, local time and night start
       * Added <home userinfo.php#pic>user picture</home> on user-info page
-         * Added page to <home edit_picture.php>edit user picture</home>
-         * Supported image-types: GIF, JPEG, PNG
+         * Added page to <home edit_picture.php>edit user picture</home>,
+           Supported image-types: GIF, JPEG, PNG
+         * Show if user has a picture on pages: users, opponents, contacts
 
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>

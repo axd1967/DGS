@@ -46,3 +46,6 @@ copy /images/team.gif
 -----------
 copy /images/blue.gif
 
+-----------
+copy /images/picture.gif
+

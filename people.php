@@ -256,6 +256,7 @@ function build_icon( $icon_name, $text )
       . build_icon('robot.gif', sprintf( T_('Robot created from [%s]'), 'computer'))
       . build_icon('team.gif', sprintf( T_('Team created from [%s]'), 'group'))
       . build_icon('info.gif', sprintf( T_('Information created from [%s]'), 'info'))
+      . build_icon('picture.gif', sprintf( T_('User picture created from [%s]'), 'photo'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
