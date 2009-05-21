@@ -25,6 +25,9 @@ ChangeLog
 
 2009-05-21 juga
 
+   * users.php:
+   - added table-row-number (in 1st column)
+
    * include/std_functions.php, admin_admins.php, admin_show_users.php,
      features/lib_votes.php (Feature.delete_feature, ~.is_admin),
      features/edit_feature.php, NEWS:
