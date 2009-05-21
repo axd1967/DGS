@@ -95,7 +95,7 @@ class Table
 
    /*!
     * \brief Array describing all tableheads:
-    *        [ Nr, Description, Sort_String, Desc_Default, Undeletable, attbs(Width) ]
+    *        [ Nr, TableHead-obj, Sort_String, Desc_Default, Undeletable, attbs(Width) ]
     * attbs is either:
     * - an array of (attribut_name => attribut_value) for the column
     * - a string supposed to be the class of the column
@@ -272,6 +272,7 @@ class Table
     * @param $nr must be >0 but if higher than BITSET_MAXSIZE or the maxsize of
     *    Table-given ConfigTableColumns, the column will be static.
     *    $nr=0 is reserved for row-number, but can be equipped with additional attributes (see also add_row)
+    * @param $description either String with description or else TableHead-instance with more detail-info
     * @param $attbs must be an array of attributs or a class-name for the column (td-element)
     *    default: no attributs or class (i.e. class "Text" left-aligned)
     *    Other known classes defined in CSS, most used are:
@@ -308,9 +309,10 @@ class Table
          $mode|= TABLE_NO_SORT;
       elseif( !is_numeric(strpos('+-',substr($sort_xtend,-1))) )
          $sort_xtend.= '+';
+      $tableHead = (is_a($description, 'TableHead')) ? $description : new TableHead($description);
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
-                'Description' => $description,
+                'Description' => $tableHead,
                 'Sort_String' => $sort_xtend,
                 'Mode' => $mode,
                 'attbs' => $attbs );
@@ -509,8 +511,9 @@ class Table
             foreach( $arr as $id ) {
                $filter = $this->Filters->get_filter($id);
                $syntax = $filter->get_syntax_description();
+               $tableHead = $this->Tableheads[$id]['Description'];
                $arr_err[]=
-                  "<strong>{$this->Tableheads[$id]['Description']}:</strong> "
+                  "<strong>{$tableHead->description}:</strong> "
                   . '<em>' . T_('Error#filter') . ': ' . $filter->errormsg() . '</em>'
                   . ( ($syntax != '') ? "; $syntax" : '');
             }
@@ -524,8 +527,9 @@ class Table
             $arr_warn = array();
             foreach( $arr as $id ) {
                $filter = $this->Filters->get_filter($id);
+               $tableHead = $this->Tableheads[$id]['Description'];
                $arr_warn[]=
-                  "<strong>{$this->Tableheads[$id]['Description']}:</strong> "
+                  "<strong>{$tableHead->description}:</strong> "
                   . '<em>' . T_('Warning#filter') . ': ' . $filter->warnmsg() . '</em>';
             }
             $warnmessages = implode( '<br>', $arr_warn );
@@ -805,21 +809,6 @@ class Table
          $rp->get_hiddens( $hiddens );
    }
 
-   /*!
-    * \brief Returns array with Nr and description of displayed tableheads.
-    * signature: array( Nr => Descr ) = get_displayed_tableheads()
-    */
-   function get_displayed_tableheads()
-   {
-      $arr_displayed = array(); // Nr => Description
-      foreach( $this->Tableheads as $thead )
-      {
-         $nr = $thead['Nr'];
-         if( $this->Is_Column_Displayed[$nr] ) $arr_displayed[$nr] = $thead['Description'];
-      }
-      return $arr_displayed;
-   }
-
 
    /*! \privatesection */
 
@@ -833,7 +822,7 @@ class Table
 
       if( !$this->Is_Column_Displayed[$nr] )
       {
-         $this->Removed_Columns[ $nr ] = $tablehead['Description'];
+         $this->Removed_Columns[ $nr ] = $tablehead['Description']->getDescriptionAddCol();
          return '';
       }
 
@@ -859,7 +848,7 @@ class Table
          ; //end_sep
 
       // field-sort-link
-      $title = (string)@$tablehead['Description'];
+      $title = @$tablehead['Description']->getDescriptionHtml();
       $field = (string)@$tablehead['Sort_String'];
       $sortimg= (string)@$this->Sortimg[$nr];
 
@@ -1407,5 +1396,50 @@ class Table
    }
 
 } // end of 'Table'
+
+
+
+/*!
+ * \class TableHead
+ *
+ * \brief Class to represent table-head (text or image).
+ */
+class TableHead
+{
+   var $description;
+   var $image_url;
+   var $image_alt;
+   var $image_title;
+   var $image_attbs;
+
+   /*! \brief Constructs TableHead-instance. */
+   function TableHead( $description, $image_url=null, $image_title=null )
+   {
+      $this->description = $description;
+      $this->image_url = $image_url;
+      $this->image_alt = $description;
+      $this->image_title = (is_null($image_title)) ? $description : $image_title;
+      $this->image_attbs = null;
+   }
+
+   function isImage()
+   {
+      return !(is_null($this->image_url));
+   }
+
+   function getDescriptionHtml()
+   {
+      global $base_path;
+      return ($this->isImage())
+         ? image( $base_path . $this->image_url, $this->image_alt, $this->image_title, $this->image_attbs )
+         : $this->description;
+   }
+
+   function getDescriptionAddCol()
+   {
+      return ( $this->isImage() ) ? "({$this->description})" : $this->description;
+   }
+
+} // end of 'TableHead'
 
 ?>
