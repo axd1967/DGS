@@ -35,6 +35,8 @@ require_once( "features/lib_votes.php" );
 
    $my_id = (int)@$player_row['ID'];
 
+   $is_admin = Feature::is_admin();
+
 /* Actual REQUEST calls used:
      view=1&fid=             : view existing feature (for description)
      fid=                    : edit new or existing feature-vote
@@ -94,7 +96,7 @@ require_once( "features/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status ));
-   if( Feature::is_super_admin() )
+   if( $is_admin )
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Editor'),
@@ -164,7 +166,7 @@ require_once( "features/lib_votes.php" );
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
    $menu_array[T_('Show feature votes')] = "features/list_votes.php";
-   if( Feature::is_admin() )
+   if( $is_admin )
    {
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
