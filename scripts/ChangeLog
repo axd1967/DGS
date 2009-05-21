@@ -23,6 +23,45 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-05-21 juga
+
+   * include/classlib_userpicture.php (UserPicture.getPicturePath, ~.getImageHtml),
+     include/quick_common.php,
+     edit_picture.php, userinfo.php, list_contacts.php, opponents.php, users.php,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt, NEWS:
+   - added indicator to show if user has an existing user-picture
+   - refactoring: moved code to display user-picture into UserPicture::getImageHtml()
+   - changed user-picture new-URL-suffix to readable date-format
+
+   * people.php:
+   - added picture-icon to show user has uploaded a picture (taken from silk icons)
+-----------
+copy /images/picture.gif
+-----------
+
+   * include/table_columns.php (Table, ~.make_table_head, ~.make_filter_row,
+       ~.get_displayed_tableheads; TableHead):
+   - allow image in table-header
+     - added TableHead-class to manage table-headers
+     - removed unused get_displayed_tableheads()-function
+
+2009-05-20 juga
+
+   * include/classlib_upload.php (UploadImageFile.*),
+     include/classlib_userpicture.php, edit_picture.php:
+   - removed resizing(-attempt) of user-picture
+     - not really needed, users should upload "fitting" images
+     - resizing needs too much special treatments for transparency
+   - restricted max. upload filesize: 100KB -> 30KB
+   - UploadImageFile.need_resize as indicator for resizing-need
+   - adjusted error-texts
+
+   * site_map.php:
+   - added edit of user-picture
+
+   * edit_picture.php:
+   - added notes on uploading user-picture
+
 2009-05-17 juga
 
    * admin_show_users.php, admin_users.php:
