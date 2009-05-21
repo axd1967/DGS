@@ -76,8 +76,8 @@ class Feature
     */
    function Feature( $id=0, $status=FEATSTAT_NEW, $subject='', $description='', $editor=0, $created=0, $lastchanged=0 )
    {
-      if( !is_numeric($editor) || !is_numeric($editor) || $editor < 0 )
-         error('invalid_user', "feature.Feature($id,$editor)");
+      if( !is_numeric($editor) || $editor < 0 )
+         error('invalid_user', "feature.Feature.check.editor($id,$editor)");
       $this->id = (int) $id;
       $this->set_status( $status );
       $this->set_subject( $subject );
@@ -278,7 +278,7 @@ class Feature
       {
          $notes[] = T_('Feature or improvement suggestions are to be discussed in the '
                      . '<home forum/index.php>forums</home> first.');
-         $notes[] = T_('Features can only be added to this list by one of the DGS executives.');
+         $notes[] = T_('Features can only be added to this list by a vote admin.');
          $notes[] = null; // empty line
       }
 
@@ -355,8 +355,11 @@ class Feature
    }
 
    /*! \brief Returns db-fields to be used for query of Feature-object. */
-   function get_query_fields()
+   function get_query_fields( $short=false )
    {
+      if( $short )
+         return array( 'FL.ID', 'FL.Status', 'FL.Subject' );
+
       return array(
          'FL.ID', 'FL.Status', 'FL.Subject', 'FL.Description', 'FL.Editor_ID',
          'IFNULL(UNIX_TIMESTAMP(FL.Created),0) AS FLCreatedU',
@@ -383,8 +386,8 @@ class Feature
    function new_from_row( $row )
    {
       $feature = new Feature(
-            $row['ID'], $row['Status'], $row['Subject'], $row['Description'],
-            $row['Editor_ID'], $row['FLCreatedU'], $row['FLLastchangedU'] );
+            $row['ID'], $row['Status'], $row['Subject'], @$row['Description'],
+            @$row['Editor_ID']+0, @$row['FLCreatedU'], @$row['FLLastchangedU'] );
       return $feature;
    }
 
@@ -514,7 +517,7 @@ class FeatureVote
    {
       // build SQL-query
       $qsql = new QuerySQL();
-      $qsql->add_part_fields( Feature::get_query_fields() );
+      $qsql->add_part_fields( Feature::get_query_fields(true) );
       $qsql->add_part( SQLP_FIELDS,
          'SUM(FV.Points) AS sumPoints',
          'COUNT(FV.fid) AS countVotes',
