@@ -86,8 +86,6 @@ require_once( "features/lib_votes.php" );
    $ftable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'FL.Subject+');
    $ftable->add_tablehead( 8, T_('My Vote#header'),     'NumberC', 0, 'FV.Points-');
    $ftable->add_tablehead( 9, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
-   if( $is_super_admin )
-      $ftable->add_tablehead( 7, T_('Editor#header'),   'User', 0, 'FL.Editor_ID+');
    $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'FL.Created+');
    $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
 
@@ -134,9 +132,7 @@ require_once( "features/lib_votes.php" );
       if( $ftable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
       if( $ftable->Is_Column_Displayed[4] )
-         $frow_strings[4] = make_html_safe( $feature->subject, true, $rx_term);
-      if( $is_super_admin && $ftable->Is_Column_Displayed[7] )
-         $frow_strings[7] = user_reference( REF_LINK, 1, '', $feature->editor );
+         $frow_strings[4] = make_html_safe( wordwrap($feature->subject, 50), true, $rx_term);
       if( $ftable->Is_Column_Displayed[5] )
          $frow_strings[5] = ($feature->created > 0 ? date(DATEFMT_FEATLIST, $feature->created) : '' );
       if( $ftable->Is_Column_Displayed[6] )
@@ -161,7 +157,7 @@ require_once( "features/lib_votes.php" );
 
 
    $menu_array = array();
-   $menu_array[T_('Show votes')] = "features/list_votes.php";
+   $menu_array[T_('Show feature votes')] = "features/list_votes.php";
    if( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
