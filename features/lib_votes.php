@@ -173,10 +173,10 @@ class Feature
       return ( $cnt_votes <= 0 );
    }
 
-   /*! \brief Deletes current Feature from database if no votes found (only as super-admin). */
+   /*! \brief Deletes current Feature from database if no votes found (only as admin). */
    function delete_feature()
    {
-      if( !Feature::is_super_admin() )
+      if( !Feature::is_admin() )
          error('feature_edit_not_allowed', "feature.delete_feature({$this->id})");
 
       if( !$this->can_delete_feature() )
@@ -237,7 +237,7 @@ class Feature
    function is_admin( $superadmin=false )
    {
       global $player_row;
-      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : (ADMINGROUP_EXECUTIVE|ADMIN_DEVELOPER);
+      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : (ADMIN_VOTE|ADMIN_DEVELOPER);
       $is_admin = (bool) ( @$player_row['admin_level'] & $chk_adminlevel );
       //return false; // for easy testing
       return $is_admin;
@@ -278,7 +278,7 @@ class Feature
       {
          $notes[] = T_('Feature or improvement suggestions are to be discussed in the '
                      . '<home forum/index.php>forums</home> first.');
-         $notes[] = T_('Features can only be added to this list by a vote admin.');
+         $notes[] = T_('Features can only be added to this list by a vote-admin.');
          $notes[] = null; // empty line
       }
 

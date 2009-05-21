@@ -39,10 +39,12 @@ require_once( "features/lib_votes.php" );
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
-   if ( !Feature::is_admin() )
-      error('feature_edit_not_allowed');
 
+   $is_admin = Feature::is_admin();
+   if ( !$is_admin )
+      error('feature_edit_not_allowed');
    $is_super_admin = Feature::is_super_admin();
+
 
 /* Actual REQUEST calls used:
      (no args)             : add new feature
@@ -129,13 +131,13 @@ require_once( "features/lib_votes.php" );
    {
       // status-change
       $status_values = array_value_to_key_and_value(
-            array( FEATSTAT_NEW , FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ) );
+            array( FEATSTAT_NEW, FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ) );
       array_push( $arr_status,
          'TEXT', '&nbsp;-&gt;&nbsp;',
          'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
    }
    $fform->add_row( $arr_status );
-   if( $is_super_admin )
+   if( $is_admin )
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Editor'),
@@ -224,7 +226,7 @@ require_once( "features/lib_votes.php" );
    $fform->echo_string();
 
    $notes = Feature::build_feature_notes( null, false );
-   if( Feature::is_admin() )
+   if( $is_admin )
       array_unshift( $notes,
          T_('Add a category-prefix to the \'Subject\', e.g. "Game: feature description"'),
          T_('Add related URLs using &lt;home&gt;-tag or &lt;http://...&gt; in description.'),
@@ -234,10 +236,10 @@ require_once( "features/lib_votes.php" );
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
    $menu_array[T_('Show feature votes')] = "features/list_votes.php";
-   if( Feature::is_admin() )
+   if( $is_admin )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
-   if( !$is_feature_delete && $can_delete_feature && $fid > 0 && Feature::is_super_admin() )
+   if( !$is_feature_delete && $can_delete_feature && $fid > 0 && $is_admin )
       $menu_array[T_('Delete this feature')] =
          array( 'url' => "features/edit_feature.php?fid=$fid".URI_AMP.'feature_delete=1', 'class' => 'AdminLink' );
    if( $is_feature_delete && $fid > 0 && $feature->allow_edit() )
