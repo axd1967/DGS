@@ -186,7 +186,8 @@ require_once( "features/lib_votes.php" );
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Subject'),
-         'TEXTINPUT',   'subject', 80, 120, $feature->subject,
+         'TEXTINPUT',   'subject', 80, 255, $feature->subject,
+         'TEXT',        MINI_SPACING . T_('(max. 255 chars)'),
          ));
       $fform->add_row( array(
          'DESCRIPTION', T_('Description'),
@@ -225,13 +226,14 @@ require_once( "features/lib_votes.php" );
    $notes = Feature::build_feature_notes( null, false );
    if( Feature::is_admin() )
       array_unshift( $notes,
+         T_('Add a category-prefix to the \'Subject\', e.g. "Game: feature description"'),
          T_('Add related URLs using &lt;home&gt;-tag or &lt;http://...&gt; in description.'),
          T_('Add reason and properly adjust description on status changes.') );
    echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
 
    $menu_array = array();
-   $menu_array[T_('Show features')] = "features/list_features.php";
-   $menu_array[T_('Show votes')]    = "features/list_votes.php";
+   $menu_array[T_('Vote on features')] = "features/list_features.php";
+   $menu_array[T_('Show feature votes')] = "features/list_votes.php";
    if( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
