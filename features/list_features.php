@@ -41,7 +41,6 @@ require_once( "features/lib_votes.php" );
 
    $my_id = (int)@$player_row['ID'];
 
-   $is_super_admin = Feature::is_super_admin();
    $user_vote_reason = Feature::allow_vote_check();
    $user_can_vote = is_null($user_vote_reason);
 
