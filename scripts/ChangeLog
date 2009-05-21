@@ -25,6 +25,30 @@ ChangeLog
 
 2009-05-21 juga
 
+   * include/std_functions.php (start_page, make_menu_horizontal, make_menu_vertical):
+   - allowed multi-texts in std-menu
+   - changed Vote-link referring to feature-vote-results
+
+   * site_map.php:
+   - added links for feature-voting
+
+   * features/lib_votes.php (Feature, ~.get_query_fields),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     features/list_features.php, features/list_votes.php,
+     features/edit_feature.php, features/vote_feature.php, NEWS:
+   - increase features-subject-maxlen: 120 -> 255, wrapped long feature-subject
+   - cleanup
+     - optimized query for vote-selection
+     - renamed page-titles and bottom-links
+     - removed Lastchanged from table-list (shown on detail-view anyway)
+     - removed Editor from table-list (shown on detail-view anyway)
+     - added more notes
+-----------
+-- allow longer Feature-subject
+ALTER TABLE FeatureList
+   CHANGE Subject Subject varchar(255) NOT NULL ;
+-----------
+
    * include/classlib_userpicture.php (UserPicture.getPicturePath, ~.getImageHtml),
      include/quick_common.php,
      edit_picture.php, userinfo.php, list_contacts.php, opponents.php, users.php,
