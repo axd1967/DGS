@@ -50,6 +50,7 @@ require_once( "include/table_columns.php" );
       ADMIN_TOURNAMENT     => array( 'TOURNAMENT',       T_('Can administrate tournaments') ),
       ADMIN_FORUM          => array( 'MODERATOR',        T_('Can moderate forum (approve, reject, show, hide posts)') ),
       ADMIN_FAQ            => array( 'FAQ_EDITOR',       T_('Can edit FAQ') ),
+      ADMIN_VOTE           => array( 'VOTE',             T_('Can administrate voting') ),
       ADMIN_SKINNER        => array( 'SKINNER',          T_('Can choose CSS-skin (experimental)') ),
       ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       T_('Can translate texts') ),
    );

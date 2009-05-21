@@ -44,6 +44,7 @@ require_once( "include/table_columns.php" );
          'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
          'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
          'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
+         'Vote'   => array( ADMIN_VOTE, /*T_*/('Voting')),
          'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
          'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
       );
