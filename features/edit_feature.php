@@ -201,7 +201,7 @@ require_once( "features/lib_votes.php" );
       {
          $fform->add_row( array(
             'DESCRIPTION', T_('Preview'),
-            'TEXT', make_html_safe( $feature->subject, true ),
+            'TEXT', make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true ),
             ));
          $fform->add_row( array(
             'TAB',
@@ -225,7 +225,7 @@ require_once( "features/lib_votes.php" );
 
    $fform->echo_string();
 
-   $notes = Feature::build_feature_notes( null, false );
+   $notes = array();
    if( $is_admin )
       array_unshift( $notes,
          T_('Add a category-prefix to the \'Subject\', e.g. "Game: feature description"'),
