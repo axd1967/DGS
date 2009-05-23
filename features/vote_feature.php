@@ -117,10 +117,10 @@ require_once( "features/lib_votes.php" );
 
    $fform->add_row( array(
       'DESCRIPTION', T_('Subject'),
-      'TEXT',        $feature->subject ));
+      'TEXT',        make_html_safe( wordwrap($feature->subject,60), true) ));
    $fform->add_row( array(
       'DESCRIPTION', T_('Description'),
-      'TEXT',        $feature->description ));
+      'TEXT',        make_html_safe( $feature->description, true) ));
 
    if( !is_null($errormsg) )
       $fform->add_row( array(
