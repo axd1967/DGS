@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/quick_common.php' );
 require_once( "include/std_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/classlib_userquota.php' );
 
 define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
@@ -103,6 +104,7 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
    ConfigPages::insert_default( $new_id );
    ConfigBoard::insert_default( $new_id );
+   UserQuota::insert_default( $new_id );
 
    set_login_cookie( $uhandle, $code );
 

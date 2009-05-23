@@ -443,3 +443,17 @@ ALTER TABLE FeatureList
    CHANGE Subject Subject varchar(255) NOT NULL ;
 
 
+-- added table for points-management and quota-like fields
+CREATE TABLE UserQuota (
+   uid int(11) NOT NULL,
+   FeaturePoints smallint(5) NOT NULL default '25',
+   FeaturePointsUpdated datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (uid),
+   KEY FeaturePointsUpdated (FeaturePointsUpdated)
+) ENGINE=MyISAM;
+
+-- create UserQuota for all players
+INSERT UserQuota (uid,FeaturePointsUpdated)
+   SELECT ID,NOW() FROM Players ;
+
+

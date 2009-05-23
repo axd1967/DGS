@@ -1,0 +1,30 @@
+###
+### Description of mysql tables:  UserQuota
+###
+
+###########################################################################
+## --- UserQuota ---
+
+Description:
+   Table to store user-specific quotas:
+   - feature-points
+
+ Field                | Type        | Default
+----------------------+-------------+---------------------
+ uid                  | int(11)     | NULL
+ FeaturePoints        | smallint(5) | 25
+ FeaturePointsUpdated | datetime    | 0000-00-00 00:00:00
+
+
+## Fields:
+
+* uid : foreign key to Players.ID
+
+* FeaturePoints : number of points, a user can use for voting on features
+   - value-range : 0 .. 100
+   - will be increased every 10 days by 1 point, but only if
+     user moved in a game within the last 6 weeks (Players.LastMove)
+
+* FeaturePointsUpdated : last time of auto-increase every 10 days by 1 point
+   - used to determine if 10 days have passed
+
