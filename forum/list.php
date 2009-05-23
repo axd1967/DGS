@@ -89,8 +89,8 @@ require_once( 'include/form_functions.php' );
    $disp_forum->headline = array(
       T_('Thread') => 'class=Subject',
       T_('Author') => 'class=Name',
-      T_('Hits') => 'class=HitCnt',
       T_('Posts') => 'class=PostCnt',
+      T_('Hits') => 'class=HitCnt',
       $head_lastpost => 'class=LastPost',
    );
 
@@ -122,8 +122,8 @@ require_once( 'include/form_functions.php' );
          echo "<tr class=Row$c>"
             . '<td class=Subject>' . anchor( $thread->build_url_post(''), $subject ) . $newstr . '</td>'
             . "<td class=Name>$author</td>"
-            . "<td class=HitCnt>{$thread->count_hits}</td>"
             . "<td class=PostCnt>{$thread->count_posts}</td>"
+            . "<td class=HitCnt>{$thread->count_hits}</td>"
             . "<td class=LastPost><span class=PostDate>$lpost_date</span>$lpost_author</td>"
             . "</tr>\n";
       }
