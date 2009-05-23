@@ -90,7 +90,7 @@ require_once( "features/lib_votes.php" );
 
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
 
-   $title = T_('Feature vote list');
+   $title = T_('Feature vote result list');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
@@ -132,6 +132,10 @@ require_once( "features/lib_votes.php" );
    $vtable->echo_table();
 
    // end of table
+
+   $notes = Feature::build_feature_notes( $user_vote_reason );
+   echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
+
 
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
