@@ -25,6 +25,7 @@ require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userquota.php' );
 require_once( "features/lib_votes.php" );
 
 
@@ -40,6 +41,9 @@ require_once( "features/lib_votes.php" );
       error('feature_disabled', 'feature_vote(list_features)');
 
    $my_id = (int)@$player_row['ID'];
+   $user_quota = UserQuota::load_user_quota($my_id);
+   if( is_null($user_quota) )
+      error('miss_user_quota', "list_features.user_quota.check($my_id)");
 
    $user_vote_reason = Feature::allow_vote_check();
    $user_can_vote = is_null($user_vote_reason);
@@ -61,7 +65,7 @@ require_once( "features/lib_votes.php" );
          true, array( FC_DEFAULT => 1 )); // def=0..
    $filter_subject =&
       $ffilter->add_filter( 4, 'Text', 'FL.Subject', true,
-         array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
+         array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
    $ffilter->add_filter( 6, 'RelativeDate', 'FL.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL|FRDTU_ABS ));
    $ffilter->add_filter( 8, 'Selection',     # filter on user-voted-state
@@ -105,8 +109,11 @@ require_once( "features/lib_votes.php" );
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
+   if( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
 
-   echo "<h3 class=Header>$title</h3>\n";
+   echo "<h3 class=Header>$title</h3>\n",
+      FeatureVote::getFeaturePointsText( $user_quota->feature_points ),
+      "<br><br>\n";
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
@@ -131,7 +138,7 @@ require_once( "features/lib_votes.php" );
       if( $ftable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
       if( $ftable->Is_Column_Displayed[4] )
-         $frow_strings[4] = make_html_safe( wordwrap($feature->subject, 50), true, $rx_term);
+         $frow_strings[4] = make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true, $rx_term);
       if( $ftable->Is_Column_Displayed[5] )
          $frow_strings[5] = ($feature->created > 0 ? date(DATEFMT_FEATLIST, $feature->created) : '' );
       if( $ftable->Is_Column_Displayed[6] )

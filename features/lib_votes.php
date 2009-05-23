@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
+define('FEAT_SUBJECT_WRAPLEN', 55);
+
 // feature.status
 define('FEATSTAT_NEW',  'NEW');  // newly added, can be voted or rejected (NACK)
 define('FEATSTAT_WORK', 'WORK'); // in work by developers
@@ -202,16 +204,27 @@ class Feature
    /*!
     * \brief Updates current FeatureVote-data into database (may replace existing featurevote
     *        and sets IP and lastchanged=NOW).
+    * \return number of points to add to UserQuota-feature-points (can be negative)
     */
    function update_vote( $voter, $points )
    {
+      $fpoints = 0; // consumed feature-points
       if( is_null($this->featurevote) )
+      {// no vote so far
          $this->featurevote = FeatureVote::new_featurevote( $this->id, $voter, $points );
+         $fpoints = $points;
+      }
       else
+      {// already voted
+         $old_points = $this->featurevote->get_points();
          $this->featurevote->set_points( $points );
+         if( $old_points != $points )
+            $fpoints = abs($old_points) - abs($points);
+      }
 
       //error_log("F.update_vote: " . $this->to_string());
       $this->featurevote->update_vote();
+      return $fpoints;
    }
 
 
@@ -498,14 +511,23 @@ class FeatureVote
 
    // ---------- Static Class functions ----------------------------
 
-   /*! \brief Returns error-message if points are invalid; otherwise return null (=points ok). */
-   function check_points( $points )
+   /*!
+    * \brief Returns error-message if points are invalid; otherwise return null (=points ok).
+    * \param points the points to check
+    * \param max_points max. amount of feature-points that can be used for voting;
+    *                   used if user less than FEATVOTE_MAXPOINTS remaining feature-points
+    *                   restricted by his quota.
+    */
+   function check_points( $points, $max_points=FEATVOTE_MAXPOINTS )
    {
       if( !is_numeric($points) )
          return sprintf( T_('points [%s] must be numeric'), $points );
-      if( $points < -FEATVOTE_MAXPOINTS || $points > FEATVOTE_MAXPOINTS )
+      if( abs($points) > FEATVOTE_MAXPOINTS )
          return sprintf( T_('points [%1$s] must be in range [%2$s,%3$s]'),
                          $points, -FEATVOTE_MAXPOINTS, FEATVOTE_MAXPOINTS );
+      if( abs($points) > $max_points )
+         return sprintf( T_('points [%1$s] must be in range [%2$s,%3$s] (restricted by feature-points quota)'),
+                         $points, -$max_points, $max_points );
       return null;
    }
 
@@ -588,6 +610,12 @@ class FeatureVote
          return null;
 
       return FeatureVote::new_from_row( $row );
+   }
+
+   /*! \brief Returns text informing about remaining feature-points. */
+   function getFeaturePointsText( $points )
+   {
+      return sprintf( T_('You have %s points available for voting on features.'), $points );
    }
 
 } // end of 'FeatureVote'

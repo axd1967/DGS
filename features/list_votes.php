@@ -57,11 +57,13 @@ require_once( "features/lib_votes.php" );
    $vfilter->add_filter( 3, 'Selection', # filter on status
          Feature::build_filter_selection_status('FL.Status'),
          true, array( FC_DEFAULT => 2 )); // def=0..
-   $vfilter->add_filter( 4, 'Text',      'FL.Subject', true,
-         array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => STARTWILD_OPTMINCHARS ) );
+   $ilter_subject =&
+      $vfilter->add_filter( 4, 'Text', 'FL.Subject', true,
+         array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
    $vfilter->add_filter(10, 'Numeric',   'sumPoints', true, array( FC_ADD_HAVING => 1 ));
    $vfilter->add_filter(11, 'Numeric',   'countVotes', true, array( FC_ADD_HAVING => 1 ));
    $vfilter->init(); // parse current value from _GET
+   $rx_term = implode('|', $filter_subject->get_rx_terms() );
 
    // init table
    $vtable->register_filter( $vfilter );
@@ -77,7 +79,7 @@ require_once( "features/lib_votes.php" );
    $vtable->add_tablehead(12, T_('#Y#header'),          'Number', 0, 'countYes-');
    $vtable->add_tablehead(13, T_('#N#header'),          'Number', 0, 'countNo-');
 
-   $vtable->set_default_sort(10); //on sumPoints
+   $vtable->set_default_sort(10, 1); //on sumPoints, ID
    $order = $vtable->current_order_string();
    $limit = $vtable->current_limit_string();
 
@@ -94,6 +96,7 @@ require_once( "features/lib_votes.php" );
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
+   if( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n";
 
@@ -114,7 +117,7 @@ require_once( "features/lib_votes.php" );
       if( $vtable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
       if( $vtable->Is_Column_Displayed[4] )
-         $frow_strings[4] = make_html_safe( wordwrap($feature->subject, 60), true);
+         $frow_strings[4] = make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true, $rx_term);
 
       // FeatureVote-fields
       if( $vtable->Is_Column_Displayed[10] )

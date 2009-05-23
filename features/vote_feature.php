@@ -22,6 +22,7 @@ $TranslateGroups[] = "Common";
 chdir('../');
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( 'include/classlib_userquota.php' );
 require_once( "features/lib_votes.php" );
 
 {
@@ -36,6 +37,9 @@ require_once( "features/lib_votes.php" );
    $my_id = (int)@$player_row['ID'];
 
    $is_admin = Feature::is_admin();
+   $user_quota = UserQuota::load_user_quota($my_id);
+   if( is_null($user_quota) )
+      error('miss_user_quota', "vote_feature.user_quota.check($my_id)");
 
 /* Actual REQUEST calls used:
      view=1&fid=             : view existing feature (for description)
@@ -53,7 +57,7 @@ require_once( "features/lib_votes.php" );
    $errormsg = null;
    if( @$_REQUEST['vote_save'] )
    {
-      $errormsg = FeatureVote::check_points( $points );
+      $errormsg = FeatureVote::check_points( $points, $user_quota->feature_points );
    }
 
    // load feature + vote
@@ -80,7 +84,9 @@ require_once( "features/lib_votes.php" );
    // insert/update feature-vote-object with values from edit-form if no error
    if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit )
    {
-      $feature->update_vote( $my_id, $points );
+      $add_fpoints = $feature->update_vote( $my_id, $points );
+      $user_quota->modify_feature_points( $add_fpoints );
+      $user_quota->update_feature_points();
       jump_to("features/vote_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature vote saved!')) );
    }
 
@@ -117,7 +123,7 @@ require_once( "features/lib_votes.php" );
 
    $fform->add_row( array(
       'DESCRIPTION', T_('Subject'),
-      'TEXT',        make_html_safe( wordwrap($feature->subject,60), true) ));
+      'TEXT',        make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true) ));
    $fform->add_row( array(
       'DESCRIPTION', T_('Description'),
       'TEXT',        make_html_safe( $feature->description, true) ));
@@ -127,10 +133,11 @@ require_once( "features/lib_votes.php" );
          'DESCRIPTION', T_('Error'),
          'TEXT',        '<span class="ErrorMsg">' . $errormsg . '</span>' ));
 
-   if( $allow_vote_edit )
+   if( $allow_vote_edit && $user_quota->feature_points > 0 )
    {
       $vote_values = array();
-      for( $i = +FEATVOTE_MAXPOINTS; $i >= -FEATVOTE_MAXPOINTS; $i--)
+      $max_points = min( FEATVOTE_MAXPOINTS, $user_quota->feature_points );
+      for( $i = +$max_points; $i >= -$max_points; $i--)
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
       $vote_values['0'] = '=0';
 
@@ -157,11 +164,12 @@ require_once( "features/lib_votes.php" );
 
 
    start_page( $title, true, $logged_in, $player_row );
-   echo "<h3 class=Header>$title</h3>\n";
+   echo "<h3 class=Header>$title</h3>\n",
+      FeatureVote::getFeaturePointsText( $user_quota->feature_points ),
+      "<br><br>\n";
 
-   echo "<CENTER>\n";
    $fform->echo_string();
-   echo "</CENTER><BR>\n";
+
 
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
