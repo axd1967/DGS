@@ -457,3 +457,13 @@ INSERT UserQuota (uid,FeaturePointsUpdated)
    SELECT ID,NOW() FROM Players ;
 
 
+-- need restriction on voted points
+ALTER TABLE FeatureVote
+   ADD INDEX Points (Points) ;
+
+
+-- table-column-set for feature-list
+ALTER TABLE ConfigPages
+   ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll ;
+
+

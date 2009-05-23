@@ -25,6 +25,7 @@ require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
+require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/classlib_userquota.php' );
 require_once( "features/lib_votes.php" );
 
@@ -44,6 +45,7 @@ require_once( "features/lib_votes.php" );
    $user_quota = UserQuota::load_user_quota($my_id);
    if( is_null($user_quota) )
       error('miss_user_quota', "list_features.user_quota.check($my_id)");
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_FEATURE_LIST );
 
    $user_vote_reason = Feature::allow_vote_check();
    $user_can_vote = is_null($user_vote_reason);
@@ -54,7 +56,7 @@ require_once( "features/lib_votes.php" );
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_FEATURES );
    $ffilter = new SearchFilter( '', $search_profile );
    //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $ftable = new Table( 'features', $page );
+   $ftable = new Table( 'features', $page, $cfg_tblcols );
    $ftable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -72,6 +74,9 @@ require_once( "features/lib_votes.php" );
          array( T_('All#filterfeat')      => '',
                 T_('Unvoted#filterfeat')  => "ISNULL(FV.fid)", // FC_DEFAULT
                 T_('Voted#filterfeat')    => "FV.fid>0",
+                T_('<0#filterfeat')       => "FV.Points<0",
+                T_('=0#filterfeat')       => "FV.Points=0",
+                T_('>0#filterfeat')       => "FV.Points>0",
          ),
          true, array( FC_DEFAULT => 1 )); // def=0..
    $ffilter->init(); // parse current value from _GET
@@ -108,8 +113,8 @@ require_once( "features/lib_votes.php" );
    $title = T_('Features to vote on');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
-   if( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
+   if( $DEBUG_SQL ) echo "QUERY: ", make_html_safe($query), "<br>\n";
+   if( $DEBUG_SQL ) echo "TERMS: ", $rx_term, "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n",
       FeatureVote::getFeaturePointsText( $user_quota->feature_points ),
