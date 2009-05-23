@@ -323,6 +323,7 @@ define('CFGCOLS_GAMES_FINISHED_ALL',      'ColumnsGamesFinishedAll');
 define('CFGCOLS_GAMES_FINISHED_USER',     'ColumnsGamesFinishedUser');
 define('CFGCOLS_GAMES_OBSERVED',          'ColumnsGamesObserved');
 define('CFGCOLS_GAMES_OBSERVED_ALL',      'ColumnsGamesObservedAll');
+define('CFGCOLS_FEATURE_LIST',            'ColumnsFeatureList');
 define('CFGCOLS_TOURNAMENTS',             'ColumnsTournaments');
 define('CFGCOLS_TOURNAMENT_PARTICIPANTS', 'ColumnsTournamentParticipants');
 define('CFGCOLS_TD_TOURNAMENT_PARTICIPANTS', 'ColumnsTDTournamentParticipants');
@@ -340,6 +341,7 @@ $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_GAMES_FINISHED_USER      => 2, // >30 bit
    CFGCOLS_GAMES_OBSERVED           => 2, // >30 bit
    CFGCOLS_GAMES_OBSERVED_ALL       => 2, // >30 bit
+   CFGCOLS_FEATURE_LIST             => 1,
    CFGCOLS_TOURNAMENTS              => 1,
    CFGCOLS_TOURNAMENT_PARTICIPANTS  => 1,
    CFGCOLS_TD_TOURNAMENT_PARTICIPANTS  => 1,
