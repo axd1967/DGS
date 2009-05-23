@@ -283,7 +283,7 @@ class ConfigBoard
    function insert_default( $user_id )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigBoard::insert_default');
-      db_query( "ConfigBoard::insert_default..insert({$this->user_id})",
+      db_query( "ConfigBoard::insert_default.insert({$this->user_id})",
          "INSERT INTO ConfigBoard SET User_ID='{$this->user_id}'" );
    }
 
