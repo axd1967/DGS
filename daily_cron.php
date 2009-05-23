@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 require_once( "include/std_functions.php" );
+require_once( "include/classlib_userquota.php" );
 //require_once( "include/rating.php" );
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
@@ -305,6 +306,13 @@ if(1){//new
    }
    mysql_free_result($result);
 }//new/old
+
+
+
+// Increase feature-points
+
+   UserQuota::increase_update_feature_points();
+
 
    db_query( 'daily_cron.reset_tick',
          "UPDATE Clock SET Ticks=0 WHERE ID=203 LIMIT 1" );
