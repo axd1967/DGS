@@ -17,13 +17,18 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+ /* Author: Jens-Uwe Gaspar */
+
+$TranslateGroups[] = "Common";
+
+require_once( 'include/std_classes.php' );
+
+
 /*!
  * \file lib_votes.php
  *
  * \brief Functions for feature-voting.
  */
-
-$TranslateGroups[] = "Common";
 
 define('FEAT_SUBJECT_WRAPLEN', 55);
 
@@ -212,7 +217,7 @@ class Feature
       if( is_null($this->featurevote) )
       {// no vote so far
          $this->featurevote = FeatureVote::new_featurevote( $this->id, $voter, $points );
-         $fpoints = $points;
+         $fpoints = -$points;
       }
       else
       {// already voted
@@ -225,6 +230,59 @@ class Feature
       //error_log("F.update_vote: " . $this->to_string());
       $this->featurevote->update_vote();
       return $fpoints;
+   }
+
+   /*!
+    * \brief Fixes user user-quota feature-points on feature-status change.
+    *
+    * \note no "return" of feature-points for status-change back from rejected: NACK -> !NACK
+    * \note "return" all feature-points if feature rejected: !NACK -> NACK
+    * \note "return" min(own-vote,average-vote) of feature-points if feature: !LIVE -> LIVE
+    * \return sum of all "returned" feature-points
+    */
+   function fix_user_quota_feature_points( $old_status, $new_status )
+   {
+      if( $old_status == $new_status ) // no status-change
+         return 0;
+      if( $old_status == FEATSTAT_NACK ) // no "return" if NACK-status changed to something
+         return 0;
+
+      // feature rejected -> "return" all feature-points
+      if( $old_status != FEATSTAT_NACK && $new_status == FEATSTAT_NACK )
+      {
+         $row = FeatureVote::load_featurevote_summary( $this->id );
+         if( !$row ) return 0;
+         $sumPoints = @$row['sumAbsPoints'] + 0;
+
+         // return all consumed points to respective voter
+         db_query( "Feature({$this->id}).fix_user_quota_feature_points($old_status,$new_status)",
+              'UPDATE UserQuota AS UQ '
+               . "INNER JOIN FeatureVote AS FV ON FV.Voter_ID=UQ.uid AND FV.fid={$this->id} AND FV.Points<>0 "
+               . 'SET UQ.FeaturePoints = UQ.FeaturePoints + ABS(FV.Points)' );
+         return $sumPoints;
+      }
+
+      // feature went live -> "return" some feature-points
+      if( $old_status != FEATSTAT_LIVE && $new_status == FEATSTAT_LIVE )
+      {
+         $row = FeatureVote::load_featurevote_summary( $this->id );
+         if( !$row ) return 0;
+         $cntVotes = @$row['cntVotes'] + 0;
+         $avgPoints = round(@$row['avgAbsPoints'] + 0.25);
+         if( $avgPoints == 0 ) $avgPoints = 1;
+
+         // return minimum of own-vote/average-vote points (but at least 1 point) to respective voter
+         db_query( "Feature({$this->id}).fix_user_quota_feature_points($old_status,$new_status)",
+              'UPDATE UserQuota AS UQ '
+               . "INNER JOIN FeatureVote AS FV ON FV.Voter_ID=UQ.uid AND FV.fid={$this->id} AND FV.Points<>0 "
+               . "SET UQ.FeaturePoints = UQ.FeaturePoints + IF($avgPoints<ABS(FV.Points),$avgPoints,ABS(FV.Points))" );
+
+         $row = FeatureVote::load_featurevote_summary( $this->id, $avgPoints );
+         $sumPoints = ($row) ? @$row['sumAvgPoints'] : $cntVotes * $avgPoints;
+         return $sumPoints;
+      }
+
+      return 0;
    }
 
 
@@ -296,7 +354,7 @@ class Feature
       }
 
       $intro_open_str = ($intro) // Open
-         ? sprintf( T_('<li>%1$s = show %2$s + %3$s'."\n"),
+         ? sprintf( T_('<li>%1$s = show status %2$s + %3$s'."\n"),
                     T_('Open#filtervote'), FEATSTAT_NEW, FEATSTAT_WORK )
          : '';
       $notes[] = sprintf(
@@ -493,8 +551,8 @@ class FeatureVote
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          . ", IP='{$this->ip}'"
          ;
-      $result = mysql_query( $update_query )
-         or error('mysql_query_failed', "feature.update_vote({$this->fid},{$this->voter},{$this->points})");
+      db_query( "feature.update_vote({$this->fid},{$this->voter},{$this->points})",
+         $update_query );
    }
 
 
@@ -533,9 +591,9 @@ class FeatureVote
 
    /*!
     * \brief Returns QuerySQL for feature-vote-list page.
-    * param ftable: Table object
+    * \param mquery QuerySQL object to merge
     */
-   function build_query_featurevote_list( $vtable )
+   function build_query_featurevote_list( $mquery=null )
    {
       // build SQL-query
       $qsql = new QuerySQL();
@@ -548,12 +606,42 @@ class FeatureVote
          );
       $qsql->add_part( SQLP_FROM, 'FeatureList AS FL' );
       $qsql->add_part( SQLP_FROM, 'LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid' );
+      $qsql->add_part( SQLP_WHERE, 'FV.Points<>0' ); // abstention from voting
       $qsql->add_part( SQLP_GROUP, 'FV.fid' );
       $qsql->add_part( SQLP_HAVING, 'sumPoints is not null' );
-      $query_vfilter = $vtable->get_query(); // clause-parts for filter
-      $qsql->merge( $query_vfilter );
+      if( !is_null($mquery) )
+         $qsql->merge( $mquery );
 
       return $qsql;
+   }
+
+   /*!
+    * \brief Returns row-array with summary about feature-votes for given feature-id.
+    * \return for avgPoints=0: row( avgAbsPoints => average, sumAbsPoints => sum-points, cntVotes => vote-count )
+    *         for avgPoints>0: row( sumAvgPoints => sum-points )
+    */
+   function load_featurevote_summary( $fid, $avgPoints=0 )
+   {
+      if( !is_numeric($fid) || $fid < 0 )
+         error('invalid_args', "FeatureVote.load_featurevote_summary($fid)");
+
+      $qsql = new QuerySQL();
+      if( $avgPoints > 0 )
+         $qsql->add_part( SQLP_FIELDS,
+            "SUM(IF($avgPoints<ABS(FV.Points),$avgPoints,ABS(FV.Points))) AS sumAvgPoints" );
+      else
+         $qsql->add_part( SQLP_FIELDS,
+            'COUNT(*) AS cntVotes',
+            'AVG(ABS(FV.Points)) AS avgAbsPoints',
+            'SUM(ABS(FV.Points)) AS sumAbsPoints' );
+      $qsql->add_part( SQLP_FROM, 'FeatureVote AS FV' );
+      $qsql->add_part( SQLP_WHERE,
+         "FV.fid='$fid'",
+         'FV.Points<>0' ); // abstention from voting
+      $query = $qsql->get_select() . ' LIMIT 1';
+
+      $row = mysql_single_fetch( "FeatureVote.load_featurevote_summary($fid)", $query );
+      return $row;
    }
 
    /*! \brief Returns db-fields to be used for query of Feature-object. */
