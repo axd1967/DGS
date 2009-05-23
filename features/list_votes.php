@@ -57,7 +57,7 @@ require_once( "features/lib_votes.php" );
    $vfilter->add_filter( 3, 'Selection', # filter on status
          Feature::build_filter_selection_status('FL.Status'),
          true, array( FC_DEFAULT => 2 )); // def=0..
-   $ilter_subject =&
+   $filter_subject =&
       $vfilter->add_filter( 4, 'Text', 'FL.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
    $vfilter->add_filter(10, 'Numeric',   'sumPoints', true, array( FC_ADD_HAVING => 1 ));
@@ -84,7 +84,7 @@ require_once( "features/lib_votes.php" );
    $limit = $vtable->current_limit_string();
 
    // build SQL-query
-   $qsql = FeatureVote::build_query_featurevote_list( $vtable );
+   $qsql = FeatureVote::build_query_featurevote_list( $vtable->get_query() );
    $query = $qsql->get_select() . "$order $limit";
 
    $result = mysql_query( $query )
@@ -95,8 +95,8 @@ require_once( "features/lib_votes.php" );
    $title = T_('Feature vote result list');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
-   if( $DEBUG_SQL ) echo "TERMS: " . $rx_term . "<br>\n";
+   if( $DEBUG_SQL ) echo "QUERY: ", make_html_safe($query), "<br>\n";
+   if( $DEBUG_SQL ) echo "TERMS: ", $rx_term, "<br>\n";
 
    echo "<h3 class=Header>$title</h3>\n";
 
