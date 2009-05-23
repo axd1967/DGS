@@ -23,6 +23,84 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-05-23 juga
+
+   * features/lib_votes.php (Feature.update_vote, ~.fix_user_quota_feature_points,
+       ~.build_feature_notes; FeatureVote.build_query_featurevote_list,
+       ~.load_featurevote_summary),
+     features/edit_feature.php, features/list_votes.php:
+   - add feature-points to voters if feature-status changes ...
+     - to NACK: return all voted points if feature rejected
+     - to LIVE: return minimum of own-vote and average-vote
+   - bugfix on consuming feature-points for unvoted feature
+   - bugfix: handle abstention from voting (0-vote) by ignoring it in calculations
+   - changed signature for FeatureVote::build_query_featurevote_list()
+   - cleanup (mysql_query -> db_query), bugfixes (wrong var),
+     minor text-adjustment for feature-notes
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     features/list_features.php:
+   - enhanced feature my-vote filter: allow search for <0 =0 >0 points
+-----------
+-- need restriction on voted points
+ALTER TABLE FeatureVote
+   ADD INDEX Points (Points) ;
+-----------
+
+   * include/classlib_userconfig.php, features/list_features.php,
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added table-column-set for feature-list: ColumnsFeatureList
+-----------
+-- table-column-set for feature-list
+ALTER TABLE ConfigPages
+   ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll ;
+-----------
+
+   * features/lib_votes.php (Feature.update_vote, FeatureVote.check_points,
+       ~.getFeaturePointsText),
+     features/list_features.php, features/list_votes.php,
+     features/vote_feature.php, features/edit_feature.php,
+     error.php:
+   - show and keep track of remaining feature-points with UserQuota
+   - refined feature-searching on subject: min-chars 4 -> 2, mark matches
+   - wordwrap feature-subject, reduced some feature-notes
+
+   * include/classlib_userquota.php (UserQuota),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-UserQuota.txt,
+     do_registration.php,
+     daily_cron.php:
+   - added UserQuota to keep track of remaining feature-points
+     that can be used to vote on features
+   - increase users feature-points every 10 days by 1 point
+-----------
+-- added table for points-management and quota-like fields
+CREATE TABLE UserQuota (
+   uid int(11) NOT NULL,
+   FeaturePoints smallint(5) NOT NULL default '25',
+   FeaturePointsUpdated datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (uid),
+   KEY FeaturePointsUpdated (FeaturePointsUpdated)
+) ENGINE=MyISAM;
+
+-- create UserQuota for all players
+INSERT UserQuota (uid,FeaturePointsUpdated)
+   SELECT ID,NOW() FROM Players ;
+-----------
+
+   * features/vote_feature.php:
+   - bugfix: show subject and description tag-formatting
+
+   * features/list_votes.php:
+   - added features-notes
+   - renamed title: Feature vote list -> Feature vote result list
+
+   * include/std_functions.php (start_page):
+   - renamed main-menu item: Vote -> Feature vote
+
+   * forum/list.php:
+   - thread list: switch columns Hits <-> PostCount
+
 2009-05-21 juga
 
    * users.php:
