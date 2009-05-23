@@ -88,7 +88,8 @@ require_once( "features/lib_votes.php" );
       jump_to("features/list_features.php?sysmsg=". urlencode(T_('Feature removed!')) );
    }
 
-   $new_status = get_request_arg('new_status');
+   $old_status = $feature->status;
+   $new_status = get_request_arg('new_status', $feature->status);
 
    // insert/update feature-object with values from edit-form if no error
    if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
@@ -102,8 +103,13 @@ require_once( "features/lib_votes.php" );
             $feature->set_status( $new_status );
 
          $feature->update_feature();
+         $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
+
+         $sysmsg = ( $is_super_admin && $added_points > 0 )
+            ? sprintf( T_('Feature saved! %s feature-points returned to voters!'), $added_points )
+            : T_('Feature saved!');
          // if new feature added, add next; if edit feature, edit again
-         jump_to("features/edit_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature saved!')) );
+         jump_to("features/edit_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode($sysmsg));
       }
    }
 
