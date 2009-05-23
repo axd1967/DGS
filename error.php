@@ -786,6 +786,12 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case('miss_user_quota'):
+      {
+         echo T_("Sorry, something is wrong with your user data. Please contact an administrator to fix this.");
+      }
+      break;
+
       //case('assert'):
       //case('internal_error'):
       default:
