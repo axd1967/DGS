@@ -1684,14 +1684,6 @@ function parse_html_safe( $msg, $some_html, $mark_terms='')
    return $str;
 }
 
-function basic_safe( $str)
-{
-   return str_replace(
-              array( '<', '>', '"', "'")
-            , array( '&lt;', '&gt;', '&quot;', '&#039;')
-            , $str);
-}
-
 function reverse_allowed( $msg)
 {
    return str_replace(

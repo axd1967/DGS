@@ -31,7 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *   - no global constants definitions or global vars
  *   - functions without reference to global vars/constants
  *   - functions without DGS-translation-texts
- *   - no GUI/HTML-contributing functions
+ *   - no big GUI/HTML-contributing functions, except minor functions
+ *     that can be useful for other projects too
  */
 
 
@@ -188,6 +189,15 @@ function extract_regex_value( $string, $rxname, $rxvalue="[-\w]+" )
       return $matches[2];
    else
       return null;
+}
+
+/*! \brief (GUI) Returns string with some basic replaced HTML ( < > " ' ) with HTML-entities. */
+function basic_safe( $str )
+{
+   return str_replace(
+         array( '<', '>', '"', "'" ),
+         array( '&lt;', '&gt;', '&quot;', '&#039;' ),
+         $str );
 }
 
 ?>
