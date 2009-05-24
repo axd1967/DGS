@@ -7,7 +7,7 @@ run (need the ADMIN_DATABASE privilege):
 # Example: T_('text-with-space' ) is not discovered as translation-text(!)
 
 # NOTE:
-# When adding new sub-directories with PHP-files, you must add the new
+# When adding new sub-directories with PHP-files,
 # you must add them in the find_php_files()-function in the scripts
 # 'scripts/update_translation_pages.php'
 # Afterwards the 'update_translation_pages.php'-script needs to be run
