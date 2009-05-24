@@ -23,6 +23,29 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-05-24 juga
+
+   * include/filterlib_country.php (FilterCountry.get_input_element,
+       ~.getFilterCountries):
+   - cleanup: refactored static-init of _FILTERC-array into lazy-init where used
+
+   * include/countries.php (getCountryText, getCountryFlagImage),
+     change_profile.php, edit_profile.php, list_contacts.php, opponents.php,
+     userinfo.php, users.php, waiting_room.php, tournaments/list_participants.php:
+   - fixed init of globals by lazy-loading
+     - T_(..) needs $tr[] array to be set beforehand
+     - lazy-init of countries-array
+     - lazy-init of filter-countries
+   - replaced global COUNTRIES-array with functions to check/get
+     country-code/-text and country-flag-image
+
+   * include/std_functions.php (basic_safe),
+     include/utilities.php (basic_safe):
+   - moved basic_safe() from std_functions.php to utilities.php
+
+   * include/languages.php:
+   - added known languages (for later)
+
 2009-05-23 juga
 
    * features/lib_votes.php (Feature.update_vote, ~.fix_user_quota_feature_points,
