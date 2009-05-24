@@ -163,13 +163,7 @@ $ThePage = new Page('TournamentParticipantList');
       if( $tptable->Is_Column_Displayed[ 3] )
          $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $tp->User->Handle, '');
       if( $tptable->Is_Column_Displayed[ 4] )
-      {
-         $cntr = $tp->User->Country;
-         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-         $cntrn = empty($cntr) ? '' :
-            "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"{$base_path}images/flags/$cntr.gif\">";
-         $row_str[ 4] = $cntrn;
-      }
+         $row_str[ 4] = getCountryFlagImage( $tp->User->Country );
       if( $tptable->Is_Column_Displayed[ 5] )
          $row_str[ 5] = echo_rating($tp->User->Rating, true, $uid);
       if( $tptable->Is_Column_Displayed[ 6] )

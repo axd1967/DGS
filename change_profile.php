@@ -21,7 +21,7 @@ $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
-require_once( "include/countries.php" );  //translations useless here, but init needed for the keys
+require_once( 'include/countries.php' );
 require_once( "include/rating.php" );
 
 {
@@ -103,7 +103,7 @@ require_once( "include/rating.php" );
    $country = trim(get_request_arg('country')) ;
    if( empty($country) )
       $query .= "Country='', ";
-   else if( isset($COUNTRIES[$country]) )
+   else if( getCountryText($country) )
       $query .= "Country='" . mysql_addslashes($country) . "', ";
 
    if( @$_GET['locally'] == 1 )

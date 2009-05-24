@@ -392,13 +392,7 @@ $ARR_DBFIELDKEYS = array(
       if( $utable->Is_Column_Displayed[ 3] )
          $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
       if( $utable->Is_Column_Displayed[16] )
-      {
-         $cntr = @$row['Country'];
-         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-         $cntrn = (empty($cntr) ? '' :
-             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-         $urow_strings[16] = $cntrn;
-      }
+         $urow_strings[16] = getCountryFlagImage( @$row['Country'] );
       if( $utable->Is_Column_Displayed[ 4] )
          $urow_strings[ 4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
       if( $utable->Is_Column_Displayed[ 5] )
@@ -525,8 +519,6 @@ function extract_user_stats( $color, $query = null )
 // param opp: maybe 0|empty
 function print_players_table( $p, $uid, $opp )
 {
-   global $COUNTRIES;
-
    $p1 = $p[$uid];
    $p2 = ( $opp && isset($p[$opp]) ) ? $p[$opp] : null;
    $SPC = ''; //'&nbsp;';
@@ -555,12 +547,8 @@ function print_players_table( $p, $uid, $opp )
       ( $p2 ? $p2['Handle'] : $SPC) );
 
    // Country
-   $c1 = $p1['Country'];
-   $c2 = ($p2 ? $p2['Country'] : '');
-   $cn1 = basic_safe(@$COUNTRIES[$c1]);
-   $cn2 = basic_safe(@$COUNTRIES[$c2]);
-   $c1 = (empty($c1) ? '' : "<img title=\"$cn1\" alt=\"$cn1\" src=\"images/flags/$c1.gif\">");
-   $c2 = (empty($c2) ? '' : "<img title=\"$cn2\" alt=\"$cn2\" src=\"images/flags/$c2.gif\">");
+   $c1 = getCountryFlagImage( $p1['Country'] );
+   $c2 = getCountryFlagImage( ($p2 ? $p2['Country'] : '') );
    $r .= sprintf( $rowpatt, T_('Country'),
       $c1,
       ( $p2 ? $c2 : $SPC ) );

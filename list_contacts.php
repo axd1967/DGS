@@ -218,13 +218,7 @@ require_once( 'include/classlib_userpicture.php' );
          $crow_strings[ 2] = "<A href=\"userinfo.php?uid=$cid\">" .
             $row['Handle'] . "</A>";
       if( $ctable->Is_Column_Displayed[ 3] )
-      {
-         $cntr = @$row['Country'];
-         $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-         $cntrn = (empty($cntr) ? '' :
-             "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-         $crow_strings[ 3] = $cntrn;
-      }
+         $crow_strings[ 3] = getCountryFlagImage( @$row['Country'] );
       if( $ctable->Is_Column_Displayed[ 4] )
          $crow_strings[ 4] = echo_rating(@$row['Rating2'],true,$cid);
       if( $ctable->Is_Column_Displayed[ 5] )

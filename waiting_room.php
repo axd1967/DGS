@@ -214,7 +214,6 @@ require_once( 'include/classlib_userconfig.php' );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
 
-
    $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
    $info_row = NULL;
    if( $show_rows > 0 || $wrfilter->has_query() )
@@ -237,13 +236,7 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[ 2] )
             $wrow_strings[ 2] = user_reference( REF_LINK, 1, '', $other_id, $other_handle, '');
          if( $wrtable->Is_Column_Displayed[15] )
-         {
-            $cntr = @$row['other_country'];
-            $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-            $cntrn = empty($cntr) ? '' :
-               "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">";
-            $wrow_strings[15] = $cntrn;
-         }
+            $wrow_strings[15] = getCountryFlagImage( @$row['other_country'] );
          if( $wrtable->Is_Column_Displayed[ 3] )
             $wrow_strings[ 3] = echo_rating($other_rating,true,$other_id);
          if( $wrtable->Is_Column_Displayed[ 4] )

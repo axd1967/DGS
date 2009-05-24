@@ -112,12 +112,6 @@ $ThePage = new Page('UserInfo');
                         ? date(DATE_FMT2, $row['X_Lastaccess']) : '' );
       $lastmove = (@$row['X_LastMove'] > 0
                         ? date(DATE_FMT2, $row['X_LastMove']) : '' );
-
-      $cntr = @$row['Country'];
-      $cntrn = basic_safe(@$COUNTRIES[$cntr]);
-      $cntrn = (empty($cntr) ? '' :
-                "<img title=\"$cntrn\" alt=\"$cntrn\" src=\"images/flags/$cntr.gif\">");
-
       $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
 
 
@@ -127,7 +121,7 @@ $ThePage = new Page('UserInfo');
          $itable->add_sinfo( T_('Type'), build_usertype_text(@$row['Type']) );
       $itable->add_sinfo( T_('Name'),    $name_safe );
       $itable->add_sinfo( T_('Userid'),  $handle_safe );
-      $itable->add_sinfo( T_('Country'), $cntrn );
+      $itable->add_sinfo( T_('Country'), getCountryFlagImage(@$row['Country']) );
 
       $itable->add_sinfo( T_('Time zone'),       $row['Timezone'] . " [GMT$user_gmt_offset]" );
       $itable->add_sinfo( T_('User local time'), $user_localtime );
@@ -158,9 +152,8 @@ $ThePage = new Page('UserInfo');
       { // show player clock
          $itable->add_row( array(
                   'rattb' => 'class=DebugInfo',
-                  'sname' => 'night / used==used(night) ',
-                  'sinfo' => $row['Nightstart'] .' / '.$row['ClockUsed']
-                        .'=='.$user_clockused .' ('.$row['ClockChanged'].')'
+                  'sname' => 'used, used(night) ',
+                  'sinfo' => $row['ClockUsed'] .', '.$user_clockused .' ('.$row['ClockChanged'].')'
                   ) );
       }
       $itable->echo_table();

@@ -76,8 +76,8 @@ require_once( "include/form_functions.php" );
          $woodcolors[$i] = sptext($tmp,2);
    }
 
-   asort($COUNTRIES);
-   $countries = $COUNTRIES;
+   $countries = getCountryText();
+   asort($countries);
    array_unshift($countries, '');
 
    $langs = get_language_descriptions_translated();
@@ -89,24 +89,18 @@ require_once( "include/form_functions.php" );
 
    $notesheights = array();
    for($i=5; $i<26; $i++ )
-   {
       $notesheights[$i] = $i;
-   }
 
    $noteswidths = array();
    for($i=15; $i<105; $i+=5 )
-   {
       $noteswidths[$i] = $i;
-   }
 
    $notesmodes = array('RIGHT' => sptext(T_('Right'),2),
-                     'BELOW' => sptext(T_('Below'),2));
+                       'BELOW' => sptext(T_('Below'),2));
 
    $notescutoffs = array();
    for($i=5; $i<26; $i++ )
-   {
       $notescutoffs[$i] = $i;
-   }
 
    include_once( 'skins/known_skins.php' );
 //   $known_skins = array('dragon' => 'Dragon Go Server original');
@@ -173,7 +167,7 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( $row);
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
-                                  'SELECTBOX', 'country', 1, $COUNTRIES,
+                                  'SELECTBOX', 'country', 1, $countries,
                                   $player_row["Country"], false ) );
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Language'),
