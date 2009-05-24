@@ -109,6 +109,27 @@ General instructions for developers:
    it is hard to modify it. Any suggestion?
 
 
+----------------- PHP, Using translations in libraries/classes:
+
+   For using translated text with  T_('some text')  first the current
+   player_row has to be loaded to determine the players language-setting.
+   That allows the  T_(..)  only to be used during execution time when
+   the player-information has been loaded.
+
+   That may need lazy-initialization for some translated texts.
+   For examples of lazy-init have a look at 'include/countries.php'.
+
+   Also keep in mind, that applying the T_()-func later does not work,
+   as then the text is not included in the database for translation!
+   That means, that you can't dynamically create a string within
+   the T_(string)-func. To accomplish that, you have to use
+   a sprintf-like-string, for example:
+
+      T_("Take $cnt apples")    // does NOT work
+
+      sprintf( T_('Take %s apples'), $cnt)  // use THIS instead
+
+
 ----------------- PHP, Database:
 
    Even if $num is numeric, think to use the quoted syntaxe to set it
@@ -204,26 +225,6 @@ General instructions for developers:
       ( (string)$value != '' )
 
 
------------------ PHP, Using translations in libraries/classes:
-
-   For using translated text with  T_('some text')  first the current
-   player_row has to be loaded to determine the players language-setting.
-   That allows the  T_(..)  only to be used during execution time when
-   the player-information has been loaded.
-
-   That may need lazy-initialization for some translated texts.
-   Also keep in mind, that applying the T_()-func later does not work,
-   as then the text is not included in the database for translation!
-
-   That means, that you can't dynamically create a string within
-   the T_(string)-func. To accomplish that, you have to use
-   a sprintf-like-string, for example:
-
-      T_("Take $cnt apples")    // does NOT work
-
-      sprintf( T_('Take %d apples'), $cnt)  // use THIS instead
-
-
 ----------------- PHP: About using 'and/or' vs. '&&/||'
 
    In logical expressions, always use '&&' and '||' instead
@@ -298,7 +299,7 @@ General instructions for developers:
    Take notice, that 0x80000000 is negative in PHP(!)
    Database fields storing such values must be signed: INT(11) NOT NULL
 
-   Here a former code-snipplet (from include/table_columns.php#add_or_del_column-func):
+   Here is a former code-snipplet (from include/table_columns.php#add_or_del_column-func):
    http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/table_columns.php?revision=1.116&view=markup#l_624
 
 -----------------
