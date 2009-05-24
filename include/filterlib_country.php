@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -23,19 +23,6 @@ require_once( "include/filter.php" );
 require_once( "include/countries.php" );
 
 
-// Inits internal static country-array
-{
-   global $COUNTRIES, $_FILTERC;
-   $_FILTERC = $COUNTRIES;
-   // some shorter countries
-   $_FILTERC['va'] = T_('Vatican City (Holy See)#filter');
-   $_FILTERC['vc'] = T_('St. Vincent & Grenadines#filter');
-   asort($_FILTERC);
-   array_unshift( $_FILTERC, '0');
-   $_FILTERC['0'] = T_('All countries#filter');
-}
-
-
  /*!
   * \class FilterCountry
   * \brief Filter for country as selectbox; SearchFilter-Type: Country.
@@ -45,6 +32,9 @@ require_once( "include/countries.php" );
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_DEFAULT (country-code),
   *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_HIDE
   */
+
+$ARR_GLOBALS_FILTER_COUNTRY = null; // lazy-init
+
 class FilterCountry extends Filter
 {
    /*! \brief Constructs Country-Filter. */
@@ -70,9 +60,35 @@ class FilterCountry extends Filter
    /*! \brief Returns selectbox form-element. */
    function get_input_element( $prefix, $attr = array() )
    {
-      global $_FILTERC;
-      return $this->build_selectbox_elem( $prefix, $_FILTERC);
+      return $this->build_selectbox_elem( $prefix, FilterCountry::getFilterCountries() );
    }
+
+   // ------------------ static functions ---------------------
+
+   /*!
+    * \brief Static (lazy-init) of filter-countries.
+    * \internal
+    */
+   function getFilterCountries()
+   {
+      global $ARR_GLOBALS_FILTER_COUNTRY;
+
+      // lazy-init
+      if( !is_array($ARR_GLOBALS_FILTER_COUNTRY) )
+      {
+         $arr = getCountryText();
+
+         // some shorter countries
+         $arr['va'] = T_('Vatican City (Holy See)#filter');
+         $arr['vc'] = T_('St. Vincent & Grenadines#filter');
+         asort($arr);
+         array_unshift( $arr, '0');
+         $arr['0'] = T_('All countries#filter');
+         $ARR_GLOBALS_FILTER_COUNTRY = $arr;
+      }
+      return $ARR_GLOBALS_FILTER_COUNTRY;
+   }
+
 } // end of 'FilterCountry'
 
 ?>
