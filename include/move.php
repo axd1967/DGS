@@ -144,25 +144,27 @@ function check_handicap( &$board, $coord=false)
 }
 
 
-//ajusted globals by check_remove(): $score, $stonestring;
-function check_remove( &$board, $coord=false )
+// returns GameScore-object
+// NOTE: adjusted globals by check_remove(): $stonestring; only if export_globals=true
+function check_remove( &$board, $scoring_mode, $coord=false, $export_globals=true )
 {
    $Size= $board->size;
    $array= &$board->array;
 
    global $stonestring;
-   if( !@$stonestring ) $stonestring = '';
+   if( $export_globals && !@$stonestring ) $stonestring = '';
+   $stonestring_loc = ( @$stonestring ) ? $stonestring : '';
 
    // toggle marked stones and marked dame to array
 
-   $l = strlen( $stonestring );
+   $l = strlen( $stonestring_loc );
 
-   // $stonearray is used to cancel out duplicates, in order to make $stonestring shorter.
+   // $stonearray is used to cancel out duplicates, in order to make $stonestring_loc shorter.
    $stonearray = array();
 
    for( $i=0; $i < $l; $i += 2 )
    {
-      list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
+      list($colnr,$rownr) = sgf2number_coords(substr($stonestring_loc, $i, 2), $Size);
 
       if( !isset($rownr) || !isset($colnr) )
          error("illegal_position",'move4');
@@ -206,17 +208,19 @@ function check_remove( &$board, $coord=false )
       }
    }
 
-   $stonestring = '';
+   $stonestring_loc = '';
    foreach( $stonearray as $colnr => $sub )
    {
       foreach( $sub as $rownr => $dummy )
       {
-         $stonestring .= number2sgf_coords($colnr, $rownr, $Size);
+         $stonestring_loc .= number2sgf_coords($colnr, $rownr, $Size);
       }
    }
+   if( $export_globals )
+      $stonestring = $stonestring_loc;
 
    global $Handicap, $Komi, $White_Prisoners, $Black_Prisoners;
-   $game_score = new GameScore( GSMODE_TERRITORY_SCORING, $Handicap, $Komi );
+   $game_score = new GameScore( $scoring_mode, $Handicap, $Komi );
    $game_score->set_prisoners_all( $Black_Prisoners,  $White_Prisoners );
    $board->fill_game_score( $game_score );
 
