@@ -69,6 +69,7 @@ $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
 define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filter-form above filter-table
 
+define('SPAN_ONLINE_MINS', 10); // being "online" = if last-accessed during last X minutes
 
 //----- { layout : change in dragon.css too!
 $bg_color='"#f7f5e3"';
@@ -2515,7 +2516,7 @@ function centered_container( $open=true)
    }
 }
 
-function section( $id='', $header='')
+function section( $id='', $header='', $anchorName='' )
 {
    static $section = '';
 
@@ -2529,6 +2530,8 @@ function section( $id='', $header='')
    }
    if( $id )
    { //section request, open it
+      if( $anchorName )
+         echo "<a name=\"$anchorName\">";
       $section = attb_quote('sect'.$id);
       echo "\n<div id=$section class=Section>";
       if( $header )
