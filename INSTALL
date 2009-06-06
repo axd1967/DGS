@@ -9,7 +9,7 @@ Requirements:
 *) MySQL >= 5.0.1 <http://www.mysql.com>
 *) cvs client <http://www.cvshome.org>
 
-*) GD to draw rating graph <http://www.boutell.com/gd/>
+*) GD >= 2.0.0 to draw rating graph and upload images <http://www.boutell.com/gd/>
 *) FreeType for optional fonts in rating graph <http://www.freetype.org>
 
 Last versions used by Dragon Live Server:
