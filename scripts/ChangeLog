@@ -25,6 +25,10 @@ ChangeLog
 
 2009-06-06 juga
 
+   * include/classlib_userconfig.php (ConfigBoard.insert_default),
+     include/classlib_userquota.php (UserQuota.insert_default):
+   - bugfix: use correct arg on static insert_default()-method
+
    * include/classlib_game.php (GameScore, ~.calculate_score, ~.recalculate_score),
      include/move.php (check_remove), confirm.php, game.php:
    - check_remove: made scoring-mode explicit
