@@ -20,11 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once( 'include/std_functions.php' );
+require_once( 'include/gui_functions.php' );
 require_once( 'include/std_classes.php' );
 require_once( 'include/table_columns.php' );
 require_once( 'include/table_infos.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'include/rating.php' );
+require_once( 'include/game_functions.php' );
 
 $ThePage = new Page('GameInfo');
 
@@ -67,8 +69,10 @@ function build_rating_diff( $rating_diff )
       'Games.*',
       'BP.Name AS Black_Name', 'BP.Handle AS Black_Handle',
       'BP.Rating2 AS Black_Rating', 'BP.OnVacation AS Black_OnVacation',
+      'BP.ClockUsed AS Black_ClockUsed',
       'WP.Name AS White_Name', 'WP.Handle AS White_Handle',
       'WP.Rating2 AS White_Rating', 'WP.OnVacation AS White_OnVacation',
+      'WP.ClockUsed AS White_ClockUsed',
       'BRL.RatingDiff AS Black_RatingDiff',
       'WRL.RatingDiff AS White_RatingDiff',
       'UNIX_TIMESTAMP(Starttime) AS X_Starttime',
@@ -99,6 +103,8 @@ function build_rating_diff( $rating_diff )
    $status = build_game_status($grow['Status']);
    $game_finished = ( $grow['Status'] === 'FINISHED' );
 
+   $to_move = get_to_move( $grow, 'gameinfo.bad_ToMove_ID' );
+
 
    // ------------------------
    // build table-info: game settings
@@ -127,7 +133,7 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
    $itable->add_sinfo( T_('Komi'),        $grow['Komi'] );
    $itable->add_sinfo( T_('Rated'),       yesno($grow['X_Rated']) );
-   $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) );
+   $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) ); // Yes=clock runs on weekend
    $itable->add_sinfo( T_('Standard Handicap'), yesno($grow['StdHandicap']) );
    $itable_str_game = $itable->make_table();
    unset($itable);
@@ -154,13 +160,21 @@ function build_rating_diff( $rating_diff )
    if( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
    {
       $itable->add_sinfo(
-            T_('On vacation'),
+            T_('On vacation') . MINI_SPACING . echo_image_vacation(),
             array(
                   echo_onvacation(@$grow['Black_OnVacation']),
                   echo_onvacation(@$grow['White_OnVacation']),
             ),
             '', 'class=OnVacation' );
    }
+
+   $itable->add_sinfo(
+         T_('Off-time'),
+         array(
+            echo_off_time( ($to_move == BLACK), ($grow['Black_OnVacation'] > 0), $grow['Black_ClockUsed'] ),
+            echo_off_time( ($to_move == WHITE), ($grow['White_OnVacation'] > 0), $grow['White_ClockUsed'] ),
+         ),
+         'class="Images"' );
    $itable->add_sinfo(
          T_('Current rating'),
          array(
@@ -200,23 +214,45 @@ function build_rating_diff( $rating_diff )
    // ------------------------
    // build table-info: time settings
 
+   // reduce player-time by current number of ticks
+   if( $grow['Maintime'] > 0 || $grow['Byotime'] > 0 )
+   {
+      // LastTicks may handle -(time spend) at the moment of the start of vacations
+      $hours = ticks_to_hours(get_clock_ticks($grow['ClockUsed']) - $grow['LastTicks']);
+
+      if( $to_move == BLACK )
+      {
+         time_remaining($hours, $grow['Black_Maintime'], $grow['Black_Byotime'],
+                        $grow['Black_Byoperiods'], $grow['Maintime'],
+                        $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+      }
+      else
+      {
+         time_remaining($hours, $grow['White_Maintime'], $grow['White_Byotime'],
+                        $grow['White_Byoperiods'], $grow['Maintime'],
+                        $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+      }
+   }
+
    $short = true; // use short-time?
    $itable = new Table_info('time');
    $itable->add_caption( T_('Remaining time and Time settings') );
    $itable->add_sinfo(
          T_('Color'),
          array(
-            T_('Game setting'),
+            ( ($to_move == BLACK)
+               ? image( "{$base_path}17/b.gif", T_('Black'), T_('Black'), 'class="InTextImage"' ) . ' ' . T_('Black to move')
+               : image( "{$base_path}17/w.gif", T_('White'), T_('White'), 'class="InTextImage"' ) . ' ' . T_('White to move') ),
             image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
             image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
          ),
-         'class=Colors' );
+         'class="Colors"' );
    $itable->add_sinfo(
          T_('Time system'),
          array(
             echo_byotype($grow['Byotype']),
-            '&nbsp;',
-            '&nbsp;',
+            '',
+            '',
          ));
    $itable->add_sinfo(
          T_('Main time'),
@@ -243,13 +279,37 @@ function build_rating_diff( $rating_diff )
                      $grow['White_Byoperiods'], false, $short, false )
             ),
          ));
+
+   $clock_status = array( BLACK => array(), WHITE => array() );
+   if( is_vacation_clock($grow['ClockUsed']) )
+   {
+      $clock_status[$to_move][] = echo_image_vacation( 'in_text',
+         echo_onvacation( ($to_move == BLACK) ? $grow['Black_OnVacation'] : $grow['White_OnVacation'] ),
+         true );
+   }
+   elseif( is_weekend_clock($grow['ClockUsed']) && is_weekend() )
+      $clock_status[$to_move][] = echo_image_weekendclock(true, true);
+   if( is_nighttime_clock( ($to_move == BLACK) ? $grow['Black_ClockUsed'] : $grow['White_ClockUsed'] ) )
+      $clock_status[$to_move][] = echo_image_nighttime('in_text', true);
+
+   $clock_stopped = count($clock_status[BLACK]) + count($clock_status[WHITE]);
+   $itable->add_sinfo(
+         T_('Clock status'),
+         array(
+            ( $clock_stopped ? T_('Clock stopped') : T_('Clock running') ),
+            implode(' ', $clock_status[BLACK]),
+            implode(' ', $clock_status[WHITE]),
+         ));
    if( $is_admin )
    {
       $itable->add_row( array(
             'rattb' => 'class=DebugInfo',
             'sname' => T_('Clock used'),
-            'sinfo' => array( $grow['ClockUsed'], '&nbsp;', '&nbsp;' ),
-            ));
+            'sinfo' => array(
+               T_('Game') . ': ' . $grow['ClockUsed'],
+               $grow['Black_ClockUsed'],
+               $grow['White_ClockUsed'],
+            )));
    }
    $itable_str_time = $itable->make_table();
    unset($itable);
