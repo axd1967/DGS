@@ -66,17 +66,21 @@ if( @is_readable( "timeadjust.php" ) )
 if( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
+// time() always returns time in UTC
 $NOW = time() + (int)$timeadjust;
 
 define('DATE_FMT', 'Y-m-d H:i');
 define('DATE_FMT2', 'Y-m-d&\n\b\s\p;H:i');
 define('DATE_FMT3', 'Y-m-d&\n\b\s\p;H:i:s');
 define('DATE_FMT4', 'YmdHis');
+define('DATE_FMT5', 'D, Y-m-d H:i T');
 define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
+define('DATE_FMT_YMD', 'Y-m-d');
 
 define('SESSION_DURATION', 3600*12*61); // 1 month
 define('TICK_FREQUENCY', 12); // ticks/hour (every 5 minutes)
 
+define('SECS_PER_DAY', 86400);
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
 define('COOKIE_PREFIX', 'cookie_');
@@ -94,7 +98,7 @@ define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')");
 define('FOLDER_NEW', 2);
 
 //used in daily_cron.php & others (to "mark" forum oldest unread entry)
-define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * 86400); // [secs]
+define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * SECS_PER_DAY); // [secs]
 
 
 //FIXME: get_magic_quotes_gpc-func is deprecated and will be removed (soon)
