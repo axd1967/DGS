@@ -31,9 +31,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
             "SELECT ID FROM Games " .
             "WHERE ToMove_ID=$uid "  .
             "AND Status" . IS_RUNNING_GAME .
-            "AND ( UNIX_TIMESTAMP(Lastchanged) > UNIX_TIMESTAMP('$Lastchanged') " .
-               "OR ( UNIX_TIMESTAMP(Lastchanged) = UNIX_TIMESTAMP('$Lastchanged') " .
-                  "AND ID>$gid )) " .
+            " AND ( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid )) " .
             //keep this order like the one in the status page
             "ORDER BY Lastchanged,ID " .
             "LIMIT 1" );
