@@ -55,17 +55,22 @@ if( !$is_down )
       or $TheErrors->dump_exit('clock_tick');
 
 
-   //setTZ('GMT');
+   // $NOW is time in UTC
    $hour = gmdate('G', $NOW);
    $day_of_week = gmdate('w', $NOW);
 
    // Now increase clocks that are not sleeping
 
    /* NIGHT_LEN hours night
-    * Nightstart= N means night in [N,(N+NIGHT_LEN)%24[ (see edit_profile.php)
+    * Nightstart= N means night in: [ N,(N+NIGHT_LEN)%24 [    (see edit_profile.php)
+    *                                 N <= time < (N + NIGHT_LEN)%24
     * if Timezone=='GMT', ClockUsed is always equal to Nightstart
     * if Timezone=='GMT+x'(ou UTC+x), ClockUsed is ( Nightstart+24-x )%24
-    *  ClockUsed is the GMT hour on which the user night start
+    * NOTES:
+    * - "+24" added to avoid becoming negative
+    * - ClockUsed is the GMT hour on which the users night start
+    * - ClockUsed also used for weekends (+weekend offset), so NightStart also influences start/end of weekend
+    *
     * When the GMT hour is 22, clock_modified= [23]U[00,13], thus:
     *  UserTZ UserTime UserNight UserClockUsed UserClockModified
     *  GMT    22       [22,07[   22            -
@@ -81,8 +86,8 @@ if( !$is_down )
     *  GMT-2  20       [02,11[   04            Y
     */
 
-   //build a range query for the field $n
-   //from $s to $e on a 24 clocks basis with the offset $o
+   // build a range SQL-query-part for the field $n
+   // from $s to $e on a 24 clocks basis with the offset $o
    function clkrng( $n, $s, $e, $o=0)
    {
       if( $s>23 ) $s-= 24;
@@ -92,7 +97,7 @@ if( !$is_down )
       $s+= $o; $e+= $o;
       if( $s==$e )
          return "$n=$s";
-      return "($n>=$s AND $n<=$e)";
+      return "($n BETWEEN $s AND $e)"; // ($n>=$s AND $n<=$e)
    }
 
    $clock_modified = clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN);
