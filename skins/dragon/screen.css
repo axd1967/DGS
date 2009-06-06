@@ -1124,7 +1124,7 @@ table.Infos {
    width: auto;
    max-width: none;
    overflow: visible;
-   empty-cells: hide;
+   empty-cells: show;
    text-align: left;
 }
 
@@ -1179,7 +1179,8 @@ table.Infos .Highlight {
    background: #ffd070;
 }
 
-table.Infos td.Colors {
+table.Infos td.Colors,
+table.Infos td.Images {
    text-align: center;
 }
 
@@ -1297,6 +1298,23 @@ td.FormClassC span.Rubric {
    font-weight: bold;
 }
 
+
+
+/* ------------------------- */
+/* userinfo */
+/* ------------------------- */
+
+table#UserInfo {
+   table-layout: auto;
+   border: 0px solid red;
+   margin: auto;
+   width: auto; /* 100% */
+}
+
+table#UserInfo td.UserInfo {
+   vertical-align: top;
+   padding: 0px 1em;
+}
 
 
 /* ------------------------- */
