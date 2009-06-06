@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/std_classes.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
@@ -109,6 +110,8 @@ require_once( 'include/classlib_userpicture.php' );
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
    $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
    $ctable->add_tablehead( 4, T_('Rating#header'), 'Rating', 0, 'P.Rating2-');
+   $ctable->add_tablehead(14, new TableHead( T_('User online#header'),
+      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
    $ctable->add_tablehead( 5, T_('Last access#header'), 'Date', 0, 'P.Lastaccess-');
    $ctable->add_tablehead( 6, T_('System categories#header'), 'Enum', 0, 'C.SystemFlags+');
    $ctable->add_tablehead( 7, T_('User categories#header'), 'Enum', 0, 'C.UserFlags+');
@@ -249,6 +252,11 @@ require_once( 'include/classlib_userpicture.php' );
       {
          $crow_strings[11] =
             ($row['lastchangedU']>0 ? date(DATE_FMT2, $row['lastchangedU']) : '');
+      }
+      if( $ctable->Is_Column_Displayed[14] )
+      {
+         $is_online = ($NOW - @$row['lastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+         $crow_strings[14] = echo_image_online( $is_online, @$row['lastaccessU'], false );
       }
 
       $ctable->add_row( $crow_strings );
