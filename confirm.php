@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -409,7 +409,7 @@ This is why:
             error('invalid_action',"confirm.done.$Status");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
-         $game_score = check_remove( $TheBoard); //ajusted globals: $stonestring
+         $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING); //ajusted globals: $stonestring
          $score = $game_score->calculate_score();
 
          $l = strlen( $stonestring );

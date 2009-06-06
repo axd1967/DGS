@@ -230,7 +230,6 @@ function get_alt_arg( $n1, $n2)
    $movecol= $TheBoard->movecol;
    $movemsg= $TheBoard->movemsg;
 
-
    $extra_infos = array();
    $game_score = null;
 
@@ -242,7 +241,7 @@ function get_alt_arg( $n1, $n2)
       {
          if( abs($Score) <= SCORE_MAX ) // don't calc for resign/time-out
          {
-            $game_score = check_remove( $TheBoard, $coord); //ajusted globals: $stonestring
+            $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING, $coord); //ajusted globals: $stonestring
             $game_score->calculate_score();
          }
          $extra_infos[score2text($Score, true)] = 'Score';
@@ -374,7 +373,7 @@ function get_alt_arg( $n1, $n2)
             error('invalid_action',"game.remove.$Status");
 
          $validation_step = false;
-         $game_score = check_remove( $TheBoard, $coord); //ajusted globals: $stonestring
+         $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING, $coord); //ajusted globals: $stonestring
          $score = $game_score->calculate_score();
 
          $done_url = "game.php?gid=$gid".URI_AMP."a=done"
@@ -395,7 +394,7 @@ function get_alt_arg( $n1, $n2)
             error('invalid_action',"game.done.$Status");
 
          $validation_step = true;
-         $game_score = check_remove( $TheBoard); //ajusted globals: $stonestring
+         $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING ); //ajusted globals: $stonestring
          $score = $game_score->calculate_score();
 
          $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
@@ -541,7 +540,10 @@ function get_alt_arg( $n1, $n2)
          echo "<br>\n";
       }
    }
-   draw_score_box( $game_score );
+   draw_score_box( $game_score, GSMODE_TERRITORY_SCORING );
+   {//FIXME: remove after testing
+      echo "<br>\n";
+      draw_score_box( $game_score, GSMODE_AREA_SCORING ); }
    echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;
@@ -1138,14 +1140,15 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    echo "</table>\n";
 } //draw_notes
 
-function draw_score_box( $game_score )
+function draw_score_box( $game_score, $scoring_mode )
 {
    global $base_path;
    if( !is_a( $game_score, 'GameScore' ) )
       return false;
 
-   //$game_score->calculate_score(GSMODE_AREA_SCORING); // for test
+   $game_score->recalculate_score($scoring_mode); // recalc if needed
    $score_info = $game_score->get_scoring_info();
+
    $fmtline3 = "<tr><td class=\"%s\">%s</td><td>%s</td><td>%s</td></tr>\n";
    $fmtline2 = "<tr><td class=\"%s\">%s</td><td colspan=\"2\">%s</td></tr>\n";
 
