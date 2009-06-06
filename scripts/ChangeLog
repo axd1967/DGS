@@ -23,6 +23,89 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-06 juga
+
+   * NEWS:
+   - game-info, off-time (vacation/nighttime/weekend), userinfo (2 cols),
+     "online"-users, mark admin users, optimizations
+
+   * userinfo.php, include/quick_common.php, skins/dragon/screen.css:
+   - show user-info table in two columns (less game- and more-game-related info)
+     with nearly equal number of rows
+   - show additional vacation-icon if user on vacation
+   - show night-icon when player is in sleeping-time (near Nighttime)
+   - show full range of night-time (from - to)
+   - bugfix: added mysql_free_result for bio-infos
+
+   * include/time_functions.php (is_hour_clock_run, is_weekend, is_weekend_clock,
+       is_weekend_clock_stopped, is_vacation_clock, is_nighttime_clock),
+     include/game_functions.php (get_to_move),
+     gameinfo.php, game.php:
+   - show images for players being off-time for vacation, sleep-time, weekend-clock,
+     show context-specific hint-tip on images
+   - gameinfo: show current clock-status and reason why it is stopped (vacation, sleep-time, weekend)
+   - show vacation-icon besides 'On vacation'-text if user on vacation
+
+   * include/time_functions.php (get_clock_used):
+   - bugfix: PHP5-adjustments for checking on invalid timestamp,
+     use date-formatting without leading zeros
+
+   * game.php:
+   - replaced red-colored 'On vacation'-text with vacation-icon
+
+   * gameinfo.php, skins/dragon/screen.css:
+   - bugfix: reduce remaining-time by current number of ticks for player to move
+   - add info which player (color) has to move next
+   - use CSS to show empty-cells
+
+   * status.php:
+   - bugfix on games order on Lastchanged (was switched accidentally on rev 1.111)
+   - show vacation-icon besides 'On vacation'-text if user on vacation
+   - added hideable game-info column in games-list with link to respective gameinfo-page
+   - added image-icon (house) for users being "online" (=lastaccess) within certain time range
+
+   * list_contacts.php, users.php, opponents.php, include/std_functions.php:
+   - added image-icon (house) for users being "online" (=lastaccess) within certain time range
+
+   * forum/forum_functions.php (DisplayForum.draw_post, ForumUser),
+     userinfo.php:
+   - forum: show admin-icon near author-info for executive-user with link to people with executives
+   - userinfo: show admin-icon on Dragon executives near user-id
+
+   * include/gui_functions.php (echo_image_vacation, echo_image_nighttime,
+       echo_image_weekendclock, echo_image_admin, echo_image_online, echo_off_time):
+   - added methods to show icon for vacation, night-time, weekend-clock,
+     being executive-admin, being "online", in off-time
+
+   * people.php (get_executives), include/std_functions.php (section),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - added section with all Dragon executives matched by ADMINGROUP_EXECUTIVE,
+     show admin-icon for Dragon executives (FAQ-editors, forum moderators)
+   - added HTML-anchors for all sections
+   - added images for: vacation, night-time
+   - added modified icons from silk-collection for:
+     admin (Dragon executive), being "online", stopped-weekend-clock
+-----------
+copy /images/admin.gif
+copy /images/online.gif
+copy /images/night.gif
+copy /images/vacation.gif
+copy /images/wclock_stop.gif
+-----------
+
+   * confirm.php:
+   - optimized SQL-query for skip-to-next-game allowing to use Lastchanged-index
+
+   * clock_tick.php:
+   - changed SQL-query using BETWEEN..AND
+   - added more comments on sleeping-time
+
+   * admin_admins.php:
+   - bugfix with db-query
+
+   * INSTALL:
+   - need GD-version 2.x at least for image-upload
+
 2009-05-24 juga
 
    * include/filterlib_country.php (FilterCountry.get_input_element,
@@ -31,7 +114,8 @@ ChangeLog
 
    * include/countries.php (getCountryText, getCountryFlagImage),
      change_profile.php, edit_profile.php, list_contacts.php, opponents.php,
-     userinfo.php, users.php, waiting_room.php, tournaments/list_participants.php:
+     userinfo.php, users.php, waiting_room.php, tournaments/list_participants.php,
+     scripts/README.developers:
    - fixed init of globals by lazy-loading
      - T_(..) needs $tr[] array to be set beforehand
      - lazy-init of countries-array

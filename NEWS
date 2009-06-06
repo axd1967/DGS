@@ -19,11 +19,20 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Games:
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
+      * Added new game info page (<image info.gif>)
       * Preview game message (access-key [v]=Preview)
-      * Added game info page (<image info.gif>),
-        added access to initial invitation message for game
       * Show scoring information in scoring step and for finished games
       * Added "Notes" column on My-Games list showing part of private game notes
+
+   * Game info:
+      * Access to initial invitation message for game
+      * Show all game parameters, e.g. Start time and Weekend clock
+      * Show some info on players:
+         * Off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
+         * Start and End rating
+      * Show full time info of game for each player:
+         * Full remaining time including extra-time
+         * Clock status (stopped/running) with reason why
 
    * Game settings:
       * Waiting room: separated adding of new game on <home new_game.php>new-game page</home>,
@@ -47,11 +56,14 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Show Weekendclock for all view-modes
 
    * <home userinfo.php>User info</home>:
-      * Show a users timezone, local time and night start
+      * Show a users timezone, local time and night start,
+      * Show icon for Vacation (<image vacation.gif>), Night time (<image night.gif>)
       * Added <home userinfo.php#pic>user picture</home> on user-info page
          * Added page to <home edit_picture.php>edit user picture</home>,
            Supported image-types: GIF, JPEG, PNG
          * Show if user has a picture on pages: users, opponents, contacts
+      * Show user-info in two columns (less game- and more-game-related info)
+      * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>
@@ -67,6 +79,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
+      * Added column with link to new game info page
+      * Added column with icon (<image online.gif>) for users being "online",
+        i.e. last access time within 10 mins ago
       * Show open tournament applications of user
       * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list
@@ -103,6 +118,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
             * This fixed "missing" new posts while replying and own new posts
             * User can mark single posts as read: 'mark read'-link on new post
             * User can mark all posts as read: 'mark all read'-link
+         * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * <home features/list_features.php>Voting on features</home> including feature status management
       * <home features/list_votes.php>Show features votes</home>, added as Vote-link in main-menu
@@ -134,7 +150,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
            fixing possible bug on large boards
          * Mark handicap-setup in view-moves list
          * Added access key [x]='Next Game', [v]=Preview
-         * Show OnVacation of user in red
+         * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
+         * Replaced 'OnVacation'-text by vacation-icon (<image vacation.gif>)
 
    * Quick Status: Added time-remaining column
 
@@ -147,6 +164,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Admin can mark user as Professional, Teacher and Robot
          * Can be searched on users and opponents page
          * Shown in user info, waiting room, on users and opponents page
+      * Show icon (<image online.gif>) for users being "online" (i.e. last access time within 10 mins ago)
+        on pages <home users.php>Users</home>, <home opponents.php>Opponents</home> and <home list_contacts.php>Contacts</home>
       * Used button-image for ID-column for users and opponents page
       * <home opponents.php>Opponents page</home>: highlight sum-rows and -columns
 
@@ -169,9 +188,12 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home docs.php>Docs</home>:
       * Added link to statistics page on docs and site-map page
-      * Added other credits on <home people.php>peoples page</home>
       * News: added table of contents
       * <home links.php>Links</home>: added gosensations.com, corrected outdated links
+
+      * <home people.php>People page</home>:
+         * Added section with all Dragon executives
+         * Added other credits
 
    * More use of CSS
 
@@ -180,6 +202,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Improvements of database queries
       * Users: faster Activity handling
+      * Game: faster skip-to-next-game
 
    * Introduction of a cache management for some pages and graphics
 
