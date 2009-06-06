@@ -131,11 +131,18 @@ $ARR_DBFIELDKEYS = array(
    $f_status =& $usfilter->get_filter(4);
 
    // table filters: use same table-IDs as in users.php(!)
+   // NOTE: Filters on Players.Name/Handle must not allow leading wildcard
+   //       like on the users-page. The pages are very much alike, but allowing
+   //       leading-wildcards make up VERY SLOW queries for the opponents-page,
+   //       so must'nt be used here.
+   //       The logic behind that is, to use the users-page to find a specific user
+   //       (if unknown or just knowing a part of it), then use that userid as
+   //       restrictions on other-pages.
    $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
    $ufilter->add_filter( 2, 'Text',    'P.Name', true,
-         array( FC_SIZE => 12 ));
+         array( FC_SIZE => 12 )); // no leading-wildcard (see NOTE above)
    $ufilter->add_filter( 3, 'Text',    'P.Handle', true,
-         array( FC_SIZE => 12 ));
+         array( FC_SIZE => 12 )); // no leading-wildcard (see NOTE above)
    //$ufilter->add_filter( 4, 'Text',    'P.Rank', true); # Rank info (don't use here, no index)
    $ufilter->add_filter( 5, 'Rating',  'P.Rating2', true);
    //$ufilter->add_filter( 6, 'Text',    'P.Open', true); # Open for matches (don't use here, no index)
@@ -206,6 +213,8 @@ $ARR_DBFIELDKEYS = array(
    $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
    $utable->add_tablehead(12, T_('Percent#header'), 'Number', 0, 'Percent-');
    $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
+   $utable->add_tablehead(20, new TableHead( T_('User online#header'),
+      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
    $utable->add_tablehead(14, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
    $utable->add_tablehead(15, T_('Last move#header'), 'Date', 0, 'LastMove-');
 
@@ -435,6 +444,11 @@ $ARR_DBFIELDKEYS = array(
          $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
       if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
          $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
+      if( $utable->Is_Column_Displayed[20] )
+      {
+         $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+         $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
+      }
 
       $utable->add_row( $urow_strings );
    }
