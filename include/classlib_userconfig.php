@@ -35,7 +35,7 @@ require_once( 'include/classlib_bitset.php' );
   * \brief Class to manage ConfigBoard-table
   *
   * Examples:
-  *    $cfg->insert_default_config_board( $user_id );
+  *    $cfg->insert_default( $user_id );
   *
   *    $cfg = ConfigBoard::load_config_board( $user_id );
   *    $cfg->set_stone_size(25);
@@ -283,8 +283,8 @@ class ConfigBoard
    function insert_default( $user_id )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigBoard::insert_default');
-      db_query( "ConfigBoard::insert_default.insert({$this->user_id})",
-         "INSERT INTO ConfigBoard SET User_ID='{$this->user_id}'" );
+      db_query( "ConfigBoard::insert_default.insert({$user_id})",
+         "INSERT INTO ConfigBoard SET User_ID='{$user_id}'" );
    }
 
 } // end of 'ConfigBoard'
@@ -298,7 +298,7 @@ class ConfigBoard
   * \brief Class to manage ConfigPages-table
   *
   * Examples:
-  *    $cfg->insert_default_config_pages( $user_id );
+  *    $cfg->insert_default( $user_id );
   *
   *    $cfg = ConfigPages::load_config_pages( $user_id );
   *    $cfg->update_config();

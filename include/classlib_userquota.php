@@ -35,7 +35,7 @@ require_once( 'include/utilities.php' );
   * \brief Class to manage UserQuota-table
   *
   * Examples:
-  *    $uq->insert_default_user_quota( $user_id );
+  *    $uq->insert_default( $user_id );
   *
   *    $uq = UserQuota::load_user_quota( $user_id );
   *    $uq->modify_feature_points( -1 );
@@ -131,8 +131,8 @@ class UserQuota
    {
       global $NOW;
       UserQuota::_check_user_id( $user_id, 'UserQuota::insert_default');
-      db_query( "UserQuota::insert_default.insert({$this->user_id})",
-         "INSERT INTO UserQuota SET uid='{$this->user_id}'"
+      db_query( "UserQuota::insert_default.insert({$user_id})",
+         "INSERT INTO UserQuota SET uid='{$user_id}'"
          . ', FeaturePointsUpdated=FROM_UNIXTIME(' . $NOW . ')' );
    }
 
