@@ -127,6 +127,8 @@ Find out which group your webserver is using (e.g. www-data).
   You can create a sub-directory in the document-root or use an alias /userpic
   pointing to a folder to store images. Adjust USERPIC_FOLDER in the local
   config-file.
+  NOTE: Be aware, that this is a security risk, if scripts are uploaded into
+        folder. The code assure, that only images are uploaded though.
 
   # Example using CACHE_FOLDER from above as storage:
   # (assert that URL-part '/userpic' points to USERPIC_FOLDER-directory
