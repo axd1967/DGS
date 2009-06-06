@@ -49,3 +49,10 @@ copy /images/blue.gif
 -----------
 copy /images/picture.gif
 
+-----------
+copy /images/night.gif
+copy /images/vacation.gif
+copy /images/admin.gif
+copy /images/online.gif
+copy /images/wclock_stop.gif
+
