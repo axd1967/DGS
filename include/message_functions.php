@@ -149,6 +149,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       if( isset($gid['byoyomitype']) )
          $Byotype = (string)$gid['byoyomitype'];
 
+      // NOTE on time-hours: 36 hours eval to 2d + 6h (because of sleeping time)
+
       if( isset($gid['timevalue']) )
          $Maintime = (int)$gid['timevalue'];
       if( isset($gid['timeunit']) )
