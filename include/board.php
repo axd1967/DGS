@@ -77,7 +77,7 @@ class Board
    // fills $array with positions where the stones are.
    // fills $moves with moves and coordinates.
    // keep the coords, color and message of the move $move.
-   function load_from_db( &$game_row, $move=0, $no_marked_dead=true )
+   function load_from_db( $game_row, $move=0, $no_marked_dead=true )
    {
       $this->array = NULL;
       $this->moves = array();
@@ -124,7 +124,7 @@ class Board
          {
             if( $PosX == POSX_ADDTIME )
             {
-         //POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
+               //POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
                $this->infos[] = array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
             }
             continue;
