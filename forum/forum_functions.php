@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Forum"; //local use
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( 'include/std_classes.php' );
 require_once( "include/form_functions.php" );
 require_once( 'include/classlib_user.php' );
@@ -716,8 +717,9 @@ class DisplayForum
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
          $post_reference = date(DATE_FMT, $post->created);
-         echo T_('by') ,' ' , $post->author->user_reference()
-            ," &nbsp;&nbsp;&nbsp;" ,$post_reference;
+         echo T_('by') ,' ' , $post->author->user_reference(),
+              echo_image_admin( $post->author->AdminLevel ),
+              ' ', SMALL_SPACING, $post_reference;
 
          echo $this->get_post_edited_string( $post );
          if( $post->last_edited > 0 )
@@ -1558,7 +1560,8 @@ class ForumPost
          'UNIX_TIMESTAMP(P.Lastchanged) AS X_Lastchanged',
          'UNIX_TIMESTAMP(P.Lastedited) AS X_Lastedited',
          'UNIX_TIMESTAMP(P.Updated) AS X_Updated',
-         'PAuthor.Name AS Author_Name', 'PAuthor.Handle AS Author_Handle' );
+         'PAuthor.Name AS Author_Name', 'PAuthor.Handle AS Author_Handle',
+         'PAuthor.Adminlevel+0 AS Author_AdminLevel' );
       $qsql->add_part( SQLP_FROM,
          'Posts AS P',
          'LEFT JOIN Players AS PAuthor ON PAuthor.ID=P.User_ID' ); // Post-Author
@@ -1573,7 +1576,7 @@ class ForumPost
             @$row['Forum_ID'],
             @$row['Thread_ID'],
             // Author_* not part of Posts-table, but are read if set in row
-            new ForumUser( @$row['User_ID'], @$row['Author_Name'], @$row['Author_Handle'] ),
+            new ForumUser( @$row['User_ID'], @$row['Author_Name'], @$row['Author_Handle'], @$row['Author_AdminLevel'] ),
             @$row['LastPost'],
             @$row['PostsInThread'],
             @$row['Hits'],
@@ -1607,13 +1610,15 @@ class ForumUser
    var $id;
    var $name;
    var $handle;
+   var $AdminLevel;
 
    /*! \brief Constructs a ForumUser with specified args. */
-   function ForumUser( $id=0, $name='', $handle='' )
+   function ForumUser( $id=0, $name='', $handle='', $admin_level=0 )
    {
       $this->id = (int) $id;
       $this->name = (string)$name;
       $this->handle = (string)$handle;
+      $this->AdminLevel = (int)$admin_level;
    }
 
    /*! \brief Returns true, if user set (id != 0). */
@@ -1627,7 +1632,8 @@ class ForumUser
    {
       return "ForumUser(id={$this->id}): "
          . "name=[{$this->name}], "
-         . "handle=[{$this->handle}]";
+         . "handle=[{$this->handle}]"
+         . "AdminLevel=[{$this->AdminLevel}]";
    }
 
    /*! \brief Returns user_reference for user in this object. */
