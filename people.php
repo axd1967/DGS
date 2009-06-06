@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
+require_once( "include/gui_functions.php" );
+
 $ThePage = new Page('People');
 
 function add_contributor_link( $text=false, $link, $extra='')
@@ -72,12 +74,33 @@ function build_icon( $icon_name, $text )
    return image( "{$base_path}images/$icon_name", $text, $text );
 }
 
+function get_executives( $level )
+{
+   $out = array();
+   if( $level & ADMIN_SUPERADMIN )
+      $out[] = T_('Admin manager#admin');
+   if( $level & ADMIN_DEVELOPER )
+      $out[] = T_('Developer &amp; Site#admin');
+   if( $level & ADMIN_PASSWORD )
+      $out[] = T_('Password#admin');
+   if( $level & ADMIN_FAQ )
+      $out[] = T_('FAQ editor#admin');
+   if( $level & ADMIN_FORUM )
+      $out[] = T_('Forum moderator#admin');
+   if( $level & ADMIN_TOURNAMENT )
+      $out[] = T_('Tournaments#admin');
+   if( $level & ADMIN_VOTE )
+      $out[] = T_('Votes#admin');
+   return array( count($out), implode(', ', $out) );
+}
+
 
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
+   $img_admin = MINI_SPACING . echo_image_admin(ADMINGROUP_EXECUTIVE);
 
    start_page(T_('People'), true, $logged_in, $player_row );
 
@@ -101,13 +124,13 @@ function build_icon( $icon_name, $text )
 
    add_contributor();
 
+
    //---------
-   section( 'FAQ', T_('FAQ editors'));
+   section( 'FAQ', T_('FAQ editors') . $img_admin, 'faq' );
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_FAQ);
-   $FAQexclude = array( 'ejlo', 'rodival', 'jug' );
+   $FAQexclude = array( 'ejlo', 'rodival' );
    $FAQmain = 'Ingmar';
-   //$FAQmain = 'jug';
    $FAQmainID = 0;
 
    $result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
@@ -160,8 +183,9 @@ function build_icon( $icon_name, $text )
 
    add_contributor();
 
+
    //---------
-   section( 'Moderators', T_('Forum moderators'));
+   section( 'Moderators', T_('Forum moderators') . $img_admin, 'moderators' );
 
    $MODexclude = array( 'ejlo', 'rodival' );
 
@@ -185,8 +209,48 @@ function build_icon( $icon_name, $text )
 
    add_contributor();
 
+
    //---------
-   section( 'Translators', T_('Translators'));
+   section( 'Executives', T_('Administration - Dragon executives') . $img_admin, 'executives' );
+
+   $MODexclude = array( 'ejlo' );
+
+   $lastAccess = $NOW - 6*7 * SECS_PER_DAY; // 6 weeks
+   $result = mysql_query( "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,".
+               " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
+               " UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess" .
+            " FROM Players" .
+            " WHERE Adminlevel>0 AND Lastaccess > FROM_UNIXTIME($lastAccess)" .
+            " ORDER BY X_AdmLevBitCount DESC, ID ASC" )
+      or error('mysql_query_failed', 'people.executives');
+
+   $people = array(); // sort-id => row, ...
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      if( in_array( $row['Handle'], $MODexclude) )
+         continue;
+
+      list( $sortmetric, $executives) = get_executives( $row['admin_level'] );
+      $people[] = array_merge( array( 'AL' => $executives ), $row );
+   }
+   mysql_free_result($result);
+
+   //shuffle($people);
+   $prevTitle = '<>nil';
+   $title = '';
+   foreach( $people as $row )
+   {
+      $title = ( $title != $prevTitle || $title != $row['AL'] ) ? $row['AL'] : '';
+      $prevTitle = $title;
+      add_contributor( $title, $row['ID'], $row['Name'], $row['Handle'],
+         ( $logged_in && @$row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : '') );
+   }
+
+   add_contributor();
+
+
+   //---------
+   section( 'Translators', T_('Translators'), 'translators' );
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
@@ -247,8 +311,9 @@ function build_icon( $icon_name, $text )
 
    add_contributor();
 
+
    //---------
-   section( 'Other credits', T_('Other credits'));
+   section( 'Other credits', T_('Other credits'), 'credits' );
 
    $images_str = // image + originating icon-name from silk-collection
         build_icon('professional.gif', sprintf( T_('Professional created from [%s]'), 'user_suite + wand'))
@@ -257,6 +322,9 @@ function build_icon( $icon_name, $text )
       . build_icon('team.gif', sprintf( T_('Team created from [%s]'), 'group'))
       . build_icon('info.gif', sprintf( T_('Information created from [%s]'), 'info'))
       . build_icon('picture.gif', sprintf( T_('User picture created from [%s]'), 'photo'))
+      . build_icon('admin.gif', sprintf( T_('Admin created from [%s]'), 'user_grey'))
+      . build_icon('online.gif', sprintf( T_('Being online (=in the house) created from [%s]'), 'house'))
+      . build_icon('wclock_stop.gif', sprintf( T_('Stopped clock created from [%s]'), 'clock_stop'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
