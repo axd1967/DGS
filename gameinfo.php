@@ -287,7 +287,7 @@ function build_rating_diff( $rating_diff )
          echo_onvacation( ($to_move == BLACK) ? $grow['Black_OnVacation'] : $grow['White_OnVacation'] ),
          true );
    }
-   elseif( is_weekend_clock($grow['ClockUsed']) && is_weekend() )
+   elseif( is_weekend_clock_stopped($grow['ClockUsed']) )
       $clock_status[$to_move][] = echo_image_weekendclock(true, true);
    if( is_nighttime_clock( ($to_move == BLACK) ? $grow['Black_ClockUsed'] : $grow['White_ClockUsed'] ) )
       $clock_status[$to_move][] = echo_image_nighttime('in_text', true);
