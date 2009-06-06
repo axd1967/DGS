@@ -25,6 +25,17 @@ ChangeLog
 
 2009-06-06 juga
 
+   * include/classlib_game.php (GameScore, ~.calculate_score, ~.recalculate_score),
+     include/move.php (check_remove), confirm.php, game.php:
+   - check_remove: made scoring-mode explicit
+   - for testing, temporarily added 2nd score-box with area-scoring for comparison
+
+   * include/board.php (Board.load_from_db):
+   - cleanup: remove un-needed arg-ref
+
+   * scripts/sql_game_export.php:
+   - added script to export game-related tables as helping "template" for local import
+
    * NEWS:
    - game-info, off-time (vacation/nighttime/weekend), userinfo (2 cols),
      "online"-users, mark admin users, optimizations
