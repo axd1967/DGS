@@ -53,19 +53,83 @@ function get_clock_used($nightstart)
  * when DST is active, mktime() can return undefined result.
  * must ALWAYS return an integer 0 <= n < 24   => clock ID
  ***/
-   $d= date("d");
-   $m= date("m");
+   $d= date("j");
+   $m= date("n");
    $y= date("Y");
    $n= -1;
    for($i=0; $i<6; $i++) //within the 6 next days,
-   { //try to find two days with the same result
+   { //try to find two days with the same result (on hour)
       $o= $n;
       $n= mktime($nightstart,0,0,$m,$d+$i,$y);
-      if( $n<0 ) continue;
+      if( $n === FALSE || $n < 0 ) continue; // invalid timestamp
       $n= gmdate('G', $n); //hour without leading zeros. 0..23
       if( $n === $o ) break;
    }
    return (max(0, (int)$n) % 24); //ALWAYS integer 0..23
+}
+
+/*! Returns true, if given check-hour lies within the running-clock interval for $NOW (or the given timestamp). */
+function is_hour_clock_run( $check_hour, $timestamp=null )
+{
+   // NOTE: also see clock_tick.php for night-time calculations
+   global $NOW;
+   $hour = gmdate('G', (is_null($timestamp) ? $NOW : $timestamp));
+   $s = ($hour + 1) % 24;
+   $e = ($hour + 24 - NIGHT_LEN) % 24;
+   if( $s <= $e)
+      $running_clock = ( $s <= $check_hour ) && ( $check_hour <= $e );
+   else
+      $running_clock = ( $check_hour <= $e ) || ( $s <= $check_hour );
+   return $running_clock;
+}
+
+/*! \brief Returns true, if it's weekend (Sat/Sun) for UTC-timezone. */
+function is_weekend( $timestamp=null )
+{
+   global $NOW;
+   $day_of_week = gmdate('w', (is_null($timestamp) ? $NOW : $timestamp));
+   return ( $day_of_week == 6 || $day_of_week == 0 ); // Sat | Sun
+}
+
+/*! Returns true, if given clock-id is a weekend-clock. */
+function is_weekend_clock( $clock_id )
+{
+   return ( $clock_id >= WEEKEND_CLOCK_OFFSET && $clock_id < WEEKEND_CLOCK_OFFSET + 24 );
+}
+
+/*! Returns true, if given clock-id is within non-ticking weekend-clock. */
+function is_weekend_clock_stopped( $clock_id, $timestamp=null )
+{
+   if( is_weekend_clock($clock_id) )
+      $clock_id -= WEEKEND_CLOCK_OFFSET;
+   if( $clock_id < 0 || $clock_id > 23 )
+      error('invalid_args', "is_weekend_clock_stopped($clock_id,$timestamp)");
+
+   if( is_weekend($timestamp) )
+   {
+      // TODO BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
+      $running_clock = false;
+   }
+   else
+      $running_clock = true;
+   return !$running_clock;
+}
+
+/*! Returns true, if given clock-id is a vacation-clock, i.e. player to move in game is on vacation. */
+function is_vacation_clock( $clock_id )
+{
+   return ( $clock_id < 0 );
+}
+
+/*! Returns true, if given clock-id indicates, that user is in sleeping-time. */
+function is_nighttime_clock( $clock_id, $timestamp=null )
+{
+   // clock_id is UTC-normalized ClockUsed (=NightStart)
+   if( is_weekend_clock($clock_id) )
+      $clock_id -= WEEKEND_CLOCK_OFFSET;
+   if( $clock_id < 0 || $clock_id > 23 )
+      error('invalid_args', "is_nighttime_clock($clock_id,$timestamp)");
+   return !is_hour_clock_run( $clock_id, $timestamp );
 }
 
 function get_clock_ticks($clock_used)
@@ -112,7 +176,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
          $byotime = $byoper = 0;  // time is up
       }
       break;
-     
+
       case("JAP"):
       {
          if( $startbyotime <= 0 )
@@ -268,9 +332,9 @@ function echo_byotype( $byotype, $keep_english=false, $short=false)
 {
    if( $short )
       return substr($byotype, 0, 1);
-      
+
    $T_= ( $keep_english ? 'fnop' : 'T_' );
-   
+
    switch( (string)$byotype )
    {
       case 'JAP':
@@ -288,8 +352,8 @@ function echo_time_limit( $maintime, $byotype, $byotime, $byoper
                   , $keep_english=false, $short=false, $btype=true)
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
-   
-   $str = ''; 
+
+   $str = '';
 
    if( $btype )
       $str.= echo_byotype( $byotype, $keep_english, $short) . ': ';
