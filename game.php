@@ -33,12 +33,14 @@ if( @$_REQUEST['nextgame']
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/game_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( 'include/classlib_game.php' );
+require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
 if( ENA_STDHANDICAP ) {
 require_once( "include/sgf_parser.php" );
@@ -99,13 +101,15 @@ function get_alt_arg( $n1, $n2)
            "Games.Flags+0 AS GameFlags, " . //used by check_move
            "black.Name AS Blackname, " .
            "black.Handle AS Blackhandle, " .
-           "black.OnVacation>0 AS Blackwarning, " .
+           "black.OnVacation AS Black_OnVacation, " .
+           "black.ClockUsed AS Black_ClockUsed, " .
            "black.Rank AS Blackrank, " .
            "black.Rating2 AS Blackrating, " .
            "black.RatingStatus AS Blackratingstatus, " .
            "white.Name AS Whitename, " .
            "white.Handle AS Whitehandle, " .
-           "white.OnVacation>0 AS Whitewarning, " .
+           "white.OnVacation AS White_OnVacation, " .
+           "white.ClockUsed AS White_ClockUsed, " .
            "white.Rank AS Whiterank, " .
            "white.Rating2 AS Whiterating, " .
            "white.RatingStatus AS Whiteratingstatus " .
@@ -943,15 +947,15 @@ function draw_game_info(&$game_row, &$board)
    echo '<table class=GameInfos>' . "\n";
 
    $cols = 4;
+   $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
 
    //black rows
+   $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'] );
    echo '<tr id="blackInfo">' . "\n";
    echo "<td class=Color>", image( "{$base_path}17/b.gif", T_('Black'), T_('Black'), "class=InTextStone" ), "</td>\n";
-   echo '<td class=Name>' .
-      user_reference( REF_LINK, 1, '', $game_row['Black_ID'],
-                      $game_row['Blackname'], $game_row['Blackhandle']) .
-      ( $game_row['Blackwarning'] ?
-            '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
+   echo '<td class=Name>',
+      user_reference( REF_LINK, 1, '', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle']),
+      ( $blackOffTime ? SMALL_SPACING . $blackOffTime : '' ),
       "</td>\n";
 
    echo '<td class=Ratings>'
@@ -975,13 +979,12 @@ function draw_game_info(&$game_row, &$board)
 
 
    //white rows
+   $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'] );
    echo '<tr id="whiteInfo">' . "\n";
    echo "<td class=Color>", image( "{$base_path}17/w.gif", T_('White'), T_('White'), "class=InTextStone" ), "</td>\n";
-   echo '<td class=Name>' .
-      user_reference( REF_LINK, 1, '', $game_row['White_ID'],
-                      $game_row['Whitename'], $game_row['Whitehandle']) .
-      ( $game_row['Whitewarning'] ?
-            '&nbsp;&nbsp;&nbsp;<span class=OnVacation>' . T_('On vacation') . '</span>' : '' ) .
+   echo '<td class=Name>',
+      user_reference( REF_LINK, 1, '', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle']),
+      ( $whiteOffTime ? SMALL_SPACING . $whiteOffTime : '' ),
       "</td>\n";
 
    echo '<td class=Ratings>'
