@@ -70,12 +70,14 @@ $ThePage = new Page('Status');
    {
       $itable= new Table_info('user');
 
+      $onVacationText = echo_onvacation($player_row['OnVacation']);
       $itable->add_sinfo(
             anchor( "edit_vacation.php", T_('Vacation days left') ),
             echo_day( floor($player_row["VacationDays"])) );
       $itable->add_sinfo(
-            anchor( "edit_vacation.php", T_('On vacation') ),
-            echo_onvacation($player_row['OnVacation']),
+            anchor( "edit_vacation.php", T_('On vacation') )
+               . MINI_SPACING . echo_image_vacation($player_row['OnVacation'], $onVacationText, true),
+            $onVacationText,
             '', 'class=OnVacation' );
 
       $itable->echo_table();
@@ -123,6 +125,7 @@ $ThePage = new Page('Status');
 
 { // show games
    $uid = $my_id;
+   $ginfo_str = T_('Game information');
 
    $gtable->add_or_del_column();
 
@@ -132,9 +135,10 @@ $ThePage = new Page('Status');
    $show_notes = (LIST_GAMENOTE_LEN>0);
    $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
 
-   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 12) + <=30(!)
+   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead(15, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'Image', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
       $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
@@ -147,7 +151,9 @@ $ThePage = new Page('Status');
    $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
    $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
    $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
-   $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
+   $gtable->add_tablehead(11, new TableHead( T_('User online#header'),
+      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
+   $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, TABLE_NO_SORT);
 
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
@@ -159,6 +165,7 @@ $ThePage = new Page('Status');
    $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time"
       .",IF(Rated='N','N','Y') AS X_Rated"
       .",opponent.Name,opponent.Handle,opponent.Rating2 AS Rating,opponent.ID AS pid"
+      .",UNIX_TIMESTAMP(opponent.Lastaccess) AS X_OppLastaccess"
       //extra bits of X_Color are for sorting purposes
       //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
       .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
@@ -263,6 +270,14 @@ $ThePage = new Page('Status');
             $grow_strings[10] = echo_time_remaining( $my_Maintime, $Byotype,
                   $my_Byotime, $my_Byoperiods, $Byotime, false, true, true);
          }
+         if( $gtable->Is_Column_Displayed[11] )
+         {
+            $is_online = ($NOW - @$X_OppLastaccess) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+            $grow_strings[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
+         }
+         if( $gtable->Is_Column_Displayed[15] )
+            $grow_strings[15] = anchor( 'gameinfo.php?gid='.$ID,
+               image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone'));
 
          $gtable->add_row( $grow_strings );
       }
