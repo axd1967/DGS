@@ -92,7 +92,7 @@ require_once( "include/table_columns.php" );
       $newadmin= get_request_arg('newadmin');
       if( $Admin['new'] != 0 && !empty($newadmin))
       {
-         $row = mysql_fetch_row( "admin_admins.find_new_admin($newadmin)",
+         $row = mysql_single_fetch( "admin_admins.find_new_admin($newadmin)",
                "SELECT ID,Adminlevel+0 AS admin_level FROM Players "
                . "WHERE Handle='".mysql_addslashes($newadmin)."' LIMIT 1" );
          if( !$row )
