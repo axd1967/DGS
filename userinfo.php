@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
+require_once( 'include/time_functions.php' );
 require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( "include/countries.php" );
@@ -98,16 +100,20 @@ $ThePage = new Page('UserInfo');
 
    // get player clock
    $tmpTZ = setTZ($row['Timezone']); //for get_clock_used() and local time
-   $user_time = time() + (int)$timeadjust; //see #NOW
-   $user_gmt_offset = date('O', $user_time);
-   $user_localtime  = date(DATE_FMT . ' T', $user_time); // +timezone-name
+   $user_gmt_offset = date('O', $NOW);
+   $user_localtime  = date(DATE_FMT5, $NOW); // +timezone-name
    $user_clockused  = get_clock_used($row['Nightstart']);
    setTZ($tmpTZ);
+   $img_nighttime = (is_nighttime_clock($user_clockused))
+      ? SMALL_SPACING . echo_image_nighttime(true) : '';
+   $night_start_str = sprintf('%02d:00 - %02d:59',
+      $row['Nightstart'],
+      ($row['Nightstart'] + NIGHT_LEN - 1) % 24 );
 
    { //User infos
       $activity = activity_string( $row['ActivityLevel']);
       $registerdate = (@$row['X_Registerdate'] > 0
-                        ? date('Y-m-d', $row['X_Registerdate']) : '' );
+                        ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
       $lastaccess = (@$row['X_Lastaccess'] > 0
                         ? date(DATE_FMT2, $row['X_Lastaccess']) : '' );
       $lastmove = (@$row['X_LastMove'] > 0
@@ -115,49 +121,69 @@ $ThePage = new Page('UserInfo');
       $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
 
 
-      $itable= new Table_info('user');
+      // draw user-info fields in two separate columns
+      $twoCols = true;
+      $itable1 = new Table_info('user');
+      $itable2 = ($twoCols) ? new Table_info('user') : $itable1;
 
       if( @$row['Type'] )
-         $itable->add_sinfo( T_('Type'), build_usertype_text(@$row['Type']) );
-      $itable->add_sinfo( T_('Name'),    $name_safe );
-      $itable->add_sinfo( T_('Userid'),  $handle_safe );
-      $itable->add_sinfo( T_('Country'), getCountryFlagImage(@$row['Country']) );
+         $itable1->add_sinfo( T_('Type'), build_usertype_text(@$row['Type']) );
+      $itable1->add_sinfo( T_('Name'),    $name_safe );
+      $itable1->add_sinfo( T_('Userid'),  $handle_safe
+         . (( @$row['Adminlevel'] & ADMINGROUP_EXECUTIVE ) ? echo_image_admin(@$row['Adminlevel']) : '') );
+      $itable1->add_sinfo( T_('Country'), getCountryFlagImage(@$row['Country']) );
 
-      $itable->add_sinfo( T_('Time zone'),       $row['Timezone'] . " [GMT$user_gmt_offset]" );
-      $itable->add_sinfo( T_('User local time'), $user_localtime );
-      $itable->add_sinfo( T_('Night Start'),     sprintf('%02d:00', $row['Nightstart']) );
-
-      $itable->add_sinfo( T_('Open for matches?'), make_html_safe(@$row['Open'],INFO_HTML) );
-      $itable->add_sinfo( T_('Activity'),  $activity );
-      $itable->add_sinfo( T_('Rating'),    echo_rating(@$row['Rating2'],true,$row['ID']) );
-      $itable->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
-
-      $itable->add_sinfo( T_('Registration date'), $registerdate );
-      $itable->add_sinfo( T_('Last access'), $lastaccess );
-      $itable->add_sinfo( T_('Last move'),   $lastmove );
-      $itable->add_sinfo( T_('Vacation days left'), echo_day(floor($row["VacationDays"])) );
-      if( $row['OnVacation'] > 0 )
-      {
-         $itable->add_sinfo(
-               T_('On vacation'), echo_onvacation($row['OnVacation']),
-               '', 'class=OnVacation' );
-      }
-      $itable->add_sinfo( anchor( $run_link, T_('Running games')),  $row['Running'] );
-      $itable->add_sinfo( anchor( $fin_link, T_('Finished games')), $row['Finished'] );
-      $itable->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
-      $itable->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
-      $itable->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
-      $itable->add_sinfo( T_('Percent'), $percent );
+      $itable2->add_sinfo( T_('Time zone'),       $row['Timezone'] . " [GMT$user_gmt_offset]" );
+      $itable2->add_sinfo( T_('User local time'), $user_localtime );
+      $itable2->add_sinfo( T_('Nighttime'),       $night_start_str . $img_nighttime );
       if( $is_admin )
       { // show player clock
-         $itable->add_row( array(
-                  'rattb' => 'class=DebugInfo',
-                  'sname' => 'used, used(night) ',
+         $itable2->add_row( array(
+                  'rattb' => 'class="DebugInfo"',
+                  'sname' => 'used, used(change)',
                   'sinfo' => $row['ClockUsed'] .', '.$user_clockused .' ('.$row['ClockChanged'].')'
                   ) );
       }
-      $itable->echo_table();
-      unset($itable);
+
+      $itable1->add_sinfo( T_('Open for matches?'), make_html_safe(@$row['Open'],INFO_HTML) );
+      $itable1->add_sinfo( T_('Activity'),  $activity );
+      $itable1->add_sinfo( T_('Rating'),    echo_rating(@$row['Rating2'],true,$row['ID']) );
+      $itable1->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
+      $itable2->add_sinfo( T_('Registration date'), $registerdate );
+      $itable1->add_sinfo( T_('Last access'), $lastaccess );
+      $itable1->add_sinfo( T_('Last move'),   $lastmove );
+
+      $itable1->add_sinfo( T_('Vacation days left'), echo_day(floor($row["VacationDays"])) );
+      if( $row['OnVacation'] > 0 )
+      {
+         $onVacationText = echo_onvacation($row['OnVacation']);
+         $itable1->add_sinfo(
+               T_('On vacation') . MINI_SPACING
+                  . echo_image_vacation($row['OnVacation'], $onVacationText, true),
+               $onVacationText,
+               '', 'class=OnVacation' );
+      }
+
+      $itable2->add_sinfo( anchor( $run_link, T_('Running games')),  $row['Running'] );
+      $itable2->add_sinfo( anchor( $fin_link, T_('Finished games')), $row['Finished'] );
+      $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
+      $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
+      $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
+      $itable2->add_sinfo( T_('Percent'), $percent );
+
+      // show user-info
+      if( $twoCols )
+      {
+         echo '<table id="UserInfo"><tr><td class="UserInfo">',
+            $itable1->make_table(),
+            '</td><td class="UserInfo">',
+            $itable2->make_table(),
+            '</td></tr></table>', "\n";
+      }
+      else
+         $itable1->echo_table();
+      unset($itable1);
+      unset($itable2);
    } //User infos
 
 
@@ -211,8 +237,9 @@ $ThePage = new Page('UserInfo');
 
       $itable->echo_table();
       unset($itable);
-      mysql_free_result($bio_result);
    }//Bio infos
+   if( !is_null($bio_result) )
+      mysql_free_result($bio_result);
    db_close();
 
 
