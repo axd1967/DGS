@@ -45,9 +45,11 @@ class GameScore
 {
    /*! \brief GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING. */
    var $mode;
+   /*! \brief Number of handicap stones. */
    var $handicap;
-   var $komi; // float
-   /*! \brief Prisoners of BLACK and WHITE. */
+   /*! \brief used komi [float] */
+   var $komi;
+   /*! \brief Prisoners of BLACK and WHITE stored in array[GSCOL_BLACK|WHITE] */
    var $prisoners; // [ B, W ]
    /*! \brief Stone-count on board of BLACK and WHITE. */
    var $stones; // [ B, W ]
@@ -58,9 +60,16 @@ class GameScore
    /*! \brief dame-count */
    var $dame;
 
-   /*! \brief calculated scoring-information. */
+   /*! \brief calculated scoring-information (may be independently set from $this->mode). */
    var $scoring_info;
+   /*! \brief calculated score (may be independently set from $this->mode). */
+   var $score;
 
+
+   /*!
+    * \brief Constructs GameScore-object.
+    * \param $mode GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING
+    */
    function GameScore( $mode, $handicap, $komi )
    {
       GameScore::check_mode( $mode, 'constructor' );
@@ -73,80 +82,94 @@ class GameScore
       $this->territory = array( 0, 0 );
       $this->dame = 0;
       $this->scoring_info = null;
+      $this->score = null;
    }
 
+   /*! \brief Returns prisoners for given color GSCOL_WHITE|BLACK. */
    function get_prisoners( $gscol )
    {
       GameScore::check_gscol( $gscol, 'get_prisoners' );
       return $this->prisoners[$gscol];
    }
 
+   /*! \brief Sets prisoners for given color GSCOL_WHITE|BLACK. */
    function set_prisoners( $gscol, $count )
    {
       GameScore::check_gscol( $gscol, 'set_prisoners' );
       $this->prisoners[$gscol] = $count;
    }
 
+   /*! \brief Sets prisoners for black and white color. */
    function set_prisoners_all( $black_count, $white_count )
    {
       $this->prisoners[GSCOL_BLACK] = $black_count;
       $this->prisoners[GSCOL_WHITE] = $white_count;
    }
 
+   /*! \brief Returns number of stones on the board of given color GSCOL_WHITE|BLACK. */
    function get_stones( $gscol )
    {
       GameScore::check_gscol( $gscol, 'get_stones' );
       return $this->stones[$gscol];
    }
 
+   /*! \brief Sets number of stones on the board of given color GSCOL_WHITE|BLACK. */
    function set_stones( $gscol, $count )
    {
       GameScore::check_gscol( $gscol, 'set_stones' );
       $this->stones[$gscol] = $count;
    }
 
+   /*! \brief Sets number of stones on the board for black and white color. */
    function set_stones_all( $black_count, $white_count )
    {
       $this->stones[GSCOL_BLACK] = $black_count;
       $this->stones[GSCOL_WHITE] = $white_count;
    }
 
+   /*! \brief Returns number of captured stones on the board of given color GSCOL_WHITE|BLACK. */
    function get_dead_stones( $gscol )
    {
       GameScore::check_gscol( $gscol, 'get_dead_stones' );
       return $this->dead_stones[$gscol];
    }
 
+   /*! \brief Sets number of captured stones on the board of given color GSCOL_WHITE|BLACK. */
    function set_dead_stones( $gscol, $count )
    {
       GameScore::check_gscol( $gscol, 'set_dead_stones' );
       $this->dead_stones[$gscol] = $count;
    }
 
+   /*! \brief Sets number of captured stones on the board for black and white color. */
    function set_dead_stones_all( $black_count, $white_count )
    {
       $this->dead_stones[GSCOL_BLACK] = $black_count;
       $this->dead_stones[GSCOL_WHITE] = $white_count;
    }
 
+   /*! \brief Returns number of territory points on the board of given color GSCOL_WHITE|BLACK. */
    function get_territory( $gscol )
    {
       GameScore::check_gscol( $gscol, 'get_territory' );
       return $this->territory[$gscol];
    }
 
+   /*! \brief Sets number of territory points on the board of given color GSCOL_WHITE|BLACK. */
    function set_territory( $gscol, $count )
    {
       GameScore::check_gscol( $gscol, 'set_territory' );
       $this->territory[$gscol] = $count;
    }
 
+   /*! \brief Sets number of territory points on the board for black and white color. */
    function set_territory_all( $black_count, $white_count )
    {
       $this->territory[GSCOL_BLACK] = $black_count;
       $this->territory[GSCOL_WHITE] = $white_count;
    }
 
+   /*! \brief Sets number of neutral (=dame) points. */
    function set_dame( $count )
    {
       $this->dame = $count;
@@ -162,6 +185,13 @@ class GameScore
    }
 
 
+   /*!
+    * \brief Calculating score for given mode (territory or area scoring).
+    * \param $mode null (use mode from constructing this object) or GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING
+    * \param $fill_scoring_info fill scoring-info map if true
+    * \return overall score (=score-white - score-black), also set in $this->score
+    * NOTE: for format of scoring-info map see code and game.php#draw_score_box()
+    */
    function calculate_score( $mode=null, $fill_scoring_info=true )
    {
       // check args
@@ -193,7 +223,7 @@ class GameScore
                         + $this->territory[GSCOL_WHITE]
                         + $this->komi;
       }
-      $score = $score_white - $score_black;
+      $this->score = $score_white - $score_black;
 
       if( $fill_scoring_info )
       {
@@ -201,7 +231,7 @@ class GameScore
             'mode_text' => $this->getModeText($mode),
             'mode'  => $mode,
             'dame'  => sprintf( '(%s)', $this->dame ),
-            'score' => $score,
+            'score' => $this->score,
          );
          $isArea = ( $mode == GSMODE_AREA_SCORING );
 
@@ -232,7 +262,15 @@ class GameScore
          $this->scoring_info = $map;
       }
 
-      return $score;
+      return $this->score;
+   }
+
+   /*! \brief Recalculates score if given mode different from mode of this object. */
+   function recalculate_score( $mode, $fill_scoring_info=true )
+   {
+      if( strcmp($this->mode, $mode) != 0 )
+         $this->calculate_score($mode, $fill_scoring_info);
+      return $this->score;
    }
 
    /*! \brief Returns mode-text or all mode-texts (if arg=null). */
