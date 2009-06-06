@@ -122,4 +122,101 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true )
       "</td></tr></table>\n";
 }
 
+/*! \brief Returns image-tag with vacation-image if on_vacation set; return '' otherwise. */
+function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stopped=false )
+{
+   global $base_path;
+   if( (is_numeric($on_vacation) && $on_vacation > 0) || $on_vacation )
+   {
+      $title = T_('On vacation');
+      if( $vacText != '' ) $title .= " ($vacText)";
+      if( $game_clock_stopped ) $title .= ', ' . T_('Game clock stopped');
+      $attbs = ($on_vacation === true ) ? '' : 'class="InTextImage"';
+      return image( $base_path.'images/vacation.gif', $title, $title, $attbs );
+   }
+   else
+      return '';
+}
+
+/*! \brief Returns image-tag with night-time-image if $sleeping set; return '' otherwise. */
+function echo_image_nighttime( $sleeping=true, $game_clock_stopped=false )
+{
+   global $base_path;
+   if( $sleeping )
+   {
+      $title = T_('User in sleeping time') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
+      $attbs = ($sleeping === true ) ? '' : 'class="InTextImage"';
+      return image( $base_path.'images/night.gif', $title, $title, $attbs );
+   }
+   else
+      return '';
+}
+
+/*! \brief Returns image-tag for weekend-clock. */
+function echo_image_weekendclock( $weekend=true, $game_clock_stopped=true )
+{
+   global $base_path;
+   if( $weekend )
+   {
+      $title = T_('Weekend (UTC)') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
+      return image( $base_path.'images/wclock_stop.gif', $title, $title, 'class="InTextImage"' );
+   }
+   else
+      return '';
+}
+
+/*! \brief Returns image-tag for admin with given admin-level. */
+function echo_image_admin( $adminlevel, $withSep=true )
+{
+   global $base_path;
+   if( $adminlevel & ADMINGROUP_EXECUTIVE )
+   {
+      $title = T_('Dragon executive');
+      return ($withSep ? MINI_SPACING : '')
+         . anchor( $base_path.'people.php#executives',
+                   image( $base_path.'images/admin.gif', $title, $title, 'class="InTextImage"' ) );
+   }
+   else
+      return '';
+}
+
+/*! \brief Returns image-tag for being-online if online; return '' otherwise. */
+function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
+{
+   global $base_path, $NOW;
+   if( $in_the_house )
+   {
+      $title = T_('Online');
+      if( $last_access > 0 )
+      {
+         $mins_ago = round( ($NOW - $last_access + 59) / 60 );
+         if( $mins_ago >= 0 )
+            $title = sprintf( T_('Online &lt;%s mins ago'), $mins_ago );
+      }
+      return ($withSep ? MINI_SPACING : '')
+         . image( $base_path.'images/online.gif', $title, $title, 'class="InTextImage"' );
+   }
+   else
+      return '';
+}
+
+/*!
+ * \brief Returns off-time echo-string for certain player.
+ * \param $on_vacation true|false | vacation-days
+ */
+function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
+{
+   if( $on_vacation === true )
+      $vac_str = echo_image_vacation();
+   elseif( is_numeric($on_vacation) && $on_vacation > 0 )
+      $vac_str = echo_image_vacation( $on_vacation, echo_onvacation($on_vacation), $player_to_move );
+   else
+      $vac_str = '';
+   return SMALL_SPACING . $vac_str
+         . (is_weekend_clock_stopped($player_clock_used)
+               ? MINI_SPACING . echo_image_weekendclock( true, $player_to_move ) : '' )
+         . (is_nighttime_clock($player_clock_used)
+               ? MINI_SPACING . echo_image_nighttime( 'in_text', $player_to_move ) : '');
+}
+
 ?>
