@@ -175,4 +175,17 @@ function adjust_handicap( $handicap, $adj_handicap, $min_handicap, $max_handicap
    return $handicap;
 }
 
+/*! \brief Determines who is to move (BLACK|WHITE), expects game-row with fields ID,Black_ID,White_ID,ToMove_ID. */
+function get_to_move( $grow, $errmsg )
+{
+   $to_move_id = $grow['ToMove_ID'];
+   if( $grow['Black_ID'] == $to_move_id )
+      $to_move = BLACK;
+   elseif( $grow['White_ID'] == $to_move_id )
+      $to_move = WHITE;
+   elseif( $to_move_id )
+      error('database_corrupted', "$errmsg({$grow['ID']})");
+   return $to_move;
+}
+
 ?>
