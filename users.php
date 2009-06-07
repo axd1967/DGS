@@ -166,7 +166,7 @@ require_once( 'include/classlib_userpicture.php' );
 
    $result = db_query( 'users.find_data', $query );
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
-   $utable->set_found_rows( mysql_found_rows( 'users.found_rows' ) );
+   $utable->set_found_rows( mysql_found_rows('users.found_rows') );
 
 
    if( $f_active->get_value() )
