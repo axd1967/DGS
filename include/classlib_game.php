@@ -337,9 +337,8 @@ class GameScore
    /*! \brief [GUI] Draws table of given GameScore and scoring-mode using echo(). */
    function draw_score_box( $game_score, $scoring_mode )
    {
-      global $base_path;
       if( !is_a( $game_score, 'GameScore' ) )
-         error('invalid_args', 'GameScore.draw_score_box.expect.GameScore');
+         return;
 
       $game_score->recalculate_score($scoring_mode); // recalc if needed
       $score_info = $game_score->get_scoring_info();
@@ -347,6 +346,7 @@ class GameScore
       $fmtline3 = "<tr><td class=\"%s\">%s</td><td>%s</td><td>%s</td></tr>\n";
       $fmtline2 = "<tr><td class=\"%s\">%s</td><td colspan=\"2\">%s</td></tr>\n";
 
+      global $base_path;
       $caption = T_('Scoring information#scoring');
       $caption2 = $score_info['mode_text'];
       echo "<table class=\"Scoring\">\n",
