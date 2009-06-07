@@ -141,6 +141,7 @@ require_once( 'include/gui_functions.php' );
    $notes = array();
    $notes[] = sprintf( T_('Limits on uploaded image-file: max. %s x %s pixels and max. %s KB'),
       USERPIC_MAX_X, USERPIC_MAX_Y, ROUND(10*USERPIC_MAXSIZE_UPLOAD/1024)/10 );
+   $notes[] = T_('Supported image formats: JPEG, GIF, PNG');
    echo_notes( 'edituserpic', T_('User picture notes'), $notes );
 
    end_page();
