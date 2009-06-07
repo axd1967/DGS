@@ -177,12 +177,33 @@ function connect2mysql($no_errors=false)
 function db_query( $debugmsg, $query)
 {
    //echo $debugmsg.'.db_query='.$query.'<br>';
+   //error_log($debugmsg.'.db_query='.$query);
    $result = mysql_query($query);
    if( $result )
       return $result;
    if( is_string($debugmsg) )
       error('mysql_query_failed', $debugmsg.'='.$query);
    return false;
+}
+
+// Returns calculated rows from previous SELECT, or -1 on error
+// needs preceeding SELECT with SQL_CALC_FOUND_ROWS, see also QuerySQL-class
+// NOTE: only if allowed in config by ALLOW_SQL_CALC_ROWS
+function mysql_found_rows( $debugmsg )
+{
+   if( !ALLOW_SQL_CALC_ROWS )
+      return -1; // not allowed
+
+   $found_rows = -1; // error
+   $result = db_query( $debugmsg, 'SELECT FOUND_ROWS()' );
+   if( $result )
+   {
+      $val = mysql_result($result, 0);
+      if( $val >= 0 )
+         $found_rows = $val;
+      mysql_free_result($result);
+   }
+   return $found_rows;
 }
 
 // arg: fetch_type (FETCHTYPE_...) controls which method to call: mysql_fetch_{$fetch_type}

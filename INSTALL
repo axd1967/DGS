@@ -190,6 +190,7 @@ By now, Dragon works with these PHP directives:
  mysql.default_user = ;Unused
  mysql.default_password = ;Unused
  mysql.max_links = -1 ;Unused
+ mysql.trace_mode = Off  ; needed for FOUND_ROWS() to work, see config.php ALLOW_SQL_CALC_ROWS
 
 
 

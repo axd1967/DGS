@@ -45,7 +45,8 @@ define('TABLE_NO_SORT', 0x01); //disable the sort options (except set_default_so
 define('TABLE_NO_HIDE', 0x02); //disable the add_or_del_column options
 define('TABLE_NO_PAGE', 0x04); //disable next_prev_links options
 define('TABLE_NO_SIZE', 0x08); //disable the re-sizing (static number of rows) (see use_show_rows)
-define('TABLE_ROW_NUM',  0x10); //show row-number on each line
+define('TABLE_ROW_NUM', 0x10); //show row-number on each line
+define('TABLE_ROWS_NAVI', 0x20); //calculate found rows and show full page-navigation
 
 define('CHAR_SHOWFILTER', '+');
 
@@ -141,6 +142,9 @@ class Table
    var $Rows_Per_Page;
    /*! \brief true, if number of rows to show should be configurable (otherwise use Players.TableMaxRows). */
    var $Use_Show_Rows;
+   /*! \brief number of FOUND_ROWS by MySQL SQL_CALC_FOUND_ROWS, activated by table-option TABLE_ROWS_NAVI; -1 = not used. */
+   var $FoundRows;
+
    /*! \brief true to use JavaScript features. */
    var $JavaScript;
 
@@ -192,6 +196,9 @@ class Table
       $this->Prefix = (string)$_prefix;
       $this->Mode = (int)$_mode;
 
+      if( !ALLOW_SQL_CALC_ROWS )
+         $this->Mode &= ~TABLE_ROWS_NAVI;
+
       // prepare for appending URL-parts (ends with either '?' or URI_AMP)
       if( !is_numeric( strpos( $_page, '?')) )
          $this->Page = $_page . '?'; //end_sep
@@ -228,6 +235,7 @@ class Table
       $this->Last_Page = true;
       $this->Use_Show_Rows = true;
       $this->Rows_Per_Page = $player_row['TableMaxRows'];
+      $this->FoundRows = -1;
       $this->JavaScript = is_javascript_enabled();
 
       // filter-stuff
@@ -265,6 +273,15 @@ class Table
    function use_show_rows( $use=true )
    {
       $this->Use_Show_Rows = (bool)$use;
+   }
+
+   /*! \brief Sets the calculated rows from SQL_CALC_FOUND_ROWS option. */
+   function set_found_rows( $found_rows )
+   {
+      // handle SQL_CALC_FOUND_ROWS
+      $this->FoundRows = -1;
+      if( $this->Mode & TABLE_ROWS_NAVI )
+         $this->FoundRows = $found_rows;
    }
 
    /*!
@@ -673,6 +690,7 @@ class Table
       }
       else
          $this->Last_Page = true;
+
       return $num_rows_result;
    } //compute_show_rows
 
@@ -1110,21 +1128,20 @@ class Table
       }
    }
 
-   /*! \brief Add next and prev links. */
-   /*
-      To show the page index: page number / number of pages
-         mysql> SELECT SQL_CALC_FOUND_ROWS * FROM tbl_name
-             -> WHERE id > 100 LIMIT 10;
-         mysql> SELECT FOUND_ROWS();
-      SQL_CALC_FOUND_ROWS must be at the front of any fields
-       in the SELECT statement.
-      Be aware that using SQL_CALC_FOUND_ROWS and FOUND_ROWS()
-       disables ORDER BY ... LIMIT optimizations.
-      The first query is longer than without the SQL_CALC_FOUND_ROWS
-       but if the ORDER BY is on a not indexed column, this is small.
-      MySQL >= 4.0.0. Refs at:
-       http://dev.mysql.com/doc/refman/4.1/en/information-functions.html
-   */
+   /*!
+    * \brief Add next and prev links.
+    * \param $id T=top, B=bottom
+    *
+    * NOTE on SQL_CALC_FOUND_ROWS:
+    * To show the page index: page number / number of pages
+    *    mysql> SELECT SQL_CALC_FOUND_ROWS * FROM tbl_name WHERE ... LIMIT 10;
+    *    mysql> SELECT FOUND_ROWS();
+    *
+    * Be aware that using SQL_CALC_FOUND_ROWS and FOUND_ROWS() "disables" LIMIT optimizations,
+    * but is faster than doing the same query twice.
+    *
+    * Doc-Reference: http://dev.mysql.com/doc/refman/5.0/en/information-functions.html#function_found-rows
+    */
    function make_next_prev_links($id)
    {
       global $base_path;
@@ -1133,8 +1150,12 @@ class Table
             || !( $this->From_Row > 0 || !$this->Last_Page ) )
          return '';
 
-      $string = 'align=bottom'; //'align=middle'
-      $button = '';
+      $current_page = floor( $this->From_Row / $this->Rows_Per_Page ) + 1;
+      $max_page = ($this->FoundRows < 0 ) ? 0 : floor( $this->FoundRows / $this->Rows_Per_Page ) + 1;
+
+      $align = 'align=bottom'; //'align=middle'
+      $navi_left = ''; // left from page-num
+      $navi_right = '';
 
       $qstr = $this->Page //end_sep
          . $this->current_extparams_string(true)
@@ -1143,41 +1164,73 @@ class Table
          . $this->current_filter_string(true)
          ; //end_sep
 
-      if( $this->From_Row > 0 )
+      if( $current_page > 2 ) // start-link
       {
-         $button.= anchor(
+         $navi_left .= anchor(
+              $qstr . $this->Prefix . 'from_row=0',
+              image( $base_path.'images/start.gif', '|<=', '', $align),
+              T_('first page') );
+      }
+
+      if( $this->From_Row > 0 ) // prev-link
+      {
+         if( $navi_left != '') $navi_left .= MINI_SPACING;
+         $navi_left .= anchor(
               $qstr //end_sep
               . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
-            , image( $base_path.'images/prev.gif', '<=', '', $string)
+            , image( $base_path.'images/prev.gif', '<=', '', $align)
             , T_("prev page")
             , array( 'accesskey' => ACCKEY_ACT_PREV )
             );
       }
 
-      $button.= '&nbsp;'.round($this->From_Row/$this->Rows_Per_Page+1).'&nbsp;';
+      // current page
+      $navi_left .= ' ';
+      $navi_page = ( $max_page > 0 )
+         ? sprintf( T_('Page %s of %s#tablenavi'), $current_page, $max_page )
+         : $current_page;
 
-      if( !$this->Last_Page )
+      if( !$this->Last_Page ) // next-link
       {
-         $button.= anchor(
+         $navi_right .= MINI_SPACING . anchor(
               $qstr //end_sep
               . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
-            , image( $base_path.'images/next.gif', '=>', '', $string)
+            , image( $base_path.'images/next.gif', '=>', '', $align)
             , T_("next page")
             , array( 'accesskey' => ACCKEY_ACT_NEXT )
             );
       }
 
+      if( $max_page > 0 && $current_page < $max_page - 1 ) // end-link
+      {
+         $last_page = floor($this->FoundRows / $this->Rows_Per_Page) * $this->Rows_Per_Page;
+         $navi_right .= MINI_SPACING . anchor(
+              $qstr . $this->Prefix . 'from_row=' . $last_page,
+              image( $base_path.'images/end.gif', '=>|', '', $align),
+              T_('last page') );
+      }
 
+      // add found-rows only at top-left
+      $navi_entries = '';
+      if( $id == 'T' && $this->FoundRows >= 0 )
+      {
+         $fmt_entries = ($this->FoundRows == 1 ) ? T_('(%s entry)') : T_('(%s entries)');
+         $navi_entries = SMALL_SPACING . '<span class="NaviInfo">'
+            . sprintf( $fmt_entries, $this->FoundRows ) . '</span>';
+      }
+
+      $paging_left  = $navi_left . $navi_page . $navi_right . $navi_entries;
+      $paging_right = $navi_left . $current_page . $navi_right;
       $string = '';
 
       $span = floor($this->Shown_Columns/2);
       if( $span < 2 ) $span = $this->Shown_Columns;
       if( $span > 0 )
-         $string.= "\n  <td class=PagingL" . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
+         $string .= "\n  <td class=PagingL" . ($span>1 ? " colspan=$span" : '') . ">$paging_left</td>";
 
       $span = $this->Shown_Columns - $span;
       if( $span > 0 )
-         $string.= "\n  <td class=PagingR" . ($span>1 ? " colspan=$span" : '') . ">$button</td>";
+         $string .= "\n  <td class=PagingR" . ($span>1 ? " colspan=$span" : '') . ">$paging_right</td>";
 
       if( $string )
          $string = "\n <tr class=Links$id>\n$string\n </tr>";
@@ -1353,7 +1406,10 @@ class Table
     */
    function get_query()
    {
-      return ( $this->UseFilters ) ? $this->Filters->get_query() : new QuerySQL();
+      $qsql = ( $this->UseFilters ) ? $this->Filters->get_query() : new QuerySQL();
+      if( $this->Mode & TABLE_ROWS_NAVI )
+         $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
+      return $qsql;
    }
 
    /*!

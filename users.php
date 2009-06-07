@@ -64,7 +64,7 @@ require_once( 'include/classlib_userpicture.php' );
    $search_profile = new SearchProfile( $uid, $profile_type );
    $ufilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'name|user|active' ); // named-filters FC_FNAME
-   $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROW_NUM );
+   $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -164,10 +164,9 @@ require_once( 'include/classlib_userpicture.php' );
    $qsql->merge( $query_ufilter );
    $query = $qsql->get_select() . "$order$limit";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'users.find_data');
-
+   $result = db_query( 'users.find_data', $query );
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
+   $utable->set_found_rows( mysql_found_rows( 'users.found_rows' ) );
 
 
    if( $f_active->get_value() )
@@ -184,7 +183,6 @@ require_once( 'include/classlib_userpicture.php' );
 
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
-   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_ufilter->get_select()) ."<br>";
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";

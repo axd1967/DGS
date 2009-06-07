@@ -185,6 +185,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Used clearer header for column ID
       * Changed default sort-direction for ID
       * Can show row-number, e.g. on Tournament participants list
+      * Enable full page-navigation (experimental) with pages- & entries-info
+        for pages: <home users.php>Users</home>
 
    * <home docs.php>Docs</home>:
       * Added link to statistics page on docs and site-map page
@@ -257,6 +259,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added config-switch for ALLOW_GO_DIAGRAMS (needs JavaScript)
       * Added config-switch for ALLOW_GOBAN_EDITOR
       * Added config-switch for ALLOW_TOURNAMENTS
+      * Added config-switch for ALLOW_SQL_CALC_ROWS
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
