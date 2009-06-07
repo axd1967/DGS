@@ -36,7 +36,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Game settings:
       * Waiting room: separated adding of new game on <home new_game.php>new-game page</home>,
-        added <home new_game.php>New game</home> into main-menu (access-key [n])
+        added <home new_game.php>New game</home> page into main-menu (access-key [n])
       * Waiting room: additionally show standard-placement (S) in Handicap-column
       * Waiting room: changed filter for "suitable" waiting games, added notes
       * New Game: added adjustment and min/max-limitation of handicap stones
@@ -151,7 +151,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Mark handicap-setup in view-moves list
          * Added access key [x]='Next Game', [v]=Preview
          * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
-         * Replaced 'OnVacation'-text by vacation-icon (<image vacation.gif>)
+         * Replaced 'OnVacation'-text by vacation-icon
+         * Show 'Comments' to right of View-move
 
    * Quick Status: Added time-remaining column
 
@@ -206,6 +207,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Improvements of database queries
       * Users: faster Activity handling
       * Game: faster skip-to-next-game
+      * Game comments: faster query
 
    * Introduction of a cache management for some pages and graphics
 
@@ -273,6 +275,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * fixed duplicated row problem for Add-Time feature
    * fixed default bug on selectbox filters
    * fixed sorting by last-access or last-move on opponents page
+   * fixed showing of game comments for PASS-, SCORE- and RESIGN-move
 
 
 #release DGS_1_0_14 [2008-Dec-14] - DGS 1.0.14  (Policy, Blocking, Admin features)
