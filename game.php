@@ -540,10 +540,10 @@ function get_alt_arg( $n1, $n2)
          echo "<br>\n";
       }
    }
-   draw_score_box( $game_score, GSMODE_TERRITORY_SCORING );
+   GameScore::draw_score_box( $game_score, GSMODE_TERRITORY_SCORING );
    {//FIXME: remove after testing
       echo "<br>\n";
-      draw_score_box( $game_score, GSMODE_AREA_SCORING ); }
+      GameScore::draw_score_box( $game_score, GSMODE_AREA_SCORING ); }
    echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;
@@ -1139,52 +1139,5 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    echo "</td></tr>\n";
    echo "</table>\n";
 } //draw_notes
-
-function draw_score_box( $game_score, $scoring_mode )
-{
-   global $base_path;
-   if( !is_a( $game_score, 'GameScore' ) )
-      return false;
-
-   $game_score->recalculate_score($scoring_mode); // recalc if needed
-   $score_info = $game_score->get_scoring_info();
-
-   $fmtline3 = "<tr><td class=\"%s\">%s</td><td>%s</td><td>%s</td></tr>\n";
-   $fmtline2 = "<tr><td class=\"%s\">%s</td><td colspan=\"2\">%s</td></tr>\n";
-
-   $caption = T_('Scoring information#scoring');
-   $caption2 = $score_info['mode_text'];
-   echo "<table class=\"Scoring\">\n",
-      "<tr><th colspan=\"3\">$caption<br>($caption2)</th></tr>\n";
-   if( !$score_info['skip_dame'] )
-      echo sprintf( $fmtline2, 'Header', T_('Dame#scoring'), $score_info['dame'] );
-   echo sprintf( "<tr class=\"Header\"><td></td><td>%s</td><td>%s</td></tr>\n",
-               image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
-               image( "{$base_path}17/w.gif", T_('White'), T_('White') ) ),
-      sprintf( $fmtline3, 'Header', T_('Territory#scoring'),
-               $score_info[GSCOL_BLACK]['territory'],
-               $score_info[GSCOL_WHITE]['territory'] ),
-      sprintf( $fmtline3, 'Header', T_('Dead stones#scoring'),
-               $score_info[GSCOL_BLACK]['dead_stones'],
-               $score_info[GSCOL_WHITE]['dead_stones'] );
-   if( !$score_info['skip_stones'] )
-      echo sprintf( $fmtline3, 'Header', T_('Stones#scoring'),
-               $score_info[GSCOL_BLACK]['stones'],
-               $score_info[GSCOL_WHITE]['stones'] );
-   if( !$score_info['skip_prisoners'] )
-      echo sprintf( $fmtline3, 'Header', T_('Prisoners#scoring'),
-               $score_info[GSCOL_BLACK]['prisoners'],
-               $score_info[GSCOL_WHITE]['prisoners'] );
-   echo sprintf( $fmtline3, 'Header', T_('Extra#scoring'),
-               $score_info[GSCOL_BLACK]['extra'],
-               $score_info[GSCOL_WHITE]['extra'] ),
-      sprintf( $fmtline3, 'HeaderSum', T_('Score#scoring'),
-               $score_info[GSCOL_BLACK]['score'],
-               $score_info[GSCOL_WHITE]['score'] ),
-      sprintf( $fmtline2, 'HeaderSum', T_('Difference#scoring'), $score_info['score'] ),
-      "</table>\n";
-
-   return true;
-} //draw_score_box
 
 ?>
