@@ -254,8 +254,13 @@ class GameScore
 
          $map[GSCOL_BLACK]['extra'] = ( $isArea && $this->handicap > 0 )
             ? sprintf( '-%s %s', $this->handicap, T_('(H)#scoring') ) : '';
-         $map[GSCOL_WHITE]['extra'] = ( $this->komi != 0.0 )
-            ? sprintf( '+%s %s', $this->komi, T_('(K)#scoring') ) : '';
+         if( $this->komi != 0.0 )
+         {
+            $fmt_komi = ($this->komi < 0.0) ? '%s %s' : '+%s %s';
+            $map[GSCOL_WHITE]['extra'] = sprintf( $fmt_komi, $this->komi, T_('(K)#scoring') );
+         }
+         else
+            $map[GSCOL_WHITE]['extra'] = '';
          $map[GSCOL_BLACK]['score'] = $score_black;
          $map[GSCOL_WHITE]['score'] = $score_white;
 
