@@ -126,7 +126,7 @@ $ThePage = new Page('GamesList');
    $search_profile = new SearchProfile( $my_id, $profile_type );
    $gfilter = new SearchFilter( $fprefix, $search_profile );
    $search_profile->register_regex_save_args( 'rated|won' ); // named-filters FC_FNAME
-   $gtable = new Table( $tableid, $page, $cfg_tblcols );
+   $gtable = new Table( $tableid, $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $gtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -606,11 +606,16 @@ $ThePage = new Page('GamesList');
       }
    }
 
+   // NOTE: full page-navigation does not work for UNION-queries
+   //       It's possible to disable unions with global-config ALLOW_SQL_UNION,
+   //       but performance of it has to be evaluate first !!
+   $has_union = $qsql->has_union();
+   if( $has_union )
+      $gtable->disable_table_mode( TABLE_ROWS_NAVI );
    $qsql->merge( $gtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
 
    $result = db_query( 'show_games.find_games', $query);
-   db_close();
 
    if( $observe ) //OB
    {
@@ -660,6 +665,8 @@ $ThePage = new Page('GamesList');
    $ginfo_str = T_('Game information');
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
+   if( !$has_union )
+      $gtable->set_found_rows( mysql_found_rows('show_games.found_rows') );
 
    while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
    {
