@@ -239,7 +239,7 @@ function get_alt_arg( $n1, $n2)
       $may_play = false;
       if( $Status == 'FINISHED' )
       {
-         if( abs($Score) <= SCORE_MAX ) // don't calc for resign/time-out
+         if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
             $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING, $coord); //ajusted globals: $stonestring
             $game_score->calculate_score();
@@ -618,17 +618,14 @@ function get_alt_arg( $n1, $n2)
       $show_notes = false;
    }
 
-   //if( $my_game ) //anyway, the observers may view the comments in the sgf files
-   {
-      echo "\n<DIV class=Comments>"
-         . anchor( "game_comments.php?gid=$gid"
-                 , T_('Comments')
-                 , ''
-                 , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
-                          'target' => FRIENDLY_SHORT_NAME.'_game_comments'
-                 ) )
-         . "</DIV>";
-   }
+   // observers may view the comments in the sgf files, so not restricted to own games
+   echo SMALL_SPACING
+      . anchor( "game_comments.php?gid=$gid"
+              , T_('Comments')
+              , ''
+              , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
+                       'target' => FRIENDLY_SHORT_NAME.'_game_comments'
+              ));
 
    echo "\n</td></tr>\n</table>"; //board & associates table }--------
 
