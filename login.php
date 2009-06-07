@@ -87,7 +87,7 @@ if( $quick_mode )
    //else cookie_check
 
    if( safe_getcookie('handle') != $uhandle
-      or safe_getcookie('sessioncode') != $code )
+      || safe_getcookie('sessioncode') != $code )
    {
       error('cookies_disabled');
    }
