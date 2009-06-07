@@ -23,6 +23,16 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-08 juga
+
+   * game.php:
+   - move showing of 'Comments'-link to the right of View-move-element
+   - bugfix: show scoring-info only on last move
+
+   * game_comments.php, NEWS:
+   - bugfix: include comments on PASS, SCORE and RESIGN moves
+   - optimize SQL-query (removed DISTINCT)
+
 2009-06-07 juga
 
    * list_messages.php, search_messages.php, waiting_room.php,
