@@ -23,6 +23,61 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-07 juga
+
+   * list_messages.php, search_messages.php, waiting_room.php,
+     features/list_features.php, features/list_votes.php,
+     tournaments/list_participants.php, tournaments/list_tournaments.php,
+     NEWS:
+   - added full-page-navigation for most pages with Tables
+     - Waiting room, Tournaments, Tournament participants, Messages,
+       Search messages, Users, Votes, Features
+     - All finished and running games, Observed games
+
+     - NOTE: User-specific (also my) finished and running games as well as the
+       opponents page can not be equipped with full-page navigation, because of
+       used UNION-db-queries, which do not work correctly with SQL_CALC_FOUND_ROWS.
+       UNION-queries can be replaced by disabling global-config ALLOW_SQL_UNION,
+       but would need performance-testing before using this option!!
+
+   * show_games.php:
+   - added full-page-navigation, except for queries using UNIONs
+
+   * include/std_classes.php (QuerySQL.has_union, ~.get_part, ~.get_select):
+   - QuerySQL: handling forbidden SQL-options with UNIONs;
+     especially SQL_CALC_FOUND_ROWS, HIGH_PRIORITY
+
+   * include/table_columns.php (Table.disable_table_mode, ~.make_next_prev_links):
+   - allow to disable some table-modes after constructing Table
+   - bugfix on full-page-navigation: show entries even if only one page showed (needing no navi)
+
+   * include/classlib_game.php (GameScore.draw_score_box),
+     game.php (draw_score_box):
+   - moved draw_score_box()-function to 'include/classlib_game.php'
+
+   * users.php:
+   - added full page-navigation using SQL_CALC_FOUND_ROWS
+
+   * include/table_columns.php (Table, ~.set_found_rows, ~.make_next_prev_links, ~.get_query),
+     include/std_classes.php (QuerySQL, ~.get_part),
+     include/connect2mysql.php (mysql_found_rows),
+     include/config.php,
+     skins/dragon/screen.css, INSTALL, NEWS:
+   - added full page-navigation for Tables using SQL_CALC_FOUND_ROWS,
+     this is experimental to evaluate need of additional load on live-server
+     - enabled with Table-option TABLE_ROWS_NAVI
+     - added additional navigation-links and info if used
+     - feature can be disabled with global config ALLOW_SQL_CALC_ROWS
+     - FOUND_ROWS() must be set from outside Table-class to avoid DB-queries in it
+     - FOUND_ROWS() need php.ini config "mysql.trace_mode = Off" to work
+   - added page-navigation-link to start of result-set
+
+   * edit_picture.php:
+   - added note about supported image-formats (JPEG, GIF, PNG)
+
+   * include/classlib_game.php (GameScore.calculate_score):
+   - fix negative komi-output in scoring-information: + -x -> -x
+
 2009-06-06 juga
 
    * include/classlib_userconfig.php (ConfigBoard.insert_default),
