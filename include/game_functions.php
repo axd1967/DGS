@@ -185,6 +185,8 @@ function get_to_move( $grow, $errmsg )
       $to_move = WHITE;
    elseif( $to_move_id )
       error('database_corrupted', "$errmsg({$grow['ID']})");
+   else
+      $to_move = -1; // can happen on finished game
    return $to_move;
 }
 
