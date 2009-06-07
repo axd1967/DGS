@@ -256,6 +256,13 @@ class Table
          $this->add_tablehead( 0, T_('##table'), 'Number', TABLE_ROW_NUM|TABLE_NO_SORT|TABLE_NO_HIDE );
    } //Table
 
+   /*! \brief Disables certain mode in table-options. */
+   function disable_table_mode( $bitmask )
+   {
+      if( $bitmask > 0 )
+         $this->Mode &= ~$bitmask;
+   }
+
    /*! \brief Sets external form for this table, $form is passed as reference */
    function set_externalform( &$form )
    {
@@ -1146,83 +1153,93 @@ class Table
    {
       global $base_path;
 
-      if( $this->Rows_Per_Page <= 0 || $this->Shown_Columns <= 0
-            || !( $this->From_Row > 0 || !$this->Last_Page ) )
+      if( $this->Rows_Per_Page <= 0 || $this->Shown_Columns <= 0 )
          return '';
-
-      $current_page = floor( $this->From_Row / $this->Rows_Per_Page ) + 1;
-      $max_page = ($this->FoundRows < 0 ) ? 0 : floor( $this->FoundRows / $this->Rows_Per_Page ) + 1;
-
-      $align = 'align=bottom'; //'align=middle'
-      $navi_left = ''; // left from page-num
-      $navi_right = '';
-
-      $qstr = $this->Page //end_sep
-         . $this->current_extparams_string(true)
-         . $this->current_sort_string(true)
-         . $this->current_rows_string(true)
-         . $this->current_filter_string(true)
-         ; //end_sep
-
-      if( $current_page > 2 ) // start-link
-      {
-         $navi_left .= anchor(
-              $qstr . $this->Prefix . 'from_row=0',
-              image( $base_path.'images/start.gif', '|<=', '', $align),
-              T_('first page') );
-      }
-
-      if( $this->From_Row > 0 ) // prev-link
-      {
-         if( $navi_left != '') $navi_left .= MINI_SPACING;
-         $navi_left .= anchor(
-              $qstr //end_sep
-              . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
-            , image( $base_path.'images/prev.gif', '<=', '', $align)
-            , T_("prev page")
-            , array( 'accesskey' => ACCKEY_ACT_PREV )
-            );
-      }
-
-      // current page
-      $navi_left .= ' ';
-      $navi_page = ( $max_page > 0 )
-         ? sprintf( T_('Page %s of %s#tablenavi'), $current_page, $max_page )
-         : $current_page;
-
-      if( !$this->Last_Page ) // next-link
-      {
-         $navi_right .= MINI_SPACING . anchor(
-              $qstr //end_sep
-              . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
-            , image( $base_path.'images/next.gif', '=>', '', $align)
-            , T_("next page")
-            , array( 'accesskey' => ACCKEY_ACT_NEXT )
-            );
-      }
-
-      if( $max_page > 0 && $current_page < $max_page - 1 ) // end-link
-      {
-         $last_page = floor($this->FoundRows / $this->Rows_Per_Page) * $this->Rows_Per_Page;
-         $navi_right .= MINI_SPACING . anchor(
-              $qstr . $this->Prefix . 'from_row=' . $last_page,
-              image( $base_path.'images/end.gif', '=>|', '', $align),
-              T_('last page') );
-      }
+      $is_onepage = ( $this->From_Row <= 0 && $this->Last_Page );
+      if( $is_onepage && $this->FoundRows < 0 )
+         return '';
 
       // add found-rows only at top-left
       $navi_entries = '';
       if( $id == 'T' && $this->FoundRows >= 0 )
       {
          $fmt_entries = ($this->FoundRows == 1 ) ? T_('(%s entry)') : T_('(%s entries)');
-         $navi_entries = SMALL_SPACING . '<span class="NaviInfo">'
-            . sprintf( $fmt_entries, $this->FoundRows ) . '</span>';
+         $navi_entries = '<span class="NaviInfo">' . sprintf( $fmt_entries, $this->FoundRows ) . '</span>';
       }
 
-      $paging_left  = $navi_left . $navi_page . $navi_right . $navi_entries;
-      $paging_right = $navi_left . $current_page . $navi_right;
-      $string = '';
+      if( $is_onepage )
+      {
+         $paging_left  = $navi_entries;
+         $paging_right = '';
+      }
+      else
+      {
+         $current_page = floor( $this->From_Row / $this->Rows_Per_Page ) + 1;
+         $max_page = ($this->FoundRows < 0 ) ? 0 : floor( $this->FoundRows / $this->Rows_Per_Page ) + 1;
 
+         $align = 'align=bottom'; //'align=middle'
+         $navi_left = ''; // left from page-num
+         $navi_right = '';
+
+         $qstr = $this->Page //end_sep
+            . $this->current_extparams_string(true)
+            . $this->current_sort_string(true)
+            . $this->current_rows_string(true)
+            . $this->current_filter_string(true)
+            ; //end_sep
+
+         if( $current_page > 2 ) // start-link
+         {
+            $navi_left .= anchor(
+                 $qstr . $this->Prefix . 'from_row=0',
+                 image( $base_path.'images/start.gif', '|<=', '', $align),
+                 T_('first page') );
+         }
+
+         if( $this->From_Row > 0 ) // prev-link
+         {
+            if( $navi_left != '') $navi_left .= MINI_SPACING;
+            $navi_left .= anchor(
+                 $qstr //end_sep
+                 . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
+               , image( $base_path.'images/prev.gif', '<=', '', $align)
+               , T_("prev page")
+               , array( 'accesskey' => ACCKEY_ACT_PREV )
+               );
+         }
+
+         // current page
+         $navi_left .= ' ';
+         $navi_page = ( $max_page > 0 )
+            ? sprintf( T_('Page %s of %s#tablenavi'), $current_page, $max_page )
+            : $current_page;
+
+         if( !$this->Last_Page ) // next-link
+         {
+            $navi_right .= MINI_SPACING . anchor(
+                 $qstr //end_sep
+                 . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
+               , image( $base_path.'images/next.gif', '=>', '', $align)
+               , T_("next page")
+               , array( 'accesskey' => ACCKEY_ACT_NEXT )
+               );
+         }
+
+         if( $max_page > 0 && $current_page < $max_page - 1 ) // end-link
+         {
+            $last_page = floor($this->FoundRows / $this->Rows_Per_Page) * $this->Rows_Per_Page;
+            $navi_right .= MINI_SPACING . anchor(
+                 $qstr . $this->Prefix . 'from_row=' . $last_page,
+                 image( $base_path.'images/end.gif', '=>|', '', $align),
+                 T_('last page') );
+         }
+
+         $paging_left  = $navi_left . $navi_page . $navi_right
+            . ( $navi_entries ? SMALL_SPACING . $navi_entries : '');
+         $paging_right = $navi_left . $current_page . $navi_right;
+      }// !is_onepage
+
+      $string = '';
       $span = floor($this->Shown_Columns/2);
       if( $span < 2 ) $span = $this->Shown_Columns;
       if( $span > 0 )
