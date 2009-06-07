@@ -131,11 +131,12 @@ function fill_sql_template( $tmpl, $op, $val )
   * \brief Class to build SQL-statements (mainly to ease handling SQL with Filters).
   * for Resulting SQL-Statement \see get_select()
   *
-  * supported: sub-clauses (though those are since mysql4.1 and DGS is below that for now).
+  * supported: sub-clauses (though those are since mysql4.1).
   * NOT supported: UNION-selects-syntax
   *
   * SQL-parts of type:
   *    SQLP_OPTS: [DISTINCT] [STRAIGHT_JOIN] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT] [SQL_CACHE | SQL_NO_CACHE]
+  *               [SQL_CALC_FOUND_ROWS]
   *    SQLP_GROUP, SQLP_LIMIT: can be only set once with same value
   *    SQLP_FIELDS, SQLP_FIELDS: mandatory
   *    SQLP_FNAMES, SQLP_WHERETMPL are not directly included for query, but fieldnames to be used for Filters
@@ -159,6 +160,8 @@ define('SQLP_LIMIT',     'limit'); // only once
 define('SQLP_FNAMES',    'fieldnames'); // field-names used to build "real" SQLP_WHERE
 define('SQLP_WHERETMPL', 'where_tmpl'); // SQL-template used to build "real" SQLP_WHERE; only used to store templates along with other parts
 define('SQLP_UNION_WHERE', 'union_where');
+
+define('SQLOPT_CALC_ROWS', 'SQL_CALC_FOUND_ROWS'); // for SQLP_OPTS
 
 // sql-statements for part-types
 $ARR_SQL_STATEMENTS = array(
@@ -328,7 +331,7 @@ class QuerySQL
       elseif( $type === SQLP_FNAMES )
          $part = implode(',', $arr);
       elseif( $type === SQLP_OPTS )
-         $part = implode(' ', $arr);
+         $part = implode(' ', array_unique($arr) );
       elseif( $type === SQLP_UNION_WHERE )
          $part = implode(' OR ', $arr);
 
