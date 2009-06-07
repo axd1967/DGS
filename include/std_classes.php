@@ -301,6 +301,12 @@ class QuerySQL
       return ( count($this->parts[$type]) > 0 );
    }
 
+   /*! \brief Returns true, if query has a UNION-part. */
+   function has_union()
+   {
+      return $this->has_part(SQLP_UNION_WHERE);
+   }
+
    /*! \brief Returns parts-array for specified part_type */
    function get_parts( $type )
    {
@@ -312,8 +318,10 @@ class QuerySQL
    /*!
     * \brief Returns typed part of select-statement; '' for none set.
     * param incl_prefix: if true, preprend sql-part with according SQL-keyword, e.g. 'SELECT' for SQLP_FIELDS
+    * \param $union_part -1 (no union = default), 0..n = part of union;
+    *        for some union-parts certain SQL-options are forbidden
     */
-   function get_part( $type, $incl_prefix = false )
+   function get_part( $type, $incl_prefix = false, $union_part=-1 )
    {
       if( !$this->has_part($type) )
          return '';
@@ -331,7 +339,18 @@ class QuerySQL
       elseif( $type === SQLP_FNAMES )
          $part = implode(',', $arr);
       elseif( $type === SQLP_OPTS )
-         $part = implode(' ', array_unique($arr) );
+      {
+         $skiparr = array(
+            'HIGH_PRIORITY'  => ($union_part >= 0), // forbidden with UNION
+            SQLOPT_CALC_ROWS => ($union_part > 0), // only allowed in 1st SELECT of UNION-clause
+         );
+         $part = '';
+         foreach( $arr as $val )
+         {
+            if( !@$skiparr[$val] )
+               $part .= ' ' . $val;
+         }
+      }
       elseif( $type === SQLP_UNION_WHERE )
          $part = implode(' OR ', $arr);
 
@@ -376,7 +395,7 @@ class QuerySQL
     */
    function get_select()
    {
-      if( !$this->has_part(SQLP_UNION_WHERE) )
+      if( !$this->has_union() )
          return $this->get_select_normal();
 
       // handle UNION-syntax
@@ -413,7 +432,7 @@ class QuerySQL
       if( $this->has_part(SQLP_FIELDS) || $has_opts )
          $arrsql[]= 'SELECT';
       if( $has_opts )
-         $arrsql[]= $this->get_part(SQLP_OPTS);
+         $arrsql[]= $this->get_part(SQLP_OPTS, false, $union_part );
       $arrsql[]= $this->get_part(SQLP_FIELDS);
       $arrsql[]= $this->get_part(SQLP_FROM, true);
 
