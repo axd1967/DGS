@@ -1,6 +1,6 @@
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -24,23 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* same initial states for any browsers */
 /* ------------------------- */
 
-/*
-* {
-   margin: 2px;
-   padding: 0px;
-   font-family: Times New Roman, Times, Geneva, serif, Arial, Helvetica, sans-serif, Verdana;
-}
+/* Legend:
+ * - FF = Firefox, IE = Internet Explorer
  */
 
 img {
    border: 0px solid black;
-/*
-  No vertical-align here, else Avant browser
-  will badly display the table.goban img:
-  enlarging the text display will increase the
-  height of the table cells too.
-   vertical-align: middle;
-*/
+   /* vertical-align: middle;
+      No vertical-align here, else Avant browser will badly display the table.goban img:
+      enlarging the text display will increase the height of the table cells too. */
    margin: 0px;
 }
 
@@ -92,19 +84,12 @@ pre {
 }
 
 /*, input[type="new"], input[type="_blank"]*/
-select,
-input {
-   vertical-align: middle; /* */
+select, input {
+   vertical-align: middle;
    margin-right: 4px;
-/*
-   margin: 0px 2px;
-   padding: 0px;
-/*   height: 2em; /* */
 }
 
-/* FF does not properly adjust its height when one change
-  the text height (Ctrl+middle) until a refresh
- */
+/* FF does not properly adjust its height when one change the text height (Ctrl+middle) until a refresh */
 /*
 select {
    height: 1.85em;
@@ -127,25 +112,11 @@ a * {
 }
 
 /*
-a:link {
-   color: blue;
-}
-
-a:visited {
-   color: navy;
-}
-
-a:hover {
-   color: purple;
-}
-
-a:focus {
-   color: red;
-}
-
-a:active {
-   color: red;
-}
+a:link    { color: blue; }
+a:visited { color: navy; }
+a:hover   { color: purple; }
+a:focus   { color: red; }
+a:active  { color: red; }
 */
 
 
@@ -215,19 +186,6 @@ a.linkmarkup {
 {
    white-space: nowrap;
 }
-
-/*
-a.rating {
-   color: black;
-}
-
-a.gameblack,
-a.sendblack,
-a.userblack {
-   color: black;
-}
-*/
-
 
 .InlineWarning {
    color: red;
@@ -302,7 +260,7 @@ table.Container { /* centered_container */
 }
 
 hr.Section {
-   display: none; /* */
+   display: none;
    margin: 1em 0px 0px 0px;
 }
 
@@ -319,7 +277,7 @@ p.SysMsg {
 .ErrMsg {
    color: darkred;
    text-decoration: none;
-   font-style: normal; /* normal italic oblique inherit(css 2) */
+   font-style: normal; /* normal italic oblique inherit (CSS2) */
    font-weight: normal;
 }
 
@@ -955,11 +913,6 @@ table.Table td.Right {
 table.Table td.Center {
    text-align: center;
 }
-/*
-table.Table td.PagingRight {
-   text-align: right;
-}
-*/
 
 table.Table th.Button {
 /* min-width problem, see MinWidth
@@ -1054,14 +1007,12 @@ table.Table tr.Head th span.Tool img.Hide { /* headers row */
 table.Table tr.Filter td span.Tool img.Hide, /* filters row */
 table.Table tr.Head th span.Tool img.Hide { /* headers row */
    border: 0px solid black;
-   margin: 0px 0px 10px 0px; /* */
-/*   margin: 0px 0px 9px 2px; /* */
+   margin: 0px 0px 10px 0px;
 }
 
 table.Table tr.Head th span.Tool img.Sort { /* headers row */
    border: 0px solid green;
-   margin: 10px 0px 0px -9px; /* */
-/*   margin: 9px 0px 0px -9px; /* */
+   margin: 10px 0px 0px -9px;
 }
 
 
@@ -1557,19 +1508,6 @@ table#gameStats tr.Number td {
 /* ------------------------- */
 
 dl.DocLink {
-/*
-   padding: 0px auto;
-   clear: none;
-   margin: 0px auto;
-   table-layout: auto;
-   text-align: center;
-   -moz-box-align: strech;
-   -moz-binding: none;
-   -moz-box-sizing: border-box;
-   display: table-row-group;
-   display: table;
-   display: inherit;
-*/
    margin: 0px auto;
    border: 0px solid lime;
 }
@@ -2104,16 +2042,6 @@ table.GameInfos tr.BoardInfos {
    border-width: 1px 0px 0px 0px;
 }
 
-/*
-div.BoardInfos {
-   border: 0px solid red;
-   margin: 0px 0px 0px 0px;
-   padding: 0px;
-   text-align: left;
-   color: green;
-}
-*/
-
 dl.BoardInfos {
    border: 0px solid green;
    margin: 0px;
@@ -2153,28 +2081,6 @@ table.MessageForm tr.Back td {
 /* ------------------------- */
 /* game comments table (class=Table) */
 /* ------------------------- */
-
-/*
-table#commentTable {
-   border: 0px solid #e0e8ed;
-   border-spacing: 0px;
-   margin: 0px;
-   text-align: left;
-   empty-cells: show;
-}
-
-table.Comments th,
-table.Comments td {
-   border: 0px solid #e0e8ed;
-   margin: 0px;
-   padding: 4px;
-   vertical-align: top;
-}
-
-table.Comments tr {
-   background: #e0e8ed;
-}
-*/
 
 table#commentTable td.Comment {
    white-space: normal; /* normal, nowrap - pre: allow &#10; */
