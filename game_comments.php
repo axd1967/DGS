@@ -63,12 +63,13 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
      $html_mode= 'game';
 
 
+   // include moves: PASS, SCORE, RESIGN
    $result = db_query( 'game_comments.messages',
-      'SELECT DISTINCT Moves.MoveNr,Moves.Stone,MoveMessages.Text'
+      'SELECT Moves.MoveNr,Moves.Stone,MoveMessages.Text'
       .' FROM MoveMessages'
       ." INNER JOIN Moves ON Moves.gid=$gid AND Moves.MoveNr=MoveMessages.MoveNr"
       ." WHERE MoveMessages.gid=$gid"
-            .' AND Moves.PosX>=0 AND Moves.Stone IN ('.WHITE.','.BLACK.')'
+            .' AND Moves.PosX>='.POSX_RESIGN.' AND Moves.Stone IN ('.WHITE.','.BLACK.')'
       .' ORDER BY Moves.MoveNr' );
 
 
