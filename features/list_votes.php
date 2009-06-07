@@ -48,7 +48,7 @@ require_once( "features/lib_votes.php" );
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_VOTES );
    $vfilter = new SearchFilter( '', $search_profile );
    //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $vtable = new Table( 'votes', $page );
+   $vtable = new Table( 'votes', $page, null, '', TABLE_ROWS_NAVI );
    $vtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -91,6 +91,7 @@ require_once( "features/lib_votes.php" );
       or error('mysql_query_failed', 'votelist.find_data');
 
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
+   $vtable->set_found_rows( mysql_found_rows('votelist.found_rows') );
 
    $title = T_('Feature vote result list');
    start_page( $title, true, $logged_in, $player_row,

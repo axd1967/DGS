@@ -56,7 +56,7 @@ require_once( "features/lib_votes.php" );
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_FEATURES );
    $ffilter = new SearchFilter( '', $search_profile );
    //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $ftable = new Table( 'features', $page, $cfg_tblcols );
+   $ftable = new Table( 'features', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ftable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -109,6 +109,7 @@ require_once( "features/lib_votes.php" );
       or error('mysql_query_failed', 'featurelist.find_data');
 
    $show_rows = $ftable->compute_show_rows(mysql_num_rows($result));
+   $ftable->set_found_rows( mysql_found_rows('featurelist.found_rows') );
 
    $title = T_('Features to vote on');
    start_page( $title, true, $logged_in, $player_row,

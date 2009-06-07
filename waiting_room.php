@@ -70,7 +70,7 @@ require_once( 'include/classlib_userconfig.php' );
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_WAITINGROOM );
    $wrfilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'good' ); // named-filters FC_FNAME
-   $wrtable = new Table( 'waitingroom', $page, $cfg_tblcols );
+   $wrtable = new Table( 'waitingroom', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $wrtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -198,9 +198,7 @@ require_once( 'include/classlib_userconfig.php' );
 
    $qsql->merge( $wrtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
-
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'waiting_room.find_waiters');
+   $result = db_query( 'waiting_room.find_waiters', $query );
 
 
    if( $f_range->get_value() )
@@ -215,6 +213,8 @@ require_once( 'include/classlib_userconfig.php' );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
    $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
+   $wrtable->set_found_rows( mysql_found_rows('waiting_room.found_rows') );
+
    $info_row = NULL;
    if( $show_rows > 0 || $wrfilter->has_query() )
    {

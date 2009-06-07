@@ -135,7 +135,8 @@ require_once( "include/filter.php" );
 
    $rx_term = get_request_arg('xterm');
 
-   $mtable = new Table( 'message', 'list_messages.php'.$page, '', '', TABLE_NO_HIDE|TABLE_NO_SIZE );
+   $mtable = new Table( 'message', 'list_messages.php'.$page, '', '',
+      TABLE_NO_HIDE|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
    //$mtable->add_or_del_column();
 
    $marked_form = new Form('messageMove','list_messages.php#action', FORM_GET, true, 'FormTable');
@@ -161,6 +162,7 @@ require_once( "include/filter.php" );
    }
 
    $show_rows = $mtable->compute_show_rows( $show_rows);
+   $mtable->set_found_rows( mysql_found_rows('list_messages.found_rows') );
 
 
    echo echo_folders($my_folders, $current_folder);

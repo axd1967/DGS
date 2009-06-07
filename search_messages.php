@@ -72,7 +72,7 @@ require_once( "include/classlib_profile.php" );
    $smfilter = new SearchFilter( 's', $search_profile );
    $mfilter = new SearchFilter( '', $search_profile );
    //#$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $mtable = new Table( 'message', $page, '', 'msgSearch', TABLE_NO_HIDE);
+   $mtable = new Table( 'message', $page, '', 'msgSearch', TABLE_NO_HIDE|TABLE_ROWS_NAVI );
    $mtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -167,6 +167,7 @@ require_once( "include/classlib_profile.php" );
 
    $show_rows = mysql_num_rows($result);
    $show_rows = $mtable->compute_show_rows( $show_rows);
+   $mtable->set_found_rows( mysql_found_rows('search_messages.found_rows') );
 
 
    $title = T_('Message search');

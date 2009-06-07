@@ -66,7 +66,7 @@ $ThePage = new Page('TournamentParticipantList');
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_PARTICIPANTS );
    $tpfilter = new SearchFilter( '', $search_profile );
-   $tptable = new Table( 'tournament', $page, $cfg_tblcols, '', TABLE_ROW_NUM );
+   $tptable = new Table( 'tournament', $page, $cfg_tblcols, '', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
    $tptable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -132,6 +132,8 @@ $ThePage = new Page('TournamentParticipantList');
 
 
    $show_rows = $tptable->compute_show_rows( $iterator->ResultRows );
+   $tptable->set_found_rows( mysql_found_rows('Tournament.list_participants.found_rows') );
+
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tp, $orow ) = $arr_item;

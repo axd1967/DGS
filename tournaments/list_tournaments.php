@@ -74,7 +74,7 @@ $ThePage = new Page('TournamentList');
    $tsfilter = new SearchFilter( 's', $search_profile );
    $tfilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'user' ); // named-filters FC_FNAME
-   $ttable = new Table( 'tournament', $page, $cfg_tblcols );
+   $ttable = new Table( 'tournament', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ttable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -172,6 +172,8 @@ $ThePage = new Page('TournamentList');
          'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
 
    $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
+   $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
+
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tourney, $orow ) = $arr_item;
