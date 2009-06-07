@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once( 'include/classlib_goban.php' );
+require_once( 'include/classlib_userconfig.php' ); // consts SMOOTH_EDGE
 
  /* Author: Jens-Uwe Gaspar */
 
