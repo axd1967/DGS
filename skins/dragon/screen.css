@@ -871,6 +871,11 @@ table.Table tr.LinksB td {
    text-align: left;
 }
 
+table.Table tr.LinksT span.NaviInfo,
+table.Table tr.LinksB span.NaviInfo {
+   font-size: smaller;
+}
+
 table.Table tr.LinksT td.PagingR,
 table.Table tr.LinksB td.PagingR {
    text-align: right;
