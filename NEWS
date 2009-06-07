@@ -186,7 +186,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Changed default sort-direction for ID
       * Can show row-number, e.g. on Tournament participants list
       * Enable full page-navigation (experimental) with pages- & entries-info
-        for pages: <home users.php>Users</home>
+        for pages: Waiting room, Tournaments, Tournament participants, Messages,
+        Search messages, Users, Games (except own), Observed games, Votes, Features
 
    * <home docs.php>Docs</home>:
       * Added link to statistics page on docs and site-map page
