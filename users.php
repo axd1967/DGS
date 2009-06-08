@@ -120,8 +120,9 @@ require_once( 'include/classlib_userpicture.php' );
    //       for the "static" filtering(!) of: Activity; also see named-filters
    $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
-   $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
-      'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'UserPicture+' );
+   if( USERPIC_FOLDER != '' )
+      $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
+         'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'UserPicture+' );
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
    $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');

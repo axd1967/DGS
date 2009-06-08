@@ -104,8 +104,9 @@ require_once( 'include/classlib_userpicture.php' );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead( 9, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
    $ctable->add_tablehead(12, T_('Type#header'), 'Enum', 0, 'P.Type+');
-   $ctable->add_tablehead(13, new TableHead( T_('User picture#header'),
-      'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'P.UserPicture+' );
+   if( USERPIC_FOLDER != '' )
+      $ctable->add_tablehead(13, new TableHead( T_('User picture#header'),
+         'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'P.UserPicture+' );
    $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
    $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
