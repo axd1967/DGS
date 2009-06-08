@@ -73,9 +73,8 @@ class ConfigBoard
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    function ConfigBoard( $user_id, $stone_size=25, $wood_color=1, $boardcoords=31,
                          $move_numbers=0, $move_modulo=0,
-                         $notes_small_height=25, $notes_large_height=25,
-                         $notes_small_width=30, $notes_large_width=30,
-                         $notes_small_mode='RIGHT', $notes_large_mode='RIGHT',
+                         $notes_small_height=25, $notes_small_width=30, $notes_small_mode='RIGHT',
+                         $notes_large_height=25, $notes_large_width=30, $notes_large_mode='RIGHT',
                          $notes_cutoff=13 )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigBoard');
