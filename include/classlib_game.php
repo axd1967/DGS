@@ -349,7 +349,7 @@ class GameScore
       global $base_path;
       $caption = T_('Scoring information#scoring');
       $caption2 = $score_info['mode_text'];
-      echo "<table class=\"Scoring\">\n",
+      echo "<table id=\"scoreInfo\" class=\"Scoring\">\n",
          "<tr><th colspan=\"3\">$caption<br>($caption2)</th></tr>\n";
       if( !$score_info['skip_dame'] )
          echo sprintf( $fmtline2, 'Header', T_('Dame#scoring'), $score_info['dame'] );
