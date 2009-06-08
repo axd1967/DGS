@@ -93,6 +93,18 @@ require_once( 'include/utilities.php' );
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range');
 
+   // komi adjustment
+   $adj_komi = (float)@$_POST['adj_komi'];
+   if( abs($adj_komi) > MAX_KOMI_RANGE )
+      $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
+   if( floor(2 * $adj_komi) != 2 * $adj_komi ) // <>x.0|x.5
+      $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
+
+   $jigo_mode = (string)@$_POST['jigo_mode'];
+   if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO
+         && $jigo_mode != JIGOMODE_NO_JIGO )
+      error('invalid_args', "add_to_waitingroom.check.jigo_mode($jigo_mode)");
+
    // handicap adjustment
    $adj_handicap = (int)@$_POST['adj_handicap'];
    if( abs($adj_handicap) > MAX_HANDICAP )
@@ -184,6 +196,8 @@ require_once( 'include/utilities.php' );
       "Komi=ROUND(2*($komi))/2, " .
       "Handicap=$handicap, " .
       "Handicaptype='$handicap_type', " .
+      "AdjKomi=$adj_komi, " .
+      "JigoMode='" . mysql_addslashes($jigo_mode) . "', " .
       "AdjHandicap=$adj_handicap, " .
       "MinHandicap=$min_handicap, " .
       ($max_handicap < 0 ? '' : "MaxHandicap=$max_handicap, " ) .

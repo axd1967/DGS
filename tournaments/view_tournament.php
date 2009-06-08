@@ -25,6 +25,7 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/table_infos.php' );
 require_once( 'include/rating.php' );
+require_once( 'include/game_functions.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
@@ -132,6 +133,15 @@ $ThePage = new Page('Tournament');
 
    if( !is_null($trule) )
    {
+      $adj_komi = array();
+      if( $trule->AdjKomi )
+         $adj_komi[] = sprintf( T_('adjusted by %s points#trules_komi'),
+               ( $trule->AdjKomi > 0 ? '+' : '') . sprintf('%.1f', $trule->AdjKomi) );
+      if( $trule->JigoMode == JIGOMODE_ALLOW_JIGO )
+         $adj_komi[] = T_('Jigo allowed#trules_komi');
+      elseif( $trule->JigoMode == JIGOMODE_NO_JIGO )
+         $adj_komi[] = T_('No Jigo allowed#trules_komi');
+
       $adj_handi = array();
       if( $trule->AdjHandicap )
          $adj_handi[] = sprintf( T_('adjusted by %s stones#trules_handi'),
@@ -158,6 +168,8 @@ $ThePage = new Page('Tournament');
                : sprintf( T_('%s komi#trules_handi'), $trule->Komi) ));
       $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'),
             ( count($adj_handi) ? implode(', ', $adj_handi) : '' ));
+      $itable->add_sinfo( T_('Komi adjustment:#trules_komi'),
+            ( count($adj_komi) ? implode(', ', $adj_komi) : '' ));
       if( ENA_STDHANDICAP )
          $itable->add_sinfo( T_('Standard placement:#trules_handi'), yesno($trule->StdHandicap) );
       $itable->add_sinfo( T_('Main time:#trules'), echo_time($trule->Maintime)

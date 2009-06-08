@@ -258,7 +258,10 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
          if( $wrtable->Is_Column_Displayed[ 6] )
-            $wrow_strings[ 6] = ($calculated ? NO_VALUE : $Komi);
+         {
+            $k_str = ( $calculated ) ? build_adjust_komi( $AdjKomi, $JigoMode, true ) : $Komi;
+            $wrow_strings[ 6] = ( (string)$k_str != '' ) ? $k_str : NO_VALUE;
+         }
          if( $wrtable->Is_Column_Displayed[ 7] )
             $wrow_strings[ 7] = $Size;
          if( $wrtable->Is_Column_Displayed[ 8] )

@@ -62,6 +62,8 @@ class TournamentRules
    var $Handicaptype;
    var $Handicap;
    var $Komi;
+   var $AdjKomi;
+   var $JigoMode;
    var $AdjHandicap;
    var $MinHandicap;
    var $MaxHandicap;
@@ -75,8 +77,9 @@ class TournamentRules
 
    /*! \brief Constructs TournamentRules-object with specified arguments. */
    function TournamentRules( $id=0, $tid=0, $lastchanged=0, $flags=0, $notes='',
-         $size=19, $handicaptype='CONV', $handicap=0, $komi=6.5, $adj_handicap=0,
-         $min_handicap=0, $max_handicap=127, $std_handicap=true,
+         $size=19, $handicaptype='CONV', $handicap=0, $komi=6.5,
+         $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
+         $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
          $maintime=450, $byotype='JAP', $byotime=15, $byoperiods=10,
          $weekendclock=true, $rated=false )
    {
@@ -89,6 +92,8 @@ class TournamentRules
       $this->Handicaptype = $handicaptype;
       $this->Handicap = (int)$handicap;
       $this->Komi = (float)$komi;
+      $this->AdjKomi = (float)$adj_komi;
+      $this->JigoMode = $jigo_mode;
       $this->AdjHandicap = (int)$adj_handicap;
       $this->MinHandicap = (int)$min_handicap;
       $this->MaxHandicap = (int)$max_handicap;
@@ -112,6 +117,8 @@ class TournamentRules
             . ", Handicaptype=[".strtoupper($this->Handicaptype)."]"
             . ", Handicap=[{$this->Handicap}]"
             . ", Komi=[{$this->Komi}]"
+            . ", AdjKomi=[{$this->AdjKomi}]"
+            . ", JigoMode=[{$this->JigoMode}]"
             . ", AdjHandicap=[{$this->AdjHandicap}]"
             . ", MinHandicap=[{$this->MinHandicap}]"
             . ", MaxHandicap=[{$this->MaxHandicap}]"
@@ -152,6 +159,8 @@ class TournamentRules
             . sprintf( ",Handicaptype='%s'", mysql_addslashes(strtoupper($this->Handicaptype)) )
             . ",Handicap='{$this->Handicap}'"
             . ",Komi='{$this->Komi}'"
+            . ",AdjKomi='{$this->AdjKomi}'"
+            . sprintf( ",JigoMode='%s'", mysql_addslashes($this->JigoMode) )
             . ",AdjHandicap='{$this->AdjHandicap}'"
             . ",MinHandicap='{$this->MinHandicap}'"
             . ",MaxHandicap='{$this->MaxHandicap}'"
@@ -212,6 +221,8 @@ class TournamentRules
       $vars['size'] = (int)$this->Size;
       $vars['handicap_type'] = strtolower($this->Handicaptype);
       $vars['komi_n'] = $this->Komi;
+      $vars['adj_komi'] = (int)$this->AdjKomi;
+      $vars['jigo_mode'] = (int)$this->JigoMode;
       $vars['adj_handicap'] = (int)$this->AdjHandicap;
       $vars['min_handicap'] = (int)$this->MinHandicap;
       $vars['max_handicap'] = min( MAX_HANDICAP, max( 0, (int)$this->MaxHandicap ));
@@ -279,6 +290,18 @@ class TournamentRules
       if( !( $handicap >= 0 && $handicap <= MAX_HANDICAP ) )
          error('handicap_range', "TournamentRules.convertEditForm_to_TournamentRules.check.handicap($handicap)");
 
+      // komi adjustment
+      $adj_komi = (float)@$_POST['adj_komi'];
+      if( abs($adj_komi) > MAX_KOMI_RANGE )
+         $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
+      if( floor(2 * $adj_komi) != 2 * $adj_komi ) // <>x.0|x.5
+         $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
+
+      $jigo_mode = (string)@$_POST['jigo_mode'];
+      if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO
+            && $jigo_mode != JIGOMODE_NO_JIGO )
+         error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.check.jigo_mode($jigo_mode)");
+
       // handicap adjustment
       $adj_handicap = (int)@$vars['adj_handicap'];
       if( abs($adj_handicap) > MAX_HANDICAP )
@@ -338,6 +361,8 @@ class TournamentRules
       $this->Handicaptype = strtoupper($handicap_type);
       $this->Handicap = $handicap;
       $this->Komi = round( 2 * $komi ) / 2;
+      $this->AdjKomi = $adj_komi;
+      $this->JigoMode = $jigo_mode;
       $this->AdjHandicap = $adj_handicap;
       $this->MinHandicap = $min_handicap;
       $this->MaxHandicap = $max_handicap;
@@ -381,7 +406,7 @@ class TournamentRules
    function build_query_sql( $tid )
    {
       // TournamentRules: ID,tid,Lastchanged,Flags,Size,Handicaptype,Handicap,Komi,
-      //     AdjHandicap,MinHandicap,MaxHandicap,StdHandicap,Maintime,Byotype,
+      //     AdjKomi,JigoMode,AdjHandicap,MinHandicap,MaxHandicap,StdHandicap,Maintime,Byotype,
       //     Byotime,Byoperiods,WeekendClock,Rated,Notes
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
@@ -407,6 +432,8 @@ class TournamentRules
             @$row['Handicaptype'],
             @$row['Handicap'],
             @$row['Komi'],
+            @$row['AdjKomi'],
+            @$row['JigoMode'],
             @$row['AdjHandicap'],
             @$row['MinHandicap'],
             @$row['MaxHandicap'],

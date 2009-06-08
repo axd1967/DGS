@@ -21,6 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
 
+// enum Waitingroom.JigoMode
+define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
+define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
+define('JIGOMODE_NO_JIGO',    'NO_JIGO');
+
 
 /*!
  * \brief returns true, if user (uid) is allowed to add additional
@@ -154,6 +159,37 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       error('mysql_insert_move',"add_time_opponent.insert_move($gid)");
 
    return $add_hours; // success (no-error)
+}
+
+// returns adjusted komi within limits, also checking for valid limits
+function adjust_komi( $komi, $adj_komi, $jigo_mode )
+{
+   // adjust
+   if( $adj_komi )
+      $komi += $adj_komi;
+
+   // assure valid limits up to the limits
+   if( $komi < -MAX_KOMI_RANGE )
+      $komi = -MAX_KOMI_RANGE;
+   elseif( $komi > MAX_KOMI_RANGE )
+      $komi = MAX_KOMI_RANGE;
+
+   if( $jigo_mode == JIGOMODE_ALLOW_JIGO && floor($komi) != $komi )
+   {
+      $komi = (($komi < 0) ? -1 : 1) * floor(abs($komi));
+   }
+   elseif( $jigo_mode == JIGOMODE_NO_JIGO && floor($komi) == $komi )
+   {
+      $komi += ($komi < 0) ? -0.5 : 0.5;
+   }
+
+   // assure valid limits after applying jigo-mode
+   if( $komi < -MAX_KOMI_RANGE )
+      $komi += 1.0;
+   elseif( $komi > MAX_KOMI_RANGE )
+      $komi -= 1.0;
+
+   return $komi;
 }
 
 // returns adjusted handicap within limits, also checking for valid limits

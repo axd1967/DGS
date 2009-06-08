@@ -40,6 +40,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Waiting room: additionally show standard-placement (S) in Handicap-column
       * Waiting room: changed filter for "suitable" waiting games, added notes
       * New Game: added adjustment and min/max-limitation of handicap stones
+      * New Game: added adjustment of komi by value and jigo mode (allow or reject Jigo)
       * New Game: added (optional) minimum number of rated finished games
       * Invitation: added indication of color, handicap & komi
         for conventional & proper handicap-type

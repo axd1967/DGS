@@ -467,3 +467,13 @@ ALTER TABLE ConfigPages
    ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll ;
 
 
+-- game-komi adjustment & jigo mode (for Waiting room)
+ALTER TABLE `Waitingroom`
+   ADD `AdjKomi` decimal(6,1) signed NOT NULL default '0.0' AFTER `Handicaptype`,
+   ADD `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI' AFTER `AdjKomi` ;
+
+-- game-komi adjustment & jigo mode (for Tournament rules)
+ALTER TABLE `TournamentRules`
+   ADD `AdjKomi` decimal(6,1) signed NOT NULL default '0.0' AFTER `Handicaptype`,
+   ADD `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI' AFTER `AdjKomi` ;
+

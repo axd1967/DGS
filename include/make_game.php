@@ -243,6 +243,12 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
    $game_info_row['Rated'] = ( $rated ? 'Y' : 'N' );
 
+   // adjust komi (AdjKomi/JigoMode may be unset)
+   $komi = adjust_komi( (float)$game_info_row['Komi'],
+      (float)@$game_info_row['AdjKomi'],
+      (string)@$game_info_row['JigoMode'] );
+   $game_info_row['Komi'] = $komi; // write back
+
    // adjust handicap (Adj/Min/MaxHandicap may be unset)
    $handicap = adjust_handicap( (int)$game_info_row['Handicap'],
       (int)@$game_info_row['AdjHandicap'],
