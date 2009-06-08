@@ -405,8 +405,17 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
 
    if( ENA_STDHANDICAP )
-   $mform->add_row( array( 'DESCRIPTION', T_('Standard placement'),
-                           'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap ) );
+   {
+      $arr = array();
+      if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
+         $arr[] = 'TAB';
+      else
+         array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
+      array_push( $arr,
+            'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap,
+            'TEXT', T_('Standard placement') );
+      $mform->add_row($arr);
+   }
 
 
    $value_array=array( 'hours' => T_('hours'),
