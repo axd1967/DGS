@@ -25,6 +25,41 @@ ChangeLog
 
 2009-06-08 juga
 
+   * include/message_functions.php (game_settings_form):
+   - added headers for game-settings-form (Time settins & Restrictions)
+
+   * include/message_functions.php (game_settings_form, game_info_table,
+       build_adjust_komi),
+     include/make_game.php (create_game),
+     include/game_functions.php (adjust_komi),
+     tournaments/include/tournament_rules.php (TournamentRules, ~.to_string,
+       ~.build_persist_query_part, ~.convertTournamentRules_to_EditForm),
+     tournaments/view_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     add_to_waitingroom.php, waiting_room.php, NEWS:
+   - added komi-adjustment: +-komi-value and jigo-mode allowing or rejecting Jigo
+   - to allow jigo always round komi down on absolute value
+-----------
+-- game-komi adjustment & jigo mode (for Waiting room)
+ALTER TABLE `Waitingroom`
+   ADD `AdjKomi` decimal(6,1) signed NOT NULL default '0.0' AFTER `Handicaptype`,
+   ADD `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI' AFTER `AdjKomi` ;
+
+-- game-komi adjustment & jigo mode (for Tournament rules)
+ALTER TABLE `TournamentRules`
+   ADD `AdjKomi` decimal(6,1) signed NOT NULL default '0.0' AFTER `Handicaptype`,
+   ADD `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI' AFTER `AdjKomi` ;
+-----------
+
+   * list_contacts.php, opponents.php users.php:
+   - show user-picture icon only if feature not disabled
+
+   * include/classlib_userconfig.php (ConfigBoard):
+   - bugfix: init notes-dimensions
+
+   * include/message_functions.php (game_settings_form):
+   - reformat handicap-stone Standard Placement on right side in form
+
    * game.php:
    - move showing of 'Comments'-link to the right of View-move-element
    - bugfix: show scoring-info only on last move
