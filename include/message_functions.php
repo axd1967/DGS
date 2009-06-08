@@ -99,6 +99,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Komi_m = 6.5;
    $Komi_n = 6.5;
    $Komi_d = 6.5;
+   $AdjustKomi = 0.0;
+   $JigoMode = JIGOMODE_KEEP_KOMI;
    $AdjustHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
@@ -138,6 +140,11 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          $Komi_n = (float)$gid['komi_n'];
       if( isset($gid['komi_d']) )
          $Komi_d = (float)$gid['komi_d'];
+
+      if( isset($gid['adj_komi']) )
+         $AdjustKomi = (float)$gid['adj_komi'];
+      if( isset($gid['jigo_mode']) )
+         $JigoMode = (string)$gid['jigo_mode'];
 
       if( isset($gid['adj_handicap']) )
          $AdjustHandicap = (int)$gid['adj_handicap'];
@@ -388,18 +395,31 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
    {
+      // adjust komi
+      $jigo_modes = array(
+         'KEEP_KOMI'  => T_('Keep komi'),
+         'ALLOW_JIGO' => T_('Allow Jigo'),
+         'NO_JIGO'    => T_('No Jigo'),
+      );
+      $mform->add_row( array( 'SPACE' ) );
+      $mform->add_row( array( 'DESCRIPTION', T_('Komi adjustment'),
+                              'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
+                              'TEXT', sptext(T_('Jigo mode'), 1),
+                              'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
+                              ));
+
+      // adjust handicap stones
       $adj_handi_stones = array();
       $HSTART = max(5, (int)(MAX_HANDICAP/3));
       for( $bs = -$HSTART; $bs <= $HSTART; $bs++ )
          $adj_handi_stones[$bs] = ($bs <= 0) ? $bs : "+$bs";
       $adj_handi_stones[0] = '&nbsp;0';
-      $mform->add_row( array( 'SPACE' ) );
       $mform->add_row( array( 'DESCRIPTION', T_('Handicap stones'),
                               'TEXT', sptext(T_('Adjust by')),
                               'SELECTBOX', 'adj_handicap', 1, $adj_handi_stones, $AdjustHandicap, false,
-                              'TEXT', '&nbsp;&nbsp;' . sptext(T_('Min.')),
+                              'TEXT', sptext(T_('Min.'), 1),
                               'SELECTBOX', 'min_handicap', 1, $handi_stones, $MinHandicap, false,
-                              'TEXT', '&nbsp;'. sptext(T_('Max.')),
+                              'TEXT', sptext(T_('Max.'), 1),
                               'SELECTBOX', 'max_handicap', 1, $handi_stones, $MaxHandicap, false,
                               ));
    }
@@ -422,7 +442,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                        'days' => T_('days'),
                        'months' => T_('months') );
 
-   $mform->add_row( array( 'SPACE' ) );
+   $mform->add_row( array( 'HEADER', T_('Time settings') ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Main time'),
                            'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
@@ -458,6 +478,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
                            'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock ) );
+
+   $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
 
    if( $iamrated )
    {
@@ -594,6 +616,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 {
+   $AdjKomi = 0.0;
+   $JigoMode = JIGOMODE_KEEP_KOMI;
    $AdjHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
@@ -733,6 +757,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle == 'waitingroom' )
    {
+      $adj_komi_str = build_adjust_komi( $AdjKomi, $JigoMode );
+      if( $adj_komi_str != '' )
+         $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
+   }
+
+   if( $tablestyle == 'waitingroom' )
+   {
       $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames);
       $itable->add_sinfo(
             T_('Rating range'), $Ratinglimit,
@@ -780,6 +811,12 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          $info_i_am_black = 0;
       }
 
+      $infoKomi_old = $infoKomi;
+      $infoKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
+      $adj_komi_str = ( $infoKomi != $infoKomi_old )
+         ? sprintf( T_('adjusted from %.1f'), $infoKomi_old )
+         : '';
+
       $infoHandicap_old = $infoHandicap;
       if( $is_calc_handitype )
          $infoHandicap = adjust_handicap( $infoHandicap, $AdjHandicap, $MinHandicap, $MaxHandicap );
@@ -811,11 +848,37 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       $itable->add_sinfo(
             T_('Handicap'),
             $infoHandicap . ($adj_handi_str ? "&nbsp;&nbsp;($adj_handi_str)" : '' ) );
-      $itable->add_sinfo( T_('Komi'),  sprintf("%.1f",$infoKomi) );
+      $itable->add_sinfo(
+            T_('Komi'),
+            sprintf("%.1f",$infoKomi) . ($adj_komi_str ? "&nbsp;&nbsp;($adj_komi_str)" : '' ) );
    } //Probable settings
 
    $itable->echo_table();
 } // end of 'game_info_table'
+
+// output (with optional parts): prefix +/-adj [jigomode] suffix
+// returns '' if no komi-adjustment; caller must format "empty" value
+function build_adjust_komi( $adj_komi, $jigo_mode, $short=false, $prefix='', $suffix='' )
+{
+   $out = array();
+   if( (float)$adj_komi != 0.0 )
+      $out[] = ($adj_komi > 0 ? '+' : '') . $adj_komi;
+   if( $jigo_mode != JIGOMODE_KEEP_KOMI )
+   {
+      $jigo_str = '';
+      if( $jigo_mode == JIGOMODE_ALLOW_JIGO )
+         $jigo_str = ($short) ? T_('k.0#wroomshort') : T_('Allow Jigo#wroom');
+      elseif( $jigo_mode == JIGOMODE_NO_JIGO )
+         $jigo_str = ($short) ? T_('k.5#wroomshort') : T_('No Jigo#wroom');
+      if( $jigo_str )
+         $out[] = sprintf( '[%s]', $jigo_str );
+   }
+
+   if( count($out) )
+      return $prefix . implode(' ',$out) . $suffix;
+   else
+      return '';
+}
 
 // output (with optional parts): prefix +/-adj [min,max] suffix
 // returns '' if no handicap; caller must format empty to NO_VALUE for example
