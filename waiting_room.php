@@ -119,6 +119,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
+   $wrtable->add_tablehead(18, T_('Color#headerwr'), 'Image', TABLE_NO_SORT );
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
@@ -288,6 +289,16 @@ require_once( 'include/classlib_userconfig.php' );
          }
          if( $wrtable->Is_Column_Displayed[16] )
             $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
+         if( $wrtable->Is_Column_Displayed[18] )
+         {
+            if( $Handicaptype == 'nigiri' )
+               $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri#color') );
+            elseif( $Handicaptype == 'double' )
+               $colstr = image( $base_path.'17/b_w.gif', T_('B+W#color'), T_('You play Black and White#color') );
+            else //if( $Handicaptype == 'conv' || $Handicaptype == 'prop' ) || otherwise
+               $colstr = '';
+            $wrow_strings[18] = $colstr;
+         }
 
          $wrtable->add_row( $wrow_strings );
       }
