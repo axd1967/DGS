@@ -39,6 +39,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
         added <home new_game.php>New game</home> page into main-menu (access-key [n])
       * Waiting room: additionally show standard-placement (S) in Handicap-column
       * Waiting room: changed filter for "suitable" waiting games, added notes
+      * Waiting room: show color for challenged user
       * New Game: added adjustment and min/max-limitation of handicap stones
       * New Game: added adjustment of komi by value and jigo mode (allow or reject Jigo)
       * New Game: added (optional) minimum number of rated finished games
