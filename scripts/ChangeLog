@@ -23,6 +23,29 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-11 juga
+
+   * confirm.php, game.php, skins/dragon/screen.css, NEWS:
+   - added 'Stay on board'-checkbox allowing to stay on board after submit move
+   - removed submit-button 'submit move and go to status'
+   - increased width of message-box: 50 -> 60
+   - adjusted text for submit button: 'submit and go to next game' -> 'submit move'
+   - adjusted text for goback button: 'Go back' -> 'Cancel move',
+     renamed action: nextback -> cancel
+   - query-optimize: OR -> IN
+   - adjusted layout: all message submit-buttons on one line
+
+   * include/message_functions.php (game_settings_form):
+   - move Komi-adjustment below handicap-adjustment
+   - added timezone-info for weekend-clock setting
+
+2009-06-10 juga
+
+   * waiting_room.php, NEWS:
+   - added color-column indicating which color game-offerer had chosen,
+     'no image shown' stands for calculated color (that's not shown,
+     because it would need too much calculation on every item)
+
 2009-06-08 juga
 
    * include/message_functions.php (game_settings_form):
