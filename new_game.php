@@ -61,8 +61,8 @@ function add_new_game_form( $form_id, $iamrated)
    //$addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
 
    $vals = array();
-   for($i=1; $i<=10; $i++)
-      $vals["$i"] = "$i";
+   for( $i=1; $i <= NEWGAME_MAX_GAMES; $i++ )
+      $vals[$i] = $i;
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                                   'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
@@ -78,6 +78,9 @@ function add_new_game_form( $form_id, $iamrated)
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Require min. rated finished games'),
                                   'TEXTINPUT', 'min_rated_games', 5, 5, '',
                                   'TEXT', MINI_SPACING . T_('(optional)'), ));
+   $same_opp_array = build_accept_same_opponent_array(array( 0,  -1, -2, -3,  3, 7, 14 ));
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
+                                  'SELECTBOX', 'same_opp', 1, $same_opp_array, '0', false, ));
 
 
    $addgame_form->add_row( array( 'SPACE' ) );

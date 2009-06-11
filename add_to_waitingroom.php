@@ -121,6 +121,10 @@ require_once( 'include/utilities.php' );
 
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
+   if( $nrGames < 1 )
+      $nrGames = 1;
+   if( $nrGames > NEWGAME_MAX_GAMES )
+      error('invalid_args', "add_to_waitingroom.check.nr_games($nrGames)");
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
 
@@ -187,6 +191,8 @@ require_once( 'include/utilities.php' );
 
    $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 10000, 0 );
 
+   $same_opponent = (int)@$_POST['same_opp'];
+
 
    $query = "INSERT INTO Waitingroom SET " .
       "uid=" . $player_row['ID'] . ', ' .
@@ -212,6 +218,7 @@ require_once( 'include/utilities.php' );
       "Ratingmin=$rating1, " .
       "Ratingmax=$rating2, " .
       "MinRatedGames=$min_rated_games, " .
+      "SameOpponent=$same_opponent, " .
       "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
 
    db_query( 'add_to_waitingroom.insert', $query );
