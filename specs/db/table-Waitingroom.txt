@@ -1,0 +1,173 @@
+###
+### Description of mysql tables:  Waitingroom, WaitingroomJoined
+###
+
+###########################################################################
+## --- Waitingroom ---
+
+Description:
+   Table to store game-offers from user who search for game challenges.
+
+Important Note:
+   - Must be kept synchron with table 'TournamentRules' for fields relevant for tournaments.
+   - Must be kept synchron with 'Invite'-feature, but Invites have less features,
+     because of the manual nature of an invitation. Also the settings for invitations
+     are kept in the Games-table.
+   - Invitations using the Message-system will be removed in the future and
+     migrated into the waiting-room.
+
+ Field         | Type                                     | Default
+---------------+------------------------------------------+---------------------
+ ID            | int(11)                                  | NULL
+ uid           | int(11)                                  | 0
+ nrGames       | int(11)                                  | 1
+ Time          | datetime                                 | 0000-00-00 00:00:00
+ Size          | int(11)                                  | 19
+ Komi          | decimal(6,1)                             | 6.5
+ Handicap      | int(11)                                  | 0
+ Handicaptype  | enum('conv','proper','nigiri','double')  | conv
+ AdjKomi       | decimal(6,1)                             | 0.0
+ JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | KEEP_KOMI
+ AdjHandicap   | tinyint(4)                               | 0
+ MinHandicap   | tinyint(4)                               | 0
+ MaxHandicap   | tinyint(4)                               | 127
+ Maintime      | int(11)                                  | 0
+ Byotype       | enum('JAP','CAN','FIS')                  | JAP
+ Byotime       | int(11)                                  | 0
+ Byoperiods    | int(11)                                  | 0
+ Rated         | enum('N','Y')                            | N
+ StdHandicap   | enum('N','Y')                            | N
+ WeekendClock  | enum('N','Y')                            | Y
+ MustBeRated   | enum('N','Y')                            | N
+ Ratingmin     | double                                   | -9999
+ Ratingmax     | double                                   | -9999
+ MinRatedGames | smallint(6)                              | 0
+ SameOpponent  | tinyint(4)                               | 0
+ Comment       | varchar(40)                              |
+
+## Fields:
+
+* ID : primary key, auto-increment for game-offer
+
+* uid : foreign key to Players.ID
+   - player placing a game-offer
+
+* nrGames : int, number of game-offers with same setting
+   - max = 20
+
+* Time : creation-date of game-offer
+
+* Size : board-size for game
+   - within range MIN_BOARD_SIZE..MAX_BOARD_SIZE, which is 5..25
+
+* Komi : komi for game
+   - only used if Type is not Conventional or Proper game
+
+* Handicap : number of handicap stones for game
+   - only used if Type is not Conventional or Proper game
+
+* Handicaptype : game-mode
+   - conv = Conventional handicap
+   - proper = Proper handicap
+   - nigiri = Even game with nigiri
+   - double = Double game
+
+* AdjKomi : Komi adjustment and Jigo-mode
+   - Calculated or fix komi is adjusted by value of 'AdjKomi' (+/- komi)
+   - AdjKomi can be natural number x.0 (no fraction) or fractional with x.5
+
+* JigoMode : Komi adjustment concerning Jigo
+   - KEEP_KOMI = Komi is not changed regarding Jigo
+   - ALLOW_JIGO = Komi is rounded down to allow Jigo (resulting Komi = x.0)
+   - NO_JIGO = Komi is rounded up to forbid Jigo (resulting Komi = x.5)
+
+* AdjHandicap, MinHandicap, MaxHandicap : Handicap stones adjustment
+   - AdjHandicap: adjust number of handicap stone by reduction (if <0) or increase (>0)
+   - MinHandicap: minimum limitation of resulting handicap stones, set to limit if exceeding
+   - MaxHandicap: maximum limitation of resulting handicap stones, set to limit if exceeding
+
+* Maintime : int, main-time for game
+   - unit is one "tick" (=5 minutes); see 'TICK_FREQUENCY' in include/quick_common.php,
+     so 15 is 1h (=one hour)
+   - can be 0
+
+* Byotype : time-mode for game
+   - JAP = Japanese Byo-yomi
+   - CAN = Canadian Byo-yomi
+   - FIS = (Capped) Fischer time without initial time, Maintime is also cap
+
+* Byotime, Byoperiods : extra-time and extra-periods for game, depending on 'Byotype'
+   - for JAP: extra-time is Byoperiods times Byotime, e.g. 10 x 1day
+   - for CAN: extra-time is Byotime time for Byoperiods number of stones,
+     e.g. 10days for 5 stones
+   - for FIS: extra-time is Byotime added for each submitted move capped by Maintime,
+     Byoperiods is not used for Fischer-time-mode
+   - Byotime can be 0 for absolute time (no extra-time) for all time-modes
+
+* Rated : boolean, specifies if game should be rated ('Y') or unrated ('N')
+
+* StdHandicap : boolean
+   - specifies if standard placement for handicap stones should be used ('Y') or not ('N')
+
+* WeekendClock : boolean
+   - specifies wether clock is running on weekend ('Y') or not running ('N')
+   - at the moment (bug), the weekend-clock of timezone UTC is used
+
+* MustBeRated : boolean
+   - specifies if challenger (opponent) must have a rating ('Y') or not ('N')
+   - if 'Y', RatingMin and RatingMax are used to restrict rating range
+
+* Ratingmin, Ratingmax : rating range challengers rating has to be in
+
+* MinRatedGames : number of minimum rated finished games of challenger
+
+* SameOpponent : restrictions on challenger for same game-offer
+   - join-status is kept in table 'WaitingroomJoined'
+   -  0 = no restriction if same opponent joins more than one game of same game-offer,
+          table WaitingroomJoined is not used in this case
+   - <0 = restrict same opponent for game-offer to max. number of times to join,
+          keeping track of joined number of games with 'WaitingroomJoined.JoinedCount'
+   - >0 = restrict same opponent for game-offer to min. time to pass for next join,
+          keeping track of joined number of games with 'WaitingroomJoined.ExpiresDate'
+
+* Comment : short note (40 chars) of user placing game-offer in waiting-room
+
+
+
+###########################################################################
+## --- WaitingroomJoined ---
+
+Description:
+   Table to keep track of restrictions of joined game-offers in waiting room.
+   Depends on value of corresponding Waitingroom.SameOpponent (not used if =0).
+
+Notes:
+   - PRIMARY KEY is (wroom_id,opp_id):
+     wroom_id comes first, because need leading index for cleanup in daily_cron
+   - db-entries without existing Waitingroom-reference will be deleted (see daily_cron)
+
+ Field       | Type       | Default
+-------------+------------+---------------------
+ opp_id      | int(11)    | NULL
+ wroom_id    | int(11)    | NULL
+ JoinedCount | tinyint(4) | 0
+ ExpireDate  | datetime   | 0000-00-00 00:00:00
+
+## Fields:
+
+* opp_id : foreign key to Players.ID
+   - identify opponent to keep track of for game-offer restrictions
+
+* wroom_id : foreign key to Waitingroom.ID
+   - identify game-offer to keep track of opponent-based restriction for
+
+* JoinedCount : int
+   - number of joined games of Player (opp_id) for game-offer (wroom_id)
+   - mutual exlusive with use of ExpireDate
+   - only used if Waitingroom.SameOpponent < 0
+
+* ExpireDate : date
+   - expire-date on which opponent (opp_id) can join another game for game-offer (wroom_id)
+   - mutual exlusive with use of JoinedCount
+   - only used if Waitingroom.SameOpponent > 0
+
