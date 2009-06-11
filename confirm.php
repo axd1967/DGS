@@ -51,7 +51,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
    if( $gid <= 0 )
       error('unknown_game');
 
-   if( @$_REQUEST['nextback'] )
+   if( @$_REQUEST['cancel'] )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
@@ -516,7 +516,7 @@ This is why:
       {
          //TODO: HOT_SECTION ???
          mysql_query("UPDATE Players SET Running=Running-1 " .
-                     "WHERE (ID=$Black_ID OR ID=$White_ID) LIMIT 2")
+                     "WHERE ID IN ($Black_ID,$White_ID) LIMIT 2")
             or error('mysql_query_failed',"confirm.update_players_delete($gid)");
 
          mysql_query("DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2")
@@ -632,7 +632,7 @@ if(1){ //new
    {
       jump_to("status.php");
    }
-   else if( @$_REQUEST['nextgame'] )
+   else if( @$_REQUEST['nextgame'] && !@$_REQUEST['stay'] )
    {
       jump_to_next_game( $my_id, $Lastchanged, $gid);
    }

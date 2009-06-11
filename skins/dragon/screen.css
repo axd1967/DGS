@@ -2071,9 +2071,10 @@ table.MessageForm td.Rubric {
 
 table.MessageForm tr.Submit td {
    text-align: left;
+   font-size: smaller;
 }
 
-table.MessageForm tr.Back td {
+table.MessageForm tr td.Cancel {
    text-align: right;
 }
 
