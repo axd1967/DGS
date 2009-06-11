@@ -644,6 +644,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             $Handitype = 'nigiri';
             break;
       }
+      $goodmingames = ( $MinRatedGames > 0 ) ? ((int)@$player_row['RatedGames'] >= $MinRatedGames) : true;
    }
    else
    {
@@ -673,7 +674,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             break;
       }
       $goodrating = 1;
-      $goodmingames = 1;
+      $goodmingames = true;
       if( $iamrated )
          $haverating = 1;
       else
@@ -769,10 +770,18 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle == 'waitingroom' )
    {
-      $Ratinglimit= echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames);
-      $itable->add_sinfo(
-            T_('Rating range'), $Ratinglimit,
+      $ratinglimit_str = echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
+         $MinRatedGames, null, true);
+      if( $ratinglimit_str != NO_VALUE )
+         $itable->add_sinfo(
+            T_('Rating restrictions'), $ratinglimit_str,
             ( ($goodrating && $goodmingames) ? '' : warning_cell_attb( T_('Out of range')) ) );
+
+      $same_opp_str = echo_accept_same_opponent($SameOpponent, $game_row);
+      if( $SameOpponent != 0 )
+         $itable->add_sinfo(
+            T_('Accept same opponent'), $same_opp_str,
+            ( $goodsameopp ? '' : warning_cell_attb( T_('Out of range')) ) );
    }
 
    $itable->add_sinfo( T_('Main time'), echo_time($Maintime) );
@@ -901,10 +910,91 @@ function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $pr
       return '';
 }
 
+/*!
+ * \brief Returns restrictions on rating-range, rated-finished-games, acceptance-mode-same-opponent.
+ * \param $SameOpponent ignore if null
+ */
+function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames, $SameOpponent=null, $short=false )
+{
+   $out = array();
+
+   if( $MustBeRated == 'Y')
+   {
+      // +/-50 reverse the inflation from add_to_waitingroom.php
+      $r1 = echo_rating( $Ratingmin + 50, false, 0, false, $short );
+      $r2 = echo_rating( $Ratingmax - 50, false, 0, false, $short );
+      if( $r1 == $r2 )
+         $Ratinglimit = sprintf( T_('%s only'), $r1);
+      else
+         $Ratinglimit = $r1 . ' - ' . $r2;
+      $out[] = $Ratinglimit;
+   }
+
+   if( $MinRatedGames > 0 )
+   {
+      $rg_str = ($short) ? T_('Rated Games[%s]#short') : T_('Rated finished Games[&gt;=%s]');
+      $out[] = sprintf( $rg_str, $MinRatedGames );
+   }
+
+   if( !is_null($SameOpponent) )
+   {
+      if( $SameOpponent < 0 )
+         $out[] = sprintf( 'SO[%sx]', -$SameOpponent ); // N times
+      elseif( $SameOpponent > 0 )
+         $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days
+   }
+
+   return ( count($out) ? implode(', ', $out) : NO_VALUE );
+}
+
+// WaitingRoom.SameOpponent: 0=always, <0=n times, >0=after n days
+function echo_accept_same_opponent( $same_opp, $game_row=null )
+{
+   if( $same_opp == 0 )
+      return T_('always#same_opp');
+
+   if( $same_opp < 0 )
+   {
+      if ($same_opp == -1)
+         $out = T_('1 time#same_opp');
+      else //if ($same_opp < 0)
+         $out = sprintf( T_('%s times#same_opp'), -$same_opp );
+      if( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
+      {
+         $join_fmt = ($game_row['JoinedCount'] > 1)
+            ? T_('joined %s games#same_opp') : T_('joined %s game#same_opp');
+         $out .= ' (' . sprintf( $join_fmt, $game_row['JoinedCount'] ) . ')';
+      }
+   }
+   else
+   {
+      global $NOW;
+      if ($same_opp == 1)
+         $out = T_('after 1 day#same_opp');
+      else //if ($same_opp > 0)
+         $out = sprintf( T_('after %s days#same_opp'), $same_opp );
+      if( is_array($game_row) && isset($game_row['X_ExpireDate'])
+            && ($game_row['X_ExpireDate'] > $NOW) )
+      {
+         $out .= ' (' . sprintf( T_('wait till %s#same_opp'),
+            date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';
+      }
+   }
+   return $out;
+}
+
+function build_accept_same_opponent_array( $arr )
+{
+   $out = array();
+   foreach( $arr as $same_opp )
+      $out[$same_opp] = echo_accept_same_opponent($same_opp);
+   return $out;
+}
+
 function build_suggestion_shortinfo( $suggest_result )
 {
    list( $handi, $komi, $iamblack ) = $suggest_result;
-   $info = sprintf( T_('... would probably be Color %1$s for you with Handicap %2$s, Komi %3$.1f'),
+   $info = sprintf( T_('... your Color is %1$s with Handicap %2$s, Komi %3$.1f'),
       get_colortext_probable( $iamblack ), $handi, $komi );
    return $info;
 }
