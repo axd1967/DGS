@@ -114,6 +114,10 @@ if( !$is_down )
       $timelimit = $NOW - $waitingroom_timelimit*24*3600;
       db_query( 'daily_cron.waitingroom',
          "DELETE FROM Waitingroom WHERE UNIX_TIMESTAMP(Time)<$timelimit" );
+
+      // Delete WaitingroomJoined entries without Waitingroom-entry
+      db_query( 'daily_cron.waitingroom_joined',
+         "DELETE FROM WaitingroomJoined WHERE wroom_id NOT IN (SELECT ID FROM Waitingroom)" );
    }
 
 
