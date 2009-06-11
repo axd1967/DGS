@@ -593,7 +593,8 @@ function get_alt_arg( $n1, $n2)
          draw_add_time( $game_row );
       else
       {
-         draw_message_box( $message);
+         $stay_on_board = ($action != 'delete');
+         draw_message_box( $message, $stay_on_board );
 
          if( $preview )
          {
@@ -858,7 +859,7 @@ function get_final_score_move( $move )
    return ( $PosX == POSX_SCORE ) ? $move - 1 : $move;
 }
 
-function draw_message_box(&$message)
+function draw_message_box( &$message, $stay_on_board )
 {
    $tabindex=1;
    $to_status_str = T_('Submit and go to status');
@@ -878,7 +879,9 @@ function draw_message_box(&$message)
             .'" value="'.T_('Submit move') // Submit and go to next game
             .'" accesskey="'.ACCKEY_ACT_EXECUTE.'" title="[&amp;'.ACCKEY_ACT_EXECUTE.']">'
          //.'<input type="submit" name="nextstatus" tabindex="'.($tabindex++).'" value="'.$to_status_str.'">'
-         .'<input type="checkbox" name="stay" tabindex="'.($tabindex++).' value="1"'.$stay_checked.'>' . T_('Stay on board')
+         .( $stay_on_board
+            ? '<input type="checkbox" name="stay" tabindex="'.($tabindex++).' value="1"'.$stay_checked.'>' . T_('Stay on board')
+            : '' )
          .SMALL_SPACING
          .'<input type="submit" name="preview" tabindex="'.($tabindex++)
             .'" value="'.T_('Preview')

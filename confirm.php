@@ -103,6 +103,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
 
    $action = @$_REQUEST['action'];
+   $stay_on_board = @$_REQUEST['stay'];
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
 
    $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
@@ -529,6 +530,7 @@ This is why:
                . "</center>has been deleted by your opponent.<br>";
 
          delete_all_observers($gid, false);
+         $stay_on_board = false; // no game to stay on
       }
       else
       {
@@ -632,7 +634,7 @@ if(1){ //new
    {
       jump_to("status.php");
    }
-   else if( @$_REQUEST['nextgame'] && !@$_REQUEST['stay'] )
+   else if( @$_REQUEST['nextgame'] && !$stay_on_board )
    {
       jump_to_next_game( $my_id, $Lastchanged, $gid);
    }
