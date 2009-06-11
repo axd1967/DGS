@@ -82,7 +82,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrfilter->add_filter( 6, 'Numeric',   'Komi', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 7, 'Numeric',   'Size', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 8, 'Boolean',
-         new QuerySQL( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating' ),
+         new QuerySQL( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' ),
          true,
          array( FC_FNAME => 'good', FC_LABEL => T_('Only suitable'), FC_STATIC => 1, FC_DEFAULT => 1 ));
    $wrfilter->add_filter( 9, 'Selection',
@@ -153,7 +153,9 @@ require_once( 'include/classlib_userconfig.php' );
       'Players.Type AS other_type',
       'Players.Country AS other_country',
       'Players.Rating2 AS other_rating',
-      'Players.RatingStatus AS other_ratingstatus' );
+      'Players.RatingStatus AS other_ratingstatus',
+      'WRJ.JoinedCount',
+      'UNIX_TIMESTAMP(WRJ.ExpireDate) AS X_ExpireDate' );
 
 // $calculated = ( $Handicaptype == 'conv' || $Handicaptype == 'proper' );
 // $haverating = ( !$calculated || is_numeric($my_rating) );
@@ -175,16 +177,22 @@ require_once( 'include/classlib_userconfig.php' );
       $haverating = "NOT $calculated";
       $goodrating = "IF(W.MustBeRated='Y',0,1)";
    }
-   $goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
+   $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
 
    $qsql->add_part( SQLP_FIELDS,
       "$calculated AS calculated",
       "$haverating AS haverating",
       "$goodrating AS goodrating",
-      "$goodmingames AS goodmingames" );
+      "$sql_goodmingames AS goodmingames",
+      'IF(W.SameOpponent=0 OR ISNULL(WRJ.wroom_id), 1, '
+         . 'IF(W.SameOpponent<0, '
+            . '(WRJ.JoinedCount < -W.SameOpponent), '
+            . "(WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) )) AS goodsameopp"
+      );
    $qsql->add_part( SQLP_FROM,
       'Waitingroom AS W',
-      'INNER JOIN Players ON W.uid=Players.ID' );
+      'INNER JOIN Players ON W.uid=Players.ID',
+      "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID" );
 
    // Contacts: make invisible the protected waitingroom games
    $tmp= CSYSFLAG_WAITINGROOM;
@@ -222,7 +230,7 @@ require_once( 'include/classlib_userconfig.php' );
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $other_rating = NULL;
-         extract($row); //including $calculated, $haverating, $goodrating, $goodmingames
+         extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodsameopp
 
          if( $idinfo == (int)$ID )
             $info_row = $row;
@@ -267,11 +275,11 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[ 7] = $Size;
          if( $wrtable->Is_Column_Displayed[ 8] )
          {
-            $wrow_strings[ 8] = array('text' =>
-               echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames, true) );
-            if( !$goodrating || !$goodmingames )
-               $wrow_strings[ 8]['attbs']=
-                  warning_cell_attb( T_('Out of range'), true);
+            $wrow_strings[ 8] = array( 'text' =>
+               echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
+                  $MinRatedGames, $SameOpponent, true) );
+            if( !$goodrating || !$goodmingames || !$goodsameopp )
+               $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
             $wrow_strings[ 9] =
@@ -310,8 +318,9 @@ require_once( 'include/classlib_userconfig.php' );
       {
          $restrictions = array(
                T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
-               T_('Rating range (user rating must be between the requested rating range)#wroom'),
-               T_('Number of rated finished games#wroom'),
+               T_('Rating range (user rating must be between the requested rating range), e.g. "25k-2d"#wroom'),
+               T_('Number of rated finished games, e.g. "RG[2]"#wroom'),
+               T_('Acceptance mode for challenges from same opponent, e.g. "SO[1x]" or "SO[&gt;7d]"#wroom'),
             );
          $notes = array();
          $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
@@ -337,32 +346,6 @@ require_once( 'include/classlib_userconfig.php' );
 }
 
 
-function echo_rating_limit($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames, $short=false)
-{
-   $out = array();
-
-   if( $MustBeRated == 'Y')
-   {
-      // +/-50 reverse the inflation from add_to_waitingroom.php
-      $r1 = echo_rating( $Ratingmin + 50, false, 0, false, $short );
-      $r2 = echo_rating( $Ratingmax - 50, false, 0, false, $short );
-      if( $r1 == $r2 )
-         $Ratinglimit = sprintf( T_('%s only'), $r1);
-      else
-         $Ratinglimit = $r1 . ' - ' . $r2;
-      $out[] = $Ratinglimit;
-   }
-
-   if( $MinRatedGames > 0 )
-   {
-      $str = ($short) ? T_('Rated Games[%s]#short') : T_('Rated Games[%s]');
-      $out[] = sprintf( $str, $MinRatedGames );
-   }
-
-   return ( count($out) ? implode(', ', $out) : NO_VALUE );
-}
-
-
 function add_old_game_form( $form_id, $game_row, $iamrated)
 {
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
@@ -380,7 +363,8 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
             'SUBMITBUTTON', 'deletebut', T_('Delete'),
          ) );
    }
-   else if( $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames'] )
+   else if( $game_row['haverating'] && $game_row['goodrating']
+         && $game_row['goodmingames'] && $game_row['goodsameopp'] )
    {
       $game_form->add_row( array(
             'DESCRIPTION', T_('Reply'),
