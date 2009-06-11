@@ -166,10 +166,10 @@ $ThePage = new Page('Tournament');
          ( $trule->needsCalculatedKomi()
                ? T_('calculated komi#trules_handi')
                : sprintf( T_('%s komi#trules_handi'), $trule->Komi) ));
-      $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'),
-            ( count($adj_handi) ? implode(', ', $adj_handi) : '' ));
-      $itable->add_sinfo( T_('Komi adjustment:#trules_komi'),
-            ( count($adj_komi) ? implode(', ', $adj_komi) : '' ));
+      if( count($adj_handi) )
+         $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'), implode(', ', $adj_handi) );
+      if( count($adj_komi) )
+         $itable->add_sinfo( T_('Komi adjustment:#trules_komi'), implode(', ', $adj_komi) );
       if( ENA_STDHANDICAP )
          $itable->add_sinfo( T_('Standard placement:#trules_handi'), yesno($trule->StdHandicap) );
       $itable->add_sinfo( T_('Main time:#trules'), echo_time($trule->Maintime)
