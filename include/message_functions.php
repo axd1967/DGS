@@ -395,27 +395,15 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
    {
-      // adjust komi
-      $jigo_modes = array(
-         'KEEP_KOMI'  => T_('Keep komi'),
-         'ALLOW_JIGO' => T_('Allow Jigo'),
-         'NO_JIGO'    => T_('No Jigo'),
-      );
-      $mform->add_row( array( 'SPACE' ) );
-      $mform->add_row( array( 'DESCRIPTION', T_('Komi adjustment'),
-                              'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
-                              'TEXT', sptext(T_('Jigo mode'), 1),
-                              'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
-                              ));
-
       // adjust handicap stones
       $adj_handi_stones = array();
       $HSTART = max(5, (int)(MAX_HANDICAP/3));
       for( $bs = -$HSTART; $bs <= $HSTART; $bs++ )
          $adj_handi_stones[$bs] = ($bs <= 0) ? $bs : "+$bs";
       $adj_handi_stones[0] = '&nbsp;0';
+      $mform->add_row( array( 'SPACE' ) );
       $mform->add_row( array( 'DESCRIPTION', T_('Handicap stones'),
-                              'TEXT', sptext(T_('Adjust by')),
+                              'TEXT', sptext(T_('Adjust by#handi')),
                               'SELECTBOX', 'adj_handicap', 1, $adj_handi_stones, $AdjustHandicap, false,
                               'TEXT', sptext(T_('Min.'), 1),
                               'SELECTBOX', 'min_handicap', 1, $handi_stones, $MinHandicap, false,
@@ -435,6 +423,22 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
             'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap,
             'TEXT', T_('Standard placement') );
       $mform->add_row($arr);
+   }
+
+   if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
+   {
+      // adjust komi
+      $jigo_modes = array(
+         'KEEP_KOMI'  => T_('Keep komi'),
+         'ALLOW_JIGO' => T_('Allow Jigo'),
+         'NO_JIGO'    => T_('No Jigo'),
+      );
+      $mform->add_row( array( 'DESCRIPTION', T_('Komi'),
+                              'TEXT', sptext(T_('Adjust by#komi')),
+                              'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
+                              'TEXT', sptext(T_('Jigo mode'), 1),
+                              'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
+                              ));
    }
 
 
@@ -477,7 +481,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $mform->add_row( array( 'SPACE' ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
-                           'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock ) );
+                           'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock,
+                           'TEXT', sprintf( '(%s)', T_('UTC timezone') ), ));
 
    $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
 
