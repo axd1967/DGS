@@ -628,6 +628,18 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
       }
       break;
 
+      case('waitingroom_not_enough_rated_fin_games'):
+      {
+         echo T_("Sorry, you don't have enough rated finished games to join this game offer.");
+      }
+      break;
+
+      case('waitingroom_not_same_opponent'):
+      {
+         echo T_("Sorry, on this game offer there are counter- or time-based restrictions for challenges from the same opponent.");
+      }
+      break;
+
       case("wrong_number_of_handicap_stone"):
       {
          echo T_("Wrong number of handicap stones");
