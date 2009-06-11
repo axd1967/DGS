@@ -74,6 +74,7 @@ define('DATE_FMT2', 'Y-m-d&\n\b\s\p;H:i');
 define('DATE_FMT3', 'Y-m-d&\n\b\s\p;H:i:s');
 define('DATE_FMT4', 'YmdHis');
 define('DATE_FMT5', 'D, Y-m-d H:i T');
+define('DATE_FMT6', 'd-M-Y H:i');
 define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
 define('DATE_FMT_YMD', 'Y-m-d');
 
