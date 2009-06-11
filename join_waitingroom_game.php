@@ -43,15 +43,24 @@ require_once( "include/contacts.php" );
    if( !is_numeric($wr_id) || $wr_id <= 0 )
       error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
 
-   $tmp= CSYSFLAG_WAITINGROOM;
+   $my_rated_games = (int)$player_row['RatedGames'];
+   $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
    $query= "SELECT W.*"
-         . ",IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied"
+         . ',IF(ISNULL(C.uid),0,C.SystemFlags & '.CSYSFLAG_WAITINGROOM.') AS C_denied'
+         . ',IF(ISNULL(WRJ.opp_id),0,1) AS X_wrj_exists'
+         . ',WRJ.JoinedCount'
+         . ',IF(W.SameOpponent=0 OR ISNULL(WRJ.wroom_id), 1, '
+            . 'IF(W.SameOpponent<0, '
+               . '(WRJ.JoinedCount < -W.SameOpponent), '
+               . "(WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) )) AS goodsameopp"
+         . ",$sql_goodmingames AS goodmingames"
          . " FROM Waitingroom AS W"
          . " LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id"
+         . " LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID"
          . " WHERE W.ID=$wr_id AND W.nrGames>0"
          . " HAVING C_denied=0"
          ;
-   $game_row = mysql_single_fetch('join_waitingroom_game.find_game', $query);
+   $game_row = mysql_single_fetch( "join_waitingroom_game.find_game(u$my_id,wr$wr_id)", $query);
    if( !$game_row )
       error('waitingroom_game_not_found', 'join_waitingroom_game.find_game');
 
@@ -88,7 +97,15 @@ require_once( "include/contacts.php" );
          && $player_row['Rating2'] <= $game_row['Ratingmax']) )
       error('waitingroom_not_in_rating_range');
 
-   $size = $game_row['Size'];
+   if( !$game_row['goodmingames'] )
+      error('waitingroom_not_enough_rated_fin_games',
+         "join_waitingroom_game.min_rated_fin_games({$game_row['MinRatedGames']})");
+
+   if( !$game_row['goodsameopp'] )
+      error('waitingroom_not_same_opponent',
+         "join_waitingroom_game.same_opponent({$game_row['SameOpponent']})");
+
+   $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
    $my_rating = $player_row["Rating2"];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
@@ -131,7 +148,7 @@ require_once( "include/contacts.php" );
       break;
       */
       default: //always available even if waiting room or unrated
-         $game_row['Handicaptype'] = 'nigiri'; 
+         $game_row['Handicaptype'] = 'nigiri';
       case 'nigiri':
       {
          $game_row['Handicap'] = 0;
@@ -140,7 +157,7 @@ require_once( "include/contacts.php" );
       }
       break;
    }
-   
+
    //TODO: HOT_SECTION ???
    $gids = array();
    if( $i_am_black || $double )
@@ -173,6 +190,34 @@ require_once( "include/contacts.php" );
       mysql_query("DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1")
          or error('mysql_query_failed', 'join_waitingroom_game.reduce_delete');
    }
+
+
+   // Update WaitingroomJoined
+   // NOTE: restriction on count and time are mutual exclusive
+
+   $same_opp = $game_row['SameOpponent'];
+   $query_so = '';
+   if( $same_opp < 0 ) // restriction on count
+   {
+      if( $game_row['X_wrj_exists'] )
+         $query_so = 'UPDATE WaitingroomJoined SET JoinedCount=JoinedCount+1 '
+            . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
+      else
+         $query_so = 'INSERT INTO WaitingroomJoined '
+            . "SET opp_id=$my_id, wroom_id=$wr_id, JoinedCount=1";
+   }
+   elseif( $same_opp > 0 ) // restriction on time
+   {
+      $expire_date = $NOW + $same_opp * SECS_PER_DAY;
+      $query_wrjexp = "WaitingroomJoined SET ExpireDate=FROM_UNIXTIME($expire_date)";
+      if( $game_row['X_wrj_exists'] ) // faster than REPLACE-INTO
+         $query_so = 'UPDATE ' . $query_wrjexp . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
+      else
+         $query_so = 'INSERT INTO ' . $query_wrjexp . ", opp_id=$my_id, wroom_id=$wr_id";
+   }
+   if( $query_so )
+      db_query( "join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
+
 
 
    // Send message to notify opponent
