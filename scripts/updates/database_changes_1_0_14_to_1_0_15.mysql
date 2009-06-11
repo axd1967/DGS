@@ -477,3 +477,23 @@ ALTER TABLE `TournamentRules`
    ADD `AdjKomi` decimal(6,1) signed NOT NULL default '0.0' AFTER `Handicaptype`,
    ADD `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI' AFTER `AdjKomi` ;
 
+
+-- accept same opponent
+ALTER TABLE Waitingroom
+   ADD SameOpponent tinyint signed NOT NULL default '0' AFTER MinRatedGames ;
+
+-- added table to keep track of joined waiting-room games with opponent
+CREATE TABLE WaitingroomJoined (
+   opp_id int(11) NOT NULL,
+   wroom_id int(11) NOT NULL,
+   JoinedCount tinyint signed NOT NULL default '0',
+   ExpireDate datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (wroom_id,opp_id)
+) ENGINE=MyISAM;
+
+-- cleanup table Waitingroom removing (unused) enum-value 'Done'
+ALTER TABLE Waitingroom
+   CHANGE Rated Rated enum('N','Y') NOT NULL default 'N',
+   CHANGE MustBeRated MustBeRated enum('N','Y') NOT NULL default 'N' ;
+
+
