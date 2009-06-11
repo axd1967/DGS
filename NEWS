@@ -155,6 +155,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
          * Replaced 'OnVacation'-text by vacation-icon
          * Show 'Comments' to right of View-move
+         * Increased size of game-message text box
+         * Added way to stay on board after submitting move,
+           Changed move-submit-button: 'Submit and go to next game' -> 'Submit move'
+         * Removed submit-move-button returning to status page
 
    * Quick Status: Added time-remaining column
 
