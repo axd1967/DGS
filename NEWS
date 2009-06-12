@@ -40,6 +40,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Waiting room: additionally show standard-placement (S) in Handicap-column
       * Waiting room: changed filter for "suitable" waiting games, added notes
       * Waiting room: show color for challenged user
+      * Waiting room: Added waiting-room restriction to avoid same opponent joining too many games,
+        Challenger has to wait some days, or can be restricted by number of games to join game-offer
+      * Waiting room: Increased number of games in offer: 10 -> 20
       * New Game: added adjustment and min/max-limitation of handicap stones
       * New Game: added adjustment of komi by value and jigo mode (allow or reject Jigo)
       * New Game: added (optional) minimum number of rated finished games

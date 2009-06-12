@@ -23,6 +23,46 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-12 juga
+
+   * include/message_functions.php (game_info_table, echo_game_restrictions,
+       echo_accept_same_opponent, build_accept_same_opponent_array,
+       build_suggestion_shortinfo),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Waitingroom.txt,
+     include/quick_common.php, include/std_functions.php, error.php,
+     waiting_room.php (echo_rating_limit), new_game.php,
+     add_to_waitingroom.php, join_waitingroom_game.php,
+     daily_cron.php, NEWS:
+   - added waiting-room restriction to avoid same opponent joining too many games,
+     challenger has to wait some days or is restricted by number of games to join
+     - daily-cron: delete unused WaitingroomJoined-entries
+   - bugfix: added check on rated-finished-games restriction, limited board-size
+   - increased number of games to 1..20 (=NEWGAME_MAX_GAMES)
+   - cleaned up Waitingroom.Rated/MustBeRated: removed unused enum-value 'Done'
+-----------
+-- accept same opponent
+ALTER TABLE Waitingroom
+   ADD SameOpponent tinyint signed NOT NULL default '0' AFTER MinRatedGames ;
+
+-- added table to keep track of joined waiting-room games with opponent
+CREATE TABLE WaitingroomJoined (
+   opp_id int(11) NOT NULL,
+   wroom_id int(11) NOT NULL,
+   JoinedCount tinyint signed NOT NULL default '0',
+   ExpireDate datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (wroom_id,opp_id)
+) ENGINE=MyISAM;
+
+-- cleanup table Waitingroom removing (unused) enum-value 'Done'
+ALTER TABLE Waitingroom
+   CHANGE Rated Rated enum('N','Y') NOT NULL default 'N',
+   CHANGE MustBeRated MustBeRated enum('N','Y') NOT NULL default 'N' ;
+-----------
+
+   * confirm.php, game.php:
+   - bugfix: on delete can't stay on board
+
 2009-06-11 juga
 
    * confirm.php, game.php, skins/dragon/screen.css, NEWS:
