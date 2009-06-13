@@ -158,6 +158,8 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
 }
 
+// (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating, size)
+// NOTE: iamblack/is_nigiri is <>''
 function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
 {
    $H = abs($rating_W - $rating_B) / 100.0;
@@ -172,19 +174,21 @@ function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
    // game is a 1 stone game where black play his handicap stone where he want.
    if( $handicap < 1 ) $handicap = 1;
 
-   if( $rating_B == $rating_W )
-      $swap = mt_rand(0,1);
+   $is_nigiri = ( $rating_B == $rating_W );
+   if( $is_nigiri )
+      $iamblack = mt_rand(0,1); // nigiri on same rating
    else
-      $swap = ( $rating_B > $rating_W );
+      $iamblack = ( $rating_B > $rating_W );
 
    $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
 
    if( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
 
-   return array($handicap, $komi, $swap);
+   return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
 }
 
-// also: suggest_conventional( $my_rating, $opp_rating, $size)
+// (handi,komi,iamblack,is_nigiri) = suggest_conventional(my_rating, $opp_rating, size)
+// NOTE: iamblack/is_nigiri is <>''
 function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
 {
    $H = abs($rating_W - $rating_B) / 100.0;
@@ -193,20 +197,18 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
    $H *= handicapfactor( $size);
 
    $handicap = round($H);
+   if( $handicap == 1 ) $handicap = 0;
 
-   if( $handicap == 0 )
-   {
-      $komi = STONE_VALUE / 2.0;
-      $swap = mt_rand(0,1);
-   }
+   $komi = ( $handicap == 0 ) ? STONE_VALUE / 2.0 : 0.5;
+
+   // NOTE: nigiri was used on handicap==0, but now manual-setup should be used for that
+   $is_nigiri = ( $rating_B == $rating_W );
+   if( $is_nigiri )
+      $iamblack = mt_rand(0,1); // nigiri on same rating
    else
-   {
-      $komi = 0.5;
-      $swap = ( $rating_B > $rating_W );
-      if( $handicap == 1 ) $handicap = 0;
-   }
+      $iamblack = ( $rating_B > $rating_W );
 
-   return array($handicap, $komi, $swap);
+   return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
 }
 
 /* obsolete
