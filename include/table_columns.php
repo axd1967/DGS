@@ -864,7 +864,7 @@ class Table
       $string .= '><div>'; //<th> end bracket
 
       if( $width >= 0 )
-         $string .= button_TD_width_insert($width);
+         $string .= button_TD_insert_width($width);
 
       $common_url =
          $this->current_extparams_string(true)

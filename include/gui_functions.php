@@ -85,11 +85,11 @@ function button_TD_anchor( $href, $text='', $title='' )
  * \brief Return a stratagem to force a minimal column width.
  * Must be inserted before a cell inner text at least one time for a column.
  */
-function button_TD_width_insert( $width=false)
+function button_TD_insert_width( $width=false )
 {
    if( !is_numeric($width) )
       $width = BUTTON_WIDTH;
-   return insert_width( $width );
+   return insert_width( $width, 0, true ); // with MinWidth-class
 }
 
 function TD_button( $title, $href, $isrc, $ialt)
