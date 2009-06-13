@@ -212,7 +212,9 @@ define('SCORE_TIME', 2000);
 define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
 
 
-define('STONE_VALUE',13); // 2 * conventional komi
+define('DEFAULT_KOMI', 6.5); // change with care only, keep separate from STONE_VALUE
+define('STONE_VALUE',13); // 2 * conventional komi (=DEFAULT_KOMIT), change with care
+
 define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
@@ -3073,14 +3075,15 @@ function anchor( $href, $text=null, $title='', $attbs='')
  *       will work fine with every browser.
  *       dot.gif is a 1x1 transparent image.
  */
-function insert_width( $width=1, $height=0 )
+function insert_width( $width=1, $height=0, $use_minwid=false )
 {
    global $base_path;
    if( !is_numeric($width) )
       $width = 1;
    if( !is_numeric($height) )
       $height = 0;
-   return "<img class=MinWidth src='{$base_path}images/dot.gif' width=$width height=$height alt=''>";
+   $img_class = ($use_minwid) ? ' class="MinWidth"' : '';
+   return "<img{$img_class} src=\"{$base_path}images/dot.gif\" width=\"$width\" height=\"$height\" alt=''>";
 }
 
 ?>
