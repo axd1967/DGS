@@ -22,19 +22,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/game_functions.php' );
 
 
-//always return a valide game ID from the database, else call error()
+// Inserts INVITATION-game or updates DISPUTE-game
+// always return a valid game ID from the database, else call error()
 function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 {
    global $NOW;
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
-   $handicap_type = @$_REQUEST['handicap_type'];
-   $color = @$_REQUEST['color'];
+
+   $cat_handicap_type = @$_REQUEST['cat_htype'];
+   $color_m = @$_REQUEST['color_m'];
+   $handicap_type = ( $cat_handicap_type == CAT_HTYPE_MANUAL ) ? $color_m : $cat_handicap_type;
+
    $handicap_m = (int)@$_REQUEST['handicap_m'];
-   $handicap_d = (int)@$_REQUEST['handicap_d'];
    $komi_m = (float)@$_REQUEST['komi_m'];
-   $komi_n = (float)@$_REQUEST['komi_n'];
-   $komi_d = (float)@$_REQUEST['komi_d'];
    $rated = @$_REQUEST['rated'];
    $stdhandicap = @$_REQUEST['stdhandicap'];
    $weekendclock = @$_REQUEST['weekendclock'];
@@ -54,71 +55,63 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
    $timeunit_fis = @$_REQUEST['timeunit_fis'];
 
-   if( $color == "White" )
-   {
-      $Black_ID = $opponent_row['ID'];
-      $White_ID = $player_row['ID'];
-   }
-   else
-   {
-      $White_ID = $opponent_row['ID'];
-      $Black_ID = $player_row['ID'];
-   }
-
    $my_rating = $player_row["Rating2"];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
    $opprating = $opponent_row["Rating2"];
    $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
 
+   if( $color_m == HTYPE_WHITE )
+   {
+      $Black_ID = $opponent_row['ID'];
+      $White_ID = $player_row['ID'];
+   }
+   else // HTYPE_NIGIRI/DOUBLE/BLACK
+   {
+      $Black_ID = $player_row['ID'];
+      $White_ID = $opponent_row['ID'];
+   }
+
 
    //ToMove_ID=$tomove will hold handitype until ACCEPTED
    switch( (string)$handicap_type )
    {
-      case 'conv':
-      {
+      case HTYPE_CONV:
          if( !$iamrated || !$opprated )
             error('no_initial_rating','make_invite_game.conv');
          $tomove = INVITE_HANDI_CONV;
          $handicap = 0; //further computing
          $komi = 0;
-      }
-      break;
+         break;
 
-      case 'proper':
-      {
+      case HTYPE_PROPER:
          if( !$iamrated || !$opprated )
             error('no_initial_rating','make_invite_game.proper');
          $tomove = INVITE_HANDI_PROPER;
          $handicap = 0; //further computing
          $komi = 0;
-      }
-      break;
+         break;
 
-      case 'double':
-      {
+      case HTYPE_DOUBLE:
          $tomove = INVITE_HANDI_DOUBLE;
-         $handicap = $handicap_d;
-         $komi = $komi_d;
-      }
-      break;
+         $handicap = $handicap_m;
+         $komi = $komi_m;
+         break;
 
-      case 'manual':
-      {
+      case HTYPE_BLACK:
+      case HTYPE_WHITE:
          $tomove = $Black_ID; //no real meaning now, any positive value
          $handicap = $handicap_m;
          $komi = $komi_m;
-      }
-      break;
+         break;
 
       default: //always available even if waiting room or unrated
-         $handicap_type = 'nigiri';
-      case 'nigiri':
-      {
+         $cat_handicap_type = CAT_HTYPE_MANUAL;
+         $handicap_type = HTYPE_NIGIRI;
+      case HTYPE_NIGIRI:
          $tomove = INVITE_HANDI_NIGIRI;
-         $handicap = 0;
-         $komi = $komi_n;
-      }
-      break;
+         $handicap = $handicap_m;
+         $komi = $komi_m;
+         break;
    }
 
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
@@ -167,15 +160,14 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    if( $disputegid > 0 )
    {
       // Check if dispute game exists
-      $row= mysql_single_fetch( 'make_game.make_invite_game.dispute',
+      $row= mysql_single_fetch( "make_game.make_invite_game.dispute($disputegid)",
                      "SELECT ID, Black_ID, White_ID FROM Games"
                     ." WHERE ID=$disputegid AND Status='INVITED'" );
       if( !$row )
-         error('unknown_game','make_invite_game.1');
+         error('unknown_game', "make_invite_game.dispute.1($disputegid)");
       if( ( $row['Black_ID']!=$player_row['ID'] || $row['White_ID']!=$opponent_row['ID'] )
-       && ( $row['White_ID']!=$player_row['ID'] || $row['Black_ID']!=$opponent_row['ID'] )
-        )
-         error('unknown_game','make_invite_game.2');
+       && ( $row['White_ID']!=$player_row['ID'] || $row['Black_ID']!=$opponent_row['ID'] ) )
+         error('unknown_game', "make_invite_game.dispute.2($disputegid)");
 
       $query = "UPDATE Games SET $query WHERE ID=$disputegid LIMIT 1";
    }
@@ -183,10 +175,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       $query = "INSERT INTO Games SET $query";
 
    $result = mysql_query( $query )
-      or error('mysql_insert_game','make_invite_game.update_game');
+      or error('mysql_insert_game', "make_invite_game.update_game($disputegid)");
 
    if( mysql_affected_rows() != 1)
-      error('mysql_start_game','make_invite_game.update_game');
+      error('mysql_start_game', "make_invite_game.update_game($disputegid)");
 
    if( $disputegid > 0 )
       $gid = $disputegid;
@@ -200,7 +192,8 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 } //make_invite_game
 
 
-//always return a valide game ID from the database, else call error()
+// Creates a running game, black/white_row are prefilled with chosen players
+// always return a valid game ID from the database, else call error()
 function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 {
    global $NOW;
@@ -215,7 +208,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
        && !($game_info_row["White_ID"] == $black_row['ID']
          && $game_info_row["Black_ID"] == $white_row['ID'] )
          )
-         error('mysql_start_game','create_game.wrong_players');
+         error('mysql_start_game', "create_game.wrong_players($gid)");
    }
 
    $rating_black = $black_row["Rating2"];
