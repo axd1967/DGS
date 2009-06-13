@@ -26,6 +26,29 @@ define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
 define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
 define('JIGOMODE_NO_JIGO',    'NO_JIGO');
 
+// see Waitingroom.Handicaptype in specs/db/table-Waitingroom.txt
+define('HTYPE_CONV',    'conv'); // conventional handicap
+define('HTYPE_PROPER',  'proper'); // proper handicap
+define('HTYPE_NIGIRI',  'nigiri'); // manual, color nigiri
+define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
+define('HTYPE_BLACK',   'black'); // manual, color black
+define('HTYPE_WHITE',   'white'); // manual, color white
+
+define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
+define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
+define('CAT_HTYPE_MANUAL', 'manual'); // manual game setting
+//define('CAT_HTYPE_FAIRKOMI', 'fairkomi'); // fair komi game
+
+// handicap-types category
+$ARR_GLOBAL_HTYPES = array(
+      HTYPE_CONV     => CAT_HTYPE_CONV,
+      HTYPE_PROPER   => CAT_HTYPE_PROPER,
+      HTYPE_NIGIRI   => CAT_HTYPE_MANUAL,
+      HTYPE_DOUBLE   => CAT_HTYPE_MANUAL,
+      HTYPE_BLACK    => CAT_HTYPE_MANUAL,
+      HTYPE_WHITE    => CAT_HTYPE_MANUAL,
+      //HTYPE_AUKO     => CAT_HTYPE_FAIRKOMI,
+   );
 
 /*!
  * \brief returns true, if user (uid) is allowed to add additional
@@ -175,13 +198,9 @@ function adjust_komi( $komi, $adj_komi, $jigo_mode )
       $komi = MAX_KOMI_RANGE;
 
    if( $jigo_mode == JIGOMODE_ALLOW_JIGO && floor($komi) != $komi )
-   {
       $komi = (($komi < 0) ? -1 : 1) * floor(abs($komi));
-   }
    elseif( $jigo_mode == JIGOMODE_NO_JIGO && floor($komi) == $komi )
-   {
       $komi += ($komi < 0) ? -0.5 : 0.5;
-   }
 
    // assure valid limits after applying jigo-mode
    if( $komi < -MAX_KOMI_RANGE )
@@ -189,7 +208,9 @@ function adjust_komi( $komi, $adj_komi, $jigo_mode )
    elseif( $komi > MAX_KOMI_RANGE )
       $komi -= 1.0;
 
-   return $komi;
+   if( (string)$komi == '-0' )
+      $komi = 0;
+   return (float)$komi;
 }
 
 // returns adjusted handicap within limits, also checking for valid limits
@@ -224,6 +245,24 @@ function get_to_move( $grow, $errmsg )
    else
       $to_move = -1; // can happen on finished game
    return $to_move;
+}
+
+/*!
+ * \brief Returns handicap-type category for handicap-type (Waitingroom.)Handicaptype.
+ * \return CAT_HTYPE_... if valid handicap-type given; false otherwise
+ */
+function get_category_handicaptype( $handitype )
+{
+   global $ARR_GLOBAL_HTYPES;
+   return @$ARR_GLOBAL_HTYPES[$handitype];
+}
+
+function build_image_double_game( $with_sep=false, $class='' )
+{
+   global $base_path;
+   return image( $base_path.'17/w.gif', T_('Double game (White)'), '', $class)
+          . ( $with_sep ? '&nbsp;+&nbsp;' : '' )
+          . image( $base_path.'17/b.gif', T_('Double game (Black)'), '', $class);
 }
 
 ?>
