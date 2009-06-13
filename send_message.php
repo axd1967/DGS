@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ $TranslateGroups[] = "Messages";
 
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
+require_once( 'include/game_functions.php' );
 require_once( "include/message_functions.php" );
 require_once( "include/make_game.php" );
 require_once( "include/contacts.php" );
@@ -176,42 +177,32 @@ disable_cache();
       switch( $handitype )
       {
          case INVITE_HANDI_CONV:
-         {
             if( !$iamrated || !$opprated )
                error('no_initial_rating');
-            list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
+            list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
                suggest_conventional( $my_rating, $opprating, $size);
-         }
-         break;
+            break;
 
          case INVITE_HANDI_PROPER:
-         {
             if( !$iamrated || !$opprated )
                error('no_initial_rating');
-            list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
+            list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
                suggest_proper( $my_rating, $opprating, $size);
-         }
-         break;
+            break;
 
          case INVITE_HANDI_NIGIRI:
-         {
             mt_srand ((double) microtime() * 1000000);
             $i_am_black = mt_rand(0,1);
-         }
-         break;
+            break;
 
          case INVITE_HANDI_DOUBLE:
-         {
             $double = true;
             $i_am_black = true;
-         }
-         break;
+            break;
 
          default: // 'manual': any positive value
-         {
             $i_am_black = ( $game_row["Black_ID"] == $my_id );
-         }
-         break;
+            break;
       }
 
       //HOT_SECTION:

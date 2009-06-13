@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Messages";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/game_functions.php' );
 require_once( "include/message_functions.php" );
 require_once( "include/form_functions.php" );
 
@@ -349,7 +350,7 @@ require_once( "include/form_functions.php" );
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
-         game_info_table( 'invite', $msg_row, $player_row, $iamrated);
+         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated);
 
          if( $can_reply )
          {
