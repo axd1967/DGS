@@ -23,6 +23,79 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-13 juga
+
+   * tournaments/include/tournament_rules.php (TournamentRules,
+       ~.convertTournamentRules_to_EditForm, ~.convertEditForm_to_TournamentRules):
+   - keep in sync with changes on waiting-room merging NIGIRI / DOUBLE
+     into MANUAL-game-setting parsing from and filling to edit-form
+   - bugfix: missed parsing/filling of handicap stones
+   - bugfix: parsing adj-komi, jigo-mode
+
+   * specs/db/table-Waitingroom.txt:
+   - added MANUAL-game with fix color for my-color WHITE and BLACK in waitingroom
+   - added future plans for fair-komi
+
+   * include/message_functions.php (game_info_table), NEWS:
+   - Changes on game-info table for waiting-room, new-game page, invite/dispute:
+     - show handicap-type with category, my-color, handicap and komi
+     - show different images to represent handicap-types for "color"
+     - show jigo-mode adjustment: k.0|k.5 removed 'k' -> .0|.5
+     - differ between 'Even game / Handicap game' for NIGIRI-handicap-type
+   - changed nigiri-handling for CONVENTIONAL and PROPER handicap-type:
+     - nigiri now only used if both players have same rating,
+       old behaviour for CONV-handicap-type was to make nigiri if there is no handicap
+     - show NIGIRI as my-color in probable game-settings in that case
+   - always show probable game-settings if calculated (conv|proper) or
+     resulting my-color, handicap and komi differing from setup handicap/komi
+
+   * include/message_functions.php (game_settings_form, game_info_table,
+       build_adjust_komi, build_suggestion_shortinfo, get_colortext_probable),
+     include/game_functions.php (adjust_komi, get_category_handicaptype,
+       build_image_double_game),
+     include/make_game.php (make_invite_game),
+     add_to_waitingroom.php, join_waitingroom_game.php,
+     waiting_room.php (determine_color), skins/dragon/screen.css,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
+   - Changes in waiting-room / new-game page:
+     - added MANUAL-game with fix color for my-color WHITE and BLACK
+     - replaced Color-column with (probable) Game-Settings (mentioned in notes) with:
+       my-color, handicap and komi
+     - changed handicap-type filter matching on collection
+       of handicap-type categories: conv, proper, nigiri, double, fix-color, manual
+   - migrated and merged handicap-types NIGIRI & DOUBLE with category MANUAL
+     for waiting-room, invites/disputes and tournament-rules
+     - replaced 'Even game with nigiri' with MANUAL-game with my-color NIGIRI
+     - replaced 'Double game' with MANUAL-game with my-color DOUBLE
+     - Waitingroom.Handicaptype is mapped to category and my-color
+       - CONV / PROPER   -> category CONV,   no my-color
+       - NIGIRI / DOUBLE -> category MANUAL, my-color NIGIRI / DOUBLE
+       - WHITE / BLACK   -> category MANUAL, my-color WHITE / BLACK
+   - bugfix of strange behaviour for adjust-komi: '-0' -> 0
+   - cleanup: use consts, better error-labeling, merges to avoid redundancies
+   - minor changes, layouting, comments
+-----------
+-- added manual coloring black/white
+ALTER TABLE Waitingroom
+   CHANGE Handicaptype Handicaptype enum('conv','proper','nigiri','double','black','white') NOT NULL default 'conv' ;
+ALTER TABLE Waitingroom
+   ADD INDEX Handicaptype (Handicaptype);
+-----------
+
+   * include/rating.php (suggest_proper, suggest_conventional):
+   - changed nigiri-handling for CONVENTIONAL and PROPER handicap-type
+     - nigiri only used if both players have same rating,
+       old behaviour for CONV-type was to make nigiri if there is no handicap
+   - bugfix: returning $iamblack as int
+
+   * include/gui_functions.php (button_TD_width_insert, button_TD_insert_width):
+   - refactoring: renamed method to easier finding of insert_width-methods
+
+   * include/std_functions.php (insert_width), include/table_columns.php (make_tablehead):
+   - defined const DEFAULT_KOMI = 6.5
+   - insert_width: allow to enable/disable MinWidth-class for forced with using transparent-image
+   - bugfix: use style MinWidth-class to achieve height 0 not disturbing other elements in table-cells
+
 2009-06-12 juga
 
    * include/message_functions.php (game_info_table, echo_game_restrictions,
