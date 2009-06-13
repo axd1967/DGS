@@ -25,7 +25,7 @@ Important Note:
  Size          | int(11)                                  | 19
  Komi          | decimal(6,1)                             | 6.5
  Handicap      | int(11)                                  | 0
- Handicaptype  | enum('conv','proper','nigiri','double')  | conv
+ Handicaptype  | enum('conv','proper','nigiri','double','black','white')  | conv
  AdjKomi       | decimal(6,1)                             | 0.0
  JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | KEEP_KOMI
  AdjHandicap   | tinyint(4)                               | 0
@@ -66,11 +66,26 @@ Important Note:
 * Handicap : number of handicap stones for game
    - only used if Type is not Conventional or Proper game
 
-* Handicaptype : game-mode
+* Handicaptype : game-mode, handicap-type, manual color setting
+   - representation of 4 game-modes:
+      - Conventional handicap: conv
+      - Proper handicap: proper
+      - Manual setting (color-setting): nigiri, double, black, white
+      - [future] Fair komi: div_ykic, div_ikyc, auko, pie_ymic, pie_imyc
+
    - conv = Conventional handicap
    - proper = Proper handicap
    - nigiri = Even game with nigiri
    - double = Double game
+   - black = manual game-mode, game-offerer wants to play as Black
+   - white = manual game-mode, game-offerer wants to play as White
+
+   - [future] div_ykic = Divide & Choose "You choose Komi, I choose Color" (needs discussion)
+   - [future] div_ikyc = Divide & Choose "I choose Komi, You choose Color"
+   - [future] auko = Auction Komi, both players choose komi, higher bid gets Black
+     giving his bid of komi to White, use nigiri on equal bidding
+   - [future] pie_ymic = Pie Rule "You choose first Move, I choose Color" (needs discussion)
+   - [future] pie_imyc = Pie Rule "I choose first Move, You choose Color"
 
 * AdjKomi : Komi adjustment and Jigo-mode
    - Calculated or fix komi is adjusted by value of 'AdjKomi' (+/- komi)
