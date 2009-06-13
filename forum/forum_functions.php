@@ -739,7 +739,6 @@ class DisplayForum
          $hidden = $postClass == 'Hidden';
          echo "\n<tr class=PostButtons><td colspan=$cols>";
 
-         // NOTE: very strange: insert_width(12) does not work, resulting in line-breaks :(
          $imgarr = $this->init_navi_images();
          $prev_parent = ( is_null($post->prev_parent_post) )
             ? ''
