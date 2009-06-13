@@ -75,7 +75,7 @@ function add_new_game_form( $form_id, $iamrated)
                                   'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
                                   'TEXT', sptext(T_('and')),
                                   'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Require min. rated finished games'),
+   $addgame_form->add_row( array( 'DESCRIPTION', T_('Min. rated finished games'),
                                   'TEXTINPUT', 'min_rated_games', 5, 5, '',
                                   'TEXT', MINI_SPACING . T_('(optional)'), ));
    $same_opp_array = build_accept_same_opponent_array(array( 0,  -1, -2, -3,  3, 7, 14 ));
