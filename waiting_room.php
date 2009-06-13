@@ -26,6 +26,7 @@ require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
+require_once( 'include/game_functions.php' );
 require_once( "include/message_functions.php" );
 require_once( "include/contacts.php" );
 require_once( "include/filter.php" );
@@ -44,15 +45,25 @@ require_once( 'include/classlib_userconfig.php' );
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_WAITINGROOM );
 
    //short descriptions for table
-   $handi_array = array( 'conv'   => T_('Conventional'),
-                         'proper' => T_('Proper'),
-                         'nigiri' => T_('Even game'),
-                         'double' => T_('Double game') );
+   $handi_array = array(
+      HTYPE_CONV   => T_('Conventional'),
+      HTYPE_PROPER => T_('Proper'),
+      HTYPE_NIGIRI => T_('Manual'),
+      HTYPE_DOUBLE => T_('Double game'),
+      HTYPE_BLACK  => T_('Fix color'),
+      HTYPE_WHITE  => T_('Fix color'),
+   );
 
    // config for handicap-filter
-   $handi_filter_array = array( T_('All') => '' );
-   foreach( $handi_array as $fval => $fkey )
-      $handi_filter_array[$fkey] = "Handicaptype='$fval'";
+   $handi_filter_array = array(
+      T_('All')            => '',
+      T_('Conventional')   => "Handicaptype='conv'",
+      T_('Proper')         => "Handicaptype='proper'",
+      T_('Nigiri')         => "Handicaptype='nigiri'",
+      T_('Double')         => "Handicaptype='double'",
+      T_('Fix color')      => "Handicaptype IN ('double','black','white')",
+      T_('Manual')         => "Handicaptype IN ('nigiri','double','black','white')",
+   );
 
    $my_rating = $player_row['Rating2'];
    $my_rated_games = (int)$player_row['RatedGames'];
@@ -119,7 +130,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
-   $wrtable->add_tablehead(18, T_('Color#headerwr'), 'Image', TABLE_NO_SORT );
+   $wrtable->add_tablehead(18, T_('Settings#headerwr'), 'GameSettings', TABLE_NO_SORT );
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
@@ -231,11 +242,28 @@ require_once( 'include/classlib_userconfig.php' );
       {
          $other_rating = NULL;
          extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodsameopp
+         $is_my_game = ( $uid == $player_row['ID'] );
 
          if( $idinfo == (int)$ID )
             $info_row = $row;
 
-         $Comment = make_html_safe($Comment, INFO_HTML);
+         // probable game-settings without adjustments
+         $infoHandi = $Handicap;
+         $infoKomi  = $Komi;
+         $iamblack = '';
+         if( $iamrated && !$is_my_game )
+         {
+            $other_is_rated = ( $other_ratingstatus && is_numeric($other_rating) && $other_rating >= MIN_RATING );
+            if( $other_is_rated )
+            {
+               if( $Handicaptype == HTYPE_CONV )
+                  list( $infoHandi, $infoKomi, $iamblack ) =
+                     suggest_conventional( @$player_row['Rating2'], $other_rating, $Size );
+               elseif( $Handicaptype == HTYPE_PROPER )
+                  list( $infoHandi, $infoKomi, $iamblack ) =
+                     suggest_proper( @$player_row['Rating2'], $other_rating, $Size );
+            }
+         }
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[17] )
@@ -249,15 +277,15 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[ 3] )
             $wrow_strings[ 3] = echo_rating($other_rating,true,$other_id);
          if( $wrtable->Is_Column_Displayed[ 4] )
-            $wrow_strings[ 4] = $Comment;
-         if( $wrtable->Is_Column_Displayed[ 5] )
+            $wrow_strings[ 4] = make_html_safe($Comment, INFO_HTML);
+         if( $wrtable->Is_Column_Displayed[ 5] ) // Handicaptype
          {
             $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
             if( !$haverating )
                $wrow_strings[ 5]['attbs']=
                   warning_cell_attb( T_('No initial rating'), true);
          }
-         if( $wrtable->Is_Column_Displayed[14] )
+         if( $wrtable->Is_Column_Displayed[14] ) // Handicap
          {
             $h_str = ( $calculated )
                ? build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap )
@@ -266,9 +294,9 @@ require_once( 'include/classlib_userconfig.php' );
                $h_str .= ' ' . T_('(Standard placement)#handicap_tablewr');
             $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
-         if( $wrtable->Is_Column_Displayed[ 6] )
+         if( $wrtable->Is_Column_Displayed[ 6] ) // Komi
          {
-            $k_str = ( $calculated ) ? build_adjust_komi( $AdjKomi, $JigoMode, true ) : $Komi;
+            $k_str = ( $calculated ) ? build_adjust_komi( $AdjKomi, $JigoMode, true ) : (float)$Komi;
             $wrow_strings[ 6] = ( (string)$k_str != '' ) ? $k_str : NO_VALUE;
          }
          if( $wrtable->Is_Column_Displayed[ 7] )
@@ -297,15 +325,14 @@ require_once( 'include/classlib_userconfig.php' );
          }
          if( $wrtable->Is_Column_Displayed[16] )
             $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
-         if( $wrtable->Is_Column_Displayed[18] )
+         if( !$is_my_game && $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
          {
-            if( $Handicaptype == 'nigiri' )
-               $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri#color') );
-            elseif( $Handicaptype == 'double' )
-               $colstr = image( $base_path.'17/b_w.gif', T_('B+W#color'), T_('You play Black and White#color') );
-            else //if( $Handicaptype == 'conv' || $Handicaptype == 'prop' ) || otherwise
-               $colstr = '';
-            $wrow_strings[18] = $colstr;
+            $colstr = determine_color( $Handicaptype, $is_my_game, $iamblack );
+            $resultHandicap = adjust_handicap( $infoHandi, $AdjHandicap, $MinHandicap, $MaxHandicap );
+            $resultKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
+            $wrow_strings[18] = ($resultHandicap > 0)
+               ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$resultHandicap, $resultKomi )
+               : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $resultKomi );
          }
 
          $wrtable->add_row( $wrow_strings );
@@ -323,6 +350,7 @@ require_once( 'include/classlib_userconfig.php' );
                T_('Acceptance mode for challenges from same opponent, e.g. "SO[1x]" or "SO[&gt;7d]"#wroom'),
             );
          $notes = array();
+         $notes[] = T_('Column \'Settings\' shows the probably game-color, handicap and komi');
          $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
                . "\n* " . implode(",\n* ", $restrictions);
          echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
@@ -351,12 +379,12 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 
    global $player_row;
-   game_info_table( 'waitingroom', $game_row, $player_row, $iamrated);
+   game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated);
 
-   $mygame= $game_row['other_id'] == $player_row['ID'];
+   $is_my_game = ($game_row['other_id'] == $player_row['ID']);
 
    $game_form->add_hidden( 'id', $game_row['ID']);
-   if( $mygame )
+   if( $is_my_game )
    {
       $game_form->add_row( array(
             'HIDDEN', 'delete', 't',
@@ -376,6 +404,43 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
          ) );
    }
    $game_form->echo_string(1);
+}
+
+function determine_color( $Handicaptype, $is_my_game, $iamblack )
+{
+   global $base_path;
+
+   if( $Handicaptype == HTYPE_NIGIRI )
+      $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color') );
+   elseif( $Handicaptype == HTYPE_DOUBLE )
+      $colstr = image( $base_path.'17/w_b.gif', T_('B+W#color'), T_('You play Black and White#color') );
+   elseif( $Handicaptype == HTYPE_BLACK )
+   {
+      if( $is_my_game )
+         $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('I play Black#color') );
+      else
+         $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('You play White#color') );
+   }
+   elseif( $Handicaptype == HTYPE_WHITE )
+   {
+      if( $is_my_game )
+         $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('I play White#color') );
+      else
+         $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You play Black#color') );
+   }
+   elseif( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
+   {
+      if( $iamblack )
+         $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You probably play Black#color') );
+      else
+         $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('You probably play White#color') );
+   }
+   else // HTYPE_CONV/PROPER (unrated|my-game-offer) or otherwise calculated
+      $colstr = '';
+
+   if( $colstr && $Handicaptype != HTYPE_DOUBLE )
+      $colstr = insert_width(5) . $colstr;
+   return $colstr;
 }
 
 ?>
