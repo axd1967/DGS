@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -115,47 +115,40 @@ require_once( "include/contacts.php" );
    $double = false;
    switch( (string)$game_row['Handicaptype'] )
    {
-      case 'conv':
-      {
+      case HTYPE_CONV:
          if( !$iamrated || !$opprated )
             error('no_initial_rating');
-         list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
+         list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
             suggest_conventional( $my_rating, $opprating, $size);
-      }
-      break;
+         break;
 
-      case 'proper':
-      {
+      case HTYPE_PROPER:
          if( !$iamrated || !$opprated )
             error('no_initial_rating');
-         list($game_row['Handicap'],$game_row['Komi'],$i_am_black) =
+         list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
             suggest_proper( $my_rating, $opprating, $size);
-      }
-      break;
+         break;
 
-      case 'double':
-      {
+      case HTYPE_DOUBLE:
          $double = true;
          $i_am_black = true;
-      }
-      break;
+         break;
 
-      case 'manual':
-      /* to be adjusted if 'manual' is allowed in the waitingroom
-      {
-         $i_am_black = false;
-      }
-      break;
-      */
+      case HTYPE_BLACK:
+         $i_am_black = false; // game-offerer wants BLACK, so challenger gets WHITE
+         break;
+
+      case HTYPE_WHITE:
+         $i_am_black = true; // game-offerer wants WHITE, so challenger gets BLACK
+         break;
+
       default: //always available even if waiting room or unrated
-         $game_row['Handicaptype'] = 'nigiri';
-      case 'nigiri':
-      {
+         $game_row['Handicaptype'] = HTYPE_NIGIRI;
          $game_row['Handicap'] = 0;
-         mt_srand ((double) microtime() * 1000000);
+      case HTYPE_NIGIRI:
+         mt_srand((double) microtime() * 1000000);
          $i_am_black = mt_rand(0,1);
-      }
-      break;
+         break;
    }
 
    //TODO: HOT_SECTION ???

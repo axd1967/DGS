@@ -41,50 +41,40 @@ require_once( 'include/utilities.php' );
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
-   $handicap_type = @$_POST['handicap_type'];
-   switch( (string)$handicap_type )
+   $cat_handicap_type = @$_POST['cat_htype'];
+   switch( (string)$cat_handicap_type )
    {
-      case 'conv':
-      {
+      case CAT_HTYPE_CONV:
          if( !$iamrated )
             error('no_initial_rating');
+         $handicap_type = HTYPE_CONV;
          $handicap = 0; //further computing
          $komi = 0.0;
-      }
-      break;
+         break;
 
-      case 'proper':
-      {
+      case CAT_HTYPE_PROPER:
          if( !$iamrated )
             error('no_initial_rating');
+         $handicap_type = HTYPE_PROPER;
          $handicap = 0; //further computing
          $komi = 0.0;
-      }
-      break;
+         break;
 
-      case 'double':
-      {
-         $handicap = (int)@$_POST['handicap_d'];
-         $komi = (float)@$_POST['komi_d'];
-      }
-      break;
+      case CAT_HTYPE_MANUAL:
+         $handicap_type = (string)@$_POST['color_m'];
+         if( empty($handicap_type) )
+            $handicap_type = HTYPE_NIGIRI;
 
-      case 'manual': //not allowed in waiting room
-      /*
-      {
          $handicap = (int)@$_POST['handicap_m'];
          $komi = (float)@$_POST['komi_m'];
-      }
-      break;
-      */
-      default: //always available even if waiting room or unrated
-         $handicap_type = 'nigiri';
-      case 'nigiri':
-      {
-         $handicap = 0;
-         $komi = (float)@$_POST['komi_n'];
-      }
-      break;
+         break;
+
+      default:
+         $cat_handicap_type = CAT_HTYPE_MANUAL;
+         $handicap_type = HTYPE_NIGIRI;
+         $handicap = (int)@$_POST['handicap_m'];
+         $komi = (float)@$_POST['komi_m'];
+         break;
    }
 
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
@@ -97,7 +87,7 @@ require_once( 'include/utilities.php' );
    $adj_komi = (float)@$_POST['adj_komi'];
    if( abs($adj_komi) > MAX_KOMI_RANGE )
       $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
-   if( floor(2 * $adj_komi) != 2 * $adj_komi ) // <>x.0|x.5
+   if( floor(2 * $adj_komi) != 2 * $adj_komi ) // round to x.0|x.5
       $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
 
    $jigo_mode = (string)@$_POST['jigo_mode'];
@@ -201,7 +191,7 @@ require_once( 'include/utilities.php' );
       "Size=$size, " .
       "Komi=ROUND(2*($komi))/2, " .
       "Handicap=$handicap, " .
-      "Handicaptype='$handicap_type', " .
+      "Handicaptype='" . mysql_addslashes($handicap_type) . "', " .
       "AdjKomi=$adj_komi, " .
       "JigoMode='" . mysql_addslashes($jigo_mode) . "', " .
       "AdjHandicap=$adj_handicap, " .
