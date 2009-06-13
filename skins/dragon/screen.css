@@ -897,6 +897,11 @@ table.Table td.MsgDir {
    text-align: right;
 }
 
+table.Table td.GameSettings {
+   text-align: left;
+   vertical-align: middle;
+}
+
 table.Table td.Enum {
    text-align: left;
    font-size: smaller;
