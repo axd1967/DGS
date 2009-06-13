@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once( 'include/std_classes.php' );
+require_once( 'include/game_functions.php' );
 
  /*!
   * \file tournament_rules.php
@@ -77,7 +78,7 @@ class TournamentRules
 
    /*! \brief Constructs TournamentRules-object with specified arguments. */
    function TournamentRules( $id=0, $tid=0, $lastchanged=0, $flags=0, $notes='',
-         $size=19, $handicaptype='CONV', $handicap=0, $komi=6.5,
+         $size=19, $handicaptype=TRULE_HANDITYPE_CONV, $handicap=0, $komi=DEFAULT_KOMI,
          $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
          $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
          $maintime=450, $byotype='JAP', $byotime=15, $byoperiods=10,
@@ -216,11 +217,21 @@ class TournamentRules
     */
    function convertTournamentRules_to_EditForm( &$vars )
    {
+      // NOTE: keep "sync'ed" with add_to_waitingroom.php
+
       $vars['_tr_notes'] = $this->Notes;
 
       $vars['size'] = (int)$this->Size;
-      $vars['handicap_type'] = strtolower($this->Handicaptype);
-      $vars['komi_n'] = $this->Komi;
+      $cat_htype = get_category_handicaptype( strtolower($this->Handicaptype) );
+      $vars['cat_htype'] = $cat_htype;
+      $vars['color_m'] = ($cat_htype == CAT_HTYPE_MANUAL) ? HTYPE_NIGIRI : $cat_htype;
+      if( $cat_htype == CAT_HTYPE_MANUAL )
+      {
+         $vars['handicap_m'] = $this->Handicap;
+         $vars['komi_m'] = $this->Komi;
+      }
+      else
+         $vars['komi_m'] = DEFAULT_KOMI;
       $vars['adj_komi'] = (int)$this->AdjKomi;
       $vars['jigo_mode'] = (int)$this->JigoMode;
       $vars['adj_handicap'] = (int)$this->AdjHandicap;
@@ -255,33 +266,35 @@ class TournamentRules
    /*! \brief Converts and sets (parsed) form-values in this TournamentRules-object. */
    function convertEditForm_to_TournamentRules( $vars )
    {
-      // NOTE: keep "sync'ed with add_to_waitingroom.php"
+      // NOTE: keep "sync'ed" with add_to_waitingroom.php
 
-      $handicap_type = @$vars['handicap_type'];
+      $cat_handicap_type = @$vars['cat_htype'];
+      $color_m = @$vars['color_m'];
+      $handicap_type = ( $cat_handicap_type == CAT_HTYPE_MANUAL ) ? $color_m : $cat_handicap_type;
       switch( (string)$handicap_type )
       {
-         case 'conv':
-         {
+         case HTYPE_CONV:
             $handicap = 0; //further computing
             $komi = 0.0;
-         }
-         break;
+            break;
 
-         case 'proper':
-         {
+         case HTYPE_PROPER:
             $handicap = 0; //further computing
             $komi = 0.0;
-         }
-         break;
+            break;
+
+         case HTYPE_DOUBLE:
+         case HTYPE_BLACK:
+         case HTYPE_WHITE:
+            // all not supported for tournaments -> fallback to default NIGIRI
 
          default: //always available even if waiting room or unrated
-            $handicap_type = 'nigiri';
-         case 'nigiri':
-         {
-            $handicap = 0;
-            $komi = (float)@$vars['komi_n'];
-         }
-         break;
+            $cat_handicap_type = CAT_HTYPE_MANUAL;
+            $handicap_type = HTYPE_NIGIRI;
+         case HTYPE_NIGIRI:
+            $handicap = (int)@$vars['handicap_m'];
+            $komi = (float)@$vars['komi_m'];
+            break;
       }
 
       if( !( $komi >= -MAX_KOMI_RANGE && $komi <= MAX_KOMI_RANGE ) )
@@ -291,13 +304,13 @@ class TournamentRules
          error('handicap_range', "TournamentRules.convertEditForm_to_TournamentRules.check.handicap($handicap)");
 
       // komi adjustment
-      $adj_komi = (float)@$_POST['adj_komi'];
+      $adj_komi = (float)@$vars['adj_komi'];
       if( abs($adj_komi) > MAX_KOMI_RANGE )
          $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
       if( floor(2 * $adj_komi) != 2 * $adj_komi ) // <>x.0|x.5
          $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
 
-      $jigo_mode = (string)@$_POST['jigo_mode'];
+      $jigo_mode = (string)@$vars['jigo_mode'];
       if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO
             && $jigo_mode != JIGOMODE_NO_JIGO )
          error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.check.jigo_mode($jigo_mode)");
@@ -360,7 +373,7 @@ class TournamentRules
       $this->Size = $size;
       $this->Handicaptype = strtoupper($handicap_type);
       $this->Handicap = $handicap;
-      $this->Komi = round( 2 * $komi ) / 2;
+      $this->Komi = ($komi < 0 ? -1 : 1) * floor( 2 * abs($komi) ) / 2.0;
       $this->AdjKomi = $adj_komi;
       $this->JigoMode = $jigo_mode;
       $this->AdjHandicap = $adj_handicap;
@@ -378,17 +391,16 @@ class TournamentRules
    /*! \brief Returns true, if handicap needs to be calculated for this ruleset. */
    function needsCalculatedHandicap()
    {
-      return ( $this->Handicaptype == TRULE_HANDITYPE_CONV    // calc
-            || $this->Handicaptype == TRULE_HANDITYPE_PROPER  // calc
-            || $this->Handicaptype == TRULE_HANDITYPE_NIGIRI  // no handicap
+      return ( $this->Handicaptype == TRULE_HANDITYPE_CONV
+            || $this->Handicaptype == TRULE_HANDITYPE_PROPER
          );
    }
 
    /*! \brief Returns true, if komi needs to be calculated for this ruleset. */
    function needsCalculatedKomi()
    {
-      return ( $this->Handicaptype == TRULE_HANDITYPE_CONV    // calc
-            || $this->Handicaptype == TRULE_HANDITYPE_PROPER  // calc
+      return ( $this->Handicaptype == TRULE_HANDITYPE_CONV
+            || $this->Handicaptype == TRULE_HANDITYPE_PROPER
          );
    }
 
