@@ -497,3 +497,9 @@ ALTER TABLE Waitingroom
    CHANGE MustBeRated MustBeRated enum('N','Y') NOT NULL default 'N' ;
 
 
+-- added manual coloring black/white
+ALTER TABLE Waitingroom
+   CHANGE Handicaptype Handicaptype enum('conv','proper','nigiri','double','black','white') NOT NULL default 'conv' ;
+ALTER TABLE Waitingroom
+   ADD INDEX Handicaptype (Handicaptype);
+
