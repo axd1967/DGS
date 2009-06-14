@@ -42,7 +42,6 @@ $ThePage = new Page('Docs');
    add_link_page_link("links.php", T_('Links'), T_('Link collection'));
    add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
    add_link_page_link("statistics.php", T_('Statistics'), T_("Statistics about Dragon"));
-   add_link_page_link("todo.php", T_('To do list'), T_('plans for future improvements'));
    add_link_page_link("http://senseis.xmp.net/?DGSWishlist", T_('DGS Wish list'),
                      T_('Features and requests DGS users dream of'));
 /* Note: Goodies are not part of DGS, but a user-to-user feature.

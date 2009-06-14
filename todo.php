@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,27 +17,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Docs";
+require_once( 'include/connect2mysql.php' );
 
-require_once( "include/std_functions.php" );
-
-   connect2mysql();
-
-   $logged_in = who_is_logged( $player_row);
-
-   start_page('To do', true, $logged_in, $player_row );
-
-   section( 'Todo', T_('To do list'));
-
-   echo "<pre>\n";
-
-   //readfile("TODO");
-   //$contents= implode('', file('TODO'));
-   $contents= @read_from_file('TODO');
-   $contents= @htmlentities($contents, ENT_QUOTES);
-   echo $contents;
-
-   echo "</pre>\n";
-
-   end_page();
+{
+   // TO-DO list moved to DGS-wishlist on SLs
+   jump_to( 'http://senseis.xmp.net/?DGSWishlist', true );
+}
 ?>
