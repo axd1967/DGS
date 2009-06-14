@@ -260,9 +260,9 @@ function get_category_handicaptype( $handitype )
 function build_image_double_game( $with_sep=false, $class='' )
 {
    global $base_path;
-   return image( $base_path.'17/w.gif', T_('Double game (White)'), '', $class)
+   return image( $base_path.'17/w.gif', T_('Double game (White)'), null, $class)
           . ( $with_sep ? '&nbsp;+&nbsp;' : '' )
-          . image( $base_path.'17/b.gif', T_('Double game (Black)'), '', $class);
+          . image( $base_path.'17/b.gif', T_('Double game (Black)'), null, $class);
 }
 
 ?>

@@ -958,7 +958,7 @@ function draw_game_info(&$game_row, &$board)
    //black rows
    $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'] );
    echo '<tr id="blackInfo">' . "\n";
-   echo "<td class=Color>", image( "{$base_path}17/b.gif", T_('Black'), T_('Black'), "class=InTextStone" ), "</td>\n";
+   echo "<td class=Color>", image( "{$base_path}17/b.gif", T_('Black'), null, 'class="InTextStone"' ), "</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle']),
       ( $blackOffTime ? SMALL_SPACING . $blackOffTime : '' ),
@@ -987,7 +987,7 @@ function draw_game_info(&$game_row, &$board)
    //white rows
    $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'] );
    echo '<tr id="whiteInfo">' . "\n";
-   echo "<td class=Color>", image( "{$base_path}17/w.gif", T_('White'), T_('White'), "class=InTextStone" ), "</td>\n";
+   echo "<td class=Color>", image( "{$base_path}17/w.gif", T_('White'), null, 'class="InTextStone"' ), "</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle']),
       ( $whiteOffTime ? SMALL_SPACING . $whiteOffTime : '' ),
@@ -1015,12 +1015,11 @@ function draw_game_info(&$game_row, &$board)
 
 
    //game rows
-   $sep = ',&nbsp;&nbsp;&nbsp;';
-   $ginfo_str = T_('Game information');
+   $sep = ',' . SMALL_SPACING;
    echo '<tr id="gameRules">' . "\n";
    echo '<td class=Color>'
       . anchor( "gameinfo.php?gid={$game_row['ID']}",
-            image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone') )
+            image( $base_path.'images/info.gif', T_('Game information'), null, 'class="InTextImage"') )
       . "</td>\n";
    echo "<td colspan=\"" . ($cols-1) . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;

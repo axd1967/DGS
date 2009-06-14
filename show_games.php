@@ -681,7 +681,7 @@ $ThePage = new Page('GamesList');
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[32] )
          $grow_strings[32] = anchor( 'gameinfo.php?gid='.$ID,
-            image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone'));
+            image( $base_path.'images/info.gif', $ginfo_str, null, 'class="InTextImage"'));
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
       if( $observe_all )

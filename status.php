@@ -277,7 +277,7 @@ $ThePage = new Page('Status');
          }
          if( $gtable->Is_Column_Displayed[15] )
             $grow_strings[15] = anchor( 'gameinfo.php?gid='.$ID,
-               image( $base_path.'images/info.gif', $ginfo_str, $ginfo_str, 'class=InTextStone'));
+               image( $base_path.'images/info.gif', $ginfo_str, null, 'class="InTextImage"'));
 
          $gtable->add_row( $grow_strings );
       }
@@ -355,9 +355,10 @@ if( ALLOW_TOURNAMENTS )
             $row_str[ 7] = (@$orow['TP_Lastchanged'] > 0) ? date(DATE_FMT2, $orow['TP_Lastchanged']) : '';
          if( $tatable->Is_Column_Displayed[ 8] )
          {
-            $tainfo_str = sprintf( T_('My registration for tournament %s'), $ID );
             $row_str[ 8] = anchor( "tournaments/register.php?tid=$ID",
-               image( $base_path.'images/info.gif', $tainfo_str, $tainfo_str, 'class=InTextStone'));
+               image( $base_path.'images/info.gif',
+                  sprintf( T_('My registration for tournament %s'), $ID ), null,
+                  'class=InTextImage'));
          }
 
          $tatable->add_row( $row_str );

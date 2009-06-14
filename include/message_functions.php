@@ -682,7 +682,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          if( $Handitype == HTYPE_NIGIRI )
          {
             $subtype = ($Handicap == 0) ? T_('Even game with nigiri') : T_('Handicap game with nigiri');
-            $colortxt = image( '17/y.gif', T_('Nigiri'), '', $color_class );
+            $colortxt = image( '17/y.gif', T_('Nigiri'), null, $color_class );
          }
          elseif( $Handitype == HTYPE_DOUBLE )
          {
@@ -706,10 +706,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             }
 
             $subtype = T_('Fix color');
-            $colortxt = image( '17/w.gif', T_('White'), '', $color_class) . MINI_SPACING
+            $colortxt = image( '17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
                       . user_reference( 0, 1, '', $user_w )
                       . SMALL_SPACING
-                      . image( '17/b.gif', T_('Black'), '', $color_class) . MINI_SPACING
+                      . image( '17/b.gif', T_('Black'), null, $color_class) . MINI_SPACING
                       . user_reference( 0, 1, '', $user_b )
                       ;
          }
@@ -814,7 +814,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          if( $Handitype == HTYPE_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
          elseif( $Handitype == HTYPE_NIGIRI || $is_nigiri )
-            $colortxt = image( '17/y.gif', T_('Nigiri'), T_('Nigiri'), $color_class);
+            $colortxt = image( '17/y.gif', T_('Nigiri'), null, $color_class);
          else
             $colortxt = get_colortext_probable( $info_i_am_black );
 
@@ -967,10 +967,10 @@ function build_suggestion_shortinfo( $suggest_result )
 
 function get_colortext_probable( $iamblack )
 {
-   $colortxt = 'class=InTextStone';
+   $color_class = 'class="InTextStone"';
    return ( $iamblack )
-      ? image( '17/b.gif', T_('Black'), T_('Black'), $colortxt)
-      : image( '17/w.gif', T_('White'), T_('White'), $colortxt);
+      ? image( '17/b.gif', T_('Black'), null, $color_class)
+      : image( '17/w.gif', T_('White'), null, $color_class);
 }
 
 

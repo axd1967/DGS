@@ -147,8 +147,8 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Color'),
          array(
-            image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
-            image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
+            image( "{$base_path}17/b.gif", T_('Black'), null ),
+            image( "{$base_path}17/w.gif", T_('White'), null ),
          ),
          'class=Colors' );
    $itable->add_sinfo(
@@ -241,10 +241,10 @@ function build_rating_diff( $rating_diff )
          T_('Color'),
          array(
             ( ($to_move == BLACK)
-               ? image( "{$base_path}17/b.gif", T_('Black'), T_('Black'), 'class="InTextImage"' ) . ' ' . T_('Black to move')
-               : image( "{$base_path}17/w.gif", T_('White'), T_('White'), 'class="InTextImage"' ) . ' ' . T_('White to move') ),
-            image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
-            image( "{$base_path}17/w.gif", T_('White'), T_('White') ),
+               ? image( "{$base_path}17/b.gif", T_('Black'), null, 'class="InTextImage"' ) . ' ' . T_('Black to move')
+               : image( "{$base_path}17/w.gif", T_('White'), null, 'class="InTextImage"' ) . ' ' . T_('White to move') ),
+            image( "{$base_path}17/b.gif", T_('Black'), null ),
+            image( "{$base_path}17/w.gif", T_('White'), null ),
          ),
          'class="Colors"' );
    $itable->add_sinfo(

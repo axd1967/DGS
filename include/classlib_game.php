@@ -354,8 +354,8 @@ class GameScore
       if( !$score_info['skip_dame'] )
          echo sprintf( $fmtline2, 'Header', T_('Dame#scoring'), $score_info['dame'] );
       echo sprintf( "<tr class=\"Header\"><td></td><td>%s</td><td>%s</td></tr>\n",
-                  image( "{$base_path}17/b.gif", T_('Black'), T_('Black') ),
-                  image( "{$base_path}17/w.gif", T_('White'), T_('White') ) ),
+                  image( "{$base_path}17/b.gif", T_('Black'), null ),
+                  image( "{$base_path}17/w.gif", T_('White'), null ) ),
          sprintf( $fmtline3, 'Header', T_('Territory#scoring'),
                   $score_info[GSCOL_BLACK]['territory'],
                   $score_info[GSCOL_WHITE]['territory'] ),

@@ -133,7 +133,7 @@ function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stoppe
       if( $vacText != '' ) $title .= " ($vacText)";
       if( $game_clock_stopped ) $title .= ', ' . T_('Game clock stopped');
       $attbs = ($on_vacation === true ) ? '' : 'class="InTextImage"';
-      return image( $base_path.'images/vacation.gif', $title, $title, $attbs );
+      return image( $base_path.'images/vacation.gif', $title, null, $attbs );
    }
    else
       return '';
@@ -147,7 +147,7 @@ function echo_image_nighttime( $sleeping=true, $game_clock_stopped=false )
    {
       $title = T_('User in sleeping time') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
       $attbs = ($sleeping === true ) ? '' : 'class="InTextImage"';
-      return image( $base_path.'images/night.gif', $title, $title, $attbs );
+      return image( $base_path.'images/night.gif', $title, null, $attbs );
    }
    else
       return '';
@@ -160,7 +160,7 @@ function echo_image_weekendclock( $weekend=true, $game_clock_stopped=true )
    if( $weekend )
    {
       $title = T_('Weekend (UTC)') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
-      return image( $base_path.'images/wclock_stop.gif', $title, $title, 'class="InTextImage"' );
+      return image( $base_path.'images/wclock_stop.gif', $title, null, 'class="InTextImage"' );
    }
    else
       return '';
@@ -175,7 +175,7 @@ function echo_image_admin( $adminlevel, $withSep=true )
       $title = T_('Dragon executive');
       return ($withSep ? MINI_SPACING : '')
          . anchor( $base_path.'people.php#executives',
-                   image( $base_path.'images/admin.gif', $title, $title, 'class="InTextImage"' ) );
+                   image( $base_path.'images/admin.gif', $title, null, 'class="InTextImage"' ) );
    }
    else
       return '';
@@ -195,7 +195,7 @@ function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
             $title = sprintf( T_('Online &lt;%s mins ago'), $mins_ago );
       }
       return ($withSep ? MINI_SPACING : '')
-         . image( $base_path.'images/online.gif', $title, $title, 'class="InTextImage"' );
+         . image( $base_path.'images/online.gif', $title, null, 'class="InTextImage"' );
    }
    else
       return '';

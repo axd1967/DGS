@@ -71,7 +71,7 @@ function add_contributor( $text=false, $uref='', $name=false, $handle=false, $ex
 function build_icon( $icon_name, $text )
 {
    global $base_path;
-   return image( "{$base_path}images/$icon_name", $text, $text );
+   return image( "{$base_path}images/$icon_name", $text, null );
 }
 
 function get_executives( $level )

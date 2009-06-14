@@ -116,14 +116,14 @@ class UserPicture
       global $base_path;
       if( is_null($pic_url) )
       {
-         $pic_alt = sprintf( T_('User [%s] has a picture'), $userhandle );
-         $img = image( $base_path.'images/picture.gif', $pic_alt, $pic_alt );
+         $pic_title = sprintf( T_('User [%s] has a picture'), $userhandle );
+         $img = image( $base_path.'images/picture.gif', $pic_title, null );
       }
       else
       {
          $pic_src = $base_path . 'userpic/' . $pic_url;
          $pic_title = sprintf( T_('Picture of user [%s]'), $userhandle );
-         $img = image( $pic_src, $pic_title, $pic_title, '', $size, $size );
+         $img = image( $pic_src, $pic_title, null, '', $size, $size );
       }
       return ($withLink) ? anchor( $base_path.'userinfo.php?user='.$userhandle.'#pic', $img) : $img;
    }

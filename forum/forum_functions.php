@@ -602,19 +602,19 @@ class DisplayForum
          global $base_path;
          $this->navi_img = array(
             'top'          => image( $base_path.'images/f_top.png',
-                                     T_('Top'), T_('Top') ),
+                                     T_('Top'), null ),
             'prev_parent'  => image( $base_path.'images/f_prevparent.png',
-                                     T_('Previous parent'), T_('Previous parent') ),
+                                     T_('Previous parent'), null ),
             'prev_answer'  => image( $base_path.'images/f_prevanswer.png',
-                                     T_('Previous answer'), T_('Previous answer') ),
+                                     T_('Previous answer'), null ),
             'next_answer'  => image( $base_path.'images/f_nextanswer.png',
-                                     T_('Next answer'), T_('Next answer') ),
+                                     T_('Next answer'), null ),
             'next_parent'  => image( $base_path.'images/f_nextparent.png',
-                                     T_('Next parent'), T_('Next parent') ),
+                                     T_('Next parent'), null ),
             'bottom'       => image( $base_path.'images/f_bottom.png',
-                                     T_('Bottom'), T_('Bottom') ),
+                                     T_('Bottom'), null ),
             'first_answer' => image( $base_path.'images/f_firstanswer.png',
-                                     T_('First answer'), T_('First answer') ),
+                                     T_('First answer'), null ),
          );
       }
       return $this->navi_img;
