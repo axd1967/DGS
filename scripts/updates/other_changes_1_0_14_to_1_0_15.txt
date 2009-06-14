@@ -67,3 +67,6 @@ copy /images/admin.gif
 copy /images/online.gif
 copy /images/wclock_stop.gif
 
+-----------
+copy /images/table.gif
+
