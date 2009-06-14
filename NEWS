@@ -35,30 +35,34 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Clock status (stopped/running) with reason why
 
    * Game settings:
-      * Changed default for Standard Handicap Placement to: ON
-      * Changed default for Time settings to: Fischer time with 30d + 1d
-      * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
-        Now only make Nigiri if both players have same rating
+      * General:
+         * Changed default for Standard Handicap Placement to: ON
+         * Changed default for Time settings to: Fischer time with 30d + 1d
+         * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
+           Now only make Nigiri if both players have same rating
 
-      * Waiting room: separated adding of new game on <home new_game.php>new-game page</home>,
-        added <home new_game.php>New game</home> page into main-menu (access-key [n])
-      * Waiting room: show probable game-settings for challenger with color, handicap and komi
-      * Waiting room: simplified filter for "suitable" waiting games, added notes
-      * Waiting room: additionally show standard-placement (S) in Handicap-column
-      * Waiting room: added waiting-room restriction to avoid same opponent joining too many games,
-        Challenger has to wait some days, or can be restricted by number of games to join game-offer
-      * Waiting room: Increased number of games in offer: 10 -> 20
-      * Waiting room: differ 'Even game' and 'Handicap game' for handicap-type NIGIRI
-        in game-offer-info
+      * <home waiting_room.php>Waiting room</home>:
+         * separated adding of new game on <home new_game.php>new-game page</home>,
+           added <home new_game.php>New game</home> page into main-menu (access-key [n])
+         * show probable game-settings for challenger with color, handicap and komi
+         * simplified filter for "suitable" waiting games, added notes
+         * additionally show "(FH)" in Settings-column
+           if standard-placement is not used (=free handicap)
+         * added waiting-room restriction to avoid same opponent joining too many games,
+           Challenger has to wait some days, or can be restricted by number of games
+           to join game-offer
+         * Increased number of games in offer: 10 -> 20
+         * differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
 
-      * New Game: added adjustment and min/max-limitation of handicap stones
-      * New Game: added adjustment of komi by value and jigo mode (allow or reject Jigo)
-      * New Game: added (optional) minimum number of rated finished games
-      * New Game: added MANUAL-game with fix color WHITE and BLACK in waitingroom,
-        merged 'Even game with Nigiri' and 'Double game' with MANUAL-game
+      * <home new_game.php>New Game </home>:
+         * added adjustment and min/max-limitation of handicap stones
+         * added adjustment of komi by value and jigo mode (allow or reject Jigo)
+         * added (optional) minimum number of rated finished games
+         * added MANUAL-game with fix color WHITE and BLACK in waitingroom,
+           merged 'Even game with Nigiri' and 'Double game' with MANUAL-game
 
-      * Invitation: added indication of color, handicap & komi
-        for conventional & proper handicap-type
+      * <home message.php?mode=Invite>Invitation</home>:
+         * added indication of color, handicap & komi for conventional & proper handicap-type
 
    * <home show_games.php>Games lists</home>:
       * <home show_games.php?observe=all>Show all observed games</home> with own search-profile and column set,
