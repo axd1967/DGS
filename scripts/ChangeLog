@@ -25,6 +25,36 @@ ChangeLog
 
 2009-06-14 juga
 
+   * include/gui_functions.php (echo_image_table),
+     opponents.php, show_games.php, NEWS:
+   - opponent page:
+     - added table-column with link to games with current opponent
+       for finished or running games; all-games treated as running
+       as there is no "all games view"
+     - added named filter "opp_hdl" on show-games page
+
+   * scripts/updates/other_changes_1_0_14_to_1_0_15.txt, people.php:
+   - added table-list image from silk icons collection representing table-list
+-----------
+copy /images/table.gif
+-----------
+
+   * include/make_game.php (create_game),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     confirm.php, gameinfo.php, join_waitingroom_game.php, send_message.php, NEWS:
+   - for (newly started) double-games:
+     - show reference to game and game-info page of corresponding game
+     - after double-game deleted remove link-reference on game-info for remaining game
+-----------
+-- added double-game reference
+ALTER TABLE Games
+   ADD DoubleGame_ID int(11) NOT NULL DEFAULT '0' AFTER Tournament_ID;
+-----------
+
+   * include/gui_functions.php (echo_image_gameinfo),
+     game.php, show_games.php, status.php:
+   - use helper-func echo_image_gameinfo() to draw game-info image
+
    * site_map.php:
    - added DGS-wishlist, install, snapshot
 
