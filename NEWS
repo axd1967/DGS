@@ -191,7 +191,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Show icon (<image online.gif>) for users being "online" (i.e. last access time within 10 mins ago)
         on pages <home users.php>Users</home>, <home opponents.php>Opponents</home> and <home list_contacts.php>Contacts</home>
       * Used button-image for ID-column for users and opponents page
-      * <home opponents.php>Opponents page</home>: highlight sum-rows and -columns
+
+      * <home opponents.php>Opponents page</home>:
+         * Added column (<image table.gif>) with link to games with current opponent for finished or running games
+         * Highlighted sum-rows and -columns on single opponent-info
 
    * <home edit_profile.php>User Profile</home>:
       * Introducing JavaScript management in profile setting
