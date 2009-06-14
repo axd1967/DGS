@@ -19,7 +19,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Games:
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
-      * Added new game info page (<image info.gif>)
+      * Added new game info page (marked by <image info.gif>)
       * Preview game message (access-key [v]=Preview)
       * Show scoring information in scoring step and for finished games
       * Added "Notes" column on My-Games list showing part of private game notes
@@ -28,7 +28,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Access to initial invitation message for game
       * Show all game parameters, e.g. Start time and Weekend clock
       * Show some info on players:
-         * Off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
+         * Off-time: Vacation, Night time, Weekend
          * Start and End rating
       * Show full time info of game for each player:
          * Full remaining time including extra-time
@@ -98,7 +98,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
       * Added column with link to new game info page
-      * Added column with icon (<image online.gif>) for users being "online",
+      * Added column with icon for users being "online",
         i.e. last access time within 10 mins ago
       * Show open tournament applications of user
       * Added "My tournaments" bottom-menu-link
