@@ -36,7 +36,11 @@ copy /images/team.gif
 
 # adjust english translation for all '%#header%'
 
+# adjust english translation for all '%#%wr%' (waiting-room)
+
 # shorten '#'-texts for tournaments, esp. '%#tmsg'
+
+# better check all for potentially needed english (shorter) translation for '%#%'
 
 -----------
 # Adjust FAQ for observing own-games-trick:
