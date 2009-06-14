@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -97,11 +97,11 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
       if( empty($Text) ) continue;
 
-      $colortxt = ' class=InTextStone';
+      $color_class = ' class="InTextStone"';
       if( $row['Stone'] == BLACK )
-        $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$colortxt>" ;
+        $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$color_class>" ;
       else
-        $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$colortxt>" ;
+        $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
 
       $movetxt = (int)$row['MoveNr'];
 
