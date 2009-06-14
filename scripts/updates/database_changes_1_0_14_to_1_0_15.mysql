@@ -503,3 +503,8 @@ ALTER TABLE Waitingroom
 ALTER TABLE Waitingroom
    ADD INDEX Handicaptype (Handicaptype);
 
+
+-- added double-game reference
+ALTER TABLE Games
+   ADD DoubleGame_ID int(11) NOT NULL DEFAULT '0' AFTER Tournament_ID;
+

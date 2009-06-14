@@ -217,6 +217,7 @@ This is why:
 - this modification is always done in first place and checked before continuation
 *********************** */
    $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
+   $doublegame_query = '';
    $Moves++;
 
 
@@ -400,6 +401,11 @@ This is why:
          $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
          $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
 
+         // mark reference in other double-game to indicate referring game has vanished
+         $dbl_gid = @$game_row['DoubleGame_ID'];
+         if( $dbl_gid > 0 )
+            $doublegame_query = "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1";
+
          $game_finished = true;
       }
       break;
@@ -522,6 +528,9 @@ This is why:
 
          mysql_query("DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2")
             or error('mysql_query_failed', "confirm.delete.gamenote($gid)");
+
+         // mark reference in other double-game to indicate referring game has vanished
+         db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
 
          $Subject = 'Game deleted';
          //reference: game is deleted => no link

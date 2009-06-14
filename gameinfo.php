@@ -112,6 +112,17 @@ function build_rating_diff( $rating_diff )
    $itable = new Table_info('game');
    $itable->add_caption( T_('Game settings') );
    $itable->add_sinfo( T_('Game ID'), anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) );
+   if( $grow['DoubleGame_ID'] )
+   {
+      $dbl_gid = $grow['DoubleGame_ID'];
+      $itable->add_sinfo(
+            T_('Double Game ID'),
+            ($dbl_gid > 0)
+               ? anchor( "{$base_path}game.php?gid=$dbl_gid", "#$dbl_gid" )
+                     .SMALL_SPACING. echo_image_gameinfo($dbl_gid)
+               : '#'.abs($dbl_gid). sprintf(' (%s)', T_('deleted#dblgame') )
+         );
+   }
    if( $is_my_game && $grow['mid'] > 0 )
    {
       $itable->add_sinfo(

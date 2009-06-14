@@ -215,9 +215,15 @@ disable_cache();
          $gids[] = create_game($opponent_row, $player_row, $game_row, $gid);
       //always after the "already in database" one (after $gid had been checked)
       if( $double )
-         $gids[] = create_game($opponent_row, $player_row, $game_row);
+      {
+         // provide a link between the two paired "double" games
+         $game_row['double_gid'] = $gid;
+         $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row);
 
-      //TODO: provide a link between the two paired "double" games
+         db_query( "join_waitingroom_game.update_double.2($gid)",
+            "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+      }
+
       $cnt = count($gids);
       mysql_query( "UPDATE Players SET Running=Running+$cnt" .
                    ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .

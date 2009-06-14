@@ -194,12 +194,11 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
 // Creates a running game, black/white_row are prefilled with chosen players
 // always return a valid game ID from the database, else call error()
+// NOTE: game_info_row['double_gid'] can be set to write reference to twin double-game
 function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 {
    global $NOW;
 
-//   var_dump($game_info_row);
-//   die();
    $gid = (int)$gid;
    if( $gid > 0 )
    {
@@ -235,6 +234,9 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
    $game_info_row['Rated'] = ( $rated ? 'Y' : 'N' );
+
+   // set reference to other double-game
+   $double_gid = (int)@$game_info_row['double_gid'];
 
    // adjust komi (AdjKomi/JigoMode may be unset)
    $komi = adjust_komi( (float)$game_info_row['Komi'],
@@ -275,6 +277,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $last_ticks = get_clock_ticks($clock_used);
 
    $set_query =
+      "DoubleGame_ID=$double_gid, " .
       "Black_ID=" . $black_row["ID"] . ", " .
       "White_ID=" . $white_row["ID"] . ", " .
       "ToMove_ID=$tomove, " .

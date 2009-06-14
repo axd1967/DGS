@@ -160,13 +160,19 @@ require_once( "include/contacts.php" );
    $gid = $gids[0];
    //keep this after the regular one ($gid => consistency with send_message)
    if( $double )
-      $gids[] = create_game($opponent_row, $player_row, $game_row);
+   {
+      // provide a link between the two paired "double" games
+      $game_row['double_gid'] = $gid;
+      $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row);
 
-   //TODO: provide a link between the two paired "double" games
+      db_query( "join_waitingroom_game.update_double.2($gid)",
+         "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+   }
+
    $cnt = count($gids);
    mysql_query( "UPDATE Players SET Running=Running+$cnt" .
                 ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" )
+                " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" )
       or error('mysql_query_failed', 'join_waitingroom_game.update_players');
 
 
