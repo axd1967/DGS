@@ -125,7 +125,10 @@ $ThePage = new Page('GamesList');
    // init search profile
    $search_profile = new SearchProfile( $my_id, $profile_type );
    $gfilter = new SearchFilter( $fprefix, $search_profile );
-   $search_profile->register_regex_save_args( 'rated|won' ); // named-filters FC_FNAME
+   $named_filters = 'rated|won';
+   if( !$observe && !$all ) //FU+RU
+      $named_filters .= '|opp_hdl';
+   $search_profile->register_regex_save_args( $named_filters ); // named-filters FC_FNAME
    $gtable = new Table( $tableid, $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $gtable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
@@ -150,7 +153,8 @@ $ThePage = new Page('GamesList');
    if( !$observe && !$all ) //FU+RU
    {
       $gfilter->add_filter( 3, 'Text',   'Opp.Name',   true);
-      $gfilter->add_filter( 4, 'Text',   'Opp.Handle', true);
+      $gfilter->add_filter( 4, 'Text',   'Opp.Handle', true,
+         array( FC_FNAME => 'opp_hdl' ));
       $gfilter->add_filter(16, 'Rating', 'Opp.Rating2', true);
    }
    if( $running && !$all ) //RU

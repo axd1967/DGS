@@ -228,4 +228,14 @@ function echo_image_gameinfo( $gid )
    return anchor( "gameinfo.php?gid=$gid", $img_str );
 }
 
+/*! \brief Returns image-tag for table-list with link. */
+function echo_image_table( $url, $title, $withSep=true )
+{
+   global $base_path;
+   return ($withSep ? MINI_SPACING : '')
+      . anchor( $url,
+         image( $base_path.'images/table.gif', $title, null, 'class="InTextImage"' ),
+         $title );
+}
+
 ?>

@@ -196,6 +196,8 @@ $ARR_DBFIELDKEYS = array(
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Activity; also see named-filters
    $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
+   $utable->add_tablehead(21, new TableHead( T_('Opponent games#header'),
+      'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    if( USERPIC_FOLDER != '' )
       $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
@@ -449,6 +451,14 @@ $ARR_DBFIELDKEYS = array(
       {
          $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
          $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
+      }
+      if( $utable->Is_Column_Displayed[21] )
+      {
+         // don't use full filter-selection of opponents-page to link to opponent-games
+         $urow_strings[21] = echo_image_table(
+            "show_games.php?uid=$uid".URI_AMP."opp_hdl={$row['Handle']}"
+               . ( $finished ? URI_AMP.'finished=1' : '' ),
+            sprintf( T_('Link to games with opponent [%s]'), $row['Handle']), true );
       }
 
       $utable->add_row( $urow_strings );
