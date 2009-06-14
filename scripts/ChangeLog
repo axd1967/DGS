@@ -23,6 +23,35 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-14 juga
+
+   * forum/forum_functions.php (DisplayForum.init_navi_images),
+     include/classlib_game.php (GameScore.draw_score_box),
+     include/classlib_userpicture.php (UserPicture.getImageHtml),
+     include/game_functions.php (build_image_double_game),
+     include/gui_functions.php (echo_image_vacation, echo_image_nighttime,
+       echo_image_weekendclock, echo_image_admin, echo_image_online),
+     include/message_functions.php (game_info_table, get_colortext_probable),
+     edit_bio.php, game.php, game_comments.php, gameinfo.php, people.php,
+     show_games.php, status.php:
+   - used option title=null of image()-func to copy alt-text of images
+   - replaced CSS-image class for (non-) stone-images: InTextStone -> InTextImage
+   - cleanup (const usage, some W3C-conformity for HTML)
+
+   * include/std_functions.php (image, build_usertype_text):
+   - added option title=null for image()-func to copy alt-text of images
+
+   * include/contacts.php (Contact.load_globals, ~.getContactSystemFlags,
+       ~.getContactUserFlags, ~.parse_system_flags, ~.parse_user_flags,
+       ~.format_system_flags, ~.format_user_flags),
+     edit_contact.php, list_contacts.php:
+   - replace load_globals() with lazy-init static funcs to return "global" values
+     for user- and system-flags
+
+   * waiting_room.php, NEWS:
+   - Game-settings: move standard-handicap-placement from Handicap-column
+     to Game-Settings-column as "Free-handicap" if no standard-placement used
+
 2009-06-13 juga
 
    * tournaments/include/tournament_rules.php (TournamentRules,
