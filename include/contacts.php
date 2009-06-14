@@ -42,6 +42,10 @@ define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (
  * \brief Class to handle contact-list for user with system and user categories,
  *        like "deny game", "friend" etc.
  */
+
+// lazy-init in Contact::get..Flags()-funcs
+$ARR_GLOBALS_CONTACT = array();
+
 class Contact
 {
    /*! \brief That's me. */
@@ -76,41 +80,6 @@ class Contact
       $this->created = (int) $created;
       $this->lastchanged = (int) $lastchanged;
       $this->set_note( $note );
-   }
-
-   //TODO: error-prone, CHANGE: must be called from within class (not in client)
-   /*!
-    * \brief Load globals used by the class
-    *        must be called only one time
-    *        delayed because translations need to be already loaded
-    *        (and save some time if not used)
-    */
-   function load_globals()
-   {
-      //TODO
-      global $ARR_CONTACT_USERFLAGS;
-      if( isset($ARR_CONTACT_USERFLAGS) )
-         return;
-
-      // userflag => ( form_elem_name, translation )
-      $ARR_CONTACT_USERFLAGS = array(
-         CUSERFLAG_BUDDY   => array( 'ufl_buddy',   T_('Buddy') ),
-         CUSERFLAG_FRIEND  => array( 'ufl_friend',  T_('Friend') ),
-         CUSERFLAG_STUDENT => array( 'ufl_student', T_('Student') ),
-         CUSERFLAG_TEACHER => array( 'ufl_teacher', T_('Teacher') ),
-         CUSERFLAG_FAN     => array( 'ufl_fan',     T_('Fan') ),
-         CUSERFLAG_TROLL   => array( 'ufl_troll',   T_('Troll') ),
-         CUSERFLAG_ADMIN   => array( 'ufl_admin',   T_('Site Crew') ),
-         CUSERFLAG_MISC    => array( 'ufl_misc',    T_('Miscellaneous') ),
-         );
-
-      // sysflag => ( form_elem_name, translation )
-      global $ARR_CONTACT_SYSFLAGS;
-      $ARR_CONTACT_SYSFLAGS = array(
-         CSYSFLAG_WAITINGROOM    => array( 'sfl_waitingroom',    T_('Protect waitingroom games') ),
-         CSYSFLAG_REJECT_MESSAGE => array( 'sfl_reject_message', T_('Reject messages') ),
-         CSYSFLAG_REJECT_INVITE  => array( 'sfl_reject_invite',  T_('Reject invitations') ),
-         );
    }
 
    /*!
@@ -175,30 +144,30 @@ class Contact
 
    /*!
     * \brief Parses system-flags from _REQUEST-array into current object:
-    *        expecting vars like 'sfl_..' as declared in $ARR_CONTACT_SYSFLAGS.
+    *        expecting vars like 'sfl_..' as declared in getContactSystemFlags().
     */
    function parse_system_flags()
    {
-      global $ARR_CONTACT_SYSFLAGS;
-
       $this->sysflags = 0;
-      foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
+      foreach( Contact::getContactSystemFlags() as $sysflag => $arr )
+      {
          if( @$_REQUEST[$arr[0]] )
             $this->sysflags |= $sysflag;
+      }
    }
 
    /*!
     * \brief Parses user-flags from _REQUEST-array into current object:
-    *        expecting vars like 'ufl_..' as declared in $ARR_CONTACT_USERFLAGS.
+    *        expecting vars like 'ufl_..' as declared in getContactUserFlags().
     */
    function parse_user_flags()
    {
-      global $ARR_CONTACT_USERFLAGS;
-
       $this->userflags = 0;
-      foreach( $ARR_CONTACT_USERFLAGS as $userflag => $arr )
+      foreach( Contact::getContactUserFlags() as $userflag => $arr )
+      {
          if( @$_REQUEST[$arr[0]] )
             $this->userflags |= $userflag;
+      }
    }
 
    /*!
@@ -284,8 +253,7 @@ class Contact
     */
    function format_system_flags( $flagmask, $sep=', ' )
    {
-      global $ARR_CONTACT_SYSFLAGS;
-      return Contact::format_flags( $ARR_CONTACT_SYSFLAGS, $flagmask, $sep );
+      return Contact::format_flags( Contact::getContactSystemFlags(), $flagmask, $sep );
    }
 
    /*!
@@ -294,8 +262,7 @@ class Contact
     */
    function format_user_flags( $flagmask, $sep=', ' )
    {
-      global $ARR_CONTACT_USERFLAGS;
-      return Contact::format_flags( $ARR_CONTACT_USERFLAGS, $flagmask, $sep );
+      return Contact::format_flags( Contact::getContactUserFlags(), $flagmask, $sep );
    }
 
    /*!
@@ -310,6 +277,47 @@ class Contact
          if( $flagmask & $flag )
             $out[]= $arr[1];
       return implode($sep, $out);
+   }
+
+   /*! \brief Returns globals (lazy init) for contact-user-flags. */
+   function getContactUserFlags()
+   {
+      // lazy-init of texts
+      $key = 'USERFLAGS';
+      if( !isset($ARR_GLOBALS_CONTACT[$key]) )
+      {
+         $arr = array();
+         // userflag => ( form_elem_name, translation )
+         $arr[CUSERFLAG_BUDDY]   = array( 'ufl_buddy',   T_('Buddy') );
+         $arr[CUSERFLAG_FRIEND]  = array( 'ufl_friend',  T_('Friend') );
+         $arr[CUSERFLAG_STUDENT] = array( 'ufl_student', T_('Student') );
+         $arr[CUSERFLAG_TEACHER] = array( 'ufl_teacher', T_('Teacher') );
+         $arr[CUSERFLAG_FAN]     = array( 'ufl_fan',     T_('Fan') );
+         $arr[CUSERFLAG_TROLL]   = array( 'ufl_troll',   T_('Troll') );
+         $arr[CUSERFLAG_ADMIN]   = array( 'ufl_admin',   T_('Site Crew') );
+         $arr[CUSERFLAG_MISC]    = array( 'ufl_misc',    T_('Miscellaneous') );
+         $ARR_GLOBALS_CONTACT[$key] = $arr;
+      }
+
+      return $ARR_GLOBALS_CONTACT[$key];
+   }
+
+   /*! \brief Returns globals (lazy init) for contact-system-flags. */
+   function getContactSystemFlags()
+   {
+      // lazy-init of texts
+      $key = 'SYSTEMFLAGS';
+      if( !isset($ARR_GLOBALS_CONTACT[$key]) )
+      {
+         $arr = array();
+         // sysflag => ( form_elem_name, translation )
+         $arr[CSYSFLAG_WAITINGROOM]    = array( 'sfl_waitingroom',    T_('Protect waitingroom games') );
+         $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_message', T_('Reject messages') );
+         $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_invite',  T_('Reject invitations') );
+         $ARR_GLOBALS_CONTACT[$key] = $arr;
+      }
+
+      return $ARR_GLOBALS_CONTACT[$key];
    }
 
 } // end of 'Contact'

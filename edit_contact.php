@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -47,9 +47,6 @@ require_once( "include/contacts.php" );
 
    if( @$_REQUEST['contact_cancel'] ) // cancel delete
       jump_to("list_contacts.php");
-
-   //TODO: init in Contact-class
-   Contact::load_globals();
 
    $my_id = $player_row['ID'];
    $cid = (int) @$_REQUEST['cid'];
@@ -171,7 +168,7 @@ require_once( "include/contacts.php" );
             $cform->set_layout( FLAYOUT_AREACONF, 2, array(
                   FAC_TABLE => 'class=EditOptions',
                ) );
-            foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr )
+            foreach( Contact::getContactSystemFlags() as $sysflag => $arr )
             {
                $cform->add_row( array(
                   'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_sysflag_set($sysflag) ));
@@ -183,13 +180,14 @@ require_once( "include/contacts.php" );
             $cform->set_layout( FLAYOUT_AREACONF, 3, array(
                   FAC_TABLE => 'class=EditOptions',
                ) );
-            reset($ARR_CONTACT_USERFLAGS);
-            while( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
+            $arr_contact_userflags = Contact::getContactUserFlags();
+            reset($arr_contact_userflags);
+            while( list($userflag, $arr) = each($arr_contact_userflags) )
             {
                $row_arr = array();
                array_push( $row_arr,
                   'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
-               if( list($userflag, $arr) = each($ARR_CONTACT_USERFLAGS) )
+               if( list($userflag, $arr) = each($arr_contact_userflags) )
                   array_push( $row_arr, 'TD',
                      'CHECKBOX', $arr[0], 1, $arr[1], $contact->is_userflag_set($userflag) );
                else

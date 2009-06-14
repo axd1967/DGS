@@ -43,19 +43,17 @@ require_once( 'include/classlib_userpicture.php' );
    $my_id = (int)@$player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_CONTACTS );
 
-   //TODO: init in Contact-class
-   Contact::load_globals();
-
    $page = "list_contacts.php?";
 
    $arr_chk_sysflags = array();
-   foreach( $ARR_CONTACT_SYSFLAGS as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
+   foreach( Contact::getContactSystemFlags() as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
    {
       $td_flagtext = "<td>%s{$arr[1]}</td>";
       $arr_chk_sysflags[$td_flagtext] = $sysflag;
    }
    $arr_chk_userflags = array();
-   foreach( $ARR_CONTACT_USERFLAGS as $userflag => $arr ) // arr=( form_elem_name, flag-text )
+
+   foreach( Contact::getContactUserFlags() as $userflag => $arr ) // arr=( form_elem_name, flag-text )
    {
       $td_flagtext = "<td>%s{$arr[1]}</td>";
       $arr_chk_userflags[$td_flagtext] = $userflag;
