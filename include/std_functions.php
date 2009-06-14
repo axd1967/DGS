@@ -286,7 +286,7 @@ function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
    if( $usertype & USERTYPE_PRO )
    {
       $text = T_('Professional');
-      $tmp = ($img) ? image( "{$base_path}images/professional.gif", $text, $text ) : '';
+      $tmp = ($img) ? image( "{$base_path}images/professional.gif", $text, null ) : '';
       if( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Pro#utype_short') : $text);
       $out[] = $tmp;
@@ -294,7 +294,7 @@ function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
    if( $usertype & USERTYPE_TEACHER )
    {
       $text = T_('Teacher');
-      $tmp = ($img) ? image( "{$base_path}images/teacher.gif", $text, $text ) : '';
+      $tmp = ($img) ? image( "{$base_path}images/teacher.gif", $text, null ) : '';
       if( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Teacher#utype_short') : $text);
       $out[] = $tmp;
@@ -302,7 +302,7 @@ function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
    if( $usertype & USERTYPE_ROBOT )
    {
       $text = T_('Robot');
-      $tmp = ($img) ? image( "{$base_path}images/robot.gif", $text, $text ) : '';
+      $tmp = ($img) ? image( "{$base_path}images/robot.gif", $text, null ) : '';
       if( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Bot#utype_short') : $text);
       $out[] = $tmp;
@@ -310,7 +310,7 @@ function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
    if( $usertype & USERTYPE_TEAM )
    {
       $text = T_('Team');
-      $tmp = ($img) ? image( "{$base_path}images/team.gif", $text, $text ) : '';
+      $tmp = ($img) ? image( "{$base_path}images/team.gif", $text, null ) : '';
       if( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Team#utype_short') : $text);
       $out[] = $tmp;
@@ -3030,11 +3030,14 @@ function attb_merge( $attb1, $attb2, $class_sep='')
    return array_merge($attb1, $attb2);
 }
 
+// if $title=null use same as $alt
 function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 {
    $str = "<img src=\"$src\" alt=".attb_quote($alt);
    if( $title )
      $str.= ' title='.attb_quote($title);
+   elseif( is_null($title) )
+     $str.= ' title='.attb_quote($alt);
    if( $height>=0 )
      $str.= " height=\"$height\"";
    if( $width>=0 )
