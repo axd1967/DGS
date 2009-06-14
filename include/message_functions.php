@@ -432,7 +432,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                            'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock,
                            'TEXT', sprintf( '(%s)', T_('UTC timezone') ), ));
 
-   $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
+   if( $formstyle == GSET_WAITINGROOM )
+      $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
 
    if( $iamrated )
    {
