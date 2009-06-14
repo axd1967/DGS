@@ -25,6 +25,14 @@ ChangeLog
 
 2009-06-14 juga
 
+   * site_map.php:
+   - added DGS-wishlist, install, snapshot
+
+   * todo.php, TODO, docs.php site_map.php:
+   - removed todo-list, moved content to DGS-Wishlist on Sensei's Library
+     http://senseis.xmp.net/?DGSWishlist
+   - keep todo-page redirecting to DGS-wishlist on SLs not to avoid breaking links
+
    * forum/forum_functions.php (DisplayForum.init_navi_images),
      include/classlib_game.php (GameScore.draw_score_box),
      include/classlib_userpicture.php (UserPicture.getImageHtml),
