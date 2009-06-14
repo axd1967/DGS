@@ -232,7 +232,9 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Links'), "links.php", true);
          item(T_('People'), "people.php", true);
          item(T_('Statistics'), "statistics.php", true);
-         item(T_('Todo list'), "todo.php", true);
+         item(T_('DGS Wish list'), "http://senseis.xmp.net/?DGSWishlist", true);
+         item(T_('Installation instructions'), "install.php", true);
+         item(T_('Download dragon sources'), "snapshot.php", true);
          item(T_('License'), "licence.php", true, true);
       } $item_level--;
 
