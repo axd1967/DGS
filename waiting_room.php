@@ -290,8 +290,6 @@ require_once( 'include/classlib_userconfig.php' );
             $h_str = ( $calculated )
                ? build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap )
                : $Handicap;
-            if( ENA_STDHANDICAP && ($StdHandicap === 'Y') && $h_str )
-               $h_str .= ' ' . T_('(Standard placement)#handicap_tablewr');
             $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
          if( $wrtable->Is_Column_Displayed[ 6] ) // Komi
@@ -325,14 +323,22 @@ require_once( 'include/classlib_userconfig.php' );
          }
          if( $wrtable->Is_Column_Displayed[16] )
             $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
-         if( !$is_my_game && $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
+         if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
          {
-            $colstr = determine_color( $Handicaptype, $is_my_game, $iamblack );
-            $resultHandicap = adjust_handicap( $infoHandi, $AdjHandicap, $MinHandicap, $MaxHandicap );
-            $resultKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
-            $wrow_strings[18] = ($resultHandicap > 0)
-               ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$resultHandicap, $resultKomi )
-               : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $resultKomi );
+            if( !$is_my_game )
+            {
+               $colstr = determine_color( $Handicaptype, $is_my_game, $iamblack );
+               $resultHandicap = adjust_handicap( $infoHandi, $AdjHandicap, $MinHandicap, $MaxHandicap );
+               $resultKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
+               $settings_str = ($resultHandicap > 0)
+                  ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$resultHandicap, $resultKomi )
+                  : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $resultKomi );
+            }
+            else
+               $settings_str = '';
+            if( ENA_STDHANDICAP && ($StdHandicap !== 'Y') )
+               $settings_str .= ($settings_str ? ' ' : '') . T_('(Free Handicap)#handicap_tablewr');
+            $wrow_strings[18] = $settings_str;
          }
 
          $wrtable->add_row( $wrow_strings );
