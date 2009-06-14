@@ -913,10 +913,9 @@ class Table
          global $base_path;
          if( $query_del ) //end_sep
          {
-            $tool1 = image( $base_path.'images/remove.gif', 'x', '', 'class=Hide');
-            $tool1 = anchor(
-                 $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}"
-               , $tool1, T_('Hide'));
+            $tool1 = anchor( $query_del . "{$this->Prefix}del=$nr#{$this->PrevColId}",
+                  image( $base_path.'images/remove.gif', 'x', '', 'class=Hide'),
+                  T_('Hide'));
          }
          else
          {
