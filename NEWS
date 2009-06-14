@@ -3,7 +3,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Tournaments, Games, Forum)
+#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Tournaments, Game settings, Users, Forum, Voting)
 
    New features and Major changes:
 
@@ -216,6 +216,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added link to statistics page on docs and site-map page
       * News: added table of contents
       * <home links.php>Links</home>: added gosensations.com, corrected outdated links
+      * Removed todo-list, moved content to DGS-Wishlist on Sensei's Library
 
       * <home people.php>People page</home>:
          * Added section with all Dragon executives
