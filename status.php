@@ -276,8 +276,7 @@ $ThePage = new Page('Status');
             $grow_strings[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
          }
          if( $gtable->Is_Column_Displayed[15] )
-            $grow_strings[15] = anchor( 'gameinfo.php?gid='.$ID,
-               image( $base_path.'images/info.gif', $ginfo_str, null, 'class="InTextImage"'));
+            $grow_strings[15] = echo_image_gameinfo($ID);
 
          $gtable->add_row( $grow_strings );
       }

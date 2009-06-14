@@ -1017,10 +1017,7 @@ function draw_game_info(&$game_row, &$board)
    //game rows
    $sep = ',' . SMALL_SPACING;
    echo '<tr id="gameRules">' . "\n";
-   echo '<td class=Color>'
-      . anchor( "gameinfo.php?gid={$game_row['ID']}",
-            image( $base_path.'images/info.gif', T_('Game information'), null, 'class="InTextImage"') )
-      . "</td>\n";
+   echo '<td class=Color>', echo_image_gameinfo($game_row['ID']), "</td>\n";
    echo "<td colspan=\"" . ($cols-1) . "\">" . T_('Rules') . ': ';
    echo T_('Komi') . ': ' . $game_row['Komi'] ;
    echo $sep . T_('Handicap') . ': ' . $game_row['Handicap'];

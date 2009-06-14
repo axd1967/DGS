@@ -662,7 +662,6 @@ $ThePage = new Page('GamesList');
       'b_w' => T_('[%s] has Black, White to move#hover'),
       'b_b' => T_('[%s] has Black, Black to move#hover'),
    );
-   $ginfo_str = T_('Game information');
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
    if( !$has_union )
@@ -680,8 +679,7 @@ $ThePage = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[32] )
-         $grow_strings[32] = anchor( 'gameinfo.php?gid='.$ID,
-            image( $base_path.'images/info.gif', $ginfo_str, null, 'class="InTextImage"'));
+         $grow_strings[32] = echo_image_gameinfo($ID);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
       if( $observe_all )
