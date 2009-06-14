@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -143,12 +143,10 @@ function find_category_box_text($cat)
                '<div>'
                      . ($cat ?$categories[$cat] :($other ?$other :'&nbsp;'))
                      . "</div><div class=center>"
-                     . anchor($moveurl."move$bid=1"
-                           , image( 'images/down.png', 'down')
-                           , T_("Move down"))
-                     . anchor($moveurl."move$bid=-1"
-                           , image( 'images/up.png', 'up')
-                           , T_("Move up"))
+                     . anchor($moveurl."move$bid=1",
+                           image( 'images/down.png', 'down'), T_("Move down"), null)
+                     . anchor($moveurl."move$bid=-1",
+                           image( 'images/up.png', 'up'), T_("Move up"), null)
                      . "</div>"
                //don't use add_info() to avoid the INFO_HTML here:
                ,$text
