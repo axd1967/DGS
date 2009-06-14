@@ -118,20 +118,20 @@ require_once( 'include/utilities.php' );
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
 
-      $byoyomitype = @$_POST['byoyomitype'];
-      $timevalue = @$_POST['timevalue'];
-      $timeunit = @$_POST['timeunit'];
+   $byoyomitype = @$_POST['byoyomitype'];
+   $timevalue = @$_POST['timevalue'];
+   $timeunit = @$_POST['timeunit'];
 
-      $byotimevalue_jap = @$_POST['byotimevalue_jap'];
-      $timeunit_jap = @$_POST['timeunit_jap'];
-      $byoperiods_jap = @$_POST['byoperiods_jap'];
+   $byotimevalue_jap = @$_POST['byotimevalue_jap'];
+   $timeunit_jap = @$_POST['timeunit_jap'];
+   $byoperiods_jap = @$_POST['byoperiods_jap'];
 
-      $byotimevalue_can = @$_POST['byotimevalue_can'];
-      $timeunit_can = @$_POST['timeunit_can'];
-      $byoperiods_can = @$_POST['byoperiods_can'];
+   $byotimevalue_can = @$_POST['byotimevalue_can'];
+   $timeunit_can = @$_POST['timeunit_can'];
+   $byoperiods_can = @$_POST['byoperiods_can'];
 
-      $byotimevalue_fis = @$_POST['byotimevalue_fis'];
-      $timeunit_fis = @$_POST['timeunit_fis'];
+   $byotimevalue_fis = @$_POST['byotimevalue_fis'];
+   $timeunit_fis = @$_POST['timeunit_fis'];
 
    list($hours, $byohours, $byoperiods) =
       interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
@@ -150,7 +150,9 @@ require_once( 'include/utilities.php' );
    {
       if( ($stdhandicap=@$_POST['stdhandicap']) != 'Y' )
          $stdhandicap = 'N';
-   } else $stdhandicap = 'N';
+   }
+   else
+      $stdhandicap = 'N';
 
    if( ($weekendclock=@$_POST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
@@ -171,9 +173,7 @@ require_once( 'include/utilities.php' );
          error('rank_not_rating');
 
       if( $rating2 < $rating1 )
-      {
-         $tmp = $rating1; $rating1 = $rating2; $rating2 = $tmp;
-      }
+         swap( $rating1, $rating2 );
 
       $rating2 += 50;
       $rating1 -= 50;
