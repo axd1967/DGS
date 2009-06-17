@@ -132,7 +132,6 @@ function fill_sql_template( $tmpl, $op, $val )
   * for Resulting SQL-Statement \see get_select()
   *
   * supported: sub-clauses (though those are since mysql4.1).
-  * NOT supported: UNION-selects-syntax
   *
   * SQL-parts of type:
   *    SQLP_OPTS: [DISTINCT] [STRAIGHT_JOIN] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT] [SQL_CACHE | SQL_NO_CACHE]
@@ -182,6 +181,7 @@ class QuerySQL
 {
    /*! \brief array( type => array( part, ...), ...) */
    var $parts;
+   var $use_union_all;
 
    /*!
     * \brief Constructs QuerySQL( part_type, part1, part2, ... part_type, ...) with var-args.
@@ -193,6 +193,7 @@ class QuerySQL
       $this->parts = array();
       foreach( array_keys($ARR_SQL_STATEMENTS) as $type )
          $this->parts[$type] = array();
+      $this->use_union_all = false;
 
       // skip arg #0=type-arg to add var-args: parts
       $type = '';
@@ -209,6 +210,11 @@ class QuerySQL
                $this->parts[$type][] = $arg;
          }
       }
+   }
+
+   function useUnionAll( $use=true )
+   {
+      $this->use_union_all = $use;
    }
 
    /*!
@@ -407,7 +413,8 @@ class QuerySQL
       }
 
       $arrsql = array();
-      $arrsql[]= '(' . implode(') UNION (', $arr_union) . ')';
+      $union_cmd = ($this->use_union_all) ? 'UNION ALL' : 'UNION DISTINCT';
+      $arrsql[]= '(' . implode(") $union_cmd (", $arr_union) . ')';
 
       if( $this->has_part(SQLP_ORDER) )
          $arrsql[]= $this->get_part(SQLP_ORDER, true);
