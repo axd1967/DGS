@@ -1174,7 +1174,8 @@ class Table
       else
       {
          $current_page = floor( $this->From_Row / $this->Rows_Per_Page ) + 1;
-         $max_page = ($this->FoundRows < 0 ) ? 0 : floor( $this->FoundRows / $this->Rows_Per_Page ) + 1;
+         $max_page = ($this->FoundRows < 0 )
+            ? 0 : floor( ($this->FoundRows + $this->Rows_Per_Page - 1) / $this->Rows_Per_Page );
 
          $align = 'align=bottom'; //'align=middle'
          $navi_left = ''; // left from page-num
@@ -1226,9 +1227,9 @@ class Table
 
          if( $max_page > 0 && $current_page < $max_page - 1 ) // end-link
          {
-            $last_page = floor($this->FoundRows / $this->Rows_Per_Page) * $this->Rows_Per_Page;
+            $last_page_row = floor( ($this->FoundRows - $this->Rows_Per_Page + 1) / $this->Rows_Per_Page) * $this->Rows_Per_Page;
             $navi_right .= MINI_SPACING . anchor(
-                 $qstr . $this->Prefix . 'from_row=' . $last_page,
+                 $qstr . $this->Prefix . 'from_row=' . $last_page_row,
                  image( $base_path.'images/end.gif', '=>|', '', $align),
                  T_('last page') );
          }
