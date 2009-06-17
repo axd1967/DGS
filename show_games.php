@@ -599,6 +599,7 @@ $ThePage = new Page('GamesList');
          $qsql->add_part( SQLP_UNION_WHERE,
             "White_ID=$uid AND Opp.ID=Black_ID",
             "Black_ID=$uid AND Opp.ID=White_ID" );
+         $qsql->useUnionAll();
       }
       else //FU+RU
       {
@@ -610,12 +611,6 @@ $ThePage = new Page('GamesList');
       }
    }
 
-   // NOTE: full page-navigation does not work for UNION-queries
-   //       It's possible to disable unions with global-config ALLOW_SQL_UNION,
-   //       but performance of it has to be evaluate first !!
-   $has_union = $qsql->has_union();
-   if( $has_union )
-      $gtable->disable_table_mode( TABLE_ROWS_NAVI );
    $qsql->merge( $gtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
 
@@ -668,8 +663,7 @@ $ThePage = new Page('GamesList');
    );
 
    $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
-   if( !$has_union )
-      $gtable->set_found_rows( mysql_found_rows('show_games.found_rows') );
+   $gtable->set_found_rows( mysql_found_rows('show_games.found_rows') );
 
    while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
    {
