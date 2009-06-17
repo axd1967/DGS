@@ -23,6 +23,19 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-17 juga
+
+   * opponents.php, show_games.php, NEWS:
+   - added full-page-navigation with found-rows for:
+     opponents-page, my finished and running games
+
+   * include/std_classes.php (QuerySQL, ~.useUnionAll, ~.get_select):
+   - added support for pages with UNION-queries, possible because LIMIT global in UNION
+   - added support for both UNION-queries: 'UNION ALL' and 'UNION DISTINCT'
+
+   * include/table_columns.php (Table.make_next_prev_links):
+   - fixed last-page calculation from found-rows (was one page too much)
+
 2009-06-14 juga
 
    * include/gui_functions.php (echo_image_table),
