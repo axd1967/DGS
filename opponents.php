@@ -113,7 +113,7 @@ $ARR_DBFIELDKEYS = array(
    $usfilter = new SearchFilter( 's', $search_profile );
    $ufilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'active' ); // named-filters FC_FNAME
-   $utable = new Table( 'user', $page, $cfg_tblcols );
+   $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -270,6 +270,7 @@ $ARR_DBFIELDKEYS = array(
       $uqsql->add_part( SQLP_UNION_WHERE,
          "G.White_ID=$uid AND P.ID=G.Black_ID",
          "G.Black_ID=$uid AND P.ID=G.White_ID" );
+      $uqsql->useUnionAll(false); // need distinct-UNION
    }
    else
    {
@@ -352,6 +353,7 @@ $ARR_DBFIELDKEYS = array(
       or error('mysql_query_failed', "opponents.find_stats($uid,$opp)");
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
+   $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
 
    if( $opp )
    {
