@@ -465,11 +465,11 @@ $msg_icones = array(
 function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $other_id, $other_name, $other_handle, //must be html_safe
                             $subject, $text, //must NOT be html_safe
-                            $reply_mid=0, $flow=0,
+                            $thread=0, $reply_mid=0, $flow=0,
                             $folders=null, $folder_nr=null, $form=null, $delayed_move=false,
                             $rx_term='')
 {
-   global $msg_icones, $bg_color;
+   global $msg_icones, $bg_color, $base_path;
 
    if( $other_id > 0 )
    {
@@ -501,7 +501,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td colspan=$cols>" . $subj_fmt . "</td></tr>\n" .
       "<tr class=Message>" .
       "<td class=Rubric>" . T_('Message') . ":" ;
-   $str = '';
+
+   $str0 = $str = '';
    if( $flow & FLOW_ANSWER && $reply_mid > 0 )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
@@ -518,8 +519,16 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
              . ' title="' . T_("Next messages") . '"'
              . "></a>&nbsp;" ;
    }
-   if( $str )
-     echo "<div class=MessageFlow>$str</div>";
+   if( $str ) // $str set if msg is answer or has answer
+      $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid#mid$mid",
+         image( $base_path.'images/thread.gif', T_('Message thread') ),
+         T_('Show message thread') ) . MINI_SPACING;
+   if( $thread != $mid )
+      $str0 .= anchor( 'message.php?mode=ShowMessage'.URI_AMP.'mid='.$thread,
+         image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
+         T_('Show initial message in thread') ) . MINI_SPACING;
+   if( $str0 || $str )
+     echo "<div class=MessageFlow>$str0$str</div>";
 
    echo "</td>\n"
       . "<td colspan=$cols>\n";
@@ -1192,6 +1201,16 @@ function folder_is_empty($nr, $uid)
    return $nr;
 }
 
+function get_message_directions()
+{
+   return array(
+      'M' => T_('Myself#msgdir'),
+      'S' => T_('Server#msgdir'),
+      'Y' => T_('To#msgdir'),
+      'N' => T_('From#msgdir'),
+   );
+}
+
 // param extra_querysql: QuerySQL-object to extend query
 // return array( result, merged-QuerySQL )
 function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date', $limit='', $extra_querysql=null)
@@ -1208,7 +1227,7 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date'
  **/
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
-      'M.Type', 'M.Subject', 'M.Game_ID',
+      'M.Type', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
       'UNIX_TIMESTAMP(M.Time) AS Time',
       'me.mid as date',
       "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
@@ -1240,7 +1259,7 @@ function message_list_head( &$mtable, $current_folder
              , $no_mark=true, $full_details=false
              )
 {
- global $msg_icones;
+   global $base_path, $msg_icones;
 
    $mtable->ExtMode['no_mark']= $no_mark;
    $mtable->ExtMode['full_details']= $full_details;
@@ -1249,6 +1268,8 @@ function message_list_head( &$mtable, $current_folder
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $mtable->add_tablehead( 1, T_('Folder#header'), 'Folder',
       ($current_folder>FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
+   $mtable->add_tablehead( 9, new TableHead( T_('Message thread#header'),
+         'images/thread.gif', T_('Show message thread') ), 'Image', 0, 'Thread+' );
 
    if( $full_details )
    {
@@ -1264,6 +1285,8 @@ function message_list_head( &$mtable, $current_folder
    $mtable->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
    list($ico,$alt) = $msg_icones[0];
    $mtable->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
+   $mtable->add_tablehead(10, new TableHead( T_('First message in thread#header'),
+         'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
    $mtable->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'date-');
    if( !$no_mark )
       $mtable->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
@@ -1277,7 +1300,7 @@ function message_list_body( &$mtable, $result, $show_rows
              , $my_folders, $toggle_marks=false, $rx_term=''
              )
 {
- global $msg_icones, $player_row;
+   global $base_path, $msg_icones, $player_row;
 
    $no_mark= @$mtable->ExtMode['no_mark'];
    $full_details= @$mtable->ExtMode['full_details'];
@@ -1294,67 +1317,37 @@ function message_list_body( &$mtable, $result, $show_rows
                   FLOW_ANSWERED => $n ,
       FLOW_ANSWER|FLOW_ANSWERED => "$p - $n" ,
       );
-
-   // synchronize those translations with search_messages.php
-   $dirs = array(
-      'M' => T_('Myself#msgdir'),
-      'S' => T_('Server#msgdir'),
-      'Y' => T_('To#msgdir'),
-      'N' => T_('From#msgdir'),
-      );
+   $dirs = get_message_directions();
 
    $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $mid = $row["mid"];
-      $mrow_strings = array();
 
       $folder_nr = $row['folder'];
       $deleted = ( is_null($folder_nr) );
       $bgcolor = $mtable->blend_next_row_color_hex();
+      $thread = $row['Thread'];
 
+      // link to message
+      $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid{$url_terms}";
+
+      $mrow_strings = array();
       $mrow_strings[ 1] = array(
          'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
 
-      if( $row['Sender'] === 'M' ) //Message to myself
-         $row["other_name"] = '(' . T_('Myself') . ')';
-      else if( $row["other_ID"] <= 0 )
-         $row["other_name"] = '[' . T_('Server message') . ']';
-      if( empty($row["other_name"]) )
-         $row["other_name"] = NO_VALUE;
-
-      // link to message
-      $showmsg_start = "<A href=\"message.php?mode=ShowMessage".URI_AMP."mid=$mid{$url_terms}\">";
-      $showmsg_end   = "</A>";
-
       // link to user
-      if( $row['Sender'] === 'M' ) //Message to myself
-      {
-         if( $full_details )
-            $user_str = user_reference( REF_LINK, 1, '', $player_row );
-         else
-            $user_str = $row['other_name'];
-      }
-      else if( $row["other_ID"] > 0 )
-         $user_str = user_reference( REF_LINK, 1, '',
-            $row['other_ID'], $row['other_name'], $row['other_handle'] );
-      else
-         $user_str = $row['other_name']; // server-msg or unknown
-
-      $str = $user_str;
-      if( !$full_details )
-         if( $row['Sender'] === 'Y' )
-            $str = T_('To') . ': ' . $str;
+      $str = message_build_user_string( $row, $player_row, $full_details );
+      if( !$full_details && ($row['Sender'] === 'Y') )
+         $str = T_('To') . ': ' . $str;
       $mrow_strings[ 2] = $str;
 
-      $subject = $row['Subject'];
-      $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
-      $mrow_strings[ 3] = "$showmsg_start$subject$showmsg_end";
+      $subject = make_html_safe( $row['Subject'], SUBJECT_HTML, $rx_term);
+      $mrow_strings[ 3] = anchor( $msg_url, $subject );
 
       list($ico,$alt) = $msg_icones[$row['flow']];
-      $str = image( $ico, $alt, $tits[$row['flow']]);
-      $mrow_strings[ 8] = "$showmsg_start$str$showmsg_end";
+      $mrow_strings[ 8] = anchor( $msg_url, image( $ico, $alt, $tits[$row['flow']] ));
 
       $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
@@ -1365,6 +1358,20 @@ function message_list_body( &$mtable, $result, $show_rows
          $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];
 
          $mrow_strings[ 7] = $dirs[$row['Sender']];
+      }
+
+      $mrow_strings[ 9] = '';
+      $mrow_strings[10] = '';
+      if( $thread )
+      {
+         $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid",
+               image( $base_path.'images/thread.gif', T_('Message thread') ),
+               T_('Show message thread') );
+
+         if( $thread != $mid )
+            $mrow_strings[10] = anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$thread",
+                  image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
+                  T_('Show initial message in thread') );
       }
 
       if( !$no_mark )
@@ -1395,5 +1402,36 @@ function message_list_body( &$mtable, $result, $show_rows
 
    return $can_move_messages ;
 } //message_list_body
+
+/*!
+ * \brief Builds user-string for message-list.
+ * \param $row expected fields: Sender, other_ID, other_name, other_handle
+ * \param $my_row most often $player_row
+ */
+function message_build_user_string( &$row, $my_row, $full_details )
+{
+   if( $row['Sender'] === 'M' ) // Message to myself
+      $row['other_name'] = '(' . T_('Myself') . ')';
+   else if( $row['other_ID'] <= 0 )
+      $row['other_name'] = '[' . T_('Server message') . ']';
+   if( empty($row['other_name']) )
+      $row['other_name'] = NO_VALUE;
+
+   // link to user
+   if( $row['Sender'] === 'M' ) // Message to myself
+   {
+      if( $full_details )
+         $user_str = user_reference( REF_LINK, 1, '', $my_row );
+      else
+         $user_str = $row['other_name'];
+   }
+   else if( $row['other_ID'] > 0 )
+      $user_str = user_reference( REF_LINK, 1, '',
+         $row['other_ID'], $row['other_name'], $row['other_handle'] );
+   else
+      $user_str = $row['other_name']; // server-msg or unknown
+
+   return $user_str;
+}
 
 ?>

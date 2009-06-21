@@ -1329,6 +1329,22 @@ table.MessageBox td {
    text-align: left;
 }
 
+/* Message-thread */
+table tr.MessageThread td.MessageThread {
+   padding: 7px 6px 5px;
+   vertical-align: top;
+   text-align: right;
+}
+table tr.MessageThread div.MessageBox {
+   /*width: 30em; /* 475px; */
+   white-space: normal;
+   text-align: left;
+   margin: 5px 0px;
+   padding: 2px 4px;
+   background: #F7F5E3;
+   border: 1px solid;
+}
+
 div.MessageFlow {
    margin: 0px auto;
    vertical-align: top;

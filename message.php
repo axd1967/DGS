@@ -272,7 +272,7 @@ require_once( "include/form_functions.php" );
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $ReplyTo, $flow,
+                            $Thread, $ReplyTo, $flow,
                             $folders, $Folder_nr, $message_form, $Replied=='M', $rx_term);
 
          if( $submode == 'AlreadyAccepted' )
@@ -346,7 +346,7 @@ require_once( "include/form_functions.php" );
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $ReplyTo, $flow,
+                            $Thread, $ReplyTo, $flow,
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
@@ -385,7 +385,7 @@ require_once( "include/form_functions.php" );
          message_info_table($mid, $date, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $ReplyTo, $flow, //no folders, so no move
+                            $Thread, $ReplyTo, $flow, //no folders, so no move
                             null, null, null, false, $rx_term);
 
          if( $preview )

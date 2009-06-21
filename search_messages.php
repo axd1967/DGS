@@ -106,7 +106,7 @@ require_once( "include/classlib_profile.php" );
          array( FC_MATCH_MODE => MATCH_BOOLMODE_SET ) );
    $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
 
-   // synchronize those translations with message_functions.php (message_list_body)
+   // synchronize those translations with message_functions.php (get_message_directions)
    $mfilter->add_filter( 7, 'Selection',
          array( T_('All#msgdir')    => '',
                 T_('From#msgdir')   => "me.Sender='N'", // from other user
