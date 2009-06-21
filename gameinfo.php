@@ -247,7 +247,7 @@ function build_rating_diff( $rating_diff )
 
    $short = true; // use short-time?
    $itable = new Table_info('time');
-   $itable->add_caption( T_('Remaining time and Time settings') );
+   $itable->add_caption( T_('Time settings and Remaining time') );
    $itable->add_sinfo(
          T_('Color'),
          array(
@@ -335,8 +335,8 @@ function build_rating_diff( $rating_diff )
    echo "<h3 class=Header>$title</h3>\n";
 
    echo "<table><tr valign=\"top\">",
-      "<td>$itable_str_game<br>$itable_str_players</td>",
-      "<td>$itable_str_time</td>",
+      "<td>$itable_str_game</td>",
+      "<td>$itable_str_time<br>$itable_str_players</td>",
       "</tr></table>\n";
 
    $menu_array = array();
