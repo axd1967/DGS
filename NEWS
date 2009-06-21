@@ -84,6 +84,12 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Show user-info in two columns (less game- and more-game-related info)
       * Mark Dragon executives with admin-icon (<image admin.gif>)
 
+   * <home list_messages.php>Messages</home>:
+      * Added new page with message-thread for a message,
+        show or hide all message-texts within message-thread
+      * Show linked icon to message-thread (<image thread.gif>) for single message and on pages with message-lists
+      * Show linked icon to initial message in thread (<image msg_first.gif>) on reply message
+
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
@@ -241,6 +247,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Optimized translations
    * Code cleanup
    * Hide some sensible server infos
+   * Provide old forum page 'phorum/post.php' to avoid redirections
 
 
    Administrative changes:
