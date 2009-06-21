@@ -1067,16 +1067,15 @@ class Table
    function make_tablerow( $tablerow, $row_num, $rclass='Row1' )
    {
       if( isset($tablerow['class']) )
-      {
          $rclass = $tablerow['class'];
-      }
 
       if( $this->JavaScript )
-         $string = "\n <tr class=\"$rclass\" ondblclick=\"toggle_class(this,'$rclass','Hil$rclass')\">";
+         $row_start = "\n <tr class=\"$rclass%s\" ondblclick=\"toggle_class(this,'$rclass','Hil$rclass')\">";
       else
-         $string = "\n <tr class=\"$rclass\">";
+         $row_start = "\n <tr class=\"$rclass%s\">";
 
       $colspan= 0;
+      $string = sprintf( $row_start, '' ); // no extra class
       foreach( $this->Tableheads as $thead )
       {
          $nr = $thead['Nr'];
@@ -1113,6 +1112,16 @@ class Table
       }
 
       $string .= "\n </tr>";
+
+      if( isset($tablerow['extra_row']) )
+      {
+         $extra_class = ( isset($tablerow['extra_row_class']) ) ? ' '.$tablerow['extra_row_class'] : '';
+         $string .= sprintf( $row_start, $extra_class );
+         if( $this->Mode & TABLE_ROW_NUM )
+            $string .= '<td></td>'; // empty col for row-num
+         $string .= $tablerow['extra_row'];
+         $string .= "\n </tr>";
+      }
 
       return $string;
    }
