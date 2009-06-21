@@ -30,6 +30,8 @@ require_once( 'include/time_functions.php' );
 
 if( !defined('SMALL_SPACING') )
    define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+if( !defined('MED_SPACING') )
+   define('MED_SPACING', '&nbsp;&nbsp;');
 if( !defined('MINI_SPACING') )
    define('MINI_SPACING', '&nbsp;');
 
