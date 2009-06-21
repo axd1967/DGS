@@ -326,6 +326,7 @@ function get_executives( $level )
       . build_icon('online.gif', sprintf( T_('Being online (=in the house) created from [%s]'), 'house'))
       . build_icon('wclock_stop.gif', sprintf( T_('Stopped clock created from [%s]'), 'clock_stop'))
       . build_icon('table.gif', sprintf( T_('Table list created from [%s]'), 'application_view_list'))
+      . build_icon('thread.gif', sprintf( T_('Thread overview created from [%s]'), 'text_align_right'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
