@@ -70,3 +70,7 @@ copy /images/wclock_stop.gif
 -----------
 copy /images/table.gif
 
+-----------
+copy /images/thread.gif
+copy /images/msg_first.gif
+
