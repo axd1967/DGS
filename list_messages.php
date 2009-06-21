@@ -150,6 +150,7 @@ require_once( "include/filter.php" );
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
 
+   $qsql->merge( $mtable->get_query() ); // include found-rows-stuff, may need adjustment for filters
    list( $result ) = message_list_query($my_id, $folderstring, $order, $limit, $qsql);
 
    $show_rows = mysql_num_rows($result);
