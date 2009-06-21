@@ -1147,8 +1147,23 @@ function send_message( $debugmsg, $text='', $subject=''
    if( $to_myself && $reccnt > 0 )
       error('internal_error', "$debugmsg.rec2($from_id,$subject)");
 
+   // determine message-thread info
+   $thread = 0;
+   $thread_level = 0;
+   if( $prev_mid > 0 )
+   {
+      $prev_msgrow = mysql_single_fetch( "$debugmsg.find_prev($from_id,$prev_mid)",
+         "SELECT Thread, Level FROM Messages WHERE ID=$prev_mid LIMIT 1" );
+      if( is_array($prev_msgrow) )
+      {
+         $thread = $prev_msgrow['Thread'];
+         $thread_level = $prev_msgrow['Level'] + 1;
+      }
+   }
+
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
-          .", Type='$type', ReplyTo=$prev_mid, Game_ID=$gid"
+          .", Type='$type', Thread='$thread', Level='$thread_level'"
+          .", ReplyTo=$prev_mid, Game_ID=$gid"
           .", Subject='$subject', Text='$text'" ;
    db_query( "$debugmsg.message", $query);
 
@@ -1165,6 +1180,12 @@ function send_message( $debugmsg, $text='', $subject=''
          $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
       else
          $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
+   }
+
+   if( $from_id > 0 && $thread == 0 )
+   {
+      db_query( "$debugmsg.upd_thread($mid,$from_id)",
+         "UPDATE Messages SET Thread='$mid', Level=0 WHERE ID='$mid' LIMIT 1" );
    }
 
    $need_reply= ( ($from_id > 0 && $type == 'INVITATION') ?'M' :'N' );
