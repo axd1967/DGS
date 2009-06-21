@@ -270,7 +270,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    //$is_rated.= " AND !(Games.Moves < ".DELETE_LIMIT."+Games.Handicap)";
 
 
-   echo "<br>On ", gmtdate(DATE_FMT, $NOW), ' GMT<br>';
+   echo "<br>On ", date(DATE_FMT, $NOW), ' GMT<br>';
 
 //-----------------
 
