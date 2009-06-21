@@ -356,7 +356,8 @@ require_once( 'include/classlib_userconfig.php' );
                T_('Acceptance mode for challenges from same opponent, e.g. "SO[1x]" or "SO[&gt;7d]"#wroom'),
             );
          $notes = array();
-         $notes[] = T_('Column \'Settings\' shows the probably game-color, handicap and komi');
+         $notes[] = T_('Column \'Settings\' shows the probably game-color, handicap and komi.')
+               . sprintf( '<br>%s = %s', T_('(Free Handicap)#handicap_tablewr'), T_('indicator of free handicap stone placement') );
          $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
                . "\n* " . implode(",\n* ", $restrictions);
          echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
