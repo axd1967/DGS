@@ -724,4 +724,97 @@ class ListIterator
 
 } // end of 'ListIterator'
 
+
+
+ /*!
+  * \class ThreadList
+  *
+  * \brief Class to help with representing threads
+  */
+class ThreadList
+{
+   /*! \brief Thread item of certain type equal for whole thread-list. */
+   var $item;
+   /*! \brief Level within thread, starting at 0. */
+   var $level;
+   /*! \brief Parent ThreadList, null if root-item. */
+   var $parent;
+   /*! \brief List of ThreadList-objects being the children of current thread. */
+   var $children;
+
+   /*!
+    * \brief Constructs ThreadList
+    * \param $qsql will be added as merge-QuerySQL
+    */
+   function ThreadList( $item, $level=0, $parent=null )
+   {
+      $this->item = $item;
+      $this->level = $level;
+      $this->parent = $parent;
+      $this->children = array();
+   }
+
+   /*! \brief Returns current item. */
+   function getItem()
+   {
+      return $this->item;
+   }
+
+   /*! \brief Returns level of current item. */
+   function getLevel()
+   {
+      return $this->level;
+   }
+
+   /*! \brief Sets level for current item. */
+   function setLevel( $level )
+   {
+      $this->level = $level;
+   }
+
+   /*! \brief Returns true, if current item has a parent item. */
+   function hasParent()
+   {
+      return !is_null($this->parent);
+   }
+
+   /*! \brief Returns true, if current item has children items. */
+   function hasChildren()
+   {
+      return (count($this->children) > 0);
+   }
+
+   /*! \brief Returns children items. */
+   function getChildren()
+   {
+      return $this->children;
+   }
+
+   /*! \brief Adds child to current item. */
+   function addChild( $item )
+   {
+      $thread = new ThreadList( $item, $this->level + 1, $this );
+      $this->children[] = $thread;
+      return $thread;
+   }
+
+   /*!
+    * \brief Deep-traverse current ThreadList applying given function on each
+    *        ThreadList-part and given $result reference.
+    * \param $function Function with signature: function_name( ThreadList, &$result )
+    * \param $result passed in as reference to function when traversing ThreadList;
+    *                can be used as storage
+    * \note Function is applied on each item first before applying it on its children.
+    */
+   function traverse( $function, &$result )
+   {
+      $function( $this, $result );
+      foreach( $this->children as $child_item )
+      {
+         $child_item->traverse( $function, $result );
+      }
+   }
+
+} // end of 'ThreadList'
+
 ?>
