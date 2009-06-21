@@ -1,0 +1,604 @@
+###
+### Description of mysql tables:  Messages, MessageCorrespondents
+###
+
+###########################################################################
+## --- Messages ---
+
+Description:
+   Table to store message-content.
+   Table MessageCorrespondents refers to this table containing the sender and receiver.
+
+Important Notes:
+   - run 'scripts/message_consistency.php' to check message-consistency
+   - Message system is "misused" to handle game-offers, which has some drawbacks:
+      - "assigning" all related messages for game-offer or after-game-messages is difficult to impossible
+      - need redundant (but different work) to handle game-offers (waiting-room <-> message system)
+
+ Field   | Type                                                                            | Default
+---------+---------------------------------------------------------------------------------+---------------------
+ ID      | int(11)                                                                         | NULL
+ Type    | enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT') | NORMAL
+ Thread  | int(11)                                                                         | 0
+ Level   | smallint(6)                                                                     | 0
+ ReplyTo | int(11)                                                                         | 0
+ Game_ID | int(11)                                                                         | 0
+ Time    | datetime                                                                        | 0000-00-00 00:00:00
+ Subject | varchar(80)                                                                     |
+ Text    | text                                                                            | NULL
+
+## Fields:
+
+* ID : primary key, auto-increment for new message
+
+* Type : message-type
+   - NORMAL       : normal message between two users
+   - INVITATION   : invitation message (from other users)
+   - ACCEPTED     : accepted invitation (by other user)
+   - DECLINED     : rejeced invitation (by other user)
+   - DELETED      : old form of deleted message, new manners are to move it
+                    into delete-folder (see MessageCorrespondents)
+   - DISPUTED     : disputed invitation (by other user)
+   - RESULT       : game-result message (from system)
+
+* Thread : message-ID of first message in a message-thread
+   - system-messages have no thread -> Thread=0
+
+* Level : thread-level of message-thread starting at 0
+   - first reply has level 1, reply of reply has level 2 and so on
+   - current maximum level of live-server is 938(!)
+
+* ReplyTo : foreign-key, message-ID that has been replied with current message
+
+* Game_ID : foreign-key, game-related message can be assigned the Games.ID
+   - it's possible, that no corresponding entry in Games-table is existing (e.g. game deleted)
+
+* Time : creation-date of message
+
+* Subject, Text : content of message
+
+
+
+###########################################################################
+## --- MessageCorrespondents ---
+
+Description:
+   Table to keep track of sender and recipients of messages.
+
+ Field     | Type                  | Default
+-----------+-----------------------+---------
+ ID        | int(11)               | NULL
+ uid       | int(11)               | 0
+ mid       | int(11)               | 0
+ Folder_nr | int(11)               | NULL
+ Sender    | enum('M','N','Y','S') | Y
+ Replied   | enum('M','N','Y')     | N
+
+
+## Fields:
+
+* ID :
+
+* uid :
+
+* mid :
+
+* Folder_nr :
+   - may be NULL (!)
+
+* Sender
+
+* Replied
+
+
+
+###########################################################################
+## --- Some more collected & discussed infos about messages ---
+
+# Topic: Messages
+# Description: Managing messages on DGS
+# URL:
+
+#-------- Rod's answer -----------------------------------------
+# JUG's Q: are you reluctant to use 2 from/to-cols instead of one?
+
+Yes, I was reluctant to have 2 columns because one of the two cells is always yourself.
+In fact, this is pending (small) problem.
+The current design is mainly historical: we started with separate folders either
+"from" or "to" (Main, Reply, Sent,...) then, some times later, added the move
+message feature to realize that a folder could contain "from" AND "to" messages.
+This layout could be adjusted but we disagree with having all the cells of
+a "From/To" column containing either a "From:" or a "To:".
+Maybe, the best solution (I think) is to have a new column "From/To" containing
+small icons and replace the "From" header by "Correspondent". The pure "from"
+or "to" folders will not have this new column and keep the "From" or "To" header as actually.
+
+
+Right now, I think that you have answered your question by yourself.
+
+
+By the way, about the "Messages":
+
+1) I have had hard time with the "message to myself" feature.
+   This was my first big work as a developer.
+   Initially, the MessageCorrespondent table was only allowing the 'Y' and 'N'
+   values for the "Sender" field. So when some users send a message to themself,
+   this message was appearing in two of his folders with some bad side effect - like
+   having to move and trash it two times while our code was not really able
+   to distinguish the two references correctly. Then I added the 'M' (Myself) value
+   for the "Sender" field and run a script to convert all the messages with identical
+   sender/receiver as a "message to myself". But, as some users have already
+   discarded some of them, it could remain some mess.
+
+The actual rules for the "Sender" field are:
+   - a sender (Y) and ONE receiver (N) row => normal message
+   - a sender (Y) and x>1 receiver (N) rows => futur normal mass message. See below
+   - only the M row => myself message
+   - no sender row, only 'N' => system message (it means too: noreply)
+   - only sender row => badly fixed old myself message (should not. if any, treat it as a 'M' row)
+   - 'M' row and other rows => badly fixed old myself message (should not. if any, ignore the other rows)
+Even if some (cursed) messages are not correctly identified with this rule, they are rather old now.
+
+2) there is actually no more than ONE receiver for a message. The code could (I hope)
+   accept one sender for multiple receivers (mass mail)... except for the message.php
+   display... so we don't allow multiple userid in the "To" field.
+   But this will be soon (alas, since few years right now). So, even if not effective,
+   the 1 sender + x receiver rule must be followed. It will be activated at least if we add a BlackList / FriendList feature.
+
+
+
+#-------- JUG - alternative table-design (highly experimental) -----------------------
+# Version 1.0 A - has some drawback, unfinished, because of select-problems
+
+preconditions:
+   - a message has one and only ONE sender
+   - a message has at least ONE (or more) receivers
+   - the receiver can be me
+
+# Message is representing the "sent" message and contains info about the sender
+TABLE Messages: ID, Type, ReplyTo, Game_ID, Time, Subject, Text
+   add columns:
+      - uid = sending user (FK Players.ID), 0 for system-message
+      - Folder_nr = folder messaged is stored in for user <uid>
+      - Flags = RECEIVERS_PUBLIC (=CC instead of BCC) | MASS_MSG (to be able to mark it in table-list)
+
+# Table is only representing the "receivers" of a message
+# (-> maybe new table MessageReceivers)
+TABLE MessageCorrespondents: ID, uid, mid, Folder_nr, Sender, Replied
+   remove column:
+      - Sender (table is only containing receivers, so not needed)
+
+   semantics for columns:
+      - uid = user (FK Players.ID) of receiving user, can also be me (msg to myself)
+      - mid = FK Messages.ID, received message
+      - Folder_Nr = current folder of message, needs special handling of myself-message (see below)
+      - Sender - to be deleted
+      - Replied - as it is now (Y=msg-replied, N=need-no-reply, M=need-reply)
+
+# Note on handling messages:
+- use-case: sending a message by a SENDER <sender> to one or more RECEIVERS <receiver1..n>
+  DB-table entries:
+    INSERT Messages (...,uid,Folder_nr) VALUES (...,<sender>,FOLDER_NEW)
+    for each UNIQUE receiver 1..n:
+      INSERT MessageCorrespondents (uid,mid,Folder_Nr,Replied) VALUES (<receiver>,mid,FOLDER_NEW,$replied)
+
+  basic select for message of user <myID>:
+    ( SELECT          -- search for 'sending'-msgs
+         M.ID as mid, M.Type, M.ReplyTo, M.Game_ID, M.Time, M.Subject, M.Text, M.uid, M.Folder_nr, M.Flags,
+         'Sender' as Correspondent,
+         GROUP_CONCAT(P.Name SEPARATOR '#') as Recipients -- since Mysql 4.1
+      FROM Messages M JOIN MessageCorrespondents MC ON M.ID=MC.mid
+         JOIN Players P ON MC.uid=P.ID
+      WHERE M.uid=<myID>
+      GROUP BY MC.mid
+    )
+
+    UNION
+
+    ( SELECT          -- search for 'received'-msgs
+         M.ID as mid, M.Type, M.ReplyTo, M.Game_ID, M.Time, M.Subject, M.Text, M.uid, M.Flags,
+         'Receiver' as Correspondent,
+         MC.ID, MC.Folder_nr, MC.Replied
+      FROM Messages M JOIN MessageCorrespondents MC ON M.ID=MC.mid
+            JOIN Players P ON MC.uid=P.ID
+      WHERE MC.uid=<myID>
+    )
+
+    - order on UNION ??
+
+- downsize of this table-design is, that it needs 2 separate ways to change folder of message:
+  one for Messages-table (sent), one for MessageCorrespondents-table (received).
+  When a message appears only once (as sent OR received), it's easier to handle.
+
+
+should only show up once (as sent or received, not both):
+  For that, synchronizing Folder_nr is needed, so the following assertion is needed:
+  assert(Messages.Folder_Nr == MessageCorrespondents.Folder_Nr)
+
+
+#-------- JUG - alternative table-design -----------------------
+# Version 1.0 B - started, dissatisfied with need of a UNION-select + order/limits
+
+preconditions:
+   - a message has one and only ONE sender (could be system)
+   - a message has at least ONE (or more) receivers
+   - the receiver can be myself
+
+# Message is representing the "sent" message and contains info about the sender
+TABLE Messages: ID, Type, ReplyTo, Game_ID, Time, Subject, Text
+   add columns:
+      - uid = sending user (FK Players.ID); default 0 = system-message
+      - Flags = PUBLIC_MSG (=CC instead of BCC) | MASS_MSG (to be able to mark it in table-list); default 0
+
+# Table is only representing the "receivers" of a message
+# (-> maybe new table MessageReceivers)
+TABLE MessageCorrespondents: ID, uid, mid, Folder_nr, Sender, Replied
+   remove column:
+      - Sender (can be determined by comparing M.uid with MC.uid)
+         M.uid == MC.uid -> message to myself
+         M.uid != MC.uid AND M.uid=<myID>  -> message sent
+         M.uid != MC.uid AND MC.uid=<myID> -> message received
+
+   semantics for columns:
+      - uid = user (FK Players.ID) of correspondent user, can also be me (msg to myself)
+      - mid = FK Messages.ID (message at hand)
+      - Folder_Nr = current folder of message
+      - Replied - as it is now (Y=msg-replied, N=need-no-reply, M=need-reply)
+
+# Note on handling messages:
+- use-case: sending a message by a SENDER <sender> to one or more RECEIVERS <receiver1..n>
+  DB-table entries:
+
+    -- insert message
+    $flags = 0;
+    if ( user wants to send public-msg, so that others can do a "reply-to-all" ) -> $flags |= PUBLIC_MSG; // note: corresponds to 'Cc'-mail-header of an email, normal message is not public 'Bcc'-behaviour
+    if ( more than one receiver ) -> $flags |= MASS_MSG; // note: then some system-msgs are considered to be a mass-msg (e.g. game-result)
+    mid = INSERT Messages (...,uid,Flags) VALUES (...,<sender>,$flags)
+
+    -- insert sender (not needed for system-messages)
+    INSERT MessageCorrespondents (uid,mid,Folder_Nr,Replied) VALUES (<sender>,mid,FOLDER_SENT,$reply_sender)
+
+    -- insert receivers
+    for each UNIQUE receiver 1..n:
+      if receiver IS NOT <myID>; // which would be a myself-message
+        INSERT MessageCorrespondents (uid,mid,Folder_Nr,Replied) VALUES (<receiver>,mid,FOLDER_NEW,$reply_rec)
+
+  -- messages sent by user <myID>
+  --   example: mid=1,NORMAL,0,0,now(), 'test','bla', sender=<myID>, Flags=MASS_MSG, smc_id=2, suid=<myID>, sFolder_nr=5(sent), msgDirection=SENT, myself=1 if <myID>, RecipientNames=User1, User2, User3
+  SELECT
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Text, M.uid AS sender, M.Flags,
+      sMC.ID AS mc_id, sMC.Folder_nr, NULL AS Replied,
+      'SENT' AS msgDirection, IF(M.uid=sMC.uid,1,0) AS myself,
+      GROUP_CONCAT(rP.Name ORDER BY rP.ID SEPARATOR ', ') AS NameCorrespondents -- since Mysql 4.1, is NULL for myself
+  FROM
+      Messages M JOIN MessageCorrespondents sMC ON M.ID=sMC.mid
+      LEFT JOIN MessageCorrespondents rMC ON M.ID=rMC.mid AND rMC.uid<>M.uid JOIN Players rP ON rMC.uid=rP.ID
+  WHERE M.uid=<myID>
+  GROUP BY rMC.mid
+
+     (...) UNION ALL (...) ORDER BY date LIMIT x,y
+
+  -- messages received by user <myID>
+  --   example: mid=3,NORMAL,0,0,now(), 'test2','bla2', sender=4, Flags=MASS_MSG, smc_id=5, suid=4, msgDirection=RECEIVED, RecipientNames=<me>, rFolder_nr=2
+  SELECT
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Text, M.uid AS sender, M.Flags,
+      rMC.ID AS mc_id, rMC.Folder_nr, rMC.Replied,
+      'RECEIVED' AS msgDirection, 0 AS myself,
+      sP.Name AS NameCorrespondents
+  FROM
+      Messages M JOIN MessageCorrespondents rMC ON M.ID=rMC.mid AND rMC.uid<>M.uid   -- last clause = not myself-msgs
+      JOIN MessageCorrespondents sMC ON M.ID=sMC.mid AND M.uid=sMC.uid JOIN Players sP ON sMC.uid=sP.ID
+  WHERE rMC.uid=<myID>
+
+
+#-------- JUG - alternative table-design -----------------------
+# Version 1.0 C - started
+
+# goal: avoid UNION, KISS
+
+# design-note: back to the roots, design based on real-email-system (back to the roots)
+
+Wanted features & restrictions:
+   - allow messages from system (no direct uid, but use 0 instead maybe)
+   - allow mass-message (message to more than one recipient)
+   - allow public-message, that is all recipients cann "see" each other,
+     that would allow a "reply-to-all"-feature (similar to Cc/Bcc known from email)
+   - meet below preconditions
+   - DB-efficiency (server-load), avoid "expensive" operations (like UNION-select for example)
+
+preconditions:
+   - a message has one and only ONE sender (could be system)
+   - a message has at least ONE (or more) recipients
+   - the recipient can be myself
+   - a message is only showed as sent-message OR as received-message (not both); especially for myself-msg
+
+A DGS-message is similar to an email. Let's take a look at an email.
+An email consists of headers and body, comparison with current Messages-table:
+
+    Email                   Messages
+    ----------------------+--------------------------------------
+    message-id (Header)     ID
+    -                       Type
+    Reference-id (Header)   ReplyTo
+    -                       Game_ID
+    Sent-Date (Header)      Time
+    Subject (Header)        Subject
+    Body                    Text
+    To (Header)             -> MessageCorrespondents: Sender=Y, ...
+    Cc, Bcc  (Header)       -
+    Sent (Header)           -> MessageCorrespondents: Sender=N/M, ...
+
+A difference i can spot, is that the 'To/Cc/Bcc/Sent' are part (attributes) of the email.
+Transferred into DGS, i would propose the following table-design to handle messages:
+
+Legend: FK=Foreign-Key
+
+# Message is representing a pure-message with all its attributes:
+#     ID/type/references/date/subject/text and also the sender and recipient(s)
+TABLE Message (M):
+   ID, Type, ReplyTo, Game_ID, Time, Subject, Text (as it is now)
+   Sender    = FK Players.ID of user that sends the message, default=0 (system-message)
+               # note: possible here, because a message can only have ONE sender
+   Recipient = FK Players.ID of user that receives the message (also myself)
+   Flags     = Bit-mask: default 0
+               PUBLIC_MSG (indicating, that for mass-msg other recipients can be seen by each other, like 'Cc'-email-header)
+               MASS_MSG   (indicating, that there are more than one recipient)
+               REPLY_ALL  (optional-feature, force reply-to-all if one user answers)
+
+   # note: if MASS_MSG-flag set, Recipient must contain first recipient,
+   #       because MessageRecipients can't be efficiently queried in one SQL-statement.
+   #       So we need at least to have one recipient to show in the message-table-list.
+   #       Also if this flag set, MessageRecipients-entries must exist.
+
+# m:n-Matrix containg the recipients for mass-messages (only informal, as attribute of a message)
+# note: entries only present if more than one recipient
+# note: for discussion: entries only present for non-system-message (assumed that it's never be a public-system-msg).
+#       In fact, it can be argued, that only a non-system mass-message need entries
+#       in this table, to determine recipients to be able to reply to.
+#       Also public mass-messages need entries to correctly show recipients in table-list.
+TABLE MessageRecipients (MR):
+   mid = FK Messages.ID
+   recipient = FK Players.ID
+
+# table containing entries for sender and receivers to manage a message for a particular user
+# note: corresponding to an email-storage-system (e.g. an IMAP-account)
+# note: assuming sending msg to myself only adds one MS-entry
+TABLE MessageStore (MS):
+   ID, uid, mid, Folder_nr, Replied (as it is now, without Sender)
+
+   # note: Sender-field not needed, it can be determined from other fields:
+     M.Sender == MS.uid              == <myID>  -> message to myself
+     M.Sender != MS.uid AND M.Sender == <myID>  -> message sent to other(s)
+     M.Sender != MS.uid AND MS.uid   == <myID>  -> message received from other
+
+TABLE Message (M): ID, Type, ReplyTo, Game_ID, Time, Subject, Text, Sender, Recipient, Flags
+TABLE MessageRecipients (MR): mid, recipient
+TABLE MessageStore (MS): ID, uid, mid, Folder_nr, Replied
+
+# Handling messages:
+- use-case: sending a message by a SENDER <sender> to one or more RECEIVERS <recipient1..n>
+  DB-table entries:
+
+    -- insert message
+    $flags = 0;
+
+    # makes only sense if mass-msg (and non-system-msg)
+    if ( sender wants to send public-msg ) $flags |= PUBLIC_MSG;
+
+    # some system-msgs can be considered a mass-msg (e.g. game-result), to avoid that system-msg is not treated as mass-msg
+    if ( mass-msg ) $flags |= MASS_MSG;
+
+    $recipient = (one recipient) ? <recipient1> : null;
+    $mid = INSERT Message (..., Sender, Recipient, Flags) VALUES (..., <sender>, $recipient, $flags);
+
+    if ( $flags & (PUBLIC_MSG | MASS_MSG) )
+        INSERT MessageRecipients (mid, recipient) VALUES ($mid, <recipientX>);
+
+    -- insert message into storage of sender
+    INSERT MessageStore (uid,mid,Folder_Nr,Replied) VALUES (<sender>,mid,FOLDER_SENT,...)
+
+    -- insert message into storage of recipients
+    for each UNIQUE receiver 1..n:
+        if receiver IS NOT <myID>; // which would be a myself-message
+            INSERT MessageStore (uid,mid,Folder_Nr,Replied) VALUES (<receiver>,mid,FOLDER_NEW, ...)
+
+- Examples:
+  # system-message to one recipient <myID> (if needed)
+      M:  ID=1,   Sender=0, Recipient=<myID>, Flags=0
+      MS: ID=100, uid=<myID>,  mid=1, Folder=NEW, Replied=N
+      SELECT folder=NEW, mid=1, mySent=0 (-> From=[Server msg])
+
+  # system-message to multi-recipients (e.g. game-result)
+      M:  ID=1,   Sender=0, Recipient=<myID>, Flags=0
+      MS: ID=100, uid=<myID>,  mid=1, Folder=NEW, Replied=N
+      MS: ID=101, uid=<other>, mid=1, Folder=NEW, Replied=N
+      SELECT folder=NEW, mid=1, mySent=0 (-> From=[Server msg])
+
+  # message from me <myID> to other recipient <otID>
+      M:  ID=1,   Sender=<myID>, Recipient=<otID>, Flags=0
+      MS: ID=100, uid=<myID>,  mid=1, Folder=SENT, Replied=N
+      MS: ID=101, uid=<other>, mid=1, Folder=NEW,  Replied=N
+      SELECT folder=SENT, mid=1, mySent=1 (-> To=user_of(<otID>))
+
+  # message from me <myID> to other recipient <otID> (invite/dispute) ????
+      M:  ID=1,   Sender=<myID>, Recipient=<otID>, Flags=0, Type=INVITATION
+      MS: ID=100, uid=<myID>,  mid=1, Folder=SENT, Replied=N
+      MS: ID=101, uid=<other>, mid=1, Folder=NEW,  Replied=M ???
+    TODO: SELECT ???
+
+  # message from me <myID> to myself
+      M:  ID=1,   Sender=<myID>, Recipient=<myID>, Flags=0
+      MS: ID=100, uid=<myID>,  mid=1, Folder=SENT, Replied=N
+      SELECT folder=SENT, mid=1, mySent=1 (To=(Myself))
+
+  # user_of(0)='[Server message]', user_of(<myID>)='(Myself)', user_of(<Players.ID>)=Players.Name
+  # mySent==0 -> msg received, From = user_of(M.Sender)
+  # mySent==1 -> msg sent,     To   = user_of(M.Recipient) or if ISNULL(M.Recipient) -> MR.concat(Players.Name)
+   SELECT
+      MS.Folder_nr, from/to, M.Subject, M.ID as mid, M.Time (date), M.Reply_to, MS.Replied,
+      IF(M.Sender=<myID>,1,0) AS mySent
+   FROM Message M JOIN MessageStore MS ON M.ID=MS.mid
+   WHERE M.Sender=<myID> OR MS.uid=<myID>
+
+  # message from me <myID> to other recipients (mass-msg)
+      M:  ID=1,  Sender=<myID>, Recipient=NULL, Flags=0
+      MR: mid=1, recipient=<other1>
+      MR: mid=1, recipient=<other2>
+      MS: ID=100, uid=<myID>,   mid=1, Folder=SENT, Replied=N
+      MS: ID=101, uid=<other1>, mid=1, Folder=NEW,  Replied=N
+      MS: ID=102, uid=<other2>, mid=1, Folder=NEW,  Replied=N
+
+   SELECT
+      MS.Folder_nr, from/to, M.Subject, M.ID as mid, M.Time (date), M.Reply_to, MS.Replied,
+      IF(M.Sender=<myID>,1,0) AS mySent
+   FROM
+      Message M
+      LEFT JOIN MessageStore myMS ON M.ID=myMS.mid
+      LEFT JOIN MessageStore oMS  ON myMS.mid=oMS.mid oMS.? <> myMS.?
+   WHERE M.Sender=<myID> OR MS.uid=<myID>
+
+# NEW SQL-statement:
+TABLE Message (M): ID, Type, ReplyTo, Game_ID, Time, Subject, Text, Sender, Recipient, Flags
+TABLE MessageRecipients (MR): mid, recipient
+TABLE MessageStore (MS): ID, uid, mid, Folder_nr, Replied
+
+
+   SELECT
+      # MS.Folder_nr, from/to, M.Subject, M.ID as mid, M.Time (date), M.Reply_to, MS.Replied,
+
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Sender, M.Recipient, M.Flags,
+      IF(M.Sender=<myID>,1,0) AS mySent,
+
+      IFNOT(ISNULL(sMS.ID),sMS.ID,rMS.ID) AS msid,
+      IFNOT(ISNULL(sMS.ID),sMS.Folder_nr,rMS.Folder_nr) AS Folder_nr,
+      IFNOT(ISNULL(sMS.ID),sMS.Replied,rMS.Replied) AS Replied,
+      IFNOT(ISNULL(sMS.ID),rP.Name,sP.Name) AS otherName,
+
+      # remaining: rMS.uid
+
+      rMS.ID, rMS.uid, rMS.mid, rMS.Folder_nr, rMS.Replied, sP.Name
+
+# TODO: flow-handling
+  "IF(Messages.ReplyTo>0 and NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"  --> if M.ReplyTo>0 and exists MS with mid=M.ReplyTo and uid=MS.uid = FLOW_ANSWER
+  "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow, " --> if M.Replied (=other.Replied) or Replied = FLOW_ANSWERED
+
+
+   FROM
+      Message M
+      -- columns with send-messages: sMS
+      LEFT JOIN MessageStore sMS ON M.ID=sMS.mid      -- sMS: my sent messages
+         AND M.Sender=<myID> AND sMS.uid=<myID>
+         LEFT JOIN Players rP ON M.Recipient=rP.ID  (<- this forces Recipient to be <>NULL)
+
+      -- columns with received-messages: rMS
+      LEFT JOIN MessageStore rMS ON M.ID=rMS.mid      -- rMS: my received messages (M.Sender someone other)
+         AND rMS.uid=<myID> AND M.Sender <> rMS.uid   -- last expr equals to => M.Sender <> <myID>
+         LEFT JOIN Players sP ON M.Sender=sP.ID       -- sP could be NULL, because M.Sender=0 (system-msg)
+
+      MR: mid=1, recipient=<other1>
+      MR: mid=1, recipient=<other2>
+
+   SELECT folder=SENT, mid=1, mySent=1 (-> To=<other1>, <other2>)
+
+   SELECT
+      MS.Folder_nr, from/to, M.Subject, M.ID as mid, M.Time (date), M.Reply_to, MS.Replied,
+      IF(M.Sender=<myID>,1,0) AS mySent
+      M:  ID=1,  Sender=<myID>, Recipient=NULL, Flags=0
+      MS: ID=101, uid=<other1>, mid=1, Folder=NEW,  Replied=N
+
+   SELECT
+      MS.Folder_nr, from/to, M.Subject, M.ID as mid, M.Time (date), M.Reply_to, MS.Replied,
+      IF(M.Sender=<myID>,1,0) AS mySent
+      M:  ID=1,  Sender=<myID>, Recipient=NULL, Flags=0
+      MS: ID=102, uid=<other2>, mid=1, Folder=NEW,  Replied=N
+
+
+
+  # message from other <other> to only me <myID>
+      M:  ID=1,   Sender=<other>, Recipient=<myID>, Flags=0
+      MS: ID=100, uid=<other>,  mid=1, Folder=SENT, Replied=N
+      MS: ID=101, uid=<myID>,   mid=1, Folder=NEW,  Replied=N
+
+  # message from other <other> to me <myID> and other recipients <other2>
+      M:  ID=1,  Sender=<other>, Recipient=<myID>, Flags=0
+      MR: mid=1, recipient=<myID>
+      MR: mid=1, recipient=<other2>
+      MS: ID=100, uid=<other>,  mid=1, Folder=SENT, Replied=N
+      MS: ID=101, uid=<myID>,   mid=1, Folder=NEW,  Replied=N
+      MS: ID=102, uid=<other2>, mid=1, Folder=NEW,  Replied=N
+
+# need to know for listing:
+   SELECT
+      MS.Folder_nr, from/to, M.Subject, M.ID as mid, M.Time (date), M.Reply_to, MS.Replied,
+      IF(M.Sender=<myID>,1,0) AS mySent
+   FROM Message M JOIN MessageStore MS ON M.ID=MS.mid
+   WHERE M.Sender=<myID> OR MS.uid=<myID>
+
+
+
+Message (M): ID, Type, ReplyTo, Game_ID, Time, Subject, Text, Sender, Recipient, Flags
+MessageRecipients (MR): mid, recipient
+MessageStore (MS): ID, uid, mid, Folder_nr, Replied
+
+- Basic SQL-select to show messages of user <myID>:
+
+  -- messages sent by user <myID>
+Message (M): ID, Type, ReplyTo, Game_ID, Time, Subject, Text, Sender, Recipient, Flags
+MessageRecipients (MR): mid, recipient
+MessageStore (MS): ID, uid, mid, Folder_nr, Replied
+
+  SELECT
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Text, M.Sender, M.Recipient, M.Flags,
+      MS.ID as msid, MS.uid, Folder_nr, Replied
+      -- 'SENT' AS msgDirection, 1 AS myself,
+      GROUP_CONCAT(rP.Name SEPARATOR ', ') AS otherNames -- since Mysql 4.1
+  FROM
+      Message M
+      JOIN MessageStore MS ON M.ID=MS.mid JOIN Players mP ON MS.uid=mP.ID
+      LEFT JOIN MessageRecipients MR ON M.id=MR.mid JOIN Players rP ON MR.recipient=P.ID
+  WHERE
+      1=1
+  GROUP BY M.id
+
+  SELECT
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Text, M.uid AS sender, M.Flags,
+      sMC.ID AS mc_id, sMC.Folder_nr, NULL AS Replied,
+      'SENT' AS msgDirection, IF(M.uid=sMC.uid,1,0) AS myself,
+      GROUP_CONCAT(rP.Name ORDER BY rP.ID SEPARATOR ', ') AS NameCorrespondents -- since Mysql 4.1, is NULL for myself
+  FROM
+      Messages M JOIN MessageCorrespondents sMC ON M.ID=sMC.mid
+      LEFT JOIN MessageCorrespondents rMC ON M.ID=rMC.mid AND rMC.uid<>M.uid JOIN Players rP ON rMC.uid=rP.ID
+  WHERE M.uid=<myID>
+  GROUP BY rMC.mid
+
+
+  -- messages sent by user <myID>
+  --   example: mid=1,NORMAL,0,0,now(), 'test','bla', sender=<myID>, Flags=MASS_MSG, smc_id=2, suid=<myID>, sFolder_nr=5(sent), msgDirection=SENT, myself=1 if <myID>, RecipientNames=User1, User2, User3
+  SELECT
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Text, M.uid AS sender, M.Flags,
+      sMC.ID AS mc_id, sMC.Folder_nr, NULL AS Replied,
+      'SENT' AS msgDirection, IF(M.uid=sMC.uid,1,0) AS myself,
+      GROUP_CONCAT(rP.Name ORDER BY rP.ID SEPARATOR ', ') AS NameCorrespondents -- since Mysql 4.1, is NULL for myself
+  FROM
+      Messages M JOIN MessageCorrespondents sMC ON M.ID=sMC.mid
+      LEFT JOIN MessageCorrespondents rMC ON M.ID=rMC.mid AND rMC.uid<>M.uid JOIN Players rP ON rMC.uid=rP.ID
+  WHERE M.uid=<myID>
+  GROUP BY rMC.mid
+
+     (...) UNION ALL (...) ORDER BY date LIMIT x,y
+
+  -- messages received by user <myID>
+  --   example: mid=3,NORMAL,0,0,now(), 'test2','bla2', sender=4, Flags=MASS_MSG, smc_id=5, suid=4, msgDirection=RECEIVED, RecipientNames=<me>, rFolder_nr=2
+  SELECT
+      M.ID AS mid, M.Type, M.ReplyTo, M.Game_ID, M.Time AS date, M.Subject, M.Text, M.uid AS sender, M.Flags,
+      rMC.ID AS mc_id, rMC.Folder_nr, rMC.Replied,
+      'RECEIVED' AS msgDirection, 0 AS myself,
+      sP.Name AS NameCorrespondents
+  FROM
+      Messages M JOIN MessageCorrespondents rMC ON M.ID=rMC.mid AND rMC.uid<>M.uid   -- last clause = not myself-msgs
+      JOIN MessageCorrespondents sMC ON M.ID=sMC.mid AND M.uid=sMC.uid JOIN Players sP ON sMC.uid=sP.ID
+  WHERE rMC.uid=<myID>
+
+
+#-------- Various ----------------------------------------------
+

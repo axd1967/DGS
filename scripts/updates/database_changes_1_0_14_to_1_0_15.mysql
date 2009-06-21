@@ -508,3 +508,71 @@ ALTER TABLE Waitingroom
 ALTER TABLE Games
    ADD DoubleGame_ID int(11) NOT NULL DEFAULT '0' AFTER Tournament_ID;
 
+
+-- cleanup (only on) live-server DB (removing old tables), saving 370 MB
+-- clarify with site-owner first before executing
+DROP TABLE dragondisc           --  88.2 MB
+DROP TABLE dragondisc_bodies    -- 206.7 MB
+DROP TABLE faqdisc              --   4.0 MB
+DROP TABLE faqdisc_bodies       --  10.6 MB
+DROP TABLE forums               --   0.1 MB
+DROP TABLE Games2               --   0.2 MB
+DROP TABLE godisc               --   7.0 MB
+DROP TABLE godisc_bodies        --  17.3 MB
+DROP TABLE news                 --   0.8 MB
+DROP TABLE news_bodies          --   1.8 MB
+DROP TABLE opponents            --   2.7 MB
+DROP TABLE opponents_bodies     --   5.3 MB
+DROP TABLE support              --   5.0 MB
+DROP TABLE support_bodies       --  10.8 MB
+DROP TABLE transl               --   2.9 MB
+DROP TABLE transl_bodies        --   6.2 MB
+
+-- drop fields not longer used, nor referenced
+ALTER TABLE Messages
+   DROP COLUMN From_ID,
+   DROP COLUMN To_ID ;
+
+-- optimize index
+ALTER TABLE MessageCorrespondents
+   DROP INDEX Folder_nr ;
+ALTER TABLE MessageCorrespondents
+   ADD INDEX Folder_nr (Folder_nr) ;
+
+
+-- add message-thread (without the need for recursion), (~90s + ~90s)
+ALTER TABLE Messages
+   ADD Level smallint NOT NULL DEFAULT '0' AFTER Type,
+   ADD Thread int(11) NOT NULL DEFAULT '0' AFTER Type ;
+ALTER TABLE Messages
+   ADD INDEX Thread (Thread) ;
+
+-- fill Messages.Thread with some database-queries and fix-script
+-- First do preparations for fix-scripts ...
+-- * step 1, init (~25s): all starting messages start a thread
+UPDATE Messages SET Thread=ID WHERE ReplyTo=0 ;
+-- * step 2, init (~20s): revert Thread-field for system-message as they should have no replies and no threads
+UPDATE Messages AS M INNER JOIN MessageCorrespondents AS MC ON MC.mid=M.ID SET M.Thread=0 WHERE M.Thread>0 AND MC.Sender='S' ;
+-- * step 3, init: shouldn't happen, but did (system-message replied) -> add thread for those
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.ReplyTo=0 SET M2.Thread=M2.ID WHERE M.ReplyTo>0 AND M.Thread=0 AND M2.Thread=0 ;
+-- * step 4, check: message-count which need message-thread assigning ... (~530.000 rows)
+SELECT COUNT(*) FROM Messages WHERE ReplyTo>0 AND Thread=0 ;
+-- * step 5, pre-run (~20s): set message of reply-level #1
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.ReplyTo=0 SET M.Thread=M.ReplyTo, M.Level=1 WHERE M.ReplyTo>0 ;
+-- * step 6, pre-run (~4-20s each run): set message of reply-level #2 (execute 10 times) !!
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+-- * step 7, check: remaining message-count that need message-thread assigning ... (~37.000 rows left)
+SELECT COUNT(*) FROM Messages WHERE ReplyTo>0 AND Thread=0 ;
+-- * step 8, repeat for all thread-levels until no more rows affected any more using optimized script:
+--           execute (with do_it=1):   'scripts/updates/fix_message_thread-1_0_15.php'
+-- execute 'scripts/message_consistency.php'
+
