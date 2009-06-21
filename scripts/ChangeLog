@@ -23,6 +23,59 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-06-21 juga
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added (optional) cleanup of unused tables and fields on live-server saving
+     several hundreds MB of data
+
+   * include/message_functions.php (message_info_table, get_message_directions,
+       message_list_query, message_list_head, message_list_body,
+       message_build_user_string),
+     include/std_functions.php (send_message),
+     include/gui_functions.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/fix_message_thread-1_0_15.php,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/table-Messages.txt,
+     message.php, message_thread.php, people.php, search_messages.php,
+     skins/dragon/screen.css, site_map.php, NEWS:
+   - added new page with message-thread
+     - function to show or hide all message-texts for message-thread
+     - added image-links to message-thread and first-message if feasible
+       - for single message
+       - for message-lists on status-page, search-messages page, list-messages page
+     - added Messages.Thread and Messages.Level to manage message-thread,
+       server-messages have no threads
+     - added script and SQL-updates to set-up message-threads for messages on server
+     - adjust sending of message to manage message-thread with thread and thread-levels
+-----------
+copy /images/thread.gif
+copy /images/msg_first.gif
+-----------
+
+   * include/table_columns.php (make_tablerow):
+   - added way to add extra-row within same row-class setting,
+     added for message-thread including texts
+
+   * include/std_classes.php (ThreadList):
+   - added class ThreadList to help managing thread-like views
+
+   * phorum/post.php:
+   - Requesting 'post.php' looks like a "spam"-attack [htaccess 404: /phorum/post.php],
+     but it consumes server-resources, because redirection writes Errorlog-entries.
+     So now avoid redirection with "catching" it with existing page declaring
+     it as "old page".
+
+   * phorum/index.php, phorum/list.php, phorum/read.php:
+   - committed "old" forum-pages to preserve code (not needed on newer servers)
+
+   * waiting_room.php:
+   - added notes about (FH) = Free handicap
+
+   * list_messages.php:
+   - bugfix adding FOUND_ROWS-SQL-directive for listing messages
+
 2009-06-17 juga
 
    * opponents.php, show_games.php, NEWS:
