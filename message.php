@@ -140,7 +140,7 @@ require_once( "include/form_functions.php" );
           "ORDER BY Sender" ;
 
       /**
-       * TODO:
+       * TODO: msg multi-receivers
        * Actually, this query and the following code does not support
        * multiple receivers (i.e. more than one "other" LEFT JOINed row).
        * Multiple receivers are just allowed when it is a message from

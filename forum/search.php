@@ -26,7 +26,7 @@ require_once( "include/filter.php" );
 require_once( "include/filterlib_mysqlmatch.php" );
 
 //does not work. Need at least a special SearchHidden class
-//TODO
+//TODO moderator-search
 define('MODERATOR_SEARCH', 0);
 
 
