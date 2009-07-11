@@ -354,6 +354,7 @@ function get_alt_arg( $n1, $n2)
 
          $validation_step = true;
          $extra_infos[T_('Passing')] = 'Info';
+         $extra_infos[T_('Assure that all boundaries of your territory are closed before ending the game.')] = 'Important';
       }
       break;
 

@@ -326,6 +326,7 @@ span.FormWarning {
    padding: 0px;
 }
 
+table.Table td.GameSettings img,
 img.InTextImage {
    border: 0px solid black;
    vertical-align: middle;
@@ -1884,7 +1885,7 @@ dl.ExtraInfos dd.Score {
 }
 
 dl.ExtraInfos dd.Important {
-   color: red;
+   color: darkred;
 }
 
 table.Captures {
