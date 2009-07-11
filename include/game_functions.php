@@ -65,8 +65,7 @@ function allow_add_time_opponent( $game_row, $uid )
       return false;
 
    // must not be a tournament-game
-   if( $game_row['Tournament_ID'] != 0 )
-      return false;
+   //TODO if( $game_row['Tournament_ID'] != 0 ) return false;
 
    // get opponents columns
    if( $game_row['Black_ID'] == $uid )
