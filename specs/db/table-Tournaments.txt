@@ -294,3 +294,39 @@ Description:
 
 * Notes : additional Notes to be shown for tournament-rules
 
+
+###########################################################################
+## --- TournamentRound ---
+
+Description:
+   Pool-setup for one tournament round.
+
+ Field       | Type                                                 | Default
+-------------+------------------------------------------------------+---------------------
+ tid         | int(11)                                              | NULL
+ Round       | int(11)                                              | NULL
+ RulesID     | int(11)                                              | NULL
+ Lastchanged | datetime                                             | 0000-00-00 00:00:00
+ Status      | enum('INIT','POOLINIT','PAIRINIT','GAMEINIT','DONE') | INIT
+ MinPoolSize | smallint(5)                                          | 0
+ MaxPoolSize | smallint(5)                                          | 0
+
+## Fields:
+
+* tid : tournament-ID
+
+* Round : round number
+
+* RulesID : FK to TournamentRules.ID
+
+* Lastchanged : update of table-entry
+
+* Status : pairing status for tournament round
+   - INIT = new round started, no setup yet
+   - POOLINIT = new pools created (empty)
+   - PAIRINIT = TPs assigned to pool
+   - GAMEINIT = T-games setup, ready to be created and started
+   - DONE = pairing for tournament round is done
+
+* MinPoolSize, MaxPoolSize : min. and max. size of pools for tournament round
+

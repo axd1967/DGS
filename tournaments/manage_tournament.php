@@ -80,6 +80,7 @@ $ThePage = new Page('TournamentManage');
    $tform->add_row( array(
          'DESCRIPTION', T_('Status'),
          'TEXT',        $tourney->getStatusText($tourney->Status), ));
+//TODO TODO add current-round
 
    $tform->add_hidden( 'tid', $tid );
 
@@ -102,11 +103,13 @@ $ThePage = new Page('TournamentManage');
          '<li>', make_menu_link( T_('Show tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
                  "</li>\n",
          '<li>', make_menu_link( T_('Edit properties'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
+//TODO TODO add "(need creation)" if needed to create/save
                  subList( array( T_('Change properties for registration ...'),
                                  T_('tournament-related: min./max. participants, rating use mode'),
                                  T_('user-related: user rating range, min. (rated) finished games') )),
                  "</li>\n",
          '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
+//TODO TODO add "(need creation)" if needed to create/save
                  subList( array( T_('Change game-settings: board size, handicap-settings, time-settings, rated, notes') )),
                  "</li>\n",
          '<li>', make_menu_link( T_('Edit participants'), array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' )),
@@ -114,6 +117,10 @@ $ThePage = new Page('TournamentManage');
                                  T_('Change status, start round, read message from user and answer with admin message') )),
                  "</li>\n",
          '<li>', make_menu_link( T_('Show tournament participants'), "tournaments/list_participants.php?tid=$tid" ),
+                 "</li>\n",
+         '<li>', make_menu_link( T_('Edit round'), array( 'url' => "tournaments/edit_round.php?tid=$tid", 'class' => 'TAdmin' )),
+//TODO TODO add "(need creation)" if needed to create/save
+                 subList( array( T_('Setup tournament round for pooling and pairing') )),
                  "</li>\n",
       '</ul>',
       '</tr></td></table>',
