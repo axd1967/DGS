@@ -48,7 +48,7 @@ require_once( 'include/classlib_userconfig.php' );
    $handi_array = array(
       HTYPE_CONV   => T_('Conventional'),
       HTYPE_PROPER => T_('Proper'),
-      HTYPE_NIGIRI => T_('Manual'),
+      HTYPE_NIGIRI => T_('Nigiri'),
       HTYPE_DOUBLE => T_('Double game'),
       HTYPE_BLACK  => T_('Fix color'),
       HTYPE_WHITE  => T_('Fix color'),
