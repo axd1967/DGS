@@ -323,7 +323,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       HTYPE_WHITE  => T_('White#htman'),
    );
    $arr_manual = array(
-      'DESCRIPTION', T_('Manual setting'),
+      'DESCRIPTION', T_('Manual setting (even or handicap game)'),
       'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType,
       'TEXT', sptext(T_('My color'),1), );
    if( $formstyle == GSET_TOURNAMENT )
