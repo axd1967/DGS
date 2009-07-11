@@ -23,6 +23,88 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-11 juga
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
+   - Synchronized table-structure of various DGS-servers
+     live - SourceForge - local - remote
+   - Optimized all tables, checked categories "[category]":
+     - [field-order] adjusted field-order within table to keep different server in sync
+     - [field-size] minimized field data-types according to
+       http://dev.mysql.com/doc/refman/5.0/en/choosing-types.html
+     - [index] checked use of prefix-index for text/binary-types
+     - [index] checked all multi-column indexes if needed or missing
+     - [index] assured same field-type + length for joins
+     - [index] analyzed data-distribution for query-optimizer
+     - [not-null] avoided NULL in fields and indexes if possible, evtl. added default
+     - [no-def] removed some defaults where it makes sense to have mandatory fields
+     - [unused] corrected or removed unused fields or tables to save space
+     - check of sources for changes [not-null] and [no-def] signaled by '[ok']
+   - Database changes worth mentioning:
+     - Changes alltogether: 3x [field-order], 94x [field-size], 42x [not-null],
+       42x [index] (7x drop index, 8x add index, 4x fix wrong index, 23x analyze table),
+       44x [no-def], 22x [unused]
+     - Changes for category [index]:
+       - added index on Bio(uid,SortOrder) to accelerate bio-show and sorting
+       - added indexes on Errorlog to be able to better search for errors (for admin)
+       - added index on Forumlog(Action) for admin-searches
+       - added index on Posts.Approved, cleanup unused PendingApproval-index
+       - cleanup of MessageCorrespondents index, removed double-index for Folder_nr
+       - fixed wrong index on Moves(gid,ID) -> Moves(gid,MoveNr)
+       - cleanup of Ratinglog index, index on gid alone
+     - Changes for category [unused]:
+       - remove game-id auto-increment in MoveMessages-table
+       - remove unused fields 'From_ID' and 'To_ID' in Messages-table
+       - remove unused (old) tables on live-server saving 370MB of space,
+         useful to reduce backup-time
+       - remove unused 'OFF'-enum-value in NotesSmall/LargeMode field of Players-table
+     - Changes for category [field-size] with regard to foreign-keys (keep same-length):
+       - Changed type for Folders.Folder_nr from int -> tinyint
+       - Changed type for Clock.ID from int -> smallint
+       - Changed type for Forums.ID from int -> smallint
+       - Changed type for *.SortOrder from int -> smallint
+       - Changed type for *.Rating* from double -> float
+   - adjusted existing DDL-change for Players.Button (after pre-db-cleanup)
+   - added notes to perform database-changes and CLEANUP
+   - changed SQL-layout for updates
+
+   * init.mysql:
+   - sync with last known DDL for stable-version 1.0.14 with dump from PHPMyAdmin
+     of current stable live-version. Enhanced with inserts for guest-Player and
+     Clock-values.
+
+   * include/game_functions.php (allow_add_time_opponent):
+   - added TODO after DB-synchronization (removal of Games.Tournament_ID)
+
+   * change_bio.php:
+   - cleanup SQL-statements (LIMIT, Bio.uid)
+
+   * people.php:
+   - cleanup SQL-statement
+
+   * new_game.php:
+   - use clearer title: add game to waiting room
+
+   * waiting_room.php:
+   - show handicap-type text "Nigiri" for according "Manual (Nigiri)"-game
+
+   * game.php, skins/dragon/screen.css:
+   - show hint to close all boundaries before passing
+   - add some CSS for Game-settings, change color for ExtraInfos
+
+   * include/message_functions.php (game_settings_form):
+   - add note for manual-game 'even or handicap game'
+
+   * tournaments/include/tournament_round.php (TournamentRound),
+     tournaments/manage_tournament.php,
+     tournaments/edit_round.php,
+     specs/db/table-Tournaments.txt:
+   - added (unfinished) first draft of TournamentRound-table
+
+   * scripts/build-game-cluster.pl:
+   - added perl-script to determine user-clusters (from wishlist), see
+     http://www.dragongoserver.net/forum/read.php?forum=4&thread=4690#25424
+
 2009-06-21 juga
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
@@ -1727,7 +1809,7 @@ ALTER TABLE Players
 -----------
 -- group (global) user-profile fields in Players-table
 ALTER TABLE `Players`
-   CHANGE Button Button int(11) NOT NULL default '0' AFTER UserFlags,
+   CHANGE Button Button tinyint unsigned NOT NULL default '0' AFTER UserFlags,
    CHANGE TableMaxRows TableMaxRows smallint(5) unsigned NOT NULL default '20'  AFTER UserFlags,
    CHANGE MenuDirection MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL' AFTER UserFlags,
    CHANGE SkinName SkinName varchar(32) NOT NULL default '' AFTER UserFlags ;
