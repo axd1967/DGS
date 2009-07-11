@@ -59,7 +59,7 @@ require_once( "include/std_functions.php" );
          $EnteredText = trim(get_request_arg("text$bid"));
          if( $EnteredText == "" )
          {
-            $query = "DELETE FROM Bio WHERE ID=$bid";
+            $query = "DELETE FROM Bio WHERE ID=$bid LIMIT 1";
             mysql_query( $query )
                or error('mysql_query_failed', "change_bio.delete_bio[$bid]");
             continue;
@@ -114,22 +114,22 @@ require_once( "include/std_functions.php" );
             )
             continue;
 
-         $query = "UPDATE Bio set uid=$my_id" .
-            ', Text="'.mysql_addslashes($EnteredText).'"' .
+         $query = 'UPDATE Bio SET ' .
+            'Text="'.mysql_addslashes($EnteredText).'"' .
             ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
-            " WHERE ID=$bid";
+            " WHERE ID=$bid AND uid=$my_id LIMIT 1";
       }
       else
       {
          if( $row['SortOrder'] == $row['newpos'] )
             continue;
 
-         $query = "UPDATE Bio set uid=$my_id" .
+         $query = 'UPDATE Bio SET '
             //', Text="'.mysql_addslashes($row['Text']).'"' .
             //', Category="'.mysql_addslashes($row['Category']).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
-            " WHERE ID=$bid";
+            " WHERE ID=$bid AND uid=$my_id LIMIT 1";
       }
 
       mysql_query( $query )
@@ -150,7 +150,7 @@ require_once( "include/std_functions.php" );
       if( $EnteredText == "" )
          continue;
 
-      $query = "INSERT INTO Bio set uid=$my_id" .
+      $query = "INSERT INTO Bio SET uid=$my_id" .
             ', Text="'.mysql_addslashes($EnteredText).'"' .
             ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.(++$max_pos).'"';
