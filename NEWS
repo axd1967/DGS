@@ -23,6 +23,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Preview game message (access-key [v]=Preview)
       * Show scoring information in scoring step and for finished games
       * Added "Notes" column on My-Games list showing part of private game notes
+      * Show hint to close all boundaries before passing
 
    * Game info page (new):
       * Access to initial invitation message for game
@@ -241,6 +242,11 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Users: faster Activity handling
       * Game: faster skip-to-next-game
       * Game comments: faster query
+      * Bio: faster bio entries
+
+      * Game moves: fixed wrong index
+      * Optimized all tables in regard to data-type and indexes
+      * Corrected and removed unused table-fields
 
    * Introduction of a cache management for some pages and graphics
 
@@ -278,6 +284,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
+      * Added indexes on Errorlog and Forumlog to allow better searches
       * Removed translations from the admin pages
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
