@@ -39,7 +39,7 @@ require_once( 'include/message_functions.php' );
    $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $page = "new_game.php?";
-   $title = T_('Add new game');
+   $title = T_('Add new game to waiting room');
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
