@@ -257,7 +257,7 @@ function get_executives( $level )
    $result = mysql_query( "SELECT ID,Handle,Name,Translator" .
             ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
             " FROM Players" .
-            " WHERE LENGTH(Translator)>0" .
+            " WHERE Translator>''" .
             " ORDER BY ID" )
       or error('mysql_query_failed', 'people.translators');
 
