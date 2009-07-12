@@ -94,13 +94,16 @@ function sgf_simpletext( $str )
       ) ) );
 }
 
-function sgf_echo_comment( $com )
+function sgf_echo_comment( $com, $trim=true )
 {
    if( !$com )
       return false;
-   echo "\nC[" . str_replace("]","\\]", str_replace("\\","\\\\",
-         reverse_htmlentities( ltrim($com,"\r\n")
-      ) ) ) . "]";
+   $comment_trimmed = ($trim) ? ltrim( $com, "\r\n" ) : $com;
+   echo "\nC[",
+      str_replace( "]","\\]",
+         str_replace("\\","\\\\",
+            reverse_htmlentities($comment_trimmed) )),
+      "]";
    return true;
 }
 
@@ -384,9 +387,11 @@ $array=array();
       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
        $field_owned .
+      'black.ID AS Black_uid, ' .
       'black.Name AS Blackname, ' .
       'black.Handle AS Blackhandle, ' .
       "IF(Games.Status='FINISHED', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
+      'white.ID AS White_uid, ' .
       'white.Name AS Whitename, ' .
       'white.Handle AS Whitehandle, ' .
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
@@ -401,18 +406,25 @@ $array=array();
    extract($row);
 
    // owned_comments: BLACK|WHITE=viewed by B/W-player, DAME=viewed by other user
+   $owned_uid = 0;
    if( $owned_comments )
    {
       $owned_comments = DAME;
       if( $Blackhandle == safe_getcookie('handle') )
       {
          if( $Blackscode == safe_getcookie('sessioncode') && $Blackexpire >= $NOW )
+         {
             $owned_comments = BLACK ;
+            $owned_uid = $Black_uid;
+         }
       }
       elseif( $Whitehandle == safe_getcookie('handle') )
       {
          if( $Whitescode == safe_getcookie('sessioncode') && $Whiteexpire >= $NOW )
+         {
             $owned_comments = WHITE ;
+            $owned_uid = $White_uid;
+         }
       }
    }
    else
@@ -420,11 +432,10 @@ $array=array();
 
    // load GamesNotes for player
    $player_notes = '';
-   if( $include_games_notes && ($owned_comments != DAME) )
+   if( $include_games_notes && ($owned_comments != DAME) && ($owned_uid > 0) )
    {
-      $enum_player = ( $owned_comments == BLACK ) ? 'B' : 'W';
-      $gn_row = mysql_single_fetch( "sgf.notes($gid,$owned_comments)",
-         "SELECT Notes FROM GamesNotes WHERE gid=$gid AND player='$enum_player' LIMIT 1" );
+      $gn_row = mysql_single_fetch( "sgf.notes($gid,$owned_comments,$owned_uid)",
+         "SELECT Notes FROM GamesNotes WHERE gid=$gid AND uid='$owned_uid' LIMIT 1" );
       if( is_array($gn_row) )
          $player_notes = @$gn_row['Notes'];
    }
@@ -768,7 +779,7 @@ $array=array();
      $node_com.= "\n\nNotes - " . ( $owned_comments == WHITE ? $Whitename : $Blackname )
                            . ":\n" . $notes ;
 
-   sgf_echo_comment( $node_com );
+   sgf_echo_comment( $node_com, false ); // no trim
    $node_com= "";
 
    echo "\n)\n";
