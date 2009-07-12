@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -46,8 +46,7 @@ require_once( "forum/forum_functions.php" );
    $flfilter->add_filter( 1, 'Numeric', 'FL.ID', true);
    $flfilter->add_filter( 2, 'Text',    'P.Handle', true);
    $flfilter->add_filter( 3, 'RelativeDate', 'FL.Time', true,
-      array( FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL,
-             FC_SIZE => 10 ));
+      array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => 60 ));
    $flfilter->add_filter( 4, 'Selection',
       array( T_('All#filter')           => '',
              T_('New post#filter')      => "Action LIKE 'new_%'",
@@ -58,13 +57,17 @@ require_once( "forum/forum_functions.php" );
                   . "','". FORUMLOGACT_SHOW_POST
                   . "','". FORUMLOGACT_HIDE_POST
                   . "')",
+             T_('Hide post#filter')     => sprintf( "Action='%s'", FORUMLOGACT_HIDE_POST ),
+             T_('Show post#filter')     => sprintf( "Action='%s'", FORUMLOGACT_SHOW_POST ),
+             T_('Approve post#filter')  => sprintf( "Action='%s'", FORUMLOGACT_APPROVE_POST ),
+             T_('Reject post#filter')   => sprintf( "Action='%s'", FORUMLOGACT_REJECT_POST ),
       ), true );
    if( $show_ip )
       $flfilter->add_filter( 5, 'Text', 'FL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $flfilter->init(); // parse current value from _GET
 
-   $fltable = new Table( 'forumlog', $page, '' );
+   $fltable = new Table( 'forumlog', $page, '', '', TABLE_ROWS_NAVI );
    $fltable->register_filter( $flfilter );
    $fltable->add_or_del_column();
 
@@ -98,6 +101,7 @@ require_once( "forum/forum_functions.php" );
       or error('mysql_query_failed', 'show_forumlog.find_data');
 
    $show_rows = $fltable->compute_show_rows(mysql_num_rows($result));
+   $fltable->set_found_rows( mysql_found_rows('show_forumlog.found_rows') );
 
    $title = T_('Forum log');
    start_page( $title, true, $logged_in, $player_row );
@@ -131,9 +135,9 @@ require_once( "forum/forum_functions.php" );
    // end of table
 
    echo "<br>\n",
-      /*T_*/'NOTE: Log shows all user forum post events and all moderating actions by forum moderators.',
+      T_('NOTE: Log shows all user forum post events and all moderating actions by forum moderators.'),
       "<br>\n",
-      /*T_*/'Index available on database-fields: ID, Userid, Time.',
+      /*T_*/'Index available on database-fields: ID, Userid, Time, Action.',
       "<br>\n";
 
    end_page();
