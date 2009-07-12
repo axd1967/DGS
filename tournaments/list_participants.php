@@ -82,7 +82,7 @@ $ThePage = new Page('TournamentParticipantList');
          array( FC_SIZE => 4 ));
    $tpfilter->add_filter(11, 'Rating', 'TP.Rating', true);
    $tpfilter->add_filter(12, 'RelativeDate', 'TP.Created', true,
-         array( FC_TIME_UNITS => FRDTU_ALL|FRDTU_ABS ));
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ));
    $tpfilter->add_filter(13, 'RelativeDate', 'TP.Lastchanged', true);
    $tpfilter->init();
 

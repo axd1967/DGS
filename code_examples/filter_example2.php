@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -308,7 +308,7 @@ elseif( $fdemo == 6 )
       2 => array( 'label' => 'Rel-Date #2', 'descr' => 'filter with specific time-units [FC_TIME_UNITS=FRDTU_YMWD]: years, months, weeks, days' ),
       3 => array( 'label' => 'Rel-Date #3', 'descr' => 'filter with specific time-units [FC_TIME_UNITS]: years, weeks, hours' ),
       4 => array( 'label' => 'Rel-Date #4', 'descr' => 'filter with only one static time-unit [FC_TIME_UNITS=FRDTU_DAY]' ),
-      5 => array( 'label' => 'Rel-Date #5', 'descr' => 'filter with additional absolute-date [FC_TIME_UNITS=FRDTU_ABS|FRDTU_ALL], [FC_SIZE=12]' ),
+      5 => array( 'label' => 'Rel-Date #5', 'descr' => 'filter with additional absolute-date [FC_TIME_UNITS=FRDTU_ABS_ALL], [FC_SIZE=12]' ),
    );
 
    # standard filter
@@ -328,7 +328,7 @@ elseif( $fdemo == 6 )
 
    # filter with additional absolute-date syntax
    $filter->add_filter( 5, 'RelativeDate', 'reldate5', true,
-         array( FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL,
+         array( FC_TIME_UNITS => FRDTU_ABS_ALL,
                 FC_SIZE => 12 ));
 }
 
@@ -641,7 +641,7 @@ elseif( $fdemo == 15 || $fdemo == 19 )
    # default for multi-element relative-date-filter
    $filter->add_filter( 6, 'RelativeDate', 'def_reldate6', true,
          def_array( $with_def, array(
-            FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL,
+            FC_TIME_UNITS => FRDTU_ALL_ABS,
             FC_DEFAULT => array( '' => '2007', 'tu' => FRDTU_ABS ))));
 
    # default for selection-filter
@@ -739,7 +739,7 @@ elseif( $fdemo == 16 )
 
    # conditional filter (depend on filter #1): if val='3rd'-> set rel-date of 30 hours (multi-element)
    $filter->add_filter( 5, 'RelativeDate', 'cond5', true,
-         array( FC_TIME_UNITS => FRDTU_ALL,
+         array( FC_TIME_UNITS => FRDTU_ALL_REL,
                 FC_IF => array( "V1=='3rd'", 'SET_VAL F,N,'.FRDTU_HOUR, 'SET_VAL F,N2,30' )));
 
    # filter (skip query) to manually build complex query

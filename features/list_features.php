@@ -69,7 +69,7 @@ require_once( "features/lib_votes.php" );
       $ffilter->add_filter( 4, 'Text', 'FL.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
    $ffilter->add_filter( 6, 'RelativeDate', 'FL.Lastchanged', true,
-         array( FC_TIME_UNITS => FRDTU_ALL|FRDTU_ABS ));
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
    $ffilter->add_filter( 8, 'Selection',     # filter on user-voted-state
          array( T_('All#filterfeat')      => '',
                 T_('Unvoted#filterfeat')  => "ISNULL(FV.fid)", // FC_DEFAULT
