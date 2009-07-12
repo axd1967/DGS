@@ -53,15 +53,16 @@ ChangeLog
 -----------
 -- change GamesNotes.player-enum to user-id (e.g. for later Rengo has more than one B and W player)
 ALTER TABLE GamesNotes
-   ADD uid int NOT NULL AFTER gid;
+   ADD uid int NOT NULL AFTER gid ;
 
 -- migrate GamesNotes.player -> uid
 UPDATE GamesNotes AS GN, Games AS G
    SET GN.uid=IF(GN.player='B',G.Black_ID,IF(G.White_ID<>G.Black_ID,G.White_ID,-1)) WHERE GN.gid=G.ID ;
+
 -- check if migration successful (following query-result must be empty)
 -- NOTE: this can happen if Games are "broken", e.g. with same user as B & W
 --       -> resolve by deleting GamesNotes or correcting Games-table
-SELECT * FROM GamesNotes WHERE uid < 0 ;
+SELECT * FROM GamesNotes WHERE uid <= 0 ;
 
 -- switch primary-key (gid,uid) must be unique (that's the case if above conflicts have been resolved)
 ALTER TABLE GamesNotes
