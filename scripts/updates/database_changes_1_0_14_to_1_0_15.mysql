@@ -1143,3 +1143,35 @@ ANALYZE TABLE Waitingroom ;
 
 
 
+-- add index on Messages.Time to support searches on date (~ 2mins)
+ALTER TABLE Messages
+   ADD INDEX Time (Time) ;
+
+
+-- enlarge field-size of Players.Open 40 -> 60
+ALTER TABLE Players
+   CHANGE Open Open varchar(60) NOT NULL default '' ;
+
+
+-- change GamesNotes.player-enum to user-id (e.g. for later Rengo has more than one B and W player)
+ALTER TABLE GamesNotes
+   ADD uid int NOT NULL AFTER gid;
+
+-- migrate GamesNotes.player -> uid
+UPDATE GamesNotes AS GN, Games AS G
+   SET GN.uid=IF(GN.player='B',G.Black_ID,IF(G.White_ID<>G.Black_ID,G.White_ID,-1)) WHERE GN.gid=G.ID ;
+-- check if migration successful (following query-result must be empty)
+-- NOTE: this can happen if Games are "broken", e.g. with same user as B & W
+--       -> resolve by deleting GamesNotes or correcting Games-table
+SELECT * FROM GamesNotes WHERE uid <= 0 ;
+
+-- switch primary-key (gid,uid) must be unique (that's the case if above conflicts have been resolved)
+ALTER TABLE GamesNotes
+   DROP PRIMARY KEY,
+   ADD PRIMARY KEY (gid,uid) ;
+
+-- remove unused field GamesNotes.ID, .player -> CLEANUP
+ALTER TABLE GamesNotes
+   DROP COLUMN ID,
+   DROP COLUMN player ;
+
