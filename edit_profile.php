@@ -142,11 +142,9 @@ require_once( "include/form_functions.php" );
                                      'TEXT', echo_rating($player_row["Rating2"],2,0,0 ) ) );
    }
    $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
-                                  'TEXTINPUT', 'rank', 32, 40,
-                                  $player_row["Rank"] ) );
+                                  'TEXTINPUT', 'rank', 32, 40, $player_row["Rank"] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches?'),
-                                  'TEXTINPUT', 'open', 32, 40,
-                                  $player_row["Open"] ) );
+                                  'TEXTINPUT', 'open', 32, 60, $player_row["Open"] ) );
 
    if( strpos($player_row["SendEmail"], 'BOARD') !== false ) $s= 3;
    elseif( strpos($player_row["SendEmail"], 'MOVE') !== false ) $s= 2;
