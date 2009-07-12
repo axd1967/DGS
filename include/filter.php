@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -133,11 +133,11 @@ define('FC_SUBSTRING', 'substring');
  * \brief for RelativeDate-Filter: selection of time-units to be shown in selectbox,
  *        values can be OR'ed together (e.g. FRDTU_ABS | FRDTU_DHM ).
  * values:  FRDTU_ABS  - also allow absolute dates like in Date-Filter, \see FilterDate
- *          FRDTU_ALL  - combining all relative time-units (YEAR, MONTH, WEEK, DAY, HOUR, MIN)
  *          FRDTU_YMWD - combining time-units (YEAR, MONTH, WEEK, DAY)
  *          FRDTU_DHM  - combining time-units (DAY, HOUR, MIN)
  *          FRDTU_YEAR, FRDTU_MONTH, FRDTU_WEEK, FRDTU_DAY, FRDTU_HOUR, FRDTU_MIN - single time-unit
- * default: FRDTU_ALL
+ *          FRDTU_ALL_ABS - combining absolute and all relative time-units (YEAR, MONTH, WEEK, DAY, HOUR, MIN)
+ * default: FRDTU_ALL_REL
  */
 define('FC_TIME_UNITS', 'time_units');
 
@@ -239,6 +239,9 @@ define('FC_SYNTAX_HELP', 'syntax_help');
 /*! \brief for CheckboxArray-Filter: indicates to build a bitmask; values: bool; default is false. */
 define('FC_BITMASK', 'bitmask');
 
+
+// globals with lazy-init for filter-specific translated texts
+$ARR_GLOBALS_FILTERS = array();
 
 
  /*!
@@ -2495,9 +2498,10 @@ define('FRDTU_WEEK',  0x0008);
 define('FRDTU_DAY',   0x0010);
 define('FRDTU_HOUR',  0x0020);
 define('FRDTU_MIN',   0x0040);
-define('FRDTU_ALL',   FRDTU_YEAR | FRDTU_MONTH | FRDTU_WEEK | FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // all above relative time-units
 define('FRDTU_YMWD',  FRDTU_YEAR | FRDTU_MONTH | FRDTU_WEEK | FRDTU_DAY ); // time-unit: year/month/week/day
 define('FRDTU_DHM',   FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // time-unit: day/hour/min
+define('FRDTU_ALL_REL', FRDTU_YEAR | FRDTU_MONTH | FRDTU_WEEK | FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // all above relative time-units
+define('FRDTU_ALL_ABS', FRDTU_ALL_REL | FRDTU_ABS ); // all time-units (relative + absolute)
 
 // array for SQL-interval-specification
 $FRDTU_interval_sql = array(
@@ -2533,24 +2537,7 @@ class FilterRelativeDate extends Filter
    /*! \brief Constructs RelativeDate-Filter. */
    function FilterRelativeDate($name, $dbfield, $config)
    {
-      static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL );
-
-      //TODO: init at a proper place
-      global $FRDTU_choices;
-      if( !isset($FRDTU_choices) )
-      {
-         // choices-array for time-units (for select-box)
-         // here because translations are now loaded (and save some time if not used)
-         $FRDTU_choices = array(
-            FRDTU_ABS   => T_('absolute#reldate'),
-            FRDTU_YEAR  => T_('years#reldate'),
-            FRDTU_MONTH => T_('months#reldate'),
-            FRDTU_WEEK  => T_('weeks#reldate'),
-            FRDTU_DAY   => T_('days#reldate'),
-            FRDTU_HOUR  => T_('hours#reldate'),
-            FRDTU_MIN   => T_('minutes#reldate'),
-         );
-      }
+      static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL_REL );
 
       parent::Filter($name, $dbfield, $_default_config, $config);
       $this->type = 'RelativeDate';
@@ -2561,6 +2548,7 @@ class FilterRelativeDate extends Filter
       $this->time_units = array();
       $this->choices_tu = array();
       $fc_time_units = $this->get_config(FC_TIME_UNITS);
+      $FRDTU_choices = FilterRelativeDate::getTimeUnitText();
       foreach( $FRDTU_choices as $tu => $descr )
       {
          if( $fc_time_units & $tu )
@@ -2696,7 +2684,7 @@ class FilterRelativeDate extends Filter
       }
       else
       { // parse relative date
-         global $FRDTU_choices, $FRDTU_interval_sql;
+         global $FRDTU_interval_sql;
 
          // handle weeks (no week-date-interval until mysql5) -> use days
          $tu = $this->values[$this->elem_tu];
@@ -2720,8 +2708,6 @@ class FilterRelativeDate extends Filter
     */
    function get_input_element($prefix, $attr = array() )
    {
-      global $FRDTU_choices;
-
       // input-text for number of (time-units)
       $r = $this->build_input_text_elem( $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
 
@@ -2729,10 +2715,39 @@ class FilterRelativeDate extends Filter
       if( count($this->time_units) > 1 )
          $r .= $this->build_generic_selectbox_elem( $prefix, $this->elem_tu, $this->values[$this->elem_tu], $this->choices_tu );
       else
-         $r .= $FRDTU_choices[$this->time_units[0]];
+         $r .= FilterRelativeDate::getTimeUnitText( $this->time_units[0] );
 
       return $r;
    }
+
+   // ----------- static funcs -----------
+
+   /*! \brief Returns choice-text for time-units or all choice-texts (if arg=null). */
+   function getTimeUnitText( $timeunit=null )
+   {
+      // lazy-init of texts
+      $key = 'reldate_choices';
+      if( !isset($ARR_GLOBALS_FILTERS[$key]) )
+      {
+         $arr = array();
+         // choices-array for time-units (for select-box)
+         $arr[FRDTU_ABS]   = T_('absolute#reldate');
+         $arr[FRDTU_YEAR]  = T_('years#reldate');
+         $arr[FRDTU_MONTH] = T_('months#reldate');
+         $arr[FRDTU_WEEK]  = T_('weeks#reldate');
+         $arr[FRDTU_DAY]   = T_('days#reldate');
+         $arr[FRDTU_HOUR]  = T_('hours#reldate');
+         $arr[FRDTU_MIN]   = T_('minutes#reldate');
+         $ARR_GLOBALS_FILTERS[$key] = $arr;
+      }
+
+      if( is_null($timeunit) )
+         return $ARR_GLOBALS_FILTERS[$key];
+      if( !isset($ARR_GLOBALS_FILTERS[$key][$timeunit]) )
+         error('invalid_args', "FilterRelativeDate.getTimeUnitText($timeunit)");
+      return $ARR_GLOBALS_FILTERS[$key][$timeunit];
+   }
+
 } // end of 'FilterRelativeDate'
 
 
