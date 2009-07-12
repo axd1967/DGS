@@ -146,7 +146,7 @@ $ThePage = new Page('GamesList');
          array( FC_SIZE => 4 ));
    $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
    $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true, // Games
-         array( FC_DEFAULT => $restrict_games ));
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => $restrict_games ));
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
 
@@ -170,7 +170,8 @@ $ThePage = new Page('GamesList');
             array( FC_ADD_HAVING => 1 ));
       $gfilter->add_filter(36, 'Rating', 'userStartRating', true,
             array( FC_ADD_HAVING => 1 ));
-      $gfilter->add_filter(15, 'RelativeDate', 'Opp.Lastaccess', true); // Players
+      $gfilter->add_filter(15, 'RelativeDate', 'Opp.Lastaccess', true, // Players
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ) );
    }
    if( $finished ) //FU+FA
    {
@@ -296,7 +297,7 @@ $ThePage = new Page('GamesList');
  *   ID, uid, gid, Time, Rating, RatingMin, RatingMax, RatingDiff
  *
  * GamesNotes (FU+RU) AS Gnt:
- *   ID, gid, player, Hidden, Notes
+ *   ID, gid, uid, Hidden, Notes
  *
  *****
  * Views-columns usage:
@@ -564,10 +565,9 @@ $ThePage = new Page('GamesList');
 
       if( $load_notes ) //FU+RU ?UNION
       {
-         $qsql->add_part( SQLP_FIELDS, "Gnt.Notes AS X_Note" );
+         $qsql->add_part( SQLP_FIELDS, "GN.Notes AS X_Note" );
          $qsql->add_part( SQLP_FROM,
-            "LEFT JOIN GamesNotes AS Gnt ON Gnt.gid=Games.ID"
-               ." AND Gnt.player=IF(White_ID=$my_id,'W','B')" );
+            "LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$my_id" );
       }
 
       if( $finished ) //FU ?UNION
