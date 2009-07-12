@@ -170,10 +170,9 @@ $ThePage = new Page('Status');
       //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
       .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
       .",Clock.Ticks" //always my clock because always my turn (status page)
-      .(!$load_notes ? '': ",Gnt.Notes AS X_Note" )
+      .(!$load_notes ? '': ",GN.Notes AS X_Note" )
       ." FROM (Games,Players AS opponent)"
-      .(!$load_notes ? '': " LEFT JOIN GamesNotes AS Gnt ON Gnt.gid=Games.ID"
-         ." AND Gnt.player=IF(White_ID=$uid,'W','B')" )
+      .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
       ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"

@@ -462,7 +462,7 @@ function get_alt_arg( $n1, $n2)
 
       if( $tmp=mysql_single_fetch( 'game.gamenotes',
              "SELECT Hidden,Notes FROM GamesNotes"
-             ." WHERE gid=$gid AND player='$my_color'") )
+             ." WHERE gid=$gid AND uid=$my_id") )
       {
          $notes = $tmp['Notes'];
          $noteshide = $tmp['Hidden'];
@@ -491,8 +491,8 @@ function get_alt_arg( $n1, $n2)
       {
          // note: GamesNotes needs PRIMARY KEY (gid,player):
          db_query( 'game.replace_gamenote',
-                 "REPLACE INTO GamesNotes (gid,player,Hidden,Notes)"
-               . " VALUES ($gid,'$my_color','$noteshide','"
+                 "REPLACE INTO GamesNotes (gid,uid,Hidden,Notes)"
+               . " VALUES ($gid,$my_id,'$noteshide','"
                   . mysql_addslashes($notes) . "')" );
       }
    }
