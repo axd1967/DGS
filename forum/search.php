@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -113,7 +113,7 @@ define('MODERATOR_SEARCH', 0);
                 T_('First messages#forum') => 'P.Parent_ID=0' ),
          true);
    $ffilter->add_filter( 5, 'RelativeDate', 'P.Time', true,
-         array( FC_SIZE => 12, FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL ) );
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 12 ) );
    $ffilter->init(); // parse current value from $_REQUEST
    $filter2 =& $ffilter->get_filter(2);
 
