@@ -23,6 +23,74 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-12 juga
+
+   * admin_show_errorlog.php, list_contacts.php, search_messages.php,
+     show_games.php:
+   - added absolute timeunit-choice for some RelativeDate-filters
+
+   * include/filter.php, features/list_features.php,
+     forum/admin_show_forumlog.php, forum/search.php,
+     tournaments/list_participants.php, code_examples/filter_example2.php:
+   - renamed const for absolute timeunit-choice of RelativeDate-filter
+   - increased size of input-field of date-filter
+
+   * include/filter.php (FilterRelativeDate, ~.get_input_element, ~.getTimeUnitText):
+   - added lazy-init for loading timeunit-choices for RelativeDate-filter
+
+   * forum/admin_show_forumlog.php:
+   - added all single moderator-actions for searching (hide/post/approve/reject post)
+   - added full-page-navigation with found-rows
+   - translated note
+
+   * sgf.php (sgf_echo_comment):
+   - fix bug with gamenote-appending in comment of last SGF-node for running-games
+
+   * game.php, status.php, show_games.php, sgf.php, NEWS,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - migrated GamesNotes.player enum-field -> GamesNotes.uid
+     in preparation for more than B and W player (e.g. TeamGo)
+-----------
+-- change GamesNotes.player-enum to user-id (e.g. for later Rengo has more than one B and W player)
+ALTER TABLE GamesNotes
+   ADD uid int NOT NULL AFTER gid;
+
+-- migrate GamesNotes.player -> uid
+UPDATE GamesNotes AS GN, Games AS G
+   SET GN.uid=IF(GN.player='B',G.Black_ID,IF(G.White_ID<>G.Black_ID,G.White_ID,-1)) WHERE GN.gid=G.ID ;
+-- check if migration successful (following query-result must be empty)
+-- NOTE: this can happen if Games are "broken", e.g. with same user as B & W
+--       -> resolve by deleting GamesNotes or correcting Games-table
+SELECT * FROM GamesNotes WHERE uid < 0 ;
+
+-- switch primary-key (gid,uid) must be unique (that's the case if above conflicts have been resolved)
+ALTER TABLE GamesNotes
+   DROP PRIMARY KEY,
+   ADD PRIMARY KEY (gid,uid) ;
+
+-- remove unused field GamesNotes.ID, .player -> CLEANUP
+ALTER TABLE GamesNotes
+   DROP COLUMN ID,
+   DROP COLUMN player ;
+-----------
+
+   * edit_profile.php, NEWS,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - enlarged length of Players.Open-field 40 -> 60
+-----------
+-- enlarge field-size of Players.Open 40 -> 60
+ALTER TABLE Players
+   CHANGE Open Open varchar(60) NOT NULL default '' ;
+-----------
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
+   - added index on Messages.Time
+-----------
+-- add index on Messages.Time to support searches on date (~ 2mins)
+ALTER TABLE Messages
+   ADD INDEX Time (Time) ;
+-----------
+
 2009-07-11 juga
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
@@ -134,6 +202,42 @@ ChangeLog
 -----------
 copy /images/thread.gif
 copy /images/msg_first.gif
+
+-- add message-thread (without the need for recursion), (~90s + ~90s)
+ALTER TABLE Messages
+   ADD Level smallint NOT NULL DEFAULT '0' AFTER Type,
+   ADD Thread int(11) NOT NULL DEFAULT '0' AFTER Type ;
+ALTER TABLE Messages
+   ADD INDEX Thread (Thread) ;
+
+-- fill Messages.Thread with some database-queries and fix-script
+-- First do preparations for fix-scripts ...
+-- * step 1, init (~25s): all starting messages start a thread
+UPDATE Messages SET Thread=ID WHERE ReplyTo=0 ;
+-- * step 2, init (~20s): revert Thread-field for system-message as they should have no replies and no threads
+UPDATE Messages AS M INNER JOIN MessageCorrespondents AS MC ON MC.mid=M.ID SET M.Thread=0 WHERE M.Thread>0 AND MC.Sender='S' ;
+-- * step 3, init: shouldn't happen, but did (system-message replied) -> add thread for those
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.ReplyTo=0 SET M2.Thread=M2.ID WHERE M.ReplyTo>0 AND M.Thread=0 AND M2.Thread=0 ;
+-- * step 4, check: message-count which need message-thread assigning ... (~530.000 rows)
+SELECT COUNT(*) FROM Messages WHERE ReplyTo>0 AND Thread=0 ;
+-- * step 5, pre-run (~20s): set message of reply-level #1
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.ReplyTo=0 SET M.Thread=M.ReplyTo, M.Level=1 WHERE M.ReplyTo>0 ;
+-- * step 6, pre-run (~4-20s each run): set message of reply-level #2 (execute 10 times) !!
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>0 SET M.Thread=M2.Thread, M.Level=M2.Level+1 WHERE M.ReplyTo>0 and M.Thread=0 ;
+-- * step 7, check: remaining message-count that need message-thread assigning ... (~37.000 rows left)
+SELECT COUNT(*) FROM Messages WHERE ReplyTo>0 AND Thread=0 ;
+-- * step 8, repeat for all thread-levels until no more rows affected any more using optimized script:
+--           execute (with do_it=1):   'scripts/updates/fix_message_thread-1_0_15.php'
+-- execute 'scripts/message_consistency.php'
 -----------
 
    * include/table_columns.php (make_tablerow):
