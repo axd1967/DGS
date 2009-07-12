@@ -90,7 +90,8 @@ require_once( 'include/classlib_userpicture.php' );
       $cfilter->add_filter( 8, 'Text', 'LOWER(C.Notes) #OP LOWER(#VAL)', true,
          array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1, FC_SQL_TEMPLATE => 1 ));
 */
-   $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true);
+   $cfilter->add_filter(10, 'RelativeDate', 'C.Created', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ) );
    $cfilter->add_filter(11, 'RelativeDate', 'C.Lastchanged', false);
    $cfilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_note->get_rx_terms() );

@@ -48,7 +48,7 @@ require_once( "include/filter.php" );
    $elfilter = new SearchFilter();
    $elfilter->add_filter( 1, 'Numeric', 'EL.ID', true);
    $elfilter->add_filter( 3, 'RelativeDate', 'EL.Date', true,
-      array( FC_TIME_UNITS => FRDTU_ABS | FRDTU_ALL, FC_SIZE => 10 ));
+      array( FC_TIME_UNITS => FRDTU_ABS_ALL, FC_SIZE => 8 ));
    if( $show_ip )
       $elfilter->add_filter( 7, 'Text', 'EL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));

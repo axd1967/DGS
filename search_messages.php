@@ -104,7 +104,8 @@ require_once( "include/classlib_profile.php" );
                 FC_SYNTAX_HINT => array( FCV_SYNHINT_ADDINFO => T_('find Userid#filtermsg') ) ));
    $mfilter->add_filter( 3, 'MysqlMatch', 'M.Subject,M.Text', true,
          array( FC_MATCH_MODE => MATCH_BOOLMODE_SET ) );
-   $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true);
+   $mfilter->add_filter( 4, 'RelativeDate', 'M.Time', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ) );
 
    // synchronize those translations with message_functions.php (get_message_directions)
    $mfilter->add_filter( 7, 'Selection',
