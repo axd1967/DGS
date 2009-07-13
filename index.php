@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -35,6 +35,20 @@ require_once( "include/form_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    $sysmsg= get_request_arg('sysmsg'); unset($_REQUEST['sysmsg']);
+
+   // check for maintenance-user to allow form-login, use URL:
+   // index.php?userid=... without exposing password in URL
+   if( $logged_in && isset($player_row['Handle']) )
+      $user_handle = $player_row['Handle'];
+   else
+      $user_handle = @$_REQUEST['userid'];
+   if( check_maintenance( $user_handle ) )
+   {
+      if( !is_array($player_row) )
+         $player_row = array();
+      $player_row['Handle'] = $user_handle;
+   }
+
    start_page(T_("Home"), true, $logged_in, $player_row );
 
 
@@ -49,13 +63,14 @@ if( HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
      '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
      '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
      "</font><HR>\n";
-}else{ //for devel server
+}
+else
+{ //for live server
   echo "<p></p><font color=green>\n" .
      sprintf( T_('Welcome to the %s!'), FRIENDLY_LONG_NAME) .
      '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
      "</font><HR>\n";
-} //for devel server
-
+}
 
    sysmsg($sysmsg);
 
