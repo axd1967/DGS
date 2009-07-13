@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,10 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( "include/connect2mysql.php" );
 require_once( "include/error_functions.php" );
 
+// $is_down can be overriden for maintenance-allowed users (in config-local.php)
+// $is_maintenance is not changed (can be used to indicate maintenance-mode)
 $is_down = false;
 $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
-                 . " please return in an hour or so."
+                 . " please return in an hour or so.<br>\n"
                  . " Don't worry: the clocks are frozen until the server restarts";
+$is_maintenance = $is_down;
+
 
 // options settable by admins (user-capabilities)
 // NOTE: also adjust admin_users.php and admin_show_users.php on adding new options
