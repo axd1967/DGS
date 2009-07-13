@@ -406,18 +406,11 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL )
 {
-   global $base_path, $is_down, $is_down_message, $printable;
+   global $base_path, $is_down, $is_down_message, $is_maintenance, $ARR_USERS_MAINTENANCE, $printable;
 
+   $user_handle = @$player_row['Handle'];
    if( $is_down && $logged_in )
-   {
-      //$is_down_allowed = array('ejlo','rodival','jug');
-      if( isset($is_down_allowed) && is_array($is_down_allowed)
-         && in_array( $player_row['Handle'], $is_down_allowed) )
-      {
-         $is_down = false;
-      }
-      //unset( $is_down_allowed);
-   }
+      check_maintenance( $user_handle );
 
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
 
@@ -432,7 +425,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          FRIENDLY_LONG_NAME."</A>";
 
       // show bookmarks
-      if( $logged_in )
+      if( $logged_in && !$is_down )
       {
          echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
             '<select name="jumpto" size="1"',
@@ -447,12 +440,15 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
             ;
       }
 
+      if( $is_maintenance ) // mark also for maintainers
+         echo '&nbsp;&nbsp;|&nbsp;&nbsp;<b>[ MAINTENANCE ]</b>';
+
       echo "</td>";
       echo "\n  <td class='LoginBox'>";
 
       if( $logged_in && !$is_down )
          echo T_("Logged in as"),
-            ": <A id=\"loggedId\" href=\"{$base_path}status.php\">", $player_row["Handle"], '</A>';
+            ": <A id=\"loggedId\" href=\"{$base_path}status.php\">", $user_handle, '</A>';
       else
          echo T_("Not logged in");
 
@@ -545,7 +541,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( $is_down )
    {
-      echo $is_down_message;
+      echo "<br><br>\n", $is_down_message, "<br><br><br>\n";
       end_page();
       exit;
    }
@@ -663,6 +659,20 @@ function grab_output_end( $filename='')
    $tmp= ob_get_contents();//grab it
    ob_end_flush(); //also copy it
    return write_to_file( $filename, $tmp);
+}
+
+/*!
+ * \brief Sets $is_down if given user-handle is a maintenance-allowed user (see 'include/config-local.php'.
+ * \return true, if given user is a maintenance-allowed user
+ */
+function check_maintenance( $user_handle )
+{
+   global $is_down, $ARR_USERS_MAINTENANCE;
+
+   $is_maint_user = ( is_array($ARR_USERS_MAINTENANCE) && in_array( $user_handle, $ARR_USERS_MAINTENANCE ) );
+   if( $is_down && $is_maint_user )
+      $is_down = false;
+   return $is_maint_user;
 }
 
 
