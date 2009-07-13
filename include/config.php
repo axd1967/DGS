@@ -172,6 +172,10 @@ define('LIST_GAMENOTE_LEN', 20);
 // enable donation-links
 define('ENABLE_DONATIONS', false);
 
+// list with user-handles allowed to login during maintenance-mode
+// activate with $is_down var in 'include/quick_common.php'
+$ARR_USERS_MAINTENANCE = array();
+
 // IP-blocklist: user with these IPs are blocked
 // Syntax: '127.0.0.1' (=ip), '127.0.0.1/32' (=subnet), '/^127\.0\.0\.1$/' (=regex)
 // Check Config with: scripts/check_block_ip.php
