@@ -28,6 +28,7 @@ ChangeLog
    * include/std_functions.php (start_page, check_maintenance),
      include/quick_common.php ($is_maintenance),
      include/config.php ($ARR_USERS_MAINTENANCE),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
      index.php:
    - moved config-array $ARR_USERS_MAINTENANCE with allowed maintenance-users
    - check for maintenance-user to allow form-login, use URL:

@@ -74,3 +74,6 @@ copy /images/table.gif
 copy /images/thread.gif
 copy /images/msg_first.gif
 
+-----------
+# adjust config-local.php for allowed maintenance-users: $ARR_USERS_MAINTENANCE
+
