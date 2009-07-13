@@ -23,6 +23,20 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-13 juga
+
+   * include/std_functions.php (start_page, check_maintenance),
+     include/quick_common.php ($is_maintenance),
+     include/config.php ($ARR_USERS_MAINTENANCE),
+     index.php:
+   - moved config-array $ARR_USERS_MAINTENANCE with allowed maintenance-users
+   - check for maintenance-user to allow form-login, use URL:
+     'index.php?userid=...' without exposing password in URL,
+     'login.php?userid=...&password=...' is still possible with exposing password
+   - added (unchanged) var-state for indication of maintenance-mode: $is_maintenance
+   - added '[MAINTENANCE]'-text in top-bar if in maintenance-mode
+   - added extra spaces around maintenance-message
+
 2009-07-12 juga
 
    * admin_show_errorlog.php, list_contacts.php, search_messages.php,
@@ -314,7 +328,7 @@ ALTER TABLE Games
    * todo.php, TODO, docs.php site_map.php:
    - removed todo-list, moved content to DGS-Wishlist on Sensei's Library
      http://senseis.xmp.net/?DGSWishlist
-   - keep todo-page redirecting to DGS-wishlist on SLs not to avoid breaking links
+   - keep todo-page redirecting to DGS-wishlist on SLs to avoid breaking links
 
    * forum/forum_functions.php (DisplayForum.init_navi_images),
      include/classlib_game.php (GameScore.draw_score_box),
@@ -540,6 +554,7 @@ ALTER TABLE `TournamentRules`
        used UNION-db-queries, which do not work correctly with SQL_CALC_FOUND_ROWS.
        UNION-queries can be replaced by disabling global-config ALLOW_SQL_UNION,
        but would need performance-testing before using this option!!
+     - NOTE (revised): It is possible under certain conditions.
 
    * show_games.php:
    - added full-page-navigation, except for queries using UNIONs
