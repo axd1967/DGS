@@ -25,6 +25,10 @@ ChangeLog
 
 2009-07-14 juga
 
+   * change_profile.php, edit_profile.php:
+   - bugfix setting SMOOTH_EDGE in user-profile (read wrong local var)
+   - store SMOOTH_EDGE-setting only for textured wood-colors + added note about that
+
    * include/classlib_userpicture.php (UserPicture.getPicturePath),
      include/config.php (USERPIC_FOLDER), INSTALL:
    - fix userpic-directory handling replaced DOC-root with relative base_path
