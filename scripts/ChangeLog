@@ -25,6 +25,10 @@ ChangeLog
 
 2009-07-14 juga
 
+   * include/classlib_userpicture.php (UserPicture.getPicturePath),
+     include/config.php (USERPIC_FOLDER), INSTALL:
+   - fix userpic-directory handling replaced DOC-root with relative base_path
+
    * specs/db/dragon-data.sql, specs/db/dragon-ddl.sql, init.mysql, INSTALL:
    - split init.mysql into dragon-ddl.sql and static dragon-data.sql
    - added note how to create Dragon DDL using PHPMyAdmin from live-server
