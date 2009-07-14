@@ -72,10 +72,25 @@ mysql> GRANT select, insert, update, delete ON dragondb.* TO dragon@localhost ID
 
 3) Create mysql tables:
 
-> mysql -D dragondb < init.mysql
+Create database-tables needed for a Dragon Go Server
+NOTE: This DDL-Export has been created using PHPMyAdmin: Export(DB) with Export (SQL) and Options:
+      - Add 'IF NOT EXISTS': on
+      - Add 'AUTO_INCREMENT' value: off
+      - Enclose table and field names with backquotes: on
+      - Data: off
+      'dragon-ddl.sql' (unused tables removed)
+
+> mysql -D dragondb < specs/db/dragon-ddl.sql
+
 (( or maybe, if needed by your configuration, the more complete:
 > mysql -D dragondb -h mysqlhost -u username -p password < init.mysql
 ))
+
+
+Import mandatory initial-data for the server:
+
+> mysql -D dragondb < specs/db/dragon-data.sql
+
 
 and add some translations (the data file can be downloaded
 from <http://www.dragongoserver.net/snapshot.php>
