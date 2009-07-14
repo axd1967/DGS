@@ -277,7 +277,7 @@ ALTER TABLE Players
    CHANGE Rank Rank varchar(40) NOT NULL default '',
    CHANGE Open Open varchar(40) NOT NULL default '',
    CHANGE Browser Browser varchar(100) NOT NULL default '',
-   CHANGE Country Country char(2) NOT NULL default '' ;
+   CHANGE Country Country char(2) NOT NULL default '',
    CHANGE NotesSmallMode NotesSmallMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
    CHANGE NotesLargeMode NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT' ;
 
@@ -1121,7 +1121,6 @@ ANALYZE TABLE Errorlog ;
 ANALYZE TABLE Folders ;
 ANALYZE TABLE ForumRead ;
 ANALYZE TABLE Forumlog ;
-ANALYZE TABLE Forumreads ;
 ANALYZE TABLE Forums ;
 ANALYZE TABLE Games ;
 ANALYZE TABLE GamesNotes ;
