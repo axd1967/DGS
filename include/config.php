@@ -100,10 +100,10 @@ define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
 // Set it to '' (empty string) to disable the cache features
 define('CACHE_FOLDER', 'temp/');
 
-// Relative path to document-root of DGS on webserver (not to be mistake
-// for an URL, which may look the same).
-// Must end with a '/'. Set it to '' (empty string) to disable user-pictures.
-define('USERPIC_FOLDER', 'dev/userpic/');
+// Relative path to root-folder ended with a '/'.
+// Set it to '' (empty string) to disable user-pictures.
+// NOTE: not to be mistaken for an URL, which may look the same
+define('USERPIC_FOLDER', 'userpic/');
 
 
 // Global parameters to configure behaviour for features of your DGS-server:

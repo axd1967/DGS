@@ -62,6 +62,8 @@ class UserPicture
     */
    function getPicturePath( $user, $ext=null, $check=true )
    {
+      global $base_path;
+
       // determine pic-filename
       $old_cache_suffix = '';
       if( is_null($ext) )
@@ -88,7 +90,7 @@ class UserPicture
          $file_part = "$uid.$ext";
       }
 
-      $path_part = $_SERVER['DOCUMENT_ROOT'] . '/' . USERPIC_FOLDER;
+      $path_part = $base_path . USERPIC_FOLDER;
       $pic_path = $path_part . $file_part;
       $pic_exists = ( $check && !empty($file_part) && file_exists($pic_path) );
 
