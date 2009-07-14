@@ -533,10 +533,10 @@ function get_alt_arg( $n1, $n2)
 
    if( $movenumbers>0 )
    {
-      $tmp = $cfg_board->get_move_modulo();
-      if( $tmp >= 0 )
+      $movemodulo = $cfg_board->get_move_modulo();
+      if( $movemodulo >= 0 )
       {
-         $TheBoard->move_marks( $move-$movenumbers, $move, $tmp);
+         $TheBoard->move_marks( $move - $movenumbers, $move, $movemodulo );
          $TheBoard->draw_captures_box( T_('Captures'));
          echo "<br>\n";
       }
