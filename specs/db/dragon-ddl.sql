@@ -1,14 +1,19 @@
-
 -- phpMyAdmin SQL Dump
 -- version 2.11.1
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 03, 2009 at 08:44 PM
+-- Generation Time: Jul 14, 2009 at 07:05 PM
 -- Server version: 5.0.45
 -- PHP Version: 5.1.6
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+
+--
+-- Database: `dragondb`
+--
+-- CREATE DATABASE `dragondb` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+-- USE `dragondb`;
 
 -- --------------------------------------------------------
 
@@ -182,7 +187,6 @@ CREATE TABLE IF NOT EXISTS `Forums` (
   `Name` varchar(40) default NULL,
   `Description` varchar(255) default NULL,
   `SortOrder` int(11) NOT NULL default '0',
-  `Moderated` char(1) NOT NULL default 'N',
   `Options` int(11) unsigned NOT NULL default '0',
   `LastPost` int(11) default NULL,
   `PostsInForum` int(11) NOT NULL default '0',
@@ -279,9 +283,10 @@ CREATE TABLE IF NOT EXISTS `GoDiagrams` (
   `View_Right` int(11) default NULL,
   `View_Up` int(11) default NULL,
   `View_Down` int(11) default NULL,
+  `Date` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Saved` enum('Y','N') NOT NULL default 'N',
   `Data` text NOT NULL,
   `SGF` text NOT NULL,
-  `Date` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -313,8 +318,6 @@ CREATE TABLE IF NOT EXISTS `MessageCorrespondents` (
 
 CREATE TABLE IF NOT EXISTS `Messages` (
   `ID` int(11) NOT NULL auto_increment,
-  `To_ID` int(11) default NULL,
-  `From_ID` int(11) default NULL,
   `Type` enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT') NOT NULL default 'NORMAL',
   `ReplyTo` int(11) NOT NULL default '0',
   `Game_ID` int(11) NOT NULL default '0',
@@ -333,7 +336,7 @@ CREATE TABLE IF NOT EXISTS `Messages` (
 --
 
 CREATE TABLE IF NOT EXISTS `MoveMessages` (
-  `gid` int(11) NOT NULL auto_increment,
+  `gid` int(11) NOT NULL,
   `MoveNr` smallint(5) unsigned NOT NULL default '0',
   `Text` text,
   PRIMARY KEY  (`gid`,`MoveNr`)
@@ -403,20 +406,21 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Adminlevel` int(11) NOT NULL default '0',
   `AdminOptions` int(11) unsigned NOT NULL default '0',
   `AdminNote` varchar(100) NOT NULL default '',
+  `MayPostOnForum` enum('N','Y','M') NOT NULL default 'Y',
   `Timezone` varchar(40) NOT NULL default 'GMT',
   `Nightstart` int(11) NOT NULL default '22',
   `ClockUsed` int(11) NOT NULL default '22',
   `ClockChanged` enum('N','Y') NOT NULL default 'Y',
   `Rating` double default NULL,
+  `Rating2` double default NULL,
   `RatingMin` double default NULL,
   `RatingMax` double default NULL,
-  `Rating2` double default NULL,
   `InitialRating` double default NULL,
   `RatingStatus` enum('INIT','RATED') default NULL,
-  `Open` varchar(40) default NULL,
+  `Open` varchar(40) NOT NULL default '',
   `Lang` varchar(20) NOT NULL default 'C',
-  `VacationDays` double default '14',
-  `OnVacation` double default '0',
+  `VacationDays` double NOT NULL default '14',
+  `OnVacation` double NOT NULL default '0',
   `SkinName` varchar(32) NOT NULL default '',
   `Woodcolor` int(11) NOT NULL default '1',
   `Boardcoords` int(11) NOT NULL default '31',
@@ -439,16 +443,15 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Translator` varchar(80) NOT NULL default '',
   `StatusFolders` varchar(40) NOT NULL default '',
   `IP` varchar(16) NOT NULL default '',
-  `Browser` varchar(100) default NULL,
-  `Country` char(2) default NULL,
+  `Browser` varchar(100) NOT NULL default '',
+  `Country` char(2) NOT NULL default '',
   `NotesSmallHeight` tinyint(3) unsigned NOT NULL default '25',
   `NotesSmallWidth` tinyint(3) unsigned NOT NULL default '30',
-  `NotesSmallMode` enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF','OFF') NOT NULL default 'RIGHT',
+  `NotesSmallMode` enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
   `NotesLargeHeight` tinyint(3) unsigned NOT NULL default '25',
   `NotesLargeWidth` tinyint(3) unsigned NOT NULL default '30',
-  `NotesLargeMode` enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF','OFF') NOT NULL default 'RIGHT',
+  `NotesLargeMode` enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
   `NotesCutoff` tinyint(3) unsigned NOT NULL default '13',
-  `MayPostOnForum` enum('N','Y','M') NOT NULL default 'Y',
   `TableMaxRows` smallint(5) unsigned NOT NULL default '20',
   `BlockReason` text NOT NULL,
   PRIMARY KEY  (`ID`),
@@ -666,6 +669,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `Time` datetime NOT NULL default '0000-00-00 00:00:00',
   `Size` int(11) NOT NULL default '19',
   `Komi` decimal(6,1) NOT NULL default '6.5',
+  `Handicap` int(11) NOT NULL default '0',
   `Handicaptype` enum('conv','proper','nigiri','double') NOT NULL default 'conv',
   `Maintime` int(11) NOT NULL default '0',
   `Byotype` enum('JAP','CAN','FIS') NOT NULL default 'JAP',
@@ -678,77 +682,6 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `Ratingmin` double NOT NULL default '-9999',
   `Ratingmax` double NOT NULL default '-9999',
   `Comment` varchar(40) NOT NULL default '',
-  `Handicap` int(11) NOT NULL default '0',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
-
-#
-# Insert Guest account
-#
-
--- replace Password-algorithm with that declared as [PASSWORD_ENCRYPT] in 'include/config.php'
-INSERT INTO Players SET
-   Handle='guest',
-   Name='Guest',
-   Password=SHA1('guest');
-
-
-#
-# Dumping data for table 'Clock'
-#
-
-INSERT INTO Clock SET ID=0;
-INSERT INTO Clock SET ID=1;
-INSERT INTO Clock SET ID=2;
-INSERT INTO Clock SET ID=3;
-INSERT INTO Clock SET ID=4;
-INSERT INTO Clock SET ID=5;
-INSERT INTO Clock SET ID=6;
-INSERT INTO Clock SET ID=7;
-INSERT INTO Clock SET ID=8;
-INSERT INTO Clock SET ID=9;
-INSERT INTO Clock SET ID=10;
-INSERT INTO Clock SET ID=11;
-INSERT INTO Clock SET ID=12;
-INSERT INTO Clock SET ID=13;
-INSERT INTO Clock SET ID=14;
-INSERT INTO Clock SET ID=15;
-INSERT INTO Clock SET ID=16;
-INSERT INTO Clock SET ID=17;
-INSERT INTO Clock SET ID=18;
-INSERT INTO Clock SET ID=19;
-INSERT INTO Clock SET ID=20;
-INSERT INTO Clock SET ID=21;
-INSERT INTO Clock SET ID=22;
-INSERT INTO Clock SET ID=23;
-INSERT INTO Clock SET ID=100;
-INSERT INTO Clock SET ID=101;
-INSERT INTO Clock SET ID=102;
-INSERT INTO Clock SET ID=103;
-INSERT INTO Clock SET ID=104;
-INSERT INTO Clock SET ID=105;
-INSERT INTO Clock SET ID=106;
-INSERT INTO Clock SET ID=107;
-INSERT INTO Clock SET ID=108;
-INSERT INTO Clock SET ID=109;
-INSERT INTO Clock SET ID=110;
-INSERT INTO Clock SET ID=111;
-INSERT INTO Clock SET ID=112;
-INSERT INTO Clock SET ID=113;
-INSERT INTO Clock SET ID=114;
-INSERT INTO Clock SET ID=115;
-INSERT INTO Clock SET ID=116;
-INSERT INTO Clock SET ID=117;
-INSERT INTO Clock SET ID=118;
-INSERT INTO Clock SET ID=119;
-INSERT INTO Clock SET ID=120;
-INSERT INTO Clock SET ID=121;
-INSERT INTO Clock SET ID=122;
-INSERT INTO Clock SET ID=123;
-INSERT INTO Clock SET ID=201,Lastchanged=0;
-INSERT INTO Clock SET ID=202,Lastchanged=0;
-INSERT INTO Clock SET ID=203,Lastchanged=0;
 
