@@ -271,7 +271,8 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( $row);
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
-         'CHECKBOX', 'smoothedge', 1, '', ($s & SMOOTH_EDGE) ) );
+         'CHECKBOX', 'smoothedge', 1, '', ($boardcoords & SMOOTH_EDGE),
+         'TEXT', sptext(T_('(only for textured wood colors)')) ));
 
    if( ENA_MOVENUMBERS )
    {

@@ -58,6 +58,7 @@ require_once( "include/rating.php" );
       }
    }
 
+   $woodcolor = (int)@$_GET['woodcolor'];
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
                 + ( @$_GET['coordsup'] ? COORD_UP : 0 )
                 + ( @$_GET['coordsright'] ? COORD_RIGHT : 0 )
@@ -65,7 +66,7 @@ require_once( "include/rating.php" );
                 + ( @$_GET['coordsover'] ? COORD_OVER : 0 )
                 + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
                 + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
-                + ( @$_GET['smoothedge'] ? SMOOTH_EDGE : 0 );
+                + ( ( @$_GET['smoothedge'] && ($woodcolor < 10) ) ? SMOOTH_EDGE : 0 );
 
    $userflags = 0;
    if( ALLOW_JAVASCRIPT )
