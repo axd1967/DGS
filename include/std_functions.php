@@ -2140,6 +2140,7 @@ function clean_url( $url, $sep='' )
 }
 
 // relative to the calling URL, not to the current dir
+// returns empty or some rel-dir with trailing '/'
 function rel_base_dir()
 {
    $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
