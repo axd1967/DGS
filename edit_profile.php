@@ -40,14 +40,13 @@ require_once( "include/form_functions.php" );
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
    $button_nr = $player_row['Button'];
-
    if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
       $button_nr = 0;
 
-   $notify_mess = array( 0 => T_('Off'),
-                         1 => T_('Notify only'),
-                         2 => T_('Moves and messages'),
-                         3 => T_('Full board and messages') );
+   $notify_msg = array( 0 => T_('Off'),
+                        1 => T_('Notify only'),
+                        2 => T_('Moves and messages'),
+                        3 => T_('Full board and messages') );
 
    $menu_directions = array('VERTICAL' => sptext(T_('Vertical'),2),
                            'HORIZONTAL' => sptext(T_('Horizontal')) );
@@ -146,13 +145,17 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches?'),
                                   'TEXTINPUT', 'open', 32, 60, $player_row["Open"] ) );
 
-   if( strpos($player_row["SendEmail"], 'BOARD') !== false ) $s= 3;
-   elseif( strpos($player_row["SendEmail"], 'MOVE') !== false ) $s= 2;
-   elseif( strpos($player_row["SendEmail"], 'ON') !== false ) $s= 1;
-   else $s= 0;
+   if( strpos($player_row["SendEmail"], 'BOARD') !== false )
+      $notify_msg_idx = 3;
+   elseif( strpos($player_row["SendEmail"], 'MOVE') !== false )
+      $notify_msg_idx = 2;
+   elseif( strpos($player_row["SendEmail"], 'ON') !== false )
+      $notify_msg_idx = 1;
+   else
+      $notify_msg_idx = 0;
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
-                                  'SELECTBOX', 'emailnotify', 1, $notify_mess, $s, false ) );
+                                  'SELECTBOX', 'emailnotify', 1, $notify_msg, $notify_msg_idx, false ) );
    $row= array('DESCRIPTION', T_('Email'),
                'TEXTINPUT', 'email', 32, 80,
                $player_row['Email'],
@@ -192,11 +195,13 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( array( 'HEADER', T_('Appearence') ) );
 
    if( (@$player_row['admin_level'] & ADMIN_SKINNER) )
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Skin'),
-                                  'SELECTBOX', 'skinname', 1, $known_skins,
-                                  $player_row['SkinName'], false ) );
+   {
+      $profile_form->add_row( array( 'DESCRIPTION', T_('Skin'),
+                                     'SELECTBOX', 'skinname', 1, $known_skins,
+                                     $player_row['SkinName'], false ) );
+   }
    else
-   $profile_form->add_row( array( 'HIDDEN', 'skinname', 'dragon'));
+      $profile_form->add_row( array( 'HIDDEN', 'skinname', 'dragon'));
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
                                   'RADIOBUTTONS', 'menudir', $menu_directions,
@@ -212,9 +217,7 @@ require_once( "include/form_functions.php" );
             $button_code .= "</tr>\n<tr>";
       }
       else
-      {
          $button_code .= "<td></td>";
-      }
       $button_style = 'color:' . $buttoncolors[$i] . ';' .
                   'background-image:url(images/' . $buttonfiles[$i] . ');';
       $button_code .=
@@ -224,10 +227,9 @@ require_once( "include/form_functions.php" );
    }
    $button_code .= "</tr></table>\n";
 
-      $profile_form->add_row( array(
-               'DESCRIPTION', T_('Game id button'),
-               'TEXT', $button_code,
-            ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Game id button'),
+         'TEXT', $button_code, ));
 
    $profile_form->add_row( array( 'DESCRIPTION', T_('Table max rows'),
                                   'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows,
@@ -276,17 +278,14 @@ require_once( "include/form_functions.php" );
 
    if( ENA_MOVENUMBERS )
    {
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Move numbering'),
-                                  'TEXTINPUT', 'movenumbers', 4, 4, $cfg_board->get_move_numbers(),
-                                  'CHECKBOX', 'movemodulo', 100,
-                                    sptext(T_('Don\'t use numbers above 100'),2),
-                                    ( ($cfg_board->get_move_modulo() > 0) ?1 :0),
-                                  'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($boardcoords & NUMBER_OVER),
-                                ) );
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Move numbering'),
+            'TEXTINPUT', 'movenumbers', 4, 4, $cfg_board->get_move_numbers(),
+            'CHECKBOX', 'movemodulo', 100, sptext(T_('Don\'t use numbers above 100'),2),
+                        ( ($cfg_board->get_move_modulo() > 0) ? 1 :0),
+            'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($boardcoords & NUMBER_OVER),
+         ));
    }
-
-//   $profile_form->add_row( array( 'SPACE' ) );
-//
 
 
    $profile_form->add_row( array( 'HEADER', T_('Private game notes') ) );
@@ -352,9 +351,8 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( array( 'SPACE' ) );
 
    $profile_form->add_row( array(
-                     'SUBMITBUTTONX', 'action', T_('Change profile'),
-                        array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
-                     ) );
+         'SUBMITBUTTONX', 'action', T_('Change profile'),
+               array( 'accesskey' => ACCKEY_ACT_EXECUTE ), ));
 
 
    $profile_form->echo_string(1);
