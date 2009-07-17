@@ -352,6 +352,7 @@ span.ErrorMsg {
    color: darkred;
 }
 
+span.AdminOption,
 .AdminLink {
    font-style: italic;
    background: #bcffab; /* light green */

@@ -259,22 +259,29 @@ require_once( "include/form_functions.php" );
 
    $boardcoords = $cfg_board->get_board_coords();
 
-   $row= array( 'DESCRIPTION', T_('Coordinate sides'),
+   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
+         'CHECKBOX', 'smoothedge', 1, '', ($boardcoords & SMOOTH_EDGE),
+         'TEXT', sptext(T_('(only for textured wood colors)')) ));
+
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Coordinate sides'),
          'CHECKBOX', 'coordsleft', 1, sptext(T_('Left'),2), ($boardcoords & COORD_LEFT),
          'CHECKBOX', 'coordsup', 1, sptext(T_('Up'),2), ($boardcoords & COORD_UP),
          'CHECKBOX', 'coordsright', 1, sptext(T_('Right'),2), ($boardcoords & COORD_RIGHT),
          'CHECKBOX', 'coordsdown', 1, sptext(T_('Down'),2), ($boardcoords & COORD_DOWN),
-         'CHECKBOX', 'coordsover', 1, sptext(T_('Hover'),2), ($boardcoords & COORD_OVER),
+      ));
+
+   $row = array(
+         'TAB',
+         'CHECKBOX', 'coordsover', 1, sptext(T_('Hover (show coordinates)'),2),
+               ($boardcoords & COORD_OVER),
       );
    if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) )
       array_push( $row,
-         'CHECKBOX', 'coordssgfover', 1, sptext(T_('Sgf over')), ($boardcoords & COORD_SGFOVER)
-      );
+         'CHECKBOX', 'coordssgfover', 1, sprintf( '<span class="AdminOption">%s</span>',
+                  sptext(T_('SGF Hover (show SGF coordinates)'))),
+               ($boardcoords & COORD_SGFOVER) );
    $profile_form->add_row( $row);
-
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
-         'CHECKBOX', 'smoothedge', 1, '', ($boardcoords & SMOOTH_EDGE),
-         'TEXT', sptext(T_('(only for textured wood colors)')) ));
 
    if( ENA_MOVENUMBERS )
    {
@@ -283,7 +290,16 @@ require_once( "include/form_functions.php" );
             'TEXTINPUT', 'movenumbers', 4, 4, $cfg_board->get_move_numbers(),
             'CHECKBOX', 'movemodulo', 100, sptext(T_('Don\'t use numbers above 100'),2),
                         ( ($cfg_board->get_move_modulo() > 0) ? 1 :0),
-            'CHECKBOX', 'numbersover', 1, sptext(T_('Hover')), ($boardcoords & NUMBER_OVER),
+            'CHECKBOX', 'numbersover', 1, sptext(T_('Show numbers only on Hover')),
+                  ($boardcoords & NUMBER_OVER),
+         ));
+
+      $profile_form->add_row( array(
+            'TAB',
+            'CHECKBOX', 'coordsrelnum', 1, sptext(T_('Relative numbering'),2),
+                  ($boardcoords & COORD_RELATIVE_MOVENUM),
+            'CHECKBOX', 'coordsrevnum', 1, sptext(T_('Reverse numbering'),2),
+                  ($boardcoords & COORD_REVERSE_MOVENUM),
          ));
    }
 
