@@ -220,7 +220,10 @@ class Board
          return;
 
       $start = max( $start, 1);
+      $movenums = count($this->moves);
 
+      $is_relative = ($this->coord_borders & COORD_RELATIVE_MOVENUM);
+      $is_reverse  = ($this->coord_borders & COORD_REVERSE_MOVENUM);
       for( $n=$end; $n>=$start; $n-- )
       {
          if( isset($this->moves[$n]) )
@@ -231,7 +234,15 @@ class Board
             if( $sgfc )
             {
                if( $mod > 1 )
-                  $mrk = (($n-1) % $mod)+1;
+               {
+                  $movelabel = $n;
+                  if( $is_reverse )
+                     $movelabel = ($is_relative ? $end : $movenums) - $movelabel;
+                  elseif( $is_relative )
+                     $movelabel = $movelabel - $start + 1;
+
+                  $mrk = (($movelabel-1) % $mod)+1;
+               }
                else
                   $mrk = $mark;
 

@@ -55,7 +55,9 @@ define('SMOOTH_EDGE',   0x010); // short board with smooth edges (for textured w
 define('COORD_OVER',    0x020); // show A1-like coordinates over board-point
 define('COORD_SGFOVER', 0x040); // show AA-like (SGF-like) coordinates over board-point
 define('NUMBER_OVER',   0x080); // show number of move over board-point (used for tiny stone-size)
-define('COORD_MASK',    (COORD_UP|COORD_RIGHT|COORD_DOWN|COORD_LEFT));
+define('COORD_RELATIVE_MOVENUM', 0x100); // relative move-numbering (previous move to current is n)
+define('COORD_REVERSE_MOVENUM',  0x200); // reverse move-numbering (previous move to current is 1)
+define('COORD_MASK', (COORD_UP|COORD_RIGHT|COORD_DOWN|COORD_LEFT));
 
 class ConfigBoard
 {
