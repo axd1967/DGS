@@ -60,13 +60,16 @@ require_once( "include/rating.php" );
 
    $woodcolor = (int)@$_GET['woodcolor'];
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
-                + ( @$_GET['coordsup'] ? COORD_UP : 0 )
-                + ( @$_GET['coordsright'] ? COORD_RIGHT : 0 )
-                + ( @$_GET['coordsdown'] ? COORD_DOWN : 0 )
-                + ( @$_GET['coordsover'] ? COORD_OVER : 0 )
-                + ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
-                + ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
-                + ( ( @$_GET['smoothedge'] && ($woodcolor < 10) ) ? SMOOTH_EDGE : 0 );
+                | ( @$_GET['coordsup'] ? COORD_UP : 0 )
+                | ( @$_GET['coordsright'] ? COORD_RIGHT : 0 )
+                | ( @$_GET['coordsdown'] ? COORD_DOWN : 0 )
+                | ( @$_GET['coordsover'] ? COORD_OVER : 0 )
+                | ( @$_GET['coordssgfover'] ? COORD_SGFOVER : 0 )
+                | ( @$_GET['numbersover'] ? NUMBER_OVER : 0 )
+                | ( ( @$_GET['smoothedge'] && ($woodcolor < 10) ) ? SMOOTH_EDGE : 0 )
+                | ( @$_GET['coordsrelnum'] ? COORD_RELATIVE_MOVENUM : 0 )
+                | ( @$_GET['coordsrevnum'] ? COORD_REVERSE_MOVENUM : 0 )
+                ;
 
    $userflags = 0;
    if( ALLOW_JAVASCRIPT )
