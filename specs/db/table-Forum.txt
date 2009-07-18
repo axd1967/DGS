@@ -1,0 +1,8 @@
+###
+### Description of mysql tables:  Forums, Posts, ForumRead, Forumlog
+###
+
+NOTE: All forum tables and refactoring on the forums are described in
+
+   specs/forums.txt
+

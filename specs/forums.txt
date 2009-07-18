@@ -1,7 +1,7 @@
 ################################################################################
 # Topic: Forums
 # Description: Forum capabilities for DGS
-# Author: Erik, Rod, JUG
+# Author of this document: juga
 
 ## /*
 ## Dragon Go Server
@@ -241,11 +241,11 @@ within the code; (could be a future refactoring step).
 # integrity of forum data.
 #
 # NOTE: fields are functionally grouped (not like in DDL)
-# NOTE: DDL available in init.sql
+# NOTE: DDL available in specs/db/dragon-ddl.sql
 
 #----- TABLE Forums
 
-# Representation of a forum with name, description and moderating­status
+# Representation of a forum with name, description and moderating-status
 TABLE Forums
    ID             - auto-inserted PK forum-id referred as $fid
    LastPost       - Posts.ID of last changed post for this forum
@@ -257,11 +257,16 @@ TABLE Forums
    Name           - forum-name
    Description    - forum-description
    SortOrder      - sort-order for forums
-   Moderated(Y,N) - if 'Y', posts in forums need approval by moderator before
-                    being shown to users
+
+   # forum-options
+   # - Bit-value 0x1 : if set, posts in forums need approval by moderator
+   #   before being shown to users
+   # - Bit-value 0x2 : forum is within admin group (hidden normally)
+   # - Bit-value 0x4 : forum is within developer group (hidden normally)
+   Options
 
    # entered data
-   Name, Description, SortOrder, Moderated
+   Name, Description, SortOrder, Options
 
    # triggered fields
    ID; LastPost, Updated, PostsInForum, ThreadsInForum
@@ -294,9 +299,10 @@ TABLE Posts
    PosIndex(80)   - sort-string used to correctly display thread-tree
    Time           - creation-date of post
    Lastedited     - last-edited-date of post
-   Approved       - hidden-state of post: 'Y'=shown post, 'N'=hidden post
-   PendingApproval - 'Y'=post needs moderation decision (approve/reject),
-                     'N'=moderator had decided for post-approval/rejection
+   Approved       - hidden-state of post:
+                    - 'Y'=shown post,
+                    - 'N'=hidden post
+                    - 'P'=post needs moderation decision (approve/reject)
 
    Subject(80)    - subject of post
    Text           - text-body of post
@@ -307,14 +313,14 @@ TABLE Posts
 
    # entered data
    Forum_ID, Thread_ID, Updated, User_ID, Parent_ID, AnswerNr, Depth, PosIndex,
-   Time, Lastedited, Approved, PendingApproval, Subject, Text, crc32, (old_ID)
+   Time, Lastedited, Approved, Subject, Text, crc32, (old_ID)
 
    # calculated fields
    PosIndex (from Parent_ID, Depth, AnswerNr), crc32 (from Text)
 
    # triggered fields
    ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
-   PosIndex, Lastedited, Approved, PendingApproval
+   PosIndex, Lastedited, Approved
 
 
 #----- TABLE Forumreads
@@ -375,7 +381,35 @@ TABLE ForumRead
    NewCount, Time
 
 
-#-------- Calculated datebase fields
+#----- TABLE Forumlog
+
+# Representation of actions in forums
+TABLE Forumlog
+   ID             - auto-inserted PK
+   User_ID        - FK for user, that performed forum-action
+   Thread_ID      - thread-id, Posts.ID of thread action was performed on
+   Post_ID        - post-id, Posts.ID of post action was performed on
+   Time           - action-date
+
+   Action         - actions of users:
+                    - new_post : user added new post
+                    - new_pend_post : user added new post needing moderation
+                    - edit_post : user edited post
+                    - edit_pend_post : user edited post needing moderation
+                    actions of moderators:
+                    - approve_post : moderator approved pending post
+                    - reject_post : moderator rejected pending post
+                    - show_post : moderator showed hidden post
+                    - hide_post : moderator hide shown post
+
+   IP             - IP of user, that performed forum-action
+
+   # entered data
+   User_ID, Thread_ID, Post_ID, Time, Action, IP
+
+
+
+#-------- Calculated database fields
 
 #----- Forum (stored in Forums-TABLE)
 # label: recalc_forum
@@ -422,6 +456,7 @@ Forums($fid):
 # label: recalc_thread
 
 # Calculate fields for all threads
+Posts():
    # calculate
    PostsInThread := as X_CountPosts :
       SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts
@@ -511,7 +546,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 # Trigger-fields:
 # - Forums: ID; LastPost, Updated, PostsInForum, ThreadsInForum
 # - Thread/Post: ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
-#   PosIndex, Lastedited, Approved, PendingApproval
+#   PosIndex, Lastedited, Approved
 # - ForumRead: NewCount, Time
 
 #----- U01: read forum-list
@@ -550,11 +585,11 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
     Hits=0, Time=$NOW, Lastchanged=Time, Updated=$NOW, Depth=1, AnswerNr=1,
     crc32=crc32(Text)
 
-  - moderated ($uid==guest or forum.Moderated):
-    LastPost=0, PostsInThread=0, Approved='N', PendingApproval='Y'
+  - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
+    LastPost=0, PostsInThread=0, Approved='P'
 
   - not moderated:
-    LastPost=$ntid, PostsInThread=1, Approved='Y', PendingApproval='N'
+    LastPost=$ntid, PostsInThread=1, Approved='Y'
 
 * if not moderated:
   - Forums($fid).ThreadsInForum++
@@ -578,11 +613,11 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
     Depth=Posts[ID=$spid].Depth+1, AnswerNr=max[Parent_ID=$spid](Posts.AnswerNr) + 1,
     PosIndex=CALC, crc32=crc32(Text)
 
-  - moderated ($uid==guest or forum.Moderated):
-    Approved='N', PendingApproval='Y'
+  - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
+    Approved='P'
 
   - not moderated:
-    Approved='Y', PendingApproval='N'
+    Approved='Y'
 
 * if not moderated:
   - Thread($tid).PostsInThread++
@@ -637,7 +672,8 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 #----- A03: move thread
 # move thread $tid from forum $sfid to forum $nfid
-#TODO new feature, not implemented yet
+#TODO new feature, not implemented yet;
+#     but doubtful to come (probably brings more confusion than bringing order)
 
 * move thread-posts:
   - $tupd := Thread($tid).Updated
@@ -670,7 +706,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 * update Posts($pid):
   - $dpid := Posts($pid).Time
-  - PendingApproval='N', Approved='Y'
+  - Approved='Y'
 
 * Thread($tid).PostsInThread++
 
@@ -689,7 +725,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 * update Posts($pid):
   - $dpid := Posts($pid).Time
-  - PendingApproval='N', Approved='N'
+  - Approved='N'
 
 #----- A06: hide post
 
@@ -771,13 +807,6 @@ going to be implemented. Just wanted to write them down somewhere.
 * Prio(1): refactor "saves" for forum, check recalcs
 
 * Prio(1): handle/fix/create/recalc triggers for forum/thread/posts
-
-* Prio(2): implement use case A03 (move thread to other forum)
-
-* Prio(3): replace PendingApproval
-  - replace PendingApproval with new Approved-enum('P')
-  - index on Approved, delete index/column PendingApproval
-  - for forum-search + recalc
 
 
 #-------- (6) Known Bugs ------------------------------------------------------
