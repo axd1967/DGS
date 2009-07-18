@@ -44,6 +44,11 @@ General instructions for developers:
          ...
       }
 
+----------------- Database:
+
+   Study the document 'specs/db/optimize-sql.txt' and the given references.
+   It might help in writing optimized SQL-statements and creating optimized
+   database-table structures.
 
 ----------------- PHP, Database:
 

@@ -1,0 +1,53 @@
+# Topic: SQL
+# Description: Hints for database, SQL, optimization
+
+#-------- MySQL-Optimizations ----------------------------------
+
+- mysql-manual Optimizations: http://dev.mysql.com/doc/refman/5.0/en/optimization.html
+   - Optimized SQL: http://dev.mysql.com/doc/refman/5.0/en/query-speed.html
+      - grant-structure
+      - explain sql-statement (check for type='ALL')
+      - analyze table for (better) value distribution (-> cardinality, show index)
+      - joins wants to use index
+      - order-optimizations http://dev.mysql.com/doc/refman/4.1/en/order-by-optimization.html
+      - avoid transform-functions in where-clauses
+      - Write Separate SQL Statements for Specific Tasks
+      - replace ordering by filtering
+      - using SQL_CALC_FOUND_ROWS lets db-server search all rows
+      - 'force index' (since mysql 4.1/5.0 ?)
+      - use prefixed indexes on strings
+      - use summary tables (instead of large selects for stats for example)
+      - store only a reference to the file rather than the file itself in the database
+
+   - Optimized Table-Design: http://dev.mysql.com/doc/refman/4.1/en/optimizing-database-structure.html
+      - design your tables to take as little space on the disk as possible
+      - Use the most efficient (smallest) data types possible
+      - Declare columns to be NOT NULL
+      - primary index of a table should be as short as possible
+      - Create only the indexes that you really need
+      - string column has a unique prefix
+      - split: dynamic-format table and it is possible to use a smaller static forma
+#
+#-------- Various ----------------------------------------------
+
+- reduce workload: http://download-uk.oracle.com/docs/cd/B10501_01/server.920/a96533/sql_1016.htm
+   Reduce the Workload:
+      This is what commonly constitutes SQL tuning: finding more efficient
+      ways to process the same workload. It is possible to change the execution
+      plan of the statement without altering the functionality to reduce the
+      resource consumption.
+      Two examples of how resource usage can be reduced are:
+
+         1. If a commonly executed query needs to access a small percentage of data in the table,
+            then it can be executed more efficiently by using an index.
+            By creating such an index, you reduce the amount of resources used.
+         2. If a user is looking at the first twenty rows of the 10,000 rows returned in a specific sort order,
+            and if the query (and sort order) can be satisfied by an index,
+            then the user does not need to access and sort the 10,000 rows to see the first 20 rows.
+
+   Balance the Workload
+      Systems often tend to have peak usage in the daytime when real users are connected to the system,
+      and low usage in the nighttime. If noncritical reports and batch jobs can be scheduled
+      to run in the nighttime and their concurrency during day time reduced,
+      then it frees up resources for the more critical programs in the day.
+
