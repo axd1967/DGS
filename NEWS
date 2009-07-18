@@ -16,13 +16,12 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added Properties editor for registration restrictions on tournament and players
       * Added Rules editor for games-setting
 
-   * Games:
+   * Game page:
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
       * Added new game info page (marked by <image info.gif>)
       * Preview game message (access-key [v]=Preview)
       * Show scoring information in scoring step and for finished games
-      * Added "Notes" column on My-Games list showing part of private game notes
       * Show hint to close all boundaries before passing
 
    * Game info page (new):
@@ -41,7 +40,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Changed default for Standard Handicap Placement to: ON
          * Changed default for Time settings to: Fischer time with 30d + 1d
          * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
-           Now only make Nigiri if both players have same rating
+           Now stronger player gets White color and only make Nigiri
+           if both players have same rating
 
       * <home waiting_room.php>Waiting room</home>:
          * separated adding of new game on <home new_game.php>new-game page</home>,
@@ -56,7 +56,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Increased number of games in offer: 10 -> 20
          * differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
 
-      * <home new_game.php>New Game </home>:
+      * <home new_game.php>New Game</home>:
          * added adjustment and min/max-limitation of handicap stones
          * added adjustment of komi by value and jigo mode (allow or reject Jigo)
          * added (optional) minimum number of rated finished games
@@ -67,6 +67,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * added indication of color, handicap & komi for conventional & proper handicap-type
 
    * <home show_games.php>Games lists</home>:
+      * Added "Notes" column on My-Games list showing part of private game notes
       * <home show_games.php?observe=all>Show all observed games</home> with own search-profile and column set,
         show number of observing users ("#Observers"-column) and
         show if my games are observed ("Mine"-column)
@@ -87,7 +88,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home list_messages.php>Messages</home>:
       * Added new page with message-thread for a message,
-        show or hide all message-texts within message-thread
+        Show or hide all message-texts within message-thread
       * Show linked icon to message-thread (<image thread.gif>) for single message and on pages with message-lists
       * Show linked icon to initial message in thread (<image msg_first.gif>) on reply message
 
@@ -165,26 +166,26 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Adjusted hint-text of colors-image for other users
       * Replaced "Show my observed games" -> "Games I'm observing"
 
-      * Game SGF Download:
-         * Included private game notes
-         * Included PASS-moves
-         * Used 3rd PASS-move as node for scoring for better RESUME-handling
-         * Removed node-text for pass/scoring-steps (viewer-problems)
-         * Added URL-arg 'no_cache' to disable cache
+   * Game SGF Download:
+      * Included private game notes
+      * Included PASS-moves
+      * Used 3rd PASS-move as node for scoring for better RESUME-handling
+      * Removed node-text for pass/scoring-steps (viewer-problems)
+      * Added URL-arg 'no_cache' to disable cache
 
-      * Game page:
-         * Show SGF-move-number near view-moves list
-         * "move"-selectbox (view-moves list) contains only subset of moves
-           fixing possible bug on large boards
-         * Mark handicap-setup in view-moves list
-         * Added access key [x]='Next Game', [v]=Preview
-         * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
-         * Replaced 'OnVacation'-text by vacation-icon
-         * Show 'Comments' to right of View-move
-         * Increased size of game-message text box
-         * Added way to stay on board after submitting move,
-           Changed move-submit-button: 'Submit and go to next game' -> 'Submit move'
-         * Removed submit-move-button returning to status page
+   * Game page:
+      * Added way to stay on board after submitting move,
+        Changed move-submit-button: 'Submit and go to next game' -> 'Submit move'
+      * Removed submit-move-button returning to status page
+      * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
+      * Replaced 'OnVacation'-text by vacation-icon
+      * Show SGF-move-number near view-moves list
+      * "move"-selectbox (view-moves list) contains only subset of moves
+        fixing possible bug on large boards
+      * Mark handicap-setup in view-moves list
+      * Added access key [x]='Next Game', [v]=Preview
+      * Show 'Comments' to right of View-move
+      * Increased size of game-message text box
 
    * Quick Status: Added time-remaining column
 
@@ -206,6 +207,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Highlighted sum-rows and -columns on single opponent-info
 
    * <home edit_profile.php>User Profile</home>:
+      * Added move-numbering options: Relative and Reverse numbering,
+      * Changed order, grouping and description of hover-options
       * Introducing JavaScript management in profile setting
       * Enlarged length of field 'Open for matches' to 60 chars
       * Initial Rating: removed converting of NNGS-rank/rating
@@ -290,6 +293,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added "Admin user" convenience link on user-info page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
       * Added indexes on Errorlog and Forumlog to allow better searches
+      * Added forum consistency script
       * Removed translations from the admin pages
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
@@ -312,6 +316,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
+      * Added maintenance-users
 
 
    Bug fixes:
