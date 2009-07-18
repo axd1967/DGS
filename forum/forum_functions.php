@@ -1028,6 +1028,52 @@ class Forum
       return $this->navi_more_threads;
    }
 
+   /*!
+    * \brief Fix forum consistency for fields (LastPost, PostsInForum, ThreadsInForum).
+    * \param $debug if true only echoes sql-statements
+    * \note see section 'Calculated database fields' in 'specs/forums.txt'
+    * \return number of updates
+    */
+   function fix_forum( $debug )
+   {
+      $upd_arr = array();
+      $fid = $this->id;
+
+      // read fix for Forums.LastPost
+      $row = mysql_single_fetch( "Forum.fix_forum.read.LastPost($fid)",
+            "SELECT ID AS X_LastPost FROM Posts " .
+            "WHERE Forum_ID='$fid' AND Thread_ID>0 AND Approved='Y' AND PosIndex>'' " .
+            "ORDER BY Time DESC LIMIT 1" );
+      if( $row && $row['X_LastPost'] != $this->last_post_id )
+         $upd_arr[] = 'LastPost=' . $row['X_LastPost'];
+
+      // read fix for Forums.PostsInForum
+      $row = mysql_single_fetch( "Forum.fix_forum.read.PostsInForum($fid)",
+            "SELECT COUNT(*) AS X_Count FROM Posts " .
+            "WHERE Forum_ID='$fid' AND Thread_ID>0 AND Approved='Y' AND PosIndex>''" );
+      if( $row && $row['X_Count'] != $this->count_posts )
+         $upd_arr[] = 'PostsInForum=' . $row['X_Count'];
+
+      // read fix for Forums.ThreadsInForum
+      $row = mysql_single_fetch( "Forum.fix_forum.read.ThreadsInForum($fid)",
+            "SELECT COUNT(*) AS X_Count FROM Posts ".
+            "WHERE Forum_ID='$fid' AND Approved='Y' AND Parent_ID=0" );
+      if( $row && $row['X_Count'] != $this->count_threads )
+         $upd_arr[] = 'ThreadsInForum=' . $row['X_Count'];
+
+      // fix Forums
+      if( count($upd_arr) > 0 )
+      {
+         $query = "UPDATE Forums SET " . implode(', ', $upd_arr) . " WHERE ID='$fid' LIMIT 1";
+         echo $query, "\n";
+         if( !$debug )
+            db_query( "Forum.fix_forum.update($fid)", $query );
+      }
+
+      return (count($upd_arr) > 0) ? 1 : 0;
+   }
+
+
    // ---------- Static Class functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Forum-object. */
@@ -1063,16 +1109,16 @@ class Forum
    function load_forum( $id )
    {
       if( !is_numeric($id) || $id <= 0 )
-         error('unknown_forum', "load_forum($id)");
+         error('unknown_forum', "Forum.load_forum($id)");
 
       $qsql = Forum::build_query_sql();
       $qsql->add_part( SQLP_WHERE, "ID='$id'" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $query = $qsql->get_select();
-      $row = mysql_single_fetch( "forum.load_forum2($id)", $query );
+      $row = mysql_single_fetch( "Forum.load_forum2($id)", $query );
       if( !$row )
-         error('unknown_forum', "load_forum3($id)");
+         error('unknown_forum', "Forum.load_forum3($id)");
 
       return Forum::new_from_row( $row );
    }
@@ -1084,7 +1130,7 @@ class Forum
    function load_forum_list( $user_id )
    {
       if( !is_numeric($user_id) )
-         error('invalid_user', "Forum.build_query_forum_list($user_id)");
+         error('invalid_user', "Forum.load_forum_list.check.user_id($user_id)");
 
       $mindate = ForumRead::get_min_date();
       $qsql = new QuerySQL();
@@ -1149,6 +1195,23 @@ class Forum
       }
       mysql_free_result($result);
       return $fnames;
+   }
+
+   /*! \brief Returns array of Forum-objects with raw Forums-fields (for forum-fixes). */
+   function load_fix_forum_list()
+   {
+      $qsql = Forum::build_query_sql();
+      $qsql->add_part( SQLP_ORDER, 'ID' );
+
+      $result = db_query( "Forum.load_fix_forum_list()", $qsql->get_select() );
+      $flist = array();
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $forum = Forum::new_from_row( $row );
+         $flist[] = $forum;
+      }
+      mysql_free_result($result);
+      return $flist;
    }
 
 } // end of 'Forum'
