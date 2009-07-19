@@ -23,7 +23,42 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-19 juga
+
+   * NEWS:
+   - remaining-time-colored warning, found-rows status-games, row-nums users-page
+   - reordered sections + cleanup newer items, fixed typos, added more links,
+     added/adjusted/unified/clarified texts (single-quote-handling for link markup,
+     quick-status external-link, user-types icons, site-map update)
+
+   * news.php:
+   - replaced <br> with LF within <pre>-context
+
+   * include/std_functions.php (parse_tags_safe):
+   - bugfix: added special handling to allow external link for tag needing closing tag,
+     allow external link with '_'-tag-suffix notation for "<home_ ..></home>"
+
+   * include/time_functions.php, include/game_functions.php, include/make_game.php,
+     include/message_functions.php, tournaments/include/tournament_rules.php,
+     add_to_waitingroom.php, game.php, waiting_room.php,
+     code_examples/check_times.php:
+   - used consts for byo-yomi types: JAP, CAN, FIS
+
+   * include/time_functions.php (time_remaining_value, get_time_remaining_warning_class),
+     show_games.php (build_time_remaining), status.php, skins/dragon/screen.css:
+   - warn with colors of my or opponents short remaining-time for status-games and my running games,
+     - use yellow(-card)-like color to warn about remaining-time <7d
+     - use red(-card)-like    color to warn about remaining-time <3d
+   - added total found-rows to status games-list
+
+   * show_games.php (build_time_remaining):
+   - for my running-games added remaining-time for myself and opponent
+   - fix ambiguity with Lastchanged-field (Games,Clock)
+
 2009-07-18 juga
+
+   * specs/db/optimize-sql.txt, scripts/README.developers:
+     - SQL optimizations, add hint in developer-README
 
    * forum/forum_functions.php (Forum.fix_forum, ~.load_fix_forum_list, ~.load_forum),
      scripts/forum_consistency.php:
