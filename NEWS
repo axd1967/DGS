@@ -44,47 +44,48 @@ Copyright (C) 2001-2009  Erik Ouchterlony
            if both players have same rating
 
       * <home waiting_room.php>Waiting room</home>:
-         * separated adding of new game on <home new_game.php>new-game page</home>,
-           added <home new_game.php>New game</home> page into main-menu (access-key [n])
-         * show probable game-settings for challenger with color, handicap and komi
-         * simplified filter for "suitable" waiting games, added notes
-         * additionally show "(FH)" in Settings-column
-           if standard-placement is not used (=free handicap)
-         * added waiting-room restriction to avoid same opponent joining too many games,
-           Challenger has to wait some days, or can be restricted by number of games
-           to join game-offer
-         * Increased number of games in offer: 10 -> 20
-         * differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
+         * Moved adding of a new game offer for the waiting room to a separate page:
+           Added <home new_game.php>New game</home> page into main-menu (access-key [n])
+         * Show probable game-settings for challenger with color, handicap and komi
+         * Simplified filter for "suitable" waiting games, added notes
+         * Additionally show "(FH)" (=free handicap) in Settings-column,
+           if standard-placement is not used
+         * Differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
 
       * <home new_game.php>New Game</home>:
-         * added adjustment and min/max-limitation of handicap stones
-         * added adjustment of komi by value and jigo mode (allow or reject Jigo)
-         * added (optional) minimum number of rated finished games
-         * added MANUAL-game with fix color WHITE and BLACK in waitingroom,
-           merged 'Even game with Nigiri' and 'Double game' with MANUAL-game
+         * Added adjustment and min/max-limitation of handicap stones
+         * Added adjustment of komi by value and jigo mode (allow or reject Jigo)
+         * Added (optional) minimum number of rated finished games
+         * Added MANUAL-game with fix color WHITE and BLACK in waitingroom,
+           Merged 'Even game with Nigiri' and 'Double game' with MANUAL-game
+         * Added optional waiting-room restriction per game-offer to avoid same opponent joining
+           too many games: challenger has to wait some days or can be restricted by number of games
+         * Increased maximum number of games in offer: 10 -> 20
 
       * <home message.php?mode=Invite>Invitation</home>:
-         * added indication of color, handicap & komi for conventional & proper handicap-type
+         * Show probable color / handicap / komi for conventional & proper handicap-type on Preview
 
    * <home show_games.php>Games lists</home>:
-      * Added "Notes" column on My-Games list showing part of private game notes
+      * Added "Notes" column on My-Games list showing leading part of private game notes
       * <home show_games.php?observe=all>Show all observed games</home> with own search-profile and column set,
-        show number of observing users ("#Observers"-column) and
-        show if my games are observed ("Mine"-column)
+        Show number of observing users ("#Observers"-column) and
+        Show if my games are observed ("Mine"-column)
       * Added columns with start-rating, end-rating and rating-diff
         of opponents counterpart-user for user-running and user-finished view
-      * Added columns with remaining-time of myself and opponent for my running games
-      * Added column with link to new game info page
+      * Added columns with remaining-time of myself and opponent for my running games.
+      * Warn about short remaining-times with colored background (red &lt;3d, yellow &lt;7d)
+        on <home status.php>status-games</home> and <home show_games.php>my running games</home>
+      * Added column with link to game info page on all game lists
       * Show Weekendclock for all view-modes
 
    * <home userinfo.php>User info</home>:
-      * Show a users timezone, local time and night start,
-      * Show icon for Vacation (<image vacation.gif>), Night time (<image night.gif>)
+      * Show a users timezone, local time and night start
+      * Show icon for Vacation (<image vacation.gif>) and Night time (<image night.gif>)
       * Added <home userinfo.php#pic>user picture</home> on user-info page
-         * Added page to <home edit_picture.php>edit user picture</home>,
+         * Added page to <home edit_picture.php>edit user picture</home> (limited size),
            Supported image-types: GIF, JPEG, PNG
-         * Show if user has a picture on pages: users, opponents, contacts
-      * Show user-info in two columns (less game- and more-game-related info)
+         * Show icon (<image picture.gif>) if user has a picture on pages: users, opponents, contacts
+      * Show user-info page in two columns (less game- and more-game-related info)
       * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * <home list_messages.php>Messages</home>:
@@ -96,25 +97,23 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
-         * users, opponents, waiting room, search messages, contacts,
-           feature-votes, tournaments
+         * users, opponents, waiting room, search messages, contacts, feature-votes, tournaments
          * observers of a game, my/all observed games
          * all/my/other finished and running games
-      * Added absolute timeunit-choice for filter on Contacts, Message search, Games
+      * Added absolute timeunit-choice for filters on Contacts, Message search, Games
         and Errorlog pages
 
    * Navigation:
-      * Added system bookmarks in top dragon bar
+      * Added system bookmarks in top Dragon bar
       * Added <home site_map.php>site-map page</home> into main-menu
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
-      * Added column with link to new game info page
-      * Added column with icon for users being "online",
+      * Added column on status games with icon for users being "online",
         i.e. last access time within 10 mins ago
       * Show open tournament applications of user
       * Added "My tournaments" bottom-menu-link
-      * Added "Notes" column on games list
+      * Added "Notes" column on games list with leading part of private game notes
 
    * <home forum/index.php>Forum pages reworked</home>:
       * Show number of NEW posts
@@ -154,9 +153,12 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * <home features/list_votes.php>Show features votes</home>, added as Vote-link in main-menu
 
    * Markup tags:
-      * Enhanced link markup with optional text: &lt;http://url.net |link text>
-      * Added markup-tag &lt;tourney id> showing link to tournament-page
-      * &lt;game> markup: Changed char used for move-number in game reference
+      * &lt;http://url.net |link text> : enhanced link markup with optional text,
+        Link text must not contain a single quote "'" -> use "&amp;apos;" instead
+      * &lt;tourney id> : showing link to corresponding tournament page
+      * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
+        (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
+      * &lt;game gid[,move]> : Changed char used for move-number in game reference
 
 
    Minor changes:
@@ -168,27 +170,27 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Replaced "Show my observed games" -> "Games I'm observing"
 
    * Game SGF Download:
-      * Included private game notes
+      * Included private game notes in last game-node
       * Included PASS-moves
-      * Used 3rd PASS-move as node for scoring for better RESUME-handling
+      * Used 3rd PASS-move as scoring node for better RESUME-handling
       * Removed node-text for pass/scoring-steps (viewer-problems)
       * Added URL-arg 'no_cache' to disable cache
 
    * Game page:
       * Added way to stay on board after submitting move,
+        Removed submit-move-button returning to status page,
         Changed move-submit-button: 'Submit and go to next game' -> 'Submit move'
-      * Removed submit-move-button returning to status page
       * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
       * Replaced 'OnVacation'-text by vacation-icon
       * Show SGF-move-number near view-moves list
-      * "move"-selectbox (view-moves list) contains only subset of moves
+      * Changed "move"-selectbox (view-moves list) containing only a subset of moves now
         fixing possible bug on large boards
       * Mark handicap-setup in view-moves list
-      * Added access key [x]='Next Game', [v]=Preview
-      * Show 'Comments' to right of View-move
+      * Added access keys [x]='Next Game', [v]=Preview
+      * Show 'Comments' to right of View-move button
       * Increased size of game-message text box
 
-   * Quick Status: Added time-remaining column
+   * <home_ quick_status.php>Quick Status</home>: Added time-remaining column
 
    * <home list_messages.php>Messages</home>:
       * Added option to stay in folder after moving messages
@@ -196,7 +198,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home users.php>Users</home>:
       * Added user-type:
-         * Admin can mark user as Professional, Teacher and Robot
+         * Admin can mark user as Professional (<image professional.gif>), Teacher (<image teacher.gif>) and Robot (<image robot.gif>)
          * Can be searched on users and opponents page
          * Shown in user info, waiting room, on users and opponents page
       * Show icon (<image online.gif>) for users being "online" (i.e. last access time within 10 mins ago)
@@ -208,7 +210,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Highlighted sum-rows and -columns on single opponent-info
 
    * <home edit_profile.php>User Profile</home>:
-      * Added move-numbering options: Relative and Reverse numbering,
+      * Added move-numbering options: Relative and Reverse numbering
       * Changed order, grouping and description of hover-options
       * Introducing JavaScript management in profile setting
       * Enlarged length of field 'Open for matches' to 60 chars
@@ -218,23 +220,23 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Filters:
       * Replaced Filter-Reset with selection to clear, reset, load/save fields
       * Changed access keys for filter-search: [e]=Search (, [z]=Reset )
-      * Added warning-message for stopwords-warning of mysql-match-search
-        (mainly for forum-search)
+      * Added warning-message for stopwords-warning of mysql-match-search (mainly for forum-search)
       * Added tooltips for submit buttons
 
    * Table Lists:
-      * Used clearer header for column ID
-      * Changed default sort-direction for ID
-      * Can show row-number, e.g. on Tournament participants list
+      * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
       * Enable full page-navigation (experimental) with pages- & entries-info
-        for pages: Waiting room, Tournaments, Tournament participants, Messages,
-        Search messages, Users, Opponents, Games, Observed games, Votes, Features
+        for pages: Status games, Waiting room, Tournaments, Tournament participants,
+        Messages, Search messages, Users, Opponents, Games, Observed games, Votes, Features
+      * Changed some default sort-directions
+      * Used clearer header names
 
    * <home docs.php>Docs</home>:
-      * Added link to statistics page on docs and site-map page
-      * News: added table of contents
-      * <home links.php>Links</home>: added gosensations.com, corrected outdated links
-      * Removed <home todo.php>todo-list</home>, moved content to DGS-Wishlist on Sensei's Library
+      * Added link to <home statistics.php>statistics</home> page on docs and site-map page
+      * Updated <home site_map.php>site map page</home>
+      * Added table of contents for <home news.php>news page</home>
+      * Added gosensations.com, corrected outdated links on <home links.php>Links page</home>
+      * Removed <home todo.php>todo-list</home>: moved content to <http://senseis.xmp.net/?DGSWishlist |DGS-Wishlist on Sensei&apos;s Library>
 
       * <home people.php>People page</home>:
          * Added section with all Dragon executives
@@ -268,15 +270,13 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Added <home donation.php>donation page</home> (deactivated when target reached)
 
-   * Statistics page:
+   * <home statistics.php>Statistics page</home>:
       * Restrict the 'loadavg'-stats to admins view
       * Added 'Activity' curve in the graph (activated in the URL)
 
    * Output Erroglog-ID on error as [ERRLOG123] for easier debugging and error-location
    * Changed handling of some URL-arguments to reduce risk of SQL-injections
    * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
-
-   * Changes for FAQ-editors:
 
    * Changes for Translators:
       * Added comments to clarify the translation process
@@ -439,8 +439,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added &lt;image source> : show image from Dragon webserver in images-dir.
         Use &lt;image board/source> : show Dragon board-images (link to dir '/17').
         Meant to be used for FAQ.
-      * &lt;home_ page>DGS-page&lt;/home> : show link to DGS-page without baseURL
-        in new window
+      * &lt;home page>DGS-page&lt;/home> : show link to DGS-page without baseURL in new window
 
 
    Minor changes:
