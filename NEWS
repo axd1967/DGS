@@ -73,6 +73,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
         show if my games are observed ("Mine"-column)
       * Added columns with start-rating, end-rating and rating-diff
         of opponents counterpart-user for user-running and user-finished view
+      * Added columns with remaining-time of myself and opponent for my running games
       * Added column with link to new game info page
       * Show Weekendclock for all view-modes
 
