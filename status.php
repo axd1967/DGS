@@ -54,7 +54,7 @@ $ThePage = new Page('Status');
 
    // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
-   $gtable = new Table( 'game', "status.php", $cfg_tblcols, '', $table_mode );
+   $gtable = new Table( 'game', "status.php", $cfg_tblcols, '', $table_mode|TABLE_ROWS_NAVI );
 
    start_page(T_('Status'), true, $logged_in, $player_row,
                button_style($player_row['Button']) );
@@ -191,6 +191,7 @@ $ThePage = new Page('Status');
    }
    else
    {
+      $gtable->set_found_rows( mysql_found_rows("status.find.my_games($my_id)") );
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $Rating=NULL;
@@ -265,9 +266,16 @@ $ThePage = new Page('Status');
 
             time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
                            $Maintime, $Byotype, $Byotime, $Byoperiods, false);
+            $hours_remtime = time_remaining_value( $Byotype, $Byotime, $Byoperiods,
+                  $my_Maintime, $my_Byotime, $my_Byoperiods );
+            $class_remtime = get_time_remaining_warning_class( $hours_remtime );
 
-            $grow_strings[10] = echo_time_remaining( $my_Maintime, $Byotype,
+            $content = echo_time_remaining( $my_Maintime, $Byotype,
                   $my_Byotime, $my_Byoperiods, $Byotime, false, true, true);
+            $grow_strings[10] = array(
+                  'attbs' => array( 'class' => $class_remtime ),
+                  'text'  => $content,
+               );
          }
          if( $gtable->Is_Column_Displayed[11] )
          {
