@@ -1454,7 +1454,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends (or empty):
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|color|';
-$html_code_closed['line'] = '|home|a'.$html_code_closed['cell'];
+$html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'];
 $html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
 $html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
 //$html_code_closed['faq'] = ''; //no closed check
@@ -1532,7 +1532,7 @@ function parse_atbs_safe( &$trail, &$bad)
    }
    if( !$bad && $head )
    {
-/*
+/* TODO check for newer/more attributes!
 This part fix a security hole. One was able to execute a javascript code
 (if read by some browsers: IExplorer, for instance) with something like:
 <b style="background:url('javascript:eval(document.all.mycode.xcode)')"
@@ -1567,6 +1567,8 @@ This part fix a security hole. One was able to execute a javascript code
  * Check up to the <$stop > tag (supposed to be the closing tag).
  * If $stop=='', check up to the end of string $trail.
  * The global $parse_mark_regex must be the well-formed preg-exp of the marked terms.
+ *
+ * \param $html_code, $html_code_closed seems to be refs because of speed !?
  **/
 $parse_mark_regex = ''; //global because parse_tags_safe() is recursive
 define('PARSE_MARK_TERM', ALLOWED_LT.'span class=MarkTerm'
@@ -1581,7 +1583,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    global $parse_mark_regex;
    $before = '';
    //$stop = preg_quote($stop, '%');
-   $reg = ( $html_code ?( $stop ?"$stop|" :'' ).$html_code :$stop );
+   $reg = ( $html_code ) ? ( $stop ? $stop.'|' : '' ) . $html_code : $stop;
    if( !$reg )
       return '';
    //enclosed by '%' because $html_code may contain '/'
@@ -1594,7 +1596,8 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          $marks = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $marks);
       $before.= $marks;
       $tag = strtolower($matches[2]) ; //Warning: same case as $html_code
-         if( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
+      if( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
+      $endtag = ( substr($tag,-1,1) == '_' ) ? substr($tag,0,-1) : $tag;
       $trail = $matches[3] ;
       unset($matches);
 
@@ -1667,7 +1670,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       }
       elseif( $to_be_closed )
       {
-         $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$tag);
+         $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$endtag);
          if( $bad)
             return $before .'<'. $head .'>'. $inside ;
       }
