@@ -843,7 +843,8 @@ table.Table tr.LinksB td.PagingR {
 
 
 /*
- rows of datas
+ rows of datas:
+ Row1/3 (light), Row2/4 (darker)
 */
 table.Table tr.Row3,
 table.Table tr.Row1 {
@@ -871,6 +872,40 @@ table.Table tr.Row4 td.Warning,
 table.Table tr.Row2 td.Warning {
    color: black;
    background: #e6b9bd;
+}
+
+/* remaining-time warnings: alarm=red-card, warning=yellow-card */
+table.Table tr.Row1 td.RemTimeWarn1,
+table.Table tr.Row3 td.RemTimeWarn1 {
+   background: #ffb0c2; /* alarm - light */
+}
+table.Table tr.Row2 td.RemTimeWarn1,
+table.Table tr.Row4 td.RemTimeWarn1 {
+   background: #fa96a6; /* alarm - dark */
+}
+table.Table tr.HilRow1 td.RemTimeWarn1,
+table.Table tr.HilRow3 td.RemTimeWarn1 {
+   background: #ff9082; /* alarm - light */
+}
+table.Table tr.HilRow2 td.RemTimeWarn1,
+table.Table tr.HilRow4 td.RemTimeWarn1 {
+   background: #fa7666; /* alarm - dark */
+}
+table.Table tr.Row1 td.RemTimeWarn2,
+table.Table tr.Row3 td.RemTimeWarn2 {
+   background: #fff69f; /* warning - light */
+}
+table.Table tr.Row2 td.RemTimeWarn2,
+table.Table tr.Row4 td.RemTimeWarn2 {
+   background: #e0e096; /* warning - dark */
+}
+table.Table tr.HilRow1 td.RemTimeWarn2,
+table.Table tr.HilRow3 td.RemTimeWarn2 {
+   background: #ffd65f; /* warning - light */
+}
+table.Table tr.HilRow2 td.RemTimeWarn2,
+table.Table tr.HilRow4 td.RemTimeWarn2 {
+   background: #e0cb62; /* warning - dark */
 }
 
 

@@ -912,14 +912,21 @@ function build_time_remaining( $grow, $prefix_col, $is_to_move )
    $userByoperiods = $grow[$prefix_col.'_Byoperiods'];
 
    // no Ticks (vacation) == 0 => lead to 0 elapsed hours
-   $elapsed_hours  = ( $is_to_move ) ? ticks_to_hours(@$grow['X_Ticks'] - @$grow['LastTicks']) : 0;
+   $elapsed_hours = ( $is_to_move ) ? ticks_to_hours(@$grow['X_Ticks'] - @$grow['LastTicks']) : 0;
 
    time_remaining($elapsed_hours, $userMaintime, $userByotime, $userByoperiods,
-                  $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+      $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+   $hours_remtime = time_remaining_value( $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
+      $userMaintime, $userByotime, $userByoperiods );
 
+   $class_remtime = get_time_remaining_warning_class( $hours_remtime );
    $rem_time = echo_time_remaining( $userMaintime, $grow['Byotype'], $userByotime,
       $userByoperiods, $grow['Byotime'], false, true, true);
-   return $rem_time;
+
+   return array(
+         'attbs' => array( 'class' => $class_remtime ),
+         'text'  => $rem_time,
+      );
 }
 
 ?>
