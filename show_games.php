@@ -27,6 +27,7 @@ require_once( "include/rating.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/time_functions.php' );
 
 $ThePage = new Page('GamesList');
 
@@ -254,6 +255,11 @@ $ThePage = new Page('GamesList');
    $load_notes = ($show_notes && $gtable->is_column_displayed(33) );
    $load_user_ratingdiff = $gtable->is_column_displayed(38);
 
+   // NOTE: check after add_or_del_column()-call
+   // only activate if column shown for user to reduce server-load for page
+   // avoiding additional outer-join on Clock-table !!
+   $load_remaining_time = ( $running && !$all && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
+
 /*****
  * Views-pages identification:
  *   views:
@@ -351,6 +357,8 @@ $ThePage = new Page('GamesList');
  * 36: >  FU+RU [userStartRating] (User-StartRating)
  * 37: >  FU [userEndRating] (User-EndRating)
  * 38: >  FU [userRatingDiff] (User-RatingDiff)
+ * 39: >  RU (my remainint time)
+ * 40: >  RU (oppenent remainint time)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -475,6 +483,12 @@ $ThePage = new Page('GamesList');
    }
    $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
 
+   if( $running && !$all && $is_mine ) //RU
+   {
+      $gtable->add_tablehead(39, T_('My time remaining#header'), null, TABLE_NO_SORT);
+      $gtable->add_tablehead(40, T_('Opponent time remaining#header'), null, TABLE_NO_SORT);
+   }
+
    if( $observe_all )
       $gtable->set_default_sort( 34, 13 ); //on ObsCount,Lastchanged
    else
@@ -486,7 +500,7 @@ $ThePage = new Page('GamesList');
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS, // std-fields
       'Games.*',
-      'UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged',
+      'UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated" );
 
    if( $observe ) //OB
@@ -592,6 +606,13 @@ $ThePage = new Page('GamesList');
       else if( $running ) //RU ?UNION
       {
          $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
+
+         if( $load_remaining_time ) //RU
+         {
+            $qsql->add_part( SQLP_FIELDS, "COALESCE(Clock.Ticks,0) AS X_Ticks" );
+            $qsql->add_part( SQLP_FROM,
+               "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
+         }
       }
 
       if( ALLOW_SQL_UNION ) //FU+RU ?UNION
@@ -796,6 +817,20 @@ $ThePage = new Page('GamesList');
          {
             if( $gtable->Is_Column_Displayed[15] )
                $grow_strings[15] = date(DATE_FMT, $oppLastaccess);
+            if( $gtable->Is_Column_Displayed[39] ) // my-RemTime
+            {
+               // X_Color: b0= White to play, b1= I am White, b4= not my turn
+               $prefix_my_col = ( $X_Color & 2 ) ? 'White' : 'Black';
+               $is_to_move    = !( $X_Color & 0x10 ); // my-turn -> use clock
+               $grow_strings[39] = build_time_remaining( $row, $prefix_my_col, $is_to_move );
+            }
+            if( $gtable->Is_Column_Displayed[40] ) // opp-RemTime
+            {
+               // X_Color: b0= White to play, b1= I am White, b4= not my turn
+               $prefix_opp_col = !( $X_Color & 2 ) ? 'White' : 'Black';
+               $is_to_move    = ( $X_Color & 0x10 ); // opp-turn -> use clock
+               $grow_strings[40] = build_time_remaining( $row, $prefix_opp_col, $is_to_move );
+            }
          }
       } //else //OB
 
@@ -868,4 +903,23 @@ $ThePage = new Page('GamesList');
 
    end_page(@$menu_array);
 }
+
+
+function build_time_remaining( $grow, $prefix_col, $is_to_move )
+{
+   $userMaintime   = $grow[$prefix_col.'_Maintime'];
+   $userByotime    = $grow[$prefix_col.'_Byotime'];
+   $userByoperiods = $grow[$prefix_col.'_Byoperiods'];
+
+   // no Ticks (vacation) == 0 => lead to 0 elapsed hours
+   $elapsed_hours  = ( $is_to_move ) ? ticks_to_hours(@$grow['X_Ticks'] - @$grow['LastTicks']) : 0;
+
+   time_remaining($elapsed_hours, $userMaintime, $userByotime, $userByoperiods,
+                  $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+
+   $rem_time = echo_time_remaining( $userMaintime, $grow['Byotype'], $userByotime,
+      $userByoperiods, $grow['Byotime'], false, true, true);
+   return $rem_time;
+}
+
 ?>
