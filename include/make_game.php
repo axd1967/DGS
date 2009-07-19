@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //$TranslateGroups[] = "Game";
 
 require_once( 'include/game_functions.php' );
+require_once( 'include/time_functions.php' );
 
 
 // Inserts INVITATION-game or updates DISPUTE-game
@@ -126,7 +127,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $hours<1 && ($byohours<1 || $byoyomitype == 'FIS') )
+   if( $hours<1 && ($byohours<1 || $byoyomitype == BYOTYPE_FISCHER) )
       error('time_limit_too_small','make_invite_game');
 
 

@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //$TranslateGroups[] = "Game";
 
+require_once( 'include/time_functions.php' );
+
+
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
 
 // enum Waitingroom.JigoMode
@@ -132,7 +135,7 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       )
       error('internal_error',"add_time_opponent.incomplete_game_row($gid)");
 
-   if( $reset_byo && $game_row['Byotype'] == 'FIS' )
+   if( $reset_byo && $game_row['Byotype'] == BYOTYPE_FISCHER )
       $reset_byo = 0;
    if( $reset_byo && $game_row["{$oppcolor}_Byoperiods"] == -1 )
       $reset_byo = 0;

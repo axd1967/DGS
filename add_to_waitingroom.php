@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/time_functions.php' );
 require_once( "include/message_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/utilities.php' );
@@ -139,7 +140,7 @@ require_once( 'include/utilities.php' );
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $hours<1 && ($byohours<1 || $byoyomitype == 'FIS') )
+   if( $hours<1 && ($byohours<1 || $byoyomitype == BYOTYPE_FISCHER) )
       error('time_limit_too_small');
 
 

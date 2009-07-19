@@ -24,6 +24,7 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( 'include/game_functions.php' );
+require_once( 'include/time_functions.php' );
 
 define('INVITE_HANDI_CONV',-1);
 define('INVITE_HANDI_PROPER',-2);
@@ -96,7 +97,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $MaxHandicap = MAX_HANDICAP;
    $Maintime = 1;
    $MaintimeUnit = 'months';
-   $Byotype = 'FIS';
+   $Byotype = BYOTYPE_FISCHER;
    $Byotime_jap = 1;
    $ByotimeUnit_jap = 'days';
    $Byoperiods_jap = 10;
@@ -237,20 +238,20 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $Byotype = $game_row['Byotype'];
       switch( (string)$Byotype )
       {
-         case 'JAP':
+         case BYOTYPE_JAPANESE:
             $Byotime_jap = $game_row['Byotime'];
             $ByotimeUnit_jap = $game_row['ByotimeUnit'];
             $Byoperiods_jap = $game_row['Byoperiods'];
             break;
 
-         case 'CAN':
+         case BYOTYPE_CANADIAN:
             $Byotime_can = $game_row['Byotime'];
             $ByotimeUnit_can = $game_row['ByotimeUnit'];
             $Byoperiods_can = $game_row['Byoperiods'];
             break;
 
-         default: //case 'FIS':
-            $Byotype = 'FIS';
+         default: //case BYOTYPE_FISCHER:
+            $Byotype = BYOTYPE_FISCHER;
             $Byotime_fis = $game_row['Byotime'];
             $ByotimeUnit_fis = $game_row['ByotimeUnit'];
             break;
@@ -402,7 +403,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    $mform->add_row( array( 'DESCRIPTION', T_('Japanese byoyomi'),
                            //'CELL', 1, 'nowrap',
-                           'RADIOBUTTONS', 'byoyomitype', array( 'JAP' => '' ), $Byotype,
+                           'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
                            'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
                            'TEXT', sptext(T_('with')),
@@ -411,7 +412,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                            ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Canadian byoyomi'),
-                           'RADIOBUTTONS', 'byoyomitype', array( 'CAN' => '' ), $Byotype,
+                           'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
                            'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
                            'TEXT', sptext(T_('for')),
@@ -420,7 +421,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
                            ) );
 
    $mform->add_row( array( 'DESCRIPTION', T_('Fischer time'),
-                           'RADIOBUTTONS', 'byoyomitype', array( 'FIS' => '' ), $Byotype,
+                           'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
                            'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
                            'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
                            'TEXT', sptext(T_('extra per move')),
@@ -995,7 +996,7 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
    if( $mainhours > $max ) $mainhours = $max;
    else if( $mainhours < 0 ) $mainhours = 0;
 
-   if( $byoyomitype == 'JAP' )
+   if( $byoyomitype == BYOTYPE_JAPANESE )
    {
       $byohours = time_convert_to_hours($byotimevalue_jap, $timeunit_jap);
       if( $byohours > $max ) $byohours = $max;
@@ -1005,7 +1006,7 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
       if( $byohours * $byoperiods > $max )
          $byoperiods = floor($max/$byohours);
    }
-   else if( $byoyomitype == 'CAN' )
+   else if( $byoyomitype == BYOTYPE_CANADIAN )
    {
       $byohours = time_convert_to_hours($byotimevalue_can, $timeunit_can);
       if( $byohours > $max ) $byohours = $max;
@@ -1014,9 +1015,9 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
       $byoperiods = (int)$byoperiods_can;
       if( $byoperiods < 1 ) $byoperiods = 1;
    }
-   else // if( $byoyomitype == 'FIS' )
+   else // if( $byoyomitype == BYOTYPE_FISCHER )
    {
-      $byoyomitype = 'FIS';
+      $byoyomitype = BYOTYPE_FISCHER;
       $byohours = time_convert_to_hours($byotimevalue_fis, $timeunit_fis);
       if( $byohours > $mainhours ) $byohours = $mainhours;
       else if( $byohours < 0 ) $byohours = 0;

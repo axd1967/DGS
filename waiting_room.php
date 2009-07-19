@@ -27,6 +27,7 @@ require_once( "include/rating.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 require_once( 'include/game_functions.php' );
+require_once( 'include/time_functions.php' );
 require_once( "include/message_functions.php" );
 require_once( "include/contacts.php" );
 require_once( "include/filter.php" );
@@ -98,9 +99,9 @@ require_once( 'include/classlib_userconfig.php' );
          array( FC_FNAME => 'good', FC_LABEL => T_('Only suitable'), FC_STATIC => 1, FC_DEFAULT => 1 ));
    $wrfilter->add_filter( 9, 'Selection',
          array( T_('All') => '',
-                T_('Japanese') => "Byotype='JAP'",
-                T_('Canadian') => "Byotype='CAN'",
-                T_('Fischer')  => "Byotype='FIS'" ),
+                T_('Japanese') => sprintf( "Byotype='%s'", BYOTYPE_JAPANESE ),
+                T_('Canadian') => sprintf( "Byotype='%s'", BYOTYPE_CANADIAN ),
+                T_('Fischer')  => sprintf( "Byotype='%s'", BYOTYPE_FISCHER ), ),
          true);
    $wrfilter->add_filter(11, 'RatedSelect', 'Rated', true);
    $wrfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);

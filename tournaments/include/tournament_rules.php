@@ -81,7 +81,7 @@ class TournamentRules
          $size=19, $handicaptype=TRULE_HANDITYPE_CONV, $handicap=0, $komi=DEFAULT_KOMI,
          $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
          $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
-         $maintime=450, $byotype='JAP', $byotime=15, $byoperiods=10,
+         $maintime=450, $byotype=BYOTYPE_FISCHER, $byotime=15, $byoperiods=10,
          $weekendclock=true, $rated=false )
    {
       $this->ID = (int)$id;
@@ -149,7 +149,7 @@ class TournamentRules
       // Handicaptype/Byotype
       if( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
          error('invalid_args', "TournamentRules.build_persist_query_part.check.Handicaptype({$this->tid},{$this->Handicaptype})");
-      if( !preg_match( "/^(JAP|CAN|FIS)$/", $this->Byotype ) )
+      if( !preg_match( "/^".REGEX_BYOTYPES."$/", $this->Byotype ) )
          error('invalid_args', "TournamentRules.build_persist_query_part.check.Byotype({$this->tid},{$this->Byotype})");
 
       return  " tid='{$this->tid}'"
@@ -240,11 +240,11 @@ class TournamentRules
       $vars['stdhandicap'] = (bool)$this->StdHandicap;
 
       $vars['byoyomitype'] = $this->Byotype;
-      if( $this->Byotype == 'JAP' )
+      if( $this->Byotype == BYOTYPE_JAPANESE )
          $suffix = '_jap';
-      elseif( $this->Byotype == 'CAN' )
+      elseif( $this->Byotype == BYOTYPE_CANADIAN )
          $suffix = '_can';
-      elseif( $this->Byotype == 'FIS' )
+      elseif( $this->Byotype == BYOTYPE_FISCHER )
          $suffix = '_fis';
 
       $vars['timeunit'] = 'hours';
@@ -256,7 +256,7 @@ class TournamentRules
       time_convert_to_longer_unit( $byo_timevalue, $byo_timeunit );
       $vars["timeunit$suffix"] = $byo_timeunit;
       $vars["byotimevalue$suffix"] = $byo_timevalue;
-      if( $this->Byotype != 'FIS' )
+      if( $this->Byotype != BYOTYPE_FISCHER )
          $vars["byoperiods$suffix"] = $this->Byoperiods;
 
       $vars['weekendclock'] = ($this->WeekendClock) ? 'Y' : 'N';
@@ -354,7 +354,7 @@ class TournamentRules
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                     $byotimevalue_fis, $timeunit_fis);
 
-      if( $hours < 1 && ($byohours < 1 || $byoyomitype == 'FIS') )
+      if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
          error('time_limit_too_small');
 
 

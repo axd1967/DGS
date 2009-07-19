@@ -2,6 +2,7 @@
 
 chdir("../");
 require_once("include/std_functions.php");
+require_once( 'include/time_functions.php' );
 chdir("code_examples/");
 
 if(1){ //display/check time_remaining and add_time
@@ -13,7 +14,7 @@ if(1){ //display/check time_remaining and add_time
    $logged_in = who_is_logged( $player_row);
 
    $game_rows[] = array(
-         'Byotype' => 'FIS',
+         'Byotype' => BYOTYPE_FISCHER,
          'Maintime' => 6,
          'Byotime' => 2,
          'Byoperiods' => 99,
@@ -49,7 +50,7 @@ if(1){ //display/check time_remaining and add_time
          );
 
    $game_rows[] = array(
-         'Byotype' => 'CAN',
+         'Byotype' => BYOTYPE_CANADIAN,
          'Maintime' => 2,
          'Byotime' => 5,
          'Byoperiods' => 3,
@@ -85,7 +86,7 @@ if(1){ //display/check time_remaining and add_time
          );
 
    $game_rows[] = array(
-         'Byotype' => 'JAP',
+         'Byotype' => BYOTYPE_JAPANESE,
          'Maintime' => 2,
          'Byotime' => 2,
          'Byoperiods' => 3,
