@@ -182,7 +182,7 @@ require_once( 'forum/forum_functions.php' );
    echo "Check Posts and Forums Updated-fields for NEW-counts ...<br>\n";
    $row = mysql_single_fetch( 'forum_consistency.read_updated',
       "SELECT COUNT(*) AS X_Count FROM Posts " .
-      "WHERE ((Lastchanged > Updated) OR (Updated=0)) AND " .
+      "WHERE ((Lastchanged > Updated) OR (Updated IS NULL)) AND " .
          "Thread_ID>0 AND Parent_ID=0 AND Approved='Y' LIMIT 1" );
    if( $row && ($row['X_Count'] > 0) )
    {
