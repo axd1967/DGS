@@ -59,6 +59,7 @@ function build_TOC( $text )
 
    // add TOC
    $contents = preg_replace("/%TOC%(<br>)?/is", $toc, $contents);
+   $contents = preg_replace("/<br>/is", "\n", $contents);
 
    start_page('DragonGoServer NEWS', true, $logged_in, $player_row );
 
