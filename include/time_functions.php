@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 define('NIGHT_LEN', 9); //may be from 0 to 24 hours
+define('DAY_LEN', (24-NIGHT_LEN));
 define('WEEKEND_CLOCK_OFFSET', 100);
 define('VACATION_CLOCK', -1); // keep it < 0
+
+define('BYOTYPE_JAPANESE', 'JAP');
+define('BYOTYPE_CANADIAN', 'CAN');
+define('BYOTYPE_FISCHER',  'FIS');
+define('REGEX_BYOTYPES', '('.BYOTYPE_JAPANESE.'|'.BYOTYPE_CANADIAN.'|'.BYOTYPE_FISCHER.')');
 
 function getmicrotime()
 {
@@ -171,13 +177,13 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
 
    switch((string)$byotype)
    {
-      case("FIS"):
+      case BYOTYPE_FISCHER:
       {
          $byotime = $byoper = 0;  // time is up
       }
       break;
 
-      case("JAP"):
+      case BYOTYPE_JAPANESE:
       {
          if( $startbyotime <= 0 )
          {
@@ -224,7 +230,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
       }
       break;
 
-      case("CAN"):
+      case BYOTYPE_CANADIAN:
       {
          if( $startbyoper <= 0 )
          {
@@ -254,6 +260,65 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
       }
       break;
    }
+} //time_remaining
+
+// remaining-time calculus aggregating remaining-time into one value of hours
+// Ref: http://www.dragongoserver.net/forum/read.php?forum=4&thread=5728#5743
+// - Fischer:   M main-time + T extra-time            -> M
+// - Japanese:  M main-time + N * T extra-time        -> M + remainingN * T
+// - Candadian: M main-time + T extra-time / N stones -> M + currT / N
+function time_remaining_value( $byotype, $startByotime, $startByoperiods,
+      $currMaintime, $currByotime, $currByoperiods )
+{
+   $result = 0;
+   switch((string)$byotype)
+   {
+      case BYOTYPE_FISCHER:
+         $result = ($currMaintime > 0) ? $currMaintime : 0;
+         break;
+
+      case BYOTYPE_JAPANESE:
+         if( $currMaintime > 0 ) // not in byo-yomi yet
+         {
+            $result = $currMaintime;
+            if( $startByotime > 0 ) // non-absolute
+               $result += $startByoperiods * $startByotime;
+         }
+         else
+         {// in byo-yomi
+            $result = $currByotime;
+            if( $startByoperiods > 0 && $startByotime > 0 )
+               $result += $currByoperiods * $startByotime;
+         }
+         break;
+
+      case BYOTYPE_CANADIAN:
+         if( $currMaintime > 0 ) // not in byo-yomi yet
+         {
+            $result = $currMaintime;
+            if( $startByoperiods > 0 ) // non-absolute
+               $result += $startByotime / $startByoperiods;
+         }
+         else
+         {// in byo-yomi
+            if( $startByoperiods > 0 && $currByoperiods > 0 )
+               $result = $currByotime / $currByoperiods;
+            else
+               $result = 0;
+         }
+   }
+   return $result;
+}
+
+// returns CSS-class if hours within warning-level for remaining-time
+function get_time_remaining_warning_class( $hours )
+{
+   if( $hours <= 3 * DAY_LEN )
+      return 'RemTimeWarn1';
+   elseif( $hours <= 7 * DAY_LEN )
+      return 'RemTimeWarn2';
+   else
+      return '';
 }
 
 function echo_day( $days, $keep_english=false, $short=false)
@@ -427,7 +492,7 @@ function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
    {
       $str.= echo_time( $maintime, $keep_english, $short);
    }
-   else if( $byotype == 'FIS' || $byotime <= 0 )
+   elseif( $byotype == BYOTYPE_FISCHER || $byotime <= 0 )
    {
       if( $short )
          $str.= NO_VALUE;
@@ -439,7 +504,7 @@ function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
       if( !$short )
          $str.= $T_('In byoyomi') . ' ';
 
-      if( $byotype == 'JAP' ) //now, it's like if $byotime was the $maintime
+      if( $byotype == BYOTYPE_JAPANESE ) //now, it's like if $byotime was the $maintime
          $str.= echo_time_limit( $byotime, $byotype, $startbyotime, $byoper
                   , $keep_english, $short, false);
       else //if( $byotype == 'CAN' )
