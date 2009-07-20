@@ -147,7 +147,7 @@ function get_executives( $level )
       if( $extra_info )
       {
          $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date'
-            . ' FROM (FAQlog AS T)'
+            . ' FROM FAQlog AS T'
             . " WHERE T.uid=$uid"
             . ' ORDER BY T.Date DESC LIMIT 1';
          $tmp = mysql_single_fetch( 'people.faq_admins.lastupdate', $query);

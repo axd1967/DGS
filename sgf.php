@@ -444,8 +444,8 @@ $array=array();
 
    $result = db_query( "sgf.moves($gid)",
       "SELECT Moves.*,MoveMessages.Text " .
-      "FROM (Moves) LEFT JOIN MoveMessages " .
-      "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
+      "FROM Moves LEFT JOIN MoveMessages " .
+         "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
       "WHERE Moves.gid=$gid ORDER BY Moves.ID"
       );
 

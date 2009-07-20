@@ -107,7 +107,7 @@ require_once( "include/std_functions.php" );
 
    $query = "SELECT M.ID as mid, M.Type"
       .", me.uid as uid, me.ID as me_mcID"
-      ." FROM (Messages AS M)"
+      ." FROM Messages AS M"
       ." LEFT JOIN MessageCorrespondents AS me"
          ." ON M.ID=me.mid"
       ." WHERE me.uid IS NULL"
@@ -136,7 +136,7 @@ require_once( "include/std_functions.php" );
 
    $query = "SELECT me.mid as mid, M.Type"
       .", me.uid as uid, me.ID as me_mcID"
-      ." FROM (MessageCorrespondents AS me)"
+      ." FROM MessageCorrespondents AS me"
       ." LEFT JOIN Messages AS M"
          ." ON M.ID=me.mid"
       ." WHERE M.Type IS NULL"
@@ -219,7 +219,7 @@ function check_system_message( $user_id=false)
       "me.ID as me_mcID, other.ID as other_mcID, " .
       "me.Replied AS replied, other.Replied AS other_replied, " .
       "me.Folder_nr AS folder, other.Folder_nr AS other_folder " .
-      "FROM (MessageCorrespondents AS me) " .
+      "FROM MessageCorrespondents AS me " .
       "LEFT JOIN MessageCorrespondents AS other"
          ." ON other.mid=me.mid AND other.Sender!='N' " .
       "WHERE me.Sender='N' AND other.Sender IS NULL " .
