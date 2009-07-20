@@ -50,8 +50,8 @@ function find_category_box_text($cat)
    $my_id = $player_row['ID'];
    $editorder = isset($_REQUEST['editorder']);
 
-   $result = mysql_query("SELECT * FROM Bio where uid=$my_id"
-               . " order by SortOrder, ID")
+   $result = mysql_query("SELECT * FROM Bio WHERE uid=$my_id"
+               . " ORDER BY SortOrder, ID")
       or error('mysql_query_failed', 'edit_bio.find_bios');
    $row_cnt = @mysql_num_rows($result);
 

@@ -42,7 +42,7 @@ echo '>>>> Should not be used now. Do not run it before a check ' .
    "Caution: no 'do_it' option"; end_html(); exit;
 
 
-   $res0 = mysql_query( "SELECT * from forums" ) or die(mysql_error());
+   $res0 = mysql_query( "SELECT * FROM forums" ) or die(mysql_error());
    while( $row0 = mysql_fetch_array( $res0 ) )
    {
       $fname = $row0['table_name'];

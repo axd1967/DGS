@@ -70,16 +70,16 @@ function export_game( $gid )
 {
    global $NOW;
 
-   $sql_games = insert_set( 'Games', "SELECT * from Games WHERE ID='$gid' LIMIT 1", true );
+   $sql_games = insert_set( 'Games', "SELECT * FROM Games WHERE ID='$gid' LIMIT 1", true );
    if( $sql_games[0] <= 0 )
       return array( false, $sql_games[1] );
 
    // skip ID
-   $sql_moves = insert_set( 'Moves', "SELECT * from Moves WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
+   $sql_moves = insert_set( 'Moves', "SELECT * FROM Moves WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
    if( $sql_moves[0] <= 0 )
       return array( false, $sql_moves[1] );
 
-   $sql_ratinglog = insert_set( 'Ratinglog', "SELECT * from Ratinglog WHERE gid='$gid' LIMIT 2", false, array( 'ID' ) );
+   $sql_ratinglog = insert_set( 'Ratinglog', "SELECT * FROM Ratinglog WHERE gid='$gid' LIMIT 2", false, array( 'ID' ) );
    if( $sql_ratinglog[0] < 0 ) // optional
       return array( false, $sql_ratinglog[1] );
 

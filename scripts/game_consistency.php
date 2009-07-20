@@ -246,7 +246,7 @@ function check_consistency( $gid)
       $colnr, $rownr, $Last_Move, $GameFlags;
 
    //echo "Game $gid: ";
-   $result = mysql_query("SELECT * from Games where ID=$gid");
+   $result = mysql_query("SELECT * FROM Games WHERE ID=$gid");
    if( @mysql_num_rows($result) != 1 )
    {
       if( $result )

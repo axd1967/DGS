@@ -129,7 +129,7 @@ $info_box = '<ul>
       $parent = $row['Parent'];
 
       $row2 = mysql_single_fetch( 'admin_faq.move.max',
-                "SELECT COUNT(*) as max FROM FAQ WHERE Parent=$parent")
+                "SELECT COUNT(*) AS max FROM FAQ WHERE Parent=$parent")
           or error('mysql_query_failed',"admin_faq.move.$action.max");
       $max = $row2['max'];
 
@@ -182,7 +182,7 @@ $info_box = '<ul>
          $newparent = $newparent['ID'];
 
          if( $max=mysql_single_fetch( 'admin_faq.bigmove.max_sortorder',
-               "SELECT MAX(SortOrder)+1 as max FROM FAQ"
+               "SELECT MAX(SortOrder)+1 AS max FROM FAQ"
                ." WHERE Parent=$newparent LIMIT 1") )
          {
             $max = $max['max'];

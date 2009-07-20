@@ -63,7 +63,7 @@ $ThePage = new Page('ForumAdmin');
           or error('admin_no_such_entry',"forum_admin.move.$action.read($fid)");
 
       $row2 = mysql_single_fetch( 'forum_admin.move.max',
-                "SELECT COUNT(*) as max FROM Forums")
+                "SELECT COUNT(*) AS max FROM Forums")
           or error('mysql_query_failed',"forum_admin.move.$action.max");
       $max = $row2['max'];
 

@@ -52,6 +52,10 @@ General instructions for developers:
 
 ----------------- PHP, Database:
 
+   By convention, write all SQL-keywords in upper-case.
+
+----------------- PHP, Database:
+
    Try to avoid the extract($row) function. Or just use it inside a
    short function. At top level, the values of $row become global
    variables. This is really risky. Even inside a function, as the $row
