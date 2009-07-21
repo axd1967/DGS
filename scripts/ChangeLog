@@ -23,7 +23,7 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
-2009-07-21 juga
+2009-07-22 juga
 
    * include/message_functions.php (message_info_table,change_folders_for_marked_messages,change_folders,echo_folder_box),
      include/std_functions.php (FOLDER_DESTROYED),
@@ -31,7 +31,7 @@ ChangeLog
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      daily_cron.php, edit_folders.php, search_messages.php, NEWS:
    - cleanup for MessageCorrespondents.Folder_nr: NOT-NULL + removed default,
-     replaced former NULL-values with FOLDER_DESTROYED (=-4)
+     replaced former NULL-values with FOLDER_DESTROYED (= -4)
 -----------
 -- [not-null] MessageCorrespondents.Folder_nr tinyint default NULL -> no default -> NOT NULL
 -- the following query-result should be empty before going on [update ca. 10s, alter-table ca. 25s]
@@ -55,9 +55,9 @@ ALTER TABLE MessageCorrespondents
      code_examples/test_clock_tick.php, rss/status.php, wap/status.php,
      clock_tick.php, confirm.php, daily_cron.php, edit_vacation.php, faq.php,
      game.php, game_comments.php, halfhourly_cron.php, quick_play.php, sgf.php:
-   - cleanup: in MySQL5 JOINs have higher precedence than ','-JOIN operator,
+   - cleanup: since MySQL 5.0.x JOINs have higher precedence than ','-JOIN operator,
      so add braces to avoid potential confusion when accidentally used with JOINs.
-     Should later be replaced with explicit JOIN-operators
+     Should later be replaced with explicit JOIN-operators.
 
 2009-07-20 juga
 
