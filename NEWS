@@ -90,7 +90,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home list_messages.php>Messages</home>:
       * Added new page with message-thread for a message,
-        Show or hide all message-texts within message-thread
+        Show or hide all message-texts within message-thread,
+        Destroyed messages are shown too (with folder '---')
       * Show linked icon to message-thread (<image thread.gif>) for single message and on pages with message-lists
       * Show linked icon to initial message in thread (<image msg_first.gif>) on reply message
 
@@ -252,7 +253,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Game: faster skip-to-next-game
       * Game comments: faster query
       * Bio: faster bio entries
-      * Messages: faster date-search
+      * Messages: faster date-search, destroyed messages
 
       * Game moves: fixed wrong index
       * Optimized all tables in regard to data-type and indexes
