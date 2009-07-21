@@ -75,6 +75,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 
 
    global $Last_Move, $GameFlags; //input only
+   // note: $GameFlags has set Ko-flag if last move has taken a single stone
 
    if( $nr_prisoners == 1 && ($GameFlags & KO) )
    {
@@ -103,7 +104,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 
    // Ok, all tests passed.
    return '';
-}
+}//check_move
 
 
 //place handicap stones from $stonestring

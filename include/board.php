@@ -903,6 +903,8 @@ class Board
    } //has_liberty_check
 
 
+   // checks if stone/move at [colnr/rownr] captures some stone(s)
+   // returns true, if some stones captured (in which case $prisoners-arg contains the x/y-coords of the prisoners)
    function check_prisoners( $colnr, $rownr, $col, &$prisoners )
    {
       $some = false;
