@@ -54,7 +54,8 @@ function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
    $STANDARD_FOLDERS = array(  // arr=( Name, BGColor, FGColor ); $bg_color value (#f7f5e3)
-      FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'),
+      //FOLDER_DESTROYED => array(T_('Destroyed'), 'ff88ee00', '000000'), // non-visible folder!!
+      FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'), // pseudo-folder (grouping other folders)
       FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
       FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
       FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
@@ -550,7 +551,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
          . "</tr></table></td>\n";
 
       echo "<td>";
-      $deleted = ( is_null($folder_nr) );
+      $deleted = ( $folder_nr == FOLDER_DESTROYED );
       if( !$deleted )
       {
          $fldrs = array('' => '');
@@ -1028,6 +1029,7 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
    return array($mainhours, $byohours, $byoperiods);
 }
 
+// FOLDER_DESTROYED is NOT in standard-folders
 function get_folders($uid, $remove_all_received=true)
 {
    global $STANDARD_FOLDERS;
@@ -1062,7 +1064,7 @@ function change_folders_for_marked_messages($uid, $folders)
    }
    else if( isset($_GET['destroy_marked'] ) )
    {
-      $new_folder = "NULL";
+      $new_folder = FOLDER_DESTROYED;
    }
    else
       return -1; //i.e. no move query
@@ -1083,8 +1085,9 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    if( count($message_ids) <= 0 )
       return 0;
 
-   if( $new_folder == "NULL" )
+   if( $new_folder == FOLDER_DESTROYED )
    {
+      // destroy'ing only allowed from Trashcan-folder
       $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";
    }
    else
@@ -1101,7 +1104,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
          $where_clause = '';
 
       if( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
-            && $current_folder != 'NULL' )
+            && $current_folder != FOLDER_DESTROYED )
          $where_clause.= "AND Folder_nr='" .$current_folder. "' ";
    }
 
@@ -1112,7 +1115,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
 
    mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
                "WHERE uid='$uid' $where_clause" .
-               "AND NOT ISNULL(Folder_nr) " .
+               'AND Folder_nr > '.FOLDER_ALL_RECEIVED.' ' .
                "AND mid IN (" . implode(',', $message_ids) . ") " .
                "LIMIT " . count($message_ids) )
       or error('mysql_query_failed','change_folders');
@@ -1159,12 +1162,12 @@ function echo_folders($folders, $current_folder)
 }
 
 // param bgcolor: if null, fall back to default-val (in blend_alpha_hex-func)
-// $folder_nr: id of the folders, may also be an array of the folder properties
+// $folder_nr: id of the folders, may also be an array with the folder properties like in $STANDARD_FOLDERS
 function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layout_fmt='')
 {
- global $STANDARD_FOLDERS;
+   global $STANDARD_FOLDERS;
 
-   if( is_null($folder_nr) ) //case of $deleted messages
+   if( $folder_nr == FOLDER_DESTROYED ) //case of $deleted messages
      list($foldername, $folderbgcolor, $folderfgcolor) = array(NO_VALUE,0,0);
    else if( is_array($folder_nr) )
      list($foldername, $folderbgcolor, $folderfgcolor) = $folder_nr;
@@ -1172,10 +1175,12 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layou
      list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
 
    if( empty($foldername) )
+   {
      if( $folder_nr < USER_FOLDERS )
        list($foldername, $folderbgcolor, $folderfgcolor) = $STANDARD_FOLDERS[$folder_nr];
      else
        $foldername = T_('Folder name');
+   }
 
    $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
    if( empty($folderfgcolor) )
@@ -1262,6 +1267,7 @@ function message_list_head( &$mtable, $current_folder
 {
    global $base_path, $msg_icones;
 
+   //TODO refactor, don't use ExtMode as "global var" to exchange args to with other methods!
    $mtable->ExtMode['no_mark']= $no_mark;
    $mtable->ExtMode['full_details']= $full_details;
    $mtable->ExtMode['current_folder']= $current_folder;
@@ -1303,6 +1309,7 @@ function message_list_body( &$mtable, $result, $show_rows
 {
    global $base_path, $msg_icones, $player_row;
 
+   //TODO refactor, don't use ExtMode as "global var" to exchange args to with other methods!
    $no_mark= @$mtable->ExtMode['no_mark'];
    $full_details= @$mtable->ExtMode['full_details'];
    //$current_folder= @$mtable->ExtMode['current_folder'];

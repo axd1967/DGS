@@ -265,13 +265,17 @@ define('ARG_USERTYPE_NO_TEXT', 'none');
 
 
 //-----
-define("FOLDER_NONE", -1);
-define("FOLDER_ALL_RECEIVED", 0);
+// folder for "destroyed" messages (former was: Folder_nr=NULL)
+// '-4'-value in regard to FOLDER_DELETED and to keep < FOLDER_NONE
+define('FOLDER_DESTROYED', -4);
+
+define('FOLDER_NONE', -1); // pseudo-folder used for "selecting no folder"
+define('FOLDER_ALL_RECEIVED', 0); // pseudo-folder-nr to check for valid-folders
 //Valid folders must be > FOLDER_ALL_RECEIVED
 define("FOLDER_MAIN", 1);
 //define("FOLDER_NEW", 2); //moved in quick_common.php
 define("FOLDER_REPLY", 3);
-define("FOLDER_DELETED", 4);
+define("FOLDER_DELETED", 4); // Trashcan-folder
 define("FOLDER_SENT", 5);
 //User folders must be >= USER_FOLDERS
 define("USER_FOLDERS", 6);
