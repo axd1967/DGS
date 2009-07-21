@@ -81,7 +81,6 @@ require_once( "include/classlib_profile.php" );
          array( FC_SIZE => FOLDER_COLS_MODULO, FC_MULTIPLE => $arr_chkfolders ) );
    $smfilter->add_filter( 2, 'Boolean',       'M.ReplyTo=0', true,
          array( FC_LABEL => T_('Show only initial-messages') ) );
-   //NOT-USED: $smfilter->add_filter( 3, 'Boolean', array( true  => 'me.Folder_Nr IS NULL', false => 'me.Folder_Nr IS NOT NULL' ), true, array( FC_LABEL => T_//('Show deleted messages') ) );
    $smfilter->add_filter( 4, 'Selection',
          array( T_('All#filtermsg') => '',
                 T_('Game-related#filtermsg')   => 'M.Game_ID>0', // <>0
@@ -162,7 +161,8 @@ require_once( "include/classlib_profile.php" );
    $qsql->merge( $query_smfilter );
    $qsql->merge( $query_mfilter );
 
-   $qsql->add_part( SQLP_WHERE, 'me.Folder_Nr IS NOT NULL' ); // only non-deleted
+   // only std- & user-folders, i.e. non-deleted
+   $qsql->add_part( SQLP_WHERE, 'me.Folder_Nr > '.FOLDER_ALL_RECEIVED );
 
    list( $result, $rqsql ) = message_list_query($my_id, '', $order, $limit, $qsql);
 
