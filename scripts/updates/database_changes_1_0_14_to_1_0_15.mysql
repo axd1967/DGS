@@ -1175,3 +1175,12 @@ ALTER TABLE GamesNotes
    DROP COLUMN ID,
    DROP COLUMN player ;
 
+
+-- [not-null] MessageCorrespondents.Folder_nr tinyint default NULL -> no default -> NOT NULL [sources adjusted]
+-- the following query-result should be empty before going on [update ca. 10s, alter-table ca. 25s]
+SELECT COUNT(*) FROM MessageCorrespondents WHERE Folder_nr < 0 ;
+UPDATE MessageCorrespondents
+   SET Folder_nr=-4 WHERE Folder_nr IS NULL ;
+ALTER TABLE MessageCorrespondents
+   CHANGE Folder_nr Folder_nr tinyint NOT NULL ;
+

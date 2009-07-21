@@ -191,7 +191,7 @@ function check_myself_message( $user_id=false)
 
       $folder = @$row['folder'];
       if( !isset($folder) ) $folder = @$row['other_folder'];
-      if( !isset($folder) ) $folder = FOLDER_MAIN; /* or simply "NULL" */
+      if( !isset($folder) ) $folder = FOLDER_MAIN; /* or simply FOLDER_DESTROYED */
 
       $replied = @$row['replied'];
       if( !isset($replied) || $replied=='N' ) $replied = @$row['other_replied'];
@@ -234,7 +234,7 @@ function check_system_message( $user_id=false)
       echo '<br>uid='.$row['uid'] .' mid='.$row['mid'];
 
       $folder = @$row['folder'];
-      if( !isset($folder) ) $folder = "NULL"; //keep it deleted
+      if( !isset($folder) ) $folder = FOLDER_DESTROYED; //keep it deleted
 
       $replied = @$row['replied'];
       if( !isset($replied) ) $replied = 'N';
