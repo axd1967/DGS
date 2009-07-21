@@ -23,6 +23,54 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-21 juga
+
+   * include/message_functions.php (message_info_table,change_folders_for_marked_messages,change_folders,echo_folder_box),
+     include/std_functions.php (FOLDER_DESTROYED),
+     scripts/message_consistency.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     daily_cron.php, edit_folders.php, search_messages.php, NEWS:
+   - cleanup for MessageCorrespondents.Folder_nr: NOT-NULL + removed default,
+     replaced former NULL-values with FOLDER_DESTROYED (=-4)
+-----------
+-- [not-null] MessageCorrespondents.Folder_nr tinyint default NULL -> no default -> NOT NULL
+-- the following query-result should be empty before going on [update ca. 10s, alter-table ca. 25s]
+SELECT COUNT(*) FROM MessageCorrespondents WHERE Folder_nr < 0 ;
+UPDATE MessageCorrespondents
+   SET Folder_nr=-4 WHERE Folder_nr IS NULL ;
+ALTER TABLE MessageCorrespondents
+   CHANGE Folder_nr Folder_nr tinyint NOT NULL ;
+-----------
+
+   * daily_cron.php:
+   - cleanup (removed unused method to delete old messages)
+
+2009-07-21 juga
+
+   * include/rating.php (update_rating,update_rating2,update_rating_glicko),
+     include/make_translationfiles.php (make_include_files),
+     include/std_functions.php (game_reference),
+     scripts/convert_from_old_forum.php, scripts/message_consistency.php,
+     scripts/recalculate_ratings2.php, scripts/start_frozen_clocks.php,
+     code_examples/test_clock_tick.php, rss/status.php, wap/status.php,
+     clock_tick.php, confirm.php, daily_cron.php, edit_vacation.php, faq.php,
+     game.php, game_comments.php, halfhourly_cron.php, quick_play.php, sgf.php:
+   - cleanup: in MySQL5 JOINs have higher precedence than ','-JOIN operator,
+     so add braces to avoid potential confusion when accidentally used with JOINs.
+     Should later be replaced with explicit JOIN-operators
+
+2009-07-20 juga
+
+   * scripts/README.developers,
+     scripts/convert_from_old_forum.php, scripts/game_consistency.php,
+     scripts/sql_game_export.php, forum/admin.php,
+     admin_faq.php, change_bio.php, edit_bio.php, userinfo.php:
+   - cleanup (write SQL-keywords in upper-case)
+
+   * scripts/message_consistency.php (game_settings_form),
+     scripts/player_consistency.php, people.php, sgf.php:
+   - cleanup (remove braces for single table-reference)
+
 2009-07-19 juga
 
    * NEWS:
@@ -42,7 +90,7 @@ ChangeLog
      include/message_functions.php, tournaments/include/tournament_rules.php,
      add_to_waitingroom.php, game.php, waiting_room.php,
      code_examples/check_times.php:
-   - used consts for byo-yomi types: JAP, CAN, FIS
+   - used consts for byo-yomi types JAP, CAN, FIS: BYOTYPE_...
 
    * include/time_functions.php (time_remaining_value, get_time_remaining_warning_class),
      show_games.php (build_time_remaining), status.php, skins/dragon/screen.css:
