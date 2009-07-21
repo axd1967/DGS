@@ -63,20 +63,7 @@ if( !$is_down )
    $waitingroom_timelimit = 30; //days
 
 
-/* to be reviewed: the field *Flags* doesn't exist.
-   if( $delete_messages )
-   {
-      // Delete old messages
-      mysql_query("UPDATE Messages " .
-                  "SET Flags=CONCAT_WS(',',Flags,'DELETED') " .
-                  "WHERE $NOW-UNIX_TIMESTAMP(Time) > " . ($message_timelimit*24*3600) .
-                  " AND NOT ( Flags LIKE '%NEW%' OR Flags LIKE '%REPLY REQUIRED%' )")
-               or error('mysql_query_failed','daily_cron?');
-   }
-*/
-
-
-/* to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = NULL).
+/* to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = FOLDER_DESTROYED).
    if( $delete_invitations )
    {
       // Delete old invitations
