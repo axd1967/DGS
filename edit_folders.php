@@ -97,10 +97,10 @@ function make_folder_form_row(&$form, $name, $nr,
 
    foreach( $_POST as $key => $val )
    {
-      if( !preg_match("/^folder(\d+)$/", $key, $matches) )
+      if( !preg_match("/^folder(\d+)$/", $key, $matches) ) // filters out negative (special) folders too
          continue;
 
-      $nr = $matches[1];
+      $nr = $matches[1]; // >=0
 
       $bgred = limit(@$_POST["bgred$nr"], 0, 255, 0);
       $bggreen = limit(@$_POST["bggreen$nr"], 0, 255, 0);
