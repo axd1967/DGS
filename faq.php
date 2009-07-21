@@ -198,7 +198,7 @@ require_once( "include/form_functions.php" );
       $result = mysql_query(
          "SELECT entry.*, Question.Text AS Q, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-         "FROM FAQ AS entry, FAQ AS parent, TranslationTexts AS Question " .
+         "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
             "AND entry.Level<3 AND entry.Level>0 " .
          "ORDER BY CatOrder,entry.Level,entry.SortOrder")

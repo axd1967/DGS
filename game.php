@@ -113,7 +113,7 @@ function get_alt_arg( $n1, $n2)
            "white.Rank AS Whiterank, " .
            "white.Rating2 AS Whiterating, " .
            "white.RatingStatus AS Whiteratingstatus " .
-           "FROM Games, Players AS black, Players AS white " .
+           "FROM (Games, Players AS black, Players AS white) " .
            "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID";
 
    if( !($game_row=mysql_single_fetch( 'game.findgame', $query)) )

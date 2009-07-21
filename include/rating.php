@@ -217,7 +217,7 @@ function update_rating($gid)
    $query = "SELECT Games.*, ".
        "white.Rating as wRating, white.RatingStatus as wRatingStatus, " .
        "black.Rating as bRating, black.RatingStatus as bRatingStatus " .
-       "FROM Games, Players as white, Players as black " .
+       "FROM (Games, Players as white, Players as black) " .
        "WHERE Status='FINISHED' AND Rated='Y' AND Games.ID=$gid " .
        //"AND white.RatingStatus='RATED' " .
        //"AND black.RatingStatus='RATED' " .
@@ -287,7 +287,7 @@ function update_rating2($gid, $check_done=true)
       "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
       "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
       "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
-      "FROM Games, Players as white, Players as black " .
+      "FROM (Games, Players as white, Players as black) " .
       "WHERE Status='FINISHED' AND Games.ID=$gid " .
       ( $check_done ? "AND Rated!='Done' " : '' ) .
       "AND white.ID=White_ID AND black.ID=Black_ID";
@@ -439,7 +439,7 @@ function update_rating_glicko($gid, $check_done=true)
       "black.RatingStatus as bRatingStatus, " .
       "black.RatingGlicko_Deviation as bRatingDeviation, " .
       "black.RatingGlicko_Volatility as bRatingVolatility " .
-      "FROM Games, Players as white, Players as black " .
+      "FROM (Games, Players as white, Players as black) " .
       "WHERE Status='FINISHED' AND Games.ID=$gid " .
       ( $check_done ? "AND Rated!='Done' " : '' ) .
       "AND white.ID=White_ID AND black.ID=Black_ID ";

@@ -78,7 +78,7 @@ else
                           "white.ClockUsed AS Whiteclock, " .
                           "black.OnVacation AS Blackonvacation, " .
                           "white.OnVacation AS Whiteonvacation " .
-                          "FROM Games, Players AS black, Players AS white " .
+                          "FROM (Games, Players AS black, Players AS white) " .
                           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
                           );
 

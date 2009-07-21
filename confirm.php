@@ -70,7 +70,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
                  "white.ClockUsed AS Whiteclock, " .
                  "black.OnVacation AS Blackonvacation, " .
                  "white.OnVacation AS Whiteonvacation " .
-                 "FROM Games, Players AS black, Players AS white " .
+                 "FROM (Games, Players AS black, Players AS white) " .
                  "WHERE Games.ID=$gid AND black.ID=Black_ID AND white.ID=White_ID" )
       or error('unknown_game', "confirm.find_game($gid)");
 

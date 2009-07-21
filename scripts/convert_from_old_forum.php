@@ -63,7 +63,7 @@ echo '>>>> Should not be used now. Do not run it before a check ' .
       $new_forum_ID = mysql_insert_id();
 
 
-      $query = "SELECT $fname.*," . $fname . "_bodies.body FROM $fname, " . $fname . "_bodies " .
+      $query = "SELECT $fname.*," . $fname . "_bodies.body FROM ($fname, " . $fname . "_bodies) " .
          "WHERE $fname.id=" . $fname . "_bodies.id AND approved='Y' ORDER by $fname.id";
 
       $result_1 = mysql_query( $query ) or die(mysql_error());

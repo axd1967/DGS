@@ -157,7 +157,7 @@ if( !$is_down )
              "black.Handle AS Blackhandle, " .
              "white.Name AS Whitename, " .
              "white.Handle AS Whitehandle " .
-             "FROM Games, Players AS black, Players AS white " .
+             "FROM (Games, Players AS black, Players AS white) " .
              "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
              " AND UNIX_TIMESTAMP(Lastchanged) >= UNIX_TIMESTAMP('$Lastaccess')";
 
@@ -299,7 +299,7 @@ if(1){//new
          );
 }else{//old
       $gres = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
-                         "FROM Games, Clock " .
+                         "FROM (Games, Clock) " .
                          "WHERE Status" . IS_RUNNING_GAME .
                          "AND Games.ClockUsed < 0 " . // VACATION_CLOCK
                          "AND Clock.ID=$ClockUsed " .

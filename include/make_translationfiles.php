@@ -96,8 +96,8 @@ function make_include_files($language=null, $group=null) //must be called from m
 
    $query = "SELECT Translations.Text, TranslationGroups.Groupname, " .
       "TranslationLanguages.Language, TranslationTexts.Text AS Original " .
-      "FROM Translations, TranslationTexts, TranslationLanguages, " .
-      "TranslationFoundInGroup, TranslationGroups " .
+      "FROM (Translations, TranslationTexts, TranslationLanguages, " .
+         "TranslationFoundInGroup, TranslationGroups) " .
       "WHERE Translations.Language_ID = TranslationLanguages.ID ".
       //"AND Translations.Text!='' " . //else a file containing only '' will not be reseted
       "AND TranslationTexts.ID=Translations.Original_ID " .

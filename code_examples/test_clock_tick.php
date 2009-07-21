@@ -52,7 +52,7 @@ function test( $qver, $nr, $print=true )
       $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                'black.Name as blackname, white.Name as whitename ' .
-               'FROM Games, Clock ,Players as white, Players as black ' .
+               'FROM (Games, Clock, Players as white, Players as black) ' .
                "WHERE Status!='INVITED' AND Status!='FINISHED' " .
                'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                'AND Clock.ID=Games.ClockUsed ' .
@@ -64,7 +64,7 @@ function test( $qver, $nr, $print=true )
       $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                'black.Name as blackname, white.Name as whitename ' .
-               'FROM Games, Clock ,Players as white, Players as black ' .
+               'FROM (Games, Clock, Players as white, Players as black) ' .
                "WHERE Status IN ('PLAY','PASS','SCORE','SCORE2') " .
                'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                'AND Clock.ID=Games.ClockUsed ' .

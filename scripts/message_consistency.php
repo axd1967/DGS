@@ -85,7 +85,7 @@ require_once( "include/std_functions.php" );
    echo "<hr>Lost replied:";
 
    $query = "SELECT org.*, cor.Replied, cor.Sender, cor.ID as cid, rep.ID as rid"
-     ." FROM Messages as rep, Messages as org, MessageCorrespondents AS cor, MessageCorrespondents AS cre"
+     ." FROM (Messages as rep, Messages as org, MessageCorrespondents AS cor, MessageCorrespondents AS cre)"
      ." WHERE rep.ReplyTo=org.ID"
      .  " AND cor.mid=org.ID AND cor.Replied!='Y' AND cor.Sender!='Y'"
      .  " AND cre.mid=rep.ID AND cre.Sender!='N' AND cor.uid=cre.uid"
@@ -177,7 +177,7 @@ function check_myself_message( $user_id=false)
       "me.ID as me_mcID, other.ID as other_mcID, " .
       "me.Replied AS replied, other.Replied AS other_replied, " .
       "me.Folder_nr AS folder, other.Folder_nr AS other_folder " .
-      "FROM MessageCorrespondents AS me, MessageCorrespondents AS other " .
+      "FROM (MessageCorrespondents AS me, MessageCorrespondents AS other) " .
       "WHERE other.mid=me.mid AND other.uid=me.uid " .
         "AND me.Sender='N' AND other.Sender != me.Sender " .
         ( $user_id>0 ? "AND me.uid=$user_id " : "" ) .

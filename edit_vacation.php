@@ -106,7 +106,7 @@ if(1){//new
             or error('mysql_query_failed', 'edit_vacation.update_games');
 }else{//old
          $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
-                         "FROM Games, Clock " .
+                         "FROM (Games, Clock) " .
                          "WHERE Status" . IS_RUNNING_GAME .
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .

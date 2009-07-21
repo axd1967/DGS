@@ -44,7 +44,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $game = mysql_single_fetch( 'game_comments.find_game',
       'SELECT Games.Status, Games.Black_ID, Games.White_ID' .
       ', black.Name AS Blackname, white.Name AS Whitename' .
-      ' FROM Games, Players AS black, Players AS white' .
+      ' FROM (Games, Players AS black, Players AS white)' .
       " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
       );
    if( !$game )

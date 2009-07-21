@@ -2636,7 +2636,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    if( $legal && ($whitename===false || $blackname===false) )
    {
      $query = 'SELECT black.Name as blackname, white.Name as whitename ' .
-              'FROM Games, Players as white, Players as black ' .
+              'FROM (Games, Players as white, Players as black) ' .
               "WHERE Games.ID=$gid " .
               ' AND white.ID=Games.White_ID ' .
               ' AND black.ID=Games.Black_ID ' .

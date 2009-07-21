@@ -67,7 +67,7 @@ echo ">>>> Should not be used now. Do not run it before a check."; end_html(); e
 
 
    $query = "SELECT Games.ID AS gid, ClockUsed, LastTicks, Clock.Ticks " .
-      "FROM Games, Clock " .
+      "FROM (Games, Clock) " .
       "WHERE Clock.ID=Games.ClockUsed " .
       "AND Games.Status" . IS_RUNNING_GAME .
       "HAVING Clock.Ticks < LastTicks";

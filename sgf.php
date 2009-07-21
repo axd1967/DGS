@@ -395,7 +395,7 @@ $array=array();
       'white.Name AS Whitename, ' .
       'white.Handle AS Whitehandle, ' .
       "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
-      'FROM Games, Players AS black, Players AS white ' .
+      'FROM (Games, Players AS black, Players AS white) ' .
       "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
       );
 

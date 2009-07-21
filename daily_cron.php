@@ -82,7 +82,7 @@ if( !$is_down )
       // Delete old invitations
       $timelimit = $invite_timelimit*24*3600;
       $query = "SELECT Messages.ID as mid, Game_ID " .
-         "FROM Messages, Games " .
+         "FROM (Messages, Games) " .
          "WHERE Game.ID=Messages.Game_ID AND Games.Status='INVITED' " .
          "AND Messages.Type='INVITATION' AND $NOW-UNIX_TIMESTAMP(Time) > $timelimit " .
          "AND $NOW-UNIX_TIMESTAMP(Lastchanged) > $timelimit";
@@ -127,7 +127,7 @@ if( !$is_down )
 
 /* to be reviewed: the field *enum* 'READY' does not exist. */
 //    $query = "SELECT Games.ID as gid ".
-//        "FROM Games, Players as white, Players as black " .
+//        "FROM (Games, Players as white, Players as black) " .
 //        "WHERE Status='FINISHED' AND Rated='Y' " .
 //        "AND white.ID=White_ID AND black.ID=Black_ID ".
 //        "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
