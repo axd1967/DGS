@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -223,9 +223,7 @@ function update_rating($gid)
        //"AND black.RatingStatus='RATED' " .
        "AND white.ID=White_ID AND black.ID=Black_ID ";
 
-
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','update_rating.find_game');
+   $result = db_query( 'update_rating.find_game', $query );
 
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found (?or rate already done)
@@ -237,8 +235,8 @@ function update_rating($gid)
    // here $Rated=='N' is always false. See rating2 to update
    if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
    {
-      mysql_query("UPDATE Games SET Rated='N' WHERE ID=$gid")
-         or error('mysql_query_failed','update_rating.set_rated_N');
+      db_query( 'update_rating.set_rated_N',
+         "UPDATE Games SET Rated='N' WHERE ID=$gid" );
 
       if( $too_few_moves )
          return 1; //not rated game, deletable
@@ -255,19 +253,19 @@ function update_rating($gid)
 
    change_rating($wRating, $bRating, $game_result, $Size, $Komi, $Handicap);
 
-   mysql_query( "UPDATE Games SET Rated='Done' WHERE ID=$gid" )
-      or error('mysql_query_failed','update_rating.set_rated_Done');
+   db_query( 'update_rating.set_rated_Done',
+      "UPDATE Games SET Rated='Done' WHERE ID=$gid" );
 
-   mysql_query( "UPDATE Players SET Rating=$bRating WHERE ID=$Black_ID LIMIT 1" )
-      or error('mysql_query_failed','update_rating.set_black_rating');
+   db_query( 'update_rating.set_black_rating',
+      "UPDATE Players SET Rating=$bRating WHERE ID=$Black_ID LIMIT 1" );
 
-   mysql_query( "UPDATE Players SET Rating=$wRating WHERE ID=$White_ID LIMIT 1" )
-      or error('mysql_query_failed','update_rating.set_white_rating');
+   db_query( 'update_rating.set_white_rating',
+      "UPDATE Players SET Rating=$wRating WHERE ID=$White_ID LIMIT 1" );
 
-   mysql_query("INSERT INTO RatingChange (uid,gid,diff) VALUES " .
+   db_query( 'update_rating.ratingchange',
+      "INSERT INTO RatingChange (uid,gid,diff) VALUES " .
                "($Black_ID, $gid, " . ($bRating - $bOld) . "), " .
-               "($White_ID, $gid, " . ($wRating - $wOld) . ")")
-      or error('mysql_query_failed','update_rating.ratingchange');
+               "($White_ID, $gid, " . ($wRating - $wOld) . ")" );
 
    return 0; //rated game
 } //update_rating
@@ -292,9 +290,7 @@ function update_rating2($gid, $check_done=true)
       ( $check_done ? "AND Rated!='Done' " : '' ) .
       "AND white.ID=White_ID AND black.ID=Black_ID";
 
-
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','update_rating2.find_game');
+   $result = db_query( 'update_rating2.find_game', $query );
 
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found or rate already done
@@ -305,11 +301,11 @@ function update_rating2($gid, $check_done=true)
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
    if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
    {
-      mysql_query("UPDATE Games SET Rated='N'" .
+      db_query( 'update_rating2.set_rated_N',
+         "UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
-                  " WHERE ID=$gid LIMIT 1")
-         or error('mysql_query_failed','update_rating2.set_rated_N');
+                  " WHERE ID=$gid LIMIT 1" );
 
       if( $too_few_moves )
          return 1; //not rated game, deletable
@@ -391,28 +387,28 @@ function update_rating2($gid, $check_done=true)
       $wRatingMin = ($wRating - $wRatingMax * $k) / (1-$k);
 
 
-   mysql_query( "UPDATE Games SET Rated='Done', " .
+   db_query( 'update_rating2.set_rated_Done',
+      "UPDATE Games SET Rated='Done', " .
                 "Black_End_Rating=$bRating, White_End_Rating=$wRating " .
-                "WHERE ID=$gid LIMIT 1" )
-      or error('mysql_query_failed','update_rating2.set_rated_Done');
+                "WHERE ID=$gid LIMIT 1" );
 
-   mysql_query( "UPDATE Players SET Rating2=$bRating, " .
+   db_query( 'update_rating2.set_black_rating',
+      "UPDATE Players SET Rating2=$bRating, " .
                 "RatingMin=$bRatingMin, RatingMax=$bRatingMax " .
-                "WHERE ID=$Black_ID LIMIT 1" )
-      or error('mysql_query_failed','update_rating2.set_black_rating');
+                "WHERE ID=$Black_ID LIMIT 1" );
 
-   mysql_query( "UPDATE Players SET Rating2=$wRating, " .
+   db_query( 'update_rating2.set_white_rating',
+      "UPDATE Players SET Rating2=$wRating, " .
                 "RatingMin=$wRatingMin, RatingMax=$wRatingMax " .
-                "WHERE ID=$White_ID LIMIT 1" )
-      or error('mysql_query_failed','update_rating2.set_white_rating');
+                "WHERE ID=$White_ID LIMIT 1" );
 
-   mysql_query('INSERT INTO Ratinglog' .
+   db_query( 'update_rating2.ratinglog',
+      'INSERT INTO Ratinglog' .
                '(uid,gid,Rating,RatingMin,RatingMax,RatingDiff,Time) VALUES ' .
                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, " .
                ($bRating - $bOld) . ", '$Lastchanged'), " .
                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, " .
-               ($wRating - $wOld) . ", '$Lastchanged') ")
-      or error('mysql_query_failed','update_rating2.ratinglog');
+               ($wRating - $wOld) . ", '$Lastchanged') " );
 
    return 0; //rated game
 } //update_rating2
@@ -445,8 +441,7 @@ function update_rating_glicko($gid, $check_done=true)
       "AND white.ID=White_ID AND black.ID=Black_ID ";
 
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','update_rating_glicko.find_game');
+   $result = db_query( 'update_rating_glicko.find_game', $query );
 
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found or rate already done
@@ -457,10 +452,11 @@ function update_rating_glicko($gid, $check_done=true)
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
    if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
    {
-      mysql_query("UPDATE Games SET Rated='N'" .
+      db_query( 0 /* "update_rating_glicko.update_rated_endrating($gid)" */,
+         "UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
-                  " WHERE ID=$gid LIMIT 1");
+                  " WHERE ID=$gid LIMIT 1" );
       if( $too_few_moves )
          return 1; //not rated game
       else
@@ -568,23 +564,23 @@ function update_rating_glicko($gid, $check_done=true)
    $w_phi *= $p;
    $b_phi *= $p;
 
-   mysql_query( "UPDATE Players SET RatingGlicko=$w_mu, " .
+   db_query( 'update_rating_glicko.update_white',
+      "UPDATE Players SET RatingGlicko=$w_mu, " .
                 "RatingGlicko_Deviation=$w_phi, RatingGlicko_Volatility=$w_sigma " .
-                "WHERE ID=$White_ID LIMIT 1" )
-      or error('mysql_query_failed','update_rating_glicko.update_white');
+                "WHERE ID=$White_ID LIMIT 1" );
 
-   mysql_query( "UPDATE Players SET RatingGlicko=$b_mu, " .
+   db_query( 'update_rating_glicko.update_black',
+      "UPDATE Players SET RatingGlicko=$b_mu, " .
                 "RatingGlicko_Deviation=$b_phi, RatingGlicko_Volatility=$b_sigma " .
-                "WHERE ID=$Black_ID LIMIT 1" )
-      or error('mysql_query_failed','update_rating_glicko.update_black');
+                "WHERE ID=$Black_ID LIMIT 1" );
 
-   mysql_query('INSERT INTO RatinglogGlicko' .
+   db_query( 'update_rating_glicko.RatinglogGlicko',
+      'INSERT INTO RatinglogGlicko' .
                '(uid,gid,RatingGlicko,RatingGlicko_Deviation,RatingGlicko_Volatility,RatingDiff,Time) VALUES ' .
                "($Black_ID, $gid, $b_mu, $b_phi, $b_sigma, " .
                ($b_mu - $bRating) . ",'$Lastchanged'), " .
                "($White_ID, $gid, $w_mu, $w_phi, $w_sigma, " .
-               ($w_mu - $wRating) . ", '$Lastchanged') ")
-      or error('mysql_query_failed','update_rating_glicko.RatinglogGlicko');
+               ($w_mu - $wRating) . ", '$Lastchanged') " );
 
    echo "<br>$gid: $White_ID - $Black_ID    $w_mu, $w_phi, $w_sigma - $b_mu, $b_phi, $b_sigma\n";
 
@@ -680,16 +676,16 @@ function rank_to_rating($val, $kyu)
 
 
 //May rise an error
-function get_rating_at($uid, $date)
+function get_rating_at_date($uid, $date)
 {
-   $row = mysql_single_fetch( 'get_rating_at.find_data',
+   $row = mysql_single_fetch( "get_rating_at.find_data($uid,$date)",
                "SELECT Rating FROM Ratinglog " .
                "WHERE uid='$uid' AND Time<='$date' " .
                "ORDER BY Time DESC LIMIT 1" );
 
    if( !$row )
-      $row = mysql_query( 'get_rating_at.initial_rating',
-               "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid'" );
+      $row = mysql_single_fetch( "get_rating_at.initial_rating($uid)",
+         "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid' LIMIT 1" );
 
    if( isset($row['Rating']) )
       return $row['Rating'];
