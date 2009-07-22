@@ -174,8 +174,7 @@ require_once( 'include/classlib_userpicture.php' );
 
    $query = $qsql->get_select() . "$order$limit";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'list_contacts.find_data');
+   $result = db_query( 'list_contacts.find_data', $query );
 
    $show_rows = $ctable->compute_show_rows(mysql_num_rows($result));
 

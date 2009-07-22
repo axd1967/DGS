@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -121,21 +121,21 @@ require_once( "include/make_translationfiles.php" );
 
    if( $replace_set )
       // note: Translations needs PRIMARY KEY (Language_ID,Original_ID):
-      mysql_query( "REPLACE INTO Translations " .
+      db_query( 'update_translation.replace',
+         "REPLACE INTO Translations " .
                    "(Original_ID,Language_ID,Text,Translated) VALUES " .
-                   substr($replace_set,1) )
-         or error('mysql_query_failed','update_translation.replace');
+                   substr($replace_set,1) );
 
    if( $log_set )
-      mysql_query( "INSERT INTO Translationlog " .
+      db_query( 'update_translation.log',
+         "INSERT INTO Translationlog " .
                    "(Player_ID,Original_ID,Language_ID,Translation) VALUES " .
-                   substr($log_set,1) ) //+ Date= timestamp
-         or error('mysql_query_failed','update_translation.log');
+                   substr($log_set,1) ); //+ Date= timestamp
 
    if( $done_set )
-      mysql_query( "UPDATE TranslationTexts SET Translatable='Done' " .
-                   "WHERE ID IN (" . substr($done_set,1) . ')' )
-         or error('mysql_query_failed','update_translation.done');
+      db_query( 'update_translation.done',
+         "UPDATE TranslationTexts SET Translatable='Done' " .
+                   "WHERE ID IN (" . substr($done_set,1) . ')' );
 
    make_include_files($translate_lang); //must be called from main dir
 

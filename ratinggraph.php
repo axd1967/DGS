@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -38,8 +38,8 @@ require_once( "include/form_functions.php" );
    else
       error("no_uid");
 
-   $result = mysql_query("SELECT ID,Name,Handle FROM Players WHERE $where")
-      or error('mysql_query_failed', 'ratinggraph.find_player');
+   $result = db_query( "ratinggraph.find_player($uid,$uhandle)",
+      "SELECT ID,Name,Handle FROM Players WHERE $where" );
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_user");
@@ -97,8 +97,8 @@ require_once( "include/form_functions.php" );
    echo "<h3 class=Header>" . T_('Rating graph for') . ' ' .
             user_reference( REF_LINK, 1, '', $user_row) . "</h3>\n" ;
 
-   $result = mysql_query("SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2")
-      or error('mysql_query_failed', 'ratinggraph.find_rating_data');
+   $result = db_query( "ratinggraph.find_rating_data($uid)",
+         "SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2" );
 
    if( @mysql_num_rows($result) < 1 )
       echo T_("Sorry, too few rated games to draw a graph") ,"\n";

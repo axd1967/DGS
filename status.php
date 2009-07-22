@@ -47,8 +47,8 @@ $ThePage = new Page('Status');
       $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
    {
       // ClockUsed is updated once a day...
-      mysql_query("UPDATE Players SET ClockChanged='Y' WHERE ID=$my_id LIMIT 1");
-         //or error('mysql_query_failed','status.summertime');
+      db_query( 0 /* "status.summertime($my_id)" */,
+         "UPDATE Players SET ClockChanged='Y' WHERE ID=$my_id LIMIT 1" );
    }
 
 
@@ -180,8 +180,7 @@ $ThePage = new Page('Status');
 
    if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'status.find_games');
+   $result = db_query( "status.find_games($uid)", $query );
 
    section( 'Games', T_('Your turn to move in the following games:'));
 

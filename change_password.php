@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -56,23 +56,22 @@ require_once( "include/std_functions.php" );
       if( !check_password( $player_row["Handle"], $player_row["Password"],
                            $player_row["Newpassword"], $oldpasswd ) )
          error("wrong_password");
-   
+
       $passwd = @$_POST['passwd'];
       if( strlen($passwd) < 6 )
          error("password_too_short");
       if( illegal_chars( $passwd, true ) )
          error("password_illegal_chars");
-   
+
       if( $passwd != @$_POST['passwd2'] )
          error("password_mismatch");
-   
+
       $query = "UPDATE Players SET " .
           "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."') " .
           "WHERE ID=" . $player_row['ID'] . " LIMIT 1";
    }
 
-   mysql_query( $query )
-      or error('mysql_query_failed','change_password');
+   db_query( 'change_password', $query );
 
    $msg = urlencode(T_('Password changed!'));
 

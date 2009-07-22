@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -36,9 +36,9 @@ require_once( "include/std_functions.php" );
    if( strtolower($pswduser) == 'guest' )
       error('not_allowed_for_guest');
 
-   $result = mysql_query( "SELECT ID, Newpassword, Email " .
-         "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" )
-      or error('mysql_query_failed', 'send_new_password.find_player');
+   $result = db_query( "send_new_password.find_player($pswduser)",
+      "SELECT ID, Newpassword, Email " .
+         "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
 
    if( @mysql_num_rows($result) != 1 )
       error('unknown_user');
@@ -91,11 +91,10 @@ require_once( "include/std_functions.php" );
 
 // Save password in database
 
-   $result = mysql_query( "UPDATE Players " .
-                          "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
-                          "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" )
-      or error('mysql_query_failed', 'send_new_password.update');
-
+   $result = db_query( "send_new_password.update($pswduser)",
+         "UPDATE Players " .
+         "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
+         "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
 
    $msg=
 "You (or possibly someone else) has requested a new password\n" .

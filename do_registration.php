@@ -55,12 +55,9 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
    if( !USE_REGEXP_REGISTRATION )
    {
-   //if foO exist, reject foo but accept fo0 (with a zero instead of uppercase o)
-      $result = mysql_query(
-            "SELECT Handle FROM Players WHERE Handle='"
-                  .mysql_addslashes($uhandle)."'"
-         )
-         or error('mysql_query_failed','do_registration.find_player');
+      //if foO exist, reject foo but accept fo0 (with a zero instead of uppercase o)
+      $result = db_query( 'do_registration.find_player',
+         "SELECT Handle FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
    }
    else
    {
@@ -73,10 +70,8 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
       $regx = mysql_addslashes($regx);
       $regx = '^'.$regx.'$';
 
-      $result = mysql_query(
-            "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'"
-         )
-         or error('mysql_query_failed','do_registration.find_player_regexp');
+      $result = db_query( 'do_registration.find_player_regexp',
+         "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'" );
    }
 
    if( @mysql_num_rows($result) > 0 )
@@ -88,14 +83,14 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
    $code = make_session_code();
 
-   $result = mysql_query( "INSERT INTO Players SET " .
+   $result = db_query( 'do_registration.insert_player',
+      "INSERT INTO Players SET " .
                           "Handle='".mysql_addslashes($uhandle)."', " .
                           "Name='".mysql_addslashes($name)."', " .
                           "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."'), " .
                           "Registerdate=FROM_UNIXTIME($NOW), " .
                           "Sessioncode='$code', " .
-                          "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" )
-      or error('mysql_query_failed', 'do_registration.insert_player');
+                          "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );
 
    $new_id = mysql_insert_id();
 

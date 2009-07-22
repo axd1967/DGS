@@ -71,8 +71,8 @@ require_once( "include/contacts.php" );
       if( $my_id != $opponent_ID )
          error('waitingroom_delete_not_own');
 
-      mysql_query("DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1")
-         or error('mysql_query_failed', 'join_waitingroom_game.delete');
+      db_query( 'join_waitingroom_game.delete',
+         "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
       $msg = urlencode(T_('Game deleted!'));
 
@@ -170,24 +170,23 @@ require_once( "include/contacts.php" );
    }
 
    $cnt = count($gids);
-   mysql_query( "UPDATE Players SET Running=Running+$cnt" .
+   db_query( 'join_waitingroom_game.update_players',
+      "UPDATE Players SET Running=Running+$cnt" .
                 ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" )
-      or error('mysql_query_failed', 'join_waitingroom_game.update_players');
+                " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
 
 
    // Reduce number of games left in the waiting room
 
    if( $game_row['nrGames'] > 1 )
    {
-      mysql_query("UPDATE Waitingroom SET nrGames=nrGames-1"
-                  ." WHERE ID=$wr_id AND nrGames>0 LIMIT 1")
-         or error('mysql_query_failed', 'join_waitingroom_game.reduce');
+      db_query( 'join_waitingroom_game.reduce',
+         "UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id AND nrGames>0 LIMIT 1" );
    }
    else
    {
-      mysql_query("DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1")
-         or error('mysql_query_failed', 'join_waitingroom_game.reduce_delete');
+      db_query( 'join_waitingroom_game.reduce_delete',
+         "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
    }
 
 

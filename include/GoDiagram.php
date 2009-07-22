@@ -254,8 +254,8 @@ function create_godiagrams( &$text, $cfg_board )
 
       if( isset($ID) && $ID > 0 )
       {
-         $result = mysql_query("SELECT * FROM GoDiagrams WHERE ID=$ID")
-            or error('mysql_query_failed', 'godiagram.create_godiagrams.find');
+         $result = db_query( 'godiagram.create_godiagrams.find',
+            "SELECT * FROM GoDiagrams WHERE ID=$ID" );
 
          if( @mysql_num_rows($result) == 1 )
          {
@@ -280,14 +280,14 @@ function create_godiagrams( &$text, $cfg_board )
             $diag->set_values_from_goban_tag($m);
          }
 
-         mysql_query("INSERT INTO GoDiagrams SET " .
+         db_query( 'godiagram.create_godiagrams.insert',
+            "INSERT INTO GoDiagrams SET " .
                      "Size={$diag->Size}, " .
                      "View_Left={$diag->Left}, " .
                      "View_Right={$diag->Right}, " .
                      "View_Down={$diag->Down}, " .
                      "View_Up={$diag->Up}, " .
-                     "Date=FROM_UNIXTIME($NOW)")
-            or error('mysql_query_failed', 'godiagram.create_godiagrams.insert');
+                     "Date=FROM_UNIXTIME($NOW)" );
 
          $New_ID = mysql_insert_id();
          $diagrams[$New_ID] = $diag;
@@ -316,9 +316,9 @@ function create_godiagrams( &$text, $cfg_board )
 
       if( $save_data )
       {
-         mysql_query('UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
-                      "WHERE ID=$ID AND Saved='N' LIMIT 1")
-            or error('mysql_query_failed', 'godiagram.create_godiagrams.save');
+         db_query( 'godiagram.create_godiagrams.save',
+            'UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
+            "WHERE ID=$ID AND Saved='N' LIMIT 1" );
       }
    } //endfor
 
@@ -337,9 +337,8 @@ function find_godiagrams($text, $cfg_board)
       if( $ID > 0 ) $diagram_IDs[]= $ID;
    }
 
-   $result = mysql_query("SELECT * FROM GoDiagrams " .
-                         "WHERE ID IN(" . implode(',',$diagram_IDs) .")")
-      or error('mysql_query_failed', 'godiagram.find_godiagrams');
+   $result = db_query( 'godiagram.find_godiagrams',
+      "SELECT * FROM GoDiagrams WHERE ID IN(" . implode(',',$diagram_IDs) .")" );
 
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -366,8 +365,8 @@ function save_diagrams($GoDiagrams)
       if( $ID > 0 ) $IDs[]= $ID;
 
    if( count($IDs) > 0 )
-      mysql_query("UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")")
-         or error('mysql_query_failed', 'godiagram.save_diagrams');
+      db_query( 'godiagram.save_diagrams',
+         "UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")" );
 }
 
 ?>

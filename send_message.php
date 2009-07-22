@@ -225,23 +225,23 @@ disable_cache();
       }
 
       $cnt = count($gids);
-      mysql_query( "UPDATE Players SET Running=Running+$cnt" .
+      db_query( "send_message.update_player($my_id,$opponent_ID)",
+            "UPDATE Players SET Running=Running+$cnt" .
                    ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
-                   " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" )
-         or error('mysql_query_failed', 'send_message.update_player');
+                   " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" );
 
       $subject = "Game invitation accepted";
    }
    else if( $declinetype )
    {
       $gid = (int)@$_REQUEST['gid'];
-      $result = mysql_query( "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
-                             //" AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
-                             //" AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
-                             " AND (White_ID=$my_id OR Black_ID=$my_id)" .
-                             " AND $opponent_ID=White_ID+Black_ID-$my_id" .
-                             " LIMIT 1")
-         or error('mysql_query_failed', "send_message.decline($gid)");
+      $result = db_query( "send_message.decline($gid)",
+            "DELETE FROM Games WHERE ID=$gid AND Status='INVITED'" .
+            //" AND ( Black_ID=$my_id OR White_ID=$my_id ) " .
+            //" AND ( Black_ID=$opponent_ID OR White_ID=$opponent_ID ) " .
+            " AND (White_ID=$my_id OR Black_ID=$my_id)" .
+            " AND $opponent_ID=White_ID+Black_ID-$my_id" .
+            " LIMIT 1" );
 
       if( mysql_affected_rows() != 1)
       {

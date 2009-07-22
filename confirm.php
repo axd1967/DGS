@@ -470,15 +470,11 @@ This is why:
 
 
    //See *** HOT_SECTION *** above
-   $result = mysql_query( $game_query . $game_clause )
-      or error('mysql_query_failed','confirm.update_game');
-
+   $result = db_query( "confirm.update_game($gid)", $game_query . $game_clause );
    if( mysql_affected_rows() != 1 )
       error('mysql_update_game',"confirm20($action,$gid)");
 
-   $result = mysql_query( $move_query )
-      or error('mysql_query_failed','confirm.update_moves');
-
+   $result = db_query( "confirm.update_moves($gid)", $move_query );
    if( mysql_affected_rows() < 1 && $action != 'delete' )
       error('mysql_insert_move',"confirm21($action,$gid)");
 
@@ -486,9 +482,7 @@ This is why:
 
    if( $message_query )
    {
-      $result = mysql_query( $message_query )
-         or error('mysql_query_failed','confirm.message_query');
-
+      $result = db_query( "confirm.message_query", $message_query );
       if( mysql_affected_rows() < 1 && $action != 'delete' )
          error('mysql_insert_move',"confirm22($action,$gid)");
    }
@@ -522,12 +516,11 @@ This is why:
       if( $action == 'delete' )
       {
          //TODO: HOT_SECTION ???
-         mysql_query("UPDATE Players SET Running=Running-1 " .
-                     "WHERE ID IN ($Black_ID,$White_ID) LIMIT 2")
-            or error('mysql_query_failed',"confirm.update_players_delete($gid)");
+         db_query( "confirm.update_players_delete($gid)",
+            "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
 
-         mysql_query("DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2")
-            or error('mysql_query_failed', "confirm.delete.gamenote($gid)");
+         db_query( "confirm.delete.gamenote($gid)",
+            "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
 
          // mark reference in other double-game to indicate referring game has vanished
          db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
@@ -551,15 +544,13 @@ This is why:
                    ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                     ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                    ) . " WHERE ID=$White_ID LIMIT 1" ;
-         mysql_query( $query)
-            or error('mysql_query_failed',"confirm.update_players_finished.W($gid,$White_ID)");
+         db_query( "confirm.update_players_finished.W($gid,$White_ID)", $query );
 
          $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
                    ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                     ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                    ) . " WHERE ID=$Black_ID LIMIT 1" ;
-         mysql_query($query)
-            or error('mysql_query_failed',"confirm.update_players_finished.B($gid,$Black_ID)");
+         db_query( "confirm.update_players_finished.B($gid,$Black_ID)", $query );
 
          $Subject = 'Game result';
          $Text = "The result in the game:<center>"
@@ -618,11 +609,11 @@ This is why:
 if(1){ //new
       notify( 'confirm', $next_to_move_ID);
 }else{ //old
-      mysql_query( "UPDATE Players SET Notify='NEXT' " .
+      db_query( 'confirm.notify_opponent',
+         "UPDATE Players SET Notify='NEXT' " .
                    "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
-                   "AND FIND_IN_SET('ON',SendEmail) LIMIT 1")
+                   "AND FIND_IN_SET('ON',SendEmail) LIMIT 1" );
                    //"AND SendEmail LIKE '%ON%' LIMIT 1")
-         or error('mysql_query_failed','confirm.notify_opponent');
 } //old/new
 
 

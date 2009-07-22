@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -372,9 +372,9 @@ else
    {
       // temp password?
 
-      $result = @mysql_query( "SELECT *, " .
-                "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+      $result = @db_query( 0 /* "rss.status.find_user.password($uhandle)" */,
+         "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -395,9 +395,9 @@ else
    {
       // logged in?
 
-      $result = @mysql_query( "SELECT *, " .
-                          "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+      $result = @db_query( 0 /* "rss.status.find_user.login($uhandle)" */,
+         "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -453,8 +453,7 @@ else
               "AND me.Sender IN('N','S') " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','rss3');
+   $result = db_query( 'rss3', $query );
 
    $cat= 'Status/Message';
    while( $row = mysql_fetch_assoc($result) )
@@ -489,8 +488,7 @@ else
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
-   $result = mysql_query( $query ) or error('mysql_query_failed','rss4');
-
+   $result = db_query( 'rss4', $query );
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )

@@ -87,8 +87,7 @@ require_once( "features/lib_votes.php" );
    $qsql = FeatureVote::build_query_featurevote_list( $vtable->get_query() );
    $query = $qsql->get_select() . "$order $limit";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'votelist.find_data');
+   $result = db_query( 'votelist.find_data', $query );
 
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
    $vtable->set_found_rows( mysql_found_rows('votelist.found_rows') );

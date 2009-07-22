@@ -82,24 +82,24 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
       if( $oldSubject != $Subject || $oldText != $Text )
       {
          //Update old record with new text
-         mysql_query("UPDATE Posts SET " .
+         db_query( "forum_post.post_message.edit.update($edit)",
+               "UPDATE Posts SET " .
                      "Lastedited=FROM_UNIXTIME($NOW), " .
                      "Subject='$Subject', " .
                      "Text='$Text' " .
                      ( ($moderated) ? ", Approved='N', PendingApproval='Y' " : '' ) .
-                     "WHERE ID=$edit LIMIT 1")
-            or error('mysql_query_failed','forum_post.post_message.edit.update');
+                     "WHERE ID=$edit LIMIT 1" );
 
          //Insert new record with old text
-         mysql_query("INSERT INTO Posts SET " .
+         db_query( 'forum_post.post_message.edit.insert',
+               "INSERT INTO Posts SET " .
                      "Time='" . $row['Time'] ."', " .
                      "Parent_ID=$edit, " .
                      "Forum_ID=" . $row['Forum_ID'] . ", " .
                      "User_ID=" . $player_row['ID'] . ", " .
                      "PosIndex='', " . // '' == inactivated (edited)
                      "Subject='$oldSubject', " .
-                     "Text='$oldText'" )
-            or error('mysql_query_failed','forum_post.post_message.edit.insert');
+                     "Text='$oldText'" );
 
          add_forum_log( @$row['Thread_ID'], $edit,
             ($moderated) ? FORUMLOGACT_EDIT_PEND_POST : FORUMLOGACT_EDIT_POST );
@@ -178,8 +178,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
          "crc32=" . crc32($Text) . ", " .
          "PosIndex='$PosIndex'";
 
-      mysql_query( $query )
-         or error('mysql_query_failed','forum_post.insert_new_post');
+      db_query( 'forum_post.insert_new_post', $query );
 
       if( mysql_affected_rows() != 1)
          error("mysql_insert_post", 'forum_post.insert_new_post');
@@ -188,7 +187,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 
       if( $is_newthread ) // U06 (New thread), also $Thread_ID = -1
       {
-         db_query( 'forum_post.new_thread',
+         db_query( "forum_post.new_thread($New_ID)",
             'UPDATE Posts SET Thread_ID=ID, LastPost=ID, '
             . 'PostsInThread=' . ($moderated ? '0' : '1')
             . " WHERE ID=$New_ID LIMIT 1" );

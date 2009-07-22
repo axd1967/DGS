@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -43,9 +43,8 @@ require_once( "include/std_functions.php" );
 
 
    // use default sort-order: SortOrder & ID (fallback)
-   $result = mysql_query("SELECT * FROM Bio WHERE uid=$my_id"
-               . " ORDER BY SortOrder, ID")
-      or error('mysql_query_failed','change_bio.find_bio');
+   $result = db_query( 'change_bio.find_bio',
+      "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder, ID" );
 
    $bios = array();
    $idx = 0;
@@ -60,8 +59,7 @@ require_once( "include/std_functions.php" );
          if( $EnteredText == "" )
          {
             $query = "DELETE FROM Bio WHERE ID=$bid LIMIT 1";
-            mysql_query( $query )
-               or error('mysql_query_failed', "change_bio.delete_bio[$bid]");
+            db_query( "change_bio.delete_bio[$bid]", $query );
             continue;
          }
       }
@@ -132,8 +130,7 @@ require_once( "include/std_functions.php" );
             " WHERE ID=$bid AND uid=$my_id LIMIT 1";
       }
 
-      mysql_query( $query )
-         or error('mysql_query_failed', "change_bio.alter_bio[$bid]");
+      db_query( "change_bio.alter_bio[$bid]", $query );
    }
 
    // add new entries
@@ -155,8 +152,7 @@ require_once( "include/std_functions.php" );
             ', Category="'.mysql_addslashes($EnteredCategory).'"' .
             ', SortOrder="'.(++$max_pos).'"';
 
-      mysql_query( $query )
-         or error('mysql_query_failed','change_bio.insert_bio');
+      db_query( 'change_bio.insert_bio', $query );
    }
 
 

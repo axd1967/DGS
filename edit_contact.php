@@ -65,8 +65,8 @@ require_once( "include/contacts.php" );
    $other_row = null; // other-player (=contact to add/edit)
    if( $cid )
    { // have cid to edit new or existing
-      $result = mysql_query("SELECT ID, Name, Handle FROM Players WHERE ID=$cid")
-         or error('mysql_query_failed', 'edit_contact.find_user.id');
+      $result = db_query( 'edit_contact.find_user.id',
+         "SELECT ID, Name, Handle FROM Players WHERE ID=$cid" );
       if( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);
@@ -74,8 +74,8 @@ require_once( "include/contacts.php" );
    if( !$other_row && $cuser != '' ) // not identified yet
    { // load cid for userid
       $qhandle = mysql_addslashes($cuser);
-      $result = mysql_query("SELECT ID, Name, Handle FROM Players WHERE Handle='$qhandle'")
-         or error('mysql_query_failed', 'edit_contact.find_user.handle');
+      $result = db_query( 'edit_contact.find_user.handle',
+         "SELECT ID, Name, Handle FROM Players WHERE Handle='$qhandle'" );
       if( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);

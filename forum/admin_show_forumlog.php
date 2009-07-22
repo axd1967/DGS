@@ -97,8 +97,7 @@ require_once( "forum/forum_functions.php" );
    $qsql->merge( $query_flfilter );
    $query = $qsql->get_select() . " $order $limit";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'show_forumlog.find_data');
+   $result = db_query( 'show_forumlog.find_data', $query );
 
    $show_rows = $fltable->compute_show_rows(mysql_num_rows($result));
    $fltable->set_found_rows( mysql_found_rows('show_forumlog.found_rows') );

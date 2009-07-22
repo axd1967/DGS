@@ -80,8 +80,7 @@ $ARR_DBFIELDKEYS = array(
       . ",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS LastaccessU"
       . ",IFNULL(UNIX_TIMESTAMP(LastMove),0) AS LastMoveU"
       . " FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', "opponents.find_users($uid,$opp)");
+   $result = db_query( "opponents.find_users($uid,$opp)", $query );
    while( $row = mysql_fetch_assoc( $result ) )
       $players[ $row['ID'] ] = $row;
    mysql_free_result($result);
@@ -349,8 +348,7 @@ $ARR_DBFIELDKEYS = array(
    }
 
    // query database for user-table
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', "opponents.find_stats($uid,$opp)");
+   $result = db_query( "opponents.find_stats($uid,$opp)", $query );
 
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
    $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
@@ -521,9 +519,7 @@ function extract_user_stats( $color, $query = null )
    $arr = array();
    if( !is_null($query) )
    {
-      $result = mysql_query( $query )
-         or error('mysql_query_failed', "opponents.extract_user_stats($color)");
-
+      $result = db_query( "opponents.extract_user_stats($color)", $query );
       if( $row = mysql_fetch_assoc( $result ) )
       {
          foreach( $ARR_DBFIELDKEYS as $key )

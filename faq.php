@@ -96,8 +96,7 @@ require_once( "include/form_functions.php" );
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder";
-      $result = mysql_query($query)
-         or error('mysql_query_failed', 'faq.search_entries');
+      $result = db_query( 'faq.search_entries', $query );
 
       $found_entries = 0;
       if( mysql_num_rows($result) > 0 )
@@ -160,7 +159,7 @@ require_once( "include/form_functions.php" );
    }
    elseif( @$_GET["read"] == 't' )
    { // show one or all faq-section(s) with all entries expanded
-      $result = mysql_query(
+      $result = db_query( 'faq.find_entries',
          "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
@@ -168,8 +167,7 @@ require_once( "include/form_functions.php" );
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
          ( $cat === 'all' ? '' : "AND (entry.ID=$cat OR entry.Parent=$cat) " ) .
-         "ORDER BY CatOrder,ParentOrder,entry.SortOrder")
-      or error('mysql_query_failed', 'faq.find_entries');
+         "ORDER BY CatOrder,ParentOrder,entry.SortOrder" );
 
       if( mysql_num_rows($result) > 0 )
       {
@@ -195,14 +193,13 @@ require_once( "include/form_functions.php" );
    }
    else
    { // show only faq-titles
-      $result = mysql_query(
+      $result = db_query( 'faq.find_titles',
          "SELECT entry.*, Question.Text AS Q, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
             "AND entry.Level<3 AND entry.Level>0 " .
-         "ORDER BY CatOrder,entry.Level,entry.SortOrder")
-         or error('mysql_query_failed', 'faq.find_titles');
+         "ORDER BY CatOrder,entry.Level,entry.SortOrder" );
 
       if( mysql_num_rows($result) > 0 )
       {

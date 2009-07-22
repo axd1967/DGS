@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,7 @@ require_once( "include/std_functions.php" );
    $q2 = "SELECT SUM(Moves) AS moves, COUNT(*) AS count FROM Games";
    $q3 = "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players";
 
-   $result = mysql_query( $q1 );
+   $result = db_query( 'statistics.games.moves', $q1 );
 
    echo '<table border=1>
 <tr><th>Status</th><th>Moves</th><th>Games</th></tr>

@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -298,20 +298,20 @@ if(1){//new
          ." AND Games.ClockUsed<0" // VACATION_CLOCK
          );
 }else{//old
-      $gres = mysql_query("SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
+      $gres = db_query( 'halfhourly_cron.find_vacation_games',
+         "SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
                          "FROM (Games, Clock) " .
                          "WHERE Status" . IS_RUNNING_GAME .
                          "AND Games.ClockUsed < 0 " . // VACATION_CLOCK
                          "AND Clock.ID=$ClockUsed " .
-                         "AND ToMove_ID='$uid'" )
-         or error('mysql_query_failed','halfhourly_cron.find_vacation_games');
+                         "AND ToMove_ID='$uid'" );
 
       while( $game_row = mysql_fetch_assoc( $gres ) )
       {
-            mysql_query("UPDATE Games SET ClockUsed=$ClockUsed"
+         db_query( 'halfhourly_cron.update_vacation_games',
+            "UPDATE Games SET ClockUsed=$ClockUsed"
                       . ", LastTicks='" . $game_row['ticks'] . "'"
-                      . " WHERE ID='" . $game_row['gid'] . "' LIMIT 1")
-               or error('mysql_query_failed','halfhourly_cron.update_vacation_games');
+                      . " WHERE ID='" . $game_row['gid'] . "' LIMIT 1" );
       }
       mysql_free_result($gres); //unset($game_row);
 }//new/old

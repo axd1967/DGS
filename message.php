@@ -194,13 +194,11 @@ require_once( "include/form_functions.php" );
 
             $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
 
-            mysql_query( "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
-                         "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" )
-               or error('mysql_query_failed', 'message.update_mess_corr');
-
+            db_query( "message.update_mess_corr($my_id,$mid,$Sender)",
+                  "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
+                  "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" );
             if( mysql_affected_rows() != 1)
                error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
-
          }
 
          if( $Type == 'INVITATION' )

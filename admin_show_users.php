@@ -133,7 +133,7 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
    $atable->add_tablehead( 4, T_('Admin options#header'));
    $atable->add_tablehead( 5, T_('Admin note#header'));
 
-   $result = mysql_query( $query ) or error('mysql_query_failed', $query_msg);
+   $result = db_query( $query_msg, $query );
 
    $edit_link = '';
    while( $row = mysql_fetch_assoc( $result ) )

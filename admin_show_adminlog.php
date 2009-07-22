@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -59,7 +59,7 @@ require_once( "include/table_columns.php" );
    if( $show_ip )
       $atable->add_tablehead( 6, T_('IP#header'));
 
-   $result = mysql_query(
+   $result = db_query( 'admin_show_adminlog.find_data',
          'SELECT AL.*, ' .
             'IFNULL(UNIX_TIMESTAMP(AL.Date),0) AS X_Date, ' .
             'PAdm.Handle AS PAdm_Handle, ' .
@@ -67,8 +67,7 @@ require_once( "include/table_columns.php" );
          'FROM Adminlog AS AL ' .
             'LEFT JOIN Players AS PAdm ON PAdm.ID=AL.uid ' .
             'LEFT JOIN Players AS PUser ON PUser.Handle=AL.Handle '.
-         'ORDER BY ID DESC ' . $limit )
-      or error('mysql_query_failed', 'admin_show_adminlog.find_data');
+         'ORDER BY ID DESC ' . $limit );
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
 

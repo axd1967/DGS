@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -53,11 +53,11 @@ require_once( "include/form_functions.php" );
          if( $vacationdiff == 0 )
             jump_to("status.php");
 
-         mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationdiff)"
+         db_query( 'edit_vacation.change_vacation',
+            "UPDATE Players SET VacationDays=VacationDays-($vacationdiff)"
                   . ",OnVacation=OnVacation+($vacationdiff)"
                   . " WHERE ID=$my_id"
-                     . " AND VacationDays >= ($vacationdiff) LIMIT 1" )
-            or error('mysql_query_failed', 'edit_vacation.change_vacation');
+                     . " AND VacationDays >= ($vacationdiff) LIMIT 1" );
 
          $msg = urlencode(T_('Vacation length changed!'));
          jump_to("status.php?sysmsg=$msg");
@@ -95,39 +95,39 @@ require_once( "include/form_functions.php" );
          // LastTicks will handle -(time spend) at the moment of the start of vacations
          // in the reference of the ClockUsed by the game
 if(1){//new
-            mysql_query("UPDATE Games"
+            db_query( 'edit_vacation.update_games',
+               "UPDATE Games"
                      . ' INNER JOIN Clock ON Clock.ID=Games.ClockUsed'
                      . " SET Games.ClockUsed=" .VACATION_CLOCK
                         . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
                      . " WHERE Games.Status" . IS_RUNNING_GAME
                      . " AND Games.ToMove_ID=$my_id"
                      . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
-                     )
-            or error('mysql_query_failed', 'edit_vacation.update_games');
+                     );
 }else{//old
-         $result = mysql_query("SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
+         $result = db_query( 'edit_vacation.find_games',
+            "SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
                          "FROM (Games, Clock) " .
                          "WHERE Status" . IS_RUNNING_GAME .
                          'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                          'AND Clock.ID=Games.ClockUsed ' .
-                         "AND ToMove_ID='$my_id'" )
-            or error('mysql_query_failed', 'edit_vacation.find_games');
+                         "AND ToMove_ID='$my_id'" );
 
          //TODO: *** HOT_SECTION *** ???
          while( $game_row = mysql_fetch_array( $result ) )
          {
-            mysql_query("UPDATE Games SET ClockUsed=" .VACATION_CLOCK
+            db_query( 'edit_vacation.update_games',
+               "UPDATE Games SET ClockUsed=" .VACATION_CLOCK
                       . ", LastTicks='" . $game_row['ticks'] . "'" 
-                      . " WHERE ID=" . $game_row['gid'] . " LIMIT 1" )
-            or error('mysql_query_failed', 'edit_vacation.update_games');
+                      . " WHERE ID=" . $game_row['gid'] . " LIMIT 1" );
          }
 }//new/old
 
-         mysql_query("UPDATE Players SET VacationDays=VacationDays-($vacationlength)"
+         db_query( 'edit_vacation.update_player',
+            "UPDATE Players SET VacationDays=VacationDays-($vacationlength)"
                   . ", OnVacation=$vacationlength"
                   . " WHERE ID=$my_id"
-                     . " AND VacationDays >= ($vacationlength) LIMIT 1" )
-            or error('mysql_query_failed', 'edit_vacation.update_player');
+                     . " AND VacationDays >= ($vacationlength) LIMIT 1" );
 
          $msg = urlencode(T_('Have a nice vacation!'));
          jump_to("status.php?sysmsg=$msg");

@@ -381,10 +381,10 @@ function update_user( $uid, $user, $fv )
    if( count($arr_sql) == 0 )
       return -1; // no update
 
-   mysql_query( 'UPDATE Players SET ' . implode(', ', $arr_sql)
-                . " WHERE ID='".mysql_addslashes($uid)."'"
-                . " AND Handle='".mysql_addslashes($user)."' LIMIT 1" ) // double(user+uid) for safety
-      or error( 'mysql_query_failed', "admin_users.save_user($user)" );
+   db_query( "admin_users.save_user($user)",
+      'UPDATE Players SET ' . implode(', ', $arr_sql)
+         . " WHERE ID='".mysql_addslashes($uid)."'"
+         . " AND Handle='".mysql_addslashes($user)."' LIMIT 1" ); // double(user+uid) for safety
 
    admin_log( @$player_row['ID'], $user, 'updated_user: ' . implode(', ', $arrdiff) );
 

@@ -57,15 +57,14 @@ require_once( "include/table_columns.php" );
    $atable->add_tablehead( 5, T_('Question#header'));
    $atable->add_tablehead( 6, T_('Answer#header'));
 
-   $result = mysql_query(
+   $result = db_query( 'admin_show_errorlog.find_data',
          'SELECT FL.*, FAQ.Level, ' .
             'IFNULL(UNIX_TIMESTAMP(FL.Date),0) AS X_Date, ' .
             'PUser.Handle AS PUser_Handle ' .
          'FROM FAQlog AS FL ' .
             'LEFT JOIN FAQ ON FAQ.ID=FL.FAQID ' .
             'LEFT JOIN Players AS PUser ON PUser.ID=FL.uid ' .
-         'ORDER BY ID DESC ' . $limit )
-      or error('mysql_query_failed', 'admin_show_errorlog.find_data');
+         'ORDER BY ID DESC ' . $limit );
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
 

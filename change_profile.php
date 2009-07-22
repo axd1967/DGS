@@ -34,6 +34,7 @@ require_once( "include/rating.php" );
       error('not_logged_in');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
+   $my_id = $player_row['ID'];
 
    $name = trim(get_request_arg('name')) ;
    if( strlen( $name ) < 1 )
@@ -209,11 +210,10 @@ require_once( "include/rating.php" );
 
    $query .= "Timezone='" . $timezone . "', " .
        "Nightstart=" . $nightstart .
-       " WHERE ID=" . $player_row['ID'] . " LIMIT 1";
+       " WHERE ID=$my_id LIMIT 1";
 
    // table (Players)
-   mysql_query( $query )
-      or error('mysql_query_failed','change_profile');
+   db_query( "change_profile($my_id)", $query );
 
    // table (ConfigBoard)
    if( $save_config_board )

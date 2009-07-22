@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -127,10 +127,10 @@ function retry_admin( $msg)
 
 
       $tmp = mysql_addslashes( $browsercode . LANG_CHARSET_CHAR . $charenc );
-      mysql_query("INSERT INTO TranslationLanguages SET " .
+      db_query( 'admin_do_translators.add.insert',
+         "INSERT INTO TranslationLanguages SET " .
                   "Name='" . mysql_addslashes($langname) . "', " .
-                  "Language='$tmp'" )
-         or error('mysql_query_failed','admin_do_translators.add.insert');
+                  "Language='$tmp'" );
 
       make_known_languages(); //must be called from main dir
 
@@ -206,9 +206,9 @@ function retry_admin( $msg)
       if( $new_langs == $old_langs )
          retry_admin( $msg);
 
-      mysql_query( "UPDATE Players SET Translator='$new_langs'"
-                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" )
-         or error('mysql_query_failed','admin_do_translators.user.update');
+      db_query( 'admin_do_translators.user.update',
+         "UPDATE Players SET Translator='$new_langs'"
+                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
 
       if( mysql_affected_rows() != 1 )
          error('internal_error', $update_it);
@@ -227,9 +227,9 @@ function retry_admin( $msg)
          retry_admin( $msg);
 
       // Something went wrong. Restore to old set then error
-      mysql_query( "UPDATE Players SET Translator='$old_langs'"
-                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" )
-         or error('mysql_query_failed','admin_do_translators.user.revert');
+      db_query( 'admin_do_translators.user.revert',
+         "UPDATE Players SET Translator='$old_langs'"
+                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
 
       error('couldnt_update_translation', $update_it);
    }

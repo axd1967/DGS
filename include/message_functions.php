@@ -1034,8 +1034,8 @@ function get_folders($uid, $remove_all_received=true)
 {
    global $STANDARD_FOLDERS;
 
-   $result = mysql_query("SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr")
-      or error('mysql_query_failed', 'get_folders');
+   $result = db_query( 'get_folders',
+      "SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr" );
 
    $fldrs = $STANDARD_FOLDERS;
 
@@ -1113,12 +1113,12 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    else
       $where_clause.= "AND Replied!='M' ";
 
-   mysql_query("UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+   db_query( 'change_folders',
+      "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
                "WHERE uid='$uid' $where_clause" .
                'AND Folder_nr > '.FOLDER_ALL_RECEIVED.' ' .
                "AND mid IN (" . implode(',', $message_ids) . ") " .
-               "LIMIT " . count($message_ids) )
-      or error('mysql_query_failed','change_folders');
+               "LIMIT " . count($message_ids) );
 
    return mysql_affected_rows() ;
 }
@@ -1198,9 +1198,9 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layou
 
 function folder_is_empty($nr, $uid)
 {
-   $result = mysql_query("SELECT ID FROM MessageCorrespondents " .
-                         "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1")
-      or error('mysql_query_failed','folder_is_empty');
+   $result = db_query( 'folder_is_empty',
+      "SELECT ID FROM MessageCorrespondents " .
+      "WHERE uid='$uid' AND Folder_nr='$nr' LIMIT 1" );
 
    $nr = (@mysql_num_rows($result) === 0);
    mysql_free_result($result);
@@ -1254,8 +1254,7 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date'
    $qsql->merge( $extra_querysql );
    $query = $qsql->get_select() . "$order$limit";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','message_list_query');
+   $result = db_query( 'message_list_query', $query );
 
    return array( $result, $qsql );
 }

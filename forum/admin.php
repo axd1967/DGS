@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -76,16 +76,15 @@ $ThePage = new Page('ForumAdmin');
          $start+= $dir;
 
          //shift the neighbours backward, reference by SortOrder
-         mysql_query("UPDATE Forums SET SortOrder=SortOrder-($dir)"
+         db_query( "forum_admin.move.update_sortorder1($start:$end)",
+               "UPDATE Forums SET SortOrder=SortOrder-($dir)"
                      . " WHERE SortOrder BETWEEN "
                         .($start>$end?"$end AND $start":"$start AND $end")
-                     . " LIMIT $cnt" )
-            or error('mysql_query_failed','forum_admin.move.update_sortorder1');
+                     . " LIMIT $cnt" );
 
          //move the entry forward, reference by ID
-         mysql_query("UPDATE Forums SET SortOrder=$end"
-                     . " WHERE ID=$fid LIMIT 1")
-            or error('mysql_query_failed','forum_admin.move.update_sortorder2');
+         db_query( "forum_admin.move.update_sortorder2($fid,$end)",
+               "UPDATE Forums SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
       }
       jump_to($abspage); //clean URL
    } //move
@@ -147,11 +146,10 @@ $ThePage = new Page('ForumAdmin');
             jump_to("$abspage?sysmsg=$msg");
          }
 
-         mysql_query("DELETE FROM Forums WHERE ID=$fid LIMIT 1")
-            or error('mysql_query_failed','forum_admin.do_edit.delete');
-         mysql_query("UPDATE Forums SET SortOrder=SortOrder-1 " .
-                     "WHERE SortOrder>" . $row["SortOrder"])
-            or error('mysql_query_failed','forum_admin.do_edit.update_sortorder');
+         db_query( "forum_admin.do_edit.delete($fid)",
+               "DELETE FROM Forums WHERE ID=$fid LIMIT 1" );
+         db_query( "forum_admin.do_edit.update_sortorder",
+               "UPDATE Forums SET SortOrder=SortOrder-1 WHERE SortOrder>" . $row["SortOrder"] );
       }
       else
       { //Update
@@ -161,12 +159,12 @@ $ThePage = new Page('ForumAdmin');
             jump_to("$abspage?sysmsg=$msg");
          }
 
-         mysql_query("UPDATE Forums SET"
+         db_query( "forum_admin.do_edit.update_forums({$row['ID']})",
+               "UPDATE Forums SET"
                   . " Name='".mysql_addslashes($name)."'"
                   . ",Description='".mysql_addslashes($description)."'"
                   . ',Options='. build_forum_options( @$_REQUEST )
-                  . " WHERE ID=" . $row['ID'] . " LIMIT 1")
-            or error('mysql_query_failed','forum_admin.do_edit.update_forums');
+                  . " WHERE ID=" . $row['ID'] . " LIMIT 1" );
       }
 
       jump_to($abspage); //clean URL
@@ -223,16 +221,15 @@ $ThePage = new Page('ForumAdmin');
       else
          $SortOrder = 0;
 
-      mysql_query("UPDATE Forums SET SortOrder=SortOrder+1 " .
-                  'WHERE SortOrder>' . $SortOrder )
-         or error('mysql_query_failed','forum_admin.update_sortorder');
+      db_query( 'forum_admin.update_sortorder',
+            'UPDATE Forums SET SortOrder=SortOrder+1 WHERE SortOrder>' . $SortOrder );
 
-      mysql_query("INSERT INTO Forums SET"
+      db_query( 'forum_admin.insert',
+            "INSERT INTO Forums SET"
                . " Name='".mysql_addslashes($name)."'"
                . ",Description='".mysql_addslashes($description)."'"
                . ",Options=" . build_forum_options( @$_REQUEST )
-               . ",SortOrder=" . ($SortOrder+1))
-         or error('mysql_query_failed','forum_admin.insert');
+               . ",SortOrder=" . ($SortOrder+1) );
 
       jump_to($abspage); //clean URL
    } //do_new
@@ -248,8 +245,7 @@ $ThePage = new Page('ForumAdmin');
 
       $query = 'SELECT * FROM Forums ORDER BY SortOrder';
       #echo "<br>QUERY: $query<br>\n"; // debug
-      $result = mysql_query($query)
-         or error('mysql_query_failed','forum_admin.list');
+      $result = db_query( 'forum_admin.list', $query );
 
       echo "<h3 class=Header>$title</h3>\n";
 

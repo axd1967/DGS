@@ -164,16 +164,16 @@ class Feature
          . ', Created=FROM_UNIXTIME(' . $this->created .')'
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
-      $result = mysql_query( $update_query )
-         or error('mysql_query_failed', "feature.update_feature({$this->id},{$this->subject})");
+      $result = db_query( "feature.update_feature({$this->id},{$this->subject})",
+         $update_query );
    }
 
    /*! \brief Returns true, if delete-feature allowed (checks constraints). */
    function can_delete_feature()
    {
       // check if there are votes for this feature to delete
-      $result = mysql_query("SELECT fid FROM FeatureVote WHERE fid={$this->id} LIMIT 1")
-         or error('mysql_query_failed', "feature.check_delete_feature({$this->id})");
+      $result = db_query( "feature.check_delete_feature({$this->id})",
+         "SELECT fid FROM FeatureVote WHERE fid={$this->id} LIMIT 1" );
       $cnt_votes = ( $result ) ? mysql_num_rows($result) : 0;
       mysql_free_result($result);
 
@@ -190,8 +190,7 @@ class Feature
          error('constraint_votes_delete_feature', "feature.delete_feature({$this->id})");
 
       $delete_query = "DELETE FROM FeatureList WHERE ID='{$this->id}' LIMIT 1";
-      $result = mysql_query( $delete_query )
-         or error('mysql_query_failed', "feature.delete_feature({$this->id})");
+      $result = db_query( "feature.delete_feature({$this->id})", $delete_query );
    }
 
 

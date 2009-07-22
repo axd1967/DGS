@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Ragnar Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -148,9 +148,7 @@ if(0){//old
    $translation_groups =
       array_value_to_key_and_value( $translation_groups);
 }else{//new
-   $result = mysql_query(
-            "SELECT Groupname FROM TranslationGroups" )
-      or error('internal_error', 'translate.groups_query');
+   $result = db_query( 'translate.groups_query', "SELECT Groupname FROM TranslationGroups" );
    $translation_groups = array();
    while( ($row = mysql_fetch_row($result)) )
       $translation_groups[$row[0]] = $row[0];

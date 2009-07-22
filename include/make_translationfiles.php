@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -26,8 +26,8 @@ define('TRANS_FULL_ADMIN', 1); //allow all languages access to ADMIN_TRANSLATORS
 
 function make_known_languages() //must be called from main dir
 {
-   $result = mysql_query("SELECT * FROM TranslationLanguages ORDER BY Language")
-      or error('mysql_query_failed', 'make_translationfiles.make_knownlanguages');
+   $result = db_query( 'make_translationfiles.make_knownlanguages',
+      "SELECT * FROM TranslationLanguages ORDER BY Language" );
 
    $Filename = 'translations/known_languages.php'; //must be called from main dir
 
@@ -111,8 +111,7 @@ function make_include_files($language=null, $group=null) //must be called from m
 
    $query .= "ORDER BY Language,Groupname";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'make_translationfiles.make_include_files');
+   $result = db_query( 'make_translationfiles.make_include_files', $query );
 
    $grp = '';
    $lang = '';
@@ -224,8 +223,7 @@ function translations_query( $translate_lang, $untranslated, $group
    }
    $query .= $order.$limit;
 
-   $result = mysql_query( $query)
-      or error('mysql_query_failed','translations_query');
+   $result = db_query( 'translations_query', $query );
 
    return $result;
 }
@@ -247,8 +245,8 @@ function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
 
    $string= mysql_addslashes($string);
 
-   $res = mysql_query("SELECT ID FROM TranslationTexts WHERE Text='$string'")
-      or error('mysql_query_failed', $debugmsg.'.find_transltext');
+   $res = db_query( $debugmsg.'.find_transltext',
+      "SELECT ID FROM TranslationTexts WHERE Text='$string'" );
 
    $Text_ID = 0;
    if( @mysql_num_rows( $res ) == 0 )
@@ -256,8 +254,7 @@ function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
       $insert= "INSERT INTO TranslationTexts SET Text='$string'";
       if( $do_it )
       {
-         mysql_query($insert)
-            or error('mysql_query_failed', $debugmsg.'.insert_transltext');
+         db_query( $debugmsg.'.insert_transltext', $insert );
          $Text_ID = mysql_insert_id();
       }
    }
@@ -274,20 +271,12 @@ function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
 
    if( $do_it && $Text_ID > 0 )
    {
-      mysql_query("REPLACE INTO TranslationFoundInGroup " .
-                  "SET Text_ID=$Text_ID, Group_ID=$Group_ID" )
-            or error('mysql_query_failed', $debugmsg.'.update_translfig');
+      db_query( $debugmsg.'.update_translfig',
+         "REPLACE INTO TranslationFoundInGroup " .
+                  "SET Text_ID=$Text_ID, Group_ID=$Group_ID" );
    }
 
    return $insert;
 }
-
-
-// function delete_translationtext($Text_ID)
-// {
-//    mysql_query("DELETE FROM TranslationTexts WHERE ID='$Text_ID'");
-//    mysql_query("DELETE FROM TranslationFoundInGroup WHERE Text_ID='$Text_ID'");
-//    mysql_query("DELETE FROM Translations WHERE Original_ID='$Text_ID'");
-// }
 
 ?>

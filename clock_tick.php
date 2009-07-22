@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -153,8 +153,7 @@ use TEMPORARY TABLEs for generated UPDATEs ???
             //slower: "AND Status" . IS_RUNNING_GAME
             . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
             ;
-   $result = mysql_query( $query)
-         or error('mysql_query_failed','clock_tick.find_timeout_games');
+   $result = db_query( 'clock_tick.find_timeout_games', $query );
 }//new/old
 
    while($row = mysql_fetch_assoc($result))

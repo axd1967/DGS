@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -71,11 +71,11 @@ if( $quick_mode )
       if( !$code || @$row['Expire'] < $NOW )
       {
          $code = make_session_code();
-         mysql_query( "UPDATE Players SET " .
+         db_query( 'login.update_player',
+            "UPDATE Players SET " .
                       "Sessioncode='$code', " .
                       'Sessionexpire=FROM_UNIXTIME(' . ($NOW + SESSION_DURATION) . ') ' .
-                      "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" )
-            or error('mysql_query_failed', 'login.update_player');
+                      "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
       }
 
       set_login_cookie( $uhandle, $code );

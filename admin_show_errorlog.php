@@ -88,8 +88,7 @@ require_once( "include/filter.php" );
    $qsql->merge( $query_elfilter );
    $query = $qsql->get_select() . " $order $limit";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed', 'admin_show_errorlog.find_data');
+   $result = db_query( 'admin_show_errorlog.find_data', $query );
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
 

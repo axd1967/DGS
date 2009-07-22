@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -152,7 +152,7 @@ require_once( "include/graph.php" );
    for( $i=0 ; $i<count($graphs) ; $i++ )
    {
       $graph= &$graphs[$i];
-      
+
       $max = $graph['max'];
       $min = $graph['min'];
       if( $max )
@@ -205,7 +205,7 @@ require_once( "include/graph.php" );
    for( $i=0 ; $i<count($graphs) ; $i++ )
    {
       $graph= &$graphs[$i];
-      
+
       $max = $graph['max'];
       //$min = $graph['min'];
       $gr->setgraphviewY($max, $max*$curves_min);
@@ -287,7 +287,7 @@ function get_stat_data()
    $tActiv = array();
    $tHits = array();
 
-   $result = mysql_query(
+   $result = db_query( 'statisticspng.min_max',
                "SELECT MAX(UNIX_TIMESTAMP(Time)) AS maxTime" .
                ",MIN(UNIX_TIMESTAMP(Time)) AS minTime" .
                ",MIN(Users) AS minUsers,MAX(Users) AS maxUsers" .
@@ -296,8 +296,7 @@ function get_stat_data()
                ",MIN(GamesRunning) AS minGameR,MAX(GamesRunning) AS maxGameR" .
                ",MIN(Activity) AS minActiv,MAX(Activity) AS maxActiv" .
                ",MIN(Hits) AS minHits,MAX(Hits) AS maxHits" .
-               " FROM Statistics")
-      or error('mysql_query_failed', 'statisticspng.min_max');
+               " FROM Statistics" );
 
    if( @mysql_num_rows( $result ) != 1 )
       exit;
@@ -306,13 +305,12 @@ function get_stat_data()
    extract($max_row);
    mysql_free_result($result);
 
-   $result = mysql_query("SELECT *,UNIX_TIMESTAMP(Time) as times" .
-                         " FROM Statistics ORDER BY Time")
-      or error('mysql_query_failed', 'statisticspng.load_data');
+   //TODO why load twice ? 1st pass for aggregating, but could be done in PHP too!
+   $result = db_query( 'statisticspng.load_data',
+         "SELECT *,UNIX_TIMESTAMP(Time) as times FROM Statistics ORDER BY Time" );
 
    if( @mysql_num_rows( $result ) < 1 )
       exit;
-
 
    while( $row = mysql_fetch_assoc($result) )
    {

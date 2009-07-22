@@ -131,21 +131,21 @@ function add_forum_log( $tid, $pid, $action )
       $uid = 1; // use guest-user as default-user
    $ip = (string) @$_SERVER['REMOTE_ADDR'];
 
-   mysql_query("INSERT INTO Forumlog SET " .
+   db_query( "forum.add_forum_log.insert($uid,$tid,$pid,$action)",
+         "INSERT INTO Forumlog SET " .
                "User_ID='$uid', " .
                "Thread_ID='$tid', " .
                "Post_ID='$pid', " .
                "Time=FROM_UNIXTIME($NOW), " .
                "Action='$action', " .
-               "IP='$ip' " )
-      or error( 'mysql_query_failed', 'forum.add_forum_log.insert' );
+               "IP='$ip' " );
 }
 
 /* \brief Returns Forum_ID for specified thread. */
 function load_forum_id( $thread )
 {
-   $result = mysql_query("SELECT Forum_ID FROM Posts WHERE ID='$thread' LIMIT 1")
-      or error('mysql_query_failed','load_forum_id');
+   $result = db_query( 'load_forum_id',
+      "SELECT Forum_ID FROM Posts WHERE ID='$thread' LIMIT 1" );
 
    if( @mysql_num_rows($result) != 1 )
       return 0;
@@ -1181,7 +1181,7 @@ class Forum
    function load_forum_names( $forum_opts )
    {
       // build forum-array for filter: ( Name => Forum_ID )
-      $result = db_query( 'Forum.load_forum_names()',
+      $result = db_query( 'Forum.load_forum_names',
             'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
 
       $fnames = array();
@@ -1203,7 +1203,7 @@ class Forum
       $qsql = Forum::build_query_sql();
       $qsql->add_part( SQLP_ORDER, 'ID' );
 
-      $result = db_query( "Forum.load_fix_forum_list()", $qsql->get_select() );
+      $result = db_query( "Forum.load_fix_forum_list", $qsql->get_select() );
       $flist = array();
       while( $row = mysql_fetch_array( $result ) )
       {
@@ -1256,7 +1256,7 @@ class ForumThread
       $qsql->merge( $qsql2 );
 
       $query = $qsql->get_select();
-      $result = db_query( "ForumThread.load_posts()", $query );
+      $result = db_query( "ForumThread.load_posts", $query );
 
       $this->thread_post = null;
       while( $row = mysql_fetch_array( $result ) )

@@ -184,8 +184,8 @@ class Contact
       global $NOW;
       $this->lastchanged = $NOW;
 
-      $result = mysql_query("SELECT ID FROM Players WHERE ID IN ('{$this->uid}','{$this->cid}') LIMIT 2")
-         or error('mysql_query_failed', "contact.find_user({$this->uid},{$this->cid})");
+      $result = db_query( "contact.find_user({$this->uid},{$this->cid})",
+         "SELECT ID FROM Players WHERE ID IN ('{$this->uid}','{$this->cid}') LIMIT 2" );
       if( !$result || mysql_num_rows($result) != 2 )
          error('unknown_user', "contact.find_user2({$this->uid},{$this->cid})");
       mysql_free_result($result);
@@ -199,8 +199,7 @@ class Contact
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          . ", Notes='" . mysql_addslashes($this->note) . "'"
          ;
-      $result = mysql_query( $update_query )
-         or error('mysql_query_failed', "contact.update_contact2({$this->uid},{$this->cid})");
+      $result = db_query( "contact.update_contact2({$this->uid},{$this->cid})", $update_query );
    }
 
    /*! \brief Deletes current Contact from database. */
@@ -213,8 +212,7 @@ class Contact
 
       $delete_query = "DELETE FROM Contacts "
          . "WHERE uid='{$this->uid}' AND cid='{$this->cid}' LIMIT 1";
-      $result = mysql_query( $delete_query )
-         or error('mysql_query_failed','contacts.delete_contact');
+      $result = db_query( 'contacts.delete_contact', $delete_query );
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */

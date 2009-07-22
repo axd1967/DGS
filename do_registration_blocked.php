@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -50,11 +50,8 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
    if( !USE_REGEXP_REGISTRATION )
    {
    //if foO exist, reject foo but accept fo0 (with a zero instead of uppercase o)
-      $result = mysql_query(
-            "SELECT Handle FROM Players WHERE Handle='"
-                  .mysql_addslashes($uhandle)."'"
-         )
-         or error('mysql_query_failed','do_registration.find_player');
+      $result = db_query( 'do_registration.find_player',
+            "SELECT Handle FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
    }
    else
    {
@@ -67,10 +64,8 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
       $regx = mysql_addslashes($regx);
       $regx = '^'.$regx.'$';
 
-      $result = mysql_query(
-            "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'"
-         )
-         or error('mysql_query_failed','do_registration.find_player_regexp');
+      $result = db_query( 'do_registration.find_player_regexp',
+            "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'" );
    }
 
    if( @mysql_num_rows($result) > 0 )
@@ -103,15 +98,14 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
             "crc32=" . crc32($Text) . ", " .
             "PosIndex='**'";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','do_registration_blocked.insert_new_post');
+   $result = db_query( 'do_registration_blocked.insert_new_post', $query );
 
    if( mysql_affected_rows() != 1)
       error('mysql_insert_post', 'do_registration_blocked.insert_new_post');
 
    $new_id = mysql_insert_id();
-   mysql_query( "UPDATE Posts SET Thread_ID=ID WHERE ID=$new_id LIMIT 1" )
-      or error('mysql_query_failed','do_registration_blocked.new_thread');
+   db_query( 'do_registration_blocked.new_thread',
+      "UPDATE Posts SET Thread_ID=ID WHERE ID=$new_id LIMIT 1" );
 
    if( mysql_affected_rows() != 1)
       error('mysql_insert_post', 'do_registration_blocked.new_thread');

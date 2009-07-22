@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -276,9 +276,9 @@ else
 
    if( $loggin_mode )
    {
-      $result = @mysql_query( "SELECT *, " .
-                     "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                     "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+      $result = @db_query( 0 /* "wap.status.find_user($uhandle)" */,
+         "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -341,8 +341,7 @@ else
               "AND me.Sender IN('N','S') " . //exclude message to myself
       "ORDER BY date, me.mid";
 
-   $resultM = mysql_query( $query )
-      or error('mysql_query_failed','wap3');
+   $resultM = db_query( 'wap3', $query );
    $countM = @mysql_num_rows($resultM);
 
 
@@ -356,8 +355,7 @@ else
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        "ORDER BY date, Games.ID";
 
-   $resultG = mysql_query( $query )
-      or error('mysql_query_failed','wap4');
+   $resultG = db_query( 'wap4', $query );
    $countG = @mysql_num_rows($resultG);
 
 

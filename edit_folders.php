@@ -193,8 +193,7 @@ function make_folder_form_row(&$form, $name, $nr,
             "FGColor='$fgcolor' ";
       }
 
-      mysql_query($query)
-         or error('mysql_query_failed', 'edit_folders.main');
+      db_query( "edit_folders.main($my_id)", $query );
 
       if( !$sysmsg )
          $sysmsg = T_('Folders adjusted!');

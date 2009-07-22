@@ -277,10 +277,9 @@ class Profile
          error('invalid_args', "profile.load_profiles($user_id,$type)");
 
       $fields = implode(',', Profile::get_query_fields());
-      $result = mysql_query(
+      $result = db_query( "profile.load_profile2($user_id,$type)",
             "SELECT $fields FROM Profiles WHERE User_ID='$user_id' AND Type='$type' " .
-            "ORDER BY SortOrder,ID LIMIT 1" )
-         or error('mysql_query_failed', "profile.load_profile2($user_id,$type)");
+            "ORDER BY SortOrder,ID LIMIT 1" );
 
       $arr_out = array();
       while( ($row = mysql_fetch_assoc( $result )) )

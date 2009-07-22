@@ -99,8 +99,8 @@ class Board
       if( $this->max_moves <= 0 )
          return TRUE;
 
-      $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
-         or error('mysql_query_failed',"board.load_from_db.find_moves($gid)");
+      $result = db_query( "board.load_from_db.find_moves($gid)",
+         "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
       if( !$result )
          return FALSE;
       if( @mysql_num_rows($result) <= 0 )
@@ -1134,10 +1134,10 @@ class Board
         error("mysql_data_corruption",
               "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
 
-     mysql_query("DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr")
-        or error('mysql_query_failed',"board.fix_corrupted_move_table.delete_moves($gid)");
-     mysql_query("DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr")
-        or error('mysql_query_failed',"board.fix_corrupted_move_table.delete_move_mess($gid)");
+     db_query( "board.fix_corrupted_move_table.delete_moves($gid)",
+         "DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr" );
+     db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
+         "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
    }
 
 

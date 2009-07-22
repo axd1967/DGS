@@ -175,8 +175,9 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    else
       $query = "INSERT INTO Games SET $query";
 
-   $result = mysql_query( $query )
-      or error('mysql_insert_game', "make_invite_game.update_game($disputegid)");
+   $result = db_query( "make_invite_game.update_game($disputegid)",
+      $query,
+      'mysql_insert_game' );
 
    if( mysql_affected_rows() != 1)
       error('mysql_start_game', "make_invite_game.update_game($disputegid)");
@@ -305,16 +306,16 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    if( $gid > 0 )
    { //game prepared by the invitation process
-      mysql_query("UPDATE Games SET $set_query WHERE ID=$gid AND Status='INVITED' LIMIT 1")
-         or error('mysql_query_failed','create_game.update:'.$gid);
+      db_query( 'create_game.update:'.$gid,
+         "UPDATE Games SET $set_query WHERE ID=$gid AND Status='INVITED' LIMIT 1" );
 
       if( mysql_affected_rows() != 1)
          error('mysql_start_game','create_game.update:'.$gid);
    }
    else
    {
-      mysql_query("INSERT INTO Games SET $set_query")
-         or error('mysql_query_failed','create_game.insert');
+      db_query( 'create_game.insert',
+         "INSERT INTO Games SET $set_query" );
       $gid = mysql_insert_id();
    }
 
@@ -385,8 +386,7 @@ function make_standard_placement_of_handicap_stones(
       if( $i+2 < $patlen ) $query .= ", ";
    }
 
-   mysql_query( $query )
-      or error('mysql_query_failed','make_std_handicap');
+   db_query( 'make_std_handicap', $query );
 
    if( $patlen != 2*$hcp )
       return false;

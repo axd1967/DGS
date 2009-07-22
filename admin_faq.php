@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -142,17 +142,16 @@ $info_box = '<ul>
          $start+= $dir;
 
          //shift the neighbours backward, reference by SortOrder
-         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-($dir)"
+         db_query( 'admin_faq.move.update_sortorder1',
+            "UPDATE FAQ SET SortOrder=SortOrder-($dir)"
                      . " WHERE SortOrder BETWEEN "
                         .($start>$end?"$end AND $start":"$start AND $end")
                      . " AND Parent=$parent"
-                     . " LIMIT $cnt" )
-            or error('mysql_query_failed','admin_faq.move.update_sortorder1');
+                     . " LIMIT $cnt" );
 
          //move the entry forward, reference by ID
-         mysql_query("UPDATE FAQ SET SortOrder=$end"
-                     . " WHERE ID=$fid LIMIT 1")
-            or error('mysql_query_failed','admin_faq.move.update_sortorder2');
+         db_query( 'admin_faq.move.update_sortorder2',
+            "UPDATE FAQ SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
       }
       jump_to("$page?id=$fid#e$fid"); //clean URL
    } //move
@@ -192,15 +191,14 @@ $info_box = '<ul>
             $max = 1;
 
          //shift down the neighbours above
-         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1"
+         db_query( 'admin_faq.bigmove.update_sortorder1',
+            "UPDATE FAQ SET SortOrder=SortOrder-1"
                   . " WHERE Parent=" . $row['Parent']
-                  . " AND SortOrder>" . $row['SortOrder'])
-            or error('mysql_query_failed','admin_faq.bigmove.update_sortorder1');
+                  . " AND SortOrder>" . $row['SortOrder'] );
 
          //move the entry in the new category
-         mysql_query( "UPDATE FAQ SET Parent=$newparent, SortOrder=$max"
-                  . " WHERE ID=$fid LIMIT 1")
-            or error('mysql_query_failed','admin_faq.bigmove.update_sortorder2');
+         db_query( 'admin_faq.bigmove.update_sortorder2',
+            "UPDATE FAQ SET Parent=$newparent, SortOrder=$max WHERE ID=$fid LIMIT 1" );
       }
       jump_to("$page?id=$fid#e$fid"); //clean URL
    } //bigmove
@@ -220,8 +218,7 @@ $info_box = '<ul>
                   "SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' " .
                   "WHERE ID=" . $row['ID'] . ' LIMIT 1';
 
-         mysql_query( $query )
-            or error('mysql_query_failed','admin_faq.hidden_update');
+         db_query( 'admin_faq.hidden_update', $query );
 
          $transl = transl_toggle_state( $row);
          if( $faqhide && $transl == 'Y' )
@@ -233,8 +230,7 @@ $info_box = '<ul>
                      ( $row['Level'] == 1 ? ' LIMIT 1'
                         : " OR ID=" . $row['Answer'] . " LIMIT 2" );
 
-            mysql_query( $query )
-               or error('mysql_query_failed','admin_faq.hidden_flags');
+            db_query( 'admin_faq.hidden_flags', $query );
          }
       }
       //jump_to($page); //clean URL
@@ -262,8 +258,7 @@ $info_box = '<ul>
                   "WHERE ID=" . $row['Question'] .
                   ( $row['Level'] == 1 ? ' LIMIT 1'
                      : " OR ID=" . $row['Answer'] . " LIMIT 2" );
-         mysql_query( $query )
-            or error('mysql_query_failed','admin_faq.transl');
+         db_query( 'admin_faq.transl', $query );
 
          make_include_files(null, 'FAQ'); //must be called from main dir
       }
@@ -389,21 +384,21 @@ $info_box = '<ul>
             jump_to("$page?sysmsg=$msg");
          }
 
-         mysql_query("DELETE FROM FAQ WHERE ID=$fid LIMIT 1")
-            or error('mysql_query_failed','admin_faq.do_edit.delete');
-         mysql_query("UPDATE FAQ SET SortOrder=SortOrder-1 " .
+         db_query( 'admin_faq.do_edit.delete',
+            "DELETE FROM FAQ WHERE ID=$fid LIMIT 1" );
+         db_query( 'admin_faq.do_edit.update_sortorder',
+            "UPDATE FAQ SET SortOrder=SortOrder-1 " .
                      "WHERE Parent=" . $row['Parent'] .
-                     " AND SortOrder>" . $row['SortOrder'])
-            or error('mysql_query_failed','admin_faq.do_edit.update_sortorder');
+                     " AND SortOrder>" . $row['SortOrder'] );
 
-         mysql_query("DELETE FROM TranslationFoundInGroup " .
+         db_query( 'admin_faq.do_edit.delete_tranlsgrps',
+            "DELETE FROM TranslationFoundInGroup " .
                      "WHERE Text_ID='$QID' " .
-                     "OR Text_ID='$AID'")
-            or error('mysql_query_failed','admin_faq.do_edit.delete_tranlsgrps');
-         mysql_query("DELETE FROM TranslationTexts " .
+                     "OR Text_ID='$AID'" );
+         db_query( 'admin_faq.do_edit.delete_tranlstexts',
+            "DELETE FROM TranslationTexts " .
                      "WHERE ID='$QID' " .
-                     "OR ID='$AID'")
-            or error('mysql_query_failed','admin_faq.do_edit.delete_tranlstexts');
+                     "OR ID='$AID'" );
 
          $ref_id = $row['Parent']; // anchor-ref to former, parent category
       }
@@ -422,9 +417,9 @@ $info_box = '<ul>
             if( $Qchanged )
             {
                $Qchanged = ", Translatable='Changed'";
-               mysql_query( "UPDATE Translations SET Translated='N'"
-                     . " WHERE Original_ID=$QID")
-                  or error('mysql_query_failed','admin_faq.do_edit.update_Qflags');
+               db_query( 'admin_faq.do_edit.update_Qflags',
+                  "UPDATE Translations SET Translated='N'"
+                     . " WHERE Original_ID=$QID" );
                $log|= 0x4;
             }
             else
@@ -433,9 +428,8 @@ $info_box = '<ul>
             $Qsql = $question;
             $Qsql = latin1_safe($Qsql);
             $Qsql = mysql_addslashes($Qsql);
-            mysql_query("UPDATE TranslationTexts SET Text='$Qsql'$Qchanged"
-                     . " WHERE ID=$QID LIMIT 1")
-               or error('mysql_query_failed','admin_faq.do_edit.update_Qtexts');
+            db_query( 'admin_faq.do_edit.update_Qtexts',
+               "UPDATE TranslationTexts SET Text='$Qsql'$Qchanged WHERE ID=$QID LIMIT 1" );
             $log|= 0x1;
          }
          else
@@ -448,9 +442,8 @@ $info_box = '<ul>
             if( $Achanged )
             {
                $Achanged = ", Translatable='Changed'";
-               mysql_query( "UPDATE Translations SET Translated='N'"
-                     . " WHERE Original_ID=$AID")
-                  or error('mysql_query_failed','admin_faq.do_edit.update_Aflags');
+               db_query( 'admin_faq.do_edit.update_Aflags',
+                  "UPDATE Translations SET Translated='N' WHERE Original_ID=$AID" );
                $log|= 0x8;
             }
             else
@@ -459,9 +452,8 @@ $info_box = '<ul>
             $Asql = $answer;
             $Asql = latin1_safe($Asql);
             $Asql = mysql_addslashes($Asql);
-            mysql_query("UPDATE TranslationTexts SET Text='$Asql'$Achanged"
-                     . " WHERE ID=$AID LIMIT 1")
-               or error('mysql_query_failed','admin_faq.do_edit.update_Atexts');
+            db_query( 'admin_faq.do_edit.update_Atexts',
+               "UPDATE TranslationTexts SET Text='$Asql'$Achanged WHERE ID=$AID LIMIT 1" );
             $log|= 0x2;
          }
          else
@@ -469,9 +461,9 @@ $info_box = '<ul>
 
          if( $log )
          {
-            mysql_query("INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
-                     . ", Question='$Qsql', Answer='$Asql'") //+ Date= timestamp
-               or error('mysql_query_failed','admin_faq.do_edit.faqlog');
+            db_query( 'admin_faq.do_edit.faqlog',
+               "INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
+                     . ", Question='$Qsql', Answer='$Asql'" ); //+ Date= timestamp
          }
       }
 
@@ -566,10 +558,9 @@ $info_box = '<ul>
       if( $fid==1 && (!$row || $row['Hidden']=='Y') )
       {
          //adjust the seed. must be Hidden='N' even if invisible
-         mysql_query(
+         db_query( 'admin_faq.do_new.replace_seed',
             "REPLACE INTO FAQ (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
-                     . " VALUES (1,1,0,0,0,0,'N')"
-            ) or error('mysql_query_failed','admin_faq.do_new.replace_seed');
+                     . " VALUES (1,1,0,0,0,0,'N')" );
          //reload it:
          $row = mysql_single_fetch( 'admin_faq.do_new.find2', $query );
       }
@@ -586,16 +577,16 @@ $info_box = '<ul>
       $ref_id = $fid; // anchor-ref
       if( $question )
       {
-         mysql_query("UPDATE FAQ SET SortOrder=SortOrder+1 " .
+         db_query( 'admin_faq.do_new.update_sortorder',
+            "UPDATE FAQ SET SortOrder=SortOrder+1 " .
                      'WHERE Parent=' . $row['Parent'] . ' ' .
-                     'AND SortOrder>' . $row['SortOrder'] )
-            or error('mysql_query_failed','admin_faq.do_new.update_sortorder');
+                     'AND SortOrder>' . $row['SortOrder'] );
 
-         mysql_query("INSERT INTO FAQ SET " .
+         db_query( 'admin_faq.do_new.insert',
+            "INSERT INTO FAQ SET " .
                      "SortOrder=" . ($row['SortOrder']+1) . ', ' .
                      "Parent=" . $row['Parent'] . ', ' .
-                     "Level=" . $row['Level'] )
-            or error('mysql_query_failed','admin_faq.do_new.insert');
+                     "Level=" . $row['Level'] );
 
          $faq_id = mysql_insert_id();
          $ref_id = $faq_id;
@@ -603,14 +594,14 @@ $info_box = '<ul>
          $Qsql = $question;
          $Qsql = latin1_safe($Qsql);
          $Qsql = mysql_addslashes($Qsql);
-         mysql_query("INSERT INTO TranslationTexts SET Text='$Qsql'" .
-                     ", Ref_ID=$faq_id, Translatable = 'N' " )
-            or error('mysql_query_failed','admin_faq.do_new.transltexts1');
+         db_query( 'admin_faq.do_new.transltexts1',
+            "INSERT INTO TranslationTexts SET Text='$Qsql'" .
+                     ", Ref_ID=$faq_id, Translatable = 'N' " );
 
          $q_id = mysql_insert_id();
-         mysql_query("INSERT INTO TranslationFoundInGroup " .
-                     "SET Text_ID=$q_id, Group_ID=$FAQ_group" )
-            or error('mysql_query_failed','admin_faq.do_new.translfoundingrp1');
+         db_query( 'admin_faq.do_new.translfoundingrp1',
+            "INSERT INTO TranslationFoundInGroup " .
+                     "SET Text_ID=$q_id, Group_ID=$FAQ_group" );
 
          $a_id = 0;
          if( $row['Level'] > 1 )
@@ -618,24 +609,24 @@ $info_box = '<ul>
             $Asql = $answer;
             $Asql = latin1_safe($Asql);
             $Asql = mysql_addslashes($Asql);
-            mysql_query("INSERT INTO TranslationTexts SET Text='$Asql'" .
-                        ", Ref_ID=$faq_id, Translatable = 'N' " )
-               or error('mysql_query_failed','admin_faq.do_new.transltexts2');
+            db_query( 'admin_faq.do_new.transltexts2',
+               "INSERT INTO TranslationTexts SET Text='$Asql'" .
+                        ", Ref_ID=$faq_id, Translatable = 'N' " );
 
             $a_id = mysql_insert_id();
-            mysql_query("INSERT INTO TranslationFoundInGroup " .
-                        "SET Text_ID=$a_id, Group_ID=$FAQ_group" )
-               or error('mysql_query_failed','admin_faq.do_new.translfoundingrp2)');
+            db_query( 'admin_faq.do_new.translfoundingrp2)',
+               "INSERT INTO TranslationFoundInGroup " .
+                        "SET Text_ID=$a_id, Group_ID=$FAQ_group" );
          }
          else
             $Asql = '';
 
-         mysql_query("UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" )
-            or error('mysql_query_failed','admin_faq.do_new.update');
+         db_query( 'admin_faq.do_new.update',
+            "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" );
 
-         mysql_query("INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
-                  . ", Question='$Qsql', Answer='$Asql'") //+ Date= timestamp
-            or error('mysql_query_failed','admin_faq.do_new.faqlog');
+         db_query( 'admin_faq.do_new.faqlog',
+            "INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
+                  . ", Question='$Qsql', Answer='$Asql'" ); //+ Date= timestamp
       }
 
       jump_to( "$page?id=$ref_id#e$ref_id" ); //clean URL (focus on new entry)
@@ -707,8 +698,7 @@ $info_box = '<ul>
          . " ORDER BY CatOrder,entry.Level,entry.SortOrder";
 
       #echo "<br>QUERY: $query<br>\n"; // debug
-      $result = mysql_query($query)
-         or error('mysql_query_failed','admin_faq.list');
+      $result = db_query( 'admin_faq.list', $query );
 
 
       echo "<h3 class=Header>$title</h3>\n";

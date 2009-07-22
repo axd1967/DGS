@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -43,10 +43,10 @@ else
    // logged in?
 
    $uhandle= safe_getcookie('handle');
-   $result = @mysql_query( 'SELECT ID, Timezone, AdminOptions, ' .
+   $result = @db_query( 'quick_play.find_player',
+      'SELECT ID, Timezone, AdminOptions, ' .
                            'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
-                           "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" )
-      or error('mysql_query_failed', 'quick_play.find_player');
+                           "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) != 1 )
    {
@@ -284,15 +284,11 @@ This is why:
 
 
    //See *** HOT_SECTION *** above
-   $result = mysql_query( $game_query . $game_clause )
-      or error('mysql_query_failed', 'quick_play.update_game');
-
+   $result = db_query( 'quick_play.update_game', $game_query . $game_clause );
    if( mysql_affected_rows() != 1 )
       error('mysql_update_game',"qp20($gid)");
 
-   $result = mysql_query( $move_query )
-      or error('mysql_query_failed', 'quick_play.update_moves');
-
+   $result = db_query( 'quick_play.update_moves', $move_query );
    if( mysql_affected_rows() < 1 && $action != 'delete' )
       error('mysql_insert_move',"qp21($gid)");
 

@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2008  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -151,8 +151,7 @@ else
                  "AND me.Sender IN('N','S') " . //exclude message to myself
          "ORDER BY date DESC";
 
-      $result = mysql_query( $query )
-         or error('mysql_query_failed','quick_status.find_messages');
+      $result = db_query( 'quick_status.find_messages', $query );
 
       while( $row = mysql_fetch_assoc($result) )
       {
@@ -187,8 +186,7 @@ else
        "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME . " " .
        "ORDER BY Games.LastChanged DESC, Games.ID";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','quick_status.find_games');
+   $result = db_query( 'quick_status.find_games', $query );
 
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )

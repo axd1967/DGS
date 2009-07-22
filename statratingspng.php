@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -223,7 +223,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    $Xmax = 0;
    $Ymin = 0;
    $Ymax = 0;
-   
+
    $Ymaxmin = 1;
    for( $g=0; $g<3 ;$g++ )
    {
@@ -267,8 +267,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
       }
       if( $query )
       {
-         $result = mysql_query( $query)
-            or error('mysql_query_failed', 'statratingspng.query'.$g);
+         $result = db_query( 'statratingspng.query'.$g, $query );
 
          $i = count($graphs); //new graph index
          $graphs[$i] = array();

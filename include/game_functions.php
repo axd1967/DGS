@@ -173,13 +173,11 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
       . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
 
    //see also confirm.php
-   mysql_query( $game_query )
-         or error('mysql_query_failed',"add_time_opponent.update($gid)");
+   db_query( "add_time_opponent.update($gid)", $game_query );
    if( mysql_affected_rows() != 1 ) //0 if it had done nothing
       error('mysql_update_game',"add_time_opponent.update($gid)");
 
-   mysql_query( $move_query )
-      or error('mysql_query_failed',"add_time_opponent.insert_move($gid)");
+   db_query( "add_time_opponent.insert_move($gid)", $move_query );
    if( mysql_affected_rows() != 1 )
       error('mysql_insert_move',"add_time_opponent.insert_move($gid)");
 

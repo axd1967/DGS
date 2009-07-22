@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -337,8 +337,7 @@ function get_rating_data($uid)
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
       "UNIX_TIMESTAMP(Registerdate) AS seconds " .
       "FROM Players WHERE ID=$uid" ;
-   $result = mysql_query( $query)
-      or error('mysql_query_failed', 'ratingpng.initial');
+   $result = db_query( 'ratingpng.initial', $query );
 
    if( @mysql_num_rows($result) != 1 )
       exit;
@@ -354,9 +353,8 @@ function get_rating_data($uid)
       $owner_row = $min_row;
    }
 
-   $result = mysql_query("SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds " .
-                         "FROM Ratinglog WHERE uid=$uid")
-      or error('mysql_query_failed', 'ratingpng.max_time');
+   $result = db_query( 'ratingpng.max_time',
+      "SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds FROM Ratinglog WHERE uid=$uid" );
 
    $max_row = mysql_fetch_assoc($result);
    if( $starttime > $max_row['seconds'] - $bound_interval )
@@ -372,10 +370,10 @@ function get_rating_data($uid)
    }
 
 
-   $result = mysql_query("SELECT Rating, RatingMax, RatingMin, " .
+   $result = db_query( 'ratingpng.ratingdata',
+      "SELECT Rating, RatingMax, RatingMin, " .
                          "UNIX_TIMESTAMP(Time) AS seconds " .
-                         "FROM Ratinglog WHERE uid=$uid ORDER BY Time")
-      or error('mysql_query_failed', 'ratingpng.ratingdata');
+                         "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
 
    if( @mysql_num_rows( $result ) < 1 )
       exit;
