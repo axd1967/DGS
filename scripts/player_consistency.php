@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -29,9 +29,6 @@ define('DEBUG',0);
 require_once( "include/table_columns.php" );
 function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
 {
-   //kill sensible fields from a query like "SELECT Password as pwd FROM Players"
-   $query= preg_replace( "%(Password|Sessioncode|Email)%is", "***", $query);
-
    $result = mysql_query( $query );
 
    $mysqlerror = @mysql_error();
@@ -105,10 +102,9 @@ function explain_query($s) {
    {
      echo "<BR>EXPLAIN $s;<BR>";
      echo_query( "EXPLAIN ".$s);
-
-     echo_query( $s);
+     echo_query( $s); // show contents
    }
-   return mysql_query( $s);
+   return mysql_query( $s); // return query-results
 }
 //---------------
 
