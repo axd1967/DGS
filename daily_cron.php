@@ -74,20 +74,19 @@ if( !$is_down )
          "AND Messages.Type='INVITATION' AND $NOW-UNIX_TIMESTAMP(Time) > $timelimit " .
          "AND $NOW-UNIX_TIMESTAMP(Lastchanged) > $timelimit";
 
-      $result = mysql_query( $query )
-               or error('mysql_query_failed','daily_cron?');
+      $result = dbquery( 'daily_cron?', $query );
 
       if( @mysql_num_rows($result) > 0 )
       {
          while( $row = mysql_fetch_assoc( $result ) )
          {
-            mysql_query( "DELETE FROM Games WHERE ID=" . $row["Game_ID"] .
-                         " AND Status='INVITED' LIMIT 1" )
-               or error('mysql_query_failed','daily_cron?');
+            db_query( 'daily_cron?',
+               "DELETE FROM Games WHERE ID=" . $row["Game_ID"]
+                  . " AND Status='INVITED' LIMIT 1" );
 
-            mysql_query( "UPDATE Messages SET Type='DELETED' " .
-                         "WHERE ID=" . $row['mid'] . " LIMIT 1")
-               or error('mysql_query_failed','daily_cron?');
+            db_query( 'daily_cron?',
+               "UPDATE Messages SET Type='DELETED' " .
+                         "WHERE ID=" . $row['mid'] . " LIMIT 1" );
          }
       }
       mysql_free_result($result);
@@ -106,33 +105,6 @@ if( !$is_down )
       db_query( 'daily_cron.waitingroom_joined',
          "DELETE FROM WaitingroomJoined WHERE wroom_id NOT IN (SELECT ID FROM Waitingroom)" );
    }
-
-
-
-
-// Update rating
-
-/* to be reviewed: the field *enum* 'READY' does not exist. */
-//    $query = "SELECT Games.ID as gid ".
-//        "FROM (Games, Players as white, Players as black) " .
-//        "WHERE Status='FINISHED' AND Rated='Y' " .
-//        "AND white.ID=White_ID AND black.ID=Black_ID ".
-//        "AND ( white.RatingStatus='READY' OR white.RatingStatus='RATED' ) " .
-//        "AND ( black.RatingStatus='READY' OR black.RatingStatus='RATED' ) " .
-//        "ORDER BY Lastchanged, gid";
-
-
-//    $result = mysql_query( $query );
-
-//    while( $row = mysql_fetch_assoc( $result ) )
-//    {
-//       update_rating($row["gid"]);
-//       $rated_status = update_rating2($row["gid"]); //0=rated game
-//    }
-//    mysql_free_result($result);
-
-//    $result = mysql_query( "UPDATE Players SET RatingStatus='READY' " .
-//                           "WHERE RatingStatus='INIT' " );
 
 
 
@@ -195,27 +167,25 @@ if num_rows==2 {compute differences and checks}
        "WHERE Status" . IS_RUNNING_GAME;
    $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity)/$ActivityForHit as Activity FROM Players";
 
-   $result = mysql_query( $q_finished )
-      or error('mysql_query_failed','daily_cron.statistics_moves_finished');
+   $result = db_query( 'daily_cron.statistics_moves_finished', $q_finished );
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
-   $result = mysql_query( $q_running )
-      or error('mysql_query_failed','daily_cron.statistics_moves_running');
-
-   if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_assoc($result));
-   mysql_free_result($result);
-
-   $result = mysql_query( $q_users )
-      or error('mysql_query_failed','daily_cron.statistics_users');
+   $result = db_query( 'daily_cron.statistics_moves_running', $q_running );
 
    if( @mysql_num_rows($result) > 0 )
       extract( mysql_fetch_assoc($result));
    mysql_free_result($result);
 
-   mysql_query( "INSERT INTO Statistics SET"
+   $result = db_query( 'daily_cron.statistics_users', $q_users );
+
+   if( @mysql_num_rows($result) > 0 )
+      extract( mysql_fetch_assoc($result));
+   mysql_free_result($result);
+
+   db_query( 'daily_cron.statistics_insert',
+      "INSERT INTO Statistics SET"
                ." Time=FROM_UNIXTIME($NOW)" //could become a Date= timestamp field
                .",Hits=" . (int)$Hits
                .",Users=" . (int)$Users
@@ -225,8 +195,7 @@ if num_rows==2 {compute differences and checks}
                .",Games=" . (int)($GamesRunning+$GamesFinished)
                .",GamesFinished=" . (int)$GamesFinished
                .",GamesRunning=" . (int)$GamesRunning
-               .",Activity=" . (int)$Activity )
-      or error('mysql_query_failed','daily_cron.statistics_insert');
+               .",Activity=" . (int)$Activity );
 
 }//new/old
 
@@ -248,9 +217,9 @@ if num_rows==2 {compute differences and checks}
 // Apply recently changed night hours
 
 if(1){//new
-   $result = mysql_query("SELECT ID, Timezone, Nightstart, ClockUsed"
-                     . " FROM Players WHERE ClockChanged='Y'")
-               or error('mysql_query_failed','daily_cron.night_hours');
+   $result = db_query( 'daily_cron.night_hours',
+      "SELECT ID, Timezone, Nightstart, ClockUsed"
+         . " FROM Players WHERE ClockChanged='Y'" );
    //adjustments from/to summertime are checked in status.php
 
    if( @mysql_num_rows( $result) > 0 )
@@ -262,16 +231,16 @@ if(1){//new
          $newclock= get_clock_used( $row['Nightstart']);
          db_query( 'daily_cron.night_hours.update',
                "UPDATE Players SET ClockChanged='N',ClockUsed=$newclock"
-               . " WHERE ID=" . $row['ID'] . " LIMIT 1")
+               . " WHERE ID=" . $row['ID'] . " LIMIT 1" )
             or error('mysql_query_failed','daily_cron.night_hours.update');
       }
       setTZ($otz); //reset to previous
    }
    mysql_free_result($result);
 }else{//older and bugged
-   $result = mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone " .
-                         "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID")
-               or error('mysql_query_failed','daily_cron.night_hours');
+   $result = db_query( 'daily_cron.night_hours',
+      "SELECT ID, Nightstart, ClockUsed, Timezone " .
+      "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID" );
    //$result always contains guest(first!) and the other ClockChanged='Y'
 
    if( @mysql_num_rows( $result) > 0 )
@@ -281,18 +250,20 @@ if(1){//new
 
       // Changed to/from summertime?
       if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
+      {
          //adjust the whole community (ClockChanged='Y' or not)
-         $result =  mysql_query("SELECT ID, Nightstart, ClockUsed, Timezone FROM Players")
-                  or error('mysql_query_failed','daily_cron.summertime_check');
+         $result = db_query( 'daily_cron.summertime_check',
+            "SELECT ID, Nightstart, ClockUsed, Timezone FROM Players" );
+      }
 
       while( $row = mysql_fetch_assoc($result) )
       {
          setTZ( $row['Timezone']);
-         mysql_query("UPDATE Players " .
+         db_query( 'daily_cron.summertime_update',
+            "UPDATE Players " .
                      "SET ClockChanged='N', " .
                      "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
-                     "WHERE ID='" . $row['ID'] . "' LIMIT 1")
-            or error('mysql_query_failed','daily_cron.summertime_update');
+                     "WHERE ID='" . $row['ID'] . "' LIMIT 1" );
       }
    }
    mysql_free_result($result);
