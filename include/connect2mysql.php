@@ -114,9 +114,7 @@ function admin_log( $uid, $handle, $err)
                   .", Handle='".mysql_addslashes($handle)."'"
                   .", Message='".mysql_addslashes($err)."'"
                   .", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
-   $result = mysql_query($query)
-      or error('mysql_query_failed','connect2mysql.admin_log');
-
+   $result = db_query( 'connect2mysql.admin_log', $query );
    return $result;
 }
 
@@ -174,15 +172,15 @@ function connect2mysql($no_errors=false)
    return false;
 }
 
-function db_query( $debugmsg, $query)
+function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 {
    //echo $debugmsg.'.db_query='.$query.'<br>';
-   //error_log($debugmsg.'.db_query='.$query);
+   //error_log($debugmsg.'.db_query=['.$query.']');
    $result = mysql_query($query);
    if( $result )
       return $result;
    if( is_string($debugmsg) )
-      error('mysql_query_failed', $debugmsg.'='.$query);
+      error( $errorcode, $debugmsg.'='.$query);
    return false;
 }
 
@@ -280,9 +278,9 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       default: $method= (version_compare(MYSQL_VERSION, '4.1', '<') ? 'PASSWORD' : 'OLD_PASSWORD'); break;
    }
    $given_passwd_encrypted =
-      mysql_single_fetch( 'check_password',
+      mysql_single_fetch( 'check_password.get_password',
                "SELECT $method('".mysql_addslashes($given_passwd)."')"
-               ,FETCHTYPE_ROW)
+               ,FETCHTYPE_ROW )
          or error('mysql_query_failed','check_password.get_password');
 
    return ($passwd_encrypted == $given_passwd_encrypted[0]);
