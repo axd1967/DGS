@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -66,7 +66,7 @@ echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    $old_order_str = "*+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
 
    $query = "SELECT ID, PosIndex " .
-      "FROM Posts WHERE PosIndex IS NOT NULL AND LENGTH(PosIndex) > 0 ";
+      "FROM Posts WHERE PosIndex IS NOT NULL AND PosIndex>'' ";
 
    $result = mysql_query($query) or die(mysql_error());
 
