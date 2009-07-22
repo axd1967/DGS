@@ -2215,29 +2215,6 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    return 0; //not found
 } //get_request_user
 
-//caution: some IP addresses have more that 50 accounts in DGS
-/* NOTE on db-query: the select "WHERE IP='$ip' AND Handle!='guest'"
- * is fine, when $field == 'Handle', then still the
- * index is used on Handle. But if $player_field is some other
- * column from the Players-table, it's doing a table-scan.
- * This is not a good idea. Be careful, when you use the function.
- * In that case, it would be good to add an index on Players.IP.
- */
-/*
-function get_players_field( $where, $field='Handle')
-{
-   $ret= array();
-   $query= 'SELECT '.$field
-          ." FROM Players WHERE ID>".GUESTS_ID_MAX." AND ($where)"; //exclude guest
-   $result = mysql_query( $query )
-      or error('get_players_field',$where);
-   while( ($row=mysql_fetch_row($result)) )
-      $ret[]= $row[0];
-   mysql_free_result($result);
-   return $ret;
-}
-*/
-
 function who_is_logged( &$player_row)
 {
    $handle = safe_getcookie('handle');
@@ -2300,8 +2277,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
           .',UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess'
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
-   $result = mysql_query( $query )
-      or error('mysql_query_failed','is_logged_in.find_player');
+   $result = db_query( 'is_logged_in.find_player', $query );
 
    if( $result && @mysql_num_rows($result) == 1 )
    {
@@ -2389,12 +2365,10 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
          err_log( $handle, 'fever_vault');
 
          //send notifications to owner
-         $subject= 'Temporary access restriction';
+         $subject= T_('Temporary access restriction');
          $text= 'On '.date(DATE_FMT, $NOW).":\n"
                .sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
 
-         //caution: some IP addresses have more that 50 accounts in DGS
-         //$handles= get_players_field("IP='$ip'"); //exclude guest
          if( $uid > GUESTS_ID_MAX )
             $handles[]= $handle;
          if( count($handles) > 0 )
@@ -2420,8 +2394,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    $query.= " WHERE ID=$uid LIMIT 1";
    //$updok will be false if an error occurs and error() is set to 'no exit'
-   $updok = mysql_query( $query )
-      or error('mysql_query_failed','is_logged_in.update_player');
+   $updok = db_query( 'is_logged_in.update_player', $query );
 
    if( !$vaultcnt ) //vault entered
    {
@@ -2902,11 +2875,10 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
    if( $notify )
    {
-      $result = mysql_query("SELECT Observers.uid AS pid " .
-                            "FROM Observers " .
-                            "WHERE gid=$gid AND Observers.uid>".GUESTS_ID_MAX //exclude guest
-                           )
-         or error('mysql_query_failed','delete_all_observers.find');
+      $result = db_query( 'delete_all_observers.find',
+         "SELECT Observers.uid AS pid " .
+         "FROM Observers " .
+         "WHERE gid=$gid AND Observers.uid>".GUESTS_ID_MAX ); //exclude guest
 
       if( @mysql_num_rows($result) > 0 )
       {
@@ -2924,8 +2896,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
       mysql_free_result($result);
    }
 
-   mysql_query("DELETE FROM Observers WHERE gid=$gid")
-      or error('mysql_query_failed','delete_all_observers.delete');
+   db_query( 'delete_all_observers.delete',
+      "DELETE FROM Observers WHERE gid=$gid" );
 } //delete_all_observers
 
 
