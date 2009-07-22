@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -93,7 +93,7 @@ function echo_browsers(&$Browsers)
 
    echo '<pre>';
 
-   $result = mysql_query("SELECT count(*) AS Count, Browser FROM Players " .
+   $result = mysql_query("SELECT COUNT(*) AS Count, Browser FROM Players " .
                          "WHERE Browser IS NOT NULL AND Browser!='' AND Activity>$ActivityForHit/10 " .
                          "GROUP BY Browser")
       or die(mysql_error());
