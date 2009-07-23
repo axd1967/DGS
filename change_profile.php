@@ -171,9 +171,8 @@ require_once( "include/rating.php" );
    $language = trim(get_request_arg('language'));
 
    if( $language === 'C'
-      || ( $language === 'N' && @$player_row['Translator'] )
-      || ( $language !== $player_row['Lang'] && language_exists( $language ) )
-     )
+         || ( $language === 'N' && @$player_row['Translator'] )
+         || ( $language !== $player_row['Lang'] && language_exists($language) ) )
    {
        $query .= "Lang='" . $language . "', ";
    }
@@ -184,10 +183,10 @@ require_once( "include/rating.php" );
    $oldrating = $player_row["Rating2"];
 
    if( $player_row["RatingStatus"] != 'RATED'
-      && (is_numeric($newrating) && $newrating >= MIN_RATING)
-      && ( $ratingtype != 'dragonrank'
-         || !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
-         || abs($newrating - $oldrating) > 0.005 ) )
+         && (is_numeric($newrating) && $newrating >= MIN_RATING)
+         && ( $ratingtype != 'dragonrank'
+            || !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
+            || abs($newrating - $oldrating) > 0.005 ) )
    {
       $query .= "Rating=$newrating, " .
          "InitialRating=$newrating, " .
@@ -199,8 +198,7 @@ require_once( "include/rating.php" );
 
    $timezone = get_request_arg('timezone') ;
    $nightstart = mod( (int)@$_REQUEST['nightstart'], 24) ;
-   if( $nightstart != $player_row["Nightstart"] ||
-       $timezone != $player_row["Timezone"] )
+   if( $nightstart != $player_row["Nightstart"] || $timezone != $player_row["Timezone"] )
    {
       $query .= "ClockChanged='Y', ";
       // ClockUsed is updated only once a day to prevent eternal night...

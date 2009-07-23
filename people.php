@@ -134,11 +134,10 @@ function get_executives( $level )
    $FAQmainID = 0;
 
    $result = db_query( 'people.faq_admins',
-      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
-            ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-            " FROM Players" .
-            " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FAQ . ") > 0" .
-            " ORDER BY ID" );
+      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+      " FROM Players" .
+      " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FAQ . ") > 0" .
+      " ORDER BY ID" );
 
    $FAQ_list = array();
    while( $row = mysql_fetch_array( $result ) )
@@ -190,11 +189,10 @@ function get_executives( $level )
    $MODexclude = array( 'ejlo', 'rodival' );
 
    $result = db_query( 'people.forum_moderators',
-      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level".
-            ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-            " FROM Players" .
-            " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
-            " ORDER BY ID" );
+      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+      " FROM Players" .
+      " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
+      " ORDER BY ID" );
 
    $first = T_('Forum moderator');
    while( $row = mysql_fetch_array( $result ) )
@@ -218,11 +216,11 @@ function get_executives( $level )
    $lastAccess = $NOW - 6*7 * SECS_PER_DAY; // 6 weeks
    $result = db_query( 'people.executives',
       "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,".
-               " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
-               " UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess" .
-            " FROM Players" .
-            " WHERE Adminlevel>0 AND Lastaccess > FROM_UNIXTIME($lastAccess)" .
-            " ORDER BY X_AdmLevBitCount DESC, ID ASC" );
+            " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
+            " UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess" .
+      " FROM Players" .
+      " WHERE Adminlevel>0 AND Lastaccess > FROM_UNIXTIME($lastAccess)" .
+      " ORDER BY X_AdmLevBitCount DESC, ID ASC" );
 
    $people = array(); // sort-id => row, ...
    while( $row = mysql_fetch_array( $result ) )
@@ -255,11 +253,10 @@ function get_executives( $level )
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
    $result = db_query( 'people.translators',
-      "SELECT ID,Handle,Name,Translator" .
-            ",UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
-            " FROM Players" .
-            " WHERE Translator>''" .
-            " ORDER BY ID" );
+      "SELECT ID,Handle,Name,Translator,UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+      " FROM Players" .
+      " WHERE Translator>''" .
+      " ORDER BY ID" );
 
    $translator_list = array();
    while( $row = mysql_fetch_array( $result ) )
@@ -283,8 +280,7 @@ function get_executives( $level )
          {
             $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date'
                . ' FROM (Translationlog AS T,TranslationLanguages AS L)'
-               . ' WHERE T.Language_ID=L.ID'
-                  . " AND T.Player_ID=$uid AND L.Language='$language'"
+               . " WHERE T.Language_ID=L.ID AND T.Player_ID=$uid AND L.Language='$language'"
                . ' ORDER BY T.Date DESC LIMIT 1';
             $tmp = mysql_single_fetch( 'people.translators.lastupdate', $query);
             $row['LastUpdate'] = $tmp ? $tmp['Date'] : 0;

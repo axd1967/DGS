@@ -78,7 +78,8 @@ require_once( "include/make_translationfiles.php" );
       /* see the translations_query() function for the constraints
        * on the "ORDER BY" clause associated with this "$oid" filter:
        */
-      if( $oid == $row['Original_ID'] ) continue;
+      if( $oid == $row['Original_ID'] )
+         continue;
       $oid = $row['Original_ID'];
       $tlangID = (int)@$row['Language_ID'];
 
@@ -93,23 +94,27 @@ require_once( "include/make_translationfiles.php" );
          if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
             $done_set .= ",$oid";
 
-         if( $same ) $translation = '';
-         else $translation = mysql_addslashes($translation);
+         if( $same )
+            $translation = '';
+         else
+            $translation = mysql_addslashes($translation);
 
          //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated)
          $replace_set .= ",($oid,$tlangID,'$translation','Y')";
 
          //no $log_set
       }
-      else if( ( $same && $row['Text'] !== '' )
+      elseif( ( $same && $row['Text'] !== '' )
             || ( !empty($translation) && $row['Text'] !== $translation ) )
       { //same or modified item
          //UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN
          if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
             $done_set .= ",$oid";
 
-         if( $same ) $translation = '';
-         else $translation = mysql_addslashes($translation);
+         if( $same )
+            $translation = '';
+         else
+            $translation = mysql_addslashes($translation);
 
          //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated)
          $replace_set .= ",($oid,$tlangID,'$translation','Y')";

@@ -61,8 +61,8 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
    }
    else
    {
-   //reject the O0, l1I and S5 confusing matchings (used by account usurpers)
-   //for instance, with the Arial font, a I and a l can't be distinguished
+      //reject the O0, l1I and S5 confusing matchings (used by account usurpers)
+      //for instance, with the Arial font, a I and a l can't be distinguished
       $regx = preg_quote($uhandle); //quotemeta()
       $regx = eregi_replace( '[0o]', '[0o]', $regx);
       $regx = eregi_replace( '[1li]', '[1li]', $regx);
@@ -79,18 +79,18 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
 
 
 
-// Userid and password are fine, now do the registration to the database
+   // Userid and password are fine, now do the registration to the database
 
    $code = make_session_code();
 
    $result = db_query( 'do_registration.insert_player',
       "INSERT INTO Players SET " .
-                          "Handle='".mysql_addslashes($uhandle)."', " .
-                          "Name='".mysql_addslashes($name)."', " .
-                          "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."'), " .
-                          "Registerdate=FROM_UNIXTIME($NOW), " .
-                          "Sessioncode='$code', " .
-                          "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );
+         "Handle='".mysql_addslashes($uhandle)."', " .
+         "Name='".mysql_addslashes($name)."', " .
+         "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."'), " .
+         "Registerdate=FROM_UNIXTIME($NOW), " .
+         "Sessioncode='$code', " .
+         "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );
 
    $new_id = mysql_insert_id();
 

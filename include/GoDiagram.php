@@ -215,9 +215,8 @@ function callback_echo_board($matches)
    global $callback_diagrams, $callback_diag_nr;
 
    if( isset($callback_diagrams[$matches[1]])
-     && is_object($callback_diagrams[$matches[1]])
-     && method_exists($callback_diagrams[$matches[1]], 'echo_board')
-     )
+         && is_object($callback_diagrams[$matches[1]])
+         && method_exists($callback_diagrams[$matches[1]], 'echo_board') )
       return $callback_diagrams[$matches[1]]->echo_board();
    else
       return "[goban #".$matches[1]."]";
@@ -362,7 +361,9 @@ function save_diagrams($GoDiagrams)
 {
    $IDs = array();
    foreach( $GoDiagrams as $ID => $diagram )
+   {
       if( $ID > 0 ) $IDs[]= $ID;
+   }
 
    if( count($IDs) > 0 )
       db_query( 'godiagram.save_diagrams',

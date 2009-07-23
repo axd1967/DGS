@@ -63,25 +63,25 @@ require_once( "include/form_functions.php" );
       'TEXT', textarea_safe(
             'user@example.com, anotheruser@example.com'
             ),
-      ) );
+      ));
    $dform->add_row( array(
       'DESCRIPTION', 'From',
       'TEXTINPUT', 'from', 80, 100, $From,
-      ) );
+      ));
    $dform->add_row( array(
       'DESCRIPTION', 'Subject',
       'TEXTINPUT', 'subject', 80, 100, $Subject,
-      ) );
+      ));
    $dform->add_row( array(
       'DESCRIPTION', 'Text',
       'CELL', 1, '',
       'OWNHTML', "<pre>$Text</pre>",
-      ) );
+      ));
    $dform->add_row( array(
       'CELL', 9, 'align="center"',
       'HIDDEN', 'charset', $encoding_used,
       'OWNHTML', '<INPUT type="submit" name="sendit" accesskey="x" value="Send it [&x]">', // keep static acckey
-      ) );
+      ));
 
    $dform->echo_string(1);
 

@@ -202,14 +202,13 @@ class Table
       // prepare for appending URL-parts (ends with either '?' or URI_AMP)
       if( !is_numeric( strpos( $_page, '?')) )
          $this->Page = $_page . '?'; //end_sep
-      elseif( substr( $_page, -1 ) == '?'
-            || substr( $_page, -strlen(URI_AMP) ) == URI_AMP )
+      elseif( substr( $_page, -1 ) == '?' || substr( $_page, -strlen(URI_AMP) ) == URI_AMP )
          $this->Page = $_page; //end_sep
       else
          $this->Page = $_page . URI_AMP; //end_sep
 
       if( !is_null($cfg_tblcols) && is_a($cfg_tblcols,'ConfigTableColumns')
-         && !($this->Mode & TABLE_NO_HIDE) )
+            && !($this->Mode & TABLE_NO_HIDE) )
       {
          $this->CfgTableCols = $cfg_tblcols;
       }
@@ -570,12 +569,13 @@ class Table
             $tr_attbs = " id=\"{$this->Prefix}TableFilter\""; // only for 1st entry
             foreach( $row_cells as $class => $cells )
             {
-               if( !$cells )
-                  continue;
-               $filter_rows .= "\n <tr$tr_attbs class=\"$class\">";
-               $filter_rows .= $cells;
-               $filter_rows .= "\n </tr>";
-               $tr_attbs = '';
+               if( $cells )
+               {
+                  $filter_rows .= "\n <tr$tr_attbs class=\"$class\">";
+                  $filter_rows .= $cells;
+                  $filter_rows .= "\n </tr>";
+                  $tr_attbs = '';
+               }
             }
          }
       }
@@ -623,6 +623,7 @@ class Table
          $adds = array();
       elseif( !is_array($adds) )
          $adds = array($adds);
+
       $dels = $this->get_arg('del');
       if( empty($dels) )
          $dels = array();
@@ -683,8 +684,7 @@ class Table
 
       $rows = (int)$this->get_saved_arg(TFORM_VAL_SHOWROWS); // nr of rows
       if( $rows > 0 )
-         $this->Rows_Per_Page =
-            get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
+         $this->Rows_Per_Page = get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
    }
 
    /*! \brief Compute the number of rows from mySQL result. */

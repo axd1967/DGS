@@ -98,17 +98,21 @@ require_once( "include/table_columns.php" );
    $aform->set_area(2);
    $aform->set_layout( FLAYOUT_AREACONF, 2, array( 'title' => T_('Legend for admin levels') ));
    foreach( $ARR_ADMLEVELS as $maskval => $arr )
+   {
       $aform->add_row( array(
          'TEXT', sprintf( '<span class="LegendItem">%s</span>', $arr[0]), 'TAB',
          'TEXT', sprintf( '<span class="LegendDescr">%s</span>', $arr[1]) ));
+   }
    $aform->add_row( array( 'SPACE' ));
 
    $aform->set_area(3);
    $aform->set_layout( FLAYOUT_AREACONF, 3, array( 'title' => T_('Legend for admin options') ));
    foreach( $ARR_ADMOPTS as $maskval => $arr )
+   {
       $aform->add_row( array(
          'TEXT', sprintf( '<span class="LegendItem">%s</span>', $arr[0]), 'TAB',
          'TEXT', sprintf( '<span class="LegendDescr">%s</span>', $arr[1]) ));
+   }
 
    $aform->echo_string();
 
@@ -142,9 +146,11 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
       if( $atable->Is_Column_Displayed[1] )
       {
          if( $show_edit_user )
+         {
             $edit_link = anchor( 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode(@$row['Handle']),
                image( 'images/edit.gif', 'E'),
                T_('Edit user attributes'), 'class=ButIcon') . '&nbsp;';
+         }
          $arow_str[1] = $edit_link . user_reference( REF_LINK, 1, '', $row );
       }
       if( $atable->Is_Column_Displayed[2] )

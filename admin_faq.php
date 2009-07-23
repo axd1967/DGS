@@ -160,7 +160,7 @@ $info_box = '<ul>
    // ***********        Move entry to new category      ****************
 
    // args: id, move=uu|dd
-   else if( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
+   elseif( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
    {
       $query = "SELECT Entry.SortOrder,Entry.Parent,Parent.SortOrder AS ParentOrder"
             . " FROM FAQ AS Entry,FAQ AS Parent"
@@ -207,7 +207,7 @@ $info_box = '<ul>
    // ***********       Toggle hidden       ****************
 
    // args: id, toggleH=Y|N
-   else if( ($action=@$_REQUEST['toggleH']) )
+   elseif( ($action=@$_REQUEST['toggleH']) )
    {
       $row = get_entry_row( $fid );
       $faqhide = ( @$row['Hidden'] == 'Y' );
@@ -240,7 +240,7 @@ $info_box = '<ul>
    // ***********       Toggle translatable       ****************
 
    // args: id, toggleT=Y|N
-   else if( ($action=@$_REQUEST['toggleT']) )
+   elseif( ($action=@$_REQUEST['toggleT']) )
    {
       $row = get_entry_row( $fid );
       $transl = transl_toggle_state( $row);
@@ -270,8 +270,8 @@ $info_box = '<ul>
 
    // args: id, edit=t type=c|e [ do_edit=?, preview=t, qterm=sql_term ]
    // keep it tested before 'do_edit' for the preview feature
-   else if( @$_REQUEST['edit'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['edit']
+         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       if( $action == 'c' )
          $title = 'FAQ Admin - Edit category';
@@ -356,8 +356,8 @@ $info_box = '<ul>
 
    // args: id, do_edit=t type=c|e, question, answer [ preview='', qterm=sql_term ]
    // keep it tested after 'edit' for the preview feature
-   else if( @$_REQUEST['do_edit'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['do_edit']
+         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $row = get_entry_row( $fid );
       $QID = $row['Question'];
@@ -468,9 +468,13 @@ $info_box = '<ul>
       }
 
       if( $log ) //i.e. modified except deleted
+      {
          if( $row['QTranslatable'] !== 'N'
-            || ( $AID>0 && $row['ATranslatable'] !== 'N' ) )
+               || ( $AID>0 && $row['ATranslatable'] !== 'N' ) )
+         {
             make_include_files(null, 'FAQ'); //must be called from main dir
+         }
+      }
 
       //clean URL (focus on edited entry or parent category if entry deleted)
       jump_to( "$page?id=$ref_id"."$url_term#e$ref_id" );
@@ -481,8 +485,8 @@ $info_box = '<ul>
 
    // args: id, new=t type=c|e [ do_new=?, preview=t ]
    // keep it tested before 'do_new' for the preview feature
-   else if( @$_REQUEST['new'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['new']
+         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       if( $action == 'c' )
          $title = 'FAQ Admin - New category';
@@ -542,8 +546,8 @@ $info_box = '<ul>
 
    // args: id, do_new=t type=c|e, question, answer, [ preview='' ]
    // keep it tested after 'new' for the preview feature
-   else if( @$_REQUEST['do_new'] &&
-      ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['do_new']
+         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
@@ -569,7 +573,7 @@ $info_box = '<ul>
 
       if( $row['Level'] == 0 ) // First category
          $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 1);
-      else if( $row['Level'] == 1 && $action == 'e' ) // First entry
+      elseif( $row['Level'] == 1 && $action == 'e' ) // First entry
          $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 2);
 
       $FAQ_group = get_faq_group_id();

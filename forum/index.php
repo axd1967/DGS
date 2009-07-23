@@ -105,18 +105,18 @@ $ThePage = new Page('ForumsList');
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
       echo '<tr class=Row1><td class=Name>'
-         . '<a href="list.php?forum=' . $forum->id . '">' . make_html_safe( $forum->name, 'cell') . '</a>'
-         . ( $fopts_str ? '<span class=Moderated>' . $fopts_str . '</span>' : '')
-         . $new_str
-         . '</td>'
-         . '<td class=ThreadCnt>' . $forum->count_threads . '</td>'
-         . '<td class=PostCnt>' . $forum->count_posts . '</td>'
-         . "<td class=LastPost><span class=PostDate>$lpost_date</span>$lpost_author</td>"
-         . "</tr>\n";
+         , '<a href="list.php?forum=', $forum->id, '">', make_html_safe( $forum->name, 'cell'), '</a>'
+         , ( $fopts_str ? "<span class=Moderated>$fopts_str</span>" : '')
+         , $new_str
+         , '</td>'
+         , '<td class=ThreadCnt>', $forum->count_threads, '</td>'
+         , '<td class=PostCnt>', $forum->count_posts, '</td>'
+         , "<td class=LastPost><span class=PostDate>$lpost_date</span>$lpost_author</td>"
+         , "</tr>\n";
 
       echo '<tr class=Row2>'
-         . '<td colspan=4><dl><dd>' . make_html_safe( $forum->description, 'faq') . '</dd></dl></td>'
-         . "</tr>\n";
+         , '<td colspan=4><dl><dd>', make_html_safe( $forum->description, 'faq'), '</dd></dl></td>'
+         , "</tr>\n";
    }
 
    $disp_forum->forum_end_table();

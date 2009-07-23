@@ -82,10 +82,10 @@ function slashed($string)
 {
    //all that can disturb a PHP string quoted with ''
    return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
-/*
+   /*
    //all that can disturb a PHP string quoted with ""
    return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $string );
-*/
+   */
 }
 
 function make_include_files($language=null, $group=null) //must be called from main dir
@@ -163,17 +163,17 @@ function make_include_files($language=null, $group=null) //must be called from m
 function translations_query( $translate_lang, $untranslated, $group
                , $from_row=-1, $alpha_order=false, $filter_en='')
 {
-/* Note: Some items appear two or more times within the untranslated set
-    when from different groups. But we can't use:
-       ( $untranslated ? "DISTINCT " : "")
-    because the Group_ID column makes the rows distinct.
-   Workaround: using "ORDER BY Original_ID LIMIT 50";
-    and filter the rows on Original_ID while computing.
-   The previous sort was:
-       "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
-   As the Original are identical when the Original_ID are identical,
-    an other possible sort is "ORDER BY Original,Original_ID";
-*/
+   /* Note: Some items appear two or more times within the untranslated set
+      when from different groups. But we can't use:
+          ( $untranslated ? "DISTINCT " : "")
+      because the Group_ID column makes the rows distinct.
+      Workaround: using "ORDER BY Original_ID LIMIT 50";
+       and filter the rows on Original_ID while computing.
+      The previous sort was:
+          "ORDER BY TranslationFoundInGroup.Group_ID LIMIT 50";
+      As the Original are identical when the Original_ID are identical,
+      an other possible sort is "ORDER BY Original,Original_ID";
+   */
    if( $alpha_order )
       $order = ' ORDER BY Original,Original_ID';
    else
@@ -204,23 +204,17 @@ function translations_query( $translate_lang, $untranslated, $group
       . " AND TranslationTexts.Translatable!='N'" ;
 
    if( $filter_en )
-      $query .=
-         " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'";
+      $query .= " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'";
 
    if( $untranslated )
-      $query .=
-         " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
+   {
+      $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
       // TODO: enhance the query around this 'OR' clause
-
-   switch( (string)$group )
-   {
-   default:
-      $query .=
-         " AND TranslationGroups.Groupname='".mysql_addslashes($group)."'";
-   case 'allgroups':
-      break;
    }
+
+   if( $group != 'allgroups' )
+      $query .= " AND TranslationGroups.Groupname='".mysql_addslashes($group)."'";
    $query .= $order.$limit;
 
    $result = db_query( 'translations_query', $query );
@@ -236,12 +230,10 @@ function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
       return false;
 
    // see the explanations for the latin1_safe() function in admin_faq.php
-   {
-      $string= preg_replace(
+   $string= preg_replace(
          "%([\\x80-\\xff])%ise",
          "'&#'.ord('\\1').';'",
          $string);
-   }
 
    $string= mysql_addslashes($string);
 

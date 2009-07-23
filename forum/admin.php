@@ -94,7 +94,7 @@ $ThePage = new Page('ForumAdmin');
 
    // args: id, edit=t [ do_edit=? ]
    // keep it tested before 'do_edit'
-   else if( @$_REQUEST['edit'] )
+   elseif( @$_REQUEST['edit'] )
    {
       $title = /*T_*/('Forum Admin').' - './*T_*/('Edit forum');
       start_page($title, true, $logged_in, $player_row );
@@ -127,7 +127,7 @@ $ThePage = new Page('ForumAdmin');
 
    // args: id, do_edit=t
    // keep it tested after 'edit'
-   else if( @$_REQUEST['do_edit'] )
+   elseif( @$_REQUEST['do_edit'] )
    {
       $row = mysql_single_fetch( 'forum_admin.do_edit.find',
                 "SELECT * FROM Forums WHERE ID=$fid")
@@ -175,7 +175,7 @@ $ThePage = new Page('ForumAdmin');
 
    // args: id, new=t
    // keep it tested before 'do_new'
-   else if( @$_REQUEST['new'] )
+   elseif( @$_REQUEST['new'] )
    {
       $title = /*T_*/('Forum Admin').' - './*T_*/('New forum');
       start_page($title, true, $logged_in, $player_row );
@@ -204,7 +204,7 @@ $ThePage = new Page('ForumAdmin');
 
    // args: id, do_new=t (insert after entry #id, 0=first)
    // keep it tested after 'new'
-   else if( @$_REQUEST['do_new'] )
+   elseif( @$_REQUEST['do_new'] )
    {
       $name = trim( get_request_arg('name') );
       $description = trim( get_request_arg('description') );

@@ -85,8 +85,8 @@ function getellipticpoint($x, $y, $w, $h, $radian)
 {
    //the Y axis is inversed, the rotation too! (clockwise)
    return array(
-      $x + round( cos($radian) * $w),
-      $y + round( sin($radian) * $h),
+         $x + round( cos($radian) * $w),
+         $y + round( sin($radian) * $h),
       );
 /* Must follow this charter:
    while( $radian >= M_2PI ) $radian-= M_2PI;
@@ -139,8 +139,7 @@ function points_join($pointX, $pointY)
 {
    $points = array();
    while( (list($dummy, $x)=each( $pointX))
-       && (list($dummy, $y)=each( $pointY))
-      )
+       && (list($dummy, $y)=each( $pointY)) )
    {
       $points[]= $x;
       $points[]= $y;
@@ -154,8 +153,7 @@ function points_split(&$points, &$pointX, &$pointY)
    $pointX = array();
    $pointY = array();
    while( (list($dummy, $x)=each( $points))
-       && (list($dummy, $y)=each( $points))
-      )
+       && (list($dummy, $y)=each( $points)) )
    {
       $pointX[]= $x;
       $pointY[]= $y;
@@ -175,8 +173,7 @@ function points_mapXY($callback, &$points)
    reset( $points);
    $p = array();
    while( (list($dummy, $x)=each( $points))
-       && (list($dummy, $y)=each( $points))
-      )
+       && (list($dummy, $y)=each( $points)) )
    {
       //call_user_func($callback, &$x, &$y); //does not pass references
       call_user_func_array($callback, array(&$x, &$y));
@@ -249,10 +246,10 @@ function get_image_type( $filename)
    $type=(int)$type[2];
    switch( $type )
    {
-      case IMAGETYPE_GIF: $mime= 'image/gif'; break;
+      case IMAGETYPE_GIF:  $mime= 'image/gif'; break;
       case IMAGETYPE_JPEG: $mime= 'image/jpeg'; break;
-      case IMAGETYPE_PNG: $mime= 'image/png'; break;
-      case IMAGETYPE_BMP: $mime= 'image/bmp'; break;
+      case IMAGETYPE_PNG:  $mime= 'image/png'; break;
+      case IMAGETYPE_BMP:  $mime= 'image/bmp'; break;
       case IMAGETYPE_WBMP: $mime= 'image/vnd.wap.wbmp'; break;
       default: return false;
    }
@@ -362,14 +359,12 @@ class Graph
     */
    function setfont( $font='')
    {
-      if( $font > '' && $font != '*'
-        && function_exists('imagettftext') //TTF need GD and Freetype.
-        )
+      //TTF need GD and Freetype.
+      if( $font > '' && $font != '*' && function_exists('imagettftext') )
       {
          $file = sprintf(TTF_PATH, $font);
          if( is_file($file) //file_exists() may return false because of safe_mode
-           && is_readable($file) //...and access rights check if needed
-           )
+               && is_readable($file) ) //...and access rights check if needed
          {
             $this->TTFfile = $file;
             TTFdefaultlabelMetrics($this);
@@ -406,7 +401,8 @@ class Graph
       return imagecolorallocate($this->im, $r, $g, $b);
    } //colorallocate
 
-   /*! \brief A way to get each time a colorid.
+   /*!
+    * \brief A way to get each time a colorid.
     * If the *exact* color is found in the image, it will be returned.
     * If we don't have the exact color, we try to allocate it.
     * If we can't allocate it, we return the closest color in the image.
@@ -448,8 +444,10 @@ class Graph
    function polyline(&$points, $nr_points, $colorid)
    {
       for( $i=0; $i<$nr_points-1; $i++)
+      {
          imageline($this->im, $points[2*$i], $points[2*$i+1],
                             $points[2*$i+2], $points[2*$i+3], $colorid);
+      }
    } //polyline
 
    function filledpolygon(&$points, $nr_points, $colorid)
@@ -486,22 +484,23 @@ class Graph
          header("Content-type: image/png");
          //header('Content-Length: ' . strlen($img));
          imagepng($this->im);
-      } else
-      if( function_exists("imagegif") )
+      }
+      elseif( function_exists("imagegif") )
       {
          header("Content-type: image/gif");
          imagegif($this->im);
-      } else
-      if( function_exists("imagejpeg") )
+      }
+      elseif( function_exists("imagejpeg") )
       {
          header("Content-type: image/jpeg");
          imagejpeg($this->im, '', 0.5);
-      } else
-      if( function_exists("imagewbmp") )
+      }
+      elseif( function_exists("imagewbmp") )
       { //for wap devices
          header("Content-type: image/vnd.wap.wbmp");
          imagewbmp($this->im);
-      } else
+      }
+      else
       {
          //imagedestroy($this->im);
          die("No PHP graphic support on this server");
@@ -535,7 +534,8 @@ class Graph
       //return array_map(array(&$this, 'scaleY'), $pointY);
    } //mapscaleY
 
-   /*! \brief Set the graph box.
+   /*!
+    * \brief Set the graph box.
     * values of two opposite corners of the rectangle
     */
    function setgraphbox($x1, $y1, $x2, $y2)
@@ -566,7 +566,8 @@ class Graph
       $this->boxbottom = $this->offsetY+$this->sizeY;
    } //setgraphbox
 
-   /*! \brief Set the graph mapping (oriented).
+   /*!
+    * \brief Set the graph mapping (oriented).
     * values of (left,top,right,bottom) bounds
     */
    function setgraphview($xleft, $ytop, $xright, $ybottom)
@@ -575,7 +576,8 @@ class Graph
       $this->setgraphviewY($ytop, $ybottom);
    } //setgraphview
 
-   /*! \brief Set the X mapping (oriented).
+   /*!
+    * \brief Set the X mapping (oriented).
     * values of (left,right) bounds
     */
    function setgraphviewX($xleft, $xright)
@@ -584,7 +586,8 @@ class Graph
       $this->maxX = $xright;
    } //setgraphviewX
 
-   /*! \brief Set the Y mapping (oriented).
+   /*!
+    * \brief Set the Y mapping (oriented).
     * values of (top,bottom) bounds
     */
    function setgraphviewY($ytop, $ybottom)
@@ -594,7 +597,8 @@ class Graph
    } //setgraphviewY
 
 
-   /*! \brief Draw the X axis grid.
+   /*!
+    * \brief Draw the X axis grid.
     * $linefct is a function($s) that return the value of the $s step.
     *   $s is one of the successive $start + N*$step
     * $textfct is a function($v) that return the label text for the $v value.
@@ -637,10 +641,8 @@ class Graph
          $step = -$step;
       if( gscale($linefct($start+$step)) <= $grid )
          return;
-      do { $start -= $step; }
-      while( gscale($linefct($start)) >= $lbound );
-      do { $start += $step; }
-      while( gscale($linefct($start)) < $lbound );
+      do { $start -= $step; } while( gscale($linefct($start)) >= $lbound );
+      do { $start += $step; } while( gscale($linefct($start)) < $lbound );
 
       //grid line bounds
       $slin = max( $this->border, $this->boxtop -6);
@@ -677,7 +679,8 @@ class Graph
       }
    } //gridX
 
-   /*! \brief Draw the Y axis grid.
+   /*!
+    * \brief Draw the Y axis grid.
     * $linefct is a function($s) that return the value of the $s step.
     *   $s is one of the successive $start + N*$step
     * $textfct is a function($v) that return the label text for the $v value.
@@ -720,10 +723,8 @@ class Graph
          $step = -$step;
       if( gscale($linefct($start+$step)) <= $grid )
          return;
-      do { $start -= $step; }
-      while( gscale($linefct($start)) >= $lbound );
-      do { $start += $step; }
-      while( gscale($linefct($start)) < $lbound );
+      do { $start -= $step; } while( gscale($linefct($start)) >= $lbound );
+      do { $start += $step; } while( gscale($linefct($start)) < $lbound );
 
       //grid line bounds
       $slin = max( $this->border, $this->boxleft -4);
@@ -758,7 +759,8 @@ class Graph
    } //gridY
 
 
-   /*! \brief draw a filled pie portion.
+   /*!
+    * \brief draw a filled pie portion.
     * supplied because imagefilledarc() need GD2. See GD2_ARC constant
     */
    function filledarc($cx, $cy, $w, $h, $s, $e, $colorid)
@@ -779,7 +781,8 @@ class Graph
       $this->filledpolygon($p, $n+1, $colorid);
    } //filledarc
 
-   /*! \brief draw an ellipse arc.
+   /*!
+    * \brief draw an ellipse arc.
     * to keep a stroke similarity with our filledarc().
     */
    function arc($cx, $cy, $w, $h, $s, $e, $colorid)
@@ -789,7 +792,8 @@ class Graph
       $this->polyline($p, $n, $colorid);
    } //arc
 
-   /*! \brief draw a pie.
+   /*!
+    * \brief draw a pie.
     * $datas[-1] is the empty portion.
     * $colors: an array of r,g,b colors to be used (allocated if needed)
     */
@@ -847,9 +851,7 @@ class Graph
       {
          //draw edge of incomplete pie
          $ang = $angles[$nbval-1];
-         if( ($ang > 270 && $ang < 360)
-             || ($ang < 90  && $ang >= 0 )
-           )
+         if( ($ang > 270 && $ang < 360) || ($ang < 90  && $ang >= 0 ) )
          {
             $p = array();
             $p[] = $cx;
@@ -937,20 +939,18 @@ class Graph
       } // draw portions
    } //pie
 
-
-   /*! \privatesection */
-
 } //class Graph
 
 
 
-   /*! \privatesection */
+/*! \privatesection */
 
 if( function_exists('imagettftext') ) //TTF need GD and Freetype.
 {
    if( function_exists('imagettfbbox') ) //TTF need GD and Freetype.
    {
-      /*! \brief return the metrics of the True Type font
+      /*!
+       * \brief return the metrics of the True Type font
        * to keep a compatibility with the embedded font.
        */
       function TTFdefaultlabelMetrics(&$gr)
@@ -959,15 +959,16 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
          $s = 3;
          $b= imagettfbbox($h, 0, $gr->TTFfile, 'MIXmix');
          $gr->labelMetrics = array(
-          'HEIGHT' => $h,
-          'WIDTH' => ($b[2]-$b[6])/6 +1,
-          'ALIGN' => $b[3]-$b[7] +1,
-          'VSPACE' => $s,
-          'LINEH' => $h+$s,
-         );
+               'HEIGHT' => $h,
+               'WIDTH' => ($b[2]-$b[6])/6 +1,
+               'ALIGN' => $b[3]-$b[7] +1,
+               'VSPACE' => $s,
+               'LINEH' => $h+$s,
+            );
       } //TTFdefaultlabelMetrics
 
-      /*! \brief return the height and width of the label
+      /*!
+       * \brief return the height and width of the label
        * as if drawn with the True Type font.
        */
       function TTFlabelbox(&$gr, $str)
@@ -977,11 +978,11 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
          foreach( $txt as $str )
          {
             /* imagettfbbox return:
-            0=>X, 1=>Y ;bottom left
-            2=>X, 3=>Y ;bottom right
-            4=>X, 5=>Y ;top right
-            6=>X, 7=>Y ;top left
-            (i.e. the polygon of the bounding rectangle)
+                  0=>X, 1=>Y ;bottom left
+                  2=>X, 3=>Y ;bottom right
+                  4=>X, 5=>Y ;top right
+                  6=>X, 7=>Y ;top left
+               (i.e. the polygon of the bounding rectangle)
             */
             $b= imagettfbbox( $gr->labelMetrics['HEIGHT'], 0, $gr->TTFfile, $str);
             $x = max($x, $b[2]-$b[6]);
@@ -993,7 +994,8 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
    }
    else
    {
-      /*! \brief return the metrics of the True Type font
+      /*!
+       * \brief return the metrics of the True Type font
        * to keep a compatibility with the embedded font.
        */
       function TTFdefaultlabelMetrics(&$gr)
@@ -1001,15 +1003,16 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
          $h = TTF_HEIGHT; //too match the embedded font
          $s = 3;
          $gr->labelMetrics = array(
-          'HEIGHT' => $h,
-          'WIDTH' => $h*4/5,
-          'ALIGN' => $h +1,
-          'VSPACE' => $s,
-          'LINEH' => $h+$s,
-         );
+               'HEIGHT' => $h,
+               'WIDTH' => $h*4/5,
+               'ALIGN' => $h +1,
+               'VSPACE' => $s,
+               'LINEH' => $h+$s,
+            );
       } //TTFdefaultlabelMetrics
 
-      /*! \brief return the height and width of the label
+      /*!
+       * \brief return the height and width of the label
        * as if drawn with the True Type font.
        */
       function TTFlabelbox(&$gr, $str)
@@ -1029,7 +1032,8 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
       } //TTFlabelbox
    }
 
-   /*! \brief draw a label with the True Type font.
+   /*!
+    * \brief draw a label with the True Type font.
     * $x,$y is the upper left corner.
     * return the lower right corner.
     */
@@ -1062,17 +1066,24 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
 }
 else //True type font problem, so use embedded fonts:
 {
-   function TTFdefaultlabelMetrics(&$gr) {
-      return EMBdefaultlabelMetrics($gr);}
-   function TTFlabelbox(&$gr, $str) {
-      return EMBlabelbox($gr, $str);}
-   function TTFlabel(&$gr, $x, $y, $str, $colorid) {
-      return EMBlabel($gr, $x, $y, $str, $colorid);}
+   function TTFdefaultlabelMetrics(&$gr)
+   {
+      return EMBdefaultlabelMetrics($gr);
+   }
+   function TTFlabelbox(&$gr, $str)
+   {
+      return EMBlabelbox($gr, $str);
+   }
+   function TTFlabel(&$gr, $x, $y, $str, $colorid)
+   {
+      return EMBlabel($gr, $x, $y, $str, $colorid);
+   }
 }
 
 
 define('LABEL_FONT', 2);
-/*! \brief return the metrics of the embedded font
+/*!
+ * \brief return the metrics of the embedded font
  * to keep a compatibility with the True Type fonts.
  */
 function EMBdefaultlabelMetrics(&$gr)
@@ -1080,15 +1091,16 @@ function EMBdefaultlabelMetrics(&$gr)
    $h = ImageFontHeight(LABEL_FONT)-1;
    $s = 2;
    $gr->labelMetrics = array(
-    'HEIGHT' => $h,
-    'WIDTH' => ImageFontWidth(LABEL_FONT),
-    'ALIGN' => $h*4/5,
-    'VSPACE' => $s,
-    'LINEH' => $h+$s,
-   );
+         'HEIGHT' => $h,
+         'WIDTH' => ImageFontWidth(LABEL_FONT),
+         'ALIGN' => $h*4/5,
+         'VSPACE' => $s,
+         'LINEH' => $h+$s,
+      );
 } //EMBdefaultlabelMetrics
 
-/*! \brief return the height and width of the label
+/*!
+ * \brief return the height and width of the label
  * as if drawn with the embedded font.
  */
 function EMBlabelbox(&$gr, $str)
@@ -1103,7 +1115,8 @@ function EMBlabelbox(&$gr, $str)
    return array('x' => $x, 'y' => $y - $gr->labelMetrics['VSPACE']);
 } //EMBlabelbox
 
-/*! \brief draw a label with the embedded font.
+/*!
+ * \brief draw a label with the embedded font.
  * $x,$y is the upper left corner.
  * return the lower right corner.
  */
@@ -1140,43 +1153,43 @@ function arcpoints(&$p, $cx, $cy, $w, $h, $s, $e)
    $s *= M_PI/180.;
    $e *= M_PI/180.; //no deg2rad($e) because $e could be >360
 
-      // steps walk.
-      // heuristic, to have smooth edges.
-      $a = $e-$s;
-      $n = ceil( $a*($w+$h) * 0.5 ) +1;
+   // steps walk.
+   // heuristic, to have smooth edges.
+   $a = $e-$s;
+   $n = ceil( $a*($w+$h) * 0.5 ) +1;
 
-      $a /= $n;
+   $a /= $n;
 
-         list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $s);
-            $ox = $px;
-            $oy = $py;
-            $p[] = $px;
-            $p[] = $py;
-            $nb = 1;
+   list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $s);
+   $ox = $px;
+   $oy = $py;
+   $p[] = $px;
+   $p[] = $py;
+   $nb = 1;
 
-      for( $i=1; $i<$n; $i++ )
+   for( $i=1; $i<$n; $i++ )
+   {
+      $s += $a;
+      list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $s);
+      if( $px != $ox || $py != $oy )
       {
-         $s += $a;
-         list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $s);
-         if( $px != $ox || $py != $oy )
-         {
-            $ox = $px;
-            $oy = $py;
-            $p[] = $px;
-            $p[] = $py;
-            $nb++;
-         }
+         $ox = $px;
+         $oy = $py;
+         $p[] = $px;
+         $p[] = $py;
+         $nb++;
       }
+   }
 
-         list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $e);
-         if( $px != $ox || $py != $oy )
-         {
-            $ox = $px;
-            $oy = $py;
-            $p[] = $px;
-            $p[] = $py;
-            $nb++;
-         }
+   list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $e);
+   if( $px != $ox || $py != $oy )
+   {
+      $ox = $px;
+      $oy = $py;
+      $p[] = $px;
+      $p[] = $py;
+      $nb++;
+   }
 
    return $nb;
 } //arcpoints

@@ -27,16 +27,8 @@ $ThePage = new Page('Links');
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page(T_('Links'), true, $logged_in, $player_row
-      , "a.blue:visited{color:purple;}" );
-
-/* see also:
-http://www.usgo.org
-http://linkexplorer.net/go/go.html
-http://news.world-go.org/
-Go News, Go Scene (2000-2003): http://www.kyoto.zaq.ne.jp/momoyama/index.html
-*/
-
+   start_page(T_('Links'), true, $logged_in, $player_row,
+      "a.blue:visited{color:purple;}" );
 
    section( 'General', T_('General Info'));
 

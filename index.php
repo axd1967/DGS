@@ -56,40 +56,45 @@ require_once( "include/form_functions.php" );
    echo "\n<BR>&nbsp;";
 
 
-if( HOSTNAME == "dragongoserver.sourceforge.net" ) { //for devel server
-  echo "<p></p><font color=green>\n" .
-     T_("Welcome to the development version of the Dragon Go Server!") .
-     '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") .
-     '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
-     '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
-     "</font><HR>\n";
-}
-else
-{ //for live server
-  echo "<p></p><font color=green>\n" .
-     sprintf( T_('Welcome to the %s!'), FRIENDLY_LONG_NAME) .
-     '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
-     "</font><HR>\n";
-}
+   if( HOSTNAME == "dragongoserver.sourceforge.net" )
+   {
+      // for devel server
+      echo "<p></p><font color=green>\n" .
+         T_("Welcome to the development version of the Dragon Go Server!") .
+         '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") .
+         '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
+         '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
+         "</font><HR>\n";
+   }
+   else
+   {
+      // for live server
+      echo "<p></p><font color=green>\n" .
+         sprintf( T_('Welcome to the %s!'), FRIENDLY_LONG_NAME) .
+         '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
+         "</font><HR>\n";
+   }
 
    sysmsg($sysmsg);
 
 
-  echo '<p></p>' . T_('Please login.') . '<font color="red"> ' .
-    sprintf( T_("To look around, use %s."), "'guest' / '$GUESTPASS'" ) . " </font>\n";
+   echo '<p></p>' . T_('Please login.') . '<font color="red"> ' .
+      sprintf( T_("To look around, use %s."), "'guest' / '$GUESTPASS'" ) . " </font>\n";
 
-  $login_form = new Form( 'loginform', 'login.php', FORM_POST );
+   $login_form = new Form( 'loginform', 'login.php', FORM_POST );
 
-  $login_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                               'TEXTINPUT', 'userid',16,16,'',
-                               ) );
-  $login_form->add_row( array( 'DESCRIPTION', T_('Password'),
-                               'PASSWORD', 'passwd',16,16,
-                               //'TD',
-                               'CELL', 99, 'align="left"', //TODO: change the 99
-                               'SUBMITBUTTON', 'login', T_('Log in'),
-                               //'HIDDEN', 'url', 'status.php',
-                               ) );
+   $login_form->add_row( array(
+         'DESCRIPTION', T_('Userid'),
+         'TEXTINPUT', 'userid',16,16,'',
+      ));
+   $login_form->add_row( array(
+         'DESCRIPTION', T_('Password'),
+         'PASSWORD', 'passwd',16,16,
+         //'TD',
+         'CELL', 99, 'align="left"', //TODO: change the 99
+         'SUBMITBUTTON', 'login', T_('Log in'),
+         //'HIDDEN', 'url', 'status.php',
+      ));
 
   $login_form->echo_string(1);
 

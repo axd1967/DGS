@@ -86,7 +86,6 @@ function table_interpolate($value, $table, $extrapolate=false)
 
    return $prev['VAL'] + ($value-$prev['KEY'])/($x['KEY']-$prev['KEY']) *
       ($x['VAL']-$prev['VAL']);
-
 }
 
 
@@ -118,7 +117,6 @@ function handicapfactor( $size)
 // $result: 0 = black win, 1 = white win, 0.5 = jigo
 function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap, $factor=1)
 {
-
    $e = 0.014;
 
    $D = $rating_W - $rating_B;
@@ -155,7 +153,6 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    $rating_W += $conW * ($result - $SEW);
    $rating_B += $conB * (1-$result - $SEB);
-
 }
 
 // (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating, size)
@@ -270,6 +267,7 @@ function update_rating($gid)
    return 0; //rated game
 } //update_rating
 obsolete */
+
 
 //
 // EGF rating, see above URIs for documentation
@@ -615,20 +613,15 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
       return '';
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
-
    $spc = ( $show_percent === true ? '&nbsp;' : ' ' );
 
    $rank_val = round($rating/100.0);
 
    $string = '';
    if( $rank_val > 20.5 )
-   {
       $string .= ( $rank_val - 20 ) . ($short ? $T_('dan#short') : $spc . $T_('dan'));
-   }
    else
-   {
       $string .= ( 21 - $rank_val ) . ($short ? $T_('kyu#short') : $spc . $T_('kyu'));
-   }
 
    if( $show_percent )
    {
@@ -639,8 +632,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    if( $graph_uid > 0 )
    {
       global $base_path;
-      $string = "<a class=Rating href=\"{$base_path}ratinggraph.php?uid=$graph_uid\">"
-               . $string . '</a>';
+      $string = "<a class=Rating href=\"{$base_path}ratinggraph.php?uid=$graph_uid\">$string</a>";
    }
    return $string;
 }
@@ -742,24 +734,24 @@ function convert_to_rating($string, $type, $no_error=false)
       case 'dragonrank':
          if( $kyu > 0 )
             $rating = read_rating($string);
-      break;
+         break;
 
       case 'dragonrating':
          $needrank = false;
          if( $kyu <= 0 )
             $rating = $val;
-      break;
+         break;
 
       case 'eurorating':
          $needrank = false;
          if( $kyu <= 0 )
             $rating = $val;
-      break;
+         break;
 
       case 'eurorank':
          if( $kyu > 0 )
             $rating = rank_to_rating($val, $kyu);
-      break;
+         break;
 
       case 'aga':
          if( $kyu > 0 )
@@ -768,7 +760,7 @@ function convert_to_rating($string, $type, $no_error=false)
             if( $rating != -OUT_OF_RATING )
                $rating -= 200.0;  // aga two stones weaker ?
          }
-      break;
+         break;
 
       case 'agarating':
          $needrank = false;
@@ -777,7 +769,7 @@ function convert_to_rating($string, $type, $no_error=false)
             $rating = $val*100 + ( $val > 0 ? 1950 : 2150 );
             $rating -= 200.0;  // aga two stones weaker ?
          }
-      break;
+         break;
 
       case 'igs':
          if( $kyu > 0 )
@@ -789,7 +781,7 @@ function convert_to_rating($string, $type, $no_error=false)
                $rating = table_interpolate($rating, $IGS_TABLE, true);
             }
          }
-      break;
+         break;
 
       /*
       case 'igsrating':
@@ -800,7 +792,7 @@ function convert_to_rating($string, $type, $no_error=false)
              $rating = $val*100 - 1130 ;
              $rating = table_interpolate($rating, $IGS_TABLE, true);
          }
-      break;
+         break;
       */
 
       case 'iytgg':
@@ -810,7 +802,7 @@ function convert_to_rating($string, $type, $no_error=false)
             if( $rating != -OUT_OF_RATING )
                $rating += 100;  // one stone stronger
          }
-      break;
+         break;
 
       case 'kgs': // rank
          if( $kyu > 0 )
@@ -822,7 +814,7 @@ function convert_to_rating($string, $type, $no_error=false)
                $rating = table_interpolate($rating, $KGS_TABLE, true);
             }
          }
-      break;
+         break;
 
       case 'japan':
          if( $kyu > 0 )
@@ -831,7 +823,7 @@ function convert_to_rating($string, $type, $no_error=false)
             if( $rating != -OUT_OF_RATING )
                $rating -= 300;  // three stones weaker
          }
-      break;
+         break;
 
       case 'china':
          if( $kyu > 0 )
@@ -840,7 +832,7 @@ function convert_to_rating($string, $type, $no_error=false)
             if( $rating != -OUT_OF_RATING )
                $rating += 100;  // one stone stronger
          }
-      break;
+         break;
 
       case 'korea':
          if( $kyu > 0 )
@@ -849,11 +841,11 @@ function convert_to_rating($string, $type, $no_error=false)
             if( $rating != -OUT_OF_RATING )
                $rating += 400;  // four stones stronger
          }
-      break;
+         break;
 
       default:
          error('wrong_rank_type');
-      break;
+         break;
    }
 
    if( $rating == -OUT_OF_RATING )

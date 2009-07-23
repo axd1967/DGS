@@ -38,30 +38,28 @@ require_once( "include/std_functions.php" );
 
    $result = db_query( 'statistics.games.moves', $q1 );
 
-   echo '<table border=1>
-<tr><th>Status</th><th>Moves</th><th>Games</th></tr>
-';
+   echo "<table border=1>\n"
+      , "<tr><th>Status</th><th>Moves</th><th>Games</th></tr>\n";
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo '<tr><td>' . $row["Status"] . '</td><td align="right">' . $row["moves"] . '</td><td align="right">' . $row["count"] . '</td></tr>
-';
+      echo '<tr><td>', $row["Status"], '</td><td align="right">', $row["moves"], '</td><td align="right">', $row["count"], "</td></tr>\n";
    }
    mysql_free_result($result);
 
    $row = mysql_single_fetch( 'statistics.q2', $q2 );
    if( $row )
    {
-      echo '<tr><td>Total</td><td align="right">' . $row["moves"] 
-         . '</td><td align="right">' . $row["count"] . "</td></tr>\n";
+      echo '<tr><td>Total</td><td align="right">', $row["moves"]
+         , '</td><td align="right">', $row["count"], "</td></tr>\n";
    }
    echo "</table>\n";
 
    $row = mysql_single_fetch( 'statistics.q3', $q3 );
    if( $row )
    {
-      echo '<p>' . $row["hits"] . ' hits by ' . $row["count"] . ' players</p>';
-      echo '<p>Activity: ' . round($row['activity']) . "</p>\n";
+      echo '<p>', $row["hits"], ' hits by ', $row["count"], ' players</p>';
+      echo '<p>Activity: ', round($row['activity']), "</p>\n";
    }
 
    //echo '<p></p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
@@ -71,7 +69,7 @@ require_once( "include/std_functions.php" );
       $tmp = '/proc/loadavg';
       if( ($tmp=trim(@read_from_file($tmp))) )
       {
-         echo '<p><span class=DebugInfo>Loadavg: ' . $tmp . '</span></p>';
+         echo '<p><span class=DebugInfo>Loadavg: ', $tmp, '</span></p>';
       }
    }
 

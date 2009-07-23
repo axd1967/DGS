@@ -23,39 +23,41 @@ require_once( 'include/quick_common.php' );
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
-connect2mysql();
+{
+   connect2mysql();
 
-error_on_blocked_ip( 'ip_blocked_register' );
+   error_on_blocked_ip( 'ip_blocked_register' );
 
-$logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-start_page(T_("Register"), true, $logged_in, $player_row );
+   start_page(T_("Register"), true, $logged_in, $player_row );
 
-echo "<center>\n";
+   echo "<center>\n";
 
-$reg_form = new Form( 'loginform', 'do_registration.php', FORM_POST );
-$reg_form->add_row( array( 'HEADER', T_('Please enter data') ) );
-$reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                           'TEXTINPUT', 'userid', 16, 16, '' ) );
-$reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                           'TEXTINPUT', 'name', 16,80, '' ) );
-$reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
-                           'PASSWORD', 'passwd', 16, 16, '' ) );
-$reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
-                           'PASSWORD', 'passwd2', 16, 16, '' ) );
+   $reg_form = new Form( 'loginform', 'do_registration.php', FORM_POST );
+   $reg_form->add_row( array( 'HEADER', T_('Please enter data') ) );
+   $reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
+                              'TEXTINPUT', 'userid', 16, 16, '' ) );
+   $reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
+                              'TEXTINPUT', 'name', 16,80, '' ) );
+   $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
+                              'PASSWORD', 'passwd', 16, 16, '' ) );
+   $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
+                              'PASSWORD', 'passwd2', 16, 16, '' ) );
 
-$reg_form->add_row( array( 'TAB',
-                           'CHECKBOX', 'policy', '1', '', false,
-                           'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
-                                            "{$HOSTBASE}policy.php" ) ) );
+   $reg_form->add_row( array( 'TAB',
+                              'CHECKBOX', 'policy', '1', '', false,
+                              'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
+                                               "{$HOSTBASE}policy.php" ) ) );
 
-$reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
-$reg_form->echo_string(1);
+   $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
+   $reg_form->echo_string(1);
 
-echo "<br>\n",
-   T_("Note for beginners: read the FAQ especially for your initial rank setting in your profile page.");
+   echo "<br>\n",
+      T_("Note for beginners: read the FAQ especially for your initial rank setting in your profile page.");
 
-echo "</center>\n";
+   echo "</center>\n";
 
-end_page();
+   end_page();
+}
 ?>

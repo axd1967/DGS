@@ -41,12 +41,12 @@ SGF EBNF Definition
   PropValue  = "[" CValueType "]"
   CValueType = (ValueType | Compose)
   ValueType  = (None | Number | Real | Double | Color | SimpleText |
-		Text | Point  | Move | Stone)
- 
+      Text | Point  | Move | Stone)
+
 
 White space (space, tab, carriage return, line feed, vertical tab and so on)
- may appear anywhere between PropValues, Properties, Nodes, Sequences and GameTrees. 
-There are two types of property lists: 'list of' and 'elist of'. 
+ may appear anywhere between PropValues, Properties, Nodes, Sequences and GameTrees.
+There are two types of property lists: 'list of' and 'elist of'.
 'list of':    PropValue { PropValue }
 'elist of':   ((PropValue { PropValue }) | None)
               In other words elist is list or "[]".
@@ -73,7 +73,7 @@ Property Value Types
 
   Compose    = ValueType ":" ValueType
 
- 
+
 */
 
 define('SGF_VAR_BEG', '(');
@@ -111,13 +111,13 @@ function sgf_parser( $sgf, &$games)
       }
 
       $i++;
-      $err= sgf_parse_node( $sgf, $i, $sgf_len, $node);
+      $err = sgf_parse_node( $sgf, $i, $sgf_len, $node);
       if( $err )
          break;
 
       if( !isset($node['GM']) || @$node['GM'][0] != 1 )
       {
-         $err= 'not a Go game (GM[1])';
+         $err = 'not a Go game (GM[1])';
          break;
       }
 
@@ -142,6 +142,7 @@ function sgf_parser( $sgf, &$games)
                $ivar--; $i++;
                $vars[$ivar][SGF_VAR_KEY][]= $vars[$ivar+1];
                break;
+
             case SGF_VAR_BEG:
                $i++;
                if( SGF_NOD_BEG != sgf_skip_space( $sgf, $i, $sgf_len) )
@@ -158,6 +159,7 @@ function sgf_parser( $sgf, &$games)
                $err= sgf_parse_node( $sgf, $i, $sgf_len, $node);
                $vars[$node_ivar=$ivar][]= $node;
                break;
+
             default :
                $err= 'syntax error';
                break;
@@ -185,7 +187,7 @@ function sgf_parser( $sgf, &$games)
          . substr( $sgf, $i, 1)
          . '>'
          . rtrim(substr( $sgf, $i+1, 20))
-         ; 
+         ;
    }
    return $err;
 }
@@ -337,21 +339,18 @@ function handicap_push( &$vars, &$var, $nb)
 // and convert it to a stonestring.
 function get_handicap_pattern( $size, $handicap, &$err)
 {
-   $stonestring='';
-   if( $handicap < 2 ) return $stonestring;
+   $stonestring ='';
+   if( $handicap < 2 )
+      return $stonestring;
 
-   $game= array();
+   $game = array();
 
    $filename = "pattern/standard_handicap_$size.sgf";
    $sgf = @read_from_file( $filename, 0);
    if( is_string($sgf) )
-   {
       $err = sgf_parser( $sgf, $game);
-   }
    else
-   {
       $err = 'File not found';
-   }
    if( $err ) {
       //error('handicap_pattern',"s=$size h=$handicap err=$err");
       //Simply returning the error message will allow
@@ -376,9 +375,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
          {
             //this perticular node is an array of variations
             for( $i=count($node)-1; $i>=0; $i-- )
-            {
                handicap_push( $vars, $node[$i], $nb);
-            }
             continue;
          }
 

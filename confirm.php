@@ -55,12 +55,9 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
-
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
-
    $my_id = $player_row['ID'];
 
    $game_row = mysql_single_fetch( "confirm.find_game($gid)",
@@ -88,12 +85,12 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    if( $Status == 'INVITED' )
       error('game_not_started');
-   else if( $Status == 'FINISHED' )
+   elseif( $Status == 'FINISHED' )
       error('game_finished');
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
-   else if( $White_ID == $ToMove_ID )
+   elseif( $White_ID == $ToMove_ID )
       $to_move = WHITE;
 /*
    else if( !$ToMove_ID ) //=0 if INVITED or FINISHED
@@ -232,9 +229,9 @@ This is why:
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring'];
 
-{//to fix the old way Ko detect. Could be removed when no more old way games.
-  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
-}
+         {//to fix the old way Ko detect. Could be removed when no more old way games.
+            if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
+         }
          check_move( $TheBoard, $coord, $to_move);
 //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
 //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
@@ -250,9 +247,11 @@ This is why:
          }
 
 
-         if( strlen($prisoner_string) != $nr_prisoners*2 ||
-             ( $stonestring && $prisoner_string != $stonestring) )
+         if( strlen($prisoner_string) != $nr_prisoners*2
+               || ( $stonestring && $prisoner_string != $stonestring) )
+         {
             error('move_problem','confirm.domove.prisoner');
+         }
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
@@ -266,10 +265,12 @@ This is why:
              "Status='PLAY', ";
 
          if( $nr_prisoners > 0 )
+         {
             if( $to_move == BLACK )
                $game_query .= "Black_Prisoners=$Black_Prisoners, ";
             else
                $game_query .= "White_Prisoners=$White_Prisoners, ";
+         }
 
          if( $nr_prisoners == 1 )
             $GameFlags |= KO;
@@ -279,14 +280,13 @@ This is why:
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
-      }
-      break;
+         break;
+      }//switch for 'domove'
 
       case 'pass':
       {
          if( $Moves < $Handicap )
             error('early_pass');
-
 
          if( $Status == 'PLAY' )
             $next_status = 'PASS';
@@ -313,8 +313,8 @@ This is why:
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
-      }
-      break;
+         break;
+      }//switch for 'pass'
 
       case 'handicap': //stonestring is the list of handicap stones
       {
@@ -351,8 +351,8 @@ This is why:
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
-      }
-      break;
+         break;
+      }//switch for 'handicap'
 
       case 'resign':
       {
@@ -380,8 +380,8 @@ This is why:
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          $game_finished = true;
-      }
-      break;
+         break;
+      }//switch for 'resign'
 
       case 'delete':
       {
@@ -407,8 +407,8 @@ This is why:
             $doublegame_query = "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1";
 
          $game_finished = true;
-      }
-      break;
+         break;
+      }//switch for 'delete'
 
       case 'done': //stonestring is the list of toggled points
       {
@@ -458,15 +458,13 @@ This is why:
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
-
-      }
-      break;
+         break;
+      }//switch for 'done'
 
       default:
-      {
          error('invalid_action',"confirm.noaction.$Status");
-      }
-   }
+         break;
+   }//switch $action
 
 
    //See *** HOT_SECTION *** above
@@ -651,12 +649,11 @@ function do_add_time( $game_row, $my_id)
    $add_hours = add_time_opponent( $game_row, $my_id,
                   time_convert_to_hours( $add_days, 'days'), $reset_byo );
    if( !is_numeric($add_hours) )
-      error('confirm_add_time',
-         "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
+      error('confirm_add_time', "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
 
-   jump_to("game.php?gid=$gid" . ($add_hours > 0
-                  ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
-         . '#boardInfos');
+   jump_to("game.php?gid=$gid"
+      . ($add_hours > 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
+      . '#boardInfos');
 }
 
 ?>

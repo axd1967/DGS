@@ -154,22 +154,11 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $marge_top   = max(10,DASH_MODULO+2); //better if > DASH_MODULO
    $marge_bottom= $gr->border+ (SHOW_NRGAMES?3:2)*$gr->labelMetrics['LINEH'];
 
-   $gr->setgraphbox(
-      $marge_left,
-      $marge_top,
-      $gr->width-$marge_right,
-      $gr->height-$marge_bottom
-      );
-
+   $gr->setgraphbox( $marge_left, $marge_top, $gr->width-$marge_right, $gr->height-$marge_bottom );
 
    //scale datas
 
-   $gr->setgraphview(
-      $xlims['MIN'],
-      $ymax,
-      $xlims['MAX'],
-      $ymin
-      );
+   $gr->setgraphview( $xlims['MIN'], $ymax, $xlims['MAX'], $ymin );
 
    $ratingmax = $gr->mapscaleY($ratingmax);
    $ratingmin = $gr->mapscaleY($ratingmin);
@@ -181,11 +170,13 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    //draw the blue array
 
    if( $nr_points > 1 )
+   {
       $gr->filledpolygon(
-            array_merge(points_join($xvals, $ratingmax)
-               ,array_reverse(points_join($ratingmin, $xvals))
-               )
-            ,2*$nr_points, $light_blue);
+            array_merge(
+               points_join($xvals, $ratingmax),
+               array_reverse(points_join($ratingmin, $xvals)) ),
+            2*$nr_points, $light_blue);
+   }
 
 
 
@@ -193,9 +184,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $step = 100; //i.e. 1 kyu step
    $start = ceil($ymin/$step)*$step;
-   $gr->gridY( $start, $step, $gr->border
-      , $ratinglabel, $black
-      , '', $black);
+   $gr->gridY( $start, $step, $gr->border, $ratinglabel, $black, '', $black );
 
 
    //horizontal scaling
@@ -211,26 +200,23 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
          function nbr2date($v){
             global $startnumber, $time, $datelabel;
             if( $startnumber >= 0 )
+            {
                if( isset($time[$v-=$startnumber]) )
                   return $datelabel($time[$v]);
+            }
             return '';
          }
          $y = $gr->boxbottom+3 +1*$gr->labelMetrics['LINEH'];
-         $gr->gridX( $startnumber, $step, $y
-            , 'nbr2date', $black
-            , '', $red);
+         $gr->gridX( $startnumber, $step, $y, 'nbr2date', $black, '', $red );
       }
       if( SHOW_NRGAMES )
       {
          $y = $gr->boxbottom+3;
-         $x = $gr->label($gr->border, $y
-                  , $T_('Games').':', $number_color);
+         $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color);
          if( $startnumber >= 0 )
          {
             $x= $x['x'] +$gr->labelMetrics['WIDTH'];
-            $gr->gridX( $startnumber, $step, $y
-               , '', $number_color
-               , '', $red, 0, $x);
+            $gr->gridX( $startnumber, $step, $y, '', $number_color, '', $red, 0, $x );
          }
       }
    }
@@ -245,15 +231,12 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $year = date('Y',$starttime);
       $dategrid = create_function('$x',
          "return mktime(0,0,0,\$x,1,$year,0);" );
-      $gr->gridX( $month, $step, $gr->boxbottom+3
-         , $datelabel, $black
-         , $dategrid, $red);
+      $gr->gridX( $month, $step, $gr->boxbottom+3, $datelabel, $black, $dategrid, $red );
 
       if( SHOW_NRGAMES )
       {
          $y = $gr->boxbottom+3 +2*$gr->labelMetrics['LINEH'];
-         $x = $gr->label($gr->border, $y
-                  , $T_('Games').':', $number_color);
+         $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color );
          if( $startnumber >= 0 )
          {
             function date2nbr($v){
@@ -266,9 +249,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
                return round($number[$n]);
             }
             $x= $x['x'] +$gr->labelMetrics['WIDTH'];
-            $gr->gridX( $month, $step, $y
-               , 'date2nbr', $number_color
-               , $dategrid, $red, 0, $x);
+            $gr->gridX( $month, $step, $y, 'date2nbr', $number_color, $dategrid, $red, 0, $x );
          }
       }
    }
@@ -325,18 +306,16 @@ function get_rating_data($uid)
 
    $bound_interval = GRAPH_RATING_MIN_INTERVAL/4;
 
-   $query =
-      "SELECT InitialRating AS Rating, " ;
+   $query = "SELECT InitialRating AS Rating, ";
    if( ENA_WIN_PIE )
    {
-      $query.=
-         "Running, Finished, RatedGames, Won, Lost," ;
+      $query .= "Running, Finished, RatedGames, Won, Lost,";
    }
-   $query.=
+   $query .=
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
       "UNIX_TIMESTAMP(Registerdate) AS seconds " .
-      "FROM Players WHERE ID=$uid" ;
+      "FROM Players WHERE ID=$uid";
    $result = db_query( 'ratingpng.initial', $query );
 
    if( @mysql_num_rows($result) != 1 )
@@ -371,9 +350,8 @@ function get_rating_data($uid)
 
 
    $result = db_query( 'ratingpng.ratingdata',
-      "SELECT Rating, RatingMax, RatingMin, " .
-                         "UNIX_TIMESTAMP(Time) AS seconds " .
-                         "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
+      "SELECT Rating, RatingMax, RatingMin, UNIX_TIMESTAMP(Time) AS seconds " .
+      "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
 
    if( @mysql_num_rows( $result ) < 1 )
       exit;
@@ -435,5 +413,4 @@ function get_rating_data($uid)
       $tmp = $row;
    } while( $row = mysql_fetch_assoc($result) ) ;
 }
-
 ?>

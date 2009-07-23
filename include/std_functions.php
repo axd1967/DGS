@@ -156,7 +156,7 @@ $cookie_pref_rows = array(
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode',
        'NotesCutoff',
-       );
+   );
 
 $vacation_min_days = 2;
 
@@ -282,6 +282,8 @@ define("USER_FOLDERS", 6);
 //-----
 
 
+
+
 // param $short: true, false, ARG_USERTYPE_NO_TEXT (no text)
 function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
 {
@@ -377,7 +379,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          // RSS Autodiscovery:
          echo "\n <link rel=\"alternate\" type=\"application/rss+xml\""
              ," title=\"".FRIENDLY_SHORT_NAME." Status RSS Feed\" href=\"/rss/status.php\">";
-      break;
+         break;
    }
 
    if( $style_string )
@@ -508,7 +510,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
                       'RSS',
                       FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed")
                      );
-         break;
+            break;
       }
    }
 
@@ -571,12 +573,10 @@ function end_page( $menu_array=NULL )
    echo "\n </tr>\n</table>\n";
 
    { //hostlink build
-
       if( HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
          $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
       else //for live server
          $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
-
    } //hostlink build
 
 
@@ -591,10 +591,12 @@ function end_page( $menu_array=NULL )
         . "</span>";
 
    if( !$printable && (@$player_row['AdminOptions'] & ADMOPT_SHOW_TIME) )
+   {
       echo "<br><span class=PageLapse>"
         . T_('Page created in') . ' <span id="pageLapse">'
         . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
         . "</span></span>";
+   }
 
    echo "</td>";
 
@@ -603,13 +605,12 @@ function end_page( $menu_array=NULL )
       echo "\n  <td class=LoginBox>";
 
       if( @$player_row['admin_level'] && !$printable )
-         echo "<a href=\"{$base_path}admin.php\">",
-            T_('Admin'), "</a>&nbsp;&nbsp;&nbsp;";
+         echo "<a href=\"{$base_path}admin.php\">", T_('Admin'), "</a>&nbsp;&nbsp;&nbsp;";
 
       if( @$player_row['Translator'] && !$printable )
          echo anchor( $base_path.'translate.php',
                       T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
-            . "&nbsp;&nbsp;&nbsp;";
+            , "&nbsp;&nbsp;&nbsp;";
 
       echo anchor( $base_path."index.php?logout=t",
                    ( $player_row['ID'] > 0 ) ? T_('Logout') : T_('Login'),
@@ -636,8 +637,10 @@ function end_page( $menu_array=NULL )
 function end_html()
 {
    if( isset($TheErrors) )
+   {
       if( $TheErrors->error_count() )
          echo $TheErrors->list_string('garbage', 1);
+   }
    echo "\n</BODY>\n</HTML>";
    ob_end_flush();
 } //end_html
@@ -1038,12 +1041,12 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
 
    switch( (string)$eol )
    {
-    default:
-      $eol= "\r\n";
-    case "\r":
-      $text= preg_replace( "/\n/", $eol, $text);
-    case "\n":
-      break;
+      default:
+         $eol = "\r\n";
+      case "\r":
+         $text = preg_replace( "/\n/", $eol, $text);
+      case "\n":
+         break;
    }
    $text= trim($text).$eol;
 
@@ -1052,10 +1055,12 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
 
    $headers= trim($headers);
    if( !$headers )
+   {
       $headers = 'From: '.EMAIL_FROM;
       //if HTML in mail allowed:
       //$headers.= "\nMIME-Version: 1.0";
       //$headers.= "\nContent-type: text/html; charset=iso-8859-1";
+   }
    $headers= preg_replace( $rgx, $rpl, trim($headers)); //.$eol;
 
    $params= trim($params);
@@ -1124,13 +1129,11 @@ function send_message( $debugmsg, $text='', $subject=''
       if( $varcnt <= 0 )
          continue;
 
-      $var= implode("','",
-         ( $field == 'ID' ? $var : array_map('mysql_addslashes', $var) ));
+      $var= implode("','", ( $field == 'ID' ? $var : array_map('mysql_addslashes', $var) ));
       if( !$var )
          continue;
 
-      $query= "SELECT ID,Notify,SendEmail"
-            ." FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
+      $query= "SELECT ID,Notify,SendEmail FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
       $result = db_query( "$debugmsg.get$field($var)", $query);
       while( ($row=mysql_fetch_assoc($result)) )
       {
@@ -1315,9 +1318,7 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
 
 /*
    if( COOKIE_OLD_COMPATIBILITY )
-   {
       setcookie( $name, '', $NOW-3600, SUB_PATH);
-   }
 */
 
    $name= COOKIE_PREFIX.$name;
@@ -1384,7 +1385,8 @@ function get_cookie_prefs(&$player_row)
    }
 } //get_cookie_prefs
 
-/*! \brief Changes admin-status for user and specified admin-mask: set/unset/toggle status.
+/*!
+ * \brief Changes admin-status for user and specified admin-mask: set/unset/toggle status.
  * param cmd command to set/unset/toggle status: y/Y/+ (=sets status), n/N/- (=unsets status), x/X/* (=toggle status)
  * \return  1 (=admin-status granted and active),
  *          0 (=admin-status granted, but inactive),
@@ -1438,14 +1440,16 @@ function add_line_breaks( $str)
    $str = trim($str);
 
    // Strip out carriage returns
-  $str=preg_replace('/[\\x01-\\x09\\x0B-\\x20]*\\x0A/','<BR>', $str);
+   $str=preg_replace('/[\\x01-\\x09\\x0B-\\x20]*\\x0A/','<BR>', $str);
 
    // Handle collapsed vertical white spaces
-  for( $i=0; $i<2; $i++)
-  $str=preg_replace('%[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>%i','<\\1>&nbsp;<\\2>', $str);
+   for( $i=0; $i<2; $i++)
+      $str = preg_replace('%[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>%i','<\\1>&nbsp;<\\2>', $str);
 
    return $str;
 }
+
+
 
 // Some regular allowed html tags. Keep them lower case.
 // 'cell': tags that does not disturb a table cell. Mostly decorations.
@@ -1549,10 +1553,8 @@ This part fix a security hole. One was able to execute a javascript code
          .'|\\beval\\s*\\('      //eval() can split most of the keywords
          .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
-      if( /*$quote &&*/  preg_match( "%($quote)%i",
-            preg_replace( "/[\\x01-\\x1f]+/", '', $head)) ) {
+      if( /*$quote &&*/  preg_match( "%($quote)%i", preg_replace( "/[\\x01-\\x1f]+/", '', $head)) )
          $bad = 2;
-      }
    }
    if( $bad )
    {
@@ -1575,10 +1577,10 @@ This part fix a security hole. One was able to execute a javascript code
  * \param $html_code, $html_code_closed seems to be refs because of speed !?
  **/
 $parse_mark_regex = ''; //global because parse_tags_safe() is recursive
-define('PARSE_MARK_TERM', ALLOWED_LT.'span class=MarkTerm'
-                        .ALLOWED_GT.'\\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
-define('PARSE_MARK_TAGTERM', ALLOWED_LT.'span class=MarkTagTerm'
-                        .ALLOWED_GT.'&lt;\\1&gt;'.ALLOWED_LT.'/span'.ALLOWED_GT);
+define('PARSE_MARK_TERM',
+      ALLOWED_LT.'span class=MarkTerm'.ALLOWED_GT.'\\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
+define('PARSE_MARK_TAGTERM',
+      ALLOWED_LT.'span class=MarkTagTerm'.ALLOWED_GT.'&lt;\\1&gt;'.ALLOWED_LT.'/span'.ALLOWED_GT);
 function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop)
 {
    if( !$trail )
@@ -1637,9 +1639,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       }
 
       if( $stop == $tag )
-      {
          return $before .ALLOWED_LT. $head .ALLOWED_GT .$marks; //mark after
-      }
 
       $before.= $marks; //mark before
       $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
@@ -1708,7 +1708,7 @@ function contains_mark_terms( $text )
  **/
 function parse_html_safe( $msg, $some_html, $mark_terms='')
 {
- global $html_code, $html_code_closed, $parse_mark_regex;
+   global $html_code, $html_code_closed, $parse_mark_regex;
 
    //set the regexp (escaped for the '/' delimiter) to the first match level (parenthesis)
    $parse_mark_regex = !$mark_terms ? '' : "/($mark_terms)/is";
@@ -1735,10 +1735,12 @@ function reverse_allowed( $msg)
       , $msg);
 }
 
+
+
+
 define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
-
 
 //Note: some of those check for the '`' i.e. the first char of ALLOWED_* vars
 $html_safe_preg = array(
@@ -1845,7 +1847,6 @@ $html_safe_preg = array(
  **/
 function make_html_safe( $msg, $some_html=false, $mark_terms='')
 {
-
    if( $some_html )
    {
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
@@ -1853,18 +1854,19 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 
       switch( (string)$some_html )
       {
-      case 'gameh':
-         $gameh = 1 ;
-         $some_html = 'game';
-         break;
-      default:
-         $some_html = 'msg'; //historical default for $some_html == true
-      case 'msg':
-      case 'cell':
-      case 'game':
-      case 'faq':
-         $gameh = 0 ;
-         break;
+         case 'gameh':
+            $gameh = 1 ;
+            $some_html = 'game';
+            break;
+
+         default:
+            $some_html = 'msg'; //historical default for $some_html == true
+         case 'msg':
+         case 'cell':
+         case 'game':
+         case 'faq':
+            $gameh = 0 ;
+            break;
       }
 
       // regular (and extended) allowed html tags check
@@ -1880,18 +1882,18 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
             $msg = preg_replace('%'.ALLOWED_LT.'(h(idden)?) *'.ALLOWED_GT.'%i',
                      ALLOWED_LT."span class=GameTagH".ALLOWED_GT.$tmp, $msg);
             $msg = preg_replace('%'.ALLOWED_LT.'(/h(idden)?) *'.ALLOWED_GT.'%i',
-                                 $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
+                     $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
          }
          else // hide hidden sgf comments
-            $msg = trim(preg_replace('%'.ALLOWED_LT.'h(idden)? *'.ALLOWED_GT
-                           .'(.*?)'.ALLOWED_LT.'/h(idden)? *'.ALLOWED_GT.'%is',
-                                 '', $msg));
+            $msg = trim(preg_replace(
+                  '%'.ALLOWED_LT.'h(idden)? *'.ALLOWED_GT.'(.*?)'.ALLOWED_LT.'/h(idden)? *'.ALLOWED_GT.'%is',
+                  '', $msg));
 
 
          $msg = preg_replace('%'.ALLOWED_LT.'(c(omment)?) *'.ALLOWED_GT.'%i',
                   ALLOWED_LT.'span class=GameTagC'.ALLOWED_GT.$tmp, $msg);
          $msg = preg_replace('%'.ALLOWED_LT.'(/c(omment)?) *'.ALLOWED_GT.'%i',
-                              $tmp.ALLOWED_LT.'/span'.ALLOWED_GT, $msg);
+                  $tmp.ALLOWED_LT.'/span'.ALLOWED_GT, $msg);
 
          $some_html = 'msg';
       }
@@ -1922,9 +1924,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
       $msg= reverse_allowed( $msg);
 
       if( $some_html && $some_html != 'cell' && $some_html != 'line' )
-      {
          $msg = add_line_breaks($msg);
-      }
    }
 
    return $msg;
@@ -1932,10 +1932,13 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 
 function textarea_safe( $msg, $charenc=false)
 {
- global $encoding_used;
-   if( !$charenc) $charenc = $encoding_used; //else 'iso-8859-1' LANG_DEF_CHARSET
+   global $encoding_used;
+   if( !$charenc)
+      $charenc = $encoding_used;
+   //else 'iso-8859-1' LANG_DEF_CHARSET
+
    $msg = @htmlspecialchars($msg, ENT_QUOTES, $charenc);
-//No:   $msg = @htmlentities($msg, ENT_QUOTES, $charenc); //Too much entities for not iso-8859-1 languages
+   //No: $msg = @htmlentities($msg, ENT_QUOTES, $charenc); //Too much entities for not iso-8859-1 languages
    return $msg;
 }
 
@@ -1972,22 +1975,16 @@ function score2text($score, $verbose, $keep_english=false)
       return "?";
 
    if( $score == 0 )
-   {
       return ( $keep_english ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
-   }
 
    $color = ($verbose
              ? ( $score > 0 ? $T_('White') : $T_('Black') )
              : ( $score > 0 ? 'W' : 'B' ));
 
    if( abs($score) == SCORE_TIME )
-   {
       return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . "+Time" );
-   }
    elseif( abs($score) == SCORE_RESIGN )
-   {
       return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . "+Resign" );
-   }
    else
       return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score))
                : $color . '+' . abs($score) );
@@ -2015,6 +2012,7 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
    ksort( $arr_maxrows, SORT_NUMERIC );
    return $arr_maxrows;
 }
+
 
 // Makes URL from a base URL and an array of variable/value pairs
 // if $sep is true, a '?' or '&' is added at the end
@@ -2093,8 +2091,7 @@ function build_hidden( $args)
       }
    }
    if( count($arr_str) )
-      return "\n<input type=\"hidden\" "
-         .implode( ">\n<input type=\"hidden\" ", $arr_str) .">";
+      return "\n<input type=\"hidden\" ".implode( ">\n<input type=\"hidden\" ", $arr_str) .">";
    return '';
 } //build_hidden
 
@@ -2193,19 +2190,17 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       return 2;
    if( $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
    {
-//default user = last referenced user
-//(ex: message.php from userinfo.php by menu link)
-      if( preg_match('/[?'.URI_AMP_IN.']'
-            .$uid_name.'=([0-9]+)/i', $refer, $eres) )
+      //default user = last referenced user
+      //(ex: message.php from userinfo.php by menu link)
+      if( preg_match('/[?'.URI_AMP_IN.']'.$uid_name.'=([0-9]+)/i', $refer, $eres) )
       {
          $uid = (int)$eres[1];
          if( $uid > 0 )
             return 5;
       }
       $uid = 0;
-//adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
-      if( preg_match('/[?'.URI_AMP_IN.']'
-            .UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
+      //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
+      if( preg_match('/[?'.URI_AMP_IN.']'.UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
       {
          $uhandle = (string)$eres[1];
          if( $uhandle )
@@ -2221,12 +2216,14 @@ function who_is_logged( &$player_row)
    $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
    global $main_path;
-// because of include_all_translate_groups() must be called from main dir
+
+   // because of include_all_translate_groups() must be called from main dir
    chdir( $main_path);
    $player_id = is_logged_in($handle, $sessioncode, $player_row);
    chdir( $curdir);
    return $player_id;
 }
+
 
 /**
  * fever-vault parameters:
@@ -2299,8 +2296,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied');
 
-   $session_expired= ( $player_row['Sessioncode'] != $scode
-                     || $player_row['Expire'] < $NOW );
+   $session_expired= ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
 
    $query = "UPDATE Players SET Hits=Hits+1";
 
@@ -2372,8 +2368,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
          if( $uid > GUESTS_ID_MAX )
             $handles[]= $handle;
          if( count($handles) > 0 )
-            send_message("fever_vault.msg($ip)", $text, $subject
-                        , '', $handles, /*notify*/false, 0);
+            send_message("fever_vault.msg($ip)", $text, $subject, '', $handles, /*notify*/false, 0);
 
          $email= $player_row['Email'];
          if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
@@ -2401,13 +2396,14 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
       switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'index.php':
-            $text= sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
-            $_REQUEST['sysmsg']= $text;
-            $session_expired= true; //fake disconnection
-         break;
+            $text = sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
+            $_REQUEST['sysmsg'] = $text;
+            $session_expired = true; //fake disconnection
+            break;
+
          default:
             jump_to("index.php");
-         break;
+            break;
       }
 /* options:
       set_login_cookie("","", true);
@@ -2477,9 +2473,7 @@ if( function_exists('file_get_contents') )
       //FIXME: PHP-func file_get_contents() has different args since PHP6 (bool->int)
       $data= @file_get_contents($filename, $incpath);
       if( is_string($data) )
-      {
          return $data;
-      }
       if( $quit_on_error )
          error( 'couldnt_open_file', 'read_from_file:'.$filename);
       trigger_error('read_from_file() failed to open stream', E_USER_WARNING);
@@ -2588,8 +2582,8 @@ function activity_string( $act_lvl)
 {
    switch( (int)$act_lvl )
    {
-      case 1: $img= 'star2.gif'; break; // orange
-      case 2: $img= 'star.gif'; break;  // green
+      case 1: $img = 'star2.gif'; break; // orange
+      case 2: $img = 'star.gif'; break;  // green
       default: return '&nbsp;';
    }
    global $base_path;
@@ -2632,17 +2626,17 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    $whitename = trim($whitename);
    $blackname = trim($blackname);
    if( $whitename )
-      $whitename = "$whitename (W)" ;
+      $whitename = "$whitename (W)";
    if( $blackname )
-      $blackname = "$blackname (B)" ;
+      $blackname = "$blackname (B)";
    if( !$whitename && !$blackname )
       $whitename = "Game#$gid" ;
    elseif( $whitename && $blackname )
-      $whitename = "$whitename vs. $blackname" ;
+      $whitename = "$whitename vs. $blackname";
    else
-      $whitename = "$whitename$blackname" ;
+      $whitename = "$whitename$blackname";
    if( $safe_it )
-      $whitename = make_html_safe($whitename) ;
+      $whitename = make_html_safe($whitename);
    if( $move>0 )
       $whitename.= " ,$move";
    if( $link && $legal )
@@ -2650,10 +2644,10 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
       $url = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");
       $url = 'A href="' . $base_path. $url . '"';
       if( $link & REF_LINK_BLANK )
-        $url.= ' target="_blank"';
+        $url .= ' target="_blank"';
       $class = 'Game'.$class;
       if( $class )
-        $url.= " class=$class";
+        $url .= " class=$class";
       if( $link & REF_LINK_ALLOWED )
       {
         $url = str_replace('"', ALLOWED_QUOT, $url);
@@ -2713,7 +2707,7 @@ function tournament_reference( $link, $safe_it, $class, $tid )
 function send_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
    if( is_numeric($link) ) //not owned reference
-      $link= -$link; //make it a send_reference
+      $link = -$link; //make it a send_reference
    return user_reference( $link, $safe_it, $class, $player_ref, $player_name, $player_handle);
 }
 
@@ -2738,7 +2732,7 @@ function send_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
  **/
 function user_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
- global $base_path;
+   global $base_path;
    if( is_array($player_ref) ) //i.e. $player_row
    {
       if( !$player_name )
@@ -2759,9 +2753,10 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
       $byid = 0;
       if( $legal )
          $player_ref = substr($player_ref,1);
-//because of old DGS users having a pure numeric Handle
-//illegal_chars( $player_ref) had been replaced by this reg_exp here
-//adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
+
+      //because of old DGS users having a pure numeric Handle
+      //illegal_chars( $player_ref) had been replaced by this reg_exp here
+      //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
       $legal = ( $player_ref && preg_match( '/^[+'.HANDLE_LEGAL_REGS."]+\$/", $player_ref) );
    }
    else
@@ -2778,11 +2773,11 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
               'LIMIT 1' ;
      if( $row=mysql_single_fetch( 'user_reference', $query ) )
      {
-       if( $player_name===false )
-         $player_name = $row['Name'];
-       if( $player_handle===false )
-         $player_handle = $row['Handle'];
-       $safe_it = true;
+         if( $player_name===false )
+            $player_name = $row['Name'];
+         if( $player_handle===false )
+            $player_handle = $row['Handle'];
+         $safe_it = true;
      }
      else
        $legal = 0;
@@ -2814,21 +2809,21 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $url = "userinfo.php?";
          $class = 'User'.$class;
       }
-//encoding '+' to %2B because of old DGS users having it in their Handle
-      $url.= ( $byid ? "uid=$player_ref"
-                 : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
+
+      //encoding '+' to %2B because of old DGS users having it in their Handle
+      $url .= ( $byid ? "uid=$player_ref" : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';
       if( $class )
-        $url.= " class=\"$class\"";
+         $url .= " class=\"$class\"";
       if( $link & REF_LINK_BLANK )
-        $url.= ' target="_blank"';
+         $url .= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
       {
-        $url = str_replace('"', ALLOWED_QUOT, $url);
-        $player_name = ALLOWED_LT.$url.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
+         $url = str_replace('"', ALLOWED_QUOT, $url);
+         $player_name = ALLOWED_LT.$url.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
       }
       else
-        $player_name = "<$url>$player_name</A>" ;
+         $player_name = "<$url>$player_name</A>" ;
    }
    return $player_name ;
 }
@@ -2837,7 +2832,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
 function has_observers( $gid )
 {
    $result = db_query( 'has_observers',
-         "SELECT ID FROM Observers WHERE gid=$gid LIMIT 1");
+      "SELECT ID FROM Observers WHERE gid=$gid LIMIT 1");
    if( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
@@ -2848,7 +2843,7 @@ function has_observers( $gid )
 function is_on_observe_list( $gid, $uid )
 {
    $result = db_query( 'is_on_observe_list',
-         "SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
+      "SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
    if( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
@@ -2882,7 +2877,6 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
       if( @mysql_num_rows($result) > 0 )
       {
-
          $Subject = 'An observed game has finished';
 
          $to_ids = array();
@@ -2899,6 +2893,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
    db_query( 'delete_all_observers.delete',
       "DELETE FROM Observers WHERE gid=$gid" );
 } //delete_all_observers
+
 
 
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
@@ -3046,13 +3041,13 @@ function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 {
    $str = "<img src=\"$src\" alt=".attb_quote($alt);
    if( $title )
-     $str.= ' title='.attb_quote($title);
+      $str.= ' title='.attb_quote($title);
    elseif( is_null($title) )
-     $str.= ' title='.attb_quote($alt);
+      $str.= ' title='.attb_quote($alt);
    if( $height>=0 )
-     $str.= " height=\"$height\"";
+      $str.= " height=\"$height\"";
    if( $width>=0 )
-     $str.= " width=\"$width\"";
+      $str.= " width=\"$width\"";
    $str.= attb_build($attbs);
    return $str.'>';
 }

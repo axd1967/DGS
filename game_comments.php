@@ -24,6 +24,7 @@ require_once( "include/table_columns.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+
 {
    connect2mysql();
 
@@ -45,8 +46,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       'SELECT Games.Status, Games.Black_ID, Games.White_ID' .
       ', black.Name AS Blackname, white.Name AS Whitename' .
       ' FROM (Games, Players AS black, Players AS white)' .
-      " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
-      );
+      " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1" );
    if( !$game )
       error('unknown_game');
 
@@ -99,9 +99,9 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
       $color_class = ' class="InTextStone"';
       if( $row['Stone'] == BLACK )
-        $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$color_class>" ;
+         $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$color_class>" ;
       else
-        $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
+         $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
 
       $movetxt = (int)$row['MoveNr'];
 
@@ -116,5 +116,4 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    end_html();
 }
-
 ?>

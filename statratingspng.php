@@ -24,6 +24,10 @@ require_once( "include/rating.php" );
 require_once( "include/graph.php" );
 
 
+//smaller kyu rank (used as offset for the curves)
+define('MIN_RANK', round(MIN_RATING/100.0));
+
+
 {
    connect2mysql();
 
@@ -32,9 +36,6 @@ require_once( "include/graph.php" );
 //   if( !$logged_in )
 //      error('not_logged_in');
 
-
-//smaller kyu rank (used as offset for the curves)
-define('MIN_RANK', round(MIN_RATING/100.));
 
    //disable translations in graph if not latin
    if( eregi( '^iso-8859-', $encoding_used) )
@@ -47,11 +48,12 @@ define('MIN_RANK', round(MIN_RATING/100.));
       $keep_english= true;
       $T_= 'fnop';
    }
-      $Xlabelfct = create_function('$x',
-         'return $x<'.(21-(MIN_RANK))
-            .'?(('.(21-(MIN_RANK)).'-$x).\'k\')'
-            .':(('.((MIN_RANK)-20).'+$x).\'d\');' );
-      $Ylabelfct = create_function('$x',
+
+   $Xlabelfct = create_function('$x',
+      'return $x<'.(21-(MIN_RANK))
+         .'?(('.(21-(MIN_RANK)).'-$x).\'k\')'
+         .':(('.((MIN_RANK)-20).'+$x).\'d\');' );
+   $Ylabelfct = create_function('$x',
          'return (string)$x;' );
 
 
@@ -144,22 +146,12 @@ define('MIN_RANK', round(MIN_RATING/100.));
    $marge_top   = max($y,DASH_MODULO+2); //better if > DASH_MODULO
    $marge_bottom= $gr->border+ 1*$gr->labelMetrics['LINEH'];
 
-   $gr->setgraphbox(
-      $marge_left,
-      $marge_top,
-      $gr->width-$marge_right,
-      $gr->height-$marge_bottom
-      );
+   $gr->setgraphbox( $marge_left, $marge_top, $gr->width-$marge_right, $gr->height-$marge_bottom );
 
 
    //scale datas
 
-   $gr->setgraphview(
-      $xlims['MIN'],
-      $ymax,
-      $xlims['MAX'],
-      $ymin
-      );
+   $gr->setgraphview( $xlims['MIN'], $ymax, $xlims['MAX'], $ymin );
 
    for( $i=0 ; $i<count($graphs) ; $i++ )
    {
@@ -173,18 +165,13 @@ define('MIN_RANK', round(MIN_RATING/100.));
 
    $step = max( 1, pow(10, round( log10($ymax)-1.1 )));
    $start = ceil($ymin/$step)*$step;
-   $gr->gridY( $start, $step, $gr->border
-      , $Ylabelfct, $black
-      , '', $black);
-
+   $gr->gridY( $start, $step, $gr->border, $Ylabelfct, $black, '', $black );
 
    //horizontal scaling
 
    $step = 1; //grads
    $y = $gr->boxbottom+3 ; //+1*$gr->labelMetrics['LINEH'];
-   $gr->gridX( $xlims['MIN'], $step, $y
-      , $Xlabelfct, $black
-      , '', $red);
+   $gr->gridX( $xlims['MIN'], $step, $y, $Xlabelfct, $black, '', $red );
 
 
    //draw the curves
@@ -194,16 +181,14 @@ define('MIN_RANK', round(MIN_RATING/100.));
       $graph= &$graphs[$i];
 
       $gr->curve($Xaxis, $graph['y'], $nr_points, $graph['c']);
-      $gr->label($title_align+$graph['labelX'], $graph['labelY']
-               , $graph['label'], $graph['c']);
+      $gr->label($title_align+$graph['labelX'], $graph['labelY'], $graph['label'], $graph['c']);
    }
 
 
    //misc drawings
 
    if( $show_time )
-      $gr->label( 0, 0,
-         sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
+      $gr->label( 0, 0, sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
    if( $cache_it )
       grab_output_start();
@@ -229,42 +214,45 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    {
       switch( $g )
       {
-      case 0:
-         $name = $T_('Active users');
-         $query =
-            "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
-            . " FROM Players WHERE Rating2>=".MIN_RATING
-               . " AND Activity>$ActiveLevel1"
-            . " GROUP BY p_rank ORDER BY p_rank" ;
-         $color = array( 255,   0,   0);
-       break;
-      case 1:
-         $name = $T_('Users');
-         $query =
-            "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
-            . " FROM Players WHERE Rating2>=".MIN_RATING
-            . " GROUP BY p_rank ORDER BY p_rank" ;
-         $color = array( 255,   0, 200);
-         break;
-      case 2:
-         $name = $T_('Rated games');
-         /* Here, the sum of all cnt will be 2 times the number of rated games
-          * because there are two players by game but is kept "as is"
-          * to avoid to have some x.5 values in the graph
-          * see also $cnt = (int)... below
-          */
-         $query =
-            "SELECT ROUND(Rating/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
-            . " FROM Ratinglog WHERE Rating>=".MIN_RATING
-            . " GROUP BY p_rank ORDER BY p_rank" ;
-         $color = array(   0, 180, 200);
-         break;
-      default:
-         $query = '';
-         $name = '';
-         $color = 0;
-         break;
-      }
+         case 0:
+            $name = $T_('Active users');
+            $query =
+               "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
+               . " FROM Players WHERE Rating2>=".MIN_RATING." AND Activity>$ActiveLevel1"
+               . " GROUP BY p_rank ORDER BY p_rank" ;
+            $color = array( 255,   0,   0);
+            break;
+
+         case 1:
+            $name = $T_('Users');
+            $query =
+               "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
+               . " FROM Players WHERE Rating2>=".MIN_RATING
+               . " GROUP BY p_rank ORDER BY p_rank" ;
+            $color = array( 255,   0, 200);
+            break;
+
+         case 2:
+            $name = $T_('Rated games');
+            /* Here, the sum of all cnt will be 2 times the number of rated games
+             * because there are two players by game but is kept "as is"
+             * to avoid to have some x.5 values in the graph
+             * see also $cnt = (int)... below
+             */
+            $query =
+               "SELECT ROUND(Rating/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
+               . " FROM Ratinglog WHERE Rating>=".MIN_RATING
+               . " GROUP BY p_rank ORDER BY p_rank" ;
+            $color = array(   0, 180, 200);
+            break;
+
+         default:
+            $query = '';
+            $name = '';
+            $color = 0;
+            break;
+      }//switch $g (for-index)
+
       if( $query )
       {
          $result = db_query( 'statratingspng.query'.$g, $query );

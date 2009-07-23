@@ -37,21 +37,14 @@ require_once( "include/form_functions.php" );
 
 /* Actual GET calls used (to identify the ways to handle them):
    if(message.php?mode=...) //with mode
-      NewMessage           : from menu
-                              (or site_map)
+      NewMessage           : from menu (or site_map)
       NewMessage&uid=      : from user info
-      ShowMessage&mid=     : from message_list_body()
-                              or message_info_table()
-                              or list_messages
-                              or here
-      Invite               : from menu
-                              (or site_map or introduction)
-      Invite&uid=          : from user_info
-                              or show_games
+      ShowMessage&mid=     : from message_list_body() or message_info_table() or list_messages or here
+      Invite               : from menu (or site_map or introduction)
+      Invite&uid=          : from user_info or show_games
       Dispute&mid=         : from here
    else if(message.php?...) //without mode
-      mid=                 : from notifications
-                              or here
+      mid=                 : from notifications or here
                            => ShowMessage&mid=
    else if(message.php) //alone
                            : from site_map
@@ -75,13 +68,14 @@ require_once( "include/form_functions.php" );
          else
          {
             $row = mysql_single_fetch( 'message.handle',
-                  "SELECT Handle FROM Players WHERE ID=$uid" );
+               "SELECT Handle FROM Players WHERE ID=$uid" );
             if( $row )
                $uhandle = $row['Handle'];
          }
       }
       $default_uhandle = $uhandle;
-      unset($uid); unset($uhandle); //no more used
+      unset($uid);
+      unset($uhandle);
    }
 
    $my_id = $player_row["ID"];
@@ -94,20 +88,12 @@ require_once( "include/form_functions.php" );
    $default_subject = get_request_arg('subject');
    $default_message = get_request_arg('message');
 
-
    $mid = (int)@$_REQUEST['mid'];
-
-
    $mode = @$_REQUEST['mode'];
    if( !$mode )
-   {
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
-   }
-   else if( @$_REQUEST['mode_dispute'] )
-   {
+   elseif( @$_REQUEST['mode_dispute'] )
       $mode = 'Dispute';
-   }
-
 
    $submode = $mode;
    if( $mode == 'ShowMessage' || $mode == 'Dispute' )
@@ -115,7 +101,7 @@ require_once( "include/form_functions.php" );
       if( !($mid > 0) )
          error("unknown_message");
 
-   /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
+      /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
       $query = "SELECT Messages.*"
          .",UNIX_TIMESTAMP(Messages.Time) AS date"
          .",IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"
@@ -136,7 +122,7 @@ require_once( "include/form_functions.php" );
           "LEFT JOIN MessageCorrespondents AS previous " .
             "ON Messages.ReplyTo>0 AND previous.mid=Messages.ReplyTo AND previous.uid=$my_id " .
           "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
-//sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
+          //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
           "ORDER BY Sender" ;
 
       /**
@@ -195,8 +181,8 @@ require_once( "include/form_functions.php" );
             $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
 
             db_query( "message.update_mess_corr($my_id,$mid,$Sender)",
-                  "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
-                  "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" );
+               "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
+               "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" );
             if( mysql_affected_rows() != 1)
                error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
          }
@@ -204,29 +190,18 @@ require_once( "include/form_functions.php" );
          if( $Type == 'INVITATION' )
          {
             if( $Status=='INVITED' && ($Replied != 'Y') )
-            {
-               if( $to_me )
-                  $submode = 'ShowInvite';
-               else
-                  $submode = 'ShowMyInvite';
-            }
+               $submode = ( $to_me ) ? 'ShowInvite' : 'ShowMyInvite';
             else if( is_null($Status) )
-            {
                $submode = 'AlreadyDeclined';
-            }
             else
-            {
                $submode = 'AlreadyAccepted';
-            }
          }
          else if( $Type == 'DISPUTED' )
          {
             $submode = 'InviteDisputed';
          }
-
       }
-
-   }
+   }// $mode == 'ShowMessage' || $mode == 'Dispute'
 
 
    // prepare to show conv/proper-handitype-suggestions
@@ -280,26 +255,30 @@ require_once( "include/form_functions.php" );
                         "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) . '</font>';
          }
          else if( $submode == 'AlreadyDeclined' )
+         {
             echo '<font color=green>' .
                T_('This invitation has been declined or the game deleted') . '</font>';
+         }
          else if( $submode == 'InviteDisputed' )
+         {
             echo '<font color=green>' .
                sprintf(T_('The settings for this game invitation has been %sdisputed%s'),
                        "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) . '</font>';
+         }
 
          if( $can_reply )
          {
             $message_form->add_row( array(
                   'HEADER', T_('Reply'),
-               ) );
+               ));
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Subject'),
                   'TEXTINPUT', 'subject', 70, 80, $default_subject,
-               ) );
+               ));
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
                   'TEXTAREA', 'message', 70, 12, $default_message,
-               ) );
+               ));
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
                   'HIDDEN', 'reply', $mid,
@@ -307,36 +286,36 @@ require_once( "include/form_functions.php" );
                               array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
                               array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-               ) );
+               ));
          }
-      }
-      break;
+         break;
+      }//case ShowMessage/AlreadyDeclined/AlreadyAccepted/InviteDisputed
 
       case 'NewMessage':
       {
          $message_form->add_row( array(
                'HEADER', T_('New message'),
-            ) );
+            ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
                'TEXTINPUT', 'to', 25, 40, $default_uhandle,
-            ) );
+            ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Subject'),
                'TEXTINPUT', 'subject', 70, 80, $default_subject,
-            ) );
+            ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
                'TEXTAREA', 'message', 70, 12, $default_message,
-            ) );
+            ));
          $message_form->add_row( array(
                'SUBMITBUTTONX', 'send_message', T_('Send Message'),
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-            ) );
-      }
-      break;
+            ));
+         break;
+      }//case NewMessage
 
       case 'ShowInvite':
       case 'ShowMyInvite':
@@ -354,15 +333,15 @@ require_once( "include/form_functions.php" );
          {
             $message_form->add_row( array(
                   'SUBMITBUTTON', 'mode_dispute', T_('Dispute settings'),
-               ) );
+               ));
 
             $message_form->add_row( array(
                   'HEADER', T_('Reply'),
-               ) );
+               ));
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
                   'TEXTAREA', 'message', 70, 12, $default_message,
-               ) );
+               ));
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
                   'HIDDEN', 'reply', $mid,
@@ -373,10 +352,10 @@ require_once( "include/form_functions.php" );
                   'SUBMITBUTTON', 'send_decline', T_('Decline'),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
                               array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-               ) );
+               ));
          }
-      }
-      break;
+         break;
+      }//case ShowInvite/ShowMyInvite
 
       case 'Dispute':
       {
@@ -393,11 +372,11 @@ require_once( "include/form_functions.php" );
 
          $message_form->add_row( array(
                'HEADER', T_('Dispute settings'),
-            ) );
+            ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
                'TEXTAREA', 'message', 70, 12, $default_message,
-            ) );
+            ));
 
          $message_form->add_row( array(
                'HIDDEN', 'to', $other_handle,
@@ -409,9 +388,9 @@ require_once( "include/form_functions.php" );
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-            ) );
-      }
-      break;
+            ));
+         break;
+      }//case Dispute
 
       case 'Invite':
       {
@@ -422,15 +401,15 @@ require_once( "include/form_functions.php" );
 
          $message_form->add_row( array(
                'HEADER', T_('Invitation message'),
-            ) );
+            ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
                'TEXTINPUT', 'to', 25, 40, $default_uhandle,
-            ) );
+            ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
                'TEXTAREA', 'message', 70, 12, $default_message,
-            ) );
+            ));
 
          $message_form->add_row( array(
                'HIDDEN', 'subject', 'Game invitation',
@@ -439,22 +418,22 @@ require_once( "include/form_functions.php" );
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-            ) );
-      }
-      break;
-   }
+            ));
+         break;
+      }//case Invite
+   }//switch $submode
 
    $message_form->echo_string(1);
 
    if( $preview )
    {
       echo "\n<h3 id='preview' class=Header>" .
-               T_('Message preview') . "</h3>\n";
+         T_('Message preview') . "</h3>\n";
       //$mid==0 means preview - display a *to_me* like message
 
       $row = mysql_single_fetch( 'message.preview',
-            'SELECT ID, Handle, Name FROM Players ' .
-            'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
+         'SELECT ID, Handle, Name FROM Players ' .
+         'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
       if( !$row )
       {
          $row['Name'] = '<span class=InlineWarning>' . T_('Receiver not found') . '</span>';
@@ -462,9 +441,7 @@ require_once( "include/form_functions.php" );
          $row['Handle'] = '';
       }
       else
-      {
          $row['Name'] = make_html_safe($row['Name']);
-      }
 
       message_info_table( 0 /* preview */, $NOW, false,
                          $row['ID'], $row['Name'], $row['Handle'],
@@ -475,5 +452,4 @@ require_once( "include/form_functions.php" );
 
    end_page();
 }
-
 ?>

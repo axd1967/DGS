@@ -209,7 +209,9 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
        && !($game_info_row["White_ID"] == $black_row['ID']
          && $game_info_row["Black_ID"] == $white_row['ID'] )
          )
+      {
          error('mysql_start_game', "create_game.wrong_players($gid)");
+      }
    }
 
    $rating_black = $black_row["Rating2"];
@@ -344,7 +346,7 @@ function standard_handicap_is_possible($size, $hcp)
    return( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
 }
 
-if( ENA_STDHANDICAP&2 ) { //skip black validation
+if( ENA_STDHANDICAP & 2 ) { //skip black validation
 //for get_handicap_pattern:
 require_once('include/sgf_parser.php');
 require_once('include/coords.php');
@@ -367,8 +369,7 @@ function make_standard_placement_of_handicap_stones(
    //if( $err ) return false;
 
    $patlen = strlen( $stonestring );
-   if( $patlen > 2*$hcp ||
-      ( $patlen < 2*$hcp && !$allow_incomplete_pattern ) )
+   if( ( $patlen > 2*$hcp ) || ( $patlen < 2*$hcp && !$allow_incomplete_pattern ) )
       error('internal_error','make_std_handicap.bad_pattern');
 
    $patlen = min( 2*$hcp, $patlen);
@@ -393,6 +394,7 @@ function make_standard_placement_of_handicap_stones(
 
    return true;
 }
+
 } //ENA_STDHANDICAP&2
 
 ?>

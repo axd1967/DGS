@@ -145,9 +145,9 @@ define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
 //    (invalid = not an element of the optional list containing the valid values)
 function get_request_arg( $name, $def='', $list=NULL)
 {
-   $val = (isset($_REQUEST[$name]) ? arg_stripslashes($_REQUEST[$name]) :
-         //$HTTP_REQUEST_VARS does not exist
-         $def) ;
+   $val = (isset($_REQUEST[$name]))
+      ? arg_stripslashes($_REQUEST[$name])
+      : $def; //$HTTP_REQUEST_VARS does not exist
    if( is_array($list) && !is_array($val) )
    {
       if( !array_key_exists( (string) $val, $list) )

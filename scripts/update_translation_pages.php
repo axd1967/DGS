@@ -46,54 +46,58 @@ function glob($pat, $flg=0)
    //echo "glob: dir='$dir' rexp=$rexp<br>";
 
    $res= array();
-   if( is_dir($dir) ) {
-     if( $dh = opendir($dir) ) {
-       while( ($file = readdir($dh)) !== false ) {
-         if( preg_match($rexp,$file) ) {
-           if( !($flg & GLOB_ONLYDIR) || is_dir($dir.$file) )
-             $res[]=$dir.$file.(($flg & GLOB_MARK)?'/':'');
+   if( is_dir($dir) )
+   {
+      if( $dh = opendir($dir) )
+      {
+         while( ($file = readdir($dh)) !== false )
+         {
+            if( preg_match($rexp,$file) )
+            {
+               if( !($flg & GLOB_ONLYDIR) || is_dir($dir.$file) )
+                  $res[]=$dir.$file.(($flg & GLOB_MARK)?'/':'');
+            }
          }
-       }
-       closedir($dh);
-     }
+         closedir($dh);
+      }
    }
    if( count($res) ) {
-     if( !($flg & GLOB_NOSORT) ) sort($res);
+      if( !($flg & GLOB_NOSORT) ) sort($res);
    }
    else
    {
-     $res = ( ($flg & GLOB_NOCHECK) ) ? $rexp : false;
+      $res = ( ($flg & GLOB_NOCHECK) ) ? $rexp : false;
    }
    return $res;
 }//glob
 
 function dir_slashe( $fn, $trail=false)
 {
-  if( $fn == '.' )
-    return '';
-  $fn=str_replace('\\','/',$fn);
-  if( $trail )
-    if( substr($fn, -1) !== '/' )
-      $fn.='/';
-  return $fn;
+   if( $fn == '.' )
+      return '';
+   $fn=str_replace('\\','/',$fn);
+   if( $trail )
+      if( substr($fn, -1) !== '/' )
+         $fn.='/';
+   return $fn;
 }//dir_slashe
 
 function filepat2preg($p, $flg=0)
 {
-  $p=preg_quote($p);
-  $p=strtr($p, array(
-      '\\?'=>'[^/\\\\]',
-      '\\*'=>'[^/\\\\]*?',
-      '\\['=>'[',
-      '\\]'=>']',
-    ));
-  if( ($flg & GLOB_BRACE) )
-    $p=preg_replace('%\\\\{([^}]*)\\\\}%e'
-      ,"'('.strtr('\\1',array('\\\\\\\\\\\\\\\\,'=>',',','=>'|')).')'"
-      ,$p);
-  //the '+' are antislashed and unused in replacements
-  $p='+^'.$p.'$+is';
-  return $p;
+   $p=preg_quote($p);
+   $p=strtr($p, array(
+         '\\?'=>'[^/\\\\]',
+         '\\*'=>'[^/\\\\]*?',
+         '\\['=>'[',
+         '\\]'=>']',
+      ));
+   if( ($flg & GLOB_BRACE) )
+      $p=preg_replace('%\\\\{([^}]*)\\\\}%e'
+         ,"'('.strtr('\\1',array('\\\\\\\\\\\\\\\\,'=>',',','=>'|')).')'"
+         ,$p );
+   //the '+' are antislashed and unused in replacements
+   $p='+^'.$p.'$+is';
+   return $p;
 }//filepat2preg
 
 }//function_exists('glob')
@@ -159,9 +163,9 @@ function group_string( $id)
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
-           die("<BR>$s;<BR>" . mysql_error() );
-        echo " --- fixed. ";
+         if( !mysql_query( $s) )
+            die("<BR>$s;<BR>" . mysql_error() );
+         echo " --- fixed. ";
       }
       echo "<p>*** Fixes errors ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')

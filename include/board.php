@@ -117,7 +117,6 @@ class Board
 
       while( $row = mysql_fetch_assoc($result) )
       {
-
          extract($row); //$MoveNr, $Stone, $PosX, $PosY, $Hours
 
          if( $PosX <= POSX_ADDTIME ) //configuration actions
@@ -131,9 +130,7 @@ class Board
          }
 
          if( $Stone == BLACK || $Stone == WHITE )
-         {
             $this->moves[$MoveNr] = array( $Stone, $PosX, $PosY);
-         }
 
          if( $MoveNr > $move )
          {
@@ -182,14 +179,12 @@ class Board
          $row= mysql_single_fetch( 'board.load_from_db.movemessage',
                   "SELECT Text FROM MoveMessages WHERE gid=$gid AND MoveNr=$move");
          if( $row )
-         {
             $this->movemsg = trim($row['Text']);
-         }
          //else $this->movemsg = '';
       }
 
       return TRUE;
-   }
+   } //load_from_db
 
 
    function set_move_mark( $x=-1, $y=-1)
@@ -202,9 +197,7 @@ class Board
    function move_marks( $start, $end, $mark=0)
    {
       if( is_string( $mark) )
-      {
          $mod = 0;
-      }
       else if( is_numeric( $mark) )
       {
          if( $mark > 0 )
@@ -262,7 +255,7 @@ class Board
             }
          }
       }
-   }
+   }// move_marks
 
 
    function draw_captures_box( $caption)
@@ -310,17 +303,21 @@ class Board
       echo "<tr>\n<th colspan=2>$caption</th>\n </tr>\n";
       echo "<tr>\n<td class=b>\n";
       if( count($bcap)>0 )
+      {
          echo '<dl><dt>'.implode("</dt\n><dt>", $bcap)."</dt\n></dl>";
          //echo implode("<br>\n", $bcap);
+      }
       echo "</td>\n<td class=w>\n";
       if( count($wcap)>0 )
+      {
          echo '<dl><dt>'.implode("</dt\n><dt>", $wcap)."</dt\n></dl>";
          //echo implode("<br>\n", $wcap);
+      }
       echo "</td>\n</tr>\n";
       echo "</table>\n";
 
       return true;
-   }
+   } //draw_captures_box
 
 
    function set_style( $cfg_board )
@@ -358,8 +355,7 @@ class Board
 
 
    // keep in sync with GobanHandlerGfxBoard
-   function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
-                            $coord_left, $coord_right )
+   function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
    {
       echo "<tr>\n";
 
@@ -383,8 +379,7 @@ class Board
 
 
    // keep in sync with GobanHandlerGfxBoard
-   function draw_edge_row( $edge_start, $edge_coord,
-                           $border_start, $border_imgs, $border_rem )
+   function draw_edge_row( $edge_start, $edge_coord, $border_start, $border_imgs, $border_rem )
    {
       echo "<tr>\n";
 
@@ -449,18 +444,18 @@ class Board
          $s = ($this->coord_borders & COORD_LEFT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
          if( $s )
             $coord_left = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
-             ( ( $this->coord_borders & COORD_LEFT ? $coord_width : 0 )
-             + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
-             " height=$stone_size alt=\" \"></td>\n";
+               ( ( $this->coord_borders & COORD_LEFT ? $coord_width : 0 )
+               + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
+               " height=$stone_size alt=\" \"></td>\n";
          else
             $coord_left = '';
 
          $s = ($this->coord_borders & COORD_RIGHT ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
          if( $s )
             $coord_right = "<td colspan=$s><img src=\"images/blank.gif\" width=" .
-             ( ( $this->coord_borders & COORD_RIGHT ? $coord_width : 0 )
-             + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
-             " height=$stone_size alt=\" \"></td>\n";
+               ( ( $this->coord_borders & COORD_RIGHT ? $coord_width : 0 )
+               + ( $smooth_edge ? EDGE_SIZE : 0 ) ) .
+               " height=$stone_size alt=\" \"></td>\n";
          else
             $coord_right = '';
       }
@@ -506,209 +501,208 @@ class Board
          $this->draw_move_message( $this->movemsg );
 
 
-      { // goban
+      { // draw goban
+         /**
+          * style="background-image..." is not understood by old browsers like Netscape Navigator 4.0
+          * meanwhile background="..." is not W3C compliant
+          * so, for those old browsers, use the bgcolor="..." option
+          **/
+         if( $this->woodcolor > 10 )
+            $woodstring = ' bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
+         else
+            $woodstring = ' style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
 
-      /**
-       * style="background-image..." is not understood by old browsers like Netscape Navigator 4.0
-       * meanwhile background="..." is not W3C compliant
-       * so, for those old browsers, use the bgcolor="..." option
-       **/
-      if( $this->woodcolor > 10 )
-         $woodstring = ' bgcolor="' . $woodbgcolors[$this->woodcolor - 10] . '"';
-      else
-         $woodstring = ' style="background-image:url(images/wood' . $this->woodcolor . '.gif);"';
+         /**
+          * Some simple browsers (like Pocket PC IE or PALM ones) poorly
+          * manage the CSS commands related to cellspacing and cellpadding.
+          * Most of the time, this results in a 1 or 2 pixels added to the
+          * cells size and is not so disturbing into normal tables.
+          * But this is really annoying for the board cells.
+          * So we keep the HTML commands here, even if deprecated.
+          **/
+         $cell_size_fix = ' border=0 cellspacing=0 cellpadding=0';
 
-      /**
-       * Some simple browsers (like Pocket PC IE or PALM ones) poorly
-       * manage the CSS commands related to cellspacing and cellpadding.
-       * Most of the time, this results in a 1 or 2 pixels added to the
-       * cells size and is not so disturbing into normal tables.
-       * But this is really annoying for the board cells.
-       * So we keep the HTML commands here, even if deprecated.
-       **/
-      $cell_size_fix = ' border=0 cellspacing=0 cellpadding=0';
+         echo '<table class=Goban' . $woodstring . $cell_size_fix . '>';
 
-      echo '<table class=Goban' . $woodstring . $cell_size_fix . '>';
+         echo '<tbody>';
 
-      echo '<tbody>';
-
-      if( $this->coord_borders & COORD_UP )
-         $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
-                           $coord_left, $coord_right );
-
-      if( $smooth_edge )
-         $this->draw_edge_row( $edge_start.'u', $edge_coord,
-                               $border_start, $border_imgs, $border_rem );
-
-      $letter_r = 'a';
-      for($rownr = $this->size; $rownr > 0; $rownr-- )
-      {
-         echo '<tr>';
-
-         if( $this->coord_borders & COORD_LEFT )
-            echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
+         if( $this->coord_borders & COORD_UP )
+            $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
+                              $coord_left, $coord_right );
 
          if( $smooth_edge )
-            echo '<td>' . $edge_vert . "l.gif\"></td>\n";
+            $this->draw_edge_row( $edge_start.'u', $edge_coord,
+                                  $border_start, $border_imgs, $border_rem );
 
-
-         $letter = 'a';
-         $letter_c = 'a';
-         for($colnr = 0; $colnr < $this->size; $colnr++ )
+         $letter_r = 'a';
+         for($rownr = $this->size; $rownr > 0; $rownr-- )
          {
-            $stone = (int)@$this->array[$colnr][$this->size-$rownr];
-            $empty = false;
-            $marked = false;
-            if( $stone & FLAG_NOCLICK ) {
-               $stone &= ~FLAG_NOCLICK;
-               $no_click = true;
-            }
-            else
-               $no_click = false;
+            echo '<tr>';
 
-            if( $stone == BLACK )
-            {
-               $type = 'b';
-               $alt = 'X';
-            }
-            else if( $stone == WHITE )
-            {
-               $type = 'w';
-               $alt = 'O';
-            }
-            else if( $stone == BLACK_DEAD )
-            {
-               $type = 'bw';
-               $alt = 'x';
-               $marked = true;
-            }
-            else if( $stone == WHITE_DEAD )
-            {
-               $type = 'wb';
-               $alt = 'o';
-               $marked = true;
-            }
-            else
-            {
-               $empty = true;
+            if( $this->coord_borders & COORD_LEFT )
+               echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
-               $type = 'e';
-               $alt = '.';
-               if( $rownr == 1 ) $type = 'd';
-               else if( $rownr == $this->size ) $type = 'u';
-               if( $colnr == 0 ) $type .= 'l';
-               else if( $colnr == $this->size-1 ) $type .= 'r';
+            if( $smooth_edge )
+               echo '<td>' . $edge_vert . "l.gif\"></td>\n";
 
-               if( $stone == BLACK_TERRITORY )
+
+            $letter = 'a';
+            $letter_c = 'a';
+            for($colnr = 0; $colnr < $this->size; $colnr++ )
+            {
+               $stone = (int)@$this->array[$colnr][$this->size-$rownr];
+               $empty = false;
+               $marked = false;
+               if( $stone & FLAG_NOCLICK ) {
+                  $stone &= ~FLAG_NOCLICK;
+                  $no_click = true;
+               }
+               else
+                  $no_click = false;
+
+               if( $stone == BLACK )
                {
-                  $type .= 'b';
-                  $alt = '+';
+                  $type = 'b';
+                  $alt = 'X';
+               }
+               else if( $stone == WHITE )
+               {
+                  $type = 'w';
+                  $alt = 'O';
+               }
+               else if( $stone == BLACK_DEAD )
+               {
+                  $type = 'bw';
+                  $alt = 'x';
                   $marked = true;
                }
-               else if( $stone == WHITE_TERRITORY )
+               else if( $stone == WHITE_DEAD )
                {
-                  $type .= 'w';
-                  $alt = '-';
+                  $type = 'wb';
+                  $alt = 'o';
                   $marked = true;
                }
-               else if( $stone == DAME )
+               else
                {
-                  $type .= 'd';
+                  $empty = true;
+
+                  $type = 'e';
                   $alt = '.';
-                  $marked = true;
-               }
-               else if( $stone == MARKED_DAME )
-               {
-                  $type .= 'g';
-                  $alt = 's'; //for seki
-                  $marked = true;
-               }
+                  if( $rownr == 1 ) $type = 'd';
+                  else if( $rownr == $this->size ) $type = 'u';
+                  if( $colnr == 0 ) $type .= 'l';
+                  else if( $colnr == $this->size-1 ) $type .= 'r';
 
-               if( $type=='e' )
-               {
-                  if( is_hoshi($colnr, $this->size-$rownr, $this->size) )
+                  if( $stone == BLACK_TERRITORY )
                   {
-                     $type = 'h';
-                     $alt = ',';
+                     $type .= 'b';
+                     $alt = '+';
+                     $marked = true;
+                  }
+                  else if( $stone == WHITE_TERRITORY )
+                  {
+                     $type .= 'w';
+                     $alt = '-';
+                     $marked = true;
+                  }
+                  else if( $stone == DAME )
+                  {
+                     $type .= 'd';
+                     $alt = '.';
+                     $marked = true;
+                  }
+                  else if( $stone == MARKED_DAME )
+                  {
+                     $type .= 'g';
+                     $alt = 's'; //for seki
+                     $marked = true;
+                  }
+
+                  if( $type=='e' )
+                  {
+                     if( is_hoshi($colnr, $this->size-$rownr, $this->size) )
+                     {
+                        $type = 'h';
+                        $alt = ',';
+                     }
                   }
                }
-            }
 
-            $sgfc = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
-            $mrk = '';
-            $numover = false;
-            if( is_array($this->marks) )
-            {
-               if( $sgfc && @$this->marks[$sgfc] )
+               $sgfc = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
+               $mrk = '';
+               $numover = false;
+               if( is_array($this->marks) )
                {
-                  $mrk = $this->marks[$sgfc];
-                  if( is_numeric($mrk) && $this->coord_borders & NUMBER_OVER )
-                     $numover = true;
-               }
-            }
-
-            if( !$marked )
-            {
-               if( !$empty && ( $stone == BLACK || $stone == WHITE )
-                   && $this->movemrkx == $colnr
-                   && $this->movemrky == $this->size-$rownr )
-               { //last move mark
-                  $type .= 'm';
-                  $alt = ( $stone == BLACK ? '#' : '@' );
-                  $marked = true;
-               }
-               elseif( $mrk )
-               {
-                  //$alt .= $mrk;
-                  if( !$numover )
+                  if( $sgfc && @$this->marks[$sgfc] )
                   {
-                     $type .= $mrk;
-                     $marked = true;
-                  } //else no mark if $numover
+                     $mrk = $this->marks[$sgfc];
+                     if( is_numeric($mrk) && $this->coord_borders & NUMBER_OVER )
+                        $numover = true;
+                  }
                }
+
+               if( !$marked )
+               {
+                  if( !$empty && ( $stone == BLACK || $stone == WHITE )
+                      && $this->movemrkx == $colnr
+                      && $this->movemrky == $this->size-$rownr )
+                  { //last move mark
+                     $type .= 'm';
+                     $alt = ( $stone == BLACK ? '#' : '@' );
+                     $marked = true;
+                  }
+                  elseif( $mrk )
+                  {
+                     //$alt .= $mrk;
+                     if( !$numover )
+                     {
+                        $type .= $mrk;
+                        $marked = true;
+                     } //else no mark if $numover
+                  }
+               }
+
+               $tit = '';
+               if( $numover )
+                  $tit = $mrk;
+               if( $this->coord_borders & COORD_OVER )
+                  //strtoupper? -> change capturebox too
+                  $tit = ( $tit ? $tit.' - ' : '' ) . $letter.$rownr;
+               if( $this->coord_borders & COORD_SGFOVER )
+                  $tit = ( $tit ? $tit.' - ' : '' ) . $sgfc;
+               if( $tit )
+                  $alt.= "\" title=\"$tit";
+
+               if( $may_play && !$no_click &&
+                   ( ($empty && $on_empty) || (!$empty && $on_not_empty) ) )
+                  echo "$move_start$letter_c$letter_r$move_alt$alt$move_src$type$move_end";
+               else
+                  echo "$nomove_start$alt$nomove_src$type$nomove_end";
+
+               $letter_c++;
+               $letter++; if( $letter == 'i' ) $letter++;
             }
 
-            $tit = '';
-            if( $numover )
-               $tit = $mrk;
-            if( $this->coord_borders & COORD_OVER )
-               //strtoupper? -> change capturebox too
-               $tit = ( $tit ? $tit.' - ' : '' ) . $letter.$rownr;
-            if( $this->coord_borders & COORD_SGFOVER )
-               $tit = ( $tit ? $tit.' - ' : '' ) . $sgfc;
-            if( $tit )
-               $alt.= "\" title=\"$tit";
+            if( $smooth_edge )
+               echo '<td>' . $edge_vert . "r.gif\"></td>\n";
 
-            if( $may_play && !$no_click &&
-                ( ($empty && $on_empty) || (!$empty && $on_not_empty) ) )
-               echo "$move_start$letter_c$letter_r$move_alt$alt$move_src$type$move_end";
-            else
-               echo "$nomove_start$alt$nomove_src$type$nomove_end";
+            if( $this->coord_borders & COORD_RIGHT )
+               echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
-            $letter_c++;
-            $letter++; if( $letter == 'i' ) $letter++;
+            echo "</tr>\n";
+            $letter_r++;
          }
 
          if( $smooth_edge )
-            echo '<td>' . $edge_vert . "r.gif\"></td>\n";
+            $this->draw_edge_row( $edge_start.'d', $edge_coord,
+                                  $border_start, $border_imgs, $border_rem );
 
-         if( $this->coord_borders & COORD_RIGHT )
-            echo $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
+         if( $this->coord_borders & COORD_DOWN )
+            $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
+                              $coord_left, $coord_right );
 
-         echo "</tr>\n";
-         $letter_r++;
-      }
-
-      if( $smooth_edge )
-         $this->draw_edge_row( $edge_start.'d', $edge_coord,
-                               $border_start, $border_imgs, $border_rem );
-
-      if( $this->coord_borders & COORD_DOWN )
-         $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end,
-                           $coord_left, $coord_right );
-
-      echo '</tbody>';
-      echo "</table>\n";
+         echo '</tbody>';
+         echo "</table>\n";
       } //goban
    } //draw_board
 
@@ -752,21 +746,13 @@ class Board
             $stone = (int)@$this->array[$colnr][$this->size-$rownr];
             $empty = false;
             if( $stone == BLACK )
-            {
                $type = 'X';
-            }
             else if( $stone == WHITE )
-            {
                $type = 'O';
-            }
             else if( $stone == BLACK_DEAD )
-            {
                $type = 'x';
-            }
             else if( $stone == WHITE_DEAD )
-            {
                $type = 'o';
-            }
             else
             {
                $empty = true;
@@ -802,9 +788,7 @@ class Board
                $pre_mark = true;
             }
             else
-            {
                $out .= " $type";
-            }
 
             $letter_c++;
          }
@@ -887,9 +871,9 @@ class Board
 
             $new_color = @$this->array[$nx][$ny];
 
-            if( (!$new_color || $new_color == NONE ) &&
-                ($nx >= 0) && ($nx < $this->size) &&
-                ($ny >= 0) && ($ny < $this->size) )
+            if( (!$new_color || $new_color == NONE )
+                  && ($nx >= 0) && ($nx < $this->size)
+                  && ($ny >= 0) && ($ny < $this->size) )
                return true; // found liberty
 
             if( $new_color == $c && !@$index[$nx][$ny])
@@ -914,8 +898,10 @@ class Board
          $y = $rownr+$this->diry[$i];
 
          if( @$this->array[$x][$y] == $col )
+         {
             if( !$this->has_liberty_check( $x, $y, $prisoners, true) )
                $some = true;
+         }
       }
       return $some;
    } //check_prisoners
@@ -969,8 +955,8 @@ class Board
             $nx = $x+$this->dirx[$dir];
             $ny = $y+$this->diry[$dir];
 
-            if( ( $nx < 0 ) || ($nx >= $this->size) || ($ny < 0) || ($ny >= $this->size) ||
-                isset($index[$nx][$ny]) )
+            if( ( $nx < 0 ) || ($nx >= $this->size) || ($ny < 0) || ($ny >= $this->size)
+                  || isset($index[$nx][$ny]) )
                continue;
 
             $new_color = @$this->array[$nx][$ny];
@@ -985,17 +971,11 @@ class Board
             else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
             {
                if( $new_color == MARKED_DAME )
-               {
                   $c = NONE; // This area will become dame
-               }
                else if( $c == -1 )
-               {
                   $c = $new_color;
-               }
                else if( $c == (WHITE+BLACK-$new_color) )
-               {
                   $c = NONE; // This area has both colors as boundary
-               }
             }
          }
       }
@@ -1009,9 +989,7 @@ class Board
          for( $y=0; $y<$this->size; $y++)
          {
             if( !@$this->array[$x][$y] || $this->array[$x][$y] == NONE )
-            {
                $this->mark_territory( $x, $y);
-            }
          }
       }
 
@@ -1044,13 +1022,13 @@ class Board
 
    function toggle_marked_area( $x, $y, &$marked, $companion_groups=true )
    {
-
       $c = @$this->array[$x][$y]; // Color of this stone
 
-   /* Actually, $opposite_dead force an already marked dead neighbour group from the
-      opposite color to reverse to not dead, but this does not work properly if
-      $companion_groups is not true, as both groups may be not touching themself.
-   */
+      /***
+       * Actually, $opposite_dead force an already marked dead neighbour group from the
+       * opposite color to reverse to not dead, but this does not work properly if
+       * $companion_groups is not true, as both groups may be not touching themself.
+       ***/
       if( $companion_groups && ($c == BLACK || $c == WHITE) )
          $opposite_dead = WHITE+BLACK_DEAD-$c ;
       else
@@ -1115,32 +1093,30 @@ class Board
    // be extra entries in the Moves and MoveMessages tables.
    function fix_corrupted_move_table( $gid)
    {
-     $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",
-              "SELECT Moves FROM Games WHERE ID=$gid" );
-     if( !$row )
-        error('internal_error', "board.fix_corrupted_move_table.moves($gid)");
-     $Moves= $row['Moves'];
+      $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",
+         "SELECT Moves FROM Games WHERE ID=$gid" );
+      if( !$row )
+         error('internal_error', "board.fix_corrupted_move_table.moves($gid)");
+      $Moves = $row['Moves'];
 
-     $row= mysql_single_fetch( "board.fix_corrupted_move_table.max: $gid",
-              "SELECT MAX(MoveNr) AS max FROM Moves WHERE gid=$gid" );
-     if( !$row )
-        error('internal_error', "board.fix_corrupted_move_table.max($gid)");
-     $max_movenr= $row['max'];
+      $row = mysql_single_fetch( "board.fix_corrupted_move_table.max: $gid",
+         "SELECT MAX(MoveNr) AS max FROM Moves WHERE gid=$gid" );
+      if( !$row )
+         error('internal_error', "board.fix_corrupted_move_table.max($gid)");
+      $max_movenr= $row['max'];
 
-     if($max_movenr == $Moves)
-        return;
+      if($max_movenr == $Moves)
+         return;
 
-     if($max_movenr != $Moves+1)
-        error("mysql_data_corruption",
-              "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
+      if( $max_movenr != $Moves+1 )
+         error("mysql_data_corruption",
+            "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
 
-     db_query( "board.fix_corrupted_move_table.delete_moves($gid)",
+      db_query( "board.fix_corrupted_move_table.delete_moves($gid)",
          "DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr" );
-     db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
+      db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
          "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
    }
-
-
 } //class Board
 
 ?>

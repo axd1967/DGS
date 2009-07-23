@@ -22,32 +22,33 @@ $TranslateGroups[] = "Users";
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
-connect2mysql();
+{
+   connect2mysql();
 
-$logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row);
 
-if( !$logged_in )
-   error("not_logged_in");
+   if( !$logged_in )
+      error("not_logged_in");
 
 
-start_page(T_("Edit password"), true, $logged_in, $player_row );
+   start_page(T_("Edit password"), true, $logged_in, $player_row );
 
-echo "<CENTER>\n";
+   echo "<CENTER>\n";
 
-$pass_form = new Form( 'passwordform', 'change_password.php', FORM_POST );
+   $pass_form = new Form( 'passwordform', 'change_password.php', FORM_POST );
 
-$pass_form->add_row( array( 'DESCRIPTION', T_('Old password'),
-                            'PASSWORD', 'oldpasswd',16,16 ) );
-$pass_form->add_row( array( 'DESCRIPTION', T_('New password'),
-                            'PASSWORD', 'passwd',16,16 ) );
-$pass_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
-                            'PASSWORD', 'passwd2',16,16 ) );
-$pass_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change password') ) );
+   $pass_form->add_row( array( 'DESCRIPTION', T_('Old password'),
+                               'PASSWORD', 'oldpasswd',16,16 ) );
+   $pass_form->add_row( array( 'DESCRIPTION', T_('New password'),
+                               'PASSWORD', 'passwd',16,16 ) );
+   $pass_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
+                               'PASSWORD', 'passwd2',16,16 ) );
+   $pass_form->add_row( array( 'SUBMITBUTTON', 'action', T_('Change password') ) );
 
-$pass_form->echo_string(1);
+   $pass_form->echo_string(1);
 
-echo "</CENTER>\n";
+   echo "</CENTER>\n";
 
-end_page();
-
+   end_page();
+}
 ?>

@@ -74,6 +74,7 @@ function echo_query( $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
             case 'Email':
                if( $val ) $val= '***';
                break;
+
             case 'Debug':
                if( $val )
                   $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
@@ -113,17 +114,11 @@ function uid_clause( $fld, $oper)
 {
    global $uid1, $uid2;
    if( $uid1>'' && $uid2>'' )
-   {
       return " $oper ($fld>=$uid1 AND $fld<=$uid2)";
-   }
    elseif( $uid1>'' )
-   {
       return " $oper ($fld=$uid1)";
-   }
    else
-   {
       return '';
-   }
 }
 
 

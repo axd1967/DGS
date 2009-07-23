@@ -100,7 +100,7 @@ class Table_info
       $this->Tablerows[]= array(
             'caption' => $capt,
             'cattb' => 'class=Caption'
-            );
+         );
    }
 
    /*! \brief Add an caption row to be displayed.
@@ -112,7 +112,7 @@ class Table_info
       $this->Tablerows[]= array(
             'scaption' => $scapt,
             'cattb' => 'class=Caption'
-            );
+         );
    }
 
    /*! \brief Add an info row to be displayed.
@@ -126,7 +126,7 @@ class Table_info
             'info' => $info,
             'iattb' => $iattb,
             'nattb' => $nattb,
-            );
+         );
       $this->check_cols( $info );
    }
 
@@ -141,7 +141,7 @@ class Table_info
             'sinfo' => $sinfo,
             'iattb' => $iattb,
             'nattb' => $nattb,
-            );
+         );
       $this->check_cols( $sinfo );
    }
 
@@ -209,9 +209,7 @@ class Table_info
 */
       $string.= ">\n  ";
 
-      if( isset($tablerow['caption'])
-         || isset($tablerow['scaption'])
-         )
+      if( isset($tablerow['caption']) || isset($tablerow['scaption']) )
       {
          $string.= $this->add_cell( $tablerow,
             'caption', 'scaption', 'cattb', '<th colspan='.($this->Columns).'$>', '</th>');

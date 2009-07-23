@@ -66,7 +66,7 @@ $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_e
 function reverse_htmlentities( $str)
 {
    //return html_entity_decode($str, ENT_QUOTES, 'UTF-8');
- global $reverse_htmlentities_table;
+   global $reverse_htmlentities_table;
    return strtr($str, $reverse_htmlentities_table);
 }
 
@@ -75,7 +75,7 @@ function reverse_htmlentities( $str)
 function wap_safe( $str)
 {
    $str = reverse_htmlentities( $str);
- global $xmltrans;
+   global $xmltrans;
    return strtr($str, $xmltrans);
 }
 
@@ -94,9 +94,9 @@ function wap_date( $dat=0)
 $wapid= 0;
 function wap_id()
 {
-  global $wapid;
-  $wapid++;
-  return $wapid;
+   global $wapid;
+   $wapid++;
+   return $wapid;
 }
 
 
@@ -110,8 +110,10 @@ function wap_open( $title)
    $wap_opened= true;
 
    if( empty($encoding_used) )
+   {
       $encoding_used = 'UTF-8';
       //$encoding_used = 'iso-8859-1';
+   }
 
    header('Content-Type: text/vnd.wap.wml; charset='.$encoding_used);
 

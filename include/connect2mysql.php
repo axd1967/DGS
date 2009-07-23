@@ -161,7 +161,8 @@ function connect2mysql($no_errors=false)
       @mysql_close( $dbcnx);
       $dbcnx= 0;
       $err= 'mysql_select_db_failed';
-      if( $no_errors ) return $err;
+      if( $no_errors )
+         return $err;
       //TODO: error() with no err_log()
       error($err);
    }
@@ -275,7 +276,9 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       case 41: $method='PASSWORD'; break;
       case 40: $method='SHA1'; break;
       case 32: $method='MD5'; break;
-      default: $method= (version_compare(MYSQL_VERSION, '4.1', '<') ? 'PASSWORD' : 'OLD_PASSWORD'); break;
+      default:
+         $method= (version_compare(MYSQL_VERSION, '4.1', '<') ? 'PASSWORD' : 'OLD_PASSWORD');
+         break;
    }
    $given_passwd_encrypted =
       mysql_single_fetch( 'check_password.get_password',

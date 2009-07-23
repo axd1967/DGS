@@ -110,21 +110,19 @@ $xmltrans['$'] = '\$';
 switch( (string)CHARSET_MODE )
 {
    case 'iso':
-   {
       $encoding_used = 'iso-8859-1';
 
       for( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";
-   }
-   break;
+      break;
+
    case 'utf':
-   {
       $encoding_used = 'utf-8';
 
       for( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";
-   }
-   break;
+      break;
+
    default:
       error('internal_error', 'rss.no_charset');
 }
@@ -138,7 +136,7 @@ $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_e
 function reverse_htmlentities( $str)
 {
    //return html_entity_decode($str, ENT_QUOTES, 'UTF-8');
- global $reverse_htmlentities_table;
+   global $reverse_htmlentities_table;
    return strtr($str, $reverse_htmlentities_table);
 }
 
@@ -147,7 +145,7 @@ function reverse_htmlentities( $str)
 function rss_safe( $str)
 {
    $str = reverse_htmlentities( $str);
- global $xmltrans;
+   global $xmltrans;
    //XML seems to not like some chars sequances (like "'$$'")
    return '<![CDATA[' . strtr($str, $xmltrans) . ']]>';
    //return strtr($str, $xmltrans);
@@ -197,8 +195,10 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
    $last_modified_stamp= $NOW;
 
    if( empty($encoding_used) )
+   {
       $encoding_used = 'UTF-8'; //really better for RSS feeders
       //$encoding_used = 'iso-8859-1';
+   }
 
    if( empty($html_clone) )
       $html_clone = HOSTBASE;
@@ -224,12 +224,6 @@ the URL for the file, which is:
 and paste it into your RSS reader or podcast program.
 
 -->\n";
-
-/*
-If you need to know more about how to do this,
-please go to the following web pages to learn
-about RSS services.
-*/
 
    $title = FRIENDLY_LONG_NAME.' - '.$title;
    echo " <channel>\n"

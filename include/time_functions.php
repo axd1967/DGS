@@ -53,12 +53,12 @@ function unix_timestamp($date)
 // >>> Caution: the result depends of the current timezone (see setTZ())
 function get_clock_used($nightstart)
 {
-/***
- * originally:  return gmdate('G', mktime( $nightstart,0,0));
- * but because ($nightstart,0,0) could fall in the one hour gap
- * when DST is active, mktime() can return undefined result.
- * must ALWAYS return an integer 0 <= n < 24   => clock ID
- ***/
+   /***
+    * originally:  return gmdate('G', mktime( $nightstart,0,0));
+    * but because ($nightstart,0,0) could fall in the one hour gap
+    * when DST is active, mktime() can return undefined result.
+    * must ALWAYS return an integer 0 <= n < 24   => clock ID
+    ***/
    $d= date("j");
    $m= date("n");
    $y= date("Y");
@@ -156,15 +156,14 @@ function ticks_to_hours($ticks)
    return ( $ticks > TICK_FREQUENCY ? floor(($ticks-1) / TICK_FREQUENCY) : 0 );
 }
 
-function time_remaining( $hours, &$main, &$byotime, &$byoper
-   , $startmaintime, $byotype, $startbyotime, $startbyoper, $has_moved)
+function time_remaining( $hours, &$main, &$byotime, &$byoper,
+      $startmaintime, $byotype, $startbyotime, $startbyoper, $has_moved)
 {
    $elapsed = $hours;
 
    if( $main > $elapsed ) // still have main time left
    {
       $main -= $elapsed;
-
       if( $has_moved && $byotype == 'FIS' )
          $main = min($startmaintime, $main + $startbyotime);
 
@@ -178,10 +177,8 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
    switch((string)$byotype)
    {
       case BYOTYPE_FISCHER:
-      {
          $byotime = $byoper = 0;  // time is up
-      }
-      break;
+         break;
 
       case BYOTYPE_JAPANESE:
       {
@@ -227,8 +224,8 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
             $byotime = $startbyotime;
          else
             $byotime-= $elapsed - $deltaper*$startbyotime;
-      }
-      break;
+         break;
+      }//case BYOTYPE_JAPANESE
 
       case BYOTYPE_CANADIAN:
       {
@@ -257,8 +254,8 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper
                $byoper = $startbyoper;
             }
          }
-      }
-      break;
+         break;
+      }//case BYOTYPE_CANADIAN
    }
 } //time_remaining
 
@@ -271,7 +268,7 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods,
       $currMaintime, $currByotime, $currByoperiods )
 {
    $result = 0;
-   switch((string)$byotype)
+   switch( (string)$byotype )
    {
       case BYOTYPE_FISCHER:
          $result = ($currMaintime > 0) ? $currMaintime : 0;
@@ -306,6 +303,7 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods,
             else
                $result = 0;
          }
+         break;
    }
    return $result;
 }
@@ -478,8 +476,8 @@ function echo_time_limit( $maintime, $byotype, $byotime, $byoper
 } //echo_time_limit
 
 
-function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
-      , $startbyotime, $keep_english=false, $short=false, $btype=false)
+function echo_time_remaining( $maintime, $byotype, $byotime, $byoper,
+      $startbyotime, $keep_english=false, $short=false, $btype=false)
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 

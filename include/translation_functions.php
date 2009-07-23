@@ -27,22 +27,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     so very soon.
 */
 if( !isset($known_languages) )
+{
    if( file_exists( "translations/known_languages.php") )
       include_once( "translations/known_languages.php" );
+}
 
 
 /* examples:
-* $known_languages = array(
-*    "en" => array( "iso-8859-1" => "English" ),
-*    "zh" => array( "utf-8" => "Chinese (Traditional)" ),
-*    "zh-cn" => array( "utf-8" => "Chinese (Simplified)" ),
-*    "jp" => array( "utf-8" => "Japanese" ) );
-* $row['Translator'] = 'en.iso-8859-1,zh-cn.utf-8,jp.utf-8';
-* get_language_descriptions_translated() : array(
-*    "en.iso-8859-1" => "English",
-*    "zh-cn.utf-8" => "Chinese (Simplified)",
-*    "jp.utf-8" => "Japanese" );
-*/
+ * $known_languages = array(
+ *    "en" => array( "iso-8859-1" => "English" ),
+ *    "zh" => array( "utf-8" => "Chinese (Traditional)" ),
+ *    "zh-cn" => array( "utf-8" => "Chinese (Simplified)" ),
+ *    "jp" => array( "utf-8" => "Japanese" ) );
+ * $row['Translator'] = 'en.iso-8859-1,zh-cn.utf-8,jp.utf-8';
+ * get_language_descriptions_translated() : array(
+ *    "en.iso-8859-1" => "English",
+ *    "zh-cn.utf-8" => "Chinese (Simplified)",
+ *    "jp.utf-8" => "Japanese" );
+ */
 
 
 function T_($string)
@@ -67,6 +69,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
    global $TranslateGroups, $known_languages;
 
    if( !isset($known_languages) )
+   {
       if( !file_exists( "translations/known_languages.php") )
       {
          require_once( "include/make_translationfiles.php" );
@@ -75,6 +78,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
          //include( "translations/known_languages.php");
          make_include_files(); //must be called from main dir
       }
+   }
 
    $TranslateGroups = array_unique($TranslateGroups);
 
@@ -83,7 +87,9 @@ function include_all_translate_groups($player_row=null) //must be called from ma
       return;
 
    foreach( $TranslateGroups as $group )
+   {
       include_translate_group($group, $language); //must be called from main dir
+   }
 }
 
 //called by include_all_translate_groups()

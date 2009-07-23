@@ -55,7 +55,9 @@ require_once( "include/std_functions.php" );
       $oldpasswd = @$_POST['oldpasswd'];
       if( !check_password( $player_row["Handle"], $player_row["Password"],
                            $player_row["Newpassword"], $oldpasswd ) )
+      {
          error("wrong_password");
+      }
 
       $passwd = @$_POST['passwd'];
       if( strlen($passwd) < 6 )

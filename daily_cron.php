@@ -24,6 +24,7 @@ require_once( "include/classlib_userquota.php" );
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
+
 if( !$is_down )
 {
    if( @$chained ) //when chained after halfhourly_cron.php
@@ -55,15 +56,15 @@ if( !$is_down )
       or $TheErrors->dump_exit('daily_cron');
 
 
-   //$delete_messages = false;
+   //$delete_messages = false; TODO not used
    //$delete_invitations = false;
    $delete_waitingroom_entries = true;
-   //$message_timelimit = 90; //days
+   //$message_timelimit = 90; //days TODO not used
    //$invite_timelimit = 60; //days
    $waitingroom_timelimit = 30; //days
 
 
-/* to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = FOLDER_DESTROYED).
+/* TODO: to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = FOLDER_DESTROYED).
    if( $delete_invitations )
    {
       // Delete old invitations
@@ -131,13 +132,13 @@ if num_rows==2 {compute differences and checks}
    $today_stats= array();
    foreach( array(
       'finished' =>
-       "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished"
+         "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished"
          ." FROM Games WHERE Status='FINISHED'",
       'running' =>
-       "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning"
+         "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning"
          ." FROM Games WHERE Status" . IS_RUNNING_GAME,
       'users' =>
-       "SELECT SUM(Hits) AS Hits, Count(*) AS Users, SUM(Activity)/$ActivityForHit AS Activity"
+         "SELECT SUM(Hits) AS Hits, Count(*) AS Users, SUM(Activity)/$ActivityForHit AS Activity"
          ." FROM Players",
       ) as $key => $query )
    {
@@ -218,8 +219,7 @@ if num_rows==2 {compute differences and checks}
 
 if(1){//new
    $result = db_query( 'daily_cron.night_hours',
-      "SELECT ID, Timezone, Nightstart, ClockUsed"
-         . " FROM Players WHERE ClockChanged='Y'" );
+      "SELECT ID, Timezone, Nightstart, ClockUsed FROM Players WHERE ClockChanged='Y'" );
    //adjustments from/to summertime are checked in status.php
 
    if( @mysql_num_rows( $result) > 0 )

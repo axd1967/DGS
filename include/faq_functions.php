@@ -30,16 +30,18 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
    $str = '';
    switch( $level )
    {
-      case -1: {
+      case -1:
          if( $prevlevel > 1 )
             $str.= "\n</ul>";
          if( $prevlevel > 0 )
             $str.= "\n</div>\n";
          $level = 0;
-      } //break;
-      case 0: {
-      } break;
-      case 1: {
+         //break;
+
+      case 0:
+         break;
+
+      case 1:
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
             $tmp = UNKNOWN_VALUE;
@@ -55,8 +57,9 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
          //if( $prevlevel < 1 )
             $str.= "\n<div class=FAQlevel1>";
          $str.= "\n$itm";
-      } break;
-      default: {
+         break;
+
+      default:
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
             $tmp = UNKNOWN_VALUE;
@@ -73,7 +76,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
          if( $prevlevel < 2 )
             $str.= "\n<ul class=FAQlevel2>";
          $str.= "\n<li>$itm</li>";
-      } break;
+         break;
    }
    $prevlevel = $level;
    return $str;

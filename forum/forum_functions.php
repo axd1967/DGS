@@ -575,19 +575,20 @@ class DisplayForum
       $c = FORUM_MAX_INDENT+1 - $i;
       switch( (int)$i )
       {
-         case 1: break;
+         case 1:
+            break;
 
          case 2:
             echo "$indent";
-         break;
+            break;
 
          case 3:
             echo "<td class=Indent2></td>$indent";
-         break;
+            break;
 
          default:
             echo "<td class=Indent2 colspan=".($i-2)."></td>$indent";
-         break;
+            break;
       }
 
       // finally, open the cell table

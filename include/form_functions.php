@@ -218,8 +218,7 @@ class Form
 
 
    /*! \brief Constructor. Initializes various variables. */
-   function Form( $name, $action_page, $method
-         , $echo_form_start_now=false, $class='FormClass' )
+   function Form( $name, $action_page, $method, $echo_form_start_now=false, $class='FormClass' )
    {
       $this->attached = array();
       $this->hiddens_echoed = false;
@@ -530,7 +529,7 @@ class Form
             {
                if( $hgr[0] == 'G' )
                   $hgr = $groups[ substr($hgr,1) ];
-               else if( $hgr < 1 )
+               elseif( $hgr < 1 )
                   error('internal_error', "Form.parse_layout_global.area-num.H<1");
                else
                   $this->areas[$hgr] = 1;
@@ -545,7 +544,7 @@ class Form
                      error('internal_error', "Form.parse_layout_global.missing_area-num.V($layout)"); // around a '|'
                   if( $vgr[0] == 'G' )
                      $vgr = $groups[ substr($vgr,1) ];
-                  else if( $vgr < 1 )
+                  elseif( $vgr < 1 )
                      error('internal_error', "Form.parse_layout_global.area-num.V<1");
                   else
                      $this->areas[$vgr] = 1;
@@ -632,13 +631,9 @@ class Form
       else
       {
          if( empty($this->rows) )
-         {
             $line_no = $this->line_no_step;
-         }
          else
-         {
             $line_no = max( array_keys( $this->rows ) ) + $this->line_no_step;
-         }
       }
 
       $this->rows[ $line_no ] = array( $make_texts_safe, $row_array, $this->area );
@@ -933,8 +928,10 @@ class Form
       if( isset($this->areaconf[$area][$context]) )
          return $this->areaconf[$area][$context]; // special first
       if( $area !== FAREA_ALL ) // all already checked
+      {
          if( isset($this->areaconf[FAREA_ALL][$context]) )
             return $this->areaconf[FAREA_ALL][$context]; // all
+      }
       return '';
    }
 
@@ -1215,8 +1212,8 @@ class Form
 
    function print_start_default()
    {
-      return $this->print_start( $this->name, $this->action
-            , $this->method, $this->form_attributes, $this->fclass);
+      return $this->print_start( $this->name, $this->action,
+            $this->method, $this->form_attributes, $this->fclass);
    }
 
    /*!
@@ -1528,8 +1525,7 @@ class Form
          if( $syntax )
             $msg.= "; $syntax";
       }
-      return $prefix . T_('Error#filter') . ': '
-         . make_html_safe( $msg ) . $suffix;
+      return $prefix . T_('Error#filter') . ': ' . make_html_safe( $msg ) . $suffix;
    }
 
    /*!
@@ -1554,8 +1550,7 @@ class Form
          if( $syntax )
             $msg.= "; $syntax";
       }
-      return $prefix . T_('Warning#filter') . ': '
-         . make_html_safe( $msg ) . $suffix;
+      return $prefix . T_('Warning#filter') . ': ' . make_html_safe( $msg ) . $suffix;
    }
 
    /*!
@@ -1626,9 +1621,9 @@ class Form
    /*! \brief Get the global attributs string of input fields. */
    function get_input_attbs()
    {
-      return ($this->disabled ? ' disabled'
-            : ($this->tabindex ? ' tabindex="'.($this->tabindex++).'"'
-             : ''));
+      return ($this->disabled)
+         ? ' disabled'
+         : ( $this->tabindex ? ' tabindex="'.($this->tabindex++).'"' : '');
    }
 
    /*! \brief Get the merged attributs string of a form part. */
@@ -1688,6 +1683,6 @@ class Form
       return build_hidden( $hiddens);
    }
 
-}
+} // end of class 'Form'
 
 ?>

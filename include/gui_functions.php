@@ -132,8 +132,10 @@ function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stoppe
    if( (is_numeric($on_vacation) && $on_vacation > 0) || $on_vacation )
    {
       $title = T_('On vacation');
-      if( $vacText != '' ) $title .= " ($vacText)";
-      if( $game_clock_stopped ) $title .= ', ' . T_('Game clock stopped');
+      if( $vacText != '' )
+         $title .= " ($vacText)";
+      if( $game_clock_stopped )
+         $title .= ', ' . T_('Game clock stopped');
       $attbs = ($on_vacation === true ) ? '' : 'class="InTextImage"';
       return image( $base_path.'images/vacation.gif', $title, null, $attbs );
    }

@@ -221,7 +221,8 @@ class BasicParser
     * \brief Returns true, if specified flag in parsing-flags set.
     * signature: bool is_flags_set()
     */
-   function is_flags_set( $flag ) {
+   function is_flags_set( $flag )
+   {
       return (bool)( $this->flags & $flag );
    }
 
@@ -229,7 +230,8 @@ class BasicParser
     * \brief Returns null on error; otherwise bool indicating if specified flag in parsed-flags ($p_flags)
     * signature: bool|null = is_parsed_flags_set()
     */
-   function is_parsed_flags_set( $flag ) {
+   function is_parsed_flags_set( $flag )
+   {
       if( $this->errormsg != '' )
          return null;
       return (bool)( $this->p_flags & $flag );
@@ -242,7 +244,8 @@ class BasicParser
     * \brief parses value with specified flags, updates: value, flags, errormsg, p_start/p_end/p_value/p_flags.
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse( $value, $flags = 0) {
+   function parse( $value, $flags = 0)
+   {
       // concrete parser needs to implement this abstract method
       error('invalid_filter', "filter_parser.parse.miss_implementation(".get_class($this).")");
    }
@@ -255,7 +258,8 @@ class BasicParser
     *        and returns true, if swapped; false otherwise.
     * signature: void handle_reverse_range([bool force = false])
     */
-   function handle_reverse_range( $force = false ) {
+   function handle_reverse_range( $force = false )
+   {
       $swapped = false;
       if( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) || $force )
       {
@@ -272,7 +276,8 @@ class BasicParser
     * \brief returns true, if p_start > p_end
     * signature: bool is_reverse_range()
     */
-   function is_reverse_range() {
+   function is_reverse_range()
+   {
       if( (string)$this->p_start != '' && (string)$this->p_end != '' )
          return ( $this->p_start > $this->p_end );
       else
@@ -283,7 +288,8 @@ class BasicParser
     * \brief swaps p_start and p_end
     * signature: void swap_range_start_end()
     */
-   function swap_range_start_end() {
+   function swap_range_start_end()
+   {
       swap( $this->p_start, $this->p_end );
    }
 } // end of 'BasicParser'
@@ -303,7 +309,8 @@ class BasicParser
 class NumericParser extends BasicParser
 {
    /*! \brief Constructs NumericParser( string value, TokenizerConfig tok_config, int flags ). */
-   function NumericParser( $value, $tok_config, $flags = 0 ) {
+   function NumericParser( $value, $tok_config, $flags = 0 )
+   {
       parent::BasicParser( $value, $tok_config, $flags );
       $this->parse($value, $flags);
    }
@@ -312,7 +319,8 @@ class NumericParser extends BasicParser
     * \brief Parses value with specified $flags
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse($value, $flags) {
+   function parse($value, $flags)
+   {
       $this->init_parse($value, $flags);
       if( $this->value == '' )
          return true; // empty (no-error)
@@ -408,7 +416,8 @@ define('STARTWILD_OPTMINCHARS', 4); // value for filter-config FC_START_WILD or 
 class TextParser extends BasicParser
 {
    /*! \brief Constructs TextParser( string value, TokenizerConfig tok_config, int flags ). */
-   function TextParser( $value, $tok_config, $flags = 0 ) {
+   function TextParser( $value, $tok_config, $flags = 0 )
+   {
       if( $flags & TEXTPARSER_IMPLICIT_WILD )
          $flags |= TEXTPARSER_FORBID_RANGE | TEXTPARSER_ALLOW_START_WILD;
       parent::BasicParser( $value, $tok_config, $flags );
@@ -419,7 +428,8 @@ class TextParser extends BasicParser
     * \brief Parses value with specified $flags
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse($value, $flags) {
+   function parse($value, $flags)
+   {
       $this->init_parse($value, $flags);
       if( $this->value == '' )
          return true; // empty (no-error)

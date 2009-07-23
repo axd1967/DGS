@@ -31,8 +31,8 @@ $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
 $reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
 function reverse_htmlentities( $str )
 {
- global $reverse_htmlentities_table;
-  return strtr($str, $reverse_htmlentities_table);
+   global $reverse_htmlentities_table;
+   return strtr($str, $reverse_htmlentities_table);
 }
 
 
@@ -263,13 +263,13 @@ function sgf_create_territories( $size, &$array,
                $black_prisoner[$coord]='AE';
             case BLACK_TERRITORY:
                $black_territory[$coord]='TB';
-            break;
+               break;
 
             case BLACK_DEAD:
                $white_prisoner[$coord]='AE';
             case WHITE_TERRITORY:
                $white_territory[$coord]='TW';
-            break;
+               break;
          }
       }
    }
@@ -317,27 +317,27 @@ $array=array();
    connect2mysql();
 
 
-//As board size may be > 'tt' coord, we can't use [tt] for pass moves
-// so we use [] and, then, we need at least sgf_version = 4 (FF[4])
+   //As board size may be > 'tt' coord, we can't use [tt] for pass moves
+   // so we use [] and, then, we need at least sgf_version = 4 (FF[4])
    $sgf_version = 4;
 
-/*
-   WARNING: Some fields could cause problems because of charset:
-   - those coming from user (like $Blackname)
-   - those translated (like score2text(), echo_rating() or echo_time_limit())
-     (but, actually, the translation database is not available here)
-   We could use the CA[] (FF[4]) property if we know what it is.
-*/
+   /*
+      WARNING: Some fields could cause problems because of charset:
+      - those coming from user (like $Blackname)
+      - those translated (like score2text(), echo_rating() or echo_time_limit())
+      (but, actually, the translation database is not available here)
+      We could use the CA[] (FF[4]) property if we know what it is.
+   */
    //$charset = 'UTF-8'; //by default
    $charset = '';
 
+   /*
+      "AGA" (rules of the American Go Association)
+      "GOE" (the Ing rules of Goe)
+      "Japanese" (the Nihon-Kiin rule set)
+      "NZ" (New Zealand rules)
+   */
    $rules = "Japanese"; //Mandatory for Go (GM[1])
-/*
- "AGA" (rules of the American Go Association)
- "GOE" (the Ing rules of Goe)
- "Japanese" (the Nihon-Kiin rule set)
- "NZ" (New Zealand rules)
-*/
 
    $use_HA = true;
    $use_AB_for_handicap = true;
@@ -700,8 +700,8 @@ $array=array();
                $node_com= "";
             }
             break;
-         }
-      }
+         }//case WHITE/BLACK
+      }//switch $Stone
 
       $sgf_trim_nr--;
    }

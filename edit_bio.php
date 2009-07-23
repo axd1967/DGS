@@ -29,21 +29,16 @@ define('USER_BIO_ADDENTRIES', 3);
 function find_category_box_text($cat)
 {
    global $categories;
-
-   if( array_key_exists($cat, $categories) )
-      return $cat;
-   else
-      return '';
+   return ( array_key_exists($cat, $categories) ) ? $cat : '';
 }
+
 
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
-
+   $logged_in = who_is_logged( $player_row );
    if( !$logged_in )
       error('not_logged_in');
-
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
       error('edit_bio_denied');
 
@@ -51,24 +46,24 @@ function find_category_box_text($cat)
    $editorder = isset($_REQUEST['editorder']);
 
    $result = db_query( "edit_bio.find_bios($my_id)",
-         "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder, ID" );
+      "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder, ID" );
    $row_cnt = @mysql_num_rows($result);
 
-   $categories = array( '' => T_('Other:'),
-                        'Country' => T_('Country'),
-                        'City' => T_('City'),
-                        'State' => T_('State'),
-                        'Club' => T_('Club'),
-                        'Homepage' => T_('Homepage'),
-                        'Email' => T_('Email'),
-                        'ICQ-number' => T_('ICQ-number'),
-                        'Game preferences' => T_('Game preferences'),
-                        'Hobbies' => T_('Hobbies'),
-                        'Occupation' => T_('Occupation'),
-                        'Native Language' => T_('Native Language'),
-                        'Language Competence' => T_('Language Competence'),
-                        );
-
+   $categories = array(
+         '' => T_('Other:'),
+         'Country' => T_('Country'),
+         'City' => T_('City'),
+         'State' => T_('State'),
+         'Club' => T_('Club'),
+         'Homepage' => T_('Homepage'),
+         'Email' => T_('Email'),
+         'ICQ-number' => T_('ICQ-number'),
+         'Game preferences' => T_('Game preferences'),
+         'Hobbies' => T_('Hobbies'),
+         'Occupation' => T_('Occupation'),
+         'Native Language' => T_('Native Language'),
+         'Language Competence' => T_('Language Competence'),
+      );
 
 
    $page = "edit_bio.php";
@@ -83,117 +78,107 @@ function find_category_box_text($cat)
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
+
+   $cat_max = 40;
+   $cat_width = 20;
+   $text_width = 70;
+   $text_height = 4;
+
+   $moveurl = 'change_bio.php';
+   if( !$editorder )
+      $bio_form = new Form( 'bioform', $moveurl, FORM_POST );
+   else
+      $bio_table = new Table_info('biomove');
+   $moveurl .= '?';
+
+   while( $row = mysql_fetch_assoc( $result ) )
    {
-      $cat_max = 40;
-      $cat_width = 20;
-      $text_width = 70;
-      $text_height = 4;
-
-      $moveurl = 'change_bio.php';
-      if( !$editorder )
-      {
-         $bio_form = new Form( 'bioform', $moveurl, FORM_POST );
-      }
+      $bid = $row['ID'];
+      $other = $row['Category'];
+      $cat = find_category_box_text($other);
+      if( $cat )
+         $other = '';
       else
       {
-         $bio_table= new Table_info('biomove');
+         if( substr( $other, 0, 1) == '=' )
+            $other = substr( $other, 1);
+         $other = make_html_safe($other, INFO_HTML);
       }
-      $moveurl.= '?';
-
-      while( $row = mysql_fetch_assoc( $result ) )
-      {
-         $bid = $row['ID'];
-         $other = $row['Category'];
-         $cat = find_category_box_text($other);
-         if( $cat )
-            $other = '';
-         else
-         {
-            if( substr( $other, 0, 1) == '=' )
-               $other = substr( $other, 1);
-            $other = make_html_safe($other, INFO_HTML);
-         }
-
-         if( !$editorder )
-         { //edit bio fields
-            // adapt text-height
-            $linecount = substr_count( $row['Text'], "\n" );
-            $txth_adapted = max( $text_height, min( 12, (int)($linecount / 1.3) ));
-
-            $bio_row = array(
-               'CELL', 0, 'class=Header',
-               'SELECTBOX', "category$bid", 1, $categories, $cat, false,
-               'BR',
-               'TEXTINPUT', "other$bid", $cat_width, $cat_max, $other,
-               'CELL', 0, 'class=Info',
-               'TEXTAREA', "text$bid", $text_width, $txth_adapted, $row['Text'],
-            );
-
-            $bio_form->add_row( $bio_row );
-         }
-         else
-         { //edit fields order
-            //$text = make_html_safe($row['Text'], false);
-            $text = textarea_safe($row['Text']);
-            $text = "<TEXTAREA readonly name=\"dtext$bid" //readonly disabled
-               . "\" cols=\"$text_width\" rows=\"$text_height\">$text</TEXTAREA>";
-
-            $bio_table->add_sinfo(
-               '<div>'
-                     . ($cat ?$categories[$cat] :($other ?$other :'&nbsp;'))
-                     . "</div><div class=center>"
-                     . anchor($moveurl."move$bid=1",
-                           image( 'images/down.png', 'down'), T_("Move down"), null)
-                     . anchor($moveurl."move$bid=-1",
-                           image( 'images/up.png', 'up'), T_("Move up"), null)
-                     . "</div>"
-               //don't use add_info() to avoid the INFO_HTML here:
-               ,$text
-            );
-         }
-      } //while($row)
-      mysql_free_result($result);
 
       if( !$editorder )
+      { //edit bio fields
+         // adapt text-height
+         $linecount = substr_count( $row['Text'], "\n" );
+         $txth_adapted = max( $text_height, min( 12, (int)($linecount / 1.3) ));
+
+         $bio_row = array(
+            'CELL', 0, 'class=Header',
+            'SELECTBOX', "category$bid", 1, $categories, $cat, false,
+            'BR',
+            'TEXTINPUT', "other$bid", $cat_width, $cat_max, $other,
+            'CELL', 0, 'class=Info',
+            'TEXTAREA', "text$bid", $text_width, $txth_adapted, $row['Text'],
+         );
+
+         $bio_form->add_row( $bio_row );
+      }
+      else
+      { //edit fields order
+         //$text = make_html_safe($row['Text'], false);
+         $text = textarea_safe($row['Text']);
+         $text = "<TEXTAREA readonly name=\"dtext$bid" //readonly disabled
+            . "\" cols=\"$text_width\" rows=\"$text_height\">$text</TEXTAREA>";
+
+         $bio_table->add_sinfo(
+            '<div>'
+               . ($cat ?$categories[$cat] :($other ?$other :'&nbsp;'))
+               . "</div><div class=center>"
+               . anchor($moveurl."move$bid=1",
+                     image( 'images/down.png', 'down'), T_("Move down"), null)
+               . anchor($moveurl."move$bid=-1",
+                     image( 'images/up.png', 'up'), T_("Move up"), null)
+               . "</div>",
+            //don't use add_info() to avoid the INFO_HTML here:
+            $text
+         );
+      }
+   } //while($row)
+   mysql_free_result($result);
+
+   if( !$editorder )
+   {
+      // And now some empty ones:
+      for($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
       {
-         // And now some empty ones:
-         for($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
-         {
-            $bio_form->add_row( array(
-                  'CELL', 0, 'class=NewHeader',
-                  'SELECTBOX', "newcategory" . $i, 1, $categories, '', false,
-
-                  'BR',
-                  'TEXTINPUT', "newother" . $i, $cat_width, $cat_max, "",
-
-                  'CELL', 0, 'class=NewInfo',
-                  'TEXTAREA', "newtext" . $i, $text_width, $text_height, "",
-               ) );
-         }
-
          $bio_form->add_row( array(
-                  'HIDDEN', 'newcnt', USER_BIO_ADDENTRIES,
-                  'SUBMITBUTTONX', 'action', T_('Change bio'),
-                     array( 'accesskey' => ACCKEY_ACT_EXECUTE )
-               ) );
-         $bio_form->echo_string(1);
+               'CELL', 0, 'class=NewHeader',
+               'SELECTBOX', "newcategory" . $i, 1, $categories, '', false,
+
+               'BR',
+               'TEXTINPUT', "newother" . $i, $cat_width, $cat_max, "",
+
+               'CELL', 0, 'class=NewInfo',
+               'TEXTAREA', "newtext" . $i, $text_width, $text_height, "",
+            ));
       }
-      else
-      {
-         echo '<p>'.T_('change order only, no text-change possible here.').'</p>';
-         $bio_table->echo_table();
-      }
+
+      $bio_form->add_row( array(
+            'HIDDEN', 'newcnt', USER_BIO_ADDENTRIES,
+            'SUBMITBUTTONX', 'action', T_('Change bio'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+         ));
+      $bio_form->echo_string(1);
    }
+   else
+   {
+      echo '<p>'.T_('change order only, no text-change possible here.').'</p>';
+      $bio_table->echo_table();
+   }
+
 
    $menu_array[T_('Show userinfo')] = "userinfo.php?uid=$my_id";
 
    if( !$editorder )
-   {
-      if( $row_cnt > 1 )
-         $page = make_url($page, array( 'editorder' => '1') );
-      else
-         $page = '';
-   }
+      $page = ( $row_cnt > 1 ) ? make_url($page, array( 'editorder' => '1') ) : '';
    if( $page )
       $menu_array[$othertitle] = $page;
 

@@ -33,33 +33,35 @@ function search_browsers($result, &$Browsers)
 //      echo "\n$Browser: ";
 
       foreach( $Browsers as $key => $browserfam )
+      {
+         $nr = 0;
+         foreach( $browserfam as $name => $b )
          {
-            $nr = 0;
-            foreach( $browserfam as $name => $b )
-               {
-                  $res = preg_match("/{$b[0]}/i", $Browser);
+            $res = preg_match("/{$b[0]}/i", $Browser);
 
-                  if( $res == 0 )
-                     if( $nr == 0 )
-                        continue 2;
-                     else
-                        continue;
+            if( $res == 0 )
+            {
+               if( $nr == 0 )
+                  continue 2;
+               else
+                  continue;
+            }
 
-                  $c = ($Browsers[$key][$name][1] += $Count);
-//                  echo $name . ": {$c}  ";
+            $c = ($Browsers[$key][$name][1] += $Count);
+//            echo $name . ": {$c}  ";
 
-                  if( $nr > 0 )
-                     continue 3;
+            if( $nr > 0 )
+               continue 3;
 
-                  $nr++;
-                  $total+=$Count;
-               }
-
-            if( $nr == 1 )
-               continue 2;
-
-            echo "No Browser Found ($Count): {$Browser}<br>\n";
+            $nr++;
+            $total+=$Count;
          }
+
+         if( $nr == 1 )
+            continue 2;
+
+         echo "No Browser Found ($Count): {$Browser}<br>\n";
+      }
 
       echo "No Family Found ($Count): {$Browser}<br>\n";
    }
@@ -71,17 +73,17 @@ function echo_browsers(&$Browsers)
    global $total;
 
    foreach( $Browsers as $key => $browserfam )
+   {
+      $nr = 0;
+      foreach( $browserfam as $name => $b )
       {
-         $nr = 0;
-         foreach( $browserfam as $name => $b )
-            {
-               if( $nr == 1 )
-                  echo "\n--------------";
-               echo "\n$name: {$b[1]}   " . sprintf("%.2f",100*$b[1]/$total) . "%";
-               $nr++;
-            }
-         echo "\n\n";
+         if( $nr == 1 )
+            echo "\n--------------";
+         echo "\n$name: {$b[1]}   " . sprintf("%.2f",100*$b[1]/$total) . "%";
+         $nr++;
       }
+      echo "\n\n";
+   }
 }
 
 

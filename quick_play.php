@@ -45,13 +45,11 @@ else
    $uhandle= safe_getcookie('handle');
    $result = @db_query( 'quick_play.find_player',
       'SELECT ID, Timezone, AdminOptions, ' .
-                           'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
-                           "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+         'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
+      "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
    if( @mysql_num_rows($result) != 1 )
-   {
       error('not_logged_in','qp1');
-   }
 
    $player_row = mysql_fetch_assoc($result);
 
@@ -59,28 +57,26 @@ else
       error('login_denied');
 
    if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
-       || $player_row['Expire'] < $NOW )
+         || $player_row['Expire'] < $NOW )
    {
       error('not_logged_in','qp2');
    }
 
    //TODO: fever vault check ???
-/*
-   setTZ( $player_row['Timezone']);
-*/
+   //setTZ( $player_row['Timezone']);
 
    $my_id = $player_row['ID'];
 
    $game_row = mysql_single_fetch( 'quick_play.find_game',
-                          "SELECT Games.*, " .
-                          "Games.Flags+0 AS GameFlags, " . //used by check_move
-                          "black.ClockUsed AS Blackclock, " .
-                          "white.ClockUsed AS Whiteclock, " .
-                          "black.OnVacation AS Blackonvacation, " .
-                          "white.OnVacation AS Whiteonvacation " .
-                          "FROM (Games, Players AS black, Players AS white) " .
-                          "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
-                          );
+         "SELECT Games.*, " .
+            "Games.Flags+0 AS GameFlags, " . //used by check_move
+            "black.ClockUsed AS Blackclock, " .
+            "white.ClockUsed AS Whiteclock, " .
+            "black.OnVacation AS Blackonvacation, " .
+            "white.OnVacation AS Whiteonvacation " .
+         "FROM (Games, Players AS black, Players AS white) " .
+         "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
+      );
 
    if( !$game_row )
       error('unknown_game');
@@ -108,9 +104,8 @@ else
       error('not_your_turn','qp9');
 
    if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
-      || !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
-      || ($Handicap>1 && $Moves<=$Handicap) //exclude first white move after handicap stones
-     )
+         || !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
+         || ($Handicap>1 && $Moves<=$Handicap) ) //exclude first white move after handicap stones
    {
       error('invalid_action');
    }
@@ -229,58 +224,59 @@ This is why:
    $Moves++;
 
 
+   //case 'domove':
+   {
+      if( $Status != 'PLAY' )
+         error('invalid_action','qp0');
 
-      //case 'domove':
-      {
-         if( $Status != 'PLAY' )
-            error('invalid_action','qp0');
+      $coord = number2sgf_coords( $query_X, $query_Y, $Size);
 
-         $coord = number2sgf_coords( $query_X, $query_Y, $Size);
-
-{//to fix the old way Ko detect. Could be removed when no more old way games.
-  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
-}
-         check_move( $TheBoard, $coord, $to_move);
-//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-//here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
-
-         $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
-
-         $prisoner_string = '';
-         foreach($prisoners as $tmp)
-         {
-            list($x,$y) = $tmp;
-            $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
-            $prisoner_string .= number2sgf_coords($x, $y, $Size);
-         }
-
-         if( strlen($prisoner_string) != $nr_prisoners*2 )
-            error('move_problem','quick_play.domove.prisoner');
-
-         $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
-
-
-         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-             "Last_X=$colnr, " . //used with mail notifications
-             "Last_Y=$rownr, " .
-             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
-             "Status='PLAY', ";
-
-         if( $nr_prisoners > 0 )
-            if( $to_move == BLACK )
-               $game_query .= "Black_Prisoners=$Black_Prisoners, ";
-            else
-               $game_query .= "White_Prisoners=$White_Prisoners, ";
-
-         if( $nr_prisoners == 1 )
-            $GameFlags |= KO;
-         else
-            $GameFlags &= ~KO;
-
-         $game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$GameFlags, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+      {//to fix the old way Ko detect. Could be removed when no more old way games.
+         if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
       }
+      check_move( $TheBoard, $coord, $to_move);
+      //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+      //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+
+      $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
+
+      $prisoner_string = '';
+      foreach($prisoners as $tmp)
+      {
+         list($x,$y) = $tmp;
+         $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+         $prisoner_string .= number2sgf_coords($x, $y, $Size);
+      }
+
+      if( strlen($prisoner_string) != $nr_prisoners*2 )
+         error('move_problem','quick_play.domove.prisoner');
+
+      $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
+
+
+      $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+          "Last_X=$colnr, " . //used with mail notifications
+          "Last_Y=$rownr, " .
+          "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
+          "Status='PLAY', ";
+
+      if( $nr_prisoners > 0 )
+      {
+         if( $to_move == BLACK )
+            $game_query .= "Black_Prisoners=$Black_Prisoners, ";
+         else
+            $game_query .= "White_Prisoners=$White_Prisoners, ";
+      }
+
+      if( $nr_prisoners == 1 )
+         $GameFlags |= KO;
+      else
+         $GameFlags &= ~KO;
+
+      $game_query .= "ToMove_ID=$next_to_move_ID, " .
+          "Flags=$GameFlags, " .
+          $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+   }
 
 
    //See *** HOT_SECTION *** above
@@ -294,28 +290,24 @@ This is why:
 
 
 
-
-
 // Notify opponent about move
 
    db_query( 'quick_play.notify_opponent',
-         "UPDATE Players SET Notify='NEXT'"
-         ." WHERE ID=$next_to_move_ID AND ID!=$my_id"
+      "UPDATE Players SET Notify='NEXT'"
+      ." WHERE ID=$next_to_move_ID AND ID!=$my_id"
          ." AND FIND_IN_SET('ON',SendEmail)"
          //." AND FIND_IN_SET('MOVE',SendEmail)"
          //." AND SendEmail LIKE '%ON%'"
          ." AND Notify='NONE' LIMIT 1" );
 
 
-
 // Increase moves and activity
 
    db_query( 'quick_play.update_player',
-         "UPDATE Players SET Moves=Moves+1"
+      "UPDATE Players SET Moves=Moves+1"
          .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
          .",LastMove=FROM_UNIXTIME($NOW)"
-         ." WHERE ID=$my_id LIMIT 1" );
-
+      ." WHERE ID=$my_id LIMIT 1" );
 
 
 // No Jump somewhere

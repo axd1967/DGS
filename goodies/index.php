@@ -17,11 +17,13 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+{
    $NOW = time();
    header('Expires: ' . gmdate('D, d M Y H:i:s',$NOW) . ' GMT');
    header('Last-Modified: ' . gmdate('D, d M Y H:i:s',$NOW-30) . ' GMT');
    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
    header('Pragma: no-cache');                                              // HTTP/1.0
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -53,7 +55,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
    a desired name link to install it:
   </em>
   <ul>
-  <?php
+<?php
+{
    $files = array();
    if( $fh = opendir('.') )
    {
@@ -65,14 +68,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       closedir($fh);
    } else echo "Error: open dir fails<br />";
    asort( $files);
-   
+
    foreach( $files as $file )
    {
       //echo "<p>$file</p>\n";
       $fh = fopen($file, 'r');
       $txt = fread($fh, filesize($file));
       fclose($fh);
-      
+
       // @name        DGS Section Hide
       foreach( array('name','description') as $field )
       {
@@ -113,10 +116,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       //$str = "<p><strong>Name: <a href='./$file'>$name</a></strong></p>\n";
 
       $txt = "<li>$str$txt</li>\n";
-      
+
       echo $txt;
    } //$files
-  ?>
+}
+?>
   </ul>
  </div>
 </body></html>

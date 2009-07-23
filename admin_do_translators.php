@@ -129,8 +129,8 @@ function retry_admin( $msg)
       $tmp = mysql_addslashes( $browsercode . LANG_CHARSET_CHAR . $charenc );
       db_query( 'admin_do_translators.add.insert',
          "INSERT INTO TranslationLanguages SET " .
-                  "Name='" . mysql_addslashes($langname) . "', " .
-                  "Language='$tmp'" );
+            "Name='" . mysql_addslashes($langname) . "', " .
+            "Language='$tmp'" );
 
       make_known_languages(); //must be called from main dir
 
@@ -156,8 +156,7 @@ function retry_admin( $msg)
       if( empty($transluser) )
          retry_admin( "Sorry, you must specify a user.");
       $row = mysql_single_fetch( 'admin_do_translators.user.find',
-                    "SELECT Translator FROM Players"
-                    ." WHERE Handle='".mysql_addslashes($transluser)."'" );
+         "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
       if( !$row )
          retry_admin( "Sorry, I couldn't find this user.");
       if( !empty($row['Translator']) )
@@ -172,8 +171,10 @@ function retry_admin( $msg)
    if( $transladd )
    {
       if( !empty($transladdlang) )
+      {
          if( !language_exists( $transladdlang ) )
             $transladdlang = '';
+      }
       if( empty($transladdlang) )
          retry_admin( "Sorry, you must specify existing languages.");
 
@@ -208,15 +209,14 @@ function retry_admin( $msg)
 
       db_query( 'admin_do_translators.user.update',
          "UPDATE Players SET Translator='$new_langs'"
-                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
+            . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
 
       if( mysql_affected_rows() != 1 )
          error('internal_error', $update_it);
 
       // Check result
       $tmp = mysql_single_fetch( 'admin_do_translators.user.translator',
-                   "SELECT Translator FROM Players"
-                   ." WHERE Handle='".mysql_addslashes($transluser)."'" );
+         "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
       if( !$tmp )
          $update_it.= '.1';
       else if( !isset($tmp['Translator']) )
@@ -229,7 +229,7 @@ function retry_admin( $msg)
       // Something went wrong. Restore to old set then error
       db_query( 'admin_do_translators.user.revert',
          "UPDATE Players SET Translator='$old_langs'"
-                  ." WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
+            . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
 
       error('couldnt_update_translation', $update_it);
    }
