@@ -198,7 +198,7 @@ function insert_values( $table, $names, $query, $title=false)
 /*
 INSERT INTO TranslationTexts
       (ID,Text,Ref_ID,Translatable) VALUES
-      (5,'Move outside board?',NULL,'Y'),
+      (5,'Move outside board?',0,'Y'),
       (...);
 */
       if( $text )
@@ -838,7 +838,7 @@ function transl_dump( $database)
 #
 # Dumping data for table 'TranslationTexts'
 #
-INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.',NULL,'Done');
+INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.',0,'Done');
 ID,Text,Ref_ID,Translatable
 #
 # Dumping data for table 'Translations'

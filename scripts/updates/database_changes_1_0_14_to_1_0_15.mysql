@@ -1224,3 +1224,11 @@ UPDATE Translationlog
 ALTER TABLE Translationlog
    CHANGE Original_ID Original_ID int(11) NOT NULL default 0 ;
 
+
+-- [not-null] TranslationTexts.Ref_ID -> NOT NULL -> default '0' [ok]
+UPDATE TranslationTexts
+   SET Ref_ID=0 WHERE Ref_ID IS NULL ;
+ALTER TABLE TranslationTexts
+   CHANGE Ref_ID Ref_ID int(11) NOT NULL default 0 ;
+
+
