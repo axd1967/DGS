@@ -25,6 +25,122 @@ ChangeLog
 
 2009-07-23 juga
 
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     include/std_functions.php (RATING_NONE, RATING_INIT, RATING_RATED),
+     include/classlib_user.php (User, ~.hasRating),
+     include/make_game.php (make_invite_game, create_game),
+     include/rating.php (update_rating, update_rating2, update_rating_glicko),
+     tournaments/include/tournament_participant.php
+       (TournamentParticipant.needTournamentRating),
+     scripts/recalculate_ratings2.php, tournaments/register.php,
+     add_to_waitingroom.php, change_profile.php, edit_profile.php,
+     join_waitingroom_game.php, message.php, new_game.php, send_message.php,
+     waiting_room.php:
+   - [not-null] db-cleanup of Players.RatingStatus: NOT-NULL + default 'NONE'
+     by adding new enum-value 'NONE' representing NULL-values,
+     added consts for enum: RATING_NONE/INIT/RATED
+-----------
+-- [not-null] Players.RatingStatus -> NOT NULL -> default 'NONE' (enhance enum) [ok]
+ALTER TABLE Players
+   CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') default 'NONE' ;
+UPDATE Players
+   SET RatingStatus='NONE' WHERE RatingStatus IS NULL OR RatingStatus='' ;
+ALTER TABLE Players
+   CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') NOT NULL default 'NONE' ;
+-----------
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/data_export.php:
+   - [not-null] db-cleanup of TranslationTexts.Ref_ID: NOT-NULL + default 0
+-----------
+-- [not-null] TranslationTexts.Ref_ID -> NOT NULL -> default '0' [ok]
+UPDATE TranslationTexts
+   SET Ref_ID=0 WHERE Ref_ID IS NULL ;
+ALTER TABLE TranslationTexts
+   CHANGE Ref_ID Ref_ID int(11) NOT NULL default 0 ;
+-----------
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - [not-null] db-cleanup of Translationlog.Original_ID: NOT-NULL + default 0
+-----------
+-- [not-null] Translationlog.Original_ID -> NOT NULL -> default '0' [ok]
+UPDATE Translationlog
+   SET Original_ID=0 WHERE Original_ID IS NULL ;
+ALTER TABLE Translationlog
+   CHANGE Original_ID Original_ID int(11) NOT NULL default 0 ;
+-----------
+
+   * admin_show_errorlog.php, skins/dragon/screen.css:
+   - added text-filter on Errorlog.Message
+   - added table-navigation and found-rows for Errorlog
+   - put too long Debug-info into 2nd line in table-rows
+   - bugfix date-filter-const (FRDTU_ABS_ALL -> FRDTU_ALL_ABS)
+
+   * include/table_columns.php (Table.get_column_count):
+   - added method to ask for number of Table-columns
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - cleanup unused db-fields in Translationlog-table,
+     which have been replaced with Player_ID and Language_ID long before
+-----------
+-- [unused] cleanup Translationlog-table (fields not used and not referenced) -> CLEANUP
+-- fields have been replaced with Player_ID/Language_ID, check with select
+SELECT DISTINCT Handle, Language FROM Translationlog ;
+ALTER TABLE Translationlog
+   DROP COLUMN Handle,
+   DROP COLUMN Language ;
+-----------
+
+   * bookmark.php:
+   - fix sort-args for Opponents/Users online (field -> table-id)
+
+   * halfhourly_cron.php:
+   - removed unused Players.Lastaccess
+   - use index for Messages.Time (removed function around index-field)
+
+   * people.php:
+   - removed unused Players.Lastaccess from queries
+
+   * show_games.php:
+   - fix showing of 0-dates for opponent-lastaccess and last-changed
+
+   * include/connect2mysql.php (db_query):
+   - added const DBG_QUERY to log db-query to error-log,
+     const can be defined somewhere e.g. in local-config
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     admin_show_users.php, list_contacts.php, opponents.php, userinfo.php, users.php:
+   - cleanup [not-null] for db-fields:
+     - Players.Registerdate:  NOT-NULL + removed default
+     - Players.Sessionexpire: NOT-NULL + default 0
+     - Players.LastMove:      NOT-NULL + default 0
+     - Players.Lastaccess:    NOT-NULL + default 0
+-----------
+-- [not-null] Players.Registerdate -> NOT NULL -> no default [mandatory field]
+-- the following query-result should be empty before going on
+SELECT COUNT(*) FROM Players WHERE Registerdate IS NULL ;
+ALTER TABLE Players
+   CHANGE Registerdate Registerdate date NOT NULL ;
+
+-- [not-null] Players.Sessionexpire -> NOT NULL -> default '0' [ok]
+UPDATE Players
+   SET Sessionexpire=0 WHERE Sessionexpire IS NULL ;
+ALTER TABLE Players
+   CHANGE Sessionexpire Sessionexpire datetime NOT NULL default 0 ;
+
+-- [not-null] Players.LastMove -> NOT NULL -> default '0' [ok]
+UPDATE Players
+   SET LastMove=0 WHERE LastMove IS NULL ;
+ALTER TABLE Players
+   CHANGE LastMove LastMove datetime NOT NULL default 0 ;
+
+-- [not-null] Players.Lastaccess -> NOT NULL -> default '0' [ok]
+UPDATE Players
+   SET Lastaccess=0 WHERE Lastaccess IS NULL ;
+ALTER TABLE Players
+   CHANGE Lastaccess Lastaccess datetime NOT NULL default 0 ;
+-----------
+
    * include/GoDiagram.php, include/board.php, include/connect2mysql.php,
      include/error_functions.php, include/faq_functions.php, include/filter_parser.php,
      include/form_functions.php, include/graph.php, include/gui_functions.php,
