@@ -118,9 +118,9 @@ class TournamentParticipant
    function needTournamentRating()
    {
       $ratingStatus = $this->User->RatingStatus;
-      if( $ratingStatus == 'INIT' || $ratingStatus == 'RATED' ) // user has rating
+      if( $ratingStatus == RATING_INIT || $ratingStatus == RATING_RATED ) // user has rating
          return false;
-      else // unrated user
+      else // unrated user ( $ratingStatus == RATING_NONE )
          return true;
    }
 

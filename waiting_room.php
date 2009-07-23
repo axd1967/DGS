@@ -68,7 +68,8 @@ require_once( 'include/classlib_userconfig.php' );
 
    $my_rating = $player_row['Rating2'];
    $my_rated_games = (int)$player_row['RatedGames'];
-   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $idinfo = (int)@$_GET['info'];
    if( $idinfo < 0)
@@ -254,7 +255,8 @@ require_once( 'include/classlib_userconfig.php' );
          $iamblack = '';
          if( $iamrated && !$is_my_game )
          {
-            $other_is_rated = ( $other_ratingstatus && is_numeric($other_rating) && $other_rating >= MIN_RATING );
+            $other_is_rated = ( $other_ratingstatus != RATING_NONE
+                  && is_numeric($other_rating) && $other_rating >= MIN_RATING );
             if( $other_is_rated )
             {
                if( $Handicaptype == HTYPE_CONV )

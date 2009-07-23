@@ -168,9 +168,11 @@ disable_cache();
       $size = $game_row['Size'];
 
       $my_rating = $player_row['Rating2'];
-      $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+      $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+            && is_numeric($my_rating) && $my_rating >= MIN_RATING );
       $opprating = $opponent_row['Rating2'];
-      $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
+      $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE
+            && is_numeric($opprating) && $opprating >= MIN_RATING );
 
 
       $double = false;
@@ -227,7 +229,7 @@ disable_cache();
       $cnt = count($gids);
       db_query( "send_message.update_player($my_id,$opponent_ID)",
             "UPDATE Players SET Running=Running+$cnt" .
-                   ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
+                   ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
                    " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" );
 
       $subject = "Game invitation accepted";

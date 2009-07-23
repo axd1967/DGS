@@ -57,9 +57,11 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    $timeunit_fis = @$_REQUEST['timeunit_fis'];
 
    $my_rating = $player_row["Rating2"];
-   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
    $opprating = $opponent_row["Rating2"];
-   $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
+   $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE
+         && is_numeric($opprating) && $opprating >= MIN_RATING );
 
    if( $color_m == HTYPE_WHITE )
    {
@@ -220,8 +222,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $rating_white = $white_row["Rating2"];
    if( !is_numeric($rating_white) )
       $rating_white = -OUT_OF_RATING;
-   $black_rated = ( $black_row['RatingStatus'] && $rating_black >= MIN_RATING );
-   $white_rated = ( $white_row['RatingStatus'] && $rating_white >= MIN_RATING );
+   $black_rated = ( $black_row['RatingStatus'] != RATING_NONE && $rating_black >= MIN_RATING );
+   $white_rated = ( $white_row['RatingStatus'] != RATING_NONE && $rating_white >= MIN_RATING );
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 

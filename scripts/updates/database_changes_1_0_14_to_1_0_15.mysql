@@ -1232,3 +1232,12 @@ ALTER TABLE TranslationTexts
    CHANGE Ref_ID Ref_ID int(11) NOT NULL default 0 ;
 
 
+-- [not-null] Players.RatingStatus -> NOT NULL -> default 'NONE' (enhance enum) [ok]
+ALTER TABLE Players
+   CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') default 'NONE' ;
+UPDATE Players
+   SET RatingStatus='NONE' WHERE RatingStatus IS NULL OR RatingStatus='' ;
+ALTER TABLE Players
+   CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') NOT NULL default 'NONE' ;
+
+

@@ -40,7 +40,8 @@ require_once( 'include/utilities.php' );
       error('not_allowed_for_guest');
 
    $my_rating = $player_row['Rating2'];
-   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $cat_handicap_type = @$_POST['cat_htype'];
    switch( (string)$cat_handicap_type )
@@ -144,7 +145,7 @@ require_once( 'include/utilities.php' );
       error('time_limit_too_small');
 
 
-   if( ($rated=@$_POST['rated']) != 'Y' || !$player_row['RatingStatus'] )
+   if( ($rated=@$_POST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
       $rated = 'N';
 
    if( ENA_STDHANDICAP )

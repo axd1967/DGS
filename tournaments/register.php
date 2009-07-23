@@ -122,6 +122,7 @@ $ThePage = new Page('TournamentRegistration');
 
    if( !$is_invite && ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] ) ) // read URL-vars
    {
+      //TODO check for rating-status
       $ratingStatus = @$player_row['RatingStatus'];
       if( $tp->ID == 0 )
          $tp->Status = ( $tp->needTournamentRating() ) ? TP_STATUS_APPLY : TP_STATUS_REGISTER;

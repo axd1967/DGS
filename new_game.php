@@ -37,7 +37,8 @@ require_once( 'include/utilities.php' );
    $my_id = $player_row['ID'];
 
    $my_rating = @$player_row['Rating2'];
-   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+      && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $page = "new_game.php?";
    $title = T_('Add new game to waiting room');

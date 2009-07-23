@@ -49,7 +49,7 @@ class User
 
    /*! \brief Constructs a ForumUser with specified args. */
    function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
-                  $rating_status='', $games_rated=0, $games_finished=0 )
+                  $rating_status=RATING_NONE, $games_rated=0, $games_finished=0 )
    {
       $this->ID = (int)$id;
       $this->Name = (string)$name;
@@ -80,9 +80,9 @@ class User
    /*! \brief Returns true, if user has set and valid rating. */
    function hasRating()
    {
-      if( $this->RatingStatus == 'INIT' || $this->RatingStatus == 'RATED' ) // user has rating
+      if( $this->RatingStatus == RATING_INIT || $this->RatingStatus == RATING_RATED ) // user has rating
          return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
-      else
+      else // user not rated ( RatingStatus == RATING_NONE )
          return false;
    }
 

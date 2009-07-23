@@ -80,7 +80,8 @@ require_once( "include/form_functions.php" );
 
    $my_id = $player_row["ID"];
    $my_rating = $player_row["Rating2"];
-   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    init_standard_folders();
    $folders = get_folders($my_id);
@@ -216,7 +217,8 @@ require_once( "include/form_functions.php" );
          if( $other_row )
          {
             $other_rating = (int)@$other_row['Rating2'];
-            if( @$other_row['RatingStatus'] && is_numeric($other_rating) && $other_rating >= MIN_RATING )
+            if( @$other_row['RatingStatus'] != RATING_NONE
+                  && is_numeric($other_rating) && $other_rating >= MIN_RATING )
             {// other is rated
                $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
             }

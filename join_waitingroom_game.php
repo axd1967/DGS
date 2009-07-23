@@ -108,9 +108,11 @@ require_once( "include/contacts.php" );
    $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
    $my_rating = $player_row["Rating2"];
-   $iamrated = ( $player_row['RatingStatus'] && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
    $opprating = $opponent_row["Rating2"];
-   $opprated = ( $opponent_row['RatingStatus'] && is_numeric($opprating) && $opprating >= MIN_RATING );
+   $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE
+         && is_numeric($opprating) && $opprating >= MIN_RATING );
 
    $double = false;
    switch( (string)$game_row['Handicaptype'] )
@@ -172,7 +174,7 @@ require_once( "include/contacts.php" );
    $cnt = count($gids);
    db_query( 'join_waitingroom_game.update_players',
       "UPDATE Players SET Running=Running+$cnt" .
-                ( $game_row['Rated'] == 'Y' ? ", RatingStatus='RATED'" : '' ) .
+                ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
                 " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
 
 

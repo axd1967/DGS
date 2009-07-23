@@ -130,7 +130,7 @@ require_once( 'include/utilities.php' );
             'TEXTINPUT', 'rating', 16, 16, echo_rating($player_row['Rating2'],2,0,1),
             'SELECTBOX', 'ratingtype', 1, getRatingTypes(), 'dragonrank', false,
          );
-      if( !@$player_row['RatingStatus'] )
+      if( @$player_row['RatingStatus'] == RATING_NONE )
          array_push( $row,
                'TEXT', '<span class="FormWarning">'.T_('Must be filled to start a rated game').'</span>' );
       $profile_form->add_row( $row);

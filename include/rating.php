@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
+require_once( "include/std_functions.php" ); // consts
+
 
 // table for interpolating rating
 $IGS_TABLE = array(
@@ -230,7 +232,7 @@ function update_rating($gid)
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
    // here $Rated=='N' is always false. See rating2 to update
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
    {
       db_query( 'update_rating.set_rated_N',
          "UPDATE Games SET Rated='N' WHERE ID=$gid" );
@@ -297,7 +299,7 @@ function update_rating2($gid, $check_done=true)
    extract($row);
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
    {
       db_query( 'update_rating2.set_rated_N',
          "UPDATE Games SET Rated='N'" .
@@ -448,7 +450,7 @@ function update_rating_glicko($gid, $check_done=true)
    extract($row);
 
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus!='RATED' || $bRatingStatus!='RATED' )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
    {
       db_query( 0 /* "update_rating_glicko.update_rated_endrating($gid)" */,
          "UPDATE Games SET Rated='N'" .
