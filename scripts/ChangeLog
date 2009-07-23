@@ -23,9 +23,96 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-23 juga
+
+   * include/GoDiagram.php, include/board.php, include/connect2mysql.php,
+     include/error_functions.php, include/faq_functions.php, include/filter_parser.php,
+     include/form_functions.php, include/graph.php, include/gui_functions.php,
+     include/index.php, include/make_game.php, include/make_translationfiles.php,
+     include/message_functions.php, include/quick_common.php, include/rating.php,
+     include/sgf_parser.php, include/std_functions.php, include/table_columns.php,
+     include/table_infos.php, include/time_functions.php, include/utilities.php,
+     include/translation_functions.php, goodies/index.php, js/index.php,
+     forum/admin.php, forum/forum_functions.php, forum/index.php,
+     forum/old_links_redirect.php, phorum/list.php, phorum/read.php,
+     scripts/browser_stats.php, scripts/data_export.php, scripts/index.php,
+     scripts/mailtest.php, scripts/player_consistency.php,
+     scripts/tests/run_tests.php, scripts/update_translation_pages.php,
+     skins/dragon/index.php, skins/dragon2/index.php, skins/index.php,
+     rss/status.php, wap/status.php, pattern/index.php,
+     admin_do_translators.php, admin_faq.php, admin_show_users.php, admin_translators.php,
+     change_bio.php, change_password.php, change_profile.php, confirm.php, daily_cron.php,
+     do_registration.php, edit_bio.php, edit_password.php, edit_profile.php,
+     edit_vacation.php, error.php, game.php, game_comments.php, index.php,
+     introduction.php, links.php, list_messages.php, message.php, new_game.php,
+     people.php, quick_play.php, ratingpng.php, register.php, sgf.php, statistics.php,
+     statratingspng.php, translate.php, update_translation.php:
+   - cleanup + layout: indent, line-wraps, elseif, nested if's, braces,
+     empty lines, switch, arrays, ?-op, clearer vars, comments
+
+   * scripts/data_export.php:
+   - replaced static config of scripts super-admin-role by using ARR_USERS_MAINTENANCE from 'include/config.php'
+
+   * translate.php:
+   - cleanup: removed old-way to determine translation-groups (static -> from db-table)
+
+   * include/message_functions.php (game_settings_form), edit_profile.php, new_game.php:
+   - use array_value_to_key_and_value() to build key-value map
+
+   * change_bio.php:
+   - bugfix: added missing str-concat
+
 2009-07-22 juga
 
-   * include/message_functions.php (message_info_table,change_folders_for_marked_messages,change_folders,echo_folder_box),
+   * include/rating.php (get_rating_at_date):
+   - bugfix get_rating_at_date: mysql_query -> mysql_single_fetch
+
+   * daily_cron.php:
+   - cleanup: removed unused code to update rating for users with not
+     existing RatingStatus=READY
+
+   * features/lib_votes.php, features/list_features.php features/list_votes.php,
+     forum/admin.php, forum/admin_show_forumlog.php, forum/forum_functions.php,
+     forum/post.php, code_examples/test_clock_tick.php,
+     include/GoDiagram.php, include/board.php, include/classlib_profile.php,
+     include/connect2mysql.php, include/contacts.php, include/game_functions.php,
+     include/make_game.php, include/make_translationfiles.php,
+     include/message_functions.php, include/rating.php, include/std_functions.php,
+     rss/status.php, wap/status.php,
+     admin_do_translators.php, admin_faq.php, admin_show_adminlog.php,
+     admin_show_errorlog.php, admin_show_faqlog.php, admin_show_users.php,
+     admin_users.php, change_bio.php, change_password.php, change_profile.php,
+     clock_tick.php, confirm.php, daily_cron.php, do_registration.php,
+     do_registration_blocked.php, edit_bio.php, edit_contact.php, edit_folders.php,
+     edit_vacation.php, faq.php, halfhourly_cron.php, join_waitingroom_game.php,
+     list_contacts.php, login.php, message.php, opponents.php, people.php,
+     quick_play.php, quick_status.php, ratinggraph.php, ratingpng.php,
+     send_message.php, send_new_password.php, statistics.php, statisticspng.php,
+     statratingspng.php, status.php, translate.php, update_translation.php:
+   - cleanup: replaced mysql_query() with db_query()-func (except for scripts/-stuff),
+     enhanced query-debugmessage to provide more error-context
+
+   * include/connect2mysql.php (db_query):
+   - db_query: added 3rd arg for different error-code
+
+   * include/std_functions.php (get_players_field):
+   - cleanup: removed get_players_field()-func (not used so far anyway), because
+     1. IPs may be re-used for different users,
+     2. retrieving generic fields with a generic query can be cumbersome
+        -> better do a specific (optimized and secured) selection
+   - make quota-exceeded notify translateable
+
+   * scripts/player_consistency.php:
+   - removed sensible-fields replacement breaking query
+
+   * scripts/browser_stats.php:
+   - cleanup (SQL-keywords in upper-case)
+
+   * scripts/convert_posindex.php:
+   - added SQL optimization using index
+
+   * include/message_functions.php (message_info_table, change_folders,
+       change_folders_for_marked_messages, echo_folder_box),
      include/std_functions.php (FOLDER_DESTROYED),
      scripts/message_consistency.php,
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
