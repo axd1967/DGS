@@ -153,7 +153,7 @@ require_once( 'include/classlib_userpicture.php' );
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.Rating2', 'P.UserPicture',
-      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS lastaccessU',
+      'UNIX_TIMESTAMP(P.Lastaccess) AS lastaccessU',
       'C.cid', 'C.SystemFlags', 'C.UserFlags AS ContactsUserFlags', 'C.Notes',
       'C.Created', 'C.Lastchanged',
       'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS createdU',

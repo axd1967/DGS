@@ -55,7 +55,7 @@ $ThePage = new Page('UserInfo');
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
       .",UNIX_TIMESTAMP(Registerdate) AS X_Registerdate"
-      .",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS X_Lastaccess"
+      .",UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess"
       .",UNIX_TIMESTAMP(LastMove) AS X_LastMove"
       ." FROM Players WHERE $where" );
 

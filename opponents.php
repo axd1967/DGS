@@ -77,7 +77,7 @@ $ARR_DBFIELDKEYS = array(
    $players = array(); // uid => ( Players.field => value )
    $query = "SELECT ID,Handle,Name,Country,Open,Rank,Rating2"
       . ",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel"
-      . ",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS LastaccessU"
+      . ",UNIX_TIMESTAMP(Lastaccess) AS LastaccessU"
       . ",UNIX_TIMESTAMP(LastMove) AS LastMoveU"
       . " FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
    $result = db_query( "opponents.find_users($uid,$opp)", $query );
@@ -284,7 +284,7 @@ $ARR_DBFIELDKEYS = array(
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
-      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS LastaccessU',
+      'UNIX_TIMESTAMP(P.Lastaccess) AS LastaccessU',
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU' );
    $uqsql->add_part( SQLP_FROM, 'Players AS P' );
    $uqsql->merge( $query_usfilter );

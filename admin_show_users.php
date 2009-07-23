@@ -68,7 +68,7 @@ require_once( "include/table_columns.php" );
 
    // fields to load
    $query_fields = 'ID,Handle,Name, Adminlevel,AdminOptions,AdminNote, ' .
-      'IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS X_Lastaccess';
+      'UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess';
 
    start_page(T_('Show user admin'), true, $logged_in, $player_row);
 

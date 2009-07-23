@@ -154,7 +154,7 @@ require_once( 'include/classlib_userpicture.php' );
       'P.Running+P.Finished AS Games',
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
-      'IFNULL(UNIX_TIMESTAMP(P.Lastaccess),0) AS LastaccessU',
+      'UNIX_TIMESTAMP(P.Lastaccess) AS LastaccessU',
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU' );
    $qsql->add_part( SQLP_FROM, 'Players AS P' );
 
