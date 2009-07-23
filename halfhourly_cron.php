@@ -128,7 +128,7 @@ if( !$is_down )
 // more infos if other SendEmail flags are set
 
    $result = db_query( 'halfhourly_cron.find_notifications',
-            "SELECT ID as uid, Email, SendEmail, Lastaccess FROM Players"
+            "SELECT ID as uid, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players"
             ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
             //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'");
 
@@ -159,7 +159,7 @@ if( !$is_down )
              "white.Handle AS Whitehandle " .
              "FROM (Games, Players AS black, Players AS white) " .
              "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
-             " AND UNIX_TIMESTAMP(Lastchanged) >= UNIX_TIMESTAMP('$Lastaccess')";
+             " AND Lastchanged >= FROM_UNIXTIME($X_Lastaccess)";
 
          $gres = db_query( 'halfhourly_cron.find_games', $query );
 
@@ -217,7 +217,7 @@ if( !$is_down )
             "WHERE me.uid=$uid AND Messages.ID=me.mid " .
               "AND me.Folder_nr IN ($folderstring) " .
               "AND me.Sender IN('N','S') " . //exclude message to myself
-              "AND UNIX_TIMESTAMP(Messages.Time) > UNIX_TIMESTAMP('$Lastaccess') " .
+              "AND Messages.Time > FROM_UNIXTIME($X_Lastaccess) " .
             "ORDER BY Time DESC";
 
          $res3 = db_query( 'halfhourly_cron.find_new_messages', $query );
