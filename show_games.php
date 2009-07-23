@@ -816,7 +816,7 @@ $ThePage = new Page('GamesList');
          else //RU
          {
             if( $gtable->Is_Column_Displayed[15] )
-               $grow_strings[15] = date(DATE_FMT, $oppLastaccess);
+               $grow_strings[15] = ( $oppLastaccess > 0 ? date(DATE_FMT, $oppLastaccess) : '' );
             if( $gtable->Is_Column_Displayed[39] ) // my-RemTime
             {
                // X_Color: b0= White to play, b1= I am White, b4= not my turn
@@ -845,7 +845,7 @@ $ThePage = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[12] )
          $grow_strings[12] = ($WeekendClock == 'Y' ? T_('Yes') : T_('No'));
       if( $gtable->Is_Column_Displayed[13] )
-         $grow_strings[13] = date(DATE_FMT, $X_Lastchanged);
+         $grow_strings[13] = ( $X_Lastchanged > 0 ? date(DATE_FMT, $X_Lastchanged) : '' );
       if( $gtable->Is_Column_Displayed[14] )
          $grow_strings[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
 
