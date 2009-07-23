@@ -1217,3 +1217,10 @@ ALTER TABLE Translationlog
    DROP COLUMN Handle,
    DROP COLUMN Language ;
 
+
+-- [not-null] Translationlog.Original_ID -> NOT NULL -> default '0' [ok]
+UPDATE Translationlog
+   SET Original_ID=0 WHERE Original_ID IS NULL ;
+ALTER TABLE Translationlog
+   CHANGE Original_ID Original_ID int(11) NOT NULL default 0 ;
+
