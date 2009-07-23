@@ -105,7 +105,7 @@ require_once( "include/form_functions.php" );
       $query = "SELECT Messages.*"
          .",UNIX_TIMESTAMP(Messages.Time) AS date"
          .",IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"
-         . "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow"
+         . "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow"
          .",me.Replied, me.Sender, me.Folder_nr"
          .",Players.ID AS other_id,Players.Handle AS other_handle"
          .",Players.Name AS other_name,Players.Rating2 AS other_rating"
