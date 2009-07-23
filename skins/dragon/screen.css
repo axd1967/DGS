@@ -2809,6 +2809,10 @@ table#adminsTable, table#faqlogTable, table#errorlogTable td {
 }
 
 
+span.DebugText {
+   font-size: smaller;
+}
+
 /* ------------------------- */
 /* edit profile page */
 /* ------------------------- */

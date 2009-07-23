@@ -48,13 +48,15 @@ require_once( "include/filter.php" );
    $elfilter = new SearchFilter();
    $elfilter->add_filter( 1, 'Numeric', 'EL.ID', true);
    $elfilter->add_filter( 3, 'RelativeDate', 'EL.Date', true,
-      array( FC_TIME_UNITS => FRDTU_ABS_ALL, FC_SIZE => 8 ));
+      array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
+   $elfilter->add_filter( 4, 'Text', 'EL.Message', true,
+      array( FC_SIZE => 20 ));
    if( $show_ip )
       $elfilter->add_filter( 7, 'Text', 'EL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $elfilter->init(); // parse current value from _GET
 
-   $atable = new Table( 'errorlog', $page, '' );
+   $atable = new Table( 'errorlog', $page, '', '', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
    $atable->register_filter( $elfilter );
    $atable->add_or_del_column();
 
@@ -67,6 +69,7 @@ require_once( "include/filter.php" );
    $atable->add_tablehead( 6, T_('Debug info#header'));
    if( $show_ip )
       $atable->add_tablehead( 7, T_('IP#header'));
+   $tbl_colcnt = $atable->get_column_count();
 
    $atable->set_default_sort( 1); // on ID
    $order = $atable->current_order_string();
@@ -91,7 +94,9 @@ require_once( "include/filter.php" );
    $result = db_query( 'admin_show_errorlog.find_data', $query );
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
+   $atable->set_found_rows( mysql_found_rows('admin_show_errorlog.found_rows') );
 
+   $cols_dbginfo = $tbl_colcnt - 1;
    while( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
    {
       $arow_str = array();
@@ -107,13 +112,24 @@ require_once( "include/filter.php" );
       if( $atable->Is_Column_Displayed[3] )
          $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT3, $row['X_Date']) : NULL );
       if( $atable->Is_Column_Displayed[4] )
-         $arow_str[4] = @$row['Message'];
+         $arow_str[4] = sprintf( '<b>%s</b>', @$row['Message'] );
       if( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = wordwrap(@$row['MysqlError'], 40, "<br>\n", true);
       if( $atable->Is_Column_Displayed[6] )
-         $arow_str[6] = wordwrap(@$row['Debug'], 40, "<br>\n", true);
+      {
+         if( strlen(@$row['Debug']) <= 40 )
+            $arow_str[6] = wordwrap(@$row['Debug'], 40, "<br>\n", true);
+         else
+         {// put long-info in 2nd line
+            $arow_str[6] = '(' . T_('see next line') . ')';
+            $dbginfo = sprintf( '<u>%s:</u> <span class="DebugText">%s</span>',
+               T_('Debug info'), wordwrap(@$row['Debug'], 120, "<br>\n", true) );
+            $arow_str['extra_row'] = "<td></td><td colspan=\"$cols_dbginfo\">$dbginfo</td>";
+         }
+      }
       if( $show_ip && $atable->Is_Column_Displayed[7] )
          $arow_str[7] = @$row['IP'];
+
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
