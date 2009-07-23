@@ -134,7 +134,7 @@ function get_executives( $level )
    $FAQmainID = 0;
 
    $result = db_query( 'people.faq_admins',
-      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
       " FROM Players" .
       " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FAQ . ") > 0" .
       " ORDER BY ID" );
@@ -149,8 +149,8 @@ function get_executives( $level )
             . ' FROM FAQlog AS T'
             . " WHERE T.uid=$uid"
             . ' ORDER BY T.Date DESC LIMIT 1';
-         $tmp = mysql_single_fetch( 'people.faq_admins.lastupdate', $query);
-         $row['LastUpdate'] = $tmp ? $tmp['Date'] : 0;
+         $lastUpd = mysql_single_fetch( 'people.faq_admins.lastupdate', $query);
+         $row['LastUpdate'] = ($lastUpd) ? $lastUpd['Date'] : 0;
       }
 
       if( $row['Handle'] == $FAQmain )
@@ -189,7 +189,7 @@ function get_executives( $level )
    $MODexclude = array( 'ejlo', 'rodival' );
 
    $result = db_query( 'people.forum_moderators',
-      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+      "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
       " FROM Players" .
       " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
       " ORDER BY ID" );
@@ -253,7 +253,7 @@ function get_executives( $level )
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
    $result = db_query( 'people.translators',
-      "SELECT ID,Handle,Name,Translator,UNIX_TIMESTAMP(Lastaccess) AS Lastaccess".
+      "SELECT ID,Handle,Name,Translator" .
       " FROM Players" .
       " WHERE Translator>''" .
       " ORDER BY ID" );
