@@ -54,7 +54,7 @@ $ThePage = new Page('UserInfo');
       .",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel"
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
-      .",IFNULL(UNIX_TIMESTAMP(Registerdate),0) AS X_Registerdate"
+      .",UNIX_TIMESTAMP(Registerdate) AS X_Registerdate"
       .",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS X_Lastaccess"
       .",IFNULL(UNIX_TIMESTAMP(LastMove),0) AS X_LastMove"
       ." FROM Players WHERE $where" );
