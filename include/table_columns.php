@@ -396,6 +396,12 @@ class Table
       return $bitset->get_bit($nr);
    }
 
+   /*! \brief Returns number of columns added so far to this Table. */
+   function get_column_count()
+   {
+      return count($this->Tableheads);
+   }
+
    /*!
     * \brief Add a row to be displayed.
     *        Texts for column #0 (with row-number TABLE_ROW_NUM-mode)
