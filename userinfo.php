@@ -56,7 +56,7 @@ $ThePage = new Page('UserInfo');
       .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
       .",UNIX_TIMESTAMP(Registerdate) AS X_Registerdate"
       .",IFNULL(UNIX_TIMESTAMP(Lastaccess),0) AS X_Lastaccess"
-      .",IFNULL(UNIX_TIMESTAMP(LastMove),0) AS X_LastMove"
+      .",UNIX_TIMESTAMP(LastMove) AS X_LastMove"
       ." FROM Players WHERE $where" );
 
    if( !$row )
