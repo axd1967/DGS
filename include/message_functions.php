@@ -25,11 +25,12 @@ require_once( 'include/table_infos.php' );
 require_once( "include/rating.php" );
 require_once( 'include/game_functions.php' );
 require_once( 'include/time_functions.php' );
+require_once( 'include/utilities.php' );
 
-define('INVITE_HANDI_CONV',-1);
-define('INVITE_HANDI_PROPER',-2);
-define('INVITE_HANDI_NIGIRI',-3);
-define('INVITE_HANDI_DOUBLE',-4);
+define('INVITE_HANDI_CONV',   -1);
+define('INVITE_HANDI_PROPER', -2);
+define('INVITE_HANDI_NIGIRI', -3);
+define('INVITE_HANDI_DOUBLE', -4);
 
 // game-settings form-/table-style defs
 define('GSET_WAITINGROOM', 'waitingroom');
@@ -257,16 +258,12 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
             $ByotimeUnit_fis = $game_row['ByotimeUnit'];
             break;
       }
-
    } //collecting datas
 
 
    // Draw game-settings form
 
-   $value_array=array();
-   for( $bs = MIN_BOARD_SIZE; $bs <= MAX_BOARD_SIZE; $bs++ )
-     $value_array[$bs]=$bs;
-
+   $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'SPACE' ) );
    $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
                            'SELECTBOX', 'size', 1, $value_array, $Size, false ) );
@@ -297,20 +294,23 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
             sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
       }
 
-      $mform->add_row( array( 'DESCRIPTION', $trc,
-                              'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType,
-                              'TEXT', $sugg_conv ));
-      $mform->add_row( array( 'DESCRIPTION', $trp,
-                              'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_PROPER => '' ), $CategoryHandiType,
-                              'TEXT', $sugg_prop ));
+      $mform->add_row( array(
+            'DESCRIPTION', $trc,
+            'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType,
+            'TEXT', $sugg_conv ));
+      $mform->add_row( array(
+            'DESCRIPTION', $trp,
+            'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_PROPER => '' ), $CategoryHandiType,
+            'TEXT', $sugg_prop ));
    }
    else
    {// user-unrated
       if( $formstyle == GSET_MSG_DISPUTE && ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER ) )
       {
          $descr_str = ( $Handitype == HTYPE_CONV ) ? $trc : $rtp; // No initial rating
-         $mform->add_row( array( 'DESCRIPTION', $descr_str,
-                                 'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1), ));
+         $mform->add_row( array(
+               'DESCRIPTION', $descr_str,
+               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1), ));
          $Handitype = HTYPE_NIGIRI; // default
          $CategoryHandiType = get_category_handicaptype( $Handitype );
          $allowed = false;
@@ -319,11 +319,11 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    // Manual game: nigiri, double, black, white
    $color_arr = array(
-      HTYPE_NIGIRI => T_('Nigiri#htman'),
-      HTYPE_DOUBLE => T_('Double#htman'),
-      HTYPE_BLACK  => T_('Black#htman'),
-      HTYPE_WHITE  => T_('White#htman'),
-   );
+         HTYPE_NIGIRI => T_('Nigiri#htman'),
+         HTYPE_DOUBLE => T_('Double#htman'),
+         HTYPE_BLACK  => T_('Black#htman'),
+         HTYPE_WHITE  => T_('White#htman'),
+      );
    $arr_manual = array(
       'DESCRIPTION', T_('Manual setting (even or handicap game)'),
       'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType,
@@ -383,56 +383,63 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          'ALLOW_JIGO' => T_('Allow Jigo'),
          'NO_JIGO'    => T_('No Jigo'),
       );
-      $mform->add_row( array( 'DESCRIPTION', T_('Komi'),
-                              'TEXT', sptext(T_('Adjust by#komi')),
-                              'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
-                              'TEXT', sptext(T_('Jigo mode'), 1),
-                              'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
-                              ));
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Komi'),
+            'TEXT', sptext(T_('Adjust by#komi')),
+            'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
+            'TEXT', sptext(T_('Jigo mode'), 1),
+            'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
+         ));
    }
 
 
-   $value_array=array( 'hours' => T_('hours'),
-                       'days' => T_('days'),
-                       'months' => T_('months') );
+   $value_array = array(
+         'hours'  => T_('hours'),
+         'days'   => T_('days'),
+         'months' => T_('months') );
 
    $mform->add_row( array( 'HEADER', T_('Time settings') ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Main time'),
-                           'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
-                           'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Main time'),
+         'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
+         'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Japanese byoyomi'),
-                           //'CELL', 1, 'nowrap',
-                           'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
-                           'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
-                           'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
-                           'TEXT', sptext(T_('with')),
-                           'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-                           'TEXT', sptext(T_('extra periods')),
-                           ) );
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Japanese byoyomi'),
+         //'CELL', 1, 'nowrap',
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
+         'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
+         'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
+         'TEXT', sptext(T_('with')),
+         'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
+         'TEXT', sptext(T_('extra periods')),
+      ));
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Canadian byoyomi'),
-                           'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
-                           'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
-                           'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
-                           'TEXT', sptext(T_('for')),
-                           'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-                           'TEXT', sptext(T_('stones')),
-                           ) );
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Canadian byoyomi'),
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
+         'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
+         'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
+         'TEXT', sptext(T_('for')),
+         'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
+         'TEXT', sptext(T_('stones')),
+      ));
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Fischer time'),
-                           'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
-                           'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
-                           'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
-                           'TEXT', sptext(T_('extra per move')),
-                           ) );
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Fischer time'),
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
+         'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
+         'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
+         'TEXT', sptext(T_('extra per move')),
+      ));
 
    $mform->add_row( array( 'SPACE' ) );
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Clock runs on weekends'),
-                           'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock,
-                           'TEXT', sprintf( '(%s)', T_('UTC timezone') ), ));
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Clock runs on weekends'),
+         'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock,
+         'TEXT', sprintf( '(%s)', T_('UTC timezone') ), ));
 
    if( $formstyle == GSET_WAITINGROOM )
       $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
@@ -444,10 +451,11 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    }
    else if( $formstyle == GSET_MSG_DISPUTE && $Rated )
    {// user unrated
-      $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
-                              'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
-                              //'HIDDEN', 'rated', '',
-                            ));
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Rated game'),
+            'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
+            //'HIDDEN', 'rated', '',
+         ));
       $allowed = false;
    }
 
@@ -462,7 +470,7 @@ $msg_icones = array(
       FLOW_ANSWER               => array('images/msg_lr.gif','&gt;-&nbsp;'), //is an answer
                   FLOW_ANSWERED => array('images/msg_rr.gif','&nbsp;-&gt;'), //is answered
       FLOW_ANSWER|FLOW_ANSWERED => array('images/msg_2r.gif','&gt;-&gt;'),
-      );
+   );
 
 function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $other_id, $other_name, $other_handle, //must be html_safe
@@ -474,20 +482,18 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    global $msg_icones, $bg_color, $base_path;
 
    if( $other_id > 0 )
-   {
       $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
-   }
    else
       $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
 
    $cols = 2;
-   echo "<table class=MessageInfos>\n" .
-      "<tr class=Date>" .
-      "<td class=Rubric>" . T_('Date') . ":</td>" .
-      "<td colspan=$cols>" . date(DATE_FMT, $date) . "</td></tr>\n" .
-      "<tr class=Correspondent>" .
-      "<td class=Rubric>" . ($to_me ? T_('From') : T_('To') ) . ":</td>\n" .
-      "<td colspan=$cols>$name</td>" .
+   echo "<table class=MessageInfos>\n",
+      "<tr class=Date>",
+      "<td class=Rubric>", T_('Date'), ":</td>",
+      "<td colspan=$cols>", date(DATE_FMT, $date), "</td></tr>\n",
+      "<tr class=Correspondent>",
+      "<td class=Rubric>", ($to_me ? T_('From') : T_('To') ), ":</td>\n",
+      "<td colspan=$cols>$name</td>",
       "</tr>\n";
 
    $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
@@ -498,28 +504,24 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    if( (string)$subject == '' )
       $subj_fmt = '<span class=InlineWarning>' . T_('(no subject)') . '</span>';
 
-   echo "<tr class=Subject>" .
-      "<td class=Rubric>" . T_('Subject') . ":</td>" .
-      "<td colspan=$cols>" . $subj_fmt . "</td></tr>\n" .
-      "<tr class=Message>" .
-      "<td class=Rubric>" . T_('Message') . ":" ;
+   echo "<tr class=Subject>",
+      "<td class=Rubric>", T_('Subject'), ":</td>",
+      "<td colspan=$cols>", $subj_fmt, "</td></tr>\n",
+      "<tr class=Message>",
+      "<td class=Rubric>", T_('Message'), ":" ;
 
    $str0 = $str = '';
    if( $flow & FLOW_ANSWER && $reply_mid > 0 )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
       $str.= "<a href=\"message.php?mode=ShowMessage".URI_AMP."mid=$reply_mid\">" .
-             "<img border=0 alt='$alt' src='$ico'"
-             . ' title="' . T_("Previous message") . '"'
-             . "></a>&nbsp;" ;
+             "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Previous message") . "\"></a>&nbsp;";
    }
    if( $flow & FLOW_ANSWERED && $mid > 0)
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
-             "<img border=0 alt='$alt' src='$ico'"
-             . ' title="' . T_("Next messages") . '"'
-             . "></a>&nbsp;" ;
+             "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Next messages") . "\"></a>&nbsp;";
    }
    if( $str ) // $str set if msg is answer or has answer
       $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid#mid$mid",
@@ -533,11 +535,11 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
      echo "<div class=MessageFlow>$str0$str</div>";
 
    echo "</td>\n"
-      . "<td colspan=$cols>\n";
+      , "<td colspan=$cols>\n";
 
    echo "<table class=MessageBox><tr><td>"
-      . $text
-      . "</td></tr></table>";
+      , $text
+      , "</td></tr></table>";
 
    echo "</td></tr>\n";
 
@@ -546,9 +548,9 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       echo "<tr class=Folder>\n";
 
       echo "<td class=Rubric>" . T_('Folder') . ":</td>\n"
-         . "<td><table class=FoldersTabs><tr>"
-         . echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
-         . "</tr></table></td>\n";
+         , "<td><table class=FoldersTabs><tr>"
+         , echo_folder_box($folders, $folder_nr, substr($bg_color, 2, 6))
+         , "</tr></table></td>\n";
 
       echo "<td>";
       $deleted = ( $folder_nr == FOLDER_DESTROYED );
@@ -556,9 +558,10 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       {
          $fldrs = array('' => '');
          foreach( $folders as $key => $val )
-            if( $key != $folder_nr && $key != FOLDER_NEW
-               && (!$to_me || $key != FOLDER_SENT) )
+         {
+            if( $key != $folder_nr && $key != FOLDER_NEW && (!$to_me || $key != FOLDER_SENT) )
                $fldrs[$key] = $val[0];
+         }
 
          echo $form->print_insert_select_box('folder', '1', $fldrs, '', '');
          if( $delayed_move )
@@ -691,6 +694,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          break;
 
       case CAT_HTYPE_MANUAL: // Manual game: Nigiri/Double/Black/White
+      {
          if( $Handitype == HTYPE_NIGIRI )
          {
             $subtype = ($Handicap == 0) ? T_('Even game with nigiri') : T_('Handicap game with nigiri');
@@ -731,7 +735,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          $itable->add_sinfo( T_('Handicap'), $Handicap );
          $itable->add_sinfo( T_('Komi'), (float)$Komi );
          break;
-   }
+      }//case CAT_HTYPE_MANUAL
+   }//switch $CategoryHandiType
 
    if( $tablestyle == GSET_WAITINGROOM ) // Handicap adjustment
    {
@@ -779,9 +784,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( $tablestyle == GSET_WAITINGROOM ) // Comment
    {
       $itable->add_row( array(
-               'sname' => T_('Comment'),
-               'info' => $Comment, //INFO_HTML
-               ) );
+            'sname' => T_('Comment'),
+            'info' => $Comment, //INFO_HTML
+         ));
    }
 
    // compute the probable game settings
@@ -994,14 +999,18 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
    $max = time_convert_to_hours( 365, 'days');
 
    $mainhours = time_convert_to_hours($timevalue, $timeunit);
-   if( $mainhours > $max ) $mainhours = $max;
-   else if( $mainhours < 0 ) $mainhours = 0;
+   if( $mainhours > $max )
+      $mainhours = $max;
+   elseif( $mainhours < 0 )
+      $mainhours = 0;
 
    if( $byoyomitype == BYOTYPE_JAPANESE )
    {
       $byohours = time_convert_to_hours($byotimevalue_jap, $timeunit_jap);
-      if( $byohours > $max ) $byohours = $max;
-      else if( $byohours < 0 ) $byohours = 0;
+      if( $byohours > $max )
+         $byohours = $max;
+      elseif( $byohours < 0 )
+         $byohours = 0;
 
       $byoperiods = (int)$byoperiods_jap;
       if( $byohours * $byoperiods > $max )
@@ -1010,8 +1019,10 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
    else if( $byoyomitype == BYOTYPE_CANADIAN )
    {
       $byohours = time_convert_to_hours($byotimevalue_can, $timeunit_can);
-      if( $byohours > $max ) $byohours = $max;
-      else if( $byohours < 0 ) $byohours = 0;
+      if( $byohours > $max )
+         $byohours = $max;
+      elseif( $byohours < 0 )
+         $byohours = 0;
 
       $byoperiods = (int)$byoperiods_can;
       if( $byoperiods < 1 ) $byoperiods = 1;
@@ -1020,8 +1031,10 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
    {
       $byoyomitype = BYOTYPE_FISCHER;
       $byohours = time_convert_to_hours($byotimevalue_fis, $timeunit_fis);
-      if( $byohours > $mainhours ) $byohours = $mainhours;
-      else if( $byohours < 0 ) $byohours = 0;
+      if( $byohours > $mainhours )
+         $byohours = $mainhours;
+      elseif( $byohours < 0 )
+         $byohours = 0;
 
       $byoperiods = 0;
    }
@@ -1042,8 +1055,9 @@ function get_folders($uid, $remove_all_received=true)
    while( $row = mysql_fetch_assoc($result) )
    {
       if( empty($row['Name']))
-         $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS ?
-                          $STANDARD_FOLDERS[$row['Folder_nr']][0] : T_('Folder name') );
+         $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS )
+               ? $STANDARD_FOLDERS[$row['Folder_nr']][0]
+               : T_('Folder name');
       $fldrs[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
    }
    mysql_free_result($result);
@@ -1063,9 +1077,7 @@ function change_folders_for_marked_messages($uid, $folders)
       $new_folder = (int)$_GET['folder'];
    }
    else if( isset($_GET['destroy_marked'] ) )
-   {
       $new_folder = FOLDER_DESTROYED;
-   }
    else
       return -1; //i.e. no move query
 
@@ -1093,7 +1105,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    else
    {
       if( !isset($new_folder) || !isset($folders[$new_folder])
-        || $new_folder == FOLDER_NEW || $new_folder == FOLDER_ALL_RECEIVED )
+            || $new_folder == FOLDER_NEW || $new_folder == FOLDER_ALL_RECEIVED )
          error('folder_not_found');
 
       if( $new_folder == FOLDER_SENT )
@@ -1260,9 +1272,7 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date'
 }
 
 // param full_details: if true, show additional fields for message-search
-function message_list_head( &$mtable, $current_folder
-             , $no_mark=true, $full_details=false
-             )
+function message_list_head( &$mtable, $current_folder, $no_mark=true, $full_details=false )
 {
    global $base_path, $msg_icones;
 
@@ -1273,7 +1283,7 @@ function message_list_head( &$mtable, $current_folder
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $mtable->add_tablehead( 1, T_('Folder#header'), 'Folder',
-      ($current_folder>FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
+         ($current_folder>FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
    $mtable->add_tablehead( 9, new TableHead( T_('Message thread#header'),
          'images/thread.gif', T_('Show message thread') ), 'Image', 0, 'Thread+' );
 
@@ -1285,8 +1295,9 @@ function message_list_head( &$mtable, $current_folder
       $mtable->add_tablehead( 2, T_('Correspondent#header'), 'User', 0, 'other_name+');
    }
    else
-      $mtable->add_tablehead( 2, ($current_folder == FOLDER_SENT ? T_('To#header')
-                  : T_('From#header')), 'User', 0, 'other_name+');
+      $mtable->add_tablehead( 2,
+            ($current_folder == FOLDER_SENT) ? T_('To#header') : T_('From#header'),
+            'User', 0, 'other_name+');
 
    $mtable->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
    list($ico,$alt) = $msg_icones[0];
@@ -1302,9 +1313,7 @@ function message_list_head( &$mtable, $current_folder
 // param result: typically coming from message_list_query()
 // param rx_terms: rx with terms to be marked within text
 // NOTE: frees given mysql $result
-function message_list_body( &$mtable, $result, $show_rows
-             , $my_folders, $toggle_marks=false, $rx_term=''
-             )
+function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
 {
    global $base_path, $msg_icones, $player_row;
 
@@ -1384,10 +1393,11 @@ function message_list_body( &$mtable, $result, $show_rows
       if( !$no_mark )
       {
          if( $folder_nr == FOLDER_NEW || $row['Replied'] == 'M'
-           || ( $folder_nr == FOLDER_REPLY && $row['Type'] == 'INVITATION'
-              && $row['Replied'] != 'Y' )
-           || $deleted )
+               || ( $folder_nr == FOLDER_REPLY && $row['Type'] == 'INVITATION' && $row['Replied'] != 'Y' )
+               || $deleted )
+         {
             $mrow_strings[ 5] = '';
+         }
          else
          {
             $can_move_messages = true;

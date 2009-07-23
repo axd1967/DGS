@@ -26,6 +26,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/table_columns.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/message_functions.php' );
+require_once( 'include/utilities.php' );
 
 {
    connect2mysql();
@@ -60,9 +61,7 @@ function add_new_game_form( $form_id, $iamrated)
 
    //$addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
 
-   $vals = array();
-   for( $i=1; $i <= NEWGAME_MAX_GAMES; $i++ )
-      $vals[$i] = $i;
+   $vals = array_value_to_key_and_value( range(1, NEWGAME_MAX_GAMES) );
    $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                                   'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
 
@@ -91,6 +90,6 @@ function add_new_game_form( $form_id, $iamrated)
    $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
 
    $addgame_form->echo_string(1);
-}
+} //add_new_game_form
 
 ?>

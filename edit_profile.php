@@ -25,6 +25,7 @@ require_once( "include/timezones.php" );
 require_once( "include/countries.php" );
 require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
+require_once( 'include/utilities.php' );
 
 // Reminder: to friendly reset the language:
 // {HOSTBASE}edit_profile.php?language=C
@@ -43,24 +44,25 @@ require_once( "include/form_functions.php" );
    if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
       $button_nr = 0;
 
-   $notify_msg = array( 0 => T_('Off'),
-                        1 => T_('Notify only'),
-                        2 => T_('Moves and messages'),
-                        3 => T_('Full board and messages') );
+   $notify_msg = array(
+         0 => T_('Off'),
+         1 => T_('Notify only'),
+         2 => T_('Moves and messages'),
+         3 => T_('Full board and messages'),
+      );
 
-   $menu_directions = array('VERTICAL' => sptext(T_('Vertical'),2),
-                           'HORIZONTAL' => sptext(T_('Horizontal')) );
+   $menu_directions = array(
+         'VERTICAL'   => sptext(T_('Vertical'),2),
+         'HORIZONTAL' => sptext(T_('Horizontal')),
+      );
 
 
    $nightstart = array();
    for($i=0; $i<24; $i++)
-   {
       $nightstart[$i] = sprintf('%02d-%02d',$i,($i+NIGHT_LEN)%24);
-   }
 
-   $stonesizes = array( 5 => 5, 7 => 7, 9 => 9, 11 => 11,
-                        13 => 13, 17 => 17, 21 => 21, 25 => 25,
-                        29 => 29, 35 => 35, 42 => 42, 50 => 50 );
+   $stonesizes = array_value_to_key_and_value(
+      array( 5, 7, 9, 11, 13, 17, 21, 25, 29, 35, 42, 50 ) );
 
    $woodcolors = array();
    for($i=1; $i<16; $i++ )
@@ -119,20 +121,18 @@ require_once( "include/form_functions.php" );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Userid'),
                                   'TEXT', $player_row["Handle"] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                                  'TEXTINPUT', 'name', 32, 40,
-                                  $player_row["Name"] ) );
+                                  'TEXTINPUT', 'name', 32, 40, $player_row["Name"] ) );
 
    if( $player_row['RatingStatus'] != 'RATED' )
    {
-      $row= array('DESCRIPTION', T_('Rating'),
-                  'TEXTINPUT', 'rating', 16, 16, echo_rating($player_row['Rating2'],2,0,1),
-                  'SELECTBOX', 'ratingtype', 1, getRatingTypes(), 'dragonrank', false,
-                  );
+      $row = array(
+            'DESCRIPTION', T_('Rating'),
+            'TEXTINPUT', 'rating', 16, 16, echo_rating($player_row['Rating2'],2,0,1),
+            'SELECTBOX', 'ratingtype', 1, getRatingTypes(), 'dragonrank', false,
+         );
       if( !@$player_row['RatingStatus'] )
          array_push( $row,
-                  'TEXT', '<span class="FormWarning">'
-                  .T_('Must be filled to start a rated game').'</span>'
-                  );
+               'TEXT', '<span class="FormWarning">'.T_('Must be filled to start a rated game').'</span>' );
       $profile_form->add_row( $row);
    }
    else
@@ -154,33 +154,32 @@ require_once( "include/form_functions.php" );
    else
       $notify_msg_idx = 0;
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Email notifications'),
-                                  'SELECTBOX', 'emailnotify', 1, $notify_msg, $notify_msg_idx, false ) );
-   $row= array('DESCRIPTION', T_('Email'),
-               'TEXTINPUT', 'email', 32, 80,
-               $player_row['Email'],
-               );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Email notifications'),
+         'SELECTBOX', 'emailnotify', 1, $notify_msg, $notify_msg_idx, false ) );
+   $row = array(
+         'DESCRIPTION', T_('Email'),
+         'TEXTINPUT', 'email', 32, 80, $player_row['Email'] );
    if( !trim($player_row['Email']) )
       array_push( $row,
-               'TEXT', '<span class="FormWarning">'
-                  .T_('Must be filled to receive a new password or a notification').'</span>'
-               );
+            'TEXT', '<span class="FormWarning">'
+                  . T_('Must be filled to receive a new password or a notification').'</span>' );
    $profile_form->add_row( $row);
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Country'),
-                                  'SELECTBOX', 'country', 1, $countries,
-                                  $player_row["Country"], false ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Country'),
+         'SELECTBOX', 'country', 1, $countries, $player_row["Country"], false ));
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Language'),
-                                  'SELECTBOX', 'language', 1,
-                                  array_reverse($langs), $player_row['Lang'], false ) );
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Timezone'),
-                                  'SELECTBOX', 'timezone', 1,
-                                  get_timezone_array(), $player_row['Timezone'], false ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Language'),
+         'SELECTBOX', 'language', 1, array_reverse($langs), $player_row['Lang'], false ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Timezone'),
+         'SELECTBOX', 'timezone', 1, get_timezone_array(), $player_row['Timezone'], false ) );
    if( NIGHT_LEN % 24 )
-      $profile_form->add_row( array( 'DESCRIPTION', T_('Nighttime'),
-                                     'SELECTBOX', 'nightstart', 1,
-                                     $nightstart, $player_row['Nightstart'], false ) );
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Nighttime'),
+            'SELECTBOX', 'nightstart', 1, $nightstart, $player_row['Nightstart'], false ) );
    else
       $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
 
@@ -196,16 +195,16 @@ require_once( "include/form_functions.php" );
 
    if( (@$player_row['admin_level'] & ADMIN_SKINNER) )
    {
-      $profile_form->add_row( array( 'DESCRIPTION', T_('Skin'),
-                                     'SELECTBOX', 'skinname', 1, $known_skins,
-                                     $player_row['SkinName'], false ) );
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Skin'),
+            'SELECTBOX', 'skinname', 1, $known_skins, $player_row['SkinName'], false ) );
    }
    else
       $profile_form->add_row( array( 'HIDDEN', 'skinname', 'dragon'));
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Menu direction'),
-                                  'RADIOBUTTONS', 'menudir', $menu_directions,
-                                  $player_row["MenuDirection"] ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Menu direction'),
+         'RADIOBUTTONS', 'menudir', $menu_directions, $player_row["MenuDirection"] ) );
 
 
    $button_code  = "\n<table class=EditProfilButtons><tr>";
@@ -231,11 +230,11 @@ require_once( "include/form_functions.php" );
          'DESCRIPTION', T_('Game id button'),
          'TEXT', $button_code, ));
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Table max rows'),
-                                  'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows,
-                                  $player_row['TableMaxRows'], false,
-                                  'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
-                                 ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Table max rows'),
+         'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows, $player_row['TableMaxRows'], false,
+         'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
+      ));
 
    if( ALLOW_JAVASCRIPT )
    {
@@ -249,17 +248,18 @@ require_once( "include/form_functions.php" );
 
    $profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Stone size'),
-                                  'SELECTBOX', 'stonesize', 1, $stonesizes,
-                                    $cfg_board->get_stone_size(), false ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Stone size'),
+         'SELECTBOX', 'stonesize', 1, $stonesizes, $cfg_board->get_stone_size(), false ) );
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Wood color'),
-                                  'RADIOBUTTONS', 'woodcolor', $woodcolors,
-                                    $cfg_board->get_wood_color() ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Wood color'),
+         'RADIOBUTTONS', 'woodcolor', $woodcolors, $cfg_board->get_wood_color() ) );
 
    $boardcoords = $cfg_board->get_board_coords();
 
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Smooth board edge'),
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Smooth board edge'),
          'CHECKBOX', 'smoothedge', 1, '', ($boardcoords & SMOOTH_EDGE),
          'TEXT', sptext(T_('(only for textured wood colors)')) ));
 
@@ -315,7 +315,7 @@ require_once( "include/form_functions.php" );
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_('Small boards') . ':</b>',
                'TAB',
-            ) );
+            ));
       }
       else
       {
@@ -323,7 +323,7 @@ require_once( "include/form_functions.php" );
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_("Large boards from") . ':</b>',
                'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $cfg_board->get_notes_cutoff(), false,
-            ) );
+            ));
       }
 
       $notesmode = $cfg_board->get_notes_mode( $cfg_type );
@@ -337,7 +337,7 @@ require_once( "include/form_functions.php" );
                'RADIOBUTTONS', "notes{$ltyp}mode", $notesmodes, $notesmode,
                'TEXT', sptext('',1),
                'CHECKBOX', "notes{$ltyp}hide", 1, sptext(T_('Hidden')), $noteshide,
-            ) );
+            ));
 
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Size'),
@@ -345,7 +345,7 @@ require_once( "include/form_functions.php" );
                'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $cfg_board->get_notes_height($cfg_type), false,
                'TEXT', sptext(T_('Width'),1),
                'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $cfg_board->get_notes_width($cfg_type), false,
-            ) );
+            ));
    }
 
 
@@ -354,26 +354,21 @@ require_once( "include/form_functions.php" );
 
 
    $profile_form->add_row( array( 'SPACE' ) );
-
-   $profile_form->add_row( array( 'SPACE' ) );
-
-   $profile_form->add_row( array( 'TAB',
-                                  'CHECKBOX', 'locally', 1,
-                                  sptext(T_('Change appearences for this browser only')),
-                                  safe_getcookie("prefs".$my_id) > '' ));
-
-   $profile_form->add_row( array( 'HR' ) );
-
    $profile_form->add_row( array( 'SPACE' ) );
 
    $profile_form->add_row( array(
-         'SUBMITBUTTONX', 'action', T_('Change profile'),
-               array( 'accesskey' => ACCKEY_ACT_EXECUTE ), ));
+         'TAB',
+         'CHECKBOX', 'locally', 1, sptext(T_('Change appearences for this browser only')),
+               safe_getcookie("prefs".$my_id) > '' ));
 
+   $profile_form->add_row( array( 'HR' ) );
+   $profile_form->add_row( array( 'SPACE' ) );
+
+   $profile_form->add_row( array(
+         'SUBMITBUTTONX', 'action', T_('Change profile'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ), ));
 
    $profile_form->echo_string(1);
 
    end_page();
 }
-
 ?>
