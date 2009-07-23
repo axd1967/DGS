@@ -73,30 +73,33 @@ require_once( "include/std_functions.php" );
 
    // compute the new SortOrder
    if( !$change_it )
-   foreach( $bios as $idx => $row )
    {
-      $bid= $row['ID'];
+      foreach( $bios as $idx => $row )
+      {
+         $bid= $row['ID'];
 
-      // check for bios movements
-      $pos = (int)@$_REQUEST['move'.$bid];
-      if( !$pos )
-         continue;
+         // check for bios movements
+         $pos = (int)@$_REQUEST['move'.$bid];
+         if( !$pos )
+            continue;
 
-      $pos+= $idx;
-      while( $pos < 1 )
-         $pos+= $max_pos;
-      while( $pos > $max_pos )
-         $pos-= $max_pos;
+         $pos+= $idx;
+         while( $pos < 1 )
+            $pos+= $max_pos;
+         while( $pos > $max_pos )
+            $pos-= $max_pos;
 
-      // swap in internal struct
-      swap( $bios[$idx]['newpos'], $bios[$pos]['newpos']);
-      // note: the result is slightly different in case of
-      // multiple adjacent ups or multiple adjacent downs
-      // but, usually, this is executed with only one move at a time.
+         // swap in internal struct
+         swap( $bios[$idx]['newpos'], $bios[$pos]['newpos']);
+         // note: the result is slightly different in case of
+         // multiple adjacent ups or multiple adjacent downs
+         // but, usually, this is executed with only one move at a time.
+      }
    }
 
    // update existing DB-entries
-   foreach( $bios as $idx => $row ) {
+   foreach( $bios as $idx => $row )
+   {
       $bid= $row['ID'];
 
       if( $change_it )
@@ -107,9 +110,8 @@ require_once( "include/std_functions.php" );
             $EnteredCategory = '='.trim(get_request_arg("other$bid"));
 
          if( $EnteredText == $row['Text']
-            && $EnteredCategory == $row['Category']
-            && $row['SortOrder'] == $row['newpos']
-            )
+               && $EnteredCategory == $row['Category']
+               && $row['SortOrder'] == $row['newpos'] )
             continue;
 
          $query = 'UPDATE Bio SET ' .
@@ -123,7 +125,7 @@ require_once( "include/std_functions.php" );
          if( $row['SortOrder'] == $row['newpos'] )
             continue;
 
-         $query = 'UPDATE Bio SET '
+         $query = 'UPDATE Bio SET ' .
             //', Text="'.mysql_addslashes($row['Text']).'"' .
             //', Category="'.mysql_addslashes($row['Category']).'"' .
             ', SortOrder="'.$row['newpos'].'"' .
@@ -166,6 +168,5 @@ require_once( "include/std_functions.php" );
 
    jump_to("edit_bio.php?sysmsg=$msg");
    //jump_to("userinfo.php?uid=$my_id" . URI_AMP."sysmsg=$msg");
-
 }
 ?>
