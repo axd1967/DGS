@@ -1210,3 +1210,10 @@ ALTER TABLE Players
    CHANGE Lastaccess Lastaccess datetime NOT NULL default 0 ;
 
 
+-- [unused] cleanup Translationlog-table (fields not used and not referenced) -> CLEANUP
+-- fields have been replaced with Player_ID/Language_ID, check with select
+SELECT DISTINCT Handle, Language FROM Translationlog ;
+ALTER TABLE Translationlog
+   DROP COLUMN Handle,
+   DROP COLUMN Language ;
+
