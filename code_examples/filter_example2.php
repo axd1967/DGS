@@ -308,7 +308,7 @@ elseif( $fdemo == 6 )
       2 => array( 'label' => 'Rel-Date #2', 'descr' => 'filter with specific time-units [FC_TIME_UNITS=FRDTU_YMWD]: years, months, weeks, days' ),
       3 => array( 'label' => 'Rel-Date #3', 'descr' => 'filter with specific time-units [FC_TIME_UNITS]: years, weeks, hours' ),
       4 => array( 'label' => 'Rel-Date #4', 'descr' => 'filter with only one static time-unit [FC_TIME_UNITS=FRDTU_DAY]' ),
-      5 => array( 'label' => 'Rel-Date #5', 'descr' => 'filter with additional absolute-date [FC_TIME_UNITS=FRDTU_ABS_ALL], [FC_SIZE=12]' ),
+      5 => array( 'label' => 'Rel-Date #5', 'descr' => 'filter with additional absolute-date [FC_TIME_UNITS=FRDTU_ALL_ABS], [FC_SIZE=12]' ),
    );
 
    # standard filter
@@ -328,7 +328,7 @@ elseif( $fdemo == 6 )
 
    # filter with additional absolute-date syntax
    $filter->add_filter( 5, 'RelativeDate', 'reldate5', true,
-         array( FC_TIME_UNITS => FRDTU_ABS_ALL,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS,
                 FC_SIZE => 12 ));
 }
 
