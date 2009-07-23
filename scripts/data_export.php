@@ -31,15 +31,16 @@ define('OLD_STYLE_DUMP', 1 xor $new_style);
 define('DEFINITION_ORIG', 0 xor $defs_orig);
 
 if(OLD_STYLE_DUMP){
-  define('QUOTE_NAME', 0);
-  define('CREATE_TIME', 0);
-  define('IF_NOT_EXISTS', 0);
-  define('DEFINITION_SORT', 0 xor $defs_sort);
-}else{ //OLD_STYLE_DUMP
-  define('QUOTE_NAME', 1);
-  define('CREATE_TIME', 1);
-  define('IF_NOT_EXISTS', 1);
-  define('DEFINITION_SORT', 0 xor $defs_sort);
+   define('QUOTE_NAME', 0);
+   define('CREATE_TIME', 0);
+   define('IF_NOT_EXISTS', 0);
+   define('DEFINITION_SORT', 0 xor $defs_sort);
+}
+else{ //OLD_STYLE_DUMP
+   define('QUOTE_NAME', 1);
+   define('CREATE_TIME', 1);
+   define('IF_NOT_EXISTS', 1);
+   define('DEFINITION_SORT', 0 xor $defs_sort);
 } //OLD_STYLE_DUMP
 define('DROP_TABLE', 0);
 define('AUTO_INCREMENT', 0);
@@ -48,9 +49,10 @@ define('CREATE_OPTION', 1);
 
 //define('COMMENT_LINE_STR', '//');
 if(OLD_STYLE_DUMP){
-  define('COMMENT_LINE_STR', '#');
-}else{ //OLD_STYLE_DUMP
-  define('COMMENT_LINE_STR', '--');
+   define('COMMENT_LINE_STR', '#');
+}
+else{ //OLD_STYLE_DUMP
+   define('COMMENT_LINE_STR', '--');
 } //OLD_STYLE_DUMP
 
 //define('CR', chr(13).chr(10));
@@ -58,10 +60,11 @@ if(OLD_STYLE_DUMP){
 define('CR', chr(10));
 
 if(OLD_STYLE_DUMP){
-  define('QUOTE', "'");
-}else{ //OLD_STYLE_DUMP
-  define('QUOTE', '`'); //backquote
-  //define('QUOTE', "'");
+   define('QUOTE', "'");
+}
+else{ //OLD_STYLE_DUMP
+   define('QUOTE', '`'); //backquote
+   //define('QUOTE', "'");
 } //OLD_STYLE_DUMP
 
 define('CRINDENT', CR.'   ');
@@ -83,8 +86,7 @@ function insert_set( $table, $query, $title=false)
    if( $title === '' )
       $title = "Dumping data for table ".quoteit( $table, QUOTE);
 
-   $result = mysql_query( $query)
-            or die(mysql_error());
+   $result = mysql_query( $query) or die(mysql_error());
 
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
@@ -131,8 +133,7 @@ function insert_values( $table, $names, $query, $title=false)
    if( $title === '' )
       $title = "Dumping data for table ".quoteit( $table, QUOTE);
 
-   $result = mysql_query( $query)
-            or die(mysql_error());
+   $result = mysql_query( $query) or die(mysql_error());
 
    $mysqlerror = @mysql_error();
    if( $mysqlerror )
@@ -242,51 +243,39 @@ function multi_insert_values( $tables, $title=false, $rowmod=0)
 
 function after_table( $table)
 {
- global $dumptype;
+   global $dumptype;
    $str = '';
 
-   switch((string)$dumptype)
+   if( (string)$dumptype == 'init' )
    {
-   case 'init':
       switch((string)$table)
       {
-      case 'Players': //'Statistics':
+         case 'Players': //'Statistics':
 /*
-         global $GUESTPASS;
-         $str = insert_set( 'Players'
-            , "SELECT Handle,Name"
-//              .",\"".PASSWORD_ENCRYPT."('$GUESTPASS')\" as Password"
-              .",Password"
-            ." FROM Players"
-            ." WHERE Handle='guest'"
-            , 'Insert Guest account'
-            );
+            global $GUESTPASS;
+            $str = insert_set( 'Players'
+               , "SELECT Handle,Name"
+//                .",\"".PASSWORD_ENCRYPT."('$GUESTPASS')\" as Password"
+               .",Password FROM Players WHERE Handle='guest'"
+               , 'Insert Guest account' );
 */
-         global $GUESTPASS;
-         $str = comment_block('Insert Guest account')
-            .CR."INSERT INTO Players SET"
-            .CRINDENT."Handle=".safe_value('guest').","
-            .CRINDENT."Name=".safe_value('Guest').","
-            .CRINDENT."Password=".PASSWORD_ENCRYPT."(".safe_value($GUESTPASS).");"
-            .CR;
-         break;
-      case 'Clock':
-         $str = insert_set( 'Clock'
-            , "SELECT ID"
-            ." FROM Clock"
-            ." WHERE ID>=0 AND MOD(ID,100)<24 AND ID<200"
-            ." ORDER BY ID"
-            , ''
-            );
-         $str.= insert_set( 'Clock'
-            , "SELECT ID, 0 as Lastchanged"
-            ." FROM Clock"
-            ." WHERE ID>200 AND ID<204"
-            ." ORDER BY ID"
-            );
-         break;
+            global $GUESTPASS;
+            $str = comment_block('Insert Guest account')
+               .CR."INSERT INTO Players SET"
+               .CRINDENT."Handle=".safe_value('guest').","
+               .CRINDENT."Name=".safe_value('Guest').","
+               .CRINDENT."Password=".PASSWORD_ENCRYPT."(".safe_value($GUESTPASS).");"
+               .CR;
+            break;
+
+         case 'Clock':
+            $str = insert_set( 'Clock',
+               "SELECT ID FROM Clock WHERE ID>=0 AND MOD(ID,100)<24 AND ID<200 ORDER BY ID", '' );
+            $str.= insert_set( 'Clock',
+               "SELECT ID, 0 as Lastchanged FROM Clock WHERE ID>200 AND ID<204 ORDER BY ID" );
+            break;
       } //switch($table)
-   } //switch($dumptype)
+   }
 
    return $str;
 } //after_table
@@ -294,57 +283,57 @@ function after_table( $table)
 
 function get_tables( $database)
 {
- global $dumptype;
-   switch($dumptype)
-   {
-   case 'init':
-     $tables = array (
-         'Players',
-         'ConfigBoard',
-         'ConfigPages',
-         'Games',
-         'GamesNotes',
-         'Bio',
-         'RatingChange', //Not used?? except in update_rating()
-         'Ratinglog',
-         'Statistics',
-         'Messages',
-         'MessageCorrespondents',
-         'Folders',
-         'Moves',
-         'MoveMessages',
-         'Waitingroom',
-         'Observers',
-         'Contacts',
-         'Tournament',
-         'TournamentRound',
-         //'Knockout',
-         'TournamentOrganizers',
-         'TournamentParticipants',
-         'Errorlog',
-         'Adminlog',
-         'Forumlog',
-         'Translationlog',
-         'TranslationTexts',
-         'Translations',
-         'TranslationLanguages',
-         'TranslationGroups',
-         'TranslationFoundInGroup',
-         'TranslationPages',
-         'Forums',
-         'Posts',
-         'Forumreads',
-         'ForumRead',
-         'GoDiagrams',
-         'FAQ',
-         'FAQlog',
-         'Clock',
-         'FeatureList',
-         'FeatureVote',
+   global $dumptype;
 
-      );
-      break;
-   default:
+   if( $dumptype == 'init' )
+   {
+      $tables = array (
+            'Players',
+            'ConfigBoard',
+            'ConfigPages',
+            'Games',
+            'GamesNotes',
+            'Bio',
+            'RatingChange', //Not used?? except in update_rating()
+            'Ratinglog',
+            'Statistics',
+            'Messages',
+            'MessageCorrespondents',
+            'Folders',
+            'Moves',
+            'MoveMessages',
+            'Waitingroom',
+            'Observers',
+            'Contacts',
+            'Tournament',
+            'TournamentRound',
+            //'Knockout',
+            'TournamentOrganizers',
+            'TournamentParticipants',
+            'Errorlog',
+            'Adminlog',
+            'Forumlog',
+            'Translationlog',
+            'TranslationTexts',
+            'Translations',
+            'TranslationLanguages',
+            'TranslationGroups',
+            'TranslationFoundInGroup',
+            'TranslationPages',
+            'Forums',
+            'Posts',
+            'Forumreads',
+            'ForumRead',
+            'GoDiagrams',
+            'FAQ',
+            'FAQlog',
+            'Clock',
+            'FeatureList',
+            'FeatureVote',
+         );
+   }
+   else
+   {
       $result = mysql_query( 'SHOW TABLES FROM ' . quoteit( $database) )
             or die(mysql_error());
 
@@ -357,13 +346,10 @@ function get_tables( $database)
 
       $tables = array();
       while( list($row) = mysql_fetch_row( $result ) )
-      {
          $tables[] = $row;
-      }
       mysql_free_result($result);
       sort( $tables);
-      break;
-   } //switch($dumptype)
+   }
 
    return $tables;
 } //get_tables
@@ -384,11 +370,11 @@ foreach( array(
    'Translationlog',
    'Forumlog',
 ) as $table ) {
- $defs_rep[$table]['Date']
-   ['%\s+default\s+CURRENT_TIMESTAMP\s+on\s+update\s+CURRENT_TIMESTAMP\b%is'] = '';
- $defs_rep[$table]['Date']
-   ['%timestamp(\s*[^\(])%is'] = 'timestamp(14)\\1';
- $defs_bef[$table]['Date'] = 'PRIMARY';
+   $defs_rep[$table]['Date']
+      ['%\s+default\s+CURRENT_TIMESTAMP\s+on\s+update\s+CURRENT_TIMESTAMP\b%is'] = '';
+   $defs_rep[$table]['Date']
+      ['%timestamp(\s*[^\(])%is'] = 'timestamp(14)\\1';
+   $defs_bef[$table]['Date'] = 'PRIMARY';
 }
 // PosIndex varchar(80) character set latin1 collate latin1_bin NOT NULL default '',
 // PosIndex varchar(80) binary NOT NULL default '',
@@ -400,20 +386,22 @@ $defs_rep['*']['*']
 
 
 //$defs_{move}[{table}][{src}] = {dst};
-switch( FRIENDLY_SHORT_NAME ) {
-case 'dDGS':{
-//$defs_aft['GoDiagrams']['Date'] = 'SGF';
-$defs_aft['Adminlog']['IP'] = 'Date';
-$defs_aft['Errorlog']['IP'] = 'Date';
-} break;
-case 'DGS':{
-//$defs_???['Messages']['To_ID'] = ''; //still exist in DGS
-//$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
-$defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
-$defs_aft['Players']['Rating2'] = 'Rating';
-$defs_bef['ConfigPages']['StatusFolders'] = 'Running';
-$defs_aft['Waitingroom']['Handicap'] = 'Komi';
-} break;
+switch( FRIENDLY_SHORT_NAME )
+{
+   case 'dDGS':
+      //$defs_aft['GoDiagrams']['Date'] = 'SGF';
+      $defs_aft['Adminlog']['IP'] = 'Date';
+      $defs_aft['Errorlog']['IP'] = 'Date';
+      break;
+
+   case 'DGS':
+      //$defs_???['Messages']['To_ID'] = ''; //still exist in DGS
+      //$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
+      $defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
+      $defs_aft['Players']['Rating2'] = 'Rating';
+      $defs_bef['ConfigPages']['StatusFolders'] = 'Running';
+      $defs_aft['Waitingroom']['Handicap'] = 'Komi';
+      break;
 } //FRIENDLY_SHORT_NAME
 //$defs_aft['GamesNotes']['Notes'] = 'Hidden';
 $defs_bef['GamesNotes']['Notes'] = 'PRIMARY';
@@ -432,47 +420,57 @@ function definitions_fix( $table, $keys)
       $ary[$name][]= $str;
    }
    foreach( array('defs_bef','defs_aft') as $mov )
-      if( isset(${$mov}[$table]) )
-         foreach( ${$mov}[$table] as $src => $dst )
    {
-      $keys = array();
-      $tmp = 0;
-      foreach( $ary as $name => $row )
+      if( isset(${$mov}[$table]) )
       {
-         if( $name == $src )
-            continue;
-         if( $name != $dst )
+         foreach( ${$mov}[$table] as $src => $dst )
          {
-            $keys[$name]= $row;
-            continue;
-         }
-         $tmp = 1;
-         if( $mov == 'defs_bef' )
-         {
-            $keys[$src]= $ary[$src];
-            $keys[$name]= $row;
-         }
-         else
-         {
-            $keys[$name]= $row;
-            $keys[$src]= $ary[$src];
+            $keys = array();
+            $tmp = 0;
+            foreach( $ary as $name => $row )
+            {
+               if( $name == $src )
+                  continue;
+               if( $name != $dst )
+               {
+                  $keys[$name]= $row;
+                  continue;
+               }
+               $tmp = 1;
+               if( $mov == 'defs_bef' )
+               {
+                  $keys[$src]= $ary[$src];
+                  $keys[$name]= $row;
+               }
+               else
+               {
+                  $keys[$name]= $row;
+                  $keys[$src]= $ary[$src];
+               }
+            }
+            if( $tmp )
+               $ary = $keys;
          }
       }
-      if( $tmp )
-         $ary = $keys;
    }
    $keys = array();
    foreach( $ary as $name => $row )
-      foreach( $row as $str )
    {
-      foreach( array($table,'*') as $tbl )
-         foreach( array($name,'*') as $nam )
-            if( isset($defs_rep[$tbl]) && isset($defs_rep[$tbl][$nam]) )
+      foreach( $row as $str )
       {
-         foreach( $defs_rep[$tbl][$nam] as $rgx => $rep )
-            $str= preg_replace($rgx, $rep, $str);
+         foreach( array($table,'*') as $tbl )
+         {
+            foreach( array($name,'*') as $nam )
+            {
+               if( isset($defs_rep[$tbl]) && isset($defs_rep[$tbl][$nam]) )
+               {
+                  foreach( $defs_rep[$tbl][$nam] as $rgx => $rep )
+                     $str= preg_replace($rgx, $rep, $str);
+               }
+            }
+         }
+         $keys[]= $str;
       }
-      $keys[]= $str;
    }
    //end move columns
 
@@ -483,25 +481,19 @@ function definitions_fix( $table, $keys)
       $row = def_split($str);
       $name = $row[0];
 
-      switch((string)$table)
+      if( (string)$table == 'Posts' )
       {
-      case('Posts'):
-         switch((string)$name)
+         if( (string)$name == 'KEY' ) //can't have this option with older versions
          {
-         case('KEY'): //can't have this option with older versions
             //TODO PendingApproval replaced with 'P'-enum in Approved-field
             //if( $row[1] == 'PendingApproval' )
             //{
                //$str= eregi_replace('Time DESC','Time',$str);
             //}
-            break;
          }
-         break;
       }
       if( $str )
-      {
          $defs[] = $str;
-      }
    }
    return $defs;
 }
@@ -571,23 +563,24 @@ function echoTR( $typ, $str)
 
    switch((string)$typ)
    {
-   case 'th':
-   case 'td':
-      if( HTML_PRE )
-         $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
-      else
-         $str= "<br>\n" . dump2html( $str) . "\n<br>";
-      $str= "<tr>\n<$typ nowrap>" . $str . "</$typ>\n</tr>\n";
-      break;
-   default:
-      if( HTML_PRE )
-         $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
-      else
-         $str= "<br>\n" . dump2html( $str) . "\n<br>";
-      $str= "<tr class=\"$typ\" ondblclick=\"toggle_class(this,'$typ','Hil$typ')\">\n"
-         . "<td nowrap>" . $str . "</td>\n</tr>\n";
-      break;
-   }
+      case 'th':
+      case 'td':
+         if( HTML_PRE )
+            $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
+         else
+            $str= "<br>\n" . dump2html( $str) . "\n<br>";
+         $str= "<tr>\n<$typ nowrap>" . $str . "</$typ>\n</tr>\n";
+         break;
+
+      default:
+         if( HTML_PRE )
+            $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
+         else
+            $str= "<br>\n" . dump2html( $str) . "\n<br>";
+         $str= "<tr class=\"$typ\" ondblclick=\"toggle_class(this,'$typ','Hil$typ')\">\n"
+            . "<td nowrap>" . $str . "</td>\n</tr>\n";
+         break;
+   }//switch $typ
 
    return $str;
 } //echoTR
@@ -784,7 +777,8 @@ class dbTable
       }
       return $body;
    }
-}
+}// end of class 'dbTable'
+
 
 function dump_header( $database)
 {
@@ -1036,8 +1030,7 @@ function freesql_dump( $database, $query)
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low');
 
-   if( $player_row['Handle'] == 'rodival'
-      )
+   if( is_array($ARR_USERS_MAINTENANCE) && in_array( $player_row['Handle'], $ARR_USERS_MAINTENANCE ) )
       $Super_admin = true;
    else
       $Super_admin = false;
@@ -1094,19 +1087,22 @@ function freesql_dump( $database, $query)
       $show_it = true;
       $dumptype = 'freeSQL';
       $export_file= 'db_export.mysql';
-   } else
-   switch( (string)$row[0] )
+   }
+   else
    {
-   case 'init': {
-      $text = init_dump( DB_NAME);
-      } break; //'init'
-   case 'transl': {
-      $text = transl_dump( DB_NAME);
-      } break; //'transl'
-   case 'lang': {
-      $text = language_dump( DB_NAME, $row[1]);
-      } break; //'lang'
-   } //switch($dumptype)
+      switch( (string)$row[0] )
+      {
+         case 'init':
+            $text = init_dump( DB_NAME);
+            break; //'init'
+         case 'transl':
+            $text = transl_dump( DB_NAME);
+            break; //'transl'
+         case 'lang':
+            $text = language_dump( DB_NAME, $row[1]);
+            break; //'lang'
+      }//switch $row[0]
+   }
 
 
    //====================
