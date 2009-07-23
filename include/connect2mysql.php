@@ -20,6 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( "include/config-local.php" );
 //@set_time_limit(0); //does not work with safe_mode
 
+if( !defined('DBG_QUERY') )
+   define('DBG_QUERY', 0);
+
+
 //because we will use MySQL, this will help to
 //complete the *multiple queries* transactions.
 //@ignore_user_abort(true); //moved to connect2mysql(), also see jump_to()
@@ -176,7 +180,7 @@ function connect2mysql($no_errors=false)
 function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 {
    //echo $debugmsg.'.db_query='.$query.'<br>';
-   //error_log($debugmsg.'.db_query=['.$query.']');
+   if( DBG_QUERY ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
    $result = mysql_query($query);
    if( $result )
       return $result;
