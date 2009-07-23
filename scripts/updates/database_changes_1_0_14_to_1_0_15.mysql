@@ -1184,3 +1184,29 @@ UPDATE MessageCorrespondents
 ALTER TABLE MessageCorrespondents
    CHANGE Folder_nr Folder_nr tinyint NOT NULL ;
 
+
+-- [not-null] Players.Registerdate -> NOT NULL -> no default [mandatory field]
+-- the following query-result should be empty
+SELECT COUNT(*) FROM Players WHERE Registerdate IS NULL ;
+ALTER TABLE Players
+   CHANGE Registerdate Registerdate date NOT NULL ;
+
+-- [not-null] Players.Sessionexpire -> NOT NULL -> default '0' [ok]
+UPDATE Players
+   SET Sessionexpire=0 WHERE Sessionexpire IS NULL ;
+ALTER TABLE Players
+   CHANGE Sessionexpire Sessionexpire datetime NOT NULL default 0 ;
+
+-- [not-null] Players.LastMove -> NOT NULL -> default '0' [ok]
+UPDATE Players
+   SET LastMove=0 WHERE LastMove IS NULL ;
+ALTER TABLE Players
+   CHANGE LastMove LastMove datetime NOT NULL default 0 ;
+
+-- [not-null] Players.Lastaccess -> NOT NULL -> default '0' [ok]
+UPDATE Players
+   SET Lastaccess=0 WHERE Lastaccess IS NULL ;
+ALTER TABLE Players
+   CHANGE Lastaccess Lastaccess datetime NOT NULL default 0 ;
+
+
