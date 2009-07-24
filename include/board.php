@@ -100,7 +100,7 @@ class Board
          return TRUE;
 
       $result = db_query( "board.load_from_db.find_moves($gid)",
-         "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" );
+         "SELECT * FROM Moves WHERE gid=$gid ORDER BY MoveNr" );
       if( !$result )
          return FALSE;
       if( @mysql_num_rows($result) <= 0 )
