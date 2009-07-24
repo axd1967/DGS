@@ -1254,3 +1254,13 @@ UPDATE Players
 ALTER TABLE Players
    CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
 
+-- [not-null] Ratinglo.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
+-- following query-result should be empty
+SELECT COUNT(*) FROM Ratinglog
+   WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
+ALTER TABLE Ratinglog
+   CHANGE Rating Rating float NOT NULL,
+   CHANGE RatingMin RatingMin float NOT NULL,
+   CHANGE RatingMax RatingMax float NOT NULL,
+   CHANGE RatingDiff RatingDiff float NOT NULL ;
+
