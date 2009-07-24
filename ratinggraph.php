@@ -39,7 +39,7 @@ require_once( "include/form_functions.php" );
       error("no_uid");
 
    $result = db_query( "ratinggraph.find_player($uid,$uhandle)",
-      "SELECT ID,Name,Handle FROM Players WHERE $where" );
+      "SELECT ID,Name,Handle FROM Players WHERE $where LIMIT 1" );
 
    if( @mysql_num_rows($result) != 1 )
       error("unknown_user");
@@ -99,7 +99,6 @@ require_once( "include/form_functions.php" );
 
    $result = db_query( "ratinggraph.find_rating_data($uid)",
          "SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2" );
-
    if( @mysql_num_rows($result) < 1 )
       echo T_("Sorry, too few rated games to draw a graph") ,"\n";
    else
