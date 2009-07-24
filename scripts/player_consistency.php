@@ -380,9 +380,8 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 
    $begin = getmicrotime();
    //RatedGames && Ratinglog consistency
-   $query = "SELECT $sqlbuf " .
-            "Players.ID, count(Ratinglog.ID) AS Log, RatedGames FROM Players " .
-            "LEFT JOIN Ratinglog ON uid=Players.ID " .
+   $query = "SELECT $sqlbuf Players.ID, COUNT(Ratinglog.ID) AS Log, RatedGames " .
+            "FROM Players LEFT JOIN Ratinglog ON Ratinglog.uid=Players.ID " .
             "GROUP BY Players.ID HAVING Log!=RatedGames"
             .uid_clause( 'Players.ID', 'AND')
             ." $limit";
