@@ -86,7 +86,7 @@ require_once( "include/rating.php" );
    $sql_have_rating = "IN ('".RATING_INIT."','".RATING_RATED."')";
    $query = "SELECT Games.ID as gid ".
        "FROM (Games, Players as white, Players as black) " .
-       "WHERE Status='FINISHED' AND Rated!='N' " . //redo Rated='Done' and do missed Rated='Y'
+       "WHERE Status='FINISHED' AND Rated IN ('Y','Done') " . //redo Rated='Done' and do missed Rated='Y'
        "AND white.ID=White_ID AND white.RatingStatus $sql_have_rating " .
        "AND black.ID=Black_ID AND black.RatingStatus $sql_have_rating " .
        "ORDER BY Lastchanged,gid $limit";
