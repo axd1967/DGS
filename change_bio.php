@@ -44,7 +44,7 @@ require_once( "include/std_functions.php" );
 
    // use default sort-order: SortOrder & ID (fallback)
    $result = db_query( 'change_bio.find_bio',
-      "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder, ID" );
+      "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder" );
 
    $bios = array();
    $idx = 0;

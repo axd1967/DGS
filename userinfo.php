@@ -67,7 +67,7 @@ $ThePage = new Page('UserInfo');
 
    // load bio
    $bio_result = db_query( 'userinfo.bio',
-      "SELECT * FROM Bio WHERE uid=$uid ORDER BY SortOrder, ID");
+      "SELECT * FROM Bio WHERE uid=$uid ORDER BY SortOrder");
    $count_bio = @mysql_num_rows($bio_result);
 
    if( $hide_bio )

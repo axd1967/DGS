@@ -46,7 +46,7 @@ function find_category_box_text($cat)
    $editorder = isset($_REQUEST['editorder']);
 
    $result = db_query( "edit_bio.find_bios($my_id)",
-      "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder, ID" );
+      "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder" );
    $row_cnt = @mysql_num_rows($result);
 
    $categories = array(
