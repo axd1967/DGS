@@ -274,6 +274,7 @@ obsolete */
 //
 // EGF rating, see above URIs for documentation
 //
+// return: 0=rated-game, 1=not-rated (deletable), 2=not-rated
 function update_rating2($gid, $check_done=true)
 {
    global $NOW;

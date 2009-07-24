@@ -44,8 +44,9 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $logged_in = who_is_logged( $player_row);
 
-//   if( !$logged_in )
-//      error("not_logged_in");
+   // rating-graph can be viewed without being logged in
+   // if( !$logged_in )
+   //    error("not_logged_in");
 
 
    //disable translations in graph if not latin
@@ -306,16 +307,15 @@ function get_rating_data($uid)
 
    $bound_interval = GRAPH_RATING_MIN_INTERVAL/4;
 
+   // note: Ratinglog-entries exists only for rated games
    $query = "SELECT InitialRating AS Rating, ";
    if( ENA_WIN_PIE )
-   {
       $query .= "Running, Finished, RatedGames, Won, Lost,";
-   }
    $query .=
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
       "UNIX_TIMESTAMP(Registerdate) AS seconds " .
-      "FROM Players WHERE ID=$uid";
+      "FROM Players WHERE ID=$uid LIMIT 1";
    $result = db_query( 'ratingpng.initial', $query );
 
    if( @mysql_num_rows($result) != 1 )
@@ -333,7 +333,7 @@ function get_rating_data($uid)
    }
 
    $result = db_query( 'ratingpng.max_time',
-      "SELECT MAX(UNIX_TIMESTAMP(Time)) AS seconds FROM Ratinglog WHERE uid=$uid" );
+      "SELECT UNIX_TIMESTAMP(MAX(Time)) AS seconds FROM Ratinglog WHERE uid=$uid LIMIT 1" );
 
    $max_row = mysql_fetch_assoc($result);
    if( $starttime > $max_row['seconds'] - $bound_interval )
