@@ -1241,3 +1241,16 @@ ALTER TABLE Players
    CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') NOT NULL default 'NONE' ;
 
 
+-- added index to accelerate building of rating-graph (for ORDER BY Time)
+ALTER TABLE Ratinglog
+   DROP INDEX uid ;
+ALTER TABLE Ratinglog
+   ADD INDEX UserTime (uid,Time) ;
+
+
+-- [not-null] Players.InitialRating -> NOT NULL -> default -9999 [ok]
+UPDATE Players
+   SET InitialRating='-9999' WHERE InitialRating IS NULL ;
+ALTER TABLE Players
+   CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
+
