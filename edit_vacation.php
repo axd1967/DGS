@@ -97,33 +97,14 @@ require_once( "include/form_functions.php" );
       {
          // LastTicks will handle -(time spend) at the moment of the start of vacations
          // in the reference of the ClockUsed by the game
-if(1){//new
-            db_query( 'edit_vacation.update_games',
-               "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
-                  . " SET Games.ClockUsed=" .VACATION_CLOCK
-                     . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
-                  . " WHERE Games.Status" . IS_RUNNING_GAME
-                  . " AND Games.ToMove_ID=$my_id"
-                  . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
-               );
-}else{//old
-         $result = db_query( 'edit_vacation.find_games',
-            "SELECT Games.ID as gid, LastTicks-Clock.Ticks AS ticks " .
-            "FROM (Games, Clock) " .
-            "WHERE Status" . IS_RUNNING_GAME .
-               'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
-               'AND Clock.ID=Games.ClockUsed ' .
-               "AND ToMove_ID='$my_id'" );
-
-         //TODO: *** HOT_SECTION *** ???
-         while( $game_row = mysql_fetch_array( $result ) )
-         {
-            db_query( 'edit_vacation.update_games',
-               "UPDATE Games SET ClockUsed=" .VACATION_CLOCK
-                  . ", LastTicks='{$game_row['ticks']}'"
-               . " WHERE ID={$game_row['gid']} LIMIT 1" );
-         }
-}//new/old
+         db_query( 'edit_vacation.update_games',
+            "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
+               . " SET Games.ClockUsed=" .VACATION_CLOCK
+                  . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
+               . " WHERE Games.Status" . IS_RUNNING_GAME
+               . " AND Games.ToMove_ID=$my_id"
+               . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
+            );
 
          db_query( 'edit_vacation.update_player',
             "UPDATE Players SET VacationDays=VacationDays-($vacationlength)"

@@ -287,7 +287,6 @@ if( !$is_down )
 
       // LastTicks handle -(time spend) at the moment of the start of vacations
       // inserts this spend time into the (possibly new) ClockUsed by the player
-if(1){//new
       db_query( 'edit_vacation.update_games',
          "UPDATE Games"
          ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
@@ -297,24 +296,6 @@ if(1){//new
          ." AND Games.ToMove_ID=$uid"
          ." AND Games.ClockUsed<0" // VACATION_CLOCK
          );
-}else{//old
-      $gres = db_query( 'halfhourly_cron.find_vacation_games',
-         "SELECT Games.ID as gid, LastTicks+Clock.Ticks AS ticks " .
-                         "FROM (Games, Clock) " .
-                         "WHERE Status" . IS_RUNNING_GAME .
-                         "AND Games.ClockUsed < 0 " . // VACATION_CLOCK
-                         "AND Clock.ID=$ClockUsed " .
-                         "AND ToMove_ID='$uid'" );
-
-      while( $game_row = mysql_fetch_assoc( $gres ) )
-      {
-         db_query( 'halfhourly_cron.update_vacation_games',
-            "UPDATE Games SET ClockUsed=$ClockUsed"
-                      . ", LastTicks='" . $game_row['ticks'] . "'"
-                      . " WHERE ID='" . $game_row['gid'] . "' LIMIT 1" );
-      }
-      mysql_free_result($gres); //unset($game_row);
-}//new/old
    }
    mysql_free_result($result); //unset($prow);
 
