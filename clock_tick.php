@@ -190,7 +190,7 @@ use TEMPORARY TABLEs for generated UPDATEs ???
          $prow = mysql_single_fetch( 'clock_tick.find_timeout_players',
             'SELECT black.Handle as blackhandle, white.Handle as whitehandle'
                .', black.Name as blackname, white.Name as whitename'
-            .' FROM (Players as white, Players as black)'
+            .' FROM (Players as white, Players as black)' // no JOIN (only to save 1 query) -> TODO: use Players where ID IN(..) in prep for TeamGo
             ." WHERE white.ID=$White_ID AND black.ID=$Black_ID" );
          if( !$prow )
             error('unknown_user', 'clock_tick.find_timeout_players');
