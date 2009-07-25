@@ -23,6 +23,53 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-24 juga
+
+   * edit_vacation.php, halfhourly_cron.php:
+   - removed alternative (old) code to handle vacation-is-over on games
+
+   * change_bio.php, edit_bio.php, userinfo.php:
+   - db-cleanup to use index on Bio.SortOrder (removed 2nd order-column)
+
+   * include/board.php (Board.load_from_db):
+   - db-cleanup to use index on Moves.MoveNr (replaced ID -> MoveNr),
+     MoveNr is not unique for game-id, but order within same MoveNr is not needed
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - cleanup [not-null] for db-fields:
+     - Players.InitialRating: NOT-NULL + default -9999
+     - Ratinglog.Rating:      NOT-NULL + removed default
+     - Ratinglog.RatingMin:   NOT-NULL + removed default
+     - Ratinglog.RatingMax:   NOT-NULL + removed default
+     - Ratinglog.RatingDiff:  NOT-NULL + removed default
+-----------
+-- [not-null] Players.InitialRating -> NOT NULL -> default -9999 [ok]
+UPDATE Players
+   SET InitialRating='-9999' WHERE InitialRating IS NULL ;
+ALTER TABLE Players
+   CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
+
+-- [not-null] Ratinglo.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
+-- following query-result should be empty
+SELECT COUNT(*) FROM Ratinglog
+   WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
+ALTER TABLE Ratinglog
+   CHANGE Rating Rating float NOT NULL,
+   CHANGE RatingMin RatingMin float NOT NULL,
+   CHANGE RatingMax RatingMax float NOT NULL,
+   CHANGE RatingDiff RatingDiff float NOT NULL ;
+-----------
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added index to accelerate building of rating-graph (for ORDER BY Time)
+-----------
+-- added index to accelerate building of rating-graph (for ORDER BY Time)
+ALTER TABLE Ratinglog
+   DROP INDEX uid ;
+ALTER TABLE Ratinglog
+   ADD INDEX UserTime (uid,Time) ;
+-----------
+
 2009-07-23 juga
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
