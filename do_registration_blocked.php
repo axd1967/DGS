@@ -93,8 +93,7 @@ define('USE_REGEXP_REGISTRATION',1); //loose account name reject
             "Parent_ID=0, " .
             "AnswerNr=1, " .
             "Depth=1, " .
-            "Approved='N', " .
-            "PendingApproval='Y', " .
+            "Approved='P', " .
             "crc32=" . crc32($Text) . ", " .
             "PosIndex='**'";
 
