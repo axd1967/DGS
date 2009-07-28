@@ -42,9 +42,6 @@ define('CHECK_GSET', 'waitingroom|tournament|invite|dispute');
 $MSG_TYPES = array( // keep them untranslated{!)
    'NORMAL'     => 'Normal',
    'INVITATION' => 'Invitation',
-   'ACCEPTED'   => 'Accept',
-   'DECLINED'   => 'Decline',
-   'DELETED'    => 'Delete',
    'DISPUTED'   => 'Dispute',
    'RESULT'     => 'Result',
 );
