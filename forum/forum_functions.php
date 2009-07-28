@@ -209,6 +209,16 @@ define('NEWMODE_OVERVIEW', 0x2);
 define('NEWMODE_NEWCOUNT', 0x4);
 define('NEWMODE_NO_LINK',  0x8);
 
+// draw-modes for draw_post()
+define('MASK_DRAWPOST_MODES', 0x0f); // lower 4 bits reserved for draw-modes
+define('DRAWPOST_NORMAL',  1); // post normal view
+define('DRAWPOST_PREVIEW', 2); // post preview
+define('DRAWPOST_EDIT',    3); // post edit
+define('DRAWPOST_REPLY',   4); // post reply
+define('DRAWPOST_SEARCH',  5); // post search-result view
+define('MASK_DRAWPOST_HIDDEN', 0x10); // post-header hidden view
+define('MASK_DRAWPOST_NO_BODY', 0x20); // no post-body shown
+
  /*!
   * \class DisplayForum
   *
@@ -230,6 +240,7 @@ class DisplayForum
    var $headline;
    var $link_array_left;
    var $link_array_right;
+   var $found_rows;
    var $new_count;
    var $back_post_id;
    var $cur_depth;
@@ -257,6 +268,7 @@ class DisplayForum
       $this->headline = array();
       $this->link_array_left = array();
       $this->link_array_right = array();
+      $this->found_rows = -1; // not shown
       $this->new_count = 0;
       $this->back_post_id = 0;
       $this->cur_depth = -1;
@@ -285,6 +297,12 @@ class DisplayForum
    function setConfigBoard( $cfg_board )
    {
       $this->ConfigBoard = $cfg_board;
+   }
+
+   function show_found_rows( $rows )
+   {
+      if( $rows >=0 )
+         $this->found_rows = $rows;
    }
 
    function print_moderation_note( $width )
@@ -318,14 +336,24 @@ class DisplayForum
          $headline = $this->headline;
 
       echo "<tr class=Caption>";
+      $first = true;
       foreach( $headline as $name => $attbs )
+      {
+         if( $first && $this->found_rows >= 0 )
+         {
+            $fmt_entries = ($this->found_rows == 1 ) ? T_('(%s entry)') : T_('(%s entries)');
+            $name .= SMALL_SPACING .
+               '<span class="NaviInfo">' . sprintf( $fmt_entries, $this->found_rows ) . '</span>';
+            $first = false;
+         }
          echo "<td $attbs>$name</td>";
+      }
       echo "</tr>\n";
    }
 
-   function forum_end_table()
+   function forum_end_table( $bottom_bar=true )
    {
-      if( $this->links & LINK_MASKS )
+      if( $bottom_bar && $this->links & LINK_MASKS )
          $this->echo_links('B');
       echo "</table>\n<a name=\"fbottom\">\n";
    }
@@ -368,7 +396,7 @@ class DisplayForum
          $get = array_merge( $_GET, $_POST);
          unset($get['modact']);
          unset($get['modpid']);
-         $get['moderator'] = ( empty($this->is_moderator) ? 'y' : 'n' );
+         $get['moderator'] = ($this->is_moderator) ? 'n' : 'y';
          if( $links & LINKPAGE_READ )
             $url = make_url( 'read.php', $get );
          elseif( $links & LINKPAGE_LIST )
@@ -491,19 +519,20 @@ class DisplayForum
             T_('new') . ( ($mode & NEWMODE_NEWCOUNT) ? " ($cnt_new)" : '' ) );
       }
       return $new;
-   }
+   }//get_new_string
 
-   function forum_message_box( $postClass, $post_id, $GoDiagrams=null, $Subject='', $Text='')
+   // \param $drawmode one of DRAWPOST_NORMAL | PREVIEW | EDIT | REPLY
+   function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $Subject='', $Text='')
    {
-      global $player_row;
-
       // reply-prefix
-      if( $postClass != 'Edit' && $postClass != 'Preview'
-         && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0 )
-            $Subject = "RE: " . $Subject;
+      if( ($drawmode == DRAWPOST_NORMAL || $drawmode == DRAWPOST_REPLY)
+            && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0 )
+         $Subject = "RE: " . $Subject;
 
       $msg_form = 'messageform';
       $form = new Form( $msg_form, "read.php#preview", FORM_POST );
+
+      global $player_row;
       if( @$player_row['ID'] <= GUESTS_ID_MAX )
       {
          $form->add_row( array(
@@ -516,7 +545,7 @@ class DisplayForum
       $form->add_row( array(
             'DESCRIPTION', T_('Subject'),
             'TEXTINPUT', 'Subject', 50, 80, $Subject,
-            'HIDDEN', ($postClass == 'Edit' ? 'edit' : 'parent'), $post_id,
+            'HIDDEN', ($drawmode == DRAWPOST_EDIT ? 'edit' : 'parent'), $post_id,
             'HIDDEN', 'thread', $this->thread_id,
             'HIDDEN', 'forum', $this->forum_id ));
       $form->add_row( array(
@@ -542,7 +571,7 @@ class DisplayForum
                   array( 'accesskey' => ACCKEY_ACT_PREVIEW ) + $arr_dump_diagrams ));
 
       $form->echo_string(1);
-   }
+   }//forum_message_box
 
 
    // The table structure of the list controlled by depth:
@@ -622,11 +651,12 @@ class DisplayForum
    }
 
 
-   //TODO: refactor (don't control logic with style-var), also see forum/read.php & forum-search (moderator-stuff)
-   // param postClass: no '_' because used as sub-class name => CSS compliance,
-   //                  values: 'Normal', 'Hidden', 'Reply', 'Preview', 'Edit', 'SearchResult'
-   // param post: ForumPost-object to draw
-   function draw_post($postClass, $post, $is_my_post, $GoDiagrams=null )
+   /*!
+    * \brief Draws various views of post controlled by $drawmode.
+    * \param $drawmode DRAWPOST_..., MASK_DRAWPOST_...
+    * \param $post: ForumPost-object to draw
+    */
+   function draw_post( $drawmode, $post, $is_my_post, $GoDiagrams=null )
    {
       global $NOW, $player_row;
 
@@ -651,9 +681,29 @@ class DisplayForum
 
       if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
+      // CSS-class for post header
+      $drawmode_type = ($drawmode & MASK_DRAWPOST_MODES);
+      if( $drawmode == DRAWPOST_NORMAL ) // most frequent case, no extras
+         $class = 'Normal';
+      elseif( $drawmode_type == DRAWPOST_SEARCH )
+         $class = 'SearchResult';
+      elseif( $drawmode & MASK_DRAWPOST_HIDDEN )
+         $class = 'Hidden';
+      elseif( $drawmode_type == DRAWPOST_PREVIEW )
+         $class = 'Preview';
+      elseif( $drawmode_type == DRAWPOST_EDIT )
+         $class = 'Edit';
+      elseif( $drawmode_type == DRAWPOST_REPLY )
+         $class = 'Reply';
+      else //if drawmode_type 0 or DRAWPOST_NORMAL
+      {
+         $drawmode_type = DRAWPOST_NORMAL;
+         $class = 'Normal';
+      }
+      $hdrclass = 'PostHead'.$class;
+
       // post header
-      $hdrclass = 'PostHead'.$postClass;
-      if( $postClass == 'Preview' )
+      if( $drawmode_type == DRAWPOST_PREVIEW )
       {
          $hdrrows = 2;
          $hdrcols = $cols;
@@ -667,11 +717,22 @@ class DisplayForum
       }
       else
       {
-         if( $postClass == 'SearchResult' )
+         if( $drawmode & MASK_DRAWPOST_HIDDEN )
+         {
+            $hdrcols = $cols-1; //because of the rowspan=$hdrrows in the "hidden"-column
+            $newstr = '';
+         }
+         else
+         {
+            $hdrcols = $cols;
+            $newstr = $this->get_new_string( 0, $post->count_new, $post->created );
+         }
+
+         if( $drawmode_type == DRAWPOST_SEARCH )
          {
             $hdrrows = 3;
-            $hdrcols = $cols;
 
+            // [header-row] search-found
             echo "\n<tr class=\"$hdrclass FoundForum\"><td class=FoundForum colspan=$hdrcols>";
             echo '<span class=FoundForum>' ,T_('found in forum')
                ,' <a href="list.php?forum='
@@ -679,42 +740,42 @@ class DisplayForum
             if( $this->show_score )
                echo ' <span class=FoundScore>' ,T_('with')
                   ,' <span>' ,T_('Score') ,' ' ,$post->score ,"</span></span>\n";
-            echo '</td></tr>';
-            echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
-            echo '<a class=PostSubject href="', $thread_url, $term_url, "#$pid\">$sbj</a>";
-            echo "</td></tr>";
          }
          else
          {
             $hdrrows = 2;
-            if( $postClass == 'Hidden' )
-            {
-               $hdrcols = $cols-1; //because of the rowspan=$hdrrows in the second column
-               $newstr = '';
-            }
-            else
-            {
-               $hdrcols = $cols;
-               $newstr = $this->get_new_string( 0, $post->count_new, $post->created );
-            }
 
+            // [header-row] subject
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
 
             //from revision_history or because, when edited, the link will be obsolete
-            if( $postClass == 'Edit' || $post->thread_no_link )
+            if( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
                echo "<a class=PostSubject name=\"$pid\">$sbj</a>";
             else
                echo '<a class=PostSubject href="', $thread_url, $term_url,
                   "#$pid\" name=\"$pid\">$sbj</a>", $newstr;
+         }
 
-            if( $hdrcols != $cols )
-            {
-               echo "</td>\n <td rowspan=$hdrrows class=PostStatus>";
-               echo ( $post->is_pending_approval() ? T_('Awaiting<br>approval') : T_('Hidden') );
-            }
+         // first [header-row] with different content (adding hidden-state)
+         if( $hdrcols != $cols )
+         {
+            echo "</td>\n <td rowspan=$hdrrows class=PostStatus><span class=\"Hidden\">";
+            echo ( $post->is_pending_approval() ? T_('Awaiting<br>approval') : T_('Hidden') );
+            if( $drawmode & MASK_DRAWPOST_NO_BODY )
+               echo sprintf( ' (%s)', T_('Content moderated'));
+            echo '</span>';
+         }
+         echo '</td></tr>';
+
+         if( $drawmode_type == DRAWPOST_SEARCH )
+         {
+            // [header-row] subject
+            echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
+            echo '<a class=PostSubject href="', $thread_url, $term_url, "#$pid\">$sbj</a>";
             echo "</td></tr>";
          }
 
+         // [header-row] post-info
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
          $post_reference = date(DATE_FMT, $post->created);
@@ -722,7 +783,8 @@ class DisplayForum
               echo_image_admin( $post->author->AdminLevel ),
               ' ', SMALL_SPACING, $post_reference;
 
-         echo $this->get_post_edited_string( $post );
+         if( !($drawmode & MASK_DRAWPOST_NO_BODY) )
+            echo $this->get_post_edited_string( $post );
          if( $post->last_edited > 0 )
             $post_reference = date(DATE_FMT, $post->last_edited);
 
@@ -732,12 +794,13 @@ class DisplayForum
       }
 
       // post body
-      echo "\n<tr class=PostBody><td colspan=$cols>$txt</td></tr>";
+      if( !($drawmode & MASK_DRAWPOST_NO_BODY) )
+         echo "\n<tr class=PostBody><td colspan=$cols>$txt</td></tr>";
 
-      // bottom line (footer)
-      if( $postClass == 'Normal' || $postClass == 'Hidden' )
+
+      // post bottom line (footer)
+      if( $drawmode_type == DRAWPOST_NORMAL )
       {
-         $hidden = $postClass == 'Hidden';
          echo "\n<tr class=PostButtons><td colspan=$cols>";
 
          $imgarr = $this->init_navi_images();
@@ -764,24 +827,19 @@ class DisplayForum
             $prev_answer,
             '&nbsp;';
 
-         if( $postClass == 'Normal' && !$this->is_moderator ) // reply link
-         {
-            echo '<a href="'.$thread_url
-               .URI_AMP."reply=$pid#$pid\">[ " .
-               T_('reply') . " ]</a>&nbsp;&nbsp;";
-            if( ALLOW_QUOTING )
-            echo '<a href="'.$thread_url
-               .URI_AMP."quote=1"
-               .URI_AMP."reply=$pid#$pid\">[ " .
-               T_('quote') . " ]</a>&nbsp;&nbsp;";
-         }
-         if( $is_my_post && !$this->is_moderator ) // edit link
-         {
-            echo '<a class=Highlight href="'.$thread_url
-               .URI_AMP."edit=$pid#$pid\">"
-               ."[ " . T_('edit') . " ]</a>&nbsp;&nbsp;";
-         }
-         if( $post->count_new > 0 && !$this->is_moderator ) // mark read link
+         // reply link
+         echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply'), " ]</a>&nbsp;&nbsp;";
+         if( ALLOW_QUOTING )
+            echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
+               T_('quote'), " ]</a>&nbsp;&nbsp;";
+
+         // edit link
+         if( $is_my_post )
+            echo '<a class=Highlight href="', $thread_url,URI_AMP,"edit=$pid#$pid\">[ ",
+               T_('edit'), " ]</a>&nbsp;&nbsp;";
+
+         // mark read link
+         if( $post->count_new > 0 )
          {
             $readmark = ( $post->read_mark != '' ) ? $post->read_mark : "p$pid.$NOW";
             echo '<a href="', $thread_url, URI_AMP, "markread=$readmark#$pid\">", // mark post
@@ -796,10 +854,11 @@ class DisplayForum
             $first_answer,
             '&nbsp;';
 
-         if( $this->is_moderator ) // hide/show/approve/reject-link
+         // for moderator: hide/show/approve/reject-link
+         if( $this->is_moderator )
          {
             $modurl_fmt = '<a class=Highlight href="'.$thread_url
-               . URI_AMP."modpid=$ID".URI_AMP."modact=%s#$pid\">[ %s ]</a>";
+               . URI_AMP."modpid=$pid".URI_AMP."modact=%s#$pid\">[ %s ]</a>";
             if( $post->is_pending_approval() )
             {
                echo sprintf( $modurl_fmt, 'approve',  T_('Approve') ),
@@ -808,10 +867,10 @@ class DisplayForum
             }
             else
             {
-               if( $hidden )
-                  echo sprintf( $modurl_fmt, 'show',  T_('show') );
-               else
+               if( $post->is_approved() )
                   echo sprintf( $modurl_fmt, 'hide',  T_('hide') );
+               else
+                  echo sprintf( $modurl_fmt, 'show',  T_('show') );
             }
          }
          echo "</td></tr>\n";
@@ -836,20 +895,30 @@ class DisplayForum
       $c=2;
       foreach( $fthread->posts as $pid => $post )
       {
-         $c = 3 - $c;
+         $hidden = !$post->is_approved();
+         $is_my_post = ( $post->author->id == $this->user_id );
+         $show_hidden_post = ( $is_my_post || $this->is_moderator );
+         if( $hidden && !$post->is_thread_post() && !$show_hidden_post )
+            continue;
+
          $subj_part = substr( $post->subject, 0, 40 )
             . ( (strlen($post->subject) > 40) ? ' ...' : '' );
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
-         $newstr = ($post->is_approved())
+         $newstr = (!$hidden)
             ? $this->get_new_string( NEWMODE_OVERVIEW, $post->count_new, $post->created ) : '';
+         $modstr = ( $hidden && ( $post->is_thread_post() || $this->is_moderator) )
+            ? MED_SPACING . sprintf( '<span class="Moderated">(%s)</span>',
+                  ForumPost::get_approved_text( $post->approved ) ) : '';
 
-         $mypostclass = ( $post->author->id == $player_row['ID'] ) ? ' class=MyPost' : '';
-         echo "\n<tr class=\"TreePostNormal Row{$c}". ($mypostclass != '' ? ' MyPost' : '') ."\">",
+         $c = 3 - $c;
+         $mypostclass = ($is_my_post) ? ' class=MyPost' : '';
+         $mypost_fmt = ($is_my_post) ? '<span class="MyPost">%s</span>' : '%s';
+         echo "\n<tr class=\"TreePostNormal Row{$c}". ($is_my_post ? ' MyPost' : '') ."\">",
             "<td$mypostclass>",
             str_repeat( '&nbsp;', 3*($post->depth - 1) ),
-            anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ),
+            sprintf( $mypost_fmt, anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ) ),
             $newstr,
-            //TODO add/handle moderator-state
+            $modstr,
             "</td><td>",
             sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
             "</td><td>",
@@ -987,7 +1056,7 @@ class Forum
             . 'AND FR.Thread_ID=P.Thread_ID AND FR.Post_ID='.THPID_NEWCOUNT );
       $qsql->add_part( SQLP_WHERE,
          "P.Forum_ID=$forum_id",
-         'P.Parent_ID=0' );
+         'P.Parent_ID=0', 'P.Thread_ID=P.ID' ); //=thread (better query with thread=id for ForumRead)
       if( !$is_moderator )
          $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
       $qsql->add_part( SQLP_ORDER, 'P.LastChanged DESC' );
@@ -1244,6 +1313,12 @@ class ForumThread
       $this->count_new = 0;
    }
 
+   /*! \brief Returns post with given post-id from this ForumThread object; or NULL if not found. */
+   function get_post( $pid )
+   {
+      return (isset($this->posts[$pid])) ? $this->posts[$pid] : NULL;
+   }
+
 
    /*!
     * \brief Loads and adds posts (to posts-arr): query fields and FROM set,
@@ -1389,11 +1464,11 @@ class ForumThread
          foreach( $navtree as $post_id => $navmap )
          {
             $this->posts[$post_id]->set_navigation(
-               ( $navmap['prevP'] ) ? $this->posts[$navmap['prevP']] : NULL,
-               ( $navmap['nextP'] ) ? $this->posts[$navmap['nextP']] : NULL,
-               ( $navmap['prevA'] ) ? $this->posts[$navmap['prevA']] : NULL,
-               ( $navmap['nextA'] ) ? $this->posts[$navmap['nextA']] : NULL,
-               ( $navmap['child'] ) ? $this->posts[$navmap['child']] : NULL
+               ( $navmap['prevP'] ) ? $this->get_post($navmap['prevP']) : NULL,
+               ( $navmap['nextP'] ) ? $this->get_post($navmap['nextP']) : NULL,
+               ( $navmap['prevA'] ) ? $this->get_post($navmap['prevA']) : NULL,
+               ( $navmap['nextA'] ) ? $this->get_post($navmap['nextA']) : NULL,
+               ( $navmap['child'] ) ? $this->get_post($navmap['child']) : NULL
             );
          }
       }
@@ -1528,13 +1603,19 @@ class ForumPost
    }
 
 
-   /*! Returns true, if post is approved (Approved=Y). */
+   /*! \brief Returns true, if post is thread-post. */
+   function is_thread_post()
+   {
+      return ( $this->id == $this->thread_id );
+   }
+
+   /*! \brief Returns true, if post is approved (Approved=Y). */
    function is_approved()
    {
       return ( $this->approved === 'Y' );
    }
 
-   /*! Returns true, if post is pending-approval (Approved=P). */
+   /*! \brief Returns true, if post is pending-approval (Approved=P). */
    function is_pending_approval()
    {
       return ( $this->approved === 'P' );
@@ -1658,6 +1739,17 @@ class ForumPost
             @$row['old_ID']
          );
       return $post;
+   }
+
+   /*! \brief Returns M(=pending approval), H=hidden, S=shown for given approved value P|N|Y. */
+   function get_approved_text( $approved )
+   {
+      if( $approved == 'P' )
+         return 'M';
+      elseif( $approved == 'N' )
+         return 'H';
+      else //if( $approved == 'Y' )
+         return 'S';
    }
 
 } // end of 'ForumPost'
@@ -1964,7 +2056,7 @@ class ForumRead
             "LEFT JOIN ForumRead AS FR ON FR.User_ID='{$this->uid}' AND FR.Forum_ID=P.Forum_ID "
                . 'AND FR.Thread_ID=P.ID AND FR.Post_ID='.THPID_NEWCOUNT );
          $qsql->add_part( SQLP_WHERE,
-            'P.Parent_ID=0',
+            'P.Parent_ID=0', 'P.Thread_ID=P.ID', //=thread (better query with thread=id for ForumRead)
             'P.PostsInThread>0',
             "P.Lastchanged > FROM_UNIXTIME({$this->min_date})" );
          if( $forum_id > 0 )
