@@ -5,9 +5,14 @@
 
 -- replace Password-algorithm with that declared as [PASSWORD_ENCRYPT] in 'include/config.php'
 INSERT INTO Players SET
+   ID=1,
    Handle='guest',
    Name='Guest',
-   Password=SHA1('guest') ;
+   Password=SHA1('guest'),
+   Registerdate=CURDATE() ;
+INSERT INTO ConfigPages SET User_ID=1 ;
+INSERT INTO ConfigBoard SET User_ID=1 ;
+INSERT INTO UserQuota SET uid=1 ;
 
 
 --
