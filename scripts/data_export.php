@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -481,17 +481,17 @@ function definitions_fix( $table, $keys)
       $row = def_split($str);
       $name = $row[0];
 
+      $str = '';
+      /*
       if( (string)$table == 'Posts' )
       {
          if( (string)$name == 'KEY' ) //can't have this option with older versions
          {
-            //TODO PendingApproval replaced with 'P'-enum in Approved-field
-            //if( $row[1] == 'PendingApproval' )
-            //{
-               //$str= eregi_replace('Time DESC','Time',$str);
-            //}
+            if( $row[1] == 'SomeFieldName' )
+               $str = eregi_replace('Time DESC','Time',$str); // do something
          }
       }
+      */
       if( $str )
          $defs[] = $str;
    }
