@@ -72,7 +72,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    {
       $row = mysql_single_fetch( 'forum_post.post_message.edit.find',
                "SELECT Forum_ID,Thread_ID,Subject,Text,GREATEST(Time,Lastedited) AS Time ".
-               "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'] )
+               "FROM Posts WHERE ID=$edit AND User_ID=" . $player_row['ID'] . ' LIMIT 1' )
          or error('unknown_parent_post', 'forum_post.post_message.edit.find');
 
       $oldSubject = mysql_addslashes( trim($row['Subject']));
@@ -87,7 +87,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
                      "Lastedited=FROM_UNIXTIME($NOW), " .
                      "Subject='$Subject', " .
                      "Text='$Text' " .
-                     ( ($moderated) ? ", Approved='N', PendingApproval='Y' " : '' ) .
+                     ( $moderated ? ", Approved='P' " : '' ) .
                      "WHERE ID=$edit LIMIT 1" );
 
          //Insert new record with old text
@@ -121,14 +121,14 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
          $is_newthread = false;
          $row = mysql_single_fetch( 'forum_post.reply.find',
                         "SELECT PosIndex,Depth,Thread_ID FROM Posts " .
-                        "WHERE ID=$parent AND Forum_ID=$forum" )
+                        "WHERE ID=$parent AND Forum_ID=$forum LIMIT 1" )
             or error('unknown_parent_post', 'forum_post.reply.find');
 
          extract( $row); // $PosIndex, $Depth, $Thread_ID
 
          $row = mysql_single_fetch( 'forum_post.reply.max',
                         "SELECT MAX(AnswerNr) AS answer_nr " .
-                        "FROM Posts WHERE Parent_ID=$parent" )
+                        "FROM Posts WHERE Parent_ID=$parent LIMIT 1" )
             or error('unknown_parent_post', 'forum_post.reply.max');
          $answer_nr = $row['answer_nr'];
 
@@ -332,7 +332,7 @@ function hide_post( $fid, $tid, $pid )
    // forum-trigger
    db_query( "approve_post.trigger_forum($fid,$pid)",
       'UPDATE Forums SET '
-      . ( ($pid == $tid) ? 'ThreadsInForum=ThreadsInForum-1, ' : '' )
+      . ( ($pid == $tid && $thread_cntposts == 0) ? 'ThreadsInForum=ThreadsInForum-1, ' : '' )
       . 'PostsInForum=PostsInForum-1, '
       . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) " // post could be a NEW one
       . "WHERE ID=$fid LIMIT 1" );
@@ -383,7 +383,7 @@ function show_post( $fid, $tid, $pid )
    // forum-trigger
    db_query( "show_post.trigger_forum($fid,$pid)",
       'UPDATE Forums SET '
-      . ( ($thread_cntposts == 1) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
+      . ( ($thread_cntposts == 0) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
       . ( ($post_created > $thread_lastchanged)
          ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
            . ( ($thread_lastpost == $forum_lastpost)
