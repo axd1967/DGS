@@ -64,6 +64,8 @@ else
    $GUESTPASS = 'guest';
 define('GUESTS_ID_MAX', 1); //minimum 1 because hard-coded in init.mysql
 
+// for debugging various variables (used for development)
+$DEBUG = false;
 $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
@@ -1399,7 +1401,6 @@ function get_cookie_prefs(&$player_row)
  *         -2 (=get admin-status from cookies, but at most grant admin-level of user)
  *         -3 (=invalid user specified)
  */
-// can return -3(=invalid user-id), -2(?), -1(not-allowed), 0(=granted, but inactive), 1(=granted and active)
 function switch_admin_status(&$player_row, $mask=0, $cmd='')
 {
    $uid = (int)@$player_row['ID'];
