@@ -870,7 +870,7 @@ ALTER TABLE FeatureVote
 
 -- table-column-set for feature-list
 ALTER TABLE ConfigPages
-   ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll ;
+   ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll2 ;
 
 
 -- game-komi adjustment & jigo mode (for Waiting room)
@@ -1254,8 +1254,8 @@ UPDATE Players
 ALTER TABLE Players
    CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
 
--- [not-null] Ratinglo.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
--- following query-result should be empty
+-- [not-null] Ratinglog.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
+-- following query-result should be 0
 SELECT COUNT(*) FROM Ratinglog
    WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
 ALTER TABLE Ratinglog
@@ -1263,4 +1263,29 @@ ALTER TABLE Ratinglog
    CHANGE RatingMin RatingMin float NOT NULL,
    CHANGE RatingMax RatingMax float NOT NULL,
    CHANGE RatingDiff RatingDiff float NOT NULL ;
+
+
+-- [unused] remove unused enum-values of Messages.Type, cleanup wrong table-values
+-- check (wrong) empty 'Type'-values (2489 empties)
+SELECT COUNT(*),Type FROM Messages GROUP BY Type ;
+-- check all for normal type (game invitations accepted or declined)
+SELECT COUNT(*) FROM Messages WHERE Type='' AND Subject LIKE 'Game invitation%' ;
+-- check for newer such entries (all should be <2009)
+SELECT MAX(Time) FROM Messages WHERE Type='' ;
+-- fix table data + check empty types again (should be 0)
+UPDATE Messages
+   SET Type='NORMAL' WHERE Type='' AND Subject LIKE 'Game invitation%' LIMIT 2489 ;
+SELECT COUNT(*),Type FROM Messages GROUP BY Type ;
+
+-- cleanup Messages.Type enum (ca. 2min)
+ALTER TABLE Messages
+   CHANGE Type Type enum('NORMAL','INVITATION','DISPUTED','RESULT') NOT NULL default 'NORMAL' ;
+
+
+-- deactivate game-notes in table-columns as default (to reduce server-load) for games-list (status, my running/finished games)
+UPDATE ConfigPages
+   SET ColumnsStatusGames=ColumnsStatusGames & ~0x800,
+   ColumnsGamesRunningUser2=ColumnsGamesRunningUser2 & ~0x4,
+   ColumnsGamesFinishedUser2=ColumnsGamesFinishedUser2 & ~0x4 ;
+
 
