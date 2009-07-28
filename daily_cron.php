@@ -56,44 +56,8 @@ if( !$is_down )
       or $TheErrors->dump_exit('daily_cron');
 
 
-   //$delete_messages = false; TODO not used
-   //$delete_invitations = false;
    $delete_waitingroom_entries = true;
-   //$message_timelimit = 90; //days TODO not used
-   //$invite_timelimit = 60; //days
    $waitingroom_timelimit = 30; //days
-
-
-/* TODO: to be reviewed: the field *Type* 'DELETED' no more used (replaced by Folder_nr = FOLDER_DESTROYED).
-   if( $delete_invitations )
-   {
-      // Delete old invitations
-      $timelimit = $invite_timelimit*24*3600;
-      $query = "SELECT Messages.ID as mid, Game_ID " .
-         "FROM (Messages, Games) " .
-         "WHERE Game.ID=Messages.Game_ID AND Games.Status='INVITED' " .
-         "AND Messages.Type='INVITATION' AND $NOW-UNIX_TIMESTAMP(Time) > $timelimit " .
-         "AND $NOW-UNIX_TIMESTAMP(Lastchanged) > $timelimit";
-
-      $result = dbquery( 'daily_cron?', $query );
-
-      if( @mysql_num_rows($result) > 0 )
-      {
-         while( $row = mysql_fetch_assoc( $result ) )
-         {
-            db_query( 'daily_cron?',
-               "DELETE FROM Games WHERE ID=" . $row["Game_ID"]
-                  . " AND Status='INVITED' LIMIT 1" );
-
-            db_query( 'daily_cron?',
-               "UPDATE Messages SET Type='DELETED' " .
-                         "WHERE ID=" . $row['mid'] . " LIMIT 1" );
-         }
-      }
-      mysql_free_result($result);
-   }
-*/
-
 
    if( $delete_waitingroom_entries )
    {
