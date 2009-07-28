@@ -805,8 +805,9 @@ class SearchFilter
     * \param choice - scalar (filter-choice, e.g. GETFILTER_ACTIVE), or
     *               - array with speficic filter-IDs to check: array( filter_id, ... )
     *               - if null or empty-array use choice GETFILTER_ACTIVE
+    * \param $arr_exclude optional array with filter-IDs to exclude from check
     */
-   function has_query( $choice = null )
+   function has_query( $choice=null, $arr_exclude=null )
    {
       if( is_null($choice) || ( is_array($choice) && count($choice) == 0 ) )
          $choice = GETFILTER_ACTIVE;
@@ -818,6 +819,8 @@ class SearchFilter
       foreach( $arr_id as $id )
       {
          $filter = $this->get_filter($id);
+         if( is_array($arr_exclude) && in_array($id, $arr_exclude) )
+            continue;
          if( isset($filter) && !is_null($filter->get_query()) )
             return true;
       }
