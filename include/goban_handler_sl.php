@@ -306,7 +306,7 @@ class GobanHandlerSL1
             $this->goban->setMarker( $x, $y, GOBM_LETTER, strtolower($item) );
          else // unknown item
          {
-error_log("WARNING: Unknown item[$item]");//TODO
+            //error_log("WARNING: Unknown item[$item]");//TODO
          }
       }
       if( $x > $this->max_x )
