@@ -25,10 +25,6 @@ require_once( "include/std_classes.php" );
 require_once( "include/filter.php" );
 require_once( "include/filterlib_mysqlmatch.php" );
 
-//does not work. Need at least a special SearchHidden class
-//TODO moderator-search
-define('MODERATOR_SEARCH', 0);
-
 
 {
    #$DEBUG_SQL = true;
@@ -40,7 +36,8 @@ define('MODERATOR_SEARCH', 0);
    $my_id = $player_row['ID'];
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
-   $is_moderator = ($switch_moderator == 1);
+   $is_moderator = ($switch_moderator == 1); // true, if in moderating mode
+   $is_admin_moderator = ( $switch_moderator >= 0 ); // true, if forum moderator
 
    // build forum-array for filter: ( Name => Forum_ID )
    $f_opts = new ForumOptions( $player_row );
@@ -51,15 +48,15 @@ define('MODERATOR_SEARCH', 0);
       $arr_forum[$name] = 'Posts.Forum_ID=' . $id;
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator );
-   $disp_forum->links = LINKPAGE_SEARCH;
+   $disp_forum->links = LINKPAGE_SEARCH | LINK_SEARCH;
 
    $page = "search.php";
    $f_opts = new ForumOptions( $player_row );
 
-   if( !MODERATOR_SEARCH || $switch_moderator < 0 )
-      $disp_forum->is_moderator = 0;
-   else
+   if( $is_admin_moderator )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
+   else
+      $disp_forum->is_moderator = 0;
 
    $title = T_('Forum search');
    start_page($title, true, $logged_in, $player_row);
@@ -114,6 +111,8 @@ define('MODERATOR_SEARCH', 0);
          true);
    $ffilter->add_filter( 5, 'RelativeDate', 'P.Time', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 12 ) );
+   if( $is_admin_moderator )
+      $ffilter->add_filter( 6, 'Boolean', array( true => '', false => "P.Approved='Y'" ), true );
    $ffilter->init(); // parse current value from $_REQUEST
    $filter2 =& $ffilter->get_filter(2);
 
@@ -137,10 +136,16 @@ define('MODERATOR_SEARCH', 0);
          'FILTER',      $ffilter, 3,
          'FILTERERROR', $ffilter, 3, '<BR>'.$FERR1, $FERR2, true,
          ));
-   $fform->add_row( array(
+   $arr = array(
          'DESCRIPTION', T_('Message scope#forum'),
          'FILTER',      $ffilter, 4,
-         ));
+      );
+   if( $is_admin_moderator )
+      array_push( $arr,
+            'TEXT',     SMALL_SPACING,
+            'FILTER',   $ffilter, 6,
+            'TEXT',     sprintf( '<span class="AdminOption">%s</span>', T_('include moderated posts') ) );
+   $fform->add_row( $arr );
    $fform->add_row( array(
          'DESCRIPTION', T_('Date#forum'),
          'CELL',        1, 'align=left',
@@ -164,17 +169,24 @@ define('MODERATOR_SEARCH', 0);
    if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
    if( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_rx_terms()) ) . "<br>\n";
 
-   if( $ffilter->has_query() )  // Display results
+   // Perform query
+   $findposts = array();
+   $nr_rows = 0;
+   $has_query = false;
+   if( $ffilter->has_query(null, array(6)) )
    {
       // get clause-part for mysql-match as select-col
+      $has_query = true;
       if( is_null($filter2->get_query()) )
          $query_match = '1';
       else
          $query_match = $filter2->get_match_query_part();
 
       $qsql = ForumPost::build_query_sql();
+      if( ALLOW_SQL_CALC_ROWS )
+         $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
       $qsql->add_part( SQLP_FIELDS, "$query_match as Score" );
-      if( !MODERATOR_SEARCH )
+      if( !$is_admin_moderator )
          $qsql->add_part( SQLP_WHERE, "P.Approved='Y'" );
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
 
@@ -195,9 +207,11 @@ define('MODERATOR_SEARCH', 0);
 
       $result = db_query( 'forum_search.find', $query );
       $nr_rows = mysql_num_rows($result);
+      $found_rows = mysql_found_rows('forum_search.found_rows');
+      if( $found_rows >= 0 )
+         $disp_forum->show_found_rows( $found_rows );
 
       $cnt_rows = $maxrows; // read only what is needed (nr_rows maybe +1)
-      $findposts = array();
       while( ($row = mysql_fetch_array( $result )) && $cnt_rows-- > 0 )
       {
          $post = ForumPost::new_from_row($row);
@@ -206,49 +220,51 @@ define('MODERATOR_SEARCH', 0);
          $findposts[] = $post;
       }
       // end of DB-stuff
-
-
-      $disp_forum->cols = $cols = 2;
-      $disp_forum->headline = array( T_('Search result') => "colspan=$cols" );
-
-      $disp_forum->links |= LINK_FORUMS;
-      if( $offset > 0 )
-         $disp_forum->links |= LINK_PREV_PAGE;
-      if( $nr_rows > $maxrows )
-         $disp_forum->links |= LINK_NEXT_PAGE;
-
-      // build navi-URL for paging (offset/maxrows set in forum_start_table/make_link_array-func)
-      $rp = $ffilter->get_req_params();
-      $rp->add_entry( 'order',  $order );
-
-      // show resultset of search
-      $rx_term = implode('|', $filter2->get_rx_terms() );
-      $disp_forum->show_score = true; // for draw_post
-      $disp_forum->set_rx_term( $rx_term );
-
-      $disp_forum->print_moderation_note('99%');
-      $disp_forum->forum_start_table('Search', $rp);
-      echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
-
-      foreach( $findposts as $post )
-      {
-         $is_my_post = ( $post->author->id == $my_id );
-         $hidden = !$post->is_approved();
-         if( $hidden && !$disp_forum->is_moderator && !$is_my_post )
-            continue;
-
-         $postClass = 'SearchResult';
-         if( $hidden )
-            $postClass = 'Hidden'; //need a special SearchHidden class
-
-         $disp_forum->draw_post($postClass, $post, $is_my_post, null );
-
-         echo "<tr><td colspan=$cols></td></tr>\n"; //separator
-      }
-
-      echo "</table></td></tr>\n";
-      $disp_forum->forum_end_table();
    }
+
+
+   // Display results
+   $disp_forum->cols = $cols = 2;
+   $disp_forum->headline = array( T_('Search result') => "colspan=$cols" );
+
+   $disp_forum->links |= LINK_FORUMS;
+   if( $offset > 0 )
+      $disp_forum->links |= LINK_PREV_PAGE;
+   if( $nr_rows > $maxrows )
+      $disp_forum->links |= LINK_NEXT_PAGE;
+
+   // build navi-URL for paging (offset/maxrows set in forum_start_table/make_link_array-func)
+   $rp = $ffilter->get_req_params();
+   $rp->add_entry( 'order',  $order );
+
+   // show resultset of search
+   $rx_term = implode('|', $filter2->get_rx_terms() );
+   $disp_forum->show_score = true; // for draw_post
+   $disp_forum->set_rx_term( $rx_term );
+
+   echo "<br>\n";
+   $disp_forum->print_moderation_note('99%');
+   $disp_forum->forum_start_table('Search', $rp);
+   echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
+
+   foreach( $findposts as $post )
+   {
+      $is_my_post = ( $post->author->id == $my_id );
+      $hidden = !$post->is_approved();
+      if( $hidden && !$is_admin_moderator && !$is_my_post )
+         continue;
+
+      $drawmode = DRAWPOST_SEARCH;
+      if( $hidden )
+         $drawmode |= MASK_DRAWPOST_HIDDEN;
+
+      $disp_forum->draw_post( $drawmode, $post, $is_my_post, null );
+
+      echo "<tr><td colspan=$cols></td></tr>\n"; //separator
+   }
+
+   echo "</table></td></tr>\n";
+   $disp_forum->forum_end_table( $has_query );
 
    end_page();
 }
