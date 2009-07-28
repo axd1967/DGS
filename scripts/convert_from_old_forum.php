@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 chdir( '../' );
 require_once( "include/std_functions.php" );
-chdir("forum/");
-require_once("forum_functions.php");
+require_once( 'forum/forum_functions.php' );
+
 
 {
    disable_cache();
@@ -38,7 +38,7 @@ require_once("forum_functions.php");
    start_html('convert_from_old_forum', 0);
 
 echo '>>>> Should not be used now. Do not run it before a check ' .
-   '(Forums.Moderated column has been replaced with Options column). ' .
+   "(run script 'scripts/forum_consistency.php' afterwards to fix all counters and triggers). " .
    "Caution: no 'do_it' option"; end_html(); exit;
 
 
@@ -54,7 +54,7 @@ echo '>>>> Should not be used now. Do not run it before a check ' .
       mysql_query("INSERT INTO Forums SET " .
                   "Name=\"" . $row0["name"] . "\", " .
                   "Description=\"" . $row0['description'] . "\", " .
-                  "Moderated=" . ($row0["moderation"] == 'y' ? '"Y"' : '"N"') . ", " .
+                  "Options=" . ($row0["moderation"] == 'y' ? FORUMOPT_MODERATED : 0 ) . ", " .
                   "SortOrder=" . $SortOrder) or die(mysql_error());
 
       if( mysql_affected_rows() != 1)
@@ -159,7 +159,7 @@ echo '>>>> Should not be used now. Do not run it before a check ' .
       mysql_free_result($result_1);
 
       //TODO: needs to be re-implemented if needed
-      recalculate_postsinforum($new_forum_ID);
+      //recalculate_postsinforum($new_forum_ID);
 
       echo "\n\nFinished $fname\n";
    }
