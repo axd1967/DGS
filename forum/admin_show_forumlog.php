@@ -23,6 +23,7 @@ $TranslateGroups[] = "Admin";
 
 chdir('..');
 require_once( "include/std_functions.php" );
+require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 require_once( "forum/forum_functions.php" );
@@ -88,10 +89,14 @@ require_once( "forum/forum_functions.php" );
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'FL.*',
+      'Posts.Approved',
       'IFNULL(UNIX_TIMESTAMP(FL.Time),0) AS X_Time',
       'P.Handle AS P_Handle',
       'P.Name AS P_Name' );
-   $qsql->add_part( SQLP_FROM, 'Forumlog AS FL', 'INNER JOIN Players AS P ON P.ID=FL.User_ID' );
+   $qsql->add_part( SQLP_FROM,
+      'Forumlog AS FL',
+      'INNER JOIN Players AS P ON P.ID=FL.User_ID',
+      'INNER JOIN Posts ON Posts.ID=FL.Post_ID' );
 
    $query_flfilter = $fltable->get_query(); // clause-parts for filter
    $qsql->merge( $query_flfilter );
@@ -123,8 +128,12 @@ require_once( "forum/forum_functions.php" );
       if( $show_ip && $fltable->Is_Column_Displayed[5] )
          $flrow_str[5] = @$row['IP'];
       if( $fltable->Is_Column_Displayed[6] )
+      {
+         $post_status = ForumPost::get_approved_text( $row['Approved'] );
          $flrow_str[6] = "<A HREF=\"read.php?thread=".@$row['Thread_ID'].URI_AMP."moderator=y#".@$row['Post_ID']."\">"
-            . sprintf( T_('Show T%s/P%s'), @$row['Thread_ID'], @$row['Post_ID'] ) . "</A>";
+            . sprintf( T_('Show T%s/P%s'), @$row['Thread_ID'], @$row['Post_ID'] ) . "</A>"
+            . " ($post_status)";
+      }
 
       $fltable->add_row( $flrow_str );
    }
@@ -133,11 +142,11 @@ require_once( "forum/forum_functions.php" );
 
    // end of table
 
-   echo "<br>\n",
-      T_('NOTE: Log shows all user forum post events and all moderating actions by forum moderators.'),
-      "<br>\n",
-      /*T_*/'Index available on database-fields: ID, Userid, Time, Action.',
-      "<br>\n";
+   $notes = array();
+   $notes[] = T_('Log shows all user forum post events and all moderating actions by forum moderators.');
+   $notes[] = T_('Index available on database-fields: ID, Userid, Time, Action.');
+   $notes[] = T_('Post status: (S) = post shown, (H) = post hidden, (M) = post needs moderation');
+   echo_notes( 'forumlog', T_('Forumlog notes'), $notes );
 
    end_page();
 }
