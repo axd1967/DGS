@@ -66,7 +66,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Show probable color / handicap / komi for conventional & proper handicap-type on Preview
 
    * <home show_games.php>Games lists</home>:
-      * Added "Notes" column on My-Games list showing leading part of private game notes
+      * Added "Notes" column on My-Games list showing leading part of private game notes (deactivated by default)
       * <home show_games.php?observe=all>Show all observed games</home> with own search-profile and column set,
         Show number of observing users ("#Observers"-column) and
         Show if my games are observed ("Mine"-column)
@@ -114,12 +114,15 @@ Copyright (C) 2001-2009  Erik Ouchterlony
         i.e. last access time within 10 mins ago
       * Show open tournament applications of user
       * Added "My tournaments" bottom-menu-link
-      * Added "Notes" column on games list with leading part of private game notes
+      * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
 
    * <home forum/index.php>Forum pages reworked</home>:
       * Show number of NEW posts
       * Changed time range for outdated forum posts from 4 to 12 weeks
       * Changed time range for old NEW posts from 2 to 4 weeks
+
+      * Forum search:
+         * Added count of total found entries of search
 
       * Forum list:
          * Indication for NEW posts in forum list
@@ -135,7 +138,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Removed link on subject and NEW-text to first new thread
 
       * Thread posts view:
-         * Force reply: User has to choose which post to reply on
+         * Force reply: User has to choose which post to reply on except for one-post threads,
+           Added "Add reply" link at end of thread view to reply to initial thread-post
          * Added tree-like overview of all posts with
             * subjects (truncated if too long), author and last changed date
             * own posts in dark-blue and bold font
@@ -279,6 +283,16 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Changed handling of some URL-arguments to reduce risk of SQL-injections
    * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
 
+   * Changes for Forum moderators:
+      * Allow add/edit/preview of post in moderator mode and non-moderator mode alike
+      * Show approved state of hidden posts in thread overview and forum-search result
+      * Added option on forum search page to allow searching for hidden posts
+        independent from moderator state
+      * Enhanced Forumlog:
+         * Added current approved status (S=shown, H=hidden, M=needs-moderation)
+         * Added all moderator-actions for searching
+         * Added indexes to allow better searches
+
    * Changes for Translators:
       * Added comments to clarify the translation process
       * Changed access-key of Translate-link from [t] to [l]
@@ -290,11 +304,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added voting-admin to add new features to vote on
       * Added Adminlog entries for admin user changes, login and login-denied
       * Added filters for showing Errorlog
-      * Added all moderator-actions for searching Forumlog
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
-      * Added indexes on Errorlog and Forumlog to allow better searches
+      * Added indexes on Errorlog to allow better searches for problems
       * Added forum consistency script
       * Removed translations from the admin pages
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
@@ -523,6 +536,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * fixed 'double game' handicap option in waitingroom
    * fixed paging of table lists to preserve form values
    * fixed search term score (relevance) for forum when using expert mode
+   * fixed bug for forum moderator losing edited text when toggling moderator-mode
+   * fixed missing borders in forum thread-view for preview of new thread
    * predefined english bio categories can be used in other languages
    * prevent to rename standard folders
    * removed first newline after some layout tags in messages
