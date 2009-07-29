@@ -23,6 +23,74 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-28 juga
+
+   * forum/forum_functions.php (DisplayForum, ~.show_found_rows, ~.print_headline,
+       ~.forum_end_table, ~.make_link_array, ~.forum_message_box, ~.draw_post, ~.draw_overview,
+       Forum.load_threads, ForumThread.get_post, ~.create_navigation_tree,
+       ForumPost.is_thread_post, ~.get_approved_text, ForumRead.recalc_thread_reads),
+     include/filter.php (SearchFilter.has_query), forum/read.php, forum/search.php,
+     skins/dragon/screen.css, NEWS:
+   - changed moderation for forum-moderators to work like in non-moderation mode:
+     - allow add/edit/preview of post in moderator mode and non-moderator mode alike
+     - added forum-search option for moderators to allow searching for hidden posts independent from moderator-state
+     - fixed bug for moderators: edit-text + toggle moderator + submit post had lead to lost text
+     - show approved-state for hidden posts in thread overview and search-result
+     - moderator-mode shows hidden posts and moderation-actions (show/hide/approve/reject)
+   - forum bugfixes:
+     - loading also hidden posts for navigation & initial thread post
+     - "quote"-option only allowed on non-hidden post (except for moderators and post-author)
+     - fix missing (CSS-)borders for preview of post in new thread
+     - fix force-reply when >1 posts: added link to "add reply" to initial-thread at end of thread
+     - fix thread view post navigation for hidden initial thread-post,
+       show first post without body if hidden (to allow replying and navigating), mark with "Content moderated"-category-text
+     - aligning own and other post-subjects in thread overview
+   - changes for forum-search:
+     - show found-rows count in forum search result view
+     - always show top forum-bar, also for init state of forum-search page without query and result,
+       omit bottom bar for initial forum-search
+     - always show forum-search link in forum-bar (for easier reloading)
+   - [cleanup]: refactored using of postClass-arg/var to control logic,
+     replaced with more flexible drawmode + defined consts DRAWPOST_..,
+     differ post views (NORMAL, PREVIEW, EDIT, REPLY, SEARCH) + submodes to mark hidden posts and allowing to omit post-body,
+     derive CSS-post-class from drawmode
+   - optimize query for ForumRead when loading and recalculating threads
+
+   * forum/post.php (hide_post, show_post):
+   - fix showing & hiding post: only increasing/decreasing Forums.ThreadsInForum
+     for completly hidden thread
+   - added LIMITs on db-queries
+
+   * include/message_functions.php ($MSG_TYPES),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - fixed table-field-order for ConfigPages.ColumnsFeatureList
+   - fix-cleanup of wrong table-values for Messages.Type
+   - removed unused Messages.Type enum-values "ACCEPTED, DECLINED, DELETED"
+   - deactivated game-notes in table-columns as default to reduce server-load
+     for games-list status-games & my running/finished games
+
+   * daily_cron.php:
+   - removed (old) code to delete old invitations (if needed add again later)
+   - removed vars to configure unused/missing code-fragments
+
+   * do_registration_blocked.php, forum/post.php (hide_post, show_post),
+     scripts/convert_from_old_forum.php, scripts/data_export.php:
+   - refactoring-fix for db-fields:
+     - replaced Forums.Moderated -> Forums.Options (FORUMOPT_MODERATED)
+     - replaced Posts.PendingApproval -> Posts.Approved
+
+   * forum/admin_show_forumlog.php:
+   - add currrent Posts.Approved-status to forumlog-entries:
+     S=shown, H=hidden, M=needs-moderation
+   - detailed forumlog notes
+
+   * include/std_functions.php ($DEBUG):
+   - added global $DEBUG for better debugging (default OFF)
+
+   * specs/db/dragon-data.sql:
+   - fixed seeding of guest-player in database of new dragon-go-server:
+     missed ConfigPages/ConfigBoard/UserQuota-table-entry
+
 2009-07-24 juga
 
    * edit_vacation.php, halfhourly_cron.php:
@@ -49,8 +117,8 @@ UPDATE Players
 ALTER TABLE Players
    CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
 
--- [not-null] Ratinglo.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
--- following query-result should be empty
+-- [not-null] Ratinglog.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
+-- following query-result should be 0
 SELECT COUNT(*) FROM Ratinglog
    WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
 ALTER TABLE Ratinglog
@@ -356,7 +424,7 @@ ALTER TABLE MessageCorrespondents
 2009-07-18 juga
 
    * specs/db/optimize-sql.txt, scripts/README.developers:
-     - SQL optimizations, add hint in developer-README
+   - SQL optimizations, add hint in developer-README
 
    * forum/forum_functions.php (Forum.fix_forum, ~.load_fix_forum_list, ~.load_forum),
      scripts/forum_consistency.php:
@@ -400,7 +468,7 @@ ALTER TABLE MessageCorrespondents
    - moved config-array $ARR_USERS_MAINTENANCE with allowed maintenance-users
    - check for maintenance-user to allow form-login, use URL:
      'index.php?userid=...' without exposing password in URL,
-     'login.php?userid=...&password=...' is still possible with exposing password
+     'login.php?userid=...&password=...' is still possible (but exposing password)
    - added (unchanged) var-state for indication of maintenance-mode: $is_maintenance
    - added '[MAINTENANCE]'-text in top-bar if in maintenance-mode
    - added extra spaces around maintenance-message
@@ -620,7 +688,7 @@ UPDATE Messages AS M INNER JOIN Messages AS M2 ON M.ReplyTo=M2.ID AND M2.Thread>
 SELECT COUNT(*) FROM Messages WHERE ReplyTo>0 AND Thread=0 ;
 -- * step 8, repeat for all thread-levels until no more rows affected any more using optimized script:
 --           execute (with do_it=1):   'scripts/updates/fix_message_thread-1_0_15.php'
--- execute 'scripts/message_consistency.php'
+-- * step 9, execute 'scripts/message_consistency.php'
 -----------
 
    * include/table_columns.php (make_tablerow):
@@ -1114,7 +1182,7 @@ ALTER TABLE FeatureVote
 -----------
 -- table-column-set for feature-list
 ALTER TABLE ConfigPages
-   ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll ;
+   ADD ColumnsFeatureList int(11) NOT NULL default '-1' AFTER ColumnsGamesObservedAll2 ;
 -----------
 
    * features/lib_votes.php (Feature.update_vote, FeatureVote.check_points,
