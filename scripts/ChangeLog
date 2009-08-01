@@ -23,6 +23,11 @@ quick TODO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-07-31 juga
+
+   * specs/db/dragon-ddl.sql:
+   - sync'ed with local DB to reflect current DDL for DGS
+
 2009-07-28 juga
 
    * forum/forum_functions.php (DisplayForum, ~.show_found_rows, ~.print_headline,
