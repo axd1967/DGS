@@ -14,8 +14,8 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- Database: `dragon`
 --
---CREATE DATABASE `dragon` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
---USE `dragon`;
+-- CREATE DATABASE `dragon` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+-- USE `dragon`;
 
 -- --------------------------------------------------------
 
