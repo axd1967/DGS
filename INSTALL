@@ -102,13 +102,14 @@ and then unzipped ):
 
 (( This could be delayed until you need it:
 Add at least one admin user then give him the full set of priviledges
-by manually setting his Adminlevel field to -1 in the Players table.
+by manually setting his Adminlevel field to 0xffff (setting all bits)
+in the Players table.
 
 > mysql -D dragondb
 
-mysql> UPDATE Players SET Adminlevel=-1 WHERE Handle='adminusernick';
+mysql> UPDATE Players SET Adminlevel=0xffff WHERE Handle='adminusernick';
 
-Then, this user will be able to manage the other admins.
+Then, this user will be able to manage the other admins in the Admin-menu.
 ))
 
 
