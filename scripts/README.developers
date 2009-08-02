@@ -18,31 +18,98 @@ General instructions for developers:
    handled in a case sensitive way under the MS Windows systems.
 
 
------------------ PHP, Layout:
+----------------- DGS clones:
 
-   Try to keep an homogeneous code presentation.
+   Keep in mind, that DGS is open source and there are some DGS clones
+   out there, running under different operating systems (like Linux, Windows,
+   MacOS), which have different handling of "things".
 
-   -Use a 3 real spaces tabing.
-   -CR, LF or CR+LF should not cause problem.
-   -Keep the files Ansi (don't use utf-8 encoding)
-   -Instead of:
-      if ( c!=0 ) exit;
-      if ( a!=0 ) {
-         ...
-      } else {
-         ...
-      }
-   use:
-      if( c!=0 )
-         exit;
-      if( a!=0 )
-      {
-         ...
-      }
-      else
-      {
-         ...
-      }
+----------------- Layout:
+
+   DGS "layout"-style for sources (PHP, JavaScript similar):
+
+   - TAB-width is 3 spaces, written with spaces.
+   - No trailing spaces in line.
+   - CR, LF or CR+LF as end-of-line should not cause problem,
+     though the preferred way is to use LF only as line-break.
+   - Keep the files in ISO-8859-1 (don't use utf-8 encoding)
+
+   - single-line if-statements are ok, preferred way is:
+
+         if( expression )
+            action;
+
+     This is the preferred way, though single-line if-statements are ok as well
+     in some cases.
+
+   - avoid nested '?'-operator (though sometimes used if expression not too complex)
+
+         $result = ( expression ) ? expr1 : expre2;
+
+         $result = ( expression )
+            ? expr1
+            : expre2;
+
+   - functions:
+
+         function method( args )
+         {
+            ...
+         }
+
+         $result = method( args );
+
+   - place each brace (for statements) on a separate line.
+     Braces may be omitted for single enclosed statements:
+
+         foreach/while/for( ... )
+         {
+         }
+
+   - if-layout (braces may be omitted for single enclosed statements):
+
+         if( expression )
+         {
+            ...
+         }
+         elseif( ... ) // use if expression operating on same arg
+         {
+            ...
+         }
+         else if( ... )
+         {
+            ...
+         }
+         else
+         {
+            ...
+         }
+
+         if( expression )
+            action;
+         else
+            action;
+
+   - switch-layout:
+
+         switch( expression )
+         {
+            case option:
+            { // braces optional
+               ...
+               break;
+            }
+         }
+
+   - space between operands and operators is preferred.
+
+   - Commenting functions and classes (and files) is done using Doxygen-style.
+
+     Comments in '#'-style only used for commenting debugging-stuff (rarely used).
+     Comments in /*..*/-style for many multi-line comments.
+     Comments on single-lines (or few lines) in //-style.
+
+   - Best to orient the layout at the existing sources.
 
 ----------------- Database:
 
