@@ -524,6 +524,10 @@ class DisplayForum
    // \param $drawmode one of DRAWPOST_NORMAL | PREVIEW | EDIT | REPLY
    function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $Subject='', $Text='')
    {
+      global $player_row;
+      if( $player_row['MayPostOnForum'] == 'N' ) // user not allowed to post
+         return;
+
       // reply-prefix
       if( ($drawmode == DRAWPOST_NORMAL || $drawmode == DRAWPOST_REPLY)
             && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0 )
@@ -537,7 +541,7 @@ class DisplayForum
       {
          $form->add_row( array(
                'DESCRIPTION', sprintf('<font color="darkred"><b>%s</b></font>', T_('NOTE#guest')),
-               'TEXT', T_('Forum posts by the guest-user needs to be approved or rejected by the server admins. '
+               'TEXT', T_("Forum posts by the guest-user can be approved or rejected by the server admins.<br>\n"
                         . 'If you want a private (non-public) answer, add your email and ask for private contact.') ));
       }
 
@@ -668,6 +672,7 @@ class DisplayForum
       $pid = $post->id;
       $thread_url = $post->build_url_post(''); //post_url ended by #$pid
       $term_url = ( $this->rx_term != '' ) ? URI_AMP."xterm=".urlencode($this->rx_term) : '';
+      $user_may_post = ( $player_row['MayPostOnForum'] != 'N' ); // use allowed to post?
 
       $post_reference = '';
       $cols = 2; //one for the subject header, one for the possible approved/hidden state
@@ -827,16 +832,19 @@ class DisplayForum
             $prev_answer,
             '&nbsp;';
 
-         // reply link
-         echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply'), " ]</a>&nbsp;&nbsp;";
-         if( ALLOW_QUOTING )
-            echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
-               T_('quote'), " ]</a>&nbsp;&nbsp;";
+         if( $user_may_post )
+         {
+            // reply link
+            echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply'), " ]</a>&nbsp;&nbsp;";
+            if( ALLOW_QUOTING )
+               echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
+                  T_('quote'), " ]</a>&nbsp;&nbsp;";
 
-         // edit link
-         if( $is_my_post )
-            echo '<a class=Highlight href="', $thread_url,URI_AMP,"edit=$pid#$pid\">[ ",
-               T_('edit'), " ]</a>&nbsp;&nbsp;";
+            // edit link
+            if( $is_my_post )
+               echo '<a class=Highlight href="', $thread_url,URI_AMP,"edit=$pid#$pid\">[ ",
+                  T_('edit'), " ]</a>&nbsp;&nbsp;";
+         }
 
          // mark read link
          if( $post->count_new > 0 )
@@ -936,10 +944,12 @@ class DisplayForum
    function get_post_edited_string( $post )
    {
       if( $post->last_edited > 0 )
-         $result = sprintf( '&nbsp;&nbsp;&nbsp;(<a href="%s">%s</a> %s)',
-            $post->build_url_post( '', URI_AMP.'revision_history='.$post->id ),
-            T_('edited'),
-            date( DATE_FMT, $post->last_edited ) );
+      {
+         $result = SMALL_SPACING . sprintf( '(<a href="%s">%s</a> %s)',
+               $post->build_url_post( '', 'revision_history='.$post->id ),
+               T_('edited'),
+               date( DATE_FMT, $post->last_edited ) );
+      }
       else
          $result = '';
       return $result;
@@ -1104,7 +1114,7 @@ class Forum
     * \note see section 'Calculated database fields' in 'specs/forums.txt'
     * \return number of updates
     */
-   function fix_forum( $debug )
+   function fix_forum( $debug, $debug_format="%s\n" )
    {
       $upd_arr = array();
       $fid = $this->id;
@@ -1116,6 +1126,8 @@ class Forum
             "ORDER BY Time DESC LIMIT 1" );
       if( $row && $row['X_LastPost'] != $this->last_post_id )
          $upd_arr[] = 'LastPost=' . $row['X_LastPost'];
+      elseif ( !$row && $this->last_post_id != 0 )
+         $upd_arr[] = 'LastPost=0';
 
       // read fix for Forums.PostsInForum
       $row = mysql_single_fetch( "Forum.fix_forum.read.PostsInForum($fid)",
@@ -1135,7 +1147,7 @@ class Forum
       if( count($upd_arr) > 0 )
       {
          $query = "UPDATE Forums SET " . implode(', ', $upd_arr) . " WHERE ID='$fid' LIMIT 1";
-         echo $query, "\n";
+         echo sprintf( $debug_format, $query );
          if( !$debug )
             db_query( "Forum.fix_forum.update($fid)", $query );
       }
@@ -1708,7 +1720,7 @@ class ForumPost
          'PAuthor.Adminlevel+0 AS Author_AdminLevel' );
       $qsql->add_part( SQLP_FROM,
          'Posts AS P',
-         'LEFT JOIN Players AS PAuthor ON PAuthor.ID=P.User_ID' ); // Post-Author
+         'INNER JOIN Players AS PAuthor ON PAuthor.ID=P.User_ID' ); // Post-Author
       return $qsql;
    }
 
@@ -2110,7 +2122,7 @@ class ForumRead
          $this->replace_row_forumread( 'Forum.recalc_thread_reads.update_forumread',
             $fid, $tid, THPID_NEWCOUNT, $NOW, $thread->count_new );
       }
-   }
+   }//recalc_thread_reads
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    function to_string()
