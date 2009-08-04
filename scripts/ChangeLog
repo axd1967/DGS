@@ -7,21 +7,66 @@ http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 previous server update:
 Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-stable-200712]
 
------
-quick INFO:
+Developers INFO:
 
-2007-12-23 rodival
-   Code Cleanup, New Features
+2009-08-04 juan_grande
+   Area scoring
 
 2009-02-11 juga
    Tournaments, Forum, Wishlist-items, Code Cleanup
 
------
-quick TODO:
+2007-12-23 rodival
+   Code Cleanup, New Features
 
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2009-08-04 juga
+
+   * scripts/forum_consistency.php:
+   - split validation-step in "with" or "without" NEW-fixes
+   - added integrity-check on posts.author reporting if unknown author found in post
+   - optimized query-fix for Thread.Updated-fields
+   - cleanup (separator-lines, date-format, shorter output/code, clearer SQL)
+
+   * forum/forum_functions.php (DisplayForum.forum_message_box, ~.draw_post,
+       ~.get_post_edited_string, Forum.fix_forum, ForumPost.build_query_sql):
+   - show post-message inputbox and reply-/edit-link on post only for allowed users
+     with Players.MayPostOnForum<>'N'
+   - fix for forum-fix for Forums.LastPost, which can be 0 if containing no threads
+   - use INNER-join for building post-query
+
+   * forum/post.php (post_message, approve_post, reject_post, hide_post, show_post,
+       hide_post_update_trigger, recalc_thread_lastpost, recalc_forum_lastpost):
+   - fix editing of post with different moderated-state changed from shown to hidden
+   - fix adding new-thread: update thread Posts.Updated and Forums.LastPost
+   - fix moderator-actions (approve/reject/hide/show_post):
+     update trigger only if moderated-state has changed to avoid wrong counters
+     if action re-done (by resubmitting same URL for example)
+   - fix recalc of thread-last-post if all posts of thread are hidden (no last-post)
+   - fix recalc of forum-last-post if all posts of forum are hidden (no last-post)
+
+   * forum/read.php:
+   - fix double forum-input-box when replying to one-post-only-thread
+
+   * forum/search.php, NEWS:
+   - added message-scope to search for own hidden messages
+
+   * specs/forums.txt:
+   - fixed comments and trigger-updates for table-fields, fixed post-editing
+   - added more docu about forum-stuff
+
+2009-08-02 juga
+
+   * scripts/README.developers:
+   - added more detailed DGS-layouting
+
+   * specs/db/dragon-ddl.sql:
+   - fix DDL-glitch with comments (missing space)
+
+   * INSTALL:
+   - fix Adminlevel=-1 (now signed field) -> 0xffff
 
 2009-07-31 juga
 
@@ -38,26 +83,34 @@ ChangeLog
      skins/dragon/screen.css, NEWS:
    - changed moderation for forum-moderators to work like in non-moderation mode:
      - allow add/edit/preview of post in moderator mode and non-moderator mode alike
-     - added forum-search option for moderators to allow searching for hidden posts independent from moderator-state
-     - fixed bug for moderators: edit-text + toggle moderator + submit post had lead to lost text
+     - added forum-search option for moderators to allow searching for hidden posts
+       independent from moderator-state
+     - fixed bug for moderators: edit-text + toggle moderator + submit post
+       had lead to lost text
      - show approved-state for hidden posts in thread overview and search-result
-     - moderator-mode shows hidden posts and moderation-actions (show/hide/approve/reject)
+     - moderator-mode shows hidden posts and moderation-actions
+       show/hide/approve/reject
    - forum bugfixes:
      - loading also hidden posts for navigation & initial thread post
-     - "quote"-option only allowed on non-hidden post (except for moderators and post-author)
+     - "quote"-option only allowed on non-hidden post (except for moderators
+       and post-author)
      - fix missing (CSS-)borders for preview of post in new thread
-     - fix force-reply when >1 posts: added link to "add reply" to initial-thread at end of thread
+     - fix force-reply when >1 posts: added link to "add reply" to initial-thread
+       at end of thread
      - fix thread view post navigation for hidden initial thread-post,
-       show first post without body if hidden (to allow replying and navigating), mark with "Content moderated"-category-text
+       show first post without body if hidden (to allow replying and navigating),
+       mark with "Content moderated"-category-text
      - aligning own and other post-subjects in thread overview
    - changes for forum-search:
      - show found-rows count in forum search result view
-     - always show top forum-bar, also for init state of forum-search page without query and result,
+     - always show top forum-bar, also for init state of forum-search page
+       without query and result,
        omit bottom bar for initial forum-search
      - always show forum-search link in forum-bar (for easier reloading)
    - [cleanup]: refactored using of postClass-arg/var to control logic,
      replaced with more flexible drawmode + defined consts DRAWPOST_..,
-     differ post views (NORMAL, PREVIEW, EDIT, REPLY, SEARCH) + submodes to mark hidden posts and allowing to omit post-body,
+     differ post views (NORMAL, PREVIEW, EDIT, REPLY, SEARCH) + submodes to mark
+     hidden posts and allowing to omit post-body,
      derive CSS-post-class from drawmode
    - optimize query for ForumRead when loading and recalculating threads
 
@@ -6420,7 +6473,7 @@ ALTER TABLE `Players`
    - introduced 2 new admins classes: developers and skinners
 -----------
 UPDATE `Players`
- SET `Adminlevel`=-1 WHERE `ID`=2 LIMIT 1 ;
+   SET `Adminlevel`=-1 WHERE `ID`=2 LIMIT 1 ;
 -----------
 
    * edit_profile.php:
