@@ -54,47 +54,6 @@ Topics:
 #                      or is triggered on certain use case,
 #                      field needs to be updated if source tables changes
 
-Forum view, shown by "forum/index.php":
-   - show list of all forums ordered by Forums.SortOrder
-   - each forum is described by forum-name and forum-description
-     - name is linked to corresponding thread-list
-   - each forum shows a moderated-state
-   - each forum shows the number of (non-hidden) threads and posts
-   - each forum shows the date and author of the last post in that forum
-     - the date is linked to the according last-post
-     - the author is linked to the according user-info
-
-Thread list view (for single forum-id), shown by "forum/list.php":
-   - show navi-list of threads ordered by last-changed threads
-   - each thread shows the thread-subject, the author of the initial-thread-post,
-     the number of hits and posts in the thread
-     - subject is linked to corresponding thread-post-list
-   - each thread shows the date and author of the last post in that thread
-     - the date is linked to the according last-post
-     - the author is linked to the according user-info
-
-Thread post view (for single thread-id), shown by "forum/read.php":
-   - thread-tree overview shows subject, author and last-change of each thread-post
-     - subject is linked to full post-data on same page
-   - thread-post-list shows subject, author, creation-date,
-     last-edit-date if edited, and the post-text
-     - subject is linked to post itself to have the URL to be used as reference
-     - edited is linked to show post revision history
-     - author is linked to according user-info
-
-Post Revision History, shown by "forum/read.php":
-   - show all previous versions of an own post
-
-Forum search, shown by "forum/search.php":
-   - search in forum, subject, text-body, for author,
-     message-scope (all / first), creation-date
-   - matching entries sortable by search terms (subject/text),
-     creation or modification date
-   - show matching post-entries in list with link to post-thread
-   - textual search terms are highlighted in subject and text-body
-   - term relevance shown
-
-
 Navigation
    - navigation between views:
      forum list - thread list - thread-post-list - search
@@ -104,10 +63,87 @@ Navigation
      - thread-post list: show all
      - revision history: show all
 
+Forum view, shown by "forum/index.php":
+   - show list of all forums ordered by Forums.SortOrder
+     - show only forums, which user is allowed to see (Forums.Options)
+   - each forum is described by forum-name and forum-description
+     - name is linked to corresponding thread-list
+     - "new(x)" is appended to name with number of new posts of forum
+   - each forum shows a moderated-state
+   - for each hidden forum a "Hidden" is shown if user is allowed to view it
+   - each forum shows the number of (non-hidden) threads and posts
+   - each forum shows the date and author of the last added post in that forum
+     - the date is linked to the according last-post
+     - the author is linked to the according user-info
+   - for moderators at the bottom a link "Show forumlog" is shown and linked
+     to view the Forumlog
 
-#TODO moderation (approve/reject, show/hide)
-#TODO editing (reply/quote-reply/edit), mark read
-#TODO NEW-handling
+Thread list view (for single forum-id), shown by "forum/list.php":
+   - show list of threads ordered by last-changed threads
+     - for moderators also all hidden threads are shown (PostCount=0)
+   - each thread shows the thread-subject, the author of the initial-thread-post,
+     the number of hits and shown posts in the thread
+     - subject is linked to corresponding thread-post-list
+     - "new(x)" is appended to subject with number of new posts of thread
+   - each thread shows the date and author of the last added post in that thread
+     - the date is linked to the according last-post
+     - the author is linked to the according user-info
+   - at the bottom a selectbox to control the max-rows is shown
+
+Thread post view (for single thread-id), shown by "forum/read.php":
+   - thread-tree overview shows subject, author and last-change of each thread-post
+     - subject is linked to full post-data on same page
+     - subject is level-indented up to 40 levels
+     - subject is emphasized for own posts
+     - "new" is appended to subject and linked to corresponding new post
+     - tree-overview can be hidden
+   - thread-post-list shows all non-hidden posts with subject, author,
+     creation-date, last-edit-date if edited and the post-text
+     - subject is linked to post itself to have the URL to be used as reference
+     - "new" is appended to subject and linked to next new post
+     - edited is linked to show post revision history
+     - author is linked to according user-info
+     - footer contains allowed actions:
+       - [reply] is linked to add a reply to post
+       - [quote] is linked to add a reply to post with quoting reply-text (if allowed in config)
+       - [edit] is linked for own post to edit own post
+       - [mark read] is linked to mark post as read
+       - arrows for navigation within thread are linked:
+         - to top (=initial thread-post), to bottom
+         - to previous/next parent
+         - to previous/next post
+         - to first answer
+       - for moderators additional actions:
+         - [approve] to approve a post that needs moderating -> non-hidden post
+         - [reject] to reject a post that needs moderating -> hidden post
+         - [show] to show a hidden post
+         - [hide] to hide a shown post
+     - show input-boxes for reply post if only post
+     - show linked action [Add reply to inital thread post] at bottom
+       to add a reply to initial thread post
+     - for moderators also all hidden posts are shown
+
+Post Revision History, shown by "forum/read.php":
+   - show all previous versions of a post
+
+Forum search, shown by "forum/search.php":
+   - search in forum, subject, text-body, for author,
+     message-scope (all / first), creation-date
+   - matching entries sortable by search terms (subject/text),
+     creation or modification date
+   - show matching post-entries in list with link to post-thread
+   - textual search terms are highlighted in subject and text-body
+   - term relevance shown as float value
+   - moderators can also include all hidden posts in the search
+
+New Posts characteristics:
+   - "new" only shown for other users posts, not for own posts
+   - markup in red (CSS NewFlag) for new posts not older than 4 weeks (standard Dragon-CSS)
+   - markup in light-red (CSS OlderNewFlag) for new posts older than 4 weeks
+     but not older than 12 weeks(standard Dragon-CSS)
+   - no markup for posts older than 12 weeks (configured with FORUM_WEEKS_NEW_END),
+     4 weeks (configured with NEW_LEVEL1)
+
 
 
 #-------- Use-Cases
@@ -287,7 +323,8 @@ TABLE Posts
                     0 for normal post
    Hits           - number of hits (reads/action on thread-posts)
    Updated        - last-updated-date for thread (indicator to recalculate
-                    NEW-count for threads and forums)
+                    NEW-count for threads and forums),
+                    0 for normal post
 
    User_ID        - Players.ID, author of post
    Parent_ID      - Posts.ID of answered/replied post (to build thread-tree)
@@ -425,7 +462,7 @@ Forums():
 # Calculate fields for single forum $fid
 Forums($fid):
    # calculate
-   LastPost := X_LastPost :
+   LastPost := X_LastPost  or else 0 if nothing found:
       SELECT ID AS X_LastPost FROM Posts
       WHERE Forum_ID=$fid AND Thread_ID>0 AND Approved='Y' AND PosIndex>''
       ORDER BY Time DESC LIMIT 1
@@ -542,6 +579,8 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
          AND FR.Thread_ID>0 AND FR.Post_ID=0 AND FR.NewCount>0
 
 
+
+
 #-------- Update-"Trigger" for use-cases
 # Trigger-fields:
 # - Forums: ID; LastPost, Updated, PostsInForum, ThreadsInForum
@@ -594,6 +633,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * if not moderated:
   - Forums($fid).ThreadsInForum++
   - Forums($fid).PostsInForum++
+  - Forums($fid).LastPost=GREATEST(LastPost,$ntid)
   - Forums($fid).Updated=GREATEST(Updated,$NOW)
 
 #----- U07: edit own post
@@ -603,7 +643,13 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * insert Posts (with old subject/text):
   Time=$NOW, Parent_ID=$pid, Forum_ID=$fid, User_ID=$uid, PosIndex=''
 
+  - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
+    Approved='P'
+
 * Thread($tid).Hits++
+
+* if moderated but non-moderated before edit:
+  -> similar to A06 (hide-post)
 
 #----- U08: reply post
 # reply to post $spid
@@ -698,9 +744,10 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * if admin chooses: send READ-ONCE message to all Thread($tid).User_ID
   informing about thread-move
 
-#TODO need URLs, updated independently from forum_id (only on thread_id) !!
+#needed for implementation:
+#TODO need URLs (also old), updated independently from forum_id (only on thread_id) !!
 #TODO need old_ID be independent from forum_id -> recalc old_ID
-#TODO need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
+#TODO (optional) need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
 
 #----- A04: approve post
 
