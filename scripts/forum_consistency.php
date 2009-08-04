@@ -23,8 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 chdir( '../' );
 require_once( 'include/std_functions.php' );
+require_once( 'include/gui_functions.php' );
 require_once( 'include/table_columns.php' );
 require_once( 'forum/forum_functions.php' );
+
+define('SEPLINE', "\n<p><hr>\n");
 
 
 {
@@ -49,6 +52,7 @@ require_once( 'forum/forum_functions.php' );
       "  tr.Row2 { background: #dddddd; }\n" .
       "  tr.hil { background: #ffb010; }" );
 
+   $withnew = get_request_arg('withnew');
    if( $do_it = @$_REQUEST['do_it'] )
    {
       echo "<p>*** Fixes errors ***"
@@ -58,46 +62,46 @@ require_once( 'forum/forum_functions.php' );
    else
    {
       $tmp = array_merge($page_args,array('do_it' => 1));
+      $tmp2 = array_merge($page_args,array('do_it' => 1, 'withnew' => 1 ));
       echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
+         .SMALL_SPACING. anchor(make_url($page, $tmp2), '[Validate it with NEW-fixes]')
          ."</p>";
    }
    $debug = !$do_it;
    $cnt_err = 0;
 
-   echo "<br>On ", date(DATE_FMT, $NOW), ' GMT<br>';
+   echo "On ", date(DATE_FMT5, $NOW);
+
 
 //----------------- Fix all forums
 
    $begin = getmicrotime();
-   echo "<p>", str_repeat('-', 60), "<br>\n";
+   echo SEPLINE;
 
    $forumlist = Forum::load_fix_forum_list();
    foreach( $forumlist as $forum )
    {
       echo sprintf( "Check forum ID [%s] Name [%s]: LastPost=%s, PostsInThread=%s, ThreadsInForum=%s :<br>\n",
             $forum->id, $forum->name, $forum->last_post_id, $forum->count_posts, $forum->count_threads );
-      echo '<pre>';
-      $cnt_err += $forum->fix_forum( $debug );
-      echo '</pre>';
+      $cnt_err += $forum->fix_forum( $debug, "<pre>%s</pre>\n" );
    }
 
-   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
-   echo "\n<br>Forums Done.";
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - Forums Done.";
 
 //----------------- Fix all threads
 
    $begin = getmicrotime();
-   echo "<p>", str_repeat('-', 60), "<br>\n";
+   echo SEPLINE;
 
    echo "Read all threads ...<br>\n";
 
-   $query =
+   $result = db_query( 'forum_consistency.load_threads',
       'SELECT ID, Forum_ID, PostsInThread, LastPost, UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged ' .
-      'FROM Posts AS P ' .
-      "WHERE Thread_ID>0 AND Parent_ID=0 AND Approved='Y'";
-   $result = db_query( 'forum_consistency.load_threads', $query );
+      'FROM Posts ' .
+      "WHERE Thread_ID>0 AND Parent_ID=0 AND Approved='Y'" );
    $threads = array(); # ID => ID,Forum_ID,PostsInThread,LastPost,X_Lastchanged
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -109,9 +113,10 @@ require_once( 'forum/forum_functions.php' );
 
    echo sprintf( "Check Posts.PostsInThread for all %s threads ...<br>\n", count($threads) );
 
-   $query = "SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts " .
-      "WHERE Thread_ID>0 AND Approved='Y' AND PosIndex>'' GROUP BY Thread_ID";
-   $result = db_query( 'forum_consistency.read_thread.PostsInThread', $query );
+   $result = db_query( 'forum_consistency.read_thread.PostsInThread',
+      "SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts " .
+      "WHERE Thread_ID>0 AND Approved='Y' AND PosIndex>'' " .
+      "GROUP BY Thread_ID" );
    $upd_arr = array();
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -132,7 +137,8 @@ require_once( 'forum/forum_functions.php' );
    foreach( $threads as $tid => $thread )
    {
       $row = mysql_single_fetch( "forum_consistency.read_thread.LastPost_Lastchanged($tid)",
-         "SELECT ID AS X_LastPost, UNIX_TIMESTAMP(Time) AS X_Lastchanged FROM Posts " .
+         "SELECT ID AS X_LastPost, UNIX_TIMESTAMP(Time) AS X_Lastchanged " .
+         "FROM Posts " .
          "WHERE Thread_ID='$tid' AND Approved='Y' AND PosIndex>'' " .
          "ORDER BY Time DESC LIMIT 1" );
       if( $row && ($row['X_LastPost'] != $thread['LastPost']
@@ -150,9 +156,12 @@ require_once( 'forum/forum_functions.php' );
 
    echo sprintf( "Check for distinct Posts.Forum_ID for all %s threads ...<br>\n", count($threads) );
 
-   $query = "SELECT Thread_ID, COUNT(DISTINCT Forum_ID) AS X_Count, COUNT(*) AS X_AllCount FROM Posts " .
-      "WHERE Approved='Y' AND PosIndex>'' AND Thread_ID>0 GROUP BY Thread_ID HAVING X_Count > 1";
-   $result = db_query( 'forum_consistency.read_thread.distinct_forum_id', $query );
+   $result = db_query( 'forum_consistency.read_thread.distinct_forum_id',
+      "SELECT Thread_ID, COUNT(DISTINCT Forum_ID) AS X_Count, COUNT(*) AS X_AllCount " .
+      "FROM Posts " .
+      "WHERE Approved='Y' AND PosIndex>'' AND Thread_ID>0 " .
+      "GROUP BY Thread_ID " .
+      "HAVING X_Count > 1" );
    $upd_arr = array();
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -169,41 +178,66 @@ require_once( 'forum/forum_functions.php' );
 
    do_updates( 'forum_consistency.update_thread.distinct_forum_idLastPost_Lastchanged', $upd_arr, $do_it );
 
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - Threads Done.";
 
-   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
-   echo "\n<br>Threads Done.";
-
-//----------------- Fix all Updates for NEW-count for threads and forums
+//----------------- Fix all Updates for NEW-count for threads
 
    $begin = getmicrotime();
-   echo "<p>", str_repeat('-', 60), "<br>\n";
+   echo SEPLINE;
 
    $upd_arr = array();
-   echo "Check Posts and Forums Updated-fields for NEW-counts ...<br>\n";
-   $row = mysql_single_fetch( 'forum_consistency.read_updated',
-      "SELECT COUNT(*) AS X_Count FROM Posts " .
-      "WHERE ((Lastchanged > Updated) OR (Updated IS NULL)) AND " .
-         "Thread_ID>0 AND Parent_ID=0 AND Approved='Y' LIMIT 1" );
+   echo "Check Threads Updated-fields for NEW-counts ...<br>\n";
+
+   $query_where =
+      "WHERE ((Lastchanged>0 AND Lastchanged > Updated) OR (Updated=0)) AND " .
+         "Thread_ID>0 AND Parent_ID=0 AND Approved='Y'";
+   $row = mysql_single_fetch( 'forum_consistency.threads.read_updated',
+      "SELECT COUNT(*) AS X_Count " .
+      "FROM Posts $query_where LIMIT 1" );
    if( $row && ($row['X_Count'] > 0) )
    {
       $cnt = $row['X_Count'];
-      $upd_arr[] = "UPDATE Posts SET Updated=GREATEST(Updated,Lastchanged) " .
-         "WHERE ((Lastchanged > Updated) OR (Updated=0)) AND " .
-            "Thread_ID>0 AND Parent_ID=0 AND Approved='Y' LIMIT $cnt";
+      $upd_arr[] = "UPDATE Posts SET Updated=GREATEST(Updated,Lastchanged) $query_where LIMIT $cnt";
       $cnt_err += $cnt;
    }
 
-   do_updates( 'forum_consistency.update_updated', $upd_arr, $do_it );
+   do_updates( 'forum_consistency.threads.update_updated', $upd_arr, ($do_it && $withnew) );
 
+//----------------- Check posts integrity (author)
+
+   $begin = getmicrotime();
+   echo SEPLINE;
+   echo "Check for existing authors ...<br>\n";
+
+   // note: join slightly faster than using subquery: Posts where User_ID not in (select ID from Players)
+   $result = db_query( 'forum_consistency.check_authors',
+      "SELECT Forum_ID, Thread_ID, Posts.ID AS Post_ID, User_ID, PL.ID AS Author " .
+      "FROM Posts LEFT JOIN Players AS PL ON PL.ID=Posts.User_ID " .
+      "HAVING ISNULL(Author)" );
+   $result_count = @mysql_num_rows($result);
+   if( $result_count > 0)
+      echo "<p><font color=darkred><b>NOTE: The following errors can't be fixed automatically!!</b></font><br>\n";
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $cnt_err++;
+      echo sprintf( "Found post with User_ID=%s for: Posts WHERE ID=%s AND Forum_ID=%s AND Thread_ID=%s<br>\n",
+         $row['User_ID'], $row['Post_ID'], $row['Forum_ID'], $row['Thread_ID'] );
+   }
+   mysql_free_result($result);
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - Author check Done.";
 
 //-----------------
 
-   echo sprintf( "<br><p><b><font color=red>Found %s errors (inconsistencies).</font></b><br>\n", $cnt_err );
+   echo SEPLINE;
+
+   echo sprintf( "<font color=red><b>Found %s errors (inconsistencies).</b></font><br>\n", $cnt_err );
    echo "<b>IMPORTANT NOTE:</b> Run this script at least twice until no errors found, because fixes influence each other!<br>\n";
 
    echo "\n<br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall));
-   echo "\n<br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall));
-   echo "<hr>Done!!!\n";
+   echo "\n<br>Done!!!\n";
    end_html();
 }
 
@@ -222,5 +256,4 @@ function do_updates( $dbgmsg, $upd_arr, $do_it )
    }
    echo '</pre>';
 }
-
 ?>
