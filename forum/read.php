@@ -25,7 +25,7 @@ require_once( 'forum/forum_functions.php' );
 require_once( 'forum/post.php' );
 
 
-// use-case U04
+// use-case U04: show revision history of post
 function revision_history( $display_forum, $post_id )
 {
    $revhist_thread = new ForumThread();
@@ -109,8 +109,7 @@ function revision_history( $display_forum, $post_id )
    {
       $msg = post_message($player_row, $cfg_board, $forum->options, $thread);
       if( is_numeric( $msg) && $msg>0 )
-         jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
-            . "#$msg");
+         jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread#$msg");
       else
          //TODO: jump to inserted post (not to new, there might be more and not the first one)
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
@@ -332,7 +331,7 @@ function revision_history( $display_forum, $post_id )
    }
 
    // footer: reply-form (only for a NEW THREAD or if ONE post existing)
-   if( ($cnt_posts <= 1) && !($edit > 0) && !$preview )
+   if( ($cnt_posts <= 1) && !($reply > 0) && !($edit > 0) && !$preview )
    {
       $disp_forum->change_depth( 1 );
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
