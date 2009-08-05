@@ -261,8 +261,19 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    // Draw game-settings form
 
-   $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'SPACE' ) );
+   if( $formstyle == GSET_WAITINGROOM )
+   {
+      // ruleset: territory scoring, area scoring
+      $ruleset_arr = array(
+            RULESET_TERRITORY => T_('Territory scoring'),
+            RULESET_AREA      => T_('Area scoring')
+         );
+      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
+                              'SELECTBOX', 'ruleset', 1, $ruleset_arr, $Ruleset, false ) );
+   }
+
+   $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
                            'SELECTBOX', 'size', 1, $value_array, $Size, false ) );
 
@@ -388,17 +399,6 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
             'TEXT', sptext(T_('Jigo mode'), 1),
             'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
          ));
-   }
-
-   if( $formstyle == GSET_WAITINGROOM )
-   {
-      // ruleset: territory scoring, area scoring
-      $ruleset_arr = array(
-            RULESET_TERRITORY => T_('Territory scoring'),
-            RULESET_AREA      => T_('Area scoring')
-         );
-      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
-                              'SELECTBOX', 'ruleset', 1, $ruleset_arr, $Ruleset, false ) );
    }
 
 
