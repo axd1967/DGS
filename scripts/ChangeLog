@@ -22,6 +22,23 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-08-05 juan_grande
+
+   * include/game_functions.php,
+     include/message_functions.php (game_settings_form),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Waitingroom.txt,
+     add_to_waitingroom.php, waiting_room.php:
+   - added area-scoring for game-offers in waiting-room:
+     - added db-field Waitingroom.Ruleset to store territory and area scoring method
+     - added selectbox in new-game for waiting-room to choose
+       from territory (default) and area scoring
+-----------
+-- added ruleset selection to waiting room
+ALTER TABLE `Waitingroom`
+   ADD COLUMN `Ruleset` enum('area', 'territory') NOT NULL DEFAULT 'territory' AFTER `Time` ;
+-----------
+
 2009-08-04 juga
 
    * scripts/forum_consistency.php:
@@ -49,9 +66,6 @@ ChangeLog
 
    * forum/read.php:
    - fix double forum-input-box when replying to one-post-only-thread
-
-   * forum/search.php, NEWS:
-   - added message-scope to search for own hidden messages
 
    * specs/forums.txt:
    - fixed comments and trigger-updates for table-fields, fixed post-editing
