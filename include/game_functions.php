@@ -37,6 +37,10 @@ define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
 
+// see Waitingroom.Ruleset in specs/db/table-Waitingroom.txt
+define('RULESET_TERRITORY', 'territory'); // territory scoring
+define('RULESET_AREA',      'area');      // area scoring
+
 define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
 define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
 define('CAT_HTYPE_MANUAL', 'manual'); // manual game setting

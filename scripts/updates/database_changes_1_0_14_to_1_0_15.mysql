@@ -1289,3 +1289,8 @@ UPDATE ConfigPages
    ColumnsGamesFinishedUser2=ColumnsGamesFinishedUser2 & ~0x4 ;
 
 
+-- added ruleset selection to waiting room
+ALTER TABLE `Waitingroom`
+   ADD COLUMN `Ruleset` enum('area', 'territory') NOT NULL DEFAULT 'territory' AFTER `Time` ;
+
+

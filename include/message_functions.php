@@ -91,6 +91,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Komi_m = DEFAULT_KOMI;
    $AdjustKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
+   $Ruleset = RULESET_TERRITORY;
    $AdjustHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
@@ -387,6 +388,17 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
             'TEXT', sptext(T_('Jigo mode'), 1),
             'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
          ));
+   }
+
+   if( $formstyle == GSET_WAITINGROOM )
+   {
+      // ruleset: territory scoring, area scoring
+      $ruleset_arr = array(
+            RULESET_TERRITORY => T_('Territory scoring'),
+            RULESET_AREA      => T_('Area scoring')
+         );
+      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
+                              'SELECTBOX', 'ruleset', 1, $ruleset_arr, $Ruleset, false ) );
    }
 
 

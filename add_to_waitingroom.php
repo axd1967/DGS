@@ -97,6 +97,9 @@ require_once( 'include/utilities.php' );
          && $jigo_mode != JIGOMODE_NO_JIGO )
       error('invalid_args', "add_to_waitingroom.check.jigo_mode($jigo_mode)");
 
+   // ruleset
+   $ruleset = @$_POST['ruleset'];
+
    // handicap adjustment
    $adj_handicap = (int)@$_POST['adj_handicap'];
    if( abs($adj_handicap) > MAX_HANDICAP )
@@ -190,6 +193,7 @@ require_once( 'include/utilities.php' );
       "uid=" . $player_row['ID'] . ', ' .
       "nrGames=$nrGames, " .
       "Time=FROM_UNIXTIME($NOW), " .
+      "Ruleset='" . mysql_addslashes($ruleset) . "', " .
       "Size=$size, " .
       "Komi=ROUND(2*($komi))/2, " .
       "Handicap=$handicap, " .

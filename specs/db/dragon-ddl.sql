@@ -923,6 +923,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `uid` int(11) NOT NULL,
   `nrGames` tinyint(3) unsigned NOT NULL default '1',
   `Time` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Ruleset` enum('area', 'territory') NOT NULL default 'territory',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(6,1) NOT NULL default '6.5',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',

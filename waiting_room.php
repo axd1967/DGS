@@ -55,6 +55,11 @@ require_once( 'include/classlib_userconfig.php' );
       HTYPE_WHITE  => T_('Fix color'),
    );
 
+   $ruleset_array = array(
+      RULESET_TERRITORY => T_('Territory'),
+      RULESET_AREA      => T_('Area'),
+   );
+
    // config for handicap-filter
    $handi_filter_array = array(
       T_('All')            => '',
@@ -130,6 +135,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'other_country+');
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'other_rating-');
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
+   $wrtable->add_tablehead(19, T_('Ruleset#header'), '', 0, 'Ruleset+');
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
    $wrtable->add_tablehead(18, T_('Settings#headerwr'), 'GameSettings', TABLE_NO_SORT );
@@ -300,6 +306,8 @@ require_once( 'include/classlib_userconfig.php' );
             $k_str = ( $calculated ) ? build_adjust_komi( $AdjKomi, $JigoMode, true ) : (float)$Komi;
             $wrow_strings[ 6] = ( (string)$k_str != '' ) ? $k_str : NO_VALUE;
          }
+         if( $wrtable->Is_Column_Displayed[19] )
+            $wrow_strings[ 19] = $ruleset_array[$Ruleset];
          if( $wrtable->Is_Column_Displayed[ 7] )
             $wrow_strings[ 7] = $Size;
          if( $wrtable->Is_Column_Displayed[ 8] )
