@@ -106,13 +106,32 @@ require_once( "include/filterlib_mysqlmatch.php" );
    $ffilter->add_filter( 3, 'Text', 'PAuthor.Handle', true,
          array( FC_SIZE => 16 ));
    $ffilter->add_filter( 4, 'Selection',
-         array( T_('All messages#forum') => '',
-                T_('First messages#forum') => 'P.Parent_ID=0' ),
-         true);
+      array( T_('All messages#forum') => '',
+             T_('First messages#forum') => 'P.Parent_ID=0' ),
+      true );
    $ffilter->add_filter( 5, 'RelativeDate', 'P.Time', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 12 ) );
-   if( $is_admin_moderator )
-      $ffilter->add_filter( 6, 'Boolean', array( true => '', false => "P.Approved='Y'" ), true );
+
+   // guest is not allowed to see hidden guest posts with emails from others
+   if( $my_id > GUESTS_ID_MAX )
+   {
+      if( $is_admin_moderator )
+      {
+         $ffilter->add_filter( 6, 'Selection',
+            array( T_('All shown messages#forum') => "P.Approved='Y'",
+                   T_('All hidden messages#forum') => "P.Approved IN ('N','P')",
+                   T_('My hidden messages#forum') => "P.User_ID=$my_id AND P.Approved IN ('N','P')",
+                   T_('Pending approval messages#forum') => "P.Approved='P'" ),
+            true );
+      }
+      else
+      {
+         $ffilter->add_filter( 6, 'Boolean',
+            array( true  => "P.User_ID=$my_id AND P.Approved IN ('N','P')",
+                   false => "P.Approved='Y'" ),
+            true );
+      }
+   }
    $ffilter->init(); // parse current value from $_REQUEST
    $filter2 =& $ffilter->get_filter(2);
 
@@ -140,11 +159,16 @@ require_once( "include/filterlib_mysqlmatch.php" );
          'DESCRIPTION', T_('Message scope#forum'),
          'FILTER',      $ffilter, 4,
       );
-   if( $is_admin_moderator )
+   if( $my_id > GUESTS_ID_MAX )
+   {
+      $filter6_str = ($is_admin_moderator)
+         ? sprintf( '<span class="AdminOption">%s</span>', T_('(moderator only)' ))
+         : T_('Show hidden posts#forum');
       array_push( $arr,
             'TEXT',     SMALL_SPACING,
             'FILTER',   $ffilter, 6,
-            'TEXT',     sprintf( '<span class="AdminOption">%s</span>', T_('include moderated posts') ) );
+            'TEXT',     $filter6_str );
+   }
    $fform->add_row( $arr );
    $fform->add_row( array(
          'DESCRIPTION', T_('Date#forum'),
@@ -165,15 +189,11 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
    echo $fform->get_form_string();
 
-   $query_filter = $ffilter->get_query(); // clause-parts for filter
-   if( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_filter->get_select()) . "<br>\n";
-   if( $DEBUG_SQL ) echo "MARK-TERMS: " . make_html_safe( implode('|', $filter2->get_rx_terms()) ) . "<br>\n";
-
    // Perform query
    $findposts = array();
    $nr_rows = 0;
    $has_query = false;
-   if( $ffilter->has_query(null, array(6)) )
+   if( $ffilter->is_init() && !$ffilter->is_reset() )
    {
       // get clause-part for mysql-match as select-col
       $has_query = true;
@@ -185,8 +205,10 @@ require_once( "include/filterlib_mysqlmatch.php" );
       $qsql = ForumPost::build_query_sql();
       if( ALLOW_SQL_CALC_ROWS )
          $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
-      $qsql->add_part( SQLP_FIELDS, "$query_match as Score" );
-      if( !$is_admin_moderator )
+      $qsql->add_part( SQLP_FIELDS, "$query_match AS Score" );
+
+      // need approved-state for non-moderators (see filter6 above)
+      if( $my_id <= GUESTS_ID_MAX )
          $qsql->add_part( SQLP_WHERE, "P.Approved='Y'" );
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
 
@@ -196,6 +218,7 @@ require_once( "include/filterlib_mysqlmatch.php" );
       $qsql->add_part( SQLP_WHERE,
          'Forums.ID IN ('.implode(',', $farr_vis).')' );
 
+      $query_filter = $ffilter->get_query(); // clause-parts for filter
       $qsql->merge($query_filter);
 
       if( $sql_order)
