@@ -114,6 +114,7 @@ function get_executives( $level )
    $first = T_("Developer");
    foreach( array('rodival' => 'Rod Ival',
                   'JUG' => 'Jens-Uwe Gaspar',
+                  'jgrande' => 'Juan Grande',
                   'ragou' => 'Ragnar Ouchterlony',
                   4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
                   ) as $uref => $name )
@@ -213,7 +214,11 @@ function get_executives( $level )
 
    $MODexclude = array( 'ejlo' );
 
-   $lastAccess = $NOW - 6*7 * SECS_PER_DAY; // 6 weeks
+   $active_weeks = 6; // [weeks]
+   $lastAccess = $NOW - $active_weeks * 7 * SECS_PER_DAY; // 6 weeks
+   echo sprintf( T_('(have been online within the last %s weeks)'), $active_weeks )
+      , ":<br>&nbsp;\n";
+
    $result = db_query( 'people.executives',
       "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,".
             " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
