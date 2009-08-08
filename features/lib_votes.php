@@ -48,7 +48,7 @@ define('DATEFMT_VOTELIST', 'Y-m-d');
 define('DATEFMT_FEATURE',  'Y-m-d&\n\b\s\p;H:i');
 
 // conditions on user to allow voting
-define('VOTE_MIN_RATEDGAMES', 10); // #games
+define('VOTE_MIN_RATEDGAMES', 5); // #games
 define('VOTE_MIN_DAYS_LASTMOVED', 30); // #days
 
 
