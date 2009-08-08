@@ -22,6 +22,33 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-08-08 juga
+
+   * forum/search.php:
+   - added search for hidden messages, except for guest-user
+   - added moderator-search for all/own shown/hidden/pending-approval messages
+
+   * forum/search.php, NEWS:
+   - added message-scope to search for own hidden messages
+
+   * features/lib_votes.php (VOTE_MIN_RATEDGAMES):
+   - reduced number of min-rated games to allow voting: 10 -> 5
+
+   * people.php:
+   - added user [jgrande] as developer
+   - changed title for Dragon executives as hint for restriction
+     on 6 weeks last-active, added active-note
+
+   * include/quick_common.php (DGS_VERSION), sgf.php (sgf_echo_rating), NEWS:
+   - fix cgoban3-issue with empty BR/WR-property for player-rank in downloaded SGF,
+     show '?' for unrated player
+   - show rating in standard short form for BR/WR-properties
+   - added more info in SGF: AP[application with DGS-version], SO[DGS-url to game]
+   - changed general comment property:
+     - added black/white start/end rating in general comment property (with ELO-rating)
+     - changed info if game if rated in extra-line: "Rated: Y|N"
+   - added comment with all useful SGF-properties, note about time-info
+
 2009-08-05 juan_grande
 
    * include/game_functions.php,

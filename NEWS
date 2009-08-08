@@ -123,6 +123,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
       * Forum search:
          * Added count of total found entries of search
+         * Added search for hidden messages
 
       * Forum list:
          * Indication for NEW posts in forum list
@@ -175,6 +176,9 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Replaced "Show my observed games" -> "Games I'm observing"
 
    * Game SGF Download:
+      * Adjusted general comments to add game rated info and players start/end rating
+      * Added application-info AP[DGS:version]
+      * Added source-info SO[DGS-game URL]
       * Included private game notes in last game-node
       * Included PASS-moves
       * Used 3rd PASS-move as scoring node for better RESUME-handling
@@ -288,6 +292,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Show approved state of hidden posts in thread overview and forum-search result
       * Added option on forum search page to allow searching for hidden posts
         independent from moderator state
+      * Added search for all/own shown/hidden/pending-approval messages
       * Enhanced Forumlog:
          * Added current approved status (S=shown, H=hidden, M=needs-moderation)
          * Added all moderator-actions for searching
