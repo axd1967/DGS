@@ -610,6 +610,7 @@ function getRatingArray()
    return $rating_array;
 }
 
+// return '' for invalid rating
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false, $short=false)
 {
    if( !is_valid_rating($rating) )
