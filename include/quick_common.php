@@ -28,6 +28,8 @@ $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
                  . " Don't worry: the clocks are frozen until the server restarts";
 $is_maintenance = $is_down;
 
+define('DGS_VERSION', '1.0.15');
+
 
 // options settable by admins (user-capabilities)
 // NOTE: also adjust admin_users.php and admin_show_users.php on adding new options
