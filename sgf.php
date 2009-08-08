@@ -36,29 +36,83 @@ function reverse_htmlentities( $str )
 }
 
 
-/* SGF specs:
+/* SGF specs (version 4):
    Setup properties must not be mixed with move properties within a node.
    Docs: http://www.red-bean.com/sgf/
-   FF[4] move & setup properties:
-ID   Description     property type    property value
----- --------------- ---------------  --------------------------------------
-AB   Add Black       setup            list of stone
-AE   Add Empty       setup            list of point
-AW   Add White       setup            list of stone
-PL   Player to play  setup            color
 
-B    Black           move             move
-BL   Black time left move             real
-BM   Bad move        move             double
-DO   Doubtful        move             none
-IT   Interesting     move             none
-KO   Ko              move             none
-MN   set move number move             number
-OB   OtStones Black  move             number
-OW   OtStones White  move             number
-TE   Tesuji          move             double
-W    White           move             move
-WL   White time left move             real
+   http://www.red-bean.com/sgf/sgf4.html
+   http://www.red-bean.com/sgf/user_guide/index.html#gameinfo
+   http://www.red-bean.com/sgf/properties.html
+
+   Coordinates for stone/point: http://www.red-bean.com/sgf/go.html
+   Property types : root, move, setup, gameinfo, -
+
+ID    Description          type        property value
+----  -------------------  ----------- --------------------------------------
+AP    application          root        "name:version"
+CA    charset              root        charset (RFC 1345); default "Latin1" = "ISO-8859-1"
+FF    file format          root        integer : 1-4; default "1"
+GM    game type            root        integer : 1=Go, default "1"
+ST    style view tree      root        0-3, default "0"
+SZ    board size           root        integer : 1-52, "cols:rows" for rectangular boards
+
+AN    annotator name       game-info   string
+BR    Black Rank           game-info   string : 9k, 3d, ?, 4k*
+WR    White Rank           game-info   string : 9k, 3d, ?, 4k*
+BT    Black team name      game-info   string
+WT    White team name      game-info   string
+CP    copyright            game-info   string
+DT    date of game         game-info   list of string : "YYYY-MM-DD", abbreviations allowed
+EV    event name           game-info   string, e.g. tournament-name without round-info
+GN    game name            game-info   string : can indicate filename
+GC    general comment      game-info   string
+HA    handicap             game-info   integer : >=2
+KM    komi                 game-info   real : -7, 3.5, 0
+ON    opening played       game-info   string
+OT    overtime info        game-info   string : freetext, re-defined in FF[5]
+PB    Black player name    game-info   string
+PW    White player name    game-info   string
+PC    place                game-info   string
+RE    result               game-info   B|W+real, W+0.5, 0=jigo, B+R|Resign, W+T|Time, B+F|Forfeit, ?, Void=no-result/suspended
+RO    round                game-info   string : "round (type)"
+RU    rules                game-info   string : AGA,GOE,Japanese,NZ
+SO    source               game-info   string
+TM    main-time            game-info   real : >0, seconds
+US    user/program of SGF  game-info   string
+
+AB    add black stone      setup       list of stone
+AW    add white stone      setup       list of stone
+AE    add empty stone      setup       list of point
+PL    player to move       setup       B|W
+
+B     black move           move        stone, "" for pass-move or "tt" for size<=19
+W     white move           move        dito
+KO    do illegal move      move        "" : ko
+MN    set move number      move        integer
+BL    black time left      move        real : seconds
+WL    white time left      move        real : seconds
+OB    stones left black    move        integer : number of stones left in overtime
+OW    stones left white    move        integer : number of stones left in overtime
+TB    black territory      -           point
+TW    white territory      -           point
+C     game-comment         -           string
+N     node name            -           string
+
+# markup properties:
+AR (arrow), CR (circle-mark), DD (dim stones), LB (labels), LN (line), MA (X-mark),
+SL (select-mark), SQ (square-mark), TR (triangle-mark)
+
+# more '-'-type properties:
+DM (even position), GB (good for B), GW (good for W), HO (hotspot), UC (unclear), V (value)
+
+# more move-type properties:
+BM (bad move), DO (doubtful move), IT (interesting move), TE (tesuji)
+
+# printing properties:
+FG    figure for printing  -           integer : mask, see http://www.red-bean.com/sgf/properties.html#FG
+PM    print number         -           0-2, default "1"
+VW    view board part      -           list of points
+
 */
 $prop_type = 'root';
 function sgf_echo_prop( $prop )
@@ -306,6 +360,16 @@ function switch_move_color( $color )
    return ($color == 'B') ? 'W' : 'B';
 }
 
+function sgf_echo_rating( $rating, $show_percent=false )
+{
+   $rating_str = echo_rating( $rating, $show_percent, false, true, true );
+   if( (string)$rating_str == '' )
+      return '?';
+   $rating_str = str_ireplace( 'dan#short', 'd', $rating_str );
+   $rating_str = str_ireplace( 'kyu#short', 'k', $rating_str );
+   return reverse_htmlentities($rating_str);
+}
+
 
 $array=array();
 
@@ -464,19 +528,49 @@ $array=array();
 
 
    echo "(\n;FF[$sgf_version]GM[1]" . ( $charset ? "CA[$charset]" : '' )
+      . "\nAP[DGS:".DGS_VERSION."]"
+      //. "\nCP[".FRIENDLY_LONG_NAME.", ".HOSTBASE."licence.php]" // copyright on games
       . "\nPC[".FRIENDLY_LONG_NAME.": ".HOSTBASE."]"
       . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
       . "\nGN[" . sgf_simpletext($filename) . "]"
-      . "\nGC[Game ID: $gid".($Rated=='N'?'':', rated')."]"   //({HOSTBASE}game.php?gid=$gid)
+      . "\nSO[".HOSTBASE."game.php?gid=$gid]"
       . "\nPB[" . sgf_simpletext("$Blackname ($Blackhandle)") . "]"
       . "\nPW[" . sgf_simpletext("$Whitename ($Whitehandle)") . "]";
 
-   if( isset($Blackrating) || isset($Whiterating) )
-   {// ratings
-      echo "\nBR[" . ( isset($Blackrating) ? echo_rating($Blackrating, 0,0,1) : '?' ) . "]" .
-           "\nWR[" . ( isset($Whiterating) ? echo_rating($Whiterating, 0,0,1) : '?' ) . "]";
-   }
+   // ratings
+   echo "\nBR[", sgf_echo_rating($Blackrating), ']',
+        "\nWR[", sgf_echo_rating($Whiterating), ']';
 
+   // general comment: game-id, rated-game, start/end-ratings
+   $w_rating_start = ( is_valid_rating($White_Start_Rating) ) ? sgf_echo_rating($White_Start_Rating,true) : '';
+   $general_comment = "Game ID: $gid"
+      . "\nRated: ". ( $Rated=='N' ? 'N' : 'Y' )
+      . "\n"
+      . ( is_valid_rating($White_Start_Rating)
+            ? sprintf( "\nWhite Start Rating: %s - ELO %d",
+                         sgf_echo_rating($White_Start_Rating,true), $White_Start_Rating )
+            : "\nWhite Start Rating: ?" )
+      . ( is_valid_rating($Black_Start_Rating)
+            ? sprintf( "\nBlack Start Rating: %s - ELO %d",
+                         sgf_echo_rating($Black_Start_Rating,true), $Black_Start_Rating )
+            : "\nBlack Start Rating: ?" );
+   if( $Status == 'FINISHED' && isset($Score) )
+   {
+      $general_comment .=
+         ( is_valid_rating($White_End_Rating)
+            ? sprintf( "\nWhite End Rating: %s - ELO %d",
+                         sgf_echo_rating($White_End_Rating,true), $White_End_Rating )
+            : "\nWhite End Rating: ?" )
+         . ( is_valid_rating($Black_End_Rating)
+            ? sprintf( "\nBlack End Rating: %s - ELO %d",
+                         sgf_echo_rating($Black_End_Rating,true), $Black_End_Rating )
+            : "\nBlack End Rating: ?" );
+   }
+   echo "\nGC[$general_comment]";
+
+   // NOTE: time-properties are noted in seconds, which on turn-based servers
+   //       can get very big numbers, disturbing SGF-viewers.
+   //       Therefore time-info not included at the moment.
    if( $sgf_version >= 4 )
    {// overtime
       echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
@@ -759,14 +853,6 @@ $array=array();
             //$node_com.= "\n";
          }
          $node_com.= "\nResult: " . score2text($Score, false, true) ;
-
-         /*
-         $node_com.= "\n";
-         $node_com.= "\nWhite_Start_Rating: $White_Start_Rating" ;
-         $node_com.= "\nBlack_Start_Rating: $Black_Start_Rating" ;
-         $node_com.= "\nWhite_End_Rating: $White_End_Rating" ;
-         $node_com.= "\nBlack_End_Rating: $Black_End_Rating" ;
-         */
       }
    }
 
