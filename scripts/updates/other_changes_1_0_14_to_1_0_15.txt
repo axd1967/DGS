@@ -93,3 +93,54 @@ scripts/forum_consistency.php
 scripts/forum_consistency.php?do_it=1
 scripts/forum_consistency.php?do_it=1
 
+-----------
+# added and updated flags
+copy /images/flags/ai.gif
+copy /images/flags/an.gif
+copy /images/flags/as.gif
+copy /images/flags/aw.gif
+copy /images/flags/ax.gif
+copy /images/flags/bm.gif
+copy /images/flags/cc.gif
+copy /images/flags/ck.gif
+copy /images/flags/cx.gif
+copy /images/flags/eh.gif
+copy /images/flags/fk.gif
+copy /images/flags/fo.gif
+copy /images/flags/gg.gif
+copy /images/flags/gi.gif
+copy /images/flags/gl.gif
+copy /images/flags/gs.gif
+copy /images/flags/gu.gif
+copy /images/flags/im.gif
+copy /images/flags/je.gif
+copy /images/flags/ky.gif
+copy /images/flags/me.gif
+copy /images/flags/mp.gif
+copy /images/flags/ms.gif
+copy /images/flags/nf.gif
+copy /images/flags/nu.gif
+copy /images/flags/pf.gif
+copy /images/flags/pn.gif
+copy /images/flags/rs.gif (updated)
+copy /images/flags/sh.gif
+copy /images/flags/tc.gif
+copy /images/flags/tk.gif
+copy /images/flags/vg.gif
+copy /images/flags/vi.gif
+copy /images/flags/xf.gif
+copy /images/flags/xk.gif
+
+# changed country-code
+copy /images/flags/tl.gif ( was former tp.gif )
+copy /images/flags/xe.gif ( was former __.gif )
+copy /images/flags/xi.gif ( was former ia.gif )
+copy /images/flags/xo.gif ( was former eo.gif )
+
+# remove old flags
+remove /images/flags/__.gif
+remove /images/flags/eo.gif
+remove /images/flags/ia.gif
+remove /images/flags/mj.gif
+remove /images/flags/tp.gif
+
