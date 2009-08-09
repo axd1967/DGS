@@ -77,3 +77,19 @@ copy /images/msg_first.gif
 -----------
 # adjust config-local.php for allowed maintenance-users: $ARR_USERS_MAINTENANCE
 
+-----------
+# Forum-behavior has been changed: Threads are no longer hidden if a thread
+# with more than one post has only the initial thread post hidden!!
+#
+# That means, some threads suddenly may appear, that have been hidden before.
+# In order to fix this, after all DDL-changes have been made and sources are updated,
+# run the forum-consistency-script and copy all the UPDATEs. You may want to hide
+# some of the now visible hidden threads.
+
+# Run it at least twice with "Validation it"-step.
+# On the first call note the changed post-threads, so later you can check them
+# on the site and hide all other posts in a thread if you want a thread to stay hidden.
+scripts/forum_consistency.php
+scripts/forum_consistency.php?do_it=1
+scripts/forum_consistency.php?do_it=1
+
