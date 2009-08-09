@@ -22,6 +22,28 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-08-09 juga
+
+   * forum/forum_functions.php (DisplayForum.print_headline, ~.draw_post,
+       Forum.fix_forum):
+   - show subject as "moderated" too for hidden initial thread-post
+   - show post-approved state in tree-overview for own posts
+   - fix-forum: also fix hidden initial thread-posts
+
+   * forum/post.php (approve_post, hide_post_update_trigger, show_post),
+     scripts/forum_consistency.php, specs/forums.txt,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - fixes for changed forum-behaviour: thread not hidden if initial thread post hidden
+     - increase Forums.ThreadsInForum for approving post only if thread was empty
+     - decrease Forums.ThreadsInForum for hiding post only if thread had only one post
+     - fix Thread.LastPost/Lastchanged/Updated also if LastPost was unset (=0)
+     - fix Forums.LastPost if LastPost was unset (=0) and fixed code with undefined forum-var
+-----------
+# Fixes for changed forum-behaviour: thread not hidden if initial thread post hidden
+# see 'scripts/updates/other_changes_1_0_14_to_1_0_15.txt' for further instructions
+scripts/forum_consistency.php
+-----------
+
 2009-08-08 juga
 
    * forum/search.php:
@@ -381,7 +403,8 @@ ALTER TABLE Players
      empty lines, switch, arrays, ?-op, clearer vars, comments
 
    * scripts/data_export.php:
-   - replaced static config of scripts super-admin-role by using ARR_USERS_MAINTENANCE from 'include/config.php'
+   - replaced static config of scripts super-admin-role by using ARR_USERS_MAINTENANCE
+     from 'include/config.php'
 
    * translate.php:
    - cleanup: removed old-way to determine translation-groups (static -> from db-table)
