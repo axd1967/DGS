@@ -101,7 +101,7 @@ define('SEPLINE', "\n<p><hr>\n");
    $result = db_query( 'forum_consistency.load_threads',
       'SELECT ID, Forum_ID, PostsInThread, LastPost, UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged ' .
       'FROM Posts ' .
-      "WHERE Thread_ID>0 AND Parent_ID=0 AND Approved='Y'" );
+      "WHERE Thread_ID>0 AND Parent_ID=0" );
    $threads = array(); # ID => ID,Forum_ID,PostsInThread,LastPost,X_Lastchanged
    while( $row = mysql_fetch_array( $result ) )
    {

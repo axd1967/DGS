@@ -451,14 +451,6 @@ TABLE Forumlog
 #----- Forum (stored in Forums-TABLE)
 # label: recalc_forum
 
-# Calculate fields for all forums
-Forums():
-   # calculate with combined select for ALL forums, if threads are up-to-date
-   PostsInForum   := X_CountPosts,
-   ThreadsInForum := X_CountThreads :
-      SELECT Forum_ID, SUM(PostsInThread) AS X_CountPosts, COUNT(*) AS X_CountThreads
-      FROM Posts WHERE Approved='Y' AND Thread_ID>0 AND Parent_ID=0 GROUP BY Forum_ID
-
 # Calculate fields for single forum $fid
 Forums($fid):
    # calculate
@@ -466,12 +458,6 @@ Forums($fid):
       SELECT ID AS X_LastPost FROM Posts
       WHERE Forum_ID=$fid AND Thread_ID>0 AND Approved='Y' AND PosIndex>''
       ORDER BY Time DESC LIMIT 1
-
-   # combined calculate, if threads are up-to-date
-   PostsInForum   := X_CountPosts,
-   ThreadsInForum := X_CountThreads :
-      SELECT SUM(PostsInThread) AS X_CountPosts, COUNT(*) AS X_CountThreads
-      FROM Posts WHERE Forum_ID=$fid AND Thread_ID>0 AND Approved='Y' AND Parent_ID=0
 
    # calculate
    PostsInForum := X_Count :
@@ -481,12 +467,12 @@ Forums($fid):
    # calculate, if threads are up-to-date
    PostsInForum := X_Count :
       SELECT SUM(PostsInThread) AS X_Count FROM Posts
-      WHERE Forum_ID=$fid AND Approved='Y' AND Parent_ID=0
+      WHERE Forum_ID=$fid AND Parent_ID=0
 
-   # calculate
+   # calculate, if threads are up-to-date
    ThreadsInForum := X_Count
       SELECT COUNT(*) AS X_Count FROM Posts
-      WHERE Forum_ID=$fid AND Approved='Y' AND Parent_ID=0
+      WHERE Forum_ID=$fid AND Parent_ID=0 AND PostsInThread>0
 
 
 #----- Thread (stored in Posts-TABLE)
@@ -592,13 +578,13 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 * recalc all threads, then recalc forum
 
-#TODO: if needed, recalc ForumRead(d) + update
+#TODO (describe): if needed, recalc ForumRead(d) + update
 
 #----- U02: read thread-list
 
 * recalc only, what is needed to display current thread-page
 
-#TODO: if needed, recalc ForumRead(c) + update
+#TODO (describe): if needed, recalc ForumRead(c) + update
 
 * before showing thread-list -> recalc thread-reads
    if not exists ForumRead -> recalc
@@ -720,6 +706,10 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 # move thread $tid from forum $sfid to forum $nfid
 #TODO new feature, not implemented yet;
 #     but doubtful to come (probably brings more confusion than bringing order)
+# also needed for implementation:
+#TODO need URLs (also old), updated independently from forum_id (only on thread_id) !!
+#TODO need old_ID be independent from forum_id -> recalc old_ID
+#TODO (optional) need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
 
 * move thread-posts:
   - $tupd := Thread($tid).Updated
@@ -744,11 +734,6 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * if admin chooses: send READ-ONCE message to all Thread($tid).User_ID
   informing about thread-move
 
-#needed for implementation:
-#TODO need URLs (also old), updated independently from forum_id (only on thread_id) !!
-#TODO need old_ID be independent from forum_id -> recalc old_ID
-#TODO (optional) need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
-
 #----- A04: approve post
 
 * update Posts($pid):
@@ -756,8 +741,9 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - Approved='Y'
 
 * Thread($tid).PostsInThread++
+  - $ptid := Thread($tid).PostsInThread
 
-* if $pid==$tid: Forums($fid).ThreadsInForum++
+* if $ptid == 1: Forums($fid).ThreadsInForum++
 * Forums($fid).PostsInForum++
 * Forums($fid).LastPost=GREATEST(LastPost,$pid)
 
@@ -779,6 +765,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * update Posts($pid).Approved='N'
 
 * Thread($tid).PostsInThread--
+  - $ptid := Thread($tid).PostsInThread
 * Thread($tid).Updated=$NOW (post could be a NEW one)
 
 * if $pid == Thread($tid).LastPost:
@@ -787,7 +774,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 * Forums($fid).PostsInForum--
 * Forums($fid).Updated=$NOW (post could be a NEW one)
-* if $pid == $tid: Forums($fid).ThreadsInForum--
+* if $ptid == 0: Forums($fid).ThreadsInForum--
 * if $pid == Forums($fid).LastPost:
   - recalc Forums($fid).LastPost
 
@@ -800,18 +787,16 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - $ptid := Thread($tid).PostsInThread
   - $ltid := Thread($tid).LastPost
 
-* if $dpid > Thread($pid).Lastchanged:
+* if $dpid > Thread($pid).Lastchanged OR $ltid == 0:
   - Thread($tid).LastPost=$pid
   - Thread($tid).Lastchanged=$dpid
   - Thread($pid).Updated = $dpid
 
   - Forums($fid).Updated=GREATEST(Updated,$dpid)
-  - if $ltid == Forums($fid).LastPost:
-    - Forums($fid).LastPost=$pid
+  - if $ltid == Forums($fid).LastPost: Forums($fid).LastPost=$pid
 
 * Forums($fid).PostsInForum++
-* if $ptid==1:
-  - Forums($fid).ThreadsInForum++
+* if $ptid==1: Forums($fid).ThreadsInForum++
 
 #----- A08: edit post
 
