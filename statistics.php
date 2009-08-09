@@ -20,17 +20,59 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
+require_once( "include/gui_functions.php" );
+require_once( "include/countries.php" );
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
 
+   $page = "statistics.php";
 
-   start_page("Statistics", true, $logged_in, $player_row );
+   // stats: 0=default, 1=user-countries
+   $stats = (int)get_request_arg('stats', 0);
+
+   $statsmenu = array();
+   $statsmenu[T_('Standard view')] = $page;
+   $statsmenu[T_('User countries')] = "$page?stats=1";
+
+   if( $stats == 1 )
+      show_stats_user_countries();
+   else // default: stats=0 or illegal
+   {
+      $title = T_('Statistics');
+      stats_start_page( $title );
+
+      make_menu( $statsmenu );
+      echo "<hr>\n";
+
+      show_stats_default();
+   }
+
+   if( $stats > 0 )
+   {
+      echo "<hr>\n";
+      make_menu( $statsmenu );
+   }
+
+   end_page();
+}
+
+function stats_start_page( $title )
+{
+   global $logged_in, $player_row;
+
+   start_page( $title, true, $logged_in, $player_row );
+   echo "<h3 class=\"Header\">$title</h3>\n";
+}
+
+
+function show_stats_default()
+{
+   global $ActivityForHit, $player_row, $NOW;
 
    $q1 = "SELECT Status,SUM(Moves) AS moves, COUNT(*) AS count FROM Games GROUP BY Status";
    $q2 = "SELECT SUM(Moves) AS moves, COUNT(*) AS count FROM Games";
@@ -43,7 +85,11 @@ require_once( "include/std_functions.php" );
 
    while( $row = mysql_fetch_array( $result ) )
    {
-      echo '<tr><td>', $row["Status"], '</td><td align="right">', $row["moves"], '</td><td align="right">', $row["count"], "</td></tr>\n";
+      echo '<tr>'
+         , "<td>{$row['Status']}</td>"
+         , "<td align=\"right\">{$row['moves']}</td>"
+         , "<td align=\"right\">{$row['count']}</td>"
+         , "</tr>\n";
    }
    mysql_free_result($result);
 
@@ -86,7 +132,65 @@ require_once( "include/std_functions.php" );
    $title = T_('Rating histogram');
    echo "<h3 class=Header>$title</h3>\n";
    echo "<img src=\"statratingspng.php$args\" alt=\"$title\">\n";
+}//show_stats_default
 
-   end_page();
+function show_stats_user_countries()
+{
+   global $NOW, $page;
+
+   $weeks = (int)get_request_arg('w',0);
+   $last_access = $NOW - $weeks * 7 * SECS_PER_DAY;
+
+   $page_user = "$page?stats=1";
+   $title = T_('Statistics - User countries');
+   stats_start_page( $title );
+
+   $userstatsmenu = array();
+   $userstatsmenu[T_('All users')] = $page_user;
+   $userstatsmenu[T_('Users online within 8 weeks')] = $page_user.URI_AMP."w=8";
+   make_menu( $userstatsmenu, false );
+
+
+   $result = db_query( 'statistics.users.countries',
+      "SELECT Country, COUNT(*) AS X_Count " .
+      "FROM Players " .
+      ( $weeks > 0 ? "WHERE Lastaccess>=FROM_UNIXTIME($last_access) " : '' ) .
+      "GROUP BY Country " .
+      "ORDER BY X_Count DESC" );
+
+   echo "<table id=\"Statistics\" class=\"Table\">\n"
+      , sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n", T_('Count'), T_('Flag#country'), T_('Country') );
+
+   $arr_countries = getCountryText();
+   while( $row = mysql_fetch_array( $result ) )
+   {
+      $ccode = $row['Country'];
+      unset($arr_countries[$ccode]);
+
+      $ccimg = getCountryFlagImage($ccode);
+      if( $ccode == '' )
+         $ccimg = NO_VALUE;
+      elseif( $ccimg == '' )
+         $ccimg = "[$ccode]";
+
+      $cctxt = getCountryText($ccode);
+      if( $ccode == '' )
+         $cctxt = T_('Unset');
+      elseif( $cctxt == '' )
+         $cctxt = NO_VALUE;
+
+      echo sprintf( "<tr><td class=\"Number\">%s</td><td class=\"Image\">%s</td><td>%s</td></tr>\n",
+                    $row['X_Count'], $ccimg, $cctxt );
+   }
+   mysql_free_result($result);
+   echo "</table>\n";
+
+   echo "<br>\n", T_('Remaining countries'), ":\n<p>\n";
+   asort($arr_countries);
+   foreach( $arr_countries as $ccode => $cctxt )
+   {
+      echo getCountryFlagImage($ccode), SMALL_SPACING, "\n";
+   }
 }
+
 ?>

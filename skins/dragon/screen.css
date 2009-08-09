@@ -2920,6 +2920,20 @@ div.quote {
 }
 
 
+/* ------------------------- */
+/* Statistics pages */
+/* ------------------------- */
+
+table#Statistics {
+   border-style: hidden;
+}
+table#Statistics th,
+table#Statistics td {
+   border: 1px solid black;
+}
+
+
+
 /* ************************* */
 /* debug overwriting tools */
 /* ************************* */
