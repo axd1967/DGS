@@ -341,9 +341,9 @@ class DisplayForum
       {
          if( $first && $this->found_rows >= 0 )
          {
-            $fmt_entries = ($this->found_rows == 1 ) ? T_('(%s entry)') : T_('(%s entries)');
+            $fmt_entries = ($this->found_rows == 1 ) ? T_('%s entry') : T_('%s entries');
             $name .= SMALL_SPACING .
-               '<span class="NaviInfo">' . sprintf( $fmt_entries, $this->found_rows ) . '</span>';
+               '<span class="NaviInfo">(' . sprintf( $fmt_entries, $this->found_rows ) . ')</span>';
             $first = false;
          }
          echo "<td $attbs>$name</td>";
@@ -732,6 +732,8 @@ class DisplayForum
             $hdrcols = $cols;
             $newstr = $this->get_new_string( 0, $post->count_new, $post->created );
          }
+         $subject_modstr = ( $drawmode & MASK_DRAWPOST_NO_BODY )
+            ? '[* '.T_('subject moderated').' *]' : $sbj;
 
          if( $drawmode_type == DRAWPOST_SEARCH )
          {
@@ -755,10 +757,10 @@ class DisplayForum
 
             //from revision_history or because, when edited, the link will be obsolete
             if( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
-               echo "<a class=PostSubject name=\"$pid\">$sbj</a>";
+               echo "<a class=PostSubject name=\"$pid\">$subject_modstr</a>";
             else
                echo '<a class=PostSubject href="', $thread_url, $term_url,
-                  "#$pid\" name=\"$pid\">$sbj</a>", $newstr;
+                  "#$pid\" name=\"$pid\">$subject_modstr</a>", $newstr;
          }
 
          // first [header-row] with different content (adding hidden-state)
@@ -776,7 +778,7 @@ class DisplayForum
          {
             // [header-row] subject
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
-            echo '<a class=PostSubject href="', $thread_url, $term_url, "#$pid\">$sbj</a>";
+            echo '<a class=PostSubject href="', $thread_url, $term_url, "#$pid\">$subject_modstr</a>";
             echo "</td></tr>";
          }
 
@@ -914,7 +916,7 @@ class DisplayForum
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
          $newstr = (!$hidden)
             ? $this->get_new_string( NEWMODE_OVERVIEW, $post->count_new, $post->created ) : '';
-         $modstr = ( $hidden && ( $post->is_thread_post() || $this->is_moderator) )
+         $modstr = ( $hidden && ( $post->is_thread_post() || $this->is_moderator || $is_my_post ) )
             ? MED_SPACING . sprintf( '<span class="Moderated">(%s)</span>',
                   ForumPost::get_approved_text( $post->approved ) ) : '';
 
@@ -1137,9 +1139,10 @@ class Forum
          $upd_arr[] = 'PostsInForum=' . $row['X_Count'];
 
       // read fix for Forums.ThreadsInForum
+      // note: delivers correct value only if Posts.PostsInThread is correct, so fix Posts first
       $row = mysql_single_fetch( "Forum.fix_forum.read.ThreadsInForum($fid)",
             "SELECT COUNT(*) AS X_Count FROM Posts ".
-            "WHERE Forum_ID='$fid' AND Approved='Y' AND Parent_ID=0" );
+            "WHERE Forum_ID='$fid' AND Parent_ID=0 AND PostsInThread>0" );
       if( $row && $row['X_Count'] != $this->count_threads )
          $upd_arr[] = 'ThreadsInForum=' . $row['X_Count'];
 
