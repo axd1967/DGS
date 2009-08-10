@@ -145,6 +145,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
             * subjects (truncated if too long), author and last changed date
             * own posts in dark-blue and bold font
             * linked NEW markers
+            * approved state of own hidden posts: H=hidden, M=needs-moderation
             * show/hide toggle in header lines
          * Added navigation links on every post to page top and bottom,
            previous and next post, previous parent and next parent post,
@@ -251,6 +252,15 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Added section with all Dragon executives
          * Added other credits
 
+   * Updates <home statistics.php?stats=1&w=1>flags</home> according to ISO-3166 country-codes list and some more:
+      * Added flags for: Aaland Islands, American Samoa, Aruba, European Union, Faroe Islands,
+        French Polynesia, Gibraltar, Greenland, Guam, Guernsey, Jersey, Netherlands Antilles,
+        Norfolk Island, Northern Mariana Islands, Tokelau, Virgin Islands (British), Western Sahara
+      * Fixed country-codes: TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO,
+        IA (Interlingua) -> XI, MJ (Montenegro) -> ME, __ (Earth) -> XE
+      * Fixed names: Antigua and Barbuda, Bosnia and Herzegovina, Brunei Darussalam, Kazakhstan,
+        Macao, Palestinian Territory
+
    * More use of CSS
 
 
@@ -280,6 +290,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Added <home donation.php>donation page</home> (deactivated when target reached)
 
    * <home statistics.php>Statistics page</home>:
+      * Added statistic view with <home statistics.php?stats=1>user countries</home> also showing all existing flags
       * Restrict the 'loadavg'-stats to admins view
       * Added 'Activity' curve in the graph (activated in the URL)
 
