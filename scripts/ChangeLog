@@ -22,6 +22,118 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-08-10 juga
+
+   * include/countries.php (getCountryText, getCountryFlagImage),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     NEWS:
+   - adjusted flags for country-codes:
+     - added flags for AX (Aaland Islands), AS (American Samoa), AW (Aruba),
+       EU (Europe), FO (Faroe Islands), PF (French Polynesia), GI (Gibraltar),
+       GL (Greenland), GU (Guam), GG (Guernsey), JE (Jersey), AN (Netherlands Antilles),
+       NF (Norfolk Island), MP (Northern Mariana Islands), TK (Tokelau),
+       VG (Virgin Islands (British)), EH (Western Sahara)
+     - fixed country-codes using user-defined ISO-3166 ccodes:
+       TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO, IA (Interlingua) -> XI,
+       CI (change pos), MJ (Montenegro) -> ME, __ (Earth) -> XE
+     - fixed names: AG (Antigua and Barbuda) lower-case 'and', BA (Bosnia and Herzegovina) typo,
+       BN (Brunei Darussalam) full name, KZ (Kazakhstan) typo, MO (Macao) typo,
+       PS (Palestinian Territory) fix-name
+     - added ccodes but commented out in lack of nice flag:
+       AI (Anguilla), BM (Bermuda), BV (Bouvet Island), KY (Cayman Islands),
+       CX (Christmas Island), CC (Cocos Islands), CK (Cook Islands), FK (Falkland Islands),
+       IM (Isle of Man), MS (Montserrat), NU (Niue), PN (Pitcairn), SH (Saint Helena),
+       GS (South Georgia and Sandwich Islands), TC (Turks and Caicos Islands),
+       VI (Virgin Islands (US))
+     - added ccode but without flag because it's the same as other countries:
+       IO (British Indian Ocean Territory), GF (French Guinea), GP (Guadeloupe), MQ (Martinique),
+       MY (Mayotte), NT (Neutral Zone), NC (New Caledonia), RE (Reunion), BL (Saint Barthelemy),
+       MF (Saint Martin), PM (Saint Pierre and Miquelon), SJ (Svalbard and Jan Mayen),
+       UM (United States Minor Outlying Islands), WF (Wallis and Futuna)
+   - added static width/height for country-images: 32x20
+   - added URLs for ISO-3166 and more links to flags-images
+-----------
+# added and updated flags
+copy /images/flags/ai.gif
+copy /images/flags/an.gif
+copy /images/flags/as.gif
+copy /images/flags/aw.gif
+copy /images/flags/ax.gif
+copy /images/flags/bm.gif
+copy /images/flags/cc.gif
+copy /images/flags/ck.gif
+copy /images/flags/cx.gif
+copy /images/flags/eh.gif
+copy /images/flags/fk.gif
+copy /images/flags/fo.gif
+copy /images/flags/gg.gif
+copy /images/flags/gi.gif
+copy /images/flags/gl.gif
+copy /images/flags/gs.gif
+copy /images/flags/gu.gif
+copy /images/flags/im.gif
+copy /images/flags/je.gif
+copy /images/flags/ky.gif
+copy /images/flags/me.gif
+copy /images/flags/mp.gif
+copy /images/flags/ms.gif
+copy /images/flags/nf.gif
+copy /images/flags/nu.gif
+copy /images/flags/pf.gif
+copy /images/flags/pn.gif
+copy /images/flags/rs.gif (updated)
+copy /images/flags/sh.gif
+copy /images/flags/tc.gif
+copy /images/flags/tk.gif
+copy /images/flags/vg.gif
+copy /images/flags/vi.gif
+copy /images/flags/xf.gif
+copy /images/flags/xk.gif
+
+# changed country-code
+copy /images/flags/tl.gif ( was former tp.gif )
+copy /images/flags/xe.gif ( was former __.gif )
+copy /images/flags/xi.gif ( was former ia.gif )
+copy /images/flags/xo.gif ( was former eo.gif )
+
+# remove old flags
+remove /images/flags/__.gif
+remove /images/flags/eo.gif
+remove /images/flags/ia.gif
+remove /images/flags/mj.gif
+remove /images/flags/tp.gif
+
+
+-- fix country-code for East Timor -> Timor Leste: TP -> TL
+UPDATE Players SET Country='tl' WHERE Country='tp' ;
+
+-- fix country-code for Montenegro: MJ -> ME
+UPDATE Players SET Country='me' WHERE Country='mj' ;
+
+-- fix country-code for Earth: __ -> XE
+UPDATE Players SET Country='xe' WHERE Country='__' ;
+
+-- fix country-code for (language) Interlingua: IA -> XI
+UPDATE Players SET Country='xi' WHERE Country='ia' ;
+
+-- fix country-code for (language) Esperanto: EO -> XO
+UPDATE Players SET Country='xo' WHERE Country='eo' ;
+
+-- obsoleted country-code for Yugoslavia: YU -> RS (Serbia), but could be ME (Montenegro)
+UPDATE Players SET Country='RS' WHERE Country='yu' ;
+
+-- check for more unknown with Statistics page (evtl. fix more):
+-- unknown flags are shown without flag-image but shows "[country-code]"
+statistics.php?stats=1
+-----------
+
+   * statistics.php (stats_start_page, show_stats_default, show_stats_user_countries),
+     skins/dragon/screen.css, NEWS:
+   - added new view with counts for user countries
+     - stats for all users or within 8 weeks (URL-var 'w')
+     - show remaining/unused countries (flags), so this can be used to view all flags
+
 2009-08-09 juga
 
    * forum/forum_functions.php (DisplayForum.print_headline, ~.draw_post,
