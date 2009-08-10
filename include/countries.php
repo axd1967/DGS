@@ -32,15 +32,19 @@ require_once( 'include/utilities.php' );
  *     (plus some international languages (ISO 639 code))
  */
 
-// some sites with flags:
-// - https://www.cia.gov/cia/publications/factbook/
-// - http://setiathome.free.fr/images/flags/iso3166-1.html
-// - plus some international languages (ISO 639 code):
-//   - http://www.oasis-open.org/cover/iso639a.html
-//   - http://www.loc.gov/standards/iso639-2/langcodes.html
-
 // use lazy-init to assure, that translation-language has been initialized !!
 $ARR_GLOBALS_COUNTRIES = array();
+
+// some sites with flags:
+// - many links: http://en.wikipedia.org/wiki/Flags#External_links
+// - http://www.atlasgeo.net/fotw/flags/country.html
+// - https://www.cia.gov/cia/publications/factbook/
+// - http://setiathome.free.fr/images/flags/iso3166-1.html
+
+// international languages (ISO 639 code):
+//   - http://www.oasis-open.org/cover/iso639a.html
+//   - http://www.loc.gov/standards/iso639-2/php/code_list.php
+
 
 /*! \brief Returns country-text or all countries (if code=null); '' if code is unknown country. */
 function getCountryText( $code=null )
@@ -49,16 +53,31 @@ function getCountryText( $code=null )
    $key = 'COUNTRIES';
    if( !isset($ARR_GLOBALS_COUNTRIES[$key]) )
    {
+      // Flag should have an entry in the ISO-3166 country code table
+      // - http://www.iso.org/iso/iso-3166-1_decoding_table
+      // - updates on: http://www.iso.org/iso/country_codes/updates_on_iso_3166.htm
+      // - flag-status taken from http://www.atlasgeo.net/fotw/flags/country.html and wikipedia
+
+      // Legend for flag:
+      // - "[country]" = territory of given country
+      // - "same as" = same flag as other [country],
+      // - "(official?)" = unclear if the official flag
+      // - "need nicer flag" = flag stored, but unsharp (from scaling)
+
       $arr = array(
          'af' => T_('Afghanistan'),
+         'ax' => T_('Aaland Islands'), // [FI] (official?)
          'al' => T_('Albania'),
          'dz' => T_('Algeria'),
+         'as' => T_('American Samoa'), // [US]
          'ad' => T_('Andorra'),
          'ao' => T_('Angola'),
+         //'ai' => T_//('Anguilla'), // [UK] -> need nicer flag
          'aq' => T_('Antarctica'),
-         'ag' => T_('Antigua And Barbuda'),
+         'ag' => T_('Antigua and Barbuda'),
          'ar' => T_('Argentina'),
          'am' => T_('Armenia'),
+         'aw' => T_('Aruba'), // [NL]
          'au' => T_('Australia'),
          'at' => T_('Austria'),
          'az' => T_('Azerbaijan'),
@@ -70,12 +89,15 @@ function getCountryText( $code=null )
          'be' => T_('Belgium'),
          'bz' => T_('Belize'),
          'bj' => T_('Benin'),
+         //'bm' => T_//('Bermuda'), // need nicer flag
          'bt' => T_('Bhutan'),
          'bo' => T_('Bolivia'),
-         'ba' => T_('Bosnia and Herzegowina'),
+         'ba' => T_('Bosnia and Herzegovina'),
          'bw' => T_('Botswana'),
+         //'bv' => T_//('Bouvet Island'), // same as [NO], not inhabited
          'br' => T_('Brazil'),
-         'bn' => T_('Brunei'),
+         //'io' => T_//('British Indian Ocean Territory'), // same as [UK]
+         'bn' => T_('Brunei Darussalam'),
          'bg' => T_('Bulgaria'),
          'bf' => T_('Burkina Faso'),
          'bi' => T_('Burundi'),
@@ -83,16 +105,19 @@ function getCountryText( $code=null )
          'cm' => T_('Cameroon'),
          'ca' => T_('Canada'),
          'cv' => T_('Cape Verde'),
+         //'ky' => T_//('Cayman Islands'), // [UK] -> need nicer flag
          'cf' => T_('Central African Republic'),
          'td' => T_('Chad'),
          'cl' => T_('Chile'),
          'cn' => T_('China'),
+         //'cx' => T_//('Christmas Island'), // [AU] (official?) -> need nicer flag
+         //'cc' => T_//('Cocos (Keeling) Islands'), // [AU] (official?) -> need nicer flag
          'co' => T_('Colombia'),
          'km' => T_('Comoros'),
          'cg' => T_('Congo-Brazzaville'),
          'cd' => T_('Congo-Kinshasa'),
+         //'ck' => T_//('Cook Islands'), // [UK] (official?) -> need nicer flag
          'cr' => T_('Costa Rica'),
-         'ci' => T_('Ivory Coast'),
          'hr' => T_('Croatia'),
          'cu' => T_('Cuba'),
          'cy' => T_('Cyprus'),
@@ -101,28 +126,35 @@ function getCountryText( $code=null )
          'dj' => T_('Djibouti'),
          'dm' => T_('Dominica'),
          'do' => T_('Dominican Republic'),
-         'tp' => T_('East Timor'),
          'ec' => T_('Ecuador'),
          'eg' => T_('Egypt'),
          'sv' => T_('El Salvador'),
          'gq' => T_('Equatorial Guinea'),
          'er' => T_('Eritrea'),
-         'eo' => T_('Esperanto'),
          'ee' => T_('Estonia'),
          'et' => T_('Ethiopia'),
-         //'eu' => T_//('Europe'),//not a nation
+         'eu' => T_('European Union'),
+         //'fk' => T_//('Falkland Islands (Malvinas)'), // [UK] (official?) -> need nicer flag
+         'fo' => T_('Faroe Islands'), // [DK]
          'fj' => T_('Fiji'),
          'fi' => T_('Finland'),
          'fr' => T_('France'),
+         //'gf' => T_//('French Guinea'), // same as [FR]
+         'pf' => T_('French Polynesia'), // [FR] (official?)
          'ga' => T_('Gabon'),
          'gm' => T_('Gambia'),
          'ge' => T_('Georgia'),
          'de' => T_('Germany'),
          'gh' => T_('Ghana'),
+         'gi' => T_('Gibraltar'), // [UK] (official?)
          'gr' => T_('Greece'),
+         'gl' => T_('Greenland'), // [DK] (official?)
          'gd' => T_('Grenada'),
+         //'gp' => T_//('Guadeloupe'), // same as [FR]
+         'gu' => T_('Guam'),
          'gt' => T_('Guatemala'),
          'gn' => T_('Guinea'),
+         'gg' => T_('Guernsey'), // [UK] (official?)
          'gw' => T_('Guinea-Bissau'),
          'gy' => T_('Guyana'),
          'ht' => T_('Haiti'),
@@ -132,16 +164,18 @@ function getCountryText( $code=null )
          'is' => T_('Iceland'),
          'in' => T_('India'),
          'id' => T_('Indonesia'),
-         'ia' => T_('Interlingua'),
+         'ci' => T_('Ivory Coast'), // Cote d'Ivoire
          'ir' => T_('Iran'),
          'iq' => T_('Iraq'),
          'ie' => T_('Ireland'),
          'il' => T_('Israel'),
+         'im' => T_('Isle of Man'), // [UK] (official?) -> flag could be nicer
          'it' => T_('Italy'),
          'jm' => T_('Jamaica'),
          'jp' => T_('Japan'),
+         'je' => T_('Jersey'), // [UK] (official?)
          'jo' => T_('Jordan'),
-         'kz' => T_('Kazakstan'),
+         'kz' => T_('Kazakhstan'),
          'ke' => T_('Kenya'),
          'ki' => T_('Kiribati'),
          'kp' => T_('Korea,North'),
@@ -157,7 +191,7 @@ function getCountryText( $code=null )
          'li' => T_('Liechtenstein'),
          'lt' => T_('Lithuania'),
          'lu' => T_('Luxembourg'),
-         'mo' => T_('Macau'),
+         'mo' => T_('Macao'),
          'mk' => T_('Macedonia'),
          'mg' => T_('Madagascar'),
          'mw' => T_('Malawi'),
@@ -166,14 +200,17 @@ function getCountryText( $code=null )
          'ml' => T_('Mali'),
          'mt' => T_('Malta'),
          'mh' => T_('Marshall Islands'),
+         //'mq' => T_//('Martinique'), // same as [FR]
          'mr' => T_('Mauritania'),
          'mu' => T_('Mauritius'),
+         //'yt' => T_//('Mayotte'), // same as [FR]
          'mx' => T_('Mexico'),
          'fm' => T_('Micronesia'),
          'md' => T_('Moldova'),
          'mc' => T_('Monaco'),
          'mn' => T_('Mongolia'),
-         'mj' => T_('Montenegro'),
+         'me' => T_('Montenegro'),
+         //'ms' => T_//('Montserrat'), // [UK] (official?) -> need nicer flag
          'ma' => T_('Morocco'),
          'mz' => T_('Mozambique'),
          'mm' => T_('Myanmar'),
@@ -181,36 +218,48 @@ function getCountryText( $code=null )
          'nr' => T_('Nauru'),
          'np' => T_('Nepal'),
          'nl' => T_('Netherlands'),
+         'an' => T_('Netherlands Antilles'), // [NL] (official?)
+         //'nt' => T_//('Neutral Zone'), // no flag, obsolete
+         //'nc' => T_//('New Caledonia'), // same as [FR]
          'nz' => T_('New Zealand'),
          'ni' => T_('Nicaragua'),
          'ne' => T_('Niger'),
          'ng' => T_('Nigeria'),
+         //'nu' => T_//('Niue'), // [NZ] (official?) -> need nicer flag
+         'nf' => T_('Norfolk Island'), // [AU] (official?)
+         'mp' => T_('Northern Mariana Islands'), // [US] (official?)
          'no' => T_('Norway'),
          'om' => T_('Oman'),
          'pk' => T_('Pakistan'),
          'pw' => T_('Palau'),
-         'ps' => T_('Palestinian Authority'),
+         'ps' => T_('Palestinian Territory'),
          'pa' => T_('Panama'),
          'pg' => T_('Papua New Guinea'),
          'py' => T_('Paraguay'),
          'pe' => T_('Peru'),
          'ph' => T_('Philippines'),
+         //'pn' => T_//('Pitcairn'), // [UK] -> need nicer flag
          'pl' => T_('Poland'),
          'pt' => T_('Portugal'),
          'pr' => T_('Puerto Rico'),
          'qa' => T_('Qatar'),
+         //'re' => T_//('Reunion'), // same as [FR]
          'ro' => T_('Romania'),
          'ru' => T_('Russia'),
          'rw' => T_('Rwanda'),
+         //'bl' => T_//('Saint Barthelemy'), // same as [FR]
+         //'sh' => T_//('Saint Helena'), // [UK] (official?) -> need nicer flag
          'kn' => T_('Saint Kitts and Nevis'),
          'lc' => T_('Saint Lucia'),
+         //'mf' => T_//('Saint Martin'), // same as [FR]
+         //'pm' => T_//('Saint Pierre and Miquelon'), // same as [FR]
          'vc' => T_('Saint Vincent and the Grenadines'),
          'ws' => T_('Samoa'),
          'sm' => T_('San Marino'),
          'st' => T_('Sao Tome and Principe'),
          'sa' => T_('Saudi Arabia'),
          'sn' => T_('Senegal'),
-         //'yu' => T_//('Serbia and Montenegro (Yugoslavia)'),//obsolete
+         //'yu' => T_//('Serbia and Montenegro (Yugoslavia)'), //obsolete: YU -> CS -> RS/ME
          'rs' => T_('Serbia'),
          'sc' => T_('Seychelles'),
          'sl' => T_('Sierra Leone'),
@@ -220,10 +269,12 @@ function getCountryText( $code=null )
          'sb' => T_('Solomon Islands'),
          'so' => T_('Somalia'),
          'za' => T_('South Africa'),
+         //'gs' => T_//('South Georgia and Sandwich Islands'), // [UK] (official?) -> need nicer flag
          'es' => T_('Spain'),
          'lk' => T_('Sri Lanka'),
          'sd' => T_('Sudan'),
          'sr' => T_('Suriname'),
+         //'sj' => T_//('Svalbard and Jan Mayen'), // same as [NO]
          'sz' => T_('Swaziland'),
          'se' => T_('Sweden'),
          'ch' => T_('Switzerland'),
@@ -232,17 +283,21 @@ function getCountryText( $code=null )
          'tj' => T_('Tajikistan'),
          'tz' => T_('Tanzania'),
          'th' => T_('Thailand'),
+         'tl' => T_('Timor Leste'),
          'tg' => T_('Togo'),
+         'tk' => T_('Tokelau'), // [NZ] (official?)
          'to' => T_('Tonga'),
          'tt' => T_('Trinidad and Tobago'),
          'tn' => T_('Tunisia'),
          'tr' => T_('Turkey'),
+         //'tc' => T_//('Turks and Caicos Islands'), // [UK] (official?) -> need nicer flag
          'tm' => T_('Turkmenistan'),
          'tv' => T_('Tuvalu'),
          'ug' => T_('Uganda'),
          'ua' => T_('Ukraine'),
          'ae' => T_('United Arab Emirates'),
          'gb' => T_('United Kingdom'),
+         //'um' => T_//('United States Minor Outlying Islands'), // same as [US]
          'us' => T_('United States'),
          'uy' => T_('Uruguay'),
          'uz' => T_('Uzbekistan'),
@@ -250,10 +305,20 @@ function getCountryText( $code=null )
          'va' => T_('Vatican City State (Holy See)'),
          've' => T_('Venezuela'),
          'vn' => T_('Vietnam'),
+         'vg' => T_('Virgin Islands (British)'), // [UK] (official?)
+         //'vi' => T_//('Virgin Islands (US)'), // [US] (official?) -> need nicer flag
+         //'wf' => T_//('Wallis and Futuna'), // same as [FR]
+         'eh' => T_('Western Sahara'),
          'ye' => T_('Yemen'),
          'zm' => T_('Zambia'),
          'zw' => T_('Zimbabwe'),
-         '__' => T_('Earth'),
+
+         // use user-defined codes in ISO-3166-1 for specials: (qm..qz, xa..xz, zz)
+         'xe' => T_('Earth'), // not a nation
+         'xo' => T_('Esperanto'), // international language
+         'xi' => T_('Interlingua'), // international language
+         'xk' => T_('Klingon Empire'), // not a nation ... but who knows for sure?
+         'xf' => T_('United Federation of Planets'), // not a nation ... yet
       );
       $ARR_GLOBALS_COUNTRIES[$key] = $arr;
    }
@@ -264,14 +329,17 @@ function getCountryText( $code=null )
    return ( isset($ARR_GLOBALS_COUNTRIES[$key][$code]) )
       ? $ARR_GLOBALS_COUNTRIES[$key][$code]
       : '';
-}
+}//getCountryText
 
 /*! \brief Returns image-tag; '' if unknown country-code used. */
 function getCountryFlagImage( $ccode )
 {
    global $base_path;
    $cText = basic_safe( getCountryText($ccode) );
-   return (empty($cText)) ? '' : "<img src=\"{$base_path}images/flags/$ccode.gif\" title=\"$cText\" alt=\"$cText\">";
+   return (empty($cText))
+      ? ''
+      : "<img src=\"{$base_path}images/flags/$ccode.gif\" " .
+        "title=\"$cText\" alt=\"$cText\" width=\"32\" height=\"20\">";
 }
 
 ?>
