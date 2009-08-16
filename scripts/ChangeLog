@@ -24,6 +24,30 @@ ChangeLog
 
 2009-08-16 juga
 
+   * include/std_functions.php (update_count_message_new),
+     include/message_functions.php (change_folders), message.php:
+   - renamed const COUNTMSGNEW_RECALC -> COUNTNEW_RECALC
+
+   * features/lib_votes.php (Feature.can_delete_feature, ~.delete_feature):
+   - minor optimize on allow-check for feature-delete
+   - returns number of affected rows for feature-delete
+
+   * include/std_functions.php (start_page, count_feature_new, update_count_feature_new),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/player_consistency.php,
+     specs/db/dragon-ddl.sql,
+     specs/db/table-Players.txt,,
+     features/edit_feature.php,
+     features/vote_feature.php,
+     NEWS:
+   - show linked count of NEW features in main-menu if there are some
+     update count accordingly when features is added, updated, deleted or voted upon
+-----------
+-- quick-read-count for NEW-features for user
+ALTER TABLE Players
+   ADD CountFeatNew smallint NOT NULL default '-1' AFTER CountMsgNew ;
+-----------
+
    * include/std_functions.php (start_page):
    - main-menu text change: Feature vote -> Features
 
@@ -52,7 +76,7 @@ ChangeLog
 ALTER TABLE ConfigPages
    ADD StatusFlags smallint NOT NULL default '3' AFTER User_ID ;
 
--- quick-read-count for new messages of user
+-- quick-read-count for NEW-messages of user
 ALTER TABLE Players
    ADD CountMsgNew mediumint NOT NULL default '-1' AFTER Notify ;
 -----------

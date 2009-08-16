@@ -160,6 +160,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home features/list_features.php>Voting on features</home> including feature status management
       * <home features/list_votes.php>Show features votes</home>, added as Vote-link in main-menu
+      * Show count of NEW features in main-menu with link to vote upon them if there are some
 
    * Markup tags:
       * &lt;http://url.net |link text> : enhanced link markup with optional text,
