@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
+require_once( 'include/globals.php' );
 require_once( "include/quick_common.php" );
 require_once( 'include/utilities.php' );
 
@@ -271,24 +272,6 @@ define('USERTYPE_TEAM',    0x0008); // unused so far
 define('ARG_USERTYPE_NO_TEXT', 'none');
 
 
-//-----
-// folder for "destroyed" messages (former was: Folder_nr=NULL)
-// '-4'-value in regard to FOLDER_DELETED and to keep < FOLDER_NONE
-define('FOLDER_DESTROYED', -4);
-
-define('FOLDER_NONE', -1); // pseudo-folder used for "selecting no folder"
-define('FOLDER_ALL_RECEIVED', 0); // pseudo-folder-nr to check for valid-folders
-//Valid folders must be > FOLDER_ALL_RECEIVED
-define("FOLDER_MAIN", 1);
-//define("FOLDER_NEW", 2); //moved in quick_common.php
-define("FOLDER_REPLY", 3);
-define("FOLDER_DELETED", 4); // Trashcan-folder
-define("FOLDER_SENT", 5);
-//User folders must be >= USER_FOLDERS
-define("USER_FOLDERS", 6);
-//-----
-
-
 
 
 // param $short: true, false, ARG_USERTYPE_NO_TEXT (no text)
@@ -408,11 +391,12 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    }
 
    if( is_a($ThePage, 'HTMLPage') )
+   {
       $tmp = $ThePage->getCSSclass(); //may be multiple, i.e. 'Games Running'
+      $tmp = ' class='.attb_quote($tmp);
+   }
    else
       $tmp='';
-   if( $tmp )
-      $tmp = ' class='.attb_quote($tmp);
    echo "\n</HEAD>\n<BODY id=\"".FRIENDLY_SHORT_NAME."\"$tmp>\n";
 } //start_html
 
@@ -472,17 +456,26 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    if( !$printable )
    {
+      $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
+
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
-      // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
+      // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
       // NOTE: row-number can be skipped, only for ordering
-      // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..)
+      // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..) or sep-str
       $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
       $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
       if( ALLOW_TOURNAMENTS )
          $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
       $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
-      $menu->add( 2,1, array( T_('Messages'),     'list_messages.php',           array( 'accesskey' => ACCKEY_MENU_MESSAGES )));
+      $arr_msgs = array( array( T_('Messages'), 'list_messages.php', array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
+      if( $cnt_msg_new > 0 )
+      {
+         $cnt_msg_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_msg_new );
+         $arr_msgs[] = '&nbsp;';
+         $arr_msgs[] = array( $cnt_msg_new_str, 'list_messages.php?folder='.FOLDER_NEW, array( 'class' => 'MainMenuCount' ) );
+      }
+      $menu->add( 2,1, $arr_msgs );
       $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
       $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )));
       $menu->add( 2,4, array( T_('New Game'),     'new_game.php',                array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
@@ -497,7 +490,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
       if( ALLOW_FEATURE_VOTE )
-         $menu->add( 5,1, array( T_('Feature vote'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+         $menu->add( 5,1, array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
       if( ALLOW_GOBAN_EDITOR )
          $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
@@ -790,13 +783,17 @@ function make_menu_horizontal($menu)
          {
             if( is_array($menuitem[0]) )
             {
-               // object = arr( arr( itemtext, itemlink, arr( accesskey/class => value )), ...) for multi-items
+               // object = arr( sep-string | arr( itemtext, itemlink [, arr( accesskey/class => value ) ] ), ...) for multi-items
                $content = '';
                foreach( $menuitem as $mitem )
                {
-                  @list( $text, $link, $attbs ) = $mitem;
-                  if( $content != '' ) $content .= MENU_MULTI_SEP;
-                  $content .= anchor( $base_path.$link, $text, '', $attbs);
+                  if( is_array($mitem) )
+                  {//item-arr
+                     @list( $text, $link, $attbs ) = $mitem;
+                     $content .= anchor( $base_path.$link, $text, '', $attbs);
+                  }
+                  else //separator
+                     $content .= $mitem;
                }
             }
             else
@@ -863,14 +860,16 @@ function make_menu_vertical($menu)
       {
          if( is_array($menuitem[0]) )
          {
-            // object = arr( arr( itemtext, itemlink, arr( accesskey/class => value )), ...) for multi-items
-            $is_first = true;
+            // object = arr( sep-string | arr( itemtext, itemlink [, arr( accesskey/class => value ) ] ), ...) for multi-items
             foreach( $menuitem as $mitem )
             {
-               @list( $text, $link, $attbs ) = $mitem;
-               if( !$is_first ) echo MENU_MULTI_SEP;
-               $is_first = false;
-               echo anchor( $base_path.$link, $text, '', $attbs);
+               if( is_array($mitem) )
+               {//item-arr
+                  @list( $text, $link, $attbs ) = $mitem;
+                  echo anchor( $base_path.$link, $text, '', $attbs);
+               }
+               else //separator
+                  echo $mitem;
             }
          }
          else
@@ -1198,10 +1197,14 @@ function send_message( $debugmsg, $text='', $subject=''
    ksort($receivers);
 
    $query= array();
+   $receivers_folder_new = array();
    if( $from_id > 0 ) //exclude system messages (no sender)
    {
       if( $to_myself )
+      {
          $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
+         $receivers_folder_new[] = $from_id;
+      }
       else
          $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
    }
@@ -1220,6 +1223,7 @@ function send_message( $debugmsg, $text='', $subject=''
          $query[]= "$mid,$uid,'N','$need_reply',".FOLDER_NEW;
       else //system messages
          $query[]= "$mid,$uid,'S','N',".FOLDER_NEW;
+      $receivers_folder_new[] = $uid;
    }
 
    $cnt= count($query);
@@ -1232,6 +1236,14 @@ function send_message( $debugmsg, $text='', $subject=''
 
       if( mysql_affected_rows() != $cnt )
          error('mysql_insert_message', "$debugmsg.correspondent");
+   }
+
+   // update receivers new-message counter
+   if( $cnt_fnew = count($receivers_folder_new) )
+   {
+      $ids = implode( ',', $receivers_folder_new );
+      db_query( "$debugmsg.count_msg_new([$ids])",
+         "UPDATE Players SET CountMsgNew=CountMsgNew+1 WHERE ID IN ($ids) LIMIT $cnt_fnew" );
    }
 
    //records the last message of the invitation/dispute sequence
@@ -2391,6 +2403,14 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
          $query.= ",VaultCnt=$vaultcnt"
                  .",VaultTime=FROM_UNIXTIME($vaulttime)";
       }
+   }//fever-fault check
+
+   // check aggregated counts
+   $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
+   if( $count_msg_new >= 0 )
+   {
+      $player_row['CountMsgNew'] = $count_msg_new;
+      $query .= ",CountMsgNew=$count_msg_new";
    }
 
    $query.= " WHERE ID=$uid LIMIT 1";
@@ -2431,6 +2451,56 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    return $uid;
 } //is_logged_in
+
+/*!
+ * \brief Counts new messages for given user-id if current count < 0 (=needs-update).
+ * \param $curr_count force counting if <0 or omitted
+ * \return new new-message count (>=0) for given user-id; or -1 on error
+ */
+function count_messages_new( $uid, $curr_count=-1 )
+{
+   if( $curr_count >= 0 )
+      return $curr_count;
+   if( !is_numeric($uid) || $uid <= 0 )
+      error( 'invalid_args', "count_messages_new.check.uid($uid)" );
+
+   $row = mysql_single_fetch( "count_messages_new($uid)",
+      "SELECT COUNT(*) AS X_Count FROM MessageCorrespondents WHERE uid='$uid' AND Folder_nr=".FOLDER_NEW );
+   return ($row) ? $row['X_Count'] : -1;
+}
+
+/*!
+ * \brief Updates or resets Players.CountMsgNew.
+ * \param $diff null|omit to reset to -1 (=recalc later); COUNTMSGNEW_RECALC to recalc now;
+ *        otherwise increase or decrease counter
+ */
+define('COUNTMSGNEW_RECALC', 'recalc');
+function update_count_message_new( $dbgmsg, $uid, $diff=null )
+{
+   if( !is_numeric($uid) )
+      error( 'invalid_args', $dbgmsg.'.check.uid' );
+
+   if( is_null($diff) )
+   {
+      db_query( "$dbgmsg.reset",
+         "UPDATE Players SET CountMsgNew=-1 WHERE ID='$uid' LIMIT 1" );
+   }
+   elseif( is_numeric($diff) && $diff != 0 )
+   {
+      $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
+      db_query( "$dbgmsg.upd($diff)",
+         "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE ID='$uid' LIMIT 1" );
+   }
+   elseif( (string)$diff == COUNTMSGNEW_RECALC )
+   {
+      global $player_row;
+      $count_new = count_messages_new( $uid );
+      if( @$player_row['ID'] == $uid )
+         $player_row['CountMsgNew'] = $count_new;
+      db_query( "$dbgmsg.recalc",
+         "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
+   }
+}
 
 // Caution: can cause concurrency problems
 if( function_exists('file_put_contents') )
