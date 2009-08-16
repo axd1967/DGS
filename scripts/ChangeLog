@@ -22,6 +22,20 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-08-16 juga
+
+   * scripts/README.developers,
+     include/classlib_profile.php (SearchProfile.handle_action),
+     include/classlib_upload.php (ImageFileUpload.checkFileUploadError, ~.loadImage),
+     include/connect2mysql.php (check_passwd_method),
+     include/error_functions.php (Errors.set_mode),
+     include/faq_functions.php (faq_item_html), include/graph.php (get_image_type),
+     include/std_functions.php (start_html, start_page, send_email,
+       switch_admin_status, is_logged_in),
+     include/time_functions.php (time_remaining),
+     send_message.php, sgf.php, statratingspng.php, scripts/data_export.php:
+   - added typed-cast for switch-statements
+
 2009-08-10 juga
 
    * include/countries.php (getCountryText, getCountryFlagImage),
@@ -294,13 +308,39 @@ ALTER TABLE `Waitingroom`
      for completly hidden thread
    - added LIMITs on db-queries
 
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - deactivated game-notes in table-columns as default to reduce server-load
+     for games-list status-games & my running/finished games
+-----------
+-- deactivate game-notes in table-columns as default (to reduce server-load) for games-list (status, my running/finished games)
+UPDATE ConfigPages
+   SET ColumnsStatusGames=ColumnsStatusGames & ~0x800,
+   ColumnsGamesRunningUser2=ColumnsGamesRunningUser2 & ~0x4,
+   ColumnsGamesFinishedUser2=ColumnsGamesFinishedUser2 & ~0x4 ;
+-----------
+
    * include/message_functions.php ($MSG_TYPES),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
    - fixed table-field-order for ConfigPages.ColumnsFeatureList
    - fix-cleanup of wrong table-values for Messages.Type
    - removed unused Messages.Type enum-values "ACCEPTED, DECLINED, DELETED"
-   - deactivated game-notes in table-columns as default to reduce server-load
-     for games-list status-games & my running/finished games
+-----------
+-- [unused] remove unused enum-values of Messages.Type (ACCEPTED,DECLINED,DELETED), cleanup wrong table-values
+-- check (wrong) empty 'Type'-values (2489 empties)
+SELECT COUNT(*),Type FROM Messages GROUP BY Type ;
+-- check all for normal type (game invitations accepted or declined)
+SELECT COUNT(*) FROM Messages WHERE Type='' AND Subject LIKE 'Game invitation%' ;
+-- check for newer such entries (all should be <2009)
+SELECT MAX(Time) FROM Messages WHERE Type='' ;
+-- fix table data + check empty types again (should be 0)
+UPDATE Messages
+   SET Type='NORMAL' WHERE Type='' AND Subject LIKE 'Game invitation%' LIMIT 2489 ;
+SELECT COUNT(*),Type FROM Messages GROUP BY Type ;
+
+-- cleanup Messages.Type enum (ca. 2min)
+ALTER TABLE Messages
+   CHANGE Type Type enum('NORMAL','INVITATION','DISPUTED','RESULT') NOT NULL default 'NORMAL' ;
+-----------
 
    * daily_cron.php:
    - removed (old) code to delete old invitations (if needed add again later)
