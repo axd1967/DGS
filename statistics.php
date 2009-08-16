@@ -162,9 +162,11 @@ function show_stats_user_countries()
       , sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n", T_('Count'), T_('Flag#country'), T_('Country') );
 
    $arr_countries = getCountryText();
+   $total = 0;
    while( $row = mysql_fetch_array( $result ) )
    {
       $ccode = $row['Country'];
+      $total += $row['X_Count'];
       unset($arr_countries[$ccode]);
 
       $ccimg = getCountryFlagImage($ccode);
@@ -183,6 +185,8 @@ function show_stats_user_countries()
                     $row['X_Count'], $ccimg, $cctxt );
    }
    mysql_free_result($result);
+   echo sprintf( "<tr><td class=\"Number\"><b>%s</b></td><td class=\"Image\">%s</td><td><b>%s</b></td></tr>\n",
+                 $total, '', T_('Total#stats') );
    echo "</table>\n";
 
    echo "<br>\n", T_('Remaining countries'), ":\n<p>\n";
