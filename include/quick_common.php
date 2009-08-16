@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/globals.php' );
 require_once( "include/connect2mysql.php" );
 require_once( "include/error_functions.php" );
 
@@ -100,12 +101,9 @@ define('UHANDLE_NAME', 'user'); //see quick_status.php and get_request_user()
 /*! SQL-clause-part applied for Games.Status to select all running games. */
 define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')");
 
-
-//used in quick_status.php and associated (wap, rss ...)
-define('FOLDER_NEW', 2);
-
 //used in daily_cron.php & others (to "mark" forum oldest unread entry)
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * SECS_PER_DAY); // [secs]
+
 
 
 //FIXME: get_magic_quotes_gpc-func is deprecated and will be removed (soon)
