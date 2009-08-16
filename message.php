@@ -188,7 +188,7 @@ require_once( "include/form_functions.php" );
                error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
 
             update_count_message_new( "message.update_mess_corr.upd_cnt_msg_new($my_id)",
-               $my_id, COUNTMSGNEW_RECALC );
+               $my_id, COUNTNEW_RECALC );
          }
 
          if( $Type == 'INVITATION' )

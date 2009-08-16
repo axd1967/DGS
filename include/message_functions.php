@@ -1145,7 +1145,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    if( $rows_updated > 0 )
    {
       update_count_message_new( "change_folders.update.upd_cnt_msg_new($uid)",
-         $uid, COUNTMSGNEW_RECALC );
+         $uid, COUNTNEW_RECALC );
    }
 
    return $rows_updated;
