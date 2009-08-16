@@ -463,7 +463,7 @@ class SearchProfile
       $prof_action = (int)get_request_arg( $prof_fname, SPROF_LOAD_DEFAULT );
 
       $this->args = NULL;
-      switch( $prof_action )
+      switch( (int)$prof_action )
       {
          case SPROF_CURR_VALUES:    // no-action, take values from _REQUEST
             break;

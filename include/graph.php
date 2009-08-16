@@ -244,7 +244,7 @@ function get_image_type( $filename)
    if( !is_array($type) )
       return false;
    $type=(int)$type[2];
-   switch( $type )
+   switch( (int)$type )
    {
       case IMAGETYPE_GIF:  $mime= 'image/gif'; break;
       case IMAGETYPE_JPEG: $mime= 'image/jpeg'; break;

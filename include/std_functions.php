@@ -380,7 +380,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
 
-   switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+   switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
    {
       case 'status.php':
          // RSS Autodiscovery:
@@ -502,7 +502,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
       $tools_array = array(); //$url => array($img,$alt,$title)
-      switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+      switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'status.php':
             if( ENABLE_DONATIONS )
@@ -1037,7 +1037,7 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
     * http://cr.yp.to/docs/smtplf.html
     * http://www.ietf.org/rfc/rfc0822.txt
     * Any problems may be platform dependent. Maybe:
-    * switch( strtoupper(substr(PHP_OS, 0, 3)) ) {
+    * switch( (string)strtoupper(substr(PHP_OS, 0, 3)) ) {
     *   case 'WIN': $eol= "\r\n"; break;
     *   case 'MAC': $eol= "\r"; break;
     *   default: $eol= "\n"; break;
@@ -1420,7 +1420,7 @@ function switch_admin_status(&$player_row, $mask=0, $cmd='')
 
    $status = $level & (int)@$player_row['admin_status'];
    $old = $status;
-   switch( strtolower($cmd) )
+   switch( (string)strtolower($cmd) )
    {
       case 'y': case '+': $status |= $mask; break; //set
       case 'n': case '-': $status &=~$mask; break; //unset
@@ -2399,7 +2399,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    if( !$vaultcnt ) //vault entered
    {
-      switch( substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+      switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'index.php':
             $text = sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));

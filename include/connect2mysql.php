@@ -275,7 +275,7 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       - SHA1() is 40
       - others?
    */
-   switch( strlen( $passwd_encrypted ) )
+   switch( (int)strlen( $passwd_encrypted ) )
    {
       case 41: $method='PASSWORD'; break;
       case 40: $method='SHA1'; break;

@@ -176,7 +176,7 @@ disable_cache();
 
 
       $double = false;
-      switch( $handitype )
+      switch( (int)$handitype )
       {
          case INVITE_HANDI_CONV:
             if( !$iamrated || !$opprated )

@@ -42,7 +42,7 @@ class Errors
    {
       $p= $this->mode;
       $m= (int)$m;
-      switch( $m )
+      switch( (int)$m )
       {
          case ERROR_MODE_PRINT:
             $this->mode = $m;

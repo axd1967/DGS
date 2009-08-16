@@ -92,7 +92,7 @@ General instructions for developers:
 
    - switch-layout:
 
-         switch( expression )
+         switch( (type)expression )
          {
             case option:
             { // braces optional
@@ -234,7 +234,7 @@ General instructions for developers:
    not initialized yet !! ok with const so far!
 
 
------------------ PHP, URL:
+----------------- PHP, Type-system, Comparisons:
 
    Question:
       Regarding String-comparison the code sometimes fails, if you compare
@@ -287,6 +287,63 @@ General instructions for developers:
       implicitly use it as an integer.
       So a preventive cast each time you use a $_GET is a good thing too.
 
+----------------- PHP, Type-system, switch:
+
+   Always add a type-cast for the expression in a switch-statement like:
+
+      switch( (string)$str )
+
+      switch( (int)$val )
+
+   PHP has no type-safety. This measure is to make it clear, what type of value
+   we are dealing with in the switch-statement and therefore avoid nasty
+   side-effects.
+
+   This behaviour is also outlined in various comments on the PHP-sites:
+      http://de2.php.net/manual/en/control-structures.switch.php#82351
+      http://de2.php.net/manual/en/control-structures.switch.php#76440
+
+   In PHP it's allowed to use string-consts in the "case"-statement.
+   In other programming languages (not PHP), values in the case-statements
+   are to be restricted on scalar-types AND in most (other) languages
+   "string" is no scalar type.
+   Therefore using "scalar" types for a switch-statement is preferred.
+
+   However in PHP, "string" is a simple-type (scalar type), so it is allowed
+   to use it as value in a case-statement. But don't use it. The possible
+   side-effects are too nasty.
+
+   If, a day, $var is numeric and contains 0 (zero), it will match any one
+   of the "case" strings because, during the implicit comparison [let's say,
+
+      if( $var == 'foo' ) ...
+
+   'foo' will (may?) be converted to a numeric value, and thus to zero!
+
+   Especially for the switch-statement, a "loose comparison" is used,
+   which can show strange effects. See:
+      http://de2.php.net/manual/en/types.comparisons.php#types.comparisions-loose
+
+      For example: The comparison:
+
+         ( "PHP" == 0 )
+
+      is TRUE.  Oerks :(
+
+   In which case, "if( $var === 0 )", it will be converted to "0"
+   and may fall into the "default" case.
+
+
+   There's also another version of switch-statements, that goes like:
+
+      switch( true )
+      {
+         case $x === 'a': ...
+      }
+
+   You can write expression in the case-statement (just like you would
+   in if-statements) ;) ... but it's rarely used, better write an if-statement
+   right away.
 
 ----------------- PHP:
 

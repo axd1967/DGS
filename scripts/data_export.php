@@ -386,7 +386,7 @@ $defs_rep['*']['*']
 
 
 //$defs_{move}[{table}][{src}] = {dst};
-switch( FRIENDLY_SHORT_NAME )
+switch( (string)FRIENDLY_SHORT_NAME )
 {
    case 'dDGS':
       //$defs_aft['GoDiagrams']['Date'] = 'SGF';

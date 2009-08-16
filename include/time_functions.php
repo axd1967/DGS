@@ -174,7 +174,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
       $elapsed -= $main;
    $main = 0;
 
-   switch((string)$byotype)
+   switch( (string)$byotype )
    {
       case BYOTYPE_FISCHER:
          $byotime = $byoper = 0;  // time is up

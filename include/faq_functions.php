@@ -28,7 +28,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
    static $prevlevel= 0;
 
    $str = '';
-   switch( $level )
+   switch( (int)$level )
    {
       case -1:
          if( $prevlevel > 1 )

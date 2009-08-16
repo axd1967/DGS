@@ -311,7 +311,7 @@ function sgf_create_territories( $size, &$array,
       for( $y=0; $y<$size; $y++)
       {
          $coord = chr($x + ord('a')) . chr($y + ord('a'));
-         switch( @$array[$x][$y] & ~FLAG_NOCLICK)
+         switch( (int)( @$array[$x][$y] & ~FLAG_NOCLICK) )
          {
             case WHITE_DEAD:
                $black_prisoner[$coord]='AE';
@@ -629,7 +629,7 @@ $array=array();
       extract($row); // fields: ID,gid,MoveNr,Stone,PosX,PosY,Hours
       $coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
 
-      switch( $Stone )
+      switch( (int)$Stone )
       {
          case MARKED_BY_WHITE:
          case MARKED_BY_BLACK:

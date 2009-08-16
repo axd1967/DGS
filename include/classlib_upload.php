@@ -138,7 +138,7 @@ class ImageFileUpload
    function checkFileUploadError( $errorcode )
    {
       $this->is_uploaded = false;
-      switch($errorcode)
+      switch( (int)$errorcode )
       {
          case UPLOAD_ERR_OK:
             if( $this->file_src_clientfile == '' )
@@ -274,7 +274,7 @@ class ImageFileUpload
     */
    function loadImage()
    {
-      switch( $this->image_type )
+      switch( (int)$this->image_type )
       {
          case IMAGETYPE_GIF:
             $this->image = @imagecreatefromgif($this->file_src_tmpfile);
