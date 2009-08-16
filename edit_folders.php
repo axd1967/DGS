@@ -55,16 +55,10 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $form->add_row( $array );
 
-   if( ConfigPages::is_system_status_folder($nr) )
-      $status_switch_text = T_('Hide on status page');
-   elseif( $nr >= USER_FOLDERS )
-      $status_switch_text = T_('Show on status page');
-   else
-      $status_switch_text = '';
-   if( $status_switch_text )
+   if( ConfigPages::is_system_status_folder($nr) || $nr >= USER_FOLDERS )
       $array = array( 'TAB',
                       'CHECKBOX', "onstatuspage$nr", 't',
-                      $status_switch_text, $onstatuspage );
+                      T_('Show on status page'), $onstatuspage );
    else
       $array = array( 'OWNHTML', '<td colspan=2></td>' );
 
@@ -243,7 +237,7 @@ function make_folder_form_row(&$form, $name, $nr,
       list($bgred,$bggreen,$bgblue,$bgalpha)= split_RGBA($bgcolor, 0);
       list($fgred,$fggreen,$fgblue,$dummy)= split_RGBA($fgcolor);
 
-      $show_checkbox = $cfg_pages->get_status_folder_hiddenstate($nr);
+      $show_checkbox = $cfg_pages->get_status_folder_visibility($nr);
       if( $show_checkbox < 0 )
          $show_checkbox = in_array($nr, $statusfolders);
 

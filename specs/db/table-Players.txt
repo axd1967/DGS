@@ -108,7 +108,7 @@ Z     UserPicture          | varchar(48)                                 | NO   
 
 # Fields for pages-related GUI-config in ConfigPages-table:
 
- 1    StatusFlags               | smallint(6)         | NO   | 0
+ 1    StatusFlags               | smallint(6)         | NO   | 3
  1    StatusFolders             | varchar(40)         | NO   |
  1    ForumFlags                | tinyint(3) unsigned | NO   | 8
  1    ColumnsStatusGames        | int(11)             | NO   | -1

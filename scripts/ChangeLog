@@ -32,7 +32,7 @@ ChangeLog
    - moved folder-consts from std_functions and quick_common to globals include-file
 
    * include/classlib_userconfig.php (ConfigPages, ~.get_status_flags,
-       ~.get_status_folder_hiddenstate, ~.set_status_flags_folderbit, ~.set_status_flags,
+       ~.get_status_folder_visibility, ~.set_status_flags_folderbit, ~.set_status_flags,
        ~.get_status_folders_querypart, ~.update_status_folders, ~.is_system_status_folder,
        ~.load_config_pages),
      include/std_functions.php (start_page, make_menu_horizontal, make_menu_vertical,
@@ -50,7 +50,7 @@ ChangeLog
 -----------
 -- GUI-flags for status page
 ALTER TABLE ConfigPages
-   ADD StatusFlags smallint NOT NULL default '0' AFTER User_ID ;
+   ADD StatusFlags smallint NOT NULL default '3' AFTER User_ID ;
 
 -- quick-read-count for new messages of user
 ALTER TABLE Players
@@ -78,7 +78,7 @@ ALTER TABLE Players
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
      NEWS:
-   - adjusted flags for country-codes:
+   - adjusted flags for country-codes (ISO-3166-1):
      - added flags for AX (Aaland Islands), AS (American Samoa), AW (Aruba),
        EU (Europe), FO (Faroe Islands), PF (French Polynesia), GI (Gibraltar),
        GL (Greenland), GU (Guam), GG (Guernsey), JE (Jersey), AN (Netherlands Antilles),

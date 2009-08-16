@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `ConfigBoard` (
 
 CREATE TABLE IF NOT EXISTS `ConfigPages` (
   `User_ID` int(11) NOT NULL,
-  `StatusFlags` smallint(6) NOT NULL default '0',
+  `StatusFlags` smallint(6) NOT NULL default '3',
   `StatusFolders` varchar(40) NOT NULL default '',
   `ForumFlags` tinyint(3) unsigned NOT NULL default '8',
   `ColumnsStatusGames` int(11) NOT NULL default '-1',

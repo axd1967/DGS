@@ -307,8 +307,9 @@ class ConfigBoard
   */
 
 // behavior-flags for status-page
-define('STATUSFLAG_HIDE_FOLDER_NEW',   0x01);
-define('STATUSFLAG_HIDE_FOLDER_REPLY', 0x02);
+define('STATUSFLAG_SHOW_FOLDER_NEW',   0x01);
+define('STATUSFLAG_SHOW_FOLDER_REPLY', 0x02);
+define('DEFAULT_STATUSFLAG', (STATUSFLAG_SHOW_FOLDER_NEW|STATUSFLAG_SHOW_FOLDER_REPLY)); // also in table ConfigPages
 
 // sync with legal-check in toggle_forum_flags-func
 define('FORUMFLAG_FORUM_SHOWAUTHOR',  0x01); // last-post author
@@ -362,7 +363,8 @@ class ConfigPages
    var $table_columns;
 
    /*! \brief Constructs ConfigPages-object with specified arguments. */
-   function ConfigPages( $user_id, $status_flags=0, $status_folders='', $forum_flags=8 )
+   function ConfigPages( $user_id, $status_flags=DEFAULT_STATUSFLAG, $status_folders='',
+                         $forum_flags=FORUMFLAG_POSTVIEW_OVERVIEW )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigPages');
 
@@ -384,16 +386,16 @@ class ConfigPages
    }
 
    /*!
-    * \brief Returns hidden state for new- and reply-folder.
+    * \brief Returns visibility-state for new- and reply-folder.
     * \param $folder_nr FOLDER_NEW or FOLDER_REPLY
-    * \return 1 if given folder should be hidden or 0 if to show; -1 if folder != FOLDER_NEW|REPLY
+    * \return 1 if given folder should be shown or 0 if to hide; -1 if folder != FOLDER_NEW|REPLY
     */
-   function get_status_folder_hiddenstate( $folder_nr )
+   function get_status_folder_visibility( $folder_nr )
    {
       if( $folder_nr == FOLDER_NEW )
-         return ( $this->status_flags & STATUSFLAG_HIDE_FOLDER_NEW ) ? 1 : 0;
+         return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW ) ? 1 : 0;
       elseif( $folder_nr == FOLDER_REPLY )
-         return ( $this->status_flags & STATUSFLAG_HIDE_FOLDER_REPLY ) ? 1 : 0;
+         return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_REPLY ) ? 1 : 0;
       else
          return -1;
    }
@@ -406,9 +408,9 @@ class ConfigPages
    function set_status_flags_folderbit( $folder_nr, $value )
    {
       if( $folder_nr == FOLDER_NEW )
-         $bitmask = STATUSFLAG_HIDE_FOLDER_NEW;
+         $bitmask = STATUSFLAG_SHOW_FOLDER_NEW;
       elseif( $folder_nr == FOLDER_REPLY )
-         $bitmask = STATUSFLAG_HIDE_FOLDER_REPLY;
+         $bitmask = STATUSFLAG_SHOW_FOLDER_REPLY;
       else
          return;
 
@@ -437,9 +439,9 @@ class ConfigPages
    function get_status_folders_querypart()
    {
       $folders = array();
-      if( !($this->status_flags & STATUSFLAG_HIDE_FOLDER_NEW) )
+      if( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW )
          $folders[] = FOLDER_NEW;
-      if( !($this->status_flags & STATUSFLAG_HIDE_FOLDER_REPLY) )
+      if( $this->status_flags & STATUSFLAG_SHOW_FOLDER_REPLY )
          $folders[] = FOLDER_REPLY;
 
       if( (string)$this->status_folders != '' )
