@@ -172,15 +172,22 @@ class Feature
    function can_delete_feature()
    {
       // check if there are votes for this feature to delete
-      $result = db_query( "feature.check_delete_feature({$this->id})",
-         "SELECT fid FROM FeatureVote WHERE fid={$this->id} LIMIT 1" );
-      $cnt_votes = ( $result ) ? mysql_num_rows($result) : 0;
-      mysql_free_result($result);
+      if( $this->id )
+      {
+         $row = mysql_single_fetch( "feature.check_delete_feature({$this->id})",
+            "SELECT fid FROM FeatureVote WHERE fid={$this->id} LIMIT 1" );
+         $has_votes = (bool)$row;
+      }
+      else
+         $has_votes = false;
 
-      return ( $cnt_votes <= 0 );
+      return !$has_votes;
    }
 
-   /*! \brief Deletes current Feature from database if no votes found (only as admin). */
+   /*!
+    * \brief Deletes current Feature from database if no votes found (only as admin).
+    * \return number of deleted rows
+    */
    function delete_feature()
    {
       if( !Feature::is_admin() )
@@ -190,7 +197,8 @@ class Feature
          error('constraint_votes_delete_feature', "feature.delete_feature({$this->id})");
 
       $delete_query = "DELETE FROM FeatureList WHERE ID='{$this->id}' LIMIT 1";
-      $result = db_query( "feature.delete_feature({$this->id})", $delete_query );
+      db_query( "feature.delete_feature({$this->id})", $delete_query );
+      return mysql_affected_rows();
    }
 
 
