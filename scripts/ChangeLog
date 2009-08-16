@@ -24,6 +24,42 @@ ChangeLog
 
 2009-08-16 juga
 
+   * include/std_functions.php (start_page):
+   - main-menu text change: Feature vote -> Features
+
+   * include/globals.php, include/quick_common.php include/std_functions.php:
+   - added include-file for globally used vars and constants without dependencies
+   - moved folder-consts from std_functions and quick_common to globals include-file
+
+   * include/classlib_userconfig.php (ConfigPages, ~.get_status_flags,
+       ~.get_status_folder_hiddenstate, ~.set_status_flags_folderbit, ~.set_status_flags,
+       ~.get_status_folders_querypart, ~.update_status_folders, ~.is_system_status_folder,
+       ~.load_config_pages),
+     include/std_functions.php (start_page, make_menu_horizontal, make_menu_vertical,
+       send_message, is_logged_in, count_messages_new, update_count_message_new),
+     include/message_functions.php (change_folders),
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/player_consistency.php, skins/dragon/screen.css,
+     edit_folders.php, message.php, status.php, NEWS:
+   - show linked count of NEW messages in main-menu if there are some,
+     update count accordingly when sending messages and changing folders
+   - NEW and REPLY message folders on status page can be hidden,
+     load messages on status page only if some folders should be shown,
+     can be changed on edit-folders-page
+-----------
+-- GUI-flags for status page
+ALTER TABLE ConfigPages
+   ADD StatusFlags smallint NOT NULL default '0' AFTER User_ID ;
+
+-- quick-read-count for new messages of user
+ALTER TABLE Players
+   ADD CountMsgNew mediumint NOT NULL default '-1' AFTER Notify ;
+-----------
+
+   * statistics.php:
+   - added total count for user-country statistics
+
    * scripts/README.developers,
      include/classlib_profile.php (SearchProfile.handle_action),
      include/classlib_upload.php (ImageFileUpload.checkFileUploadError, ~.loadImage),
