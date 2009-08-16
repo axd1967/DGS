@@ -1102,7 +1102,6 @@ function change_folders_for_marked_messages($uid, $folders)
 
 function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false)
 {
-
    if( count($message_ids) <= 0 )
       return 0;
 
@@ -1115,7 +1114,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    {
       if( !isset($new_folder) || !isset($folders[$new_folder])
             || $new_folder == FOLDER_NEW || $new_folder == FOLDER_ALL_RECEIVED )
-         error('folder_not_found');
+         error('folder_not_found', "change_folders.check.new_folder($uid,$new_folder)");
 
       if( $new_folder == FOLDER_SENT )
          $where_clause = "AND Sender IN('Y','M') ";
@@ -1134,15 +1133,23 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    else
       $where_clause.= "AND Replied!='M' ";
 
-   db_query( 'change_folders',
+   $msg_id_str = implode(',', $message_ids);
+   db_query( "change_folders.update($uid,$new_folder,[$msg_id_str])",
       "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
                "WHERE uid='$uid' $where_clause" .
                'AND Folder_nr > '.FOLDER_ALL_RECEIVED.' ' .
-               "AND mid IN (" . implode(',', $message_ids) . ") " .
+               "AND mid IN ($msg_id_str) " .
                "LIMIT " . count($message_ids) );
+   $rows_updated = mysql_affected_rows() ;
 
-   return mysql_affected_rows() ;
-}
+   if( $rows_updated > 0 )
+   {
+      update_count_message_new( "change_folders.update.upd_cnt_msg_new($uid)",
+         $uid, COUNTMSGNEW_RECALC );
+   }
+
+   return $rows_updated;
+}//change_folders
 
 function echo_folders($folders, $current_folder)
 {

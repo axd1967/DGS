@@ -614,6 +614,17 @@ table.MenuVertical dt {
 */
 }
 
+span.MainMenuCount {
+   color: red;
+   text-decoration: none;
+}
+a.MainMenuCount {
+   text-decoration: none;
+}
+a:hover.MainMenuCount {
+   text-decoration: underline;
+}
+
 table#pageMenu a {
    color: black;
 }

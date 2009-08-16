@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/globals.php' );
 require_once( 'include/classlib_bitset.php' );
 
  /* Author: Jens-Uwe Gaspar */
@@ -305,6 +306,10 @@ class ConfigBoard
   *    $cfg->update_config();
   */
 
+// behavior-flags for status-page
+define('STATUSFLAG_HIDE_FOLDER_NEW',   0x01);
+define('STATUSFLAG_HIDE_FOLDER_REPLY', 0x02);
+
 // sync with legal-check in toggle_forum_flags-func
 define('FORUMFLAG_FORUM_SHOWAUTHOR',  0x01); // last-post author
 define('FORUMFLAG_THREAD_SHOWAUTHOR', 0x02);
@@ -351,16 +356,18 @@ $SIZECONFIG_CFGCOLS = array(
 class ConfigPages
 {
    var $user_id;
+   var $status_flags;
    var $status_folders;
    var $forum_flags;
    var $table_columns;
 
    /*! \brief Constructs ConfigPages-object with specified arguments. */
-   function ConfigPages( $user_id, $status_folders='', $forum_flags=8 )
+   function ConfigPages( $user_id, $status_flags=0, $status_folders='', $forum_flags=8 )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigPages');
 
       $this->user_id = (int)$user_id;
+      $this->status_flags = $status_flags;
       $this->status_folders = $status_folders;
       $this->forum_flags = $forum_flags;
       $this->table_columns = null;
@@ -371,6 +378,51 @@ class ConfigPages
       return $this->user_id;
    }
 
+   function get_status_flags()
+   {
+      return $this->status_flags;
+   }
+
+   /*!
+    * \brief Returns hidden state for new- and reply-folder.
+    * \param $folder_nr FOLDER_NEW or FOLDER_REPLY
+    * \return 1 if given folder should be hidden or 0 if to show; -1 if folder != FOLDER_NEW|REPLY
+    */
+   function get_status_folder_hiddenstate( $folder_nr )
+   {
+      if( $folder_nr == FOLDER_NEW )
+         return ( $this->status_flags & STATUSFLAG_HIDE_FOLDER_NEW ) ? 1 : 0;
+      elseif( $folder_nr == FOLDER_REPLY )
+         return ( $this->status_flags & STATUSFLAG_HIDE_FOLDER_REPLY ) ? 1 : 0;
+      else
+         return -1;
+   }
+
+   /*!
+    * \brief Sets bit of StatusFlags for given folder.
+    * \param $folder_nr FOLDER_NEW|REPLY
+    * \param $value [bool]
+    */
+   function set_status_flags_folderbit( $folder_nr, $value )
+   {
+      if( $folder_nr == FOLDER_NEW )
+         $bitmask = STATUSFLAG_HIDE_FOLDER_NEW;
+      elseif( $folder_nr == FOLDER_REPLY )
+         $bitmask = STATUSFLAG_HIDE_FOLDER_REPLY;
+      else
+         return;
+
+      if( $value )
+         $this->status_flags |= $bitmask;
+      else
+         $this->status_flags &= ~$bitmask;
+   }
+
+   function set_status_flags( $status_flags )
+   {
+      $this->status_flags = $status_flags;
+   }
+
    function get_status_folders()
    {
       return $this->status_folders;
@@ -379,6 +431,21 @@ class ConfigPages
    function set_status_folders( $status_folders )
    {
       $this->status_folders = $status_folders;
+   }
+
+   /*! \brief Returns query-restriction on Folder_nr for user. */
+   function get_status_folders_querypart()
+   {
+      $folders = array();
+      if( !($this->status_flags & STATUSFLAG_HIDE_FOLDER_NEW) )
+         $folders[] = FOLDER_NEW;
+      if( !($this->status_flags & STATUSFLAG_HIDE_FOLDER_REPLY) )
+         $folders[] = FOLDER_REPLY;
+
+      if( (string)$this->status_folders != '' )
+         $folders[] = $this->status_folders; // ','-separated folder-list
+
+      return implode(',', $folders);
    }
 
    function get_forum_flags()
@@ -398,11 +465,12 @@ class ConfigPages
    }
 
 
-   /*! \brief Updates ConfigPages-data into database for field StatusFolders only. */
+   /*! \brief Updates ConfigPages-data into database for field StatusFlags and StatusFolders only. */
    function update_status_folders()
    {
       ConfigPages::_check_user_id( $this->user_id, 'ConfigPages::update_status_folders');
       $arr_write = array(
+            'StatusFlags'   => $this->status_flags,
             'StatusFolders' => $this->status_folders,
          );
       ConfigPages::_update_query(
@@ -419,6 +487,15 @@ class ConfigPages
          error('invalid_user', "$loc.check.user_id($user_id)");
    }
 
+   /*!
+    * \brief Returns true if given folder-nr is system-folder FOLDER_NEW|REPLY
+    *        for which hidden-state is managed in StatusFlags-field.
+    */
+   function is_system_status_folder( $folder_nr )
+   {
+      return ( $folder_nr == FOLDER_NEW || $folder_nr == FOLDER_REPLY );
+   }
+
    /*! \brief (static) Loads ConfigPages-data for given user (without column-sets). */
    function load_config_pages( $uid, $col_name='' )
    {
@@ -428,7 +505,7 @@ class ConfigPages
       if( $col_name && !isset($SIZECONFIG_CFGCOLS[$col_name]) )
          error('invalid_args', "ConfigPages::load_config_pages.check.col_name($col_name)");
 
-      $fieldset = 'User_ID,StatusFolders,ForumFlags';
+      $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
       if( $col_name )
          $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
       $row = mysql_single_fetch("ContactPages::load_config_pages.find($uid,$col_name)",
@@ -438,6 +515,7 @@ class ConfigPages
 
       $config = new ConfigPages(
             $row['User_ID'],
+            $row['StatusFlags'],
             $row['StatusFolders'],
             $row['ForumFlags']
             );

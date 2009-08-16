@@ -86,6 +86,8 @@ $ThePage = new Page('Status');
 } // show user infos
 
 
+$folder_nr_querystr = $cfg_pages->get_status_folders_querypart();
+if( (string)$folder_nr_querystr != '' )
 { // show messages
 
    // NOTE: msg-list can't allow TABLE-SORT, because of the fixed LIMIT and no prev/next feature
@@ -101,11 +103,7 @@ $ThePage = new Page('Status');
    $order = $mtable->current_order_string(/*'date+'*/);
    $limit = ' LIMIT 20'; //$mtable->current_limit_string();
 
-   $status_folders = $cfg_pages->get_status_folders();
-   $folderstring = $status_folders . (empty($status_folders) ? '' : ',')
-      . FOLDER_NEW . ',' . FOLDER_REPLY;
-
-   list( $result ) = message_list_query($my_id, $folderstring, $order, $limit);
+   list( $result ) = message_list_query($my_id, $folder_nr_querystr, $order, $limit);
    if( @mysql_num_rows($result) > 0 )
    {
       init_standard_folders();

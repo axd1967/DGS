@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
+require_once( 'include/globals.php' );
 require_once( "include/std_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/form_functions.php" );
@@ -54,12 +55,18 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $form->add_row( $array );
 
-   if( $nr < USER_FOLDERS )
-      $array = array( 'OWNHTML', '<td colspan=2></td>' );
+   if( ConfigPages::is_system_status_folder($nr) )
+      $status_switch_text = T_('Hide on status page');
+   elseif( $nr >= USER_FOLDERS )
+      $status_switch_text = T_('Show on status page');
    else
+      $status_switch_text = '';
+   if( $status_switch_text )
       $array = array( 'TAB',
                       'CHECKBOX', "onstatuspage$nr", 't',
-                      T_('Show on status page'), $onstatuspage );
+                      $status_switch_text, $onstatuspage );
+   else
+      $array = array( 'OWNHTML', '<td colspan=2></td>' );
 
    array_push( $array, 'DESCRIPTION', T_('Foreground'),
                'DESCRIPTION', T_('Red'),
@@ -95,6 +102,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    // Update folders
 
+   $old_status_flags = $cfg_pages->get_status_flags();
    foreach( $_POST as $key => $val )
    {
       if( !preg_match("/^folder(\d+)$/", $key, $matches) ) // filters out negative (special) folders too
@@ -126,6 +134,10 @@ function make_folder_form_row(&$form, $name, $nr,
             if($i !== false)
                unset($statusfolders[$i]);
          }
+      }
+      elseif( ConfigPages::is_system_status_folder($nr) )
+      {
+         $cfg_pages->set_status_flags_folderbit( $nr, $onstatuspage );
       }
 
       if( empty($name) && $nr > $max_folder )
@@ -201,7 +213,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
 
    asort($statusfolders);
-   if( $statusfolders != $old_statusfolders )
+   if( $statusfolders != $old_statusfolders || $cfg_pages->get_status_flags() != $old_status_flags )
    {
       $cfg_pages->set_status_folders( implode(',', $statusfolders) );
       $cfg_pages->update_status_folders();
@@ -231,16 +243,20 @@ function make_folder_form_row(&$form, $name, $nr,
       list($bgred,$bggreen,$bgblue,$bgalpha)= split_RGBA($bgcolor, 0);
       list($fgred,$fggreen,$fgblue,$dummy)= split_RGBA($fgcolor);
 
+      $show_checkbox = $cfg_pages->get_status_folder_hiddenstate($nr);
+      if( $show_checkbox < 0 )
+         $show_checkbox = in_array($nr, $statusfolders);
+
       make_folder_form_row($form, $name, $nr,
                            $bgred, $bggreen, $bgblue, $bgalpha, $fgred, $fggreen, $fgblue,
-                           in_array($nr, $statusfolders));
+                           $show_checkbox );
    }
 
 
 
-// And now three empty ones:
+// And now two empty ones:
 
-   for($i=$max_folder+1; $i<=$max_folder+3; $i++)
+   for($i=$max_folder+1; $i<=$max_folder+2; $i++)
    {
       make_folder_form_row($form, '', $i, 247, 245, 227, 255, 0, 0, 0, false);
    }

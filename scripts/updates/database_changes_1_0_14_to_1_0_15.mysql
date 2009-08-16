@@ -1317,3 +1317,12 @@ UPDATE Players SET Country='RS' WHERE Country='yu' ;
 statistics.php?stats=1
 
 
+-- GUI-flags for status page
+ALTER TABLE ConfigPages
+   ADD StatusFlags smallint NOT NULL default '0' AFTER User_ID ;
+
+-- quick-read-count for new messages of user
+ALTER TABLE Players
+   ADD CountMsgNew mediumint NOT NULL default '-1' AFTER Notify ;
+
+

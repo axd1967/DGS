@@ -186,6 +186,9 @@ require_once( "include/form_functions.php" );
                "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" );
             if( mysql_affected_rows() != 1)
                error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
+
+            update_count_message_new( "message.update_mess_corr.upd_cnt_msg_new($my_id)",
+               $my_id, COUNTMSGNEW_RECALC );
          }
 
          if( $Type == 'INVITATION' )

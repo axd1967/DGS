@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS `ConfigBoard` (
 
 CREATE TABLE IF NOT EXISTS `ConfigPages` (
   `User_ID` int(11) NOT NULL,
+  `StatusFlags` smallint(6) NOT NULL default '0',
   `StatusFolders` varchar(40) NOT NULL default '',
   `ForumFlags` tinyint(3) unsigned NOT NULL default '8',
   `ColumnsStatusGames` int(11) NOT NULL default '-1',
@@ -506,6 +507,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Rank` varchar(40) NOT NULL default '',
   `SendEmail` set('ON','MOVE','BOARD','MESSAGE') NOT NULL default '',
   `Notify` enum('NONE','NEXT','NOW','DONE') NOT NULL default 'NONE',
+  `CountMsgNew` mediumint(9) NOT NULL default '-1',
   `Adminlevel` smallint(5) unsigned NOT NULL default '0',
   `AdminOptions` smallint(5) unsigned NOT NULL default '0',
   `AdminNote` varchar(100) NOT NULL default '',

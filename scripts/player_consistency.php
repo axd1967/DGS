@@ -438,6 +438,41 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Misc Done.";
 
 
+//----------------- main-menu counters
+
+   $begin = getmicrotime();
+   echo "\n<br>";
+
+   // fix Players.CountMsgNew
+   $query = "SELECT ID, CountMsgNew FROM Players WHERE CountMsgNew>=0 " .
+            uid_clause( 'ID', 'AND' ) .
+            "ORDER BY ID $limit";
+   $result = explain_query($query)
+      or die("CountMsgNew.A: " . mysql_error());
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      $uid = $row['ID'];
+      $CountMsgNew = $row['CountMsgNew'];
+
+      $count_msg_new = count_messages_new( $uid ); // force-recalc
+      if( $count_msg_new >= 0 && $count_msg_new != $CountMsgNew )
+      {
+         echo "\n<br>ID: $uid fix CountMsgNew [$CountMsgNew] -> [$count_msg_new].";
+         dbg_query("UPDATE Players SET CountMsgNew=$count_msg_new WHERE ID=$uid LIMIT 1");
+         $err++;
+      }
+   }
+   mysql_free_result($result);
+   if( $err )
+      echo "\n<br>--- $err error(s) found and fixed.";
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
+   echo "\n<br>MessageNew count Done.";
+
+
+//-----------------
+
    echo "\n<br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall));
    echo "<hr>Done!!!\n";
    end_html();

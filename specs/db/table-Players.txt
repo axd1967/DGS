@@ -51,6 +51,7 @@ OuA   Name                 | varchar(40)                                 | NO   
 Ou    Rank                 | varchar(40)                                 | YES  | NULL
  u    SendEmail            | set('ON','MOVE','BOARD','MESSAGE')          | NO   |
  u    Notify               | enum('NONE','NEXT','NOW','DONE')            | NO   | NONE
+ SZ   CountMsgNew          | mediumint(9)                                | NO   | -1
   A   Adminlevel           | int(11)                                     | NO   | 0
   A   AdminOptions         | int(11) unsigned                            | NO   | 0
   A   AdminNote            | varchar(100)                                | NO   |
@@ -107,6 +108,7 @@ Z     UserPicture          | varchar(48)                                 | NO   
 
 # Fields for pages-related GUI-config in ConfigPages-table:
 
+ 1    StatusFlags               | smallint(6)         | NO   | 0
  1    StatusFolders             | varchar(40)         | NO   |
  1    ForumFlags                | tinyint(3) unsigned | NO   | 8
  1    ColumnsStatusGames        | int(11)             | NO   | -1
