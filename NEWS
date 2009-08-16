@@ -89,6 +89,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * <home list_messages.php>Messages</home>:
+      * Show count of NEW messages in main-menu with link to show them if there are some
       * Added new page with message-thread for a message,
         Show or hide all message-texts within message-thread,
         Destroyed messages are shown too (with folder '---')
@@ -110,6 +111,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show vacation if on vacation
+      * NEW and REPLY message folders can be hidden -> change on <home edit_folders.php>edit folders page</home>
       * Added column on status games with icon for users being "online",
         i.e. last access time within 10 mins ago
       * Show open tournament applications of user
