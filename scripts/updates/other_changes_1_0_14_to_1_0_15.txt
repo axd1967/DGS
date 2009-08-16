@@ -1,4 +1,5 @@
-# copy/merge include/config.php to include/config-local.php and adjust to server-needs
+# copy/merge include/config.php to include/config-local.php before CVS-update
+# and adjust to server-needs
 
 -----------
 # see also CACHE_FOLDER in config.php
