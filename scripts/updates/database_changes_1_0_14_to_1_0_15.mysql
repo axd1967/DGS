@@ -1265,7 +1265,7 @@ ALTER TABLE Ratinglog
    CHANGE RatingDiff RatingDiff float NOT NULL ;
 
 
--- [unused] remove unused enum-values of Messages.Type, cleanup wrong table-values
+-- [unused] remove unused enum-values of Messages.Type (ACCEPTED,DECLINED,DELETED), cleanup wrong table-values
 -- check (wrong) empty 'Type'-values (2489 empties)
 SELECT COUNT(*),Type FROM Messages GROUP BY Type ;
 -- check all for normal type (game invitations accepted or declined)
