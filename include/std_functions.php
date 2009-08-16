@@ -457,6 +457,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( !$printable )
    {
       $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
+      $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
 
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
@@ -490,7 +491,16 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
       if( ALLOW_FEATURE_VOTE )
-         $menu->add( 5,1, array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )));
+      {
+         $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
+         if( $cnt_feat_new > 0 )
+         {
+            $cnt_feat_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_feat_new );
+            $arr_feats[] = '&nbsp;';
+            $arr_feats[] = array( $cnt_feat_new_str, 'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
+         }
+         $menu->add( 5,1, $arr_feats );
+      }
       if( ALLOW_GOBAN_EDITOR )
          $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
@@ -2413,6 +2423,17 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
       $query .= ",CountMsgNew=$count_msg_new";
    }
 
+   if( ALLOW_FEATURE_VOTE )
+   {
+      $count_feat_new = count_feature_new( $uid, $player_row['CountFeatNew'] );
+      if( $count_msg_new >= 0 )
+      {
+         $player_row['CountFeatNew'] = $count_feat_new;
+         $query .= ",CountFeatNew=$count_feat_new";
+      }
+   }
+
+
    $query.= " WHERE ID=$uid LIMIT 1";
    //$updok will be false if an error occurs and error() is set to 'no exit'
    $updok = db_query( 'is_logged_in.update_player', $query );
@@ -2471,10 +2492,10 @@ function count_messages_new( $uid, $curr_count=-1 )
 
 /*!
  * \brief Updates or resets Players.CountMsgNew.
- * \param $diff null|omit to reset to -1 (=recalc later); COUNTMSGNEW_RECALC to recalc now;
+ * \param $diff null|omit to reset to -1 (=recalc later); COUNTNEW_RECALC to recalc now;
  *        otherwise increase or decrease counter
  */
-define('COUNTMSGNEW_RECALC', 'recalc');
+define('COUNTNEW_RECALC', 'recalc');
 function update_count_message_new( $dbgmsg, $uid, $diff=null )
 {
    if( !is_numeric($uid) )
@@ -2491,7 +2512,7 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
       db_query( "$dbgmsg.upd($diff)",
          "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE ID='$uid' LIMIT 1" );
    }
-   elseif( (string)$diff == COUNTMSGNEW_RECALC )
+   elseif( (string)$diff == COUNTNEW_RECALC )
    {
       global $player_row;
       $count_new = count_messages_new( $uid );
@@ -2499,6 +2520,68 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
          $player_row['CountMsgNew'] = $count_new;
       db_query( "$dbgmsg.recalc",
          "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
+   }
+}
+
+/*!
+ * \brief Counts new features for given user-id if current count < 0 (=needs-update).
+ * \param $curr_count force counting if <0 or omitted
+ * \return new features count (>=0) for given user-id; or -1 on error
+ */
+function count_feature_new( $uid, $curr_count=-1 )
+{
+   if( !ALLOW_FEATURE_VOTE )
+      return -1;
+   if( $curr_count >= 0 )
+      return $curr_count;
+   if( !is_numeric($uid) || $uid <= 0 )
+      error( 'invalid_args', "count_features_new.check.uid($uid)" );
+
+   $row = mysql_single_fetch( "count_features_new($uid)",
+      "SELECT COUNT(*) AS X_Count " .
+      "FROM FeatureList AS FL " .
+         "LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid AND FV.Voter_ID='$uid' " .
+      "WHERE FL.Status='NEW' AND ISNULL(FV.fid)" );
+   return ($row) ? $row['X_Count'] : -1;
+}
+
+/*!
+ * \brief Updates or resets Players.CountFeatNew.
+ * \param $uid 0 update all users
+ * \param $diff null|omit to reset to -1 (=recalc later);
+ *        COUNTNEW_RECALC to recalc now (for specific user-id only);
+ *        otherwise increase or decrease counter
+ */
+function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
+{
+   if( !ALLOW_FEATURE_VOTE )
+      return;
+   if( !is_numeric($uid) )
+      error( 'invalid_args', $dbgmsg.'.check.uid' );
+
+   if( is_null($diff) )
+   {
+      $query = "UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0";
+      if( $uid > 0 )
+         $query .= " AND ID='$uid' LIMIT 1";
+      db_query( "$dbgmsg.reset", $query );
+   }
+   elseif( is_numeric($diff) && $diff != 0 )
+   {
+      $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
+      $query = "UPDATE Players SET CountFeatNew=CountFeatNew$diffstr WHERE CountFeatNew>=0";
+      if( $uid > 0 )
+         $query .= " AND ID='$uid' LIMIT 1";
+      db_query( "$dbgmsg.upd($diff)", $query );
+   }
+   elseif( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
+   {
+      global $player_row;
+      $count_new = count_features_new( $uid );
+      if( @$player_row['ID'] == $uid )
+         $player_row['CountFeatNew'] = $count_new;
+      db_query( "$dbgmsg.recalc",
+         "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
    }
 }
 
