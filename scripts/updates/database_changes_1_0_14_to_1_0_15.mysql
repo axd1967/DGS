@@ -1321,8 +1321,13 @@ statistics.php?stats=1
 ALTER TABLE ConfigPages
    ADD StatusFlags smallint NOT NULL default '3' AFTER User_ID ;
 
--- quick-read-count for new messages of user
+-- quick-read-count for NEW-messages of user
 ALTER TABLE Players
    ADD CountMsgNew mediumint NOT NULL default '-1' AFTER Notify ;
+
+
+-- quick-read-count for NEW-features for user
+ALTER TABLE Players
+   ADD CountFeatNew smallint NOT NULL default '-1' AFTER CountMsgNew ;
 
 

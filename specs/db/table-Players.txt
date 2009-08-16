@@ -52,6 +52,7 @@ Ou    Rank                 | varchar(40)                                 | YES  
  u    SendEmail            | set('ON','MOVE','BOARD','MESSAGE')          | NO   |
  u    Notify               | enum('NONE','NEXT','NOW','DONE')            | NO   | NONE
  SZ   CountMsgNew          | mediumint(9)                                | NO   | -1
+ SZ   CountFeatNew         | smallint(6)                                 | NO   | -1
   A   Adminlevel           | int(11)                                     | NO   | 0
   A   AdminOptions         | int(11) unsigned                            | NO   | 0
   A   AdminNote            | varchar(100)                                | NO   |

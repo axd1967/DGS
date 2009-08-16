@@ -87,6 +87,10 @@ require_once( "features/lib_votes.php" );
       $add_fpoints = $feature->update_vote( $my_id, $points );
       $user_quota->modify_feature_points( $add_fpoints );
       $user_quota->update_feature_points();
+
+      if( is_null($fvote) ) // is new vote by user
+         update_count_feature_new( "vote_feature.save_vote($fid,$my_id)", $my_id, -1 ); // one NEW less
+
       jump_to("features/vote_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode(T_('Feature vote saved!')) );
    }
 

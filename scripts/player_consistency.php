@@ -465,11 +465,44 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    }
    mysql_free_result($result);
    if( $err )
-      echo "\n<br>--- $err error(s) found and fixed.";
+      echo "\n<br>--- $err error(s) found.";
 
-   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>MessageNew count Done.";
 
+   echo "\n<br>";
+
+
+   // fix Players.CountFeatNew
+   $query = "SELECT ID, CountFeatNew FROM Players WHERE CountFeatNew>=0 " .
+            uid_clause( 'ID', 'AND' ) .
+            "ORDER BY ID $limit";
+   $result = explain_query($query)
+      or die("CountFeatNew.A: " . mysql_error());
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      $uid = $row['ID'];
+      $CountFeatNew = $row['CountFeatNew'];
+
+      $count_feat_new = count_feature_new( $uid ); // force-recalc
+      if( $count_feat_new >= 0 && $count_feat_new != $CountFeatNew )
+      {
+         echo "\n<br>ID: $uid fix CountFeatNew [$CountFeatNew] -> [$count_feat_new].";
+         $err++;
+      }
+   }
+   mysql_free_result($result);
+   if( $err )
+   {
+      // reset all to recalc on user-reloading
+      dbg_query("UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0 LIMIT $err");
+      echo "\n<br>--- $err error(s) found.";
+   }
+
+   echo "\n<br>FeatureNew count Done.";
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
+   echo "\n<br>Players main-menu counts Done.";
 
 //-----------------
 

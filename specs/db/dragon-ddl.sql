@@ -508,6 +508,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `SendEmail` set('ON','MOVE','BOARD','MESSAGE') NOT NULL default '',
   `Notify` enum('NONE','NEXT','NOW','DONE') NOT NULL default 'NONE',
   `CountMsgNew` mediumint(9) NOT NULL default '-1',
+  `CountFeatNew` smallint(6) NOT NULL default '-1',
   `Adminlevel` smallint(5) unsigned NOT NULL default '0',
   `AdminOptions` smallint(5) unsigned NOT NULL default '0',
   `AdminNote` varchar(100) NOT NULL default '',
