@@ -256,9 +256,15 @@ Copyright (C) 2001-2009  Erik Ouchterlony
          * Added other credits
 
    * Updates <home statistics.php?stats=1&w=1>flags</home> according to ISO-3166 country-codes list and some more:
-      * Added flags for: Aaland Islands, American Samoa, Aruba, European Union, Faroe Islands,
-        French Polynesia, Gibraltar, Greenland, Guam, Guernsey, Jersey, Netherlands Antilles,
-        Norfolk Island, Northern Mariana Islands, Tokelau, Virgin Islands (British), Western Sahara
+      * Added flags for: Aaland Islands, American Samoa, Anguilla, Aruba, Bermuda,
+        British Indian Ocean Territory, Cayman Islands, Christmas Island, Cocos Islands,
+        Cook Islands, European Union, Falkland Islands, Faroe Islands, French Guinea,
+        French Polynesia, Gibraltar, Greenland, Guadeloupe, Guam, Guernsey, Isle of Man,
+        Jersey, Martinique, Mayotte, Montserrat, Netherlands Antilles, New Caledonia, Niue,
+        Norfolk Island, Northern Mariana Islands, Pitcairn, Reunion, Saint Barthelemy,
+        Saint Helena, Saint Martin, Saint Pierre and Miquelon, South Georgia and Sandwich Islands,
+        Tokelau, Turks and Caicos Islands, Virgin Islands (British), Virgin Islands (US),
+        Wallis and Futuna, Western Sahara
       * Fixed country-codes: TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO,
         IA (Interlingua) -> XI, MJ (Montenegro) -> ME, __ (Earth) -> XE
       * Fixed names: Antigua and Barbuda, Bosnia and Herzegovina, Brunei Darussalam, Kazakhstan,
