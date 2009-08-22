@@ -79,8 +79,13 @@ class FilterCountry extends Filter
          $arr = getCountryText();
 
          // some shorter countries
-         $arr['va'] = T_('Vatican City (Holy See)#filter');
-         $arr['vc'] = T_('St. Vincent & Grenadines#filter');
+         $arr['io'] = T_('British Indian Ocean#ccfilter');
+         $arr['pm'] = T_('St. Pierre & Miquelon#ccfilter');
+         $arr['vc'] = T_('St. Vincent & Grenadines#ccfilter');
+         $arr['gs'] = T_('S-Georgia & Sandwich Isl.#ccfilter');
+         $arr['va'] = T_('Vatican City (Holy See)#ccfilter');
+         $arr['xf'] = T_('United Fed. of Planets#ccfilter');
+
          asort($arr);
          array_unshift( $arr, '0');
          $arr['0'] = T_('All countries#filter');
