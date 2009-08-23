@@ -178,3 +178,6 @@ copy /images/flags/sh.gif
 copy /images/flags/tc.gif
 copy /images/flags/vi.gif
 
+-----------
+copy /images/game_comment.gif
+
