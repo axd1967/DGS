@@ -405,13 +405,13 @@ TABLE ForumRead
    NewCount := number of NEW shown posts of single thread
    Time := creation-date for current entry (used as date-trigger with Posts.Updated)
 
-   # (d) Count of NEW shown posts for thread $tid, stored as:
+   # (d) Count of NEW shown posts for forum $fid, stored as:
    Forum_ID := $fid, Thread_ID := 0, Post_ID := 0
    NewCount := number of NEW shown threads of single forum
    Time := creation-date for current entry (used as date-trigger with Posts.Updated)
 
    # NOTES:
-   - Forum_ID and Thread_ID for (a)-(d) are set for easier/faster calculation
+   - Forum_ID and Thread_ID for (a)-(d) are used for easier/faster calculation
      of forum/thread-NEW-counts
 
    # triggered fields
