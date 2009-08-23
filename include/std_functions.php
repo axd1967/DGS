@@ -235,7 +235,8 @@ define('MAX_MOVENUMBERS', 500);
 
 
 //keep next constants powers of 2
-define("KO", 0x01);
+define('GAMEFLAGS_KO', 0x01);
+define('GAMEFLAGS_HIDDEN_MSG', 0x02);
 
 //-----
 // UserFlags (also stored in cookie)
@@ -458,6 +459,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
       $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
+      $cnt_forum_new = (isset($player_row['CountForumNew'])) ? (int)$player_row['CountForumNew'] : -1;
 
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
@@ -485,7 +487,14 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
       $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
-      $menu->add( 4,1, array( T_('Forums'),   'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )));
+      $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
+      if( $cnt_forum_new > 0 )
+      {
+         $cnt_forum_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_forum_new );
+         $arr_msgs[] = '&nbsp;';
+         $arr_msgs[] = array( $cnt_forum_new_str, 'forum/index.php', array( 'class' => 'MainMenuCount' ) );
+      }
+      $menu->add( 4,1, $arr_forums );
       $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
       $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
       $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
@@ -2396,7 +2405,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
          if( $uid > GUESTS_ID_MAX )
             $handles[]= $handle;
          if( count($handles) > 0 )
-            send_message("fever_vault.msg($ip)", $text, $subject, '', $handles, /*notify*/false, 0);
+            send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false, 0);
 
          $email= $player_row['Email'];
          if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
@@ -2431,6 +2440,13 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
          $player_row['CountFeatNew'] = $count_feat_new;
          $query .= ",CountFeatNew=$count_feat_new";
       }
+   }
+
+   $count_forum_new = count_forum_new( $uid, $player_row['CountForumNew'] );
+   if( $count_forum_new >= 0 )
+   {
+      $player_row['CountForumNew'] = $count_forum_new;
+      $query .= ",CountForumNew=$count_forum_new";
    }
 
 
@@ -2510,7 +2526,7 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
    {
       $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
       db_query( "$dbgmsg.upd($diff)",
-         "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE ID='$uid' LIMIT 1" );
+         "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
    }
    elseif( (string)$diff == COUNTNEW_RECALC )
    {
@@ -2583,6 +2599,22 @@ function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
       db_query( "$dbgmsg.recalc",
          "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
    }
+}
+
+/*!
+ * \brief Counts NEW-forum entries for given user-id if current count < 0 (=needs-update).
+ * \param $curr_count force counting if <0 or omitted
+ * \return new NEW-forum-post count (>=0) for given user-id; or -1 on error
+ */
+function count_forum_new( $uid, $curr_count=-1 )
+{
+   if( $curr_count >= 0 )
+      return $curr_count;
+   if( !is_numeric($uid) || $uid <= 0 )
+      error( 'invalid_args', "count_forum_new.check.uid($uid)" );
+
+   // TODO get number of NEW counts for user
+   return -1;
 }
 
 // Caution: can cause concurrency problems
@@ -3042,7 +3074,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
          while( $row = mysql_fetch_array( $result ) )
             $to_ids[] = $row['pid'];
 
-         send_message( 'delete_all_observers', $Text, $Subject
+         send_message( "delete_all_observers($gid)", $Text, $Subject
             ,$to_ids, '', /*notify*/false
             , 0, 'NORMAL', $gid);
       }
