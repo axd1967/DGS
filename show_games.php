@@ -359,13 +359,18 @@ $ThePage = new Page('GamesList');
  * 38: >  FU [userRatingDiff] (User-RatingDiff)
  * 39: >  RU (my remainint time)
  * 40: >  RU (oppenent remainint time)
+ * 41: >  FU (Indicator if there are (hidden) game-comments)
  *****/
+   $ginfo_str = T_('Game information');
+   $gcomm_str = T_('Hidden game comments');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(32, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT); // game-info
+   $gtable->add_tablehead(32, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'Image', 0 ); // game-info
+   if( $finished && !$all )
+      $gtable->add_tablehead(41, new TableHead( $gcomm_str, 'images/game_comment.gif', $gcomm_str), 'Image', 0 ); // game-comment
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( $observe_all )
    {
@@ -500,6 +505,7 @@ $ThePage = new Page('GamesList');
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS, // std-fields
       'Games.*',
+      'Games.Flags+0 AS X_GameFlags',
       'UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated" );
 
@@ -812,6 +818,9 @@ $ThePage = new Page('GamesList');
                   $grow_strings[38] = ( $userRatingDiff > 0 ? '+' : '' )
                      . sprintf( "%0.2f", $userRatingDiff / 100 );
             }
+
+            if( $gtable->Is_Column_Displayed[41] && ($X_GameFlags & GAMEFLAGS_HIDDEN_MSG) )
+               $grow_strings[41] = echo_image_gamecomment($ID);
          }
          else //RU
          {
