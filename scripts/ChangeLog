@@ -22,6 +22,101 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-08-23 juga
+
+   * include/classlib_game.php (GameScore.calculate_score):
+   - fix area-scoring: substract only "Handicap-1" points from Black as compensation
+
+   * include/gui_functions.php (echo_image_gamecomment),
+     scripts/updates/fix_game_comments-1_0_15.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     clock_tick.php, confirm.php, game.php, people.php, show_games.php, NEWS:
+   - mark games that have hidden game comments from one of the players
+     - notify players about hidden game comments after game finished
+     - show icon near Comments-link on game page if there are hidden comments
+     - added column with icon as indicator if there are hidden comments
+       on games-list with my finished games
+-----------
+-- add indicator for hidden-comments within move-messages
+ALTER TABLE Games
+   CHANGE Flags Flags set('Ko','HiddenMsg') NOT NULL default '' ;
+-- execute fix-script (with do_it=1 right away), because db-statement takes quite some time:
+--    'scripts/updates/fix_game_comments-1_0_15.php?do_it=1'
+-----------
+
+   * confirm.php:
+   - added more LFs in game-result message
+
+   * people.php:
+   - changed text for site-admin (ADMIN_DEVELOPER)
+
+   * show_games.php:
+   - added hideable column-header for game-info column
+
+   * include/std_functions.php (is_logged_in, delete_all_observers),
+     include/move.php (check_move), scripts/game_consistency.php, quick_play.php:
+   - renamed const KO -> GAMEFLAGS_KO
+   - more detail in error-labels
+
+   * include/std_functions.php (start_page, is_logged_in, update_count_message_new,
+       count_forum_new),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - prepared main-menu to add linked count of NEW forum-posts in main-menu
+   - bugfix on update for message-count in main-menu
+-----------
+-- quick-read-count for NEW-forum for user
+ALTER TABLE Players
+   ADD CountForumNew mediumint NOT NULL default '-1' AFTER CountFeatNew ;
+-----------
+
+   * include/filterlib_country.php (getFilterCountries):
+   - added shorter names for some long ones for country-codes: IO,PM,VC,GS,VA,XF
+
+   * include/countries.php (getCountryText), NEWS,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - added flags for country-codes (ISO-3166-1), even if unoffical flags:
+     AI (Anguilla), BL (Saint Barthelemy), BM (Bermuda), CC (Cocos Islands),
+     CK (Cook Islands), CX (Christmas Island), FK (Falkland Islands),
+     GF (French Guinea), GP (Guadeloupe), GS (South Georgia and Sandwich Islands),
+     IM (Isle of Man), IO (British Indian Ocean Territory), KY (Cayman Islands),
+     MF (Saint Martin), MQ (Martinique), MS (Montserrat), NC (New Caledonia),
+     NU (Niue), PM (Saint Pierre and Miquelon), PN (Pitcairn), RE (Reunion),
+     SH (Saint Helena), TC (Turks and Caicos Islands), VI (US Virgin Islands),
+     WF (Wallis and Futuna), YT (Mayotte)
+   - removed country-codes: BV (Bouvet Island), NT (Neutral Zone)
+-----------
+# added flags
+copy /images/flags/bl.gif
+copy /images/flags/gf.gif
+copy /images/flags/gp.gif
+copy /images/flags/io.gif
+copy /images/flags/mf.gif
+copy /images/flags/mq.gif
+copy /images/flags/nc.gif
+copy /images/flags/pm.gif
+copy /images/flags/re.gif
+copy /images/flags/wf.gif
+copy /images/flags/yt.gif
+
+# updated flags
+copy /images/flags/ai.gif
+copy /images/flags/bm.gif
+copy /images/flags/cc.gif
+copy /images/flags/ck.gif
+copy /images/flags/cx.gif
+copy /images/flags/fk.gif
+copy /images/flags/gs.gif
+copy /images/flags/im.gif
+copy /images/flags/ky.gif
+copy /images/flags/ms.gif
+copy /images/flags/nu.gif
+copy /images/flags/pn.gif
+copy /images/flags/sh.gif
+copy /images/flags/tc.gif
+copy /images/flags/vi.gif
+-----------
+
 2009-08-16 juga
 
    * include/std_functions.php (update_count_message_new),
@@ -46,6 +141,8 @@ ChangeLog
 -- quick-read-count for NEW-features for user
 ALTER TABLE Players
    ADD CountFeatNew smallint NOT NULL default '-1' AFTER CountMsgNew ;
+ALTER TABLE Players
+   ADD INDEX CountFeatNew (CountFeatNew) ;
 -----------
 
    * include/std_functions.php (start_page):
@@ -100,14 +197,13 @@ ALTER TABLE Players
 
    * include/countries.php (getCountryText, getCountryFlagImage),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
-     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
-     NEWS:
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt, NEWS:
    - adjusted flags for country-codes (ISO-3166-1):
      - added flags for AX (Aaland Islands), AS (American Samoa), AW (Aruba),
        EU (Europe), FO (Faroe Islands), PF (French Polynesia), GI (Gibraltar),
        GL (Greenland), GU (Guam), GG (Guernsey), JE (Jersey), AN (Netherlands Antilles),
        NF (Norfolk Island), MP (Northern Mariana Islands), TK (Tokelau),
-       VG (Virgin Islands (British)), EH (Western Sahara)
+       EH (Western Sahara)
      - fixed country-codes using user-defined ISO-3166 ccodes:
        TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO, IA (Interlingua) -> XI,
        CI (change pos), MJ (Montenegro) -> ME, __ (Earth) -> XE
@@ -119,7 +215,7 @@ ALTER TABLE Players
        CX (Christmas Island), CC (Cocos Islands), CK (Cook Islands), FK (Falkland Islands),
        IM (Isle of Man), MS (Montserrat), NU (Niue), PN (Pitcairn), SH (Saint Helena),
        GS (South Georgia and Sandwich Islands), TC (Turks and Caicos Islands),
-       VI (Virgin Islands (US))
+       VG (Virgin Islands (British)), VI (Virgin Islands (US))
      - added ccode but without flag because it's the same as other countries:
        IO (British Indian Ocean Territory), GF (French Guinea), GP (Guadeloupe), MQ (Martinique),
        MY (Mayotte), NT (Neutral Zone), NC (New Caledonia), RE (Reunion), BL (Saint Barthelemy),
@@ -128,7 +224,7 @@ ALTER TABLE Players
    - added static width/height for country-images: 32x20
    - added URLs for ISO-3166 and more links to flags-images
 -----------
-# added and updated flags
+# added flags
 copy /images/flags/ai.gif
 copy /images/flags/an.gif
 copy /images/flags/as.gif
@@ -156,7 +252,6 @@ copy /images/flags/nf.gif
 copy /images/flags/nu.gif
 copy /images/flags/pf.gif
 copy /images/flags/pn.gif
-copy /images/flags/rs.gif (updated)
 copy /images/flags/sh.gif
 copy /images/flags/tc.gif
 copy /images/flags/tk.gif
@@ -164,6 +259,9 @@ copy /images/flags/vg.gif
 copy /images/flags/vi.gif
 copy /images/flags/xf.gif
 copy /images/flags/xk.gif
+
+# updated flags
+copy /images/flags/rs.gif
 
 # changed country-code
 copy /images/flags/tl.gif ( was former tp.gif )
