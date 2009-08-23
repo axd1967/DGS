@@ -1329,5 +1329,19 @@ ALTER TABLE Players
 -- quick-read-count for NEW-features for user
 ALTER TABLE Players
    ADD CountFeatNew smallint NOT NULL default '-1' AFTER CountMsgNew ;
+ALTER TABLE Players
+   ADD INDEX CountFeatNew (CountFeatNew) ;
+
+
+-- quick-read-count for NEW-forum for user
+ALTER TABLE Players
+   ADD CountForumNew mediumint NOT NULL default '-1' AFTER CountFeatNew ;
+
+
+-- add indicator for hidden-comments within move-messages
+ALTER TABLE Games
+   CHANGE Flags Flags set('Ko','HiddenMsg') NOT NULL default '' ;
+-- execute fix-script (with do_it=1 right away), because db-statement takes quite some time:
+--    'scripts/updates/fix_game_comments-1_0_15.php?do_it=1'
 
 
