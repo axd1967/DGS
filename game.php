@@ -615,6 +615,8 @@ function get_alt_arg( $n1, $n2)
               , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
                        'target' => FRIENDLY_SHORT_NAME.'_game_comments'
               ));
+   if( $Status == 'FINISHED' && $GameFlags & GAMEFLAGS_HIDDEN_MSG )
+      echo MED_SPACING . echo_image_gamecomment( $gid );
 
    echo "\n</td></tr>\n</table>"; //board & associates table }--------
 

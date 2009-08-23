@@ -232,6 +232,16 @@ function echo_image_gameinfo( $gid )
    return anchor( "gameinfo.php?gid=$gid", $img_str );
 }
 
+/*! \brief Returns image indicating that game have hidden game-comments for given game-id. */
+function echo_image_gamecomment( $gid, $hidden_comments=true )
+{
+   global $base_path;
+   $arr = array();
+   if( $hidden_comments )
+      $arr[] = T_('Game has hidden comments');
+   return image( $base_path.'images/game_comment.gif', implode(', ', $arr), null, 'class="InTextImage"');
+}
+
 /*! \brief Returns image-tag for table-list with link. */
 function echo_image_table( $url, $title, $withSep=true )
 {
