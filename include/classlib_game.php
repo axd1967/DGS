@@ -203,6 +203,7 @@ class GameScore
       // calculate score
       if( $mode == GSMODE_TERRITORY_SCORING )
       {
+         $handi_diff = $this->handicap;
          $score_black = $this->territory[GSCOL_BLACK]
                         + $this->prisoners[GSCOL_BLACK]
                         - 2 * $this->dead_stones[GSCOL_BLACK];
@@ -213,10 +214,11 @@ class GameScore
       }
       else //if( $mode == GSMODE_AREA_SCORING )
       {
+         $handi_diff = ($this->handicap >= 2 ) ? $this->handicap - 1 : 0;
          $score_black = $this->stones[GSCOL_BLACK]
                         + $this->dead_stones[GSCOL_WHITE]
                         + $this->territory[GSCOL_BLACK]
-                        - $this->handicap;
+                        - $handi_diff;
 
          $score_white = $this->stones[GSCOL_WHITE]
                         + $this->dead_stones[GSCOL_BLACK]
@@ -252,8 +254,8 @@ class GameScore
          $map['skip_dame'] = $map['skip_stones'] = !$isArea;
          $map['skip_prisoners'] = $isArea;
 
-         $map[GSCOL_BLACK]['extra'] = ( $isArea && $this->handicap > 0 )
-            ? sprintf( '-%s %s', $this->handicap, T_('(H)#scoring') ) : '';
+         $map[GSCOL_BLACK]['extra'] = ( $isArea && $handi_diff > 0 )
+            ? sprintf( '-%s %s', $handi_diff, T_('(H)#scoring') ) : '';
          if( $this->komi != 0.0 )
          {
             $fmt_komi = ($this->komi < 0.0) ? '%s %s' : '+%s %s';
