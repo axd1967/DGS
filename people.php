@@ -80,7 +80,7 @@ function get_executives( $level )
    if( $level & ADMIN_SUPERADMIN )
       $out[] = T_('Admin manager#admin');
    if( $level & ADMIN_DEVELOPER )
-      $out[] = T_('Developer &amp; Site#admin');
+      $out[] = T_('Site#admin');
    if( $level & ADMIN_PASSWORD )
       $out[] = T_('Password#admin');
    if( $level & ADMIN_FAQ )
@@ -328,6 +328,7 @@ function get_executives( $level )
       . build_icon('wclock_stop.gif', sprintf( T_('Stopped clock created from [%s]'), 'clock_stop'))
       . build_icon('table.gif', sprintf( T_('Table list created from [%s]'), 'application_view_list'))
       . build_icon('thread.gif', sprintf( T_('Thread overview created from [%s]'), 'text_align_right'))
+      . build_icon('game_comment.gif', sprintf( T_('Hidden game comments created from [%s]'), 'user_comment'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
