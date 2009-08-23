@@ -131,7 +131,7 @@ if(1){//new
  During a test, this lowered the number of returned rows from 10,960 to 675
 */
    $result = db_query( 'clock_tick.find_timeout_games',
-      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks"
+      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags AS X_GameFlags"
       ." FROM Games"
       ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
       .' WHERE Clock.Ticks - Games.LastTicks > '.TICK_FREQUENCY
@@ -143,7 +143,7 @@ This query is sometime slow and may return more than 10000 rows!
 It (and the following UPDATE) should be optimized, splited in smaller chunk?
 use TEMPORARY TABLEs for generated UPDATEs ???
 */
-   $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks'
+   $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags AS X_GameFlags'
             . ' FROM (Games, Clock)'
             . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)"
             . ' AND Clock.ID>=0' // not VACATION_CLOCK
@@ -201,7 +201,6 @@ use TEMPORARY TABLEs for generated UPDATEs ???
              "Last_X=".POSX_TIME.", " .
              "ToMove_ID=0, " .
              "Score=$score, " .
-             //"Flags=0, " . //Not useful
              "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
@@ -231,7 +230,9 @@ use TEMPORARY TABLEs for generated UPDATEs ???
                . "</center>was:<center>"
                . score2text($score,true,true)
                . "</center>";
-         $Text.= "Send a message to:<center>"
+         if( $X_GameFlags & GAMEFLAGS_HIDDEN_MSG )
+            $Text .= "<p><b>Info:</b> The game has hidden comments!";
+         $Text.= "<p>Send a message to:<center>"
                . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
                . "<br>"
                . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
