@@ -77,7 +77,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
    global $Last_Move, $GameFlags; //input only
    // note: $GameFlags has set Ko-flag if last move has taken a single stone
 
-   if( $nr_prisoners == 1 && ($GameFlags & KO) )
+   if( $nr_prisoners == 1 && ($GameFlags & GAMEFLAGS_KO) )
    {
 
       // Check for ko

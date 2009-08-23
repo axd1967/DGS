@@ -269,9 +269,9 @@ This is why:
       }
 
       if( $nr_prisoners == 1 )
-         $GameFlags |= KO;
+         $GameFlags |= GAMEFLAGS_KO;
       else
-         $GameFlags &= ~KO;
+         $GameFlags &= ~GAMEFLAGS_KO;
 
       $game_query .= "ToMove_ID=$next_to_move_ID, " .
           "Flags=$GameFlags, " .

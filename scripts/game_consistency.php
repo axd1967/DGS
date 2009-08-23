@@ -267,7 +267,7 @@ function check_consistency( $gid)
   if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
    $games_Last_Move = $Last_Move;
-   $games_Flags = ( $Flags ? KO : 0 );
+   $games_Flags = ( $Flags ? GAMEFLAGS_KO : 0 );
 
    $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
        or die('<BR>' . mysql_error());
@@ -358,9 +358,9 @@ function check_consistency( $gid)
          return "Problem at move $move_nr: $err";
 
       if( $nr_prisoners == 1 )
-         $GameFlags |= KO;
+         $GameFlags |= GAMEFLAGS_KO;
       else
-         $GameFlags &= ~KO;
+         $GameFlags &= ~GAMEFLAGS_KO;
       $Last_X = $PosX;
       $Last_Y = $PosY;
       $Last_Move = $coord;
@@ -403,7 +403,7 @@ function check_consistency( $gid)
       }
 
       if( $games_Flags!=$GameFlags 
-        || ( ($GameFlags & KO) && $games_Last_Move!=$Last_Move ) )
+        || ( ($GameFlags & GAMEFLAGS_KO) && $games_Last_Move!=$Last_Move ) )
       {
          return "Wrong Ko status!"
             . "\nLast_Move: [$games_Last_Move] should be [$Last_Move]"
