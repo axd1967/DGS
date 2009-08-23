@@ -3069,15 +3069,19 @@ $FSCORE_RESULT_choices = array(
 // sql-templates for the corresponding score-mode, %s is replaced with db-field
 $FSCORE_BUILD_SQL = array(
    '',
+   //'?+R', 'B+R', 'W+R',
    '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
    '%s = -'.SCORE_RESIGN,
    '%s = '.SCORE_RESIGN,
+   //'?+T', 'B+T', 'W+T',
    '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
    '%s = -'.SCORE_TIME,
    '%s = '.SCORE_TIME,
+   //'?+?', 'B+?', 'W+?',
    'ABS(%s)',
    '-%s',
    '%s',
+   //Jigo
    '%s = 0',
 );
 
