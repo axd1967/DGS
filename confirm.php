@@ -273,9 +273,12 @@ This is why:
          }
 
          if( $nr_prisoners == 1 )
-            $GameFlags |= KO;
+            $GameFlags |= GAMEFLAGS_KO;
          else
-            $GameFlags &= ~KO;
+            $GameFlags &= ~GAMEFLAGS_KO;
+
+         if( $message && preg_match( "#</?h(idden)?>#is", $message) )
+            $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
@@ -557,7 +560,7 @@ This is why:
                . score2text($score,true,true)
                . "</center>";
 
-         $tmp = $Text . "Send a message to:<center>"
+         $tmp = $Text . "<p>Send a message to:<center>"
                . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
                . "<br>"
                . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
@@ -567,6 +570,12 @@ This is why:
 
       //Send a message to the opponent
 
+      if( $action != 'delete' )
+      {
+         if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
+            $Text .= "<p><b>Info:</b> The game has hidden comments!";
+      }
+
       $message_from_server_way = true; //else simulate a message from this player
       //nervertheless, the clock_tick.php messages are always sent by the server
       //so it's better to keep $message_from_server_way = true
@@ -574,7 +583,7 @@ This is why:
       {
          //The server messages does not allow a reply,
          // so add a *in message* reference to this player.
-         $Text.= "Send a message to:<center>"
+         $Text.= "<p>Send a message to:<center>"
                . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
                . "</center>" ;
       }
@@ -584,12 +593,12 @@ This is why:
          if( $message_from_server_way )
          {
             //A server message will only be read by this player
-            $Text .= "Your opponent wrote:<p></p>" . $message_raw;
+            $Text .= "<p>Your opponent wrote:<p></p>" . $message_raw;
          }
          else
          {
             //Because both players will read this message
-            $Text .= "The final message was:<p></p>" . $message_raw;
+            $Text .= "<p>The final message was:<p></p>" . $message_raw;
          }
       }
 
