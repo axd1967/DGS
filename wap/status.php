@@ -341,7 +341,7 @@ else
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
               "AND Messages.ID=me.mid " .
               "AND me.Sender IN('N','S') " . //exclude message to myself
-      "ORDER BY date, me.mid";
+      "ORDER BY Messages.Time, me.mid";
 
    $resultM = db_query( 'wap3', $query );
    $countM = @mysql_num_rows($resultM);
@@ -349,13 +349,13 @@ else
 
    // Games to play?
 
-   $query = "SELECT UNIX_TIMESTAMP(LastChanged) as date,Games.ID, " .
+   $query = "SELECT UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
        "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
        "opponent.Name, opponent.Handle " .
        "FROM (Games,Players AS opponent) " .
        "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       "ORDER BY date, Games.ID";
+       "ORDER BY Games.LastChanged, Games.ID";
 
    $resultG = db_query( 'wap4', $query );
    $countG = @mysql_num_rows($resultG);

@@ -1247,7 +1247,8 @@ function get_message_directions()
 
 // param extra_querysql: QuerySQL-object to extend query
 // return array( result, merged-QuerySQL )
-function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date', $limit='', $extra_querysql=null)
+// NOTE: $order (default sort on me.mid equals to sort on date) !!
+function message_list_query($my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='', $extra_querysql=null)
 {
 /**
  * N.B.: On 2007-10-15, we have found, in the DGS database,
@@ -1263,7 +1264,6 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY date'
    $qsql->add_part( SQLP_FIELDS,
       'M.Type', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
       'UNIX_TIMESTAMP(M.Time) AS Time',
-      'me.mid as date',
       "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
           "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
       'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
@@ -1320,7 +1320,7 @@ function message_list_head( &$mtable, $current_folder, $no_mark=true, $full_deta
    $mtable->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
    $mtable->add_tablehead(10, new TableHead( T_('First message in thread#header'),
          'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
-   $mtable->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'date-');
+   $mtable->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
    if( !$no_mark )
       $mtable->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
 
