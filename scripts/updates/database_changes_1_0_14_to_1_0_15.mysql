@@ -1310,9 +1310,9 @@ UPDATE Players SET Country='xi' WHERE Country='ia' ;
 UPDATE Players SET Country='xo' WHERE Country='eo' ;
 
 -- obsoleted country-code for Yugoslavia: YU -> RS (Serbia), but could be ME (Montenegro)
-UPDATE Players SET Country='RS' WHERE Country='yu' ;
+UPDATE Players SET Country='rs' WHERE Country='yu' ;
 
--- check for more unknown with Statistics page (evtl. fix more):
+-- check for more unknown country-codes with Statistics page (evtl. fix more):
 -- unknown flags are shown without flag-image but shows "[country-code]"
 statistics.php?stats=1
 
@@ -1343,5 +1343,9 @@ ALTER TABLE Games
    CHANGE Flags Flags set('Ko','HiddenMsg') NOT NULL default '' ;
 -- execute fix-script (with do_it=1 right away), because db-statement takes quite some time:
 --    'scripts/updates/fix_game_comments-1_0_15.php?do_it=1'
+
+
+-- fix date-field Contacts.Created
+UPDATE Contacts SET Created=Lastchanged WHERE YEAR(Created)=1970 ;
 
 
