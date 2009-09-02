@@ -479,7 +479,8 @@ class DisplayForum
 
    /*!
     * \brief Increase global new counter, builds and returns current new-string.
-    * param $mode bitmask of NEWMODE_BOTTOM; NEWMODE_OVERVIEW, NEWMODE_NEWCOUNT
+    * param $mode bitmask of NEWMODE_BOTTOM ('new' for bottom-bar);
+    *       NEWMODE_OVERVIEW, NEWMODE_NEWCOUNT (append NEW-count), NEWMODE_NO_LINK
     * param $cnt_new number of new entries to show, add '(count)' if NEWMODE_NEWCOUNT set
     * param $newdate used to decide which CSS-class to use for display new-string
     *       (NewFlag=default, OlderNewFlag)
@@ -488,7 +489,7 @@ class DisplayForum
    {
       $new = '';
       $anchor_prefix = 'new';
-      if( $mode & NEWMODE_BOTTOM )
+      if( $mode & NEWMODE_BOTTOM ) // bottom-bar refers to 1st-NEW
       {
          $link = ($mode & NEWMODE_NO_LINK) ? '' : ' href="#new1"';
          if( $this->new_count > 0 )
@@ -510,10 +511,9 @@ class DisplayForum
          else
             $addnew = 1;
 
+         $this->new_count++;
          $link = ($mode & NEWMODE_NO_LINK)
             ? '' : sprintf(' href="#new%d"', $this->new_count + $addnew );
-
-         $this->new_count++;
          $new = sprintf( $this->fmt_new,
             $newclass, $anchor_prefix, $this->new_count, $link,
             T_('new') . ( ($mode & NEWMODE_NEWCOUNT) ? " ($cnt_new)" : '' ) );
@@ -1374,7 +1374,7 @@ class ForumThread
     */
    function load_revision_history( $post_id )
    {
-      global $NOW;
+      global $NOW, $player_row;
 
       // select current active post
       $qsql = ForumPost::build_query_sql();
@@ -1386,6 +1386,14 @@ class ForumThread
 
       $post = ForumPost::new_from_row($row);
       $this->thread_post = $post;
+
+      // check if allowed to view
+      if( !$post->is_approved() )
+      {
+         $my_id = $player_row['ID'];
+         if( ( $post->author->id != $my_id ) && !($player_row['admin_level'] & ADMIN_FORUM) )
+            error('forbidden_post', "ForumThread.load_revision_history.check_viewer($post_id,$my_id)");
+      }
 
       // select all inactive history posts
       $qsql = ForumPost::build_query_sql();
@@ -2031,7 +2039,8 @@ class ForumRead
             . 'AND Thread_ID>0 AND Post_ID=0 AND NewCount>0';
 
       // NOTE: foreach does NOT work with array-reference (need PHP5)
-      for( $i=0; $i < count($forums); $i++)
+      $cnt_forums = count($forums);
+      for( $i=0; $i < $cnt_forums; $i++)
       {
          // Calculate fields for single thread if update needed
          $forum =& $forums[$i];
@@ -2106,7 +2115,8 @@ class ForumRead
             . "AND P.User_ID<>{$this->uid}";
 
       // NOTE: foreach does NOT work with array-reference (need PHP5)
-      for( $i=0; $i < count($threads); $i++)
+      $cnt_threads = count($threads);
+      for( $i=0; $i < $cnt_threads; $i++)
       {
          // Calculate fields for single thread if update needed
          $thread =& $threads[$i];
