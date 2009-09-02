@@ -407,7 +407,8 @@ class QuerySQL
       // handle UNION-syntax
       $arr_union = array();
       $union_parts = $this->get_parts(SQLP_UNION_WHERE);
-      for( $idx=0; $idx < count($union_parts); $idx++)
+      $cnt_uparts = count($union_parts);
+      for( $idx=0; $idx < $cnt_uparts; $idx++)
       {
          $arr_union[]= $this->get_select_normal($idx);
       }

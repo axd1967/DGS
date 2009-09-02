@@ -149,7 +149,8 @@ require_once( "include/graph.php" );
    $x = 0;
    $a = $gr->width-2*$title_sep;
    $m = 0;
-   for( $i=0 ; $i<count($graphs) ; $i++ )
+   $cnt_graphs = count($graphs);
+   for( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -202,7 +203,7 @@ require_once( "include/graph.php" );
    $gr->setgraphviewX($minTime, $maxTime);
 
    $curves_min-= 0.01; //add a little spacing
-   for( $i=0 ; $i<count($graphs) ; $i++ )
+   for( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -245,7 +246,7 @@ require_once( "include/graph.php" );
 
    //draw the curves
 
-   for( $i=0 ; $i<count($graphs) ; $i++ )
+   for( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 

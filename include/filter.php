@@ -1871,7 +1871,8 @@ class Filter
       {
          if( $is_multi && !is_array($value) )
             $value = array();
-         for( $i=0; $i < count($values); $i++)
+         $cnt_values = count($values);
+         for( $i=0; $i < $cnt_values; $i++ )
          {
             $optval = $index_start_keys + $i;
             if( $is_multi )

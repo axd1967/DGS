@@ -109,7 +109,8 @@ define('MIN_RANK', round(MIN_RATING/100.0));
    $x = 0;
    $a = $gr->width-2*$title_sep;
    $m = 0;
-   for( $i=0 ; $i<count($graphs) ; $i++ )
+   $cnt_graphs = count($graphs);
+   for( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -153,7 +154,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    $gr->setgraphview( $xlims['MIN'], $ymax, $xlims['MAX'], $ymin );
 
-   for( $i=0 ; $i<count($graphs) ; $i++ )
+   for( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i]['y'];
       $graph = $gr->mapscaleY($graph);
@@ -176,7 +177,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    //draw the curves
 
-   for( $i=0 ; $i<count($graphs) ; $i++ )
+   for( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 

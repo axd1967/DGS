@@ -863,7 +863,8 @@ class Form
          $cnt = 0;
          if( $L[0] == 'H' )
          { // horizontal grouping
-            for( $i=1; $i < count($L); $i++ )
+            $cnt_L = count($L);
+            for( $i=1; $i < $cnt_L; $i++ )
             {
                $area = $L[$i];
                $str = $this->build_areas( $area, $AR, false);

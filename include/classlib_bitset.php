@@ -91,7 +91,8 @@ class BitSet
       }
       else
       {
-         for( $i=0; $i < count($this->store); $i++)
+         $cnt_store = count($this->store);
+         for( $i=0; $i < $cnt_store; $i++)
             $this->store[$i] = 0;
       }
    }
