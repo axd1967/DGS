@@ -24,10 +24,6 @@ if( !defined('DBG_QUERY') )
    define('DBG_QUERY', 0);
 
 
-//because we will use MySQL, this will help to
-//complete the *multiple queries* transactions.
-//@ignore_user_abort(true); //moved to connect2mysql(), also see jump_to()
-
 // fetch-types for mysql_single_fetch-function
 //   PHP has funcs: mysql_fetch_(array|assoc|field|lengths|object|row)
 define('FETCHTYPE_ARRAY', 'array');
@@ -122,6 +118,9 @@ function admin_log( $uid, $handle, $err)
    return $result;
 }
 
+// IMPORTANT NOTE:
+//   in general, position of db_close() must take into account,
+//   that texts may contain DGS-markup still needing db-access
 function db_close()
 {
    global $dbcnx;
@@ -136,7 +135,10 @@ function connect2mysql($no_errors=false)
    global $dbcnx;
 
    // user can stop the output, but not the script
-   $old_ignore = @ignore_user_abort(true);
+   // Because we will use MySQL, this will help to complete the *multiple queries* transactions.
+   //TODO use around HOT-sections to avoid "transaction"-breaks, but allow users to stop requests (slow queries)
+   //$old_ignore = @ignore_user_abort(true);
+   //@ignore_user_abort($old_ignore);
 
    $retry = DB_CONNECT_RETRY_COUNT; //retry count = $retry+1 attempts to connect
    for(;;)
@@ -171,7 +173,6 @@ function connect2mysql($no_errors=false)
       error($err);
    }
 
-   @ignore_user_abort((bool)$old_ignore);
    //error_log("connect2mysql($no_errors): dbcnx=$dbcnx on attempt #".(4-$i)."/3");
 
    return false;
