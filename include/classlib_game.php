@@ -214,6 +214,7 @@ class GameScore
       }
       else //if( $mode == GSMODE_AREA_SCORING )
       {
+         // "why H-1?": http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25620
          $handi_diff = ($this->handicap >= 2 ) ? $this->handicap - 1 : 0;
          $score_black = $this->stones[GSCOL_BLACK]
                         + $this->dead_stones[GSCOL_WHITE]
