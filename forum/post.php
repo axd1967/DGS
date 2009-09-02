@@ -398,11 +398,12 @@ function show_post( $fid, $tid, $pid )
       'UPDATE Forums SET '
       . ( ($thread_cntposts == 0) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
       . ( ($post_created > $thread_lastchanged)
-            ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), " .
-              "LastPost=IF(LastPost=$thread_lastpost,GREATEST(LastPost,$pid),LastPost), "
+            ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
             : '' )
       . 'PostsInForum=PostsInForum+1 '
       . "WHERE ID=$fid LIMIT 1" );
+
+   recalc_forum_lastpost($fid);
 }//show_post
 
 
