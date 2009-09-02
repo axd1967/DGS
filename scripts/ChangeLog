@@ -22,6 +22,58 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-09-02 juga
+
+   * halfhourly_cron.php, NEWS:
+   - optimize vacation-check-queries by restricting it on Players.Lastaccess within
+     twice max-vacation to avoid yet more indexes (OnVacation/VacationDays-fields)
+
+   * forum/forum_functions.php (DisplayForum.get_new_string,
+       ForumThread.load_revision_history),
+     error.php:
+   - bugfix: wrong NEW-link in tree-overview
+   - bugfix: forbid viewing of revision-history for non-approved post except
+     for author or moderators
+
+   * forum/post.php (show_post):
+   - bugfix: updating Forums.LastPost on showing hidden post
+
+   * include/message_functions.php (message_list_query, message_list_head),
+     scripts/translation_consistency.php, quick_status.php,
+     rss/status.php, wap/status.php:
+   - cleanup ORDER-BY query: avoid aliases and calculated fields;
+     e.g. MessageCorrespondents.mid has similar order as Messages.Time used
+     to sort messages
+
+   * forum/forum_functions.php (ForumRead.recalc_forum_reads, ~.recalc_thread_reads),
+     include/classlib_bitset.php (BitSet.reset),
+     include/filter.php (Filter.build_generic_selectbox_elem),
+     include/form_functions.php (Form.build_areas),
+     include/std_classes.php (QuerySQL.get_select),
+     game.php, statisticspng.php, statratingspng.php:
+   - slight optimize (loop-invariants)
+
+   * include/connect2mysql.php (db_close),
+     edit_vacation.php, game.php:
+   - removed or moved closing of db-connection;
+     in general position of db_close() must take into account,
+     that texts may contain DGS-markup still needing db-access
+
+   * include/connect2mysql.php (connect2mysql):
+   - removed use of ignore_user_abort() in connect-function,
+     added TODO to use it around HOT-sections to avoid transaction-break
+
+   * include/contacts.php (Contact.load_contact, ~.update_contact),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - fixed wrong handling of date-handling for Contacts.Created & Lastchanged
+-----------
+-- fix date-field Contacts.Created
+UPDATE Contacts SET Created=Lastchanged WHERE YEAR(Created)=1970 ;
+-----------
+
+   * scripts/README.developers:
+   - added W3C-compliance, adjusted myths about constant strings
+
 2009-08-23 juga
 
    * include/classlib_game.php (GameScore.calculate_score):
@@ -293,9 +345,9 @@ UPDATE Players SET Country='xi' WHERE Country='ia' ;
 UPDATE Players SET Country='xo' WHERE Country='eo' ;
 
 -- obsoleted country-code for Yugoslavia: YU -> RS (Serbia), but could be ME (Montenegro)
-UPDATE Players SET Country='RS' WHERE Country='yu' ;
+UPDATE Players SET Country='rs' WHERE Country='yu' ;
 
--- check for more unknown with Statistics page (evtl. fix more):
+-- check for more unknown country-codes with Statistics page (evtl. fix more):
 -- unknown flags are shown without flag-image but shows "[country-code]"
 statistics.php?stats=1
 -----------
