@@ -278,7 +278,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    Code improvements:
 
    * Improvements of database queries
-      * Users: faster Activity handling
+      * Users: faster Activity handling and Vacation handling
       * Game: faster skip-to-next-game
       * Game comments: faster query
       * Bio: faster bio entries
