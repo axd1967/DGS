@@ -78,7 +78,7 @@ echo ">>>> Most of them needs manual fixes.";
      ." FROM TranslationTexts"
      ." LEFT JOIN FAQ ON TranslationTexts.Ref_ID=FAQ.ID"
      ." WHERE TranslationTexts.Ref_ID>0"
-     ." ORDER BY TID";
+     ." ORDER BY TranslationTexts.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -113,7 +113,7 @@ echo ">>>> Most of them needs manual fixes.";
      ." FROM FAQ"
      ." LEFT JOIN TranslationTexts ON TranslationTexts.ID=FAQ.Question"
      ." WHERE FAQ.ID>0 AND FAQ.Question>0"
-     ." ORDER BY FID";
+     ." ORDER BY FAQ.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -141,7 +141,7 @@ echo ">>>> Most of them needs manual fixes.";
      ." FROM FAQ"
      ." LEFT JOIN TranslationTexts ON TranslationTexts.ID=FAQ.Answer"
      ." WHERE FAQ.ID>0 AND FAQ.Answer>0"
-     ." ORDER BY FID";
+     ." ORDER BY FAQ.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -175,7 +175,7 @@ echo ">>>> Most of them needs manual fixes.";
      ." FROM TranslationTexts AS T"
      ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=T.ID"
      ." WHERE T.ID>0 AND T.Text>''"
-     ." ORDER BY TID";
+     ." ORDER BY T.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -211,7 +211,7 @@ echo ">>>> Most of them needs manual fixes.";
      ." FROM (TranslationTexts AS T, TranslationFoundInGroup AS I)"
      ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
      ." WHERE T.ID>0 AND T.Text>'' AND I.Text_ID=T.ID"
-     ." ORDER BY TID";
+     ." ORDER BY T.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -252,7 +252,7 @@ echo ">>>> Most of them needs manual fixes.";
         ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
         ." WHERE F.ID>0 AND F.$type>0 AND T.ID=F.$type AND T.Text>''"
         ." HAVING G.Groupname IS NULL"
-        ." ORDER BY FID";
+        ." ORDER BY F.ID";
       $result = mysql_query( $query ) or die(mysql_error());
 
       while( ($row = mysql_fetch_assoc( $result )) )

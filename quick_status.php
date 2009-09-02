@@ -149,7 +149,7 @@ else
          "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
                  "AND Messages.ID=me.mid " .
                  "AND me.Sender IN('N','S') " . //exclude message to myself
-         "ORDER BY date DESC";
+         "ORDER BY Messages.Time DESC";
 
       $result = db_query( 'quick_status.find_messages', $query );
 
