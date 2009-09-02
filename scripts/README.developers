@@ -3,6 +3,15 @@
 General instructions for developers:
 -----------------
 
+----------------- HTML, W3C validator
+
+   An aim on HTML used for DGS is to keep it conform to:
+
+     "-//W3C//DTD HTML 4.01 Transitional//EN"
+
+   Validating can be done using a locally installed w3c-markup-validator
+   (Linux ubuntu-package) for example.
+
 ----------------- CVS, filenames, database names:
 
    Don't use uppercase letters in the filenames (unless a special needed
@@ -412,11 +421,15 @@ General instructions for developers:
       SELECT Moves, Moves/2 AS X_HalfMoves FROM Games
 
 
------------------ PHP: Constant Strings
+----------------- PHP: Constant Strings, PHP-Myths
 
-   Constant strings should be written as  'string'  instead of  "string".
-   This can be processed faster by PHP.
+   Constant strings can be written as  'string'  or  "string".
+   The speed-difference is very minor.
 
+   Similar for "using $var in strings", though string-concat is a bit faster
+   in this case.
+
+   see PHP-myths: http://www.tuxradar.com/practicalphp/18/1/23
 
 ----------------- PHP: Faster String output with echo
 
