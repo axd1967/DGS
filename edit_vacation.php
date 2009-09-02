@@ -43,7 +43,6 @@ require_once( "include/form_functions.php" );
       $vacationdiff = round(@$_POST['vacationdiff']);
       if( $minimum_days > $days_left || ( $minimum_days == $days_left && $minimum_days == 0 ) )
       {
-         db_close();
          $str .= T_("Sorry, you can't change the vacation length at the moment.");
       }
       else if( isset($_POST['change_vacation']) &&
@@ -63,7 +62,6 @@ require_once( "include/form_functions.php" );
       }
       else
       {
-         db_close();
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
@@ -89,7 +87,6 @@ require_once( "include/form_functions.php" );
       $vacationlength = round(@$_POST['vacationlength']);
       if( $days_left < $vacation_min_days )
       {
-         db_close();
          $str .= sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
       elseif( isset($_POST['start_vacation'])
@@ -116,7 +113,6 @@ require_once( "include/form_functions.php" );
       }
       else
       {
-         db_close();
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
