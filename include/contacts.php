@@ -69,9 +69,7 @@ class Contact
     */
    function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
-      if( !is_numeric($uid) || !is_numeric($cid)
-            || $uid <= 0 || $cid < 0
-            || $uid == $cid )
+      if( !is_numeric($uid) || !is_numeric($cid) || $uid <= 0 || $cid < 0 || $uid == $cid )
          error('invalid_user', "contacts.Contact($uid,$cid)");
       $this->uid = (int) $uid;
       $this->cid = (int) $cid;
@@ -105,14 +103,17 @@ class Contact
          error('invalid_user', "contact.load_contact($uid,$cid)");
 
       $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
-            "SELECT * FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
+            "SELECT uid,cid,SystemFlags,UserFlags,Notes, " .
+               "UNIX_TIMESTAMP(Created) AS X_Created, " .
+               "UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged " .
+            "FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
       if( !$row )
          return null;
 
       $contact = new Contact(
             $row['uid'], $row['cid'],
             $row['SystemFlags'], $row['UserFlags'],
-            $row['Created'], $row['Lastchanged'],
+            $row['X_Created'], $row['X_Lastchanged'],
             $row['Notes'] );
 
       return $contact;
@@ -182,6 +183,8 @@ class Contact
          error('invalid_user', "contact.update_contact({$this->uid},{$this->cid})");
 
       global $NOW;
+      if( $this->created == 0 )
+         $this->created = $NOW;
       $this->lastchanged = $NOW;
 
       $result = db_query( "contact.find_user({$this->uid},{$this->cid})",
