@@ -490,7 +490,6 @@ function get_alt_arg( $n1, $n2)
       $show_notes = false;
       $noteshide = 'Y';
    }
-   db_close();
 
    if( ENA_MOVENUMBERS )
    {
@@ -537,6 +536,8 @@ function get_alt_arg( $n1, $n2)
    $TheBoard->movemsg= $movemsg;
    $TheBoard->draw_board( $may_play, $action, $stonestring);
    //TODO: javascript move buttons && numbers hide
+
+   db_close(); // text with DGS-markup needs DB-access
 
    //messages about actions
    if( $validation_step )
@@ -1053,7 +1054,8 @@ function draw_board_info($board)
          //echo var_export($row, true);
          $fmt = array_shift($sub);
          $val = array();
-         for( $i=0; $i<count($sub); $i++ )
+         $cnt_sub = count($sub);
+         for( $i=0; $i < $cnt_sub; $i++ )
          {
             list($n, $fct) = $sub[$i];
             //echo "$n => $tmp<br>";
