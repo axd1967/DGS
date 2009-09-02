@@ -277,8 +277,17 @@ if( !$is_down )
 
 // Check end of vacations and reset associated game clocks
 
+   $max_vacations = 365.24/12; //1 month [days]
+
+   // IMPORTANT NOTE:
+   // relies on the fact, that to start-vacation Players.Lastaccess is changed
+   // => take into account for future alternative interfaces
+   $vac_maxusercheck = 2 * (int)$max_vacations;
+   $vac_restrict = "Lastaccess > FROM_UNIXTIME($NOW) - INTERVAL $vac_maxusercheck DAY";
+
    $result = db_query( 'halfhourly_cron.onvacation',
-      "SELECT ID, ClockUsed FROM Players WHERE OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
+      "SELECT ID, ClockUsed FROM Players " .
+      "WHERE $vac_restrict AND OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
 
    while( $prow = mysql_fetch_assoc( $result ) )
    {
@@ -303,12 +312,12 @@ if( !$is_down )
 
 // Change vacation days
 
-   $max_vacations = 365.24/12; //1 month
    db_query( 'halfhourly_cron.vacation_days',
       "UPDATE Players SET OnVacation=GREATEST(0, OnVacation - 1/($this_ticks_per_day))" //1 day after 1 day
       .",VacationDays=LEAST($max_vacations, VacationDays + 1/(12*$this_ticks_per_day))" //1 day after 12 days
-      ." WHERE VacationDays<$max_vacations OR OnVacation>0" // LIMIT ???
+      ." WHERE $vac_restrict AND VacationDays<$max_vacations OR OnVacation>0" // LIMIT ???
       );
+
 
    db_query( 'halfhourly_cron.reset_tick',
          "UPDATE Clock SET Ticks=0 WHERE ID=202 LIMIT 1" );
