@@ -1937,27 +1937,14 @@ class ForumRead
    /*! \brief Replaces ForumRead-db-entry with time and newcount for specified fid/tid/pid-key. */
    function replace_row_forumread( $dbgmsg, $fid, $tid, $pid, $time, $newcount )
    {
-      //TODO use 'INSERT .. ON DUPLICATE UPDATE', need 4.1.x and 5.0.38 for replication-bugfix
-      // NOTE:
-      // - REPLACE is shorter, but not faster as it's a DELETE + INSERT !
-      // - affected-rows can be also 0, if old/new-values for update are the same
-      //   => use insert-IGNORE-option
-      $argstr = "{$this->uid},$fid,$tid,$pid";
-      db_query( "{$dbgmsg}($argstr)",
-         "UPDATE ForumRead SET NewCount=$newcount, Time=FROM_UNIXTIME($time) "
-            . "WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND "
-            . "Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" );
-      if( mysql_affected_rows() <= 0 ) // insert if not existing
-      {
-         //TODO: get rid of the 'if' with mysql >= 4.1 (simply using IGNORE option to INSERT)
-         if( mysql_single_fetch( "{$dbgmsg}3($argstr)", "SELECT 1 FROM ForumRead WHERE User_ID='{$this->uid}' AND Forum_ID='$fid' AND Thread_ID='$tid' AND Post_ID='$pid' LIMIT 1" ) === false )
-         {
-            $opt_insert = (version_compare(MYSQL_VERSION, '4.1', '>=')) ? 'IGNORE' : ''; //TODO use direct
-            db_query( "{$dbgmsg}2($argstr)",
-               "INSERT $opt_insert INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time) "
-                  . "VALUES ('{$this->uid}','$fid','$tid','$pid','$newcount',FROM_UNIXTIME($time))" );
-         }
-      }
+      // IMPORTANT NOTE:
+      // - 'INSERT .. ON DUPLICATE UPDATE' need at least 5.0.38 for replication-bugfix,
+      //   can also be used for multi-row inserts.
+      // - REPLACE would be a combined DELETE + INSERT with full index-updating on both steps.
+      db_query( $dbgmsg."({$this->uid},$fid,$tid,$pid,$newcount)",
+         "INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time) "
+            . "VALUES ({$this->uid},$fid,$tid,$pid,$newcount,FROM_UNIXTIME($time)) "
+            . "ON DUPLICATE KEY UPDATE NewCount=VALUES(NewCount), Time=VALUES(Time)" );
    }
 
    /*!
