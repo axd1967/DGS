@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
+require_once( 'include/globals.php' );
 require_once( "include/std_functions.php" );
 require_once( 'include/gui_functions.php' );
 require_once( "include/std_classes.php" );
@@ -353,12 +354,16 @@ $ARR_DBFIELDKEYS = array(
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
    $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
 
+   $link_fmt = ( $finished )
+      ? T_('Link to finished games with opponent [%s]')
+      : T_('Link to running games with opponent [%s]'); // running + all
+
    if( $opp )
    {
       //players infos
       $usform->set_area( 2 );
       $usform->add_row( array(
-            'TEXT', print_players_table( $players, $uid, $opp ) ));
+            'TEXT', print_players_table( $players, $uid, $opp, $finished ) ));
 
       // add stats-table into form (0-value-table if no opp)
       $usform->set_area( 3 );
@@ -454,11 +459,8 @@ $ARR_DBFIELDKEYS = array(
       }
       if( $utable->Is_Column_Displayed[21] )
       {
-         // don't use full filter-selection of opponents-page to link to opponent-games
-         $urow_strings[21] = echo_image_table(
-            "show_games.php?uid=$uid".URI_AMP."opp_hdl={$row['Handle']}"
-               . ( $finished ? URI_AMP.'finished=1' : '' ),
-            sprintf( T_('Link to games with opponent [%s]'), $row['Handle']), true );
+         // don't use full selection of filter-values to link to opponent-games
+         $urow_strings[21] = build_opp_games_link( $uid, $row['Handle'], $finished );
       }
 
       $utable->add_row( $urow_strings );
@@ -508,6 +510,14 @@ $ARR_DBFIELDKEYS = array(
    end_page(@$menu_array);
 }
 
+function build_opp_games_link( $uid, $opp_handle, $fin )
+{
+   global $link_fmt;
+   return echo_image_table(
+      "show_games.php?uid=$uid".URI_AMP."opp_hdl=$opp_handle".REQF_URL.'opp_hdl'
+         . ( $fin ? URI_AMP.'finished=1' : '' ),
+      sprintf($link_fmt, $opp_handle), true );
+}
 
 // return array with dbfields extracted from passed db-result
 // keys: cntGames, cntJigo, (cnt|max)Handicap, cnt(Won|Lost)(|Time|Resign|Score)
@@ -540,7 +550,7 @@ function extract_user_stats( $color, $query = null )
 // echo table with info about both players: uid and opponent
 // param p: players-array[$uid,$opp] = ( ID, Name, Handle, Rating2, Country )
 // param opp: maybe 0|empty
-function print_players_table( $p, $uid, $opp )
+function print_players_table( $p, $uid, $opp, $fin )
 {
    $p1 = $p[$uid];
    $p2 = ( $opp && isset($p[$opp]) ) ? $p[$opp] : null;
@@ -563,10 +573,11 @@ function print_players_table( $p, $uid, $opp )
    // Name, Handle
    $r .= sprintf( $rowpatt, T_('Name'),
       "<A href=\"userinfo.php?uid=$uid\">" . make_html_safe( $p1['Name']) . "</A>",
-      ( $p2 ? "<A href=\"userinfo.php?uid=$opp\">" . make_html_safe( $p2['Name']) . "</A>"
+      ( $p2
+         ? "<A href=\"userinfo.php?uid=$opp\">" . make_html_safe( $p2['Name']) . "</A>"
          : NO_VALUE ) );
    $r .= sprintf( $rowpatt, T_('Userid'),
-      $p1['Handle'],
+      $p1['Handle'] . ( $p2 ? MED_SPACING . build_opp_games_link( $uid, $p2['Handle'], $fin ) : '' ),
       ( $p2 ? $p2['Handle'] : $SPC) );
 
    // Country
