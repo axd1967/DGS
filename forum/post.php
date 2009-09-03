@@ -35,6 +35,8 @@ function hit_thread( $thread )
 
 /*!
  * \brief Saves post-message for use-cases U06/U07/U08/U09
+ * \return array( id, msg ); if id=inserted/updated-Post.ID: msg contains success-message,
+ *         if id=0: msg contains error-message (post not saved!)
  * \see specs/forums.txt
  */
 function post_message($player_row, $cfg_board, $forum_opts, &$thread )
@@ -42,23 +44,20 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    global $NOW, $order_str;
 
    if( $player_row['MayPostOnForum'] == 'N' )
-      return T_('Sorry, you are not allowed to post on the forum');
+      return array( 0, T_('Sorry, you are not allowed to post on the forum') );
 
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum_opts ) )
-      error('forbidden_forum');
+      error('forbidden_forum', "post_message({$player_row['ID']})");
 
    $forum = @$_POST['forum']+0;
    $parent = @$_POST['parent']+0;
    $edit = @$_POST['edit']+0;
 
    $Text = trim(get_request_arg('Text'));
-   if( $Text == '' )
-      return '';
-   // TODO return on empty subject (subject & text are mandatory)
    $Subject = trim(get_request_arg('Subject'));
-   if( $Subject == '' )
-      $Subject = UNKNOWN_VALUE;
+   if( (string)$Subject == '' || (string)$Text == '' )
+      return array( 0, T_('Message not saved, because of missing subject and/or text-body.') );
 //   $allow_go_diagrams = ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() );
 //   if( $allow_go_diagrams) $GoDiagrams = create_godiagrams($Text, $cfg_board);
    $Subject = mysql_addslashes( $Subject);
@@ -110,7 +109,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 
       hit_thread( $thread );
 
-      return $edit;
+      return array( $edit, T_('Message updated!') );
    }//edit-post
    else
    {
@@ -203,7 +202,8 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
       if( $moderated ) // hidden post
       {
          add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_PEND_POST . $flog_actsuffix );
-         return T_('This post is subject to moderation. It will be shown once the moderators have approved it.');
+         return array( $New_ID, T_('This post is subject to moderation. '
+            . 'It will be shown once the moderators have approved it.') );
       }
       else // shown post
       {
@@ -230,7 +230,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 
          add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_POST . $flog_actsuffix );
 
-         return T_('Message sent!');
+         return array( $New_ID, T_('Message sent!') );
       }
    }//add-post
 } //post_message

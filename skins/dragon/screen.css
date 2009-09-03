@@ -2594,6 +2594,12 @@ form#tableFSFForm td.Description {
    text-align: left;
 }
 
+table.Forum span.ErrorMsg {
+   color: darkred;
+   font-style: normal;
+   font-weight: bold;
+}
+
 
 /* ------------------------- */
 /* Tournaments pages */

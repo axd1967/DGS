@@ -105,15 +105,20 @@ function revision_history( $display_forum, $post_id )
 //   if( ALLOW_GO_DIAGRAMS && ( $preview || isset($_POST['post']) ) )
 //      $cfg_board = ConfigBoard::load_config_board($my_id);
 
+   $post_errmsg = '';
    if( isset($_POST['post']) )
    {
-      $msg = post_message($player_row, $cfg_board, $forum->options, $thread);
-      if( is_numeric( $msg) && $msg>0 )
-         jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread#$msg");
-      else
-         //TODO: jump to inserted post (not to new, there might be more and not the first one)
+      list( $pmsg_id, $msg ) = post_message($player_row, $cfg_board, $forum->options, $thread);
+      if( $pmsg_id )
+      {// added/edited post successfully
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
-            . URI_AMP."sysmsg=".urlencode($msg)."#new1");
+            . URI_AMP."sysmsg=".urlencode($msg)."#$pmsg_id");
+      }
+      else
+      {// error detected, post not saved -> switch to preview
+         $preview = true;
+         $post_errmsg = $msg;
+      }
    }
 
    // prepare users forum-reads
@@ -309,7 +314,7 @@ function revision_history( $display_forum, $post_id )
             $GoDiagrams = null;
          }
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-         $disp_forum->forum_message_box($drawmode_type, $pid, $GoDiagrams,
+         $disp_forum->forum_message_box($drawmode_type, $pid, $GoDiagrams, $post_errmsg,
             $pvw_post->subject, $pvw_post_text);
          echo "</td></tr>\n";
       }
@@ -325,7 +330,7 @@ function revision_history( $display_forum, $post_id )
       $disp_forum->draw_post(DRAWPOST_PREVIEW, $post, false, $GoDiagrams );
 
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-      $disp_forum->forum_message_box(DRAWPOST_PREVIEW, $thread, $GoDiagrams,
+      $disp_forum->forum_message_box(DRAWPOST_PREVIEW, $thread, $GoDiagrams, $post_errmsg,
          $post->subject, $post->text );
       echo "</td></tr>\n";
    }
@@ -337,7 +342,7 @@ function revision_history( $display_forum, $post_id )
       echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
       if( $thread > 0 )
          echo '<hr>';
-      $disp_forum->forum_message_box(DRAWPOST_NORMAL, $thread, null, $thread_Subject);
+      $disp_forum->forum_message_box(DRAWPOST_NORMAL, $thread, null, '', $thread_Subject);
       echo "</td></tr>\n";
    }
 

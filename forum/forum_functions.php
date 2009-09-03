@@ -522,7 +522,7 @@ class DisplayForum
    }//get_new_string
 
    // \param $drawmode one of DRAWPOST_NORMAL | PREVIEW | EDIT | REPLY
-   function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $Subject='', $Text='')
+   function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='' )
    {
       global $player_row;
       if( $player_row['MayPostOnForum'] == 'N' ) // user not allowed to post
@@ -540,11 +540,18 @@ class DisplayForum
       if( @$player_row['ID'] <= GUESTS_ID_MAX )
       {
          $form->add_row( array(
-               'DESCRIPTION', sprintf('<font color="darkred"><b>%s</b></font>', T_('NOTE#guest')),
-               'TEXT', T_("Forum posts by the guest-user can be approved or rejected by the server admins.<br>\n"
-                        . 'If you want a private (non-public) answer, add your email and ask for private contact.') ));
+               'DESCRIPTION', sprintf('<span class="ErrorMsg"><b>%s</b></span>', T_('NOTE#guest')),
+               'TEXT', '<span class="ErrorMsg">'
+                        . T_("Forum posts by the guest-user can be approved or rejected by the server admins.<br>\n"
+                           . "If you want a private (non-public) answer, add your email and ask for private contact.")
+                        . '</span>' ));
       }
-
+      if( $ErrorMsg )
+      {
+         $form->add_row( array(
+               'DESCRIPTION', sprintf('<span class="ErrorMsg"><b>%s</b></span>', T_('Error#forum')),
+               'TEXT', "<span class=\"ErrorMsg\">$ErrorMsg</span>" ));
+      }
 
       $form->add_row( array(
             'DESCRIPTION', T_('Subject'),
