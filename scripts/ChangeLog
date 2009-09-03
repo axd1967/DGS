@@ -22,11 +22,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-09-03 juga
+
+   * opponents.php:
+   - added opponent-games-link on game-statistics page in players-info
+   - enhanced opponent-games-link by "finished" or "running" games
+
+   * include/filter.php (SearchFilter, ~.add_filter, ~.extract_filter_formname,
+       ~.add_or_del_filter, ~.get_required_ids, ~.to_string, ~.reset_filter),
+     include/table_columns.php (Table.add_or_del_column),
+     include/globals.php, specs/filters.txt,
+     opponents.php, show_games.php, site_map.php, userinfo.php, NEWS:
+   - bugfix: filter-framework can now add hidden columns on-the-fly if required,
+     so table-columns need not be static any more to workaround this problem
+     - added parsing of REQF_URL-parameter used to declare required filters for search,
+     - required filters are skipped on filter-reset
+     - added Table-handling to add hidden columns for required filters
+     - make Rated/Won-columns on games-lists non-static,
+       adjusted source-links on user-info and site-map
+
+   * show_games.php, scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
+   - added filter-search for existance of game-comments for my finished games
+-----------
+-- added index to search for games with comments
+ALTER TABLE Games
+   ADD INDEX Flags (Flags) ;
+-----------
+
+   * scripts/player_consistency.php:
+   - added consistency-check for Players/ConfigBoard/ConfigPages/UserQuota-tables,
+     fix missing entries by inserting
+
 2009-09-02 juga
 
    * halfhourly_cron.php, NEWS:
    - optimize vacation-check-queries by restricting it on Players.Lastaccess within
-     twice max-vacation to avoid yet more indexes (OnVacation/VacationDays-fields)
+     twice max-vacation to avoid yet more indexes (Players.OnVacation/VacationDays)
 
    * forum/forum_functions.php (DisplayForum.get_new_string,
        ForumThread.load_revision_history),
@@ -53,8 +84,7 @@ ChangeLog
      game.php, statisticspng.php, statratingspng.php:
    - slight optimize (loop-invariants)
 
-   * include/connect2mysql.php (db_close),
-     edit_vacation.php, game.php:
+   * include/connect2mysql.php (db_close), edit_vacation.php, game.php:
    - removed or moved closing of db-connection;
      in general position of db_close() must take into account,
      that texts may contain DGS-markup still needing db-access
