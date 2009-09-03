@@ -2333,6 +2333,9 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied');
 
+   setTZ( $player_row['Timezone']);
+
+
    $session_expired= ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
 
    $query = "UPDATE Players SET Hits=Hits+1";
@@ -2423,6 +2426,13 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
                  .",VaultTime=FROM_UNIXTIME($vaulttime)";
       }
    }//fever-fault check
+
+   // DST-check if the player's clock need an adjustment from/to summertime
+   if( $player_row['ClockChanged'] != 'Y'
+         && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
+   {
+      $query .= ",ClockChanged='Y'"; // ClockUsed is updated once a day...
+   }
 
    // check aggregated counts
    $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );

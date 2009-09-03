@@ -42,15 +42,6 @@ $ThePage = new Page('Status');
    $cfg_pages = ConfigPages::load_config_pages( $my_id, CFGCOLS_STATUS_GAMES );
    $cfg_tblcols = $cfg_pages->get_table_columns();
 
-   //check if the player's clock need an adjustment from/to summertime
-   if( $player_row['ClockChanged'] != 'Y' &&
-      $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
-   {
-      // ClockUsed is updated once a day...
-      db_query( 0 /* "status.summertime($my_id)" */,
-         "UPDATE Players SET ClockChanged='Y' WHERE ID=$my_id LIMIT 1" );
-   }
-
 
    // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
