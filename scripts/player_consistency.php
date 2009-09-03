@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 chdir( '../' );
 require_once( "include/std_functions.php" );
+require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/classlib_userquota.php' );
 
 define('DEBUG',0);
 
@@ -437,6 +439,56 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>Misc Done.";
 
+
+//----------------- Player-related tables (ConfigBoard, ConfigPages, UserQuota)
+
+   $begin = getmicrotime();
+   echo "\n<br>";
+
+   // check missing ConfigBoard/ConfigPages/UserQuota
+   $query = "SELECT P.ID, IFNULL(CB.User_ID,0) AS XCB_uid, " .
+               "IFNULL(CP.User_ID,0) AS XCP_uid, IFNULL(UQ.uid,0) AS XUQ_uid " .
+            "FROM Players AS P " .
+               "LEFT JOIN ConfigBoard AS CB ON CB.User_ID=P.ID " .
+               "LEFT JOIN ConfigPages AS CP ON CP.User_ID=P.ID " .
+               "LEFT JOIN UserQuota AS UQ ON UQ.uid=P.ID " .
+            uid_clause( 'P.ID', 'AND' ) .
+            "HAVING (XCB_uid=0 OR XCP_uid=0 OR XUQ_uid=0) " .
+            "ORDER BY P.ID $limit";
+   $result = explain_query($query)
+      or die("PlayersFK.A: " . mysql_error());
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      $uid = $row['ID'];
+      if( $row['XCB_uid'] == 0 )
+      {
+         $err++;
+         echo "Inserting ConfigBoard for user-id [$uid] ...\n<br>";
+         if( $do_it )
+            ConfigBoard::insert_default( $uid );
+      }
+      if( $row['XCP_uid'] == 0 )
+      {
+         $err++;
+         echo "Inserting ConfigPages for user-id [$uid] ...\n<br>";
+         if( $do_it )
+            ConfigPages::insert_default( $uid );
+      }
+      if( $row['XUQ_uid'] == 0 )
+      {
+         $err++;
+         echo "Inserting UserQuota for user-id [$uid] ...\n<br>";
+         if( $do_it )
+            UserQuota::insert_default( $uid );
+      }
+   }
+   if( $err )
+      echo "\n<br>--- $err error(s) found.";
+
+   echo "\n<br>Player-related tables Done.";
+
+   echo "\n<br>";
 
 //----------------- main-menu counters
 
