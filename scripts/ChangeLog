@@ -24,6 +24,21 @@ ChangeLog
 
 2009-09-03 juga
 
+   * forum/forum_functions.php (DisplayForum.forum_message_box),
+     forum/post.php (post_message), forum/read.php, skins/dragon/screen.css:
+   - preserved entered forum-message on missing subject and/or text,
+     switching into preview
+   - show optional error-message above forum-message-box
+   - use CSS for description-header
+
+   * include/std_functions.php (is_logged_in), status.php:
+   - moved check and switch for DST (daylight-saving-time) from status-page
+     into is_logged_in() in std-functions
+
+   * forum/forum_functions.php (ForumRead.replace_row_forumread), INSTALL:
+   - replaced 3-step UPDATE/check/INSERT with "INSERT .. ON DUPLICATE UPDATE"
+     supported by MySQL >= 5.0.38 (bugfix)
+
    * opponents.php:
    - added opponent-games-link on game-statistics page in players-info
    - enhanced opponent-games-link by "finished" or "running" games
