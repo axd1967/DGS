@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
+require_once( 'include/globals.php' );
 require_once( "include/std_functions.php" );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/time_functions.php' );
@@ -94,9 +95,10 @@ $ThePage = new Page('UserInfo');
 
    $run_link = "show_games.php?uid=$uid";
    $fin_link = $run_link.URI_AMP.'finished=1';
-   $rat_link = $fin_link.URI_AMP.'rated=1'; //Rated=yes
-   $won_link = $rat_link.URI_AMP.'won=1'; //Won?=Won
-   $los_link = $rat_link.URI_AMP.'won=2'; //Won?=Lost
+   $rat_link = $fin_link.URI_AMP.'rated=1'.REQF_URL.'rated'; //Rated=yes
+   $won_link = $rat_link.URI_AMP.'won=1'.REQF_URL.'rated,won'; //Won?=Won
+   $los_link = $rat_link.URI_AMP.'won=2'.REQF_URL.'rated,won'; //Won?=Lost
+
 
    // get player clock
    $tmpTZ = setTZ($row['Timezone']); //for get_clock_used() and local time

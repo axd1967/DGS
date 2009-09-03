@@ -137,9 +137,9 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('My rating graph'), "ratinggraph.php?uid=$id", true);
          item(T_('My running games'), "show_games.php?uid=$id", true);
          item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
-         item(T_('My rated games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1", true);
-         item(T_('My won games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=1", true);
-         item(T_('My lost games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=2", true);
+         item(T_('My rated games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".REQF_URL.'rated', true);
+         item(T_('My won games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=1".REQF_URL.'rated,won', true);
+         item(T_('My lost games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=2".REQF_URL.'rated,won', true);
          item(T_('Edit profile'), "edit_profile.php", true);
          item(T_('Edit biographical info'), "edit_bio.php", true);
          item(T_('Edit user picture'), "edit_picture.php", true);
