@@ -1349,3 +1349,7 @@ ALTER TABLE Games
 UPDATE Contacts SET Created=Lastchanged WHERE YEAR(Created)=1970 ;
 
 
+-- added index to search for games with comments
+ALTER TABLE Games
+   ADD INDEX Flags (Flags) ;
+
