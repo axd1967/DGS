@@ -137,6 +137,8 @@ $ThePage = new Page('GamesList');
    // table filters
    //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
+   if( $finished && !$all ) //FU
+      $gfilter->add_filter(41, 'Boolean', 'Games.Flags>0 AND (Games.Flags & 2)', true );
    $gfilter->add_filter( 6, 'Numeric', 'Size', true,
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 7, 'Numeric', 'Handicap', true,
@@ -369,7 +371,7 @@ $ThePage = new Page('GamesList');
    //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead(32, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'Image', 0 ); // game-info
-   if( $finished && !$all )
+   if( $finished && !$all ) //FU
       $gtable->add_tablehead(41, new TableHead( $gcomm_str, 'images/game_comment.gif', $gcomm_str), 'Image', 0 ); // game-comment
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( $observe_all )
@@ -461,11 +463,11 @@ $ThePage = new Page('GamesList');
       else //FU ?UNION
       {
          $gtable->add_tablehead(10, T_('Score#header'), '', 0, 'Score-'); //despite ?UNION else X_Score
-         $gtable->add_tablehead(11, T_('Win?#header'), 'Image', TABLE_NO_HIDE, 'X_Score-');
+         $gtable->add_tablehead(11, T_('Win?#header'), 'Image', 0, 'X_Score-');
       }
    }
 
-   $gtable->add_tablehead(14, T_('Rated#header'), '', TABLE_NO_HIDE, 'X_Rated-');
+   $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
 
    // col 13 must be static for RESTRICT_SHOW_GAMES_ALL
    $table_mode13 = ($restrict_games) ? TABLE_NO_HIDE : 0;
