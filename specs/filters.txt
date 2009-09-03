@@ -5,7 +5,7 @@
 
 ## /*
 ## Dragon Go Server
-## Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
+## Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU Affero General Public License as
@@ -133,6 +133,7 @@ This section contains several subsections, you may be interested in:
    - Page-links and form-elements
    - How to combine tables, forms and additional URL-vars with filters
    - How to manage different filter-sets on one page
+   - Traps and Tips for linking to filtered page
 
 
 Filters can be used with a static form (only), can be included in a Table
@@ -254,7 +255,7 @@ To add a filter to the SearchFilter-container use the following class-function:
 
    add_filter( $id, $type, $dbfield, $active = false, $config = null );
 
-Each filter is identified with a numerical id normally in range 1..32.
+Each filter is identified with a numerical id normally in range 1..BITSET_MAXSIZE.
 When used with the Table-class, the identifiers of the filter must match
 with the respective table-column-id.
 
@@ -547,8 +548,9 @@ in the previous subsection, two SearchFilters are defined:
    $ufilter = new SearchFilter();
 
 One with prefix and one without to have different namespaces.
-With that mechanism you can also define more than 32 filters, though only
-32 filters applied on a single table and its corresponding filters.
+With that mechanism you can also define more than BITSET_MAXSIZE filters,
+though only BITSET_MAXSIZE filters applied on a single table and its
+corresponding filters.
 
 Be aware that there is an exception when using the filter-config FC_FNAME.
 If you specify an alternative form-elements-name with this config, the prefix
@@ -558,6 +560,30 @@ different views. The other purpose of FC_FNAME was to allow to pass-in
 a filter-value over URL without using a cryptic name like 'sf<ID>',
 that could be subject to change, if the order of filter-IDs is changed
 (for example, see the page "users.php" for the 'active'-filter).
+
+# ----- Traps and Tips for linking to filtered page
+
+When linking from other pages to a page on which filtering should take place,
+you must be aware, that as long as filter and columns are not defined as STATIC,
+columns with filters you want to filter on are hidden (not shown).
+
+When the Table-class is used, there's a simple way to specify an additional
+declaration of required filter-fields:
+
+   filtered_page.php?finished=1&rated=1&won=2&sf_req=rated,won
+
+The above link contains the URL-part 'sf_req' (see constant REQF_URL), that
+provides the mechanism to add hidden columns in case they are not shown on
+the filtered page. The required columns are "permanently" added: it's the same
+as you would add a column to the Table with GUI-control elements. The additional
+URL-arg can also contain field-ID-numbers instead of the names.
+
+Adding the table-column in this way, simplifies the the handling of the page's
+SearchProfile dramatically.
+
+This may not what the user wants to. There's only the other possibility
+to declare a filter and its table-column in a static fashion, so the column
+is always visible.
 
 
 #-------- (4) Development Guide -----------------------------------------------
@@ -679,6 +705,11 @@ see section (2) Classes and Files.
 
   Yes. See "include/filter.php" function "is_init()" and "is_reset()".
   Example in "show_games.php", see game-restriction RESTRICT_SHOW_GAMES_ALL.
+
+* Can I dynamically add columns/filters when using links, even when some
+  of the filtered columns are "removed" ?
+
+  Yes. See description above about REQF_URL-parameter.
 
 * What filter can be used to search for negative numeric values ?
 

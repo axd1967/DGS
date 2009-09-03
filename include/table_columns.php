@@ -619,6 +619,7 @@ class Table
 
       // handle filter-visibility
       $this->Filters->add_or_del_filter();
+      $arr_required_cols = $this->Filters->get_required_ids();
 
       // handle show-rows
       $this->handle_show_rows();
@@ -637,6 +638,15 @@ class Table
          $dels = array($dels);
 
       $bitset =& $this->CfgTableCols->get_bitset();
+
+      // add columns not visible yet but needed for filtering
+      foreach( $arr_required_cols as $col_nr )
+      {
+         if( !$bitset->get_bit($col_nr) && !in_array($col_nr, $adds) )
+            $adds[] = $col_nr;
+      }
+
+      // add and delete table-columns
       $max_bits = $this->CfgTableCols->get_maxsize();
       $old_bithex = $bitset->get_hex_format();
       foreach( $adds as $add )

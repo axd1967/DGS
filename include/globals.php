@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( "include/config-local.php" );
+
 /*!
  * \file globals.php
  *
@@ -40,5 +42,11 @@ define('FOLDER_DELETED', 4); // Trashcan-folder
 define('FOLDER_SENT', 5);
 //User folders must be >= USER_FOLDERS
 define('USER_FOLDERS', 6);
+
+
+// ---------- Filter stuff ----------------------------------------
+
+define('FNAME_REQUIRED', 'sf_req');  // comma-separated list of required filters (id or name); not included in SearchProfile!!
+define('REQF_URL', URI_AMP.FNAME_REQUIRED.'=');  // prepared URL-part for appending to require certain filters
 
 ?>

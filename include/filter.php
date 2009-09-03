@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
+require_once( 'include/globals.php' );
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
 require_once( "include/form_functions.php" );
@@ -252,11 +253,15 @@ class SearchFilter
 {
    /*! \brief array storing filters: arr( id => Filter ) */
    var $Filters;
+   /*! \brief array of (optional) form-element-names for filters: arr( form-element-name => id ) */
+   var $FilterFormNames;
    /*! \brief Prefix used to build vars for URL/form-names (without PFX_FILTER). */
    var $Prefix;
    /*! \brief Profile-handler */
    var $ProfileHandler;
 
+   /*! \brief List of filter-IDs additionally required (skipped on filter-reset): arr( id => 1 ) */
+   var $RequiredFilters;
    /*! \brief previous hash-code to check if filter-values have changed. */
    var $HashCode;
    /*! \brief true, if filter is initialized; false = no-search-started yet */
@@ -280,6 +285,9 @@ class SearchFilter
       $this->set_accesskeys( ACCKEY_ACT_FILT_SEARCH, ACCKEY_ACT_FILT_RESET );
 
       $this->set_profile_handler( $prof_handler );
+
+      $this->FilterFormNames = array();
+      $this->RequiredFilters = array();
    }
 
    /*! \brief Sets ProfileHandler managing search-profiles; use NULL to clear it. */
@@ -297,7 +305,8 @@ class SearchFilter
                FNAME_INIT,
             ));
 
-         // NOTE: \d+\w* capture most of the additional-element-names, e.g. for Score/RelativeDate/CheckboxArray/MysqlMatch-Filter
+         // NOTE: \d+\w* capture most of the additional-element-names,
+         //       e.g. for Score/RelativeDate/CheckboxArray/MysqlMatch-Filter
          $this->ProfileHandler->register_regex_save_args(
             sprintf( "%s(%s|%s|%s|%s)|%s",
                $pfx, PFX_FILTER."\d+\w*", FNAME_INIT, FNAME_ACTIVE_SET, FNAME_HASHCODE,
@@ -363,6 +372,7 @@ class SearchFilter
       $filter = new $filter_class($id, $dbfield, $config); // error if unknown class
       $filter->SearchFilter = $this;
       $this->Filters[$id] =& $filter; // need ref
+      $this->extract_filter_formname($filter);
 
       // init filter
       $filter->set_active($active);
@@ -377,6 +387,13 @@ class SearchFilter
       }
 
       return $filter;
+   }
+
+   /*! \brief Extracts optional filters form-name and sets up name-reference. */
+   function extract_filter_formname( $filter )
+   {
+      if( (string)($fname = $filter->get_config(FC_FNAME)) != '' )
+         $this->FilterFormNames[$fname] = $filter->id;
    }
 
    /*! \brief Parses vars from _REQUEST to initialize filters with internal and filter-values. */
@@ -455,7 +472,7 @@ class SearchFilter
       $this->accesskeys[1] = $acckey_reset;
    }
 
-   /*! \brief Parses vars from _REQUEST to update activity-state of filters (used for Table). */
+   /*! \brief Parses vars from _REQUEST to update activity-state and required-IDs for filters (used for Table). */
    function add_or_del_filter()
    {
       $act = (string) $this->get_arg(FFORM_TOGGLE_ACTION, true); // set if show-/hide-action needed
@@ -476,6 +493,28 @@ class SearchFilter
          else // fname=0 (hide all)
             $this->setall_active(false);
       }
+
+      // parse additionally requested filter-IDs (from links for example)
+      $freq_str = trim( (string) $this->get_arg(FNAME_REQUIRED, false) );
+      if( (string)$freq_str != '' )
+      {
+         $arr_freq = explode(',', $freq_str);
+         foreach( $arr_freq as $req_fid )
+         {
+            if( !is_numeric($req_fid) && isset($this->FilterFormNames[$req_fid]) )
+               $req_fid = $this->FilterFormNames[$req_fid];
+            if( !is_numeric($req_fid) || !isset($this->Filters[$req_fid]) )
+               error('invalid_filter', "SearchFilter.add_or_del_filter($req_fid)");
+
+            $this->RequiredFilters[$req_fid] = 1;
+         }
+      }
+   }
+
+   /*! \brief Returns non-empty filter-id array, that are required for filtering (parsed from FNAME_REQUIRED-arg). */
+   function get_required_ids()
+   {
+      return array_keys($this->RequiredFilters);
    }
 
    /*! \brief Returns reference of specified filter or null if no filter defined for id. */
@@ -584,15 +623,29 @@ class SearchFilter
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   function to_string( $short=false )
    {
       $out = "SearchFilter={ Prefix=[{$this->Prefix}], HashCode=[{$this->HashCode}], is_init=[{$this->is_init}], "
-         . "is_reset=[{$this->is_reset}],";
+         . "is_reset=[{$this->is_reset}], ";
+
+      $nout = array();
+      foreach( $this->FilterFormNames as $fname => $fid )
+         $nout[] = "$fname=$fid";
+      $out .= 'FilterFormNames=[' . implode(' ', $nout) . '], ';
+
+      $out .= 'RequiredFilters=['.implode(' ', array_keys($this->RequiredFilters)).'], ';
+
       $cnt = 0;
-      foreach( $this->Filters as $filter )
+      $arr_filters = $this->Filters;
+      ksort($arr_filters, SORT_NUMERIC);
+      foreach( $arr_filters as $fid => $filter )
       {
          $cnt++;
-         $out .= "$cnt. " . $filter->to_string() . "\n";
+         if( $short )
+            $out .= sprintf( "%s. Filter.%s: type=%s, name=%s, vis=%s, act=%s, value=[%s]\n",
+               $cnt, $filter->id, $filter->type, $filter->name, $filter->visible, $filter->active, $filter->value );
+         else
+            $out .= "$cnt. " . $filter->to_string() . "\n";
       }
       return $out;
    }
@@ -870,12 +923,18 @@ class SearchFilter
    }
 
 
-   /*! \brief Resets specified filter to default-state (clear if no default-set). */
+   /*!
+    * \brief Resets specified filter to default-state (clear if no default-set),
+    * unless filter is flagged as required.
+    */
    function reset_filter( $id )
    {
-      $filter =& $this->get_filter($id);
-      if( isset($filter) )
-         $filter->reset();
+      if( !@$this->RequiredFilters[$id] )
+      {
+         $filter =& $this->get_filter($id);
+         if( isset($filter) )
+            $filter->reset();
+      }
    }
 
    /*! \brief Resets specified choice (GETFILTER_...) of managed filters to their default-state. */
