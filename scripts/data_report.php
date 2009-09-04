@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2007  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2009  Erik Ouchterlony, Rod Ival
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
 
-// DGS seems to not allow "unbeffered" queries...
+// DGS seems to not allow "unbuffered" queries...
 // meanwhile, not very useful, see below.
 define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
@@ -83,7 +83,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    /*
       The mysql_unbuffered_query() implementation was a test. It is useless
       to control the MySQL queries resulting in a too long run time.
-      The code just reminds here for memory.
+      The code just remains here for memory.
       MySQL < 5.* seems unable to abort a query before the first result row.
       Waiting for better, a query result is now displayed in two steps:
        1) enter (or modify) some fields in the query form.
