@@ -1151,7 +1151,12 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    return $rows_updated;
 }//change_folders
 
-function echo_folders($folders, $current_folder)
+/*!
+ * \brief Builds string with user folders in table with links to browse respective folder.
+ * \param $current_folder current-folder (will be marked)
+ * \param $curr_linked false if current folder should not be shown with link
+ */
+function echo_folders( $folders, $current_folder, $curr_linked=true )
 {
    global $STANDARD_FOLDERS;
 
@@ -1168,11 +1173,10 @@ function echo_folders($folders, $current_folder)
           $string .= "</tr>\n<tr><td></td>"; //empty cell under title
       $i++;
 
-      if( $nr == $current_folder)
-         $string.= echo_folder_box( $folders, $val, null, 'class=Selected');
-      else
-         $string.= echo_folder_box( $folders, $val, null, 'class=Tab'
-                        , "<a href=\"list_messages.php?folder=$nr\">%s</a>");
+      $fclass = ( $nr == $current_folder ) ? 'Selected' : 'Tab';
+      $link_fmt = ( $curr_linked || $nr != $current_folder )
+         ? "<a href=\"list_messages.php?folder=$nr\">%s</a>" : '';
+      $string .= echo_folder_box( $folders, $val, null, 'class='.$fclass, $link_fmt );
    }
    $i = ($i % FOLDER_COLS_MODULO);
    if( $i > 0 ) //empty cells of last line
@@ -1358,7 +1362,7 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
       $mid = $row["mid"];
 
       $folder_nr = $row['folder'];
-      $deleted = ( is_null($folder_nr) );
+      $deleted = ( $folder_nr == FOLDER_DESTROYED );
       $bgcolor = $mtable->blend_next_row_color_hex();
       $thread = $row['Thread'];
 
@@ -1408,10 +1412,8 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
 
       if( !$no_mark )
       {
-         if( $folder_nr == FOLDER_NEW || $row['Replied'] == 'M'
-               || ( $folder_nr == FOLDER_REPLY && $row['Type'] == 'INVITATION' && $row['Replied'] != 'Y' )
-               || $deleted )
-         {
+         if( $row['Replied'] == 'M' )
+         {// message needs reply (so forbid marking and force inspection)
             $mrow_strings[ 5] = '';
          }
          else
