@@ -17,6 +17,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//
+// NOTE: this script is adjusted to DGS, but phpMyAdmin may be a help too!!
+//
+
+
 chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
@@ -154,8 +159,8 @@ function insert_values( $table, $names, $query, $title=false)
 
    /**
     * TODO: it would be better to soon switch to the new_style_dump
-    * for this function because the OLD_STYLE_DUMP syntaxe does not
-    * insure that some columns are not swaped.
+    * for this function because the OLD_STYLE_DUMP syntax does not
+    * ensure that some columns are not swaped.
     * - by construction - without warning -
     **/
    //TODO: substitute REPLACE to INSERT?
@@ -206,7 +211,7 @@ INSERT INTO TranslationTexts
             . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
             . CRINDENT."($names) VALUES"
             . substr( $text, 0, -1) .";";
-   } //OLD_STYLE_DUMP
+   } //!OLD_STYLE_DUMP
 
    if( $title !== false )
       $text = comment_block( $title).$text.CR;
@@ -262,9 +267,14 @@ function after_table( $table)
             global $GUESTPASS;
             $str = comment_block('Insert Guest account')
                .CR."INSERT INTO Players SET"
+               .CRINDENT."ID=1,"
                .CRINDENT."Handle=".safe_value('guest').","
                .CRINDENT."Name=".safe_value('Guest').","
                .CRINDENT."Password=".PASSWORD_ENCRYPT."(".safe_value($GUESTPASS).");"
+               .CR
+               .CR."INSERT INTO ConfigPages SET User_ID=1 ;"
+               .CR."INSERT INTO ConfigBoard SET User_ID=1 ;"
+               .CR."INSERT INTO UserQuota SET uid=1 ;"
                .CR;
             break;
 
@@ -291,6 +301,8 @@ function get_tables( $database)
             'Players',
             'ConfigBoard',
             'ConfigPages',
+            'UserQuota',
+            'Profiles',
             'Games',
             'GamesNotes',
             'Bio',
@@ -303,13 +315,15 @@ function get_tables( $database)
             'Moves',
             'MoveMessages',
             'Waitingroom',
+            'WaitingroomJoined',
             'Observers',
             'Contacts',
             'Tournament',
-            'TournamentRound',
-            //'Knockout',
-            'TournamentOrganizers',
+            'TournamentDirector',
             'TournamentParticipants',
+            'TournamentProperties',
+            'TournamentRound',
+            'TournamentRules',
             'Errorlog',
             'Adminlog',
             'Forumlog',
@@ -322,7 +336,7 @@ function get_tables( $database)
             'TranslationPages',
             'Forums',
             'Posts',
-            'Forumreads',
+            'Forumreads', //FIXME not used since DGS 1.0.15-release
             'ForumRead',
             'GoDiagrams',
             'FAQ',
@@ -357,9 +371,9 @@ function get_tables( $database)
 
 // definitions_fix -------------
 // hide some variations between MySQL or DGS versions.
-$defs_bef= array();
+$defs_bef= array(); // defs_bef|aft[table][field1] = field2  (field1 before|after field2)
 $defs_aft= array();
-$defs_rep= array();
+$defs_rep= array(); // repair defs_rep[table][field][regex] = replacement
 
 //those are the default values of older versions
 // Date timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
@@ -374,7 +388,7 @@ foreach( array(
       ['%\s+default\s+CURRENT_TIMESTAMP\s+on\s+update\s+CURRENT_TIMESTAMP\b%is'] = '';
    $defs_rep[$table]['Date']
       ['%timestamp(\s*[^\(])%is'] = 'timestamp(14)\\1';
-   $defs_bef[$table]['Date'] = 'PRIMARY';
+   //$defs_bef[$table]['Date'] = 'PRIMARY';
 }
 // PosIndex varchar(80) character set latin1 collate latin1_bin NOT NULL default '',
 // PosIndex varchar(80) binary NOT NULL default '',
@@ -385,26 +399,29 @@ $defs_rep['*']['*']
    ['%\s+character\s+set\s+latin1\b%is'] = '';
 
 
+// correct field-order
+/* FIXME not needed(?) after DB-sync for DGS 1.0.15 release
 //$defs_{move}[{table}][{src}] = {dst};
 switch( (string)FRIENDLY_SHORT_NAME )
 {
    case 'dDGS':
       //$defs_aft['GoDiagrams']['Date'] = 'SGF';
-      $defs_aft['Adminlog']['IP'] = 'Date';
-      $defs_aft['Errorlog']['IP'] = 'Date';
+      //$defs_aft['Adminlog']['IP'] = 'Date';
+      //$defs_aft['Errorlog']['IP'] = 'Date';
       break;
 
    case 'DGS':
       //$defs_???['Messages']['To_ID'] = ''; //still exist in DGS
       //$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
-      $defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
-      $defs_aft['Players']['Rating2'] = 'Rating';
-      $defs_bef['ConfigPages']['StatusFolders'] = 'Running';
-      $defs_aft['Waitingroom']['Handicap'] = 'Komi';
+      //$defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
+      //$defs_aft['Players']['Rating2'] = 'Rating';
+      //$defs_bef['ConfigPages']['StatusFolders'] = 'Running';
+      //$defs_aft['Waitingroom']['Handicap'] = 'Komi';
       break;
 } //FRIENDLY_SHORT_NAME
 //$defs_aft['GamesNotes']['Notes'] = 'Hidden';
-$defs_bef['GamesNotes']['Notes'] = 'PRIMARY';
+//$defs_bef['GamesNotes']['Notes'] = 'PRIMARY';
+*/
 
 
 function definitions_fix( $table, $keys)
@@ -481,7 +498,6 @@ function definitions_fix( $table, $keys)
       $row = def_split($str);
       $name = $row[0];
 
-      $str = '';
       /*
       if( (string)$table == 'Posts' )
       {
@@ -538,7 +554,10 @@ function fdate( $sdat)
 define('HTML_PRE', 1);
 function dump2html( $str)
 {
-   $str = textarea_safe( $str);
+   // NOTE: default without charset doesn't work for TranslationsTexts somehow (must be some strange char in it)
+   //$str = textarea_safe( $str ); TODO
+   $str = textarea_safe( $str, 'ISO-8859-1' );
+
    if( HTML_PRE )
    {
       $str = trim( $str);
@@ -553,7 +572,7 @@ function dump2html( $str)
 
 function echoTR( $typ, $str)
 {
- global $export_it;
+   global $export_it;
 
    if( !$str)
       return $str;
@@ -696,7 +715,7 @@ class dbTable
                . ( IF_NOT_EXISTS ?'IF NOT EXISTS ' :'' )
                . $this->xname.' ('.CR
             . $body
-            . ') TYPE='.$this->engine.$opts.$incr.';'.CR
+            . ') ENGINE='.$this->engine.$opts.$incr.';'.CR
             ;
       }
       return $struct;
@@ -871,10 +890,9 @@ ID,Page,Group_ID
       'TranslationGroups'
          => array('ID,Groupname','','ID'),
       'TranslationPages'
-         => OLD_STYLE_DUMP
-            ?array('ID,Page,Group_ID','', 'Page,Group_ID')
-            :array('Page,Group_ID','', 'Group_ID,Page')
-         ,
+         => ( OLD_STYLE_DUMP
+               ? array('ID,Page,Group_ID','', 'Page,Group_ID')
+               : array('Page,Group_ID','', 'Group_ID,Page') ),
       'TranslationTexts' //Originals
          => array('ID,Text,Ref_ID,Translatable','','ID'),
       'TranslationFoundInGroup'
@@ -1035,6 +1053,7 @@ function freesql_dump( $database, $query)
    else
       $Super_admin = false;
 
+   //FIXME UTF-8 makes problems, see dump2html()-func !!
    $encoding_used= get_request_arg( 'charset', 'UTF-8'); //LANG_DEF_CHARSET iso-8859-1 UTF-8
 
    if( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
@@ -1046,9 +1065,9 @@ function freesql_dump( $database, $query)
                   , $row[0], $row[1], intval($row[2])));
 */
    } else {
-      define('READ_MYSQL_VERSION', '3.23.32');
+      define('READ_MYSQL_VERSION', '5.0.38');
 /*
-      define('READ_MYSQL_VERSION_INT', 32332);
+      define('READ_MYSQL_VERSION_INT', 5038);
 */
    }
 
@@ -1149,18 +1168,22 @@ function freesql_dump( $database, $query)
       'SELECTBOX', 'dumptype', 1, $dumptypes, $dumptype, false,
       ) );
    $dform->add_row( array(
-      'HIDDEN', 'charset', $encoding_used,
+      'TAB',
+      'CHECKBOX', 'new_style', 1, 'New export style&nbsp;', $new_style,
+      'CHECKBOX', 'defs_sort', 1, 'Definitions sort&nbsp;', $defs_sort,
+      'CHECKBOX', 'defs_orig', 1, 'Original DDL&nbsp;', $defs_orig,
+      ));
+   $dform->add_row( array(
       'SUBMITBUTTONX', 'show_it', 'Show it [&amp;s]',
                array('accesskey' => 's'),  // keep static acckey
       'SUBMITBUTTONX', 'export_it', 'Download it [&amp;d]',
                array('accesskey' => 'd'),  // keep static acckey
-      'CHECKBOX', 'new_style', 1, 'New style&nbsp;', $new_style,
-      'CHECKBOX', 'defs_sort', 1, 'Defs sort&nbsp;', $defs_sort,
-      'CHECKBOX', 'defs_orig', 1, 'original&nbsp;', $defs_orig,
+      'HIDDEN', 'charset', $encoding_used,
       ) );
 
    if( @$GLOBALS['Super_admin'] )
    {
+      $dform->add_empty_row();
       $dform->add_row( array(
          'DESCRIPTION', 'free SQL',
          'TEXTAREA', 'freesql', 60, 3, $freesql,
