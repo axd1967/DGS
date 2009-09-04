@@ -222,22 +222,15 @@ require_once( "include/contacts.php" );
 
    // Send message to notify opponent
 
-// This was often truncated by the database field:
-//   $subject = mysql_addslashes('<A href=\"userinfo.php?uid=' . $player_row['ID'] . '\">' . $player_row['Name'] . ' (' . $player_row['Handle'] .")</A> has joined your waiting room game");
-   $subject = 'Your waiting room game has been joined.';
-   $reply = trim(get_request_arg('reply'));
-   if( $reply )
-   {
-      $reply = user_reference( REF_LINK, 1, '', $player_row). " wrote:\n" . $reply;
-   }
-   else
-   {
-      $reply = user_reference( REF_LINK, 1, '', $player_row). " has joined your waiting room game.";
-   }
-   if( !empty($game_row['Comment']) )
-      $reply = 'Comment: '.$game_row['Comment']."\n".$reply;
+   $subject = 'Your waiting room game has been joined.'; // maxlen=80
+   $message = ( empty($game_row['Comment']) ) ? '' : "Comment: {$game_row['Comment']}\n\n";
+   $message .= sprintf( "%s has joined your waiting room game.\n",
+      user_reference( REF_LINK, 1, '', $player_row) );
+   $message .= "\nGames:\n";
+   foreach( $gids as $gid )
+      $message .= "* <game $gid>\n";
 
-   send_message( 'join_waitingroom_game', $reply, $subject
+   send_message( 'join_waitingroom_game', $message, $subject
       , $opponent_ID, '', true
       , 0, 'NORMAL', $gid);
 

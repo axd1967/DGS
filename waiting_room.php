@@ -411,10 +411,6 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
          && $game_row['goodmingames'] && $game_row['goodsameopp'] )
    {
       $game_form->add_row( array(
-            'DESCRIPTION', T_('Reply'),
-            'TEXTAREA', 'reply', 60, 8, '',
-         ) );
-      $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'),
                         array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
          ) );
