@@ -31,46 +31,50 @@ $TranslateGroups[] = "Common";
  *
  * \brief Class to ease the creation of simpler Dragon pages.
  */
-
 class HTMLPage
 {
    /*! \privatesection */
 
    /*! \brief Id used for CSS differentiation. */
-   var $Id;
+   var $ClassCSS;
 
-   /*! \brief Script of the page relative to the root.
-    * e.g: 'forum/index.php'
-    */
+   /*! \brief Script of the page relative to the root, e.g: 'forum/index.php' */
    var $BaseName;
+
 
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new page and initialize it. */
-   function HTMLPage( $_pageid=false)
+   function HTMLPage( $_pageid=false )
    {
       $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
 
       if( !is_string($_pageid) )
          $_pageid = substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
       //make it CSS compatible, just allowing the space (see getCSSclass())
-      $this->Id = preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
+      $this->ClassCSS = preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
 
       /*
        * a soon bufferization seems to prevent a possible E_WARNING message
        * to disturb later header() functions
        * else we should have to set output_buffering and output_handler
        * in the php.ini file (and adjust our INSTALL file accordingly)
+       *
+       * NOTE:
+       * Before "ob_start('ob_gzhandler');" you may use "ini_set('zlib.output_compression_level', 3);" on-the-fly.
+       * Default-level for ZLib-compression is 6, but 3 gives less load on web-server.
+       * Or may be set in php.ini-file -> see http://de2.php.net/manual/en/zlib.configuration.php#ini.zlib.output-compression
        */
       ob_start('ob_gzhandler');
    }
 
-   /*! \brief retrieve the CSS class.
-    * may be multiple, i.e. 'Games Running'
+   /*!
+    * \brief retrieve the CSS class.
+    * \note may be multiple, i.e. 'Games Running'
     */
-   function getCSSclass( )
+   function getClassCSS( )
    {
-      return $this->Id;
+      return $this->ClassCSS;
    }
 
 } //class HTMLPage
@@ -81,7 +85,6 @@ class HTMLPage
  *
  * \brief Class to ease the creation of complete Dragon pages.
  */
-
 class Page extends HTMLPage
 {
    function Page( $_pageid=false )
