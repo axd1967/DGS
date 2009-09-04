@@ -25,6 +25,9 @@ require_once( "include/message_functions.php" );
 require_once( "include/form_functions.php" );
 
 
+define('MSGBOXROWS_NORMAL', 12);
+define('MSGBOXROWS_INVITE', 6);
+
 {
    connect2mysql();
 
@@ -282,7 +285,7 @@ require_once( "include/form_functions.php" );
                ));
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 70, 12, $default_message,
+                  'TEXTAREA', 'message', 70, MSGBOXROWS_NORMAL, $default_message,
                ));
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
@@ -311,7 +314,7 @@ require_once( "include/form_functions.php" );
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
-               'TEXTAREA', 'message', 70, 12, $default_message,
+               'TEXTAREA', 'message', 70, MSGBOXROWS_NORMAL, $default_message,
             ));
          $message_form->add_row( array(
                'SUBMITBUTTONX', 'send_message', T_('Send Message'),
@@ -345,7 +348,7 @@ require_once( "include/form_functions.php" );
                ));
             $message_form->add_row( array(
                   'DESCRIPTION', T_('Message'),
-                  'TEXTAREA', 'message', 70, 12, $default_message,
+                  'TEXTAREA', 'message', 70, MSGBOXROWS_INVITE, $default_message,
                ));
             $message_form->add_row( array(
                   'HIDDEN', 'to', $other_handle,
@@ -380,7 +383,7 @@ require_once( "include/form_functions.php" );
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
-               'TEXTAREA', 'message', 70, 12, $default_message,
+               'TEXTAREA', 'message', 70, MSGBOXROWS_INVITE, $default_message,
             ));
 
          $message_form->add_row( array(
@@ -413,7 +416,7 @@ require_once( "include/form_functions.php" );
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
-               'TEXTAREA', 'message', 70, 12, $default_message,
+               'TEXTAREA', 'message', 70, MSGBOXROWS_INVITE, $default_message,
             ));
 
          $message_form->add_row( array(
