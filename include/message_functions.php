@@ -1292,7 +1292,7 @@ function message_list_head( &$mtable, $current_folder, $no_mark=true, $full_deta
 {
    global $base_path, $msg_icones;
 
-   //TODO refactor, don't use ExtMode as "global var" to exchange args to with other methods!
+   //TODO refactor, don't use Table.ExtMode as "global var" to exchange args to with other methods!!
    $mtable->ExtMode['no_mark']= $no_mark;
    $mtable->ExtMode['full_details']= $full_details;
    $mtable->ExtMode['current_folder']= $current_folder;
