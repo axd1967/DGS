@@ -263,7 +263,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          if( $errorlog_id ) echo $errorlog_id;
          echo T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.'),
             "<br><br>\n",
-            sprintf( T_('If you think the IP block is not intended for you, please register your account with our <a href="%s">alternative registration page</a>.'),
+            sprintf( T_('If you think the IP block is not intended for you, please register your account with the <a href="%s">alternative registration page</a>.'),
                "{$HOSTBASE}register.php" );
          break;
 
