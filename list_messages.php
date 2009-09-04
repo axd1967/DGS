@@ -143,9 +143,7 @@ require_once( "include/filter.php" );
    $marked_form->set_tabindex(1);
    $marked_form->attach_table( $mtable);
 
-   message_list_head( $mtable, $current_folder,
-          /*no_mark*/ ($current_folder == FOLDER_NEW),
-          /*full_details*/ false );
+   message_list_head( $mtable, $current_folder, /*no_mark*/ false, /*full_details*/ false );
    $mtable->set_default_sort( 4); //on date
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
@@ -176,7 +174,7 @@ require_once( "include/filter.php" );
    $mtable->echo_table();
    //echo "<br>\n";
 
-   if( $can_move_messages && $current_folder != FOLDER_NEW )
+   if( $can_move_messages )
    {
       /****
        *      Actually, toggle marks does not destroy sort
@@ -222,7 +220,7 @@ require_once( "include/filter.php" );
                      T_('Move marked messages'),
                      array('id'=>'action', 'accesskey' => ACCKEY_ACT_EXECUTE )) .
                  "<br>\n" .
-                 $marked_form->print_insert_checkbox( 'follow', '1', T_('Follow move'), $follow ),
+                 $marked_form->print_insert_checkbox( 'follow', '1', T_('Follow moving'), $follow ),
               "</td>\n<td>",
                  $elem_toggle_marks,
               "</td>\n",
