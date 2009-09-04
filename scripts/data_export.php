@@ -28,49 +28,28 @@ require_once( "include/table_columns.php" );
 //require_once( "include/form_functions.php" );
 
 
-$new_style = (int)(bool)get_request_arg('new_style',0);
 $defs_orig = (int)(bool)get_request_arg('defs_orig',0);
 $defs_sort = (int)(bool)get_request_arg('defs_sort',0);
 
-define('OLD_STYLE_DUMP', 1 xor $new_style);
 define('DEFINITION_ORIG', 0 xor $defs_orig);
 
-if(OLD_STYLE_DUMP){
-   define('QUOTE_NAME', 0);
-   define('CREATE_TIME', 0);
-   define('IF_NOT_EXISTS', 0);
-   define('DEFINITION_SORT', 0 xor $defs_sort);
-}
-else{ //OLD_STYLE_DUMP
-   define('QUOTE_NAME', 1);
-   define('CREATE_TIME', 1);
-   define('IF_NOT_EXISTS', 1);
-   define('DEFINITION_SORT', 0 xor $defs_sort);
-} //OLD_STYLE_DUMP
+// new-style dump
+define('QUOTE_NAME', 1);
+define('CREATE_TIME', 1);
+define('IF_NOT_EXISTS', 1);
+define('DEFINITION_SORT', 0 xor $defs_sort);
+
 define('DROP_TABLE', 0);
 define('AUTO_INCREMENT', 0);
 define('CREATE_OPTION', 1);
 
-
-//define('COMMENT_LINE_STR', '//');
-if(OLD_STYLE_DUMP){
-   define('COMMENT_LINE_STR', '#');
-}
-else{ //OLD_STYLE_DUMP
-   define('COMMENT_LINE_STR', '--');
-} //OLD_STYLE_DUMP
+define('COMMENT_LINE_STR', '--');
 
 //define('CR', chr(13).chr(10));
-//define('CR', chr(13));
 define('CR', chr(10));
 
-if(OLD_STYLE_DUMP){
-   define('QUOTE', "'");
-}
-else{ //OLD_STYLE_DUMP
-   define('QUOTE', '`'); //backquote
-   //define('QUOTE', "'");
-} //OLD_STYLE_DUMP
+define('QUOTE', '`'); //backquote
+//define('QUOTE', "'");
 
 define('CRINDENT', CR.'   ');
 define('BLOCKBEG', CR.COMMENT_LINE_STR.' {'.CR);
@@ -157,28 +136,11 @@ function insert_values( $table, $names, $query, $title=false)
       return 0;
    }
 
-   /**
-    * TODO: it would be better to soon switch to the new_style_dump
-    * for this function because the OLD_STYLE_DUMP syntax does not
-    * ensure that some columns are not swaped.
-    * - by construction - without warning -
-    **/
-   //TODO: substitute REPLACE to INSERT?
-   if( OLD_STYLE_DUMP )
-   {
-//INSERT INTO TranslationTexts VALUES (5,'Move outside board?',NULL,'Y');
-      $rowbeg = CR."INSERT INTO "
-         . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
-         . " VALUES ("
-         ;
-      $rowend = ");";
-   }
-   else //OLD_STYLE_DUMP
-   {
-//       (5,'Move outside board?',NULL,'Y'),
-      $rowbeg = CRINDENT."(";
-      $rowend = "),";
-   } //OLD_STYLE_DUMP
+   // NOTE: OLD_STYLE_DUMP (removed now) does not ensure that some columns are not swapped.
+   // old-style: INSERT INTO TranslationTexts VALUES (5,'Move outside board?',NULL,'Y');
+   // new-style: (5,'Move outside board?',NULL,'Y'),
+   $rowbeg = CRINDENT."(";
+   $rowend = "),";
 
    $hdrs = explode(',',$names);
    $text = '';
@@ -198,20 +160,17 @@ function insert_values( $table, $names, $query, $title=false)
    }
    mysql_free_result($result);
 
-   if( !OLD_STYLE_DUMP )
-   {
-/*
+/* new-style:
 INSERT INTO TranslationTexts
       (ID,Text,Ref_ID,Translatable) VALUES
       (5,'Move outside board?',0,'Y'),
       (...);
 */
-      if( $text )
-         $text = CR."INSERT INTO "
-            . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
-            . CRINDENT."($names) VALUES"
-            . substr( $text, 0, -1) .";";
-   } //!OLD_STYLE_DUMP
+   if( $text )
+      $text = CR."INSERT INTO "
+         . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
+         . CRINDENT."($names) VALUES"
+         . substr( $text, 0, -1) .";";
 
    if( $title !== false )
       $text = comment_block( $title).$text.CR;
@@ -298,52 +257,52 @@ function get_tables( $database)
    if( $dumptype == 'init' )
    {
       $tables = array (
-            'Players',
+            'Adminlog',
+            'Bio',
+            'Clock',
             'ConfigBoard',
             'ConfigPages',
-            'UserQuota',
-            'Profiles',
+            'Contacts',
+            'Errorlog',
+            'FAQ',
+            'FAQlog',
+            'FeatureList',
+            'FeatureVote',
+            'Folders',
+            'ForumRead',
+            'Forumlog',
+            'Forumreads', //FIXME not used since DGS 1.0.15-release
+            'Forums',
             'Games',
             'GamesNotes',
-            'Bio',
-            'RatingChange', //Not used?? except in update_rating()
+            'GoDiagrams',
+            'MessageCorrespondents',
+            'Messages',
+            'MoveMessages',
+            'Moves',
+            'Observers',
+            'Players',
+            'Posts',
+            'Profiles',
+            'RatingChange', // only used in "old" update_rating()-func, but keeping for now
             'Ratinglog',
             'Statistics',
-            'Messages',
-            'MessageCorrespondents',
-            'Folders',
-            'Moves',
-            'MoveMessages',
-            'Waitingroom',
-            'WaitingroomJoined',
-            'Observers',
-            'Contacts',
             'Tournament',
             'TournamentDirector',
             'TournamentParticipants',
             'TournamentProperties',
             'TournamentRound',
             'TournamentRules',
-            'Errorlog',
-            'Adminlog',
-            'Forumlog',
-            'Translationlog',
-            'TranslationTexts',
-            'Translations',
-            'TranslationLanguages',
-            'TranslationGroups',
             'TranslationFoundInGroup',
+            'TranslationGroups',
+            'TranslationLanguages',
             'TranslationPages',
-            'Forums',
-            'Posts',
-            'Forumreads', //FIXME not used since DGS 1.0.15-release
-            'ForumRead',
-            'GoDiagrams',
-            'FAQ',
-            'FAQlog',
-            'Clock',
-            'FeatureList',
-            'FeatureVote',
+            'TranslationTexts',
+            'Translationlog',
+            'Translations',
+            'UserQuota',
+            'Waitingroom',
+            'WaitingroomJoined',
          );
    }
    else
@@ -826,8 +785,7 @@ function init_dump( $database)
    if( !is_array($tables) )
       return '';
 
-   if( !OLD_STYLE_DUMP )
-      asort($tables);
+   asort($tables);
 
    $text = dump_header( $database);
    $text = echoTR( 'th', $text);
@@ -890,9 +848,7 @@ ID,Page,Group_ID
       'TranslationGroups'
          => array('ID,Groupname','','ID'),
       'TranslationPages'
-         => ( OLD_STYLE_DUMP
-               ? array('ID,Page,Group_ID','', 'Page,Group_ID')
-               : array('Page,Group_ID','', 'Group_ID,Page') ),
+         => array('Page,Group_ID','', 'Group_ID,Page'),
       'TranslationTexts' //Originals
          => array('ID,Text,Ref_ID,Translatable','','ID'),
       'TranslationFoundInGroup'
@@ -904,11 +860,7 @@ ID,Page,Group_ID
       'TranslationLanguages'
          => array('ID,Language,Name',"ID=$langID", 'ID'),
       'Translations' //better to split it in different files
-         => OLD_STYLE_DUMP
-            ?array('Original_ID,Language_ID,Text',"Language_ID=$langID",
-               'Original_ID,Language_ID')
-            :array('Language_ID,Original_ID,Text',"Language_ID=$langID",
-               'Language_ID,Original_ID'),
+         => array('Language_ID,Original_ID,Text',"Language_ID=$langID",'Language_ID,Original_ID'),
  * or, farther:
       $text.= language_dump( $database, 'en.iso-8859-1', false);
  **/
@@ -953,11 +905,7 @@ function language_dump( $database, $lang, $header=true)
       'TranslationLanguages'
          => array('ID,Language,Name',"ID=$langID", 'ID'),
       'Translations' //better to split it in different files
-         => OLD_STYLE_DUMP
-            ?array('Original_ID,Language_ID,Text',"Language_ID=$langID",
-               'Original_ID,Language_ID')
-            :array('Language_ID,Original_ID,Text',"Language_ID=$langID",
-               'Language_ID,Original_ID'),
+         => array('Language_ID,Original_ID,Text',"Language_ID=$langID",'Language_ID,Original_ID'),
    );
 
    $text.= multi_insert_values( $tables, $title);
@@ -1169,7 +1117,6 @@ function freesql_dump( $database, $query)
       ) );
    $dform->add_row( array(
       'TAB',
-      'CHECKBOX', 'new_style', 1, 'New export style&nbsp;', $new_style,
       'CHECKBOX', 'defs_sort', 1, 'Definitions sort&nbsp;', $defs_sort,
       'CHECKBOX', 'defs_orig', 1, 'Original DDL&nbsp;', $defs_orig,
       ));
