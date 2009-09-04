@@ -260,7 +260,8 @@ $ThePage = new Page('GamesList');
    // NOTE: check after add_or_del_column()-call
    // only activate if column shown for user to reduce server-load for page
    // avoiding additional outer-join on Clock-table !!
-   $load_remaining_time = ( $running && !$all && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
+   $load_remaining_time = ( $running && !$all
+      && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
 
 /*****
  * Views-pages identification:
@@ -359,8 +360,8 @@ $ThePage = new Page('GamesList');
  * 36: >  FU+RU [userStartRating] (User-StartRating)
  * 37: >  FU [userEndRating] (User-EndRating)
  * 38: >  FU [userRatingDiff] (User-RatingDiff)
- * 39: >  RU (my remainint time)
- * 40: >  RU (oppenent remainint time)
+ * 39: >  RU (my remaining time)
+ * 40: >  RU (oppenent remaining time)
  * 41: >  FU (Indicator if there are (hidden) game-comments)
  *****/
    $ginfo_str = T_('Game information');
@@ -757,11 +758,9 @@ $ThePage = new Page('GamesList');
       else //FU+RU ?UNION
       {
          if( $load_notes && $gtable->Is_Column_Displayed[33] )
-         { //keep the first line up to LIST_GAMENOTE_LEN chars
-            $X_Note= trim( substr(
-               preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
-               , 0, LIST_GAMENOTE_LEN) );
-            $grow_strings[33] = make_html_safe($X_Note);
+         {
+            // keep the first line up to LIST_GAMENOTE_LEN chars
+            $grow_strings[33] = make_html_safe( strip_gamenotes($X_Note) );
          }
          if( $gtable->Is_Column_Displayed[3] )
             $grow_strings[3] = "<A href=\"userinfo.php?uid=$oppID\">" .
@@ -828,14 +827,14 @@ $ThePage = new Page('GamesList');
          {
             if( $gtable->Is_Column_Displayed[15] )
                $grow_strings[15] = ( $oppLastaccess > 0 ? date(DATE_FMT, $oppLastaccess) : '' );
-            if( $gtable->Is_Column_Displayed[39] ) // my-RemTime
+            if( $is_mine && $gtable->Is_Column_Displayed[39] ) // my-RemTime
             {
                // X_Color: b0= White to play, b1= I am White, b4= not my turn
                $prefix_my_col = ( $X_Color & 2 ) ? 'White' : 'Black';
                $is_to_move    = !( $X_Color & 0x10 ); // my-turn -> use clock
                $grow_strings[39] = build_time_remaining( $row, $prefix_my_col, $is_to_move );
             }
-            if( $gtable->Is_Column_Displayed[40] ) // opp-RemTime
+            if( $is_mine && $gtable->Is_Column_Displayed[40] ) // opp-RemTime
             {
                // X_Color: b0= White to play, b1= I am White, b4= not my turn
                $prefix_opp_col = !( $X_Color & 2 ) ? 'White' : 'Black';
