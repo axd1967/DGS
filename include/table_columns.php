@@ -109,7 +109,9 @@ class Table
    var $Head_closed;
    /*! \brief optional features of the table. */
    var $Mode;
+
    /*! \brief a place to store some external infos (array) */
+   //TODO refactor, don't use Table.ExtMode as "global var" to exchange args with other methods!!
    var $ExtMode;
 
    /*! \brief Array of rows to be diplayed.
@@ -308,29 +310,20 @@ class Table
     *    ended by a '+' to sort it in the asc order or a '-' to sort it in the desc order
     *    default: no sort
     */
-   function add_tablehead( $nr,
-                           $description,
-                           $attbs = null,
-                           $mode = null,
-                           $sort_xtend = '' )
+   function add_tablehead( $nr, $description, $attbs = null, $mode = null, $sort_xtend = '' )
    {
       if( $this->Head_closed )
          error('assert', "Table.add_tablehead.closed($nr)");
       if( $nr < 0 || ( $nr == 0 && !($this->Mode & TABLE_ROW_NUM) ) )
          error('assert', "Table.add_tablehead.bad_col_nr($nr)");
       if( !is_array($attbs) )
-      {
-         if( is_string($attbs) && !empty($attbs) )
-            $attbs= array( 'class' => $attbs);
-         else
-            $attbs= null;
-      }
+         $attbs = ( is_string($attbs) && !empty($attbs) ) ? array( 'class' => $attbs) : null;
       if( !isset($mode) )
          $mode= TABLE_NO_HIDE|TABLE_NO_SORT;
       $sort_xtend= trim($sort_xtend);
       if( !$sort_xtend )
          $mode|= TABLE_NO_SORT;
-      elseif( !is_numeric(strpos('+-',substr($sort_xtend,-1))) )
+      elseif( strpos('+-',substr($sort_xtend,-1)) === false ) // append (default) '+' if missing +/-
          $sort_xtend.= '+';
       $tableHead = (is_a($description, 'TableHead')) ? $description : new TableHead($description);
       $this->Tableheads[$nr] =
@@ -358,15 +351,15 @@ class Table
       $this->Head_closed = 1;
       $s = array();
       //even if TABLE_NO_SORT or TABLE_MAX_SORT == 0:
-      for( $i=func_num_args(); $i>0; )
+      for( $i=0; $i < func_num_args(); $i++ )
       {
-         --$i;
          $sd = func_get_arg($i);
          if( is_string($sd) )
             error('assert', "Table.set_default_sort.old_way($sd)");
          if( $sd = (int)$sd )
-            $s = array( abs($sd) => $sd ) + $s; // put new key first in array
+            $s[abs($sd)] = $sd;
       }
+
       if( TABLE_MAX_SORT > 0 && !($this->Mode & TABLE_NO_SORT) )
       {
          //get the sort parameters from URL
@@ -376,6 +369,7 @@ class Table
                $s = array( abs($sd) => $sd ) + $s; // put new key first in array
          }
       }
+
       $this->Sort = $s;
    } //set_default_sort
 
@@ -733,13 +727,12 @@ class Table
       //$this->Sortimg = array();
       $str = '';
       $i=0;
-      foreach( $this->Sort as $sd )
+      foreach( $this->Sort as $sk => $sd )
       {
          if( $i >= TABLE_MAX_SORT )
             break;
-         if( !$sd ) // ±num
+         if( !$sd ) // num
             continue;
-         $sk = abs($sd);
          $field = (string)@$this->Tableheads[$sk]['Sort_String'];
          if( !$field )
             continue;
@@ -766,7 +759,7 @@ class Table
       }
       if( !$str )
          return '';
-      $str = str_replace( array('-','+'), array(' DESC,',','), $str); // replace all occurences
+      $str = str_replace( array('-','+'), array(' DESC,',' ASC,'), $str); // replace all occurences
       return ' ORDER BY '.substr($str,0,-1); // remove trailing ','
    } //current_order_string
 
@@ -827,7 +820,7 @@ class Table
          {
             if( $i >= TABLE_MAX_SORT )
                break;
-            if( $sd ) // ±num
+            if( $sd ) // num
             {
                ++$i;
                $hiddens[$this->Prefix . "sort$i"] = $sd;
@@ -1280,10 +1273,15 @@ class Table
       return $string;
    } //make_next_prev_links
 
-   /*! \brief Make sort part of URL */
+   /*!
+    * \brief Make sort part of URL
+    * \param $add_sort [+-]table-col-id giving sort-direction; or 0 (=don't add col-sort)
+    * \note does not modify $this->Sort
+    */
    function make_sort_string( $add_sort=0, $end_sep=false )
    {
-      if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return '';
+      if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT )
+         return '';
       $s = $this->Sort;
       if( $add_sort )
       {
@@ -1300,19 +1298,19 @@ class Table
          //unset($s[$key]);
          $s = array($key=>$add_sort) + $s; // put new key first in array
       }
+
       $str = '';
       $i=0;
       foreach( $s as $sd )
       {
          if( $i >= TABLE_MAX_SORT )
             break;
-         if( !$sd )
-            continue;
-         ++$i;
-         if( $str )
-            $str .= URI_AMP.$this->Prefix . "sort$i=$sd";
-         else
-            $str = $this->Prefix . "sort$i=$sd";
+         if( $sd )
+         {
+            ++$i;
+            if( $str ) $str .= URI_AMP;
+            $str .= $this->Prefix . "sort$i=$sd";
+         }
       }
       if( $str && $end_sep )
          $str .= URI_AMP;
