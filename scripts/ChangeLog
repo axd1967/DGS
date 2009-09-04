@@ -22,6 +22,37 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-09-04 juga
+
+   * include/error_functions.php (dump_exit),
+     include/message_functions.php (message_list_head),
+     include/std_functions.php (game_reference, tournament_reference, user_reference),
+     include/table_columns.php (Table.add_tablehead, ~.set_default_sort,
+       ~.current_order_string, ~.make_sort_string),
+     edit_profile.php, error.php, game.php:
+   - minor cleanup (clearer code, use bool instead ints), comments,
+     TODOs, FIXMEs?, typos, layouting
+
+   * include/page_functions.php (HTMLPage), include/std_functions.php (start_html):
+   - cleanup: sync'ed HTMLPage-varname with methodname: Id -> ClassCSS
+
+   * include/std_functions.php (strip_gamenotes, game_reference, tournament_reference, user_reference),
+     show_games.php, status.php:
+   - extracted strip_gamenotes()-func for trimming game-notes on games-lists
+
+   * show_games.php:
+   - bugfix: limit remaining-time columns to my-running-games view only
+
+   * waiting_room.php:
+   - remove sorting from Restrictions-column, makes not many sense
+   - revert default-sort for Games-numbers
+
+   * scripts/README.developers:
+   - enhanced text about translations, fixed typos
+
+   * admin_password.php:
+   - set translategroup (even if without translated text)
+
 2009-09-03 juga
 
    * forum/forum_functions.php (DisplayForum.forum_message_box),
@@ -4957,6 +4988,10 @@ copy /images/favicon.ico into the root folder
    * show_games.php:
    - fix some bugs around query (filter and sort)
      reduced a little the db connection time.
+   - cleanup Weekendclock-column (was mixed with Lastchanged for FU/FA)
+     -> keep Weekendclock for RU for col#12
+   - changed col#12(FU+FA) 'Lastchanged' into col#13 (for FU/FA) together
+     with OB/RU/RA (as 'Last move')
 
 2008-03-17 rodival
 
