@@ -17,6 +17,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//
+// NOTE: this script is adjusted to DGS, but phpMyAdmin may be a help too!!
+//
+
+
 chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
