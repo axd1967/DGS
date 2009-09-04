@@ -393,7 +393,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    if( is_a($ThePage, 'HTMLPage') )
    {
-      $tmp = $ThePage->getCSSclass(); //may be multiple, i.e. 'Games Running'
+      $tmp = $ThePage->getClassCSS(); //may be multiple, i.e. 'Games Running'
       $tmp = ' class='.attb_quote($tmp);
    }
    else
@@ -965,7 +965,7 @@ function sysmsg($msg)
 
 //must never allow quotes, ampersand, < , > and URI reserved chars
 //to be used in a preg_exp enclosed by [] and possibly by ()
-define('HANDLE_LEGAL_REGS', '\\-_a-zA-Z0-9');
+define('HANDLE_LEGAL_REGS', '\\-_a-zA-Z0-9'); // '+' allowed in old ages, but not anymore for new handles
 define('HANDLE_TAG_CHAR', '='); //not in: HANDLE_LEGAL_REGS or < or >
 define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'\\.\\?\\*\\+,;:!%');
 
@@ -1010,7 +1010,7 @@ function generate_random_password()
    return $return;
 }
 
-/* TODO:
+/* NOTE:
  An email address validity function should never be treated as definitive.
  In more simple terms, if a user-supplied email address fails a validity check,
   don't tell the users the email address they entered is invalid
@@ -1143,9 +1143,7 @@ function send_message( $debugmsg, $text='', $subject=''
    $to_myself= false;
    $receivers= array();
    //if( eregi( 'mysql', get_resource_type($to_ids)) )
-   foreach( array( 'ID' => &$to_ids,
-                   'Handle' => &$to_handles,
-            ) as $field => $var )
+   foreach( array( 'ID' => &$to_ids, 'Handle' => &$to_handles ) as $field => $var )
    {
       if( is_array($var) )
          $var= implode(',', $var);
@@ -1425,7 +1423,7 @@ function get_cookie_prefs(&$player_row)
 
 /*!
  * \brief Changes admin-status for user and specified admin-mask: set/unset/toggle status.
- * param cmd command to set/unset/toggle status: y/Y/+ (=sets status), n/N/- (=unsets status), x/X/* (=toggle status)
+ * \param $cmd command to set/unset/toggle status: y/Y/+ (=sets status), n/N/- (=unsets status), x/X/* (=toggle status)
  * \return  1 (=admin-status granted and active),
  *          0 (=admin-status granted, but inactive),
  *         -1 (=status not granted, admin-level not sufficient)
@@ -1630,6 +1628,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    if( !$reg )
       return '';
    //enclosed by '%' because $html_code may contain '/'
+   //FIXME(?) ... and $html_code can not contain '%' too ?
    $reg = "%^(.*?)<($reg)\\b(.*)$%is";
 
    while( preg_match($reg, $trail, $matches) )
@@ -2212,7 +2211,7 @@ function get_request_url( $absolute=false)
 
 
 //Priorities: URI(id) > URI(handle) > REFERER(id) > REFERER(handle)
-//returns what is found: b0=uid, b1=uhandle, b2=...from referer
+//returns bitmask of what is found: bit0=uid, bit1=uhandle, bit2=...from referer
 //Warning: the '+' (an URI reserved char) must be substitued with %2B in 'handle'.
 function get_request_user( &$uid, &$uhandle, $from_referer=false)
 {
@@ -2220,11 +2219,11 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    $uid = (int)@$_REQUEST[$uid_name];
    $uhandle = '';
    if( $uid > 0 )
-      return 1;
+      return 1; //bit0
    $uid = 0;
    $uhandle = (string)@$_REQUEST[UHANDLE_NAME];
    if( $uhandle )
-      return 2;
+      return 2; //bit1
    if( $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
    {
       //default user = last referenced user
@@ -2233,7 +2232,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       {
          $uid = (int)$eres[1];
          if( $uid > 0 )
-            return 5;
+            return 5; //bit0,2
       }
       $uid = 0;
       //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
@@ -2241,7 +2240,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       {
          $uhandle = (string)$eres[1];
          if( $uhandle )
-            return 6;
+            return 6; //bit1,2
       }
    }
    return 0; //not found
@@ -2804,7 +2803,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    global $base_path;
 
    $gid = (int)$gid;
-   $legal = ( $gid<=0 ? 0 : 1 );
+   $legal = ( $gid > 0 );
    if( $legal && ($whitename===false || $blackname===false) )
    {
      $query = 'SELECT black.Name as blackname, white.Name as whitename ' .
@@ -2822,7 +2821,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
        $safe_it = true;
      }
      else
-       $legal = 0;
+       $legal = false;
    }
    $whitename = trim($whitename);
    $blackname = trim($blackname);
@@ -2876,7 +2875,7 @@ function tournament_reference( $link, $safe_it, $class, $tid )
          $safe_it = true;
       }
       else
-         $legal = 0;
+         $legal = false;
    }
 
    $tourney = sprintf( T_('Tournament #%s [%s]'),
@@ -2941,8 +2940,8 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
       if( !$player_handle )
          $player_handle = $player_ref['Handle'];
       $player_ref = (int)$player_ref['ID'];
-      $byid = 1;
-      $legal = 0; //temporary
+      $byid = true;
+      $legal = false; //temporary
    }
    else
    {
@@ -2951,7 +2950,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
    }
    if( !$byid || $legal )
    {
-      $byid = 0;
+      $byid = false;
       if( $legal )
          $player_ref = substr($player_ref,1);
 
@@ -2962,7 +2961,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
    }
    else
    {
-      $byid = 1;
+      $byid = true;
       $player_ref = (int)$player_ref;
       $legal = ( $player_ref > 0 );
    }
@@ -2981,7 +2980,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $safe_it = true;
      }
      else
-       $legal = 0;
+       $legal = false;
    }
    $player_name = trim($player_name);
    $player_handle = trim($player_handle);
@@ -3294,6 +3293,13 @@ function insert_width( $width=1, $height=0, $use_minwid=false )
       $height = 0;
    $img_class = ($use_minwid) ? ' class="MinWidth"' : '';
    return "<img{$img_class} src=\"{$base_path}images/dot.gif\" width=\"$width\" height=\"$height\" alt=''>";
+}
+
+/*! \brief Returns trimmed and stripped game-notes (used for games-lists). */
+function strip_gamenotes( $note )
+{
+   // strip special-chars (including tabs/LF and following text)
+   return trim( substr( preg_replace('/[\x00-\x1f].*$/s','',$note) , 0, LIST_GAMENOTE_LEN) );
 }
 
 ?>
