@@ -174,7 +174,7 @@ General instructions for developers:
 
 ----------------- PHP, DGS, Translations:
 
-   Take care of the T_() function and tranlation features.
+   Take care of the T_() function and translation features.
 
    Use the T_() enclosure each time that the string need a
    translation. Don't use such an enclosure anywhere else: most
@@ -188,10 +188,24 @@ General instructions for developers:
    look at the README.translations file in the scripts folder.
 
    When adding a new string, try to first find if a similar one
-   already exist in the database.
+   already existing in the database.
 
-   Maybe this is not the better way to do the translations but
-   it is hard to modify it. Any suggestion?
+   You may encounter the following or similar notations around
+   texts:
+
+      //T_//('text')   - the T_// is to "hide" the translation to the
+                         scanning translation-functions. Otherwise it
+                         would appear as text-to-be-translated.
+                         Comments are not skipped yet while scanning.
+
+      /*T_*/('text')   - The commented out parts should be kept to indicate,
+                         that it's a potential text to translate or once it
+                         was one and will be again in the future.
+
+   Maybe this is not the best way to do translations but it is hard
+   to modify it. An advantage is, that it does not need much database-
+   access, but only sometimes to export all translated texts into
+   the "cache"-directory 'translations'.
 
 
 ----------------- PHP, Using translations in libraries/classes:
