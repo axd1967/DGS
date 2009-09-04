@@ -17,9 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// translations removed for this page: $TranslateGroups[] = "Start";
-// may be changed to:
-// translations removed for this page: $TranslateGroups[] = "Admin";
+$TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
