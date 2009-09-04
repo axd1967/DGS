@@ -126,8 +126,7 @@ require_once( 'include/classlib_userconfig.php' );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: Keep the headers "..#headerwr" to allow translators to solve local language ambiguities
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
-   //       for the "static" filtering(!) of: Handicap/RatingRange + show-all/suitable-games;
-   //       also see named-filters
+   //       for the "static" filtering(!) of; also see named-filters
    $wrtable->add_tablehead(17, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'other_type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'other_name+');
@@ -141,13 +140,13 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead(18, T_('Settings#headerwr'), 'GameSettings', TABLE_NO_SORT );
    $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
-   $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE, 'Ratingmin-Ratingmax-');
+   $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );
-   $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames+');
+   $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames-');
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
    $wrtable->add_tablehead(12, T_('Weekend Clock#header'), '', 0, 'WeekendClock-');
    // NOTE: User can choose:
-   // View "merged" "Handicap + StdPlacement (in Handicap column),
+   // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:
    if( ENA_STDHANDICAP )
       $wrtable->add_tablehead(13, T_('Standard placement#header'), '', 0, 'StdHandicap-');
@@ -291,8 +290,7 @@ require_once( 'include/classlib_userconfig.php' );
          {
             $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
             if( !$haverating )
-               $wrow_strings[ 5]['attbs']=
-                  warning_cell_attb( T_('No initial rating'), true);
+               $wrow_strings[ 5]['attbs'] = warning_cell_attb( T_('No initial rating'), true);
          }
          if( $wrtable->Is_Column_Displayed[14] ) // Handicap
          {
