@@ -85,7 +85,7 @@ require_once( 'include/utilities.php' );
    //it's not obvious that this sort on "translated" strings will always give a good result:
    arsort($langs); //will be reversed to place ahead the following:
    if( @$player_row['Translator'] )
-      $langs['N'] = /**T_**/('Native texts');
+      $langs['N'] = /**T_**/('Native texts'); // pseudo-language, that shows original texts
    $langs['C'] = T_('Use browser settings');
 
    $notesheights = array();
