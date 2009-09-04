@@ -24,6 +24,41 @@ ChangeLog
 
 2009-09-04 juga
 
+   * scripts/data_export.php:
+   - removed OLD_STYLE_DUMP and configuration of it,
+     keeping notes about old-/new-style
+   - changed orders of exporting DDL of tables to alphabetical
+
+   * scripts/data_export.php (after_table, definitions_fix, dump2html, dbTable.structure):
+   - adjusted export-script for MySQL5 and DB-changes:
+     - added guest-seeding for ConfigPages/ConfigBoard/UserQuota-tables
+     - added new tables for export
+     - fixed definitions-fix emptying text (from last Posts-change)
+     - needed to use ISO-8859-1 encoding:
+       UTF-8 made problems resulting in empty TranslationTexts for HTML-view
+     - fixed MySQL5-syntax for "CREATE TABLE (..) TYPE=" -> ".. ) ENGINE="
+     - changed default mysql-version: 3.23.32 -> 5.0.38
+   - typos, comments, layouting, enhanced description for checkboxes
+
+   * include/message_functions.php (echo_folders, message_list_body),
+     list_messages.php:
+   - allow marking and moving of messages in NEW- and REPLY-folder when no reply
+     is needed on message
+   - show folders always with links to allow refresh
+   - bugfix: fixed check for destroyed messages: is_null -> ==FOLDER_DESTROYED
+   - adjust text for 'Follow move' -> 'Follow moving'
+
+   * waiting_room.php, join_waitingroom_game.php:
+   - removed way to enter message when joining waiting-room-game,
+     players can "chat" and greet during game
+     - changed notify text for joining waiting-room game:
+       added game links and removed user-message on game-join
+     - aiming for anonymizing notifies, relieving message-system from game-stuff
+
+   * message.php:
+   - reduced message-box height from 12 to 6 for invitations and disputes
+     to let user have focus on game-settings
+
    * include/error_functions.php (dump_exit),
      include/message_functions.php (message_list_head),
      include/std_functions.php (game_reference, tournament_reference, user_reference),
@@ -44,7 +79,8 @@ ChangeLog
    - bugfix: limit remaining-time columns to my-running-games view only
 
    * waiting_room.php:
-   - remove sorting from Restrictions-column, makes not many sense
+   - remove sorting from Restrictions-column,
+     makes not many sense any more with multiple restraints
    - revert default-sort for Games-numbers
 
    * scripts/README.developers:
@@ -56,7 +92,8 @@ ChangeLog
 2009-09-03 juga
 
    * forum/forum_functions.php (DisplayForum.forum_message_box),
-     forum/post.php (post_message), forum/read.php, skins/dragon/screen.css:
+     forum/post.php (post_message), forum/read.php,
+     skins/dragon/screen.css, NEWS:
    - preserved entered forum-message on missing subject and/or text,
      switching into preview
    - show optional error-message above forum-message-box
