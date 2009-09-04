@@ -195,32 +195,17 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[ 3] = "<A href=\"userinfo.php?uid=$pid\">" .
                make_html_safe($Name) . "</a>";
          if( $gtable->Is_Column_Displayed[4] )
-            $grow_strings[ 4] = "<A href=\"userinfo.php?uid=$pid\">" .
-               $Handle . "</a>";
+            $grow_strings[ 4] = "<A href=\"userinfo.php?uid=$pid\">$Handle</a>";
          if( $load_notes && $gtable->Is_Column_Displayed[12] )
-         { //keep the first line up to LIST_GAMENOTE_LEN chars
-            $X_Note= trim( substr(
-               preg_replace("/[\\x00-\\x1f].*\$/s",'',$X_Note)
-               , 0, LIST_GAMENOTE_LEN) );
-            $grow_strings[12] = make_html_safe($X_Note);
+         {
+            // keep the first line up to LIST_GAMENOTE_LEN chars
+            $grow_strings[12] = make_html_safe( strip_gamenotes($X_Note) );
          }
          if( $gtable->Is_Column_Displayed[16] )
             $grow_strings[16] = echo_rating($Rating,true,$pid);
          if( $gtable->Is_Column_Displayed[5] )
          {
-            if( $X_Color & 2 ) //my color
-               $colors = 'w';
-            else
-               $colors = 'b';
-      /*
-            if( !($X_Color & 0x20) )
-            {
-               if( $X_Color & 1 ) //to move color
-                  $colors.= '_w';
-               else
-                  $colors.= '_b';
-            }
-      */
+            $colors = ( $X_Color & 2 ) ? 'w' : 'b'; //my color
             $grow_strings[ 5] = "<img src=\"17/$colors.gif\" alt=\"$colors\">";
          }
          if( $gtable->Is_Column_Displayed[6] )
