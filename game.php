@@ -158,7 +158,7 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
-   // ??? no more useful: equ (!$just_looking && !$may_play) which is nearly ($may_play && !$may_play)
+   //FIXME ??? no more useful: equ (!$just_looking && !$may_play) which is nearly ($may_play && !$may_play)
    if( !$just_looking && !($logged_in && $my_id == $ToMove_ID) )
       error('not_your_turn');
 

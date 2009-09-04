@@ -98,12 +98,14 @@ class Errors
       $this->error_list = array();
    }
 
+   //FIXME ??? NOTE on $html_mode: remove arg $html_mode (the client should close the HTML-page not the error-func)
    function dump_exit($prefix='', $html_mode=false)
    {
       echo $this->list_string($prefix, $html_mode);
       $this->error_clear();
       if( $html_mode )
          echo "\n</BODY></HTML>\n"; // at least
+      //FIXME ??? need the following ???:   ob_end_flush();
       exit;
    } //dump_exit
 
