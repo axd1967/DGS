@@ -52,7 +52,7 @@ function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
    $STANDARD_FOLDERS = array(  // arr=( Name, BGColor, FGColor ); $bg_color value (#f7f5e3)
-      //FOLDER_DESTROYED => array(T_('Destroyed'), 'ff88ee00', '000000'), // non-visible folder!!
+      //FOLDER_DESTROYED => array(T_//('Destroyed'), 'ff88ee00', '000000'), // non-visible folder!!
       FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'), // pseudo-folder (grouping other folders)
       FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
       FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
