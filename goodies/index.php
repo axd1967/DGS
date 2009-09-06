@@ -99,7 +99,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          $str.= "<br />- Script infos:\n";
       $txt.= "<dt>\n$str</dt>\n";
 
-      if( !$infos ) $str = ''; else
+      if( !$infos )
+         $str = '';
+      else
          $str = "<pre>$infos</pre>\n";
       $txt.= "<dd>\n$str</dd>\n";
 

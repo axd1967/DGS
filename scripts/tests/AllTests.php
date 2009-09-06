@@ -7,7 +7,8 @@ require_once 'BitSetTest.php';
 require_once 'ProfileTest.php';
 
 /*!
- * \class Suite including all phpunit-tests for DGS.
+ * \class AllTests
+ * \brief Suite including all phpunit-tests for DGS.
  */
 class AllTests
 {
