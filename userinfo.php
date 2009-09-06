@@ -218,6 +218,7 @@ $ThePage = new Page('UserInfo');
       echo '<p></p><h3 class=Header>' . T_('Biographical info') . "</h3>\n";
 
       $itable= new Table_info('bio');
+      $TW_ = 'T_'; // for non-const translation-texts
 
       while( $row = mysql_fetch_assoc( $bio_result ) )
       {
@@ -226,8 +227,8 @@ $ThePage = new Page('UserInfo');
             $cat = make_html_safe(substr( $cat, 1), INFO_HTML);
          else
          {
-            $tmp = T_($cat);
-            if( $tmp == $cat )
+            $tmp = $TW_($cat); // for defined categories see 'edit_bio.php'
+            if( $tmp == $cat ) // no translation defined
                $cat = make_html_safe($cat, INFO_HTML);
             else
                $cat = $tmp;

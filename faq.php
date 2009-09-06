@@ -36,6 +36,7 @@ require_once( "include/form_functions.php" );
          T_('Frequently Asked Questions') . "</a></h3>\n";
 
    // init vars
+   $TW_ = 'T_'; // for non-const translation-texts
    $faq_url = 'faq.php?';
    //$faqhide = "AND entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
    $faqhide = " AND entry.Hidden='N' AND parent.Hidden='N'"; //need a viewable root
@@ -117,8 +118,8 @@ require_once( "include/form_functions.php" );
             }
             else
             { // use user-language-specific translation
-               $question = T_( $row['Q'] );
-               $answer   = T_( $row['A'] );
+               $question = $TW_( $row['Q'] );
+               $answer   = $TW_( $row['A'] );
             }
 
             $match = search_faq_match_terms( $question, $answer, $rx_term );
@@ -177,7 +178,7 @@ require_once( "include/form_functions.php" );
          while( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
             echo faq_item_html( $row['Level']
-                           , T_( $row['Q'] ), T_( $row['A'] )
+                           , $TW_( $row['Q'] ), $TW_( $row['A'] )
                            , $row['Level'] == 1
                               ? "href=\"faq.php#Title{$row['ID']}\""
                               : "name=\"Entry{$row['ID']}\""
@@ -210,7 +211,7 @@ require_once( "include/form_functions.php" );
          while( $row = mysql_fetch_assoc( $result ) )
          { //titles only
             echo faq_item_html( $row['Level']
-                           , T_( $row['Q'] ), ''
+                           , $TW_( $row['Q'] ), ''
                            , $row['Level'] == 1
                               ? $tmp.$row['ID'].'#Entry'.$row['ID'].'"'
                               : $tmp.$row['Parent'].'#Entry'.$row['ID'].'"'

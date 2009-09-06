@@ -255,6 +255,7 @@ function get_executives( $level )
    //---------
    section( 'Translators', T_('Translators'), 'translators' );
 
+   $TW_ = 'T_'; // for non-const translation-texts
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
    $result = db_query( 'people.translators',
@@ -277,7 +278,7 @@ function get_executives( $level )
 
          $langname = (string)@$known_languages[$browsercode][$charenc];
          if( $langname )
-            $langname = T_($langname);
+            $langname = $TW_($langname);
          else
             $langname = $language;
 
