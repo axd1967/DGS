@@ -3,13 +3,15 @@
 # IMPORTANT NOTE:
 # * Do a full backup of all data in the database before performing (these) changes !!
 #   Note current space (phpmyadmin or 'show table status') for later comparison.
-# * Do NOT simply execute these SQL-statements as there are DROP-tables in it !!
+# * Do NOT simply execute these SQL-statements as there are DROP-tables,
+#   some to-be-replaced templates and non-SQL-statements in it !!
 #   Comments ending with '-> CLEANUP' can be postponed for later; the others,
 #   even if looking like postponable needs to be executed (those are marked
 #   by '[mandatory']').
 #
 # * Recommendation: Import it section by section manually taking comments into account !
 #
+
 
 ###  NOTE: these are mandatory changes before release 1.0.15 can be done !!
 ###
@@ -43,6 +45,9 @@ ALTER TABLE Errorlog
 ALTER TABLE Errorlog
    ADD INDEX Message (Message(8)),
    ADD INDEX Date (Date) ;
+
+-- cleanup Errorlog (delete old portion of data, e.g. keep 6 months)
+DELETE FROM Errorlog WHERE Date < NOW() - INTERVAL 180 DAY ;
 
 -- [index] IDX Forumlog.Action -> prefix-index Action(4) for searches
 ALTER TABLE Forumlog
@@ -1352,4 +1357,9 @@ UPDATE Contacts SET Created=Lastchanged WHERE YEAR(Created)=1970 ;
 -- added index to search for games with comments
 ALTER TABLE Games
    ADD INDEX Flags (Flags) ;
+
+
+-- grant access-right to create temporary tables to DGS db-user
+-- Lookup your respective configuration in 'include/config-local.php'
+GRANT create temporary tables ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 
