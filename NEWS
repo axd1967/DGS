@@ -250,7 +250,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
       * Enable full page-navigation (experimental) with pages- & entries-info
         for pages: Status games, Waiting room, Tournaments, Tournament participants,
-        Messages, Search messages, Users, Opponents, Games, Observed games, Votes, Features
+        Users, Opponents, Games, Observed games, Votes, Features
       * Changed some default sort-directions
       * Used clearer header names
 
