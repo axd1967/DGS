@@ -21,7 +21,7 @@ require_once( "include/config-local.php" );
 //@set_time_limit(0); //does not work with safe_mode
 
 if( !defined('DBG_QUERY') )
-   define('DBG_QUERY', 0);
+   define('DBG_QUERY', 0); //0=no-debug, 1=print-query, 2=print-retry-count
 
 
 // fetch-types for mysql_single_fetch-function
@@ -141,8 +141,10 @@ function connect2mysql($no_errors=false)
    //@ignore_user_abort($old_ignore);
 
    $retry = DB_CONNECT_RETRY_COUNT; //retry count = $retry+1 attempts to connect
+   $rcnt = 0;
    for(;;)
    {
+      $rcnt++;
       $dbcnx = @mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD);
       if( $dbcnx ) break; // got connection
       if( --$retry < 0 ) break; // retry count reached (don't sleep on last loop)
@@ -173,7 +175,7 @@ function connect2mysql($no_errors=false)
       error($err);
    }
 
-   //error_log("connect2mysql($no_errors): dbcnx=$dbcnx on attempt #".(4-$i)."/3");
+   if( DBG_QUERY>1 ) error_log("connect2mysql($no_errors): dbcnx=[$dbcnx] on attempt #$rcnt/".DB_CONNECT_RETRY_COUNT);
 
    return false;
 }
