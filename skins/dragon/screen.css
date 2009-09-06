@@ -2834,6 +2834,11 @@ span.DebugText {
    font-size: smaller;
 }
 
+body.Scripts table#Scripts th {
+   text-align: left;
+   padding-right: 1em;
+}
+
 /* ------------------------- */
 /* edit profile page */
 /* ------------------------- */

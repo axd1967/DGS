@@ -67,6 +67,8 @@ $ThePage = new Page('Admin');
                      '', $admin_level & ADMIN_DEVELOPER);
    add_link_page_link('admin_show_adminlog.php', T_('Show admin log'),
                      '', $admin_level & ADMIN_DEVELOPER);
+   add_link_page_link('scripts/', T_('Show admin scripts'),
+                     '', $admin_level & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER));
 
    add_link_page_link();
 
