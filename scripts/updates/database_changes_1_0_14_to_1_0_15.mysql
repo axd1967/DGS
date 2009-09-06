@@ -1363,3 +1363,7 @@ ALTER TABLE Games
 -- Lookup your respective configuration in 'include/config-local.php'
 GRANT create temporary tables ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 
+
+-- cleanup Adminlog (delete uninteresting messages, not longer logged)
+DELETE FROM Adminlog WHERE Message = 'logged_in' ;
+

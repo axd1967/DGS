@@ -95,7 +95,7 @@ if( $quick_mode )
    if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied');
 
-   admin_log( 0, $userid, 'logged_in');
+   //admin_log( 0, $userid, 'logged_in');
 
    if( $quick_mode )
    {
