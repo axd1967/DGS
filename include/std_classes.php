@@ -743,10 +743,6 @@ class ThreadList
    /*! \brief List of ThreadList-objects being the children of current thread. */
    var $children;
 
-   /*!
-    * \brief Constructs ThreadList
-    * \param $qsql will be added as merge-QuerySQL
-    */
    function ThreadList( $item, $level=0, $parent=null )
    {
       $this->item = $item;

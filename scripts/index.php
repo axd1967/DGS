@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*!
- * \file scripts/index.php
+ * \file
  *
  * \brief Shows TOC (table of contents) of important scripts in current folder.
  */

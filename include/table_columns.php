@@ -338,11 +338,12 @@ class Table
          $this->Filters->set_visible($nr, $visible);
    } //add_tablehead
 
-   /*!@brief records the default order of the table
-    *  by the way, close and compute the headers definitions
-    * @param $default_sorts are +/- $column_nbr
-    * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
-    *  (allowing a current_order_string() default usage)
+   /*!
+    * \brief records the default order of the table.
+    * (\)param $default_sorts are +/- $column_nbr
+    * \note by the way, close and compute the headers definitions.
+    * \note works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
+    *       (allowing a current_order_string() default usage)
     */
    function set_default_sort( /* {$default_sort1 {,$default_sort2 [,...]}} */)
    {

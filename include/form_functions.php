@@ -1464,7 +1464,7 @@ class Form
     * \param $name     The field name that will be used as the variable name
     *                  in the GET or POST.
     * \param $size     field-box size
-    * \param $maxlenth maximum length of uploaded file (not implemented by most browser),
+    * \param $maxlength maximum length of uploaded file (not implemented by most browser),
     *                  0 to use no maxlength (=default)
     * \param $accept   what MIME-types are accepted (not implemented by most browser),
     *                  e.g. 'image/*', 'text/*' (default is '')
