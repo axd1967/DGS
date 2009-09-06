@@ -63,15 +63,16 @@ require_once( "include/std_functions.php" );
             'translation_consistency.php' => "Check consistency of Translation-data",
 
          "Info" => 0,
-            'phpinfo.php'              => "Shows PHP-info (URL-args: module, config, env, var)",
+            'phpinfo.php'              => "Shows PHP-info",
+            'phpinfo.php?module=1&config=1&env=1&var=1' => "Shows PHP-info with ENV and variables (sensitive)",
             'apc_cache_info.php'       => "Show info for APC cache",
             'browser_stats.php'        => "Build browser statistics on all players",
       ),
 
       'scripts/updates/', array(
-         "Migration scripts for release 1.0.15" => 0,
-            'fix_message_thread-1_0_15.php'  => "Set message-threads/level (see database_changes_1_0_14_to_1_0_15.mysql)",
-            'fix_game_comments-1_0_15.php'   => "Set game hidden-comments flags (see database_changes_1_0_14_to_1_0_15.mysql)",
+         "Migration scripts for release 1.0.15, use <b>ONLY</b> if you know how they work !!<br>\n(see database_changes_1_0_14_to_1_0_15.mysql)" => 0,
+            'fix_message_thread-1_0_15.php'  => "Set message-threads/level",
+            'fix_game_comments-1_0_15.php'   => "Set game hidden-comments flags",
       ),
    ); //arr_scripts
 
@@ -88,6 +89,8 @@ require_once( "include/std_functions.php" );
 function echo_scripts( $arr_dirs )
 {
    global $base_path;
+
+   $chk_scripts = array();
    echo '<table id="Scripts"><tr><th>Category</th> <th>Script</th> <th>Description</th></tr>', "\n";
    while( count($arr_dirs) > 1 )
    {
@@ -95,10 +98,20 @@ function echo_scripts( $arr_dirs )
       $arr_scripts = array_shift($arr_dirs);
       foreach( $arr_scripts as $key => $val )
       {
+         // show only script-name, but keep unique
+         $scriptname = preg_replace( '/\?.*$/', '', $key );
+         if( isset($chk_scripts[$scriptname]) )
+         {
+            $chk_scripts[$scriptname]++;
+            $scriptname .= ' #' . $chk_scripts[$scriptname];
+         }
+         else
+            $chk_scripts[$scriptname] = 1;
+
          if( is_numeric($val) && $val == 0 ) // section-title
             printf( '<tr class="Title"><td colspan="3"><hr>%s</td>', $key );
          else // script with description
-            printf( '<tr><td></td> <td>%s</td> <td>%s</td>', anchor($dir.$key, $key), $val );
+            printf( '<tr><td></td> <td>%s</td> <td>%s</td>', anchor($dir.$key, $scriptname), $val );
          echo "</tr>\n";
       }
    }
