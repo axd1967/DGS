@@ -46,7 +46,7 @@ ALTER TABLE Errorlog
    ADD INDEX Message (Message(8)),
    ADD INDEX Date (Date) ;
 
--- cleanup Errorlog (delete old portion of data, e.g. keep 6 months)
+-- [data] cleanup Errorlog (delete old portion of data, e.g. keep 6 months)
 DELETE FROM Errorlog WHERE Date < NOW() - INTERVAL 180 DAY ;
 
 -- [index] IDX Forumlog.Action -> prefix-index Action(4) for searches
@@ -1364,6 +1364,10 @@ ALTER TABLE Games
 GRANT create temporary tables ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 
 
--- cleanup Adminlog (delete uninteresting messages, not longer logged)
+-- [data] cleanup Adminlog (delete uninteresting messages, not longer logged)
 DELETE FROM Adminlog WHERE Message = 'logged_in' ;
+
+
+-- [data] cleanup unused Clocks
+DELETE FROM Clock WHERE NOT ((ID BETWEEN 0 AND 23) OR (ID BETWEEN 100 AND 123) OR ID IN (201,202,203) ) ;
 
