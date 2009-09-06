@@ -162,7 +162,7 @@ require_once( "include/filterlib_mysqlmatch.php" );
    if( $my_id > GUESTS_ID_MAX )
    {
       $filter6_str = ($is_admin_moderator)
-         ? sprintf( '<span class="AdminOption">%s</span>', T_('(moderator only)' ))
+         ? sprintf( '<span class="AdminOption">%s</span>', T_('(moderator only)') )
          : T_('Show hidden posts#forum');
       array_push( $arr,
             'TEXT',     SMALL_SPACING,
