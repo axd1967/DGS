@@ -31,21 +31,22 @@ require_once( "include/graph.php" );
 //   if( !$logged_in )
 //      error("not_logged_in");
 
+   // define all months for (*) to have translation-texts:
+   if(0) T_('Jan').T_('Feb').T_('Mar').T_('Apr').T_('May').T_('Jun').T_('Jul').T_('Aug').T_('Sep').T_('Oct').T_('Nov').T_('Dec');
+   $TW_ = 'T_'; // for non-const translation-texts
 
    //disable translations in graph if not latin
    if( eregi( '^iso-8859-', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';
-      $datelabel = create_function('$x',
-         'return T_(date("M",$x)).date("\\nY",$x);' );
+      $datelabel = create_function('$x', 'return $TW_(date("M",$x)).date("\\nY",$x);' );
    }
    else
    {
       $keep_english= true;
       $T_= 'fnop';
-      $datelabel = create_function('$x',
-         'return date("M\\nY",$x);' );
+      $datelabel = create_function('$x', 'return date("M\\nY",$x);' );
    }
 
 
