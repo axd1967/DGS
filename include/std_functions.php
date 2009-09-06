@@ -2639,7 +2639,7 @@ if( function_exists('file_put_contents') )
       }
       if( $quit_on_error )
          error( 'couldnt_open_file', 'write_to_file:'.$filename);
-      trigger_error("write_to_file() failed to write stream", E_USER_WARNING);
+      trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
       return false;
    }
 }
@@ -2661,7 +2661,7 @@ else
       }
       if( $quit_on_error )
          error( 'couldnt_open_file', 'write_to_file:'.$filename);
-      trigger_error("write_to_file() failed to write stream", E_USER_WARNING);
+      trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
       return false;
    }
 } //write_to_file
@@ -2670,13 +2670,15 @@ if( function_exists('file_get_contents') )
 {
    function read_from_file($filename, $quit_on_error=true, $incpath=false)
    {
-      //FIXME: PHP-func file_get_contents() has different args since PHP6 (bool->int)
-      $data= @file_get_contents($filename, $incpath);
+      if( defined('FILE_USE_INCLUDE_PATH') ) //since PHP5
+         $data = @file_get_contents( $filename, ($incpath ? FILE_USE_INCLUDE_PATH : 0) );
+      else
+         $data = @file_get_contents( $filename, $incpath ); //PHP4
       if( is_string($data) )
          return $data;
       if( $quit_on_error )
          error( 'couldnt_open_file', 'read_from_file:'.$filename);
-      trigger_error('read_from_file() failed to open stream', E_USER_WARNING);
+      trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
       return false;
    }
 }
@@ -2705,7 +2707,7 @@ else
       }
       if( $quit_on_error )
          error( 'couldnt_open_file', 'read_from_file:'.$filename);
-      trigger_error('read_from_file() failed to open stream', E_USER_WARNING);
+      trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
       return false;
    }
 } //read_from_file
