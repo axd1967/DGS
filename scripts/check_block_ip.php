@@ -121,6 +121,7 @@ require_once( "include/form_functions.php" );
 
    $ipform->echo_string(1);
 
+   echo "<p><p>Syntax: '127.0.0.1' (=ip), '127.0.0.1/32' (=subnet), '/^127\.0\.0\.1$/' (=regex)<br>\n";
    echo "</center>\n";
 
    end_html();
