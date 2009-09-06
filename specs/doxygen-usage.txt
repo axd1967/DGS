@@ -1,0 +1,82 @@
+###
+### Doxygen Usage:
+###
+
+References:
+   - http://www.stack.nl/~dimitri/doxygen/manual.html
+   - http://www.stack.nl/~dimitri/doxygen/docblocks.html
+   - http://www.stack.nl/~dimitri/doxygen/commands.html
+
+Requirements:
+   - install doxygen
+   - install graphviz
+
+Usage:
+   - run with 'doxygen scripts/doxygenConfig >/dev/null'
+     that writes errors/warning on STDERR
+
+
+###
+### Doxygen Syntax:
+###
+
+Legend:
+   scope of args:
+      - <word> (until EOL)
+      - {until next paragraph = blank-line or section-indicator)
+
+General:
+   - all cmds start with '\' or '@' within /*! .. */ or after //!
+   - \n : newline
+   - \ : char to escape: \,@,&,$,#,<,>,%
+
+Doc-Block with:
+   - start doc: /** ... */   or   /*! ... */
+   - start doc: multi-lines of   /// ...   or   //! ...
+   - doc AFTER member (detailed): /**< ... */   or   /*!< ...*/   or   //!< ...
+   - doc AFTER member (brief):    //!< ...   or ///< ...
+   - inline-doc for args: foo( $v /**< [in] docs for $v. */ );
+
+Most common commands:
+   - \file [file] : doc about current file
+   - \class classname, \interface name, \enum enumname
+   - \test {test-descr}
+   - \internal : for internal use only
+   - \example filename : ref to example-file
+   - \see {refs}
+
+   - \brief {descr}
+   - \param[in|out|in,out] <name> {descr} : \param[in] name descr, \param a b
+   - \return {descr}
+   - \note {text}
+   - \warning {message}
+   - \deprecated {descr}
+   - \since {text}
+
+Links:
+   - (<className>"::")n<funcName>"("<arg-list>")"
+   - #name : link to name-member
+
+Lesser used commands:
+   - \author {authors}
+   - \todo {descr}
+   - \bug {descr}
+   - \throw <obj> {descr}
+   - \version {version}
+   - \pre {preconditions}
+   - \post {postconditions}
+   - \relates classname : non-member-func relating to class
+
+   - \copydoc <link-obj>
+   - \code .. \endcode
+   - \image <format> <file> ["caption"] [<sizeind>=<size>]
+   - \namespace name
+   - \extends name, \implements name
+   - \private, \protected, \public
+
+Formatting:
+   - \a <word> : special-font
+   - \b : bold
+   - \c or \p : typewriter
+   - \e or \em <word> : italic
+

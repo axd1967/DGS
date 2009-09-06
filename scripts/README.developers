@@ -114,6 +114,8 @@ General instructions for developers:
 
    - Commenting functions and classes (and files) is done using Doxygen-style.
 
+     Read 'specs/doxygen-usage.txt' for the most common commands and references!
+
      Comments in '#'-style only used for commenting debugging-stuff (rarely used).
      Comments in /*..*/-style for many multi-line comments.
      Comments on single-lines (or few lines) in //-style.
