@@ -51,8 +51,8 @@ require_once( 'include/classlib_userconfig.php' );
       HTYPE_PROPER => T_('Proper'),
       HTYPE_NIGIRI => T_('Nigiri'),
       HTYPE_DOUBLE => T_('Double game'),
-      HTYPE_BLACK  => T_('Fix color'),
-      HTYPE_WHITE  => T_('Fix color'),
+      HTYPE_BLACK  => T_('Color Black'),
+      HTYPE_WHITE  => T_('Color White'),
    );
 
    $ruleset_array = array(
