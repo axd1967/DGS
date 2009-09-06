@@ -1,0 +1,100 @@
+# Topic: Rengo, Team-Go, Pair-Go, Zen-Go
+# Description: Playing team-go
+# URL: http://www.dragongoserver.net/forum/read.php?forum=5&thread=9423#9423
+
+#-------- Various ----------------------------------------------
+
+- forming 2 teams playing against each other
+- alternating players
+  - switching color on each next move
+  - TeamGo needs 2 cyclers, ZenGo needs only 1 cycler
+- team consists of 1-N players
+- match-mode: equal team-size, min/max-team-size
+- forming of teams, order within teams
+- table-design
+
+- ZenGo may be implemented as similar variant of TeamGo:
+  - influencing order of players only ONE team (cycling through players),
+  - N players, N should be odd (otherwise it's like TeamGo)
+  - zen-mode (own game-type but similar game-model):
+    only one team rotating players (with odd number of players)
+
+- big problems:
+   - time counted for TEAM (color) !! not players -> so 2 timers (B+W)
+   - which timezone to use for timers? - alternatives:
+     - a) TZ selected by player-to-move (most simple)
+     - b) TZ of game-master
+     - c) TZs set by game-master
+     - d) TZ of server
+   - handle players on vacation:
+      - L: if one player on vacation -> team on vacation
+      - L: if one player on vacation -> time stalled for game
+      - L: if one player on vacation -> other players can move for him (skip-player-on-vacation)
+        - game stalls on vacation
+        - can be game-option, or
+        - can be choice if users starts vacation (allow other players to play for me -> but disturbs order)
+          if option is set -> player is skipped (who's next to move), even if normally a vacationer can play
+      - problem is, that a player on vacation can still play normally
+      - problem is, that a team may consist of 1..n players against different number of opponents, so the bigger team may compensate time with more vacation
+
+#-------- Related features -------------------------------------
+
+* Beware of invitation-DISPUTEs !!
+  - invited-player can dispute with game-master, but there are different players
+  => check, if invitation is a good way to start team-games (may be restricted to "special" waiting-room)
+
+* Q: Are all players equal or is there a game-master ?
+  => IMHO for setup game there is a game-master (the one inviting others or posting game-offer)
+  => during game there is no game-master
+
+* Q: is Admin functionality needed to exchange players (if player "escaped") ? - need GAME_ADMIN
+
+* Q: stats about played TeamGo-games ? - Players.TeamGo-counter ?
+
+* Functionality / Rights for game-master:
+  - make a new game-offer in waiting-room
+    - accept challengers on game-offer in waiting-room
+    - deny challengers on game-offer in waiting-room, is this possible ?
+    - "set" some initial players (same or different team)
+  - invite other users
+  - can define order of players (optional)
+  - can define team-assignment (optional)
+  - setup handicap / komi (optional); what if player is unrated? -> game-master decides
+  - choose timezones (?) -> probably better to use TZ of current player to move
+  => Needs kind of "chat" between players (message system, related to game)
+
+* Game-properties for TeamGo:
+  - (condition): players must be unique (trust!); at least 3 players
+  - define DGS-maximum of attending players: 16
+  - allow player-skipping: by game-master, by admin, if on vacation, if requested
+  - type: TeamGo, RenGo, ZenGo
+  - match-mode: equal team-size, min/max-team-size
+  - for each player-position can set: required rated player, requires certain rank-range
+  - option to balance teams
+  - game-settings: board-size, ruleset, handicap/komi/color, handicap-placement, time-setting
+
+* Game-lists:
+  - not sufficient to list by B|W-id alone, list by Team OR representative OR last moved player
+  - handle opponents-page
+  - handle pages with all/user/my finished/running/observed/observing games
+
+* Nice would be revised game-page with full game-message-list in <div>-tag
+
+* Nice would be additional "public" game-chat (similar to wanted review-comments):
+  any number at any time by everyone, but restricted to players to be "public"
+
+* Need multi-receivers-message
+
+* Need way to ask partner if it's okay to resign
+
+* Need adjusted scoring-step for multi-players (all players must pass/approve)
+
+* No conditional moves for TeamGo-games!
+
+* New-game: add description with specialties of game
+  for Team-Go: special treatment of players on vacation (team-vacation)
+
+* Rengo-SGF-download: include who's moving name -> use what SGF-props ?
+
+* Rengo: disallow team-talk, but how? -> not possible (only by trust)
+
