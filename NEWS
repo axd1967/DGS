@@ -337,10 +337,12 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Changes for Admins:
       * Added tournament-admin
       * Added voting-admin to add new features to vote on
-      * Added Adminlog entries for admin user changes, login and login-denied
+      * Added Adminlog entries for admin user changes, login-denied and
+        if admin-level too low for script execution
       * Added filters for showing Errorlog
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
+      * Added page with list of important admin-scripts on admin page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
       * Added indexes on Errorlog to allow better searches for problems
       * Added forum consistency script
