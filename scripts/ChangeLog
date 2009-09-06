@@ -22,6 +22,112 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-09-06 juga
+
+   * include/message_functions.php (game_info_table), waiting_room.php:
+   - fixed text for manual-handicaptype: Fix color -> Color Black|White
+   - fixed wrongly showed handicaptype of game-info for own game-offer
+
+   * scripts/index.php (echo_scripts):
+   - added 2nd phpinfo-link (with adjusted link)
+   - added more info about release-helper scripts
+
+   * error.php, admin.php, admin_admins.php, admin_do_translators.php, admin_faq.php,
+     admin_password.php, admin_show_adminlog.php, admin_show_errorlog.php,
+     admin_show_faqlog.php, admin_show_users.php, admin_translators.php,
+     admin_users.php, change_password.php, send_new_password.php,
+     forum/admin.php, forum/admin_show_forumlog.php,
+     scripts/check_block_ip.php, scripts/convert_from_old_forum.php,
+     scripts/convert_posindex.php, scripts/data_export.php, scripts/data_report.php,
+     scripts/game_consistency.php, scripts/generate_translation_texts.php,
+     scripts/index.php, scripts/mailtest.php, scripts/make_handicap_pattern.php,
+     scripts/message_consistency.php, scripts/player_consistency.php,
+     scripts/recalculate_ratings2.php, scripts/start_frozen_clocks.php,
+     scripts/translation_consistency.php, scripts/update_translation_pages.php,
+     scripts/updates/fix_game_comments-1_0_15.php,
+     scripts/updates/fix_message_thread-1_0_15.php, NEWS:
+   - save Adminlog-entry for adminlevel_too_low with originating source-page
+
+   * scripts/index.php (echo_scripts), skins/dragon/screen.css, admin.php:
+   - show list of important admin-scripts for "mighty" admins with short description
+   - produce error if admin-level too low
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - cleanup of unused entries in Clock-table
+-----------
+-- [data] cleanup unused Clocks
+DELETE FROM Clock WHERE NOT ((ID BETWEEN 0 AND 23) OR (ID BETWEEN 100 AND 123) OR ID IN (201,202,203) ) ;
+-----------
+
+   * list_messages.php, search_messages.php, NEWS:
+   - deactivated found-rows for message-pages with small usefulness
+     but high potential for slow-queries
+
+   * login.php, scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - no longer log user-login, also to have less needed db-queries
+   - delete uninteresting messages in Adminlog-table
+-----------
+-- [data] cleanup Adminlog (delete uninteresting messages, not longer logged)
+DELETE FROM Adminlog WHERE Message = 'logged_in' ;
+-----------
+
+   * faq.php, people.php, ratingpng.php, statisticspng.php, userinfo.php:
+   - replaced T_(non-const) with $TW_(..) to prevent error in script
+     'generate_translation_texts.php'
+
+   * forum/search.php, include/message_functions.php, introduction.php:
+   - fixed wrong/unused T_(..)-translation-texts
+
+   * scripts/generate_translation_texts.php (find_translation_texts, eat_comments,
+       eat_whitespace, eat_translation_text),
+     scripts/README.translations:
+   - refined and adjusted parsing of T_()-content to be more flexible replacing pattern-matches with manually parsing
+   - replaced T_(non-const) with $TW_(..) to prevent error in 'generate_translation_texts.php'
+   - use php_strip_whitespace()-func to read php-files stripping all comments (since PHP5)
+   - better error-handling, show errors and new entry count
+   - scan pages sorted alphabetically
+   - corrected current-dir for use of php_strip_whitespace() to base-dir
+   - adjusted parsing of $TranslateGroups[]
+
+   * scripts/update_translation_pages.php:
+   - adjusted parsing of $TranslateGroups[] allowing also single quotes
+     and more whitespaces
+
+   * specs/doxygen-usage.txt, scripts/README.developers,
+     goodies/index.php, scripts/tests/AllTests.php:
+   - added references, installation, usage for doxygen doc-style used for DGS
+   - fix doxygen-warnings
+
+   * scripts/doxygenConfig:
+   - updated config for doxygen 1.2.16-20020609 -> v1.5.5, adjusted to DGS
+
+   * scripts/experiments/activity_players.php,
+     scripts/experiments/analyze-slow_log.php,
+     scripts/experiments/bitfield_mysql_set.php,
+     scripts/experiments/bitmask_signed_int.php,
+     scripts/experiments/grabout.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, INSTALL:
+   - added and adjusted (old) test- and check scripts
+   - added access-right CREATE-TEMPORARY-TABLE for dragon user
+-----------
+-- grant access-right to create temporary tables to DGS db-user
+-- Lookup your respective configuration in 'include/config-local.php'
+GRANT create temporary tables ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
+-----------
+
+   * include/std_functions.php (write_to_file, read_from_file):
+   - detailed error-message on error while reading or writing file
+   - added compatibility-code for file_get_contents()-func: changed args since PHP5
+
+   * scripts/check_block_ip.php:
+   - added syntax-description
+
+   * include/connect2mysql.php (connect2mysql):
+   - log retry-connect-count if DBG_QUERY>1
+
+   * admin_password.php:
+   - removed translation-group till there are any translation-texts
+
 2009-09-04 juga
 
    * scripts/data_export.php:
