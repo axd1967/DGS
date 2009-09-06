@@ -719,24 +719,37 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             // determine user-white/black
             // NOTE: my-color (for waiting-room color is switched above in this case)
             //       so use same choices for waitingroom/invite/dispute
-            if( $Color == HTYPE_BLACK )
+            if( $is_my_game )
             {
-               $user_w = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
-               $user_b = $player_row;
+               $subtype = ( $Color == HTYPE_BLACK) ? T_('Color Black') : T_('Color White');
+               $colortxt =
+                  (( $Color == HTYPE_BLACK )
+                     ? image( '17/b.gif', T_('Black'), null, $color_class)
+                     : image( '17/w.gif', T_('White'), null, $color_class) )
+                  . MINI_SPACING . user_reference( 0, 1, '', $player_row );
             }
             else
             {
-               $user_w = $player_row;
-               $user_b = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
-            }
+               if( $Color == HTYPE_BLACK )
+               {
+                  $subtype = T_('Color White');
+                  $user_w = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
+                  $user_b = $player_row;
+               }
+               else
+               {
+                  $subtype = T_('Color Black');
+                  $user_w = $player_row;
+                  $user_b = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
+               }
 
-            $subtype = T_('Fix color');
-            $colortxt = image( '17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
-                      . user_reference( 0, 1, '', $user_w )
-                      . SMALL_SPACING
-                      . image( '17/b.gif', T_('Black'), null, $color_class) . MINI_SPACING
-                      . user_reference( 0, 1, '', $user_b )
-                      ;
+               $colortxt = image( '17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
+                  . user_reference( 0, 1, '', $user_w )
+                  . SMALL_SPACING
+                  . image( '17/b.gif', T_('Black'), null, $color_class) . MINI_SPACING
+                  . user_reference( 0, 1, '', $user_b )
+                  ;
+            }
          }
 
          $itable->add_sinfo( T_('Type'), sprintf( T_('%s (Manual setting)'), $subtype ) );
