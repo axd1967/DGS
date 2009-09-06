@@ -291,7 +291,7 @@ function get_tables( $database)
             'TournamentDirector',
             'TournamentParticipants',
             'TournamentProperties',
-            'TournamentRound',
+            //'TournamentRound',  // not yet there
             'TournamentRules',
             'TranslationFoundInGroup',
             'TranslationGroups',
