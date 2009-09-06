@@ -71,7 +71,7 @@ require_once( "include/make_translationfiles.php" );
          . "ORDER BY TP.Page" );
 
    $errorfmt = "<br><a name=\"err%s\"></a><font color=\"red\">*** Error:</font> %s<br>\n"; //err-no, err-msg
-   echo "<p><b>NOTE:</b> Check at <a href=\"#errors\">bottom</a> if errors occured.<br>\n";
+   echo "<p><b>NOTE:</b> Check at <a href=\"#errors\">bottom</a> if errors or new entries are detected.<br>\n";
 
    $php5_strip_php_comments = (function_exists('php_strip_whitespace'));
    $errcnt = 0;
