@@ -34,7 +34,7 @@ require_once( "include/form_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_translators');
 
 
 /*

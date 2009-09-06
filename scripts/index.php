@@ -37,7 +37,7 @@ require_once( "include/std_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER)) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts-index');
 
    $arr_scripts = array(
       'scripts/', array(

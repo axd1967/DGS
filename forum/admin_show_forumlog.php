@@ -37,7 +37,7 @@ require_once( "forum/forum_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_FORUM) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_show_forumlog');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
 
    $page = 'admin_show_forumlog.php';

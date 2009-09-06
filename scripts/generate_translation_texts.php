@@ -32,7 +32,7 @@ require_once( "include/make_translationfiles.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'generate_translation_texts');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

@@ -34,7 +34,7 @@ require_once( "include/rating.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'recalculate_ratings2');
 
    if( ($lim=@$_REQUEST['limit']) > '' )
       $limit = " LIMIT $lim";

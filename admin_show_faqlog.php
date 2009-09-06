@@ -36,7 +36,7 @@ require_once( "include/table_columns.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_show_faqlog');
 
    // init
    $page = 'admin_show_faqlog.php';

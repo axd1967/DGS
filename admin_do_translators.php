@@ -75,7 +75,7 @@ function retry_admin( $msg)
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_do_translators');
 
 /* Originally, the language code was a 2 letters code (like ISO 639-1).
    Because of language particularities within the same charset (like

@@ -33,7 +33,7 @@ require_once( 'forum/forum_functions.php' );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'convert_from_old_forum');
 
    start_html('convert_from_old_forum', 0);
 

@@ -36,7 +36,7 @@ $ThePage = new Page('ForumAdmin');
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER ) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'forum_admin');
 
    $fid = max(0,@$_REQUEST['id']);
 

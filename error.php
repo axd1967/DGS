@@ -549,6 +549,8 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          break;
 
       case("adminlevel_too_low"):
+         if( (string)$userid != '' )
+            admin_log( 0, $userid, 'adminlevel_too_low');
          echo T_("Sorry, this page is solely for users with administrative tasks.");
          break;
 

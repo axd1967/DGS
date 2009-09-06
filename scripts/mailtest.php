@@ -33,7 +33,7 @@ require_once( "include/form_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_SUPERADMIN) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'mailtest');
 
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8

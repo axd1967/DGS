@@ -33,7 +33,7 @@ $ThePage = new Page('Admin');
 
    $admin_level = (int)@$player_row['admin_level']; //local modifications
    if( !$admin_level )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin.show');
 
    db_close();
    start_page(/*T_*/('Admin'), true, $logged_in, $player_row);

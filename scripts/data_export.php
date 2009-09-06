@@ -994,7 +994,7 @@ function freesql_dump( $database, $query)
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'date_export');
 
    if( is_array($ARR_USERS_MAINTENANCE) && in_array( $player_row['Handle'], $ARR_USERS_MAINTENANCE ) )
       $Super_admin = true;

@@ -95,7 +95,7 @@ $info_box = '<ul>
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_faq');
 
    $fid = max(0,@$_REQUEST['id']);
    $sql_term = get_request_arg('qterm', '');

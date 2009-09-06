@@ -56,7 +56,7 @@ require_once( "include/std_functions.php" );
          if( !$logged_in )
             error('not_logged_in');
          if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
-            error('adminlevel_too_low');
+            error('adminlevel_too_low', 'send_new_password.reset_password');
 
          $row['Newpassword'] = '';
       }
@@ -71,7 +71,7 @@ require_once( "include/std_functions.php" );
       if( !$logged_in )
          error('not_logged_in');
       if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
-         error('adminlevel_too_low');
+         error('adminlevel_too_low', 'send_new_password.set_email');
 
       $row['Email'] = trim($_POST['email']);
    }

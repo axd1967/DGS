@@ -40,7 +40,7 @@ require_once( "include/std_functions.php" );
    {
       // admin can change guest-password(?)
       if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
-         error('adminlevel_too_low');
+         error('adminlevel_too_low', 'change_password');
 
       $passwd = $GUESTPASS;
       if( illegal_chars( $passwd, true ) )

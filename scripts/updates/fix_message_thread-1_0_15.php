@@ -30,7 +30,7 @@ require_once( "include/std_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'fix_game_comments-1_0_15');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
