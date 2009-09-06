@@ -132,6 +132,8 @@ function find_php_files( )
 function grep_file($regexp, $file, &$matches)
 {
    $contents = read_from_file($file, 0);
+   //$contents = php_strip_whitespace($file); //FIXME (since PHP5) strip PHP-comments
+
    return preg_match($regexp.'m', $contents, $matches);
 }
 
@@ -201,9 +203,9 @@ function group_string( $id)
    {
       //note: only keep the first match of the file (starting at column 1)
       //TODO: is this wanted?
-      if( grep_file('/^\$TranslateGroups\[\] = \"(\w+)\";/', $file, $matches) )
+      if( grep_file('/^\$TranslateGroups\[\]\s*=\s*([\"\'])(\w+)\1\s*;/', $file, $matches) )
       {
-         $group_found = $matches[1];
+         $group_found = $matches[2];
          //echo $file . " " . $group_found . ", " . $translationgroups[$group_found] . "<br>\n";
          if( !isset($translationgroups[$group_found]) )
          {
