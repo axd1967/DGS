@@ -61,8 +61,8 @@ $ThePage = new Page('Intro');
           "<home forum/index.php>forums</home>.") . "\n";
    */
    echo T_('More information can be found in the <a href="/faq.php">FAQ</a>.'
-      , ' When you have questions you are also encouraged to submit them in one'
-      , ' of the <a href="/forum/index.php">forums</a>.')
+      . ' When you have questions you are also encouraged to submit them in one'
+      . ' of the <a href="/forum/index.php">forums</a>.')
       , "<p></p>\n"
       , T_("Once again welcome, and enjoy your visit here!") . "\n";
 
