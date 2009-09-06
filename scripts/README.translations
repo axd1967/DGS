@@ -3,8 +3,20 @@ run (need the ADMIN_DATABASE privilege):
 
 # NOTE:
 # keep in mind, that translation-text discovery only works correctly,
-# if T_('')-call is correct. There must be NO space between the [')] or [")].
-# Example: T_('text-with-space' ) is not discovered as translation-text(!)
+# if T_('')-call is correct. Only constant quoted strings are valid.
+# Variables within texts are not allowed, because they can't be statically
+# used as translation texts!
+#
+# Examples (valid):   T_('text')  T_('a' . 'b')
+# Examples (invalid): T_($var)  T_(" .. $var ")  T_( func() )
+#
+# Variables can be used when all possible instances of the variable is declared
+# translation text somewhere in a "registered page" (with TranslateGroup), even
+# if the statements are never executed. For example see 'statisticspng.php'.
+# Variables can then be used by defining a placeholder-function like:
+#
+#    $TW_ = 'T_';   echo $TW_($var) . $TW_(func());
+
 
 # NOTE:
 # When adding new sub-directories with PHP-files,
@@ -13,9 +25,16 @@ run (need the ADMIN_DATABASE privilege):
 # Afterwards the 'update_translation_pages.php'-script needs to be run
 # at least two times to find all new groups and new pages.
 
-# NOTE: The translate-group in the files MUST be enclosed within
-# the '"' double-quotes; otherwise they are not found by the
-# 'update_translation_pages'-script.
+
+# NOTE:
+# Each file with translations must set a translation-group with the
+# following line (first one taken):
+#
+#     $TranslateGroups[] = "GroupName";
+#
+# The statement must begin in the first column. The exact regex for matching
+# the line can be checked in the 'update_translation_pages'-script.
+
 
 
 > update_translation_pages.php
