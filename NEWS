@@ -53,8 +53,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
            if standard-placement is not used
          * Differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
          * Remove sorting of Restrictions-column
-         * Removed reply-box when joining waiting-room-game, players can "talk" during game
-         * Enhanced notify about joined waiting-room game with list to started game(s)
+         * Removed reply-box when joining waiting-room-game
+         * Enhanced notify about joined waiting-room game with list of started game(s)
 
       * <home new_game.php>New Game</home>:
          * Added adjustment and min/max-limitation of handicap stones
@@ -64,7 +64,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
            Merged 'Even game with Nigiri' and 'Double game' with MANUAL-game
          * Added optional waiting-room restriction per game-offer to avoid same opponent joining
            too many games: challenger has to wait some days or can be restricted by number of games
-         * Increased maximum number of games in offer: 10 -> 20
 
       * <home message.php?mode=Invite>Invitation</home>:
          * Show probable color / handicap / komi for conventional & proper handicap-type on Preview

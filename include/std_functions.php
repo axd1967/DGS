@@ -117,7 +117,7 @@ $ActiveLevel1 = $ActivityForMove + 2*$ActivityForHit; //a "move sequence" value
 $ActiveLevel2 = 15*$ActiveLevel1;
 $ActivityMax = 0x7FFF0000-$ActivityForMove;
 
-define('NEWGAME_MAX_GAMES', 20);
+define('NEWGAME_MAX_GAMES', 10);
 
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
