@@ -1,6 +1,7 @@
 # Topic: Rengo, Team-Go, Pair-Go, Zen-Go
 # Description: Playing team-go
 # URL: http://www.dragongoserver.net/forum/read.php?forum=5&thread=9423#9423
+#      http://www.dragongoserver.net/forum/read.php?forum=6&thread=25718#25735
 
 #-------- Various ----------------------------------------------
 
