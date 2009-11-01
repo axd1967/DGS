@@ -22,6 +22,21 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-11-01 juga
+
+   * include/std_functions.php, NEWS:
+   - New game: Decreased maximum number of games in offer: 20 -> back to default 10
+
+   * snapshot.php:
+   - easier versioning
+
+2009-09-07 juga
+
+   * include/classlib_profile.php, include/form_functions.php,
+     include/std_classes.php, include/table_columns.php,
+     scripts/index.php:
+   - fixed doxygen-warnings
+
 2009-09-06 juga
 
    * include/message_functions.php (game_info_table), waiting_room.php:
@@ -81,9 +96,12 @@ DELETE FROM Adminlog WHERE Message = 'logged_in' ;
    * scripts/generate_translation_texts.php (find_translation_texts, eat_comments,
        eat_whitespace, eat_translation_text),
      scripts/README.translations:
-   - refined and adjusted parsing of T_()-content to be more flexible replacing pattern-matches with manually parsing
-   - replaced T_(non-const) with $TW_(..) to prevent error in 'generate_translation_texts.php'
-   - use php_strip_whitespace()-func to read php-files stripping all comments (since PHP5)
+   - refined and adjusted parsing of T_()-content to be more flexible replacing
+     pattern-matches with manually parsing
+   - replaced T_(non-const) with $TW_(..) to prevent error in script
+     'generate_translation_texts.php'
+   - use php_strip_whitespace()-func to read php-files stripping all comments,
+     since PHP5
    - better error-handling, show errors and new entry count
    - scan pages sorted alphabetically
    - corrected current-dir for use of php_strip_whitespace() to base-dir
