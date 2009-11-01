@@ -32,19 +32,23 @@ $ThePage = new Page('Docs');
    section( 'current', T_('Snapshots of the source code'));
    centered_container();
 
-   add_link_page_link('snapshot/DragonGoServer-cvs.tar.gz', 'DragonGoServer-cvs.tar.gz', T_('The latest version of the source code, directly from the cvs'));
+   add_link_page_link('snapshot/DragonGoServer-cvs.tar.gz', 'DragonGoServer-cvs.tar.gz',
+      T_('The latest version of the source code, directly from the cvs'));
 
-   add_link_page_link('snapshot/DragonGoServer-stable-200812.tar.gz', 'DragonGoServer-stable-200812.tar.gz', T_('The code this server is running (version 1.0.14)'));
+   add_link_page_link('snapshot/DragonGoServer-stable-200812.tar.gz', 'DragonGoServer-stable-200812.tar.gz',
+      sprintf( T_('The code this server is running (version %s'), '1.0.14'));
 
-   add_link_page_link('snapshot/DragonGoServer-stable-200712.tar.gz', 'DragonGoServer-stable-200712.tar.gz', T_('The previous version 1.0.13'));
+   add_link_page_link('snapshot/DragonGoServer-stable-200712.tar.gz', 'DragonGoServer-stable-200712.tar.gz',
+      sprintf( T_('The previous version %s'), '1.0.13'));
 
-   add_link_page_link('snapshot/DragonGoServer-stable-200608.tar.gz', 'DragonGoServer-stable-200608.tar.gz', T_('The version 1.0.12'));
+   add_link_page_link('snapshot/DragonGoServer-stable-200608.tar.gz', 'DragonGoServer-stable-200608.tar.gz',
+      sprintf( T_('The version %s'), '1.0.12'));
 
-   add_link_page_link('snapshot/DragonGoServer-stable-200608.tar.gz', 'DragonGoServer-stable-200608.tar.gz', T_('The previous version'));
+   add_link_page_link('snapshot/images.tar.gz', 'images.tar.gz',
+      T_('The collection of images used on the server'));
 
-   add_link_page_link('snapshot/images.tar.gz', 'images.tar.gz', T_('The collection of images used on the server'));
-
-   add_link_page_link('snapshot/Translationdata.mysql.gz', 'Translationdata.mysql.gz', T_('The translation data'));
+   add_link_page_link('snapshot/Translationdata.mysql.gz', 'Translationdata.mysql.gz',
+      T_('The translation data'));
 
    add_link_page_link();
 
