@@ -106,7 +106,7 @@ define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * SECS_PER_DAY); // [secs]
 
 
 
-//FIXME: get_magic_quotes_gpc-func is deprecated and will be removed (soon)
+//FIXME: get_magic_quotes_gpc-func is deprecated and will be removed (soon) -> really?
 // NOTE: also calling arg_stripslashes recursively can be exploited:
 //       see http://talks.php.net/show/php-best-practices/26
 if( get_magic_quotes_gpc() )
