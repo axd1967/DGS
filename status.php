@@ -39,11 +39,26 @@ $ThePage = new Page('Status');
    if( !$logged_in )
       error('not_logged_in');
    $my_id = $player_row['ID'];
+
+   if( get_request_arg('set_order') )
+   {
+      $value = get_request_arg('stg_order', 1);
+      $next_game_order = get_next_game_order( '', $value, false );
+      if( $player_row['NextGameOrder'] != $next_game_order )
+      {
+         db_query( "status.update.next_game_order($uid,$value)",
+            "UPDATE Players SET NextGameOrder='".mysql_addslashes($next_game_order) .
+            "' WHERE ID=$my_id LIMIT 1" );
+      }
+      jump_to('status.php');
+   }
+
    $cfg_pages = ConfigPages::load_config_pages( $my_id, CFGCOLS_STATUS_GAMES );
    $cfg_tblcols = $cfg_pages->get_table_columns();
 
 
-   // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort
+   // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort;
+   //       ordering is implemented using explicit "Set Order" saved in Players.NextGameOrder !!
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
    $gtable = new Table( 'game', "status.php", $cfg_tblcols, '', $table_mode|TABLE_ROWS_NAVI );
 
@@ -145,8 +160,12 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, TABLE_NO_SORT);
 
+   // static order for status-games (coupled with "next game" on game-page)
    $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
-   $order = $gtable->current_order_string('ID-');
+   //$order = $gtable->current_order_string('ID-');
+   $order = ' ORDER BY ' .
+      get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
+
    $limit = ''; //$gtable->current_limit_string();
    $gtable->use_show_rows(false);
 
@@ -179,6 +198,8 @@ if( (string)$folder_nr_querystr != '' )
    }
    else
    {
+      $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //defined below
+
       $gtable->set_found_rows( mysql_found_rows("status.find.my_games($my_id)") );
       while( $row = mysql_fetch_assoc( $result ) )
       {
@@ -371,4 +392,25 @@ if( ALLOW_TOURNAMENTS )
    end_page(@$menu_array);
 
 }
+
+
+// callback-func for games-status Table-form
+function status_games_extend_table_form( &$gtable, &$form )
+{
+   global $player_row;
+
+   // values defined in 'get_next_game_order()' in std_funcs
+   $arr_orders = array(
+      1 => T_('Last moved#nextgame'),
+      2 => T_('Moves#nextgame'),
+   );
+
+   $result = $form->print_insert_select_box(
+         'stg_order', '1', $arr_orders,
+         get_next_game_order( '', $player_row['NextGameOrder'], false ), // enum -> idx
+         false);
+   $result .= $form->print_insert_submit_button( 'set_order', T_('Set Order') );
+   return $result;
+}
+
 ?>

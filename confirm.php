@@ -25,15 +25,22 @@ require_once( "include/rating.php" );
 
 
 
-function jump_to_next_game($uid, $Lastchanged, $gid)
+function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
 {
-   $row = mysql_single_fetch( 'confirm.jump_to_next_game',
+   global $player_row;
+   $order = get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
+
+   // restrictions must be oriented on next-game-order-string
+   $where_nextgame = "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
+   if( $player_row['NextGameOrder'] == 'MOVES' )
+      $where_nextgame = "( Moves < $Moves OR (Moves=$Moves AND $where_nextgame ))";
+
+   $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)",
             "SELECT ID FROM Games " .
             "WHERE ToMove_ID=$uid "  .
             "AND Status" . IS_RUNNING_GAME .
-            " AND ( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid )) " .
-            //keep this order like the one in the status page
-            "ORDER BY Lastchanged,ID " .
+            " AND $where_nextgame " . //keep this order like the one in the status page
+            "ORDER BY $order " .
             "LIMIT 1" );
 
    if( !$row )
@@ -75,7 +82,7 @@ function jump_to_next_game($uid, $Lastchanged, $gid)
 
    if( @$_REQUEST['nextskip'] )
    {
-      jump_to_next_game( $my_id, $Lastchanged, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $Moves, $gid);
    }
 
    if( @$_REQUEST['nextaddtime'] )
@@ -643,7 +650,7 @@ if(1){ //new
    }
    else if( @$_REQUEST['nextgame'] && !$stay_on_board )
    {
-      jump_to_next_game( $my_id, $Lastchanged, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $Moves, $gid);
    }
 
    jump_to("game.php?gid=$gid");

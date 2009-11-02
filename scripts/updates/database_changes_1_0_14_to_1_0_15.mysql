@@ -1371,3 +1371,8 @@ DELETE FROM Adminlog WHERE Message = 'logged_in' ;
 -- [data] cleanup unused Clocks
 DELETE FROM Clock WHERE NOT ((ID BETWEEN 0 AND 23) OR (ID BETWEEN 100 AND 123) OR ID IN (201,202,203) ) ;
 
+
+-- status-games ordering coupled with "next game"
+ALTER TABLE Players
+   ADD NextGameOrder enum('LASTMOVED','MOVES') NOT NULL DEFAULT 'LASTMOVED' AFTER UserPicture ;
+
