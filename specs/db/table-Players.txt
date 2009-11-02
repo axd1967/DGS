@@ -90,6 +90,7 @@ Z     MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   
 Z     TableMaxRows         | smallint(5) unsigned                        | NO   | 20
 Z     Button               | int(11)                                     | NO   | 0
 Z     UserPicture          | varchar(48)                                 | NO   |
+Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO')            | NO   | LASTMOVED
 
 # Fields for board-related GUI-config in ConfigBoard-table:
 

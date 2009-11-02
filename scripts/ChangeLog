@@ -22,6 +22,27 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-11-02 juga
+
+   * include/std_functions.php (get_next_game_order),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Players.txt,
+     confirm.php (jump_to_next_game),
+     status.php (status_games_extend_table_form),
+     NEWS:
+   - added constrained order for status games bound to "next game"
+     on game-page for: last moved (default), number of moves
+-----------
+-- status-games ordering coupled with "next game"
+ALTER TABLE Players
+   ADD NextGameOrder enum('LASTMOVED','MOVES') NOT NULL DEFAULT 'LASTMOVED' AFTER UserPicture ;
+-----------
+
+   * include/table_columns.php (Table.set_extend_table_form_function,
+       ~.make_add_column_form):
+   - added optional callback-function to extend table-form with additional
+     form-elements
+
 2009-11-01 juga
 
    * include/std_functions.php, NEWS:
