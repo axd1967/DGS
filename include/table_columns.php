@@ -67,6 +67,8 @@ class Table
    var $Prefix;
    /*! \brief already opened Form class to be used by add_column and filters */
    var $ExternalForm;
+   /*! \brief optional callback-function expecting two arguments: this Table and table-Form objects. */
+   var $ExtendTableFormFunc;
 
    /*! \brief Array of the columns to sort on
     *  $Sort= array( nr1 => +/-nr1, nr2 => +/-nr2, ...);
@@ -185,6 +187,7 @@ class Table
       global $player_row;
 
       $this->ExternalForm = NULL;
+      $this->ExtendTableFormFunc = NULL;
       $this->ExtMode = array();
       $this->Removed_Columns = NULL;
       $this->Shown_Columns = 0;
@@ -269,6 +272,17 @@ class Table
    {
       $this->ExternalForm = $form;
       $form->attach_table($this);
+   }
+
+   /*!
+    * \brief Sets callback function to extend table-form.
+    * Function must expect two arguments (call by reference possible):
+    * 1. this Table-instance
+    * 2. Tables Form-instance
+    */
+   function set_extend_table_form_function( $func )
+   {
+      $this->ExtendTableFormFunc = $func;
    }
 
    /*! \brief Overwrites standard rows-per-page for this table */
@@ -1347,13 +1361,19 @@ class Table
       // add show-rows elements in add-column-row
       $r_string = $this->make_show_rows( $ac_form );
 
+      $ex_string = '';
+      if( $this->ExtendTableFormFunc && function_exists($this->ExtendTableFormFunc) )
+         $ex_string = call_user_func_array( $this->ExtendTableFormFunc,
+               array( $this, $ac_form ) ); // call vars by ref
+
       $string = false;
-      if( $ac_string || $f_string || $r_string )
+      if( $ac_string || $f_string || $r_string || $ex_string )
       {
          $arr = array();
-         if( $f_string )  $arr[]= $f_string;
-         if( $r_string )  $arr[]= $r_string;
-         if( $ac_string ) $arr[]= $ac_string;
+         if( $f_string )  $arr[]= $f_string;  // filter-submits
+         if( $r_string )  $arr[]= $r_string;  // show-rows
+         if( $ac_string ) $arr[]= $ac_string; // add-cols
+         if( $ex_string ) $arr[]= $ex_string; // custom-extension
 
          $string = "<div id='{$this->Prefix}tableFAC'>";
          $string .= implode( '&nbsp;&nbsp;&nbsp;', $arr );
