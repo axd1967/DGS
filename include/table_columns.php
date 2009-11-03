@@ -726,14 +726,11 @@ class Table
       return $num_rows_result;
    } //compute_show_rows
 
-   /*! @brief Retrieve MySQL ORDER BY part from table.
-    * @param $sort_xtend is an extended-alias-name
-    *  (ended by a '+' or '-' like in add_tablehead())
-    *  added to the current sort list
-    * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
-    *   (computing the set_default_sort() datas)
+   /*!
+    * \brief Sets the sort-images in the table-header.
+    * \note Should be called, if current_order_string() is not used
     */
-   function current_order_string( $sort_xtend='')
+   function make_sort_images()
    {
       if( !$this->Head_closed )
          error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
@@ -760,6 +757,25 @@ class Table
          //alt-attb and part of "images/sort$i$c.gif" $i:[1..n] $c:[a,d] (a=ascending, d=descending)
          $this->Sortimg[$sk] = "$i$c";
       }
+
+      return $str;
+   }
+
+   /*!
+    * \brief Retrieve MySQL ORDER BY part from table and sets table-sort-images.
+    * @param $sort_xtend is an extended-alias-name
+    *        (ended by a '+' or '-' like in add_tablehead())
+    *        added to the current sort list
+    * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
+    *   (computing the set_default_sort() datas)
+    */
+   function current_order_string( $sort_xtend='')
+   {
+      if( !$this->Head_closed )
+         error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
+      //if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
+
+      $str = $this->make_sort_images();
       if( $sort_xtend )
       {
          if( $str )
