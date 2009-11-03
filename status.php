@@ -161,8 +161,12 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, TABLE_NO_SORT);
 
    // static order for status-games (coupled with "next game" on game-page)
-   $gtable->set_default_sort( 13/*, 1*/); //on Lastchanged,ID
+   if( $player_row['NextGameOrder'] == 'LASTMOVED' )
+      $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
+   elseif( $player_row['NextGameOrder'] == 'MOVES' )
+      $gtable->set_default_sort( 9, 13); //on Lastchanged,ID
    //$order = $gtable->current_order_string('ID-');
+   $gtable->make_sort_images();
    $order = ' ORDER BY ' .
       get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
 
