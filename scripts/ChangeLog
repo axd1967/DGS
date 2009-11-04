@@ -24,6 +24,9 @@ ChangeLog
 
 2009-11-04 juga
 
+   * status.php:
+   - bugfix: show priority too if column is shown
+
    * include/classlib_game.php (NextGameOrder.load_game_priority, ~.persist_game_priority, ~.delete_game_priorities),
      specs/db/table-Games.txt, scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      scripts/game_consistency.php, clock_tick.php, confirm.php (jump_to_next_game),
@@ -31,6 +34,7 @@ ChangeLog
    - added status-games-order on priority (per player) and
      editing on game-info page
    - delete GamesPriority-table-entries for finished and deleted games
+   - deactivate status-game priority column by default
 -----------
 -- status-games ordering by priority
 CREATE TABLE GamesPriority (
@@ -42,6 +46,9 @@ CREATE TABLE GamesPriority (
 
 ALTER TABLE Players
    CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO') NOT NULL DEFAULT 'LASTMOVED' ;
+
+-- deactivate status-game priority column by default
+UPDATE ConfigPages SET ColumnsStatusGames=ColumnsStatusGames & ~0x10000 ;
 -----------
 
    * include/classlib_game.php (NextGameOrder.ARR_NEXT_GAME_ORDER,
