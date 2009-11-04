@@ -122,7 +122,10 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * NEW and REPLY message folders can be hidden -> change on <home edit_folders.php>edit folders page</home>
       * Added column on status games with icon for users being "online",
         i.e. last access time within 10 mins ago
-      * Added constrained order for status games on: last moved (default), number of moves
+      * Added constrained order for status games on:
+         * last moved (default)
+         * number of moves
+         * priority (editing on game-info page)
       * Show open tournament applications of user
       * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
