@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once( "include/std_functions.php" );
+require_once( "include/std_classes.php" );
 require_once( "include/game_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
@@ -29,32 +30,42 @@ require_once( 'include/classlib_game.php' );
 function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
 {
    global $player_row;
+
    $order = NextGameOrder::get_next_game_order(
       'Games', $player_row['NextGameOrder'], true ); // enum -> order
+   $qsql = new QuerySQL(
+         SQLP_FIELDS, 'ID',
+         SQLP_FROM,   'Games',
+         SQLP_WHERE,  "ToMove_ID=$uid", 'Status '.IS_RUNNING_GAME,
+         SQLP_ORDER,  $order,
+         SQLP_LIMIT,  1
+      );
 
-   // restrictions must be oriented on next-game-order-string
-   $show_prio = false;
-   $where_nextgame = "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
+   // restrictions must be oriented on next-game-order-string to keep order
+   // like for status-games on status-page
+   $def_where_nextgame =
+      "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
    if( $player_row['NextGameOrder'] == 'MOVES' )
-      $where_nextgame = "( Moves < $Moves OR (Moves=$Moves AND $where_nextgame ))";
+   {
+      $qsql->add_part( SQLP_WHERE,
+         "( Moves < $Moves OR (Moves=$Moves AND $def_where_nextgame ))" );
+   }
    elseif( $player_row['NextGameOrder'] == 'PRIO' )
    {
-      $show_prio = true;
       $prio = NextGameOrder::load_game_priority( $gid, $uid );
-      $where_nextgame = "( COALESCE(GP.Priority,0) < $prio OR (COALESCE(GP.Priority,0)=$prio AND $where_nextgame ))";
+      $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
+      $qsql->add_part( SQLP_WHERE,
+         "( COALESCE(GP.Priority,0) < $prio OR "
+            . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
+   }
+   else // default 'LASTMOVED'
+   {
+      $qsql->add_part( SQLP_WHERE, $def_where_nextgame );
    }
 
-   $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)",
-            "SELECT ID " .
-            ($show_prio ? ",COALESCE(GP.Priority,0) AS X_Priority " : '') .
-            "FROM Games " .
-            ($show_prio ? "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid " : '') .
-            "WHERE ToMove_ID=$uid "  .
-            "AND Status" . IS_RUNNING_GAME .
-            " AND $where_nextgame " . //keep this order like the one in the status page
-            "ORDER BY $order " .
-            "LIMIT 1" );
-
+   $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );
    if( !$row )
       jump_to("status.php");
 
