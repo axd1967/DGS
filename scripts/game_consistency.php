@@ -23,6 +23,7 @@ chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
+require_once( 'include/classlib_game.php' );
 
 {
    disable_cache();
@@ -233,6 +234,41 @@ echo ">>>> Most of them needs manual fixes.";
    mysql_free_result($result);
 
 //---------
+   echo "\n<hr>Games Priority check:";
+
+   $query = "SELECT GP.gid, IFNULL(Games.ID,0) AS X_MissGame, Games.Status "
+      . "FROM GamesPriority AS GP "
+         . "LEFT JOIN Games AS G ON G.ID=GP.gid "
+      . "$where ORDER BY GP.gid$limit";
+
+   echo "\n<br>query: $query;\n";
+   $result = mysql_query($query)
+       or die('<BR>' . mysql_error());
+
+   $n= (int)@mysql_num_rows($result);
+   echo "\n<br>=&gt; result: $n rows\n";
+
+   if( $n > 0 )
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      $gid = $row['gid'];
+      $missgame_gid = $row['X_MissGame'];
+      $status = $row['Status'];
+
+      $errmsg = '';
+      if( $missgame_gid == 0 )
+         $errmsg = "Found GamesPriority without Games-entry -> removing";
+      elseif( $status == 'INVITED' || $status == 'FINISHED' )
+         $errmsg = "Found GamesPriority in non-running Games-status -> removing";
+      if( $errmsg )
+      {
+         echo "<br>Game $gid: $errmsg\n";
+         dbg_query("DELETE FROM GamesPriority WHERE gid=$gid");
+      }
+   }
+   mysql_free_result($result);
+
+//---------
    echo "\n<hr>Done!!!\n";
    end_html();
 }
@@ -402,7 +438,7 @@ function check_consistency( $gid)
          return "Wrong Player to move! Should be $to_move.";
       }
 
-      if( $games_Flags!=$GameFlags 
+      if( $games_Flags!=$GameFlags
         || ( ($GameFlags & GAMEFLAGS_KO) && $games_Last_Move!=$Last_Move ) )
       {
          return "Wrong Ko status!"
