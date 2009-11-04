@@ -26,6 +26,7 @@ require_once( 'include/table_infos.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/classlib_game.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 
@@ -43,7 +44,7 @@ $ThePage = new Page('Status');
    if( get_request_arg('set_order') )
    {
       $value = get_request_arg('stg_order', 1);
-      $next_game_order = get_next_game_order( '', $value, false );
+      $next_game_order = NextGameOrder::get_next_game_order( '', $value, false );
       if( $player_row['NextGameOrder'] != $next_game_order )
       {
          db_query( "status.update.next_game_order($uid,$value)",
@@ -139,6 +140,8 @@ if( (string)$folder_nr_querystr != '' )
    $show_notes = (LIST_GAMENOTE_LEN>0);
    $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
 
+   $show_prio = ($player_row['NextGameOrder'] == 'PRIO');
+
    // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
@@ -158,17 +161,21 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead(11, new TableHead( T_('User online#header'),
       'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
    $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
+   $gtable->add_tablehead(17, T_('Priority#header'), 'Number',
+      ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, TABLE_NO_SORT);
 
    // static order for status-games (coupled with "next game" on game-page)
    if( $player_row['NextGameOrder'] == 'LASTMOVED' )
       $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
    elseif( $player_row['NextGameOrder'] == 'MOVES' )
-      $gtable->set_default_sort( 9, 13); //on Lastchanged,ID
+      $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged
+   elseif( $player_row['NextGameOrder'] == 'PRIO' )
+      $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
    //$order = $gtable->current_order_string('ID-');
    $gtable->make_sort_images();
    $order = ' ORDER BY ' .
-      get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
+      NextGameOrder::get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
 
    $limit = ''; //$gtable->current_limit_string();
    $gtable->use_show_rows(false);
@@ -183,8 +190,10 @@ if( (string)$folder_nr_querystr != '' )
       .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
       .",Clock.Ticks" //always my clock because always my turn (status page)
       .(!$load_notes ? '': ",GN.Notes AS X_Note" )
+      .($show_prio ? ",COALESCE(GP.Priority,0) AS X_Priority" : ",0 AS X_Priority")
       ." FROM (Games,Players AS opponent)"
       .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
+      .(!$show_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
       ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"
@@ -282,6 +291,8 @@ if( (string)$folder_nr_querystr != '' )
          }
          if( $gtable->Is_Column_Displayed[15] )
             $grow_strings[15] = echo_image_gameinfo($ID);
+         if( $gtable->Is_Column_Displayed[17] )
+            $grow_strings[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
 
          $gtable->add_row( $grow_strings );
       }
@@ -403,15 +414,9 @@ function status_games_extend_table_form( &$gtable, &$form )
 {
    global $player_row;
 
-   // values defined in 'get_next_game_order()' in std_funcs
-   $arr_orders = array(
-      1 => T_('Last moved#nextgame'),
-      2 => T_('Moves#nextgame'),
-   );
-
    $result = $form->print_insert_select_box(
-         'stg_order', '1', $arr_orders,
-         get_next_game_order( '', $player_row['NextGameOrder'], false ), // enum -> idx
+         'stg_order', '1', NextGameOrder::get_next_game_orders_selection(),
+         NextGameOrder::get_next_game_order( '', $player_row['NextGameOrder'], false ), // enum -> idx
          false);
    $result .= $form->print_insert_submit_button( 'set_order', T_('Set Order') );
    return $result;
