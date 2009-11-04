@@ -273,43 +273,6 @@ define('USERTYPE_TEAM',    0x0008); // unused so far
 define('ARG_USERTYPE_NO_TEXT', 'none');
 
 
-
-// SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
-// NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
-$ARR_NEXT_GAME_ORDER = array(
-   // idx => [ Players.NextGameOrder-value, order-string ]
-   1 => array( 'LASTMOVED', '%G.Lastchanged ASC, %G.ID DESC' ),
-   2 => array( 'MOVES',     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC' ),
-   'LASTMOVED' => 1,
-   'MOVES' => 2,
-);
-
-/*!
- * \brief Maps NextGameOrder for status-games.
- * \param $idx if numeric (map selection-index to enum-value (sql_order=false) or to order-string;
- *             if string (map enum-value to selection-index ot to order-string)
- * Examples:
- *   get_next_game_order( 'Games', 3, false ) -> PRIO
- *   get_next_game_order( '',  'MOVES', false ) -> 2
- *   get_next_game_order( 'G', 'MOVES', true ) = get_..( 'G', 2, true ) -> sql-order
- */
-function get_next_game_order( $tablename, $idx, $sql_order=false )
-{
-   global $ARR_NEXT_GAME_ORDER;
-
-   $idx_value = $idx;
-   if( !is_numeric($idx) ) // map enum-val to selection-index or order-string
-   {
-      $idx_value = $ARR_NEXT_GAME_ORDER[$idx];
-      if( !$sql_order )
-         return $idx_value;
-   }
-
-   $arr_idx = ($sql_order) ? 1 : 0;
-   $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][$arr_idx];
-   return str_replace( '%G', $tablename, $order_fmt );
-}
-
 // param $short: true, false, ARG_USERTYPE_NO_TEXT (no text)
 function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
 {
