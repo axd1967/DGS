@@ -22,6 +22,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-11-04 juga
+
+   * include/classlib_game.php (NextGameOrder.load_game_priority, ~.persist_game_priority, ~.delete_game_priorities),
+     specs/db/table-Games.txt, scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/game_consistency.php, clock_tick.php, confirm.php (jump_to_next_game),
+     gameinfo.php, status.php, NEWS:
+   - added status-games-order on priority (per player) and
+     editing on game-info page
+   - delete GamesPriority-table-entries for finished and deleted games
+-----------
+-- status-games ordering by priority
+CREATE TABLE GamesPriority (
+   gid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Priority smallint signed NOT NULL default '0',
+   PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM;
+
+ALTER TABLE Players
+   CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO') NOT NULL DEFAULT 'LASTMOVED' ;
+-----------
+
+   * include/classlib_game.php (NextGameOrder.ARR_NEXT_GAME_ORDER,
+       ~.get_next_game_orders_selection, ~.get_next_game_order),
+     include/std_functions.php (ARR_NEXT_GAME_ORDER, get_next_game_order),
+     confirm.php (jump_to_next_game),
+     status.php:
+   - moved status-games-next-game-order stuff to NextGameOrder-class
+     to 'include/classlib_game.php'
+
+2009-11-03 juga
+
+   * include/table_columns.php (Table.make_sort_images, current_order_string),
+     status.php:
+   - show status-games sort-order with table-header sort-images
+
 2009-11-02 juga
 
    * include/std_functions.php (get_next_game_order),
