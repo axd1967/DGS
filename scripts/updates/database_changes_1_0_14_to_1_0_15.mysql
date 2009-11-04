@@ -1388,3 +1388,7 @@ CREATE TABLE GamesPriority (
 ALTER TABLE Players
    CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO') NOT NULL DEFAULT 'LASTMOVED' ;
 
+-- deactivate status-game priority column by default
+UPDATE ConfigPages SET ColumnsStatusGames=ColumnsStatusGames & ~0x10000 ;
+
+
