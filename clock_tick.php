@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
+require_once( 'include/classlib_game.php' );
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -211,6 +212,7 @@ use TEMPORARY TABLEs for generated UPDATEs ???
             continue;
          }
 
+//FIXME(?)
 /* To store the last $hours info (never used, to be checked)
          $to_move= ( $ToMove_ID == $Black_ID ? BLACK : WHITE );
          db_query( "clock_tick.update_moves($gid)",
@@ -259,6 +261,8 @@ use TEMPORARY TABLEs for generated UPDATEs ???
 
          delete_all_observers($gid, $rated_status!=1, $Text);
 
+         // GamesPriority-entries are kept for running games only, delete for finished games too
+         NextGameOrder::delete_game_priorities( $gid );
       }
    }
    mysql_free_result($result);
