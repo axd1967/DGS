@@ -385,4 +385,114 @@ class GameScore
 
 } //end 'GameScore'
 
+
+
+
+ /*!
+  * \class NextGameOrder
+  * \brief Static helper class to handle table next-game-order for status-games
+  *        and GamesPriority-table.
+  */
+
+// SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
+// NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
+$ARR_NEXT_GAME_ORDER = array(
+   // idx => [ Players.NextGameOrder-value, order-string ]
+   1 => array( 'LASTMOVED', '%G.Lastchanged ASC, %G.ID DESC' ),
+   2 => array( 'MOVES',     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC' ),
+   3 => array( 'PRIO',      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC' ),
+   'LASTMOVED' => 1,
+   'MOVES'     => 2,
+   'PRIO'      => 3,
+);
+
+class NextGameOrder
+{
+   // ---------- static funcs ----------------------
+
+   /*! \brief Returns array with orders for status-games-list order-selection. */
+   function get_next_game_orders_selection()
+   {
+      return array(
+         1 => T_('Last moved#nextgame'),
+         2 => T_('Moves#nextgame'),
+         3 => T_('Priority#nextgame'),
+      );
+   }
+
+   /*!
+    * \brief Maps NextGameOrder for status-games.
+    * \param $idx if numeric (map selection-index to enum-value (sql_order=false) or to order-string;
+    *             if string (map enum-value to selection-index ot to order-string)
+    * Examples:
+    *   get_next_game_order( 'Games', 3, false ) -> PRIO
+    *   get_next_game_order( '',  'MOVES', false ) -> 2
+    *   get_next_game_order( 'G', 'MOVES', true ) = get_..( 'G', 2, true ) -> sql-order
+    */
+   function get_next_game_order( $tablename, $idx, $sql_order=false )
+   {
+      global $ARR_NEXT_GAME_ORDER;
+
+      $idx_value = $idx;
+      if( !is_numeric($idx) ) // map enum-val to selection-index or order-string
+      {
+         $idx_value = $ARR_NEXT_GAME_ORDER[$idx];
+         if( !$sql_order )
+            return $idx_value;
+      }
+
+      $arr_idx = ($sql_order) ? 1 : 0;
+      $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][$arr_idx];
+      return str_replace( '%G', $tablename, $order_fmt );
+   }
+
+
+   /*!
+    * \brief Loads priority from GamesPriority-table for given game and user.
+    * \return loaded integer-prio or else $defval
+    */
+   function load_game_priority( $gid, $uid, $defval=0 )
+   {
+      $prio_row = mysql_single_col( "nextgameorder.gameprio.find($gid,$uid)",
+         "SELECT Priority FROM GamesPriority WHERE gid=$gid AND uid=$uid LIMIT 1" );
+      $prio = ( $prio_row ) ? $prio_row[0] : $defval;
+      return $prio;
+   }
+
+   /*!
+    * \brief Saves or deletes GamesPriority-table-entry for given arguments.
+    * \param $prio '' to delete entry; integer-value to save it;
+    *              non-integer will lead to an error
+    */
+   function persist_game_priority( $gid, $uid, $prio )
+   {
+      if( (string)$prio == '' )
+      {
+         db_query( "nextgameorder.gameprio.delete($gid,$uid)",
+            "DELETE FROM GamesPriority WHERE gid=$gid AND uid=$uid LIMIT 1" );
+      }
+      else
+      {
+         if( !is_numeric($prio) )
+            error('invalid_args', "nextgameorder.gameprio.check.prio.no_int($gid,$uid,$new_prio)");
+         $new_prio = (int)$prio;
+         if( $new_prio < -32768 || $new_prio > 32767 )
+            error('invalid_args', "nextgameorder.gameprio.check.prio.range($gid,$uid,$new_prio)");
+
+         db_query( "nextgameorder.gameprio.update($gid,$uid,$new_prio)",
+            "INSERT INTO GamesPriority (gid,uid,Priority) VALUES ($gid,$uid,$new_prio) " .
+            "ON DUPLICATE KEY UPDATE Priority=VALUES(Priority)" );
+      }
+   }
+
+   /*! \brief Deletes all GamesPriority-table-entries for given game-id. */
+   function delete_game_priorities( $gid )
+   {
+      // for now only 2 players, change with RENGO
+      db_query( "nextgameorder.gameprio.delete_all($gid)",
+         "DELETE FROM GamesPriority WHERE gid=$gid LIMIT 2" );
+   }
+
+} //end 'NextGameOrder'
+
 ?>
