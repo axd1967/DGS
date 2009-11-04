@@ -27,6 +27,7 @@ require_once( 'include/table_infos.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
+require_once( 'include/classlib_game.php' );
 
 $ThePage = new Page('GameInfo');
 
@@ -62,6 +63,13 @@ function build_rating_diff( $rating_diff )
    $gid = (int) get_request_arg('gid', 0);
    if( $gid < 1 )
       error('unknown_game', "gameinfo($gid)");
+
+   if( get_request_arg('set_prio') )
+   {
+      $new_prio = trim(get_request_arg('prio'));
+      NextGameOrder::persist_game_priority( $gid, $my_id, $new_prio );
+   }
+
 
    // load game-values
    $qsql = new QuerySQL();
@@ -325,6 +333,28 @@ function build_rating_diff( $rating_diff )
    $itable_str_time = $itable->make_table();
    unset($itable);
 
+
+   // ------------------------
+   // build form for editing games-priority
+
+   // for players and running games only
+   if( $is_my_game && !$game_finished )
+   {
+      $prio = NextGameOrder::load_game_priority( $gid, $my_id, '' );
+
+      $prioform = new Form( 'gameprio', "gameinfo.php?gid=$gid", FORM_GET );
+      $prioform->add_row( array(
+            'DESCRIPTION',  T_('Status games list#nextgame'),
+            'TEXTINPUT',    'prio', 5, 5, $prio, '',
+            'SUBMITBUTTON', 'set_prio', T_('Set priority'),
+            'HIDDEN', 'gid', $gid,
+         ));
+
+      $form_str_gameprio = $prioform->get_form_string();
+   }
+   else
+      $form_str_gameprio = '';
+
    // ------------------------ END of building
 
 
@@ -335,7 +365,7 @@ function build_rating_diff( $rating_diff )
    echo "<h3 class=Header>$title</h3>\n";
 
    echo "<table><tr valign=\"top\">",
-      "<td>$itable_str_game</td>",
+      "<td>$itable_str_game<br>$form_str_gameprio</td>",
       "<td>$itable_str_time<br>$itable_str_players</td>",
       "</tr></table>\n";
 
