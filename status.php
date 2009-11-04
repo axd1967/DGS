@@ -141,6 +141,7 @@ if( (string)$folder_nr_querystr != '' )
    $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
 
    $show_prio = ($player_row['NextGameOrder'] == 'PRIO');
+   $load_prio = ($show_prio || $gtable->is_column_displayed(17) );
 
    // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -190,10 +191,10 @@ if( (string)$folder_nr_querystr != '' )
       .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
       .",Clock.Ticks" //always my clock because always my turn (status page)
       .(!$load_notes ? '': ",GN.Notes AS X_Note" )
-      .($show_prio ? ",COALESCE(GP.Priority,0) AS X_Priority" : ",0 AS X_Priority")
+      .($load_prio ? ",COALESCE(GP.Priority,0) AS X_Priority" : ",0 AS X_Priority")
       ." FROM (Games,Players AS opponent)"
       .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
-      .(!$show_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
+      .(!$load_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
       ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"
