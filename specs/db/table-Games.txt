@@ -1,0 +1,30 @@
+###
+### Description of mysql tables:  GamesPriority
+###
+
+###########################################################################
+## --- GamesPriority ---
+
+Description:
+   Table to be able to sort status-games by priority
+   - table-entries are only kept for RUNNING games
+   - table-entries are deleted for finished games
+   - table-entry only inserted on demand by user,
+     there are games without GamesPriority-entries
+
+
+ Field    | Type        | Default
+----------+-------------+-------------
+ gid      | int(11)     | NULL
+ uid      | int(11)     | NULL
+ Priority | smallint(6) | 0
+
+
+## Fields:
+
+* gid : foreign key to Games.ID
+
+* uid : foreign key to Players.ID
+
+* Priority : integer-value with priority
+

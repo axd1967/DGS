@@ -1376,3 +1376,15 @@ DELETE FROM Clock WHERE NOT ((ID BETWEEN 0 AND 23) OR (ID BETWEEN 100 AND 123) O
 ALTER TABLE Players
    ADD NextGameOrder enum('LASTMOVED','MOVES') NOT NULL DEFAULT 'LASTMOVED' AFTER UserPicture ;
 
+
+-- status-games ordering by priority
+CREATE TABLE GamesPriority (
+   gid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Priority smallint signed NOT NULL default '0',
+   PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM;
+
+ALTER TABLE Players
+   CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO') NOT NULL DEFAULT 'LASTMOVED' ;
+
