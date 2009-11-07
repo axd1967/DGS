@@ -92,6 +92,8 @@ require_once( "features/lib_votes.php" );
 
    $old_status = $feature->status;
    $new_status = get_request_arg('new_status', $feature->status);
+   if( ($new_status != $old_status ) && $feature->is_final_status() )
+      error('feature_edit_bad_status', "edit_feature.feature.final_status($fid,$my_id,{$feature->status})");
 
    // insert/update feature-object with values from edit-form if no error
    if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
@@ -140,14 +142,16 @@ require_once( "features/lib_votes.php" );
    $arr_status = array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status );
-   if( $is_super_admin )
+   if( $is_super_admin && !$feature->is_final_status() )
    {
       // status-change
       $status_values = array_value_to_key_and_value(
-            array( FEATSTAT_NEW, FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ) );
+         array( FEATSTAT_NEW, FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ));
+      $chg_note = sprintf( T_('Status-change to [%s] is final !'), FEATSTAT_NACK.'|'.FEATSTAT_LIVE );
       array_push( $arr_status,
          'TEXT', '&nbsp;-&gt;&nbsp;',
-         'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
+         'SELECTBOX', 'new_status', 1, $status_values, $new_status, false,
+         'TEXT', SMALL_SPACING . "($chg_note)" );
    }
    $fform->add_row( $arr_status );
    if( $is_admin )
