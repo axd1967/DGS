@@ -61,6 +61,7 @@ require_once( "include/std_functions.php" );
             'game_consistency.php'     => "Check consistency of Games-data",
             'message_consistency.php'  => "Check consistency of Message-data",
             'translation_consistency.php' => "Check consistency of Translation-data",
+            'fix_games_timeleft.php'   => "Fix Games.TimeOutDate for running games (after long maintenance)",
 
          "Info" => 0,
             'phpinfo.php'              => "Shows PHP-info",
