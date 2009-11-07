@@ -24,6 +24,16 @@ ChangeLog
 
 2009-11-07 juga
 
+   * features/lib_votes.php (Feature.is_final_status, ~.fix_user_quota_feature_points),
+     features/edit_feature.php:
+   - forbid changing LIVE|NACK-status, added warning for admins about that
+   - return all taken feature-points when feature goes LIVE (same as NACK = rejected),
+     cap UserQuota.FeaturePoints to maximum of FEATURE_POINTS_MAX_VALUE
+
+   * include/classlib_userquota.php:
+   - limit feature-points to maximum: 100 -> 50
+   - increased time-interval before increase feature-points: 10 -> 20 days
+
    * include/time_functions.php (time_remaining), NEWS:
    - bugfix not capping main-time on moving for Fischer-time after adding time
      exceeding starting-main-time;
@@ -33,6 +43,7 @@ ChangeLog
    - added description for Games-table
 
    * include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/game_functions.php (add_time_opponent),
      include/time_functions.php (time_left_ticksdate),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/dragon-data.sql, specs/db/table-Players.txt,
