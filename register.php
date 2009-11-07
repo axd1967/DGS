@@ -48,7 +48,7 @@ require_once( "include/form_functions.php" );
    $reg_form->add_row( array( 'TAB',
                               'CHECKBOX', 'policy', '1', '', false,
                               'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
-                                               "{$HOSTBASE}policy.php" ) ) );
+                                               HOSTBASE."policy.php" ) ) );
 
    $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
    $reg_form->echo_string(1);

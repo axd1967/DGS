@@ -264,7 +264,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          echo T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.'),
             "<br><br>\n",
             sprintf( T_('If you think the IP block is not intended for you, please register your account with the <a href="%s">alternative registration page</a>.'),
-               "{$HOSTBASE}register.php" );
+               HOSTBASE."register.php" );
          break;
 
       case('ip_blocked_register'):
@@ -297,7 +297,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
               '<tr>',
                 '<td>&nbsp;</td>',
                 '<td><input type="checkbox" name="policy" value="1">&nbsp;'
-                     . sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'), "{$HOSTBASE}policy.php" ) . '</td>',
+                     . sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'), HOSTBASE."policy.php" ) . '</td>',
               '</tr>', "\n",
               '<tr><td colspan="2">&nbsp;</td></tr>', "\n",
               '<tr>',
