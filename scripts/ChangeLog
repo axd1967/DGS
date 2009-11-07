@@ -22,7 +22,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-11-07 juga
+
+   * specs/db/table-Games.txt:
+   - added description for Games-table
+
+   * include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/time_functions.php (time_left_ticksdate),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-data.sql, specs/db/table-Players.txt,
+     scripts/fix_games_timeleft.php, scripts/index.php,
+     clock_tick.php, confirm.php (jump_to_next_game), status.php, NEWS:
+   - added status-games-order on remaining-time
+     - time-left calculus used from
+       http://www.dragongoserver.net/forum/read.php?forum=4&thread=5728#5743
+     - use new clock with Clock.ID=204 to serve as time-anchor for time-left calculus
+     - added script to set Games.TimeOutDate
+-----------
+-- status-games ordering by remaining-time
+ALTER TABLE Games
+   ADD TimeOutDate int NOT NULL DEFAULT '0' AFTER ClockUsed ;
+ALTER TABLE Players
+   CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL DEFAULT 'LASTMOVED' ;
+
+-- Clock for remaining-time ordering
+INSERT INTO Clock SET ID=204,Lastchanged=0 ;
+-- execute fix-script
+--    'scripts/fix_games_timeleft.php'
+-----------
+
+   * include/config.php, error.php, register.php:
+   - fix $HOSTBASE -> HOSTBASE
+
 2009-11-04 juga
+
+   * confirm.php (jump_to_next_game):
+   - cleanup: replace building SQL-statement using QuerySQL-class
 
    * status.php:
    - bugfix: show priority too if column is shown
