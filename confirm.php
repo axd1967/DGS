@@ -27,7 +27,7 @@ require_once( 'include/classlib_game.php' );
 
 
 
-function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
+function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 {
    global $player_row;
 
@@ -59,6 +59,11 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
       $qsql->add_part( SQLP_WHERE,
          "( COALESCE(GP.Priority,0) < $prio OR "
             . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
+   }
+   elseif( $player_row['NextGameOrder'] == 'TIMELEFT' )
+   {
+      $qsql->add_part( SQLP_WHERE,
+         "( TimeOutDate > $TimeOutDate OR (TimeOutDate=$TimeOutDate AND $def_where_nextgame ))" );
    }
    else // default 'LASTMOVED'
    {
@@ -93,8 +98,8 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
    $game_row = mysql_single_fetch( "confirm.find_game($gid)",
                  "SELECT Games.*, " .
                  "Games.Flags+0 AS GameFlags, " . //used by check_move
-                 "black.ClockUsed AS Blackclock, " .
-                 "white.ClockUsed AS Whiteclock, " .
+                 "black.ClockUsed AS X_BlackClock, " .
+                 "white.ClockUsed AS X_WhiteClock, " .
                  "black.OnVacation AS Blackonvacation, " .
                  "white.OnVacation AS Whiteonvacation " .
                  "FROM (Games, Players AS black, Players AS white) " .
@@ -105,7 +110,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
 
    if( @$_REQUEST['nextskip'] )
    {
-      jump_to_next_game( $my_id, $Lastchanged, $Moves, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
    }
 
    if( @$_REQUEST['nextaddtime'] )
@@ -195,13 +200,18 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $gid)
       }
       else
       {
-         $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
+         $next_clockused = ( $next_to_move == BLACK ? $X_BlackClock : $X_WhiteClock );
          if( $WeekendClock != 'Y' )
             $next_clockused += WEEKEND_CLOCK_OFFSET;
       }
 
-      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused)
-         . ", ClockUsed=$next_clockused, ";
+      $next_lastticks = get_clock_ticks($next_clockused);
+
+      $timeout_date = NextGameOrder::make_timeout_date( $game_row, $next_to_move, $next_lastticks );
+
+      $time_query .= "LastTicks=$next_lastticks"
+         . ", ClockUsed=$next_clockused, "
+         . ", TimeOutDate=$timeout_date, ";
    }
    else
    {
@@ -676,7 +686,7 @@ if(1){ //new
    }
    else if( @$_REQUEST['nextgame'] && !$stay_on_board )
    {
-      jump_to_next_game( $my_id, $Lastchanged, $Moves, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
    }
 
    jump_to("game.php?gid=$gid");

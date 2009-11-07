@@ -70,4 +70,5 @@ INSERT INTO Clock SET ID=123 ;
 INSERT INTO Clock SET ID=201,Lastchanged=0 ;
 INSERT INTO Clock SET ID=202,Lastchanged=0 ;
 INSERT INTO Clock SET ID=203,Lastchanged=0 ;
+INSERT INTO Clock SET ID=204,Lastchanged=0 ;
 

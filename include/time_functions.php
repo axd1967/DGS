@@ -20,9 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 define('NIGHT_LEN', 9); //may be from 0 to 24 hours
-define('DAY_LEN', (24-NIGHT_LEN));
+define('DAY_LEN', (24-NIGHT_LEN)); // hours
 define('WEEKEND_CLOCK_OFFSET', 100);
 define('VACATION_CLOCK', -1); // keep it < 0
+define('CLOCK_TIMELEFT', 204);
 
 define('BYOTYPE_JAPANESE', 'JAP');
 define('BYOTYPE_CANADIAN', 'CAN');
@@ -263,7 +264,7 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
 // Ref: http://www.dragongoserver.net/forum/read.php?forum=4&thread=5728#5743
 // - Fischer:   M main-time + T extra-time            -> M
 // - Japanese:  M main-time + N * T extra-time        -> M + remainingN * T
-// - Candadian: M main-time + T extra-time / N stones -> M + currT / N
+// - Canadian:  M main-time + T extra-time / N stones -> M + currT / N
 function time_remaining_value( $byotype, $startByotime, $startByoperiods,
       $currMaintime, $currByotime, $currByoperiods )
 {
@@ -317,6 +318,32 @@ function get_time_remaining_warning_class( $hours )
       return 'RemTimeWarn2';
    else
       return '';
+}
+
+/*!
+ * \brief Returns "absolute" time in ticks aligned with Clock[ID=CLOCK_TIMELEFT].
+ * \param $hours_left hours_left is not precise but following the calculus of time_remaining_value()
+ * \note
+ * - used for time-remaining ordering
+ * - Weekend-handling is NOT implemented, because:
+ *   Weekend-handling would have a flaw, which after outages for which the clock are not "ticking"
+ *   (like maintenance) would need that admins have to recalculate the Games.TimeOutDate.
+ *   The weekend-handling would need to use the current time to compensate all weekends during
+ *   the time left. This weekend-compensation would make it unsynchronized with
+ *   the Clock-aligned TimeOutDate.
+ *
+ *   => Admins can run fix_games_timeleft-script for games without weekend-clock
+ *   to fix Games.TimeOutDate after longer outages.
+ *   However, the TimeOutDate is "corrected" on the players next-move, so it can be
+ *   accepted to skip the fix-step after maintenance if not taking too long.
+ */
+function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
+{
+   if( $curr_ticks < 0 )
+      $curr_ticks = get_clock_ticks(CLOCK_TIMELEFT);
+
+   $ticks_date = $curr_ticks + round( $hours_left * TICK_FREQUENCY );
+   return $ticks_date;
 }
 
 function echo_day( $days, $keep_english=false, $short=false)

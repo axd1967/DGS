@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
+require_once( "include/time_functions.php" );
+
 
  /*!
   * \file classlib_game.php
@@ -401,9 +403,11 @@ $ARR_NEXT_GAME_ORDER = array(
    1 => array( 'LASTMOVED', '%G.Lastchanged ASC, %G.ID DESC' ),
    2 => array( 'MOVES',     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC' ),
    3 => array( 'PRIO',      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC' ),
+   4 => array( 'TIMELEFT',  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC' ),
    'LASTMOVED' => 1,
    'MOVES'     => 2,
    'PRIO'      => 3,
+   'TIMELEFT'  => 4,
 );
 
 class NextGameOrder
@@ -417,6 +421,7 @@ class NextGameOrder
          1 => T_('Last moved#nextgame'),
          2 => T_('Moves#nextgame'),
          3 => T_('Priority#nextgame'),
+         4 => T_('Time remaining#nextgame'),
       );
    }
 
@@ -491,6 +496,37 @@ class NextGameOrder
       // for now only 2 players, change with RENGO
       db_query( "nextgameorder.gameprio.delete_all($gid)",
          "DELETE FROM GamesPriority WHERE gid=$gid LIMIT 2" );
+   }
+
+   /*!
+    * \brief Calculates timeout-date (in ticks) to be stored in Games.TimeOutDate.
+    * \param $grow Games-table-row to read time-settings for game
+    * \param $to_move BLACK | WHITE
+    * \note used for status-games-ordering on remaining-time
+    * \return "absolute" date (in ticks) aligned to Clock[ID=CLOCK_TIMELEFT]
+    */
+   function make_timeout_date( $grow, $to_move, $lastticks )
+   {
+      $clockused = ($to_move == BLACK) ? $grow['X_BlackClock'] : $grow['X_WhiteClock'];
+      if( $grow['WeekendClock'] != 'Y' );
+         $clockused += WEEKEND_CLOCK_OFFSET;
+
+      // determine time-stuff for time-left-calculus
+      $pfx = ($to_move == BLACK) ? 'Black' : 'White';
+      $tl_Maintime   = $grow["{$pfx}_Maintime"];
+      $tl_Byotime    = $grow["{$pfx}_Byotime"];
+      $tl_Byoperiods = $grow["{$pfx}_Byoperiods"];
+      $tl_clockused  = $grow["X_{$pfx}Clock"]; // ignore vacation and weekends
+
+      $elapsed_hours = ticks_to_hours(get_clock_ticks($clockused) - $lastticks);
+      time_remaining($elapsed_hours, $tl_Maintime, $tl_Byotime, $tl_Byoperiods,
+         $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+
+      $hours_left = time_remaining_value( $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
+            $tl_Maintime, $tl_Byotime, $tl_Byoperiods );
+      $timeout_date = time_left_ticksdate( $hours_left );
+
+      return $timeout_date;
    }
 
 } //end 'NextGameOrder'

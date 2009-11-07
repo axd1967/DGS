@@ -107,6 +107,7 @@ if( !$is_down )
       $clock_modified.= " OR ".
          clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN, WEEKEND_CLOCK_OFFSET);
 
+   $clock_modified .= " OR Clock.ID=204"; // for remaining-time ordering
 
    db_query( 'clock_tick.increase_clocks',
       "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) WHERE $clock_modified" );

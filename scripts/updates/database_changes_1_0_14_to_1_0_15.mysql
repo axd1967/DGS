@@ -1392,3 +1392,15 @@ ALTER TABLE Players
 UPDATE ConfigPages SET ColumnsStatusGames=ColumnsStatusGames & ~0x10000 ;
 
 
+-- status-games ordering by remaining-time
+ALTER TABLE Games
+   ADD TimeOutDate int NOT NULL DEFAULT '0' AFTER ClockUsed ;
+ALTER TABLE Players
+   CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL DEFAULT 'LASTMOVED' ;
+
+-- Clock for remaining-time ordering
+INSERT INTO Clock SET ID=204,Lastchanged=0 ;
+-- execute fix-script
+--    'scripts/fix_games_timeleft.php'
+
+

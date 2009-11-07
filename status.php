@@ -164,7 +164,7 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
    $gtable->add_tablehead(17, T_('Priority#header'), 'Number',
       ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
-   $gtable->add_tablehead(10, T_('Time remaining#header'), null, TABLE_NO_SORT);
+   $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
 
    // static order for status-games (coupled with "next game" on game-page)
    if( $player_row['NextGameOrder'] == 'LASTMOVED' )
@@ -173,6 +173,8 @@ if( (string)$folder_nr_querystr != '' )
       $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged
    elseif( $player_row['NextGameOrder'] == 'PRIO' )
       $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
+   elseif( $player_row['NextGameOrder'] == 'TIMELEFT' )
+      $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
    //$order = $gtable->current_order_string('ID-');
    $gtable->make_sort_images();
    $order = ' ORDER BY ' .
@@ -259,14 +261,14 @@ if( (string)$folder_nr_querystr != '' )
          {
             if( $X_Color & 2 )
             {
-               $my_Maintime = $White_Maintime;
-               $my_Byotime = $White_Byotime;
+               $my_Maintime   = $White_Maintime;
+               $my_Byotime    = $White_Byotime;
                $my_Byoperiods = $White_Byoperiods;
             }
             else
             {
-               $my_Maintime = $Black_Maintime;
-               $my_Byotime = $Black_Byotime;
+               $my_Maintime   = $Black_Maintime;
+               $my_Byotime    = $Black_Byotime;
                $my_Byoperiods = $Black_Byoperiods;
             }
             //if( !(($Color+1) & 2) ) //is it my turn? (always set in status page)
