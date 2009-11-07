@@ -3,10 +3,155 @@
 ###
 
 ###########################################################################
+## --- Games ---
+
+Description:
+   Table to store static and dynamic information about game.
+   - store invited game, running game, finished game
+
+ Field              | Type                                 | Default
+--------------------+--------------------------------------+---------------------
+ ID                 | int(11)                              | NULL
+ Starttime          | datetime                             | 0000-00-00 00:00:00
+ Lastchanged        | datetime                             | 0000-00-00 00:00:00
+ mid                | int(11)                              | 0
+ DoubleGame_ID      | int(11)                              | 0
+ Black_ID           | int(11)                              | NULL
+ White_ID           | int(11)                              | NULL
+ ToMove_ID          | int(11)                              | 0
+ Size               | tinyint(3) unsigned                  | 19
+ Komi               | decimal(6,1)                         | 6.5
+ Handicap           | tinyint(3) unsigned                  | 0
+ Status             | enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') | INVITED
+ Moves              | smallint(5) unsigned                 | 0
+ Black_Prisoners    | smallint(5) unsigned                 | 0
+ White_Prisoners    | smallint(5) unsigned                 | 0
+ Last_X             | tinyint(4)                           | -1
+ Last_Y             | tinyint(4)                           | -1
+ Last_Move          | char(2)                              |
+ Flags              | set('Ko','HiddenMsg')                |
+ Score              | decimal(7,1)                         | 0.0
+ Maintime           | smallint(6)                          | 0
+ Byotype            | enum('JAP','CAN','FIS')              | JAP
+ Byotime            | smallint(6)                          | 0
+ Byoperiods         | tinyint(4)                           | 0
+ Black_Maintime     | smallint(6)                          | 0
+ White_Maintime     | smallint(6)                          | 0
+ Black_Byotime      | smallint(6)                          | 0
+ White_Byotime      | smallint(6)                          | 0
+ Black_Byoperiods   | tinyint(4)                           | -1
+ White_Byoperiods   | tinyint(4)                           | -1
+ LastTicks          | int(11)                              | 0
+ ClockUsed          | smallint(6)                          | 0
+ TimeOutDate        | int(11)                              | 0
+ Rated              | enum('N','Y','Done')                 | N
+ StdHandicap        | enum('N','Y')                        | N
+ WeekendClock       | enum('N','Y')                        | Y
+ Black_Start_Rating | float                                | -9999
+ White_Start_Rating | float                                | -9999
+ Black_End_Rating   | float                                | -9999
+ White_End_Rating   | float                                | -9999
+
+
+## Fields:
+
+* ID : primary key, games-ID
+
+* Starttime : timestamp when game has started (clock starts ticking)
+   - for invited game it's the creation date,
+     which will be updated when the game actually starts
+
+* Lastchanged : timestamp when there was a move-like change to the game
+   - not changed on adding-time
+
+* mid : foreign key to Messages.ID
+   - field is 0 if game has been created using waiting-room
+   - field is set, if game has been created by an invitation,
+     then referring to the first invitation message
+
+* DoubleGame_ID : foreign key to Games.ID
+   - referring to other game if started as double-game
+
+* Black_ID, White_ID : foreign key to Players.ID
+   - representing current Black and White players
+
+* ToMove_ID : foreign key to Players.ID
+   - field-value points to player, that has to move next in game
+
+* Size, Komi, Handicap : settings for game (board-size, komi, handicap-stones)
+
+* Status : current status for game
+   - INVITED: game-entry is used to hold game-settings for invitational game negotiation
+   - PLAY: running game, playing mode
+   - PASS: running game, player has passed (transition to scoring-step)
+   - SCORE: running game, first player marks dead stones (scoring-step 1)
+   - SCORE2: running game, second player marks dead stones (scoring-step 2)
+   - FINISHED: finished game, game has finished, ratings adjusted eventually
+
+* Moves : number of moves in game, including handicap-stones
+
+* Black_Prisoners, White_Prisoners : number of Black and White (stone) prisoners
+
+* Last_X, Last_Y, Last_Move : ??
+
+* Flags : game-flags indicating certain state of game
+   - Ko: last move has taken a single stone, used to check for Ko
+   - HiddenMsg: one of the game-messages contain a hidden message ("<h>...</h>")
+
+* Score : score of game for finished game
+   - 0 = jigo
+   - -1000, 1000 = Black(-1000)/White(1000) has won game by resignation
+   - -2000, 2000 = Black(-2000)/White(2000) has won game by timeout
+
+* Maintime, Byotype, Byotime, Byoperiods : time-settings for game
+   - Maintime = main-time
+   - Byotype = time-system (japanese, canadian, Fischer)
+   - Byotime = extra-time for time-systems
+   - Byoperiods = extra-periods for time-systems (japanese and canadian), 0 for Fischer
+
+* Black_Maintime, Black_Byotime, Black_Byoperiods : current remaining time for Black player
+   - Maintime = remaining main-time,
+     if 0 byo-yomi has started for japanese and canadian time-systems
+   - Byotime = remaining time of byo-yomi-period for japanese and canadian, 0 for Fischer
+   - Byoperiods =
+     - for japanese and canadian:
+       -1 if byo-yomi not started yet, otherwise remaining number of byo-yomi periods
+     - for Fischer always -1
+
+* White_Maintime, White_Byotime, White_Byoperiods :
+   - current remaining time for White player
+
+* LastTicks : last-ticks (from ClockUsed) of current player, used for time-calculus
+
+* ClockUsed : foreign key to Clock.ID, which clock to use for current player
+   - can be normal clock (0-23), weekend-clock (100-123) or "vacation-clock" -1
+
+* TimeOutDate : absolute "date" expressed in ticks aligned to Clock.ID=204,
+   - used for remaining-time ordering for status-games
+
+* Rated : game-setting
+   - game is rated if field-value == 'Y', non-rated otherwise
+
+* StdHandicap : game-setting
+   - game uses standard handicap stones placement on setup-phase if value == 'Y',
+     free handicap placement otherwise
+
+* WeekendClock : time-setting for game
+   - weekend-clock is running if field-value is 'Y'
+
+* Black_Start_Rating, Black_End_Rating :
+   - start and end rating of Black player for rated finished game
+
+* White_Start_Rating, White_End_Rating :
+   - start and end rating of White player for rated finished game
+
+
+
+###########################################################################
 ## --- GamesPriority ---
 
 Description:
-   Table to be able to sort status-games by priority
+   Table to be able to sort status-games by priority.
    - table-entries are only kept for RUNNING games
    - table-entries are deleted for finished games
    - table-entry only inserted on demand by user,
