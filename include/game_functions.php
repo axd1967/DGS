@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //$TranslateGroups[] = "Game";
 
 require_once( 'include/time_functions.php' );
+require_once( 'include/classlib_game.php' );
 
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
@@ -166,6 +167,16 @@ function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
    }
    if( !$game_query )
       return 0; //nothing to do
+
+   // handle Games.TimeOutDate
+   if( $game_row['ToMove_ID'] == $uid )
+   {
+      $timeout_date = NextGameOrder::make_timeout_date(
+            $game_row, $Stone/*to_move*/, $game_row['LastTicks'] );
+
+      $game_query .= ", TimeOutDate=$timeout_date";
+      $game_row['TimeOutDate'] = $timeout_date;
+   }
 
    //TODO: HOT_SECTION to avoid multiple-clicks
    $game_query = "UPDATE Games SET ".substr($game_query,1)
