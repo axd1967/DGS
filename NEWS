@@ -388,6 +388,8 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * fixed showing of game comments for PASS-, SCORE- and RESIGN-move on SGF-download
    * fixed appending of game comments on SGF-download for running games
    * fixed forum by preserving entered forum-message on missing subject and/or text
+   * fixed Fischer-time capping: no cap for move when time has been added during game
+     exceeding starting main-time
 
 
 #release DGS_1_0_14 [2008-Dec-14] - DGS 1.0.14  (Policy, Blocking, Admin features)

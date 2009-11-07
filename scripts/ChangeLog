@@ -24,6 +24,11 @@ ChangeLog
 
 2009-11-07 juga
 
+   * include/time_functions.php (time_remaining), NEWS:
+   - bugfix not capping main-time on moving for Fischer-time after adding time
+     exceeding starting-main-time;
+     avoiding complicated checks for add-time feature
+
    * specs/db/table-Games.txt:
    - added description for Games-table
 
