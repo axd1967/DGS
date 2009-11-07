@@ -209,9 +209,9 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 
       $timeout_date = NextGameOrder::make_timeout_date( $game_row, $next_to_move, $next_lastticks );
 
-      $time_query .= "LastTicks=$next_lastticks"
-         . ", ClockUsed=$next_clockused, "
-         . ", TimeOutDate=$timeout_date, ";
+      $time_query .= "LastTicks=$next_lastticks, "
+         . "ClockUsed=$next_clockused, "
+         . "TimeOutDate=$timeout_date, ";
    }
    else
    {
