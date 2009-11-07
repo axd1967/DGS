@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 require_once( 'include/std_classes.php' );
+require_once( 'include/classlib_userquota.php' ); // for FEATURE_POINTS_MAX_VALUE
 
 
 /*!
@@ -101,6 +102,12 @@ class Feature
          error('invalid_status', "feature.set_status($status)");
 
       $this->status = $status;
+   }
+
+   /*! \brief Returns true, if feature-status is final (and can't be changed). */
+   function is_final_status()
+   {
+      return ( $this->status == FEATSTAT_LIVE || $this->status == FEATSTAT_NACK );
    }
 
    /*! \brief Sets description */
@@ -242,8 +249,11 @@ class Feature
    /*!
     * \brief Fixes user user-quota feature-points on feature-status change.
     *
-    * \note no "return" of feature-points for status-change back from rejected: NACK -> !NACK
     * \note "return" all feature-points if feature rejected: !NACK -> NACK
+    * \note no "return" of feature-points for status-change back from rejected: NACK -> !NACK
+    *       (because feature-points have already been returned for rejected features;
+    *       votes are kept, principally allowing to increase ones points by "taking"
+    *       back voted points => so better not undo feature-rejection)
     * \note "return" min(own-vote,average-vote) of feature-points if feature: !LIVE -> LIVE
     * \return sum of all "returned" feature-points
     */
@@ -254,8 +264,9 @@ class Feature
       if( $old_status == FEATSTAT_NACK ) // no "return" if NACK-status changed to something
          return 0;
 
-      // feature rejected -> "return" all feature-points
-      if( $old_status != FEATSTAT_NACK && $new_status == FEATSTAT_NACK )
+      // feature rejected OR feature went live -> "return" all feature-points
+      if( ( $old_status != FEATSTAT_NACK && $new_status == FEATSTAT_NACK )
+            || ( $old_status != FEATSTAT_LIVE && $new_status == FEATSTAT_LIVE ) )
       {
          $row = FeatureVote::load_featurevote_summary( $this->id );
          if( !$row ) return 0;
@@ -265,27 +276,7 @@ class Feature
          db_query( "Feature({$this->id}).fix_user_quota_feature_points($old_status,$new_status)",
               'UPDATE UserQuota AS UQ '
                . "INNER JOIN FeatureVote AS FV ON FV.Voter_ID=UQ.uid AND FV.fid={$this->id} AND FV.Points<>0 "
-               . 'SET UQ.FeaturePoints = UQ.FeaturePoints + ABS(FV.Points)' );
-         return $sumPoints;
-      }
-
-      // feature went live -> "return" some feature-points
-      if( $old_status != FEATSTAT_LIVE && $new_status == FEATSTAT_LIVE )
-      {
-         $row = FeatureVote::load_featurevote_summary( $this->id );
-         if( !$row ) return 0;
-         $cntVotes = @$row['cntVotes'] + 0;
-         $avgPoints = round(@$row['avgAbsPoints'] + 0.25);
-         if( $avgPoints == 0 ) $avgPoints = 1;
-
-         // return minimum of own-vote/average-vote points (but at least 1 point) to respective voter
-         db_query( "Feature({$this->id}).fix_user_quota_feature_points($old_status,$new_status)",
-              'UPDATE UserQuota AS UQ '
-               . "INNER JOIN FeatureVote AS FV ON FV.Voter_ID=UQ.uid AND FV.fid={$this->id} AND FV.Points<>0 "
-               . "SET UQ.FeaturePoints = UQ.FeaturePoints + IF($avgPoints<ABS(FV.Points),$avgPoints,ABS(FV.Points))" );
-
-         $row = FeatureVote::load_featurevote_summary( $this->id, $avgPoints );
-         $sumPoints = ($row) ? @$row['sumAvgPoints'] : $cntVotes * $avgPoints;
+               . 'SET UQ.FeaturePoints = LEAST('.FEATURE_POINTS_MAX_VALUE.', UQ.FeaturePoints + ABS(FV.Points))' );
          return $sumPoints;
       }
 
