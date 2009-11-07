@@ -42,9 +42,9 @@ require_once( 'include/utilities.php' );
   *    $uq->update();
   */
 
-define('FEATURE_POINTS_MAX_VALUE', 100);
+define('FEATURE_POINTS_MAX_VALUE', 50);
 define('FEATURE_POINTS_DAYS_LASTMOVED', (6*7) ); // increase feature-points only if user last-moved within X weeks
-define('FEATURE_POINTS_INC_DAYS', 10); // increase feature-points every X days
+define('FEATURE_POINTS_INC_DAYS', 20); // increase feature-points every X days
 define('FEATURE_POINTS_INC_VALUE', 1); // increase by amount of X points
 
 class UserQuota
