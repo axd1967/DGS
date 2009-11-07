@@ -165,8 +165,15 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
    if( $main > $elapsed ) // still have main time left
    {
       $main -= $elapsed;
+
+      // add extra-time on move for Fischer-time
       if( $has_moved && $byotype == 'FIS' )
-         $main = min($startmaintime, $main + $startbyotime);
+      {
+         // not capping main-time after adding time if it exceeds starting-main-time (cap)
+         // NOTE: avoiding complicated checks for add-time feature
+         if( $main < $startmaintime )
+            $main = min($startmaintime, $main + $startbyotime);
+      }
 
       return;
    }
