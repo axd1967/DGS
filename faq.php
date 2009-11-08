@@ -75,9 +75,9 @@ require_once( "include/form_functions.php" );
       'TAB',
       'CHECKBOX', 'orig', 1, T_('search only in original english FAQ (in case of untranslated entries)'), $orig ));
 
-   //TODO align form-content left-aligned
    echo "</td></tr><tr><td class=\"FAQsearch\">\n";
    $faq_form->echo_string(1);
+   echo "<br>\n";
 
    $cat = @$_GET['cat'];
    if( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
@@ -104,7 +104,6 @@ require_once( "include/form_functions.php" );
       {
          echo "</td></tr><tr><td class=FAQsearch>\n";
 
-         //TODO: <hr> missing sometimes over a section
          echo faq_item_html( 0);
          $outbuf = '';
          $cntmatch = 0; // count of matches for level1-section

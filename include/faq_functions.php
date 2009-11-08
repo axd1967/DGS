@@ -52,14 +52,16 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
          if( $prevlevel > 1 )
             $str.= "\n</ul>";
          if( $prevlevel > 0 )
-            $str.= "\n<hr></div>\n";
+            $str.= "\n</div>\n";
 
          //if( $prevlevel < 1 )
             $str.= "\n<div class=FAQlevel1>";
+         if( $prevlevel != 0 )
+            $str .= "<hr>";
          $str.= "\n$itm";
          break;
 
-      default:
+      default: // level==2
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
             $tmp = UNKNOWN_VALUE;

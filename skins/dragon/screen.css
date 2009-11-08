@@ -2707,6 +2707,10 @@ table.FAQ td {
    color: black;
 }
 
+table.FAQ td.FAQsearch table.FormClass { /* FAQ-search form */
+   margin: 0px;
+}
+
 table.FAQ h3.Header {
 /*   margin: 0px; */
    text-align: left;
