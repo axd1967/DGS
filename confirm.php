@@ -564,7 +564,8 @@ This is why:
             "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
 
          // mark reference in other double-game to indicate referring game has vanished
-         db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
+         if( $doublegame_query )
+            db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
 
          $Subject = 'Game deleted';
          //reference: game is deleted => no link
