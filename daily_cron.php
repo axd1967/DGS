@@ -175,7 +175,7 @@ if num_rows==2 {compute differences and checks}
       . "AND Time < FROM_UNIXTIME($min_date)" );
 
    db_query( 'daily_cron.cleanup_forum_read.delete_old_thread_newcnt',
-      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID=0' // Post_ID: 0=THPID_NEWCOUNT
+      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID=0 ' // Post_ID: 0=THPID_NEWCOUNT
       . "AND Time < FROM_UNIXTIME($min_date)" );
 
 
