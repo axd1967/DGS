@@ -74,7 +74,7 @@ require_once( 'include/form_functions.php' );
 
    $disp_forum->cols = 5;
    $disp_forum->links = LINKPAGE_LIST;
-   $disp_forum->links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH;
+   $disp_forum->links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH | LINK_REFRESH;
    if( $offset > 0 )
       $disp_forum->links |= LINK_PREV_PAGE;
    if( $forum->has_more_threads() )

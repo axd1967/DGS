@@ -38,6 +38,7 @@ function revision_history( $display_forum, $post_id )
    );
    $display_forum->back_post_id = $post_id;
    $display_forum->links |= LINK_BACK_TO_THREAD;
+   $display_forum->links &= ~LINK_REFRESH;
 
    $display_forum->forum_start_table('Revision');
    $display_forum->change_depth( 1 );
@@ -143,7 +144,7 @@ function revision_history( $display_forum, $post_id )
    $disp_forum->set_rx_term( $rx_term );
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
-   $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH;
+   $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH | LINK_REFRESH;
 
    if( $switch_moderator >= 0 )
    {

@@ -56,6 +56,7 @@ define("LINKPAGE_INDEX", 1 << 10);
 define("LINKPAGE_SEARCH", 1 << 11);
 define("LINK_TOGGLE_MODERATOR", 1 << 12);
 define("LINKPAGE_STATUS", 1 << 13); // used for status-page
+define("LINK_REFRESH", 1 << 14);
 
 define("LINK_MASKS", ~(LINKPAGE_READ | LINKPAGE_LIST | LINKPAGE_INDEX
           | LINKPAGE_SEARCH | LINKPAGE_STATUS) );
@@ -382,6 +383,24 @@ class DisplayForum
 
       if( $links & LINK_NEW_TOPIC )
          $this->link_array_left[T_('New Topic')] = "read.php?forum=$fid";
+
+      if( $links & LINK_REFRESH )
+      {
+         $get = array_merge( $_GET, $_POST);
+         if( $links & LINKPAGE_READ )
+            $url = make_url( 'read.php',
+               array( 'forum' => $get['forum'], 'thread' => $get['thread'] ));
+         elseif( $links & LINKPAGE_LIST )
+            $url = make_url( 'list.php',
+               array( 'forum' => $get['forum'], 'maxrows' => @$get['maxrows'] ));
+         elseif( $links & LINKPAGE_SEARCH )
+            $url = '';
+         else
+            $url = make_url( 'index.php', '' );
+         if( $url )
+            $this->link_array_left[T_('Refresh')] = $url;
+      }
+
       if( $links & LINK_SEARCH )
          $this->link_array_left[T_('Search')] = "search.php";
 
