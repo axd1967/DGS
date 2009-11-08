@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( 'include/game_functions.php' );
 require_once( 'include/time_functions.php' );
+require_once( 'include/classlib_game.php' );
 
 
 // Inserts INVITATION-game or updates DISPUTE-game
@@ -272,15 +273,22 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    {
       //$moves = $moves;
       $tomove = $white_row['ID'];
+      $col_to_move = WHITE;
       $clock_used = $clock_used_white;
    }
    else
    {
       $moves = 0;
       $tomove = $black_row['ID'];
+      $col_to_move = BLACK;
       $clock_used = $clock_used_black;
    }
    $last_ticks = get_clock_ticks($clock_used);
+
+   $game_info_row['X_BlackClock'] = $clock_used_black;
+   $game_info_row['X_WhiteClock'] = $clock_used_white;
+   $timeout_date = NextGameOrder::make_timeout_date(
+      $game_info_row, $col_to_move, $last_ticks, true/*new-game*/ );
 
    $set_query =
       "DoubleGame_ID=$double_gid, " .
@@ -290,6 +298,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Status='PLAY', " .
       "Moves=$moves, " .
       "ClockUsed=$clock_used, " .
+      "TimeOutDate=$timeout_date, " .
       "LastTicks=$last_ticks, " .
       "Lastchanged=FROM_UNIXTIME($NOW), " .
       "Starttime=FROM_UNIXTIME($NOW), " .
