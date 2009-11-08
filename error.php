@@ -228,7 +228,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          break;
 
       case('no_email'):
-         echo T_("Sorry, no email has been given, so I can't send you the password. Please log in as guest and use the support forum to get help.");
+         echo T_("Sorry, no email has been given, so I can't send you the password. Please log in as guest and use the support forum to get help (provide your user-id and your email).");
          break;
 
       case('bad_mail_address'):
