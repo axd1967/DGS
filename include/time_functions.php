@@ -115,6 +115,7 @@ function is_weekend_clock_stopped( $clock_id, $timestamp=null )
    if( is_weekend($timestamp) )
    {
       // TODO BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
+      //      -> really ? just keep it and it's easy (keeping UTC-weekends)
       $running_clock = false;
    }
    else
@@ -353,199 +354,6 @@ function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
    return $ticks_date;
 }
 
-function echo_day( $days, $keep_english=false, $short=false)
-{
-   if( $short && $keep_english )
-      return $days . 'd';
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-   if( $short )
-      return $days . ( abs($days) <= 1 ? $T_('day#short') : $T_('days#short') );
-   return $days .'&nbsp;' . ( abs($days) <= 1 ? $T_('day') : $T_('days') );
-} //echo_day
-
-function echo_hour( $hours, $keep_english=false, $short=false)
-{
-   if( $short && $keep_english )
-      return $hours . 'h';
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-   if( $short )
-      return $hours . ( abs($hours) <= 1 ? $T_('hour#short') : $T_('hours#short') );
-   return $hours .'&nbsp;' . ( abs($hours) <= 1 ? $T_('hour') : $T_('hours') );
-} //echo_hour
-
-function echo_time( $hours, $keep_english=false, $short=false)
-{
-   if( $hours <= 0 )
-      return NO_VALUE;
-
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-
-   $h = $hours % 15;
-   $days = ($hours-$h) / 15;
-   if( $days > 0 )
-      $str = echo_day( $days, $keep_english, $short);
-   else
-      $str = '';
-
-   if( $h > 0 ) //or $str == '' )
-   {
-      if( $str > '' )
-         $str.= ( $short ? '&nbsp;' : '&nbsp;' . $T_('and') . '&nbsp;');
-
-      $str.= echo_hour( $h, $keep_english, $short);
-   }
-
-   return $str;
-} //echo_time
-
-function echo_onvacation( $days, $keep_english=false, $short=false)
-{
-   //return echo_day(floor($days)).' '.T_('left#2');
-   $hours= round($days*24);
-   if( $hours <= 0 )
-      return NO_VALUE;
-
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-
-   $h = $hours % 24;
-   $days = ($hours-$h) / 24;
-   if( $days > 0 )
-      $str = echo_day( $days, $keep_english, $short);
-   else
-      $str = '';
-
-   if( $h > 0 )
-   {
-      if( $str > '' )
-         $str.= ( $short ? '&nbsp;' : '&nbsp;' . $T_('and') . '&nbsp;');
-
-      $str.= echo_hour( $h, $keep_english, $short);
-   }
-
-   return $str.' '.$T_('left#2');
-} //echo_onvacation
-
-function echo_byotype( $byotype, $keep_english=false, $short=false)
-{
-   if( $short )
-      return substr($byotype, 0, 1);
-
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-
-   switch( (string)$byotype )
-   {
-      case 'JAP':
-         return $T_('Japanese byoyomi');
-      case 'CAN':
-         return $T_('Canadian byoyomi');
-      case 'FIS':
-         return $T_('Fischer time');
-   }
-
-   return '';
-} //echo_byotype
-
-function echo_time_limit( $maintime, $byotype, $byotime, $byoper
-                  , $keep_english=false, $short=false, $btype=true)
-{
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-
-   $str = '';
-
-   if( $btype )
-      $str.= echo_byotype( $byotype, $keep_english, $short) . ': ';
-
-   if( $maintime > 0 )
-      $str.= echo_time( $maintime, $keep_english, $short) . ' ';
-
-   if( $byotype == 'FIS' )
-   {
-      if( $short )
-         $str.= '+ ' . echo_time( $byotime, $keep_english, $short);
-      else
-         $str.= sprintf( $T_('with %s extra per move')
-                     , echo_time( $byotime, $keep_english, $short) );
-   }
-   else
-   {
-      if( $byotime <= 0 )
-      {
-         if( !$short )
-            $str.= $T_('without byoyomi');
-      }
-      else if( $short )
-      {
-         if( $maintime > 0 )
-            $str.= '+ ';
-
-         $str.= echo_time( $byotime, $keep_english, $short);
-         if( $byotype == 'JAP' )
-         {
-            $str.= ' * ' . $byoper;
-         }
-         else //if( $byotype == 'CAN' )
-         {
-            $str.= ' / ' . $byoper;
-         }
-      }
-      else
-      {
-         if( $maintime > 0 )
-            $str.= '+ ';
-
-         if( $byotype == 'JAP' )
-         {
-            $str.= sprintf( $T_('%s per move and %s extra periods')
-               , echo_time( $byotime, $keep_english, $short), $byoper);
-         }
-         else //if( $byotype == 'CAN' )
-         {
-            $str.= sprintf( $T_('%s per %s stones')
-               , echo_time( $byotime, $keep_english, $short), $byoper);
-         }
-      }
-   }
-
-   return $str;
-} //echo_time_limit
-
-
-function echo_time_remaining( $maintime, $byotype, $byotime, $byoper,
-      $startbyotime, $keep_english=false, $short=false, $btype=false)
-{
-   $T_= ( $keep_english ? 'fnop' : 'T_' );
-
-   $str = '';
-
-   if( $btype )
-      $str.= echo_byotype( $byotype, $keep_english, $short) . ': ';
-
-   if( $maintime > 0 )
-   {
-      $str.= echo_time( $maintime, $keep_english, $short);
-   }
-   elseif( $byotype == BYOTYPE_FISCHER || $byotime <= 0 )
-   {
-      if( $short )
-         $str.= NO_VALUE;
-      else
-         $str.= $T_('The time is up');
-   }
-   else
-   {
-      if( !$short )
-         $str.= $T_('In byoyomi') . ' ';
-
-      if( $byotype == BYOTYPE_JAPANESE ) //now, it's like if $byotime was the $maintime
-         $str.= echo_time_limit( $byotime, $byotype, $startbyotime, $byoper
-                  , $keep_english, $short, false);
-      else //if( $byotype == 'CAN' )
-         $str.= echo_time_limit( -1, $byotype, $byotime, $byoper
-                  , $keep_english, $short, false);
-   }
-
-   return $str;
-} //echo_time_remaining
 
 function time_convert_to_hours($time, $unit)
 {
@@ -571,4 +379,300 @@ function time_convert_to_longer_unit(&$time, &$unit)
       $time /= 30;
    }
 }
+
+
+
+define('TIMEFMT_ENGL',     0x0001 ); // ignore users-language (keep english)
+define('TIMEFMT_SHORT',    0x0002 ); // long-text <-> short-text form
+define('TIMEFMT_HTMLSPC',  0x0004 ); // whitespace separator: plain space <-> HTML &nbsp;
+define('TIMEFMT_ADDTYPE',  0x0008 ); // omit byo-type <-> include byo-type
+define('TIMEFMT_ADDEXTRA', 0x0010 ); // omit extra-time (byo-yomi) <-> include extra-time
+define('TIMEFMT_ZERO',     0x0020 ); // use zero time <-> return special-zero-value on zero
+define('TIMEFMT_ABBEXTRA', 0x0040 ); // abbreviate extra-time <-> full extra-specs
+
+/*!
+ * \brief Static helper class to format Dragon time.
+ */
+class TimeFormat
+{
+
+   // "7d" (short), "7 days" (long)
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC
+   function echo_day( $days, $fmtflags=0 )
+   {
+      if( ($fmtflags & TIMEFMT_SHORT) && ($fmtflags & TIMEFMT_ENGL) )
+         return $days . 'd';
+
+      $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
+      $absdays = abs($days);
+
+      $str = $days;
+      if( $fmtflags & TIMEFMT_SHORT )
+         $str .= ( $absdays > 0 && $absdays <= 1 ) ? $T_('day#short') : $T_('days#short');
+      else
+         $str .= ' ' . ( ($absdays > 0 && $absdays <= 1) ? $T_('day') : $T_('days') );
+
+      return TimeFormat::_replace_space($str, $fmtflags);
+   }
+
+   // "3h" (short), "3 hours" (long)
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC
+   function echo_hour( $hours, $fmtflags=0 )
+   {
+      if( ($fmtflags & TIMEFMT_SHORT) && ($fmtflags & TIMEFMT_ENGL) )
+         return $hours . 'h';
+
+      $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
+      $abshours = abs($hours);
+
+      $str = $hours;
+      if( $fmtflags & TIMEFMT_SHORT )
+         $str .= ( $abshours > 0 && $abshours <= 1 ) ? $T_('hour#short') : $T_('hours#short');
+      else
+         $str .= ' ' . ( ($abshours > 0 && $abshours <= 1) ? $T_('hour') : $T_('hours') );
+
+      return TimeFormat::_replace_space($str, $fmtflags);
+   }
+
+   // \internal
+   // "5d 7h" (short), "5 days and 7 hours" (long)
+   // 0 -> zero_value
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
+   function _echo_time( $hours, $hours_per_day, $fmtflags=0, $zero_value=NO_VALUE )
+   {
+      if( $hours <= 0 )
+         return ($fmtflags & TIMEFMT_ZERO) ? TimeFormat::echo_hour(0, $fmtflags) : $zero_value;
+
+      $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
+
+      $h = $hours % $hours_per_day;
+      $days = ($hours-$h) / $hours_per_day;
+      $str = ( $days > 0 ) ? TimeFormat::echo_day( $days, $fmtflags ) : '';
+
+      if( $h > 0 ) //or $str == '' )
+      {
+         if( $str > '' )
+         {
+            $str .= ' ';
+            if( !($fmtflags & TIMEFMT_SHORT) )
+               $str .= $T_('and') . ' ';
+         }
+
+         $str .= TimeFormat::echo_hour( $h, $fmtflags );
+      }
+
+      return TimeFormat::_replace_space($str,$fmtflags);
+   } //_echo_time
+
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
+   function echo_time( $hours, $fmtflags=0, $zero_value=NO_VALUE )
+   {
+      return TimeFormat::_echo_time( $hours, 15, $fmtflags, $zero_value );
+   }
+
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
+   function echo_onvacation( $days, $fmtflags=0, $zero_value=NO_VALUE )
+   {
+      $hours = round($days*24);
+      $str = TimeFormat::_echo_time( $hours, 24, $fmtflags, $zero_value );
+      if( $hours > 0 || ($fmtflags & TIMEFMT_ZERO) )
+         $str .= ' ' . ( ($fmtflags & TIMEFMT_ENGL) ? 'left' : T_('left#2') ); //FIXME: -> engl -> '%s left' (wait for transl-label)
+
+      return TimeFormat::_replace_space($str,$fmtflags);
+   }
+
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT
+   function echo_byotype( $byotype, $fmtflags=0 )
+   {
+      if( $fmtflags & TIMEFMT_SHORT )
+         return substr($byotype, 0, 1); // J, C, F
+
+      $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
+      switch( (string)$byotype )
+      {
+         case BYOTYPE_JAPANESE:
+            return $T_('Japanese byoyomi');
+         case BYOTYPE_CANADIAN:
+            return $T_('Canadian byoyomi');
+         case BYOTYPE_FISCHER:
+            return $T_('Fischer time');
+      }
+
+      return '';
+   }
+
+   // "J: 7d 3h + 2d * 5" (short), "J: $maintime + $byotime per move and $byoper extra periods"
+   // "C: 7d 3h + 9d / 3" (short), "C: $maintime + $byotime per NUMBER stones"
+   // "F: 7d 3h + 2d"     (short), "F: $maintime + $byotime per move"
+   // type, maintime or extra-time are optional
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE
+   function echo_time_limit( $maintime, $byotype, $byotime, $byoper, $fmtflags=TIMEFMT_ADDTYPE )
+   {
+      $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
+      $str = '';
+
+      if( $fmtflags & TIMEFMT_ADDTYPE )
+         $str .= TimeFormat::echo_byotype($byotype, $fmtflags) . ': ';
+
+      if( $maintime > 0 )
+         $str .= TimeFormat::echo_time($maintime, $fmtflags) . ' ';
+
+      if( $maintime <= 0 && $byotime <= 0 )
+      {
+         $str .= TimeFormat::echo_hour(0, $fmtflags);
+      }
+      else if( $byotype == BYOTYPE_FISCHER )
+      {
+         if( $byotime > 0 )
+         {
+            if( $fmtflags & TIMEFMT_SHORT )
+               $str .= '+ ' . TimeFormat::echo_time($byotime, $fmtflags);
+            else
+               $str .= sprintf( $T_('with %s extra per move'),
+                                TimeFormat::echo_time($byotime, $fmtflags) );
+         }//else: absolute-time
+      }
+      else // JAP|CAN
+      {
+         if( $byotime <= 0 ) // absolute-time
+         {
+            if( !($fmtflags & TIMEFMT_SHORT) )
+               $str .= $T_('without byoyomi');
+         }
+         else // has byo-time
+         {
+            if( $maintime > 0 )
+               $str .= '+ ';
+
+            if( $fmtflags & TIMEFMT_SHORT )
+            {
+               $str .= TimeFormat::echo_time($byotime, $fmtflags);
+               if( $byotype == BYOTYPE_JAPANESE )
+                  $str .= " * $byoper";
+               else //if( $byotype == BYOTYPE_CANADIAN )
+                  $str .= " / $byoper";
+            }
+            else
+            {
+               if( $byotype == BYOTYPE_JAPANESE )
+               {
+                  $str .= sprintf( $T_('%s per move and %s extra periods'),
+                                   TimeFormat::echo_time($byotime, $fmtflags), $byoper );
+               }
+               else //if( $byotype == BYOTYPE_CANADIAN )
+               {
+                  $str .= sprintf( $T_('%s per %s stones'),
+                                   TimeFormat::echo_time($byotime, $fmtflags), $byoper );
+               }
+            }
+         }
+      }
+
+      return TimeFormat::_replace_space($str, $fmtflags);
+   } //echo_time_limit
+
+
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE,
+   //           TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
+   function echo_time_remaining( $maintime, $byotype, $byotime, $byoper,
+                                 $startbyotime, $startbyoper, $fmtflags=null )
+   {
+      if( is_null($fmtflags) )
+         $fmtflags = TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
+      $short = ($fmtflags & TIMEFMT_SHORT);
+      $str = '';
+
+      if( $fmtflags & TIMEFMT_ADDTYPE )
+         $str .= TimeFormat::echo_byotype($byotype, $fmtflags) . ': ';
+
+      // remaining main/byoyomi-time
+      $rem_time = $maintime;
+      if( $maintime <= 0 )
+      {
+         if( $byotype == BYOTYPE_FISCHER || $byotime <= 0 ) // time is up
+         {
+            $str .= ( $short )
+               ? TimeFormat::echo_time($maintime, $fmtflags | TIMEFMT_ZERO)
+               : $T_('The time is up');
+            return TimeFormat::_replace_space($str, $fmtflags);
+         }
+
+         $rem_time = $byotime;
+      }
+
+      $str .= TimeFormat::echo_time($rem_time, $fmtflags) . ' ';
+
+      if( $startbyotime <= 0 ) // absolute time
+      {
+         if( $fmtflags & (TIMEFMT_ADDEXTRA|TIMEFMT_ABBEXTRA) )
+         {
+            if( $short )
+               $str .= '(-)';
+            else
+               $str .= ( $byotype == BYOTYPE_FISCHER )
+                  ? $T_('without extra time') : $T_('without byoyomi');
+         }
+
+         return TimeFormat::_replace_space($str, $fmtflags);
+      }
+
+      // ignore invalid time-values (M=0, B>0); should not occur esp. after add-time
+      if( $byotype == BYOTYPE_CANADIAN && $maintime <= 0 && $byotime > 0 && $byoper > 0 )
+         $str .= "/ $byoper ";
+
+      // extra-time
+      if( $fmtflags & (TIMEFMT_ADDEXTRA|TIMEFMT_ABBEXTRA) )
+      {
+         if( $byotype == BYOTYPE_FISCHER )
+         {
+            if( $short )
+            {
+               $str .= ( $fmtflags & TIMEFMT_ABBEXTRA )
+                  ? '(+)'
+                  : '(+ ' . TimeFormat::echo_time($startbyotime, $fmtflags) . ')';
+            }
+            else
+               $str .= sprintf( $T_('with %s extra per move'),
+                                TimeFormat::echo_time($startbyotime, $fmtflags) );
+         }
+         else
+         {
+            if( $byoper != 0 )
+            {
+               if( $byotype == BYOTYPE_CANADIAN )
+                  $rem_byoper = $startbyoper;
+               else
+                  $rem_byoper = ( $byoper > 0 ) ? $byoper : $startbyoper;
+
+               $str2 = TimeFormat::echo_time_limit( 0, $byotype, $startbyotime, $rem_byoper,
+                  $fmtflags & ~TIMEFMT_ADDTYPE );
+
+               if( $fmtflags & TIMEFMT_ABBEXTRA)
+                  $str .= ( $maintime > 0 ) ? '(+)' : '(..)';
+               else
+                  $str .= ( $maintime > 0 ) ? "(+ $str2)" : "($str2)";
+            }
+            else
+            {
+               $str2 = ($short) ? '-' : $T_('last byoyomi period');
+               $str .= "($str2)";
+            }
+         }
+      }
+
+      return TimeFormat::_replace_space($str, $fmtflags);
+   } //echo_time_remaining
+
+   /** \internal */
+   function _replace_space( $str, $opts )
+   {
+      if( $opts & TIMEFMT_HTMLSPC )
+         return str_replace( ' ', '&nbsp;', trim($str) );
+      else
+         return trim($str);
+   }
+
+} //end 'TimeFormat'
+
 ?>
