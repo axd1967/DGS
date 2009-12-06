@@ -77,10 +77,10 @@ $ThePage = new Page('Status');
    {
       $itable= new Table_info('user');
 
-      $onVacationText = echo_onvacation($player_row['OnVacation']);
+      $onVacationText = TimeFormat::echo_onvacation($player_row['OnVacation']);
       $itable->add_sinfo(
             anchor( "edit_vacation.php", T_('Vacation days left') ),
-            echo_day( floor($player_row["VacationDays"])) );
+            TimeFormat::echo_day( floor($player_row["VacationDays"])) );
       $itable->add_sinfo(
             anchor( "edit_vacation.php", T_('On vacation') )
                . MINI_SPACING . echo_image_vacation($player_row['OnVacation'], $onVacationText, true),
@@ -280,8 +280,9 @@ if( (string)$folder_nr_querystr != '' )
                   $my_Maintime, $my_Byotime, $my_Byoperiods );
             $class_remtime = get_time_remaining_warning_class( $hours_remtime );
 
-            $content = echo_time_remaining( $my_Maintime, $Byotype,
-                  $my_Byotime, $my_Byoperiods, $Byotime, false, true, true);
+            $content = TimeFormat::echo_time_remaining( $my_Maintime, $Byotype,
+                  $my_Byotime, $my_Byoperiods, $Byotime, $Byoperiods,
+                  TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
             $grow_strings[10] = array(
                   'attbs' => array( 'class' => $class_remtime ),
                   'text'  => $content,
