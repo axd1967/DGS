@@ -572,15 +572,15 @@ class TimeFormat
    } //echo_time_limit
 
 
-   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE,
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE,
    //           TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
    function echo_time_remaining( $maintime, $byotype, $byotime, $byoper,
                                  $startbyotime, $startbyoper, $fmtflags=null )
    {
       if( is_null($fmtflags) )
          $fmtflags = TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      $fmtflags |= TIMEFMT_SHORT; // default
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
-      $short = ($fmtflags & TIMEFMT_SHORT);
       $str = '';
 
       if( $fmtflags & TIMEFMT_ADDTYPE )
@@ -592,9 +592,7 @@ class TimeFormat
       {
          if( $byotype == BYOTYPE_FISCHER || $byotime <= 0 ) // time is up
          {
-            $str .= ( $short )
-               ? TimeFormat::echo_time($maintime, $fmtflags | TIMEFMT_ZERO)
-               : $T_('The time is up');
+            $str .= TimeFormat::echo_time($maintime, $fmtflags | TIMEFMT_ZERO);
             return TimeFormat::_replace_space($str, $fmtflags);
          }
 
@@ -606,13 +604,7 @@ class TimeFormat
       if( $startbyotime <= 0 ) // absolute time
       {
          if( $fmtflags & (TIMEFMT_ADDEXTRA|TIMEFMT_ABBEXTRA) )
-         {
-            if( $short )
-               $str .= '(-)';
-            else
-               $str .= ( $byotype == BYOTYPE_FISCHER )
-                  ? $T_('without extra time') : $T_('without byoyomi');
-         }
+            $str .= '(-)';
 
          return TimeFormat::_replace_space($str, $fmtflags);
       }
@@ -626,15 +618,9 @@ class TimeFormat
       {
          if( $byotype == BYOTYPE_FISCHER )
          {
-            if( $short )
-            {
-               $str .= ( $fmtflags & TIMEFMT_ABBEXTRA )
-                  ? '(+)'
-                  : '(+ ' . TimeFormat::echo_time($startbyotime, $fmtflags) . ')';
-            }
-            else
-               $str .= sprintf( $T_('with %s extra per move'),
-                                TimeFormat::echo_time($startbyotime, $fmtflags) );
+            $str .= ( $fmtflags & TIMEFMT_ABBEXTRA )
+               ? '(+)'
+               : '(+ ' . TimeFormat::echo_time($startbyotime, $fmtflags) . ')';
          }
          else
          {
@@ -654,10 +640,7 @@ class TimeFormat
                   $str .= ( $maintime > 0 ) ? "(+ $str2)" : "($str2)";
             }
             else
-            {
-               $str2 = ($short) ? '-' : $T_('last byoyomi period');
-               $str .= "($str2)";
-            }
+               $str .= '(-)';
          }
       }
 

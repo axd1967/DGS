@@ -282,7 +282,7 @@ if( (string)$folder_nr_querystr != '' )
 
             $content = TimeFormat::echo_time_remaining( $my_Maintime, $Byotype,
                   $my_Byotime, $my_Byoperiods, $Byotime, $Byoperiods,
-                  TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
+                  TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
             $grow_strings[10] = array(
                   'attbs' => array( 'class' => $class_remtime ),
                   'text'  => $content,

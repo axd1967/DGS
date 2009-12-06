@@ -208,7 +208,7 @@ else
       $time_remaining =
          TimeFormat::echo_time_remaining( $my_Maintime, $row['Byotype'], $my_Byotime,
                      $my_Byoperiods, $row['Byotime'], $row['Byoperiods'],
-                     TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
+                     TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
       // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining
       echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s'\n",

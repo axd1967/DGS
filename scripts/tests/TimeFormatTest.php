@@ -206,7 +206,7 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
    /** Tests echo_time_remaining() for Japanese time. */
    public function test_echo_time_remaining_jap() {
       // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-      $fmt = TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
 
       // JAP: M + B * P
       $this->assertEquals( "J: 0h",
@@ -241,7 +241,7 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( "8h&nbsp;(+&nbsp;2d&nbsp;*&nbsp;7)",
          TimeFormat::echo_time_remaining( // HTML-space, no type
             8, BYOTYPE_JAPANESE, 0, -1,  30, 7,
-            TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_ADDEXTRA | TIMEFMT_HTMLSPC ));
+            TIMEFMT_ENGL | TIMEFMT_ADDEXTRA | TIMEFMT_HTMLSPC ));
       $this->assertEquals( "J: 10d 7h (+)",
          TimeFormat::echo_time_remaining( // abbreviate extra-time
             157, BYOTYPE_JAPANESE, 0, -1,  30, 7, $fmt | TIMEFMT_ABBEXTRA ));
@@ -256,7 +256,7 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
    /** Tests echo_time_remaining() for Canadian time. */
    public function test_echo_time_remaining_can() {
       // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-      $fmt = TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
 
       // CAN: M + B / P
       $this->assertEquals( "C: 0h",
@@ -298,7 +298,7 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
    /** Tests echo_time_remaining() for Fischer time. */
    public function test_echo_time_remaining_fischer() {
       // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-      $fmt = TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
 
       // FIS: M + B
       $this->assertEquals( "F: 0h",

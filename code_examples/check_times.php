@@ -191,13 +191,13 @@ if(1){ //display/check time_remaining and add_time
             TimeFormat::echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
                           ,$game_row['White_Byotime'], $game_row['White_Byoperiods']
                           ,$game_row['Byotime'], $game_row['Byoperiods'],
-                          TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA ) .
+                          TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA ) .
             "</td>";
          echo "<td>" .
             TimeFormat::echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
                           ,$game_row['White_Byotime'], $game_row['White_Byoperiods']
                           ,$game_row['Byotime'], $game_row['Byoperiods'],
-                          TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA ) .
+                          TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA ) .
             "</td>";
          echo '</tr>';
       }

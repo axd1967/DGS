@@ -932,7 +932,7 @@ function build_time_remaining( $grow, $prefix_col, $is_to_move )
    $class_remtime = get_time_remaining_warning_class( $hours_remtime );
    $rem_time = TimeFormat::echo_time_remaining( $userMaintime, $grow['Byotype'], $userByotime,
       $userByoperiods, $grow['Byotime'], $grow['Byoperiods'],
-      TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
+      TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
 
    return array(
          'attbs' => array( 'class' => $class_remtime ),
