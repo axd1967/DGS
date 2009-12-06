@@ -216,7 +216,7 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
-   $may_add_time = $my_game && allow_add_time_opponent( $game_row, $my_id);
+   $may_add_time = $my_game && GameAddTime::allow_add_time_opponent( $game_row, $my_id);
 
 
    $no_marked_dead = ( $Status == 'PLAY' || $Status == 'PASS' ||
@@ -910,6 +910,7 @@ function draw_add_time( $game_row )
           </TD>
         </TR>';
 
+   //TODO### tell, that if in byo-yomi, the current period will be resetted (probably that's only important for JAP !?)
    if( $game_row['Byotype'] != BYOTYPE_FISCHER
          && $game_row['Byotime'] > 0 && $game_row['Byoperiods'] > 0 ) // no byoyomi-reset if no byoyomi
    {
@@ -960,11 +961,12 @@ function draw_game_info(&$game_row, &$board)
    if( $game_row['Status'] != 'FINISHED' )
    {
       echo '<tr id="blackTime">', "\n";
-      echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": "
-         , echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype'],
+      echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
+         TimeFormat::echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype'],
                $game_row['Black_Byotime'], $game_row['Black_Byoperiods'],
-               $game_row['Byotime'])
-         , "</td>\n</tr>\n";
+               $game_row['Byotime'], $game_row['Byoperiods'],
+               TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ZERO | TIMEFMT_ADDEXTRA ),
+         "</td>\n</tr>\n";
    }
 
 
@@ -990,9 +992,10 @@ function draw_game_info(&$game_row, &$board)
    {
       echo '<tr id="whiteTime">', "\n";
       echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
-         echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype'],
+         TimeFormat::echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype'],
                $game_row['White_Byotime'], $game_row['White_Byoperiods'],
-               $game_row['Byotime']),
+               $game_row['Byotime'], $game_row['Byoperiods'],
+               TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ZERO | TIMEFMT_ADDEXTRA ),
          "</td>\n</tr>\n";
    }
 
@@ -1011,8 +1014,8 @@ function draw_game_info(&$game_row, &$board)
 
    echo '<tr id="gameTime">', "\n";
    echo "<td colspan=\"$cols\">", T_('Time limit'), ': ',
-      echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
-                  $game_row['Byotime'], $game_row['Byoperiods']),
+      TimeFormat::echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
+         $game_row['Byotime'], $game_row['Byoperiods']),
       "</td>\n";
 
    echo "</tr>\n";
@@ -1039,7 +1042,7 @@ function draw_board_info($board)
          array( 0, null), //MoveNr
          array( 1, array( WHITE => T_('White'), BLACK => T_('Black'))), //From
          array( 1, array( BLACK => T_('White'), WHITE => T_('Black'))), //To
-         array( 2, 'echo_time'), //Hours
+         array( 2, 'TimeFormat::echo_time'), //Hours
          array( 3, array( 0 => '', 1 => T_('and restarted byoyomi'))), //Reset
       ),
    );
@@ -1062,7 +1065,7 @@ function draw_board_info($board)
             if( is_array($fct) )
                $val[$i] = $fct[$row[$n]];
             else if( is_string($fct) )
-               $val[$i] = $fct($row[$n]);
+               $val[$i] = TimeFormat::echo_time($row[$n]);
             else
                $val[$i] = $row[$n];
          }
