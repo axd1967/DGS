@@ -52,11 +52,11 @@ function mail_link( $nam, $lnk)
             $lnk = substr($lnk,3);
          $lnk = HOSTBASE.$lnk;
       }
-      $nam = ( $nam ? "$nam ($lnk)" : "$lnk" );
+      $nam = ($nam) ? "$nam ($lnk)" : $lnk;
    }
    if( !$nam )
       return '';
-   $nam = str_replace("\\\"","\"",$nam);
+   $nam = trim( str_replace("\\\"","\"", $nam) );
    return "[ $nam ]";
 }
 
