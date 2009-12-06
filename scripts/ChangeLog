@@ -22,6 +22,81 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-12-06 juga
+
+   * quick_status.php, NEWS:
+   - sync games-order with status-page (by Lastchange ASC)
+
+   * include/game_functions.php (GameAddTime.add_time, ~.allow_add_time_opponent,
+       ~.add_time_opponent),
+     scripts/tests/AllTests.php,
+     scripts/tests/GameAddTimeTest.php,
+     scripts/tests/Game_SettingsHelperTest.php,
+     confirm.php, game.php:
+   - refactored add_time-methods into class GameAddTime for unit-test-support
+
+   * include/time_functions.php (TimeFormat.echo_day, ~.echo_hour, ~.echo_time,
+       ~._echo_time, ~.echo_byotype, ~.echo_onvacation, ~.echo_time_limit,
+       ~.echo_time_remaining, ~._replace_space),
+     specs/time.txt,
+     include/gui_functions.php (echo_off_time),
+     include/message_functions.php (game_info_table),
+     scripts/tests/AllTests.php, scripts/tests/TimeFormatTest.php,
+     tournaments/view_tournament.php, code_examples/check_times.php,
+     edit_vacation.php, gameinfo.php, game.php (draw_game_info, draw_board_info),
+     quick_status.php, sgf.php, show_games.php, status.php, userinfo.php,
+     waiting_room.php, NEWS:
+   - refactored time-formatting methods into class TimeFormat with flexible
+     formatting-options
+     - enhanced time-formatting with extra-time-info for remaining-time in
+       abbreviated and complete-form
+     - use space as default for time-output (instead of HTML-non-breakable-space),
+       fixed replacing of spaces to include all spaces
+     - added TIMEFMT_ZERO-option to allow zero-value for no-time-left or zero-time
+     - removed long-text-form for echo_time_remaining(), because text was too long
+       with extra-info
+     - time-formats are described in specs/time.txt and unit-tested
+       with scripts/tests/TimeFormatTest.php
+   - game-page: enhanced players remaining-time with extra-time info,
+     switched to short-text-form
+   - gameinfo: show included remaining extra-time-settings for players
+   - quick-status: enhanced remaining-time with extra-time info
+   - status/show-games: enhanced players remaining-time with abbreviated
+     extra-time info
+
+   * include/globals.php, include/std_functions.php:
+   - moved constants in: NO_VALUE, UNKNOWN_VALUE
+
+2009-11-08 juga
+
+   * include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/make_game.php (create_game):
+   - bugfix: set Games.TimeOutDate on creating game for joining waiting-room
+     and accepting invitation
+
+   * confirm.php:
+   - bugfix: execute double-game-update query on delete-game only
+     if it IS a double-game
+
+   * forum/forum_functions.php (make_link_array),
+     forum/list.php, forum/read.php, NEWS:
+   - added "Refresh"-link in forum link-bars to init-reload thread-list
+     and thread-posts-view
+
+   * scripts/.cvsignore:
+   - ignore .htaccess-file to protect folder
+
+   * daily_cron.php:
+   - bugfix: bad SQL-query on ForumRead-cleanup
+
+   * include/faq_functions.php (faq_item_html), skins/dragon/screen.css, faq.php:
+   - fixed missing separator between FAQ-sections on searching
+   - left-align search-form
+
+   * error.php:
+   - adjusted text for forgotten-password with no_email,
+     added what's needed (user-id + email) to get password-reset via admin
+
 2009-11-07 juga
 
    * features/lib_votes.php (Feature.is_final_status, ~.fix_user_quota_feature_points),
