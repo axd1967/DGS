@@ -579,7 +579,7 @@ function get_alt_arg( $n1, $n2)
       }
 
       if( $action == 'add_time' )
-         draw_add_time( $game_row );
+         draw_add_time( $game_row, $to_move );
       else
       {
          $stay_on_board = ($action != 'delete');
@@ -883,7 +883,7 @@ function draw_message_box( &$message, $stay_on_board )
       ;
 } //draw_message_box
 
-function draw_add_time( $game_row )
+function draw_add_time( $game_row, $colorToMove )
 {
    $tabindex=10; //TODO: fix this start value
    echo '
@@ -897,9 +897,19 @@ function draw_add_time( $game_row )
            <SELECT name="add_days" size="1"  tabindex="', ($tabindex++), '">';
 
    //basic_safe() because inside <option></option>
+   $pfx = ($colorToMove == BLACK) ? 'Black' : 'White';
+   $allow_reset = false;
+   if( $game_row['Byotype'] == BYOTYPE_CANADIAN )
+      $allow_reset = true;
+   elseif( $game_row['Byotype'] == BYOTYPE_JAPANESE && $game_row["{$pfx}_Byoperiods"] >= 0 )
+      $allow_reset = true;
+   if( $game_row['Byotime'] <= 0 ) // absolute-time
+      $allow_reset = false;
+
    $trday = basic_safe(T_('day'));
    $trdays = basic_safe(T_('days'));
-   for( $i=0; $i <= MAX_ADD_DAYS; $i++)
+   $startidx = ($allow_reset) ? 0 : 1;
+   for( $i=$startidx; $i <= MAX_ADD_DAYS; $i++)
    {
       echo sprintf( "<OPTION value=\"%d\"%s>%s %s</OPTION>\n",
             $i, ( ($i==1) ? ' selected' : '' ),
@@ -910,16 +920,18 @@ function draw_add_time( $game_row )
           </TD>
         </TR>';
 
-   //TODO### tell, that if in byo-yomi, the current period will be resetted (probably that's only important for JAP !?)
-   if( $game_row['Byotype'] != BYOTYPE_FISCHER
-         && $game_row['Byotime'] > 0 && $game_row['Byoperiods'] > 0 ) // no byoyomi-reset if no byoyomi
+   // no byoyomi-reset if no byoyomi
+   if( $allow_reset )
    {
       echo '<TR>
               <TD>
                 <input type="checkbox" checked name="reset_byoyomi" tabindex="', ($tabindex++), '" value="1"',
                    '>&nbsp;', T_('Reset byoyomi settings when re-entering'), '
               </TD>
-            </TR>';
+            </TR>
+            <TR><TD>',
+               T_('Note: Current byoyomi period is resetted regardless of full reset.'), '
+            </TD></TR>';
    }
 
    echo '<TR>
@@ -1038,7 +1050,9 @@ function draw_board_info($board)
    $fmts= array(
       //array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
       POSX_ADDTIME => array(
-         T_('%2$s had added %4$s to %3$s %5$s at move %1$d'),
+         array( T_('%2$s had added %4$s to %3$s %5$s at move %1$d'),
+                T_('%2$s had restarted byoyomi for %3$s at move %1$d') ),
+         // [ colnum, mapping ]
          array( 0, null), //MoveNr
          array( 1, array( WHITE => T_('White'), BLACK => T_('Black'))), //From
          array( 1, array( BLACK => T_('White'), WHITE => T_('Black'))), //To
@@ -1055,19 +1069,20 @@ function draw_board_info($board)
       if( $sub )
       {
          //echo var_export($row, true);
-         $fmt = array_shift($sub);
+         $fmtarr = array_shift($sub);
+         $fmt = (is_array($fmtarr)) ? $fmtarr[($row[2] > 0) ? 0 : 1] : $fmtarr;
          $val = array();
          $cnt_sub = count($sub);
          for( $i=0; $i < $cnt_sub; $i++ )
          {
-            list($n, $fct) = $sub[$i];
-            //echo "$n => $tmp<br>";
+            list($col, $fct) = $sub[$i];
+            //echo "$col=> $tmp<br>";
             if( is_array($fct) )
-               $val[$i] = $fct[$row[$n]];
+               $val[$i] = $fct[$row[$col]];
             else if( is_string($fct) )
-               $val[$i] = TimeFormat::echo_time($row[$n]);
+               $val[$i] = TimeFormat::echo_time($row[$col]);
             else
-               $val[$i] = $row[$n];
+               $val[$i] = $row[$col];
          }
          //echo var_export($val, true);
          $str= vsprintf($fmt, $val);
