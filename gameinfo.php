@@ -181,8 +181,8 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo(
             T_('On vacation') . MINI_SPACING . echo_image_vacation(),
             array(
-                  echo_onvacation(@$grow['Black_OnVacation']),
-                  echo_onvacation(@$grow['White_OnVacation']),
+                  TimeFormat::echo_onvacation(@$grow['Black_OnVacation']),
+                  TimeFormat::echo_onvacation(@$grow['White_OnVacation']),
             ),
             '', 'class=OnVacation' );
    }
@@ -253,7 +253,7 @@ function build_rating_diff( $rating_diff )
       }
    }
 
-   $short = true; // use short-time?
+   $timefmt = TIMEFMT_SHORT | TIMEFMT_ZERO; // use short-time?
    $itable = new Table_info('time');
    $itable->add_caption( T_('Time settings and Remaining time') );
    $itable->add_sinfo(
@@ -269,33 +269,36 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Time system'),
          array(
-            echo_byotype($grow['Byotype']),
+            TimeFormat::echo_byotype($grow['Byotype']),
             '',
             '',
          ));
    $itable->add_sinfo(
          T_('Main time'),
          array(
-            echo_time($grow['Maintime'], false, false&&$short),
-            echo_time($grow['Black_Maintime'], false, $short),
-            echo_time($grow['White_Maintime'], false, $short),
+            TimeFormat::echo_time($grow['Maintime']),
+            TimeFormat::echo_time($grow['Black_Maintime'], $timefmt ),
+            TimeFormat::echo_time($grow['White_Maintime'], $timefmt ),
          ));
-   $game_extratime = echo_time_limit( -1, $grow['Byotype'],
-         $grow['Byotime'], $grow['Byoperiods'], false, $short, false );
+
+   $game_extratime = TimeFormat::echo_time_limit( -1, $grow['Byotype'], $grow['Byotime'],
+         $grow['Byoperiods'], $timefmt );
    $itable->add_sinfo(
          T_('Extra time'),
          array(
-            echo_time_limit( -1, $grow['Byotype'],
-                  $grow['Byotime'], $grow['Byoperiods'], false, false&&$short, false ),
+            TimeFormat::echo_time_limit( -1, $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
+               $timefmt & 0),
             (( $grow['Black_Maintime'] > 0 )
                ? $game_extratime
-               : echo_time_limit( -1, $grow['Byotype'], $grow['Black_Byotime'],
-                     $grow['Black_Byoperiods'], false, $short, false )
+               : TimeFormat::echo_time_remaining( 0, $grow['Byotype'], $grow['Black_Byotime'],
+                     $grow['Black_Byoperiods'], $grow['Byotime'], $grow['Byoperiods'],
+                     $timefmt | TIMEFMT_ADDEXTRA )
             ),
             (( $grow['White_Maintime'] > 0 )
                ? $game_extratime
-               : echo_time_limit( -1, $grow['Byotype'], $grow['White_Byotime'],
-                     $grow['White_Byoperiods'], false, $short, false )
+               : TimeFormat::echo_time_remaining( 0, $grow['Byotype'], $grow['White_Byotime'],
+                     $grow['White_Byoperiods'], $grow['Byotime'], $grow['Byoperiods'],
+                     $timefmt | TIMEFMT_ADDEXTRA )
             ),
          ));
 
@@ -303,7 +306,8 @@ function build_rating_diff( $rating_diff )
    if( is_vacation_clock($grow['ClockUsed']) )
    {
       $clock_status[$to_move][] = echo_image_vacation( 'in_text',
-         echo_onvacation( ($to_move == BLACK) ? $grow['Black_OnVacation'] : $grow['White_OnVacation'] ),
+         TimeFormat::echo_onvacation(
+            ($to_move == BLACK) ? $grow['Black_OnVacation'] : $grow['White_OnVacation'] ),
          true );
    }
    elseif( is_weekend_clock_stopped($grow['ClockUsed']) )
