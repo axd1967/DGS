@@ -79,6 +79,7 @@ define('FORUMLOGACT_HIDE_POST',     'hide_post');
 define('FORUMOPT_MODERATED',     0x0001);
 define('FORUMOPT_GROUP_ADMIN',   0x0002); // forum is of admin group
 define('FORUMOPT_GROUP_DEV',     0x0004); // forum is of develop/advisor group
+define('FORUMOPT_READ_ONLY',     0x0008);
 // mask for normally hidden forums
 define('FORUMOPTS_GROUPS_HIDDEN', FORUMOPT_GROUP_ADMIN|FORUMOPT_GROUP_DEV);
 
@@ -249,6 +250,7 @@ class DisplayForum
    /*! \brief rx-terms (optionally array) that are to be highlighted in text. */
    var $rx_term;
    var $ConfigBoard;
+   var $forum_opts;
 
    // consts
    var $max_rows;
@@ -276,6 +278,7 @@ class DisplayForum
       $this->show_score = false;
       $this->rx_term = '';
       $this->ConfigBoard = null;
+      $this->forum_opts = null;
 
       $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
@@ -298,6 +301,11 @@ class DisplayForum
    function setConfigBoard( $cfg_board )
    {
       $this->ConfigBoard = $cfg_board;
+   }
+
+   function set_forum_options( $forum_opts )
+   {
+      $this->forum_opts = $forum_opts;
    }
 
    function show_found_rows( $rows )
@@ -545,6 +553,9 @@ class DisplayForum
    {
       global $player_row;
       if( $player_row['MayPostOnForum'] == 'N' ) // user not allowed to post
+         return;
+
+      if( !Forum::allow_posting($player_row, $this->forum_opts) )
          return;
 
       // reply-prefix
@@ -860,7 +871,7 @@ class DisplayForum
             $prev_answer,
             '&nbsp;';
 
-         if( $user_may_post )
+         if( $user_may_post && Forum::allow_posting($player_row, $this->forum_opts) )
          {
             // reply link
             echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply'), " ]</a>&nbsp;&nbsp;";
@@ -1043,12 +1054,6 @@ class Forum
       $this->count_new = -1; // unknown count
    }
 
-   /*! \brief Returns true, if forum is moderated. */
-   function is_moderated()
-   {
-      return ( $this->options & FORUMOPT_MODERATED );
-   }
-
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    function to_string()
    {
@@ -1186,6 +1191,16 @@ class Forum
 
 
    // ---------- Static Class functions ----------------------------
+
+   /*! \brief Returns true if "writing posts" is allowed for read-only forum for given user. */
+   function allow_posting( $user_row, $forum_opts )
+   {
+      if( is_null($forum_opts) )
+         $forum_opts = FORUMOPT_READ_ONLY; // assuming read-only to be safe
+      return ( $forum_opts & FORUMOPT_READ_ONLY )
+         ? ( (int)@$user_row['admin_level'] & (ADMIN_FORUM|ADMIN_DEVELOPER) )
+         : true;
+   }
 
    /*! \brief Returns db-fields to be used for query of Forum-object. */
    function build_query_sql()
