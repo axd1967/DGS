@@ -184,7 +184,7 @@ else
          "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$my_id) " .
          "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
        "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME . " " .
-       "ORDER BY Games.LastChanged DESC, Games.ID";
+       "ORDER BY Games.LastChanged ASC, Games.ID";
 
    $result = db_query( 'quick_status.find_games', $query );
 
@@ -206,9 +206,9 @@ else
                      $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'], false);
 
       $time_remaining =
-         echo_time_remaining( $my_Maintime, $row['Byotype'], $my_Byotime,
-                     $my_Byoperiods, $row['Byotime'], true, true, true);
-      $time_remaining = str_replace( "&nbsp;", ' ', $time_remaining );
+         TimeFormat::echo_time_remaining( $my_Maintime, $row['Byotype'], $my_Byotime,
+                     $my_Byoperiods, $row['Byotime'], $row['Byoperiods'],
+                     TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
       // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining
       echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s'\n",
