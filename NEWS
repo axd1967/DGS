@@ -296,6 +296,24 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * More use of CSS
 
 
+   Bug fixes:
+
+   * fixed activation toggle for filters: Contacts countries, Games score
+   * fixed filters: hidden columns are now be added on-the-fly if required for search,
+     so static columns Rated & Won on games-lists are no longer static;
+     added table-columns stay added till user removes them
+   * fixed problems with favicon picture
+   * fixed duplicated row problem for Add-Time feature
+   * fixed default bug on selectbox filters
+   * fixed sorting by last-access or last-move on opponents page
+   * fixed showing of game comments for PASS-, SCORE- and RESIGN-move on SGF-download
+   * fixed appending of game comments on SGF-download for running games
+   * fixed forum by preserving entered forum-message on missing subject and/or text
+   * fixed Fischer-time capping: no cap for move when time has been added during game
+     exceeding starting main-time
+   * fixed default games order of quick-status (show last-moved game first)
+
+
    Code improvements:
 
    * Improvements of database queries
@@ -385,24 +403,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added maintenance-users
 
 
-   Bug fixes:
-
-   * fixed activation toggle for filters: Contacts countries, Games score
-   * fixed filters: hidden columns are now be added on-the-fly if required for search,
-     so static columns Rated & Won on games-lists are no longer static;
-     added table-columns stay added till user removes them
-   * fixed problems with favicon picture
-   * fixed duplicated row problem for Add-Time feature
-   * fixed default bug on selectbox filters
-   * fixed sorting by last-access or last-move on opponents page
-   * fixed showing of game comments for PASS-, SCORE- and RESIGN-move on SGF-download
-   * fixed appending of game comments on SGF-download for running games
-   * fixed forum by preserving entered forum-message on missing subject and/or text
-   * fixed Fischer-time capping: no cap for move when time has been added during game
-     exceeding starting main-time
-   * fixed default games order of quick-status (show last-moved game first)
-
-
 #release DGS_1_0_14 [2008-Dec-14] - DGS 1.0.14  (Policy, Blocking, Admin features)
 
    Policy changes:
@@ -420,6 +420,11 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * <home people.php>People page</home>:
       * Changed main FAQ editor
       * Added list of forum moderators
+
+
+   Bug fixes:
+
+   * fixed score-filter in finished games list
 
 
    Code improvements:
@@ -449,11 +454,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Added Adminlog entries for admin user changes, login and login-denied
       * Added Forumlog entry for changes in forums and posts
       * Restricted access to Forum management
-
-
-   Bug fixes:
-
-   * fixed score-filter in finished games list
 
 
 #release DGS_1_0_13 [2007-Oct-07] - DGS 1.0.13  (CSS, Searching, Contacts, Add time)
@@ -537,6 +537,27 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Added rating histogram on statistics page
 
 
+   Bug fixes:
+
+   * fixed problems downloading SGF for some browsers (namely PDA devices):
+     (replaced header 'Content-Disposition' from 'inline' to 'attachment',
+     so download now always open dialog)
+   * fixed hover option with move numbering: don't display numbers on stones
+   * fixed display of japanese byoyomi when byoyomi reached
+   * fixed tag &lt;user =userid&gt;
+   * fixed edit vacation bug
+   * fixed bad running games count for some users
+   * fixed 'double game' handicap option in waitingroom
+   * fixed paging of table lists to preserve form values
+   * fixed search term score (relevance) for forum when using expert mode
+   * fixed bug for forum moderator losing edited text when toggling moderator-mode
+   * fixed missing borders in forum thread-view for preview of new thread
+   * predefined english bio categories can be used in other languages
+   * prevent to rename standard folders
+   * removed first newline after some layout tags in messages
+   * various other bugfixes
+
+
    Code improvements:
 
    * Optimized some database queries and added indexes:
@@ -579,27 +600,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Changes for Admins:
       * Added check for a users clock in respective user info page
       * Can overwrite current new password and create new
-
-
-   Bug fixes:
-
-   * fixed problems downloading SGF for some browsers (namely PDA devices):
-     (replaced header 'Content-Disposition' from 'inline' to 'attachment',
-     so download now always open dialog)
-   * fixed hover option with move numbering: don't display numbers on stones
-   * fixed display of japanese byoyomi when byoyomi reached
-   * fixed tag &lt;user =userid&gt;
-   * fixed edit vacation bug
-   * fixed bad running games count for some users
-   * fixed 'double game' handicap option in waitingroom
-   * fixed paging of table lists to preserve form values
-   * fixed search term score (relevance) for forum when using expert mode
-   * fixed bug for forum moderator losing edited text when toggling moderator-mode
-   * fixed missing borders in forum thread-view for preview of new thread
-   * predefined english bio categories can be used in other languages
-   * prevent to rename standard folders
-   * removed first newline after some layout tags in messages
-   * various other bugfixes
 
 
 #release DGS_1_0_12 [2006-Aug-07] - DGS 1.0.12  (New forum, Invitations, Game notes, Markup)
@@ -701,6 +701,17 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Various other code improvements and bug fixes
 
 
+   Bug fixes:
+
+   * fixed disappearance of sgf file before your viewer could open it
+   * fixed melted bio order when deleting an item
+   * fixed duplicated moves bug
+
+   * Known behaviour about "Duplicated messages" and "Duplicated posts":
+     Problems with these happen when user clicks the submit button twice or more
+     times. If you hit it a second time, the post has been sent a second time.
+
+
    Administrative changes:
 
    * Status page for forum admins:
@@ -719,17 +730,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * More admin roles
       * Better cron handling, better error-handling (Adminlog)
       * Various scripts for checks and administrators daily work
-
-
-   Bug fixes:
-
-   * fixed disappearance of sgf file before your viewer could open it
-   * fixed melted bio order when deleting an item
-   * fixed duplicated moves bug
-
-   * Known behaviour about "Duplicated messages" and "Duplicated posts":
-     Problems with these happen when user clicks the submit button twice or more
-     times. If you hit it a second time, the post has been sent a second time.
 
 
 #release DGS_1_0_11 [2003-Jul-15] - DGS 1.0.11  (Messaging system, vacation, country)
