@@ -70,14 +70,14 @@ require_once( "include/form_functions.php" );
             if( $i==0 )
                $days[$i] = '';
             else
-               $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . ' ' . echo_day(abs($i));
+               $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . ' ' . TimeFormat::echo_day(abs($i));
          }
 
          $vacation_form->add_row( array( 'HEADER', T_('Change vacation length') ) );
 
          $vacation_form->add_row( array( 'SPACE' ) );
          $vacation_form->add_row( array(
-                  'DESCRIPTION', echo_day($floor_onvacation),
+                  'DESCRIPTION', TimeFormat::echo_day($floor_onvacation),
                   'SELECTBOX', 'vacationdiff', 1, $days, 0, false,
                   'SUBMITBUTTON', 'change_vacation', T_('Change vacation length') ) );
       }

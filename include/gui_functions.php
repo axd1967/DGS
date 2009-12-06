@@ -214,7 +214,8 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
    if( $on_vacation === true )
       $vac_str = echo_image_vacation();
    elseif( is_numeric($on_vacation) && $on_vacation > 0 )
-      $vac_str = echo_image_vacation( $on_vacation, echo_onvacation($on_vacation), $player_to_move );
+      $vac_str = echo_image_vacation( $on_vacation,
+         TimeFormat::echo_onvacation($on_vacation), $player_to_move );
    else
       $vac_str = '';
    return SMALL_SPACING . $vac_str

@@ -317,8 +317,8 @@ require_once( 'include/classlib_userconfig.php' );
                $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
-            $wrow_strings[ 9] =
-               echo_time_limit( $Maintime, $Byotype, $Byotime, $Byoperiods, 0, 1);
+            $wrow_strings[ 9] = TimeFormat::echo_time_limit(
+                  $Maintime, $Byotype, $Byotime, $Byoperiods, TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
          if( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = $nrGames;
          if( $wrtable->Is_Column_Displayed[11] )

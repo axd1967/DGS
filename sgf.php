@@ -573,7 +573,8 @@ $array=array();
    //       Therefore time-info not included at the moment.
    if( $sgf_version >= 4 )
    {// overtime
-      echo "\nOT[" . sgf_simpletext(echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, 1)) . "]";
+      $timeprop = TimeFormat::echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, TIMEFMT_ENGL);
+      echo "\nOT[", sgf_simpletext($timeprop), "]";
    }
 
    if( $rules )

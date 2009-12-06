@@ -793,10 +793,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             ( $goodsameopp ? '' : warning_cell_attb( T_('Out of range')) ) );
    }
 
-   $itable->add_sinfo( T_('Main time'), echo_time($Maintime) );
+   $itable->add_sinfo( T_('Main time'), TimeFormat::echo_time($Maintime) );
    $itable->add_sinfo(
-         echo_byotype($Byotype),
-         echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods , false, false, false) );
+         TimeFormat::echo_byotype($Byotype),
+         TimeFormat::echo_time_limit( -1, $Byotype, $Byotime, $Byoperiods, 0) );
 
    $itable->add_sinfo(
          T_('Rated game'), yesno( $Rated),

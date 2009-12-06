@@ -155,10 +155,11 @@ $ThePage = new Page('UserInfo');
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
 
-      $itable1->add_sinfo( T_('Vacation days left'), echo_day(floor($row["VacationDays"])) );
+      $itable1->add_sinfo( T_('Vacation days left'),
+         TimeFormat::echo_day(floor($row["VacationDays"])) );
       if( $row['OnVacation'] > 0 )
       {
-         $onVacationText = echo_onvacation($row['OnVacation']);
+         $onVacationText = TimeFormat::echo_onvacation($row['OnVacation']);
          $itable1->add_sinfo(
                T_('On vacation') . MINI_SPACING
                   . echo_image_vacation($row['OnVacation'], $onVacationText, true),

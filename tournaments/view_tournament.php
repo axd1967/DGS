@@ -172,12 +172,12 @@ $ThePage = new Page('Tournament');
          $itable->add_sinfo( T_('Komi adjustment:#trules_komi'), implode(', ', $adj_komi) );
       if( ENA_STDHANDICAP )
          $itable->add_sinfo( T_('Standard placement:#trules_handi'), yesno($trule->StdHandicap) );
-      $itable->add_sinfo( T_('Main time:#trules'), echo_time($trule->Maintime)
+      $itable->add_sinfo( T_('Main time:#trules'), TimeFormat::echo_time($trule->Maintime)
             . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)#trules') : '' ));
       if( $trule->Byotime > 0 )
          $itable->add_sinfo(
-            echo_byotype($trule->Byotype) . ':',
-            echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods , false, false, false) );
+            TimeFormat::echo_byotype($trule->Byotype) . ':',
+            TimeFormat::echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods, 0) );
       $itable->add_sinfo( T_('Clock runs on weekends:#trules'), yesno($trule->WeekendClock) );
       $itable->add_sinfo( T_('Rated:#trules'), yesno($trule->Rated) );
 

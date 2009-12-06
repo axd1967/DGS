@@ -161,7 +161,7 @@ if(1){ //display/check time_remaining and add_time
             echo "<tr><td colspan=$nbcols>$str</td></tr>";
          }
 
-         // see add_time_opponent()
+         // see GameAddTime::add_time_opponent()
          if( $add_hours > 0 )
             $game_row["White_Maintime"]+= $add_hours;
          if( $reset_byo )
@@ -185,17 +185,19 @@ if(1){ //display/check time_remaining and add_time
 
          /*
          function echo_time_remaining( $maintime, $byotype, $byotime, $byoper
-            , $startbyotime, $keep_english=false, $short=false, $btype=false)
+            , $startbyotime, $startbyoper, $fmtflags=TIMEFMT_..., $zero_value=NO_VALUE )
          */
          echo "<td>" .
-            echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
+            TimeFormat::echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
                           ,$game_row['White_Byotime'], $game_row['White_Byoperiods']
-                          ,$game_row['Byotime'], 0,0,0) .
+                          ,$game_row['Byotime'], $game_row['Byoperiods'],
+                          TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA ) .
             "</td>";
          echo "<td>" .
-            echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
+            TimeFormat::echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype']
                           ,$game_row['White_Byotime'], $game_row['White_Byoperiods']
-                          ,$game_row['Byotime'], 0,1,1) .
+                          ,$game_row['Byotime'], $game_row['Byoperiods'],
+                          TIMEFMT_SHORT | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA ) .
             "</td>";
          echo '</tr>';
       }
