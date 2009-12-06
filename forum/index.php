@@ -100,6 +100,8 @@ $ThePage = new Page('ForumsList');
       $fopts_str = '';
       if( $forum->options & FORUMOPT_MODERATED )
          $fopts_str .= $opt_prefix . T_('Moderated') . ']';
+      if( $forum->options & FORUMOPT_READ_ONLY )
+         $fopts_str .= $opt_prefix . T_('Read-Only') . ']';
       if( $show_fopts && ($forum->options & FORUMOPTS_GROUPS_HIDDEN) )
          $fopts_str .= $opt_prefix . T_('Hidden#forum') . ']';
 

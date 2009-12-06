@@ -50,6 +50,9 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    if( !$f_opts->is_visible_forum( $forum_opts ) )
       error('forbidden_forum', "post_message({$player_row['ID']})");
 
+   if( !Forum::allow_posting( $player_row, $forum_opts ) )
+      error('read_only_forum', "post_message.read_only({$player_row['ID']})");
+
    $forum = @$_POST['forum']+0;
    $parent = @$_POST['parent']+0;
    $edit = @$_POST['edit']+0;

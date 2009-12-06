@@ -46,6 +46,7 @@ $ThePage = new Page('ForumAdmin');
 
    $ARR_FORUMOPTS = array( // maskval => [ argname, bit-text, label, descr ]
       FORUMOPT_MODERATED   => array( 'moderated', 'MODERATED', T_('Moderated'), T_('all posts need moderation') ),
+      FORUMOPT_READ_ONLY   => array( 'readonly',  'READ_ONLY', T_('Read-Only'), T_('only forum moderators can write posts') ),
       FORUMOPT_GROUP_ADMIN => array( 'fgr_admin', 'FGR_ADMIN', '', T_('ADMIN - mark as admin-forum') ),
       FORUMOPT_GROUP_DEV   => array( 'fgr_dev',   'FGR_DEV',   '', T_('DEV - mark as development-forum') ),
    );

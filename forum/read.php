@@ -141,6 +141,7 @@ function revision_history( $display_forum, $post_id )
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
    $disp_forum->setConfigBoard( $cfg_board );
+   $disp_forum->set_forum_options( $forum->options );
    $disp_forum->set_rx_term( $rx_term );
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
@@ -322,39 +323,42 @@ function revision_history( $display_forum, $post_id )
    } //posts loop
 
 
-   // preview of new thread
-   if( $preview && $preview_ID == 0 )
+   if( Forum::allow_posting( $player_row, $forum->options ) )
    {
-      $disp_forum->change_depth( 1 );
-      $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
-      $GoDiagrams = $preview_GoDiagrams;
-      $disp_forum->draw_post(DRAWPOST_PREVIEW, $post, false, $GoDiagrams );
+      // preview of new thread
+      if( $preview && $preview_ID == 0 )
+      {
+         $disp_forum->change_depth( 1 );
+         $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
+         $GoDiagrams = $preview_GoDiagrams;
+         $disp_forum->draw_post(DRAWPOST_PREVIEW, $post, false, $GoDiagrams );
 
-      echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-      $disp_forum->forum_message_box(DRAWPOST_PREVIEW, $thread, $GoDiagrams, $post_errmsg,
-         $post->subject, $post->text );
-      echo "</td></tr>\n";
-   }
+         echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
+         $disp_forum->forum_message_box(DRAWPOST_PREVIEW, $thread, $GoDiagrams, $post_errmsg,
+            $post->subject, $post->text );
+         echo "</td></tr>\n";
+      }
 
-   // footer: reply-form (only for a NEW THREAD or if ONE post existing)
-   if( ($cnt_posts <= 1) && !($reply > 0) && !($edit > 0) && !$preview )
-   {
-      $disp_forum->change_depth( 1 );
-      echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-      if( $thread > 0 )
-         echo '<hr>';
-      $disp_forum->forum_message_box(DRAWPOST_NORMAL, $thread, null, '', $thread_Subject);
-      echo "</td></tr>\n";
-   }
+      // footer: reply-form (only for a NEW THREAD or if ONE post existing)
+      if( ($cnt_posts <= 1) && !($reply > 0) && !($edit > 0) && !$preview )
+      {
+         $disp_forum->change_depth( 1 );
+         echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
+         if( $thread > 0 )
+            echo '<hr>';
+         $disp_forum->forum_message_box(DRAWPOST_NORMAL, $thread, null, '', $thread_Subject);
+         echo "</td></tr>\n";
+      }
 
-   // add link to add reply to initial-thread at end of thread-view
-   if( $cnt_posts > 1 && !$preview && !($edit > 0) )
-   {
-      $disp_forum->change_depth( 0 );
-      echo "<tr><td colspan={$disp_forum->cols} align=center>\n<hr>"
-         , anchor( $post0->build_url_post(null, 'reply='.$post0->id),
-                   '[ '.T_('Add reply to inital thread post').' ]' )
-         , "<br>&nbsp;</td></tr>\n";
+      // add link to add reply to initial-thread at end of thread-view
+      if( $cnt_posts > 1 && !$preview && !($edit > 0) )
+      {
+         $disp_forum->change_depth( 0 );
+         echo "<tr><td colspan={$disp_forum->cols} align=center>\n<hr>"
+            , anchor( $post0->build_url_post(null, 'reply='.$post0->id),
+                      '[ '.T_('Add reply to inital thread post').' ]' )
+            , "<br>&nbsp;</td></tr>\n";
+      }
    }
 
    $disp_forum->change_depth( -1 );

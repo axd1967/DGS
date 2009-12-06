@@ -431,6 +431,10 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          echo T_("Sorry, you are not allowed to view or post in this forum.");
          break;
 
+      case('read_only_forum'):
+         echo T_("Sorry, you are not allowed to post in this forum.");
+         break;
+
       case("forbidden_post"):
          echo T_("Sorry, you are not allowed to view this post.");
          break;
