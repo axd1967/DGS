@@ -168,9 +168,6 @@ $cookie_pref_rows = array(
 
 $vacation_min_days = 2;
 
-define('NO_VALUE', '---');
-define('UNKNOWN_VALUE', '???');
-
 define('INFO_HTML', 'cell'); //HTML parsing for texts like 'Rank info'
 define('SUBJECT_HTML', false); //HTML parsing for subjects of posts and messages
 
@@ -1046,7 +1043,7 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    $rgx= array("/\r\n/","/\r/");
    $rpl= array("\n","\n");
    $text= preg_replace( $rgx, $rpl, $text);
-   $text= wordwrap( $text, 70, "\n", 1);
+   $text= wordwrap( $text, 70, "\n", 1); //TODO make optional for send-mail for halfhourly-cron
 
    /**
     * How to break the lines of an email ? CRLF.

@@ -26,6 +26,12 @@ require_once( "include/config-local.php" );
  */
 
 
+// ---------- General stuff----------------------------------------
+
+define('NO_VALUE', '---');
+define('UNKNOWN_VALUE', '???');
+
+
 // ---------- Folder stuff ----------------------------------------
 
 // folder for "destroyed" messages (former was: Folder_nr=NULL)
