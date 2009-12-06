@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( 'include/time_functions.php' );
 require_once( 'include/classlib_game.php' );
+require_once( 'include/utilities.php' );
 
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
@@ -278,17 +279,19 @@ function adjust_komi( $komi, $adj_komi, $jigo_mode )
    elseif( $komi > MAX_KOMI_RANGE )
       $komi -= 1.0;
 
-   if( (string)$komi == '-0' )
+   if( (string)$komi == '-0' ) // strange effect
       $komi = 0;
    return (float)$komi;
 }
 
 // returns adjusted handicap within limits, also checking for valid limits
-function adjust_handicap( $handicap, $adj_handicap, $min_handicap, $max_handicap )
+function adjust_handicap( $handicap, $adj_handicap, $min_handicap=0, $max_handicap=MAX_HANDICAP )
 {
    // assure valid limits
    $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
    $max_handicap = ( $max_handicap < 0 ) ? MAX_HANDICAP : min( MAX_HANDICAP, $max_handicap );
+   if( $min_handicap > $max_handicap )
+      swap( $min_handicap, $max_handicap );
 
    // adjust
    if( $adj_handicap )
