@@ -24,6 +24,49 @@ ChangeLog
 
 2009-12-06 juga
 
+   * include/time_functions.php (time_remaining_value):
+   - bugfix on calculating timeout-date for status-next-game-order handling partly
+     byo-yomi-reset after add-time
+
+   * NEWS:
+   - moved all "Bug fixes"-sections after "Minor changes"-sections
+
+   * forum/forum_functions.php (DisplayForum.set_forum_options,
+       ~.forum_message_box, ~.draw_post; Forum.allow_posting, ~.is_moderated),
+     forum/admin.php, forum/index.php, forum/post.php, forum/read.php,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt, error.php, NEWS:
+   - added forum-option READ-ONLY to restrict post-writing to forum-moderators
+     and developer-role-users
+
+   * game.php (draw_add_time, draw_board_info):
+   - for adding time:
+     - show byo-yomi-reset only if reset would change some byo-yomi-time data
+     - show changed time-added-text in board-info if only byo-yomi restarted
+     - allow "0 days" only for JAP/CAN-time for byo-yomi-reset without adding days
+
+   * confirm.php:
+   - time-added detection for sys-message also if only byo-yomi resetted
+
+   * include/game_functions.php (GameAddTime.add_time, ~.add_time_opponent),
+     scripts/tests/GameAddTimeTest.php:
+   - reset current byo-yomi period for JAP|CAN-time if in byo-yomi
+   - moved TimeOutDate-handling into add_time_opponent() because of database-load
+   - bugfix: reset byo-yomi time-data to first period if no main-time
+   - bugfix: setting TimeOutDate for correct user (uid is the player GIVING time)
+   - bugfix: no aggregation of main- with byo-time, byo-yomi-resetting
+   - return non-0 result for add_time()/add_time_opponent() if only byo-yomi
+     had been resetted
+   - added unit-test for GameAddTime-class
+
+   * include/game_functions.php (adjust_handicap),
+     scripts/tests/Game_SettingsHelperTest.php:
+   - added unit-test + fix for adjust_komi() and adjust_handicap()
+
+   * include/time_functions.php (TimeFormat.echo_time_remaining),
+     scripts/tests/TimeFormatTest.php, code_examples/check_times.php,
+     game.php, quick_status.php, show_games.php, status.php:
+   - removed long-text-form for TimeFormat::echo_time_remaning()
+
    * quick_status.php, NEWS:
    - sync games-order with status-page (by Lastchange ASC)
 
