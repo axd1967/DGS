@@ -11,7 +11,7 @@ phpunit testclass.php
 # create phpunit test-skeleton from existing class
 cd <DGS-basepath>
 phpunit --skeleton BitSet include/classlib_bitset.php
-mv BitSetTest.php to scripts/test/
+mv BitSetTest.php to scripts/tests/
 # adjust to DGS-layout (3 space indent)
 
 # run test-class generated with phpunit --skeleton:
