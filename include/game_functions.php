@@ -58,146 +58,201 @@ $ARR_GLOBAL_HTYPES = array(
       //HTYPE_AUKO     => CAT_HTYPE_FAIRKOMI,
    );
 
-/*!
- * \brief returns true, if user (uid) is allowed to add additional
- *        time for his/her opponent in game specified by $game_row.
+
+/**
+ * \brief Class to handle adding of time for a game.
+ * \note class with splitted add_time_opponent()-method to support unit-tests.
  */
-function allow_add_time_opponent( $game_row, $uid )
+class GameAddTime
 {
-   // must be a running-game
-   if( $game_row['Status'] == 'FINISHED' || $game_row['Status'] == 'INVITED' )
-      return false;
+   /*! \brief User to add time for. */
+   var $uid;
+   var $game_row;
+   var $game_query;
 
-   // must be one of my games
-   if( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
-      return false;
-
-   // must not be a tournament-game
-   //TODO if( $game_row['Tournament_ID'] != 0 ) return false;
-
-   // get opponents columns
-   if( $game_row['Black_ID'] == $uid )
-      $oppcolor = 'White';
-   else
-      $oppcolor = 'Black';
-   // don't exceed 365 days maintime
-   if( $game_row["{$oppcolor}_Maintime"]
-         + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(360,'days') )
-      return false;
-
-   // TODO: might be denied, if declared as forbidden in waiting-room (by option)
-   return true;
-}
-
-/*!
- * \brief returns number of hours added (may be 0), if time has been successfully added
- *        for opponent of player (uid) in specified game (gid).
- *        Otherwise error-string is returned.
- * \param $game_row pre-loaded game_row to add time for
- *        or numeric game-id to load the game from database
- * \param $uid user giving time to his opponent
- * \param $add_hours amount of hours to add to maintime of opponent,
- *        allowed range is 0 hour .. MAX_ADD_DAYS
- * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
- */
-function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
-{
-   if( !is_numeric($add_hours) || $add_hours < 0
-         || $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
-      return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
-
-   if( !$reset_byo && $add_hours == 0 )
-      return 0; // nothing to do (0 hours added, no error)
-
-   if( is_numeric($game_row) )
+   function GameAddTime( &$game_row, $uid )
    {
-      $gid = $game_row;
-      $game_row = mysql_single_fetch( 'add_time_opponent',
-                  "SELECT Games.* from Games WHERE ID=$gid");
-      if( !$game_row )
-         error('unknown_game',"add_time_opponent($gid)");
-   }
-   else
-      $gid = $game_row['ID'];
-
-   if( !allow_add_time_opponent( $game_row, $uid ) )
-      return "Conditions are not met to allow to add time for game [$gid]";
-
-   // get opponents columns to update
-   if( $game_row['Black_ID'] == $uid )
-   {
-      $oppcolor = 'White';
-      $Stone = BLACK;
-   }
-   else
-   {
-      $oppcolor = 'Black';
-      $Stone = WHITE;
+      $this->uid = $uid;
+      $this->game_row = $game_row;
+      $this->game_query = '';
    }
 
-   if( !isset($game_row["{$oppcolor}_Maintime"])
-      || !isset($game_row["{$oppcolor}_Byoperiods"])
-      )
-      error('internal_error',"add_time_opponent.incomplete_game_row($gid)");
-
-   if( $reset_byo && $game_row['Byotype'] == BYOTYPE_FISCHER )
-      $reset_byo = 0;
-   if( $reset_byo && $game_row["{$oppcolor}_Byoperiods"] == -1 )
-      $reset_byo = 0;
-   if( $reset_byo && ($game_row['Byotime'] <= 0 || $game_row['Byoperiods'] <= 0) )
-      $reset_byo = 0; // no byoyomi-reset if no byoyomi (no time or no periods)
-
-/*
-   // min. 1h to be able to reset byo-period with -1 (for next period)
-   if( $reset_byo && $add_hours <= 0 && $game_row["{$oppcolor}_Maintime"] <= 0 )
-      $add_hours = 1;
-*/
-
-   // add maintime and eventually reset byo-time for opponent
-   $game_query = '';
-   if( $add_hours > 0 )
+   /*!
+    * \brief Adds time to given player updating game-row without data-persisting.
+    * \internal
+    * \param $add_hours amount of hours to add to maintime of opponent,
+    *        allowed range is 0 hour .. MAX_ADD_DAYS
+    * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
+    * \return number of hours added (may be 0), if time has been successfully added
+    *        for opponent of player (uid) in specified game (gid).
+    *        Otherwise error-string is returned.
+    */
+   function add_time( $add_hours, $reset_byo=false )
    {
-      $game_query.= ",{$oppcolor}_Maintime={$oppcolor}_Maintime+$add_hours";
-      $game_row["{$oppcolor}_Maintime"]+= $add_hours;
-   }
-   if( $reset_byo )
+      if( !is_numeric($add_hours) || $add_hours < 0
+            || $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
+         return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
+
+      if( !$reset_byo && $add_hours == 0 )
+         return 0; // nothing to do (0 hours added, no error)
+
+      if( is_numeric($this->game_row) )
+      {
+         $gid = $this->game_row;
+         $this->game_row = mysql_single_fetch( 'add_time_opponent',
+            "SELECT Games.* from Games WHERE ID=$gid");
+         if( !$this->game_row )
+            error('unknown_game',"add_time_opponent($gid)");
+      }
+      else
+         $gid = $this->game_row['ID'];
+
+      if( !GameAddTime::allow_add_time_opponent( $this->game_row, $this->uid ) )
+         return "Conditions are not met to allow to add time for game [$this->gid]";
+
+      // get opponents columns to update
+      if( $this->game_row['Black_ID'] == $this->uid )
+      {
+         $oppcolor = 'White';
+         $Stone = BLACK;
+      }
+      else
+      {
+         $oppcolor = 'Black';
+         $Stone = WHITE;
+      }
+
+      if( !isset($this->game_row["{$oppcolor}_Maintime"])
+            || !isset($this->game_row["{$oppcolor}_Byotime"])
+            || !isset($this->game_row["{$oppcolor}_Byoperiods"]) )
+         error('internal_error',"add_time_opponent.incomplete_game_row($gid)");
+
+      if( $reset_byo && $this->game_row['Byotype'] == BYOTYPE_FISCHER )
+         $reset_byo = 0;
+      if( $reset_byo && $this->game_row["{$oppcolor}_Byoperiods"] == -1 )
+         $reset_byo = 0;
+      //TODO### check
+      if( $reset_byo && ($this->game_row['Byotime'] <= 0 || $this->game_row['Byoperiods'] <= 0) )
+         $reset_byo = 0; // no byoyomi-reset if no byoyomi (no time or no periods)
+
+      /*
+      // min. 1h to be able to reset byo-period with -1 (for next period)
+      if( $reset_byo && $add_hours <= 0 && $this->game_row["{$oppcolor}_Maintime"] <= 0 )
+         $add_hours = 1;
+      */
+
+      // add maintime and eventually reset byo-time for opponent
+      // TODO### reset current byo-yomi period for JAP|CAN if in byo-yomi
+      $this->game_query = '';
+      if( $add_hours > 0 )
+      {
+         // TODO### handle if byoper < 0 from prev-add-time
+         $add_byotime = $this->game_row["{$oppcolor}_Byotime"];
+         $this->game_query.= ",{$oppcolor}_Maintime={$oppcolor}_Maintime+" . ($add_hours + $add_byotime);
+         $this->game_query.= ",{$oppcolor}_Byotime=0";
+         $this->game_row["{$oppcolor}_Maintime"] += $add_hours + $add_byotime;
+         $this->game_row["{$oppcolor}_Byotime"] = 0;
+      }
+      if( $reset_byo )
+      {
+         $this->game_query.= ",{$oppcolor}_Byoperiods=-1";
+         $this->game_row["{$oppcolor}_Byoperiods"] = -1;
+      }
+      if( !$this->game_query )
+         return 0; //nothing to do
+
+      // handle Games.TimeOutDate
+      if( $this->game_row['ToMove_ID'] == $this->uid )
+      {
+         $timeout_date = NextGameOrder::make_timeout_date(
+               $this->game_row, $Stone/*to_move*/, $this->game_row['LastTicks'] );
+
+         $this->game_query .= ", TimeOutDate=$timeout_date";
+         $this->game_row['TimeOutDate'] = $timeout_date;
+      }
+
+      return $add_hours;
+   }//add_time
+
+
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief returns true, if user (uid) is allowed to add additional
+    *        time for his/her opponent in game specified by $game_row.
+    */
+   function allow_add_time_opponent( $game_row, $uid )
    {
-      $game_query.= ",{$oppcolor}_Byoperiods=-1";
-      $game_row["{$oppcolor}_Byoperiods"] = -1;
-   }
-   if( !$game_query )
-      return 0; //nothing to do
+      // must be a running-game
+      if( $game_row['Status'] == 'FINISHED' || $game_row['Status'] == 'INVITED' )
+         return false;
 
-   // handle Games.TimeOutDate
-   if( $game_row['ToMove_ID'] == $uid )
+      // must be one of my games
+      if( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
+         return false;
+
+      // must not be a tournament-game
+      //TODO if( $game_row['Tournament_ID'] != 0 ) return false;
+
+      // get opponents columns
+      if( $game_row['Black_ID'] == $uid )
+         $oppcolor = 'White';
+      else
+         $oppcolor = 'Black';
+      // don't exceed 365 days maintime
+      if( $game_row["{$oppcolor}_Maintime"]
+            + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(360,'days') )
+         return false;
+
+      // TODO: might be denied, if declared as forbidden in waiting-room (by option)
+      return true;
+   }
+
+   /*!
+    * \brief Adds time to given player updating game-row and save into database.
+    * \param $game_row pre-loaded game_row to add time for
+    *        or numeric game-id to load the game from database
+    * \param $uid user giving time to his opponent
+    * \param $add_hours amount of hours to add to maintime of opponent,
+    *        allowed range is 0 hour .. MAX_ADD_DAYS
+    * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
+    * \return number of hours added (may be 0), if time has been successfully added
+    *        for opponent of player (uid) in specified game (gid).
+    *        Otherwise error-string is returned.
+    */
+   function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
    {
-      $timeout_date = NextGameOrder::make_timeout_date(
-            $game_row, $Stone/*to_move*/, $game_row['LastTicks'] );
+      $game_addtime = new GameAddTime( $game_row, $uid );
+      $add_hours = $game_addtime->add_time( $add_hours, $reset_byo );
 
-      $game_query .= ", TimeOutDate=$timeout_date";
-      $game_row['TimeOutDate'] = $timeout_date;
-   }
+      if( !is_numeric($add_hours) || $add_hours == 0 ) // error or nothing to do
+         return $add_hours;
 
-   //TODO: HOT_SECTION to avoid multiple-clicks
-   $game_query = "UPDATE Games SET ".substr($game_query,1)
-               . " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
+      //TODO: HOT_SECTION to avoid multiple-clicks
+      $gid = $this->game_row['ID'];
+      $game_query = "UPDATE Games SET ".substr($this->game_query,1)
+                  . " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
 
-   // insert entry in Moves-table
-   $Moves = $game_row['Moves'];
-   $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES "
-      . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
+      // insert entry in Moves-table
+      $Moves = $this->game_row['Moves'];
+      $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES "
+         . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $add_hours)";
 
-   //see also confirm.php
-   db_query( "add_time_opponent.update($gid)", $game_query );
-   if( mysql_affected_rows() != 1 ) //0 if it had done nothing
-      error('mysql_update_game',"add_time_opponent.update($gid)");
+      //see also confirm.php
+      db_query( "add_time_opponent.update($gid)", $game_query );
+      if( mysql_affected_rows() != 1 ) //0 if it had done nothing
+         error('mysql_update_game',"add_time_opponent.update($gid)");
 
-   db_query( "add_time_opponent.insert_move($gid)", $move_query );
-   if( mysql_affected_rows() != 1 )
-      error('mysql_insert_move',"add_time_opponent.insert_move($gid)");
+      db_query( "add_time_opponent.insert_move($gid)", $move_query );
+      if( mysql_affected_rows() != 1 )
+         error('mysql_insert_move',"add_time_opponent.insert_move($gid)");
 
-   return $add_hours; // success (no-error)
-}
+      return $add_hours; // success (no-error)
+   } //add_time_opponent
+
+} //end 'GameAddTime'
+
+
 
 // returns adjusted komi within limits, also checking for valid limits
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
