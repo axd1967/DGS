@@ -277,6 +277,7 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods,
       $currMaintime, $currByotime, $currByoperiods )
 {
    $result = 0;
+
    switch( (string)$byotype )
    {
       case BYOTYPE_FISCHER:
@@ -284,10 +285,14 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods,
          break;
 
       case BYOTYPE_JAPANESE:
+         // IMPORTANT NOTE: need to handle add-time properly, see also specs/time.txt !!
+         //   byo-yomi partly reset on add-time needs special handling
          if( $currMaintime > 0 ) // not in byo-yomi yet
          {
             $result = $currMaintime;
-            if( $startByotime > 0 ) // non-absolute
+            if( $currByoperiods > 0 ) // can happen after add-time (only for JAP-time)
+               $result += $currByoperiods * $startByotime; // part byo-yomi reset
+            elseif( $startByotime > 0 ) // non-absolute
                $result += $startByoperiods * $startByotime;
          }
          else
@@ -299,6 +304,8 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods,
          break;
 
       case BYOTYPE_CANADIAN:
+         // IMPORTANT NOTE: need to handle add-time properly, see also specs/time.txt !!
+         //    byo-yomi fully resetted on add-time, so no special handling needed
          if( $currMaintime > 0 ) // not in byo-yomi yet
          {
             $result = $currMaintime;
@@ -307,7 +314,7 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods,
          }
          else
          {// in byo-yomi
-            if( $startByoperiods > 0 && $currByoperiods > 0 )
+            if( $startByoperiods > 0 && $currByoperiods > 0 ) // non-absolute
                $result = $currByotime / $currByoperiods;
             else
                $result = 0;
