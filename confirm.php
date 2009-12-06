@@ -705,7 +705,7 @@ function do_add_time( $game_row, $my_id)
       error('confirm_add_time', "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
 
    jump_to("game.php?gid=$gid"
-      . ($add_hours > 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
+      . ($add_hours != 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
       . '#boardInfos');
 }
 
