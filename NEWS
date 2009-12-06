@@ -135,6 +135,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
       * Show number of NEW posts
       * Changed time range for outdated forum posts from 4 to 12 weeks
       * Changed time range for old NEW posts from 2 to 4 weeks
+      * Added read-only forum option
 
       * Forum search:
          * Added count of total found entries of search
@@ -331,6 +332,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
 
    * Changes for Forum moderators:
       * Allow add/edit/preview of post in moderator mode and non-moderator mode alike
+      * Allow writing posts in read-only forums
       * Show approved state of hidden posts in thread overview and forum-search result
       * Added option on forum search page to allow searching for hidden posts
         independent from moderator state
