@@ -253,7 +253,7 @@ function build_rating_diff( $rating_diff )
       }
    }
 
-   $timefmt = TIMEFMT_SHORT | TIMEFMT_ZERO; // use short-time?
+   $timefmt = TIMEFMT_SHORT | TIMEFMT_ZERO;
    $itable = new Table_info('time');
    $itable->add_caption( T_('Time settings and Remaining time') );
    $itable->add_sinfo(
