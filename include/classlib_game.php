@@ -500,10 +500,10 @@ class NextGameOrder
 
    /*!
     * \brief Calculates timeout-date (in ticks) to be stored in Games.TimeOutDate.
+    * \note used for status-games-ordering on remaining-time
     * \param $grow Games-table-row to read time-settings for game
     * \param $to_move BLACK | WHITE
     * \param $is_new_game if true get time-settings from $grow without prefix
-    * \note used for status-games-ordering on remaining-time
     * \return "absolute" date (in ticks) aligned to Clock[ID=CLOCK_TIMELEFT]
     */
    function make_timeout_date( $grow, $to_move, $lastticks, $is_new_game=false )
