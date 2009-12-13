@@ -20,11 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 
-// TODO: discuss system-flags with Erik(!), then implement actions defined for CSYSFLAGS !!
 // system-flags (bitmask for database): 16bit
-define('CSYSFLAG_WAITINGROOM'    ,0x0001); // hide my games in waiting-room from contact
-define('CSYSFLAG_REJECT_MESSAGE' ,0x0002); // don't accept message from contact
-define('CSYSFLAG_REJECT_INVITE'  ,0x0004); // don't accept invitation from contact
+define('CSYSFLAG_WAITINGROOM',    0x0001); // hide my games in waiting-room from contact
+define('CSYSFLAG_REJECT_MESSAGE', 0x0002); // don't accept message from contact
+define('CSYSFLAG_REJECT_INVITE',  0x0004); // don't accept invitation from contact
+define('CSYSFLAG_WR_HIDE_GAMES',  0x0008); // hide games of user in waiting-room (e.g. paid games)
 
 // user-flags (bitmask for database): 32bit
 define('CUSERFLAG_BUDDY',   0x00000001); // contact is good friend of mine
@@ -312,9 +312,10 @@ class Contact
       {
          $arr = array();
          // sysflag => ( form_elem_name, translation )
-         $arr[CSYSFLAG_WAITINGROOM]    = array( 'sfl_waitingroom',    T_('Protect waitingroom games') );
-         $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_message', T_('Reject messages') );
-         $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_invite',  T_('Reject invitations') );
+         $arr[CSYSFLAG_WR_HIDE_GAMES]  = array( 'sfl_wr_hide',    T_('Hide waitingroom games') );
+         $arr[CSYSFLAG_WAITINGROOM]    = array( 'sfl_wr_protect', T_('Protect waitingroom games') );
+         $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_msg', T_('Reject messages') );
+         $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_inv', T_('Reject invitations') );
          $ARR_GLOBALS_CONTACT[$key] = $arr;
       }
 

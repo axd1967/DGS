@@ -780,7 +780,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( $tablestyle == GSET_WAITINGROOM ) // Restrictions
    {
       $ratinglimit_str = echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
-         $MinRatedGames, null, true);
+         $MinRatedGames, null, null, true);
       if( $ratinglimit_str != NO_VALUE )
          $itable->add_sinfo(
             T_('Rating restrictions'), $ratinglimit_str,
@@ -916,10 +916,13 @@ function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $pr
 }
 
 /*!
- * \brief Returns restrictions on rating-range, rated-finished-games, acceptance-mode-same-opponent.
+ * \brief Returns restrictions on rating-range, rated-finished-games, acceptance-mode-same-opponent,
+ *        contact-hidden option.
  * \param $SameOpponent ignore if null
+ * \param $Hidden ignore if null
  */
-function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames, $SameOpponent=null, $short=false )
+function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames,
+                                $SameOpponent=null, $Hidden=null, $short=false )
 {
    $out = array();
 
@@ -948,6 +951,9 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
       elseif( $SameOpponent > 0 )
          $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days
    }
+
+   if( !is_null($Hidden) && $Hidden )
+      $out[] = sprintf( '[%s]', T_('Hidden#wroom') );
 
    return ( count($out) ? implode(', ', $out) : NO_VALUE );
 }

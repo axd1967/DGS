@@ -117,6 +117,7 @@ require_once( 'include/classlib_userconfig.php' );
          array( FC_HIDE => 1 ));
    $wrfilter->init();
    $f_range =& $wrfilter->get_filter(8);
+   $suitable = $f_range->get_value(); // !suitable == all
 
 
    // init table
@@ -212,10 +213,9 @@ require_once( 'include/classlib_userconfig.php' );
       'INNER JOIN Players ON W.uid=Players.ID',
       "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID" );
 
-   // Contacts: make invisible the protected waitingroom games
-   $tmp= CSYSFLAG_WAITINGROOM;
+   // Contacts: make the protected waitingroom games invisible
    $qsql->add_part( SQLP_FIELDS,
-      "IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied" );
+      "IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_WAITINGROOM.") AS C_denied" );
    $qsql->add_part( SQLP_FROM,
       "LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id" );
    $qsql->add_part( SQLP_WHERE,
@@ -223,12 +223,20 @@ require_once( 'include/classlib_userconfig.php' );
    $qsql->add_part( SQLP_HAVING,
       'C_denied=0' );
 
+   // Contacts: hide unwanted user-offers
+   $qsql->add_part( SQLP_FIELDS,
+      "IF(ISNULL(CH.uid),0,CH.SystemFlags & ".CSYSFLAG_WR_HIDE_GAMES.") AS CH_hidden" );
+   $qsql->add_part( SQLP_FROM,
+      "LEFT JOIN Contacts AS CH ON CH.uid=$my_id AND CH.cid=W.uid" );
+   if( $suitable )
+      $qsql->add_part( SQLP_HAVING, 'CH_hidden=0' );
+
    $qsql->merge( $wrtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
    $result = db_query( 'waiting_room.find_waiters', $query );
 
 
-   if( $f_range->get_value() )
+   if( $suitable )
       $title = T_('Suitable waiting games');
    else
       $title = T_('All waiting games');
@@ -312,8 +320,8 @@ require_once( 'include/classlib_userconfig.php' );
          {
             $wrow_strings[ 8] = array( 'text' =>
                echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
-                  $MinRatedGames, $SameOpponent, true) );
-            if( !$goodrating || !$goodmingames || !$goodsameopp )
+                  $MinRatedGames, $SameOpponent, (!$suitable && @$CH_hidden), true) );
+            if( !$goodrating || !$goodmingames || !$goodsameopp || @$CH_hidden )
                $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
@@ -363,6 +371,8 @@ require_once( 'include/classlib_userconfig.php' );
                T_('Rating range (user rating must be between the requested rating range), e.g. "25k-2d"#wroom'),
                T_('Number of rated finished games, e.g. "RG[2]"#wroom'),
                T_('Acceptance mode for challenges from same opponent, e.g. "SO[1x]" or "SO[&gt;7d]"#wroom'),
+               sprintf( T_('Contact-option \'Hide waiting room games\', marked by "%s"'),
+                        sprintf('[%s]', T_('Hidden#wroom')) ),
             );
          $notes = array();
          $notes[] = T_('Column \'Settings\' shows the probably game-color, handicap and komi.')
