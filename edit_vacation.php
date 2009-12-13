@@ -92,7 +92,7 @@ require_once( "include/form_functions.php" );
       elseif( isset($_POST['start_vacation'])
             && $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
       {
-         // LastTicks will handle -(time spend) at the moment of the start of vacations
+         // LastTicks will handle -(time spent) at the moment of the start of vacations
          // in the reference of the ClockUsed by the game
          db_query( 'edit_vacation.update_games',
             "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
