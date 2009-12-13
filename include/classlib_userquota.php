@@ -144,8 +144,9 @@ class UserQuota
       $update_due_date = $NOW - FEATURE_POINTS_INC_DAYS * 86400;
 
       $update_query = 'UPDATE UserQuota AS UQ INNER JOIN Players AS P ON P.ID=UQ.uid SET'
-         . ' UQ.FeaturePoints=IF(UQ.FeaturePoints<'.FEATURE_POINTS_MAX_VALUE.',UQ.FeaturePoints+'
-               .FEATURE_POINTS_INC_VALUE.','.FEATURE_POINTS_MAX_VALUE.')'
+         . ' UQ.FeaturePoints=IF(UQ.FeaturePoints <= '
+               . (FEATURE_POINTS_MAX_VALUE - FEATURE_POINTS_INC_VALUE)
+               . ',UQ.FeaturePoints+'.FEATURE_POINTS_INC_VALUE.','.FEATURE_POINTS_MAX_VALUE.')'
          . ", UQ.FeaturePointsUpdated=FROM_UNIXTIME($NOW)"
          . " WHERE UQ.FeaturePointsUpdated < FROM_UNIXTIME($update_due_date)"
          .   " AND P.LastMove >= FROM_UNIXTIME($lastmoved_date)"
