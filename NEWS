@@ -309,8 +309,6 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * fixed showing of game comments for PASS-, SCORE- and RESIGN-move on SGF-download
    * fixed appending of game comments on SGF-download for running games
    * fixed forum by preserving entered forum-message on missing subject and/or text
-   * fixed Fischer-time capping: no cap for move when time has been added during game
-     exceeding starting main-time
    * fixed default games order of quick-status (show last-moved game first)
 
 
@@ -415,22 +413,31 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * Forum pages:
       * Show note for guest-user on reply-textbox about writing posts
 
+   * Contacts:
+      * Added option to hide waiting-room games of certain user
+
    * Increased size of bio and message text boxes
 
-   * <home people.php>People page</home>:
+   * People page:
       * Changed main FAQ editor
       * Added list of forum moderators
-
-
-   Bug fixes:
-
-   * fixed score-filter in finished games list
 
 
    Code improvements:
 
    * Optimized some database queries and added indexes:
       * Speed up full game list by default restriction on Last move
+
+
+   Bug fixes:
+
+   * fixed score-filter in finished games list
+   * fixed bug (ambiguous column) with sorting my finished games by the Rated column
+   * fixed Fischer-time capping: no cap for move when time has been added during game
+     exceeding starting main-time
+   * fixed wrong clock setting after vacation is finished for games with clock
+     not running on weekends
+   * fixed format of game-id in mail-notifications
 
 
    Administrative changes:
