@@ -1023,18 +1023,25 @@ function verify_email( $debugmsg, $email)
    return $res;
 }
 
+
+// format-option for send_email()
+define('EMAILFMT_SKIP_WORDWRAP', 0x01); // skipping word-wrapping
+
 /**
- * $email may be:
- * - user@example.com
- * - user.com, anotheruser@example.com
- * - User <user@example.com>
- * - User <user@example.com>, Another User <anotheruser@example.com>
- * or an array of those.
- * $subject default => FRIENDLY_LONG_NAME.' notification';
- * $headers default => 'From: '.EMAIL_FROM;
- * no $params default.
+ * \brief Sends email to one or multiple recipients.
+ * \param $email may be:
+ *     - user@example.com
+ *     - user.com, anotheruser@example.com
+ *     - User <user@example.com>
+ *     - User <user@example.com>, Another User <anotheruser@example.com>
+ *   or an array of those.
+ * \param $formatopts format-options for email: 0=none, EMAILFMT_SKIP_WORDWRAP
+ * \param $subject default => FRIENDLY_LONG_NAME.' notification';
+ * \param $headers default => 'From: '.EMAIL_FROM;
+ * \param $params optional command-line paramenters for mail-command (may differ);
+ *     none per default
  **/
-function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params='')
+function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
 {
    if( !$subject )
       $subject = FRIENDLY_LONG_NAME.' notification';
@@ -1043,7 +1050,8 @@ function send_email( $debugmsg, $email, $text, $subject='', $headers='', $params
    $rgx= array("/\r\n/","/\r/");
    $rpl= array("\n","\n");
    $text= preg_replace( $rgx, $rpl, $text);
-   $text= wordwrap( $text, 70, "\n", 1); //TODO make optional for send-mail for halfhourly-cron
+   if( !($formatopts & EMAILFMT_SKIP_WORDWRAP) )
+      $text= wordwrap( $text, 70, "\n", 1);
 
    /**
     * How to break the lines of an email ? CRLF.
@@ -2406,7 +2414,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
          $email= $player_row['Email'];
          if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
-            send_email("fever_vault.email($handle)", $email, $text
+            send_email("fever_vault.email($handle)", $email, 0, $text
                       , FRIENDLY_LONG_NAME.' - '.$subject);
       }
       else //cool enough: reset counters for one period

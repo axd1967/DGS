@@ -109,7 +109,7 @@ Both the old and the new password will also be valid until
 
    verify_email( 'send_new_password', $Email);
 
-   send_email("send_new_password Uid:$pswduser Text:$msg", $Email, $msg);
+   send_email("send_new_password Uid:$pswduser Text:$msg", $Email, 0, $msg);
 
    $msg = urlencode(T_("New password sent!"));
    if( $logged_in )

@@ -114,7 +114,7 @@ require_once( "include/form_functions.php" );
              "Subject: ".strip_tags( $Subject, '') . "\n\n" .
              strip_tags( $Text, '') . "\n";
 
-         $res= send_email( false, $Email, $msg
+         $res= send_email( false, $Email, 0, $msg
                      , FRIENDLY_LONG_NAME.' mail test', $headers);
          if( !$res )
          {
