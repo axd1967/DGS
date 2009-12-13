@@ -22,6 +22,49 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-12-13 juga
+
+   * NEWS:
+   - sync with NEWS of last stable-release (bugfixes)
+
+   * halfhourly_cron.php, NEWS,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - bugfixes on vacation-handling:
+     - fixed wrong clock setting after vacation is finished for games with clock
+       not running on weekends
+     - splitted vacation-days changes for VacationDays and OnVacation in two
+       separate queries avoiding unnecessary updates;
+       also removed restriction on Players.Lastaccess as VacationDays must not
+       be limited by last-access
+     - avoiding long-queries on vacation-fields: replaced restriction
+       on Players.Lastaccess by using added indexes. Players.Lastaccess and
+       vacation-handling are two separate concerns. Not using it as restriction
+       makes it easier to handle, because it would be an unexpected connection;
+       e.g. quick-play-suite does NOT change last-access field,
+       but allows to play without logging in changing last-access.
+-----------
+-- add index for vacation-cron job to increase/decrase vacation-days
+ALTER TABLE Players
+   ADD INDEX OnVacation (OnVacation),
+   ADD INDEX VacationDays (VacationDays) ;
+-----------
+
+   * include/contacts.php (Contact.getContactSystemFlags),
+     include/message_functions.php (echo_game_restrictions, game_info_table),
+     waiting_room.php, NEWS:
+   - added contact-option to "hide waiting-room games" for contact-user
+     - for example to be able to hide unsolicited game-offers asking for payment,
+       see forum-discussion:
+       http://www.dragongoserver.net/forum/read.php?forum=8&thread=26273
+     - bind hidden-games to only-suitable selection
+     - show "[Hidden]" for hidden game-offers in restriction-column
+       if showing all games
+
+   * include/std_functions.php (send_email, is_logged_in),
+     halfhourly_cron.php, scripts/mailtest.php, send_new_password.php:
+   - bugfix: skip 2nd word-wrapping in send_email()-function for sending email
+     with game-links and messages
+
 2009-12-06 juga
 
    * include/time_functions.php (time_remaining_value):
@@ -50,7 +93,7 @@ ChangeLog
    * include/game_functions.php (GameAddTime.add_time, ~.add_time_opponent),
      scripts/tests/GameAddTimeTest.php:
    - reset current byo-yomi period for JAP|CAN-time if in byo-yomi
-   - moved TimeOutDate-handling into add_time_opponent() because of database-load
+   - moved TimeOutDate-handling into add_time_opponent() because of db-loading
    - bugfix: reset byo-yomi time-data to first period if no main-time
    - bugfix: setting TimeOutDate for correct user (uid is the player GIVING time)
    - bugfix: no aggregation of main- with byo-time, byo-yomi-resetting
@@ -65,7 +108,9 @@ ChangeLog
    * include/time_functions.php (TimeFormat.echo_time_remaining),
      scripts/tests/TimeFormatTest.php, code_examples/check_times.php,
      game.php, quick_status.php, show_games.php, status.php:
-   - removed long-text-form for TimeFormat::echo_time_remaning()
+   - removed long-text-form for echo_time_remaining(), because text would have
+     been too long with extra-info and building of text not really thrilling
+     for non-english languages with other grammar
 
    * quick_status.php, NEWS:
    - sync games-order with status-page (by Lastchange ASC)
@@ -96,8 +141,7 @@ ChangeLog
      - use space as default for time-output (instead of HTML-non-breakable-space),
        fixed replacing of spaces to include all spaces
      - added TIMEFMT_ZERO-option to allow zero-value for no-time-left or zero-time
-     - removed long-text-form for echo_time_remaining(), because text was too long
-       with extra-info
+       for display-fix '---' -> '0h'
      - time-formats are described in specs/time.txt and unit-tested
        with scripts/tests/TimeFormatTest.php
    - game-page: enhanced players remaining-time with extra-time info,
@@ -138,7 +182,7 @@ ChangeLog
 
    * error.php:
    - adjusted text for forgotten-password with no_email,
-     added what's needed (user-id + email) to get password-reset via admin
+     added in text what's needed (user-id + email) to get password-reset via admin
 
 2009-11-07 juga
 
@@ -5533,11 +5577,16 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 # (Release in branch DGS-stable-200712)
 
 # History:
-2008-12-14: release of DGS 1.0.14
+2008-12-14: release 1.0.14, mostly to add blocking functions
 2009-01-04: bug fix update (by JUG) as DGS 1.0.14.b
 2009-02-15: update (added PayPal-donation-page) as DGS 1.0.14.c
 2009-02-21: bug fix update (by JUG) as DGS 1.0.14.d (opponents)
 2009-02-22: bug fix update (by JUG) as DGS 1.0.14.e
+2009-05-30: bug fix update (by JUG) as DGS 1.0.14.f
+2009-06-06: uploaded games-export script (by JUG) as DGS 1.0.14.g
+2009-08-08: bug fix update (by JUG) as DGS 1.0.14.h
+2009-11-15: bug fix update (by JUG) as DGS 1.0.14.i
+2009-12-13: uploaded contact-enhancement + bug fix (by JUG) as DGS 1.0.14.j
 
 2008-12-14 juga
 
