@@ -310,6 +310,7 @@ Copyright (C) 2001-2009  Erik Ouchterlony
    * fixed appending of game comments on SGF-download for running games
    * fixed forum by preserving entered forum-message on missing subject and/or text
    * fixed default games order of quick-status (show last-moved game first)
+   * fixes double HTML-escaping of texts on contact-edit
 
 
    Code improvements:

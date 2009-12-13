@@ -136,7 +136,7 @@ require_once( "include/contacts.php" );
    {
       $cform->add_row( array(
          'DESCRIPTION',  T_('Userid'),
-         'TEXTINPUT',    'cuser', 16, 16, textarea_safe($cuser),
+         'TEXTINPUT',    'cuser', 16, 16, $cuser,
          'SUBMITBUTTON', 'contact_check', T_('Check contact') ));
       if( !is_null($errormsg) )
          $cform->add_row( array(
@@ -198,7 +198,7 @@ require_once( "include/contacts.php" );
             $cform->set_area(4);
             $cform->add_row( array(
                   'DESCRIPTION', T_('Notes'),
-                  'TEXTAREA', 'note', 60, 3, textarea_safe($contact->note),
+                  'TEXTAREA', 'note', 60, 3, $contact->note,
                   'BR', 'TEXT', '(' . T_('keep notes short, max. 255 chars') . ')'
                   ));
 
