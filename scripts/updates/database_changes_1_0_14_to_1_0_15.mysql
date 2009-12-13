@@ -1404,3 +1404,9 @@ INSERT INTO Clock SET ID=204,Lastchanged=0 ;
 --    'scripts/fix_games_timeleft.php'
 
 
+-- add index for vacation-cron job to increase/decrase vacation-days
+ALTER TABLE Players
+   ADD INDEX OnVacation (OnVacation),
+   ADD INDEX VacationDays (VacationDays) ;
+
+
