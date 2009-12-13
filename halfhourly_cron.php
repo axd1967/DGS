@@ -246,7 +246,7 @@ if( !$is_down )
 
       $msg .= str_pad('', 47, '-');
 
-      send_email('halfhourly_cron', $Email, $msg);
+      send_email('halfhourly_cron', $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg);
    } //notifications found
    mysql_free_result($result);
 
@@ -279,27 +279,23 @@ if( !$is_down )
 
    $max_vacations = 365.24/12; //1 month [days]
 
-   // IMPORTANT NOTE:
-   // relies on the fact, that to start-vacation Players.Lastaccess is changed
-   // => take into account for future alternative interfaces
-   $vac_maxusercheck = 2 * (int)$max_vacations;
-   $vac_restrict = "Lastaccess > FROM_UNIXTIME($NOW) - INTERVAL $vac_maxusercheck DAY";
-
    $result = db_query( 'halfhourly_cron.onvacation',
       "SELECT ID, ClockUsed FROM Players " .
-      "WHERE $vac_restrict AND OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
+      "WHERE OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
 
    while( $prow = mysql_fetch_assoc( $result ) )
    {
       $uid = $prow['ID'];
       $ClockUsed = $prow['ClockUsed'];
+      $WeekendClockUsed = $ClockUsed + WEEKEND_CLOCK_OFFSET;
 
-      // LastTicks handle -(time spend) at the moment of the start of vacations
-      // inserts this spend time into the (possibly new) ClockUsed by the player
+      // NOTE: LastTicks handle -(time spent) at the moment of the start of vacations
+      //       inserts this spent time into the (possibly new) ClockUsed by the player.
+      // NOTE: use weekendclock on Games.WeekendClock=N, otherwise use normal clock
       db_query( 'edit_vacation.update_games',
          "UPDATE Games"
          ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
-         ." SET Games.ClockUsed=$ClockUsed"
+         ." SET Games.ClockUsed=IF(Games.WeekendClock='Y',$ClockUsed,$WeekendClockUsed)"
             .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
          ." WHERE Games.Status" . IS_RUNNING_GAME
          ." AND Games.ToMove_ID=$uid"
@@ -312,11 +308,16 @@ if( !$is_down )
 
 // Change vacation days
 
-   db_query( 'halfhourly_cron.vacation_days',
-      "UPDATE Players SET OnVacation=GREATEST(0, OnVacation - 1/($this_ticks_per_day))" //1 day after 1 day
-      .",VacationDays=LEAST($max_vacations, VacationDays + 1/(12*$this_ticks_per_day))" //1 day after 12 days
-      ." WHERE $vac_restrict AND VacationDays<$max_vacations OR OnVacation>0" // LIMIT ???
-      );
+   db_query( 'halfhourly_cron.vacation_days.increase', // -1 day after 1 day
+      "UPDATE Players SET "
+      . "OnVacation=GREATEST(0, OnVacation - 1/($this_ticks_per_day))"
+      . " WHERE OnVacation>0" );
+
+   db_query( 'halfhourly_cron.on_vacation.decrease', // +1 day after 12 days
+      "UPDATE Players SET "
+      . "VacationDays=LEAST($max_vacations, VacationDays + 1/(12*$this_ticks_per_day))"
+      . " WHERE VacationDays<$max_vacations" );
+
 
 
    db_query( 'halfhourly_cron.reset_tick',
