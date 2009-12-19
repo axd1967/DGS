@@ -145,6 +145,7 @@ require_once( "features/lib_votes.php" );
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
       $vote_values['0'] = '=0';
 
+      $fform->add_empty_row();
       $fform->add_row( array(
          'DESCRIPTION', T_('Vote'),
          'SELECTBOX',   'points', 1, $vote_values, $points, false,
