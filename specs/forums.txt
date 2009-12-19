@@ -70,6 +70,7 @@ Forum view, shown by "forum/index.php":
      - name is linked to corresponding thread-list
      - "new(x)" is appended to name with number of new posts of forum
    - each forum shows a moderated-state
+   - each forum can show a read-only-state
    - for each hidden forum a "Hidden" is shown if user is allowed to view it
    - each forum shows the number of (non-hidden) threads and posts
    - each forum shows the date and author of the last added post in that forum
@@ -118,7 +119,7 @@ Thread post view (for single thread-id), shown by "forum/read.php":
          - [reject] to reject a post that needs moderating -> hidden post
          - [show] to show a hidden post
          - [hide] to hide a shown post
-     - show input-boxes for reply post if only post
+     - show input-boxes to reply post if it's only one post
      - show linked action [Add reply to inital thread post] at bottom
        to add a reply to initial thread post
      - for moderators also all hidden posts are shown
@@ -299,6 +300,7 @@ TABLE Forums
    #   before being shown to users
    # - Bit-value 0x2 : forum is within admin group (hidden normally)
    # - Bit-value 0x4 : forum is within developer group (hidden normally)
+   # - Bit-value 0x8 : forum is read-only for non-moderators and non-developers
    Options
 
    # entered data
