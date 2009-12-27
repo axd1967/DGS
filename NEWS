@@ -133,6 +133,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
    * <home forum/index.php>Forum pages reworked</home>:
       * Show if there are NEW posts
+      * Show forum-options near forum-title on thread-list and thread-posts-view page
       * Added read-only forum option
       * Changed time range for outdated forum posts from 4 to 12 weeks
       * Removed separation of old and more recent NEW posts

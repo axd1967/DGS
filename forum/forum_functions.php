@@ -90,6 +90,8 @@ class ForumOptions
 {
    /*! \brief Players.ID */
    var $uid;
+   /*! \brief from Players.Adminlevel */
+   var $admin_level;
    /*! \brief true if admin-option ADMOPT_FGROUP_ADMIN for user set [bool] */
    var $view_admin;
    /*! \brief true if admin-option ADMOPT_FGROUP_DEV for user set [bool] */
@@ -99,8 +101,14 @@ class ForumOptions
    function ForumOptions( $urow )
    {
       $this->uid = (int)@$urow['ID'];
+      $this->admin_level = (int)@$urow['admin_level'];
       $this->view_admin = (@$urow['AdminOptions'] & ADMOPT_FGROUP_ADMIN);
       $this->view_dev = (@$urow['AdminOptions'] & ADMOPT_FGROUP_DEV);
+   }
+
+   function is_executive_admin()
+   {
+      return ($this->admin_level & ADMINGROUP_EXECUTIVE);
    }
 
    /*! \brief returns true if forum with given Options can be seen by user. */
@@ -1062,6 +1070,27 @@ class Forum
          . ", options=[{$this->options}]"
          . ', last_post={' . ( is_null($this->last_post) ? '' : $this->last_post->to_string() ) . '}'
          . ", has_new_posts=[{$this->has_new_posts}]";
+   }
+
+   /*!
+    * \brief Returns Forums.Options in text-form.
+    * \param $forum_opts ForumOptions-object for specific user
+    */
+   function build_options_text( $forum_opts, $formatted=true )
+   {
+      $opt_prefix = ' &nbsp;&nbsp;[';
+      $str = '';
+
+      if( $this->options & FORUMOPT_MODERATED )
+         $str .= $opt_prefix . T_('Moderated') . ']';
+      if( $this->options & FORUMOPT_READ_ONLY )
+         $str .= $opt_prefix . T_('Read-Only') . ']';
+      if( $forum_opts->is_executive_admin() && ($this->options & FORUMOPTS_GROUPS_HIDDEN) )
+         $str .= $opt_prefix . T_('Hidden#forum') . ']';
+
+      if( $formatted && $str )
+         $str = SMALL_SPACING . sprintf( "<span class=\"ForumOpts\">%s</span>", $str );
+      return $str;
    }
 
    /*!

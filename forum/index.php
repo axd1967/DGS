@@ -43,12 +43,10 @@ $ThePage = new Page('ForumsList');
    }
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_FORUM_SHOWAUTHOR );
 
-   $f_opts = new ForumOptions( $player_row );
-   $show_fopts = (@$player_row['admin_level'] & ADMINGROUP_EXECUTIVE);
-
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);
    $is_moderator = ($switch_moderator == 1);
 
+   $f_opts = new ForumOptions( $player_row );
    $forums = Forum::load_forum_list( $f_opts );
    //TODO# move into main-menu with updated-check
    //$has_new = ForumRead::load_global_new( $f_opts );
@@ -94,21 +92,12 @@ $ThePage = new Page('ForumsList');
       $new_str = ( $forum->has_new_posts )
          ? sprintf( '<span class="NewFlag">%s</span>', T_('new') )
          : '';
-
-      $opt_prefix = ' &nbsp;&nbsp;[';
-      $fopts_str = '';
-      if( $forum->options & FORUMOPT_MODERATED )
-         $fopts_str .= $opt_prefix . T_('Moderated') . ']';
-      if( $forum->options & FORUMOPT_READ_ONLY )
-         $fopts_str .= $opt_prefix . T_('Read-Only') . ']';
-      if( $show_fopts && ($forum->options & FORUMOPTS_GROUPS_HIDDEN) )
-         $fopts_str .= $opt_prefix . T_('Hidden#forum') . ']';
+      $fopts_str = $forum->build_options_text( $f_opts );
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;
       echo '<tr class=Row1><td class=Name>'
          , '<a href="list.php?forum=', $forum->id, '">', make_html_safe( $forum->name, 'cell'), '</a>'
-         , $new_str
-         , ( $fopts_str ? SMALL_SPACING . "<span class=Moderated>$fopts_str</span>" : '')
+         , $new_str, $fopts_str
          , '</td>'
          , '<td class=ThreadCnt>', $forum->count_threads, '</td>'
          , '<td class=PostCnt>', $forum->count_posts, '</td>'

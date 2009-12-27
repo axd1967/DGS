@@ -97,7 +97,6 @@ function revision_history( $display_forum, $post_id )
       $forum_id = load_forum_id( $thread );
 
    $forum = Forum::load_forum( $forum_id );
-
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "visible($forum_id,$my_id)");
@@ -194,7 +193,9 @@ function revision_history( $display_forum, $post_id )
    $style_str = (is_null($cfg_board))
       ? '' : GobanWriterGfxBoard::style_string( $cfg_board->get_stone_size() );
    start_page($title, true, $logged_in, $player_row, $style_str );
-   echo "<h3 class=Header>$title</h3>\n";
+
+   $fopts_str = $forum->build_options_text( $f_opts );
+   echo "<h3 class=Header>$title$fopts_str</h3>\n";
    if( $DEBUG ) echo "<pre>", print_r($_REQUEST,true), "</pre><br>\n";
 
    $disp_forum->print_moderation_note('99%');

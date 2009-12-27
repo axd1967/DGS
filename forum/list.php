@@ -103,7 +103,9 @@ require_once( 'include/form_functions.php' );
 
    $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
    start_page($title, true, $logged_in, $player_row );
-   echo "<h3 class=Header>$title</h3>\n";
+
+   $fopts_str = $forum->build_options_text( $f_opts );
+   echo "<h3 class=Header>$title$fopts_str</h3>\n";
 
    $disp_forum->print_moderation_note('98%');
    $disp_forum->forum_start_table('List');
