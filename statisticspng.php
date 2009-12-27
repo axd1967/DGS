@@ -60,14 +60,12 @@ require_once( "include/graph.php" );
    if( $cache_it )
    {
       $cache_name= CACHE_FOLDER.'cache_statisticspng'.$activity;
-      clearstatcache();
+      clearstatcache(); //FIXME since PHP5.3.0 with filename
       $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
       if( $tmp >= $NOW )
       {
          if( image_passthru($cache_name, $NOW, $tmp) )
-         {
             exit;
-         }
       }
    }
 
