@@ -31,8 +31,8 @@ require_once( "include/std_functions.php" );
    $my_id = $player_row['ID'];
 
    $system_bookmarks = array(
-      // recent forum posts during the last 7 days
-      'S1' => 'forum/search.php?order=1&sf5=7',
+      // recent forum posts during the last 4 weeks
+      'S1' => 'forum/search.php?order=1&sf5=4&sf5tu=8&sf_init=1',
       // opponents "online" during the last 10 mins
       'S2' => 'opponents.php?ssf4=1&sf14=10&sf14tu=64&sort1=14&desc1=1',
       // users "online" during the last 5 mins
