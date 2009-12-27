@@ -123,6 +123,7 @@ function revision_history( $display_forum, $post_id )
          $preview = true;
          $post_errmsg = $msg;
       }
+   }
 
    $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
    $preview_GoDiagrams = NULL;
