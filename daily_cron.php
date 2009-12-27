@@ -166,17 +166,13 @@ if num_rows==2 {compute differences and checks}
 
 
 
-// Delete old Forumreads: use-case A11 (cleanup) from specs/forums.txt
+// Delete old Forumreads: use-case A08 (cleanup) from specs/forums.txt
 
    $min_date = $NOW - FORUM_SECS_NEW_END;
-
-   db_query( 'daily_cron.cleanup_forum_read.delete_old_post_reads',
-      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID<>0 '
-      . "AND Time < FROM_UNIXTIME($min_date)" );
-
-   db_query( 'daily_cron.cleanup_forum_read.delete_old_thread_newcnt',
-      'DELETE FROM ForumRead WHERE Thread_ID>0 AND Post_ID=0 ' // Post_ID: 0=THPID_NEWCOUNT
-      . "AND Time < FROM_UNIXTIME($min_date)" );
+   db_query( 'daily_cron.cleanup_forum_read.delete_old',
+      "DELETE FROM Forumreads " .
+      "WHERE Thread_ID>0 AND Time < FROM_UNIXTIME($min_date)" .
+         " AND User_ID>0 AND Forum_ID>0" ); // secondary restrictions
 
 
 // Apply recently changed night hours

@@ -27,6 +27,9 @@ Topics:
    1. Introduction and GUI
    2. Classes and Files (comprising and supporting forum)
    3. Development Guide (data model)
+      3.1 Database Schema
+      3.2 NEW-flag management
+      3.3 Update-"Trigger" for use-cases
    4. FAQ
    5. Future Enhancements
    6. Known Bugs
@@ -48,6 +51,7 @@ Topics:
 #   PK           = primary key
 #   user         = normal user (non-admin, non-moderator)
 #   shown posts  = non-hidden post, that has been approved and is not hidden
+#   new posts    = unread posts by certain user
 #
 #   calculated field = value can be calculated from other fields in SAME table
 #   triggered field  = value can be calculated from data from OTHER tables,
@@ -68,7 +72,7 @@ Forum view, shown by "forum/index.php":
      - show only forums, which user is allowed to see (Forums.Options)
    - each forum is described by forum-name and forum-description
      - name is linked to corresponding thread-list
-     - "new(x)" is appended to name with number of new posts of forum
+     - "new" is appended to name if there are new posts in forum
    - each forum shows a moderated-state
    - each forum can show a read-only-state
    - for each hidden forum a "Hidden" is shown if user is allowed to view it
@@ -85,13 +89,14 @@ Thread list view (for single forum-id), shown by "forum/list.php":
    - each thread shows the thread-subject, the author of the initial-thread-post,
      the number of hits and shown posts in the thread
      - subject is linked to corresponding thread-post-list
-     - "new(x)" is appended to subject with number of new posts of thread
+     - "new" is appended to subject if there are new posts in thread
    - each thread shows the date and author of the last added post in that thread
      - the date is linked to the according last-post
      - the author is linked to the according user-info
    - at the bottom a selectbox to control the max-rows is shown
 
 Thread post view (for single thread-id), shown by "forum/read.php":
+   - viewing thread marks new posts as read
    - thread-tree overview shows subject, author and last-change of each thread-post
      - subject is linked to full post-data on same page
      - subject is level-indented up to 40 levels
@@ -101,14 +106,13 @@ Thread post view (for single thread-id), shown by "forum/read.php":
    - thread-post-list shows all non-hidden posts with subject, author,
      creation-date, last-edit-date if edited and the post-text
      - subject is linked to post itself to have the URL to be used as reference
-     - "new" is appended to subject and linked to next new post
+     - "new" is appended to subject if it's a new post and linked to next new post
      - edited is linked to show post revision history
      - author is linked to according user-info
      - footer contains allowed actions:
        - [reply] is linked to add a reply to post
        - [quote] is linked to add a reply to post with quoting reply-text (if allowed in config)
        - [edit] is linked for own post to edit own post
-       - [mark read] is linked to mark post as read
        - arrows for navigation within thread are linked:
          - to top (=initial thread-post), to bottom
          - to previous/next parent
@@ -139,11 +143,8 @@ Forum search, shown by "forum/search.php":
 
 New Posts characteristics:
    - "new" only shown for other users posts, not for own posts
-   - markup in red (CSS NewFlag) for new posts not older than 4 weeks (standard Dragon-CSS)
-   - markup in light-red (CSS OlderNewFlag) for new posts older than 4 weeks
-     but not older than 12 weeks(standard Dragon-CSS)
-   - no markup for posts older than 12 weeks (configured with FORUM_WEEKS_NEW_END),
-     4 weeks (configured with NEW_LEVEL1)
+   - no markup for posts older than 12 weeks (configured with FORUM_WEEKS_NEW_END)
+   - markup in red (CSS NewFlag) for new posts not older than 12 weeks
 
 
 
@@ -160,24 +161,20 @@ structural integrity; especially when introducing new features.
 (U05) Forum Search
 (U06) Add new thread in forum $fid: (a) by myself, (b) by other -> new post $ntid
 (U07) Edit (own) post $pid of thread $tid with saving history -> new post $npid { Subject, Text }
-(U08) Reply to post $pid -> new post $npid
-(U09) Quote-Reply to post $pist -> new post $npid
-(U10) Mark (other) post $pid as read
-(U11) Mark all posts in thread $tid as read
-(U12) Mark checked threads $tidX as read
+(U08) Reply (or Quote-Reply) to post $pid -> new post $npid
+(U09) Mark all posts in thread $tid as read
 
 # Admin tasks
 (A01) Admin-Add new forum -> new forum $nfid
 (A02) Admin-Edit forum $fid { Name, Description, Moderated, SortOrder }
-(A03) Admin-Move thread $tid from forum $sfid to forum $dfid
+(A03) ( NOT-IMPLEMENTED ): Admin-Move thread $tid from forum $sfid to forum $dfid
 (A04) Moderate-Approve (pending-approval) post $pid
 (A05) Moderate-Reject (pending-approval) post $pid
 (A06) Moderate-Hide post $pid
 (A07) Moderate-Show (=unhide) post $pid
-(A08) Moderate-Edit (own & other) post $pid without saving history { Subject, Text }
+(A08) Cleanup old forum-reads
 (A09) Recalc forum-fields
 (A10) Recalc thread-fields
-(A11) Cleanup
 
 
 #-------- (2) Classes and Files -----------------------------------------------
@@ -219,6 +216,9 @@ of the classes, their variables and functions.
    - forum/admin.php:
      Administrative functions and page to add/edit forums.
 
+   - forum/admin_show_forumlog.php:
+     Show forumlogs.
+
 There was a big refactoring in Aug/Sep-2008, which was an attempt to separate
 application logic and the presentational layer (GUI & layout) from database
 operations. This was accomplished by the introduction of classes serving
@@ -239,7 +239,6 @@ step from less OO-oriented code (mostly function-call-sequences passing
 global vars) to concentrate object-behaviour in classes with the goals
 explained above.
 
-#TODO add more details on classes
    class ForumDisplay
       Serving as general container to help in displaying forum content
 
@@ -264,15 +263,15 @@ explained above.
 This section contains the database scheme with a description of all fields
 and all the uses-cases, that can happen in the forums. A further sub-section
 contains the mapping between data model and database schema.
-It's also described what "triggers" are needed to keep the structural
-integrity of the forum data.
+It's also described what "triggers" (not db-triggers) are needed to keep the
+structural integrity of the forum data.
 
 There are container-classes, that could be used to map to the according
 entitities (=database tables), but at the moment (Sep-2008) those are not
 used as pure entities, but more like enhanced DAOs (data access objects)
-within the code; (could be a future refactoring step).
+within the code (could be a future refactoring step).
 
-#-------- Database Schema
+#-------- (3.1) Database Schema
 
 # Lists forum-related database tables with important field to keep structural
 # integrity of forum data.
@@ -287,7 +286,7 @@ TABLE Forums
    ID             - auto-inserted PK forum-id referred as $fid
    LastPost       - Posts.ID of last changed post for this forum
    Updated        - last-updated-date for forum (indicator to recalculate
-                    NEW-count for threads and forums)
+                    NEW-state for threads and forums):
    PostsInForum   - number of shown posts for this forum
    ThreadsInForum - number of shown threads for this forum
 
@@ -318,23 +317,23 @@ TABLE Posts
                     thread-id[ID=Thread_ID or Parent_ID=0] referred as $tid
    Forum_ID       - post of forum Forums.ID
    Thread_ID      - thread-id, Posts.ID $tid of a post, see { ID }
-   LastPost       - Posts.ID of last changed post for this thread,
-                    0 for normal post
-   Lastchanged    - last-changed-date for thread (not for single post)
-   PostsInThread  - number of shown threads for this thread { Thread_ID },
-                    0 for normal post
+
+   # Fields only set for Thread (on initial post) with value=0 for normal post:
+   LastPost       - Posts.ID of last changed post for this thread
+   Lastchanged    - last-changed-date for thread (post-edit is NO change to thread)
+   PostsInThread  - number of shown posts for this thread { Thread_ID }
    Hits           - number of hits (reads/action on thread-posts)
    Updated        - last-updated-date for thread (indicator to recalculate
-                    NEW-count for threads and forums),
-                    0 for normal post
+                    NEW-state for threads and forums)
 
    User_ID        - Players.ID, author of post
    Parent_ID      - Posts.ID of answered/replied post (to build thread-tree)
    AnswerNr       - reply-number for parent-post starting with 1,
                     consecutive number (sort-order) within post-list for
-                    replied post with post-id Posts.Parent_ID
+                    replied post with post-id Posts.Parent_ID,
+                    < 64*64 (=4096) posts maximum in thread
    Depth          - depth of this post within thread-tree, starting with 1,
-                    >1 for normal post
+                    >1 for normal post, < FORUM_MAX_DEPTH (=40)
    PosIndex(80)   - sort-string used to correctly display thread-tree
    Time           - creation-date of post
    Lastedited     - last-edited-date of post
@@ -364,60 +363,68 @@ TABLE Posts
 
 #----- TABLE Forumreads
 
-# Representation of a thread-read-date
-TABLE Forumreads  - old table, replaced by ForumRead
-   User_ID        - Players.ID
-   Thread_ID      - Posts.ID of thread
-   Time datetime  - last read-date of thread
-
-   # triggered fields
-   Time
-
-
-#----- TABLE ForumRead
-
 # Representation of forum-read information
-# - last read-date of post/thread
-# - new-thread counter for forum
-# - new-post counter for thread
-TABLE ForumRead
+# - last read-date of single thread, single forum, all forums
+#   for posts not older than FORUM_WEEKS_NEW_END
+TABLE Forumreads
    User_ID        - Players.ID
    Forum_ID       - Forums.ID
    Thread_ID      - Posts.ID of thread
-   Post_ID        - Posts.ID of post
-   NewCount       - number of NEW threads or NEW posts for a forum or
-                    thread respectively
-   Time           - last read-date for a post or thread,
-                    last NEW-update-date for forum/thread-list
 
-   # (a) Last read-date for single post $pid in thread $tid, stored as:
-   #     NOTE: Time is used, but shows no effect (but code is prepared for
-   #           future to mark edited posts as unread)
-   Forum_ID := $fid, Thread_ID := $tid, Post_ID := $pid
-   NewCount := -1 (db-default), but is irrelevant
-   Time := post read-date
+   Time           - last read-date,
+                    used as date-trigger in combination with Forum/Posts.Updated
+   HasNew         - 0|1, 1=there are new posts in forum(s), 0=no new posts,
+                    used for forum-list and global-forum only,
+                    0 for threads forum-read
 
-   # (b) Last read-date for all posts in thread $tid, stored as:
-   Forum_ID := $fid, Thread_ID := $tid, Post_ID := -1
-   NewCount := -1 (db-default), but is irrelevant
-   Time := thread read-date
+                    This field is updated to current timestamp when something
+                    has been changed for forum[Forums.ID], being an indicator
+                    when forum could have something new and so forum-read for
+                    user must be checked.
 
-   # (c) Count of NEW shown posts for thread $tid, stored as:
-   Forum_ID := $fid, Thread_ID := $tid, Post_ID := 0
-   NewCount := number of NEW shown posts of single thread
-   Time := creation-date for current entry (used as date-trigger with Posts.Updated)
+   # (a) Last read-date for all shown posts in thread $tid:
+   #     post is read when older than FORUM_WEEKS_NEW_END weeks or
+   #     there is a Forumreads-entry with FR.Time >= Posts.Lastchanged
+   User_ID := $uid, Forum_ID := $fid, Thread_ID := $tid
+   Time := MAX(Posts[$tid].Lastchanged) = date of last-read posts,
+           this ensures that posts added during own replying are not going to be "missed"
+   HasNew := 0
 
-   # (d) Count of NEW shown posts for forum $fid, stored as:
-   Forum_ID := $fid, Thread_ID := 0, Post_ID := 0
-   NewCount := number of NEW shown threads of single forum
-   Time := creation-date for current entry (used as date-trigger with Posts.Updated)
+   # (b) Last updated-date for NEW-flags for all threads in forum $fid:
+   User_ID := $uid, Forum_ID := $fid, Thread_ID := 0
+   Time := current timestamp of NEW-flag detection,
+           recalc of NEW-flag is needed when Forum[$fid].Updated > Time
+   HasNew := 0 (if there are no NEW posts in forum),
+             1 (if there are at least one NEW post in forum)
+
+   # (c) Last udpated-date for global NEW-flag for all forums:
+   User_ID := $uid, Forum_ID := 0, Thread_ID := 0
+   Time := current timestamp of NEW-flag detection,
+           recalc of NEW-flag is needed when global_forum_updated-date > Time,
+           global forum-update-date is stored in cached-file (faster than db-access)
+           but needs working CACHE_FOLDER (otherwise global-update always assumed)
+   HasNew := 0 (if there are no NEW posts in all forums),
+             1 (if there are at least one NEW post in all forums)
 
    # NOTES:
-   - Forum_ID and Thread_ID for (a)-(d) are used for easier/faster calculation
-     of forum/thread-NEW-counts
+   - Forum_ID and Thread_ID for (a)-(c) are used for easier/faster calculation
+     of NEW-flag on forum-list and global forum-NEW-flag in main-menu
+
+   - PRIMARY-KEY for table is (Thread_ID,User_ID,Forum_ID):
+     - order for fields in primary-key is optimized for various use-cases
+       for NEW-handling using this table taking best cardinality into account
+       for BTREE-index-structure
+     - cleanup for use-case A08 could need other index or index-order
+       to avoid table-scan, but would need a force index on added Time-index
+       to be useful ... which isn't should a big deal as it is only executed
+       once a day.
+
+   - NEW-flag management uses lazy-loading and lazy-writing
+     - recalculating can be enforced by deleting all Forumreads-table entries
+       for all users with Thread_ID>0
 
    # triggered fields
-   NewCount, Time
+   Time, HasNew
 
 
 #----- TABLE Forumlog
@@ -425,21 +432,22 @@ TABLE ForumRead
 # Representation of actions in forums
 TABLE Forumlog
    ID             - auto-inserted PK
-   User_ID        - FK for user, that performed forum-action
-   Thread_ID      - thread-id, Posts.ID of thread action was performed on
+   User_ID        - FK to Players.ID for user, that performed forum-action
+   Thread_ID      - thread-id, Posts.ID of thread the action was performed on
    Post_ID        - post-id, Posts.ID of post action was performed on
    Time           - action-date
 
    Action         - actions of users:
-                    - new_post : user added new post
-                    - new_pend_post : user added new post needing moderation
-                    - edit_post : user edited post
-                    - edit_pend_post : user edited post needing moderation
-                    actions of moderators:
-                    - approve_post : moderator approved pending post
-                    - reject_post : moderator rejected pending post
-                    - show_post : moderator showed hidden post
-                    - hide_post : moderator hide shown post
+                    - 'new_post' : user added new post
+                    - 'new_pend_post' : user added new post needing moderation
+                    - 'edit_post' : user edited post
+                    - 'edit_pend_post' : user edited post needing moderation
+
+                  - actions of moderators:
+                    - 'approve_post' : moderator approved pending post
+                    - 'reject_post' : moderator rejected pending post
+                    - 'show_post' : moderator showed hidden post
+                    - 'hide_post' : moderator hide shown post
 
    IP             - IP of user, that performed forum-action
 
@@ -502,104 +510,119 @@ Posts($fid,$tid):
       WHERE Thread_ID=$tid AND Approved='Y' AND PosIndex>''
 
 
-#----- Forum-read / New-Counter (stored in ForumRead-TABLE)
-# label: recalc_forum_read
 
-#--- ForumRead (c): thread NEW-post-counter
+#-------- (3.2) NEW-flag management ---------
 
-# check, if recalculation is needed:
-recalc needed, ...
-   (1) if Posts[ID=$tid,Parent_ID=0].Updated > ForumRead.Time; or
-   (2) if ForumRead.NewCount < 0 (reserved for future use)
+* General comments
+   - Posts.Lastedited is NOT influencing NEW-flags on posts/threads/forums
+   - 'new'-flags for global-forum, forum-list and thread-list are independent
+     of each other, i.e. for example, that 'new'-flag for thread-list is NOT needed
+     to calculate 'new'-flag for forum-list or global-forum, nor is 'new'-flag
+     calculations for forum-list needed for global-forum 'new'-flag
 
-   # identify threads, that need recalc
-   # - NOTE: can be optimized while loading threads, before displaying them
-   SELECT IF(ISNULL(FR.Thread_ID),P.ID,0) AS X_Thread_ID
-   FROM Posts AS P
-      -- calculated thread
-      LEFT JOIN ForumRead AS FR ON FR.User_ID=$uid AND FR.Forum_ID=P.Forum_ID
-         AND FR.Thread_ID=P.ID AND FR.Post_ID=0 AND FR.Time >= P.Updated
-   WHERE P.Forum_ID=$fid AND P.Parent_ID=0
-      AND P.Lastchanged > FROM_UNIXTIME($min_readdate)
-   HAVING X_Thread_ID > 0
+* NEW-flags in thread-post view
+   - post is "read" when Posts[$pid].Time is older than FORUM_WEEKS_NEW_END weeks
+   - post is "read" when Forumreads[$uid,$fid,$tid].Time >= Posts[$pid].Time
+   - otherwise post is "unread" (='new')
 
-# Calculate fields for single thread $tid
-ForumRead($uid,$fid,$tid,Post_ID=0,Time=NOW):
-   NewCount := X_NewCount :
-      SELECT SUM(ISNULL(FRT.Thread_ID) & ISNULL(FRP.Post_ID)) AS X_NewCount
-      FROM Posts AS P
-         -- thread read-date
-         LEFT JOIN ForumRead AS FRT ON FRT.User_ID=$uid AND FRT.Forum_ID=$fid
-            AND FRT.Thread_ID=$tid AND FRT.Post_ID=-1 AND FRT.Time >= P.Time
-         -- post read
-         LEFT JOIN ForumRead AS FRP ON FRP.User_ID=$uid AND FRP.Forum_ID=$fid
-            AND FRP.Thread_ID=$tid AND FRP.Post_ID=P.ID AND FRP.Time >= P.Time
-      WHERE P.Forum_ID=$fid AND P.Thread_ID=$tid
-         AND P.Approved='Y'
-         AND P.Time > FROM_UNIXTIME($read_mindate) AND P.User_ID<>$uid
+   - stored for FR:=Forumreads[User_ID=$uid,Forum_ID=$fid,Thread_ID=$tid]:
+
+         FR.HasNew := 0
+         FR.Time   := MAX(Posts[Thread_ID=$tid].Time) [A]
+
+     instead of setting FR.Time to $NOW, [A] ensures,
+     that new posts from other users while replying are not missed
 
 
-#--- ForumRead (d): forum NEW-thread-counter
+* NEW-flags in forum thread-list
+   - thread is "read" when Thread[$tid].Lastchanged is older than FORUM_WEEKS_NEW_END weeks
+   - thread is "read" when Forumreads[$uid,$fid,$tid=0].Time >= Thread[$tid].Lastchanged
+   - otherwise thread contains "unread" posts, therefore has a "new"-flag
 
-# check, if recalculation is needed:
-recalc needed, ...
-   (1) if exists Posts[Forum_ID=$fid,Parent_ID=0].Updated > ForumRead.Time; or
-   (2) if (c) is up-to-date for forum $fid,
-       then if ForumRead[$uid,$fid,$tid,$pid=0].Time > ForumRead.Time; or
-   (3) if ForumRead.NewCount < 0 (reserved for future use)
-
-   # check & identify forum, that needs recalc
-   # - NOTE: after thread-recalc !!
-   # - NOTE: can be optimized while loading forums, before displaying them
-   SELECT IF(ISNULL(FRT.Forum_ID),FRF.Forum_ID,0) AS X_Forum_ID
-   FROM ForumRead as FRF
-      -- calculated forum
-      LEFT JOIN ForumRead AS FRT ON FRT.User_ID=$uid AND FRT.Forum_ID=FRF.Forum_ID
-         AND FRT.Thread_ID>0 AND FRT.Post_ID=0 AND FRT.Time >= FRF.Time
-   WHERE FRF.User_ID=$uid AND FRF.Forum_ID=$fid AND FRF.Thread_ID=0 AND FRF.Post_ID=0
-   HAVING X_Forum_ID > 0
-
-# Calculate fields for single forum $fid
-ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
-   NewCount := X_NewCount :
-      SELECT SUM(FR.NewCount) AS X_NewCount FROM ForumRead AS FR
-      WHERE FR.User_ID=$uid AND FR.Forum_ID=$fid
-         AND FR.Thread_ID>0 AND FR.Post_ID=0 AND FR.NewCount>0
+   - using stored Forumreads[User_ID=$uid,Forum_ID=$fid,Thread_ID=$tid]
+     to calculate 'new'-flag
 
 
+* NEW-flags in forum-list
+   - forum is "new" when there is at least one unread thread in forum
+   - otherwise all posts for forum are "read"
+
+   - using stored Forumreads[User_ID=$uid,Forum_ID=$fid,Thread_ID=*]
+     to calculate 'new'-flag
+   - result of this "new"-check is stored for
+     FR:=Forumreads[User_ID=$uid,Forum_ID=$fid,Thread_ID=0]:
+
+         FR.HasNew := state of "new"-flag (1=set, 0=unset)
+         FR.Time   := $NOW (=date of calculating 'new'-flag-state)
+
+     when according Forums[ID=$fid].Updated > FR.Time, then "recalculate" of 'new'-flag
+     is required.
 
 
-#-------- Update-"Trigger" for use-cases
+* NEW-flags in main-menu (global-forum)
+   - global-forum is "new" when there is at least one unread thread in one of all forums
+   - otherwise all posts in all forums are "read"
+
+   - using stored Forumreads[User_ID=$uid,Forum_ID=*,Thread_ID=*]
+     to calculate 'new'-flag
+   - result of this "new"-check is stored for
+     FR:=Forumreads[User_ID=$uid,Forum_ID=0,Thread_ID=0]:
+
+         FR.HasNew := state of "new"-flag (1=set, 0=unset)
+         FR.Time   := $NOW (=date of calculating 'new'-flag-state)
+
+     when global-forum-updated-date (stored by modification-time of cache-file)
+     CACHEFILE_FORUM_GLOBAL.ModifiedTime > FR.Time,
+     then "recalculate" of 'new'-flag is required.
+
+   - NOTE: storing global 'new'-flag-state in Forumreads has a disadvantage:
+     to show it in the main-menu Forumreads-table-entry need to be loaded
+     for EVERY page-call showing the main-menu.
+
+     => Therefore (later) it would be good to refactor storing the data
+        from FR above in the Players-table.
+
+
+
+#-------- (3.3) Update-"Trigger" for use-cases
+
 # Trigger-fields:
 # - Forums: ID; LastPost, Updated, PostsInForum, ThreadsInForum
 # - Thread/Post: ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
 #   PosIndex, Lastedited, Approved
-# - ForumRead: NewCount, Time
+# - Forumreads: Time, HasNew
+# - global-Forumreads: touch CACHEFILE_FORUM_GLOBAL-file to update
+#   modification-time representing Updated-date
 
 #----- U01: read forum-list
 
-* recalc all threads, then recalc forum
-
-#TODO (describe): if needed, recalc ForumRead(d) + update
+* lazy-init of NEW-flags for non-hidden forums for user
+  - check if there is a NEW post for non-hidden forums of user
+  - write NEW-flags for each showed forum into Forumreads-table,
+    see (b)-description above
+  - see 'forum/forum_functions.php', Forum::load_forum_list(ForumOptions)
 
 #----- U02: read thread-list
 
-* recalc only, what is needed to display current thread-page
-
-#TODO (describe): if needed, recalc ForumRead(c) + update
-
-* before showing thread-list -> recalc thread-reads
-   if not exists ForumRead -> recalc
-   if Thread.lastchanged > ForumRead.Time -> recalc
-   if ForumRead.NewCount < 0 -> recalc
+* lazy-init of NEW-flags for threads of forum for user
+  - check if there is a NEW post within current forum-threads
+  - read NEW-flags for each showed thread from Forumreads-table,
+    see (a)-description above
+  - see 'forum/forum_functions.php', Forum::load_threads($uid,$is_moderator,$maxrows,$offset)
 
 #----- U03: read thread-post-list
 
-* Thread($tid).Hits++
+* if not replying/previewing and at least one post from another user:
+  Thread($tid).Hits++
+
+* if not replying/previewing/moderate-switching
+  - mark thread as read with MAX(viewed Posts.Lastchanged):
+    Forumreads($uid,$fid,$tid).Time=MAX(viewed Posts.Lastchanged), HasNew=0
 
 #----- U04: read post revision history
 
-* Thread($tid).Hits++
+* if not author of post:
+  Thread($tid).Hits++
 
 #----- U05: search forum
 
@@ -623,6 +646,9 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - Forums($fid).PostsInForum++
   - Forums($fid).LastPost=GREATEST(LastPost,$ntid)
   - Forums($fid).Updated=GREATEST(Updated,$NOW)
+  - Global.Updated=$NOW
+
+* write Forumlog-entry
 
 #----- U07: edit own post
 # ID of post must stay the same (for LastPost-fields in other tables)
@@ -634,12 +660,14 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
     Approved='P'
 
-* Thread($tid).Hits++
-
 * if moderated but non-moderated before edit:
   -> similar to A06 (hide-post)
 
-#----- U08: reply post
+* Thread($tid).Hits++
+
+* write Forumlog-entry
+
+#----- U08: reply post + quote-reply post
 # reply to post $spid
 
 * insert Posts:
@@ -658,59 +686,43 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - Thread($tid).LastPost=GREATEST(LastPost,$npid)
   - Thread($tid).Lastchanged=IF(LastPost>$npid,Lastchanged,$npid.Time)
   - Thread($tid).Updated=GREATEST(Updated,$NOW)
-
-* if not moderated:
   - Forums($fid).PostsInForum++
   - Forums($fid).LastPost=GREATEST(LastPost,$npid)
   - Forums($fid).Updated=GREATEST(Updated,$NOW)
+  - Global.Updated=$NOW
 
 * Thread($tid).Hits++
 
-#----- U09: quote-reply post
+* write Forumlog-entry
 
-* same as U08
+#----- U09: mark all threads as read
 
-#----- U10: mark post as read
-
-* insert/update ForumRead:
-  User_ID=$uid, Forum_ID=$fid, Thread_ID=$tid, Post_ID=$pid, Time=$NOW
-
-* Thread($tid).Updated=GREATEST(Updated,$NOW)
-* Forums($fid).Updated=GREATEST(Updated,$NOW)
-
-#----- U11: mark all thread-posts as read
-
-* insert/update ForumRead:
-  User_ID=$uid, Forum_ID=$fid, Thread_ID=$tid, Post_ID=-1, Time=$NOW
-
-* Thread($tid).Updated=GREATEST(Updated,$NOW)
-* Forums($fid).Updated=GREATEST(Updated,$NOW)
-
-#----- U12: mark checked threads as read
-
-* foreach checked thread $ctid:
-  - insert ForumRead:
-    User_ID=$uid, Forum_ID=$fid, Thread_ID=$ctid, Post_ID=-1, Time=$NOW
-  - Thread($ctid).Updated=GREATEST(Updated,$NOW)
+* foreach thread $ctid with unread posts:
+  - insert Forumreads($uid,$fid,$ctid).Time=$NOW, HasNew=0
+  - see 'forum/forum_functions.php', ForumRead::mark_forum_read($markread,$is_moderator)
 
 * Forums($fid).Updated=GREATEST(Updated,$NOW)
+* Global.Updated=$NOW
+
 
 #----- A01: add new forum
 
-* insert Forums with name, description, order, moderated=Y|N
+* insert Forums with name, description, order, options
   (insert with defaults)
 
 #----- A02: edit forum
 
-* update Forums($fid) on name, description, order, moderated
+* update Forums($fid) on name, description, order, options
 
 #----- A03: move thread
 # move thread $tid from forum $sfid to forum $nfid
 #TODO new feature, not implemented yet;
-#     but doubtful to come (probably brings more confusion than bringing order)
+#     but doubtful to come (probably brings more confusion than bringing order).
+#     problem is to cope with race-conditions when user at this moment replies in thread to be moved.
+#
 # also needed for implementation:
-#TODO need URLs (also old), updated independently from forum_id (only on thread_id) !!
-#TODO need old_ID be independent from forum_id -> recalc old_ID
+#TODO need URLs (also old), updated independently from forum_id (only on thread_id) to preserve old links !!
+#TODO need old_ID be independent from forum_id -> recalc old_ID, see 'forum/old_links_redirect.php'
 #TODO (optional) need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
 
 * move thread-posts:
@@ -718,7 +730,7 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - Posts[Thread_ID=$tid].Forum_ID=$nfid
 
 * move forum-reads:
-  - ForumRead[Thread_ID=$tid].Forum_ID=$nfid
+  - Forumreads[Thread_ID=$tid].Forum_ID=$nfid
 
 * update source-forum (Forum_ID=$sfid):
   - Forums.ThreadsInForum--
@@ -735,6 +747,10 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 
 * if admin chooses: send READ-ONCE message to all Thread($tid).User_ID
   informing about thread-move
+
+#FIXME * trigger on thread/forum/gobal
+
+* write Forumlog-entry
 
 #----- A04: approve post
 
@@ -753,8 +769,8 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - Thread($pid).LastPost = $pid
   - Thread($pid).Lastchanged = $dpid
   - Thread($pid).Updated = $dpid
-
   - Forums($fid).Updated=GREATEST(Updated,$dpid)
+  - Global.Updated=$NOW
 
 #----- A05: reject post
 
@@ -767,11 +783,11 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * update Posts($pid).Approved='N'
 
 * Thread($tid).PostsInThread--
-  - $ptid := Thread($tid).PostsInThread
+  $ptid := Thread($tid).PostsInThread
 * Thread($tid).Updated=$NOW (post could be a NEW one)
 
 * if $pid == Thread($tid).LastPost:
-  - if Thread($tid).PostsInThread>0: recalc Thread($tid).LastPost, Lastchanged
+  if Thread($tid).PostsInThread>0: recalc Thread($tid).LastPost, Lastchanged
     else: Thread($tid).LastPost=0
 
 * Forums($fid).PostsInForum--
@@ -779,6 +795,8 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
 * if $ptid == 0: Forums($fid).ThreadsInForum--
 * if $pid == Forums($fid).LastPost:
   - recalc Forums($fid).LastPost
+
+* Global.Updated=$NOW (post could be a NEW one)
 
 #----- A07: show post
 
@@ -797,29 +815,24 @@ ForumRead($uid,$fid,Thread_ID=0,Post_ID=0,Time=NOW):
   - Forums($fid).Updated=GREATEST(Updated,$dpid)
   - if $ltid == Forums($fid).LastPost: Forums($fid).LastPost=$pid
 
+  - Global.Updated=$NOW
+
 * Forums($fid).PostsInForum++
 * if $ptid==1: Forums($fid).ThreadsInForum++
 
-#----- A08: edit post
+#----- A08: cleanup
 
-* no trigger changes
+* delete old Forumreads-entries, to be placed in daily or weekly cron:
+  DELETE FROM Forumreads
+  WHERE Time < $GLOBAL_MIN_READDATE AND Thread_ID>0 AND User_ID>0 AND Forum_ID>0
 
 #----- A09: recalc forum
 
-* see label recalc_forum and recalc_forum_read
+* see label recalc_forum, see 'scripts/forum_consistency.php'
 
 #----- A10: recalc thread
 
-* see label recalc_thread and recalc_forum_read
-
-#----- A11: cleanup
-
-* delete old ForumRead-entries, to be placed in daily or weekly cron:
-  - DELETE FROM ForumRead WHERE
-    Time < $GLOBAL_MIN_READDATE AND Thread_ID>0 AND Post_ID<>0
-
-  - DELETE FROM ForumRead WHERE
-    Time < $GLOBAL_MIN_READDATE AND Thread_ID>0 AND Post_ID=0 AND NewCount=0
+* see label recalc_thread, see 'scripts/forum_consistency.php'
 
 
 #-------- (4) FAQ -------------------------------------------------------------
@@ -838,9 +851,14 @@ developers of DGS. More documentation you will also find in the sources.
 This section outlines some ideas regarding the forums, but are not necessarily
 going to be implemented. Just wanted to write them down somewhere.
 
-* Prio(1): refactor "saves" for forum, check recalcs
+* Prio(1): "Forum tags" to add tags to posts (public or private customizable)
+  - allows to "agree"/"disagree" even realize 'voting'
+  - can mark post as "ad", with certain "<topics>"
+  - tags should be searchable
 
-* Prio(1): handle/fix/create/recalc triggers for forum/thread/posts
+* Prio(?): use-case A03 (moving threads): could be irritating for users when their
+  posts have been moved. Also there are seldom threads solely assignable to ONE
+  forum.
 
 
 #-------- (6) Known Bugs ------------------------------------------------------

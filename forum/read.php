@@ -26,6 +26,7 @@ require_once( 'forum/post.php' );
 
 
 // use-case U04: show revision history of post
+// return: loaded ForumThread
 function revision_history( $display_forum, $post_id )
 {
    $revhist_thread = new ForumThread();
@@ -54,6 +55,8 @@ function revision_history( $display_forum, $post_id )
 
    $display_forum->change_depth( -1 );
    $display_forum->forum_end_table();
+
+   return $revhist_thread;
 } //revision_history
 
 
@@ -72,7 +75,6 @@ function revision_history( $display_forum, $post_id )
    $forum_id = @$_REQUEST['forum']+0;
    $thread = @$_REQUEST['thread']+0;
    $edit = @$_REQUEST['edit']+0;
-   $markread = get_request_arg('markread', ''); // syntax of ForumRead::mark_read
    $rx_term = get_request_arg('xterm', '');
 
    // toggle forumflag
@@ -98,7 +100,7 @@ function revision_history( $display_forum, $post_id )
 
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum->options ) )
-      error('forbidden_forum');
+      error('forbidden_forum', "visible($forum_id,$my_id)");
 
    // for GoDiagrams
    $preview = isset($_POST['preview']);
@@ -112,20 +114,15 @@ function revision_history( $display_forum, $post_id )
       list( $pmsg_id, $msg ) = post_message($player_row, $cfg_board, $forum->options, $thread);
       if( $pmsg_id )
       {// added/edited post successfully
+         // maybe there are new posts during reply, so omit jump to reply, but jump to top instead
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
-            . URI_AMP."sysmsg=".urlencode($msg)."#$pmsg_id");
+            . URI_AMP."sysmsg=".urlencode($msg));
       }
       else
       {// error detected, post not saved -> switch to preview
          $preview = true;
          $post_errmsg = $msg;
       }
-   }
-
-   // prepare users forum-reads
-   $FR = new ForumRead( $my_id, $forum_id, $thread );
-   if( $markread != '' )
-      $FR->mark_read( $markread );
 
    $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
    $preview_GoDiagrams = NULL;
@@ -147,6 +144,7 @@ function revision_history( $display_forum, $post_id )
    $disp_forum->links = LINKPAGE_READ;
    $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH | LINK_REFRESH;
 
+   $modact = '';
    if( $switch_moderator >= 0 )
    {
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
@@ -202,15 +200,17 @@ function revision_history( $display_forum, $post_id )
 
    if( @$_GET['revision_history'] > 0 )
    {
-      revision_history( $disp_forum, @$_GET['revision_history'] );
+      $revh_fthread = revision_history( $disp_forum, @$_GET['revision_history'] );
       end_page();
-      hit_thread( $thread ); // use-case U04
+      if( !$revh_fthread->thread_post->is_author($my_id) )
+         hit_thread( $thread ); // use-case U04
       exit;
    }
 
 
-   // load users forum-reads
-   $FR->load_reads_post();
+   // load user forum-reads
+   $FR = new ForumRead( $my_id, $forum_id, $thread );
+   $FR->load_forum_reads();
 
    // select all posts of current thread
    $qsql = new QuerySQL();
@@ -222,9 +222,12 @@ function revision_history( $display_forum, $post_id )
    $fthread = new ForumThread( $FR );
    $fthread->load_posts( $qsql );
    $fthread->create_navigation_tree();
+   if( !$reply && !$edit && !$preview && !$modact )
+      $FR->mark_thread_read( $thread, $fthread->last_created ); // use-case U01
    // end of DB-stuff
 
-   $post0 = $fthread->thread_post(); // initial post of the thread
+
+   $post0 = $fthread->thread_post; // initial post of the thread
    $is_empty_thread = is_null($post0);
    if( $is_empty_thread )
    {
@@ -241,9 +244,6 @@ function revision_history( $display_forum, $post_id )
 
    // headline2 = no thread tree-overview
    $disp_forum->headline = ( $show_overview ) ? $headline1 : $headline2;
-
-   if( $fthread->count_new > 0 )
-      $disp_forum->links |= LINK_MARK_READ;
    $disp_forum->forum_start_table('Read');
 
    if( $show_overview && !$is_empty_thread )
@@ -257,7 +257,6 @@ function revision_history( $display_forum, $post_id )
    $all_my_posts = true;
    foreach( $fthread->posts as $post )
    {
-      $post->count_new = ($FR->is_read_post($post)) ? 0 : 1;
       $pid = $post->id;
       $uid = $post->author->id;
       $is_my_post = ($uid == $my_id);
@@ -365,7 +364,7 @@ function revision_history( $display_forum, $post_id )
    $disp_forum->forum_end_table();
 
    // use-cases U03: increase thread-hits show thread-"activity"
-   if( !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
+   if( $thread > 0 && !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
       hit_thread( $thread );
 
    end_page();

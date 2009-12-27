@@ -134,10 +134,11 @@ define('SEPLINE', "\n<p><hr>\n");
    echo sprintf( "Check Posts.LastPost,Lastchanged for all %s threads ...<br>\n", count($threads) );
 
    $upd_arr = array();
+   $upd_freads = array(); // fid => 1
    foreach( $threads as $tid => $thread )
    {
       $row = mysql_single_fetch( "forum_consistency.read_thread.LastPost_Lastchanged($tid)",
-         "SELECT ID AS X_LastPost, UNIX_TIMESTAMP(Time) AS X_Lastchanged " .
+         "SELECT ID AS X_LastPost, Forum_ID, UNIX_TIMESTAMP(Time) AS X_Lastchanged " .
          "FROM Posts " .
          "WHERE Thread_ID='$tid' AND Approved='Y' AND PosIndex>'' " .
          "ORDER BY Time DESC LIMIT 1" );
@@ -146,8 +147,21 @@ define('SEPLINE', "\n<p><hr>\n");
       {
          $upd_arr[] = "UPDATE Posts SET LastPost={$row['X_LastPost']}, " .
             "Lastchanged=FROM_UNIXTIME({$row['X_Lastchanged']}) WHERE ID='$tid' LIMIT 1";
+
+         if( $row['X_Lastchanged'] != $thread['X_Lastchanged'] )
+            $upd_freads[$row['Forum_ID']] = 1;
       }
    }
+
+   if( count($upd_freads) )
+   {
+      foreach( $upd_freads as $fid => $tmp )
+         $upd_arr[] = "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
+            . "WHERE ID=$fid LIMIT 1";
+
+      update_forum_global( $do_it, $NOW );
+   }
+
    $cnt_err += count($upd_arr);
 
    do_updates( 'forum_consistency.update_thread.LastPost_Lastchanged', $upd_arr, $do_it );
@@ -181,28 +195,26 @@ define('SEPLINE', "\n<p><hr>\n");
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - Threads Done.";
 
-//----------------- Fix all Updates for NEW-count for threads
+//----------------- Fix all Updates for NEW-flag for global/forums/threads
 
    $begin = getmicrotime();
    echo SEPLINE;
+   echo "Cleanup for NEW-entries for forums ...<br>\n";
 
+   // cleanup Forumreads forcing to re-create all forum-reads (also global Forum_ID=0)
+   // for updated Posts for all users and all forums
    $upd_arr = array();
-   echo "Check Threads Updated-fields for NEW-counts ...<br>\n";
+   $upd_arr[] = "DELETE FROM Forumreads WHERE Thread_ID=0";
 
-   $query_where =
-      "WHERE ((Lastchanged>0 AND Lastchanged > Updated) OR (Updated=0)) AND " .
-         "Thread_ID>0 AND Parent_ID=0 AND Approved='Y'";
-   $row = mysql_single_fetch( 'forum_consistency.threads.read_updated',
-      "SELECT COUNT(*) AS X_Count " .
-      "FROM Posts $query_where LIMIT 1" );
-   if( $row && ($row['X_Count'] > 0) )
-   {
-      $cnt = $row['X_Count'];
-      $upd_arr[] = "UPDATE Posts SET Updated=GREATEST(Updated,Lastchanged) $query_where LIMIT $cnt";
-      $cnt_err += $cnt;
-   }
+   if( $withnew )
+      update_forum_global( $do_it, $NOW );
 
-   do_updates( 'forum_consistency.threads.update_updated', $upd_arr, ($do_it && $withnew) );
+   if( !$withnew )
+      echo "... will be SKIPPED!<br>\n(need NEW-fix switch to be executed) !!<br>\n";
+   do_updates( 'forum_consistency.forum.forum_reads.delete', $upd_arr, ($do_it && $withnew) );
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - NEW-cleanup for forums Done.";
 
 //----------------- Check posts integrity (author)
 
@@ -241,6 +253,13 @@ define('SEPLINE', "\n<p><hr>\n");
    end_html();
 }
 
+
+function update_forum_global( $do_it, $time )
+{
+   if( !$do_it ) echo "... SKIP ";
+   echo "... triggered forum global update with ForumRead::trigger_recalc_global()<br>\n";
+   if( $do_it ) ForumRead::trigger_recalc_global( $time );
+}
 
 function do_updates( $dbgmsg, $upd_arr, $do_it )
 {

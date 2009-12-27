@@ -496,13 +496,10 @@ CREATE TABLE ForumRead (
 ) ENGINE=MyISAM ;
 
 -- migrate Forumreads- to ForumRead-table
+DELETE FROM Forumreads WHERE Thread_ID=0 ;
 INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
    SELECT FR.User_ID,P.Forum_ID,FR.Thread_ID,-1,-1,FR.Time
       FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID ;
-
--- later can drop old forum-reads-table -> CLEANUP
-DROP TABLE Forumreads ;
-
 
 -- configure forum-GUI for user, manage hidden forum-config for user
 ALTER TABLE `Players`
@@ -1124,7 +1121,7 @@ ANALYZE TABLE Bio ;
 ANALYZE TABLE Contacts ;
 ANALYZE TABLE Errorlog ;
 ANALYZE TABLE Folders ;
-ANALYZE TABLE ForumRead ;
+ANALYZE TABLE Forumreads ;
 ANALYZE TABLE Forumlog ;
 ANALYZE TABLE Forums ;
 ANALYZE TABLE Games ;
@@ -1408,5 +1405,30 @@ INSERT INTO Clock SET ID=204,Lastchanged=0 ;
 ALTER TABLE Players
    ADD INDEX OnVacation (OnVacation),
    ADD INDEX VacationDays (VacationDays) ;
+
+
+-- changed forum to backport to enhanced Forumreads-table, optimizing index
+ALTER TABLE Forumreads
+   DROP PRIMARY KEY ;
+ALTER TABLE Forumreads
+   ADD Forum_ID smallint NOT NULL DEFAULT '0' AFTER User_ID ;
+ALTER TABLE Forumreads
+   ADD PRIMARY KEY (Thread_ID,User_ID,Forum_ID) ;
+ANALYZE TABLE Forumreads ;
+
+-- [not-null] cleanup Forumreads.Time datetime default NULL -> no default -> NOT NULL
+ALTER TABLE Forumreads
+   CHANGE Time Time datetime NOT NULL ;
+
+-- NEW-flag for forum-list
+ALTER TABLE Forumreads
+   ADD HasNew tinyint NOT NULL DEFAULT '0' ;
+
+-- discard unused table after backport-migration to former Forumreads-table
+DROP TABLE ForumRead ;
+
+-- removed unused field for (first-trial) aggregated global-forum NEW-flag
+ALTER TABLE Players
+   DROP COLUMN CountForumNew ;
 
 

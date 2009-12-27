@@ -35,6 +35,7 @@ require_once( 'include/form_functions.php' );
 
    $forum_id = max(0, (int)get_request_arg('forum'));
    $offset = max(0, (int)get_request_arg('offset'));
+   $markread = (int)get_request_arg('markread', ''); // syntax: time
    unset( $_GET['forum_showrows'] );
 
    // show max-rows
@@ -61,12 +62,16 @@ require_once( 'include/form_functions.php' );
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
-   $show_rows = $forum->load_threads( $my_id, $is_moderator, $maxrows, $offset );
 
-   // recalc NEWs
-   $FR = new ForumRead( $my_id );
-   $FR->recalc_thread_reads( $forum->threads );
+   if( $markread > 0 ) // use-case U09
+   {
+      $FR = new ForumRead( $my_id, $forum_id );
+      $FR->mark_forum_read( $markread, $is_moderator );
+   }
+
+   $show_rows = $forum->load_threads( $my_id, $is_moderator, $maxrows, $offset );
    // end of DB-stuff
+
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id );
    $disp_forum->offset = $offset;
@@ -81,6 +86,8 @@ require_once( 'include/form_functions.php' );
       $disp_forum->links |= LINK_NEXT_PAGE;
    if( $switch_moderator >= 0 )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
+   if( $forum->has_new_posts_in_threads() )
+      $disp_forum->links |= LINK_MARK_READ;
 
    $head_lastpost = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
       T_('Last post'),
@@ -109,8 +116,7 @@ require_once( 'include/form_functions.php' );
          $c=($c % LIST_ROWS_MODULO)+1;
          $lpost = $thread->last_post;
 
-         $newstr = $disp_forum->get_new_string( NEWMODE_NEWCOUNT | NEWMODE_NO_LINK,
-            $thread->count_new );
+         $newstr = ($thread->has_new_posts) ? $disp_forum->get_new_string(NEWMODE_NO_LINK) : '';
          $subject = make_html_safe( $thread->subject, SUBJECT_HTML);
          $author = $thread->author->user_reference();
 

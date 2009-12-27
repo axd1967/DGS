@@ -265,6 +265,16 @@ function mysql_single_col( $debugmsg, $query, $keyed=false)
    return false;
 }
 
+// returns true, if at least $expected_rows have been found
+function mysql_exists_row( $debugmsg, $query, $expected_rows=1 )
+{
+   $dbg_str = ( !is_string($debugmsg) ) ? false : $debugmsg.'.exists_row';
+   $result = db_query( $dbg_str, $query);
+   $exists_row = ( mysql_num_rows($result) >= $expected_rows );
+   mysql_free_result($result);
+   return $exists_row;
+}
+
 // Returns true, if encrypted passwords matches the given_passwd
 // Returns SQL-encryption-func in method-var used to encrypt password:
 //    PASSWORD, OLD_PASSWORD, SHA1, MD5

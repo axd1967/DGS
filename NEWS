@@ -3,7 +3,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2009-???-??] - DGS 1.0.15  (Tournaments, Game settings, Users, Forum, Voting)
+#release DGS_1_0_15 [2010-???-??] - DGS 1.0.15  (Tournaments, Game settings, Users, Forum, Voting)
 
    New features and Major changes:
 
@@ -132,16 +132,16 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
 
    * <home forum/index.php>Forum pages reworked</home>:
-      * Show number of NEW posts
-      * Changed time range for outdated forum posts from 4 to 12 weeks
-      * Changed time range for old NEW posts from 2 to 4 weeks
+      * Show if there are NEW posts
       * Added read-only forum option
+      * Changed time range for outdated forum posts from 4 to 12 weeks
+      * Removed separation of old and more recent NEW posts
 
-      * Forum search:
+      * <home forum/search.php>Forum search</home>:
          * Added count of total found entries of search
-         * Added search for hidden messages
+         * Added search for hidden messages for forum-moderators
 
-      * Forum list:
+      * <home forum/index.php>Forum list</home>:
          * Indication for NEW posts in forum list
          * Added thread count column
          * Added link on date to view last post
@@ -150,27 +150,25 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Thread list:
          * Added hits column showing activity in a thread
          * Added refresh link in forum-bars to reload thread list
+         * Added 'Mark all read'-link to mark all posts in thread as read
          * Added link on date to view last post
          * Added author of last post (with show/hide toggle in header line)
          * Added max rows selectbox to control number of shown threads
-         * Removed link on subject and NEW-text to first new thread
+         * Removed link on subject and NEW-text to first new thread into thread posts view
 
       * Thread posts view:
          * Force reply: User has to choose which post to reply on except for one-post threads,
            Added "Add reply" link at end of thread view to reply to initial thread-post
-         * Added tree-like overview of all posts with
+         * Added optional tree-like overview of all posts with
             * subjects (truncated if too long), author and last changed date
             * own posts in dark-blue and bold font
-            * linked NEW markers
+            * linked NEW markers for unread posts
             * approved state of own hidden posts: H=hidden, M=needs-moderation
             * show/hide toggle in header lines
          * Added navigation links on every post to page top and bottom,
            previous and next post, previous parent and next parent post,
            and to first answer of post
-         * Viewing thread posts doesn't mark thread as read
-            * This fixed "missing" new posts while replying and own new posts
-            * User can mark single posts as read: 'mark read'-link on new post
-            * User can mark all posts as read: 'mark all read'-link
+         * Fixed viewing of "missing" new posts while replying
          * Added refresh link in forum-bars to reload thread posts view
          * Mark Dragon executives with admin-icon (<image admin.gif>)
 
@@ -310,7 +308,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
    * fixed appending of game comments on SGF-download for running games
    * fixed forum by preserving entered forum-message on missing subject and/or text
    * fixed default games order of quick-status (show last-moved game first)
-   * fixes double HTML-escaping of texts on contact-edit
+   * fixed double HTML-escaping of texts on contact-edit
+   * fixed "missing" new posts while replying (forum-read data corrected)
 
 
    Code improvements:

@@ -269,9 +269,8 @@ function get_tables( $database)
             'FeatureList',
             'FeatureVote',
             'Folders',
-            'ForumRead',
             'Forumlog',
-            'Forumreads', //FIXME not used since DGS 1.0.15-release
+            'Forumreads',
             'Forums',
             'Games',
             'GamesNotes',

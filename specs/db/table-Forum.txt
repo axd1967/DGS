@@ -1,5 +1,5 @@
 ###
-### Description of mysql tables:  Forums, Posts, ForumRead, Forumlog
+### Description of mysql tables:  Forums, Posts, Forumreads, Forumlog
 ###
 
 NOTE: All forum tables and refactoring on the forums are described in
