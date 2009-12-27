@@ -31,6 +31,8 @@ require_once( 'include/std_classes.php' );
 require_once( "include/form_functions.php" );
 require_once( 'include/classlib_user.php' );
 require_once( 'include/classlib_goban.php' );
+require_once( 'forum/class_forum_options.php' );
+require_once( 'forum/class_forum_read.php' );
 //if( ALLOW_GO_DIAGRAMS ) require_once( "include/GoDiagram.php" );
 
 
@@ -73,75 +75,6 @@ define('FORUMLOGACT_REJECT_POST',   'reject_post');
 define('FORUMLOGACT_SHOW_POST',     'show_post');
 define('FORUMLOGACT_HIDE_POST',     'hide_post');
 
-// Forums.Options
-define('FORUMOPT_MODERATED',     0x0001);
-define('FORUMOPT_GROUP_ADMIN',   0x0002); // forum is of admin group
-define('FORUMOPT_GROUP_DEV',     0x0004); // forum is of develop/advisor group
-define('FORUMOPT_READ_ONLY',     0x0008);
-// mask for normally hidden forums
-define('FORUMOPTS_GROUPS_HIDDEN', FORUMOPT_GROUP_ADMIN|FORUMOPT_GROUP_DEV);
-
-
- /*!
-  * \class ForumOptions
-  * \brief Class to handle Forums.Options and user allowed to view hidden forums.
-  */
-class ForumOptions
-{
-   /*! \brief Players.ID */
-   var $uid;
-   /*! \brief from Players.Adminlevel */
-   var $admin_level;
-   /*! \brief true if admin-option ADMOPT_FGROUP_ADMIN for user set [bool] */
-   var $view_admin;
-   /*! \brief true if admin-option ADMOPT_FGROUP_DEV for user set [bool] */
-   var $view_dev;
-
-   /*! \brief Constructs ForumOptions from specified player_row. */
-   function ForumOptions( $urow )
-   {
-      $this->uid = (int)@$urow['ID'];
-      $this->admin_level = (int)@$urow['admin_level'];
-      $this->view_admin = (@$urow['AdminOptions'] & ADMOPT_FGROUP_ADMIN);
-      $this->view_dev = (@$urow['AdminOptions'] & ADMOPT_FGROUP_DEV);
-   }
-
-   function is_executive_admin()
-   {
-      return ($this->admin_level & ADMINGROUP_EXECUTIVE);
-   }
-
-   /*! \brief returns true if forum with given Options can be seen by user. */
-   function is_visible_forum( $fopts )
-   {
-      $show = true;
-
-      // hidden forums has precedence (overwriting other forum-visibility)
-      if( $fopts & FORUMOPTS_GROUPS_HIDDEN )
-      {// is hidden forum
-         if( ($fopts & FORUMOPT_GROUP_DEV) && $this->view_dev )
-            $show = true;
-         elseif( ($fopts & FORUMOPT_GROUP_ADMIN) && $this->view_admin )
-            $show = true;
-         else
-            $show = false;
-      }
-
-      return $show;
-   }
-
-   /*! \brief Returns bit-mask to use on Forum.Options to select only matching forums for user. */
-   function build_db_options_exclude()
-   {
-      $mask = 0x8FFFFFFF; // PHP only 31-bit unsigned
-      if( $this->view_admin )
-         $mask &= ~FORUMOPT_GROUP_ADMIN;
-      if( $this->view_dev )
-         $mask &= ~FORUMOPT_GROUP_DEV;
-      return $mask;
-   }
-
-} // end of 'ForumOptions'
 
 
 /* \brief Adds entry into Forumlog */
@@ -1458,7 +1391,7 @@ class ForumThread
          $post = ForumPost::new_from_row( $row );
          if( $post->parent_id == 0 )
             $this->thread_post = $post;
-         $post->is_read = $this->forum_read->is_post_read($post);
+         $post->is_read = $post->is_post_read( $this->forum_read );
          if( $post->created > $this->last_created )
             $this->last_created = $post->created;
 
@@ -1811,6 +1744,29 @@ class ForumPost
          . "score=[{$this->score}]";
    }
 
+   /*!
+    * \brief Returns true, if user has read specified ForumPost,
+    *        i.e. own post, newer than FORUM_WEEKS_NEW_END or has newer thread-read-date
+    * \param $fread ForumRead-object pre-loaded for post
+    */
+   function is_post_read( $fread )
+   {
+      // own posts are always read
+      if( $this->author->id == $fread->uid )
+         return true;
+
+      $chkdate = $this->created; // check against post creation-date
+
+      // mark read, if date passed global read-date
+      if( $fread->min_date >= $chkdate )
+         return true;
+
+      // check if mark as read, if date passed thread read-date
+      if( $fread->has_newer_read_date($chkdate, $fread->fid, $fread->tid) )
+         return true;
+
+      return false; // unread = new
+   }
 
    // ---------- Static Class functions ----------------------------
 
@@ -1923,363 +1879,5 @@ class ForumUser
    }
 
 } // end of 'ForumUser'
-
-
-
- /*!
-  * \class ForumRead
-  *
-  * \brief Class to help with handling forum-reads and cope with 'new'-flag.
-  * NOTE: Dates are stored in UNIX-time
-  * NOTE: expected row-fields: Forum_ID, Thread_ID, X_Time, HasNew
-  * NOTE: need combined index on IDs for correct working of update-funcs
-  */
-
-define('CACHEFILE_FORUM_GLOBAL', CACHE_FOLDER.'cache_forum_global_updated');
-
-class ForumRead
-{
-   var $uid;
-   var $fid;
-   var $tid;
-   var $reads; // [ "fid,tid" => unix-time ]
-   var $min_date; // posts older (or equal) than min_date are considered as read
-
-   /*! \brief Constructs a ForumUser with specified args. */
-   function ForumRead( $user_id, $forum_id=0, $thread_id=0 )
-   {
-      $this->uid = $user_id;
-      $this->fid = $forum_id;
-      $this->tid = $thread_id;
-      $this->reads = array();
-      $this->min_date = ForumRead::get_min_date();
-   }
-
-   /*!
-    * \brief Returns true, if specified check-date is older than read-date
-    *        stored for specified forum and thread.
-    *        So is a read (and no "new") post.
-    */
-   function has_newer_read_date( $chkdate, $forum_id, $thread_id )
-   {
-      $time = (int)@$this->reads["$forum_id,$thread_id"];
-      return ( $time >= $chkdate );
-   }
-
-   /*! \brief Loads forum-reads for thread-post view into this ForumRead-object. */
-   function load_forum_reads()
-   {
-      $qsql = ForumRead::build_query_sql( $this->uid );
-      $qsql->add_part( SQLP_WHERE,
-         'Forum_ID='.$this->fid,
-         'Thread_ID='.$this->tid );
-      $query = $qsql->get_select();
-      $result = db_query( "ForumRead.load_forum_reads({$this->uid},{$this->fid},{$this->tid})", $query );
-
-      while( $row = mysql_fetch_array( $result ) )
-      {
-         $key = $row['Forum_ID'] . ',' . $row['Thread_ID'];
-         $this->reads[$key] = $row['X_Time'];
-      }
-      mysql_free_result($result);
-   }
-
-   /*!
-    * \brief Returns true, if user has read specified ForumPost,
-    *        i.e. own post, newer than FORUM_WEEKS_NEW_END or has newer thread-read-date
-    */
-   function is_post_read( $post )
-   {
-      // own posts are always read
-      if( $post->author->id == $this->uid )
-         return true;
-
-      $chkdate = $post->created; // check against post creation-date
-
-      // mark read, if date passed global read-date
-      if( $this->min_date >= $chkdate )
-         return true;
-
-      // mark read, if date passed thread read-date
-      if( $this->has_newer_read_date( $chkdate, $this->fid, $this->tid ) )
-         return true;
-
-      return false; // unread = new
-   }
-
-   /*! \brief Replaces Forumreads-db-entry with time and new-flag for specified fid/tid-key. */
-   function replace_row_forumread( $dbgmsg, $fid, $tid, $time, $has_new=false )
-   {
-      // IMPORTANT NOTE:
-      // - 'INSERT .. ON DUPLICATE UPDATE' need at least 5.0.38 for replication-bugfix,
-      //   can also be used for multi-row inserts.
-      // - REPLACE is slower as it would be a combined DELETE + INSERT
-      //   with full index-updating on both steps.
-      $new_val = ($has_new) ? 1 : 0;
-      db_query( $dbgmsg."({$this->uid},$fid,$tid)",
-         "INSERT INTO Forumreads (User_ID,Forum_ID,Thread_ID,Time,HasNew) "
-            . "VALUES ({$this->uid},$fid,$tid,FROM_UNIXTIME($time),$new_val) "
-            . "ON DUPLICATE KEY UPDATE Time=VALUES(Time), HasNew=VALUES(HasNew)" );
-   }
-
-   /*!
-    * \brief Marks posts in thread as read that are older than specified (read-)time.
-    * \see specs/forums.txt (use-case U09)
-    */
-   function mark_thread_read( $thread_id, $mark_time )
-   {
-      if( $this->fid > 0 && $thread_id > 0 && $mark_time >= $this->min_date )
-      {
-         $this->replace_row_forumread( "ForumRead.mark_thread_read",
-            $this->fid, $thread_id, $mark_time );
-
-         global $NOW;
-         ForumRead::trigger_recalc_forum( $this->fid, $NOW );
-         ForumRead::trigger_recalc_global( $NOW );
-      }
-   }
-
-   /*! \brief Marks threads in forum-list as read that are older than specified (read-)time. */
-   function mark_forum_read( $mark_time, $is_moderator )
-   {
-      if( $this->fid <= 0 || $mark_time < $this->min_date )
-         return;
-
-      $min_date = ForumRead::get_min_date();
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'P.Thread_ID',
-         'UNIX_TIMESTAMP(P.Lastchanged) AS X_Lastchanged',
-         'IF(ISNULL(FR.User_ID),0,UNIX_TIMESTAMP(FR.Time)) AS FR_X_Lastread' );
-      $qsql->add_part( SQLP_FROM,
-         'Posts AS P',
-         "LEFT JOIN Forumreads AS FR ON FR.User_ID='{$this->uid}' AND FR.Forum_ID='{$this->fid}' "
-            . 'AND FR.Thread_ID=P.Thread_ID' );
-      $qsql->add_part( SQLP_WHERE,
-         "P.Forum_ID=".$this->fid,
-         'P.Parent_ID=0', 'P.Thread_ID=P.ID', //=thread (better query with thread=id for Forumreads)
-         "P.Lastchanged >= FROM_UNIXTIME($min_date)" );
-      if( !$is_moderator )
-         $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
-      $query = $qsql->get_select();
-      $result = db_query( "ForumRead.mark_forum_read.load({$this->uid},{$this->fid})", $query );
-
-      $upd_arr = array();
-      $ins_arr = array();
-      while( $row = mysql_fetch_array( $result ) )
-      {
-         if( $row['FR_X_Lastread'] > 0 )
-         {
-            if( $row['X_Lastchanged'] > $row['FR_X_Lastread'] )
-               $upd_arr[] = $row['Thread_ID'];
-         }
-         else
-            $ins_arr[] = $row['Thread_ID'];
-      }
-      mysql_free_result($result);
-
-      if( count($upd_arr) ) // update existing Forumreads-entries
-      {
-         $upd_threads = implode(',', $upd_arr);
-         db_query( "ForumRead.mark_forum_read.update(({$this->uid},{$this->fid})",
-            "UPDATE Forumreads SET Time=GREATEST(Time,FROM_UNIXTIME($mark_time)) " .
-            "WHERE User_ID={$this->uid} AND Forum_ID={$this->fid} AND Thread_ID>0 AND " .
-               "Thread_ID IN ($upd_threads)" );
-      }
-
-      if( count($ins_arr) ) // insert new Forumreads-entries for NEW-threads
-      {
-         $query = "INSERT INTO Forumreads (User_ID,Forum_ID,Thread_ID,Time) VALUES ";
-
-         $first = true;
-         foreach( $ins_arr as $thread_id )
-         {
-            if( !$first ) $query .= ', ';
-            $first = false;
-            $query .= "({$this->uid},{$this->fid},$thread_id,FROM_UNIXTIME($mark_time))";
-         }
-
-         // use ON-DUPLICATE to avoid race-condiditions
-         db_query( "ForumRead.mark_forum_read.insert(({$this->uid},{$this->fid})",
-            $query . " ON DUPLICATE KEY UPDATE Time=GREATEST(Time,VALUES(Time))" );
-      }
-
-      global $NOW;
-      ForumRead::trigger_recalc_forum( $this->fid, $NOW );
-      ForumRead::trigger_recalc_global( $NOW );
-   } //mark_forum_read
-
-   /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
-   {
-      $reads = '';
-      foreach( $this->reads as $k => $time )
-         $reads .= sprintf( "\n{ [$k]=[%s] },", date('Y-m-d H:i:s', $time));
-      return "ForumRead(uid={$this->uid},fid={$this->fid},tid={$this->tid}): "
-         . "min_date=[{$this->min_date}], "
-         . $reads;
-   }
-
-
-   // ---------- Static Class functions ----------------------------
-
-   /*! \brief Builds basic QuerySQL to load forum-reads. */
-   function build_query_sql( $uid )
-   {
-      // Forumreads: User_ID, Forum_ID, Thread_ID, Time
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS, 'FR.*', 'UNIX_TIMESTAMP(FR.Time) AS X_Time' );
-      $qsql->add_part( SQLP_FROM, 'Forumreads AS FR' );
-      $qsql->add_part( SQLP_WHERE, "FR.User_ID='$uid'" );
-      return $qsql;
-   }
-
-   /*!
-    * \brief Returns true, if there is at least one new post in all forums or in specific forum.
-    * \param $forum_id if 0 check for all forums, otherwise check for given forum
-    */
-   function has_new_posts_in_forums( $uid, $forum_id )
-   {
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'P.Lastchanged',
-         "IF(ISNULL(FR.User_ID),'0000-00-00 00:00:00',FR.Time) AS FR_Lastread" );
-      $qsql->add_part( SQLP_FROM,
-         "Posts AS P",
-         "LEFT JOIN Forumreads AS FR " .
-            "ON FR.Forum_ID=P.Forum_ID AND FR.Thread_ID=P.Thread_ID AND FR.User_ID='$uid'" );
-      $qsql->add_part( SQLP_WHERE,
-         'P.ID=P.Thread_ID',
-         'P.Parent_ID=0', // redundant, but sometimes query is faster (intersect-index-merge)
-         'P.PostsInThread>0',
-         'P.Lastchanged >= FROM_UNIXTIME('.ForumRead::get_min_date().')' );
-      if( $forum_id >= 0 )
-         $qsql->add_part( SQLP_WHERE, 'P.Forum_ID='.$forum_id );
-      $qsql->add_part( SQLP_HAVING, 'P.Lastchanged > FR_Lastread' );
-      $qsql->add_part( SQLP_LIMIT, '1' );
-
-      $query = $qsql->get_select();
-      $has_new = mysql_exists_row( "ForumRead.has_new_posts_in_forums($uid,$forum_id)", $query );
-      return $has_new;
-   } //has_new_posts_in_forums
-
-   /*!
-    * \brief Returns true, if there is at least one new post in all forums user can view.
-    * \param $forum_opts ForumOptions-object with user-id
-    */
-   function has_new_posts_in_all_forums( $forum_opts )
-   {
-      $uid = $forum_opts->uid;
-      $exclude_fopts = (int)$forum_opts->build_db_options_exclude();
-
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'P.Lastchanged',
-         "IF(ISNULL(FR.User_ID),'0000-00-00 00:00:00',FR.Time) AS FR_Lastread" );
-      $qsql->add_part( SQLP_FROM,
-         "Posts AS P",
-         "INNER JOIN Forums ON Forums.ID=P.Forum_ID",
-         "LEFT JOIN Forumreads AS FR " .
-            "ON FR.Forum_ID=P.Forum_ID AND FR.Thread_ID=P.Thread_ID AND FR.User_ID='$uid'" );
-      $qsql->add_part( SQLP_WHERE,
-         "Forums.Options & $exclude_fopts = 0",
-         'P.ID=P.Thread_ID',
-         'P.Parent_ID=0', // redundant, but sometimes query is faster (intersect-index-merge)
-         'P.PostsInThread>0',
-         'P.Lastchanged >= FROM_UNIXTIME('.ForumRead::get_min_date().')' );
-      $qsql->add_part( SQLP_HAVING, 'P.Lastchanged > FR_Lastread' );
-      $qsql->add_part( SQLP_LIMIT, '1' );
-
-      $query = $qsql->get_select();
-      $has_new = mysql_exists_row( "ForumRead.has_new_posts_in_all_forums($uid)", $query );
-      return $has_new;
-   } //has_new_posts_in_all_forums
-
-   /*!
-    * \brief Returns boolean if forums have new posts for specified user-id (in ForumOptions).
-    * \param $forum_opts ForumOptions-object for given user-id
-    * \note stores result for user in Forumreads-table
-    */
-   function load_global_new( $forum_opts )
-   {
-      if( !is_a($forum_opts, 'ForumOptions') )
-         error('invalid_args', "ForumRead.load_global_new.check.forum_opts");
-      $user_id = $forum_opts->uid;
-
-      $global_updated = ForumRead::load_global_updated();
-      $global_has_new = false;
-
-      //FIXME: replace ForumRead(User_ID,Forum_ID=0,Thread_ID=0) with Players.ForumRead/ForumHasNew-fields !?
-      // load and check against global forum-read for user
-      $qsql = ForumRead::build_query_sql( $user_id );
-      $qsql->add_part( SQLP_WHERE, 'Forum_ID=0', 'Thread_ID=0' );
-      $query = $qsql->get_select();
-      $row = mysql_single_fetch( "ForumRead.load_global_new($user_id)", $query );
-
-      if( !$row || ( $row['X_Time'] <= 0 || $global_updated > $row['X_Time'] ) )
-      {
-         $global_has_new = ForumRead::has_new_posts_in_all_forums( $forum_opts );
-         $fread = new ForumRead( $user_id );
-         $fread->replace_row_forumread( "ForumRead.load_global_new.forum_read.upd",
-            0, 0, $global_updated, $global_has_new );
-      }
-      else
-         $global_has_new = $row['HasNew'];
-
-      return $global_has_new;
-   } //load_global_new
-
-   /*! \brief Returns non-0 global forum Updated date (creates one if not existing). */
-   function load_global_updated()
-   {
-      // assume updated=true if no file-cache (inefficient but functionality available)
-      if( (string)CACHE_FOLDER == '' )
-         return true;
-
-      // read from file-cache
-      clearstatcache(); //FIXME since PHP5.3.0 with filename
-      $updated = ( file_exists(CACHEFILE_FORUM_GLOBAL) )
-         ? (int)@filemtime(CACHEFILE_FORUM_GLOBAL)
-         : -1;
-
-      if( $updated <= 0 ) // need-update ?
-      {
-         global $NOW;
-         $updated = $NOW;
-         ForumRead::trigger_recalc_global( $updated );
-      }
-      return $updated;
-   }
-
-   /*! \brief Updates global-forum Updated-date (Stored in file-system). */
-   function trigger_recalc_global( $time )
-   {
-      if( (string)CACHE_FOLDER != '' )
-      {
-         // read from file-cache
-         clearstatcache(); //FIXME since PHP5.3.0 with filename
-         $updated = ( file_exists(CACHEFILE_FORUM_GLOBAL) )
-            ? (int)@filemtime(CACHEFILE_FORUM_GLOBAL)
-            : -1;
-         if( $updated < 0 || $time > $updated ) // update only if newer
-            touch(CACHEFILE_FORUM_GLOBAL, $time );
-      }
-   }
-
-   /*! \brief Triggers recalc of forum new-count. */
-   function trigger_recalc_forum( $forum_id, $time )
-   {
-      db_query( "ForumRead.trigger_recalc_forum($forum_id,$time)",
-         "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($time)) "
-            . "WHERE ID='$forum_id' LIMIT 1" );
-   }
-
-   function get_min_date()
-   {
-      global $NOW;
-      return $NOW - FORUM_SECS_NEW_END;
-   }
-
-} // end of 'ForumRead'
 
 ?>
