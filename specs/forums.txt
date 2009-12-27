@@ -619,6 +619,9 @@ Posts($fid,$tid):
   - mark thread as read with MAX(viewed Posts.Lastchanged):
     Forumreads($uid,$fid,$tid).Time=MAX(viewed Posts.Lastchanged), HasNew=0
 
+* Forumreads($uid,$fid,tid=0).Time= .Time - 1 day (for forum-read)
+* Forumreads($uid,fid=0,tid=0).Time= .Time - 1 day (for global-forum read)
+
 #----- U04: read post revision history
 
 * if not author of post:
@@ -701,8 +704,8 @@ Posts($fid,$tid):
   - insert Forumreads($uid,$fid,$ctid).Time=$NOW, HasNew=0
   - see 'forum/forum_functions.php', ForumRead::mark_forum_read($markread,$is_moderator)
 
-* Forums($fid).Updated=GREATEST(Updated,$NOW)
-* Global.Updated=$NOW
+* Forumreads($uid,$fid,tid=0).Time= .Time - 1 day (for forum-read)
+* Forumreads($uid,fid=0,tid=0).Time= .Time - 1 day (for global-forum read)
 
 
 #----- A01: add new forum

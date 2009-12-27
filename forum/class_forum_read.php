@@ -106,7 +106,7 @@ class ForumRead
 
    /*!
     * \brief Marks posts in thread as read that are older than specified (read-)time.
-    * \see specs/forums.txt (use-case U09)
+    * \see specs/forums.txt (use-case U03)
     */
    function mark_thread_read( $thread_id, $mark_time )
    {
@@ -119,7 +119,11 @@ class ForumRead
       }
    }
 
-   /*! \brief Marks threads in forum-list as read that are older than specified (read-)time. */
+   /*!
+    * \brief Marks threads in forum-list as read that are older than specified (read-)time.
+    * \see specs/forums.txt (use-case U09)
+    */
+    */
    function mark_forum_read( $mark_time, $is_moderator )
    {
       if( $this->fid <= 0 || $mark_time < $this->min_date )
