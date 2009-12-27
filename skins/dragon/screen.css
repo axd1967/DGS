@@ -2275,6 +2275,16 @@ table.Forum td {
    color: black;
 }
 
+h3 span.ForumOpts {
+   font-size: 70%;
+   font-weight: normal;
+   color: #cc0044;
+}
+span.ForumOpts {
+   font-size: 80%;
+   color: #ff4466;
+}
+
 table.Forum .Moderated {
    color: #ff4466;
 }
@@ -2532,13 +2542,15 @@ table.Forum form.FormClass table.FormClass {
 table.Forum span.NewFlag {
    margin: 0px 6px;
    font-size: 80%;
-   color: #ff0000;
+   font-weight: bold;
+   color: #dd0000;
 }
 
 table.Forum span.NewFlag a {
    text-decoration: none;
    font-size: 80%;
-   color: #ff0000;
+   font-weight: bold;
+   color: #dd0000;
 }
 
 table.Forum span.Parent {
