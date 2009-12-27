@@ -2529,33 +2529,16 @@ table.Forum form.FormClass table.FormClass {
    margin: 0px auto 0px 0px;
 }
 
-table.Forum span.OlderNewFlag,
 table.Forum span.NewFlag {
    margin: 0px 6px;
-}
-
-table.Forum span.OlderNewFlag {
-   font-size: 80%;
-   color: #ff7777;
-}
-
-table.Forum span.NewFlag {
    font-size: 80%;
    color: #ff0000;
 }
 
-table.Forum span.OlderNewFlag a,
 table.Forum span.NewFlag a {
-   font-size: 80%;
    text-decoration: none;
-}
-
-table.Forum span.NewFlag a {
+   font-size: 80%;
    color: #ff0000;
-}
-
-table.Forum span.OlderNewFlag a {
-   color: #ff7777;
 }
 
 table.Forum span.Parent {
