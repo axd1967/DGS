@@ -231,7 +231,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
             . "WHERE ID='$forum' LIMIT 1" );
 
          // global forum-trigger
-         ForumRead::trigger_recalc_global( $NOW );
+         ForumRead::trigger_recalc_global_post_update( $NOW );
 
          add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_POST . $flog_actsuffix );
 
@@ -292,7 +292,7 @@ function approve_post( $fid, $tid, $pid )
 
    // global-trigger
    if( $post_created > $thread_lastchanged )
-      ForumRead::trigger_recalc_global( $post_created );
+      ForumRead::trigger_recalc_global_post_update( $post_created );
 }//approve_post
 
 // use-case A05 (reject post on pending-approval)
@@ -356,7 +356,7 @@ function hide_post_update_trigger( $fid, $tid, $pid )
       . "WHERE ID=$fid LIMIT 1" );
 
    // global-trigger
-   ForumRead::trigger_recalc_global( $NOW );
+   ForumRead::trigger_recalc_global_post_update( $NOW );
 
    if( $pid == $thread_lastpost && $thread_cntposts > 0 )
       recalc_thread_lastpost($tid);
@@ -417,7 +417,7 @@ function show_post( $fid, $tid, $pid )
 
    // global-trigger
    if( $post_created > $thread_lastchanged )
-      ForumRead::trigger_recalc_global( $post_created );
+      ForumRead::trigger_recalc_global_post_update( $post_created );
 
    recalc_forum_lastpost($fid);
 }//show_post

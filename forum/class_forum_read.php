@@ -114,10 +114,8 @@ class ForumRead
       {
          $this->replace_row_forumread( "ForumRead.mark_thread_read",
             $this->fid, $thread_id, $mark_time );
-
-         global $NOW;
-         ForumRead::trigger_recalc_forum( $this->fid, $NOW );
-         ForumRead::trigger_recalc_global( $NOW );
+         ForumRead::trigger_recalc_forum_read_update( $this->uid, $this->fid );
+         ForumRead::trigger_recalc_global_read_update( $this->uid );
       }
    }
 
@@ -186,9 +184,8 @@ class ForumRead
             $query . " ON DUPLICATE KEY UPDATE Time=GREATEST(Time,VALUES(Time))" );
       }
 
-      global $NOW;
-      ForumRead::trigger_recalc_forum( $this->fid, $NOW );
-      ForumRead::trigger_recalc_global( $NOW );
+      ForumRead::trigger_recalc_forum_read_update( $this->uid, $this->fid );
+      ForumRead::trigger_recalc_global_read_update( $this->uid );
    } //mark_forum_read
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
@@ -312,7 +309,7 @@ class ForumRead
    } //load_global_new
 
    /*! \brief Returns non-0 global forum Updated date (creates one if not existing). */
-   function load_global_updated()
+   function load_global_updated( $need_update=true )
    {
       // assume updated=true if no file-cache (inefficient but functionality available)
       if( (string)CACHE_FOLDER == '' )
@@ -324,36 +321,49 @@ class ForumRead
          ? (int)@filemtime(CACHEFILE_FORUM_GLOBAL)
          : -1;
 
-      if( $updated <= 0 ) // need-update ?
+      if( $need_update && $updated <= 0 ) // need-update ?
       {
          global $NOW;
          $updated = $NOW;
-         ForumRead::trigger_recalc_global( $updated );
+         ForumRead::trigger_recalc_global_post_update( $updated );
       }
       return $updated;
    }
 
-   /*! \brief Updates global-forum Updated-date (Stored in file-system). */
-   function trigger_recalc_global( $time )
+   /*! \brief Updates global-forum Updated-date because of change to post (stored in file-system). */
+   function trigger_recalc_global_post_update( $time )
    {
       if( (string)CACHE_FOLDER != '' )
       {
-         // read from file-cache
-         clearstatcache(); //FIXME since PHP5.3.0 with filename
-         $updated = ( file_exists(CACHEFILE_FORUM_GLOBAL) )
-            ? (int)@filemtime(CACHEFILE_FORUM_GLOBAL)
-            : -1;
+         $updated = ForumRead::load_global_updated( false );
          if( $updated < 0 || $time > $updated ) // update only if newer
             touch(CACHEFILE_FORUM_GLOBAL, $time );
       }
    }
 
-   /*! \brief Triggers recalc of forum new-count. */
-   function trigger_recalc_forum( $forum_id, $time )
+   /*! \brief Updates Forumreads to initiate recalculation for global-forum NEW-flag-state. */
+   function trigger_recalc_global_read_update( $uid )
    {
-      db_query( "ForumRead.trigger_recalc_forum($forum_id,$time)",
-         "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($time)) "
-            . "WHERE ID='$forum_id' LIMIT 1" );
+      // force trigger updating with older updated-date on next load-global
+      $global_updated = ForumRead::load_global_updated( false );
+      $fread = new ForumRead( $uid );
+      $fread->replace_row_forumread( "ForumRead.trigger_recalc_global_read_update.upd",
+         0, 0, $global_updated - SECS_PER_DAY );
+   }
+
+   /*! \brief Updates Forumreads to initiate recalculation for forum NEW-flag-state. */
+   function trigger_recalc_forum_read_update( $uid, $forum_id )
+   {
+      // force trigger updating with older updated-date on next load-global
+      global $NOW;
+      $row = mysql_single_col( "ForumRead.trigger_recalc_forum_read_update.read_forum($uid,$forum_id)",
+         "SELECT UNIX_TIMESTAMP(Updated) AS X_Updated FROM Forums WHERE ID='$forum_id' LIMIT 1" );
+      $rowval = ( $row ) ? $row[0] : 0;
+      $forum_updated = ($rowval > 0) ? $rowval : $NOW;
+
+      $fread = new ForumRead( $uid, $forum_id );
+      $fread->replace_row_forumread( "ForumRead.trigger_recalc_forum_read_update.upd",
+         $forum_id, 0, $forum_updated - SECS_PER_DAY );
    }
 
    function get_min_date()

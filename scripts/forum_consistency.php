@@ -159,7 +159,7 @@ define('SEPLINE', "\n<p><hr>\n");
          $upd_arr[] = "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
             . "WHERE ID=$fid LIMIT 1";
 
-      update_forum_global( $do_it, $NOW );
+      update_forum_global_post_update( $do_it, $NOW );
    }
 
    $cnt_err += count($upd_arr);
@@ -207,7 +207,7 @@ define('SEPLINE', "\n<p><hr>\n");
    $upd_arr[] = "DELETE FROM Forumreads WHERE Thread_ID=0";
 
    if( $withnew )
-      update_forum_global( $do_it, $NOW );
+      update_forum_global_post_update( $do_it, $NOW );
 
    if( !$withnew )
       echo "... will be SKIPPED!<br>\n(need NEW-fix switch to be executed) !!<br>\n";
@@ -254,11 +254,11 @@ define('SEPLINE', "\n<p><hr>\n");
 }
 
 
-function update_forum_global( $do_it, $time )
+function update_forum_global_post_update( $do_it, $time )
 {
    if( !$do_it ) echo "... SKIP ";
-   echo "... triggered forum global update with ForumRead::trigger_recalc_global()<br>\n";
-   if( $do_it ) ForumRead::trigger_recalc_global( $time );
+   echo "... triggered forum global update with ForumRead::trigger_recalc_global_post_update()<br>\n";
+   if( $do_it ) ForumRead::trigger_recalc_global_post_update( $time );
 }
 
 function do_updates( $dbgmsg, $upd_arr, $do_it )
