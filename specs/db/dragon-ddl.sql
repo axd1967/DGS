@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 2.11.3deb1ubuntu1.2
+-- version 2.11.3deb1ubuntu1.3
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 01, 2009 at 02:11 AM
+-- Generation Time: Dec 27, 2009 at 05:38 PM
 -- Server version: 5.0.51
--- PHP Version: 5.2.4-2ubuntu5.6
+-- PHP Version: 5.2.4-2ubuntu5.9
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -245,23 +245,6 @@ CREATE TABLE IF NOT EXISTS `Folders` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ForumRead`
---
-
-CREATE TABLE IF NOT EXISTS `ForumRead` (
-  `User_ID` int(11) NOT NULL,
-  `Forum_ID` smallint(6) NOT NULL default '0',
-  `Thread_ID` int(11) NOT NULL default '0',
-  `Post_ID` int(11) NOT NULL default '0',
-  `NewCount` int(11) NOT NULL default '-1',
-  `Time` datetime NOT NULL default '0000-00-00 00:00:00',
-  UNIQUE KEY `FR_Uniq` (`Thread_ID`,`Post_ID`,`Forum_ID`,`User_ID`),
-  KEY `Time` (`Time`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Forumlog`
 --
 
@@ -278,6 +261,21 @@ CREATE TABLE IF NOT EXISTS `Forumlog` (
   KEY `Time` (`Time`),
   KEY `Action` (`Action`(4))
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Forumreads`
+--
+
+CREATE TABLE IF NOT EXISTS `Forumreads` (
+  `User_ID` int(11) NOT NULL default '0',
+  `Forum_ID` smallint(6) NOT NULL default '0',
+  `Thread_ID` int(11) NOT NULL default '0',
+  `Time` datetime NOT NULL,
+  `HasNew` tinyint(4) NOT NULL default '0',
+  PRIMARY KEY  (`Thread_ID`,`User_ID`,`Forum_ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -323,7 +321,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `Last_X` tinyint(4) NOT NULL default '-1',
   `Last_Y` tinyint(4) NOT NULL default '-1',
   `Last_Move` char(2) NOT NULL default '',
-  `Flags` set('Ko') NOT NULL default '',
+  `Flags` set('Ko','HiddenMsg') NOT NULL default '',
   `Score` decimal(7,1) NOT NULL default '0.0',
   `Maintime` smallint(6) NOT NULL default '0',
   `Byotype` enum('JAP','CAN','FIS') NOT NULL default 'JAP',
@@ -337,6 +335,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `White_Byoperiods` tinyint(4) NOT NULL default '-1',
   `LastTicks` int(11) NOT NULL default '0',
   `ClockUsed` smallint(6) NOT NULL default '0',
+  `TimeOutDate` int(11) NOT NULL default '0',
   `Rated` enum('N','Y','Done') NOT NULL default 'N',
   `StdHandicap` enum('N','Y') NOT NULL default 'N',
   `WeekendClock` enum('N','Y') NOT NULL default 'Y',
@@ -354,7 +353,8 @@ CREATE TABLE IF NOT EXISTS `Games` (
   KEY `White_ID` (`White_ID`),
   KEY `Handicap` (`Handicap`),
   KEY `Moves` (`Moves`),
-  KEY `Score` (`Score`)
+  KEY `Score` (`Score`),
+  KEY `Flags` (`Flags`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -368,6 +368,19 @@ CREATE TABLE IF NOT EXISTS `GamesNotes` (
   `uid` int(11) NOT NULL,
   `Hidden` enum('N','Y') NOT NULL default 'N',
   `Notes` text NOT NULL,
+  PRIMARY KEY  (`gid`,`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `GamesPriority`
+--
+
+CREATE TABLE IF NOT EXISTS `GamesPriority` (
+  `gid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `Priority` smallint(6) NOT NULL default '0',
   PRIMARY KEY  (`gid`,`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -543,6 +556,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `TableMaxRows` smallint(5) unsigned NOT NULL default '20',
   `Button` tinyint(3) unsigned NOT NULL default '0',
   `UserPicture` varchar(48) NOT NULL default '',
+  `NextGameOrder` enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED',
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `Handle` (`Handle`),
   KEY `Rating2` (`Rating2`),
@@ -552,7 +566,9 @@ CREATE TABLE IF NOT EXISTS `Players` (
   KEY `Lastaccess` (`Lastaccess`),
   KEY `Adminlevel` (`Adminlevel`),
   KEY `AdminOptions` (`AdminOptions`),
-  KEY `Type` (`Type`)
+  KEY `Type` (`Type`),
+  KEY `OnVacation` (`OnVacation`),
+  KEY `VacationDays` (`VacationDays`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -666,7 +682,7 @@ CREATE TABLE IF NOT EXISTS `Statistics` (
   `GamesRunning` int(11) NOT NULL,
   `Activity` int(11) NOT NULL,
   PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -926,7 +942,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `uid` int(11) NOT NULL,
   `nrGames` tinyint(3) unsigned NOT NULL default '1',
   `Time` datetime NOT NULL default '0000-00-00 00:00:00',
-  `Ruleset` enum('area', 'territory') NOT NULL default 'territory',
+  `Ruleset` enum('area','territory') NOT NULL default 'territory',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(6,1) NOT NULL default '6.5',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',

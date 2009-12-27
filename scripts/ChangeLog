@@ -24,6 +24,9 @@ ChangeLog
 
 2009-12-27 juga
 
+   * specs/db/dragon-ddl.sql:
+   - sync with current DGS db-schema
+
    * include/std_functions.php (start_page, count_forum_new):
    - removed unused field for (first-trial) aggregated global-forum NEW-flag
    - added TODOs for global-forum 'new'-flag
