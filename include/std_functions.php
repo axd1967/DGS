@@ -454,7 +454,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
       $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
-      $cnt_forum_new = (isset($player_row['CountForumNew'])) ? (int)$player_row['CountForumNew'] : -1;
+      $has_forum_new = false; //TODO###
 
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
@@ -483,11 +483,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
       $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
-      if( $cnt_forum_new > 0 )
+      if( $has_forum_new )
       {
-         $cnt_forum_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_forum_new );
-         $arr_msgs[] = '&nbsp;';
-         $arr_msgs[] = array( $cnt_forum_new_str, 'forum/index.php', array( 'class' => 'MainMenuCount' ) );
+         $arr_forums[] = '&nbsp;';
+         //TODO# $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
       }
       $menu->add( 4,1, $arr_forums );
       $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
@@ -2454,13 +2453,6 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
       }
    }
 
-   $count_forum_new = count_forum_new( $uid, $player_row['CountForumNew'] );
-   if( $count_forum_new >= 0 )
-   {
-      $player_row['CountForumNew'] = $count_forum_new;
-      $query .= ",CountForumNew=$count_forum_new";
-   }
-
 
    $query.= " WHERE ID=$uid LIMIT 1";
    //$updok will be false if an error occurs and error() is set to 'no exit'
@@ -2613,6 +2605,7 @@ function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
    }
 }
 
+//TODO# 'new'-flag
 /*!
  * \brief Counts NEW-forum entries for given user-id if current count < 0 (=needs-update).
  * \param $curr_count force counting if <0 or omitted
