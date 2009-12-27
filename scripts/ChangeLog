@@ -24,6 +24,36 @@ ChangeLog
 
 2009-12-27 juga
 
+   * forum/class_forum_read.php (ForumRead.mark_thread_read, ~.mark_forum_read,
+       ~.load_global_updated, ~.trigger_recalc_global_post_update,
+       ~.trigger_recalc_global_read_update, ~.trigger_recalc_forum_read_update),
+     forum/post.php (post_message, approve_post, hide_post_update_trigger, show_post),
+     scripts/forum_consistency.php (update_forum_global_post_update),
+     specs/forums.txt:
+   - fixed forum- and global-forum updated-date: must differ between trigger
+     on changed-post and trigger for changed read-state
+
+   * include/std_functions.php (start_page, load_global_forum_new),
+     forum/index.php, NEWS:
+   - show global-forum NEW-flag-state in main-menu as '(*)'
+     linked to system-bookmark S1 (showing recent forum posts)
+
+   * forum/forum_functions.php (class ForumOptions; class ForumRead;
+       ForumPost.is_post_read; ForumThread.load_posts),
+     forum/class_forum_options.php (class ForumOptions),
+     forum/class_forum_read.php (class ForumRead, ~.is_post_read):
+   - splitted forum_functions.php: moved class ForumOptions and class ForumRead
+     to separate includes in preparation to be able to import them for main-menu
+     global-forum NEW-flagging
+   - refactored method ForumRead.is_post_read() into ForumPost.is_post_read()
+
+   * forum/forum_functions.php (ForumOptions.is_executive_admin, ~.build_options_text),
+     forum/index.php, forum/list.php, forum/read.php, skins/dragon/screen.css, NEWS:
+   - show forum-options near forum-title on thread-list and thread-posts-view
+
+   * skins/dragon/screen.css:
+   - show forum NEW-flag in bold-font
+
    * specs/db/dragon-ddl.sql:
    - sync with current DGS db-schema
 
