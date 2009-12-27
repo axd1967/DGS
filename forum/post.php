@@ -34,7 +34,7 @@ function hit_thread( $thread )
 }
 
 /*!
- * \brief Saves post-message for use-cases U06/U07/U08/U09
+ * \brief Saves post-message for use-cases U06/U07/U08
  * \return array( id, msg ); if id=inserted/updated-Post.ID: msg contains success-message,
  *         if id=0: msg contains error-message (post not saved!)
  * \see specs/forums.txt
@@ -118,7 +118,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    {
    // -------   Add post  ----------
 
-      // -------   Reply / Quote  ---------- (use-case U08/U09)
+      // -------   Reply / Quote  ---------- (use-case U08)
       if( $parent > 0 ) // existing thread
       {
          $is_newthread = false;
@@ -136,8 +136,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
          $answer_nr = $row['answer_nr'];
          if( $answer_nr <= 0 ) $answer_nr = 0;
 
-         //TODO: why not set as for new-thread in DB ? (maybe because of edit-date-handling) !?
-         $lastchanged_string = '';
+         $lastchanged_string = ''; // Lastchanged/Updated only set for thread
       }
       // -------   New thread  ---------- (use-case U06)
       else
@@ -153,7 +152,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
       }
 
 
-      // -------   Update database   ------- (use-case U06, U08/U09)
+      // -------   Update database   ------- (use-case U06, U08)
 
       if( $answer_nr >= 64*64 )
          error('internal_error', "AnswerNr too large: $answer_nr" );
@@ -194,7 +193,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 
          $thread = $Thread_ID = $New_ID;
       }
-      else // U08/U09 (reply/quote)
+      else // U08 (reply/quote)
       {
          hit_thread( $Thread_ID );
       }
@@ -230,6 +229,9 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
             . "LastPost=GREATEST(LastPost,$New_ID), "
             . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
             . "WHERE ID='$forum' LIMIT 1" );
+
+         // global forum-trigger
+         ForumRead::trigger_recalc_global( $NOW );
 
          add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_POST . $flog_actsuffix );
 
@@ -287,6 +289,10 @@ function approve_post( $fid, $tid, $pid )
             : '' )
       . "LastPost=GREATEST(LastPost,$pid) "
       . "WHERE ID=$fid LIMIT 1" );
+
+   // global-trigger
+   if( $post_created > $thread_lastchanged )
+      ForumRead::trigger_recalc_global( $post_created );
 }//approve_post
 
 // use-case A05 (reject post on pending-approval)
@@ -349,6 +355,9 @@ function hide_post_update_trigger( $fid, $tid, $pid )
       . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) " // post could be a NEW one
       . "WHERE ID=$fid LIMIT 1" );
 
+   // global-trigger
+   ForumRead::trigger_recalc_global( $NOW );
+
    if( $pid == $thread_lastpost && $thread_cntposts > 0 )
       recalc_thread_lastpost($tid);
 
@@ -406,6 +415,10 @@ function show_post( $fid, $tid, $pid )
       . 'PostsInForum=PostsInForum+1 '
       . "WHERE ID=$fid LIMIT 1" );
 
+   // global-trigger
+   if( $post_created > $thread_lastchanged )
+      ForumRead::trigger_recalc_global( $post_created );
+
    recalc_forum_lastpost($fid);
 }//show_post
 
@@ -440,39 +453,6 @@ function recalc_forum_lastpost( $fid )
 
    db_query( "recalc_forum_lastpost.update_lastpost($fid)",
       "UPDATE Forums SET LastPost=$lastpost WHERE ID='$fid' LIMIT 1" );
-}
-
-// recalculate Thread.PostsInThread and Forums.ThreadsInForum/PostsInForum
-// for all threads in specific forum
-function recalc_forum_counts( $fid, $update_thread_counts=true )
-{
-   $result =
-      db_query( "recalc_forum_counts.find_counts($fid)",
-         "SELECT Thread_ID, COUNT(*) AS X_CountPosts FROM Posts "
-         . "WHERE Thread_ID>0 AND Approved='Y' "
-         . "AND PosIndex>'' " // ''=inactivated (edited)
-         . "AND Forum_ID='$fid' "
-         . "GROUP BY Thread_ID" );
-
-   $cnt_threads = 0;
-   $sum_posts = 0;
-   while( $row = mysql_fetch_array( $result ) )
-   {
-      $tid = $row['Thread_Id'];
-      $cnt = $row['X_CountPosts'];
-      $cnt_threads++;
-      $sum_posts += $cnt;
-
-      // update thread-count
-      if( $update_thread_counts )
-         db_query( "recalc_forum_counts.update_thread_counts($tid)",
-            "UPDATE Posts SET PostsInThread=$cnt WHERE ID='$tid' LIMIT 1" );
-   }
-
-   // update forum-counts
-   db_query( "recalc_forum_counts.update_forum_counts($fid)",
-      "UPDATE Forums SET ThreadsInForum=$cnt_threads, PostsInForum=$sum_posts "
-      . "WHERE ID='$fid' LIMIT 1" );
 }
 
 ?>
