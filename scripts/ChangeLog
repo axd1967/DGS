@@ -22,6 +22,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-12-27 juga
+
+   * all files:
+   - adjusted Copyright on every file to: 2001-2010
+
+   * scripts/change_copyright.pl:
+   - added script to automatically change copyright in DGS-files
+
 2009-12-13 juga
 
    * NEWS:
