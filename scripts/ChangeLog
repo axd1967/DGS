@@ -24,11 +24,101 @@ ChangeLog
 
 2009-12-27 juga
 
+   * include/std_functions.php (start_page, count_forum_new):
+   - removed unused field for (first-trial) aggregated global-forum NEW-flag
+   - added TODOs for global-forum 'new'-flag
+
+   * forum/forum_functions.php (class ForumOptions, ~.build_db_options_exclude;
+       class DisplayForum, ~.draw_post, ~.get_new_string, ~.make_link_array;
+       class Forum, ~.build_query_sql, ~.has_new_posts_in_threads,
+         ~.load_forum_list, ~.load_threads, ~.new_from_row;
+       class ForumThread, ~.load_posts, ~.thread_post;
+       class ForumPost, ~.is_author;
+       class ForumRead, ~.build_query_sql, ~.has_new_posts_in_all_forums,
+         ~.has_new_posts_in_forums, ~.has_newer_read_date, ~.is_post_read,
+         ~.load_forum_reads, ~.load_global_new, ~.load_global_updated,
+         ~.mark_forum_read, ~.mark_thread_read, ~.replace_row_forumread,
+         ~.trigger_recalc_forum, ~.trigger_recalc_global,
+         ~.is_read_post, ~.load_reads_post, ~.mark_read, ~.recalc_forum_reads,
+         ~.recalc_thread_reads, ~.set_read, ~.trigger_recalc_thread),
+     forum/post.php (post_message, approve_post, hide_post_update_trigger,
+       show_post, recalc_forum_counts),
+     include/connect2mysql.php (mysql_exists_row),
+     specs/forums.txt,
+     specs/db/table-Forum.txt,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/data_export.php,
+     scripts/forum_consistency.php,
+     forum/index.php,
+     forum/list.php,
+     forum/read.php (revision_history),
+     skins/dragon/screen.css,
+     daily_cron.php,
+     NEWS:
+   - refactored and optimized forum 'NEW'-flag management by migrating from
+     ForumRead-table to now enhanced former Forumreads-table
+     - replaced (very) inefficient NEW-post-counter with simple 'NEW'-flag
+       indicating that there are new posts but not how many
+     - adjusted forum-specs "specs/forum.txt"
+     - removed difference of older and more recent NEW posts
+     - fixed viewing of "missing" new posts while replying
+     - removed 'Mark all read' from thread-posts view
+     - replaced/removed ForumThread-method: thread_post
+     - replaced/removed ForumRead-methods: is_read_post, load_reads_post, mark_read,
+       recalc_forum_reads, recalc_thread_reads, set_read, trigger_recalc_thread
+     - forum/post.php: removed method: recalc_forum_counts
+   - added 'Mark all read' on forums thread-list
+   - added Forums-link for refresh forums
+-----------
+-- changed forum to backport to enhanced Forumreads-table, optimizing index
+ALTER TABLE Forumreads
+   DROP PRIMARY KEY ;
+ALTER TABLE Forumreads
+   ADD Forum_ID smallint NOT NULL DEFAULT '0' AFTER User_ID ;
+ALTER TABLE Forumreads
+   ADD PRIMARY KEY (Thread_ID,User_ID,Forum_ID) ;
+ANALYZE TABLE Forumreads ;
+
+-- [not-null] cleanup Forumreads.Time datetime default NULL -> no default -> NOT NULL
+ALTER TABLE Forumreads
+   CHANGE Time Time datetime NOT NULL ;
+
+-- NEW-flag for forum-list
+ALTER TABLE Forumreads
+   ADD HasNew tinyint NOT NULL DEFAULT '0' ;
+
+-- discard unused table after backport-migration to former Forumreads-table
+DROP TABLE ForumRead ;
+
+-- removed unused field for (first-trial) aggregated global-forum NEW-flag
+ALTER TABLE Players
+   DROP COLUMN CountForumNew ;
+-----------
+
+   * userinfo.php:
+   - added link to starting/editing vacation on "Vacation days left"
+     after hiding that link on status-page if not on vacation
+
+   * forum/old_links_redirect.php, scripts/change_files.pl:
+   - added DGS-copyright notice
+
+   * bookmark.php:
+   - changed system-bookmark S1 showing recent forum posts during the last
+     from 7 days -> 4 weeks
+
    * all files:
    - adjusted Copyright on every file to: 2001-2010
 
    * scripts/change_copyright.pl:
    - added script to automatically change copyright in DGS-files
+
+2009-12-14 juga
+
+   * include/classlib_userquota.php (UserQuota.increase_update_feature_points):
+   - bugfix: fix SQL-statement for FEATURE_POINTS_INC_VALUE>1
+
+   * edit_contact.php, NEWS:
+   - bugfix: removed double HTML-escaping for editing contact user and note-text
 
 2009-12-13 juga
 
@@ -4309,12 +4399,10 @@ CREATE TABLE ForumRead (
 ) ENGINE=MyISAM ;
 
 -- migrate Forumreads- to ForumRead-table
+DELETE FROM Forumreads WHERE Thread_ID=0 ;
 INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
    SELECT FR.User_ID,P.Forum_ID,FR.Thread_ID,-1,-1,FR.Time
       FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID ;
-
--- later can drop old forum-reads-table (or keep it)
-DROP TABLE Forumreads ;
 
 // added images for thread-post-list navigation
 copy images/f_bottom.png
