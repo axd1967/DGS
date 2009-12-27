@@ -155,7 +155,7 @@ $ThePage = new Page('UserInfo');
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
 
-      $itable1->add_sinfo( T_('Vacation days left'),
+      $itable1->add_sinfo( anchor( "edit_vacation.php", T_('Vacation days left') ),
          TimeFormat::echo_day(floor($row["VacationDays"])) );
       if( $row['OnVacation'] > 0 )
       {
