@@ -132,7 +132,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
 
    * <home forum/index.php>Forum pages reworked</home>:
-      * Show if there are NEW posts
+      * Show if there are NEW posts in main-menu, forum-list and thread-list
       * Show forum-options near forum-title on thread-list and thread-posts-view page
       * Added read-only forum option
       * Changed time range for outdated forum posts from 4 to 12 weeks

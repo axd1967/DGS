@@ -40,6 +40,7 @@ require_once( "include/page_functions.php" );
 
 require_once( "include/translation_functions.php" );
 require_once( "include/classlib_matrix.php" );
+require_once( "forum/class_forum_read.php" );
 
 
 // Server birth date:
@@ -454,7 +455,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
       $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
-      $has_forum_new = false; //TODO###
+      $has_forum_new = load_global_forum_new();
 
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
@@ -486,7 +487,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       if( $has_forum_new )
       {
          $arr_forums[] = '&nbsp;';
-         //TODO# $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
+         $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
       }
       $menu->add( 4,1, $arr_forums );
       $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
@@ -2605,21 +2606,17 @@ function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
    }
 }
 
-//TODO# 'new'-flag
 /*!
- * \brief Counts NEW-forum entries for given user-id if current count < 0 (=needs-update).
- * \param $curr_count force counting if <0 or omitted
- * \return new NEW-forum-post count (>=0) for given user-id; or -1 on error
+ * \brief Loads (and updates if needed) global-forum NEW-flag-state for current player.
+ * \return true, if there are NEW posts in forum for user to read; false otherwise
  */
-function count_forum_new( $uid, $curr_count=-1 )
+function load_global_forum_new()
 {
-   if( $curr_count >= 0 )
-      return $curr_count;
-   if( !is_numeric($uid) || $uid <= 0 )
-      error( 'invalid_args', "count_forum_new.check.uid($uid)" );
+   global $player_row;
 
-   // TODO get number of NEW counts for user
-   return -1;
+   $f_opts = new ForumOptions( $player_row );
+   $has_new = ForumRead::load_global_new( $f_opts );
+   return $has_new;
 }
 
 // Caution: can cause concurrency problems

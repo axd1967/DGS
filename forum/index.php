@@ -48,8 +48,6 @@ $ThePage = new Page('ForumsList');
 
    $f_opts = new ForumOptions( $player_row );
    $forums = Forum::load_forum_list( $f_opts );
-   //TODO# move into main-menu with updated-check
-   //$has_new = ForumRead::load_global_new( $f_opts );
    // end of DB-stuff
 
 
