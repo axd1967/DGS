@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Start";
 
-require_once( 'include/quick_common.php' );
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/register_functions.php" );
 
 {
    connect2mysql();
@@ -30,23 +30,52 @@ require_once( "include/form_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
 
+   $reg = new UserRegistration( /*die_on_error*/false );
+   $errors = 0;
+   if( @$_REQUEST['register'] ) // register user
+   {
+      $errors = $reg->check_registration_normal();
+      if( !$errors )
+      {
+         $reg->register_user();
+         jump_to("status.php");
+      }
+   }
+
+
    start_page(T_("Register"), true, $logged_in, $player_row );
 
-   echo "<center>\n";
+   $reg_form = new Form( 'loginform', 'register.php', FORM_POST );
+   $reg_form->set_layout( FLAYOUT_GLOBAL, '1,2,3' );
 
-   $reg_form = new Form( 'loginform', 'do_registration.php', FORM_POST );
+   $reg_form->set_area(1);
    $reg_form->add_row( array( 'HEADER', T_('Please enter data') ) );
+
+   if( is_array($errors) )
+   {
+      $error_str = '';
+      foreach( $errors as $errtext )
+         $error_str .= "\n<li>$errtext</li>";
+
+      $reg_form->set_area(2);
+      $reg_form->add_row( array( 'TAB', 'TEXT',
+         sprintf( '<span class="ErrorMsg"><b>%s:</b></span>',
+                  T_('The following errors have been detected') )));
+      $reg_form->add_row( array( 'TAB', 'TEXT', "<ul>$error_str</ul>" ));
+   }
+
+   $reg_form->set_area(3);
    $reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                              'TEXTINPUT', 'userid', 16, 16, '' ) );
+                              'TEXTINPUT', 'userid', 16, 16, $reg->uhandle ) );
    $reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                              'TEXTINPUT', 'name', 16,80, '' ) );
+                              'TEXTINPUT', 'name', 16, 80, $reg->name ) );
    $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
-                              'PASSWORD', 'passwd', 16, 16, '' ) );
+                              'PASSWORD', 'passwd', 16, 16, $reg->password ) );
    $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
-                              'PASSWORD', 'passwd2', 16, 16, '' ) );
+                              'PASSWORD', 'passwd2', 16, 16, $reg->password2 ) );
 
    $reg_form->add_row( array( 'TAB',
-                              'CHECKBOX', 'policy', '1', '', false,
+                              'CHECKBOX', 'policy', '1', '', $reg->policy,
                               'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
                                                HOSTBASE."policy.php" ) ) );
 
@@ -55,8 +84,6 @@ require_once( "include/form_functions.php" );
 
    echo "<br>\n",
       T_("Note for beginners: read the FAQ especially for your initial rank setting in your profile page.");
-
-   echo "</center>\n";
 
    end_page();
 }
