@@ -22,6 +22,50 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-12-29 juga
+
+   * include/register_functions.php (class UserRegistration, ~.check_registration_normal,
+       ~.check_registration_blocked, ~.check_userid, ~.check_email, ~.check_name,
+       ~.check_password, ~.check_policy, ~.check_existing_user, ~._error,
+       ~.register_user, ~.register_blocked_user),
+     register.php, do_registration.php, do_registration_blocked.php, NEWS:
+   - preserve entered input-field-data for normal registration on input-check-errors,
+     behaviour was that all entered data was lost on input-error
+   - show all input-check-erros in error-list instead of only one error
+     with error()-method destroying all entered input-data
+   - refactored registration-code with checks and user-db-registration for blocked
+     and normal user into UserRegistration-class in 'include/register_functions.php'
+   - refactored all functionality of 'do_registration.php' into 'register.php'
+
+   * include/form_functions.php (class Form, ~.create_string_func_password, ~.print_insert_password_input),
+     edit_password.php, index.php:
+   - preserve former form-value for PASSWORD-type-field
+
+   * include/error_codes.php (class ErrorCode, ~.echo_error_text, ~.get_error_text,
+       ~.is_shown_error_log_id, ~.is_sensitive, ~.init),
+     error.php (handle_error):
+   - refactored error-codes into ErrorCode-class to prepare for registration-page
+     without losing input-fields on input-check-errors
+
+   * include/std_functions.php (start_page, verify_email):
+   - bugfix: load global-forum NEW-flag only if user logged in
+   - verify_email: added die_on_error-argument to email-verify method
+
+   * include/classlib_game.php (class GameScore.getModeText),
+     include/contacts.php (class Contact.getContactUserFlags, ~.getContactSystemFlags),
+     include/countries.php (getCountryText),
+     include/filter.php (class FilterRelativeDate.getTimeUnitText),
+     include/languages.php (getLanguageText),
+     tournaments/include/tournament.php (class Tournament.getScopeText,
+       ~.getTypeText, ~.getStatusText),
+     tournaments/include/tournament_participant.php (class TournamentParticipant.getStatusText, ~.getFlagsText),
+     tournaments/include/tournament_properties.php (class TournamentProperties.getRatingUseModeText),
+     tournaments/include/tournament_round.php (class TournamentRound.getStatusText),
+     tournaments/include/tournament_rules.php (class TournamentRules.getFlagsText,
+       ~.getHandicaptypeText):
+   - bugfix: import global-arrays into method-scope for lazy-init methods,
+     behaviour with global was to re-initialize array with every call
+
 2009-12-27 juga
 
    * forum/class_forum_read.php (ForumRead.mark_thread_read, ~.mark_forum_read,

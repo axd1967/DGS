@@ -252,6 +252,10 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Initial Rating: removed converting of NNGS-rank/rating
       * Initial Rating: added KGS-rank and DGS-rating conversion
 
+   * <home register.php>Registration page</home>:
+      * Preserve entered registration-data on input-data check-errors (was that entered data was lost on check-error)
+      * Show ALL check-errors for entered registration-data instead of only one
+
    * Filters:
       * Replaced Filter-Reset with selection to clear, reset, load/save fields
       * Changed access keys for filter-search: [e]=Search (, [z]=Reset )
