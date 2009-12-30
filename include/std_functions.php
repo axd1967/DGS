@@ -455,7 +455,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
       $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
-      $has_forum_new = load_global_forum_new();
+      $has_forum_new = ($logged_in) ? load_global_forum_new() : false;
 
       $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
       // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
@@ -1005,21 +1005,34 @@ function generate_random_password()
    return $return;
 }
 
-/* NOTE:
- An email address validity function should never be treated as definitive.
- In more simple terms, if a user-supplied email address fails a validity check,
-  don't tell the users the email address they entered is invalid
-  but just force them to enter something different.
-*/
-function verify_email( $debugmsg, $email)
+/*!
+ * \brief Checks if given email is valid.
+ *
+ * \note An email address validity function should never be treated as definitive.
+ *       In more simple terms, if a user-supplied email address fails a validity check,
+ *       don't tell the users the email address they entered is invalid
+ *       but just force them to enter something different.
+ *
+ * \return true if email is valid; otherwise an error('bad_mail_address')
+ *       is called (if debugmsg given) or else error-code is returned instead
+ */
+function verify_email( $debugmsg, $email, $die_on_error=true )
 {
    //RFC 2822 - 3.4.1. Addr-spec specification
    //See http: //www.faqs.org/rfcs/rfc2822
    //$regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$";
    $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,4})\$/i";
    $res= preg_match($regexp, $email);
-   if( is_string($debugmsg) && !$res )
-      error('bad_mail_address', "$debugmsg=$email");
+   if( !$res ) // invalid email
+   {
+      if( $die_on_error )
+      {
+         if( $is_string($debugmsg) )
+            error('bad_mail_address', "$debugmsg=$email");
+      }
+      else
+         return 'bad_mail_address';
+   }
    return $res;
 }
 
