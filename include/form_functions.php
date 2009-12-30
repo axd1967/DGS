@@ -292,7 +292,7 @@ class Form
                                   'EndTD'   => false,
                                   'SpanAllColumns' => false,
                                   'Attbs'   => array('class'=>'FormTextinput') ),
-         'PASSWORD'     => array( 'NumArgs' => 3,
+         'PASSWORD'     => array( 'NumArgs' => 4,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
@@ -1006,7 +1006,7 @@ class Form
     */
    function create_string_func_password( &$result, $args )
    {
-      $result .= $this->print_insert_password_input( $args[0], $args[1], $args[2] );
+      $result .= $this->print_insert_password_input( $args[0], $args[1], $args[2], $args[3] );
    }
 
    /*!
@@ -1298,11 +1298,12 @@ class Form
     *                   in the GET or POST.
     * \param $size      The size of the text input box.
     * \param $maxlength How many characters it is allowed to enter.
+    * \param $initial_value Text that appears initially in the input box.
     */
-   function print_insert_password_input( $name, $size, $maxlength )
+   function print_insert_password_input( $name, $size, $maxlength, $initival_value )
    {
       return "<INPUT type=\"password\" name=\"$name\"" .
-         $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\">";
+         $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\" value=\"$initival_value\">";
    }
 
    /*!
