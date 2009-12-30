@@ -59,6 +59,8 @@ $ARR_GLOBALS_COUNTRIES = array();
  */
 function getCountryText( $code=null )
 {
+   global $ARR_GLOBALS_COUNTRIES;
+
    // lazy-init of texts
    $key = 'COUNTRIES';
    if( !isset($ARR_GLOBALS_COUNTRIES[$key]) )

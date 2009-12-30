@@ -351,6 +351,8 @@ class Tournament
    /*! \brief Returns scope-text or all scope-texts (if arg=null). */
    function getScopeText( $scope=null )
    {
+      global $ARR_GLOBALS_TOURNAMENT;
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT['SCOPE']) )
       {
@@ -371,6 +373,8 @@ class Tournament
    /*! \brief Returns type-text or all type-texts (if arg=null). */
    function getTypeText( $type=null )
    {
+      global $ARR_GLOBALS_TOURNAMENT;
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT['TYPE']) )
       {
@@ -389,6 +393,8 @@ class Tournament
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null )
    {
+      global $ARR_GLOBALS_TOURNAMENT;
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS']) )
       {

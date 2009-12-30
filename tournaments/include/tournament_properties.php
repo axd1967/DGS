@@ -334,6 +334,8 @@ class TournamentProperties
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getRatingUseModeText( $use_mode=null, $short=true )
    {
+      global $ARR_GLOBALS_TOURNAMENT_PROPERTIES;
+
       // lazy-init of texts
       $key = 'USE_MODE';
       if( !isset($ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key]) )

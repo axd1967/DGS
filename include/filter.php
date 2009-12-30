@@ -2788,6 +2788,8 @@ class FilterRelativeDate extends Filter
    /*! \brief Returns choice-text for time-units or all choice-texts (if arg=null). */
    function getTimeUnitText( $timeunit=null )
    {
+      global $ARR_GLOBALS_FILTERS;
+
       // lazy-init of texts
       $key = 'reldate_choices';
       if( !isset($ARR_GLOBALS_FILTERS[$key]) )

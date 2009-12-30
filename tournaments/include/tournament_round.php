@@ -237,6 +237,8 @@ class TournamentRound
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null )
    {
+      global $ARR_GLOBALS_TOURNAMENT_ROUND;
+
       // lazy-init of texts
       $key = 'STATUS';
       if( !isset($ARR_GLOBALS_TOURNAMENT_ROUND[$key]) )

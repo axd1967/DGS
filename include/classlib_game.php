@@ -286,6 +286,8 @@ class GameScore
    /*! \brief Returns mode-text or all mode-texts (if arg=null). */
    function getModeText( $mode=null )
    {
+      global $ARR_GLOBALS_GAMESCORE;
+
       // lazy-init of texts
       $key = 'MODE';
       if( !isset($ARR_GLOBALS_GAMESCORE[$key]) )

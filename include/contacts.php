@@ -283,6 +283,8 @@ class Contact
    /*! \brief Returns globals (lazy init) for contact-user-flags. */
    function getContactUserFlags()
    {
+      global $ARR_GLOBALS_CONTACT;
+
       // lazy-init of texts
       $key = 'USERFLAGS';
       if( !isset($ARR_GLOBALS_CONTACT[$key]) )
@@ -306,6 +308,8 @@ class Contact
    /*! \brief Returns globals (lazy init) for contact-system-flags. */
    function getContactSystemFlags()
    {
+      global $ARR_GLOBALS_CONTACT;
+
       // lazy-init of texts
       $key = 'SYSTEMFLAGS';
       if( !isset($ARR_GLOBALS_CONTACT[$key]) )

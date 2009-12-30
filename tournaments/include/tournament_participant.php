@@ -364,6 +364,8 @@ class TournamentParticipant
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null, $with_value=false, $info_mode=false )
    {
+      global $ARR_GLOBALS_TOURNAMENT_PARTICIPANT;
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT_PARTICIPANT['STATUS']) )
       {
@@ -407,6 +409,8 @@ class TournamentParticipant
    /*! \brief Returns flags-text for given int-bitmask or all flags-texts (if arg=null). */
    function getFlagsText( $flags=null )
    {
+      global $ARR_GLOBALS_TOURNAMENT_PARTICIPANT;
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT_PARTICIPANT['FLAGS']) )
       {

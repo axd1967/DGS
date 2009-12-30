@@ -502,6 +502,8 @@ class TournamentRules
    /*! \brief Returns flags-text for given int-bitmask or all flags-texts (if arg=null). */
    function getFlagsText( $flags=null )
    {
+      global $ARR_GLOBALS_TOURNAMENT_RULES;
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_TOURNAMENT_RULES['FLAGS']) )
       {
@@ -523,6 +525,8 @@ class TournamentRules
    /*! \brief Returns type-text. */
    function getHandicaptypeText( $type )
    {
+      global $ARR_GLOBALS_TOURNAMENT_RULES;
+
       // lazy-init of texts
       $key = 'HANDICAPTYPE';
       if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key]) )

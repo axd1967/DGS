@@ -34,6 +34,8 @@ $ARR_GLOBALS_LANGUAGES = array();
 /*! \brief Returns language-text or all languages (if code=null). */
 function getLanguageText( $code=null )
 {
+   global $ARR_GLOBALS_LANGUAGES;
+
    // lazy-init of texts
    $key = 'LANGUAGES';
    if( !isset($ARR_GLOBALS_LANGUAGES[$key]) )
@@ -103,6 +105,6 @@ function getLanguageText( $code=null )
    if( !isset($ARR_GLOBALS_LANGUAGES[$key][$code]) )
       error('invalid_args', "Countries.getLanguageText($code)");
    return $ARR_GLOBALS_LANGUAGES[$key][$code];
-}
+} //getLanguageText
 
 ?>
