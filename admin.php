@@ -36,7 +36,6 @@ $ThePage = new Page('Admin');
       error('adminlevel_too_low', 'admin.show');
 
    start_page(/*T_*/('Admin'), true, $logged_in, $player_row);
-   db_close();
 
    section( 'Admin', /*T_*/('Administration'));
    centered_container();
