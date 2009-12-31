@@ -50,6 +50,9 @@ require_once( "include/form_functions.php" );
                                ) );
    $passwd_form->echo_string(1);
 
-   end_page();
+
+   $menu_array[T_("Show login page")] = 'index.php?logout=t';
+
+   end_page(@$menu_array);
 }
 ?>
