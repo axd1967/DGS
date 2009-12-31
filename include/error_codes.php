@@ -39,7 +39,7 @@ class ErrorCode
    function echo_error_text( $error_code, $error_log_id )
    {
       if( $error_log_id && ErrorCode::is_shown_error_log_id( $error_code ) )
-         echo $error_log_id;
+         echo " [ERRLOG{$error_log_id}]: ";
       echo ErrorCode::get_error_text( $error_code );
    }
 
