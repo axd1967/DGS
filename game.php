@@ -706,6 +706,8 @@ function get_alt_arg( $n1, $n2)
    end_page(@$menu_array);
 }// main
 
+
+
 function draw_moves( $gid, $move, $handicap )
 {
    global $TheBoard, $player_row;
