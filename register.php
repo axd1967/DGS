@@ -83,7 +83,7 @@ require_once( "include/register_functions.php" );
       'DESCRIPTION', T_('Email'),
       'TEXTINPUT', 'email', 50, 80, $reg->email,
       'TEXT', "<br>\n"
-            . T_('The email is optional, though it\'s recommended to give your email.')
+            . T_('The email is optional, though it\'s recommended to specify an email.')
             . "<br>\n"
             . T_('In case you\'ll forget the DGS password a reset will be easier.')
             . "<br>\n"
