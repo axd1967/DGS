@@ -23,7 +23,7 @@ require_once( "include/std_functions.php" );
 $ThePage = new Page('SiteMap');
 
 
-function item($text, $link='', $working=true, $last=false)
+function echo_item($text, $link='', $show_link, $working=true, $last=false)
 {
    global $item_nbcols, $item_level;
    static $f = array();
@@ -53,25 +53,35 @@ function item($text, $link='', $working=true, $last=false)
       echo "<td colspan=$level>";
    else
       echo "<td>";
-   if( $working && $link )
+   if( $show_link && $working && $link )
       echo "<a href=\"$link\">$text</a>";
    else
       echo "<span class=Inactive>$text</span>";
    echo "</td></tr>\n";
+} //echo_item
+
+function item($text, $link='', $working=true, $last=false)
+{
+   global $logged_in;
+   return echo_item( $text, $link, $logged_in, $working, $last);
 }
+
+function itemL($text, $link='', $working=true, $last=false)
+{
+   return echo_item( $text, $link, true, $working, $last);
+}
+
 
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
+   $id = (int)@$player_row['ID'];
+   $uhandle = @$player_row['Handle'];
 
    start_page(T_('Site map'), true, $logged_in, $player_row );
 
-   if( !$logged_in )
-      error("not_logged_in");
-
-   $id = $player_row["ID"];
 
    section( 'SiteMap', T_('Site map'));
 
@@ -81,14 +91,16 @@ function item($text, $link='', $working=true, $last=false)
 
    item(T_('Welcome page'), "index.php", true);
    { $item_level++;
-      item(T_('Introduction'), "introduction.php", true);
+      itemL(T_('Register new account'), "register.php", true);
+      itemL(T_('Forgot password?'), "forgot.php", true);
+      itemL(T_('Introduction'), "introduction.php", true);
       item(T_('Status'), "status.php", true);
       { $item_level++;
          item(T_('My user info'), "userinfo.php?uid=$id", true);
          item(T_('My running games'), "show_games.php?uid=$id", true);
          item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
          item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
-         item(T_('My tournaments'), "tournaments/list_tournaments.php?user=".urlencode($player_row['Handle']), true);
+         item(T_('My tournaments'), "tournaments/list_tournaments.php?user=".urlencode($uhandle), true);
          item(T_('Show messages'), "message.php?mode=ShowMessage", false);
          item(T_('Show game (follow id)'), "game.php", false, true);
          { $item_level++;
@@ -216,27 +228,27 @@ function item($text, $link='', $working=true, $last=false)
          item(T_('Search forums'), "forum/search.php", true, true);
       } $item_level--;
 
-      item(T_('FAQ'), "faq.php", true);
+      itemL(T_('FAQ'), "faq.php", true);
 
-      item(T_('Site map'), "site_map.php", true);
+      itemL(T_('Site map'), "site_map.php", true);
 
-      item(T_('Documentation'), "docs.php", true);
+      itemL(T_('Documentation'), "docs.php", true);
       { $item_level++;
-         item(T_('Introduction'), "introduction.php", true);
-         item(T_('Terms of Service - Rules of Conduct and Privacy Policy'), "policy.php", true);
+         itemL(T_('Introduction'), "introduction.php", true);
+         itemL(T_('Terms of Service - Rules of Conduct and Privacy Policy'), "policy.php", true);
          if( ENABLE_DONATIONS )
             item(T_('Donation'), 'donation.php', true);
-         item(T_('News, Release notes'), "news.php", true);
-         item(T_('Site map'), "site_map.php", true);
-         item(T_('FAQ'), "faq.php", true);
+         itemL(T_('News, Release notes'), "news.php", true);
+         itemL(T_('Site map'), "site_map.php", true);
+         itemL(T_('FAQ'), "faq.php", true);
          //item(T_//('Goodies'), "goodies/index.php", true); // not a DGS-feature
-         item(T_('Links'), "links.php", true);
-         item(T_('People'), "people.php", true);
-         item(T_('Statistics'), "statistics.php", true);
-         item(T_('DGS Wish list'), "http://senseis.xmp.net/?DGSWishlist", true);
-         item(T_('Installation instructions'), "install.php", true);
-         item(T_('Download dragon sources'), "snapshot.php", true);
-         item(T_('License'), "licence.php", true, true);
+         itemL(T_('Links'), "links.php", true);
+         itemL(T_('People'), "people.php", true);
+         itemL(T_('Statistics'), "statistics.php", true);
+         itemL(T_('DGS Wish list'), "http://senseis.xmp.net/?DGSWishlist", true);
+         itemL(T_('Installation instructions'), "install.php", true);
+         itemL(T_('Download dragon sources'), "snapshot.php", true);
+         itemL(T_('License'), "licence.php", true, true);
       } $item_level--;
 
       if( ALLOW_FEATURE_VOTE )
@@ -254,12 +266,15 @@ function item($text, $link='', $working=true, $last=false)
       if( @$player_row['Translator'] )
          item(T_('Translate'), "translate.php", true);
 
-      item(T_('Logout'), "index.php?logout=t", true, true);
+      itemL(T_('Logout'), "index.php?logout=t", true, true);
 
    } $item_level--;
 
    echo "</table>\n";
-   echo T_('The black links require an argument to work, so they are not usable here.');
+   if( $logged_in )
+      echo T_('The black links require an argument to work, so they are not usable here.');
+   else
+      echo T_('The black links require to be logged in, so they are not usable here.');
 
    end_page();
 }
