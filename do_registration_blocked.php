@@ -49,7 +49,7 @@ require_once( "include/register_functions.php" );
    }
 
 
-   $title = T_('User Registration (IP blocked)');
+   $title = T_('User Registration for IP blocked users');
    start_page( $title, true, false, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
