@@ -56,6 +56,7 @@ class UserRegistration
       // for both normal and blocked registration
       $this->uhandle = get_request_arg('userid');
       $this->policy = get_request_arg('policy');
+      $this->email = trim(get_request_arg('email'));
 
       // only for normal-registration
       $this->name = trim(get_request_arg('name'));
@@ -63,7 +64,6 @@ class UserRegistration
       $this->password2 = get_request_arg('passwd2');
 
       // only for blocked-registration
-      $this->email = trim(get_request_arg('email'));
       $this->comment = trim(get_request_arg('comment'));
    }
 
@@ -79,6 +79,7 @@ class UserRegistration
       $this->check_policy();
       if( $this->die_on_error )
          $this->check_existing_user();
+      $this->check_email();
       return (count($this->errors)) ? $this->errors : 0;
    }
 
@@ -131,10 +132,13 @@ class UserRegistration
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
    function check_email()
    {
-      $errorcode = verify_email( "Registration.check_email({$this->uhandle})",
-         $this->email, $this->die_on_error );
-      if( $errorcode !== true )
-         $this->_error($errorcode);
+      if( (string)$this->email != '' )
+      {
+         $errorcode = verify_email( "Registration.check_email({$this->uhandle})",
+            $this->email, $this->die_on_error );
+         if( $errorcode !== true )
+            $this->_error($errorcode);
+      }
    }
 
 
@@ -191,6 +195,7 @@ class UserRegistration
             "Handle='".mysql_addslashes($this->uhandle)."', " .
             "Name='".mysql_addslashes($this->name)."', " .
             "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($this->password)."'), " .
+            ($this->email ? "Email='".mysql_addslashes($this->email)."', " : '' ) .
             "Registerdate=FROM_UNIXTIME($NOW), " .
             "Sessioncode='$code', " .
             "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );

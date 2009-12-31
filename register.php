@@ -64,25 +64,41 @@ require_once( "include/register_functions.php" );
 
    $reg_form->set_area(3);
    $reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                              'TEXTINPUT', 'userid', 16, 16, $reg->uhandle ) );
+                              'TEXTINPUT', 'userid', 16, 16, $reg->uhandle ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                              'TEXTINPUT', 'name', 16, 80, $reg->name ) );
+                              'TEXTINPUT', 'name', 16, 80, $reg->name ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
-                              'PASSWORD', 'passwd', 16, 16, $reg->password ) );
+                              'PASSWORD', 'passwd', 16, 16, $reg->password ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
-                              'PASSWORD', 'passwd2', 16, 16, $reg->password2 ) );
+                              'PASSWORD', 'passwd2', 16, 16, $reg->password2 ));
 
-   $reg_form->add_row( array( 'TAB',
-                              'CHECKBOX', 'policy', '1', '', $reg->policy,
-                              'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
-                                               HOSTBASE."policy.php" ) ) );
+   $reg_form->add_row( array(
+      'TAB',
+      'CHECKBOX', 'policy', '1', '', $reg->policy,
+      'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
+                       HOSTBASE."policy.php" ) ));
 
-   $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ) );
+   $reg_form->add_empty_row();
+   $reg_form->add_row( array(
+      'DESCRIPTION', T_('Email'),
+      'TEXTINPUT', 'email', 50, 80, $reg->email,
+      'TEXT', "<br>\n"
+            . T_('The email is optional, though it\'s recommended to give your email.')
+            . "<br>\n"
+            . T_('In case you\'ll forget the DGS password a reset will be easier.')
+            . "<br>\n"
+            . sprintf( T_('The email is kept confidential, see "Privacy Policy" in the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
+                       HOSTBASE."policy.php" ) ));
+
+   $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ));
    $reg_form->echo_string(1);
 
    echo "<br>\n",
       T_("Note for beginners: read the FAQ especially for your initial rank setting in your profile page.");
 
-   end_page();
+
+   $menu_array[T_("Show login page")] = 'index.php?logout=t';
+
+   end_page(@$menu_array);
 }
 ?>
