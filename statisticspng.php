@@ -229,18 +229,18 @@ require_once( "include/graph.php" );
 
    //horizontal scaling
 
-      $step = 20.; //min grid distance in pixels
-      $step/= $gr->sizeX; //graph width
-      $step/= 3600*24*30; //one month
-      $step = ceil(($maxTime - $minTime) * $step);
+   $step = 20.; //min grid distance in pixels
+   $step/= $gr->sizeX; //graph width
+   $step/= 3600*24*30; //one month
+   $step = ceil(($maxTime - $minTime) * $step);
 
-      $month = date('n',$minTime)+1;
-      $year = date('Y',$minTime);
-      $dategrid = create_function('$x',
-         "return mktime(0,0,0,\$x,1,$year,0);" );
-      $gr->gridX( $month, $step, $gr->boxbottom+3
-         , $datelabel, $black
-         , $dategrid, $red);
+   $month = date('n',$minTime)+1;
+   $year = date('Y',$minTime);
+   $dategrid = create_function('$x',
+      "return mktime(0,0,0,\$x,1,$year,0);" );
+   $gr->gridX( $month, $step, $gr->boxbottom+3
+      , $datelabel, $black
+      , $dategrid, $red);
 
 
    //draw the curves
@@ -323,6 +323,6 @@ function get_stat_data()
       $tHits[]= $row['Hits'];
    }
    mysql_free_result($result);
-}
+} //get_stat_data
 
 ?>
