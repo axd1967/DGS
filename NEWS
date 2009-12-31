@@ -252,8 +252,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Initial Rating: removed converting of NNGS-rank/rating
       * Initial Rating: added KGS-rank and DGS-rating conversion
 
-   * <home register.php>Registration page</home>:
-      * Preserve entered registration-data on input-data check-errors (was that entered data was lost on check-error)
+   * <home register.php>Registration pages</home>:
+      * Preserve entered input-data on check-errors for normal and IP-blocked registration
+        (former behaviour was that entered data was lost on check-error)
       * Show ALL check-errors for entered registration-data instead of only one
 
    * Filters:
@@ -377,7 +378,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added filters for showing Errorlog
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added "Admin user" convenience link on user-info page
-      * Added page with list of important admin-scripts on admin page
+      * Added page with list of important <home scripts/index.php>admin-scripts</home> on <home admin.php>admin page</home>
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
       * Added indexes on Errorlog to allow better searches for problems
       * Added forum consistency script
