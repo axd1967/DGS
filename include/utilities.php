@@ -198,4 +198,16 @@ function basic_safe( $str )
          $str );
 }
 
+/*! \brief Formats elements of array with given sprintf-format */
+function format_array( $arr, $fmt_elem )
+{
+   $str = '';
+   if( is_array($arr) && count($arr) > 0 )
+   {
+      foreach( $arr as $elem )
+         $str .= sprintf( $fmt_elem, $elem );
+   }
+   return $str;
+}
+
 ?>

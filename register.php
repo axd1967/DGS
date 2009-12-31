@@ -53,9 +53,7 @@ require_once( "include/register_functions.php" );
 
    if( is_array($errors) )
    {
-      $error_str = '';
-      foreach( $errors as $errtext )
-         $error_str .= "\n<li>$errtext</li>";
+      $error_str = format_array( $errors, "\n<li>%s</li>" );
 
       $reg_form->set_area(2);
       $reg_form->add_row( array( 'TAB', 'TEXT',
