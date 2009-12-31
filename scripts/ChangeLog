@@ -24,6 +24,15 @@ ChangeLog
 
 2009-12-31 juga
 
+   * send_new_password.php:
+   - more hints who wants to change what for whom in error-message
+
+   * include/error_codes.php (ErrorCode.init), forgot.php:
+   - give more hints to reset password in case no email is set in account
+
+   * do_registration_blocked.php, forgot.php, register.php:
+   - added/changed page title
+
    * include/std_functions.php (start_page, echo_dragon_top_bar, make_dragon_main_menu,
        make_dragon_main_menu_logged_out, make_dragon_tools, echo_menu_tools),
      site_map.php (echo_item, item, itemL),
