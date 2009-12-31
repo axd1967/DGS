@@ -408,128 +408,22 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
 
-   if( !$printable )
+   echo_dragon_top_bar( $logged_in, $user_handle );
+
+   if( !$printable ) // main-menu
    {
-      // forum for bookmark (around table for formatting)
-      echo '<form name="bookmarkForm" action="'.$base_path.'bookmark.php" method="GET">';
-
-      echo "\n\n<table id=\"pageHead\">",
-         "\n <tr>",
-         "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">",
-         FRIENDLY_LONG_NAME."</A>";
-
-      // show bookmarks
-      if( $logged_in && !$is_down )
-      {
-         echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
-            '<select name="jumpto" size="1"',
-                  ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
-               '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
-               '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
-               '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
-               '<option value="S3">' . T_('Users online#bookmark') . '</option>',
-               '<option value="S4">' . T_('Edit profile#bookmark') . '</option>',
-            '</select>',
-            '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
-            ;
-      }
-
-      if( $is_maintenance ) // mark also for maintainers
-         echo '&nbsp;&nbsp;|&nbsp;&nbsp;<b>[ MAINTENANCE ]</b>';
-
-      echo "</td>";
-      echo "\n  <td class='LoginBox'>";
-
-      if( $logged_in && !$is_down )
-         echo T_("Logged in as"),
-            ": <A id=\"loggedId\" href=\"{$base_path}status.php\">", $user_handle, '</A>';
+      if( $logged_in )
+         $menu = make_dragon_main_menu( $player_row );
       else
-         echo T_("Not logged in");
+      {
+         $menu = make_dragon_main_menu_logged_out();
+         $player_row['MenuDirection'] = 'VERTICAL'; //layout like menu_vertical without menu
+      }
 
-      echo "</td>",
-         "\n </tr>\n</table>\n",
-         '</form>';
+      $tools_array = make_dragon_tools();
    }
 
-   if( !$printable )
-   {
-      $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
-      $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
-      $has_forum_new = ($logged_in) ? load_global_forum_new() : false;
-
-      $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
-      // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
-      // NOTE: row-number can be skipped, only for ordering
-      // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..) or sep-str
-      $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
-      $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
-      if( ALLOW_TOURNAMENTS )
-         $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
-      $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
-
-      $arr_msgs = array( array( T_('Messages'), 'list_messages.php', array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
-      if( $cnt_msg_new > 0 )
-      {
-         $cnt_msg_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_msg_new );
-         $arr_msgs[] = '&nbsp;';
-         $arr_msgs[] = array( $cnt_msg_new_str, 'list_messages.php?folder='.FOLDER_NEW, array( 'class' => 'MainMenuCount' ) );
-      }
-      $menu->add( 2,1, $arr_msgs );
-      $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
-      $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )));
-      $menu->add( 2,4, array( T_('New Game'),     'new_game.php',                array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
-
-      $menu->add( 3,1, array( T_('Users'),    'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )));
-      $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
-      $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
-
-      $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
-      if( $has_forum_new )
-      {
-         $arr_forums[] = '&nbsp;';
-         $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
-      }
-      $menu->add( 4,1, $arr_forums );
-      $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
-      $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
-      $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
-
-      if( ALLOW_FEATURE_VOTE )
-      {
-         $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
-         if( $cnt_feat_new > 0 )
-         {
-            $cnt_feat_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_feat_new );
-            $arr_feats[] = '&nbsp;';
-            $arr_feats[] = array( $cnt_feat_new_str, 'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
-         }
-         $menu->add( 5,1, $arr_feats );
-      }
-      if( ALLOW_GOBAN_EDITOR )
-         $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
-
-      $tools_array = array(); //$url => array($img,$alt,$title)
-      switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
-      {
-         case 'status.php':
-            if( ENABLE_DONATIONS )
-            {
-               $tools_array['donation.php'] = array(
-                  $base_path.'images/donate.gif',
-                  T_('Donate'), T_('Support DGS with a donation') );
-            }
-
-            $tools_array['rss/status.php'] =
-               array( $base_path.'images/rss-icon.png',
-                      'RSS',
-                      FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed")
-                     );
-            break;
-      }
-   }
-
-
-   if( !$logged_in || $is_down || $printable )
+   if( $is_down || $printable )
    {
       //layout like menu_horizontal without menu
       $player_row['MenuDirection'] = 'HORIZONTAL';
@@ -540,7 +434,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       //echo "\n  <td class=Menu>\n";
       make_menu_horizontal($menu); //outside layout table
-      make_tools( $tools_array, 0);
+      echo_menu_tools( $tools_array, 0);
       //echo "\n  </td></tr><tr>";
       echo "\n<table id='pageLayout'>" //layout table
          . "\n <tr class=LayoutHorizontal>";
@@ -551,7 +445,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
          . "\n <tr class=LayoutVertical>"
          . "\n  <td class=Menu rowspan=2>\n";
       make_menu_vertical($menu); //inside layout table
-      make_tools( $tools_array, 4);
+      echo_menu_tools( $tools_array, 4);
       echo "\n  </td>";
    }
    //this <table><tr><td> is left open until page end
@@ -566,6 +460,161 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       exit;
    }
 } //start_page
+
+function echo_dragon_top_bar( $logged_in, $user_handle )
+{
+   global $base_path, $is_down, $printable, $is_maintenance;
+
+   // forum for bookmark (around table for formatting)
+   if( !$printable )
+      echo '<form name="bookmarkForm" action="'.$base_path.'bookmark.php" method="GET">';
+
+   echo "\n\n<table id=\"pageHead\">",
+      "\n <tr>",
+      "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">",
+      FRIENDLY_LONG_NAME."</A>";
+
+   // show bookmarks
+   if( !$printable && $logged_in && !$is_down )
+   {
+      echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
+         '<select name="jumpto" size="1"',
+               ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
+            '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
+            '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
+            '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
+            '<option value="S3">' . T_('Users online#bookmark') . '</option>',
+            '<option value="S4">' . T_('Edit profile#bookmark') . '</option>',
+         '</select>',
+         '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
+         ;
+   }
+
+   if( $is_maintenance ) // mark also for maintainers
+      echo '&nbsp;&nbsp;|&nbsp;&nbsp;<b>[ MAINTENANCE ]</b>';
+
+   echo "</td>";
+   echo "\n  <td class='LoginBox'>";
+
+   if( $logged_in && !$is_down )
+      echo T_("Logged in as"),
+         ": <A id=\"loggedId\" href=\"{$base_path}status.php\">", $user_handle, '</A>';
+   else
+      echo T_("Not logged in");
+
+   echo "</td>",
+      "\n </tr>\n</table>\n";
+
+   if( !$printable )
+      echo '</form>';
+} //echo_dragon_top_bar
+
+function make_dragon_main_menu_logged_out()
+{
+   $menu = new Matrix(); // see make_dragon_main_menu()
+   // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
+
+   $menu->add( 1,1, array( T_('Login'),        'index.php?logout=t', array()));
+   $menu->add( 1,2, array( T_('Register'),     'register.php',       array()));
+
+   $menu->add( 2,1, array( T_('Introduction'), 'introduction.php', array()));
+   $menu->add( 2,2, array( T_('Policy'),       'policy.php',       array()));
+   $menu->add( 2,3, array( T_('FAQ'),          'faq.php',          array( 'accesskey' => ACCKEY_MENU_FAQ )));
+
+   $menu->add( 3,1, array( T_('Docs'),         'docs.php',         array( 'accesskey' => ACCKEY_MENU_DOCS )));
+   $menu->add( 3,2, array( T_('Site map'),     'site_map.php',     array()));
+   $menu->add( 3,3, array( T_('Statistics'),   'statistics.php',   array()));
+
+   return $menu;
+} //make_dragon_main_menu_logged_out
+
+function make_dragon_main_menu( $player_row )
+{
+   $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
+   $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
+   $has_forum_new = load_global_forum_new();
+
+   $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
+   // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
+   // NOTE: row-number can be skipped, only for ordering
+   // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..) or sep-str
+   $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
+   $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
+   if( ALLOW_TOURNAMENTS )
+      $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
+   $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
+
+   $arr_msgs = array( array( T_('Messages'), 'list_messages.php', array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
+   if( $cnt_msg_new > 0 )
+   {
+      $cnt_msg_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_msg_new );
+      $arr_msgs[] = '&nbsp;';
+      $arr_msgs[] = array( $cnt_msg_new_str, 'list_messages.php?folder='.FOLDER_NEW, array( 'class' => 'MainMenuCount' ) );
+   }
+   $menu->add( 2,1, $arr_msgs );
+   $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
+   $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )));
+   $menu->add( 2,4, array( T_('New Game'),     'new_game.php',                array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
+
+   $menu->add( 3,1, array( T_('Users'),    'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )));
+   $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
+   $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
+
+   $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
+   if( $has_forum_new )
+   {
+      $arr_forums[] = '&nbsp;';
+      $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
+   }
+   $menu->add( 4,1, $arr_forums );
+   $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
+   $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
+
+   if( ALLOW_FEATURE_VOTE )
+   {
+      $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
+      if( $cnt_feat_new > 0 )
+      {
+         $cnt_feat_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_feat_new );
+         $arr_feats[] = '&nbsp;';
+         $arr_feats[] = array( $cnt_feat_new_str, 'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
+      }
+      $menu->add( 5,1, $arr_feats );
+   }
+   if( ALLOW_GOBAN_EDITOR )
+      $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
+
+   return $menu;
+} //make_dragon_main_menu
+
+function make_dragon_tools()
+{
+   global $base_path;
+
+   $tools_array = array(); //$url => array($img,$alt,$title)
+   $page = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
+   switch( (string)$page )
+   {
+      case 'status.php':
+      {
+         if( ENABLE_DONATIONS )
+         {
+            $tools_array['donation.php'] = array(
+               $base_path.'images/donate.gif',
+               T_('Donate'), T_('Support DGS with a donation') );
+         }
+
+         $tools_array['rss/status.php'] =
+            array( $base_path.'images/rss-icon.png',
+                   'RSS',
+                   FRIENDLY_SHORT_NAME . ' ' . T_("Status RSS Feed") );
+         break;
+      }
+   }
+
+   return $tools_array;
+} //make_dragon_tools
 
 function end_page( $menu_array=NULL )
 {
@@ -909,7 +958,7 @@ function make_menu_vertical($menu)
 */
 }
 
-function make_tools( $array, $width=0)
+function echo_menu_tools( $array, $width=0)
 {
    if( !is_array($array) || count($array)==0 )
       return;
