@@ -35,8 +35,8 @@ $ThePage = new Page('Admin');
    if( !$admin_level )
       error('adminlevel_too_low', 'admin.show');
 
-   db_close();
    start_page(/*T_*/('Admin'), true, $logged_in, $player_row);
+   db_close();
 
    section( 'Admin', /*T_*/('Administration'));
    centered_container();
@@ -67,7 +67,7 @@ $ThePage = new Page('Admin');
                      '', $admin_level & ADMIN_DEVELOPER);
    add_link_page_link('admin_show_adminlog.php', T_('Show admin log'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('scripts/', T_('Show admin scripts'),
+   add_link_page_link('scripts/index.php', T_('Show admin scripts'),
                      '', $admin_level & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER));
 
    add_link_page_link();
