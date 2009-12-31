@@ -1033,7 +1033,7 @@ function verify_email( $debugmsg, $email, $die_on_error=true )
       else
          return 'bad_mail_address';
    }
-   return $res;
+   return true;
 }
 
 
