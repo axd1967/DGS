@@ -2368,7 +2368,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
               .",Lastaccess=FROM_UNIXTIME($NOW)"
               .",Notify='NONE'";
 
-      $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 100);
+      $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
       if( $player_row['Browser'] !== $browser )
       {
          $query.= ",Browser='".mysql_addslashes($browser)."'";

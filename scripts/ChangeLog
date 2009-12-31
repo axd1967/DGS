@@ -24,6 +24,16 @@ ChangeLog
 
 2009-12-31 juga
 
+   * include/std_functions.php (is_logged_in),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql:
+   - increase Players.Browser-field length: 100->150
+-----------
+-- increase Browser-field length: 100->150
+ALTER TABLE Players
+   CHANGE Browser Browser varchar(150) NOT NULL DEFAULT '';
+-----------
+
    * admin.php:
    - bugfix: closed db-connection too early
 

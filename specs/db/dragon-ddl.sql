@@ -547,7 +547,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Lost` mediumint(8) unsigned NOT NULL default '0',
   `Translator` varchar(80) NOT NULL default '',
   `IP` varchar(16) NOT NULL default '',
-  `Browser` varchar(100) NOT NULL default '',
+  `Browser` varchar(150) NOT NULL default '',
   `Country` char(2) NOT NULL default '',
   `BlockReason` text NOT NULL,
   `UserFlags` int(11) NOT NULL default '0',

@@ -1432,3 +1432,8 @@ ALTER TABLE Players
    DROP COLUMN CountForumNew ;
 
 
+-- increase Browser-field length: 100->150
+ALTER TABLE Players
+   CHANGE Browser Browser varchar(150) NOT NULL DEFAULT '';
+
+
