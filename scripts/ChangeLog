@@ -22,6 +22,32 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2009-12-31 juga
+
+   * admin.php:
+   - bugfix: closed db-connection too early
+
+   * features/lib_votes.php (Feature.set_subject), features/edit_feature.php:
+   - cut off feature-subject to 255 chars length
+   - changed subject-input to textarea
+
+   * include/error_codes.php (ErrorCode.echo_error_text),
+     include/register_functions.php (class UserRegistration),
+     include/std_functions.php (verify_email),
+     do_registration_blocked.php, error.php (handle_error), NEWS:
+   - refactored blocked-registration-code from 'error.php'
+     into 'do_registration_blocked.php'
+     - preserve entered input-field-data for blocked registration on input-
+       check-errors, behaviour was that all entered data was lost on input-error
+     - show all input-check-erros in error-list instead of only one error
+       with error()-method destroying all entered input-data
+   - moved building error-log-id-text into ErrorCode-class
+   - trimmed some registration form-values (name, email, comment)
+   - bugfix: fix success-result for email-verify
+
+   * include/utilities.php (format_array), register.php:
+   - extracted utilities-method to format array to 'include/utilities.php'
+
 2009-12-29 juga
 
    * include/register_functions.php (class UserRegistration, ~.check_registration_normal,
@@ -29,15 +55,16 @@ ChangeLog
        ~.check_password, ~.check_policy, ~.check_existing_user, ~._error,
        ~.register_user, ~.register_blocked_user),
      register.php, do_registration.php, do_registration_blocked.php, NEWS:
-   - preserve entered input-field-data for normal registration on input-check-errors,
-     behaviour was that all entered data was lost on input-error
-   - show all input-check-erros in error-list instead of only one error
-     with error()-method destroying all entered input-data
    - refactored registration-code with checks and user-db-registration for blocked
      and normal user into UserRegistration-class in 'include/register_functions.php'
-   - refactored all functionality of 'do_registration.php' into 'register.php'
+     - preserve entered input-field-data for normal registration on input-check-errors,
+       behaviour was that all entered data was lost on input-error
+     - show all input-check-erros in error-list instead of only one error
+       with error()-method destroying all entered input-data
+     - refactored all functionality of 'do_registration.php' into 'register.php'
 
-   * include/form_functions.php (class Form, ~.create_string_func_password, ~.print_insert_password_input),
+   * include/form_functions.php (class Form, ~.create_string_func_password,
+       ~.print_insert_password_input),
      edit_password.php, index.php:
    - preserve former form-value for PASSWORD-type-field
 
@@ -45,7 +72,7 @@ ChangeLog
        ~.is_shown_error_log_id, ~.is_sensitive, ~.init),
      error.php (handle_error):
    - refactored error-codes into ErrorCode-class to prepare for registration-page
-     without losing input-fields on input-check-errors
+     without losing input-fields on input-check-errors using error()-call
 
    * include/std_functions.php (start_page, verify_email):
    - bugfix: load global-forum NEW-flag only if user logged in
@@ -56,15 +83,13 @@ ChangeLog
      include/countries.php (getCountryText),
      include/filter.php (class FilterRelativeDate.getTimeUnitText),
      include/languages.php (getLanguageText),
-     tournaments/include/tournament.php (class Tournament.getScopeText,
-       ~.getTypeText, ~.getStatusText),
-     tournaments/include/tournament_participant.php (class TournamentParticipant.getStatusText, ~.getFlagsText),
-     tournaments/include/tournament_properties.php (class TournamentProperties.getRatingUseModeText),
-     tournaments/include/tournament_round.php (class TournamentRound.getStatusText),
-     tournaments/include/tournament_rules.php (class TournamentRules.getFlagsText,
-       ~.getHandicaptypeText):
+     tournaments/include/tournament.php (Tournament.getScopeText, ~.getTypeText, ~.getStatusText),
+     tournaments/include/tournament_participant.php (TournamentParticipant.getStatusText, ~.getFlagsText),
+     tournaments/include/tournament_properties.php (TournamentProperties.getRatingUseModeText),
+     tournaments/include/tournament_round.php (TournamentRound.getStatusText),
+     tournaments/include/tournament_rules.php (TournamentRules.getFlagsText, ~.getHandicaptypeText):
    - bugfix: import global-arrays into method-scope for lazy-init methods,
-     behaviour with global was to re-initialize array with every call
+     behaviour without global was to re-initialize array with every call
 
 2009-12-27 juga
 
@@ -87,8 +112,8 @@ ChangeLog
      forum/class_forum_options.php (class ForumOptions),
      forum/class_forum_read.php (class ForumRead, ~.is_post_read):
    - splitted forum_functions.php: moved class ForumOptions and class ForumRead
-     to separate includes in preparation to be able to import them for main-menu
-     global-forum NEW-flagging
+     to separate include-file 'class_forum_read.php' in preparation to be able
+     to import them for main-menu global-forum NEW-flagging
    - refactored method ForumRead.is_post_read() into ForumPost.is_post_read()
 
    * forum/forum_functions.php (ForumOptions.is_executive_admin, ~.build_options_text),
@@ -121,17 +146,11 @@ ChangeLog
      forum/post.php (post_message, approve_post, hide_post_update_trigger,
        show_post, recalc_forum_counts),
      include/connect2mysql.php (mysql_exists_row),
-     specs/forums.txt,
-     specs/db/table-Forum.txt,
+     specs/forums.txt, specs/db/table-Forum.txt,
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
-     scripts/data_export.php,
-     scripts/forum_consistency.php,
-     forum/index.php,
-     forum/list.php,
-     forum/read.php (revision_history),
-     skins/dragon/screen.css,
-     daily_cron.php,
-     NEWS:
+     scripts/data_export.php, scripts/forum_consistency.php,
+     forum/index.php, forum/list.php, forum/read.php (revision_history),
+     skins/dragon/screen.css, daily_cron.php, NEWS:
    - refactored and optimized forum 'NEW'-flag management by migrating from
      ForumRead-table to now enhanced former Forumreads-table
      - replaced (very) inefficient NEW-post-counter with simple 'NEW'-flag
@@ -871,11 +890,8 @@ copy /images/flags/vi.gif
    * include/std_functions.php (start_page, count_feature_new, update_count_feature_new),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      scripts/player_consistency.php,
-     specs/db/dragon-ddl.sql,
-     specs/db/table-Players.txt,,
-     features/edit_feature.php,
-     features/vote_feature.php,
-     NEWS:
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     features/edit_feature.php, features/vote_feature.php, NEWS:
    - show linked count of NEW features in main-menu if there are some
      update count accordingly when features is added, updated, deleted or voted upon
 -----------
@@ -1093,7 +1109,7 @@ scripts/forum_consistency.php
    - added more info in SGF: AP[application with DGS-version], SO[DGS-url to game]
    - changed general comment property:
      - added black/white start/end rating in general comment property (with ELO-rating)
-     - changed info if game if rated in extra-line: "Rated: Y|N"
+     - changed info if game is rated in extra-line: "Rated: Y|N"
    - added comment with all useful SGF-properties, note about time-info
 
 2009-08-05 juan_grande
@@ -1685,7 +1701,7 @@ UPDATE GamesNotes AS GN, Games AS G
 -- check if migration successful (following query-result must be empty)
 -- NOTE: this can happen if Games are "broken", e.g. with same user as B & W
 --       -> resolve by deleting GamesNotes or correcting Games-table
-SELECT * FROM GamesNotes WHERE uid <= 0 ;
+SELECT gid FROM GamesNotes WHERE uid <= 0 ;
 
 -- switch primary-key (gid,uid) must be unique (that's the case if above conflicts have been resolved)
 ALTER TABLE GamesNotes
@@ -2105,7 +2121,7 @@ ALTER TABLE Waitingroom
 2009-06-08 juga
 
    * include/message_functions.php (game_settings_form):
-   - added headers for game-settings-form (Time settins & Restrictions)
+   - added headers for game-settings-form (Time settings & Restrictions)
 
    * include/message_functions.php (game_settings_form, game_info_table,
        build_adjust_komi),
@@ -3698,7 +3714,7 @@ UPDATE Players SET Adminlevel=Adminlevel & ~0x10 WHERE Adminlevel > 0 ;
      include/gui_functions.php (button_TD_anchor), include/quick_common.php,
      error.php, skins/dragon/screen.css:
    - changed feature-lifecycle (status): NEW > NACK|WORK > DONE > LIVE
-     - NEW  = new feature, can be vote upon
+     - NEW  = new feature, can be voted upon
      - NACK = rejected feature
      - WORK = feature implementation started
      - DONE = feature implemented, not released yet
@@ -3897,7 +3913,7 @@ ALTER TABLE `Players`
    - deprecated nsq_addslashes()
 
    * add_to_waitingroom.php:
-   - fixed bug for handicap-adjustment: swap min/max-handicap if max>min
+   - fixed bug for handicap-adjustment: swap min/max-handicap if min>max
 
    * add_to_waitingroom.php, waiting_room.php, NEWS,
      include/game_functions.php (adjust_handicap),
