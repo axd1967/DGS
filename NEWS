@@ -252,10 +252,15 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Initial Rating: removed converting of NNGS-rank/rating
       * Initial Rating: added KGS-rank and DGS-rating conversion
 
+   * <home index.php?logout=t>Login page</home>:
+      * Show special main-menu for users not logged in and new users
+      * Show basic supporting pages even if not logged in
+
    * <home register.php>Registration pages</home>:
       * Preserve entered input-data on check-errors for normal and IP-blocked registration
         (former behaviour was that entered data was lost on check-error)
       * Show ALL check-errors for entered registration-data instead of only one
+      * Ask for optional email to register normal user (recommended)
 
    * Filters:
       * Replaced Filter-Reset with selection to clear, reset, load/save fields
@@ -283,6 +288,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Added other credits
 
    * Updates <home statistics.php?stats=1&w=1>flags</home> according to ISO-3166 country-codes list and some more:
+      * Show page even if not logged in
       * Added flags for: Aaland Islands, American Samoa, Anguilla, Aruba, Bermuda,
         British Indian Ocean Territory, Cayman Islands, Christmas Island, Cocos Islands,
         Cook Islands, European Union, Falkland Islands, Faroe Islands, French Guinea,

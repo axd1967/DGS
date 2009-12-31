@@ -24,6 +24,22 @@ ChangeLog
 
 2009-12-31 juga
 
+   * include/std_functions.php (start_page, echo_dragon_top_bar, make_dragon_main_menu,
+       make_dragon_main_menu_logged_out, make_dragon_tools, echo_menu_tools),
+     site_map.php (echo_item, item, itemL),
+     statistics.php, NEWS:
+   - show special vertical main-menu for users not logged in and new users
+   - show also DGS top-bar if $printable set though without form-elements
+   - show basic supporting pages (FAQ/Docs/site-map and statistics) even if not logged in
+
+   * include/register_functions.php (class UserRegistration, ~.check_registration_normal,
+       ~.check_email, ~.register_user),
+     register.php, NEWS:
+   - ask for optional email to register normal user
+
+   * forgot.php, register.php:
+   - added bottom-link to login-page
+
    * include/std_functions.php (is_logged_in),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/dragon-ddl.sql:
