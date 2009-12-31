@@ -205,7 +205,7 @@ require_once( "features/lib_votes.php" );
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Subject'),
-         'TEXTINPUT',   'subject', 80, 255, $feature->subject,
+         'TEXTAREA',   'subject', 80, 4, $feature->subject,
          'TEXT',        MINI_SPACING . T_('(max. 255 chars)'),
          ));
       $fform->add_row( array(

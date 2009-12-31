@@ -121,14 +121,14 @@ class Feature
 
    /*!
     * \brief Sets subject after doing some replacements
-    *        (remove double-LFs, remove starting/trailing whitespaces and LFs).
+    *        (remove double-LFs, remove starting/trailing whitespaces and LFs, cut length to 255).
     */
    function set_subject( $subject )
    {
       if( is_null($subject) )
          $this->subject = '';
       else
-         $this->subject = preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) );
+         $this->subject = substr( preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) ), 255);
    }
 
    /*! \brief Returns true, if feature can be voted on (NEW status); no user-specific checks. */
