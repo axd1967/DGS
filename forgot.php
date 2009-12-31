@@ -21,21 +21,31 @@ $TranslateGroups[] = "Start";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/error_codes.php" );
 
 {
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page(T_('Forgot password?'), true, $logged_in, $player_row );
+   $title = T_('Forgot password?');
+   start_page( $title, true, $logged_in, $player_row );
+   echo "<h3 class=\"Header\">$title</h3>\n";
 
    echo '<p></p>';
    centered_container();
-   echo '<p></p>';
-   echo T_('If you have forgotten your password we can email a new one.
+   echo '<p></p>',
+      T_('Resetting a password by yourself is only possible if you have a set email in your account.'),
+      '<p></p>',
+      T_('If you have forgotten your password we can email a new one.
 <br>The new password will be randomly generated, but you can of course change it later from the edit profile page.
-<br>Until you change it, both new and old passwords will be operational.');
+<br>Until you change it, both new and old passwords will be operational.'),
+      '<p></p>',
+      T_('In case you have no email set in your account:'),
+      "<br>\n",
+      ErrorCode::get_error_text('no_email:support');
    centered_container(0);
+
 
    $passwd_form = new Form( 'newpasswd', "send_new_password.php", FORM_POST );
 

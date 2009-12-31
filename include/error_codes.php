@@ -199,9 +199,11 @@ class ErrorCode
          $arr['newpassword_already_sent'] =
             T_("A new password has already been sent to this user, please use that password instead of sending another one.");
 
+         $arr['no_email:support'] =
+            T_("Please log in as guest and use the support forum to get help (provide your user-id and your email).");
          $arr['no_email'] =
-            T_("Sorry, no email has been given, so I can't send you the password. " .
-               "Please log in as guest and use the support forum to get help (provide your user-id and your email).");
+            T_("Sorry, no email has been given, so I can't send you the password. ") .
+            $arr['no_email:support'];
 
          $arr['bad_mail_address'] = //an email address validity function should never be treated as definitive
             T_("Sorry, the email given does not seem to be a valid address. Please, verify your spelling or try another one.");
