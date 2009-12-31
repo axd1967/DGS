@@ -50,6 +50,10 @@ require_once( "include/error_codes.php" );
    }
 
    $err = get_request_arg('err');
+   $errorlog_id = get_request_arg('eid');
+
+   // written if set, can be resetted to NULL on certain errors to avoid publishing sensitive data
+   $debugmsg = get_request_arg('debugmsg');
 
 /*
 Within the .htaccess file of the server root:
@@ -95,23 +99,13 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    start_page("Error", true, $logged_in, $player_row );
    echo '&nbsp;<br>';
 
-   // prep output of error-log ID
-   $errorlog_id = get_request_arg('eid');
-   if( $errorlog_id )
-      $errorlog_id = " [ERRLOG{$errorlog_id}]: ";
-
-   // written if set, can be resetted to NULL on certain errors to avoid publishing sensitive data
-   $debugmsg = get_request_arg('debugmsg');
-
 
    // NOTE:
-   // - When adding a new error-code, add output of errolog_id if it is helpful
+   // - When adding a new error-code, add output of errorlog_id if it is helpful
    //   to know the Errorlog.ID to identify a problem.
-   //   Having a ID releaves support of searching in big Errorlog-table.
+   //   Having a ID relieves support of searching in big Errorlog-table.
    // - It's not always useful to log errorlog_id,
    //   e.g. not for errors indicating a false behaviour of a user
-
-   //TODO handle syntax-checks defined in here on edit-pages without redirect to error-page
 
    $hide_dbgmsg = handle_error( $err, $errorlog_id, $userid, $is_admin, $BlockReason );
    if( $hide_dbgmsg )
@@ -124,7 +118,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    {
       $mysqlerror = str_replace(
          array( MYSQLHOST, DB_NAME, MYSQLUSER, MYSQLPASSWORD),
-         array( '[*h*]', '[*d*]', '[*u*]', '[*p*]'),
+         array( '[*host*]', '[*db*]', '[*user*]', '[*pwd*]'),
          $mysqlerror);
       echo "<p>MySQL error: ".basic_safe($mysqlerror)."</p>";
    }
@@ -145,7 +139,6 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
    $hide_debugmsg = false;
 
    Errorcode::echo_error_text($error_code, $errorlog_id);
-
    if( Errorcode::is_sensitive($error_code) )
       $hide_debugmsg = true;
 
@@ -156,46 +149,8 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
          break;
 
       case('ip_blocked_register'):
-      {
-         echo "<br><br>\n",
-            '<form action="do_registration_blocked.php" method="post">',
-            T_('To register a new account despite the IP-block, a user account can be created by an admin.'),
-            "<br>\n",
-            T_('Please enter a user-id for the DragonGoServer and your email to send you the login details.'),
-            "<br><br>\n",
-            T_('An IP-block is only used to keep misbehaving users away.'),
-            "<br>\n",
-            T_('So please add why you want to bypass the IP-block in the Comments-field.'),
-            "<br>\n",
-            T_('There you can also add questions you might have.'),
-            "<br>\n",
-            T_('All fields must be provided in order to fulfill the request.'),
-            "<br><br>\n",
-            '<table>',
-              '<tr>',
-                '<td>', T_('Userid'), ':</td>',
-                '<td><input type="text" name="userid" value="" size="16"></td>',
-              '</tr>', "\n",
-              '<tr>',
-                '<td>', T_('Email'), ':</td>',
-                '<td><input type="text" name="email" value="" size="50"></td>',
-              '</tr>', "\n",
-              '<tr>',
-                '<td>&nbsp;</td>',
-                '<td><input type="checkbox" name="policy" value="1">&nbsp;'
-                     . sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'), HOSTBASE."policy.php" ) . '</td>',
-              '</tr>', "\n",
-              '<tr><td colspan="2">&nbsp;</td></tr>', "\n",
-              '<tr>',
-                '<td>', T_('Comments'), ':</td>',
-                '<td><textarea name="comment" cols="60" rows="10"></textarea></td>',
-              '</tr>', "\n",
-            '</table>', "\n",
-            sprintf( '<input type="submit" name="send_request" value="%s">', T_('Send registration request') ),
-            '</form>',
-            "\n";
+         jump_to("do_registration_blocked.php?errlog_id=$errorlog_id");
          break;
-      }//ip_blocked_register
 
       case('login_denied'):
       {
