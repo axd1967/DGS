@@ -58,13 +58,13 @@ class UserRegistration
       $this->policy = get_request_arg('policy');
 
       // only for normal-registration
-      $this->name = get_request_arg('name');
+      $this->name = trim(get_request_arg('name'));
       $this->password = get_request_arg('passwd');
       $this->password2 = get_request_arg('passwd2');
 
       // only for blocked-registration
-      $this->email = get_request_arg('email');
-      $this->comment = get_request_arg('comment');
+      $this->email = trim(get_request_arg('email'));
+      $this->comment = trim(get_request_arg('comment'));
    }
 
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
