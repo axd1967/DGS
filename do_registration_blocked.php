@@ -49,9 +49,9 @@ require_once( "include/register_functions.php" );
    }
 
 
-   $title = T_('User Registration for IP blocked users');
+   $title = T_('Register new account for IP blocked users');
    start_page( $title, true, false, $player_row );
-   echo "<h3 class=Header>$title</h3>\n";
+   echo "<h3 class=\"Header\">$title</h3>\n";
 
    Errorcode::echo_error_text('ip_blocked_register', $errorlog_id);
    echo "<br><br>\n",

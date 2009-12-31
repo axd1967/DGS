@@ -44,6 +44,7 @@ require_once( "include/register_functions.php" );
 
 
    start_page(T_("Register"), true, $logged_in, $player_row );
+   echo '<h3 class="Header">', T_('Register new account'), "</h3>\n";
 
    $reg_form = new Form( 'loginform', 'register.php', FORM_POST );
    $reg_form->set_layout( FLAYOUT_GLOBAL, '1,2,3' );
