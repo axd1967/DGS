@@ -76,7 +76,7 @@ function make_known_languages() //must be called from main dir
    fwrite( $fd, ( $first ? '' : ' )' ) . "\n);\n\n?>" );
    fclose($fd);
    unset($fd);
-}
+} //make_known_languages
 
 function slashed($string)
 {
@@ -157,7 +157,7 @@ function make_include_files($language=null, $group=null) //must be called from m
    }
 
    chdir('../');
-}
+} //make_include_files
 
 
 function translations_query( $translate_lang, $untranslated, $group
@@ -220,7 +220,7 @@ function translations_query( $translate_lang, $untranslated, $group
    $result = db_query( 'translations_query', $query );
 
    return $result;
-}
+} //translations_query
 
 
 function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
@@ -269,6 +269,6 @@ function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
    }
 
    return $insert;
-}
+} //add_text_to_translate
 
 ?>
