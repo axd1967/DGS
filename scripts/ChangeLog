@@ -13,7 +13,7 @@ Developers INFO:
    Area scoring
 
 2009-02-11 juga
-   Tournaments, Forum, Wishlist-items, Code Cleanup
+   Tournaments
 
 2007-12-23 rodival
    Code Cleanup, New Features
@@ -21,6 +21,28 @@ Developers INFO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2010-01-01 juga
+
+   * scripts/generate_translation_texts.php, scripts/README.translations,
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration),
+     tournaments/include/tournament_participant.php (TournamentParticipant.build_notes),
+     features/lib_votes.php (Feature.build_feature_notes),
+     include/error_codes.php (ErrorCode.init),
+     policy.php:
+   - bugfix: leading and trailing spaces are not allowed within T_(..) translation-texts
+-----------
+UPDATE TranslationTexts
+   SET Text=TRIM(Text) WHERE LENGTH(Text) != LENGTH(TRIM(Text)) ;
+
+-- run translation-scripts as described in 'scripts/README.translations'
+-----------
+
+   * scripts/index.php:
+   - open admin-scripts in new window, because they have no DGS-bars and DGS-menus
+
+   * forum/read.php:
+   - do not mark posts as read when in moderation-mode or toggling moderator-mode
 
 2009-12-31 juga
 
@@ -5811,6 +5833,7 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2009-08-08: bug fix update (by JUG) as DGS 1.0.14.h
 2009-11-15: bug fix update (by JUG) as DGS 1.0.14.i
 2009-12-13: uploaded contact-enhancement + bug fix (by JUG) as DGS 1.0.14.j
+2010-01-01: bug fix update (by JUG) as DGS 1.0.14.k
 
 2008-12-14 juga
 
