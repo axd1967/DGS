@@ -25,42 +25,6 @@ require_once( 'forum/forum_functions.php' );
 require_once( 'forum/post.php' );
 
 
-// use-case U04: show revision history of post
-// return: loaded ForumThread
-function revision_history( $display_forum, $post_id )
-{
-   $revhist_thread = new ForumThread();
-   $revhist_thread->load_revision_history( $post_id );
-   $revhist_thread->thread_post->last_edited = 0; // don't show last-edit
-   // end of DB-stuff
-
-   $display_forum->headline = array(
-      T_('Revision history') => "colspan={$display_forum->cols}",
-   );
-   $display_forum->back_post_id = $post_id;
-   $display_forum->links |= LINK_BACK_TO_THREAD;
-   $display_forum->links &= ~LINK_REFRESH;
-
-   $display_forum->forum_start_table('Revision');
-   $display_forum->change_depth( 1 );
-   $display_forum->draw_post( DRAWPOST_REPLY, $revhist_thread->thread_post, null );
-
-   echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
-   $display_forum->change_depth( 2 );
-   foreach( $revhist_thread->posts as $post )
-   {
-      $display_forum->draw_post( DRAWPOST_EDIT, $post, true, null );
-      echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
-   }
-
-   $display_forum->change_depth( -1 );
-   $display_forum->forum_end_table();
-
-   return $revhist_thread;
-} //revision_history
-
-
-
 {
    #$DEBUG = true;
    connect2mysql();
@@ -91,6 +55,11 @@ function revision_history( $display_forum, $post_id )
    $arg_moderator = get_request_arg('moderator');
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, $arg_moderator );
    $is_moderator = ($switch_moderator == 1);
+
+   // no mark-read on moderator-actions or after moderator-toggle
+   $allow_mark_read = !$is_moderator;
+   if( $switch_moderator >= 0 && (string)$arg_moderator != '' )
+      $allow_mark_read = false;
 
    // assure independence from forum_id
    if( $forum_id == 0 && $thread > 0 )
@@ -160,6 +129,7 @@ function revision_history( $display_forum, $post_id )
             approve_post( $forum_id, $thread, $modpid );
          elseif( $modact == 'reject' )
             reject_post( $forum_id, $thread, $modpid );
+         $allow_mark_read = false;
       }
    }
 
@@ -224,7 +194,7 @@ function revision_history( $display_forum, $post_id )
    $fthread = new ForumThread( $FR );
    $fthread->load_posts( $qsql );
    $fthread->create_navigation_tree();
-   if( !$reply && !$edit && !$preview && !$modact )
+   if( !$reply && !$edit && !$preview && $allow_mark_read )
       $FR->mark_thread_read( $thread, $fthread->last_created ); // use-case U01
    // end of DB-stuff
 
@@ -371,4 +341,39 @@ function revision_history( $display_forum, $post_id )
 
    end_page();
 }
+
+// use-case U04: show revision history of post
+// return: loaded ForumThread
+function revision_history( $display_forum, $post_id )
+{
+   $revhist_thread = new ForumThread();
+   $revhist_thread->load_revision_history( $post_id );
+   $revhist_thread->thread_post->last_edited = 0; // don't show last-edit
+   // end of DB-stuff
+
+   $display_forum->headline = array(
+      T_('Revision history') => "colspan={$display_forum->cols}",
+   );
+   $display_forum->back_post_id = $post_id;
+   $display_forum->links |= LINK_BACK_TO_THREAD;
+   $display_forum->links &= ~LINK_REFRESH;
+
+   $display_forum->forum_start_table('Revision');
+   $display_forum->change_depth( 1 );
+   $display_forum->draw_post( DRAWPOST_REPLY, $revhist_thread->thread_post, null );
+
+   echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
+   $display_forum->change_depth( 2 );
+   foreach( $revhist_thread->posts as $post )
+   {
+      $display_forum->draw_post( DRAWPOST_EDIT, $post, true, null );
+      echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
+   }
+
+   $display_forum->change_depth( -1 );
+   $display_forum->forum_end_table();
+
+   return $revhist_thread;
+} //revision_history
+
 ?>
