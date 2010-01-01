@@ -101,7 +101,7 @@ require_once( "include/make_translationfiles.php" );
       }
 
       // NOTE: this old pattern does not cover all T_-texts.
-      // Not possible to ensure, if all wrong occurences are correctly formulated.
+      // Not possible with this pattern to ensure, if all wrong occurences are correctly formulated.
       //$pattern = "%T_\((['\"].*?['\"])\)[^'\"]%s";
       //preg_match_all( $pattern, $contents, $matches );
 
@@ -114,9 +114,16 @@ require_once( "include/make_translationfiles.php" );
          list( $transl_text, $errormsg, $pos ) = $resultmatch;
          if( is_numeric($errormsg) && $errormsg == 0 )
          {
-            $result_eval = eval( "\$tstring = trim($transl_text);" );
+            $result_eval = eval( "\$tstring = $transl_text;" );
             if( $result_eval === false || strlen($tstring) == 0 )
                $errormsg = "Evaluation error";
+            else
+            {
+               $orig_tstr = $tstring;
+               $tstring = trim($tstring);
+               if( strlen($orig_tstr) != strlen($tstring) )
+                  $errormsg = "Found forbidden leading or trailing white-space";
+            }
          }
 
          if( $errormsg )
@@ -226,6 +233,7 @@ function find_translation_texts( $contents )
             break;
          }
       }
+
       if( !$endtext )
       {
          if( $errpos != $spos )
@@ -247,7 +255,7 @@ function find_translation_texts( $contents )
    }
 
    return $result;
-}
+} //find_translation_texts
 
 // eat comments "/*..*/", "//...", "#..."
 function eat_comments( $contents, $clen, &$pos )
@@ -281,7 +289,7 @@ function eat_comments( $contents, $clen, &$pos )
    }
 
    eat_whitespace( $contents, $clen, $pos );
-}
+} //eat_comments
 
 function eat_whitespace( $contents, $clen, &$pos )
 {
@@ -321,6 +329,6 @@ function eat_translation_text( $contents, $clen, &$pos )
       return array( $text, "Found invalid variable-usage in translation-text [{$match[1]}]", $spos );
 
    return array( $text, 0, $spos );
-}
+} //eat_translation_text
 
 ?>

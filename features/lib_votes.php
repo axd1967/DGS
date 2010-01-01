@@ -352,7 +352,7 @@ class Feature
       }
 
       $intro_open_str = ($intro) // Open
-         ? sprintf( T_('<li>%1$s = show status %2$s + %3$s'."\n"),
+         ? sprintf( T_('<li>%1$s = show status %2$s + %3$s') . "\n",
                     T_('Open#filtervote'), FEATSTAT_NEW, FEATSTAT_WORK )
          : '';
       $notes[] = sprintf(

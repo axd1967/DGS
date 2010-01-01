@@ -56,7 +56,8 @@ require_once( "include/std_functions.php" );
 
       '<h3>', T_('Privacy Policy'), '</h3>',
       T_('<p>We will not give away personal information about you (email address, IP address and messages), ' .
-         'which resides on DragonGoServer without explicit permission from you unless it is requested by police force. '),
+         'which resides on DragonGoServer without explicit permission from you unless it is requested by police force.'),
+      "\n",
       T_('<p>You are responsible for your actions and information that you put on the site in your bio, ' .
          'forums or in messages to other members.'),
 

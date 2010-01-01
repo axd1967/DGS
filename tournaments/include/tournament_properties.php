@@ -216,7 +216,7 @@ class TournamentProperties
       {// need user-rating
          $this->_load_user( $user );
          if( !$user->hasRating() )
-            $errors[] = T_('User has no Dragon rating, which is needed for tournament rating mode: ')
+            $errors[] = T_('User has no Dragon rating, which is needed for tournament rating mode:')
                . "\n" . TournamentProperties::getRatingUseModeText( $this->RatingUseMode, false );
       }
 

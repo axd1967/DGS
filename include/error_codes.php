@@ -185,10 +185,10 @@ class ErrorCode
                "If you can't log in, please try once more and, if this fails, contact the support.");
 
          $arr['mysql_query_failed'] =
-            T_("Database query failed. Please wait a few minutes and try again. ");
+            T_("Database query failed. Please wait a few minutes and try again.");
 
          $arr['mysql_select_db_failed'] =
-            T_("Couldn't select the database. Please wait a few minutes and try again. ");
+            T_("Couldn't select the database. Please wait a few minutes and try again.");
 
          $arr['mysql_start_game'] =
             T_("Sorry, couldn't start the game. Please wait a few minutes and try again.");
@@ -202,7 +202,7 @@ class ErrorCode
          $arr['no_email:support'] =
             T_("Please log in as guest and use the support forum to get help (provide your user-id and your email).");
          $arr['no_email'] =
-            T_("Sorry, no email has been given, so I can't send you the password. ") .
+            T_("Sorry, no email has been given, so I can't send you the password.") . ' ' .
             $arr['no_email:support'];
 
          $arr['bad_mail_address'] = //an email address validity function should never be treated as definitive

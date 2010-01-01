@@ -450,7 +450,7 @@ class TournamentParticipant
          $notes[] = null; // empty line
 
          $notes[] = T_('You will need a custom rating when you don\'t have a DGS-rating yet or '
-               .  "if you don't want to start with your DGS-rating.\n");
+               .  "if you don't want to start with your DGS-rating.");
          $notes[] = T_('If you enter a non-default starting round or a custom rating, '
                . "your application needs to be verified by a tournament director.\n"
                . 'Therefore please add your reasoning for the changes in the user-message '
