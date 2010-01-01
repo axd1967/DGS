@@ -103,6 +103,8 @@ require_once( "include/classlib_game.php" );
    if( $do_it )
       _echo('Running games remaining-time fix for Games.TimeOutDate finished.');
 
+   _echo( "<p></p>Done." );
+
    end_html();
 }
 
