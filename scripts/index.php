@@ -112,7 +112,8 @@ function echo_scripts( $arr_dirs )
          if( is_numeric($val) && $val == 0 ) // section-title
             printf( '<tr class="Title"><td colspan="3"><hr>%s</td>', $key );
          else // script with description
-            printf( '<tr><td></td> <td>%s</td> <td>%s</td>', anchor($dir.$key, $scriptname), $val );
+            printf( '<tr><td></td> <td>%s</td> <td>%s</td>',
+               anchor($dir.$key, $scriptname, '', 'target="_blank"'), $val );
          echo "</tr>\n";
       }
    }
