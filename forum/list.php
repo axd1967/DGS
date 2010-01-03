@@ -79,13 +79,15 @@ require_once( 'forum/forum_functions.php' );
 
    $disp_forum->cols = 5;
    $disp_forum->links = LINKPAGE_LIST;
-   $disp_forum->links |= LINK_FORUMS | LINK_NEW_TOPIC | LINK_SEARCH | LINK_REFRESH;
+   $disp_forum->links |= LINK_FORUMS | LINK_SEARCH | LINK_REFRESH;
    if( $offset > 0 )
       $disp_forum->links |= LINK_PREV_PAGE;
    if( $forum->has_more_threads() )
       $disp_forum->links |= LINK_NEXT_PAGE;
    if( $switch_moderator >= 0 )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
+   if( Forum::allow_posting( $player_row, $forum->options ) ) // read-only forum
+      $disp_forum->links |= LINK_NEW_TOPIC;
    if( $forum->has_new_posts_in_threads() )
       $disp_forum->links |= LINK_MARK_READ;
 
