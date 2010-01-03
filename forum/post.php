@@ -136,7 +136,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
          $answer_nr = $row['answer_nr'];
          if( $answer_nr <= 0 ) $answer_nr = 0;
 
-         $lastchanged_string = ''; // Lastchanged/Updated only set for thread
+         $lastchanged_string = ''; // Lastchanged only set for thread
       }
       // -------   New thread  ---------- (use-case U06)
       else
@@ -147,8 +147,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
          $PosIndex = ''; //just right now... (adjusted below)
          $Depth = 0;
          $Thread_ID = -1;
-         $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), "
-            . "Updated=FROM_UNIXTIME($NOW), ";
+         $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";
       }
 
 
@@ -216,8 +215,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
                'UPDATE Posts SET '
                . 'PostsInThread=PostsInThread+1, '
                . "LastPost=GREATEST(LastPost,$New_ID), "
-               . "Lastchanged=IF(LastPost>$New_ID,Lastchanged,FROM_UNIXTIME($NOW)), "
-               . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
+               . "Lastchanged=IF(LastPost>$New_ID,Lastchanged,FROM_UNIXTIME($NOW)) "
                . "WHERE ID='$Thread_ID' LIMIT 1" );
          }
 
@@ -244,9 +242,11 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 // use-case A04 (approve post on pending-approval)
 function approve_post( $fid, $tid, $pid )
 {
+   global $NOW;
+
    // approve post
    db_query( "approve_post.update_post($pid)",
-      "UPDATE Posts SET Approved='Y' WHERE ID=$pid LIMIT 1" );
+      "UPDATE Posts SET Approved='Y' WHERE ID=$pid AND Approved<>'Y' LIMIT 1" );
    if( mysql_affected_rows() < 1 )
       return; // already approved
 
@@ -272,9 +272,7 @@ function approve_post( $fid, $tid, $pid )
    db_query( "approve_post.trigger_thread($tid,$pid)",
       'UPDATE Posts SET '
       . ( ($post_created > $thread_lastchanged)
-            ? "LastPost=$pid, " .
-              "Lastchanged=FROM_UNIXTIME($post_created), " .
-              "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
+            ? "LastPost=$pid, Lastchanged=FROM_UNIXTIME($post_created), "
             : '' )
       . 'PostsInThread=PostsInThread+1 '
       . "WHERE ID=$tid LIMIT 1" );
@@ -284,22 +282,19 @@ function approve_post( $fid, $tid, $pid )
       'UPDATE Forums SET '
       . 'PostsInForum=PostsInForum+1, '
       . ( ($thread_cntposts == 0) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
-      . ( ($post_created > $thread_lastchanged)
-            ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
-            : '' )
+      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
       . "LastPost=GREATEST(LastPost,$pid) "
       . "WHERE ID=$fid LIMIT 1" );
 
    // global-trigger
-   if( $post_created > $thread_lastchanged )
-      ForumRead::trigger_recalc_global_post_update( $post_created );
+   ForumRead::trigger_recalc_global_post_update( $NOW );
 }//approve_post
 
 // use-case A05 (reject post on pending-approval)
 function reject_post( $fid, $tid, $pid )
 {
    db_query( "reject_post.update_post($pid)",
-      "UPDATE Posts SET Approved='N' WHERE ID=$pid LIMIT 1" );
+      "UPDATE Posts SET Approved='N' WHERE ID=$pid AND Approved<>'N' LIMIT 1" );
    if( mysql_affected_rows() < 1 )
       return; // already rejected
 
@@ -311,7 +306,7 @@ function hide_post( $fid, $tid, $pid )
 {
    // hide post
    db_query( "hide_post.update_post($pid)",
-      "UPDATE Posts SET Approved='N' WHERE ID=$pid LIMIT 1" );
+      "UPDATE Posts SET Approved='N' WHERE ID=$pid AND Approved<>'N' LIMIT 1" );
    if( mysql_affected_rows() < 1 )
       return; // already hidden
 
@@ -325,6 +320,7 @@ function hide_post( $fid, $tid, $pid )
 function hide_post_update_trigger( $fid, $tid, $pid )
 {
    global $NOW;
+
    $row = // read thread-info
       mysql_single_fetch( "hide_post_update_trigger.find_thread($tid)",
          "SELECT LastPost, PostsInThread FROM Posts "
@@ -343,8 +339,7 @@ function hide_post_update_trigger( $fid, $tid, $pid )
    db_query( "hide_post_update_trigger.trigger_thread($tid,$pid)",
       'UPDATE Posts SET '
       . ( ($pid == $thread_lastpost && $thread_cntposts == 0) ? 'LastPost=0, ' : '' )
-      . 'PostsInThread=PostsInThread-1, '
-      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) " // post could be a NEW one
+      . 'PostsInThread=PostsInThread-1 '
       . "WHERE ID=$tid LIMIT 1" );
 
    // forum-trigger
@@ -352,7 +347,7 @@ function hide_post_update_trigger( $fid, $tid, $pid )
       'UPDATE Forums SET '
       . ( ($thread_cntposts == 1) ? 'ThreadsInForum=ThreadsInForum-1, ' : '' )
       . 'PostsInForum=PostsInForum-1, '
-      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) " // post could be a NEW one
+      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
       . "WHERE ID=$fid LIMIT 1" );
 
    // global-trigger
@@ -363,14 +358,16 @@ function hide_post_update_trigger( $fid, $tid, $pid )
 
    if( $pid == $forum_lastpost )
       recalc_forum_lastpost($fid);
-}//hide_post_update_trigger
+} //hide_post_update_trigger
 
 // use-case A07 (show hidden post)
 function show_post( $fid, $tid, $pid )
 {
+   global $NOW;
+
    // show post
    db_query( "show_post.update_post($pid)",
-      "UPDATE Posts SET Approved='Y' WHERE ID=$pid LIMIT 1" );
+      "UPDATE Posts SET Approved='Y' WHERE ID=$pid AND Approved<>'Y' LIMIT 1" );
    if( mysql_affected_rows() < 1 )
       return; // already shown
 
@@ -398,9 +395,7 @@ function show_post( $fid, $tid, $pid )
    db_query( "show_post.trigger_thread($tid,$pid)",
       'UPDATE Posts SET '
       . ( ($post_created > $thread_lastchanged || $thread_lastpost == 0)
-         ? "LastPost=$pid, "
-           . "Lastchanged=FROM_UNIXTIME($post_created), "
-           . "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
+         ? "LastPost=$pid, Lastchanged=FROM_UNIXTIME($post_created), "
          : '' )
       . 'PostsInThread=PostsInThread+1 '
       . "WHERE ID=$tid LIMIT 1" );
@@ -409,15 +404,12 @@ function show_post( $fid, $tid, $pid )
    db_query( "show_post.trigger_forum($fid,$pid)",
       'UPDATE Forums SET '
       . ( ($thread_cntposts == 0) ? 'ThreadsInForum=ThreadsInForum+1, ' : '' )
-      . ( ($post_created > $thread_lastchanged)
-            ? "Updated=GREATEST(Updated,FROM_UNIXTIME($post_created)), "
-            : '' )
+      . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
       . 'PostsInForum=PostsInForum+1 '
       . "WHERE ID=$fid LIMIT 1" );
 
    // global-trigger
-   if( $post_created > $thread_lastchanged )
-      ForumRead::trigger_recalc_global_post_update( $post_created );
+   ForumRead::trigger_recalc_global_post_update( $NOW );
 
    recalc_forum_lastpost($fid);
 }//show_post

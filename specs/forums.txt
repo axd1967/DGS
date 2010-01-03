@@ -323,8 +323,6 @@ TABLE Posts
    Lastchanged    - last-changed-date for thread (post-edit is NO change to thread)
    PostsInThread  - number of shown posts for this thread { Thread_ID }
    Hits           - number of hits (reads/action on thread-posts)
-   Updated        - last-updated-date for thread (indicator to recalculate
-                    NEW-state for threads and forums)
 
    User_ID        - Players.ID, author of post
    Parent_ID      - Posts.ID of answered/replied post (to build thread-tree)
@@ -350,14 +348,14 @@ TABLE Posts
                     see forum/old_links_redirect.php
 
    # entered data
-   Forum_ID, Thread_ID, Updated, User_ID, Parent_ID, AnswerNr, Depth, PosIndex,
+   Forum_ID, Thread_ID, User_ID, Parent_ID, AnswerNr, Depth, PosIndex,
    Time, Lastedited, Approved, Subject, Text, crc32, (old_ID)
 
    # calculated fields
    PosIndex (from Parent_ID, Depth, AnswerNr), crc32 (from Text)
 
    # triggered fields
-   ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
+   ID; LastPost, Lastchanged, PostsInThread, Hits;
    PosIndex, Lastedited, Approved
 
 
@@ -372,15 +370,15 @@ TABLE Forumreads
    Thread_ID      - Posts.ID of thread
 
    Time           - last read-date,
-                    used as date-trigger in combination with Forum/Posts.Updated
+                    used as date-trigger in combination with Forums.Updated
    HasNew         - 0|1, 1=there are new posts in forum(s), 0=no new posts,
                     used for forum-list and global-forum only,
                     0 for threads forum-read
 
-                    This field is updated to current timestamp when something
-                    has been changed for forum[Forums.ID], being an indicator
-                    when forum could have something new and so forum-read for
-                    user must be checked.
+                    These fields are updated to current timestamp and current
+                    new-flag-state when something has been changed for
+                    forum[Forums.ID], being an indicator when forum could have
+                    something new and so forum-read for user must be checked.
 
    # (a) Last read-date for all shown posts in thread $tid:
    #     post is read when older than FORUM_WEEKS_NEW_END weeks or
@@ -518,7 +516,7 @@ Posts($fid,$tid):
    - 'new'-flags for global-forum, forum-list and thread-list are independent
      of each other, i.e. for example, that 'new'-flag for thread-list is NOT needed
      to calculate 'new'-flag for forum-list or global-forum, nor is 'new'-flag
-     calculations for forum-list needed for global-forum 'new'-flag
+     calculation for forum-list needed for global-forum 'new'-flag.
 
 * NEW-flags in thread-post view
    - post is "read" when Posts[$pid].Time is older than FORUM_WEEKS_NEW_END weeks
@@ -588,7 +586,7 @@ Posts($fid,$tid):
 
 # Trigger-fields:
 # - Forums: ID; LastPost, Updated, PostsInForum, ThreadsInForum
-# - Thread/Post: ID; LastPost, Lastchanged, PostsInThread, Hits, Updated;
+# - Thread/Post: ID; LastPost, Lastchanged, PostsInThread, Hits;
 #   PosIndex, Lastedited, Approved
 # - Forumreads: Time, HasNew
 # - global-Forumreads: touch CACHEFILE_FORUM_GLOBAL-file to update
@@ -635,7 +633,7 @@ Posts($fid,$tid):
 
 * insert Posts:
   - Forum_ID=$fid, Parent_ID=0, Thread_ID=$ntid (update after insert),
-    Hits=0, Time=$NOW, Lastchanged=Time, Updated=$NOW, Depth=1, AnswerNr=1,
+    Hits=0, Time=$NOW, Lastchanged=Time, Depth=1, AnswerNr=1,
     crc32=crc32(Text)
 
   - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
@@ -649,7 +647,7 @@ Posts($fid,$tid):
   - Forums($fid).PostsInForum++
   - Forums($fid).LastPost=GREATEST(LastPost,$ntid)
   - Forums($fid).Updated=GREATEST(Updated,$NOW)
-  - Global.Updated=$NOW
+  - Global.Updated=GREATEST(Updated,$NOW)
 
 * write Forumlog-entry
 
@@ -688,11 +686,10 @@ Posts($fid,$tid):
   - Thread($tid).PostsInThread++
   - Thread($tid).LastPost=GREATEST(LastPost,$npid)
   - Thread($tid).Lastchanged=IF(LastPost>$npid,Lastchanged,$npid.Time)
-  - Thread($tid).Updated=GREATEST(Updated,$NOW)
   - Forums($fid).PostsInForum++
   - Forums($fid).LastPost=GREATEST(LastPost,$npid)
   - Forums($fid).Updated=GREATEST(Updated,$NOW)
-  - Global.Updated=$NOW
+  - Global.Updated=GREATEST(Updated,$NOW)
 
 * Thread($tid).Hits++
 
@@ -729,7 +726,6 @@ Posts($fid,$tid):
 #TODO (optional) need READ-ONCE message feature (=NOTIFY-message deleting itself if marked as read)
 
 * move thread-posts:
-  - $tupd := Thread($tid).Updated
   - Posts[Thread_ID=$tid].Forum_ID=$nfid
 
 * move forum-reads:
@@ -738,7 +734,7 @@ Posts($fid,$tid):
 * update source-forum (Forum_ID=$sfid):
   - Forums.ThreadsInForum--
   - Forums.PostsInForum -= Thread($tid).PostsInThread
-  - Forums.Updated=GREATEST(Updated,$tupd)
+  - Forums.Updated=GREATEST(Updated,$NOW)
 
   - recalc Forums.LastPost
 
@@ -746,7 +742,7 @@ Posts($fid,$tid):
   - Forums.LastPost=GREATEST(LastPost,Threads($tid).LastPost)
   - Forums.ThreadsInForum++
   - Forums.PostsInForum += Thread($tid).PostsInThread
-  - Forums.Updated=GREATEST(Updated,$tupd)
+  - Forums.Updated=GREATEST(Updated,$NOW)
 
 * if admin chooses: send READ-ONCE message to all Thread($tid).User_ID
   informing about thread-move
@@ -771,9 +767,10 @@ Posts($fid,$tid):
 * if $dpid > Thread($pid).Lastchanged:
   - Thread($pid).LastPost = $pid
   - Thread($pid).Lastchanged = $dpid
-  - Thread($pid).Updated = $dpid
-  - Forums($fid).Updated=GREATEST(Updated,$dpid)
-  - Global.Updated=$NOW
+
+* Forums($fid).Updated=GREATEST(Updated,$NOW)
+
+* Global.Updated=GREATEST(Updated,$NOW)
 
 #----- A05: reject post
 
@@ -787,19 +784,18 @@ Posts($fid,$tid):
 
 * Thread($tid).PostsInThread--
   $ptid := Thread($tid).PostsInThread
-* Thread($tid).Updated=$NOW (post could be a NEW one)
 
 * if $pid == Thread($tid).LastPost:
   if Thread($tid).PostsInThread>0: recalc Thread($tid).LastPost, Lastchanged
     else: Thread($tid).LastPost=0
 
 * Forums($fid).PostsInForum--
-* Forums($fid).Updated=$NOW (post could be a NEW one)
+* Forums($fid).Updated=GREATEST(Updated,$NOW) (post could be a NEW one)
 * if $ptid == 0: Forums($fid).ThreadsInForum--
 * if $pid == Forums($fid).LastPost:
   - recalc Forums($fid).LastPost
 
-* Global.Updated=$NOW (post could be a NEW one)
+* Global.Updated=GREATEST(Updated,$NOW) (post could be a NEW one)
 
 #----- A07: show post
 
@@ -813,15 +809,14 @@ Posts($fid,$tid):
 * if $dpid > Thread($pid).Lastchanged OR $ltid == 0:
   - Thread($tid).LastPost=$pid
   - Thread($tid).Lastchanged=$dpid
-  - Thread($pid).Updated = $dpid
 
-  - Forums($fid).Updated=GREATEST(Updated,$dpid)
   - if $ltid == Forums($fid).LastPost: Forums($fid).LastPost=$pid
 
-  - Global.Updated=$NOW
-
+* Forums($fid).Updated=GREATEST(Updated,$NOW)
 * Forums($fid).PostsInForum++
 * if $ptid==1: Forums($fid).ThreadsInForum++
+
+* Global.Updated=GREATEST(Updated,$NOW)
 
 #----- A08: cleanup
 
