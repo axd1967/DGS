@@ -233,7 +233,6 @@ class UserRegistration
                "Thread_ID=0, " .
                "Time=FROM_UNIXTIME($NOW), " .
                "LastChanged=FROM_UNIXTIME($NOW), " .
-               "Updated=FROM_UNIXTIME($NOW), " .
                "Subject=\"$Subject\", " .
                "Text=\"$Text\", " .
                "User_ID=1, " . // user moderated guest-user
