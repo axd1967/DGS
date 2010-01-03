@@ -22,6 +22,26 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-03 juga
+
+   * forum/post.php (post_message, approve_post, hide_post_update_trigger, show_post),
+     forum/forum_functions.php (class ForumPost, ~.to_string, ~.build_query_sql, ~.new_from_row),
+     include/register_functions.php (UserRegistration.register_blocked_user),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/forums.txt:
+   - bugfix: handling forum and global-forum NEW-flag-state always resetting
+     respective Updated-data for moderate-actions approve/reject/show/hide
+   - removed unused db-table-field: Posts.Updated (after revised NEW-flag handling)
+   - removed unused class-attribute: ForumPost.last_updated
+   - query-optimization on post-moderation checking Posts.Approved on old-value
+-----------
+-- [unused] remove unused field
+ALTER TABLE Posts
+   DROP COLUMN Updated ;
+-----------
+
+   * forum/list.php:
+   - bugfix: don't show "New topic"-link in top-bar for read-only forums
+
 2010-01-01 juga
 
    * scripts/generate_translation_texts.php, scripts/README.translations,
@@ -32,9 +52,9 @@ ChangeLog
      policy.php:
    - bugfix: leading and trailing spaces are not allowed within T_(..) translation-texts
 -----------
+-- bugfix: leading and trailing spaces are not allowed within T_(..) translation-texts
 UPDATE TranslationTexts
    SET Text=TRIM(Text) WHERE LENGTH(Text) != LENGTH(TRIM(Text)) ;
-
 -- run translation-scripts as described in 'scripts/README.translations'
 -----------
 
@@ -223,6 +243,9 @@ ALTER TABLE Players
    - added 'Mark all read' on forums thread-list
    - added Forums-link for refresh forums
 -----------
+-- check Forumreads-table with thread=0 (must be 0 entries)
+SELECT * FROM Forumreads WHERE Thread_ID=0 ;
+
 -- changed forum to backport to enhanced Forumreads-table, optimizing index
 ALTER TABLE Forumreads
    DROP PRIMARY KEY ;
@@ -230,7 +253,12 @@ ALTER TABLE Forumreads
    ADD Forum_ID smallint NOT NULL DEFAULT '0' AFTER User_ID ;
 ALTER TABLE Forumreads
    ADD PRIMARY KEY (Thread_ID,User_ID,Forum_ID) ;
+UPDATE Forumreads AS FR INNER JOIN Posts AS P ON P.ID=FR.Thread_ID
+   SET FR.Forum_ID=P.Forum_ID WHERE FR.Thread_ID>0 AND FR.Forum_ID=0 ;
 ANALYZE TABLE Forumreads ;
+
+-- check Forumreads-table with forum=0 (must be 0 entries)
+SELECT * FROM Forumreads WHERE Forum_ID=0 ;
 
 -- [not-null] cleanup Forumreads.Time datetime default NULL -> no default -> NOT NULL
 ALTER TABLE Forumreads

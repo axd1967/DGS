@@ -1407,6 +1407,9 @@ ALTER TABLE Players
    ADD INDEX VacationDays (VacationDays) ;
 
 
+-- check Forumreads-table with thread=0 (must be 0 entries)
+SELECT * FROM Forumreads WHERE Thread_ID=0 ;
+
 -- changed forum to backport to enhanced Forumreads-table, optimizing index
 ALTER TABLE Forumreads
    DROP PRIMARY KEY ;
@@ -1414,7 +1417,12 @@ ALTER TABLE Forumreads
    ADD Forum_ID smallint NOT NULL DEFAULT '0' AFTER User_ID ;
 ALTER TABLE Forumreads
    ADD PRIMARY KEY (Thread_ID,User_ID,Forum_ID) ;
+UPDATE Forumreads AS FR INNER JOIN Posts AS P ON P.ID=FR.Thread_ID
+   SET FR.Forum_ID=P.Forum_ID WHERE FR.Thread_ID>0 AND FR.Forum_ID=0 ;
 ANALYZE TABLE Forumreads ;
+
+-- check Forumreads-table with forum=0 (must be 0 entries)
+SELECT * FROM Forumreads WHERE Forum_ID=0 ;
 
 -- [not-null] cleanup Forumreads.Time datetime default NULL -> no default -> NOT NULL
 ALTER TABLE Forumreads
@@ -1435,5 +1443,16 @@ ALTER TABLE Players
 -- increase Browser-field length: 100->150
 ALTER TABLE Players
    CHANGE Browser Browser varchar(150) NOT NULL DEFAULT '';
+
+
+-- bugfix: leading and trailing spaces are not allowed within T_(..) translation-texts
+UPDATE TranslationTexts
+   SET Text=TRIM(Text) WHERE LENGTH(Text) != LENGTH(TRIM(Text)) ;
+-- run translation-scripts as described in 'scripts/README.translations'
+
+
+-- [unused] remove unused field
+ALTER TABLE Posts
+   DROP COLUMN Updated ;
 
 
