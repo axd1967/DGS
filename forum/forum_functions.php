@@ -644,7 +644,7 @@ class DisplayForum
 
       // post-vars needed:
       //    id, forum_id, thread_id, parent_id, subject, text, author(id,name,handle),
-      //    pending_approval, last_updated, last_edited, last_read
+      //    pending_approval, last_edited, last_read
       // post-vars only needed for forum-search: forum_name, score; this->show_score
 
       $pid = $post->id;
@@ -1581,8 +1581,6 @@ class ForumPost
    var $last_changed;
    /*! \brief Posts.Lastedited */
    var $last_edited;
-   /*! \brief Posts.Updated (change-date for thread-forum-read) */
-   var $updated;
 
    /*! \brief Posts.crc32 */
    var $crc32;
@@ -1591,8 +1589,6 @@ class ForumPost
 
    // non-db vars
 
-   /*! \brief max of (created,last_edited) = GREATEST(Posts.Time,Posts.Lastedited); date of last-change of current post */
-   var $last_updated;
    /*! \brief true, if for thread no link should be drawn (used in draw_post-func) [default=false] */
    var $thread_no_link;
 
@@ -1619,7 +1615,7 @@ class ForumPost
    function ForumPost( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
          $count_posts=0, $count_hits=0, $subject='', $text='', $parent_id=0, $answer_num=0,
          $depth=0, $posindex='', $approved='Y',
-         $created=0, $last_changed=0, $last_edited=0, $updated=0, $crc32=0, $old_id=0 )
+         $created=0, $last_changed=0, $last_edited=0, $crc32=0, $old_id=0 )
    {
       $this->id = (int) $id;
       $this->forum_id = (int) $forum_id;
@@ -1638,11 +1634,9 @@ class ForumPost
       $this->created = (int) $created;
       $this->last_changed = (int) $last_changed;
       $this->last_edited = (int) $last_edited;
-      $this->updated = (int) $updated;
       $this->crc32 = (int) $crc32;
       $this->old_id = (int) $old_id;
       // non-db
-      $this->last_updated = max( $this->created, $this->last_edited );
       $this->thread_no_link = false;
       $this->has_new_posts = false;
       $this->is_read = true;
@@ -1734,10 +1728,8 @@ class ForumPost
          . "created=[{$this->created}], "
          . "last_changed=[{$this->last_changed}], "
          . "last_edited=[{$this->last_edited}], "
-         . "updated=[{$this->updated}], "
          . "crc32=[{$this->crc32}], "
          . "old_id=[{$this->old_id}], "
-         . "last_updated=[{$this->last_updated}], "
          . "thread_no_link=[{$this->thread_no_link}], "
          . "has_new_posts=[{$this->has_new_posts}], "
          . "is_read=[{$this->is_read}], "
@@ -1773,7 +1765,7 @@ class ForumPost
    /*! \brief Builds basic QuerySQL to load post(s). */
    function build_query_sql()
    {
-      // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Updated,Subject,Text,User_ID,Parent_ID,Thread_ID,
+      // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Subject,Text,User_ID,Parent_ID,Thread_ID,
       //        AnswerNr,Depth,crc32,PosIndex,old_ID,Approved,PostsInThread,LastPost
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
@@ -1781,7 +1773,6 @@ class ForumPost
          'UNIX_TIMESTAMP(P.Time) AS X_Time',
          'UNIX_TIMESTAMP(P.Lastchanged) AS X_Lastchanged',
          'UNIX_TIMESTAMP(P.Lastedited) AS X_Lastedited',
-         'UNIX_TIMESTAMP(P.Updated) AS X_Updated',
          'PAuthor.Name AS Author_Name', 'PAuthor.Handle AS Author_Handle',
          'PAuthor.Adminlevel+0 AS Author_AdminLevel' );
       $qsql->add_part( SQLP_FROM,
@@ -1813,7 +1804,6 @@ class ForumPost
             @$row['X_Time'],
             @$row['X_Lastchanged'],
             @$row['X_Lastedited'],
-            @$row['X_Updated'],
             @$row['crc32'],
             @$row['old_ID']
          );
