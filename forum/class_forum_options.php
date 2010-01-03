@@ -89,11 +89,12 @@ class ForumOptions
    /*! \brief Returns bit-mask to use on Forum.Options to select only matching forums for user. */
    function build_db_options_exclude()
    {
-      $mask = 0x8FFFFFFF; // PHP only 31-bit unsigned
-      if( $this->view_admin )
-         $mask &= ~FORUMOPT_GROUP_ADMIN;
-      if( $this->view_dev )
-         $mask &= ~FORUMOPT_GROUP_DEV;
+      // choose mask, so that: Forums.Options & exclude_mask = 0 !!
+      $mask = 0;
+      if( !$this->view_admin )
+         $mask |= FORUMOPT_GROUP_ADMIN;
+      if( !$this->view_dev )
+         $mask |= FORUMOPT_GROUP_DEV;
       return $mask;
    }
 

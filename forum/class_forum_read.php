@@ -263,8 +263,9 @@ class ForumRead
          "INNER JOIN Forums ON Forums.ID=P.Forum_ID",
          "LEFT JOIN Forumreads AS FR " .
             "ON FR.Forum_ID=P.Forum_ID AND FR.Thread_ID=P.Thread_ID AND FR.User_ID='$uid'" );
+      if( $exclude_fopts > 0 )
+         $qsql->add_part( SQLP_WHERE, "Forums.Options & $exclude_fopts = 0" );
       $qsql->add_part( SQLP_WHERE,
-         "Forums.Options & $exclude_fopts = 0",
          'P.ID=P.Thread_ID',
          'P.Parent_ID=0', // redundant, but sometimes query is faster (intersect-index-merge)
          'P.PostsInThread>0',
