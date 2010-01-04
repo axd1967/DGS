@@ -173,39 +173,36 @@ function err_log( $handle, $err, $debugmsg=NULL)
 {
    $mysqlerror = @mysql_error();
 
-   global $dbcnx;
+   global $dbcnx, $player_row;
    if( !@$dbcnx )
       connect2mysql(true);
 
    $uri = "error.php?err=" . urlencode($err);
    if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
 
+   $uid = (int)@$player_row['ID'];
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
+
+   //CAUTION: sometime, REQUEST_URI != PHP_SELF+args
+   //if there is a redirection, _URI==requested, while _SELF==reached (running one)
+   $request = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
+   $request = substr( $request, strlen(SUB_PATH));
+
    $errorlog_query = "INSERT INTO Errorlog SET"
-                     ." Handle='".mysql_addslashes($handle)."'"
-                    .", Message='".mysql_addslashes($err)."'"
-                    .", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
+                     . " uid='$uid'"
+                     . ", Handle='".mysql_addslashes($handle)."'"
+                     . ", Message='".mysql_addslashes($err)."'"
+                     . ", Request='".mysql_addslashes($request)."'"
+                     . ", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
 
    if( !empty($mysqlerror) )
    {
       $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".mysql_addslashes( $mysqlerror)."'";
+      $errorlog_query .= ", MysqlError='".mysql_addslashes($mysqlerror)."'";
       $err.= ' / '. $mysqlerror;
    }
-
-   if( !is_string($debugmsg) )
-   {
-      //CAUTION: sometime, REQUEST_URI != PHP_SELF+args
-      //if there is a redirection, _URI==requested, while _SELF==reached (running one)
-      $debugmsg = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
-      //$debugmsg = str_replace( SUB_PATH, '', $debugmsg);
-      $debugmsg = substr( $debugmsg, strlen(SUB_PATH));
-   }
    if( is_string($debugmsg) )
-   {
-      $errorlog_query .= ", Debug='".mysql_addslashes( $debugmsg)."'";
-      //$err.= ' / '. $debugmsg; //Do not display this info!
-   }
+      $errorlog_query .= ", Debug='".mysql_addslashes($debugmsg)."'";
 
    if( $dbcnx )
    {

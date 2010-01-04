@@ -1456,3 +1456,9 @@ ALTER TABLE Posts
    DROP COLUMN Updated ;
 
 
+-- enhanced Errorlog with uid and page-request for causing error
+ALTER TABLE Errorlog
+   ADD uid int(11) NOT NULL DEFAULT '0' AFTER ID,
+   ADD Request varchar(128) NOT NULL DEFAULT '' AFTER Message ;
+
+

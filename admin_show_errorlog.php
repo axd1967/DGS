@@ -62,9 +62,11 @@ require_once( "include/filter.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $atable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'EL.ID-');
+   $atable->add_tablehead( 9, T_('uid#header'), 'ID');
    $atable->add_tablehead( 2, T_('User#header'), 'User');
    $atable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'EL.Date-');
    $atable->add_tablehead( 4, T_('Message#header'));
+   $atable->add_tablehead( 8, T_('Request#header'));
    $atable->add_tablehead( 5, T_('DB error#header'));
    $atable->add_tablehead( 6, T_('Debug info#header'));
    if( $show_ip )
@@ -100,6 +102,7 @@ require_once( "include/filter.php" );
    while( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
    {
       $arow_str = array();
+      $dbginfo = '';
       if( $atable->Is_Column_Displayed[1] )
          $arow_str[1] = @$row['ID'];
       if( $atable->Is_Column_Displayed[2] )
@@ -113,6 +116,17 @@ require_once( "include/filter.php" );
          $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT3, $row['X_Date']) : NULL );
       if( $atable->Is_Column_Displayed[4] )
          $arow_str[4] = sprintf( '<b>%s</b>', @$row['Message'] );
+      if( $atable->Is_Column_Displayed[8] )
+      {
+         if( strlen(@$row['Request']) <= 50 )
+            $arow_str[8] = @$row['Request'];
+         else
+         {
+            $arow_str[8] = '(' . T_('see next line') . ')';
+            $dbginfo .= sprintf( '<u>%s:</u> <span class="DebugText">%s</span>',
+               T_('Request info'), @$row['Request'] );
+         }
+      }
       if( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = wordwrap(@$row['MysqlError'], 40, "<br>\n", true);
       if( $atable->Is_Column_Displayed[6] )
@@ -120,19 +134,27 @@ require_once( "include/filter.php" );
          if( strlen(@$row['Debug']) <= 40 )
             $arow_str[6] = wordwrap(@$row['Debug'], 40, "<br>\n", true);
          else
-         {// put long-info in 2nd line
+         {
             $arow_str[6] = '(' . T_('see next line') . ')';
             $dbginfo = sprintf( '<u>%s:</u> <span class="DebugText">%s</span>',
                T_('Debug info'), wordwrap(@$row['Debug'], 120, "<br>\n", true) );
-            $arow_str['extra_row'] = "<td></td><td colspan=\"$cols_dbginfo\">$dbginfo</td>";
          }
       }
       if( $show_ip && $atable->Is_Column_Displayed[7] )
          $arow_str[7] = @$row['IP'];
+      if( $atable->Is_Column_Displayed[9] )
+      {
+         $arow_str[9] = ((int)@$row['uid'] > 0)
+            ? anchor( $base_path."userinfo.php?uid=".$row['uid'], $row['uid'] ) : '';
+      }
+
+      if( $dbginfo ) // put long-info in extra line
+         $arow_str['extra_row'] = "<td></td><td colspan=\"$cols_dbginfo\">$dbginfo</td>";
 
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
+
 
    start_page(T_('Show error log'), true, $logged_in, $player_row);
    section( 'errorlog', T_('Error log') );
