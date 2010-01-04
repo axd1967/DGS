@@ -27,8 +27,6 @@ require_once( "include/table_columns.php" );
 require_once( "include/message_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/classlib_game.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_participant.php' );
 
 $ThePage = new Page('Status');
 
@@ -308,86 +306,6 @@ if( (string)$folder_nr_querystr != '' )
 }
 
 
-if( ALLOW_TOURNAMENTS )
-{ // show tournament applications
-   $ta_cfg_pages = ConfigPages::load_config_pages( $my_id, CFGCOLS_STATUS_TOURNAMENTS );
-   $tatable = new Table( 'tournament', "status.php", $ta_cfg_pages->get_table_columns(), '', $table_mode );
-   $tatable->add_or_del_column();
-
-   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $tatable->add_tablehead( 1, T_('Tournament ID#headert'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $tatable->add_tablehead( 8, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT); // tourney-registration
-   $tatable->add_tablehead( 2, T_('Scope#headert'), 'Enum', 0, 'Scope+');
-   $tatable->add_tablehead( 3, T_('Type#headert'), 'Enum', 0, 'Type+');
-   $tatable->add_tablehead( 4, T_('Status#headert'), 'Enum', 0, 'Status+');
-   $tatable->add_tablehead( 5, T_('Title#headert'), '', 0, 'Title+');
-   $tatable->add_tablehead( 6, T_('Registration Status#headert'), 'Enum', TABLE_NO_HIDE, 'Title+');
-   $tatable->add_tablehead( 7, T_('Updated#T_reg'), 'Date', 0, 'TP.Lastchanged-');
-
-   $tatable->set_default_sort( 1 ); //on ID
-   $tatable->use_show_rows(false);
-
-   $ta_qsql = $tatable->get_query();
-   $ta_qsql->add_part( SQLP_FIELDS,
-         'TP.Status AS TP_Status',
-         'UNIX_TIMESTAMP(TP.Lastchanged) AS TP_Lastchanged' );
-   $ta_qsql->add_part( SQLP_FROM,
-         'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID' );
-   $ta_qsql->add_part( SQLP_WHERE,
-         "TP.uid='" . mysql_addslashes($my_id) . "'",
-         "TP.Status<>'".TP_STATUS_REGISTER."'" );
-
-   // build SQL-query (for tournaments)
-   $iterator = new ListIterator( 'TournamentApplications',
-         $ta_qsql,
-         $tatable->current_order_string('ID-'),
-         '' // no limit
-         );
-   $iterator = Tournament::load_tournaments( $iterator );
-
-   if( $DEBUG_SQL ) echo "QUERY-TOURNEYS: " . make_html_safe($iterator->Query) ."<br>\n";
-
-   if( $iterator->ResultRows > 0 )
-   {
-      section( 'TournamentApplications', T_('Your open tournament applications:'));
-
-      $show_rows = $tatable->compute_show_rows( $iterator->ResultRows );
-      while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
-      {
-         list( $tourney, $orow ) = $arr_item;
-         $ID = $tourney->ID;
-         $row_str = array();
-
-         if( $tatable->Is_Column_Displayed[ 1] )
-            $row_str[ 1] = button_TD_anchor( "tournaments/view_tournament.php?tid=$ID", $ID );
-         if( $tatable->Is_Column_Displayed[ 2] )
-            $row_str[ 2] = Tournament::getScopeText( $tourney->Scope );
-         if( $tatable->Is_Column_Displayed[ 3] )
-            $row_str[ 3] = Tournament::getTypeText( $tourney->Type );
-         if( $tatable->Is_Column_Displayed[ 4] )
-            $row_str[ 4] = Tournament::getStatusText( $tourney->Status );
-         if( $tatable->Is_Column_Displayed[ 5] )
-            $row_str[ 5] = make_html_safe( $tourney->Title );
-         if( $tatable->Is_Column_Displayed[ 6] )
-            $row_str[ 6] = TournamentParticipant::getStatusText($orow['TP_Status']);
-         if( $tatable->Is_Column_Displayed[ 7] )
-            $row_str[ 7] = (@$orow['TP_Lastchanged'] > 0) ? date(DATE_FMT2, $orow['TP_Lastchanged']) : '';
-         if( $tatable->Is_Column_Displayed[ 8] )
-         {
-            $row_str[ 8] = anchor( "tournaments/register.php?tid=$ID",
-               image( $base_path.'images/info.gif',
-                  sprintf( T_('My registration for tournament %s'), $ID ), null,
-                  'class=InTextImage'));
-         }
-
-         $tatable->add_row( $row_str );
-      }
-
-      $tatable->echo_table();
-   }
-} // show tournament applications
-
-
 { // show pending posts
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
@@ -406,14 +324,13 @@ if( ALLOW_TOURNAMENTS )
          T_('Games I\'m observing') => "show_games.php?observe=$my_id",
       );
    if( ALLOW_TOURNAMENTS )
-      $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?user=".urlencode($player_row['Handle']);
+      $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
 
    end_page(@$menu_array);
-
 }
 
 
-// callback-func for games-status Table-form
+// callback-func for games-status Table-form adding form-elements below table
 function status_games_extend_table_form( &$gtable, &$form )
 {
    global $player_row;

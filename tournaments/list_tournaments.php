@@ -28,6 +28,7 @@ require_once( 'include/classlib_profile.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_participant.php' );
 
 $ThePage = new Page('TournamentList');
 
@@ -73,30 +74,25 @@ $ThePage = new Page('TournamentList');
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
    $tsfilter = new SearchFilter( 's', $search_profile );
    $tfilter = new SearchFilter( '', $search_profile );
-   $search_profile->register_regex_save_args( 'user' ); // named-filters FC_FNAME
+   $search_profile->register_regex_save_args( 'uid|tdir' ); // named-filters FC_FNAME
    $ttable = new Table( 'tournament', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ttable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
    // static filters
-   $tsfilter->add_filter( 1, 'Text', 'TPP.Handle', true, array(
-            FC_FNAME => 'user',
+   $tsfilter->add_filter( 1, 'Text', 'TP.uid', true, array(
+            FC_FNAME => 'uid',
             FC_QUERYSQL => new QuerySQL(
-               SQLP_FROM,
-                  'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID',
-                  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid',
-               SQLP_WHERE,
-                  $where_scope ),
-            FC_SIZE => 12 ));
-   $tsfilter->add_filter( 2, 'Text', 'TDP.Handle', true, array(
+               SQLP_FIELDS, 'TP.Status AS TP_Status',
+               SQLP_FROM,  'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID',
+               SQLP_WHERE, $where_scope ) ));
+   $tsfilter->add_filter( 2, 'Text', 'TD.uid', true, array(
+            FC_FNAME => 'tdir',
             FC_QUERYSQL => new QuerySQL(
-               SQLP_FROM,
-                  'INNER JOIN TournamentDirector AS TD ON TD.tid=T.ID',
-                  'INNER JOIN Players AS TDP ON TDP.ID=TD.uid',
-               SQLP_WHERE,
-                  $where_scope ),
-            FC_SIZE => 12 ));
+               SQLP_FROM,  'INNER JOIN TournamentDirector AS TD ON TD.tid=T.ID',
+               SQLP_WHERE, $where_scope ) ));
    $tsfilter->init();
+   $has_uid = (bool)( $tsfilter->get_filter_value(1) );
 
    // table filters
    $tfilter->add_filter( 1, 'Numeric', 'T.ID', true);
@@ -112,15 +108,8 @@ $ThePage = new Page('TournamentList');
    $ttable->register_filter( $tfilter );
    $ttable->add_or_del_column();
 
-   // External-Form
-   $tform = new Form( $ttable->Prefix, $page, FORM_GET, false);
-   $tform->set_layout( FLAYOUT_GLOBAL, '1' );
-   $tform->set_config( FEC_EXTERNAL_FORM, true );
-   $ttable->set_externalform( $tform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form
-   $tform->attach_table( $tsfilter ); // attach manage-filter as hiddens (static) to ext-form
-
    // attach external URL-parameters from static filter
-   $ttable->add_external_parameters( $tsfilter->get_req_params(), false );
+   $ttable->add_external_parameters( $tsfilter->get_req_params(), true );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ttable->add_tablehead( 1, T_('ID#headert'), 'Button', TABLE_NO_HIDE, 'ID-');
@@ -129,6 +118,8 @@ $ThePage = new Page('TournamentList');
    $ttable->add_tablehead( 4, T_('Status#headert'), 'Enum', 0, 'Status+');
    $ttable->add_tablehead( 5, T_('Title#headert'), '', TABLE_NO_HIDE, 'Title+');
    $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
+   if( $has_uid )
+      $ttable->add_tablehead(11, T_('Registration Status#headert'), 'Enum', TABLE_NO_HIDE, 'TP_Status+');
    $ttable->add_tablehead( 6, T_('Owner#headert'), 'User', 0, 'X_OwnerHandle+');
    $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
@@ -154,25 +145,17 @@ $ThePage = new Page('TournamentList');
    $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
 
 
-   $title = T_('Tournaments');
+   if( $has_uid )
+      $title = T_('My tournaments as participant');
+   elseif( $tsfilter->get_filter_value(2) )
+      $title = T_('My tournaments as tournament director');
+   else
+      $title = T_('Tournaments');
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
-
-   // form for static filters
-   $tform->set_area( 1 );
-   $tform->set_layout( FLAYOUT_AREACONF, 1,
-      array( 'title' => T_('Search tournaments by user roles'), ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Participating user'),
-         'FILTER',      $tsfilter, 1,
-         'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament director'),
-         'FILTER',      $tsfilter, 2,
-         'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
@@ -200,21 +183,29 @@ $ThePage = new Page('TournamentList');
          $row_str[ 9] = ($tourney->EndTime > 0) ? date(DATE_FMT2, $tourney->EndTime) : '';
       if( $ttable->Is_Column_Displayed[10] )
          $row_str[10] = $tourney->formatRound(true);
+      if( $has_uid && $ttable->Is_Column_Displayed[11] )
+      {
+         $row_str[11] =
+            anchor( $base_path."tournaments/register.php?tid=$ID",
+               image( $base_path.'images/info.gif',
+                  sprintf( T_('Registration for tournament %s'), $ID ),
+                  null, 'class=InTextImage'))
+            . '&nbsp;' . TournamentParticipant::getStatusText($orow['TP_Status']);
+      }
 
       $ttable->add_row( $row_str );
    }
 
    // print static-filter & table
-   echo "\n",
-      $tform->print_start_default(),
-      $ttable->make_table(),
-      "<br>\n",
-      $tform->get_form_string(), // static form
-      $tform->print_end();
+   echo "\n";
+   $ttable->echo_table();
 
 
    $menu_array = array();
    $menu_array[T_('Show all tournaments')] = 'tournaments/list_tournaments.php';
+   $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
+   $menu_array[T_('Directoring tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
+
    if( TournamentUtils::isAdmin() )
       $menu_array[T_('Add new tournament')] =
          array( 'url' => 'tournaments/edit_tournament.php', 'class' => 'TAdmin' );
