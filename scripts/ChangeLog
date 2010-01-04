@@ -22,7 +22,31 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-04 juga
+
+   * scripts/game_consistency.php, clock_tick.php:
+   - bugfix: avoid sharing of Clock.ID=204 in query searching timed-out-games
+   - query-optimize for new timed-out-handling on Games.Status
+   - added TODO for potential bug when searching for timed-out games:
+
+   * include/table_columns.php (Table.add_tablehead, ~._parse_sort_extension,
+       ~.current_order_string):
+   - replaced FIXME with function to check and parse sort-extension
+
+   * include/classlib_profile.php (SearchProfile.set_sysmessage),
+     include/classlib_userconfig.php,
+     include/error_codes.php (ErrorCode.init),
+     include/quick_common.php,
+     include/std_functions.php (start_html, nsq_addslashes, is_on_observe_list),
+     include/time_functions.php (is_weekend_clock_stopped),
+     game.php, confirm.php:
+   - minor cleanups of TODOs and FIXMEs
+
 2010-01-03 juga
+
+   * forum/class_forum_options.php (ForumOptions.build_db_options_exclude),
+     forum/class_forum_read.php (ForumRead.has_new_posts_in_all_forums):
+   - bugfix: exclude non-visible forums
 
    * forum/post.php (post_message, approve_post, hide_post_update_trigger, show_post),
      forum/forum_functions.php (class ForumPost, ~.to_string, ~.build_query_sql, ~.new_from_row),
