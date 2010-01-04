@@ -380,7 +380,7 @@ class ErrorCode
          $arr['rating_out_of_range'] =
             T_("Sorry, the initial rating must be between 30 kyu and 6 dan.");
 
-         $arr['value_not_numeric'] = //TODO unused, but could be useful, so not deleted
+         $arr['value_not_numeric'] = // note: unused, but could be useful, so not deleted
             T_("Sorry, you wrote a non-numeric value on a numeric field.");
 
          $arr['not_translator'] =
