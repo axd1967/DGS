@@ -114,7 +114,8 @@ function is_weekend_clock_stopped( $clock_id, $timestamp=null )
 
    if( is_weekend($timestamp) )
    {
-      // TODO BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
+      // NOTE: this can be seen as bug, but MUCH easier if you don't!
+      //       BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
       //      -> really ? just keep it and it's easy (keeping UTC-weekends)
       $running_clock = false;
    }
