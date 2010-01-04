@@ -819,8 +819,8 @@ ID,Text,Ref_ID,Translatable
 #
 # Dumping data for table 'Translations'
 #
-INSERT INTO Translations VALUES (96,1,'Admin');
-Original_ID,Language_ID,Text
+INSERT INTO Translations VALUES (96,1,'Admin','N');
+Original_ID,Language_ID,Text,Translated
 #
 # Dumping data for table 'TranslationLanguages'
 #
@@ -858,6 +858,7 @@ ID,Page,Group_ID
       $langID = ID_of('en.iso-8859-1'); //which is not 1, actually
       'TranslationLanguages'
          => array('ID,Language,Name',"ID=$langID", 'ID'),
+      //TODO missing Translations.Translated
       'Translations' //better to split it in different files
          => array('Language_ID,Original_ID,Text',"Language_ID=$langID",'Language_ID,Original_ID'),
  * or, farther:
@@ -903,6 +904,7 @@ function language_dump( $database, $lang, $header=true)
    $tables = array(
       'TranslationLanguages'
          => array('ID,Language,Name',"ID=$langID", 'ID'),
+      //TODO missing Translations.Translated
       'Translations' //better to split it in different files
          => array('Language_ID,Original_ID,Text',"Language_ID=$langID",'Language_ID,Original_ID'),
    );
