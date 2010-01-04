@@ -1505,8 +1505,9 @@ class Table
     * \brief Adds external-parameters included into URL
     *        (expecting to have 3 interface-methods 'get_hiddens', 'get_url_parts' and 'use_hidden').
     * \param rp \see RequestParameters
-    * \param use_hidden true, if parameters should be included into table-hiddens; default is false
-    *        state is stored in $rp-structure
+    * \param use_hidden true, if parameters should be included into table-hiddens;
+    *        state is stored in $rp-structure;
+    *        giving no default is with intent!
     */
    function add_external_parameters( $rp, $use_hidden )
    {
