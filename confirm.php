@@ -579,7 +579,6 @@ This is why:
       else
       {
          //TODO: HOT_SECTION ???
-//         update_rating($gid);
          $rated_status = update_rating2($gid); //0=rated game
 
          $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
