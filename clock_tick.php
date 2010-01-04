@@ -102,20 +102,29 @@ if( !$is_down )
    }
 
    $clock_modified = clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN);
-
    if( $day_of_week > 0 && $day_of_week < 6 )
       $clock_modified.= " OR ".
          clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN, WEEKEND_CLOCK_OFFSET);
 
-   $clock_modified .= " OR Clock.ID=204"; // for remaining-time ordering
-
    db_query( 'clock_tick.increase_clocks',
-      "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) WHERE $clock_modified" );
+      "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) "
+         . "WHERE $clock_modified " // game-clocks (also used below)
+         . "OR Clock.ID=204" // clock for remaining-time ordering
+      );
 
 
 
    // Check if any game has timed out
 
+/* TODO BUG in old & new version: !?
+  if maintenance spans more than a whole hour and graces the sleeping-clocks,
+  the time-window has passed to detect time-outs within that hour.
+  So time-outs are delayed by a full day till the games with the respective clock is checked again!
+
+  => keep Clock.ID>=0 (as safety for clones; else join with Games would be empty anyway
+     as there is no Clock.ID<0 any more)
+  => remove Clock.Lastchanged=$NOW to match all clock-timeouts
+ */
 if(1){//new
 /*
  In a first approximation, as $has_moved==false (see time_remaining()),
@@ -130,7 +139,9 @@ if(1){//new
  which is:
  - WHERE IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)
       < ((Clock.Ticks-Games.LastTicks) / TICK_FREQUENCY)
- During a test, this lowered the number of returned rows from 10,960 to 675
+
+ During a test, this lowered the number of returned rows from 10,960 to 675.
+ This is a table scan, but indeed reduces the number of affected rows.
 */
    $result = db_query( 'clock_tick.find_timeout_games',
       "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags AS X_GameFlags"
@@ -138,13 +149,12 @@ if(1){//new
       ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
       .' WHERE Clock.Ticks - Games.LastTicks > '.TICK_FREQUENCY
          ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
-      ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED'" );
+      ." AND Status" . IS_RUNNING_GAME
+      //slower: ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
+      );
 }else{//old
-/* TODO:
-This query is sometime slow and may return more than 10000 rows!
-It (and the following UPDATE) should be optimized, splited in smaller chunk?
-use TEMPORARY TABLEs for generated UPDATEs ???
-*/
+   // TODO: This query is sometimes slow and may return more than 10000 rows!
+
    $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags AS X_GameFlags'
             . ' FROM (Games, Clock)'
             . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)"
@@ -157,6 +167,9 @@ use TEMPORARY TABLEs for generated UPDATEs ???
             ;
    $result = db_query( 'clock_tick.find_timeout_games', $query );
 }//new/old
+
+   /* TODO: The following UPDATE should be optimized, splited in smaller chunk?
+            use TEMPORARY TABLEs for generated UPDATEs ??? */
 
    while($row = mysql_fetch_assoc($result))
    {

@@ -455,7 +455,7 @@ function check_consistency( $gid)
    }
    else //$Status=='FINISHED'
    {
-/* TODO?
+/* TODO? see time-out cleanup in clock_tick.php
       $few_moves = DELETE_LIMIT+$Handicap;
       if( $Moves < $few_moves )
       {
