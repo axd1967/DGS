@@ -314,7 +314,7 @@ define('DEFAULT_STATUSFLAG', (STATUSFLAG_SHOW_FOLDER_NEW|STATUSFLAG_SHOW_FOLDER_
 // sync with legal-check in toggle_forum_flags-func
 define('FORUMFLAG_FORUM_SHOWAUTHOR',  0x01); // last-post author
 define('FORUMFLAG_THREAD_SHOWAUTHOR', 0x02);
-define('FORUMFLAG_POSTVIEW_AUTOREAD', 0x04); // viewing marks thread as read //TODO (not implemented yet)
+//define('FORUMFLAG_POSTVIEW_AUTOREAD', 0x04); //TODO viewing does not marking thread as read
 define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
 
 // Table column-sets (db-fieldname-prefix for ConfigPages-table for BitSet-handling)
