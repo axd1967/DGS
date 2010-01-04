@@ -80,10 +80,10 @@ require_once( 'include/utilities.php' );
    }
 
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
-      error('komi_range');
+      error('komi_range', "add_to_waitingroom.check.komi($komi)");
 
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
-      error('handicap_range');
+      error('handicap_range', "add_to_waitingroom.check.handicap($handicap)");
 
    // komi adjustment
    $adj_komi = (float)@$_POST['adj_komi'];

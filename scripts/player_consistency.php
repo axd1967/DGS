@@ -197,7 +197,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'player_consistency');
+      error('adminlevel_too_low');
 
    //uid could be '12,27' meaning from player=12 to player=27
    @list( $uid1, $uid2) = explode( ',', @$_REQUEST['uid']);

@@ -42,7 +42,7 @@ require_once( "include/form_functions.php" );
       "SELECT ID,Name,Handle FROM Players WHERE $where LIMIT 1" );
 
    if( @mysql_num_rows($result) != 1 )
-      error("unknown_user");
+      error("unknown_user", "ratinggraph.find_player2($uid,$uhandle)");
 
    $user_row = mysql_fetch_array($result);
 

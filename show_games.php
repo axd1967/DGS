@@ -71,9 +71,9 @@ $ThePage = new Page('GamesList');
             else
                error('no_uid');
 
-            $user_row = mysql_single_fetch('show_games.find_player',
+            $user_row = mysql_single_fetch( "show_games.find_player($uid,$uhandle)",
                   "SELECT ID, Name, Handle, Rating2 FROM Players WHERE $where" )
-               or error('unknown_user', 'show_games.find_player');
+               or error('unknown_user', "show_games.find_player2($uid,$uhandle)");
 
             $uid = $user_row['ID'];
          }

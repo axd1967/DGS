@@ -34,7 +34,7 @@ require_once( "include/table_columns.php" );
    // only SUPERADMIN can manage admins
    $player_level = (int)@$player_row['admin_level']; //local modifications
    if( !($player_level & ADMIN_SUPERADMIN) )
-      error('adminlevel_too_low', 'admin_admins');
+      error('adminlevel_too_low');
 
    $admin_tasks = array( // admin-level-id => arr( admin-bitmask, admin-text )
          'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),

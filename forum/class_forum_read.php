@@ -286,7 +286,7 @@ class ForumRead
    function load_global_new( $forum_opts )
    {
       if( !is_a($forum_opts, 'ForumOptions') )
-         error('invalid_args', "ForumRead.load_global_new.check.forum_opts");
+         error('invalid_args', "ForumRead.load_global_new.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
       $global_updated = ForumRead::load_global_updated();

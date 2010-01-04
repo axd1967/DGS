@@ -171,12 +171,13 @@ if( !$is_down )
             {
 
                $TheBoard = new Board();
+               $gid = @$game_row['ID'];
                if( !$TheBoard->load_from_db( $game_row) )
-                  error('internal_error', 'halfhourly_cron load_from_db '.$game_row['ID']);
+                  error('internal_error', "halfhourly_cron.game.load_from_db($gid)");
                $movemsg= $TheBoard->movemsg;
 
                $msg .= str_pad('', 47, '-') . "\n";
-               $msg .= "Game ID: ".mail_link($game_row['ID'],'game.php?gid='.$game_row['ID'])."\n";
+               $msg .= "Game ID: ".mail_link($gid, 'game.php?gid='.$gid) . "\n";
                $msg .= "Black: ".mail_strip_html(
                         $game_row['Blackname'].' ('.$game_row['Blackhandle'].')')."\n";
                $msg .= "White: ".mail_strip_html(

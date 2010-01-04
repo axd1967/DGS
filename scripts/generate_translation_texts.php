@@ -32,7 +32,7 @@ require_once( "include/make_translationfiles.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low', 'generate_translation_texts');
+      error('adminlevel_too_low');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
@@ -89,9 +89,10 @@ require_once( "include/make_translationfiles.php" );
          $contents = php_strip_whitespace($Filename); // strips also LFs
       else
       {
+         //FIXME: what is $main_path ?
          $fd = fopen( $main_path . $Filename, 'r' )
-            or error( 'couldnt_open_file', 'generate_translation_texts:'.$Filename);
-         $contents = fread($fd, filesize ($main_path . $Filename));
+            or error( 'couldnt_open_file', "generate_translation_texts.open_file($Filename)");
+         $contents = fread($fd, filesize($main_path . $Filename));
          fclose($fd);
       }
       if( (string)$contents == '' )

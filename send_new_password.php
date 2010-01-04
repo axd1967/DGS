@@ -39,9 +39,8 @@ require_once( "include/std_functions.php" );
    $result = db_query( "send_new_password.find_player($pswduser)",
       "SELECT ID, Newpassword, Email " .
          "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
-
    if( @mysql_num_rows($result) != 1 )
-      error('unknown_user', "send_new_password.find_user($pswduser)");
+      error('unknown_user', "send_new_password.find_player2($pswduser)");
 
    $row = mysql_fetch_assoc($result);
    if( $row['ID'] <= GUESTS_ID_MAX )

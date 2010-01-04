@@ -32,7 +32,7 @@ require_once( "include/form_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_DATABASE)) )
-      error('adminlevel_too_low', 'check_block_ip');
+      error('adminlevel_too_low');
 
 
    start_html( 'checkip', 0, '', '' );

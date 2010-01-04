@@ -48,7 +48,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       ' FROM (Games, Players AS black, Players AS white)' .
       " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1" );
    if( !$game )
-      error('unknown_game');
+      error('unknown_game', "game_comments.find_game($gid)");
 
 
    $my_game = ( $logged_in && ( $player_row['ID'] == $game['Black_ID'] || $player_row['ID'] == $game['White_ID'] ) ) ;

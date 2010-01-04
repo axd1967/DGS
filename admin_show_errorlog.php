@@ -38,7 +38,7 @@ require_once( "include/filter.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
-      error('adminlevel_too_low', 'admin_show_errorlog');
+      error('adminlevel_too_low');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER ); // only for adm-dev!
 
    // init

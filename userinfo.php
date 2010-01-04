@@ -50,7 +50,7 @@ $ThePage = new Page('UserInfo');
    else
       $where = "ID=$my_id";
 
-   $row = mysql_single_fetch( 'userinfo.find',
+   $row = mysql_single_fetch( "userinfo.find_player($uid,$uhandle)",
       "SELECT *"
       .",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel"
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
@@ -61,13 +61,13 @@ $ThePage = new Page('UserInfo');
       ." FROM Players WHERE $where" );
 
    if( !$row )
-      error('unknown_user');
+      error('unknown_user', "userinfo.find_player2($uid,$uhandle)");
    $uid = (int)$row['ID'];
    $user_handle = $row['Handle'];
    $hide_bio = (@$row['AdminOptions'] & ADMOPT_HIDE_BIO);
 
    // load bio
-   $bio_result = db_query( 'userinfo.bio',
+   $bio_result = db_query( "userinfo.find_bio($uid)",
       "SELECT * FROM Bio WHERE uid=$uid ORDER BY SortOrder");
    $count_bio = @mysql_num_rows($bio_result);
 

@@ -189,10 +189,11 @@ if(1){//new
       {
          setTZ( $row['Timezone']); //for get_clock_used()
          $newclock= get_clock_used( $row['Nightstart']);
-         db_query( 'daily_cron.night_hours.update',
+         $uid = $row['ID'];
+         db_query( "daily_cron.night_hours.update($uid)",
                "UPDATE Players SET ClockChanged='N',ClockUsed=$newclock"
-               . " WHERE ID=" . $row['ID'] . " LIMIT 1" )
-            or error('mysql_query_failed','daily_cron.night_hours.update');
+               . " WHERE ID=$uid LIMIT 1" )
+            or error('mysql_query_failed', "daily_cron.night_hours.update2($uid)");
       }
       setTZ($otz); //reset to previous
    }

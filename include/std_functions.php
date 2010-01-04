@@ -1073,7 +1073,7 @@ function verify_email( $debugmsg, $email, $die_on_error=true )
       if( $die_on_error )
       {
          if( $is_string($debugmsg) )
-            error('bad_mail_address', "$debugmsg=$email");
+            error('bad_mail_address', "verify_email.$debugmsg($email)");
       }
       else
          return 'bad_mail_address';
@@ -1162,9 +1162,9 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
       $res= false;
 
    if( is_string($debugmsg) && !$res )
-      error('mail_failure', "$debugmsg=$email - $subject");
+      error('mail_failure', "send_email.$debugmsg($email,[$subject])");
    return $res;
-}
+} //send_email
 
 /**
  * $text and $subject must NOT be escaped by mysql_escape_string()
@@ -2391,7 +2391,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    include_all_translate_groups($player_row); //must be called from main dir
 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-      error('login_denied');
+      error('login_denied', "is_logged_in($uid)");
 
    setTZ( $player_row['Timezone']);
 
@@ -2515,7 +2515,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    $query.= " WHERE ID=$uid LIMIT 1";
    //$updok will be false if an error occurs and error() is set to 'no exit'
-   $updok = db_query( 'is_logged_in.update_player', $query );
+   $updok = db_query( "is_logged_in.update_player($uid)", $query );
 
    if( !$vaultcnt ) //vault entered
    {
@@ -2578,17 +2578,17 @@ define('COUNTNEW_RECALC', 'recalc');
 function update_count_message_new( $dbgmsg, $uid, $diff=null )
 {
    if( !is_numeric($uid) )
-      error( 'invalid_args', $dbgmsg.'.check.uid' );
+      error( 'invalid_args', "$dbgmsg.check.uid($uid)" );
 
    if( is_null($diff) )
    {
-      db_query( "$dbgmsg.reset",
+      db_query( "$dbgmsg.reset($uid)",
          "UPDATE Players SET CountMsgNew=-1 WHERE ID='$uid' LIMIT 1" );
    }
    elseif( is_numeric($diff) && $diff != 0 )
    {
       $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
-      db_query( "$dbgmsg.upd($diff)",
+      db_query( "$dbgmsg.upd($uid,$diff)",
          "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
    }
    elseif( (string)$diff == COUNTNEW_RECALC )
@@ -2597,7 +2597,7 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
       $count_new = count_messages_new( $uid );
       if( @$player_row['ID'] == $uid )
          $player_row['CountMsgNew'] = $count_new;
-      db_query( "$dbgmsg.recalc",
+      db_query( "$dbgmsg.recalc($uid)",
          "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
    }
 }
@@ -2636,14 +2636,14 @@ function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
    if( !ALLOW_FEATURE_VOTE )
       return;
    if( !is_numeric($uid) )
-      error( 'invalid_args', $dbgmsg.'.check.uid' );
+      error( 'invalid_args', "$dbgmsg.check.uid($uid)" );
 
    if( is_null($diff) )
    {
       $query = "UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0";
       if( $uid > 0 )
          $query .= " AND ID='$uid' LIMIT 1";
-      db_query( "$dbgmsg.reset", $query );
+      db_query( "$dbgmsg.reset($uid)", $query );
    }
    elseif( is_numeric($diff) && $diff != 0 )
    {
@@ -2651,7 +2651,7 @@ function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
       $query = "UPDATE Players SET CountFeatNew=CountFeatNew$diffstr WHERE CountFeatNew>=0";
       if( $uid > 0 )
          $query .= " AND ID='$uid' LIMIT 1";
-      db_query( "$dbgmsg.upd($diff)", $query );
+      db_query( "$dbgmsg.upd($uid,$diff)", $query );
    }
    elseif( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
    {
@@ -2659,7 +2659,7 @@ function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
       $count_new = count_features_new( $uid );
       if( @$player_row['ID'] == $uid )
          $player_row['CountFeatNew'] = $count_new;
-      db_query( "$dbgmsg.recalc",
+      db_query( "$dbgmsg.recalc($uid)",
          "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
    }
 }
@@ -2689,7 +2689,7 @@ if( function_exists('file_put_contents') )
          return $num;
       }
       if( $quit_on_error )
-         error( 'couldnt_open_file', 'write_to_file:'.$filename);
+         error( 'couldnt_open_file', "write_to_file($filename)");
       trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
       return false;
    }
@@ -2711,7 +2711,7 @@ else
          }
       }
       if( $quit_on_error )
-         error( 'couldnt_open_file', 'write_to_file:'.$filename);
+         error( 'couldnt_open_file', "write_to_file($filename)");
       trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
       return false;
    }
@@ -2728,7 +2728,7 @@ if( function_exists('file_get_contents') )
       if( is_string($data) )
          return $data;
       if( $quit_on_error )
-         error( 'couldnt_open_file', 'read_from_file:'.$filename);
+         error( 'couldnt_open_file', "read_from_file.err1($filename)");
       trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
       return false;
    }
@@ -2757,7 +2757,7 @@ else
             return $data;
       }
       if( $quit_on_error )
-         error( 'couldnt_open_file', 'read_from_file:'.$filename);
+         error( 'couldnt_open_file', "read_from_file.err2($filename)");
       trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
       return false;
    }

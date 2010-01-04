@@ -41,7 +41,7 @@ require_once( "include/contacts.php" );
 
    $wr_id = @$_REQUEST['id'];
    if( !is_numeric($wr_id) || $wr_id <= 0 )
-      error('waitingroom_game_not_found', 'join_waitingroom_game.bad_id');
+      error('waitingroom_game_not_found', "join_waitingroom_game.bad_id($wr_id)");
 
    $my_rated_games = (int)$player_row['RatedGames'];
    $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
@@ -60,18 +60,18 @@ require_once( "include/contacts.php" );
          . " WHERE W.ID=$wr_id AND W.nrGames>0"
          . " HAVING C_denied=0"
          ;
-   $game_row = mysql_single_fetch( "join_waitingroom_game.find_game(u$my_id,wr$wr_id)", $query);
+   $game_row = mysql_single_fetch( "join_waitingroom_game.find_game($wr_id,$my_id)", $query);
    if( !$game_row )
-      error('waitingroom_game_not_found', 'join_waitingroom_game.find_game');
+      error('waitingroom_game_not_found', "join_waitingroom_game.find_game2($wr_id,$my_id)");
 
    $opponent_ID = $game_row['uid'];
 
    if( @$_REQUEST['delete'] == 't' )
    {
       if( $my_id != $opponent_ID )
-         error('waitingroom_delete_not_own');
+         error('waitingroom_delete_not_own', "join_waitingroom_game.check.user($opponent_ID)");
 
-      db_query( 'join_waitingroom_game.delete',
+      db_query( "join_waitingroom_game.delete($wr_id)",
          "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
       $msg = urlencode(T_('Game deleted!'));
@@ -87,7 +87,7 @@ require_once( "include/contacts.php" );
          "FROM Players WHERE ID=$opponent_ID");
 
    if( !$opponent_row )
-      error('waitingroom_game_not_found', 'join_waitingroom_game.find_players');
+      error('waitingroom_game_not_found', "join_waitingroom_game.find_players.opp($opponent_ID)");
 
    if( $my_id == $opponent_ID )
       error('waitingroom_own_game');
@@ -167,7 +167,7 @@ require_once( "include/contacts.php" );
       $game_row['double_gid'] = $gid;
       $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row);
 
-      db_query( "join_waitingroom_game.update_double.2($gid)",
+      db_query( "join_waitingroom_game.update_double2($gid)",
          "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
    }
 

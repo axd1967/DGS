@@ -364,9 +364,9 @@ class SearchFilter
       if( $id < 1 || $id > BITSET_MAXSIZE )
          error('invalid_filter', "filter.add_filter.filter_id_out_of_range($id)");
       if( isset($this->Filters[$id]) )
-         error('invalid_filter', "filter.add_filter.unique_filter_id($id)");
+         error('invalid_filter', "filter.add_filter.unique_filter_id($id,$type)");
       if( count($this->Filters) > BITSET_MAXSIZE )
-         error('invalid_filter', "filter.add_filter.full");
+         error('invalid_filter', "filter.add_filter.full($id,$type)");
 
       $filter_class = 'Filter' . $type;
       $filter = new $filter_class($id, $dbfield, $config); // error if unknown class
@@ -2144,7 +2144,7 @@ class FilterText extends Filter
       if( $this->get_config(FC_SUBSTRING) )
       {
          if( !$minchars )
-            error('invalid_filter', "filter.FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD");
+            error('invalid_filter', "filter.FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD({$this->id},$name)");
          $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
          $this->syntax_descr = '['. T_('substring#filter') . '] ' . $this->syntax_descr;
       }
@@ -2622,7 +2622,7 @@ class FilterRelativeDate extends Filter
          }
       }
       if( count($this->time_units) == 0 )
-         error('invalid_filter', "filter.FilterRelativeDate.miss_time_unit");
+         error('invalid_filter', "filter.FilterRelativeDate.miss_time_unit({$this->id},$name)");
 
       // absolute filter
       $this->filterdate = NULL;
@@ -2726,7 +2726,7 @@ class FilterRelativeDate extends Filter
                ( $this->get_config(FC_TIME_UNITS) & FRDTU_DAY ) ? FRDTU_DAY : $this->time_units[0];
       }
       else
-         error('invalid_filter', "filter.RelativeDate.parse_value.invalid_arg.name($name,$val)");
+         error('invalid_filter', "filter.RelativeDate.parse_value.invalid_arg.name({$this->id},$name,$val)");
 
       return true;
    }
@@ -2871,7 +2871,7 @@ class FilterSelection extends Filter
       else
       {
          if( !is_array($dbfield) )
-            error('invalid_filter', "filter.FilterSelection.expect_dbfield_array($name)");
+            error('invalid_filter', "filter.FilterSelection.expect_dbfield_array({$this->id},$name)");
          $this->check_forbid_sql_template( 0 ); # no fieldnames
          $dbfield = $this->dbfield;
          $this->idx_start = 0;
@@ -2905,7 +2905,7 @@ class FilterSelection extends Filter
          {
             $idx = $v - $this->idx_start;
             if( !isset($this->clauses[$idx]) )
-               error('invalid_filter', "ERROR: FilterSelection.parse_value($name): bad index-value [$v] used for filter [{$this->id}]");
+               error('invalid_filter', "FilterSelection.parse_value.bad_index({$this->id},$name,$v)");
             $arr_in[]= "'" . mysql_addslashes( $this->clauses[$idx] ) . "'";
          }
 
@@ -3195,7 +3195,7 @@ class FilterScore extends Filter
       elseif( $name === $this->elem_result )
          ; // only var set in values[elem_result]
       else
-         error('invalid_filter', "ERROR: Score-Filter parse_value($name,$val) called with unknown key");
+         error('invalid_filter', "FilterScore.parse_value.unknown_key({$this->id},$name,$val)");
 
       return true;
    }

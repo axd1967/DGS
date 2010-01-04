@@ -35,7 +35,7 @@ require_once( "include/move.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'start_frozen_clocks');
+      error('adminlevel_too_low');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

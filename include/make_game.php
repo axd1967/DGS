@@ -119,10 +119,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    }
 
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
-      error('komi_range','make_invite_game');
+      error('komi_range', "make_invite_game.check.komi($komi)");
 
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
-      error('handicap_range','make_invite_game');
+      error('handicap_range', "make_invite_game.check.handicap($handicap)");
 
    list($hours, $byohours, $byoperiods) =
       interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
@@ -168,10 +168,10 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
                      "SELECT ID, Black_ID, White_ID FROM Games"
                     ." WHERE ID=$disputegid AND Status='INVITED'" );
       if( !$row )
-         error('unknown_game', "make_invite_game.dispute.1($disputegid)");
+         error('unknown_game', "make_invite_game.dispute1($disputegid)");
       if( ( $row['Black_ID']!=$player_row['ID'] || $row['White_ID']!=$opponent_row['ID'] )
        && ( $row['White_ID']!=$player_row['ID'] || $row['Black_ID']!=$opponent_row['ID'] ) )
-         error('unknown_game', "make_invite_game.dispute.2($disputegid)");
+         error('unknown_game', "make_invite_game.dispute2($disputegid)");
 
       $query = "UPDATE Games SET $query WHERE ID=$disputegid LIMIT 1";
    }
@@ -183,7 +183,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       'mysql_insert_game' );
 
    if( mysql_affected_rows() != 1)
-      error('mysql_start_game', "make_invite_game.update_game($disputegid)");
+      error('mysql_start_game', "make_invite_game.update_game2($disputegid)");
 
    if( $disputegid > 0 )
       $gid = $disputegid;
@@ -191,7 +191,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       $gid = mysql_insert_id();
 
    if( $gid <= 0 )
-      error('internal_error','make_invite_game.gameID='.$gid);
+      error('internal_error', "make_invite_game.err2($gid)");
 
    return $gid;
 } //make_invite_game
@@ -319,11 +319,10 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    if( $gid > 0 )
    { //game prepared by the invitation process
-      db_query( 'create_game.update:'.$gid,
+      db_query( "create_game.update($gid)",
          "UPDATE Games SET $set_query WHERE ID=$gid AND Status='INVITED' LIMIT 1" );
-
       if( mysql_affected_rows() != 1)
-         error('mysql_start_game','create_game.update:'.$gid);
+         error('mysql_start_game', "create_game.update2($gid)");
    }
    else
    {
@@ -333,7 +332,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    }
 
    if( $gid <= 0 )
-      error('internal_error','create_game.gameID='.$gid);
+      error('internal_error', "create_game.err2($gid)");
 
    //ENA_STDHANDICAP:
    // both b1 and b2 set is not fully handled (error if incomplete pattern)
@@ -343,7 +342,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       {
          //error because it's too late to have a manual placement
          //as the game is already initialized for the white play
-         error('internal_error','create_game.std_handicap.gameID='.$gid);
+         error('internal_error', "create_game.std_handicap($gid)");
       }
    }
 
@@ -381,7 +380,7 @@ function make_standard_placement_of_handicap_stones(
 
    $patlen = strlen( $stonestring );
    if( ( $patlen > 2*$hcp ) || ( $patlen < 2*$hcp && !$allow_incomplete_pattern ) )
-      error('internal_error','make_std_handicap.bad_pattern');
+      error('internal_error', "make_std_handicap.bad_pattern($gid,$hcp,$patlen)");
 
    $patlen = min( 2*$hcp, $patlen);
 
@@ -392,13 +391,13 @@ function make_standard_placement_of_handicap_stones(
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $size);
 
       if( !isset($rownr) || !isset($colnr) )
-         error('illegal_position','make_std_handicap');
+         error('illegal_position','make_std_handicap.err2');
 
       $query .= "($gid, " . ($i/2 + 1) . ", " . BLACK . ", $colnr, $rownr, 0)";
       if( $i+2 < $patlen ) $query .= ", ";
    }
 
-   db_query( 'make_std_handicap', $query );
+   db_query( 'make_std_handicap.err3', $query );
 
    if( $patlen != 2*$hcp )
       return false;

@@ -57,7 +57,7 @@ require_once( 'forum/forum_functions.php' );
    $forum = Forum::load_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum->options ) )
-      error('forbidden_forum');
+      error('forbidden_forum', "forumlist.check.forum($forum_id)");
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);

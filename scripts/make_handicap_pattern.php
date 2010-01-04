@@ -38,7 +38,7 @@ define('MAX_PATTERN_SIZE',51);
 
    $player_level = (int)$player_row['admin_level'];
    if( !($player_level & ADMIN_DATABASE) )
-      error("adminlevel_too_low", 'make_handicap_pattern');
+      error('adminlevel_too_low');
 
 
    start_html( 'handicap_pattern', 0 );

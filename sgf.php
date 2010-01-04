@@ -431,7 +431,7 @@ $array=array();
    }
    $gid = (int)$gid;
    if( $gid <= 0 )
-      error('unknown_game');
+      error('unknown_game', "sgf.check.game($gid)");
 
    $use_cache = @$_GET['no_cache'];
    #$use_cache = false;
@@ -446,7 +446,7 @@ $array=array();
    else
       $field_owned = '';
 
-   $result = db_query( 'sgf.find',
+   $result = db_query( "sgf.find_game($gid)",
       'SELECT Games.*, ' .
       'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
       'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
@@ -464,7 +464,7 @@ $array=array();
       );
 
    if( @mysql_num_rows($result) != 1 )
-      error('unknown_game');
+      error('unknown_game', "sgf.find_game2($gid)");
 
    $row = mysql_fetch_array($result);
    extract($row);

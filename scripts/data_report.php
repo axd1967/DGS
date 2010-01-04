@@ -42,7 +42,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'data_report');
+      error('adminlevel_too_low');
 
 
    $encoding_used= get_request_arg( 'charset', 'UTF-8'); //LANG_DEF_CHARSET iso-8859-1 UTF-8

@@ -178,7 +178,7 @@ function connect2mysql($no_errors=false)
    if( DBG_QUERY>1 ) error_log("connect2mysql($no_errors): dbcnx=[$dbcnx] on attempt #$rcnt/".DB_CONNECT_RETRY_COUNT);
 
    return false;
-}
+} //connect2mysql
 
 function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 {
@@ -298,10 +298,10 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
          break;
    }
    $given_passwd_encrypted =
-      mysql_single_fetch( 'check_password.get_password',
+      mysql_single_fetch( "check_password.get_password($method)",
                "SELECT $method('".mysql_addslashes($given_passwd)."')"
                ,FETCHTYPE_ROW )
-         or error('mysql_query_failed','check_password.get_password');
+         or error('mysql_query_failed', "check_password.get_password2($method)");
 
    return ($passwd_encrypted == $given_passwd_encrypted[0]);
 }
@@ -318,7 +318,7 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
    }
    if( !empty($new_passwd) || $method != PASSWORD_ENCRYPT )
    {
-      db_query( 'check_password.set_password',
+      db_query( "check_password.set_password($uhandle)",
            'UPDATE Players'
          . " SET Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($given_passwd)."')"
             . ",Newpassword=''"

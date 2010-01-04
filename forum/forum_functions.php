@@ -1035,11 +1035,11 @@ class Forum
       if( !is_numeric($user_id) )
          error('invalid_user', "Forum.load_threads($user_id)");
       if( !is_numeric($show_rows) || !is_numeric($offset) )
-         error('invalid_args', "Forum.load_threads(show_rows=$show_rows,offset=$offset)");
+         error('invalid_args', "Forum.load_threads($show_rows,$offset)");
 
       $forum_id = $this->id;
       if( !is_numeric($forum_id) )
-         error('unknown_forum', "Forum.load_threads(forum_id={$forum_id})");
+         error('unknown_forum', "Forum.load_threads($forum_id)");
 
       $min_date = ForumRead::get_min_date();
       $qsql = ForumPost::build_query_sql();
@@ -1233,7 +1233,7 @@ class Forum
    function load_forum_list( $forum_opts )
    {
       if( !is_a($forum_opts, 'ForumOptions') )
-         error('invalid_args', "Forum.load_forum_list.check.forum_opts");
+         error('invalid_args', "Forum.load_forum_list.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
       $qsql = Forum::build_query_sql();
@@ -1424,7 +1424,7 @@ class ForumThread
       {
          $my_id = $player_row['ID'];
          if( ( $post->author->id != $my_id ) && !($player_row['admin_level'] & ADMIN_FORUM) )
-            error('forbidden_post', "ForumThread.load_revision_history.check_viewer($post_id,$my_id)");
+            error('forbidden_post', "ForumThread.load_revision_history.check_viewer($my_id,$post_id)");
       }
 
       // select all inactive history posts

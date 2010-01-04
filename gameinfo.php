@@ -62,7 +62,7 @@ function build_rating_diff( $rating_diff )
 
    $gid = (int) get_request_arg('gid', 0);
    if( $gid < 1 )
-      error('unknown_game', "gameinfo($gid)");
+      error('unknown_game', "gameinfo.check.game($gid)");
 
    if( get_request_arg('set_prio') )
    {
@@ -99,7 +99,7 @@ function build_rating_diff( $rating_diff )
 
    $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
    if( !$grow )
-      error('unknown_game', "gameinfo($gid)");
+      error('unknown_game', "gameinfo.find2($gid)");
 
    // init some vars
    $is_my_game = ( $my_id == $grow['Black_ID'] || $my_id == $grow['White_ID'] );

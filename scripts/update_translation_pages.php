@@ -154,7 +154,7 @@ function group_string( $id)
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'update_translation_pages');
+      error('adminlevel_too_low');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

@@ -116,13 +116,13 @@ function get_alt_arg( $n1, $n2)
            "FROM (Games, Players AS black, Players AS white) " .
            "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1";
 
-   if( !($game_row=mysql_single_fetch( 'game.findgame', $query)) )
-      error('unknown_game','game.findgame');
+   if( !($game_row=mysql_single_fetch( "game.findgame($gid)", $query)) )
+      error('unknown_game', "game.findgame2($gid)");
 
    extract($game_row);
 
    if( $Status == 'INVITED' )
-      error('unknown_game','game.invited');
+      error('unknown_game', "game.check.invited($gid)");
 
 
    if( @$_REQUEST['movechange'] )
@@ -187,7 +187,7 @@ function get_alt_arg( $n1, $n2)
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
    else if( $ToMove_ID )
-      error('database_corrupted', "game.bad_ToMove_ID($gid)");
+      error('database_corrupted', "game.bad_ToMove_ID($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
    if( $Status != 'FINISHED' && ($Maintime > 0 || $Byotime > 0) )
    {
@@ -243,7 +243,7 @@ function get_alt_arg( $n1, $n2)
       {
          case 'choose_move': //single input pass
             if( !$is_running_game ) //after resume
-               error('invalid_action',"game.choose_move.$Status");
+               error('invalid_action',"game.choose_move.check_status($gid,$Status)");
 
             $validation_step = false;
             break;
@@ -251,7 +251,7 @@ function get_alt_arg( $n1, $n2)
          case 'domove': //for validation after 'choose_move'
          {
             if( !$is_running_game ) //after resume
-               error('invalid_action',"game.domove.$Status");
+               error('invalid_action',"game.domove.check_status($gid,$Status)");
 
             $validation_step = true;
             {//to fix old way Ko detect. Could be removed when no more old way games.
@@ -271,7 +271,7 @@ function get_alt_arg( $n1, $n2)
             }
 
             if( strlen($stonestring) != $nr_prisoners*2 )
-               error('move_problem');
+               error('move_problem', "game.domove.check_prisoners($gid,$stonestring,$nr_prisoners)");
 
             $TheBoard->set_move_mark( $colnr, $rownr);
             //$coord must be kept for validation by confirm.php
@@ -281,7 +281,7 @@ function get_alt_arg( $n1, $n2)
          case 'handicap': //multiple input step + validation
          {
             if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==0 ) )
-               error('invalid_action',"game.handicap.$Status");
+               error('invalid_action',"game.handicap.check_status($gid,$Status)");
 
             $paterr = '';
             $patdone = 0;
@@ -316,7 +316,7 @@ function get_alt_arg( $n1, $n2)
 
          case 'resign': //for validation
             if( !$may_resign_game )
-               error('invalid_action',"game.resign($Status,$my_id)");
+               error('invalid_action', "game.resign.check_status($gid,$Status,$my_id)");
 
             $validation_step = true;
             $extra_infos[T_('Resigning')] = 'Important';
@@ -324,14 +324,14 @@ function get_alt_arg( $n1, $n2)
 
          case 'add_time': //add-time for opponent
             if( !$may_add_time )
-               error('invalid_action', "game.add_time");
+               error('invalid_action', "game.add_time.check_status($gid)");
 
             $validation_step = true;
             break;
 
          case 'pass': //for validation
             if( $Status != 'PLAY' && $Status != 'PASS' )
-               error('invalid_action',"game.pass.$Status");
+               error('invalid_action', "game.pass.check_status($gid,$Status)");
 
             $validation_step = true;
             $extra_infos[T_('Passing')] = 'Info';
@@ -340,7 +340,7 @@ function get_alt_arg( $n1, $n2)
 
          case 'delete': //for validation
             if( !$may_add_time )
-               error('invalid_action',"game.delete($Status,$my_id)");
+               error('invalid_action',"game.delete.check_status($gid,$Status,$my_id)");
 
             $validation_step = true;
             $extra_infos[T_('Deleting game')] = 'Important';
@@ -349,7 +349,7 @@ function get_alt_arg( $n1, $n2)
          case 'remove': //multiple input step
          {
             if( $Status != 'SCORE' && $Status != 'SCORE2' )
-               error('invalid_action',"game.remove.$Status");
+               error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
             $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING, $coord); //ajusted globals: $stonestring
@@ -370,7 +370,7 @@ function get_alt_arg( $n1, $n2)
          case 'done': //for validation after 'remove'
          {
             if( $Status != 'SCORE' && $Status != 'SCORE2' )
-               error('invalid_action',"game.done.$Status");
+               error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
             $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING ); //ajusted globals: $stonestring
@@ -381,7 +381,7 @@ function get_alt_arg( $n1, $n2)
          }//case 'done'
 
          default:
-            error('invalid_action',"game.noaction.$Status");
+            error('invalid_action', "game.noaction.check($gid,$action,$Status)");
             break;
       }//switch $action
    }// !$just_looking

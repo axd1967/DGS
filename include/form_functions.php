@@ -502,7 +502,7 @@ class Form
 
       // syntax-checks: allowed chars, non-empty braces
       if( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
-         error('internal_error', "Form.parse_layout_global.bad_syntax.1($layout)");
+         error('internal_error', "Form.parse_layout_global.bad_syntax1($layout)");
 
       $groups = array();
       $grcnt = 0;
@@ -515,7 +515,7 @@ class Form
          # found ')', search backwards to '(' -> group
          $spos = strrpos( substr($L, 0, $epos), '(' );
          if( $spos === false )
-            error('internal_error', "Form.parse_layout_global.bracing-mismatch.1($layout)");
+            error('internal_error', "Form.parse_layout_global.bracing_mismatch1($layout)");
 
          $group = substr( $L, $spos + 1, $epos - $spos - 1 ); // no '()' in group, only x or x, or x|
          $arr = array();
@@ -560,9 +560,9 @@ class Form
       }
 
       if( !(strpos( $L, '(' ) === false) )
-         error('internal_error', "Form.parse_layout_global.bracing-mismatch.2($layout)");
+         error('internal_error', "Form.parse_layout_global.bracing_mismatch2($layout)");
       if( preg_match( "/[\|,]/", $L ) )
-         error('internal_error', "Form.parse_layout_global.bad_syntax.2($layout)"); // with one of '|,'
+         error('internal_error', "Form.parse_layout_global.bad_syntax2($layout)"); // with one of '|,'
 
       $result = $groups[$grcnt-1];
       while( is_array($result) && count($result) == 1 )

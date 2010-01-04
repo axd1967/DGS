@@ -151,7 +151,7 @@ class FilterMysqlMatch extends Filter
       elseif( $name === $this->elem_boolmode )
          ; // only var set in values[elem_boolmode]
       else
-         error('invalid_filter', "ERROR: MysqlMatch-Filter parse_value($name,$val) called with unknown key");
+         error('invalid_filter', "FilterMysqlMatch.parse_value.unknown_key({$this->id},$name,$val)");
 
       return true;
    }
@@ -221,7 +221,7 @@ class FilterMysqlMatch extends Filter
       elseif( $match_mode === MATCH_QUERY_EXPANSION )
          $sql_option = 'WITH QUERY EXPANSION';
       else
-         error('invalid_filter', "ERROR: FilterMysqlMatch.build_query(): unknown FC_MATCH_MODE [$match_mode] for filter [{$this->id}]");
+         error('invalid_filter', "FilterMysqlMatch.build_query.unknown_FC_MATCH_MODE({$this->id},$match_mode)");
 
       return $sql_option;
    }

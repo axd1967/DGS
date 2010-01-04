@@ -31,7 +31,7 @@ require_once( "include/std_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'translation_consistency');
+      error('adminlevel_too_low');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
@@ -63,9 +63,9 @@ echo ">>>> Most of them needs manual fixes.";
 
 
 
-   $row = mysql_single_fetch( 'FAQtransl_consistency.get_faq_group_id',
+   $row = mysql_single_fetch( 'translation_consistency.get_faq_group_id1',
             "SELECT ID FROM TranslationGroups WHERE Groupname='FAQ'" )
-      or error('internal_error', 'FAQtransl_consistency.get_faq_group_id');
+      or error('internal_error', 'translation_consistency.get_faq_group_id2');
 
    $FAQ_group = $row['ID'];
 

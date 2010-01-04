@@ -202,13 +202,13 @@ if(1){//new
       {
          //TODO: Delete games with too few moves ???
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
-         $prow = mysql_single_fetch( 'clock_tick.find_timeout_players',
+         $prow = mysql_single_fetch( "clock_tick.find_timeout_players($White_ID,$Black_ID)",
             'SELECT black.Handle as blackhandle, white.Handle as whitehandle'
                .', black.Name as blackname, white.Name as whitename'
             .' FROM (Players as white, Players as black)' // no JOIN (only to save 1 query) -> TODO: use Players where ID IN(..) in prep for TeamGo
             ." WHERE white.ID=$White_ID AND black.ID=$Black_ID" );
          if( !$prow )
-            error('unknown_user', 'clock_tick.find_timeout_players');
+            error('unknown_user', "clock_tick.find_timeout_players2($White_ID,$Black_ID)");
          extract($prow);
 
          //TODO: HOT_SECTION ???
@@ -222,7 +222,7 @@ if(1){//new
 
          if( @mysql_affected_rows() != 1)
          {
-            error('mysql_update_game',"clock_tick.time_is_up($gid)");
+            error('mysql_update_game',"clock_tick.time_is_up2($gid)");
             continue;
          }
 

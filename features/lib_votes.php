@@ -508,7 +508,7 @@ class FeatureVote
    function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0, $ip='' )
    {
       if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
-         error('invalid_user', "featurevote.FeatureVote($id,$voter)");
+         error('invalid_user', "featurevote.FeatureVote($fid,$voter)");
       $this->fid = (int) $fid;
       $this->voter = (int) $voter;
       $this->set_points( $points );

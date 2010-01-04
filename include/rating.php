@@ -848,7 +848,7 @@ function convert_to_rating($string, $type, $no_error=false)
          break;
 
       default:
-         error('wrong_rank_type');
+         error('wrong_rank_type', "convert_to_rating.check.type($type)");
          break;
    }
 
@@ -856,8 +856,8 @@ function convert_to_rating($string, $type, $no_error=false)
    {
       if( $no_error )
          return $rating;
-      error($needrank ? 'rank_not_rating' : 'rating_not_rank'
-         , "type:$type str:$string val:$val kyu:$kyu");
+      error($needrank ? 'rank_not_rating' : 'rating_not_rank',
+         "convert_to_rating.check.rating($type,$string,$val,$kyu)");
    }
 
    //valid rating, so ends with a limited bound corrections, else error

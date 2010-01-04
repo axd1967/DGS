@@ -43,24 +43,20 @@ else
    // logged in?
 
    $uhandle= safe_getcookie('handle');
-   $result = @db_query( 'quick_play.find_player',
+   $result = @db_query( "quick_play.find_player($uhandle)",
       'SELECT ID, Timezone, AdminOptions, ' .
          'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
       "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
-
    if( @mysql_num_rows($result) != 1 )
-      error('not_logged_in','qp1');
+      error('not_logged_in', "quick_play.find_player2($uhandle)");
 
    $player_row = mysql_fetch_assoc($result);
 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied');
 
-   if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
-         || $player_row['Expire'] < $NOW )
-   {
+   if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row['Expire'] < $NOW )
       error('not_logged_in','qp2');
-   }
 
    //TODO: fever vault check ???
    //setTZ( $player_row['Timezone']);
@@ -79,15 +75,15 @@ else
       );
 
    if( !$game_row )
-      error('unknown_game');
+      error('unknown_game', "quick_play.find_game($gid)");
 
    $Last_X = $Last_Y = -1;
    extract($game_row);
 
    if( $Status == 'INVITED' )
-      error('game_not_started');
+      error('game_not_started', "quick_play.check_status.invited($gid)");
    else if( $Status == 'FINISHED' )
-      error('game_finished');
+      error('game_finished', "quick_play.check_status.finished($gid)");
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -98,16 +94,16 @@ else
       error('not_your_turn', "confirm.bad_ToMove_ID($gid)");
 */
    else
-      error('database_corrupted');
+      error('database_corrupted', "quick_play.check_tomove($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
    if( $my_id != $ToMove_ID )
-      error('not_your_turn','qp9');
+      error('not_your_turn', "quick_play.check_tomove2($gid,$ToMove_ID)");
 
    if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
          || !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
          || ($Handicap>1 && $Moves<=$Handicap) ) //exclude first white move after handicap stones
    {
-      error('invalid_action');
+      error('invalid_action', "quick_play.check_status.play($gid,$Status)");
    }
 
 
@@ -121,7 +117,7 @@ else
       list( $query_X, $query_Y) = array( NULL, NULL);
 
    if( is_null($query_X) || is_null($query_Y) )
-      error('illegal_position','qp3');
+      error('illegal_position', "quick_play.err1($gid)");
 
    if( isset($_REQUEST['sgf_prev']) )
       list( $prev_X, $prev_Y) = sgf2number_coords($_REQUEST['sgf_prev'], $Size);
@@ -131,14 +127,14 @@ else
       list( $prev_X, $prev_Y) = array( NULL, NULL);
 
    if( is_null($prev_X) || is_null($prev_Y) )
-      error('illegal_position','qp4');
+      error('illegal_position', "quick_play.err2($gid)");
 
    if( $prev_X != $Last_X || $prev_Y != $Last_Y )
-      error('already_played','qp5');
+      error('already_played', "quick_play.err3($gid)");
 
    $move_color = strtoupper( @$_REQUEST['color']);
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
-      error('not_your_turn','qp8');
+      error('not_your_turn', "quick_play.err4($gid)");
 
    //$action = always 'domove'
 
@@ -195,7 +191,7 @@ else
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
-      error('internal_error', "quick_play load_from_db $gid");
+      error('internal_error', "quick_play.load_from_db($gid)");
 
    //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
 
@@ -227,7 +223,7 @@ This is why:
    //case 'domove':
    {
       if( $Status != 'PLAY' )
-         error('invalid_action','qp0');
+         error('invalid_action', "quick_play.err5($gid)");
 
       $coord = number2sgf_coords( $query_X, $query_Y, $Size);
 
@@ -249,7 +245,7 @@ This is why:
       }
 
       if( strlen($prisoner_string) != $nr_prisoners*2 )
-         error('move_problem','quick_play.domove.prisoner');
+         error('move_problem', "quick_play.domove.prisoner($gid)");
 
       $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
@@ -280,19 +276,19 @@ This is why:
 
 
    //See *** HOT_SECTION *** above
-   $result = db_query( 'quick_play.update_game', $game_query . $game_clause );
+   $result = db_query( "quick_play.update_game($gid)", $game_query . $game_clause );
    if( mysql_affected_rows() != 1 )
-      error('mysql_update_game',"qp20($gid)");
+      error('mysql_update_game', "quick_play.update_game2($gid)");
 
-   $result = db_query( 'quick_play.update_moves', $move_query );
+   $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
    if( mysql_affected_rows() < 1 && $action != 'delete' )
-      error('mysql_insert_move',"qp21($gid)");
+      error('mysql_insert_move', "quick_play.update_moves2($gid,$action)");
 
 
 
 // Notify opponent about move
 
-   db_query( 'quick_play.notify_opponent',
+   db_query( "quick_play.notify_opponent($gid,$next_to_move_ID)",
       "UPDATE Players SET Notify='NEXT'"
       ." WHERE ID=$next_to_move_ID AND ID!=$my_id"
          ." AND FIND_IN_SET('ON',SendEmail)"
@@ -303,7 +299,7 @@ This is why:
 
 // Increase moves and activity
 
-   db_query( 'quick_play.update_player',
+   db_query( "quick_play.update_player($gid,$my_id)",
       "UPDATE Players SET Moves=Moves+1"
          .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
          .",LastMove=FROM_UNIXTIME($NOW)"

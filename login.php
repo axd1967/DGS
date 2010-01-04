@@ -46,12 +46,12 @@ if( $quick_mode )
       $uhandle = substr($uhandle,0,$i);
    }
 
-   $row = mysql_single_fetch( 'login.find_player',
+   $row = mysql_single_fetch( "login.find_player($uhandle)",
                   "SELECT Handle, AdminOptions,Password,Newpassword,Sessioncode, " .
                         "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
                   "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
    if( !$row )
-      error('wrong_userid');
+      error('wrong_userid', "login.find_player2($uhandle)");
 
    $code = @$row['Sessioncode'];
    $userid = @$row['Handle'];
@@ -65,7 +65,7 @@ if( $quick_mode )
                            $row['Newpassword'], $passwd ) )
       {
          admin_log( 0, $userid, 'wrong_password');
-         error("wrong_password");
+         error("wrong_password", "login.check_password($userid,$uhandle)");
       }
 
       if( !$code || @$row['Expire'] < $NOW )
@@ -86,16 +86,13 @@ if( $quick_mode )
    }
    //else cookie_check
 
-   if( safe_getcookie('handle') != $uhandle
-      || safe_getcookie('sessioncode') != $code )
-   {
-      error('cookies_disabled');
-   }
+   if( safe_getcookie('handle') != $uhandle || safe_getcookie('sessioncode') != $code )
+      error('cookies_disabled', "login.check_cookies($uhandle)");
 
    if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied');
 
-   //admin_log( 0, $userid, 'logged_in');
+   //admin_log( 0, $userid, 'logged_in'); // activate when needed
 
    if( $quick_mode )
    {

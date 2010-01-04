@@ -38,7 +38,7 @@ require_once( "include/rating.php" );
 
    $name = trim(get_request_arg('name')) ;
    if( strlen( $name ) < 1 )
-      error('name_not_given');
+      error('name_not_given', "change_profile.miss_name($my_id)");
 
    $email = trim(get_request_arg('email'));
    if( $email )

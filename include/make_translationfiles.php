@@ -39,7 +39,7 @@ function make_known_languages() //must be called from main dir
       //echo "couldnt_open_file ". $Filename; exit;
       global $TheErrors;
       $TheErrors->set_mode(ERROR_MODE_PRINT);
-      error('couldnt_open_file', 'make_known_languages:'.$Filename);
+      error('couldnt_open_file', "make_known_languages.err1($Filename)");
    }
 
    $group= 'Common';
@@ -136,9 +136,7 @@ function make_include_files($language=null, $group=null) //must be called from m
          $fd = @fopen( $Filename, 'w');
          //error_reporting($e);
          if( !$fd )
-         {
-            error('couldnt_open_file', 'make_include_files:'.$Filename);
-         }
+            error('couldnt_open_file', "make_include_files.err2($Filename)");
 
          fwrite( $fd, "<?php\n\n/* Automatically generated at " .
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");

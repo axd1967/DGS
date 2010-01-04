@@ -104,7 +104,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
                  "white.OnVacation AS Whiteonvacation " .
                  "FROM (Games, Players AS black, Players AS white) " .
                  "WHERE Games.ID=$gid AND black.ID=Black_ID AND white.ID=White_ID" )
-      or error('unknown_game', "confirm.find_game($gid)");
+      or error('unknown_game', "confirm.find_game2($gid)");
 
    extract($game_row);
 
@@ -119,9 +119,9 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    }
 
    if( $Status == 'INVITED' )
-      error('game_not_started');
+      error('game_not_started', "confirm.check.invited($gid)");
    elseif( $Status == 'FINISHED' )
-      error('game_finished');
+      error('game_finished', "confirm.check.finished($gid)");
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -147,23 +147,22 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    if( $action == 'resign' )
    {
       if( !$may_resign_game )
-         error('invalid_action', "confirm.resign($gid,$Status,$my_id)");
+         error('invalid_action', "confirm.resign($gid,$Status)");
 
       if( $my_id != $ToMove_ID )
          $to_move = WHITE+BLACK-$to_move;
    }
 
    if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
-      error('not_your_turn');
+      error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
 
 
    //See *** HOT_SECTION *** below
    if( !isset($_REQUEST['move']) )
-      //error('internal_error','confirm10');
-      error('move_problem','confirm10');
+      error('move_problem', "confirm.check.miss_move($gid)");
    $qry_move = @$_REQUEST['move'];
    if( $qry_move != $Moves )
-      error('already_played','confirm11');
+      error('already_played', "confirm.check.move($gid,$qry_move,$Moves)");
 
    $next_to_move = WHITE+BLACK-$to_move;
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
@@ -223,7 +222,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
-      error('internal_error', "confirm load_from_db $gid");
+      error('internal_error', "confirm.board.load_from_db($gid)");
 
    $message_raw = trim(get_request_arg('message'));
    $message = mysql_addslashes($message_raw);
@@ -264,7 +263,7 @@ This is why:
       case 'domove': //stonestring is the list of prisoners
       {
          if( !$is_running_game ) //after resume
-            error('invalid_action',"confirm.domove.$Status");
+            error('invalid_action', "confirm.domove.check_status($gid,$Status)");
 
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring'];
@@ -290,7 +289,7 @@ This is why:
          if( strlen($prisoner_string) != $nr_prisoners*2
                || ( $stonestring && $prisoner_string != $stonestring) )
          {
-            error('move_problem','confirm.domove.prisoner');
+            error('move_problem', "confirm.domove.prisoner($gid)");
          }
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
@@ -329,14 +328,14 @@ This is why:
       case 'pass':
       {
          if( $Moves < $Handicap )
-            error('early_pass');
+            error('early_pass', "confirm.pass($gid,$Moves,$Handicap)");
 
          if( $Status == 'PLAY' )
             $next_status = 'PASS';
          else if( $Status == 'PASS' )
             $next_status = 'SCORE';
          else
-            error('invalid_action',"confirm.pass.$Status");
+            error('invalid_action', "confirm.pass.check_status($gid,$Status)");
 
 
          $move_query = "INSERT INTO Moves SET " .
@@ -362,13 +361,13 @@ This is why:
       case 'handicap': //stonestring is the list of handicap stones
       {
          if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==1 ) )
-            error('invalid_action',"confirm.handicap.$Status");
+            error('invalid_action', "confirm.handicap.check_status($gid,$Status,$Handicap,$Moves)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          check_handicap( $TheBoard); //adjust $stonestring
 
          if( strlen( $stonestring ) != 2 * $Handicap )
-            error('wrong_number_of_handicap_stone');
+            error('wrong_number_of_handicap_stone', "confirm.check.handicap($gid,$Handicap,$stonestring)");
 
 
          $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
@@ -378,7 +377,7 @@ This is why:
             list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-2, 2), $Size);
 
             if( !isset($rownr) || !isset($colnr) )
-               error('illegal_position');
+               error('illegal_position', "confirm.check_pos($gid,#$i,$Handicap)");
 
             $move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
                ($i == $Handicap ? "$hours)" : "0), " );
@@ -429,7 +428,7 @@ This is why:
       case 'delete':
       {
          if( !$may_del_game )
-            error('invalid_action',"confirm.delete($Status,$my_id)");
+            error('invalid_action', "confirm.delete($gid,$my_id,$Status)");
 
 /*
   Here, the previous line was:
@@ -456,7 +455,7 @@ This is why:
       case 'done': //stonestring is the list of toggled points
       {
          if( $Status != 'SCORE' && $Status != 'SCORE2' )
-            error('invalid_action',"confirm.done.$Status");
+            error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
          $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING); //ajusted globals: $stonestring
@@ -505,27 +504,27 @@ This is why:
       }//switch for 'done'
 
       default:
-         error('invalid_action',"confirm.noaction.$Status");
+         error('invalid_action', "confirm.noaction($gid,$Status)");
          break;
    }//switch $action
 
 
    //See *** HOT_SECTION *** above
-   $result = db_query( "confirm.update_game($gid)", $game_query . $game_clause );
+   $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
    if( mysql_affected_rows() != 1 )
-      error('mysql_update_game',"confirm20($action,$gid)");
+      error('mysql_update_game', "confirm.update_game2($gid,$action)");
 
-   $result = db_query( "confirm.update_moves($gid)", $move_query );
+   $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
    if( mysql_affected_rows() < 1 && $action != 'delete' )
-      error('mysql_insert_move',"confirm21($action,$gid)");
+      error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
 
 
 
    if( $message_query )
    {
-      $result = db_query( "confirm.message_query", $message_query );
+      $result = db_query( "confirm.message_query($gid,$action)", $message_query );
       if( mysql_affected_rows() < 1 && $action != 'delete' )
-         error('mysql_insert_move',"confirm22($action,$gid)");
+         error('mysql_insert_move', "confirm.message_query2($gid,$action)");
    }
 
 
@@ -533,10 +532,10 @@ This is why:
    {
       // send message to my opponent about the result
 
-      $opponent_row = mysql_single_fetch( 'confirm.find_opponent',
+      $opponent_row = mysql_single_fetch( "confirm.find_opponent($gid,$White_ID,$Black_ID)",
                         "SELECT * FROM Players WHERE ID=" .
                            ($White_ID + $Black_ID - $my_id) )
-         or error('opponent_not_found');
+         or error('opponent_not_found', "confirm.find_opponent2($gid,$White_ID,$Black_ID)");
 
       if( $my_id == $Black_ID )
       {
@@ -557,7 +556,7 @@ This is why:
       if( $action == 'delete' )
       {
          //TODO: HOT_SECTION ???
-         db_query( "confirm.update_players_delete($gid)",
+         db_query( "confirm.update_players_delete($gid,$Black_ID,$White_ID)",
             "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
 
          db_query( "confirm.delete.gamenote($gid)",
@@ -701,7 +700,7 @@ function do_add_time( $game_row, $my_id)
    $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id,
          time_convert_to_hours( $add_days, 'days'), $reset_byo );
    if( !is_numeric($add_hours) )
-      error('confirm_add_time', "do_add_time($gid,$my_id,$add_days,$reset_byo): $add_hours");
+      error('confirm_add_time', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
 
    jump_to("game.php?gid=$gid"
       . ($add_hours != 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')

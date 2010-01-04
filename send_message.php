@@ -42,9 +42,9 @@ disable_cache();
       error('not_allowed_for_guest');
 
 
-   $tmp = (int)@$_REQUEST['senderid'];
-   if( $tmp>0 && $my_id != $tmp )
-      error('user_mismatch');
+   $sender_id = (int)@$_REQUEST['senderid'];
+   if( $sender_id > 0 && $my_id != $sender_id )
+      error('user_mismatch', "send_message.check.user($my_id,$sender_id)");
 
    $tohdl = get_request_arg('to');
    $subject = get_request_arg('subject');
@@ -117,9 +117,9 @@ disable_cache();
          . " WHERE P.Handle='".mysql_addslashes($tohdl)."'"
          //. " HAVING C_denied=0"
          ;
-   $opponent_row = mysql_single_fetch( 'send_message.find_receiver', $query);
+   $opponent_row = mysql_single_fetch( "send_message.find_receiver($tohdl)", $query);
    if( !$opponent_row )
-      error('receiver_not_found');
+      error('receiver_not_found', "send_message.find_receiver2($tohdl)");
    if( $opponent_row['C_denied'] )
    {
       if( $type == 'INVITATION' )
@@ -222,7 +222,7 @@ disable_cache();
          $game_row['double_gid'] = $gid;
          $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row);
 
-         db_query( "join_waitingroom_game.update_double.2($gid)",
+         db_query( "join_waitingroom_game.update_double2($gid)",
             "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
       }
 

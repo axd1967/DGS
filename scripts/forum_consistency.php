@@ -40,7 +40,7 @@ define('SEPLINE', "\n<p><hr>\n");
    if( !$logged_in )
       error('not_logged_in');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'forum_consistency');
+      error('adminlevel_too_low');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

@@ -32,7 +32,7 @@ require_once( "include/form_functions.php" );
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
-      error('adminlevel_too_low', 'admin_users');
+      error('adminlevel_too_low');
 
 /* URL-syntax for this page:
       cancel                : jump to show-user-form

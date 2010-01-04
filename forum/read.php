@@ -68,7 +68,7 @@ require_once( 'forum/post.php' );
    $forum = Forum::load_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum->options ) )
-      error('forbidden_forum', "visible($forum_id,$my_id)");
+      error('forbidden_forum', "forum_read.check.forum_visible($forum_id,$my_id)");
 
    // for GoDiagrams
    $preview = isset($_POST['preview']);

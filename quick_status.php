@@ -90,12 +90,12 @@ else
          if( $uhandle )
             $idmode= 'cookie';
          else
-            error('no_uid','quick_status');
+            error('no_uid');
       }
    }
 
 
-   $player_row = mysql_single_fetch( 'quick_status.find_player',
+   $player_row = mysql_single_fetch( "quick_status.find_player($uid,$uhandle)",
                   "SELECT ID, Timezone, AdminOptions, " .
                   'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
                   'FROM Players WHERE ' .
@@ -105,18 +105,13 @@ else
                   ) );
 
    if( !$player_row )
-   {
-      error('unknown_user','quick_status.find_player');
-   }
+      error('unknown_user', "quick_status.find_player2($uid,$uhandle)");
 
    //TODO: fever vault check
    if( $idmode == 'cookie' )
    {
-      if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode')
-          || $player_row["Expire"] < $NOW )
-      {
+      if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row["Expire"] < $NOW )
          error('not_logged_in','quick_status.expired');
-      }
       $logged_in = true;
       setTZ( $player_row['Timezone']);
       $datfmt = 'Y-m-d H:i';

@@ -56,15 +56,16 @@ require_once( "include/make_translationfiles.php" );
       $from_row = max(0,(int)@$_REQUEST['from_row']);
 
    if( !in_array( $translate_lang, $translator_array ) )
-      error('not_correct_transl_language', $translate_lang.':'.$translator_set.':'.implode("*", $translator_array));
+      error('not_correct_transl_language', "update_translation.check("
+         . $translate_lang.':'.$translator_set.':'.implode("*", $translator_array).')');
 
    $result = translations_query( $translate_lang, $untranslated, $group
             , $from_row, $alpha_order, $filter_en)
-      or error('mysql_query_failed','update_translation.translations_query');
+      or error('mysql_query_failed', "update_translation.translations_query($translate_lang)");
 
    $show_rows = (int)@mysql_num_rows($result);
    if( $show_rows <= 0 && !$untranslated )
-      error('translation_bad_language_or_group','uptranslat1');
+      error('translation_bad_language_or_group', "update_translation.translations_query2($translate_lang)");
    if( $show_rows > TRANS_ROW_PER_PAGE )
       $show_rows = TRANS_ROW_PER_PAGE;
 

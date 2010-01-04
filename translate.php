@@ -168,7 +168,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
    if( $translate_lang )
    {
       if( !in_array( $translate_lang, $translator_array ) )
-         error('not_correct_transl_language');
+         error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
       $result = translations_query( $translate_lang, $untranslated, $group
                , $from_row, $alpha_order, $filter_en)
@@ -176,7 +176,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
 
       $show_rows = (int)@mysql_num_rows($result);
       if( !TRANSL_ALLOW_FILTER && $show_rows <= 0 && !$untranslated )
-         error('translation_bad_language_or_group','translat1');
+         error('translation_bad_language_or_group', 'translate.check.lang_group');
 
       $lang_string = '';
       foreach( $known_languages as $browsercode => $array )

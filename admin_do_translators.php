@@ -75,7 +75,7 @@ function retry_admin( $msg)
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low', 'admin_do_translators');
+      error('adminlevel_too_low');
 
 /* Originally, the language code was a 2 letters code (like ISO 639-1).
    Because of language particularities within the same charset (like
@@ -137,7 +137,7 @@ function retry_admin( $msg)
       //insert the name of language to be translated
       $row = mysql_single_fetch( 'admin_do_translators.add.find_group',
             "SELECT ID FROM TranslationGroups WHERE Groupname='Users'")
-         or error('internal_error','admin_do_translators.add.find_group');
+         or error('internal_error','admin_do_translators.add.find_group2');
 
       $Group_ID = $row['ID'];
 
@@ -207,15 +207,15 @@ function retry_admin( $msg)
       if( $new_langs == $old_langs )
          retry_admin( $msg);
 
-      db_query( 'admin_do_translators.user.update',
+      db_query( "admin_do_translators.user.update($transluser,$new_langs)",
          "UPDATE Players SET Translator='$new_langs'"
             . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
 
       if( mysql_affected_rows() != 1 )
-         error('internal_error', $update_it);
+         error('internal_error', "admin_do_translators.user.update2($transluser,$new_langs)");
 
       // Check result
-      $tmp = mysql_single_fetch( 'admin_do_translators.user.translator',
+      $tmp = mysql_single_fetch( "admin_do_translators.user.translator($transluser)",
          "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
       if( !$tmp )
          $update_it.= '.1';
@@ -227,11 +227,11 @@ function retry_admin( $msg)
          retry_admin( $msg);
 
       // Something went wrong. Restore to old set then error
-      db_query( 'admin_do_translators.user.revert',
+      db_query( "admin_do_translators.user.revert($transluser,$old_langs)",
          "UPDATE Players SET Translator='$old_langs'"
             . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
 
-      error('couldnt_update_translation', $update_it);
+      error('couldnt_update_translation', "admin_do_translators.update_failed");
    }
    retry_admin('');
 }

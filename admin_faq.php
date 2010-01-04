@@ -95,7 +95,7 @@ $info_box = '<ul>
       error('not_logged_in');
 
    if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
-      error('adminlevel_too_low', 'admin_faq');
+      error('adminlevel_too_low');
 
    $fid = max(0,@$_REQUEST['id']);
    $sql_term = get_request_arg('qterm', '');
@@ -123,14 +123,14 @@ $info_box = '<ul>
       $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
       $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
 
-      $row = mysql_single_fetch( 'admin_faq.move.find',
+      $row = mysql_single_fetch( "admin_faq.move.find($fid,$action)",
                 "SELECT * FROM FAQ WHERE ID=$fid")
-          or error('admin_no_such_entry',"admin_faq.move.$action.read($fid)");
+          or error('admin_no_such_entry', "admin_faq.move.find2($fid,$action)");
       $parent = $row['Parent'];
 
-      $row2 = mysql_single_fetch( 'admin_faq.move.max',
+      $row2 = mysql_single_fetch( "admin_faq.move.max($action,$parent)",
                 "SELECT COUNT(*) AS max FROM FAQ WHERE Parent=$parent")
-          or error('mysql_query_failed',"admin_faq.move.$action.max");
+          or error('mysql_query_failed', "admin_faq.move.max2($action,$parent)");
       $max = $row2['max'];
 
       $start = $row['SortOrder'];
@@ -166,8 +166,8 @@ $info_box = '<ul>
             . " FROM FAQ AS Entry,FAQ AS Parent"
             . " WHERE Entry.ID=$fid AND Parent.ID=Entry.Parent";
 
-      $row= mysql_single_fetch('admin_faq.bigmove.find', $query)
-         or error('admin_no_such_entry',"admin_faq.move.$action.read($fid)");
+      $row= mysql_single_fetch( "admin_faq.bigmove.find($fid,$action)", $query)
+         or error('admin_no_such_entry', "admin_faq.bigmove.find2($fid,$action)");
 
       $query = 'SELECT ID FROM FAQ'
             . ' WHERE Level=1 AND SortOrder'
@@ -558,18 +558,18 @@ $info_box = '<ul>
       }
 
       $query = "SELECT * FROM FAQ WHERE ID=$fid";
-      $row = mysql_single_fetch( 'admin_faq.do_new.find1', $query );
+      $row = mysql_single_fetch( "admin_faq.do_new.find1($fid)", $query );
       if( $fid==1 && (!$row || $row['Hidden']=='Y') )
       {
          //adjust the seed. must be Hidden='N' even if invisible
-         db_query( 'admin_faq.do_new.replace_seed',
+         db_query( "admin_faq.do_new.replace_seed($fid)",
             "REPLACE INTO FAQ (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
                      . " VALUES (1,1,0,0,0,0,'N')" );
          //reload it:
-         $row = mysql_single_fetch( 'admin_faq.do_new.find2', $query );
+         $row = mysql_single_fetch( "admin_faq.do_new.find2($fid)", $query );
       }
       if( !$row )
-         error('admin_no_such_entry','admin_faq.do_new');
+         error('admin_no_such_entry', "admin_faq.do_new.find3($fid)");
 
       if( $row['Level'] == 0 ) // First category
          $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 1);
@@ -839,14 +839,14 @@ function get_faq_group_id()
 
 function get_entry_row( $id )
 {
-   $row = mysql_single_fetch( 'admin_faq.get_entry_row',
+   $row = mysql_single_fetch( "admin_faq.get_entry_row($id)",
         "SELECT FAQ.*, Question.Text AS Q, Answer.Text AS A".
         ", Question.Translatable AS QTranslatable".
         ", Answer.Translatable AS ATranslatable ".
         "FROM (FAQ, TranslationTexts AS Question) " .
         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=FAQ.Answer " .
         "WHERE FAQ.ID='$id' AND Question.ID=FAQ.Question" )
-      or error('internal_error','admin_faq.get_entry_row');
+      or error('internal_error', "admin_faq.get_entry_row($id)");
 
    return $row;
 }

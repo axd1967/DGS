@@ -103,7 +103,7 @@ define('MSGBOXROWS_INVITE', 6);
    if( $mode == 'ShowMessage' || $mode == 'Dispute' )
    {
       if( !($mid > 0) )
-         error("unknown_message");
+         error("unknown_message", "message.miss_message($mid)");
 
       /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
       $query = "SELECT Messages.*"
@@ -137,9 +137,9 @@ define('MSGBOXROWS_INVITE', 6);
        * the server (ID=0) because the message is not read BY the server.
        * See also: send_message
        **/
-      $msg_row = mysql_single_fetch( 'message.find', $query);
+      $msg_row = mysql_single_fetch( "message.find($mid)", $query);
       if( !$msg_row )
-         error('unknown_message');
+         error('unknown_message', "message.find.not_found($mid)");
 
       extract($msg_row);
 
@@ -188,7 +188,7 @@ define('MSGBOXROWS_INVITE', 6);
                "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
                "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" );
             if( mysql_affected_rows() != 1)
-               error("mysql_message_info", "remove new-flag failed mid=$mid uid=$my_id Sender='$Sender'");
+               error("mysql_message_info", "message.update_mess_corr2($mid,$my_id,$Sender)");
 
             update_count_message_new( "message.update_mess_corr.upd_cnt_msg_new($my_id)",
                $my_id, COUNTNEW_RECALC );
