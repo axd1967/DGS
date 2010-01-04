@@ -202,7 +202,6 @@ function group_string( $id)
    foreach( $files as $file )
    {
       //note: only keep the first match of the file (starting at column 1)
-      //TODO: is this wanted?
       if( grep_file('/^\$TranslateGroups\[\]\s*=\s*([\"\'])(\w+)\1\s*;/', $file, $matches) )
       {
          $group_found = $matches[2];
