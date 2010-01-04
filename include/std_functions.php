@@ -380,11 +380,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goban_editor.js\"></script>";
 
       if( ALLOW_GO_DIAGRAMS )
-      {
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
-         $version = 1;
-         //echo "\n<script language=\"JavaScript\" type=\"text/javascript\"> version=$version; </script>"; //TODO
-      }
    }
 
    if( is_a($ThePage, 'HTMLPage') )
@@ -2849,12 +2845,6 @@ function activity_string( $act_lvl)
 }
 
 
-// @deprecated: not used -> TODO remove
-function nsq_addslashes( $str )
-{
-  return str_replace( array( "\\", "\"", "\$" ), array( "\\\\", "\\\"", "\\\$" ), $str );
-}
-
 function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=false, $blackname=false)
 {
    global $base_path;
@@ -3100,7 +3090,7 @@ function has_observers( $gid )
 function is_on_observe_list( $gid, $uid )
 {
    $result = db_query( 'is_on_observe_list',
-      "SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid");
+      "SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
    if( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
