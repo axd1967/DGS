@@ -161,7 +161,7 @@ require_once( "include/filter.php" );
    }
 
    $show_rows = $mtable->compute_show_rows( $show_rows);
-   //$mtable->set_found_rows( mysql_found_rows('list_messages.found_rows') );
+   //$mtable->set_found_rows( mysql_found_rows('list_messages.found_rows') ); // too slow for so many msgs
 
 
    echo echo_folders($my_folders, $current_folder);

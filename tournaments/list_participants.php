@@ -122,6 +122,9 @@ $ThePage = new Page('TournamentParticipantList');
          $tptable->current_limit_string() );
    $iterator = TournamentParticipant::load_tournament_participants( $iterator, $tid );
 
+   $show_rows = $tptable->compute_show_rows( $iterator->ResultRows );
+   $tptable->set_found_rows( mysql_found_rows('Tournament.list_participants.found_rows') );
+
 
    $pagetitle = sprintf( T_('Tournament Participants #%d'), $tid );
    $title = sprintf( T_('Tournament Participants of [%s]'), $tourney->Title );
@@ -130,9 +133,6 @@ $ThePage = new Page('TournamentParticipantList');
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
-
-   $show_rows = $tptable->compute_show_rows( $iterator->ResultRows );
-   $tptable->set_found_rows( mysql_found_rows('Tournament.list_participants.found_rows') );
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {

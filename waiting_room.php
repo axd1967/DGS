@@ -235,6 +235,9 @@ require_once( 'include/classlib_userconfig.php' );
    $query = $qsql->get_select() . "$order$limit";
    $result = db_query( 'waiting_room.find_waiters', $query );
 
+   $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
+   $wrtable->set_found_rows( mysql_found_rows('waiting_room.found_rows') );
+
 
    if( $suitable )
       $title = T_('Suitable waiting games');
@@ -246,9 +249,6 @@ require_once( 'include/classlib_userconfig.php' );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
-
-   $show_rows = $wrtable->compute_show_rows(mysql_num_rows($result));
-   $wrtable->set_found_rows( mysql_found_rows('waiting_room.found_rows') );
 
    $info_row = NULL;
    if( $show_rows > 0 || $wrfilter->has_query() )

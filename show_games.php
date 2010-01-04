@@ -646,6 +646,10 @@ $ThePage = new Page('GamesList');
 
    $result = db_query( 'show_games.find_games', $query);
 
+   $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
+   $gtable->set_found_rows( mysql_found_rows('show_games.found_rows') );
+
+
    if( $observe ) //OB
    {
       $title1 = $title2 = ( $observe_all )
@@ -691,9 +695,6 @@ $ThePage = new Page('GamesList');
       'b_w' => T_('[%s] has Black, White to move#hover'),
       'b_b' => T_('[%s] has Black, Black to move#hover'),
    );
-
-   $show_rows = $gtable->compute_show_rows(mysql_num_rows($result));
-   $gtable->set_found_rows( mysql_found_rows('show_games.found_rows') );
 
    while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
    {

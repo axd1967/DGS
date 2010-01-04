@@ -150,6 +150,9 @@ $ThePage = new Page('TournamentList');
          new QuerySQL( SQLP_WHERE, "T.Status<>'".TOURNEY_STATUS_ADMIN."'" ));
    $iterator = Tournament::load_tournaments( $iterator );
 
+   $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
+   $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
+
 
    $title = T_('Tournaments');
    start_page($title, true, $logged_in, $player_row,
@@ -170,9 +173,6 @@ $ThePage = new Page('TournamentList');
          'DESCRIPTION', T_('Tournament director'),
          'FILTER',      $tsfilter, 2,
          'FILTERERROR', $tsfilter, 1, '<br>'.$FERR1, $FERR2, true ));
-
-   $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
-   $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
