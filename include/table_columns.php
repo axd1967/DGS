@@ -337,8 +337,8 @@ class Table
       $sort_xtend= trim($sort_xtend);
       if( !$sort_xtend )
          $mode|= TABLE_NO_SORT;
-      elseif( strpos('+-',substr($sort_xtend,-1)) === false ) // append (default) '+' if missing +/-
-         $sort_xtend.= '+';
+      else
+         $sort_xtend = $this->_parse_sort_extension( "add_tablehead", $sort_xtend );
       $tableHead = (is_a($description, 'TableHead')) ? $description : new TableHead($description);
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
@@ -351,6 +351,18 @@ class Table
       if( $nr > 0 && $this->UseFilters ) // fix filter-visibility (especially for static cols)
          $this->Filters->set_visible($nr, $visible);
    } //add_tablehead
+
+   // \internal
+   function _parse_sort_extension( $dbgmsg, $sort_xtend )
+   {
+      if( !preg_match('/^[a-z_][\\w\\.]+[+-]?$/i', $sort_xtend) ) // check db-field-syntax
+         error('invalid_args', "Table.{$dbgmsg}._parse_sort_extension({$this->Id},$sort_xtend)");
+
+      if( !preg_match('/[+-]$/', $sort_xtend) ) // append (default) '+' if missing +/-
+         $sort_xtend .= '+';
+
+      return $sort_xtend;
+   }
 
    /*!
     * \brief records the default order of the table.
@@ -780,9 +792,9 @@ class Table
       {
          if( $str )
          {
-            //FIXME: Q: is replacement in next line correct ?
-            $c = preg_replace( "/[-+]+/", "[-+]", trim( $sort_xtend, "-+ ") );
-            if( !preg_match( "/\\b{$c}[-+]/i", $str) )
+            $sort_xtend = $this->_parse_sort_extension( "current_order_string", $sort_xtend );
+            $sort_field = trim($sort_xtend, "-+ ");
+            if( !preg_match( "/\\b{$sort_field}[-+]/i", $str) ) // already in current-order-string ?
                $str .= $sort_xtend;
          }
          else
