@@ -521,8 +521,6 @@ class SearchProfile
    /*! \brief Sets sys-message. */
    function set_sysmessage( $msg )
    {
-      //FIXME: get_magic_quotes_gpc-func is deprecated and will be removed, -> really ?
-      //       check quick_common.php arg_stripslashes-func
       $_REQUEST['sysmsg'] = ( get_magic_quotes_gpc() ) ? addslashes($msg) : $msg;
    }
 
