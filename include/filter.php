@@ -530,6 +530,15 @@ class SearchFilter
       }
    }
 
+   /*! \brief Returns value for given filter-id (wrapper). */
+   function get_filter_value( $id )
+   {
+      $filter = $this->get_filter($id);
+      if( is_null($filter) )
+         error('invalid_args', "SearchFilter.get_filter_value($id)");
+      return $filter->get_value();
+   }
+
    /*!
     * \brief Returns names of all registered filters (not neccessarily unordered)
     *        with optionally specified filter-characteristics.
