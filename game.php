@@ -131,14 +131,10 @@ function get_alt_arg( $n1, $n2)
       $move = $Moves;
 
    if( $Status == 'FINISHED' || $move < $Moves )
-   {
       $may_play = false;
-      $just_looking = true;
-   }
    else
    {
       $may_play = ( $logged_in && $my_id == $ToMove_ID ) ;
-      $just_looking = !$may_play;
       if( $may_play )
       {
          if( !$action )
@@ -158,11 +154,8 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
-   //FIXME ??? no more useful: equ (!$just_looking && !$may_play) which is nearly ($may_play && !$may_play)
-   if( !$just_looking && !($logged_in && $my_id == $ToMove_ID) )
-      error('not_your_turn');
-
    // allow validation
+   $just_looking = !$may_play;
    if( $just_looking && ( $action == 'add_time' || $action == 'delete' || $action == 'resign' ) )
       $just_looking = false;
 
@@ -175,8 +168,7 @@ function get_alt_arg( $n1, $n2)
       $my_observe = is_on_observe_list( $gid, $my_id);
       if( @$_REQUEST['toggleobserve'] == ($my_observe ? 'N' : 'Y') )
       {
-         //TODO: weakness: toggle_observe_list() recall is_on_observe_list()!
-         toggle_observe_list($gid, $my_id);
+         toggle_observe_list($gid, $my_id); // NOTE: this again calls is_on_observe_list() !
          $my_observe = !$my_observe;
       }
    }
