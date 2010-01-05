@@ -173,6 +173,21 @@ Find out which group your webserver is using (e.g. www-data).
 * If you want to adjust the source-code, please have a look to the
   notes in 'scripts/README.developers'
 
+* MySQL Database Config:
+
+  In order to support the forum search using a good full-text index,
+  the real DragonGoServer http://www.dragongoserver.net/ changed the
+  following server variable:
+
+     http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_ft_min_word_len
+
+     ft_min_word_len  =  1     (default-value is 4)
+
+  After the change you have to rebuild the index for the following tables with:
+
+     REPAIR TABLE Messages QUICK
+     REPAIR TABLE Posts QUICK
+
 * PHP config:
 
 By now, Dragon works with these PHP directives:
