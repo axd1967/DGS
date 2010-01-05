@@ -239,6 +239,8 @@ Description:
  Flags        | smallint(5) unsigned                    | 0
  Size         | int(11)                                 | 19
  Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE') | CONV
+ AdjKomi      | decimal(6,1)                             | 0.0
+ JigoMode     | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | KEEP_KOMI
  Handicap     | int(11)                                 | 0
  Komi         | decimal(6,1)                            | 6.5
  AdjHandicap  | tinyint(4)                              | 0
@@ -269,6 +271,11 @@ Description:
    - NIGIRI = even game with nigiri
    - DOUBLE = double game (not supported yet)
    - in relation to Waitingroom-table noted enums in upper-case
+
+* AdjKomi : TODO
+
+* JigoMode : TODO
+   enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')
 
 * Handicap : number of handicap stones
 
@@ -310,6 +317,7 @@ Description:
  Status      | enum('INIT','POOLINIT','PAIRINIT','GAMEINIT','DONE') | INIT
  MinPoolSize | smallint(5)                                          | 0
  MaxPoolSize | smallint(5)                                          | 0
+ PoolCount   | smallint(5)                                          | 0
 
 ## Fields:
 
@@ -329,4 +337,6 @@ Description:
    - DONE = pairing for tournament round is done
 
 * MinPoolSize, MaxPoolSize : min. and max. size of pools for tournament round
+
+* PoolCount : TODO
 
