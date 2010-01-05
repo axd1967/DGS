@@ -22,16 +22,72 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-05 juga
+
+   * INSTALL:
+   - note about ft_min_word_len mysql-system-variable
+
 2010-01-04 juga
+
+   * tournaments/list_tournaments.php, status.php, NEWS:
+   - moved showing of tournament-applications from status-page
+     to list-tournaments page
+   - show registration-status with link to registration-page on
+     participating tournaments for specific user
+   - replaced external-form by URL-arguments + added bottom-links for:
+     - participating user: uid-arg
+     - directing tournaments: tdir-arg
+
+   * include/filter.php (SearchFilter.get_filter_value):
+   - added wrapper-function to get value of specific filter in SearchFilter-object
+
+   * include/error_functions.php (err_log), admin_show_errorlog.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
+   - enhanced Errorlog with uid and page-request for causing error
+-----------
+-- enhanced Errorlog with uid and page-request for causing error
+ALTER TABLE Errorlog
+   ADD uid int(11) NOT NULL DEFAULT '0' AFTER ID,
+   ADD Request varchar(128) NOT NULL DEFAULT '' AFTER Message ;
+-----------
+
+   * tournaments/list_participants.php, tournaments/list_tournaments.php,
+     list_messages.php, show_games.php, waiting_room.php:
+   - bugfix: select FOUND_ROWS() right after query,
+     intermediate start_page() executed another db-request losing found-rows-data
+
+   * add_to_waitingroom.php, admin.php, admin_admins.php, admin_do_translators.php,
+     admin_faq.php, admin_password.php, admin_show_adminlog.php, admin_show_errorlog.php,
+     admin_show_faqlog.php, admin_show_users.php, admin_translators.php, admin_users.php,
+     change_password.php, change_profile.php, clock_tick.php, confirm.php, daily_cron.php,
+     features/lib_votes.php, forum/admin.php, forum/admin_show_forumlog.php,
+     forum/class_forum_read.php, forum/forum_functions.php, forum/list.php,
+     forum/old_links_redirect.php, forum/post.php, forum/read.php, game.php,
+     game_comments.php, gameinfo.php, goban_editor.php, halfhourly_cron.php,
+     include/connect2mysql.php, include/error_functions.php, include/filter.php,
+     include/filterlib_mysqlmatch.php, include/form_functions.php, include/make_game.php,
+     include/make_translationfiles.php, include/rating.php, include/std_functions.php,
+     join_waitingroom_game.php, login.php, message.php, phorum/read.php, quick_play.php,
+     quick_status.php, ratinggraph.php, scripts/check_block_ip.php,
+     scripts/convert_from_old_forum.php, scripts/convert_posindex.php,
+     scripts/data_export.php, scripts/data_report.php, scripts/fix_games_timeleft.php,
+     scripts/forum_consistency.php, scripts/game_consistency.php,
+     scripts/generate_translation_texts.php, scripts/mailtest.php,
+     scripts/make_handicap_pattern.php, scripts/message_consistency.php,
+     scripts/player_consistency.php, scripts/recalculate_ratings2.php,
+     scripts/start_frozen_clocks.php, scripts/translation_consistency.php,
+     scripts/update_translation_pages.php, send_message.php, send_new_password.php,
+     sgf.php, show_games.php, translate.php, update_translation.php, userinfo.php:
+   - added more debug-info on error()-calls, simplified some admin-errors
 
    * scripts/game_consistency.php, clock_tick.php:
    - bugfix: avoid sharing of Clock.ID=204 in query searching timed-out-games
    - query-optimize for new timed-out-handling on Games.Status
-   - added TODO for potential bug when searching for timed-out games:
+   - added TODO for potential bug when searching for timed-out games
 
    * include/table_columns.php (Table.add_tablehead, ~._parse_sort_extension,
        ~.current_order_string):
-   - replaced FIXME with function to check and parse sort-extension
+   - fixed FIXME: added function to check and parse sort-extension
 
    * include/classlib_profile.php (SearchProfile.set_sysmessage),
      include/classlib_userconfig.php,
@@ -40,7 +96,7 @@ ChangeLog
      include/std_functions.php (start_html, nsq_addslashes, is_on_observe_list),
      include/time_functions.php (is_weekend_clock_stopped),
      game.php, confirm.php:
-   - minor cleanups of TODOs and FIXMEs
+   - minor cleanup of some TODOs and FIXMEs
 
 2010-01-03 juga
 
