@@ -22,6 +22,46 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-06 juga
+
+   * tournaments/include/tournament.php (Tournament.insert, ~.update, ~.fillEntityData, ~.build_query_sql):
+   - replaced db-stuff using Entity/EntityData-classes
+
+   * include/db_classes.php (EntityData.build_sql_update, ~.build_sql_delete),
+     scripts/tests/EntityDataTest.php:
+   - added LIMIT-clause for update & insert
+
+   * include/filter.php:
+   - moved static var back as global non-static, because PHP-parser treats
+     string-concatenation as non-constant forbidding static-keyword
+
+   * include/db_classes.php (class Entity; class EntityData),
+     scripts/tests/EntityDataTest.php, scripts/tests/EntityTest.php,
+     scripts/tests/UnitTestHelper.php, scripts/tests/AllTests.php:
+   - added classes Entity and EntityData for db-access-abstractions with unit-tests
+
+   * include/error_functions.php (class DgsErrors, ~.add_error):
+   - renamed class Errors -> DgsErrors (clashed with PHP-unit)
+   - added ERROR_MODE_TEST for PHP-unit-tests,
+   - allow for separte collecting and printing of errors
+
+   * forum/forum_functions.php, forum/post.php, include/classlib_game.php,
+     include/classlib_goban.php, include/classlib_upload.php, include/classlib_userconfig.php,
+     include/contacts.php, include/coords.php, include/countries.php, include/error_codes.php,
+     include/error_functions.php, include/filter.php, include/filter_functions.php,
+     include/filterlib_country.php, include/form_functions.php, include/game_functions.php,
+     include/goban_handler_gfx.php, include/message_functions.php, include/quick_common.php,
+     include/rating.php, include/std_classes.php, include/std_functions.php,
+     include/tokenizer.php, scripts/convert_from_old_forum.php, scripts/convert_posindex.php,
+     tournaments/include/tournament.php, tournaments/include/tournament_participant.php,
+     tournaments/include/tournament_properties.php, tournaments/include/tournament_round.php,
+     tournaments/include/tournament_rules.php:
+   - since PHP5 global-vars need explicit "global"-directive,
+     so use consts or statics if possible, otherwise declare as global
+
+   * tournaments/include/index.php:
+   - index-page redirecting to tournament-list page
+
 2010-01-05 juga
 
    * INSTALL:
