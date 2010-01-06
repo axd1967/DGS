@@ -28,14 +28,15 @@ require_once( 'include/error_functions.php' );
   *
   * \brief Functions for handling db-access
 
-// template for new entity
-$ENTITY_TABLENAME = new Entity( 'Table',
-      FTYPE_PKEY,
-      FTYPE_AUTO,
-      FTYPE_INT,
-      FTYPE_TEXT,
-      FTYPE_DATE,
-      FTYPE_ENUM,
+// template for static function returning new entity
+global $ENTITY_TABLE; //PHP5
+$ENTITY_TABLE = new Entity( 'Table',
+   FTYPE_PKEY,
+   FTYPE_AUTO,
+   FTYPE_INT,
+   FTYPE_TEXT,
+   FTYPE_DATE,
+   FTYPE_ENUM,
    );
 
   */
@@ -270,7 +271,7 @@ class EntityData
       return $query;
    }
 
-   function build_sql_update()
+   function build_sql_update( $limit=0 )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -294,10 +295,12 @@ class EntityData
 
       $query = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr)
          . ' WHERE ' . implode(' AND ', $arr_pkeys);
+      if( is_numeric($limit) && $limit > 0 )
+         $query .= " LIMIT $limit";
       return $query;
    }
 
-   function build_sql_delete()
+   function build_sql_delete( $limit=0 )
    {
       $arr = array();
       foreach( $this->entity->pkeys as $field => $tmp )
@@ -310,6 +313,8 @@ class EntityData
       }
 
       $query = 'DELETE FROM ' . $this->entity->table . ' WHERE ' . implode(' AND ', $arr);
+      if( is_numeric($limit) && $limit > 0 )
+         $query .= " LIMIT $limit";
       return $query;
    }
 

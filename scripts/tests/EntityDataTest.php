@@ -146,6 +146,9 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          "UPDATE Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678) WHERE ID=4711",
          $this->data->build_sql_update() );
+      $this->assertEquals(
+         "UPDATE Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678) WHERE ID=4711 LIMIT 1",
+         $this->data->build_sql_update(1) );
    }
 
    public function test_build_sql_delete() {
@@ -153,6 +156,7 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->data->set_value('i1', 0);
       $this->data->set_value('t1', 12);
       $this->assertEquals( "DELETE FROM Table WHERE ID=4711", $this->data->build_sql_delete() );
+      $this->assertEquals( "DELETE FROM Table WHERE ID=4711 LIMIT 2", $this->data->build_sql_delete(2) );
    }
 
    public function test_multi_field_pkey() {
