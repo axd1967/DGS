@@ -17,22 +17,26 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+require_once( 'include/quick_common.php' );
+require_once( 'include/connect2mysql.php' );
 
 
 define('ERROR_MODE_JUMP', 1);
 define('ERROR_MODE_PRINT', 2);
 define('ERROR_MODE_COLLECT', 3);
+define('ERROR_MODE_TEST', 4);
 
-class Errors
+class DgsErrors
 {
    var $mode;
    var $errors_are_fatal;
    var $log_errors;
+   var $collect_errors;
+   var $print_errors;
 
    var $error_list;
 
-   function Errors()
+   function DgsErrors()
    {
       $this->error_list = array();
       $this->set_mode( ERROR_MODE_JUMP);
@@ -48,11 +52,22 @@ class Errors
             $this->mode = $m;
             $this->errors_are_fatal = true;
             $this->log_errors = true;
+            $this->collect_errors = false;
+            $this->print_errors = true;
             break;
          case ERROR_MODE_COLLECT:
             $this->mode = $m;
             $this->errors_are_fatal = false;
             $this->log_errors = true;
+            $this->collect_errors = true;
+            $this->print_errors = false;
+            break;
+         case ERROR_MODE_TEST:
+            $this->mode = $m;
+            $this->errors_are_fatal = false;
+            $this->log_errors = false;
+            $this->collect_errors = true;
+            $this->print_errors = false;
             break;
 
          default:
@@ -60,6 +75,8 @@ class Errors
             $this->mode = ERROR_MODE_JUMP;
             $this->errors_are_fatal = true;
             $this->log_errors = true;
+            $this->collect_errors = false;
+            $this->print_errors = false;
             break;
       }
       return $p;
@@ -127,11 +144,13 @@ class Errors
          if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
       }
 
-      if( $this->mode == ERROR_MODE_COLLECT )
+      if( $this->collect_errors )
          $this->error_list[] = array($err, $debugmsg, $warn);
-      elseif( $this->mode == ERROR_MODE_PRINT || $warn )
-         echo ( $warn ?"#Warning" :"#Error" ), ": $err\n";
-      else // case ERROR_MODE_JUMP:
+
+      if( $this->print_errors || $warn  )
+         echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
+
+      if( !$warn && $this->mode == ERROR_MODE_JUMP )
       {
          disable_cache();
          jump_to( $uri );
@@ -142,12 +161,13 @@ class Errors
       return false;
    } //add_error
 
-} //end of class 'Errors'
+} //end of class 'DgsErrors'
 
 
 
 
-$TheErrors = new Errors();
+global $TheErrors; //PHP5
+$TheErrors = new DgsErrors();
 
 if( !function_exists('error') )
 {
