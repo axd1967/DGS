@@ -3125,6 +3125,26 @@ define('FSCORE_B_SCORE',  8);
 define('FSCORE_W_SCORE',  9);
 define('FSCORE_JIGO',    10);
 
+// sql-templates for the corresponding score-mode, %s is replaced with db-field
+global $FSCORE_BUILD_SQL; //PHP5
+$FSCORE_BUILD_SQL = array(
+      '',
+      //'?+R', 'B+R', 'W+R',
+      '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
+      '%s = -'.SCORE_RESIGN,
+      '%s = '.SCORE_RESIGN,
+      //'?+T', 'B+T', 'W+T',
+      '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
+      '%s = -'.SCORE_TIME,
+      '%s = '.SCORE_TIME,
+      //'?+?', 'B+?', 'W+?',
+      'ABS(%s)',
+      '-%s',
+      '%s',
+      //Jigo
+      '%s = 0',
+   );
+
 class FilterScore extends Filter
 {
    /*! \brief element-name for result-selectbox */
@@ -3209,24 +3229,7 @@ class FilterScore extends Filter
       $arrfn = $query->get_parts(SQLP_FNAMES);
       $field = $arrfn[0];
 
-      // sql-templates for the corresponding score-mode, %s is replaced with db-field
-      static $FSCORE_BUILD_SQL = array(
-            '',
-            //'?+R', 'B+R', 'W+R',
-            '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
-            '%s = -'.SCORE_RESIGN,
-            '%s = '.SCORE_RESIGN,
-            //'?+T', 'B+T', 'W+T',
-            '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
-            '%s = -'.SCORE_TIME,
-            '%s = '.SCORE_TIME,
-            //'?+?', 'B+?', 'W+?',
-            'ABS(%s)',
-            '-%s',
-            '%s',
-            //Jigo
-            '%s = 0',
-         );
+      global $FSCORE_BUILD_SQL;
       $clause = sprintf( $FSCORE_BUILD_SQL[$idx], $field );
       if( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
