@@ -190,7 +190,7 @@ function sgf_parser( $sgf, &$games)
          ;
    }
    return $err;
-}
+}//sgf_parser
 
 
 // In short, it does the opposite of sgf_parser()
@@ -325,7 +325,7 @@ function sgf_parse_key( $sgf, &$i, $l)
    return $key;
 }
 
-if( defined('ENA_STDHANDICAP') && ENA_STDHANDICAP ) {
+if( defined('ENA_STDHANDICAP') && ENA_STDHANDICAP ) { //TODO clearer structure
 
 function handicap_push( &$vars, &$var, $nb)
 {

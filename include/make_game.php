@@ -356,6 +356,7 @@ function standard_handicap_is_possible($size, $hcp)
    return( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
 }
 
+//TODO resolve following into clearer construction
 if( ENA_STDHANDICAP & 2 ) { //skip black validation
 //for get_handicap_pattern:
 require_once('include/sgf_parser.php');
