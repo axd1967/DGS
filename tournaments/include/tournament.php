@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/std_classes.php' );
+require_once( 'include/db_classes.php' );
 require_once( 'include/std_functions.php' ); // for ADMIN_TOURNAMENT
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament_director.php' );
@@ -59,6 +59,16 @@ define('CHECK_TOURNEY_STATUS', 'ADM|NEW|REG|PAIR|PLAY|CLOSED');
 global $ARR_GLOBALS_TOURNAMENT; //PHP5
 $ARR_GLOBALS_TOURNAMENT = array();
 
+global $ENTITY_TOURNAMENT; //PHP5
+$ENTITY_TOURNAMENT = new Entity( 'Tournament',
+   FTYPE_PKEY, 'ID',
+   FTYPE_AUTO, 'ID',
+   FTYPE_INT,  'ID', 'Owner_ID', 'Rounds', 'CurrentRound',
+   FTYPE_TEXT, 'Title', 'Description',
+   FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
+   FTYPE_ENUM, 'Scope', 'Type', 'Status'
+   );
+
 class Tournament
 {
    var $ID;
@@ -67,7 +77,7 @@ class Tournament
    var $Title;
    var $Description;
    var $Owner_ID;
-   var $Owner_Handle;
+   var $Owner_Handle; // non-table
    var $Status;
    var $Created;
    var $Lastchanged;
@@ -163,25 +173,6 @@ class Tournament
       return $success;
    }
 
-   /*! \brief Builds query-part for persistance (insert or update). */
-   function build_persist_query_part( $withCreated )
-   {
-      // Scope/Type/Status are checked
-      return  " Scope='{$this->Scope}'"
-            . ",Type='{$this->Type}'"
-            . ",Title='" . mysql_addslashes($this->Title) . "'"
-            . ",Description='" . mysql_addslashes($this->Description) . "'"
-            . ",Owner_ID='{$this->Owner_ID}'"
-            . ",Status='{$this->Status}'"
-            . ( $withCreated ? ",Created=FROM_UNIXTIME({$this->Created})" : '' )
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",StartTime=FROM_UNIXTIME({$this->StartTime})"
-            . ( $this->EndTime > 0 ? ",EndTime=FROM_UNIXTIME({$this->EndTime})" : '' )
-            . ",Rounds='{$this->Rounds}'"
-            . ",CurrentRound='{$this->CurrentRound}'"
-         ;
-   }
-
    /*!
     * \brief Inserts Tournament-entry.
     * \note sets Created=NOW, Lastchanged=NOW, StartTime=NOW
@@ -189,15 +180,10 @@ class Tournament
     */
    function insert()
    {
-      global $NOW;
-      $this->Created = $NOW;
-      $this->Lastchanged = $NOW;
-      $this->StartTime = $NOW;
+      $this->Created = $this->Lastchanged = $this->StartTime = $GLOBALS['NOW'];
 
-      $result = db_query( "Tournament::insert({$this->ID})",
-            "INSERT INTO Tournament SET "
-            . $this->build_persist_query_part(true)
-         );
+      $entityData = $this->fillEntityData(true);
+      $result = db_query( "Tournament::insert({$this->ID})", $entityData->build_sql_insert() );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
@@ -209,15 +195,34 @@ class Tournament
     */
    function update()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "Tournament::update({$this->ID})",
-            "UPDATE Tournament SET "
-            . $this->build_persist_query_part(false /*-Created*/)
-            . " WHERE ID='{$this->ID}' LIMIT 1"
-         );
+      $entityData = $this->fillEntityData(false /*-Created*/);
+      $result = db_query( "Tournament::update({$this->ID})", $entityData->build_sql_update(1) );
       return $result;
+   }
+
+   /*! \brief Builds EntityData for persist (insert or update). */
+   function fillEntityData( $withCreated )
+   {
+      // checked fields: Scope/Type/Status
+      $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
+      $data->set_value( 'Scope', $this->Scope );
+      $data->set_value( 'Type', $this->Type );
+      $data->set_value( 'Title', $this->Title );
+      $data->set_value( 'Description', $this->Description );
+      $data->set_value( 'Owner_ID', $this->Owner_ID );
+      $data->set_value( 'Status', $this->Status );
+      if( $withCreated )
+         $data->set_value( 'Created', $this->Created );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'StartTime', $this->StartTime );
+      if( $this->EndTime > 0 )
+         $data->set_value( 'EndTime', $this->EndTime );
+      $data->set_value( 'Rounds', $this->Rounds );
+      $data->set_value( 'CurrentRound', $this->CurrentRound );
+      return $data;
    }
 
    /*! \brief Returns true if given user can edit tournament. */
@@ -270,22 +275,16 @@ class Tournament
       return $errors;
    }
 
+
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Tournament-object. */
    function build_query_sql()
    {
-      // Tournament: ID,Scope,Type,Title,Description,Owner_ID,Status,Created,Lastchanged,StartTime,EndTime
-      $qsql = new QuerySQL();
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT']->buildQuery('T');
       $qsql->add_part( SQLP_FIELDS,
-         'T.*',
-         'UNIX_TIMESTAMP(T.Created) AS X_Created',
-         'UNIX_TIMESTAMP(T.Lastchanged) AS X_Lastchanged',
-         'UNIX_TIMESTAMP(T.StartTime) AS X_StartTime',
-         'UNIX_TIMESTAMP(T.EndTime) AS X_EndTime',
          'Owner.Handle AS X_OwnerHandle' );
       $qsql->add_part( SQLP_FROM,
-         'Tournament AS T',
          'INNER JOIN Players AS Owner ON Owner.ID=T.Owner_ID' );
       return $qsql;
    }
