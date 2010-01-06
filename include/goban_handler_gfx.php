@@ -41,6 +41,7 @@ if( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);
 
 // see init_statics()
+global $MAP_FORM_MARKERS, $MAP_BOX_MARKERS, $MAP_BOARDLINES; //PHP5
 $MAP_FORM_MARKERS = NULL;
 $MAP_BOX_MARKERS = NULL;
 $MAP_BOARDLINES = NULL;

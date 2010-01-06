@@ -163,6 +163,7 @@ define('SQLP_UNION_WHERE', 'union_where');
 define('SQLOPT_CALC_ROWS', 'SQL_CALC_FOUND_ROWS'); // for SQLP_OPTS
 
 // sql-statements for part-types
+global $ARR_SQL_STATEMENTS; //PHP5
 $ARR_SQL_STATEMENTS = array(
    SQLP_FIELDS    => 'SELECT',
    SQLP_OPTS      => '',

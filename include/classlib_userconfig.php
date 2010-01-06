@@ -335,6 +335,7 @@ define('CFGCOLS_TOURNAMENTS',             'ColumnsTournaments');
 define('CFGCOLS_TOURNAMENT_PARTICIPANTS', 'ColumnsTournamentParticipants');
 define('CFGCOLS_TD_TOURNAMENT_PARTICIPANTS', 'ColumnsTDTournamentParticipants');
 // col_name => number of ints in DB (needed for writing)
+global $SIZECONFIG_CFGCOLS; //PHP5
 $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_STATUS_GAMES             => 1,
    CFGCOLS_STATUS_TOURNAMENTS       => 1,

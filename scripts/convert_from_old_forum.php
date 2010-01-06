@@ -117,6 +117,7 @@ echo '>>>> Should not be used now. Do not run it before a check ' .
             $parent = 0;
          }
 
+         $order_str = ORDER_STR;
          $PosIndex .= $order_str[$answer_nr/64] . $order_str[$answer_nr%64];
          $Depth++;
          $Text = trim($Text);

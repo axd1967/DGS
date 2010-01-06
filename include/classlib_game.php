@@ -41,6 +41,7 @@ define('GSCOL_WHITE', 1);
   */
 
 // lazy-init in GameScore::get..Text()-funcs
+global $ARR_GLOBALS_GAMESCORE; //PHP5
 $ARR_GLOBALS_GAMESCORE = array();
 
 class GameScore
@@ -400,6 +401,7 @@ class GameScore
 
 // SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
 // NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
+global $ARR_NEXT_GAME_ORDER; //PHP5
 $ARR_NEXT_GAME_ORDER = array(
    // idx => [ Players.NextGameOrder-value, order-string ]
    1 => array( 'LASTMOVED', '%G.Lastchanged ASC, %G.ID DESC' ),

@@ -23,6 +23,7 @@ require_once( "include/std_functions.php" ); // consts
 
 
 // table for interpolating rating
+global $IGS_TABLE; //PHP5
 $IGS_TABLE = array(
    array( 'KEY' =>  200, 'VAL' =>  500 ),
    array( 'KEY' =>  900, 'VAL' => 1000 ),
@@ -31,6 +32,7 @@ $IGS_TABLE = array(
 );
 
 // table for interpolating rating
+global $KGS_TABLE; //PHP5
 $KGS_TABLE = array(
    array( 'KEY' =>  400, 'VAL' =>    0 ),
    array( 'KEY' => 1300, 'VAL' => 1100 ), // 8k
@@ -38,12 +40,14 @@ $KGS_TABLE = array(
    array( 'KEY' => 2700, 'VAL' => 2600 ), // 7d -> 6d
 );
 
+global $A_TABLE; //PHP5
 $A_TABLE = array(
    array( 'KEY' =>   100, 'VAL' =>  200 ),
    array( 'KEY' =>  2700, 'VAL' =>   70 ),
    array( 'KEY' => 10000, 'VAL' =>   70 ),   //higher, should be constant
 );
 
+global $CON_TABLE; //PHP5
 $CON_TABLE = array(
    array( 'KEY' =>   100, 'VAL' => 116 ),
    array( 'KEY' =>   200, 'VAL' => 110 ),

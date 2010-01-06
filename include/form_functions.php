@@ -133,16 +133,6 @@ define('FEA_STARTTD',     'StartTD');
 define('FEA_SPANALLCOLS', 'SpanAllColumns');
 define('FEA_ATTBS',       'Attbs');
 
-// known attribute-names for form-elements and read-only-state
-$ARR_FORMELEM_READONLY = array(
-   FEA_NUMARGS     => 1,
-   FEA_NEWTD       => 0,
-   FEA_ENDTD       => 0,
-   FEA_STARTTD     => 0,
-   FEA_SPANALLCOLS => 0,
-   FEA_ATTBS       => 0,
-);
-
 
 if( !defined('SMALL_SPACING') )
    define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
@@ -455,7 +445,16 @@ class Form
     */
    function set_attr_form_element( $name, $attrname, $value )
    {
-      global $ARR_FORMELEM_READONLY;
+      // known attribute-names for form-elements and read-only-state
+      static $ARR_FORMELEM_READONLY = array(
+            FEA_NUMARGS     => 1,
+            FEA_NEWTD       => 0,
+            FEA_ENDTD       => 0,
+            FEA_STARTTD     => 0,
+            FEA_SPANALLCOLS => 0,
+            FEA_ATTBS       => 0,
+         );
+
       $rx_attrs = "/^(" . implode('|', array_keys($ARR_FORMELEM_READONLY) ) . ")$/";
 
       $name = strtoupper($name);

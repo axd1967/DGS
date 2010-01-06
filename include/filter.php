@@ -242,6 +242,7 @@ define('FC_BITMASK', 'bitmask');
 
 
 // globals with lazy-init for filter-specific translated texts
+global $ARR_GLOBALS_FILTERS; //PHP5
 $ARR_GLOBALS_FILTERS = array();
 
 
@@ -2575,18 +2576,6 @@ define('FRDTU_DHM',   FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // time-unit: day/hou
 define('FRDTU_ALL_REL', FRDTU_YEAR | FRDTU_MONTH | FRDTU_WEEK | FRDTU_DAY | FRDTU_HOUR | FRDTU_MIN); // all above relative time-units
 define('FRDTU_ALL_ABS', FRDTU_ALL_REL | FRDTU_ABS ); // all time-units (relative + absolute)
 
-// array for SQL-interval-specification
-$FRDTU_interval_sql = array(
-   FRDTU_YEAR  => 'YEAR',
-   FRDTU_MONTH => 'MONTH',
-   # no week-date-interval until mysql5 -> convert to days
-   #FRDTU_WEEK  => 'WEEK', # supported since mysql5.0.0
-   FRDTU_WEEK  => '*7 DAY', //Note: need appropriate parenthesis in formulas
-   FRDTU_DAY   => 'DAY',
-   FRDTU_HOUR  => 'HOUR',
-   FRDTU_MIN   => 'MINUTE',
-);
-
 // some internals
 define('FRD_RANGE_ABS',   1); // absolute-values
 define('FRD_RANGE_START', 2); // start-range
@@ -2756,7 +2745,15 @@ class FilterRelativeDate extends Filter
       }
       else
       { // parse relative date
-         global $FRDTU_interval_sql;
+         // array for SQL-interval-specification
+         static $FRDTU_interval_sql = array(
+               FRDTU_YEAR  => 'YEAR',
+               FRDTU_MONTH => 'MONTH',
+               FRDTU_WEEK  => 'WEEK', # since mysql5
+               FRDTU_DAY   => 'DAY',
+               FRDTU_HOUR  => 'HOUR',
+               FRDTU_MIN   => 'MINUTE',
+            );
 
          // handle weeks (no week-date-interval until mysql5) -> use days
          $tu = $this->values[$this->elem_tu];
@@ -3128,34 +3125,6 @@ define('FSCORE_B_SCORE',  8);
 define('FSCORE_W_SCORE',  9);
 define('FSCORE_JIGO',    10);
 
-// choices-array for score-results (for selectbox)
-$FSCORE_RESULT_choices = array(
-   'All',
-   '?+R', 'B+R', 'W+R',
-   '?+T', 'B+T', 'W+T',
-   '?+?', 'B+?', 'W+?',
-   'Jigo',
-);
-
-// sql-templates for the corresponding score-mode, %s is replaced with db-field
-$FSCORE_BUILD_SQL = array(
-   '',
-   //'?+R', 'B+R', 'W+R',
-   '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
-   '%s = -'.SCORE_RESIGN,
-   '%s = '.SCORE_RESIGN,
-   //'?+T', 'B+T', 'W+T',
-   '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
-   '%s = -'.SCORE_TIME,
-   '%s = '.SCORE_TIME,
-   //'?+?', 'B+?', 'W+?',
-   'ABS(%s)',
-   '-%s',
-   '%s',
-   //Jigo
-   '%s = 0',
-);
-
 class FilterScore extends Filter
 {
    /*! \brief element-name for result-selectbox */
@@ -3240,7 +3209,24 @@ class FilterScore extends Filter
       $arrfn = $query->get_parts(SQLP_FNAMES);
       $field = $arrfn[0];
 
-      global $FSCORE_BUILD_SQL;
+      // sql-templates for the corresponding score-mode, %s is replaced with db-field
+      static $FSCORE_BUILD_SQL = array(
+            '',
+            //'?+R', 'B+R', 'W+R',
+            '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
+            '%s = -'.SCORE_RESIGN,
+            '%s = '.SCORE_RESIGN,
+            //'?+T', 'B+T', 'W+T',
+            '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
+            '%s = -'.SCORE_TIME,
+            '%s = '.SCORE_TIME,
+            //'?+?', 'B+?', 'W+?',
+            'ABS(%s)',
+            '-%s',
+            '%s',
+            //Jigo
+            '%s = 0',
+         );
       $clause = sprintf( $FSCORE_BUILD_SQL[$idx], $field );
       if( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
@@ -3258,7 +3244,14 @@ class FilterScore extends Filter
    /*! \brief Returns selectbox and input-text form-element for score-mode-selection and score-value. */
    function get_input_element($prefix, $attr = array() )
    {
-      global $FSCORE_RESULT_choices;
+      // choices-array for score-results (for selectbox)
+      static $FSCORE_RESULT_choices = array(
+            'All',
+            '?+R', 'B+R', 'W+R',
+            '?+T', 'B+T', 'W+T',
+            '?+?', 'B+?', 'W+?',
+            'Jigo',
+         );
 
       // select-box for result
       $r = $this->build_generic_selectbox_elem($prefix,

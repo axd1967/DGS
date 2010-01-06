@@ -37,7 +37,7 @@ require_once( 'forum/class_forum_read.php' );
 
 
 //must follow the "ORDER BY PosIndex" order and have at least 64 chars:
-$order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+define('ORDER_STR', "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 define('FORUM_MAX_DEPTH', 40); //half the length of the Posts.PosIndex field
 define('FORUM_MAX_INDENT', 15); //at the display time
 
@@ -155,7 +155,7 @@ function display_posts_pending_approval()
 
    mysql_free_result($result);
    return $cnt;
-}
+} //display_posts_pending_approval
 
 
 // mode-bitmask for get_new_string-func

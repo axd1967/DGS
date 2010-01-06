@@ -23,6 +23,7 @@ require_once( "include/error_functions.php" );
 
 // $is_down can be overriden for maintenance-allowed users (in config-local.php)
 // $is_maintenance is not changed (can be used to indicate maintenance-mode)
+global $is_down, $is_down_message, $is_maintenance; //PHP5
 $is_down = false;
 $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
                  . " please return in an hour or so.<br>\n"
@@ -67,6 +68,7 @@ function setTZ( $tz='GMT')
 
 setTZ('GMT'); //default
 
+global $timeadjust; //PHP5
 $timeadjust = 0;
 if( @is_readable( "timeadjust.php" ) )
    include_once( "timeadjust.php" );
@@ -74,6 +76,7 @@ if( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
 // time() always returns time in UTC
+global $NOw; //PHP5
 $NOW = time() + (int)$timeadjust;
 
 define('DATE_FMT', 'Y-m-d H:i');

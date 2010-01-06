@@ -33,8 +33,6 @@ require_once( "include/countries.php" );
   *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_HIDE
   */
 
-$ARR_GLOBALS_FILTER_COUNTRY = null; // lazy-init
-
 class FilterCountry extends Filter
 {
    /*! \brief Constructs Country-Filter. */
@@ -71,7 +69,7 @@ class FilterCountry extends Filter
     */
    function getFilterCountries()
    {
-      global $ARR_GLOBALS_FILTER_COUNTRY;
+      static $ARR_GLOBALS_FILTER_COUNTRY = null;
 
       // lazy-init
       if( !is_array($ARR_GLOBALS_FILTER_COUNTRY) )

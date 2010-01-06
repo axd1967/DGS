@@ -56,6 +56,7 @@ define('TOURNEY_STATUS_CLOSED',   'CLOSED');
 define('CHECK_TOURNEY_STATUS', 'ADM|NEW|REG|PAIR|PLAY|CLOSED');
 
 // lazy-init in Tournament::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT; //PHP5
 $ARR_GLOBALS_TOURNAMENT = array();
 
 class Tournament

@@ -46,6 +46,7 @@ define('TPROP_RUMODE_ENTER_FIX',    'ENTER_FIX');
 define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX|ENTER_FIX');
 
 // lazy-init in TournamentProperties::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();
 
 class TournamentProperties

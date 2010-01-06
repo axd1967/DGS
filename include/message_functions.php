@@ -39,13 +39,6 @@ define('GSET_MSG_INVITE',  'invite');
 define('GSET_MSG_DISPUTE', 'dispute');
 define('CHECK_GSET', 'waitingroom|tournament|invite|dispute');
 
-$MSG_TYPES = array( // keep them untranslated{!)
-   'NORMAL'     => 'Normal',
-   'INVITATION' => 'Invitation',
-   'DISPUTED'   => 'Dispute',
-   'RESULT'     => 'Result',
-);
-
 define('FOLDER_COLS_MODULO', 8); //number of columns of "tab" layouts
 
 function init_standard_folders()
@@ -474,6 +467,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
 define('FLOW_ANSWER'  ,0x1);
 define('FLOW_ANSWERED',0x2);
+
+global $msg_icones; //PHP5
 $msg_icones = array(
       0                         => array('images/msg.gif'   ,'&nbsp;-&nbsp;'),
       FLOW_ANSWER               => array('images/msg_lr.gif','&gt;-&nbsp;'), //is an answer
@@ -1409,7 +1404,12 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
       // additional fields for search-messages
       if( $full_details )
       {
-         global $MSG_TYPES;
+         static $MSG_TYPES = array( // keep them untranslated{!)
+               'NORMAL'     => 'Normal',
+               'INVITATION' => 'Invitation',
+               'DISPUTED'   => 'Dispute',
+               'RESULT'     => 'Result',
+            );
          $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];
 
          $mrow_strings[ 7] = $dirs[$row['Sender']];

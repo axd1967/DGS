@@ -30,6 +30,7 @@ require_once( "include/tokenizer.php" );
   */
 
 // layout prefix/suffix for filter-errors in static-forms
+global $FERR1, $FERR2, $FWRN1, $FWRN2; //PHP5
 $FERR1 = '<strong class=ErrMsg>';
 $FERR2 = '</strong>';
 $FWRN1 = '<strong class=WarnMsg>';

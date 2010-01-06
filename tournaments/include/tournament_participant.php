@@ -50,6 +50,7 @@ define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
 define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
 
 // lazy-init in TournamentParticipant::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT_PARTICIPANT; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PARTICIPANT = array();
 
 class TournamentParticipant

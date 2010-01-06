@@ -45,6 +45,7 @@ define('CHECK_TROUND_STATUS', 'INIT|POOLINIT|PAIRINIT|GAMEINIT|DONE');
 
 
 // lazy-init in TournamentRound::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT_ROUND; //PHP5
 $ARR_GLOBALS_TOURNAMENT_ROUND = array();
 
 class TournamentRound

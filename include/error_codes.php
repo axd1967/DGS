@@ -30,6 +30,7 @@ $TranslateGroups[] = "Error";
   */
 
 // lazy-init in ErrorCode-funcs
+global $ARR_GLOBALS_ERRORS; //PHP5
 $ARR_GLOBALS_ERRORS = array();
 
 class ErrorCode

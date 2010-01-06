@@ -44,6 +44,7 @@ define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (
  */
 
 // lazy-init in Contact::get..Flags()-funcs
+global $ARR_GLOBALS_CONTACT; //PHP5
 $ARR_GLOBALS_CONTACT = array();
 
 class Contact

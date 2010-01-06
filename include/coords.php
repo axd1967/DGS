@@ -68,14 +68,13 @@ function board2number_coords($coord, $Size)
    return array(NULL,NULL);
 }
 
-//board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
-$hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
-$hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
-//$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
-
 function is_hoshi($x, $y, $sz, $szy=null)
 {
-   global $hoshi_pos, $hoshi_dist;
+   //board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
+   static $hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
+   static $hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
+   //$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
+
    if( is_null($szy) ) $szy = $sz;
 
    if( $sz == $szy )

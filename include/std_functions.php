@@ -26,6 +26,8 @@ require_once( "include/quick_common.php" );
 require_once( 'include/utilities.php' );
 
 require_once( "include/time_functions.php" );
+
+global $page_microtime, $main_path, $base_path, $printable; //PHP5
 if( !isset($page_microtime) )
 {
    $page_microtime = getmicrotime();
@@ -49,10 +51,12 @@ define('BEGINMONTH', 8);
 
 
 // because of the cookies host, $hostname_jump = true is nearly mandatory
+global $hostname_jump; //PHP5
 $hostname_jump = true;  // ensure $HTTP_HOST is same as HOSTNAME
 
 // If using apache add this row to your virtual host to make this work:
 // AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
+global $has_sgf_alias; //PHP5
 $has_sgf_alias = false;
 
 
@@ -60,6 +64,7 @@ $has_sgf_alias = false;
  * run HOSTBASE."change_password.php?guestpass=".GUEST_ID
  * with ADMIN_PASSWORD privileges
  */
+global $GUESTPASS; //PHP5
 if( FRIENDLY_SHORT_NAME == 'DGS' )
    $GUESTPASS = 'guest'.'pass';
 else
@@ -67,6 +72,7 @@ else
 define('GUESTS_ID_MAX', 1); //minimum 1 because hard-coded in init.mysql
 
 // for debugging various variables (used for development)
+global $DEBUG, $DEBUG_SQL; //PHP5
 $DEBUG = false;
 $DEBUG_SQL = false; // for debugging filter showing where-clause on page
 
@@ -76,19 +82,22 @@ define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filte
 define('SPAN_ONLINE_MINS', 10); // being "online" = if last-accessed during last X minutes
 
 //----- { layout : change in dragon.css too!
+global $bg_color; //PHP5
 $bg_color='"#f7f5e3"';
 
 //$menu_fg_color='"#FFFC70"';
+global $menu_bg_color; //PHP5
 if( FRIENDLY_SHORT_NAME == 'DGS' )
    $menu_bg_color='"#0C41C9"'; //live server
 else
    $menu_bg_color='"#C9410C"'; //devel server
 
 //{ N.B.: only used for folder transparency but CSS incompatible
+global $table_row_color1, $table_row_color2; //PHP5
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
 //}
-// obsolete since CSS
+// obsolete since CSS //FIXME remove
 //$table_head_color='"#CCCCCC"';
 //$table_row_color_del1='"#FFCFCF"';
 //$table_row_color_del2='"#F0B8BD"';
@@ -98,6 +107,7 @@ $table_row_color2='"#E0E8ED"';
 //----- } layout : change in dragon.css too!
 
 
+global $max_links_in_main_menu; //PHP5
 $max_links_in_main_menu=5;
 
 //-----
@@ -110,10 +120,12 @@ define('MAXROWS_PER_PAGE_FORUM',   50); // max for forum-search
 define('MAXROWS_PER_PAGE', 100);
 //-----
 
+global $ActivityHalvingTime, $ActivityForHit, $ActivityForMove; //PHP5
 $ActivityHalvingTime = 4 * 24 * 60; // [minutes] four days halving time
 $ActivityForHit = 1000.0; //it is the base unit for all the Activity calculus
 $ActivityForMove = 10*$ActivityForHit;
 
+global $ActiveLevel1, $ActiveLevel2, $ActivityMax; //PHP5
 $ActiveLevel1 = $ActivityForMove + 2*$ActivityForHit; //a "move sequence" value
 $ActiveLevel2 = 15*$ActiveLevel1;
 $ActivityMax = 0x7FFF0000-$ActivityForMove;
@@ -139,6 +151,8 @@ define('CACHE_EXPIRE_GRAPH', 24*3600); //1 day
 define('MENU_MULTI_SEP', ' / ');
 
 define('BUTTON_WIDTH', 96);
+
+global $button_max, $buttonfiles, $buttoncolors, $woodbgcolors; //PHP5
 $button_max = 11;
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
@@ -149,6 +163,7 @@ $buttoncolors = array('white','white','white','white',
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
+global $cookie_pref_rows; //PHP5
 $cookie_pref_rows = array(
        // global config (from Players-table):
        'UserFlags',
@@ -167,6 +182,7 @@ $cookie_pref_rows = array(
        'NotesCutoff',
    );
 
+global $vacation_min_days; //PHP5
 $vacation_min_days = 2;
 
 define('INFO_HTML', 'cell'); //HTML parsing for texts like 'Rank info'
@@ -1557,6 +1573,7 @@ function add_line_breaks( $str)
 
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends (or empty):
+global $html_code_closed; //PHP5
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|color|';
 $html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'];
 $html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
@@ -1566,6 +1583,7 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
   // more? '|/li|/p|/br|/ *br';
 
   // ** no '|' at ends:
+global $html_code; //PHP5
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
@@ -1672,6 +1690,7 @@ This part fix a security hole. One was able to execute a javascript code
  *
  * \param $html_code, $html_code_closed seems to be refs because of speed !?
  **/
+global $parse_mark_regex; //PHP5
 $parse_mark_regex = ''; //global because parse_tags_safe() is recursive
 define('PARSE_MARK_TERM',
       ALLOWED_LT.'span class=MarkTerm'.ALLOWED_GT.'\\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
@@ -1840,6 +1859,7 @@ define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
 
 //Note: some of those check for the '`' i.e. the first char of ALLOWED_* vars
+global $html_safe_preg; //PHP5
 $html_safe_preg = array(
 
 //<note>...</note> =>removed from entry, seen only by editors
@@ -3145,7 +3165,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
 
-$ENUM_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' );
+global $ENUM_GAMES_STATUS; //PHP5
+$ENUM_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' ); //FIXME used?
 
 /*!
  * Builds IN-SQL-part for some enum-array containing all possible values

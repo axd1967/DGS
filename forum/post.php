@@ -41,7 +41,7 @@ function hit_thread( $thread )
  */
 function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 {
-   global $NOW, $order_str;
+   global $NOW;
 
    if( $player_row['MayPostOnForum'] == 'N' )
       return array( 0, T_('Sorry, you are not allowed to post on the forum') );
@@ -160,6 +160,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
       if( ++$Depth >= FORUM_MAX_DEPTH ) //see also the length of Posts.PosIndex
          error('internal_error', "post_message.depth.too_large($Thread_ID,$Depth)");
 
+      $order_str = ORDER_STR;
       $PosIndex .= $order_str[$answer_nr/64] . $order_str[$answer_nr%64];
 
       $query = "INSERT INTO Posts SET " .

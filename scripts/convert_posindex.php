@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Checks and fix the PosIndex bug in the Posts database.
 
-require_once( "../forum/forum_functions.php" );
+chdir( '../' );
+require_once( "forum/forum_functions.php" );
 
 {
    disable_cache();
@@ -61,7 +62,7 @@ echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
          ."</p>";
    }
 
-   $new_order_str = "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+   $new_order_str = ORDER_STR;
 
    $old_order_str = "*+-/0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
 

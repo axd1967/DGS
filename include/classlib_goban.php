@@ -37,11 +37,13 @@ require_once( 'include/goban_handler_gfx.php' );
 // - constructor( $args_map )
 // - Goban  read_goban( $text )
 // - String write_goban( Goban )
+global $ARR_GOBAN_HANDLERS_READER; //PHP5
 $ARR_GOBAN_HANDLERS_READER = array(
    // uppercase(igoban_type) => GobanHandler-class
    'SL1' => 'GobanHandlerSL1',
 );
 
+global $ARR_GOBAN_HANDLERS_WRITER; //PHP5
 $ARR_GOBAN_HANDLERS_WRITER = array(
    // uppercase(Goban-Writer-type) => GobanHandler-class
    'GFX' => 'GobanHandlerGfxBoard',

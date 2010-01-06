@@ -48,17 +48,6 @@ define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
 define('CAT_HTYPE_MANUAL', 'manual'); // manual game setting
 //define('CAT_HTYPE_FAIRKOMI', 'fairkomi'); // fair komi game
 
-// handicap-types category
-$ARR_GLOBAL_HTYPES = array(
-      HTYPE_CONV     => CAT_HTYPE_CONV,
-      HTYPE_PROPER   => CAT_HTYPE_PROPER,
-      HTYPE_NIGIRI   => CAT_HTYPE_MANUAL,
-      HTYPE_DOUBLE   => CAT_HTYPE_MANUAL,
-      HTYPE_BLACK    => CAT_HTYPE_MANUAL,
-      HTYPE_WHITE    => CAT_HTYPE_MANUAL,
-      //HTYPE_AUKO     => CAT_HTYPE_FAIRKOMI,
-   );
-
 
 /**
  * \brief Class to handle adding of time for a game.
@@ -356,7 +345,16 @@ function get_to_move( $grow, $errmsg )
  */
 function get_category_handicaptype( $handitype )
 {
-   global $ARR_GLOBAL_HTYPES;
+   // handicap-types category
+   static $ARR_GLOBAL_HTYPES = array(
+         HTYPE_CONV     => CAT_HTYPE_CONV,
+         HTYPE_PROPER   => CAT_HTYPE_PROPER,
+         HTYPE_NIGIRI   => CAT_HTYPE_MANUAL,
+         HTYPE_DOUBLE   => CAT_HTYPE_MANUAL,
+         HTYPE_BLACK    => CAT_HTYPE_MANUAL,
+         HTYPE_WHITE    => CAT_HTYPE_MANUAL,
+         //HTYPE_AUKO     => CAT_HTYPE_FAIRKOMI,
+      );
    return @$ARR_GLOBAL_HTYPES[$handitype];
 }
 

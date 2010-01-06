@@ -42,13 +42,6 @@ define('TOK_SEPARATOR', 2); // separator-token
 define('TOK_XMLTAG',    3); // xml-tag, token-value is a XmlTag-object
 define('TOK_XMLENTITY', 4); // xml-entity (&xyz;)
 
-$TOKEN_TYPES = array(
-   TOK_TEXT       => 'TEXT',
-   TOK_SEPARATOR  => 'SEP',
-   TOK_XMLTAG     => 'XMLTAG',
-   TOK_XMLENTITY  => 'XMLENT',
-);
-
 define('TOKFLAG_QUOTED', 0x01); // token representing quoted-text
 
  /*!
@@ -93,7 +86,12 @@ class Token
     */
    function get_type( $as_text = false )
    {
-      global $TOKEN_TYPES;
+      static $TOKEN_TYPES = array(
+            TOK_TEXT       => 'TEXT',
+            TOK_SEPARATOR  => 'SEP',
+            TOK_XMLTAG     => 'XMLTAG',
+            TOK_XMLENTITY  => 'XMLENT',
+         );
       return ($as_text) ? $TOKEN_TYPES[$this->type] : $this->type;
    }
 

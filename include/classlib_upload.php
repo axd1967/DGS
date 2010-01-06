@@ -43,6 +43,7 @@ if( !defined('UPLOAD_ERR_EXTENSION') )
 // Sources (but stripped to 'image/*'-mime-types):
 // - http://de2.php.net/manual/en/function.image-type-to-mime-type.php
 // - http://de2.php.net/manual/en/function.image-type-to-extension.php#69994
+global $ARR_GLOBAL_UPLOAD_EXTENSION; //PHP5
 $ARR_GLOBAL_UPLOAD_EXTENSION = array(
    IMAGETYPE_GIF     => 'gif',  // 1 = GIF, image/gif
    IMAGETYPE_JPEG    => 'jpg',  // 2 = JPG, image/jpeg

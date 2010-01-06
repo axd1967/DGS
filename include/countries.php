@@ -33,6 +33,7 @@ require_once( 'include/utilities.php' );
  */
 
 // use lazy-init to assure, that translation-language has been initialized !!
+global $ARR_GLOBALS_COUNTRIES; //PHP5
 $ARR_GLOBALS_COUNTRIES = array();
 
 
