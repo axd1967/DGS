@@ -32,7 +32,8 @@ require_once( 'include/classlib_userconfig.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 
-$ThePage = new Page('TournamentParticipantList');
+$GLOBALS['ThePage'] = new Page('TournamentParticipantList');
+
 
 {
    #$DEBUG_SQL = true;
@@ -211,8 +212,12 @@ $ThePage = new Page('TournamentParticipantList');
    if( $reg_user_str )
       $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
    if( $allow_edit_tourney )
+   {
       $menu_array[T_('Edit participants')] =
          array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
+      $menu_array[T_('Manage this tournament')] =
+         array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
+   }
 
    end_page(@$menu_array);
 }
