@@ -30,7 +30,8 @@ require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 
-$ThePage = new Page('TournamentList');
+$GLOBALS['ThePage'] = new Page('TournamentList');
+
 
 {
    #$DEBUG_SQL = true;
@@ -205,12 +206,8 @@ $ThePage = new Page('TournamentList');
    $menu_array[T_('Show all tournaments')] = 'tournaments/list_tournaments.php';
    $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
    $menu_array[T_('Directoring tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
-
-   if( TournamentUtils::isAdmin() )
-      $menu_array[T_('Add new tournament')] =
-         array( 'url' => 'tournaments/edit_tournament.php', 'class' => 'TAdmin' );
+   $menu_array[T_('Create new tournament')] = 'tournaments/wizard.php';
 
    end_page(@$menu_array);
 }
-
 ?>
