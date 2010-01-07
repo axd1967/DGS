@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/std_classes.php' );
+require_once( 'include/db_classes.php' );
 require_once( 'include/game_functions.php' );
 
  /*!
@@ -49,6 +49,16 @@ define('CHECK_TRULE_HANDITYPE', 'CONV|PROPER|NIGIRI');
 // lazy-init in TournamentRules::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_RULES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_RULES = array();
+
+global $ENTITY_TOURNAMENT_RULES; //PHP5
+$ENTITY_TOURNAMENT_RULES = new Entity( 'TournamentRules',
+      FTYPE_PKEY, 'ID',
+      FTYPE_AUTO, 'ID',
+      FTYPE_INT,  'ID', 'tid', 'Flags', 'Size', 'AdjKomi', 'Handicap', 'Komi', 'AdjHandicap', 'MinHandicap', 'MaxHandicap', 'Maintime', 'Byotime', 'Byoperiods',
+      FTYPE_TEXT, 'Notes',
+      FTYPE_DATE, 'Lastchanged',
+      FTYPE_ENUM, 'Handicaptype', 'JigoMode', 'StdHandicap', 'Byotype', 'WeekendClock', 'Rated'
+   );
 
 class TournamentRules
 {
@@ -144,72 +154,67 @@ class TournamentRules
       return $success;
    }
 
-   /*! \brief Builds query-part for persistance (insert or update). */
-   function build_persist_query_part()
-   {
-      // Handicaptype/Byotype
-      if( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
-         error('invalid_args', "TournamentRules.build_persist_query_part.check.Handicaptype({$this->tid},{$this->Handicaptype})");
-      if( !preg_match( "/^".REGEX_BYOTYPES."$/", $this->Byotype ) )
-         error('invalid_args', "TournamentRules.build_persist_query_part.check.Byotype({$this->tid},{$this->Byotype})");
-
-      return  " tid='{$this->tid}'"
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",Flags='{$this->Flags}'"
-            . ",Notes='" . mysql_addslashes($this->Notes) . "'"
-            . ",Size='{$this->Size}'"
-            . sprintf( ",Handicaptype='%s'", mysql_addslashes(strtoupper($this->Handicaptype)) )
-            . ",Handicap='{$this->Handicap}'"
-            . ",Komi='{$this->Komi}'"
-            . ",AdjKomi='{$this->AdjKomi}'"
-            . sprintf( ",JigoMode='%s'", mysql_addslashes($this->JigoMode) )
-            . ",AdjHandicap='{$this->AdjHandicap}'"
-            . ",MinHandicap='{$this->MinHandicap}'"
-            . ",MaxHandicap='{$this->MaxHandicap}'"
-            . sprintf( ",StdHandicap='%s'", ($this->StdHandicap ? 'Y' : 'N') )
-            . ",Maintime='{$this->Maintime}'"
-            . sprintf( ",Byotype='%s'", mysql_addslashes($this->Byotype) )
-            . ",Byotime='{$this->Byotime}'"
-            . ",Byoperiods='{$this->Byoperiods}'"
-            . sprintf( ",WeekendClock='%s'", ($this->WeekendClock ? 'Y' : 'N') )
-            . sprintf( ",Rated='%s'", ($this->Rated ? 'Y' : 'N') )
-         ;
-   }
-
-   /*!
-    * \brief Inserts TournamentRules-entry.
-    * \note sets Lastchanged=NOW
-    * \note sets ID to inserted TournamentRules.ID
-    */
    function insert()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
+      $this->checkData();
 
-      $result = db_query( "TournamentRules::insert({$this->tid})",
-            "INSERT INTO TournamentRules SET "
-            . $this->build_persist_query_part()
-         );
+      $entityData = $this->fillEntityData();
+      $result = $entityData->insert( "TournamentRules::insert(%s,{$this->tid})" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
 
-   /*!
-    * \brief Updates TournamentRules-entry.
-    * \note sets Lastchanged=NOW
-    */
    function update()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
+      $this->checkData();
 
-      $result = db_query( "TournamentRules::update({$this->ID})",
-            "UPDATE TournamentRules SET "
-            . $this->build_persist_query_part()
-            . " WHERE ID='{$this->ID}' LIMIT 1"
-         );
-      return $result;
+      $entityData = $this->fillEntityData();
+      return $entityData->update( "TournamentRules::update(%s,{$this->tid})" );
+   }
+
+   function delete()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->delete( "TournamentRules::delete(%s,{$this->tid})" );
+   }
+
+   function checkData()
+   {
+      if( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
+         error('invalid_args', "TournamentRules.checkData.Handicaptype({$this->tid},{$this->Handicaptype})");
+      if( !preg_match( "/^".REGEX_BYOTYPES."$/", $this->Byotype ) )
+         error('invalid_args', "TournamentRules.checkData.Byotype({$this->tid},{$this->Byotype})");
+   }
+
+   function fillEntityData()
+   {
+      // checked fields: Handicaptype/Byotype
+      $data = $GLOBALS['ENTITY_TOURNAMENT_RULES']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
+      $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'Flags', $this->Flags );
+      $data->set_value( 'Notes', $this->Notes );
+      $data->set_value( 'Size', $this->Size );
+      $data->set_value( 'Handicaptype', strtoupper($this->Handicaptype) );
+      $data->set_value( 'Handicap', $this->Handicap );
+      $data->set_value( 'Komi', $this->Komi );
+      $data->set_value( 'AdjKomi', $this->AdjKomi );
+      $data->set_value( 'JigoMode', $this->JigoMode );
+      $data->set_value( 'AdjHandicap', $this->AdjHandicap );
+      $data->set_value( 'MinHandicap', $this->MinHandicap );
+      $data->set_value( 'MaxHandicap', $this->MaxHandicap );
+      $data->set_value( 'StdHandicap', ($this->StdHandicap ? 'Y' : 'N') );
+      $data->set_value( 'Maintime', $this->Maintime );
+      $data->set_value( 'Byotype', $this->Byotype );
+      $data->set_value( 'Byotime', $this->Byotime );
+      $data->set_value( 'Byoperiods', $this->Byoperiods );
+      $data->set_value( 'WeekendClock', ($this->WeekendClock ? 'Y' : 'N') );
+      $data->set_value( 'Rated', ($this->Rated ? 'Y' : 'N') );
+      return $data;
    }
 
    /*!
@@ -410,23 +415,14 @@ class TournamentRules
    /*! \brief Deletes TournamentRules-entry for given id. */
    function delete_tournament_rules( $id )
    {
-      $result = db_query( "TournamentRules::delete_tournament_rules($id)",
-         "DELETE FROM TournamentRules WHERE ID='$id' LIMIT 1" );
-      return $result;
+      $t_rules = new TournamentRules( $id );
+      return $t_rules->delete( "TournamentRules::delete_tournament_rules(%s)" );
    }
 
    /*! \brief Returns db-fields to be used for query of TournamentRules-objects for given tournament-id. */
    function build_query_sql( $tid )
    {
-      // TournamentRules: ID,tid,Lastchanged,Flags,Size,Handicaptype,Handicap,Komi,
-      //     AdjKomi,JigoMode,AdjHandicap,MinHandicap,MaxHandicap,StdHandicap,Maintime,Byotype,
-      //     Byotime,Byoperiods,WeekendClock,Rated,Notes
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'TR.*',
-         'UNIX_TIMESTAMP(TR.Lastchanged) AS X_Lastchanged' );
-      $qsql->add_part( SQLP_FROM,
-         'TournamentRules AS TR' );
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT_RULES']->newQuerySQL('TR');
       $qsql->add_part( SQLP_WHERE, "TR.tid='$tid'" );
       return $qsql;
    }

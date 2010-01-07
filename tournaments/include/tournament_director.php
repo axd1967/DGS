@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/std_classes.php' );
+require_once( 'include/db_classes.php' );
 require_once( 'include/classlib_user.php' );
 
  /*!
@@ -36,6 +36,14 @@ require_once( 'include/classlib_user.php' );
   *
   * \brief Class to manage TournamentDirector-table
   */
+
+global $ENTITY_TOURNAMENT_DIRECTOR; //PHP5
+$ENTITY_TOURNAMENT_DIRECTOR = new Entity( 'TournamentDirector',
+      FTYPE_PKEY, 'tid', 'uid',
+      FTYPE_INT,  'tid', 'uid',
+      FTYPE_TEXT, 'Comment'
+   );
+
 class TournamentDirector
 {
    var $tid;
@@ -56,10 +64,37 @@ class TournamentDirector
    function persist()
    {
       if( TournamentDirector::isTournamentDirector($this->tid, $this->uid) )
-         $success = TournamentDirector::update_tournament_director( $this->tid, $this->uid, $this->Comment );
+         $success = $this->update();
       else
-         $success = TournamentDirector::insert_tournament_director( $this->tid, $this->uid, $this->Comment );
+         $success = $this->insert();
       return $success;
+   }
+
+   function insert()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->insert( "TournamentDirector::insert(%s,{$this->uid})" );
+   }
+
+   function update()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->update( "TournamentDirector::update(%s,{$this->uid})" );
+   }
+
+   function delete()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->delete( "TournamentDirector::delete(%s,{$this->uid})" );
+   }
+
+   function fillEntityData()
+   {
+      $data = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newEntityData();
+      $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'uid', $this->uid );
+      $data->set_value( 'Comment', $this->Comment );
+      return $data;
    }
 
    // ------------ static functions ----------------------------
@@ -67,54 +102,25 @@ class TournamentDirector
    /*! \brief Checks, if user is a tournament director of given tournament. */
    function isTournamentDirector( $tid, $uid )
    {
-      $row = mysql_single_fetch( "TournamentDirector.isTournamentDirector($tid,$uid)",
+      return (bool)mysql_single_fetch( "TournamentDirector.isTournamentDirector($tid,$uid)",
          "SELECT 1 FROM TournamentDirector WHERE tid='$tid' AND uid='$uid' LIMIT 1" );
-      return (bool)$row;
    }
 
-   /*! \brief Inserts TournamentDirector-entry with given tournament-/user-id and comment. */
-   function insert_tournament_director( $tid, $uid, $comment='' )
+   function delete_tournament_director( $tid, $uid ) //TODO# used?
    {
-      $result = db_query( "TournamentDirector::insert_tournament_director($tid,$uid,$comment)",
-         "INSERT INTO TournamentDirector SET "
-            . " tid='$tid'"
-            . ",uid='$uid'"
-            . ",Comment='".mysql_addslashes($comment)."'"
-         );
-      return $result;
-   }
-
-   /*! \brief Updates TournamentDirector-entry with given tournament-/user-id and comment. */
-   function update_tournament_director( $tid, $uid, $comment='' )
-   {
-      $result = db_query( "TournamentDirector::update_tournament_director($tid,$uid,$comment)",
-         "UPDATE TournamentDirector SET "
-            . " Comment='".mysql_addslashes($comment)."'"
-            . " WHERE tid='$tid' AND uid='$uid' LIMIT 1"
-         );
-      return $result;
-   }
-
-   /*! \brief Deletes TournamentDirector-entry for given tournament- and user-id. */
-   function delete_tournament_director( $tid, $uid )
-   {
-      $result = db_query( "TournamentDirector::delete_tournament_director($tid,$uid)",
-         "DELETE FROM TournamentDirector WHERE tid='$tid' AND uid='$uid' LIMIT 1" );
-      return $result;
+      $t_dir = new TournmentDirector( $tid, $uid );
+      return $t_dir->delete( "TournamentDirector::delete_tournament_director(%s)" );
    }
 
    /*! \brief Returns db-fields to be used for query of TournamentDirector-object. */
    function build_query_sql( $tid )
    {
-      // TournamentDirector: tid,uid,Comment
-      $qsql = new QuerySQL();
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
       $qsql->add_part( SQLP_FIELDS,
-         'TD.*',
          'TDPL.ID AS TDPL_ID', 'TDPL.Name AS TDPL_Name',
          'TDPL.Handle AS TDPL_Handle', 'TDPL.Rating2 AS TDPL_Rating2',
          'UNIX_TIMESTAMP(TDPL.Lastaccess) AS TDPL_X_Lastaccess' );
       $qsql->add_part( SQLP_FROM,
-         'TournamentDirector AS TD',
          'INNER JOIN Players AS TDPL ON TDPL.ID=TD.uid' );
       $qsql->add_part( SQLP_WHERE,
          "TD.tid='$tid'" );

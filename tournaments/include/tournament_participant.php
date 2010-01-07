@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once( 'include/utilities.php' );
-require_once( 'include/std_classes.php' );
+require_once( 'include/db_classes.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
  /*!
@@ -52,6 +52,16 @@ define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restri
 // lazy-init in TournamentParticipant::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PARTICIPANT; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PARTICIPANT = array();
+
+global $ENTITY_TOURNAMENT_PARTICIPANT; //PHP5
+$ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
+      FTYPE_PKEY, 'ID',
+      FTYPE_AUTO, 'ID',
+      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'Rating', 'StartRound',
+      FTYPE_TEXT, 'AuthToken', 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
+      FTYPE_DATE, 'Created', 'Lastchanged',
+      FTYPE_ENUM, 'Status'
+   );
 
 class TournamentParticipant
 {
@@ -155,64 +165,60 @@ class TournamentParticipant
       return $success;
    }
 
-   /*! \brief Builds query-part for persistance (insert or update). */
-   function build_persist_query_part( $withCreated )
-   {
-      // Rating/StartRound are checked
-      if( is_null($this->Status) )
-         error('invalid_args', 'TournamentParticipant.build_persist_query_part.check.status(null)');
-
-      return  " tid='{$this->tid}'"
-            . ",uid='{$this->uid}'"
-            . ",Status='{$this->Status}'"
-            . ",Flags='{$this->Flags}'"
-            . ",Rating='{$this->Rating}'"
-            . ",StartRound='{$this->StartRound}'"
-            . ",AuthToken='" . mysql_addslashes($this->AuthToken) . "'"
-            . ( $withCreated ? ",Created=FROM_UNIXTIME({$this->Created})" : '' )
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",Comment='" . mysql_addslashes($this->Comment) . "'"
-            . ",Notes='" . mysql_addslashes($this->Notes) . "'"
-            . ",UserMessage='" . mysql_addslashes($this->UserMessage) . "'"
-            . ",AdminMessage='" . mysql_addslashes($this->AdminMessage) . "'"
-         ;
-   }
-
-   /*!
-    * \brief Inserts TournamentParticipant-entry.
-    * \note sets Created=NOW, Lastchanged=NOW
-    * \note sets ID to inserted Tournament.ID
-    */
    function insert()
    {
-      global $NOW;
-      $this->Created = $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Created = $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "TournamentParticipant::insert({$this->ID})",
-            "INSERT INTO TournamentParticipant SET "
-            . $this->build_persist_query_part(true)
-         );
+      $this->checkData();
+      $entityData = $this->fillEntityData(true);
+      $result = $entityData->insert( "TournamentParticipant::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
 
-   /*!
-    * \brief Updates TournamentParticipant-entry.
-    * \note sets Lastchanged=NOW
-    */
    function update()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "TournamentParticipant::update({$this->ID})",
-            "UPDATE TournamentParticipant SET "
-            . $this->build_persist_query_part()
-            . " WHERE ID='{$this->ID}' LIMIT 1"
-         );
-      return $result;
+      $this->checkData();
+      $entityData = $this->fillEntityData();
+      return $entityData->update( "TournamentParticipant::update(%s)" );
+   }
+
+   function delete()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->delete( "TournamentParticipant::delete(%s)" );
+   }
+
+   function checkData()
+   {
+      if( is_null($this->Status) )
+         error('invalid_args', "TournamentParticipant.checkData.miss_status({$this->ID},{$this->tid})");
+   }
+
+   function fillEntityData( $withCreated )
+   {
+      // checked fields: Rating/StartRound
+      $data = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
+      $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'uid', $this->uid );
+      $data->set_value( 'Status', $this->Status );
+      $data->set_value( 'Flags', $this->Flags );
+      $data->set_value( 'Rating', $this->Rating );
+      $data->set_value( 'StartRound', $this->StartRound );
+      $data->set_value( 'AuthToken', $this->AuthToken );
+      $data->set_value( 'ID', $this->ID );
+      if( $withCreated )
+         $data->set_value( 'Created', $this->Created );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'Comment', $this->Comment );
+      $data->set_value( 'Notes', $this->Notes );
+      $data->set_value( 'UserMessage', $this->UserMessage );
+      $data->set_value( 'AdminMessage', $this->AdminMessage );
+      return $data;
    }
 
    // ------------ static functions ----------------------------
@@ -242,27 +248,21 @@ class TournamentParticipant
    }
 
    /*! \brief Deletes TournamentParticipant-entry for given tournament- and reg-id. */
-   function delete_tournament_participant( $tid, $rid )
+   function delete_tournament_participant( $tid, $rid ) //TODO used?
    {
-      $result = db_query( "TournamentParticipant::delete_tournament_participant($tid,$rid)",
-         "DELETE FROM TournamentParticipant WHERE ID='$rid' AND tid='$tid' LIMIT 1" );
-      return $result;
+      $tp = new TournamentParticipant( $rid, $tid );
+      return $tp->delete( "TournamentParticipant::delete_tournament_participant(%s,$tid)" );
    }
 
    /*! \brief Returns db-fields to be used for query of TournamentParticipant-object. */
    function build_query_sql()
    {
-      // TournamentParticipant: ID,tid,uid,Status,Flags,Rating,StartRound,AuthToken,Created,Lastchanged,Comment,Notes
-      $qsql = new QuerySQL();
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newQuerySQL('TP');
       $qsql->add_part( SQLP_FIELDS,
-         'TP.*',
-         'UNIX_TIMESTAMP(TP.Created) AS X_Created',
-         'UNIX_TIMESTAMP(TP.Lastchanged) AS X_Lastchanged',
          'TPP.Name', 'TPP.Handle', 'TPP.Country', 'TPP.Rating2', 'TPP.RatingStatus',
          'TPP.RatedGames', 'TPP.Finished',
          'UNIX_TIMESTAMP(TPP.Lastaccess) AS X_Lastaccess' );
       $qsql->add_part( SQLP_FROM,
-         'TournamentParticipant AS TP',
          'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
       return $qsql;
    }

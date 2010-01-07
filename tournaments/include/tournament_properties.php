@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/std_classes.php' );
+require_once( 'include/db_classes.php' );
 require_once( 'include/classlib_user.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
@@ -48,6 +48,16 @@ define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX|ENTER_FIX');
 // lazy-init in TournamentProperties::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();
+
+global $ENTITY_TOURNAMENT_PROPERTIES; //PHP5
+$ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
+      FTYPE_PKEY, 'tid',
+      FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'UserMinRating',
+                  'UserMaxRating', 'UserMinGamesFinished', 'UserMinGamesRated',
+      FTYPE_TEXT, 'Notes',
+      FTYPE_DATE, 'Lastchanged', 'RegisterEndTime',
+      FTYPE_ENUM, 'RatingUseMode', 'UserRated'
+   );
 
 class TournamentProperties
 {
@@ -104,78 +114,58 @@ class TournamentProperties
 
    function to_string()
    {
-      return " tid=[{$this->tid}]"
-            . ", Lastchanged=[{$this->Lastchanged}]"
-            . ", Notes=[{$this->Notes}]"
-            . ", MinParticipants=[{$this->MinParticipants}]"
-            . ", MaxParticipants=[{$this->MaxParticipants}]"
-            . ", RatingUseMode=[{$this->RatingUseMode}]"
-            . ", RegisterEndTime=[{$this->RegisterEndTime}]"
-            . ", UserMinRating=[{$this->UserMinRating}]"
-            . ", UserMaxRating=[{$this->UserMaxRating}]"
-            . ", UserRated=[{$this->UserRated}]"
-            . ", UserMinGamesFinished=[{$this->UserMinGamesFinished}]"
-            . ", UserMinGamesRated=[{$this->UserMinGamesRated}]"
-         ;
+      return print_r( $this, true );
    }
 
    /*! \brief Inserts or updates tournament-properties in database. */
    function persist()
    {
-      $success = $this->insert();
+      if( TournamentProperties::isTournamentProperties($this->tid) ) // async
+         $success = $this->update();
+      else
+         $success = $this->insert();
       return $success;
    }
 
-   /*! \brief Builds query-part for persistance (insert or update). */
-   function build_persist_query_part()
-   {
-      // RatingUseMode/UserMinRating/UserMaxRating are checked
-      return  " tid='{$this->tid}'"
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",Notes='" . mysql_addslashes($this->Notes) . "'"
-            . ",MinParticipants='{$this->MinParticipants}'"
-            . ",MaxParticipants='{$this->MaxParticipants}'"
-            . ",RatingUseMode='" . mysql_addslashes($this->RatingUseMode) . "'"
-            . ",RegisterEndTime=FROM_UNIXTIME({$this->RegisterEndTime})"
-            . ",UserMinRating='{$this->UserMinRating}'"
-            . ",UserMaxRating='{$this->UserMaxRating}'"
-            . sprintf( ",UserRated='%s'", ($this->UserRated ? 'Y' : 'N') )
-            . ",UserMinGamesFinished='{$this->UserMinGamesFinished}'"
-            . ",UserMinGamesRated='{$this->UserMinGamesRated}'"
-         ;
-   }
-
-   /*!
-    * \brief Inserts or replaces existing TournamentProperties-entry.
-    * \note sets Lastchanged=NOW
-    */
    function insert()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "TournamentProperties::insert({$this->tid})",
-            "REPLACE INTO TournamentProperties SET "
-            . $this->build_persist_query_part()
-         );
-      return $result;
+      $entityData = $this->fillEntityData();
+      return $entityData->insert( "TournamentProperties::insert(%s)" );
    }
 
-   /*!
-    * \brief Updates TournamentProperties-entry.
-    * \note sets Lastchanged=NOW
-    */
    function update()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "TournamentProperties::update({$this->tid})",
-            "UPDATE TournamentProperties SET "
-            . $this->build_persist_query_part()
-            . " WHERE tid='{$this->tid}' LIMIT 1"
-         );
-      return $result;
+      $entityData = $this->fillEntityData();
+      return $entityData->update( "TournamentProperties::update(%s)" );
+   }
+
+   function delete()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->delete( "TournamentProperties::delete(%s)" );
+   }
+
+   function fillEntityData( )
+   {
+      // checked fields: RatingUseMode/UserMinRating/UserMaxRating
+      $data = $GLOBALS['ENTITY_TOURNAMENT_PROPERTIES']->newEntityData();
+      $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'MinParticipants', $this->MinParticipants );
+      $data->set_value( 'MaxParticipants', $this->MaxParticipants );
+      $data->set_value( 'RatingUseMode', $this->RatingUseMode );
+      $data->set_value( 'RegisterEndTime', $this->RegisterEndTime );
+      $data->set_value( 'UserMinRating', $this->UserMinRating );
+      $data->set_value( 'UserMaxRating', $this->UserMaxRating );
+      $data->set_value( 'UserRated', ($this->UserRated ? 'Y' : 'N') );
+      $data->set_value( 'UserMinGamesFinished', $this->UserMinGamesFinished );
+      $data->set_value( 'UserMinGamesRated', $this->UserMinGamesRated );
+      $data->set_value( 'Notes', $this->Notes );
+      return $data;
    }
 
    /*!
@@ -267,29 +257,25 @@ class TournamentProperties
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Deletes TournamentProperties-entry for given tournament-id. */
-   function delete_tournament_properties( $tid )
+   /*! \brief Checks, if tournament property existing for given tournament. */
+   function isTournamentProperties( $tid )
    {
-      $result = db_query( "TournamentProperties::delete_tournament_properties($tid)",
-         "DELETE FROM TournamentProperties WHERE tid='$tid' LIMIT 1" );
-      return $result;
+      return (bool)mysql_single_fetch( "TournamentProperties.isTournamentProperties($tid)",
+         "SELECT 1 FROM TournamentProperties WHERE tid='$tid' LIMIT 1" );
+   }
+
+   /*! \brief Deletes TournamentProperties-entry for given tournament-id. */
+   function delete_tournament_properties( $tid ) //TODO used?
+   {
+      $t_props = new TournamentProperties( $tid );
+      return $t_props->delete( "TournamentProperties::delete_tournament_properties(%s)" );
    }
 
    /*! \brief Returns db-fields to be used for query of single TournamentProperties-object for given tournament-id. */
    function build_query_sql( $tid )
    {
-      // TournamentProperties: tid,Lastchanged,Notes,MinParticipants,MaxParticipants,
-      //     RatingUseMode,RegisterEndTime,UserMinRating,UserMaxRating,UserRated,
-      //     UserMinGamesFinished,UserMinGamesRated
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'TPR.*',
-         'UNIX_TIMESTAMP(TPR.Lastchanged) AS X_Lastchanged',
-         'UNIX_TIMESTAMP(TPR.RegisterEndTime) AS X_RegisterEndTime' );
-      $qsql->add_part( SQLP_FROM,
-         'TournamentProperties AS TPR' );
-      $qsql->add_part( SQLP_WHERE,
-         "TPR.tid='$tid'" );
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT_PROPERTIES']->newQuerySQL('TPR');
+      $qsql->add_part( SQLP_WHERE, "TPR.tid='$tid'" );
       $qsql->add_part( SQLP_LIMIT, '1' );
       return $qsql;
    }

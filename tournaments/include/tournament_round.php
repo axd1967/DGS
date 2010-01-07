@@ -48,6 +48,14 @@ define('CHECK_TROUND_STATUS', 'INIT|POOLINIT|PAIRINIT|GAMEINIT|DONE');
 global $ARR_GLOBALS_TOURNAMENT_ROUND; //PHP5
 $ARR_GLOBALS_TOURNAMENT_ROUND = array();
 
+global $ENTITY_TOURNAMENT_ROUND; //PHP5
+$ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
+      FTYPE_PKEY, 'tid', 'Round',
+      FTYPE_INT,  'ID', 'Round', 'RulesID', 'MinPoolSize', 'MaxPoolSize', 'PoolCount',
+      FTYPE_DATE, 'Lastchanged',
+      FTYPE_ENUM, 'Status'
+   );
+
 class TournamentRound
 {
    var $tid;
@@ -83,74 +91,65 @@ class TournamentRound
 
    function to_string()
    {
-      return "tid=[{$this->tid}]"
-            . ", Round=[{$this->Round}]"
-            . ", RulesID=[{$this->RulesID}]"
-            . ", Lastchanged=[{$this->Lastchanged}]"
-            . ", Status=[{$this->Status}]"
-            . ", MinPoolSize=[{$this->MinPoolSize}]"
-            . ", MaxPoolSize=[{$this->MaxPoolSize}]"
-            . ", PoolCount=[{$this->PoolCount}]"
-         ;
+      return print_r( $this, true );
    }
 
    /*! \brief Inserts or updates tournament-properties in database. */
    function persist()
    {
-      $success = $this->insert();
+      if( TournamentRound::isTournamentRound($this->tid, $this->Round) )
+         $success = $this->update();
+      else
+         $success = $this->insert();
       return $success;
    }
 
-   /*! \brief Builds query-part for persistance (insert or update). */
-   function build_persist_query_part()
-   {
-      // Status is checked
-      return  " tid='{$this->tid}'"
-            . ",Round='{$this->Round}'"
-            . ",RulesID='{$this->RulesID}'"
-            . ",Lastchanged=FROM_UNIXTIME({$this->Lastchanged})"
-            . ",Status='" . mysql_addslashes($this->Status) . "'"
-            . ",MinPoolSize='{$this->MinPoolSize}'"
-            . ",MaxPoolSize='{$this->MaxPoolSize}'"
-            . ",PoolCount='{$this->PoolCount}'"
-         ;
-   }
-
-   /*!
-    * \brief Inserts or replaces existing TournamentRound-entry.
-    * \note sets Lastchanged=NOW
-    */
    function insert()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "TournamentRound::insert({$this->tid},{$this->Round})",
-            "REPLACE INTO TournamentRound SET "
-            . $this->build_persist_query_part()
-         );
-      return $result;
+      $entityData = $this->fillEntityData();
+      return $entityData->insert( "TournamentRound::insert(%s)" );
    }
 
-   /*!
-    * \brief Updates TournamentRound-entry.
-    * \note sets Lastchanged=NOW
-    */
    function update()
    {
-      global $NOW;
-      $this->Lastchanged = $NOW;
+      $this->Lastchanged = $GLOBALS['NOW'];
 
-      $result = db_query( "TournamentRound::update({$this->tid})",
-            "UPDATE TournamentRound SET "
-            . $this->build_persist_query_part()
-            . " WHERE tid='{$this->tid}' AND Round='{$this->Round}' LIMIT 1"
-         );
-      return $result;
+      $entityData = $this->fillEntityData();
+      return $entityData->update( "TournamentRound::update(%s)" );
+   }
+
+   function delete()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->delete( "TournamentRound::delete(%s)" );
+   }
+
+   function fillEntityData( $withCreated )
+   {
+      // checked fields: Status
+      $data = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newEntityData();
+      $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'Round', $this->Round );
+      $data->set_value( 'RulesID', $this->RulesID );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'Status', $this->Status );
+      $data->set_value( 'MinPoolSize', $this->MinPoolSize );
+      $data->set_value( 'MaxPoolSize', $this->MaxPoolSize );
+      $data->set_value( 'PoolCount', $this->PoolCount );
+      return $data;
    }
 
 
    // ------------ static functions ----------------------------
+
+   /*! \brief Checks, if there is a tournament-round for given tournament-id and round. */
+   function isTournamentRound( $tid, $round )
+   {
+      return (bool)mysql_single_fetch( "TournamentRound.isTournamentRound($tid,$round)",
+         "SELECT 1 FROM TournamentRound WHERE tid='$tid' AND Round='$Round' LIMIT 1" );
+   }
 
    /*! \brief Deletes TournamentRound-entry for given id. */
    function delete_tournament_round( $tid, $round )
@@ -163,13 +162,7 @@ class TournamentRound
    /*! \brief Returns db-fields to be used for query of TournamentRound-objects for given tournament-id. */
    function build_query_sql( $tid )
    {
-      // TournamentRound: tid,Round,RulesID,Lastchanged,Status,MinPoolSize,MaxPoolSize
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS,
-         'TRD.*',
-         'UNIX_TIMESTAMP(TRD.Lastchanged) AS X_Lastchanged' );
-      $qsql->add_part( SQLP_FROM,
-         'TournamentRound AS TRD' );
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newQuerySQL('TRD');
       $qsql->add_part( SQLP_WHERE, "TRD.tid='$tid'" );
       return $qsql;
    }
