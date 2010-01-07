@@ -8,13 +8,17 @@ Copyright (C) 2001-2010  Erik Ouchterlony
    New features and Major changes:
 
    * <home tournaments/list.php>Tournaments</home>:
+      * Added <home tournaments/wizard.php>Tournament-Wizard</home> to create tournaments
+         * Ladder Tournament without restrictions of 'Dragon'-scope (created by Admin only)
+
+* TODO: Added Round-Robin Tournament of scope 'Dragon' or 'Public'
       * Added Tournaments-link into main-menu (access-key [t])
-      * Added Round-Robin Tournaments with public scopes:
-        Dragon (official Dragon tournaments), Public
-      * Added page to manage tournament
+      * Added Tournaments with Dragon or Public scope
+
+      * Added Tournament Manager
       * Added Tournament Registration: Apply, Register, Invite
       * Added Properties editor for registration restrictions on tournament and players
-      * Added Rules editor for games-setting
+      * Added Rules editor for tournament-games-setting
 
    * Game page:
       * Delete game on opponents turn (within first 10 moves)
