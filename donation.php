@@ -22,7 +22,7 @@ $TranslateGroups[] = "Common";
 require_once( "include/std_functions.php" );
 
 {
-   $ThePage = new Page('Donation');
+   $GLOBALS['ThePage'] = new Page('Donation');
 
    connect2mysql();
 

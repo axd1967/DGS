@@ -27,7 +27,7 @@ require_once( 'include/goban_handler_sl.php' );
 require_once( 'include/goban_handler_gfx.php' );
 require_once( 'include/GoDiagram.php' ); // OLD go-editor
 
-$ThePage = new Page('GobanEdit');
+$GLOBALS['ThePage'] = new Page('GobanEdit');
 
 define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
 

@@ -29,7 +29,7 @@ require_once( "include/countries.php" );
 require_once( "include/contacts.php" );
 require_once( "include/classlib_userpicture.php" );
 
-$ThePage = new Page('UserInfo');
+$GLOBALS['ThePage'] = new Page('UserInfo');
 
 {
    connect2mysql();

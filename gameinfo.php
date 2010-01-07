@@ -29,7 +29,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
 require_once( 'include/classlib_game.php' );
 
-$ThePage = new Page('GameInfo');
+$GLOBALS['ThePage'] = new Page('GameInfo');
 
 
 // Status: enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED')

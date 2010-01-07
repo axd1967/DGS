@@ -29,7 +29,7 @@ require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/time_functions.php' );
 
-$ThePage = new Page('GamesList');
+$GLOBALS['ThePage'] = new Page('GamesList');
 
 {
    #$DEBUG_SQL = true;

@@ -25,7 +25,7 @@ chdir('..');
 require_once( "forum/forum_functions.php" );
 require_once( "include/gui_functions.php" );
 
-$ThePage = new Page('ForumAdmin');
+$GLOBALS['ThePage'] = new Page('ForumAdmin');
 
 {
    connect2mysql();

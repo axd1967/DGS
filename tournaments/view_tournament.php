@@ -32,7 +32,7 @@ require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
 
-$ThePage = new Page('Tournament');
+$GLOBALS['ThePage'] = new Page('Tournament');
 
 {
    connect2mysql();

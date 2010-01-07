@@ -28,7 +28,7 @@ require_once( "include/std_functions.php" );
 
 
 {
-   $ThePage = new Page('Scripts');
+   $GLOBALS['ThePage'] = new Page('Scripts');
 
    connect2mysql();
    $logged_in = who_is_logged($player_row);

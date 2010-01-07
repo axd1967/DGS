@@ -28,7 +28,7 @@ require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 
-$ThePage = new Page('TournamentPropertiesEdit');
+$GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
 {
    connect2mysql();

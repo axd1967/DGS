@@ -25,7 +25,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
 require_once( "include/filter_parser.php" );
-$ThePage = new Page('FAQAdmin');
+$GLOBALS['ThePage'] = new Page('FAQAdmin');
 
 
 $info_box = '<ul>

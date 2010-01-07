@@ -30,7 +30,7 @@ require_once( 'include/classlib_userconfig.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_director.php' );
 
-$ThePage = new Page('TournamentDirectorList');
+$GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
 {
    #$DEBUG_SQL = true;

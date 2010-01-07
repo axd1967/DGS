@@ -27,7 +27,7 @@ require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_director.php' );
 
-$ThePage = new Page('TournamentDirectorEdit');
+$GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
 {
    connect2mysql();

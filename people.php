@@ -22,7 +22,7 @@ $TranslateGroups[] = "Docs";
 require_once( "include/std_functions.php" );
 require_once( "include/gui_functions.php" );
 
-$ThePage = new Page('People');
+$GLOBALS['ThePage'] = new Page('People');
 
 function add_contributor_link( $text=false, $link, $extra='')
 {

@@ -27,7 +27,7 @@ require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'include/message_functions.php' );
 
-$ThePage = new Page('TournamentRulesEdit');
+$GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
 {
    connect2mysql();

@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
-$ThePage = new Page('Docs');
+$GLOBALS['ThePage'] = new Page('Docs');
 
 {
    connect2mysql();

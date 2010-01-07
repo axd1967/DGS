@@ -40,7 +40,7 @@ function build_TOC( $text )
 } //build_TOC
 
 {
-   $ThePage = new Page('News');
+   $GLOBALS['ThePage'] = new Page('News');
 
    connect2mysql();
 

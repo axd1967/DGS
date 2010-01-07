@@ -28,7 +28,7 @@ require_once( "include/message_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/classlib_game.php' );
 
-$ThePage = new Page('Status');
+$GLOBALS['ThePage'] = new Page('Status');
 
 {
    #$DEBUG_SQL = true;

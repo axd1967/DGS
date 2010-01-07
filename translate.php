@@ -23,7 +23,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter_functions.php" );
 require_once( "include/make_translationfiles.php" );
-$ThePage = new Page('Translate');
+$GLOBALS['ThePage'] = new Page('Translate');
 
 define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
 define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases

@@ -26,7 +26,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 
-$ThePage = new Page('TournamentManage');
+$GLOBALS['ThePage'] = new Page('TournamentManage');
 
 {
    connect2mysql();

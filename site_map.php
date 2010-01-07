@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
-$ThePage = new Page('SiteMap');
+$GLOBALS['ThePage'] = new Page('SiteMap');
 
 
 function echo_item($text, $link='', $show_link, $working=true, $last=false)

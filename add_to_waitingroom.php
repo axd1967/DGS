@@ -24,7 +24,6 @@ require_once( 'include/time_functions.php' );
 require_once( "include/message_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/utilities.php' );
-//Useless: $ThePage = new Page('...');
 
 {
    disable_cache();

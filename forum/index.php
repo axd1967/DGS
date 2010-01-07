@@ -23,7 +23,7 @@ chdir('..');
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'forum/forum_functions.php' );
 
-$ThePage = new Page('ForumsList');
+$GLOBALS['ThePage'] = new Page('ForumsList');
 
 {
    connect2mysql();

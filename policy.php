@@ -22,7 +22,7 @@ $TranslateGroups[] = "Start";
 require_once( "include/std_functions.php" );
 
 {
-   $ThePage = new Page('Policy');
+   $GLOBALS['ThePage'] = new Page('Policy');
 
    connect2mysql();
 
