@@ -2,7 +2,6 @@
 
 chdir("../");
 require_once( "include/quick_common.php" );
-chdir("phorum");
 
 {
    $forum_id = (int)@$_REQUEST['f'];
