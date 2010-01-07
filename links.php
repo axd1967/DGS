@@ -68,6 +68,9 @@ $GLOBALS['ThePage'] = new Page('Links');
    add_link_page_link("http://www.britgo.org/intro/intro1.html",
                      T_('Introduction'),
                      T_('Very well written introduction by the British Go Association.'));
+   add_link_page_link("http://www.pandanet.co.jp/English/introduction_of_go/",
+                     T_('Introduction to Go'),
+                     T_('You can master Go in 10 days'));
    add_link_page_link('http://web.archive.org/web/20070101004300/http://www.sentex.net/~mmcadams/teachgo/',
                      T_('How to Teach Go'),
                      T_('This is all you need to get started. Very basic stuff'));
