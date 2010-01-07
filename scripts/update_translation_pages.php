@@ -113,6 +113,7 @@ function find_php_files( )
          , 'rss/'
          , 'tournaments/'
          , 'tournaments/include/'
+         , 'tournaments/include/types/'
          , 'wap/'
          );
 
