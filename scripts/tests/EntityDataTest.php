@@ -72,6 +72,7 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
    public function test_set_value() {
       $this->data->set_value('ID', 4711);
       $this->assertEquals( 4711, $this->data->values['ID'] );
+      $this->assertEquals( "ID[4711]", $this->data->get_pkey_string() );
 
       UnitTestHelper::clearErrors(ERROR_MODE_TEST);
       $this->data->set_value('unknown', 7);
@@ -111,6 +112,7 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
    }
 
    public function test_build_sql_insert() {
+      $this->data->set_value('ID', 4711);
       $this->data->set_value('i1', 0);
       $this->data->set_value('i2', '');
       $this->data->set_value('t1', 12);
@@ -119,6 +121,17 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          "INSERT INTO Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678)",
          $this->data->build_sql_insert() );
+   }
+
+   public function test_build_sql_insert_NoAutoKey() {
+      $e = new Entity( 'NTable',
+            FTYPE_PKEY, 'id',
+            FTYPE_INT,  'id', 'f1'
+         );
+      $d = $e->newEntityData();
+      $d->set_value('id', 1);
+      $d->set_value('f1', 2);
+      $this->assertEquals( "INSERT INTO NTable SET id=1, f1=2", $d->build_sql_insert() );
    }
 
    public function test_build_sql_insert_values() {
@@ -145,17 +158,18 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->data->set_value('d1', 12345678);
       $this->assertEquals(
          "UPDATE Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678) WHERE ID=4711",
-         $this->data->build_sql_update() );
+         $this->data->build_sql_update(0) );
       $this->assertEquals(
          "UPDATE Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678) WHERE ID=4711 LIMIT 1",
-         $this->data->build_sql_update(1) );
+         $this->data->build_sql_update() );
    }
 
    public function test_build_sql_delete() {
       $this->data->set_value('ID', 4711);
       $this->data->set_value('i1', 0);
       $this->data->set_value('t1', 12);
-      $this->assertEquals( "DELETE FROM Table WHERE ID=4711", $this->data->build_sql_delete() );
+      $this->assertEquals( "DELETE FROM Table WHERE ID=4711", $this->data->build_sql_delete(0) );
+      $this->assertEquals( "DELETE FROM Table WHERE ID=4711 LIMIT 1", $this->data->build_sql_delete() );
       $this->assertEquals( "DELETE FROM Table WHERE ID=4711 LIMIT 2", $this->data->build_sql_delete(2) );
    }
 
@@ -169,11 +183,12 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $d->set_value('id2', 2);
       $d->set_value('f1', 3);
 
+      $this->assertEquals( "id1[1],id2[2]", $d->get_pkey_string() );
       $this->assertEquals( "INSERT INTO MTable SET id1=1, id2=2, f1=3", $d->build_sql_insert() );
       $this->assertEquals( "INSERT INTO MTable (id1,id2,f1) VALUES ", $d->build_sql_insert_values(true) );
       $this->assertEquals( "(1,2,3)", $d->build_sql_insert_values() );
-      $this->assertEquals( "UPDATE MTable SET f1=3 WHERE id1=1 AND id2=2", $d->build_sql_update() );
-      $this->assertEquals( "DELETE FROM MTable WHERE id1=1 AND id2=2", $d->build_sql_delete() );
+      $this->assertEquals( "UPDATE MTable SET f1=3 WHERE id1=1 AND id2=2", $d->build_sql_update(0) );
+      $this->assertEquals( "DELETE FROM MTable WHERE id1=1 AND id2=2", $d->build_sql_delete(0) );
    }
 
 }

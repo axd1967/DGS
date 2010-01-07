@@ -42,7 +42,7 @@ $ENTITY_TABLE = new Entity( 'Table',
   */
 
 
-define('FTYPE_INT',  1);
+define('FTYPE_INT',  1); // for numeric-values (ints, float, double), which need no escaping
 define('FTYPE_TEXT', 2);
 define('FTYPE_DATE', 3);
 define('FTYPE_ENUM', 4);
@@ -187,6 +187,16 @@ class EntityData
       return print_r( $this, true );
    }
 
+   function get_pkey_string()
+   {
+      $arr = array();
+      foreach( $this->entity->pkeys as $field => $tmp )
+         $arr[] = sprintf( '%s[%s]', $field,
+            ( isset($this->values[$field]) ? $this->values[$field] : '' ));
+      return implode(',', $arr);
+   }
+
+
    function set_value( $field, $value )
    {
       if( !$this->entity->is_field($field) )
@@ -235,7 +245,8 @@ class EntityData
       {
          if( !$this->entity->is_field($field) )
             error('assert', "EntityData.build_sql_insert.unknown_field({$this->entity->table},$field)");
-         $arr[] = $field . '=' . $this->get_sql_value( $field );
+         if( !$this->entity->is_auto_increment($field) )
+            $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
 
       $query = 'INSERT INTO ' . $this->entity->table . ' SET ' . implode(', ', $arr);
@@ -271,7 +282,7 @@ class EntityData
       return $query;
    }
 
-   function build_sql_update( $limit=0 )
+   function build_sql_update( $limit=1 )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -300,7 +311,7 @@ class EntityData
       return $query;
    }
 
-   function build_sql_delete( $limit=0 )
+   function build_sql_delete( $limit=1 )
    {
       $arr = array();
       foreach( $this->entity->pkeys as $field => $tmp )
@@ -316,6 +327,21 @@ class EntityData
       if( is_numeric($limit) && $limit > 0 )
          $query .= " LIMIT $limit";
       return $query;
+   }
+
+   function insert( $msgfmt )
+   {
+      return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_insert() );
+   }
+
+   function update( $msgfmt, $limit=1 )
+   {
+      return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_update($limit) );
+   }
+
+   function delete( $msgfmt, $limit=1 )
+   {
+      return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_delete($limit) );
    }
 
 } // end of 'EntityData'
