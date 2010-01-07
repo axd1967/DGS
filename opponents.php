@@ -34,15 +34,6 @@ require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/classlib_userpicture.php' );
 
 
-$ARR_DBFIELDKEYS = array(
-   'cntGames',
-   'cntJigo',
-   'cntHandicap', 'maxHandicap',
-   'cntWon',  'cntWonTime',  'cntWonResign',  'cntWonScore',
-   'cntLost', 'cntLostTime', 'cntLostResign', 'cntLostScore'
-);
-
-
 {
    #$DEBUG_SQL = true;
    connect2mysql();
@@ -524,7 +515,13 @@ function build_opp_games_link( $uid, $opp_handle, $fin )
 // param query: if null, only fill array with 0-values
 function extract_user_stats( $color, $query = null )
 {
-   global $ARR_DBFIELDKEYS;
+   static $ARR_DBFIELDKEYS = array(
+      'cntGames',
+      'cntJigo',
+      'cntHandicap', 'maxHandicap',
+      'cntWon',  'cntWonTime',  'cntWonResign',  'cntWonScore',
+      'cntLost', 'cntLostTime', 'cntLostResign', 'cntLostScore'
+   );
 
    $arr = array();
    if( !is_null($query) )
