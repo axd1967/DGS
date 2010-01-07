@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'tournaments/include/tournament_globals.php';
 require_once( 'include/db_classes.php' );
 require_once( 'include/std_functions.php' ); // for ADMIN_TOURNAMENT
 require_once( 'tournaments/include/tournament_utils.php' );
@@ -39,34 +40,18 @@ require_once( 'tournaments/include/tournament_director.php' );
   * \brief Class to manage Tournament-table
   */
 
-define('TOURNEY_SCOPE_DRAGON',  'DRAGON');
-define('TOURNEY_SCOPE_PUBLIC',  'PUBLIC');
-define('TOURNEY_SCOPE_PRIVATE', 'PRIVATE');
-define('CHECK_TOURNEY_SCOPE', 'DRAGON|PUBLIC|PRIVATE');
-
-define('TOURNEY_TYPE_ROUND_ROBIN', 'ROUNDROBIN');
-define('CHECK_TOURNEY_TYPE', 'ROUNDROBIN');
-
-define('TOURNEY_STATUS_ADMIN',    'ADM');
-define('TOURNEY_STATUS_NEW',      'NEW');
-define('TOURNEY_STATUS_REGISTER', 'REG');
-define('TOURNEY_STATUS_PAIR',     'PAIR');
-define('TOURNEY_STATUS_PLAY',     'PLAY');
-define('TOURNEY_STATUS_CLOSED',   'CLOSED');
-define('CHECK_TOURNEY_STATUS', 'ADM|NEW|REG|PAIR|PLAY|CLOSED');
-
 // lazy-init in Tournament::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT; //PHP5
 $ARR_GLOBALS_TOURNAMENT = array();
 
 global $ENTITY_TOURNAMENT; //PHP5
 $ENTITY_TOURNAMENT = new Entity( 'Tournament',
-   FTYPE_PKEY, 'ID',
-   FTYPE_AUTO, 'ID',
-   FTYPE_INT,  'ID', 'Owner_ID', 'Rounds', 'CurrentRound',
-   FTYPE_TEXT, 'Title', 'Description',
-   FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
-   FTYPE_ENUM, 'Scope', 'Type', 'Status'
+      FTYPE_PKEY, 'ID',
+      FTYPE_AUTO, 'ID',
+      FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Rounds', 'CurrentRound',
+      FTYPE_TEXT, 'Title', 'Description',
+      FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
+      FTYPE_ENUM, 'Scope', 'Type', 'Status'
    );
 
 class Tournament
@@ -74,6 +59,7 @@ class Tournament
    var $ID;
    var $Scope;
    var $Type;
+   var $WizardType;
    var $Title;
    var $Description;
    var $Owner_ID;
@@ -91,14 +77,16 @@ class Tournament
    var $TP_Counts;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_ROUND_ROBIN,
-                        $title='', $description='', $owner_id=0, $owner_handle='',
-                        $status=TOURNEY_STATUS_NEW, $created=0, $lastchanged=0,
-                        $starttime=0, $endtime=0, $rounds=1, $current_round=1 )
+   function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
+                        $wizard_type=TOURNEY_WIZTYPE_DGS_LADDER, $title='', $description='',
+                        $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW,
+                        $created=0, $lastchanged=0, $starttime=0, $endtime=0,
+                        $rounds=1, $current_round=1 )
    {
       $this->ID = (int)$id;
       $this->setScope( $scope );
       $this->setType( $type );
+      $this->setWizardType( $wizard_type );
       $this->Title = $title;
       $this->Description = $description;
       $this->Owner_ID = (int)$owner_id;
@@ -133,6 +121,14 @@ class Tournament
       $this->Type = $type;
    }
 
+   function setWizardType( $wizard_type )
+   {
+      if( !is_numeric($wizard_type) || $wizard_type < 1 || $wizard_type > MAX_TOURNEY_WIZARD_TYPE )
+         error('invalid_args', "Tournament.setWizardType($wizard_type)");
+      $this->WizardType = $wizard_type;
+      $this->setType( TournamentUtils::getWizardTournamentType($wizard_type) );
+   }
+
    function setStatus( $status )
    {
       if( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
@@ -163,7 +159,6 @@ class Tournament
       $this->TP_Counts = array_merge( array(), $arr );
    }
 
-   /*! \brief Inserts or updates tournament in database. */
    function persist()
    {
       if( $this->ID > 0 )
@@ -173,36 +168,31 @@ class Tournament
       return $success;
    }
 
-   /*!
-    * \brief Inserts Tournament-entry.
-    * \note sets Created=NOW, Lastchanged=NOW, StartTime=NOW
-    * \note sets ID to inserted Tournament.ID
-    */
    function insert()
    {
       $this->Created = $this->Lastchanged = $this->StartTime = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(true);
-      $result = db_query( "Tournament::insert({$this->ID})", $entityData->build_sql_insert() );
+      $result = $entityData->insert( "Tournament::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
 
-   /*!
-    * \brief Updates Tournament-entry.
-    * \note sets Lastchanged=NOW
-    */
    function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(false /*-Created*/);
-      $result = db_query( "Tournament::update({$this->ID})", $entityData->build_sql_update(1) );
-      return $result;
+      return $entityData->update( "Tournament::update(%s)" );
    }
 
-   /*! \brief Builds EntityData for persist (insert or update). */
+   function delete()
+   {
+      $entityData = $this->fillEntityData(false);
+      return $entityData->delete( "Tournament::delete(%s)" );
+   }
+
    function fillEntityData( $withCreated )
    {
       // checked fields: Scope/Type/Status
@@ -210,6 +200,7 @@ class Tournament
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'Scope', $this->Scope );
       $data->set_value( 'Type', $this->Type );
+      $data->set_value( 'WizardType', $this->WizardType );
       $data->set_value( 'Title', $this->Title );
       $data->set_value( 'Description', $this->Description );
       $data->set_value( 'Owner_ID', $this->Owner_ID );
@@ -281,7 +272,7 @@ class Tournament
    /*! \brief Returns db-fields to be used for query of Tournament-object. */
    function build_query_sql()
    {
-      $qsql = $GLOBALS['ENTITY_TOURNAMENT']->buildQuery('T');
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT']->newQuerySQL('T');
       $qsql->add_part( SQLP_FIELDS,
          'Owner.Handle AS X_OwnerHandle' );
       $qsql->add_part( SQLP_FROM,
@@ -296,6 +287,7 @@ class Tournament
             @$row['ID'],
             @$row['Scope'],
             @$row['Type'],
+            @$row['WizardType'],
             @$row['Title'],
             @$row['Description'],
             @$row['Owner_ID'],
@@ -348,6 +340,7 @@ class Tournament
       return $iterator;
    }
 
+
    /*! \brief Returns scope-text or all scope-texts (if arg=null). */
    function getScopeText( $scope=null )
    {
@@ -379,6 +372,7 @@ class Tournament
       if( !isset($ARR_GLOBALS_TOURNAMENT['TYPE']) )
       {
          $arr = array();
+         $arr[TOURNEY_TYPE_LADDER] = T_('Ladder#T_type');
          $arr[TOURNEY_TYPE_ROUND_ROBIN] = T_('Round Robin#T_type');
          $ARR_GLOBALS_TOURNAMENT['TYPE'] = $arr;
       }
@@ -424,10 +418,6 @@ class Tournament
    function allow_create( $uid )
    {
       if( $uid <= GUESTS_ID_MAX )
-         return false;
-
-      //TODO(later) remove this to allow T-create for normal users
-      if( !TournamentUtils::isAdmin() )
          return false;
 
       // anyone can create Ts except guests

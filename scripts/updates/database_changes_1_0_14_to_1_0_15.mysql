@@ -1462,3 +1462,9 @@ ALTER TABLE Errorlog
    ADD Request varchar(128) NOT NULL DEFAULT '' AFTER Message ;
 
 
+-- create official "DGS-ladder" for tournament-wizard
+ALTER TABLE Tournament
+   ADD WizardType tinyint NOT NULL AFTER Type,
+   CHANGE Type Type enum('LADDER','ROUNDROBIN') NOT NULL ;
+
+
