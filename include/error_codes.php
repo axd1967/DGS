@@ -96,6 +96,7 @@ class ErrorCode
          $arr_logid['game_delete_invitation'] = 1;
          $arr_logid['invalid_action'] = 1;
          $arr_logid['invalid_args'] = 1;
+         $arr_logid['invalid_method'] = 1;
          $arr_logid['invalid_filter'] = 1;
          $arr_logid['ip_blocked_guest_login'] = 1;
          $arr_logid['ip_blocked_register'] = 1;
@@ -412,6 +413,9 @@ class ErrorCode
          $arr['tournament_edit_not_allowed'] =
             T_("Sorry, you are not allowed to add or edit this tournament.");
 
+         $arr['tournament_create_error'] =
+            T_("Sorry, some errors occured on tournament creation.");
+
          $arr['tournament_director_edit_not_allowed'] =
             T_("Sorry, you are not allowed to add, edit or delete a tournament director for this tournament.");
 
@@ -432,6 +436,9 @@ class ErrorCode
 
          $arr['invalid_args'] =
             T_("Sorry, invalid arguments used.");
+
+         $arr['invalid_method'] =
+            T_("Sorry, there's a problem with a class-method.");
 
          $arr['constraint_votes_delete_feature'] =
             T_("Sorry, feature can't be deleted because of existing votes for feature.");
