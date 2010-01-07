@@ -61,8 +61,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_properties.edit_tournament($tid,$my_id)");
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
-   $no_tprops = is_null($tprops);
-   if( $no_tprops )
+   if( is_null($tprops) )
       $tprops = new TournamentProperties( $tid );
 
    // init
@@ -70,7 +69,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $rating_array = getRatingArray();
 
    // check + parse edit-form
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $tprops, $no_tprops );
+   list( $vars, $edits, $errorlist ) = parse_edit_form( $tprops );
 
    // save tournament-properties-object with values from edit-form
    if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && is_null($errorlist) )
@@ -101,10 +100,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT',        '<span class="ErrorMsg">'
-                  . T_('There are some errors, so Tournament-properties can\'t be saved:') . "<br>\n"
-                  . '* ' . implode(",<br>\n* ", $errorlist)
-                  . '</span>' ));
+            'TEXT', TournamentUtils::buildErrorListString(
+                       T_('There are some errors, so Tournament-properties can\'t be saved'),
+                       $errorlist ) ));
    }
 
    $reg_end_time = trim(get_request_arg('reg_end_time'));
@@ -189,7 +187,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
  * \brief Parses and checks input, returns error-list or NULL if no error.
  * \return ( vars-hash, edits-arr, errorlist|null )
  */
-function parse_edit_form( &$tpr, $not_saved )
+function parse_edit_form( &$tpr )
 {
    $edits = array();
    $errors = array();
@@ -289,5 +287,6 @@ function parse_edit_form( &$tpr, $not_saved )
    }
 
    return array( $vars, array_unique($edits), ( count($errors) ? $errors : NULL ) );
-}
+}//parse_edit_form
+
 ?>

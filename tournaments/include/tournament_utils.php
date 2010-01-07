@@ -109,6 +109,14 @@ class TournamentUtils
       return $arr_map[$wizard_type];
    }
 
+   function buildErrorListString( $errmsg, $errors )
+   {
+      return ( count($errors) )
+         ? '<span class="ErrorMsg">' . ( $errmsg ? "$errmsg:" : '')
+               . "<br>\n* " . implode(",<br>\n* ", $errors) . '</span>'
+         : '';
+   }
+
 } // end of 'TournamentUtils'
 
 ?>

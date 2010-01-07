@@ -106,12 +106,6 @@ class TournamentDirector
          "SELECT 1 FROM TournamentDirector WHERE tid='$tid' AND uid='$uid' LIMIT 1" );
    }
 
-   function delete_tournament_director( $tid, $uid ) //TODO# used?
-   {
-      $t_dir = new TournmentDirector( $tid, $uid );
-      return $t_dir->delete( "TournamentDirector::delete_tournament_director(%s)" );
-   }
-
    /*! \brief Returns db-fields to be used for query of TournamentDirector-object. */
    function build_query_sql( $tid )
    {
@@ -180,6 +174,36 @@ class TournamentDirector
       mysql_free_result($result);
 
       return $iterator;
+   }
+
+   /*!
+    * \brief Identify user from given user-info (uid or handle).
+    * \return row-array with ID/Name/Handle/Rating/X_Lastaccess; null if nothing found
+    */
+   function load_user_row( $uid, $uhandle )
+   {
+      $player_query = 'SELECT ID, Name, Handle, Rating2, '
+            . 'UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players WHERE ';
+
+      if( $uid )
+      {
+         // load user by ID
+         $row = mysql_single_fetch( "TournamentDirector.load_user_row.find_user.id($uid)",
+            $player_query . "ID=$uid LIMIT 1" );
+         if( $row )
+            return $row;
+      }
+
+      if( $uhandle != '' )
+      {
+         // load user by userid
+         $row = mysql_single_fetch( "edit_director.find_user.handle($uid,$uhandle)",
+            $player_query . "Handle='" . mysql_addslashes($uhandle) . "' LIMIT 1");
+         if( $row )
+            return $row;
+      }
+
+      return null;
    }
 
 } // end of 'TournamentDirector'
