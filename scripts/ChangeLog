@@ -24,6 +24,83 @@ ChangeLog
 
 2010-01-06 juga
 
+   * tournaments/edit_director.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/edit_round.php,
+     tournaments/edit_rules.php, tournaments/edit_tournament.php,
+     tournaments/list_directors.php, tournaments/manage_tournament.php,
+     tournaments/register.php, tournaments/view_tournament.php,
+     forum/admin.php, forum/index.php, scripts/index.php, admin.php,
+     add_to_waitingroom.php, admin_faq.php, docs.php, donation.php,
+     donation_success.php, gameinfo.php, goban_editor.php, introduction.php,
+     links.php, news.php, people.php, policy.php, show_games.php, site_map.php,
+     snapshot.php, status.php, translate.php, userinfo.php:
+   - since PHP5 global-vars need explicit "global"-directive: globalize $ThePage
+
+   * tournaments/include/tournament.php (class Tournament, ~.setWizardType, ~.insert,
+       ~.update, ~.delete, ~.fillEntityData, ~.build_query_sql, ~.allow_create),
+     tournaments/include/tournament_factory.php (class TournamentFactory.getTournament),
+     tournaments/include/tournament_globals.php,
+     tournaments/include/tournament_template.php (class TournamentTemplate, ~.to_string,
+       ~.create_error, ~.createTournament),
+     tournaments/include/tournament_utils.php (TournamentUtils.getWizardTournamentType),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament, ~.createTournament),
+     tournaments/include/types/index.php, tournaments/list_tournaments.php,
+     tournaments/wizard.php, include/error_codes.php (ErrorCodes.init),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/update_translation_pages.php, NEWS:
+   - added tournament-wizard to create new tournament
+     - added DRAGON ladder tournament without restrictions
+     - added Tournament.WizardType, influencing existing Tournament.Type
+     - allowed potentially all users to create new tournaments with wizard
+     - added error-codes: invalid_method, tournament_create_error
+     - refactored/added insert/update/delete using convenience-methods
+       of Entity/EntityData-classes,
+     - moved tournament constants into tournament_globals.php
+     - added directory to scan for translations: tournaments/include/types/
+-----------
+-- create official "DGS-ladder" for tournament-wizard
+ALTER TABLE Tournament
+   ADD WizardType tinyint NOT NULL AFTER Type,
+   CHANGE Type Type enum('LADDER','ROUNDROBIN') NOT NULL ;
+-----------
+
+   * tournaments/include/tournament_director.php (class TournamentDirector,
+       ~.isTournamentDirector, ~.delete_tournament_director),
+     tournaments/include/tournament_participant.php (class TournamentParticipant,
+       ~.delete_tournament_participant),
+     tournaments/include/tournament_properties.php (class TournamentProperties,
+       ~.isTournamentProperties, ~.delete_tournament_properties),
+     tournaments/include/tournament_round.php (class TournamentRound,
+       ~.isTournamentRound, ~.delete_tournament_round),
+     tournaments/include/tournament_rules.php (class TournamentRules,
+       ~.delete_tournament_rules):
+   - refactored class using Entity/EntityData-classes to access db-table,
+     - adjusted/added methods: persist, insert, update, delete,
+       checkData, fillEntityData, build_query_sql, to_string
+
+   * include/db_classes.php (EntityData.get_pkey_string, ~.build_sql_insert,
+       ~.build_sql_update, ~.build_sql_delete, ~.insert, ~.update, ~.delete),
+     scripts/tests/EntityDataTest.php:
+   - use FTYPE_INT also for float-values
+   - don't include auto-increment key for inserting entity-data
+   - change default-LIMIT for update + delete: none(=0) -> 1
+   - added convenience-functions with db-writings for operations
+
+   * tournaments/list_participants.php:
+   - added tournament-manager-link to bottom-menu-links
+
+   * tournaments/list_participants.php, tournaments/list_tournaments.php,
+     opponents.php:
+   - since PHP5 global-vars need explicit "global"-directive,
+     so use consts or statics if possible, otherwise declare as global
+
+   * phorum/list.php, phorum/read.php:
+   - removed unnecessary change-dir
+
+   * scripts/tests/AllTests.php, scripts/tests/UnitTestHelper.php,
+     scripts/tests/run_tests.php:
+   - added copyright
+
    * tournaments/include/tournament.php (Tournament.insert, ~.update, ~.fillEntityData, ~.build_query_sql):
    - replaced db-stuff using Entity/EntityData-classes
 
