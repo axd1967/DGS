@@ -61,7 +61,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if( !$tourney->allow_edit_tournaments($my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
 
-   //TODO(later) load and edit list of set of rules
    $trule = TournamentRules::load_tournament_rule( $tid );
    if( is_null($trule) )
       $trule = new TournamentRules( 0, $tid );
@@ -72,7 +71,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    // save tournament-rules-object with values from edit-form
    if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && is_null($errorlist) )
    {
-      $trule->persist(); // insert or update
+      $trule->persist();
       jump_to("tournaments/edit_rules.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament rules saved!')) );
    }
@@ -89,23 +88,31 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        anchor( "view_tournament.php?tid=$tid", $tid ),
          'TEXT',        SMALL_SPACING . '[' . make_html_safe( $tourney->Title, true ) . ']', ));
-   if( $trule->ID )
-      $trform->add_row( array(
-            'DESCRIPTION', T_('Rule ID'),
-            'TEXT',        $trule->ID, ));
    if( $trule->Lastchanged )
       $trform->add_row( array(
             'DESCRIPTION', T_('Last changed date'),
             'TEXT',        date(DATEFMT_TOURNAMENT, $trule->Lastchanged) ));
+   $trform->add_row( array( 'HR' ));
+
+   if( !is_null($errorlist) )
+   {
+      $trform->add_row( array(
+            'DESCRIPTION', T_('Error'),
+            'TEXT', TournamentUtils::buildErrorListString(
+                       T_('There are some errors, so Tournament-rules can\'t be saved'),
+                       $errorlist ) ));
+   }
 
    game_settings_form( $trform, GSET_TOURNAMENT, true/*$iamrated*/, 'redraw', $vars );
-   //TODO(later) T-rule setup-all-manual later
-   //TODO(later) add settings to forbid vacation
 
    $trform->add_empty_row();
    $trform->add_row( array(
          'DESCRIPTION', T_('Notes'),
          'TEXTAREA',    '_tr_notes', 70, 6, $vars['_tr_notes'] ));
+
+   $trform->add_row( array(
+         'DESCRIPTION', T_('Unsaved edits'),
+         'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits)), ));
 
    $trform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
@@ -148,14 +155,11 @@ function parse_edit_form( &$trule )
    $errors = array();
    $is_posted = ( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] );
 
-   //TODO fix edits on time-settings: together with defaults doesn't work right
-
    // read from DB or set defaults
    $vars = array();
    $trule->convertTournamentRules_to_EditForm( $vars );
 
-   // copy to determine edit-changes
-   $old_vals = array() + $vars;
+   $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
@@ -169,9 +173,52 @@ function parse_edit_form( &$trule )
    // parse URL-vars
    if( $is_posted )
    {
-      $trule->convertEditForm_to_TournamentRules( $vars );
+      $trule->convertEditForm_to_TournamentRules( $vars, $errors );
+
+      // determine edits
+      $tr_cat_htype = get_category_handicaptype(strtolower($trule->Handicaptype));
+      if( $old_vals['size'] != $trule->Size ) $edits[] = T_('Board size#edits');
+      if( $old_vals['cat_htype'] != $tr_cat_htype )
+         $edits[] = T_('Handicap type#edits');
+      elseif( $tr_cat_htype == CAT_HTYPE_MANUAL )
+      {
+         if( $old_vals['handicap_m'] != $trule->Handicap ) $edits[] = T_('Handicap#edits');
+         if( $old_vals['komi_m'] != $trule->Komi ) $edits[] = T_('Komi#edits');
+      }
+
+      if( ($old_vals['adj_komi'] != $trule->AdjKomi) || ( $old_vals['jigo_mode'] != $trule->JigoMode ) )
+         $edits[] = T_('Adjust Komi#edits');
+      if( ($old_vals['adj_handicap'] != $trule->AdjHandicap)
+            || ( $old_vals['min_handicap'] != $trule->MinHandicap )
+            || ( $old_vals['max_handicap'] != $trule->MaxHandicap ) )
+         $edits[] = T_('Adjust Handicap#edits');
+      if( getBool($old_vals['stdhandicap']) != getBool($trule->StdHandicap) )
+         $edits[] = T_('Standard placement#edits');
+
+      list($old_hours, $old_byohours, $old_byoperiods) =
+         TournamentRules::convertFormTimeSettings( $old_vals );
+      if( ($old_vals['byoyomitype'] != $trule->Byotype)
+            || ($old_hours != $trule->Maintime)
+            || ($old_byohours != $trule->Byotime)
+            || ($trule->Byotype == BYOTYPE_FISCHER && $old_byoperiods != $trule->Byoperiods) )
+         $edits[] = T_('Time settings#edits');
+
+      if( getBool($old_vals['weekendclock']) != getBool($trule->WeekendClock) )
+         $edits[] = T_('Weekend clock#edits');
+      if( getBool($old_vals['rated']) != getBool($trule->Rated) ) $edits[] = T_('Rated#edits');
+      if( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes#edits');
    }
 
    return array( $vars, array_unique($edits), ( count($errors) ? $errors : NULL ) );
+}//parse_edit_form
+
+// return true|false from val (Y|N|bool|int|str|null)
+function getBool( $val )
+{
+   if( is_string($val) ) return ( $val == 'Y' );
+   if( is_numeric($val) ) return ( $val != 0 );
+   if( is_null($val) ) return false;
+   return (bool)$val;
 }
+
 ?>

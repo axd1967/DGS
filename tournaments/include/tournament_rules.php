@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once( 'include/db_classes.php' );
 require_once( 'include/game_functions.php' );
+require_once( 'include/error_codes.php' );
 
  /*!
   * \file tournament_rules.php
@@ -219,7 +220,7 @@ class TournamentRules
 
    /*!
     * \brief Converts this TournamentRules-object to hashmap to be used as
-    *        form-value-hash for tournaments/edit_rule.php.
+    *        form-value-hash for tournaments/edit_rules.php.
     */
    function convertTournamentRules_to_EditForm( &$vars )
    {
@@ -270,7 +271,7 @@ class TournamentRules
    }
 
    /*! \brief Converts and sets (parsed) form-values in this TournamentRules-object. */
-   function convertEditForm_to_TournamentRules( $vars )
+   function convertEditForm_to_TournamentRules( $vars, &$errors )
    {
       // NOTE: keep "sync'ed" with add_to_waitingroom.php
 
@@ -304,10 +305,10 @@ class TournamentRules
       }
 
       if( !( $komi >= -MAX_KOMI_RANGE && $komi <= MAX_KOMI_RANGE ) )
-         error('komi_range', "TournamentRules.convertEditForm_to_TournamentRules.check.komi($komi)");
+         $errors[] = ErrorCode::get_error_text('komi_range');
 
       if( !( $handicap >= 0 && $handicap <= MAX_HANDICAP ) )
-         error('handicap_range', "TournamentRules.convertEditForm_to_TournamentRules.check.handicap($handicap)");
+         $errors[] = ErrorCode::get_error_text('handicap_range');
 
       // komi adjustment
       $adj_komi = (float)@$vars['adj_komi'];
@@ -317,9 +318,8 @@ class TournamentRules
          $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
 
       $jigo_mode = (string)@$vars['jigo_mode'];
-      if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO
-            && $jigo_mode != JIGOMODE_NO_JIGO )
-         error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.check.jigo_mode($jigo_mode)");
+      if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO && $jigo_mode != JIGOMODE_NO_JIGO )
+         $jigo_mode = JIGOMODE_KEEP_KOMI;
 
       // handicap adjustment
       $adj_handicap = (int)@$vars['adj_handicap'];
@@ -339,29 +339,11 @@ class TournamentRules
       $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$vars['size']));
 
       // time settings
+      list( $hours, $byohours, $byoperiods ) = TournamentRules::convertFormTimeSettings( $vars );
       $byoyomitype = @$vars['byoyomitype'];
-      $timevalue = @$vars['timevalue'];
-      $timeunit = @$vars['timeunit'];
-
-      $byotimevalue_jap = @$vars['byotimevalue_jap'];
-      $timeunit_jap = @$vars['timeunit_jap'];
-      $byoperiods_jap = @$vars['byoperiods_jap'];
-
-      $byotimevalue_can = @$vars['byotimevalue_can'];
-      $timeunit_can = @$vars['timeunit_can'];
-      $byoperiods_can = @$vars['byoperiods_can'];
-
-      $byotimevalue_fis = @$vars['byotimevalue_fis'];
-      $timeunit_fis = @$vars['timeunit_fis'];
-
-      list($hours, $byohours, $byoperiods) =
-         interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
-                                    $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
-                                    $byotimevalue_can, $timeunit_can, $byoperiods_can,
-                                    $byotimevalue_fis, $timeunit_fis);
 
       if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
-         error('time_limit_too_small');
+         $errors[] = ErrorCode::get_error_text('time_limit_too_small');
 
 
       $rated = ( @$vars['rated'] == 'Y' );
@@ -394,6 +376,32 @@ class TournamentRules
       $this->Rated = (bool)$rated;
    } //convertTournamentRules_to_EditForm
 
+   // returns array [ $main_hours, $byohours, $byoperiods ]
+   function convertFormTimeSettings( $map )
+   {
+      // time settings
+      $byoyomitype = @$map['byoyomitype'];
+      $timevalue = @$map['timevalue'];
+      $timeunit = @$map['timeunit'];
+
+      $byotimevalue_jap = @$map['byotimevalue_jap'];
+      $timeunit_jap = @$map['timeunit_jap'];
+      $byoperiods_jap = @$map['byoperiods_jap'];
+
+      $byotimevalue_can = @$map['byotimevalue_can'];
+      $timeunit_can = @$map['timeunit_can'];
+      $byoperiods_can = @$map['byoperiods_can'];
+
+      $byotimevalue_fis = @$map['byotimevalue_fis'];
+      $timeunit_fis = @$map['timeunit_fis'];
+
+      return
+         interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
+                                    $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+                                    $byotimevalue_can, $timeunit_can, $byoperiods_can,
+                                    $byotimevalue_fis, $timeunit_fis);
+   }
+
    /*! \brief Returns true, if handicap needs to be calculated for this ruleset. */
    function needsCalculatedHandicap()
    {
@@ -413,7 +421,7 @@ class TournamentRules
    // ------------ static functions ----------------------------
 
    /*! \brief Deletes TournamentRules-entry for given id. */
-   function delete_tournament_rules( $id )
+   function delete_tournament_rules( $id ) //TODO# needed ?
    {
       $t_rules = new TournamentRules( $id );
       return $t_rules->delete( "TournamentRules::delete_tournament_rules(%s)" );
