@@ -22,6 +22,35 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-07 juga
+
+   * tournaments/edit_director.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/edit_round.php,
+     tournaments/edit_rules.php, tournaments/list_participants.php,
+     tournaments/list_tournaments.php:
+   - minor GUI-layout/cleanup/TODOs
+
+   * tournaments/include/tournament_rules.php (TournamentRules.convertFormTimeSettings,
+       ~.convertEditForm_to_TournamentRules),
+     tournaments/edit_rules.php (getBool):
+   - enhanced rules-edit with parse-edit-form (show edits, better error-parsing)
+   - removed RuleID (Tournament <-> Rules is 1:1 relation)
+
+   * include/error_codes.php (ErrorCode.init):
+   - added missing error-code: handicap_range
+
+   * tournaments/include/tournament_director.php (TournamentDirector.load_user_row),
+     tournaments/include/tournament_utils.php (TournamentUtils.buildErrorListString),
+     tournaments/edit_director.php (parse_edit_form),
+     tournaments/edit_properties.php (parse_edit_form):
+   - enhanced director-edit with parse-edit-form (show edits, better error-parsing),
+   - replaced deleting TD with TournamentDirector::delete_tournament_director()
+   - moved loading TD-user into TournamentDirector::load_user_row()
+   - moved formatting of error-list into TournamentUtils::buildErrorListString()
+
+   * links.php:
+   - added link to another go-introduction mentioned by DGS-user
+
 2010-01-06 juga
 
    * tournaments/edit_director.php, tournaments/edit_participant.php,
