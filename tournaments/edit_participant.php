@@ -219,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    // persist TP in database
    if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
    {
-      $tp->persist(); // insert or update
+      $tp->persist();
       jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid={$tp->uid}".URI_AMP."sysmsg="
             . urlencode(T_('Registration saved!')) );
    }
@@ -269,10 +269,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT',        '<span class="ErrorMsg">'
-                  . T_('There are some errors:') . "<br>\n"
-                  . '* ' . implode(",<br>\n* ", $errors)
-                  . '</span>' ));
+            'TEXT', TournamentUtils::buildErrorListString( T_('There are some errors'), $errors ) ));
+      $tpform->add_empty_row();
    }
 
    if( !is_null($user) )
@@ -378,6 +376,13 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
+
+   $sectmenu = array();
+   $sectmenu[T_('Show users')] = "users.php?tid=$tid";
+   $sectmenu[T_('Show my opponents')] = "opponents.php?tid=$tid";
+   $sectmenu[T_('Show my contacts')] = "list_contacts.php?tid=$tid";
+   make_menu( $sectmenu, false);
+   echo "<p></p>\n";
 
    $tpform->echo_string();
 
