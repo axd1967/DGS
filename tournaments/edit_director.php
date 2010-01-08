@@ -244,8 +244,7 @@ function parse_edit_form( &$tdir )
       'comment'   => $tdir->Comment,
    );
 
-   // copy to determine edit-changes
-   $old_vals = array_merge( array(), $vars );
+   $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );

@@ -198,7 +198,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    }
 
    // print static-filter & table
-   echo "\n";
    $ttable->echo_table();
 
 

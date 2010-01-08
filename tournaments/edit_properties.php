@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    // save tournament-properties-object with values from edit-form
    if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && is_null($errorlist) )
    {
-      $tprops->persist(); // insert or update
+      $tprops->persist();
       jump_to("tournaments/edit_properties.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Properties saved!')) );
    }
@@ -95,6 +95,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed date'),
             'TEXT',        date(DATEFMT_TOURNAMENT, $tprops->Lastchanged) ));
+   $tform->add_row( array( 'HR' ));
 
    if( !is_null($errorlist) )
    {
@@ -103,6 +104,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
             'TEXT', TournamentUtils::buildErrorListString(
                        T_('There are some errors, so Tournament-properties can\'t be saved'),
                        $errorlist ) ));
+      $tform->add_empty_row();
    }
 
    $reg_end_time = trim(get_request_arg('reg_end_time'));
@@ -206,8 +208,7 @@ function parse_edit_form( &$tpr )
       'notes'              => $tpr->Notes,
    );
 
-   // copy to determine edit-changes
-   $old_vals = array_merge( array(), $vars );
+   $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );

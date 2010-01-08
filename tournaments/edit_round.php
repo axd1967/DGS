@@ -119,8 +119,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Count'),
          'TEXT',        $tround->PoolCount, ));
-   $trform->add_empty_row();
+   $trform->add_row( array( 'HR' ));
 
+   $trform->add_empty_row();
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Size'),
          'TEXT',        T_('min.#TRD_poolsize') . MINI_SPACING,

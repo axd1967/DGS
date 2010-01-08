@@ -203,7 +203,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    }
 
    // print table
-   echo $tptable->make_table();
+   $tptable->echo_table();
 
 
    $menu_array = array();

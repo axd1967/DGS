@@ -147,6 +147,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $custom_rating_str = echo_rating( $custom_rating, true );
    }
 
+   //TODO check that rated-tourney can only accept rated users (or with rating added afterwards)
+
    $old_status = $tp->Status;
    $old_flags = $tp->Flags;
    $old_rating = $tp->Rating;
