@@ -46,6 +46,7 @@ require_once( 'include/classlib_userpicture.php' );
     * uid = player to show opponents for, if empty, use myself
     * opp = if unset, show user-table of players opponents to select for stats
     *       if set, show game-stats for player $uid and opponent $opp
+    * tid = tournament-ID for convenience tournament-invitations (optional)
     */
 
    // check vars
@@ -61,6 +62,8 @@ require_once( 'include/classlib_userpicture.php' );
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
    }
+   $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
+   if( $tid < 0 ) $tid = 0;
 
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_OPPONENTS );
 
@@ -176,6 +179,7 @@ require_once( 'include/classlib_userpicture.php' );
    $page_vars->add_entry( 'uid', $uid );
    if( $opp )
       $page_vars->add_entry( 'opp', $opp );
+   if( $tid ) $page_vars->add_entry( 'tid', $tid );
    $usform->attach_table( $page_vars ); // for page-vars as hiddens in form
 
    // attach external URL-parameters from static filter and page-vars for table-links
@@ -186,7 +190,8 @@ require_once( 'include/classlib_userpicture.php' );
    // table: use same table-IDs as in users.php(!)
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Activity; also see named-filters
-   $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
+   $header_1 = ($tid) ? T_('Invite#header') : T_('ID#header');
+   $utable->add_tablehead( 1, $header_1, 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(21, new TableHead( T_('Opponent games#header'),
       'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
@@ -392,8 +397,12 @@ require_once( 'include/classlib_userpicture.php' );
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[ 1] )
-         $urow_strings[ 1] = button_TD_anchor(
-            "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID", $ID );
+      {
+         $ulink = ( $tid )
+            ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$ID"
+            : "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID";
+         $urow_strings[1] = button_TD_anchor( $ulink, $ID );
+      }
       if( $utable->Is_Column_Displayed[ 2] )
          $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
@@ -482,6 +491,8 @@ require_once( 'include/classlib_userpicture.php' );
    // end of table
 
    $menu_array = array();
+   if( $tid )
+      $menu_array[ T_('Show users') ] = "users.php?tid=$tid";
    if( $opp )
       $menu_array[ T_('Show opponents') ] = "{$page}{$filterURL}uid=$uid";
 

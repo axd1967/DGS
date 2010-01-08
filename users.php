@@ -48,6 +48,9 @@ require_once( 'include/classlib_userpicture.php' );
    // observers of game
    $observe_gid = (int)get_request_arg('observe');
 
+   $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
+   if( $tid < 0 ) $tid = 0;
+
    // config for usertype-filter
    $query_usertype = 'Type>0 AND (Type & %d)';
    $usertypes_array = array(
@@ -107,10 +110,11 @@ require_once( 'include/classlib_userpicture.php' );
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
-   if( $observe_gid )
+   if( $observe_gid || $tid )
    {
       $rp = new RequestParameters();
-      $rp->add_entry( 'observe', $observe_gid );
+      if( $observe_gid ) $rp->add_entry( 'observe', $observe_gid );
+      if( $tid ) $rp->add_entry( 'tid', $tid );
       $utable->add_external_parameters( $rp, true );
    }
 
@@ -118,7 +122,8 @@ require_once( 'include/classlib_userpicture.php' );
    // table: use same table-IDs as in opponents.php(!)
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Activity; also see named-filters
-   $utable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID+');
+   $header_1 = ($tid) ? T_('Invite#header') : T_('ID#header');
+   $utable->add_tablehead( 1, $header_1, 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    if( USERPIC_FOLDER != '' )
       $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
@@ -195,7 +200,12 @@ require_once( 'include/classlib_userpicture.php' );
 
       $urow_strings = array();
       if( $utable->Is_Column_Displayed[1] )
-         $urow_strings[1] = button_TD_anchor( "userinfo.php?uid=$ID", $ID );
+      {
+         $ulink = ( $tid )
+            ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$ID"
+            : "userinfo.php?uid=$ID";
+         $urow_strings[1] = button_TD_anchor( $ulink, $ID );
+      }
       if( $utable->Is_Column_Displayed[2] )
          $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
@@ -259,7 +269,7 @@ require_once( 'include/classlib_userpicture.php' );
    // end of table
 
    $menu_array = array(
-      T_('Show my opponents') => "opponents.php" );
+      T_('Show my opponents') => "opponents.php?tid=$tid" );
 
    end_page(@$menu_array);
 }

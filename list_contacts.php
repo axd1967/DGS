@@ -45,6 +45,9 @@ require_once( 'include/classlib_userpicture.php' );
 
    $page = "list_contacts.php?";
 
+   $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
+   if( $tid < 0 ) $tid = 0;
+
    $arr_chk_sysflags = array();
    foreach( Contact::getContactSystemFlags() as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
    {
@@ -130,8 +133,14 @@ require_once( 'include/classlib_userpicture.php' );
    $cform->attach_table($scfilter); // for hiddens
 
    // attach external URL-parameters to table (for links)
-   $extparam = $scfilter->get_req_params();
-   $ctable->add_external_parameters( $extparam, false );
+   $ctable->add_external_parameters( $scfilter->get_req_params(), false );
+   if( $tid )
+   {
+      $page_vars = new RequestParameters();
+      $page_vars->add_entry( 'tid', $tid );
+      $cform->attach_table( $page_vars ); // for page-vars as hiddens in form
+      $ctable->add_external_parameters( $page_vars, true ); // add as hiddens
+   }
 
    $cform->set_area(1);
    $cform->add_row( array(
@@ -195,10 +204,14 @@ require_once( 'include/classlib_userpicture.php' );
 
       if( $ctable->Is_Column_Displayed[ 9] )
       {
+         $uinvlink = ( $tid )
+            ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$cid"
+            : "message.php?mode=Invite".URI_AMP."uid=$cid";
+
          $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
                image( 'images/send.gif', 'M'),
                T_('Send a message'), 'class=ButIcon');
-         $links .= anchor( "message.php?mode=Invite".URI_AMP."uid=$cid",
+         $links .= anchor( $uinvlink,
                image( 'images/invite.gif', 'I'),
                T_('Invite'), 'class=ButIcon');
          $links .= anchor( "edit_contact.php?cid=$cid",
