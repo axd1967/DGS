@@ -793,7 +793,7 @@ function make_menu($menu_array, $with_accesskeys=true)
       if( is_a($link, 'Form') )
          echo $link->echo_string();
       else
-         echo make_menu_link( $text, $link, $i % 10 );
+         echo make_menu_link( $text, $link, ($with_accesskeys ? $i % 10 : '') );
       echo '</td>';
 
       $cumwidth += $width;
