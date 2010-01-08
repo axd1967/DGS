@@ -17,6 +17,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
       * Added Tournament Manager
       * Added Tournament Registration: Apply, Register, Invite
+         * Added Tournament invitations for users, opponents and contacts page
       * Added Properties editor for registration restrictions on tournament and players
       * Added Rules editor for tournament-games-setting
 
