@@ -116,9 +116,9 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
    $page = "edit_director.php";
    if( @$_REQUEST['td_delete'] )
-      $title = T_('Tournament director removal for [%s]');
+      $title = T_('Tournament Director Removal for [%s]');
    else
-      $title = T_('Tournament director edit for [%s]');
+      $title = T_('Tournament Director Edit for [%s]');
    $title = sprintf( $title, $tourney->Title );
 
 

@@ -102,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  "</li>\n",
          '<li>', make_menu_link( T_('Show tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
                  "</li>\n",
-         '<li>', make_menu_link( T_('Edit properties'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
+         '<li>', make_menu_link( T_('Edit registration properties'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
 //TODO TODO add "(need creation)" if needed to create/save
                  subList( array( T_('Change properties for registration ...'),
                                  T_('tournament-related: min./max. participants, rating use mode'),

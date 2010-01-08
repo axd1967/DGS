@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    }
 
    $page = "edit_properties.php";
-   $title = T_('Tournament Properties Editor');
+   $title = T_('Tournament Registration-Properties Editor');
 
 
    // ---------- Tournament-Properties EDIT form --------------------
