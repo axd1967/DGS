@@ -162,6 +162,9 @@ class ErrorCode
          $arr['komi_range'] =
             T_("The komi is out of range, please choose a more reasonable value.");
 
+         $arr['handicap_range'] =
+            T_("The handicap is out of range, please choose a more reasonable value.");
+
          $arr['time_limit_too_small'] =
             T_("The time limit is too small, please choose at least one hour.");
 
