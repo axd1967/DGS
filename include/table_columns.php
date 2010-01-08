@@ -329,7 +329,9 @@ class Table
       if( $this->Head_closed )
          error('assert', "Table.add_tablehead.closed($nr)");
       if( $nr < 0 || ( $nr == 0 && !($this->Mode & TABLE_ROW_NUM) ) )
-         error('assert', "Table.add_tablehead.bad_col_nr($nr)");
+         error('invalid_args', "Table.add_tablehead.bad_col_nr($nr)");
+      if( isset($this->Tableheads[$nr]) )
+         error('invalid_args', "Table.add_tablehead.col_exists($nr)");
       if( !is_array($attbs) )
          $attbs = ( is_string($attbs) && !empty($attbs) ) ? array( 'class' => $attbs) : null;
       if( !isset($mode) )
