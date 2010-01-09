@@ -551,5 +551,11 @@ class TournamentRules
       return $ARR_GLOBALS_TOURNAMENT_RULES[$key][$type];
    }
 
+   function get_edit_tournament_status()
+   {
+      static $statuslist = array( TOURNEY_STATUS_NEW );
+      return $statuslist;
+   }
+
 } // end of 'TournamentRules'
 ?>
