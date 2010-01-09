@@ -253,27 +253,12 @@ class TournamentRound
       return $ARR_GLOBALS_TOURNAMENT_ROUND[$key][$status];
    }
 
-   /*! \brief Returns array with notes about tournament-round. */
-   function build_notes( $intro=true )
+   function get_edit_tournament_status()
    {
-      $notes = array();
-      //$notes[] = null; // empty line
-
-      $notes[] = sprintf(
-            T_('Tournament round status:<ul>'
-               . '<li>%1$s = start new tournament round'."\n" // init
-               . '<li>%2$s = new pools for tournament round created'."\n" // pool-init
-               . '<li>%3$s = participants assigned to pools'."\n" // pair-init
-               . '<li>%4$s = tournament games prepared, ready to start games'."\n" // game-init
-               . '<li>%5$s = pairing for tournament round finished'."\n" // done
-               . '</ul>'),
-            TournamentRound::getStatusText(TROUND_STATUS_INIT),
-            TournamentRound::getStatusText(TROUND_STATUS_POOLINIT),
-            TournamentRound::getStatusText(TROUND_STATUS_PAIRINIT),
-            TournamentRound::getStatusText(TROUND_STATUS_GAMEINIT),
-            TournamentRound::getStatusText(TROUND_STATUS_DONE)
-         );
-      return $notes;
+      static $statuslist = array(
+         TOURNEY_STATUS_NEW, TOURNEY_STATUS_PAIR
+      );
+      return $statuslist;
    }
 
 } // end of 'TournamentRound'
