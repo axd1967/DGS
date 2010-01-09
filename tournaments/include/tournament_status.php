@@ -168,7 +168,7 @@ class TournamentStatus
    }
 
    /*!
-    * \brief Checks if current tourname-status allows editing.
+    * \brief Checks if current tournament-status allows editing.
     * \param $arr_status status-array
     * \return error-list; empty if no error
     */
