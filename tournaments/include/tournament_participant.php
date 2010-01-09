@@ -433,47 +433,6 @@ class TournamentParticipant
       return implode(', ', $out);
    }
 
-   /*! \brief Returns array with notes about registering users. */
-   function build_notes( $deny_reason=null, $intro=true )
-   {
-      $notes = array();
-      if( !is_null($deny_reason) )
-      {
-         $notes[] = sprintf( '<color darkred><b>%s:</b></color> %s',
-               T_('Registration restricted'), $deny_reason );
-         $notes[] = null; // empty line
-      }
-
-      if( $intro )
-      {
-         $notes[] = T_('Questions and support requests regarding this tournament '
-                     . 'can be directed to the tournament directors.');
-         $notes[] = null; // empty line
-
-         $notes[] = T_('You will need a custom rating when you don\'t have a DGS-rating yet or '
-               .  "if you don't want to start with your DGS-rating.");
-         $notes[] = T_('If you enter a non-default starting round or a custom rating, '
-               . "your application needs to be verified by a tournament director.\n"
-               . 'Therefore please add your reasoning for the changes in the user-message '
-               . 'box to accellerate the registration process.');
-         $notes[] = null; // empty line
-      }
-
-      $notes[] = sprintf(
-            T_('Registration status:<ul>'
-               . '<li>%1$s = user is not registered for tournament'."\n" // unregistered
-               . '<li>%2$s = user-application needs verification by tournament director'."\n" // APPLY
-               . '<li>%3$s = user has been invited by tournament director'."\n" // INVITE
-               . '<li>%4$s = user has been successfully registered'."\n" // REGISTER
-               . '</ul>'),
-            NO_VALUE,
-            TournamentParticipant::getStatusText(TP_STATUS_APPLY, true),
-            TournamentParticipant::getStatusText(TP_STATUS_INVITE, true),
-            TournamentParticipant::getStatusText(TP_STATUS_REGISTER, true)
-         );
-      return $notes;
-   }
-
    /*! \brief Returns registration-link-text for given user. */
    function getLinkTextRegistration( $tourney, $uid, $reg_user_status=null )
    {
@@ -484,6 +443,14 @@ class TournamentParticipant
          return ($reg_user_status) ? T_('Show my registration') : '';
       else
          return ($reg_user_status) ? T_('Edit my registration') : T_('Registration');
+   }
+
+   function get_edit_tournament_status()
+   {
+      static $statuslist = array(
+         TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY
+      );
+      return $statuslist;
    }
 
 } // end of 'TournamentParticipant'
