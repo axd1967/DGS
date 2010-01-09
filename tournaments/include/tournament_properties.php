@@ -42,8 +42,7 @@ require_once( 'tournaments/include/tournament.php' );
 define('TPROP_RUMODE_COPY_CUSTOM',  'COPY_CUSTOM');
 define('TPROP_RUMODE_CURR_FIX',     'CURR_FIX');
 define('TPROP_RUMODE_COPY_FIX',     'COPY_FIX');
-define('TPROP_RUMODE_ENTER_FIX',    'ENTER_FIX');
-define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX|ENTER_FIX');
+define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
 
 // lazy-init in TournamentProperties::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
@@ -172,18 +171,18 @@ class TournamentProperties
     * \brief Checks potential registration by given user and returns non-null
     *        list of matching criteria, that disallow registration.
     * \param $tourney Tournament with set TP_Counts (loaded if not set)
-    * \param $user User-object or user-id
+    * \param $tp_has_rating = is_valid_rating(TournamentParticipant->Rating)
+    * \param $check_user User-object or user-id
     */
-   function checkUserRegistration( $tourney, $user )
+   function checkUserRegistration( $tourney, $tp_has_rating, $check_user )
    {
       global $NOW;
       $errors = array();
-      //TODO(later) non-strict -> apply to TD, add add-text-warning; workaround now: TP asks TD for invite
 
       // limit register end-time
       if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
          $errors[] = sprintf( T_('Registration phase ended on [%s].'),
-               TournamentUtils::formatDate( $this->RegisterEndTime ) );
+                              TournamentUtils::formatDate($this->RegisterEndTime) );
 
       // limit participants
       if( $this->MaxParticipants > 0 )
@@ -193,24 +192,26 @@ class TournamentProperties
 
          if( (int)@$tourney->TP_Counts[TPCOUNT_STATUS_ALL] >= $this->MaxParticipants )
             $errors[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
-               $this->MaxParticipants );
+                                 $this->MaxParticipants );
       }
 
       // ----- user-specific checks -----
 
+      $user = $this->_load_user($check_user);
+
       // use-rating-mode
       if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
-      {// need user-rating
-         $this->_load_user( $user );
-         if( !$user->hasRating() )
-            $errors[] = T_('User has no Dragon rating, which is needed for tournament rating mode:')
-               . "\n" . TournamentProperties::getRatingUseModeText( $this->RatingUseMode, false );
+      {// need user-rating or tournament-rating
+         //TODO BUG: CURR_FIX must NOT check tp_has_rating
+         if( !$user->hasRating() && !$tp_has_rating )
+            $errors[] = T_('User has no Dragon or tournament rating, which is needed for tournament rating mode:')
+               . "\n" . TournamentProperties::getRatingUseModeText($this->RatingUseMode, false);
       }
 
       // limit user-rating
       if( $this->UserRated )
       {
-         $this->_load_user( $user );
+         // user must have rating, because tournament-games are rated
          if( !$user->hasRating() )
             $errors[] = T_('User has no Dragon rating, which is required for this tournament.');
          elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
@@ -223,14 +224,12 @@ class TournamentProperties
       // limit games-number
       if( $this->UserMinGamesFinished > 0 )
       {
-         $this->_load_user( $user );
          if( $user->GamesFinished < $this->UserMinGamesFinished )
             $errors[] = sprintf( T_('User must have at least %s finished games, but has only %s.'),
                $this->UserMinGamesFinished, $user->GamesFinished );
       }
       if( $this->UserMinGamesRated > 0 )
       {
-         $this->_load_user( $user );
          if( $user->GamesRated < $this->UserMinGamesRated )
             $errors[] = sprintf( T_('User must have at least %s rated finished games, but has only %s.'),
                $this->UserMinGamesRated, $user->GamesRated );
@@ -239,15 +238,14 @@ class TournamentProperties
       return $errors;
    }// checkUser
 
-   /*! \brief (internally) loads User-object if user is only user-id. */
-   function _load_user( &$user )
+   /*! \brief (internally) loads User-object if user is only user-id and returns User-object. */
+   function _load_user( $check_user )
    {
-      if( !is_a($user, 'User') )
-      {
-         if( !is_numeric($user) )
-            error('invalid_args', "TournamentProperties._load_user($user)");
-         $user = User::load_user( (int)$user );
-      }
+      if( is_a($check_user, 'User') )
+         return $check_user;
+      if( !is_numeric($check_user) )
+         error('invalid_args', "TournamentProperties._load_user($check_user)");
+      return User::load_user( (int)$check_user );
    }
 
 
@@ -327,21 +325,19 @@ class TournamentProperties
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Copy Custom#TP_usemode');
          $arr[TPROP_RUMODE_COPY_FIX]    = T_('Copy Fix#TP_usemode');
          $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Fix#TP_usemode');
-         $arr[TPROP_RUMODE_ENTER_FIX]   = T_('Enter Fix#TP_usemode');
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key] = $arr;
 
          $arr = array();
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is copied on registration, but can be customized by user.');
          $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is copied on registration and can not be changed.');
-         $arr[TPROP_RUMODE_CURR_FIX]    = T_('Actual Dragon user rating will be used during whole tournament.');
-         $arr[TPROP_RUMODE_ENTER_FIX]   = T_('Tournament rating must be manually entered on registration.');
+         $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Dragon user rating will be used during whole tournament.');
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_LONG'] = $arr;
       }
 
+      if( !$short )
+         $key .= '_LONG';
       if( is_null($use_mode) )
          return $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key];
-
-      if( !$short ) $key .= '_LONG';
       if( !isset($ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key][$use_mode]) )
          error('invalid_args', "TournamentProperties.getRatingUseModeText($use_mode,$key)");
       return $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key][$use_mode];
