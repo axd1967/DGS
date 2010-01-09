@@ -57,8 +57,13 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       $type_filter_array[$text] = "T.Type='$type'";
 
    $status_filter_array = array( T_('All') => '' );
+   $idx = 1;
    foreach( Tournament::getStatusText() as $status => $text )
+   {
       $status_filter_array[$text] = "T.Status='$status'";
+      if( $status == TOURNEY_STATUS_ADMIN ) $idx_status_admin = $idx;
+      $idx++;
+   }
 
    $owner_filter_array = array(
          T_('All') => '',
@@ -94,6 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
                SQLP_WHERE, $where_scope ) ));
    $tsfilter->init();
    $has_uid = (bool)( $tsfilter->get_filter_value(1) );
+   $has_tdir = (bool)( $tsfilter->get_filter_value(2) );
 
    // table filters
    $tfilter->add_filter( 1, 'Numeric', 'T.ID', true);
@@ -137,7 +143,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $tqsql,
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );
-   if( !TournamentUtils::isAdmin() )
+   if( !TournamentUtils::isAdmin() && $idx_status_admin != (int)$tfilter->get_filter_value(4) )
       $iterator->addQuerySQLMerge(
          new QuerySQL( SQLP_WHERE, "T.Status<>'".TOURNEY_STATUS_ADMIN."'" ));
    $iterator = Tournament::load_tournaments( $iterator );
@@ -148,7 +154,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    if( $has_uid )
       $title = T_('My tournaments as participant');
-   elseif( $tsfilter->get_filter_value(2) )
+   elseif( $has_tdir )
       $title = T_('My tournaments as tournament director');
    else
       $title = T_('Tournaments');
@@ -165,7 +171,12 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       $row_str = array();
 
       if( $ttable->Is_Column_Displayed[ 1] )
-         $row_str[ 1] = button_TD_anchor( "view_tournament.php?tid=$ID", $ID );
+      {
+         $tlink = ( $has_tdir )
+            ? $base_path."tournaments/manage_tournament.php?tid=$ID"
+            : $base_path."tournaments/view_tournament.php?tid=$ID";
+         $row_str[ 1] = button_TD_anchor( $tlink, $ID );
+      }
       if( $ttable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = Tournament::getScopeText( $tourney->Scope );
       if( $ttable->Is_Column_Displayed[ 3] )
