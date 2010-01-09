@@ -180,10 +180,6 @@ class TournamentProperties
       $errors = array();
       //TODO(later) non-strict -> apply to TD, add add-text-warning; workaround now: TP asks TD for invite
 
-      // check T-status (must be REG)
-      if( $tourney->Status != TOURNEY_STATUS_REGISTER )
-         $errors[] = T_('Tournament is not in registration phase.');
-
       // limit register end-time
       if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
          $errors[] = sprintf( T_('Registration phase ended on [%s].'),
@@ -329,49 +325,32 @@ class TournamentProperties
       {
          $arr = array();
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Copy Custom#TP_usemode');
-         $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Fix#TP_usemode');
          $arr[TPROP_RUMODE_COPY_FIX]    = T_('Copy Fix#TP_usemode');
+         $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Fix#TP_usemode');
          $arr[TPROP_RUMODE_ENTER_FIX]   = T_('Enter Fix#TP_usemode');
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key] = $arr;
 
          $arr = array();
-         $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is used for registration, but can be changed afterwards.');
-         $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Dragon user rating will be used during whole tournament.');
-         $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is used for registration and can not be changed afterwards by user.');
+         $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is copied on registration, but can be customized by user.');
+         $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is copied on registration and can not be changed.');
+         $arr[TPROP_RUMODE_CURR_FIX]    = T_('Actual Dragon user rating will be used during whole tournament.');
          $arr[TPROP_RUMODE_ENTER_FIX]   = T_('Tournament rating must be manually entered on registration.');
-         $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_SHORT'] = $arr;
+         $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_LONG'] = $arr;
       }
 
       if( is_null($use_mode) )
          return $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key];
 
-      if( !$short ) $key .= '_SHORT';
+      if( !$short ) $key .= '_LONG';
       if( !isset($ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key][$use_mode]) )
          error('invalid_args', "TournamentProperties.getRatingUseModeText($use_mode,$key)");
       return $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key][$use_mode];
    }
 
-   /*! \brief Returns array with notes about tournament properties. */
-   function build_notes()
+   function get_edit_tournament_status()
    {
-      $notes = array();
-      $notes[] = T_('All properties on this page are optional.');
-      $notes[] = T_('Value of [0] is treated as no restriction.');
-      $notes[] = null; // empty line
-
-      $notes[] = sprintf(
-            T_('Rating Use Mode:<ul>'
-               . '<li>%1$s = Rating is copied on registration. Rating can be customized by user.'."\n" // copy-custom
-               . '<li>%2$s = Current rating is always used. Rating can\'t be changed by user or tournament director.'."\n" // curr-fix
-               . '<li>%3$s = Rating is copied on registration, but can\'t be changed by user afterwards.'."\n" // copy-fix
-               . '<li>%4$s = Rating must be manually entered and can be customized by user.'."\n" // enter-fix
-               . '</ul>'),
-            TournamentProperties::getRatingUseModeText(TPROP_RUMODE_COPY_CUSTOM),
-            TournamentProperties::getRatingUseModeText(TPROP_RUMODE_CURR_FIX),
-            TournamentProperties::getRatingUseModeText(TPROP_RUMODE_COPY_FIX),
-            TournamentProperties::getRatingUseModeText(TPROP_RUMODE_ENTER_FIX)
-         );
-      return $notes;
+      static $statuslist = array( TOURNEY_STATUS_NEW );
+      return $statuslist;
    }
 
 } // end of 'TournamentProperties'
