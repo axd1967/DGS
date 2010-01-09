@@ -28,8 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define('TOURNEY_SCOPE_DRAGON',  'DRAGON');
 define('TOURNEY_SCOPE_PUBLIC',  'PUBLIC');
-define('TOURNEY_SCOPE_PRIVATE', 'PRIVATE');
-define('CHECK_TOURNEY_SCOPE', 'DRAGON|PUBLIC|PRIVATE');
+//TODO define('TOURNEY_SCOPE_PRIVATE', 'PRIVATE');
+define('CHECK_TOURNEY_SCOPE', 'DRAGON|PUBLIC');
 
 // tournament-types
 define('TOURNEY_TYPE_LADDER',      'LADDER');
@@ -41,12 +41,14 @@ define('CHECK_TOURNEY_TYPE', 'LADDER|ROUNDROBIN');
 define('TOURNEY_WIZTYPE_DGS_LADDER', 1);
 define('MAX_TOURNEY_WIZARD_TYPE', 1);
 
+// also adjust TournamentStatus::check_status_change()
 define('TOURNEY_STATUS_ADMIN',    'ADM');
 define('TOURNEY_STATUS_NEW',      'NEW');
 define('TOURNEY_STATUS_REGISTER', 'REG');
 define('TOURNEY_STATUS_PAIR',     'PAIR');
 define('TOURNEY_STATUS_PLAY',     'PLAY');
 define('TOURNEY_STATUS_CLOSED',   'CLOSED');
-define('CHECK_TOURNEY_STATUS', 'ADM|NEW|REG|PAIR|PLAY|CLOSED');
+define('TOURNEY_STATUS_DELETE',   'DEL');
+define('CHECK_TOURNEY_STATUS', 'ADM|NEW|REG|PAIR|PLAY|CLOSED|DEL');
 
 ?>
