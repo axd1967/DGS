@@ -129,11 +129,12 @@ class Tournament
       $this->setType( TournamentUtils::getWizardTournamentType($wizard_type) );
    }
 
-   function setStatus( $status )
+   function setStatus( $status, $check_only=false )
    {
       if( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
          error('invalid_args', "Tournament.setStatus($status)");
-      $this->Status = $status;
+      if( !$check_only )
+         $this->Status = $status;
    }
 
    // current-round / rounds|*
@@ -266,6 +267,29 @@ class Tournament
       return $errors;
    }
 
+   /*! \brief Returns info about tournament with linked ID, scope, type and title. */
+   function build_info()
+   {
+      return anchor( "view_tournament.php?tid=".$this->ID, $this->ID )
+         . sprintf( '%s(%s %s)',
+                    SMALL_SPACING,
+                    Tournament::getScopeText($this->Scope),
+                    Tournament::getTypeText($this->Type) )
+         . SMALL_SPACING . '[' . make_html_safe( $this->Title, true ) . ']';
+   }
+
+   function build_role_info()
+   {
+      if( TournamentUtils::isAdmin() )
+         return T_('You are a tournament admin.');
+
+      global $player_row;
+      if( $player_row['ID'] == $this->Owner_ID )
+         return T_('You are the owner of this tournament.');
+
+      // "normal" user
+      return T_('You are a director of this tournament.');
+   }
 
    // ------------ static functions ----------------------------
 
@@ -347,20 +371,21 @@ class Tournament
       global $ARR_GLOBALS_TOURNAMENT;
 
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_TOURNAMENT['SCOPE']) )
+      $key = 'SCOPE';
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_SCOPE_DRAGON]  = T_('Dragon#T_scope');
          $arr[TOURNEY_SCOPE_PUBLIC]  = T_('Public#T_scope');
-         $arr[TOURNEY_SCOPE_PRIVATE] = T_('Private#T_scope');
-         $ARR_GLOBALS_TOURNAMENT['SCOPE'] = $arr;
+         //TODO $arr[TOURNEY_SCOPE_PRIVATE] = T_('Private#T_scope');
+         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 
       if( is_null($scope) )
-         return $ARR_GLOBALS_TOURNAMENT['SCOPE'];
-      if( !isset($ARR_GLOBALS_TOURNAMENT['SCOPE'][$scope]) )
+         return $ARR_GLOBALS_TOURNAMENT[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$scope]) )
          error('invalid_args', "Tournament.getScopeText($scope)");
-      return $ARR_GLOBALS_TOURNAMENT['SCOPE'][$scope];
+      return $ARR_GLOBALS_TOURNAMENT[$key][$scope];
    }
 
    /*! \brief Returns type-text or all type-texts (if arg=null). */
@@ -369,19 +394,41 @@ class Tournament
       global $ARR_GLOBALS_TOURNAMENT;
 
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_TOURNAMENT['TYPE']) )
+      $key = 'TYPE';
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_TYPE_LADDER] = T_('Ladder#T_type');
          $arr[TOURNEY_TYPE_ROUND_ROBIN] = T_('Round Robin#T_type');
-         $ARR_GLOBALS_TOURNAMENT['TYPE'] = $arr;
+         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 
       if( is_null($type) )
-         return $ARR_GLOBALS_TOURNAMENT['TYPE'];
-      if( !isset($ARR_GLOBALS_TOURNAMENT['TYPE'][$type]) )
+         return $ARR_GLOBALS_TOURNAMENT[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$type]) )
          error('invalid_args', "Tournament.getTypeText($type)");
-      return $ARR_GLOBALS_TOURNAMENT['TYPE'][$type];
+      return $ARR_GLOBALS_TOURNAMENT[$key][$type];
+   }
+
+   /*! \brief Returns wizard-type-text or all type-texts (if arg=null). */
+   function getWizardTypeText( $wiztype=null )
+   {
+      global $ARR_GLOBALS_TOURNAMENT;
+
+      // lazy-init of texts
+      $key = 'WIZARDTYPE';
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      {
+         $arr = array();
+         $arr[TOURNEY_WIZTYPE_DGS_LADDER] = T_('DGS Ladder');
+         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+      }
+
+      if( is_null($wiztype) )
+         return $ARR_GLOBALS_TOURNAMENT[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$wiztype]) )
+         error('invalid_args', "Tournament.getWizardTypeText($wiztype)");
+      return $ARR_GLOBALS_TOURNAMENT[$key][$wiztype];
    }
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
@@ -390,7 +437,8 @@ class Tournament
       global $ARR_GLOBALS_TOURNAMENT;
 
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS']) )
+      $key = 'STATUS';
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_STATUS_ADMIN]    = T_('Admin#T_status');
@@ -399,19 +447,21 @@ class Tournament
          $arr[TOURNEY_STATUS_PAIR]     = T_('Pair#T_status');
          $arr[TOURNEY_STATUS_PLAY]     = T_('Play#T_status');
          $arr[TOURNEY_STATUS_CLOSED]   = T_('Finished#T_status');
-         $ARR_GLOBALS_TOURNAMENT['STATUS'] = $arr;
+         $arr[TOURNEY_STATUS_DELETE]   = T_('Delete#T_status');
+         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 
       if( is_null($status) )
       {
-         $arrout = array() + $ARR_GLOBALS_TOURNAMENT['STATUS'];
-         if( !TournamentUtils::isAdmin() )
-            unset($arrout[TOURNEY_STATUS_ADMIN]);
-         return $arrout;
+         return array() + $ARR_GLOBALS_TOURNAMENT[$key]; // cloned
+         //$arrout = array() + $ARR_GLOBALS_TOURNAMENT[$key];
+         //if( !TournamentUtils::isAdmin() )
+            //unset($arrout[TOURNEY_STATUS_ADMIN]);
+         //return $arrout;
       }
-      if( !isset($ARR_GLOBALS_TOURNAMENT['STATUS'][$status]) )
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$status]) )
          error('invalid_args', "Tournament.getStatusText($status)");
-      return $ARR_GLOBALS_TOURNAMENT['STATUS'][$status];
+      return $ARR_GLOBALS_TOURNAMENT[$key][$status];
    }
 
    /*! \brief Returns true if given user can create a new tournament. */
@@ -424,29 +474,10 @@ class Tournament
       return true;
    }
 
-   /*! \brief Returns array with notes about creating/editing tournament. */
-   function build_notes( $intro=true )
+   function get_edit_tournament_status()
    {
-      $notes = array();
-      //$notes[] = null; // empty line
-
-      $notes[] = sprintf(
-            T_('Tournament status:<ul>'
-               . '<li>%1$s = hidden, archived tournaments managed by tournament admin'."\n" // admin
-               . '<li>%2$s = initial setup phase for tournament (adding infos and rules)'."\n" // new
-               . '<li>%3$s = registration phase for tournament (users can register or be invited)'."\n" // reg
-               . '<li>%4$s = pairing phase, preparing and setting up games for tournament'."\n" // pair
-               . '<li>%5$s = tournament games are started, participants are playing'."\n" // play
-               . '<li>%6$s = results are announced, tournament is finished'."\n" // closed
-               . '</ul>'),
-            Tournament::getStatusText(TOURNEY_STATUS_ADMIN),
-            Tournament::getStatusText(TOURNEY_STATUS_NEW),
-            Tournament::getStatusText(TOURNEY_STATUS_REGISTER),
-            Tournament::getStatusText(TOURNEY_STATUS_PAIR),
-            Tournament::getStatusText(TOURNEY_STATUS_PLAY),
-            Tournament::getStatusText(TOURNEY_STATUS_CLOSED)
-         );
-      return $notes;
+      static $statuslist = array( TOURNEY_STATUS_NEW );
+      return $statuslist;
    }
 
 } // end of 'Tournament'
