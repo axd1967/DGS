@@ -85,7 +85,7 @@ function itemL($text, $link='', $working=true, $last=false)
 
    section( 'SiteMap', T_('Site map'));
 
-   $item_nbcols = 5;
+   $item_nbcols = 6;
    $item_level = 0;
    echo "<table class=SiteMap>";
 
@@ -120,7 +120,10 @@ function itemL($text, $link='', $working=true, $last=false)
       {
       item(T_('Tournaments'), "tournaments/list_tournaments.php", true);
       { $item_level++;
-         item(T_('Add new tournament'), "tournaments/edit_tournament.php", true);
+         item(T_('Show all tournaments'), "tournaments/list_tournaments.php", true);
+         item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
+         item(T_('Directoring tournaments'), "tournaments/list_tournaments.php?tdir=$id", true);
+         item(T_('Create new tournament'), "tournaments/wizard.php", true);
          item(T_('View tournament'), "tournaments/view_tournament.php", false, true);
          { $item_level++;
             item(T_('Tournament directors'), "tournaments/list_directors.php", false);
@@ -132,10 +135,19 @@ function itemL($text, $link='', $working=true, $last=false)
             } $item_level--;
             item(T_('Manage this tournament'), "tournaments/manage_tournament.php", false);
             { $item_level++;
+               item(T_('Change status'), "tournaments/edit_status.php", false);
+               item(T_('Edit tournament'), "tournaments/edit_tournament.php", false);
                item(T_('Add tournament director'), "tournaments/edit_directors.php", false);
-               item(T_('Edit properties'), "tournaments/edit_properties.php", false);
+               item(T_('Show tournament directors'), "tournaments/list_directors.php", false);
+               item(T_('Edit registration properties'), "tournaments/edit_properties.php", false);
+               item(T_('Edit rules'), "tournaments/edit_rules.php", false);
                item(T_('Edit participants'), "tournaments/edit_participant.php", false);
-               item(T_('Edit rules'), "tournaments/edit_rules.php", false, true);
+               { $item_level++;
+                  item(T_('Show users'), "users.php", false);
+                  item(T_('Show my opponents'), "opponents.php", false);
+                  item(T_('Show my contacts'), "list_contacts.php", false, true);
+               } $item_level--;
+               item(T_('Show tournament participants'), "tournaments/list_participants.php", false, true);
             } $item_level--;
             item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
             item(T_('Registration'), "tournaments/register.php", false, false);
