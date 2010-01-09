@@ -23,6 +23,7 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'tournaments/include/tournament_globals.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 
@@ -58,31 +59,29 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    // init
    $page = "manage_tournament.php";
-   $title = T_('Tournament Management');
+   $title = T_('Tournament Manager');
 
 
    // ---------- Tournament Info -----------------------------------
 
    $tform = new Form( 'tournament', $page, FORM_POST );
+   $tform->add_hidden( 'tid', $tid );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
-         'TEXT',        anchor( "view_tournament.php?tid=$tid", $tid ),
-         'TEXT',        SMALL_SPACING . '[' . make_html_safe( $tourney->Title, true ) . ']', ));
+         'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Owner'),
          'TEXT',        ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, '', $tourney->Owner_ID ) : NO_VALUE ) ));
-   if( $tourney->Lastchanged )
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Last changed date'),
-            'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Lastchanged) ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Last changed date'),
+         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Lastchanged) ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Status'),
-         'TEXT',        $tourney->getStatusText($tourney->Status), ));
-//TODO TODO add current-round
-
-   $tform->add_hidden( 'tid', $tid );
+         'TEXT', $tourney->getStatusText($tourney->Status) . SEP_SPACING .
+                 make_menu_link( T_('Change status#tourney'),
+                     array( 'url' => "tournaments/edit_status.php?tid=$tid", 'class' => 'TAdmin' )) ));
 
 
    start_page( $title, true, $logged_in, $player_row );
@@ -91,40 +90,36 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $tform->echo_string();
 
    echo '<table><tr><td>', "<hr>\n",
+      make_header( 1, T_('Setup phase'), TOURNEY_STATUS_NEW ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit tournament'), array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Change status, scope, type, title, description, rounds') )),
-                 "</li>\n",
+                 subList( array( T_('Change start-time, title, description#mngt') . ($is_admin ? '; ' . T_('owner, scope#mngt') : '') )),
          '<li>', ( $allow_new_del_TD
                      ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))
                      : T_('Add tournament director') ),
-                 subList( array( T_('Adding new tournament director (allowed only for Tournament Owner)') )),
-                 "</li>\n",
-         '<li>', make_menu_link( T_('Show tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
-                 "</li>\n",
+                 sprintf( ' (%s)', T_('only by owner') ), SEP_SPACING,
+                 make_menu_link( T_('Show tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
          '<li>', make_menu_link( T_('Edit registration properties'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
-//TODO TODO add "(need creation)" if needed to create/save
-                 subList( array( T_('Change properties for registration ...'),
-                                 T_('tournament-related: min./max. participants, rating use mode'),
-                                 T_('user-related: user rating range, min. (rated) finished games') )),
-                 "</li>\n",
+                 subList( array( T_('tournament-related: end-time, min./max. participants, rating-use-mode#mngt'),
+                                 T_('user-related: user rating-range, min. games#mngt') )),
          '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
-//TODO TODO add "(need creation)" if needed to create/save
-                 subList( array( T_('Change game-settings: board size, handicap-settings, time-settings, rated, notes') )),
-                 "</li>\n",
-         '<li>', make_menu_link( T_('Edit participants'), array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Manage registration of users: invite user, approve or reject application, remove registration'),
-                                 T_('Change status, start round, read message from user and answer with admin message') )),
-                 "</li>\n",
-         '<li>', make_menu_link( T_('Show tournament participants'), "tournaments/list_participants.php?tid=$tid" ),
-                 "</li>\n",
+                 subList( array( T_('Change game-settings: board size, handicap-settings, time-settings, rated#mngt') )),
+         /* TODO only for round-robin
          '<li>', make_menu_link( T_('Edit round'), array( 'url' => "tournaments/edit_round.php?tid=$tid", 'class' => 'TAdmin' )),
-//TODO TODO add "(need creation)" if needed to create/save
                  subList( array( T_('Setup tournament round for pooling and pairing') )),
-                 "</li>\n",
+         */
+      '</ul>',
+      make_header( 2, T_('Registration phase'), TOURNEY_STATUS_REGISTER ), //------------------------
+      '<ul class="TAdminLinks">',
+         '<li>', make_menu_link( T_('Edit participants'), array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' )),
+                 SEP_SPACING,
+                 make_menu_link( T_('Show tournament participants'), "tournaments/list_participants.php?tid=$tid" ),
+                 subList( array( T_('Manage registration of users: invite user, approve or reject application, remove registration#mngt'),
+                                 T_('Change status, start-round, read message from user and answer with message#mngt') )),
       '</ul>',
       '</tr></td></table>',
       "\n";
+
 
    $menu_array = array();
    if( $tid )
@@ -135,11 +130,18 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    end_page(@$menu_array);
 }
 
+
+function make_header( $no, $title, $t_status )
+{
+   return sprintf( "<h4 class=\"SubHeader\">%s. %s (%s)</h4>\n",
+                   $no, $title, Tournament::getStatusText($t_status) );
+}
+
 function subList( $arr, $class='SubList' )
 {
    if( count($arr) == 0 )
       return '';
    $class_str = ($class != '') ? " class=\"$class\"" : '';
    return "<ul{$class_str}><li>" . implode("</li>\n<li>", $arr) . "</li></ul>\n";
-}
+}//subList
 ?>
