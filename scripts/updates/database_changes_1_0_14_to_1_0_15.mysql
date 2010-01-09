@@ -1468,3 +1468,8 @@ ALTER TABLE Tournament
    CHANGE Type Type enum('LADDER','ROUNDROBIN') NOT NULL ;
 
 
+-- added tournament delete-status
+ALTER TABLE Tournament
+   CHANGE Status Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') NOT NULL default 'NEW' ;
+
+
