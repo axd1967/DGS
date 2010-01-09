@@ -24,6 +24,10 @@ ChangeLog
 
 2010-01-08 juga
 
+   * site_map.php:
+   - synced with tournament-pages (T-list, T-manager, T-participants users-lists)
+   - increased nest-level max-cols: 5 -> 6
+
    * tournaments/manage_tournament.php (make_header), skins/dragon/screen.css:
    - added tournament-change-status page
    - hide editing of round-stuff for ladder-type tournament
