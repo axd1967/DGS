@@ -168,28 +168,47 @@ class TournamentStatus
    }
 
    /*!
-    * \brief Checks if current tournament-status allows editing.
+    * \brief Checks if current tournament-status allows certain action.
     * \param $arr_status status-array
+    * \param $allow_admin if true admin can do anything; otherwise admin is treated like non-admin
     * \return error-list; empty if no error
     */
-   function check_edit_status( $arr_status )
+   function check_action_status( $errmsgfmt, $arr_status, $allow_admin=true )
    {
       $errors = array();
 
       // T-Admin can do anything at any time
-      if( !$this->is_admin && !in_array($this->tourney->Status, $arr_status) )
+      if( $allow_admin && $this->is_admin )
+         $allow = true;
+      else
+         $allow = in_array($this->tourney->Status, $arr_status);
+
+      if( !$allow )
       {
          $arrst = array();
          foreach( $arr_status as $status )
             $arrst[] = Tournament::getStatusText($status);
 
-         //$errors[] = sprintf( T_('Edit forbidden for Tournament Status [%s], only allowed for (%s)!'),
          $errors[] = sprintf( T_('Edit is forbidden for tournament on status [%s], only allowed for (%s) !'),
                               Tournament::getStatusText($this->tourney->Status),
                               implode('|', $arrst) );
       }
 
       return $errors;
+   }//check_action_status
+
+   function check_edit_status( $arr_status, $allow_admin=true )
+   {
+      return $this->check_action_status(
+         T_('Edit is forbidden for tournament on status [%s], only allowed for (%s) !'),
+         $arr_status, $allow_admin );
+   }
+
+   function check_register_status( $arr_status, $allow_admin=true )
+   {
+      return $this->check_action_status(
+         T_('Registration is forbidden for tournament on status [%s], only allowed for (%s) !'),
+         $arr_status, $allow_admin );
    }
 
 } // end of 'TournamentStatus'
