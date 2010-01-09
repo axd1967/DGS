@@ -26,6 +26,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_status.php' );
+require_once( 'tournaments/include/tournament_factory.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
@@ -57,6 +58,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_tournament.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
+   $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
@@ -68,7 +70,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $arr_scopes = Tournament::getScopeText();
 
    // check + parse edit-form
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $tourney, $is_admin );
+   list( $vars, $edits, $errorlist ) = parse_edit_form( $tourney, $ttype, $is_admin );
    $errorlist += $tstatus->check_edit_status( Tournament::get_edit_tournament_status() );
 
    // save tournament-object with values from edit-form
@@ -155,16 +157,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'DESCRIPTION', T_('Description'),
          'TEXTAREA',    'descr', 70, 15, $tourney->Description ));
 
-   if( $tourney->Type == TOURNEY_TYPE_LADDER )
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Tournament rounds'),
-            'TEXT',        $tourney->Rounds, ));
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Current tournament round'),
-            'TEXT',        $tourney->CurrentRound, ));
-   }
-   else // round-robin
+   if( $ttype->need_rounds )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Tournament rounds'),
@@ -172,6 +165,15 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
       $tform->add_row( array(
             'DESCRIPTION', T_('Current tournament round'),
             'TEXTINPUT',   'current_round', 5, 5, $tourney->CurrentRound, '' ));
+   }
+   else
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament rounds'),
+            'TEXT',        $tourney->Rounds, ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Current tournament round'),
+            'TEXT',        $tourney->CurrentRound, ));
    }
 
    $tform->add_row( array(
@@ -215,7 +217,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tney, $is_admin )
+function parse_edit_form( &$tney, $ttype, $is_admin )
 {
    $edits = array();
    $errors = array();
@@ -292,34 +294,28 @@ function parse_edit_form( &$tney, $is_admin )
       else
          $tney->Description = $new_value;
 
-      $new_value = $vars['rounds'];
-      if( $tney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      if( $ttype->need_rounds )
       {
+         $new_value = $vars['rounds'];
          if( !is_numeric($new_value) )
             $errors[] = T_('Expecting positive number for tournament rounds');
-         elseif( $tney->Type == TOURNEY_TYPE_ROUND_ROBIN && $new_value <= 0 )
-            $errors[] = T_('Round-Robin tournament must have at least one round.');
+         elseif( $new_value <= 0 )
+            $errors[] = T_('Tournament must have at least one round.');
          else
-            $tney->Rounds = $new_value;
-      }
+            $tney->Rounds = (int)$new_value;
 
-      $new_value = $vars['current_round'];
-      if( $tney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-      {
+         $new_value = $vars['current_round'];
          if( !is_numeric($new_value) )
             $errors[] = T_('Expecting positive number for tournament current round');
          elseif( $new_value < 1 || $new_value > $tney->Rounds )
-            $errors[] = sprintf( T_('Current tournament round must be in value-range [1..%s] of tournament rounds.'), $tney->Rounds );
+            $errors[] = sprintf( T_('Current tournament round must be in rounds value-range [1..%s].'), $tney->Rounds );
          else
-            $tney->CurrentRound = $new_value;
+            $tney->CurrentRound = (int)$new_value;
       }
 
       // determine edits
-      if( $is_admin )
-      {
-         if( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#edits');
-         if( $old_vals['scope'] != $tney->Scope ) $edits[] = T_('Scope#edits');
-      }
+      if( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#edits');
+      if( $old_vals['scope'] != $tney->Scope ) $edits[] = T_('Scope#edits');
       if( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start-time#edits');
       if( $old_vals['title'] != $tney->Title ) $edits[] = T_('Title#edits');
       if( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description#edits');
