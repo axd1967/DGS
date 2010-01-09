@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once( 'include/globals.php' );
 require_once( 'include/std_functions.php' );
 require_once( 'include/time_functions.php' );
 
@@ -26,14 +27,6 @@ require_once( 'include/time_functions.php' );
  *
  * \brief Collection of GUI-related functions.
  */
-
-
-if( !defined('SMALL_SPACING') )
-   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
-if( !defined('MED_SPACING') )
-   define('MED_SPACING', '&nbsp;&nbsp;');
-if( !defined('MINI_SPACING') )
-   define('MINI_SPACING', '&nbsp;');
 
 
 /*!
@@ -118,6 +111,14 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true )
    {
       if( is_null($note) || (string)$note === '' )
          echo "<p></p>\n";
+      elseif( is_array($note) )
+      {
+         $note_title = array_shift( $note );
+         $note_str = '';
+         foreach( $note as $note_item )
+            $note_str .= "<li>$note_item\n";
+         echo "$note_title:\n<ul>$note_str</ul>";
+      }
       else
          echo '  <li>' . make_html_safe($note, 'line') . "\n";
    }
