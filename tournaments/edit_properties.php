@@ -65,7 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
    if( is_null($tprops) )
-      $tprops = new TournamentProperties( $tid );
+      error('bad_tournament', "Tournament.edit_properties.miss_properties($tid,$my_id)");
 
    // init
    $arr_rating_use_modes = TournamentProperties::getRatingUseModeText();
@@ -190,6 +190,7 @@ function parse_edit_form( &$tpr )
 {
    $edits = array();
    $errors = array();
+   $is_posted = ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] );
 
    // read from props or set defaults
    $vars = array(
@@ -209,9 +210,15 @@ function parse_edit_form( &$tpr )
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( $is_posted )
+   {
+      foreach( array( 'user_rated' ) as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // parse URL-vars
-   if( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] )
+   if( $is_posted )
    {
       $old_vals['reg_end_time'] = $tpr->RegisterEndTime;
       $old_vals['user_min_rating'] = $tpr->UserMinRating;
@@ -299,7 +306,7 @@ function build_properties_notes()
 
    $narr = array( T_('Rating Use Mode') );
    foreach( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
-      $narr[] = sprintf( "%s = %s", $usemode, $descr );
+      $narr[] = sprintf( "%s = $descr", TournamentProperties::getRatingUseModeText($usemode) );
    $notes[] = $narr;
 
    return $notes;
