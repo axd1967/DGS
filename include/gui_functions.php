@@ -104,26 +104,25 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true )
       return;
 
    echo ( $pre_sep ? "<br><br>\n" : '' ),
-      "<table id=\"{$table_id}\">\n",
-      ( $title != '' ? "<tr><th>" . make_html_safe($title, 'line') . "</th></tr>\n" : '' ),
-      "<tr><td><ul>";
+      "<table id=\"{$table_id}\">\n";
+   if( $title != '' )
+      echo "<tr><th>", make_html_safe($title, 'line'), "</th></tr>\n";
+   echo "<tr><td><ul>\n";
    foreach( $notes as $note )
    {
       if( is_null($note) || (string)$note === '' )
          echo "<p></p>\n";
       elseif( is_array($note) )
       {
-         $note_title = array_shift( $note );
-         $note_str = '';
+         echo '  <li>', array_shift( $note ), ":\n<ul>\n"; // note-title
          foreach( $note as $note_item )
-            $note_str .= "<li>$note_item\n";
-         echo "$note_title:\n<ul>$note_str</ul>";
+            echo "<li>$note_item\n";
+         echo "</ul>\n";
       }
       else
-         echo '  <li>' . make_html_safe($note, 'line') . "\n";
+         echo '  <li>', make_html_safe($note, 'line'), "\n";
    }
-   echo "</ul>\n",
-      "</td></tr></table>\n";
+   echo "</ul>\n", "</td></tr></table>\n";
 }
 
 /*! \brief Returns image-tag with vacation-image if on_vacation set; return '' otherwise. */
@@ -252,6 +251,21 @@ function echo_image_table( $url, $title, $withSep=true )
       . anchor( $url,
          image( $base_path.'images/table.gif', $title, null, 'class="InTextImage"' ),
          $title );
+}
+
+/*!
+ * \brief Formats string: <SPACES><TAG_L>str<TAG_R><SPACES>
+ * \note spacing('text', 1, 'b'); -> ' <b>text</b> '
+ * \note spacing('text', 1, 'ts', '/te'); -> ' <ts>text</te> '
+ * \note spacing('text', 1, 'ts', ''); -> ' <ts>text '
+ */
+function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
+{
+   $spc = str_repeat( MINI_SPACING, $space_count );
+   if( is_null($tag_r) ) $tag_r = "/$tag_l";
+   if( $tag_l ) $tag_l = "<$tag_l>";
+   if( $tag_r ) $tag_r = "<$tag_r>";
+   return "{$spc}{$tag_l}{$str}{$tag_r}{$spc}";
 }
 
 ?>
