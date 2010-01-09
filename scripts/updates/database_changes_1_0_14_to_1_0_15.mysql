@@ -1473,3 +1473,8 @@ ALTER TABLE Tournament
    CHANGE Status Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') NOT NULL default 'NEW' ;
 
 
+-- removed RatingUseMode 'ENTER_FIX'
+ALTER TABLE TournamentProperties
+   CHANGE RatingUseMode RatingUseMode enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM' ;
+
+

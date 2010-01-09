@@ -179,7 +179,7 @@ Description:
  Lastchanged          | datetime                                              | 0000-00-00 00:00:00
  MinParticipants      | smallint(6)                                           | 0
  MaxParticipants      | smallint(6)                                           | 0
- RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX','ENTER_FIX') | COPY_CUSTOM
+ RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX')             | COPY_CUSTOM
  RegisterEndTime      | datetime                                              | 0000-00-00 00:00:00
  UserMinRating        | double                                                | -9999
  UserMaxRating        | double                                                | -9999
@@ -204,8 +204,6 @@ Description:
    - CURR_FIX = always use current DGS-rating during T,
      no customization of rating allowed by TD or user
    - COPY_FIX = copies exising user-rating for T-rating,
-     can't be changed afterwards by user (fix = not customizable)
-   - ENTER_FIX = T-rating must be entered on registration by user,
      can't be changed afterwards by user (fix = not customizable)
 
 * RegisterEndTime : datetime for end of registration-phase
