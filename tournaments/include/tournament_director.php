@@ -156,6 +156,23 @@ class TournamentDirector
       return $result;
    }
 
+   /*! \brief Returns true, if there is at least one TD. for given tournament. */
+   function has_tournament_director( $tid )
+   {
+      if( $tid > 0 )
+      {
+         $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
+         $qsql->add_part( SQLP_WHERE, "TD.tid=$tid" );
+         $qsql->add_part( SQLP_LIMIT, '1' );
+
+         $row = mysql_single_fetch( "TournamentDirector.has_tournament_director($tid)",
+            $qsql->get_select() );
+         if( $row )
+            return true;
+      }
+      return false;
+   }
+
    /*! \brief Returns enhanced (passed) ListIterator with TournamentDirector-objects. */
    function load_tournament_directors( $iterator, $tid )
    {
@@ -204,6 +221,15 @@ class TournamentDirector
       }
 
       return null;
+   }
+
+   function get_edit_tournament_status()
+   {
+      static $statuslist = array(
+         TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR,
+         TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED
+      );
+      return $statuslist;
    }
 
 } // end of 'TournamentDirector'
