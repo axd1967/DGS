@@ -31,6 +31,14 @@ require_once( "include/config-local.php" );
 define('NO_VALUE', '---');
 define('UNKNOWN_VALUE', '???');
 
+if( !defined('MINI_SPACING') )
+   define('MINI_SPACING', '&nbsp;');
+if( !defined('MED_SPACING') )
+   define('MED_SPACING', '&nbsp;&nbsp;');
+if( !defined('SMALL_SPACING') )
+   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+define('SEP_SPACING', SMALL_SPACING.'|'.SMALL_SPACING);
+
 
 // ---------- Folder stuff ----------------------------------------
 
