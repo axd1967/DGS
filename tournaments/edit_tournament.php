@@ -25,8 +25,10 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_status.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentEdit');
+
 
 {
    connect2mysql();
@@ -51,46 +53,26 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = null;
-   if( $tid )
-      $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-
-   // create/edit allowed?
-   $is_admin = TournamentUtils::isAdmin();
-   $allow_edit_tourney = false;
+   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
-   {
-      if( !Tournament::allow_create($my_id) )
-         error('tournament_edit_not_allowed', "edit_tournament.new_tournament($my_id)");
+      error('unknown_tournament', "Tournament.edit_tournament.find_tournament($tid)");
+   $tstatus = new TournamentStatus( $tourney );
 
-      // new tournament
-      $tourney = new Tournament();
-      $tourney->Owner_ID = $my_id;
-   }
-   else
-   {
-      if( !$tourney->allow_edit_tournaments($my_id) )
-         error('tournament_edit_not_allowed', "edit_tournament.edit_tournament($tid,$my_id)");
-      $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
-   }
+   // edit allowed?
+   $is_admin = TournamentUtils::isAdmin();
+   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   if( !$allow_edit_tourney )
+      error('tournament_edit_not_allowed', "Tournament.edit_tournament.edit($tid,$my_id)");
 
    // init
    $arr_scopes = Tournament::getScopeText();
-   if( !$is_admin )
-      unset($arr_scopes[TOURNEY_SCOPE_DRAGON]); // only admin can set Dragon-scope
-   unset($arr_scopes[TOURNEY_SCOPE_PRIVATE]); //TODO(later) not supported yet
-
-   if( !$is_admin && !$tid ) // only admin can edit status on T-creation
-      $arr_status = array( TOURNEY_STATUS_NEW => Tournament::getStatusText(TOURNEY_STATUS_NEW) );
-   else
-      $arr_status = Tournament::getStatusText();
 
    // check + parse edit-form
-   //TODO use same method as in edit_properties.php (error, edits, vars, parsing)
-   $errorlist = parse_edit_form( $tourney );
+   list( $vars, $edits, $errorlist ) = parse_edit_form( $tourney, $is_admin );
+   $errorlist += $tstatus->check_edit_status( Tournament::get_edit_tournament_status() );
 
    // save tournament-object with values from edit-form
-   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && is_null($errorlist) )
+   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errorlist) == 0 )
    {
       $tourney->persist(); // insert or update
       jump_to("tournaments/edit_tournament.php?tid={$tourney->ID}".URI_AMP
@@ -104,27 +86,62 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    // ---------- Tournament EDIT form ------------------------------
 
    $tform = new Form( 'tournament', $page, FORM_POST );
+   $tform->add_hidden( 'tid', $tid );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
-         'TEXT',        ( ($tid) ? anchor( "view_tournament.php?tid=$tid", $tid ) : NO_VALUE ) ));
+         'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Owner'),
-         'TEXT',        ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, '', $tourney->Owner_ID ) : NO_VALUE ) ));
-   if( $tourney->Created )
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Creation date'),
-            'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
-   if( $tourney->Lastchanged )
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Last changed date'),
-            'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Lastchanged) ));
+         'DESCRIPTION', T_('Owner#tourney'),
+         'TEXT',        user_reference( REF_LINK, 1, '', $tourney->Owner_ID ), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Creation date'),
+         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Last changed date'),
+         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Lastchanged) ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Type#tourney'),
+         'TEXT',        Tournament::getTypeText($tourney->Type), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Wizard type#tourney'),
+         'TEXT',        Tournament::getWizardTypeText($tourney->WizardType), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Status#tourney'),
+         'TEXT',        Tournament::getStatusText($tourney->Status), ));
+   $tform->add_row( array( 'HR' ));
 
-   $start_time = trim(get_request_arg('start_time'));
+   if( count($errorlist) )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Error'),
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
+      $tform->add_empty_row();
+   }
+
+   if( $is_admin )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Owner#tourney'),
+            'TEXTINPUT',   'owner', 16, 16, textarea_safe($vars['owner']),
+            'TEXT',        T_('(change with care, only by admin)'), ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Scope#tourney'),
+            'SELECTBOX',   'scope', 1, $arr_scopes, $tourney->Scope, false,
+            'TEXT',        T_('(change with care, only by admin)'), ));
+   }
+   else
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Scope#tourney'),
+            'TEXT',        Tournament::getScopeText($tourney->Scope), ));
+   }
+
+   $tform->add_empty_row();
    $tform->add_row( array(
          'DESCRIPTION', T_('Start time'),
          'TEXTINPUT',   'start_time', 20, 20,
-                        TournamentUtils::formatDate($tourney->StartTime, $start_time), '',
+                        TournamentUtils::formatDate($tourney->StartTime, $vars['start_time']), '',
          'TEXT',  '&nbsp;<span class="EditNote">'
                      . sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT ) . '</span>' ));
    $tform->add_row( array(
@@ -132,48 +149,36 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'TEXT',        TournamentUtils::formatDate($tourney->EndTime, NO_VALUE) ));
 
    $tform->add_row( array(
-         'DESCRIPTION', T_('Scope'),
-         'SELECTBOX',   'scope', 1, $arr_scopes, $tourney->Scope, false ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Type'),
-         'SELECTBOX',   'type', 1, Tournament::getTypeText(), $tourney->Type, false ));
-   //TODO Type can ONLY be changed when T has no registrations
-   //TODO Status can NOT be changed to NEW if T has been started (PLAY) !? -> why not, but makes things more complex
-   if( $is_admin || $tid ) // only admin can edit status on T-creation
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Status'),
-            'SELECTBOX',   'status', 1, $arr_status, $tourney->Status, false ));
-   else
-   {
-      $tform->add_hidden( 'status', TOURNEY_STATUS_NEW );
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Status'),
-            'TEXT',        $arr_status[TOURNEY_STATUS_NEW] ));
-   }
-
-   if( !is_null($errorlist) )
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Error'),
-            'TEXT',        '<span class="ErrorMsg">'
-                  . T_('There are some errors, so Tournament can\'t be saved:') . "<br>\n"
-                  . '* ' . implode(",<br>\n* ", $errorlist)
-                  . '</span>' ));
-   }
-
-   $tform->add_row( array(
          'DESCRIPTION', T_('Title'),
          'TEXTINPUT',   'title', 80, 255, $tourney->Title, '' ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Description'),
          'TEXTAREA',    'descr', 70, 15, $tourney->Description ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament rounds'),
-         'TEXTINPUT',   'rounds', 5, 5, $tourney->Rounds, '' ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Current tournament round'),
-         'TEXTINPUT',   'current_round', 5, 5, $tourney->CurrentRound, '' ));
 
+   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament rounds'),
+            'TEXT',        $tourney->Rounds, ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Current tournament round'),
+            'TEXT',        $tourney->CurrentRound, ));
+   }
+   else // round-robin
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Tournament rounds'),
+            'TEXTINPUT',   'rounds', 5, 5, $tourney->Rounds, '' ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Current tournament round'),
+            'TEXTINPUT',   'current_round', 5, 5, $tourney->CurrentRound, '' ));
+   }
+
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Unsaved edits'),
+         'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits)), ));
+
+   $tform->add_empty_row();
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 't_save', T_('Save tournament'),
@@ -192,16 +197,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    }
 
 
-   $tform->add_hidden( 'tid', $tid );
-
-
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
    $tform->echo_string();
 
-   $notes = Tournament::build_notes();
-   echo_notes( 'edittournamentnotesTable', T_('Tournament notes'), $notes );
 
    $menu_array = array();
    if( $tid )
@@ -214,71 +214,119 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 }
 
 
-/*! \brief Parses and checks input, returns error-list or NULL if no error. */
-function parse_edit_form( &$tourney )
+// return [ vars-hash, edits-arr, errorlist ]
+function parse_edit_form( &$tney, $is_admin )
 {
-   global $arr_scopes, $arr_status;
-   $read = ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] ); // read-URL-vars
+   $edits = array();
    $errors = array();
+   $is_posted = ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] );
 
-   $new_value = get_request_arg('scope');
-   if( $read )
+   // read from props or set defaults
+   $vars = array(
+      'owner'           => $tney->Owner_Handle,
+      'scope'           => $tney->Scope,
+      'start_time'      => TournamentUtils::formatDate($tney->StartTime),
+      'title'           => $tney->Title,
+      'descr'           => $tney->Description,
+      'rounds'          => $tney->Rounds,
+      'current_round'   => $tney->CurrentRound,
+   );
+
+   $old_vals = array() + $vars; // copy to determine edit-changes
+   // read URL-vals into vars
+   foreach( $vars as $key => $val )
+      $vars[$key] = get_request_arg( $key, $val );
+
+   // parse URL-vars
+   if( $is_posted )
    {
-      if( !isset($arr_scopes[$new_value]) ) // admin-restricted
-         error('invalid_args', "edit_tournament.check.scope($new_value)");
-      $tourney->setScope( $new_value );
-   }
+      $old_vals['start_time'] = $tney->StartTime;
 
-   $new_value = get_request_arg('type');
-   if( $read )
-      $tourney->setType( $new_value );
+      if( $is_admin )
+      {
+         $new_value = trim($vars['owner']);
+         if( (string)$new_value == '' )
+            $errors[] = T_('Missing owner handle');
+         elseif( $new_value != $tney->Owner_Handle )
+         {
+            $owner_row = TournamentDirector::load_user_row( 0, $new_value );
+            if( !is_array($owner_row) )
+               $errors[] = T_('Unknown user handle for owner');
+            else
+            {
+               $tney->Owner_ID = $owner_row['ID'];
+               $tney->Owner_Handle = $owner_row['Handle'];
+               $vars['owner'] = $tney->Owner_Handle;
+            }
+         }
 
-   $new_value = get_request_arg('status');
-   if( $read )
-   {
-      if( !isset($arr_status[$new_value]) ) // admin-restricted
-         error('invalid_args', "edit_tournament.check.status($new_value)");
-      $tourney->setStatus( $new_value );
-   }
+         global $arr_scopes;
+         $new_value = trim($vars['scope']);
+         if( !isset($arr_scopes[$new_value]) )
+            $errors[] = T_('Unknown tournament scope');
+         else
+            $tney->setScope( $new_value );
+      }
 
-   $new_value = trim(get_request_arg('title'));
-   if( $read )
-      $tourney->Title = $new_value;
-   if( $tourney->Title == '' )
-      $errors[] = T_('Title for tournament is missing');
-
-   $new_value = trim(get_request_arg('descr'));
-   if( $read )
-      $tourney->Description = $new_value;
-   if( $tourney->Description == '' )
-      $errors[] = T_('Description for tournament is missing');
-
-   $new_value = trim(get_request_arg('start_time'));
-   if( $read )
-   {
-      $parsed_value = TournamentUtils::parseDate( T_('Start time of tournament'), $new_value );
+      $parsed_value = TournamentUtils::parseDate( T_('Start time for tournament'), $vars['start_time'] );
       if( is_numeric($parsed_value) )
-         $tourney->StartTime = $parsed_value;
+      {
+         $tney->StartTime = $parsed_value;
+         $vars['start_time'] = TournamentUtils::formatDate($tney->StartTime);
+      }
       else
          $errors[] = $parsed_value;
+
+      $new_value = trim($vars['title']);
+      if( strlen($new_value) < 8 )
+         $errors[] = T_('Tournament title missing or too short');
+      elseif( $tney->Scope != TOURNEY_SCOPE_DRAGON
+            && preg_match('/(dragon|drag\s+on|\bD\W*G\W*S\b)/i', $new_value, $groups) )
+         $errors[] = sprintf( T_('Tournament title must not contain reserved Dragon/DGS words [%s].'), $groups[1] );
+      else
+         $tney->Title = $new_value;
+
+      $new_value = trim($vars['descr']);
+      if( strlen($new_value) < 4 )
+         $errors[] = T_('Tournament description missing or too short');
+      else
+         $tney->Description = $new_value;
+
+      $new_value = $vars['rounds'];
+      if( $tney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         if( !is_numeric($new_value) )
+            $errors[] = T_('Expecting positive number for tournament rounds');
+         elseif( $tney->Type == TOURNEY_TYPE_ROUND_ROBIN && $new_value <= 0 )
+            $errors[] = T_('Round-Robin tournament must have at least one round.');
+         else
+            $tney->Rounds = $new_value;
+      }
+
+      $new_value = $vars['current_round'];
+      if( $tney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         if( !is_numeric($new_value) )
+            $errors[] = T_('Expecting positive number for tournament current round');
+         elseif( $new_value < 1 || $new_value > $tney->Rounds )
+            $errors[] = sprintf( T_('Current tournament round must be in value-range [1..%s] of tournament rounds.'), $tney->Rounds );
+         else
+            $tney->CurrentRound = $new_value;
+      }
+
+      // determine edits
+      if( $is_admin )
+      {
+         if( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#edits');
+         if( $old_vals['scope'] != $tney->Scope ) $edits[] = T_('Scope#edits');
+      }
+      if( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start-time#edits');
+      if( $old_vals['title'] != $tney->Title ) $edits[] = T_('Title#edits');
+      if( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description#edits');
+      if( $old_vals['rounds'] != $tney->Rounds ) $edits[] = T_('Rounds#edits');
+      if( $old_vals['current_round'] != $tney->CurrentRound ) $edits[] = T_('Rounds#edits');
    }
 
-   $new_value = (int)trim(get_request_arg('rounds'));
-   if( $read && is_numeric($new_value) && $new_value >= 0 )
-      $tourney->Rounds = $new_value;
-   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN && $tourney->Rounds <= 0 )
-      $errors[] = T_('Round-Robin tournament should have at least one round.');
-
-   $new_value = (int)trim(get_request_arg('current_round'));
-   if( $read && is_numeric($new_value) && $new_value >= 0 )
-      $tourney->CurrentRound = $new_value;
-   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-   {
-      if( $tourney->CurrentRound <= 0 || $tourney->CurrentRound > $tourney->Rounds )
-         $errors[] = sprintf( T_('Round-Robin tournament round must be in range [1-%s].'), $tourney->Rounds );
-   }
-
-   return (count($errors)) ? $errors : NULL;
-} //parse_edit_form
-
+   return array( $vars, array_unique($edits), $errors );
+}//parse_edit_form
 ?>
