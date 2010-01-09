@@ -326,8 +326,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    $tpform->echo_string();
 
-   $notes = TournamentParticipant::build_notes();
-   echo_notes( 'registernotesTable', T_('Registration notes'), $notes );
+   echo_notes( 'registernotesTable', T_('Registration notes'), build_participant_notes() );
 
 
    $menu_array = array();
@@ -337,5 +336,45 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    end_page(@$menu_array);
 }
+
+
+/*! \brief Returns array with notes about registering users. */
+function build_participant_notes( $deny_reason=null, $intro=true )
+{
+   $notes = array();
+   if( !is_null($deny_reason) )
+   {
+      $notes[] = sprintf( '<color darkred><b>%s:</b></color> %s',
+                          T_('Registration restricted'), $deny_reason );
+      $notes[] = null; // empty line
+   }
+
+   if( $intro )
+   {
+      $notes[] = T_('Questions and support requests regarding this tournament '
+                  . 'can be directed to the tournament directors.');
+      $notes[] = null; // empty line
+
+      $notes[] = T_('You will need a custom rating when you don\'t have a DGS-rating yet or '
+            .  "if you don't want to start with your DGS-rating.");
+      $notes[] = T_('If you enter a non-default starting round or a custom rating, '
+            . "your application needs to be verified by a tournament director.\n"
+            . 'Therefore please add your reasoning for the changes in the user-message '
+            . 'box to accellerate the registration process.');
+      $notes[] = null; // empty line
+   }
+
+   $arrst = array();
+   $arrst[NO_VALUE] = T_('user is not registered for tournament#tpstat_unreg');
+   $arrst[TP_STATUS_APPLY] = T_('user-application needs verification by tournament director#tpstat_apply');
+   $arrst[TP_STATUS_INVITE] = T_('user has been invited by tournament director#tpstat_invite');
+   $arrst[TP_STATUS_REGISTER] = T_('user has been successfully registered#tpstat_reg');
+   $narr = array( T_('Registration status') );
+   foreach( $arrst as $status => $descr )
+      $narr = sprintf( "%s = $descr", TournamentParticipant::getStatusText($status, true) );
+   $notes[] = $narr;
+
+   return $notes;
+}//build_participant_notes
 
 ?>
