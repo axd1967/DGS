@@ -44,6 +44,8 @@ class DgsLadderTournament extends TournamentTemplate
    function DgsLadderTournament()
    {
       parent::TournamentTemplate( TOURNEY_WIZTYPE_DGS_LADDER );
+      $this->need_rounds = false;
+      $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
    }
 
    function createTournament()

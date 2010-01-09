@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
+require_once 'tournaments/include/tournament_globals.php';
+
  /*!
   * \file tournament_template.php
   *
@@ -36,12 +38,19 @@ class TournamentTemplate
    var $wizard_type;
    var $uid;
 
+   var $need_rounds;
+   var $allow_register_tourney_status;
+
    /*! \brief Constructs template for different tournament-types. */
    function TournamentTemplate( $wizard_type )
    {
       global $player_row;
       $this->wizard_type = $wizard_type;
       $this->uid = (int)@$player_row['ID'];
+
+      // tournament-type-specific properties
+      $this->need_rounds = false;
+      $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
    }
 
    function to_string()
