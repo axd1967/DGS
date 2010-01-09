@@ -301,6 +301,9 @@ class ErrorCode
          $arr['rating_not_rank'] =
             T_("Sorry, I've problem with the rating, you shouldn't use 'kyu' or 'dan' for this ratingtype");
 
+         $arr['invalid_rating'] =
+            T_("The specified rating is invalid.");
+
          $arr['registration_policy_not_checked'] =
             T_("Please read the Rules of Conduct page and check the box if you accept it.");
 
@@ -413,6 +416,9 @@ class ErrorCode
          $arr['unknown_tournament'] =
             T_("Sorry, I couldn't find the given tournament.");
 
+         $arr['bad_tournament'] =
+            T_("Sorry, there's something wrong with this tournament. Please contact a tournament admin.");
+
          $arr['tournament_edit_not_allowed'] =
             T_("Sorry, you are not allowed to add or edit this tournament.");
 
@@ -427,6 +433,9 @@ class ErrorCode
 
          $arr['tournament_register_not_allowed'] =
             T_("Sorry, you are not allowed to register for this tournament.");
+
+         $arr['tournament_register_edit_not_allowed'] =
+            T_("Sorry, you are not allowed to edit this tournament registration.");
 
          $arr['tournament_miss_rules'] =
             T_("Sorry, missing configured rules-set for this tournament.");
