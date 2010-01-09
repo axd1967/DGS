@@ -22,6 +22,97 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-08 juga
+
+   * tournaments/manage_tournament.php (make_header), skins/dragon/screen.css:
+   - added tournament-change-status page
+   - hide editing of round-stuff for ladder-type tournament
+   - changed title, added/adjusted/compacted texts, added phase-sections
+
+   * tournaments/include/tournament_status.php (class TournamentStatus,
+       ~.check_conditions_status_ADM/NEW/REG/PAIR/PLAY/CLOSED/DEL,
+       ~.has_error, ~.check_status_change, ~.error_expected_status,
+       ~.check_edit_status),
+     tournaments/include/tournament_director.php (TournamentDirector.has_tournament_director),
+     tournaments/edit_status.php, NEWS:
+   - added tournament-change-status page and checks for allowed status-changes
+     - Tournament-admin is always allowed to change tournament-status
+     - check for allowed status-transitions: NEW > REG > PAIR > PLAY > CLOSED
+     - for REG-status check for existing title, description and tournament-director
+
+   * tournaments/edit_tournament.php (parse_edit_form):
+   - enhanced tournament-edit with parse-edit-form (show edits, better error-parsing)
+   - restrict editing of owner and scope to tournament-admin
+   - removed editing of tournament-status
+   - removed creation of tournament, which is done by tournament-wizard alone
+   - hide editing of round-stuff for ladder-type tournament
+   - show tournament wizard-type
+   - removed PRIVATE-scope for later
+   - removed tournament-status notes
+   - code cleanups-refactorings
+
+   * tournaments/include/tournament.php (Tournament.getStatusText),
+     tournaments/list_tournaments.php, NEWS:
+   - allow search for Admin-type tournaments
+   - show Admin-type tournaments only if selected in filter
+   - linked ID-button to tournament-manager for directoring-tournaments-list-view
+
+   * tournaments/include/tournament.php (Tournament.setStatus, ~.build_info,
+       ~.build_role_info, ~.getScopeText, ~.getTypeText, ~.getWizardTypeText,
+       ~.getStatusText, ~.get_edit_tournament_status),
+     tournaments/include/tournament_director.php (TournamentDirector.get_edit_tournament_status),
+     tournaments/include/tournament_participant.php (TournamentParticipant.get_edit_tournament_status),
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration,
+       ~.getRatingUseModeText, ~.get_edit_tournament_status),
+     tournaments/include/tournament_round.php (TournamentRound.get_edit_tournament_status),
+     tournaments/include/tournament_rules.php (TournamentRules.get_edit_tournament_status),
+     tournaments/include/tournament_globals.php,
+     tournaments/edit_director.php (parse_edit_form),
+     tournaments/edit_participant.php,
+     tournaments/edit_properties.php (parse_edit_form, build_properties_notes),
+     tournaments/edit_round.php (parse_edit_form, build_round_notes),
+     tournaments/edit_rules.php (parse_edit_form),
+     tournaments/edit_tournament.php (parse_edit_form),
+     tournaments/register.php (build_participant_notes),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, NEWS:
+   - restrict edit-pages to specific tournament-status-list for editing of
+     - tournament:              NEW
+     - tournament-director:     NEW, REG, PAIR, PLAY, CLOSED
+     - tournament-participants: REG, PAIR, PLAY
+     - tournament-properties:   NEW
+     - tournament-round:        NEW, PAIR
+     - tournament-rules:        NEW
+   - added tournament delete-status: TOURNEY_STATUS_DELETE
+   - refactored build_notes() from class into edit-page
+   - removed PRIVATE-scope for later
+   - cleanup parsing and checking of edit-form
+   - code cleanups-refactorings, added/changed/simplified texts
+-----------
+-- added tournament delete-status
+ALTER TABLE Tournament
+   CHANGE Status Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') NOT NULL default 'NEW' ;
+-----------
+
+   * include/gui_functions.php (echo_notes), include/globals.php,
+     include/table_columns.php:
+   - moved MINI|MED|SMALL_SPACING from gui_functions.php into globals.php
+   - enhanced echo_notes() with sub-lists
+   - added SEP_SPACING for tournaments
+
+   * tournaments/edit_participant.php, list_contacts.php, opponents.php,
+     users.php, NEWS:
+   - added tournament-invitations for users, opponents and contacts page
+
+   * include/std_functions.php (make_menu):
+   - bugfix: handle with_accesskeys-arg not to create access-keys to links
+
+   * include/table_columns.php (Table.add_tablehead):
+   - bugfix: error if table-id-number used again
+
+   * tournaments/edit_director.php, tournaments/edit_properties.php,
+     tournaments/manage_tournament.php:
+   - changed titles
+
 2010-01-07 juga
 
    * tournaments/edit_director.php, tournaments/edit_participant.php,
