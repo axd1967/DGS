@@ -27,8 +27,10 @@ require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
+require_once( 'tournaments/include/tournament_status.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
+
 
 {
    connect2mysql();
@@ -74,13 +76,15 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_participant.find_tournament($tid)");
+   $tstatus = new TournamentStatus( $tourney );
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_participant($tid,$my_id)");
 
+   $errors = $tstatus->check_edit_status( TournamentParticipant::get_edit_tournament_status() );
+
    // load-user, change-user?
-   $errors = array();
    $edits = array();
    if( @$_REQUEST['tp_showuser_uid'] )
    {
@@ -217,7 +221,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
 
    // persist TP in database
-   if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
+   if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 && count($reg_errors) == 0 )
    {
       $tp->persist();
       jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid={$tp->uid}".URI_AMP."sysmsg="

@@ -26,8 +26,10 @@ require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'include/message_functions.php' );
+require_once( 'tournaments/include/tournament_status.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
+
 
 {
    connect2mysql();
@@ -54,7 +56,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_rules.find_tournament($tid)");
-   //TODO(later) allow rule-editing only for certain T-status
+   $tstatus = new TournamentStatus( $tourney );
    //TODO(later) if Rated=Yes, check that ALL users have a rating
 
    // create/edit allowed?
@@ -67,9 +69,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
    // check + parse edit-form (notes)
    list( $vars, $edits, $errorlist ) = parse_edit_form( $trule );
+   $errorlist += $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
 
    // save tournament-rules-object with values from edit-form
-   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && is_null($errorlist) )
+   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errorlist) == 0 )
    {
       $trule->persist();
       jump_to("tournaments/edit_rules.php?tid={$tid}".URI_AMP
@@ -86,21 +89,18 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
    $trform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
-         'TEXT',        anchor( "view_tournament.php?tid=$tid", $tid ),
-         'TEXT',        SMALL_SPACING . '[' . make_html_safe( $tourney->Title, true ) . ']', ));
+         'TEXT',        $tourney->build_info() ));
    if( $trule->Lastchanged )
       $trform->add_row( array(
             'DESCRIPTION', T_('Last changed date'),
             'TEXT',        date(DATEFMT_TOURNAMENT, $trule->Lastchanged) ));
    $trform->add_row( array( 'HR' ));
 
-   if( !is_null($errorlist) )
+   if( count($errorlist) )
    {
       $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(
-                       T_('There are some errors, so Tournament-rules can\'t be saved'),
-                       $errorlist ) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
    }
 
    game_settings_form( $trform, GSET_TOURNAMENT, true/*$iamrated*/, 'redraw', $vars );
@@ -145,10 +145,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    end_page(@$menu_array);
 }
 
-/*!
- * \brief Parses and checks input, returns error-list or NULL if no error.
- * \return ( vars-hash, edits-arr, errorlist|null )
- */
+// return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$trule )
 {
    $edits = array();
@@ -209,7 +206,7 @@ function parse_edit_form( &$trule )
       if( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes#edits');
    }
 
-   return array( $vars, array_unique($edits), ( count($errors) ? $errors : NULL ) );
+   return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
 
 // return true|false from val (Y|N|bool|int|str|null)

@@ -27,8 +27,10 @@ require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
+require_once( 'tournaments/include/tournament_status.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
+
 
 {
    connect2mysql();
@@ -55,6 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_properties.find_tournament($tid)");
+   $tstatus = new TournamentStatus( $tourney );
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
@@ -70,9 +73,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    // check + parse edit-form
    list( $vars, $edits, $errorlist ) = parse_edit_form( $tprops );
+   $errorlist += $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
 
    // save tournament-properties-object with values from edit-form
-   if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && is_null($errorlist) )
+   if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errorlist) == 0 )
    {
       $tprops->persist();
       jump_to("tournaments/edit_properties.php?tid={$tid}".URI_AMP
@@ -86,24 +90,22 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    // ---------- Tournament-Properties EDIT form --------------------
 
    $tform = new Form( 'tournament', $page, FORM_POST );
+   $tform->add_hidden( 'tid', $tid );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
-         'TEXT',        anchor( "view_tournament.php?tid=$tid", $tid ),
-         'TEXT',        SMALL_SPACING . '[' . make_html_safe( $tourney->Title, true ) . ']', ));
+         'TEXT',        $tourney->build_info() ));
    if( $tprops->Lastchanged )
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed date'),
             'TEXT',        date(DATEFMT_TOURNAMENT, $tprops->Lastchanged) ));
    $tform->add_row( array( 'HR' ));
 
-   if( !is_null($errorlist) )
+   if( count($errorlist) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(
-                       T_('There are some errors, so Tournament-properties can\'t be saved'),
-                       $errorlist ) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
       $tform->add_empty_row();
    }
 
@@ -164,16 +166,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
             'TEXT', make_html_safe( $tprops->Notes, true ) ));
    }
 
-   $tform->add_hidden( 'tid', $tid );
-
 
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
    $tform->echo_string();
 
-   $notes = TournamentProperties::build_notes();
-   echo_notes( 'edittournamentpropsnotesTable', T_('Tournament properties notes'), $notes );
+   echo_notes( 'edittournamentpropsnotesTable', T_('Tournament properties notes'),
+               build_properties_notes() );
 
 
    $menu_array = array();
@@ -185,10 +185,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 }
 
 
-/*!
- * \brief Parses and checks input, returns error-list or NULL if no error.
- * \return ( vars-hash, edits-arr, errorlist|null )
- */
+// return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tpr )
 {
    $edits = array();
@@ -222,7 +219,10 @@ function parse_edit_form( &$tpr )
 
       $parsed_value = TournamentUtils::parseDate( T_('End time for registration'), $vars['reg_end_time'] );
       if( is_numeric($parsed_value) )
+      {
          $tpr->RegisterEndTime = $parsed_value;
+         $vars['reg_end_time'] = TournamentUtils::formatDate($tpr->RegisterEndTime);
+      }
       else
          $errors[] = $parsed_value;
 
@@ -258,7 +258,6 @@ function parse_edit_form( &$tpr )
       $tpr->Notes = $vars['notes'];
 
       // reformat
-      $vars['reg_end_time'] = TournamentUtils::formatDate($tpr->RegisterEndTime);
       $vars['user_min_rating'] = echo_rating( $tpr->UserMinRating, false, 0, true, false );
       $vars['user_max_rating'] = echo_rating( $tpr->UserMaxRating, false, 0, true, false );
 
@@ -287,7 +286,22 @@ function parse_edit_form( &$tpr )
       swap( $vars['user_min_rating'], $vars['user_max_rating'] );
    }
 
-   return array( $vars, array_unique($edits), ( count($errors) ? $errors : NULL ) );
+   return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
 
+/*! \brief Returns array with notes about tournament properties. */
+function build_properties_notes()
+{
+   $notes = array();
+   $notes[] = T_('All properties on this page are optional.');
+   $notes[] = T_('Value of [0] is treated as no restriction.');
+   $notes[] = null; // empty line
+
+   $narr = array( T_('Rating Use Mode') );
+   foreach( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
+      $narr[] = sprintf( "%s = %s", $usemode, $descr );
+   $notes[] = $narr;
+
+   return $notes;
+}//build_properties_notes
 ?>
