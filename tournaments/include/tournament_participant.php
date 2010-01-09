@@ -125,16 +125,6 @@ class TournamentParticipant
       $this->StartRound = limit( (int)$start_round, 1, 255, 1 );
    }
 
-   /*! \brief Returns true, if customized tournament rating is needed for this participant. */
-   function needTournamentRating()
-   {
-      $ratingStatus = $this->User->RatingStatus;
-      if( $ratingStatus == RATING_INIT || $ratingStatus == RATING_RATED ) // user has rating
-         return false;
-      else // unrated user ( $ratingStatus == RATING_NONE )
-         return true;
-   }
-
    function to_string()
    {
       return " ID=[{$this->ID}]"
@@ -248,7 +238,7 @@ class TournamentParticipant
    }
 
    /*! \brief Deletes TournamentParticipant-entry for given tournament- and reg-id. */
-   function delete_tournament_participant( $tid, $rid ) //TODO used?
+   function delete_tournament_participant( $tid, $rid )
    {
       $tp = new TournamentParticipant( $rid, $tid );
       return $tp->delete( "TournamentParticipant::delete_tournament_participant(%s,$tid)" );
@@ -331,9 +321,11 @@ class TournamentParticipant
             if( $rid > 0 ) // load by reg-id, check for matching tid and uid
             {
                if( $check_tid && @$row['tid'] != $tid )
-                  error('invalid_args', "TournamentParticipant.load_tournament_participant.check.tid($tid,$uid,$rid)");
+                  error('tournament_register_edit_not_allowed',
+                        "TournamentParticipant.load_tournament_participant.check.tid($tid,$uid,$rid)");
                if( $check_uid && @$row['uid'] != $uid )
-                  error('invalid_args', "TournamentParticipant.load_tournament_participant.check.uid($tid,$uid,$rid)");
+                  error('tournament_register_edit_not_allowed',
+                        "TournamentParticipant.load_tournament_participant.check.uid($tid,$uid,$rid)");
             }
             $result = TournamentParticipant::new_from_row( $row );
          }
