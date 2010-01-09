@@ -65,7 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
    $trule = TournamentRules::load_tournament_rule( $tid );
    if( is_null($trule) )
-      $trule = new TournamentRules( 0, $tid );
+      error('bad_tournament', "Tournament.edit_rules.miss_rules($tid,$my_id)");
 
    // check + parse edit-form (notes)
    list( $vars, $edits, $errorlist ) = parse_edit_form( $trule );
