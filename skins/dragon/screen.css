@@ -222,12 +222,6 @@ h3.Header {
    margin: 1em 0px;
 }
 
-h4.SubHeader {
-   color: #800000;
-   text-align: center;
-   margin: 0em;
-}
-
 span.NativeText {
    border: 1px solid lime;
    border-style: dashed;
@@ -2609,6 +2603,9 @@ table.Forum span.ErrorMsg {
 span.EditNote {
    font-size: 80%;
 }
+span.TInfo {
+   font-size: smaller;
+}
 
 span.TWarning {
    font-size: 90%;
@@ -2678,6 +2675,12 @@ ul.SubList {
    margin: 0.2em auto 0.4em;
    line-height: 1em;
    font-size: smaller;
+}
+
+h4.SubHeader {
+   color: #800000;
+   text-align: center;
+   margin: 0em;
 }
 
 
