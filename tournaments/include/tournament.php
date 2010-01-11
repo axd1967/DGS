@@ -253,20 +253,6 @@ class Tournament
       }
    }
 
-   /*!
-    * \brief Returns empty error-array if given user can register to tournament;
-    * \note Tournament-properties are separately checked.
-    */
-   function allow_register( $uid, $ignore_status=false )
-   {
-      global $player_row;
-      $errors = array();
-      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
-         return $errors + array( T_('Guest-users are not allowed to register in tournaments.') );
-
-      return $errors;
-   }
-
    /*! \brief Returns info about tournament with linked ID, scope, type and title. */
    function build_info()
    {
