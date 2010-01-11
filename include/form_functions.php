@@ -67,7 +67,7 @@ require_once( 'include/std_functions.php' );
   * <b>Other things you could have in a row.</b>
   *
   * <ul>
-  * <li> SPACE     -- Vertical space, should be used on it's own row.
+  * <li> SPACE     -- Vertical space, should be used on it's own row. Or use add_empty_row().
   * <li> HR        -- Vertical separator, should be used on it's own row.
   * <li> TAB       -- Horizontal space. Add an empty cell.
   * <li> BR        -- Forces a linebreak within the row.
@@ -76,7 +76,6 @@ require_once( 'include/std_functions.php' );
   * <li> ROW       -- Force the class specified for the row.
   * </ul>
   *
-  * \todo Add more types (if necessary).
   * \todo To be able to use the type functions separately
   *       (probably possible already but not tested).
   * \todo Breaks within radiobuttons.
@@ -1126,7 +1125,7 @@ class Form
     */
    function create_string_func_br( &$result, $args )
    {
-      $result .= "<br>";
+      $result .= "<br>\n";
    }
 
    /*!
