@@ -55,23 +55,24 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
      tp_delete&confirm=1&tid=&rid=  : remove registration (confirmed)
      tp_cancel&tid=&rid=            : cancel remove-confirmation
      tp_ack_invite&tid=             : approve invitation by TD
-     tp_edit_invite&tid=            : reject invitation by TD, transforming to user-apply
+     tp_edit_invite&tid=            : reject invitation by TD, transforming to user-application
 */
 
    $tid = (int) @$_REQUEST['tid'];
    $rid = (int) @$_REQUEST['rid'];
+   $is_delete = (bool) @$_REQUEST['tp_delete'];
    if( $rid < 0 ) $rid = 0;
 
    if( @$_REQUEST['tp_cancel'] ) // cancel delete
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid=$rid");
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
+   $tourney = Tournament::load_tournament($tid); // existing tournament ?
+   if( is_null($tourney) || $tid <= 0 )
       error('unknown_tournament', "Tournament.register.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
-   $tprops = TournamentProperties::load_tournament_properties( $tid );
+   $tprops = TournamentProperties::load_tournament_properties($tid);
    if( is_null($tprops) )
       error('bad_tournament', "Tournament.register.miss_properties($tid,$my_id)");
 
@@ -79,119 +80,93 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $tp = TournamentParticipant::load_tournament_participant( $tid, $my_id, $rid, true, true );
    if( is_null($tp) )
       $tp = new TournamentParticipant( 0, $tid, $my_id, User::new_from_row($player_row) ); // new TP
-   else
-      $rid = $tp->ID;
+   $rid = $tp->ID; // 0=new-registration, >0 = edit-registration
 
-   // register/edit allowed?
-   $reg_errors = $tourney->allow_register($my_id);
-   if( count($reg_errors) )
-      error('tournament_register_not_allowed', "Tournament.register($tid,$my_id)");
-   $tp_has_rating = is_valid_rating($tp->Rating);
-   $reg_errors = $tprops->checkUserRegistration( $tourney, $tp_has_rating, $my_id );
-
-   $is_delete = (bool)( @$_REQUEST['tp_delete'] );
-   if( $rid && $is_delete && @$_REQUEST['confirm'] )
+   if( $rid && $is_delete && @$_REQUEST['confirm'] ) // confirm delete TP-reg
    {
       TournamentParticipant::delete_tournament_participant( $tid, $rid );
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."sysmsg="
             . urlencode( sprintf( T_('Registration for user [%s] removed!'), @$player_row['Handle'] )) );
    }
 
+
+   // init
+   $errors = array();
+   $reg_errors = $tprops->checkUserRegistration( $tourney, $my_id );
+   $allow_register = ( count($reg_errors) == 0 );
+
+   $old_status = $tp->Status;
+   $old_rating = $tp->Rating;
+   $old_start_round = $tp->StartRound;
+
+   if( !$rid ) // new-TP
+   {
+      if( count($reg_errors) )
+         $errors[] = T_('Registration restrictions disallow you to register.');
+
+      $tp->Status = $tp->calc_init_status($tprops->RatingUseMode);
+   }
    $is_invite = ( $tp->Status == TP_STATUS_INVITE );
 
-
    // check + parse edit-form
-   //TODO use same method as in edit_properties.php (error, edits, vars, parsing)
-   $errors = array();
-   $allow_register = true;
-   if( $tp->ID == 0 && count($reg_errors) ) // error only if new-reg by user
-      $errors[] = T_('Registration restrictions disallow you to register.');
-   $errors += $tstatus->check_register_status( $ttype->allow_register_tourney_status, false );
-   $allow_register = ( count($errors) == 0 );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
+   $errors += $input_errors;
 
-   $val_custom_rating = trim(get_request_arg('custom_rating'));
-   if( !$is_invite && (string)$val_custom_rating != '' )
+   // ---------- Process inputs into actions ------------------------------------
+
+   if( $is_invite )
    {
-      $custom_rating = convert_to_rating( $val_custom_rating,
-            get_request_arg('ratingtype', 'dragonrank'), true );
-      //TODO if( $custom_rating == '' ) error (bad-rating)
-   }
-   else
-      $custom_rating = $tp->Rating;
-   $custom_rating_str = echo_rating( $custom_rating, true );
-
-   if( !$is_invite && ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] ) ) // read URL-vars
-   {
-      //TODO check for rating-status
-      if( $tp->ID == 0 )
-         $tp->Status = ( $tp->User->hasRating() ) ? TP_STATUS_REGISTER : TP_STATUS_APPLY;
-
-      if( $val_custom_rating != '' && (string)$custom_rating != '' )
+      // handle invitation: ACK (approval)
+      if( @$_REQUEST['tp_ack_invite'] ) // accepted invite
       {
-         $tp->Rating = $custom_rating;
+         $tp->Status = TP_STATUS_REGISTER;
+         $tp->Flags |= TP_FLAGS_ACK_INVITE;
+         $tp->persist(); // update
+         jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
+               . urlencode(T_('Invitation accepted!')) );
+      }
+
+      // handle invitation: NACK (rejection) -> transform into APPLY
+      if( @$_REQUEST['tp_edit_invite'] ) // declined invite with edit
+      {
          $tp->Status = TP_STATUS_APPLY;
+         $tp->Flags &= ~TP_FLAGS_ACK_APPLY;
+         $tp->persist(); // update
+         jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
+               . urlencode(T_('Invitation declined and transformed into application!')) );
       }
+   }
 
-      if( $ttype->need_rounds )
+   if( $tp->Status == TP_STATUS_REGISTER )
+   {
+      // NOTE: an APPLY should not be reverted to REGISTER-status by user
+      //       (there might be other reasons for the apply than just round and rating)
+      if( $tp->StartRound > 1 && $tp->StartRound != $old_start_round )
+         $tp->Status = TP_STATUS_APPLY;
+      if( $tp->hasRating() && (int)$old_rating != (int)$tp->Rating && (int)$tp->User->Rating != (int)$tp->Rating )
+         $tp->Status = TP_STATUS_APPLY;
+   }
+
+   if( $old_status != $tp->Status )
+      $edits[] = T_('Status#edits');
+
+   // persist TP-reg/edit in database
+   if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && $allow_register && count($errors) == 0 )
+   {
+      if( $tp->Status == TP_STATUS_REGISTER && $tprops->need_rating_copy() )
       {
-         $start_round = trim(get_request_arg('start_round'));
-         if( $start_round != '' && is_numeric($start_round) )
-         {
-            // check round
-            if( $tourney->Rounds > 0 && $start_round > $tourney->Rounds )
-               $start_round = $tourney->Rounds;
-            if( $tp->StartRound != $start_round )
-            {
-               $tp->StartRound = $start_round;
-               $tp->Status = TP_STATUS_APPLY;
-            }
-         }
+         if( !$vars['_has_custom_rating'] ) // copy only if no custom-rating
+            $tp->Rating = $tp->User->Rating;
       }
-   }
 
-   if( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview']
-         || @$_REQUEST['tp_ack_invite'] || @$_REQUEST['tp_edit_invite'] ) // read URL-vars
-   {
-      $tp->Comment = trim(get_request_arg('comment'));
-      $tp->UserMessage = trim(get_request_arg('user_message'));
-   }
-
-   // handle invitation: ACK (approval)
-   if( $is_invite && @$_REQUEST['tp_ack_invite'] ) // accepted invite
-   {
-      $tp->Status = TP_STATUS_REGISTER;
-      $tp->Flags |= TP_FLAGS_ACK_INVITE;
-      $tp->persist(); // update
-      jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
-            . urlencode(T_('Invitation accepted!')) );
-   }
-
-   // handle invitation: NACK (rejection)
-   if( $is_invite && @$_REQUEST['tp_edit_invite'] ) // declined invite with edit
-   {
-      $tp->Status = TP_STATUS_APPLY;
-      $tp->Flags &= ~TP_FLAGS_ACK_APPLY;
-      $tp->persist(); // update
-      jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
-            . urlencode(T_('Invitation declined and transformed into application!')) );
-   }
-
-
-   // persist TP in database
-   if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
-   {
       $tp->persist(); // insert or update
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
             . urlencode(T_('Registration saved!')) );
    }
 
-   $reg_user_status = TournamentParticipant::isTournamentParticipant( $tid, $my_id );
-   $reg_user_info = ( count($tourney->allow_register($my_id, true)) )
-      ? '' : TournamentParticipant::getStatusText( $reg_user_status, false, true );
-
 
    $page = "register.php";
-   if( @$_REQUEST['tp_delete'] )
+   if( $is_delete )
       $title = T_('Tournament Registration removal for [%s]');
    else
       $title = T_('Tournament Registration for [%s]');
@@ -199,8 +174,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
 
    // ---------- Tournament-Registration EDIT form ------------------------------
-
-   $current_rating = echo_rating( @$player_row['Rating2'], true, $my_id );
 
    $tpform = new Form( 'tournamentparticipant', $page, FORM_POST );
    $tpform->add_hidden( 'tid', $tid );
@@ -222,71 +195,101 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        date(DATE_FMT2, $tp->Lastchanged), ));
    $tpform->add_row( array(
-         'DESCRIPTION', T_('Status'),
-         'TEXT',        ($rid ? TournamentParticipant::getStatusText($tp->Status, true) : NO_VALUE)
-                        . "<br>\n<span class=\"TUserStatus\">$reg_user_info</span>", ));
+         'DESCRIPTION', T_('Current Registration Status'),
+         'TEXT', ( $old_status ? TournamentParticipant::getStatusText($old_status) : NO_VALUE )
+                  . SEP_SPACING
+                  . span('TUserStatus', TournamentParticipant::getStatusUserInfo($old_status)), ));
+   if( $old_status != $tp->Status )
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('New Registration Status'),
+            'TEXT',        span('TWarning', TournamentParticipant::getStatusText($tp->Status)), ));
 
    if( count($errors) )
    {
+      $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
    }
+   if( count($reg_errors) )
+   {
+      // NOTE: if tourney-restrictions forbid registration -> TP can ask TD for invitation
+      $tpform->add_row( array( 'HR' ));
+      $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
+      $tpform->add_row( array(
+            'TEXT', TournamentUtils::buildErrorListString(
+                       T_('You are not allowed to register for this tournament:'), $reg_errors) ));
+   }
 
-   $tpform->add_empty_row();
+   // EDIT: Ratings --------------------
+
+   $tpform->add_row( array( 'HR' ));
    $tpform->add_row( array(
          'DESCRIPTION', T_('Rating Use Mode'),
-         'TEXT',  sprintf( "<span class=\"TInfo\">%s</span>",
-                           TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false) ), ));
+         'TEXT',        span('TInfo', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false)), ));
+
+   $current_rating_str = ($tp->User->hasRating()) ? echo_rating($tp->User->Rating, true, $my_id) : NO_VALUE;
    $tpform->add_row( array(
-         'DESCRIPTION', T_('Current Rating'),
-         'TEXT',        ( $current_rating ? $current_rating : NO_VALUE), ));
-   if( $allow_register && !$is_invite && !$is_delete )
+         'DESCRIPTION', T_('Current User Rating'),
+         'TEXT',        $current_rating_str, ));
+
+   if( $allow_register && !$is_invite && !$is_delete && $tprops->allow_rating_edit() )
    {
+      $custom_rating_str = ( $tp->hasRating() && $vars['_has_custom_rating'] )
+         ? echo_rating($tp->Rating, true) : NO_VALUE;
+      $rating_type = get_request_arg('rating_type', 'dragonrank');
+
       $tpform->add_row( array(
-            'DESCRIPTION', T_('Custom Rating'),
-            'TEXT',        ( $custom_rating_str ? $custom_rating_str : NO_VALUE ) . SMALL_SPACING,
-            'TEXTINPUT',   'custom_rating', 10, 10, get_request_arg('custom_rating'), '',
-            'SELECTBOX',   'ratingtype', 1, getRatingTypes(),
-                           get_request_arg('ratingtype','dragonrank'), false,
+            'DESCRIPTION', T_('Customized Rating'),
+            'TEXT',        $custom_rating_str . SMALL_SPACING,
+            'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'], '',
+            'SELECTBOX',   'ratingtype', 1, getRatingTypes(), $rating_type, false,
             'SUBMITBUTTON', 'tp_preview', T_('Convert Rating'), ));
    }
-   if( abs($tp->Rating) < OUT_OF_RATING )
+   if( $tp->hasRating() )
       $tpform->add_row( array(
             'DESCRIPTION', T_('Tournament Rating'),
-            'TEXT',        echo_rating( $tp->Rating, true, $my_id ), ));
+            'TEXT',        echo_rating($tp->Rating, true), ));
    $tpform->add_empty_row();
+
+   // EDIT: Rounds ---------------------
 
    if( $ttype->need_rounds )
    {
-      if( $allow_register )
-         $tpform->add_row( array(
-               'DESCRIPTION', T_('Start Round'),
-               'TEXT',        $tp->StartRound, ));
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('Current Start Round'),
+            'TEXT',        $old_start_round, ));
       if( $allow_register && !$is_invite && !$is_delete )
       {
          $tpform->add_row( array(
-               'DESCRIPTION', T_('Custom Start Round'),
-               'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '',
+               'DESCRIPTION', T_('Customized Start Round'),
+               'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'], '',
                'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
       }
       $tpform->add_empty_row();
    }
+
+   // EDIT: Texts ----------------------
 
    if( $allow_register && !$is_delete )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Public User Comment'),
             'TEXTINPUT',   'comment', 60, 60, $tp->Comment, '', ));
-
       $tpform->add_row( array(
             'DESCRIPTION', T_('User Message'),
-            'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage ));
+            'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage, ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Admin Message'),
-            'TEXT', make_html_safe( $tp->AdminMessage, true ) ));
+            'TEXT', make_html_safe($tp->AdminMessage, true), ));
    }
 
+   if( $allow_register )
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('Unsaved edits'),
+            'TEXT',        span('TWarning', implode(', ', $edits ), '[%s]'), ));
+
+   // submit-buttons
    if( $is_delete )
    {
       $tpform->add_hidden( 'confirm', 1 );
@@ -324,16 +327,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   if( count($reg_errors) )
-   {
-      echo "<center><hr class=Inline></center>\n";
-      section( 'restriction', T_('Registration restrictions') );
-      echo_notes( 'registerrestrictionsTable',
-         T_('You are not eligible to register for this tournament:'), $reg_errors, false );
-      // NOTE: if tourney-restrictions forbid registration -> TP can ask TD for invitation
-      echo "<center><hr class=Inline></center>\n";
-   }
-
    $tpform->echo_string();
 
    echo_notes( 'registernotesTable', T_('Registration notes'), build_participant_notes() );
@@ -343,10 +336,87 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+
+   $reg_user_str = TournamentParticipant::getLinkTextRegistration( $tourney, $my_id, $old_status );
+   $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
 
    end_page(@$menu_array);
 }
 
+
+// return [ vars-hash, edits-arr, errorlist ]
+function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
+{
+   $edits = array();
+   $errors = array();
+   $is_posted = ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] );
+
+   // read from props or set defaults
+   $vars = array(
+      'custom_rating'      => '', // no default
+      '_has_custom_rating' => false,
+      'start_round'        => $tp->StartRound,
+      'comment'            => $tp->Comment,
+      'user_message'       => $tp->UserMessage,
+   );
+
+   $old_vals = array() + $vars; // copy to determine edit-changes
+   // read URL-vals into vars
+   foreach( $vars as $key => $val )
+      $vars[$key] = get_request_arg( $key, $val );
+
+   // parse URL-vars
+   if( $is_posted && ($tp->Status != TP_STATUS_INVITE) )
+   {
+      $old_vals['custom_rating'] = -OUT_OF_RATING;
+
+      $new_value = trim($vars['custom_rating']); // optional
+      if( (string)$new_value != '' )
+      {
+         $rating_type = get_request_arg('rating_type', 'dragonrank');
+         $custom_rating = convert_to_rating( $new_value, $rating_type, true );
+         if( !is_valid_rating($custom_rating) )
+            $errors[] = ErrorCode::get_error_text('invalid_rating');
+         else
+         {
+            $tp->Rating = $custom_rating;
+            $vars['custom_rating'] = echo_rating( $tp->Rating, false, 0, true, false ); // reformat
+            $vars['_has_custom_rating'] = true;
+         }
+      }
+
+      if( $ttype->need_rounds )
+      {
+         $new_value = trim($vars['start_round']); // optional
+         if( (string)$new_value != '' )
+         {
+            if( !is_numeric($new_value) || $new_value < 1 )
+               $errors[] = T_('Expecting positive number for start round');
+            elseif( $tourney->Rounds > 0 && $new_value > $tourney->Rounds )
+               $errors[] = sprintf( T_('Start round is out of range of actual rounds [1..%s] for this tournament.'), $tourney->Rounds );
+            else
+               $tp->StartRound = $new_value;
+         }
+      }
+
+      // determine edits
+      if( $old_vals['custom_rating'] != $tp->Rating ) $edits[] = T_('Rating#edits');
+      if( $old_vals['start_round'] != $tp->StartRound ) $edits[] = T_('StartRound#edits');
+   }
+
+   if( $is_posted || @$_REQUEST['tp_ack_invite'] || @$_REQUEST['tp_edit_invite'] )
+   {
+      $tp->Comment = trim(get_request_arg('comment'));
+      $tp->UserMessage = trim(get_request_arg('user_message'));
+
+      // determine edits
+      if( $old_vals['comment'] != $tp->Comment ) $edits[] = T_('Comment#edits');
+      if( $old_vals['user_message'] != $tp->UserMessage ) $edits[] = T_('UserMessage#edits');
+   }
+
+   return array( $vars, array_unique($edits), $errors );
+}//parse_edit_form
 
 /*! \brief Returns array with notes about registering users. */
 function build_participant_notes( $deny_reason=null, $intro=true )
@@ -370,17 +440,16 @@ function build_participant_notes( $deny_reason=null, $intro=true )
       $notes[] = null; // empty line
    }
 
-   $narr = array( T_('Registration status') );
+   $narr = array( T_('Registration Status') );
    $narr[] = sprintf( '%s = %s', NO_VALUE, T_('user is not registered for tournament#tpstat_unreg') );
    $arrst = array();
    $arrst[TP_STATUS_APPLY] = T_('user-application needs verification by tournament director#tpstat_apply');
-   $arrst[TP_STATUS_INVITE] = T_('user has been invited by tournament director#tpstat_invite');
+   $arrst[TP_STATUS_INVITE] = T_('user has been invited by tournament director and needs verification by user#tpstat_invite');
    $arrst[TP_STATUS_REGISTER] = T_('user has been successfully registered#tpstat_reg');
    foreach( $arrst as $status => $descr )
-      $narr[] = sprintf( "%s = $descr", TournamentParticipant::getStatusText($status, true) );
+      $narr[] = sprintf( "%s = $descr", TournamentParticipant::getStatusText($status) );
    $notes[] = $narr;
 
    return $notes;
 }//build_participant_notes
-
 ?>
