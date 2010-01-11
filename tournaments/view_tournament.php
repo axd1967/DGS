@@ -112,16 +112,14 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    echo "<hr>\n", '<a name="result">', "\n";
    section( 'tournament', T_('Tournament Status#T_view') );
 
-   $reg_user_status = TournamentParticipant::isTournamentParticipant( $tid, $my_id );
-   $reg_user_info = ( count($tourney->allow_register($my_id, true)) )
-      ? '' : TournamentParticipant::getStatusText( $reg_user_status, false, true );
+   $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
+   $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
 
    $itable = new Table_info('tstatus');
    $itable->add_sinfo( T_('Current Tournament Status:'), $tourney->getStatusText($tourney->Status) );
    $itable->add_sinfo( T_('Current Tournament Round:'), $tourney->formatRound() );
    if( $reg_user_info )
-      $itable->add_sinfo( T_('Registration status:'),
-         sprintf( '<span class="TUserStatus">%s</span>', $reg_user_info ));
+      $itable->add_sinfo( T_('Registration status:'), span('TUserStatus', $reg_user_info) );
 
    echo $itable->make_table();
 
