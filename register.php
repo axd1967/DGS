@@ -28,7 +28,13 @@ require_once( "include/register_functions.php" );
 
    error_on_blocked_ip( 'ip_blocked_register' );
 
+   // logout if still logged-in
    $logged_in = who_is_logged( $player_row);
+   if( $logged_in )
+   {
+      set_login_cookie("","", true);
+      $logged_in = who_is_logged( $player_row);
+   }
 
    $reg = new UserRegistration( /*die_on_error*/false );
    $errors = 0;
