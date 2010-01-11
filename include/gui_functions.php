@@ -268,4 +268,9 @@ function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
    return "{$spc}{$tag_l}{$str}{$tag_r}{$spc}";
 }
 
+function span( $class, $str, $strfmt='%s' )
+{
+   return sprintf( "<span class=\"$class\">$strfmt</span>", $str );
+}
+
 ?>
