@@ -69,9 +69,9 @@ class TournamentParticipant
    var $tid;
    var $uid;
    var $User; // User-object
-   var $Status;
+   var $Status; // null | TP_STATUS_...
    var $Flags;
-   var $Rating;
+   var $Rating; // -OUT_OF_RATING | valid-rating
    var $StartRound;
    var $AuthToken;
    var $Created;
@@ -144,6 +144,22 @@ class TournamentParticipant
             . ", AdminMessage=[{$this->AdminMessage}]"
          ;
    }
+
+   /*! \brief Returns true if TP will need to enter a rating to fulfill T-restrictions. */
+   function need_rating() //TODO used?
+   {
+      return !$this->User->hasRating();
+   }
+
+   function calc_init_status( $rating_use_mode )
+   {
+      return ( $rating_use_mode == TPROP_RUMODE_COPY_CUSTOM && !$this->User->hasRating() )
+         ? TP_STATUS_APPLY
+         : TP_STATUS_REGISTER;
+   }
+
+
+
 
    /*! \brief Inserts or updates tournament-participant in database. */
    function persist()
@@ -399,6 +415,11 @@ class TournamentParticipant
       }
    }
 
+   function getStatusUserInfo( $status )
+   {
+      return TournamentParticipant::getStatusText($status, false, true);
+   }
+
    /*! \brief Returns flags-text for given int-bitmask or all flags-texts (if arg=null). */
    function getFlagsText( $flags=null )
    {
@@ -431,10 +452,7 @@ class TournamentParticipant
       if( is_null($reg_user_status) )
          $reg_user_status = TournamentParticipant::isTournamentParticipant( $tourney->ID, $uid );
 
-      if( count($tourney->allow_register($uid)) ) // not allowed
-         return ($reg_user_status) ? T_('Show my registration') : '';
-      else
-         return ($reg_user_status) ? T_('Edit my registration') : T_('Registration');
+      return ($reg_user_status) ? T_('Edit my registration') : T_('Registration');
    }
 
    function get_edit_tournament_status()
