@@ -116,6 +116,20 @@ class TournamentProperties
       return print_r( $this, true );
    }
 
+   /*! \brief Returns true, if user-rating need to be copied. */
+   function need_rating_copy()
+   {
+      return ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM
+            || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX );
+   }
+
+   /*! \brief Returns true, if custom T-rating can be specified. */
+   function allow_rating_edit()
+   {
+      return ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM );
+   }
+
+
    /*! \brief Inserts or updates tournament-properties in database. */
    function persist()
    {
@@ -171,10 +185,9 @@ class TournamentProperties
     * \brief Checks potential registration by given user and returns non-null
     *        list of matching criteria, that disallow registration.
     * \param $tourney Tournament with set TP_Counts (loaded if not set)
-    * \param $tp_has_rating = is_valid_rating(TournamentParticipant->Rating)
     * \param $check_user User-object or user-id
     */
-   function checkUserRegistration( $tourney, $tp_has_rating, $check_user )
+   function checkUserRegistration( $tourney, $check_user )
    {
       global $NOW;
       $errors = array();
@@ -199,12 +212,11 @@ class TournamentProperties
 
       $user = $this->_load_user($check_user);
 
-      // use-rating-mode
+      // check use-rating-modes
       if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {// need user-rating or tournament-rating
-         //TODO BUG: CURR_FIX must NOT check tp_has_rating
-         if( !$user->hasRating() && !$tp_has_rating )
-            $errors[] = T_('User has no Dragon or tournament rating, which is needed for tournament rating mode:')
+         if( !$user->hasRating() )
+            $errors[] = T_('User has no valid Dragon rating, which is needed for tournament rating mode:')
                . "\n" . TournamentProperties::getRatingUseModeText($this->RatingUseMode, false);
       }
 
@@ -213,7 +225,7 @@ class TournamentProperties
       {
          // user must have rating, because tournament-games are rated
          if( !$user->hasRating() )
-            $errors[] = T_('User has no Dragon rating, which is required for this tournament.');
+            $errors[] = T_('User has no Dragon rating, which is required for this rated tournament.');
          elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
             $errors[] = sprintf( T_('User rating [%s] does not match the required rating range [%s - %s].'),
                echo_rating( $user->Rating ),
@@ -236,7 +248,7 @@ class TournamentProperties
       }
 
       return $errors;
-   }// checkUser
+   } //checkUserRegistration
 
    /*! \brief (internally) loads User-object if user is only user-id and returns User-object. */
    function _load_user( $check_user )
@@ -328,7 +340,7 @@ class TournamentProperties
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key] = $arr;
 
          $arr = array();
-         $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is copied on registration, but can be customized by user.');
+         $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is used for registration, but can be customized by user.');
          $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is copied on registration and can not be changed.');
          $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Dragon user rating will be used during whole tournament.');
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_LONG'] = $arr;
