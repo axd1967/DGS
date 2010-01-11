@@ -140,6 +140,27 @@ Description:
    - REGISTER = user is registered, can be unregistered by user or TD
    - INVITE = user is invited, user need to approve or reject invitation
 
+   - State-Transitions for TD & User:
+      - INIT = not registered to T
+      - "<OLD-STATE> ---[action]---> <NEW-STATE>"
+
+      - State-Transitions for User:
+
+            INIT ---[register]---> REGISTER (matching T-restrictions, no customization)
+            INIT ---[apply]------> APPLY    (customized registration)
+            INVITE ---[ACK-Invite]----> REGISTER
+            INVITE ---[EDIT-Invite]---> APPLY
+            ( APPLY | REGISTER | INVITE ) ---[remove]----> INIT
+
+      - State-Diagram for TD:
+
+            INIT ---[register]---> REGISTER
+            INIT ---[apply]------> APPLY
+            INIT ---[invite]-----> INVITE
+            APPLY ---[ACK-Apply]----> REGISTER
+            APPLY ---[EDIT-Apply]---> INVITE
+            ( APPLY | REGISTER | INVITE ) ---[remove + notify user]---> INIT
+
 * Flags :
    - additional properties of registered user:
       - INVITED (by TD)
