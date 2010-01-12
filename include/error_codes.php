@@ -419,6 +419,9 @@ class ErrorCode
          $arr['bad_tournament'] =
             T_("Sorry, there's something wrong with this tournament. Please contact a tournament admin.");
 
+         $arr['tournament_create_not_allowed'] =
+            T_("Sorry, you are not allowed to create this type of tournament.");
+
          $arr['tournament_edit_not_allowed'] =
             T_("Sorry, you are not allowed to add or edit this tournament.");
 
