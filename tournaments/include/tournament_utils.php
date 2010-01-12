@@ -112,8 +112,7 @@ class TournamentUtils
    function buildErrorListString( $errmsg, $errors )
    {
       return ( count($errors) )
-         ? '<span class="ErrorMsg">' . ( $errmsg ? "$errmsg:" : '')
-               . "<br>\n* " . implode(",<br>\n* ", $errors) . '</span>'
+         ? span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode(",<br>\n* ", $errors))
          : '';
    }
 

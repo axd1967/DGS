@@ -144,8 +144,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'DESCRIPTION', T_('Start time'),
          'TEXTINPUT',   'start_time', 20, 20,
                         TournamentUtils::formatDate($tourney->StartTime, $vars['start_time']), '',
-         'TEXT',  '&nbsp;<span class="EditNote">'
-                     . sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT ) . '</span>' ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('End time'),
          'TEXT',        TournamentUtils::formatDate($tourney->EndTime, NO_VALUE) ));
@@ -178,7 +177,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
-         'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits)), ));
+         'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
    $tform->add_empty_row();
    $tform->add_row( array(

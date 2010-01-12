@@ -113,8 +113,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Register end time'),
          'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'], '',
-         'TEXT',  '&nbsp;<span class="EditNote">'
-                     . sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT ) . '</span>' ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Restrict participants'),
@@ -150,7 +149,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'TEXTAREA',    'notes', 70, 10, $vars['notes'] ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
-         'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits)), ));
+         'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons

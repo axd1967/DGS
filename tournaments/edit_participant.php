@@ -172,8 +172,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    // check user-attributes
    if( !is_null($tprops) )
    {
-      $tp_has_rating = is_valid_rating($tp->Rating);
-      $reg_errors = $tprops->checkUserRegistration( $tourney, $tp_has_rating, $user );
+      $tp_has_rating = is_valid_rating($tp->Rating); //TODO used?
+      $reg_errors = $tprops->checkUserRegistration( $tourney, $user );
    }
    else
       $reg_errors = array();
@@ -219,12 +219,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
    if( count($reg_errors) )
    {
-      $restrictions = '<span class="TWarning">'
-         . T_('<b>Registration restrictions</b> for this tournament and this user:')
-         . "<ul>";
+      $restrictions = T_('<b>Registration restrictions</b> for this tournament and this user:')
+         . "\n<ul>";
       foreach( $reg_errors as $err )
          $restrictions .= "<li>" . make_html_safe($err, 'line') . "\n";
-      $restrictions .= "</ul><hr></span>\n";
+      $restrictions .= "</ul><hr>";
+      $restrictions = span('TWarning', $restrictions);
       $tpform->add_row( array(
             'OWNHTML', "<td colspan=2>$restrictions</td>" ));
    }
@@ -270,9 +270,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       if( !is_null($tprops) )
          $tpform->add_row( array(
                'DESCRIPTION', T_('Rating Use Mode'),
-               'TEXT',  TournamentProperties::getRatingUseModeText($tprops->RatingUseMode) .
-                        sprintf( "<br>\n<span class=\"TInfo\">(%s)</span>",
-                                 TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false) ), ));
+               'TEXT',  TournamentProperties::getRatingUseModeText($tprops->RatingUseMode)
+                        . "<br>\n"
+                        . span('TInfo', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false), '(%s)'), ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current Rating'),
             'TEXT',        build_rating_str($tp->User->Rating, $tp->uid), ));
@@ -328,7 +328,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
       $tpform->add_row( array(
             'DESCRIPTION', T_('Unsaved edits'),
-            'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits )), ));
+            'TEXT',        span('TWarning', implode(', ', $edits ), '[%s]'), ));
 
       if( $is_delete )
       {

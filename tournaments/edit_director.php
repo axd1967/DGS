@@ -169,8 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
             $tdform->add_row( array(
                   'DESCRIPTION', T_('Comment'),
                   'TEXTAREA', 'comment', 60, 3, $director->Comment,
-                  'BR', 'TEXT', '<span class="EditNote">'
-                              . T_('(Keep comment short, max. 255 chars)') . '</span>' ));
+                  'BR', 'TEXT', span('EditNote', T_('(Keep comment short, max. 255 chars)')) ));
             $preview_descr = T_('Preview');
          }
          else
@@ -178,7 +177,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
          $tdform->add_row( array(
                'DESCRIPTION', T_('Unsaved edits'),
-               'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits)), ));
+               'TEXT',        span('TWarning', implode(', ', $edits), '[%s]') ));
 
          if( @$_REQUEST['td_preview'] || $director->Comment != '' )
          {

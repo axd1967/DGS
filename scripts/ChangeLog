@@ -24,6 +24,16 @@ ChangeLog
 
 2010-01-11 juga
 
+   * tournaments/include/tournament_utils.php,
+     tournaments/edit_director.php,
+     tournaments/edit_participant.php,
+     tournaments/edit_properties.php,
+     tournaments/edit_round.php,
+     tournaments/edit_rules.php,
+     tournaments/edit_status.php,
+     tournaments/edit_tournament.php:
+   - replace "<span class=..>str</span>" by span(..)-func-call in gui_functions.php
+
    * tournaments/include/tournament_factory.php (TournamentFactory.getTournamentTypes),
      tournaments/include/tournament_template.php (class TournamentTemplate),
      tournaments/include/types/dgs_ladder.php (class DgsLadderTournament),

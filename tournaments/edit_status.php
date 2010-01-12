@@ -145,8 +145,8 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          $tform->add_empty_row();
          $tform->add_row( array(
                'DESCRIPTION', T_('Confirmation notes#tourney'),
-               'TEXT', sprintf( "<span class=\"ErrorMsg\">%s<br>\n%s</span>",
-                                $tourney->build_role_info(), $confirm_notes ), ));
+               'TEXT', span('ErrorMsg',
+                          sprintf( "%s<br>\n%s", $tourney->build_role_info(), $confirm_notes )), ));
          $tform->add_row( array(
                'TAB', 'CELL', 1, '', // align submit-buttons
                'SUBMITBUTTON', 't_confirm', T_('Confirm status change'),

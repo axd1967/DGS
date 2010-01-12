@@ -142,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $trform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
-         'TEXT', sprintf( '<span class="TWarning">[%s]</span>', implode(', ', $edits)), ));
+         'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
    $trform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
