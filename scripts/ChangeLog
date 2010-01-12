@@ -22,6 +22,114 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-11 juga
+
+   * tournaments/include/tournament_factory.php (TournamentFactory.getTournamentTypes),
+     tournaments/include/tournament_template.php (class TournamentTemplate),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/wizard.php (build_tourney_type_radio):
+   - check if user is allowed to create selected type of tournament
+     - added tournament-type title
+     - added attribute to configure if tournament-creation requires tournament-admin
+     - show admin-required types with disabled radio-buttons
+     - scan list with available tournament-types using tournament-factory
+
+   * include/form_functions.php (Form.create_string_func_radiobuttons,
+       ~.create_string_func_radiobuttonsx, ~.print_insert_radio_buttonsx,
+       ~.parse_input_standard_attributes, ~.get_input_attbs):
+   - added RADIOBUTTONSX-elementtype with additional attributes to disable radio-button
+
+   * tournaments/register.php (parse_edit_form, build_participant_notes):
+   - enhanced tournament-registration with parse-edit-form (better error-parsing)
+     - added checks for custom-rating and start-round
+     - ask custom-rating only if needed and allowed by rating-use-mode
+     - check if registration allowed for tourney-status, properties and user-rating
+     - init participant-status for new registration to APPLY or REGISTER
+     - update participant-status to APPLY for edits of custom-rating if different
+       to current-user-rating and starting-round
+     - copy user-rating to tournament-rating if needed for rating-use-modes
+     - show more static info (tourney-info, old/new status, rating-use-mode)
+   - code/GUI cleanups-refactorings (clearer structure), bugfixes, adjusted texts
+
+   * specs/db/table-Tournaments.txt:
+   - added state-transitions for TournamentParticipant.Status for TD & User
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.need_rating,
+       ~.calc_init_status, ~.getStatusUserInfo, ~.getLinkTextRegistration),
+     tournaments/include/tournament_properties.php (TournamentProperties.need_rating_copy,
+       ~.allow_rating_edit, ~.checkUserRegistration, ~.getRatingUseModeText),
+     tournaments/include/tournament.php (class Tournament),
+     tournaments/view_tournament.php:
+   - added helper-methods to decide for tournament-registration and participants-edits
+   - fixed rating-check for tournament-restrictions for user
+   - fixed tournament-participant status-user-info
+   - removed allow_register()-function
+   - adjusted texts
+
+   * include/gui_functions.php (span):
+   - added helper method span() to format string with <span...>
+
+   * include/form_functions.php (Form.create_string_func_br):
+   - added LF for 'BR'-form-element
+
+   * register.php:
+   - logout if still logged-in
+
+2010-01-09 juga
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_action_status,
+       ~.check_edit_status, ~.check_register_status),
+     tournaments/edit_participant.php (parse_edit_form, build_rating_str),
+     tournaments/register.php (build_participant_notes),
+     skins/dragon/screen.css:
+   - checked for bad-tournament (missing tournament-properties)
+   - enhanced tournament-participant-edit with parse-edit-form (better error-parsing),
+     added checks for custom-rating and start-round
+   - check if registration allowed for tourney-status
+   - used tournament-specific attribute 'need_rounds' for rounds-stuff
+   - show more static info (tourney-info, rating-use-mode)
+   - code/GUI cleanups-refactorings, bugfixes, adjusted texts
+
+   * tournaments/edit_properties.php (parse_edit_form), tournaments/edit_rules.php:
+   - checked for bad-tournament (missing tournament-properties/rules)
+   - bugfix parsing value of checkboxes (user-rated)
+   - bugfix showing rating-use-mode
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant,
+       ~.delete_tournament_participant),
+     tournaments/include/tournament_properties.php (class TournamentProperties,
+       ~.checkUserRegistration, ~._load_user, ~.getRatingUseModeText),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - removed TournamentProperties 'ENTER_FIX'-RatingUseMode
+   - used better error-code if registration-edit forbidden
+   - code cleanups-refactorings, added TODOs
+-----------
+-- removed RatingUseMode 'ENTER_FIX'
+ALTER TABLE TournamentProperties
+   CHANGE RatingUseMode RatingUseMode enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM' ;
+-----------
+
+   * tournaments/include/tournament_template.php (class TournamentTemplate),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament),
+     tournaments/edit_tournament.php (parse_edit_form):
+   - added attributes specific for tourney-types into TournamentTemplate with defaults:
+     - 'need_rounds' to express if tournament-type has rounds
+     - 'allow_register_tourney_status' containing allowed tournament-status for registrations
+   - fixed checks on rounds-stuff
+
+   * tournaments/view_tournament.php (echo_tournament_rules, echo_tournament_registration):
+   - emphasized Komi-/Handicap-adjustment for tournament-rules
+   - code/GUI cleanups-refactorings, adjusted texts
+
+   * include/gui_functions.php (echo_notes, spacing):
+   - bugfix (missed <li>), optimized replacing string-concat with echo, better LF'ing
+   - added method for easy building of spacings with formatting
+
+   * include/error_codes.php:
+   - added error-codes: invalid_rating, bad_tournament, tournament_register_edit_not_allowed
+
 2010-01-08 juga
 
    * site_map.php:
