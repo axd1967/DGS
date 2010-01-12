@@ -50,6 +50,7 @@ require_once( 'include/std_functions.php' );
   * <li> Textarea
   * <li> Selectbox
   * <li> Radiobuttons
+  * <li> RadiobuttonsX
   * <li> Checkbox
   * <li> Submitbutton
   * <li> SubmitbuttonX
@@ -312,6 +313,12 @@ class Form
                                   'SpanAllColumns' => false,
                                   'Attbs'   => array('class'=>'FormSelectbox') ),
          'RADIOBUTTONS' => array( 'NumArgs' => 3,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Attbs'   => array('class'=>'FormRadiobuttons') ),
+         'RADIOBUTTONSX' => array( 'NumArgs' => 4,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
@@ -1051,7 +1058,16 @@ class Form
     */
    function create_string_func_radiobuttons( &$result, $args )
    {
-      $result .= $this->print_insert_radio_buttons( $args[0], $args[1], $args[2] );
+      $result .= $this->print_insert_radio_buttonsx( $args[0], $args[1], $args[2], '', true );
+   }
+
+   /*!
+    * \brief Function for making radiobuttons string extended with attributes in the standard form
+    * \internal
+    */
+   function create_string_func_radiobuttonsx( &$result, $args )
+   {
+      $result .= $this->print_insert_radio_buttonsx( $args[0], $args[1], $args[2], $args[3], false );
    }
 
    /*!
@@ -1385,8 +1401,11 @@ class Form
     * \param $selected    If multiple this should be an array of all values
     *                     that should be selected from start else the value
     *                     of the selected value.
+    * \param $attbs Additionnal attributes.
+    * \param $use_disable false to restrict 'disabled'-attribute to $attbs-argument;
+    *                     otherwise this->disabled is used.
     */
-   function print_insert_radio_buttons( $name, $value_array, $selected )
+   function print_insert_radio_buttonsx( $name, $value_array, $selected, $attbs='', $use_disable )
    {
       $result = '';
       foreach( $value_array as $value => $info )
@@ -1395,11 +1414,14 @@ class Form
          if($value == $selected)
             $result .= " checked";
 
-         $result .= $this->get_input_attbs() . "> $info";
+         $result .= $this->get_input_attbs($use_disable);
+         $result .= Form::parse_input_standard_attributes($attbs);
+         $result .= "> $info";
       }
 
       return $result;
    }
+
 
    /*!
     * \brief This will insert some checkboxes.
@@ -1586,6 +1608,12 @@ class Form
             }
          }
 
+         if( isset($attbs['disabled']) )
+         {
+            $str .= ' disabled';
+            unset($attbs['disabled']);
+         }
+
          // skip some attributes
          if( $rx_skipattr )
          {
@@ -1619,9 +1647,9 @@ class Form
    }
 
    /*! \brief Get the global attributs string of input fields. */
-   function get_input_attbs()
+   function get_input_attbs( $use_disable=true )
    {
-      return ($this->disabled)
+      return ($use_disable && $this->disabled)
          ? ' disabled'
          : ( $this->tabindex ? ' tabindex="'.($this->tabindex++).'"' : '');
    }
