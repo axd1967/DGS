@@ -50,12 +50,16 @@ require_once 'tournaments/include/tournament_factory.php';
 
    // check + parse args
    $type = (int)get_request_arg('type');
-   $tourney = ( $type ) ? TournamentFactory::getTournament($type) : null;
+   $ttype = ( $type ) ? TournamentFactory::getTournament($type) : null;
 
    // save tournament-object with values from edit-form
-   if( @$_REQUEST['t_save'] && !is_null($tourney) )
+   if( @$_REQUEST['t_save'] && !is_null($ttype) )
    {
-      $tid = $tourney->createTournament();
+      // check if user is allowed to create tournament
+      if( $ttype->need_admin_create_tourney && !$is_admin )
+         error('tournament_create_not_allowed', "tournament_wizard.create.non_admin($my_id,$type)");
+
+      $tid = $ttype->createTournament();
       jump_to("tournaments/manage_tournament.php?tid=$tid".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament created!')) );
    }
@@ -69,10 +73,11 @@ require_once 'tournaments/include/tournament_factory.php';
    $tform = new Form( 'wizard', $page, FORM_POST );
 
    $tform->add_row( array( 'HEADER', T_('Choose type of tournament') ));
-   if( $is_admin )
-      $tform->add_row( array(
-         'RADIOBUTTONS', 'type', array(
-               TOURNEY_WIZTYPE_DGS_LADDER => T_('DGS Ladder (only for Admin)') ), $type ));
+   foreach( TournamentFactory::getTournamentTypes() as $wiztype )
+   {
+      $new_ttype = TournamentFactory::getTournament($wiztype);
+      $tform->add_row( build_tourney_type_radio($new_ttype, $type, $is_admin) );
+   }
 
    $tform->add_empty_row();
    $tform->add_row( array(
@@ -91,4 +96,15 @@ require_once 'tournaments/include/tournament_factory.php';
 
    end_page(@$menu_array);
 }
+
+
+function build_tourney_type_radio( $ttype, $type, $is_admin )
+{
+   $radio_defs = array( $ttype->wizard_type => $ttype->title );
+   if( $ttype->need_admin_create_tourney && !$is_admin )
+      $result = array( 'RADIOBUTTONSX', 'type', $radio_defs, $type, 'disabled=1' );
+   else
+      $result = array( 'RADIOBUTTONS', 'type', $radio_defs, $type );
+   return $result;
+}//build_tourney_type_radio
 ?>
