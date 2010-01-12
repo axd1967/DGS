@@ -36,21 +36,25 @@ require_once 'tournaments/include/tournament_globals.php';
 class TournamentTemplate
 {
    var $wizard_type;
+   var $title;
    var $uid;
 
    var $need_rounds;
    var $allow_register_tourney_status;
+   var $need_admin_create_tourney;
 
    /*! \brief Constructs template for different tournament-types. */
-   function TournamentTemplate( $wizard_type )
+   function TournamentTemplate( $wizard_type, $title )
    {
       global $player_row;
       $this->wizard_type = $wizard_type;
+      $this->title = $title;
       $this->uid = (int)@$player_row['ID'];
 
       // tournament-type-specific properties
       $this->need_rounds = false;
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
+      $this->need_admin_create_tourney = true;
    }
 
    function to_string()
@@ -63,6 +67,7 @@ class TournamentTemplate
       error('tournament_create_error', sprintf( $msgfmt, $this->uid ) );
    }
 
+   // ---------- Interface ----------------------------------------
 
    /*! \brief Returns inserted Tournament.ID if successful; 0 otherwise. */
    function createTournament()

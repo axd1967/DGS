@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
+$TranslateGroups[] = "Tournament";
+
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_template.php';
@@ -43,8 +45,7 @@ class DgsLadderTournament extends TournamentTemplate
 {
    function DgsLadderTournament()
    {
-      parent::TournamentTemplate( TOURNEY_WIZTYPE_DGS_LADDER );
-      $this->need_rounds = false;
+      parent::TournamentTemplate( TOURNEY_WIZTYPE_DGS_LADDER, T_('DGS Ladder (only for Admin)#ttype') );
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
    }
 
