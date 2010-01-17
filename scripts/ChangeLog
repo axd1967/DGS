@@ -22,6 +22,41 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-17 juga
+
+   * include/db_classes.php (class Entity; class EntityData.get_sql_value,
+       ~.build_changed_by, ~.build_sql_insert, ~.build_sql_update),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     tournaments/edit_participant.php,
+     tournaments/edit_properties.php,
+     tournaments/edit_rules.php,
+     tournaments/edit_status.php,
+     tournaments/edit_tournament.php,
+     tournaments/include/tournament.php (class Tournament, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_participant.php (class TournamentParticipant,
+       ~.to_string, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_properties.php (class TournamentProperties,
+       ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_rules.php (class TournamentRules,
+       ~.to_string, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_utils.php (TournamentUtils.buildLastchangedBy),
+     tournaments/manage_tournament.php,
+     tournaments/register.php:
+   - added changed-by field for tournament-tables showing users, that last updated data-row
+   - adjusted field-date-names 'Last changed date' -> 'Last changed', 'Creation date' -> 'Created'
+-----------
+-- added changed-by field
+ALTER TABLE Tournament
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+ALTER TABLE TournamentProperties
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+ALTER TABLE TournamentRules
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+ALTER TABLE TournamentParticipant
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+-----------
+
 2010-01-16 juga
 
    * tournaments/edit_participant.php (build_new_status_choices, parse_edit_form,
