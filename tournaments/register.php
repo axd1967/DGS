@@ -186,7 +186,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if( $tp->Lastchanged > 0 )
       $tpform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
-            'TEXT',        date(DATE_FMT2, $tp->Lastchanged), ));
+            'TEXT',        TournamentUtils::buildLastchangedBy($tp->Lastchanged, $tp->ChangedBy) ));
    $tpform->add_row( array(
          'DESCRIPTION', T_('Current Registration Status'),
          'TEXT', ( $old_status ? TournamentParticipant::getStatusText($old_status) : NO_VALUE )

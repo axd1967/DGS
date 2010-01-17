@@ -96,11 +96,11 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Creation date'),
+         'DESCRIPTION', T_('Created'),
          'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Last changed date'),
-         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Lastchanged) ));
+         'DESCRIPTION', T_('Last changed'),
+         'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
    $tform->add_row( array( 'HR' ));
 
    if( $tstatus->has_error() )

@@ -97,11 +97,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'DESCRIPTION', T_('Owner#tourney'),
          'TEXT',        user_reference( REF_LINK, 1, '', $tourney->Owner_ID ), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Creation date'),
+         'DESCRIPTION', T_('Created'),
          'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Last changed date'),
-         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Lastchanged) ));
+         'DESCRIPTION', T_('Last changed'),
+         'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Type#tourney'),
          'TEXT',        Tournament::getTypeText($tourney->Type), ));

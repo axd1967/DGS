@@ -92,8 +92,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
          'TEXT',        $tourney->build_info() ));
    if( $trule->Lastchanged )
       $trform->add_row( array(
-            'DESCRIPTION', T_('Last changed date'),
-            'TEXT',        date(DATEFMT_TOURNAMENT, $trule->Lastchanged) ));
+            'DESCRIPTION', T_('Last changed'),
+            'TEXT',        TournamentUtils::buildLastchangedBy($trule->Lastchanged, $trule->ChangedBy) ));
    $trform->add_row( array( 'HR' ));
 
    if( count($errorlist) )
