@@ -123,7 +123,7 @@ class TournamentProperties
             || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX );
    }
 
-   /*! \brief Returns true, if custom T-rating can be specified. */
+   /*! \brief Returns true, if customized T-rating can be specified. */
    function allow_rating_edit()
    {
       return ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM );
@@ -185,9 +185,10 @@ class TournamentProperties
     * \brief Checks potential registration by given user and returns non-null
     *        list of matching criteria, that disallow registration.
     * \param $tourney Tournament with set TP_Counts (loaded if not set)
+    * \param $tp_has_rating true if customized-rating set for tourney
     * \param $check_user User-object or user-id
     */
-   function checkUserRegistration( $tourney, $check_user )
+   function checkUserRegistration( $tourney, $tp_has_rating, $check_user )
    {
       global $NOW;
       $errors = array();
@@ -216,8 +217,13 @@ class TournamentProperties
       if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {// need user-rating or tournament-rating
          if( !$user->hasRating() )
-            $errors[] = T_('User has no valid Dragon rating, which is needed for tournament rating mode:')
-               . "\n" . TournamentProperties::getRatingUseModeText($this->RatingUseMode, false);
+            $errors[] = T_('User has no valid Dragon rating, which is needed for tournament rating mode.');
+               //. "\n" . TournamentProperties::getRatingUseModeText($this->RatingUseMode, false);
+      }
+      elseif( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
+      {
+         if( !$tp_has_rating && !$user->hasRating() )
+            $errors[] = T_('User needs valid Dragon rating or customized rating, which is required by tournament rating mode.');
       }
 
       // limit user-rating
