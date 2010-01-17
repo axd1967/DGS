@@ -527,11 +527,11 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
              "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Next messages") . "\"></a>&nbsp;";
    }
-   if( $str ) // $str set if msg is answer or has answer
+   if( $str && $thread > 0 ) // $str set if msg is answer or has answer
       $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid#mid$mid",
          image( $base_path.'images/thread.gif', T_('Message thread') ),
          T_('Show message thread') ) . MINI_SPACING;
-   if( $thread != $mid )
+   if( $thread > 0 && $thread != $mid )
       $str0 .= anchor( 'message.php?mode=ShowMessage'.URI_AMP.'mid='.$thread,
          image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
          T_('Show initial message in thread') ) . MINI_SPACING;
