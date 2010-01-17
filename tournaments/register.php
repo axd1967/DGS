@@ -181,7 +181,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          'TEXT',        user_reference( REF_LINK, 1, '', $player_row), ));
    if( $tp->Created > 0 )
       $tpform->add_row( array(
-            'DESCRIPTION', T_('Application Date'),
+            'DESCRIPTION', T_('Created'),
             'TEXT',        date(DATE_FMT2, $tp->Created), ));
    if( $tp->Lastchanged > 0 )
       $tpform->add_row( array(
