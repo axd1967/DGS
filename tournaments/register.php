@@ -46,6 +46,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
+   $page = "register.php";
+
 /* Actual REQUEST calls used (TD=tournament-director)
      tid=                           : current user registers for tournament
      tid=&rid=                      : current user edits existing registration
@@ -91,14 +93,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
 
    // init
-   $errors = array();
-   $reg_errors = $tprops->checkUserRegistration( $tourney, $my_id );
-   $allow_register = ( count($reg_errors) == 0 );
-
    $old_status = $tp->Status;
    $old_rating = $tp->Rating;
    $old_start_round = $tp->StartRound;
 
+   // check + parse edit-form
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
+   $reg_errors = $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id );
+
+   $errors = array();
    if( !$rid ) // new-TP
    {
       if( count($reg_errors) )
@@ -106,11 +109,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
       $tp->Status = $tp->calc_init_status($tprops->RatingUseMode);
    }
+   $errors = array_merge( $errors, $input_errors );
    $is_invite = ( $tp->Status == TP_STATUS_INVITE );
-
-   // check + parse edit-form
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
-   $errors += $input_errors;
+   $allow_register = ( count($reg_errors) == 0 );
 
    // ---------- Process inputs into actions ------------------------------------
 
@@ -153,9 +154,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    // persist TP-reg/edit in database
    if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && $allow_register && count($errors) == 0 )
    {
-      if( $tp->Status == TP_STATUS_REGISTER && $tprops->need_rating_copy() )
+      if( $tp->Status == TP_STATUS_REGISTER && $tprops->need_rating_copy() && !$tp->hasRating() )
       {
-         if( !$vars['_has_custom_rating'] ) // copy only if no custom-rating
+         if( !$vars['_has_custom_rating'] ) // copy only if no customized-rating
             $tp->Rating = $tp->User->Rating;
       }
 
@@ -163,14 +164,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
             . urlencode(T_('Registration saved!')) );
    }
-
-
-   $page = "register.php";
-   if( $is_delete )
-      $title = T_('Tournament Registration removal for [%s]');
-   else
-      $title = T_('Tournament Registration for [%s]');
-   $title = sprintf( $title, $tourney->Title );
 
 
    // ---------- Tournament-Registration EDIT form ------------------------------
@@ -217,8 +210,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
       $tpform->add_row( array(
-            'TEXT', TournamentUtils::buildErrorListString(
-                       T_('You are not allowed to register for this tournament:'), $reg_errors) ));
+            'OWNHTML', TournamentUtils::buildErrorListString(
+                           T_('You are not allowed to register for this tournament'), $reg_errors, 2) ));
    }
 
    // EDIT: Ratings --------------------
@@ -243,10 +236,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'DESCRIPTION', T_('Customized Rating'),
             'TEXT',        $custom_rating_str . SMALL_SPACING,
             'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'], '',
-            'SELECTBOX',   'ratingtype', 1, getRatingTypes(), $rating_type, false,
+            'SELECTBOX',   'rating_type', 1, getRatingTypes(), $rating_type, false,
             'SUBMITBUTTON', 'tp_preview', T_('Convert Rating'), ));
    }
-   if( $tp->hasRating() )
+   if( !$is_delete && $tp->hasRating() )
       $tpform->add_row( array(
             'DESCRIPTION', T_('Tournament Rating'),
             'TEXT',        echo_rating($tp->Rating, true), ));
@@ -254,12 +247,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    // EDIT: Rounds ---------------------
 
-   if( $ttype->need_rounds )
+   if( $ttype->need_rounds && !$is_delete )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current Start Round'),
             'TEXT',        $old_start_round, ));
-      if( $allow_register && !$is_invite && !$is_delete )
+      if( $tourney->Rounds > 1 && $allow_register && !$is_invite && !$is_delete )
       {
          $tpform->add_row( array(
                'DESCRIPTION', T_('Customized Start Round'),
@@ -279,17 +272,21 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tpform->add_row( array(
             'DESCRIPTION', T_('User Message'),
             'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage, ));
+      if( @$_REQUEST['tp_preview'] )
+         $tpform->add_row( array(
+               'DESCRIPTION', T_('Preview'),
+               'TEXT', make_html_safe( $tp->UserMessage, true ) ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Admin Message'),
             'TEXT', make_html_safe($tp->AdminMessage, true), ));
-   }
 
-   if( $allow_register )
       $tpform->add_row( array(
             'DESCRIPTION', T_('Unsaved edits'),
             'TEXT',        span('TWarning', implode(', ', $edits ), '[%s]'), ));
+   }
 
-   // submit-buttons
+   // EDIT: Submit-Buttons -------------
+
    if( $is_delete )
    {
       $tpform->add_hidden( 'confirm', 1 );
@@ -315,15 +312,18 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'SUBMITBUTTON', 'tp_preview', T_('Preview') );
       }
       if( $rid )
-      {
          array_push( $rowarr,
                'TEXT', SMALL_SPACING,
                'SUBMITBUTTON', 'tp_delete', T_('Remove registration') );
-      }
+      if( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] )
+         array_push( $rowarr,
+               'TEXT', SMALL_SPACING,
+               'SUBMITBUTTON', 'tp_cancel', T_('Cancel') );
       $tpform->add_row( $rowarr );
    }
 
 
+   $title = sprintf( T_('Tournament Registration for [%s]'), $tourney->Title );
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
@@ -360,6 +360,7 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
       'comment'            => $tp->Comment,
       'user_message'       => $tp->UserMessage,
    );
+   $old_rating = $tp->Rating;
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
@@ -381,12 +382,11 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
          else
          {
             $tp->Rating = $custom_rating;
-            $vars['custom_rating'] = echo_rating( $tp->Rating, false, 0, true, false ); // reformat
             $vars['_has_custom_rating'] = true;
          }
       }
 
-      if( $ttype->need_rounds )
+      if( $ttype->need_rounds && $tourney->Rounds > 1 )
       {
          $new_value = trim($vars['start_round']); // optional
          if( (string)$new_value != '' )
@@ -401,7 +401,7 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
       }
 
       // determine edits
-      if( $old_vals['custom_rating'] != $tp->Rating ) $edits[] = T_('Rating#edits');
+      if( $old_rating != $tp->Rating ) $edits[] = T_('Rating#edits');
       if( $old_vals['start_round'] != $tp->StartRound ) $edits[] = T_('StartRound#edits');
    }
 
@@ -434,8 +434,8 @@ function build_participant_notes( $deny_reason=null, $intro=true )
       $notes[] = T_('Questions and support requests regarding this tournament can be directed to the tournament directors.');
       $notes[] = null; // empty line
 
-      $notes[] = T_('You will need a custom rating if you don\'t have a DGS-rating yet or if you don\'t want to start with your current DGS-rating.');
-      $notes[] = T_('If you enter a custom rating or a non-default starting-round, your application needs to be verified by a tournament director.');
+      $notes[] = T_('You will need a customized rating if you don\'t have a DGS-rating yet or if you don\'t want to start with your current DGS-rating.');
+      $notes[] = T_('If you enter a customized rating or a non-default starting-round, your application needs to be verified by a tournament director.');
       $notes[] = T_('To accelerate the registration process please add your reasoning for the changes in the user-message box.');
       $notes[] = null; // empty line
    }
