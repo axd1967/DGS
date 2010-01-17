@@ -73,6 +73,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $tid = (int) @$_REQUEST['tid'];
    $uid = (int) @$_REQUEST['uid'];
    $is_delete = (bool) @$_REQUEST['tp_delete'];
+   $ignore_warnings = get_request_arg('no_warn');
    $userhandle = get_request_arg('showuser');
    $user = NULL;
 
@@ -151,14 +152,16 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype );
-   $reg_errors = ( !is_null($tprops) )
-      ? $tprops->checkUserRegistration($tourney, $tp->hasRating(), $user)
-      : array();
+   list( $reg_errors, $reg_warnings ) = ( !is_null($tprops) )
+      ? $tprops->checkUserRegistration($tourney, $tp->hasRating(), $user, TPROP_CHKTYPE_TD)
+      : array( array(), array() );
 
    if( !$rid ) // new-TP
    {
       if( count($reg_errors) )
-         $errors[] = T_('Registration restrictions disallow user to be registered.');
+         $errors[] = T_('[Errors]: Registration restrictions disallow user to be registered.');
+      if( !$ignore_warnings && count($reg_warnings) )
+         $errors[] = T_('[Warnings]: Registration restrictions normally disallow user to be registered.');
 
       $tp->Status = TP_STATUS_INVITE; // TD can only invite
    }
@@ -190,14 +193,15 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tp->Flags = ($tp->Flags | TP_FLAGS_INVITED) & ~TP_FLAGS_ACK_INVITE;
       elseif( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER )
          $tp->Flags |= TP_FLAGS_ACK_APPLY;
-      if( count($reg_errors) ) // violate registration restrictions
+      if( count($reg_errors) || count($reg_warnings) ) // violate registration restrictions
          $tp->Flags |= TP_FLAGS_VIOLATE;
 
       if( $old_status != $tp->Status )
          $edits[] = T_('Status#edits');
 
       // persist TP in database
-      if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 && count($reg_errors) == 0 )
+      if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0
+            && count($reg_errors) == 0 && ( $rid || $ignore_warnings || count($reg_warnings) == 0 ) )
       {
          if( $tp->Status == TP_STATUS_REGISTER && $tprops->need_rating_copy() && !$tp->hasRating() )
          {
@@ -220,6 +224,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
          jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
+
+      if( $tp->Status == TP_STATUS_REGISTER && count($edits) == 0 && !$is_delete )
+         $reg_warnings = array();
    }//known-user
 
 
@@ -252,13 +259,23 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             'TEXT', TournamentUtils::buildErrorListString( T_('There are some errors'), $errors ) ));
       $tpform->add_empty_row();
    }
-   if( count($reg_errors) )
+   if( count($reg_errors) || count($reg_warnings) )
    {
       $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
-      $tpform->add_row( array(
-            'OWNHTML', TournamentUtils::buildErrorListString(
-                          T_('User is not allowed to register for this tournament'), $reg_errors, 2) ));
+      if( count($reg_errors) )
+         $tpform->add_row( array(
+               'OWNHTML', TournamentUtils::buildErrorListString(
+                          T_('[Errors]: User is not allowed to register for this tournament'), $reg_errors, 2) ));
+      if( count($reg_warnings) )
+      {
+         $tpform->add_row( array(
+               'OWNHTML', TournamentUtils::buildErrorListString(
+                          T_('[Warnings]: User is normally not allowed to register for this tournament'), $reg_warnings, 2) ));
+         if( !$rid && count($reg_errors) == 0 ) // no ignore on error, else ignore only for NEW-reg
+            $tpform->add_row( array(
+                  'CHECKBOX', 'no_warn', '1', T_('Ignore warnings'), (get_request_arg('no_warn') ? 1 : '') ));
+      }
       $tpform->add_row( array( 'HR' ));
    }
 

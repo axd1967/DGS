@@ -44,6 +44,12 @@ define('TPROP_RUMODE_CURR_FIX',     'CURR_FIX');
 define('TPROP_RUMODE_COPY_FIX',     'COPY_FIX');
 define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
 
+// check-types for checkUserRegistration-func
+define('TPROP_CHKTYPE_TD', 1);
+define('TPROP_CHKTYPE_USER_NEW', 2);
+define('TPROP_CHKTYPE_USER_EDIT', 3);
+
+
 // lazy-init in TournamentProperties::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();
@@ -187,20 +193,26 @@ class TournamentProperties
 
    /*!
     * \brief Checks potential registration by given user and returns non-null
-    *        list of matching criteria, that disallow registration.
+    *        list of errors and warnings with matching criteria, that disallow registration.
+    * \note warnings only issued for set director_check
     * \param $tourney Tournament with set TP_Counts (loaded if not set)
     * \param $tp_has_rating true if customized-rating set for tourney
     * \param $check_user User-object or user-id
+    * \param $check_type TPROP_CHKTYPE_TD|USER_NEW|USER_EDIT
     */
-   function checkUserRegistration( $tourney, $tp_has_rating, $check_user )
+   function checkUserRegistration( $tourney, $tp_has_rating, $check_user, $check_type )
    {
-      global $NOW;
       $errors = array();
+      if( $check_type == TPROP_CHKTYPE_USER_NEW )
+         $warnings =& $errors;
+      else
+         $warnings = array();
 
       // limit register end-time
+      global $NOW;
       if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
-         $errors[] = sprintf( T_('Registration phase ended on [%s].'),
-                              TournamentUtils::formatDate($this->RegisterEndTime) );
+         $warnings[] = sprintf( T_('Registration phase ended on [%s].'),
+                                TournamentUtils::formatDate($this->RegisterEndTime) );
 
       // limit participants
       if( $this->MaxParticipants > 0 )
@@ -209,8 +221,8 @@ class TournamentProperties
             $tourney->setTP_Counts( TournamentParticipant::count_tournament_participants( $this->tid ) );
 
          if( (int)@$tourney->TP_Counts[TPCOUNT_STATUS_ALL] >= $this->MaxParticipants )
-            $errors[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
-                                 $this->MaxParticipants );
+            $warnings[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
+                                   $this->MaxParticipants );
       }
 
       // ----- user-specific checks -----
@@ -237,27 +249,29 @@ class TournamentProperties
          if( !$user->hasRating() )
             $errors[] = T_('User has no Dragon rating, which is required for this rated tournament.');
          elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
-            $errors[] = sprintf( T_('User rating [%s] does not match the required rating range [%s - %s].'),
-               echo_rating( $user->Rating ),
-               echo_rating( $this->UserMinRating, false ),
-               echo_rating( $this->UserMaxRating, false ) );
+            $warnings[] = sprintf( T_('User rating [%s] does not match the required rating range [%s - %s].'),
+                  echo_rating( $user->Rating ),
+                  echo_rating( $this->UserMinRating, false ),
+                  echo_rating( $this->UserMaxRating, false ) );
       }
 
       // limit games-number
       if( $this->UserMinGamesFinished > 0 )
       {
          if( $user->GamesFinished < $this->UserMinGamesFinished )
-            $errors[] = sprintf( T_('User must have at least %s finished games, but has only %s.'),
+            $warnings[] = sprintf( T_('User must have at least %s finished games, but has only %s.'),
                $this->UserMinGamesFinished, $user->GamesFinished );
       }
       if( $this->UserMinGamesRated > 0 )
       {
          if( $user->GamesRated < $this->UserMinGamesRated )
-            $errors[] = sprintf( T_('User must have at least %s rated finished games, but has only %s.'),
+            $warnings[] = sprintf( T_('User must have at least %s rated finished games, but has only %s.'),
                $this->UserMinGamesRated, $user->GamesRated );
       }
 
-      return $errors;
+      return ($check_type == TPROP_CHKTYPE_USER_NEW)
+         ? array( $errors, array() )
+         : array( $errors, $warnings );
    } //checkUserRegistration
 
    /*! \brief (internally) loads User-object if user is only user-id and returns User-object. */

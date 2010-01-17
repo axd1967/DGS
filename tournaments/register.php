@@ -99,7 +99,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
-   $reg_errors = $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id );
+   list( $reg_errors, $reg_warnings ) =
+      $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id,
+                                      ( $rid ? TPROP_CHKTYPE_USER_EDIT : TPROP_CHKTYPE_USER_NEW ) );
 
    $errors = array();
    if( !$rid ) // new-TP
@@ -165,6 +167,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             . urlencode(T_('Registration saved!')) );
    }
 
+   if( $tp->Status == TP_STATUS_REGISTER && count($edits) == 0 && !$is_delete )
+      $reg_warnings = array();
+
 
    // ---------- Tournament-Registration EDIT form ------------------------------
 
@@ -204,14 +209,19 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
    }
-   if( count($reg_errors) )
+   if( count($reg_errors) || count($reg_warnings) )
    {
       // NOTE: if tourney-restrictions forbid registration -> TP can ask TD for invitation
       $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
-      $tpform->add_row( array(
-            'OWNHTML', TournamentUtils::buildErrorListString(
-                           T_('You are not allowed to register for this tournament'), $reg_errors, 2) ));
+      if( count($reg_errors) )
+         $tpform->add_row( array(
+               'OWNHTML', TournamentUtils::buildErrorListString(
+                          T_('[Errors]: You are not allowed to register for this tournament'), $reg_errors, 2) ));
+      if( count($reg_warnings) )
+         $tpform->add_row( array(
+               'OWNHTML', TournamentUtils::buildErrorListString(
+                          T_('[Warnings]: You are normally not allowed to register anew for this tournament'), $reg_warnings, 2) ));
    }
 
    // EDIT: Ratings --------------------
