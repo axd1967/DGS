@@ -22,6 +22,35 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-16 juga
+
+   * tournaments/edit_participant.php (build_new_status_choices, parse_edit_form,
+       send_register_notification),
+     tournaments/register.php (parse_edit_form),
+     specs/db/table-Tournaments.txt:
+   - changed tournament participants editor
+     - defined new register-status transitions for user and TD for
+       tournament-registration, see 'specs/db/table-tournaments.txt'
+     - send server-messages when TD changes user-registration-status
+     - registration-restrictions disallow user to register also for tournament-admin
+     - allow rounds-edit only if tournament has more than 1 round
+     - added cancel for editing too
+     - show preview for admin- and user-message
+     - added more data about user-registration (old/new status/flags)
+     - fixed bugs for editing user-registration:
+       copy-rating, parse URL-args for show-user, array-merging
+     - synchronized TP-editor with user-registration, adjusted GUI
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration):
+   - added check for rating-use-mode COPY_CUSTOM if there's a valid Dragon-rating
+     OR tournament-rating
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.buildErrorListString):
+   - enhanced error-list builder with option for <ul>-list and embedding into table-cell
+
+   * include/message_functions.php (message_info_table):
+   - bugfix: don't sow initial-thread icon if it is no thread
+
 2010-01-11 juga
 
    * tournaments/include/tournament_utils.php,
