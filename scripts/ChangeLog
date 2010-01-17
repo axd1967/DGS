@@ -24,6 +24,16 @@ ChangeLog
 
 2010-01-17 juga
 
+   * tournaments/include/tournament_properties.php (class TournamentProperties.checkUserRegistration),
+     tournaments/edit_participant.php, tournaments/register.php:
+   - differ tournament-user-restrictions into errors and warnings
+     - errors always prohibit registration
+     - warnings are ignored but shown for existing TournamentParticipants for TD and user
+     - warnings must be explicitly ignored for new users by TD
+     - warnings will be errors for new users
+     - warnings are not shown if TP on REGISTER-status
+     - show warnings as extra list in registration-restriction section
+
    * include/db_classes.php (class Entity; class EntityData.get_sql_value,
        ~.build_changed_by, ~.build_sql_insert, ~.build_sql_update),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
