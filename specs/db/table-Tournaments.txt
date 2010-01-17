@@ -142,24 +142,40 @@ Description:
 
    - State-Transitions for TD & User:
       - INIT = not registered to T
+      - Edit-C = edit customized fields
+      - Edit-M = edit non-customized fields like messages, comment
+      - Edit-All = edit all fields
       - "<OLD-STATE> ---[action]---> <NEW-STATE>"
 
       - State-Transitions for User:
 
-            INIT ---[register]---> REGISTER (matching T-restrictions, no customization)
-            INIT ---[apply]------> APPLY    (customized registration)
-            INVITE ---[ACK-Invite]----> REGISTER
-            INVITE ---[EDIT-Invite]---> APPLY
-            ( APPLY | REGISTER | INVITE ) ---[remove]----> INIT
+            INIT  ---[apply]---------> APPLY    (customized registration)
+            APPLY ---[EDIT-All]------> APPLY
+            APPLY ---[remove]--------> INIT
 
-      - State-Diagram for TD:
+            INIT     ---[register]---> REGISTER (matching T-restrictions, no customization)
+            REGISTER ---[EDIT-C]-----> APPLY
+            REGISTER ---[EDIT-M]-----> REGISTER
+            REGISTER ---[remove]-----> INIT
 
-            INIT ---[register]---> REGISTER
-            INIT ---[apply]------> APPLY
-            INIT ---[invite]-----> INVITE
-            APPLY ---[ACK-Apply]----> REGISTER
-            APPLY ---[EDIT-Apply]---> INVITE
-            ( APPLY | REGISTER | INVITE ) ---[remove + notify user]---> INIT
+            INVITE ---[EDIT-C]-------> APPLY
+            INVITE ---[ACK-Invite]---> REGISTER
+            INVITE ---[remove]-------> INIT
+
+      - State-Transitions for TD:
+
+            INIT   ---[invite]-----> INVITE       [ + notify ]
+            INVITE ---[EDIT-All]---> INVITE
+            INVITE ---[remove]-----> INIT         [ + notify ]
+
+            APPLY ---[ACK-Apply]---> REGISTER     [ + notify ]
+            APPLY ---[EDIT-C]------> INVITE       [ + notify ]
+            APPLY ---[EDIT-M]------> APPLY
+            APPLY ---[remove]------> INIT         [ + notify ]
+
+            REGISTER ---[EDIT-C]---> INVITE       [ + notify ]
+            REGISTER ---[EDIT-M]---> REGISTER
+            REGISTER ---[remove]---> INIT         [ + notify ]
 
 * Flags :
    - additional properties of registered user:
