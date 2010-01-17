@@ -57,6 +57,7 @@ global $ENTITY_TOURNAMENT_PARTICIPANT; //PHP5
 $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
+      FTYPE_CHBY,
       FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'Rating', 'StartRound',
       FTYPE_TEXT, 'AuthToken', 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
       FTYPE_DATE, 'Created', 'Lastchanged',
@@ -76,6 +77,7 @@ class TournamentParticipant
    var $AuthToken;
    var $Created;
    var $Lastchanged;
+   var $ChangedBy;
    var $Comment;
    var $Notes;
    var $UserMessage;
@@ -84,7 +86,8 @@ class TournamentParticipant
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    function TournamentParticipant( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
                   $rating=NULL, $start_round=1, $auth_token='', $created=0,
-                  $lastchanged=0, $comment='', $notes='', $user_message='', $admin_message='' )
+                  $lastchanged=0, $changed_by='', $comment='', $notes='', $user_message='',
+                  $admin_message='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -97,6 +100,7 @@ class TournamentParticipant
       $this->AuthToken = $auth_token;
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
+      $this->ChangedBy = $changed_by;
       $this->Comment = $comment;
       $this->Notes = $notes;
       $this->UserMessage = $user_message;
@@ -138,6 +142,7 @@ class TournamentParticipant
             . ", AuthToken=[{$this->AuthToken}]"
             . ", Created=[{$this->Created}]"
             . ", Lastchanged=[{$this->Lastchanged}]"
+            . ", ChangedBy=[{$this->ChangedBy}]"
             . ", Comment=[{$this->Comment}]"
             . ", Notes=[{$this->Notes}]"
             . ", UserMessage=[{$this->UserMessage}]"
@@ -220,6 +225,7 @@ class TournamentParticipant
       if( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'Comment', $this->Comment );
       $data->set_value( 'Notes', $this->Notes );
       $data->set_value( 'UserMessage', $this->UserMessage );
@@ -289,6 +295,7 @@ class TournamentParticipant
             @$row['AuthToken'],
             @$row['X_Created'],
             @$row['X_Lastchanged'],
+            @$row['ChangedBy'],
             @$row['Comment'],
             @$row['Notes'],
             @$row['UserMessage'],

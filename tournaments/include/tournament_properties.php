@@ -51,6 +51,7 @@ $ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();
 global $ENTITY_TOURNAMENT_PROPERTIES; //PHP5
 $ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
       FTYPE_PKEY, 'tid',
+      FTYPE_CHBY,
       FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'UserMinRating',
                   'UserMaxRating', 'UserMinGamesFinished', 'UserMinGamesRated',
       FTYPE_TEXT, 'Notes',
@@ -62,6 +63,7 @@ class TournamentProperties
 {
    var $tid;
    var $Lastchanged;
+   var $ChangedBy;
    var $Notes;
    var $MinParticipants;
    var $MaxParticipants;
@@ -75,13 +77,14 @@ class TournamentProperties
 
    /*! \brief Constructs TournamentProperties-object with specified arguments. */
    function TournamentProperties(
-         $tid=0, $lastchanged=0, $notes='',
+         $tid=0, $lastchanged=0, $changed_by='', $notes='',
          $min_participants=2, $max_participants=0, $rating_use_mode=TPROP_RUMODE_COPY_CUSTOM,
          $reg_end_time=0, $user_min_rating=MIN_RATING, $user_max_rating=RATING_9DAN, $user_rated=false,
          $user_min_games_finished=0, $user_min_games_rated=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
+      $this->ChangedBy = $changed_by;
       $this->Notes = $notes;
       $this->MinParticipants = (int)$min_participants;
       $this->MaxParticipants = (int)$max_participants;
@@ -168,6 +171,7 @@ class TournamentProperties
       $data = $GLOBALS['ENTITY_TOURNAMENT_PROPERTIES']->newEntityData();
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'MinParticipants', $this->MinParticipants );
       $data->set_value( 'MaxParticipants', $this->MaxParticipants );
       $data->set_value( 'RatingUseMode', $this->RatingUseMode );
@@ -299,6 +303,7 @@ class TournamentProperties
             // from TournamentProperties
             @$row['tid'],
             @$row['X_Lastchanged'],
+            @$row['ChangedBy'],
             @$row['Notes'],
             @$row['MinParticipants'],
             @$row['MaxParticipants'],

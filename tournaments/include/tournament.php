@@ -48,6 +48,7 @@ global $ENTITY_TOURNAMENT; //PHP5
 $ENTITY_TOURNAMENT = new Entity( 'Tournament',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
+      FTYPE_CHBY,
       FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Rounds', 'CurrentRound',
       FTYPE_TEXT, 'Title', 'Description',
       FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
@@ -67,6 +68,7 @@ class Tournament
    var $Status;
    var $Created;
    var $Lastchanged;
+   var $ChangedBy;
    var $StartTime;
    var $EndTime;
    var $Rounds;
@@ -80,7 +82,7 @@ class Tournament
    function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
                         $wizard_type=TOURNEY_WIZTYPE_DGS_LADDER, $title='', $description='',
                         $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW,
-                        $created=0, $lastchanged=0, $starttime=0, $endtime=0,
+                        $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
                         $rounds=1, $current_round=1 )
    {
       $this->ID = (int)$id;
@@ -94,6 +96,7 @@ class Tournament
       $this->setStatus( $status );
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
+      $this->ChangedBy = $changed_by;
       $this->StartTime = (int)$starttime;
       $this->EndTime = (int)$endtime;
       $this->Rounds = (int)$rounds;
@@ -209,6 +212,7 @@ class Tournament
       if( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'StartTime', $this->StartTime );
       if( $this->EndTime > 0 )
          $data->set_value( 'EndTime', $this->EndTime );
@@ -305,6 +309,7 @@ class Tournament
             @$row['Status'],
             @$row['X_Created'],
             @$row['X_Lastchanged'],
+            @$row['ChangedBy'],
             @$row['X_StartTime'],
             @$row['X_EndTime'],
             @$row['Rounds'],

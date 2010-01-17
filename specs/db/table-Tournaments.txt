@@ -10,13 +10,11 @@ Legend:
    - TP = Tournament Participant (registered player)
 
 Important Notes:
-   - Guests can't perform "writing" operations for Ts
-   - Admin can edit all Ts,
-   - Admin can set T-status to 'ADM', e.g. for migrations or archiving
+   - Guests can NOT perform "writing" operations for Ts
+   - Admin can edit all Ts
    - Admin can set T-status at any time to any status
    - Admin and T-owner can add, delete & edit all TDs of a T
    - All TDs can edit their T
-   - All TDs can edit all TDs of their T
 
 
 ###########################################################################
@@ -37,6 +35,7 @@ Description:
  Status       | enum('ADM','NEW','REG','PAIR','PLAY','CLOSED') | NEW
  Created      | datetime                                       | 0000-00-00 00:00:00
  Lastchanged  | datetime                                       | 0000-00-00 00:00:00
+ ChangedBy    | varchar(54)                                    |
  StartTime    | datetime                                       | 0000-00-00 00:00:00
  EndTime      | datetime                                       | 0000-00-00 00:00:00
  Rounds       | int(11)                                        | 1
@@ -74,6 +73,8 @@ Description:
 * Created : date of creation of T
 
 * Lastchanged : date of last-update of T (on Status, Name, Description, Start/EndTime)
+
+* ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
 * StartTime : official start-date of T (informal)
 
@@ -121,6 +122,7 @@ Description:
  AuthToken    | varchar(32)                       |
  Created      | datetime                          | 0000-00-00 00:00:00
  Lastchanged  | datetime                          | 0000-00-00 00:00:00
+ ChangedBy    | varchar(54)                                    |
  Comment      | varchar(60)                       |
  Notes        | text                              | NULL
  UserMessage  | text                              | NULL
@@ -195,6 +197,8 @@ Description:
 
 * Lastchanged : date of last-update on TP
 
+* ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
+
 * Comment : public comment from user
 
 * Notes : private notes for TDs about user
@@ -214,6 +218,7 @@ Description:
 ----------------------+-------------------------------------------------------+---------------------
  tid                  | int(11)                                               | NULL
  Lastchanged          | datetime                                              | 0000-00-00 00:00:00
+ ChangedBy            | varchar(54)                                           |
  MinParticipants      | smallint(6)                                           | 0
  MaxParticipants      | smallint(6)                                           | 0
  RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX')             | COPY_CUSTOM
@@ -231,6 +236,8 @@ Description:
 * tid : tournament-ID
 
 * Lastchanged : update of table-entry
+
+* ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
 * MinParticipants, MaxParticipants : minimum / maximum number of TPs
    - 0 = no limits
@@ -271,6 +278,7 @@ Description:
  ID           | int(11)                                 | NULL
  tid          | int(11)                                 | NULL
  Lastchanged  | datetime                                | 0000-00-00 00:00:00
+ ChangedBy    | varchar(54)                             |
  Flags        | smallint(5) unsigned                    | 0
  Size         | int(11)                                 | 19
  Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE') | CONV
@@ -295,6 +303,8 @@ Description:
 * tid : tournament-ID
 
 * Lastchanged : update of table-entry
+
+* ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
 * Flags : not-used
 

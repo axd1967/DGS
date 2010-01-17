@@ -127,6 +127,12 @@ class TournamentUtils
       }
    }
 
+   function buildLastchangedBy( $lastchanged, $changed_by )
+   {
+      return date(DATEFMT_TOURNAMENT, $lastchanged) . MED_SPACING
+           . sprintf( T_('( by %s)'), ( $changed_by ? $changed_by : NO_VALUE ) );
+   }
+
 } // end of 'TournamentUtils'
 
 ?>

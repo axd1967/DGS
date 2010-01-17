@@ -37,6 +37,7 @@ $ENTITY_TABLE = new Entity( 'Table',
    FTYPE_TEXT,
    FTYPE_DATE,
    FTYPE_ENUM,
+   FTYPE_CHBY,
    );
 
   */
@@ -48,7 +49,10 @@ define('FTYPE_DATE', 3);
 define('FTYPE_ENUM', 4);
 define('FTYPE_PKEY', 5); // primary-key of entity
 define('FTYPE_AUTO', 6); // auto-increment field
-define('_FTYPE_MAX', 6);
+define('FTYPE_CHBY', 7); // ChangedBy-field
+define('_FTYPE_MAX', 7);
+
+define('FIELD_CHANGEDBY', 'ChangedBy');
 
  /*!
   * \class Entity
@@ -65,6 +69,8 @@ class Entity
    var $pkeys;
    /*! \brief fieldname with auto-increment. */
    var $field_autoinc;
+   /*! \brief true, if entity has a ChangedBy-field. */
+   var $has_changedby;
 
    /*! \brief array with date-fields: [ fieldname, ... ] */
    var $date_fields;
@@ -80,6 +86,7 @@ class Entity
       $this->pkeys = array();
       $this->date_fields = array();
       $this->field_autoinc = null;
+      $this->has_changedby = false;
 
       // skip arg #0=type-arg to add var-args: fields
       $type = 0;
@@ -92,11 +99,19 @@ class Entity
                $type = $arg;
             else
                error('invalid_args', "Entity.bad_type($i,$arg)");
+
+            if( $type == FTYPE_CHBY )
+            {
+               $this->fields[FIELD_CHANGEDBY] = $type;
+               $this->has_changedby = true;
+            }
          }
          else
          {
             if( $type == 0)
                error('invalid_args', "Entity.miss_type($i,$type,$arg)");
+            if( $type == FTYPE_CHBY )
+               error('invalid_args', "Entity.bad_arg.changedby_no_arg($i,$type,$arg)");
             if( $arg == '' )
                error('invalid_args', "Entity.bad_arg($i,$type,$arg)");
 
@@ -216,6 +231,9 @@ class EntityData
 
    function get_sql_value( $field, $default=null )
    {
+      if( $field == FIELD_CHANGEDBY )
+         return "'" . mysql_addslashes( $this->build_changed_by() ) . "'";
+
       if( !isset($this->values[$field]) )
          return $default;
 
@@ -229,6 +247,19 @@ class EntityData
          return "FROM_UNIXTIME($value)";
       else
          error('assert', "EntityData.get_sql_value.bad_field_type({$this->entity->table},$field)");
+   }
+
+   function build_changed_by( $value=null )
+   {
+      global $player_row;
+      $changed_by = '[' . @$player_row['Handle'] . '] ';
+
+      if( is_null($value) )
+         $value = $this->get_value(FIELD_CHANGEDBY, '');
+
+      if( strncmp($value, $changed_by, strlen($changed_by)) != 0 )
+         $value = $changed_by . $value;
+      return $value;
    }
 
    function build_sql_insert()
@@ -248,6 +279,9 @@ class EntityData
          if( !$this->entity->is_auto_increment($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
+
+      if( $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
+         $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
       $query = 'INSERT INTO ' . $this->entity->table . ' SET ' . implode(', ', $arr);
       return $query;
@@ -303,6 +337,9 @@ class EntityData
          if( !$this->entity->is_primary_key($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
+
+      if( $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
+         $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
       $query = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr)
          . ' WHERE ' . implode(' AND ', $arr_pkeys);

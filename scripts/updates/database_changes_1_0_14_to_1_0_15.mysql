@@ -1478,3 +1478,14 @@ ALTER TABLE TournamentProperties
    CHANGE RatingUseMode RatingUseMode enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM' ;
 
 
+-- added changed-by field
+ALTER TABLE Tournament
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+ALTER TABLE TournamentProperties
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+ALTER TABLE TournamentRules
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+ALTER TABLE TournamentParticipant
+   ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
+
+

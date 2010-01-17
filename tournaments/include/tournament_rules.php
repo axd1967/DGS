@@ -55,7 +55,9 @@ global $ENTITY_TOURNAMENT_RULES; //PHP5
 $ENTITY_TOURNAMENT_RULES = new Entity( 'TournamentRules',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'tid', 'Flags', 'Size', 'AdjKomi', 'Handicap', 'Komi', 'AdjHandicap', 'MinHandicap', 'MaxHandicap', 'Maintime', 'Byotime', 'Byoperiods',
+      FTYPE_CHBY,
+      FTYPE_INT,  'ID', 'tid', 'Flags', 'Size', 'AdjKomi', 'Handicap', 'Komi',
+                  'AdjHandicap', 'MinHandicap', 'MaxHandicap', 'Maintime', 'Byotime', 'Byoperiods',
       FTYPE_TEXT, 'Notes',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'Handicaptype', 'JigoMode', 'StdHandicap', 'Byotype', 'WeekendClock', 'Rated'
@@ -66,6 +68,7 @@ class TournamentRules
    var $ID;
    var $tid;
    var $Lastchanged;
+   var $ChangedBy;
    var $Flags;
    var $Notes;
 
@@ -89,7 +92,7 @@ class TournamentRules
    var $Rated;
 
    /*! \brief Constructs TournamentRules-object with specified arguments. */
-   function TournamentRules( $id=0, $tid=0, $lastchanged=0, $flags=0, $notes='',
+   function TournamentRules( $id=0, $tid=0, $lastchanged=0, $changed_by='', $flags=0, $notes='',
          $size=19, $handicaptype=TRULE_HANDITYPE_CONV, $handicap=0, $komi=DEFAULT_KOMI,
          $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
          $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
@@ -99,6 +102,7 @@ class TournamentRules
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
+      $this->ChangedBy = $changed_by;
       $this->Flags = (int)$flags;
       $this->Notes = $notes;
       $this->Size = (int)$size;
@@ -124,6 +128,7 @@ class TournamentRules
       return " ID=[{$this->ID}]"
             . ", tid=[{$this->tid}]"
             . ", Lastchanged=[{$this->Lastchanged}]"
+            . ", ChangedBy=[{$this->ChangedBy}]"
             . sprintf( ",Flags=[0x%x]", $this->Flags)
             . ", Notes=[{$this->Notes}]"
             . ", Size=[{$this->Size}]"
@@ -197,6 +202,7 @@ class TournamentRules
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Notes', $this->Notes );
       $data->set_value( 'Size', $this->Size );
@@ -443,6 +449,7 @@ class TournamentRules
             @$row['ID'],
             @$row['tid'],
             @$row['X_Lastchanged'],
+            @$row['ChangedBy'],
             @$row['Flags'],
             @$row['Notes'],
             @$row['Size'],
