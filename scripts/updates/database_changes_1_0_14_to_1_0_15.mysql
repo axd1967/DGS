@@ -1489,3 +1489,10 @@ ALTER TABLE TournamentParticipant
    ADD ChangedBy varchar(54) NOT NULL DEFAULT '' AFTER Lastchanged ;
 
 
+-- added index for TP-status
+ALTER TABLE TournamentParticipant
+   DROP INDEX tid ;
+ALTER TABLE TournamentParticipant
+   ADD INDEX tid_status (tid,Status) ;
+
+
