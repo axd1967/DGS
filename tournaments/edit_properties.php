@@ -244,6 +244,9 @@ function parse_edit_form( &$tpr )
       else
          $errors[] = T_('Expecting positive number for maximum participants');
 
+      if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
+         $errors[] = T_('Maximum participants must be greater than minimum participants');
+
       $tpr->setRatingUseMode( $vars['rating_use_mode'] );
       $tpr->UserRated = (bool)$vars['user_rated'];
       $tpr->setUserMinRating( read_rating( $vars['user_min_rating'] ));
