@@ -385,3 +385,34 @@ Description:
 
 * PoolCount : TODO
 
+
+###########################################################################
+## --- TournamentLadder ---
+
+Description:
+   Table to keep track of ladder of ladder-typed tournaments.
+
+ Field    | Type                 | Default
+----------+----------------------+---------------------
+ tid      | int(11)              | NULL
+ rid      | int(11)              | NULL
+ uid      | int(11)              | NULL
+ Created  | datetime             | 0000-00-00 00:00:00
+ Rank     | smallint(5) unsigned | 0
+ BestRank | smallint(5) unsigned | 0
+
+## Fields:
+
+* tid : FK to Tournament.ID
+
+* rid : FK to TournamentParticipant.ID
+
+* uid : FK to TournamentParticipant.uid (=redundant with rid, added for faster-access)
+
+* Created : start-date of user in ladder
+
+* Rank : current ladder-rank (=position) for user
+
+* BestRank : maximum of reached ladder-ranks for user
+
+

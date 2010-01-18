@@ -1496,3 +1496,17 @@ ALTER TABLE TournamentParticipant
    ADD INDEX tid_status (tid,Status) ;
 
 
+-- added table for keeping track of Ladder-type tournament
+CREATE TABLE TournamentLadder (
+   tid int(11) NOT NULL,
+   rid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Rank smallint unsigned NOT NULL DEFAULT '0',
+   BestRank smallint unsigned NOT NULL DEFAULT '0',
+   PRIMARY KEY (tid,rid),
+   KEY uid (uid),
+   KEY Rank (tid,Rank)
+) ENGINE=MyISAM;
+
+
