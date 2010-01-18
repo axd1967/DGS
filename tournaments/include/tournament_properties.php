@@ -44,7 +44,6 @@ define('TPROP_RUMODE_CURR_FIX',     'CURR_FIX');
 define('TPROP_RUMODE_COPY_FIX',     'COPY_FIX');
 define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
 
-// check-types for checkUserRegistration-func
 define('TPROP_CHKTYPE_TD', 1);
 define('TPROP_CHKTYPE_USER_NEW', 2);
 define('TPROP_CHKTYPE_USER_EDIT', 3);
@@ -218,7 +217,8 @@ class TournamentProperties
       if( $this->MaxParticipants > 0 )
       {
          if( is_null($tourney->TP_Counts) )
-            $tourney->setTP_Counts( TournamentParticipant::count_tournament_participants( $this->tid ) );
+            $tourney->setTP_Counts(
+               TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER) );
 
          if( (int)@$tourney->TP_Counts[TPCOUNT_STATUS_ALL] >= $this->MaxParticipants )
             $warnings[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
