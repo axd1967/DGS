@@ -19,9 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
+require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_properties.php';
 
  /*!
   * \file tournament_status.php
@@ -40,6 +43,7 @@ class TournamentStatus
    var $tid; // Tournament.ID
    var $is_admin;
    var $tourney; // Tournament-object
+   var $tprops; // TournamentProperties-object
    var $curr_status; // old Tournament.Status
    var $new_status; // new Tournament.Status
    var $errors; // arr
@@ -62,7 +66,9 @@ class TournamentStatus
          $this->tourney = Tournament::load_tournament( $this->tid );
       }
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
-         error('unknown_tournament', "TournamentStatus.find_tournament($tid)");
+         error('unknown_tournament', "TournamentStatus.find_tournament({$this->tid})");
+
+      $this->tprops = null;
 
       $this->is_admin = TournamentUtils::isAdmin();
       $this->curr_status = $this->new_status = $this->tourney->Status;
@@ -72,6 +78,16 @@ class TournamentStatus
    function has_error()
    {
       return (bool)count($this->errors);
+   }
+
+   function _load_tprops()
+   {
+      if( is_null($this->tprops) )
+      {
+         $this->tprops = TournamentProperties::load_tournament_properties($this->tid);
+         if( is_null($this->tprops) )
+            error('bad_tournament', "TournamentStatus.find_tournamt_properties({$this->tid})");
+      }
    }
 
    /*! \brief Checks change for new-status (writes also $this->errors). */
@@ -105,15 +121,7 @@ class TournamentStatus
       if( $this->curr_status != TOURNEY_STATUS_NEW )
          $this->errors[] = $this->error_expected_status( TOURNEY_STATUS_NEW );
 
-      if( strlen($this->tourney->Title) < 8 )
-         $this->errors[] = T_('Tournament title missing or too short');
-      if( strlen($this->tourney->Description) < 4 )
-         $this->errors[] = T_('Tournament description missing or too short');
-
-      if( !TournamentDirector::has_tournament_director($this->tid) )
-         $this->errors[] = T_('Missing at least one tournament director');
-
-      //TODO condition: no contradicting settings (rules-rated <-> reg-prop-user-rating )
+      $this->check_basic_conditions_status_change();
    }
 
    function check_conditions_status_PAIR()
@@ -121,14 +129,45 @@ class TournamentStatus
       if( $this->curr_status != TOURNEY_STATUS_REGISTER )
          $this->errors[] = $this->error_expected_status( TOURNEY_STATUS_REGISTER );
 
-      //TODO condition: T-props must be fulfilled
-      $this->errors[] = 'not_implemented_yet';
+      $this->check_basic_conditions_status_change();
+
+      // check participants-count
+      $this->_load_tprops();
+      $tp_counts = TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER);
+      $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
+      if( $this->tprops->MinParticipants > 0 && $reg_count < $this->tprops->MinParticipants )
+         $this->errors[] = sprintf(
+               T_('Tournament min. participant limit (%s users) has not been reached yet: %s registrations are missing.'),
+               $this->tprops->MinParticipants, $this->tprops->MinParticipants - $reg_count );
+      if( $this->tprops->MaxParticipants > 0 && $reg_count > $this->tprops->MaxParticipants )
+         $this->errors[] = sprintf(
+               T_('Tournament max. participant limit (%s users) has been exceeded by %s registrations.'),
+               $this->tprops->MaxParticipants, $reg_count - $this->tprops->MaxParticipants );
+
+      // check restrictions for all registered users
+      global $base_path;
+      $iterator = new ListIterator( 'TournamentStatus.check_conditions_status_PAIR',
+            new QuerySQL( SQLP_WHERE, sprintf( "TP.Status='%s'", mysql_addslashes(TP_STATUS_REGISTER)) ) );
+      $iterator = TournamentParticipant::load_tournament_participants($iterator, $this->tid);
+      while( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $tp, $orow ) = $arr_item;
+         list( $reg_errors, $reg_warnings ) =
+            $this->tprops->checkUserRegistration($this->tourney, $tp->hasRating(), $tp->User, TPROP_CHKTYPE_TD);
+         foreach( $reg_errors as $err )
+         {
+            $err_link = anchor( $base_path."tournaments/edit_participant.php?tid={$this->tid}".URI_AMP."uid={$tp->uid}", $tp->User->Handle );
+            $this->errors[] = make_html_safe( sprintf( T_('Error for user %s'), "[$err_link]"), 'line') . ": $err";
+         }
+      }
    }
 
    function check_conditions_status_PLAY()
    {
       if( $this->curr_status != TOURNEY_STATUS_PAIR )
          $this->errors[] = $this->error_expected_status( TOURNEY_STATUS_PAIR );
+
+      $this->check_basic_conditions_status_change();
 
       //TODO condition: all T-games must be ready to start (i.e. inserted and set up)
       $this->errors[] = 'not_implemented_yet';
@@ -139,6 +178,8 @@ class TournamentStatus
       if( $this->curr_status != TOURNEY_STATUS_PLAY )
          $this->errors[] = $this->error_expected_status( TOURNEY_STATUS_PLAY );
 
+      $this->check_basic_conditions_status_change();
+
       //TODO condition: no running T-game
       $this->errors[] = 'not_implemented_yet';
    }
@@ -147,6 +188,17 @@ class TournamentStatus
    {
       //TODO condition: no running T-game
       $this->errors[] = 'not_implemented_yet';
+   }
+
+
+   function check_basic_conditions_status_change()
+   {
+      if( strlen($this->tourney->Title) < 8 )
+         $this->errors[] = T_('Tournament title missing or too short');
+      if( strlen($this->tourney->Description) < 4 )
+         $this->errors[] = T_('Tournament description missing or too short');
+      if( !TournamentDirector::has_tournament_director($this->tid) )
+         $this->errors[] = T_('Missing at least one tournament director');
    }
 
 
