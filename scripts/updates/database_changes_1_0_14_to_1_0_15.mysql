@@ -1510,3 +1510,8 @@ CREATE TABLE TournamentLadder (
 ) ENGINE=MyISAM;
 
 
+-- table-column-set for tournament-ladder-view
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentLadderView int NOT NULL DEFAULT -1 ;
+
+
