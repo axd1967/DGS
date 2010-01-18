@@ -677,7 +677,7 @@ class ListIterator
          $merged_qsql->merge( $m_qsql );
       $this->MergedQuerySQL = $merged_qsql;
 
-      $query = $merged_qsql->get_select() . $this->QueryOrder . $this->QueryLimit;
+      $query = $merged_qsql->get_select() . ' ' . $this->QueryOrder . ' ' . $this->QueryLimit;
       $this->setQuery( $query );
       return $query;
    }
