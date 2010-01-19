@@ -73,7 +73,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $ltable->add_tablehead( 6, T_('Current Rating#T_ladder'), 'Rating', 0 );
    $ltable->add_tablehead( 7, T_('Action#T_ladder'), 'Image', TABLE_NO_HIDE );
    $ltable->add_tablehead( 8, T_('Challenges#T_ladder'), '', TABLE_NO_HIDE );
-   $ltable->add_tablehead( 9, T_('Started#T_ladder'), 'Date', 0 );
+   $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
+   $ltable->add_tablehead(10, T_('Started#T_ladder'), 'Date', 0 );
 
    $iterator = new ListIterator( 'Tournament.ladder_view',
       $ltable->get_query(), 'ORDER BY Rank ASC' );
@@ -114,7 +115,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if( $ltable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = ''; //TODO game-list
       if( $ltable->Is_Column_Displayed[ 9] )
-         $row_str[ 9] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
+         $row_str[ 9] = ($tl->RankChanged > 0) ? date(DATE_FMT2, $tl->RankChanged) : '';
+      if( $ltable->Is_Column_Displayed[10] )
+         $row_str[10] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
 
       $ltable->add_row( $row_str );
    }

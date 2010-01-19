@@ -40,7 +40,7 @@ global $ENTITY_TOURNAMENT_LADDER; //PHP5
 $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
       FTYPE_PKEY, 'tid', 'rid',
       FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank',
-      FTYPE_DATE, 'Created'
+      FTYPE_DATE, 'Created', 'RankChanged'
    );
 
 class TournamentLadder
@@ -49,16 +49,18 @@ class TournamentLadder
    var $rid;
    var $uid;
    var $Created;
+   var $RankChanged;
    var $Rank;
    var $BestRank;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
-   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank=0, $bestrank=0 )
+   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0 )
    {
       $this->tid = (int)$tid;
       $this->rid = (int)$rid;
       $this->uid = (int)$uid;
       $this->Created = (int)$created;
+      $this->RankChanged = (int)$rank_changed;
       $this->Rank = $rank;
       $this->BestRank = $bestrank;
    }
@@ -105,6 +107,7 @@ class TournamentLadder
       $data->set_value( 'rid', $this->rid );
       $data->set_value( 'uid', $this->uid );
       $data->set_value( 'Created', $this->Created );
+      $data->set_value( 'RankChanged', $this->RankChanged );
       $data->set_value( 'Rank', $this->Rank );
       $data->set_value( 'BestRank', $this->BestRank );
       return $data;
@@ -130,6 +133,7 @@ class TournamentLadder
             @$row['rid'],
             @$row['uid'],
             @$row['X_Created'],
+            @$row['X_RankChanged'],
             @$row['Rank'],
             @$row['BestRank']
          );
