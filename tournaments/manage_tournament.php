@@ -89,7 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    $tform->echo_string();
 
-   echo '<table><tr><td>', "<hr>\n",
+   echo '<table id="TournamentManager"><tr><td>', "<hr>\n",
       make_header( 1, T_('Setup phase'), TOURNEY_STATUS_NEW ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit tournament'), array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' )),
@@ -109,6 +109,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  subList( array( T_('Setup tournament round for pooling and pairing') )),
          */
       '</ul>',
+
       make_header( 2, T_('Registration phase'), TOURNEY_STATUS_REGISTER ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit participants'), array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' )),
@@ -117,6 +118,14 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  subList( array( T_('Manage registration of users: invite user, approve or reject application, remove registration#mngt'),
                                  T_('Change status, start-round, read message from user and answer with message#mngt') )),
       '</ul>',
+
+      make_header( 3, T_('Start phase'), TOURNEY_STATUS_PAIR ), //------------------------
+      '<ul class="TAdminLinks">',
+         '<li>', /* TODO make_menu_link( T_('Prepare Ladder'), array( 'url' => "tournaments/ladder/prepare.php?tid=$tid", 'class' => 'TAdmin' )),
+                 SEP_SPACING, */
+                 make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
+      '</ul>',
+
       '</tr></td></table>',
       "\n";
 
