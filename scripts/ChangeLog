@@ -22,6 +22,77 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-19 juga
+
+   * tournaments/manage_tournament.php:
+   - added start-phase to prepare ladder-tournament: view ladder
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.fillEntityData, ~.new_from_row),
+     tournaments/ladder/view.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added table-field TournamentLadder.RankChanged to indicate when TPs rank
+     has changed by TP losing or winning
+
+2010-01-18 juga
+
+   * tournaments/include/tournament.php (Tournament.build_info),
+     tournaments/ladder/view.php,
+     include/classlib_userconfig.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added viewing of tournament-ladder showing entries from TournamentLadder-table
+   - added table-column-set for saving columns of tournament-ladder-view
+-----------
+-- table-column-set for tournament-ladder-view
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentLadderView int NOT NULL DEFAULT -1 ;
+-----------
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder),
+     tournaments/ladder/index.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added TournamentLadder-table to keep track of Ladder-type tournament
+-----------
+-- added table to keep track of Ladder-type tournament
+CREATE TABLE TournamentLadder (
+   tid int(11) NOT NULL,
+   rid int(11) NOT NULL,
+   uid int(11) NOT NULL,
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   RankChanged datetime NOT NULL default '0000-00-00 00:00:00',
+   Rank smallint unsigned NOT NULL DEFAULT '0',
+   BestRank smallint unsigned NOT NULL DEFAULT '0',
+   PRIMARY KEY (tid,rid),
+   KEY uid (uid),
+   KEY Rank (tid,Rank)
+) ENGINE=MyISAM;
+-----------
+
+   * tournaments/include/tournament_status.php (class TournamentStatus, ~._load_tprops,
+       ~.check_conditions_status_REG, ~.check_basic_conditions_status_change,
+       ~.check_conditions_status_PAIR),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added check-conditions for status-change REG->PAIR
+     - check min/max participant-count
+     - check registration-restrictions for all registered users
+   - extracted basic checks on tournament-title/description/director in separate check-method,
+     added check for status-changes to REG/PAIR/PLAY
+   - added index for TournamentProperties-status
+-----------
+-- added index for TP-status
+ALTER TABLE TournamentParticipant
+   DROP INDEX tid ;
+ALTER TABLE TournamentParticipant
+   ADD INDEX tid_status (tid,Status) ;
+-----------
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration):
+   - check max-count on REGISTERed tournament-participants
+
+   * tournaments/edit_properties.php (parse_edit_form):
+   - for editing registration-properties: assure min < max tournament-participants
+
 2010-01-17 juga
 
    * tournaments/include/tournament_properties.php (class TournamentProperties.checkUserRegistration),
@@ -30,7 +101,7 @@ ChangeLog
      - errors always prohibit registration
      - warnings are ignored but shown for existing TournamentParticipants for TD and user
      - warnings must be explicitly ignored for new users by TD
-     - warnings will be errors for new users
+     - warnings will be errors for new users by TD and user
      - warnings are not shown if TP on REGISTER-status
      - show warnings as extra list in registration-restriction section
 
@@ -94,7 +165,7 @@ ALTER TABLE TournamentParticipant
    - enhanced error-list builder with option for <ul>-list and embedding into table-cell
 
    * include/message_functions.php (message_info_table):
-   - bugfix: don't sow initial-thread icon if it is no thread
+   - bugfix: don't show initial-thread icon if it is no thread
 
 2010-01-11 juga
 
