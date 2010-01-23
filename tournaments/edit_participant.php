@@ -59,7 +59,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
      tp_preview&tid=&uid=                 : preview edits for TP
      tp_save&tid=&uid=                    : update TP-registration in database
      tp_delete&tid=&uid=                  : remove TP (need confirm)
-     tp_delete&confirm=1tid=&uid=         : remove TP (confirmed)
+     tp_delete&confirm=1&tid=&uid=        : remove TP (confirmed)
      tp_cancel&tid=&uid=                  : cancel remove-confirmation or cancel editing
 
    Fields for preview & save:
