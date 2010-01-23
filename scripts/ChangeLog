@@ -22,6 +22,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-23 juga
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.insert,
+       ~.update, ~.delete, ~.fillEntityData, ~.check_participant_registrations),
+     tournaments/include/tournament_participant.php (class TournamentParticipant,
+       ~.load_tournament_participants_registered),
+     tournaments/include/tournament_status.php (class TournamentStatus, ~.check_conditions_status_PLAY),
+     tournaments/include/tournament_template.php (class TournamentTemplate, ~.checkParticipantRegistrations),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament, ~.checkParticipantRegistrations),
+     tournaments/edit_properties.php (parse_edit_form):
+   - implemented check for PAIR->PLAY tournament-status change
+   - added tournament-type specific limits for min/max participants
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.load_max_rank,
+       ~.add_user_to_ladder, ~.add_participant_to_ladder, ~.delete_ladder, ~.seed_ladder),
+     tournaments/include/tournament_properties.php (TournamentProperties.build_ladder_seed_order),
+     tournaments/include/tournament_globals.php, tournaments/ladder/admin.php,
+     tournaments/manage_tournament.php, scripts/update_translation_pages.php, NEWS:
+   - added admin-interface for ladder-tournament for TD
+     - seed ladder with certain seed-order by:
+       current-rating, tournament-rating, register-time, random
+     - delete ladder with confirmation
+     - add single registered tournament-participant to ladder
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.get_edit_tournament_status),
+     tournaments/register.php:
+   - restricted editing of user-registration for user and participant-edit for TD:
+     deactivated PAIR -> REGISTER|PLAY
+
+   * tournaments/ladder/view.php:
+   - added number of registered users for ladder
+
+   * include/connect2mysql.php (ta_begin, ta_end):
+   - added for multi-table inserts: transaction-start/end:
+     no real DB-TA, but at least can not be broken by user-abort
+
 2010-01-19 juga
 
    * tournaments/manage_tournament.php:
