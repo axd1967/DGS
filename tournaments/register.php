@@ -78,13 +78,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if( is_null($tprops) )
       error('bad_tournament', "Tournament.register.miss_properties($tid,$my_id)");
 
+   $errors = $tstatus->check_edit_status( TournamentParticipant::get_edit_tournament_status(), false );
+
    // existing application ? (check matching tid & uid if loaded by rid)
    $tp = TournamentParticipant::load_tournament_participant( $tid, $my_id, $rid, true, true );
    if( is_null($tp) )
       $tp = new TournamentParticipant( 0, $tid, $my_id, User::new_from_row($player_row) ); // new TP
    $rid = $tp->ID; // 0=new-registration, >0 = edit-registration
 
-   if( $rid && $is_delete && @$_REQUEST['confirm'] ) // confirm delete TP-reg
+   if( $rid && $is_delete && @$_REQUEST['confirm'] && count($errors) == 0 ) // confirm delete TP-reg
    {
       TournamentParticipant::delete_tournament_participant( $tid, $rid );
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."sysmsg="
@@ -103,7 +105,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id,
                                       ( $rid ? TPROP_CHKTYPE_USER_EDIT : TPROP_CHKTYPE_USER_NEW ) );
 
-   $errors = array();
    if( !$rid ) // new-TP
    {
       if( count($reg_errors) )
@@ -117,7 +118,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    // ---------- Process inputs into actions ------------------------------------
 
-   if( $is_invite )
+   if( $is_invite && count($errors) == 0 )
    {
       // handle invitation: ACK (approval)
       if( @$_REQUEST['tp_ack_invite'] ) // accepted invite
