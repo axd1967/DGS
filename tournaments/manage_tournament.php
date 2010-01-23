@@ -121,8 +121,8 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
       make_header( 3, T_('Start phase'), TOURNEY_STATUS_PAIR ), //------------------------
       '<ul class="TAdminLinks">',
-         '<li>', /* TODO make_menu_link( T_('Prepare Ladder'), array( 'url' => "tournaments/ladder/prepare.php?tid=$tid", 'class' => 'TAdmin' )),
-                 SEP_SPACING, */
+         '<li>', make_menu_link( T_('Admin Ladder'), array( 'url' => "tournaments/ladder/admin.php?tid=$tid", 'class' => 'TAdmin' )),
+                 SEP_SPACING,
                  make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
       '</ul>',
 

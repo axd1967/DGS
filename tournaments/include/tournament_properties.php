@@ -21,10 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/db_classes.php' );
-require_once( 'include/classlib_user.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
-require_once( 'tournaments/include/tournament.php' );
+require_once 'include/db_classes.php';
+require_once 'include/classlib_user.php';
+require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament.php';
 
  /*!
   * \file tournament_properties.php
@@ -47,7 +48,6 @@ define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
 define('TPROP_CHKTYPE_TD', 1);
 define('TPROP_CHKTYPE_USER_NEW', 2);
 define('TPROP_CHKTYPE_USER_EDIT', 3);
-
 
 // lazy-init in TournamentProperties::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
@@ -282,6 +282,25 @@ class TournamentProperties
       if( !is_numeric($check_user) )
          error('invalid_args', "TournamentProperties._load_user($check_user)");
       return User::load_user( (int)$check_user );
+   }
+
+   /*! \brief Returns array with default and seed-order array for ladder-tourney. */
+   function build_ladder_seed_order()
+   {
+      $arr = array();
+      $default = 0;
+      if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX )
+      {
+         $arr[LADDER_SEEDORDER_CURRENT_RATING] = T_('Current user rating#seedorder');
+         $default = LADDER_SEEDORDER_CURRENT_RATING;
+      }
+      $arr[LADDER_SEEDORDER_REGISTER_TIME] = T_('Tournament register time#seedorder');
+      if( $default == 0 )
+         $default = LADDER_SEEDORDER_REGISTER_TIME;
+      if( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
+         $arr[LADDER_SEEDORDER_TOURNEY_RATING] = T_('Tournament rating#seedorder');
+      $arr[LADDER_SEEDORDER_RANDOM] = T_('Random#seedorder');
+      return array( $default, $arr );
    }
 
 

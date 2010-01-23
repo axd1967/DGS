@@ -112,6 +112,7 @@ function find_php_files( )
          , 'translations/'
          , 'rss/'
          , 'tournaments/'
+         , 'tournaments/ladder/'
          , 'tournaments/include/'
          , 'tournaments/include/types/'
          , 'wap/'
