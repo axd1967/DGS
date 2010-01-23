@@ -25,6 +25,7 @@ require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_factory.php';
 
  /*!
   * \file tournament_status.php
@@ -43,6 +44,7 @@ class TournamentStatus
    var $tid; // Tournament.ID
    var $is_admin;
    var $tourney; // Tournament-object
+   var $ttype; // specific typed TournamentTemplate-object
    var $tprops; // TournamentProperties-object
    var $curr_status; // old Tournament.Status
    var $new_status; // new Tournament.Status
@@ -68,6 +70,7 @@ class TournamentStatus
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentStatus.find_tournament({$this->tid})");
 
+      $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
       $this->tprops = null;
 
       $this->is_admin = TournamentUtils::isAdmin();
@@ -160,7 +163,7 @@ class TournamentStatus
             $this->errors[] = make_html_safe( sprintf( T_('Error for user %s'), "[$err_link]"), 'line') . ": $err";
          }
       }
-   }
+   }//check_conditions_status_PAIR
 
    function check_conditions_status_PLAY()
    {
@@ -169,8 +172,12 @@ class TournamentStatus
 
       $this->check_basic_conditions_status_change();
 
-      //TODO condition: all T-games must be ready to start (i.e. inserted and set up)
-      $this->errors[] = 'not_implemented_yet';
+      // check that all registered TPs are added
+      //TODO(later) condition (for round-robin): all T-games must be ready to start (i.e. inserted and set up)
+      $arr_TPs = TournamentParticipant::load_tournament_participants_registered( $this->tid );
+      $chk_errors = $this->ttype->checkParticipantRegistrations( $this->tid, $arr_TPs );
+      if( count($chk_errors) )
+         $this->errors = array_merge( $this->errors, $chk_errors );
    }
 
    function check_conditions_status_CLOSED()
