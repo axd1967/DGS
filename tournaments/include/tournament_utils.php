@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once 'include/std_functions.php'; // for ADMIN_TOURNAMENT
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 
  /*!
@@ -130,7 +131,7 @@ class TournamentUtils
    function buildLastchangedBy( $lastchanged, $changed_by )
    {
       return date(DATEFMT_TOURNAMENT, $lastchanged) . MED_SPACING
-           . sprintf( T_('( by %s)'), ( $changed_by ? $changed_by : NO_VALUE ) );
+           . sprintf( T_('( changed by %s )#tourney'), ( $changed_by ? trim($changed_by) : NO_VALUE ) );
    }
 
 } // end of 'TournamentUtils'
