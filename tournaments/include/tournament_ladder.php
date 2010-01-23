@@ -21,7 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/db_classes.php' );
+require_once 'include/db_classes.php';
+require_once 'include/std_classes.php';
+require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_properties.php';
 
  /*!
   * \file tournament_ladder.php
@@ -85,24 +90,25 @@ class TournamentLadder
       $this->Created = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->insert( "TournamentLadder::insert(%s,{$this->tid},{$this->rid})" );
+      return $entityData->insert( "TournamentLadder::insert(%s)" );
    }
 
    function update()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentLadder::update(%s,{$this->tid},{$this->rid})" );
+      return $entityData->update( "TournamentLadder::update(%s)" );
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentLadder::delete(%s,{$this->tid},{$this->rid})" );
+      return $entityData->delete( "TournamentLadder::delete(%s)" );
    }
 
-   function fillEntityData()
+   function fillEntityData( &$data=null )
    {
-      $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
+      if( is_null($data) )
+         $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'rid', $this->rid );
       $data->set_value( 'uid', $this->uid );
@@ -127,7 +133,7 @@ class TournamentLadder
    /*! \brief Returns TournamentLadder-object created from specified (db-)row. */
    function new_from_row( $row )
    {
-      $tp = new TournamentLadder(
+      $tl = new TournamentLadder(
             // from TournamentLadder
             @$row['tid'],
             @$row['rid'],
@@ -137,7 +143,17 @@ class TournamentLadder
             @$row['Rank'],
             @$row['BestRank']
          );
-      return $tp;
+      return $tl;
+   }
+
+   /*! \brief Returns max Rank of TournamentLadder for given tournament-id; 0 if no entries found. */
+   function load_max_rank( $tid )
+   {
+      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql->clear_parts( SQLP_FIELDS );
+      $qsql->add_part( SQLP_FIELDS, 'IFNULL(MAX(Rank),0) AS X_Rank' );
+      $row = mysql_single_fetch( "TournamentLadder::get_max_rank($tid)", $qsql->get_select() );
+      return ( $row ) ? (int)@$row['X_Rank'] : 0;
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentLadder-objects for given tournament-id. */
@@ -159,6 +175,153 @@ class TournamentLadder
 
       return $iterator;
    }
+
+   /*! \brief Adds user given by User-object for tournament tid at bottom of ladder. */
+   function add_user_to_ladder( $tid, $user )
+   {
+      if( !is_a($user, 'User') )
+         error('invalid_user', "TournamentLadder::add_user_to_ladder.check_user($tid)");
+      $uid = $user->ID;
+
+      $tp = TournamentParticipant::load_tournament_participant( $tid, $uid, 0 );
+      if( is_null($tp) )
+         error('invalid_args', "TournamentLadder::add_user_to_ladder.load_tp($tid,$uid)");
+
+      return TournamentLadder::add_participant_to_ladder( $tid, $tp->ID, $uid );
+   }
+
+   /*! \brief Adds TP configured by rid,uid for tournament tid at bottom of ladder. */
+   function add_participant_to_ladder( $tid, $rid, $uid )
+   {
+      global $NOW;
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $query = "INSERT INTO $table (tid,rid,uid,Created,RankChanged,Rank,BestRank) "
+             . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), FROM_UNIXTIME($NOW), "
+               . "IFNULL(MAX(Rank),0)+1 AS Rank, IFNULL(MAX(Rank),0)+1 AS BestRank "
+               . "FROM $table WHERE tid=$tid";
+      return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid])", $query );
+   }
+
+   /*! \brief Delete complete ladder for given tournament-id. */
+   function delete_ladder( $tid )
+   {
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $query = "DELETE FROM $table WHERE tid=$tid";
+      return db_query( "TournamentLadder::delete_ladder(tid[$tid])", $query );
+   }
+
+   /*! \brief Seeds ladder with all registered TPs. */
+   function seed_ladder( $tourney, $tprops, $seed_order )
+   {
+      if( !is_a($tourney, 'Tournament') && $tourney->ID <= 0 )
+         error('unknown_tournament', "TournamentLadder::seed_ladder.check_tid($seed_order)");
+      $tid = $tourney->ID;
+
+      list( $def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
+      if( !isset($arr_seed_order[$seed_order]) )
+         error('invalid_args', "TournamentLadder::seed_ladder.check_seed_order($tid,$seed_order)");
+
+      // find all registered TPs (optimized)
+      $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS, 'TP.ID AS rid', 'TP.uid' );
+      $qsql->add_part( SQLP_FROM,   "$table AS TP" );
+      $qsql->add_part( SQLP_WHERE,  "TP.tid=$tid", "TP.Status='".TP_STATUS_REGISTER."'" );
+      if( $seed_order == LADDER_SEEDORDER_CURRENT_RATING )
+      {
+         $qsql->add_part( SQLP_FROM,  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
+         $qsql->add_part( SQLP_ORDER, 'TPP.Rating2 DESC' );
+      }
+      elseif( $seed_order == LADDER_SEEDORDER_REGISTER_TIME )
+         $qsql->add_part( SQLP_ORDER, 'TP.Created ASC' );
+      elseif( $seed_order == LADDER_SEEDORDER_TOURNEY_RATING )
+         $qsql->add_part( SQLP_ORDER, 'TP.Rating DESC' );
+
+      // load all registered TPs (optimized = no TournamentParticipant-objects)
+      $result = db_query( "TournamentLadder::seed_ladder.load_tournament_participants($tid,$seed_order)",
+         $qsql->get_select() );
+      $arr_TPs = array();
+      while( $row = mysql_fetch_array($result) )
+         $arr_TPs[] = $row;
+      mysql_free_result($result);
+
+      if( $seed_order == LADDER_SEEDORDER_RANDOM )
+         shuffle( $arr_TPs );
+
+      // add all TPs to ladder
+      global $NOW;
+      $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
+      $arr_inserts = array();
+      $rank = TournamentLadder::load_max_rank($tid);
+      foreach( $arr_TPs as $row )
+      {
+         ++$rank;
+         $tladder = new TournamentLadder( $tid, $row['rid'], $row['uid'], $NOW, $NOW, $rank, $rank );
+         $tladder->fillEntityData( $data );
+         $arr_inserts[] = $data->build_sql_insert_values();
+      }
+      unset($arr_TPs);
+
+      // insert all registered TPs to ladder
+      $cnt = count($arr_inserts);
+      $seed_query = $data->build_sql_insert_values(true) . implode(', ', $arr_inserts);
+      return db_query( "TournamentLadder::seed_ladder.insert_all(tid[$tid],$seed_order,#{$cnt})", $seed_query );
+   }//seed_ladder
+
+   /*!
+    * \brief Checks if all participants (arr_TPS[rid=>uid]) are registered in ladder;
+    *        auto-removing bad registrations.
+    */
+   function check_participant_registrations( $tid, $arr_TPs )
+   {
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS, 'rid', 'uid' );
+      $qsql->add_part( SQLP_FROM,   $table );
+      $qsql->add_part( SQLP_WHERE,  "tid=$tid" );
+      $result = db_query( "TournamentLadder::check_participant_registrations.load_ladder($tid)",
+         $qsql->get_select() );
+
+      $arr_miss = array() + $arr_TPs; // registered TP, but not in ladder
+      $arr_bad  = array(); // user in ladder, but not a registered TP
+      while( $row = mysql_fetch_array($result) )
+      {
+         $rid = $row['rid'];
+         $uid = $row['uid'];
+         if( isset($arr_TPs[$rid]) )
+            unset($arr_miss[$rid]);
+         else
+            $arr_bad[$rid] = $uid;
+      }
+      mysql_free_result($result);
+
+      global $base_path;
+      $errors = array();
+      if( count($arr_miss) )
+      {
+         $arr = array();
+         foreach( $arr_miss as $rid => $uid )
+            $arr[] = anchor( $base_path."tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid", $uid );
+         $errors[] = T_('Found registered tournament participants not added to ladder')
+            . "<br>\n" . sprintf( T_('users [%s]#T_ladder'), implode(', ', $arr) );
+      }
+      if( count($arr_bad) )
+      {
+         $arr = array();
+         foreach( $arr_bad as $rid => $uid )
+            $arr[] = anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid", $uid );
+         $errors[] = T_('Auto-removing of found users added to ladder without registration')
+            . "<br>\n" . sprintf( T_('users [%s]#T_ladder'), implode(', ', $arr) );
+
+         // removing bad ladder-registrations
+         foreach( $arr_bad as $rid => $uid )
+         {
+            $tladder = new TournamentLadder( $tid, $rid );
+            $tladder->delete();
+         }
+      }
+      return $errors;
+   }//check_participant_registrations
 
    function get_edit_tournament_status()
    {
