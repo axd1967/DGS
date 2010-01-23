@@ -363,7 +363,7 @@ class TournamentParticipant
       $qsql->add_part( SQLP_WHERE, "TP.tid='$tid'" );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentParticipant.load_tournament_participants", $query );
+      $result = db_query( "TournamentParticipant.load_tournament_participants($tid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
@@ -375,6 +375,20 @@ class TournamentParticipant
       mysql_free_result($result);
 
       return $iterator;
+   }
+
+   /*! \brief Returns array( ID=>uid ) with TournamentParticipant.ID for given tournament. */
+   function load_tournament_participants_registered( $tid )
+   {
+      $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
+      $query = "SELECT ID, uid FROM $table WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."'";
+      $result = db_query( "TournamentParticipant.load_tournament_participants_registered($tid)", $query );
+
+      $arr = array();
+      while( $row = mysql_fetch_array( $result ) )
+         $arr[$row['ID']] = $row['uid'];
+      mysql_free_result($result);
+      return $arr;
    }
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
@@ -465,7 +479,7 @@ class TournamentParticipant
    function get_edit_tournament_status()
    {
       static $statuslist = array(
-         TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY
+         TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY
       );
       return $statuslist;
    }
