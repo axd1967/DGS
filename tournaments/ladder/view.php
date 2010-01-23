@@ -55,7 +55,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    // init table
    $page = "view.php?";
    $ltable = new Table( 'tournament_ladder', $page, $cfg_tblcols, '',
-      TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE );
+      TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
    $ltable->use_show_rows(false);
    $ltable->add_or_del_column();
 
@@ -84,6 +84,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
       ));
    $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
+
+   $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
+   $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
 
 
    $title = sprintf( T_('Tournament-Ladder #%s'), $tid );
