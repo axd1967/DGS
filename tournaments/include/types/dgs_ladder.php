@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_template.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_ladder.php';
 
  /*!
   * \file dgs_ladder.php
@@ -47,6 +48,8 @@ class DgsLadderTournament extends TournamentTemplate
    {
       parent::TournamentTemplate( TOURNEY_WIZTYPE_DGS_LADDER, T_('DGS Ladder (only for Admin)#ttype') );
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
+      $this->limit_min_participants = 1;
+      $this->limit_max_participants = 0;
    }
 
    function createTournament()
@@ -72,6 +75,11 @@ class DgsLadderTournament extends TournamentTemplate
          create_error("LadderTournament.createTournament3(%s,$tid)");
 
       return $tid;
+   }
+
+   function checkParticipantRegistrations( $tid, $arr_TPs )
+   {
+      return TournamentLadder::check_participant_registrations( $tid, $arr_TPs );
    }
 
 } // end of 'DgsLadderTournament'

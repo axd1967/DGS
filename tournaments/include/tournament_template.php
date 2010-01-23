@@ -42,6 +42,8 @@ class TournamentTemplate
    var $need_rounds;
    var $allow_register_tourney_status;
    var $need_admin_create_tourney;
+   var $limit_min_participants;
+   var $limit_max_participants;
 
    /*! \brief Constructs template for different tournament-types. */
    function TournamentTemplate( $wizard_type, $title )
@@ -55,6 +57,8 @@ class TournamentTemplate
       $this->need_rounds = false;
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
       $this->need_admin_create_tourney = true;
+      $this->limit_min_participants = 1;
+      $this->limit_max_participants = 0;
    }
 
    function to_string()
@@ -73,6 +77,12 @@ class TournamentTemplate
    function createTournament()
    {
       error('invalid_method', "TournamentTemplate.createTournament({$this->wizard_type})");
+      return 0;
+   }
+
+   function checkParticipantRegistrations( $tid, $arr_TPs )
+   {
+      error('invalid_method', "TournamentTemplate.checkParticipantRegistrations({$this->wizard_type},$tid)");
       return 0;
    }
 
