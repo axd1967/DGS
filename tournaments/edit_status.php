@@ -132,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          $confirm_notes = T_('Are you still sure you want to change the status?');
          if( !$tstatus->is_admin )
             $confirm_notes = // role_info comes here (see below)
-               T_('As such only the status changes defined below are possible.')
+               T_('Be aware, that only the status changes defined below are possible.')
                . "<br>\n"
                . T_('The status change may not be reversible.')
                . "<br><br>\n"
