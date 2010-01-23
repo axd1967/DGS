@@ -28,6 +28,7 @@ require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
+require_once( 'tournaments/include/tournament_factory.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
@@ -58,6 +59,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_properties.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
+   $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
@@ -72,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $rating_array = getRatingArray();
 
    // check + parse edit-form
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $tprops );
+   list( $vars, $edits, $errorlist ) = parse_edit_form( $tprops, $ttype );
    $errorlist += $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
 
    // save tournament-properties-object with values from edit-form
@@ -185,7 +187,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tpr )
+function parse_edit_form( &$tpr, $ttype )
 {
    $edits = array();
    $errors = array();
@@ -233,16 +235,19 @@ function parse_edit_form( &$tpr )
          $errors[] = $parsed_value;
 
       $new_value = $vars['min_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
-         $tpr->MinParticipants = limit( $new_value, 0, 99999, 0 );
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $ttype->limit_min_participants )
+         $tpr->MinParticipants = limit( $new_value, $ttype->limit_min_participants, 99999, 0 );
       else
-         $errors[] = T_('Expecting positive number for minimum participants');
+         $errors[] = sprintf( T_('Expecting positive number for minimum participants > %s'),
+                              $ttype->limit_min_participants - 1 );
 
+      $limit_max_TPs = ($ttype->limit_max_participants > 0) ? $ttype->limit_max_participants : 99999;
       $new_value = $vars['max_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
-         $tpr->MaxParticipants = limit( $new_value, 0, 99999, 0 );
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value <= $limit_max_TPs )
+         $tpr->MaxParticipants = limit( $new_value, 0, $limit_max_TPs, 0 );
       else
-         $errors[] = T_('Expecting positive number for maximum participants');
+         $errors[] = sprintf( T_('Expecting positive number for maximum participants < %s'),
+                              $limit_max_TPs + 1 );
 
       if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');
