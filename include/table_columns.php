@@ -129,6 +129,7 @@ class Table
     *      (if 'owntd' is present, the rest of the array is ignored)
     *   'text' => the inner text for the cell
     *   'attbs' => the local attributs for the <td...>text</td> tag
+    * \see make_tablerow()
     */
    var $Tablerows;
 
@@ -1119,18 +1120,24 @@ class Table
       }
    //}
 
+   // tablerow additional keys:
+   //    class (=solely row-class), extra_class (=additional row-class),
+   //    extra_row (=row-html), extra_row_class (=class for extra-row)
+   // cell of table-row additional keys:
+   //    owntd (=own TD-format), text (=content), attbs (=td-attributes)
    function make_tablerow( $tablerow, $row_num, $rclass='Row1' )
    {
       if( isset($tablerow['class']) )
          $rclass = $tablerow['class'];
+      $extra_class = ( isset($tablerow['extra_class']) ) ? ' '.$tablerow['extra_class'] : '';
 
       if( $this->JavaScript )
-         $row_start = "\n <tr class=\"$rclass%s\" ondblclick=\"toggle_class(this,'$rclass','Hil$rclass')\">";
+         $row_start = "\n <tr class=\"$rclass$extra_class%s\" ondblclick=\"toggle_class(this,'$rclass$extra_class','Hil$rclass$extra_class')\">";
       else
-         $row_start = "\n <tr class=\"$rclass%s\">";
+         $row_start = "\n <tr class=\"$rclass$extra_class%s\">";
 
       $colspan= 0;
-      $string = sprintf( $row_start, '' ); // no extra class
+      $string = sprintf( $row_start, '' );
       foreach( $this->Tableheads as $thead )
       {
          $nr = $thead['Nr'];
