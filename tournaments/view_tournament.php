@@ -78,10 +78,12 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    section( 'info', $title );
    echo
       T_('This page contains all necessary information and links to participate in the tournament.'),
+      MINI_SPACING,
       T_('There are different sections:#tourney'), "\n<ul>",
          "\n<li>", anchor( "$base_path$page_tourney#title", T_('Tournament description') ),
          "\n<li>", anchor( "$base_path$page_tourney#rules", T_('Tournament ruleset') ),
          "\n<li>", anchor( "$base_path$page_tourney#registration", T_('Tournament registration information') ),
+         "\n<li>", anchor( "$base_path$page_tourney#games", T_('Tournament games') ),
          "\n<li>", anchor( "$base_path$page_tourney#result", T_('Tournament results') ),
       "</ul>\n",
       make_html_safe(
@@ -167,13 +169,31 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    make_menu( $sectmenu, false);
 
+
+   // --------------- Games -----------------------------------------
+
+   echo "<hr>\n", '<a name="games">', "\n";
+   section( 'tournament', T_('Games#T_view') );
+
+   // ------------- Section Menu
+
+   $sectmenu = array();
+   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+
+   make_menu( $sectmenu, false);
+
+
    // --------------- Results ---------------------------------------
 
    echo "<hr>\n", '<a name="result">', "\n";
    section( 'tournament', T_('Results#T_view') );
+
+   /* TODO
    echo
-      "[TODO] Results (Show Winners, Show intermediate results (link))", //TODO
+      "[TODO] Results (Show Winners, Show intermediate results (link))",
       "\n";
+   */
 
 
    end_page();
