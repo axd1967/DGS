@@ -143,6 +143,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    }
    $rid = $tp->ID; // 0 (=register new), >0 (=edit)
 
+   // authorize actions
+   $authorise_delete = $tp->authorise_delete( $tourney->Status );
+   $authorise_edit_custom = $tp->authorise_edit_customized( $tourney->Status );
+
 
    // init
    $old_status = $tp->Status;
@@ -171,7 +175,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
    if( !is_null($user) ) // edit
    {
-      if( $rid && $is_delete && @$_REQUEST['confirm'] ) // confirm delete TP-reg
+      if( $rid && $is_delete && $authorise_delete && @$_REQUEST['confirm'] && count($errors) == 0 ) // confirm delete TP-reg
       {
          TournamentParticipant::delete_tournament_participant( $tid, $rid );
          $sys_msg = send_register_notification( 'delete', $tp, $my_id );
@@ -198,6 +202,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
       if( $old_status != $tp->Status )
          $edits[] = T_('Status#edits');
+
+      $tp->authorise_edit_register_status($tourney->Status, $old_status, $errors); // check status-change
 
       // persist TP in database
       if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0
@@ -247,6 +253,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $tpform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   $tpform->add_row( array(
+         'DESCRIPTION', T_('Tournament Status'),
+         'TEXT',        Tournament::getStatusText($tourney->Status), ));
    if( !is_null($user) )
       $tpform->add_row( array(
             'DESCRIPTION', T_('User'),
@@ -297,11 +306,14 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current Registration Status'),
             'TEXT',        $old_status_str, ));
-      $tpform->add_row( array(
-            'DESCRIPTION', T_('New Registration Status'),
-            'TEXT',        span('TWarning', TournamentParticipant::getStatusText($tp->Status)) .
-                           SMALL_SPACING,
-            'SELECTBOX',   'status', 1, build_new_status_choices($tp), $vars['status'], false, ));
+      if( $authorise_edit_custom )
+      {
+         $tpform->add_row( array(
+               'DESCRIPTION', T_('New Registration Status'),
+               'TEXT',        span('TWarning', TournamentParticipant::getStatusText($tp->Status)) .
+                              SMALL_SPACING,
+               'SELECTBOX',   'status', 1, build_new_status_choices($tp), $vars['status'], false, ));
+      }
 
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current Flags'),
@@ -322,7 +334,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current User Rating'),
             'TEXT',        build_rating_str($tp->User->Rating, $tp->uid), ));
-      if( !$is_delete && $tprops->allow_rating_edit() )
+      if( !$is_delete && $authorise_edit_custom && $tprops->allow_rating_edit() )
       {
          $custom_rating_str = ( $tp->hasRating() && $vars['_has_custom_rating'] )
             ? echo_rating($tp->Rating, true) : NO_VALUE;
@@ -341,7 +353,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $arr = array(
                'DESCRIPTION', T_('Tournament Rating'),
                'TEXT',        build_rating_str($tp->Rating, $tp->uid), );
-         if( !$is_delete && $tp->User->hasRating() ) // T-rating not needed if user has rating
+         if( !$is_delete && $authorise_edit_custom && $tp->User->hasRating() ) // T-rating not needed if user has rating
             array_push( $arr,
                'TEXT', SMALL_SPACING,
                'CHECKBOX', 'del_rating', '1', T_('Remove customized rating'),
@@ -357,7 +369,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tpform->add_row( array(
                'DESCRIPTION', T_('Current Start Round'),
                'TEXT',        $old_start_round, ));
-         if( $tourney->Rounds > 1 && !$is_delete )
+         if( $tourney->Rounds > 1 && !$is_delete && $authorise_edit_custom )
             $tpform->add_row( array(
                   'DESCRIPTION', T_('Customized Start Round'),
                   'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '',
@@ -397,12 +409,15 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
       if( $is_delete )
       {
-         $tpform->add_hidden( 'confirm', 1 );
-         $tpform->add_row( array(
-               'TAB', 'CELL', 1, '', // align submit-buttons
-               'SUBMITBUTTON', 'tp_delete', T_('Confirm removal of registration'),
-               'TEXT', SMALL_SPACING,
-               'SUBMITBUTTON', 'tp_cancel', T_('Cancel') ));
+         if( $authorise_delete )
+         {
+            $tpform->add_hidden( 'confirm', 1 );
+            $tpform->add_row( array(
+                  'TAB', 'CELL', 1, '', // align submit-buttons
+                  'SUBMITBUTTON', 'tp_delete', T_('Confirm removal of registration'),
+                  'TEXT', SMALL_SPACING,
+                  'SUBMITBUTTON', 'tp_cancel', T_('Cancel') ));
+         }
       }
       else
       {
@@ -410,7 +425,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                'TAB', 'CELL', 1, '', // align submit-buttons
                'SUBMITBUTTON', 'tp_save', ($rid ? T_('Update registration') : T_('Save registration')),
                'SUBMITBUTTON', 'tp_preview', T_('Preview') );
-         if( $rid )
+         if( $rid && $authorise_delete )
             array_push( $rowarr,
                   'TEXT', SMALL_SPACING,
                   'SUBMITBUTTON', 'tp_delete', T_('Remove registration') );
@@ -440,6 +455,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   if( $tourney->Type == TOURNEY_TYPE_LADDER && $rid )
+      $menu_array[T_('Admin user')] =
+            array( 'url' => "tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage this tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 

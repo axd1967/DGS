@@ -21,9 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/utilities.php' );
-require_once( 'include/db_classes.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
+require_once 'include/utilities.php';
+require_once 'include/db_classes.php';
+require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_globals.php';
 
  /*!
   * \file tournament_participant.php
@@ -164,6 +165,50 @@ class TournamentParticipant
    }
 
 
+   /*! \brief Returns true if removal of tournament-participant is authorised; t_status is tournament-status. */
+   function authorise_delete( $t_status )
+   {
+      if( $t_status == TOURNEY_STATUS_REGISTER )
+         return true;
+      if( $t_status == TOURNEY_STATUS_PLAY && $this->ID && $this->Status != TP_STATUS_REGISTER )
+         return true;
+      return false;
+   }
+
+   /*! \brief Returns true if editing customized fields is authorised; t_status is tournament-status. */
+   function authorise_edit_customized( $t_status )
+   {
+      if( $t_status == TOURNEY_STATUS_REGISTER )
+         return true;
+      if( $t_status == TOURNEY_STATUS_PLAY )
+      {
+         if( $this->ID <= 0 || $this->Status != TP_STATUS_REGISTER )
+            return true;
+      }
+      return false;
+   }
+
+   /*! \brief Returns true if TP-status-change from TP-REGISTER is authorised; t_status is tournament-status. */
+   function authorise_edit_register_status( $t_status, $tp_status_old, &$errors )
+   {
+      $allowed = false;
+      if( $t_status == TOURNEY_STATUS_REGISTER )
+         $allowed = true;
+      elseif( $t_status == TOURNEY_STATUS_PLAY )
+      {
+         if( $this->ID <= 0 ) // new
+            $allowed = true;
+         elseif( $tp_status_old != TP_STATUS_REGISTER || $tp_status_old == $this->Status ) // existing TP
+            $allowed = true;
+      }
+
+      if( !$allowed && is_array($errors) )
+         $errors[] = sprintf( T_('Registration status change [%s] to [%s] is not allowed for tournament status [%s].'),
+                              TournamentParticipant::getStatusText($tp_status_old),
+                              TournamentParticipant::getStatusText($this->Status),
+                              Tournament::getStatusText($t_status) );
+      return $allowed;
+   }
 
 
    /*! \brief Inserts or updates tournament-participant in database. */
