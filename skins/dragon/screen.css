@@ -2629,6 +2629,10 @@ body.Tournament table#pageLayout td#pageBody div.Section {
    text-align: left;
 }
 
+table tr.TourneyUser td {
+   background: #bbddff;
+}
+
 table#gamerulesTableInfos {
    border: 0px solid blue;
    border-spacing: 0px;

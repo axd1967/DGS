@@ -71,7 +71,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $ltable->add_tablehead( 4, T_('Userid#T_ladder'), 'User', TABLE_NO_HIDE );
    $ltable->add_tablehead( 5, T_('Country#T_ladder'), 'Image', 0 );
    $ltable->add_tablehead( 6, T_('Current Rating#T_ladder'), 'Rating', 0 );
-   $ltable->add_tablehead( 7, T_('Action#T_ladder'), 'Image', TABLE_NO_HIDE );
+   $ltable->add_tablehead( 7, T_('Action#T_ladder'), '', TABLE_NO_HIDE );
    $ltable->add_tablehead( 8, T_('Challenges#T_ladder'), '', TABLE_NO_HIDE );
    $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
    $ltable->add_tablehead(10, T_('Started#T_ladder'), 'Date', 0 );
@@ -93,18 +93,20 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h2 class=Header>", $tourney->build_info(2), "</h2>\n";
 
+   $tl_user = null;
    while( list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tl, $orow ) = $arr_item;
       $uid = $tl->uid;
       $user = User::new_from_row($orow, 'TLP_');
+      $is_mine = ( $my_id == $uid );
 
       $row_str = array();
 
       if( $ltable->Is_Column_Displayed[ 1] )
          $row_str[ 1] = $tl->Rank . '.';
       if( $ltable->Is_Column_Displayed[ 2] )
-         $row_str[ 2] = $tl->BestRank . '.';
+         $row_str[ 2] = ($tl->BestRank > 0) ? $tl->BestRank . '.' : '';
       if( $ltable->Is_Column_Displayed[ 3] )
          $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
       if( $ltable->Is_Column_Displayed[ 4] )
@@ -114,7 +116,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if( $ltable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = echo_rating( $user->Rating, true, $uid);
       if( $ltable->Is_Column_Displayed[ 7] )
-         $row_str[ 7] = ''; //TODO actions
+      {
+         if( $is_mine )
+            $row_str[ 7] = '<b>' . T_('This is you') . '</b>';
+         else
+            $row_str[ 7] = ''; //TODO actions
+      }
       if( $ltable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = ''; //TODO game-list
       if( $ltable->Is_Column_Displayed[ 9] )
@@ -122,7 +129,20 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if( $ltable->Is_Column_Displayed[10] )
          $row_str[10] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
 
+      if( $is_mine )
+      {
+         $tl_user = $tl;
+         $row_str['extra_class'] = 'TourneyUser';
+      }
       $ltable->add_row( $row_str );
+   }
+
+   if( !is_null($tl_user) )
+   {
+      echo sprintf( T_('Your current rank is #%s.'), $tl_user->Rank );
+      if( $tl_user->BestRank > 0 )
+         echo MED_SPACING, sprintf( T_('Your best rank is #%s.'), $tl_user->BestRank );
+      echo "<br>\n";
    }
 
    // print table
