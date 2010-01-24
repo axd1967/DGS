@@ -206,9 +206,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $menu_array = array();
    if( $tid )
-      $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+      $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if( $allow_edit_tourney ) # for TD
-      $menu_array[T_('Manage this tournament')] =
+      $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);

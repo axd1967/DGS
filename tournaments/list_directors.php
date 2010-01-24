@@ -152,12 +152,12 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
 
    $menu_array = array();
-   $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if( $allow_new_del )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
    if( $tourney->allow_edit_tournaments($my_id) )
-      $menu_array[T_('Manage this tournament')] =
+      $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);

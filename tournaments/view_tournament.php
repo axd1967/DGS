@@ -97,7 +97,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $sectmenu = array();
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
    if( $tourney->allow_edit_tournaments($my_id) )
-      $sectmenu[T_('Manage this tournament')] =
+      $sectmenu[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    make_menu( $sectmenu, false);
 

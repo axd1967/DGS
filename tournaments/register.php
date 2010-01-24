@@ -358,7 +358,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $menu_array = array();
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
-   $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
 
    $reg_user_str = TournamentParticipant::getLinkTextRegistration( $tourney, $my_id, $old_status );
    $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";

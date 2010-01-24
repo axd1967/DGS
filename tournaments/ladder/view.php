@@ -150,9 +150,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
 
    $menu_array = array();
-   $menu_array[T_('View this tournament')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if( $tourney->allow_edit_tournaments($my_id) )
-      $menu_array[T_('Manage this tournament')] =
+      $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
