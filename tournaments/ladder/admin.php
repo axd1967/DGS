@@ -51,6 +51,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
      tid=                        : admin T-ladder
      ta_seed&tid=                : seed T-ladder with registered TPs
      ta_adduser&tid=&uid=        : add user (Players.ID) to T-ladder
+     ta_deluser&tid=&uid=        : remove user (Players.ID) from T-ladder (no confirm)
+     ta_deluserall&tid=&uid=     : remove user (Players.ID) along WITH user-registration (no confirm)
      ta_delete&tid=              : delete T-ladder (to seed again, need confirm)
      ta_delete&confirm=1&tid=    : delete T-ladder (confirmed)
 */
@@ -78,29 +80,48 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    if( is_null($tprops) )
       error('bad_tournament', "Tournament.ladder_admin.miss_properties($tid,$my_id)");
 
-   $errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_PAIR ));
+   $errors = $tstatus->check_edit_status( TournamentLadder::get_edit_tournament_status() );
+   $authorise_seed = ( $tourney->Status == TOURNEY_STATUS_PAIR );
 
    // init
    $user = null;
+   $tladder_user = null;
+   $authorise_edit_user = $authorise_add_user = false;
    if( !$is_delete && $uid > 0 )
    {
       $user = User::load_user($uid);
       if( is_null($user) )
          $errors[] = T_('Unknown user-id') . " [".$uid."]";
+      else
+      {
+         $tladder_user = TournamentLadder::load_tournament_ladder_by_uid($tid, $uid);
+
+         $tp = TournamentParticipant::load_tournament_participant( $tid, $uid, 0 );
+         if( is_null($tp) )
+            $errors[] = sprintf( T_('Missing tournament user registration for user [%s].'), $user->Handle );
+         else
+         {
+            $authorise_edit_user = true;
+            $authorise_add_user = ( $tp->Status == TP_STATUS_REGISTER );
+
+            if( @$_REQUEST['ta_adduser'] && !$authorise_add_user )
+               $errors[] = T_('Adding unregistered user to ladder is not allowed.');
+         }
+      }
    }
 
    // ---------- Process actions ------------------------------------------------
 
    if( count($errors) == 0 )
    {
-      if( $is_delete && @$_REQUEST['confirm'] ) // confirm delete ladder
+      if( $is_delete && $authorise_seed && @$_REQUEST['confirm'] ) // confirm delete ladder
       {
          TournamentLadder::delete_ladder($tid);
          $sys_msg = urlencode( T_('Ladder deleted!#tourney') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
 
-      if( @$_REQUEST['ta_seed'] )
+      if( @$_REQUEST['ta_seed'] && $authorise_seed )
       {
          $seed_order = get_request_arg('seed_order');
          TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order );
@@ -108,11 +129,28 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
 
-      if( @$_REQUEST['ta_adduser'] && !is_null($user) )
+      if( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
       {
          TournamentLadder::add_user_to_ladder( $tid, $user );
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!#tourney'), $user->Handle) );
-         jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
+         jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+      }
+
+      $remove_all = (bool)@$_REQUEST['ta_deluserall'];
+      if( (@$_REQUEST['ta_deluser'] || $remove_all) && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      {
+         $del_errors = $tladder_user->remove_user_from_ladder( $remove_all );
+         if( count($del_errors) )
+            $errors = array_merge( $errors, $del_errors );
+         else
+         {
+            //TODO send user-notification about removal !?
+            $txtfmt = ($remove_all)
+               ? T_('User [%s] completely removed from this ladder-tournament!#tourney')
+               : T_('User [%s] removed from ladder!#tourney');
+            $sys_msg = urlencode( sprintf( $txtfmt, $user->Handle) );
+            jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+         }
       }
    }
 
@@ -130,10 +168,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $tform->add_row( array(
          'DESCRIPTION', T_('Rating Use Mode'),
          'TEXT',  TournamentProperties::getRatingUseModeText($tprops->RatingUseMode) ));
-   $tform->add_row( array( 'HR' ));
 
    if( count($errors) )
    {
+      $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString( T_('There are some errors'), $errors ) ));
@@ -142,50 +180,85 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    // ADMIN: Seed Ladder ---------------
 
-   if( !$is_delete )
+   if( $authorise_seed )
    {
-      list( $seed_order_def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
-      $seed_order_val = get_request_arg('seed_order', $seed_order_def);
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'TEXT', T_('Seed ladder with all registered tournament participants') . ':', ));
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'TEXT',         T_('Order by') . MED_SPACING,
-            'SELECTBOX',    'seed_order', 1, $arr_seed_order, $seed_order_val, false,
-            'SUBMITBUTTON', 'ta_seed', T_('Seed Ladder'),
-            'TEXT',         SMALL_SPACING,
-            'SUBMITBUTTON', 'ta_delete', T_('Delete Ladder'), ));
-   }
-   else
-   {
-      $tform->add_hidden( 'confirm', 1 );
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'TEXT', T_('Please confirm deletion of ladder') . ':', ));
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'SUBMITBUTTON', 'ta_delete', T_('Confirm delete'),
-            'TEXT', SMALL_SPACING,
-            'SUBMITBUTTON', 'ta_cancel', T_('Cancel') ));
-   }
-
-   // ADMIN: Add user ------------------
-
-   if( !$is_delete && !is_null($user) ) // valid user
-   {
-      $tform->add_empty_row();
       $tform->add_row( array( 'HR' ));
+      $tform->add_row( array( 'HEADER', T_('Prepare Ladder') ));
 
+      if( !$is_delete )
+      {
+         list( $seed_order_def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
+         $seed_order_val = get_request_arg('seed_order', $seed_order_def);
+         $tform->add_row( array(
+               'CELL', 2, '',
+               'TEXT', T_('Seed ladder with all registered tournament participants') . ':', ));
+         $tform->add_row( array(
+               'CELL', 2, '',
+               'TEXT',         T_('Order by') . MED_SPACING,
+               'SELECTBOX',    'seed_order', 1, $arr_seed_order, $seed_order_val, false,
+               'SUBMITBUTTON', 'ta_seed', T_('Seed Ladder'),
+               'TEXT',         SMALL_SPACING,
+               'SUBMITBUTTON', 'ta_delete', T_('Delete Ladder'), ));
+      }
+      else
+      {
+         $tform->add_hidden( 'confirm', 1 );
+         $tform->add_row( array(
+               'CELL', 2, '',
+               'TEXT', T_('Please confirm deletion of ladder') . ':', ));
+         $tform->add_row( array(
+               'CELL', 2, '',
+               'SUBMITBUTTON', 'ta_delete', T_('Confirm delete'),
+               'TEXT', SMALL_SPACING,
+               'SUBMITBUTTON', 'ta_cancel', T_('Cancel') ));
+      }
+
+      $tform->add_empty_row();
+   }
+
+   // ADMIN: Add/Remove user -----------
+
+   $tform->add_row( array( 'HR' ));
+   $tform->add_row( array( 'HEADER', T_('Admin Ladder participants') ));
+   if( $uid > 0 )
+   {
       $tform->add_hidden( 'uid', $uid );
       $tform->add_row( array(
             'CELL', 2, '',
-            'TEXT', T_('Add registered tournament participant to ladder (at bottom)') . ':', ));
-      $tform->add_row( array(
-            'CELL', 2, '',
-            'TEXT', T_('User') . MED_SPACING . $user->user_reference() . SMALL_SPACING,
-            'SUBMITBUTTON', 'ta_adduser', sprintf( T_('Add user [%s] to ladder'), $user->Handle ), ));
+            'TEXT', sprintf( '%s: %s%s',
+                             T_('User to edit#tourney'),
+                             SMALL_SPACING . $user->user_reference() . SMALL_SPACING.SMALL_SPACING,
+                             anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid",
+                                     T_('Edit participant'), '', 'class="TAdmin"') ), ));
+      $tform->add_empty_row();
    }
+   if( !$is_delete && !is_null($user) && $authorise_edit_user ) // valid user
+   {
+      if( is_null($tladder_user) )
+      {
+         if( $authorise_add_user )
+            add_form_edit_user( $tform, $user,
+               'ta_adduser', T_('Add user [%s] to ladder'),
+               T_('Add registered tournament participant to ladder (at bottom)') );
+         else
+            $tform->add_row( array(
+                  'CELL', 2, '',
+                  'TEXT', T_('NOTE: Adding user only allowed for registered tournament participants.'), ));
+      }
+      else
+      {
+         add_form_edit_user( $tform, $user,
+            'ta_deluser', T_('Remove user [%s] from ladder'),
+            T_('Remove tournament participant from ladder and eventually remove user registration too'),
+            T_('User will only be removed from ladder. Tournament user registration is kept.') );
+
+         $tform->add_empty_row();
+         add_form_edit_user( $tform, $user,
+            'ta_deluserall', T_('Remove user [%s] completely'),
+            T_('User will be removed from ladder and tournament user registration will be removed too.') );
+      }
+   }
+   $tform->add_empty_row();
 
 
    $title = T_('Tournament Ladder Admin');
@@ -204,4 +277,19 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    end_page(@$menu_array);
 }
+
+
+function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $extra='' )
+{
+   $form->add_row( array(
+         'CELL', 2, '',
+         'TEXT', $title.':', ));
+   if( $extra )
+      $form->add_row( array(
+            'CELL', 2, '',
+            'TEXT', $extra, ));
+   $form->add_row( array(
+         'CELL', 2, '',
+         'SUBMITBUTTON', $action, sprintf( $act_fmt, $user->Handle ), ));
+}//add_form_edit_user
 ?>
