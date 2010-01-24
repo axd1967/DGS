@@ -119,6 +119,30 @@ class TournamentLadder
       return $data;
    }
 
+   /*!
+    * \brief Removes user given by User-object from ladder with given tournament tid and
+    *        remove TP if $remove_all=true.
+    * \return error-list (empty on success)
+    */
+   function remove_user_from_ladder( $remove_all )
+   {
+      //TODO do consistency-checks (no running games for tournament)
+      //if( ... ) return array( T_('error...') );
+
+      ta_begin();
+      {
+         $this->delete();
+         //TODO update rank after user-removal from ladder
+
+         $tladder_check = TournamentLadder::load_tournament_ladder_by_uid( $this->tid, $this->uid );
+         if( is_null($tladder_check) && $remove_all ) // really deleted ?
+            TournamentParticipant::delete_tournament_participant( $this->tid, $this->rid );
+      }
+      ta_end();
+
+      return array();
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -156,6 +180,24 @@ class TournamentLadder
       return ( $row ) ? (int)@$row['X_Rank'] : 0;
    }
 
+   /*!
+    * \brief Loads and returns TournamentLadder-object for given tournament-ID and user-id;
+    * \return NULL if nothing found; TournamentLadder otherwise
+    */
+   function load_tournament_ladder_by_uid( $tid, $uid )
+   {
+      if( $tid <=0 || $uid <= GUESTS_ID_MAX )
+         return NULL;
+
+      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql->add_part( SQLP_WHERE, "TL.uid='$uid'" );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "TournamentLadder.load_tournament_ladder_by_uid($tid,$uid)",
+         $qsql->get_select() );
+      return ($row) ? TournamentLadder::new_from_row($row) : NULL;
+   }
+
    /*! \brief Returns enhanced (passed) ListIterator with TournamentLadder-objects for given tournament-id. */
    function load_tournament_ladder( $iterator, $tid )
    {
@@ -187,6 +229,11 @@ class TournamentLadder
       if( is_null($tp) )
          error('invalid_args', "TournamentLadder::add_user_to_ladder.load_tp($tid,$uid)");
 
+      // check pre-conditions
+      if( $tp->Status != TP_STATUS_REGISTER )
+         error('tournament_participant_invalid_status',
+               "TournamentLadder::add_user_to_ladder.check_tp_status($tid,$uid,{$tp->Status})");
+
       return TournamentLadder::add_participant_to_ladder( $tid, $tp->ID, $uid );
    }
 
@@ -197,7 +244,7 @@ class TournamentLadder
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $query = "INSERT INTO $table (tid,rid,uid,Created,RankChanged,Rank,BestRank) "
              . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), FROM_UNIXTIME($NOW), "
-               . "IFNULL(MAX(Rank),0)+1 AS Rank, IFNULL(MAX(Rank),0)+1 AS BestRank "
+               . "IFNULL(MAX(Rank),0)+1 AS Rank, 0 AS BestRank "
                . "FROM $table WHERE tid=$tid";
       return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid])", $query );
    }
@@ -256,7 +303,7 @@ class TournamentLadder
       foreach( $arr_TPs as $row )
       {
          ++$rank;
-         $tladder = new TournamentLadder( $tid, $row['rid'], $row['uid'], $NOW, $NOW, $rank, $rank );
+         $tladder = new TournamentLadder( $tid, $row['rid'], $row['uid'], $NOW, $NOW, $rank, 0 );
          $tladder->fillEntityData( $data );
          $arr_inserts[] = $data->build_sql_insert_values();
       }
@@ -325,7 +372,7 @@ class TournamentLadder
 
    function get_edit_tournament_status()
    {
-      static $statuslist = array( TOURNEY_STATUS_PAIR );
+      static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 
