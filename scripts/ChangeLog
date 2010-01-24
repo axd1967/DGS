@@ -22,6 +22,49 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-24 juga
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant.authorise_delete,
+       ~.authorise_edit_customized, ~.authorise_edit_register_status),
+     tournaments/register.php,
+     tournaments/edit_participant.php:
+   - restrict customized-editing, deleting TP and status-change
+     to certain tournament-status (REG|PLAY) and TP-status (<>REG),
+     hide inputs when change not allowed
+   - show current tournament-status
+   - for edit-TP: added link in bottom bar to admin-ladder-user
+
+   * tournaments/ladder/admin.php (add_form_edit_user):
+   - added removal of ladder-users for ladder-only or with TP-registration
+   - added consistency-checks on adding and removing ladder-users
+   - allow restricted editing also for PLAY-tourney-status
+   - added uid in form-URL if available for refresh add-status
+   - added sub-section headers
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder.remove_user_from_ladder,
+       ~.load_tournament_ladder_by_uid, ~.add_user_to_ladder, ~.get_edit_tournament_status):
+   - added functions to support admin of ladder-users: add-user, remove-user
+   - allow editing of TP also for PLAY-tourney-status
+
+   * tournaments/view_tournament.php:
+   - added ladder-view in new section 'Tournament games'
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder.seed_ladder,
+       ~.add_participant_to_ladder),
+     tournaments/ladder/view.php, skins/dragon/screen.css:
+   - mark own row in tournament-ladder with light blue background
+   - show ladder-users current and best rank, show best-rank only if not 0
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_action_status):
+   - fixed bug in check_action_status: used given error-message-format
+   - removed unused method 'check_register_status'
+
+   * include/table_columns.php (Table.make_tablerow):
+   - added additional table-row-class-attribute 'extra_class'
+
+   * include/error_codes.php:
+   - added error-code for invalid TP-status
+
 2010-01-23 juga
 
    * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.insert,
