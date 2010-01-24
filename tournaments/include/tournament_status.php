@@ -228,8 +228,9 @@ class TournamentStatus
 
    /*!
     * \brief Checks if current tournament-status allows certain action.
+    * \param $errmsgfmt error-message-format expecting two args: 1. tourney-status, 2. expected status-list
     * \param $arr_status status-array
-    * \param $allow_admin if true admin can do anything; otherwise admin is treated like non-admin
+    * \param $allow_admin if true, admin can do anything; otherwise admin is treated like non-admin
     * \return error-list; empty if no error
     */
    function check_action_status( $errmsgfmt, $arr_status, $allow_admin=true )
@@ -248,7 +249,7 @@ class TournamentStatus
          foreach( $arr_status as $status )
             $arrst[] = Tournament::getStatusText($status);
 
-         $errors[] = sprintf( T_('Edit is forbidden for tournament on status [%s], only allowed for (%s) !'),
+         $errors[] = sprintf( $errmsgfmt,
                               Tournament::getStatusText($this->tourney->Status),
                               implode('|', $arrst) );
       }
@@ -260,13 +261,6 @@ class TournamentStatus
    {
       return $this->check_action_status(
          T_('Edit is forbidden for tournament on status [%s], only allowed for (%s) !'),
-         $arr_status, $allow_admin );
-   }
-
-   function check_register_status( $arr_status, $allow_admin=true )
-   {
-      return $this->check_action_status(
-         T_('Registration is forbidden for tournament on status [%s], only allowed for (%s) !'),
          $arr_status, $allow_admin );
    }
 
