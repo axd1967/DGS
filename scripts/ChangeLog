@@ -22,7 +22,68 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-26 juga
+
+   * tournaments/manage_tournament.php, tournaments/ladder/admin.php:
+   - added Edit-Ladder to remove ladder-user and change rank of ladder-users
+   - added description about Admin/Edit-Ladder functionality
+   - added 4th step PLAY-phase
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_view_status),
+     tournaments/ladder/view.php (prepare_update_rank, admin_edit_ladder_extend_table_form),
+     tournaments/ladder/retreat.php,
+     skins/dragon/screen.css:
+   - added functionality in restricted admin-mode for Edit-Ladder to remove ladder-user and change rank of ladder-users
+   - added way for user to retreat from ladder also removing tourney user registration
+   - allow viewing of ladder only on certain tourney-status PLAY|CLOSED for user, additional on PAIR for TD
+   - added link in bottom bar for ladder-user to retreat from ladder also removing tourney user registration
+   - use CSS to emphasize current user in ladder
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder,
+       ~.change_user_rank, ~.load_max_rank, ~.load_rank, ~.load_tournament_ladder_by_user,
+       ~.load_tournament_ladder_by_rank, ~.add_participant_to_ladder, ~.move_up_ladder_part,
+       ~.move_down_ladder_part, ~.get_view_ladder_status):
+   - fix removal of user from ladder:
+     - move below ladder-users one rank up
+     - optimized check if user removed from ladder
+   - added function to support:
+     - changing of user-rank moving up or down in ladder
+     - switching rank-places of two users in ladder using atomar/optimized SQL-statement
+     - load rank of ladder-user
+     - loading ladder-user by TournamentLadder.uid or .rid
+     - loading ladder-user by TournamentLadder.Rank
+     - move ladder-part up or down by one rank
+     - decision with authorisation about viewing ladder for TD or user
+
+   * include/table_columns.php (class Table, ~.make_table_form, ~.make_table):
+   - added/refactored method to pass-out Form-object before printing and making-table
+
+   * tournaments/edit_participant.php:
+   - show Admin-user link in bottom bar only on tourney-status PAIR|PLAY
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.build_num_range_sql_clause,
+       ~.calc_best_rank):
+   - added function to build SQL-clause for number range
+   - added function to calculate new best-rank for TournamentLadder.BestRank
+
+   * tournaments/include/types/dgs_ladder.php (DgsLadderTournament.createTournament):
+   - fix bug using object-method createError()
+
+   * tournaments/view_tournament.php:
+   - cleanup: less db-queries
+
 2010-01-24 juga
+
+   * tournaments/edit_director.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/edit_round.php,
+     tournaments/edit_rules.php, tournaments/edit_status.php,
+     tournaments/edit_tournament.php, tournaments/ladder/admin.php,
+     tournaments/ladder/view.php, tournaments/list_directors.php,
+     tournaments/list_participants.php, tournaments/manage_tournament.php,
+     tournaments/register.php, tournaments/view_tournament.php:
+   - adjusted bottom-menu link-texts:
+     - "View this tournament" -> "Tournament info"
+     - "Manage this tournament" -> "Manage tournament"
 
    * tournaments/include/tournament_participant.php (class TournamentParticipant.authorise_delete,
        ~.authorise_edit_customized, ~.authorise_edit_register_status),
