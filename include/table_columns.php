@@ -66,6 +66,8 @@ class Table
    var $Id;
    /*! \brief Prefix to be used in _GET to avoid clashes with other tables and variables. */
    var $Prefix;
+   /*! \brief Intermediate Form-object, can be created before make_table() to be used for external form-purposes. */
+   var $TableForm;
    /*! \brief already opened Form class to be used by add_column and filters */
    var $ExternalForm;
    /*! \brief optional callback-function expecting two arguments: this Table and table-Form objects. */
@@ -189,6 +191,7 @@ class Table
       global $player_row;
 
       $this->ExternalForm = NULL;
+      $this->TableForm = NULL;
       $this->ExtendTableFormFunc = NULL;
       $this->ExtMode = array();
       $this->Removed_Columns = NULL;
@@ -438,6 +441,24 @@ class Table
       $this->Tablerows[]= $row_array;
    }
 
+   function make_table_form( $need_form=true )
+   {
+      if( !is_null($this->ExternalForm) )
+         $this->TableForm = $this->ExternalForm; // read-only
+      elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter, show-rows or add-column
+      {
+         $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
+            clean_url( $this->Page),
+            FORM_GET, false, 'FormTableFAC');
+         $table_form->attach_table($this);
+         $this->TableForm = $table_form;
+      }
+      else
+         $this->TableForm = NULL;
+
+      return $this->TableForm;
+   }
+
    /*! \brief Create a string of the table. */
    function make_table()
    {
@@ -501,18 +522,9 @@ class Table
 
       // NOTE: avoid nested forms with other forms (because nested hiddens are not working)
 
-      if( isset($this->ExternalForm) )
-         $table_form = $this->ExternalForm; // read-only
-      elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter, show-rows or add-column
-      {
-         $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
-            clean_url( $this->Page),
-            FORM_GET, false, 'FormTableFAC');
-         $table_form->attach_table($this);
-      }
-      else
-         unset( $table_form);
-
+      $table_form = $this->make_table_form( $need_form );
+      if( is_null($table_form) )
+         unset($table_form);
 
       if( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // add-col & filter-submits & show-rows
       {
