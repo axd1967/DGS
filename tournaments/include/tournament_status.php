@@ -264,6 +264,13 @@ class TournamentStatus
          $arr_status, $allow_admin );
    }
 
+   function check_view_status( $arr_status, $allow_admin=true )
+   {
+      return $this->check_action_status(
+         T_('View of tournament is forbidden on status [%s], only allowed for (%s) !'),
+         $arr_status, $allow_admin );
+   }
+
 } // end of 'TournamentStatus'
 
 ?>
