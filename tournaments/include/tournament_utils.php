@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
+require_once 'include/utilities.php';
 require_once 'tournaments/include/tournament_globals.php';
 
  /*!
@@ -132,6 +133,27 @@ class TournamentUtils
    {
       return date(DATEFMT_TOURNAMENT, $lastchanged) . MED_SPACING
            . sprintf( T_('( changed by %s )#tourney'), ( $changed_by ? trim($changed_by) : NO_VALUE ) );
+   }
+
+   function build_num_range_sql_clause( $field, $min, $max, $prefix_op='' )
+   {
+      if( $min > 0 && $max > 0 )
+      {
+         if( $min > $max )
+            swap( $min, $max );
+         return "$prefix_op $field BETWEEN $min AND $max";
+      }
+      elseif( $min > 0 )
+         return "$prefix_op $field >= $min";
+      elseif( $max > 0 )
+         return "$prefix_op $field <= $max";
+      return '';
+   }
+
+   // best_rank=0 (init-value)
+   function calc_best_rank( $best_rank, $rank )
+   {
+      return ($best_rank == 0) ? $rank : min($best_rank, $rank);
    }
 
 } // end of 'TournamentUtils'
