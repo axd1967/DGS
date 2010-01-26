@@ -2632,6 +2632,9 @@ body.Tournament table#pageLayout td#pageBody div.Section {
 table tr.TourneyUser td {
    background: #bbddff;
 }
+span.TourneyUser {
+   font-weight: bold;
+}
 
 table#gamerulesTableInfos {
    border: 0px solid blue;
