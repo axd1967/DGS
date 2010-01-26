@@ -489,7 +489,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    // show bookmarks
    if( !$printable && $logged_in && !$is_down )
    {
-      echo '&nbsp;&nbsp;|&nbsp;&nbsp;',
+      echo SEP_SPACING,
          '<select name="jumpto" size="1"',
                ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
             '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
