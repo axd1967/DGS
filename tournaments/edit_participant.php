@@ -456,8 +456,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if( $tourney->Type == TOURNEY_TYPE_LADDER && $rid )
-      $menu_array[T_('Admin user')] =
-            array( 'url' => "tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid", 'class' => 'TAdmin' );
+   {
+      if( $tourney->Status == TOURNEY_STATUS_PAIR || $tourney->Status == TOURNEY_STATUS_PLAY )
+         $menu_array[T_('Admin user')] =
+               array( 'url' => "tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid", 'class' => 'TAdmin' );
+   }
    $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
