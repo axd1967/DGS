@@ -123,7 +123,16 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Admin Ladder'), array( 'url' => "tournaments/ladder/admin.php?tid=$tid", 'class' => 'TAdmin' )),
                  SEP_SPACING,
+                 make_menu_link( T_('Edit Ladder'), array( 'url' => "tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1", 'class' => 'TAdmin' )),
+                 SEP_SPACING,
                  make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
+                 subList( array( T_('Admin Ladder (seed ladder, remove users)'),
+                                 T_('Edit Ladder (remove users, rank-changes)#mngt') )),
+      '</ul>',
+
+      make_header( 4, T_('Play phase'), TOURNEY_STATUS_PLAY ), //------------------------
+      '<ul class="TAdminLinks">',
+         '<li>', make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
       '</ul>',
 
       '</tr></td></table>',
