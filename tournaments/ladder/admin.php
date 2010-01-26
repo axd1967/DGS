@@ -94,7 +94,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $errors[] = T_('Unknown user-id') . " [".$uid."]";
       else
       {
-         $tladder_user = TournamentLadder::load_tournament_ladder_by_uid($tid, $uid);
+         $tladder_user = TournamentLadder::load_tournament_ladder_by_user($tid, $uid);
 
          $tp = TournamentParticipant::load_tournament_participant( $tid, $uid, 0 );
          if( is_null($tp) )
@@ -272,6 +272,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+   $menu_array[T_('Edit Ladder')] =
+      array( 'url' => "tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
