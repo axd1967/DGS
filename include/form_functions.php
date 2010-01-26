@@ -1405,7 +1405,7 @@ class Form
     * \param $use_disable false to restrict 'disabled'-attribute to $attbs-argument;
     *                     otherwise this->disabled is used.
     */
-   function print_insert_radio_buttonsx( $name, $value_array, $selected, $attbs='', $use_disable )
+   function print_insert_radio_buttonsx( $name, $value_array, $selected, $attbs='', $use_disable=true )
    {
       $result = '';
       foreach( $value_array as $value => $info )

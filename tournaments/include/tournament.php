@@ -197,7 +197,7 @@ class Tournament
       return $entityData->delete( "Tournament::delete(%s)" );
    }
 
-   function fillEntityData( $withCreated )
+   function fillEntityData( $withCreated=false )
    {
       // checked fields: Scope/Type/Status
       $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();

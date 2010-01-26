@@ -254,7 +254,7 @@ class TournamentParticipant
          error('invalid_args', "TournamentParticipant.checkData.miss_status({$this->ID},{$this->tid})");
    }
 
-   function fillEntityData( $withCreated )
+   function fillEntityData( $withCreated=false )
    {
       // checked fields: Rating/StartRound
       $data = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newEntityData();
@@ -351,14 +351,14 @@ class TournamentParticipant
 
    /*!
     * \brief Checks, if user is participant for given tournament and status
-    *        (TP_STATUS_...) within; returns status if given status is null.
+    *        (TP_STATUS_...) within; returns status if given status is null; false if no entry found.
     */
    function isTournamentParticipant( $tid, $uid, $status=null )
    {
       $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid)",
          "SELECT Status FROM TournamentParticipant WHERE tid='$tid' AND uid='$uid' LIMIT 1" );
       if( is_null($status) )
-         return @$row['Status'];
+         return ($row) ? @$row['Status'] : false;
       else
          return ( strcmp($status, @$row['Status']) == 0 );
    }
