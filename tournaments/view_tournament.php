@@ -48,7 +48,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tid = (int) @$_REQUEST['tid'];
    $tourney = Tournament::load_tournament( $tid );
    if( is_null($tourney) )
-      error('unknown_tournament', "view_tournament.find_tournament($tid)");
+      error('unknown_tournament', "Tournament.view_tournament.find_tournament($tid)");
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
    // init
@@ -96,7 +96,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    $sectmenu = array();
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
-   if( $tourney->allow_edit_tournaments($my_id) )
+   if( $allow_edit_tourney )
       $sectmenu[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    make_menu( $sectmenu, false);
