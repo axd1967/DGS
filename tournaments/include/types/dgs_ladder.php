@@ -60,19 +60,19 @@ class DgsLadderTournament extends TournamentTemplate
       $tourney->Title = "DGS Ladder (19x19)";
       $tourney->Owner_ID = $this->uid;
       if( !$tourney->persist() )
-         create_error("LadderTournament.createTournament1(%s)");
+         $this->create_error("LadderTournament.createTournament1(%s)");
       $tid = $tourney->ID;
 
       $tprops = new TournamentProperties( $tid );
       $tprops->MinParticipants = 1;
       if( !$tprops->insert() )
-         create_error("LadderTournament.createTournament2(%s,$tid)");
+         $this->create_error("LadderTournament.createTournament2(%s,$tid)");
 
       $t_rules = new TournamentRules( 0, $tid );
       $t_rules->Size = 19;
       $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
       if( !$t_rules->persist() )
-         create_error("LadderTournament.createTournament3(%s,$tid)");
+         $this->create_error("LadderTournament.createTournament3(%s,$tid)");
 
       return $tid;
    }
