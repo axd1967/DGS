@@ -132,7 +132,7 @@ class TournamentLadder
       //if( ... ) return array( T_('error...') );
 
       ta_begin();
-      {//HOT-section
+      {//HOT-section to remove user from ladder and eventually from TournamentParticipant-table
          $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
          db_lock( "TournamentLadder.remove_user_from_ladder({$this->tid},{$this->rid})",
             "$table WRITE, $table AS TL READ" );
@@ -172,7 +172,7 @@ class TournamentLadder
          else
          {
             ta_begin();
-            {//HOT-section
+            {//HOT-section to update ladder
                if( $this->Rank > $new_rank ) // user-move-up
                   TournamentLadder::move_down_ladder_part( $this->tid, $new_rank, $this->Rank - 1 );
                else // user-move-down
