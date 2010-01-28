@@ -434,6 +434,9 @@ class ErrorCode
          $arr['tournament_director_new_del_not_allowed'] =
             T_("Sorry, you are not allowed to add or delete a tournament director for this tournament.");
 
+         $arr['tournament_director_min1'] =
+            T_("Sorry, there must be at least one tournament director.");
+
          $arr['tournament_register_not_allowed'] =
             T_("Sorry, you are not allowed to register for this tournament.");
 
