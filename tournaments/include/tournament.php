@@ -268,10 +268,11 @@ class Tournament
                        Tournament::getTypeText($this->Type) )
             . SMALL_SPACING . '[' . make_html_safe( $this->Title, true ) . ']';
       else
-         return sprintf( '(%s %s) %s - %s',
+         return sprintf( '(%s %s) %s #%s - %s',
                          Tournament::getScopeText($this->Scope),
                          Tournament::getTypeText($this->Type),
                          T_('Tournament'),
+                         $this->ID,
                          //SMALL_SPACING,
                          make_html_safe( $this->Title, true) );
    }
