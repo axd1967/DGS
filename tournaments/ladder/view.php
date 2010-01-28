@@ -27,6 +27,7 @@ require_once 'include/countries.php';
 require_once 'include/rating.php';
 require_once 'include/classlib_user.php';
 require_once 'include/classlib_userconfig.php';
+require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
@@ -115,7 +116,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead( 7, T_('Action#T_ladder'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead( 8, T_('Challenges#T_ladder'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
-      $ltable->add_tablehead(10, T_('Started#T_ladder'), 'Date', 0 );
+      $ltable->add_tablehead(10, T_('Rank Kept#T_ladder'), '', 0 );
+      $ltable->add_tablehead(11, T_('Started#T_ladder'), 'Date', 0 );
 
       $iterator = new ListIterator( 'Tournament.ladder_view',
          $ltable->get_query(), 'ORDER BY Rank ASC' );
@@ -184,7 +186,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[ 9] )
             $row_str[ 9] = ($tl->RankChanged > 0) ? date(DATE_FMT2, $tl->RankChanged) : '';
          if( $ltable->Is_Column_Displayed[10] )
-            $row_str[10] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
+         {
+            $row_str[10] = ($tl->RankChanged > 0 )
+               ? TimeFormat::echo_time( round(($NOW - $tl->RankChanged)/SECS_PER_HOUR),
+                                        TIMEFMT_SHORT|TIMEFMT_ZERO, '0' )
+               : '';
+         }
+         if( $ltable->Is_Column_Displayed[11] )
+            $row_str[11] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
 
          if( $is_mine )
          {
@@ -229,6 +238,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    }
    if( $allow_edit_tourney )
    {
+      if( $admin_mode )
+         $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
       $menu_array[T_('Edit Ladder')] =
          array( 'url' => "tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1", 'class' => 'TAdmin' );
       $menu_array[T_('Manage tournament')] =
