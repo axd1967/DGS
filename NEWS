@@ -403,6 +403,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
       * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
       * Added "Admin user" convenience link on user-info page
+      * Added email-check for password-admins with privacy policy note
       * Added page with list of important <home scripts/index.php>admin-scripts</home> on <home admin.php>admin page</home>
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
       * Added indexes on Errorlog to allow better searches for problems
