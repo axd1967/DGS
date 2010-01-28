@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $title = sprintf( '%s %s %s',
                      Tournament::getScopeText($tourney->Scope),
                      Tournament::getTypeText($tourney->Type),
-                     T_('Tournament - General Information') );
+                     sprintf( T_('Tournament #%s - General Information'), $tid ));
    section( 'info', $title );
    echo
       T_('This page contains all necessary information and links to participate in the tournament.'),
