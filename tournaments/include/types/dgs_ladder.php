@@ -59,20 +59,25 @@ class DgsLadderTournament extends TournamentTemplate
       $tourney->setWizardType($this->wizard_type);
       $tourney->Title = "DGS Ladder (19x19)";
       $tourney->Owner_ID = $this->uid;
-      if( !$tourney->persist() )
-         $this->create_error("LadderTournament.createTournament1(%s)");
-      $tid = $tourney->ID;
 
-      $tprops = new TournamentProperties( $tid );
-      $tprops->MinParticipants = 1;
-      if( !$tprops->insert() )
-         $this->create_error("LadderTournament.createTournament2(%s,$tid)");
+      ta_begin();
+      {//HOT-section to create a new tournament
+         if( !$tourney->persist() )
+            $this->create_error("LadderTournament.createTournament1(%s)");
+         $tid = $tourney->ID;
 
-      $t_rules = new TournamentRules( 0, $tid );
-      $t_rules->Size = 19;
-      $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
-      if( !$t_rules->persist() )
-         $this->create_error("LadderTournament.createTournament3(%s,$tid)");
+         $tprops = new TournamentProperties( $tid );
+         $tprops->MinParticipants = 1;
+         if( !$tprops->insert() )
+            $this->create_error("LadderTournament.createTournament2(%s,$tid)");
+
+         $t_rules = new TournamentRules( 0, $tid );
+         $t_rules->Size = 19;
+         $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
+         if( !$t_rules->persist() )
+            $this->create_error("LadderTournament.createTournament3(%s,$tid)");
+      }
+      ta_end();
 
       return $tid;
    }
@@ -85,7 +90,7 @@ class DgsLadderTournament extends TournamentTemplate
    function joinTournament( $tp )
    {
       ta_begin();
-      {
+      {//HOT-section to save TournamentParticipant and add user in ladder
          $result = $tp->persist();
          if( $tp->Status == TP_STATUS_REGISTER )
             $result = TournamentLadder::add_user_to_ladder( $tp->tid, $tp->uid );
