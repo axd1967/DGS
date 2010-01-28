@@ -86,6 +86,12 @@ class TournamentTemplate
       return 0;
    }
 
+   /*! \brief Saves given TournamentParticipant in HOT-section if needed and joins (running) tournament. */
+   function joinTournament( $tp )
+   {
+      return $tp->persist();
+   }
+
 } // end of 'TournamentTemplate'
 
 ?>

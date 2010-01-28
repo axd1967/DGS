@@ -215,7 +215,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                $tp->Rating = $tp->User->Rating;
          }
 
-         $tp->persist();
+         $ttype->joinTournament( $tp ); // insert or update (and join eventually)
 
          // send notification (if needed)
          if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK
@@ -575,6 +575,7 @@ function send_register_notification( $type, $tp, $my_id )
    $tid = $tp->tid;
    $uid = $tp->uid;
 
+   $body2 = '';
    switch( (string)$type )
    {
       case 'delete':
@@ -590,6 +591,7 @@ function send_register_notification( $type, $tp, $my_id )
       case 'new_invite':
          $subj = T_('Invitation for tournament #%s');
          $body = T_('Tournament director %2$s has invited you for %1$s. This invitation must be verified by you by either approving or rejecting it.');
+         $body2 = anchor( SUB_PATH."tournaments/register.php?tid=$tid", T_('Edit tournament registration') );
          $msg  = T_('User [%s] invited!');
          break;
       case TP_STATUS_APPLY.'_invite':
@@ -608,6 +610,7 @@ function send_register_notification( $type, $tp, $my_id )
 
    send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",
       trim( sprintf( $body, "<tourney $tid>", "<user $my_id>" ) . "\n\n" .
+            ( $body2 ? "$body2\n\n" : '' ) .
             "$sep<b>" . T_('Last user message:') . "</b>\n" . $tp->UserMessage . "\n" .
             "$sep<b>" . T_('Last admin message:') . "</b>\n" . $tp->AdminMessage ),
       sprintf( $subj, $tid ),

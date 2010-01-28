@@ -129,7 +129,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       {
          $tp->Status = TP_STATUS_REGISTER;
          $tp->Flags |= TP_FLAGS_ACK_INVITE;
-         $tp->persist(); // update
+         $ttype->joinTournament( $tp ); // update
          jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
                . urlencode(T_('Invitation accepted!')) );
       }
@@ -169,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             $tp->Rating = $tp->User->Rating;
       }
 
-      $tp->persist(); // insert or update
+      $ttype->joinTournament( $tp ); // insert or update (and join eventually)
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
             . urlencode(T_('Registration saved!')) );
    }

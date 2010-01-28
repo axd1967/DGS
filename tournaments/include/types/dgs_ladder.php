@@ -82,6 +82,18 @@ class DgsLadderTournament extends TournamentTemplate
       return TournamentLadder::check_participant_registrations( $tid, $arr_TPs );
    }
 
+   function joinTournament( $tp )
+   {
+      ta_begin();
+      {
+         $result = $tp->persist();
+         if( $tp->Status == TP_STATUS_REGISTER )
+            $result = TournamentLadder::add_user_to_ladder( $tp->tid, $tp->uid );
+      }
+      ta_end();
+      return $result;
+   }
+
 } // end of 'DgsLadderTournament'
 
 ?>
