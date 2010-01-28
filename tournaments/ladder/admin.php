@@ -131,7 +131,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
       if( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
       {
-         TournamentLadder::add_user_to_ladder( $tid, $user );
+         TournamentLadder::add_user_to_ladder( $tid, $user->ID );
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!#tourney'), $user->Handle) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
