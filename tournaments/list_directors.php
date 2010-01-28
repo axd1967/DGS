@@ -88,6 +88,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
          $tdtable->current_order_string(),
          $tdtable->current_limit_string() );
    $iterator = TournamentDirector::load_tournament_directors( $iterator, $tid );
+   $allow_del1 = TournamentDirector::assert_min_directors( $tid, $tourney->Status, false,
+         $iterator->getItemCount() );
 
 
    $pagetitle = sprintf( T_('Tournament Directors #%d'), $tid );
@@ -125,7 +127,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
                   image( $base_path.'images/edit.gif', 'E'),
                   T_('Edit tournament director'), 'class=ButIcon');
          }
-         if( $allow_new_del )
+         if( $allow_new_del && $allow_del1 )
          {
             $links .= SMALL_SPACING;
             $links .= anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP

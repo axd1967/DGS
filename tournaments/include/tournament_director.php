@@ -173,6 +173,18 @@ class TournamentDirector
       return false;
    }
 
+   /*! \brief Returns count of tournament-directors (TDs) for given tournament; 0 otherwise. */
+   function count_tournament_directors( $tid )
+   {
+      if( $tid <= 0 )
+         error('invalid_args', "TournamentDirector::count_tournament_directors($tid)");
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->table;
+      $row = mysql_single_fetch( "TournamentDirector::count_tournament_directors($tid)",
+         "SELECT COUNT(*) AS X_Count FROM $table WHERE tid=$tid" );
+      return ($row) ? (int)@$row['X_Count'] : 0;
+   }
+
    /*! \brief Returns enhanced (passed) ListIterator with TournamentDirector-objects. */
    function load_tournament_directors( $iterator, $tid )
    {
@@ -202,7 +214,7 @@ class TournamentDirector
       $player_query = 'SELECT ID, Name, Handle, Rating2, '
             . 'UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players WHERE ';
 
-      if( $uid )
+      if( $uid && is_numeric($uid) )
       {
          // load user by ID
          $row = mysql_single_fetch( "TournamentDirector.load_user_row.find_user.id($uid)",
@@ -221,6 +233,29 @@ class TournamentDirector
       }
 
       return null;
+   }
+
+   /*!
+    * \brief Assert with error (if $die set), that tourney has at least one TD.
+    * \param $count_TDs give number of TDs (T-directors) or load count from DB if null
+    * \return true if check is ok, false on error
+    */
+   function assert_min_directors( $tid, $t_status, $die=true, $count_TDs=null )
+   {
+      static $allowed_status = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_NEW, TOURNEY_STATUS_DELETE );
+      $has_error = false;
+      if( !in_array($t_status, $allowed_status) )
+      {
+         $cntTD = ( is_null($count_TDs) || !is_numeric($count_TDs) )
+            ? TournamentDirector::count_tournament_directors($tid)
+            : $count_TDs;
+         if( $cntTD <= 1 )
+            $has_error = true;
+      }
+
+      if( $die && $has_error )
+         error('tournament_director_min1', "TournamentDirector::assert_min_directors($tid,$t_status)");
+      return !$has_error;
    }
 
    function get_edit_tournament_status()

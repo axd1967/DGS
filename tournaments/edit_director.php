@@ -66,6 +66,9 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    if( !$tourney->allow_edit_directors($my_id, false) )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit($tid,$my_id)");
 
+   if( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
+      TournamentDirector::assert_min_directors( $tid, $tourney->Status );
+
    if( @$_REQUEST['td_cancel'] ) // cancel delete
       jump_to("tournaments/list_directors.php?tid=$tid");
 
