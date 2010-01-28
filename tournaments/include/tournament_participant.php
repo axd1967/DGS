@@ -39,17 +39,6 @@ require_once 'tournaments/include/tournament_globals.php';
   * \brief Class to manage TournamentParticipant-table
   */
 
-define('TP_STATUS_APPLY',     'APPLY');
-define('TP_STATUS_REGISTER',  'REGISTER');
-define('TP_STATUS_INVITE',    'INVITE');
-define('CHECK_TP_STATUS', 'APPLY|REGISTER|INVITE');
-define('TPCOUNT_STATUS_ALL',  '*');
-
-define('TP_FLAGS_INVITED',       0x0001); // invited by TD
-define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
-define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
-define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
-
 // lazy-init in TournamentParticipant::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PARTICIPANT; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PARTICIPANT = array();

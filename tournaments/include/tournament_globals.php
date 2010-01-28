@@ -56,4 +56,17 @@ define('LADDER_SEEDORDER_REGISTER_TIME',  2);
 define('LADDER_SEEDORDER_TOURNEY_RATING', 3);
 define('LADDER_SEEDORDER_RANDOM',         4);
 
+// ---------- Tournament Participant Stuff ------------------------
+
+define('TP_STATUS_APPLY',     'APPLY');
+define('TP_STATUS_REGISTER',  'REGISTER');
+define('TP_STATUS_INVITE',    'INVITE');
+define('CHECK_TP_STATUS', 'APPLY|REGISTER|INVITE');
+define('TPCOUNT_STATUS_ALL',  '*');
+
+define('TP_FLAGS_INVITED',       0x0001); // invited by TD
+define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
+define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
+define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
+
 ?>
