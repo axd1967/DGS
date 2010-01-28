@@ -288,8 +288,8 @@ function get_stat_data()
    $tHits = array();
 
    $result = db_query( 'statisticspng.min_max',
-               "SELECT MAX(UNIX_TIMESTAMP(Time)) AS maxTime" .
-               ",MIN(UNIX_TIMESTAMP(Time)) AS minTime" .
+               "SELECT UNIX_TIMESTAMP(MAX(Time)) AS maxTime" .
+               ",UNIX_TIMESTAMP(MIN(Time)) AS minTime" .
                ",MIN(Users) AS minUsers,MAX(Users) AS maxUsers" .
                ",MIN(Moves) AS minMoves,MAX(Moves) AS maxMoves" .
                ",MIN(Games) AS minGames,MAX(Games) AS maxGames" .
