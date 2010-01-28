@@ -700,6 +700,12 @@ class ListIterator
       return each( $this->Items );
    }
 
+   /*! \brief Returns number of stored items. */
+   function getItemCount()
+   {
+      return count( $this->Items );
+   }
+
    /*! \brief Returns String-representation of this object. */
    function to_string()
    {
