@@ -57,13 +57,15 @@ require_once( "include/table_columns.php" );
 
    $ARR_ADMOPTS = array( // maskval => [ bit-text, descr ]
       //ADMOPT_BYPASS_IP_BLOCK  => array( 'BYPASS_IP_BLOCK', T_('Bypass IP-Block to allow login for accidentally blocked user') ),
-      ADMOPT_DENY_LOGIN       => array( 'DENY_LOGIN',    T_('Deny login (user can not use site)') ),
-      ADMOPT_DENY_EDIT_BIO    => array( 'DENY_EDIT_BIO', T_('Deny edit bio and user picture (user can not edit bio or user picture)') ),
-      ADMOPT_DENY_VOTE        => array( 'DENY_VOTE',     T_('Deny voting (user can not vote on features)') ),
-      ADMOPT_HIDE_BIO         => array( 'HIDE_BIO',      T_('Hide bio and picture (users bio and picture is hidden)') ),
-      ADMOPT_SHOW_TIME        => array( 'SHOW_TIME',     T_('Show "time needed" for page-requests (in bottom bar)') ),
-      ADMOPT_FGROUP_ADMIN     => array( 'FGR_ADMIN',     T_('View ADMIN-forums (which are normally hidden)') ),
-      ADMOPT_FGROUP_DEV       => array( 'FGR_DEV',       T_('View DEV-forums (which are normally hidden)') ),
+      ADMOPT_DENY_LOGIN             => array( 'DENY_LOGIN',    T_('Deny login (user can not use site)') ),
+      ADMOPT_DENY_EDIT_BIO          => array( 'DENY_EDIT_BIO', T_('Deny edit bio and user picture (user can not edit bio or user picture)') ),
+      ADMOPT_DENY_VOTE              => array( 'DENY_VOTE',     T_('Deny voting (user can not vote on features)') ),
+      ADMOPT_DENY_TOURNEY_CREATE    => array( 'DENY_TNEY_CREATE', T_('Deny create tournament (user can not create new tournaments)') ),
+      ADMOPT_DENY_TOURNEY_REGISTER  => array( 'DENY_TNEY_REG', T_('Deny tournament registration (user can not register to any new tournament)') ),
+      ADMOPT_HIDE_BIO               => array( 'HIDE_BIO',      T_('Hide bio and picture (users bio and picture is hidden)') ),
+      ADMOPT_SHOW_TIME              => array( 'SHOW_TIME',     T_('Show "time needed" for page-requests (in bottom bar)') ),
+      ADMOPT_FGROUP_ADMIN           => array( 'FGR_ADMIN',     T_('View ADMIN-forums (which are normally hidden)') ),
+      ADMOPT_FGROUP_DEV             => array( 'FGR_DEV',       T_('View DEV-forums (which are normally hidden)') ),
    );
 
    // fields to load

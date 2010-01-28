@@ -46,10 +46,11 @@ class User
    var $RatingStatus;
    var $GamesRated;
    var $GamesFinished;
+   var $AdminOptions;
 
    /*! \brief Constructs a ForumUser with specified args. */
    function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
-                  $rating_status=RATING_NONE, $games_rated=0, $games_finished=0 )
+                  $rating_status=RATING_NONE, $games_rated=0, $games_finished=0, $admin_opts=0 )
    {
       $this->ID = (int)$id;
       $this->Name = (string)$name;
@@ -61,6 +62,7 @@ class User
       $this->RatingStatus = $rating_status;
       $this->GamesRated = (int)$games_rated;
       $this->GamesFinished = (int)$games_finished;
+      $this->AdminOptions = (int)$admin_opts;
    }
 
    function setRating( $rating )
@@ -103,13 +105,14 @@ class User
       return "User(ID={$this->ID}):"
          . "  Name=[{$this->Name}]"
          . ", Handle=[{$this->Handle}]"
-         . sprintf( " Type=[0x%x]", $this->Type )
+         . sprintf( ", Type=[0x%x]", $this->Type )
          . ", Lastaccess=[{$this->Lastaccess}]"
          . ", Country=[{$this->Country}]"
          . ", Rating=[{$this->Rating}]"
          . ", RatingStatus=[{$this->RatingStatus}]"
          . ", GamesRated=[{$this->GamesRated}]"
          . ", GamesFinished=[{$this->GamesFinished}]"
+         . sprintf( ", AdminOptions=[0x%x]", $this->AdminOptions )
          ;
    }
 
@@ -134,7 +137,7 @@ class User
       //    OnVacation,Running,Finished,RatedGames,Won,Lost,Translator,IP,Browser,Country,
       //    BlockReason,UserFlags,SkinName,MenuDirection,TableMaxRows,Button
 
-      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus,RatedGames,Finished
+      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus,RatedGames,Finished,AdminOptions
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'P.*',
@@ -157,7 +160,8 @@ class User
             @$row[$prefix.'Rating2'],
             @$row[$prefix.'RatingStatus'],
             @$row[$prefix.'RatedGames'],
-            @$row[$prefix.'Finished']
+            @$row[$prefix.'Finished'],
+            @$row[$prefix.'AdminOptions']
          );
       return $user;
    }

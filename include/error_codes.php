@@ -419,6 +419,12 @@ class ErrorCode
          $arr['bad_tournament'] =
             T_("Sorry, there's something wrong with this tournament. Please contact a tournament admin.");
 
+         $arr['tournament_create_denied'] =
+            T_('Sorry, you are not allowed to create a new tournament. This feature has been blocked by admins.');
+
+         $arr['tournament_register_denied'] =
+            T_('Sorry, you are not allowed to register for a tournament. This feature has been blocked by admins.');
+
          $arr['tournament_create_not_allowed'] =
             T_("Sorry, you are not allowed to create this type of tournament.");
 

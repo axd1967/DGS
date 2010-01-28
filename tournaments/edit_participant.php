@@ -182,6 +182,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
 
+      // check user-denial
+      if( ($user->AdminOptions & ADMOPT_DENY_TOURNEY_REGISTER) && $tp->Status != TP_STATUS_REGISTER )
+         $errors[] = T_('Tournament registration of this user has been denied by admins.');
+
       // check status integrity
       $is_customized = false;
       if( $tp->StartRound > 1 && $tp->StartRound != $old_start_round )

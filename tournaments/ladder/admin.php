@@ -106,6 +106,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
             if( @$_REQUEST['ta_adduser'] && !$authorise_add_user )
                $errors[] = T_('Adding unregistered user to ladder is not allowed.');
+
+            if( is_null($tladder_user) && ($user->AdminOptions & ADMOPT_DENY_TOURNEY_REGISTER) )
+               $errors[] = T_('Tournament registration of this user has been denied by admins.');
          }
       }
    }

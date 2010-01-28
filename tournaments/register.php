@@ -46,6 +46,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
+   if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
+      error('tournament_register_denied');
+
    $page = "register.php";
 
 /* Actual REQUEST calls used (TD=tournament-director)
@@ -360,7 +363,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
 
-   $reg_user_str = TournamentParticipant::getLinkTextRegistration( $tourney, $my_id, $old_status );
+   $reg_user_str = TournamentParticipant::getLinkTextRegistration($tid, $old_status);
    $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
 
    end_page(@$menu_array);

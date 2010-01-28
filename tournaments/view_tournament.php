@@ -159,7 +159,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $sectmenu = array();
    $sectmenu[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
 
-   $reg_user_str = TournamentParticipant::getLinkTextRegistration( $tourney, $my_id, $reg_user_status );
+   $reg_user_str = TournamentParticipant::getLinkTextRegistration($tid, $reg_user_status);
    if( $reg_user_str )
       $sectmenu[$reg_user_str] = "tournaments/register.php?tid=$tid"; # for user
 

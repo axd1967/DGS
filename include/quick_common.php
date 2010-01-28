@@ -36,16 +36,18 @@ define('DGS_VERSION', '1.0.15');
 // options settable by admins (user-capabilities)
 // NOTE: also adjust admin_users.php and admin_show_users.php on adding new options
 //define('ADMOPT_BYPASS_IP_BLOCK', 0x001); // by-passes blocked IP for user
-define('ADMOPT_DENY_LOGIN',      0x002); // deny: server usage, login
-define('ADMOPT_DENY_EDIT_BIO',   0x004);
-//define('ADMOPT_DENY_START_GAME', 0x008); // deny: new/join game in waitroom, invite; being invited allowed
-//define('ADMOPT_DENY_SEND_MSG',   0x010);
-//define('ADMOPT_DENY_UPD_FORUM',  0x020); // deny: new/edits in forums
-define('ADMOPT_SHOW_TIME',       0x040); // shows time in page bottom bar
-define('ADMOPT_HIDE_BIO',        0x080); // hide user bio
-define('ADMOPT_FGROUP_ADMIN',    0x100); // user can see ADMIN-forums
-define('ADMOPT_FGROUP_DEV',      0x200); // user can see DEV-forums
-define('ADMOPT_DENY_VOTE',       0x400); // deny: voting on features
+define('ADMOPT_DENY_LOGIN',            0x0002); // deny: server usage, login
+define('ADMOPT_DENY_EDIT_BIO',         0x0004);
+//define('ADMOPT_DENY_START_GAME', 0x0008); // deny: new/join game in waitroom, invite; being invited allowed
+//define('ADMOPT_DENY_SEND_MSG',   0x0010);
+//define('ADMOPT_DENY_UPD_FORUM',  0x0020); // deny: new/edits in forums
+define('ADMOPT_SHOW_TIME',             0x0040); // shows time in page bottom bar
+define('ADMOPT_HIDE_BIO',              0x0080); // hide user bio
+define('ADMOPT_FGROUP_ADMIN',          0x0100); // user can see ADMIN-forums
+define('ADMOPT_FGROUP_DEV',            0x0200); // user can see DEV-forums
+define('ADMOPT_DENY_VOTE',             0x0400); // deny: voting on features
+define('ADMOPT_DENY_TOURNEY_CREATE',   0x0800); // deny: voting on features
+define('ADMOPT_DENY_TOURNEY_REGISTER', 0x1000); // deny: voting on features
 
 
 function setTZ( $tz='GMT')

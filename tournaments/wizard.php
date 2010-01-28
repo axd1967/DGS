@@ -39,6 +39,8 @@ require_once 'tournaments/include/tournament_factory.php';
       error('not_allowed_for_guest');
 
    // create/edit allowed?
+   if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_CREATE )
+      error('tournament_create_denied');
    if( !Tournament::allow_create($my_id) )
       error('tournament_edit_not_allowed', "tournament_wizard.create($my_id)");
    $is_admin = TournamentUtils::isAdmin();

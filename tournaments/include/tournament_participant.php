@@ -501,11 +501,18 @@ class TournamentParticipant
       return implode(', ', $out);
    }
 
-   /*! \brief Returns registration-link-text for given user. */
-   function getLinkTextRegistration( $tourney, $uid, $reg_user_status=null )
+   /*! \brief Returns registration-link-text for given user; return empty string if user-registration is denied. */
+   function getLinkTextRegistration( $tid, $reg_user_status=null )
    {
+      global $player_row;
+
       if( is_null($reg_user_status) )
-         $reg_user_status = TournamentParticipant::isTournamentParticipant( $tourney->ID, $uid );
+         $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $player_row['ID']);
+      if( $reg_user_status != TP_STATUS_REGISTER )
+      {
+         if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
+            return '';
+      }
 
       return ($reg_user_status) ? T_('Edit my registration') : T_('Registration');
    }
