@@ -1209,16 +1209,16 @@ class Forum
    function load_forum( $id )
    {
       if( !is_numeric($id) || $id <= 0 )
-         error('unknown_forum', "Forum.load_forum($id)");
+         error('unknown_forum', "Forum::load_forum($id)");
 
       $qsql = Forum::build_query_sql();
       $qsql->add_part( SQLP_WHERE, "ID='$id'" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $query = $qsql->get_select();
-      $row = mysql_single_fetch( "Forum.load_forum2($id)", $query );
+      $row = mysql_single_fetch( "Forum::load_forum2($id)", $query );
       if( !$row )
-         error('unknown_forum', "Forum.load_forum3($id)");
+         error('unknown_forum', "Forum::load_forum3($id)");
 
       return Forum::new_from_row( $row );
    }
@@ -1233,7 +1233,7 @@ class Forum
    function load_forum_list( $forum_opts )
    {
       if( !is_a($forum_opts, 'ForumOptions') )
-         error('invalid_args', "Forum.load_forum_list.check.forum_opts($forum_opts)");
+         error('invalid_args', "Forum::load_forum_list.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
       $qsql = Forum::build_query_sql();
@@ -1253,7 +1253,7 @@ class Forum
       $qsql->add_part( SQLP_ORDER, 'SortOrder' );
 
       $query = $qsql->get_select();
-      $result = db_query( "Forum.load_forum_list($user_id)", $query );
+      $result = db_query( "Forum::load_forum_list($user_id)", $query );
 
       $fread = new ForumRead( $user_id );
       $flist = array();
@@ -1276,7 +1276,7 @@ class Forum
             if( $row['FR_X_Lastread'] <= 0 || $forum->updated > $row['FR_X_Lastread'] )
             {
                $forum->has_new_posts = ForumRead::has_new_posts_in_forums( $user_id, $fid );
-               $fread->replace_row_forumread( "Forum.load_forum_list.forum_read.upd",
+               $fread->replace_row_forumread( "Forum::load_forum_list.forum_read.upd",
                   $fid, 0, $forum->updated, $forum->has_new_posts );
             }
             else
@@ -1298,7 +1298,7 @@ class Forum
    function load_forum_names( $forum_opts )
    {
       // build forum-array for filter: ( Name => Forum_ID )
-      $result = db_query( 'Forum.load_forum_names',
+      $result = db_query( 'Forum::load_forum_names',
             'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
 
       $fnames = array();
@@ -1320,7 +1320,7 @@ class Forum
       $qsql = Forum::build_query_sql();
       $qsql->add_part( SQLP_ORDER, 'ID' );
 
-      $result = db_query( "Forum.load_fix_forum_list", $qsql->get_select() );
+      $result = db_query( "Forum::load_fix_forum_list", $qsql->get_select() );
       $flist = array();
       while( $row = mysql_fetch_array( $result ) )
       {

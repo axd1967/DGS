@@ -256,10 +256,10 @@ class Profile
    function load_profile( $prof_id, $user_id )
    {
       if( !is_numeric($prof_id) || !is_numeric($user_id) )
-         error('invalid_args', "profile.load_profile($prof_id,$user_id)");
+         error('invalid_args', "Profile::load_profile($prof_id,$user_id)");
 
       $fields = implode(',', Profile::get_query_fields());
-      $row = mysql_single_fetch("profile.load_profile2($prof_id,$user_id)",
+      $row = mysql_single_fetch("Profile::load_profile2($prof_id,$user_id)",
             "SELECT $fields FROM Profiles WHERE ID='$prof_id' AND User_ID='$user_id' LIMIT 1");
       if( !$row )
          return NULL;
@@ -274,10 +274,10 @@ class Profile
    function load_profiles( $user_id, $type )
    {
       if( !is_numeric($user_id) || !is_numeric($type) )
-         error('invalid_args', "profile.load_profiles($user_id,$type)");
+         error('invalid_args', "Profile::load_profiles($user_id,$type)");
 
       $fields = implode(',', Profile::get_query_fields());
-      $result = db_query( "profile.load_profile2($user_id,$type)",
+      $result = db_query( "Profile::load_profiles2($user_id,$type)",
             "SELECT $fields FROM Profiles WHERE User_ID='$user_id' AND Type='$type' " .
             "ORDER BY SortOrder,ID LIMIT 1" );
 

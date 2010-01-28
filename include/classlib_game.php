@@ -330,13 +330,13 @@ class GameScore
    function check_mode( $mode, $method )
    {
       if( $mode != GSMODE_TERRITORY_SCORING && $mode != GSMODE_AREA_SCORING )
-         error('invalid_args', "GameScore.$method($mode)");
+         error('invalid_args', "GameScore::$method($mode)");
    }
 
    function check_gscol( $gscol, $method )
    {
       if( $gscol != GSCOL_BLACK && $gscol != GSCOL_WHITE )
-         error('invalid_args', "GameScore.$method($gscol)");
+         error('invalid_args', "GameScore::$method($gscol)");
    }
 
 
@@ -462,7 +462,7 @@ class NextGameOrder
     */
    function load_game_priority( $gid, $uid, $defval=0 )
    {
-      $prio_row = mysql_single_col( "nextgameorder.gameprio.find($gid,$uid)",
+      $prio_row = mysql_single_col( "NextGameOrder::load_game_priority.find($gid,$uid)",
          "SELECT Priority FROM GamesPriority WHERE gid=$gid AND uid=$uid LIMIT 1" );
       $prio = ( $prio_row ) ? $prio_row[0] : $defval;
       return $prio;
@@ -477,18 +477,18 @@ class NextGameOrder
    {
       if( (string)$prio == '' )
       {
-         db_query( "nextgameorder.gameprio.delete($gid,$uid)",
+         db_query( "NextGameOrder::persist_game_priority.delete($gid,$uid)",
             "DELETE FROM GamesPriority WHERE gid=$gid AND uid=$uid LIMIT 1" );
       }
       else
       {
          if( !is_numeric($prio) )
-            error('invalid_args', "nextgameorder.gameprio.check.prio.no_int($gid,$uid,$new_prio)");
+            error('invalid_args', "NextGameOrder::persist_game_priority.check.prio.no_int($gid,$uid,$new_prio)");
          $new_prio = (int)$prio;
          if( $new_prio < -32768 || $new_prio > 32767 )
-            error('invalid_args', "nextgameorder.gameprio.check.prio.range($gid,$uid,$new_prio)");
+            error('invalid_args', "NextGameOrder::persist_game_priority.check.prio.range($gid,$uid,$new_prio)");
 
-         db_query( "nextgameorder.gameprio.update($gid,$uid,$new_prio)",
+         db_query( "NextGameOrder::persist_game_priority.update($gid,$uid,$new_prio)",
             "INSERT INTO GamesPriority (gid,uid,Priority) VALUES ($gid,$uid,$new_prio) " .
             "ON DUPLICATE KEY UPDATE Priority=VALUES(Priority)" );
       }
@@ -498,7 +498,7 @@ class NextGameOrder
    function delete_game_priorities( $gid )
    {
       // for now only 2 players, change with RENGO
-      db_query( "nextgameorder.gameprio.delete_all($gid)",
+      db_query( "NextGameOrder::persist_game_priority.delete_all($gid)",
          "DELETE FROM GamesPriority WHERE gid=$gid LIMIT 2" );
    }
 

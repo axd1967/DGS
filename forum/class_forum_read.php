@@ -241,7 +241,7 @@ class ForumRead
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $query = $qsql->get_select();
-      $has_new = mysql_exists_row( "ForumRead.has_new_posts_in_forums($uid,$forum_id)", $query );
+      $has_new = mysql_exists_row( "ForumRead::has_new_posts_in_forums($uid,$forum_id)", $query );
       return $has_new;
    } //has_new_posts_in_forums
 
@@ -274,7 +274,7 @@ class ForumRead
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $query = $qsql->get_select();
-      $has_new = mysql_exists_row( "ForumRead.has_new_posts_in_all_forums($uid)", $query );
+      $has_new = mysql_exists_row( "ForumRead::has_new_posts_in_all_forums($uid)", $query );
       return $has_new;
    } //has_new_posts_in_all_forums
 
@@ -286,7 +286,7 @@ class ForumRead
    function load_global_new( $forum_opts )
    {
       if( !is_a($forum_opts, 'ForumOptions') )
-         error('invalid_args', "ForumRead.load_global_new.check.forum_opts($forum_opts)");
+         error('invalid_args', "ForumRead::load_global_new.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
       $global_updated = ForumRead::load_global_updated();
@@ -297,13 +297,13 @@ class ForumRead
       $qsql = ForumRead::build_query_sql( $user_id );
       $qsql->add_part( SQLP_WHERE, 'Forum_ID=0', 'Thread_ID=0' );
       $query = $qsql->get_select();
-      $row = mysql_single_fetch( "ForumRead.load_global_new($user_id)", $query );
+      $row = mysql_single_fetch( "ForumRead::load_global_new($user_id)", $query );
 
       if( !$row || ( $row['X_Time'] <= 0 || $global_updated > $row['X_Time'] ) )
       {
          $global_has_new = ForumRead::has_new_posts_in_all_forums( $forum_opts );
          $fread = new ForumRead( $user_id );
-         $fread->replace_row_forumread( "ForumRead.load_global_new.forum_read.upd",
+         $fread->replace_row_forumread( "ForumRead::load_global_new.forum_read.upd",
             0, 0, $global_updated, $global_has_new );
       }
       else
@@ -351,7 +351,7 @@ class ForumRead
       // force trigger updating with older updated-date on next load-global
       $global_updated = ForumRead::load_global_updated( false );
       $fread = new ForumRead( $uid );
-      $fread->replace_row_forumread( "ForumRead.trigger_recalc_global_read_update.upd",
+      $fread->replace_row_forumread( "ForumRead::trigger_recalc_global_read_update.upd",
          0, 0, $global_updated - SECS_PER_DAY );
    }
 
@@ -360,13 +360,13 @@ class ForumRead
    {
       // force trigger updating with older updated-date on next load-global
       global $NOW;
-      $row = mysql_single_col( "ForumRead.trigger_recalc_forum_read_update.read_forum($uid,$forum_id)",
+      $row = mysql_single_col( "ForumRead::trigger_recalc_forum_read_update.read_forum($uid,$forum_id)",
          "SELECT UNIX_TIMESTAMP(Updated) AS X_Updated FROM Forums WHERE ID='$forum_id' LIMIT 1" );
       $rowval = ( $row ) ? $row[0] : 0;
       $forum_updated = ($rowval > 0) ? $rowval : $NOW;
 
       $fread = new ForumRead( $uid, $forum_id );
-      $fread->replace_row_forumread( "ForumRead.trigger_recalc_forum_read_update.upd",
+      $fread->replace_row_forumread( "ForumRead::trigger_recalc_forum_read_update.upd",
          $forum_id, 0, $forum_updated - SECS_PER_DAY );
    }
 

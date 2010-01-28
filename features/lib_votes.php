@@ -409,7 +409,7 @@ class Feature
    function build_query_feature_list( $ftable, $user_id )
    {
       if( !is_numeric($user_id) )
-         error('invalid_user', "Feature.build_query_feature_list($user_id)");
+         error('invalid_user', "Feature::build_query_feature_list($user_id)");
 
       // build SQL-query
       $qsql = new QuerySQL();
@@ -467,10 +467,10 @@ class Feature
    function load_feature( $id )
    {
       if( !is_numeric($id) )
-         error('invalid_feature', "feature.load_feature($id)");
+         error('invalid_feature', "feature::load_feature($id)");
 
       $fields = implode(',', Feature::get_query_fields());
-      $row = mysql_single_fetch("feature.load_feature2($id)",
+      $row = mysql_single_fetch("feature::load_feature2($id)",
             "SELECT $fields FROM FeatureList AS FL WHERE FL.ID='$id' LIMIT 1");
       if( !$row )
          return null;
@@ -621,7 +621,7 @@ class FeatureVote
    function load_featurevote_summary( $fid, $avgPoints=0 )
    {
       if( !is_numeric($fid) || $fid < 0 )
-         error('invalid_args', "FeatureVote.load_featurevote_summary($fid)");
+         error('invalid_args', "FeatureVote::load_featurevote_summary($fid)");
 
       $qsql = new QuerySQL();
       if( $avgPoints > 0 )
@@ -638,7 +638,7 @@ class FeatureVote
          'FV.Points<>0' ); // abstention from voting
       $query = $qsql->get_select() . ' LIMIT 1';
 
-      $row = mysql_single_fetch( "FeatureVote.load_featurevote_summary($fid)", $query );
+      $row = mysql_single_fetch( "FeatureVote::load_featurevote_summary($fid)", $query );
       return $row;
    }
 
@@ -687,10 +687,10 @@ class FeatureVote
    function load_featurevote( $fid, $voter )
    {
       if( !is_numeric($fid) )
-         error('invalid_feature', "featurevote.load_feature($fid,$voter)");
+         error('invalid_feature', "featurevote::load_feature($fid,$voter)");
 
       $fields = implode(',', FeatureVote::get_query_fields());
-      $row = mysql_single_fetch("featurevote.load_feature2($fid,$voter)",
+      $row = mysql_single_fetch("featurevote::load_feature2($fid,$voter)",
             "SELECT $fields FROM FeatureVote AS FV WHERE FV.fid='$fid' and FV.Voter_ID='$voter' LIMIT 1");
       if( !$row )
          return null;

@@ -83,9 +83,9 @@ class MarkupHandlerGoban
       $readerClass = @$ARR_GOBAN_HANDLERS_READER[strtoupper($igoban_type)];
       $writerClass = @$ARR_GOBAN_HANDLERS_WRITER[strtoupper($writer_type)];
       if( !$readerClass )
-         error('invalid_args', "Goban.parse_igoban.check.igoban_type($igoban_type)");
+         error('invalid_args', "MarkupHandlerGoban::parse_igoban.check.igoban_type($igoban_type)");
       if( !$writerClass )
-         error('invalid_args', "Goban.parse_igoban.check.writer_type($writer_type)");
+         error('invalid_args', "MarkupHandlerGoban::parse_igoban.check.writer_type($writer_type)");
 
       $goban_reader = new $readerClass( $map_args );
       $goban = $goban_reader->read_goban( $text );
@@ -255,7 +255,7 @@ class Goban
       if( is_array($value) )
          $this->matrix[$y][$x] = $value;
       elseif( !is_numeric($value) )
-         error('invalid_args', "Goban.setValue($x,$y,$value)");
+         error('invalid_args', "Goban::setValue($x,$y,$value)");
       elseif( is_null($label) )
          $this->matrix[$y][$x] = $value; // optimization to avoid too many object-instances
       else
@@ -379,7 +379,7 @@ class Goban
    function makeBoard( $width, $height, $withHoshi=true )
    {
       if( $width < 2 || $height < 2 )
-         error('invalid_args', "Goban.makeBoard.check($width,$height)");
+         error('invalid_args', "Goban::makeBoard.check($width,$height)");
 
       for( $y=1; $y <= $width; $y++)
       {

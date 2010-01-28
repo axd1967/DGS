@@ -240,7 +240,7 @@ class Contact
    {
       if( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
          return -1;
-      $result = db_query( 'contact.has_contact',
+      $result = db_query( 'Contact::has_contact',
          "SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
       if( !$result )
          return 0;
