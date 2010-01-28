@@ -22,6 +22,44 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-28 juga
+
+   * admin_password.php, NEWS:
+   - add 2nd form to show email (if existing) on admin-new-password page
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.getLinkTextRegistration),
+     include/classlib_user.php (class User, ~.to_string, ~.new_from_row),
+     include/error_codes.php (ErrorCode.init), include/quick_common.php,
+     admin_show_users.php, admin_users.php,
+     tournaments/edit_participant.php, tournaments/register.php,
+     tournaments/list_participants.php, tournaments/list_tournaments.php,
+     tournaments/view_tournament.php, tournaments/ladder/admin.php,
+     tournaments/wizard.php, NEWS:
+   - added admin-options to deny tournament creation and registration for NEW tournaments,
+     user can continue in tourneys he's already registered
+
+   * tournaments/include/types/dgs_ladder.php (DgsLadderTournament.createTournament):
+   - added ta_begin/end-transactional enclosing to create tournament with multi-table-updates
+
+   * tournaments/edit_director.php, tournaments/edit_participant.php,
+     tournaments/register.php:
+   - keep bottom-links in nearly same order for different tournament-pages
+
+   * tournaments/view_tournament.php:
+   - added tourney-ID to title
+
+   * tournaments/include/tournament_director.php (TournamentDirector.count_tournament_directors,
+       ~.load_user_row, ~.assert_min_directors),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/edit_director.php, tournaments/list_directors.php:
+   - assure min. number of tournament directors if not in NEW/ADMIN/DELETED tourney-status
+
+   * include/std_classes.php (ListIterator.getItemCount):
+   - added function to get number of items stored in ListIterator
+
+   * tournaments/include/tournament.php (Tournament.build_info):
+   - added tourney-ID in build-tourney-info for titles
+
 2010-01-27 juga
 
    * tournaments/include/tournament_template.php (TournamentTemplate.joinTournament),
