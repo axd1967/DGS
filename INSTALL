@@ -65,7 +65,7 @@ and expects it to be in the document-root.
 2) Make a mysql database and a mysql user to access the database:
 
 mysql> CREATE DATABASE dragondb;
-mysql> GRANT select, insert, update, delete, create temporary tables ON dragondb.* TO dragon@localhost IDENTIFIED BY 'secret';
+mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES ON dragondb.* TO dragon@localhost IDENTIFIED BY 'secret';
 
 
 

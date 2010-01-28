@@ -198,6 +198,17 @@ function ta_end( $new_ignore_user_abort=null )
    $old_ignore_user_abort = $new_ignore_user_abort;
 }
 
+function db_lock( $debugmsg, $locktables )
+{
+   return db_query( "db_lock($locktables).$debugmsg", 'LOCK TABLES '.$locktables );
+}
+
+// note: ending session implicitly unlocks all tables
+function db_unlock()
+{
+   return db_query( "db_unlock()", 'UNLOCK TABLES' );
+}
+
 function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 {
    //echo $debugmsg.'.db_query='.$query.'<br>';

@@ -464,5 +464,43 @@ General instructions for developers:
    Here is a former code-snipplet (from include/table_columns.php#add_or_del_column-func):
    http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/table_columns.php?revision=1.116&view=markup#l_624
 
+----------------- PHP: Transactions
+
+   DGS uses MyISAM-mysql-table-engine which does not support multi-table transactions.
+   In the Dragon code there are two "methods" used to "simulate" transactional
+   behaviour as closely as possible:
+
+   * LOCK TABLES - is used to lock a single table when there are multiple changes
+     on the same table that should be performed within one transaction.
+
+     In the source, make up a block to clearer mark the scope of the table-lock.
+     Also try to execute the db-operations as quickly as possible to minimize the
+     time the table is being locked:
+
+         db_lock( "label", "Table READ|WRITE, ..." );
+         {//LOCK <Table>
+            ...
+         }
+         db_unlock();
+
+   * ignore_user_abort() - Changes in multiple db-tables should be kept in a block.
+     The SQL-statements are called HOT-sections (=transaction-like) throughout
+     the DGS code. Enclose those HOT-sections like the following code-snipplet:
+
+         ta_begin();
+         {//HOT-SECTION to ...
+            ...
+         }
+         ta_end();
+
+      The ta_begin() and ta_end() functions set/resets the ignore_user_abort()-state.
+      This prevents that the abortion of the client connection to stop the execution
+      of the script running, and with it breaking the SQL-statements.
+
+      Like this at least the DB-updates in best-case are all executed.
+      Be aware, that this is no REAL transaction, but the closest we can get
+      without switching to another table-engine (like InnoDB for example) with
+      real transactions.
+
 -----------------
 

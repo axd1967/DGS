@@ -1358,7 +1358,7 @@ ALTER TABLE Games
 
 -- grant access-right to create temporary tables to DGS db-user
 -- Lookup your respective configuration in 'include/config-local.php'
-GRANT create temporary tables ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
+GRANT CREATE TEMPORARY TABLES ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 
 
 -- [data] cleanup Adminlog (delete uninteresting messages, not longer logged)
@@ -1514,5 +1514,10 @@ CREATE TABLE TournamentLadder (
 -- table-column-set for tournament-ladder-view
 ALTER TABLE ConfigPages
    ADD ColumnsTournamentLadderView int NOT NULL DEFAULT -1 ;
+
+
+-- grant access-right to lock tables to DGS db-user
+-- Lookup your respective configuration in 'include/config-local.php'
+GRANT LOCK TABLES ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 
 
