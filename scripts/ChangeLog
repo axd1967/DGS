@@ -22,6 +22,62 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-27 juga
+
+   * tournaments/include/tournament_template.php (TournamentTemplate.joinTournament),
+     tournaments/include/types/dgs_ladder.php (DgsLadderTournament.joinTournament),
+     tournaments/edit_participant.php (send_register_notification),
+     tournaments/register.php:
+   - join ladder-tournament if user is finally REGISTERed by
+     - user accepting invitation
+     - user registering by him/herself
+     - tournament-director accepting user-application
+   - add link in tourney-invite-notification to edit tourney-user-registration
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/ladder/admin.php:
+   - changed signature of add_user_to_ladder(tid,User-object) -> (tid,uid)
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder,
+       ~.remove_user_from_ladder, ~.change_user_rank, ~.switch_user_rank,
+       ~.add_participant_to_ladder, ~.move_up_ladder_part, ~.move_down_ladder_part,
+       ~.seed_ladder):
+   - lock table TournamentLadder for multiple SQL-statements on same table to
+     - remove user from ladder
+     - change rank of ladder-user
+     - seed ladder
+   - update TournamentLadder.BestRank + RankChanged for
+     - switching places in ladder if BestRank set already,
+     - moving ladder-users up or down one rank
+     - seeding ladder
+     - set RankChanged to default-value, i.e. unset, for newly added ladder-user
+   - changed nomenclature for object-methods in db-query-debug-message
+
+   * include/connect2mysql.php (db_lock, db_unlock),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/README.developers, INSTALL:
+   - added function to support table-locking
+   - need access-right LOCK-TABLES grant for DGS-user
+-----------
+-- grant access-right to lock tables to DGS db-user
+-- Lookup your respective configuration in 'include/config-local.php'
+GRANT LOCK TABLES ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
+-----------
+
+   * tournaments/ladder/view.php:
+   - added table-column 'Rank Kept' with relative-time rank is kept for ladder-users
+   - for TDs show tournament-participant-list in admin-mode
+
+   * tournaments/include/tournament_participant.php,
+     tournaments/include/tournament_globals.php:
+   - moved TournamentParticipant-consts to tournament_globals.php
+
+   * include/quick_common.php:
+   - added const SECS_PER_HOUR
+
+   * statisticspng.php:
+   - optimize aggregrate-SQL MAX(func(col)) -> func(MAX(col))
+
 2010-01-26 juga
 
    * tournaments/manage_tournament.php, tournaments/ladder/admin.php:
