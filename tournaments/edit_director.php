@@ -220,8 +220,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
 
    $menu_array = array();
-   $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
    if( $allow_new_del_TD )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );

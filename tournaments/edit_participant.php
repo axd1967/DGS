@@ -452,9 +452,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $tpform->echo_string();
 
    $menu_array = array();
+   $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
-   $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if( $tourney->Type == TOURNEY_TYPE_LADDER && $rid )
    {
       if( $tourney->Status == TOURNEY_STATUS_PAIR || $tourney->Status == TOURNEY_STATUS_PLAY )
