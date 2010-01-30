@@ -24,6 +24,19 @@ ChangeLog
 
 2010-01-30 juga
 
+   * include/error_codes.php (ErrorCode.init),
+     tournaments/edit_round.php, tournaments/ladder/challenge.php:
+   - die with new error 'tournament_wrong_status' if on wrong tourney-status
+   - replaced specific error-code 'tournament_miss_rules' with 'bad_tournament'
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.build_rank_kept),
+     tournaments/ladder/challenge.php, tournaments/ladder/view.php, NEWS:
+   - added ladder-challenge page to confirm or cancel challenge
+   - moved building of Rank-Kept info into TournamentLadder-class
+
+   * include/std_functions.php (make_menu):
+   - bugfix catching division-by-zero for empty menu-array while making menus
+
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps),
      tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_REG),
      tournaments/include/tournament_template.php (TournamentTemplate.checkProperties),
