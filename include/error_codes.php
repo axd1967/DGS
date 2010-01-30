@@ -449,11 +449,11 @@ class ErrorCode
          $arr['tournament_register_edit_not_allowed'] =
             T_("Sorry, you are not allowed to edit this tournament registration.");
 
-         $arr['tournament_miss_rules'] =
-            T_("Sorry, missing configured rules-set for this tournament.");
-
          $arr['tournament_participant_invalid_status'] =
             T_("Sorry, action on tournament participant is not allowed for registration status.");
+
+         $arr['tournament_wrong_status'] =
+            T_('Sorry, tournament is on wrong status to allow this action for tournament.');
 
          $arr['folder_not_found'] =
             T_("Sorry, couldn't find the specified message folder.");
