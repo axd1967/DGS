@@ -191,8 +191,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // ------------- Section Menu
 
    $sectmenu = array();
-   if( $tourney->Type == TOURNEY_TYPE_LADDER )
-      $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+   if( $tourney->Type == TOURNEY_TYPE_LADDER ) //TODO only show on certain stati
+      if( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
+         $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
 
    make_menu( $sectmenu, false);
 
