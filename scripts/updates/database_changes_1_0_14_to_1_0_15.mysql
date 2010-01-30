@@ -1521,3 +1521,13 @@ ALTER TABLE ConfigPages
 GRANT LOCK TABLES ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 
 
+-- added table for ladder tournament properties
+CREATE TABLE TournamentLadderProps (
+   tid int(11) NOT NULL,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL default '',
+   ChallengeRangeAbsolute smallint unsigned NOT NULL DEFAULT '0',
+   PRIMARY KEY (tid)
+) ENGINE=MyISAM;
+
+

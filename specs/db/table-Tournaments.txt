@@ -420,3 +420,29 @@ Description:
 * BestRank : maximum of reached ladder-ranks for user caused by direct win or loss
 
 
+###########################################################################
+## --- TournamentLadderProps ---
+
+Description:
+   Table for ladder-specific tournament properties.
+
+ Field                  | Type                 | Default
+------------------------+----------------------+---------------------
+ tid                    | int(11)              | NULL
+ Lastchanged            | datetime             | 0000-00-00 00:00:00
+ ChangedBy              | varchar(54)          |
+ ChallengeRangeAbsolute | smallint(5)          | 0
+
+## Fields:
+
+* tid : FK to Tournament.ID
+
+* Lastchanged : date of last update of table-entry
+
+* ChangedBy : user-list that updated table-entry in format: "[user2] [user1] ..."
+
+* ChallengeRangeAbsolute :
+   - number of rank-positions a ladder-user can challenge users above own position
+   - -1 = no limit, challenger can challenge all users above own position
+   -  0 = unused option, i.e. other challenge ranges must configure challenge-range
+

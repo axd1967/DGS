@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_template.php';
 
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_ladder.php';
 
@@ -76,10 +77,25 @@ class DgsLadderTournament extends TournamentTemplate
          $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
          if( !$t_rules->persist() )
             $this->create_error("LadderTournament.createTournament3(%s,$tid)");
+
+         $tl_props = new TournamentLadderProps( $tid );
+         $tl_props->ChallengeRangeAbsolute = 10;
+         if( !$tl_props->insert() )
+            $this->create_error("LadderTournament.createTournament4(%s,$tid)");
       }
       ta_end();
 
       return $tid;
+   }
+
+   function checkProperties( $tid )
+   {
+      $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
+      if( is_null($tl_props) )
+         error('bad_tournament', "LadderTournament.checkProperties($tid,{$this->uid})");
+
+      $errors = $tl_props->check_properties();
+      return $errors;
    }
 
    function checkParticipantRegistrations( $tid, $arr_TPs )

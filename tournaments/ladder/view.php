@@ -31,6 +31,7 @@ require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
@@ -65,6 +66,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( $admin_mode && !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.ladder_view.admin_mode($tid,$my_id)");
+
+   $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
+   if( is_null($tl_props) )
+      error('bad_tournament', "Tournament.ladder_view.ladder_props($tid,$my_id)");
 
    $errors = $tstatus->check_view_status( TournamentLadder::get_view_ladder_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
@@ -131,6 +136,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
 
+      // add ladder-info (challenge-range)
+      $tl_props->make_ladder_info( $iterator, $my_id );
+
       if( $admin_mode )
          $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
    }//allow-view
@@ -165,7 +173,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[ 5] = getCountryFlagImage( $user->Country );
          if( $ltable->Is_Column_Displayed[ 6] )
             $row_str[ 6] = echo_rating( $user->Rating, true, $uid);
-         if( $ltable->Is_Column_Displayed[ 7] )
+         if( $ltable->Is_Column_Displayed[ 7] ) // actions
          {
             if( $admin_mode )
             {
@@ -179,7 +187,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             elseif( $is_mine )
                $row_str[7] = span('TourneyUser', T_('This is you#T_ladder') );
             else
-               $row_str[7] = ''; //TODO actions
+            {
+               $row_str[7] = '';
+               if( $tl->AllowChallenge )
+                  $row_str[7] = sprintf( '[%s]', T_('Challenge this user') );
+            }
          }
          if( $ltable->Is_Column_Displayed[ 8] )
             $row_str[ 8] = ''; //TODO game-list
@@ -225,6 +237,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       }
 
       $ltable->echo_table();
+   }
+
+   if( !is_null($tl_props) )
+   {
+      $tt_notes = $tl_props->build_notes_props();
+      echo_notes( 'ttprops', $tt_notes[0], $tt_notes[1] );
    }
 
 

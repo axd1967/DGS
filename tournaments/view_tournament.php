@@ -31,6 +31,7 @@ require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
+require_once( 'tournaments/include/tournament_ladder_props.php' );
 
 $GLOBALS['ThePage'] = new Page('Tournament');
 
@@ -61,6 +62,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
    $trule  = TournamentRules::load_tournament_rule( $tid );
+
+   $tt_props = null; // T-type-specific props
+   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      $tt_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
+
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
    $page_tourney = "tournaments/view_tournament.php?tid=$tid";
@@ -174,6 +180,13 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    echo "<hr>\n", '<a name="games">', "\n";
    section( 'tournament', T_('Games#T_view') );
+
+   // show tourney-type-specific properties
+   $tt_notes = null;
+   if( !is_null($tt_props) )
+      $tt_notes = $tt_props->build_notes_props();
+   if( !is_null($tt_notes) )
+      echo_notes( 'ttprops', $tt_notes[0], $tt_notes[1], false );
 
    // ------------- Section Menu
 
@@ -298,5 +311,4 @@ function echo_tournament_registration( $tprops )
    if( $tprops->Notes != '' )
       echo make_html_safe($tprops->Notes, true), "<br><br>\n";
 }//echo_tournament_registration
-
 ?>

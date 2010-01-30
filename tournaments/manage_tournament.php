@@ -104,10 +104,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                                  T_('user-related: user rating-range, min. games#mngt') )),
          '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
                  subList( array( T_('Change game-settings: board size, handicap-settings, time-settings, rated#mngt') )),
-         /* TODO only for round-robin
-         '<li>', make_menu_link( T_('Edit round'), array( 'url' => "tournaments/edit_round.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Setup tournament round for pooling and pairing') )),
-         */
+         make_links_ttype_specific( $tourney ),
       '</ul>',
 
       make_header( 2, T_('Registration phase'), TOURNEY_STATUS_REGISTER ), //------------------------
@@ -153,6 +150,25 @@ function make_header( $no, $title, $t_status )
 {
    return sprintf( "<h4 class=\"SubHeader\">%s. %s (%s)</h4>\n",
                    $no, $title, Tournament::getStatusText($t_status) );
+}
+
+function make_links_ttype_specific( $tourney )
+{
+   $tid = $tourney->ID;
+
+   // TYPE: ladder-specific stuff
+   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      return '<li>'
+         . make_menu_link( T_('Edit Ladder properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
+         . subList( array( T_('challenge-range#mngt') ));
+
+   // TYPE: round-robin-specific stuff
+   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      return '<li>'
+         . make_menu_link( T_('Edit round'), array( 'url' => "tournaments/edit_round.php?tid=$tid", 'class' => 'TAdmin' ))
+         . subList( array( T_('Setup tournament round for pooling and pairing') ));
+
+   return '';
 }
 
 function subList( $arr, $class='SubList' )

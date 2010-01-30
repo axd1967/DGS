@@ -125,6 +125,11 @@ class TournamentStatus
          $this->errors[] = $this->error_expected_status( TOURNEY_STATUS_NEW );
 
       $this->check_basic_conditions_status_change();
+
+      // check tournament-type specific checks
+      $check_errors = $ttype->checkProperties( $this->tid );
+      if( count($check_errors) )
+         $this->erros = array_merge( $this->errors, $check_errors );
    }
 
    function check_conditions_status_PAIR()
