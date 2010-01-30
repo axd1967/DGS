@@ -767,13 +767,16 @@ function make_menu($menu_array, $with_accesskeys=true)
 {
    global $base_path, $max_links_in_main_menu;
 
-   echo "\n\n<table id=\"pageLinks\" class=Links>\n <tr>";
-
    $nr_menu_links = count($menu_array);
+   if( $nr_menu_links == 0 )
+      return;
+
    $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
    $menu_width = ceil($nr_menu_links/$menu_levels);
    $remain = ($menu_levels*$menu_width) - $nr_menu_links +1;
    $w = 100/$menu_width;
+
+   echo "\n\n<table id=\"pageLinks\" class=Links>\n <tr>";
 
    $cumwidth = $cumw = 0;
    $i = 0;
