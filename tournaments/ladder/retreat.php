@@ -145,7 +145,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 }
 
 
-/*! \brief Returns array with notes about registering users. */
+/*! \brief Returns array with notes about retreating from ladder. */
 function build_retreat_notes()
 {
    $notes = array();
