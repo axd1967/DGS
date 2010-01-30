@@ -190,7 +190,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             {
                $row_str[7] = '';
                if( $tl->AllowChallenge )
-                  $row_str[7] = sprintf( '[%s]', T_('Challenge this user') );
+                  $row_str[7] = sprintf( '[%s]',
+                     anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tl->rid}",
+                             T_('Challenge this user') ));
             }
          }
          if( $ltable->Is_Column_Displayed[ 8] )
@@ -198,12 +200,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[ 9] )
             $row_str[ 9] = ($tl->RankChanged > 0) ? date(DATE_FMT2, $tl->RankChanged) : '';
          if( $ltable->Is_Column_Displayed[10] )
-         {
-            $row_str[10] = ($tl->RankChanged > 0 )
-               ? TimeFormat::echo_time( round(($NOW - $tl->RankChanged)/SECS_PER_HOUR),
-                                        TIMEFMT_SHORT|TIMEFMT_ZERO, '0' )
-               : '';
-         }
+            $row_str[10] = $tl->build_rank_kept();
          if( $ltable->Is_Column_Displayed[11] )
             $row_str[11] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
 
