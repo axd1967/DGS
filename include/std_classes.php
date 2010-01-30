@@ -694,6 +694,12 @@ class ListIterator
       $this->Items[] = array( $item, $row );
    }
 
+   /*! \brief Resets iterating with getListIterator-func. */
+   function resetListIterator()
+   {
+      reset( $this->Items );
+   }
+
    /*! \brief Returns each() from items-list of this ListIterator. */
    function getListIterator()
    {
