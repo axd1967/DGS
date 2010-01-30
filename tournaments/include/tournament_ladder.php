@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
 require_once 'include/utilities.php';
+require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -81,6 +82,17 @@ class TournamentLadder
    function to_string()
    {
       return print_r($this, true);
+   }
+
+   function build_rank_kept( $timefmt=null, $zero_val='' )
+   {
+      if( $this->RankChanged <= 0 )
+         return $zero_val;
+
+      if( is_null($timefmt) )
+         $timefmt = TIMEFMT_SHORT|TIMEFMT_ZERO;
+      return TimeFormat::echo_time(
+         round(($GLOBALS['NOW'] - $this->RankChanged)/SECS_PER_HOUR), $timefmt, '0' );
    }
 
    /*! \brief Inserts or updates tournament-ladder in database. */
