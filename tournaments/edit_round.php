@@ -82,7 +82,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
       $trule = TournamentRules::load_tournament_rule( $tid );
       if( is_null($trule) )
-         error('tournament_miss_rules', "Tournament.edit_round.new_round($tid,$round)");
+         error('bad_tournament', "Tournament.edit_round.new_round($tid,$round)");
 
       $tround = new TournamentRound( $tid, $round, $trule->ID );
    }
