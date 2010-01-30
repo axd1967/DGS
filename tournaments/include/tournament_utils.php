@@ -96,9 +96,10 @@ class TournamentUtils
          return limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
    }
 
-   function isNumberOrEmpty( $value )
+   function isNumberOrEmpty( $value, $allow_negative=false )
    {
-      return ((string)$value == '') || preg_match( "/^\d+$/", $value );
+      $rx_sign = ($allow_negative) ? '\\-?' : '';
+      return ((string)$value == '') || preg_match( "/^{$rx_sign}\d+$/", $value );
    }
 
    function getWizardTournamentType( $wizard_type )
