@@ -58,7 +58,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_round.find_tournament($tid)");
-   //TODO not supported yet for Ts (ladder)
+   //TODO not supported yet for Ts (only ladder for now)
    error('assert', "Tournament.edit_round.not_implemented($tid)");
    $tstatus = new TournamentStatus( $tourney );
 
@@ -88,14 +88,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    }
 
    // init
+   $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
 
    // check + parse edit-form (notes)
-   //TODO(later) T should be in status REG,PAIR,PLAY
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $tround );
-   $errorlist += $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround );
+   $errors = array_merge( $errors, $input_errors );
 
    // save tournament-round-object with values from edit-form
-   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errorlist) == 0 )
+   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
    {
       $tround->persist(); // insert or update
       jump_to("tournaments/edit_round.php?tid={$tid}".URI_AMP."round={$round}".URI_AMP
@@ -125,11 +125,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
          'TEXT',        $tround->PoolCount, ));
    $trform->add_row( array( 'HR' ));
 
-   if( count($errorlist) )
+   if( count($errors) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
       $tform->add_empty_row();
    }
 

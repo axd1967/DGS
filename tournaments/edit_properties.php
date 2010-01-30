@@ -47,9 +47,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
-     tid=                : add new or edit tournament properties
-     tp_preview&tid=     : preview for tournament-properties-save
-     tp_save&tid=        : update (replace) tournament-properties in database
+     tid=                : edit tournament properties
+     tp_preview&tid=     : preview for properties-save
+     tp_save&tid=        : update (replace) properties in database
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -70,17 +70,18 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       error('bad_tournament', "Tournament.edit_properties.miss_properties($tid,$my_id)");
 
    // init
+   $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
    $arr_rating_use_modes = TournamentProperties::getRatingUseModeText();
    $rating_array = getRatingArray();
 
    // check + parse edit-form
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $tprops, $ttype );
-   $errorlist += $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $ttype );
+   $errors = array_merge( $errors, $input_errors );
 
    // save tournament-properties-object with values from edit-form
-   if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errorlist) == 0 )
+   if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
    {
-      $tprops->persist();
+      $tprops->update();
       jump_to("tournaments/edit_properties.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Properties saved!')) );
    }
@@ -103,11 +104,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
             'TEXT',        TournamentUtils::buildLastchangedBy($tprops->Lastchanged, $tprops->ChangedBy) ));
    $tform->add_row( array( 'HR' ));
 
-   if( count($errorlist) )
+   if( count($errors) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
       $tform->add_empty_row();
    }
 

@@ -45,8 +45,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
-     (no args)          : add new tournament
-     tid=               : edit new (preview) or existing tournament
+     tid=               : edit existing tournament
      t_preview&tid=     : preview for tournament-save
      t_save&tid=        : update (replace) tournament in database
 */
@@ -67,16 +66,17 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_tournament.edit($tid,$my_id)");
 
    // init
+   $errors = $tstatus->check_edit_status( Tournament::get_edit_tournament_status() );
    $arr_scopes = Tournament::getScopeText();
 
    // check + parse edit-form
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $tourney, $ttype, $is_admin );
-   $errorlist += $tstatus->check_edit_status( Tournament::get_edit_tournament_status() );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tourney, $ttype, $is_admin );
+   $errors = array_merge( $errors, $input_errors );
 
    // save tournament-object with values from edit-form
-   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errorlist) == 0 )
+   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 )
    {
-      $tourney->persist(); // insert or update
+      $tourney->update();
       jump_to("tournaments/edit_tournament.php?tid={$tourney->ID}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament saved!')) );
    }
@@ -113,11 +113,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
    $tform->add_row( array( 'HR' ));
 
-   if( count($errorlist) )
+   if( count($errors) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
       $tform->add_empty_row();
    }
 

@@ -67,14 +67,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if( is_null($trule) )
       error('bad_tournament', "Tournament.edit_rules.miss_rules($tid,$my_id)");
 
+   $errors = $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
+
    // check + parse edit-form (notes)
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $trule );
-   $errorlist += $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $trule );
+   $errors = array_merge( $errors, $input_errors );
 
    // save tournament-rules-object with values from edit-form
-   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errorlist) == 0 )
+   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
    {
-      $trule->persist();
+      $trule->update();
       jump_to("tournaments/edit_rules.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament rules saved!')) );
    }
@@ -96,11 +98,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
             'TEXT',        TournamentUtils::buildLastchangedBy($trule->Lastchanged, $trule->ChangedBy) ));
    $trform->add_row( array( 'HR' ));
 
-   if( count($errorlist) )
+   if( count($errors) )
    {
       $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
    }
 
    game_settings_form( $trform, GSET_TOURNAMENT, true/*$iamrated*/, 'redraw', $vars );
