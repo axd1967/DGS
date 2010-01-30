@@ -22,6 +22,50 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-01-30 juga
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_REG),
+     tournaments/include/tournament_template.php (TournamentTemplate.checkProperties),
+     tournaments/include/types/dgs_ladder.php (DgsLadderTournament.createTournament, ~.checkProperties),
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     tournaments/view_tournament.php,
+     tournaments/ladder/edit_props.php,
+     tournaments/ladder/view.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - added ladder-specific properties
+     - absolute challenge-range = challenge allowed for X positions above own position
+     - added editor for ladder-specific props with preview
+     - show ladder-specific props in ladder-view
+     - show which users can be challenged for current user in ladder-view
+     - Wizard: insert TournamentLadderProps to create new DGS-ladder
+       with default 10 for absolute challenge-range
+-----------
+-- added table for ladder tournament properties
+CREATE TABLE TournamentLadderProps (
+   tid int(11) NOT NULL,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL default '',
+   ChallengeRangeAbsolute smallint unsigned NOT NULL DEFAULT '0',
+   PRIMARY KEY (tid)
+) ENGINE=MyISAM;
+-----------
+
+   * include/std_classes.php (ListIterator.resetListIterator):
+   - added function to reset iterating of ListIterator
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder):
+   - added non-DB field AllowChallenge that is true if challenge is allowed in user-context
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.isNumberOrEmpty):
+   - added arg for number-check to check for negative numbers
+
+   * tournaments/edit_properties.php, tournaments/edit_round.php,
+     tournaments/edit_rules.php, tournaments/edit_tournament.php:
+   - fix array-merging of error-list with += which only works ok on hashes
+   - replace persist() using additional query by direct update(), wizard creates needed tables
+
 2010-01-28 juga
 
    * admin_password.php, NEWS:
