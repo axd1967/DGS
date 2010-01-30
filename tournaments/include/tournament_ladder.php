@@ -60,6 +60,10 @@ class TournamentLadder
    var $Rank;
    var $BestRank;
 
+   // non-DB fields
+
+   var $AllowChallenge;
+
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0 )
    {
@@ -70,6 +74,8 @@ class TournamentLadder
       $this->RankChanged = (int)$rank_changed;
       $this->Rank = $rank;
       $this->BestRank = $bestrank;
+      // non-DB fields
+      $this->AllowChallenge = false;
    }
 
    function to_string()
