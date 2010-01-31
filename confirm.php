@@ -141,7 +141,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game;
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 );
 
    $may_resign_game = $my_game && $is_running_game;
    if( $action == 'resign' )
