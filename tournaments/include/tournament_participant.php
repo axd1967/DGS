@@ -25,6 +25,7 @@ require_once 'include/utilities.php';
 require_once 'include/db_classes.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament.php';
 
  /*!
   * \file tournament_participant.php
@@ -49,7 +50,7 @@ $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
       FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'Rating', 'StartRound',
-      FTYPE_TEXT, 'AuthToken', 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
+      FTYPE_TEXT, 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
       FTYPE_DATE, 'Created', 'Lastchanged',
       FTYPE_ENUM, 'Status'
    );
@@ -64,7 +65,6 @@ class TournamentParticipant
    var $Flags;
    var $Rating; // -OUT_OF_RATING | valid-rating
    var $StartRound;
-   var $AuthToken;
    var $Created;
    var $Lastchanged;
    var $ChangedBy;
@@ -75,9 +75,8 @@ class TournamentParticipant
 
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    function TournamentParticipant( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
-                  $rating=NULL, $start_round=1, $auth_token='', $created=0,
-                  $lastchanged=0, $changed_by='', $comment='', $notes='', $user_message='',
-                  $admin_message='' )
+         $rating=NULL, $start_round=1, $created=0, $lastchanged=0, $changed_by='',
+         $comment='', $notes='', $user_message='', $admin_message='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -87,7 +86,6 @@ class TournamentParticipant
       $this->Flags = (int)$flags;
       $this->setRating( $rating );
       $this->setStartRound( $start_round );
-      $this->AuthToken = $auth_token;
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
@@ -129,7 +127,6 @@ class TournamentParticipant
             . sprintf( ",Flags=[0x%x]", $this->Flags)
             . ", Rating=[{$this->Rating}]"
             . ", StartRound=[{$this->StartRound}]"
-            . ", AuthToken=[{$this->AuthToken}]"
             . ", Created=[{$this->Created}]"
             . ", Lastchanged=[{$this->Lastchanged}]"
             . ", ChangedBy=[{$this->ChangedBy}]"
@@ -138,12 +135,6 @@ class TournamentParticipant
             . ", UserMessage=[{$this->UserMessage}]"
             . ", AdminMessage=[{$this->AdminMessage}]"
          ;
-   }
-
-   /*! \brief Returns true if TP will need to enter a rating to fulfill T-restrictions. */
-   function need_rating() //TODO used?
-   {
-      return !$this->User->hasRating();
    }
 
    function calc_init_status( $rating_use_mode )
@@ -254,7 +245,6 @@ class TournamentParticipant
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Rating', $this->Rating );
       $data->set_value( 'StartRound', $this->StartRound );
-      $data->set_value( 'AuthToken', $this->AuthToken );
       $data->set_value( 'ID', $this->ID );
       if( $withCreated )
          $data->set_value( 'Created', $this->Created );
@@ -326,7 +316,6 @@ class TournamentParticipant
             @$row['Flags'],
             @$row['Rating'],
             @$row['StartRound'],
-            @$row['AuthToken'],
             @$row['X_Created'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],

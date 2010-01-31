@@ -1617,3 +1617,8 @@ CREATE TABLE TournamentGames (
 ) ENGINE=MyISAM;
 
 
+-- [unused] removed unused field
+ALTER TABLE TournamentParticipant
+   DROP COLUMN AuthToken ;
+
+
