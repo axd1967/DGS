@@ -71,9 +71,9 @@ define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restri
 
 // ---------- Tournament Games Stuff ------------------------------
 
-define('TG_STATUS_APPLY',     'INIT');
-define('TG_STATUS_REGISTER',  'PLAY');
-define('TG_STATUS_INVITE',    'DONE');
+define('TG_STATUS_INIT', 'INIT');
+define('TG_STATUS_PLAY', 'PLAY');
+define('TG_STATUS_DONE', 'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|DONE');
 
 ?>
