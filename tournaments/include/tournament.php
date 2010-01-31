@@ -257,24 +257,33 @@ class Tournament
       }
    }
 
-   /*! \brief Returns info about tournament with linked ID, scope, type and title. */
+   /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..3. */
    function build_info( $version=1 )
    {
-      if( $version == 1 )
+      if( $version == 1 ) // ID-link (scope type) [title]
          return anchor( "view_tournament.php?tid=".$this->ID, $this->ID )
-            . sprintf( '%s(%s %s)',
-                       SMALL_SPACING,
+            . SMALL_SPACING
+            . sprintf( '(%s %s)',
                        Tournament::getScopeText($this->Scope),
                        Tournament::getTypeText($this->Type) )
             . SMALL_SPACING . '[' . make_html_safe( $this->Title, true ) . ']';
-      else
+
+      if( $version == 2 ) // (scope type) Tournament #ID - title
          return sprintf( '(%s %s) %s #%s - %s',
                          Tournament::getScopeText($this->Scope),
                          Tournament::getTypeText($this->Type),
                          T_('Tournament'),
                          $this->ID,
-                         //SMALL_SPACING,
                          make_html_safe( $this->Title, true) );
+
+      //if( $version == 3 )
+      return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
+                      Tournament::getScopeText($this->Scope),
+                      Tournament::getTypeText($this->Type),
+                      T_('Tournament'),
+                      $this->ID,
+                      T_('Status#tourney'),
+                      Tournament::getStatusText($this->Status) );
    }
 
    function build_role_info()

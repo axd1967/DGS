@@ -44,6 +44,10 @@ require_once( "include/rating.php" );
 if( ENA_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
+if( ALLOW_TOURNAMENTS ) {
+   require_once 'tournaments/include/tournament.php';
+}
+
 
 // abbreviations used to reduce file size
 function get_alt_arg( $n1, $n2)
@@ -124,6 +128,13 @@ function get_alt_arg( $n1, $n2)
    if( $Status == 'INVITED' )
       error('unknown_game', "game.check.invited($gid)");
 
+   $tourney = null;
+   if( $tid > 0 )
+   {
+      $tourney = Tournament::load_tournament($tid);
+      if( is_null($tourney) )
+         error('unknown_tournament', "game.find_tournament($gid,$tid)");
+   }
 
    if( @$_REQUEST['movechange'] )
       $move = (int)@$_REQUEST['gotomove'];
@@ -178,7 +189,7 @@ function get_alt_arg( $n1, $n2)
    $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game;
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 );
 
    $may_resign_game = ( $action == 'choose_move') || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
 
@@ -208,7 +219,7 @@ function get_alt_arg( $n1, $n2)
       }
    }
 
-   $may_add_time = $my_game && GameAddTime::allow_add_time_opponent( $game_row, $my_id);
+   $may_add_time = $my_game && GameAddTime::allow_add_time_opponent($game_row, $my_id);
 
 
    $no_marked_dead = ( $Status == 'PLAY' || $Status == 'PASS' ||
@@ -339,7 +350,7 @@ function get_alt_arg( $n1, $n2)
             break;
 
          case 'delete': //for validation
-            if( !$may_add_time )
+            if( !$may_del_game )
                error('invalid_action',"game.delete.check_status($gid,$Status,$my_id)");
 
             $validation_step = true;
@@ -630,7 +641,7 @@ function get_alt_arg( $n1, $n2)
    echo "\n</FORM>";
 
    echo "\n<HR>";
-   draw_game_info($game_row, $TheBoard);
+   draw_game_info($game_row, $TheBoard, $tourney);
 /*
    $txt= draw_board_info($TheBoard);
    if( $txt )
@@ -938,7 +949,7 @@ function draw_add_time( $game_row, $colorToMove )
 ';
 } //draw_add_time
 
-function draw_game_info(&$game_row, &$board)
+function draw_game_info( &$game_row, &$board, $tourney )
 {
    global $base_path;
 
@@ -1005,6 +1016,19 @@ function draw_game_info(&$game_row, &$board)
          "</td>\n</tr>\n";
    }
 
+
+   //tournament rows
+   if( !is_null($tourney) )
+   {
+      echo "<tr id=\"gameRules\">\n"
+         , '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n"
+         , "<td colspan=\"", ($cols-1), "\">", $tourney->build_info(3), "</td>\n"
+         , "</tr>\n"
+         , "<tr id=\"gameRules\">\n"
+         , "<td></td>\n"
+         , "<td colspan=\"$cols\">", T_('Title#tourney'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
+         , "</tr>\n";
+   }
 
    //game rows
    $sep = ',' . SMALL_SPACING;
