@@ -139,6 +139,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
    if( $finished && !$all ) //FU
       $gfilter->add_filter(41, 'Boolean', 'Games.Flags>0 AND (Games.Flags & 2)', true );
+   $gfilter->add_filter(32, 'Boolean', 'tid>0', true,
+         array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
    $gfilter->add_filter( 6, 'Numeric', 'Size', true,
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 7, 'Numeric', 'Handicap', true,
@@ -371,7 +373,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(32, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'Image', 0 ); // game-info
+   $gtable->add_tablehead(32, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'ImagesLeft', 0 ); // game-info
    if( $finished && !$all ) //FU
       $gtable->add_tablehead(41, new TableHead( $gcomm_str, 'images/game_comment.gif', $gcomm_str), 'Image', 0 ); // game-comment
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
@@ -708,7 +710,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[32] )
-         $grow_strings[32] = echo_image_gameinfo($ID);
+         $grow_strings[32] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid,true);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
       if( $observe_all )

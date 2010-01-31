@@ -940,6 +940,10 @@ table.Table td.Image {
    text-align: center;
 }
 
+table.Table td.ImagesLeft {
+   text-align: left;
+}
+
 table.Table td.MsgDir {
    text-align: right;
 }

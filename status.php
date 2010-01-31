@@ -144,7 +144,7 @@ if( (string)$folder_nr_querystr != '' )
    // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(15, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'Image', 0 );
+   $gtable->add_tablehead(15, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'ImagesLeft', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
       $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
@@ -292,7 +292,7 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
          }
          if( $gtable->Is_Column_Displayed[15] )
-            $grow_strings[15] = echo_image_gameinfo($ID);
+            $grow_strings[15] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid, true);
          if( $gtable->Is_Column_Displayed[17] )
             $grow_strings[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
 
