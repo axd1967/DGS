@@ -24,6 +24,71 @@ ChangeLog
 
 2010-01-30 juga
 
+-----------
+-- [field-size] COL Games.Score : dec(7,1) -> dec(5,1)
+-- [cleanup] COL Games.Score : migrate MySQL4 -> MySQL5 interal storage
+-- following must be 0
+SELECT COUNT(*) FROM Games WHERE Score NOT BETWEEN -2000 AND 2000 ;
+-- compare Data_length for table before & after field-migration
+SHOW TABLE STATUS LIKE 'Games' ;
+-- migrate MySQL4 (decimal string-type) -> MySQL5 (decimal byte-type)
+ALTER TABLE Games
+   ADD MIGR_Score decimal(5,1) NOT NULL DEFAULT '0.0' AFTER Score ;
+UPDATE Games
+   SET MIGR_Score = Score ;
+ALTER TABLE Games
+   DROP COLUMN Score ;
+ALTER TABLE Games
+   CHANGE MIGR_Score Score decimal(5,1) NOT NULL DEFAULT '0.0' ;
+ALTER TABLE Games
+  ADD KEY Score (Score) ;
+SHOW TABLE STATUS LIKE 'Games' ;
+
+-- [field-size] COL Games.Komi : dec(6,1) -> dec(4,1)
+-- [cleanup] COL Games.Komi : migrate MySQL4 -> MySQL5 interal storage
+-- following must be 0
+SELECT COUNT(*) FROM Games WHERE Komi NOT BETWEEN -200 AND 200 ;
+-- compare Data_length for table before & after field-migration
+SHOW TABLE STATUS LIKE 'Games' ;
+-- migrate MySQL4 (decimal string-type) -> MySQL5 (decimal byte-type)
+ALTER TABLE Games
+   ADD MIGR_Komi decimal(4,1) NOT NULL DEFAULT '6.5' AFTER Komi ;
+UPDATE Games
+   SET MIGR_Komi = Komi ;
+ALTER TABLE Games
+   DROP COLUMN Komi ;
+ALTER TABLE Games
+   CHANGE MIGR_Komi Komi decimal(4,1) NOT NULL DEFAULT '6.5' ;
+SHOW TABLE STATUS LIKE 'Games' ;
+
+-- [field-size] COL Waitingroom.Komi : dec(6,1) -> dec(4,1)
+-- [cleanup] COL Waitingroom.Komi : migrate MySQL4 -> MySQL5 interal storage
+-- following must be 0
+SELECT COUNT(*) FROM Waitingroom WHERE Komi NOT BETWEEN -200 AND 200 ;
+-- compare Data_length for table before & after field-migration
+SHOW TABLE STATUS LIKE 'Waitingroom' ;
+-- migrate MySQL4 (decimal string-type) -> MySQL5 (decimal byte-type)
+ALTER TABLE Waitingroom
+   ADD MIGR_Komi decimal(4,1) NOT NULL DEFAULT '6.5' AFTER Komi ;
+UPDATE Waitingroom
+   SET MIGR_Komi = Komi ;
+ALTER TABLE Waitingroom
+   DROP COLUMN Komi ;
+ALTER TABLE Waitingroom
+   CHANGE MIGR_Komi Komi decimal(4,1) NOT NULL DEFAULT '6.5' ;
+SHOW TABLE STATUS LIKE 'Waitingroom' ;
+
+-- [field-size] COL Waitingroom.AdjKomi : dec(6,1) -> dec(4,1)
+ALTER TABLE Waitingroom
+   CHANGE AdjKomi AdjKomi decimal(4,1) NOT NULL default '0.0' ;
+
+-- [field-size] COL TournamentRules.Komi : dec(6,1) -> dec(4,1)
+-- [field-size] COL TournamentRules.AdjKomi : dec(6,1) -> dec(4,1)
+ALTER TABLE TournamentRules
+   CHANGE Komi Komi decimal(4,1) NOT NULL default '6.5',
+   CHANGE AdjKomi AdjKomi decimal(4,1) NOT NULL default '0.0' ;
+-----------
+
    * include/error_codes.php (ErrorCode.init),
      tournaments/edit_round.php, tournaments/ladder/challenge.php:
    - die with new error 'tournament_wrong_status' if on wrong tourney-status
