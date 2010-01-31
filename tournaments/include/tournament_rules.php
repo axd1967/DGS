@@ -21,9 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once( 'include/db_classes.php' );
-require_once( 'include/game_functions.php' );
-require_once( 'include/error_codes.php' );
+require_once 'include/db_classes.php';
+require_once 'include/error_codes.php';
+require_once 'include/game_functions.php';
+require_once 'include/make_game.php';
+require_once 'include/rating.php';
+require_once 'tournaments/include/tournament_helper.php';
 
  /*!
   * \file tournament_rules.php
@@ -224,6 +227,34 @@ class TournamentRules
       return $data;
    }
 
+   /*! \brief Converts this TournamentRules-object to hashmap to be used as game-row to create game. */
+   function convertTournamentRules_to_GameRow()
+   {
+      // NOTE: keep "sync'ed" with add_to_waitingroom.php
+
+      $grow = array();
+      $grow['double_gid'] = 0;
+      $grow['Size'] = limit( (int)$this->Size, MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
+
+      $grow['Handicap'] = (int)$this->Handicap;
+      $grow['AdjHandicap'] = (int)$this->AdjHandicap;
+      $grow['MinHandicap'] = (int)$this->MinHandicap;
+      $grow['MaxHandicap'] = min( MAX_HANDICAP, max( 0, (int)$this->MaxHandicap ));
+      $grow['StdHandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
+      $grow['Komi'] = (int)$this->Komi;
+      $grow['AdjKomi'] = (int)$this->AdjKomi;
+      $grow['JigoMode'] = (int)$this->JigoMode;
+
+      $grow['Byotype'] = $this->Byotype;
+      $grow['Maintime'] = $this->Maintime;
+      $grow['Byotime'] = $this->Byotime;
+      $grow['Byoperiods'] = $this->Byoperiods;
+
+      $grow['WeekendClock'] = ($this->WeekendClock) ? 'Y' : 'N';
+      $grow['Rated'] = ($this->Rated) ? 'Y' : 'N';
+      return $grow;
+   }
+
    /*!
     * \brief Converts this TournamentRules-object to hashmap to be used as
     *        form-value-hash for tournaments/edit_rules.php.
@@ -250,7 +281,7 @@ class TournamentRules
       $vars['adj_handicap'] = (int)$this->AdjHandicap;
       $vars['min_handicap'] = (int)$this->MinHandicap;
       $vars['max_handicap'] = min( MAX_HANDICAP, max( 0, (int)$this->MaxHandicap ));
-      $vars['stdhandicap'] = (bool)$this->StdHandicap;
+      $vars['stdhandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
 
       $vars['byoyomitype'] = $this->Byotype;
       if( $this->Byotype == BYOTYPE_JAPANESE )
@@ -412,17 +443,71 @@ class TournamentRules
    function needsCalculatedHandicap()
    {
       return ( $this->Handicaptype == TRULE_HANDITYPE_CONV
-            || $this->Handicaptype == TRULE_HANDITYPE_PROPER
-         );
+            || $this->Handicaptype == TRULE_HANDITYPE_PROPER );
    }
 
    /*! \brief Returns true, if komi needs to be calculated for this ruleset. */
    function needsCalculatedKomi()
    {
       return ( $this->Handicaptype == TRULE_HANDITYPE_CONV
-            || $this->Handicaptype == TRULE_HANDITYPE_PROPER
-         );
+            || $this->Handicaptype == TRULE_HANDITYPE_PROPER );
    }
+
+   /*!
+    * \brief Creates normal game and updates all game-stuff.
+    * \param $user_ch User-object of challenger
+    * \param $user_df User-object of defender
+    */
+   function create_game( $tprops_RatingUseMode, $user_ch, $user_df )
+   {
+      // challenger & defender rating
+      $ch_uid = $user_ch->ID;
+      $ch_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_ch, $tprops_RatingUseMode );
+      $user_ch->urow['Rating2'] = $ch_rating;
+
+      $df_uid = $user_df->ID;
+      $df_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_df, $tprops_RatingUseMode );
+      $user_df->urow['Rating2'] = $df_rating;
+
+      $game_row = $this->convertTournamentRules_to_GameRow();
+      $double = false;
+      switch( (string)$this->Handicaptype )
+      {
+         case TRULE_HANDITYPE_CONV:
+            list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black ) =
+               suggest_conventional( $ch_rating, $df_rating, $this->Size );
+            break;
+
+         case TRULE_HANDITYPE_PROPER:
+            list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black ) =
+               suggest_proper( $ch_rating, $df_rating, $this->Size );
+            break;
+
+         case TRULE_HANDITYPE_NIGIRI:
+            $game_row['Handicap'] = 0;
+            mt_srand((double) microtime() * 1000000);
+            $ch_is_black = mt_rand(0,1);
+            break;
+
+         default:
+            error('not_implemented', "TournamentRules.create_game.htype_unknown"
+               . "({$this->tid},$ch_uid,$df_uid,{$this->Handicaptype})");
+            break;
+      }
+
+      if( $ch_is_black )
+         $gid = create_game($user_ch->urow, $user_df->urow, $game_row);
+      else
+         $gid = create_game($user_df->urow, $user_ch->urow, $game_row);
+
+      db_query( "TournamentRules.create_game.update_players({$this->tid},$ch_uid,$df_uid)",
+         "UPDATE Players SET Running=Running+1" .
+            ( $this->Rated ? ", RatingStatus='".RATING_RATED."'" : '' ) .
+         " WHERE ID IN ($ch_uid,$df_uid) LIMIT 2" );
+
+      return $gid;
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -483,7 +568,7 @@ class TournamentRules
          $qsql = TournamentRules::build_query_sql( $tid );
          $qsql->add_part( SQLP_LIMIT, '1' );
          $qsql->add_part( SQLP_ORDER, 'TR.ID DESC' );
-         $row = mysql_single_fetch( "TournamentRules.load_tournament_rule($tid)",
+         $row = mysql_single_fetch( "TournamentRules::load_tournament_rule($tid)",
             $qsql->get_select() );
          if( $row )
             $result = TournamentRules::new_from_row( $row );
@@ -497,7 +582,7 @@ class TournamentRules
       $qsql = TournamentRules::build_query_sql( $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentRules.load_tournament_rules", $query );
+      $result = db_query( "TournamentRules::load_tournament_rules($tid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
@@ -554,7 +639,7 @@ class TournamentRules
       if( is_null($type) )
          return $ARR_GLOBALS_TOURNAMENT_RULES[$key];
       if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key][$type]) )
-         error('invalid_args', "TournamentRules.getHandicaptypeText($type)");
+         error('invalid_args', "TournamentRules::getHandicaptypeText($type)");
       return $ARR_GLOBALS_TOURNAMENT_RULES[$key][$type];
    }
 
