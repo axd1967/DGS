@@ -34,6 +34,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page
+      * Delete-Game and Add-Time forbidden for Tournament game
 
    * Game page:
       * Delete game on opponents turn (within first 10 moves)
@@ -43,6 +44,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Show scoring information in scoring step and for finished games
       * Show and notify if there are hidden game comments (<image game_comment.gif>) for a finished game
       * Show hint to close all boundaries before passing
+      * Show tournament info for tournament-game
 
    * Game info page (new):
       * Access to initial invitation message for game
@@ -54,6 +56,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Show full time info of game for each player:
          * Full remaining time including extra-time
          * Clock status (stopped/running) with reason why
+      * Show tournament info for tournament-game
 
    * Game settings:
       * General:
@@ -101,6 +104,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added column with link to game info page on all game lists
       * Added searchable column with indicator if there are hidden game comments for my finished games
       * Show Weekendclock for all view-modes
+      * Show icon for Tournament-games (<image tourney.gif>)
 
    * <home userinfo.php>User info</home>:
       * Show a users timezone, local time and night start
@@ -148,6 +152,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * remaining time
       * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
+      * Show icon for Tournament-games (<image tourney.gif>)
 
    * <home forum/index.php>Forum pages reworked</home>:
       * Show if there are NEW posts in main-menu, forum-list and thread-list

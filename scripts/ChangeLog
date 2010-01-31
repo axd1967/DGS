@@ -24,6 +24,42 @@ ChangeLog
 
 2010-01-31 juga
 
+   * tournaments/include/tournament.php (Tournament.build_info),
+     include/game_functions.php (class GameAddTime.add_time, ~.allow_add_time_opponent),
+     scripts/tests/GameAddTimeTest.php, confirm.php,
+     game.php (draw_game_info), NEWS:
+   - forbid adding-time and game-deletion for tournament-games
+   - show tournament-info with links in game-info-box:
+     scope, type, tourney-ID, status, title
+   - bugfixes, minor changes
+
+   * gameinfo.php, NEWS:
+   - added tournament-info with links: tourney-ID, scope, type, title, status, rounds
+   - added game-info link at Game-ID to refresh page
+
+   * show_games.php, status.php, skins/dragon/screen.css, NEWS:
+   - show tourney-icon for tournament-games linked to tournament-view
+   - Games-page: added filter to search for tournament-games
+
+   * include/gui_functions.php (echo_image_gameinfo, echo_image_tournament_info):
+   - show tourney-icon for tournament-games with or without link to tournament-view
+
+   * people.php:
+   - added tourney-icon from
+     http://www.iconarchive.com/show/sport-icons-by-icons-land/Trophy-Gold-icon.html
+
+   * tournaments/include/tournament_rules.php (TournamentRules.create_game),
+     include/make_game.php (create_game),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - set Games.tid on creating game for tournament-reference
+-----------
+-- add tournament-reference in Games-table to tournament
+ALTER TABLE Games
+   ADD tid int NOT NULL DEFAULT '0' AFTER ID ;
+ALTER TABLE Games
+   ADD KEY tid (tid) ;
+-----------
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.new_tournament_game),
      tournaments/include/tournament_ladder_props.php (TournamentLadderProps.make_ladder_info,
        ~.calc_highest_challenge_rank, ~.verify_challenge),
