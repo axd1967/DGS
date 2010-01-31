@@ -74,9 +74,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $errors = $tstatus->check_view_status( TournamentLadder::get_view_ladder_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
 
+   $tl_user = null;
    if( $allow_view )
    {
-      if( $admin_mode && @$_REQUEST['ta_updrank'] )
+      if( $admin_mode && @$_REQUEST['ta_updrank'] ) // move rank (by TD)
       {
          $prep_errors = array();
          $tladder = prepare_update_rank( $tid, $rid, $new_rank, $prep_errors );
@@ -126,6 +127,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
       $iterator = new ListIterator( 'Tournament.ladder_view',
          $ltable->get_query(), 'ORDER BY Rank ASC' );
+      $iterator->addIndex( 'Rank', 'uid' );
       $iterator->addQuerySQLMerge( new QuerySQL(
             SQLP_FIELDS, 'TLP.ID AS TLP_ID', 'TLP.Name AS TLP_Name', 'TLP.Handle AS TLP_Handle',
                          'TLP.Country AS TLP_Country', 'TLP.Rating2 AS TLP_Rating2',
@@ -137,7 +139,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
 
       // add ladder-info (challenge-range)
-      $tl_props->make_ladder_info( $iterator, $my_id );
+      $tl_user = $tl_props->make_ladder( $iterator, $my_id );
 
       if( $admin_mode )
          $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
@@ -148,7 +150,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h2 class=Header>", $tourney->build_info(2), "</h2>\n";
 
-   $tl_user = null;
    if( $allow_view )
    {
       $tform = $ltable->make_table_form();
@@ -205,10 +206,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[11] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
 
          if( $is_mine )
-         {
-            $tl_user = $tl;
             $row_str['extra_class'] = 'TourneyUser';
-         }
          $ltable->add_row( $row_str );
       }
    }//allow-view

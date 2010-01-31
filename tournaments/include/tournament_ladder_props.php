@@ -140,18 +140,12 @@ class TournamentLadderProps
 
    /*!
     * \brief Enhances ladder with additional info/data (Challenge-range).
+    * \param $iterator ListIterator on TournamentLadder with iterator-Index on Rank & uid
     * \return TournamentLadder of given user or null if not in ladder.
     */
-   function make_ladder_info( &$iterator, $uid )
+   function make_ladder( &$iterator, $uid )
    {
-      $tl_user = null;
-      while( is_null($tl_user) && list(,$arr_item) = $iterator->getListIterator() )
-      {
-         $tladder = $arr_item[0];
-         if( $tladder->uid == $uid )
-            $tl_user = $tladder;
-      }
-      $iterator->resetListIterator();
+      $tl_user = $iterator->getIndexValue( 'uid', $uid, 0 );
       if( is_null($tl_user) )
          return null;
 
@@ -159,13 +153,12 @@ class TournamentLadderProps
       $user_rank = $tl_user->Rank;
       $high_rank = $this->calc_highest_challenge_rank( $tl_user->Rank );
 
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      for( $pos=$user_rank; $pos >= $high_rank; $pos-- )
       {
-         list( $tladder, $orow ) = $arr_item;
+         $tladder = $iterator->getIndexValue( 'Rank', $pos, 0 );
          if( $tladder->Rank >= $high_rank && $tladder->Rank < $user_rank )
             $tladder->AllowChallenge = true;
       }
-      $iterator->resetListIterator();
 
       return $tl_user;
    }
