@@ -57,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_rules.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
-   //TODO(later) if Rated=Yes, check that ALL users have a rating
+   //TODO(later) if Rated=Yes, check here that ALL existing TPs have a user-rating (can happen by admin-operation)
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )

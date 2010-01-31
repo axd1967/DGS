@@ -191,9 +191,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // ------------- Section Menu
 
    $sectmenu = array();
-   if( $tourney->Type == TOURNEY_TYPE_LADDER ) //TODO only show on certain stati
+   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   {
       if( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
          $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+   }
 
    make_menu( $sectmenu, false);
 
@@ -203,7 +205,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    echo "<hr>\n", '<a name="result">', "\n";
    section( 'tournament', T_('Results#T_view') );
 
-   /* TODO
+   /*
    echo
       "[TODO] Results (Show Winners, Show intermediate results (link))",
       "\n";
