@@ -48,6 +48,10 @@ class User
    var $GamesFinished;
    var $AdminOptions;
 
+   // other DB-fields
+
+   var $urow;
+
    /*! \brief Constructs a ForumUser with specified args. */
    function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
                   $rating_status=RATING_NONE, $games_rated=0, $games_finished=0, $admin_opts=0 )
@@ -63,6 +67,8 @@ class User
       $this->GamesRated = (int)$games_rated;
       $this->GamesFinished = (int)$games_finished;
       $this->AdminOptions = (int)$admin_opts;
+      // other DB-fields
+      $this->urow = null;
    }
 
    function setRating( $rating )
@@ -113,6 +119,7 @@ class User
          . ", GamesRated=[{$this->GamesRated}]"
          . ", GamesFinished=[{$this->GamesFinished}]"
          . sprintf( ", AdminOptions=[0x%x]", $this->AdminOptions )
+         . sprintf( ", urow={%s}", print_r($this->urow, true) )
          ;
    }
 
@@ -163,6 +170,7 @@ class User
             @$row[$prefix.'Finished'],
             @$row[$prefix.'AdminOptions']
          );
+      $user->urow = $row;
       return $user;
    }
 
