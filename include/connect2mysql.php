@@ -180,21 +180,31 @@ function connect2mysql($no_errors=false)
    return false;
 } //connect2mysql
 
+
+global $level_ignore_user_abort; //PHP5
+$level_ignore_user_abort = 0;
+
 // used for multi-table transaction-start (no real DB-TA, but at least not broken by user-abort)
+// nested call keeps first state
 function ta_begin()
 {
-   global $old_ignore_user_abort;
-   $old_ignore_user_abort = @ignore_user_abort(true);
+   global $old_ignore_user_abort, $level_ignore_user_abort;
+   if( $level_ignore_user_abort < 0 )
+      $level_ignore_user_abort = 0;
+   if( $level_ignore_user_abort++ == 0 )
+      $old_ignore_user_abort = @ignore_user_abort(true);
    return $old_ignore_user_abort;
 }
 
 // used for multi-table transaction-end (no real DB-TA, but at least not broken by user-abort)
+// nested call keeps first state
 function ta_end( $new_ignore_user_abort=null )
 {
-   global $old_ignore_user_abort;
+   global $old_ignore_user_abort, $level_ignore_user_abort;
    if( is_null($new_ignore_user_abort) )
       $new_ignore_user_abort = $old_ignore_user_abort;
-   @ignore_user_abort((bool)$new_ignore_user_abort);
+   if( --$level_ignore_user_abort <= 0 )
+      @ignore_user_abort((bool)$new_ignore_user_abort);
    $old_ignore_user_abort = $new_ignore_user_abort;
 }
 
