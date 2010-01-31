@@ -22,8 +22,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2010-01-30 juga
+2010-01-31 juga
 
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - db-cleanup field-size DECIMAL-type fields
+   - db-cleanup for DECIMAL-type fields for which internal representation
+     changed for MySQL-upgrade from v4 to v5: string -> byte
 -----------
 -- [field-size] COL Games.Score : dec(7,1) -> dec(5,1)
 -- [cleanup] COL Games.Score : migrate MySQL4 -> MySQL5 interal storage
@@ -88,6 +92,8 @@ ALTER TABLE TournamentRules
    CHANGE Komi Komi decimal(4,1) NOT NULL default '6.5',
    CHANGE AdjKomi AdjKomi decimal(4,1) NOT NULL default '0.0' ;
 -----------
+
+2010-01-30 juga
 
    * include/error_codes.php (ErrorCode.init),
      tournaments/edit_round.php, tournaments/ladder/challenge.php:
