@@ -470,6 +470,8 @@ class TournamentRules
       $user_df->urow['Rating2'] = $df_rating;
 
       $game_row = $this->convertTournamentRules_to_GameRow();
+      $game_row['tid'] = $this->tid;
+
       $double = false;
       switch( (string)$this->Handicaptype )
       {

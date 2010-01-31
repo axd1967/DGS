@@ -1622,3 +1622,10 @@ ALTER TABLE TournamentParticipant
    DROP COLUMN AuthToken ;
 
 
+-- add tournament-reference in Games-table to tournament
+ALTER TABLE Games
+   ADD tid int NOT NULL DEFAULT '0' AFTER ID ;
+ALTER TABLE Games
+   ADD KEY tid (tid) ;
+
+

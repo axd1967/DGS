@@ -200,6 +200,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 // Creates a running game, black/white_row are prefilled with chosen players
 // always return a valid game ID from the database, else call error()
 // NOTE: game_info_row['double_gid'] can be set to write reference to twin double-game
+// NOTE: game_info_row['tid'] = tournament-id
 function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 {
    global $NOW;
@@ -216,6 +217,12 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
          error('mysql_start_game', "create_game.wrong_players($gid)");
       }
    }
+
+   if( isset($game_info_row['tid']) ) // tournament-id
+      $tid = (int)$game_info_row['tid'];
+   else
+      $game_info_row['tid'] = $tid = 0;
+   if( $tid < 0 ) $tid = 0;
 
    $rating_black = $black_row["Rating2"];
    if( !is_numeric($rating_black) )
@@ -288,6 +295,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       $game_info_row, $col_to_move, $last_ticks, true/*new-game*/ );
 
    $set_query =
+      "tid=$tid, " .
       "DoubleGame_ID=$double_gid, " .
       "Black_ID=" . $black_row["ID"] . ", " .
       "White_ID=" . $white_row["ID"] . ", " .
