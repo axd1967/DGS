@@ -84,7 +84,7 @@ require_once( "include/contacts.php" );
    $opponent_row = mysql_single_fetch('join_waitingroom_game.find_players',
          "SELECT ID,Name,Handle," .
          "Rating2,RatingStatus,ClockUsed,OnVacation " .
-         "FROM Players WHERE ID=$opponent_ID");
+         "FROM Players WHERE ID=$opponent_ID LIMIT 1");
 
    if( !$opponent_row )
       error('waitingroom_game_not_found', "join_waitingroom_game.find_players.opp($opponent_ID)");
