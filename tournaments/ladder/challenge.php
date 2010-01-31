@@ -24,6 +24,8 @@ require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
+require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
@@ -84,19 +86,36 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    else
       $user_df = User::load_user( $tladder_df->uid );
 
-   //TODO check if challenge is valid
-   //$tl_props->verify_challenge( $tladder_ch, $tladder_df );
+   // check if challenge is valid
+   if( !is_null($tladder_ch) && !is_null($tladder_df) )
+   {
+      $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
+      if( is_null($tl_props) )
+         error('bad_tournament', "Tournament.ladder.challenge.find_lprops($tid)");
+
+      $challenge_errors = $tl_props->verify_challenge( $tladder_ch, $tladder_df );
+      $errors = array_merge( $errors, $challenge_errors );
+   }
 
 
    // ---------- Process actions ------------------------------------------------
 
    if( @$_REQUEST['confirm'] && !is_null($tladder_ch) && !is_null($tladder_df) && count($errors) == 0 ) // confirm challange
    {
-      //TODO schedule T-game
-      error('not_implemented');
-      $sys_msg = urlencode( T_('Tournament game scheduled!#tourney') );
-      //TODO later jump to T-games
-      jump_to("tournaments/view_tournament.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
+      ta_begin();
+      {//HOT-section to start T-game
+         $gid = TournamentHelper::create_game_from_tournament_rules( $tid, $user_ch, $user_df );
+
+         $tg = TournamentLadder::new_tournament_game( $tid, $tladder_ch, $tladder_df );
+         $tg->gid = $gid;
+         $tg->setStatus( TG_STATUS_PLAY );
+         $tg->StartTime = $NOW;
+         $tg->insert();
+      }
+      ta_end();
+
+      $sys_msg = urlencode( T_('Tournament game started!#tourney') );
+      jump_to("game.php?gid=$gid".URI_AMP."sysmsg=$sys_msg");
    }
 
 
