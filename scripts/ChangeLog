@@ -22,6 +22,18 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-01 juga
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.make_ladder),
+     tournaments/ladder/view.php:
+   - added index on ListIterator with TournamentLadder-objects on Rank & uid
+     for optimized enhancing ladder-scans
+   - renamed method: make_ladder_info -> make_ladder
+
+   * include/std_classes.php (class ListIterator, ~.clearIndex, ~.addIndex,
+       ~.getIndexMap, ~.getIndexValue, ~.to_string, ~.addItem, ~.rescanIndex):
+   - added index on row-fields for ListIterator
+
 2010-01-31 juga
 
    * tournaments/include/tournament.php (Tournament.build_info),
@@ -45,7 +57,7 @@ ChangeLog
    - show tourney-icon for tournament-games with or without link to tournament-view
 
    * people.php:
-   - added tourney-icon from
+   - added credits for tourney-icon from
      http://www.iconarchive.com/show/sport-icons-by-icons-land/Trophy-Gold-icon.html
 
    * tournaments/include/tournament_rules.php (TournamentRules.create_game),
@@ -254,7 +266,7 @@ CREATE TABLE TournamentLadderProps (
 2010-01-28 juga
 
    * admin_password.php, NEWS:
-   - add 2nd form to show email (if existing) on admin-new-password page
+   - add 2nd HTML-form to show email (if existing) on admin-new-password page
 
    * tournaments/include/tournament_participant.php (TournamentParticipant.getLinkTextRegistration),
      include/classlib_user.php (class User, ~.to_string, ~.new_from_row),
