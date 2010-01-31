@@ -134,7 +134,7 @@ class TournamentLadderProps
          $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
       $arr_props[] = $arr;
 
-      return array( T_('The ladder is configured by the following properties') . ':', $arr_props );
+      return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }
 
    /*!
