@@ -226,11 +226,30 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
 }
 
 /*! \brief Returns image to game-info page for given game-id. */
-function echo_image_gameinfo( $gid )
+function echo_image_gameinfo( $gid, $with_sep=false )
 {
    global $base_path;
    $img_str = image( $base_path.'images/info.gif', T_('Game information'), null, 'class="InTextImage"');
-   return anchor( "gameinfo.php?gid=$gid", $img_str );
+   return ($with_sep ? ' ' : '' ) . anchor( "gameinfo.php?gid=$gid", $img_str );
+}
+
+/*! \brief Returns image to tournament-info page for given tournament-id. */
+function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
+{
+   if( $tid > 0 )
+   {
+      global $base_path;
+      $img_str = image( $base_path.'images/tourney.gif',
+                        ($img_only ? T_('Tournaments') : T_('Tournament info') . ' #' . $tid ),
+                        null, 'class="InTextImage"');
+      $str_sep = ($with_sep ? ' ' : '' );
+      if( $img_only )
+         return $str_sep . $img_str;
+      else
+         return $str_sep . anchor( "tournaments/view_tournament.php?tid=$tid", $img_str );
+   }
+   else
+      return '';
 }
 
 /*! \brief Returns image indicating that game have hidden game-comments for given game-id. */
