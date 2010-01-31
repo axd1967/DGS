@@ -101,7 +101,8 @@ class GameAddTime
          $gid = $this->game_row['ID'];
 
       if( !GameAddTime::allow_add_time_opponent( $this->game_row, $this->uid ) )
-         return "Conditions are not met to allow to add time by user [$this->uid] for game [$this->gid]";
+         return sprintf( T_('Conditions are not met to allow to add time by user [%s] for game [%s]'),
+                         $this->uid, $gid );
 
       // get opponents columns to update
       $oppcolor = ( $this->game_row['Black_ID'] == $this->uid ) ? 'White' : 'Black';
@@ -192,7 +193,8 @@ class GameAddTime
          return false;
 
       // must not be a tournament-game
-      //TODO if( $game_row['Tournament_ID'] != 0 ) return false;
+      if( $game_row['tid'] != 0 )
+         return false;
 
       // get opponents columns
       if( $game_row['Black_ID'] == $uid )
@@ -204,7 +206,6 @@ class GameAddTime
             + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(360,'days') )
          return false;
 
-      // TODO: might be denied, if declared as forbidden in waiting-room (by option)
       return true;
    }
 
@@ -215,7 +216,7 @@ class GameAddTime
     *
     *        Need the following fields set in game_row, and also the fields needed
     *        for NextGameOrder::make_timeout_date():
-    *           ID, Status, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID,
+    *           ID, tid, Status, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID,
     *           LastTicks, Moves, (Black/White)_ID/_Maintime/_Byotime/_Byoperiods
     * \param $uid user giving time to his opponent
     * \param $add_hours amount of hours to add to maintime of opponent,
