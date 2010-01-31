@@ -21,11 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'include/db_classes.php';
+require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
-require_once( 'include/db_classes.php' );
-require_once( 'include/std_functions.php' ); // for ADMIN_TOURNAMENT
-require_once( 'tournaments/include/tournament_utils.php' );
-require_once( 'tournaments/include/tournament_director.php' );
+require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_director.php';
 
  /*!
   * \file tournament.php

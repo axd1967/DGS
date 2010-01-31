@@ -25,7 +25,7 @@ require_once 'include/db_classes.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_participant.php';
 
  /*!
   * \file tournament_properties.php
