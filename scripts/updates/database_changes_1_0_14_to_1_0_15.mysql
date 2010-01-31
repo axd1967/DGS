@@ -1596,3 +1596,24 @@ ALTER TABLE TournamentRules
    CHANGE AdjKomi AdjKomi decimal(4,1) NOT NULL default '0.0' ;
 
 
+-- added table for tournament games
+CREATE TABLE TournamentGames (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   gid int NOT NULL DEFAULT '0',
+   Status enum('INIT','PLAY','DONE') NOT NULL DEFAULT 'INIT',
+   Flags smallint unsigned NOT NULL DEFAULT '0',
+   Lastchanged datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL DEFAULT '',
+   Challenger_uid int NOT NULL,
+   Challenger_rid int NOT NULL,
+   Defender_uid int NOT NULL,
+   Defender_rid int NOT NULL,
+   StartTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   EndTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   Score decimal(5,1) NOT NULL DEFAULT '0.0',
+   PRIMARY KEY (ID),
+   KEY tid (tid)
+) ENGINE=MyISAM;
+
+

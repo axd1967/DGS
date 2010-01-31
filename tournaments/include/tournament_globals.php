@@ -69,4 +69,11 @@ define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
 define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
 define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
 
+// ---------- Tournament Games Stuff ------------------------------
+
+define('TG_STATUS_APPLY',     'INIT');
+define('TG_STATUS_REGISTER',  'PLAY');
+define('TG_STATUS_INVITE',    'DONE');
+define('CHECK_TG_STATUS', 'INIT|PLAY|DONE');
+
 ?>

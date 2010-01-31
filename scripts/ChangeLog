@@ -24,6 +24,33 @@ ChangeLog
 
 2010-01-31 juga
 
+   * tournaments/include/tournament_games.php (class TournamentGames),
+     tournaments/include/tournament_globals.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added table for tournament games
+-----------
+-- added table for tournament games
+CREATE TABLE TournamentGames (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   gid int NOT NULL DEFAULT '0',
+   Status enum('INIT','PLAY','DONE') NOT NULL DEFAULT 'INIT',
+   Flags smallint unsigned NOT NULL DEFAULT '0',
+   Lastchanged datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL DEFAULT '',
+   Challenger_uid int NOT NULL,
+   Challenger_rid int NOT NULL,
+   Defender_uid int NOT NULL,
+   Defender_rid int NOT NULL,
+   StartTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   EndTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   Score decimal(5,1) NOT NULL DEFAULT '0.0',
+   PRIMARY KEY (ID),
+   KEY tid (tid)
+) ENGINE=MyISAM;
+-----------
+
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
    - db-cleanup field-size DECIMAL-type fields
    - db-cleanup for DECIMAL-type fields for which internal representation
@@ -1632,7 +1659,7 @@ DELETE FROM Adminlog WHERE Message = 'logged_in' ;
 -----------
 -- grant access-right to create temporary tables to DGS db-user
 -- Lookup your respective configuration in 'include/config-local.php'
-GRANT create temporary tables ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
+GRANT CREATE TEMPORARY TABLES ON DB_NAME.* TO MYSQLUSER@MYSQLHOST ;
 -----------
 
    * include/std_functions.php (write_to_file, read_from_file):
