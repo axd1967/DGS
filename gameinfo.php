@@ -28,6 +28,9 @@ require_once( 'include/time_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
 require_once( 'include/classlib_game.php' );
+if( ALLOW_TOURNAMENTS ) {
+   require_once 'tournaments/include/tournament.php';
+}
 
 $GLOBALS['ThePage'] = new Page('GameInfo');
 
@@ -101,6 +104,18 @@ function build_rating_diff( $rating_diff )
    if( !$grow )
       error('unknown_game', "gameinfo.find2($gid)");
 
+   $tid = (int) @$grow['tid'];
+   $tourney = null;
+   if( $tid <= 0 )
+      $tid = 0;
+   else
+   {
+      $tourney = Tournament::load_tournament($tid);
+      if( is_null($tourney) )
+         error('unknown_tournament', "gameinfo.find_tournament($gid,$tid)");
+   }
+
+
    // init some vars
    $is_my_game = ( $my_id == $grow['Black_ID'] || $my_id == $grow['White_ID'] );
    $arr_status = array(
@@ -119,7 +134,9 @@ function build_rating_diff( $rating_diff )
 
    $itable = new Table_info('game');
    $itable->add_caption( T_('Game settings') );
-   $itable->add_sinfo( T_('Game ID'), anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) );
+   $itable->add_sinfo(
+         T_('Game ID'),
+         anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) . echo_image_gameinfo($gid, true) );
    if( $grow['DoubleGame_ID'] )
    {
       $dbl_gid = $grow['DoubleGame_ID'];
@@ -339,6 +356,41 @@ function build_rating_diff( $rating_diff )
 
 
    // ------------------------
+   // build table-info: tournament info
+
+   if( $tid && !is_null($tourney) )
+   {
+      $itable = new Table_info('tourney');
+      $itable->add_caption( T_('Tournament info') );
+
+      $itable->add_sinfo(
+            T_('ID#tourney'),
+            anchor( $base_path."tournaments/view_tournament.php?tid=$tid", "#$tid" )
+               . echo_image_tournament_info($tid, true) );
+      $itable->add_sinfo(
+            T_('Scope#tourney'),
+            Tournament::getScopeText($tourney->Scope) );
+      $itable->add_sinfo(
+            T_('Type#tourney'),
+            Tournament::getTypeText($tourney->Type) );
+      $itable->add_sinfo(
+            T_('Title#tourney'),
+            make_html_safe($tourney->Title, true) );
+      $itable->add_sinfo(
+            T_('Status#tourney'),
+            Tournament::getStatusText($tourney->Status) );
+      $itable->add_sinfo(
+            T_('Current Round#tourney'),
+            $tourney->formatRound() );
+
+      $itable_str_tourney = $itable->make_table();
+      unset($itable);
+   }
+   else
+      $itable_str_tourney = '';
+
+
+   // ------------------------
    // build form for editing games-priority
 
    // for players and running games only
@@ -368,10 +420,12 @@ function build_rating_diff( $rating_diff )
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title</h3>\n";
 
-   echo "<table><tr valign=\"top\">",
-      "<td>$itable_str_game<br>$form_str_gameprio</td>",
+   echo
+      "<table><tr valign=\"top\">",
+      "<td>$itable_str_game<br>$form_str_gameprio<br>$itable_str_tourney</td>",
       "<td>$itable_str_time<br>$itable_str_players</td>",
       "</tr></table>\n";
+
 
    $menu_array = array();
    $menu_array[T_('Show game')] = 'game.php?gid='.$gid;
