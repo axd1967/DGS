@@ -593,6 +593,8 @@ class ListIterator
    var $ResultRows;
    /*! \brief List of array with objects and original row read from db-query: array( array( Obj, row), ...). */
    var $Items;
+   /*! \brief optional index mapping index-fields from query-result to items: array( field => [ val => (Obj,row) ], ...). */
+   var $Index;
 
    /*!
     * \brief Constructs ListIterator with name
@@ -611,6 +613,31 @@ class ListIterator
       $this->Query = '';
       $this->ResultRows = -1; // not queried yet
       $this->clearItems();
+      $this->Index = array();
+   }
+
+   /*! \brief Clears list of items in this list-iterator. */
+   function clearItems()
+   {
+      $this->Items = array();
+   }
+
+   /*! \brief Returns number of stored items. */
+   function getItemCount()
+   {
+      return count( $this->Items );
+   }
+
+   /*! \brief Returns each() from items-list of this ListIterator. */
+   function getListIterator()
+   {
+      return each( $this->Items );
+   }
+
+   /*! \brief Resets iterating with getListIterator-func. */
+   function resetListIterator()
+   {
+      reset( $this->Items );
    }
 
    /*! \brief Sets main QuerySQL. */
@@ -660,56 +687,46 @@ class ListIterator
       $this->ResultRows = $result_rows;
    }
 
+   /*! \brief Clears list of indexes in this list-iterator. */
+   function clearIndex()
+   {
+      $this->Index = array();
+   }
+
+   /*! \brief Adds index-field(s) to be generated on iterator. */
+   function addIndex( /*var-args*/ )
+   {
+      for( $i=0; $i < func_num_args(); $i++)
+      {
+         $field = func_get_arg($i);
+         $this->Index[$field] = array();
+      }
+   }
+
+   /*! \brief Returns index-map for indexed field; die with error on unknown field. */
+   function getIndexMap( $field )
+   {
+      if( !isset($this->Index[$field]) )
+         error('invalid_args', "ListIterator.getIndexMap({$this->Name},$field)");
+
+      return $this->Index[$field];
+   }
+
    /*!
-    * \brief Builds SQL-query from main QuerySQL and merge-list of QuerySQLs,
-    *        appending optional order and limit query parts.
-    * \note Sets QuerySQL if unset.
-    * \note Sets MergedQuerySQL and Query with finalized SQL-query-string.
+    * \brief Returns index-map-value for indexed field and key; null if undefined.
+    * \param $ret_val -1 = return [item,row]; 0=return item, 1=return row
     */
-   function buildQuery()
+   function getIndexValue( $field, $key, $ret_val=-1 )
    {
-      if( is_null($this->QuerySQL) )
-         $this->QuerySQL = new QuerySQL();
-
-      // merge all QuerySQLs
-      $merged_qsql = $this->QuerySQL;
-      foreach( $this->QuerySQLMerge as $m_qsql )
-         $merged_qsql->merge( $m_qsql );
-      $this->MergedQuerySQL = $merged_qsql;
-
-      $query = $merged_qsql->get_select() . ' ' . $this->QueryOrder . ' ' . $this->QueryLimit;
-      $this->setQuery( $query );
-      return $query;
-   }
-
-   /*! \brief Clears list of items in this list-iterator. */
-   function clearItems()
-   {
-      $this->Items = array();
-   }
-
-   /*! \brief Adds item to item-list. */
-   function addItem( $item, $row )
-   {
-      $this->Items[] = array( $item, $row );
-   }
-
-   /*! \brief Resets iterating with getListIterator-func. */
-   function resetListIterator()
-   {
-      reset( $this->Items );
-   }
-
-   /*! \brief Returns each() from items-list of this ListIterator. */
-   function getListIterator()
-   {
-      return each( $this->Items );
-   }
-
-   /*! \brief Returns number of stored items. */
-   function getItemCount()
-   {
-      return count( $this->Items );
+      if( !isset($this->Index[$field][$key]) )
+         return null;
+      $arr_item = $this->Index[$field][$key];
+      if( $ret_val < 0 )
+         return $arr_item;
+      elseif( $ret_val == 0 )
+         return $arr_item[0];
+      else
+         return $arr_item[1];
    }
 
    /*! \brief Returns String-representation of this object. */
@@ -733,7 +750,55 @@ class ListIterator
          $arr[] = sprintf( "Item.%d=[%s]", $idx++,
             ( method_exists($item, 'to_string') ? $item->to_string() : print_r($item,true) ));
       }
+      $arr[] = 'Index=[' . print_r( $this->Index, true ) . ']';
       return "ListIterator({$this->Name}): " . implode(', ', $arr);
+   }
+
+
+   /*!
+    * \brief Builds SQL-query from main QuerySQL and merge-list of QuerySQLs,
+    *        appending optional order and limit query parts.
+    * \note Sets QuerySQL if unset.
+    * \note Sets MergedQuerySQL and Query with finalized SQL-query-string.
+    */
+   function buildQuery()
+   {
+      if( is_null($this->QuerySQL) )
+         $this->QuerySQL = new QuerySQL();
+
+      // merge all QuerySQLs
+      $merged_qsql = $this->QuerySQL;
+      foreach( $this->QuerySQLMerge as $m_qsql )
+         $merged_qsql->merge( $m_qsql );
+      $this->MergedQuerySQL = $merged_qsql;
+
+      $query = $merged_qsql->get_select() . ' ' . $this->QueryOrder . ' ' . $this->QueryLimit;
+      $this->setQuery( $query );
+      return $query;
+   }
+
+   /*! \brief Adds item to item-list. */
+   function addItem( $item, $row )
+   {
+      $arr_item = array( $item, $row );
+      $this->Items[] = $arr_item;
+
+      foreach( $this->Index as $field => $map )
+         $this->Index[$field][$row[$field]] = $arr_item;
+   }
+
+   /*! \brief Rescans items and re-filling index. */
+   function rescanIndex()
+   {
+      foreach( $this->Index as $field => $map )
+         $map[$field] = array();
+
+      foreach( $this->Items as $arr_item )
+      {
+         $row = $arr_item[1];
+         foreach( $this->Index as $field => $map )
+            $this->Index[$field][$row[$field]] = $arr_item;
+      }
    }
 
 } // end of 'ListIterator'
