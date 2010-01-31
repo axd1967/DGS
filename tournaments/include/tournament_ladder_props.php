@@ -54,7 +54,8 @@ class TournamentLadderProps
    var $ChallangeRangeAbsolute;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
-   function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='', $challenge_range_abs=0 )
+   function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
+         $challenge_range_abs=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -156,11 +157,7 @@ class TournamentLadderProps
 
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
-      $high_rank = $tl_user->Rank;
-      if( $this->ChallengeRangeAbsolute < 0 )
-         $high_ranks = 1;
-      elseif( $this->ChallengeRangeAbsolute > 0 )
-         $high_rank = $user_rank - $this->ChallengeRangeAbsolute;
+      $high_rank = $this->calc_highest_challenge_rank( $tl_user->Rank );
 
       while( list(,$arr_item) = $iterator->getListIterator() )
       {
@@ -171,6 +168,42 @@ class TournamentLadderProps
       $iterator->resetListIterator();
 
       return $tl_user;
+   }
+
+   /*!
+    * \brief Returns highest allowed challenge rank.
+    * \param $ch_rank challenger-rank
+    * \note wording: 1 is "higher" than 2 in ladder.
+    */
+   function calc_highest_challenge_rank( $ch_rank )
+   {
+      $high_rank = $ch_rank;
+
+      if( $this->ChallengeRangeAbsolute < 0 )
+         $high_rank = 1;
+      elseif( $this->ChallengeRangeAbsolute > 0 )
+         $high_rank = $ch_rank - $this->ChallengeRangeAbsolute;
+
+      return $high_rank;
+   }
+
+   /*!
+    * \brief Verifies challenge to defender; return errors-list or empty if ok.
+    * \param $tladder_ch TournamentLadder from challenger
+    * \param $tladder_df TournamentLadder from defender
+    */
+   function verify_challenge( $tladder_ch, $tladder_df )
+   {
+      $errors = array();
+
+      $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank );
+      if( $tladder_ch->Rank < $tladder_df->Rank )
+         $errors[] = T_('You can only challenge users above your own position.');
+      if( $tladder_df->Rank < $high_rank )
+         $errors[] = sprintf( T_('Defender rank #%s is out of your rank challenge range [#%s..#%s].'),
+                              $tladder_df->Rank, $high_rank, $tladder_ch->Rank - 1 );
+
+      return $errors;
    }
 
 
