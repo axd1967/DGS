@@ -24,6 +24,44 @@ ChangeLog
 
 2010-01-31 juga
 
+   * tournaments/include/tournament_ladder.php (TournamentLadder.new_tournament_game),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.make_ladder_info,
+       ~.calc_highest_challenge_rank, ~.verify_challenge),
+     tournaments/include/tournament_rules.php (class TournamentRules, ~.create_game,
+       ~.convertTournamentRules_to_GameRow, ~.convertTournamentRules_to_EditForm),
+     tournaments/include/tournament_helper.php (class TournamentHelper),
+     tournaments/ladder/challenge.php,
+     include/error_codes.php (ErrorCode.init), NEWS:
+   - create game and tournament-game for verified challenge
+   - fix bug handling StdHandicap-field: missed bool <-> Y|N conversion
+   - added error-code 'tournament_participant_unknown'
+
+   * include/make_game.php (create_game):
+   - fixed bug for making status-games-timeout-date:
+     weekend-clock-offset has been added twice
+
+   * include/db_classes.php (EntityData.get_sql_value):
+   - handling 0-value for dates
+
+   * include/classlib_user.php (class User, ~.to_string, ~.new_from_row):
+   - added full Players-row into User-object: User->urow
+
+   * include/connect2mysql.php (ta_begin, ta_end):
+   - allow ta_begin/end() to be nested preserving first ignore-user-abort
+     until all transactions are "closed"
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant,
+       ~.to_string, ~.need_rating, ~.fillEntityData, ~.new_from_row),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - cleanup: removed unused db-field TournamentParticipant.AuthToken
+   - cleanup: removed unused function TournamentParticipant.need_rating()
+-----------
+-- [unused] removed unused field
+ALTER TABLE TournamentParticipant
+   DROP COLUMN AuthToken ;
+-----------
+
    * tournaments/include/tournament_games.php (class TournamentGames),
      tournaments/include/tournament_globals.php,
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,

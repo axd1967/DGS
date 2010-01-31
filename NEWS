@@ -30,7 +30,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Participants editor to edit user registrations
       * Tournament Ladder Properties Editor for ladder-specific properties
       * Tournament Ladder admin-interface to prepare and edit ladder
-      * Tournament Ladder challenge page to confirm challenge
+      * Tournament Ladder challenge page to confirm challenge starting tournament game
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page
