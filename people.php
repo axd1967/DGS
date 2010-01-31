@@ -337,6 +337,11 @@ function get_executives( $level )
                 . 'Creative Commons Attribution 2.5 License: %s'), $images_str ),
       anchor('http://www.famfamfam.com/archive/silk-icons-thats-your-lot/') );
 
+   add_contributor_link( T_('Other Icons'),
+      anchor( "http://www.iconarchive.com/show/sport-icons-by-icons-land/Trophy-Gold-icon.html",
+              build_icon('tourney.gif', T_('Tournament')) )
+      );
+
    add_contributor();
 
 
