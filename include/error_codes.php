@@ -452,6 +452,9 @@ class ErrorCode
          $arr['tournament_participant_invalid_status'] =
             T_("Sorry, action on tournament participant is not allowed for registration status.");
 
+         $arr['tournament_participant_unknown'] =
+            T_("Sorry, user is unknown for current tournament.");
+
          $arr['tournament_wrong_status'] =
             T_('Sorry, tournament is on wrong status to allow this action for tournament.');
 
