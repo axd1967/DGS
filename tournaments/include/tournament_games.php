@@ -68,9 +68,9 @@ class TournamentGames
 
    /*! \brief Constructs TournamentGames-object with specified arguments. */
    function TournamentGames( $id=0, $tid=0, $gid=0, $status=TG_STATUS_INIT, $flags=0,
-                             $lastchanged=0, $changed_by='', $challenger_uid=0, $challenger_rid=0,
-                             $defender_uid=0, $defender_rid=0, $start_time=0, $end_time=0,
-                             $score=0.0 )
+         $lastchanged=0, $changed_by='',
+         $challenger_uid=0, $challenger_rid=0, $defender_uid=0, $defender_rid=0,
+         $start_time=0, $end_time=0, $score=0.0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
