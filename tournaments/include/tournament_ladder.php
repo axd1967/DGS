@@ -26,10 +26,11 @@ require_once 'include/std_classes.php';
 require_once 'include/utilities.php';
 require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
-require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_games.php';
 
  /*!
   * \file tournament_ladder.php
@@ -546,6 +547,16 @@ class TournamentLadder
       }
       return $errors;
    }//check_participant_registrations
+
+   function new_tournament_game( $tid, $tladder_ch, $tladder_df )
+   {
+      $tg = new TournamentGames( 0, $tid );
+      $tg->Challenger_uid = $tladder_ch->uid;
+      $tg->Challenger_rid = $tladder_ch->rid;
+      $tg->Defender_uid   = $tladder_df->uid;
+      $tg->Defender_rid   = $tladder_df->rid;
+      return $tg;
+   }
 
    function get_edit_tournament_status()
    {
