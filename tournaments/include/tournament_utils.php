@@ -29,7 +29,7 @@ require_once 'tournaments/include/tournament_globals.php';
  /*!
   * \file tournament_utils.php
   *
-  * \brief General functions to support tournament management
+  * \brief General utility functions to support tournament management without db-access.
   */
 
 
@@ -40,7 +40,7 @@ define('DATEFMT_TOURNAMENT', 'Y-m-d H:i'); // for output
  /*!
   * \class TournamentUtils
   *
-  * \brief Helper-class with mostly static functions to support Tournament management
+  * \brief Helper-class with mostly static functions to support Tournament management without db-access.
   */
 
 class TournamentUtils
