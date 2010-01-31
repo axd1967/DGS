@@ -244,7 +244,7 @@ class EntityData
       elseif( $ftype == FTYPE_TEXT || $ftype == FTYPE_ENUM )
          return "'" . mysql_addslashes($value) . "'";
       elseif( $ftype == FTYPE_DATE )
-         return "FROM_UNIXTIME($value)";
+         return ( $value != 0 ) ? "FROM_UNIXTIME($value)" : "'0000-00-00 00:00:00'";
       else
          error('assert', "EntityData.get_sql_value.bad_field_type({$this->entity->table},$field)");
    }
