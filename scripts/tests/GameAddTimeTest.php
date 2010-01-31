@@ -54,6 +54,7 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
    protected function setUp() {
       $this->grow = array( // Games-row
          'ID'                 => 4711,
+         'tid'                => 0,
          'Status'             => 'PLAY',
          // T=JAP, M=210, B=15, P=10; B(111): m=210,b=0,p=-1, W(222): m=210,b=0,p=-1
          'Byotype'            => BYOTYPE_JAPANESE,
@@ -269,6 +270,10 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
       $gamerow['White_Maintime'] = time_convert_to_hours( 360 + MAX_ADD_DAYS, 'days') + 1;
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 222 ));
+
+      $gamerow = array() + $this->grow; // clone array to mess data
+      $gamerow['tid'] = 1; // forbidden for tournament
+      $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
    }
 
    private function createGAT( $byotype, $uid )
