@@ -53,7 +53,7 @@ class TournamentLadderProps
    var $ChangedBy;
    var $ChallangeRangeAbsolute;
 
-   /*! \brief Constructs TournamentLadder-object with specified arguments. */
+   /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='', $challenge_range_abs=0 )
    {
       $this->tid = (int)$tid;
@@ -184,7 +184,7 @@ class TournamentLadderProps
       return $qsql;
    }
 
-   /*! \brief Returns TournamentLadder-object created from specified (db-)row. */
+   /*! \brief Returns TournamentLadderProps-object created from specified (db-)row. */
    function new_from_row( $row )
    {
       $tlp = new TournamentLadderProps(
