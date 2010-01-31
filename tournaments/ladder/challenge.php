@@ -199,7 +199,7 @@ function build_challenge_notes()
 {
    $notes = array();
 
-   $notes[] = T_('After confirmation a tournament game will normally be started within the next 30 minutes.');
+   $notes[] = T_('After confirmation a tournament game will be started immediately.');
    $notes[] = null; // empty line
 
    return $notes;
