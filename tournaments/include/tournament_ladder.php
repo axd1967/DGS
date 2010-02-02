@@ -65,6 +65,8 @@ class TournamentLadder
    // non-DB fields
 
    var $AllowChallenge;
+   /*! \brief array of TournamentGames-object of incoming-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
+   var $RunningTourneyGames;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0 )
@@ -78,6 +80,39 @@ class TournamentLadder
       $this->BestRank = $bestrank;
       // non-DB fields
       $this->AllowChallenge = false;
+      $this->RunningTourneyGames = array();
+   }
+
+   /*! \brief Adds TournamentGames-object to list of incoming challenge (running) games. */
+   function add_running_game( $tgame )
+   {
+      if( !is_a($tgame, 'TournamentGames') )
+         error('invalid_args', "TournamentLadder.add_running_game({$this->tid},{$this->rid})");
+      $this->RunningTourneyGames[$tgame->ID] = $tgame;
+   }
+
+   /*! \brief Returns list of running TournamentGames-objects ordered by TG.ID, that is creation-order (first=first-created). */
+   function get_running_games()
+   {
+      ksort( $this->RunningTourneyGames, SORT_NUMERIC );
+      return $this->RunningTourneyGames;
+   }
+
+   /*! \brief Returns non-null array with "[#Rank]" linked to game-id for running tourney-games. */
+   function build_linked_running_games()
+   {
+      $arr = array();
+      if( count($this->RunningTourneyGames) )
+      {
+         global $base_path;
+
+         foreach( $this->get_running_games() as $tgid => $tgame )
+         {
+            $rank = $tgame->Challenger_tladder->Rank;
+            $arr[] = sprintf( '[%s]', anchor( $base_path."game.php?gid={$tgame->gid}", "#$rank" ));
+         }
+      }
+      return $arr;
    }
 
    function to_string()
@@ -354,8 +389,8 @@ class TournamentLadder
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = TournamentLadder::new_from_row( $row );
-         $iterator->addItem( $tourney, $row );
+         $tladder = TournamentLadder::new_from_row( $row );
+         $iterator->addItem( $tladder, $row );
       }
       mysql_free_result($result);
 

@@ -140,10 +140,10 @@ class TournamentLadderProps
 
    /*!
     * \brief Enhances ladder with additional info/data (Challenge-range).
-    * \param $iterator ListIterator on TournamentLadder with iterator-Index on Rank & uid
+    * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on Rank & uid
     * \return TournamentLadder of given user or null if not in ladder.
     */
-   function make_ladder( &$iterator, $uid )
+   function fill_ladder_challenge_range( &$iterator, $uid )
    {
       $tl_user = $iterator->getIndexValue( 'uid', $uid, 0 );
       if( is_null($tl_user) )
@@ -161,6 +161,32 @@ class TournamentLadderProps
       }
 
       return $tl_user;
+   }
+
+   /*!
+    * \brief Enhances ladder with additional info/data (incoming challenge-games).
+    * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
+    * \param $tgame_iterator ListIterator on TournamentGames
+    */
+   function fill_ladder_running_games( &$iterator, $tgame_iterator )
+   {
+      while( list(,$arr_item) = $tgame_iterator->getListIterator() )
+      {
+         list( $tgame, $orow ) = $arr_item;
+
+         // identify TLadder of defender and challenger
+         $df_tladder = $iterator->getIndexValue( 'uid', $tgame->Defender_uid, 0 );
+         if( !is_null($df_tladder) )
+         {
+            $ch_tladder = $iterator->getIndexValue( 'uid', $tgame->Challenger_uid, 0 );
+            if( !is_null($ch_tladder) )
+            {
+               $tgame->Defender_tladder = $df_tladder;
+               $tgame->Challenger_tladder = $ch_tladder;
+               $df_tladder->add_running_game( $tgame );
+            }
+         }
+      }
    }
 
    /*!

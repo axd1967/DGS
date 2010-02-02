@@ -66,6 +66,11 @@ class TournamentGames
    var $EndTime;
    var $Score;
 
+   // non-DB fields
+
+   var $Defender_tladder;
+   var $Challenger_tladder;
+
    /*! \brief Constructs TournamentGames-object with specified arguments. */
    function TournamentGames( $id=0, $tid=0, $gid=0, $status=TG_STATUS_INIT, $flags=0,
          $lastchanged=0, $changed_by='',
@@ -86,6 +91,9 @@ class TournamentGames
       $this->StartTime = (int)$start_time;
       $this->EndTime = (int)$end_time;
       $this->Score = (float)$score;
+      // non-DB fields
+      $this->Defender_tladder = null;
+      $this->Challenger_tladder = null;
    }
 
    function to_string()
@@ -190,6 +198,28 @@ class TournamentGames
             @$row['Score']
          );
       return $tg;
+   }
+
+   /*! \brief Returns ListIterator with TournamentGames-objects for given tournament-id and TournamentGames-status. */
+   function load_tournament_games( $iterator, $tid, $status=null )
+   {
+      $qsql = TournamentGames::build_query_sql( $tid );
+      if( !is_null($status) )
+         $qsql->add_part( SQLP_WHERE, "TG.Status='" . mysql_addslashes($status) . "'" );
+      $iterator->setQuerySQL( $qsql );
+      $query = $iterator->buildQuery();
+      $result = db_query( "TournamentGams::load_tournament_games", $query );
+      $iterator->setResultRows( mysql_num_rows($result) );
+
+      $iterator->clearItems();
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $tgame = TournamentGames::new_from_row( $row );
+         $iterator->addItem( $tgame, $row );
+      }
+      mysql_free_result($result);
+
+      return $iterator;
    }
 
 } // end of 'TournamentGames'
