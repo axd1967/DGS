@@ -32,6 +32,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_games.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
@@ -125,7 +126,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(10, T_('Rank Kept#T_ladder'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#T_ladder'), 'Date', 0 );
 
-      $iterator = new ListIterator( 'Tournament.ladder_view',
+      $iterator = new ListIterator( 'Tournament.ladder_view.load_ladder',
          $ltable->get_query(), 'ORDER BY Rank ASC' );
       $iterator->addIndex( 'Rank', 'uid' );
       $iterator->addQuerySQLMerge( new QuerySQL(
@@ -138,8 +139,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
 
+      $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
+      $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, TG_STATUS_PLAY );
+
       // add ladder-info (challenge-range)
-      $tl_user = $tl_props->make_ladder( $iterator, $my_id );
+      $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
+      $tl_props->fill_ladder_running_games( $iterator, $tg_iterator );
 
       if( $admin_mode )
          $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
@@ -155,17 +160,17 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $tform = $ltable->make_table_form();
       while( list(,$arr_item) = $iterator->getListIterator() )
       {
-         list( $tl, $orow ) = $arr_item;
-         $uid = $tl->uid;
+         list( $tladder, $orow ) = $arr_item;
+         $uid = $tladder->uid;
          $user = User::new_from_row($orow, 'TLP_');
          $is_mine = ( $my_id == $uid );
 
          $row_str = array();
 
          if( $ltable->Is_Column_Displayed[ 1] )
-            $row_str[ 1] = $tl->Rank . '.';
+            $row_str[ 1] = $tladder->Rank . '.';
          if( $ltable->Is_Column_Displayed[ 2] )
-            $row_str[ 2] = ($tl->BestRank > 0) ? $tl->BestRank . '.' : '';
+            $row_str[ 2] = ($tladder->BestRank > 0) ? $tladder->BestRank . '.' : '';
          if( $ltable->Is_Column_Displayed[ 3] )
             $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
          if( $ltable->Is_Column_Displayed[ 4] )
@@ -183,27 +188,28 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
                           image( $base_path.'images/edit.gif', 'E'),
                           T_('Admin user'), 'class=ButIcon')
                   . SMALL_SPACING
-                  . $tform->print_insert_radio_buttonsx( 'rid', array( $tl->rid => '' ), ($rid == $tl->rid) );
+                  . $tform->print_insert_radio_buttonsx(
+                        'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
             }
             elseif( $is_mine )
                $row_str[7] = span('TourneyUser', T_('This is you#T_ladder') );
             else
             {
                $row_str[7] = '';
-               if( $tl->AllowChallenge )
+               if( $tladder->AllowChallenge )
                   $row_str[7] = sprintf( '[%s]',
-                     anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tl->rid}",
+                     anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
                              T_('Challenge this user') ));
             }
          }
          if( $ltable->Is_Column_Displayed[ 8] )
-            $row_str[ 8] = ''; //TODO game-list
+            $row_str[ 8] = implode(' ', $tladder->build_linked_running_games());
          if( $ltable->Is_Column_Displayed[ 9] )
-            $row_str[ 9] = ($tl->RankChanged > 0) ? date(DATE_FMT2, $tl->RankChanged) : '';
+            $row_str[ 9] = ($tladder->RankChanged > 0) ? date(DATE_FMT2, $tladder->RankChanged) : '';
          if( $ltable->Is_Column_Displayed[10] )
-            $row_str[10] = $tl->build_rank_kept();
+            $row_str[10] = $tladder->build_rank_kept();
          if( $ltable->Is_Column_Displayed[11] )
-            $row_str[11] = ($tl->Created > 0) ? date(DATE_FMT2, $tl->Created) : '';
+            $row_str[11] = ($tladder->Created > 0) ? date(DATE_FMT2, $tladder->Created) : '';
 
          if( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
