@@ -1629,3 +1629,10 @@ ALTER TABLE Games
    ADD KEY tid (tid) ;
 
 
+-- adjust key: combine index on tid with Status
+ALTER TABLE TournamentGames
+   DROP KEY tid ;
+ALTER TABLE TournamentGames
+   ADD KEY tid_Status (tid,Status) ;
+
+
