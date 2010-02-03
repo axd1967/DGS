@@ -22,6 +22,49 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-03 juga
+
+   * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_uid),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props,
+       ~.fill_ladder_running_games, ~.verify_challenge),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     tournaments/ladder/view.php:
+   - restrict challenges to one running game per ladder-user
+-----------
+-- [index] added index on player uids
+ALTER TABLE TournamentGames
+   ADD KEY Challenger_uid (Challenger_uid),
+   ADD KEY Defender_uid (Defender_uid ) ;
+-----------
+
+   * tournaments/ladder/challenge.php:
+   - show confirm-button only if no error detected for challenge
+
+   * include/gui_functions.php (echo_notes), skins/dragon/screen.css:
+   - use CSS-class for <ul>-elements for tighter output of nested lists
+
+2010-02-02 juga
+
+   * tournaments/include/tournament_games.php (class TournamentGames,
+       ~.load_tournament_games),
+     tournaments/include/tournament_ladder.php (class TournamentLadder,
+       ~.add_running_game, ~.get_running_games, ~.build_linked_running_games),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_challenge_range,
+       ~.fill_ladder_running_games),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     tournaments/ladder/view.php:
+   - show list of running tournament games for incoming challenges
+     at defenders position in ladder-view with rank of challenger:
+     link "[#challenger-rank]" to page with tournament-game
+   - adjust key: combine index on tid with Status
+-----------
+-- adjust key: combine index on tid with Status
+ALTER TABLE TournamentGames
+   DROP KEY tid ;
+ALTER TABLE TournamentGames
+   ADD KEY tid_Status (tid,Status) ;
+-----------
+
 2010-02-01 juga
 
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.make_ladder),
