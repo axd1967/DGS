@@ -144,7 +144,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
       // add ladder-info (challenge-range)
       $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
-      $tl_props->fill_ladder_running_games( $iterator, $tg_iterator );
+      $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
 
       if( $admin_mode )
          $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below

@@ -1636,3 +1636,9 @@ ALTER TABLE TournamentGames
    ADD KEY tid_Status (tid,Status) ;
 
 
+-- [index] added index on player uids
+ALTER TABLE TournamentGames
+   ADD KEY Challenger_uid (Challenger_uid),
+   ADD KEY Defender_uid (Defender_uid ) ;
+
+

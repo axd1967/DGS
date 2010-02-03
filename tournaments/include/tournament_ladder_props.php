@@ -135,6 +135,9 @@ class TournamentLadderProps
          $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
       $arr_props[] = $arr;
 
+      // general conditions
+      $arr_props[] = T_('You may only have one running game per opponent.');
+
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }
 
@@ -165,10 +168,11 @@ class TournamentLadderProps
 
    /*!
     * \brief Enhances ladder with additional info/data (incoming challenge-games).
+    * \note Must run after fill_ladder_challenge_range()-func
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     */
-   function fill_ladder_running_games( &$iterator, $tgame_iterator )
+   function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
    {
       while( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
@@ -178,6 +182,9 @@ class TournamentLadderProps
          $df_tladder = $iterator->getIndexValue( 'uid', $tgame->Defender_uid, 0 );
          if( !is_null($df_tladder) )
          {
+            if( $tgame->Challenger_uid == $my_id )
+               $df_tladder->AllowChallenge = false;
+
             $ch_tladder = $iterator->getIndexValue( 'uid', $tgame->Challenger_uid, 0 );
             if( !is_null($ch_tladder) )
             {
@@ -215,9 +222,14 @@ class TournamentLadderProps
    {
       $errors = array();
 
+      $tgame = TournamentGames::load_tournament_game_by_uid( $tladder_ch->tid,
+         $tladder_ch->uid, $tladder_df->uid );
+      if( !is_null($tgame) )
+         $errors[] = T_('You may only have one running game per opponent.');
+
       $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank );
       if( $tladder_ch->Rank < $tladder_df->Rank )
-         $errors[] = T_('You can only challenge users above your own position.');
+         $errors[] = T_('You may only challenge users above your own position.');
       if( $tladder_df->Rank < $high_rank )
          $errors[] = sprintf( T_('Defender rank #%s is out of your rank challenge range [#%s..#%s].'),
                               $tladder_df->Rank, $high_rank, $tladder_ch->Rank - 1 );
