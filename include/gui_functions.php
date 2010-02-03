@@ -107,14 +107,14 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true )
       "<table id=\"{$table_id}\">\n";
    if( $title != '' )
       echo "<tr><th>", make_html_safe($title, 'line'), "</th></tr>\n";
-   echo "<tr><td><ul>\n";
+   echo "<tr><td><ul class=\"Notes\">\n";
    foreach( $notes as $note )
    {
       if( is_null($note) || (string)$note === '' )
          echo "<p></p>\n";
       elseif( is_array($note) )
       {
-         echo '  <li>', array_shift( $note ), ":\n<ul>\n"; // note-title
+         echo '  <li>', array_shift( $note ), ":\n<ul class=\"SubNotes\">\n"; // note-title
          foreach( $note as $note_item )
             echo "<li>$note_item\n";
          echo "</ul>\n";

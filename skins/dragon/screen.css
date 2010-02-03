@@ -2694,6 +2694,16 @@ h4.SubHeader {
    margin: 1em;
 }
 
+ul.Notes {
+   line-height: 1.4em;
+}
+
+ul.SubNotes {
+   margin: 0.2em auto 0.6em;
+   line-height: 1.2em;
+   font-size: smaller;
+}
+
 
 /* ------------------------- */
 /* FAQ pages */
