@@ -144,15 +144,22 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    // EDIT: Submit-Buttons -------------
 
-   $tform->add_hidden( 'confirm', 1 );
    $tform->add_row( array(
          'CELL', 2, '',
          'TEXT', T_('Please confirm if you want to challenge this user!') . "<br>\n" . T_('(also see notes below)'), ));
-   $tform->add_row( array(
-         'CELL', 2, '',
+
+   $rowarr = array( 'CELL', 2, '' );
+   if( count($errors) == 0 )
+   {
+      //$tform->add_hidden( 'confirm', 1 );
+      array_push( $rowarr,
+         'HIDDEN', 'confirm', 1,
          'SUBMITBUTTON', 'tl_challenge', T_('Confirm Challenge'),
-         'TEXT', SMALL_SPACING,
-         'SUBMITBUTTON', 'tl_cancel', T_('Cancel') ));
+         'TEXT', SMALL_SPACING );
+   }
+   array_push( $rowarr,
+      'SUBMITBUTTON', 'tl_cancel', T_('Cancel') );
+   $tform->add_row( $rowarr );
 
 
    $title = T_('Challenge Ladder User');
