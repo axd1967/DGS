@@ -113,6 +113,26 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_empty_row();
 
    $tform->add_row( array(
+         'DESCRIPTION', T_('Max. Defenses'),
+         'TEXT',        T_('Start Rank') . ': ',
+         'TEXTINPUT',   'max_def_start1', 3, 3, $vars['max_def_start1'], '',
+         'TEXT',        MED_SPACING . T_('Max. Defenses') . ': ',
+         'TEXTINPUT',   'max_def1', 3, 3, $vars['max_def1'], '',
+         'TEXT',        T_('(Group #1)'), ));
+   $tform->add_row( array(
+         'TAB',
+         'TEXT',        T_('Start Rank') . ': ',
+         'TEXTINPUT',   'max_def_start2', 3, 3, $vars['max_def_start2'], '',
+         'TEXT',        MED_SPACING . T_('Max. Defenses') . ': ',
+         'TEXTINPUT',   'max_def2', 3, 3, $vars['max_def2'], '',
+         'TEXT',        T_('(Group #2)'), ));
+   $tform->add_row( array(
+         'TAB',
+         'TEXT',        T_('For remaining ranks restrict max. defenses to') . ': ',
+         'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'], '', ));
+   $tform->add_empty_row();
+
+   $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
@@ -155,6 +175,11 @@ function parse_edit_form( &$tlp )
    // read from props or set defaults
    $vars = array(
       'chall_range_abs' => $tlp->ChallengeRangeAbsolute,
+      'max_def'         => $tlp->MaxDefenses,
+      'max_def1'        => $tlp->MaxDefenses1,
+      'max_def2'        => $tlp->MaxDefenses2,
+      'max_def_start1'  => $tlp->MaxDefensesStart1,
+      'max_def_start2'  => $tlp->MaxDefensesStart2,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -172,8 +197,45 @@ function parse_edit_form( &$tlp )
       else
          $errors[] = sprintf( T_('Expecting number for absolute challenge range in range [-1..%s]'), $max_value );
 
+
+      $new_value = $vars['max_def'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->MaxDefenses = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for max. defenses in range [1..%s]'), TLADDER_MAX_DEFENSES );
+
+      $new_value = $vars['max_def1'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->MaxDefenses1 = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range [0..%s]'), 1, TLADDER_MAX_DEFENSES );
+
+      $new_value = $vars['max_def2'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->MaxDefenses2 = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range [0..%s]'), 2, TLADDER_MAX_DEFENSES );
+
+      $new_value = $vars['max_def_start1'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->MaxDefensesStart1 = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s'), 1 );
+
+      $new_value = $vars['max_def_start2'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->MaxDefensesStart2 = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s'), 2 );
+
+
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
+      if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('MaxDefenses#edits');
+      if( $old_vals['max_def1'] != $tlp->MaxDefenses1 ) $edits[] = T_('MaxDefenses#edits');
+      if( $old_vals['max_def2'] != $tlp->MaxDefenses2 ) $edits[] = T_('MaxDefenses#edits');
+      if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('MaxDefenses#edits');
+      if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('MaxDefenses#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

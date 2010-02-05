@@ -75,11 +75,17 @@ class DgsLadderTournament extends TournamentTemplate
          $t_rules = new TournamentRules( 0, $tid );
          $t_rules->Size = 19;
          $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
-         if( !$t_rules->persist() )
+         if( !$t_rules->insert() )
             $this->create_error("LadderTournament.createTournament3(%s,$tid)");
 
          $tl_props = new TournamentLadderProps( $tid );
          $tl_props->ChallengeRangeAbsolute = 10;
+         // 1..5 max. 5 games, 6..10 max. 4 games, else 3 games:
+         $tl_props->MaxDefenses1 = 5;
+         $tl_props->MaxDefensesStart1 = 5;
+         $tl_props->MaxDefenses2 = 4;
+         $tl_props->MaxDefensesStart2 = 10;
+         $tl_props->MaxDefenses = 3;
          if( !$tl_props->insert() )
             $this->create_error("LadderTournament.createTournament4(%s,$tid)");
       }

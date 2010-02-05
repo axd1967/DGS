@@ -429,6 +429,12 @@ Description:
  Lastchanged            | datetime             | 0000-00-00 00:00:00
  ChangedBy              | varchar(54)          |
  ChallengeRangeAbsolute | smallint(5)          | 0
+ MaxDefenses            | tinyint(3) unsigned  | NULL
+ MaxDefenses1           | tinyint(3) unsigned  | 0
+ MaxDefenses2           | tinyint(3) unsigned  | 0
+ MaxDefensesStart1      | tinyint(3) unsigned  | 0
+ MaxDefensesStart2      | tinyint(3) unsigned  | 0
+
 
 ## Fields:
 
@@ -442,6 +448,21 @@ Description:
    - number of rank-positions a ladder-user can challenge users above own position
    - -1 = no limit, challenger can challenge all users above own position
    -  0 = unused option, i.e. other challenge ranges must configure challenge-range
+
+* MaxDefenses : default max. number of defenses
+* MaxDefenses1 : max. number of defenses for 1st rank-group
+* MaxDefenses2 : max. number of defenses for 2nd rank-group
+* MaxDefensesStart1 : start-rank for MaxDefenses1 (counting up) for 1st rank-group
+* MaxDefensesStart2 : start-rank for MaxDefenses2 (counting up) for 2nd rank-group
+   - There can be 3 groups of different max-defenses. Example:
+      - restrict ranks 1..5 to 5 games, ranks 6..10 to 4 games, other ranks to 3 games
+        MaxDefenses1=5, MaxDefensesStart1=5,
+        MaxDefenses2=4, MaxDefensesStart1=10,
+        MaxDefenses=3
+   - With 2 rank-groups MaxDefenses2,Start2=0
+   - With 1 rank-groups MaxDefenses1/2,Start1/2=0
+   - There must be a default limitation > 0
+   - rank-groups1/2 restrictions are optional => use 0 = not-used
 
 
 ###########################################################################

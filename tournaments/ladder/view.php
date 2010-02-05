@@ -139,14 +139,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
 
-      $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
-      $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, TG_STATUS_PLAY );
+      if( !$admin_mode )
+      {
+         $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
+         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, TG_STATUS_PLAY );
 
-      // add ladder-info (challenge-range)
-      $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
-      $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
-
-      if( $admin_mode )
+         // add ladder-info (challenge-range)
+         $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
+         $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
+      }
+      else
          $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
    }//allow-view
 
@@ -200,6 +202,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
                   $row_str[7] = sprintf( '[%s]',
                      anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
                              T_('Challenge this user') ));
+               elseif( $tladder->MaxChallenged )
+                  $row_str[7] = span('MaxChallenged', sprintf( T_('Already in %s challenges'), $tladder->ChallengesIn ));
             }
          }
          if( $ltable->Is_Column_Displayed[ 8] )

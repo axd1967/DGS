@@ -31,6 +31,8 @@ require_once 'tournaments/include/tournament_globals.php';
   * \brief Functions for ladder-specific tournament properties: tables TournamentLadderProps
   */
 
+define('TLADDER_MAX_DEFENSES', 20);
+
 
  /*!
   * \class TournamentLadderProps
@@ -42,7 +44,8 @@ global $ENTITY_TOURNAMENT_LADDER_PROPS; //PHP5
 $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute',
+      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2',
+                  'MaxDefensesStart1', 'MaxDefensesStart2',
       FTYPE_DATE, 'Lastchanged'
    );
 
@@ -51,16 +54,27 @@ class TournamentLadderProps
    var $tid;
    var $Lastchanged;
    var $ChangedBy;
-   var $ChallangeRangeAbsolute;
+   var $ChallengeRangeAbsolute;
+   var $MaxDefenses;
+   var $MaxDefenses1;
+   var $MaxDefenses2;
+   var $MaxDefensesStart1;
+   var $MaxDefensesStart2;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
-         $challenge_range_abs=0 )
+         $challenge_range_abs=0, $max_defenses=0, $max_defenses1=0, $max_defenses2=0,
+         $max_defenses_start1=0, $max_defenses_start2=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
       $this->ChallengeRangeAbsolute = (int)$challenge_range_abs;
+      $this->MaxDefenses = (int)$max_defenses;
+      $this->MaxDefenses1 = (int)$max_defenses1;
+      $this->MaxDefenses2 = (int)$max_defenses2;
+      $this->MaxDefensesStart1 = (int)$max_defenses_start1;
+      $this->MaxDefensesStart2 = (int)$max_defenses_start2;
    }
 
    function to_string()
@@ -108,6 +122,11 @@ class TournamentLadderProps
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'ChallengeRangeAbsolute', $this->ChallengeRangeAbsolute );
+      $data->set_value( 'MaxDefenses', $this->MaxDefenses );
+      $data->set_value( 'MaxDefenses1', $this->MaxDefenses1 );
+      $data->set_value( 'MaxDefenses2', $this->MaxDefenses2 );
+      $data->set_value( 'MaxDefensesStart1', $this->MaxDefensesStart1 );
+      $data->set_value( 'MaxDefensesStart2', $this->MaxDefensesStart2 );
       return $data;
    }
 
@@ -118,6 +137,28 @@ class TournamentLadderProps
 
       if( $this->ChallengeRangeAbsolute == 0 )
          $errors[] = T_('There must be at least one USED challenge range configuration.');
+
+      if( $this->MaxDefenses <= 0 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
+         $errors[] = sprintf( T_('Max. defenses for remaining ranks must be in range [1..%s].'), TLADDER_MAX_DEFENSES );
+      if( $this->MaxDefenses1 < 0 || $this->MaxDefenses1 > TLADDER_MAX_DEFENSES
+            || $this->MaxDefenses2 < 0 || $this->MaxDefenses2 > TLADDER_MAX_DEFENSES )
+         $errors[] = sprintf( T_('Max. defenses for groups must be in range [0..%s] (0 if not used).'), TLADDER_MAX_DEFENSES );
+      if( $this->MaxDefensesStart1 < 0 || $this->MaxDefensesStart2 < 0 )
+         $errors[] = T_('Max. defenses start-rank for groups must be 0 (if not used) or >0 otherwise.');
+      if( ($this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 == 0) || ($this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 > 0) )
+         $errors[] = sprintf( T_('Max. defenses and start-rank for group #%s must both be 0 (if not used) or both be given.'), 1 );
+      if( ($this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 == 0) || ($this->MaxDefenses2 == 0 && $this->MaxDefensesStart2 > 0) )
+         $errors[] = sprintf( T_('Max. defenses and start-rank for group #%s must both be 0 (if not used) or both be given.'), 2 );
+      if( $this->MaxDefenses1 > 0 && ($this->MaxDefenses >= $this->MaxDefenses1) )
+         $errors[] = sprintf( T_('Max. defenses for remaining ranks must be < max. defenses for group #%s.'), 1 );
+      if( $this->MaxDefenses2 > 0 && ($this->MaxDefenses >= $this->MaxDefenses2) )
+         $errors[] = sprintf( T_('Max. defenses for remaining ranks must be < max. defenses for group #%s.'), 2 );
+      if( $this->MaxDefenses1 > 0 && $this->MaxDefenses2 > 0 && ($this->MaxDefenses2 >= $this->MaxDefenses1) )
+         $errors[] = T_('Max. defenses for group #1 must be > max. defenses for group #2.');
+      if( $this->MaxDefensesStart1 > 0 && $this->MaxDefensesStart2 > 0 && ($this->MaxDefensesStart2 <= $this->MaxDefensesStart1) )
+         $errors[] = T_('Max. defenses start-rank for group #1 must be < start-rank for group #2.');
+      if( $this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 == 0 && $this->MaxDefenses2 > 0 )
+         $errors[] = T_('If one group is unused, it must be group #2.');
 
       return $errors;
    }
@@ -133,6 +174,27 @@ class TournamentLadderProps
          $arr[] = T_('anyone above your own ladder position');
       elseif( $this->ChallengeRangeAbsolute > 0 )
          $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
+      $arr_props[] = $arr;
+
+      $arr = array( T_('The number of incoming challenges for any defender is restricted to') );
+      $groups = 3;
+      if( $this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 > 0 )
+         $arr[] = sprintf( T_('%s challenges for ranks #1..%s'),
+                           $this->MaxDefenses1, $this->MaxDefensesStart1 );
+      else
+         --$groups;
+      if( $this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 > 0 )
+         $arr[] = sprintf( T_('%s challenges for ranks #%s..%s'),
+                           $this->MaxDefenses2, $this->MaxDefensesStart1 + 1, $this->MaxDefensesStart2 );
+      else
+         --$groups;
+      if( $this->MaxDefenses > 0 )
+      {
+         if( $groups > 1 )
+            $arr[] = sprintf( T_('%s challenges for remaining ranks'), $this->MaxDefenses );
+         else
+            $arr[] = sprintf( T_('%s challenges for all ranks'), $this->MaxDefenses );
+      }
       $arr_props[] = $arr;
 
       // general conditions
@@ -155,12 +217,20 @@ class TournamentLadderProps
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
       $high_rank = $this->calc_highest_challenge_rank( $tl_user->Rank );
-
       for( $pos=$user_rank; $pos >= $high_rank; $pos-- )
       {
          $tladder = $iterator->getIndexValue( 'Rank', $pos, 0 );
-         if( $tladder->Rank >= $high_rank && $tladder->Rank < $user_rank )
-            $tladder->AllowChallenge = true;
+         if( is_null($tladder) )
+            continue;
+
+         if( $tladder->Rank >= $high_rank && $tladder->Rank < $user_rank ) // chk again (race-cond)
+         {
+            // check max-defenses
+            if( $tladder->ChallengesIn < $this->calc_max_defenses($tladder->Rank) )
+               $tladder->AllowChallenge = true;
+            else
+               $tladder->MaxChallenged = true;
+         }
       }
 
       return $tl_user;
@@ -210,7 +280,19 @@ class TournamentLadderProps
       elseif( $this->ChallengeRangeAbsolute > 0 )
          $high_rank = $ch_rank - $this->ChallengeRangeAbsolute;
 
-      return $high_rank;
+      return max( 1, $high_rank );
+   }
+
+   /*! \brief Returns non-0 number of max. defenses for given ladder-rank. */
+   function calc_max_defenses( $rank )
+   {
+      if( $this->MaxDefenses1 > 0 && $rank <= $this->MaxDefensesStart1 )
+         $max_defenses = $this->MaxDefenses1;
+      elseif( $this->MaxDefenses2 > 0 && $rank <= $this->MaxDefensesStart2 )
+         $max_defenses = $this->MaxDefenses2;
+      else
+         $max_defenses = $this->MaxDefenses;
+      return $max_defenses;
    }
 
    /*!
@@ -227,12 +309,17 @@ class TournamentLadderProps
       if( !is_null($tgame) )
          $errors[] = T_('You may only have one running game per opponent.');
 
+      // check rank-range
       $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank );
       if( $tladder_ch->Rank < $tladder_df->Rank )
          $errors[] = T_('You may only challenge users above your own position.');
       if( $tladder_df->Rank < $high_rank )
          $errors[] = sprintf( T_('Defender rank #%s is out of your rank challenge range [#%s..#%s].'),
                               $tladder_df->Rank, $high_rank, $tladder_ch->Rank - 1 );
+
+      // check defenders max. defenses
+      if( $tladder_df->ChallengesIn >= $this->calc_max_defenses($tladder_df->Rank) )
+         $errors[] = sprintf( T_('Defender already has max. %s incoming challenges.'), $tladder_df->ChallengesIn );
 
       return $errors;
    }
@@ -256,7 +343,12 @@ class TournamentLadderProps
             @$row['tid'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],
-            @$row['ChallengeRangeAbsolute']
+            @$row['ChallengeRangeAbsolute'],
+            @$row['MaxDefenses'],
+            @$row['MaxDefenses1'],
+            @$row['MaxDefenses2'],
+            @$row['MaxDefensesStart1'],
+            @$row['MaxDefensesStart2']
          );
       return $tlp;
    }

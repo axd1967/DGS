@@ -2616,6 +2616,11 @@ span.TWarning {
    color: darkred;
 }
 
+span.MaxChallenged {
+   font-size: 85%;
+   font-style: italic;
+}
+
 a.TAdmin {
    color: blue;
    font-style: italic;

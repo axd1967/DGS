@@ -1642,3 +1642,15 @@ ALTER TABLE TournamentGames
    ADD KEY Defender_uid (Defender_uid ) ;
 
 
+-- added max. number of incoming ladder-challenges
+ALTER TABLE TournamentLadderProps
+   ADD MaxDefenses tinyint unsigned NOT NULL,
+   ADD MaxDefenses1 tinyint unsigned NOT NULL DEFAULT '0',
+   ADD MaxDefenses2 tinyint unsigned NOT NULL DEFAULT '0',
+   ADD MaxDefensesStart1 tinyint unsigned NOT NULL DEFAULT '0',
+   ADD MaxDefensesStart2 tinyint unsigned NOT NULL DEFAULT '0' ;
+
+ALTER TABLE TournamentLadder
+   ADD ChallengesIn tinyint unsigned NOT NULL DEFAULT '0' ;
+
+

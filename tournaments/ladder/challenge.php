@@ -111,6 +111,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          $tg->setStatus( TG_STATUS_PLAY );
          $tg->StartTime = $NOW;
          $tg->insert();
+
+         $tladder_df->update_incoming_challenges( +1 );
       }
       ta_end();
 
