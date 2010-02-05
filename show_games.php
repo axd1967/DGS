@@ -40,6 +40,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       error("not_logged_in");
    $my_id = $player_row['ID'];
 
+   $ext_tid = (int)@$_REQUEST['tid']; // tourney
+   if( $ext_tid < 0 ) $ext_tid = 0;
+
    $observe = @$_GET['observe']; // all | user (only my_id)
    $observe_all = false;
    if( $observe ) //OB=OU+OA
@@ -249,6 +252,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( $finished )
          $extparam->add_entry( 'finished', 1 );
    }
+   if( $ext_tid > 0 )
+      $extparam->add_entry( 'tid', $ext_tid );
    $gtable->add_external_parameters( $extparam, true ); // also for hiddens
 
    // NOTE: check after add_or_del_column()-call
@@ -514,6 +519,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       'UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated" );
 
+   if( $ext_tid > 0 )
+      $qsql->add_part( SQLP_WHERE, "Games.tid=$ext_tid" );
+
    if( $observe ) //OB
    {
       $qsql->add_part( SQLP_FIELDS,
@@ -671,6 +679,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $title2 = sprintf( $games_for,
          user_reference( REF_LINK, 1, '', $user_row),
          echo_rating( @$user_row['Rating2'], true, $uid ));
+   }
+   if( $ext_tid > 0 )
+   {
+      $title2 .= SEP_SPACING . '('
+         . anchor( $base_path."tournaments/view_tournament.php?tid=$ext_tid",
+                   T_('Tournament') . ' #' . $ext_tid ) . ')';
    }
 
 
@@ -880,6 +894,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $menu_array = array();
    $row_str = $gtable->current_rows_string();
    $need_my_games = $all || $is_other;
+
+   if( $ext_tid > 0 )
+      $page .= "tid=$ext_tid".URI_AMP;
 
    if( $is_other ) //RU+FU (other)
    {
