@@ -514,7 +514,7 @@ class TournamentRules
    // ------------ static functions ----------------------------
 
    /*! \brief Deletes TournamentRules-entry for given id. */
-   function delete_tournament_rules( $id ) //TODO# needed ?
+   function delete_tournament_rules( $id )
    {
       $t_rules = new TournamentRules( $id );
       return $t_rules->delete( "TournamentRules::delete_tournament_rules(%s)" );
@@ -607,7 +607,6 @@ class TournamentRules
       if( !isset($ARR_GLOBALS_TOURNAMENT_RULES['FLAGS']) )
       {
          $arr = array();
-         //TODO $arr[TR_FLAGS_]     = T_('Invited#TP_flag');
          $ARR_GLOBALS_TOURNAMENT_RULES['FLAGS'] = $arr;
       }
       else

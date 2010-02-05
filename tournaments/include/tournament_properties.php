@@ -314,7 +314,7 @@ class TournamentProperties
    }
 
    /*! \brief Deletes TournamentProperties-entry for given tournament-id. */
-   function delete_tournament_properties( $tid ) //TODO used?
+   function delete_tournament_properties( $tid )
    {
       $t_props = new TournamentProperties( $tid );
       return $t_props->delete( "TournamentProperties::delete_tournament_properties(%s)" );
