@@ -48,7 +48,7 @@ require_once 'tournaments/include/tournament_games.php';
 global $ENTITY_TOURNAMENT_LADDER; //PHP5
 $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
       FTYPE_PKEY, 'tid', 'rid',
-      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank',
+      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'ChallengesIn',
       FTYPE_DATE, 'Created', 'RankChanged'
    );
 
@@ -61,15 +61,20 @@ class TournamentLadder
    var $RankChanged;
    var $Rank;
    var $BestRank;
+   var $ChallengesIn;
 
    // non-DB fields
 
+   /*! \brief true if challenge allowed on this user. */
    var $AllowChallenge;
+   /*! \brief true, if max. number of incoming challenges reached for current tank. */
+   var $MaxChallenged;
    /*! \brief array of TournamentGames-object of incoming-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
    var $RunningTourneyGames;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
-   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0 )
+   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0,
+         $challenges_in=0 )
    {
       $this->tid = (int)$tid;
       $this->rid = (int)$rid;
@@ -78,8 +83,10 @@ class TournamentLadder
       $this->RankChanged = (int)$rank_changed;
       $this->Rank = $rank;
       $this->BestRank = $bestrank;
+      $this->ChallengesIn = $challenges_in;
       // non-DB fields
       $this->AllowChallenge = false;
+      $this->MaxChallenged = false;
       $this->RunningTourneyGames = array();
    }
 
@@ -131,16 +138,6 @@ class TournamentLadder
          round(($GLOBALS['NOW'] - $this->RankChanged)/SECS_PER_HOUR), $timefmt, '0' );
    }
 
-   /*! \brief Inserts or updates tournament-ladder in database. */
-   function persist()
-   {
-      if( $this->ID > 0 )
-         $success = $this->update();
-      else
-         $success = $this->insert();
-      return $success;
-   }
-
    function insert()
    {
       $this->Created = $GLOBALS['NOW'];
@@ -172,7 +169,24 @@ class TournamentLadder
       $data->set_value( 'RankChanged', $this->RankChanged );
       $data->set_value( 'Rank', $this->Rank );
       $data->set_value( 'BestRank', $this->BestRank );
+      $data->set_value( 'ChallengesIn', $this->ChallengesIn );
       return $data;
+   }
+
+   /*! \brief Increases or decreases TournamentLadder.ChallengesIn by given amount. */
+   function update_incoming_challenges( $diff )
+   {
+      if( !is_numeric($diff) || $diff == 0 )
+         error('invalid_args', "TournamentLadder.update_incoming_challenges.check.diff({$this->rid},$diff)");
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $op = ($diff > 0) ? "+$diff" : '-'.abs($diff);
+      $result = db_query( "TournamentLadder.update_incoming_challenges.update({$this->rid},$diff)",
+         "UPDATE $table SET ChallengesIn=ChallengesIn $op "
+            . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+      if( $result )
+         $this->ChallengesIn += $diff;
+      return $result;
    }
 
    /*!
@@ -308,7 +322,8 @@ class TournamentLadder
             @$row['X_Created'],
             @$row['X_RankChanged'],
             @$row['Rank'],
-            @$row['BestRank']
+            @$row['BestRank'],
+            @$row['ChallengesIn']
          );
       return $tl;
    }
@@ -420,9 +435,10 @@ class TournamentLadder
    {
       $NOW = $GLOBALS['NOW'];
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-      $query = "INSERT INTO $table (tid,rid,uid,Created,RankChanged,Rank,BestRank) "
-             . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), DEFAULT(RankChanged), "
-               . "IFNULL(MAX(Rank),0)+1 AS Rank, 0 AS BestRank "
+
+      // defaults: RankChanged=0, BestRank=0, ChallengesIn=0
+      $query = "INSERT INTO $table (tid,rid,uid,Created,Rank) "
+             . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), IFNULL(MAX(Rank),0)+1 AS Rank "
                . "FROM $table WHERE tid=$tid";
       return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
    }
