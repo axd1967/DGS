@@ -197,6 +197,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
    }
 
+   $sectmenu[T_('My running games')] = "show_games.php?tid=$tid".URI_AMP."uid=$my_id";
+   $sectmenu[T_('All running games')] = "show_games.php?tid=$tid".URI_AMP."uid=all";
+   $sectmenu[T_('My finished games')] = "show_games.php?tid=$tid".URI_AMP."uid=$my_id".URI_AMP."finished=1";
+   $sectmenu[T_('All finished games')] = "show_games.php?tid=$tid".URI_AMP."uid=all".URI_AMP."finished=1";
+
    make_menu( $sectmenu, false);
 
 
