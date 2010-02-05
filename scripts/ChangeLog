@@ -22,6 +22,34 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-05 juga
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder,
+       ~.insert, ~.fillEntityData, ~.update_incoming_challenges, ~.new_from_row,
+       ~.add_participant_to_ladder),
+     tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.calc_max_defenses, ~.check_properties, ~.build_notes_props,
+       ~.fill_ladder_challenge_range, ~.verify_challenge, ~.new_from_row)
+     tournaments/include/types/dgs_ladder.php (DgsLadderTournament.createTournament),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, skins/dragon/screen.css,
+     tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/view.php, tournaments/manage_tournament.php:
+   - added max. number of incoming ladder-challenges: TournamentLadderProps.MaxDefenses*
+   - added current number of incoming challenges: TournamentLadder.ChallengesIn
+-----------
+-- added max. number of incoming ladder-challenges
+ALTER TABLE TournamentLadderProps
+   ADD MaxDefenses tinyint unsigned NOT NULL,
+   ADD MaxDefenses1 tinyint unsigned NOT NULL DEFAULT '0',
+   ADD MaxDefenses2 tinyint unsigned NOT NULL DEFAULT '0',
+   ADD MaxDefensesStart1 tinyint unsigned NOT NULL DEFAULT '0',
+   ADD MaxDefensesStart2 tinyint unsigned NOT NULL DEFAULT '0' ;
+
+ALTER TABLE TournamentLadder
+   ADD ChallengesIn tinyint unsigned NOT NULL DEFAULT '0' ;
+-----------
+
 2010-02-03 juga
 
    * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_uid),
