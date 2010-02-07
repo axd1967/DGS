@@ -20,24 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( "include/std_functions.php" );
 require_once( "include/classlib_userquota.php" );
-//require_once( "include/rating.php" );
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 
 if( !$is_down )
 {
-   if( @$chained ) //when chained after halfhourly_cron.php
-   {
-      $i = 3600*24;
-      $daily_diff = $i - $chained/2;
-      $chained = $i;
-   }
+   if( $chained )
+      $daily_diff = $chained = 3600*24;
    else
-   {
-      $daily_diff = 3600*23;
       connect2mysql();
-   }
+   $daily_diff -= 3600;
 
 
    // Check that updates are not too frequent
@@ -45,15 +38,16 @@ if( !$is_down )
    $row = mysql_single_fetch( 'daily_cron.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=203 LIMIT 1" );
-   if( !$row ) $TheErrors->dump_exit('daily_cron');
-
+   if( !$row )
+      $TheErrors->dump_exit('daily_cron');
    if( $row['timediff'] < $daily_diff )
-      //if( !@$_REQUEST['forced'] )
-         $TheErrors->dump_exit('daily_cron');
+      $TheErrors->dump_exit('daily_cron');
 
    db_query( 'daily_cron.set_lastchanged',
-      "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203 LIMIT 1" )
+         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203 LIMIT 1" )
       or $TheErrors->dump_exit('daily_cron');
+
+   // ---------- BEGIN ------------------------------
 
 
    $delete_waitingroom_entries = true;
@@ -125,7 +119,7 @@ if num_rows==2 {compute differences and checks}
    db_query( 'daily_cron.statistics_insert',
       "INSERT INTO Statistics SET $query" );
 
-}else{//old
+}else{//old //TODO check! remove !?
    $q_finished = "SELECT SUM(Moves) as MovesFinished, COUNT(*) as GamesFinished FROM Games " .
        "WHERE Status='FINISHED'";
    $q_running = "SELECT SUM(Moves) as MovesRunning, COUNT(*) as GamesRunning FROM Games " .
@@ -180,7 +174,7 @@ if num_rows==2 {compute differences and checks}
 if(1){//new
    $result = db_query( 'daily_cron.night_hours',
       "SELECT ID, Timezone, Nightstart, ClockUsed FROM Players WHERE ClockChanged='Y'" );
-   //adjustments from/to summertime are checked in status.php
+   // note: DST-adjustments are checked in include/std_functions.php is_logged_in()
 
    if( @mysql_num_rows( $result) > 0 )
    {
@@ -198,7 +192,7 @@ if(1){//new
       setTZ($otz); //reset to previous
    }
    mysql_free_result($result);
-}else{//older and bugged
+}else{//older and bugged //TODO remove !?
    $result = db_query( 'daily_cron.night_hours',
       "SELECT ID, Nightstart, ClockUsed, Timezone " .
       "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID" );
@@ -237,9 +231,13 @@ if(1){//new
    UserQuota::increase_update_feature_points();
 
 
+   // ---------- END --------------------------------
+
    db_query( 'daily_cron.reset_tick',
          "UPDATE Clock SET Ticks=0 WHERE ID=203 LIMIT 1" );
-//if( !@$chained ) $TheErrors->dump_exit('daily_cron');
-$TheErrors->dump_exit('daily_cron');
-}
+
+   if( !$chained )
+      $TheErrors->dump_exit('daily_cron');
+
+}//$is_down
 ?>
