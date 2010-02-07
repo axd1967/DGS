@@ -101,12 +101,11 @@ class TournamentGames
       return print_r($this, true);
    }
 
-   function setStatus( $status, $check_only=false )
+   function setStatus( $status )
    {
       if( !preg_match( "/^(".CHECK_TG_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentGames.setStatus($status)");
-      if( !$check_only )
-         $this->Status = $status;
+      $this->Status = $status;
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */
