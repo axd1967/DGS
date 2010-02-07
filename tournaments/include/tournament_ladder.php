@@ -190,8 +190,7 @@ class TournamentLadder
    }
 
    /*!
-    * \brief Removes user given by User-object from ladder with given tournament tid and
-    *        remove TP if $remove_all=true.
+    * \brief Removes user from ladder with given tournament tid and remove TP if $remove_all=true.
     * \return error-list (empty on success)
     */
    function remove_user_from_ladder( $remove_all )
