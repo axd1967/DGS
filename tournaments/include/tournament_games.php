@@ -223,11 +223,16 @@ class TournamentGames
       return ($row) ? TournamentGames::new_from_row($row) : NULL;
    }
 
-   /*! \brief Returns ListIterator with TournamentGames-objects for given tournament-id and TournamentGames-status. */
+   /*!
+    * \brief Returns ListIterator with TournamentGames-objects for given tournament-id and TournamentGames-status.
+    * \param $status null=no restriction on status, single-status or array with status to restrict on
+    */
    function load_tournament_games( $iterator, $tid, $status=null )
    {
       $qsql = TournamentGames::build_query_sql( $tid );
-      if( !is_null($status) )
+      if( is_array($status) )
+         $qsql->add_part( SQLP_WHERE, build_query_in_clause('TG.Status', $status, true) );
+      elseif( !is_null($status) )
          $qsql->add_part( SQLP_WHERE, "TG.Status='" . mysql_addslashes($status) . "'" );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
@@ -243,6 +248,21 @@ class TournamentGames
       mysql_free_result($result);
 
       return $iterator;
+   }
+
+   /*! \brief Signals end of tournament-game updating TournamentGames to SCORE-status for given tournament-ID and game-id. */
+   function update_tournament_game_end( $dbgmsg, $tid, $gid )
+   {
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('invalid_args', "TournamentGames.update_tournament_game_end.check.tid($tid,$gid)");
+      if( !is_numeric($gid) || $gid <= 0 )
+         error('invalid_args', "TournamentGames.update_tournament_game_end.check.gid($tid,$gid)");
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->table;
+      $result = db_query( $dbgmsg."($gid,$tid)",
+         "UPDATE $table SET Status='".TG_STATUS_SCORE."' "
+         . "WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
+      return $result;
    }
 
 } // end of 'TournamentGames'

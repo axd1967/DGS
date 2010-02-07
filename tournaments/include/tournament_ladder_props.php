@@ -357,7 +357,7 @@ class TournamentLadderProps
 
       $tgame = TournamentGames::load_tournament_game_by_uid( $tladder_ch->tid,
          $tladder_ch->uid, $tladder_df->uid );
-      if( !is_null($tgame) )
+      if( !is_null($tgame) && $tgame->Status != TG_STATUS_DONE )
          $errors[] = T_('You may only have one running game per opponent.');
 
       // check rank-range

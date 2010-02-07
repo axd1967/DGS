@@ -71,10 +71,11 @@ define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restri
 
 // ---------- Tournament Games Stuff ------------------------------
 
-define('TG_STATUS_INIT', 'INIT');
-define('TG_STATUS_PLAY', 'PLAY');
-define('TG_STATUS_DONE', 'DONE');
-define('CHECK_TG_STATUS', 'INIT|PLAY|DONE');
+define('TG_STATUS_INIT',   'INIT');
+define('TG_STATUS_PLAY',   'PLAY');
+define('TG_STATUS_SCORE',  'SCORE');
+define('TG_STATUS_DONE',   'DONE');
+define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|DONE');
 
 // ---------- Tournament Ladder Props -----------------------------
 
