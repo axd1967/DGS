@@ -245,9 +245,10 @@ Check and adjust defines in 'include/graph.php':
 > crontab -e
 
 # m  h dom mon dow command
-*/5  *  *   *   *   wget -q -O - http://your.url/clock_tick.php
-0,30 *  *   *   *   wget -q -O - http://your.url/halfhourly_cron.php
-25   5  *   *   *   wget -q -O - http://your.url/daily_cron.php
+*/5 * * * *          wget -q -O - http://your.url/clock_tick.php
+7,22,37,52 * * * *   wget -q -O - http://your.url/tournaments/cron_tournaments.php
+0,30 * * * *         wget -q -O - http://your.url/halfhourly_cron.php
+25 5 * * *           wget -q -O - http://your.url/daily_cron.php
 
 
 (( Windows NT/200x/XP - some freeware clones of cron may be found on the web ))
