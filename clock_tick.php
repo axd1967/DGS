@@ -21,23 +21,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/classlib_game.php' );
+require_once 'tournaments/include/tournament_games.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
-   $chained = @$_REQUEST['chained'];
-   if( @$chained ) //to be chained to other cron jobs (see at EOF)
-   {
-      $i = floor(3600/TICK_FREQUENCY);
-      $tick_diff = $i - 10;
-      $chained = $i;
-   }
+   if( $chained )
+      $tick_diff = $chained = floor(3600/TICK_FREQUENCY);
    else
-   {
-      $tick_diff = floor(3600/TICK_FREQUENCY) - 10;
-   }
-   connect2mysql();
+      connect2mysql();
+   $tick_diff -= 10;
 
 
    // Check that ticks are not too frequent
@@ -45,16 +39,17 @@ if( !$is_down )
    $row = mysql_single_fetch( 'clock_tick.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=201 LIMIT 1" );
-   if( !$row ) $TheErrors->dump_exit('clock_tick');
-
+   if( !$row )
+      $TheErrors->dump_exit('clock_tick');
    if( $row['timediff'] < $tick_diff )
-      //if( !@$_REQUEST['forced'] )
-         $TheErrors->dump_exit('clock_tick');
+      $TheErrors->dump_exit('clock_tick');
 
    db_query( 'clock_tick.set_lastchanged',
-      "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201 LIMIT 1" )
+         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201 LIMIT 1" )
       or $TheErrors->dump_exit('clock_tick');
 
+
+   // ---------- BEGIN ------------------------------
 
    // $NOW is time in UTC
    $hour = gmdate('G', $NOW);
@@ -212,19 +207,25 @@ if(1){//new
          extract($prow);
 
          //TODO: HOT_SECTION ???
-         $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
-             "Last_X=".POSX_TIME.", " .
-             "ToMove_ID=0, " .
-             "Score=$score, " .
-             "Lastchanged=FROM_UNIXTIME($NOW)" ;
+         ta_begin();
+         {//HOT-section to save game-timeout
+            $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
+                "Last_X=".POSX_TIME.", " .
+                "ToMove_ID=0, " .
+                "Score=$score, " .
+                "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
-         db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
+            db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
 
-         if( @mysql_affected_rows() != 1)
-         {
-            error('mysql_update_game',"clock_tick.time_is_up2($gid)");
-            continue;
-         }
+            if( @mysql_affected_rows() != 1)
+            {
+               error('mysql_update_game',"clock_tick.time_is_up2($gid)");
+               continue;
+            }
+
+            // signal game-end for tournament
+            if( $tid > 0 )
+               TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout", $tid, $gid );
 
 //FIXME(?)
 /* To store the last $hours info (never used, to be checked)
@@ -240,52 +241,58 @@ if(1){//new
             error('mysql_insert_move', "clock_tick.update_moves($gid)");
 */
 
-         // Send messages to the players
-         $Text = "The result in the game:<center>"
-               . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
-               . "</center>was:<center>"
-               . score2text($score,true,true)
-               . "</center>";
-         if( $X_GameFlags & GAMEFLAGS_HIDDEN_MSG )
-            $Text .= "<p><b>Info:</b> The game has hidden comments!";
-         $Text.= "<p>Send a message to:<center>"
-               . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
-               . "<br>"
-               . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
-               . "</center>" ;
+            // Send messages to the players
+            $Text = "The result in the game:<center>"
+                  . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
+                  . "</center>was:<center>"
+                  . score2text($score,true,true)
+                  . "</center>";
+            if( $X_GameFlags & GAMEFLAGS_HIDDEN_MSG )
+               $Text .= "<p><b>Info:</b> The game has hidden comments!";
+            $Text.= "<p>Send a message to:<center>"
+                  . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
+                  . "<br>"
+                  . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
+                  . "</center>" ;
 
-         send_message( 'clock_tick', $Text, 'Game result'
-            ,array($Black_ID,$White_ID), '', /*notify*/true
-            , 0, 'RESULT', $gid);
+            send_message( 'clock_tick', $Text, 'Game result'
+               ,array($Black_ID,$White_ID), '', /*notify*/true
+               , 0, 'RESULT', $gid);
 
-         $rated_status = update_rating2($gid); //0=rated game
+            $rated_status = update_rating2($gid); //0=rated game
 
-         // Change some stats
-         db_query( "clock_tick.timeup_update_white($gid)",
-            "UPDATE Players SET Running=Running-1, Finished=Finished+1"
-            .($rated_status ? '' : ", RatedGames=RatedGames+1"
-               .($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-             ). " WHERE ID=$White_ID LIMIT 1" );
+            // Change some stats
+            db_query( "clock_tick.timeup_update_white($gid)",
+               "UPDATE Players SET Running=Running-1, Finished=Finished+1"
+               .($rated_status ? '' : ", RatedGames=RatedGames+1"
+                  .($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+                ). " WHERE ID=$White_ID LIMIT 1" );
 
-         db_query( "clock_tick.timeup_update_black($gid)",
-            "UPDATE Players SET Running=Running-1, Finished=Finished+1"
-            .($rated_status ? '' : ", RatedGames=RatedGames+1"
-               .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-             ). " WHERE ID=$Black_ID LIMIT 1" );
+            db_query( "clock_tick.timeup_update_black($gid)",
+               "UPDATE Players SET Running=Running-1, Finished=Finished+1"
+               .($rated_status ? '' : ", RatedGames=RatedGames+1"
+                  .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+                ). " WHERE ID=$Black_ID LIMIT 1" );
 
-         delete_all_observers($gid, $rated_status!=1, $Text);
+            delete_all_observers($gid, $rated_status!=1, $Text);
 
-         // GamesPriority-entries are kept for running games only, delete for finished games too
-         NextGameOrder::delete_game_priorities( $gid );
+            // GamesPriority-entries are kept for running games only, delete for finished games too
+            NextGameOrder::delete_game_priorities( $gid );
+         }
+         ta_end();
       }
    }
    mysql_free_result($result);
    //unset($ticks);
 
+
+   // ---------- END --------------------------------
+
    db_query( 'clock_tick.reset_tick',
          "UPDATE Clock SET Ticks=0 WHERE ID=201 LIMIT 1" );
-if( !@$chained ) $TheErrors->dump_exit('clock_tick');
-//the whole cron stuff in one cron job (else comments this line):
-include_once( "halfhourly_cron.php" );
-} //$is_down
+
+   if( !$chained )
+      $TheErrors->dump_exit('clock_tick');
+
+}//$is_down
 ?>
