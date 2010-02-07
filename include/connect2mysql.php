@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once( "include/config-local.php" );
+require_once( "include/error_functions.php" );
 //@set_time_limit(0); //does not work with safe_mode
 
 if( !defined('DBG_QUERY') )
@@ -364,6 +365,24 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
          . " WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
    }
    return true;
+}
+
+/*! \brief Returns query-part for field with IN-clause. */
+function build_query_in_clause( $field, $arr, $is_string=true )
+{
+   $clause = '';
+   if( count($arr) > 0 )
+   {
+      $arr_vals = array();
+      foreach( $arr as $item )
+      {
+         $arr_vals[] = ( $is_string || !is_numeric($item) )
+            ? "'" . mysql_addslashes($item) . "'"
+            : $item;
+      }
+      $clause = "$field IN (" . implode(',', $arr_vals) . ")";
+   }
+   return $clause;
 }
 
 ?>
