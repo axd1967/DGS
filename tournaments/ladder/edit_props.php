@@ -107,11 +107,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
       $tform->add_empty_row();
    }
 
+   // challenge range
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Range Absolute'),
          'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], '', ));
    $tform->add_empty_row();
 
+   // max. defenses
    $tform->add_row( array(
          'DESCRIPTION', T_('Max. Defenses'),
          'TEXT',        T_('Start Rank') . ': ',
@@ -130,6 +132,24 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TAB',
          'TEXT',        T_('For remaining ranks restrict max. defenses to') . ': ',
          'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'], '', ));
+   $tform->add_empty_row();
+
+   // game-end
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Game End handling'),
+         'SELECTBOX',   'gend_normal', 1, TournamentLadderProps::getGameEndText(null, TGE_NORMAL),
+                        $vars['gend_normal'], false,
+         'TEXT',        sprintf( '(%s)', T_('Challenger wins by score or resignation')), ));
+   $tform->add_row( array(
+         'TAB',
+         'SELECTBOX',   'gend_timeout', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT),
+                        $vars['gend_timeout'], false,
+         'TEXT',        sprintf( '(%s)', T_('Defender loses by timeout')), ));
+   $tform->add_row( array(
+         'TAB',
+         'SELECTBOX',   'gend_jigo', 1, TournamentLadderProps::getGameEndText(null, TGE_JIGO),
+                        $vars['gend_jigo'], false,
+         'TEXT',        sprintf( '(%s)', T_('Jigo')), ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
@@ -180,6 +200,9 @@ function parse_edit_form( &$tlp )
       'max_def2'        => $tlp->MaxDefenses2,
       'max_def_start1'  => $tlp->MaxDefensesStart1,
       'max_def_start2'  => $tlp->MaxDefensesStart2,
+      'gend_normal'     => $tlp->GameEndNormal,
+      'gend_jigo'       => $tlp->GameEndJigo,
+      'gend_timeout'    => $tlp->GameEndTimeout,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -229,6 +252,10 @@ function parse_edit_form( &$tlp )
          $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s'), 2 );
 
 
+      $tlp->setGameEndNormal( $vars['gend_normal'] );
+      $tlp->setGameEndTimeout( $vars['gend_timeout'] );
+      $tlp->setGameEndJigo( $vars['gend_jigo'] );
+
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
       if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('MaxDefenses#edits');
@@ -236,6 +263,9 @@ function parse_edit_form( &$tlp )
       if( $old_vals['max_def2'] != $tlp->MaxDefenses2 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('MaxDefenses#edits');
+      if( $old_vals['gend_normal'] != $tlp->GameEndNormal ) $edits[] = T_('GameEnd#edits');
+      if( $old_vals['gend_timeout'] != $tlp->GameEndTimeout ) $edits[] = T_('GameEnd#edits');
+      if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('GameEnd#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

@@ -76,4 +76,20 @@ define('TG_STATUS_PLAY', 'PLAY');
 define('TG_STATUS_DONE', 'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|DONE');
 
+// ---------- Tournament Ladder Props -----------------------------
+
+// action to do for handling game-end in tournament for case
+define('TGEND_NO_CHANGE',        'NO_CHANGE');  // no change for challenger and defender
+define('TGEND_CHALLENGER_ABOVE', 'CH_ABOVE');   // challenger moves 1 rank above defender
+define('TGEND_CHALLENGER_BELOW', 'CH_BELOW');   // challenger moves 1 rank below defender
+define('TGEND_SWITCH',           'SWITCH');     // challenger and defender switch places
+define('TGEND_DEFENDER_BELOW',   'DF_BELOW');   // defender moves 1 rank below challenger
+define('TGEND_DEFENDER_LAST',    'DF_LAST');    // defender moves at ladder-bottom
+define('TGEND_DEFENDER_DELETE',  'DF_DEL');     // defender is removed from ladder
+
+// see also TournamentLadderProps::getGameEndText()
+define('CHECK_TGEND_NORMAL',  'CH_ABOVE|CH_BELOW|SWITCH|DF_BELOW|DF_LAST');
+define('CHECK_TGEND_JIGO',    'NO_CHANGE|CH_ABOVE|CH_BELOW');
+define('CHECK_TGEND_TIMEOUT', 'NO_CHANGE|CH_ABOVE|CH_BELOW|SWITCH|DF_BELOW|DF_LAST|DF_DEL');
+
 ?>

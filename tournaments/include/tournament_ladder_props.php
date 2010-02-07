@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
+require_once 'include/utilities.php';
 require_once 'tournaments/include/tournament_globals.php';
 
  /*!
@@ -33,6 +34,10 @@ require_once 'tournaments/include/tournament_globals.php';
 
 define('TLADDER_MAX_DEFENSES', 20);
 
+// game-end type
+define('TGE_NORMAL',  1);
+define('TGE_JIGO',    2);
+define('TGE_TIMEOUT', 3);
 
  /*!
   * \class TournamentLadderProps
@@ -40,13 +45,18 @@ define('TLADDER_MAX_DEFENSES', 20);
   * \brief Class to manage TournamentLadderProps-table for ladder-specific properties
   */
 
+// lazy-init in Tournament::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS; //PHP5
+$ARR_GLOBALS_TOURNAMENT_LADDER_PROPS = array();
+
 global $ENTITY_TOURNAMENT_LADDER_PROPS; //PHP5
 $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2',
                   'MaxDefensesStart1', 'MaxDefensesStart2',
-      FTYPE_DATE, 'Lastchanged'
+      FTYPE_DATE, 'Lastchanged',
+      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeout'
    );
 
 class TournamentLadderProps
@@ -60,11 +70,16 @@ class TournamentLadderProps
    var $MaxDefenses2;
    var $MaxDefensesStart1;
    var $MaxDefensesStart2;
+   var $GameEndNormal;
+   var $GameEndJigo;
+   var $GameEndTimeout;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
-         $challenge_range_abs=0, $max_defenses=0, $max_defenses1=0, $max_defenses2=0,
-         $max_defenses_start1=0, $max_defenses_start2=0 )
+         $challenge_range_abs=0,
+         $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
+         $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
+         $game_end_timeout=TGEND_DEFENDER_BELOW )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -75,11 +90,35 @@ class TournamentLadderProps
       $this->MaxDefenses2 = (int)$max_defenses2;
       $this->MaxDefensesStart1 = (int)$max_defenses_start1;
       $this->MaxDefensesStart2 = (int)$max_defenses_start2;
+      $this->setGameEndNormal($game_end_normal);
+      $this->setGameEndJigo($game_end_jigo);
+      $this->setGameEndTimeout($game_end_timeout);
    }
 
    function to_string()
    {
       return print_r($this, true);
+   }
+
+   function setGameEndNormal( $game_end )
+   {
+      if( !preg_match( "/^(".CHECK_TGEND_NORMAL.")$/", $game_end ) )
+         error('invalid_args', "TournamentLadderProps.setGameEndNormal($game_end)");
+      $this->GameEndNormal = $game_end;
+   }
+
+   function setGameEndJigo( $game_end )
+   {
+      if( !preg_match( "/^(".CHECK_TGEND_JIGO.")$/", $game_end ) )
+         error('invalid_args', "TournamentLadderProps.setGameEndJigo($game_end)");
+      $this->GameEndJigo = $game_end;
+   }
+
+   function setGameEndTimeout( $game_end )
+   {
+      if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT.")$/", $game_end ) )
+         error('invalid_args', "TournamentLadderProps.setGameEndTimeout($game_end)");
+      $this->GameEndTimeout = $game_end;
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */
@@ -127,6 +166,9 @@ class TournamentLadderProps
       $data->set_value( 'MaxDefenses2', $this->MaxDefenses2 );
       $data->set_value( 'MaxDefensesStart1', $this->MaxDefensesStart1 );
       $data->set_value( 'MaxDefensesStart2', $this->MaxDefensesStart2 );
+      $data->set_value( 'GameEndNormal', $this->GameEndNormal );
+      $data->set_value( 'GameEndJigo', $this->GameEndJigo );
+      $data->set_value( 'GameEndTimeout', $this->GameEndTimeout );
       return $data;
    }
 
@@ -161,7 +203,7 @@ class TournamentLadderProps
          $errors[] = T_('If one group is unused, it must be group #2.');
 
       return $errors;
-   }
+   }//check_properties
 
    /*! \brief Returns array( header, notes-array ) with this properties in textual form. */
    function build_notes_props()
@@ -200,8 +242,17 @@ class TournamentLadderProps
       // general conditions
       $arr_props[] = T_('You may only have one running game per opponent.');
 
+      // game-end handling
+      $arr = array( T_('On game-end perform the following action') );
+      $arr[] = sprintf( '%s: %s', T_('if challengers wins by score or resignation'),
+                        TournamentLadderProps::getGameEndText($this->GameEndNormal) );
+      $arr[] = sprintf( '%s: %s', T_('if defender loses by timeout'),
+                        TournamentLadderProps::getGameEndText($this->GameEndTimeout) );
+      $arr[] = sprintf( '%s: %s', T_('on Jigo'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
+      $arr_props[] = $arr;
+
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
-   }
+   }//build_notes_props
 
    /*!
     * \brief Enhances ladder with additional info/data (Challenge-range).
@@ -348,7 +399,10 @@ class TournamentLadderProps
             @$row['MaxDefenses1'],
             @$row['MaxDefenses2'],
             @$row['MaxDefensesStart1'],
-            @$row['MaxDefensesStart2']
+            @$row['MaxDefensesStart2'],
+            @$row['GameEndNormal'],
+            @$row['GameEndJigo'],
+            @$row['GameEndTimeout']
          );
       return $tlp;
    }
@@ -375,6 +429,50 @@ class TournamentLadderProps
       $row = mysql_single_fetch( "TournamentLadderProps::load_tournament_ladder_props($tid)",
          $qsql->get_select() );
       return ($row) ? TournamentLadderProps::new_from_row($row) : NULL;
+   }
+
+   /*! \brief Returns game-end-text, or all game-end-texts for given game-end-type TGE_.. (if game_end=null). */
+   function getGameEndText( $game_end=null, $game_end_type=TGE_NORMAL )
+   {
+      static $arr_tgame_end = array(
+         // NOTE: all enum-values:
+         //       TGEND_NO_CHANGE, TGEND_CHALLENGER_ABOVE, TGEND_CHALLENGER_BELOW, TGEND_SWITCH,
+         //       TGEND_DEFENDER_BELOW, TGEND_DEFENDER_LAST, TGEND_DEFENDER_DELETE
+         TGE_NORMAL  => array( TGEND_CHALLENGER_ABOVE, TGEND_CHALLENGER_BELOW, TGEND_SWITCH,
+                               TGEND_DEFENDER_BELOW, TGEND_DEFENDER_LAST ),
+         TGE_JIGO    => array( TGEND_NO_CHANGE, TGEND_CHALLENGER_ABOVE, TGEND_CHALLENGER_BELOW ),
+         TGE_TIMEOUT => 1, //=all
+      );
+      global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS;
+
+      // lazy-init of texts
+      $key = 'TGAMEEND';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]) )
+      {
+         $arr = array();
+         $arr[TGEND_NO_CHANGE]         = T_('No change#T_gameend');
+         $arr[TGEND_CHALLENGER_ABOVE]  = T_('Move challenger above defender#T_gameend');
+         $arr[TGEND_CHALLENGER_BELOW]  = T_('Move challenger below defender#T_gameend');
+         $arr[TGEND_SWITCH]            = T_('Switch challenger and defender#T_gameend');
+         $arr[TGEND_DEFENDER_BELOW]    = T_('Move defender below challenger#T_gameend');
+         $arr[TGEND_DEFENDER_LAST]     = T_('Move defender to ladder-bottom#T_gameend');
+         $arr[TGEND_DEFENDER_DELETE]   = T_('Remove defender from ladder#T_gameend');
+         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key] = $arr;
+      }
+
+      if( is_null($game_end) )
+      {
+         $arr = $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]; // clone
+         if( !isset($arr_tgame_end[$game_end_type]) )
+            error('invalid_args', "TournamentLadderProps.getGameEndText.check_type($game_end,$game_end_type)");
+         $arr_intersect = $arr_tgame_end[$game_end_type];
+         if( is_array($arr_intersect) )
+            $arr = array_intersect_key_values( $arr, $arr_intersect );
+         return $arr;
+      }
+      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end]) )
+         error('invalid_args', "TournamentLadderProps.getGameEndText($game_end)");
+      return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end];
    }
 
    function get_edit_tournament_status()

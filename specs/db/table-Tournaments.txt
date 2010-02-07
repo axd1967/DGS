@@ -434,6 +434,10 @@ Description:
  MaxDefenses2           | tinyint(3) unsigned  | 0
  MaxDefensesStart1      | tinyint(3) unsigned  | 0
  MaxDefensesStart2      | tinyint(3) unsigned  | 0
+ GameEndNormal          | enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST')                      | CH_ABOVE
+ GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | CH_BELOW
+ GameEndTimeout         | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | DF_BELOW
+
 
 
 ## Fields:
@@ -463,6 +467,18 @@ Description:
    - With 1 rank-groups MaxDefenses1/2,Start1/2=0
    - There must be a default limitation > 0
    - rank-groups1/2 restrictions are optional => use 0 = not-used
+
+* GameEndNormal : normal handling on game-end when challenger wins over defender
+   - default = CH_ABOVE
+   - Enum-values subset: see tournaments/include/tournament_globals.php
+
+* GameEndJigo : handling of game-end with jigo
+   - default = CH_BELOW
+   - Enum-values subset: see tournaments/include/tournament_globals.php
+
+* GameEndTimeout : handling of game-end with timeout of defender
+   - default = DF_BELOW
+   - Enum-values: see tournaments/include/tournament_globals.php
 
 
 ###########################################################################

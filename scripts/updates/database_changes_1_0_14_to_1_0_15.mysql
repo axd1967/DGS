@@ -1654,3 +1654,10 @@ ALTER TABLE TournamentLadder
    ADD ChallengesIn tinyint unsigned NOT NULL DEFAULT '0' ;
 
 
+-- added properties for handling tournament-game-end
+ALTER TABLE TournamentLadderProps
+   ADD GameEndNormal enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST') NOT NULL DEFAULT 'CH_ABOVE',
+   ADD GameEndJigo enum('NO_CHANGE','CH_ABOVE','CH_BELOW') NOT NULL DEFAULT 'CH_BELOW',
+   ADD GameEndTimeout enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL DEFAULT 'DF_BELOW' ;
+
+
