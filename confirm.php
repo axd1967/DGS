@@ -24,6 +24,7 @@ require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
 require_once( 'include/classlib_game.php' );
+require_once 'tournaments/include/tournament_games.php';
 
 
 
@@ -75,7 +76,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       jump_to("status.php");
 
    jump_to("game.php?gid=" . $row['ID']);
-}
+}//jump_to_next_game
 
 
 
@@ -509,171 +510,181 @@ This is why:
    }//switch $action
 
 
-   //See *** HOT_SECTION *** above
-   $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
-   if( mysql_affected_rows() != 1 )
-      error('mysql_update_game', "confirm.update_game2($gid,$action)");
+   ta_begin();
+   {//HOT-section to update game-action
 
-   $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
-   if( mysql_affected_rows() < 1 && $action != 'delete' )
-      error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
+      //See *** HOT_SECTION *** above
+      $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
+      if( mysql_affected_rows() != 1 )
+         error('mysql_update_game', "confirm.update_game2($gid,$action)");
 
-
-
-   if( $message_query )
-   {
-      $result = db_query( "confirm.message_query($gid,$action)", $message_query );
+      $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
       if( mysql_affected_rows() < 1 && $action != 'delete' )
-         error('mysql_insert_move', "confirm.message_query2($gid,$action)");
-   }
+         error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
 
 
-   if( $game_finished )
-   {
-      // send message to my opponent about the result
 
-      $opponent_row = mysql_single_fetch( "confirm.find_opponent($gid,$White_ID,$Black_ID)",
-                        "SELECT * FROM Players WHERE ID=" .
-                           ($White_ID + $Black_ID - $my_id) )
-         or error('opponent_not_found', "confirm.find_opponent2($gid,$White_ID,$Black_ID)");
-
-      if( $my_id == $Black_ID )
+      if( $message_query )
       {
-         $blackname = $player_row['Name'];
-         $whitename = $opponent_row['Name'];
-         $blackhandle = $player_row['Handle'];
-         $whitehandle = $opponent_row['Handle'];
-      }
-      else
-      {
-         $whitename = $player_row['Name'];
-         $blackname = $opponent_row['Name'];
-         $whitehandle = $player_row['Handle'];
-         $blackhandle = $opponent_row['Handle'];
+         $result = db_query( "confirm.message_query($gid,$action)", $message_query );
+         if( mysql_affected_rows() < 1 && $action != 'delete' )
+            error('mysql_insert_move', "confirm.message_query2($gid,$action)");
       }
 
 
-      if( $action == 'delete' )
+      if( $game_finished )
       {
-         //TODO: HOT_SECTION ???
-         db_query( "confirm.update_players_delete($gid,$Black_ID,$White_ID)",
-            "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
+         // signal game-end for tournament
+         if( $tid > 0 )
+            TournamentGames::update_tournament_game_end( "confirm.tourney_game_end.$action", $tid, $gid );
 
-         db_query( "confirm.delete.gamenote($gid)",
-            "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
+         // send message to my opponent about the result
 
-         // mark reference in other double-game to indicate referring game has vanished
-         if( $doublegame_query )
-            db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
+         $opponent_row = mysql_single_fetch( "confirm.find_opponent($gid,$White_ID,$Black_ID)",
+                           "SELECT * FROM Players WHERE ID=" .
+                              ($White_ID + $Black_ID - $my_id) )
+            or error('opponent_not_found', "confirm.find_opponent2($gid,$White_ID,$Black_ID)");
 
-         $Subject = 'Game deleted';
-         //reference: game is deleted => no link
-         $Text = "The game:<center>"
-               . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname)
-               . "</center>has been deleted by your opponent.<br>";
-
-         delete_all_observers($gid, false);
-         $stay_on_board = false; // no game to stay on
-      }
-      else
-      {
-         //TODO: HOT_SECTION ???
-         $rated_status = update_rating2($gid); //0=rated game
-
-         $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                   ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                    ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                   ) . " WHERE ID=$White_ID LIMIT 1" ;
-         db_query( "confirm.update_players_finished.W($gid,$White_ID)", $query );
-
-         $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                   ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                    ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                   ) . " WHERE ID=$Black_ID LIMIT 1" ;
-         db_query( "confirm.update_players_finished.B($gid,$Black_ID)", $query );
-
-         $Subject = 'Game result';
-         $Text = "The result in the game:<center>"
-               . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
-               . "</center>was:<center>"
-               . score2text($score,true,true)
-               . "</center>";
-
-         $tmp = $Text . "<p>Send a message to:<center>"
-               . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
-               . "<br>"
-               . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
-               . "</center>" ;
-         delete_all_observers($gid, $rated_status!=1, $tmp);
-      }
-
-      // GamesPriority-entries are kept for running games only, delete for finished games too
-      NextGameOrder::delete_game_priorities( $gid );
-
-      //Send a message to the opponent
-
-      if( $action != 'delete' )
-      {
-         if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
-            $Text .= "<p><b>Info:</b> The game has hidden comments!";
-      }
-
-      $message_from_server_way = true; //else simulate a message from this player
-      //nervertheless, the clock_tick.php messages are always sent by the server
-      //so it's better to keep $message_from_server_way = true
-      if( $message_from_server_way )
-      {
-         //The server messages does not allow a reply,
-         // so add a *in message* reference to this player.
-         $Text.= "<p>Send a message to:<center>"
-               . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
-               . "</center>" ;
-      }
-
-      if( $message_raw )
-      {
-         if( $message_from_server_way )
+         if( $my_id == $Black_ID )
          {
-            //A server message will only be read by this player
-            $Text .= "<p>Your opponent wrote:<p></p>" . $message_raw;
+            $blackname = $player_row['Name'];
+            $whitename = $opponent_row['Name'];
+            $blackhandle = $player_row['Handle'];
+            $whitehandle = $opponent_row['Handle'];
          }
          else
          {
-            //Because both players will read this message
-            $Text .= "<p>The final message was:<p></p>" . $message_raw;
+            $whitename = $player_row['Name'];
+            $blackname = $opponent_row['Name'];
+            $whitehandle = $player_row['Handle'];
+            $blackhandle = $opponent_row['Handle'];
          }
+
+
+         if( $action == 'delete' )
+         {
+            //TODO: HOT_SECTION ???
+            db_query( "confirm.update_players_delete($gid,$Black_ID,$White_ID)",
+               "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
+
+            db_query( "confirm.delete.gamenote($gid)",
+               "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
+
+            // mark reference in other double-game to indicate referring game has vanished
+            if( $doublegame_query )
+               db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
+
+            $Subject = 'Game deleted';
+            //reference: game is deleted => no link
+            $Text = "The game:<center>"
+                  . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname)
+                  . "</center>has been deleted by your opponent.<br>";
+
+            delete_all_observers($gid, false);
+            $stay_on_board = false; // no game to stay on
+         }
+         else
+         {
+            //TODO: HOT_SECTION ???
+            $rated_status = update_rating2($gid); //0=rated game
+
+            $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
+                       ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+                      ) . " WHERE ID=$White_ID LIMIT 1" ;
+            db_query( "confirm.update_players_finished.W($gid,$White_ID)", $query );
+
+            $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
+                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
+                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+                      ) . " WHERE ID=$Black_ID LIMIT 1" ;
+            db_query( "confirm.update_players_finished.B($gid,$Black_ID)", $query );
+
+            $Subject = 'Game result';
+            $Text = "The result in the game:<center>"
+                  . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
+                  . "</center>was:<center>"
+                  . score2text($score,true,true)
+                  . "</center>";
+
+            $tmp = $Text . "<p>Send a message to:<center>"
+                  . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
+                  . "<br>"
+                  . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
+                  . "</center>" ;
+
+            delete_all_observers($gid, $rated_status!=1, $tmp);
+         }
+
+         // GamesPriority-entries are kept for running games only, delete for finished games too
+         NextGameOrder::delete_game_priorities( $gid );
+
+         //Send a message to the opponent
+
+         if( $action != 'delete' )
+         {
+            if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
+               $Text .= "<p><b>Info:</b> The game has hidden comments!";
+         }
+
+         $message_from_server_way = true; //else simulate a message from this player
+         //nervertheless, the clock_tick.php messages are always sent by the server
+         //so it's better to keep $message_from_server_way = true
+         if( $message_from_server_way )
+         {
+            //The server messages does not allow a reply,
+            // so add a *in message* reference to this player.
+            $Text.= "<p>Send a message to:<center>"
+                  . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
+                  . "</center>" ;
+         }
+
+         if( $message_raw )
+         {
+            if( $message_from_server_way )
+            {
+               //A server message will only be read by this player
+               $Text .= "<p>Your opponent wrote:<p></p>" . $message_raw;
+            }
+            else
+            {
+               //Because both players will read this message
+               $Text .= "<p>The final message was:<p></p>" . $message_raw;
+            }
+         }
+
+         send_message( 'confirm', $Text, $Subject
+            ,$opponent_row['ID'], ''
+            , /*notify*/false //the move itself is always notified, see below
+            ,( $message_from_server_way ? 0 : $my_id )
+            , 'RESULT', $gid);
       }
 
-      send_message( 'confirm', $Text, $Subject
-         ,$opponent_row['ID'], ''
-         , /*notify*/false //the move itself is always notified, see below
-         ,( $message_from_server_way ? 0 : $my_id )
-         , 'RESULT', $gid);
-   }
 
+      // Notify opponent about move
 
-   // Notify opponent about move
-
-   //if( $next_to_move_ID != $my_id ) //always true
+      //if( $next_to_move_ID != $my_id ) //always true
 if(1){ //new
-      notify( 'confirm', $next_to_move_ID);
+         notify( 'confirm', $next_to_move_ID);
 }else{ //old
-      db_query( 'confirm.notify_opponent',
-         "UPDATE Players SET Notify='NEXT' " .
-                   "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
-                   "AND FIND_IN_SET('ON',SendEmail) LIMIT 1" );
-                   //"AND SendEmail LIKE '%ON%' LIMIT 1")
+         db_query( 'confirm.notify_opponent',
+            "UPDATE Players SET Notify='NEXT' " .
+                      "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
+                      "AND FIND_IN_SET('ON',SendEmail) LIMIT 1" );
+                      //"AND SendEmail LIKE '%ON%' LIMIT 1")
 } //old/new
 
 
 
-   // Increase moves and activity
+      // Increase moves and activity
 
-   db_query( 'confirm.activity',
-         "UPDATE Players SET Moves=Moves+1"
-         .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
-         .",LastMove=FROM_UNIXTIME($NOW)"
-         ." WHERE ID=$my_id LIMIT 1" );
+      db_query( 'confirm.activity',
+            "UPDATE Players SET Moves=Moves+1"
+            .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
+            .",LastMove=FROM_UNIXTIME($NOW)"
+            ." WHERE ID=$my_id LIMIT 1" );
+   }
+   ta_end();
 
 
 
@@ -697,10 +708,14 @@ function do_add_time( $game_row, $my_id)
    $add_days  = (int) @$_REQUEST['add_days'];
    $reset_byo = (bool) @$_REQUEST['reset_byoyomi'];
 
-   $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id,
-         time_convert_to_hours( $add_days, 'days'), $reset_byo );
-   if( !is_numeric($add_hours) )
-      error('confirm_add_time', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
+   ta_begin();
+   {//HOT-section to add time
+      $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id,
+            time_convert_to_hours( $add_days, 'days'), $reset_byo );
+      if( !is_numeric($add_hours) )
+         error('confirm_add_time', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
+   }
+   ta_end();
 
    jump_to("game.php?gid=$gid"
       . ($add_hours != 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
