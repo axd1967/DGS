@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once( 'include/globals.php' );
-require_once( "include/connect2mysql.php" );
 require_once( "include/error_functions.php" );
+require_once( "include/connect2mysql.php" );
 
 // $is_down can be overriden for maintenance-allowed users (in config-local.php)
 // $is_maintenance is not changed (can be used to indicate maintenance-mode)
@@ -29,6 +29,11 @@ $is_down_message = "Sorry, dragon is down for maintenance at the moment,"
                  . " please return in an hour or so.<br>\n"
                  . " Don't worry: the clocks are frozen until the server restarts";
 $is_maintenance = $is_down;
+
+
+// chained crons, see 'cron_chained.php'
+global $chained; //PHP5
+$chained = 0;
 
 define('DGS_VERSION', '1.0.15');
 

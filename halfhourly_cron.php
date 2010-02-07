@@ -79,7 +79,8 @@ $strip_html_table = array(
    );
 function mail_strip_html( $str)
 {
- global $strip_html_table;
+   global $strip_html_table;
+
    //keep replaced tags
    $str = strip_tags( $str, '<a><br><p><center><ul><ol><li><goban>');
    $str = preg_replace( array_keys($strip_html_table), array_values($strip_html_table), $str);
@@ -90,19 +91,14 @@ function mail_strip_html( $str)
 }
 
 
+
 if( !$is_down )
 {
-   if( @$chained ) //when chained after clock_tick.php
-   {
-      $i = 3600/2;
-      $half_diff = $i - $chained/2;
-      $chained = $i;
-   }
+   if( $chained )
+      $half_diff = $chained = 3600/2;
    else
-   {
-      $half_diff = 1500;
       connect2mysql();
-   }
+   $half_diff -= 300;
 
 
    // Check that updates are not too frequent
@@ -110,16 +106,17 @@ if( !$is_down )
    $row = mysql_single_fetch( 'halfhourly_cron.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=202 LIMIT 1" );
-   if( !$row ) $TheErrors->dump_exit('halfhourly_cron');
-
+   if( !$row )
+      $TheErrors->dump_exit('halfhourly_cron');
    if( $row['timediff'] < $half_diff )
-      //if( !@$_REQUEST['forced'] )
-         $TheErrors->dump_exit('halfhourly_cron');
+      $TheErrors->dump_exit('halfhourly_cron');
 
    db_query( 'halfhourly_cron.set_lastchanged',
-      "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202 LIMIT 1" )
+         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202 LIMIT 1" )
       or $TheErrors->dump_exit('halfhourly_cron');
 
+
+   // ---------- BEGIN ------------------------------
 
    $this_ticks_per_day = 2*24;
 
@@ -320,11 +317,13 @@ if( !$is_down )
       . " WHERE VacationDays<$max_vacations" );
 
 
+   // ---------- END --------------------------------
 
    db_query( 'halfhourly_cron.reset_tick',
          "UPDATE Clock SET Ticks=0 WHERE ID=202 LIMIT 1" );
-if( !@$chained ) $TheErrors->dump_exit('halfhourly_cron');
-//the whole cron stuff in one cron job (else comments this line):
-include_once( "daily_cron.php" );
-}
+
+   if( !$chained )
+      $TheErrors->dump_exit('halfhourly_cron');
+
+}//$is_down
 ?>
