@@ -210,4 +210,34 @@ function format_array( $arr, $fmt_elem )
    return $str;
 }
 
+/*!
+ * \brief Returns array intersecting first array $array1 with var-args given flat arrays
+ * \note: signature: array array_intersect_key_values( hash $array1, key-array, ... )
+ */
+function array_intersect_key_values( $array1 ) // var-args
+{
+   $arr_keys = array();
+
+   for( $i=1; $i < func_num_args(); $i++)
+   {
+      $arr_intersect = func_get_arg($i);
+      if( !is_array($arr_intersect) )
+         error('invalid_args', "array_intersect_key.check_arr(arg$i)");
+      foreach( $arr_intersect as $key )
+      {
+         if( isset($array1[$key]) )
+            $arr_keys[$key] = 1;
+      }
+   }
+
+   // build intersection in key-order of given main-array
+   $arr = array();
+   foreach( $array1 as $key => $val )
+   {
+      if( isset($arr_keys[$key]) )
+         $arr[$key] = $val;
+   }
+   return $arr;
+}
+
 ?>
