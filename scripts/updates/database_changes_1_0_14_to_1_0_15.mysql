@@ -1661,3 +1661,12 @@ ALTER TABLE TournamentLadderProps
    ADD GameEndTimeout enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL DEFAULT 'DF_BELOW' ;
 
 
+-- added SCORE-status for signaling game-end
+ALTER TABLE TournamentGames
+   CHANGE Status Status enum('INIT','PLAY','SCORE','DONE') NOT NULL DEFAULT 'INIT',
+   ADD INDEX gid (gid) ;
+
+-- Clock for tournament-cron
+INSERT INTO Clock SET ID=205,Lastchanged=0 ;
+
+

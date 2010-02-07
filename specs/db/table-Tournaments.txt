@@ -492,7 +492,7 @@ Description:
  ID             | int(11)                    | NULL
  tid            | int(11)                    | NULL
  gid            | int(11)                    | 0
- Status         | enum('INIT','PLAY','DONE') | INIT
+ Status         | enum('INIT','PLAY','SCORE','DONE') | INIT
  Flags          | smallint(5) unsigned       | 0
  Lastchanged    | datetime                   | 0000-00-00 00:00:00
  ChangedBy      | varchar(54)                |
@@ -514,6 +514,8 @@ Description:
 * Status : status for Tournament-game
    - INIT = Tournament-game scheduled, need to be started
    - PLAY = Tournament-game is being played by challenger and defender
+   - SCORE = Tournament-game has ended by score/resign/jigo/timeout and
+     needs processing for tournament
    - DONE = Tournament-game is finished and results booked in tournament
 
 * Flags : flags
@@ -532,6 +534,7 @@ Description:
 
 * EndTime : like Games.Lastchanged when game finished
 
-* Score : like Games.Score, 0=unset yet (only for INIT/PLAY-status)
+* Score : similar to Games.Score but meaning is oriented on challenger/defender-roles
+   - 0 = unset yet, only for INIT/PLAY-status
 
 
