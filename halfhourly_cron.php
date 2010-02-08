@@ -94,8 +94,9 @@ function mail_strip_html( $str)
 
 if( !$is_down )
 {
+   $half_diff = 3600/2;
    if( $chained )
-      $half_diff = $chained = 3600/2;
+      $chained = $half_diff;
    else
       connect2mysql();
    $half_diff -= 300;

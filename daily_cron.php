@@ -26,8 +26,9 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
+   $daily_diff = 3600*24;
    if( $chained )
-      $daily_diff = $chained = 3600*24;
+      $chained = $daily_diff;
    else
       connect2mysql();
    $daily_diff -= 3600;
