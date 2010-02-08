@@ -22,7 +22,107 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-09 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.update_rank,
+       ~.remove_user_from_ladder, ~.process_game_end, ~._process_game_end),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.calc_game_end_action),
+     tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_end),
+     tournaments/cron_tournaments.php (process_tournament_ladder_game_end),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - process tournament-game ending for ladder-tournament
+     - game-end-handling configured by TournamentLadderProps:
+       - use GameEndNormal  on score/resignation
+       - use GameEndJigo    on jigo
+       - use GameEndTimeout on game-timeout
+     - processing game-end-actions: NO_CHANGE, CH_ABOVE, CH_BELOW, SWITCH,
+       DF_BELOW, DF_LAST, DF_DEL; see 'specs/db/table-Tournaments.txt'
+     - set TournamentGames.Status/Score/EndTime/Lastchanged/ChangedBy-fields
+     - lock TournamentLadder-table for processing game-end-actions
+     - tournament-cron: use tournament-cache to reduce db-load
+     - tournament-cron: check for ALLOW_TOURNAMENTS-config
+-----------
+-- handle tournament-game-ending for tournament-cron
+ALTER TABLE TournamentGames
+   DROP INDEX tid_Status,
+   ADD INDEX tid (tid),
+   ADD INDEX Status (Status) ;
+-----------
+
+   * clock_tick.php, daily_cron.php, halfhourly_cron.php,
+     tournaments/cron_tournaments.php:
+   - bugfix initializing clock-diff
+
+   * clock_tick.php, confirm.php, specs/db/table-Tournaments.txt:
+   - set TG.Score on tournament-game-end
+
+   * tournaments/include/tournament_cache.php (class TournamentCache):
+   - use tournament-cache to reduce db-load for tournament-cron
+
+   * include/db_classes.php (EntityData.get_sql_value, ~.build_changed_by,
+       ~.build_update_part_changed_by):
+   - RTRIM()'ed ChangedBy-field on update
+   - added static func to build field-clause for ChangedBy-field
+   - use '???' if player-unknown, e.g. running from cron
+
+   * include/connect2mysql.php (ta_begin, ta_end):
+   - add error_log()'ing for ta_begin/end()-funcs controlled by DGB_QUERY-const
+
+2010-02-07 juga
+
+   * include/quick_common.php, cron_chained.php, clock_tick.php, daily_cron.php,
+     halfhourly_cron.php:
+   - cleanup of chained-cron: chain crons only with 'cron_chained.php'
+
+   * tournaments/include/tournament_games.php (TournamentGames.load_tournament_games,
+       ~.update_tournament_game_end),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.verify_challenge),
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/view.php, tournaments/cron_tournaments.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-data.sql, specs/db/table-Tournaments.txt,
+     confirm.php (do_add_time), clock_tick.php, INSTALL:
+   - signal game-end for tournament by setting TournamentGames.Status=SCORE
+   - added cron with Clock.ID=205 for tournaments-stuff running every 15 mins
+   - added HOT-section with ta_begin/end() for db-updates
+-----------
+-- added SCORE-status for signaling game-end
+ALTER TABLE TournamentGames
+   CHANGE Status Status enum('INIT','PLAY','SCORE','DONE') NOT NULL DEFAULT 'INIT',
+   ADD INDEX gid (gid) ;
+
+-- Clock for tournament-cron
+INSERT INTO Clock SET ID=205,Lastchanged=0 ;
+-----------
+
+   * include/connect2mysql.php (build_query_in_clause):
+   - added function to build SQL-clause for IN-expression
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.setGameEndNormal, ~.setGameEndJigo, ~.setGameEndTimeout, ~.fillEntityData,
+       ~.build_notes_props, ~.new_from_row, ~.getGameEndText),
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/edit_props.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - added ladder-tournament properties for handling game-end
+-----------
+-- added properties for handling tournament-game-end
+ALTER TABLE TournamentLadderProps
+   ADD GameEndNormal enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST') NOT NULL DEFAULT 'CH_ABOVE',
+   ADD GameEndJigo enum('NO_CHANGE','CH_ABOVE','CH_BELOW') NOT NULL DEFAULT 'CH_BELOW',
+   ADD GameEndTimeout enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL DEFAULT 'DF_BELOW' ;
+-----------
+
+   * include/utilities.php (array_intersect_key_values):
+   - added function to intersect array-map with array-keys
+
 2010-02-05 juga
+
+   * tournaments/view_tournament.php, show_games.php, NEWS:
+   - show tournament-games for specific tournament given by URL-arg 'tid'
+     for all view-modi for my/all running/finished games
+   - added links to show tournament-games for my/all running/finished games
 
    * tournaments/include/tournament_ladder.php (class TournamentLadder,
        ~.insert, ~.fillEntityData, ~.update_incoming_challenges, ~.new_from_row,
