@@ -236,7 +236,7 @@ class TournamentGames
          $qsql->add_part( SQLP_WHERE, "TG.Status='" . mysql_addslashes($status) . "'" );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentGams::load_tournament_games", $query );
+      $result = db_query( "TournamentGames::load_tournament_games", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
@@ -250,17 +250,27 @@ class TournamentGames
       return $iterator;
    }
 
-   /*! \brief Signals end of tournament-game updating TournamentGames to SCORE-status for given tournament-ID and game-id. */
-   function update_tournament_game_end( $dbgmsg, $tid, $gid )
+   /*!
+    * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
+    *        setting TG.Score for given tournament-ID and game-id.
+    */
+   function update_tournament_game_end( $dbgmsg, $changed_by, $tid, $gid, $black_uid, $score )
    {
       if( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentGames.update_tournament_game_end.check.tid($tid,$gid)");
       if( !is_numeric($gid) || $gid <= 0 )
          error('invalid_args', "TournamentGames.update_tournament_game_end.check.gid($tid,$gid)");
+      if( !is_numeric($black_uid) || $black_uid <= GUESTS_ID_MAX )
+         error('invalid_args', "TournamentGames.update_tournament_game_end.check.black_uid($tid,$gid,$black_uid)");
 
       $table = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->table;
-      $result = db_query( $dbgmsg."($gid,$tid)",
-         "UPDATE $table SET Status='".TG_STATUS_SCORE."' "
+      $result = db_query( $dbgmsg."($gid,$tid,$black_uid,$score)",
+         "UPDATE $table SET "
+            . "Status='".TG_STATUS_SCORE."', "
+            . "Score=IF(Challenger_uid=$black_uid,$score,-$score), "
+            . "EndTime=FROM_UNIXTIME($NOW), "
+            . "Lastchanged=FROM_UNIXTIME($NOW), "
+            . EntityData::build_update_part_changed_by($changed_by)
          . "WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
       return $result;
    }

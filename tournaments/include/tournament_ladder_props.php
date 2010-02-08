@@ -375,6 +375,31 @@ class TournamentLadderProps
       return $errors;
    }
 
+   /*!
+    * \brief Checks tournament-game-score and returns corresponding ladder-action for it.
+    * \param $score tournament-game score, see also 'specs/db/table-Tournaments.txt'
+    * \return TGEND_NO_CHANGE if no action needed; otherwise TGEND_..-action
+    */
+   function calc_game_end_action( $score )
+   {
+      $action = TGEND_NO_CHANGE;
+
+      if( abs($score) == SCORE_TIME ) // game timeout
+      {
+         if( $abs == -SCORE_TIME )
+            $action = $this->GameEndTimeout;
+      }
+      elseif( $score != 0 ) // game score|resignation
+      {
+         if( $score < 0 )
+            $action = $this->GameEndNormal;
+      }
+      else // ==0 = jigo
+         $action = $this->GameEndJigo;
+
+      return $action;
+   }
+
 
    // ------------ static functions ----------------------------
 
