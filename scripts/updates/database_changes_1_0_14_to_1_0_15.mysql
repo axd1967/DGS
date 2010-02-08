@@ -1670,3 +1670,10 @@ ALTER TABLE TournamentGames
 INSERT INTO Clock SET ID=205,Lastchanged=0 ;
 
 
+-- handle tournament-game-ending for tournament-cron
+ALTER TABLE TournamentGames
+   DROP INDEX tid_Status,
+   ADD INDEX tid (tid),
+   ADD INDEX Status (Status) ;
+
+
