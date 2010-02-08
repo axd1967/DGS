@@ -232,7 +232,7 @@ class EntityData
    function get_sql_value( $field, $default=null )
    {
       if( $field == FIELD_CHANGEDBY )
-         return "'" . mysql_addslashes( $this->build_changed_by() ) . "'";
+         return "RTRIM('" . mysql_addslashes( $this->build_changed_by() ) . "')";
 
       if( !isset($this->values[$field]) )
          return $default;
@@ -252,13 +252,14 @@ class EntityData
    function build_changed_by( $value=null )
    {
       global $player_row;
-      $changed_by = '[' . @$player_row['Handle'] . '] ';
+      $handle = ( (string)@$player_row['Handle'] != '' ) ? @$player_row['Handle'] : UNKNOWN_VALUE;
+      $changed_by = "[$handle]";
 
       if( is_null($value) )
          $value = $this->get_value(FIELD_CHANGEDBY, '');
 
       if( strncmp($value, $changed_by, strlen($changed_by)) != 0 )
-         $value = $changed_by . $value;
+         $value = "$changed_by $value";
       return $value;
    }
 
@@ -379,6 +380,14 @@ class EntityData
    function delete( $msgfmt, $limit=1 )
    {
       return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_delete($limit) );
+   }
+
+
+   // ------------ static functions ----------------------------
+
+   function build_update_part_changed_by( $handle )
+   {
+      return "ChangedBy=RTRIM(CONCAT('[" . mysql_addslashes($handle) . "] ',ChangedBy))";
    }
 
 } // end of 'EntityData'
