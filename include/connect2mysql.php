@@ -194,6 +194,7 @@ function ta_begin()
       $level_ignore_user_abort = 0;
    if( $level_ignore_user_abort++ == 0 )
       $old_ignore_user_abort = @ignore_user_abort(true);
+   if( DBG_QUERY ) error_log("ta_begin(): level=[$level_ignore_user_abort], old=$old_ignore_user_abort");
    return $old_ignore_user_abort;
 }
 
@@ -204,6 +205,7 @@ function ta_end( $new_ignore_user_abort=null )
    global $old_ignore_user_abort, $level_ignore_user_abort;
    if( is_null($new_ignore_user_abort) )
       $new_ignore_user_abort = $old_ignore_user_abort;
+   if( DBG_QUERY ) error_log("ta_end(): level=[$level_ignore_user_abort], new=$new_ignore_user_abort");
    if( --$level_ignore_user_abort <= 0 )
       @ignore_user_abort((bool)$new_ignore_user_abort);
    $old_ignore_user_abort = $new_ignore_user_abort;
