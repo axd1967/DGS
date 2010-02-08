@@ -536,7 +536,8 @@ This is why:
       {
          // signal game-end for tournament
          if( $tid > 0 )
-            TournamentGames::update_tournament_game_end( "confirm.tourney_game_end.$action", $tid, $gid );
+            TournamentGames::update_tournament_game_end( "confirm.tourney_game_end.$action",
+               $player_row['Handle'], $tid, $gid, $Black_ID, $score );
 
          // send message to my opponent about the result
 

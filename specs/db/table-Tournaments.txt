@@ -537,4 +537,9 @@ Description:
 * Score : similar to Games.Score but meaning is oriented on challenger/defender-roles
    - 0 = unset yet, only for INIT/PLAY-status
 
+   - set for SCORE/DONE-status:
+      - 0 = jigo
+      - -1000, 1000 = Challenger(-1000)/Defender(1000) has won game by resignation
+      - -2000, 2000 = Challenger(-2000)/Defender(2000) has won game by timeout
+
 
