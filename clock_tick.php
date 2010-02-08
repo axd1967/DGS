@@ -27,8 +27,9 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
+   $tick_diff = floor(3600/TICK_FREQUENCY);
    if( $chained )
-      $tick_diff = $chained = floor(3600/TICK_FREQUENCY);
+      $chained = $tick_diff;
    else
       connect2mysql();
    $tick_diff -= 10;
@@ -225,7 +226,8 @@ if(1){//new
 
             // signal game-end for tournament
             if( $tid > 0 )
-               TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout", $tid, $gid );
+               TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout",
+                  'cron', $tid, $gid, $Black_ID, $score );
 
 //FIXME(?)
 /* To store the last $hours info (never used, to be checked)
