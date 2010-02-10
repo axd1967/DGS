@@ -235,15 +235,13 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
-   $clock_used_black = ( $black_row['OnVacation'] > 0 ? VACATION_CLOCK : $black_row["ClockUsed"]);
-   $clock_used_white = ( $white_row['OnVacation'] > 0 ? VACATION_CLOCK : $white_row["ClockUsed"]);
-   $game_info_row['X_BlackClock'] = $clock_used_black; // without weekendclock-offset
-   $game_info_row['X_WhiteClock'] = $clock_used_white;
-   if( $game_info_row['WeekendClock'] != 'Y' )
-   {
-      $clock_used_black += WEEKEND_CLOCK_OFFSET;
-      $clock_used_white += WEEKEND_CLOCK_OFFSET;
-   }
+   $weekend_clock_offset = ( $game_info_row['WeekendClock'] != 'Y' ) ? WEEKEND_CLOCK_OFFSET : 0;
+   $clock_used_black = ( $black_row['OnVacation'] > 0 )
+      ? VACATION_CLOCK
+      : $black_row['ClockUsed'] + $weekend_clock_offset;
+   $clock_used_white = ( $white_row['OnVacation'] > 0 )
+      ? VACATION_CLOCK
+      : $white_row['ClockUsed'] + $weekend_clock_offset;
 
    $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
    $game_info_row['Rated'] = ( $rated ? 'Y' : 'N' );
@@ -291,6 +289,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    }
    $last_ticks = get_clock_ticks($clock_used);
 
+   $game_info_row['X_BlackClock'] = $black_row['ClockUsed']; // no weekendclock-offset or vacation-clock
+   $game_info_row['X_WhiteClock'] = $white_row['ClockUsed'];
    $timeout_date = NextGameOrder::make_timeout_date(
       $game_info_row, $col_to_move, $last_ticks, true/*new-game*/ );
 
