@@ -142,9 +142,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        sprintf( '(%s)', T_('Challenger wins by score or resignation')), ));
    $tform->add_row( array(
          'TAB',
-         'SELECTBOX',   'gend_timeout', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT),
-                        $vars['gend_timeout'], false,
-         'TEXT',        sprintf( '(%s)', T_('Defender loses by timeout')), ));
+         'SELECTBOX',   'gend_timeout_w', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT_WIN),
+                        $vars['gend_timeout_w'], false,
+         'TEXT',        sprintf( '(%s)', T_('Challenger wins by timeout')), ));
+   $tform->add_row( array(
+         'TAB',
+         'SELECTBOX',   'gend_timeout_l', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT_LOSS),
+                        $vars['gend_timeout_l'], false,
+         'TEXT',        sprintf( '(%s)', T_('Challenger loses by timeout')), ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',   'gend_jigo', 1, TournamentLadderProps::getGameEndText(null, TGE_JIGO),
@@ -202,7 +207,8 @@ function parse_edit_form( &$tlp )
       'max_def_start2'  => $tlp->MaxDefensesStart2,
       'gend_normal'     => $tlp->GameEndNormal,
       'gend_jigo'       => $tlp->GameEndJigo,
-      'gend_timeout'    => $tlp->GameEndTimeout,
+      'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
+      'gend_timeout_l'  => $tlp->GameEndTimeoutLoss,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -253,7 +259,8 @@ function parse_edit_form( &$tlp )
 
 
       $tlp->setGameEndNormal( $vars['gend_normal'] );
-      $tlp->setGameEndTimeout( $vars['gend_timeout'] );
+      $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
+      $tlp->setGameEndTimeoutLoss( $vars['gend_timeout_l'] );
       $tlp->setGameEndJigo( $vars['gend_jigo'] );
 
       // determine edits
@@ -264,7 +271,8 @@ function parse_edit_form( &$tlp )
       if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['gend_normal'] != $tlp->GameEndNormal ) $edits[] = T_('GameEnd#edits');
-      if( $old_vals['gend_timeout'] != $tlp->GameEndTimeout ) $edits[] = T_('GameEnd#edits');
+      if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('GameEnd#edits');
+      if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('GameEnd#edits');
    }
 

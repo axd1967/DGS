@@ -35,9 +35,10 @@ require_once 'tournaments/include/tournament_globals.php';
 define('TLADDER_MAX_DEFENSES', 20);
 
 // game-end type
-define('TGE_NORMAL',  1);
-define('TGE_JIGO',    2);
-define('TGE_TIMEOUT', 3);
+define('TGE_NORMAL', 1);
+define('TGE_JIGO', 2);
+define('TGE_TIMEOUT_WIN', 3);
+define('TGE_TIMEOUT_LOSS', 4);
 
  /*!
   * \class TournamentLadderProps
@@ -56,7 +57,7 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2',
                   'MaxDefensesStart1', 'MaxDefensesStart2',
       FTYPE_DATE, 'Lastchanged',
-      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeout'
+      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
    );
 
 class TournamentLadderProps
@@ -72,14 +73,15 @@ class TournamentLadderProps
    var $MaxDefensesStart2;
    var $GameEndNormal;
    var $GameEndJigo;
-   var $GameEndTimeout;
+   var $GameEndTimeoutWin;
+   var $GameEndTimeoutLoss;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
          $challenge_range_abs=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
-         $game_end_timeout=TGEND_DEFENDER_BELOW )
+         $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -92,7 +94,8 @@ class TournamentLadderProps
       $this->MaxDefensesStart2 = (int)$max_defenses_start2;
       $this->setGameEndNormal($game_end_normal);
       $this->setGameEndJigo($game_end_jigo);
-      $this->setGameEndTimeout($game_end_timeout);
+      $this->setGameEndTimeoutWin($game_end_timeout_win);
+      $this->setGameEndTimeoutLoss($game_end_timeout_loss);
    }
 
    function to_string()
@@ -114,11 +117,18 @@ class TournamentLadderProps
       $this->GameEndJigo = $game_end;
    }
 
-   function setGameEndTimeout( $game_end )
+   function setGameEndTimeoutWin( $game_end )
    {
-      if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT.")$/", $game_end ) )
-         error('invalid_args', "TournamentLadderProps.setGameEndTimeout($game_end)");
-      $this->GameEndTimeout = $game_end;
+      if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_WIN.")$/", $game_end ) )
+         error('invalid_args', "TournamentLadderProps.setGameEndTimeoutWin($game_end)");
+      $this->GameEndTimeoutWin = $game_end;
+   }
+
+   function setGameEndTimeoutLoss( $game_end )
+   {
+      if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_LOSS.")$/", $game_end ) )
+         error('invalid_args', "TournamentLadderProps.setGameEndTimeoutLoss($game_end)");
+      $this->GameEndTimeoutLoss = $game_end;
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */
@@ -168,7 +178,8 @@ class TournamentLadderProps
       $data->set_value( 'MaxDefensesStart2', $this->MaxDefensesStart2 );
       $data->set_value( 'GameEndNormal', $this->GameEndNormal );
       $data->set_value( 'GameEndJigo', $this->GameEndJigo );
-      $data->set_value( 'GameEndTimeout', $this->GameEndTimeout );
+      $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
+      $data->set_value( 'GameEndTimeoutLoss', $this->GameEndTimeoutLoss );
       return $data;
    }
 
@@ -248,8 +259,10 @@ class TournamentLadderProps
       $arr = array( T_('On game-end the following action is performed') );
       $arr[] = sprintf( '%s: %s', T_('if challengers wins by score or resignation'),
                         TournamentLadderProps::getGameEndText($this->GameEndNormal) );
-      $arr[] = sprintf( '%s: %s', T_('if defender loses by timeout'),
-                        TournamentLadderProps::getGameEndText($this->GameEndTimeout) );
+      $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout'),
+                        TournamentLadderProps::getGameEndText($this->GameEndTimeoutWin) );
+      $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout'),
+                        TournamentLadderProps::getGameEndText($this->GameEndTimeoutLoss) );
       $arr[] = sprintf( '%s: %s', T_('on Jigo'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
       $arr_props[] = $arr;
 
@@ -386,11 +399,10 @@ class TournamentLadderProps
    {
       $action = TGEND_NO_CHANGE;
 
-      if( abs($score) == SCORE_TIME ) // game timeout
-      {
-         if( $abs == -SCORE_TIME )
-            $action = $this->GameEndTimeout;
-      }
+      if( $score == -SCORE_TIME ) // game timeout (challenger won)
+         $action = $this->GameEndTimeoutWin;
+      elseif( $score == SCORE_TIME ) // game timeout (challenger lost)
+         $action = $this->GameEndTimeoutLoss;
       elseif( $score != 0 ) // game score|resignation
       {
          if( $score < 0 )
@@ -429,7 +441,8 @@ class TournamentLadderProps
             @$row['MaxDefensesStart2'],
             @$row['GameEndNormal'],
             @$row['GameEndJigo'],
-            @$row['GameEndTimeout']
+            @$row['GameEndTimeoutWin'],
+            @$row['GameEndTimeoutLoss']
          );
       return $tlp;
    }
@@ -464,11 +477,13 @@ class TournamentLadderProps
       static $arr_tgame_end = array(
          // NOTE: all enum-values:
          //       TGEND_NO_CHANGE, TGEND_CHALLENGER_ABOVE, TGEND_CHALLENGER_BELOW, TGEND_SWITCH,
-         //       TGEND_DEFENDER_BELOW, TGEND_DEFENDER_LAST, TGEND_DEFENDER_DELETE
+         //       TGEND_DEFENDER_BELOW, TGEND_DEFENDER_LAST, TGEND_DEFENDER_DELETE,
+         //       TGEND_CHALLENGER_LAST, TGEND_CHALLENGER_DELETE
          TGE_NORMAL  => array( TGEND_CHALLENGER_ABOVE, TGEND_CHALLENGER_BELOW, TGEND_SWITCH,
                                TGEND_DEFENDER_BELOW, TGEND_DEFENDER_LAST ),
          TGE_JIGO    => array( TGEND_NO_CHANGE, TGEND_CHALLENGER_ABOVE, TGEND_CHALLENGER_BELOW ),
-         TGE_TIMEOUT => 1, //=all
+         TGE_TIMEOUT_WIN  => 1, //=all
+         TGE_TIMEOUT_LOSS => array( TGEND_NO_CHANGE, TGEND_CHALLENGER_LAST, TGEND_CHALLENGER_DELETE ),
       );
       global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS;
 
@@ -480,6 +495,8 @@ class TournamentLadderProps
          $arr[TGEND_NO_CHANGE]         = T_('No change#T_gameend');
          $arr[TGEND_CHALLENGER_ABOVE]  = T_('Move challenger above defender#T_gameend');
          $arr[TGEND_CHALLENGER_BELOW]  = T_('Move challenger below defender#T_gameend');
+         $arr[TGEND_CHALLENGER_LAST]   = T_('Move challenger to ladder-bottom#T_gameend');
+         $arr[TGEND_CHALLENGER_DELETE] = T_('Remove challenger from ladder#T_gameend');
          $arr[TGEND_SWITCH]            = T_('Switch challenger and defender#T_gameend');
          $arr[TGEND_DEFENDER_BELOW]    = T_('Move defender below challenger#T_gameend');
          $arr[TGEND_DEFENDER_LAST]     = T_('Move defender to ladder-bottom#T_gameend');

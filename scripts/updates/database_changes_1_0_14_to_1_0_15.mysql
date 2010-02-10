@@ -1677,3 +1677,9 @@ ALTER TABLE TournamentGames
    ADD INDEX Status (Status) ;
 
 
+-- added property for handling tournament-game-end challenger-timeout
+ALTER TABLE TournamentLadderProps
+   CHANGE GameEndTimeout GameEndTimeoutWin enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL DEFAULT 'DF_BELOW',
+   ADD GameEndTimeoutLoss enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL DEFAULT 'CH_LAST' ;
+
+
