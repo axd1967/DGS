@@ -177,7 +177,7 @@ class TournamentLadder
    function update_rank( $new_rank, $upd_rank=true )
    {
       $this->Rank = $new_rank;
-      if( $this->Rank < $this->BestRank )
+      if( $this->BestRank <= 0 || $this->Rank < $this->BestRank )
          $this->BestRank = $new_rank;
       if( $upd_rank )
          $this->RankChanged = $GLOBALS['NOW'];
@@ -652,6 +652,7 @@ class TournamentLadder
     */
    function _process_game_end( $tid, $ch_rid, $df_rid, $game_end_action )
    {
+      if( $game_end_action != TGEND_CHALLENGER_LAST && $game_end_action != TGEND_CHALLENGER_DELETE )
       $tladder_df = TournamentLadder::load_tournament_ladder_by_user($tid, 0, $df_rid);
       if( is_null($tladder_df) ) // defender not longer on ladder -> nothing to do
          return true;
@@ -695,6 +696,23 @@ class TournamentLadder
 
             TournamentLadder::move_down_ladder_part( $tid, $ch_new_rank, $tladder_ch->Rank - 1 );
             $success = $tladder_ch->update_rank( $ch_new_rank );
+            break;
+         }
+
+         case TGEND_CHALLENGER_LAST:
+         {
+            $ch_new_rank = TournamentLadder::load_max_rank( $tid ); // last ladder-rank
+            if( $tladder_ch->Rank == $ch_new_rank ) // challenger on new position already -> nothing to do
+               return true;
+
+            TournamentLadder::move_up_ladder_part( $tid, $tladder_ch->Rank + 1, $ch_new_rank );
+            $success = $tladder_ch->update_rank( $ch_new_rank );
+            break;
+         }
+
+         case TGEND_CHALLENGER_DELETE:
+         {
+            $success = $tladder_ch->remove_user_from_ladder( true, false ); //TODO: also "handle" other running games
             break;
          }
 
