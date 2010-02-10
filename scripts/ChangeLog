@@ -22,6 +22,44 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-10 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.update_rank):
+   - bugfix: update TournamentLadder.BestRank if not set yet
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.setGameEndTimeoutWin, ~.setGameEndTimeoutLoss, ~.fillEntityData,
+       ~.build_notes_props, ~.calc_game_end_action, ~.new_from_row, ~.getGameEndText),
+     tournaments/include/tournament_ladder.php (TournamentLadder._process_game_end),
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/edit_props.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added handling tournament-game-end when challenger is losing by timeout
+   - processing game-end-actions: CH_LAST, CH_DEL; see 'specs/db/table-Tournaments.txt'
+-----------
+-- added property for handling tournament-game-end challenger-timeout
+ALTER TABLE TournamentLadderProps
+   CHANGE GameEndTimeout GameEndTimeoutWin enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL DEFAULT 'DF_BELOW',
+   ADD GameEndTimeoutLoss enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL DEFAULT 'CH_LAST' ;
+-----------
+
+   * tournaments/cron_tournaments.php:
+   - load tournament-games to process ordered by tourney-ID and last-changed-date
+
+   * tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_end):
+   - bugfix: missed global $NOW
+
+   * include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/make_game.php (create_game):
+   - fix bug creating new game chosing used clock:
+     ignore weekend if player on vacation
+   - fix bug to calculate games timeout-date chosing to be used clock:
+     ignore weekends and vacation
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props):
+   - adjusted notes-text, added note about running games on user-removal
+
 2010-02-09 juga
 
    * tournaments/include/tournament_ladder.php (TournamentLadder.update_rank,
