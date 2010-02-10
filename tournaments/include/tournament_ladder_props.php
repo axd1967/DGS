@@ -241,9 +241,11 @@ class TournamentLadderProps
 
       // general conditions
       $arr_props[] = T_('You may only have one running game per opponent.');
+      $arr_props[] = T_("On user removal or retreat from the ladder, the running tournament games\n"
+         . "will be continued as normal games without effecting the tournament.");
 
       // game-end handling
-      $arr = array( T_('On game-end perform the following action') );
+      $arr = array( T_('On game-end the following action is performed') );
       $arr[] = sprintf( '%s: %s', T_('if challengers wins by score or resignation'),
                         TournamentLadderProps::getGameEndText($this->GameEndNormal) );
       $arr[] = sprintf( '%s: %s', T_('if defender loses by timeout'),
