@@ -505,6 +505,8 @@ class NextGameOrder
    /*!
     * \brief Calculates timeout-date (in ticks) to be stored in Games.TimeOutDate.
     * \note used for status-games-ordering on remaining-time
+    * \note ignores vacation and weekends
+    *
     * \param $grow Games-table-row to read time-settings for game
     * \param $to_move BLACK | WHITE
     * \param $is_new_game if true get time-settings from $grow without prefix
@@ -512,10 +514,6 @@ class NextGameOrder
     */
    function make_timeout_date( $grow, $to_move, $lastticks, $is_new_game=false )
    {
-      $clockused = ($to_move == BLACK) ? $grow['X_BlackClock'] : $grow['X_WhiteClock'];
-      if( $grow['WeekendClock'] != 'Y' );
-         $clockused += WEEKEND_CLOCK_OFFSET;
-
       // determine time-stuff for time-left-calculus
       $pfx = ($to_move == BLACK) ? 'Black' : 'White';
       if( $is_new_game )
@@ -532,7 +530,7 @@ class NextGameOrder
       }
       $tl_clockused  = $grow["X_{$pfx}Clock"]; // ignore vacation and weekends
 
-      $elapsed_hours = ticks_to_hours(get_clock_ticks($clockused) - $lastticks);
+      $elapsed_hours = ticks_to_hours(get_clock_ticks($tl_clockused) - $lastticks);
       time_remaining($elapsed_hours, $tl_Maintime, $tl_Byotime, $tl_Byoperiods,
          $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
 
