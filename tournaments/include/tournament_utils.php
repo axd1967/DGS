@@ -154,7 +154,7 @@ class TournamentUtils
    // best_rank=0 (init-value)
    function calc_best_rank( $best_rank, $rank )
    {
-      return ($best_rank == 0) ? $rank : min($best_rank, $rank);
+      return ($best_rank <= 0) ? $rank : min($best_rank, $rank);
    }
 
 } // end of 'TournamentUtils'

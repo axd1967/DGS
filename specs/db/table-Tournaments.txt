@@ -415,6 +415,7 @@ Description:
 * Rank : current ladder-rank (=position) for user
 
 * BestRank : maximum of reached ladder-ranks for user caused by direct win or loss
+   - defaults to Rank
 
 
 ###########################################################################

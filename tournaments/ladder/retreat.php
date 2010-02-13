@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
          'TEXT',        $tladder->Rank ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Best Rank'),
-         'TEXT',        ($tladder->BestRank > 0) ? $tladder->BestRank : NO_VALUE ));
+         'TEXT',        $tladder->BestRank ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
