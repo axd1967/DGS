@@ -219,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                $tp->Rating = $tp->User->Rating;
          }
 
-         $ttype->joinTournament( $tp ); // insert or update (and join eventually)
+         $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
 
          // send notification (if needed)
          if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK

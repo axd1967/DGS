@@ -109,12 +109,12 @@ class DgsLadderTournament extends TournamentTemplate
       return TournamentLadder::check_participant_registrations( $tid, $arr_TPs );
    }
 
-   function joinTournament( $tp )
+   function joinTournament( $tourney, $tp )
    {
       ta_begin();
       {//HOT-section to save TournamentParticipant and add user in ladder
          $result = $tp->persist();
-         if( $tp->Status == TP_STATUS_REGISTER )
+         if( $tourney->Status == TOURNEY_STATUS_PLAY && $tp->Status == TP_STATUS_REGISTER )
             $result = TournamentLadder::add_user_to_ladder( $tp->tid, $tp->uid );
       }
       ta_end();
