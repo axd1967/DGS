@@ -3046,6 +3046,7 @@ body#dDGS table#pageMenu {
 /* JUG local devel servers:
  * ldDGS = local devel on CVS-HEAD
  * lsDGS = local stable branch
+ * ltDGS = local devel for db-tests
  */
 body#lsDGS table#pageFoot,
 body#lsDGS table#pageHead,
@@ -3061,6 +3062,7 @@ body#ldDGS table#pageMenu {
 /* JUG remote devel servers:
  * rdDGS = remote devel on CVS-HEAD
  * rsDGS = remote stable branch
+ * ltDGS = local devel for db-tests
  */
 body#rsDGS table#pageFoot,
 body#rsDGS table#pageHead,
@@ -3071,6 +3073,22 @@ body#rdDGS table#pageHead {
 body#rsDGS table#pageMenu,
 body#rdDGS table#pageMenu {
    border-color: #5838C8;
+}
+
+/* JUG local test servers:
+ * ldDGS = local devel on CVS-HEAD
+ * lsDGS = local stable branch
+ * ltDGS = local devel for db-tests
+ */
+body#ltDGS table#pageFoot,
+body#ltDGS table#pageHead,
+body#ltDGS table#pageFoot,
+body#ltDGS table#pageHead {
+   background: #686888;
+}
+body#ltDGS table#pageMenu,
+body#ltDGS table#pageMenu {
+   border-color: #683888;
 }
 
 /* ------------------------- */
