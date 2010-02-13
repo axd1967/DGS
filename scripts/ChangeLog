@@ -24,6 +24,9 @@ ChangeLog
 
 2010-02-13 juga
 
+   * specs/db/dragon-ddl.sql:
+   - sync with current DGS db-schema (tourney-ladder-stuff, cleanup)
+
    * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.update_rank,
        ~.remove_user_from_ladder, ~.switch_user_rank, ~.add_participant_to_ladder,
        ~.move_up_ladder_part, ~.move_down_ladder_part, ~.seed_ladder, ~._process_game_end),
