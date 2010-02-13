@@ -36,13 +36,13 @@ chdir("code_examples/");
         "  b - number of boards (default 20, max. 100)\n" .
         "\n\n\n";
 
-   $loop = get_request_arg('l');
+   $loop = (int)get_request_arg('l', '10');
    if( empty($loop) || $loop <= 0 )
       $loop = 10;
    if( $loop > 100 )
       $loop = 100;
 
-   $bcnt = get_request_arg('b');
+   $bcnt = (int)get_request_arg('b', '20');
    if( empty($bcnt) || $bcnt <= 0 )
       $bcnt = 20;
    if( $bcnt > 100 )

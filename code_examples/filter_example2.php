@@ -60,7 +60,7 @@ $arr_filter_demos = array(
   18 => 'Miscellaneous', # more FC_...
 );
 
-$fdemo = get_request_arg('fdemo');
+$fdemo = (int)get_request_arg('fdemo');
 if( !isset($arr_filter_demos[$fdemo]) )
    $fdemo = 1;
 

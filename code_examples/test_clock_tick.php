@@ -27,6 +27,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
 {
+   if( 1 ) exit; // for security: comment for local-testing only
+
    connect2mysql();
 
    $start = time();

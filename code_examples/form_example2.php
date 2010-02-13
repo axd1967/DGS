@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 chdir("../");
-//require_once("include/quick_common.php");
 require_once( "include/std_functions.php" );
 require_once("include/form_functions.php");
 chdir("code_examples/");
@@ -61,7 +60,7 @@ function ff( $col, $msg ) {
    return "<font color=\"$col\">$msg</font>";
 }
 
-$layout = get_request_arg('layout');
+$layout = (int)get_request_arg('layout', '1');
 if( !isset($arr_layouts[$layout]) )
    $layout = 1;
 $align = (int)@$_REQUEST['align'];
