@@ -25,6 +25,8 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_ladder.php';
 
  /*!
   * \file tournament_helper.php
@@ -39,9 +41,44 @@ require_once 'tournaments/include/tournament_rules.php';
   * \brief Helper-class with mostly static functions to support Tournament management
   *        with db-access combining forces of different tournament-classes.
   */
-
 class TournamentHelper
 {
+   var $tcache;
+
+   function TournamentHelper()
+   {
+      $this->tcache = new TournamentCache();
+   }
+
+   function process_tournament_ladder_game_end( $tourney, $tgame )
+   {
+      $tid = $tourney->ID;
+      $tl_props = $this->tcache->load_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid);
+      if( is_null($tl_props) )
+         return false;
+
+      // process game-end
+      $game_end_action = $tl_props->calc_game_end_action( $tgame->Score );
+
+      ta_begin();
+      {//HOT-section to process tournament-game-end
+         $success = TournamentLadder::process_game_end( $tid, $tgame, $game_end_action );
+         if( $success )
+         {
+            // decrease TG.ChallengesIn for defender
+            $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid ); // don't load
+            $tladder_df->update_incoming_challenges( -1 );
+
+            // tournament-game done
+            $tgame->setStatus(TG_STATUS_DONE);
+            $tgame->update();
+         }
+      }
+      ta_end();
+
+      return $success;
+   }
+
 
    // ------------ static functions ----------------------------
 

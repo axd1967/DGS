@@ -21,10 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 chdir('..');
 require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_cache.php';
-require_once 'tournaments/include/tournament_ladder.php';
-require_once 'tournaments/include/tournament_ladder_props.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -57,7 +56,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
 
    // ---------- BEGIN ------------------------------
 
-   $tcache = new TournamentCache();
+   $thelper = new TournamentHelper();
 
 
    // handle tournament-game ending by score/resignation/jigo/timeout
@@ -71,12 +70,11 @@ if( ALLOW_TOURNAMENTS && !$is_down )
       list( $tgame, $orow ) = $arr_item;
       $tid = $tgame->tid;
 
-      // load Tournament
-      $tourney = $tcache->load_tournament( 'Tournament.cron.game_end', $tid);
+      $tourney = $thelper->tcache->load_tournament( 'Tournament.cron.game_end', $tid);
       if( !is_null($tourney) )
       {
          if( $tourney->Type == TOURNEY_TYPE_LADDER )
-            process_tournament_ladder_game_end( $tourney, $tgame );
+            $thelper->process_tournament_ladder_game_end( $tourney, $tgame );
          elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
             error('invalid_method', "Tournament.cron.game_end.ttype($tid,$tourney->Type)");
       }
@@ -90,37 +88,5 @@ if( ALLOW_TOURNAMENTS && !$is_down )
 
    if( !$chained )
       $TheErrors->dump_exit('cron_tournament');
-
 }//$is_down
-
-
-function process_tournament_ladder_game_end( $tourney, $tgame )
-{
-   global $tcache;
-   $tid = $tourney->ID;
-
-   $tl_props = $tcache->load_tournament_ladder_props( 'Tournament.cron.game_end', $tid);
-   if( is_null($tl_props) )
-      return;
-
-   // process game-end
-   $game_end_action = $tl_props->calc_game_end_action( $tgame->Score );
-
-   ta_begin();
-   {//HOT-section to process tournament-game-end
-      $success = TournamentLadder::process_game_end( $tid, $tgame, $game_end_action );
-      if( $success )
-      {
-         // decrease TG.ChallengesIn for defender
-         $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid ); // don't load
-         $tladder_df->update_incoming_challenges( -1 );
-
-         // tournament-game done
-         $tgame->setStatus(TG_STATUS_DONE);
-         $tgame->update();
-      }
-   }
-   ta_end();
-}//process_tournament_ladder_game_end
-
 ?>
