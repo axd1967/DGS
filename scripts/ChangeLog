@@ -22,6 +22,53 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-13 juga
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.update_rank,
+       ~.remove_user_from_ladder, ~.switch_user_rank, ~.add_participant_to_ladder,
+       ~.move_up_ladder_part, ~.move_down_ladder_part, ~.seed_ladder, ~._process_game_end),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.getGameEndText),
+     tournaments/include/tournament_utils.php (TournamentUtils.calc_best_rank),
+     tournaments/ladder/admin.php, tournaments/ladder/retreat.php,
+     tournaments/ladder/view.php:
+   - fix processing of game-end for ladder-tournament:
+     - forbid to punish challenger for winning tournament-game on timeout
+       with game-end-actions: TGEND_CHALLENGER_LAST, TGEND_CHALLENGER_DELETE
+     - set BestRank/RankChanged on switch-user-rank, moving ladder-user on ladder
+     - additionally lock TournamentParticipant on removing ladder-user,
+       because processing game-end needs "nested" lock
+     - changed signature of TournamentLadder.remove_user_from_ladder-func
+     - for debug-mode log rank-change
+     - bugfixes
+   - changed TournamentLadder.BestRank: defaulting to initial-Rank
+   - fix ladder-view:
+     - don't allow challenging or retreating if not on tourney-PLAY-status
+     - show admin-ladder-link when in tourney-PAIR-status
+
+   * include/table_columns.php (Table.set_rows_per_page),
+     tournaments/ladder/view.php:
+   - set rows-per-page to found-rows to enforce single-page for table-navigation
+
+   * tournaments/include/tournament_helper.php (class TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/cron_tournaments.php:
+   - moved processing of game-end for tournament-ladder into tournament-helper
+     to keep cron simple
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_REG):
+   - bugfix: corrected local-var access
+
+   * tournaments/include/tournament_template.php (TournamentTemplate.joinTournament),
+     tournaments/include/types/dgs_ladder.php (DgsLadderTournament.joinTournament),
+     tournaments/edit_participant.php, tournaments/register.php:
+   - registered-user joins ladder-tournament only if tournament on PLAY-status
+
+   * include/register_functions.php (UserRegistration.register_user):
+   - set cookied on demand specified by arg
+
+   * code_examples/filter_example2.php, code_examples/form_example2.php,
+     code_examples/test_clock_tick.php, code_examples/test_nigiri_random.php:
+   - increase script-security for open scripts: type-cast args, early-exit script
+
 2010-02-10 juga
 
    * tournaments/include/tournament_ladder.php (TournamentLadder.update_rank):
