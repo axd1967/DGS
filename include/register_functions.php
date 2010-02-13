@@ -184,7 +184,7 @@ class UserRegistration
 
 
    // do the registration to the database
-   function register_user()
+   function register_user( $set_cookie=true )
    {
       global $NOW;
 
@@ -209,7 +209,8 @@ class UserRegistration
       ConfigBoard::insert_default( $new_id );
       UserQuota::insert_default( $new_id );
 
-      set_login_cookie( $this->uhandle, $code );
+      if( $set_cookie )
+         set_login_cookie( $this->uhandle, $code );
    } //register_user
 
 
