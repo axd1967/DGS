@@ -290,10 +290,10 @@ class Table
       $this->ExtendTableFormFunc = $func;
    }
 
-   /*! \brief Overwrites standard rows-per-page for this table */
+   /*! \brief Overwrites standard rows-per-page for this table; copy found_rows if null given. */
    function set_rows_per_page( $rows )
    {
-      $this->Rows_Per_Page = $rows;
+      $this->Rows_Per_Page = (is_nulL($rows)) ? $this->FoundRows : $rows;
    }
 
    /*! \brief if false, rows-selection is not shown (table using static number of maxrows); default is true. */
