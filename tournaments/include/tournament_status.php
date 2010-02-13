@@ -127,7 +127,7 @@ class TournamentStatus
       $this->check_basic_conditions_status_change();
 
       // check tournament-type specific checks
-      $check_errors = $ttype->checkProperties( $this->tid );
+      $check_errors = $this->ttype->checkProperties( $this->tid );
       if( count($check_errors) )
          $this->erros = array_merge( $this->errors, $check_errors );
    }
