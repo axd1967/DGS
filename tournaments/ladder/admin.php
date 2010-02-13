@@ -142,10 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       $remove_all = (bool)@$_REQUEST['ta_deluserall'];
       if( (@$_REQUEST['ta_deluser'] || $remove_all) && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
       {
-         $del_errors = $tladder_user->remove_user_from_ladder( $remove_all );
-         if( count($del_errors) )
-            $errors = array_merge( $errors, $del_errors );
-         else
+         if( $tladder_user->remove_user_from_ladder( $remove_all ) )
          {
             //TODO send user-notification about removal !?
             $txtfmt = ($remove_all)
