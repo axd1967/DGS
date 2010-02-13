@@ -63,6 +63,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.ladder_view.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
+   $is_seed_status = ( $tourney->Status == TOURNEY_STATUS_PAIR );
+   $allow_play = ( $tourney->Status == TOURNEY_STATUS_PLAY );
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( $admin_mode && !$allow_edit_tourney )
@@ -136,8 +138,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          ));
       $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
 
-      $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
+      $ltable->set_rows_per_page( null ); // no navigating
+      $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
 
       if( !$admin_mode )
       {
@@ -173,7 +176,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[ 1] )
             $row_str[ 1] = $tladder->Rank . '.';
          if( $ltable->Is_Column_Displayed[ 2] )
-            $row_str[ 2] = ($tladder->BestRank > 0) ? $tladder->BestRank . '.' : '';
+            $row_str[ 2] = $tladder->BestRank . '.';
          if( $ltable->Is_Column_Displayed[ 3] )
             $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
          if( $ltable->Is_Column_Displayed[ 4] )
@@ -196,7 +199,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             }
             elseif( $is_mine )
                $row_str[7] = span('TourneyUser', T_('This is you#T_ladder') );
-            else
+            elseif( $allow_play )
             {
                $row_str[7] = '';
                if( $tladder->AllowChallenge )
@@ -236,10 +239,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    {
       if( !is_null($tl_user) && !$admin_mode )
       {
-         echo sprintf( T_('Your current rank is #%s.'), $tl_user->Rank );
-         if( $tl_user->BestRank > 0 )
-            echo MED_SPACING, sprintf( T_('Your best rank is #%s.'), $tl_user->BestRank );
-         echo "<br>\n";
+         echo sprintf( T_('Your current rank is #%s.'), $tl_user->Rank ),
+            MED_SPACING,
+            sprintf( T_('Your best rank is #%s.'), $tl_user->BestRank ),
+            "<br>\n";
       }
 
       $ltable->echo_table();
@@ -257,13 +260,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    if( $allow_view )
    {
       $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
-      if( !is_null($tl_user) && !$admin_mode )
+      if( !$is_seed_status && !is_null($tl_user) && !$admin_mode )
          $menu_array[T_('Retreat from Ladder')] = "tournaments/ladder/retreat.php?tid=$tid";
    }
    if( $allow_edit_tourney )
    {
       if( $admin_mode )
          $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
+      if( $is_seed_status )
+         $menu_array[T_('Admin Ladder')] =
+            array( 'url' => "tournaments/ladder/admin.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Edit Ladder')] =
          array( 'url' => "tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1", 'class' => 'TAdmin' );
       $menu_array[T_('Manage tournament')] =
