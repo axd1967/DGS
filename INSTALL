@@ -83,7 +83,7 @@ NOTE: This DDL-Export has been created using PHPMyAdmin: Export(DB) with Export 
 > mysql -D dragondb < specs/db/dragon-ddl.sql
 
 (( or maybe, if needed by your configuration, the more complete:
-> mysql -D dragondb -h mysqlhost -u username -p password < init.mysql
+> mysql -D dragondb -h mysqlhost -u username -p password < specs/db/dragon-ddl.sql
 ))
 
 
