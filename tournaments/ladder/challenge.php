@@ -93,7 +93,18 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       if( is_null($tl_props) )
          error('bad_tournament', "Tournament.ladder.challenge.find_lprops($tid)");
 
-      $challenge_errors = $tl_props->verify_challenge( $tladder_ch, $tladder_df );
+      $rating_pos = 0;
+      if( $tl_props->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
+      {
+         $iterator = new ListIterator( 'Tournament.ladder.challenge.find_ladder_rating_pos',
+            new QuerySQL(
+               SQLP_FIELDS, 'TLP.Rating2 AS TLP_Rating2',
+               SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid' ));
+         $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
+         $rating_pos = $tl_props->find_ladder_rating_pos( $iterator, @$user_ch->Rating );
+      }
+
+      $challenge_errors = $tl_props->verify_challenge( $tladder_ch, $tladder_df, $rating_pos );
       $errors = array_merge( $errors, $challenge_errors );
    }
 

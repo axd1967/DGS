@@ -160,7 +160,7 @@ function make_links_ttype_specific( $tourney )
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
       return '<li>'
          . make_menu_link( T_('Edit Ladder properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
-         . subList( array( T_('challenge-range, max. defenses#mngt') ));
+         . subList( array( T_('challenge-range, max. defenses, max. challenges, game-end-handling#mngt') ));
 
    // TYPE: round-robin-specific stuff
    if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )

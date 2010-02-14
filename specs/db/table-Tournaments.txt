@@ -437,6 +437,7 @@ Description:
  ChangedBy              | varchar(54)          |
  ChallengeRangeAbsolute | smallint(5)          | 0
  ChallengeRangeRelative | tinyint(3) unsigned  | 0
+ ChallengeRangeRating   | smallint(6)          | -32768
  ChallengeRematchWait   | smallint(5) unsigned | 0
  MaxDefenses            | tinyint(3) unsigned  | NULL
  MaxDefenses1           | tinyint(3) unsigned  | 0
@@ -466,6 +467,15 @@ Description:
 * ChallengeRangeRelative :
    - percentage of ladder-users above current pos that can be challenged
    - 0 = unused option, i.e. other challenge ranges must configure challenge-range
+
+* ChallengeRangeRating :
+   - challenge-range is [ChallengeRangeRating] ranks down from theoretical position
+     in laddered ordered by user/tourney-rating
+     - Example:
+       - rank of 1dans on ladder is 7, user-rating is 1dan, ChallengeRangeRating=5
+       - Then user can challenge ladder-users up to rank 12 (=7+5).
+   - value = -32768 : unused option,
+     i.e. other challenge ranges must configure challenge-range
 
 * ChallengeRematchWait : how many hours to wait till rematch same user
    - 0 = unused, challenger can immediately rematch same user

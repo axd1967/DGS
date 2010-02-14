@@ -26,6 +26,29 @@ ChangeLog
 
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
        ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row,
+       ~.fill_ladder_challenge_range, ~.find_ladder_rating_pos, ~.verify_challenge,
+       ~.calc_highest_challenge_rank, ~.formatChallengeRangeRating),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/challenge.php,
+     tournaments/manage_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - added challenge-range option with ranks around theoretical pos in ladder
+     ordered by user-rating: TournamentLadderProps.ChallengeRangeRating
+-----------
+-- added option for challenge-range for theoretical pos in ladder by rating-order
+ALTER TABLE TournamentLadderProps
+   ADD ChallengeRangeRating smallint NOT NULL DEFAULT '-32768' AFTER ChallengeRangeRelative ;
+-----------
+
+   * include/std_functions.php, include/globals.php:
+   - moved rating-const from 'include/std_functions.php' to 'include/globals.php'
+
+   * tournaments/ladder/view.php:
+   - adjusted style of challenges-out
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row,
        ~.calc_highest_challenge_rank),
      tournaments/ladder/edit_props.php (parse_edit_form),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,

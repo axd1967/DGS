@@ -37,6 +37,8 @@ require_once 'tournaments/include/tournament_globals.php';
 define('TLADDER_MAX_DEFENSES', 20);
 define('TLADDER_MAX_CHALLENGES', 200);
 define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // 3 months
+define('TLADDER_MAX_CHRNG_RATING', 32767);
+define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
 
 // game-end type
 define('TGE_NORMAL', 1);
@@ -58,7 +60,8 @@ global $ENTITY_TOURNAMENT_LADDER_PROPS; //PHP5
 $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRematchWait',
+      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRangeRating',
+                  'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
                   'MaxChallenges',
       FTYPE_DATE, 'Lastchanged',
@@ -72,6 +75,7 @@ class TournamentLadderProps
    var $ChangedBy;
    var $ChallengeRangeAbsolute;
    var $ChallengeRangeRelative;
+   var $ChallengeRangeRating;
    var $ChallengeRematchWaitHours;
    var $MaxDefenses;
    var $MaxDefenses1;
@@ -86,7 +90,8 @@ class TournamentLadderProps
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
-         $challenge_range_abs=0, $challenge_range_rel=0, $challenge_rematch_wait_hours=0,
+         $challenge_range_abs=0, $challenge_range_rel=0, $challenge_range_rating=TLADDER_CHRNG_RATING_UNUSED,
+         $challenge_rematch_wait_hours=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
          $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
@@ -97,6 +102,7 @@ class TournamentLadderProps
       $this->ChangedBy = $changed_by;
       $this->ChallengeRangeAbsolute = (int)$challenge_range_abs;
       $this->ChallengeRangeRelative = (int)$challenge_range_rel;
+      $this->ChallengeRangeRating = (int)$challenge_range_rating;
       $this->ChallengeRematchWaitHours = (int)$challenge_rematch_wait_hours;
       $this->MaxDefenses = (int)$max_defenses;
       $this->MaxDefenses1 = (int)$max_defenses1;
@@ -184,6 +190,7 @@ class TournamentLadderProps
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'ChallengeRangeAbsolute', $this->ChallengeRangeAbsolute );
       $data->set_value( 'ChallengeRangeRelative', $this->ChallengeRangeRelative );
+      $data->set_value( 'ChallengeRangeRating', $this->ChallengeRangeRating );
       $data->set_value( 'ChallengeRematchWait', $this->ChallengeRematchWaitHours );
       $data->set_value( 'MaxDefenses', $this->MaxDefenses );
       $data->set_value( 'MaxDefenses1', $this->MaxDefenses1 );
@@ -203,10 +210,15 @@ class TournamentLadderProps
    {
       $errors = array();
 
-      if( $this->ChallengeRangeAbsolute == 0 && $this->ChallengeRangeRelative == 0 )
+      if( $this->ChallengeRangeAbsolute == 0 && $this->ChallengeRangeRelative == 0
+            && $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED )
          $errors[] = T_('There must be at least one USED challenge range configuration.');
       if( $this->ChallengeRangeRelative < 0 || $this->ChallengeRangeRelative > 100 )
          $errors[] = T_('Challenge Range Relative must be in percentage range of [0..100].');
+      if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED
+            && abs($this->ChallengeRangeRating) > TLADDER_MAX_CHRNG_RATING )
+         $errors[] = sprintf( T_('Challenge Range Rating must be in range of [%s..%s].'),
+                              -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING );
 
       if( $this->MaxDefenses <= 0 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
          $errors[] = sprintf( T_('Max. defenses for remaining ranks must be in range [1..%s].'), TLADDER_MAX_DEFENSES );
@@ -242,13 +254,24 @@ class TournamentLadderProps
       $arr_props = array();
 
       // challenge-range
-      $arr = array( T_('You can challenge the highest position matching the following conditions') );
+      $arr = array( T_('You can challenge the highest ladder position matching the following conditions') );
       if( $this->ChallengeRangeAbsolute < 0 )
          $arr[] = T_('anyone above your own ladder position');
       elseif( $this->ChallengeRangeAbsolute > 0 )
          $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
       if( $this->ChallengeRangeRelative > 0 )
          $arr[] = sprintf( T_('%s of ladder users above your own position'), $this->ChallengeRangeRelative.'%' );
+      if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
+      {
+         if( $this->ChallengeRangeRating < 0 )
+            $arr[] = sprintf( T_('%s positions above your theoretical position ordered by user rating'),
+                              abs($this->ChallengeRangeRating) );
+         elseif( $this->ChallengeRangeRating > 0 )
+            $arr[] = sprintf( T_('%s positions below your theoretical position ordered by user rating'),
+                              $this->ChallengeRangeRating );
+         else //==0
+            $arr[] = T_('your theoretical position ordered by user rating');
+      }
       $arr_props[] = $arr;
 
       // incoming challenges
@@ -309,7 +332,7 @@ class TournamentLadderProps
     */
    function fill_ladder_challenge_range( &$iterator, $uid )
    {
-      $tl_user = $iterator->getIndexValue( 'uid', $uid, 0 );
+      list( $tl_user, $tl_user_orow ) = $iterator->getIndexValue( 'uid', $uid );
       if( is_null($tl_user) )
          return null;
 
@@ -319,7 +342,8 @@ class TournamentLadderProps
 
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
-      $high_rank = $this->calc_highest_challenge_rank( $tl_user->Rank );
+      $user_rating_tl_pos = $this->find_ladder_rating_pos( $iterator, @$tl_user_orow['TLP_Rating2'] );
+      $high_rank = $this->calc_highest_challenge_rank( $user_rank, $user_rating_tl_pos );
       for( $pos=$user_rank; $pos >= $high_rank; $pos-- )
       {
          $tladder = $iterator->getIndexValue( 'Rank', $pos, 0 );
@@ -372,11 +396,38 @@ class TournamentLadderProps
    }
 
    /*!
+    * \brief Returns theoretical position for given rating in ladder ordered by user rating.
+    * \param $iterator ListIterator on ordered TournamentLadder, expecting orow-field TLP_Rating2 with user-rating
+    * \return ladder-position; or 0 if given rating greater than all ladder-users-ratings
+    */
+   function find_ladder_rating_pos( $iterator, $rating )
+   {
+      if( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED
+            || (string)$rating == '' || (int)$rating <= -OUT_OF_RATING )
+         return 0;
+
+      $cnt_higher = 0; // count of ladder-users with rating >= given-rating
+      while( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         $orow = $arr_item[1];
+         if( isset($orow['TLP_Rating2']) )
+         {
+            $tl_rating = $orow['TLP_Rating2'];
+            if( $tl_rating > -OUT_OF_RATING && $rating <= $tl_rating )
+               ++$cnt_higher;
+         }
+      }
+      $iterator->resetListIterator();
+
+      return $cnt_higher;
+   }
+
+   /*!
     * \brief Returns highest allowed challenge rank.
     * \param $ch_rank challenger-rank
     * \note wording: 1 is "higher" than 2 in ladder.
     */
-   function calc_highest_challenge_rank( $ch_rank )
+   function calc_highest_challenge_rank( $ch_rank, $rating_pos=0 )
    {
       if( $this->ChallengeRangeAbsolute < 0 )
          $abs_high_rank = 1;
@@ -393,7 +444,12 @@ class TournamentLadderProps
       else
          $rel_high_rank = $ch_rank;
 
-      return min( $abs_high_rank, $rel_high_rank );
+      if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED && $rating_pos > 0 )
+         $rating_high_rank = $rating_pos + $this->ChallengeRangeRating;
+      else
+         $rating_high_rank = $ch_rank;
+
+      return min( $abs_high_rank, $rel_high_rank, $rating_high_rank );
    }
 
    /*! \brief Returns non-0 number of max. defenses for given ladder-rank. */
@@ -413,7 +469,7 @@ class TournamentLadderProps
     * \param $tladder_ch TournamentLadder from challenger
     * \param $tladder_df TournamentLadder from defender
     */
-   function verify_challenge( $tladder_ch, $tladder_df )
+   function verify_challenge( $tladder_ch, $tladder_df, $rating_pos )
    {
       $errors = array();
 
@@ -435,7 +491,7 @@ class TournamentLadderProps
       }
 
       // check rank-range
-      $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank );
+      $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank, $rating_pos );
       if( $tladder_ch->Rank < $tladder_df->Rank )
          $errors[] = T_('You may only challenge users above your own position.');
       if( $tladder_df->Rank < $high_rank )
@@ -520,6 +576,7 @@ class TournamentLadderProps
             @$row['ChangedBy'],
             @$row['ChallengeRangeAbsolute'],
             @$row['ChallengeRangeRelative'],
+            @$row['ChallengeRangeRating'],
             @$row['ChallengeRematchWait'],
             @$row['MaxDefenses'],
             @$row['MaxDefenses1'],
@@ -612,6 +669,11 @@ class TournamentLadderProps
    function echo_rematch_wait( $hours, $short=false )
    {
       return TimeFormat::_echo_time( $hours, 24, TIMEFMT_ZERO | ($short ? TIMEFMT_SHORT : 0), 0 );
+   }
+
+   function formatChallengeRangeRating( $ch_range_rating )
+   {
+      return ($ch_range_rating == TLADDER_CHRNG_RATING_UNUSED) ? '' : $ch_range_rating;
    }
 
    function get_edit_tournament_status()

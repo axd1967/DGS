@@ -29,8 +29,10 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Invite: User can be invited by tournament director (needs confirmation by invited user)
       * Tournament Participants editor to edit user registrations
       * Tournament Ladder Properties Editor for ladder-specific properties
-         * Challenge range (absolute, relative), Challenge rematch wait-time,
-           Max. Defenses, Max. Challenges, Game-end handling
+         * Challenge range (absolute, relative, rating)
+         * Challenge rematch wait-time
+         * Max. Defenses, Max. Challenges
+         * Game-end handling
       * Tournament Ladder admin-interface to prepare and edit ladder
       * Tournament Ladder challenge page to confirm challenge starting tournament game
 

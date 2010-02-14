@@ -1707,3 +1707,8 @@ ALTER TABLE TournamentLadderProps
    ADD ChallengeRangeRelative tinyint unsigned NOT NULL DEFAULT '0' AFTER ChallengeRangeAbsolute ;
 
 
+-- added option for challenge-range for theoretical pos in ladder by rating-order
+ALTER TABLE TournamentLadderProps
+   ADD ChallengeRangeRating smallint NOT NULL DEFAULT '-32768' AFTER ChallengeRangeRelative ;
+
+

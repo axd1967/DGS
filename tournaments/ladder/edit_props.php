@@ -115,6 +115,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'DESCRIPTION', T_('Challenge Range Relative'),
          'TEXTINPUT',   'chall_range_rel', 3, 3, $vars['chall_range_rel'], '',
          'TEXT',        MINI_SPACING . '%', ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Challenge Range Rating'),
+         'TEXTINPUT',   'chall_range_rat', 6, 6, $vars['chall_range_rat'], '',
+         'TEXT',        MINI_SPACING . '('.T_('clear to deactivate').')', ));
 
    // challenge rematch
    $tform->add_row( array(
@@ -216,6 +220,7 @@ function parse_edit_form( &$tlp )
    $vars = array(
       'chall_range_abs' => $tlp->ChallengeRangeAbsolute,
       'chall_range_rel' => $tlp->ChallengeRangeRelative,
+      'chall_range_rat' => TournamentLadderProps::formatChallengeRangeRating($tlp->ChallengeRangeRating),
       'chall_rematch'   => $tlp->ChallengeRematchWaitHours,
       'max_def'         => $tlp->MaxDefenses,
       'max_def1'        => $tlp->MaxDefenses1,
@@ -237,6 +242,8 @@ function parse_edit_form( &$tlp )
    // parse URL-vars
    if( $is_posted )
    {
+      $old_vals['chall_range_rat'] = $tlp->ChallengeRangeRating;
+
       $new_value = $vars['chall_range_abs'];
       $max_value = 1000;
       if( TournamentUtils::isNumberOrEmpty($new_value, true) && $new_value >= -1 )
@@ -249,6 +256,21 @@ function parse_edit_form( &$tlp )
          $tlp->ChallengeRangeRelative = (int)$new_value;
       else
          $errors[] = T_('Expecting number for relative challenge range in percentage range [0..100]');
+
+      $new_value = trim($vars['chall_range_rat']);
+      $is_error = false;
+      if( (string)$new_value == '' )
+         $tlp->ChallengeRangeRating = TLADDER_CHRNG_RATING_UNUSED;
+      elseif( TournamentUtils::isNumberOrEmpty($new_value, true) )
+         $tlp->ChallengeRangeRating = (int)$new_value;
+      else
+      {
+         $is_error = true;
+         $errors[] = sprintf( T_('Expecting number for rating challenge range in range [%s..%s]'),
+                              -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING );
+      }
+      if( !$is_error ) // reformat
+         $vars['chall_range_rat'] = TournamentLadderProps::formatChallengeRangeRating($tlp->ChallengeRangeRating);
 
       $new_value = $vars['chall_rematch'];
       if( is_numeric($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_WAIT_REMATCH )
@@ -303,6 +325,7 @@ function parse_edit_form( &$tlp )
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
       if( $old_vals['chall_range_rel'] != $tlp->ChallengeRangeRelative ) $edits[] = T_('ChallengeRange#edits');
+      if( $old_vals['chall_range_rat'] != $tlp->ChallengeRangeRating ) $edits[] = T_('ChallengeRange#edits');
       if( $old_vals['chall_rematch'] != $tlp->ChallengeRematchWaitHours ) $edits[] = T_('ChallengeRematchWait#edits');
       if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def1'] != $tlp->MaxDefenses1 ) $edits[] = T_('MaxDefenses#edits');
