@@ -24,6 +24,27 @@ ChangeLog
 
 2010-02-14 juga
 
+   * tournaments/include/tournament_rules.php (class TournamentRules, ~.to_string,
+       ~.convertTournamentRules_to_GameRow, ~.convertTournamentRules_to_EditForm,
+       ~.convertEditForm_to_TournamentRules, ~.create_game, ~.getHandicaptypeText,
+       ~.convert_trule_handicaptype_to_stdhtype),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_game_from_tournament_rules),
+     include/message_functions.php (game_settings_form),
+     tournaments/ladder/challenge.php,
+     tournaments/edit_rules.php,
+     tournaments/view_tournament.php (echo_tournament_rules),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added manual handicap-types BLACK/WHITE for tournaments:
+     - for ladder: challenger gets BLACK|WHITE color
+     - for round-robin: stronger player gets BLACK|WHITE color
+   - bugfix: casting komi-fields with float instead of int
+-----------
+-- added manual handicap-types BLACK/WHITE for tournaments
+ALTER TABLE TournamentRules
+   CHANGE Handicaptype Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV' ;
+-----------
+
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
        ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row,
        ~.fill_ladder_challenge_range, ~.find_ladder_rating_pos, ~.verify_challenge,
