@@ -75,4 +75,17 @@ define('USER_FOLDERS', 6);
 define('FNAME_REQUIRED', 'sf_req');  // comma-separated list of required filters (id or name); not included in SearchProfile!!
 define('REQF_URL', URI_AMP.FNAME_REQUIRED.'=');  // prepared URL-part for appending to require certain filters
 
+
+// ---------- Rating stuff ----------------------------------------
+
+define('MAX_START_RATING', 2600); //6 dan
+define('MIN_RATING', -900); //30 kyu
+define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
+define('RATING_9DAN', 2900); //9 dan (selectable max-rating)
+
+// Players.RatingStatus
+define('RATING_NONE',  'NONE'); // no rating set
+define('RATING_INIT',  'INIT'); // rating set, but can be changed (no rated games yet)
+define('RATING_RATED', 'RATED'); // rating established (rated game exists)
+
 ?>
