@@ -22,6 +22,59 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-14 juga
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.build_notes_props, ~.fill_ladder_running_games, ~.verify_challenge,
+       ~.calc_ticks_due_rematch_wait, ~.calc_rematch_wait_remaining_hours, ~.new_from_row,
+       ~.echo_rematch_wait),
+     tournaments/include/tournament_ladder.php (class TournamentLadder),
+     tournaments/include/tournament_games.php (class TournamentGames, ~.fillEntityData,
+       ~.new_from_row, ~.update_tournament_game_wait),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.load_tournament,
+       ~.load_tournament_ladder_props, ~.load_clock_ticks),
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css, NEWS:
+   - added tournament-ladder option to configure how many hours to wait
+     to challenge same user again:
+     - if ChallengeRematchWait=0 a rematch can be started immediately by challenger
+     - keep tournament-games on added WAIT-status till rematch-waiting-time is due
+     - added db-field TournamentLadderProps.ChallengeRematchWait
+     - added db-field TournamentGames.TicksDue
+     - added WAIT-status for db-field TournamentGames.Status
+   - use '#CRON' for tourney-tables ChangedBy-fields
+   - for verify-challenge added check for same-user
+   - mark general info in ladder-view with CSS-style LadderInfo
+-----------
+-- added property to control waiting-time to rematch user
+ALTER TABLE TournamentLadderProps
+   ADD ChallengeRematchWait smallint unsigned NOT NULL DEFAULT '0' AFTER ChallengeRangeAbsolute ;
+
+ALTER TABLE TournamentGames
+   CHANGE Status Status enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',
+   ADD TicksDue int NOT NULL DEFAULT '0' AFTER Status,
+   DROP INDEX Status,
+   ADD INDEX Status_Ticks (Status,TicksDue) ;
+-----------
+
+   * quick_status.php (loc_start_page), NEWS:
+   - added tournament-id in game-list
+   - added URL-arg 'no_cache' to omit Expires-header
+
+   * sgf.php:
+   - bugfix: reverted use_cache reading from URL-arg 'no_cache'
+
+   * include/globals.php, include/time_functions.php, include/form_functions.php:
+   - added clock to be used for tournament-game rematch-waiting
+   - moved/added CLOCK-related consts into 'include/globals.php'
+   - moved const SMALL_SPACING into 'include/globals.php'
+
 2010-02-13 juga
 
    * specs/db/dragon-ddl.sql:
