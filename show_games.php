@@ -371,16 +371,14 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 40: >  RU (oppenent remaining time)
  * 41: >  FU (Indicator if there are (hidden) game-comments)
  *****/
-   $ginfo_str = T_('Game information');
-   $gcomm_str = T_('Hidden game comments');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(32, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'ImagesLeft', 0 ); // game-info
+   $gtable->add_tablehead(32, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 ); // game-info
    if( $finished && !$all ) //FU
-      $gtable->add_tablehead(41, new TableHead( $gcomm_str, 'images/game_comment.gif', $gcomm_str), 'Image', 0 ); // game-comment
+      $gtable->add_tablehead(41, new TableHead( T_('Hidden game comments'), 'images/game_comment.gif'), 'Image', 0 ); // game-comment
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( $observe_all )
    {

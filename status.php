@@ -128,7 +128,6 @@ if( (string)$folder_nr_querystr != '' )
 
 { // show games
    $uid = $my_id;
-   $ginfo_str = T_('Game information');
 
    $gtable->add_or_del_column();
 
@@ -144,7 +143,7 @@ if( (string)$folder_nr_querystr != '' )
    // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(15, new TableHead( $ginfo_str, 'images/info.gif', $ginfo_str), 'ImagesLeft', 0 );
+   $gtable->add_tablehead(15, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
       $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
