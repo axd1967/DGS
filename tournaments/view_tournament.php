@@ -138,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    section( 'tournament', T_('Rules#T_view') );
 
    if( !is_null($trule) )
-      echo_tournament_rules( $trule );
+      echo_tournament_rules( $tourney, $trule );
 
 
    // --------------- Registration ----------------------------------
@@ -221,7 +221,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 }
 
 
-function echo_tournament_rules( $trule )
+function echo_tournament_rules( $tourney, $trule )
 {
    $adj_komi = array();
    if( $trule->AdjKomi )
@@ -247,7 +247,7 @@ function echo_tournament_rules( $trule )
    $itable = new Table_info('gamerules');
    $itable->add_sinfo( T_('Board Size:#trules'), $trule->Size .' x '. $trule->Size );
    $itable->add_sinfo( T_('Handicap Type:#trules'),
-         TournamentRules::getHandicaptypeText($trule->Handicaptype) );
+         TournamentRules::getHandicaptypeText($trule->Handicaptype, $tourney->Type) );
    $itable->add_sinfo( T_('Handicap:#trules'),
       ( $trule->needsCalculatedHandicap()
             ? T_('calculated stones#trules_handi')
@@ -255,7 +255,7 @@ function echo_tournament_rules( $trule )
       . ', ' .
       ( $trule->needsCalculatedKomi()
             ? T_('calculated komi#trules_handi')
-            : sprintf( T_('%s komi#trules_handi'), $trule->Komi) ));
+            : sprintf( T_('%s points komi#trules_handi'), $trule->Komi) ));
    if( count($adj_handi) )
       $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'), implode(', ', $adj_handi) );
    if( count($adj_komi) )

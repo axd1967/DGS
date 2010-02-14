@@ -94,11 +94,12 @@ class TournamentHelper
    // ------------ static functions ----------------------------
 
    /*! \brief Wrapper to TournamentRules.create_game(). */
-   function create_game_from_tournament_rules( $tid, $user_ch, $user_df )
+   function create_game_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
    {
       $trules = TournamentRules::load_tournament_rule( $tid );
       if( is_null($trules) )
          error('bad_tournament', "TournamentHelper::create_game_from_tournament_rules.find_trules($tid)");
+      $trules->TourneyType = $tourney_type;
 
       $tprops = TournamentProperties::load_tournament_properties( $tid );
       if( is_null($tprops) )

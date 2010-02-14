@@ -278,7 +278,7 @@ Description:
  ChangedBy    | varchar(54)                             |
  Flags        | smallint(5) unsigned                    | 0
  Size         | int(11)                                 | 19
- Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE') | CONV
+ Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | CONV
  AdjKomi      | decimal(6,1)                             | 0.0
  JigoMode     | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | KEEP_KOMI
  Handicap     | int(11)                                 | 0
@@ -311,6 +311,9 @@ Description:
    - CONV = conventional handicap
    - PROPER = proper handicap
    - NIGIRI = even game with nigiri
+   - BLACK | WHITE =
+     - ladder-tournament:      manual game with challenger getting black | white
+     - round-robin-tournament: manual game with stronger player getting black | white
    - DOUBLE = double game (not supported yet)
    - in relation to Waitingroom-table noted enums in upper-case
 

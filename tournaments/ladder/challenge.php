@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    {
       ta_begin();
       {//HOT-section to start T-game
-         $gid = TournamentHelper::create_game_from_tournament_rules( $tid, $user_ch, $user_df );
+         $gid = TournamentHelper::create_game_from_tournament_rules( $tid, $tourney->Type, $user_ch, $user_df );
 
          $tg = TournamentLadder::new_tournament_game( $tid, $tladder_ch, $tladder_df );
          $tg->gid = $gid;

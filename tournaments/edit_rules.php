@@ -23,9 +23,9 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'include/message_functions.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
-require_once( 'include/message_functions.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
@@ -105,7 +105,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
             'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
    }
 
-   game_settings_form( $trform, GSET_TOURNAMENT, true/*$iamrated*/, 'redraw', $vars );
+   $formstyle = ($tourney->Type == TOURNEY_TYPE_LADDER) ? GSET_TOURNAMENT_LADDER : GSET_TOURNAMENT_ROUNDROBIN;
+   game_settings_form( $trform, $formstyle, true/*$iamrated*/, 'redraw', $vars );
 
    $trform->add_empty_row();
    $trform->add_row( array(

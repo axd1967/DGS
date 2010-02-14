@@ -34,10 +34,11 @@ define('INVITE_HANDI_DOUBLE', -4);
 
 // game-settings form-/table-style defs
 define('GSET_WAITINGROOM', 'waitingroom');
-define('GSET_TOURNAMENT',  'tournament');
+define('GSET_TOURNAMENT_LADDER', 'tournament_ladder');
+define('GSET_TOURNAMENT_ROUNDROBIN', 'tournament_roundrobin');
 define('GSET_MSG_INVITE',  'invite');
 define('GSET_MSG_DISPUTE', 'dispute');
-define('CHECK_GSET', 'waitingroom|tournament|invite|dispute');
+define('CHECK_GSET', 'waitingroom|tournament_ladder|tournament_roundrobin|invite|dispute');
 
 define('FOLDER_COLS_MODULO', 8); //number of columns of "tab" layouts
 
@@ -61,7 +62,7 @@ function init_standard_folders()
  * \param $formstyle:
  *     GSET_MSG_INVITE | GSET_MSG_DISPUTE = for message.php
  *     GSET_WAITINGROOM = for waiting_room.php / new_game.php
- *     GSET_TOURNAMENT = for tournaments/edit_rules.php
+ *     GSET_TOURNAMENT_LADDER, GSET_TOURNAMENT_ROUNDROBIN = for tournaments/edit_rules.php
  * \param $map_ratings:
  *     if set, contain map with keys (rating1, rating2) ->
  *     then add probable game-settings for conventional/proper-handicap-type
@@ -72,6 +73,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 {
    if( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
       $formstyle = GSET_MSG_INVITE;
+   $is_fstyle_tourney = ( $formstyle == GSET_TOURNAMENT_LADDER || $formstyle == GSET_TOURNAMENT_ROUNDROBIN );
 
    $allowed = true;
 
@@ -326,26 +328,28 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          HTYPE_BLACK  => T_('Black#htman'),
          HTYPE_WHITE  => T_('White#htman'),
       );
-   $arr_manual = array(
+   if( $is_fstyle_tourney )
+      unset($color_arr[HTYPE_DOUBLE]);
+
+   if( $formstyle == GSET_TOURNAMENT_LADDER )
+      $color_txt = T_('Color Challenger#T_ladder');
+   elseif( $formstyle == GSET_TOURNAMENT_ROUNDROBIN )
+      $color_txt = T_('Color Stronger#T_RRobin');
+   else
+      $color_txt = T_('My color');
+
+   $mform->add_row( array(
       'DESCRIPTION', T_('Manual setting (even or handicap game)'),
       'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType,
-      'TEXT', sptext(T_('My color'),1), );
-   if( $formstyle == GSET_TOURNAMENT )
-      array_push( $arr_manual,
-         'HIDDEN', 'color_m', HTYPE_NIGIRI,
-         'TEXT', sprintf( '(%s)', T_('Nigiri')) );
-   else
-      array_push( $arr_manual,
-         'SELECTBOX', 'color_m', 1, $color_arr, $Color_m, false );
-   array_push( $arr_manual,
+      'TEXT', sptext($color_txt,1),
+      'SELECTBOX', 'color_m', 1, $color_arr, $Color_m, false,
       'TEXT', sptext(T_('Handicap'),1),
       'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
       'TEXT', sptext(T_('Komi'),1),
-      'TEXTINPUT', 'komi_m', 5, 5, $Komi_m );
-   $mform->add_row( $arr_manual );
+      'TEXTINPUT', 'komi_m', 5, 5, $Komi_m, ));
 
 
-   if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
+   if( $formstyle == GSET_WAITINGROOM || $is_fstyle_tourney )
    {
       // adjust handicap stones
       $adj_handi_stones = array();
@@ -367,7 +371,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    if( ENA_STDHANDICAP )
    {
       $arr = array();
-      if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
+      if( $formstyle == GSET_WAITINGROOM || $is_fstyle_tourney )
          $arr[] = 'TAB';
       else
          array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
@@ -377,7 +381,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row($arr);
    }
 
-   if( $formstyle == GSET_WAITINGROOM || $formstyle == GSET_TOURNAMENT )
+   if( $formstyle == GSET_WAITINGROOM || $is_fstyle_tourney )
    {
       // adjust komi
       $jigo_modes = array(

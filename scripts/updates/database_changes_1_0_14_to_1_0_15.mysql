@@ -1712,3 +1712,8 @@ ALTER TABLE TournamentLadderProps
    ADD ChallengeRangeRating smallint NOT NULL DEFAULT '-32768' AFTER ChallengeRangeRelative ;
 
 
+-- added manual handicap-types BLACK/WHITE for tournaments
+ALTER TABLE TournamentRules
+   CHANGE Handicaptype Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV' ;
+
+
