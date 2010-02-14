@@ -35,6 +35,7 @@ require_once 'tournaments/include/tournament_globals.php';
   */
 
 define('TLADDER_MAX_DEFENSES', 20);
+define('TLADDER_MAX_CHALLENGES', 200);
 define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // 3 months
 
 // game-end type
@@ -59,6 +60,7 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_CHBY,
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
+                  'MaxChallenges',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
    );
@@ -75,6 +77,7 @@ class TournamentLadderProps
    var $MaxDefenses2;
    var $MaxDefensesStart1;
    var $MaxDefensesStart2;
+   var $MaxChallenges;
    var $GameEndNormal;
    var $GameEndJigo;
    var $GameEndTimeoutWin;
@@ -84,6 +87,7 @@ class TournamentLadderProps
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
          $challenge_range_abs=0, $challenge_rematch_wait_hours=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
+         $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST )
    {
@@ -97,6 +101,7 @@ class TournamentLadderProps
       $this->MaxDefenses2 = (int)$max_defenses2;
       $this->MaxDefensesStart1 = (int)$max_defenses_start1;
       $this->MaxDefensesStart2 = (int)$max_defenses_start2;
+      $this->MaxChallenges = (int)$max_challenges;
       $this->setGameEndNormal($game_end_normal);
       $this->setGameEndJigo($game_end_jigo);
       $this->setGameEndTimeoutWin($game_end_timeout_win);
@@ -182,6 +187,7 @@ class TournamentLadderProps
       $data->set_value( 'MaxDefenses2', $this->MaxDefenses2 );
       $data->set_value( 'MaxDefensesStart1', $this->MaxDefensesStart1 );
       $data->set_value( 'MaxDefensesStart2', $this->MaxDefensesStart2 );
+      $data->set_value( 'MaxChallenges', $this->MaxChallenges );
       $data->set_value( 'GameEndNormal', $this->GameEndNormal );
       $data->set_value( 'GameEndJigo', $this->GameEndJigo );
       $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
@@ -219,6 +225,9 @@ class TournamentLadderProps
       if( $this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 == 0 && $this->MaxDefenses2 > 0 )
          $errors[] = T_('If one group is unused, it must be group #2.');
 
+      if( $this->MaxChallenges < 0 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
+         $errors[] = sprintf( T_('Max. outgoing challenges must be in range [0..%s].'), TLADDER_MAX_CHALLENGES );
+
       return $errors;
    }//check_properties
 
@@ -235,6 +244,7 @@ class TournamentLadderProps
          $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
       $arr_props[] = $arr;
 
+      // incoming challenges
       $arr = array( T_('The number of incoming challenges for any defender is restricted to') );
       $groups = 3;
       if( $this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 > 0 )
@@ -255,6 +265,11 @@ class TournamentLadderProps
             $arr[] = sprintf( T_('%s challenges for all ranks'), $this->MaxDefenses );
       }
       $arr_props[] = $arr;
+
+      // outgoing challenges
+      if( $this->MaxChallenges > 0 )
+         $arr_props[] = sprintf( T_('The number of outgoing challenges is restricted to %s games.'),
+                                 $this->MaxChallenges );
 
       // challenge-rematch
       if( $this->ChallengeRematchWaitHours > 0 )
@@ -291,6 +306,10 @@ class TournamentLadderProps
       if( is_null($tl_user) )
          return null;
 
+      // check max-challenges
+      if( $this->MaxChallenges > 0 && $tl_user->ChallengesOut >= $this->MaxChallenges )
+         $tl_user->MaxChallengedOut = true;
+
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
       $high_rank = $this->calc_highest_challenge_rank( $tl_user->Rank );
@@ -302,11 +321,10 @@ class TournamentLadderProps
 
          if( $tladder->Rank >= $high_rank && $tladder->Rank < $user_rank ) // chk again (race-cond)
          {
-            // check max-defenses
-            if( $tladder->ChallengesIn < $this->calc_max_defenses($tladder->Rank) )
+            if( $tladder->ChallengesIn < $this->calc_max_defenses($tladder->Rank) ) // check max-defenses
                $tladder->AllowChallenge = true;
             else
-               $tladder->MaxChallenged = true;
+               $tladder->MaxChallengedIn = true;
          }
       }
 
@@ -413,8 +431,12 @@ class TournamentLadderProps
       if( $tladder_df->ChallengesIn >= $this->calc_max_defenses($tladder_df->Rank) )
          $errors[] = sprintf( T_('Defender already has max. %s incoming challenges.'), $tladder_df->ChallengesIn );
 
+      // check challengers max. outgoing challenges
+      if( $tladder_ch->ChallengesOut >= $this->MaxChallenges )
+         $errors[] = sprintf( T_('Challenger already has max. %s outgoing challenges.'), $tladder_ch->ChallengesOut );
+
       return $errors;
-   }
+   }//verify_challenge
 
    /*!
     * \brief Checks tournament-game-score and returns corresponding ladder-action for it.
@@ -488,6 +510,7 @@ class TournamentLadderProps
             @$row['MaxDefenses2'],
             @$row['MaxDefensesStart1'],
             @$row['MaxDefensesStart2'],
+            @$row['MaxChallenges'],
             @$row['GameEndNormal'],
             @$row['GameEndJigo'],
             @$row['GameEndTimeoutWin'],

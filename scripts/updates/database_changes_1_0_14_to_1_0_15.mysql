@@ -1694,3 +1694,11 @@ ALTER TABLE TournamentGames
    ADD INDEX Status_Ticks (Status,TicksDue) ;
 
 
+-- added max. number of outgoing ladder-challenges
+ALTER TABLE TournamentLadderProps
+   ADD MaxChallenges tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxDefensesStart2 ;
+
+ALTER TABLE TournamentLadder
+   ADD ChallengesOut tinyint unsigned NOT NULL DEFAULT '0' ;
+
+

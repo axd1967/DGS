@@ -48,7 +48,7 @@ require_once 'tournaments/include/tournament_games.php';
 global $ENTITY_TOURNAMENT_LADDER; //PHP5
 $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
       FTYPE_PKEY, 'tid', 'rid',
-      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'ChallengesIn',
+      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'ChallengesIn', 'ChallengesOut',
       FTYPE_DATE, 'Created', 'RankChanged'
    );
 
@@ -62,13 +62,16 @@ class TournamentLadder
    var $Rank;
    var $BestRank;
    var $ChallengesIn;
+   var $ChallengesOut;
 
    // non-DB fields
 
-   /*! \brief true if challenge allowed on this user. */
+   /*! \brief true if challenge allowed on this user, also if max. outgoing challenges reached. */
    var $AllowChallenge;
-   /*! \brief true, if max. number of incoming challenges reached for current tank. */
-   var $MaxChallenged;
+   /*! \brief true, if max. number of incoming challenges reached for ladder-user. */
+   var $MaxChallengedIn;
+   /*! \brief true, if max. number of outgoing challenges reached for ladder-user. */
+   var $MaxChallengedOut;
    /*! \brief array of TournamentGames-object of incoming-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
    var $RunningTourneyGames;
    /*! \brief how many hours to wait till rematch allowed with same user; -1=rematch allowed, 0=TG still on WAIT-status but due. */
@@ -76,7 +79,7 @@ class TournamentLadder
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0,
-         $challenges_in=0 )
+         $challenges_in=0, $challenges_out=0 )
    {
       $this->tid = (int)$tid;
       $this->rid = (int)$rid;
@@ -86,9 +89,11 @@ class TournamentLadder
       $this->Rank = (int)$rank;
       $this->BestRank = (int)$bestrank;
       $this->ChallengesIn = (int)$challenges_in;
+      $this->ChallengesOut = (int)$challenges_out;
       // non-DB fields
       $this->AllowChallenge = false;
-      $this->MaxChallenged = false;
+      $this->MaxChallengedIn = false;
+      $this->MaxChallengedOut = false;
       $this->RunningTourneyGames = array();
       $this->RematchWait = -1;
    }
@@ -173,6 +178,7 @@ class TournamentLadder
       $data->set_value( 'Rank', $this->Rank );
       $data->set_value( 'BestRank', $this->BestRank );
       $data->set_value( 'ChallengesIn', $this->ChallengesIn );
+      $data->set_value( 'ChallengesOut', $this->ChallengesOut );
       return $data;
    }
 
@@ -200,6 +206,22 @@ class TournamentLadder
             . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
       if( $result )
          $this->ChallengesIn += $diff;
+      return $result;
+   }
+
+   /*! \brief Increases or decreases TournamentLadder.ChallengesOut by given amount. */
+   function update_outgoing_challenges( $diff )
+   {
+      if( !is_numeric($diff) || $diff == 0 )
+         error('invalid_args', "TournamentLadder.update_outgoing_challenges.check.diff({$this->rid},$diff)");
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $op = ($diff > 0) ? "+$diff" : '-'.abs($diff);
+      $result = db_query( "TournamentLadder.update_outgoing_challenges.update({$this->rid},$diff)",
+         "UPDATE $table SET ChallengesOut=ChallengesOut $op "
+            . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+      if( $result )
+         $this->ChallengesOut += $diff;
       return $result;
    }
 
@@ -320,7 +342,8 @@ class TournamentLadder
             @$row['X_RankChanged'],
             @$row['Rank'],
             @$row['BestRank'],
-            @$row['ChallengesIn']
+            @$row['ChallengesIn'],
+            @$row['ChallengesOut']
          );
       return $tl;
    }

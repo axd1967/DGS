@@ -389,15 +389,17 @@ Description:
 Description:
    Table to keep track of ladder of ladder-typed tournaments.
 
- Field       | Type                 | Default
--------------+----------------------+---------------------
- tid         | int(11)              | NULL
- rid         | int(11)              | NULL
- uid         | int(11)              | NULL
- Created     | datetime             | 0000-00-00 00:00:00
- RankChanged | datetime             | 0000-00-00 00:00:00
- Rank        | smallint(5) unsigned | 0
- BestRank    | smallint(5) unsigned | 0
+ Field         | Type                 | Default
+---------------+----------------------+---------------------
+ tid           | int(11)              | NULL
+ rid           | int(11)              | NULL
+ uid           | int(11)              | NULL
+ Created       | datetime             | 0000-00-00 00:00:00
+ RankChanged   | datetime             | 0000-00-00 00:00:00
+ Rank          | smallint(5) unsigned | 0
+ BestRank      | smallint(5) unsigned | 0
+ ChallengesIn  | tinyint(3) unsigned  | 0
+ ChallengesOut | tinyint(3) unsigned  | 0
 
 ## Fields:
 
@@ -416,6 +418,10 @@ Description:
 
 * BestRank : maximum of reached ladder-ranks for user caused by direct win or loss
    - defaults to Rank
+
+* ChallengesIn : number of current incoming challenges for ladder-user
+
+* ChallengesOut : number of current outgoing challenges for ladder-user
 
 
 ###########################################################################
@@ -436,6 +442,7 @@ Description:
  MaxDefenses2           | tinyint(3) unsigned  | 0
  MaxDefensesStart1      | tinyint(3) unsigned  | 0
  MaxDefensesStart2      | tinyint(3) unsigned  | 0
+ MaxChallenges          | tinyint(3) unsigned  | 0
  GameEndNormal          | enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST')                      | CH_ABOVE
  GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | CH_BELOW
  GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | DF_BELOW
@@ -473,6 +480,9 @@ Description:
    - With 1 rank-groups MaxDefenses1/2,Start1/2=0
    - There must be a default limitation > 0
    - rank-groups1/2 restrictions are optional => use 0 = not-used
+
+* MaxChallenges : max. number of outgoing challenges (for challenger)
+   - 0 = unlimited
 
 * GameEndNormal : normal handling on game-end when challenger wins over defender
    - default = CH_ABOVE

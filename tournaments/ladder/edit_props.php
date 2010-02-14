@@ -111,7 +111,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Range Absolute'),
          'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], '', ));
-   $tform->add_empty_row();
 
    // challenge rematch
    $tform->add_row( array(
@@ -139,6 +138,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TAB',
          'TEXT',        T_('For remaining ranks restrict max. defenses to') . ': ',
          'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'], '', ));
+
+   // max. challenges
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Max. Challenges'),
+         'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'], '', ));
    $tform->add_empty_row();
 
    // game-end
@@ -213,6 +217,7 @@ function parse_edit_form( &$tlp )
       'max_def2'        => $tlp->MaxDefenses2,
       'max_def_start1'  => $tlp->MaxDefensesStart1,
       'max_def_start2'  => $tlp->MaxDefensesStart2,
+      'max_chall'       => $tlp->MaxChallenges,
       'gend_normal'     => $tlp->GameEndNormal,
       'gend_jigo'       => $tlp->GameEndJigo,
       'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
@@ -272,6 +277,13 @@ function parse_edit_form( &$tlp )
          $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s'), 2 );
 
 
+      $new_value = $vars['max_chall'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->MaxChallenges = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for max. outgoing challenges in range [0..%s]'), TLADDER_MAX_CHALLENGES );
+
+
       $tlp->setGameEndNormal( $vars['gend_normal'] );
       $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
       $tlp->setGameEndTimeoutLoss( $vars['gend_timeout_l'] );
@@ -285,6 +297,7 @@ function parse_edit_form( &$tlp )
       if( $old_vals['max_def2'] != $tlp->MaxDefenses2 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('MaxDefenses#edits');
+      if( $old_vals['max_chall'] != $tlp->MaxChallenges ) $edits[] = T_('MaxChallenges#edits');
       if( $old_vals['gend_normal'] != $tlp->GameEndNormal ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('GameEnd#edits');

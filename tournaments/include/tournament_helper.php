@@ -70,6 +70,10 @@ class TournamentHelper
             $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid ); // don't load
             $tladder_df->update_incoming_challenges( -1 );
 
+            // decrease TG.ChallengesOut for challenger
+            $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid ); // don't load
+            $tladder_ch->update_outgoing_challenges( -1 );
+
             // tournament-game done
             if( $tl_props->ChallengeRematchWaitHours > 0 )
             {

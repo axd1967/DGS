@@ -2616,9 +2616,20 @@ span.TWarning {
    color: darkred;
 }
 
+span.TLMaxChallenges {
+   font-weight: bold;
+   color: darkred;
+   font-style: italic;
+}
+
 span.LadderInfo {
    font-size: 85%;
    font-style: italic;
+}
+span.LadderWarn {
+   font-size: 85%;
+   font-style: italic;
+   color: darkred;
 }
 
 a.TAdmin {
