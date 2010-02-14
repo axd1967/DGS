@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* The code in this file is written by Ragnar Ouchterlony */
 
+require_once( 'include/globals.php' );
 require_once( 'include/std_functions.php' );
 
  /*!
@@ -134,8 +135,7 @@ define('FEA_SPANALLCOLS', 'SpanAllColumns');
 define('FEA_ATTBS',       'Attbs');
 
 
-if( !defined('SMALL_SPACING') )
-   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+//define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 //format a text to be placed before/between input boxes
 //$seps: optionnaly add separations before=1 or after=2
 //&nbsp; are kept for text-only browsers
