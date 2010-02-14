@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( "include/config-local.php" );
+require_once 'include/config-local.php';
 
 /*!
  * \file globals.php
@@ -31,13 +31,25 @@ require_once( "include/config-local.php" );
 define('NO_VALUE', '---');
 define('UNKNOWN_VALUE', '???');
 
-if( !defined('MINI_SPACING') )
-   define('MINI_SPACING', '&nbsp;');
-if( !defined('MED_SPACING') )
-   define('MED_SPACING', '&nbsp;&nbsp;');
-if( !defined('SMALL_SPACING') )
-   define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
-define('SEP_SPACING', SMALL_SPACING.'|'.SMALL_SPACING);
+define('MINI_SPACING',  '&nbsp;');
+define('MED_SPACING',   '&nbsp;&nbsp;');
+define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
+define('SEP_SPACING',   SMALL_SPACING.'|'.SMALL_SPACING);
+
+
+// ---------- Clock stuff -----------------------------------------
+
+define('CLOCK_CRON_TICK', 201);
+define('CLOCK_CRON_HALFHOUR', 202);
+define('CLOCK_CRON_DAY', 203);
+define('CLOCK_TIMELEFT', 204);
+define('CLOCK_CRON_TOURNEY', 205);
+define('MAX_CLOCK', 205);
+
+define('CLOCK_TOURNEY_GAME_WAIT', CLOCK_CRON_HALFHOUR);
+
+define('WEEKEND_CLOCK_OFFSET', 100);
+define('VACATION_CLOCK', -1); // keep it < 0
 
 
 // ---------- Folder stuff ----------------------------------------
