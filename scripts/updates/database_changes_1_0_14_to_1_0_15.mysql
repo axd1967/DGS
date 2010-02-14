@@ -1702,3 +1702,8 @@ ALTER TABLE TournamentLadder
    ADD ChallengesOut tinyint unsigned NOT NULL DEFAULT '0' ;
 
 
+-- added optional percentage of ladder-users above current pos that can be challenged
+ALTER TABLE TournamentLadderProps
+   ADD ChallengeRangeRelative tinyint unsigned NOT NULL DEFAULT '0' AFTER ChallengeRangeAbsolute ;
+
+

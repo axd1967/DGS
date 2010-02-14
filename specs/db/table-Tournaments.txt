@@ -436,6 +436,7 @@ Description:
  Lastchanged            | datetime             | 0000-00-00 00:00:00
  ChangedBy              | varchar(54)          |
  ChallengeRangeAbsolute | smallint(5)          | 0
+ ChallengeRangeRelative | tinyint(3) unsigned  | 0
  ChallengeRematchWait   | smallint(5) unsigned | 0
  MaxDefenses            | tinyint(3) unsigned  | NULL
  MaxDefenses1           | tinyint(3) unsigned  | 0
@@ -461,6 +462,10 @@ Description:
    - number of rank-positions a ladder-user can challenge users above own position
    - -1 = no limit, challenger can challenge all users above own position
    -  0 = unused option, i.e. other challenge ranges must configure challenge-range
+
+* ChallengeRangeRelative :
+   - percentage of ladder-users above current pos that can be challenged
+   - 0 = unused option, i.e. other challenge ranges must configure challenge-range
 
 * ChallengeRematchWait : how many hours to wait till rematch same user
    - 0 = unused, challenger can immediately rematch same user

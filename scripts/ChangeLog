@@ -25,6 +25,20 @@ ChangeLog
 2010-02-14 juga
 
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row,
+       ~.calc_highest_challenge_rank),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - added option challenge-range with percentage of ladder-users above current pos:
+     TournamentLadderProps.ChallengeRangeRelative
+-----------
+-- added optional percentage of ladder-users above current pos that can be challenged
+ALTER TABLE TournamentLadderProps
+   ADD ChallengeRangeRelative tinyint unsigned NOT NULL DEFAULT '0' AFTER ChallengeRangeAbsolute ;
+-----------
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
        ~.fillEntityData, ~.check_properties, ~.build_notes_props,
        ~.fill_ladder_challenge_range, ~.verify_challenge, ~.new_from_row),
      tournaments/include/tournament_ladder.php (class TournamentLadder, ~.fillEntityData,

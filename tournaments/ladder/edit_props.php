@@ -111,6 +111,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Range Absolute'),
          'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], '', ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Challenge Range Relative'),
+         'TEXTINPUT',   'chall_range_rel', 3, 3, $vars['chall_range_rel'], '',
+         'TEXT',        MINI_SPACING . '%', ));
 
    // challenge rematch
    $tform->add_row( array(
@@ -141,7 +145,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
    // max. challenges
    $tform->add_row( array(
-         'DESCRIPTION', T_('Max. Challenges'),
+         'DESCRIPTION', T_('Max. outgoing Challenges'),
          'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'], '', ));
    $tform->add_empty_row();
 
@@ -211,6 +215,7 @@ function parse_edit_form( &$tlp )
    // read from props or set defaults
    $vars = array(
       'chall_range_abs' => $tlp->ChallengeRangeAbsolute,
+      'chall_range_rel' => $tlp->ChallengeRangeRelative,
       'chall_rematch'   => $tlp->ChallengeRematchWaitHours,
       'max_def'         => $tlp->MaxDefenses,
       'max_def1'        => $tlp->MaxDefenses1,
@@ -238,6 +243,12 @@ function parse_edit_form( &$tlp )
          $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, $max_value, 10 );
       else
          $errors[] = sprintf( T_('Expecting number for absolute challenge range in range [-1..%s]'), $max_value );
+
+      $new_value = $vars['chall_range_rel'];
+      if( TournamentUtils::isNumberOrEmpty($new_value, true) )
+         $tlp->ChallengeRangeRelative = (int)$new_value;
+      else
+         $errors[] = T_('Expecting number for relative challenge range in percentage range [0..100]');
 
       $new_value = $vars['chall_rematch'];
       if( is_numeric($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_WAIT_REMATCH )
@@ -291,6 +302,7 @@ function parse_edit_form( &$tlp )
 
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
+      if( $old_vals['chall_range_rel'] != $tlp->ChallengeRangeRelative ) $edits[] = T_('ChallengeRange#edits');
       if( $old_vals['chall_rematch'] != $tlp->ChallengeRematchWaitHours ) $edits[] = T_('ChallengeRematchWait#edits');
       if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def1'] != $tlp->MaxDefenses1 ) $edits[] = T_('MaxDefenses#edits');

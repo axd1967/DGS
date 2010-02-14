@@ -58,7 +58,7 @@ global $ENTITY_TOURNAMENT_LADDER_PROPS; //PHP5
 $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRematchWait',
+      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
                   'MaxChallenges',
       FTYPE_DATE, 'Lastchanged',
@@ -71,6 +71,7 @@ class TournamentLadderProps
    var $Lastchanged;
    var $ChangedBy;
    var $ChallengeRangeAbsolute;
+   var $ChallengeRangeRelative;
    var $ChallengeRematchWaitHours;
    var $MaxDefenses;
    var $MaxDefenses1;
@@ -85,7 +86,7 @@ class TournamentLadderProps
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
-         $challenge_range_abs=0, $challenge_rematch_wait_hours=0,
+         $challenge_range_abs=0, $challenge_range_rel=0, $challenge_rematch_wait_hours=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
          $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
@@ -95,6 +96,7 @@ class TournamentLadderProps
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
       $this->ChallengeRangeAbsolute = (int)$challenge_range_abs;
+      $this->ChallengeRangeRelative = (int)$challenge_range_rel;
       $this->ChallengeRematchWaitHours = (int)$challenge_rematch_wait_hours;
       $this->MaxDefenses = (int)$max_defenses;
       $this->MaxDefenses1 = (int)$max_defenses1;
@@ -181,6 +183,7 @@ class TournamentLadderProps
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'ChallengeRangeAbsolute', $this->ChallengeRangeAbsolute );
+      $data->set_value( 'ChallengeRangeRelative', $this->ChallengeRangeRelative );
       $data->set_value( 'ChallengeRematchWait', $this->ChallengeRematchWaitHours );
       $data->set_value( 'MaxDefenses', $this->MaxDefenses );
       $data->set_value( 'MaxDefenses1', $this->MaxDefenses1 );
@@ -200,8 +203,10 @@ class TournamentLadderProps
    {
       $errors = array();
 
-      if( $this->ChallengeRangeAbsolute == 0 )
+      if( $this->ChallengeRangeAbsolute == 0 && $this->ChallengeRangeRelative == 0 )
          $errors[] = T_('There must be at least one USED challenge range configuration.');
+      if( $this->ChallengeRangeRelative < 0 || $this->ChallengeRangeRelative > 100 )
+         $errors[] = T_('Challenge Range Relative must be in percentage range of [0..100].');
 
       if( $this->MaxDefenses <= 0 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
          $errors[] = sprintf( T_('Max. defenses for remaining ranks must be in range [1..%s].'), TLADDER_MAX_DEFENSES );
@@ -242,6 +247,8 @@ class TournamentLadderProps
          $arr[] = T_('anyone above your own ladder position');
       elseif( $this->ChallengeRangeAbsolute > 0 )
          $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
+      if( $this->ChallengeRangeRelative > 0 )
+         $arr[] = sprintf( T_('%s of ladder users above your own position'), $this->ChallengeRangeRelative.'%' );
       $arr_props[] = $arr;
 
       // incoming challenges
@@ -371,14 +378,22 @@ class TournamentLadderProps
     */
    function calc_highest_challenge_rank( $ch_rank )
    {
-      $high_rank = $ch_rank;
-
       if( $this->ChallengeRangeAbsolute < 0 )
-         $high_rank = 1;
+         $abs_high_rank = 1;
       elseif( $this->ChallengeRangeAbsolute > 0 )
-         $high_rank = $ch_rank - $this->ChallengeRangeAbsolute;
+         $abs_high_rank = $ch_rank - $this->ChallengeRangeAbsolute;
+      else
+         $abs_high_rank = $ch_rank;
 
-      return max( 1, $high_rank );
+      if( $this->ChallengeRangeRelative > 0 )
+      {
+         $rel_rank = $ch_rank - round( $ch_rank * $this->ChallengeRangeRelative / 100 );
+         $rel_high_rank = ( $rel_rank > 0 ) ? $rel_rank : 1;
+      }
+      else
+         $rel_high_rank = $ch_rank;
+
+      return min( $abs_high_rank, $rel_high_rank );
    }
 
    /*! \brief Returns non-0 number of max. defenses for given ladder-rank. */
@@ -504,6 +519,7 @@ class TournamentLadderProps
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],
             @$row['ChallengeRangeAbsolute'],
+            @$row['ChallengeRangeRelative'],
             @$row['ChallengeRematchWait'],
             @$row['MaxDefenses'],
             @$row['MaxDefenses1'],
