@@ -239,10 +239,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $tl_props->MaxChallenges > 0 )
          {
             $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges'),
-                                   $tl_user->ChallengesOut, $tl_props->MaxChallenges );
-            echo ( ($tl_user->MaxChallengedOut) ? span('TLMaxChallenges', $ch_out_str.': ') : $ch_out_str.': ' ),
-               span('LadderWarn', ($tl_user->MaxChallengedOut ? T_('Challenging stalled') : T_('Challenging allowed') )),
-               '.', "<br>\n";
+                                   $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
+            echo
+               ( ($tl_user->MaxChallengedOut)
+                  ? span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled'))
+                  : $ch_out_str . T_('Challenging allowed')
+               ), ".<br>\n";
          }
          echo sprintf( T_('Your current rank is #%s.'), $tl_user->Rank ),
             MED_SPACING,
