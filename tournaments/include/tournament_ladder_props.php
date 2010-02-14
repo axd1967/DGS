@@ -21,9 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'include/globals.php';
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
 require_once 'include/utilities.php';
+require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 
  /*!
@@ -33,6 +35,7 @@ require_once 'tournaments/include/tournament_globals.php';
   */
 
 define('TLADDER_MAX_DEFENSES', 20);
+define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // 3 months
 
 // game-end type
 define('TGE_NORMAL', 1);
@@ -54,8 +57,8 @@ global $ENTITY_TOURNAMENT_LADDER_PROPS; //PHP5
 $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2',
-                  'MaxDefensesStart1', 'MaxDefensesStart2',
+      FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRematchWait',
+                  'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
    );
@@ -66,6 +69,7 @@ class TournamentLadderProps
    var $Lastchanged;
    var $ChangedBy;
    var $ChallengeRangeAbsolute;
+   var $ChallengeRematchWaitHours;
    var $MaxDefenses;
    var $MaxDefenses1;
    var $MaxDefenses2;
@@ -78,7 +82,7 @@ class TournamentLadderProps
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
-         $challenge_range_abs=0,
+         $challenge_range_abs=0, $challenge_rematch_wait_hours=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST )
@@ -87,6 +91,7 @@ class TournamentLadderProps
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
       $this->ChallengeRangeAbsolute = (int)$challenge_range_abs;
+      $this->ChallengeRematchWaitHours = (int)$challenge_rematch_wait_hours;
       $this->MaxDefenses = (int)$max_defenses;
       $this->MaxDefenses1 = (int)$max_defenses1;
       $this->MaxDefenses2 = (int)$max_defenses2;
@@ -171,6 +176,7 @@ class TournamentLadderProps
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'ChallengeRangeAbsolute', $this->ChallengeRangeAbsolute );
+      $data->set_value( 'ChallengeRematchWait', $this->ChallengeRematchWaitHours );
       $data->set_value( 'MaxDefenses', $this->MaxDefenses );
       $data->set_value( 'MaxDefenses1', $this->MaxDefenses1 );
       $data->set_value( 'MaxDefenses2', $this->MaxDefenses2 );
@@ -250,6 +256,11 @@ class TournamentLadderProps
       }
       $arr_props[] = $arr;
 
+      // challenge-rematch
+      if( $this->ChallengeRematchWaitHours > 0 )
+         $arr_props[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.'),
+                                 TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
+
       // general conditions
       $arr_props[] = T_('You may only have one running game per opponent.');
       $arr_props[] = T_("On user removal or retreat from the ladder, the running tournament games\n"
@@ -308,7 +319,7 @@ class TournamentLadderProps
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     */
-   function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
+   function fill_ladder_running_games( &$tcache, &$iterator, $tgame_iterator, $my_id )
    {
       while( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
@@ -326,7 +337,10 @@ class TournamentLadderProps
             {
                $tgame->Defender_tladder = $df_tladder;
                $tgame->Challenger_tladder = $ch_tladder;
-               $df_tladder->add_running_game( $tgame );
+               if( $tgame->Status == TG_STATUS_WAIT )
+                  $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tcache, $tgame );
+               else
+                  $df_tladder->add_running_game( $tgame );
             }
          }
       }
@@ -370,10 +384,22 @@ class TournamentLadderProps
    {
       $errors = array();
 
+      if( $tladder_ch->rid == $tladder_df->rid )
+         error('invalid_args', "TournamentLadderProps.verify_challenge.check_rid_same({$this->tid},{$tladder_ch->rid})");
+
       $tgame = TournamentGames::load_tournament_game_by_uid( $tladder_ch->tid,
          $tladder_ch->uid, $tladder_df->uid );
-      if( !is_null($tgame) && $tgame->Status != TG_STATUS_DONE )
-         $errors[] = T_('You may only have one running game per opponent.');
+      if( !is_null($tgame) )
+      {
+         if( $tgame->Status == TG_STATUS_WAIT )
+         {
+            // should normally not be reached by link from ladder-view, so don't calc remaing-hours
+            $errors[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.'),
+                                 TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
+         }
+         elseif( $tgame->Status != TG_STATUS_DONE )
+            $errors[] = T_('You may only have one running game per opponent.');
+      }
 
       // check rank-range
       $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank );
@@ -414,6 +440,28 @@ class TournamentLadderProps
       return $action;
    }
 
+   /*! \brief Returns TicksDue for rematch-wait, anchored on half-hourly-clock. */
+   function calc_ticks_due_rematch_wait( &$tcache )
+   {
+      $clock_ticks = $tcache->load_clock_ticks(
+         "TournamentLadderProps.calc_ticks_due_rematch_wait({$this->tid})", CLOCK_TOURNEY_GAME_WAIT );
+      $ticks_due = $clock_ticks + 2 * $this->ChallengeRematchWaitHours; // half-hour-ticks to wait
+      return $ticks_due;
+   }
+
+   /*! \brief Returns remaining hours to wait for rematch. */
+   function calc_rematch_wait_remaining_hours( &$tcache, $tgame )
+   {
+      $wait_ticks = $tcache->load_clock_ticks(
+         "TournamentLadderProps.calc_rematch_wait_remaining_hours({$this->tid},{$tgame->ID})",
+         CLOCK_TOURNEY_GAME_WAIT);
+
+      $remaining_hours = floor(($tgame->TicksDue - $wait_ticks + 1) / 2);
+      if( $remaining_hours < 0 )
+         $remaining_hours = 0;
+      return $remaining_hours;
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -434,6 +482,7 @@ class TournamentLadderProps
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],
             @$row['ChallengeRangeAbsolute'],
+            @$row['ChallengeRematchWait'],
             @$row['MaxDefenses'],
             @$row['MaxDefenses1'],
             @$row['MaxDefenses2'],
@@ -519,6 +568,11 @@ class TournamentLadderProps
       if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end]) )
          error('invalid_args', "TournamentLadderProps.getGameEndText($game_end)");
       return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end];
+   }
+
+   function echo_rematch_wait( $hours, $short=false )
+   {
+      return TimeFormat::_echo_time( $hours, 24, TIMEFMT_ZERO | ($short ? TIMEFMT_SHORT : 0), 0 );
    }
 
    function get_edit_tournament_status()

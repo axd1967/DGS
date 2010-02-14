@@ -1683,3 +1683,14 @@ ALTER TABLE TournamentLadderProps
    ADD GameEndTimeoutLoss enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL DEFAULT 'CH_LAST' ;
 
 
+-- added property to control waiting-time to rematch user
+ALTER TABLE TournamentLadderProps
+   ADD ChallengeRematchWait smallint unsigned NOT NULL DEFAULT '0' AFTER ChallengeRangeAbsolute ;
+
+ALTER TABLE TournamentGames
+   CHANGE Status Status enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',
+   ADD TicksDue int NOT NULL DEFAULT '0' AFTER Status,
+   DROP INDEX Status,
+   ADD INDEX Status_Ticks (Status,TicksDue) ;
+
+

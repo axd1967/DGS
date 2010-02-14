@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
@@ -146,11 +147,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       {
          $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
          $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid,
-               array(TG_STATUS_PLAY, TG_STATUS_SCORE) );
+               array(TG_STATUS_PLAY, TG_STATUS_WAIT, TG_STATUS_SCORE) );
 
          // add ladder-info (challenge-range)
+         $thelper = new TournamentHelper();
          $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
-         $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
+         $tl_props->fill_ladder_running_games( $thelper->tcache, $iterator, $tg_iterator, $my_id );
       }
       else
          $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
@@ -207,7 +209,18 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
                      anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
                              T_('Challenge this user') ));
                elseif( $tladder->MaxChallenged )
-                  $row_str[7] = span('MaxChallenged', sprintf( T_('Already in %s challenges'), $tladder->ChallengesIn ));
+                  $row_str[7] = span('LadderInfo', sprintf( T_('Already in %s challenges'), $tladder->ChallengesIn ));
+               elseif( $tladder->RematchWait >= 0 )
+               {
+                  if( $tladder->RematchWait > 0 )
+                  {
+                     $time_str = TournamentLadderProps::echo_rematch_wait($tladder->RematchWait, true);
+                     $time_str = sprintf( T_('Rematch Wait [%s]'), $time_str );
+                  }
+                  else
+                     $time_str = T_('Rematch Wait due');
+                  $row_str[7] = span('LadderInfo', $time_str);
+               }
             }
          }
          if( $ltable->Is_Column_Displayed[ 8] )

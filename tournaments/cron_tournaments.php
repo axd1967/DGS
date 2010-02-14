@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 chdir('..');
+require_once 'include/globals.php';
 require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_helper.php';
@@ -56,13 +57,13 @@ if( ALLOW_TOURNAMENTS && !$is_down )
 
    // ---------- BEGIN ------------------------------
 
+   $player_row['Handle'] = '#CRON'; // for tourney-tables ChangedBy-fields
+   $tg_order = "ORDER BY TG.tid ASC, TG.Lastchanged ASC, TG.ID ASC";
    $thelper = new TournamentHelper();
 
+   // ---------- handle tournament-game ending by score/resignation/jigo/timeout
 
-   // handle tournament-game ending by score/resignation/jigo/timeout
-
-   $tg_iterator = new ListIterator( 'Tournament.cron.load_tgames.score', null,
-      "ORDER BY TG.tid ASC, TG.Lastchanged ASC, TG.ID ASC");
+   $tg_iterator = new ListIterator( 'Tournament.cron.load_tgames.score', null, $tg_order );
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, TG_STATUS_SCORE );
 
    while( list(,$arr_item) = $tg_iterator->getListIterator() )
@@ -79,6 +80,11 @@ if( ALLOW_TOURNAMENTS && !$is_down )
             error('invalid_method', "Tournament.cron.game_end.ttype($tid,$tourney->Type)");
       }
    }
+
+   // ---------- finish waiting, due tournament-games
+
+   $wait_ticks = (int)$thelper->tcache->load_clock_ticks( 'Tournament.cron.game_wait', CLOCK_TOURNEY_GAME_WAIT );
+   TournamentGames::update_tournament_game_wait( 'Tournament.cron', $player_row['Handle'], $wait_ticks );
 
 
    // ---------- END --------------------------------

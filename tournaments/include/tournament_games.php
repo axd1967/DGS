@@ -43,7 +43,7 @@ $ENTITY_TOURNAMENT_GAMES = new Entity( 'TournamentGames',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'tid', 'gid', 'Flags', 'Challenger_uid', 'Challenger_rid',
+      FTYPE_INT,  'ID', 'tid', 'gid', 'TicksDue', 'Flags', 'Challenger_uid', 'Challenger_rid',
                   'Defender_uid', 'Defender_rid', 'Score',
       FTYPE_DATE, 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Status'
@@ -55,6 +55,7 @@ class TournamentGames
    var $tid;
    var $gid;
    var $Status;
+   var $TicksDue;
    var $Flags;
    var $Lastchanged;
    var $ChangedBy;
@@ -72,7 +73,7 @@ class TournamentGames
    var $Challenger_tladder;
 
    /*! \brief Constructs TournamentGames-object with specified arguments. */
-   function TournamentGames( $id=0, $tid=0, $gid=0, $status=TG_STATUS_INIT, $flags=0,
+   function TournamentGames( $id=0, $tid=0, $gid=0, $status=TG_STATUS_INIT, $ticks_due=0, $flags=0,
          $lastchanged=0, $changed_by='',
          $challenger_uid=0, $challenger_rid=0, $defender_uid=0, $defender_rid=0,
          $start_time=0, $end_time=0, $score=0.0 )
@@ -81,6 +82,7 @@ class TournamentGames
       $this->tid = (int)$tid;
       $this->gid = (int)$gid;
       $this->setStatus( $status );
+      $this->TicksDue = (int)$ticks_due;
       $this->Flags = (int)$flags;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
@@ -151,6 +153,7 @@ class TournamentGames
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'gid', $this->gid );
       $data->set_value( 'Status', $this->Status );
+      $data->set_value( 'TicksDue', $this->TicksDue );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
@@ -185,6 +188,7 @@ class TournamentGames
             @$row['tid'],
             @$row['gid'],
             @$row['Status'],
+            @$row['TicksDue'],
             @$row['Flags'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],
@@ -272,7 +276,24 @@ class TournamentGames
             . "EndTime=FROM_UNIXTIME($NOW), "
             . "Lastchanged=FROM_UNIXTIME($NOW), "
             . EntityData::build_update_part_changed_by($changed_by)
-         . "WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
+         . " WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
+      return $result;
+   }
+
+   /*! \brief Updates due tournament-games finishing with DONE-status. */
+   function update_tournament_game_wait( $dbgmsg, $changed_by, $wait_ticks )
+   {
+      if( !is_numeric($wait_ticks) )
+         error('invalid_args', "TournamentGames.update_tournament_game_wait.check.ticks($wait_ticks)");
+
+      global $NOW;
+      $table = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->table;
+      $result = db_query( "$dbgmsg.update_tournament_game_wait($wait_ticks)",
+         "UPDATE $table SET "
+            . "Status='".TG_STATUS_DONE."', "
+            . "Lastchanged=FROM_UNIXTIME($NOW), "
+            . EntityData::build_update_part_changed_by($changed_by)
+         . " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks" );
       return $result;
    }
 

@@ -71,6 +71,8 @@ class TournamentLadder
    var $MaxChallenged;
    /*! \brief array of TournamentGames-object of incoming-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
    var $RunningTourneyGames;
+   /*! \brief how many hours to wait till rematch allowed with same user; -1=rematch allowed, 0=TG still on WAIT-status but due. */
+   var $RematchWait;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0,
@@ -88,6 +90,7 @@ class TournamentLadder
       $this->AllowChallenge = false;
       $this->MaxChallenged = false;
       $this->RunningTourneyGames = array();
+      $this->RematchWait = -1;
    }
 
    /*! \brief Adds TournamentGames-object to list of incoming challenge (running) games. */

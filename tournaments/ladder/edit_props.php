@@ -113,6 +113,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], '', ));
    $tform->add_empty_row();
 
+   // challenge rematch
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Challenge Rematch Wait-Time'),
+         'TEXTINPUT',   'chall_rematch', 5, 5, $vars['chall_rematch'], '',
+         'TEXT',        MINI_SPACING . T_('hours'), ));
+   $tform->add_empty_row();
+
    // max. defenses
    $tform->add_row( array(
          'DESCRIPTION', T_('Max. Defenses'),
@@ -200,6 +207,7 @@ function parse_edit_form( &$tlp )
    // read from props or set defaults
    $vars = array(
       'chall_range_abs' => $tlp->ChallengeRangeAbsolute,
+      'chall_rematch'   => $tlp->ChallengeRematchWaitHours,
       'max_def'         => $tlp->MaxDefenses,
       'max_def1'        => $tlp->MaxDefenses1,
       'max_def2'        => $tlp->MaxDefenses2,
@@ -225,6 +233,12 @@ function parse_edit_form( &$tlp )
          $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, $max_value, 10 );
       else
          $errors[] = sprintf( T_('Expecting number for absolute challenge range in range [-1..%s]'), $max_value );
+
+      $new_value = $vars['chall_rematch'];
+      if( is_numeric($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_WAIT_REMATCH )
+         $tlp->ChallengeRematchWaitHours = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for rematch waiting time in hours range [0..%s]'), TLADDER_MAX_WAIT_REMATCH );
 
 
       $new_value = $vars['max_def'];
@@ -265,6 +279,7 @@ function parse_edit_form( &$tlp )
 
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
+      if( $old_vals['chall_rematch'] != $tlp->ChallengeRematchWaitHours ) $edits[] = T_('ChallengeRematchWait#edits');
       if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def1'] != $tlp->MaxDefenses1 ) $edits[] = T_('MaxDefenses#edits');
       if( $old_vals['max_def2'] != $tlp->MaxDefenses2 ) $edits[] = T_('MaxDefenses#edits');

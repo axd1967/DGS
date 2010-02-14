@@ -74,8 +74,9 @@ define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restri
 define('TG_STATUS_INIT',   'INIT');
 define('TG_STATUS_PLAY',   'PLAY');
 define('TG_STATUS_SCORE',  'SCORE');
+define('TG_STATUS_WAIT',   'WAIT');
 define('TG_STATUS_DONE',   'DONE');
-define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|DONE');
+define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
 
 // ---------- Tournament Ladder Props -----------------------------
 

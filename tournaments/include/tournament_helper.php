@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 
  /*!
   * \file tournament_helper.php
@@ -70,7 +71,13 @@ class TournamentHelper
             $tladder_df->update_incoming_challenges( -1 );
 
             // tournament-game done
-            $tgame->setStatus(TG_STATUS_DONE);
+            if( $tl_props->ChallengeRematchWaitHours > 0 )
+            {
+               $tgame->setStatus(TG_STATUS_WAIT);
+               $tgame->TicksDue = $tl_props->calc_ticks_due_rematch_wait( $this->tcache );
+            }
+            else
+               $tgame->setStatus(TG_STATUS_DONE);
             $tgame->update();
          }
       }

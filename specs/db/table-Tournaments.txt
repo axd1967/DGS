@@ -430,6 +430,7 @@ Description:
  Lastchanged            | datetime             | 0000-00-00 00:00:00
  ChangedBy              | varchar(54)          |
  ChallengeRangeAbsolute | smallint(5)          | 0
+ ChallengeRematchWait   | smallint(5) unsigned | 0
  MaxDefenses            | tinyint(3) unsigned  | NULL
  MaxDefenses1           | tinyint(3) unsigned  | 0
  MaxDefenses2           | tinyint(3) unsigned  | 0
@@ -453,6 +454,10 @@ Description:
    - number of rank-positions a ladder-user can challenge users above own position
    - -1 = no limit, challenger can challenge all users above own position
    -  0 = unused option, i.e. other challenge ranges must configure challenge-range
+
+* ChallengeRematchWait : how many hours to wait till rematch same user
+   - 0 = unused, challenger can immediately rematch same user
+   - >0 = hours to wait before a rematch with same user
 
 * MaxDefenses : default max. number of defenses
 * MaxDefenses1 : max. number of defenses for 1st rank-group
@@ -497,7 +502,8 @@ Description:
  ID             | int(11)                    | NULL
  tid            | int(11)                    | NULL
  gid            | int(11)                    | 0
- Status         | enum('INIT','PLAY','SCORE','DONE') | INIT
+ Status         | enum('INIT','PLAY','SCORE','WAIT','DONE') | INIT
+ TicksDue       | int(11)                    | 0
  Flags          | smallint(5) unsigned       | 0
  Lastchanged    | datetime                   | 0000-00-00 00:00:00
  ChangedBy      | varchar(54)                |
@@ -521,7 +527,14 @@ Description:
    - PLAY = Tournament-game is being played by challenger and defender
    - SCORE = Tournament-game has ended by score/resign/jigo/timeout and
      needs processing for tournament
+   - WAIT = mark Tournament-game for rematch-waiting with same user,
+     see TicksDue-field
    - DONE = Tournament-game is finished and results booked in tournament
+
+* TicksDue : half-hour due-ticks to keep track of rematch-lock
+   - has meaning only if status=WAIT
+   - TicksDue contains the absolute half-hour-ticks when the status is changed
+     to DONE to allow rematch of challenger and defender
 
 * Flags : flags
 
