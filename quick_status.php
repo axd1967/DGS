@@ -35,7 +35,7 @@ function slashed($string)
 }
 
 
-function loc_start_page()
+function loc_start_page( $use_cache=true )
 {
    global $encoding_used, $NOW;
    ob_start('ob_gzhandler');
@@ -49,9 +49,11 @@ function loc_start_page()
    //header( "Content-Disposition: attachment; filename=\"$filename\"" );
    header( "Content-Description: PHP Generated Data" );
 
-   header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
-   header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
-
+   if( $use_cache )
+   {
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+      header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
+   }
 }
 
 function loc_end_page()
@@ -69,7 +71,7 @@ if( $is_down )
 }
 else
 {
-   loc_start_page();
+   loc_start_page( !((bool)get_request_arg('no_cache','0')) );
    //disable_cache();
 
    connect2mysql();
@@ -168,7 +170,7 @@ else
 
    // Games to play?
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, (White_ID=$my_id)+0 AS Color, " .
+   $query = "SELECT Black_ID,White_ID,Games.ID, tid, (White_ID=$my_id)+0 AS Color, " .
        "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
        "Maintime, Byotype, Byotime, Byoperiods, " .
        "White_Maintime, White_Byotime, White_Byoperiods, " .
@@ -205,10 +207,10 @@ else
                      $my_Byoperiods, $row['Byotime'], $row['Byoperiods'],
                      TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
-      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining
-      echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s'\n",
+      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, tid
+      echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s', %s\n",
                     'G', $row['ID'], slashed(@$row['oHandle']), $clrs{@$row['Color']},
-                    date($datfmt, @$row['date']), $time_remaining );
+                    date($datfmt, @$row['date']), $time_remaining, $row['tid'] );
    }
    mysql_free_result($result);
 
