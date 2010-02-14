@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'include/connect2mysql.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
@@ -46,15 +47,20 @@ class TournamentCache
    /*! \brief array( tid => TournamentLadderProps-object ) */
    var $cache_tl_props;
 
+   /*! \brief array( clock_id => ticks ) */
+   var $cache_clock_ticks;
+
 
    function TournamentCache()
    {
       $this->cache_tournament = array();
       $this->cache_tl_props = array();
+      $this->cache_clock_ticks = array();
    }
 
    function load_tournament( $dbgmsg, $tid )
    {
+      $tid = (int)$tid;
       if( isset($this->cache_tournament[$tid]) )
          $tourney = $this->cache_tournament[$tid];
       else
@@ -70,6 +76,7 @@ class TournamentCache
 
    function load_tournament_ladder_props( $dbgmsg, $tid )
    {
+      $tid = (int)$tid;
       if( isset($this->cache_tl_props[$tid]) )
          $tl_props = $this->cache_tl_props[$tid];
       else
@@ -81,6 +88,24 @@ class TournamentCache
             $this->cache_tl_props[$tid] = $tl_props;
       }
       return $tl_props;
+   }
+
+   function load_clock_ticks( $dbgmsg, $clock_id )
+   {
+      if( !is_numeric($clock_id) || $clock_id < 0 || $clock_id > MAX_CLOCK )
+         error('invalid_args', "$dbgmsg.load_clock_ticks.check($clock_id)");
+
+      if( !isset($this->cache_clock_ticks[$clock_id]) )
+      {
+         $row = mysql_single_fetch( "$dbgmsg.load_clock_ticks.find($clock_id)",
+            "SELECT Ticks FROM Clock WHERE ID=$clock_id LIMIT 1" );
+         if( !$row )
+            error('invalid_args', "$dbgmsg.load_clock_ticks.bad_clock($clock_id)");
+         else
+            $this->cache_clock_ticks[$clock_id] = (int)@$row['Ticks'];
+      }
+      $ticks = (int)@$this->cache_clock_ticks[$clock_id];
+      return $ticks;
    }
 
 } // end of 'TournamentCache'
