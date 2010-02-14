@@ -433,7 +433,7 @@ $array=array();
    if( $gid <= 0 )
       error('unknown_game', "sgf.check.game($gid)");
 
-   $use_cache = @$_GET['no_cache'];
+   $use_cache = !((bool)@$_GET['no_cache']);
    #$use_cache = false;
 
    $owned_comments = @$_GET['owned_comments'];
