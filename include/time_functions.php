@@ -19,16 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
+require_once 'include/globals.php';
+
+
 define('NIGHT_LEN', 9); //may be from 0 to 24 hours
 define('DAY_LEN', (24-NIGHT_LEN)); // hours
-define('WEEKEND_CLOCK_OFFSET', 100);
-define('VACATION_CLOCK', -1); // keep it < 0
-define('CLOCK_TIMELEFT', 204);
 
 define('BYOTYPE_JAPANESE', 'JAP');
 define('BYOTYPE_CANADIAN', 'CAN');
 define('BYOTYPE_FISCHER',  'FIS');
 define('REGEX_BYOTYPES', '('.BYOTYPE_JAPANESE.'|'.BYOTYPE_CANADIAN.'|'.BYOTYPE_FISCHER.')');
+
 
 function getmicrotime()
 {
