@@ -25,6 +25,36 @@ ChangeLog
 2010-02-14 juga
 
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props,
+       ~.fill_ladder_challenge_range, ~.verify_challenge, ~.new_from_row),
+     tournaments/include/tournament_ladder.php (class TournamentLadder, ~.fillEntityData,
+       ~.update_outgoing_challenges, ~.new_from_row),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/challenge.php, tournaments/ladder/view.php (build_action_row_str),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, skins/dragon/screen.css, NEWS:
+   - added max. number of outgoing ladder-challenges: TournamentLadderProps.MaxChallenges
+   - added current number of outgoing challenges: TournamentLadder.ChallengesOut
+   - ladder-view:
+     - added table-column with links to show-games-page with running tournament-games
+       of ladder-user
+     - show number of outgoing challenges for current user,
+       highlight if limit reached
+   - renamed TournamentLadder.MaxChallenged -> MaxChallengedIn
+-----------
+-- added max. number of outgoing ladder-challenges
+ALTER TABLE TournamentLadderProps
+   ADD MaxChallenges tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxDefensesStart2 ;
+
+ALTER TABLE TournamentLadder
+   ADD ChallengesOut tinyint unsigned NOT NULL DEFAULT '0' ;
+-----------
+
+   * show_games.php, status.php:
+   - cleanup: omit 3rd arg for TableHead-constructor if identical to 1st arg
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
        ~.fillEntityData, ~.build_notes_props, ~.fill_ladder_running_games, ~.verify_challenge,
        ~.calc_ticks_due_rematch_wait, ~.calc_rematch_wait_remaining_hours, ~.new_from_row,
        ~.echo_rematch_wait),
