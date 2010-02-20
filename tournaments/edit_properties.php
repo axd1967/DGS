@@ -115,16 +115,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $reg_end_time = trim(get_request_arg('reg_end_time'));
    $tform->add_row( array(
          'DESCRIPTION', T_('Register end time'),
-         'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'], '',
+         'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Restrict participants'),
-         'TEXTINPUT',   'min_participants', 5, 5, $vars['min_participants'], '',
+         'TEXTINPUT',   'min_participants', 5, 5, $vars['min_participants'],
          'TEXT',        MINI_SPACING . T_('(Minimum)'), ));
    $tform->add_row( array(
          'TAB',
-         'TEXTINPUT',   'max_participants', 5, 5, $vars['max_participants'], '',
+         'TEXTINPUT',   'max_participants', 5, 5, $vars['max_participants'],
          'TEXT',        MINI_SPACING . T_('(Maximum)'), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Rating Use Mode'),
@@ -140,11 +140,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'SELECTBOX',   'user_max_rating', 1, $rating_array, $vars['user_max_rating'], false, ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Minimum finished games'),
-         'TEXTINPUT',   'min_games_finished', 5, 5, $vars['min_games_finished'], '',
+         'TEXTINPUT',   'min_games_finished', 5, 5, $vars['min_games_finished'],
          'TEXT',        MINI_SPACING . T_('(rated and unrated)'), ));
    $tform->add_row( array(
          'TAB',
-         'TEXTINPUT',   'min_games_rated', 5, 5, $vars['min_games_rated'], '',
+         'TEXTINPUT',   'min_games_rated', 5, 5, $vars['min_games_rated'],
          'TEXT',        MINI_SPACING . T_('(rated only)'), ));
 
    $tform->add_row( array(

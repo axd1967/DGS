@@ -110,20 +110,20 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    // challenge range
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Range Absolute'),
-         'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], '', ));
+         'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Range Relative'),
-         'TEXTINPUT',   'chall_range_rel', 3, 3, $vars['chall_range_rel'], '',
+         'TEXTINPUT',   'chall_range_rel', 3, 3, $vars['chall_range_rel'],
          'TEXT',        MINI_SPACING . '%', ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Range Rating'),
-         'TEXTINPUT',   'chall_range_rat', 6, 6, $vars['chall_range_rat'], '',
+         'TEXTINPUT',   'chall_range_rat', 6, 6, $vars['chall_range_rat'],
          'TEXT',        MINI_SPACING . '('.T_('clear to deactivate').')', ));
 
    // challenge rematch
    $tform->add_row( array(
          'DESCRIPTION', T_('Challenge Rematch Wait-Time'),
-         'TEXTINPUT',   'chall_rematch', 5, 5, $vars['chall_rematch'], '',
+         'TEXTINPUT',   'chall_rematch', 5, 5, $vars['chall_rematch'],
          'TEXT',        MINI_SPACING . T_('hours'), ));
    $tform->add_empty_row();
 
@@ -131,26 +131,26 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Max. Defenses'),
          'TEXT',        T_('Start Rank') . ': ',
-         'TEXTINPUT',   'max_def_start1', 3, 3, $vars['max_def_start1'], '',
+         'TEXTINPUT',   'max_def_start1', 3, 3, $vars['max_def_start1'],
          'TEXT',        MED_SPACING . T_('Max. Defenses') . ': ',
-         'TEXTINPUT',   'max_def1', 3, 3, $vars['max_def1'], '',
+         'TEXTINPUT',   'max_def1', 3, 3, $vars['max_def1'],
          'TEXT',        T_('(Group #1)'), ));
    $tform->add_row( array(
          'TAB',
          'TEXT',        T_('Start Rank') . ': ',
-         'TEXTINPUT',   'max_def_start2', 3, 3, $vars['max_def_start2'], '',
+         'TEXTINPUT',   'max_def_start2', 3, 3, $vars['max_def_start2'],
          'TEXT',        MED_SPACING . T_('Max. Defenses') . ': ',
-         'TEXTINPUT',   'max_def2', 3, 3, $vars['max_def2'], '',
+         'TEXTINPUT',   'max_def2', 3, 3, $vars['max_def2'],
          'TEXT',        T_('(Group #2)'), ));
    $tform->add_row( array(
          'TAB',
          'TEXT',        T_('For remaining ranks restrict max. defenses to') . ': ',
-         'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'], '', ));
+         'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'], ));
 
    // max. challenges
    $tform->add_row( array(
          'DESCRIPTION', T_('Max. outgoing Challenges'),
-         'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'], '', ));
+         'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'], ));
    $tform->add_empty_row();
 
    // game-end

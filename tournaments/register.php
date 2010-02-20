@@ -258,7 +258,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tpform->add_row( array(
             'DESCRIPTION', T_('Customized Rating'),
             'TEXT',        $custom_rating_str . SMALL_SPACING,
-            'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'], '',
+            'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'],
             'SELECTBOX',   'rating_type', 1, getRatingTypes(), $rating_type, false,
             'SUBMITBUTTON', 'tp_preview', T_('Convert Rating'), ));
    }
@@ -279,7 +279,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       {
          $tpform->add_row( array(
                'DESCRIPTION', T_('Customized Start Round'),
-               'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'], '',
+               'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'],
                'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
       }
       $tpform->add_empty_row();
@@ -291,7 +291,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Public User Comment'),
-            'TEXTINPUT',   'comment', 60, 60, $tp->Comment, '', ));
+            'TEXTINPUT',   'comment', 60, 60, $tp->Comment, ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('User Message'),
             'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage, ));

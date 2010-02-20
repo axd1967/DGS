@@ -143,7 +143,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Start time'),
          'TEXTINPUT',   'start_time', 20, 20,
-                        TournamentUtils::formatDate($tourney->StartTime, $vars['start_time']), '',
+                        TournamentUtils::formatDate($tourney->StartTime, $vars['start_time']),
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('End time'),
@@ -151,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Title'),
-         'TEXTINPUT',   'title', 80, 255, $tourney->Title, '' ));
+         'TEXTINPUT',   'title', 80, 255, $tourney->Title ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Description'),
          'TEXTAREA',    'descr', 70, 15, $tourney->Description ));
@@ -160,10 +160,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Tournament rounds'),
-            'TEXTINPUT',   'rounds', 5, 5, $tourney->Rounds, '' ));
+            'TEXTINPUT',   'rounds', 5, 5, $tourney->Rounds ));
       $tform->add_row( array(
             'DESCRIPTION', T_('Current tournament round'),
-            'TEXTINPUT',   'current_round', 5, 5, $tourney->CurrentRound, '' ));
+            'TEXTINPUT',   'current_round', 5, 5, $tourney->CurrentRound ));
    }
    else
    {

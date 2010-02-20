@@ -249,7 +249,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    // edit registration
    $tpform->add_row( array(
          'DESCRIPTION',    T_('Edit User'),
-         'TEXTINPUT',      'showuser', 16, 16, $userhandle, '',
+         'TEXTINPUT',      'showuser', 16, 16, $userhandle,
          'SUBMITBUTTON',   'tp_showuser_handle', T_('Show User by Handle'),
          'SUBMITBUTTON',   'tp_showuser_uid', T_('Show User by ID'), ));
    $tpform->add_row( array( 'HR' ));
@@ -347,7 +347,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tpform->add_row( array(
                'DESCRIPTION', T_('Customized Rating'),
                'TEXT',        $custom_rating_str . SMALL_SPACING,
-               'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'], '',
+               'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'],
                'SELECTBOX',   'rating_type', 1, getRatingTypes(), $rating_type, false,
                'SUBMITBUTTON', 'tp_preview', T_('Convert Rating'), ));
       }
@@ -376,7 +376,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          if( $tourney->Rounds > 1 && !$is_delete && $authorise_edit_custom )
             $tpform->add_row( array(
                   'DESCRIPTION', T_('Customized Start Round'),
-                  'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'), '',
+                  'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'),
                   'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
          $tpform->add_empty_row();
       }
