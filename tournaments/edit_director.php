@@ -65,6 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
    if( !$tourney->allow_edit_directors($my_id, false) )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit($tid,$my_id)");
+   $allow_edit_flags = ( TournamentUtils::isAdmin() || ($tourney->Owner_ID == $my_id) );
 
    if( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
       TournamentDirector::assert_min_directors( $tid, $tourney->Status );
@@ -95,6 +96,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    elseif( $has_user )
       $errors[] = T_('Unknown user');
 
+
    $director = null;
    if( count($errors) == 0 && $uid )
       $director = TournamentDirector::load_tournament_director( $tid, $uid ); // existing TD ?
@@ -107,6 +109,12 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
             . urlencode(T_('Tournament director removed!')) );
    }
+
+   // init
+   $arr_flags = array(
+      TD_FLAG_GAME_END        => 'flag_gend',
+      TD_FLAG_GAME_ADD_TIME   => 'flag_addtime',
+   );
 
    // check + parse edit-form
    list( $vars, $edits, $errorlist ) = parse_edit_form( $director );
@@ -169,6 +177,25 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
       {
          if( !@$_REQUEST['td_delete'] )
          {
+            if( $allow_edit_flags )
+            {
+               $first = true;
+               foreach( $arr_flags as $flag => $name )
+               {
+                  $arr = ($first) ? array( 'DESCRIPTION', T_('Flags') ) : array( 'TAB' );
+                  $first = false;
+                  array_push( $arr,
+                     'CHECKBOX', $name, 1, TournamentDirector::getFlagsText($flag), ($director->Flags & $flag) );
+                  $tdform->add_row( $arr );
+               }
+            }
+            else
+            {
+               $tdform->add_row( array(
+                     'DESCRIPTION', T_('Flags'),
+                     'TEXT',        $director->formatFlags(), ));
+            }
+
             $tdform->add_row( array(
                   'DESCRIPTION', T_('Comment'),
                   'TEXTAREA', 'comment', 60, 3, $director->Comment,
@@ -236,11 +263,15 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tdir )
 {
+   global $arr_flags, $allow_edit_flags;
+
    $edits = array();
    $errors = array();
+   $is_posted = ( @$_REQUEST['td_save'] || @$_REQUEST['td_preview'] );
 
    // read from props or set defaults
    $vars = array(
+      'flags'     => $tdir->Flags,
       'comment'   => $tdir->Comment,
    );
 
@@ -248,13 +279,31 @@ function parse_edit_form( &$tdir )
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( $is_posted )
+   {
+      foreach( array_values($arr_flags) as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // parse URL-vars
-   if( @$_REQUEST['td_save'] || @$_REQUEST['td_preview'] )
+   if( $is_posted )
    {
+      if( $allow_edit_flags )
+      {
+         $new_value = 0;
+         foreach( $arr_flags as $flag => $name )
+         {
+            if( $vars[$name] )
+               $new_value |= $flag;
+         }
+         $tdir->Flags = $new_value;
+      }
+
       $tdir->Comment = trim($vars['comment']);
 
       // determine edits
+      if( $old_vals['flags'] != $tdir->Flags ) $edits[] = T_('Flags#edits');
       if( $old_vals['comment'] != $tdir->Comment ) $edits[] = T_('Comment#edits');
    }
 

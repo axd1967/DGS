@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once( 'include/db_classes.php' );
 require_once( 'include/classlib_user.php' );
+require_once( 'tournaments/include/tournament_globals.php' );
 
  /*!
   * \file tournament_director.php
@@ -37,10 +38,14 @@ require_once( 'include/classlib_user.php' );
   * \brief Class to manage TournamentDirector-table
   */
 
+// lazy-init in TournamentDirector::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT_DIRECTOR; //PHP5
+$ARR_GLOBALS_TOURNAMENT_DIRECTOR = array();
+
 global $ENTITY_TOURNAMENT_DIRECTOR; //PHP5
 $ENTITY_TOURNAMENT_DIRECTOR = new Entity( 'TournamentDirector',
       FTYPE_PKEY, 'tid', 'uid',
-      FTYPE_INT,  'tid', 'uid',
+      FTYPE_INT,  'tid', 'uid', 'Flags',
       FTYPE_TEXT, 'Comment'
    );
 
@@ -48,22 +53,36 @@ class TournamentDirector
 {
    var $tid;
    var $uid;
+   var $Flags;
    var $Comment;
    var $User; // User-object
 
    /*! \brief Constructs TournamentDirector-object with specified arguments. */
-   function TournamentDirector( $tid=0, $uid=0, $comment='', $user=NULL )
+   function TournamentDirector( $tid=0, $uid=0, $flags=0, $comment='', $user=NULL )
    {
       $this->tid = (int)$tid;
       $this->uid = (int)$uid;
+      $this->Flags = (int)$flags;
       $this->Comment = $comment;
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+   }
+
+   function formatFlags()
+   {
+      $arr = array();
+      $arr_flags = TournamentDirector::getFlagsText();
+      foreach( $arr_flags as $flag => $flagtext )
+      {
+         if( $this->Flags & $flag )
+            $arr[] = $flagtext;
+      }
+      return implode(', ', $arr);
    }
 
    /*! \brief Inserts or updates TournmentDirector in database. */
    function persist()
    {
-      if( TournamentDirector::isTournamentDirector($this->tid, $this->uid) )
+      if( !is_null(TournamentDirector::load_tournament_director($this->tid, $this->uid, /*with_user*/false)) )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -93,44 +112,42 @@ class TournamentDirector
       $data = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newEntityData();
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'uid', $this->uid );
+      $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Comment', $this->Comment );
       return $data;
    }
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Checks, if user is a tournament director of given tournament. */
-   function isTournamentDirector( $tid, $uid )
-   {
-      return (bool)mysql_single_fetch( "TournamentDirector.isTournamentDirector($tid,$uid)",
-         "SELECT 1 FROM TournamentDirector WHERE tid='$tid' AND uid='$uid' LIMIT 1" );
-   }
-
    /*! \brief Returns db-fields to be used for query of TournamentDirector-object. */
-   function build_query_sql( $tid )
+   function build_query_sql( $tid, $with_user=true )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
-      $qsql->add_part( SQLP_FIELDS,
-         'TDPL.ID AS TDPL_ID', 'TDPL.Name AS TDPL_Name',
-         'TDPL.Handle AS TDPL_Handle', 'TDPL.Rating2 AS TDPL_Rating2',
-         'UNIX_TIMESTAMP(TDPL.Lastaccess) AS TDPL_X_Lastaccess' );
-      $qsql->add_part( SQLP_FROM,
-         'INNER JOIN Players AS TDPL ON TDPL.ID=TD.uid' );
+      if( $with_user )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'TDPL.ID AS TDPL_ID', 'TDPL.Name AS TDPL_Name',
+            'TDPL.Handle AS TDPL_Handle', 'TDPL.Rating2 AS TDPL_Rating2',
+            'UNIX_TIMESTAMP(TDPL.Lastaccess) AS TDPL_X_Lastaccess' );
+         $qsql->add_part( SQLP_FROM,
+            'INNER JOIN Players AS TDPL ON TDPL.ID=TD.uid' );
+      }
       $qsql->add_part( SQLP_WHERE,
          "TD.tid='$tid'" );
       return $qsql;
    }
 
    /*! \brief Returns TournamentDirector-object created from specified (db-)row. */
-   function new_from_row( $row )
+   function new_from_row( $row, $with_user=true )
    {
       $director = new TournamentDirector(
             // from TournamentDirector
             @$row['tid'],
             @$row['uid'],
+            @$row['Flags'],
             @$row['Comment'],
             // from Players
-            User::new_from_row( $row, 'TDPL_' )
+            ( $with_user ? User::new_from_row($row, 'TDPL_') : null )
          );
       return $director;
    }
@@ -139,19 +156,19 @@ class TournamentDirector
     * \brief Loads and returns TournamentDirector-object for given
     *        tournament-ID and user-id; NULL if nothing found.
     */
-   function load_tournament_director( $tid, $uid )
+   function load_tournament_director( $tid, $uid, $with_user=true )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = TournamentDirector::build_query_sql( $tid );
+         $qsql = TournamentDirector::build_query_sql( $tid, $with_user );
          $qsql->add_part( SQLP_WHERE, "TD.uid='$uid'" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          $row = mysql_single_fetch( "TournamentDirector.load_tournament_director($tid,$uid)",
             $qsql->get_select() );
          if( $row )
-            $result = TournamentDirector::new_from_row( $row );
+            $result = TournamentDirector::new_from_row( $row, $with_user );
       }
       return $result;
    }
@@ -256,6 +273,28 @@ class TournamentDirector
       if( $die && $has_error )
          error('tournament_director_min1', "TournamentDirector::assert_min_directors($tid,$t_status)");
       return !$has_error;
+   }
+
+   /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
+   function getFlagsText( $flag=null )
+   {
+      global $ARR_GLOBALS_TOURNAMENT_DIRECTOR;
+
+      // lazy-init of texts
+      $key = 'FLAGS';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key]) )
+      {
+         $arr = array();
+         $arr[TD_FLAG_GAME_END] = T_('Game End#TD_flag');
+         $arr[TD_FLAG_GAME_ADD_TIME] = T_('Add Time#TD_flag');
+         $ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key] = $arr;
+      }
+
+      if( is_null($flag) )
+         return $ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key][$flag]) )
+         error('invalid_args', "TournamentDirector::getFlagsText($flag)");
+      return $ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key][$flag];
    }
 
    function get_edit_tournament_status()

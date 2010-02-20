@@ -87,18 +87,25 @@ Description:
 ## --- TournamentDirector ---
 
 Description:
-   List of TDs for tournament with additional comment about TD.
+   List of TDs for tournament with additional flags and comment about TD.
 
- Field   | Type         | Default
----------+--------------+--------
- tid     | int(11)      | NULL
- uid     | int(11)      | NULL
- Comment | varchar(255) |
+ Field   | Type                 | Default
+---------+----------------------+--------
+ tid     | int(11)              | NULL
+ uid     | int(11)              | NULL
+ Flags   | smallint(5) unsigned | 0
+ Comment | varchar(255)         |
 
 ## Fields:
 
 * tid, uid : primary key of this table
    - Existing DB-entry makes User [uid] a TD for T [tid]
+
+* Flags : bitmask with flags for TD
+   - 0x0001 = TD_FLAG_GAME_END = TD is allowed to end tournament-game prematurely,
+     (only when on TournamentGames.Status=PLAY)
+   - 0x0002 = TD_FLAG_GAME_ADD_TIME = TD is allowed to add time
+     to players of tournament-game as long as game is running
 
 * Comment : public comment about TD, may be empty
 

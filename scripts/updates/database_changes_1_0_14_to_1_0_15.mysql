@@ -1717,3 +1717,8 @@ ALTER TABLE TournamentRules
    CHANGE Handicaptype Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV' ;
 
 
+-- added flags to handle admin-rights for TD
+ALTER TABLE TournamentDirector
+   ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER uid ;
+
+

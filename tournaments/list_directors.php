@@ -79,6 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $tdtable->add_tablehead( 2, T_('Tournament director#T_dir'), 'User', 0, 'Name+');
    $tdtable->add_tablehead( 3, T_('Rating#T_dir'), 'Rating', 0, 'Rating2-');
    $tdtable->add_tablehead( 4, T_('Last access#T_dir'), 'Date', 0, 'Lastaccess-');
+   $tdtable->add_tablehead( 6, T_('Admin Flags#T_dir'), '', TABLE_NO_SORT);
    $tdtable->add_tablehead( 5, T_('Comment#T_dir'), '', TABLE_NO_SORT);
 
    $tdtable->set_default_sort( 4 ); //on Lastaccess
@@ -145,6 +146,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
          $row_str[4] = ($director->User->Lastaccess > 0) ? date(DATE_FMT2, $director->User->Lastaccess) : '';
       if( $tdtable->Is_Column_Displayed[5] )
          $row_str[5] = make_html_safe( $director->Comment, true );
+      if( $tdtable->Is_Column_Displayed[6] )
+         $row_str[6] = span('TInfo', $director->formatFlags());
 
       $tdtable->add_row( $row_str );
    }

@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'include/connect2mysql.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 
  /*!
@@ -31,6 +32,9 @@ require_once 'tournaments/include/tournament_ladder_props.php';
   *
   * \brief Container and function to cache tournament-objects.
   */
+
+global $TOURNAMENT_CACHE;
+$TOURNAMENT_CACHE = new TournamentCache();
 
 
  /*!
@@ -44,6 +48,9 @@ class TournamentCache
    /*! \brief array( tid => Tournament-object ) */
    var $cache_tournament;
 
+   /*! \brief array( tid:uid => TournamentDirector-object(without-user) ) */
+   var $cache_tdirector;
+
    /*! \brief array( tid => TournamentLadderProps-object ) */
    var $cache_tl_props;
 
@@ -54,6 +61,7 @@ class TournamentCache
    function TournamentCache()
    {
       $this->cache_tournament = array();
+      $this->cache_tdirector = array();
       $this->cache_tl_props = array();
       $this->cache_clock_ticks = array();
    }
@@ -72,6 +80,27 @@ class TournamentCache
             $this->cache_tournament[$tid] = $tourney;
       }
       return $tourney;
+   }
+
+   /*!
+    * \brief Checks if user(uid) is tournament-director for given tournament with given flags.
+    * \param $flags TD_FLAG_GAME_END, ...
+    * \return flags-matching TournamentDirectory-object; null otherwise
+    */
+   function is_tournament_director( $dbgmsg, $tid, $uid, $flags=0 )
+   {
+      $tid = (int)$tid;
+      $uid = (int)$uid;
+      $key = "$tid:$uid";
+      if( isset($this->cache_tdirector[$key]) )
+         $td = $this->cache_tdirector[$key];
+      else
+      {
+         $td = TournamentDirector::load_tournament_director( $tid, $uid, /*with_user*/false );
+         $this->cache_tdirector[$key] = $td;
+      }
+      $is_tdir = ($flags > 0) ? ($td->Flags & $flags) : !is_null($td);
+      return ($is_tdir) ? $td : null;
    }
 
    function load_tournament_ladder_props( $dbgmsg, $tid )
