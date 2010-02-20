@@ -76,6 +76,9 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $tform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Your Roles'),
+         'TEXT', $tourney->getRoleText($my_id), ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Status'),
