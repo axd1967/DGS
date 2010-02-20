@@ -34,6 +34,7 @@ $ENTITY_TABLE = new Entity( 'Table',
    FTYPE_PKEY,
    FTYPE_AUTO,
    FTYPE_INT,
+   FTYPE_FLOAT,
    FTYPE_TEXT,
    FTYPE_DATE,
    FTYPE_ENUM,
@@ -43,14 +44,15 @@ $ENTITY_TABLE = new Entity( 'Table',
   */
 
 
-define('FTYPE_INT',  1); // for numeric-values (ints, float, double), which need no escaping
-define('FTYPE_TEXT', 2);
-define('FTYPE_DATE', 3);
-define('FTYPE_ENUM', 4);
-define('FTYPE_PKEY', 5); // primary-key of entity
-define('FTYPE_AUTO', 6); // auto-increment field
-define('FTYPE_CHBY', 7); // ChangedBy-field
-define('_FTYPE_MAX', 7);
+define('FTYPE_INT',   1); // for numeric-values (ints), which need no escaping
+define('FTYPE_FLOAT', 2); // for floating-point-values (float, double, decimal), which need no escaping
+define('FTYPE_TEXT',  3);
+define('FTYPE_DATE',  4);
+define('FTYPE_ENUM',  5);
+define('FTYPE_PKEY',  6); // primary-key of entity
+define('FTYPE_AUTO',  7); // auto-increment field
+define('FTYPE_CHBY',  8); // ChangedBy-field
+define('_FTYPE_MAX',  8);
 
 define('FIELD_CHANGEDBY', 'ChangedBy');
 
@@ -245,6 +247,8 @@ class EntityData
          return "'" . mysql_addslashes($value) . "'";
       elseif( $ftype == FTYPE_DATE )
          return ( $value != 0 ) ? "FROM_UNIXTIME($value)" : "'0000-00-00 00:00:00'";
+      elseif( $ftype == FTYPE_FLOAT )
+         return (float)$value;
       else
          error('assert', "EntityData.get_sql_value.bad_field_type({$this->entity->table},$field)");
    }
@@ -317,7 +321,8 @@ class EntityData
       return $query;
    }
 
-   function build_sql_update( $limit=1 )
+   /*! \brief Returns update-query as query-string or array( update-part, where-part, after-where-part ). */
+   function build_sql_update( $limit=1, $as_arr=false )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -342,11 +347,11 @@ class EntityData
       if( $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
          $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
-      $query = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr)
-         . ' WHERE ' . implode(' AND ', $arr_pkeys);
-      if( is_numeric($limit) && $limit > 0 )
-         $query .= " LIMIT $limit";
-      return $query;
+      $arr_query = array();
+      $arr_query[] = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr);
+      $arr_query[] = 'WHERE ' . implode(' AND ', $arr_pkeys);
+      $arr_query[] = ( is_numeric($limit) && $limit > 0 ) ? "LIMIT $limit" : '';
+      return ($as_arr) ? $arr_query : rtrim(implode(' ', $arr_query));
    }
 
    function build_sql_delete( $limit=1 )

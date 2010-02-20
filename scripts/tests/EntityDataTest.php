@@ -61,6 +61,7 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
             FTYPE_PKEY, 'ID',
             FTYPE_AUTO, 'ID',
             FTYPE_INT,  'ID', 'i1', 'i2',
+            FTYPE_FLOAT, 'f1',
             FTYPE_TEXT, 't1', 't2',
             FTYPE_DATE, 'd1', 'd2',
             FTYPE_ENUM, 'e1', 'e2'
@@ -118,8 +119,9 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->data->set_value('t1', 12);
       $this->data->set_value('e2', 'e-val');
       $this->data->set_value('d1', 12345678);
+      $this->data->set_value('f1', 1.3);
       $this->assertEquals(
-         "INSERT INTO Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678)",
+         "INSERT INTO Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678), f1=1.3",
          $this->data->build_sql_insert() );
    }
 
@@ -140,12 +142,13 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->data->set_value('e2', 'e-val');
       $this->data->set_value('i1', 0);
       $this->data->set_value('i2', '');
+      $this->data->set_value('f1', '0.5');
       $this->data->set_value('t1', 12);
       $this->assertEquals(
-         "INSERT INTO Table (i1,i2,t1,t2,d1,d2,e1,e2) VALUES ",
+         "INSERT INTO Table (i1,i2,f1,t1,t2,d1,d2,e1,e2) VALUES ",
          $this->data->build_sql_insert_values(true) );
       $this->assertEquals(
-         "(0,0,'12',DEFAULT(t2),FROM_UNIXTIME(12345678),DEFAULT(d2),DEFAULT(e1),'e-val')",
+         "(0,0,0.5,'12',DEFAULT(t2),FROM_UNIXTIME(12345678),DEFAULT(d2),DEFAULT(e1),'e-val')",
          $this->data->build_sql_insert_values() );
    }
 

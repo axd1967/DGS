@@ -57,6 +57,7 @@ class EntityTest extends PHPUnit_Framework_TestCase {
             FTYPE_PKEY, 'ID',
             FTYPE_AUTO, 'ID',
             FTYPE_INT,  'ID', 'i1', 'i2',
+            FTYPE_FLOAT, 'f1',
             FTYPE_TEXT, 't1', 't2',
             FTYPE_DATE, 'd1', 'd2',
             FTYPE_ENUM, 'e1', 'e2'
@@ -74,7 +75,7 @@ class EntityTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( 'ID', $this->entity->field_autoinc );
 
-      $this->assertEquals( 9, count($this->entity->fields) );
+      $this->assertEquals( 10, count($this->entity->fields) );
       $this->assertEquals( FTYPE_INT, $this->entity->fields['ID'] );
       $this->assertEquals( FTYPE_INT, $this->entity->fields['i1'] );
       $this->assertEquals( FTYPE_INT, $this->entity->fields['i2'] );
@@ -84,6 +85,7 @@ class EntityTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( FTYPE_DATE, $this->entity->fields['d2'] );
       $this->assertEquals( FTYPE_ENUM, $this->entity->fields['e1'] );
       $this->assertEquals( FTYPE_ENUM, $this->entity->fields['e2'] );
+      $this->assertEquals( FTYPE_FLOAT, $this->entity->fields['f1'] );
 
       $this->assertEquals( 2, count($this->entity->date_fields) );
       $arr = array_merge( array(), $this->entity->date_fields );
