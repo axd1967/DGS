@@ -128,9 +128,9 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true )
 /*! \brief Returns image-tag with vacation-image if on_vacation set; return '' otherwise. */
 function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stopped=false )
 {
-   global $base_path;
    if( (is_numeric($on_vacation) && $on_vacation > 0) || $on_vacation )
    {
+      global $base_path;
       $title = T_('On vacation');
       if( $vacText != '' )
          $title .= " ($vacText)";
@@ -146,9 +146,9 @@ function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stoppe
 /*! \brief Returns image-tag with night-time-image if $sleeping set; return '' otherwise. */
 function echo_image_nighttime( $sleeping=true, $game_clock_stopped=false )
 {
-   global $base_path;
    if( $sleeping )
    {
+      global $base_path;
       $title = T_('User in sleeping time') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
       $attbs = ($sleeping === true ) ? '' : 'class="InTextImage"';
       return image( $base_path.'images/night.gif', $title, null, $attbs );
@@ -160,9 +160,9 @@ function echo_image_nighttime( $sleeping=true, $game_clock_stopped=false )
 /*! \brief Returns image-tag for weekend-clock. */
 function echo_image_weekendclock( $weekend=true, $game_clock_stopped=true )
 {
-   global $base_path;
    if( $weekend )
    {
+      global $base_path;
       $title = T_('Weekend (UTC)') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
       return image( $base_path.'images/wclock_stop.gif', $title, null, 'class="InTextImage"' );
    }
@@ -173,9 +173,9 @@ function echo_image_weekendclock( $weekend=true, $game_clock_stopped=true )
 /*! \brief Returns image-tag for admin with given admin-level. */
 function echo_image_admin( $adminlevel, $withSep=true )
 {
-   global $base_path;
    if( $adminlevel & ADMINGROUP_EXECUTIVE )
    {
+      global $base_path;
       $title = T_('Dragon executive');
       return ($withSep ? MINI_SPACING : '')
          . anchor( $base_path.'people.php#executives',
@@ -188,9 +188,9 @@ function echo_image_admin( $adminlevel, $withSep=true )
 /*! \brief Returns image-tag for being-online if online; return '' otherwise. */
 function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
 {
-   global $base_path, $NOW;
    if( $in_the_house )
    {
+      global $base_path, $NOW;
       $title = T_('Online');
       if( $last_access > 0 )
       {
@@ -230,7 +230,7 @@ function echo_image_gameinfo( $gid, $with_sep=false )
 {
    global $base_path;
    $img_str = image( $base_path.'images/info.gif', T_('Game information'), null, 'class="InTextImage"');
-   return ($with_sep ? ' ' : '' ) . anchor( "gameinfo.php?gid=$gid", $img_str );
+   return ($with_sep ? ' ' : '' ) . anchor( $base_path."gameinfo.php?gid=$gid", $img_str );
 }
 
 /*! \brief Returns image to tournament-info page for given tournament-id. */
@@ -246,7 +246,7 @@ function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
       if( $img_only )
          return $str_sep . $img_str;
       else
-         return $str_sep . anchor( "tournaments/view_tournament.php?tid=$tid", $img_str );
+         return $str_sep . anchor( $base_path."tournaments/view_tournament.php?tid=$tid", $img_str );
    }
    else
       return '';
