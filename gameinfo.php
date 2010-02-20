@@ -401,7 +401,7 @@ function build_rating_diff( $rating_diff )
       $prioform = new Form( 'gameprio', "gameinfo.php?gid=$gid", FORM_GET );
       $prioform->add_row( array(
             'DESCRIPTION',  T_('Status games list#nextgame'),
-            'TEXTINPUT',    'prio', 5, 5, $prio, '',
+            'TEXTINPUT',    'prio', 5, 5, $prio,
             'SUBMITBUTTON', 'set_prio', T_('Set priority'),
             'HIDDEN', 'gid', $gid,
          ));
@@ -429,6 +429,15 @@ function build_rating_diff( $rating_diff )
 
    $menu_array = array();
    $menu_array[T_('Show game')] = 'game.php?gid='.$gid;
+   if( $tid && !is_null($tourney) )
+   {
+      if( $tourney->allow_edit_tournaments($my_id, TD_FLAG_GAME_END) )
+         $menu_array[T_('Admin tournament game')] =
+            array( 'url' => "tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid", 'class' => 'TAdmin' );
+      if( $tourney->allow_edit_tournaments($my_id) )
+         $menu_array[T_('Manage tournament')] =
+            array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
+   }
 
    end_page(@$menu_array);
 }

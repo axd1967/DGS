@@ -26,6 +26,7 @@ require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_director.php';
+require_once 'tournaments/include/tournament_cache.php';
 
  /*!
   * \file tournament.php
@@ -221,8 +222,26 @@ class Tournament
       return $data;
    }
 
-   /*! \brief Returns true if given user can edit tournament. */
-   function allow_edit_tournaments( $uid )
+   function getRoleText( $uid )
+   {
+      global $TOURNAMENT_CACHE;
+
+      $arr = array();
+      if( $this->Owner_ID == $uid )
+         $arr[] = T_('Owner#T_role');
+      $td = $TOURNAMENT_CACHE->is_tournament_director('Tournament.getRoleText', $this->ID, $uid, 0xffff);
+      if( !is_null($td) )
+         $arr[] = sprintf( T_('Tournament Director [%s]#T_role'), $td->formatFlags() );
+      if( TournamentUtils::isAdmin() )
+         $arr[] = T_('Tournament Admin#T_role');
+      return (count($arr)) ? implode(', ', $arr) : NO_VALUE;
+   }
+
+   /*!
+    * \brief Returns true if given user can edit tournament,
+    *        or if can admin tournament-game if tournament-director-flag given.
+    */
+   function allow_edit_tournaments( $uid, $td_flag=0 )
    {
       if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
          return false;
@@ -231,8 +250,13 @@ class Tournament
       if( TournamentUtils::isAdmin() )
          return true;
 
-      // edit allowed for T-owner or TD
-      if( $this->Owner_ID == $uid || TournamentDirector::isTournamentDirector($this->ID, $uid) )
+      // edit/admin-game allowed for T-owner or TD
+      if( $this->Owner_ID == $uid )
+         return true;
+
+      // admin-game allowed for TD with respective right (td_flag)
+      global $TOURNAMENT_CACHE;
+      if( $TOURNAMENT_CACHE->is_tournament_director('Tournament.allow_edit_tournaments', $this->ID, $uid, $td_flag) )
          return true;
 
       return false;

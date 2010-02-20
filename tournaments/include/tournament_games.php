@@ -38,13 +38,18 @@ require_once 'tournaments/include/tournament_globals.php';
   * \brief Class to manage tournament-games
   */
 
+// lazy-init in TournamentGames::get..Text()-funcs
+global $ARR_GLOBALS_TOURNAMENT_GAMES; //PHP5
+$ARR_GLOBALS_TOURNAMENT_GAMES = array();
+
 global $ENTITY_TOURNAMENT_GAMES; //PHP5
 $ENTITY_TOURNAMENT_GAMES = new Entity( 'TournamentGames',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
       FTYPE_INT,  'ID', 'tid', 'gid', 'TicksDue', 'Flags', 'Challenger_uid', 'Challenger_rid',
-                  'Defender_uid', 'Defender_rid', 'Score',
+                  'Defender_uid', 'Defender_rid',
+      FTYPE_FLOAT, 'Score',
       FTYPE_DATE, 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Status'
    );
@@ -167,6 +172,32 @@ class TournamentGames
       return $data;
    }
 
+   /*!
+    * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
+    *        setting TG.Score for given tournament-ID and game-id.
+    */
+   function update_score( $dbgmsg, $old_status=null )
+   {
+      $this->Lastchanged = $this->EndTime = $GLOBALS['NOW'];
+
+      $data = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
+      $data->set_value( 'Status', $this->Status );
+      $data->set_value( 'Flags', $this->Flags );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
+      $data->set_value( 'EndTime', $this->EndTime );
+      $data->set_value( 'Score', $this->Score );
+
+      $arr_query = $data->build_sql_update( 1, true );
+      if( !is_null($old_status) )
+         $arr_query[1] .= " AND Status='" . mysql_addslashes($old_status) . "'";
+
+      $result = db_query( "$dbgmsg.TournamentGames.update_score({$this->ID},{$this->tid},{$this->gid},{$this->Score})",
+         implode(' ', $arr_query) );
+      return $result;
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -201,6 +232,25 @@ class TournamentGames
             @$row['Score']
          );
       return $tg;
+   }
+
+   /*!
+    * \brief Loads and returns TournamentGames-object for given games-ID.
+    * \return NULL if nothing found; TournamentGames otherwise
+    */
+   function load_tournament_game_by_gid( $gid )
+   {
+      if( !is_numeric($gid) || $gid <= 0 )
+         error('invalid_args', "TournamentGames.load_tournament_game_by_gid.check_gid($gid)");
+
+      $qsql = TournamentGames::build_query_sql();
+      $qsql->add_part( SQLP_WHERE,
+            "TG.gid=$gid" );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "TournamentGames::load_tournament_game_by_gid.find_tgame($gid)",
+         $qsql->get_select() );
+      return ($row) ? TournamentGames::new_from_row($row) : NULL;
    }
 
    /*!
@@ -295,6 +345,37 @@ class TournamentGames
             . EntityData::build_update_part_changed_by($changed_by)
          . " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks" );
       return $result;
+   }
+
+   /*! \brief Returns status-text or all status-texts (if arg=null). */
+   function getStatusText( $status=null )
+   {
+      global $ARR_GLOBALS_TOURNAMENT_GAMES;
+
+      // lazy-init of texts
+      $key = 'STATUS';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_GAMES[$key]) )
+      {
+         $arr = array();
+         $arr[TG_STATUS_INIT] = T_('Init#TG_status');
+         $arr[TG_STATUS_PLAY] = T_('Play#TG_status');
+         $arr[TG_STATUS_SCORE] = T_('Score#TG_status');
+         $arr[TG_STATUS_WAIT] = T_('Wait#TG_status');
+         $arr[TG_STATUS_DONE] = T_('Done#TG_status');
+         $ARR_GLOBALS_TOURNAMENT_GAMES[$key] = $arr;
+      }
+
+      if( is_null($status) )
+         return $ARR_GLOBALS_TOURNAMENT_GAMES[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT_GAMES[$key][$status]) )
+         error('invalid_args', "TournamentGames.getStatusText($status)");
+      return $ARR_GLOBALS_TOURNAMENT_GAMES[$key][$status];
+   }
+
+   function get_admin_tournament_status()
+   {
+      static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
+      return $statuslist;
    }
 
 } // end of 'TournamentGames'

@@ -56,6 +56,12 @@ define('LADDER_SEEDORDER_REGISTER_TIME',  2);
 define('LADDER_SEEDORDER_TOURNEY_RATING', 3);
 define('LADDER_SEEDORDER_RANDOM',         4);
 
+// ---------- Tournament Director Stuff ---------------------------
+
+// see also TournamentDirector::getFlagsText()
+define('TD_FLAG_GAME_END', 0x0001);
+define('TD_FLAG_GAME_ADD_TIME', 0x0002);
+
 // ---------- Tournament Participant Stuff ------------------------
 
 define('TP_STATUS_APPLY',     'APPLY');
@@ -77,6 +83,9 @@ define('TG_STATUS_SCORE',  'SCORE');
 define('TG_STATUS_WAIT',   'WAIT');
 define('TG_STATUS_DONE',   'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
+
+define('TG_FLAG_GAME_END_TD', 0x0001); // T-game ended by TD
+
 
 // ---------- Tournament Ladder Props -----------------------------
 
