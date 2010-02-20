@@ -57,8 +57,8 @@ global $ENTITY_TOURNAMENT_PROPERTIES; //PHP5
 $ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'UserMinRating',
-                  'UserMaxRating', 'UserMinGamesFinished', 'UserMinGamesRated',
+      FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'UserMinGamesFinished', 'UserMinGamesRated',
+      FTYPE_FLOAT, 'UserMinRating', 'UserMaxRating',
       FTYPE_TEXT, 'Notes',
       FTYPE_DATE, 'Lastchanged', 'RegisterEndTime',
       FTYPE_ENUM, 'RatingUseMode', 'UserRated'
