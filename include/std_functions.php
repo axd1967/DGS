@@ -218,11 +218,6 @@ define('POSX_TIME', -4);   // timeout for Stone=BLACK|WHITE: PosY=0, Hours=passe
 // game commands
 define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=0|1 (1=byoyomi-reset), Hours=add_hours
 
-//Games table: particular Score values
-define('SCORE_RESIGN', 1000);
-define('SCORE_TIME', 2000);
-define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
-
 
 define('DEFAULT_KOMI', 6.5); // change with care only, keep separate from STONE_VALUE
 define('STONE_VALUE',13); // 2 * conventional komi (=DEFAULT_KOMIT), change with care
@@ -237,10 +232,6 @@ define('ENA_STDHANDICAP',0x3);
 define('ENA_MOVENUMBERS',1);
 define('MAX_MOVENUMBERS', 500);
 
-
-//keep next constants powers of 2
-define('GAMEFLAGS_KO', 0x01);
-define('GAMEFLAGS_HIDDEN_MSG', 0x02);
 
 //-----
 // UserFlags (also stored in cookie)
