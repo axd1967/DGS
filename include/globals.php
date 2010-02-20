@@ -52,6 +52,26 @@ define('WEEKEND_CLOCK_OFFSET', 100);
 define('VACATION_CLOCK', -1); // keep it < 0
 
 
+// ---------- Games stuff -----------------------------------------
+
+define('GAME_STATUS_INVITED', 'INVITED');
+define('GAME_STATUS_PLAY', 'PLAY');
+define('GAME_STATUS_PASS', 'PASS');
+define('GAME_STATUS_SCORE', 'SCORE');
+define('GAME_STATUS_SCORE2', 'SCORE2');
+define('GAME_STATUS_FINISHED', 'FINISHED');
+define('CHECK_GAME_STATUS', 'INVITED|PLAY|PASS|SCORE|SCORE2|FINISHED');
+
+//keep next constants powers of 2
+define('GAMEFLAGS_KO', 0x01);
+define('GAMEFLAGS_HIDDEN_MSG', 0x02);
+
+//Games table: particular Score values
+define('SCORE_RESIGN', 1000);
+define('SCORE_TIME', 2000);
+define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
+
+
 // ---------- Folder stuff ----------------------------------------
 
 // folder for "destroyed" messages (former was: Folder_nr=NULL)
@@ -81,6 +101,7 @@ define('REQF_URL', URI_AMP.FNAME_REQUIRED.'=');  // prepared URL-part for append
 define('MAX_START_RATING', 2600); //6 dan
 define('MIN_RATING', -900); //30 kyu
 define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
+define('NO_RATING', -OUT_OF_RATING);
 define('RATING_9DAN', 2900); //9 dan (selectable max-rating)
 
 // Players.RatingStatus
