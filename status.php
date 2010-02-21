@@ -256,34 +256,8 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[13] = date(DATE_FMT, $Time);
          if( $gtable->Is_Column_Displayed[10] )
          {
-            if( $X_Color & 2 )
-            {
-               $my_Maintime   = $White_Maintime;
-               $my_Byotime    = $White_Byotime;
-               $my_Byoperiods = $White_Byoperiods;
-            }
-            else
-            {
-               $my_Maintime   = $Black_Maintime;
-               $my_Byotime    = $Black_Byotime;
-               $my_Byoperiods = $Black_Byoperiods;
-            }
-            //if( !(($Color+1) & 2) ) //is it my turn? (always set in status page)
-            $hours = ticks_to_hours($Ticks - $LastTicks);
-
-            time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
-                           $Maintime, $Byotype, $Byotime, $Byoperiods, false);
-            $hours_remtime = time_remaining_value( $Byotype, $Byotime, $Byoperiods,
-                  $my_Maintime, $my_Byotime, $my_Byoperiods );
-            $class_remtime = get_time_remaining_warning_class( $hours_remtime );
-
-            $content = TimeFormat::echo_time_remaining( $my_Maintime, $Byotype,
-                  $my_Byotime, $my_Byoperiods, $Byotime, $Byoperiods,
-                  TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
-            $grow_strings[10] = array(
-                  'attbs' => array( 'class' => $class_remtime ),
-                  'text'  => $content,
-               );
+            $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
+            $grow_strings[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true );
          }
          if( $gtable->Is_Column_Displayed[11] )
          {

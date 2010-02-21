@@ -338,6 +338,41 @@ function get_time_remaining_warning_class( $hours )
 }
 
 /*!
+ * \brief Builds time-remaining info.
+ * \param $grow = Games-row with (White|Black)_(Maintime|Byotime|Byoperiods),
+ *              X_Ticks, LastTicks, Maintime, Byotype, Byotime, Byoperiods
+ * \param $color BLACK | WHITE
+ * \param $is_to_move true if color-user is to move (taking current ticks into account)
+ * \return array( attbs => CSS-arr, text => remaining-time-str )
+ */
+function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
+{
+   $prefix_col = ($color == BLACK) ? 'Black' : 'White';
+   $userMaintime   = $grow[$prefix_col.'_Maintime'];
+   $userByotime    = $grow[$prefix_col.'_Byotime'];
+   $userByoperiods = $grow[$prefix_col.'_Byoperiods'];
+   if( is_null($timefmt) )
+      $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO;
+
+   // no Ticks (vacation) == 0 => lead to 0 elapsed hours
+   $elapsed_hours = ( $is_to_move ) ? ticks_to_hours(@$grow['X_Ticks'] - @$grow['LastTicks']) : 0;
+
+   time_remaining($elapsed_hours, $userMaintime, $userByotime, $userByoperiods,
+      $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+   $hours_remtime = time_remaining_value( $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
+      $userMaintime, $userByotime, $userByoperiods );
+
+   $class_remtime = get_time_remaining_warning_class( $hours_remtime );
+   $rem_time = TimeFormat::echo_time_remaining( $userMaintime, $grow['Byotype'], $userByotime,
+      $userByoperiods, $grow['Byotime'], $grow['Byoperiods'], $timefmt );
+
+   return array(
+         'attbs' => array( 'class' => $class_remtime ),
+         'text'  => $rem_time,
+      );
+}//build_time_remaining
+
+/*!
  * \brief Returns "absolute" time in ticks aligned with Clock[ID=CLOCK_TIMELEFT].
  * \param $hours_left hours_left is not precise but following the calculus of time_remaining_value()
  * \note

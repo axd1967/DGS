@@ -845,16 +845,16 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             if( $is_mine && $gtable->Is_Column_Displayed[39] ) // my-RemTime
             {
                // X_Color: b0= White to play, b1= I am White, b4= not my turn
-               $prefix_my_col = ( $X_Color & 2 ) ? 'White' : 'Black';
-               $is_to_move    = !( $X_Color & 0x10 ); // my-turn -> use clock
-               $grow_strings[39] = build_time_remaining( $row, $prefix_my_col, $is_to_move );
+               $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
+               $is_to_move = !( $X_Color & 0x10 ); // my-turn -> use clock
+               $grow_strings[39] = build_time_remaining( $row, $my_col, $is_to_move );
             }
             if( $is_mine && $gtable->Is_Column_Displayed[40] ) // opp-RemTime
             {
                // X_Color: b0= White to play, b1= I am White, b4= not my turn
-               $prefix_opp_col = !( $X_Color & 2 ) ? 'White' : 'Black';
-               $is_to_move    = ( $X_Color & 0x10 ); // opp-turn -> use clock
-               $grow_strings[40] = build_time_remaining( $row, $prefix_opp_col, $is_to_move );
+               $opp_col = !( $X_Color & 2 ) ? WHITE : BLACK;
+               $is_to_move = ( $X_Color & 0x10 ); // opp-turn -> use clock
+               $grow_strings[40] = build_time_remaining( $row, $opp_col, $is_to_move );
             }
          }
       } //else //OB
@@ -931,31 +931,4 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    end_page(@$menu_array);
 }
-
-
-function build_time_remaining( $grow, $prefix_col, $is_to_move )
-{
-   $userMaintime   = $grow[$prefix_col.'_Maintime'];
-   $userByotime    = $grow[$prefix_col.'_Byotime'];
-   $userByoperiods = $grow[$prefix_col.'_Byoperiods'];
-
-   // no Ticks (vacation) == 0 => lead to 0 elapsed hours
-   $elapsed_hours = ( $is_to_move ) ? ticks_to_hours(@$grow['X_Ticks'] - @$grow['LastTicks']) : 0;
-
-   time_remaining($elapsed_hours, $userMaintime, $userByotime, $userByoperiods,
-      $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
-   $hours_remtime = time_remaining_value( $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
-      $userMaintime, $userByotime, $userByoperiods );
-
-   $class_remtime = get_time_remaining_warning_class( $hours_remtime );
-   $rem_time = TimeFormat::echo_time_remaining( $userMaintime, $grow['Byotype'], $userByotime,
-      $userByoperiods, $grow['Byotime'], $grow['Byoperiods'],
-      TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO );
-
-   return array(
-         'attbs' => array( 'class' => $class_remtime ),
-         'text'  => $rem_time,
-      );
-}
-
 ?>
