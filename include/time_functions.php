@@ -515,6 +515,18 @@ class TimeFormat
    }
 
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
+   function echo_time_diff( $now, $time, $hours_per_day, $fmtflags=0, $zero_value=NO_VALUE )
+   {
+      if( $time > 0 )
+      {
+         $hours_diff = round( ($now - $time) / SECS_PER_HOUR );
+         return TimeFormat::_echo_time( $hours_diff, $hours_per_day, $fmtflags, $zero_value );
+      }
+      else
+         return '';
+   }
+
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
    function echo_onvacation( $days, $fmtflags=0, $zero_value=NO_VALUE )
    {
       $hours = round($days*24);

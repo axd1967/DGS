@@ -129,6 +129,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead( 8, T_('Challenges#T_ladder'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#T_ladder'), '', 0 );
+      $ltable->add_tablehead(13, T_('Last access#T_ladder'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#T_ladder'), 'Date', 0 );
 
       $iterator = new ListIterator( 'Tournament.ladder_view.load_ladder',
@@ -137,6 +138,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $iterator->addQuerySQLMerge( new QuerySQL(
             SQLP_FIELDS, 'TLP.ID AS TLP_ID', 'TLP.Name AS TLP_Name', 'TLP.Handle AS TLP_Handle',
                          'TLP.Country AS TLP_Country', 'TLP.Rating2 AS TLP_Rating2',
+                         'UNIX_TIMESTAMP(TLP.Lastaccess) AS TLP_X_Lastaccess',
             SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
          ));
       $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
@@ -215,6 +217,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[11] = ($tladder->Created > 0) ? date(DATE_FMT2, $tladder->Created) : '';
          if( $ltable->Is_Column_Displayed[12] )
             $row_str[12] = $run_games_str;
+         if( $ltable->Is_Column_Displayed[13] )
+            $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT, '' );
 
          if( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
