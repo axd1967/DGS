@@ -326,7 +326,7 @@ class EntityData
    }
 
    /*! \brief Returns update-query as query-string or array( update-part, where-part, after-where-part ). */
-   function build_sql_update( $limit=1, $as_arr=false )
+   function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -348,7 +348,7 @@ class EntityData
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
 
-      if( $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
+      if( $incl_chby && $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
          $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
       $arr_query = array();
