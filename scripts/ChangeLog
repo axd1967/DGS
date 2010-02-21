@@ -22,6 +22,86 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-21 juga
+
+   * include/game_functions.php (class GameAddTime, ~.add_time, ~.make_add_time_info,
+       ~.allow_add_time_opponent, ~.add_time_opponent),
+     include/board.php (Board.load_from_db),
+     include/std_functions.php,
+     tournaments/game_admin.php (parse_edit_form, draw_game_end, calc_opponent,
+       draw_add_time),
+     game.php (draw_add_time, draw_game_info), NEWS:
+   - added add-time for TD on tournament game-admin page
+     - time-added by TD is stored in Moves.PosY bit #2
+     - refactored add-time and show-remaining-time to avoid redundancy using extracted funcs
+     - adjusted showing of add-time added by tournament-director
+   - bugfix: reset byoyomi-reset if not needed for time-types
+   - cleanup
+
+   * include/db_classes.php (EntityData.make_row):
+   - added make_row()-func to build row with entries from table-row
+
+   * include/time_functions.php (build_time_remaining),
+     show_games.php, status.php:
+   - refactored show-remaining-time to avoid redundancy
+
+   * include/db/games.php (Games.setByotype, ~.is_status_running):
+   - fix bug setting wrong-field for Byotype
+   - added is_status_running()-func
+
+2010-02-20 juga
+
+   * tournaments/edit_director.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/edit_round.php,
+     tournaments/edit_tournament.php, tournaments/register.php,
+     tournaments/ladder/edit_props.php:
+   - fix form-TEXTINPUT: removed additional option only needed for TEXTINPUTX
+
+   * tournaments/include/tournament_games.php (class TournamentGames, ~.update_score, ~.load_tournament_game_by_gid, ~.getStatusText, ~.get_admin_tournament_status),
+     tournaments/include/tournament.php (Tournament.getRoleText, ~.allow_edit_tournaments),
+     tournaments/include/tournament_globals.php,
+     tournaments/game_admin.php, gameinfo.php, NEWS:
+   - added tournament game-admin page for TDs to prematurely end tournament-game
+   - added link on game-info page to game-admin page
+
+   * tournaments/include/tournament_director.php (class TournamentDirector, ~.formatFlags, ~.persist, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_tournament_director, ~.getFlagsText),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.is_tournament_director),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     tournaments/edit_director.php (parse_edit_form)
+     tournaments/list_directors.php:
+   - added TournamentDirector.Flags handling admin-rights for TD to:
+     - set end of tournament-game: TD_FLAG_GAME_END
+     - add time to players of tournament-game: TD_FLAG_GAME_ADD_TIME
+   - removed isTournamentDirector()-func, replaced using load_tournament_director()-func
+   - adjusted load-funcs to skip loading of user for optimized query
+-----------
+-- added flags to handle admin-rights for TD
+ALTER TABLE TournamentDirector
+   ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER uid ;
+-----------
+
+   * include/db/games.php (class Games), include/globals.php,
+     include/db/index.php, scripts/update_translation_pages.php,
+     include/std_functions.php:
+   - added db-entity-class for Games-table
+   - moved SCORE_/GAMEFLAGS_-consts to 'include/globals.php'
+
+   * tournaments/manage_tournament.php:
+   - show TD-roles including tournament admin-rights
+
+   * include/db_classes.php (class EntityData, ~.get_sql_value, ~.build_sql_update),
+     scripts/tests/EntityDataTest.php, scripts/tests/EntityTest.php,
+     tournaments/include/tournament_participant.php (class TournamentParticipant),
+     tournaments/include/tournament_properties.php (class TournamentProperties),
+     tournaments/include/tournament_rules.php (class TournamentRules):
+   - added field-type for FLOAT
+   - added option to build_sql_update()-func to return update-query in parts
+
+   * include/gui_functions.php (echo_image_gameinfo, echo_image_tournament_info):
+   - used globals within if-clauses
+   - fix bug: added $base_path where missing
+
 2010-02-14 juga
 
    * tournaments/include/tournament_rules.php (class TournamentRules, ~.to_string,
@@ -36,8 +116,8 @@ ChangeLog
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/table-Tournaments.txt:
    - added manual handicap-types BLACK/WHITE for tournaments:
-     - for ladder: challenger gets BLACK|WHITE color
-     - for round-robin: stronger player gets BLACK|WHITE color
+     - for ladder:      challenger gets BLACK/WHITE color
+     - for round-robin: stronger player gets BLACK/WHITE color
    - bugfix: casting komi-fields with float instead of int
 -----------
 -- added manual handicap-types BLACK/WHITE for tournaments
@@ -56,6 +136,7 @@ ALTER TABLE TournamentRules
      specs/db/table-Tournaments.txt, NEWS:
    - added challenge-range option with ranks around theoretical pos in ladder
      ordered by user-rating: TournamentLadderProps.ChallengeRangeRating
+     - default-value -32768 = option not used
 -----------
 -- added option for challenge-range for theoretical pos in ladder by rating-order
 ALTER TABLE TournamentLadderProps
@@ -179,8 +260,8 @@ ALTER TABLE TournamentGames
      - forbid to punish challenger for winning tournament-game on timeout
        with game-end-actions: TGEND_CHALLENGER_LAST, TGEND_CHALLENGER_DELETE
      - set BestRank/RankChanged on switch-user-rank, moving ladder-user on ladder
-     - additionally lock TournamentParticipant on removing ladder-user,
-       because processing game-end needs "nested" lock
+     - additionally lock TournamentParticipant-table on removing ladder-user,
+       because processing game-end needs "nested" db-lock
      - changed signature of TournamentLadder.remove_user_from_ladder-func
      - for debug-mode log rank-change
      - bugfixes
@@ -226,7 +307,10 @@ ALTER TABLE TournamentGames
      tournaments/ladder/edit_props.php,
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/table-Tournaments.txt:
-   - added handling tournament-game-end when challenger is losing by timeout
+   - added/changed handling tournament-game-end won/lost by timeout
+     configured by TournamentLadderProps:
+     - use GameEndTimeoutWin  on game-timeout won by challenger
+     - use GameEndTimeoutLoss on game-timeout lost by challenger
    - processing game-end-actions: CH_LAST, CH_DEL; see 'specs/db/table-Tournaments.txt'
 -----------
 -- added property for handling tournament-game-end challenger-timeout
@@ -243,7 +327,7 @@ ALTER TABLE TournamentLadderProps
 
    * include/classlib_game.php (NextGameOrder.make_timeout_date),
      include/make_game.php (create_game):
-   - fix bug creating new game chosing used clock:
+   - fix bug creating new game choosing used clock:
      ignore weekend if player on vacation
    - fix bug to calculate games timeout-date chosing to be used clock:
      ignore weekends and vacation
