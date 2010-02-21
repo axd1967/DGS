@@ -338,7 +338,7 @@ function check_consistency( $gid)
       {
          if( $PosX == POSX_ADDTIME )
          {
-            //TODO: Stone=time-adder, PosY=0|1 (1=byo-yomi-reset), Hours = hours added
+            //TODO: include time-info, fields see const-def
             continue;
          }
 

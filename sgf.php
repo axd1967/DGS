@@ -672,7 +672,7 @@ $array=array();
          {
             if( $PosX <= POSX_ADDTIME ) //configuration actions
             {
-               //TODO: POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
+               //TODO: include time-info, fields see const-def
                break;
             }
 

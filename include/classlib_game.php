@@ -507,7 +507,8 @@ class NextGameOrder
     * \note used for status-games-ordering on remaining-time
     * \note ignores vacation and weekends
     *
-    * \param $grow Games-table-row to read time-settings for game
+    * \param $grow Games-table-row to read time-settings for game, expected fields: Maintime, Byotype,
+    *              Byotime, Byoperiods, (White|Black)_(Maintime|Byotime|Byoperiods), X_(White|Black)Clock
     * \param $to_move BLACK | WHITE
     * \param $is_new_game if true get time-settings from $grow without prefix
     * \return "absolute" date (in ticks) aligned to Clock[ID=CLOCK_TIMELEFT]
