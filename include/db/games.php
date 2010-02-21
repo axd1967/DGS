@@ -169,7 +169,7 @@ class Games
    {
       if( !preg_match( "/^".REGEX_BYOTYPES."$/", $byotype ) )
          error('invalid_args', "Games.setByotype($byotype)");
-      $this->Byotime = $byotype;
+      $this->Byotype = $byotype;
    }
 
    function setRated( $rated )
@@ -177,6 +177,12 @@ class Games
       if( !preg_match( "/^(Y|N|Done)$/", $rated ) )
          error('invalid_args', "Games.setRated($rated)");
       $this->Rated = $rated;
+   }
+
+   function is_status_running()
+   {
+      return ($this->Status == GAME_STATUS_PLAY || $this->Status == GAME_STATUS_PASS
+         || $this->Status == GAME_STATUS_SCORE || $this->Status == GAME_STATUS_SCORE2 );
    }
 
    function to_string()
