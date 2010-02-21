@@ -2616,6 +2616,11 @@ span.TWarning {
    color: darkred;
 }
 
+span.TLockInfo {
+   font-weight: bold;
+   color: darkred;
+}
+
 span.TLMaxChallenges {
    font-weight: bold;
    color: darkred;
