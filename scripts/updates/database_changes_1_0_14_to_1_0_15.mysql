@@ -1722,3 +1722,8 @@ ALTER TABLE TournamentDirector
    ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER uid ;
 
 
+-- added tournament-flags for lock-status
+ALTER TABLE Tournament
+   ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER Status ;
+
+

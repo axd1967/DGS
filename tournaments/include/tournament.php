@@ -50,7 +50,7 @@ $ENTITY_TOURNAMENT = new Entity( 'Tournament',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Rounds', 'CurrentRound',
+      FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Flags', 'Rounds', 'CurrentRound',
       FTYPE_TEXT, 'Title', 'Description',
       FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Scope', 'Type', 'Status'
@@ -67,6 +67,7 @@ class Tournament
    var $Owner_ID;
    var $Owner_Handle; // non-table
    var $Status;
+   var $Flags;
    var $Created;
    var $Lastchanged;
    var $ChangedBy;
@@ -82,7 +83,7 @@ class Tournament
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
                         $wizard_type=TOURNEY_WIZTYPE_DGS_LADDER, $title='', $description='',
-                        $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW,
+                        $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW, $flags=0,
                         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
                         $rounds=1, $current_round=1 )
    {
@@ -95,6 +96,7 @@ class Tournament
       $this->Owner_ID = (int)$owner_id;
       $this->Owner_Handle = $owner_handle;
       $this->setStatus( $status );
+      $this->Flags = (int)$flags;
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
@@ -139,6 +141,23 @@ class Tournament
          error('invalid_args', "Tournament.setStatus($status)");
       if( !$check_only )
          $this->Status = $status;
+   }
+
+   function isFlagSet( $flag )
+   {
+      return ($this->Flags & $flag);
+   }
+
+   function formatFlags( $zero_val='' )
+   {
+      $arr = array();
+      $arr_flags = Tournament::getFlagsText();
+      foreach( $arr_flags as $flag => $flagtext )
+      {
+         if( $this->Flags & $flag )
+            $arr[] = ($flag == TOURNEY_FLAG_LOCK_ADMIN) ? span('TLockInfo', $flagtext) : $flagtext;
+      }
+      return (count($arr)) ? implode(', ', $arr) : $zero_val;
    }
 
    // current-round / rounds|*
@@ -210,6 +229,7 @@ class Tournament
       $data->set_value( 'Description', $this->Description );
       $data->set_value( 'Owner_ID', $this->Owner_ID );
       $data->set_value( 'Status', $this->Status );
+      $data->set_value( 'Flags', $this->Flags );
       if( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
@@ -220,6 +240,29 @@ class Tournament
       $data->set_value( 'Rounds', $this->Rounds );
       $data->set_value( 'CurrentRound', $this->CurrentRound );
       return $data;
+   }
+
+   /*!
+    * \brief Updates given tournament-flag.
+    * \param $set_flag true = set flag, false = clear flag
+    */
+   function update_flags( $flag, $set_flag )
+   {
+      if( $flag > 0 )
+      {
+         if( $set_flag )
+            $this->Flags |= $flag;
+         else
+            $this->Flags &= ~$flag;
+
+         $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
+         $data->set_value( 'ID', $this->ID );
+         $data->set_value( 'Flags', $this->Flags );
+         $query = $data->build_sql_update( 1, false, false );
+         return db_query( "Tournament.update_flags({$this->tid},$flag,$set_flag)", $query );
+      }
+      else
+         return false;
    }
 
    function getRoleText( $uid )
@@ -349,6 +392,7 @@ class Tournament
             @$row['Owner_ID'],
             @$row['X_OwnerHandle'],
             @$row['Status'],
+            @$row['Flags'],
             @$row['X_Created'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],
@@ -497,6 +541,30 @@ class Tournament
       return $ARR_GLOBALS_TOURNAMENT[$key][$status];
    }
 
+   /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
+   function getFlagsText( $flag=null )
+   {
+      global $ARR_GLOBALS_TOURNAMENT;
+
+      // lazy-init of texts
+      $key = 'FLAGS';
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      {
+         $arr = array();
+         $arr[TOURNEY_FLAG_LOCK_ADMIN] = T_('Admin-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_REGISTER] = T_('Register-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_LADDER] = T_('Ladder-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_CRON] = T_('Cron-Lock#T_flag');
+         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+      }
+
+      if( is_null($flag) )
+         return $ARR_GLOBALS_TOURNAMENT[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$flag]) )
+         error('invalid_args', "Tournament::getFlagsText($flag)");
+      return $ARR_GLOBALS_TOURNAMENT[$key][$flag];
+   }
+
    /*! \brief Returns true if given user can create a new tournament. */
    function allow_create( $uid )
    {
@@ -510,6 +578,12 @@ class Tournament
    function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
+      return $statuslist;
+   }
+
+   function get_edit_lock_tournament_status()
+   {
+      static $statuslist = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 

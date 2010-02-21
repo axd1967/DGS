@@ -79,7 +79,11 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $tform->add_row( array(
          'DESCRIPTION', T_('Your Roles'),
          'TEXT', $tourney->getRoleText($my_id), ));
-
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Flags#tourney'),
+         'TEXT', $tourney->formatFlags(NO_VALUE) . SEP_SPACING .
+                 make_menu_link( T_('Edit locks#tourney'),
+                     array( 'url' => "tournaments/edit_lock.php?tid=$tid", 'class' => 'TAdmin' )) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Status'),
          'TEXT', $tourney->getStatusText($tourney->Status) . SEP_SPACING .
@@ -96,7 +100,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       make_header( 1, T_('Setup phase'), TOURNEY_STATUS_NEW ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit tournament'), array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Change start-time, title, description#mngt') . ($is_admin ? '; ' . T_('owner, scope#mngt') : '') )),
+                 subList( array( T_('Change start-time, title, description#mngt') . ($is_admin ? '; ' . T_('owner, scope, flags (locks)#mngt') : '') )),
          '<li>', ( $allow_new_del_TD
                      ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))
                      : T_('Add tournament director') ),

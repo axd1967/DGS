@@ -51,6 +51,12 @@ define('TOURNEY_STATUS_CLOSED',   'CLOSED');
 define('TOURNEY_STATUS_DELETE',   'DEL');
 define('CHECK_TOURNEY_STATUS', 'ADM|NEW|REG|PAIR|PLAY|CLOSED|DEL');
 
+// also adjust Tournament::getFlagsText(), edit_tournament.php, edit_lock.php
+define('TOURNEY_FLAG_LOCK_ADMIN',      0x0001); // lock all ops on tourney for T-admin-work
+define('TOURNEY_FLAG_LOCK_REGISTER',   0x0002); // lock user-registration for tourney
+define('TOURNEY_FLAG_LOCK_LADDER',     0x0004); // lock ladder for TD-work, prohibits challenges/retreats/cron
+define('TOURNEY_FLAG_LOCK_CRON',       0x0008); // lock by cron, prohibits certain tourney-specific actions
+
 define('LADDER_SEEDORDER_CURRENT_RATING', 1);
 define('LADDER_SEEDORDER_REGISTER_TIME',  2);
 define('LADDER_SEEDORDER_TOURNEY_RATING', 3);
