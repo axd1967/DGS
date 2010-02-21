@@ -123,8 +123,9 @@ class Board
          {
             if( $PosX == POSX_ADDTIME )
             {
-               //POSX_ADDTIME Stone=time-adder, PosY=0|1 (1=byoyomi-reset), Hours=hours added
-               $this->infos[] = array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
+               $added_by_td = ($PosY & 2);
+               $time_from = ($added_by_td) ? STONE_TD_ADDTIME : $Stone;
+               $this->infos[] = array(POSX_ADDTIME, $MoveNr, $time_from, $Stone, $Hours, ($PosY & 1));
             }
             continue;
          }

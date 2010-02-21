@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //$TranslateGroups[] = "Game";
 
+require_once( 'include/globals.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'include/classlib_game.php' );
 require_once( 'include/utilities.php' );
@@ -57,12 +58,16 @@ class GameAddTime
 {
    /*! \brief User GIVING time to his opponent. */
    var $uid;
+   /*! \brief user-id of tournament-director, which is adding-time (TD needs admin-right TD_FLAG_GAME_ADD_TIME). */
+   var $td_uid;
    var $game_row;
    var $game_query;
+   var $reset_byoyomi;
 
-   function GameAddTime( &$game_row, $uid )
+   function GameAddTime( &$game_row, $uid, $td_uid=0 )
    {
-      $this->uid = $uid;
+      $this->uid = (int)$uid;
+      $this->td_uid = ( (int)$td_uid > GUESTS_ID_MAX ) ? (int)$td_uid : 0;
       $this->game_row = $game_row;
       $this->game_query = '';
    }
@@ -77,9 +82,12 @@ class GameAddTime
     *        for opponent of player (uid) in specified game (gid).
     *        -1|-2 if only byo-yomi has been resetted (-1=full-reset, -2=part-reset).
     *        Otherwise error-string is returned.
+    *
+    *        NOTE: reset_byoyomi is resetted if needed and stored in $this->reset_byoyomi.
     */
    function add_time( $add_hours, $reset_byo=false )
    {
+      $this->reset_byoyomi = $reset_byo;
       if( !is_numeric($add_hours) || $add_hours < 0
             || $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
          return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
@@ -100,9 +108,9 @@ class GameAddTime
       else
          $gid = $this->game_row['ID'];
 
-      if( !GameAddTime::allow_add_time_opponent( $this->game_row, $this->uid ) )
+      if( !GameAddTime::allow_add_time_opponent( $this->game_row, $this->uid, $this->td_uid ) )
          return sprintf( T_('Conditions are not met to allow to add time by user [%s] for game [%s]'),
-                         $this->uid, $gid );
+                         ($this->tdir ? T_('Tournament director') : $this->uid), $gid );
 
       // get opponents columns to update
       $oppcolor = ( $this->game_row['Black_ID'] == $this->uid ) ? 'White' : 'Black';
@@ -134,6 +142,7 @@ class GameAddTime
          elseif( $this->game_row['Byotime'] <= 0 || $this->game_row['Byoperiods'] < 0 )
             $reset_byo = 0; // no byoyomi-reset if absolute-time
       }
+      $this->reset_byoyomi = $reset_byo;
 
       if( !$reset_byo && $add_hours <= 0 )
          return 0; // nothing to do (0 hours added, no error)
@@ -179,21 +188,48 @@ class GameAddTime
    // ------------ static functions ----------------------------
 
    /*!
-    * \brief returns true, if user (uid) is allowed to add additional
-    *        time for his/her opponent in game specified by $game_row.
+    * \brief returns array( days => arr_days, byo_reset => bool ) for add-time-form
+    * \param $game_row expect fields: Byotype, Byotime, (Black|White)_Byoperiods
+    * \param $color_to_move BLACK | WHITE, used to check if byo-yomi-reset needed for current to-move
     */
-   function allow_add_time_opponent( $game_row, $uid )
+   function make_add_time_info( $game_row, $color_to_move )
+   {
+      $pfx = ($color_to_move == BLACK) ? 'Black' : 'White';
+
+      $allow_reset = false;
+      if( $game_row['Byotype'] == BYOTYPE_CANADIAN )
+         $allow_reset = true;
+      elseif( $game_row['Byotype'] == BYOTYPE_JAPANESE && $game_row["{$pfx}_Byoperiods"] >= 0 )
+         $allow_reset = true;
+      if( $game_row['Byotime'] <= 0 ) // absolute-time
+         $allow_reset = false;
+
+      $arr_days = array();
+      $startidx = ($allow_reset) ? 0 : 1;
+      for( $i=$startidx; $i <= MAX_ADD_DAYS; $i++)
+         $arr_days[$i] = $i . ' ' . (($i>1) ? T_('days') : T_('day'));
+
+      return array( 'days' => $arr_days, 'byo_reset' => $allow_reset );
+   }
+
+   /*!
+    * \brief returns true, if user (uid) (or TD) is allowed to add additional
+    *        time for uid's opponent in game specified by $game_row.
+    * \param $game_row expect fields: Status, (Black|White)_(ID|Maintime), tid
+    * \param $is_tdir true, if tournament-director with TD_FLAG_GAME_ADD_TIME-right
+    */
+   function allow_add_time_opponent( $game_row, $uid, $is_tdir=false )
    {
       // must be a running-game
-      if( $game_row['Status'] == 'FINISHED' || $game_row['Status'] == 'INVITED' )
+      if( $game_row['Status'] == GAME_STATUS_FINISHED || $game_row['Status'] == GAME_STATUS_INVITED )
          return false;
 
       // must be one of my games (to give time to my opponent)
       if( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
          return false;
 
-      // must not be a tournament-game
-      if( $game_row['tid'] != 0 )
+      // must not be a tournament-game except TD-allowed-to-add-time
+      if( !$is_tdir && $game_row['tid'] != 0 )
          return false;
 
       // get opponents columns
@@ -217,20 +253,24 @@ class GameAddTime
     *        Need the following fields set in game_row, and also the fields needed
     *        for NextGameOrder::make_timeout_date():
     *           ID, tid, Status, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID,
-    *           LastTicks, Moves, (Black/White)_ID/_Maintime/_Byotime/_Byoperiods
+    *           LastTicks, Moves, (Black/White)_ID/_Maintime/_Byotime/_Byoperiods,
+    *           X_(White|Black)Clock (from Players.Clock)
+    *
     * \param $uid user giving time to his opponent
     * \param $add_hours amount of hours to add to maintime of opponent,
     *        allowed range is 0 hour .. MAX_ADD_DAYS
     * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
+    * \param $by_td_uid user-id of tournament-director, which adds time
     * \return number of hours added (may be 0), if time has been successfully added
     *        for opponent of player (uid) in specified game (gid).
     *        -1|-2 if only byo-yomi has been resetted (-1=full-reset, -2=part-reset).
     *        Otherwise error-string is returned.
     */
-   function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false )
+   function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false, $by_td_uid=0 )
    {
-      $game_addtime = new GameAddTime( $game_row, $uid );
+      $game_addtime = new GameAddTime( $game_row, $uid, $by_td_uid );
       $add_hours = $game_addtime->add_time( $add_hours, $reset_byo );
+      $reset_byo = $game_addtime->reset_byoyomi;
 
       if( !is_numeric($add_hours) || ($add_hours == 0 && !$reset_byo) ) // error or nothing to do
          return $add_hours;
@@ -247,7 +287,7 @@ class GameAddTime
       }
 
 
-      //TODO: HOT_SECTION to avoid multiple-clicks
+      //TODO HOT-SECTION to avoid double-clicks
       $gid = $game_row['ID'];
       $game_query = "UPDATE Games SET ".substr($game_addtime->game_query,1)
                   . " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";
@@ -256,17 +296,18 @@ class GameAddTime
       $Moves = $game_row['Moves'];
       $Stone = ( $game_row['Black_ID'] == $uid ) ? BLACK : WHITE;
       $save_hours = ($add_hours < 0) ? 0 : $add_hours;
+      $pos_y = ($reset_byo ? 1 : 0) | ($game_addtime->td_uid ? 2 : 0);
       $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES "
-         . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", ".($reset_byo ? 1 : 0).", $save_hours)";
+         . "($gid, $Moves, $Stone, ".POSX_ADDTIME.", $pos_y, $save_hours)";
 
-      //see also confirm.php
-      db_query( "add_time_opponent.update($gid)", $game_query );
+      // see also confirm.php
+      db_query( "GameAddTime::add_time_opponent.update($gid)", $game_query );
       if( mysql_affected_rows() != 1 ) //0 if it had done nothing
-         error('mysql_update_game',"add_time_opponent.update($gid)");
+         error('mysql_update_game',"GameAddTime::add_time_opponent.update($gid)");
 
-      db_query( "add_time_opponent.insert_move($gid)", $move_query );
+      db_query( "GameAddTime::add_time_opponent.insert_move($gid)", $move_query );
       if( mysql_affected_rows() != 1 )
-         error('mysql_insert_move',"add_time_opponent.insert_move($gid)");
+         error('mysql_insert_move',"GameAddTime::add_time_opponent.insert_move($gid)");
 
       return $add_hours; // success (no-error)
    } //add_time_opponent

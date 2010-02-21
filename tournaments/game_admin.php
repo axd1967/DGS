@@ -25,6 +25,8 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
+require_once 'include/game_functions.php';
+require_once 'include/time_functions.php';
 require_once 'include/db/games.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_games.php';
@@ -53,8 +55,9 @@ define('GA_RES_TIMOUT', 3);
    $page = "game_admin.php";
 
 /* Actual REQUEST calls used
-     tid=&gid=             : admin T-game
-     gend_save&tid=        : update T-game-score/status for admin-game-end
+     tid=&gid=                : admin T-game
+     gend_save&tid/gid=       : update T-game-score/status for admin-game-end
+     addtime_save&tid/gid=    : add time for T-game
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -103,6 +106,37 @@ define('GA_RES_TIMOUT', 3);
          if( $tgame->update_score( 'Tournament.game_admin', TG_STATUS_PLAY ) )
          {
             $sys_msg = urlencode( T_('Tournament game result set!#tourney') );
+            jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP."sysmsg=$sys_msg");
+         }
+      }
+
+      if( @$_REQUEST['addtime_save'] && $authorise_add_time )
+      {
+         $color = @$vars['color'];
+         $opp = calc_opponent( $game, $color );
+         if( is_null($opp) ) // shouldn't happen
+            error('assert', "Tournament.game_admin.addtime.check.opp($tid,$gid,$color)");
+         $add_days  = (int) @$vars['add_days'];
+         $reset_byo = (bool) @$vars['reset_byoyomi'];
+
+         $game_data = $game->fillEntityData();
+         $game_row = $game_data->make_row();
+         // fill clock-used for NextGameOrder::make_timeout_date()
+         $game_row['X_BlackClock'] = $user_black->urow['ClockUsed'];
+         $game_row['X_WhiteClock'] = $user_white->urow['ClockUsed'];
+
+         ta_begin();
+         {//HOT-section to add time
+            $add_hours = GameAddTime::add_time_opponent( $game_row, $opp,
+                  time_convert_to_hours($add_days, 'days'), $reset_byo, /*by_td*/$my_id );
+         }
+         ta_end();
+
+         if( !is_numeric($add_hours) ) // error occured
+            $errors[] = $add_hours;
+         else
+         {
+            $sys_msg = urlencode( T_('Time added!') );
             jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -159,65 +193,13 @@ define('GA_RES_TIMOUT', 3);
    // ADMIN: End game ------------------
 
    if( $authorise_game_end )
-   {
-      $tform = new Form( 'tournament2', $page, FORM_GET );
-      $tform->add_hidden( 'tid', $tid );
-      $tform->add_hidden( 'gid', $gid );
-
-      $allow_edit = ( $tgame->Status == TG_STATUS_PLAY );
-      $disabled = ( !$allow_edit ) ? 'disabled=1' : '';
-
-      $tform->add_row( array(
-            'CELL', 3, '',
-            'HEADER', T_('End Tournament Game') ));
-      $tform->add_row( array(
-            'TEXT', ($allow_edit ? T_('Set game result') : T_('View game result') ).':', ));
-      $tform->add_row( array(
-            'CELL', 1, '',
-            'TEXT', str_repeat(SMALL_SPACING,3) . T_('Winner is#TG_admin').': ',
-            'CELL', 1, '',
-            'RADIOBUTTONSX', 'color', array( BLACK => T_('Black') ), @$vars['color'], $disabled,
-            'TEXT', SMALL_SPACING . T_('wins by#TG_admin') . SMALL_SPACING,
-            'CELL', 1, '',
-            'RADIOBUTTONSX', 'result', array( GA_RES_SCORE => T_('Score#TG_admin') ), @$vars['result'], $disabled,
-            'TEXT', MED_SPACING,
-            'TEXTINPUTX', 'score', 6, 6, @$vars['score'], $disabled,
-            'TEXT', sprintf( ' (%s)', T_('0=Jigo#TG_admin') ), ));
-      $tform->add_row( array(
-            'TAB',
-            'RADIOBUTTONSX', 'color', array( WHITE => T_('White') ), @$vars['color'], $disabled,
-            'CELL', 1, '',
-            'RADIOBUTTONSX', 'result', array( GA_RES_RESIGN => T_('Resignation#TG_admin') ), @$vars['result'], $disabled, ));
-      $tform->add_row( array(
-            'TAB', 'TAB',
-            'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout#TG_admin') ), @$vars['result'], $disabled, ));
-
-      if( $allow_edit )
-      {
-         $tform->add_row( array(
-               'CELL', 3, '',
-               'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
-         $tform->add_row( array(
-               'CELL', 3, '', // align submit-buttons
-               'SUBMITBUTTON', 'gend_save', T_('Save game result#TG_admin'), ));
-      }
-
-      $tform->echo_string();
-   }
+      draw_game_end( $tgame );
 
 
    // ADMIN: Add time ------------------
 
-   if( $authorise_add_time )
-   {
-      $tform = new Form( 'tournament3', $page, FORM_GET );
-      $tform->add_hidden( 'tid', $tid );
-      $tform->add_hidden( 'gid', $gid );
-
-      $tform->add_row( array( 'HEADER', T_('Add time for Tournament Game') ));
-
-      $tform->echo_string();
-   }
+   if( $authorise_add_time && $game->is_status_running() )
+      draw_add_time( $tgame, $game, $authorise_add_time );
 
 
    $menu_array = array();
@@ -241,10 +223,15 @@ function parse_edit_form( &$tgame, $game )
 
    // read from props or set defaults
    $vars = array(
-      'TG_Score'  => '',
+      // all
       'color'     => '',
+      // game-end
+      'TG_Score'  => '',
       'score'     => '',
       'result'    => '',
+      // add-time
+      'add_days'  => 1,
+      'reset_byoyomi' => '',
    );
 
    // init for game-end
@@ -274,11 +261,17 @@ function parse_edit_form( &$tgame, $game )
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( @$_REQUEST['addtime_save'] )
+   {
+      foreach( array( 'reset_byoyomi' ) as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // parse URL-vars
-   if( @$_REQUEST['gend_save'] )
+   $mask_gend = 0;
+   if( @$_REQUEST['gend_save'] || @$_REQUEST['addtime_save'] )
    {
-      $mask_gend = 0;
       $new_value = $vars['color'];
       if( (string)$new_value != '' )
       {
@@ -287,7 +280,10 @@ function parse_edit_form( &$tgame, $game )
          else
             $mask_gend |= 1;
       }
+   }
 
+   if( @$_REQUEST['gend_save'] )
+   {
       $new_value = (int)$vars['result'];
       if( $new_value )
       {
@@ -345,8 +341,148 @@ function parse_edit_form( &$tgame, $game )
 
       // determine edits
       if( $old_vals['TG_Score'] != $tgame->Score ) $edits[] = T_('Score#edits');
+   }//game-end
+   elseif( @$_REQUEST['addtime_save'] )
+   {
+      if( ($mask_gend & 1) != 1 ) // expected color
+         $errors[] = T_('Missing color for add-time');
+
+      $new_value = $vars['add_days'];
+      if( !is_numeric($new_value) || $new_value < 1 || $new_value > MAX_ADD_DAYS )
+         error('assert', "Tournament.game_admin.parse_edit_form.check.add_days($tid,$gid,$new_value)");
    }
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
+
+function draw_game_end( $tgame )
+{
+   global $page;
+   $allow_edit = ( $tgame->Status == TG_STATUS_PLAY );
+   $disabled = ( !$allow_edit ) ? 'disabled=1' : '';
+
+   $tform = new Form( 'tournament2', $page, FORM_GET );
+   $tform->add_hidden( 'tid', $tgame->tid );
+   $tform->add_hidden( 'gid', $tgame->gid );
+
+   $tform->add_row( array(
+         'CELL', 3, '',
+         'HEADER', T_('End Tournament Game') ));
+
+   $tform->add_row( array(
+         'TEXT', ($allow_edit ? T_('Set game result') : T_('View game result') ).':', ));
+   $tform->add_row( array(
+         'CELL', 1, '',
+         'TEXT', str_repeat(SMALL_SPACING,3) . T_('Winner is#TG_admin').': ',
+         'CELL', 1, '',
+         'RADIOBUTTONSX', 'color', array( BLACK => T_('Black') ), @$vars['color'], $disabled,
+         'TEXT', SMALL_SPACING . T_('wins by#TG_admin') . SMALL_SPACING,
+         'CELL', 1, '',
+         'RADIOBUTTONSX', 'result', array( GA_RES_SCORE => T_('Score#TG_admin') ), @$vars['result'], $disabled,
+         'TEXT', MED_SPACING,
+         'TEXTINPUTX', 'score', 6, 6, @$vars['score'], $disabled,
+         'TEXT', sprintf( ' (%s)', T_('0=Jigo#TG_admin') ), ));
+   $tform->add_row( array(
+         'TAB',
+         'RADIOBUTTONSX', 'color', array( WHITE => T_('White') ), @$vars['color'], $disabled,
+         'CELL', 1, '',
+         'RADIOBUTTONSX', 'result', array( GA_RES_RESIGN => T_('Resignation#TG_admin') ), @$vars['result'], $disabled, ));
+   $tform->add_row( array(
+         'TAB', 'TAB',
+         'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout#TG_admin') ), @$vars['result'], $disabled, ));
+
+   if( $allow_edit )
+   {
+      $tform->add_row( array(
+            'CELL', 3, '',
+            'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
+      $tform->add_row( array(
+            'CELL', 3, '', // align submit-buttons
+            'SUBMITBUTTON', 'gend_save', T_('Save game result#TG_admin'), ));
+   }
+
+   $tform->add_empty_row();
+   $tform->add_row( array( 'HR' ));
+   $tform->echo_string();
+}//draw_game_end
+
+function calc_opponent( $game, $color )
+{
+   if( $color == WHITE )
+      return $game->Black_ID;
+   elseif( $color == BLACK )
+      return $game->White_ID;
+   return null;
+}
+
+// keep in sync with game.php#draw_add_time()-func
+function draw_add_time( $tgame, $game, $allow_add_time )
+{
+   global $page, $vars;
+   $game_data = $game->fillEntityData();
+   $game_row = $game_data->make_row();
+
+   $opp = calc_opponent( $game, @$vars['color'] );
+   $allow_edit = (is_null($opp))
+      ? true
+      : GameAddTime::allow_add_time_opponent($game_row, $opp, $allow_add_time);
+
+   $black_to_move = ( $game->ToMove_ID == $game->Black_ID );
+   $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ZERO | TIMEFMT_ADDEXTRA;
+   $black_remtime = build_time_remaining( $game_row, BLACK, $black_to_move, $timefmt );
+   $white_remtime = build_time_remaining( $game_row, WHITE, !$black_to_move, $timefmt );
+
+   $tform = new Form( 'tournament3', $page, FORM_GET );
+   $tform->add_hidden( 'tid', $tgame->tid );
+   $tform->add_hidden( 'gid', $tgame->gid );
+
+   $tform->add_row( array( 'HEADER', T_('Add time for Tournament Game') ));
+
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Time limit'),
+         'CELL', 2, '',
+         'TEXT', TimeFormat::echo_time_limit( $game->Maintime, $game->Byotype, $game->Byotime, $game->Byoperiods ), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Add time for'),
+         'RADIOBUTTONS', 'color', array( BLACK => T_('Black') ), @$vars['color'],
+         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $black_remtime['text'],
+         'TAB', ));
+   $tform->add_row( array(
+         'TAB',
+         'RADIOBUTTONS', 'color', array( WHITE => T_('White') ), @$vars['color'],
+         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $white_remtime['text'],
+         'TAB', ));
+   $tform->add_empty_row();
+
+   if( $allow_edit )
+   {
+      $info = GameAddTime::make_add_time_info( $game_row, ($black_to_move) ? BLACK : WHITE );
+
+      $tform->add_row( array(
+            'CELL', 3, '',
+            'TEXT', T_('Choose how much additional time you wish to give the selected player').':', ));
+      $tform->add_row( array(
+            'TAB', 'CELL', 2, '',
+            'SELECTBOX', 'add_days', 1, $info['days'], @$vars['add_days'], false,
+            'TEXT', MINI_SPACING . T_('added to maintime.'), ));
+
+      // no byoyomi-reset if no byoyomi
+      if( $info['byo_reset'] )
+      {
+         $tform->add_row( array(
+               'TAB', 'CELL', 2, '',
+               'CHECKBOX', 'reset_byoyomi', 1, T_('Reset byoyomi settings when re-entering'), @$vars['reset_byoyomi'], ));
+         $tform->add_row( array(
+               'TAB', 'CELL', 2, '',
+               'TEXT', T_('Note: Current byoyomi period is resetted regardless of full reset.'), ));
+      }
+   }
+
+   $tform->add_row( array(
+         'CELL', 1, '', // align submit-buttons
+         'SUBMITBUTTON', 'addtime_save', T_('Add time#TG_admin'), ));
+
+   $tform->add_empty_row();
+   $tform->echo_string();
+}//draw_add_time
 ?>

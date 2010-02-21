@@ -187,6 +187,7 @@ define('MAX_SEKI_MARK', 2);
 define("NONE", 0); //i.e. DAME, Moves(Stone=NONE,PosX/PosY=coord,Hours=0)
 define("BLACK", 1);
 define("WHITE", 2);
+define('STONE_TD_ADDTIME', -1); //dummy-val (not stored in DB)
 
 define("OFFSET_TERRITORY", 0x04); //keep it a power of 2
 define("DAME", OFFSET_TERRITORY+NONE);
@@ -216,7 +217,7 @@ define('POSX_SCORE', -2);  // scoring step by Stone=BLACK|WHITE, PosY=0, Hours=p
 define('POSX_RESIGN', -3); // resigned by Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 define('POSX_TIME', -4);   // timeout for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 // game commands
-define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=0|1 (1=byoyomi-reset), Hours=add_hours
+define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=bitmask (bit #1(0|1)=byoyomi-reset, bit #2(0|2)=added-by-TD), Hours=add_hours
 
 
 define('DEFAULT_KOMI', 6.5); // change with care only, keep separate from STONE_VALUE

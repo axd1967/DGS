@@ -641,12 +641,7 @@ function get_alt_arg( $n1, $n2)
    echo "\n</FORM>";
 
    echo "\n<HR>";
-   draw_game_info($game_row, $TheBoard, $tourney);
-/*
-   $txt= draw_board_info($TheBoard);
-   if( $txt )
-      echo "<div id=\"boardInfos\">$txt</div>\n";
-*/
+   draw_game_info($game_row, $TheBoard, $tourney); // with board-info
    echo "<HR>\n";
 
 
@@ -888,9 +883,12 @@ function draw_message_box( &$message, $stay_on_board )
       ;
 } //draw_message_box
 
+// keep in sync with tournaments/game_admin.php#draw_add_time()-func
 function draw_add_time( $game_row, $colorToMove )
 {
+   $info = GameAddTime::make_add_time_info( $game_row, $colorToMove );
    $tabindex=10; //TODO: fix this start value
+
    echo '
     <a name="addtime"></a>
       <TABLE class=AddtimeForm>
@@ -902,23 +900,10 @@ function draw_add_time( $game_row, $colorToMove )
            <SELECT name="add_days" size="1"  tabindex="', ($tabindex++), '">';
 
    //basic_safe() because inside <option></option>
-   $pfx = ($colorToMove == BLACK) ? 'Black' : 'White';
-   $allow_reset = false;
-   if( $game_row['Byotype'] == BYOTYPE_CANADIAN )
-      $allow_reset = true;
-   elseif( $game_row['Byotype'] == BYOTYPE_JAPANESE && $game_row["{$pfx}_Byoperiods"] >= 0 )
-      $allow_reset = true;
-   if( $game_row['Byotime'] <= 0 ) // absolute-time
-      $allow_reset = false;
-
-   $trday = basic_safe(T_('day'));
-   $trdays = basic_safe(T_('days'));
-   $startidx = ($allow_reset) ? 0 : 1;
-   for( $i=$startidx; $i <= MAX_ADD_DAYS; $i++)
+   foreach( $info['days'] as $idx => $day_str )
    {
-      echo sprintf( "<OPTION value=\"%d\"%s>%s %s</OPTION>\n",
-            $i, ( ($i==1) ? ' selected' : '' ),
-            $i, ( ($i>1)  ? $trdays : $trday ) );
+      echo sprintf( "<OPTION value=\"%d\"%s>%s</OPTION>\n",
+                    $idx, ( ($idx==1) ? ' selected' : '' ), basic_safe($day_str) );
    }
    echo '  </SELECT>
            &nbsp;', T_('added to maintime of your opponent.'), '
@@ -926,7 +911,7 @@ function draw_add_time( $game_row, $colorToMove )
         </TR>';
 
    // no byoyomi-reset if no byoyomi
-   if( $allow_reset )
+   if( $info['byo_reset'] )
    {
       echo '<TR>
               <TD>
@@ -945,11 +930,10 @@ function draw_add_time( $game_row, $colorToMove )
 ><input type=submit name="cancel" tabindex="', ($tabindex++), '" value="', T_('Cancel'), '"
 ></TD>
         </TR>
-      </TABLE>
-';
+      </TABLE>';
 } //draw_add_time
 
-function draw_game_info( &$game_row, &$board, $tourney )
+function draw_game_info( &$game_row, $board, $tourney )
 {
    global $base_path;
 
@@ -1060,22 +1044,24 @@ function draw_game_info( &$game_row, &$board, $tourney )
    echo "</table>\n";
 } //draw_game_info
 
+// NOTE: not drawn if no move stored yet (see Board.load_from_db-func)
 function draw_board_info($board)
 {
    if( count($board->infos) <= 0 )
       return '';
 
    $fmts= array(
-      //array(POSX_ADDTIME, $MoveNr, $Stone, $Hours, $PosY);
+      //array(POSX_ADDTIME, $MoveNr, TimeFrom, TimeTo(=$Stone), $Hours, ByoReset);
       POSX_ADDTIME => array(
          array( T_('%2$s had added %4$s to %3$s %5$s at move %1$d'),
                 T_('%2$s had restarted byoyomi for %3$s at move %1$d') ),
          // [ colnum, mapping ]
          array( 0, null), //MoveNr
-         array( 1, array( WHITE => T_('White'), BLACK => T_('Black'))), //From
-         array( 1, array( BLACK => T_('White'), WHITE => T_('Black'))), //To
-         array( 2, 'TimeFormat::echo_time'), //Hours
-         array( 3, array( 0 => '', 1 => T_('and restarted byoyomi'))), //Reset
+         array( 1, array( WHITE => T_('White'), BLACK => T_('Black'), //From
+                          STONE_TD_ADDTIME => T_('Tournament director') )),
+         array( 2, array( BLACK => T_('White'), WHITE => T_('Black'))), //To
+         array( 3, 'string(TimeFormat::echo_time)'), //Hours
+         array( 4, array( 0 => '', 1 => T_('and restarted byoyomi'))), //Reset
       ),
    );
 
