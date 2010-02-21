@@ -213,12 +213,16 @@ class EntityData
       return implode(',', $arr);
    }
 
-
    function set_value( $field, $value )
    {
       if( !$this->entity->is_field($field) )
          error('assert', "EntityData.set_value.unknown_field({$this->entity->table},$field)");
       $this->values[$field] = $value;
+   }
+
+   function make_row( $clone=false )
+   {
+      return ($clone) ? array() + $this->values : $this->values;
    }
 
    function get_value( $field, $default=null )
