@@ -23,6 +23,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Director can be allowed special admin-rights
          * End tournament-game prematurely
          * Add time to players of tournament-game
+      * Tournament Flags Editor to edit locks on tournament
       * Tournament Status Editor to change tournament status with preconditional checks
       * Tournament Properties editor for registration restrictions on tournament and players
       * Tournament Rules editor for tournament-games-setting

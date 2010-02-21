@@ -24,6 +24,36 @@ ChangeLog
 
 2010-02-21 juga
 
+   * tournaments/include/tournament.php (class Tournament, ~.isFlagSet, ~.formatFlags,
+       ~.fillEntityData, ~.update_flags, ~.new_from_row, ~.getFlagsText,
+       ~.get_edit_lock_tournament_status),
+     tournaments/include/tournament_globals.php,
+     tournaments/edit_lock.php (parse_edit_form),
+     tournaments/edit_tournament.php (parse_edit_form),
+     tournaments/manage_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     skins/dragon/screen.css, NEWS:
+    - added Tournament.Flags to store tournament-locks:
+      - Admin-Lock = set only by Admin for tourney-maintenance, blocks all read-write ops
+      - Register-Lock = prohibits registration by user
+      - Ladder-Lock = lock set by TD to ladder-maintenance, prohibits cron and user-ops
+        like registration, challenging and retreat from ladder
+      - Cron-Lock = tourney-specific lock, only set by cron, prohibit Ladder-Lock
+    - T-Admin can edit all lock-flags on edit-tournament page
+    - added edit-lock page to edit Tournament.Flags for locking
+-----------
+-- added tournament-flags for lock-status
+ALTER TABLE Tournament
+   ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER Status ;
+-----------
+
+   * include/db_classes.php (EntityData.build_sql_update):
+   - for update added arg to omit update of ChangedBy-field
+
+   * include/time_functions.php (TimeFormat.echo_time_diff),
+     tournaments/ladder/view.php:
+   - show time-diff to players last-access-date for tournament-ladder-view
+
    * include/game_functions.php (class GameAddTime, ~.add_time, ~.make_add_time_info,
        ~.allow_add_time_opponent, ~.add_time_opponent),
      include/board.php (Board.load_from_db),
