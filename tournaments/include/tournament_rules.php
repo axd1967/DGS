@@ -51,9 +51,6 @@ define('TRULE_HANDITYPE_WHITE',  'WHITE');
 //define('TRULE_HANDITYPE_DOUBLE', 'DOUBLE');
 define('CHECK_TRULE_HANDITYPE', 'CONV|PROPER|NIGIRI|BLACK|WHITE');
 
-//TODO(later) Flags
-//define('TR_FLAGS_MANUAL',  0x0001); // TD setups T-games manually (H/K, what else?)
-
 // lazy-init in TournamentRules::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_RULES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_RULES = array();
