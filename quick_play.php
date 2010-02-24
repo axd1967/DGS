@@ -136,11 +136,16 @@ else
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
       error('not_your_turn', "quick_play.err4($gid)");
 
-   //$action = always 'domove'
+   $action = 'domove'; //$action = always 'domove'
 
    $next_to_move = WHITE+BLACK-$to_move;
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
+
+   $message = trim(@$_REQUEST['message']);
+   if( (string)$message != '' )
+      $message = mysql_addslashes($message);
+   $message_query = '';
 
 
 // Update clock
@@ -249,6 +254,8 @@ This is why:
 
       $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
+      if( $message )
+         $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text='$message'";
 
       $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
           "Last_X=$colnr, " . //used with mail notifications
@@ -283,6 +290,13 @@ This is why:
    $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
    if( mysql_affected_rows() < 1 && $action != 'delete' )
       error('mysql_insert_move', "quick_play.update_moves2($gid,$action)");
+
+   if( $message_query )
+   {
+      $result = db_query( "quick_play.update_movemessage1($gid)", $message_query );
+      if( mysql_affected_rows() < 1 && $action != 'delete' )
+         error('mysql_insert_move', "quick_play.update_movemessage2($gid,$action)");
+   }
 
 
 

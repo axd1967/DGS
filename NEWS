@@ -472,6 +472,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Changed main FAQ editor
       * Added list of forum moderators
 
+   * Quick-Play Suite:
+      * Added optional 'message'-argument to provide move-message
 
    Code improvements:
 
