@@ -22,6 +22,86 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-02-28 juga
+
+   * tournaments/edit_participant.php, tournaments/register.php:
+   - check Admin/TDWork/Close-Lock prohibiting registering/editing
+   - for TD: show Register-Lock and Close-Lock as warning
+
+   * tournaments/edit_director.php, tournaments/edit_properties.php,
+     tournaments/edit_round.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php (parse_edit_form),
+     tournaments/ladder/edit_props.php, tournaments/game_admin.php:
+   - check Admin-Lock prohibiting adding/editing
+   - small bugfixes
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.allow_edit_ladder),
+     tournaments/ladder/view.php (build_action_row_str),
+     tournaments/ladder/admin.php (add_form_edit_user),
+     tournaments/ladder/challenge.php, tournaments/ladder/retreat.php:
+   - added check for tournament locks:
+     - Admin/TDWork/Cron-Lock prohibiting TD to edit locked ladder
+     - Admin/TDWork/Close-Lock prohibiting user to start challenge
+     - Admin/TDWork-Lock prohibiting user to retreat from ladder
+   - disabled submit-buttons on tournament-lock-errors
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end,
+       ~.process_tournament_ladder_game_end),
+     tournaments/cron_tournaments.php:
+   - set Cron-Lock for tournament during processing game-end
+   - use tournament-type-independent func to process tournament-game-end
+   - added check if game-end processing allowed
+
+   * tournaments/manage_tournament.php (make_admin_tgame):
+   - moved editing of Admin-/Cron-Lock from edit-tournament-page to edit_lock-page
+   - added form to enter game-id to admin tournament-game
+
+   * tournaments/view_tournament.php (check_locks, echo_tournament_rules):
+   - show current state of Admin/TDWork/Register/Close-Lock
+   - use Table_info-TABLEOPT_LABEL_COLON to append label with colon
+
+   * tournaments/edit_lock.php (parse_edit_form, build_lock_notes),
+     tournaments/edit_tournament.php (parse_edit_form):
+   - Admin-Lock prohibits adding/editing of locks excepts for T-Admin
+   - show error on Admin-Lock to non-T-Admins
+   - moved editing of Admin-/Cron-Lock from edit-tournament-page to edit-lock page as combined edit,
+     though restricted to T-Admin, disable checkboxes of uneditable locks
+   - fix bug: add hidden-field for disabled checkboxes not to lose former lock-state
+   - refactored specific TOURNEY_FLAG_LOCK_LADDER into generalized TOURNEY_FLAG_LOCK_TDWORk
+   - added editing of Close-Lock
+   - added tournament-lock-notes with lock-descriptions
+
+   * tournaments/include/tournament.php (Tournament.formatFlags, ~.buildMaintenanceLockText,
+       ~.buildAdminLockText, ~.update_flags, ~.checkRegistrationLocks, ~.getFlagsText, ~.getLockText),
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration),
+     tournaments/include/tournament_status.php (TournamentStatus.add_error, ~.check_conditions_status_PAIR),
+     tournaments/include/tournament_globals.php,
+     skins/dragon/screen.css:
+   - added Close-Lock TOURNEY_FLAG_LOCK_CLOSE to prepare transition to tournament-CLOSE-status
+   - added/extended funcs to check and show info for all tournament-locks:
+     Admin/TDWork/Register/Cron/Close-Lock
+   - refactored specific TOURNEY_FLAG_LOCK_LADDER into generalized TOURNEY_FLAG_LOCK_TDWORk
+   - added CSS for tournament-locks
+   - renamed TPROP_CHKTYPE_.. -> TCHKTYPE_..
+
+   * specs/db/table-Tournaments.txt, NEWS:
+   - added doc about Tournament.Flags to store tournament-locks
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.buildErrorListString):
+   - added optional safe-argument to make error-texts HTML-safe
+     for table-layouted error-lists
+
+   * include/table_infos.php (class Table_info, ~.add_info, ~.add_sinfo, ~._append_colon):
+   - added option to append colon to labels: TABLEOPT_LABEL_COLON
+
+   * include/form_functions.php (class Form, ~.create_string_func_checkboxx, ~.print_insert_checkbox):
+   - added extended CHECKBOX with additional attributes argument
+
+2010-02-24 juga
+
+   * quick_play.php, NEWS:
+   - added URL-argument 'message' to provide move-message
+
 2010-02-21 juga
 
    * tournaments/include/tournament.php (class Tournament, ~.isFlagSet, ~.formatFlags,
@@ -87,15 +167,19 @@ ALTER TABLE Tournament
      tournaments/ladder/edit_props.php:
    - fix form-TEXTINPUT: removed additional option only needed for TEXTINPUTX
 
-   * tournaments/include/tournament_games.php (class TournamentGames, ~.update_score, ~.load_tournament_game_by_gid, ~.getStatusText, ~.get_admin_tournament_status),
+   * tournaments/include/tournament_games.php (class TournamentGames, ~.update_score,
+       ~.load_tournament_game_by_gid, ~.getStatusText, ~.get_admin_tournament_status),
      tournaments/include/tournament.php (Tournament.getRoleText, ~.allow_edit_tournaments),
      tournaments/include/tournament_globals.php,
      tournaments/game_admin.php, gameinfo.php, NEWS:
    - added tournament game-admin page for TDs to prematurely end tournament-game
    - added link on game-info page to game-admin page
 
-   * tournaments/include/tournament_director.php (class TournamentDirector, ~.formatFlags, ~.persist, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_tournament_director, ~.getFlagsText),
-     tournaments/include/tournament_cache.php (class TournamentCache, ~.is_tournament_director),
+   * tournaments/include/tournament_director.php (class TournamentDirector,
+       ~.formatFlags, ~.persist, ~.fillEntityData, ~.build_query_sql,
+       ~.new_from_row, ~.load_tournament_director, ~.getFlagsText),
+     tournaments/include/tournament_cache.php (class TournamentCache,
+       ~.is_tournament_director),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/table-Tournaments.txt,
      tournaments/edit_director.php (parse_edit_form)
@@ -7435,6 +7519,7 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2009-11-15: bug fix update (by JUG) as DGS 1.0.14.i
 2009-12-13: uploaded contact-enhancement + bug fix (by JUG) as DGS 1.0.14.j
 2010-01-01: bug fix update (by JUG) as DGS 1.0.14.k
+2010-02-24: uploaded quick-play-enhancement (by JUG) as DGS 1.0.14.l
 
 2008-12-14 juga
 
