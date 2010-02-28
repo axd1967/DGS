@@ -58,20 +58,26 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    $tstatus = new TournamentStatus( $tourney );
 
    // edit allowed?
+   $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_lock.edit($tid,$my_id)");
 
    // init
    $arr_flags = array(
-      //TOURNEY_FLAG_LOCK_ADMIN - can only be edited by admin on edit-tourney page
+      TOURNEY_FLAG_LOCK_ADMIN    => 'tfl_lock_admin',
       TOURNEY_FLAG_LOCK_REGISTER => 'tfl_lock_reg',
-      TOURNEY_FLAG_LOCK_LADDER   => 'tfl_lock_ladder',
-      //TOURNEY_FLAG_LOCK_CRON - can only be edited/set by admin/cron
+      TOURNEY_FLAG_LOCK_TDWORK   => 'tfl_lock_tdwork',
+      TOURNEY_FLAG_LOCK_CRON     => 'tfl_lock_cron',
+      TOURNEY_FLAG_LOCK_CLOSE    => 'tfl_lock_close',
    );
-   if( $tourney->Type != TOURNEY_TYPE_LADDER )
-      unset($arr_flags[TOURNEY_FLAG_LOCK_LADDER]);
+   $arr_flags_admin = array( // admin-flags can only be edited by admin (not by TD/owner)
+      TOURNEY_FLAG_LOCK_ADMIN    => 1,
+      TOURNEY_FLAG_LOCK_CRON     => 1,
+   );
    $errors = $tstatus->check_edit_status( Tournament::get_edit_lock_tournament_status() );
+   if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tourney );
@@ -81,7 +87,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 )
    {
       $tourney->update();
-      jump_to("tournaments/edit_tournament.php?tid={$tourney->ID}".URI_AMP
+      jump_to("tournaments/edit_lock.php?tid={$tourney->ID}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament saved!')) );
    }
 
@@ -119,11 +125,18 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    $first = true;
    foreach( $arr_flags as $flag => $name )
    {
+      $disable = ( !$is_admin && @$arr_flags_admin[$flag] ) ? 'disabled=1' : '';
+      $flag_set = $tourney->isFlagSet($flag);
       $arr = ($first) ? array( 'DESCRIPTION', T_('Flags#tourney') ) : array( 'TAB' );
       $first = false;
-      array_push( $arr,
-         'CHECKBOX', $name, 1, Tournament::getFlagsText($flag), $tourney->isFlagSet($flag) );
+
+      array_push( $arr, 'CHECKBOXX', $name, 1, Tournament::getFlagsText($flag), $flag_set, $disable );
+      if( @$arr_flags_admin[$flag] )
+         array_push( $arr, 'TEXT', MINI_SPACING . '('.T_('change only by admin#tlock').')' );
       $tform->add_row( $arr );
+
+      if( $disable )
+         $tform->add_hidden( $name, $flag_set );
    }
    $tform->add_empty_row();
 
@@ -145,6 +158,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 
    $tform->echo_string();
 
+   echo_notes( 'edittournamentlocknotesTable', T_('Tournament lock notes'), build_lock_notes() );
+
 
    $menu_array = array();
    if( $tid )
@@ -160,7 +175,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tney )
 {
-   global $arr_flags;
+   global $arr_flags, $arr_flags_admin, $is_admin;
 
    $edits = array();
    $errors = array();
@@ -178,8 +193,11 @@ function parse_edit_form( &$tney )
    // handle checkboxes having no key/val in _POST-hash
    if( $is_posted )
    {
-      foreach( array_values($arr_flags) as $key )
-         $vars[$key] = get_request_arg( $key, false );
+      foreach( $arr_flags as $flag => $key )
+      {
+         if( $is_admin || !(@$arr_flags_admin[$flag]) )
+            $vars[$key] = get_request_arg( $key, false );
+      }
    }
 
    // parse URL-vars
@@ -189,9 +207,12 @@ function parse_edit_form( &$tney )
       $flagmask = 0;
       foreach( $arr_flags as $flag => $name )
       {
-         $flagmask |= $flag;
-         if( $vars[$name] )
-            $new_value |= $flag;
+         if( $is_admin || !(@$arr_flags_admin[$flag]) )
+         {
+            $flagmask |= $flag;
+            if( $vars[$name] )
+               $new_value |= $flag;
+         }
       }
       $tney->Flags = ($tney->Flags & ~$flagmask) | $new_value; // don't touch other flags
 
@@ -201,4 +222,18 @@ function parse_edit_form( &$tney )
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
+
+/*! \brief Returns array with notes about tournament locks. */
+function build_lock_notes()
+{
+   $notes = array();
+   //$notes[] = null; // empty line
+
+   $narr = array( T_('Tournament Locks') );
+   foreach( Tournament::getFlagsText(null, false) as $flag => $descr )
+      $narr[] = sprintf( "%s = $descr", Tournament::getFlagsText($flag) );
+   $notes[] = $narr;
+
+   return $notes;
+}//build_properties_notes
 ?>
