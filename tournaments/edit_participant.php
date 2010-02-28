@@ -89,6 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_participant($tid,$my_id)");
+   $is_admin = TournamentUtils::isAdmin();
 
    $errors = $tstatus->check_edit_status( TournamentParticipant::get_edit_tournament_status() );
 
@@ -157,8 +158,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype );
    list( $reg_errors, $reg_warnings ) = ( !is_null($tprops) )
-      ? $tprops->checkUserRegistration($tourney, $tp->hasRating(), $user, TPROP_CHKTYPE_TD)
+      ? $tprops->checkUserRegistration($tourney, $tp->hasRating(), $user, TCHKTYPE_TD)
       : array( array(), array() );
+
+   list( $lock_errors, $lock_warnings ) = $tourney->checkRegistrationLocks(TCHKTYPE_TD);
+   if( count($lock_errors) )
+      $errors = array_merge( $lock_errors, $errors );
 
    if( !$rid ) // new-TP
    {
@@ -213,6 +218,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       if( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0
             && count($reg_errors) == 0 && ( $rid || $ignore_warnings || count($reg_warnings) == 0 ) )
       {
+         //TODO handle EDIT of (registered) TP
+
          if( $tp->Status == TP_STATUS_REGISTER && $tprops->need_rating_copy() && !$tp->hasRating() )
          {
             if( !$vars['_has_custom_rating'] ) // copy only if no customized-rating
@@ -271,6 +278,13 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString( T_('There are some errors'), $errors ) ));
       $tpform->add_empty_row();
+   }
+   if( count($lock_warnings) )
+   {
+      $tpform->add_row( array( 'HR' ));
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('Warning'),
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some warnings'), $lock_warnings) ));
    }
    if( count($reg_errors) || count($reg_warnings) )
    {
