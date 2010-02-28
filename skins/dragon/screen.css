@@ -1140,6 +1140,10 @@ table.Infos {
    text-align: left;
 }
 
+table.Infos tr {
+   vertical-align: top;
+}
+
 table.Infos th,
 table.Infos td {
    margin: 0px;
@@ -2616,9 +2620,10 @@ span.TWarning {
    color: darkred;
 }
 
-span.TLockInfo {
+span.TLockWarn {
    font-weight: bold;
    color: darkred;
+   font-style: italic;
 }
 
 span.TLMaxChallenges {
@@ -2637,6 +2642,7 @@ span.LadderWarn {
    color: darkred;
 }
 
+span.TAdmin,
 a.TAdmin {
    color: blue;
    font-style: italic;
