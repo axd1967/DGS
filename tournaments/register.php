@@ -107,10 +107,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $old_start_round = $tp->StartRound;
 
    // check + parse edit-form
+   $reg_check_type = ( $rid ? TCHKTYPE_USER_EDIT : TCHKTYPE_USER_NEW );
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
    list( $reg_errors, $reg_warnings ) =
-      $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id,
-                                      ( $rid ? TPROP_CHKTYPE_USER_EDIT : TPROP_CHKTYPE_USER_NEW ) );
+      $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id, $reg_check_type );
+
+   list( $lock_errors, $lock_warnings ) = $tourney->checkRegistrationLocks( $reg_check_type );
+   if( count($lock_errors) )
+      $errors = array_merge( $lock_errors, $errors );
 
    if( !$rid ) // new-TP
    {
@@ -121,7 +125,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    }
    $errors = array_merge( $errors, $input_errors );
    $is_invite = ( $tp->Status == TP_STATUS_INVITE );
-   $allow_register = ( count($reg_errors) == 0 );
+   $allow_register = ( count($reg_errors) + count($lock_errors) == 0 );
+
 
    // ---------- Process inputs into actions ------------------------------------
 
