@@ -100,7 +100,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       make_header( 1, T_('Setup phase'), TOURNEY_STATUS_NEW ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit tournament'), array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Change start-time, title, description#mngt') . ($is_admin ? '; ' . T_('owner, scope, flags (locks)#mngt') : '') )),
+                 subList( array( T_('Change start-time, title, description#mngt') . ($is_admin ? '; ' . T_('owner, scope#mngt') : '') )),
          '<li>', ( $allow_new_del_TD
                      ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))
                      : T_('Add tournament director') ),
@@ -137,6 +137,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       make_header( 4, T_('Play phase'), TOURNEY_STATUS_PLAY ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
+         '<li>', make_admin_tgame( $tid ), MED_SPACING, '(', T_('also see game info pages'), ')',
       '</ul>',
 
       '</tr></td></table>',
@@ -185,4 +186,18 @@ function subList( $arr, $class='SubList' )
    $class_str = ($class != '') ? " class=\"$class\"" : '';
    return "<ul{$class_str}><li>" . implode("</li>\n<li>", $arr) . "</li></ul>\n";
 }//subList
+
+function make_admin_tgame( $tid )
+{
+   global $base_path;
+   $label_textbox = span('TAdmin', T_('Admin tournament game')) . ', ' . T_('Enter Game ID');
+   $label_submit = T_('Edit#T_gameadmin');
+
+   return <<<___FORMEND___
+      <FORM action="{$base_path}tournaments/game_admin.php" method="GET">
+      <INPUT type="hidden" name="tid" value="$tid">
+      $label_textbox: <INPUT type="text" name="gid" value="" size="8" maxlength="8">
+      <INPUT type="submit" name="atg" value="$label_submit">
+___FORMEND___;
+}//make_admin_tgame
 ?>
