@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
@@ -82,6 +83,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_edit_tournament_status() );
    $allow_admin = TournamentLadder::allow_edit_ladder($tourney, $errors); // check-locks
+   $tdwork_locked = $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK);
    $authorise_seed = ( $tourney->Status == TOURNEY_STATUS_PAIR );
 
 
@@ -164,6 +166,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Status'),
          'TEXT', $tourney->getStatusText($tourney->Status) ));
@@ -178,6 +181,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString( T_('There are some errors'), $errors ) ));
       $tform->add_empty_row();
+   }
+   elseif( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
+   {
+      $tform->add_row( array( 'HR' ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Warning'),
+            'TEXT', $tourney->buildMaintenanceLockText(TOURNEY_FLAG_LOCK_TDWORK) ));
    }
 
    // ADMIN: Seed Ladder ---------------

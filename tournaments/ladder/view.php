@@ -35,6 +35,7 @@ require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
@@ -67,7 +68,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $tstatus = new TournamentStatus( $tourney );
    $is_seed_status = ( $tourney->Status == TOURNEY_STATUS_PAIR );
    $allow_play = ( $tourney->Status == TOURNEY_STATUS_PLAY );
-   $play_locked = $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK | TOURNEY_FLAG_LOCK_CLOSE);
+   $tdwork_locked = $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK);
+   $play_locked = $tdwork_locked || $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_CLOSE);
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( $admin_mode && !$allow_edit_tourney )
@@ -234,7 +236,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    }//allow-view
 
    if( $admin_mode )
+   {
       echo '<h3 class="Header">', T_('Edit Ladder'), "</h3>\n";
+      if( TournamentUtils::isAdmin() )
+         echo T_('Tournament Flags#tourney'), ': ', $tourney->formatFlags(NO_VALUE), "<br><br>\n";
+   }
 
    if( count($errors) )
    {
@@ -247,7 +253,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    {
       if( $play_locked )
       {
-         if( !$admin_mode )
+         if( !$admin_mode || $tdwork_locked )
             echo $tourney->buildMaintenanceLockText(0, ': '),
                span('LadderWarn', T_('Challenging locked')), ".<br>\n";
          if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
