@@ -93,7 +93,7 @@ class TournamentTemplate
       return 0;
    }
 
-   /*! \brief Saves given TournamentParticipant in HOT-section if needed and joins (running) tournament. */
+   /*! \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined. */
    function joinTournament( $tourney, $tp )
    {
       return $tp->persist();
