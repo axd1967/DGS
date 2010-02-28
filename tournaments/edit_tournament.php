@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    if( $tourney->Flags > 0 )
    {
       $tform->add_row( array(
-            'DESCRIPTION', T_('Flags#tourney'),
+            'DESCRIPTION', T_('Tournament Flags#tourney'),
             'TEXT',        $tourney->formatFlags(), ));
    }
    $tform->add_row( array(

@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'DESCRIPTION', T_('Your Roles'),
          'TEXT', $tourney->getRoleText($my_id), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Flags#tourney'),
+         'DESCRIPTION', T_('Tournament Flags#tourney'),
          'TEXT', $tourney->formatFlags(NO_VALUE) . SEP_SPACING .
                  make_menu_link( T_('Edit locks#tourney'),
                      array( 'url' => "tournaments/edit_lock.php?tid=$tid", 'class' => 'TAdmin' )) ));
