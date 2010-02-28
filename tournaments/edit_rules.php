@@ -68,6 +68,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
       error('bad_tournament', "Tournament.edit_rules.miss_rules($tid,$my_id)");
 
    $errors = $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
    list( $vars, $edits, $input_errors ) = parse_edit_form( $trule );

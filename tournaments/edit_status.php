@@ -73,6 +73,8 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    $new_status = $vars['status'];
    $tstatus->check_status_change($new_status);
    $tourney->setStatus($new_status);
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $tstatus->add_error( $tourney->buildAdminLockText() );
 
    // save tournament-object with values from edit-form (if no errors and something changed)
    $allow_confirm = ( !$tstatus->has_error() || $tstatus->is_admin );

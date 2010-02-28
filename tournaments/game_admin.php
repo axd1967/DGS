@@ -86,6 +86,8 @@ define('GA_RES_TIMOUT', 3);
       error('tournament_edit_not_allowed', "Tournament.game_admin.edit($tid,$my_id)");
 
    $errors = $tstatus->check_edit_status( TournamentGames::get_admin_tournament_status() );
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
    $authorise_game_end = $tourney->allow_edit_tournaments($my_id, TD_FLAG_GAME_END);
    $authorise_add_time = $tourney->allow_edit_tournaments($my_id, TD_FLAG_GAME_ADD_TIME);
 

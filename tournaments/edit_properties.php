@@ -73,6 +73,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
    $arr_rating_use_modes = TournamentProperties::getRatingUseModeText();
    $rating_array = getRatingArray();
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $ttype );

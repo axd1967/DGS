@@ -70,11 +70,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
    // init
    $errors = $tstatus->check_edit_status( TournamentLadderProps::get_edit_tournament_status() );
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tl_props );
-   $errors = array_merge( $errors, $input_errors );
-   $errors = array_merge( $errors, $tl_props->check_properties() );
+   $errors = array_merge( $errors, $input_errors, $tl_props->check_properties() );
 
    // save properties-object with values from edit-form
    if( @$_REQUEST['tlp_save'] && !@$_REQUEST['tlp_preview'] && count($edits) && count($errors) == 0 )
