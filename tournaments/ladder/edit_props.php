@@ -23,10 +23,10 @@ chdir('../..');
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
-require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
@@ -94,6 +94,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   TournamentUtils::show_tournament_flags( $tform, $tourney );
    if( $tl_props->Lastchanged )
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed'),

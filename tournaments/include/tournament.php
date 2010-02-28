@@ -148,18 +148,23 @@ class Tournament
       return ($this->Flags & $flag);
    }
 
-   function formatFlags( $zero_val='', $intersect_flags=0 )
+   function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null )
    {
+      if( is_null($class) )
+         $class = 'TLockWarn';
+
       $check_flags = $this->Flags;
       if( $intersect_flags > 0 )
          $check_flags &= $intersect_flags;
 
       $arr = array();
-      $arr_flags = Tournament::getFlagsText();
+      $arr_flags = Tournament::getFlagsText(null, ($short ? 'SHORT' : true));
       foreach( $arr_flags as $flag => $flagtext )
       {
          if( $check_flags & $flag )
-            $arr[] = ( $flag == TOURNEY_FLAG_LOCK_ADMIN ) ? span('TLockWarn', $flagtext) : $flagtext;
+            $arr[] = ( $class || ($flag & (TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK)) ) // emphasize
+               ? span($class, $flagtext)
+               : $flagtext;
       }
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
    }
@@ -626,6 +631,14 @@ class Tournament
          $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Edit of ladder is prohibited by set %s. Please wait a moment.#T_lock');
          $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('%s is set prohibiting users to join tournament or start challenges.#T_lock');
          $ARR_GLOBALS_TOURNAMENT[$key.'_LOCK'] = $arr;
+
+         $arr = array();
+         $arr[TOURNEY_FLAG_LOCK_ADMIN]    = 'ADMIN';
+         $arr[TOURNEY_FLAG_LOCK_REGISTER] = 'REG';
+         $arr[TOURNEY_FLAG_LOCK_TDWORK]   = 'TDWORK';
+         $arr[TOURNEY_FLAG_LOCK_CRON]     = 'CRON';
+         $arr[TOURNEY_FLAG_LOCK_CLOSE]    = 'CLOSE';
+         $ARR_GLOBALS_TOURNAMENT[$key.'_SHORT'] = $arr;
       }
 
       if( $short === false )
@@ -637,7 +650,7 @@ class Tournament
       if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$flag]) )
          error('invalid_args', "Tournament::getFlagsText($flag,$short)");
       return $ARR_GLOBALS_TOURNAMENT[$key][$flag];
-   }
+   }//getFlagsText
 
    function getLockText( $flag )
    {

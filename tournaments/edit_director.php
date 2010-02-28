@@ -24,10 +24,10 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_director.php' );
 require_once( 'tournaments/include/tournament_status.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
@@ -146,6 +146,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
    $tdform = new Form( 'tournamentdirector', $page, FORM_POST );
    $tdform->add_hidden( 'tid', $tid );
+   TournamentUtils::show_tournament_flags( $tdform, $tourney );
 
    if( count($errors) )
    {

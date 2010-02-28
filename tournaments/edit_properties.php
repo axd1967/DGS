@@ -24,11 +24,11 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
@@ -100,6 +100,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   TournamentUtils::show_tournament_flags( $tform, $tourney );
    if( $tprops->Lastchanged )
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed'),

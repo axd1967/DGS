@@ -20,13 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/form_functions.php' );
-require_once( 'include/message_functions.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_rules.php' );
-require_once( 'tournaments/include/tournament_status.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/message_functions.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
@@ -94,6 +95,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $trform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   TournamentUtils::show_tournament_flags( $trform, $tourney );
    if( $trule->Lastchanged )
       $trform->add_row( array(
             'DESCRIPTION', T_('Last changed'),

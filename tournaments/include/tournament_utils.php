@@ -157,6 +157,17 @@ class TournamentUtils
       return ($best_rank <= 0) ? $rank : min($best_rank, $rank);
    }
 
+   /*! \brief Show all tournament-flags for admin in given Form-object. */
+   function show_tournament_flags( &$tform, $tourney )
+   {
+      if( TournamentUtils::isAdmin() && $tourney->Flags > 0 )
+      {
+         $tform->add_row( array(
+               'DESCRIPTION', T_('Tournament Flags#tourney'),
+               'TEXT',        $tourney->formatFlags(NO_VALUE) ));
+      }
+   }
+
 } // end of 'TournamentUtils'
 
 ?>

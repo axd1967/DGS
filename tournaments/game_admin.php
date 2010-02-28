@@ -31,6 +31,7 @@ require_once 'include/db/games.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentGameAdmin');
 
@@ -156,6 +157,7 @@ define('GA_RES_TIMOUT', 3);
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status) ));

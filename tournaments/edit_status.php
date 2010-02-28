@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/form_functions.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_status.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
@@ -97,6 +97,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Created'),
          'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));

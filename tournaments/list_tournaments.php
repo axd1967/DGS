@@ -20,15 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/std_classes.php' );
-require_once( 'include/table_columns.php' );
-require_once( 'include/filter.php' );
-require_once( 'include/classlib_profile.php' );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_participant.php' );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/table_columns.php';
+require_once 'include/filter.php';
+require_once 'include/classlib_profile.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentList');
 
@@ -70,7 +70,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          T_('Mine#T_owner') => "T.Owner_ID=$my_id",
       );
 
-   if( TournamentUtils::isAdmin() )
+   $is_admin = TournamentUtils::isAdmin();
+   if( $is_admin )
       $where_scope = "1=1"; // admin can see all scopes (incl. private)
    else
       $where_scope = sprintf( "T.Scope IN ('%s','%s')", TOURNEY_SCOPE_DRAGON, TOURNEY_SCOPE_PUBLIC );
@@ -127,6 +128,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
    if( $has_uid )
       $ttable->add_tablehead(11, T_('Registration Status#headert'), 'Enum', TABLE_NO_HIDE, 'TP_Status+');
+   if( $is_admin )
+      $ttable->add_tablehead(12, T_('Flags#headert'), '', 0, 'Flags-');
    $ttable->add_tablehead( 6, T_('Owner#headert'), 'User', 0, 'X_OwnerHandle+');
    $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
@@ -204,6 +207,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
                   null, 'class=InTextImage'))
             . '&nbsp;' . TournamentParticipant::getStatusText($orow['TP_Status']);
       }
+      if( $is_admin && $ttable->Is_Column_Displayed[12] )
+         $row_str[12] = $tourney->formatFlags('', 0, true, 'TWarning');
+
 
       $ttable->add_row( $row_str );
    }
