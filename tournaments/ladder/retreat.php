@@ -62,10 +62,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    $tstatus = new TournamentStatus( $tourney );
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_view_ladder_status(false) );
+   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
+      $errors[] = $tourney->buildMaintenanceLockText();
 
    $tladder = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id);
    if( is_null($tladder) )
-      $errors[] = T_('Retreat from this ladder is not possible, because you didn\'t joined it.');
+      $errors[] = T_('Retreat from this ladder is not possible, because you didn\'t join it.');
 
 
    // ---------- Process actions ------------------------------------------------
@@ -90,7 +92,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
          'DESCRIPTION', T_('User'),
          'TEXT',        user_reference( REF_LINK, 1, '', $player_row ) ));
 
-   if( count($errors) )
+   $has_errors = ( count($errors) > 0 );
+   if( $has_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -119,10 +122,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    $tform->add_row( array(
          'TAB',
-         'TEXT', T_('Please confirm if you want to retreat from ladder!') . "<br>\n" . T_('(also see notes below)'), ));
+         'TEXT', T_('Please confirm if you want to retreat from ladder!') . "<br>\n"
+               . T_('(also see notes below)'), ));
    $tform->add_row( array(
          'TAB', 'CELL', 2, '',
-         'SUBMITBUTTON', 'tu_retreat', T_('Confirm Retreat'),
+         'SUBMITBUTTONX', 'tu_retreat', T_('Confirm Retreat'), ($has_errors ? 'disabled=1' : ''),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tu_cancel', T_('Cancel') ));
 
