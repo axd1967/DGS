@@ -71,9 +71,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    if( $tourney->Status != TOURNEY_STATUS_PLAY )
       error('tournament_wrong_status', "Tournament.ladder.challenge.check_status($tid,{$tourney->Status})");
 
-
    // checks
    $errors = array();
+   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
+      $errors[] = $tourney->buildMaintenanceLockText();
+   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+      $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
+
    $tladder_ch = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id); // challenger
    if( is_null($tladder_ch) )
       $errors[] = T_('Challenger is not participating on ladder');
@@ -147,7 +151,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    add_form_user_info( $tform, T_('Challenger'), $user_ch, $tladder_ch );
    add_form_user_info( $tform, T_('Defender'),   $user_df, $tladder_df );
 
-   if( count($errors) )
+   $has_errors = ( count($errors) > 0 );
+   if( $has_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -162,18 +167,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          'CELL', 2, '',
          'TEXT', T_('Please confirm if you want to challenge this user!') . "<br>\n" . T_('(also see notes below)'), ));
 
-   $rowarr = array( 'CELL', 2, '' );
-   if( count($errors) == 0 )
-   {
-      //$tform->add_hidden( 'confirm', 1 );
-      array_push( $rowarr,
-         'HIDDEN', 'confirm', 1,
-         'SUBMITBUTTON', 'tl_challenge', T_('Confirm Challenge'),
-         'TEXT', SMALL_SPACING );
-   }
-   array_push( $rowarr,
-      'SUBMITBUTTON', 'tl_cancel', T_('Cancel') );
-   $tform->add_row( $rowarr );
+   if( !$has_errors )
+      $tform->add_hidden( 'confirm', 1 );
+   $tform->add_row( array(
+         'CELL', 2, '',
+         'SUBMITBUTTONX', 'tl_challenge', T_('Confirm Challenge'), ( $has_errors ? 'disabled=1' : '' ),
+         'TEXT', SMALL_SPACING,
+         'SUBMITBUTTON', 'tl_cancel', T_('Cancel') ));
 
 
    $title = T_('Challenge Ladder User');
