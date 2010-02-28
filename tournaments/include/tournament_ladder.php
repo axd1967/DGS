@@ -443,6 +443,8 @@ class TournamentLadder
          error('invalid_args', "TournamentLadder::add_user_to_ladder.load_tp($tid,$uid)");
 
       // check pre-conditions
+      if( TournamentLadder::load_rank($tid, 0, $uid) > 0 )
+         return true; // already joined ladder
       if( $tp->Status != TP_STATUS_REGISTER )
          error('tournament_participant_invalid_status',
                "TournamentLadder::add_user_to_ladder.check_tp_status($tid,$uid,{$tp->Status})");
@@ -792,30 +794,22 @@ class TournamentLadder
    }//_process_game_end
 
    /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
-   function allow_edit_ladder( $tourney, &$errors )
+   function allow_edit_ladder( $tourney, &$return_errors )
    {
-      $allow_edit = false;
+      $errors = array();
 
       // check admin-lock
       if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
          $errors[] = $tourney->buildAdminLockText();
-      else
-         $allow_edit = true;
 
       // check other locks
-      $check_ok = 0;
       if( !$tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
          $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_TDWORK);
-      else
-         $check_ok++;
       if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CRON) )
          $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CRON);
-      else
-         $check_ok++;
-      if( $check_ok == 2 )
-         $allow_edit = true;
 
-      return $allow_edit;
+      $return_errors = array_merge( $return_errors, $errors );
+      return ( count($errors) == 0 );
    }
 
    function get_edit_tournament_status()
