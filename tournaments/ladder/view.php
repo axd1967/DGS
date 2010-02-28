@@ -51,7 +51,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
 /* Actual REQUEST calls used
      tid=                           : view T-ladder
-     tid=&admin=1                   : admin-mode on T-ladder
+     tid=&admin=1                   : admin-mode on T-ladder (edit-ladder)
      tid=&admin=1&ta_updrank&rid=&new_rank= : change rank of user given by rid
 */
 
@@ -67,6 +67,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $tstatus = new TournamentStatus( $tourney );
    $is_seed_status = ( $tourney->Status == TOURNEY_STATUS_PAIR );
    $allow_play = ( $tourney->Status == TOURNEY_STATUS_PLAY );
+   $play_locked = $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK | TOURNEY_FLAG_LOCK_CLOSE);
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( $admin_mode && !$allow_edit_tourney )
@@ -78,11 +79,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
    $errors = $tstatus->check_view_status( TournamentLadder::get_view_ladder_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
+   $allow_admin = ($admin_mode)
+      ? TournamentLadder::allow_edit_ladder($tourney, $errors) // check-locks
+      : false;
 
    $tl_user = null;
    if( $allow_view )
    {
-      if( $admin_mode && @$_REQUEST['ta_updrank'] ) // move rank (by TD)
+      if( $admin_mode && $allow_admin && @$_REQUEST['ta_updrank'] ) // move rank (by TD)
       {
          $prep_errors = array();
          $tladder = prepare_update_rank( $tid, $rid, $new_rank, $prep_errors );
@@ -94,7 +98,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             if( $tladder->change_user_rank($new_rank) )
             {
                $sys_msg = urlencode( sprintf( T_('Moved selected user from rank [%s] to [%s]!#tourney'),
-                                             $old_rank, $new_rank ));
+                                              $old_rank, $new_rank ));
                jump_to("tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1".URI_AMP."rid=$rid"
                      . URI_AMP."sysmsg=$sys_msg");
             }
@@ -147,7 +151,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_rows_per_page( null ); // no navigating
       $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
 
-      if( !$admin_mode )
+      if( $admin_mode )
+      {
+         if( $allow_admin )
+            $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
+      }
+      else
       {
          $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
          $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid,
@@ -158,8 +167,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
          $tl_props->fill_ladder_running_games( $thelper->tcache, $iterator, $tg_iterator, $my_id );
       }
-      else
-         $ltable->set_extend_table_form_function( 'admin_edit_ladder_extend_table_form' ); //defined below
    }//allow-view
 
 
@@ -205,7 +212,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[ 6] )
             $row_str[ 6] = echo_rating( $user->Rating, true, $uid);
          if( $ltable->Is_Column_Displayed[ 7] ) // actions
-            $row_str[ 7] = build_action_row_str( $tladder, $is_mine,
+            $row_str[ 7] = build_action_row_str( $tladder, $is_mine, $rid,
                ( $ltable->Is_Column_Displayed[12] ? '' : $run_games_str) );
          if( $ltable->Is_Column_Displayed[ 8] )
             $row_str[ 8] = implode(' ', $tladder->build_linked_running_games());
@@ -232,12 +239,23 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    if( count($errors) )
    {
       echo "<table><tr>",
-         TournamentUtils::buildErrorListString( T_('There are some errors'), $errors, 1 ),
+         TournamentUtils::buildErrorListString( T_('There are some errors'), $errors, 1, false ),
          "</tr></table>\n";
    }
 
    if( $allow_view )
    {
+      if( $play_locked )
+      {
+         if( !$admin_mode )
+            echo $tourney->buildMaintenanceLockText(0, ': '),
+               span('LadderWarn', T_('Challenging locked')), ".<br>\n";
+         if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+            echo Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE), MINI_SPACING,
+               span('LadderWarn', T_('Challenging locked')), ".<br>\n";
+         echo "<br>\n";
+      }
+
       if( !is_null($tl_user) && !$admin_mode )
       {
          if( $tl_props->MaxChallenges > 0 )
@@ -322,21 +340,25 @@ function admin_edit_ladder_extend_table_form( &$table, &$form )
    return $result;
 }
 
-function build_action_row_str( &$tladder, $is_mine, $run_games_str )
+function build_action_row_str( &$tladder, $is_mine, $rid, $run_games_str )
 {
-   global $base_path, $ltable, $tform, $tl_user, $tid, $rid, $admin_mode, $allow_play;
-   $uid = $tladder->uid;
+   global $base_path, $admin_mode, $allow_play, $allow_admin;
+   $tid = $tladder->tid;
 
    $row_str = '';
    if( $admin_mode )
    {
-      $row_str =
-         anchor( $base_path."tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid",
-                 image( $base_path.'images/edit.gif', 'E'),
-                 T_('Admin user'), 'class=ButIcon')
-         . SMALL_SPACING
-         . $tform->print_insert_radio_buttonsx(
-               'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
+      global $tform;
+      if( !$allow_admin )
+         $row_str = span('LadderWarn', T_('Edit prohibited#T_ladder'));
+      else
+         $row_str =
+            anchor( $base_path."tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid={$tladder->uid}",
+                  image( $base_path.'images/edit.gif', 'E'),
+                  T_('Admin user'), 'class=ButIcon')
+            . SMALL_SPACING
+            . $tform->print_insert_radio_buttonsx(
+                  'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
    }
    elseif( $is_mine )
    {
@@ -348,15 +370,20 @@ function build_action_row_str( &$tladder, $is_mine, $run_games_str )
    {
       if( $tladder->AllowChallenge )
       {
-         if( !is_null($tl_user) && $tl_user->MaxChallengedOut )
-            $row_str = span('LadderWarn', sprintf( '(%s)', T_('Challenging stalled') ));
+         global $tl_user, $play_locked;
+         if( $play_locked )
+            $row_str = span('LadderWarn', T_('Challenging locked') );
+         elseif( !is_null($tl_user) && $tl_user->MaxChallengedOut )
+            $row_str = span('LadderWarn', T_('Challenging stalled') );
          else
             $row_str = sprintf( '[%s]',
                anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
                        T_('Challenge this user') ));
       }
       elseif( $tladder->MaxChallengedIn )
+      {
          $row_str = span('LadderInfo', sprintf( T_('Already in %s challenges'), $tladder->ChallengesIn ));
+      }
       elseif( $tladder->RematchWait >= 0 )
       {
          if( $tladder->RematchWait > 0 )
