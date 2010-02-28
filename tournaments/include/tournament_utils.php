@@ -112,18 +112,18 @@ class TournamentUtils
       return $arr_map[$wizard_type];
    }
 
-   function buildErrorListString( $errmsg, $errors, $colspan=0 )
+   function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true )
    {
       if( count($errors) == 0 )
          return '';
 
       if( $colspan <= 0 )
-         return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode(",<br>\n* ", $errors));
+         return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
       else
       {
          $out = "\n<ul>";
          foreach( $errors as $err )
-            $out .= "<li>" . span('TWarning', make_html_safe($err, 'line')) . "\n";
+            $out .= "<li>" . span('TWarning', ($safe ? make_html_safe($err, 'line') : $err)) . "\n";
          $out .= "</ul>\n";
          $out = span('ErrorMsg', ( $errmsg ? "$errmsg:<br>\n" : '' )) . $out;
          return "<td colspan=\"$colspan\">$out</td>";
