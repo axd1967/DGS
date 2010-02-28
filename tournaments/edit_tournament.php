@@ -66,14 +66,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_tournament.edit($tid,$my_id)");
 
    // init
-   $arr_flags = array( // only admin can edit (at any time)
-      TOURNEY_FLAG_LOCK_ADMIN    => 'tfl_lock_adm',
-      TOURNEY_FLAG_LOCK_REGISTER => 'tfl_lock_reg',
-      TOURNEY_FLAG_LOCK_LADDER   => 'tfl_lock_ladder',
-      TOURNEY_FLAG_LOCK_CRON     => 'tfl_lock_cron',
-   );
-   $errors = $tstatus->check_edit_status( Tournament::get_edit_tournament_status() );
    $arr_scopes = Tournament::getScopeText();
+
+   $errors = $tstatus->check_edit_status( Tournament::get_edit_tournament_status() );
+   if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tourney, $ttype, $is_admin );
@@ -143,15 +140,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
             'DESCRIPTION', T_('Scope#tourney'),
             'SELECTBOX',   'scope', 1, $arr_scopes, $tourney->Scope, false,
             'TEXT',        T_('(change with care, only by admin)'), ));
-
-      $arr = array( 'DESCRIPTION', T_('Flags#tourney') );
-      foreach( $arr_flags as $flag => $name )
-      {
-         array_push( $arr,
-            'CHECKBOX', $name, 1, Tournament::getFlagsText($flag), $tourney->isFlagSet($flag),
-            'TEXT', SMALL_SPACING );
-      }
-      $tform->add_row( $arr );
    }
    else
    {
@@ -239,8 +227,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tney, $ttype, $is_admin )
 {
-   global $arr_flags;
-
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] );
@@ -254,19 +240,12 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       'descr'           => $tney->Description,
       'rounds'          => $tney->Rounds,
       'current_round'   => $tney->CurrentRound,
-      'flags'           => $tney->Flags,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
-   // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
-   {
-      foreach( array_values($arr_flags) as $key )
-         $vars[$key] = get_request_arg( $key, false );
-   }
 
    // parse URL-vars
    if( $is_posted )
@@ -297,14 +276,6 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
             $errors[] = T_('Unknown tournament scope');
          else
             $tney->setScope( $new_value );
-
-         $new_value = 0;
-         foreach( $arr_flags as $flag => $name )
-         {
-            if( $vars[$name] )
-               $new_value |= $flag;
-         }
-         $tney->Flags = $new_value;
       }
 
       $parsed_value = TournamentUtils::parseDate( T_('Start time for tournament'), $vars['start_time'] );
@@ -358,7 +329,6 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       if( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description#edits');
       if( $old_vals['rounds'] != $tney->Rounds ) $edits[] = T_('Rounds#edits');
       if( $old_vals['current_round'] != $tney->CurrentRound ) $edits[] = T_('Rounds#edits');
-      if( $old_vals['flags'] != $tney->Flags ) $edits[] = T_('Flags#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );
