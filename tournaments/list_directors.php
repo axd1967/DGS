@@ -47,9 +47,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $tourney = Tournament::load_tournament( $tid );
    if( is_null($tourney) )
       error('unknown_tournament', "list_directors.find_tournament($tid)");
-
-   $allow_edit = $tourney->allow_edit_directors($my_id, false);
-   $allow_new_del = $tourney->allow_edit_directors($my_id, true);
+   $allow_edit = $tourney->allow_edit_directors($my_id);
 
    $page = "list_directors.php?";
 
@@ -75,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $tdtable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $tdtable->add_tablehead( 1, T_('Actions#T_dir'), 'Image', TABLE_NO_HIDE, '');
+   $tdtable->add_tablehead( 1, T_('Actions#T_dir'), 'ImagesLeft', TABLE_NO_HIDE, '');
    $tdtable->add_tablehead( 2, T_('Tournament director#T_dir'), 'User', 0, 'Name+');
    $tdtable->add_tablehead( 3, T_('Rating#T_dir'), 'Rating', 0, 'Rating2-');
    $tdtable->add_tablehead( 4, T_('Last access#T_dir'), 'Date', 0, 'Lastaccess-');
@@ -121,14 +119,14 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
                      . "uid=$uid".URI_AMP."subject=$msg_subj".URI_AMP."message=$msg_text",
                image( $base_path.'images/send.gif', 'M'),
                T_('Send a message'), 'class=ButIcon');
-         if( $allow_edit )
+         if( $allow_edit || $my_id == $uid )
          {
             $links .= SMALL_SPACING;
             $links .= anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid",
                   image( $base_path.'images/edit.gif', 'E'),
                   T_('Edit tournament director'), 'class=ButIcon');
          }
-         if( $allow_new_del && $allow_del1 )
+         if( $allow_edit )
          {
             $links .= SMALL_SPACING;
             $links .= anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP
@@ -158,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_new_del )
+   if( $allow_edit )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
    if( $tourney->allow_edit_tournaments($my_id) )

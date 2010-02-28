@@ -55,7 +55,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $is_admin = TournamentUtils::isAdmin();
    if( !$tourney->allow_edit_tournaments($my_id) )
       error('tournament_edit_not_allowed', "manage_tournament.edit_tournament($tid,$my_id)");
-   $allow_new_del_TD = $tourney->allow_edit_directors($my_id, true);
+   $allow_new_del_TD = $tourney->allow_edit_directors($my_id);
 
    // init
    $page = "manage_tournament.php";

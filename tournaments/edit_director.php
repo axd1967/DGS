@@ -63,7 +63,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
       error('unknown_tournament', "Tournament.edit_director.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
 
-   if( !$tourney->allow_edit_directors($my_id, false) )
+   if( !$tourney->allow_edit_tournaments($my_id) )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit($tid,$my_id)");
 
    if( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
@@ -78,7 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $has_user = ( $uid || $user != '' ); // has in vars, can still be unknown
 
    // new+del needs special rights
-   $owner_allow_edit = $tourney->allow_edit_directors($my_id, true);
+   $owner_allow_edit = $tourney->allow_edit_directors($my_id);
    if( !$has_user && !$owner_allow_edit )
       error('tournament_director_new_del_not_allowed', "Tournament.edit_director.new_del($tid,$my_id)");
 
@@ -97,6 +97,9 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    }
    elseif( $has_user )
       $tduser_errors[] = T_('Unknown user');
+
+   if( !$owner_allow_edit && ($my_id != $uid) )
+      error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit_other($tid,$my_id,$uid)");
 
 
    $director = null;
