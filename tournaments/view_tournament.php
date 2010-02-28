@@ -81,16 +81,17 @@ $GLOBALS['ThePage'] = new Page('Tournament');
                      Tournament::getScopeText($tourney->Scope),
                      Tournament::getTypeText($tourney->Type),
                      sprintf( T_('Tournament #%s - General Information'), $tid ));
+   $base_page_tourney = $base_path . $page_tourney;
    section( 'info', $title );
    echo
       T_('This page contains all necessary information and links to participate in the tournament.'),
       MINI_SPACING,
       T_('There are different sections:#tourney'), "\n<ul>",
-         "\n<li>", anchor( "$base_path$page_tourney#title", T_('Tournament description') ),
-         "\n<li>", anchor( "$base_path$page_tourney#rules", T_('Tournament ruleset') ),
-         "\n<li>", anchor( "$base_path$page_tourney#registration", T_('Tournament registration information') ),
-         "\n<li>", anchor( "$base_path$page_tourney#games", T_('Tournament games') ),
-         "\n<li>", anchor( "$base_path$page_tourney#result", T_('Tournament results') ),
+         "\n<li>", anchor( "$base_page_tourney#title", T_('Tournament description') ),
+         "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament ruleset') ),
+         "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament registration information') ),
+         "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament games') ),
+         "\n<li>", anchor( "$base_page_tourney#result", T_('Tournament results') ),
       "</ul>\n",
       make_html_safe(
          T_('When you have a question about the tournament, please send a message '
@@ -122,12 +123,15 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
+   $arr_locks = check_locks( $tourney );
 
-   $itable = new Table_info('tstatus');
-   $itable->add_sinfo( T_('Current Tournament Status:'), $tourney->getStatusText($tourney->Status) );
-   $itable->add_sinfo( T_('Current Tournament Round:'), $tourney->formatRound() );
+   $itable = new Table_info('tstatus', TABLEOPT_LABEL_COLON);
+   if( count($arr_locks) )
+      $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
+   $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
+   $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if( $reg_user_info )
-      $itable->add_sinfo( T_('Registration status:'), span('TUserStatus', $reg_user_info) );
+      $itable->add_sinfo( T_('Registration status'), span('TUserStatus', $reg_user_info) );
 
    echo $itable->make_table();
 
@@ -221,6 +225,18 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 }
 
 
+function check_locks( $tourney )
+{
+   $arr_locks = array();
+   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
+      $arr_locks[] = $tourney->buildMaintenanceLockText();
+   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_REGISTER) )
+      $arr_locks[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_REGISTER);
+   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+      $arr_locks[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
+   return $arr_locks;
+}
+
 function echo_tournament_rules( $tourney, $trule )
 {
    $adj_komi = array();
@@ -244,11 +260,11 @@ function echo_tournament_rules( $tourney, $trule )
    elseif( $trule->MaxHandicap < MAX_HANDICAP )
       $adj_handi[] = sprintf( T_('limited by max. %s stones#trules_handi'), $trule->MaxHandicap );
 
-   $itable = new Table_info('gamerules');
-   $itable->add_sinfo( T_('Board Size:#trules'), $trule->Size .' x '. $trule->Size );
-   $itable->add_sinfo( T_('Handicap Type:#trules'),
+   $itable = new Table_info('gamerules', TABLEOPT_LABEL_COLON);
+   $itable->add_sinfo( T_('Board Size#trules'), $trule->Size .' x '. $trule->Size );
+   $itable->add_sinfo( T_('Handicap Type#trules'),
          TournamentRules::getHandicaptypeText($trule->Handicaptype, $tourney->Type) );
-   $itable->add_sinfo( T_('Handicap:#trules'),
+   $itable->add_sinfo( T_('Handicap#trules'),
       ( $trule->needsCalculatedHandicap()
             ? T_('calculated stones#trules_handi')
             : sprintf( T_('%s stones#trules_handi'), $trule->Handicap) )
@@ -257,19 +273,19 @@ function echo_tournament_rules( $tourney, $trule )
             ? T_('calculated komi#trules_handi')
             : sprintf( T_('%s points komi#trules_handi'), $trule->Komi) ));
    if( count($adj_handi) )
-      $itable->add_sinfo( T_('Handicap adjustment:#trules_handi'), implode(', ', $adj_handi) );
+      $itable->add_sinfo( T_('Handicap adjustment#trules_handi'), implode(', ', $adj_handi) );
    if( count($adj_komi) )
-      $itable->add_sinfo( T_('Komi adjustment:#trules_komi'), implode(', ', $adj_komi) );
+      $itable->add_sinfo( T_('Komi adjustment#trules_komi'), implode(', ', $adj_komi) );
    if( ENA_STDHANDICAP )
-      $itable->add_sinfo( T_('Standard placement:#trules_handi'), yesno($trule->StdHandicap) );
-   $itable->add_sinfo( T_('Main time:#trules'), TimeFormat::echo_time($trule->Maintime)
+      $itable->add_sinfo( T_('Standard placement#trules_handi'), yesno($trule->StdHandicap) );
+   $itable->add_sinfo( T_('Main time#trules'), TimeFormat::echo_time($trule->Maintime)
          . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)#trules') : '' ));
    if( $trule->Byotime > 0 )
       $itable->add_sinfo(
-         TimeFormat::echo_byotype($trule->Byotype) . ':',
+         TimeFormat::echo_byotype($trule->Byotype),
          TimeFormat::echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods, 0) );
-   $itable->add_sinfo( T_('Clock runs on weekends:#trules'), yesno($trule->WeekendClock) );
-   $itable->add_sinfo( T_('Rated:#trules'), yesno($trule->Rated) );
+   $itable->add_sinfo( T_('Clock runs on weekends#trules'), yesno($trule->WeekendClock) );
+   $itable->add_sinfo( T_('Rated#trules'), yesno($trule->Rated) );
 
    if( $trule->Notes != '')
       echo make_html_safe( $trule->Notes, true ), "<br><br>\n";
