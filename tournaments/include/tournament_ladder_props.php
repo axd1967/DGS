@@ -309,7 +309,7 @@ class TournamentLadderProps
       // general conditions
       $arr_props[] = T_('You may only have one running game per opponent.');
       $arr_props[] = T_("On user removal or retreat from the ladder, the running tournament games\n"
-         . "will be continued as normal games without effecting the tournament.");
+         . "will be continued as normal games without further effect to the tournament.");
 
       // game-end handling
       $arr = array( T_('On game-end the following action is performed') );
