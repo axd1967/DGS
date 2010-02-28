@@ -23,7 +23,12 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Director can be allowed special admin-rights
          * End tournament-game prematurely
          * Add time to players of tournament-game
-      * Tournament Flags Editor to edit locks on tournament
+      * Tournament Locks Editor to edit tournament-locks:
+         * Admin-Lock = maintenance-mode for tournament-admins
+         * Register-Lock = prohibits user tournament-registration
+         * TDWork-Lock = maintenance-mode for tournament-directors
+         * Cron-Lock = exclusive lock for cron-based modifications on tournaments
+         * Close-Lock = preparation for transition to finish tournament
       * Tournament Status Editor to change tournament status with preconditional checks
       * Tournament Properties editor for registration restrictions on tournament and players
       * Tournament Rules editor for tournament-games-setting
