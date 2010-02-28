@@ -81,7 +81,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       error('bad_tournament', "Tournament.ladder_admin.miss_properties($tid,$my_id)");
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_edit_tournament_status() );
+   $allow_admin = TournamentLadder::allow_edit_ladder($tourney, $errors); // check-locks
    $authorise_seed = ( $tourney->Status == TOURNEY_STATUS_PAIR );
+
 
    // init
    $user = null;
@@ -115,7 +117,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    // ---------- Process actions ------------------------------------------------
 
-   if( count($errors) == 0 )
+   if( $allow_admin && count($errors) == 0 )
    {
       if( $is_delete && $authorise_seed && @$_REQUEST['confirm'] ) // confirm delete ladder
       {
@@ -283,6 +285,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
 function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $extra='' )
 {
+   global $allow_admin;
+
    $form->add_row( array(
          'CELL', 2, '',
          'TEXT', $title.':', ));
@@ -292,6 +296,6 @@ function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $extra=''
             'TEXT', $extra, ));
    $form->add_row( array(
          'CELL', 2, '',
-         'SUBMITBUTTON', $action, sprintf( $act_fmt, $user->Handle ), ));
+         'SUBMITBUTTONX', $action, sprintf( $act_fmt, $user->Handle ), ($allow_admin ? '' : 'disabled=1') ));
 }//add_form_edit_user
 ?>
