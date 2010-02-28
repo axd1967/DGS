@@ -45,10 +45,6 @@ define('TPROP_RUMODE_CURR_FIX',     'CURR_FIX');
 define('TPROP_RUMODE_COPY_FIX',     'COPY_FIX');
 define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
 
-define('TPROP_CHKTYPE_TD', 1);
-define('TPROP_CHKTYPE_USER_NEW', 2);
-define('TPROP_CHKTYPE_USER_EDIT', 3);
-
 // lazy-init in TournamentProperties::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();
@@ -197,12 +193,12 @@ class TournamentProperties
     * \param $tourney Tournament with set TP_Counts (loaded if not set)
     * \param $tp_has_rating true if customized-rating set for tourney
     * \param $check_user User-object or user-id
-    * \param $check_type TPROP_CHKTYPE_TD|USER_NEW|USER_EDIT
+    * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
     */
    function checkUserRegistration( $tourney, $tp_has_rating, $check_user, $check_type )
    {
       $errors = array();
-      if( $check_type == TPROP_CHKTYPE_USER_NEW )
+      if( $check_type == TCHKTYPE_USER_NEW )
          $warnings =& $errors;
       else
          $warnings = array();
@@ -269,7 +265,7 @@ class TournamentProperties
                $this->UserMinGamesRated, $user->GamesRated );
       }
 
-      return ($check_type == TPROP_CHKTYPE_USER_NEW)
+      return ($check_type == TCHKTYPE_USER_NEW)
          ? array( $errors, array() )
          : array( $errors, $warnings );
    } //checkUserRegistration
