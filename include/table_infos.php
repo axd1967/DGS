@@ -26,6 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * \brief Functions for creating info tables.
  */
 
+define('TABLEOPT_LABEL_COLON', 0x0001); // append colon ':' to label
+
+
 /*!
  * \class Table_info
  *
@@ -69,15 +72,18 @@ class Table_info
    /*! \brief Number of columns (dependent on info/sinfo). */
    var $Columns;
 
+   var $Options;
+
 
    /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table_info( $_tableid)
+   function Table_info( $_tableid, $opts=0 )
    {
       $this->Tablerows = array();
       $this->Id = $_tableid;
       $this->Columns = 2; // default column-width
+      $this->Options = $opts;
    }
 
    /*! \brief Add a row to be displayed.
@@ -122,7 +128,7 @@ class Table_info
    function add_info( $name='', $info='', $iattb='', $nattb='' )
    {
       $this->Tablerows[]= array(
-            'name' => $name,
+            'name' => $this->_append_colon($name),
             'info' => $info,
             'iattb' => $iattb,
             'nattb' => $nattb,
@@ -137,12 +143,21 @@ class Table_info
    function add_sinfo( $sname='', $sinfo='', $iattb='', $nattb='' )
    {
       $this->Tablerows[]= array(
-            'sname' => $sname,
+            'sname' => $this->_append_colon($sname),
             'sinfo' => $sinfo,
             'iattb' => $iattb,
             'nattb' => $nattb,
          );
       $this->check_cols( $sinfo );
+   }
+
+   /*!
+    * \brief Appends colon ':' to label if flag TABLEOPT_LABEL_COLON is set.
+    * \internal
+    */
+   function _append_colon( $label )
+   {
+      return ( ($this->Options & TABLEOPT_LABEL_COLON) && substr($label,-1) != ':' ) ? $label . ':' : $label;
    }
 
    /*! \brief Checks if passed arg is array, and adjust column-count accordingly if needed. */
