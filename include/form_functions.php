@@ -53,6 +53,7 @@ require_once( 'include/std_functions.php' );
   * <li> Radiobuttons
   * <li> RadiobuttonsX
   * <li> Checkbox
+  * <li> Checkboxx
   * <li> Submitbutton
   * <li> SubmitbuttonX
   * <li> File           --- File-Upload
@@ -325,6 +326,12 @@ class Form
                                   'SpanAllColumns' => false,
                                   'Attbs'   => array('class'=>'FormRadiobuttons') ),
          'CHECKBOX'     => array( 'NumArgs' => 4,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Attbs'   => array('class'=>'FormCheckbox') ),
+         'CHECKBOXX'    => array( 'NumArgs' => 5,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
@@ -1080,6 +1087,15 @@ class Form
    }
 
    /*!
+    * \brief Function for making checkbox string extended with attributes in the standard form
+    * \internal
+    */
+   function create_string_func_checkboxx( &$result, $args )
+   {
+      $result .= $this->print_insert_checkbox( $args[0], $args[1], $args[2], $args[3], $args[4] );
+   }
+
+   /*!
     * \brief Function for making submitbutton string in the standard form
     * \internal
     */
@@ -1431,14 +1447,17 @@ class Form
     * \param $value       The value of the variable if checked.
     * \param $description A description of the checkbox.
     * \param $selected    True if checked at beginning.
+    * \param $attbs       optional attributes.
     */
-   function print_insert_checkbox( $name, $value, $description, $selected )
+   function print_insert_checkbox( $name, $value, $description, $selected, $attbs='' )
    {
       $result = "<INPUT type=\"checkbox\" name=\"$name\" value=\"$value\"";
       if($selected)
          $result .= " checked";
 
-      $result .= $this->get_input_attbs() . ">$description";
+      $result .= $this->get_input_attbs();
+      $result .= Form::parse_input_standard_attributes($attbs);
+      $result .= ">$description";
 
       return $result;
    }
