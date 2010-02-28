@@ -66,20 +66,39 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $tg_iterator = new ListIterator( 'Tournament.cron.load_tgames.score', null, $tg_order );
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, TG_STATUS_SCORE );
 
+   $lock_tourney = null;
    while( list(,$arr_item) = $tg_iterator->getListIterator() )
    {
       list( $tgame, $orow ) = $arr_item;
       $tid = $tgame->tid;
 
-      $tourney = $thelper->tcache->load_tournament( 'Tournament.cron.game_end', $tid);
-      if( !is_null($tourney) )
+      $tourney = $thelper->tcache->load_tournament( 'Tournament.cron.game_end', $tid );
+      if( !is_null($tourney) && $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/true ) )
       {
-         if( $tourney->Type == TOURNEY_TYPE_LADDER )
-            $thelper->process_tournament_ladder_game_end( $tourney, $tgame );
-         elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-            error('invalid_method', "Tournament.cron.game_end.ttype($tid,$tourney->Type)");
+         // release (previous) lock when handling new tourney-ID
+         if( !is_null($lock_tourney) && ($tourney->ID != $lock_tourney->ID) )
+         {
+            $lock_tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 0 );
+            $lock_tourney = null;
+         }
+
+         // check locks
+         if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK) )
+            continue;
+
+         // lock for tourney-changes
+         if( is_null($lock_tourney) )
+         {
+            $tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 1 );
+            $lock_tourney = $tourney;
+         }
+
+         $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/false );
       }
    }
+   if( !is_null($lock_tourney) )
+      $lock_tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 0 );
+
 
    // ---------- finish waiting, due tournament-games
 
