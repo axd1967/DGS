@@ -51,8 +51,27 @@ class TournamentHelper
       $this->tcache = new TournamentCache();
    }
 
-   function process_tournament_ladder_game_end( $tourney, $tgame )
+   function process_tournament_game_end( $tourney, $tgame, $check_only )
    {
+      $tid = $tourney->ID;
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         return $this->process_tournament_ladder_game_end( $tourney, $tgame, $check_only );
+      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         error('invalid_method', "TournamentHelper.process_tournament_game_end($tid,{$tourney->Type},{$tgame->ID})");
+      else
+         error('invalid_args', "TournamentHelper.process_tournament_game_end($tid,{$tourney->Type},{$tgame->ID})");
+   }
+
+
+
+   function process_tournament_ladder_game_end( $tourney, $tgame, $check_only )
+   {
+      // check if processing needed
+      if( $tourney->Status != TOURNEY_STATUS_PLAY ) // process only PLAY-status
+         return false;
+      if( $check_only )
+         return true;
+
       $tid = $tourney->ID;
       $tl_props = $this->tcache->load_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid);
       if( is_null($tl_props) )
