@@ -65,7 +65,6 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
    if( !$tourney->allow_edit_directors($my_id, false) )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit($tid,$my_id)");
-   $allow_edit_flags = ( TournamentUtils::isAdmin() || ($tourney->Owner_ID == $my_id) );
 
    if( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
       TournamentDirector::assert_min_directors( $tid, $tourney->Status );
@@ -79,31 +78,34 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $has_user = ( $uid || $user != '' ); // has in vars, can still be unknown
 
    // new+del needs special rights
-   $allow_new_del_TD = $tourney->allow_edit_directors($my_id, true);
-   if( !$has_user && !$allow_new_del_TD )
+   $owner_allow_edit = $tourney->allow_edit_directors($my_id, true);
+   if( !$has_user && !$owner_allow_edit )
       error('tournament_director_new_del_not_allowed', "Tournament.edit_director.new_del($tid,$my_id)");
 
    // identify user from $uid and $user: other-player (=user to add/edit)
-   $other_row = TournamentDirector::load_user_row( $uid, $user );
+   $tduser_row = TournamentDirector::load_user_row( $uid, $user );
 
    $errors = $tstatus->check_edit_status( TournamentDirector::get_edit_tournament_status() );
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
-   if( $other_row ) // valid user
+   $tduser_errors = array();
+   if( $tduser_row ) // valid user
    {
-      $uid = $other_row['ID'];
-      $user = $other_row['Handle'];
+      $uid = $tduser_row['ID'];
+      $user = $tduser_row['Handle'];
    }
    elseif( $has_user )
-      $errors[] = T_('Unknown user');
+      $tduser_errors[] = T_('Unknown user');
 
 
    $director = null;
-   if( count($errors) == 0 && $uid )
+   if( count($tduser_errors) == 0 && $uid )
       $director = TournamentDirector::load_tournament_director( $tid, $uid ); // existing TD ?
    if( is_null($director) )
       $director = new TournamentDirector( $tid, $uid ); // new TD
 
-   if( $uid && @$_REQUEST['td_delete'] && @$_REQUEST['confirm'] ) // delete TD
+   if( $uid && $owner_allow_edit && @$_REQUEST['td_delete'] && @$_REQUEST['confirm'] && count($errors) == 0 ) // delete TD
    {
       $director->delete();
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
@@ -117,10 +119,11 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    );
 
    // check + parse edit-form
-   list( $vars, $edits, $errorlist ) = parse_edit_form( $director );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $director );
+   $errors = array_merge( $errors, $input_errors );
 
    // persist TD in database
-   if( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errorlist) == 0 )
+   if( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 )
    {
       $director->persist();
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
@@ -141,11 +144,11 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $tdform = new Form( 'tournamentdirector', $page, FORM_POST );
    $tdform->add_hidden( 'tid', $tid );
 
-   if( count($errorlist) )
+   if( count($errors) )
    {
-      $tform->add_row( array(
+      $tdform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errorlist) ));
+            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
    }
 
    if( $uid <= 0 ) // ask for user to add/edit
@@ -154,8 +157,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
             'DESCRIPTION',  T_('Userid'),
             'TEXTINPUT',    'user', 16, 16, textarea_safe($user),
             'SUBMITBUTTON', 'td_check', T_('Check user') ));
-      if( count($errors) )
-         $tdform->add_row( array( 'TAB', 'TEXT', TournamentUtils::buildErrorListString( '', $errors ) ));
+      if( count($tduser_errors) )
+         $tdform->add_row( array( 'TAB', 'TEXT', TournamentUtils::buildErrorListString( '', $tduser_errors ) ));
    }
    else // edit user (no change of user-id allowed)
    {
@@ -164,20 +167,20 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
             'TEXT',        $user ));
       $tdform->add_row( array(
             'DESCRIPTION', T_('Name'),
-            'TEXT',        user_reference( REF_LINK, 1, '', $other_row ) ));
+            'TEXT',        user_reference( REF_LINK, 1, '', $tduser_row ) ));
       $tdform->add_row( array(
             'DESCRIPTION', T_('Rating'),
-            'TEXT',        echo_rating( @$other_row['Rating2'], true, $uid ) ));
-      $lastaccess = @$other_row['X_Lastaccess'];
+            'TEXT',        echo_rating( @$tduser_row['Rating2'], true, $uid ) ));
+      $lastaccess = @$tduser_row['X_Lastaccess'];
       $tdform->add_row( array(
             'DESCRIPTION', T_('Last access'),
             'TEXT',        ( ($lastaccess > 0) ? date(DATE_FMT2, $lastaccess) : '' ) ));
 
-      if( $other_row )
+      if( $tduser_row )
       {
          if( !@$_REQUEST['td_delete'] )
          {
-            if( $allow_edit_flags )
+            if( $owner_allow_edit )
             {
                $first = true;
                foreach( $arr_flags as $flag => $name )
@@ -249,7 +252,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
-   if( $allow_new_del_TD )
+   if( $owner_allow_edit )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
    if( $tourney->allow_edit_tournaments($my_id) )
@@ -263,7 +266,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tdir )
 {
-   global $arr_flags, $allow_edit_flags;
+   global $arr_flags, $owner_allow_edit;
 
    $edits = array();
    $errors = array();
@@ -289,7 +292,7 @@ function parse_edit_form( &$tdir )
    // parse URL-vars
    if( $is_posted )
    {
-      if( $allow_edit_flags )
+      if( $owner_allow_edit )
       {
          $new_value = 0;
          foreach( $arr_flags as $flag => $name )
