@@ -799,14 +799,20 @@ class TournamentLadder
       $errors = array();
 
       // check admin-lock
-      if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $is_admin = TournamentUtils::isAdmin();
+      $is_admin_lock = $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN);
+      if( !$is_admin && $is_admin_lock )
          $errors[] = $tourney->buildAdminLockText();
 
       // check other locks
-      if( !$tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
-         $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_TDWORK);
-      if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CRON) )
-         $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CRON);
+      // NOTE: being T-Admin + Admin-lock overwrites other locks
+      if( !( $is_admin && $is_admin_lock ) )
+      {
+         if( !$tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
+            $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_TDWORK);
+         if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CRON) )
+            $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CRON);
+      }
 
       $return_errors = array_merge( $return_errors, $errors );
       return ( count($errors) == 0 );
