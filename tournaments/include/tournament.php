@@ -148,16 +148,35 @@ class Tournament
       return ($this->Flags & $flag);
    }
 
-   function formatFlags( $zero_val='' )
+   function formatFlags( $zero_val='', $intersect_flags=0 )
    {
+      $check_flags = $this->Flags;
+      if( $intersect_flags > 0 )
+         $check_flags &= $intersect_flags;
+
       $arr = array();
       $arr_flags = Tournament::getFlagsText();
       foreach( $arr_flags as $flag => $flagtext )
       {
-         if( $this->Flags & $flag )
-            $arr[] = ($flag == TOURNEY_FLAG_LOCK_ADMIN) ? span('TLockInfo', $flagtext) : $flagtext;
+         if( $check_flags & $flag )
+            $arr[] = ( $flag == TOURNEY_FLAG_LOCK_ADMIN ) ? span('TLockWarn', $flagtext) : $flagtext;
       }
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
+   }
+
+   function buildMaintenanceLockText( $intersect_flags=0, $suffix='.' )
+   {
+      $check_flags = ($intersect_flags > 0)
+         ? $intersect_flags
+         : TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK;
+      $str = sprintf( Tournament::getFlagsText(TOURNEY_FLAG_LOCK_ADMIN, 'LOCK') . $suffix,
+                      $this->formatFlags('', $check_flags) );
+      return span('TLockWarn', $str);
+   }
+
+   function buildAdminLockText()
+   {
+      return $this->buildMaintenanceLockText( TOURNEY_FLAG_LOCK_ADMIN, ': ' . T_('Edit prohibited.') );
    }
 
    // current-round / rounds|*
@@ -259,7 +278,7 @@ class Tournament
          $data->set_value( 'ID', $this->ID );
          $data->set_value( 'Flags', $this->Flags );
          $query = $data->build_sql_update( 1, false, false );
-         return db_query( "Tournament.update_flags({$this->tid},$flag,$set_flag)", $query );
+         return db_query( "Tournament.update_flags({$this->ID},$flag,$set_flag)", $query );
       }
       else
          return false;
@@ -365,6 +384,49 @@ class Tournament
       // "normal" user
       return T_('You are a director of this tournament.');
    }
+
+   /*!
+    * \brief Checks tournament-locks and returns non-null
+    *        list of errors and warnings, that disallow registration.
+    * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
+    */
+   function checkRegistrationLocks( $check_type, $with_admin_check=true )
+   {
+      $regerr = T_('Registration/Edit prohibited at the moment');
+      $errors = array();
+      if( $check_type != TCHKTYPE_TD )
+         $warnings =& $errors;
+      else
+         $warnings = array();
+
+      // check admin-lock
+      if( $with_admin_check && $this->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      {
+         $errmsg = $this->buildAdminLockText();
+         if( ($check_type == TCHKTYPE_TD) && TournamentUtils::isAdmin() )
+            $warnings[] = $errmsg;
+         else
+            $errors[] = $errmsg;
+      }
+
+      // check other locks
+      $chk_flags = TOURNEY_FLAG_LOCK_REGISTER | TOURNEY_FLAG_LOCK_TDWORK;
+      if( $this->isFlagSet($chk_flags) )
+      {
+         $errmsg = span('TLockWarn', sprintf( '%s (%s).', $regerr, $this->formatFlags('', $chk_flags) ));
+         if( $check_type == TCHKTYPE_TD )
+            $warnings[] = $errmsg;
+         else
+            $errors[] = $errmsg;
+      }
+      if( $this->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+         $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
+
+      return ($check_type == TCHKTYPE_USER_NEW)
+         ? array( $errors, array() )
+         : array( $errors, $warnings );
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -542,7 +604,7 @@ class Tournament
    }
 
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
-   function getFlagsText( $flag=null )
+   function getFlagsText( $flag=null, $short=true )
    {
       global $ARR_GLOBALS_TOURNAMENT;
 
@@ -551,18 +613,44 @@ class Tournament
       if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
       {
          $arr = array();
-         $arr[TOURNEY_FLAG_LOCK_ADMIN] = T_('Admin-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Admin-Lock#T_flag');
          $arr[TOURNEY_FLAG_LOCK_REGISTER] = T_('Register-Lock#T_flag');
-         $arr[TOURNEY_FLAG_LOCK_LADDER] = T_('Ladder-Lock#T_flag');
-         $arr[TOURNEY_FLAG_LOCK_CRON] = T_('Cron-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Director-Work-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Cron-Lock#T_flag');
+         $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('Close-Lock#T_flag');
          $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+
+         $arr = array();
+         $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Prohibits all writing operations on tournament for non-admins.');
+         $arr[TOURNEY_FLAG_LOCK_REGISTER] = T_('Prohibits users to join tournament (by application, registration, ACK-invite).');
+         $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Provides exclusive write-access to tournament directors on certain tournament-data.');
+         $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Provides exclusive write-access to tounament-cron on certain tournament-data.');
+         $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('Prohibits users to join tournament or start challenges (preparation to finish tournament).');
+         $ARR_GLOBALS_TOURNAMENT[$key.'_LONG'] = $arr;
+
+         $arr = array();
+         $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Tournament is in Maintenance-mode (%s)#T_lock');
+         $arr[TOURNEY_FLAG_LOCK_REGISTER] = T_('%s is set prohibiting users to register or join tournament.#T_lock');
+         $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Edit of ladder needs %s.#T_lock');
+         $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Edit of ladder is prohibited by set %s. Please wait a moment.#T_lock');
+         $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('%s is set prohibiting users to join tournament or start challenges.#T_lock');
+         $ARR_GLOBALS_TOURNAMENT[$key.'_LOCK'] = $arr;
       }
 
+      if( $short === false )
+         $key .= '_LONG';
+      elseif( $short !== true )
+         $key .= '_' . $short;
       if( is_null($flag) )
          return $ARR_GLOBALS_TOURNAMENT[$key];
       if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$flag]) )
-         error('invalid_args', "Tournament::getFlagsText($flag)");
+         error('invalid_args', "Tournament::getFlagsText($flag,$short)");
       return $ARR_GLOBALS_TOURNAMENT[$key][$flag];
+   }
+
+   function getLockText( $flag )
+   {
+      return span('TLockWarn', sprintf( Tournament::getFlagsText($flag, 'LOCK'), Tournament::getFlagsText($flag)) );
    }
 
    /*! \brief Returns true if given user can create a new tournament. */
