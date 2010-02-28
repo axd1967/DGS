@@ -791,6 +791,33 @@ class TournamentLadder
       return $success;
    }//_process_game_end
 
+   /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
+   function allow_edit_ladder( $tourney, &$errors )
+   {
+      $allow_edit = false;
+
+      // check admin-lock
+      if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+         $errors[] = $tourney->buildAdminLockText();
+      else
+         $allow_edit = true;
+
+      // check other locks
+      $check_ok = 0;
+      if( !$tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
+         $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_TDWORK);
+      else
+         $check_ok++;
+      if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CRON) )
+         $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CRON);
+      else
+         $check_ok++;
+      if( $check_ok == 2 )
+         $allow_edit = true;
+
+      return $allow_edit;
+   }
+
    function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
