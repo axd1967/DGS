@@ -24,6 +24,35 @@ ChangeLog
 
 2010-02-28 juga
 
+   * tournaments/ladder/admin.php, tournaments/ladder/view.php:
+   - show tournament-flags for T-Admin
+   - show warning for TD on set TDWork-Lock
+
+   * tournaments/include/tournament.php (Tournament.formatFlags, ~.getFlagsText),
+     tournaments/include/tournament_utils.php (TournamentUtils.show_tournament_flags),
+     tournaments/ladder/edit_props.php, tournaments/edit_director.php,
+     tournaments/edit_properties.php, tournaments/edit_round.php,
+     tournaments/edit_rules.php, tournaments/edit_status.php,
+     tournaments/game_admin.php, tournaments/list_tournaments.php:
+   - show tournament-flags for T-Admin
+
+   * tournaments/edit_tournament.php, tournaments/manage_tournament.php:
+   - unified tournament-flags text
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.allow_edit_ladder):
+   - Admin-Lock overwrites other tournament-locks for T-Admin to allow editing ladder
+
+   * tournaments/include/tournament.php (Tournament.allow_edit_directors),
+     tournaments/edit_director.php, tournaments/list_directors.php,
+     tournaments/manage_tournament.php:
+   - fix bug: TD can only edit own comment,
+     adding TD and editing ALL TDs restricted to Owner/T-Admin
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder, ~.allow_edit_ladder),
+     tournaments/include/tournament_template.php (TournamentTemplate.joinTournament):
+   - fix bug: check if tournament-participant already joined tournament on edit-TP
+   - fix bug: prohibit edit if TDWork-lock unset
+
    * tournaments/edit_participant.php, tournaments/register.php:
    - check Admin/TDWork/Close-Lock prohibiting registering/editing
    - for TD: show Register-Lock and Close-Lock as warning
