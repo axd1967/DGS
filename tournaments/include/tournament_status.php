@@ -83,6 +83,12 @@ class TournamentStatus
       return (bool)count($this->errors);
    }
 
+   function add_error( $str )
+   {
+      if( $str )
+         $this->errors[] = $str;
+   }
+
    function _load_tprops()
    {
       if( is_null($this->tprops) )
@@ -161,7 +167,7 @@ class TournamentStatus
       {
          list( $tp, $orow ) = $arr_item;
          list( $reg_errors, $reg_warnings ) =
-            $this->tprops->checkUserRegistration($this->tourney, $tp->hasRating(), $tp->User, TPROP_CHKTYPE_TD);
+            $this->tprops->checkUserRegistration($this->tourney, $tp->hasRating(), $tp->User, TCHKTYPE_TD);
          foreach( $reg_errors as $err )
          {
             $err_link = anchor( $base_path."tournaments/edit_participant.php?tid={$this->tid}".URI_AMP."uid={$tp->uid}", $tp->User->Handle );
