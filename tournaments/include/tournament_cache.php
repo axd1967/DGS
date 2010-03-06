@@ -57,6 +57,9 @@ class TournamentCache
    /*! \brief array( clock_id => ticks ) */
    var $cache_clock_ticks;
 
+   /*! \brief locked Tournament-object (mostly used for cron-locking). */
+   var $lock_tourney;
+
 
    function TournamentCache()
    {
@@ -64,6 +67,7 @@ class TournamentCache
       $this->cache_tdirector = array();
       $this->cache_tl_props = array();
       $this->cache_clock_ticks = array();
+      $this->lock_tourney = null;
    }
 
    function load_tournament( $dbgmsg, $tid )
@@ -135,6 +139,45 @@ class TournamentCache
       }
       $ticks = (int)@$this->cache_clock_ticks[$clock_id];
       return $ticks;
+   }
+
+   function is_tournament_locked()
+   {
+      return !is_null($this->lock_tourney);
+   }
+
+   /*! \brief Releases (previously) cron-locked tournament. */
+   function release_tournament_cron_lock( $tid=0 )
+   {
+      // release (previous) lock when handling NEW tourney-ID
+      if( $this->is_tournament_locked() && ($tid != $this->lock_tourney->ID) )
+      {
+         $this->lock_tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 0 );
+         $this->lock_tourney = null;
+      }
+   }
+
+   /*!
+    * \brief Sets cron-lock for given tournament if not admin/tdwork-locked.
+    * \param $tid tournament-ID
+    * \param true if lock was successful; false otherwise
+    */
+   function set_tournament_cron_lock( $tid )
+   {
+      // load (cached) Tournament
+      $tourney = $this->load_tournament( 'TournamentCache.set_tournament_cron_lock.find', $tid );
+
+      if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK) )
+         return false;
+
+      // lock for tourney-changes
+      if( !$this->is_tournament_locked() )
+      {
+         $tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 1 );
+         $this->lock_tourney = $tourney;
+      }
+
+      return true;
    }
 
 } // end of 'TournamentCache'
