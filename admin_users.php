@@ -61,6 +61,7 @@ require_once( "include/form_functions.php" );
       'VaultTime'       => 'time*',
       'VacationDays'    => 'int*',
       'OnVacation'      => 'int*',
+      'UseVacation'     => 'int*',
       'AdminOptions'    => 'mask',
       'MayPostOnForum'  => array( 'Y' => 'Y = can post',
                                   'N' => 'N = can NOT post',
@@ -316,6 +317,9 @@ function update_user( $uid, $user, $fv )
 
    if( !preg_match( "/^(\d+|\d+\.\d+)$/", $fv['OnVacation'] ) || (double)$fv['OnVacation'] >= 31.0 )
       return 'Bad syntax for OnVacation-field (must be positive real number below 31 days)';
+
+   if( !preg_match( "/^(\d+)$/", $fv['UseVacation'] ) || (int)$fv['UseVacation'] >= 31 )
+      return 'Bad syntax for UseVacation-field (must be positive real number below 31 days)';
 
    if( !preg_match( "/^[YNM]$/", $fv['MayPostOnForum'] ) )
       return 'Bad value for MayPostOnForum-field (must be one of [Y,N,M])';
