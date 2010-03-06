@@ -63,9 +63,10 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRangeRating',
                   'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
-                  'MaxChallenges',
+                  'MaxChallenges', 'UserAbsenceDays',
       FTYPE_DATE, 'Lastchanged',
-      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
+      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss',
+                  'UserAbsenceAction'
    );
 
 class TournamentLadderProps
@@ -87,6 +88,8 @@ class TournamentLadderProps
    var $GameEndJigo;
    var $GameEndTimeoutWin;
    var $GameEndTimeoutLoss;
+   var $UserAbsenceDays;
+   var $UserAbsenceAction;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
@@ -95,7 +98,8 @@ class TournamentLadderProps
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
          $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
-         $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST )
+         $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
+         $user_absence_days=0, $user_absence_action=TLP_USERABS_DEL )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -114,6 +118,8 @@ class TournamentLadderProps
       $this->setGameEndJigo($game_end_jigo);
       $this->setGameEndTimeoutWin($game_end_timeout_win);
       $this->setGameEndTimeoutLoss($game_end_timeout_loss);
+      $this->UserAbsenceDays = (int)$user_absence_days;
+      $this->setUserAbsenceAction($user_absence_action);
    }
 
    function to_string()
@@ -147,6 +153,13 @@ class TournamentLadderProps
       if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_LOSS.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndTimeoutLoss($game_end)");
       $this->GameEndTimeoutLoss = $game_end;
+   }
+
+   function setUserAbsenceAction( $action )
+   {
+      if( !preg_match( "/^(".CHECK_TLP_USERABS.")$/", $action ) )
+         error('invalid_args', "TournamentLadderProps.setUserAbsenceAction($action)");
+      $this->UserAbsenceAction = $action;
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */
@@ -202,6 +215,8 @@ class TournamentLadderProps
       $data->set_value( 'GameEndJigo', $this->GameEndJigo );
       $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
       $data->set_value( 'GameEndTimeoutLoss', $this->GameEndTimeoutLoss );
+      $data->set_value( 'UserAbsenceDays', $this->UserAbsenceDays );
+      $data->set_value( 'UserAbsenceAction', $this->UserAbsenceAction );
       return $data;
    }
 
@@ -244,6 +259,9 @@ class TournamentLadderProps
 
       if( $this->MaxChallenges < 0 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
          $errors[] = sprintf( T_('Max. outgoing challenges must be in range [0..%s].'), TLADDER_MAX_CHALLENGES );
+
+      if( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
+         $errors[] = sprintf( T_('User absence must be in range [0..%s] days.'), 255 );
 
       return $errors;
    }//check_properties
@@ -321,6 +339,12 @@ class TournamentLadderProps
                         TournamentLadderProps::getGameEndText($this->GameEndTimeoutLoss) );
       $arr[] = sprintf( '%s: %s', T_('on Jigo'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
       $arr_props[] = $arr;
+
+      // user absence handling
+      if( $this->UserAbsenceDays > 0 )
+         $arr_props[] = sprintf( T_("If player haven't accessed DGS within the last %d days (excluding vacation)\n"
+            . 'the following action is performed'), $this->UserAbsenceDays ) . ': ' .
+            TournamentLadderProps::getUserAbsenceText($this->UserAbsenceAction);
 
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }//build_notes_props
@@ -587,7 +611,9 @@ class TournamentLadderProps
             @$row['GameEndNormal'],
             @$row['GameEndJigo'],
             @$row['GameEndTimeoutWin'],
-            @$row['GameEndTimeoutLoss']
+            @$row['GameEndTimeoutLoss'],
+            @$row['UserAbsenceDays'],
+            @$row['UserAbsenceAction']
          );
       return $tlp;
    }
@@ -664,7 +690,29 @@ class TournamentLadderProps
       if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end]) )
          error('invalid_args', "TournamentLadderProps.getGameEndText($game_end)");
       return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end];
-   }
+   }//getGameEndText
+
+   /*! \brief Returns user-absence-text, or all texts for given action TLP_USERABS_.. (if action=null). */
+   function getUserAbsenceText( $action=null )
+   {
+      global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS;
+
+      // lazy-init of texts
+      $key = 'USERABS';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]) )
+      {
+         $arr = array();
+         $arr[TLP_USERABS_DEL]  = T_('Remove user from ladder#T_userabs');
+         $arr[TLP_USERABS_LAST] = T_('Move user to ladder-bottom#T_userabs');
+         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key] = $arr;
+      }
+
+      if( is_null($action) )
+         return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$action]) )
+         error('invalid_args', "TournamentLadderProps.getUserAbsenceText($action)");
+      return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$action];
+   }//getGameEndText
 
    function echo_rematch_wait( $hours, $short=false )
    {

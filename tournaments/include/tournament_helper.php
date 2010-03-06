@@ -62,8 +62,6 @@ class TournamentHelper
          error('invalid_args', "TournamentHelper.process_tournament_game_end($tid,{$tourney->Type},{$tgame->ID})");
    }
 
-
-
    function process_tournament_ladder_game_end( $tourney, $tgame, $check_only )
    {
       // check if processing needed
@@ -107,7 +105,7 @@ class TournamentHelper
       ta_end();
 
       return $success;
-   }
+   }//process_tournament_ladder_game_end
 
 
    // ------------ static functions ----------------------------
@@ -146,6 +144,32 @@ class TournamentHelper
       }
 
       return $rating;
+   }
+
+   function load_ladder_absent_users( $iterator=null )
+   {
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'TL.tid', 'TL.rid', 'TL.uid',
+            'TLP.UserAbsenceDays AS TLP_UserAbsenceDays',
+            'TLP.UserAbsenceAction AS TLP_UserAbsenceAction',
+         SQLP_FROM,
+            'Tournament AS T',
+            'INNER JOIN TournamentLadderProps AS TLP ON TLP.tid=T.ID',
+            'INNER JOIN TournamentLadder AS TL ON TL.tid=T.ID',
+            'INNER JOIN Players AS P ON P.ID=TL.uid',
+         SQLP_WHERE,
+            'TLP.UserAbsenceDays > 0',
+            "T.Status='".TOURNEY_STATUS_PLAY."'",
+            'P.Lastaccess < NOW() - INTERVAL (TLP.UserAbsenceDays + IF(P.OnVacation>0,P.UseVacation,0)) DAY',
+         SQLP_ORDER,
+            'TL.tid ASC'
+         );
+
+      if( is_null($iterator) )
+         $iterator = new ListIterator( 'TournamentHelper::load_ladder_absent_users' );
+      $iterator->addQuerySQLMerge( $qsql );
+      return TournamentLadder::load_tournament_ladder( $iterator );
    }
 
 } // end of 'TournamentHelper'

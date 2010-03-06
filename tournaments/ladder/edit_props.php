@@ -178,6 +178,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        sprintf( '(%s)', T_('Jigo')), ));
    $tform->add_empty_row();
 
+   // user-absence
+   $tform->add_row( array(
+         'DESCRIPTION', T_('User Absence handling'),
+         'SELECTBOX',   'uabs_act', 1, TournamentLadderProps::getUserAbsenceText(), $vars['uabs_act'], false,
+         'TEXT',        ' ' . T_('if user absent for [days]') . ': ',
+         'TEXTINPUT',   'uabs_days', 4, 4, $vars['uabs_days'], ));
+   $tform->add_empty_row();
+
    $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
@@ -234,6 +242,8 @@ function parse_edit_form( &$tlp )
       'gend_jigo'       => $tlp->GameEndJigo,
       'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
       'gend_timeout_l'  => $tlp->GameEndTimeoutLoss,
+      'uabs_days'       => $tlp->UserAbsenceDays,
+      'uabs_act'        => $tlp->UserAbsenceAction,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -319,10 +329,18 @@ function parse_edit_form( &$tlp )
          $errors[] = sprintf( T_('Expecting number for max. outgoing challenges in range [0..%s]'), TLADDER_MAX_CHALLENGES );
 
 
+      $new_value = $vars['uabs_days'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->UserAbsenceDays = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for user absence in range [0..%s] days'), 255 );
+
+
       $tlp->setGameEndNormal( $vars['gend_normal'] );
       $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
       $tlp->setGameEndTimeoutLoss( $vars['gend_timeout_l'] );
       $tlp->setGameEndJigo( $vars['gend_jigo'] );
+      $tlp->setUserAbsenceAction( $vars['uabs_act'] );
 
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
@@ -339,6 +357,8 @@ function parse_edit_form( &$tlp )
       if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('GameEnd#edits');
+      if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('UserAbsence#edits');
+      if( $old_vals['uabs_act'] != $tlp->UserAbsenceAction ) $edits[] = T_('UserAbsence#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

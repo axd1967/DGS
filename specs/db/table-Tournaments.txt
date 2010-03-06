@@ -484,6 +484,8 @@ Description:
  GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | CH_BELOW
  GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | DF_BELOW
  GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')                                           | CH_LAST
+ UserAbsenceDays        | tinyint(3) unsigned  | 0
+ UserAbsenceAction      | enum('LAST','DEL')   | DEL
 
 
 ## Fields:
@@ -549,6 +551,13 @@ Description:
 * GameEndTimeoutLoss : handling of game-end when challengers loses by timeout (=defender wins by timeout)
    - default = CH_LAST
    - Enum-values: see tournaments/include/tournament_globals.php
+
+* UserAbsenceDays : days of user being absent without taking actions
+   - 0 = unused
+   - days, not counting user on vacation
+* UserAbsenceAction : action to take on user not being online for $UserAbsenceDays days
+   - LAST = move user to ladder-bottom
+   - DEL  = remove user from ladder
 
 
 ###########################################################################

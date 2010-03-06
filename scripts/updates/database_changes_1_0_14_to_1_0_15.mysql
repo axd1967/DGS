@@ -1727,3 +1727,19 @@ ALTER TABLE Tournament
    ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER Status ;
 
 
+-- handling long-user-absence for tournaments
+ALTER TABLE TournamentLadderProps
+   ADD UserAbsenceDays tinyint unsigned NOT NULL DEFAULT '0',
+   ADD UserAbsenceAction enum('LAST','DEL') NOT NULL DEFAULT 'DEL' ;
+ALTER TABLE TournamentLadderProps
+   ADD INDEX UserAbsenceDays (UserAbsenceDays) ;
+
+ALTER TABLE Players
+   ADD UseVacation tinyint unsigned NOT NULL DEFAULT '0' AFTER OnVacation ;
+UPDATE Players
+   SET UseVacation=ROUND(OnVacation)+1 WHERE OnVacation > 0 AND UseVacation = 0 ;
+
+-- Clock for (daily) tournament-cron
+INSERT INTO Clock SET ID=206, Lastchanged=0 ;
+
+
