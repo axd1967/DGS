@@ -21,8 +21,11 @@ require_once( "include/config-local.php" );
 require_once( "include/error_functions.php" );
 //@set_time_limit(0); //does not work with safe_mode
 
+// following switches can be defined in config-local for test-systems
 if( !defined('DBG_QUERY') )
    define('DBG_QUERY', 0); //0=no-debug, 1=print-query, 2=print-retry-count
+if( !defined('DBG_TEST') )
+   define('DBG_TEST', 0); //0=no-debug, 1=allow-some-stuff-for-testing
 
 
 // fetch-types for mysql_single_fetch-function
