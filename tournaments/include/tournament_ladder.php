@@ -477,7 +477,8 @@ class TournamentLadder
          error('invalid_args', "TournamentLadder::move_up_ladder_part.check_tid($tid,$min_rank,$max_rank)");
 
       global $NOW;
-      $query = "UPDATE TournamentLadder SET Rank=Rank-1, BestRank=LEAST(BestRank,Rank-1) "
+      $query = "UPDATE TournamentLadder SET Rank=Rank-1, "
+            . "BestRank=LEAST(BestRank,Rank) " // NOTE: 'Rank' is the updated field-value, so actually Rank-1
             . ( $upd_rank ? ", RankChanged=FROM_UNIXTIME($NOW) " : '' )
             . "WHERE tid=$tid "
             . TournamentUtils::build_num_range_sql_clause('Rank', $min_rank, $max_rank, 'AND');
@@ -494,7 +495,8 @@ class TournamentLadder
          error('invalid_args', "TournamentLadder::move_down_ladder_part.check_tid($tid,$min_rank,$max_rank)");
 
       global $NOW;
-      $query = "UPDATE TournamentLadder SET Rank=Rank+1, BestRank=LEAST(BestRank,Rank+1) "
+      $query = "UPDATE TournamentLadder SET Rank=Rank+1, "
+            . "BestRank=LEAST(BestRank,Rank) " // NOTE: 'Rank' is the updated field-value, so actually Rank+1
             . ( $upd_rank ? ", RankChanged=FROM_UNIXTIME($NOW) " : '' )
             . "WHERE tid=$tid "
             . TournamentUtils::build_num_range_sql_clause('Rank', $min_rank, $max_rank, 'AND');
@@ -795,65 +797,26 @@ class TournamentLadder
    }//_process_game_end
 
    /*!
-    * \brief Processes long absence of user not being online with given action: TLP_USERABS_DEL|LAST.
+    * \brief Processes long absence of user not being online by removing user from ladder.
     * \note expecting to run into HOT-section
     */
-   function process_user_absence( $tid, $uid, $user_absence_action )
-   {
-      if( !preg_match( "/^(".CHECK_TLP_USERABS.")$/", $user_absence_action ) )
-         error('invalid_args', "TournamentLadder::process_user_absence($tid,$uid,$user_absence_action)");
-
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-      db_lock( "TournamentLadder::process_user_absence($tid,$uid,$user_absence_action)",
-         "$table WRITE, $table AS TL READ" );
-      {//LOCK TournamentLadder
-         $success = TournamentLadder::_process_user_absence( $tid, $uid, $user_absence_action );
-      }
-      db_unlock();
-
-      return $success;
-   }//process_user_absence
-
-   /*!
-    * \brief (INTERNAL) processing long-user-absence, called from process_user_absence()-func with already locked TL-table.
-    * \internal
-    */
-   function _process_user_absence( $tid, $uid, $user_absence_action )
+   function process_user_absence( $tid, $uid )
    {
       // reload TL because Rank could have been changed in the meantime !!
       $tladder = TournamentLadder::load_tournament_ladder_by_user( $tid, $uid );
       if( is_null($tladder) )
          return true;
 
-      switch( (string)$user_absence_action )
-      {
-         case TLP_USERABS_LAST:
-         {
-            $logmsg = "U.Rank={$tladder->Rank}";
-            $new_rank = TournamentLadder::load_max_rank( $tid ); // get last ladder-rank
-            if( $tladder->Rank < $new_rank ) // user to last ladder-pos
-            {
-               TournamentLadder::move_up_ladder_part( $tid, true, $tladder->Rank + 1, $new_rank );
-               $success = $tladder->update_rank( $new_rank );
-               $logmsg .= ">LAST$new_rank";
-            }
-            break;
-         }
-
-         case TLP_USERABS_DEL:
-         {
-            $success = $tladder->remove_user_from_ladder( true, true/*upd-rank*/ );
-            $logmsg = "U.Rank={$tladder->Rank}>DEL";
-            //TODO: also "handle" other running games
-            break;
-         }
-      }
+      // remove user from ladder
+      $success = $tladder->remove_user_from_ladder( true, true/*upd-rank*/ );
+      $logmsg = "U.Rank={$tladder->Rank}>DEL";
+      //TODO: also "handle" other running games
 
       if( DBG_QUERY )
-         error_log("TournamentLadder::_process_user_absence($tid,$uid,$user_absence_action): $logmsg");
+         error_log("TournamentLadder::process_user_absence($tid,$uid): $logmsg");
 
       return $success;
-   }//_process_user_absence
+   }//process_user_absence
 
    /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
    function allow_edit_ladder( $tourney, &$return_errors )
