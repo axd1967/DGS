@@ -129,6 +129,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
          $tladder_df->update_incoming_challenges( +1 );
          $tladder_ch->update_outgoing_challenges( +1 );
+         //TODO notify defender about started game !?
       }
       ta_end();
 
