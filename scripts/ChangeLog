@@ -22,6 +22,87 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-06 juga
+
+   * tournaments/ladder/edit_props.php:
+   - added edit-note stating to use '0'-value to disable features
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.move_down_ladder_part,
+       ~.move_up_ladder_part):
+   - bugfix fixing updated BestRank: fix UPDATE-query on TournamentLadder.BestRank
+     calculated from Rank already changed in UPDATE-SET-part before
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder.php (TournamentLadder.process_user_absence),
+     tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_absent_users),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/cron_tournaments.php:
+   - only remove-user-from-ladder action makes sense for handling long-user-absence,
+     because moving user to ladder-bottom for absent-users would be checked each day
+     in tournament-cron. So being more strict on user-absence and removed
+     TournamentLadderProps.UserAbsenceAction
+-----------
+-- reduce long-user-absence handling to one option, so remove field with action-choice
+ALTER TABLE TournamentLadderProps
+   DROP COLUMN UserAbsenceAction ;
+-----------
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.setUserAbsenceAction, ~.fillEntityData, ~.check_properties, ~.build_notes_props,
+       ~.new_from_row, ~.getUserAbsenceText),
+     tournaments/include/tournament_ladder.php (TournamentLadder.build_query_sql,
+       ~.load_tournament_ladder, ~.process_user_absence, ~._process_user_absence,
+     tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_absent_users),
+     tournaments/include/tournament_globals.php, include/globals.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-data.sql,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/cron_tournaments.php (run_once_daily),
+     tournaments/manage_tournament.php,
+     admin_users.php, edit_vacation.php, NEWS:
+   - added handling of long-user-absence
+     - check once a day if there are users not being online for UserAbsenceDays
+       without vacation and process UserAbsenceAction for them either
+       - TLP_USERABS_DEL:  removing user from ladder, or
+       - TLP_USERABS_LAST: moving absent user to last position in ladder
+     - added fields TournamentLadderProps.UserAbsenceDays + UserAbsenceAction,
+       adjusted ladder-props editor for new fields
+     - added clock for daily check in tournaments-cron processing long user-absence
+     - added Players.UseVacation with (starting) days of new vacation period
+       to check on user-absence for tournaments
+       - added administration of UseVacation-field
+       - adjust UseVacation when changing length of running vacation
+-----------
+-- handling long-user-absence for tournaments
+ALTER TABLE TournamentLadderProps
+   ADD UserAbsenceDays tinyint unsigned NOT NULL DEFAULT '0',
+   ADD UserAbsenceAction enum('LAST','DEL') NOT NULL DEFAULT 'DEL' ;
+ALTER TABLE TournamentLadderProps
+   ADD INDEX UserAbsenceDays (UserAbsenceDays) ;
+
+ALTER TABLE Players
+   ADD UseVacation tinyint unsigned NOT NULL DEFAULT '0' AFTER OnVacation ;
+UPDATE Players
+   SET UseVacation=ROUND(OnVacation)+1 WHERE OnVacation > 0 AND UseVacation = 0 ;
+
+-- Clock for (daily) tournament-cron
+INSERT INTO Clock SET ID=206, Lastchanged=0 ;
+-----------
+
+   * tournaments/include/tournament_cache.php (class TournamentCache, ~.is_tournament_locked,
+       ~.release_tournament_cron_lock, ~.set_tournament_cron_lock),
+     tournaments/cron_tournaments.php:
+   - moved checking/setting/releasing tournament-locking check into tournament-cache
+     class used for tournament-cron
+
+   * include/connect2mysql.php (DBG_TEST),
+     tournaments/cron_tournaments.php:
+   - added const DBG_TEST, can be set in local-config to allow local tests
+
 2010-02-28 juga
 
    * tournaments/ladder/admin.php, tournaments/ladder/view.php:
@@ -548,7 +629,7 @@ ALTER TABLE TournamentGames
    ADD INDEX gid (gid) ;
 
 -- Clock for tournament-cron
-INSERT INTO Clock SET ID=205,Lastchanged=0 ;
+INSERT INTO Clock SET ID=205, Lastchanged=0 ;
 -----------
 
    * include/connect2mysql.php (build_query_in_clause):
@@ -2189,7 +2270,7 @@ ALTER TABLE Players
    CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL DEFAULT 'LASTMOVED' ;
 
 -- Clock for remaining-time ordering
-INSERT INTO Clock SET ID=204,Lastchanged=0 ;
+INSERT INTO Clock SET ID=204, Lastchanged=0 ;
 -- execute fix-script
 --    'scripts/fix_games_timeleft.php'
 -----------
