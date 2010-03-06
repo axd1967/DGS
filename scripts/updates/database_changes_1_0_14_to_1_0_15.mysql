@@ -1743,3 +1743,8 @@ UPDATE Players
 INSERT INTO Clock SET ID=206, Lastchanged=0 ;
 
 
+-- reduce long-user-absence handling to one option, so remove field with action-choice
+ALTER TABLE TournamentLadderProps
+   DROP COLUMN UserAbsenceAction ;
+
+

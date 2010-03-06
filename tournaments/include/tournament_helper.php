@@ -152,7 +152,6 @@ class TournamentHelper
          SQLP_FIELDS,
             'TL.tid', 'TL.rid', 'TL.uid',
             'TLP.UserAbsenceDays AS TLP_UserAbsenceDays',
-            'TLP.UserAbsenceAction AS TLP_UserAbsenceAction',
          SQLP_FROM,
             'Tournament AS T',
             'INNER JOIN TournamentLadderProps AS TLP ON TLP.tid=T.ID',

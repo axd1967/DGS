@@ -555,9 +555,7 @@ Description:
 * UserAbsenceDays : days of user being absent without taking actions
    - 0 = unused
    - days, not counting user on vacation
-* UserAbsenceAction : action to take on user not being online for $UserAbsenceDays days
-   - LAST = move user to ladder-bottom
-   - DEL  = remove user from ladder
+     user is removed from ladder for user not being online for $UserAbsenceDays days
 
 
 ###########################################################################
