@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 14, 2010 at 12:35 AM
+-- Generation Time: Mar 07, 2010 at 12:56 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.10
 
@@ -545,6 +545,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Lang` varchar(20) NOT NULL default 'C',
   `VacationDays` float NOT NULL default '14',
   `OnVacation` float NOT NULL default '0',
+  `UseVacation` tinyint(3) unsigned NOT NULL default '0',
   `Running` smallint(5) unsigned NOT NULL default '0',
   `Finished` mediumint(8) unsigned NOT NULL default '0',
   `RatedGames` mediumint(8) unsigned NOT NULL default '0',
@@ -703,6 +704,7 @@ CREATE TABLE IF NOT EXISTS `Tournament` (
   `Description` text NOT NULL,
   `Owner_ID` int(11) NOT NULL,
   `Status` enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') NOT NULL default 'NEW',
+  `Flags` smallint(5) unsigned NOT NULL default '0',
   `Created` datetime NOT NULL,
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
@@ -724,6 +726,7 @@ CREATE TABLE IF NOT EXISTS `Tournament` (
 CREATE TABLE IF NOT EXISTS `TournamentDirector` (
   `tid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
+  `Flags` smallint(5) unsigned NOT NULL default '0',
   `Comment` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`tid`,`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -738,7 +741,8 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
   `gid` int(11) NOT NULL default '0',
-  `Status` enum('INIT','PLAY','SCORE','DONE') NOT NULL default 'INIT',
+  `Status` enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',
+  `TicksDue` int(11) NOT NULL default '0',
   `Flags` smallint(5) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
@@ -754,7 +758,7 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   KEY `Defender_uid` (`Defender_uid`),
   KEY `gid` (`gid`),
   KEY `tid` (`tid`),
-  KEY `Status` (`Status`)
+  KEY `Status_Ticks` (`Status`,`TicksDue`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -772,6 +776,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadder` (
   `Rank` smallint(5) unsigned NOT NULL default '0',
   `BestRank` smallint(5) unsigned NOT NULL default '0',
   `ChallengesIn` tinyint(3) unsigned NOT NULL default '0',
+  `ChallengesOut` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`tid`,`rid`),
   KEY `uid` (`uid`),
   KEY `Rank` (`tid`,`Rank`)
@@ -788,16 +793,22 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
   `ChallengeRangeAbsolute` smallint(6) NOT NULL default '0',
+  `ChallengeRangeRelative` tinyint(3) unsigned NOT NULL default '0',
+  `ChallengeRangeRating` smallint(6) NOT NULL default '-32768',
+  `ChallengeRematchWait` smallint(5) unsigned NOT NULL default '0',
   `MaxDefenses` tinyint(3) unsigned NOT NULL,
   `MaxDefenses1` tinyint(3) unsigned NOT NULL default '0',
   `MaxDefenses2` tinyint(3) unsigned NOT NULL default '0',
   `MaxDefensesStart1` tinyint(3) unsigned NOT NULL default '0',
   `MaxDefensesStart2` tinyint(3) unsigned NOT NULL default '0',
+  `MaxChallenges` tinyint(3) unsigned NOT NULL default '0',
   `GameEndNormal` enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST') NOT NULL default 'CH_ABOVE',
   `GameEndJigo` enum('NO_CHANGE','CH_ABOVE','CH_BELOW') NOT NULL default 'CH_BELOW',
   `GameEndTimeoutWin` enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL default 'DF_BELOW',
   `GameEndTimeoutLoss` enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL default 'CH_LAST',
-  PRIMARY KEY  (`tid`)
+  `UserAbsenceDays` tinyint(3) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`tid`),
+  KEY `UserAbsenceDays` (`UserAbsenceDays`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -881,7 +892,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRules` (
   `ChangedBy` varchar(54) NOT NULL default '',
   `Flags` smallint(5) unsigned NOT NULL default '0',
   `Size` tinyint(3) unsigned NOT NULL default '19',
-  `Handicaptype` enum('CONV','PROPER','NIGIRI','DOUBLE') NOT NULL default 'CONV',
+  `Handicaptype` enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV',
   `AdjKomi` decimal(4,1) NOT NULL default '0.0',
   `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',
