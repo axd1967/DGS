@@ -129,7 +129,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
          $tladder_df->update_incoming_challenges( +1 );
          $tladder_ch->update_outgoing_challenges( +1 );
-         //TODO notify defender about started game !?
+
+         // notify defender about started game
+         $ch_uid = $user_ch->ID;
+         $df_uid = $user_df->ID;
+         send_message( "tournament.ladder.challenge.notify($tid,$ch_uid,$df_uid)",
+            trim( sprintf( T_('%s has challenged you in %s: %s#tourney'),
+                           "<user $ch_uid>", "<tourney $tid>", "<game $gid>" )),
+            sprintf( T_('Challenge started for tournament #%s'), $tid ),
+            $df_uid, '', true,
+            0/*sys-msg*/, 'NORMAL', 0 );
       }
       ta_end();
 
