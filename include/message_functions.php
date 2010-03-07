@@ -595,9 +595,12 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
  * \param $tablestyle:
  *     GSET_MSG_INVITE | GSET_MSG_DISPUTE = for message.php
  *     GSET_WAITINGROOM = for waiting_room.php
+ *     GSET_TOURNAMENT_LADDER = for ladder-tournament challenge
  */
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 {
+   global $base_path;
+
    $Color = HTYPE_NIGIRI; // default, always represents My-Color (of current player)
    $AdjKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
@@ -605,9 +608,11 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
 
+   // $game_row containing:
    // - for GSET_WAITINGROOM: Waitingroom.*
+   // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
    // - for GSET_MSG_INVITE:
-   //   Players: other_id, other_handle, other_name, other_rating, other_ratingstatus
+   //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
    //   Games: Status, Game_mid(=mid), Size, Komi, Handicap, Rated, WeekendClock,
    //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, myColor
    extract($game_row);
@@ -633,6 +638,19 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       $goodmingames = ( $MinRatedGames > 0 )
          ? ((int)@$player_row['RatedGames'] >= $MinRatedGames)
          : true;
+   }
+   elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
+   {
+      // for transparency put following into separate fields (see tournaments/ladder/challenge.php)
+      $Handitype  = (string)$X_Handitype;
+      $Color      = (string)$X_Color;
+      $calculated = (bool)$X_Calculated;
+
+      $CategoryHandiType = get_category_handicaptype( $Handitype );
+
+      $goodrating = 1;
+      $goodmingames = true;
+      $haverating = ( $iamrated ) ? 1 : !$calculated;
    }
    else // invite|dispute
    {
@@ -672,6 +690,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       $haverating = ( $iamrated ) ? 1 : !$calculated;
    }
 
+
+   // ---------- start game-info table ------------------------
+
    $itable = new Table_info('game'); //==> ID='gameTableInfos'
 
    if( $tablestyle == GSET_WAITINGROOM )
@@ -682,8 +703,11 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
             T_('Player'),
             user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) );
    }
+   elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
+      $itable->add_scaption(T_('Game Info'));
 
-   $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+   if( $tablestyle != GSET_TOURNAMENT_LADDER )
+      $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
    $itable->add_sinfo( T_('Size'), $Size );
 
    $color_class = 'class=InTextImage';
@@ -706,7 +730,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          if( $Handitype == HTYPE_NIGIRI )
          {
             $subtype = ($Handicap == 0) ? T_('Even game with nigiri') : T_('Handicap game with nigiri');
-            $colortxt = image( '17/y.gif', T_('Nigiri'), null, $color_class );
+            $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class );
          }
          elseif( $Handitype == HTYPE_DOUBLE )
          {
@@ -723,8 +747,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                $subtype = ( $Color == HTYPE_BLACK) ? T_('Color Black') : T_('Color White');
                $colortxt =
                   (( $Color == HTYPE_BLACK )
-                     ? image( '17/b.gif', T_('Black'), null, $color_class)
-                     : image( '17/w.gif', T_('White'), null, $color_class) )
+                     ? image( $base_path.'17/b.gif', T_('Black'), null, $color_class)
+                     : image( $base_path.'17/w.gif', T_('White'), null, $color_class) )
                   . MINI_SPACING . user_reference( 0, 1, '', $player_row );
             }
             else
@@ -741,11 +765,15 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
                   $user_w = $player_row;
                   $user_b = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
                }
+               if( $tablestyle == GSET_TOURNAMENT_LADDER )
+                  $subtype = ($Color == HTYPE_BLACK) ? T_('Color Challenger Black#T_ladder') : T_('Color Challenger White#T_ladder');
+               elseif( $tablestyle == GSET_TOURNAMENT_ROUNDROBIN )
+                  $subtype = ($Color == HTYPE_BLACK) ? T_('Color Stronger Black#T_RRobin') : T_('Color Stronger White#T_RRobin');
 
-               $colortxt = image( '17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
+               $colortxt = image( $base_path.'17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
                   . user_reference( 0, 1, '', $user_w )
                   . SMALL_SPACING
-                  . image( '17/b.gif', T_('Black'), null, $color_class) . MINI_SPACING
+                  . image( $base_path.'17/b.gif', T_('Black'), null, $color_class) . MINI_SPACING
                   . user_reference( 0, 1, '', $user_b )
                   ;
             }
@@ -759,7 +787,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       }//case CAT_HTYPE_MANUAL
    }//switch $CategoryHandiType
 
-   if( $tablestyle == GSET_WAITINGROOM ) // Handicap adjustment
+   if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
    {
       $adj_handi_str = build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap );
       if( $adj_handi_str != '' )
@@ -769,7 +797,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( ENA_STDHANDICAP )
       $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
-   if( $tablestyle == GSET_WAITINGROOM ) // Komi adjustment
+   if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
    {
       $adj_komi_str = build_adjust_komi( $AdjKomi, $JigoMode );
       if( (string)$adj_komi_str != '' )
@@ -829,7 +857,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       {
          $infoHandicap = $Handicap;
          $infoKomi = $Komi;
-         $info_i_am_black = 0;
+         if( $tablestyle == GSET_TOURNAMENT_LADDER )
+            $info_i_am_black = (bool)$game_row['X_ChallengerIsBlack'];
+         else
+            $info_i_am_black = ($Handitype != HTYPE_BLACK); // game-offerer wants BLACK, so challenger gets WHITE
       }
 
       // adjust handicap
@@ -852,14 +883,12 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          if( $Handitype == HTYPE_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
          elseif( $Handitype == HTYPE_NIGIRI || $is_nigiri )
-            $colortxt = image( '17/y.gif', T_('Nigiri'), null, $color_class);
+            $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class);
          else
             $colortxt = get_colortext_probable( $info_i_am_black );
 
          $is_calc_handitype = ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER );
-         $itable->add_scaption( ($is_calc_handitype)
-            ? T_('Probable game settings')
-            : T_('Game settings') );
+         $itable->add_scaption( ($is_calc_handitype) ? T_('Probable game settings') : T_('Game settings') );
 
          $itable->add_sinfo( T_('Color'), $colortxt );
          $itable->add_sinfo(
@@ -1011,10 +1040,11 @@ function build_suggestion_shortinfo( $suggest_result )
 
 function get_colortext_probable( $iamblack )
 {
+   global $base_path;
    $color_class = 'class="InTextStone"';
    return ( $iamblack )
-      ? image( '17/b.gif', T_('Black'), null, $color_class)
-      : image( '17/w.gif', T_('White'), null, $color_class);
+      ? image( $base_path.'17/b.gif', T_('Black'), null, $color_class)
+      : image( $base_path.'17/w.gif', T_('White'), null, $color_class);
 }
 
 
