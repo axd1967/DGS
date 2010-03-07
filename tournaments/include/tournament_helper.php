@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'include/connect2mysql.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -144,6 +145,18 @@ class TournamentHelper
       }
 
       return $rating;
+   }
+
+   /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
+   function check_rated_tournament_participants( $tid )
+   {
+      $row = mysql_single_fetch( "TournamentHelper.check_rated_tournament_participants.find_unrated($tid)",
+         "SELECT TP.uid FROM TournamentParticipant AS TP INNER JOIN Players AS P ON P.ID=TP.uid " .
+         "WHERE TP.tid=$tid AND P.RatingStatus='NONE' LIMIT 1" );
+      if( $row )
+         return false;
+
+      return true;
    }
 
    function load_ladder_absent_users( $iterator=null )

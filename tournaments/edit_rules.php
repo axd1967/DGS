@@ -58,7 +58,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_rules.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
-   //TODO(later) if Rated=Yes, check here that ALL existing TPs have a user-rating (can happen by admin-operation)
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
@@ -75,6 +74,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    // check + parse edit-form (notes)
    list( $vars, $edits, $input_errors ) = parse_edit_form( $trule );
    $errors = array_merge( $errors, $input_errors );
+
+   // check (if Rated=Yes) that ALL existing TPs have a user-rating (can happen by admin-ops)
+   if( $trule->Rated && !TournamentHelper::check_rated_tournament_participants($tid) )
+      $errors[] = T_('There are users without a rating, which conflicts with a "rated" tournament.');
 
    // save tournament-rules-object with values from edit-form
    if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
