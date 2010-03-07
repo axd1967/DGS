@@ -31,6 +31,7 @@ require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
+require_once( 'tournaments/include/tournament_ladder.php' );
 require_once( 'tournaments/include/tournament_ladder_props.php' );
 
 $GLOBALS['ThePage'] = new Page('Tournament');
@@ -64,8 +65,15 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $trule  = TournamentRules::load_tournament_rule( $tid );
 
    $tt_props = null; // T-type-specific props
+   $tt_user_state = '';
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   {
       $tt_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
+      $tl_rank = TournamentLadder::load_rank( $tid, 0, $my_id );
+      $tt_user_state = ( $tl_rank > 0 )
+         ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_counts[TP_STATUS_REGISTER] )
+         : NO_VALUE;
+   }
 
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
@@ -91,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament ruleset') ),
          "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament registration information') ),
          "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament games') ),
-         "\n<li>", anchor( "$base_page_tourney#result", T_('Tournament results') ),
+         //TODO "\n<li>", anchor( "$base_page_tourney#result", T_('Tournament results') ),
       "</ul>\n",
       make_html_safe(
          T_('When you have a question about the tournament, please send a message '
@@ -102,6 +110,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // ------------- Section Menu
 
    $sectmenu = array();
+   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   {
+      if( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
+         $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+   }
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
    if( $allow_edit_tourney )
       $sectmenu[T_('Manage tournament')] =
@@ -132,6 +145,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if( $reg_user_info )
       $itable->add_sinfo( T_('Registration status'), span('TUserStatus', $reg_user_info) );
+   if( $tt_user_state )
+   {
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         $itable->add_sinfo( T_('User Result State'), $tt_user_state );
+   }
 
    echo $itable->make_table();
 
@@ -211,10 +229,10 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Results ---------------------------------------
 
+   /*
    echo "<hr>\n", '<a name="result">', "\n";
    section( 'tournament', T_('Results#T_view') );
 
-   /*
    echo
       "[TODO] Results (Show Winners, Show intermediate results (link))",
       "\n";
