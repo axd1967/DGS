@@ -24,12 +24,15 @@ require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
+require_once 'include/message_functions.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_properties.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
@@ -91,11 +94,20 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       $user_df = User::load_user( $tladder_df->uid );
 
    // check if challenge is valid
+   $trule = $tprops = null;
    if( !is_null($tladder_ch) && !is_null($tladder_df) )
    {
       $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
       if( is_null($tl_props) )
          error('bad_tournament', "Tournament.ladder.challenge.find_lprops($tid)");
+
+      $trule = TournamentRules::load_tournament_rule( $tid );
+      if( is_null($trule) )
+         error('bad_tournament', "Tournament.ladder.challenge.find_rules($tid)");
+
+      $tprops = TournamentProperties::load_tournament_properties( $tid );
+      if( is_null($tprops) )
+         error('bad_tournament', "Tournament.ladder.challenge.find_tprops($tid)");
 
       $rating_pos = 0;
       if( $tl_props->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
@@ -192,6 +204,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    $tform->echo_string();
 
+   // show probable game-info/settings for challenge
+   show_game_info( $tid, $user_ch, $user_df, $trule, $tprops );
+
    echo_notes( 'challengenotesTable', T_('Challenge notes'), build_challenge_notes() );
 
 
@@ -224,6 +239,41 @@ function add_form_user_info( &$tform, $utype, $user, $tladder )
 
    $tform->add_empty_row();
 }//add_form_user_info
+
+// show game-info-table for challenge
+function show_game_info( $tid, $user_ch, $user_df, $trule, $tprops )
+{
+   if( is_null($user_ch) || is_null($user_df) )
+      return;
+
+   $ch_rating = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode );
+   $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
+   $ch_is_black = $trule->prepare_create_game_row( $game_row, $user_ch->ID, $ch_rating, $user_df->ID, $df_rating );
+
+   $game_row = $trule->convertTournamentRules_to_GameRow();
+   $game_row['X_Handitype'] = TournamentRules::convert_trule_handicaptype_to_stdhtype($trule->Handicaptype);
+   if( $trule->Handicaptype == TRULE_HANDITYPE_NIGIRI )
+      $game_row['X_Color'] = HTYPE_NIGIRI;
+   else
+      $game_row['X_Color'] = ($ch_is_black) ? HTYPE_BLACK : HTYPE_WHITE;
+   $game_row['X_Calculated'] = $trule->needsCalculatedHandicap();
+   $game_row['X_ChallengerIsBlack'] = $ch_is_black;
+
+   // user-data
+   $game_row['other_id']     = $user_df->ID;
+   $game_row['other_handle'] = $user_df->Handle;
+   $game_row['other_name']   = $user_df->Name;
+   $game_row['other_rating'] = $df_rating;
+   $user_row = array(
+      'ID'      => $user_ch->ID,
+      'Handle'  => $user_ch->Handle,
+      'Name'    => $user_ch->Name,
+      'Rating2' => $ch_rating,
+   );
+
+   echo "<br>\n";
+   game_info_table( GSET_TOURNAMENT_LADDER, $game_row, $user_row, $user_ch->hasRating() );
+}//show_game_info
 
 /*! \brief Returns array with notes about challenging users on ladder. */
 function build_challenge_notes()
