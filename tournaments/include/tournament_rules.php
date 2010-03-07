@@ -448,7 +448,7 @@ class TournamentRules
     * \brief Creates normal game and updates all game-stuff.
     * \param $user_ch User-object of challenger
     * \param $user_df User-object of defender
-    * \note Expect set this.TourneyType
+    * \note Expect set var this.TourneyType
     */
    function create_game( $tprops_RatingUseMode, $user_ch, $user_df )
    {
@@ -513,7 +513,7 @@ class TournamentRules
          " WHERE ID IN ($ch_uid,$df_uid) LIMIT 2" );
 
       return $gid;
-   }
+   }//create_game
 
 
    // ------------ static functions ----------------------------
