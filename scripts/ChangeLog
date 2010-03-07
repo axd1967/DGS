@@ -24,6 +24,31 @@ ChangeLog
 
 2010-03-07 juga
 
+   * tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameRow,
+       ~.convertTournamentRules_to_EditForm, ~.create_game, ~.prepare_create_game_row),
+     include/message_functions.php (game_info_table),
+     tournaments/ladder/challenge.php (show_game_info), NEWS:
+   - show probable game-info/settings for ladder-challenge similar to waiting-room
+   - fix bug using string-type-casting on JigoMode-field instead of int-casting
+
+   * include/message_functions.php (game_info_table, get_colortext_probable):
+   - fix bug for waiting-room BLACK|WHITE-handicap-type showing wrong color
+     for probable game-settings
+   - fix bug with image-URLs missing $base_path
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.check_rated_tournament_participants),
+     tournaments/edit_rules.php:
+   - if tournament should be Rated, added check that ALL existing TPs
+     have a user-rating (can also happen later by admin-operations)
+
+   * tournaments/view_tournament.php:
+   - add current ladder-rank for user
+   - added additional "View Ladder"-link in top-section
+   - commented out tournament-results (will be done later)
+
+   * specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql:
+   - synchronized tournament-tables with current state of db
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder,
        ~._process_game_end, ~.notify_removed_user, ~.process_user_absence, ~.get_notes_user_removed),
      tournaments/ladder/admin.php (add_form_edit_user),
