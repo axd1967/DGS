@@ -45,6 +45,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Long user-absence handling
       * Tournament Ladder admin-interface to prepare and edit ladder
       * Tournament Ladder challenge page to confirm challenge starting tournament game
+      * Tournament user notifications:
+         * Defender will be notified about game challenge
+         * User will be notified about full removal from tournament
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page

@@ -22,6 +22,18 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-07 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder,
+       ~._process_game_end, ~.notify_removed_user, ~.process_user_absence, ~.get_notes_user_removed),
+     tournaments/ladder/admin.php (add_form_edit_user),
+     tournaments/ladder/retreat.php (build_retreat_notes),
+     tournaments/cron_tournaments.php (run_once_daily), NEWS:
+   - send notify about (full) removal from tournament-ladder to removed user
+
+   * tournaments/ladder/challenge.php:
+   - send notify about tournament-ladder challenge to defender
+
 2010-03-06 juga
 
    * tournaments/ladder/edit_props.php:
