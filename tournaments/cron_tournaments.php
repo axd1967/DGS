@@ -136,7 +136,7 @@ function run_once_daily()
 
          $thelper->tcache->release_tournament_cron_lock( $tid );
          if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
-            TournamentLadder::process_user_absence( $tid, $tladder->uid );
+            TournamentLadder::process_user_absence( $tid, $tladder->uid, $orow['TLP_UserAbsenceDays'] );
       }
       $thelper->tcache->release_tournament_cron_lock();
    }

@@ -148,11 +148,17 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          if( $tladder_user->remove_user_from_ladder( $remove_all ) )
          {
-            //TODO send user-notification about removal !?
+            if( $remove_all )
+            {
+               TournamentLadder::notify_removed_user( "Tournament.ladder_admin.notify($tid,$uid,$my_id)", $tid, $uid,
+                  sprintf( T_('You have been removed from %s by tournament director (or admin).#tourney'),
+                           "<tourney $tid>", "<user $uid>" ));
+            }
+
             $txtfmt = ($remove_all)
                ? T_('User [%s] completely removed from this ladder-tournament!#tourney')
                : T_('User [%s] removed from ladder!#tourney');
-            $sys_msg = urlencode( sprintf( $txtfmt, $user->Handle) );
+            $sys_msg = urlencode( sprintf( $txtfmt, $user->Handle) . ' ' . T_('User has been notified!') );
             jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -251,7 +257,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          if( $authorise_add_user )
             add_form_edit_user( $tform, $user,
                'ta_adduser', T_('Add user [%s] to ladder'),
-               T_('Add registered tournament participant to ladder (at bottom)') );
+               T_('Add registered tournament participant to ladder (at bottom).') );
          else
             $tform->add_row( array(
                   'CELL', 2, '',
@@ -261,13 +267,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          add_form_edit_user( $tform, $user,
             'ta_deluser', T_('Remove user [%s] from ladder'),
-            T_('Remove tournament participant from ladder and eventually remove user registration too'),
+            T_('Remove tournament participant from ladder and eventually remove user registration too.'),
+            /*notify*/false,
             T_('User will only be removed from ladder. Tournament user registration is kept.') );
 
          $tform->add_empty_row();
          add_form_edit_user( $tform, $user,
             'ta_deluserall', T_('Remove user [%s] completely'),
-            T_('User will be removed from ladder and tournament user registration will be removed too.') );
+            T_('User will be removed from ladder and tournament user registration will be removed too.'),
+            /*notify*/true );
       }
    }
    $tform->add_empty_row();
@@ -293,17 +301,22 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 }
 
 
-function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $extra='' )
+function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=false, $extra='' )
 {
    global $allow_admin;
 
    $form->add_row( array(
          'CELL', 2, '',
-         'TEXT', $title.':', ));
+         'TEXT', $title ));
    if( $extra )
       $form->add_row( array(
             'CELL', 2, '',
-            'TEXT', $extra, ));
+            'TEXT', $extra ));
+   $form->add_row( array(
+         'CELL', 2, '',
+         'TEXT', ( $notify
+                     ? T_('User will be notified of removal.#tourney')
+                     : T_('User will NOT be notified of removal.#tourney') ) ));
    $form->add_row( array(
          'CELL', 2, '',
          'SUBMITBUTTONX', $action, sprintf( $act_fmt, $user->Handle ), ($allow_admin ? '' : 'disabled=1') ));

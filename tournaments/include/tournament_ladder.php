@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
+require_once 'include/std_functions.php';
 require_once 'include/utilities.php';
 require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
@@ -225,12 +226,12 @@ class TournamentLadder
       return $result;
    }
 
-   /*! \brief Removes user from ladder with given tournament tid and remove TP if $remove_all=true. */
+   /*!
+    * \brief Removes user from ladder with given tournament tid and remove TP if $remove_all=true.
+    * \note ignoring running games for tournament
+    */
    function remove_user_from_ladder( $remove_all, $upd_rank=false )
    {
-      //TODO do consistency-checks (no running games for tournament)
-      //if( ... ) return array( T_('error...') );
-
       ta_begin();
       {//HOT-section to remove user from ladder and eventually from TournamentParticipant-table
          $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
@@ -738,7 +739,10 @@ class TournamentLadder
          {
             $success = $tladder_ch->remove_user_from_ladder( true, true/*upd-rank*/ );
             $logmsg = "CH.Rank={$tladder_ch->Rank}>DEL";
-            //TODO: also "handle" other running games
+
+            if( $success )
+               TournamentLadder::notify_removed_user( "TournamentLadder::_process_game_end($game_end_action)",
+                  $tid, $tladder_ch->uid, null );
             break;
          }
 
@@ -785,7 +789,10 @@ class TournamentLadder
          {
             $success = $tladder_df->remove_user_from_ladder( true, true/*upd-rank*/ );
             $logmsg = "DF.Rank={$tladder_df->Rank}>DEL";
-            //TODO: also "handle" other running games
+
+            if( $success ) // notify removed user
+               TournamentLadder::notify_removed_user( "TournamentLadder::_process_game_end($game_end_action)",
+                  $tid, $tladder_df->uid, null );
             break;
          }
       }//switch(game_end_action)
@@ -797,10 +804,29 @@ class TournamentLadder
    }//_process_game_end
 
    /*!
+    * \brief Sends notify to removed-user.
+    * \param $main_body null=game-end-handling, otherwise body-header-text given as arg
+    */
+   function notify_removed_user( $dbgmsg, $tid, $uid, $main_body=null )
+   {
+      if( is_null($main_body) )
+         $body = sprintf( T_('The system has removed you from %s due to the ladder configuration defined for tournament game-ends.#tourney'),
+                          "<tourney $tid>" );
+      else
+         $body = $main_body;
+
+      return send_message( "$dbgmsg.notify($tid,$uid)",
+         trim( $body . "\n" . TournamentLadder::get_notes_user_removed() ),
+         sprintf( T_('Removal from tournament #%s'), $tid ),
+         $uid, '', true,
+         0/*sys-msg*/, 'NORMAL', 0 );
+   }
+
+   /*!
     * \brief Processes long absence of user not being online by removing user from ladder.
     * \note expecting to run into HOT-section
     */
-   function process_user_absence( $tid, $uid )
+   function process_user_absence( $tid, $uid, $user_abs_days )
    {
       // reload TL because Rank could have been changed in the meantime !!
       $tladder = TournamentLadder::load_tournament_ladder_by_user( $tid, $uid );
@@ -810,10 +836,17 @@ class TournamentLadder
       // remove user from ladder
       $success = $tladder->remove_user_from_ladder( true, true/*upd-rank*/ );
       $logmsg = "U.Rank={$tladder->Rank}>DEL";
-      //TODO: also "handle" other running games
 
       if( DBG_QUERY )
          error_log("TournamentLadder::process_user_absence($tid,$uid): $logmsg");
+
+      // notify removed user
+      if( $success )
+      {
+         TournamentLadder::notify_removed_user( "TournamentLadder::process_user_absence", $tid, $uid,
+            sprintf( T_('The system has removed you from %s due to inactivity for more than %s days.#tourney'),
+                     "<tourney $tid>", $user_abs_days ) );
+      }
 
       return $success;
    }//process_user_absence
@@ -841,6 +874,11 @@ class TournamentLadder
 
       $return_errors = array_merge( $return_errors, $errors );
       return ( count($errors) == 0 );
+   }
+
+   function get_notes_user_removed()
+   {
+      return T_('Your running tournament games will be continued as normal games without effecting the tournament.');
    }
 
    function get_edit_tournament_status()

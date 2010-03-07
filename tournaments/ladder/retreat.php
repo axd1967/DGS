@@ -155,7 +155,7 @@ function build_retreat_notes()
    $notes = array();
 
    $notes[] = T_('Retreating from this ladder will also remove your tournament user registration.');
-   $notes[] = T_('Your running tournament games will be continued as normal games without effecting the tournament.');
+   $notes[] = TournamentLadder::get_notes_user_removed();
    $notes[] = T_('If you rejoin the ladder, your ladder rank will be restarted according to the tournaments properties.');
    $notes[] = null; // empty line
 
