@@ -229,12 +229,12 @@ class TournamentRules
       $grow['StdHandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
       $grow['Komi'] = (float)$this->Komi;
       $grow['AdjKomi'] = (float)$this->AdjKomi;
-      $grow['JigoMode'] = (int)$this->JigoMode;
+      $grow['JigoMode'] = $this->JigoMode;
 
       $grow['Byotype'] = $this->Byotype;
-      $grow['Maintime'] = $this->Maintime;
-      $grow['Byotime'] = $this->Byotime;
-      $grow['Byoperiods'] = $this->Byoperiods;
+      $grow['Maintime'] = (int)$this->Maintime;
+      $grow['Byotime'] = (int)$this->Byotime;
+      $grow['Byoperiods'] = (int)$this->Byoperiods;
 
       $grow['WeekendClock'] = ($this->WeekendClock) ? 'Y' : 'N';
       $grow['Rated'] = ($this->Rated) ? 'Y' : 'N';
@@ -258,13 +258,13 @@ class TournamentRules
       $vars['color_m'] = $std_htype;
       if( $cat_htype == CAT_HTYPE_MANUAL )
       {
-         $vars['handicap_m'] = $this->Handicap;
-         $vars['komi_m'] = $this->Komi;
+         $vars['handicap_m'] = (int)$this->Handicap;
+         $vars['komi_m'] = (float)$this->Komi;
       }
       else
          $vars['komi_m'] = DEFAULT_KOMI;
       $vars['adj_komi'] = (float)$this->AdjKomi;
-      $vars['jigo_mode'] = (int)$this->JigoMode;
+      $vars['jigo_mode'] = $this->JigoMode;
       $vars['adj_handicap'] = (int)$this->AdjHandicap;
       $vars['min_handicap'] = (int)$this->MinHandicap;
       $vars['max_handicap'] = min( MAX_HANDICAP, max( 0, (int)$this->MaxHandicap ));
@@ -279,16 +279,16 @@ class TournamentRules
          $suffix = '_fis';
 
       $vars['timeunit'] = 'hours';
-      $vars['timevalue'] = $this->Maintime;
+      $vars['timevalue'] = (int)$this->Maintime;
       time_convert_to_longer_unit( $vars['timevalue'], $vars['timeunit'] );
 
       $byo_timeunit  = 'hours';
-      $byo_timevalue = $this->Byotime;
+      $byo_timevalue = (int)$this->Byotime;
       time_convert_to_longer_unit( $byo_timevalue, $byo_timeunit );
       $vars["timeunit$suffix"] = $byo_timeunit;
       $vars["byotimevalue$suffix"] = $byo_timevalue;
       if( $this->Byotype != BYOTYPE_FISCHER )
-         $vars["byoperiods$suffix"] = $this->Byoperiods;
+         $vars["byoperiods$suffix"] = (int)$this->Byoperiods;
 
       $vars['weekendclock'] = ($this->WeekendClock) ? 'Y' : 'N';
       $vars['rated'] = ($this->Rated) ? 'Y' : 'N';
@@ -464,6 +464,23 @@ class TournamentRules
       $game_row = $this->convertTournamentRules_to_GameRow();
       $game_row['tid'] = $this->tid;
 
+      $ch_is_black = $this->prepare_create_game_row( $game_row, $ch_uid, $ch_rating, $df_uid, $df_rating );
+      if( $ch_is_black )
+         $gid = create_game($user_ch->urow, $user_df->urow, $game_row);
+      else
+         $gid = create_game($user_df->urow, $user_ch->urow, $game_row);
+
+      db_query( "TournamentRules.create_game.update_players({$this->tid},$ch_uid,$df_uid)",
+         "UPDATE Players SET Running=Running+1" .
+            ( $this->Rated ? ", RatingStatus='".RATING_RATED."'" : '' ) .
+         " WHERE ID IN ($ch_uid,$df_uid) LIMIT 2" );
+
+      return $gid;
+   }//create_game
+
+   /*! \brief Prepares game_row setting fields: Handicap/Komi and returning if challenger is black. */
+   function prepare_create_game_row( &$game_row, $ch_uid, $ch_rating, $df_uid, $df_rating )
+   {
       switch( (string)$this->Handicaptype )
       {
          case TRULE_HANDITYPE_CONV:
@@ -497,23 +514,13 @@ class TournamentRules
             break;
 
          default:
-            error('not_implemented', "TournamentRules.create_game.htype_unknown"
+            error('not_implemented', "TournamentRules.prepare_game_row.unknown_htype"
                . "({$this->tid},$ch_uid,$df_uid,{$this->Handicaptype})");
             break;
       }
 
-      if( $ch_is_black )
-         $gid = create_game($user_ch->urow, $user_df->urow, $game_row);
-      else
-         $gid = create_game($user_df->urow, $user_ch->urow, $game_row);
-
-      db_query( "TournamentRules.create_game.update_players({$this->tid},$ch_uid,$df_uid)",
-         "UPDATE Players SET Running=Running+1" .
-            ( $this->Rated ? ", RatingStatus='".RATING_RATED."'" : '' ) .
-         " WHERE ID IN ($ch_uid,$df_uid) LIMIT 2" );
-
-      return $gid;
-   }//create_game
+      return $ch_is_black;
+   }//prepare_create_game_row
 
 
    // ------------ static functions ----------------------------
