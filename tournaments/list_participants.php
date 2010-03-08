@@ -109,6 +109,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    if( $allow_edit_tourney )
       $tptable->add_tablehead( 9, T_('Flags#T_reg'), 'Enum', 0, 'Flags+');
    $tptable->add_tablehead(10, T_('Round#T_reg'), 'Number', 0, 'StartRound-');
+   $tptable->add_tablehead(15, new TableHead( T_('Running Games#T_reg'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
    $tptable->add_tablehead(11, T_('Tournament Rating#T_reg'), 'Rating', 0, 'Rating-');
    $tptable->add_tablehead(12, T_('Registered#T_reg'), 'Date', 0, 'Created+');
    $tptable->add_tablehead(13, T_('Updated#T_reg'), 'Date', 0, 'Lastchanged-');
@@ -197,6 +198,12 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
          if( (string)$tp->UserMessage != '' ) $msgs[] = T_('UserMsg#tmsg');
          if( (string)$tp->AdminMessage != '' ) $msgs[] = T_('AdmMsg#tmsg');
          $row_str[14] = implode(', ', $msgs);
+      }
+      if( $tptable->Is_Column_Displayed[15] )
+      {
+         $row_str[15] = echo_image_table(
+               $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
+               sprintf( T_('Running games of user [%s]'), $tp->User->Handle ) );
       }
 
       $tptable->add_row( $row_str );
