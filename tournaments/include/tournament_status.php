@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_games.php';
 
  /*!
   * \file tournament_status.php
@@ -89,6 +90,7 @@ class TournamentStatus
          $this->errors[] = $str;
    }
 
+   /*! \internal to load TournamentProperties. */
    function _load_tprops()
    {
       if( is_null($this->tprops) )
@@ -113,18 +115,21 @@ class TournamentStatus
       }
    }
 
+   /*! \brief Check if change to ADM-tourney-status is allowed. */
    function check_conditions_status_ADM()
    {
       $this->errors[] = sprintf( T_('Change to Tournament status [%s] only allowed by Tournament Admin.'),
                                  Tournament::getStatusText($this->new_status) );
    }
 
+   /*! \brief Check if change to NEW-tourney-status is allowed. */
    function check_conditions_status_NEW()
    {
       $this->errors[] = sprintf( T_('Change to Tournament status [%s] only allowed by Tournament Admin.'),
                                  Tournament::getStatusText($this->new_status) );
    }
 
+   /*! \brief Check if change to REG-tourney-status is allowed. */
    function check_conditions_status_REG()
    {
       if( $this->curr_status != TOURNEY_STATUS_NEW )
@@ -138,6 +143,7 @@ class TournamentStatus
          $this->erros = array_merge( $this->errors, $check_errors );
    }
 
+   /*! \brief Check if change to PAIR-tourney-status is allowed. */
    function check_conditions_status_PAIR()
    {
       if( $this->curr_status != TOURNEY_STATUS_REGISTER )
@@ -176,6 +182,7 @@ class TournamentStatus
       }
    }//check_conditions_status_PAIR
 
+   /*! \brief Check if change to PLAY-tourney-status is allowed. */
    function check_conditions_status_PLAY()
    {
       if( $this->curr_status != TOURNEY_STATUS_PAIR )
@@ -191,24 +198,24 @@ class TournamentStatus
          $this->errors = array_merge( $this->errors, $chk_errors );
    }
 
+   /*! \brief Check if change to CLOSED-tourney-status is allowed. */
    function check_conditions_status_CLOSED()
    {
       if( $this->curr_status != TOURNEY_STATUS_PLAY )
          $this->errors[] = $this->error_expected_status( TOURNEY_STATUS_PLAY );
 
       $this->check_basic_conditions_status_change();
-
-      //TODO condition: no running T-game
-      $this->errors[] = 'not_implemented_yet';
+      $this->check_conditions_unfinished_tourney_games();
    }
 
+   /*! \brief Check if change to DEL-tourney-status is allowed. */
    function check_conditions_status_DEL()
    {
-      //TODO condition: no running T-game
-      $this->errors[] = 'not_implemented_yet';
+      $this->check_conditions_unfinished_tourney_games();
    }
 
 
+   /*! \brief Checks basic conditions for change of tourney-status: title/description/TD. */
    function check_basic_conditions_status_change()
    {
       if( strlen($this->tourney->Title) < 8 )
@@ -217,6 +224,17 @@ class TournamentStatus
          $this->errors[] = T_('Tournament description missing or too short');
       if( !TournamentDirector::has_tournament_director($this->tid) )
          $this->errors[] = T_('Missing at least one tournament director');
+   }
+
+   /*! \brief Checks if there are unfinished tourney-games that can prohibit tourney-status-change. */
+   function check_conditions_unfinished_tourney_games()
+   {
+      // check for not-DONE T-games
+      $tg_count_running = TournamentGames::count_tournament_games();
+      if( $tg_count_running > 0 )
+         $this->errors[] = sprintf(
+               T_('Tournament has %s unfinished tournament games, that must be ended first.'),
+               $tg_count_running );
    }
 
 

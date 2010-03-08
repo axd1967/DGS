@@ -304,6 +304,24 @@ class TournamentGames
       return $iterator;
    }
 
+   /*! \brief Counts Tournament-games with given status-array or single status. */
+   function count_tournament_games( $arr_status=null )
+   {
+      static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
+      if( is_nulL($arr_status) )
+         $arr_status = $tg_undone_status;
+      elseif( !is_array($arr_status) )
+         $arr_status = array( $arr_status );
+
+      $qsql = new QuerySQL(
+         SQLP_FIELDS, 'COUNT(*) AS X_Count',
+         SQLP_FROM, 'TournamentGames AS TG',
+         SQLP_WHERE, build_query_in_clause('TG.Status', $arr_status, /*is_str*/true) );
+
+      $row = mysql_single_fetch( 'TournamentGames::count_tournament_games()', $qsql->get_select() );
+      return ( $row ) ? (int)$row['X_Count'] : 0;
+   }
+
    /*!
     * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
     *        setting TG.Score for given tournament-ID and game-id.
