@@ -28,6 +28,7 @@ require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/time_functions.php' );
+require_once( 'tournaments/include/tournament_games.php' );
 
 $GLOBALS['ThePage'] = new Page('GamesList');
 
@@ -142,17 +143,17 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
    if( $finished && !$all ) //FU
       $gfilter->add_filter(41, 'Boolean', 'Games.Flags>0 AND (Games.Flags & 2)', true );
-   $gfilter->add_filter(32, 'Boolean', 'tid>0', true,
+   $gfilter->add_filter(32, 'Boolean', 'Games.tid>0', true,
          array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
-   $gfilter->add_filter( 6, 'Numeric', 'Size', true,
+   $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true,
          array( FC_SIZE => 3 ));
-   $gfilter->add_filter( 7, 'Numeric', 'Handicap', true,
+   $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true,
          array( FC_SIZE => 3 ));
-   $gfilter->add_filter( 8, 'Numeric', 'Komi', true,
+   $gfilter->add_filter( 8, 'Numeric', 'Games.Komi', true,
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 9, 'Numeric', 'Games.Moves', true,
          array( FC_SIZE => 4 ));
-   $gfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
+   $gfilter->add_filter(12, 'BoolSelect', 'Games.Weekendclock', true);
    $gfilter->add_filter(13, 'RelativeDate', 'Games.Lastchanged', true, // Games
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => $restrict_games ));
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
@@ -171,8 +172,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             array( T_('All#filter') => '',
                    T_('User B#filtercol')  => new QuerySQL( SQLP_HAVING, '!(X_Color&2)' ),
                    T_('User W#filtercol')  => new QuerySQL( SQLP_HAVING, '(X_Color&2)' ),
-                   T_('User move#filtercol') => "ToMove_ID=$uid",
-                   T_('Opp move#filtercol')  => "ToMove_ID<>$uid" ), // <- no db-index used
+                   T_('User move#filtercol') => "Games.ToMove_ID=$uid",
+                   T_('Opp move#filtercol')  => "Games.ToMove_ID<>$uid" ), // <- no db-index used
             true);
       $gfilter->add_filter(23, 'Rating', 'oppStartRating', true,
             array( FC_ADD_HAVING => 1 ));
@@ -183,12 +184,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    }
    if( $finished ) //FU+FA
    {
-      $gfilter->add_filter(10, 'Score', 'Score', false,
+      $gfilter->add_filter(10, 'Score', 'Games.Score', false,
             array( FC_SIZE => 3, FC_HIDE => 1 ));
       if( $all ) //FA
       {
-         $gfilter->add_filter(27, 'Rating', 'Black_End_Rating', true);
-         $gfilter->add_filter(30, 'Rating', 'White_End_Rating', true);
+         $gfilter->add_filter(27, 'Rating', 'Games.Black_End_Rating', true);
+         $gfilter->add_filter(30, 'Rating', 'Games.White_End_Rating', true);
          $gfilter->add_filter(28, 'RatingDiff', 'blog.RatingDiff', true);
          $gfilter->add_filter(31, 'RatingDiff', 'wlog.RatingDiff', true);
       }
@@ -196,14 +197,14 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gfilter->add_filter( 5, 'Selection',
                array( T_('All#filter') => '',
-                      T_('B#filter')   => "Black_ID=$uid",
-                      T_('W#filter')   => "White_ID=$uid" ),
+                      T_('B#filter')   => "Games.Black_ID=$uid",
+                      T_('W#filter')   => "Games.White_ID=$uid" ),
                true);
          $gfilter->add_filter(11, 'Selection',
                array( T_('All#filter')  => '',
                       T_('Won')  => new QuerySQL( SQLP_HAVING, 'X_Score>0' ),
                       T_('Lost') => new QuerySQL( SQLP_HAVING, 'X_Score<0' ),
-                      T_('Jigo') => 'Score=0' ),
+                      T_('Jigo') => 'Games.Score=0' ),
                true,
                array( FC_FNAME => 'won' ));
          $gfilter->add_filter(23, 'Rating', 'oppStartRating', true,
@@ -315,6 +316,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * GamesNotes (FU+RU) AS Gnt:
  *   ID, gid, uid, Hidden, Notes
  *
+ * TournamentGames (OB+FU+RU+FA+RA) AS TG:
+ *   Status
+ *
  *****
  * Views-columns usage:
  * Notes:
@@ -370,6 +374,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 39: >  RU (my remaining time)
  * 40: >  RU (oppenent remaining time)
  * 41: >  FU (Indicator if there are (hidden) game-comments)
+ * 42:    TournamentGames.Status
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -380,6 +385,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    if( $finished && !$all ) //FU
       $gtable->add_tablehead(41, new TableHead( T_('Hidden game comments'), 'images/game_comment.gif'), 'Image', 0 ); // game-comment
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
+   if( $ext_tid )
+      $gtable->add_tablehead(42, T_('TGame-Status#header'), 'Enum', 0 );
    if( $observe_all )
    {
       $gtable->add_tablehead(34, T_('#Observers#header'), 'NumberC', 0, 'X_ObsCount-');
@@ -509,6 +516,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $order = $gtable->current_order_string('ID-');
    $limit = $gtable->current_limit_string();
 
+
    // build SQL-query
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS, // std-fields
@@ -516,9 +524,6 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       'Games.Flags+0 AS X_GameFlags',
       'UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated" );
-
-   if( $ext_tid > 0 )
-      $qsql->add_part( SQLP_WHERE, "Games.tid=$ext_tid" );
 
    if( $observe ) //OB
    {
@@ -532,8 +537,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $qsql->add_part( SQLP_FROM,
          'Observers AS Obs',
          'INNER JOIN Games ON Games.ID=Obs.gid',
-         'INNER JOIN Players AS white ON white.ID=White_ID',
-         'INNER JOIN Players AS black ON black.ID=Black_ID' );
+         'INNER JOIN Players AS white ON white.ID=Games.White_ID',
+         'INNER JOIN Players AS black ON black.ID=Games.Black_ID' );
 
       if( $observe_all ) //OA
       {
@@ -560,8 +565,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          'Games.White_Start_Rating AS whiteStartRating' );
       $qsql->add_part( SQLP_FROM,
          'Games',
-         'INNER JOIN Players AS white ON white.ID=White_ID',
-         'INNER JOIN Players AS black ON black.ID=Black_ID' );
+         'INNER JOIN Players AS white ON white.ID=Games.White_ID',
+         'INNER JOIN Players AS black ON black.ID=Games.Black_ID' );
 
       if( $finished ) //FA
       {
@@ -571,12 +576,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             'blog.RatingDiff AS blackDiff',
             'wlog.RatingDiff AS whiteDiff' );
          $qsql->add_part( SQLP_FROM,
-            'LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Black_ID',
-            'LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=White_ID' );
-         $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
+            'LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Games.Black_ID',
+            'LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=Games.White_ID' );
+         $qsql->add_part( SQLP_WHERE, "Games.Status='FINISHED'" );
       }
       else if( $running ) //RA
-         $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, 'Games.Status' . IS_RUNNING_GAME );
    }
    else //FU+RU ?UNION
    {
@@ -585,13 +590,14 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          'Opp.Handle AS oppHandle',
          'Opp.ID AS oppID',
          'Opp.Rating2 AS oppRating',
-         "IF(Black_ID=$uid, Games.White_Start_Rating, Games.Black_Start_Rating) AS oppStartRating",
-         "IF(Black_ID=$uid, Games.Black_Start_Rating, Games.White_Start_Rating) AS userStartRating",
-         "IF(Black_ID=$uid, $uid, White_ID) AS userID",
+         "IF(Games.Black_ID=$uid, Games.White_Start_Rating, Games.Black_Start_Rating) AS oppStartRating",
+         "IF(Games.Black_ID=$uid, Games.Black_Start_Rating, Games.White_Start_Rating) AS userStartRating",
+         "IF(Games.Black_ID=$uid, $uid, Games.White_ID) AS userID",
          'UNIX_TIMESTAMP(Opp.Lastaccess) AS oppLastaccess',
          //extra bits of Color are for sorting purposes
          //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-         "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color" );
+         "IF(Games.ToMove_ID=$uid,0,0x10)+IF(Games.White_ID=$uid,2,0)+"
+            . "IF(Games.White_ID=Games.ToMove_ID,1,IF(Games.Black_ID=Games.ToMove_ID,0,0x20)) AS X_Color" );
       $qsql->add_part( SQLP_FROM, 'Games', 'Players AS Opp' );
 
       if( $load_notes ) //FU+RU ?UNION
@@ -604,25 +610,25 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( $finished ) //FU ?UNION
       {
          $qsql->add_part( SQLP_FIELDS,
-            "IF(Black_ID=$uid, -Score, Score) AS X_Score",
-            "IF(Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS oppEndRating",
-            "IF(White_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS userEndRating",
+            "IF(Games.Black_ID=$uid, -Games.Score, Games.Score) AS X_Score",
+            "IF(Games.Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS oppEndRating",
+            "IF(Games.White_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS userEndRating",
             'oppRlog.RatingDiff AS oppRatingDiff' );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=Games.ID AND oppRlog.uid=$uid" );
-         $qsql->add_part( SQLP_WHERE, "Status='FINISHED'" );
+         $qsql->add_part( SQLP_WHERE, "Games.Status='FINISHED'" );
 
          if( $load_user_ratingdiff )
          {
             $qsql->add_part( SQLP_FIELDS,
                'userRlog.RatingDiff AS userRatingDiff' );
             $qsql->add_part( SQLP_FROM,
-               "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=Games.ID AND userRlog.uid=White_ID+Black_ID-$uid" );
+               "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=Games.ID AND userRlog.uid=Games.White_ID+Games.Black_ID-$uid" );
          }
       }
       else if( $running ) //RU ?UNION
       {
-         $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, 'Games.Status' . IS_RUNNING_GAME );
 
          if( $load_remaining_time ) //RU
          {
@@ -635,18 +641,26 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( ALLOW_SQL_UNION ) //FU+RU ?UNION
       {
          $qsql->add_part( SQLP_UNION_WHERE,
-            "White_ID=$uid AND Opp.ID=Black_ID",
-            "Black_ID=$uid AND Opp.ID=White_ID" );
+            "Games.White_ID=$uid AND Opp.ID=Games.Black_ID",
+            "Games.Black_ID=$uid AND Opp.ID=Games.White_ID" );
          $qsql->useUnionAll();
       }
       else //FU+RU
       {
          $qsql->add_part( SQLP_WHERE,
-            //"(( Black_ID=$uid AND White_ID=Opp.ID ) OR
-            //( White_ID=$uid AND Black_ID=Opp.ID ))"
-            "(White_ID=$uid OR Black_ID=$uid)",
-            "Opp.ID=White_ID+Black_ID-$uid" );
+            //"(( Games.Black_ID=$uid AND Games.White_ID=Opp.ID ) OR
+            //( Games.White_ID=$uid AND Games.Black_ID=Opp.ID ))"
+            "(Games.White_ID=$uid OR Games.Black_ID=$uid)",
+            "Opp.ID=Games.White_ID+Games.Black_ID-$uid" );
       }
+   }
+
+   if( $ext_tid )
+   {
+      $qsql->add_part( SQLP_WHERE, "Games.tid=$ext_tid" );
+
+      $qsql->add_part( SQLP_FIELDS, 'TG.Status AS TG_Status' );
+      $qsql->add_part( SQLP_FROM, 'LEFT JOIN TournamentGames AS TG ON TG.gid=Games.ID' );
    }
 
    $qsql->merge( $gtable->get_query() );
@@ -873,6 +887,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $grow_strings[13] = ( $X_Lastchanged > 0 ? date(DATE_FMT, $X_Lastchanged) : '' );
       if( $gtable->Is_Column_Displayed[14] )
          $grow_strings[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
+
+      if( $ext_tid && $gtable->Is_Column_Displayed[42] && @$TG_Status )
+         $grow_strings[42] = TournamentGames::getStatusText($TG_Status);
 
       if( $finished ) //FU+FA
       {
