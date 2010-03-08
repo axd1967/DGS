@@ -30,6 +30,7 @@ require_once( 'include/game_functions.php' );
 require_once( 'include/classlib_game.php' );
 if( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament.php';
+   require_once 'tournaments/include/tournament_games.php';
 }
 
 $GLOBALS['ThePage'] = new Page('GameInfo');
@@ -105,7 +106,7 @@ function build_rating_diff( $rating_diff )
       error('unknown_game', "gameinfo.find2($gid)");
 
    $tid = (int) @$grow['tid'];
-   $tourney = null;
+   $tourney = $tgmae = null;
    if( $tid <= 0 )
       $tid = 0;
    else
@@ -113,6 +114,8 @@ function build_rating_diff( $rating_diff )
       $tourney = Tournament::load_tournament($tid);
       if( is_null($tourney) )
          error('unknown_tournament', "gameinfo.find_tournament($gid,$tid)");
+
+      $tgame = TournamentGames::load_tournament_game_by_gid($gid);
    }
 
 
@@ -376,12 +379,36 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo(
             T_('Title#tourney'),
             make_html_safe($tourney->Title, true) );
+      if( $tourney->Type != TOURNEY_TYPE_LADDER )
+         $itable->add_sinfo(
+               T_('Current Round#tourney'),
+               $tourney->formatRound() );
       $itable->add_sinfo(
-            T_('Status#tourney'),
+            T_('Tourney Status#tourney'),
             Tournament::getStatusText($tourney->Status) );
-      $itable->add_sinfo(
-            T_('Current Round#tourney'),
-            $tourney->formatRound() );
+      if( !is_null($tgame) )
+      {
+         $itable->add_sinfo(
+               T_('Tourney Game Status#tourney'),
+               TournamentGames::getStatusText($tgame->Status) );
+
+         if( $tgame->isScoreStatus() && @$grow['Black_ID'] )
+         {
+            $arr_flags = array();
+            if( $tgame->Flags & TG_FLAG_GAME_END_TD )
+               $arr_flags[] = T_('by TD#TG_flag');
+            $flags_str = (count($arr_flags)) ? sprintf( ' (%s)', implode(', ', $arr_flags)) : '';
+
+            $tg_score = $tgame->getScoreForUser( $grow['Black_ID'] );
+            $tg_score_str = score2text( $tg_score, false );
+            if( !$game_finished || ( @$grow['Score'] != $tg_score ) )
+               $tg_score_str = span('ScoreWarning', $tg_score_str );
+
+            $itable->add_sinfo(
+                  T_('Tourney Game Score#tourney'),
+                  $tg_score_str . $flags_str );
+         }
+      }
 
       $itable_str_tourney = $itable->make_table();
       unset($itable);
@@ -431,6 +458,8 @@ function build_rating_diff( $rating_diff )
    $menu_array[T_('Show game')] = 'game.php?gid='.$gid;
    if( $tid && !is_null($tourney) )
    {
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
       if( $tourney->allow_edit_tournaments($my_id, TD_FLAG_GAME_END) )
          $menu_array[T_('Admin tournament game')] =
             array( 'url' => "tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid", 'class' => 'TAdmin' );

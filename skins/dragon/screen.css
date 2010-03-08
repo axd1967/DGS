@@ -2620,6 +2620,7 @@ span.TWarning {
    color: darkred;
 }
 
+
 span.TLockWarn {
    font-weight: bold;
    color: darkred;
@@ -2640,6 +2641,11 @@ span.LadderWarn {
    font-size: 85%;
    font-style: italic;
    color: darkred;
+}
+
+span.ScoreWarning {
+   color: darkred;
+   font-weight: bold;
 }
 
 span.TAdmin,
