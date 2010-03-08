@@ -22,6 +22,31 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-08 juga
+
+   * tournaments/include/tournament_games.php (TournamentGames.isScoreStatus, ~.getScoreForUser),
+     gameinfo.php, skins/dragon/screen.css, NEWS:
+   - show more defails for tournaments on game-info page:
+     - add tournament-game info: status, tourney-game-score with flags,
+       emphasize score if different to game-score or game still running
+     - hide current round for ladder-tourneys
+     - added link to ladder-view for ladder-tourneys
+
+   * show_games.php, NEWS:
+   - enhance games-list page for specific tournament with tournament-game-status,
+     mostly to allow TD an easy search for unfinished games
+   - query-cleanup: always qualify Games-table in field-references,
+     because the following fields were ambiguous with TournamentGames: tid, Status, Flags
+
+   * tournaments/list_participants.php:
+   - added column with link to users running games
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_CLOSED,
+       ~.check_conditions_status_DEL, ~.check_conditions_unfinished_tourney_games),
+     tournaments/include/tournament_games.php (TournamentGames.count_tournament_games):
+   - added checks to change to CLOSED/DEL-tournament-status:
+     checking for unfinished tournament-games
+
 2010-03-07 juga
 
    * tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameRow,
