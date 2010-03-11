@@ -192,11 +192,14 @@ class EntityData
    var $entity;
    /*! \brief Array with values: [ fieldname => value ] */
    var $values;
+   /*! \brief Array with query-part-clauses: [ fieldname => field-based-query-part ] */
+   var $query_values;
 
    function EntityData( $entity )
    {
       $this->entity = $entity;
       $this->values = array();
+      $this->query_values = array();
    }
 
    function to_string()
@@ -220,6 +223,35 @@ class EntityData
       $this->values[$field] = $value;
    }
 
+   function set_query_value( $field, $query_value )
+   {
+      if( !$this->entity->is_field($field) )
+         error('assert', "EntityData.set_query_value.unknown_field({$this->entity->table},$field)");
+      $this->query_values[$field] = $query_value;
+   }
+
+   /*! \brief Returns array with valid field-names for current entity. */
+   function get_fields( $dbgmsg )
+   {
+      $arr = array();
+      foreach( $this->values as $field => $tmp )
+      {
+         if( !$this->entity->is_field($field) )
+            error('assert', "$dbgmsg.unknown_field({$this->entity->table},$field)");
+         $arr[$field] = 1;
+      }
+
+      foreach( $this->query_values as $field => $tmp )
+      {
+         if( !$this->entity->is_field($field) )
+            error('assert', "$dbgmsg.unknown_field2({$this->entity->table},$field)");
+         $arr[$field] = 2;
+      }
+
+      return array_keys( $arr );
+   }
+
+   /*! \brief Returns cloned array with values (without query-values). */
    function make_row( $clone=false )
    {
       return ($clone) ? array() + $this->values : $this->values;
@@ -230,9 +262,16 @@ class EntityData
       return (isset($this->values[$field])) ? $this->values[$field] : $default;
    }
 
-   function remove_value( $field )
+   function get_query_value( $field, $default=null )
+   {
+      return (isset($this->query_values[$field])) ? $this->query_values[$field] : $default;
+   }
+
+   function remove_value( $field, $with_queryval=true )
    {
       unset($this->values[$field]);
+      if( $with_queryval )
+         unset($this->query_values[$field]);
    }
 
    function get_sql_value( $field, $default=null )
@@ -240,21 +279,25 @@ class EntityData
       if( $field == FIELD_CHANGEDBY )
          return "RTRIM('" . mysql_addslashes( $this->build_changed_by() ) . "')";
 
-      if( !isset($this->values[$field]) )
-         return $default;
-
-      $ftype = $this->entity->fields[$field];
-      $value = $this->get_value( $field, $default );
-      if( $ftype == FTYPE_INT )
-         return (int)$value;
-      elseif( $ftype == FTYPE_TEXT || $ftype == FTYPE_ENUM )
-         return "'" . mysql_addslashes($value) . "'";
-      elseif( $ftype == FTYPE_DATE )
-         return ( $value != 0 ) ? "FROM_UNIXTIME($value)" : "'0000-00-00 00:00:00'";
-      elseif( $ftype == FTYPE_FLOAT )
-         return (float)$value;
+      if( isset($this->values[$field]) )
+      {
+         $ftype = $this->entity->fields[$field];
+         $value = $this->get_value( $field, $default );
+         if( $ftype == FTYPE_INT )
+            return (int)$value;
+         elseif( $ftype == FTYPE_TEXT || $ftype == FTYPE_ENUM )
+            return "'" . mysql_addslashes($value) . "'";
+         elseif( $ftype == FTYPE_DATE )
+            return ( $value != 0 ) ? "FROM_UNIXTIME($value)" : "'0000-00-00 00:00:00'";
+         elseif( $ftype == FTYPE_FLOAT )
+            return (float)$value;
+         else
+            error('assert', "EntityData.get_sql_value.bad_field_type({$this->entity->table},$field)");
+      }
+      elseif( isset($this->query_values[$field]) )
+         return $this->get_query_value( $field, $default );
       else
-         error('assert', "EntityData.get_sql_value.bad_field_type({$this->entity->table},$field)");
+         return $default;
    }
 
    function build_changed_by( $value=null )
@@ -281,10 +324,8 @@ class EntityData
       }
 
       $arr = array();
-      foreach( $this->values as $field => $value )
+      foreach( $this->get_fields("EntityData.build_sql_insert") as $field )
       {
-         if( !$this->entity->is_field($field) )
-            error('assert', "EntityData.build_sql_insert.unknown_field({$this->entity->table},$field)");
          if( !$this->entity->is_auto_increment($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
@@ -340,10 +381,8 @@ class EntityData
       }
 
       $arr = array();
-      foreach( $this->values as $field => $value )
+      foreach( $this->get_fields("EntityData.build_sql_update") as $field )
       {
-         if( !$this->entity->is_field($field) )
-            error('assert', "EntityData.build_sql_update.unknown_field({$this->entity->table},$field)");
          if( !$this->entity->is_primary_key($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }

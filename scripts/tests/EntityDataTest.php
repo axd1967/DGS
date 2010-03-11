@@ -80,6 +80,15 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( 1, UnitTestHelper::countErrors() );
    }
 
+   public function test_set_get_query_value() {
+      $qval = "77*RAND()";
+      $this->data->set_value('ID', 4711);
+      $this->data->set_query_value('i1', $qval );
+      $this->assertEquals( $qval, $this->data->query_values['i1'] );
+      $this->assertEquals( $qval, $this->data->get_query_value('i1') );
+      $this->assertEquals( '3-1', $this->data->get_query_value('i2', '3-1') );
+   }
+
    public function test_get_value() {
       $this->data->set_value('ID', 4711);
       $this->data->set_value('t2', 15);
@@ -91,10 +100,25 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
    }
 
    public function test_remove_value() {
+      $qval = "1+2+3";
       $this->data->set_value('ID', 4711);
+      $this->data->set_query_value('i1', $qval);
       $this->assertEquals( 4711, $this->data->get_value('ID') );
       $this->data->remove_value('ID');
       $this->assertNull( $this->data->get_value('ID') );
+      $this->assertEquals( $qval, $this->data->get_query_value('i1') );
+
+      $this->data->set_value('i1', 123);
+      $this->data->set_query_value('i1', $qval);
+      $this->data->remove_value('i1', false);
+      $this->assertNull( $this->data->get_value('i1') );
+      $this->assertEquals( $qval, $this->data->get_query_value('i1') );
+
+      $this->data->set_value('i1', 123);
+      $this->data->set_query_value('i1', $qval);
+      $this->data->remove_value('i1');
+      $this->assertNull( $this->data->get_value('i1') );
+      $this->assertNull( $this->data->get_query_value('i1') );
    }
 
    public function test_get_sql_value() {
@@ -110,6 +134,13 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( "'e-val'", $this->data->get_sql_value('e2') );
       $this->data->set_value('d1', 12345678);
       $this->assertEquals( "FROM_UNIXTIME(12345678)", $this->data->get_sql_value('d1') );
+
+      $qval = "1+2+3";
+      $this->data->set_value('i1', -7);
+      $this->data->set_query_value('i1', $qval);
+      $this->assertEquals( "-7", $this->data->get_sql_value('i1') );
+      $this->data->remove_value('i1', false);
+      $this->assertEquals( $qval, $this->data->get_sql_value('i1') );
    }
 
    public function test_build_sql_insert() {
@@ -122,6 +153,15 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->data->set_value('f1', 1.3);
       $this->assertEquals(
          "INSERT INTO Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678), f1=1.3",
+         $this->data->build_sql_insert() );
+   }
+
+   public function test_build_sql_insert_WithQueryValues() {
+      $this->data->set_value('ID', 4711);
+      $this->data->set_value('i1', 0);
+      $this->data->set_query_value('i2', "1+2+3");
+      $this->assertEquals(
+         "INSERT INTO Table SET i1=0, i2=1+2+3",
          $this->data->build_sql_insert() );
    }
 
@@ -150,6 +190,12 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          "(0,0,0.5,'12',DEFAULT(t2),FROM_UNIXTIME(12345678),DEFAULT(d2),DEFAULT(e1),'e-val')",
          $this->data->build_sql_insert_values() );
+
+      $this->data->remove_value('i2');
+      $this->data->set_query_value('i2', "7*RAND()");
+      $this->assertEquals(
+         "(0,7*RAND(),0.5,'12',DEFAULT(t2),FROM_UNIXTIME(12345678),DEFAULT(d2),DEFAULT(e1),'e-val')",
+         $this->data->build_sql_insert_values() );
    }
 
    public function test_build_sql_update() {
@@ -165,6 +211,15 @@ class EntityDataTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          "UPDATE Table SET i1=0, i2=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678) WHERE ID=4711 LIMIT 1",
          $this->data->build_sql_update() );
+
+      $this->data->remove_value('i2');
+      $this->data->set_query_value('i2', "7*RAND()");
+      $arr = $this->data->build_sql_update(3, true);
+      $this->assertEquals(
+         "UPDATE Table SET i1=0, t1='12', e2='e-val', d1=FROM_UNIXTIME(12345678), i2=7*RAND()",
+         $arr[0] );
+      $this->assertEquals( "WHERE ID=4711", $arr[1] );
+      $this->assertEquals( 'LIMIT 3', $arr[2] );
    }
 
    public function test_build_sql_delete() {
