@@ -136,7 +136,8 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
       make_header( 4, T_('Play phase'), TOURNEY_STATUS_PLAY ), //------------------------
       '<ul class="TAdminLinks">',
-         '<li>', make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
+         '<li>', make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ), SEP_SPACING,
+                 make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" ),
          '<li>', make_admin_tgame( $tid ), MED_SPACING, '(', T_('also see game info pages'), ')',
       '</ul>',
 
