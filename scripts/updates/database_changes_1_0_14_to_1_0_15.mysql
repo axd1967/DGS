@@ -1748,3 +1748,10 @@ ALTER TABLE TournamentLadderProps
    DROP COLUMN UserAbsenceAction ;
 
 
+-- added tournament-game stats for tournament-participant
+ALTER TABLE TournamentParticipant
+   ADD Finished mediumint unsigned NOT NULL default '0',
+   ADD Won mediumint unsigned NOT NULL default '0',
+   ADD Lost mediumint unsigned NOT NULL default '0' ;
+
+

@@ -85,11 +85,11 @@ class TournamentHelper
          if( $success )
          {
             // decrease TG.ChallengesIn for defender
-            $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid ); // don't load
+            $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid );
             $tladder_df->update_incoming_challenges( -1 );
 
             // decrease TG.ChallengesOut for challenger
-            $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid ); // don't load
+            $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
             $tladder_ch->update_outgoing_challenges( -1 );
 
             // tournament-game done
@@ -101,6 +101,10 @@ class TournamentHelper
             else
                $tgame->setStatus(TG_STATUS_DONE);
             $tgame->update();
+
+            // update TP.Finished/Won/Lost for challenger and defender
+            TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Score );
+            TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, -$tgame->Score );
          }
       }
       ta_end();

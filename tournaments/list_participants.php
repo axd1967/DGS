@@ -111,6 +111,9 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tptable->add_tablehead(10, T_('Round#T_reg'), 'Number', 0, 'StartRound-');
    $tptable->add_tablehead(15, new TableHead( T_('Running Games#T_reg'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
    $tptable->add_tablehead(11, T_('Tournament Rating#T_reg'), 'Rating', 0, 'Rating-');
+   $tptable->add_tablehead(16, T_('Finished#T_reg'), 'Number', 0, 'Finished-');
+   $tptable->add_tablehead(17, T_('Won#T_reg'), 'Number', 0, 'Won-');
+   $tptable->add_tablehead(18, T_('Lost#T_reg'), 'Number', 0, 'Lost-');
    $tptable->add_tablehead(12, T_('Registered#T_reg'), 'Date', 0, 'Created+');
    $tptable->add_tablehead(13, T_('Updated#T_reg'), 'Date', 0, 'Lastchanged-');
    if( $allow_edit_tourney )
@@ -205,6 +208,12 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
                $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
                sprintf( T_('Running games of user [%s]'), $tp->User->Handle ) );
       }
+      if( $tptable->Is_Column_Displayed[16] )
+         $row_str[16] = $tp->Finished;
+      if( $tptable->Is_Column_Displayed[17] )
+         $row_str[17] = $tp->Won;
+      if( $tptable->Is_Column_Displayed[18] )
+         $row_str[18] = $tp->Lost;
 
       $tptable->add_row( $row_str );
    }

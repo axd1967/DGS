@@ -164,6 +164,9 @@ Description:
  Notes        | text                              | NULL
  UserMessage  | text                              | NULL
  AdminMessage | text                              | NULL
+ Finished     | mediumint(8) unsigned             | 0
+ Won          | mediumint(8) unsigned             | 0
+ Lost         | mediumint(8) unsigned             | 0
 
 
 ## Fields:
@@ -241,6 +244,8 @@ Description:
 * UserMessage : private message from user to TD
 
 * AdminMessage : private message from TD to user
+
+* Finished, Won, Lost : number of finished/won/lost tournament-games of user
 
 
 ###########################################################################

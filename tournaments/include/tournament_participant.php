@@ -49,7 +49,7 @@ $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound',
+      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'Finished', 'Won', 'Lost',
       FTYPE_FLOAT, 'Rating',
       FTYPE_TEXT, 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
       FTYPE_DATE, 'Created', 'Lastchanged',
@@ -61,7 +61,6 @@ class TournamentParticipant
    var $ID;
    var $tid;
    var $uid;
-   var $User; // User-object
    var $Status; // null | TP_STATUS_...
    var $Flags;
    var $Rating; // -OUT_OF_RATING | valid-rating
@@ -73,16 +72,22 @@ class TournamentParticipant
    var $Notes;
    var $UserMessage;
    var $AdminMessage;
+   var $Finished;
+   var $Won;
+   var $Lost;
+
+   // non-DB fields
+
+   var $User; // User-object
 
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    function TournamentParticipant( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
          $rating=NULL, $start_round=1, $created=0, $lastchanged=0, $changed_by='',
-         $comment='', $notes='', $user_message='', $admin_message='' )
+         $comment='', $notes='', $user_message='', $admin_message='', $finished=0, $won=0, $lost=0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->uid = (int)$uid;
-      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
       $this->setStatus( $status );
       $this->Flags = (int)$flags;
       $this->setRating( $rating );
@@ -94,6 +99,11 @@ class TournamentParticipant
       $this->Notes = $notes;
       $this->UserMessage = $user_message;
       $this->AdminMessage = $admin_message;
+      $this->Finished = (int)$finished;
+      $this->Won = (int)$won;
+      $this->Lost = (int)$lost;
+      // non-DB fields
+      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
    }
 
    function setStatus( $status )
@@ -135,6 +145,9 @@ class TournamentParticipant
             . ", Notes=[{$this->Notes}]"
             . ", UserMessage=[{$this->UserMessage}]"
             . ", AdminMessage=[{$this->AdminMessage}]"
+            . ", Finished=[{$this->Finished}]"
+            . ", Won=[{$this->Won}]"
+            . ", Lost=[{$this->Lost}]"
          ;
    }
 
@@ -246,7 +259,6 @@ class TournamentParticipant
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Rating', $this->Rating );
       $data->set_value( 'StartRound', $this->StartRound );
-      $data->set_value( 'ID', $this->ID );
       if( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
@@ -255,6 +267,9 @@ class TournamentParticipant
       $data->set_value( 'Notes', $this->Notes );
       $data->set_value( 'UserMessage', $this->UserMessage );
       $data->set_value( 'AdminMessage', $this->AdminMessage );
+      $data->set_value( 'Finished', $this->Finished );
+      $data->set_value( 'Won', $this->Won );
+      $data->set_value( 'Lost', $this->Lost );
       return $data;
    }
 
@@ -296,9 +311,14 @@ class TournamentParticipant
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newQuerySQL('TP');
       $qsql->add_part( SQLP_FIELDS,
-         'TPP.Name', 'TPP.Handle', 'TPP.Country', 'TPP.Rating2', 'TPP.RatingStatus',
-         'TPP.RatedGames', 'TPP.Finished',
-         'UNIX_TIMESTAMP(TPP.Lastaccess) AS X_Lastaccess' );
+         'TPP.Name AS TPP_Name',
+         'TPP.Handle AS TPP_Handle',
+         'TPP.Country AS TPP_Country',
+         'TPP.Rating2 AS TPP_Rating2',
+         'TPP.RatingStatus AS TPP_RatingStatus',
+         'TPP.RatedGames AS TPP_RatedGames',
+         'TPP.Finished AS TPP_Finished',
+         'UNIX_TIMESTAMP(TPP.Lastaccess) AS TPP_X_Lastaccess' );
       $qsql->add_part( SQLP_FROM,
          'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
       return $qsql;
@@ -312,7 +332,7 @@ class TournamentParticipant
             @$row['ID'],
             @$row['tid'],
             @$row['uid'],
-            User::new_from_row( $row ), // from Players TPP
+            User::new_from_row( $row, 'TPP_' ), // from Players TPP
             @$row['Status'],
             @$row['Flags'],
             @$row['Rating'],
@@ -323,7 +343,10 @@ class TournamentParticipant
             @$row['Comment'],
             @$row['Notes'],
             @$row['UserMessage'],
-            @$row['AdminMessage']
+            @$row['AdminMessage'],
+            @$row['Finished'],
+            @$row['Won'],
+            @$row['Lost']
          );
       return $tp;
    }
@@ -413,6 +436,25 @@ class TournamentParticipant
          $arr[$row['ID']] = $row['uid'];
       mysql_free_result($result);
       return $arr;
+   }
+
+   /*!
+    * \brief Updates TournamentParticipant.Finished/Won/Lost-fields for given rid (=TP.ID).
+    * \param $score relative score for user: <0 = game won, >0 = game lost for given user
+    */
+   function update_game_end_stats( $tid, $rid, $score )
+   {
+      $data = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newEntityData();
+      $data->set_value( 'ID', $rid );
+      $data->set_value( 'tid', $tid );
+      $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
+      $data->set_query_value( 'Finished', "Finished+1" );
+      if( $score < 0 )
+         $data->set_query_value( 'Won', "Won+1" );
+      if( $score > 0 )
+         $data->set_query_value( 'Lost', "Lost+1" );
+
+      return $data->update( "TournamentParticipant::update_game_end_stats($tid,$rid,$score)" );
    }
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
