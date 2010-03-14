@@ -1755,3 +1755,26 @@ ALTER TABLE TournamentParticipant
    ADD Lost mediumint unsigned NOT NULL default '0' ;
 
 
+-- added history for tournament-ladder-ranks
+ALTER TABLE TournamentLadder
+   ADD HistoryRank smallint unsigned NOT NULL default '0' AFTER BestRank,
+   ADD PeriodRank smallint unsigned NOT NULL default '0' AFTER BestRank,
+   ADD StartRank smallint unsigned NOT NULL default '0' AFTER BestRank ;
+
+-- added table for tournament-runtime-properties
+CREATE TABLE TournamentExtension (
+   tid int NOT NULL,
+   Property smallint unsigned NOT NULL,
+   IntValue int NOT NULL DEFAULT '0',
+   DateValue datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   Lastchanged datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL DEFAULT '',
+   PRIMARY KEY (tid,Property),
+   KEY DateValue (DateValue)
+) ENGINE=MyISAM;
+
+-- added length of rank-period in months
+ALTER TABLE TournamentLadderProps
+   ADD RankPeriodLength tinyint unsigned NOT NULL DEFAULT '1' ;
+
+

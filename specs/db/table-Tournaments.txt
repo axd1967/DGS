@@ -448,6 +448,9 @@ Description:
  RankChanged   | datetime             | 0000-00-00 00:00:00
  Rank          | smallint(5) unsigned | 0
  BestRank      | smallint(5) unsigned | 0
+ StartRank     | smallint(5) unsigned | 0
+ PeriodRank    | smallint(5) unsigned | 0
+ HistoryRank   | smallint(5) unsigned | 0
  ChallengesIn  | tinyint(3) unsigned  | 0
  ChallengesOut | tinyint(3) unsigned  | 0
 
@@ -469,6 +472,16 @@ Description:
 
 * BestRank : maximum of reached ladder-ranks for user caused by direct win or loss
    - defaults to Rank
+
+* StartRank : starting rank, doesn't change
+
+* PeriodRank : rank at start of new period
+   - period defined by ladder configuration
+      - e.g. one month, so could be rank from start of month
+
+* HistoryRank : rank from previous period
+   - period defined by ladder configuration
+      - e.g. one month, so could be rank from previous month
 
 * ChallengesIn : number of current incoming challenges for ladder-user
 
@@ -501,6 +514,7 @@ Description:
  GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | DF_BELOW
  GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')    | CH_LAST
  UserAbsenceDays        | tinyint(3) unsigned                     | 0
+ RankPeriodLength       | tinyint(3) unsigned                     | 1
 
 
 ## Fields:
@@ -572,6 +586,12 @@ Description:
    - days, not counting user on vacation
      user is removed from ladder for user not being online for $UserAbsenceDays days
 
+* RankPeriodLength : length (in months) of one rank-period after which rank is "archived"
+   - min. value = 1
+   - unit is number of months
+   - each new period at start of month, the ladder-tournament current ranks
+     are copied to PeriodRank-field and former PeriodRank copied to HistoryRank-field
+
 
 ###########################################################################
 ## --- TournamentGames ---
@@ -641,5 +661,37 @@ Description:
       - 0 = jigo
       - -1000, 1000 = Challenger(-1000)/Defender(1000) has won game by resignation
       - -2000, 2000 = Challenger(-2000)/Defender(2000) has won game by timeout
+
+
+###########################################################################
+## --- TournamentExtension ---
+
+Description:
+   Table with extended tournament-data.
+
+ Field       | Type                 | Default
+-------------+----------------------+---------------------
+ tid         | int(11)              | NULL
+ Property    | smallint(5) unsigned | NULL
+ IntValue    | int(11)              | 0
+ DateValue   | datetime             | 0000-00-00 00:00:00
+ Lastchanged | datetime             | 0000-00-00 00:00:00
+ ChangedBy   | varchar(54)          |
+
+
+## Fields:
+
+* tid : FK to Tournament.ID
+
+* Property : key for property-extension
+   - 1 = date-property with next date to update Ladder-Tournament Rank-history
+
+* IntValue : optional integer-like value
+
+* DateValue : optional date-like value
+
+* Lastchanged : date of last update of table-entry
+
+* ChangedBy : user-list that updated table-entry in format: "[user2] [user1] ..."
 
 
