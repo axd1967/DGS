@@ -287,6 +287,8 @@ class TournamentParticipant
             . "WHERE tid='$tid' $query_status GROUP BY Status" );
 
       $out = array();
+      if( !is_null($status) )
+         $out[$status] = 0;
       $sum = 0;
       while( $row = mysql_fetch_array( $result ) )
       {

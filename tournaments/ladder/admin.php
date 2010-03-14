@@ -121,7 +121,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    elseif( !$is_delete && $uid <= 0 )
    {
       $tp_arr = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
-      $count_tp_reg = $tp_arr[TP_STATUS_REGISTER];
+      $count_tp_reg = (int)@$tp_arr[TP_STATUS_REGISTER];
       $count_tl_user = TournamentLadder::count_tournament_ladder( $tid );
    }
 
