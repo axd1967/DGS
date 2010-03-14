@@ -101,9 +101,13 @@ class TournamentCache
       else
       {
          $td = TournamentDirector::load_tournament_director( $tid, $uid, /*with_user*/false );
-         $this->cache_tdirector[$key] = $td;
+         if( !is_null($td) )
+            $this->cache_tdirector[$key] = $td;
       }
-      $is_tdir = ($flags > 0) ? ($td->Flags & $flags) : !is_null($td);
+
+      $is_tdir = !is_null($td);
+      if( $is_tdir && ($flags > 0) )
+         $is_tdir = ( $td->Flags & $flags );
       return ($is_tdir) ? $td : null;
    }
 
