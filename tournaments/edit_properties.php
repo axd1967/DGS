@@ -25,6 +25,7 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_globals.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
@@ -245,7 +246,7 @@ function parse_edit_form( &$tpr, $ttype )
          $errors[] = sprintf( T_('Expecting positive number for minimum participants > %s'),
                               $ttype->limit_min_participants - 1 );
 
-      $limit_max_TPs = ($ttype->limit_max_participants > 0) ? $ttype->limit_max_participants : 99999;
+      $limit_max_TPs = ($ttype->limit_max_participants > 0) ? $ttype->limit_max_participants : TP_MAX_COUNT;
       $new_value = $vars['max_participants'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value <= $limit_max_TPs )
          $tpr->MaxParticipants = limit( $new_value, 0, $limit_max_TPs, 0 );
