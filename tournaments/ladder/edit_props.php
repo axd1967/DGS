@@ -267,11 +267,12 @@ function parse_edit_form( &$tlp )
       $old_vals['chall_range_rat'] = $tlp->ChallengeRangeRating;
 
       $new_value = $vars['chall_range_abs'];
-      $max_value = 1000;
-      if( TournamentUtils::isNumberOrEmpty($new_value, true) && $new_value >= -1 )
-         $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, $max_value, 10 );
+      if( TournamentUtils::isNumberOrEmpty($new_value, true)
+            && $new_value >= -1 && $new_value <= TLADDER_MAX_CHRNG_ABS )
+         $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, TLADDER_MAX_CHRNG_ABS, 10 );
       else
-         $errors[] = sprintf( T_('Expecting number for absolute challenge range in range [-1..%s]'), $max_value );
+         $errors[] = sprintf( T_('Expecting number for absolute challenge range in range [-1..%s]'),
+            TLADDER_MAX_CHRNG_ABS );
 
       $new_value = $vars['chall_range_rel'];
       if( TournamentUtils::isNumberOrEmpty($new_value, true) )
