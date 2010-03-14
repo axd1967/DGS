@@ -71,6 +71,18 @@ class TournamentTemplate
       error('tournament_create_error', sprintf( $msgfmt, $this->uid ) );
    }
 
+   /*! \brief Creates Tournament object with given arguments. */
+   function make_tournament( $scope, $title )
+   {
+      $tourney = new Tournament();
+      $tourney->setScope( $scope );
+      $tourney->setWizardType( $this->wizard_type );
+      $tourney->Title = $title;
+      $tourney->Owner_ID = $this->uid;
+      return $tourney;
+   }
+
+
    // ---------- Interface ----------------------------------------
 
    /*! \brief Returns inserted Tournament.ID if successful; 0 otherwise. */
@@ -98,6 +110,9 @@ class TournamentTemplate
    {
       return $tp->persist();
    }
+
+
+   // ------------ static functions ----------------------------
 
 } // end of 'TournamentTemplate'
 

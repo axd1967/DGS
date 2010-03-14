@@ -30,53 +30,50 @@ require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 
  /*!
-  * \file dgs_ladder.php
+  * \file public_ladder.php
   *
   * \brief Classes and functions to handle Ladder-typed tournament
   */
 
 
  /*!
-  * \class DgsLadderTournament
+  * \class PublicLadderTournament
   *
-  * \brief Template-pattern for official "DGS Ladder"-tournament
+  * \brief Template-pattern for public Ladder-tournament
   */
-class DgsLadderTournament extends TournamentTemplateLadder
+class PublicLadderTournament extends TournamentTemplateLadder
 {
-   function DgsLadderTournament()
+   function PublicLadderTournament()
    {
       parent::TournamentTemplateLadder(
-         TOURNEY_WIZTYPE_DGS_LADDER,
-         T_('DGS Ladder (only for Admin)#ttype') );
-      $this->limit_min_participants = 1;
-      $this->limit_max_participants = 0;
+         TOURNEY_WIZTYPE_PUBLIC_LADDER,
+         T_('Public Ladder (with game restrictions)#ttype') );
+
+      // overwrite tournament-type-specific properties
+      $this->need_admin_create_tourney = false;
+      $this->limit_max_participants = 300;
    }
 
    function createTournament()
    {
-      $tourney = $this->make_tournament( TOURNEY_SCOPE_DRAGON, "DGS Ladder (19x19)" );
+      global $player_row;
+      $tourney = $this->make_tournament( TOURNEY_SCOPE_PUBLIC,
+         sprintf( T_('%s\'s Ladder'), $player_row['Handle'] ) );
 
       $tprops = new TournamentProperties();
       $tprops->MinParticipants = 1;
-      $tprops->MaxParticipants = 0;
+      $tprops->MaxParticipants = 100;
 
       $t_rules = new TournamentRules();
-      $t_rules->Size = 19;
-      $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
 
       $tl_props = new TournamentLadderProps();
       $tl_props->ChallengeRangeAbsolute = 10;
-      $tl_props->MaxChallenges = 10;
-      // 1..5 max. 5 games, 6..10 max. 4 games, else 3 games:
-      $tl_props->MaxDefenses1 = 5;
-      $tl_props->MaxDefensesStart1 = 5;
-      $tl_props->MaxDefenses2 = 4;
-      $tl_props->MaxDefensesStart2 = 10;
+      $tl_props->MaxChallenges = 5;
       $tl_props->MaxDefenses = 3;
 
       return $this->_createTournament( $tourney, $tprops, $t_rules, $tl_props );
    }
 
-} // end of 'DgsLadderTournament'
+} // end of 'PublicLadderTournament'
 
 ?>
