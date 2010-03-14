@@ -49,7 +49,8 @@ require_once 'tournaments/include/tournament_games.php';
 global $ENTITY_TOURNAMENT_LADDER; //PHP5
 $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
       FTYPE_PKEY, 'tid', 'rid',
-      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'ChallengesIn', 'ChallengesOut',
+      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'StartRank', 'PeriodRank', 'HistoryRank',
+                  'ChallengesIn', 'ChallengesOut',
       FTYPE_DATE, 'Created', 'RankChanged'
    );
 
@@ -62,6 +63,9 @@ class TournamentLadder
    var $RankChanged;
    var $Rank;
    var $BestRank;
+   var $StartRank;
+   var $PeriodRank;
+   var $HistoryRank;
    var $ChallengesIn;
    var $ChallengesOut;
 
@@ -79,8 +83,8 @@ class TournamentLadder
    var $RematchWait;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
-   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $bestrank=0,
-         $challenges_in=0, $challenges_out=0 )
+   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
+         $start_rank=0, $period_rank=0, $history_rank=0, $challenges_in=0, $challenges_out=0 )
    {
       $this->tid = (int)$tid;
       $this->rid = (int)$rid;
@@ -88,7 +92,10 @@ class TournamentLadder
       $this->Created = (int)$created;
       $this->RankChanged = (int)$rank_changed;
       $this->Rank = (int)$rank;
-      $this->BestRank = (int)$bestrank;
+      $this->BestRank = (int)$best_rank;
+      $this->StartRank = (int)$start_rank;
+      $this->PeriodRank = (int)$period_rank;
+      $this->HistoryRank = (int)$history_rank;
       $this->ChallengesIn = (int)$challenges_in;
       $this->ChallengesOut = (int)$challenges_out;
       // non-DB fields
@@ -178,6 +185,9 @@ class TournamentLadder
       $data->set_value( 'RankChanged', $this->RankChanged );
       $data->set_value( 'Rank', $this->Rank );
       $data->set_value( 'BestRank', $this->BestRank );
+      $data->set_value( 'StartRank', $this->StartRank );
+      $data->set_value( 'PeriodRank', $this->PeriodRank );
+      $data->set_value( 'HistoryRank', $this->HistoryRank );
       $data->set_value( 'ChallengesIn', $this->ChallengesIn );
       $data->set_value( 'ChallengesOut', $this->ChallengesOut );
       return $data;
@@ -344,6 +354,9 @@ class TournamentLadder
             @$row['X_RankChanged'],
             @$row['Rank'],
             @$row['BestRank'],
+            @$row['StartRank'],
+            @$row['PeriodRank'],
+            @$row['HistoryRank'],
             @$row['ChallengesIn'],
             @$row['ChallengesOut']
          );
@@ -457,13 +470,18 @@ class TournamentLadder
    /*! \brief Adds TP configured by rid,uid for tournament tid at bottom of ladder. */
    function add_participant_to_ladder( $tid, $rid, $uid )
    {
+      static $query_next_rank = "IFNULL(MAX(Rank),0)+1";
       $NOW = $GLOBALS['NOW'];
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
 
       // defaults: RankChanged=0, ChallengesIn=0
-      $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank) "
-             . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), IFNULL(MAX(Rank),0)+1 AS Rank, "
-                  . "IFNULL(MAX(Rank),0)+1 AS BestRank "
+      $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank,StartRank,PeriodRank,HistoryRank) "
+             . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), "
+                  . "$query_next_rank AS Rank, "
+                  . "$query_next_rank AS BestRank, "
+                  . "$query_next_rank AS StartRank, "
+                  . "$query_next_rank AS PeriodRank, "
+                  . "$query_next_rank AS HistoryRank "
              . "FROM $table WHERE tid=$tid";
       return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
    }
@@ -563,7 +581,8 @@ class TournamentLadder
          foreach( $arr_TPs as $row )
          {
             ++$rank;
-            $tladder = new TournamentLadder( $tid, $row['rid'], $row['uid'], $NOW, 0, $rank, $rank );
+            $tladder = new TournamentLadder( $tid, $row['rid'], $row['uid'], $NOW, 0,
+               $rank, $rank, $rank, $rank, $rank );
             $tladder->fillEntityData( $data );
             $arr_inserts[] = $data->build_sql_insert_values();
          }
@@ -851,6 +870,16 @@ class TournamentLadder
       return $success;
    }//process_user_absence
 
+   /*! \brief Copies PeriodRank over to HistoryRank-field and Rank to PeriodRank-field. */
+   function process_rank_period( $tid )
+   {
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('invalid_args', "TournamentLadder::process_rank_period.check.tid($tid)");
+
+      return db_query( "TournamentLadder::process_rank_period($tid)",
+         "UPDATE TournamentLadder SET HistoryRank=PeriodRank, PeriodRank=Rank WHERE tid=$tid" );
+   }
+
    /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
    function allow_edit_ladder( $tourney, &$return_errors )
    {
@@ -874,6 +903,18 @@ class TournamentLadder
 
       $return_errors = array_merge( $return_errors, $errors );
       return ( count($errors) == 0 );
+   }
+
+   /*! \brief Returns relative rank-diff-info for given ranks and format. */
+   function build_rank_diff( $rank, $prev_rank, $fmt='%s. (%s)' )
+   {
+      if( $rank == $prev_rank )
+         $rank_diff = '=';
+      elseif( $rank < $prev_rank )
+         $rank_diff = '+' . ($prev_rank - $rank);
+      else //$rank > $prev_rank
+         $rank_diff = '-' . ($rank - $prev_rank);
+      return sprintf( $fmt, $prev_rank, $rank_diff );
    }
 
    function get_notes_user_removed()
