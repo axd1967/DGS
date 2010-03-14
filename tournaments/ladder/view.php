@@ -50,6 +50,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       error('feature_disabled', 'Tournament.ladder.view');
    $my_id = $player_row['ID'];
 
+   // define JavaScript for ladder-view: set translated texts as global JS-vars
+   $js_enabled = is_javascript_enabled();
+   $js  = add_js_var( 'T_rankInfoTitle', T_('Player Rank Details') );
+   $js .= add_js_var( 'T_rankInfoFormat',
+      sprintf( "%s: %%s.<br>%s: %%s.<br>%s: %%s<br>%s: %%s",
+         basic_safe(T_('Current Rank')),
+         basic_safe(T_('Best Rank')),
+         basic_safe(T_('Start of Period (Change)')),
+         basic_safe(T_('Previous Period (Change)')) ));
+
 /* Actual REQUEST calls used
      tid=                           : view T-ladder
      tid=&admin=1                   : admin-mode on T-ladder (edit-ladder)
@@ -124,8 +134,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_external_parameters( $page_vars, true ); // add as hiddens
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      $ltable->add_tablehead( 2, T_('Change#T_ladder'), 'Center', 0 );
       $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE );
-      $ltable->add_tablehead( 2, T_('Best Rank#T_ladder'), 'Number', 0 );
       $ltable->add_tablehead( 3, T_('Name#T_ladder'), 'User', 0 );
       $ltable->add_tablehead( 4, T_('Userid#T_ladder'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#T_ladder'), 'Image', 0 );
@@ -173,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
 
    $title = sprintf( T_('Tournament-Ladder #%s'), $tid );
-   start_page( $title, true, $logged_in, $player_row );
+   start_page( $title, true, $logged_in, $player_row, null, null, $js );
    echo "<h2 class=Header>", $tourney->build_info(2), "</h2>\n";
 
    if( $allow_view )
@@ -204,7 +214,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[ 1] )
             $row_str[ 1] = $tladder->Rank . '.';
          if( $ltable->Is_Column_Displayed[ 2] )
-            $row_str[ 2] = $tladder->BestRank . '.';
+            $row_str[ 2] = build_rank_change( $tladder );
          if( $ltable->Is_Column_Displayed[ 3] )
             $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
          if( $ltable->Is_Column_Displayed[ 4] )
@@ -265,18 +275,26 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if( !is_null($tl_user) && !$admin_mode )
       {
          if( $tl_props->MaxChallenges > 0 )
-         {
             $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges'),
                                    $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
-            echo
-               ( ($tl_user->MaxChallengedOut)
-                  ? span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled'))
-                  : $ch_out_str . T_('Challenging allowed')
-               ), ".<br>\n";
+         else
+            $ch_out_str = sprintf( T_('You have started %s outgoing game challenges'),
+                                   $tl_user->ChallengesOut ) . ': ';
+         echo
+            ( ($tl_user->MaxChallengedOut)
+               ? span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled'))
+               : $ch_out_str . T_('Challenging allowed')
+            ), ".<br>\n";
+         if( !is_javascript_enabled() )
+         {
+            echo sprintf( T_('Your start rank (change) in the current period is: %s'),
+                        TournamentLadder::build_rank_diff( $tl_user->Rank, $tl_user->PeriodRank )), "<br>\n";
+            echo sprintf( T_('Your rank (change) in the previous period was: %s'),
+                        TournamentLadder::build_rank_diff( $tl_user->Rank, $tl_user->HistoryRank )), "<br>\n";
          }
-         echo sprintf( T_('Your current rank is #%s.'), $tl_user->Rank ),
+         echo sprintf( T_('Your current rank is %s.'), $tl_user->Rank ),
             MED_SPACING,
-            sprintf( T_('Your best rank is #%s.'), $tl_user->BestRank ),
+            sprintf( T_('Your best rank is %s.'), $tl_user->BestRank ),
             "<br>\n";
       }
 
@@ -343,6 +361,24 @@ function admin_edit_ladder_extend_table_form( &$table, &$form )
 {
    $result = $form->print_insert_text_input( 'new_rank', 6, 6, get_request_arg('new_rank') );
    $result .= $form->print_insert_submit_button( 'ta_updrank', T_('Update rank') );
+   return $result;
+}
+
+function build_rank_change( $tladder )
+{
+   global $js_enabled;
+
+   $result = TournamentLadder::build_rank_diff( $tladder->Rank, $tladder->PeriodRank, '%2$s' );
+   if( $js_enabled )
+   {
+      $result = anchor( '#', $result, '',
+         array(
+            'class' => 'TLadderRank',
+            'onmouseover' => sprintf( "showTLRankInfo(event,%s,%s,%s,%s);",
+                                      $tladder->Rank, $tladder->BestRank,
+                                      $tladder->PeriodRank, $tladder->HistoryRank ),
+            'onmouseout' => 'hideInfo();' ));
+   }
    return $result;
 }
 
