@@ -50,15 +50,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       error('feature_disabled', 'Tournament.ladder.view');
    $my_id = $player_row['ID'];
 
-   // define JavaScript for ladder-view: set translated texts as global JS-vars
+   // JavaScript for ladder-view: set translated texts as global JS-vars
    $js_enabled = is_javascript_enabled();
-   $js  = add_js_var( 'T_rankInfoTitle', T_('Player Rank Details') );
-   $js .= add_js_var( 'T_rankInfoFormat',
-      sprintf( "%s: %%s.<br>%s: %%s.<br>%s: %%s<br>%s: %%s",
-         basic_safe(T_('Current Rank')),
-         basic_safe(T_('Best Rank')),
-         basic_safe(T_('Start of Period (Change)')),
-         basic_safe(T_('Previous Period (Change)')) ));
+   if( $js_enabled )
+   {
+      $js  = add_js_var( 'T_rankInfoTitle', T_('Player Rank Details') );
+      $js .= add_js_var( 'T_rankInfoFormat', TournamentLadder::get_rank_info_format() );
+   }
+   else
+      $js = null;
 
 /* Actual REQUEST calls used
      tid=                           : view T-ladder

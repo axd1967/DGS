@@ -908,6 +908,7 @@ class TournamentLadder
    /*! \brief Returns relative rank-diff-info for given ranks and format. */
    function build_rank_diff( $rank, $prev_rank, $fmt='%s. (%s)' )
    {
+      // also see 'js/common.js buildRankDiff()'
       if( $rank == $prev_rank )
          $rank_diff = '=';
       elseif( $rank < $prev_rank )
@@ -920,6 +921,16 @@ class TournamentLadder
    function get_notes_user_removed()
    {
       return T_('Your running tournament games will be continued as normal games without effecting the tournament.');
+   }
+
+   function get_rank_info_format()
+   {
+      return
+         sprintf( "%s: %%s.<br>%s: %%s.<br>%s: %%s<br>%s: %%s",
+            basic_safe(T_('Current Rank')),
+            basic_safe(T_('Best Rank')),
+            basic_safe(T_('Start of Period (Change)')),
+            basic_safe(T_('Previous Period (Change)')) );
    }
 
    function get_edit_tournament_status()
