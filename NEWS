@@ -43,6 +43,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Max. Defenses, Max. Challenges
          * Game-end handling
          * Long user-absence handling
+         * Rank-History period-length [in months]
+      * Tournament Ladder view page showing current ladder standings
+         * Added pop-up with rank-change information for each user (if JavaScript enabled)
       * Tournament Ladder admin-interface to prepare and edit ladder
       * Tournament Ladder challenge page to confirm challenge starting tournament game
          * Show probable game-settings for challenge
@@ -53,6 +56,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page
       * Added view of games for specific tournament on games-list pages
+      * Added number of finished, won and lost tournament-games for tournament-participants
       * Delete-Game and Add-Time forbidden for Tournament game
 
    * Game page:
