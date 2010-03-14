@@ -339,8 +339,8 @@ class TournamentLadderProps
 
       // user absence handling
       if( $this->UserAbsenceDays > 0 )
-         $arr_props[] = sprintf( T_("If player haven't accessed DGS within the last %d days (excluding vacation)\n"
-            . 'the user will be removed from ladder.'), $this->UserAbsenceDays );
+         $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
+            . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
 
       // rank-change period
       $arr_props[] = T_('Length of one rank-archive period') . ': ' .
