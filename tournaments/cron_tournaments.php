@@ -61,26 +61,6 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $thelper = new TournamentHelper();
 
 
-   // ---------- jobs running only once a day
-
-   // NOTE: added special daily-jobs here to avoid the complexity of cron-locking
-   //       of daily_cron/tournament-cron-scripts
-
-   $row = mysql_single_fetch( 'cron_tournament.daily.check_frequency',
-      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
-      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
-   if( $row )
-   {
-      if( DBG_TEST || $row['timediff'] >= 3600*24 ) // one day-check
-      {
-         db_query( 'cron_tournament.daily.next_run_date',
-            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
-
-         run_once_daily();
-      }
-   }
-
-
    // ---------- handle tournament-game ending by score/resignation/jigo/timeout
 
    $tg_iterator = new ListIterator( 'cron_tournament.load_tgames.score', null, $tg_order );
@@ -106,6 +86,27 @@ if( ALLOW_TOURNAMENTS && !$is_down )
 
    $wait_ticks = (int)$thelper->tcache->load_clock_ticks( 'cron_tournament.game_wait', CLOCK_TOURNEY_GAME_WAIT );
    TournamentGames::update_tournament_game_wait( 'cron_tournament', $player_row['Handle'], $wait_ticks );
+
+
+
+   // ---------- jobs running only once a day ----------
+
+   // NOTE: added special daily-jobs here to avoid the complexity of cron-locking
+   //       of daily_cron/tournament-cron-scripts
+
+   $row = mysql_single_fetch( 'cron_tournament.daily.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
+   if( $row )
+   {
+      if( DBG_TEST || $row['timediff'] >= 3600*24 ) // one day-check
+      {
+         db_query( 'cron_tournament.daily.next_run_date',
+            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
+
+         run_once_daily();
+      }
+   }
 
 
    // ---------- END --------------------------------
@@ -141,5 +142,27 @@ function run_once_daily()
       $thelper->tcache->release_tournament_cron_lock();
    }
    ta_end();
+
+
+   // ---------- Update history/period-rank for ladder-tournaments
+
+   $te_iterator = TournamentHelper::load_ladder_rank_period_update(
+      new ListIterator( 'cron_tournament.load_ladder_rank_period_update' ));
+
+   ta_begin();
+   {//HOT-section to process rank-updates
+      while( list(,$arr_item) = $te_iterator->getListIterator() )
+      {
+         list( $t_ext, $orow ) = $arr_item;
+         $tid = $t_ext->tid;
+
+         $thelper->tcache->release_tournament_cron_lock( $tid );
+         if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+            $thelper->process_rank_period( $t_ext );
+      }
+      $thelper->tcache->release_tournament_cron_lock();
+   }
+   ta_end();
+
 }//run_once_daily
 ?>
