@@ -67,6 +67,11 @@ define('TCHKTYPE_TD', 1);
 define('TCHKTYPE_USER_NEW', 2);
 define('TCHKTYPE_USER_EDIT', 3);
 
+// ---------- Tournament Extension Stuff --------------------------
+
+define('TE_PROP_TLADDER_RANK_PERIOD_UPDATE', 1);
+define('TE_MAX_PROP', 1); // max. tournament-extension-property
+
 // ---------- Tournament Director Stuff ---------------------------
 
 // see also TournamentDirector::getFlagsText()
