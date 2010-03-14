@@ -34,12 +34,6 @@ require_once 'tournaments/include/tournament_globals.php';
   * \brief Functions for ladder-specific tournament properties: tables TournamentLadderProps
   */
 
-define('TLADDER_MAX_DEFENSES', 20);
-define('TLADDER_MAX_CHALLENGES', 200);
-define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // 3 months
-define('TLADDER_MAX_CHRNG_RATING', 32767);
-define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
-
 // game-end type
 define('TGE_NORMAL', 1);
 define('TGE_JIGO', 2);
