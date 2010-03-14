@@ -83,7 +83,7 @@ class Tournament
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
-                        $wizard_type=TOURNEY_WIZTYPE_DGS_LADDER, $title='', $description='',
+                        $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
                         $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW, $flags=0,
                         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
                         $rounds=1, $current_round=1, $lock_note='' )
@@ -560,6 +560,7 @@ class Tournament
       {
          $arr = array();
          $arr[TOURNEY_WIZTYPE_DGS_LADDER] = T_('DGS Ladder');
+         $arr[TOURNEY_WIZTYPE_PUBLIC_LADDER] = T_('Public Ladder');
          $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 
