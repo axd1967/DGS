@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/connect2mysql.php';
+require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_extension.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_rules.php';
-require_once 'tournaments/include/tournament_cache.php';
-require_once 'tournaments/include/tournament_ladder.php';
-require_once 'tournaments/include/tournament_ladder_props.php';
 
  /*!
   * \file tournament_helper.php
@@ -112,6 +113,24 @@ class TournamentHelper
       return $success;
    }//process_tournament_ladder_game_end
 
+   /*! \brief Updates TournamentLadder.Period/History-Rank when rank-update is due, set next update-date. */
+   function process_rank_period( $t_ext )
+   {
+      $tid = $t_ext->tid;
+      $tl_props = $this->tcache->load_tournament_ladder_props( 'process_rank_period', $tid);
+      if( is_null($tl_props) )
+         return false;
+
+      // set next check date at month-start (min-period = 1 month)
+      $t_ext->DateValue = TournamentUtils::get_month_start_time( $GLOBALS['NOW'], $tl_props->RankPeriodLength );
+      $success = $t_ext->update();
+
+      if( $success )
+         $success = TournamentLadder::process_rank_period( $tid );
+
+      return $success;
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -151,18 +170,6 @@ class TournamentHelper
       return $rating;
    }
 
-   /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
-   function check_rated_tournament_participants( $tid )
-   {
-      $row = mysql_single_fetch( "TournamentHelper.check_rated_tournament_participants.find_unrated($tid)",
-         "SELECT TP.uid FROM TournamentParticipant AS TP INNER JOIN Players AS P ON P.ID=TP.uid " .
-         "WHERE TP.tid=$tid AND P.RatingStatus='NONE' LIMIT 1" );
-      if( $row )
-         return false;
-
-      return true;
-   }
-
    function load_ladder_absent_users( $iterator=null )
    {
       $qsql = new QuerySQL(
@@ -186,6 +193,27 @@ class TournamentHelper
          $iterator = new ListIterator( 'TournamentHelper::load_ladder_absent_users' );
       $iterator->addQuerySQLMerge( $qsql );
       return TournamentLadder::load_tournament_ladder( $iterator );
+   }
+
+   function load_ladder_rank_period_update( $iterator = null )
+   {
+      global $NOW;
+
+      $qsql = new QuerySQL(
+         SQLP_FROM,
+            'INNER JOIN Tournament AS T ON T.ID=TE.tid',
+         SQLP_WHERE,
+            "T.Status='".TOURNEY_STATUS_PLAY."'",
+            "TE.Property=".TE_PROP_TLADDER_RANK_PERIOD_UPDATE,
+            "TE.DateValue <= FROM_UNIXTIME($NOW)",
+         SQLP_ORDER,
+            'TE.tid ASC'
+         );
+
+      if( is_null($iterator) )
+         $iterator = new ListIterator( 'TournamentHelper::load_ladder_rank_period_update' );
+      $iterator->addQuerySQLMerge( $qsql );
+      return TournamentExtension::load_tournament_extensions( $iterator );
    }
 
 } // end of 'TournamentHelper'
