@@ -316,7 +316,8 @@ function is_javascript_enabled()
    return ( ALLOW_JAVASCRIPT && (@$player_row['UserFlags'] & USERFLAG_JAVASCRIPT_ENABLED) );
 }
 
-function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL )
+function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL,
+                     $javascript=null )
 {
    global $base_path, $encoding_used, $printable;
 
@@ -379,6 +380,9 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
       if( ALLOW_GO_DIAGRAMS )
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
+
+      if( !is_null($javascript) && is_string($javascript) )
+         echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$javascript\n</script>";
    }
 
    if( is_a($ThePage, 'HTMLPage') )
@@ -389,10 +393,11 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    else
       $tmp='';
    echo "\n</HEAD>\n<BODY id=\"".FRIENDLY_SHORT_NAME."\"$tmp>\n";
+   echo "<div id=\"InfoBox\"></div>\n";
 } //start_html
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
-                     $style_string=NULL, $last_modified_stamp=NULL )
+                     $style_string=NULL, $last_modified_stamp=NULL, $javascript=null )
 {
    global $base_path, $is_down, $is_down_message, $is_maintenance, $ARR_USERS_MAINTENANCE, $printable;
 
@@ -400,7 +405,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( $is_down && $logged_in )
       check_maintenance( $user_handle );
 
-   start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp);
+   start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp, $javascript );
 
    echo_dragon_top_bar( $logged_in, $user_handle );
 
