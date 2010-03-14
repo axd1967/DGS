@@ -209,7 +209,7 @@ class TournamentGames
 
       $arr_query = $data->build_sql_update( 1, true );
       if( !is_null($old_status) )
-         $arr_query[1] .= " AND Status='" . mysql_addslashes($old_status) . "'";
+         $arr_query[1] .= " AND Status='" . mysql_addslashes($old_status) . "'"; // WHERE-clause
 
       $result = db_query( "$dbgmsg.TournamentGames.update_score({$this->ID},{$this->tid},{$this->gid},{$this->Score})",
          implode(' ', $arr_query) );
