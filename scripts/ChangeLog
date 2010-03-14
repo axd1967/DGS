@@ -24,6 +24,65 @@ ChangeLog
 
 2010-03-14 juga
 
+   * tournaments/include/tournament_template_ladder.php (class TournamentTemplateLadder,
+       ~._createTournament, ~.checkProperties, ~.checkParticipantRegistrations, ~.joinTournament),
+     tournaments/include/tournament_template.php (TournamentTemplate.make_tournament),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament, ~.createTournament),
+     tournaments/include/types/public_ladder.php (class PublicLadderTournament, ~.createTournament),
+     tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),
+     tournaments/include/tournament_utils.php (TournamentUtils.getWizardTournamentType),
+     tournaments/include/tournament.php (class Tournament, ~.getWizardTypeText),
+     tournaments/include/tournament_globals.php, NEWS:
+   - added wizard-type and tournament-type for public-ladder:
+     TOURNEY_WIZTYPE_PUBLIC_LADDER, PublicLadderTournament-class
+   - added default for MaxChallenges=10 for DGS_LADDER-type
+   - refactored tournament-templating adding template TournamentTemplateLadder-class
+     for ladder-typed-tournaments
+
+   * tournaments/manage_tournament.php:
+   - added better description for admin-tourney-game, edit-ladder-props
+
+   * tournaments/edit_tournament.php:
+   - show original input instead of only correctly parsed values for:
+     owner, scope, start-time, title, description, rounds, current-round
+   - cleanup: remove redundant textarea_safe()-calls
+
+   * tournaments/include/tournament_ladder_props.php,
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/edit_properties.php (parse_edit_form):
+   - use const for max-TPs TP_MAX_COUNT
+   - defined const for and increased max-value for tournament-ladder
+     absolute challenge-range: 1000 -> 2000
+   - moved max-limit consts from tournament_ladder.php to tournament_globals.php
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.count_tournament_participants),
+     tournaments/ladder/admin.php:
+   - bugfix: set default count for requested status
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_conditions_unfinished_tourney_games),
+     tournaments/include/tournament_games.php (TournamentGames.count_tournament_games):
+   - bugfix: count tournament-games for specific tournament-id on transition
+     to tourney-DELETE-status
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.count_tournament_ladder,
+       ~.seed_ladder),
+     tournaments/ladder/admin.php:
+   - bugfix: seed tournament-ladder also handling already joined TPs
+     with or without reordering of existing ladder-users
+
+   * tournaments/include/tournament.php (class Tournament, ~.fillEntityData, ~.new_from_row),
+     tournaments/edit_lock.php (format_lock_note, build_notes_locking),
+     tournaments/manage_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added field Tournament.LockNote to store reasons for tournament-lockings
+-----------
+-- added note with reason for tournament-locking
+ALTER TABLE Tournament
+   ADD LockNote varchar(255) NOT NULL default '' ;
+-----------
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.get_rank_info_format),
      tournaments/ladder/view.php:
    - moved building of translated-texts rank-info-format for JavaScript
