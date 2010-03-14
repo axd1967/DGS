@@ -24,6 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_factory.php';
@@ -91,6 +92,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $user = null;
    $tladder_user = null;
    $authorise_edit_user = $authorise_add_user = false;
+   $count_tp_reg = $count_tl_user = 0;
    if( !$is_delete && $uid > 0 )
    {
       $user = User::load_user($uid);
@@ -116,6 +118,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          }
       }
    }
+   elseif( !$is_delete && $uid <= 0 )
+   {
+      $tp_arr = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
+      $count_tp_reg = $tp_arr[TP_STATUS_REGISTER];
+      $count_tl_user = TournamentLadder::count_tournament_ladder( $tid );
+   }
+
 
    // ---------- Process actions ------------------------------------------------
 
@@ -130,8 +139,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
       if( @$_REQUEST['ta_seed'] && $authorise_seed )
       {
-         $seed_order = get_request_arg('seed_order');
-         TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order );
+         $seed_order = (int)get_request_arg('seed_order');
+         $seed_reorder = (bool)get_request_arg('seed_reorder');
+         TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order, $seed_reorder );
          $sys_msg = urlencode( T_('Ladder seeded!#tourney') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
@@ -202,11 +212,21 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array( 'HEADER', T_('Prepare Ladder') ));
+      if( $count_tp_reg + $count_tl_user > 0 )
+      {
+         $tform->add_row( array(
+               'CELL', 2, '',
+               'TEXT', sprintf( T_('There are %s registered participants from which %s already joined the ladder.'),
+                              $count_tp_reg, $count_tl_user ), ));
+         $tform->add_empty_row();
+      }
 
       if( !$is_delete )
       {
          list( $seed_order_def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
          $seed_order_val = get_request_arg('seed_order', $seed_order_def);
+         $seed_reorder = get_request_arg('seed_reorder');
+
          $tform->add_row( array(
                'CELL', 2, '',
                'TEXT', T_('Seed ladder with all registered tournament participants') . ':', ));
@@ -217,6 +237,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                'SUBMITBUTTON', 'ta_seed', T_('Seed Ladder'),
                'TEXT',         SMALL_SPACING,
                'SUBMITBUTTON', 'ta_delete', T_('Delete Ladder'), ));
+         if( $count_tp_reg + $count_tl_user > 0 )
+            $tform->add_row( array(
+                  'CELL', 2, '',
+                  'CHECKBOX', 'seed_reorder', 1, T_('Reorder already joined users (otherwise append new users)'), $seed_reorder, ));
       }
       else
       {

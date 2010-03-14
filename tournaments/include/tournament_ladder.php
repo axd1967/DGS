@@ -373,6 +373,16 @@ class TournamentLadder
       return ( $row ) ? (int)@$row['X_Rank'] : 0;
    }
 
+   /*! \brief Count TournamentLadder-entries for given tournament-id; 0 if no entries found. */
+   function count_tournament_ladder( $tid )
+   {
+      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql->clear_parts( SQLP_FIELDS );
+      $qsql->add_part( SQLP_FIELDS, 'COUNT(*) AS X_Count' );
+      $row = mysql_single_fetch( "TournamentLadder::count_tournament_ladder($tid)", $qsql->get_select() );
+      return ( $row ) ? (int)@$row['X_Count'] : 0;
+   }
+
    /*! \brief Returns current Rank of given for given RID or else UID or else current player; 0 if user not on ladder. */
    function load_rank( $tid, $rid=0, $uid=0 )
    {
@@ -530,8 +540,12 @@ class TournamentLadder
       return db_query( "TournamentLadder::delete_ladder(tid[$tid])", $query );
    }
 
-   /*! \brief Seeds ladder with all registered TPs. */
-   function seed_ladder( $tourney, $tprops, $seed_order )
+   /*!
+    * \brief Seeds ladder with all registered TPs handling already joined users.
+    * \param $reorder true = reorder already joined users according to $seed_order;
+    *        false = append new users below existing users
+    */
+   function seed_ladder( $tourney, $tprops, $seed_order, $reorder=false )
    {
       if( !is_a($tourney, 'Tournament') && $tourney->ID <= 0 )
          error('unknown_tournament', "TournamentLadder::seed_ladder.check_tid($seed_order)");
@@ -540,6 +554,11 @@ class TournamentLadder
       list( $def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
       if( !isset($arr_seed_order[$seed_order]) )
          error('invalid_args', "TournamentLadder::seed_ladder.check_seed_order($tid,$seed_order)");
+
+      // load already joined ladder-users
+      $tl_iterator = new ListIterator( "TournamentLadder::seed_ladder.load_ladder($tid)" );
+      $tl_iterator->addIndex( 'uid' );
+      $tl_iterator = TournamentLadder::load_tournament_ladder( $tl_iterator, $tid );
 
       // find all registered TPs (optimized)
       $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
@@ -577,21 +596,44 @@ class TournamentLadder
       db_lock( "TournamentLadder::seed_ladder($tid,$seed_order)",
          "$table WRITE, $table AS TL READ" );
       {//LOCK TournamentLadder
-         $rank = TournamentLadder::load_max_rank($tid);
+         $rank = ($reorder) ? 1 : TournamentLadder::load_max_rank($tid) + 1;
          foreach( $arr_TPs as $row )
          {
-            ++$rank;
-            $tladder = new TournamentLadder( $tid, $row['rid'], $row['uid'], $NOW, 0,
-               $rank, $rank, $rank, $rank, $rank );
+            $uid = $row['uid'];
+            $tladder = $tl_iterator->getIndexValue( 'uid', $uid, 0 );
+            if( is_null($tladder) ) // user not joined ladder yet
+            {
+               $tladder = new TournamentLadder( $tid, $row['rid'], $uid, $NOW, 0,
+                  $rank, $rank, $rank, $rank, $rank );
+            }
+            else // user already joined ladder
+            {
+               if( !$reorder )
+                  continue; // no reorder -> skip already joined user (no rank-inc)
+               if( $tladder->Rank == $rank )
+               {
+                  ++$rank;
+                  continue; // no update (same rank), but rank-inc
+               }
+               $tladder->Rank = $rank;
+               $tladder->BestRank = TournamentUtils::calc_best_rank( $rank, $tladder->BestRank );
+               $tladder->RankChanged = $NOW;
+            }
+
             $tladder->fillEntityData( $data );
             $arr_inserts[] = $data->build_sql_insert_values();
+            ++$rank;
          }
          unset($arr_TPs);
+         unset($tl_iterator);
 
          // insert all registered TPs to ladder
          $cnt = count($arr_inserts);
-         $seed_query = $data->build_sql_insert_values(true) . implode(', ', $arr_inserts);
-         $result = db_query( "TournamentLadder::seed_ladder.insert_all(tid[$tid],$seed_order,#{$cnt})", $seed_query );
+         $seed_query = $data->build_sql_insert_values(true) . implode(',', $arr_inserts)
+            . " ON DUPLICATE KEY UPDATE Rank=VALUES(Rank), BestRank=VALUES(BestRank), "
+            . " RankChanged=VALUES(RankChanged)";
+         $result = db_query( "TournamentLadder::seed_ladder.insert($tid,$seed_order,$reorder,#$cnt)",
+            $seed_query );
       }
       db_unlock();
 
