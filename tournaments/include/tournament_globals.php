@@ -91,6 +91,8 @@ define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
 define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
 define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
 
+define('TP_MAX_COUNT', 32767);
+
 // ---------- Tournament Games Stuff ------------------------------
 
 define('TG_STATUS_INIT',   'INIT');
@@ -101,7 +103,6 @@ define('TG_STATUS_DONE',   'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
 
 define('TG_FLAG_GAME_END_TD', 0x0001); // T-game ended by TD
-
 
 // ---------- Tournament Ladder Props -----------------------------
 
@@ -121,5 +122,13 @@ define('CHECK_TGEND_NORMAL',        'CH_ABOVE|CH_BELOW|SWITCH|DF_BELOW|DF_LAST')
 define('CHECK_TGEND_JIGO',          'NO_CHANGE|CH_ABOVE|CH_BELOW');
 define('CHECK_TGEND_TIMEOUT_WIN',   'NO_CHANGE|CH_ABOVE|CH_BELOW|SWITCH|DF_BELOW|DF_LAST|DF_DEL');
 define('CHECK_TGEND_TIMEOUT_LOSS',  'NO_CHANGE|CH_LAST|CH_DEL');
+
+// ladder-limits
+define('TLADDER_MAX_DEFENSES', 20);
+define('TLADDER_MAX_CHALLENGES', 200);
+define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // 3 months
+define('TLADDER_MAX_CHRNG_RATING', 32767);
+define('TLADDER_MAX_CHRNG_ABS', 2000);
+define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
 
 ?>
