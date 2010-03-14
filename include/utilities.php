@@ -198,6 +198,22 @@ function basic_safe( $str )
          $str );
 }
 
+/*! \brief (GUI) Returns string with some basic replacement for a JavaScript-string. */
+function js_safe( $str, $quote="'" )
+{
+   $str = str_replace(
+         array( "\r", "\n" ),
+         array( '\r', '\n' ),
+         addslashes($str) );
+   return $quote . $str. $quote;
+}
+
+/*! \brief (GUI) Returns JavaScript initializing global-var with quoted PHP-string. */
+function add_js_var( $varname, $text )
+{
+   return sprintf( "var %s = %s;\n", $varname, js_safe($text) );
+}
+
 /*! \brief Formats elements of array with given sprintf-format */
 function format_array( $arr, $fmt_elem )
 {
