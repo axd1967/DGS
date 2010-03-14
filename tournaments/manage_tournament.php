@@ -134,7 +134,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  make_menu_link( T_('Edit Ladder'), array( 'url' => "tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1", 'class' => 'TAdmin' )),
                  SEP_SPACING,
                  make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ),
-                 subList( array( T_('Admin Ladder (seed ladder, remove users)'),
+                 subList( array( T_('Admin Ladder (seed ladder, remove users)#mngt'),
                                  T_('Edit Ladder (remove users, rank-changes)#mngt') )),
       '</ul>',
 
@@ -143,6 +143,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          '<li>', make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" ), SEP_SPACING,
                  make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" ),
          '<li>', make_admin_tgame( $tid ), MED_SPACING, '(', T_('also see game info pages'), ')',
+                 subList( array( T_('End game, Add time#mngt') )),
       '</ul>',
 
       '</tr></td></table>',
@@ -173,7 +174,8 @@ function make_links_ttype_specific( $tourney )
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
       return '<li>'
          . make_menu_link( T_('Edit Ladder properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
-         . subList( array( T_('challenge-range, max. defenses, max. challenges, game-end-handling, user-absence-handling#mngt') ));
+         . subList( array( T_('challenge-range, max. defenses, max. challenges#mngt'),
+                           T_('game-end-handling, user-absence-handling, rank-period length#mngt') ));
 
    // TYPE: round-robin-specific stuff
    if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
