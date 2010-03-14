@@ -39,7 +39,8 @@ define('CHECK_TOURNEY_TYPE', 'LADDER|ROUNDROBIN');
 // wizard tournament-types with different profiles for tournament-types
 // also adjust TournamentUtils::getWizardTournamentType()
 define('TOURNEY_WIZTYPE_DGS_LADDER', 1);
-define('MAX_TOURNEY_WIZARD_TYPE', 1);
+define('TOURNEY_WIZTYPE_PUBLIC_LADDER', 2);
+define('MAX_TOURNEY_WIZARD_TYPE', 2);
 
 // also adjust TournamentStatus::check_status_change()
 define('TOURNEY_STATUS_ADMIN',    'ADM');

@@ -106,6 +106,7 @@ class TournamentUtils
    {
       static $arr_map = array(
          TOURNEY_WIZTYPE_DGS_LADDER => TOURNEY_TYPE_LADDER,
+         TOURNEY_WIZTYPE_PUBLIC_LADDER => TOURNEY_TYPE_LADDER,
       );
       if( !isset($arr_map[$wizard_type]) )
          error('invalid_args', "TournamentUtils.getWizardTournamentType($wizard_type)");
