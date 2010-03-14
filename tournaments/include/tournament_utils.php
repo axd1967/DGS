@@ -168,6 +168,17 @@ class TournamentUtils
       }
    }
 
+   /*!
+    * \brief Calculates unix-timestamp for start of month.
+    * \param $month_add 0=current month, -1=previous-month
+    */
+   function get_month_start_time( $gm_time, $month_add=0 )
+   {
+       $arr = localtime( $gm_time, true);
+       return gmmktime( /*hour*/ 1, 0, 0, /*month*/ $arr['tm_mon'] + 1 + $month_add,
+                        /*day*/ 1, /*year*/ $arr['tm_year'] + 1900, $arr['tm_isdst'] );
+   }
+
 } // end of 'TournamentUtils'
 
 ?>

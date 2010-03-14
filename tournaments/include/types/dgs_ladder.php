@@ -30,6 +30,7 @@ require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_extension.php';
 
  /*!
   * \file dgs_ladder.php
@@ -55,6 +56,8 @@ class DgsLadderTournament extends TournamentTemplate
 
    function createTournament()
    {
+      global $NOW;
+
       $tourney = new Tournament();
       $tourney->setScope(TOURNEY_SCOPE_DRAGON);
       $tourney->setWizardType($this->wizard_type);
@@ -88,6 +91,11 @@ class DgsLadderTournament extends TournamentTemplate
          $tl_props->MaxDefenses = 3;
          if( !$tl_props->insert() )
             $this->create_error("LadderTournament.createTournament4(%s,$tid)");
+
+         $t_ext = new TournamentExtension( $tid, TE_PROP_TLADDER_RANK_PERIOD_UPDATE, 0,
+               TournamentUtils::get_month_start_time($NOW) );
+         if( !$t_ext->persist() )
+            $this->create_error("LadderTournament.createTournament5(%s,$tid)");
       }
       ta_end();
 

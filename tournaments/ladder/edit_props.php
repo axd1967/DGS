@@ -185,6 +185,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        sprintf( '(%s)', T_('[days] user can be absent without being removed from ladder')), ));
    $tform->add_empty_row();
 
+   // rank-archive-period
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Rank-archive Period Length'),
+         'TEXTINPUT',   'rankplen', 4, 4, $vars['rankplen'],
+         'TEXT',        MED_SPACING . T_('months'), ));
+   $tform->add_empty_row();
+
    $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
@@ -246,6 +253,7 @@ function parse_edit_form( &$tlp )
       'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
       'gend_timeout_l'  => $tlp->GameEndTimeoutLoss,
       'uabs_days'       => $tlp->UserAbsenceDays,
+      'rankplen'        => $tlp->RankPeriodLength,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -337,6 +345,12 @@ function parse_edit_form( &$tlp )
       else
          $errors[] = sprintf( T_('Expecting number for user absence in range [0..%s] days'), 255 );
 
+      $new_value = $vars['rankplen'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->RankPeriodLength = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for rank-archive period length in range [1..%s] months'), 255 );
+
 
       $tlp->setGameEndNormal( $vars['gend_normal'] );
       $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
@@ -359,6 +373,7 @@ function parse_edit_form( &$tlp )
       if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('UserAbsence#edits');
+      if( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('RankPeriodLength#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );
