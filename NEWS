@@ -14,6 +14,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
       * <home tournaments/wizard.php>Tournament-Wizard</home> to create tournaments:
          * Ladder Tournament without restrictions of 'Dragon'-scope (created by Admin only)
+         * Ladder Tournament with restrictions of 'Public'-scope
 
       * <home tournaments/list_tournaments.php>Tournament List</home> with different views:
          * "My tournaments"-view with ID-button linked to view tournament
