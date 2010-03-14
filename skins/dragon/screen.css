@@ -1073,6 +1073,30 @@ table.Table tr.Head th span.Tool img.Sort { /* headers row */
 
 
 /* ------------------------- */
+/* Popup info-box */
+/* ------------------------- */
+
+div#InfoBox {
+   position: absolute;
+   visibility: hidden;
+   z-index: 20;
+   width: 300px;
+   padding: 5px;
+   border: 1px solid #0C41C9;
+   background: #f7f5ff;
+   text-align: left;
+}
+
+div#InfoBox table {
+   margin: 0px auto 0px 0px;
+}
+
+div#InfoBox table th {
+   font-weight: bold;
+}
+
+
+/* ------------------------- */
 /* embossed tables */
 /* ------------------------- */
 /*
@@ -1232,6 +1256,7 @@ span.MarkTagTerm {
 /* ------------------------- */
 
 /* see also: embossed tables */
+/* TODO cleanup with upper def of InfoBox */
 table.InfoBox {
    margin: 0px auto;
    width: 100%;
@@ -2735,6 +2760,13 @@ ul.SubNotes {
    margin: 0.2em auto 0.6em;
    line-height: 1.2em;
    font-size: smaller;
+}
+
+a.TLadderRank {
+   text-decoration: none;
+}
+a:hover.TLadderRank {
+   text-decoration: underline;
 }
 
 
