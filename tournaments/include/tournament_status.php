@@ -230,7 +230,7 @@ class TournamentStatus
    function check_conditions_unfinished_tourney_games()
    {
       // check for not-DONE T-games
-      $tg_count_running = TournamentGames::count_tournament_games();
+      $tg_count_running = TournamentGames::count_tournament_games( $this->tid );
       if( $tg_count_running > 0 )
          $this->errors[] = sprintf(
                T_('Tournament has %s unfinished tournament games, that must be ended first.'),
