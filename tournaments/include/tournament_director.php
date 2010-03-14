@@ -79,7 +79,7 @@ class TournamentDirector
       return implode(', ', $arr);
    }
 
-   /*! \brief Inserts or updates TournmentDirector in database. */
+   /*! \brief Inserts or updates TournamentDirector in database. */
    function persist()
    {
       if( !is_null(TournamentDirector::load_tournament_director($this->tid, $this->uid, /*with_user*/false)) )
