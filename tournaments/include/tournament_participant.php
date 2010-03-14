@@ -438,6 +438,18 @@ class TournamentParticipant
       return $arr;
    }
 
+   /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
+   function check_rated_tournament_participants( $tid )
+   {
+      $row = mysql_single_fetch( "TournamentParticipant::check_rated_tournament_participants.find_unrated($tid)",
+         "SELECT TP.uid FROM TournamentParticipant AS TP INNER JOIN Players AS P ON P.ID=TP.uid " .
+         "WHERE TP.tid=$tid AND P.RatingStatus='NONE' LIMIT 1" );
+      if( $row )
+         return false;
+
+      return true;
+   }
+
    /*!
     * \brief Updates TournamentParticipant.Finished/Won/Lost-fields for given rid (=TP.ID).
     * \param $score relative score for user: <0 = game won, >0 = game lost for given user

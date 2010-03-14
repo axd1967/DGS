@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_participant.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
@@ -76,7 +77,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // check (if Rated=Yes) that ALL existing TPs have a user-rating (can happen by admin-ops)
-   if( $trule->Rated && !TournamentHelper::check_rated_tournament_participants($tid) )
+   if( $trule->Rated && !TournamentParticipant::check_rated_tournament_participants($tid) )
       $errors[] = T_('There are users without a rating, which conflicts with a "rated" tournament.');
 
    // save tournament-rules-object with values from edit-form
