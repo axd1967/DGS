@@ -63,7 +63,7 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRangeRating',
                   'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
-                  'MaxChallenges', 'UserAbsenceDays',
+                  'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
    );
@@ -88,6 +88,7 @@ class TournamentLadderProps
    var $GameEndTimeoutWin;
    var $GameEndTimeoutLoss;
    var $UserAbsenceDays;
+   var $RankPeriodLength;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
@@ -97,7 +98,7 @@ class TournamentLadderProps
          $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
-         $user_absence_days=0 )
+         $user_absence_days=0, $rank_period_len=1 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -117,6 +118,7 @@ class TournamentLadderProps
       $this->setGameEndTimeoutWin($game_end_timeout_win);
       $this->setGameEndTimeoutLoss($game_end_timeout_loss);
       $this->UserAbsenceDays = (int)$user_absence_days;
+      $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
    }
 
    function to_string()
@@ -206,6 +208,7 @@ class TournamentLadderProps
       $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
       $data->set_value( 'GameEndTimeoutLoss', $this->GameEndTimeoutLoss );
       $data->set_value( 'UserAbsenceDays', $this->UserAbsenceDays );
+      $data->set_value( 'RankPeriodLength', $this->RankPeriodLength );
       return $data;
    }
 
@@ -251,6 +254,9 @@ class TournamentLadderProps
 
       if( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
          $errors[] = sprintf( T_('User absence must be in range [0..%s] days.'), 255 );
+
+      if( $this->RankPeriodLength < 1 || $this->RankPeriodLength > 255 )
+         $errors[] = sprintf( T_('Rank-period length must be in range [1..%s] months.'), 255 );
 
       return $errors;
    }//check_properties
@@ -307,6 +313,8 @@ class TournamentLadderProps
       if( $this->MaxChallenges > 0 )
          $arr_props[] = sprintf( T_('The number of outgoing challenges is restricted to %s games.'),
                                  $this->MaxChallenges );
+      else
+         $arr_props[] = T_('The number of outgoing challenges is not restricted.');
 
       // challenge-rematch
       if( $this->ChallengeRematchWaitHours > 0 )
@@ -333,6 +341,12 @@ class TournamentLadderProps
       if( $this->UserAbsenceDays > 0 )
          $arr_props[] = sprintf( T_("If player haven't accessed DGS within the last %d days (excluding vacation)\n"
             . 'the user will be removed from ladder.'), $this->UserAbsenceDays );
+
+      // rank-change period
+      $arr_props[] = T_('Length of one rank-archive period') . ': ' .
+         ( ($this->RankPeriodLength == 1)
+               ? T_('1 month')
+               : sprintf( T_('%s months'), $this->RankPeriodLength ) );
 
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }//build_notes_props
@@ -600,7 +614,8 @@ class TournamentLadderProps
             @$row['GameEndJigo'],
             @$row['GameEndTimeoutWin'],
             @$row['GameEndTimeoutLoss'],
-            @$row['UserAbsenceDays']
+            @$row['UserAbsenceDays'],
+            @$row['RankPeriodLength']
          );
       return $tlp;
    }
