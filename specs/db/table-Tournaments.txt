@@ -42,6 +42,7 @@ Description:
  EndTime      | datetime                                             | 0000-00-00 00:00:00
  Rounds       | int(11)                                              | 1
  CurrentRound | int(11)                                              | 1
+ LockNote     | varchar(255)                                         |
 
 
 ## Fields:
@@ -112,6 +113,8 @@ Description:
 * EndTime : datetime when T closed, T can be changed afterwards still by TDs
 
 * Rounds, CurrentRound : number of rounds, current round-number of T
+
+* LockNote : note for other TDs/T-Admins when tournament-locks are set
 
 
 ###########################################################################

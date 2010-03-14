@@ -1778,3 +1778,8 @@ ALTER TABLE TournamentLadderProps
    ADD RankPeriodLength tinyint unsigned NOT NULL DEFAULT '1' ;
 
 
+-- added note with reason for tournament-locking
+ALTER TABLE Tournament
+   ADD LockNote varchar(255) NOT NULL default '' ;
+
+

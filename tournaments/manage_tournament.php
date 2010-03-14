@@ -84,6 +84,10 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'TEXT', $tourney->formatFlags(NO_VALUE) . SEP_SPACING .
                  make_menu_link( T_('Edit locks#tourney'),
                      array( 'url' => "tournaments/edit_lock.php?tid=$tid", 'class' => 'TAdmin' )) ));
+   if( $tourney->LockNote )
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Lock Note'),
+            'TEXT',        make_html_safe($tourney->LockNote, true), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Status'),
          'TEXT', $tourney->getStatusText($tourney->Status) . SEP_SPACING .

@@ -51,7 +51,7 @@ $ENTITY_TOURNAMENT = new Entity( 'Tournament',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
       FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Flags', 'Rounds', 'CurrentRound',
-      FTYPE_TEXT, 'Title', 'Description',
+      FTYPE_TEXT, 'Title', 'Description', 'LockNote',
       FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Scope', 'Type', 'Status'
    );
@@ -75,6 +75,7 @@ class Tournament
    var $EndTime;
    var $Rounds;
    var $CurrentRound;
+   var $LockNote;
 
    // non-DB vars
 
@@ -85,7 +86,7 @@ class Tournament
                         $wizard_type=TOURNEY_WIZTYPE_DGS_LADDER, $title='', $description='',
                         $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW, $flags=0,
                         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
-                        $rounds=1, $current_round=1 )
+                        $rounds=1, $current_round=1, $lock_note='' )
    {
       $this->ID = (int)$id;
       $this->setScope( $scope );
@@ -104,6 +105,7 @@ class Tournament
       $this->EndTime = (int)$endtime;
       $this->Rounds = (int)$rounds;
       $this->CurrentRound = (int)$current_round;
+      $this->LockNote = $lock_note;
       // non-DB
       $this->TP_Counts = NULL;
    }
@@ -263,6 +265,7 @@ class Tournament
          $data->set_value( 'EndTime', $this->EndTime );
       $data->set_value( 'Rounds', $this->Rounds );
       $data->set_value( 'CurrentRound', $this->CurrentRound );
+      $data->set_value( 'LockNote', $this->LockNote );
       return $data;
    }
 
@@ -457,7 +460,8 @@ class Tournament
             @$row['X_StartTime'],
             @$row['X_EndTime'],
             @$row['Rounds'],
-            @$row['CurrentRound']
+            @$row['CurrentRound'],
+            @$row['LockNote']
          );
       return $tournament;
    }

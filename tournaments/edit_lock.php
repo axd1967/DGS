@@ -138,6 +138,17 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
       if( $disable )
          $tform->add_hidden( $name, $flag_set );
    }
+
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Lock Note'),
+         'TEXT', T_('Please add your reasons for locking (for other directors/admins):') .
+                 sprintf( "<br>\n(%s)<br>\n(%s)<br>\n",
+                          T_('edit only your own note lines'),
+                          T_('your lines will be prefixed with date and user-handle') ),
+         'TEXTAREA',    'locknote', 80, 3, $vars['locknote'], ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Preview Lock Note'),
+         'TEXT', ( $tourney->LockNote ? make_html_safe($tourney->LockNote, true) : NO_VALUE ) ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
@@ -158,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 
    $tform->echo_string();
 
-   echo_notes( 'edittournamentlocknotesTable', T_('Tournament lock notes'), build_lock_notes() );
+   echo_notes( 'edittournamentlocknotesTable', T_('Tournament lock notes'), build_notes_locking() );
 
 
    $menu_array = array();
@@ -183,7 +194,8 @@ function parse_edit_form( &$tney )
 
    // read from props or set defaults
    $vars = array(
-      'flags' => $tney->Flags,
+      'flags'     => $tney->Flags,
+      'locknote'  => $tney->LockNote,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -216,15 +228,53 @@ function parse_edit_form( &$tney )
       }
       $tney->Flags = ($tney->Flags & ~$flagmask) | $new_value; // don't touch other flags
 
+      list( $new_value, $note_len, $has_line ) = format_lock_note( trim($vars['locknote']) );
+      $vars['locknote'] = $new_value;
+      $lock_flags = ($tney->Flags & $flagmask);
+      if( $lock_flags && ( ($has_line && $note_len < 4) || (!$has_line && empty($new_value)) ) )
+         $errors[] = T_('Your lock note is insufficient for set locks.');
+      else
+         $tney->LockNote = ( $lock_flags ) ? $new_value : '';
+
       // determine edits
       if( $old_vals['flags'] != $tney->Flags ) $edits[] = T_('Flags#edits');
+      if( $old_vals['locknote'] != $tney->LockNote ) $edits[] = T_('LockNote#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
 
+/*! \brief Adds prefix in lock-note with date and user-handle. */
+function format_lock_note( $note )
+{
+   global $player_row, $NOW;
+
+   $user = preg_quote( $player_row['Handle'] );
+   $arr = preg_split( "/\\r?\\n/", $note );
+   $result = array();
+   $notelen = 0;
+   $user_hasline = false;
+   foreach( $arr as $line )
+   {
+      $line = trim($line);
+      if( (string)$line != '' && (/*skip other users*/ !preg_match("/^\\[[^\\/]+\\/(?!$user)/i", $line)) )
+      {
+         // check for complete line for current user
+         if( preg_match( "/^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}\\/$user\\]:\\s+(.*)$/i", $line, $matches ) )
+         {
+            $notelen += strlen($matches[1]);
+            $user_hasline = true;
+         }
+         else
+            $line = sprintf( '[%s/%s]: %s', date(DATE_FMT, $NOW), $user, $line );
+      }
+      $result[] = $line;
+   }
+   return array( implode("\n", $result), $notelen, $user_hasline );
+}
+
 /*! \brief Returns array with notes about tournament locks. */
-function build_lock_notes()
+function build_notes_locking()
 {
    $notes = array();
    //$notes[] = null; // empty line
@@ -235,5 +285,5 @@ function build_lock_notes()
    $notes[] = $narr;
 
    return $notes;
-}//build_properties_notes
+}//build_notes_locking
 ?>
