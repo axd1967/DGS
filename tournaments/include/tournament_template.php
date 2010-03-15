@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  /* Author: Jens-Uwe Gaspar */
 
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_limits.php';
 
  /*!
   * \file tournament_template.php
@@ -42,8 +43,7 @@ class TournamentTemplate
    var $need_rounds;
    var $allow_register_tourney_status;
    var $need_admin_create_tourney;
-   var $limit_min_participants;
-   var $limit_max_participants;
+   var $limits;
 
    /*! \brief Constructs template for different tournament-types. */
    function TournamentTemplate( $wizard_type, $title )
@@ -52,13 +52,18 @@ class TournamentTemplate
       $this->wizard_type = $wizard_type;
       $this->title = $title;
       $this->uid = (int)@$player_row['ID'];
+      $this->limits = new TournamentLimits();
 
       // tournament-type-specific properties
       $this->need_rounds = false;
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
       $this->need_admin_create_tourney = true;
-      $this->limit_min_participants = 1;
-      $this->limit_max_participants = 0;
+      $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, TP_MAX_COUNT );
+   }
+
+   function getTournamentLimits()
+   {
+      return $this->limits;
    }
 
    function to_string()

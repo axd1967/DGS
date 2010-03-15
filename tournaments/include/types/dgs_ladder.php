@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_limits.php';
 require_once 'tournaments/include/tournament_template_ladder.php';
 
 require_once 'tournaments/include/tournament_properties.php';
@@ -48,8 +49,10 @@ class DgsLadderTournament extends TournamentTemplateLadder
       parent::TournamentTemplateLadder(
          TOURNEY_WIZTYPE_DGS_LADDER,
          T_('DGS Ladder (only for Admin)#ttype') );
-      $this->limit_min_participants = 1;
-      $this->limit_max_participants = 0;
+
+      $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
+      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 1, TLADDER_MAX_DEFENSES );
+      $this->limits->setLimits( TLIMITS_TL_MAX_CH, true, 0, TLADDER_MAX_CHALLENGES );
    }
 
    function createTournament()
@@ -57,7 +60,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
       $tourney = $this->make_tournament( TOURNEY_SCOPE_DRAGON, "DGS Ladder (19x19)" );
 
       $tprops = new TournamentProperties();
-      $tprops->MinParticipants = 1;
+      $tprops->MinParticipants = 0;
       $tprops->MaxParticipants = 0;
 
       $t_rules = new TournamentRules();

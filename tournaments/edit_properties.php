@@ -240,19 +240,16 @@ function parse_edit_form( &$tpr, $ttype )
          $errors[] = $parsed_value;
 
       $new_value = $vars['min_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $ttype->limit_min_participants )
-         $tpr->MinParticipants = limit( $new_value, $ttype->limit_min_participants, 99999, 0 );
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tpr->MinParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
-         $errors[] = sprintf( T_('Expecting positive number for minimum participants > %s'),
-                              $ttype->limit_min_participants - 1 );
+         $errors[] = sprintf( T_('Expecting positive number for minimum participants >= %s'), 0 );
 
-      $limit_max_TPs = ($ttype->limit_max_participants > 0) ? $ttype->limit_max_participants : TP_MAX_COUNT;
       $new_value = $vars['max_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value <= $limit_max_TPs )
-         $tpr->MaxParticipants = limit( $new_value, 0, $limit_max_TPs, 0 );
+      if( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tpr->MaxParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
-         $errors[] = sprintf( T_('Expecting positive number for maximum participants < %s'),
-                              $limit_max_TPs + 1 );
+         $errors[] = sprintf( T_('Expecting positive number for maximum participants <= %s'), TP_MAX_COUNT );
 
       if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');

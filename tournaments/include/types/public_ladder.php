@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_limits.php';
 require_once 'tournaments/include/tournament_template_ladder.php';
 
 require_once 'tournaments/include/tournament_properties.php';
@@ -51,7 +52,9 @@ class PublicLadderTournament extends TournamentTemplateLadder
 
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
-      $this->limit_max_participants = 300;
+      $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, 300 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 1, 10 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 10 );
    }
 
    function createTournament()
@@ -61,7 +64,7 @@ class PublicLadderTournament extends TournamentTemplateLadder
          sprintf( T_('%s\'s Ladder'), $player_row['Handle'] ) );
 
       $tprops = new TournamentProperties();
-      $tprops->MinParticipants = 1;
+      $tprops->MinParticipants = 0;
       $tprops->MaxParticipants = 100;
 
       $t_rules = new TournamentRules();
