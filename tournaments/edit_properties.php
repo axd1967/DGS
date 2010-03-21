@@ -249,11 +249,16 @@ function parse_edit_form( &$tpr, $ttype )
 
       $new_value = $vars['max_participants'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
-         $tpr->MaxParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
+      {
+         $limit_errors = $t_limits->check_MaxParticipants( $new_value );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $tpr->MaxParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
+      }
       else
          $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
-                              $t_limits->getLimitRangeText(TLIMITS_MAX_TP) ); // check for general MAX, but show specific max
-      $errors = array_merge( $errors, $t_limits->check_MaxParticipants($new_value) );
+            $t_limits->getLimitRangeText(TLIMITS_MAX_TP) ); // check for general MAX, but show specific max
 
       if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');

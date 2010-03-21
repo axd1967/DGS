@@ -308,28 +308,43 @@ function parse_edit_form( &$tlp, $ttype )
 
       $new_value = $vars['max_def'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value > 0 && $new_value < TLADDER_MAX_DEFENSES )
-         $tlp->MaxDefenses = $new_value;
+      {
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, null );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $tlp->MaxDefenses = $new_value;
+      }
       else
          $errors[] = sprintf( T_('Expecting number for max. defenses in range %s.'),
                               // check for general MAX, but show specific max
                               TournamentUtils::build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
-      $errors = array_merge( $errors, $t_limits->checkLadder_MaxDefenses($new_value, null) );
 
       $new_value = $vars['max_def1'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_DEFENSES )
-         $tlp->MaxDefenses1 = $new_value;
+      {
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, sprintf( T_('of group #%s'), 1) );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $tlp->MaxDefenses1 = $new_value;
+      }
       else
          $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range %s.'), 1,
-                              $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
-      $errors = array_merge( $errors, $t_limits->checkLadder_MaxDefenses($new_value, sprintf( T_('of group #%s'), 1)) );
+            $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_def2'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_DEFENSES )
-         $tlp->MaxDefenses2 = $new_value;
+      {
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, sprintf( T_('of group #%s'), 2) );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $tlp->MaxDefenses2 = $new_value;
+      }
       else
          $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range %s.'), 2,
-                              $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
-      $errors = array_merge( $errors, $t_limits->checkLadder_MaxDefenses($new_value, sprintf( T_('of group #%s'), 2)) );
+            $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_def_start1'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
@@ -346,11 +361,16 @@ function parse_edit_form( &$tlp, $ttype )
 
       $new_value = $vars['max_chall'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
-         $tlp->MaxChallenges = $new_value;
+      {
+         $limit_errors = $t_limits->checkLadder_MaxChallenges( $new_value );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $tlp->MaxChallenges = $new_value;
+      }
       else
          $errors[] = sprintf( T_('Expecting number for max. outgoing challenges in range %s.'),
                               $t_limits->getLimitRangeText(TLIMITS_TL_MAX_CH) ); // check for general MAX, but show specific max
-      $errors = array_merge( $errors, $t_limits->checkLadder_MaxChallenges($new_value) );
 
 
       $new_value = $vars['uabs_days'];
