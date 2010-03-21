@@ -61,29 +61,63 @@ class TournamentLimits
 
    function getLimits( $limit_id )
    {
+      /* TODO later:
       if( TournamentUtils::isAdmin() ) // T-Admin can set any out-of-limit value
          return false;
       else
-         return @$this->limit_config[$limit_id];
+      */
+      return @$this->limit_config[$limit_id];
+   }
+
+   function getMinLimit( $limit_id )
+   {
+      return (int)@$this->limit_config[$limit_id][1];
+   }
+
+   function getMaxLimit( $limit_id )
+   {
+      return (int)@$this->limit_config[$limit_id][2];
+   }
+
+   function getLimitRangeText( $limit_id )
+   {
+      return TournamentUtils::build_range_text( $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id) );
    }
 
 
    function check_MaxParticipants( $value )
    {
       $errors = array();
-      if( $limits = $this->getLimits(TLIMITS_MAX_TP) )
+      if( is_numeric($value) && ($limits = $this->getLimits(TLIMITS_MAX_TP)) )
       {
-         //TODO
+         list( $disable_allowed, $min_value, $max_value ) = $limits;
+         if( $value == 0 && !$disable_allowed )
+            $errors[] = T_('Disabling feature of maximum participants with 0-value not allowed.');
+         elseif(  ( !is_null($min_value) && $value < $min_value )
+               || ( !is_null($max_value) && $max_value < TP_MAX_COUNT && $value > $max_value ) )
+         {
+            $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
+                                 TournamentUtils::build_range_text($min_value, $max_value) );
+         }
       }
       return $errors;
    }
 
-   function checkLadder_MaxDefenses( $value )
+   function checkLadder_MaxDefenses( $value, $group_id=null )
    {
       $errors = array();
-      if( $limits = $this->getLimits(TLIMITS_TL_MAX_DF) )
+      if( is_numeric($value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_DF)) )
       {
-         //TODO
+         $group_label = (is_null($group_id)) ? '' : " $group_id";
+         list( $disable_allowed, $min_value, $max_value ) = $limits;
+         if( $value == 0 && is_null($group_id) /*&& !$disable_allowed*/ ) // always forbidden for main-group
+            $errors[] = T_('Disabling feature of maximum defenses with 0-value not allowed.');
+         elseif(  ( !is_null($min_value) && $value < $min_value )
+               || ( !is_null($max_value) && $max_value < TLADDER_MAX_DEFENSES && $value > $max_value ) )
+         {
+            $errors[] = sprintf( T_('Max. defenses%s must be in range %s, but was [%s].'),
+               $group_label, TournamentUtils::build_range_text($min_value, $max_value), $value );
+         }
       }
       return $errors;
    }
@@ -91,9 +125,17 @@ class TournamentLimits
    function checkLadder_MaxChallenges( $value )
    {
       $errors = array();
-      if( $limits = $this->getLimits(TLIMITS_TL_MAX_CH) )
+      if( is_numeric($value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_CH)) )
       {
-         //TODO
+         list( $disable_allowed, $min_value, $max_value ) = $limits;
+         if( $value == 0 && !$disable_allowed )
+            $errors[] = T_('Disabling feature of max. outgoing challenges with 0-value not allowed.');
+         elseif(  ( !is_null($min_value) && $value < $min_value )
+               || ( !is_null($max_value) && $max_value < TLADDER_MAX_CHALLENGES && $value > $max_value ) )
+         {
+            $errors[] = sprintf( T_('Max. outgoing challenges must be in range %s.'),
+                                 TournamentUtils::build_range_text($min_value, $max_value) );
+         }
       }
       return $errors;
    }

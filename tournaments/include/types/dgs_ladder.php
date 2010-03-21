@@ -51,7 +51,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
          T_('DGS Ladder (only for Admin)#ttype') );
 
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
-      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 1, TLADDER_MAX_DEFENSES );
+      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, TLADDER_MAX_DEFENSES );
       $this->limits->setLimits( TLIMITS_TL_MAX_CH, true, 0, TLADDER_MAX_CHALLENGES );
    }
 

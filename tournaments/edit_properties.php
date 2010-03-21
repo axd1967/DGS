@@ -197,6 +197,7 @@ function parse_edit_form( &$tpr, $ttype )
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] );
+   $t_limits = $ttype->getTournamentLimits();
 
    // read from props or set defaults
    $vars = array(
@@ -240,16 +241,19 @@ function parse_edit_form( &$tpr, $ttype )
          $errors[] = $parsed_value;
 
       $new_value = $vars['min_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
          $tpr->MinParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
-         $errors[] = sprintf( T_('Expecting positive number for minimum participants >= %s'), 0 );
+         $errors[] = sprintf( T_('Expecting number for minimum participants in range %s.'),
+                              TournamentUtils::build_range_text(0, TP_MAX_COUNT) );
 
       $new_value = $vars['max_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
          $tpr->MaxParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
-         $errors[] = sprintf( T_('Expecting positive number for maximum participants <= %s'), TP_MAX_COUNT );
+         $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
+                              $t_limits->getLimitRangeText(TLIMITS_MAX_TP) ); // check for general MAX, but show specific max
+      $errors = array_merge( $errors, $t_limits->check_MaxParticipants($new_value) );
 
       if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');
@@ -260,16 +264,16 @@ function parse_edit_form( &$tpr, $ttype )
       $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
 
       $new_value = $vars['min_games_finished'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
          $tpr->UserMinGamesFinished = limit( $new_value, 0, 9999, 0 );
       else
-         $errors[] = T_('Expecting positive number of finished games');
+         $errors[] = T_('Expecting positive number of finished games.');
 
       $new_value = $vars['min_games_rated'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
          $tpr->UserMinGamesRated = limit( $new_value, 0, 9999, 0 );
       else
-         $errors[] = T_('Expecting positive number of rated finished games');
+         $errors[] = T_('Expecting positive number of rated finished games.');
 
       $tpr->Notes = $vars['notes'];
 

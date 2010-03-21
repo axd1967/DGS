@@ -348,7 +348,8 @@ function prepare_update_rank( $tid, $rid, $new_rank, &$errors )
 
    $max_rank = TournamentLadder::load_max_rank($tid);
    if( $new_rank < 1 || $new_rank > $max_rank )
-      $errors[] = sprintf( T_('New rank [%s] is out of valid range [%s..%s]'), $new_rank, 1, $max_rank );
+      $errors[] = sprintf( T_('New rank [%s] is out of valid range %s.'), $new_rank,
+         TournamentUtils::build_range_text(1, $max_rank) );
 
    if( !is_null($tladder) && $new_rank == $tladder->Rank )
       $errors[] = sprintf( T_('No change in rank [%s] for selected user'), $tladder->Rank );

@@ -53,7 +53,7 @@ class PublicLadderTournament extends TournamentTemplateLadder
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, 300 );
-      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 1, 10 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, 10 );
       $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 10 );
    }
 
