@@ -245,10 +245,12 @@ class TournamentProperties
          if( !$user->hasRating() )
             $errors[] = T_('User has no Dragon rating, which is required for this rated tournament.');
          elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
-            $warnings[] = sprintf( T_('User rating [%s] does not match the required rating range [%s - %s].'),
+            $warnings[] = sprintf( T_('User rating [%s] does not match the required rating range %s.'),
                   echo_rating( $user->Rating ),
-                  echo_rating( $this->UserMinRating, false ),
-                  echo_rating( $this->UserMaxRating, false ) );
+                  TournamentUtils::build_range_text(
+                     echo_rating( $this->UserMinRating, false ),
+                     echo_rating( $this->UserMaxRating, false ),
+                     '[%s - %s]' ) );
       }
 
       // limit games-number

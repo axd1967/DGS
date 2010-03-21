@@ -560,7 +560,8 @@ function parse_edit_form( &$tp, $tourney, $ttype )
             if( !is_numeric($new_value) || $new_value < 1 )
                $errors[] = T_('Expecting positive number for start round');
             elseif( $tourney->Rounds > 0 && $new_value > $tourney->Rounds )
-               $errors[] = sprintf( T_('Start round is out of range of actual rounds [1..%s] for this tournament.'), $tourney->Rounds );
+               $errors[] = sprintf( T_('Start round is out of range of actual rounds %s for this tournament.'),
+                  TournamentUtils::build_range_text(1, $tourney->Rounds) );
             else
                $tp->StartRound = $new_value;
          }
