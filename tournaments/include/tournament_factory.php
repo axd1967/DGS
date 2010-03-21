@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/types/dgs_ladder.php';
 require_once 'tournaments/include/types/public_ladder.php';
+require_once 'tournaments/include/types/private_ladder.php';
 
 
  /*!
@@ -48,6 +49,8 @@ class TournamentFactory
          return new DgsLadderTournament();
       elseif( $wizard_type == TOURNEY_WIZTYPE_PUBLIC_LADDER )
          return new PublicLadderTournament();
+      elseif( $wizard_type == TOURNEY_WIZTYPE_PRIVATE_LADDER )
+         return new PrivateLadderTournament();
       else
          error('invalid_args', "TournamentFactory.getTournament($wizard_type)");
    }
@@ -58,6 +61,7 @@ class TournamentFactory
       static $arr_types = array(
          TOURNEY_WIZTYPE_DGS_LADDER,
          TOURNEY_WIZTYPE_PUBLIC_LADDER,
+         TOURNEY_WIZTYPE_PRIVATE_LADDER,
       );
       return $arr_types;
    }

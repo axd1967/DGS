@@ -516,7 +516,7 @@ class Tournament
          $arr = array();
          $arr[TOURNEY_SCOPE_DRAGON]  = T_('Dragon#T_scope');
          $arr[TOURNEY_SCOPE_PUBLIC]  = T_('Public#T_scope');
-         //TODO $arr[TOURNEY_SCOPE_PRIVATE] = T_('Private#T_scope');
+         $arr[TOURNEY_SCOPE_PRIVATE] = T_('Private#T_scope');
          $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 
@@ -561,6 +561,7 @@ class Tournament
          $arr = array();
          $arr[TOURNEY_WIZTYPE_DGS_LADDER] = T_('DGS Ladder');
          $arr[TOURNEY_WIZTYPE_PUBLIC_LADDER] = T_('Public Ladder');
+         $arr[TOURNEY_WIZTYPE_PRIVATE_LADDER] = T_('Private Ladder');
          $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 

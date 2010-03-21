@@ -203,6 +203,9 @@ class TournamentProperties
       else
          $warnings = array();
 
+      if( $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
+         $errors[] = T_('This is a private tournament, so you must be invited to participate.');
+
       // limit register end-time
       global $NOW;
       if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
