@@ -216,6 +216,15 @@ class ForumRead
       return $qsql;
    }
 
+   /*! \brief Updates global forum-read for user. */
+   function update_global_forum_read( $dbgmsg, $uid, $time, $has_new=false )
+   {
+      $new_val = ($has_new) ? 1 : 0;
+      return db_query( "ForumRead::update_global_forum_read.$dbgmsg($uid,$time,$new_val)",
+         "UPDATE Players SET ForumReadTime=FROM_UNIXTIME($time), ForumReadNew=$new_val " .
+         "WHERE ID=$uid LIMIT 1" );
+   }
+
    /*!
     * \brief Returns true, if there is at least one new post in all forums or in specific forum.
     * \param $forum_id if 0 check for all forums, otherwise check for given forum
@@ -285,6 +294,8 @@ class ForumRead
     */
    function load_global_new( $forum_opts )
    {
+      global $player_row;
+
       if( !is_a($forum_opts, 'ForumOptions') )
          error('invalid_args', "ForumRead::load_global_new.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
@@ -292,22 +303,21 @@ class ForumRead
       $global_updated = ForumRead::load_global_updated();
       $global_has_new = false;
 
-      //FIXME: replace ForumRead(User_ID,Forum_ID=0,Thread_ID=0) with Players.ForumRead/ForumHasNew-fields !?
-      // load and check against global forum-read for user
-      $qsql = ForumRead::build_query_sql( $user_id );
-      $qsql->add_part( SQLP_WHERE, 'Forum_ID=0', 'Thread_ID=0' );
-      $query = $qsql->get_select();
-      $row = mysql_single_fetch( "ForumRead::load_global_new($user_id)", $query );
-
-      if( !$row || ( $row['X_Time'] <= 0 || $global_updated > $row['X_Time'] ) )
+      // load (from player_row) and check against global forum-read for user
+      $fr_time = (int)@$player_row['X_ForumReadTime'];
+      if( $fr_time <= 0 || $global_updated > $fr_time )
       {
          $global_has_new = ForumRead::has_new_posts_in_all_forums( $forum_opts );
-         $fread = new ForumRead( $user_id );
-         $fread->replace_row_forumread( "ForumRead::load_global_new.forum_read.upd",
-            0, 0, $global_updated, $global_has_new );
+         $success_update = ForumRead::update_global_forum_read( "load_global_new",
+            $user_id, $global_updated, $global_has_new );
+         if( $success_update )
+         {
+            $player_row['X_ForumReadTime'] = $global_updated;
+            $player_row['ForumReadNew'] = ($global_has_new) ? 1 : 0;
+         }
       }
       else
-         $global_has_new = $row['HasNew'];
+         $global_has_new = (bool)$player_row['ForumReadNew'];
 
       return $global_has_new;
    } //load_global_new
@@ -350,9 +360,8 @@ class ForumRead
    {
       // force trigger updating with older updated-date on next load-global
       $global_updated = ForumRead::load_global_updated( false );
-      $fread = new ForumRead( $uid );
-      $fread->replace_row_forumread( "ForumRead::trigger_recalc_global_read_update.upd",
-         0, 0, $global_updated - SECS_PER_DAY );
+      return ForumRead::update_global_forum_read( "trigger_recalc_global_read_update",
+         $uid, $global_updated - SECS_PER_DAY, false );
    }
 
    /*! \brief Updates Forumreads to initiate recalculation for forum NEW-flag-state. */

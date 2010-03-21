@@ -2379,6 +2379,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
           .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
           .',UNIX_TIMESTAMP(LastMove) AS X_LastMove'
           .',UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess'
+          .',UNIX_TIMESTAMP(ForumReadTime) AS X_ForumReadTime'
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
    $result = db_query( 'is_logged_in.find_player', $query );

@@ -569,6 +569,11 @@ Posts($fid,$tid):
          FR.HasNew := state of "new"-flag (1=set, 0=unset)
          FR.Time   := $NOW (=date of calculating 'new'-flag-state)
 
+     NOTE: since 21-Mar-2010 this has been replaced by storing it into:
+
+         Players.ForumReadTime == FR.Time
+         Players.ForumReadNew  == FR.HasNew
+
      when global-forum-updated-date (stored by modification-time of cache-file)
      CACHEFILE_FORUM_GLOBAL.ModifiedTime > FR.Time,
      then "recalculate" of 'new'-flag is required.
@@ -579,6 +584,7 @@ Posts($fid,$tid):
 
      => Therefore (later) it would be good to refactor storing the data
         from FR above in the Players-table.
+        NOTE: implemented since 21-Mar-2010
 
 
 

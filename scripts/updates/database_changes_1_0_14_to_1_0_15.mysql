@@ -1783,3 +1783,15 @@ ALTER TABLE Tournament
    ADD LockNote varchar(255) NOT NULL default '' ;
 
 
+-- store global forum-read date and NEW-flag in Players-table
+ALTER TABLE Players
+   ADD ForumReadTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   ADD ForumReadNew tinyint NOT NULL default '0' ;
+
+-- migration of global forum-read data
+UPDATE Players AS P INNER JOIN Forumreads AS FR ON FR.User_ID=P.ID
+   SET P.ForumReadTime=FR.Time, P.ForumReadNew=FR.HasNew WHERE FR.Forum_ID=0 AND FR.Thread_ID=0 ;
+DELETE FROM Forumreads
+   WHERE Forum_ID=0 AND Thread_ID=0 ;
+
+
