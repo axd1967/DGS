@@ -24,6 +24,16 @@ ChangeLog
 
 2010-03-21 juga
 
+   * tournaments/include/types/private_ladder.php (class PrivateLadderTournament, ~.createTournament),
+     tournaments/include/tournament.php (Tournament.getScopeText, ~.getWizardTypeText),
+     tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration),
+     tournaments/include/tournament_utils.php (TournamentUtils.getWizardTournamentType),
+     tournaments/include/tournament_globals.php, NEWS:
+   - added private-scoped tournament as invite-only tournament
+     blocking user registering by himself
+   - added private-ladder tournament of wizard-type TOURNEY_WIZTYPE_PRIVATE_LADDER
+
    * tournaments/include/tournament_limits.php (TournamentLimits.getLimits,
        ~.getMinLimit, ~.getMaxLimit, ~.getLimitRangeText, ~.check_MaxParticipants,
        ~.checkLadder_MaxDefenses, ~.checkLadder_MaxChallenges),
