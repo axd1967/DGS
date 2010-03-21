@@ -50,7 +50,7 @@ class ForumRead
    var $reads; // [ "fid,tid" => unix-time ]
    var $min_date; // posts older (or equal) than min_date are considered as read
 
-   /*! \brief Constructs a ForumUser with specified args. */
+   /*! \brief Constructs a ForumRead-object with specified args. */
    function ForumRead( $user_id, $forum_id=0, $thread_id=0 )
    {
       $this->uid = $user_id;
