@@ -44,6 +44,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       error('feature_disabled', 'Tournament.list_tournaments');
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENTS );
+   $is_admin = TournamentUtils::isAdmin();
 
    $page = "list_tournaments.php?";
 
@@ -70,12 +71,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          T_('Mine#T_owner') => "T.Owner_ID=$my_id",
       );
 
-   $is_admin = TournamentUtils::isAdmin();
-   if( $is_admin )
-      $where_scope = "1=1"; // admin can see all scopes (incl. private)
-   else
-      $where_scope = sprintf( "T.Scope IN ('%s','%s')", TOURNEY_SCOPE_DRAGON, TOURNEY_SCOPE_PUBLIC );
-
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
@@ -91,13 +86,11 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
             FC_FNAME => 'uid',
             FC_QUERYSQL => new QuerySQL(
                SQLP_FIELDS, 'TP.Status AS TP_Status',
-               SQLP_FROM,  'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID',
-               SQLP_WHERE, $where_scope ) ));
+               SQLP_FROM,  'INNER JOIN TournamentParticipant AS TP ON TP.tid=T.ID' ) ));
    $tsfilter->add_filter( 2, 'Text', 'TD.uid', true, array(
             FC_FNAME => 'tdir',
             FC_QUERYSQL => new QuerySQL(
-               SQLP_FROM,  'INNER JOIN TournamentDirector AS TD ON TD.tid=T.ID',
-               SQLP_WHERE, $where_scope ) ));
+               SQLP_FROM,  'INNER JOIN TournamentDirector AS TD ON TD.tid=T.ID' ) ));
    $tsfilter->init();
    $has_uid = (bool)( $tsfilter->get_filter_value(1) );
    $has_tdir = (bool)( $tsfilter->get_filter_value(2) );
