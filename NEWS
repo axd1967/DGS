@@ -427,7 +427,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Displaying the group-names
 
    * Changes for Admins:
-      * Added tournament-admin
+      * Added tournament-admin to fix problems with tournaments
       * Added voting-admin to add new features to vote on
       * Added Adminlog entries for admin user changes, login-denied and
         if admin-level too low for script execution
