@@ -61,6 +61,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       error('unknown_tournament', "Tournament.edit_properties.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
+   $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
@@ -78,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $ttype );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $t_limits );
    $errors = array_merge( $errors, $input_errors );
 
    // save tournament-properties-object with values from edit-form
@@ -129,7 +130,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tform->add_row( array(
          'TAB',
          'TEXTINPUT',   'max_participants', 5, 5, $vars['max_participants'],
-         'TEXT',        MINI_SPACING . T_('(Maximum)'), ));
+         'TEXT',        MINI_SPACING . T_('(Maximum)'),
+         'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_MAX_TP), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Rating Use Mode'),
          'SELECTBOX',   'rating_use_mode', 1, $arr_rating_use_modes, $vars['rating_use_mode'], false, ));
@@ -192,12 +194,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tpr, $ttype )
+function parse_edit_form( &$tpr, $t_limits )
 {
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] );
-   $t_limits = $ttype->getTournamentLimits();
 
    // read from props or set defaults
    $vars = array(
@@ -250,7 +251,7 @@ function parse_edit_form( &$tpr, $ttype )
       $new_value = $vars['max_participants'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
       {
-         $limit_errors = $t_limits->check_MaxParticipants( $new_value );
+         $limit_errors = $t_limits->check_MaxParticipants( $new_value, $tpr->MaxParticipants );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
@@ -258,7 +259,8 @@ function parse_edit_form( &$tpr, $ttype )
       }
       else
          $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
-            $t_limits->getLimitRangeText(TLIMITS_MAX_TP) ); // check for general MAX, but show specific max
+            build_limit_range($t_limits) ); // check for general MAX, but show specific max
+            $t_limits->getLimitRangeText(TLIMITS_MAX_TP, TP_MAX_COUNT);
 
       if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');

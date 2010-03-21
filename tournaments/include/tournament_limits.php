@@ -61,12 +61,10 @@ class TournamentLimits
 
    function getLimits( $limit_id )
    {
-      /* TODO later:
       if( TournamentUtils::isAdmin() ) // T-Admin can set any out-of-limit value
          return false;
       else
-      */
-      return @$this->limit_config[$limit_id];
+         return @$this->limit_config[$limit_id];
    }
 
    function getMinLimit( $limit_id )
@@ -84,11 +82,26 @@ class TournamentLimits
       return TournamentUtils::build_range_text( $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id) );
    }
 
+   function getLimitRangeTextAdmin( $limit_id )
+   {
+      if( TournamentUtils::isAdmin() )
+      {
+         return span('TWarning', sprintf( ' %s: %s',
+            T_('Limits'),
+            TournamentUtils::build_range_text(
+               $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id),
+               '[%s..%s [..%s]]',
+               TournamentLimits::getStaticMaxLimit($limit_id)) ));
+      }
+      else
+         return '';
+   }
 
-   function check_MaxParticipants( $value )
+
+   function check_MaxParticipants( $value, $curr_value )
    {
       $errors = array();
-      if( is_numeric($value) && ($limits = $this->getLimits(TLIMITS_MAX_TP)) )
+      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_MAX_TP)) )
       {
          list( $disable_allowed, $min_value, $max_value ) = $limits;
          if( $value == 0 && !$disable_allowed )
@@ -103,10 +116,10 @@ class TournamentLimits
       return $errors;
    }
 
-   function checkLadder_MaxDefenses( $value, $group_id=null )
+   function checkLadder_MaxDefenses( $value, $curr_value, $group_id=null )
    {
       $errors = array();
-      if( is_numeric($value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_DF)) )
+      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_DF)) )
       {
          $group_label = (is_null($group_id)) ? '' : " $group_id";
          list( $disable_allowed, $min_value, $max_value ) = $limits;
@@ -122,10 +135,10 @@ class TournamentLimits
       return $errors;
    }
 
-   function checkLadder_MaxChallenges( $value )
+   function checkLadder_MaxChallenges( $value, $curr_value )
    {
       $errors = array();
-      if( is_numeric($value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_CH)) )
+      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_CH)) )
       {
          list( $disable_allowed, $min_value, $max_value ) = $limits;
          if( $value == 0 && !$disable_allowed )
@@ -138,6 +151,19 @@ class TournamentLimits
          }
       }
       return $errors;
+   }
+
+
+   // ------------ static functions ----------------------------
+
+   function getStaticMaxLimit( $limit_id )
+   {
+      static $arr = array(
+         TLIMITS_MAX_TP    => TP_MAX_COUNT,
+         TLIMITS_TL_MAX_DF => TLADDER_MAX_DEFENSES,
+         TLIMITS_TL_MAX_CH => TLADDER_MAX_CHALLENGES,
+      );
+      return $arr[$limit_id];
    }
 
 } // end of 'TournamentLimits'

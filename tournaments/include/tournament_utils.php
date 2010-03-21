@@ -181,9 +181,9 @@ class TournamentUtils
                         /*day*/ 1, /*year*/ $arr['tm_year'] + 1900, $arr['tm_isdst'] );
    }
 
-   function build_range_text( $min, $max, $fmt='[%s..%s]' )
+   function build_range_text( $min, $max, $fmt='[%s..%s]', $generic_max=null )
    {
-      return sprintf( $fmt, $min, $max );
+      return sprintf( $fmt, $min, $max, $generic_max );
    }
 
 } // end of 'TournamentUtils'

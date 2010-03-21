@@ -60,6 +60,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
       error('unknown_tournament', "TournamentLadderProps.edit_props.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
+   $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
@@ -75,7 +76,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tl_props, $ttype );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tl_props, $t_limits );
    $errors = array_merge( $errors, $input_errors, $tl_props->check_properties() );
 
    // save properties-object with values from edit-form
@@ -148,12 +149,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'TAB',
          'TEXT',        T_('For remaining ranks restrict max. defenses to') . ': ',
-         'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'], ));
+         'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'],
+         'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TL_MAX_DF), ));
 
    // max. challenges
    $tform->add_row( array(
          'DESCRIPTION', T_('Max. outgoing Challenges'),
-         'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'], ));
+         'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'],
+         'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TL_MAX_CH), ));
    $tform->add_empty_row();
 
    // game-end
@@ -231,12 +234,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tlp, $ttype )
+function parse_edit_form( &$tlp, $t_limits )
 {
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tlp_save'] || @$_REQUEST['tlp_preview'] );
-   $t_limits = $ttype->getTournamentLimits();
 
    // read from props or set defaults
    $vars = array(
@@ -309,7 +311,7 @@ function parse_edit_form( &$tlp, $ttype )
       $new_value = $vars['max_def'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value > 0 && $new_value < TLADDER_MAX_DEFENSES )
       {
-         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, null );
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses, null );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
@@ -323,7 +325,7 @@ function parse_edit_form( &$tlp, $ttype )
       $new_value = $vars['max_def1'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_DEFENSES )
       {
-         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, sprintf( T_('of group #%s'), 1) );
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses1, sprintf( T_('of group #%s'), 1) );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
@@ -336,7 +338,7 @@ function parse_edit_form( &$tlp, $ttype )
       $new_value = $vars['max_def2'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_DEFENSES )
       {
-         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, sprintf( T_('of group #%s'), 2) );
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses2, sprintf( T_('of group #%s'), 2) );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
@@ -362,7 +364,7 @@ function parse_edit_form( &$tlp, $ttype )
       $new_value = $vars['max_chall'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
       {
-         $limit_errors = $t_limits->checkLadder_MaxChallenges( $new_value );
+         $limit_errors = $t_limits->checkLadder_MaxChallenges( $new_value, $tlp->MaxChallenges );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
