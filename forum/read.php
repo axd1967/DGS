@@ -230,8 +230,7 @@ require_once( 'forum/post.php' );
    foreach( $fthread->posts as $post )
    {
       $pid = $post->id;
-      $uid = $post->author->id;
-      $is_my_post = ($uid == $my_id);
+      $is_my_post = $post->is_author($my_id);
       if( !$is_my_post ) $all_my_posts = false;
 
       $hidden = !$post->is_approved();

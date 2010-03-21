@@ -272,7 +272,7 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
    foreach( $findposts as $post )
    {
-      $is_my_post = ( $post->author->id == $my_id );
+      $is_my_post = $post->is_author($my_id);
       $hidden = !$post->is_approved();
       if( $hidden && !$is_admin_moderator && !$is_my_post )
          continue;

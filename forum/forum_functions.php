@@ -775,7 +775,7 @@ class DisplayForum
 
          echo "</td></tr>\n";
 
-         $post_reference = "<user {$post->author->id}> ($post_reference):";
+         $post_reference = "<user {$post->author->ID}> ($post_reference):";
       }
 
       // post body
@@ -876,7 +876,7 @@ class DisplayForum
       foreach( $fthread->posts as $pid => $post )
       {
          $hidden = !$post->is_approved();
-         $is_my_post = ( $post->author->id == $this->user_id );
+         $is_my_post = $post->is_author($this->user_id);
          $show_hidden_post = ( $is_my_post || $this->is_moderator );
          if( $hidden && !$post->is_thread_post() && !$show_hidden_post )
             continue;
@@ -1070,9 +1070,8 @@ class Forum
       while( $row = mysql_fetch_array( $result ) )
       {
          $thread = ForumPost::new_from_row( $row ); // Post
-         $thread->last_post =
-            new ForumPost( $thread->last_post_id, $this->id, $thread->thread_id,
-               new ForumUser( $row['LPAuthor_ID'], $row['LPAuthor_Name'], $row['LPAuthor_Handle'] ));
+         $thread->last_post = new ForumPost( $thread->last_post_id, $this->id, $thread->thread_id,
+               User::newForumUser( $row['LPAuthor_ID'], $row['LPAuthor_Name'], $row['LPAuthor_Handle'] ));
          $thread->has_new_posts =
             ( $thread->last_changed >= $min_date ) && ( $thread->last_changed > $row['FR_X_Lastread'] );
 
@@ -1264,9 +1263,8 @@ class Forum
             continue;
 
          $fid = $forum->id;
-         $post =
-            new ForumPost( $forum->last_post_id, $fid, $row['LP_Thread'],
-               new ForumUser( $row['LP_User_ID'], $row['LP_Name'], $row['LP_Handle'] ) );
+         $post = new ForumPost( $forum->last_post_id, $fid, $row['LP_Thread'],
+               User::newForumUser( $row['LP_User_ID'], $row['LP_Name'], $row['LP_Handle'] ));
          $post->created = $row['LP_Time'];
          $forum->last_post = $post;
 
@@ -1423,7 +1421,7 @@ class ForumThread
       if( !$post->is_approved() )
       {
          $my_id = $player_row['ID'];
-         if( ( $post->author->id != $my_id ) && !($player_row['admin_level'] & ADMIN_FORUM) )
+         if( !$post->is_author($my_id) && !($player_row['admin_level'] & ADMIN_FORUM) )
             error('forbidden_post', "ForumThread.load_revision_history.check_viewer($my_id,$post_id)");
       }
 
@@ -1556,7 +1554,7 @@ class ForumPost
 
    // Post Meta & Content
 
-   /*! \brief non-null ForumUser-object ( .id = Posts.User_ID ) */
+   /*! \brief non-null User-object ( .ID = Posts.User_ID ) */
    var $author;
    /*! \brief Posts.Subject */
    var $subject;
@@ -1623,7 +1621,7 @@ class ForumPost
       $this->count_posts = (int) $count_posts;
       $this->count_hits = (int) $count_hits;
       $this->last_post_id = (int) $last_post_id;
-      $this->author = ( is_null($author) ? new ForumUser() : $author );
+      $this->author = ( is_null($author) ? new User() : $author );
       $this->subject = $subject;
       $this->text = $text;
       $this->parent_id = (int) $parent_id;
@@ -1665,7 +1663,7 @@ class ForumPost
    /*! \brief Returns true, if authors post matches given user-id. */
    function is_author( $uid )
    {
-      return ( $this->author->id == $uid );
+      return ( $this->author->ID == $uid );
    }
 
    /*! \brief Sets tree-navigation vars for this post (NULL=not-set). */
@@ -1744,7 +1742,7 @@ class ForumPost
    function is_post_read( $fread )
    {
       // own posts are always read
-      if( $this->author->id == $fread->uid )
+      if( $this->is_author($fread->uid) )
          return true;
 
       $chkdate = $this->created; // check against post creation-date
@@ -1789,7 +1787,7 @@ class ForumPost
             @$row['Forum_ID'],
             @$row['Thread_ID'],
             // Author_* not part of Posts-table, but are read if set in row
-            new ForumUser( @$row['User_ID'], @$row['Author_Name'], @$row['Author_Handle'],
+            User::newForumUser( @$row['User_ID'], @$row['Author_Name'], @$row['Author_Handle'],
                @$row['Author_AdminLevel'] ),
             @$row['LastPost'],
             @$row['PostsInThread'],
@@ -1822,52 +1820,4 @@ class ForumPost
    }
 
 } // end of 'ForumPost'
-
-
- /*!
-  * \brief Intermediate convenience class to represent user with User_ID, Name, Handle.
-  * At the moment used as container to hold data to be able to create user-reference.
-  * TODO: needs to be refactored into Players-class.
-  */
-class ForumUser
-{
-   var $id;
-   var $name;
-   var $handle;
-   var $AdminLevel;
-
-   /*! \brief Constructs a ForumUser with specified args. */
-   function ForumUser( $id=0, $name='', $handle='', $admin_level=0 )
-   {
-      $this->id = (int) $id;
-      $this->name = (string)$name;
-      $this->handle = (string)$handle;
-      $this->AdminLevel = (int)$admin_level;
-   }
-
-   /*! \brief Returns true, if user set (id != 0). */
-   function is_set()
-   {
-      return ( is_numeric($this->id) && $this->id > 0 );
-   }
-
-   /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
-   {
-      return "ForumUser(id={$this->id}): "
-         . "name=[{$this->name}], "
-         . "handle=[{$this->handle}]"
-         . "AdminLevel=[{$this->AdminLevel}]";
-   }
-
-   /*! \brief Returns user_reference for user in this object. */
-   function user_reference()
-   {
-      $name = ( (string)$this->name != '' ) ? $this->name : UNKNOWN_VALUE;
-      $handle = ( (string)$this->handle != '' ) ? $this->handle : UNKNOWN_VALUE;
-      return user_reference( REF_LINK, 1, '', $this->id, $name, $handle );
-   }
-
-} // end of 'ForumUser'
-
 ?>

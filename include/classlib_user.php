@@ -31,7 +31,7 @@ require_once( 'include/std_functions.php' );
  /*!
   * \class User
   *
-  * \brief Convenience Class to manage some parts of Players-table
+  * \brief Convenience Class to manage some parts of Players-table.
   *        Used as container to hold data to be able to create user-reference.
   */
 class User
@@ -47,14 +47,16 @@ class User
    var $GamesRated;
    var $GamesFinished;
    var $AdminOptions;
+   var $AdminLevel;
 
    // other DB-fields
 
    var $urow;
 
-   /*! \brief Constructs a ForumUser with specified args. */
+   /*! \brief Constructs a User with specified args. */
    function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
-                  $rating_status=RATING_NONE, $games_rated=0, $games_finished=0, $admin_opts=0 )
+                  $rating_status=RATING_NONE, $games_rated=0, $games_finished=0, $admin_opts=0,
+                  $admin_level=0 )
    {
       $this->ID = (int)$id;
       $this->Name = (string)$name;
@@ -67,6 +69,7 @@ class User
       $this->GamesRated = (int)$games_rated;
       $this->GamesFinished = (int)$games_finished;
       $this->AdminOptions = (int)$admin_opts;
+      $this->AdminLevel = (int)$admin_level;
       // other DB-fields
       $this->urow = null;
    }
@@ -119,6 +122,7 @@ class User
          . ", GamesRated=[{$this->GamesRated}]"
          . ", GamesFinished=[{$this->GamesFinished}]"
          . sprintf( ", AdminOptions=[0x%x]", $this->AdminOptions )
+         . sprintf( ", AdminLevel=[0x%x]", $this->AdminLevel )
          . sprintf( ", urow={%s}", print_r($this->urow, true) )
          ;
    }
@@ -136,15 +140,7 @@ class User
    /*! \brief Returns db-fields to be used for query of User-object. */
    function build_query_sql()
    {
-      // Players (all fields): ID,Type,Handle,Password,Newpassword,Sessioncode,
-      //    Sessionexpire,Lastaccess,LastMove,Registerdate,Hits,VaultCnt,VaultTime,
-      //    Moves,Activity,Name,Email,Rank,SendEmail,Notify,Adminlevel,AdminOptions,
-      //    AdminNote,MayPostOnForum,Timezone,Nightstart,ClockUsed,ClockChanged,Rating,
-      //    Rating2,RatingMin,RatingMax,InitialRating,RatingStatus,Open,Lang,VacationDays,
-      //    OnVacation,Running,Finished,RatedGames,Won,Lost,Translator,IP,Browser,Country,
-      //    BlockReason,UserFlags,SkinName,MenuDirection,TableMaxRows,Button
-
-      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus,RatedGames,Finished,AdminOptions
+      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus,RatedGames,Finished,AdminOptions,Adminlevel
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'P.*',
@@ -168,9 +164,18 @@ class User
             @$row[$prefix.'RatingStatus'],
             @$row[$prefix.'RatedGames'],
             @$row[$prefix.'Finished'],
-            @$row[$prefix.'AdminOptions']
+            @$row[$prefix.'AdminOptions'],
+            @$row[$prefix.'Adminlevel']
          );
       $user->urow = $row;
+      return $user;
+   }
+
+   /*! \brief Constructs a User for forum-users. */
+   function newForumUser( $id=0, $name='', $handle='', $admin_level=0 )
+   {
+      $user = new User( $id, $name, $handle );
+      $user->AdminLevel = (int)$admin_level;
       return $user;
    }
 
