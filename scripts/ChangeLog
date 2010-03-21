@@ -22,6 +22,48 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-21 juga
+
+   * tournaments/include/tournament_limits.php (TournamentLimits.getLimits,
+       ~.getMinLimit, ~.getMaxLimit, ~.getLimitRangeText, ~.check_MaxParticipants,
+       ~.checkLadder_MaxDefenses, ~.checkLadder_MaxChallenges),
+     tournaments/include/tournament_template_ladder.php (class TournamentTemplate),
+     tournaments/include/tournament_ladder_props.php (parse_edit_form),
+     tournaments/include/types/dgs_ladder.php (class TournamentTemplateLadder),
+     tournaments/include/types/public_ladder.php (class PublicLadderTournament),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/view.php (prepare_update_rank),
+     tournaments/edit_properties.php (parse_edit_form):
+   - added additional limitations on max-tournament-participants, ladder-max-defenses/challenges
+   - bugfix: reduce min-check for ladder-max-defenses from 1 to 0 because of max-defenses for group#1/2
+   - do not accept off-limit values with auto-limits for most properties, but show range-value-error instead
+   - no special handling for T-Admin for now
+   - use TournamentUtils::build_range_text()-func to build range-text '[min..max]'
+   - adjusted texts (added '.', more detailed error-text)
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.build_range_text),
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration),
+     tournaments/edit_participant.php (parse_edit_form),
+     tournaments/register.php (parse_edit_form):
+   - use TournamentUtils::build_range_text()-func to build range-text '[min..max]'
+
+2010-03-15 juga
+
+   * tournaments/include/tournament_limits.php (class TournamentLimits, ~.setLimits,
+       ~.getLimits, ~.check_MaxParticipants, ~.checkLadder_MaxDefenses, ~.checkLadder_MaxChallenges),
+     tournaments/include/tournament_template.php (class TournamentTemplate, ~.getTournamentLimits),
+     tournaments/include/tournament_template_ladder.php (class TournamentTemplateLadder),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament, ~.createTournament),
+     tournaments/include/types/public_ladder.php (class PublicLadderTournament, ~.createTournament),
+     tournaments/edit_properties.php (parse_edit_form):
+   - replaced restriction specified by TournamentTemplate.limit_min/max_participants
+     with field-specific limits enforced by database (and not by policy)
+   - added TournamentLimits()-helper-class to add tournament-type specific checks for:
+     - TournamentProperties.MaxParticipants
+     - TournamentLadderProps.MaxDefenses/MaxChallenges
+   - added default-tournament-limits for Dragon/Public-scoped tournaments
+   - allow/use no min-participants for ladder (=0-value)
+
 2010-03-14 juga
 
    * tournaments/include/tournament_template_ladder.php (class TournamentTemplateLadder,
