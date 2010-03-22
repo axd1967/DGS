@@ -81,6 +81,8 @@ OS    Lost                 | int(11)                                     | NO   
  S    Browser              | varchar(100)                                | NO   |
 Ou    Country              | char(2)                                     | NO   |
   A   BlockReason          | text                                        | NO   | NULL
+ S    ForumReadTime        | datetime                                    | NO   | 0000-00-00 00:00:00
+ S    ForumReadNew         | tinyint(4)                                  | NO   | 0
 
 # Fields for (global) GUI-config in Players-table:
 
@@ -91,6 +93,7 @@ Z     TableMaxRows         | smallint(5) unsigned                        | NO   
 Z     Button               | int(11)                                     | NO   | 0
 Z     UserPicture          | varchar(48)                                 | NO   |
 Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   | LASTMOVED
+
 
 # Fields for board-related GUI-config in ConfigBoard-table:
 
