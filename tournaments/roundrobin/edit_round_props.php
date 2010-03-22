@@ -136,9 +136,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Size'),
          'TEXT',        T_('min.#TRD_poolsize') . MINI_SPACING,
-         'TEXTINPUT',   'min_pool_size', 5, 5, $tround->MinPoolSize, '',
+         'TEXTINPUT',   'min_pool_size', 5, 5, $tround->MinPoolSize,
          'TEXT',        SMALL_SPACING . T_('max.#TRD_poolsize') . MINI_SPACING,
-         'TEXTINPUT',   'min_pool_size', 5, 5, $tround->MinPoolSize, '', ));
+         'TEXTINPUT',   'min_pool_size', 5, 5, $tround->MinPoolSize, ));
 
    $trform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
