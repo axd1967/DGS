@@ -232,7 +232,7 @@ function parse_edit_form( &$tney )
       $vars['locknote'] = $new_value;
       $lock_flags = ($tney->Flags & $flagmask);
       if( $lock_flags && ( ($has_line && $note_len < 4) || (!$has_line && empty($new_value)) ) )
-         $errors[] = T_('Your lock note is insufficient for set locks.');
+         $errors[] = T_('Your lock note is insufficient for setting locks.');
       else
          $tney->LockNote = ( $lock_flags ) ? $new_value : '';
 

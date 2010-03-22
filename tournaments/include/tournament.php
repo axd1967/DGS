@@ -681,7 +681,7 @@ class Tournament
 
    function get_edit_lock_tournament_status()
    {
-      static $statuslist = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
+      static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 
