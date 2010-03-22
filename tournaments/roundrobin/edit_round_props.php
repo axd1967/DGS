@@ -89,6 +89,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    // init
    $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
+   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround );
@@ -127,10 +129,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    if( count($errors) )
    {
-      $tform->add_row( array(
+      $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
-      $tform->add_empty_row();
+      $trform->add_empty_row();
    }
 
    $trform->add_row( array(
