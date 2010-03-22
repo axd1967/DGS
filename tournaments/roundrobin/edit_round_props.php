@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-chdir('..');
+chdir('../..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
@@ -39,7 +39,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    if( !$logged_in )
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.edit_round');
+      error('feature_disabled', 'Tournament.edit_round_props');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
@@ -58,15 +58,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_round.find_tournament($tid)");
+      error('unknown_tournament', "Tournament.edit_round_props.find_tournament($tid)");
    //TODO not supported yet for Ts (only ladder for now)
-   error('assert', "Tournament.edit_round.not_implemented($tid)");
+   error('assert', "Tournament.edit_round_props.not_implemented($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
-      error('tournament_edit_not_allowed', "Tournament.edit_round.edit_tournament($tid,$my_id)");
+      error('tournament_edit_not_allowed', "Tournament.edit_round_props.edit_tournament($tid,$my_id)");
 
    //TODO handle new T-round & edit old T-round, + check round
    // load existing (current T-round) or create new T-round
@@ -98,11 +98,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
    {
       $tround->persist(); // insert or update
-      jump_to("tournaments/edit_round.php?tid={$tid}".URI_AMP."round={$round}".URI_AMP
+      jump_to("tournaments/roundrobin/edit_round_props.php?tid={$tid}".URI_AMP."round={$round}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament round saved!')) );
    }
 
-   $page = "edit_round.php";
+   $page = "edit_round_props.php";
    $title = T_('Tournament Round Editor');
 
 

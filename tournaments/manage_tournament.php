@@ -202,7 +202,7 @@ function make_links_ttype_specific( $tourney, $tstat )
    {
       if( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
-            . make_menu_link( T_('Edit round'), array( 'url' => "tournaments/edit_round.php?tid=$tid", 'class' => 'TAdmin' ))
+            . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('Setup tournament round for pooling and pairing') ));
    }
 
