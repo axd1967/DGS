@@ -198,7 +198,7 @@ class TournamentParticipant
 
       if( !$allowed && is_array($errors) )
          $errors[] = sprintf( T_('Registration status change [%s] to [%s] is not allowed for tournament status [%s].'),
-                              TournamentParticipant::getStatusText($tp_status_old),
+                              (is_null($tp_status_old) ? NO_VALUE : TournamentParticipant::getStatusText($tp_status_old)),
                               TournamentParticipant::getStatusText($this->Status),
                               Tournament::getStatusText($t_status) );
       return $allowed;
