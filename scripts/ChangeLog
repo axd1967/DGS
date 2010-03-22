@@ -22,7 +22,93 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-22 juga
+
+   * include/game_functions.php (getRulesetText, build_ruleset_filter_array, getRulesetScoring),
+     include/make_game.php (make_invite_game, create_game),
+     include/message_functions.php (~.game_settings_form, ~.game_info_table),
+     tournaments/include/tournament_rules.php (class TournamentRules, ~.setRuleset,
+       ~.fillEntityData, ~.convertTournamentRules_to_GameRow, ~.convertTournamentRules_to_EditForm,
+       ~.convertEditForm_to_TournamentRules, ~.new_from_row),
+     include/error_codes.php (ErrorCode.init), include/globals.php,
+     specs/db/table-Tournaments.txt, specs/db/table-Waitingroom.txt,
+     tournaments/manage_tournament.php,
+     tournaments/view_tournament.php (echo_tournament_rules),
+     game.php (draw_game_info), gameinfo.php, message.php, send_message.php,
+     sgf.php (get_ruleset), show_games.php, status.php, waiting_room.php, NEWS:
+   - added Rulesets Japanese/Chinese with territory/area-scoring
+     for waiting-room, new game and tournament-rules
+   - removed FIXME: show scoring-box only for chosen ruleset
+-----------
+-- changed Ruleset from scoring-method to real ruleset for new game
+ALTER TABLE Waitingroom
+   DROP COLUMN Ruleset ;
+ALTER TABLE Waitingroom
+   ADD Ruleset enum('JAPANESE','CHINESE') NOT NULL DEFAULT 'JAPANESE' AFTER Time ;
+
+-- added Ruleset for new game
+ALTER TABLE Games
+   ADD Ruleset enum('JAPANESE','CHINESE') NOT NULL DEFAULT 'JAPANESE' AFTER ToMove_ID ;
+
+-- added Ruleset for tournament-rules
+ALTER TABLE TournamentRules
+   ADD Ruleset enum('JAPANESE','CHINESE') NOT NULL DEFAULT 'JAPANESE' AFTER Flags ;
+-----------
+
+   * tournaments/include/tournament.php (Tournament.get_edit_lock_tournament_status),
+     tournaments/edit_lock.php (parse_edit_form):
+   - bugfix: lock-edit also allowed for tourney-Pair-status
+
 2010-03-21 juga
+
+   * forum/forum_functions.php (DisplayForum.draw_post, ~.draw_overview;
+       Forum.load_threads, ~.load_forum_list; ForumThread.load_revision_history;
+       class ForumPost, ~.is_author, ~.is_post_read, ~.new_from_row),
+     include/classlib_user.php (class User, ~.to_string, ~.build_query_sql, ~.newForumUser),
+     forum/read.php, forum/search.php:
+   - refactored ForumUser-class into using User-class: adding AdminLevel-handling
+
+   * forum/class_forum_read.php (ForumRead.update_global_forum_read,
+       ~.load_global_new, ~.trigger_recalc_global_read_update),
+     include/std_functions.php (is_logged_in),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Players.txt, specs/forums.txt:
+   - optimization by replacing ForumRead(User_ID,Forum_ID=0,Thread_ID=0) to omit
+     extra-Forumreads-lookup with new Players-fields:
+     - Players.ForumReadTime=Forumreads.Time,
+     - Players.ForumReadNew=Forumreads.HasNew
+-----------
+-- store global forum-read date and NEW-flag in Players-table
+ALTER TABLE Players
+   ADD ForumReadNew tinyint NOT NULL default '0' AFTER BlockReason,
+   ADD ForumReadTime datetime NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER BlockReason ;
+
+-- migration of global forum-read data
+UPDATE Players AS P INNER JOIN Forumreads AS FR ON FR.User_ID=P.ID
+   SET P.ForumReadTime=FR.Time, P.ForumReadNew=FR.HasNew WHERE FR.Forum_ID=0 AND FR.Thread_ID=0 ;
+
+-- cleanup, later eventually
+DELETE FROM Forumreads
+   WHERE Forum_ID=0 AND Thread_ID=0 ;
+-----------
+
+   * tournaments/list_tournaments.php:
+   - bugfix: show private-scoped tournaments to non-admins too
+
+   * tournaments/include/tournament_limits.php (TournamentLimits.getLimits,
+       ~.getLimitRangeTextAdmin, ~.check_MaxParticipants, ~.checkLadder_MaxDefenses,
+       ~.checkLadder_MaxChallenges, ~.getStaticMaxLimit),
+     tournaments/include/tournament_utils.php (TournamentUtils.build_range_text),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/edit_properties.php (parse_edit_form):
+   - allow tourney-admin to overwrite tourney-limits with off-limit-values
+     preserving overwritten values for non-T-admin
+   - showing tourney-limits to T-admin
+
+   * tournaments/edit_properties.php (parse_edit_form),
+     tournaments/ladder/edit_props.php (parse_edit_form):
+   - bugfix: check additional limitations and use new-value on max-participant,
+     ladder-max-defenses/challenges only if generic and additional checks are ok
 
    * tournaments/include/types/private_ladder.php (class PrivateLadderTournament, ~.createTournament),
      tournaments/include/tournament.php (Tournament.getScopeText, ~.getWizardTypeText),
