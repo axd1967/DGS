@@ -92,6 +92,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $MaxHandicap = MAX_HANDICAP;
    $Maintime = 1;
    $MaintimeUnit = 'months';
+   // NOTE: take note, that '36 hours' eval to '2d + 6h' because of sleeping time
    $Byotype = BYOTYPE_FISCHER;
    $Byotime_jap = 1;
    $ByotimeUnit_jap = 'days';
