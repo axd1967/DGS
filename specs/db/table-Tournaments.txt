@@ -28,7 +28,7 @@ Description:
 --------------+------------------------------------------------------+---------------------
  ID           | int(11)                                              | NULL, auto_increment
  Scope        | enum('DRAGON','PUBLIC','PRIVATE')                    | PUBLIC
- Type         | enum('ROUNDROBIN')                                   | ROUNDROBIN
+ Type         | enum('LADDER','ROUNDROBIN')                          | NULL
  WizardType   | tinyint(4)                                           | NULL
  Title        | varchar(255)                                         |
  Description  | text                                                 | NULL
@@ -54,8 +54,8 @@ Description:
    - PRIVATE = private tournament, registration only with token or by TD-invitation
 
 * Type : Tournament-type
+   - LADDER = TP can "climb" up ladder (=KING-OF-THE-HILL)
    - ROUNDROBIN = TPs playing in pooled rounds
-   - future: LADDER = TP can "climb" up ladder (=KING-OF-THE-HILL)
    - future: LEAGUE = Team-tournaments
 
 * WizardType : type of tournament created by tournament-wizard (more precise than Type)
@@ -405,16 +405,17 @@ Description:
 Description:
    Pool-setup for one tournament round.
 
- Field       | Type                                                 | Default
--------------+------------------------------------------------------+---------------------
- tid         | int(11)                                              | NULL
- Round       | int(11)                                              | NULL
- RulesID     | int(11)                                              | NULL
- Lastchanged | datetime                                             | 0000-00-00 00:00:00
- Status      | enum('INIT','POOLINIT','PAIRINIT','GAMEINIT','DONE') | INIT
- MinPoolSize | smallint(5)                                          | 0
- MaxPoolSize | smallint(5)                                          | 0
- PoolCount   | smallint(5)                                          | 0
+ Field       | Type                                     | Default
+-------------+------------------------------------------+---------------------
+ ID          | int(11)                                  | NULL
+ tid         | int(11)                                  | NULL
+ Round       | tinyint(3) unsigned                      | 1
+ Status      | enum('INIT','POOL','PAIR','GAME','DONE') | INIT
+ MinPoolSize | smallint(5) unsigned                     | 0
+ MaxPoolSize | smallint(5) unsigned                     | 0
+ PoolCount   | smallint(5) unsigned                     | 0
+ Lastchanged | datetime                                 | 0000-00-00 00:00:00
+ ChangedBy   | varchar(54)                              |
 
 
 ## Fields:
@@ -423,20 +424,20 @@ Description:
 
 * Round : round number
 
-* RulesID : FK to TournamentRules.ID
-
-* Lastchanged : update of table-entry
-
 * Status : pairing status for tournament round
-   - INIT = new round started, no setup yet
-   - POOLINIT = new pools created (empty)
-   - PAIRINIT = TPs assigned to pool
-   - GAMEINIT = T-games setup, ready to be created and started
-   - DONE = pairing for tournament round is done
+   - INIT = new round started, setting up round
+   - POOL = create/setup pools
+   - PAIR = assign TPs to pools
+   - GAME = setup T-games, games ready to be created and started
+   - DONE = pairing for tournament-round is done
 
 * MinPoolSize, MaxPoolSize : min. and max. size of pools for tournament round
 
-* PoolCount : TODO
+* PoolCount : how many pools are being used
+
+* Lastchanged : date of last update of table-entry
+
+* ChangedBy : user-list that updated table-entry in format: "[user2] [user1] ..."
 
 
 ###########################################################################
