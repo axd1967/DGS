@@ -1812,3 +1812,21 @@ ALTER TABLE TournamentRules
    ADD Ruleset enum('JAPANESE','CHINESE') NOT NULL DEFAULT 'JAPANESE' AFTER Flags ;
 
 
+-- redefine tournament-round for round-robin tournaments: only one set of rules, shorter status-values
+DROP TABLE IF EXISTS TournamentRound ;
+
+CREATE TABLE TournamentRound (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   Round tinyint unsigned NOT NULL DEFAULT '1',
+   Status enum('INIT','POOL','PAIR','GAME','DONE') NOT NULL DEFAULT 'INIT',
+   MinPoolSize smallint unsigned NOT NULL DEFAULT '0',
+   MaxPoolSize smallint unsigned NOT NULL DEFAULT '0',
+   PoolCount smallint unsigned NOT NULL DEFAULT '0',
+   Lastchanged datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL DEFAULT '',
+   PRIMARY KEY (ID),
+   UNIQUE KEY tidRound (tid,Round)
+) ENGINE=MyISAM ;
+
+
