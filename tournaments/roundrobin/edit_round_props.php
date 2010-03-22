@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
          'TEXT',        $tourney->build_info() ));
    if( $tround->Lastchanged )
       $trform->add_row( array(
-            'DESCRIPTION', T_('Last changed date'),
+            'DESCRIPTION', T_('Last changed'),
             'TEXT',        date(DATEFMT_TOURNAMENT, $tround->Lastchanged) ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Status'),
