@@ -24,6 +24,9 @@ ChangeLog
 
 2010-03-22 juga
 
+   * specs/db/dragon-ddl.sql:
+   - synchronized tournament-tables with current state of db
+
    * include/game_functions.php (getRulesetText, build_ruleset_filter_array, getRulesetScoring),
      include/make_game.php (make_invite_game, create_game),
      include/message_functions.php (~.game_settings_form, ~.game_info_table),

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 07, 2010 at 12:56 PM
+-- Generation Time: Mar 22, 2010 at 01:15 AM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.10
 
@@ -315,6 +315,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `Black_ID` int(11) NOT NULL,
   `White_ID` int(11) NOT NULL,
   `ToMove_ID` int(11) NOT NULL default '0',
+  `Ruleset` enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(4,1) NOT NULL default '6.5',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',
@@ -556,6 +557,8 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Browser` varchar(150) NOT NULL default '',
   `Country` char(2) NOT NULL default '',
   `BlockReason` text NOT NULL,
+  `ForumReadTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `ForumReadNew` tinyint(4) NOT NULL default '0',
   `UserFlags` int(11) NOT NULL default '0',
   `SkinName` varchar(32) NOT NULL default '',
   `MenuDirection` enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL',
@@ -712,6 +715,7 @@ CREATE TABLE IF NOT EXISTS `Tournament` (
   `EndTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `Rounds` tinyint(3) unsigned NOT NULL default '1',
   `CurrentRound` tinyint(3) unsigned NOT NULL default '1',
+  `LockNote` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `Status` (`Status`),
   KEY `StartTime` (`StartTime`)
@@ -729,6 +733,23 @@ CREATE TABLE IF NOT EXISTS `TournamentDirector` (
   `Flags` smallint(5) unsigned NOT NULL default '0',
   `Comment` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`tid`,`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `TournamentExtension`
+--
+
+CREATE TABLE IF NOT EXISTS `TournamentExtension` (
+  `tid` int(11) NOT NULL,
+  `Property` smallint(5) unsigned NOT NULL,
+  `IntValue` int(11) NOT NULL default '0',
+  `DateValue` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  `ChangedBy` varchar(54) NOT NULL default '',
+  PRIMARY KEY  (`tid`,`Property`),
+  KEY `DateValue` (`DateValue`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -775,6 +796,9 @@ CREATE TABLE IF NOT EXISTS `TournamentLadder` (
   `RankChanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `Rank` smallint(5) unsigned NOT NULL default '0',
   `BestRank` smallint(5) unsigned NOT NULL default '0',
+  `StartRank` smallint(5) unsigned NOT NULL default '0',
+  `PeriodRank` smallint(5) unsigned NOT NULL default '0',
+  `HistoryRank` smallint(5) unsigned NOT NULL default '0',
   `ChallengesIn` tinyint(3) unsigned NOT NULL default '0',
   `ChallengesOut` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`tid`,`rid`),
@@ -807,6 +831,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `GameEndTimeoutWin` enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL default 'DF_BELOW',
   `GameEndTimeoutLoss` enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL default 'CH_LAST',
   `UserAbsenceDays` tinyint(3) unsigned NOT NULL default '0',
+  `RankPeriodLength` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`tid`),
   KEY `UserAbsenceDays` (`UserAbsenceDays`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -832,6 +857,9 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
   `Notes` text NOT NULL,
   `UserMessage` text NOT NULL,
   `AdminMessage` text NOT NULL,
+  `Finished` mediumint(8) unsigned NOT NULL default '0',
+  `Won` mediumint(8) unsigned NOT NULL default '0',
+  `Lost` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),
   KEY `tid_status` (`tid`,`Status`)
@@ -891,6 +919,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRules` (
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
   `Flags` smallint(5) unsigned NOT NULL default '0',
+  `Ruleset` enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Handicaptype` enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV',
   `AdjKomi` decimal(4,1) NOT NULL default '0.0',
@@ -1033,7 +1062,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `uid` int(11) NOT NULL,
   `nrGames` tinyint(3) unsigned NOT NULL default '1',
   `Time` datetime NOT NULL default '0000-00-00 00:00:00',
-  `Ruleset` enum('area','territory') NOT NULL default 'territory',
+  `Ruleset` enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(4,1) NOT NULL default '6.5',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',
