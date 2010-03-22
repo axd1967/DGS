@@ -55,11 +55,6 @@ require_once( 'include/classlib_userconfig.php' );
       HTYPE_WHITE  => T_('Color White'),
    );
 
-   $ruleset_array = array(
-      RULESET_TERRITORY => T_('Territory'),
-      RULESET_AREA      => T_('Area'),
-   );
-
    // config for handicap-filter
    $handi_filter_array = array(
       T_('All')            => '',
@@ -115,6 +110,7 @@ require_once( 'include/classlib_userconfig.php' );
       $wrfilter->add_filter(13, 'BoolSelect', 'StdHandicap', true);
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
+   $wrfilter->add_filter(19, 'Selection', build_ruleset_filter_array(), true);
    $wrfilter->init();
    $f_range =& $wrfilter->get_filter(8);
    $suitable = $f_range->get_value(); // !suitable == all
@@ -312,8 +308,6 @@ require_once( 'include/classlib_userconfig.php' );
             $k_str = ( $calculated ) ? build_adjust_komi( $AdjKomi, $JigoMode, true ) : (float)$Komi;
             $wrow_strings[ 6] = ( (string)$k_str != '' ) ? $k_str : NO_VALUE;
          }
-         if( $wrtable->Is_Column_Displayed[19] )
-            $wrow_strings[ 19] = $ruleset_array[$Ruleset];
          if( $wrtable->Is_Column_Displayed[ 7] )
             $wrow_strings[ 7] = $Size;
          if( $wrtable->Is_Column_Displayed[ 8] )
@@ -357,6 +351,8 @@ require_once( 'include/classlib_userconfig.php' );
                $settings_str .= ($settings_str ? ' ' : '') . T_('(Free Handicap)#handicap_tablewr');
             $wrow_strings[18] = $settings_str;
          }
+         if( $wrtable->Is_Column_Displayed[19] )
+            $wrow_strings[19] = getRulesetText($Ruleset);
 
          $wrtable->add_row( $wrow_strings );
       }

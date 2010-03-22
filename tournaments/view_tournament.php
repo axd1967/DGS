@@ -279,6 +279,7 @@ function echo_tournament_rules( $tourney, $trule )
       $adj_handi[] = sprintf( T_('limited by max. %s stones#trules_handi'), $trule->MaxHandicap );
 
    $itable = new Table_info('gamerules', TABLEOPT_LABEL_COLON);
+   $itable->add_sinfo( T_('Ruleset'), getRulesetText($trule->Ruleset) );
    $itable->add_sinfo( T_('Board Size#trules'), $trule->Size .' x '. $trule->Size );
    $itable->add_sinfo( T_('Handicap Type#trules'),
          TournamentRules::getHandicaptypeText($trule->Handicaptype, $tourney->Type) );

@@ -30,6 +30,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 {
    global $NOW;
 
+   $ruleset = @$_REQUEST['ruleset'];
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
 
    $cat_handicap_type = @$_REQUEST['cat_htype'];
@@ -118,6 +119,9 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
          break;
    }
 
+   if( $ruleset != RULESET_JAPANESE && $ruleset != RULESET_CHINESE )
+      error('unknown_ruleset', "make_invite_game.check.ruleset($ruleset)");
+
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
       error('komi_range', "make_invite_game.check.komi($komi)");
 
@@ -148,6 +152,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       "White_ID=$White_ID, " .
       "ToMove_ID=$tomove, " .
       "Lastchanged=FROM_UNIXTIME($NOW), " .
+      "Ruleset='" . mysql_addslashes($ruleset) . "', " .
       "Size=$size, " .
       "Handicap=$handicap, " .
       "Komi=ROUND(2*($komi))/2, " .
@@ -233,6 +238,9 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $black_rated = ( $black_row['RatingStatus'] != RATING_NONE && $rating_black >= MIN_RATING );
    $white_rated = ( $white_row['RatingStatus'] != RATING_NONE && $rating_white >= MIN_RATING );
 
+   if( !isset($game_info_row['Ruleset']) )
+      $game_info_row['Ruleset'] = RULESET_JAPANESE; // default
+
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
    $weekend_clock_offset = ( $game_info_row['WeekendClock'] != 'Y' ) ? WEEKEND_CLOCK_OFFSET : 0;
@@ -300,6 +308,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Black_ID=" . $black_row["ID"] . ", " .
       "White_ID=" . $white_row["ID"] . ", " .
       "ToMove_ID=$tomove, " .
+      "Ruleset='" . mysql_addslashes($game_info_row['Ruleset']) . "', " .
       "Status='PLAY', " .
       "Moves=$moves, " .
       "ClockUsed=$clock_used, " .

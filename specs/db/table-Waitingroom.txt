@@ -22,7 +22,7 @@ Important Note:
  uid           | int(11)                                  | 0
  nrGames       | int(11)                                  | 1
  Time          | datetime                                 | 0000-00-00 00:00:00
- Ruleset       | enum('area', 'territory')                | territory
+ Ruleset       | enum('JAPANESE','CHINESE')               | JAPANESE
  Size          | int(11)                                  | 19
  Komi          | decimal(6,1)                             | 6.5
  Handicap      | int(11)                                  | 0
@@ -58,7 +58,9 @@ Important Note:
 
 * Time : creation-date of game-offer
 
-* Ruleset : territory scoring or area scoring
+* Ruleset : supported rulesets on DGS
+   - JAPANESE = using territory-scoring (default)
+   - CHINESE = using area-scoring
 
 * Size : board-size for game
    - within range MIN_BOARD_SIZE..MAX_BOARD_SIZE, which is 5..25

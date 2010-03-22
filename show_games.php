@@ -23,6 +23,7 @@ require_once( "include/std_functions.php" );
 require_once( 'include/gui_functions.php' );
 require_once( "include/table_columns.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/filter.php" );
 require_once( "include/classlib_profile.php" );
@@ -158,6 +159,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => $restrict_games ));
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
+   $gfilter->add_filter(43, 'Selection', build_ruleset_filter_array(), true);
 
    if( !$observe && !$all ) //FU+RU
    {
@@ -292,7 +294,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *   Actually (FU+RU) may use the ?UNION
  *
  * Games (OB+FU+RU+FA+RA) AS Games:
- *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, Size, Komi, Handicap,
+ *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, Ruleset, Size, Komi, Handicap,
  *   Status, Moves, Black_Prisoners, White_Prisoners, Last_X, Last_Y, Last_Move, Flags, Score,
  *   Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime,
  *   Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed,
@@ -375,6 +377,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 40: >  RU (oppenent remaining time)
  * 41: >  FU (Indicator if there are (hidden) game-comments)
  * 42:    TournamentGames.Status
+ * 43:    Ruleset
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -464,6 +467,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       }
    }
 
+   $gtable->add_tablehead(43, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
    $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
    $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
@@ -890,6 +894,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
       if( $ext_tid && $gtable->Is_Column_Displayed[42] && @$TG_Status )
          $grow_strings[42] = TournamentGames::getStatusText($TG_Status);
+
+      if( $gtable->Is_Column_Displayed[43] )
+         $grow_strings[43] = getRulesetText($Ruleset);
 
       if( $finished ) //FU+FA
       {

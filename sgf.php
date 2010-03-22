@@ -370,6 +370,24 @@ function sgf_echo_rating( $rating, $show_percent=false )
    return reverse_htmlentities($rating_str);
 }
 
+/*!
+ * \brief Returns ruleset-content for RU[]-tag.
+ * \note available
+ *  "AGA" (rules of the American Go Association)
+ *  "GOE" (the Ing rules of Goe)
+ *  "Japanese" (the Nihon-Kiin rule set)
+ *  "NZ" (New Zealand rules)
+*/
+function get_ruleset( $ruleset=null )
+{
+   static $arr = array(
+      RULESET_JAPANESE => 'Japanese',
+      RULESET_CHINESE  => 'Chinese',
+   );
+   return ( !is_null($ruleset) && isset($arr[$ruleset]) ) ? $arr[$ruleset] : 'Japanese';
+}
+
+
 
 $array=array();
 
@@ -394,14 +412,6 @@ $array=array();
    */
    //$charset = 'UTF-8'; //by default
    $charset = '';
-
-   /*
-      "AGA" (rules of the American Go Association)
-      "GOE" (the Ing rules of Goe)
-      "Japanese" (the Nihon-Kiin rule set)
-      "NZ" (New Zealand rules)
-   */
-   $rules = "Japanese"; //Mandatory for Go (GM[1])
 
    $use_HA = true;
    $use_AB_for_handicap = true;
@@ -577,6 +587,7 @@ $array=array();
       echo "\nOT[", sgf_simpletext($timeprop), "]";
    }
 
+   $rules = get_ruleset($Ruleset); //Mandatory for Go (GM[1])
    if( $rules )
       echo "\nRU[$rules]";
 

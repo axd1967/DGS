@@ -24,6 +24,7 @@ require_once( 'include/gui_functions.php' );
 require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
 require_once( "include/table_columns.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/classlib_game.php' );
@@ -151,6 +152,7 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
    $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
    $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
+   $gtable->add_tablehead(18, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
    $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
    $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
@@ -268,6 +270,8 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[15] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid, true);
          if( $gtable->Is_Column_Displayed[17] )
             $grow_strings[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
+         if( $gtable->Is_Column_Displayed[18] )
+            $grow_strings[18] = getRulesetText($Ruleset);
 
          $gtable->add_row( $grow_strings );
       }

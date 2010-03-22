@@ -40,14 +40,15 @@ define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
 
-// see Waitingroom.Ruleset in specs/db/table-Waitingroom.txt
-define('RULESET_TERRITORY', 'territory'); // territory scoring
-define('RULESET_AREA',      'area');      // area scoring
-
 define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
 define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
 define('CAT_HTYPE_MANUAL', 'manual'); // manual game setting
 //define('CAT_HTYPE_FAIRKOMI', 'fairkomi'); // fair komi game
+
+// lazy-init in Tournament::get..Text()-funcs
+global $ARR_GLOBALS_GAME; //PHP5
+$ARR_GLOBALS_GAME = array();
+
 
 
 /**
@@ -406,6 +407,45 @@ function build_image_double_game( $with_sep=false, $class='' )
    return image( $base_path.'17/w.gif', T_('Double game (White)'), null, $class)
           . ( $with_sep ? '&nbsp;+&nbsp;' : '' )
           . image( $base_path.'17/b.gif', T_('Double game (Black)'), null, $class);
+}
+
+function getRulesetText( $ruleset=null )
+{
+   global $ARR_GLOBALS_GAME;
+
+   // lazy-init of texts
+   $key = 'RULESET';
+   if( !isset($ARR_GLOBALS_GAME[$key]) )
+   {
+      $arr = array();
+      $arr[RULESET_JAPANESE] = T_('Japanese#ruleset');
+      $arr[RULESET_CHINESE]  = T_('Chinese#ruleset');
+      $ARR_GLOBALS_GAME[$key] = $arr;
+   }
+
+   if( is_null($ruleset) )
+      return $ARR_GLOBALS_GAME[$key];
+   if( !isset($ARR_GLOBALS_GAME[$key][$ruleset]) )
+      error('invalid_args', "getRulesetText($ruleset)");
+   return $ARR_GLOBALS_GAME[$key][$ruleset];
+}
+
+function build_ruleset_filter_array( $prefix='' )
+{
+   return array(
+      T_('All')                        => '',
+      getRulesetText(RULESET_JAPANESE) => $prefix."Ruleset='".RULESET_JAPANESE."'",
+      getRulesetText(RULESET_CHINESE)  => $prefix."Ruleset='".RULESET_CHINESE."'",
+   );
+}
+
+function getRulesetScoring( $ruleset )
+{
+   static $arr = array(
+      RULESET_JAPANESE => GSMODE_TERRITORY_SCORING,
+      RULESET_CHINESE  => GSMODE_AREA_SCORING,
+   );
+   return $arr[$ruleset];
 }
 
 ?>

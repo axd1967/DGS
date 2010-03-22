@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  subList( array( T_('tournament-related: end-time, min./max. participants, rating-use-mode#mngt'),
                                  T_('user-related: user rating-range, min. games#mngt') )),
          '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Change game-settings: board size, handicap-settings, time-settings, rated#mngt') )),
+                 subList( array( T_('Change game-settings: ruleset, board size, handicap-settings, time-settings, rated#mngt') )),
          make_links_ttype_specific( $tourney ),
       '</ul>',
 

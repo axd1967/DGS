@@ -323,6 +323,7 @@ Description:
  Lastchanged  | datetime                                                | 0000-00-00 00:00:00
  ChangedBy    | varchar(54)                                             |
  Flags        | smallint(5) unsigned                                    | 0
+ Ruleset      | enum('JAPANESE','CHINESE')                              | JAPANESE
  Size         | int(11)                                                 | 19
  Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | CONV
  AdjKomi      | decimal(4,1)                                            | 0.0
@@ -351,6 +352,8 @@ Description:
 * ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
 * Flags : not-used
+
+* Ruleset : ruleset, see 'specs/db/table-Waitingroom.txt'
 
 * Size : board-size in range 5..25
 

@@ -168,6 +168,7 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false));
    $itable->add_sinfo( T_('Start time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
    $itable->add_sinfo( T_('Lastchanged'), date(DATE_FMT3, @$grow['X_Lastchanged']) );
+   $itable->add_sinfo( T_('Ruleset'),     getRulesetText($grow['Ruleset']) );
    $itable->add_sinfo( T_('Size'),        $grow['Size'] );
    $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
    $itable->add_sinfo( T_('Komi'),        $grow['Komi'] );

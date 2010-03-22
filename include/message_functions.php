@@ -86,7 +86,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $Komi_m = DEFAULT_KOMI;
    $AdjustKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
-   $Ruleset = RULESET_TERRITORY;
+   $Ruleset = RULESET_JAPANESE; // using territory-scoring
    $AdjustHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
@@ -110,6 +110,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       // If redraw, use values from array $gid
       // ($gid[] is the $_POST[] of the form asking the preview (i.e. this form))
 
+      if( isset($gid['ruleset']) )
+         $Ruleset = $gid['ruleset'];
       if( isset($gid['size']) )
          $Size = (int)$gid['size'];
 
@@ -257,16 +259,8 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    // Draw game-settings form
 
    $mform->add_row( array( 'SPACE' ) );
-   if( $formstyle == GSET_WAITINGROOM )
-   {
-      // ruleset: territory scoring, area scoring
-      $ruleset_arr = array(
-            RULESET_TERRITORY => T_('Territory scoring'),
-            RULESET_AREA      => T_('Area scoring')
-         );
-      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
-                              'SELECTBOX', 'ruleset', 1, $ruleset_arr, $Ruleset, false ) );
-   }
+   $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
+                           'SELECTBOX', 'ruleset', 1, getRulesetText(), $Ruleset, false ) );
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
@@ -613,7 +607,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
-   //   Games: Status, Game_mid(=mid), Size, Komi, Handicap, Rated, WeekendClock,
+   //   Games: Status, Game_mid(=mid), Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
    //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, myColor
    extract($game_row);
 
@@ -708,6 +702,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle != GSET_TOURNAMENT_LADDER )
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+   $itable->add_sinfo( T_('Ruleset'), getRulesetText($Ruleset) );
    $itable->add_sinfo( T_('Size'), $Size );
 
    $color_class = 'class=InTextImage';

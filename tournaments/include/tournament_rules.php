@@ -63,7 +63,7 @@ $ENTITY_TOURNAMENT_RULES = new Entity( 'TournamentRules',
       FTYPE_INT,  'ID', 'tid', 'Flags', 'Size', 'Handicap', 'AdjHandicap', 'MinHandicap', 'MaxHandicap',
                   'Maintime', 'Byotime', 'Byoperiods',
       FTYPE_FLOAT, 'AdjKomi', 'Komi',
-      FTYPE_TEXT, 'Notes',
+      FTYPE_TEXT, 'Notes', 'Ruleset',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'Handicaptype', 'JigoMode', 'StdHandicap', 'Byotype', 'WeekendClock', 'Rated'
    );
@@ -79,6 +79,7 @@ class TournamentRules
 
    // keep fields in "sync" with waiting-room functionality:
 
+   var $Ruleset;
    var $Size;
    var $Handicaptype;
    var $Handicap;
@@ -102,8 +103,8 @@ class TournamentRules
 
    /*! \brief Constructs TournamentRules-object with specified arguments. */
    function TournamentRules( $id=0, $tid=0, $lastchanged=0, $changed_by='', $flags=0, $notes='',
-         $size=19, $handicaptype=TRULE_HANDITYPE_CONV, $handicap=0, $komi=DEFAULT_KOMI,
-         $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
+         $ruleset=RULESET_JAPANESE, $size=19, $handicaptype=TRULE_HANDITYPE_CONV,
+         $handicap=0, $komi=DEFAULT_KOMI, $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
          $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
          $maintime=450, $byotype=BYOTYPE_FISCHER, $byotime=15, $byoperiods=10,
          $weekendclock=true, $rated=false )
@@ -114,6 +115,7 @@ class TournamentRules
       $this->ChangedBy = $changed_by;
       $this->Flags = (int)$flags;
       $this->Notes = $notes;
+      $this->setRuleset( $ruleset );
       $this->Size = (int)$size;
       $this->Handicaptype = $handicaptype;
       $this->Handicap = (int)$handicap;
@@ -132,6 +134,13 @@ class TournamentRules
       $this->Rated = (bool)$rated;
       // non-DB fields
       $this->TourneyType = '';
+   }
+
+   function setRuleset( $ruleset )
+   {
+      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+         error('invalid_args', "TournamentRules.setRuleset($ruleset)");
+      $this->Ruleset = $ruleset;
    }
 
    function to_string()
@@ -194,6 +203,7 @@ class TournamentRules
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Notes', $this->Notes );
+      $data->set_value( 'Ruleset', $this->Ruleset );
       $data->set_value( 'Size', $this->Size );
       $data->set_value( 'Handicaptype', strtoupper($this->Handicaptype) );
       $data->set_value( 'Handicap', $this->Handicap );
@@ -220,6 +230,7 @@ class TournamentRules
 
       $grow = array();
       $grow['double_gid'] = 0;
+      $grow['Ruleset'] = $this->Ruleset;
       $grow['Size'] = limit( (int)$this->Size, MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
       $grow['Handicap'] = (int)$this->Handicap;
@@ -251,6 +262,7 @@ class TournamentRules
 
       $vars['_tr_notes'] = $this->Notes;
 
+      $vars['ruleset'] = $this->Ruleset;
       $vars['size'] = (int)$this->Size;
       $std_htype = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $cat_htype = get_category_handicaptype($std_htype);
@@ -338,6 +350,11 @@ class TournamentRules
       if( !( $handicap >= 0 && $handicap <= MAX_HANDICAP ) )
          $errors[] = ErrorCode::get_error_text('handicap_range');
 
+      // ruleset
+      $ruleset = @$vars['ruleset'];
+      if( $ruleset != RULESET_JAPANESE && $ruleset != RULESET_CHINESE )
+         $errors[] = ErrorCode::get_error_text('unknown_ruleset');
+
       // komi adjustment
       $adj_komi = (float)@$vars['adj_komi'];
       if( abs($adj_komi) > MAX_KOMI_RANGE )
@@ -386,6 +403,7 @@ class TournamentRules
 
       // parse into this TournamentRules-object
       $this->Notes = @$vars['_tr_notes'];
+      $this->Ruleset = $ruleset;
       $this->Size = $size;
       $this->Handicaptype = strtoupper($handicap_type);
       $this->Handicap = $handicap;
@@ -551,6 +569,7 @@ class TournamentRules
             @$row['ChangedBy'],
             @$row['Flags'],
             @$row['Notes'],
+            @$row['Ruleset'],
             @$row['Size'],
             @$row['Handicaptype'],
             @$row['Handicap'],

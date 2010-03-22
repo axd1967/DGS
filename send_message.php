@@ -153,7 +153,7 @@ disable_cache();
       $game_row = mysql_single_fetch( 'send_message.accept',
                              "SELECT Status"
                            . ",Black_ID,White_ID,ToMove_ID"
-                           . ",Size,Handicap,Komi"
+                           . ",Ruleset,Size,Handicap,Komi"
                            . ",Maintime,Byotype,Byotime,Byoperiods"
                            . ",Rated,StdHandicap,WeekendClock"
                            . " FROM Games WHERE ID=$gid" );

@@ -72,6 +72,11 @@ define('SCORE_RESIGN', 1000);
 define('SCORE_TIME', 2000);
 define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
 
+// see Games/Waitingroom/TournamentRules.Ruleset, see also specs/db/table-Waitingroom.txt
+define('RULESET_JAPANESE', 'JAPANESE'); // using area-scoring
+define('RULESET_CHINESE',  'CHINESE'); // using territory-scoring
+define('CHECK_RULESETS', 'JAPANESE|CHINESE');
+
 
 // ---------- Folder stuff ----------------------------------------
 

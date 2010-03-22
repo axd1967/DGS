@@ -159,6 +159,9 @@ class ErrorCode
             T_("Sorry, you may not retake a stone which has just captured a stone, " .
                "since it would repeat a previous board position. Look for 'ko' in the rules.");
 
+         $arr['unknown_ruleset'] =
+            T_("Sorry, an unknown ruleset has been used.");
+
          $arr['komi_range'] =
             T_("The komi is out of range, please choose a more reasonable value.");
 

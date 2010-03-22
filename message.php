@@ -115,7 +115,7 @@ define('MSGBOXROWS_INVITE', 6);
          .",Players.Name AS other_name,Players.Rating2 AS other_rating"
          .",Players.RatingStatus AS other_ratingstatus"
          .",Games.Status,Games.mid AS Game_mid"
-         .",Size, Komi, Handicap, Rated, WeekendClock, StdHandicap"
+         .",Ruleset, Size, Komi, Handicap, Rated, WeekendClock, StdHandicap"
          .",Maintime, Byotype, Byotime, Byoperiods"
          .",ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS myColor"
          ." FROM (Messages, MessageCorrespondents AS me) " .
