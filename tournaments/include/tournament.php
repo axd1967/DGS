@@ -562,6 +562,7 @@ class Tournament
          $arr[TOURNEY_WIZTYPE_DGS_LADDER] = T_('DGS Ladder');
          $arr[TOURNEY_WIZTYPE_PUBLIC_LADDER] = T_('Public Ladder');
          $arr[TOURNEY_WIZTYPE_PRIVATE_LADDER] = T_('Private Ladder');
+         $arr[TOURNEY_WIZTYPE_DGS_ROUNDROBIN] = T_('DGS Round-Robin');
          $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
       }
 

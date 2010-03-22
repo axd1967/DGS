@@ -17,6 +17,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Ladder Tournament with restrictions of 'Public'-scope
          * Ladder Tournament with restrictions of 'Private'-scope (invite-only registration)
 
+         * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
+
       * <home tournaments/list_tournaments.php>Tournament List</home> with different views:
          * "My tournaments"-view with ID-button linked to view tournament
          * "Directoring tournaments"-view with ID-button linked to manage tournament

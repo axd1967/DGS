@@ -23,6 +23,7 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/types/dgs_ladder.php';
 require_once 'tournaments/include/types/public_ladder.php';
 require_once 'tournaments/include/types/private_ladder.php';
+require_once 'tournaments/include/types/dgs_round_robin.php';
 
 
  /*!
@@ -51,6 +52,8 @@ class TournamentFactory
          return new PublicLadderTournament();
       elseif( $wizard_type == TOURNEY_WIZTYPE_PRIVATE_LADDER )
          return new PrivateLadderTournament();
+      elseif( $wizard_type == TOURNEY_WIZTYPE_DGS_ROUNDROBIN )
+         return new DgsRoundRobinTournament();
       else
          error('invalid_args', "TournamentFactory.getTournament($wizard_type)");
    }
@@ -62,6 +65,7 @@ class TournamentFactory
          TOURNEY_WIZTYPE_DGS_LADDER,
          TOURNEY_WIZTYPE_PUBLIC_LADDER,
          TOURNEY_WIZTYPE_PRIVATE_LADDER,
+         TOURNEY_WIZTYPE_DGS_ROUNDROBIN,
       );
       return $arr_types;
    }
