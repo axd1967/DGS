@@ -23,10 +23,10 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
+require_once( 'tournaments/include/tournament_status.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
@@ -114,12 +114,17 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    if( $tourney->Flags > 0 )
    {
       $tform->add_row( array(
-            'DESCRIPTION', T_('Tournament Flags#tourney'),
+            'DESCRIPTION', T_('Flags#tourney'),
             'TEXT',        $tourney->formatFlags(), ));
    }
    $tform->add_row( array(
          'DESCRIPTION', T_('Status#tourney'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
+   if( $ttype->need_rounds )
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Rounds#tourney'),
+            'TEXT', $tourney->formatRound(), ));
+
    $tform->add_row( array( 'HR' ));
 
    if( count($errors) )
@@ -163,25 +168,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Description'),
          'TEXTAREA',    'descr', 70, 15, $vars['descr'] ));
-
-   if( $ttype->need_rounds )
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Tournament rounds'),
-            'TEXTINPUT',   'rounds', 5, 5, $vars['rounds'] ));
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Current tournament round'),
-            'TEXTINPUT',   'current_round', 5, 5, $vars['current_round'] ));
-   }
-   else
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Tournament rounds'),
-            'TEXT',        $tourney->Rounds, ));
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Current tournament round'),
-            'TEXT',        $tourney->CurrentRound, ));
-   }
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
@@ -237,8 +223,6 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       'start_time'      => TournamentUtils::formatDate($tney->StartTime),
       'title'           => $tney->Title,
       'descr'           => $tney->Description,
-      'rounds'          => $tney->Rounds,
-      'current_round'   => $tney->CurrentRound,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -301,24 +285,6 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       else
          $tney->Description = $new_value;
 
-      if( $ttype->need_rounds )
-      {
-         $new_value = $vars['rounds'];
-         if( !is_numeric($new_value) )
-            $errors[] = T_('Expecting positive number for tournament rounds');
-         elseif( $new_value <= 0 )
-            $errors[] = T_('Tournament must have at least one round.');
-         else
-            $tney->Rounds = (int)$new_value;
-
-         $new_value = $vars['current_round'];
-         if( !is_numeric($new_value) )
-            $errors[] = T_('Expecting positive number for tournament current round');
-         elseif( $new_value < 1 || $new_value > $tney->Rounds )
-            $errors[] = sprintf( T_('Current tournament round must be in rounds value-range [1..%s].'), $tney->Rounds );
-         else
-            $tney->CurrentRound = (int)$new_value;
-      }
 
       // determine edits
       if( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#edits');
@@ -326,8 +292,6 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       if( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start-time#edits');
       if( $old_vals['title'] != $tney->Title ) $edits[] = T_('Title#edits');
       if( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description#edits');
-      if( $old_vals['rounds'] != $tney->Rounds ) $edits[] = T_('Rounds#edits');
-      if( $old_vals['current_round'] != $tney->CurrentRound ) $edits[] = T_('Rounds#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );
