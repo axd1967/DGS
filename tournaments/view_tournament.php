@@ -26,13 +26,14 @@ require_once( 'include/form_functions.php' );
 require_once( 'include/table_infos.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'tournaments/include/tournament_ladder.php' );
 require_once( 'tournaments/include/tournament_ladder_props.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('Tournament');
 
@@ -51,6 +52,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tourney = Tournament::load_tournament( $tid );
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.view_tournament.find_tournament($tid)");
+   $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
    // init
@@ -142,7 +144,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    if( count($arr_locks) )
       $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
    $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
-   $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
+   if( $ttype->need_rounds )
+      $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if( $reg_user_info )
       $itable->add_sinfo( T_('Registration status'), span('TUserStatus', $reg_user_info) );
    if( $tt_user_state )
