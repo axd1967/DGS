@@ -23,11 +23,11 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_round.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'tournaments/include/tournament_status.php' );
+require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
@@ -119,6 +119,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       $trform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        date(DATEFMT_TOURNAMENT, $tround->Lastchanged) ));
+   TournamentUtils::show_tournament_flags( $trform, $tourney );
    $trform->add_row( array(
          'DESCRIPTION', T_('Status'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
