@@ -529,11 +529,7 @@ function get_alt_arg( $n1, $n2)
          echo "<br>\n";
       }
    }
-   GameScore::draw_score_box( $game_score, GSMODE_TERRITORY_SCORING );
-   {//FIXME: remove after testing
-      echo "<br>\n";
-      GameScore::draw_score_box( $game_score, GSMODE_AREA_SCORING );
-   }
+   GameScore::draw_score_box( $game_score, getRulesetScoring($Ruleset) );
    echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;
@@ -1015,11 +1011,11 @@ function draw_game_info( &$game_row, $board, $tourney )
    }
 
    //game rows
-   $sep = ',' . SMALL_SPACING;
+   $sep = ',' . MED_SPACING;
    echo '<tr id="gameRules">', "\n";
    echo '<td class=Color>', echo_image_gameinfo($game_row['ID']), "</td>\n";
-   echo "<td colspan=\"", ($cols-1), "\">", T_('Rules'), ': ';
-   echo T_('Komi'), ': ', $game_row['Komi'];
+   echo "<td colspan=\"", ($cols-1), "\">", T_('Ruleset'), ': ', getRulesetText($game_row['Ruleset']);
+   echo $sep, T_('Komi'), ': ', $game_row['Komi'];
    echo $sep, T_('Handicap'), ': ', $game_row['Handicap'];
    echo $sep, T_('Rated game'), ': ',
       ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ), "</td>\n";
