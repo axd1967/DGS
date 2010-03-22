@@ -24,6 +24,49 @@ ChangeLog
 
 2010-03-22 juga
 
+   * tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin,
+       ~._createTournament, ~.checkProperties, ~.checkParticipantRegistrations),
+     tournaments/include/types/dgs_round_robin.php (class DgsRoundRobinTournament, ~.createTournament),
+     tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),
+     tournaments/include/tournament.php (Tournament.getWizardTypeText),
+     tournaments/include/tournament_utils.php (TournamentUtils.getWizardTournamentType),
+     tournaments/include/tournament_round.php (class TournamentRound, ~.persist,
+       ~.fillEntityData, ~.isTournamentRound, ~.delete_tournament_round, ~.new_from_row,
+       ~.getStatusText),
+     tournaments/include/tournament_globals.php,
+     tournaments/edit_round.php (parse_edit_form),
+     tournaments/edit_tournament.php (parse_edit_form),
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     tournaments/view_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - added pooled round-robin tournament wizard-type without restrictions:
+     TOURNEY_WIZTYPE_DGS_ROUNDROBIN
+   - show current tourney-rounds only if tournament needs rounds
+   - redefined/added TournamentRound-table to keep track of tournament-rounds
+     for round-robin-tournament, relying on only one set of tourney-rules,
+     using shorter status-values, added ChangedBy-field and auto-increment ID-field
+   - moved editing of tournament-rounds from tournament-editor to round-editor
+   - bugfixes, small text-adjustments
+-----------
+-- redefine tournament-round for round-robin tournaments: only one set of rules, shorter status-values
+DROP TABLE IF EXISTS TournamentRound ;
+
+CREATE TABLE TournamentRound (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   Round tinyint unsigned NOT NULL DEFAULT '1',
+   Status enum('INIT','POOL','PAIR','GAME','DONE') NOT NULL DEFAULT 'INIT',
+   MinPoolSize smallint unsigned NOT NULL DEFAULT '0',
+   MaxPoolSize smallint unsigned NOT NULL DEFAULT '0',
+   PoolCount smallint unsigned NOT NULL DEFAULT '0',
+   Lastchanged datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+   ChangedBy varchar(54) NOT NULL DEFAULT '',
+   PRIMARY KEY (ID),
+   UNIQUE KEY tidRound (tid,Round)
+) ENGINE=MyISAM ;
+-----------
+
    * specs/db/dragon-ddl.sql:
    - synchronized tournament-tables with current state of db
 
@@ -34,6 +77,7 @@ ChangeLog
        ~.fillEntityData, ~.convertTournamentRules_to_GameRow, ~.convertTournamentRules_to_EditForm,
        ~.convertEditForm_to_TournamentRules, ~.new_from_row),
      include/error_codes.php (ErrorCode.init), include/globals.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/table-Tournaments.txt, specs/db/table-Waitingroom.txt,
      tournaments/manage_tournament.php,
      tournaments/view_tournament.php (echo_tournament_rules),
