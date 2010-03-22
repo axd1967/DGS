@@ -37,12 +37,12 @@ require_once 'include/std_classes.php';
   * \brief Class to manage TournamentRound-table with pairing-related tournament-settings
   */
 
-define('TROUND_STATUS_INIT',     'INIT');
-define('TROUND_STATUS_POOLINIT', 'POOLINIT');
-define('TROUND_STATUS_PAIRINIT', 'PAIRINIT');
-define('TROUND_STATUS_GAMEINIT', 'GAMEINIT');
-define('TROUND_STATUS_DONE',     'DONE');
-define('CHECK_TROUND_STATUS', 'INIT|POOLINIT|PAIRINIT|GAMEINIT|DONE');
+define('TROUND_STATUS_INIT', 'INIT');
+define('TROUND_STATUS_POOL', 'POOL');
+define('TROUND_STATUS_PAIR', 'PAIR');
+define('TROUND_STATUS_GAME', 'GAME');
+define('TROUND_STATUS_DONE', 'DONE');
+define('CHECK_TROUND_STATUS', 'INIT|POOL|PAIR|GAME|DONE');
 
 
 // lazy-init in TournamentRound::get..Text()-funcs
@@ -51,36 +51,39 @@ $ARR_GLOBALS_TOURNAMENT_ROUND = array();
 
 global $ENTITY_TOURNAMENT_ROUND; //PHP5
 $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
-      FTYPE_PKEY, 'tid', 'Round',
-      FTYPE_INT,  'ID', 'Round', 'RulesID', 'MinPoolSize', 'MaxPoolSize', 'PoolCount',
-      FTYPE_DATE, 'Lastchanged',
-      FTYPE_ENUM, 'Status'
+   FTYPE_PKEY,  'ID',
+   FTYPE_AUTO,  'ID',
+   FTYPE_CHBY,
+   FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'PoolCount',
+   FTYPE_DATE,  'Lastchanged',
+   FTYPE_ENUM,  'Status'
    );
 
 class TournamentRound
 {
+   var $ID;
    var $tid;
    var $Round;
-   var $RulesID;
-   var $Lastchanged;
    var $Status;
    var $MinPoolSize;
    var $MaxPoolSize;
    var $PoolCount;
+   var $Lastchanged;
+   var $ChangedBy;
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
-   function TournamentRound( $tid=0, $round=0, $rules_id=0, $lastchanged=0,
-         $status=TROUND_STATUS_INIT, $min_pool_size=0, $max_pool_size=0,
-         $pool_count=0 )
+   function TournamentRound( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
+         $min_pool_size=0, $max_pool_size=0, $pool_count=0, $lastchanged=0, $changed_by='' )
    {
+      $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->Round = (int)$round;
-      $this->RulesID = (int)$rules_id;
-      $this->Lastchanged = (int)$lastchanged;
       $this->setStatus( $status );
       $this->MinPoolSize = (int)$min_pool_size;
       $this->MaxPoolSize = (int)$max_pool_size;
       $this->PoolCount = (int)$pool_count;
+      $this->Lastchanged = (int)$lastchanged;
+      $this->ChangedBy = $changed_by;
    }
 
    function setStatus( $status )
@@ -95,10 +98,10 @@ class TournamentRound
       return print_r( $this, true );
    }
 
-   /*! \brief Inserts or updates tournament-properties in database. */
+   /*! \brief Inserts or updates tournament-round in database. */
    function persist()
    {
-      if( TournamentRound::isTournamentRound($this->tid, $this->Round) )
+      if( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -109,8 +112,11 @@ class TournamentRound
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
-      $entityData = $this->fillEntityData();
-      return $entityData->insert( "TournamentRound::insert(%s)" );
+      $entityData = $this->fillEntityData(true);
+      $result = $entityData->insert( "Tournament::insert(%s)" );
+      if( $result )
+         $this->ID = mysql_insert_id();
+      return $result;
    }
 
    function update()
@@ -131,14 +137,15 @@ class TournamentRound
    {
       // checked fields: Status
       $data = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Round', $this->Round );
-      $data->set_value( 'RulesID', $this->RulesID );
-      $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'MinPoolSize', $this->MinPoolSize );
       $data->set_value( 'MaxPoolSize', $this->MaxPoolSize );
       $data->set_value( 'PoolCount', $this->PoolCount );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
       return $data;
    }
 
@@ -148,7 +155,7 @@ class TournamentRound
    /*! \brief Checks, if there is a tournament-round for given tournament-id and round. */
    function isTournamentRound( $tid, $round )
    {
-      return (bool)mysql_single_fetch( "TournamentRound.isTournamentRound($tid,$round)",
+      return (bool)mysql_single_fetch( "TournamentRound::isTournamentRound($tid,$round)",
          "SELECT 1 FROM TournamentRound WHERE tid='$tid' AND Round='$Round' LIMIT 1" );
    }
 
@@ -156,7 +163,7 @@ class TournamentRound
    function delete_tournament_round( $tid, $round )
    {
       $result = db_query( "TournamentRound::delete_tournament_round($tid,$round)",
-         "DELETE FROM TournamentRound WHERE tid='$tid' AND Round='{$this->Round}' LIMIT 1" );
+         "DELETE FROM TournamentRound WHERE tid='$tid' AND Round='$round' LIMIT 1" );
       return $result;
    }
 
@@ -173,14 +180,15 @@ class TournamentRound
    {
       $trd = new TournamentRound(
             // from TournamentRound
+            @$row['ID'],
             @$row['tid'],
             @$row['Round'],
-            @$row['RulesID'],
-            @$row['X_Lastchanged'],
             @$row['Status'],
             @$row['MinPoolSize'],
             @$row['MaxPoolSize'],
-            @$row['PoolCount']
+            @$row['PoolCount'],
+            @$row['X_Lastchanged'],
+            @$row['ChangedBy']
          );
       return $trd;
    }
@@ -201,7 +209,7 @@ class TournamentRound
          else // get latest round
             $qsql->add_part( SQLP_ORDER, "TRD.Round DESC'" );
 
-         $row = mysql_single_fetch( "TournamentRound.load_tournament_round($tid,$round)",
+         $row = mysql_single_fetch( "TournamentRound::load_tournament_round($tid,$round)",
             $qsql->get_select() );
          if( $row )
             $result = TournamentRound::new_from_row( $row );
@@ -215,7 +223,7 @@ class TournamentRound
       $qsql = TournamentRound::build_query_sql( $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentRound.load_tournament_rounds", $query );
+      $result = db_query( "TournamentRound::load_tournament_rounds", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
@@ -239,11 +247,11 @@ class TournamentRound
       if( !isset($ARR_GLOBALS_TOURNAMENT_ROUND[$key]) )
       {
          $arr = array();
-         $arr[TROUND_STATUS_INIT]     = T_('Init#TRD_status');
-         $arr[TROUND_STATUS_POOLINIT] = T_('Pool-Init#TRD_status');
-         $arr[TROUND_STATUS_PAIRINIT] = T_('Pair-Init#TRD_status');
-         $arr[TROUND_STATUS_GAMEINIT] = T_('Game-Init#TRD_status');
-         $arr[TROUND_STATUS_DONE]     = T_('Done#TRD_status');
+         $arr[TROUND_STATUS_INIT] = T_('Init#TRD_status');
+         $arr[TROUND_STATUS_POOL] = T_('Pool-Init#TRD_status');
+         $arr[TROUND_STATUS_PAIR] = T_('Pair-Init#TRD_status');
+         $arr[TROUND_STATUS_GAME] = T_('Game-Init#TRD_status');
+         $arr[TROUND_STATUS_DONE] = T_('Done#TRD_status');
          $ARR_GLOBALS_TOURNAMENT_ROUND[$key] = $arr;
       }
 
