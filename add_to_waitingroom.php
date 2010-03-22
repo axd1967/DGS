@@ -84,6 +84,9 @@ require_once( 'include/utilities.php' );
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range', "add_to_waitingroom.check.handicap($handicap)");
 
+   // ruleset
+   $ruleset = @$_POST['ruleset'];
+
    // komi adjustment
    $adj_komi = (float)@$_POST['adj_komi'];
    if( abs($adj_komi) > MAX_KOMI_RANGE )
@@ -95,9 +98,6 @@ require_once( 'include/utilities.php' );
    if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO
          && $jigo_mode != JIGOMODE_NO_JIGO )
       error('invalid_args', "add_to_waitingroom.check.jigo_mode($jigo_mode)");
-
-   // ruleset
-   $ruleset = @$_POST['ruleset'];
 
    // handicap adjustment
    $adj_handicap = (int)@$_POST['adj_handicap'];
