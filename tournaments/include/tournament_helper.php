@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
 
  /*!
@@ -214,6 +215,32 @@ class TournamentHelper
          $iterator = new ListIterator( 'TournamentHelper::load_ladder_rank_period_update' );
       $iterator->addQuerySQLMerge( $qsql );
       return TournamentExtension::load_tournament_extensions( $iterator );
+   }
+
+   /*! \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object. */
+   function add_new_tournament_round( $tourney )
+   {
+      ta_begin();
+      {//HOT-section to add T-round and updating T-data
+         $tround = TournamentRound::add_tournament_round( $tourney->ID );
+         if( !is_null($tround) )
+            $success = $tourney->update_rounds( 1 );
+      }
+      ta_end();
+      return $tround;
+   }
+
+   /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
+   function delete_tournament_round( $tourney, $round )
+   {
+      ta_begin();
+      {//HOT-section to remove existing T-round and updating T-data
+         $success = TournamentRound::delete_tournament_round( $tourney->ID, $round );
+         if( $success )
+            $success = $tourney->update_rounds( -1 );
+      }
+      ta_end();
+      return $success;
    }
 
 } // end of 'TournamentHelper'

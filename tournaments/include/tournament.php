@@ -292,6 +292,25 @@ class Tournament
          return false;
    }
 
+   /*! \brief Updates Tournament.Rounds/CurrentRound. */
+   function update_rounds( $change_rounds, $curr_round=0 )
+   {
+      if( !is_numeric($change_rounds) )
+         error('invalid_args', "Tournament.update_rounds.check.change_rounds({$this->ID},$change_rounds)");
+      if( !is_numeric($curr_round) )
+         error('invalid_args', "Tournament.update_rounds.check.curr_rounds({$this->ID},$curr_round)");
+
+      $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
+      if( $change_rounds )
+         $data->set_query_value( 'Rounds', "Rounds+($change_rounds)" );
+      if( $curr_round > 0 )
+         $data->set_value( 'CurrentRound', $curr_round );
+      $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
+      return $data->update( "Tournament.update_rounds(%s,$change_rounds,$curr_round)" );
+   }
+
    function getRoleText( $uid )
    {
       global $TOURNAMENT_CACHE;

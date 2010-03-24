@@ -159,6 +159,28 @@ class TournamentRound
          "SELECT 1 FROM TournamentRound WHERE tid='$tid' AND Round='$Round' LIMIT 1" );
    }
 
+   /*!
+    * \brief Adds new tournament-round with defaults for given tournament-id,
+    *        returning new TournamentRound-object added or null on error.
+    */
+   function add_tournament_round( $tid )
+   {
+      global $player_row, $NOW;
+      $table = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->table;
+      $tround = null;
+
+      // defaults: Status=INIT, MinPoolSize=0, MaxPoolSize=0, PoolCount=0
+      $changed_by = EntityData::build_sql_value_changed_by( $player_row['Handle'] );
+      $query = "INSERT INTO $table (tid,Round,Lastchanged,ChangedBy) "
+             . "SELECT $tid, MAX(Round)+1, FROM_UNIXTIME($NOW), $changed_by FROM $table WHERE tid=$tid";
+      if( db_query( "TournamentRound::add_tournament_round.insert($tid)", $query ) )
+      {
+         $new_id = mysql_insert_id();
+         $tround = TournamentRound::load_tournament_round_by_id($new_id);
+      }
+      return $tround;
+   }
+
    /*! \brief Deletes TournamentRound-entry for given id. */
    function delete_tournament_round( $tid, $round )
    {
@@ -168,10 +190,11 @@ class TournamentRound
    }
 
    /*! \brief Returns db-fields to be used for query of TournamentRound-objects for given tournament-id. */
-   function build_query_sql( $tid )
+   function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newQuerySQL('TRD');
-      $qsql->add_part( SQLP_WHERE, "TRD.tid='$tid'" );
+      if( $tid > 0 )
+         $qsql->add_part( SQLP_WHERE, "TRD.tid='$tid'" );
       return $qsql;
    }
 
@@ -193,9 +216,7 @@ class TournamentRound
       return $trd;
    }
 
-   /*!
-    * \brief Loads and returns TournamentRound-object for given tournament-ID.
-    */
+   /*! \brief Loads and returns TournamentRound-object for given tournament-ID and round [1..n]. */
    function load_tournament_round( $tid, $round )
    {
       $result = NULL;
@@ -215,6 +236,18 @@ class TournamentRound
             $result = TournamentRound::new_from_row( $row );
       }
       return $result;
+   }
+
+   /*! \brief Loads TournamentRound-object for given tournament-round-ID. */
+   function load_tournament_round_by_id( $id )
+   {
+      $id = (int)$id;
+      $qsql = TournamentRound::build_query_sql();
+      $qsql->add_part( SQLP_WHERE, "ID=$id" );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "TournamentRound::load_tournament_round_by_id($id)", $qsql->get_select() );
+      return ( $row ) ? TournamentRound::new_from_row( $row ) : null;
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentRound-objects for given tournament-id. */
@@ -265,7 +298,7 @@ class TournamentRound
    function get_edit_tournament_status()
    {
       static $statuslist = array(
-         TOURNEY_STATUS_NEW, TOURNEY_STATUS_PAIR
+         TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR
       );
       return $statuslist;
    }

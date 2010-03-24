@@ -438,6 +438,11 @@ class EntityData
       return "ChangedBy=RTRIM(CONCAT('[" . mysql_addslashes($handle) . "] ',ChangedBy))";
    }
 
+   function build_sql_value_changed_by( $handle )
+   {
+      return "'[" . mysql_addslashes($handle) . "]'";
+   }
+
 } // end of 'EntityData'
 
 ?>
