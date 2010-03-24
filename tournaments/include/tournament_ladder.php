@@ -480,7 +480,7 @@ class TournamentLadder
    /*! \brief Adds TP configured by rid,uid for tournament tid at bottom of ladder. */
    function add_participant_to_ladder( $tid, $rid, $uid )
    {
-      static $query_next_rank = "IFNULL(MAX(Rank),0)+1";
+      static $query_next_rank = "IFNULL(MAX(Rank),0)+1"; // must result in 1 result-row
       $NOW = $GLOBALS['NOW'];
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
 
