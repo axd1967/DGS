@@ -22,7 +22,55 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-26 juga
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.add_new_tournament_round, ~.delete_tournament_round, ~.set_tournament_round),
+     tournaments/include/tournament_round.php (class TournamentRound, ~.getStatusText, ~.authorise_set_tround),
+     tournaments/include/tournament_limits.php (TournamentLimits.check_MaxRounds, ~.getStaticMaxLimit),
+     tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin),
+     tournaments/include/tournament_globals.php,
+     include/error_codes.php (ErrorCodes.init),
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form, build_round_notes),
+     tournaments/roundrobin/edit_rounds.php (echo_confirm), NEWS:
+   - added/enhanced tournament-round editing and checks for use-cases in tournament rounds editors:
+     - view tournament round data
+     - add new tournament-round
+     - remove tournament-round
+     - set current tournament-round
+     - edit properties/data of tournament-round
+   - added checking min/max-limits on tournament-rounds
+
+2010-03-24 juga
+
+   * tournaments/include/tournament_round.php (TournamentRound.add_tournament_round,
+       ~.build_query_sql, ~.load_tournament_round_by_id, ~.get_edit_tournament_status),
+     tournaments/include/tournament_helper.php (TournamentHelper.add_new_tournament_round,
+       ~.delete_tournament_round),
+     tournaments/include/tournament.php (Tournament.update_rounds),
+     include/db_classes.php (EntityData.build_sql_value_changed_by),
+     tournaments/roundrobin/edit_rounds.php:
+   - started rounds-editor with viewing T-rounds, adding/removing T-round,
+     editing of T-round
+
+   * tournaments/include/types/dgs_round_robin.php (class DgsRoundRobinTournament):
+   - initialize TournamentRound with all 0's to provoke error on T-status-change,
+     so TD needs to edit it
+
 2010-03-22 juga
+
+   * tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/index.php,
+     tournaments/edit_round.php,
+     tournaments/manage_tournament.php:
+   - copied full CVS-history in single commits from 'tournaments/edit_round.php'
+     to 'tournaments/roundrobin/edit_round_props.php',
+   - removed old 'tournaments/edit_round.php'
+
+   * tournaments/roundrobin/edit_round_props.php,
+     - copied full CVS-history in single committs from tournaments/edit_round.php
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.authorise_edit_register_status):
+   - bugfix: show '---' (no-value) for not-registered "TP-status"
 
    * tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin,
        ~._createTournament, ~.checkProperties, ~.checkParticipantRegistrations),
@@ -39,7 +87,7 @@ ChangeLog
      tournaments/manage_tournament.php (make_links_ttype_specific),
      tournaments/view_tournament.php,
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
-     specs/db/table-Tournaments.txt, NEWS:
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt, NEWS:
    - added pooled round-robin tournament wizard-type without restrictions:
      TOURNEY_WIZTYPE_DGS_ROUNDROBIN
    - show current tourney-rounds only if tournament needs rounds
