@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'include/connect2mysql.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_extension.php';
+require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
@@ -31,6 +32,7 @@ require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_helper.php
@@ -218,8 +220,18 @@ class TournamentHelper
    }
 
    /*! \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object. */
-   function add_new_tournament_round( $tourney )
+   function add_new_tournament_round( $tourney, &$errors, $check_only )
    {
+      $errors = array();
+      $ttype = TournamentFactory::getTournament($tourney->WizardType);
+      $t_limits = $ttype->getTournamentLimits();
+
+      if( $tourney->Rounds >= TROUND_MAX_COUNT ) // check for static-max T-rounds
+         $errors[] = sprintf( T_('Maximum of allowed tournament rounds of %s has been reached.'), TROUND_MAX_COUNT );
+      $errors = array_merge( $errors, $t_limits->check_MaxRounds( $tourney->Rounds + 1, $tourney->Rounds ) );
+      if( count($errors) || $check_only )
+         return null;
+
       ta_begin();
       {//HOT-section to add T-round and updating T-data
          $tround = TournamentRound::add_tournament_round( $tourney->ID );
@@ -227,19 +239,68 @@ class TournamentHelper
             $success = $tourney->update_rounds( 1 );
       }
       ta_end();
+
       return $tround;
    }
 
    /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
-   function delete_tournament_round( $tourney, $round )
+   function delete_tournament_round( $tourney, $tround, &$errors, $check_only )
    {
+      $errors = array();
+      if( $tourney->CurrentRound == $tround->Round )
+         $errors[] = T_('The current tournament round can not be removed.');
+      if( $tround->Status != TROUND_STATUS_INIT )
+         $errors[] = sprintf( T_('Only tournament rounds on status [%s] can be removed.'),
+            TournamentRound::getStatusText(TROUND_STATUS_INIT) );
+      if( $tourney->Rounds <= 1 )
+         $errors[] = T_('There must be at least one tournament-round.');
+      if( $tround->Round != $tourney->Rounds )
+         $errors[] = sprintf( T_('You can only remove the last tournament round #%s.'), $tourney->Rounds );
+      if( count($errors) || $check_only )
+         return false;
+
       ta_begin();
       {//HOT-section to remove existing T-round and updating T-data
-         $success = TournamentRound::delete_tournament_round( $tourney->ID, $round );
+         $success = TournamentRound::delete_tournament_round( $tourney->ID, $tround->Round );
          if( $success )
             $success = $tourney->update_rounds( -1 );
       }
       ta_end();
+
+      return $success;
+   }
+
+   /*! \brief Sets current tournament-round updating Tournament.CurrentRound. */
+   function set_tournament_round( $tourney, $new_round, &$errors, $check_only )
+   {
+      $tround = TournamentRound::load_tournament_round( $tourney->ID, $tourney->CurrentRound );
+      if( is_null($tround) )
+         error('bad_tournament', "TournamentHelper.set_tournament_round.find_tround({$tourney->ID},{$tourney->CurrentRound})");
+
+      $errors = array();
+      if( !TournamentRound::authorise_set_tround($tourney->Status) )
+         $errors[] = sprintf( T_('Setting current tournament round is only allowed on tournament status %s.'),
+            Tournament::getStatusText(TOURNEY_STATUS_PAIR) );
+      if( $new_round < 1 || $new_round > $tourney->Rounds )
+         $errors[] = sprintf( T_('Selected tournament round must be an existing round in range %s.'),
+            TournamentUtils::build_range_text(1, $tourney->Rounds) );
+      if( $tround->Round == $new_round )
+         $errors[] = T_('Current tournament round is already set to selected round.');
+      if( $tround->Status != TROUND_STATUS_DONE )
+         $errors[] = sprintf( T_('Current tournament round %s must be finished before switching to next.'),
+            $tourney->CurrentRound );
+      if( $tround->Status == TROUND_STATUS_DONE && $new_round != $tround->Round + 1 )
+         $errors[] = sprintf( T_('You are only allowed to switch to the next tournament round %s.'),
+            $tround->Round + 1 );
+      if( count($errors) || $check_only )
+         return false;
+
+      ta_begin();
+      {//HOT-section to switch T-round
+         $success = $tourney->update_rounds( 0, $new_round );
+      }
+      ta_end();
+
       return $success;
    }
 

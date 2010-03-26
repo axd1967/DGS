@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_round.php
@@ -36,13 +37,6 @@ require_once 'include/std_classes.php';
   *
   * \brief Class to manage TournamentRound-table with pairing-related tournament-settings
   */
-
-define('TROUND_STATUS_INIT', 'INIT');
-define('TROUND_STATUS_POOL', 'POOL');
-define('TROUND_STATUS_PAIR', 'PAIR');
-define('TROUND_STATUS_GAME', 'GAME');
-define('TROUND_STATUS_DONE', 'DONE');
-define('CHECK_TROUND_STATUS', 'INIT|POOL|PAIR|GAME|DONE');
 
 
 // lazy-init in TournamentRound::get..Text()-funcs
@@ -281,9 +275,9 @@ class TournamentRound
       {
          $arr = array();
          $arr[TROUND_STATUS_INIT] = T_('Init#TRD_status');
-         $arr[TROUND_STATUS_POOL] = T_('Pool-Init#TRD_status');
-         $arr[TROUND_STATUS_PAIR] = T_('Pair-Init#TRD_status');
-         $arr[TROUND_STATUS_GAME] = T_('Game-Init#TRD_status');
+         $arr[TROUND_STATUS_POOL] = T_('Pool#TRD_status');
+         $arr[TROUND_STATUS_PAIR] = T_('Pair#TRD_status');
+         $arr[TROUND_STATUS_GAME] = T_('Game#TRD_status');
          $arr[TROUND_STATUS_DONE] = T_('Done#TRD_status');
          $ARR_GLOBALS_TOURNAMENT_ROUND[$key] = $arr;
       }
@@ -301,6 +295,12 @@ class TournamentRound
          TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR
       );
       return $statuslist;
+   }
+
+   /*! \brief Authorise setting/switching of T-round depending on tourney-status. */
+   function authorise_set_tround( $t_status )
+   {
+      return ( $t_status == TOURNEY_STATUS_PAIR || TournamentUtils::isAdmin() );
    }
 
 } // end of 'TournamentRound'

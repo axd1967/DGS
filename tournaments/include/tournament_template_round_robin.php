@@ -47,6 +47,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       // overwrite tournament-type-specific properties
       $this->need_rounds = true;
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
+      $this->limits->setLimits( TLIMITS_MAX_ROUNDS, true, 1, TROUND_MAX_COUNT );
    }
 
    /*!

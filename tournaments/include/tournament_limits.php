@@ -36,6 +36,7 @@ require_once 'tournaments/include/tournament_utils.php';
 define('TLIMITS_MAX_TP', 'max_tp'); // TournamentProperties.MaxParticipants
 define('TLIMITS_TL_MAX_DF', 'tl_max_df'); // TournamentLadderProps.MaxDefenses
 define('TLIMITS_TL_MAX_CH', 'tl_max_ch'); // TournamentLadderProps.MaxChallenges
+define('TLIMITS_MAX_ROUNDS', 'max_rounds'); // TournamentRound.Round / Tournament.Rounds
 
  /*!
   * \class TournamentLimits
@@ -153,15 +154,34 @@ class TournamentLimits
       return $errors;
    }
 
+   function check_MaxRounds( $value, $curr_value )
+   {
+      $errors = array();
+      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_MAX_ROUNDS)) )
+      {
+         list( $disable_allowed, $min_value, $max_value ) = $limits;
+         if( $value == 0 && !$disable_allowed )
+            $errors[] = T_('Disabling feature of maximum tournament rounds with 0-value not allowed.');
+         elseif(  ( !is_null($min_value) && $value < $min_value )
+               || ( !is_null($max_value) && $max_value < TROUND_MAX_COUNT && $value > $max_value ) )
+         {
+            $errors[] = sprintf( T_('Expecting number for maximum tournament rounds in range %s.'),
+                                 TournamentUtils::build_range_text($min_value, $max_value) );
+         }
+      }
+      return $errors;
+   }
+
 
    // ------------ static functions ----------------------------
 
    function getStaticMaxLimit( $limit_id )
    {
       static $arr = array(
-         TLIMITS_MAX_TP    => TP_MAX_COUNT,
-         TLIMITS_TL_MAX_DF => TLADDER_MAX_DEFENSES,
-         TLIMITS_TL_MAX_CH => TLADDER_MAX_CHALLENGES,
+         TLIMITS_MAX_TP       => TP_MAX_COUNT,
+         TLIMITS_TL_MAX_DF    => TLADDER_MAX_DEFENSES,
+         TLIMITS_TL_MAX_CH    => TLADDER_MAX_CHALLENGES,
+         TLIMITS_MAX_ROUNDS   => TROUND_MAX_COUNT,
       );
       return $arr[$limit_id];
    }

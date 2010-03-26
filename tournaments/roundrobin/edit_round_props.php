@@ -20,15 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('../..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/form_functions.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_factory.php' );
-require_once( 'tournaments/include/tournament_round.php' );
-require_once( 'tournaments/include/tournament_rules.php' );
-require_once( 'tournaments/include/tournament_status.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
@@ -46,9 +46,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
-     tid=                : add new or edit tournament round
-     tr_preview&tid=     : preview for tournament-round-save
-     tr_save&tid=        : update (replace) tournament-round in database
+     tid=&round=              : edit tournament round
+     tr_preview&tid=&round=   : preview for tournament-round-save
+     tr_save&tid=&round=      : update (replace) tournament-round in database
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -59,31 +59,19 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_round_props.find_tournament($tid)");
-   //TODO not supported yet for Ts (only ladder for now)
-   error('assert', "Tournament.edit_round_props.not_implemented($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
+   if( !$ttype->need_rounds )
+      error('tournament_edit_rounds_not_allowed', "Tournament.edit_round_props.need_rounds($tid)");
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_round_props.edit_tournament($tid,$my_id)");
 
-   //TODO handle new T-round & edit old T-round, + check round
-   // load existing (current T-round) or create new T-round
-   if( $round == 0 )
-      $round = $tourney->CurrentRound;
+   // load existing T-round
    $tround = TournamentRound::load_tournament_round( $tid, $round );
    if( is_null($tround) )
-   {
-      // new T-round
-      if( $round == 0 )
-      {
-         $tround_max = TournamentRound::load_tournament_round( $tid, 0 );
-         $round = (is_null($tround_max)) ? 1 : $tround_max->Round + 1;
-      }
-
-      $tround = new TournamentRound( 0, $tid, $round );
-   }
+      error('bad_tournament', "Tournament.edit_round_props.find_tournament_round($tid,$round,$my_id)");
 
    // init
    $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
@@ -103,22 +91,27 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    }
 
    $page = "edit_round_props.php";
-   $title = T_('Tournament Round Editor');
+   $title = T_('Tournament Round Properties Editor');
 
 
    // --------------- Tournament-Round EDIT form --------------------
 
-   $trform = new Form( 'tournament', $page, FORM_POST );
+   $trform = new Form( 'tournament', $page, FORM_GET );
+   $trform->add_hidden( 'tid', $tid );
+   $trform->add_hidden( 'round', $round );
 
    $trform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $trform->add_row( array(
+         'DESCRIPTION', T_('Tournament Round'),
+         'TEXT',        $tround->Round, ));
+   $trform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));
    TournamentUtils::show_tournament_flags( $trform, $tourney );
    $trform->add_row( array(
-         'DESCRIPTION', T_('Status'),
+         'DESCRIPTION', T_('Round Status'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Count'),
@@ -133,18 +126,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       $trform->add_empty_row();
    }
 
-   /* TODO copied from T-edit
-   if( $ttype->need_rounds )
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Tournament rounds'),
-            'TEXTINPUT',   'rounds', 5, 5, $vars['rounds'] ));
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Current tournament round'),
-            'TEXTINPUT',   'current_round', 5, 5, $vars['current_round'] ));
-   }
-   */
-
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Size'),
          'TEXT',        T_('min.#TRD_poolsize') . MINI_SPACING,
@@ -158,13 +139,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $trform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'tr_save', T_('Save tournament rounds'),
+         'SUBMITBUTTON', 'tr_save', T_('Save tournament round'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tr_preview', T_('Preview'),
       ));
-
-   $trform->add_hidden( 'tid', $tid );
-   $trform->add_hidden( 'round', $round );
 
 
    start_page( $title, true, $logged_in, $player_row );
@@ -177,6 +155,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Edit rounds')] =
+         array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
@@ -191,7 +171,6 @@ function parse_edit_form( &$trd )
 
    // read from props or set defaults
    $vars = array(
-      'status'          => $trd->Status,
       'min_pool_size'   => $trd->MinPoolSize,
       'max_pool_size'   => $trd->MaxPoolSize,
    );
@@ -203,34 +182,8 @@ function parse_edit_form( &$trd )
       $vars[$key] = get_request_arg( $key, $val );
 
    // parse URL-vars
-   if( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] )
+   if( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] )
    {
-      /* TODO copied from T-edit
-      if( $ttype->need_rounds )
-      {
-         $new_value = $vars['rounds'];
-         if( !is_numeric($new_value) )
-            $errors[] = T_('Expecting positive number for tournament rounds');
-         elseif( $new_value <= 0 )
-            $errors[] = T_('Tournament must have at least one round.');
-         else
-            $tney->Rounds = (int)$new_value;
-
-         $new_value = $vars['current_round'];
-         if( !is_numeric($new_value) )
-            $errors[] = T_('Expecting positive number for tournament current round');
-         elseif( $new_value < 1 || $new_value > $tney->Rounds )
-            $errors[] = sprintf( T_('Current tournament round must be in rounds value-range [1..%s].'), $tney->Rounds );
-         else
-            $tney->CurrentRound = (int)$new_value;
-      }
-
-      if( $old_vals['rounds'] != $tney->Rounds ) $edits[] = T_('Rounds#edits');
-      if( $old_vals['current_round'] != $tney->CurrentRound ) $edits[] = T_('Rounds#edits');
-      */
-
-      $trd->setStatus( $vars['status'] );
-
       $new_value = $vars['min_pool_size'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
          $trd->MinPoolSize = limit( $new_value, 0, 999, 0 );
@@ -244,7 +197,6 @@ function parse_edit_form( &$trd )
          $errors[] = T_('Expecting positive number for maximum pool size');
 
       // determine edits
-      if( $old_vals['status'] != $trd->Status ) $edits[] = T_('Status#edits');
       if( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool-Size#edits');
       if( $old_vals['max_pool_size'] != $trd->MaxPoolSize ) $edits[] = T_('Pool-Size#edits');
    }
@@ -263,12 +215,12 @@ function build_round_notes()
    //$notes[] = null; // empty line
 
    $arrst = array();
-   $arrst[TROUND_STATUS_INIT] = T_('start new tournament round#trdstat_init');
-   $arrst[TROUND_STATUS_POOL] = T_('new pools for tournament round created#trdstat_poolinit');
-   $arrst[TROUND_STATUS_PAIR] = T_('participants assigned to pools#trdstat_pairinit');
-   $arrst[TROUND_STATUS_GAME] = T_('tournament games prepared, ready to start games#trdstat_gameinit');
-   $arrst[TROUND_STATUS_DONE] = T_('pairing for tournament round finished#trdstat_done');
-   $narr = array ( T_('Tournament round status') );
+   $arrst[TROUND_STATUS_INIT] = T_('start and setup new tournament round#trdstat');
+   $arrst[TROUND_STATUS_POOL] = T_('create and setup pools for tournament round#trdstat');
+   $arrst[TROUND_STATUS_PAIR] = T_('assign participants to pools#trdstat');
+   $arrst[TROUND_STATUS_GAME] = T_('prepare tournament games, ready to be started#trdstat');
+   $arrst[TROUND_STATUS_DONE] = T_('pairing for tournament round finished, playing can start#trdstat');
+   $narr = array ( T_('Tournament Round Status') );
    foreach( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = $descr", TournamentRound::getStatusText($status) );
    $notes[] = $narr;
