@@ -134,4 +134,16 @@ define('TLADDER_MAX_CHRNG_RATING', 32767);
 define('TLADDER_MAX_CHRNG_ABS', 2000);
 define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
 
+// ---------- Tournament Round Stuff ------------------------------
+
+define('TROUND_STATUS_INIT', 'INIT');
+define('TROUND_STATUS_POOL', 'POOL');
+define('TROUND_STATUS_PAIR', 'PAIR');
+define('TROUND_STATUS_GAME', 'GAME');
+define('TROUND_STATUS_DONE', 'DONE');
+define('CHECK_TROUND_STATUS', 'INIT|POOL|PAIR|GAME|DONE');
+
+// tournament-round limits
+define('TROUND_MAX_COUNT', 255);
+
 ?>
