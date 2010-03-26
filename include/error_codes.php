@@ -432,7 +432,10 @@ class ErrorCode
             T_("Sorry, you are not allowed to create this type of tournament.");
 
          $arr['tournament_edit_not_allowed'] =
-            T_("Sorry, you are not allowed to add or edit this tournament.");
+            T_("Sorry, you are not allowed to edit this tournament.");
+
+         $arr['tournament_edit_rounds_not_allowed'] =
+            T_("Sorry, you are not allowed to edit rounds for this tournament.");
 
          $arr['tournament_create_error'] =
             T_("Sorry, some errors occured on tournament creation.");
