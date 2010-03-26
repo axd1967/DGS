@@ -41,6 +41,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Register: User can directly register to tournament
          * Invite: User can be invited by tournament director (needs confirmation by invited user)
       * Tournament Participants editor to edit user registrations
+
       * Tournament Ladder Properties Editor for ladder-specific properties
          * Challenge range (absolute, relative, rating)
          * Challenge rematch wait-time
@@ -56,6 +57,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament user notifications:
          * Defender will be notified about game challenge
          * User will be notified about full removal from tournament
+
+      * Tournament Round Editor for round-robin-specific properties
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page
