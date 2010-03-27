@@ -108,7 +108,7 @@ class TournamentRound
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(true);
-      $result = $entityData->insert( "Tournament::insert(%s)" );
+      $result = $entityData->insert( "TournamentRound::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
@@ -173,8 +173,8 @@ class TournamentRound
       // status / pool-size / pool-count
       $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'),
          TournamentRound::getStatusText($this->Status) );
-      $arr_props[] = sprintf( '%s: %s', T_('Pool minimum size'), $this->MinPoolSize );
-      $arr_props[] = sprintf( '%s: %s', T_('Pool maximum size'), $this->MaxPoolSize );
+      $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size#tround'), $this->MinPoolSize );
+      $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size#tround'), $this->MaxPoolSize );
       if( $this->MaxPoolCount > 0 )
          $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
 

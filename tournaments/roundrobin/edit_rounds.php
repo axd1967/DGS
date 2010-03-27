@@ -244,8 +244,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             'DESCRIPTION', T_('Round Status#tround'),
             'TEXT', TournamentRound::getStatusText($tround->Status), ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Pool Size#tround'),
-            'TEXT', sprintf( T_('min/max-range %s'), TournamentUtils::build_range_text($tround->MinPoolSize, $tround->MaxPoolSize) ), ));
+            'DESCRIPTION', T_('Min. Pool Size#tround'),
+            'TEXT', $tround->MinPoolSize, ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Max. Pool Size#tround'),
+            'TEXT', $tround->MaxPoolSize, ));
       $tform->add_row( array(
             'DESCRIPTION', T_('Max. Pool Count#tround'),
             'TEXT', ( $tround->MaxPoolCount > 0 ? $tround->MaxPoolCount : NO_VALUE ), ));
