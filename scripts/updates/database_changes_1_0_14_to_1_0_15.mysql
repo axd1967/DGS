@@ -1830,3 +1830,14 @@ CREATE TABLE TournamentRound (
 ) ENGINE=MyISAM ;
 
 
+-- [cleanup] renamed/resized fields
+ALTER TABLE TournamentRound
+   MODIFY MinPoolSize tinyint unsigned NOT NULL DEFAULT '0',
+   MODIFY MaxPoolSize tinyint unsigned NOT NULL DEFAULT '0',
+   CHANGE PoolCount MaxPoolCount smallint unsigned NOT NULL DEFAULT '0' ;
+
+-- add PLAY-status
+ALTER TABLE TournamentRound
+   MODIFY Status enum('INIT','POOL','PAIR','GAME','PLAY','DONE') NOT NULL DEFAULT 'INIT' ;
+
+

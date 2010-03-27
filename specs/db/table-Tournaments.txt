@@ -405,17 +405,17 @@ Description:
 Description:
    Pool-setup for one tournament round.
 
- Field       | Type                                     | Default
--------------+------------------------------------------+---------------------
- ID          | int(11)                                  | NULL
- tid         | int(11)                                  | NULL
- Round       | tinyint(3) unsigned                      | 1
- Status      | enum('INIT','POOL','PAIR','GAME','DONE') | INIT
- MinPoolSize | smallint(5) unsigned                     | 0
- MaxPoolSize | smallint(5) unsigned                     | 0
- PoolCount   | smallint(5) unsigned                     | 0
- Lastchanged | datetime                                 | 0000-00-00 00:00:00
- ChangedBy   | varchar(54)                              |
+ Field        | Type                                            | Default
+--------------+-------------------------------------------------+---------------------
+ ID           | int(11)                                         | NULL
+ tid          | int(11)                                         | NULL
+ Round        | tinyint(3) unsigned                             | 1
+ Status       | enum('INIT','POOL','PAIR','GAME','PLAY','DONE') | INIT
+ MinPoolSize  | tinyint(3) unsigned                             | 0
+ MaxPoolSize  | tinyint(3) unsigned                             | 0
+ MaxPoolCount | smallint(5) unsigned                            | 0
+ Lastchanged  | datetime                                        | 0000-00-00 00:00:00
+ ChangedBy    | varchar(54)                                     |
 
 
 ## Fields:
@@ -429,11 +429,13 @@ Description:
    - POOL = create/setup pools
    - PAIR = assign TPs to pools
    - GAME = setup T-games, games ready to be created and started
-   - DONE = pairing for tournament-round is done
+   - PLAY = play all games, take over pool-winners to next round or final results
+   - DONE = round is completed
 
 * MinPoolSize, MaxPoolSize : min. and max. size of pools for tournament round
 
-* PoolCount : how many pools are being used
+* MaxPoolCount : how many pools are being used at maximum
+   - minimum pool-count is implicitly = 1
 
 * Lastchanged : date of last update of table-entry
 
