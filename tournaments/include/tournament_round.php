@@ -48,7 +48,7 @@ $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
    FTYPE_CHBY,
-   FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'PoolCount',
+   FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'MaxPoolCount',
    FTYPE_DATE,  'Lastchanged',
    FTYPE_ENUM,  'Status'
    );
@@ -61,13 +61,13 @@ class TournamentRound
    var $Status;
    var $MinPoolSize;
    var $MaxPoolSize;
-   var $PoolCount;
+   var $MaxPoolCount;
    var $Lastchanged;
    var $ChangedBy;
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    function TournamentRound( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
-         $min_pool_size=0, $max_pool_size=0, $pool_count=0, $lastchanged=0, $changed_by='' )
+         $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $lastchanged=0, $changed_by='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -75,7 +75,7 @@ class TournamentRound
       $this->setStatus( $status );
       $this->MinPoolSize = (int)$min_pool_size;
       $this->MaxPoolSize = (int)$max_pool_size;
-      $this->PoolCount = (int)$pool_count;
+      $this->MaxPoolCount = (int)$max_pool_count;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
    }
@@ -137,11 +137,52 @@ class TournamentRound
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'MinPoolSize', $this->MinPoolSize );
       $data->set_value( 'MaxPoolSize', $this->MaxPoolSize );
-      $data->set_value( 'PoolCount', $this->PoolCount );
+      $data->set_value( 'MaxPoolCount', $this->MaxPoolCount );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       return $data;
    }
+
+   /*! \brief Checks if all round-properties are valid; return error-list, empty if ok. */
+   function check_properties()
+   {
+      $errors = array();
+
+      if( $this->MinPoolSize < 2 || $this->MinPoolSize > TROUND_MAX_POOLSIZE )
+         $errors[] = sprintf( T_('Tournament round min. pool size must be in range %s.'),
+            TournamentUtils::build_range_text(2, TROUND_MAX_POOLSIZE) );
+      if( $this->MaxPoolSize < 2 || $this->MaxPoolSize > TROUND_MAX_POOLSIZE )
+         $errors[] = sprintf( T_('Tournament round max. pool size must be in range %s.'),
+            TournamentUtils::build_range_text(2, TROUND_MAX_POOLSIZE) );
+      if( $this->MinPoolSize > $this->MaxPoolSize )
+         $errors[] = T_('Tournament round min. pool size must be smaller than max. pool size.');
+
+      if( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
+         $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
+            TournamentUtils::build_range_text(2, TROUND_MAX_POOLCOUNT) );
+
+      return $errors;
+   }
+
+   /*! \brief Returns array( header, notes-array ) with this properties in textual form. */
+   function build_notes_props()
+   {
+      $arr_props = array();
+
+      // status / pool-size / pool-count
+      $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'),
+         TournamentRound::getStatusText($this->Status) );
+      $arr_props[] = sprintf( '%s: %s', T_('Pool minimum size'), $this->MinPoolSize );
+      $arr_props[] = sprintf( '%s: %s', T_('Pool maximum size'), $this->MaxPoolSize );
+      if( $this->MaxPoolCount > 0 )
+         $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
+
+      // general conditions
+      $arr_props[] = sprintf( T_("You may only retreat from the tournament round while not in status [%s]."),
+         TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
+
+      return array( T_('Configuration of the current tournament round') . ':', $arr_props );
+   }//build_notes_props
 
 
    // ------------ static functions ----------------------------
@@ -163,7 +204,7 @@ class TournamentRound
       $table = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->table;
       $tround = null;
 
-      // defaults: Status=INIT, MinPoolSize=0, MaxPoolSize=0, PoolCount=0
+      // defaults: Status=INIT, MinPoolSize=0, MaxPoolSize=0, MaxPoolCount=0
       $changed_by = EntityData::build_sql_value_changed_by( $player_row['Handle'] );
       $query = "INSERT INTO $table (tid,Round,Lastchanged,ChangedBy) "
              . "SELECT $tid, MAX(Round)+1, FROM_UNIXTIME($NOW), $changed_by FROM $table WHERE tid=$tid";
@@ -203,7 +244,7 @@ class TournamentRound
             @$row['Status'],
             @$row['MinPoolSize'],
             @$row['MaxPoolSize'],
-            @$row['PoolCount'],
+            @$row['MaxPoolCount'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy']
          );
@@ -278,6 +319,7 @@ class TournamentRound
          $arr[TROUND_STATUS_POOL] = T_('Pool#TRD_status');
          $arr[TROUND_STATUS_PAIR] = T_('Pair#TRD_status');
          $arr[TROUND_STATUS_GAME] = T_('Game#TRD_status');
+         $arr[TROUND_STATUS_PLAY] = T_('Play#TRD_status');
          $arr[TROUND_STATUS_DONE] = T_('Done#TRD_status');
          $ARR_GLOBALS_TOURNAMENT_ROUND[$key] = $arr;
       }
