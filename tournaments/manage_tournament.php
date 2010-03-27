@@ -20,13 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/form_functions.php' );
-require_once( 'tournaments/include/tournament_globals.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_factory.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentManage');
 
@@ -95,10 +96,25 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'TEXT', $tourney->getStatusText($tourney->Status) . SEP_SPACING .
                  make_menu_link( T_('Change status#tourney'),
                      array( 'url' => "tournaments/edit_status.php?tid=$tid", 'class' => 'TAdmin' )) ));
+
+   $round = $tourney->CurrentRound;
+   $tround = null;
    if( $ttype->need_rounds )
+   {
+      $tround = TournamentRound::load_tournament_round( $tid, $round );
+      if( is_null($tround) )
+         error('bad_tournament', "manage_tournament.find_tround($tid,$round,$my_id)");
+
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Round Status#tround'),
+            'TEXT', TournamentRound::getStatusText($tround->Status) . SEP_SPACING .
+                    make_menu_link( T_('Change round status#tourney'),
+                        array( 'url' => "tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round",
+                               'class' => 'TAdmin' )) ));
       $tform->add_row( array(
             'DESCRIPTION', T_('Rounds#tourney'),
             'TEXT', $tourney->formatRound(), ));
+   }
 
 
    start_page( $title, true, $logged_in, $player_row );
