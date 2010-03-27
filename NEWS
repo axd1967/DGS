@@ -58,8 +58,11 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Defender will be notified about game challenge
          * User will be notified about full removal from tournament
 
-      * Tournament Round Editor for round-robin-specific properties
+      * Tournament Rounds Editor
+      * Tournament Round Properties Editor for round-robin-specific properties
+      * Tournament Round Status Editor
          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
+      * Tournament Round Pools Editor
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page

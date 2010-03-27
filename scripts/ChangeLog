@@ -24,6 +24,84 @@ ChangeLog
 
 2010-03-27 juga
 
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.to_string,
+       ~.persist, ~.insert, ~.update, ~.delete, ~.fillEntityData, ~.build_query_sql,
+       ~.new_from_row, ~.load_tournament_pools, ~.get_edit_tournament_status),
+     tournaments/roundrobin/edit_pools.php,
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, NEWS:
+   - started pools-editor for round-robin tournaments,
+     added TournamentPool-class and corresponding db-table
+-----------
+-- table to assign users to pools
+CREATE TABLE TournamentPool (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   Round tinyint unsigned NOT NULL,
+   Pool smallint unsigned NOT NULL,
+   uid int NOT NULL DEFAULT '0',
+   GamesRun smallint unsigned NOT NULL DEFAULT '0',
+   PRIMARY KEY (ID),
+   KEY tidRoundPool (tid,Round,Pool),
+   KEY uid (uid)
+) ENGINE=MyISAM ;
+-----------
+
+   * tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
+     tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/edit_round_props.php:
+   - show separated min/max-pool-size info for tournament-round
+   - removed redundant tournament-round-status info, it's on edit-round-status page
+
+   * tournaments/include/tournament_round.php (TournamentRound.getStatusText),
+     tournaments/include/tournament_round_status.php (class TournamentRoundStatus),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/edit_round_props.php (build_round_notes),
+     tournaments/roundrobin/edit_round_status.php (build_status_notes),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - combined round-status POOL+PAIR in POOL-status, using PAIR-round-status
+     to prepare games making GAME-status meaningless
+-----------
+-- remove GAME-status
+ALTER TABLE TournamentRound
+   MODIFY Status enum('INIT','POOL','PAIR','PLAY','DONE') NOT NULL DEFAULT 'INIT' ;
+-----------
+
+   * tournaments/manage_tournament.php:
+   - added editor to change tournament-round-status
+   - show tournament-round-status for round-robin tourneys
+
+   * tournaments/include/tournament_round_status.php (class TournamentRoundStatus,
+       ~.has_error, ~.add_error, ~.check_status_change,
+       ~.check_conditions_status_INIT, ~.check_conditions_status_POOL,
+       ~.check_conditions_status_PAIR, ~.check_conditions_status_GAME,
+       ~.check_conditions_status_PLAY, ~.check_conditions_status_DONE),
+     tournaments/include/tournament_round.php (TournamentRound.setStatus),
+     tournaments/roundrobin/edit_round_status.php (parse_edit_form, build_status_notes),
+     tournaments/roundrobin/edit_rounds.php, NEWS:
+   - added editor to change tournament-round-status
+
+   * scripts/update_translation_pages.php:
+   - added new sub-dir for round-robin-tournaments
+
+   * tournaments/register.php:
+   - make user-message with reason mandatory if apply-status needed
+     for new registration
+
+   * tournaments/include/tournament_status.php (class TournamentStatus, ~._load_tround,
+       ~.check_conditions_status_PAIR),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.calcTournamentMinParticipants,
+       ~.checkProperties),
+     tournaments/include/tournament_template.php (TournamentTemplate.calcTournamentMinParticipants,
+       ~.checkProperties),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkProperties):
+   - round-robin tourney: check for min-participants determined also
+     by round-properties min-pool-size
+   - round-robin tourney: check round-properties also for status-transition
+     to PAIR-tourney-status
+
    * tournaments/include/tournament_round.php (class TournamentRound, ~.fillEntityData,
        ~.check_properties, ~.build_notes_props, ~.new_from_row, ~.getStatusText),
      tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin.checkProperties),
