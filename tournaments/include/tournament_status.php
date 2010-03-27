@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
-require_once 'tournaments/include/tournament_utils.php';
-require_once 'tournaments/include/tournament_participant.php';
-require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_status.php
@@ -199,7 +199,7 @@ class TournamentStatus
       }
 
       // check tournament-type specific checks
-      $check_errors = $this->ttype->checkProperties( $this->tourney, TOURNEY_STATUS_PAIR, $this->tprops, $tp_counts );
+      $check_errors = $this->ttype->checkProperties( $this->tourney, TOURNEY_STATUS_PAIR );
       if( count($check_errors) )
          $this->errors = array_merge( $this->errors, $check_errors );
    }//check_conditions_status_PAIR
