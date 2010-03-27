@@ -319,7 +319,6 @@ class TournamentRound
          $arr[TROUND_STATUS_INIT] = T_('Init#TRD_status');
          $arr[TROUND_STATUS_POOL] = T_('Pool#TRD_status');
          $arr[TROUND_STATUS_PAIR] = T_('Pair#TRD_status');
-         $arr[TROUND_STATUS_GAME] = T_('Game#TRD_status');
          $arr[TROUND_STATUS_PLAY] = T_('Play#TRD_status');
          $arr[TROUND_STATUS_DONE] = T_('Done#TRD_status');
          $ARR_GLOBALS_TOURNAMENT_ROUND[$key] = $arr;

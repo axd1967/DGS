@@ -1841,3 +1841,8 @@ ALTER TABLE TournamentRound
    MODIFY Status enum('INIT','POOL','PAIR','GAME','PLAY','DONE') NOT NULL DEFAULT 'INIT' ;
 
 
+-- remove GAME-status
+ALTER TABLE TournamentRound
+   MODIFY Status enum('INIT','POOL','PAIR','PLAY','DONE') NOT NULL DEFAULT 'INIT' ;
+
+

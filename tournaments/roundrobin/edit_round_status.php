@@ -240,13 +240,9 @@ function build_status_notes()
          sprintf( $stchfmt,
             TournamentRound::getStatusText(TROUND_STATUS_POOL),
             TournamentRound::getStatusText(TROUND_STATUS_PAIR),
-            T_('Pooling for current tournament round must be complete.') ),
+            T_('All registered users must be assigned to pools for current tournament round.') ),
          sprintf( $stchfmt,
             TournamentRound::getStatusText(TROUND_STATUS_PAIR),
-            TournamentRound::getStatusText(TROUND_STATUS_GAME),
-            T_('Pairing for current tournament round must be complete.') ),
-         sprintf( $stchfmt,
-            TournamentRound::getStatusText(TROUND_STATUS_GAME),
             TournamentRound::getStatusText(TROUND_STATUS_PLAY),
             T_('All tournament-games for current tournament round must be ready to start.') ),
          sprintf( $stchfmt,
@@ -262,10 +258,9 @@ function build_status_notes()
 
    $arrst = array();
    $arrst[TROUND_STATUS_INIT] = T_('Tournament round setup phase (set properties needed for pooling, pairing and playing)#trdstat');
-   $arrst[TROUND_STATUS_POOL] = T_('Tournament round pooling phase (create and setup pools)#trdstat');
-   $arrst[TROUND_STATUS_PAIR] = T_('Tournament round pairing phase (each registered user is assigned to a pool)#trdstat');
-   $arrst[TROUND_STATUS_GAME] = T_('Tournament game setup phase (tournament games are prepared)#trdstat');
-   $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game are started and played)#trdstat');
+   $arrst[TROUND_STATUS_POOL] = T_('Tournament round pooling phase (create pools, assign users to pools)#trdstat');
+   $arrst[TROUND_STATUS_PAIR] = T_('Tournament game setup phase (prepare all tournament games)#trdstat');
+   $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game can be played)#trdstat');
    $arrst[TROUND_STATUS_DONE] = T_('Tournament finalizing phase (prepare next round, announce results, tournament round is finished)#trdstat');
    $narr = array( T_('Tournament Round Status') );
    foreach( $arrst as $status => $descr )

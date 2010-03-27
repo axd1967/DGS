@@ -246,10 +246,9 @@ function build_round_notes()
    //$notes[] = null; // empty line
 
    $arrst = array();
-   $arrst[TROUND_STATUS_INIT] = T_('start and setup new tournament round#trdstat');
-   $arrst[TROUND_STATUS_POOL] = T_('create and setup pools for tournament round#trdstat');
-   $arrst[TROUND_STATUS_PAIR] = T_('assign participants to pools#trdstat');
-   $arrst[TROUND_STATUS_GAME] = T_('prepare tournament games, ready to be started#trdstat');
+   $arrst[TROUND_STATUS_INIT] = T_('setup tournament round properties#trdstat');
+   $arrst[TROUND_STATUS_POOL] = T_('setup pools and assign users to them for tournament round#trdstat');
+   $arrst[TROUND_STATUS_PAIR] = T_('prepare tournament games, ready to be started#trdstat');
    $arrst[TROUND_STATUS_PLAY] = T_('play games, prepare next round or final results#trdstat');
    $arrst[TROUND_STATUS_DONE] = T_('pairing for tournament round finished, playing can start#trdstat');
    $narr = array ( T_('Tournament Round Status') );

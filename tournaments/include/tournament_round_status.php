@@ -120,13 +120,6 @@ class TournamentRoundStatus
       $this->errors[] = 'status-transition not implemented yet';
    }
 
-   /*! \brief Check if change to GAME-tourney-status is allowed. */
-   function check_conditions_status_GAME()
-   {
-      //TODO
-      $this->errors[] = 'status-transition not implemented yet';
-   }
-
    /*! \brief Check if change to PLAY-tourney-status is allowed. */
    function check_conditions_status_PLAY()
    {

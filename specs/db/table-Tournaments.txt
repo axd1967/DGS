@@ -405,17 +405,17 @@ Description:
 Description:
    Pool-setup for one tournament round.
 
- Field        | Type                                            | Default
---------------+-------------------------------------------------+---------------------
- ID           | int(11)                                         | NULL
- tid          | int(11)                                         | NULL
- Round        | tinyint(3) unsigned                             | 1
- Status       | enum('INIT','POOL','PAIR','GAME','PLAY','DONE') | INIT
- MinPoolSize  | tinyint(3) unsigned                             | 0
- MaxPoolSize  | tinyint(3) unsigned                             | 0
- MaxPoolCount | smallint(5) unsigned                            | 0
- Lastchanged  | datetime                                        | 0000-00-00 00:00:00
- ChangedBy    | varchar(54)                                     |
+ Field        | Type                                     | Default
+--------------+------------------------------------------+---------------------
+ ID           | int(11)                                  | NULL
+ tid          | int(11)                                  | NULL
+ Round        | tinyint(3) unsigned                      | 1
+ Status       | enum('INIT','POOL','PAIR','PLAY','DONE') | INIT
+ MinPoolSize  | tinyint(3) unsigned                      | 0
+ MaxPoolSize  | tinyint(3) unsigned                      | 0
+ MaxPoolCount | smallint(5) unsigned                     | 0
+ Lastchanged  | datetime                                 | 0000-00-00 00:00:00
+ ChangedBy    | varchar(54)                              |
 
 
 ## Fields:
@@ -426,9 +426,8 @@ Description:
 
 * Status : pairing status for tournament round
    - INIT = new round started, setting up round
-   - POOL = create/setup pools
-   - PAIR = assign TPs to pools
-   - GAME = setup T-games, games ready to be created and started
+   - POOL = create/setup pools, assign TPs to pools
+   - PAIR = setup T-games, games ready to be created and started
    - PLAY = play all games, take over pool-winners to next round or final results
    - DONE = round is completed
 
