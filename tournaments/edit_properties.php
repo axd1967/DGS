@@ -320,8 +320,7 @@ function parse_edit_form( &$tpr, $t_limits )
 function build_properties_notes()
 {
    $notes = array();
-   $notes[] = T_('All properties on this page are optional.');
-   $notes[] = T_('Value of [0] is treated as no restriction.');
+   $notes[] = T_('To disable restrictions, you may use 0-value in (some) fields.');
    $notes[] = null; // empty line
 
    $narr = array( T_('Rating Use Mode') );
