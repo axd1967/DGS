@@ -63,9 +63,9 @@ class DgsLadderTournament extends TournamentTemplateLadder
       $tprops->MinParticipants = 0;
       $tprops->MaxParticipants = 0;
 
-      $t_rules = new TournamentRules();
-      $t_rules->Size = 19;
-      $t_rules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
+      $trules = new TournamentRules();
+      $trules->Size = 19;
+      $trules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
 
       $tl_props = new TournamentLadderProps();
       $tl_props->ChallengeRangeAbsolute = 10;
@@ -77,7 +77,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
       $tl_props->MaxDefensesStart2 = 10;
       $tl_props->MaxDefenses = 3;
 
-      return $this->_createTournament( $tourney, $tprops, $t_rules, $tl_props );
+      return $this->_createTournament( $tourney, $tprops, $trules, $tl_props );
    }
 
 } // end of 'DgsLadderTournament'

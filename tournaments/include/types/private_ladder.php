@@ -67,14 +67,14 @@ class PrivateLadderTournament extends TournamentTemplateLadder
       $tprops->MinParticipants = 0;
       $tprops->MaxParticipants = 50;
 
-      $t_rules = new TournamentRules();
+      $trules = new TournamentRules();
 
       $tl_props = new TournamentLadderProps();
       $tl_props->ChallengeRangeAbsolute = 10;
       $tl_props->MaxChallenges = 5;
       $tl_props->MaxDefenses = 3;
 
-      return $this->_createTournament( $tourney, $tprops, $t_rules, $tl_props );
+      return $this->_createTournament( $tourney, $tprops, $trules, $tl_props );
    }
 
 } // end of 'PrivateLadderTournament'
