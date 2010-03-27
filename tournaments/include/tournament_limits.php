@@ -81,11 +81,13 @@ class TournamentLimits
       return (int)@$this->limit_config[$limit_id][2];
    }
 
+   /*! \brief Returns text '[min..max]' for given limit-id. */
    function getLimitRangeText( $limit_id )
    {
       return TournamentUtils::build_range_text( $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id) );
    }
 
+   /*! \brief Returns text '[0; min..max [..admin-max]]' for given limit-id (the '0' appears if disabling-feature is allowed). */
    function getLimitRangeTextAdmin( $limit_id )
    {
       if( TournamentUtils::isAdmin() )
@@ -102,6 +104,29 @@ class TournamentLimits
          return '';
    }
 
+   /*!
+    * \brief Internal helper-func to check min/max-value and if disabling feature is allowed.
+    * \internal
+    * \param $limit_id what limit to check, choose one of TLIMITS_..
+    * \param $value new value to check for validity;
+    * \param $curr_value current-value of field to check;
+    * \param $errtext_disable error-text (without arguments) that is used if disabling feature by
+    *        using 0-value is not allowed.
+    * \param $errtext_value error-text (with expected one sprintf-argument to note min/max-range)
+    *        is used when new value exceeds the allowed limitations.
+    * \return empty array if no errors found; otherwise errors-list
+    *
+    * \note IMPORTANT NOTE on $value:
+    *       tournament-admin can use any value, so it's important,
+    *       that the checks in this class are only ADDITIONAL checks.
+    *       There must be value checks for the absolute limits somewhere else!!
+    *
+    * \note IMPORTANT NOTE on $curr_value:
+    *       tournament-admin can overwrite limitations for some fields,
+    *       so the current-value of a field may be higher than is allowed for a non-tourney-admin.
+    *       In this case, the value can NOT be changed by non-admins, otherwise the original
+    *       limitations set by tournament-type-specifics are applied on the new values!!
+    */
    function _checkValue_MinMaxDisable( $limit_id, $value, $curr_value, $errtext_disable, $errtext_value )
    {
       $errors = array();
@@ -122,6 +147,9 @@ class TournamentLimits
    }
 
 
+   // ---------- General field checks --------------------
+
+   /*! \brief Returns errors-array for check on min/max/disabling of tournament-max-participants value. */
    function check_MaxParticipants( $value, $curr_value )
    {
       return $this->_checkValue_MinMaxDisable(
@@ -130,7 +158,9 @@ class TournamentLimits
          T_('Expecting number for maximum participants in range %s.') );
    }
 
+   // ---------- Fields checks for Ladder-tournaments --------------------
 
+   /*! \brief Returns errors-array for check on min/max of the different grouped tournament-ladder-max-defenses value. */
    function checkLadder_MaxDefenses( $value, $curr_value, $group_id=null )
    {
       $errors = array();
@@ -150,6 +180,7 @@ class TournamentLimits
       return $errors;
    }
 
+   /*! \brief Returns errors-array for check on min/max/disabling of tournament-ladder-max-challenges value. */
    function checkLadder_MaxChallenges( $value, $curr_value )
    {
       return $this->_checkValue_MinMaxDisable(
@@ -158,7 +189,9 @@ class TournamentLimits
          T_('Max. outgoing challenges must be in range %s.') );
    }
 
+   // ---------- Fields checks for Round-Robin-tournaments --------------------
 
+   /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-max-rounds value. */
    function check_MaxRounds( $value, $curr_value )
    {
       return $this->_checkValue_MinMaxDisable(
@@ -167,6 +200,7 @@ class TournamentLimits
          T_('Expecting number for maximum tournament rounds in range %s.') );
    }
 
+   /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-min-pool-size value. */
    function checkRounds_MinPoolSize( $value, $curr_value )
    {
       return $this->_checkValue_MinMaxDisable(
@@ -175,6 +209,7 @@ class TournamentLimits
          T_('Expecting number for min. pool size in range %s.') );
    }
 
+   /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-max-pool-size value. */
    function checkRounds_MaxPoolSize( $value, $curr_value )
    {
       return $this->_checkValue_MinMaxDisable(
@@ -183,6 +218,7 @@ class TournamentLimits
          T_('Expecting number for max. pool size in range %s.') );
    }
 
+   /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-max-pool-count value. */
    function checkRounds_MaxPoolCount( $value, $curr_value )
    {
       return $this->_checkValue_MinMaxDisable(
@@ -194,6 +230,7 @@ class TournamentLimits
 
    // ------------ static functions ----------------------------
 
+   /*! \brief Provide the absolute upper limits for known limit-id. */
    function getStaticMaxLimit( $limit_id )
    {
       static $arr = array(
