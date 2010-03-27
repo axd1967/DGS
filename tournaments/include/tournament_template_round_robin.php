@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
+require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 
  /*!
@@ -95,16 +96,24 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       return $tid;
    }
 
-   function checkProperties( $tourney )
+   function calcTournamentMinParticipants( $tprops, $tround=null )
+   {
+      return max( $tprops->MinParticipants, $tround->MinPoolSize );
+   }
+
+   function checkProperties( $tourney, $t_status )
    {
       $tid = $tourney->ID;
       $round = $tourney->CurrentRound;
+      $errors = array();
 
       $tround = TournamentRound::load_tournament_round( $tid, $round );
       if( is_null($tround) )
-         error('bad_tournament', "TournamentTemplateRoundRobin.checkProperties($tid,$round,{$this->uid})");
+         error('bad_tournament', "TournamentTemplateRoundRobin.checkProperties.find_tround($tid,$round,{$this->uid})");
 
-      $errors = $tround->check_properties();
+      if( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
+         $errors = array_merge( $errors, $tround->check_properties() );
+
       return $errors;
    }
 

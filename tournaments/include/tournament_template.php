@@ -97,8 +97,14 @@ class TournamentTemplate
       return 0;
    }
 
-   /*! \brief Returns list with error from checking tournament-type-speficic properties; empty if ok. */
-   function checkProperties( $tourney )
+   /*! \brief Returns calculated min-participants required for specific tournament-type. */
+   function calcTournamentMinParticipants( $tprops, $tround=null )
+   {
+      return $tprops->MinParticipants;
+   }
+
+   /*! \brief Returns list with error from checking tournament-type-speficic properties for specific target-tourney-status; empty if ok. */
+   function checkProperties( $tourney, $t_status )
    {
       error('invalid_method', "TournamentTemplate.checkProperties({$this->wizard_type},{$tourney->ID})");
       return 0;

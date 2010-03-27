@@ -47,6 +47,7 @@ class TournamentStatus
    var $tourney; // Tournament-object
    var $ttype; // specific typed TournamentTemplate-object
    var $tprops; // TournamentProperties-object
+   var $tround; // TournamentRound-object
    var $curr_status; // old Tournament.Status
    var $new_status; // new Tournament.Status
    var $errors; // arr
@@ -73,6 +74,7 @@ class TournamentStatus
 
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
       $this->tprops = null;
+      $this->tround = null;
 
       $this->is_admin = TournamentUtils::isAdmin();
       $this->curr_status = $this->new_status = $this->tourney->Status;
@@ -97,7 +99,19 @@ class TournamentStatus
       {
          $this->tprops = TournamentProperties::load_tournament_properties($this->tid);
          if( is_null($this->tprops) )
-            error('bad_tournament', "TournamentStatus.find_tournamt_properties({$this->tid})");
+            error('bad_tournament', "TournamentStatus.find_tournament_properties({$this->tid})");
+      }
+   }
+
+   /*! \internal to load TournamentRound (if needed). */
+   function _load_tround()
+   {
+      if( is_null($this->tround) && $this->ttype->need_rounds )
+      {
+         $round = $this->tourney->CurrentRound;
+         $this->tround = TournamentRound::load_tournament_round( $this->tid, $round );
+         if( is_null($this->tround) )
+            error('bad_tournament', "TournamentStatus.find_tournament_round({$this->tid},$round)");
       }
    }
 
@@ -138,7 +152,7 @@ class TournamentStatus
       $this->check_basic_conditions_status_change();
 
       // check tournament-type specific checks
-      $check_errors = $this->ttype->checkProperties( $this->tourney );
+      $check_errors = $this->ttype->checkProperties( $this->tourney, TOURNEY_STATUS_REGISTER );
       if( count($check_errors) )
          $this->errors = array_merge( $this->errors, $check_errors );
    }
@@ -153,12 +167,14 @@ class TournamentStatus
 
       // check participants-count
       $this->_load_tprops();
+      $this->_load_tround();
+      $min_participants = $this->ttype->calcTournamentMinParticipants( $this->tprops, $this->tround );
       $tp_counts = TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER);
       $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
-      if( $this->tprops->MinParticipants > 0 && $reg_count < $this->tprops->MinParticipants )
+      if( $min_participants > 0 && $reg_count < $min_participants )
          $this->errors[] = sprintf(
                T_('Tournament min. participant limit (%s users) has not been reached yet: %s registrations are missing.'),
-               $this->tprops->MinParticipants, $this->tprops->MinParticipants - $reg_count );
+               $min_participants, $min_participants - $reg_count );
       if( $this->tprops->MaxParticipants > 0 && $reg_count > $this->tprops->MaxParticipants )
          $this->errors[] = sprintf(
                T_('Tournament max. participant limit (%s users) has been exceeded by %s registrations.'),
@@ -169,6 +185,7 @@ class TournamentStatus
       $iterator = new ListIterator( 'TournamentStatus.check_conditions_status_PAIR',
             new QuerySQL( SQLP_WHERE, sprintf( "TP.Status='%s'", mysql_addslashes(TP_STATUS_REGISTER)) ) );
       $iterator = TournamentParticipant::load_tournament_participants($iterator, $this->tid);
+      //TODO(later) optimization to reduce load: limit to certain amount of erroneous users
       while( list(,$arr_item) = $iterator->getListIterator() )
       {
          list( $tp, $orow ) = $arr_item;
@@ -180,6 +197,11 @@ class TournamentStatus
             $this->errors[] = make_html_safe( sprintf( T_('Error for user %s'), "[$err_link]"), 'line') . ": $err";
          }
       }
+
+      // check tournament-type specific checks
+      $check_errors = $this->ttype->checkProperties( $this->tourney, TOURNEY_STATUS_PAIR, $this->tprops, $tp_counts );
+      if( count($check_errors) )
+         $this->errors = array_merge( $this->errors, $check_errors );
    }//check_conditions_status_PAIR
 
    /*! \brief Check if change to PLAY-tourney-status is allowed. */
