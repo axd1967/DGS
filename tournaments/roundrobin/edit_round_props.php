@@ -61,6 +61,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       error('unknown_tournament', "Tournament.edit_round_props.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
+   $t_limits = $ttype->getTournamentLimits();
    if( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_round_props.need_rounds($tid)");
 
@@ -79,8 +80,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround );
-   $errors = array_merge( $errors, $input_errors );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $t_limits );
+   $errors = array_merge( $errors, $input_errors, $tround->check_properties() );
 
    // save tournament-round-object with values from edit-form
    if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
@@ -104,35 +105,39 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $trform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round'),
+         'DESCRIPTION', T_('Tournament Round#tround'),
          'TEXT',        $tround->Round, ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));
    TournamentUtils::show_tournament_flags( $trform, $tourney );
    $trform->add_row( array(
-         'DESCRIPTION', T_('Round Status'),
+         'DESCRIPTION', T_('Round Status#tround'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
-   $trform->add_row( array(
-         'DESCRIPTION', T_('Pool Count'),
-         'TEXT',        $tround->PoolCount, ));
-   $trform->add_row( array( 'HR' ));
 
    if( count($errors) )
    {
+      $trform->add_row( array( 'HR' ));
       $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
       $trform->add_empty_row();
    }
 
+   $trform->add_row( array( 'HR' ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Pool Size'),
          'TEXT',        T_('min.#TRD_poolsize') . MINI_SPACING,
-         'TEXTINPUT',   'min_pool_size', 5, 5, $tround->MinPoolSize,
+         'TEXTINPUT',   'min_pool_size', 3, 3, $vars['min_pool_size'],
          'TEXT',        SMALL_SPACING . T_('max.#TRD_poolsize') . MINI_SPACING,
-         'TEXTINPUT',   'min_pool_size', 5, 5, $tround->MinPoolSize, ));
+         'TEXTINPUT',   'max_pool_size', 3, 3, $vars['max_pool_size'],
+         'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLSIZE), ));
+   $trform->add_row( array(
+         'DESCRIPTION', T_('Max. Pool Count#tround'),
+         'TEXTINPUT',   'max_pool_count', 5, 5, $vars['max_pool_count'],
+         'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLCOUNT), ));
 
+   $trform->add_empty_row();
    $trform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
@@ -164,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 }
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$trd )
+function parse_edit_form( &$trd, $t_limits )
 {
    $edits = array();
    $errors = array();
@@ -173,6 +178,7 @@ function parse_edit_form( &$trd )
    $vars = array(
       'min_pool_size'   => $trd->MinPoolSize,
       'max_pool_size'   => $trd->MaxPoolSize,
+      'max_pool_count'  => $trd->MaxPoolCount,
    );
 
    // copy to determine edit-changes
@@ -185,24 +191,49 @@ function parse_edit_form( &$trd )
    if( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] )
    {
       $new_value = $vars['min_pool_size'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
-         $trd->MinPoolSize = limit( $new_value, 0, 999, 0 );
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TROUND_MAX_POOLSIZE )
+      {
+         $limit_errors = $t_limits->checkRounds_MinPoolSize( $new_value, $trd->MinPoolSize );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $trd->MinPoolSize = $new_value;
+      }
       else
-         $errors[] = T_('Expecting positive number for minimum pool size');
+         $errors[] = sprintf( T_('Expecting number for min. pool size in range %s.'),
+            $t_limits->getLimitRangeText(TLIMITS_TRD_MIN_POOLSIZE) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_pool_size'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) )
-         $trd->MaxPoolSize = limit( $new_value, 0, 999, 0 );
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TROUND_MAX_POOLSIZE )
+      {
+         $limit_errors = $t_limits->checkRounds_MaxPoolSize( $new_value, $trd->MaxPoolSize );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $trd->MaxPoolSize = $new_value;
+      }
       else
-         $errors[] = T_('Expecting positive number for maximum pool size');
+         $errors[] = sprintf( T_('Expecting number for max. pool size in range %s.'),
+            $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLSIZE) ); // check for general MAX, but show specific max
+
+      $new_value = $vars['max_pool_count'];
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TROUND_MAX_POOLCOUNT )
+      {
+         $limit_errors = $t_limits->checkRounds_MaxPoolCount( $new_value, $trd->MaxPoolCount );
+         if( count($limit_errors) )
+            $errors = array_merge( $errors, $limit_errors );
+         else
+            $trd->MaxPoolCount = $new_value;
+      }
+      else
+         $errors[] = sprintf( T_('Expecting number for max. pool count in range %s.'),
+            $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLCOUNT) ); // check for general MAX, but show specific max
 
       // determine edits
       if( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool-Size#edits');
       if( $old_vals['max_pool_size'] != $trd->MaxPoolSize ) $edits[] = T_('Pool-Size#edits');
+      if( $old_vals['max_pool_count'] != $trd->MaxPoolCount ) $edits[] = T_('Pool-Count#edits');
    }
-
-   if( $trd->MinPoolSize > $trd->MaxPoolSize )
-      swap( $trd->MinPoolSize, $trd->MaxPoolSize );
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
@@ -219,6 +250,7 @@ function build_round_notes()
    $arrst[TROUND_STATUS_POOL] = T_('create and setup pools for tournament round#trdstat');
    $arrst[TROUND_STATUS_PAIR] = T_('assign participants to pools#trdstat');
    $arrst[TROUND_STATUS_GAME] = T_('prepare tournament games, ready to be started#trdstat');
+   $arrst[TROUND_STATUS_PLAY] = T_('play games, prepare next round or final results#trdstat');
    $arrst[TROUND_STATUS_DONE] = T_('pairing for tournament round finished, playing can start#trdstat');
    $narr = array ( T_('Tournament Round Status') );
    foreach( $arrst as $status => $descr )
