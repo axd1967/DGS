@@ -22,6 +22,52 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-27 juga
+
+   * tournaments/include/tournament_round.php (class TournamentRound, ~.fillEntityData,
+       ~.check_properties, ~.build_notes_props, ~.new_from_row, ~.getStatusText),
+     tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin.checkProperties),
+     tournaments/include/tournament_limits.php (TournamentLimits.getLimitRangeTextAdmin,
+       ~._checkValue_MinMaxDisable, ~.check_MaxParticipants, ~.checkLadder_MaxChallenges,
+       ~.check_MaxRounds, ~.checkRounds_MinPoolSize, ~.checkRounds_MaxPoolSize,
+       ~.checkRounds_MaxPoolCount, ~.getStaticMaxLimit),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form, build_round_notes),
+     tournaments/roundrobin/edit_rounds.php,
+     tournaments/view_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - cleanup of TournamentRound-table for pool-size and pool-count:
+     - renamed PoolCount to MaxPoolCount
+     - adjusted fields-size
+     - changed defaults for Min/MaxPoolSize: 0 -> 2
+     - added TournamentRound PLAY-status
+   - added edit of MaxPoolCount replacing read-only PoolCount
+   - added properties-check for current tournament-round on tourney-status change to REG-status
+   - added limitations on tournament-round min/max-pool-size and max-pool-count
+   - added rudimentary info about tournament-round on T-info page
+   - minor text-changes
+-----------
+-- [cleanup] renamed/resized fields
+ALTER TABLE TournamentRound
+   MODIFY MinPoolSize tinyint unsigned NOT NULL DEFAULT '0',
+   MODIFY MaxPoolSize tinyint unsigned NOT NULL DEFAULT '0',
+   CHANGE PoolCount MaxPoolCount smallint unsigned NOT NULL DEFAULT '0' ;
+
+-- add PLAY-status
+ALTER TABLE TournamentRound
+   MODIFY Status enum('INIT','POOL','PAIR','GAME','PLAY','DONE') NOT NULL DEFAULT 'INIT' ;
+-----------
+
+   * tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin.checkProperties),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_REG, ~.check_conditions_status_PLAY),
+     tournaments/include/tournament_template.php (TournamentTemplate.checkProperties),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkProperties):
+   - pass Tournament-object instead of tourney-ID for checking properties on change to REG-status
+
+   * tournaments/ladder/edit_props.php (parse_edit_form):
+   - bugfix: accept also max-limit as valid value
+
 2010-03-26 juga
 
    * tournaments/include/tournament_helper.php (TournamentHelper.add_new_tournament_round, ~.delete_tournament_round, ~.set_tournament_round),
