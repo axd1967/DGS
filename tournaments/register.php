@@ -112,6 +112,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    list( $reg_errors, $reg_warnings ) =
       $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id, $reg_check_type );
 
+   $need_apply_status = false;
+   if( $tp->StartRound > 1 && $tp->StartRound != $old_start_round )
+      $need_apply_status = true;
+   elseif( $tp->hasRating() && (int)$old_rating != (int)$tp->Rating && (int)$tp->User->Rating != (int)$tp->Rating )
+      $need_apply_status = true;
+   if( $need_apply_status && strlen($tp->UserMessage) < 10 )
+      $errors[] = T_('Missing reason in user-message for your application (also see notes below).');
+
    list( $lock_errors, $lock_warnings ) = $tourney->checkRegistrationLocks( $reg_check_type );
    if( count($lock_errors) )
       $errors = array_merge( $lock_errors, $errors );
@@ -157,9 +165,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    {
       // NOTE: an APPLY should not be reverted to REGISTER-status by user
       //       (there might be other reasons for the apply than just round and rating)
-      if( $tp->StartRound > 1 && $tp->StartRound != $old_start_round )
-         $tp->Status = TP_STATUS_APPLY;
-      if( $tp->hasRating() && (int)$old_rating != (int)$tp->Rating && (int)$tp->User->Rating != (int)$tp->Rating )
+      if( $need_apply_status )
          $tp->Status = TP_STATUS_APPLY;
    }
 
