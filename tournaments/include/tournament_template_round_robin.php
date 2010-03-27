@@ -114,6 +114,8 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       if( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
 
+      //TODO check, that there are enough TPs taking care users with TPs.StartRound > 1
+
       return $errors;
    }
 
