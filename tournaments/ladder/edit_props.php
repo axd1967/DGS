@@ -301,7 +301,7 @@ function parse_edit_form( &$tlp, $t_limits )
          $vars['chall_range_rat'] = TournamentLadderProps::formatChallengeRangeRating($tlp->ChallengeRangeRating);
 
       $new_value = $vars['chall_rematch'];
-      if( is_numeric($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_WAIT_REMATCH )
+      if( is_numeric($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_WAIT_REMATCH )
          $tlp->ChallengeRematchWaitHours = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for rematch waiting time in hours range %s.'),
@@ -309,7 +309,7 @@ function parse_edit_form( &$tlp, $t_limits )
 
 
       $new_value = $vars['max_def'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value > 0 && $new_value < TLADDER_MAX_DEFENSES )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value > 0 && $new_value <= TLADDER_MAX_DEFENSES )
       {
          $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses, null );
          if( count($limit_errors) )
@@ -323,7 +323,7 @@ function parse_edit_form( &$tlp, $t_limits )
                               TournamentUtils::build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
 
       $new_value = $vars['max_def1'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_DEFENSES )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_DEFENSES )
       {
          $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses1, sprintf( T_('of group #%s'), 1) );
          if( count($limit_errors) )
@@ -336,7 +336,7 @@ function parse_edit_form( &$tlp, $t_limits )
             $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_def2'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value < TLADDER_MAX_DEFENSES )
+      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_DEFENSES )
       {
          $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses2, sprintf( T_('of group #%s'), 2) );
          if( count($limit_errors) )
