@@ -189,9 +189,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit_tourney ) # for TD
-      $menu_array[T_('Manage tournament')] =
-         array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
+   $menu_array[T_('Edit rounds')] =
+      array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
+   $menu_array[T_('Manage tournament')] =
+      array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
 }
