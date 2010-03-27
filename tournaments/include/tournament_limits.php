@@ -36,7 +36,10 @@ require_once 'tournaments/include/tournament_utils.php';
 define('TLIMITS_MAX_TP', 'max_tp'); // TournamentProperties.MaxParticipants
 define('TLIMITS_TL_MAX_DF', 'tl_max_df'); // TournamentLadderProps.MaxDefenses
 define('TLIMITS_TL_MAX_CH', 'tl_max_ch'); // TournamentLadderProps.MaxChallenges
-define('TLIMITS_MAX_ROUNDS', 'max_rounds'); // TournamentRound.Round / Tournament.Rounds
+define('TLIMITS_TRD_MAX_ROUNDS', 'trd_max_rounds'); // TournamentRound.Round / Tournament.Rounds
+define('TLIMITS_TRD_MIN_POOLSIZE', 'trd_min_poolsize'); // TournamentRound.MinPoolSize
+define('TLIMITS_TRD_MAX_POOLSIZE', 'trd_max_poolsize'); // TournamentRound.MaxPoolSize
+define('TLIMITS_TRD_MAX_POOLCOUNT', 'trd_max_poolcnt'); // TournamentRound.MaxPoolCount
 
  /*!
   * \class TournamentLimits
@@ -87,10 +90,11 @@ class TournamentLimits
    {
       if( TournamentUtils::isAdmin() )
       {
+         $limits = $this->limit_config[$limit_id];
          return span('TWarning', sprintf( ' %s: %s',
             T_('Limits'),
             TournamentUtils::build_range_text(
-               $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id),
+               ($limits[0] ? '0; ' : '' ) . /*min*/$limits[1], /*max*/$limits[2],
                '[%s..%s [..%s]]',
                TournamentLimits::getStaticMaxLimit($limit_id)) ));
       }
@@ -98,24 +102,34 @@ class TournamentLimits
          return '';
    }
 
-
-   function check_MaxParticipants( $value, $curr_value )
+   function _checkValue_MinMaxDisable( $limit_id, $value, $curr_value, $errtext_disable, $errtext_value )
    {
       $errors = array();
-      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_MAX_TP)) )
+      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits($limit_id)) )
       {
+         $limit_maxval = TournamentLimits::getStaticMaxLimit($limit_id);
          list( $disable_allowed, $min_value, $max_value ) = $limits;
+
          if( $value == 0 && !$disable_allowed )
-            $errors[] = T_('Disabling feature of maximum participants with 0-value not allowed.');
+            $errors[] = $errtext_disable;
          elseif(  ( !is_null($min_value) && $value < $min_value )
-               || ( !is_null($max_value) && $max_value < TP_MAX_COUNT && $value > $max_value ) )
+               || ( !is_null($max_value) && $max_value < $limit_maxval && $value > $max_value ) )
          {
-            $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
-                                 TournamentUtils::build_range_text($min_value, $max_value) );
+            $errors[] = sprintf( $errtext_value, TournamentUtils::build_range_text($min_value, $max_value) );
          }
       }
       return $errors;
    }
+
+
+   function check_MaxParticipants( $value, $curr_value )
+   {
+      return $this->_checkValue_MinMaxDisable(
+         TLIMITS_MAX_TP, $value, $curr_value,
+         T_('Disabling feature of maximum participants with 0-value not allowed.'),
+         T_('Expecting number for maximum participants in range %s.') );
+   }
+
 
    function checkLadder_MaxDefenses( $value, $curr_value, $group_id=null )
    {
@@ -138,38 +152,43 @@ class TournamentLimits
 
    function checkLadder_MaxChallenges( $value, $curr_value )
    {
-      $errors = array();
-      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_CH)) )
-      {
-         list( $disable_allowed, $min_value, $max_value ) = $limits;
-         if( $value == 0 && !$disable_allowed )
-            $errors[] = T_('Disabling feature of max. outgoing challenges with 0-value not allowed.');
-         elseif(  ( !is_null($min_value) && $value < $min_value )
-               || ( !is_null($max_value) && $max_value < TLADDER_MAX_CHALLENGES && $value > $max_value ) )
-         {
-            $errors[] = sprintf( T_('Max. outgoing challenges must be in range %s.'),
-                                 TournamentUtils::build_range_text($min_value, $max_value) );
-         }
-      }
-      return $errors;
+      return $this->_checkValue_MinMaxDisable(
+         TLIMITS_TL_MAX_CH, $value, $curr_value,
+         T_('Disabling feature of max. outgoing challenges with 0-value not allowed.'),
+         T_('Max. outgoing challenges must be in range %s.') );
    }
+
 
    function check_MaxRounds( $value, $curr_value )
    {
-      $errors = array();
-      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_MAX_ROUNDS)) )
-      {
-         list( $disable_allowed, $min_value, $max_value ) = $limits;
-         if( $value == 0 && !$disable_allowed )
-            $errors[] = T_('Disabling feature of maximum tournament rounds with 0-value not allowed.');
-         elseif(  ( !is_null($min_value) && $value < $min_value )
-               || ( !is_null($max_value) && $max_value < TROUND_MAX_COUNT && $value > $max_value ) )
-         {
-            $errors[] = sprintf( T_('Expecting number for maximum tournament rounds in range %s.'),
-                                 TournamentUtils::build_range_text($min_value, $max_value) );
-         }
-      }
-      return $errors;
+      return $this->_checkValue_MinMaxDisable(
+         TLIMITS_TRD_MAX_ROUNDS, $value, $curr_value,
+         T_('Disabling feature of maximum tournament rounds with 0-value not allowed.'),
+         T_('Expecting number for maximum tournament rounds in range %s.') );
+   }
+
+   function checkRounds_MinPoolSize( $value, $curr_value )
+   {
+      return $this->_checkValue_MinMaxDisable(
+         TLIMITS_TRD_MIN_POOLSIZE, $value, $curr_value,
+         T_('Disabling feature of minimum pool size with 0-value not allowed.'),
+         T_('Expecting number for min. pool size in range %s.') );
+   }
+
+   function checkRounds_MaxPoolSize( $value, $curr_value )
+   {
+      return $this->_checkValue_MinMaxDisable(
+         TLIMITS_TRD_MAX_POOLSIZE, $value, $curr_value,
+         T_('Disabling feature of maximum pool size with 0-value not allowed.'),
+         T_('Expecting number for max. pool size in range %s.') );
+   }
+
+   function checkRounds_MaxPoolCount( $value, $curr_value )
+   {
+      return $this->_checkValue_MinMaxDisable(
+         TLIMITS_TRD_MAX_POOLCOUNT, $value, $curr_value,
+         T_('Disabling feature of maximum pool count with 0-value not allowed.'),
+         T_('Expecting number for max. pool count in range %s.') );
    }
 
 
@@ -178,10 +197,13 @@ class TournamentLimits
    function getStaticMaxLimit( $limit_id )
    {
       static $arr = array(
-         TLIMITS_MAX_TP       => TP_MAX_COUNT,
-         TLIMITS_TL_MAX_DF    => TLADDER_MAX_DEFENSES,
-         TLIMITS_TL_MAX_CH    => TLADDER_MAX_CHALLENGES,
-         TLIMITS_MAX_ROUNDS   => TROUND_MAX_COUNT,
+         TLIMITS_MAX_TP             => TP_MAX_COUNT,
+         TLIMITS_TL_MAX_DF          => TLADDER_MAX_DEFENSES,
+         TLIMITS_TL_MAX_CH          => TLADDER_MAX_CHALLENGES,
+         TLIMITS_TRD_MAX_ROUNDS     => TROUND_MAX_COUNT,
+         TLIMITS_TRD_MIN_POOLSIZE   => TROUND_MAX_POOLSIZE,
+         TLIMITS_TRD_MAX_POOLSIZE   => TROUND_MAX_POOLSIZE,
+         TLIMITS_TRD_MAX_POOLCOUNT  => TROUND_MAX_POOLCOUNT,
       );
       return $arr[$limit_id];
    }
