@@ -47,14 +47,17 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       // overwrite tournament-type-specific properties
       $this->need_rounds = true;
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
-      $this->limits->setLimits( TLIMITS_MAX_ROUNDS, true, 1, TROUND_MAX_COUNT );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, 1, TROUND_MAX_COUNT );
+      $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 2, TROUND_MAX_POOLSIZE );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 2, TROUND_MAX_POOLSIZE );
+      $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1, TROUND_MAX_POOLCOUNT );
    }
 
    /*!
     * \brief Abstract function to persist create tournament-tables.
     * \internal
     */
-   function _createTournament( $tourney, $tprops, $t_rules, $t_rnd )
+   function _createTournament( $tourney, $tprops, $trules, $tround )
    {
       global $NOW;
 
@@ -65,10 +68,10 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.check(%s)");
          if( !is_a($tprops, 'TournamentProperties') )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.check(%s)");
-         if( !is_a($t_rules, 'TournamentRules') )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.t_rules.check(%s)");
-         if( !is_a($t_rnd, 'TournamentRound') )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.t_rnd.check(%s)");
+         if( !is_a($trules, 'TournamentRules') )
+            $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.check(%s)");
+         if( !is_a($tround, 'TournamentRound') )
+            $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.check(%s)");
 
          // insert tournament-related tables
          if( !$tourney->persist() )
@@ -79,23 +82,30 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
          if( !$tprops->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.insert(%s,$tid)");
 
-         $t_rules->tid = $tid;
-         if( !$t_rules->insert() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.t_rules.insert(%s,$tid)");
+         $trules->tid = $tid;
+         if( !$trules->insert() )
+            $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.insert(%s,$tid)");
 
-         $t_rnd->tid = $tid;
-         if( !$t_rnd->insert() )
-            $this->create_error("TournamentTemplateRoundRobin._createTournament.t_rnd.insert(%s,$tid)");
+         $tround->tid = $tid;
+         if( !$tround->insert() )
+            $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.insert(%s,$tid)");
       }
       ta_end();
 
       return $tid;
    }
 
-   function checkProperties( $tid )
+   function checkProperties( $tourney )
    {
-      //TODO check-properties for round-robin
-      return array( 'Error' );
+      $tid = $tourney->ID;
+      $round = $tourney->CurrentRound;
+
+      $tround = TournamentRound::load_tournament_round( $tid, $round );
+      if( is_null($tround) )
+         error('bad_tournament', "TournamentTemplateRoundRobin.checkProperties($tid,$round,{$this->uid})");
+
+      $errors = $tround->check_properties();
+      return $errors;
    }
 
    function checkParticipantRegistrations( $tid, $arr_TPs )
