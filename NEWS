@@ -59,6 +59,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * User will be notified about full removal from tournament
 
       * Tournament Round Editor for round-robin-specific properties
+         * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page

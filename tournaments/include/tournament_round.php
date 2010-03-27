@@ -80,11 +80,12 @@ class TournamentRound
       $this->ChangedBy = $changed_by;
    }
 
-   function setStatus( $status )
+   function setStatus( $status, $check_only=false )
    {
       if( !preg_match( "/^(".CHECK_TROUND_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentRound.setStatus($status)");
-      $this->Status = $status;
+      if( !$check_only )
+         $this->Status = $status;
    }
 
    function to_string()

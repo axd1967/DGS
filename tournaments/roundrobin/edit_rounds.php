@@ -58,7 +58,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
      tre_edit&tid=&round=           : edit selected round-data (forward to separate edit-single-round page)
      tre_set&tid=&round=            : sets selected round as the current round (need confirmation)
      tre_set_confirm&tid=&round=    : sets selected round as the current round (confirmed)
-     //TODO tre_stat&tid=&round=           : changes round status (forward to separate edit-round-status page)
+     tre_stat&tid=&round=           : changes round status (forward to separate edit-round-status page)
      tre_cancel&tid=&round=         : cancel previous action
 */
 
@@ -70,6 +70,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round");
    elseif( @$_REQUEST['tre_edit'] ) // edit-data
       jump_to("tournaments/roundrobin/edit_round_props.php?tid=$tid".URI_AMP."round=$round");
+   elseif( @$_REQUEST['tre_stat'] ) // edit-status
+      jump_to("tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round");
 
    $tourney = Tournament::load_tournament($tid);
    if( is_null($tourney) )
@@ -222,11 +224,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             'tre_set', T_('Confirm setting') );
    }
 
-   /* TODO change T-round status
    $tform->add_row( array(
          'TAB', 'CELL', 1, '',
          'SUBMITBUTTON', 'tre_stat', T_('Change Round Status'), ));
-   */
 
    // GUI: show round info -------------
 
