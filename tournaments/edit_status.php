@@ -179,7 +179,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
 
 // return ( vars-hash, edits-arr )
-function parse_edit_form( $tourney )
+function parse_edit_form( &$tourney )
 {
    $edits = array();
    $is_posted = ( @$_REQUEST['t_save'] || @$_REQUEST['t_confirm'] );
