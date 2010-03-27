@@ -138,9 +138,9 @@ class TournamentStatus
       $this->check_basic_conditions_status_change();
 
       // check tournament-type specific checks
-      $check_errors = $this->ttype->checkProperties( $this->tid );
+      $check_errors = $this->ttype->checkProperties( $this->tourney );
       if( count($check_errors) )
-         $this->erros = array_merge( $this->errors, $check_errors );
+         $this->errors = array_merge( $this->errors, $check_errors );
    }
 
    /*! \brief Check if change to PAIR-tourney-status is allowed. */
@@ -193,9 +193,9 @@ class TournamentStatus
       // check that all registered TPs are added
       //TODO(later) condition (for round-robin): all T-games must be ready to start (i.e. inserted and set up)
       $arr_TPs = TournamentParticipant::load_tournament_participants_registered( $this->tid );
-      $chk_errors = $this->ttype->checkParticipantRegistrations( $this->tid, $arr_TPs );
-      if( count($chk_errors) )
-         $this->errors = array_merge( $this->errors, $chk_errors );
+      $check_errors = $this->ttype->checkParticipantRegistrations( $this->tid, $arr_TPs );
+      if( count($check_errors) )
+         $this->errors = array_merge( $this->errors, $check_errors );
    }
 
    /*! \brief Check if change to CLOSED-tourney-status is allowed. */
