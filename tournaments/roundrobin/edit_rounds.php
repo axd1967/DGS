@@ -86,7 +86,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    $authorise_set_tround = TournamentRound::authorise_set_tround( $tourney->Status );
 
    $t_limits = $ttype->getTournamentLimits();
-   $max_rounds = $t_limits->getMaxLimit(TLIMITS_MAX_ROUNDS);
+   $max_rounds = $t_limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS);
    if( $round < 1 || $round > $max_rounds )
       $round = $tourney->CurrentRound;
    $tround = null;
@@ -222,7 +222,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             'tre_set', T_('Confirm setting') );
    }
 
-   /* TODO
+   /* TODO change T-round status
    $tform->add_row( array(
          'TAB', 'CELL', 1, '',
          'SUBMITBUTTON', 'tre_stat', T_('Change Round Status'), ));
@@ -247,8 +247,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             'DESCRIPTION', T_('Pool Size#tround'),
             'TEXT', sprintf( T_('min/max-range %s'), TournamentUtils::build_range_text($tround->MinPoolSize, $tround->MaxPoolSize) ), ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Pool Count#tround'),
-            'TEXT', $tround->PoolCount, ));
+            'DESCRIPTION', T_('Max. Pool Count#tround'),
+            'TEXT', ( $tround->MaxPoolCount > 0 ? $tround->MaxPoolCount : NO_VALUE ), ));
    }
 
 
