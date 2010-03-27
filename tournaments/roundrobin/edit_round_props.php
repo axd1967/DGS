@@ -26,7 +26,6 @@ require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_round.php';
-require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -126,10 +125,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $trform->add_row( array( 'HR' ));
    $trform->add_row( array(
-         'DESCRIPTION', T_('Pool Size'),
-         'TEXT',        T_('min.#TRD_poolsize') . MINI_SPACING,
+         'DESCRIPTION', T_('Min. Pool Size#tround'),
          'TEXTINPUT',   'min_pool_size', 3, 3, $vars['min_pool_size'],
-         'TEXT',        SMALL_SPACING . T_('max.#TRD_poolsize') . MINI_SPACING,
+         'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MIN_POOLSIZE), ));
+   $trform->add_row( array(
+         'DESCRIPTION', T_('Max. Pool Size#tround'),
          'TEXTINPUT',   'max_pool_size', 3, 3, $vars['max_pool_size'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLSIZE), ));
    $trform->add_row( array(
@@ -154,8 +154,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    echo "<h3 class=Header>$title</h3>\n";
 
    $trform->echo_string();
-
-   echo_notes( 'edittournamentroundnotesTable', T_('Tournament round notes'), build_round_notes() );
 
 
    $menu_array = array();
@@ -237,26 +235,4 @@ function parse_edit_form( &$trd, $t_limits )
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
-
-
-/*! \brief Returns array with notes about tournament-round. */
-function build_round_notes()
-{
-   $notes = array();
-   //$notes[] = null; // empty line
-
-   $arrst = array();
-   $arrst[TROUND_STATUS_INIT] = T_('setup tournament round properties#trdstat');
-   $arrst[TROUND_STATUS_POOL] = T_('setup pools and assign users to them for tournament round#trdstat');
-   $arrst[TROUND_STATUS_PAIR] = T_('prepare tournament games, ready to be started#trdstat');
-   $arrst[TROUND_STATUS_PLAY] = T_('play games, prepare next round or final results#trdstat');
-   $arrst[TROUND_STATUS_DONE] = T_('pairing for tournament round finished, playing can start#trdstat');
-   $narr = array ( T_('Tournament Round Status') );
-   foreach( $arrst as $status => $descr )
-      $narr[] = sprintf( "%s = $descr", TournamentRound::getStatusText($status) );
-   $notes[] = $narr;
-
-   return $notes;
-}//build_round_notes
-
 ?>
