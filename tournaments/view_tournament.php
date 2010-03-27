@@ -76,6 +76,10 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_counts[TP_STATUS_REGISTER] )
          : NO_VALUE;
    }
+   elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   {
+      $tt_props = TournamentRound::load_tournament_round( $tid, $tourney->CurrentRound );
+   }
 
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
