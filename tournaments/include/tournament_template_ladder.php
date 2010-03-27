@@ -99,8 +99,9 @@ class TournamentTemplateLadder extends TournamentTemplate
       return $tid;
    }
 
-   function checkProperties( $tid )
+   function checkProperties( $tourney )
    {
+      $tid = $tourney->ID;
       $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
       if( is_null($tl_props) )
          error('bad_tournament', "TournamentTemplateLadder.checkProperties($tid,{$this->uid})");

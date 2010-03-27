@@ -98,9 +98,9 @@ class TournamentTemplate
    }
 
    /*! \brief Returns list with error from checking tournament-type-speficic properties; empty if ok. */
-   function checkProperties( $tid )
+   function checkProperties( $tourney )
    {
-      error('invalid_method', "TournamentTemplate.checkProperties({$this->wizard_type},$tid)");
+      error('invalid_method', "TournamentTemplate.checkProperties({$this->wizard_type},{$tourney->ID})");
       return 0;
    }
 
