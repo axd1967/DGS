@@ -1846,3 +1846,17 @@ ALTER TABLE TournamentRound
    MODIFY Status enum('INIT','POOL','PAIR','PLAY','DONE') NOT NULL DEFAULT 'INIT' ;
 
 
+-- table to assign users to pools
+CREATE TABLE TournamentPool (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   Round tinyint unsigned NOT NULL,
+   Pool smallint unsigned NOT NULL,
+   uid int NOT NULL DEFAULT '0',
+   GamesRun smallint unsigned NOT NULL DEFAULT '0',
+   PRIMARY KEY (ID),
+   KEY tidRoundPool (tid,Round,Pool),
+   KEY uid (uid)
+) ENGINE=MyISAM ;
+
+

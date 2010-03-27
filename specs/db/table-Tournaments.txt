@@ -703,3 +703,32 @@ Description:
 * ChangedBy : user-list that updated table-entry in format: "[user2] [user1] ..."
 
 
+###########################################################################
+## --- TournamentPool ---
+
+Description:
+   Table to store pool for round-robin tournaments with assigned users.
+
+ Field    | Type                 | Default
+----------+----------------------+---------
+ ID       | int(11)              | NULL
+ tid      | int(11)              | NULL
+ Round    | tinyint(3) unsigned  | NULL
+ Pool     | smallint(5) unsigned | NULL
+ uid      | int(11)              | 0
+ GamesRun | smallint(5) unsigned | 0
+
+
+## Fields:
+
+* tid : FK to Tournament.ID
+
+* Round : round number
+
+* Pool : pool number
+
+* uid : FK to TournamentParticipant.uid = Players.ID
+
+* GamesRun : number of running tournament-games
+
+

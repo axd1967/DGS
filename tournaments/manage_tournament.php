@@ -214,16 +214,21 @@ function make_links_ttype_specific( $tourney, $tstat )
 
 
    // TYPE: round-robin-specific stuff
-   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN && $tstat == TOURNEY_STATUS_NEW )
+   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
       if( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
             . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('Setup tournament rounds for pooling and pairing') ));
+
+      if( $tstat == TOURNEY_STATUS_PAIR )
+         return '<li>'
+            . make_menu_link( T_('Edit pools'), array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' ))
+            . subList( array( T_('Setup pools and assign users for current tournament round#mngt') ));
    }
 
    return '';
-}
+}//make_links_ttype_specific
 
 function subList( $arr, $class='SubList' )
 {
