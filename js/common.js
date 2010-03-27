@@ -71,7 +71,7 @@ function showTLRankInfo( e, rank, best_rank, period_rank, history_rank )
    showInfo( e, T_rankInfoTitle, String.sprintf( T_rankInfoFormat, rank, best_rank, diff1, diff2 ) );
 }
 
-// see TournamentLadder::build_rank_diff()
+// see PHP TournamentLadder::build_rank_diff()
 function buildRankDiff( rank, prev_rank )
 {
    if( rank == prev_rank )
