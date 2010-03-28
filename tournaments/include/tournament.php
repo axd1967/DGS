@@ -364,8 +364,10 @@ class Tournament
    /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..3. */
    function build_info( $version=1 )
    {
+      global $base_path;
+
       if( $version == 1 ) // ID-link (scope type) [title]
-         return anchor( "view_tournament.php?tid=".$this->ID, $this->ID )
+         return anchor( $base_path."tournaments/view_tournament.php?tid=".$this->ID, $this->ID )
             . SMALL_SPACING
             . sprintf( '(%s %s)',
                        Tournament::getScopeText($this->Scope),
