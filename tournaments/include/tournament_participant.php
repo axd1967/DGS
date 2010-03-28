@@ -360,7 +360,7 @@ class TournamentParticipant
    function isTournamentParticipant( $tid, $uid, $status=null )
    {
       $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid)",
-         "SELECT Status FROM TournamentParticipant WHERE tid='$tid' AND uid='$uid' LIMIT 1" );
+         sprintf( "SELECT Status FROM TournamentParticipant WHERE tid='%s' AND uid='%s' LIMIT 1", $tid, $uid ) );
       if( is_null($status) )
          return ($row) ? @$row['Status'] : false;
       else
