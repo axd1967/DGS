@@ -146,6 +146,20 @@ class TournamentPool
       return $trd;
    }
 
+   /*! \brief Checks, if TournamentPool-entry exists in db; false if no entry found. */
+   function existsTournamentPool( $tid, $round, $pool=0, $uid=null )
+   {
+      $query = sprintf( "SELECT 1 FROM TournamentPool WHERE tid=%s AND Round=%s", (int)$tid, (int)$round );
+      if( is_numeric($pool) && $pool > 0 )
+         $query .= " AND Pool=$pool";
+      if( !is_null($uid) && is_numeric($uid) )
+         $query .= " AND uid=$uid";
+
+      $row = mysql_single_fetch( "TournamentPool.isTournamentPool.find($tid,$round,$pool,$uid)",
+         "$query LIMIT 1" );
+      return (bool)$row;
+   }
+
    /*! \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id. */
    function load_tournament_pools( $iterator, $tid )
    {

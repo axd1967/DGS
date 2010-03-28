@@ -1860,3 +1860,9 @@ CREATE TABLE TournamentPool (
 ) ENGINE=MyISAM ;
 
 
+-- define actual pool-size and pool-count to be used for pooling tournament round
+ALTER TABLE TournamentRound
+   ADD PoolSize tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount,
+   ADD Pools smallint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
+
+

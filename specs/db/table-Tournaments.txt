@@ -414,6 +414,8 @@ Description:
  MinPoolSize  | tinyint(3) unsigned                      | 0
  MaxPoolSize  | tinyint(3) unsigned                      | 0
  MaxPoolCount | smallint(5) unsigned                     | 0
+ Pools        | smallint(5) unsigned                     | 0
+ PoolSize     | tinyint(3) unsigned                      | 0
  Lastchanged  | datetime                                 | 0000-00-00 00:00:00
  ChangedBy    | varchar(54)                              |
 
@@ -435,6 +437,10 @@ Description:
 
 * MaxPoolCount : how many pools are being used at maximum
    - minimum pool-count is implicitly = 1
+
+* Pools : number of pools actually used for tournament-round
+
+* PoolSize : max. size of every pool actually used for tournament-round
 
 * Lastchanged : date of last update of table-entry
 

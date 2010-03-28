@@ -187,6 +187,16 @@ class TournamentUtils
       return sprintf( $fmt, $min, $max, $generic_max );
    }
 
+   function calc_pool_count( $user_count, $pool_size )
+   {
+      return floor( ( $user_count + $pool_size - 1 ) / $pool_size );
+   }
+
+   function calc_pool_games( $pool_size, $games_per_challenge=1 )
+   {
+      return $games_per_challenge * floor( $pool_size * ( $pool_size - 1 ) / 2 );
+   }
+
 } // end of 'TournamentUtils'
 
 ?>

@@ -49,6 +49,7 @@ $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
    FTYPE_AUTO,  'ID',
    FTYPE_CHBY,
    FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'MaxPoolCount',
+                'Pools', 'PoolSize',
    FTYPE_DATE,  'Lastchanged',
    FTYPE_ENUM,  'Status'
    );
@@ -62,12 +63,15 @@ class TournamentRound
    var $MinPoolSize;
    var $MaxPoolSize;
    var $MaxPoolCount;
+   var $Pools;
+   var $PoolSize;
    var $Lastchanged;
    var $ChangedBy;
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    function TournamentRound( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
-         $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $lastchanged=0, $changed_by='' )
+         $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $pool_count=0, $pool_size=0,
+         $lastchanged=0, $changed_by='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -76,6 +80,8 @@ class TournamentRound
       $this->MinPoolSize = (int)$min_pool_size;
       $this->MaxPoolSize = (int)$max_pool_size;
       $this->MaxPoolCount = (int)$max_pool_count;
+      $this->Pools = (int)$pool_count;
+      $this->PoolSize = (int)$pool_size;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
    }
@@ -139,6 +145,8 @@ class TournamentRound
       $data->set_value( 'MinPoolSize', $this->MinPoolSize );
       $data->set_value( 'MaxPoolSize', $this->MaxPoolSize );
       $data->set_value( 'MaxPoolCount', $this->MaxPoolCount );
+      $data->set_value( 'Pools', $this->Pools );
+      $data->set_value( 'PoolSize', $this->PoolSize );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       return $data;
@@ -246,6 +254,8 @@ class TournamentRound
             @$row['MinPoolSize'],
             @$row['MaxPoolSize'],
             @$row['MaxPoolCount'],
+            @$row['Pools'],
+            @$row['PoolSize'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy']
          );
