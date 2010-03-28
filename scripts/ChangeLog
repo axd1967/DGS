@@ -9,9 +9,6 @@ Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-s
 
 Developers INFO:
 
-2009-08-04 juan_grande
-   Area scoring
-
 2009-02-11 juga
    Tournaments
 
@@ -21,6 +18,47 @@ Developers INFO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2010-03-28 juga
+
+   * tournaments/include/tournament_round.php (class TournamentRound, ~.fillEntityData,
+       ~.new_from_row),
+     tournaments/include/tournament_pool.php (TournamentPool.existsTournamentPool),
+     tournaments/include/tournament_utils.php (TournamentUtils.calc_pool_count,
+       ~.calc_pool_games),
+     tournaments/roundrobin/define_pools.php (parse_edit_form, make_suggestions_table,
+       compare_suggestions),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, skins/dragon/screen.css, NEWS:
+   - enhanced pool-definition-editor to determine pool-parameter for pools-editing
+   - define actual pool-size and pool-count to be used for pooling tournament round,
+     stored in TournamentRound.PoolSize/Pools
+   - added distribution samples with suggestions for pool-size and pool-count
+     for current tournament round
+   - defining pool-parameter only possible if there's no TournamentPool-entry yet
+-----------
+-- define actual pool-size and pool-count to be used for pooling tournament round
+ALTER TABLE TournamentRound
+   ADD PoolSize tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount,
+   ADD Pools smallint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
+-----------
+
+   * include/table_columns.php (Table.set_row_extra):
+   - allow to add additional row-data
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.isTournamentParticipant):
+   - use type-casts to prevent sql-injection
+
+   * tournaments/manage_tournament.php, tournaments/roundrobin/edit_pools.php:
+   - started (new) pool-editor to assign users to pools for tournament round
+
+   * tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/define_pools.php:
+   - renamed pool-editor 'edit_pools.php' to 'define_pools.php'
+     to define pool-parameters: pool-size, pool-count
+
+   * tournaments/include/tournament.php (Tournament.build_info):
+   - bugfix: fix URL adding base_path for tournament-info
 
 2010-03-27 juga
 
