@@ -223,8 +223,11 @@ function make_links_ttype_specific( $tourney, $tstat )
 
       if( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'
+            . make_menu_link( T_('Define pools'), array( 'url' => "tournaments/roundrobin/define_pools.php?tid=$tid", 'class' => 'TAdmin' ))
+            . SEP_SPACING
             . make_menu_link( T_('Edit pools'), array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Setup pools and assign users for current tournament round#mngt') ));
+            . subList( array( T_('Define pools (set pool parameters pool-size and pool-count)#mngt'),
+                              T_('Edit pools (Create pools, assign users to pools for current tournament round)#mngt') ));
    }
 
    return '';
