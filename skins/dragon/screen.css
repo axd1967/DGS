@@ -2770,6 +2770,16 @@ a:hover.TLadderRank {
    text-decoration: underline;
 }
 
+table#TPoolSuggestionsTable tr.UserChoice td {
+   font-weight: bold;
+}
+table#TPoolSuggestionsTable tr.Best td.Note {
+   background: #bbddff;
+}
+table#TPoolSuggestionsTable tr.Violation td.Note {
+   background: #ffc4d8;
+}
+
 
 /* ------------------------- */
 /* FAQ pages */
