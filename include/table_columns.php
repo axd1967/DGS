@@ -441,6 +441,17 @@ class Table
       $this->Tablerows[]= $row_array;
    }
 
+   function set_row_extra( $row_index, $arr_extra )
+   {
+      foreach( $arr_extra as $key => $value )
+      {
+         if( $key == 'extra_class' && isset($this->Tablerows[$row_index][$key]) )
+            $this->Tablerows[$row_index][$key] .= ' ' . $value;
+         else
+            $this->Tablerows[$row_index][$key] = $value;
+      }
+   }
+
    function make_table_form( $need_form=true )
    {
       if( !is_null($this->ExternalForm) )
