@@ -41,14 +41,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    if( !$logged_in )
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.edit_pools');
+      error('feature_disabled', 'Tournament.create_pools');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
-     tid=&round=              : edit tournament pools
+     tid=&round=              : create/manage tournament pools
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -58,22 +58,22 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_pools.find_tournament($tid)");
+      error('unknown_tournament', "Tournament.create_pools.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )
-      error('tournament_edit_rounds_not_allowed', "Tournament.edit_pools.need_rounds($tid)");
+      error('tournament_edit_rounds_not_allowed', "Tournament.create_pools.need_rounds($tid)");
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
-      error('tournament_edit_not_allowed', "Tournament.edit_pools.edit_tournament($tid,$my_id)");
+      error('tournament_edit_not_allowed', "Tournament.create_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
    if( $round < 1 )
       $round = $tourney->CurrentRound;
    $tround = TournamentRound::load_tournament_round( $tid, $round );
    if( is_null($tround) )
-      error('bad_tournament', "Tournament.edit_pools.find_tournament_round($tid,$round,$my_id)");
+      error('bad_tournament', "Tournament.create_pools.find_tournament_round($tid,$round,$my_id)");
 
 
    // init
@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
    if( $tround->PoolSize == 0 || $tround->Pools == 0 )
-      $errors[] = T_('Pool parameters must be defined first before you can edit pools assigning users!');
+      $errors[] = T_('Pool parameters must be defined first before you can manage pools!');
 
    $tp_counts = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
    $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
@@ -91,8 +91,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    //TODO list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
    //TODO $errors = array_merge( $errors, $input_errors );
 
-   $page = "edit_pools.php";
-   $title = T_('Tournament Pools Editor');
+   $page = "create_pools.php";
+   $title = T_('Tournament Pools Creation');
 
 
    // --------------- Tournament-Pools EDIT form --------------------
@@ -112,17 +112,6 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tround'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
-   /* TODO use
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Base Pool Size#tround'),
-         'TEXT',        $tround->PoolSize, ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Pool Count#tround'),
-         'TEXT',        $tround->Pools, ));
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Registered users#tround'),
-         'TEXT',        $reg_count, ));
-   */
 
    if( count($errors) )
    {

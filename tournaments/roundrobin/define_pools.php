@@ -198,8 +198,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Define pools')] =
+      array( 'url' => "tournaments/roundrobin/define_pools.php?tid=$tid", 'class' => 'TAdmin' );
+   $menu_array[T_('Create pools')] =
+      array( 'url' => "tournaments/roundrobin/create_pools.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Edit pools')] =
-      array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
+      array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
