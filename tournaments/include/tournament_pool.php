@@ -83,7 +83,7 @@ class TournamentPool
 
    function insert()
    {
-      $entityData = $this->fillEntityData(true);
+      $entityData = $this->fillEntityData();
       $result = $entityData->insert( "TournamentPool::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
@@ -102,10 +102,10 @@ class TournamentPool
       return $entityData->delete( "TournamentPool::delete(%s)" );
    }
 
-   function fillEntityData()
+   function fillEntityData( &$data=null )
    {
-      // checked fields: Status
-      $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
+      if( is_null($data) )
+         $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Round', $this->Round );
@@ -147,7 +147,7 @@ class TournamentPool
    }
 
    /*! \brief Checks, if TournamentPool-entry exists in db; false if no entry found. */
-   function existsTournamentPool( $tid, $round, $pool=0, $uid=null )
+   function exists_tournament_pool( $tid, $round, $pool=0, $uid=null )
    {
       $query = sprintf( "SELECT 1 FROM TournamentPool WHERE tid=%s AND Round=%s", (int)$tid, (int)$round );
       if( is_numeric($pool) && $pool > 0 )
@@ -155,9 +155,20 @@ class TournamentPool
       if( !is_null($uid) && is_numeric($uid) )
          $query .= " AND uid=$uid";
 
-      $row = mysql_single_fetch( "TournamentPool.isTournamentPool.find($tid,$round,$pool,$uid)",
+      $row = mysql_single_fetch( "TournamentPool::exists_tournament_pool.find($tid,$round,$pool,$uid)",
          "$query LIMIT 1" );
       return (bool)$row;
+   }
+
+   /*! \brief Returns array( pool-entries, pool-count ) for given tournament-id and round (and pool-id if given). */
+   function count_tournament_pool( $tid, $round, $pool=0 )
+   {
+      $query = 'SELECT COUNT(*) AS X_CountAll, COUNT(DISTINCT Pool) AS X_CountPools '
+         . sprintf( 'FROM TournamentPool WHERE tid=%s AND Round=%s', (int)$tid, (int)$round );
+      if( is_numeric($pool) && $pool > 0 )
+         $query .= " AND Pool=$pool";
+      $row = mysql_single_fetch( "TournamentPool::count_tournament_pool($tid,$round,$pool)", $query );
+      return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'] ) : array( 0, 0 );
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id. */
@@ -179,6 +190,114 @@ class TournamentPool
 
       return $iterator;
    }
+
+   /*! \brief Returns array with default and slice-mode array for round-robin-tournament. */
+   function build_slice_mode()
+   {
+      $arr = array();
+      $arr[TROUND_SLICE_ROUND_ROBIN]   = T_('Round-Robin#trd_slicemode');
+      $arr[TROUND_SLICE_FILLUP_POOLS]  = T_('Filling up pools#trd_slicemode');
+      $arr[TROUND_SLICE_MANUAL]        = T_('Manual#trd_slicemode');
+      return array( /*default*/TROUND_SLICE_ROUND_ROBIN, $arr );
+   }
+
+   /*! \brief Delete all pools for given tournament-id and round. */
+   function delete_pools( $tid, $round )
+   {
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('invalid_args', "TournamentPool::delete_pools.check.tid($tid,$round)");
+      if( !is_numeric($round) || $round < 1 )
+         error('invalid_args', "TournamentPool::delete_pools.check.round($tid,$round)");
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_POOL']->table;
+      $query = "DELETE FROM $table WHERE tid=$tid AND Round=$round";
+      return db_query( "TournamentPool::delete_pools($tid,$round)", $query );
+   }
+
+   /*! \brief Seeds pools with all registered TPs for round. */
+   function seed_pools( $tourney, $tprops, $tround, $seed_order, $slice_mode )
+   {
+      if( !is_a($tourney, 'Tournament') && $tourney->ID <= 0 )
+         error('unknown_tournament', "TournamentPool::seed_pools.check_tid($seed_order)");
+      $tid = $tourney->ID;
+
+      if( !is_a($tround, 'TournamentRound') )
+         error('invalid_args', "TournamentPool::seed_pools.check_tround($tid,$seed_order)");
+      $round = $tround->Round;
+
+      list( $def, $arr_seed_order ) = $tprops->build_seed_order();
+      if( !isset($arr_seed_order[$seed_order]) )
+         error('invalid_args', "TournamentPool::seed_pools.check_seed_order($tid,$seed_order)");
+
+      list( $def, $arr_slice_mode ) = TournamentPool::build_slice_mode();
+      if( !isset($arr_slice_mode[$slice_mode]) )
+         error('invalid_args', "TournamentPool::seed_pools.check_slice_mode($tid,$slice_mode)");
+
+      // load already joined pool-users
+      $tpool_iterator = new ListIterator( "TournamentPool::seed_pools.load_pools($tid,$round)" );
+      $tpool_iterator->addIndex( 'uid' );
+      $tpool_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,  "TPOOL.Round=$round" ));
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid );
+
+      // find all registered TPs (optimized)
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order );
+
+      //TODO(needed?) optimize SQL for manual with one query: INSERT ... SELECT const, Pool=0 FROM TP ...
+
+      // add all TPs to ladder
+      $NOW = $GLOBALS['NOW'];
+      $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
+      $arr_inserts = array();
+      $arr_pools = array(); // [ pool-id => entries ], also for pool-id=0
+      foreach( range(0, $tround->Pools) as $pool_id )
+         $arr_pools[$pool_id] = 0;
+      $pool = ( $slice_mode == TROUND_SLICE_FILLUP_POOLS ) ? 1 : 0;
+
+      foreach( $arr_TPs as $row )
+      {
+         $uid = $row['uid'];
+
+         // handle slice-mode for user-distribution on pools
+         if( $slice_mode == TROUND_SLICE_ROUND_ROBIN )
+         {
+            if( ++$pool > $tround->Pools )
+               $pool = 1;
+         }
+         elseif( $slice_mode == TROUND_SLICE_FILLUP_POOLS )
+         {
+            if( $pool < $tround->Pools && $arr_pools[$pool] >= $tround->PoolSize )
+               $pool++;
+         } //else: always 0 for TROUND_SLICE_MANUAL
+
+         $tpool = $tpool_iterator->getIndexValue( 'uid', $uid, 0 );
+         if( is_null($tpool) ) // user not joined yet
+            $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
+         else // user already joined
+            $tpool->Pool = $pool; //TODO assure, that TPool.GamesRun==0 !! (or else merge it)
+         $arr_pools[$pool]++;
+
+         $tpool->fillEntityData( $data );
+         $arr_inserts[] = $data->build_sql_insert_values(false, /*with-PK*/true);
+      }
+      unset($arr_TPs);
+      unset($tpool_iterator);
+
+      // insert all registered TPs to ladder
+      $cnt = count($arr_inserts);
+      $seed_query = $data->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
+         . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
+
+      $table = $data->entity->table;
+      db_lock( "TournamentPool::seed_pools($tid,$round,$seed_order,$slice_mode)",
+         "$table WRITE" );
+      {//LOCK TournamentPool
+         $result = db_query( "TournamentPool::seed_pools.insert($tid,$round,$seed_order,$slice_mode,#$cnt)",
+            $seed_query );
+      }
+      db_unlock();
+
+      return $result;
+   }//seed_pools
 
    function get_edit_tournament_status()
    {
