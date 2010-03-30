@@ -57,6 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
      ta_deluserall&tid=&uid=     : remove user (Players.ID) along WITH user-registration (no confirm)
      ta_delete&tid=              : delete T-ladder (to seed again, need confirm)
      ta_delete&confirm=1&tid=    : delete T-ladder (confirmed)
+     ta_cancel&tid=              : cancel ladder-deletion
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -223,7 +224,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
       if( !$is_delete )
       {
-         list( $seed_order_def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
+         list( $seed_order_def, $arr_seed_order ) = $tprops->build_seed_order();
          $seed_order_val = get_request_arg('seed_order', $seed_order_def);
          $seed_reorder = get_request_arg('seed_reorder');
 
