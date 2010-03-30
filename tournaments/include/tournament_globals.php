@@ -61,10 +61,10 @@ define('TOURNEY_FLAG_LOCK_TDWORK',     0x0004); // lock tourney for TD-work, pro
 define('TOURNEY_FLAG_LOCK_CRON',       0x0008); // lock by cron, prohibits certain tourney-specific actions
 define('TOURNEY_FLAG_LOCK_CLOSE',      0x0010); // lock preparing for transition to CLOSED-status
 
-define('LADDER_SEEDORDER_CURRENT_RATING', 1);
-define('LADDER_SEEDORDER_REGISTER_TIME',  2);
-define('LADDER_SEEDORDER_TOURNEY_RATING', 3);
-define('LADDER_SEEDORDER_RANDOM',         4);
+define('TOURNEY_SEEDORDER_CURRENT_RATING', 1);
+define('TOURNEY_SEEDORDER_REGISTER_TIME',  2);
+define('TOURNEY_SEEDORDER_TOURNEY_RATING', 3);
+define('TOURNEY_SEEDORDER_RANDOM',         4);
 
 define('TCHKTYPE_TD', 1);
 define('TCHKTYPE_USER_NEW', 2);
@@ -147,5 +147,9 @@ define('CHECK_TROUND_STATUS', 'INIT|POOL|PAIR|PLAY|DONE');
 define('TROUND_MAX_COUNT', 255);
 define('TROUND_MAX_POOLSIZE', 100);
 define('TROUND_MAX_POOLCOUNT', 1000);
+
+define('TROUND_SLICE_ROUND_ROBIN', 1);
+define('TROUND_SLICE_FILLUP_POOLS', 2);
+define('TROUND_SLICE_MANUAL', 3);
 
 ?>
