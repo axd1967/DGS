@@ -551,7 +551,7 @@ class TournamentLadder
          error('unknown_tournament', "TournamentLadder::seed_ladder.check_tid($seed_order)");
       $tid = $tourney->ID;
 
-      list( $def, $arr_seed_order ) = $tprops->build_ladder_seed_order();
+      list( $def, $arr_seed_order ) = $tprops->build_seed_order();
       if( !isset($arr_seed_order[$seed_order]) )
          error('invalid_args', "TournamentLadder::seed_ladder.check_seed_order($tid,$seed_order)");
 
@@ -561,31 +561,7 @@ class TournamentLadder
       $tl_iterator = TournamentLadder::load_tournament_ladder( $tl_iterator, $tid );
 
       // find all registered TPs (optimized)
-      $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS, 'TP.ID AS rid', 'TP.uid' );
-      $qsql->add_part( SQLP_FROM,   "$table AS TP" );
-      $qsql->add_part( SQLP_WHERE,  "TP.tid=$tid", "TP.Status='".TP_STATUS_REGISTER."'" );
-      if( $seed_order == LADDER_SEEDORDER_CURRENT_RATING )
-      {
-         $qsql->add_part( SQLP_FROM,  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
-         $qsql->add_part( SQLP_ORDER, 'TPP.Rating2 DESC' );
-      }
-      elseif( $seed_order == LADDER_SEEDORDER_REGISTER_TIME )
-         $qsql->add_part( SQLP_ORDER, 'TP.Created ASC' );
-      elseif( $seed_order == LADDER_SEEDORDER_TOURNEY_RATING )
-         $qsql->add_part( SQLP_ORDER, 'TP.Rating DESC' );
-
-      // load all registered TPs (optimized = no TournamentParticipant-objects)
-      $result = db_query( "TournamentLadder::seed_ladder.load_tournament_participants($tid,$seed_order)",
-         $qsql->get_select() );
-      $arr_TPs = array();
-      while( $row = mysql_fetch_array($result) )
-         $arr_TPs[] = $row;
-      mysql_free_result($result);
-
-      if( $seed_order == LADDER_SEEDORDER_RANDOM )
-         shuffle( $arr_TPs );
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order );
 
       // add all TPs to ladder
       $NOW = $GLOBALS['NOW'];
