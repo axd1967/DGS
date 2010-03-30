@@ -440,6 +440,42 @@ class TournamentParticipant
       return $arr;
    }
 
+   /*!
+    * \brief Returns array of row-arrays with [ rid=> TP.ID, uid => TP.uid ]
+    *        for given tournament ordered according to given tourney-seed-order.
+    */
+   function load_registered_users_in_seedorder( $tid, $seed_order )
+   {
+      // find all registered TPs (optimized)
+      $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS, 'TP.ID AS rid', 'TP.uid' );
+      $qsql->add_part( SQLP_FROM,   "$table AS TP" );
+      $qsql->add_part( SQLP_WHERE,  "TP.tid=$tid", "TP.Status='".TP_STATUS_REGISTER."'" );
+      if( $seed_order == TOURNEY_SEEDORDER_CURRENT_RATING )
+      {
+         $qsql->add_part( SQLP_FROM,  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
+         $qsql->add_part( SQLP_ORDER, 'TPP.Rating2 DESC' );
+      }
+      elseif( $seed_order == TOURNEY_SEEDORDER_REGISTER_TIME )
+         $qsql->add_part( SQLP_ORDER, 'TP.Created ASC' );
+      elseif( $seed_order == TOURNEY_SEEDORDER_TOURNEY_RATING )
+         $qsql->add_part( SQLP_ORDER, 'TP.Rating DESC' );
+
+      // load all registered TPs (optimized = no TournamentParticipant-objects)
+      $result = db_query( "TournamentParticipant::load_registered_users_ordered.find_TPs($tid,$seed_order)",
+         $qsql->get_select() );
+      $arr_TPs = array();
+      while( $row = mysql_fetch_array($result) )
+         $arr_TPs[] = $row;
+      mysql_free_result($result);
+
+      if( $seed_order == TOURNEY_SEEDORDER_RANDOM )
+         shuffle( $arr_TPs );
+
+      return $arr_TPs;
+   }
+
    /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
    function check_rated_tournament_participants( $tid )
    {
