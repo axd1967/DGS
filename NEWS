@@ -62,8 +62,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Round Properties Editor for round-robin-specific properties
       * Tournament Round Status Editor
          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
-      * Tournament Round Pools Definition Editor
-      * Tournament Round Pools Editor
+      * Tournament Round Pool Setup (define pool parameters)
+      * Tournament Round Pool Manager (create and delete pools)
+      * Tournament Round Pool Editor (edit pools)
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page
