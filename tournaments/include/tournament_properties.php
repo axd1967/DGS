@@ -285,22 +285,22 @@ class TournamentProperties
       return User::load_user( (int)$check_user );
    }
 
-   /*! \brief Returns array with default and seed-order array for ladder-tourney. */
-   function build_ladder_seed_order()
+   /*! \brief Returns array with default and seed-order array for tournaments (ladder + round-robin). */
+   function build_seed_order()
    {
       $arr = array();
       $default = 0;
       if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX )
       {
-         $arr[LADDER_SEEDORDER_CURRENT_RATING] = T_('Current user rating#seedorder');
-         $default = LADDER_SEEDORDER_CURRENT_RATING;
+         $arr[TOURNEY_SEEDORDER_CURRENT_RATING] = T_('Current user rating#seedorder');
+         $default = TOURNEY_SEEDORDER_CURRENT_RATING;
       }
-      $arr[LADDER_SEEDORDER_REGISTER_TIME] = T_('Tournament register time#seedorder');
+      $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament register time#seedorder');
       if( $default == 0 )
-         $default = LADDER_SEEDORDER_REGISTER_TIME;
+         $default = TOURNEY_SEEDORDER_REGISTER_TIME;
       if( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
-         $arr[LADDER_SEEDORDER_TOURNEY_RATING] = T_('Tournament rating#seedorder');
-      $arr[LADDER_SEEDORDER_RANDOM] = T_('Random#seedorder');
+         $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament rating#seedorder');
+      $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#seedorder');
       return array( $default, $arr );
    }
 
