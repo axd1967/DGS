@@ -19,6 +19,51 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-03-30 juga
+
+   * tournaments/include/tournament_pool.php (TournamentPool.insert, ~.fillEntityData,
+       ~.exists_tournament_pool, ~.count_tournament_pool, ~.build_slice_mode,
+       ~.delete_pools, ~.seed_pools),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php, NEWS:
+   - added deletion of all pools,
+     show number of existing TournamentPool-entries, which enables deletion
+   - added seeding of all pools by certain order and certain slice-mode
+     - slice-modes (=how to distribute on different pools):
+       - round-robin: distribute users round-robin on pools
+       - fill-up pools: first fill up one pool, then go next pool
+       - manual: seed with 0-pool to mark manual assigning for pool-editor
+     - handle already joined users in pool, overwrite to new pools at the moment
+   - define_pools: adjusted title to 'Tournament Pools Setup'
+   - create_pools: adjusted title to 'Tournament Pools Manager'
+   - bugfixes preparing data-persisting
+   - renamed existsTournamentPool-function into exists_tournament_pool()-func
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.seed_ladder),
+     tournaments/include/tournament_participant.php (TournamentParticipant.load_registered_users_in_seedorder),
+     tournaments/include/tournament_properties.php (TournamentProperties.build_seed_order),
+     tournaments/include/tournament_globals.php,
+     tournaments/ladder/admin.php:
+   - moved loading of all registered TPs from TournamentLadder-class
+     into TournamentParticipant-class as load_registered_users_in_seedorder()-func
+   - renamed function TournamentProperties.build_ladder_seed_order -> .build_seed_order
+   - renamed seed-order consts used for round-robin tournaments too:
+     LADDER_SEEDORDER_... -> TOURNEY_SEEDORDER_...
+
+   * include/db_classes.php (EntityData.build_sql_insert_values):
+   - enhance INSERT ... ON DUPLICAT KEY UPDATE by allowing to include primary-key,
+     used for seeding TournamentPool-entries
+
+2010-03-29 juga
+
+   * tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pools.php,
+     tournaments/manage_tournament.php, NEWS:
+   - started (new) pool-editor to create and seed pools for tournament round
+   - added bottom-links for all 3 pool-editors (define, create, edit)
+
 2010-03-28 juga
 
    * tournaments/include/tournament_round.php (class TournamentRound, ~.fillEntityData,
