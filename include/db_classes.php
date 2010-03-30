@@ -337,7 +337,7 @@ class EntityData
       return $query;
    }
 
-   function build_sql_insert_values( $header=false )
+   function build_sql_insert_values( $header=false, $with_PK=false )
    {
       $arr = array();
       if( $header ) // header
@@ -345,7 +345,7 @@ class EntityData
          $query_fmt = 'INSERT INTO ' . $this->entity->table . ' (%s) VALUES ';
          foreach( $this->entity->fields as $field => $ftype ) // in order from entity
          {
-            if( !$this->entity->is_auto_increment($field) )
+            if( $with_PK || !$this->entity->is_auto_increment($field) )
                $arr[] = $field;
          }
       }
@@ -354,7 +354,7 @@ class EntityData
          $query_fmt = '(%s)';
          foreach( $this->entity->fields as $field => $ftype ) // in order from entity
          {
-            if( !$this->entity->is_auto_increment($field) )
+            if( $with_PK || !$this->entity->is_auto_increment($field) )
             {
                $sql_val = $this->get_sql_value( $field );
                $arr[] = (is_null($sql_val)) ? "DEFAULT($field)" : $sql_val;
