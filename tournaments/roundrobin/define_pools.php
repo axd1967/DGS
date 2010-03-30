@@ -47,6 +47,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
+   $page = "define_pools.php";
+
 /* Actual REQUEST calls used:
      tid=&round=              : define tournament pools
      t_preview&tid=&round=    : preview for tournament-pool-save
@@ -83,7 +85,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
-   if( TournamentPool::existsTournamentPool($tid, $round) )
+   if( TournamentPool::exists_tournament_pool($tid, $round) )
       $errors[] = T_('Pool parameters can only be changed if all pools have been removed!');
 
    $tp_counts = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
@@ -91,10 +93,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $min_pool_count = min( TROUND_MAX_POOLCOUNT, TournamentUtils::calc_pool_count($reg_count, $tround->MaxPoolSize) );
    $max_pool_count = min( TROUND_MAX_POOLCOUNT, TournamentUtils::calc_pool_count($reg_count, $tround->MinPoolSize) );
 
-
    // check + parse edit-form (notes)
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
    $errors = array_merge( $errors, $input_errors );
+
+   // ---------- Process actions ------------------------------------------------
 
    $ttable = null;
    if( @$_REQUEST['t_suggest'] || @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
@@ -107,10 +110,6 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament round saved!')) );
    }
-
-   $page = "define_pools.php";
-   $title = T_('Tournament Pools Definition');
-
 
    // --------------- Tournament-Pools EDIT form --------------------
 
@@ -168,6 +167,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       ));
 
 
+   $title = T_('Tournament Pools Setup');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
