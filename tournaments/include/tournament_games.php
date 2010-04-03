@@ -46,7 +46,6 @@ global $ENTITY_TOURNAMENT_GAMES; //PHP5
 $ENTITY_TOURNAMENT_GAMES = new Entity( 'TournamentGames',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_CHBY,
       FTYPE_INT,  'ID', 'tid', 'gid', 'TicksDue', 'Flags', 'Challenger_uid', 'Challenger_rid',
                   'Defender_uid', 'Defender_rid',
       FTYPE_FLOAT, 'Score',
@@ -63,7 +62,6 @@ class TournamentGames
    var $TicksDue;
    var $Flags;
    var $Lastchanged;
-   var $ChangedBy;
    var $Challenger_uid;
    var $Challenger_rid;
    var $Defender_uid;
@@ -79,8 +77,7 @@ class TournamentGames
 
    /*! \brief Constructs TournamentGames-object with specified arguments. */
    function TournamentGames( $id=0, $tid=0, $gid=0, $status=TG_STATUS_INIT, $ticks_due=0, $flags=0,
-         $lastchanged=0, $changed_by='',
-         $challenger_uid=0, $challenger_rid=0, $defender_uid=0, $defender_rid=0,
+         $lastchanged=0, $challenger_uid=0, $challenger_rid=0, $defender_uid=0, $defender_rid=0,
          $start_time=0, $end_time=0, $score=0.0 )
    {
       $this->ID = (int)$id;
@@ -90,7 +87,6 @@ class TournamentGames
       $this->TicksDue = (int)$ticks_due;
       $this->Flags = (int)$flags;
       $this->Lastchanged = (int)$lastchanged;
-      $this->ChangedBy = $changed_by;
       $this->Challenger_uid = (int)$challenger_uid;
       $this->Challenger_rid = (int)$challenger_rid;
       $this->Defender_uid = (int)$defender_uid;
@@ -179,7 +175,6 @@ class TournamentGames
       $data->set_value( 'TicksDue', $this->TicksDue );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
-      $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'Challenger_uid', $this->Challenger_uid );
       $data->set_value( 'Challenger_rid', $this->Challenger_rid );
       $data->set_value( 'Defender_uid', $this->Defender_uid );
@@ -203,7 +198,6 @@ class TournamentGames
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
-      $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'EndTime', $this->EndTime );
       $data->set_value( 'Score', $this->Score );
 
@@ -240,7 +234,6 @@ class TournamentGames
             @$row['TicksDue'],
             @$row['Flags'],
             @$row['X_Lastchanged'],
-            @$row['ChangedBy'],
             @$row['Challenger_uid'],
             @$row['Challenger_rid'],
             @$row['Defender_uid'],
@@ -345,7 +338,7 @@ class TournamentGames
     * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
     *        setting TG.Score for given tournament-ID and game-id.
     */
-   function update_tournament_game_end( $dbgmsg, $changed_by, $tid, $gid, $black_uid, $score )
+   function update_tournament_game_end( $dbgmsg, $tid, $gid, $black_uid, $score )
    {
       if( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentGames.update_tournament_game_end.check.tid($tid,$gid)");
@@ -362,13 +355,12 @@ class TournamentGames
             . "Score=IF(Challenger_uid=$black_uid,$score,-$score), "
             . "EndTime=FROM_UNIXTIME($NOW), "
             . "Lastchanged=FROM_UNIXTIME($NOW), "
-            . EntityData::build_update_part_changed_by($changed_by)
          . " WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
       return $result;
    }
 
    /*! \brief Updates due tournament-games finishing with DONE-status. */
-   function update_tournament_game_wait( $dbgmsg, $changed_by, $wait_ticks )
+   function update_tournament_game_wait( $dbgmsg, $wait_ticks )
    {
       if( !is_numeric($wait_ticks) )
          error('invalid_args', "TournamentGames.update_tournament_game_wait.check.ticks($wait_ticks)");
@@ -379,7 +371,6 @@ class TournamentGames
          "UPDATE $table SET "
             . "Status='".TG_STATUS_DONE."', "
             . "Lastchanged=FROM_UNIXTIME($NOW), "
-            . EntityData::build_update_part_changed_by($changed_by)
          . " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks" );
       return $result;
    }

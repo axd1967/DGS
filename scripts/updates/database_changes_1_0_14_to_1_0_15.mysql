@@ -1866,8 +1866,13 @@ ALTER TABLE TournamentRound
    ADD Pools smallint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
 
 
--- reduced max. pool size: 100 -> 25
+-- [field-size] reducing max. pool-size (100->25), TournamentPool.GamesRun: smallint -> tinyint
 ALTER TABLE TournamentPool
    MODIFY GamesRun tinyint unsigned NOT NULL DEFAULT '0' ;
+
+
+-- [table-size] removed ChangedBy-field, saving size for expected-big-table
+ALTER TABLE TournamentGames
+   DROP COLUMN ChangedBy ;
 
 

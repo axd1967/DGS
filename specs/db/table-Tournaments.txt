@@ -622,7 +622,6 @@ Description:
  TicksDue       | int(11)                                   | 0
  Flags          | smallint(5) unsigned                      | 0
  Lastchanged    | datetime                                  | 0000-00-00 00:00:00
- ChangedBy      | varchar(54)                               |
  Challenger_uid | int(11)                                   | NULL
  Challenger_rid | int(11)                                   | NULL
  Defender_uid   | int(11)                                   | NULL
@@ -655,8 +654,6 @@ Description:
 * Flags : flags
 
 * Lastchanged : date of last update of table-entry
-
-* ChangedBy : user-list that updated table-entry in format: "[user2] [user1] ..."
 
 * Challenger_uid : FK to Players.ID for challenger
 * Challenger_rid : FK to TournamentParticipant.ID = TournamentLadder.rid

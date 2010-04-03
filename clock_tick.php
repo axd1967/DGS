@@ -227,7 +227,7 @@ if(1){//new
             // signal game-end for tournament
             if( $tid > 0 )
                TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout",
-                  'cron', $tid, $gid, $Black_ID, $score );
+                  $tid, $gid, $Black_ID, $score );
 
 //FIXME(?)
 /* To store the last $hours info (never used, to be checked)

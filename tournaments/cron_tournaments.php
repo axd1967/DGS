@@ -85,7 +85,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    // ---------- finish waiting, due tournament-games
 
    $wait_ticks = (int)$thelper->tcache->load_clock_ticks( 'cron_tournament.game_wait', CLOCK_TOURNEY_GAME_WAIT );
-   TournamentGames::update_tournament_game_wait( 'cron_tournament', $player_row['Handle'], $wait_ticks );
+   TournamentGames::update_tournament_game_wait( 'cron_tournament', $wait_ticks );
 
 
 
