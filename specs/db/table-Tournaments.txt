@@ -722,7 +722,8 @@ Description:
  Round    | tinyint(3) unsigned  | NULL
  Pool     | smallint(5) unsigned | NULL
  uid      | int(11)              | 0
- GamesRun | smallint(5) unsigned | 0
+ GamesRun | tinyint(3) unsigned  | 0
+
 
 
 ## Fields:
@@ -736,5 +737,8 @@ Description:
 * uid : FK to TournamentParticipant.uid = Players.ID
 
 * GamesRun : number of running tournament-games
+   - restricted by const TROUND_MAX_POOLSIZE (=max. number of opponents for a pool-user + 1)
+     and number of games per round for the same user (later e.g. double or triple round-robin),
+     so for 25 max. poolsize and triple-round-robin it would be max. 24 * 3 games
 
 

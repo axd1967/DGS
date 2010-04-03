@@ -145,7 +145,7 @@ define('CHECK_TROUND_STATUS', 'INIT|POOL|PAIR|PLAY|DONE');
 
 // tournament-round limits
 define('TROUND_MAX_COUNT', 255);
-define('TROUND_MAX_POOLSIZE', 100);
+define('TROUND_MAX_POOLSIZE', 25);
 define('TROUND_MAX_POOLCOUNT', 1000);
 
 define('TROUND_SLICE_ROUND_ROBIN', 1);

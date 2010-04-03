@@ -1866,3 +1866,8 @@ ALTER TABLE TournamentRound
    ADD Pools smallint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
 
 
+-- reduced max. pool size: 100 -> 25
+ALTER TABLE TournamentPool
+   MODIFY GamesRun tinyint unsigned NOT NULL DEFAULT '0' ;
+
+
