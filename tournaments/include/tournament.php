@@ -362,7 +362,7 @@ class Tournament
    }
 
    /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..3. */
-   function build_info( $version=1 )
+   function build_info( $version=1, $extra='' )
    {
       global $base_path;
 
@@ -382,7 +382,14 @@ class Tournament
                          $this->ID,
                          make_html_safe( $this->Title, true) );
 
-      //if( $version == 3 )
+      if( $version == 3 ) // (scope type) title [- extra]
+         return sprintf( '(%s %s) %s' . ($extra ? ' - %s' : ''),
+                         Tournament::getScopeText($this->Scope),
+                         Tournament::getTypeText($this->Type),
+                         make_html_safe( $this->Title, true),
+                         $extra );
+
+      //if( $version == 4 )
       return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
                       Tournament::getScopeText($this->Scope),
                       Tournament::getTypeText($this->Type),
