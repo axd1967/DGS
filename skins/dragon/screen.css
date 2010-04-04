@@ -2781,6 +2781,46 @@ table#TPoolSuggestionsTable tr.Violation td.Note {
 }
 
 
+table#PoolViewerTable tr.Title,
+table#PoolViewerTable tr.Empty {
+   background: #F7F5E3;
+}
+table#PoolViewerTable tr.Empty {
+   height: 1.5em;
+}
+table#PoolViewerTable tr.Title td {
+   font-weight: bold;
+   font-size: larger;
+}
+table#PoolViewerTable th.Matrix {
+   text-align: center;
+   border-left: 1px dotted black;
+   border-right: 1px dotted black;
+   width: 1em;
+}
+table#PoolViewerTable td.Matrix {
+   text-align: center;
+   border: 1px dotted black;
+   font-color: black;
+   text-decoration: none;
+}
+table#PoolViewerTable td.TourneyUser {
+   background: #bbddff;
+}
+table#PoolViewerTable td.MatrixSelf {
+   background: black;
+}
+table#PoolViewerTable td.MatrixWon {
+   background: #bbffbb;
+}
+table#PoolViewerTable td.MatrixLost {
+   background: #ffcc99;
+}
+table#PoolViewerTable td.MatrixJigo {
+   background: #bbeedd;
+}
+
+
 /* ------------------------- */
 /* FAQ pages */
 /* ------------------------- */

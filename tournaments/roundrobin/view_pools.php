@@ -20,14 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('../..');
+require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/table_columns.php';
-require_once 'include/form_functions.php';
 require_once 'include/countries.php';
 require_once 'include/rating.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_pool.php';
+require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -44,7 +47,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       error('feature_disabled', 'Tournament.roundrobin.view_pools');
    $my_id = $player_row['ID'];
 
-   $page = "view_pools.php?";
+   $page = "view_pools.php";
 
 /* Actual REQUEST calls used
      tid=[&round=]                  : view T-pool
@@ -59,15 +62,40 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.pool_view.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
+   $ttype = TournamentFactory::getTournament($tourney->WizardType);
+   if( !$ttype->need_rounds )
+      error('tournament_edit_rounds_not_allowed', "Tournament.pool_view.find_tournament($tid)");
+
+   // create/edit allowed?
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   if( !$allow_edit_tourney )
+      error('tournament_edit_not_allowed', "Tournament.pool_view.find_tournament($tid)");
+
+   // load existing T-round
+   if( $round < 1 || $round > $tourney->CurrentRound )
+      $round = $tourney->CurrentRound;
+   $tround = TournamentRound::load_tournament_round( $tid, $round );
+   if( is_null($tround) )
+      error('bad_tournament', "Tournament.pool_view.find_tournament_round($tid,$round,$my_id)");
 
    // init
    $errors = array();
 
+   $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
+   $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, /*with_user*/true );
+   $poolTables = new PoolTables( $tround->Pools );
+   $poolTables->fill_pools( $tpool_iterator );
+
+   //TODO $tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
+   //TODO $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, /*TODO*/$tround->ID, /*all-stati*/null );
+   //TODO $poolTables->fill_games( $tg_iterator );
+
+
+   // --------------- Tournament-Pools EDIT form --------------------
 
    $title = sprintf( T_('Pools of Tournament #%s for round %s'), $tid, $round );
    start_page( $title, true, $logged_in, $player_row );
-   echo "<h2 class=Header>", $tourney->build_info(2), "</h2>\n";
+   echo "<h2 class=Header>", $tourney->build_info(3, sprintf(T_('Round #%s'), $round)), "</h2>\n";
 
    if( count($errors) )
    {
@@ -75,6 +103,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          TournamentUtils::buildErrorListString( T_('There are some errors'), $errors, 1, false ),
          "</tr></table>\n";
    }
+
+   $poolViewer = new PoolViewer( $tid, $page, $poolTables );
+   $poolViewer->make_table();
+   $poolViewer->echo_table();
 
 
    $menu_array = array();
