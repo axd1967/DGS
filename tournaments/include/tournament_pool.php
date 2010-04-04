@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
+require_once 'include/classlib_user.php';
 
  /*!
   * \file tournament_pool.php
@@ -55,6 +56,10 @@ class TournamentPool
    var $uid;
    var $GamesRun;
 
+   // non-DB fields
+
+   var $User; // User-object
+
    /*! \brief Constructs TournamentPool-object with specified arguments. */
    function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $games_run=0 )
    {
@@ -64,6 +69,8 @@ class TournamentPool
       $this->Pool = (int)$pool;
       $this->uid = (int)$uid;
       $this->GamesRun = (int)$games_run;
+      // non-DB fields
+      $this->User = (is_a($uid, 'User')) ? $user : new User( $this->uid );
    }
 
    function to_string()
@@ -172,10 +179,21 @@ class TournamentPool
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id. */
-   function load_tournament_pools( $iterator, $tid )
+   function load_tournament_pools( $iterator, $tid, $round, $pool=0, $with_user=false )
    {
-      $qsql = TournamentPool::build_query_sql( $tid );
+      $qsql = TournamentPool::build_query_sql( $tid, $round, $pool );
+      if( $with_user )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'TPU.Name AS TPU_Name',
+            'TPU.Handle AS TPU_Handle',
+            'TPU.Rating2 AS TPU_Rating2',
+            'TPU.Country AS TPU_Country' );
+         $qsql->add_part( SQLP_FROM,
+            'INNER JOIN Players AS TPU ON TPU.ID=TPOOL.uid' );
+      }
       $iterator->setQuerySQL( $qsql );
+      $iterator->addIndex( 'uid' );
       $query = $iterator->buildQuery();
       $result = db_query( "TournamentPool::load_tournament_pools", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
@@ -183,8 +201,10 @@ class TournamentPool
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = TournamentPool::new_from_row( $row );
-         $iterator->addItem( $tourney, $row );
+         $tpool = TournamentPool::new_from_row( $row );
+         if( $with_user )
+            $tpool->User = User::new_from_row( $row, 'TPU_' );
+         $iterator->addItem( $tpool, $row );
       }
       mysql_free_result($result);
 
