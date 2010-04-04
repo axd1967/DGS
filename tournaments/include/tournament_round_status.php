@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
+$TranslateGroups[] = "Tournament";
+
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_round.php';
 
