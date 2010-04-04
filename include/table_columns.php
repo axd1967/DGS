@@ -48,6 +48,7 @@ define('TABLE_NO_PAGE', 0x04); //disable next_prev_links options
 define('TABLE_NO_SIZE', 0x08); //disable the re-sizing (static number of rows) (see use_show_rows)
 define('TABLE_ROW_NUM', 0x10); //show row-number on each line
 define('TABLE_ROWS_NAVI', 0x20); //calculate found rows and show full page-navigation
+define('TABLE_NO_THEAD', 0x40); //disable table-header, need explicitly adding of table-headers (see add_row_thead)
 
 define('CHAR_SHOWFILTER', '+');
 
@@ -430,6 +431,15 @@ class Table
       return count($this->Tableheads);
    }
 
+   /*! \brief Static func to create row-cell with text (and optional CSS-class). */
+   function build_row_cell( $text, $class=null )
+   {
+      if( is_null($class) )
+         return $text;
+      else
+         return array( 'text' => $text, 'attbs' => array( 'class' => $class ) );
+   }
+
    /*!
     * \brief Add a row to be displayed.
     *        Texts for column #0 (with row-number TABLE_ROW_NUM-mode)
@@ -439,6 +449,53 @@ class Table
    function add_row( $row_array )
    {
       $this->Tablerows[]= $row_array;
+   }
+
+   /*!
+    * \brief Adds one row with headline/title.
+    * \see for params see: add_row_one_col()-func
+    */
+   function add_row_title( $col_arr, $row_arr_attr=null )
+   {
+      $row_attr = ( is_null($row_arr_attr) ) ? array() : $row_arr_attr;
+      if( isset($row_arr['extra_class']) )
+         $row_attr['extra_class'] .= ' Title';
+      else
+         $row_attr['extra_class'] = 'Title';
+      $this->add_row_one_col( $col_arr, $row_attr );
+   }
+
+   /*!
+    * \brief Adds table-header row.
+    * \param $row_array optional array with attributes: mode1 = table-mode-to-set
+    */
+   function add_row_thead( $row_arr_attr=null )
+   {
+      $row_attr = ( is_null($row_arr_attr) ) ? array() : $row_arr_attr;
+      $row_attr['add_thead'] = 1;
+      $this->Tablerows[] = $row_attr;
+   }
+
+   /*!
+    * \brief Adds one row with one column.
+    * \param $col_arr_text expect scalar-text or else array with col-attributes 'text' or 'owntd' (+ 'attbs')
+    * \param $row_arr_attr optional array row-attributes: 'extra_class'
+    */
+   function add_row_one_col( $col_arr_text, $row_arr_attr=null )
+   {
+      reset($this->Tableheads);
+      $first_col = each($this->Tableheads);
+      $first_col = $first_col['value']['Nr'];
+
+      $col_arr = ( is_array($col_arr_text) ) ? $col_arr_text : array( 'text' => $col_arr_text );
+      if( !isset($col_arr['attbs']) )
+         $col_arr['attbs'] = array();
+      if( !isset($col_arr['attbs']['colspan']) )
+         $col_arr['attbs']['colspan'] = $this->get_column_count();
+
+      $row_arr = ( is_null($row_arr_attr) ) ? array() : $row_arr_attr;
+      $row_arr[$first_col] = $col_arr;
+      $this->Tablerows[] = $row_arr;
    }
 
    function set_row_extra( $row_index, $arr_extra )
@@ -482,9 +539,7 @@ class Table
       $this->PrevColId = $this->Prefix.'TableHead';
       $head_row = "\n <tr id=\"{$this->PrevColId}\" class=Head>";
       foreach( $this->Tableheads as $thead )
-      {
          $head_row .= $this->make_tablehead( $thead ); //compute Shown_Columns
-      }
       $head_row .= "\n </tr>";
 
       /* Make filter row */
@@ -501,9 +556,25 @@ class Table
          $row_num = $this->From_Row; // current start-row-num
          foreach( $this->Tablerows as $trow )
          {
-            $row_num++;
-            $c=($c % LIST_ROWS_MODULO)+1;
-            $table_rows .= $this->make_tablerow( $trow, $row_num, "Row$c" );
+            if( isset($trow['add_thead']) )
+            {
+               if( count($trow) > 1 )
+               {
+                  $table_rows .= "\n <tr class=\"Head\">";
+                  foreach( $this->Tableheads as $thead )
+                     $table_rows .= $this->make_tablehead( $thead, $trow );
+                  $table_rows .= "\n </tr>";
+               }
+               else
+                  $table_rows .= $head_row;
+               $c = 0;
+            }
+            else
+            {
+               $row_num++;
+               $c=($c % LIST_ROWS_MODULO)+1;
+               $table_rows .= $this->make_tablerow( $trow, $row_num, "Row$c" );
+            }
          }
       }
 
@@ -514,7 +585,8 @@ class Table
 
       $string = "\n<table id='{$this->Id}Table' class=Table>";
       $string .= $this->make_next_prev_links('T');
-      $string .= $head_row;
+      if( !($this->Mode & TABLE_NO_THEAD) )
+         $string .= $head_row;
       if( $this->ConfigFilters[FCONF_FILTER_TABLEHEAD] )
       { // filter at table-header
          $string .= $filter_row; // maybe empty
@@ -641,7 +713,11 @@ class Table
     * \brief Returns (locally cached) URL-parts for all filters (even if not used).
     * signature: string querystring = current_filter_string ([ choice = GETFILTER_ALL ])
     */
-   function current_filter_string( $end_sep=false, $filter_choice=GETFILTER_ALL ) {
+   function current_filter_string( $end_sep=false, $filter_choice=GETFILTER_ALL )
+   {
+      if( !$this->UseFilters )
+         return '';
+
       if( !isset($this->cache_curr_filter[$filter_choice]) )
       {
          $trash = null;
@@ -916,22 +992,32 @@ class Table
 
    /*! \privatesection */
 
-   function make_tablehead( $tablehead )
+   /*!
+    * \brief Create table-header.
+    * \param $arr_opts optional array with additional layout-config for table-header:
+    *        mode1 = mode-flags to set
+    */
+   function make_tablehead( $tablehead, $arr_opts=null )
    {
       //if( !$this->Head_closed )
       //   error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
       $nr = (int)@$tablehead['Nr'];
       if( $nr < 0 || ($nr == 0 && !($this->Mode && TABLE_ROW_NUM)) )
          return '';
+      $is_std = is_null($arr_opts); // std-call couting Shown_Columns
 
       if( !$this->Is_Column_Displayed[$nr] )
       {
-         $this->Removed_Columns[ $nr ] = $tablehead['Description']->getDescriptionAddCol();
+         if( $is_std )
+            $this->Removed_Columns[ $nr ] = $tablehead['Description']->getDescriptionAddCol();
          return '';
       }
 
-      $this->Shown_Columns++;
+      if( $is_std )
+         $this->Shown_Columns++;
       $mode = $this->Mode | (int)@$tablehead['Mode'];
+      if( is_array($arr_opts) )
+         $mode |= (int)@$arr_opts['mode1'];
       if( $nr == 0 )
          $mode = ($mode | TABLE_ROW_NUM | TABLE_NO_HIDE) & ~TABLE_NO_SORT;
 
