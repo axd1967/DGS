@@ -1876,3 +1876,8 @@ ALTER TABLE TournamentGames
    DROP COLUMN ChangedBy ;
 
 
+-- table-column-set for pool-view for round-robin-tournament
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentPoolView int NOT NULL DEFAULT -1 ;
+
+
