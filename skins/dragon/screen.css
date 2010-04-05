@@ -2791,6 +2791,7 @@ table#PoolViewerTable tr.Empty {
 table#PoolViewerTable tr.Title td {
    font-weight: bold;
    font-size: larger;
+   text-align: left;
 }
 table#PoolViewerTable th.Matrix {
    text-align: center;
