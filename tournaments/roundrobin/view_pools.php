@@ -109,6 +109,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          "</tr></table>\n";
    }
 
+   $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
+   if( $my_tpool )
+      echo sprintf( T_('You are playing in Pool %s.'), $my_tpool->Pool ), "<br><br>\n";
+
    $poolViewer = new PoolViewer( $tid, $page, $poolTables, ( $need_trating ? 0 : PVOPT_NO_TRATING ) );
    $poolViewer->init_table();
    $poolViewer->make_table();
