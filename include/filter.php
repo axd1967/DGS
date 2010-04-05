@@ -344,6 +344,13 @@ class SearchFilter
       return get_request_arg($fname);
    }
 
+   /*! \brief Returns true, if filter-action search or reset has been chosen. */
+   function was_filter_submit_action()
+   {
+      return ($this->get_arg(FFORM_RESET_ACTION, false) != '')
+         || ($this->get_arg(FFORM_SEARCH_ACTION, false) != '');
+   }
+
    /*!
     * \brief Adds a filter.
     * signature: Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
@@ -1055,14 +1062,14 @@ class SearchFilter
    function get_submit_elements( $form )
    {
       $search_elem = $form->print_insert_submit_buttonx(
-         $this->Prefix . FFORM_SEARCH_ACTION,
+         FFORM_SEARCH_ACTION,
          T_('Search#filter'), array( 'accesskey' => $this->accesskeys[0] ));
 
       if( is_null($this->ProfileHandler) )
       {
          // normal reset-element
          $reset_elem = $form->print_insert_submit_buttonx(
-            $this->Prefix . FFORM_RESET_ACTION,
+            FFORM_RESET_ACTION,
             T_('Reset search#filter'), array( 'accesskey' => $this->accesskeys[1] ));
 
          $form_elems = array( $search_elem, $reset_elem );
