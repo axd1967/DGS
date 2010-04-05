@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 22, 2010 at 03:43 PM
+-- Generation Time: Apr 05, 2010 at 09:30 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.10
 
@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS `ConfigPages` (
   `ColumnsTournamentParticipants` int(11) NOT NULL default '-1',
   `ColumnsTDTournamentParticipants` int(11) NOT NULL default '-1',
   `ColumnsTournamentLadderView` int(11) NOT NULL default '-1',
+  `ColumnsTournamentPoolView` int(11) NOT NULL default '-1',
   PRIMARY KEY  (`User_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -766,7 +767,6 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   `TicksDue` int(11) NOT NULL default '0',
   `Flags` smallint(5) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  `ChangedBy` varchar(54) NOT NULL default '',
   `Challenger_uid` int(11) NOT NULL,
   `Challenger_rid` int(11) NOT NULL,
   `Defender_uid` int(11) NOT NULL,
@@ -868,6 +868,24 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `TournamentPool`
+--
+
+CREATE TABLE IF NOT EXISTS `TournamentPool` (
+  `ID` int(11) NOT NULL auto_increment,
+  `tid` int(11) NOT NULL,
+  `Round` tinyint(3) unsigned NOT NULL,
+  `Pool` smallint(5) unsigned NOT NULL,
+  `uid` int(11) NOT NULL default '0',
+  `GamesRun` tinyint(3) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`ID`),
+  KEY `tidRoundPool` (`tid`,`Round`,`Pool`),
+  KEY `uid` (`uid`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `TournamentProperties`
 --
 
@@ -898,10 +916,12 @@ CREATE TABLE IF NOT EXISTS `TournamentRound` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
   `Round` tinyint(3) unsigned NOT NULL default '1',
-  `Status` enum('INIT','POOL','PAIR','GAME','DONE') NOT NULL default 'INIT',
-  `MinPoolSize` smallint(5) unsigned NOT NULL default '0',
-  `MaxPoolSize` smallint(5) unsigned NOT NULL default '0',
-  `PoolCount` smallint(5) unsigned NOT NULL default '0',
+  `Status` enum('INIT','POOL','PAIR','PLAY','DONE') NOT NULL default 'INIT',
+  `MinPoolSize` tinyint(3) unsigned NOT NULL default '0',
+  `MaxPoolSize` tinyint(3) unsigned NOT NULL default '0',
+  `MaxPoolCount` smallint(5) unsigned NOT NULL default '0',
+  `Pools` smallint(5) unsigned NOT NULL default '0',
+  `PoolSize` tinyint(3) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
   PRIMARY KEY  (`ID`),
