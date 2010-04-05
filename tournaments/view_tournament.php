@@ -229,6 +229,10 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       if( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
          $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
    }
+   elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   {
+      $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
+   }
 
    $sectmenu[T_('My running games')] = "show_games.php?tid=$tid".URI_AMP."uid=$my_id";
    $sectmenu[T_('All running games')] = "show_games.php?tid=$tid".URI_AMP."uid=all";
