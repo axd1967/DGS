@@ -110,6 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    }
 
    $poolViewer = new PoolViewer( $tid, $page, $poolTables, ( $need_trating ? 0 : PVOPT_NO_TRATING ) );
+   $poolViewer->init_table();
    $poolViewer->make_table();
    $poolViewer->echo_table();
 

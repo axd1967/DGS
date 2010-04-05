@@ -148,6 +148,7 @@ define('PVOPT_NO_COLCFG',  0x02); // don't load table-column-config
 define('PVOPT_NO_EMPTY',   0x04); // don't show empty pools
 define('PVOPT_EMPTY_SEL',  0x08); // show "selected" empty-pools (directly called with make_pool_table-func)
 define('PVOPT_NO_TRATING', 0x10); // don't show T-rating (is same as user-rating)
+define('PVOPT_EDIT_COL',   0x20); // add edit-actions table-column
 
 class PoolViewer
 {
@@ -156,6 +157,7 @@ class PoolViewer
 
    var $my_id; // player_row['ID']
    var $options;
+   var $edit_callback;
 
    var $pools_max_users;
    var $first_pool;
@@ -171,6 +173,7 @@ class PoolViewer
       $this->options = (int)$pv_opts;
       $this->pools_max_users = $this->ptabs->count_pools_max_user();
       $this->first_pool = true;
+      $this->edit_callback = null;
 
       if( $this->options & PVOPT_NO_COLCFG )
          $cfg_tblcols = null;
@@ -186,29 +189,38 @@ class PoolViewer
       $table->add_external_parameters( new RequestParameters( array( 'tid' => $tid )), true );
       if( !$hide_results )
          $table->add_or_del_column();
+      $this->table = $table;
+   }
 
+   function setEditCallback( $edit_callback )
+   {
+      $this->edit_callback = $edit_callback;
+   }
+
+   function init_table()
+   {
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      $table->add_tablehead( 1, T_('Name#header'), 'User', 0 );
-      $table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE );
-      $table->add_tablehead( 3, T_('User Rating#pool_header'), 'Rating', 0 );
+      if( $this->options & PVOPT_EDIT_COL )
+         $this->table->add_tablehead( 8, T_('Actions#pool_header'), 'Image', TABLE_NO_HIDE );
+      $this->table->add_tablehead( 1, T_('Name#header'), 'User', 0 );
+      $this->table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE );
+      $this->table->add_tablehead( 3, T_('User Rating#pool_header'), 'Rating', 0 );
       if( !($this->options & PVOPT_NO_TRATING) )
-         $table->add_tablehead( 4, T_('Tournament Rating#pool_header'), 'Rating', 0 );
-      $table->add_tablehead( 5, T_('Country#pool_header'), 'Image', 0 );
+         $this->table->add_tablehead( 4, T_('Tournament Rating#pool_header'), 'Rating', 0 );
+      $this->table->add_tablehead( 5, T_('Country#pool_header'), 'Image', 0 );
 
       $idx = 11;
       $this->poolidx = $idx - 1;
-      if( !$hide_results )
+      if( !($this->options & PVOPT_NO_RESULT) )
       {
-         $table->add_tablehead( 6, T_('Place#pool_header'), 'NumberC', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 6, T_('Place#pool_header'), 'NumberC', TABLE_NO_HIDE );
 
          foreach( range(1, $this->pools_max_users) as $pool )
-            $table->add_tablehead( $idx++, $pool, 'Matrix', TABLE_NO_HIDE );
+            $this->table->add_tablehead( $idx++, $pool, 'Matrix', TABLE_NO_HIDE );
 
-         $table->add_tablehead( 7, T_('Points#header'), 'Number', TABLE_NO_HIDE );
-         //$table->add_tablehead( 8, T_//('TieBreaker1#header'), 'Number' );
+         $this->table->add_tablehead( 7, T_('Points#header'), 'Number', TABLE_NO_HIDE );
       }
 
-      $this->table = $table;
    }
 
    /*! \brief Prints build table, need make_table() first. */
@@ -243,6 +255,7 @@ class PoolViewer
       $cnt_users = count($arr_users);
       $show_results = ( $pool > 0 ) && !( $this->options & PVOPT_NO_RESULT );
       $show_trating = !( $this->options & PVOPT_NO_TRATING );
+      $show_edit_col = ( $this->options & PVOPT_EDIT_COL ) && !is_null($this->edit_callback);
 
       // header
       if( !$this->first_pool )
@@ -304,6 +317,10 @@ class PoolViewer
                }
             }
          }
+
+         if( $show_edit_col )
+            $row_arr[8] = call_user_func_array( $this->edit_callback,
+               array( $this, $uid ) ); // call vars by ref
 
          $this->table->add_row( $row_arr );
       }

@@ -356,6 +356,23 @@ class TournamentPool
       return $result;
    }//seed_pools
 
+   function assign_pool( $tround, $pool, $arr_uid )
+   {
+      $tid = (int)$tround->tid;
+      $round = (int)$tround->Round;
+      if( !is_numeric($pool) || $pool < 0 || $pool > $tround->Pools )
+         error('invalid_args', "TournamentPool::assign_pool.check.pool($tid,$round,$pool)");
+
+      $cnt = count($arr_uid);
+      if( $cnt == 0 )
+         return true;
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_POOL']->table;
+      $uid_where = implode(',', $arr_uid);
+      return db_query( "TournamentPool::assign_pool.update($tid,$round,$pool)",
+         "UPDATE $table SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+   }
+
    function get_edit_tournament_status()
    {
       static $statuslist = array(

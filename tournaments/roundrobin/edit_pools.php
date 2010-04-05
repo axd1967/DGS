@@ -55,9 +55,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $page = "edit_pools.php";
 
 /* Actual REQUEST calls used:
-     tid=&round=                 : edit tournament pools
-     t_unassigned&tid=&round=    : show unassigned users (+ selected pools)
-     t_showpools&tid=&round=     : show selected pools only
+     tid=&round=                       : edit tournament pools
+     t_unassigned&tid=&round=          : show unassigned users (+ selected pools)
+     t_showpools&tid=&round=           : show selected pools only
+     t_detach&tid=&round=&mark_$uid..  : detach marked users from assigned pools
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -65,7 +66,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $round = (int) @$_REQUEST['round'];
    if( $round < 0 ) $round = 0;
    $show_unassigned = ( @$_REQUEST['t_unassigned'] );
-   $show_pools = ( @$_REQUEST['t_showpools'] || $show_unassigned );
+   $show_pools = ( @$_REQUEST['t_showpools'] || $show_unassigned || @$_REQUEST['t_detach'] );
 
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
@@ -103,6 +104,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $uatable = new Table( 'poolUnassigned', $page, null, 'ua', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
    if( $uafilter->was_filter_submit_action() || $uatable->was_table_submit_action() )
       $show_unassigned = $show_pools = true;
+
+
+   if( @$_REQUEST['t_detach'] )
+   {
+      $arr_marked_uid = get_marked_users();
+      if( count($arr_marked_uid) )
+         TournamentPool::assign_pool( $tround, 0, $arr_marked_uid );
+   }
 
 
    // load selected pool-data
@@ -179,6 +188,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    $tform->set_area(2);
    $tform->add_row( array(
+         'DESCRIPTION',  T_('Selection'),
          'SUBMITBUTTON', 't_unassigned', T_('Show Unassigned'),
          'TEXT', MED_SPACING,
          'TEXTINPUT',   'selpool1', 4, 4, get_request_arg('selpool1'),
@@ -187,6 +197,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          'SUBMITBUTTON', 't_showpools', T_('Show Pools'),
          'TEXT', $pool_range_str, ));
 
+   $tform->add_empty_row();
+   $tform->add_row( array(
+         'DESCRIPTION',  T_('Edit Actions'),
+         'CELL', 1, '', // align submit-buttons
+         'SUBMITBUTTON', 't_detach', T_('Detach from Pool'), ));
 
    // --------------- Start Page ------------------------------------
 
@@ -194,13 +209,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
-   echo $tform->print_start_default(),
-      $tform->get_form_string(),
-      "<p></p>\n";
+   echo $tform->print_start_default(), $tform->get_form_string();
 
    if( $show_pools && !is_null($poolTables) )
    {
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, PVOPT_NO_COLCFG|PVOPT_NO_RESULT|PVOPT_NO_EMPTY );
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables,
+         PVOPT_NO_COLCFG|PVOPT_NO_RESULT|PVOPT_NO_EMPTY|PVOPT_EDIT_COL );
+      $poolViewer->setEditCallback( 'pools_edit_col_actions' );
+      $poolViewer->init_table();
       foreach( $arr_selpool as $pool )
          $poolViewer->make_pool_table( $pool, PVOPT_EMPTY_SEL );
 
@@ -230,6 +246,17 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    end_page(@$menu_array);
 }
 
+
+function get_marked_users()
+{
+   $arr = array();
+   foreach( $_REQUEST as $key => $val )
+   {
+      if( strpos($key, 'mark_') === 0 )
+         $arr[] = (int)substr($key, 5);
+   }
+   return $arr;
+}
 
 function make_pool_unassigned_table( $tid, &$uatable, &$uafilter )
 {
@@ -320,5 +347,12 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
       $uatable->add_row( $row_arr );
    }
 }//load_and_fill_pool_unassigned
+
+// callback-func for edit-column in selected pools
+function pools_edit_col_actions( &$poolviewer, $uid )
+{
+   global $tform;
+   return $tform->print_insert_checkbox( "mark_$uid", '1', '', false, false );
+}
 
 ?>
