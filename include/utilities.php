@@ -256,4 +256,10 @@ function array_intersect_key_values( $array1 ) // var-args
    return $arr;
 }
 
+/*! \brief Format number with sign. */
+function format_number( $num )
+{
+   return ( $num <= 0 ) ? $num : "+$num";
+}
+
 ?>
