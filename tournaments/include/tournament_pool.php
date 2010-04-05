@@ -236,6 +236,7 @@ class TournamentPool
          if( $has_userdata )
          {
             $tpool->User = User::new_from_row( $row, 'TPU_' );
+            $tpool->User->ID = $tpool->uid;
             $tpool->User->urow = array(
                'TP_X_RegisterTime'  => (int)@$row['TP_X_RegisterTime'],
                'TP_Rating'          => (float)@$row['TP_Rating'],
