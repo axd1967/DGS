@@ -40,11 +40,6 @@ require_once 'tournaments/include/tournament_participant.php';
   * \brief Class to manage TournamentProperties-table to restrict registration-phase
   */
 
-define('TPROP_RUMODE_COPY_CUSTOM',  'COPY_CUSTOM');
-define('TPROP_RUMODE_CURR_FIX',     'CURR_FIX');
-define('TPROP_RUMODE_COPY_FIX',     'COPY_FIX');
-define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
-
 // lazy-init in TournamentProperties::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
 $ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();

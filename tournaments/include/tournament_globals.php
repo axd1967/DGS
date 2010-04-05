@@ -70,6 +70,13 @@ define('TCHKTYPE_TD', 1);
 define('TCHKTYPE_USER_NEW', 2);
 define('TCHKTYPE_USER_EDIT', 3);
 
+// ---------- Tournament Properties Stuff -------------------------
+
+define('TPROP_RUMODE_COPY_CUSTOM',  'COPY_CUSTOM');
+define('TPROP_RUMODE_CURR_FIX',     'CURR_FIX');
+define('TPROP_RUMODE_COPY_FIX',     'COPY_FIX');
+define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
+
 // ---------- Tournament Extension Stuff --------------------------
 
 define('TE_PROP_TLADDER_RANK_PERIOD_UPDATE', 1);
