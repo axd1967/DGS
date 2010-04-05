@@ -54,6 +54,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
      t_preview&tid=&round=    : preview for tournament-pool-save
      t_save&tid=&round=       : update (replace) tournament-round pool-info in database
      t_suggest&tid=&round=    : show suggestions for pool-info
+     t_cancel&tid=&round=     : cancel editing, reload page
+     ...&addpool=1            : add one pool (if possible)
+     ...&delpool=1            : delete last pool (if possible)
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -80,13 +83,15 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    if( is_null($tround) )
       error('bad_tournament', "Tournament.define_pools.find_tournament_round($tid,$round,$my_id)");
 
+   if( @$_REQUEST['t_cancel'] )
+      jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round");
+
 
    // init
+   $old_poolcount = $tround->Pools;
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
-   if( TournamentPool::exists_tournament_pool($tid, $round) )
-      $errors[] = T_('Pool parameters can only be changed if all pools have been removed!');
 
    $tp_counts = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
    $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
@@ -96,6 +101,32 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    // check + parse edit-form (notes)
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
    $errors = array_merge( $errors, $input_errors );
+
+   $adjust_pool = '';
+   if( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
+   {
+      if( count($edits) == 0 ) // no edits (add/del-pools checkbox is no edit)
+      {
+         if( $vars['addpool'] )
+         {
+            $adjust_pool = '+1';
+            $tround->Pools++;
+         }
+         elseif( $vars['delpool'] )
+         {
+            $adjust_pool = '-1';
+            if( TournamentPool::exists_tournament_pool($tid, $round, $tround->Pools) )
+               $errors[] = sprintf( T_('Last Pool [%s] must be empty to allow deletion!'), $tround->Pools );
+            else
+               $tround->Pools--;
+         }
+      }
+      else
+      {
+         if( TournamentPool::exists_tournament_pool($tid, $round) )
+            $errors[] = T_('Pool parameters can only be directly changed if all pools have been removed!');
+      }
+   }
 
    // ---------- Process actions ------------------------------------------------
 
@@ -150,7 +181,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tform->add_row( array(
          'DESCRIPTION', T_('Pool Count#tround'),
          'TEXTINPUT',   'pool_count', 4, 4, $vars['pool_count'],
+         'TEXT',        ( $adjust_pool ? "<b>$adjust_pool</b>" . SMALL_SPACING : ''),
          'TEXT',        TournamentUtils::build_range_text( $min_pool_count, $max_pool_count ), ));
+   if( $old_poolcount < $max_pool_count )
+      $tform->add_row( array(
+            'TAB',
+            'CHECKBOX', 'addpool', 1, T_('Add Pool (possible if no violation)'), $vars['addpool'], ));
+   if( $old_poolcount > $min_pool_count - 1 )
+      $tform->add_row( array(
+            'TAB',
+            'CHECKBOX', 'delpool', 1, T_('Delete last Pool (possible if pool empty and no violation)'), $vars['delpool'], ));
 
    $tform->add_empty_row();
    $tform->add_row( array(
@@ -164,7 +204,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          'SUBMITBUTTON', 't_preview', T_('Preview'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_suggest', T_('Suggest Pool Parameters'),
-      ));
+         'TEXT', SMALL_SPACING,
+         'SUBMITBUTTON', 't_cancel', T_('Cancel'), ));
 
 
    $title = T_('Tournament Pools Setup');
@@ -216,11 +257,14 @@ function parse_edit_form( &$trd )
 {
    $edits = array();
    $errors = array();
+   $is_posted = ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] || @$_REQUEST['t_suggest'] );
 
    // read from props or set defaults
    $vars = array(
       'pool_size'    => $trd->PoolSize,
       'pool_count'   => $trd->Pools,
+      'addpool'      => 0,
+      'delpool'      => 0,
    );
 
    // copy to determine edit-changes
@@ -228,9 +272,15 @@ function parse_edit_form( &$trd )
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( $is_posted )
+   {
+      foreach( array('addpool','delpool') as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // parse URL-vars
-   if( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] || @$_REQUEST['t_suggest'] )
+   if( $is_posted )
    {
       global $min_pool_count, $max_pool_count;
 
@@ -247,6 +297,9 @@ function parse_edit_form( &$trd )
       else
          $errors[] = sprintf( T_('Expecting number for pool count in range %s.'),
             TournamentUtils::build_range_text( $min_pool_count, $max_pool_count ) );
+
+      if( $vars['addpool'] && $vars['delpool'] )
+         $errors[] = T_('Adding and deleting pool are mutual exclusive actions: Choose only one.');
 
       // determine edits
       if( $old_vals['pool_size'] != $trd->PoolSize ) $edits[] = T_('Pool-Size#edits');
