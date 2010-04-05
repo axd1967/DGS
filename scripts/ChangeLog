@@ -19,6 +19,149 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-04-05 juga
+
+   * tournaments/roundrobin/edit_pools.php (get_assigned_user_pools, pools_edit_col_actions):
+   - pool-editor:
+     - added re-assign for users in selected-pools to new individual pool
+     - show detach/re-assign only if pools have been selected
+     - started integrity-check for current tournament-pools
+     - re-added define-pools bottom-link
+
+   * tournaments/roundrobin/view_pools.php:
+   - show headline with pool of current-user
+
+   * tournaments/roundrobin/define_pools.php (parse_edit_form):
+   - define-pools: added way to add poll and to delete last (empty) pool
+   - added cancel to reload-page
+
+   * include/utilities.php (format_number):
+   - added func to give number with explicit sign +/-num
+
+   * specs/db/dragon-ddl.sql:
+   - synced with current db-state
+
+   * tournaments/roundrobin/edit_pools.php (get_marked_users, get_assigned_user_pools,
+       load_and_fill_pool_unassigned, pools_unassigned_extend_table_form):
+   - pool-editor:
+     - added update with individual new pool for unassigned pool-users
+     - assign-pool-submit-button below unassigned-user-table
+     - bugfix: check for valid uid for pool-assignments
+
+   * tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools),
+     tournaments/roundrobin/edit_pools.php (load_and_fill_pool_unassigned):
+   - pool-editor: assign unassigned (=detached) marked user to new pool,
+     added actions-column to unassigned users with checkboxes to mark users to assign
+   - don't show detach-action and select-pools-action
+     if unassigned users are shown, they can't be detached again
+   - bugfix: fill User.ID on loading tournament-pools
+
+   * tournaments/include/tournament_pool_classes.php (class PoolViewer, ~.setEditCallback,
+       ~.init_table, ~.make_pool_table),
+     tournaments/include/tournament_pool.php (TournamentPool.assign_pool),
+     tournaments/roundrobin/edit_pools.php (get_marked_users, pools_edit_col_actions),
+     tournaments/roundrobin/view_pools.php:
+   - pool-editor: detach marked users from pools,
+     added actions-column to selected pools with checkboxes to mark users to detach
+
+   * tournaments/include/tournament_pool_classes.php (class PoolTables.count_pools_max_user;
+       class PoolViewer, ~.make_table, ~.make_pool_table),
+     tournaments/include/tournament_pool.php (class TournamentPool, ~.load_tournament_pools),
+     tournaments/roundrobin/edit_pools.php (make_pool_unassigned_table, load_and_fill_pool_unassigned),
+     tournaments/roundrobin/view_pools.php:
+   - changes on pool-editor:
+     - show tournament-3-pool selection with or without unassigned pool-users
+     - added table-list with unassigned pool-users for tournament-round with navigational paging
+     - added loading of user last-access, tournament-participant register-time and tourney-rating only if needed
+
+   * include/filter.php (SearchFilter.was_filter_submit_action, ~.get_submit_elements):
+   - added function to check if filter-submit-action has been chosen
+   - removed prefix for standard filter-submit-actions
+
+   * include/table_columns.php (class Table, ~.make_add_column_form, ~.make_show_rows,
+       ~.was_table_submit_action):
+   - added function to check if table-submit-action has been chosen
+   - cleanup: used consts for table-submit-actions
+
+   * tournaments/include/tournament_globals.php,
+     tournaments/include/tournament_properties.php:
+   - moved tourney-properties runmode-consts
+     from tournament_properties.php to tournament_globals.php
+
+   * tournaments/view_tournament.php:
+   - added view-pools link in games-section for round-robin-tourneys
+
+2010-04-04 juga
+
+   * tournaments/include/tournament_pool_classes.php (class PoolGame;
+       class PoolTables, ~.fill_pools, ~.fill_games, ~.count_pools_max_user;
+       class PoolViewer, ~.echo_table, ~.make_table, ~.make_pool_table),
+     tournaments/roundrobin/view_pools.php,
+     skins/dragon/screen.css, NEWS:
+   - added pool-view for round-robin-tournament with pool-cross-tables
+
+   * include/classlib_userconfig.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added table-column-set for pool-view for round-robin-tournament:
+     CFGCOLS_TOURNAMENT_POOL_VIEW
+-----------
+-- table-column-set for pool-view for round-robin-tournament
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentPoolView int NOT NULL DEFAULT -1 ;
+-----------
+
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.load_tournament_pools):
+   - added pool-view for round-robin-tournament with pool-cross-tables
+     - added non-DB-field User to store additional data for T-pool
+     - load tournament-pools with additional user-info if needed
+
+   * tournaments/include/tournament.php (Tournament.build_info):
+   - added version 3 for tournament-title with extra-info like current round
+     for round-robin pool-view
+
+   * include/table_columns.php (class Table, ~.build_row_cell, ~.add_row_title, ~.add_row_thead,
+       ~.add_row_one_col, ~.make_table, ~.current_filter_string, ~.make_tablehead):
+   - added support pool-view for round-robin-tournament with separate
+     but aligned cross-tables:
+     - added option TABLE_NO_THEAD to disable normal table-header
+     - added way to add special row spanning all table-columns
+     - added way to add title spanning all table-columns
+     - added way to show table-header multiple times with or without controls
+   - added helper-function to build row-cell with class-attribute
+   - bugfix: do not include filter-URL-args if no filters used
+
+   * tournaments/include/tournament_round_status.php,
+     tournaments/include/tournament_status.php:
+   - added missed TranslateGroups-declaration for translations
+
+2010-04-03 juga
+
+   * tournaments/include/tournament_games.php (class TournamentGames, ~.fillEntityData,
+       ~.update_score, ~.new_from_row, ~.update_tournament_game_end, ~.update_tournament_game_wait),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/table-Tournaments.txt,
+     tournaments/cron_tournaments.php, clock_tick.php, confirm.php:
+   - removed TournamengGames.ChangedBy-field to save size for expected-big-table
+-----------
+-- [table-size] removed ChangedBy-field, saving size for expected-big-table
+ALTER TABLE TournamentGames
+   DROP COLUMN ChangedBy ;
+-----------
+
+   * tournaments/include/tournament_globals.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - reduced max. pool size: 100 -> 25
+-----------
+-- [field-size] reducing max. pool-size (100->25), TournamentPool.GamesRun: smallint -> tinyint
+ALTER TABLE TournamentPool
+   MODIFY GamesRun tinyint unsigned NOT NULL DEFAULT '0' ;
+-----------
+
+2010-03-31 juga
+
+   * tournaments/roundrobin/view_pools.php, tournaments/view_tournament.php:
+   - started view of tournament-pools for current round
+
 2010-03-30 juga
 
    * tournaments/include/tournament_pool.php (TournamentPool.insert, ~.fillEntityData,
