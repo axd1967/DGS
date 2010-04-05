@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
 require_once 'include/classlib_user.php';
+require_once 'tournaments/include/tournament_globals.php';
 
  /*!
   * \file tournament_pool.php
@@ -39,6 +40,10 @@ require_once 'include/classlib_user.php';
   * \brief Class to manage TournamentPool-table with pooling-related tournament-settings
   *        for round-robin tournaments
   */
+
+define('TPOOL_LOADOPT_USER',    0x01 ); // load Players-stuff
+define('TPOOL_LOADOPT_TRATING', 0x02 ); // load TournamentParticipant.Rating
+define('TPOOL_LOADOPT_REGTIME', 0x04 ); // load TournamentParticipant.Created (=register-time)
 
 global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
@@ -178,20 +183,46 @@ class TournamentPool
       return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'] ) : array( 0, 0 );
    }
 
-   /*! \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id. */
-   function load_tournament_pools( $iterator, $tid, $round, $pool=0, $with_user=false )
+   /*!
+    * \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id.
+    * \param $pool 0 = load all pools, otherwise load specific pool
+    * \param $with_user false = don't load user, true = load user-data,
+    *        otherwise: rating-use-mode = load T-rating + TP-register-time
+    * \return uid-indexed iterator with items: TournamentPool + .User + .User.urow[TP_X_RegisterTime|TP_Rating]
+    */
+   function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
    {
+      $needs_user = ( $load_opts & TPOOL_LOADOPT_USER );
+      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
+      $has_userdata = $needs_user || $needs_tp;
+
       $qsql = TournamentPool::build_query_sql( $tid, $round, $pool );
-      if( $with_user )
+      if( $load_opts & TPOOL_LOADOPT_USER )
       {
          $qsql->add_part( SQLP_FIELDS,
             'TPU.Name AS TPU_Name',
             'TPU.Handle AS TPU_Handle',
             'TPU.Rating2 AS TPU_Rating2',
-            'TPU.Country AS TPU_Country' );
+            'TPU.Country AS TPU_Country',
+            'TPU.Country AS TPU_Country',
+            'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess' );
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS TPU ON TPU.ID=TPOOL.uid' );
+
+         if( !$needs_tp )
+            $qsql->add_part( SQLP_FIELDS, 'TPU.Rating2 AS TP_Rating', '0 AS TP_X_RegisterTime' );
       }
+
+      if( $needs_tp )
+      {
+         if( $load_opts & TPOOL_LOADOPT_TRATING )
+            $qsql->add_part( SQLP_FIELDS, 'TP.Rating AS TP_Rating' );
+         if( $load_opts & TPOOL_LOADOPT_REGTIME )
+            $qsql->add_part( SQLP_FIELDS, 'UNIX_TIMESTAMP(TP.Created) AS TP_X_RegisterTime' );
+         $qsql->add_part( SQLP_FROM,
+            "INNER JOIN TournamentParticipant AS TP ON TP.tid=$tid AND TP.uid=TPOOL.uid" );
+      }
+
       $iterator->setQuerySQL( $qsql );
       $iterator->addIndex( 'uid' );
       $query = $iterator->buildQuery();
@@ -202,14 +233,20 @@ class TournamentPool
       while( $row = mysql_fetch_array( $result ) )
       {
          $tpool = TournamentPool::new_from_row( $row );
-         if( $with_user )
+         if( $has_userdata )
+         {
             $tpool->User = User::new_from_row( $row, 'TPU_' );
+            $tpool->User->urow = array(
+               'TP_X_RegisterTime'  => (int)@$row['TP_X_RegisterTime'],
+               'TP_Rating'          => (float)@$row['TP_Rating'],
+            );
+         }
          $iterator->addItem( $tpool, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_pools
 
    /*! \brief Returns array with default and slice-mode array for round-robin-tournament. */
    function build_slice_mode()

@@ -23,14 +23,12 @@ chdir('../..');
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
-require_once 'include/table_columns.php';
-require_once 'include/countries.php';
-require_once 'include/rating.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
+require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -78,17 +76,24 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( is_null($tround) )
       error('bad_tournament', "Tournament.pool_view.find_tournament_round($tid,$round,$my_id)");
 
+   $tprops = TournamentProperties::load_tournament_properties( $tid );
+   if( is_null($tprops) )
+      error('bad_tournament', "Tournament.edit_pools.find_tournament_props($tid,$my_id)");
+
    // init
    $errors = array();
+   $need_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
 
    $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
-   $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, /*with_user*/true );
+   $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0,
+      TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 ) );
    $poolTables = new PoolTables( $tround->Pools );
    $poolTables->fill_pools( $tpool_iterator );
 
-   //TODO $tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
-   //TODO $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, /*TODO*/$tround->ID, /*all-stati*/null );
-   //TODO $poolTables->fill_games( $tg_iterator );
+   //TODO load T-games
+   //$tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
+   //$tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, /*TODO*/$tround->ID, /*all-stati*/null );
+   //$poolTables->fill_games( $tg_iterator );
 
 
    // --------------- Tournament-Pools EDIT form --------------------
@@ -104,7 +109,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          "</tr></table>\n";
    }
 
-   $poolViewer = new PoolViewer( $tid, $page, $poolTables );
+   $poolViewer = new PoolViewer( $tid, $page, $poolTables, ( $need_trating ? 0 : PVOPT_NO_TRATING ) );
    $poolViewer->make_table();
    $poolViewer->echo_table();
 
