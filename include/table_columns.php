@@ -54,9 +54,11 @@ define('CHAR_SHOWFILTER', '+');
 
 define('FCONF_SHOW_TOGGLE_FILTER', 'ShowToggleFilter');    // true to show hide-toggle besides input-fields (default true)
 define('FCONF_FILTER_TABLEHEAD',   'FilterTableHead');     // true to show filters above table-rows (default defined as LAYOUT_FILTER_IN_TABLEHEAD)
-define('FCONF_EXTERNAL_SUBMITS',   'ExternalSubmits');     // false to include start/reset-submits into table-structure (default false), else omit
+define('FCONF_EXTERNAL_SUBMITS',   'ExternalSubmits');     // false to include filter-search/reset-submits into table-structure (default false), else omit
 
 define('TFORM_VAL_SHOWROWS', 'maxrows'); // form-elementname for Show-Rows
+define('TFORM_ACTION_SHOWROWS', 'showrows'); // form-submit for table-showrows-submit-action
+define('TFORM_ACTION_ADDCOL',   'addcol');   // form-submit for table-add/remove-columns-submit-action
 
 
 class Table
@@ -1497,7 +1499,7 @@ class Table
          $ac_string = $ac_form->print_insert_select_box(
                $this->Prefix.'add', '1', $this->Removed_Columns, '', false);
          $ac_string.= $ac_form->print_insert_submit_button(
-               $this->Prefix.'addcol', T_('Add Column'));
+               $this->Prefix.TFORM_ACTION_ADDCOL, T_('Add Column'));
       }
 
       // add filter-submits in add-column-row if not in table-head and need form for filter
@@ -1540,7 +1542,7 @@ class Table
       $elems = $form->print_insert_select_box(
             $this->Prefix.TFORM_VAL_SHOWROWS, '1', build_maxrows_array($rows), $rows, false);
       $elems.= $form->print_insert_submit_button(
-            $this->Prefix.'showrows', T_('Show Rows'));
+            $this->Prefix.TFORM_ACTION_SHOWROWS, T_('Show Rows'));
       return $elems;
    }
 
@@ -1564,6 +1566,12 @@ class Table
    function get_arg( $name, $def='')
    {
       return get_request_arg( $this->Prefix . $name, $def);
+   }
+
+   /*! \brief Returns true, if table-action show-rows or add/del-column has been chosen. */
+   function was_table_submit_action()
+   {
+      return $this->get_arg(TFORM_ACTION_SHOWROWS) || $this->get_arg(TFORM_ACTION_ADDCOL);
    }
 
    /*! \brief Sets ProfileHandler managing search-profiles; use NULL to clear it. */
