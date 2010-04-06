@@ -24,6 +24,8 @@ $TranslateGroups[] = "Tournament";
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
+require_once 'tournaments/include/tournament_pool.php';
+require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 
@@ -118,6 +120,25 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
 
       return $errors;
    }
+
+   function checkPooling( $tourney, $round )
+   {
+      $tid = $tourney->ID;
+
+      if( is_a($round, 'TournamentRound') )
+      {
+         $tround = $round;
+         $round = $tround->Round;
+      }
+      else
+      {
+         $tround = TournamentRound::load_tournament_round( $tid, $round );
+         if( is_null($tround) )
+            error('bad_tournament', "TournamentTemplateRoundRobin.checkPooling.find_tround($tid,$round,{$this->uid})");
+      }
+
+      return TournamentPool::check_pools( $tround );
+   }//checkPooling
 
    function checkParticipantRegistrations( $tid, $arr_TPs )
    {

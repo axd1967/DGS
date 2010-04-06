@@ -110,6 +110,13 @@ class TournamentTemplate
       return 0;
    }
 
+   /*! \brief Returns list with error from checking pooling for tournament; empty if ok. */
+   function checkPooling( $tourney, $round )
+   {
+      error('invalid_method', "TournamentTemplate.checkPooling({$this->wizard_type},{$tourney->ID},$round)");
+      return 0;
+   }
+
    function checkParticipantRegistrations( $tid, $arr_TPs )
    {
       error('invalid_method', "TournamentTemplate.checkParticipantRegistrations({$this->wizard_type},$tid)");

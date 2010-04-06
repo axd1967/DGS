@@ -155,6 +155,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       }
    }
 
+   if( @$_REQUEST['t_check'] )
+   {
+      $errors = array_merge( $errors, TournamentPool::check_pools($tround) );
+   }
+
 
    // External-Form
    $tform = new Form( 'tournament', $page, FORM_GET );
