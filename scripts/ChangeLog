@@ -19,6 +19,35 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-04-06 juga
+
+   * tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool,
+       ~.load_tournament_pool_bad_user, ~.load_tournament_participants_with_pools,
+       ~.seed_pools,
+     tournaments/include/tournament_pool_classes.php (PoolTables.fill_pools, ~.calc_pool_summary),
+     tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_conditions_status_POOL),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPooling),
+     tournaments/include/tournament_template.php (TournamentTemplate.checkPooling),
+     tournaments/roundrobin/edit_pools.php:
+   - added pool-integrity checking for transition from POOL to PAIR round-status and for pool-editor
+     - check that uids are distinct in all pools
+     - check that there are some pools
+     - check that count of pools matches the expected TRound.Pools-count
+     - check that all registered users joined somewhere in the pools
+     - check that there are no unassigned users (with Pool=0)
+     - check that the user-count of each pool is in valid range of min/max-pool-size
+     - check that there are no empty pools
+   - bugfix in seed_pools fixing loading existing tournament-pools: missed argument
+
+   * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_conditions_status_POOL,
+       ~.check_conditions_status_PAIR, ~.check_conditions_status_PLAY,
+       ~.check_conditions_status_DONE, ~.error_expected_status):
+   - added standard check on current-status for status-transitions:
+     INIT->POOL, POOL->PAIR, PAIR->PLAY, PLAY->DONE
+
+   * tournaments/roundrobin/define_pools.php:
+   - show add/del-pool only for POOL-round-status
+
 2010-04-05 juga
 
    * tournaments/roundrobin/edit_pools.php (get_assigned_user_pools, pools_edit_col_actions):
