@@ -98,6 +98,7 @@ class PoolTables
       while( list(,$arr_item) = $tpool_iterator->getListIterator() )
       {
          list( $tpool, $orow ) = $arr_item;
+         if( is_null($tpool) ) continue;
          $uid = $tpool->uid;
          $pool = $tpool->Pool;
 
@@ -130,6 +131,15 @@ class PoolTables
             $max_users = max( $max_users, count($arr_users) );
       }
       return $max_users;
+   }
+
+   /*! \brief Returns #users for each pool. */
+   function calc_pool_summary()
+   {
+      $arr = array(); // [ pool => #users, ... ]
+      foreach( $this->pools as $pool => $arr_users )
+         $arr[$pool] = count($arr_users);
+      return $arr;
    }
 
 } // end of 'PoolTables
