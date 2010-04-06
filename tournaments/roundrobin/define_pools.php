@@ -105,7 +105,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $adjust_pool = '';
    if( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
    {
-      if( count($edits) == 0 ) // no edits (add/del-pools checkbox is no edit)
+      // NOTE: add/del-pools checkboxes don't show up under 'edits'
+      if( $tround->Status == TROUND_STATUS_POOL && count($edits) == 0 )
       {
          if( $vars['addpool'] )
          {
@@ -183,14 +184,17 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          'TEXTINPUT',   'pool_count', 4, 4, $vars['pool_count'],
          'TEXT',        ( $adjust_pool ? "<b>$adjust_pool</b>" . SMALL_SPACING : ''),
          'TEXT',        TournamentUtils::build_range_text( $min_pool_count, $max_pool_count ), ));
-   if( $old_poolcount < $max_pool_count )
-      $tform->add_row( array(
-            'TAB',
-            'CHECKBOX', 'addpool', 1, T_('Add Pool (possible if no violation)'), $vars['addpool'], ));
-   if( $old_poolcount > $min_pool_count - 1 )
-      $tform->add_row( array(
-            'TAB',
-            'CHECKBOX', 'delpool', 1, T_('Delete last Pool (possible if pool empty and no violation)'), $vars['delpool'], ));
+   if( $tround->Status == TROUND_STATUS_POOL )
+   {
+      if( $old_poolcount < $max_pool_count )
+         $tform->add_row( array(
+               'TAB',
+               'CHECKBOX', 'addpool', 1, T_('Add Pool (possible if no violation)'), $vars['addpool'], ));
+      if( $old_poolcount > $min_pool_count - 1 )
+         $tform->add_row( array(
+               'TAB',
+               'CHECKBOX', 'delpool', 1, T_('Delete last Pool (possible if pool empty and no violation)'), $vars['delpool'], ));
+   }
 
    $tform->add_empty_row();
    $tform->add_row( array(
