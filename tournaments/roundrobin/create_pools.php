@@ -207,6 +207,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
          'TEXT',         SMALL_SPACING . T_('Slice by') . MED_SPACING,
          'SELECTBOX',    'slice_mode', 1, $arr_slice_mode, $slice_mode_val, false,
          'SUBMITBUTTON', 't_seed', T_('Seed Pools'), ));
+   //TODO add reorder-option, at the moment it it's always with re-ordering
    $tform->add_row( array(
          'CELL', 2, '',
          'TEXT', T_('This may take a while, so please be patient!'), ));
