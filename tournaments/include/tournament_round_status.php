@@ -94,7 +94,7 @@ class TournamentRoundStatus
 
       if( $this->curr_status != $new_status )
       {
-         // expected status is: TROUND_STATUS_(INIT|POOL|PAIR|GAME|PLAY|DONE)
+         // expected status is: TROUND_STATUS_(INIT|POOL|PAIR|PLAY|DONE)
          $check_funcname = 'check_conditions_status_' . strtoupper($new_status);
          call_user_func( array( $this, $check_funcname ) );
       }
@@ -103,13 +103,16 @@ class TournamentRoundStatus
    /*! \brief Check if change to INIT-tourney-status is allowed. */
    function check_conditions_status_INIT()
    {
-      $this->errors[] = sprintf( T_('Change to Tournament Round status [%s] only allowed by Tournament Admin.'),
+      $this->errors[] = sprintf( T_('Change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
                                  TournamentRound::getStatusText($this->new_status) );
    }
 
    /*! \brief Check if change to POOL-tourney-status is allowed. */
    function check_conditions_status_POOL()
    {
+      if( $this->curr_status != TROUND_STATUS_INIT )
+         $this->errors[] = $this->error_expected_status( TROUND_STATUS_INIT );
+
       $check_errors = $this->ttype->checkProperties( $this->tourney, TOURNEY_STATUS_PAIR );
       if( count($check_errors) )
          $this->errors = array_merge( $this->errors, $check_errors );
@@ -118,13 +121,20 @@ class TournamentRoundStatus
    /*! \brief Check if change to PAIR-tourney-status is allowed. */
    function check_conditions_status_PAIR()
    {
-      //TODO
-      $this->errors[] = 'status-transition not implemented yet';
+      if( $this->curr_status != TROUND_STATUS_POOL )
+         $this->errors[] = $this->error_expected_status( TROUND_STATUS_POOL );
+
+      $check_errors = $this->ttype->checkPooling( $this->tourney, $this->tround );
+      if( count($check_errors) )
+         $this->errors = array_merge( $this->errors, $check_errors );
    }
 
    /*! \brief Check if change to PLAY-tourney-status is allowed. */
    function check_conditions_status_PLAY()
    {
+      if( $this->curr_status != TROUND_STATUS_PAIR )
+         $this->errors[] = $this->error_expected_status( TROUND_STATUS_PAIR );
+
       //TODO
       $this->errors[] = 'status-transition not implemented yet';
    }
@@ -132,8 +142,29 @@ class TournamentRoundStatus
    /*! \brief Check if change to DONE-tourney-status is allowed. */
    function check_conditions_status_DONE()
    {
+      if( $this->curr_status != TROUND_STATUS_PLAY )
+         $this->errors[] = $this->error_expected_status( TROUND_STATUS_PLAY );
+
       //TODO
       $this->errors[] = 'status-transition not implemented yet';
+   }
+
+
+   function error_expected_status( $status )
+   {
+      if( is_array($status) )
+      {
+         $arr = array();
+         foreach( $status as $s )
+            $arr[] = TournamentRound::getStatusText($s);
+         $status_str = implode('|', $arr);
+      }
+      else
+         $status_str = TournamentRound::getStatusText($status);
+
+      return sprintf( T_('Expecting current tournament round status [%s] for change to status [%s]'),
+                      $status_str,
+                      TournamentRound::getStatusText($this->new_status) );
    }
 
 } // end of 'TournamentRoundStatus'
