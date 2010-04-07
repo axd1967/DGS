@@ -489,15 +489,16 @@ class TournamentPool
       // check that all registered users joined somewhere in the pools
       $arr_missing_users = array();
       $iterator->resetListIterator();
+      $cnt_missing_users = 0;
       while( list(,$arr_item) = $iterator->getListIterator() )
       {
          list(,$orow ) = $arr_item;
          if( !$orow['X_HasPool'] )
-            $arr_missing_users[] = $orow['uid'];
+            $cnt_missing_users++;
       }
-      if( count($arr_missing_users) > 0 )
-         $errors[] = sprintf( T_('There are %s registered users [%s], that are not appearing in the pools.'),
-            count($arr_missing_users), implode(',', $arr_missing_users) );
+      if( $cnt_missing_users > 0 )
+         $errors[] = sprintf( T_('There are %s registered users, that are not appearing in the pools.'),
+            $cnt_missing_users );
 
       // check that there are no unassigned users (with Pool=0)
       if( $cnt_pool0 > 0 )
@@ -507,36 +508,34 @@ class TournamentPool
       }
 
       // check that the user-count of each pool is in valid range of min/max-pool-size
-      $arr_violate_poolsize = array();
+      $cnt_violate_poolsize = 0;
       foreach( $arr_counts as $pool => $pool_usercount )
       {
          if( $pool == 0 ) continue;
          if( $pool_usercount < $tround->MinPoolSize || $pool_usercount > $tround->MaxPoolSize )
-            $arr_violate_poolsize[] = $pool;
+            $cnt_violate_poolsize++;
          if( $pool_usercount < $tround->MinPoolSize )
             $pool_summary[$pool][1][] = T_('Pool-Size too small#poolsum');
          if( $pool_usercount > $tround->MaxPoolSize )
             $pool_summary[$pool][1][] = T_('Pool-Size too big#poolsum');
       }
-      if( count($arr_violate_poolsize) > 0 )
-         $errors[] = sprintf( T_('There are %s pools [%s] violating the valid pool-size range %s.'),
-            count($arr_violate_poolsize), implode(',', $arr_violate_poolsize),
+      if( $cnt_violate_poolsize > 0 )
+         $errors[] = sprintf( T_('There are %s pools violating the valid pool-size range %s.'),
+            $cnt_violate_poolsize,
             TournamentUtils::build_range_text($tround->MinPoolSize, $tround->MaxPoolSize) );
 
       // check that there are no empty pools
-      $arr_empty = array();
+      $cnt_empty = 0;
       foreach( $arr_counts as $pool => $pool_usercount )
       {
          if( $pool_usercount == 0 )
          {
-            $arr_empty[] = $pool;
+            $cnt_empty++;
             $pool_summary[$pool][1][] = T_('Pool empty#poolsum');
          }
-
       }
-      if( count($arr_empty) > 0 )
-         $errors[] = sprintf( T_('There are %s empty pools [%s]. Please fill or remove them!'),
-            count($arr_empty), implode(',', $arr_empty) );
+      if( $cnt_empty > 0 )
+         $errors[] = sprintf( T_('There are %s empty pools. Please fill or remove them!'), $cnt_empty );
 
       return $errors;
    }//check_pools
