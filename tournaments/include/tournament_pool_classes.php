@@ -312,6 +312,11 @@ class PoolViewer
          if( $show_results )
          {
             $row_arr[$this->poolidx + $idx] = Table::build_row_cell( 'X', 'MatrixSelf' );
+            if( $cnt_users < $this->pools_max_users )
+            {
+               for( $colidx = $cnt_users + 1; $colidx <= $this->pools_max_users; $colidx++ )
+                  $row_arr[$this->poolidx + $colidx] = '-';
+            }
 
             //TODO add game-results
             // X=self, 0=lost, 1=jigo, 2=won, #=running-game;; for Hahn use score instead +-score
