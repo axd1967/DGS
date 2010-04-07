@@ -336,11 +336,10 @@ class TournamentPool
    }
 
    /*! \brief Seeds pools with all registered TPs for round. */
-   function seed_pools( $tourney, $tprops, $tround, $seed_order, $slice_mode )
+   function seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode )
    {
-      if( !is_a($tourney, 'Tournament') && $tourney->ID <= 0 )
-         error('unknown_tournament', "TournamentPool::seed_pools.check_tid($seed_order)");
-      $tid = $tourney->ID;
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('unknown_tournament', "TournamentPool::seed_pools.check_tid($tid)");
 
       if( !is_a($tround, 'TournamentRound') )
          error('invalid_args', "TournamentPool::seed_pools.check_tround($tid,$seed_order)");
@@ -363,9 +362,7 @@ class TournamentPool
       // find all registered TPs (optimized)
       $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order );
 
-      //TODO(needed?) optimize SQL for manual with one query: INSERT ... SELECT const, Pool=0 FROM TP ...
-
-      // add all TPs to ladder
+      // add all TPs to pools
       $NOW = $GLOBALS['NOW'];
       $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
@@ -403,7 +400,7 @@ class TournamentPool
       unset($arr_TPs);
       unset($tpool_iterator);
 
-      // insert all registered TPs to ladder
+      // insert all registered TPs to pools
       $cnt = count($arr_inserts);
       $seed_query = $data->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
          . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
@@ -419,6 +416,61 @@ class TournamentPool
 
       return $result;
    }//seed_pools
+
+   /*! \brief Add missing registered users to pool #0 (very similar to seed_pools()-func). */
+   function add_missing_registered_users( $tid, $tround )
+   {
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('unknown_tournament', "TournamentPool::add_missing_registered_users.check_tid($tid)");
+
+      if( !is_a($tround, 'TournamentRound') )
+         error('invalid_args', "TournamentPool::add_missing_registered_users.check_tround($tid)");
+      $round = $tround->Round;
+
+      // load already joined pool-users
+      $tpool_iterator = new ListIterator( "TournamentPool::add_missing_registered_users.load_pools($tid,$round)" );
+      $tpool_iterator->addIndex( 'uid' );
+      $tpool_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,  "TPOOL.Round=$round" ));
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round );
+
+      // find all registered TPs (optimized)
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, TOURNEY_SEEDORDER_NONE );
+
+      // add all missing TPs to pools
+      $NOW = $GLOBALS['NOW'];
+      $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
+      $arr_inserts = array();
+
+      $pool = 0; // like for TROUND_SLICE_MANUAL
+      foreach( $arr_TPs as $row )
+      {
+         $uid = $row['uid'];
+
+         $tpool = $tpool_iterator->getIndexValue( 'uid', $uid, 0 );
+         if( !is_null($tpool) ) // user already joined
+            continue;
+
+         $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
+         $tpool->fillEntityData( $data );
+         $arr_inserts[] = $data->build_sql_insert_values(false, /*with-PK*/true);
+      }
+      unset($arr_TPs);
+      unset($tpool_iterator);
+
+      // insert all missing registered TPs to pool #0
+      $cnt = count($arr_inserts);
+      $seed_query = $data->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
+         . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
+
+      $table = $data->entity->table;
+      db_lock( "TournamentPool::add_missing_registered_users($tid,$round)", "$table WRITE" );
+      {//LOCK TournamentPool
+         $result = db_query( "TournamentPool::add_missing_registered_users.insert($tid,$round,#$cnt)", $seed_query );
+      }
+      db_unlock();
+
+      return $result;
+   }//add_missing_registered_users
 
    function assign_pool( $tround, $pool, $arr_uid )
    {
