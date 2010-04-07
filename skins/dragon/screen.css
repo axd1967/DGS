@@ -2780,6 +2780,10 @@ table#TPoolSuggestionsTable tr.Violation td.Note {
    background: #ffc4d8;
 }
 
+table#TPoolSummaryTable tr.Violation td.Note {
+   background: #ffc4d8;
+}
+
 
 table#PoolViewerTable tr.Title,
 table#PoolViewerTable tr.Empty {

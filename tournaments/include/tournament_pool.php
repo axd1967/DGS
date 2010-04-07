@@ -437,8 +437,11 @@ class TournamentPool
          "UPDATE $table SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
    }
 
-   /*! \brief checks pool integrity and return list of errors; empty list if all ok. */
-   function check_pools( $tround )
+   /*!
+    * \brief checks pool integrity and return list of errors; empty list if all ok.
+    * \param $pool_summary fill in pool-summary: array( pool => array( pool-user-count, array( errormsg, ... ) ), ... )
+    */
+   function check_pools( $tround, &$pool_summary=null )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -456,6 +459,10 @@ class TournamentPool
       list( $cnt_entries, $cnt_pools, $cnt_users ) = // cnt_pools can include 0-pool
          TournamentPool::count_tournament_pool( $tid, $round, 0, /*count_uid*/true );
 
+      $pool_summary = array();
+      foreach( $arr_counts as $pool => $pool_usercount )
+         $pool_summary[$pool] = array( $pool_usercount, array() );
+
       // ---------- check pool integrity ----------
 
       // check that uids are distinct in all pools
@@ -472,8 +479,12 @@ class TournamentPool
 
       // check that count of pools matches the expected TRound.Pools-count
       if( $cnt_real_pools != $tround->Pools )
+      {
          $errors[] = sprintf( T_('Expected %s pools, but currently there are %s pools.'),
             $tround->Pools, $cnt_real_pools );
+         for( $i = $tround->Pools; $i <= $cnt_real_pools; $i++ )
+            $pool_summary[$i][1][] = T_('Bad Pool-Number#poolsum');
+      }
 
       // check that all registered users joined somewhere in the pools
       $arr_missing_users = array();
@@ -490,7 +501,10 @@ class TournamentPool
 
       // check that there are no unassigned users (with Pool=0)
       if( $cnt_pool0 > 0 )
+      {
          $errors[] = sprintf( T_('There are %s unassigned users. Please assign them to a pool!'), $cnt_pool0 );
+         $pool_summary[0][1][] = T_('Unassigned users#poolsum');
+      }
 
       // check that the user-count of each pool is in valid range of min/max-pool-size
       $arr_violate_poolsize = array();
@@ -499,6 +513,10 @@ class TournamentPool
          if( $pool == 0 ) continue;
          if( $pool_usercount < $tround->MinPoolSize || $pool_usercount > $tround->MaxPoolSize )
             $arr_violate_poolsize[] = $pool;
+         if( $pool_usercount < $tround->MinPoolSize )
+            $pool_summary[$pool][1][] = T_('Pool-Size too small#poolsum');
+         if( $pool_usercount > $tround->MaxPoolSize )
+            $pool_summary[$pool][1][] = T_('Pool-Size too big#poolsum');
       }
       if( count($arr_violate_poolsize) > 0 )
          $errors[] = sprintf( T_('There are %s pools [%s] violating the valid pool-size range %s.'),
@@ -510,7 +528,11 @@ class TournamentPool
       foreach( $arr_counts as $pool => $pool_usercount )
       {
          if( $pool_usercount == 0 )
+         {
             $arr_empty[] = $pool;
+            $pool_summary[$pool][1][] = T_('Pool empty#poolsum');
+         }
+
       }
       if( count($arr_empty) > 0 )
          $errors[] = sprintf( T_('There are %s empty pools [%s]. Please fill or remove them!'),

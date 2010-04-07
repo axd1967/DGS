@@ -155,9 +155,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       }
    }
 
+   $arr_pool_summary = null;
    if( @$_REQUEST['t_check'] )
    {
-      $errors = array_merge( $errors, TournamentPool::check_pools($tround) );
+      $errors = array_merge( $errors, TournamentPool::check_pools($tround, $arr_pool_summary) );
    }
 
 
@@ -245,10 +246,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          'SUBMITBUTTON', 't_check', T_('Check Pools'),
          'TEXT', MED_SPACING . '(' . T_('Check pool integrity and show summary') . ')', ));
 
-   $tform->add_empty_row();
-   $tform->add_row( array(
-         'DESCRIPTION', T_('Edit Actions'),
-         'TEXT',        T_('Please note, that selected marks are not saved!'), ));
+   if( $show_pools || $show_unassigned )
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Edit Actions'),
+            'TEXT',        T_('Please note, that selected marks are not saved!'), ));
+   }
    if( $show_pools && !$show_unassigned && count($arr_selpool) )
    {
       $tform->add_row( array(
@@ -268,6 +272,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    echo "<h3 class=Header>$title</h3>\n";
 
    echo $tform->print_start_default(), $tform->get_form_string();
+
+   if( !is_null($arr_pool_summary) )
+      echo_pool_summary( $tround, $arr_pool_summary );
 
    if( $show_pools && !is_null($poolTables) )
    {
@@ -464,5 +471,46 @@ function pools_unassigned_extend_table_form( &$table, &$form )
       . $form->print_insert_text_input( 'newpool', 4, 4, get_request_arg('newpool') )
       . $form->print_insert_submit_button( 't_assign', T_('Assign to Pool') );
 }
+
+function echo_pool_summary( $tround, $arr_pool_sum )
+{
+   global $page, $base_path;
+   $tid = $tround->tid;
+
+   $pstable = new Table( 'TPoolSummary', $page, null, 'ps',
+      TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
+
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $pstable->add_tablehead( 1, T_('Pool#poolsum_header'), 'Number' );
+   $pstable->add_tablehead( 2, T_('Size#poolsum_header'), 'Number' );
+   $pstable->add_tablehead( 3, T_('Pool Errors#poolsum_header'), 'Note' );
+
+   ksort($arr_pool_sum);
+   foreach( $arr_pool_sum as $pool => $arr )
+   {
+      list( $pool_usercount, $errors ) = $arr;
+      $cnt_errors = count($errors);
+      $row_arr = array(
+         1 => $pool,
+         2 => $pool_usercount,
+         3 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK#poolsum') ),
+      );
+      if( $cnt_errors )
+         $row_arr['extra_class'] = 'Violation';
+      $pstable->add_row( $row_arr );
+   }
+
+   section('poolSummary', T_('Pool Summary'));
+   echo
+      sprintf( T_('You have chosen the following pool parameters on the %s page:'),
+         anchor($base_path."tournaments/roundrobin/define_pools.php?tid=$tid",
+         T_('Define Pools')) ),
+      "<br>\n",
+      sprintf( T_('Pool Count [%s], Pool-Size range %s, Best chosen Pool-Size [%s]'),
+         $tround->Pools, TournamentUtils::build_range_text($tround->MinPoolSize, $tround->MaxPoolSize),
+         $tround->PoolSize ),
+      "<p></p>\n",
+      $pstable->make_table();
+}//echo_pool_summary
 
 ?>
