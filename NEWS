@@ -63,7 +63,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Round Status Editor
          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
-      * Tournament Round Pool Manager (create and delete pools)
+      * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
       * Tournament Round Pool Editor (edit pools)
       * Tournament Pool view page
 
