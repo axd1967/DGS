@@ -61,6 +61,7 @@ define('TOURNEY_FLAG_LOCK_TDWORK',     0x0004); // lock tourney for TD-work, pro
 define('TOURNEY_FLAG_LOCK_CRON',       0x0008); // lock by cron, prohibits certain tourney-specific actions
 define('TOURNEY_FLAG_LOCK_CLOSE',      0x0010); // lock preparing for transition to CLOSED-status
 
+define('TOURNEY_SEEDORDER_NONE',           0); // no choice in GUI
 define('TOURNEY_SEEDORDER_CURRENT_RATING', 1);
 define('TOURNEY_SEEDORDER_REGISTER_TIME',  2);
 define('TOURNEY_SEEDORDER_TOURNEY_RATING', 3);
