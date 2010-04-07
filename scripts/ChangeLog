@@ -19,6 +19,30 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-04-07 juga
+
+   * tournaments/include/tournament_pool.php (TournamentPool.seed_pools, ~.add_missing_registered_users),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/create_pools.php, NEWS:
+   - create-pools: add missing registered users to pool #0 for manual pool-assignment
+   - allow seeding pools only if all pools are empty, because re-seeding overwrites
+     all orders anyway, so enforce deletion or use adding missed users functionality
+   - allow deleting all pools only if there is at least one pool
+   - cleanup: simplified func-signature: Tournament-object -> tid
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.make_pool_table):
+   - show '-' in unused crosstable-column for pool with less users than ideal size
+
+   * tournaments/include/tournament_pool.php (TournamentPool.check_pools):
+   - remove (bad) user- and pool-lists from pool-check errors,
+     could be too much in certain situations
+
+   * tournaments/include/tournament_pool.php (TournamentPool.check_pools),
+     tournaments/roundrobin/edit_pools.php (echo_pool_summary),
+     skins/dragon/screen.css:
+   - pool-editor: added pool-summary including pool-specific errors
+     for checking pool-integrity
+
 2010-04-06 juga
 
    * tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool,
@@ -29,7 +53,8 @@ ChangeLog
      tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPooling),
      tournaments/include/tournament_template.php (TournamentTemplate.checkPooling),
      tournaments/roundrobin/edit_pools.php:
-   - added pool-integrity checking for transition from POOL to PAIR round-status and for pool-editor
+   - added pool-integrity checking for transition from POOL to PAIR round-status
+     and for pool-editor:
      - check that uids are distinct in all pools
      - check that there are some pools
      - check that count of pools matches the expected TRound.Pools-count
