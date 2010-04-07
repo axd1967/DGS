@@ -55,6 +55,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
      t_seed&tid=&round=&seed_order=&slice_mode=    : seed pools
      t_delete&tid=&round=                          : delete all pools (needs confirm)
      t_del_confirm&tid=&round=                     : delete all pools (confirmed)
+     t_add_miss&tid=&round=                        : add missing registered users to default pool #0
      t_cancel&tid=                                 : cancel pool-deletion
 */
 
@@ -115,21 +116,29 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
 
    if( count($errors) == 0 )
    {
-      if( @$_REQUEST['t_seed'] )
+      if( @$_REQUEST['t_seed'] && $count_poolrows == 0 )
       {
          $seed_order = (int)get_request_arg('seed_order');
          $slice_mode = (int)get_request_arg('slice_mode');
-         if( TournamentPool::seed_pools( $tourney, $tprops, $tround, $seed_order, $slice_mode ) )
+         if( TournamentPool::seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode ) )
          {
             $sys_msg = urlencode( T_('Tournament Pools seeded!#tourney') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
-      elseif( @$_REQUEST['t_del_confirm'] )
+      elseif( @$_REQUEST['t_del_confirm'] && $count_poolrows > 0 )
       {
          if( TournamentPool::delete_pools($tid, $round) )
          {
             $sys_msg = urlencode( T_('Tournament Pools removed!#tourney') );
+            jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
+         }
+      }
+      elseif( @$_REQUEST['t_add_miss'] && $reg_count > $count_poolrows )
+      {
+         if( TournamentPool::add_missing_registered_users( $tid, $tround ) )
+         {
+            $sys_msg = urlencode( T_('Tournament Default Pool filled with missing users!#tourney') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -194,23 +203,42 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
                'SUBMITBUTTON', 't_cancel', T_('Cancel') ));
       }
       $tform->add_empty_row();
+
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', span('TWarning', T_('Seeding pools is only allowed with empty pools!')), ));
+   }
+   else
+   {
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', sprintf( T_('Create and seed pools with all %s registered users for tournament round #%s'),
+                           $reg_count, $round) . ':', ));
+
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT',         T_('Order by') . MED_SPACING,
+            'SELECTBOX',    'seed_order', 1, $arr_seed_order, $seed_order_val, false,
+            'TEXT',         SMALL_SPACING . T_('Slice by') . MED_SPACING,
+            'SELECTBOX',    'slice_mode', 1, $arr_slice_mode, $slice_mode_val, false,
+            'SUBMITBUTTON', 't_seed', T_('Seed Pools') ));
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', T_('This may take a while, so please be patient!'), ));
    }
 
-   $tform->add_row( array(
-         'CELL', 2, '',
-         'TEXT', sprintf( T_('Create and seed pools with all %s registered users for tournament round #%s'),
-                          $reg_count, $round) . ':', ));
-   $tform->add_row( array(
-         'CELL', 2, '',
-         'TEXT',         T_('Order by') . MED_SPACING,
-         'SELECTBOX',    'seed_order', 1, $arr_seed_order, $seed_order_val, false,
-         'TEXT',         SMALL_SPACING . T_('Slice by') . MED_SPACING,
-         'SELECTBOX',    'slice_mode', 1, $arr_slice_mode, $slice_mode_val, false,
-         'SUBMITBUTTON', 't_seed', T_('Seed Pools'), ));
-   //TODO add reorder-option, at the moment it it's always with re-ordering
-   $tform->add_row( array(
-         'CELL', 2, '',
-         'TEXT', T_('This may take a while, so please be patient!'), ));
+   if( $reg_count > $count_poolrows )
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', sprintf( T_('There are %s registered users from which %s users are not appearing in the pools.'),
+                             $reg_count, $reg_count - $count_poolrows ), ));
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', T_('Add missing registered users to default pool (with unassigned users).') . "<br>\n",
+            'SUBMITBUTTON', 't_add_miss', T_('Assign missing users to Default Pool'), ));
+   }
 
 
    $title = T_('Tournament Pools Manager');
