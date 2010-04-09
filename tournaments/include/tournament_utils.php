@@ -192,6 +192,7 @@ class TournamentUtils
       return floor( ( $user_count + $pool_size - 1 ) / $pool_size );
    }
 
+   /*! Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round. */
    function calc_pool_games( $pool_size, $games_per_challenge=1 )
    {
       return $games_per_challenge * floor( $pool_size * ( $pool_size - 1 ) / 2 );
