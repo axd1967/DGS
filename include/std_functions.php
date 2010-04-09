@@ -615,7 +615,7 @@ function make_dragon_tools()
    return $tools_array;
 } //make_dragon_tools
 
-function end_page( $menu_array=NULL )
+function end_page( $menu_array=NULL, $links_per_line=0 )
 {
    global $page_microtime, $player_row, $base_path, $printable;
 
@@ -627,7 +627,7 @@ function end_page( $menu_array=NULL )
    {
       echo "\n </tr><tr class=Links>"
          . "\n  <td class=Links>";
-      make_menu($menu_array);
+      make_menu( $menu_array, true, $links_per_line );
       echo "\n  </td>";
    }
 
@@ -750,15 +750,16 @@ function check_maintenance( $user_handle )
 //    linktext  => URL
 //    linktext  => array( 'url' => URL, attb1 => val1, ... )
 //    dummytext => Form-object
-function make_menu($menu_array, $with_accesskeys=true)
+function make_menu($menu_array, $with_accesskeys=true, $links_per_line=0 )
 {
    global $base_path, $max_links_in_main_menu;
+   $links_per_line = ( $links_per_line > 0 ) ? $links_per_line : $max_links_in_main_menu;
 
    $nr_menu_links = count($menu_array);
    if( $nr_menu_links == 0 )
       return;
 
-   $menu_levels = ceil($nr_menu_links/$max_links_in_main_menu);
+   $menu_levels = ceil( $nr_menu_links / $links_per_line );
    $menu_width = ceil($nr_menu_links/$menu_levels);
    $remain = ($menu_levels*$menu_width) - $nr_menu_links +1;
    $w = 100/$menu_width;
