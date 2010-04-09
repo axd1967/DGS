@@ -312,7 +312,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
-   end_page(@$menu_array);
+   end_page( @$menu_array, 6 );
 }
 
 
