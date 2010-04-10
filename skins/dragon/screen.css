@@ -962,10 +962,10 @@ table.Table td.Mark {
    text-align: center;
 }
 
-/* TODO: remove those three: */
 table.Table td.Right {
    text-align: right;
 }
+
 table.Table td.Center {
    text-align: center;
 }
@@ -2770,8 +2770,13 @@ a:hover.TLadderRank {
    text-decoration: underline;
 }
 
+table#TPoolSuggestionsTable th,
+table#TPoolSuggestionsTable td {
+   border: 1px dotted black;
+}
 table#TPoolSuggestionsTable tr.UserChoice td {
    font-weight: bold;
+   background: #bbddff;
 }
 table#TPoolSuggestionsTable tr.Best td.Note {
    background: #bbddff;
@@ -2779,6 +2784,7 @@ table#TPoolSuggestionsTable tr.Best td.Note {
 table#TPoolSuggestionsTable tr.Violation td.Note {
    background: #ffc4d8;
 }
+
 
 table#TPoolSummaryTable tr.Violation td.Note {
    background: #ffc4d8;
