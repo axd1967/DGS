@@ -483,17 +483,19 @@ function echo_pool_summary( $tround, $arr_pool_sum )
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $pstable->add_tablehead( 1, T_('Pool#poolsum_header'), 'Number' );
    $pstable->add_tablehead( 2, T_('Size#poolsum_header'), 'Number' );
-   $pstable->add_tablehead( 3, T_('Pool Errors#poolsum_header'), 'Note' );
+   $pstable->add_tablehead( 3, T_('Games#poolsum_header'), 'Number' );
+   $pstable->add_tablehead( 4, T_('Pool Errors#poolsum_header'), 'Note' );
 
    ksort($arr_pool_sum);
    foreach( $arr_pool_sum as $pool => $arr )
    {
-      list( $pool_usercount, $errors ) = $arr;
+      list( $pool_usercount, $errors, $pool_games ) = $arr;
       $cnt_errors = count($errors);
       $row_arr = array(
          1 => $pool,
          2 => $pool_usercount,
-         3 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK#poolsum') ),
+         3 => $pool_games,
+         4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK#poolsum') ),
       );
       if( $cnt_errors )
          $row_arr['extra_class'] = 'Violation';
