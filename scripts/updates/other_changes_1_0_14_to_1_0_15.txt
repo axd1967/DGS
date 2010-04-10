@@ -1,3 +1,5 @@
+# make a backup of the old include/config.php (to allow for a rollback)
+
 # copy/merge include/config.php to include/config-local.php before CVS-update
 # and adjust to server-needs
 
