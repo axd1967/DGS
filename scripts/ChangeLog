@@ -19,6 +19,32 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-04-10 juga
+
+   * tournaments/roundrobin/define_pools.php (stripLF, calc_suggestion,
+       make_suggestions_table, compare_pool_parameters, compare_suggestions),
+     skins/dragon/screen.css:
+   - pool-definition-editor suggestions-table:
+     - bugfix handling TD-choice with user-diffs larger than pool-size,
+       chosen pool-size may be adjusted to find best-pool-distribution for TD-choice
+     - try to find best suggestion by ordering suggestions by:
+       min. user-diff, slice-ratio, pool-size
+     - changed data shown for suggestions:
+       replaced former values with user-capacity, user-diff, best-pool-distribution
+     - mark current TD-choice by CSS and in suggestion-note, use table-borders
+     - added ordering of suggestions by pool-size+count or best pool distribution
+     - remove double-entries, sort TD-choice into normal suggestions
+   - show add/del-pools only if pool-count saved already or specified by TD
+
+   * include/utilities.php (concat_str):
+   - added function to concat two strings with separator
+
+2010-04-09 juga
+
+   * include/std_functions.php (end_page, make_menu),
+     tournaments/roundrobin/edit_pools.php:
+   - use max. 6 bottom-links per line for pool-editor
+
 2010-04-07 juga
 
    * tournaments/include/tournament_pool.php (TournamentPool.seed_pools, ~.add_missing_registered_users),
