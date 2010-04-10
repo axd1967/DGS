@@ -275,24 +275,33 @@ class TournamentPool
    /*!
     * \brief Returns ListIterator with array-items: uncomplete TPool(tid,round,pool) + orow.
     * \return orow: array( 'uid' => X, 'Pool' => Y, 'X_HasPool' => 0|1 (0=TP without pool-entry) ).
-    * \note TPool returned is incomplete, so don't update from that object
+    * \note TPool returned is incomplete, so don't update() from that object
     */
-   function load_tournament_participants_with_pools( $iterator, $tid, $round )
+   function load_tournament_participants_with_pools( $iterator, $tid, $round, $only_pools=false )
    {
-      $qsql = new QuerySQL(
-         SQLP_FIELDS,
-            'TP.uid',
-            'TPOOL.ID',
-            'TPOOL.Pool',
-            'IFNULL(TPOOL.ID,0) AS X_HasPool',
-         SQLP_FROM,
-            'TournamentParticipant AS TP',
-            "LEFT JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid "
-               . "AND TPOOL.tid=$tid AND TPOOL.Round=$round", // must not be in WHERE for outer-join
-         SQLP_WHERE,
-            "TP.tid=$tid",
-            "TP.Status='".TP_STATUS_REGISTER."'"
-         );
+      if( $only_pools )
+      {
+         $qsql = new QuerySQL(
+            SQLP_FIELDS, 'uid', 'ID', 'Pool', '1 AS X_HasPool',
+            SQLP_FROM,   'TournamentPool',
+            SQLP_WHERE,  "tid=$tid", "Round=$round" );
+      }
+      else
+      {
+         $qsql = new QuerySQL(
+            SQLP_FIELDS,
+               'TP.uid',
+               'TPOOL.ID', 'TPOOL.Pool', 'IFNULL(TPOOL.ID,0) AS X_HasPool',
+            SQLP_FROM,
+               'TournamentParticipant AS TP',
+               "LEFT JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid "
+                  . "AND TPOOL.tid=$tid AND TPOOL.Round=$round", // must not be in WHERE for outer-join
+            SQLP_WHERE,
+               "TP.tid=$tid",
+               "TP.Status='".TP_STATUS_REGISTER."'"
+            );
+      }
+
       $iterator->setQuerySQL( $qsql );
       $iterator->addIndex( 'uid' );
       $query = $iterator->buildQuery();
@@ -491,9 +500,10 @@ class TournamentPool
 
    /*!
     * \brief checks pool integrity and return list of errors; empty list if all ok.
-    * \param $pool_summary fill in pool-summary: array( pool => array( pool-user-count, array( errormsg, ... ) ), ... )
+    * \param $pool_summary fill in pool-summary:
+    *        array( pool => array( pool-user-count, array( errormsg, ... ), pool-games-count ), ... )
     */
-   function check_pools( $tround, &$pool_summary=null )
+   function check_pools( $tround, &$pool_summary=null, $only_summary=false )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -501,19 +511,24 @@ class TournamentPool
 
       // load tourney-participants and pool data
       $iterator = new ListIterator( 'TournamentTemplateRoundRobin.checkPooling.load_tp_pools' );
-      $iterator = TournamentPool::load_tournament_participants_with_pools( $iterator, $tid, $round );
+      $iterator = TournamentPool::load_tournament_participants_with_pools( $iterator, $tid, $round, $only_summary );
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $iterator );
       $arr_counts = $poolTables->calc_pool_summary();
+
+      $pool_summary = array();
+      foreach( $arr_counts as $pool => $pool_usercount )
+         $pool_summary[$pool] = array( $pool_usercount, array(), TournamentUtils::calc_pool_games($pool_usercount) );
+
+      if( $only_summary ) // load only summary
+         return $errors;
+
+
       $cnt_pool0 = (int)@$arr_counts[0];
       $cnt_real_pools = count($arr_counts) - ( $cnt_pool0 > 0 ? 1 : 0 ); // pool-count without 0-pool
       list( $cnt_entries, $cnt_pools, $cnt_users ) = // cnt_pools can include 0-pool
          TournamentPool::count_tournament_pool( $tid, $round, 0, /*count_uid*/true );
-
-      $pool_summary = array();
-      foreach( $arr_counts as $pool => $pool_usercount )
-         $pool_summary[$pool] = array( $pool_usercount, array() );
 
       // ---------- check pool integrity ----------
 
