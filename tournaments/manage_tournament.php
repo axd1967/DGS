@@ -228,9 +228,14 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Create pools'), array( 'url' => "tournaments/roundrobin/create_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
             . make_menu_link( T_('Edit pools'), array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' ))
+            . SEP_SPACING
+            . make_menu_link( T_('View Pools'), "tournaments/roundrobin/view_pools.php?tid=$tid" )
             . subList( array( T_('Define pools (set pool parameters: pool-size, pool-count)#mngt'),
                               T_('Create pools (create, remove, seed pools)#mngt'),
-                              T_('Edit pools (assign users to pools)#mngt') ));
+                              T_('Edit pools (assign users to pools)#mngt') ))
+            . '<li>'
+            . make_menu_link( T_('Edit game pairing'), array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' ))
+            . subList( array( T_('Edit game pairing (starting games for all pools)#mngt') ));
    }
 
    return '';
