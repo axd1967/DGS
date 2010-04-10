@@ -262,4 +262,14 @@ function format_number( $num )
    return ( $num <= 0 ) ? $num : "+$num";
 }
 
+/*! \brief Concats two strings separated by given separator if strings are non-empty. */
+function concat_str( $str1, $sep, $str2 )
+{
+   if( (string)$str1.$str2 == '' )
+      return '';
+   else
+      return $str1 . ( ((string)$str1 != '' && (string)$str2 != '') ? $sep : '' ) . $str2;
+   return $result;
+}
+
 ?>
