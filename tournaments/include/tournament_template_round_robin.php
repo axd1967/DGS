@@ -137,7 +137,8 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
             error('bad_tournament', "TournamentTemplateRoundRobin.checkPooling.find_tround($tid,$round,{$this->uid})");
       }
 
-      return TournamentPool::check_pools( $tround );
+      list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround );
+      return $check_errors;
    }//checkPooling
 
    function checkParticipantRegistrations( $tid, $arr_TPs )
