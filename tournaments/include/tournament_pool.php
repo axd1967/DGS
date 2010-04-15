@@ -46,12 +46,15 @@ require_once 'tournaments/include/tournament_utils.php';
 define('TPOOL_LOADOPT_USER',    0x01 ); // load Players-stuff
 define('TPOOL_LOADOPT_TRATING', 0x02 ); // load TournamentParticipant.Rating
 define('TPOOL_LOADOPT_REGTIME', 0x04 ); // load TournamentParticipant.Created (=register-time)
+define('TPOOL_LOADOPT_ONLY_RATING', 0x08 ); // only load Rating2 from Players-table
+define('TPOOL_LOADOPT_UROW_RATING', 0x10 ); // additionally set TPool->User->urow['Rating2']
+define('TPOOL_LOADOPT_TP_RID',  0x20 ); // load TournamentParticipant.IP as rid for TournamentGames
 
 global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
-   FTYPE_INT,   'ID', 'tid', 'Round', 'Pool', 'uid', 'GamesRun'
+   FTYPE_INT,   'ID', 'tid', 'Round', 'Pool', 'uid'
    );
 
 class TournamentPool
@@ -61,21 +64,19 @@ class TournamentPool
    var $Round;
    var $Pool;
    var $uid;
-   var $GamesRun;
 
    // non-DB fields
 
    var $User; // User-object
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
-   function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $games_run=0 )
+   function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->Round = (int)$round;
       $this->Pool = (int)$pool;
       $this->uid = (int)$uid;
-      $this->GamesRun = (int)$games_run;
       // non-DB fields
       $this->User = (is_a($uid, 'User')) ? $user : new User( $this->uid );
    }
@@ -125,7 +126,6 @@ class TournamentPool
       $data->set_value( 'Round', $this->Round );
       $data->set_value( 'Pool', $this->Pool );
       $data->set_value( 'uid', $this->uid );
-      $data->set_value( 'GamesRun', $this->GamesRun );
       return $data;
    }
 
@@ -154,8 +154,7 @@ class TournamentPool
             @$row['tid'],
             @$row['Round'],
             @$row['Pool'],
-            @$row['uid'],
-            @$row['GamesRun']
+            @$row['uid']
          );
       return $trd;
    }
@@ -216,32 +215,44 @@ class TournamentPool
    function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
    {
       $needs_user = ( $load_opts & TPOOL_LOADOPT_USER );
-      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
+      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME|TPOOL_LOADOPT_TP_RID) );
+      $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
       $has_userdata = $needs_user || $needs_tp;
 
       $qsql = TournamentPool::build_query_sql( $tid, $round, $pool );
       if( $load_opts & TPOOL_LOADOPT_USER )
       {
+         if( !($load_opts & TPOOL_LOADOPT_ONLY_RATING) )
+         {
+            $qsql->add_part( SQLP_FIELDS,
+               'TPU.Name AS TPU_Name',
+               'TPU.Handle AS TPU_Handle',
+               'TPU.Country AS TPU_Country',
+               'TPU.Country AS TPU_Country',
+               'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess' );
+         }
          $qsql->add_part( SQLP_FIELDS,
-            'TPU.Name AS TPU_Name',
-            'TPU.Handle AS TPU_Handle',
             'TPU.Rating2 AS TPU_Rating2',
-            'TPU.Country AS TPU_Country',
-            'TPU.Country AS TPU_Country',
-            'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess' );
+            'TPU.RatingStatus AS TPU_RatingStatus',
+            'TPU.OnVacation AS TPU_OnVacation',
+            'TPU.ClockUsed AS TPU_ClockUsed' );
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS TPU ON TPU.ID=TPOOL.uid' );
 
+         if( !$needs_tp_rating )
+            $qsql->add_part( SQLP_FIELDS, 'TPU.Rating2 AS TP_Rating' );
          if( !$needs_tp )
-            $qsql->add_part( SQLP_FIELDS, 'TPU.Rating2 AS TP_Rating', '0 AS TP_X_RegisterTime' );
+            $qsql->add_part( SQLP_FIELDS, '0 AS TP_X_RegisterTime' );
       }
 
       if( $needs_tp )
       {
-         if( $load_opts & TPOOL_LOADOPT_TRATING )
+         if( $needs_tp_rating )
             $qsql->add_part( SQLP_FIELDS, 'TP.Rating AS TP_Rating' );
          if( $load_opts & TPOOL_LOADOPT_REGTIME )
             $qsql->add_part( SQLP_FIELDS, 'UNIX_TIMESTAMP(TP.Created) AS TP_X_RegisterTime' );
+
+         $qsql->add_part( SQLP_FIELDS, 'TP.ID AS TP_ID' );
          $qsql->add_part( SQLP_FROM,
             "INNER JOIN TournamentParticipant AS TP ON TP.tid=$tid AND TP.uid=TPOOL.uid" );
       }
@@ -258,12 +269,14 @@ class TournamentPool
          $tpool = TournamentPool::new_from_row( $row );
          if( $has_userdata )
          {
-            $tpool->User = User::new_from_row( $row, 'TPU_' );
-            $tpool->User->ID = $tpool->uid;
-            $tpool->User->urow = array(
-               'TP_X_RegisterTime'  => (int)@$row['TP_X_RegisterTime'],
-               'TP_Rating'          => (float)@$row['TP_Rating'],
-            );
+            $user = User::new_from_row( $row, 'TPU_', /*urow-strip-prefix*/true );
+            $user->ID = $tpool->uid;
+            $user->urow['TP_ID'] = (int)@$row['TP_ID'];
+            $user->urow['TP_X_RegisterTime'] = (int)@$row['TP_X_RegisterTime'];
+            $user->urow['TP_Rating'] = (float)@$row['TP_Rating'];
+            if( $load_opts & TPOOL_LOADOPT_UROW_RATING ) // User- or TP-rating dependent on load-opts TPOOL_LOADOPT_TRATING
+               $user->urow['Rating2'] = $user->urow['TP_Rating'];
+            $tpool->User = $user;
          }
          $iterator->addItem( $tpool, $row );
       }
@@ -400,7 +413,7 @@ class TournamentPool
          if( is_null($tpool) ) // user not joined yet
             $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
          else // user already joined
-            $tpool->Pool = $pool; //TODO assure, that TPool.GamesRun==0 !! (or else merge it)
+            $tpool->Pool = $pool;
          $arr_pools[$pool]++;
 
          $tpool->fillEntityData( $data );
@@ -500,10 +513,11 @@ class TournamentPool
 
    /*!
     * \brief checks pool integrity and return list of errors; empty list if all ok.
-    * \param $pool_summary fill in pool-summary:
-    *        array( pool => array( pool-user-count, array( errormsg, ... ), pool-games-count ), ... )
+    * \return array( errors, pool_summary )
+    *         $pool_summary fill in pool-summary:
+    *         array( pool => array( pool-user-count, array( errormsg, ... ), pool-games-count ), ... )
     */
-   function check_pools( $tround, &$pool_summary=null, $only_summary=false )
+   function check_pools( $tround, $only_summary=false )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -522,7 +536,7 @@ class TournamentPool
          $pool_summary[$pool] = array( $pool_usercount, array(), TournamentUtils::calc_pool_games($pool_usercount) );
 
       if( $only_summary ) // load only summary
-         return $errors;
+         return array( $errors, $pool_summary );
 
 
       $cnt_pool0 = (int)@$arr_counts[0];
@@ -604,7 +618,7 @@ class TournamentPool
       if( $cnt_empty > 0 )
          $errors[] = sprintf( T_('There are %s empty pools. Please fill or remove them!'), $cnt_empty );
 
-      return $errors;
+      return array( $errors, $pool_summary );
    }//check_pools
 
    function get_edit_tournament_status()
