@@ -464,25 +464,21 @@ class TournamentRules
 
    /*!
     * \brief Creates normal game and updates all game-stuff.
-    * \param $user_ch User-object of challenger
-    * \param $user_df User-object of defender
+    * \param $user_ch User-object of challenger with set urow['Rating2'] (according to rating-use-mode)
+    * \param $user_df User-object of defender with set urow['Rating2'] (dito)
     * \note Expect set var this.TourneyType
     */
-   function create_game( $tprops_RatingUseMode, $user_ch, $user_df )
+   function create_game( $user_ch, $user_df )
    {
-      // challenger & defender rating
       $ch_uid = $user_ch->ID;
-      $ch_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_ch, $tprops_RatingUseMode );
-      $user_ch->urow['Rating2'] = $ch_rating;
-
       $df_uid = $user_df->ID;
-      $df_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_df, $tprops_RatingUseMode );
-      $user_df->urow['Rating2'] = $df_rating;
 
       $game_row = $this->convertTournamentRules_to_GameRow();
       $game_row['tid'] = $this->tid;
 
-      $ch_is_black = $this->prepare_create_game_row( $game_row, $ch_uid, $ch_rating, $df_uid, $df_rating );
+      $ch_is_black = $this->prepare_create_game_row( $game_row,
+         $ch_uid, $user_ch->urow['Rating2'],
+         $df_uid, $user_df->urow['Rating2'] );
       if( $ch_is_black )
          $gid = create_game($user_ch->urow, $user_df->urow, $game_row);
       else
