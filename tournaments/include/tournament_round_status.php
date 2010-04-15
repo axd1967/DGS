@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_round_status.php
@@ -38,17 +39,22 @@ require_once 'tournaments/include/tournament_round.php';
   */
 class TournamentRoundStatus
 {
+   var $tid; // TournamentRound.tid
+   var $is_admin;
    var $tourney; // Tournament-object
    var $ttype; // specific typed TournamentTemplate-object
    var $tround; // TournamentRound-object
-   var $tid; // TournamentRound.tid
    var $Round; // TournamentRound.Round
    var $old_status;
    var $new_status;
    var $errors; // arr
 
 
-   /*! \brief Constructs TournamentRoundStatus. */
+   /*!
+    * \brief Constructs TournamentRoundStatus.
+    * \param $tid Tournament-object or tournament-id
+    * \param $round TournamentRound-object or tournament-round
+    */
    function TournamentRoundStatus( $tid, $round )
    {
       if( is_a($tid, 'Tournament') )
@@ -64,12 +70,22 @@ class TournamentRoundStatus
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentRoundStatus.find_tournament({$this->tid},{$this->Round})");
 
-      $this->Round = (int)$round;
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
-      $this->tround = TournamentRound::load_tournament_round( $this->tid, $this->Round );
-      if( is_null($this->tround) )
-         error('bad_tournament', "TournamentRoundStatus.find_tround({$this->tid},{$this->Round})");
 
+      if( is_a($round, 'TournamentRound') )
+      {
+         $this->tround = $round;
+         $this->Round = $this->tround->Round;
+      }
+      else
+      {
+         $this->Round = (int)$round;
+         $this->tround = TournamentRound::load_tournament_round( $this->tid, $this->Round );
+         if( is_null($this->tround) )
+            error('bad_tournament', "TournamentRoundStatus.find_tround({$this->tid},{$this->Round})");
+      }
+
+      $this->is_admin = TournamentUtils::isAdmin();
       $this->curr_status = $this->new_status = $this->tround->Status;
       $this->errors = array();
    }
@@ -165,6 +181,47 @@ class TournamentRoundStatus
       return sprintf( T_('Expecting current tournament round status [%s] for change to status [%s]'),
                       $status_str,
                       TournamentRound::getStatusText($this->new_status) );
+   }
+
+
+   /*!
+    * \brief Checks if current tournament-round-status allows certain action.
+    * \param $errmsgfmt error-message-format expecting two args: 1. tourney-round-status, 2. expected status-list
+    * \param $arr_status status-array or single status
+    * \param $allow_admin if true, admin can do anything; otherwise admin is treated like non-admin
+    * \return error-list; empty if no error
+    */
+   function check_action_status( $errmsgfmt, $arr_status, $allow_admin=true )
+   {
+      $errors = array();
+      if( !is_array($arr_status) )
+         $arr_status = array( $arr_status );
+
+      // T-Admin can do anything at any time
+      if( $allow_admin && $this->is_admin )
+         $allow = true;
+      else
+         $allow = in_array($this->tround->Status, $arr_status);
+
+      if( !$allow )
+      {
+         $arrst = array();
+         foreach( $arr_status as $status )
+            $arrst[] = TournamentRound::getStatusText($status);
+
+         $errors[] = sprintf( $errmsgfmt,
+                              TournamentRound::getStatusText($this->tround->Status),
+                              implode('|', $arrst) );
+      }
+
+      return $errors;
+   }//check_action_status
+
+   function check_edit_status( $arr_status, $allow_admin=true )
+   {
+      return $this->check_action_status(
+         T_('Edit is forbidden for tournament round on status [%s], only allowed for (%s) !'),
+         $arr_status, $allow_admin );
    }
 
 } // end of 'TournamentRoundStatus'
