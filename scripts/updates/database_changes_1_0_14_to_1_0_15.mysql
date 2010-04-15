@@ -1881,3 +1881,14 @@ ALTER TABLE ConfigPages
    ADD ColumnsTournamentPoolView int NOT NULL DEFAULT -1 ;
 
 
+-- added TournamentRound.ID for round-robin tournaments
+ALTER TABLE TournamentGames
+   ADD Round_ID int NOT NULL default '0' AFTER tid,
+   DROP INDEX tid,
+   ADD INDEX tidRound (tid,Round_ID) ;
+
+-- remove calculated field
+ALTER TABLE TournamentPool
+   DROP COLUMN GamesRun ;
+
+
