@@ -93,6 +93,17 @@ class PoolTables
          $this->pools[$pool] = array();
    }
 
+   function get_user_tournament_pool( $uid )
+   {
+      return @$this->users[$uid];
+   }
+
+   /*! \brief Returns array( pool => arr[ uid's, ... ] ). */
+   function get_pool_users()
+   {
+      return $this->pools;
+   }
+
    function fill_pools( $tpool_iterator )
    {
       while( list(,$arr_item) = $tpool_iterator->getListIterator() )
@@ -143,6 +154,69 @@ class PoolTables
    }
 
 } // end of 'PoolTables
+
+
+
+
+
+ /*!
+  * \class PoolSummary
+  *
+  * \brief Utility methods for pool-summary for one tournament-round
+  */
+class PoolSummary
+{
+   var $pool_summary; // pool => [ pool-user-count, errors, pool-games ]
+   var $table; // Table-object
+
+   function PoolSummary( $page, $arr_pool_sum )
+   {
+      $this->pool_summary = $arr_pool_sum;
+
+      $pstable = new Table( 'TPoolSummary', $page, null, 'ps',
+         TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
+
+      // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      $pstable->add_tablehead( 1, T_('Pool#poolsum_header'), 'Number' );
+      $pstable->add_tablehead( 2, T_('Size#poolsum_header'), 'Number' );
+      $pstable->add_tablehead( 3, T_('Games#poolsum_header'), 'Number' );
+      $pstable->add_tablehead( 4, T_('Pool Errors#poolsum_header'), 'Note' );
+      $this->table = $pstable;
+   }
+
+   function make_table_pool_summary()
+   {
+      ksort($this->pool_summary);
+      $cnt_users = 0;
+      $cnt_games = 0;
+      foreach( $this->pool_summary as $pool => $arr )
+      {
+         list( $pool_usercount, $errors, $pool_games ) = $arr;
+         $cnt_errors = count($errors);
+         $cnt_users += $pool_usercount;
+         $cnt_games += $pool_games;
+
+         $row_arr = array(
+            1 => $pool,
+            2 => $pool_usercount,
+            3 => $pool_games,
+            4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK#poolsum') ),
+         );
+         if( $cnt_errors )
+            $row_arr['extra_class'] = 'Violation';
+         $this->table->add_row( $row_arr );
+      }
+
+      // summary row
+      $this->table->add_row( array(
+            2 => $cnt_users,
+            3 => $cnt_games,
+            4 => T_('Sum#poolsum'),
+            'extra_class' => 'Sum', ));
+
+      return $this->table;
+   }
+} // end of 'PoolSummary'
 
 
 
