@@ -46,8 +46,8 @@ global $ENTITY_TOURNAMENT_GAMES; //PHP5
 $ENTITY_TOURNAMENT_GAMES = new Entity( 'TournamentGames',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'tid', 'gid', 'TicksDue', 'Flags', 'Challenger_uid', 'Challenger_rid',
-                  'Defender_uid', 'Defender_rid',
+      FTYPE_INT,  'ID', 'tid', 'Round_ID', 'gid', 'TicksDue', 'Flags',
+                  'Challenger_uid', 'Challenger_rid', 'Defender_uid', 'Defender_rid',
       FTYPE_FLOAT, 'Score',
       FTYPE_DATE, 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Status'
@@ -57,6 +57,7 @@ class TournamentGames
 {
    var $ID;
    var $tid;
+   var $Round_ID;
    var $gid;
    var $Status;
    var $TicksDue;
@@ -76,12 +77,13 @@ class TournamentGames
    var $Challenger_tladder;
 
    /*! \brief Constructs TournamentGames-object with specified arguments. */
-   function TournamentGames( $id=0, $tid=0, $gid=0, $status=TG_STATUS_INIT, $ticks_due=0, $flags=0,
-         $lastchanged=0, $challenger_uid=0, $challenger_rid=0, $defender_uid=0, $defender_rid=0,
-         $start_time=0, $end_time=0, $score=0.0 )
+   function TournamentGames( $id=0, $tid=0, $round_id=0, $gid=0, $status=TG_STATUS_INIT,
+         $ticks_due=0, $flags=0, $lastchanged=0, $challenger_uid=0, $challenger_rid=0,
+         $defender_uid=0, $defender_rid=0, $start_time=0, $end_time=0, $score=0.0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
+      $this->Round_ID = (int)$round_id;
       $this->gid = (int)$gid;
       $this->setStatus( $status );
       $this->TicksDue = (int)$ticks_due;
@@ -170,6 +172,7 @@ class TournamentGames
          $data = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'Round_ID', $this->Round_ID );
       $data->set_value( 'gid', $this->gid );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'TicksDue', $this->TicksDue );
@@ -229,6 +232,7 @@ class TournamentGames
             // from TournamentGames
             @$row['ID'],
             @$row['tid'],
+            @$row['Round_ID'],
             @$row['gid'],
             @$row['Status'],
             @$row['TicksDue'],
@@ -316,10 +320,11 @@ class TournamentGames
    }
 
    /*! \brief Counts Tournament-games with given status-array or single status. */
-   function count_tournament_games( $tid, $arr_status=null )
+   function count_tournament_games( $tid, $round_id=0, $arr_status=null )
    {
       static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
       $tid = (int)$tid;
+      $round_id = (int)$round_id;
       if( is_nulL($arr_status) )
          $arr_status = $tg_undone_status;
       elseif( !is_array($arr_status) )
@@ -329,8 +334,10 @@ class TournamentGames
          SQLP_FIELDS, 'COUNT(*) AS X_Count',
          SQLP_FROM, 'TournamentGames AS TG',
          SQLP_WHERE, "TG.tid=$tid", build_query_in_clause('TG.Status', $arr_status, /*is_str*/true) );
+      if( $round_id > 0 )
+         $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
 
-      $row = mysql_single_fetch( 'TournamentGames::count_tournament_games()', $qsql->get_select() );
+      $row = mysql_single_fetch( "TournamentGames::count_tournament_games($tid,$round_id)", $qsql->get_select() );
       return ( $row ) ? (int)$row['X_Count'] : 0;
    }
 
