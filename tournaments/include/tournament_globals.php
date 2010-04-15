@@ -81,7 +81,8 @@ define('CHECK_TPROP_RUMODE', 'COPY_CUSTOM|CURR_FIX|COPY_FIX');
 // ---------- Tournament Extension Stuff --------------------------
 
 define('TE_PROP_TLADDER_RANK_PERIOD_UPDATE', 1);
-define('TE_MAX_PROP', 1); // max. tournament-extension-property
+define('TE_PROP_TROUND_START_TGAMES', 2);
+define('TE_MAX_PROP', 2); // max. tournament-extension-property
 
 // ---------- Tournament Director Stuff ---------------------------
 
