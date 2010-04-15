@@ -28,12 +28,16 @@ require_once 'include/filterlib_country.php';
 require_once 'include/form_functions.php';
 require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_extension.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -55,13 +59,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    $page = "edit_pairing.php";
 
 /* Actual REQUEST calls used:
-     tid=&round=                       : edit tournament pairing
+     tid=                        : edit tournament pairing
+     t_pair&tid=                 : start all pool T-games for current round
 */
 
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
-   $round = (int) @$_REQUEST['round'];
-   if( $round < 0 ) $round = 0;
+   $do_pair = (bool)@$_REQUEST['t_pair'];
 
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
@@ -76,30 +80,33 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_pairing.edit_tournament($tid,$my_id)");
 
    // load existing T-round
-   if( $round < 1 )
-      $round = $tourney->CurrentRound;
+   $round = $tourney->CurrentRound;
    $tround = TournamentRound::load_tournament_round( $tid, $round );
    if( is_null($tround) )
       error('bad_tournament', "Tournament.edit_pairing.find_tournament_round($tid,$round,$my_id)");
+   $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
+   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_PAIR ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
+   // check for pairing-"lock" (stored in T-extension)
+   $t_ext = TournamentExtension::load_tournament_extension( $tid, TE_PROP_TROUND_START_TGAMES );
+   if( !is_null($t_ext) )
+      $errors[] = sprintf( T_('Creating tournament games is in work already (started at [%s] by %s ).'),
+         date(DATEFMT_TOURNAMENT, $t_ext->DateValue), $t_ext->ChangedBy );
+
    $arr_pool_summary = null;
-   if( count($errors) == 0 )
-   {
-      $errors = array_merge( $errors, TournamentPool::check_pools($tround, $arr_pool_summary, /*only-sum*/true) );
-   }
+   if( count($errors) == 0 && !$do_pair )
+      list( $errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, /*only-sum*/true );
 
 
    // --------------- Tournament-Pairing EDIT form --------------------
 
    $tform = new Form( 'tournament', $page, FORM_GET );
-
    $tform->add_hidden( 'tid', $tid );
-   $tform->add_hidden( 'round', $round );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
@@ -112,8 +119,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
          'DESCRIPTION', T_('Round Status#tround'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
+   $disable_create = '';
    if( count($errors) )
    {
+      $disable_create = 'disabled=1';
+
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -123,6 +133,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
 
    $tform->add_row( array( 'HR' ));
 
+   if( !$do_pair )
+   {
+      $tform->add_row( array(
+            'CELL', 2, '', // align submit-buttons
+            'SUBMITBUTTONX', 't_pair', T_('Create tournament games'), $disable_create,
+            'TEXT', MED_SPACING . '(' . T_('Start games for all pools in current round') . ')', ));
+   }
+
    // --------------- Start Page ------------------------------------
 
    $title = T_('Tournament Pairing Editor');
@@ -130,6 +148,32 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    echo "<h3 class=Header>$title</h3>\n";
 
    $tform->echo_string();
+
+   if( !is_null($arr_pool_summary) )
+   {
+      $pool_sum = new PoolSummary( $page, $arr_pool_summary );
+      $pstable = $pool_sum->make_table_pool_summary();
+
+      $count_pools = count($arr_pool_summary);
+      $count_users = 0;
+      $count_games = 0;
+      foreach( $arr_pool_summary as $pool => $arr )
+      {
+         $count_users += $arr[0];
+         $count_games += $arr[2];
+      }
+
+      section('poolSummary', T_('Pool Summary'));
+      echo sprintf( T_('Tournament Round #%s has %s pools with %s users going to play in %s games.'),
+                    $round, $count_pools, $count_users, $count_games ), "<p></p>\n";
+      $pstable->echo_table();
+   }
+
+   if( $do_pair )
+   {
+      $thelper = new TournamentHelper();
+      $count_created_games = $thelper->start_tournament_round_games( $tourney, $tround );
+   }
 
 
    $menu_array = array();
