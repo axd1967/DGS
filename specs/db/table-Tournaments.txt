@@ -617,6 +617,7 @@ Description:
 ----------------+-------------------------------------------+---------------------
  ID             | int(11)                                   | NULL
  tid            | int(11)                                   | NULL
+ Round_ID       | int(11)                                   | 0
  gid            | int(11)                                   | 0
  Status         | enum('INIT','PLAY','SCORE','WAIT','DONE') | INIT
  TicksDue       | int(11)                                   | 0
@@ -634,6 +635,10 @@ Description:
 ## Fields:
 
 * tid : FK to Tournament.ID
+
+* Round_ID : FK to TournamentRound.ID
+   - 0 for ladder-type tournaments
+   - only set for round-robin-type tournaments
 
 * gid : FK to Games.ID, 0 = unset yet
 
@@ -696,6 +701,10 @@ Description:
 
 * Property : key for property-extension
    - 1 = date-property with next date to update Ladder-Tournament Rank-history
+   - 2 = date-property with date when TD has started to create all (pool-)games
+         for current round. Extension-entry only serves as "token" and "lock"
+         to prevent others to do the same at the same time. The row will be
+         deleted after successfully starting of all games.
 
 * IntValue : optional integer-like value
 
@@ -712,6 +721,12 @@ Description:
 Description:
    Table to store pool for round-robin tournaments with assigned users.
 
+Notes:
+   - number of running tournament-games :
+     restricted by const TROUND_MAX_POOLSIZE (=max. number of opponents for a pool-user + 1)
+     and number of games per round for the same user (later e.g. double or triple round-robin),
+     so for 25 max. poolsize and triple-round-robin it would be max. 24 * 3 games
+
  Field    | Type                 | Default
 ----------+----------------------+---------
  ID       | int(11)              | NULL
@@ -719,7 +734,6 @@ Description:
  Round    | tinyint(3) unsigned  | NULL
  Pool     | smallint(5) unsigned | NULL
  uid      | int(11)              | 0
- GamesRun | tinyint(3) unsigned  | 0
 
 
 
@@ -732,10 +746,5 @@ Description:
 * Pool : pool number
 
 * uid : FK to TournamentParticipant.uid = Players.ID
-
-* GamesRun : number of running tournament-games
-   - restricted by const TROUND_MAX_POOLSIZE (=max. number of opponents for a pool-user + 1)
-     and number of games per round for the same user (later e.g. double or triple round-robin),
-     so for 25 max. poolsize and triple-round-robin it would be max. 24 * 3 games
 
 
