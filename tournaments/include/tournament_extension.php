@@ -140,7 +140,7 @@ class TournamentExtension
             @$row['tid'],
             @$row['Property'],
             @$row['IntValue'],
-            @$row['DateValue'],
+            @$row['X_DateValue'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy']
          );
