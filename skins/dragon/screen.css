@@ -2789,6 +2789,16 @@ table#TPoolSuggestionsTable tr.Violation td.Note {
 table#TPoolSummaryTable tr.Violation td.Note {
    background: #ffc4d8;
 }
+table#TPoolSummaryTable tr.Sum td {
+   font-weight: bold;
+   background: #bbddff;
+   border: 1px dotted black;
+}
+table#TPoolSummaryTable th,
+table#TPoolSummaryTable td {
+   border-left: 1px dotted black;
+   border-right: 1px dotted black;
+}
 
 
 table#PoolViewerTable tr.Title,
