@@ -34,6 +34,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -55,20 +56,18 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $page = "edit_pools.php";
 
 /* Actual REQUEST calls used:
-     tid=&round=                       : edit tournament pools
-     t_unassigned&tid=&round=          : show unassigned users (+ selected pools)
-     t_showpools&tid=&round=           : show selected pools only
-     t_detach&tid=&round=&mark_$uid..  : detach marked users from assigned pools
-     t_assign&tid=&round=&newpool=&mark_$uid..  : assign marked users to new-pool
-     t_assign&tid=&round=&uap_$uid..   : assign (unassigned) users to individual new-pools
-     t_reassign&tid=&round=&rap_$uid.. : re-assign (assigned) users to individual new-pools
-     t_check&tid=&round=               : check pools-integrity and show summary
+     tid=                                 : edit tournament pools
+     t_unassigned&tid=                    : show unassigned users (+ selected pools)
+     t_showpools&tid=                     : show selected pools only
+     t_detach&tid=&mark_$uid..            : detach marked users from assigned pools
+     t_assign&tid=&newpool=&mark_$uid..   : assign marked users to new-pool
+     t_assign&tid=&uap_$uid..             : assign (unassigned) users to individual new-pools
+     t_reassign&tid=&rap_$uid..           : re-assign (assigned) users to individual new-pools
+     t_check&tid=                         : check pools-integrity and show summary
 */
 
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
-   $round = (int) @$_REQUEST['round'];
-   if( $round < 0 ) $round = 0;
    $show_unassigned = ( @$_REQUEST['t_unassigned'] || @$_REQUEST['t_assign'] );
    $show_pools = ( @$_REQUEST['t_showpools'] || $show_unassigned
       || @$_REQUEST['t_detach'] || @$_REQUEST['t_reassign'] );
@@ -86,11 +85,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
-   if( $round < 1 )
-      $round = $tourney->CurrentRound;
+   $round = $tourney->CurrentRound;
    $tround = TournamentRound::load_tournament_round( $tid, $round );
    if( is_null($tround) )
       error('bad_tournament', "Tournament.edit_pools.find_tournament_round($tid,$round,$my_id)");
+   $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
    if( is_null($tprops) )
@@ -100,6 +99,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
+   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_POOL ) );
+   $count_status_errors = count($errors);
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
    if( $tround->PoolSize == 0 || $tround->Pools == 0 )
@@ -119,38 +120,41 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    }
 
    // perform edit-actions: detach, assign-pool
-   if( @$_REQUEST['t_detach'] )
+   if( count($errors) == 0 )
    {
-      $arr_marked_uid = get_marked_users();
-      if( count($arr_marked_uid) )
-         TournamentPool::assign_pool( $tround, 0, $arr_marked_uid );
-   }
-   if( @$_REQUEST['t_assign'] || @$_REQUEST['t_reassign'] )
-   {
-      // bulk-updates for users with invidually assigned new pool
-      if( $show_pools && !$show_unassigned )
-         $arr_assign_uid = get_assigned_user_pools( $errors, 'rap_' ); // re-assign pool-users
-      else
-         $arr_assign_uid = get_assigned_user_pools( $errors, 'uap_' ); // assign detached users
-      if( count($arr_assign_uid) )
+      if( @$_REQUEST['t_detach'] )
       {
-         foreach( $arr_assign_uid as $pool => $arr_uids )
-            TournamentPool::assign_pool( $tround, $pool, $arr_uids );
+         $arr_marked_uid = get_marked_users();
+         if( count($arr_marked_uid) )
+            TournamentPool::assign_pool( $tround, 0, $arr_marked_uid );
       }
-   }
-   if( @$_REQUEST['t_assign'] )
-   {
-      // bulk-update for marked users to one new pool
-      $newpool = trim(get_request_arg('newpool'));
-      if( (string)$newpool != '' )
+      if( @$_REQUEST['t_assign'] || @$_REQUEST['t_reassign'] )
       {
-         if( !is_numeric($newpool) || $newpool < 1 || $newpool > $tround->Pools )
-            $errors[] = sprintf( T_('Pool [%s] for assigning is invalid, must be in range %s'), $newpool, $pool_range_str );
+         // bulk-updates for users with invidually assigned new pool
+         if( $show_pools && !$show_unassigned )
+            $arr_assign_uid = get_assigned_user_pools( $errors, 'rap_' ); // re-assign pool-users
          else
+            $arr_assign_uid = get_assigned_user_pools( $errors, 'uap_' ); // assign detached users
+         if( count($arr_assign_uid) )
          {
-            $arr_marked_uid = get_marked_users();
-            if( count($arr_marked_uid) )
-               TournamentPool::assign_pool( $tround, $newpool, $arr_marked_uid );
+            foreach( $arr_assign_uid as $pool => $arr_uids )
+               TournamentPool::assign_pool( $tround, $pool, $arr_uids );
+         }
+      }
+      if( @$_REQUEST['t_assign'] )
+      {
+         // bulk-update for marked users to one new pool
+         $newpool = trim(get_request_arg('newpool'));
+         if( (string)$newpool != '' )
+         {
+            if( !is_numeric($newpool) || $newpool < 1 || $newpool > $tround->Pools )
+               $errors[] = sprintf( T_('Pool [%s] for assigning is invalid, must be in range %s'), $newpool, $pool_range_str );
+            else
+            {
+               $arr_marked_uid = get_marked_users();
+               if( count($arr_marked_uid) )
+                  TournamentPool::assign_pool( $tround, $newpool, $arr_marked_uid );
+            }
          }
       }
    }
@@ -158,7 +162,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $arr_pool_summary = null;
    if( @$_REQUEST['t_check'] )
    {
-      $errors = array_merge( $errors, TournamentPool::check_pools($tround, $arr_pool_summary) );
+      list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround );
+      $errors = array_merge( $errors, $check_errors );
    }
 
 
@@ -173,7 +178,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    // load selected pool-data
    $poolTables = null;
-   if( $show_pools && count($arr_selpool) && count($errors) == 0 )
+   $count_errors = count($errors);
+   if( $show_pools && count($arr_selpool) && ($count_errors == $count_status_errors) )
    {
       $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
       $tpool_iterator->addQuerySQLMerge(
@@ -206,7 +212,6 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    $tform->set_area(1);
    $tform->add_hidden( 'tid', $tid );
-   $tform->add_hidden( 'round', $round );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
@@ -219,7 +224,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          'DESCRIPTION', T_('Round Status#tround'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
-   if( count($errors) )
+   if( $count_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -253,7 +258,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
             'DESCRIPTION', T_('Edit Actions'),
             'TEXT',        T_('Please note, that selected marks are not saved!'), ));
    }
-   if( $show_pools && !$show_unassigned && count($arr_selpool) )
+   if( $show_pools && !$show_unassigned && count($arr_selpool) && $count_status_errors == 0 )
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '', // align submit-buttons
@@ -279,7 +284,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    if( $show_pools && !is_null($poolTables) )
    {
       $pv_opts = PVOPT_NO_COLCFG | PVOPT_NO_RESULT | PVOPT_NO_EMPTY;
-      if( $show_pools && !$show_unassigned )
+      if( $show_pools && !$show_unassigned && $count_status_errors == 0 )
          $pv_opts |= PVOPT_EDIT_COL;
       $poolViewer = new PoolViewer( $tid, $page, $poolTables, $pv_opts );
       $poolViewer->setEditCallback( 'pools_edit_col_actions' );
@@ -477,30 +482,8 @@ function echo_pool_summary( $tround, $arr_pool_sum )
    global $page, $base_path;
    $tid = $tround->tid;
 
-   $pstable = new Table( 'TPoolSummary', $page, null, 'ps',
-      TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
-
-   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $pstable->add_tablehead( 1, T_('Pool#poolsum_header'), 'Number' );
-   $pstable->add_tablehead( 2, T_('Size#poolsum_header'), 'Number' );
-   $pstable->add_tablehead( 3, T_('Games#poolsum_header'), 'Number' );
-   $pstable->add_tablehead( 4, T_('Pool Errors#poolsum_header'), 'Note' );
-
-   ksort($arr_pool_sum);
-   foreach( $arr_pool_sum as $pool => $arr )
-   {
-      list( $pool_usercount, $errors, $pool_games ) = $arr;
-      $cnt_errors = count($errors);
-      $row_arr = array(
-         1 => $pool,
-         2 => $pool_usercount,
-         3 => $pool_games,
-         4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK#poolsum') ),
-      );
-      if( $cnt_errors )
-         $row_arr['extra_class'] = 'Violation';
-      $pstable->add_row( $row_arr );
-   }
+   $pool_sum = new PoolSummary( $page, $arr_pool_sum );
+   $pstable = $pool_sum->make_table_pool_summary();
 
    section('poolSummary', T_('Pool Summary'));
    echo
