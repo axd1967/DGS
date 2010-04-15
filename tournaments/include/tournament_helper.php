@@ -25,10 +25,13 @@ require_once 'include/connect2mysql.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_extension.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_pool.php';
+require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
@@ -149,7 +152,125 @@ class TournamentHelper
       if( is_null($tprops) )
          error('bad_tournament', "TournamentHelper::create_game_from_tournament_rules.find_tprops($tid)");
 
-      return $trules->create_game( $tprops->RatingUseMode, $user_ch, $user_df );
+      // set challenger & defender rating according to rating-use-mode
+      $ch_uid = $user_ch->ID;
+      $ch_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_ch, $tprops->RatingUseMode );
+      $user_ch->urow['Rating2'] = $ch_rating;
+
+      $df_uid = $user_df->ID;
+      $df_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_df, $tprops->RatingUseMode );
+      $user_df->urow['Rating2'] = $df_rating;
+
+      return $trules->create_game( $user_ch, $user_df );
+   }
+
+   /*!
+    * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
+    * \return number of started games or 0 on lock-error.
+    */
+   function start_tournament_round_games( $tourney, $tround )
+   {
+      global $NOW;
+      $tid = $tourney->ID;
+      $round = $tround->Round;
+      $count_games = 0;
+
+      // lock T-ext
+      $t_ext = new TournamentExtension( $tid, TE_PROP_TROUND_START_TGAMES, 0, $NOW );
+      if( !$t_ext->insert() ) // need to fail if existing
+         return 0;
+
+      // read T-rule
+      $trule = TournamentRules::load_tournament_rule( $tid );
+      if( is_null($trule) )
+         error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_trules($tid)");
+      $trule->TourneyType = $tourney->Type;
+
+      // read T-props
+      $tprops = TournamentProperties::load_tournament_properties( $tid );
+      if( is_null($tprops) )
+         error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_tprops($tid)");
+
+      // read all pools with all users and TPs (if needed for T-rating)
+      $load_opts_tpool = TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
+      if( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX )
+         $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
+      $tpool_iterator = new ListIterator( "TournamentHelper::start_tournament_round_games.load_pools($tid,$round)" );
+      $tpool_iterator->addIndex( 'uid' );
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
+      $poolTables = new PoolTables( $tround->Pools );
+      $poolTables->fill_pools( $tpool_iterator );
+      $arr_poolusers = $poolTables->get_pool_users();
+
+      // loop over all pools
+      $cnt_pools = count($arr_poolusers);
+      echo "<table id=\"Progress\"><tr><td><ul>\n";
+      foreach( $arr_poolusers as $pool => $arr_users )
+      {
+         echo_message( "<br>\n<li>" . sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ) . ":<br>\n" );
+
+         $count_game_curr = $count_games;
+         while( count($arr_users) )
+         {
+            $ch_uid = array_shift( $arr_users ); // challenger
+            $ch_tpool = $poolTables->get_user_tournament_pool( $ch_uid );
+            $user_ch = $ch_tpool->User;
+
+            // start game with all remaining opponent-users (as defender)
+            foreach( $arr_users as $df_uid )
+            {
+               $df_tpool = $poolTables->get_user_tournament_pool( $df_uid );
+               if( TournamentHelper::create_pairing_game( $trule, $tround->ID, $user_ch, $df_tpool->User ) )
+                  $count_games++;
+
+               if( !($count_games % 25) )
+                  echo_message( sprintf( T_('Created %s games so far ...') . "<br>\n", $count_games ));
+            }
+         }
+
+         echo_message( sprintf( T_('Created %s games for pool #%s') . "</li>",
+            ($count_games - $count_game_curr), $pool ));
+      }
+      echo_message("</ul></td></tr></table>\n");
+
+      // switch T-round-status PAIR -> PLAY
+      $tround->setStatus( TROUND_STATUS_PLAY );
+      $tround->update();
+
+      // unlock T-ext
+      $t_ext->delete();
+
+      // return number of created games
+      return $count_games;
+   }//start_tournament_round_games
+
+   /*!
+    * \brief Creates tournament game for specific pairing of two users.
+    * \param $trule TournamentRules-object containing tourney-id tid
+    * \param $tround_id TournamentRound-ID
+    * \param $user_ch 1st user (challenger) as User-object with ID and urow->['TP_ID'] (=rid) set
+    * \param $user_df 2nd user (defender) as User-object (dito as $user_ch)
+    * \return TournamentGames-object or null on error (shouldn't happen because "exceptions" on errors).
+    */
+   function create_pairing_game( $trule, $tround_id, $user_ch, $user_df )
+   {
+      $gid = $trule->create_game( $user_ch, $user_df );
+      if( !$gid )
+         return null;
+
+      $tg = new TournamentGames( 0, $trule->tid );
+      $tg->Challenger_uid = $user_ch->ID;
+      $tg->Challenger_rid = $user_ch->urow['TP_ID'];
+      $tg->Defender_uid   = $user_df->ID;
+      $tg->Defender_rid   = $user_df->urow['TP_ID'];
+
+      $tg->gid = $gid;
+      $tg->Round_ID = $tround_id;
+      $tg->setStatus( TG_STATUS_PLAY );
+      $tg->StartTime = $GLOBALS['NOW'];
+      $tg->insert();
+
+      return $tg;
    }
 
    /*!
