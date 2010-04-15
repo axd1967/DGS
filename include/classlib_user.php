@@ -150,7 +150,7 @@ class User
    }
 
    /*! \brief Returns User-object created from specified (db-)row and given table-prefix. */
-   function new_from_row( $row, $prefix='' )
+   function new_from_row( $row, $prefix='', $urow_strip_prefix=false )
    {
       $user = new User(
             // expected from Players-table
@@ -167,7 +167,17 @@ class User
             @$row[$prefix.'AdminOptions'],
             @$row[$prefix.'Adminlevel']
          );
+
       $user->urow = $row;
+      if( $urow_strip_prefix && (string)$prefix != '' )
+      {
+         foreach( $user->urow as $key => $val )
+         {
+            if( strpos($key, $prefix) == 0 )
+               $user->urow[substr($key, strlen($prefix))] = $val;
+         }
+      }
+
       return $user;
    }
 
