@@ -730,6 +730,17 @@ function grab_output_end( $filename='')
    return write_to_file( $filename, $tmp);
 }
 
+// prints message and flushing output-buffer
+function echo_message( $msg, $flush=true )
+{
+   echo $msg;
+   if( $flush && ob_get_length() )
+   {
+      @ob_flush();
+      @flush();
+   }
+}
+
 /*!
  * \brief Sets $is_down if given user-handle is a maintenance-allowed user (see 'include/config-local.php'.
  * \return true, if given user is a maintenance-allowed user
