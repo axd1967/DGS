@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -50,19 +51,17 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $page = "define_pools.php";
 
 /* Actual REQUEST calls used:
-     tid=&round=              : define tournament pools
-     t_preview&tid=&round=    : preview for tournament-pool-save
-     t_save&tid=&round=       : update (replace) tournament-round pool-info in database
-     t_suggest&tid=&round=    : show suggestions for pool-info
-     t_cancel&tid=&round=     : cancel editing, reload page
+     tid=                     : define tournament pools
+     t_preview&tid=           : preview for tournament-pool-save
+     t_save&tid=              : update (replace) tournament-round pool-info in database
+     t_suggest&tid=           : show suggestions for pool-info
+     t_cancel&tid=            : cancel editing, reload page
      ...&addpool=1            : add one pool (if possible)
      ...&delpool=1            : delete last pool (if possible)
 */
 
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
-   $round = (int) @$_REQUEST['round'];
-   if( $round < 0 ) $round = 0;
 
    $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
    if( is_null($tourney) )
@@ -77,11 +76,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       error('tournament_edit_not_allowed', "Tournament.define_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
-   if( $round < 1 )
-      $round = $tourney->CurrentRound;
+   $round = $tourney->CurrentRound;
    $tround = TournamentRound::load_tournament_round( $tid, $round );
    if( is_null($tround) )
       error('bad_tournament', "Tournament.define_pools.find_tournament_round($tid,$round,$my_id)");
+   $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    if( @$_REQUEST['t_cancel'] )
       jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round");
@@ -90,6 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    // init
    $old_poolcount = $tround->Pools;
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
+   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_POOL ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
@@ -154,7 +154,6 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $tform = new Form( 'tournament', $page, FORM_GET );
    $tform->add_hidden( 'tid', $tid );
-   $tform->add_hidden( 'round', $round );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
@@ -232,7 +231,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       section( 'suggestions', T_('Pool Suggestions') );
       echo "<p>\n",
          sprintf( T_('The table shows sample distributions for the %s registered users of round #%s for allowed pool-sizes.'),
-                  "<b>$reg_count</b>", $tourney->CurrentRound ), ":<br>\n",
+                  "<b>$reg_count</b>", $round ), ":<br>\n",
          $ttable->make_table(),
          "<br>\n";
 
