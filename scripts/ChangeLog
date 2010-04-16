@@ -19,6 +19,92 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-04-16 juga
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.create_game_from_tournament_rules,
+       ~.start_tournament_round_games, ~.create_pairing_game),
+     tournaments/include/tournament_pool.php (class TournamentPool, ~.fillEntityData,
+       ~.new_from_row, ~.load_tournament_pools, ~.seed_pools, ~.check_pools),
+     tournaments/include/tournament_pool_classes.php (PoolTables.get_user_tournament_pool,
+       ~.get_pool_users; class PoolSummary, ~.make_table_pool_summary),
+     tournaments/include/tournament_games.php (class TournamentGames, ~.fillEntityData,
+       ~.new_from_row, ~.count_tournament_games),
+     tournaments/include/tournament_rules.php (TournamentRules.create_game),
+     tournaments/include/tournament_globals.php,
+     include/classlib_user.php (User.new_from_row),
+     tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php (echo_pool_summary),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css, NEWS:
+   - start all tournament-games for all pools of current tournament-round-robin-tourney
+     - load TournamentPool-entries along with user/tournament-participant-rating
+       and time-related data needed for creating-game
+     - starting games is only allowed on PAIR-tournament-round-status
+     - lock creation with TournamentExtension (id=2) to prevent executing it twice
+       at the same time
+     - print progress while starting games as this can be thousands of games
+     - tournament-status will be updated to PLAY-status after successful
+       game-creation for all pools
+   - refactored game-creation for tournament-ladder to support starting games for
+     tournament-round-robin as well preparing users before TournamentRule.create_game()-func
+   - added and enhanced pool-summary for round-robin-tourneys
+   - showing pool-summary with amount of users and games to create for all pools
+     using refactored PoolSummary-class calculate pool-counts with number of games
+     per pool and users per pool with total sums as pool-summary
+   - creating, defining and editing pools is only allowed on POOL-tournament-round-status
+   - added TournamentGames.Round_ID needed for round-robin-pooled tournaments
+   - remove field TournamentPool.GamesRun, which can be calculated
+   - removed round-URL-arg by using current Tournament.CurrentRound instead,
+     which allows easier checks for T-Admins and TDs alike
+   - disabled submit-buttons if creating pools is not allowed
+     because of error or wrong round-status
+   - minor cleanup also returning pool-summary while checking pools
+-----------
+-- added TournamentRound.ID for round-robin tournaments
+ALTER TABLE TournamentGames
+   ADD Round_ID int NOT NULL default '0' AFTER tid,
+   DROP INDEX tid,
+   ADD INDEX tidRound (tid,Round_ID) ;
+
+-- remove calculated field
+ALTER TABLE TournamentPool
+   DROP COLUMN GamesRun ;
+-----------
+
+   * include/std_functions.php (echo_message):
+   - added func to print string along with flushing output-buffers
+
+   * tournaments/include/tournament_extension.php (TournamentExtension.new_from_row):
+   - bugfix loading DateValue-field using UNIX_TIMESTAMP()-func
+
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPooling),
+     tournaments/roundrobin/edit_pools.php (echo_pool_summary):
+   - showing extended pool-summary with amount of users and games to create for all pools
+   - refactored pool-summary for round-robin-tourneys from editing pools
+     into PoolSummary-class
+
+   * tournaments/include/tournament_round_status.php (class TournamentRoundStatus.
+       ~.check_action_status, ~.check_edit_status):
+   - cleanup: allow to pass in TournamentRound-object to save loading of round twice
+   - checks if tournament-round-status allows certain actions,
+     use same checks as for TournamentStatus
+
+2010-04-11 juga
+
+   * tournaments/include/tournament_pool.php (load_tournament_participants_with_pools, check_pools),
+     tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php:
+   - started edit-game-pairing editor:
+     - added games-count for each pool into summary-array
+     - enhanced pool-load-functions to load only T-pools (without TournamentParticipants)
+
+   * tournaments/manage_tournament.php (make_links_ttype_specific):
+   - added link to View-Pools
+   - added link to (new) Edit-game-pairing-editor
+
 2010-04-10 juga
 
    * tournaments/roundrobin/define_pools.php (stripLF, calc_suggestion,
