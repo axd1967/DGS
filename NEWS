@@ -65,6 +65,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
       * Tournament Round Pool Editor (edit pools)
+      * Tournament Round Pairing Editor
       * Tournament Pool view page
 
       * Added Tournaments-link into main-menu (access-key [t])
@@ -227,9 +228,10 @@ Copyright (C) 2001-2010  Erik Ouchterlony
             * linked NEW markers for unread posts
             * approved state of own hidden posts: H=hidden, M=needs-moderation
             * show/hide toggle in header lines
-         * Added navigation links on every post to page top and bottom,
-           previous and next post, previous parent and next parent post,
-           and to first answer of post
+         * Added navigation links on every post to
+            * page top (<image f_top.png>) and page bottom (<image f_bottom.png>),
+            * previous post (<image f_prevanswer.png>), next post (<image f_nextanswer.png>) and first answer of post (<image f_firstanswer.png>),
+            * previous parent post (<image f_prevparent.png>) and next parent post (<image f_nextparent.png>)
          * Fixed viewing of "missing" new posts while replying
          * Added refresh link in forum-bars to reload thread posts view
          * Mark Dragon executives with admin-icon (<image admin.gif>)
@@ -303,8 +305,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Used button-image for ID-column for users and opponents page
 
       * <home opponents.php>Opponents page</home>:
-         * Added column (<image table.gif>) with link to games with current opponent
-           for finished or running games
+         * Added column (<image table.gif>) with link to games with current opponent for finished or running games
          * Highlighted sum-rows and -columns on single opponent-info
 
    * <home edit_profile.php>User Profile</home>:
