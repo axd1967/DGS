@@ -21,6 +21,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
+
+/* Options to sgf.php:
+      quick_mode=0|1       : 1 = ignore errors
+      gid=1234|game1234    : game-id
+      no_cache=0|1         : 1 = disable cache (expire-header)
+      owned_comments=0|1|N : 1 = if set try to return private comments (for players only) including private notes on game,
+                             0 = return only public comments
+                             N = return NO comments or notes
+      bulk=0|1             : 1 = use special filename-pattern (omit handicap if =0 and result if unfinished game):
+                             DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
+ */
+
 $quick_mode = (boolean)@$_REQUEST['quick_mode'];
 if( $quick_mode )
    $TheErrors->set_mode(ERROR_MODE_PRINT);
@@ -447,6 +459,12 @@ $array=array();
    #$use_cache = false;
 
    $owned_comments = @$_GET['owned_comments'];
+   $no_comments = false;
+   if( strtolower($owned_comments) == 'n' )
+   {
+      $owned_comments = 0;
+      $no_comments = true;
+   }
    if( $owned_comments )
       $field_owned =
          'black.Sessioncode AS Blackscode, ' .
@@ -516,15 +534,47 @@ $array=array();
 
    $node_com = "";
 
-   $result = db_query( "sgf.moves($gid)",
-      "SELECT Moves.*,MoveMessages.Text " .
-      "FROM Moves LEFT JOIN MoveMessages " .
-         "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
-      "WHERE Moves.gid=$gid ORDER BY Moves.ID"
-      );
+   if( $no_comments )
+   {
+      $moves_query =
+         "SELECT Moves.*, '' AS Text " .
+         "FROM Moves WHERE Moves.gid=$gid ORDER BY Moves.ID";
+   }
+   else
+   {
+      $moves_query =
+         "SELECT Moves.*,MoveMessages.Text " .
+         "FROM Moves LEFT JOIN MoveMessages " .
+            "ON MoveMessages.gid=$gid AND MoveMessages.MoveNr=Moves.MoveNr " .
+         "WHERE Moves.gid=$gid ORDER BY Moves.ID";
+   }
+   $result = db_query( "sgf.moves($gid)", $moves_query );
+
+   // determine filename
+   if( @$_GET['bulk'] )
+   {
+      // DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
+      $f_rated = ( $row['Rated'] == 'N' ) ? 'F' : 'R';
+      $f_size = $row['Size'];
+      $f_handi = ( $row['Handicap'] > 0 ) ? 'H' . $row['Handicap'] : '';
+      $f_komi = 'K' . str_replace( '.', ',', $row['Komi'] );
+      $f_result = '';
+      if( $row['Status'] == 'FINISHED' )
+      {
+         $f_result = '=' . ( $row['Score'] < 0 ? 'B' : 'W' );
+         if( abs($row['Score']) == SCORE_TIME )
+            $f_result .= 'T';
+         elseif( abs($row['Score']) == SCORE_RESIGN )
+            $f_result .= 'R';
+         else
+            $f_result .= str_replace( '.', ',', abs($row['Score']) );
+      }
+      $filename = "DGS-{$gid}_" . date('Y-m-d', $timestamp) . "_{$f_rated}{$f_size}{$f_handi}{$f_komi}{$f_result}_{$Whitehandle}-{$Blackhandle}";
+   }
+   else
+      $filename = "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp);
 
    header( 'Content-Type: application/x-go-sgf' );
-   $filename= "$Whitehandle-$Blackhandle-$gid-" . date('Ymd', $timestamp) ;
    //before 2007-10-10: header( "Content-Disposition: inline; filename=\"$filename.sgf\"" );
    header( "Content-Disposition: attachment; filename=\"$filename.sgf\"" );
    header( "Content-Description: PHP Generated Data" );
