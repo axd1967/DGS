@@ -19,6 +19,41 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-04-17 juga
+
+   * scripts/admin-sgf-bulk.php (create_dir), NEWS:
+   - added admin-script to perform a SGF-bulk-download of certain games
+
+   * include/sgf_builder.php (class SgfBuilder, ~.echo_sgf, ~.sgf_echo_prop,
+       ~.sgf_echo_comment, ~.sgf_echo_point, ~.load_trimmed_moves,
+       ~.build_sgf_start, ~.build_sgf_moves, ~.build_sgf_result, ~.build_sgf_end),
+     sgf.php:
+   - introduced way to output SGF into buffer instead of printing it directly
+   - bugfix: don't seek to first row if there are no rows avoid mysql-warning
+
+   * include/sgf_builder.php (class SgfBuilder, ~.sgf_echo_prop, ~.sgf_echo_comment,
+       ~.sgf_echo_point, ~.mark_territory, ~.sgf_create_territories, ~.load_game_info,
+       ~.load_player_game_notes, ~.load_trimmed_moves, ~.build_filename_sgf,
+       ~.build_sgf, ~.build_sgf_start, ~.build_sgf_moves, ~.build_sgf_result,
+       ~.build_sgf_end, ~.sgf_simpletext, ~.switch_move_color, ~.sgf_count_string,
+       ~.sgf_echo_rating, ~.sgf_get_ruleset)
+     sgf.php, NEWS:
+   - refactored building of SGF into SgfBuilder-class in 'include/sgf_builder.php'
+   - added URL-arg 'inline' to use "inline"-typed Content-Disposition HTTP-header
+     for direct start of browser-application
+   - moved redundant code setting up reverse_htmlentities_table into quick_common.php
+
+   * include/quick_common.php (reverse_htmlentities),
+     halfhourly_cron.php, rss/status.php, wap/status.php:
+   - moved redundant code setting up reverse_htmlentities_table into quick_common.php
+
+   * sgf.php, NEWS:
+   - enhanced URL-arg 'owned_comments' with value 'N' to omit all comments and notes
+   - added URL-arg 'bulk' using different filename for bulk-download (for admin)
+
+   * links.php:
+   - removed invalid links
+
 2010-04-16 juga
 
    * tournaments/include/tournament_helper.php (TournamentHelper.create_game_from_tournament_rules,
