@@ -269,7 +269,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Included PASS-moves
       * Used 3rd PASS-move as scoring node for better RESUME-handling
       * Removed node-text for pass/scoring-steps (viewer-problems)
+      * Enhanced URL-arg 'owned_comments' with value 'N' to just omit all comments or notes
       * Added URL-arg 'no_cache' to disable cache
+      * Added URL-arg 'bulk' using different filename for bulk-download (for admin)
 
    * Game page:
       * Added way to stay on board after submitting move,
