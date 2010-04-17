@@ -65,7 +65,7 @@ if( $quick_mode )
       $no_comments = true;
    }
 
-   $sgf = new SgfBuilder( $gid );
+   $sgf = new SgfBuilder( $gid, /*use_buf*/false );
    $row = $sgf->load_game_info( $gid );
    extract($row);
 

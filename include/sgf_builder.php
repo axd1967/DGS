@@ -147,7 +147,11 @@ class SgfBuilder
    var $dirx;
    var $diry;
 
-   function SgfBuilder( $gid )
+   var $use_buffer; // bool
+   var $SGF; // output-buffer
+
+
+   function SgfBuilder( $gid, $use_buffer )
    {
       //As board size may be > 'tt' coord, we can't use [tt] for pass moves
       // so we use [] and, then, we need at least sgf_version = 4 (FF[4])
@@ -192,6 +196,17 @@ class SgfBuilder
       // {--- from old board.php (before board class)
       $this->dirx = array( -1,0,1,0 );
       $this->diry = array( 0,-1,0,1 );
+
+      $this->use_buffer = $use_buffer;
+      $this->SGF = '';
+   }
+
+   function echo_sgf( $sgf_text )
+   {
+      if( $this->use_buffer )
+         $this->SGF .= $sgf_text;
+      else
+         echo $sgf_text;
    }
 
    function sgf_echo_prop( $prop )
@@ -200,21 +215,21 @@ class SgfBuilder
       if( stristr('-B-W-MN-', '-'.$prop.'-') )
       {
          if( $this->prop_type == 'setup' )
-            echo "\n;" . $prop;
+            $this->echo_sgf( "\n;" . $prop );
          else
-            echo $prop;
+            $this->echo_sgf( $prop );
          $this->prop_type = 'move';
       }
       else if( stristr('-AB-AE-AW-PL-', '-'.$prop.'-') )
       {
          if( $this->prop_type == 'move' )
-            echo "\n;" . $prop;
+            $this->echo_sgf( "\n;" . $prop );
          else
-            echo $prop;
+            $this->echo_sgf( $prop );
          $this->prop_type = 'setup';
       }
       else
-         echo $prop;
+         $this->echo_sgf( $prop );
    }
 
    function sgf_echo_comment( $com, $trim=true )
@@ -222,11 +237,10 @@ class SgfBuilder
       if( !$com )
          return false;
       $comment_trimmed = ($trim) ? ltrim( $com, "\r\n" ) : $com;
-      echo "\nC[",
+      $this->echo_sgf( "\nC[" .
          str_replace( "]","\\]",
-            str_replace("\\","\\\\",
-               reverse_htmlentities($comment_trimmed) )),
-         "]";
+            str_replace("\\","\\\\", reverse_htmlentities($comment_trimmed) ))
+         . "]" );
       return true;
    }
 
@@ -243,7 +257,7 @@ class SgfBuilder
       if( $overwrite_prop )
       {
          $prop = $overwrite_prop;
-         echo "\n";
+         $this->echo_sgf( "\n" );
          $this->sgf_echo_prop( $prop );
       }
       else
@@ -259,10 +273,10 @@ class SgfBuilder
             if( !$point_prop )
                continue;
             $prop = $point_prop;
-            echo "\n";
+            $this->echo_sgf( "\n" );
             $this->sgf_echo_prop( $prop );
          }
-         echo "[$coord]";
+         $this->echo_sgf( "[$coord]" );
       }
 
       return true;
@@ -472,7 +486,8 @@ class SgfBuilder
             $this->sgf_trim_nr-- ;
          }
 
-         mysql_data_seek($result, 0);
+         if( $this->moves_iterator->ResultRows > 0 )
+            mysql_data_seek($result, 0);
       }
 
       $this->moves_iterator->clearItems();
@@ -523,7 +538,9 @@ class SgfBuilder
    {
       extract($this->game_row);
 
-      echo "(\n;FF[{$this->sgf_version}]GM[1]" . ( $this->charset ? "CA[{$this->charset}]" : '' )
+      $this->echo_sgf(
+         "(\n;FF[{$this->sgf_version}]GM[1]"
+         . ( $this->charset ? "CA[{$this->charset}]" : '' )
          . "\nAP[DGS:".DGS_VERSION."]"
          //. "\nCP[".FRIENDLY_LONG_NAME.", ".HOSTBASE."licence.php]" // copyright on games
          . "\nPC[".FRIENDLY_LONG_NAME.": ".HOSTBASE."]"
@@ -531,11 +548,14 @@ class SgfBuilder
          . "\nGN[" . SgfBuilder::sgf_simpletext($filename) . "]"
          . "\nSO[".HOSTBASE."game.php?gid={$this->gid}]"
          . "\nPB[" . SgfBuilder::sgf_simpletext("$Blackname ($Blackhandle)") . "]"
-         . "\nPW[" . SgfBuilder::sgf_simpletext("$Whitename ($Whitehandle)") . "]";
+         . "\nPW[" . SgfBuilder::sgf_simpletext("$Whitename ($Whitehandle)") . "]"
+         );
 
       // ratings
-      echo "\nBR[", SgfBuilder::sgf_echo_rating($Blackrating), ']',
-           "\nWR[", SgfBuilder::sgf_echo_rating($Whiterating), ']';
+      $this->echo_sgf(
+         "\nBR[" . SgfBuilder::sgf_echo_rating($Blackrating) . ']' .
+         "\nWR[" . SgfBuilder::sgf_echo_rating($Whiterating) . ']'
+         );
 
       // general comment: game-id, rated-game, start/end-ratings
       $w_rating_start = ( is_valid_rating($White_Start_Rating) ) ? SgfBuilder::sgf_echo_rating($White_Start_Rating,true) : '';
@@ -562,7 +582,7 @@ class SgfBuilder
                             SgfBuilder::sgf_echo_rating($Black_End_Rating,true), $Black_End_Rating )
                : "\nBlack End Rating: ?" );
       }
-      echo "\nGC[$general_comment]";
+      $this->echo_sgf( "\nGC[$general_comment]" );
 
       // NOTE: time-properties are noted in seconds, which on turn-based servers
       //       can get very big numbers, disturbing SGF-viewers.
@@ -570,22 +590,23 @@ class SgfBuilder
       if( $this->sgf_version >= 4 )
       {// overtime
          $timeprop = TimeFormat::echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, TIMEFMT_ENGL);
-         echo "\nOT[", SgfBuilder::sgf_simpletext($timeprop), "]";
+         $this->echo_sgf( "\nOT[" . SgfBuilder::sgf_simpletext($timeprop) . "]" );
       }
 
       $rules = SgfBuilder::sgf_get_ruleset($Ruleset); //Mandatory for Go (GM[1])
       if( $rules )
-         echo "\nRU[$rules]";
+         $this->echo_sgf( "\nRU[$rules]" );
 
-      echo "\nSZ[$Size]";
-      echo "\nKM[$Komi]";
+      $this->echo_sgf(
+         "\nSZ[$Size]" .
+         "\nKM[$Komi]" );
 
       if( $Handicap > 0 && $this->use_HA )
-         echo "\nHA[$Handicap]";
+         $this->echo_sgf( "\nHA[$Handicap]" );
 
       if( $Status == 'FINISHED' && isset($Score) )
       {
-         echo "\nRE[" . SgfBuilder::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]";
+         $this->echo_sgf( "\nRE[" . SgfBuilder::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]" );
       }
    }//build_sgf_start
 
@@ -715,7 +736,7 @@ class SgfBuilder
                   if( $this->next_color != $color )
                   {
                      $this->sgf_echo_prop('PL'); //setup property
-                     echo "[$color]";
+                     $this->echo_sgf( "[$color]" );
                   }
 
 
@@ -724,7 +745,7 @@ class SgfBuilder
                   else
                      $this->next_color = 'W';
 
-                  echo( "\n;" ); //Node start
+                  $this->echo_sgf( "\n;" ); //Node start
                   $this->prop_type = '';
 
                   // sync move-number
@@ -735,7 +756,7 @@ class SgfBuilder
                      {
                         //useful when "non AB handicap" or "resume after SCORE"
                         $this->sgf_echo_prop('MN'); //move property
-                        echo "[$movenum]";
+                        $this->echo_sgf( "[$movenum]" );
                         $movesync = $MoveNr - $movenum;
                      }
                   }
@@ -743,11 +764,11 @@ class SgfBuilder
                   if( $PosX < POSX_PASS )
                   { //score steps, others filtered by sgf_trim_level
                      $this->sgf_echo_prop($color);
-                     echo "[]"; // add 3rd pass
+                     $this->echo_sgf( "[]" ); // add 3rd pass
                      $this->next_color = SgfBuilder::switch_move_color( $color );
 
                      if( $this->sgf_score_highlight & 1 )
-                        echo "N[$color SCORE]";
+                        $this->echo_sgf( "N[$color SCORE]" );
 
                      if( $this->sgf_score_highlight & 2 )
                         $this->node_com .= "\n$color SCORE";
@@ -760,10 +781,10 @@ class SgfBuilder
                      if( $PosX == POSX_PASS )
                      {
                         $this->sgf_echo_prop($color); //move property
-                        echo "[]"; //do not use [tt]
+                        $this->echo_sgf( "[]" ); //do not use [tt]
 
                         if( $this->sgf_pass_highlight & 1 )
-                           echo "N[$color PASS]";
+                           $this->echo_sgf( "N[$color PASS]" );
 
                         if( $this->sgf_pass_highlight & 2 )
                            $this->node_com .= "\n$color PASS";
@@ -771,7 +792,7 @@ class SgfBuilder
                      else //move or non AB handicap
                      {
                         $this->sgf_echo_prop($color); //move property
-                        echo "[$coord]";
+                        $this->echo_sgf( "[$coord]" );
                      }
 
                      $this->points = array();
@@ -792,12 +813,12 @@ class SgfBuilder
    {
       if( $this->game_row['Status'] == 'FINISHED' )
       {
-         echo "\n;"; // Node start
+         $this->echo_sgf( "\n;" ); // Node start
          $this->sgf_echo_prop($this->next_color);
-         echo "[]"; // add 3rd pass
+         $this->echo_sgf( "[]" ); // add 3rd pass
 
          if( $this->include_node_name )
-            echo "N[RESULT]"; //Node start
+            $this->echo_sgf( "N[RESULT]" ); //Node start
          $this->prop_type = '';
 
          // highlighting result in last comments:
@@ -854,7 +875,7 @@ class SgfBuilder
       $this->sgf_echo_comment( $this->node_com, false ); // no trim
       $this->node_com = '';
 
-      echo "\n)\n";
+      $this->echo_sgf( "\n)\n" );
    }
 
 
