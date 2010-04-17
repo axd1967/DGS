@@ -58,19 +58,6 @@ for( $i=0x80; $i<0x100 ; $i++ )
    $xmltrans[chr($i)] = "&#$i;";
 
 
-// can't use html_entity_decode() because of the '&nbsp;' below:
-//HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
-$reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
-$reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
-$reverse_htmlentities_table['&nbsp;'] = ' '; //else may be '\xa0' as with html_entity_decode()
-function reverse_htmlentities( $str)
-{
-   //return html_entity_decode($str, ENT_QUOTES, 'UTF-8');
-   global $reverse_htmlentities_table;
-   return strtr($str, $reverse_htmlentities_table);
-}
-
-
 // could not be called twice on the same string
 function wap_safe( $str)
 {

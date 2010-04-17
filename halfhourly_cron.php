@@ -26,13 +26,13 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
 {
    //HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
-   $reverse_htmlentities_table= get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
-   $reverse_htmlentities_table= array_flip($reverse_htmlentities_table);
+   $local_reverse_htmlentities_table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
+   $local_reverse_htmlentities_table = array_flip($local_reverse_htmlentities_table);
 
    function html_entity_decode($str, $quote_style=ENT_COMPAT, $charset='ISO-8859-1')
    {
-    global $reverse_htmlentities_table;
-      return strtr($str, $reverse_htmlentities_table);
+      global $local_reverse_htmlentities_table;
+      return strtr($str, $local_reverse_htmlentities_table);
    }
 }
 
