@@ -463,6 +463,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
       * Different CSS-layout for most admin-actions
+      * Added admin-script for bulk SGF-downloads
 
 
    Server config:
