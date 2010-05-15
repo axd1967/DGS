@@ -226,6 +226,8 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $message_raw = trim(get_request_arg('message'));
+   if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
+      $message_raw = '';
    $message = mysql_addslashes($message_raw);
    $message_query = '';
 
