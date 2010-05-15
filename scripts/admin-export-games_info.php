@@ -39,9 +39,9 @@ require_once 'include/rating.php';
    $errors = array();
    if( $argc == 2 )
    {
-      $cmd = $argv[1];
-      if( $cmd != 'count' && $cmd != 'exec' )
-         $errors[] = "Bad command '$cmd', allowed are [count|exec]";
+      $offset = $argv[1];
+      if( !is_numeric($offset) || $offset < 10 || $offset > 1000 )
+         $errors[] = "Bad offset '$offset', allowed are integers between [10..1000]";
    }
    else
       $errors[] = 'Bad arguments';
@@ -49,9 +49,9 @@ require_once 'include/rating.php';
    {
       $err_text = implode('], [', $errors);
       echo "ERROR: [$err_text]\n";
-      echo "Usage: $argv[0] <command>\n";
+      echo "Usage: $argv[0] <offset>\n";
       echo "Options:\n";
-      echo "   <command> = count (=count games to load), exec (=export games-info)\n";
+      echo "   <offset> = row-count to retrieve in one SELECT-query\n";
       echo "\n";
       exit;
    }
@@ -65,9 +65,8 @@ require_once 'include/rating.php';
 
    $qsql = new QuerySQL(
       SQLP_FIELDS,
-         'G.ID AS gid',
-         'YEAR(G.Lastchanged) AS Year',
          'G.*',
+         'YEAR(G.Lastchanged) AS Year',
          'UNIX_TIMESTAMP(G.Starttime) AS X_Starttime',
          'UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged',
       SQLP_FROM,
@@ -75,30 +74,38 @@ require_once 'include/rating.php';
       SQLP_WHERE,
          "G.Status='FINISHED'",
       SQLP_ORDER,
-         'G.Lastchanged ASC',
-         'G.ID ASC'
+         'G.Lastchanged ASC' // needs sort by date (year)
    );
-   $result = db_query( 'export_gamesinfo.find_games', $qsql->get_select() );
-
-   $rows = @mysql_num_rows($result);
-   echo "There are $rows games to export ...\n";
-   if( $cmd != 'exec' )
-      exit;
+   $query = $qsql->get_select();
 
    $cnt = 0;
    $begin_secs = time();
    $filehandle = null;
    $curr_year = -1;
-   while( $row = mysql_fetch_array( $result ) )
+   $curr_offset = 0;
+   while( true )
    {
-      $cnt++;
-      $timediff = time() - $begin_secs;
-      if( !($cnt % 10000) )
-         echo "Retrieving game $gid ($cnt / $rows) ... needed $timediff secs so far ...\n";
+      $result = db_query( 'export_gamesinfo.find_games', "$query LIMIT $curr_offset, $offset" );
 
-      write_game_info( $curr_year, $row );
+      $rows = @mysql_num_rows($result);
+      if( $rows <= 0 )
+         break;
+      echo "There are $rows games to export from offset $offset ...\n";
+
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $cnt++;
+         if( !($cnt % 20) )
+         {
+            $timediff = time() - $begin_secs;
+            echo "Retrieving game $gid ($cnt / $rows) ... needed $timediff secs so far ...\n";
+         }
+
+         write_game_info( $curr_year, $row );
+      }
+      mysql_free_result($result);
+      $curr_offset += $offset;
    }
-   mysql_free_result($result);
 
    close_file();
 
