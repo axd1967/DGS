@@ -19,6 +19,25 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-05-15 juga
+
+   * scripts/admin-export-games_info.php, NEWS:
+   - added admin-script to perform export of info for all finished games
+
+   * include/std_functions.php (echo_dragon_top_bar), bookmark.php:
+   - added system-bookmark link to edit vacation
+
+   * people.php:
+   - removed "FAQ-maintainer", only use role as "FAQ-editor"
+
+   * include/config.php, game.php, NEWS:
+   - sync from stable-branch; (experimental for sensei-account on live-DGS):
+     added AUTO_COMMENT_UID-config with Players.ID
+     for which to add "<c></c>"-tags on new game-message
+
+   * confirm.php:
+   - empty game-message if only containing empty <c>-tags
+
 2010-04-17 juga
 
    * scripts/admin-sgf-bulk.php (create_dir), NEWS:
@@ -29,7 +48,7 @@ ChangeLog
        ~.build_sgf_start, ~.build_sgf_moves, ~.build_sgf_result, ~.build_sgf_end),
      sgf.php:
    - introduced way to output SGF into buffer instead of printing it directly
-   - bugfix: don't seek to first row if there are no rows avoid mysql-warning
+   - bugfix: don't seek to first row if there are no rows to avoid mysql-warning
 
    * include/sgf_builder.php (class SgfBuilder, ~.sgf_echo_prop, ~.sgf_echo_comment,
        ~.sgf_echo_point, ~.mark_territory, ~.sgf_create_territories, ~.load_game_info,
@@ -40,7 +59,7 @@ ChangeLog
      sgf.php, NEWS:
    - refactored building of SGF into SgfBuilder-class in 'include/sgf_builder.php'
    - added URL-arg 'inline' to use "inline"-typed Content-Disposition HTTP-header
-     for direct start of browser-application
+     for direct start of browser-application when downloading SGF
    - moved redundant code setting up reverse_htmlentities_table into quick_common.php
 
    * include/quick_common.php (reverse_htmlentities),
@@ -8658,6 +8677,7 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2009-12-13: uploaded contact-enhancement + bug fix (by JUG) as DGS 1.0.14.j
 2010-01-01: bug fix update (by JUG) as DGS 1.0.14.k
 2010-02-24: uploaded quick-play-enhancement (by JUG) as DGS 1.0.14.l
+2010-05-10: uploaded experimental auto-comment for DGS-sensei (by JUG) as DGS 1.0.14.m
 
 2008-12-14 juga
 
