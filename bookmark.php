@@ -37,8 +37,10 @@ require_once( "include/std_functions.php" );
       'S2' => 'opponents.php?ssf4=1&sf14=10&sf14tu=64&sort1=14&desc1=1',
       // users "online" during the last 5 mins
       'S3' => 'users.php?sf14=5&sf14tu=64&sort1=14&active=0',
+      // shortcut to edit vacation
+      'S4' => 'edit_vacation.php',
       // shortcut to editing profile
-      'S4' => 'edit_profile.php',
+      'S5' => 'edit_profile.php',
    );
 
    // get and check args

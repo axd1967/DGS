@@ -483,7 +483,8 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
             '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
             '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
             '<option value="S3">' . T_('Users online#bookmark') . '</option>',
-            '<option value="S4">' . T_('Edit profile#bookmark') . '</option>',
+            '<option value="S4">' . T_('Edit vacation#bookmark') . '</option>',
+            '<option value="S5">' . T_('Edit profile#bookmark') . '</option>',
          '</select>',
          '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
          ;
