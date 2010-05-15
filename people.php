@@ -131,8 +131,6 @@ function get_executives( $level )
 
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_FAQ);
    $FAQexclude = array( 'ejlo', 'rodival' );
-   $FAQmain = 'Ingmar';
-   $FAQmainID = 0;
 
    $result = db_query( 'people.faq_admins',
       "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
@@ -154,24 +152,11 @@ function get_executives( $level )
          $row['LastUpdate'] = ($lastUpd) ? $lastUpd['Date'] : 0;
       }
 
-      if( $row['Handle'] == $FAQmain )
-         $FAQmainID = $uid;
-
       $FAQ_list[$uid] = $row;
    }
    mysql_free_result($result);
 
-   if( $FAQmainID > 0 )
-   {
-      $row = $FAQ_list[$FAQmainID];
-      add_contributor( T_("FAQ editor"), $row['ID'], $row['Name'], $row['Handle'],
-         ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
-      $FAQexclude[] = $FAQmain;
-   }
-   else
-      $FAQmain='';
-
-   $first = T_("FAQ co-editor");
+   $first = T_('FAQ editor');
    foreach( $FAQ_list as $uid => $row )
    {
       if( in_array( $row['Handle'], $FAQexclude) )
