@@ -66,7 +66,7 @@ if( $quick_mode )
    }
 
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
-   $row = $sgf->load_game_info( $gid );
+   $row = $sgf->load_game_info();
    extract($row);
 
    $filename = $sgf->build_filename_sgf( @$_GET['bulk'] );

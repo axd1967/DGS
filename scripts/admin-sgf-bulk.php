@@ -102,7 +102,7 @@ require_once 'include/sgf_builder.php';
 
       // build SGF in buffer
       $sgf = new SgfBuilder( $gid, /*use_buf*/true );
-      $sgf->load_game_info( $gid );
+      $sgf->load_game_info();
       $filename = $sgf->build_filename_sgf( /*bulk*/true );
       $sgf->load_trimmed_moves( /*comments*/false );
       $sgf->build_sgf( $filename, $owned_comments );
