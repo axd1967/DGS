@@ -286,6 +286,13 @@ function get_alt_arg( $n1, $n2)
 
             $TheBoard->set_move_mark( $colnr, $rownr);
             //$coord must be kept for validation by confirm.php
+
+            // auto-comment option
+            if( defined('AUTO_COMMENT_UID') && AUTO_COMMENT_UID && ($Black_ID == AUTO_COMMENT_UID || $White_ID == AUTO_COMMENT_UID) )
+            {
+               if( (string)trim($message) == '' )
+                  $message = "<c>\n\n</c>";
+            }
             break;
          }//case 'domove'
 

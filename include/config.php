@@ -172,6 +172,10 @@ define('LIST_GAMENOTE_LEN', 20);
 // enable donation-links
 define('ENABLE_DONATIONS', false);
 
+// Players.ID adding <c>-help for game-comments (used for DGS-sensei-account)
+// set to 0 to disable
+define('AUTO_COMMENT_UID', 9284);
+
 // list with user-handles allowed to login during maintenance-mode
 // activate with $is_down var in 'include/quick_common.php'
 $ARR_USERS_MAINTENANCE = array();
