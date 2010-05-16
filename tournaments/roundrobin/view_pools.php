@@ -90,10 +90,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $poolTables = new PoolTables( $tround->Pools );
    $poolTables->fill_pools( $tpool_iterator );
 
-   //TODO load T-games
-   //$tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
-   //$tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, /*TODO*/$tround->ID, /*all-stati*/null );
-   //$poolTables->fill_games( $tg_iterator );
+   $tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
+   $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, /*all-stati*/null );
+   $poolTables->fill_games( $tg_iterator );
+   $counts = $poolTables->count_games();
 
 
    // --------------- Tournament-Pools EDIT form --------------------
@@ -109,9 +109,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          "</tr></table>\n";
    }
 
+   echo sprintf( T_('Round summary: %s games started, %s finished, %s running'),
+                 $counts['all'], $counts['finished'], $counts['run'] ),
+      "<br>\n";
+
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
    if( $my_tpool )
-      echo sprintf( T_('You are playing in Pool %s.'), $my_tpool->Pool ), "<br><br>\n";
+      echo sprintf( T_('You are playing in Pool %s.'), $my_tpool->Pool ), "<br>\n";
+   echo "<br>\n";
 
    $poolViewer = new PoolViewer( $tid, $page, $poolTables, ( $need_trating ? 0 : PVOPT_NO_TRATING ) );
    $poolViewer->init_table();
