@@ -166,6 +166,8 @@ class TournamentHelper
 
    /*!
     * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
+    * \note IMPORTANT NOTE: need HOT-section
+    *
     * \return number of started games or 0 on lock-error.
     */
    function start_tournament_round_games( $tourney, $tround )
