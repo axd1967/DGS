@@ -172,7 +172,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    if( $do_pair )
    {
       $thelper = new TournamentHelper();
-      $count_created_games = $thelper->start_tournament_round_games( $tourney, $tround );
+      ta_begin();
+      {//HOT-section to start all T-games for T-round
+         $count_created_games = $thelper->start_tournament_round_games( $tourney, $tround );
+      }
+      ta_end();
    }
 
 
