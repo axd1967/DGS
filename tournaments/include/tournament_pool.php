@@ -48,7 +48,6 @@ define('TPOOL_LOADOPT_TRATING', 0x02 ); // load TournamentParticipant.Rating
 define('TPOOL_LOADOPT_REGTIME', 0x04 ); // load TournamentParticipant.Created (=register-time)
 define('TPOOL_LOADOPT_ONLY_RATING', 0x08 ); // only load Rating2 from Players-table
 define('TPOOL_LOADOPT_UROW_RATING', 0x10 ); // additionally set TPool->User->urow['Rating2']
-define('TPOOL_LOADOPT_TP_RID',  0x20 ); // load TournamentParticipant.IP as rid for TournamentGames
 
 global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
@@ -68,6 +67,7 @@ class TournamentPool
    // non-DB fields
 
    var $User; // User-object
+   var $PoolGames; // PoolGame-object array
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
    function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0 )
@@ -78,7 +78,14 @@ class TournamentPool
       $this->Pool = (int)$pool;
       $this->uid = (int)$uid;
       // non-DB fields
-      $this->User = (is_a($uid, 'User')) ? $user : new User( $this->uid );
+      if( is_a($uid, 'User') )
+      {
+         $this->User = $uid;
+         $this->uid = $this->User->ID;
+      }
+      else
+         $this->User = new User( $this->uid );
+      $this->PoolGames = array();
    }
 
    function to_string()
@@ -215,7 +222,7 @@ class TournamentPool
    function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
    {
       $needs_user = ( $load_opts & TPOOL_LOADOPT_USER );
-      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME|TPOOL_LOADOPT_TP_RID) );
+      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
       $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
       $has_userdata = $needs_user || $needs_tp;
 
@@ -225,9 +232,9 @@ class TournamentPool
          if( !($load_opts & TPOOL_LOADOPT_ONLY_RATING) )
          {
             $qsql->add_part( SQLP_FIELDS,
+               'TPU.ID AS TPU_ID', // MUST have to overwrite TP.ID with Players.ID in User-obj and User->urow(!)
                'TPU.Name AS TPU_Name',
                'TPU.Handle AS TPU_Handle',
-               'TPU.Country AS TPU_Country',
                'TPU.Country AS TPU_Country',
                'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess' );
          }
@@ -270,7 +277,6 @@ class TournamentPool
          if( $has_userdata )
          {
             $user = User::new_from_row( $row, 'TPU_', /*urow-strip-prefix*/true );
-            $user->ID = $tpool->uid;
             $user->urow['TP_ID'] = (int)@$row['TP_ID'];
             $user->urow['TP_X_RegisterTime'] = (int)@$row['TP_X_RegisterTime'];
             $user->urow['TP_Rating'] = (float)@$row['TP_Rating'];
