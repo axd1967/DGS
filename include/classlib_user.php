@@ -171,10 +171,11 @@ class User
       $user->urow = $row;
       if( $urow_strip_prefix && (string)$prefix != '' )
       {
+         $prefixlen = strlen($prefix);
          foreach( $user->urow as $key => $val )
          {
             if( strpos($key, $prefix) == 0 )
-               $user->urow[substr($key, strlen($prefix))] = $val;
+               $user->urow[substr($key, $prefixlen)] = $val;
          }
       }
 
