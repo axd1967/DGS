@@ -313,14 +313,14 @@ class TournamentStatus
    function check_edit_status( $arr_status, $allow_admin=true )
    {
       return $this->check_action_status(
-         T_('Edit is forbidden for tournament on status [%s], only allowed for (%s) !'),
+         T_('Edit is forbidden for tournament on status [%s], only allowed for [%s] !'),
          $arr_status, $allow_admin );
    }
 
    function check_view_status( $arr_status, $allow_admin=true )
    {
       return $this->check_action_status(
-         T_('View of tournament is forbidden on status [%s], only allowed for (%s) !'),
+         T_('View of tournament is forbidden on status [%s], only allowed for [%s] !'),
          $arr_status, $allow_admin );
    }
 

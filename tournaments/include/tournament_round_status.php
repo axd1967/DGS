@@ -220,7 +220,7 @@ class TournamentRoundStatus
    function check_edit_status( $arr_status, $allow_admin=true )
    {
       return $this->check_action_status(
-         T_('Edit is forbidden for tournament round on status [%s], only allowed for (%s) !'),
+         T_('Edit is forbidden for tournament round on status [%s], only allowed for [%s] !'),
          $arr_status, $allow_admin );
    }
 
