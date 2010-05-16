@@ -294,18 +294,21 @@ class TournamentGames
 
    /*!
     * \brief Returns ListIterator with TournamentGames-objects for given tournament-id and TournamentGames-status.
+    * \param $round_id optional TournamentRound.ID
     * \param $status null=no restriction on status, single-status or array with status to restrict on
     */
-   function load_tournament_games( $iterator, $tid, $status=null )
+   function load_tournament_games( $iterator, $tid, $round_id=0, $status=null )
    {
       $qsql = TournamentGames::build_query_sql( $tid );
       if( is_array($status) )
          $qsql->add_part( SQLP_WHERE, build_query_in_clause('TG.Status', $status, true) );
       elseif( !is_null($status) )
          $qsql->add_part( SQLP_WHERE, "TG.Status='" . mysql_addslashes($status) . "'" );
+      if( $round_id > 0 )
+         $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentGames::load_tournament_games", $query );
+      $result = db_query( "TournamentGames::load_tournament_games($tid,$round_id)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
