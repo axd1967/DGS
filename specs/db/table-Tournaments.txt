@@ -640,6 +640,12 @@ Description:
    - 0 for ladder-type tournaments
    - only set for round-robin-type tournaments
 
+   - Q: why is this field needed ?
+     A: problem is that T-game is not unique for different rounds. Two players
+        could meet again in later rounds. T-game most often used to process
+        T-game-end. Round-no makes a bad index, so used TRound.ID
+
+
 * gid : FK to Games.ID, 0 = unset yet
 
 * Status : status for Tournament-game
