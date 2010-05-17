@@ -236,6 +236,15 @@ function make_links_ttype_specific( $tourney, $tstat )
             . '<li>'
             . make_menu_link( T_('Edit game pairing'), array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('Edit game pairing (starting games for all pools)#mngt') ));
+
+      if( $tstat == TOURNEY_STATUS_PLAY )
+         return '<li>'
+            . make_menu_link( T_('View Pools'), "tournaments/roundrobin/view_pools.php?tid=$tid" )
+            . SEP_SPACING
+            . make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" )
+            . '<li>'
+            . make_admin_tgame( $tid ) . MED_SPACING . '(' . T_('also see game info pages') . ')'
+            . subList( array( T_('End game, Add time#mngt') ));
    }
 
    return '';
