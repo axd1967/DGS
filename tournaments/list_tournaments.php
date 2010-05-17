@@ -23,6 +23,8 @@ chdir('..');
 require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/table_columns.php';
+require_once 'include/game_functions.php';
+require_once 'include/time_functions.php';
 require_once 'include/filter.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/classlib_userconfig.php';
@@ -57,11 +59,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    foreach( Tournament::getTypeText() as $type => $text )
       $type_filter_array[$text] = "T.Type='$type'";
 
-   $status_filter_array = array(
-         T_('All') => '',
-         T_('Open#T_status')   => "T.Status IN ('".TOURNEY_STATUS_NEW."','".TOURNEY_STATUS_REGISTER."')",
-         T_('Active#T_status') => "T.Status IN ('".TOURNEY_STATUS_PAIR."','".TOURNEY_STATUS_PLAY."')",
-      );
+   $status_filter_array = array( T_('All') => '' );
    $idx = 1;
    foreach( Tournament::getStatusText() as $status => $text )
    {
@@ -107,6 +105,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $tfilter->add_filter( 6, 'Selection', $owner_filter_array, true );
    $tfilter->add_filter( 8, 'RelativeDate', 'T.StartTime', true,
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ));
+   $tfilter->add_filter(13, 'Numeric', 'TRULE.Size', true,
+         array( FC_SIZE => 3 ));
    $tfilter->init();
 
    // init table
@@ -122,11 +122,16 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead( 3, T_('Type#headert'), 'Enum', 0, 'Type+');
    $ttable->add_tablehead( 4, T_('Status#headert'), 'Enum', 0, 'Status+');
    $ttable->add_tablehead( 5, T_('Title#headert'), '', TABLE_NO_HIDE, 'Title+');
-   $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
    if( $has_uid )
       $ttable->add_tablehead(11, T_('Registration Status#headert'), 'Enum', TABLE_NO_HIDE, 'TP_Status+');
+   $ttable->add_tablehead(13, T_('Size#headert'), 'Number', 0, 'TRULE.Size-');
+   $ttable->add_tablehead(14, T_('Rated#headert'), 'YesNo', TABLE_NO_SORT);
+   $ttable->add_tablehead(15, T_('Ruleset#headert'), 'Enum', TABLE_NO_SORT);
    if( $is_admin )
       $ttable->add_tablehead(12, T_('Flags#headert'), '', 0, 'Flags-');
+   $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
+   $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
+   $ttable->add_tablehead(17, T_('Tournament-Size#headert'), 'NumberC', TABLE_NO_SORT);
    $ttable->add_tablehead( 6, T_('Owner#headert'), 'User', 0, 'X_OwnerHandle+');
    $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
@@ -138,6 +143,20 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $query_tsfilter = $tsfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $tqsql = $ttable->get_query(); // clause-parts for filter
    $tqsql->merge( $query_tsfilter );
+   $tqsql->merge( new QuerySQL(
+      SQLP_FIELDS,
+         'TRULE.Size',
+         "IF(TRULE.Rated='N','N','Y') AS X_Rated",
+         'TRULE.Ruleset',
+         'TRULE.Maintime', 'TRULE.Byotype', 'TRULE.Byotime', 'TRULE.Byoperiods',
+      SQLP_FROM,
+         'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID' ));
+   if( $ttable->is_column_displayed(17) )
+   {
+      $tqsql->merge( new QuerySQL(
+         SQLP_FIELDS, 'TPR.MaxParticipants',
+         SQLP_FROM, 'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
+   }
 
    $iterator = new ListIterator( 'Tournaments',
          $tqsql,
@@ -206,7 +225,17 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       }
       if( $is_admin && $ttable->Is_Column_Displayed[12] )
          $row_str[12] = $tourney->formatFlags('', 0, true, 'TWarning');
-
+      if( $ttable->Is_Column_Displayed[13] )
+         $row_str[13] = $orow['Size']; // TRULE.Size
+      if( $ttable->Is_Column_Displayed[14] )
+         $row_str[14] = ($orow['X_Rated'] == 'N') ? T_('No') : T_('Yes');
+      if( $ttable->Is_Column_Displayed[15] )
+         $row_str[15] = getRulesetText( $orow['Ruleset'] );
+      if( $ttable->Is_Column_Displayed[16] )
+         $row_str[16] = TimeFormat::echo_time_limit( $orow['Maintime'], $orow['Byotype'],
+            $orow['Byotime'], $orow['Byoperiods'], TIMEFMT_SHORT|TIMEFMT_ADDTYPE|TIMEFMT_ADDTYPE );
+      if( $ttable->Is_Column_Displayed[17] )
+         $row_str[17] = ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE;
 
       $ttable->add_row( $row_str );
    }
