@@ -94,7 +94,7 @@ class PoolTables
    {
       $this->users = array();
       $this->pools = array();
-      foreach( range(1, $count_pools) as $pool )
+      for( $pool=1; $pool <= $count_pools; $pool++ )
          $this->pools[$pool] = array();
    }
 
@@ -204,13 +204,28 @@ class PoolTables
       return $max_users;
    }
 
-   /*! \brief Returns #users for each pool. */
+   /*!
+    * \brief Returns #users for each pool with some extra.
+    * \return arr( pool => arr( user-count, errors-arr(empty), pool-games-count ), ... ).
+    */
    function calc_pool_summary()
    {
-      $arr = array(); // [ pool => #users, ... ]
+      $arr = array(); // [ pool => [ #users, [], #games-per-pool ], ... ]
       foreach( $this->pools as $pool => $arr_users )
-         $arr[$pool] = count($arr_users);
+      {
+         $usercount = count($arr_users);
+         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount) );
+      }
       return $arr;
+   }
+
+   /*! \brief Returns expected sum of games for all pools. */
+   function calc_pool_games_count()
+   {
+      $count = 0;
+      foreach( $this->pools as $pool => $arr_users )
+         $count += TournamentUtils::calc_pool_games( count($arr_users) );
+      return $count;
    }
 
 } // end of 'PoolTables
@@ -276,6 +291,22 @@ class PoolSummary
 
       return $this->table;
    }
+
+   /*! \brief returns arr( pools-count, user-count, games-count ). */
+   function get_counts()
+   {
+      $cnt_users = 0;
+      $cnt_games = 0;
+      foreach( $this->pool_summary as $pool => $arr )
+      {
+         list( $pool_usercount, $errors, $pool_games ) = $arr;
+         $cnt_users += $pool_usercount;
+         $cnt_games += $pool_games;
+      }
+
+      return array( count($this->pool_summary), $cnt_users, $cnt_games );
+   }
+
 } // end of 'PoolSummary'
 
 
