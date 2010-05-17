@@ -128,7 +128,7 @@ class TournamentGames
       if( $uid > 0 && $this->isScoreStatus() )
          return (( $this->Challenger_uid == $uid ) ? 1 : -1 ) * $this->Score;
       else
-         return -OUT_OF_RATING;
+         return null;
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */

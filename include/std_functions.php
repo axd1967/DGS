@@ -2091,7 +2091,7 @@ function score2text($score, $verbose, $keep_english=false)
 {
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
-   if( !isset($score) )
+   if( is_null($score) || !isset($score) || abs($score) >= SCORE_TIME )
       return "?";
 
    if( $score == 0 )

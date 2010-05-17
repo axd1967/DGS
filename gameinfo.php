@@ -379,7 +379,7 @@ function build_rating_diff( $rating_diff )
             Tournament::getTypeText($tourney->Type) );
       $itable->add_sinfo(
             T_('Title#tourney'),
-            make_html_safe($tourney->Title, true) );
+            make_html_safe(wordwrap($tourney->Title, 30), true) );
       if( $tourney->Type != TOURNEY_TYPE_LADDER )
          $itable->add_sinfo(
                T_('Current Round#tourney'),
@@ -402,7 +402,7 @@ function build_rating_diff( $rating_diff )
 
             $tg_score = $tgame->getScoreForUser( $grow['Black_ID'] );
             $tg_score_str = score2text( $tg_score, false );
-            if( !$game_finished || ( @$grow['Score'] != $tg_score ) )
+            if( !$game_finished || ( !is_null($tg_score) && @$grow['Score'] != $tg_score ) )
                $tg_score_str = span('ScoreWarning', $tg_score_str );
 
             $itable->add_sinfo(
