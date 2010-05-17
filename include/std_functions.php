@@ -39,6 +39,7 @@ if( !isset($page_microtime) )
 }
 
 require_once( "include/page_functions.php" );
+require_once( "include/gui_functions.php" );
 
 require_once( "include/translation_functions.php" );
 require_once( "include/classlib_matrix.php" );
@@ -462,7 +463,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
 function echo_dragon_top_bar( $logged_in, $user_handle )
 {
-   global $base_path, $is_down, $printable, $is_maintenance;
+   global $base_path, $is_down, $printable, $is_maintenance, $player_row;
 
    // forum for bookmark (around table for formatting)
    if( !$printable )
@@ -491,7 +492,9 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    }
 
    if( $is_maintenance ) // mark also for maintainers
-      echo '&nbsp;&nbsp;|&nbsp;&nbsp;<b>[ MAINTENANCE ]</b>';
+      echo SEP_MEDSPACING . span('Maintenance', '[MAINTENANCE]');
+   if( @$player_row['admin_level'] & ADMIN_TOURNAMENT ) // remind of mighty T-Admin
+      echo SEP_MEDSPACING . span('AdminTournament', '[Tournament-Admin]');
 
    echo "</td>";
    echo "\n  <td class='LoginBox'>";

@@ -292,6 +292,11 @@ span.FormWarning {
    color: darkred;
 }
 
+span.Maintenance {
+   font-weight: bold;
+   background: red;
+}
+
 .DebugInfoBox {
    width: auto;
    height: auto;
@@ -2633,6 +2638,11 @@ table.Forum span.ErrorMsg {
 /* ------------------------- */
 /* Tournaments pages */
 /* ------------------------- */
+
+span.AdminTournament {
+   font-weight: bold;
+   background: red;
+}
 
 span.EditNote {
    font-size: 80%;
