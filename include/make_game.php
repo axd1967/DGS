@@ -295,7 +295,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       $col_to_move = BLACK;
       $clock_used = $clock_used_black;
    }
-   $last_ticks = get_clock_ticks($clock_used);
+   $last_ticks = get_clock_ticks( $clock_used, /*refresh-cache*/false );
 
    $game_info_row['X_BlackClock'] = $black_row['ClockUsed']; // no weekendclock-offset or vacation-clock
    $game_info_row['X_WhiteClock'] = $white_row['ClockUsed'];

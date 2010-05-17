@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Common";
 
 require_once 'include/globals.php';
+require_once 'include/cache_clock.php';
 
 
 define('NIGHT_LEN', 9); //may be from 0 to 24 hours
@@ -142,16 +143,10 @@ function is_nighttime_clock( $clock_id, $timestamp=null )
    return !is_hour_clock_run( $clock_id, $timestamp );
 }
 
-function get_clock_ticks($clock_used)
+function get_clock_ticks( $clock_used, $refresh_cache=true )
 {
-   if( $clock_used < 0) // VACATION_CLOCK
-      return 0; // On vacation
-
-   $row= mysql_single_fetch( 'time_functions.get_clock_ticks',
-                  "SELECT Ticks FROM Clock WHERE ID=$clock_used" );
-   if( $row )
-      return (int)@$row['Ticks'];
-   error('mysql_clock_ticks', 'time_functions.get_clock_ticks:'.$clock_used);
+   global $CACHE_CLOCK;
+   return $CACHE_CLOCK->load_clock_ticks( 'time_functions.get_clock_ticks', $clock_used, $refresh_cache );
 }
 
 function ticks_to_hours($ticks)
@@ -392,7 +387,7 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
 function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
 {
    if( $curr_ticks < 0 )
-      $curr_ticks = get_clock_ticks(CLOCK_TIMELEFT);
+      $curr_ticks = get_clock_ticks( CLOCK_TIMELEFT, /*refresh-cache*/false );
 
    $ticks_date = $curr_ticks + round( $hours_left * TICK_FREQUENCY );
    return $ticks_date;

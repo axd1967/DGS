@@ -19,9 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
-$TranslateGroups[] = "Tournament";
-
 require_once 'include/connect2mysql.php';
+require_once 'include/cache_clock.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
@@ -54,8 +53,7 @@ class TournamentCache
    /*! \brief array( tid => TournamentLadderProps-object ) */
    var $cache_tl_props;
 
-   /*! \brief array( clock_id => ticks ) */
-   var $cache_clock_ticks;
+   var $cache_clock;
 
    /*! \brief locked Tournament-object (mostly used for cron-locking). */
    var $lock_tourney;
@@ -66,7 +64,7 @@ class TournamentCache
       $this->cache_tournament = array();
       $this->cache_tdirector = array();
       $this->cache_tl_props = array();
-      $this->cache_clock_ticks = array();
+      $this->cache_clock = new ClockCache();
       $this->lock_tourney = null;
    }
 
@@ -129,20 +127,7 @@ class TournamentCache
 
    function load_clock_ticks( $dbgmsg, $clock_id )
    {
-      if( !is_numeric($clock_id) || $clock_id < 0 || $clock_id > MAX_CLOCK )
-         error('invalid_args', "$dbgmsg.load_clock_ticks.check($clock_id)");
-
-      if( !isset($this->cache_clock_ticks[$clock_id]) )
-      {
-         $row = mysql_single_fetch( "$dbgmsg.load_clock_ticks.find($clock_id)",
-            "SELECT Ticks FROM Clock WHERE ID=$clock_id LIMIT 1" );
-         if( !$row )
-            error('invalid_args', "$dbgmsg.load_clock_ticks.bad_clock($clock_id)");
-         else
-            $this->cache_clock_ticks[$clock_id] = (int)@$row['Ticks'];
-      }
-      $ticks = (int)@$this->cache_clock_ticks[$clock_id];
-      return $ticks;
+      return $this->cache_clock->load_clock_ticks( $dbgmsg, $clock_id, /*refresh*/false );
    }
 
    function is_tournament_locked()
