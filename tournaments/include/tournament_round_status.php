@@ -151,8 +151,9 @@ class TournamentRoundStatus
       if( $this->curr_status != TROUND_STATUS_PAIR )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_PAIR );
 
-      //TODO
-      $this->errors[] = 'status-transition not implemented yet';
+      $this->errors[] = T_('Status change normally done automatically by Pairing-Editor.') . ' '
+         . sprintf( T_('Change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
+                    TournamentRound::getStatusText($this->new_status) );
    }
 
    /*! \brief Check if change to DONE-tourney-status is allowed. */
