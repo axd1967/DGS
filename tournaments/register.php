@@ -406,7 +406,7 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
    // parse URL-vars
    if( $is_posted && ($tp->Status != TP_STATUS_INVITE) )
    {
-      $old_vals['custom_rating'] = -OUT_OF_RATING;
+      $old_vals['custom_rating'] = NO_RATING;
 
       $new_value = trim($vars['custom_rating']); // optional
       if( (string)$new_value != '' )

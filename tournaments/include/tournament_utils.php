@@ -91,9 +91,9 @@ class TournamentUtils
    {
       if( is_null($rating) || !is_numeric($rating)
             || $rating <= -OUT_OF_RATING || $rating >= OUT_OF_RATING )
-         return -OUT_OF_RATING;
+         return NO_RATING;
       else
-         return limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
+         return limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, NO_RATING );
    }
 
    function isNumberOrEmpty( $value, $allow_negative=false )

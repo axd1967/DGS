@@ -231,10 +231,10 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    $rating_black = $black_row["Rating2"];
    if( !is_numeric($rating_black) )
-      $rating_black = -OUT_OF_RATING;
+      $rating_black = NO_RATING;
    $rating_white = $white_row["Rating2"];
    if( !is_numeric($rating_white) )
-      $rating_white = -OUT_OF_RATING;
+      $rating_white = NO_RATING;
    $black_rated = ( $black_row['RatingStatus'] != RATING_NONE && $rating_black >= MIN_RATING );
    $white_rated = ( $white_row['RatingStatus'] != RATING_NONE && $rating_white >= MIN_RATING );
 

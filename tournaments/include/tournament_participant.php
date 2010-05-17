@@ -63,7 +63,7 @@ class TournamentParticipant
    var $uid;
    var $Status; // null | TP_STATUS_...
    var $Flags;
-   var $Rating; // -OUT_OF_RATING | valid-rating
+   var $Rating; // NO_RATING | valid-rating
    var $StartRound;
    var $Created;
    var $Lastchanged;

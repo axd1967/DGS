@@ -656,7 +656,7 @@ function read_rating($string)
    $string = strtolower($string);
 
    if( !preg_match(RATING_PATTERN, $string, $matches) )
-      return -OUT_OF_RATING;
+      return NO_RATING;
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
    return rank_to_rating($matches[1], $kyu) + ((int)@$matches[4]);
@@ -671,7 +671,7 @@ function rank_to_rating($val, $kyu)
    else if( $kyu == 2 )
       return $val*100 + 2000;
    else
-      return -OUT_OF_RATING;
+      return NO_RATING;
 }
 
 
@@ -689,7 +689,7 @@ function get_rating_at_date($uid, $date)
 
    if( isset($row['Rating']) )
       return $row['Rating'];
-   return -OUT_OF_RATING; //not ranked
+   return NO_RATING; //not ranked
 }
 
 // for converting ranks, see convert_to_rating()-func
@@ -717,7 +717,7 @@ function getRatingTypes()
 // check RATING_PATTERN for syntax, this func must be kept synchron with read_rating-func
 function convert_to_rating($string, $type, $no_error=false)
 {
-   $rating = -OUT_OF_RATING;
+   $rating = NO_RATING;
    if( (string)$string == '' )
       return $rating;
 
@@ -765,7 +765,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
                $rating -= 200.0;  // aga two stones weaker ?
          }
          break;
@@ -783,7 +783,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
             {
                global $IGS_TABLE;
                $rating = table_interpolate($rating, $IGS_TABLE, true);
@@ -807,7 +807,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
                $rating += 100;  // one stone stronger
          }
          break;
@@ -816,7 +816,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
             {
                global $KGS_TABLE;
                $rating = table_interpolate($rating, $KGS_TABLE, true);
@@ -828,7 +828,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
                $rating -= 300;  // three stones weaker
          }
          break;
@@ -837,7 +837,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
                $rating += 100;  // one stone stronger
          }
          break;
@@ -846,7 +846,7 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != -OUT_OF_RATING )
+            if( $rating != NO_RATING )
                $rating += 400;  // four stones stronger
          }
          break;
@@ -856,7 +856,7 @@ function convert_to_rating($string, $type, $no_error=false)
          break;
    }
 
-   if( $rating == -OUT_OF_RATING )
+   if( $rating == NO_RATING )
    {
       if( $no_error )
          return $rating;
@@ -877,7 +877,7 @@ function convert_to_rating($string, $type, $no_error=false)
    if( $no_error )
       return $rating;
    error('rating_out_of_range');
-   return -OUT_OF_RATING;
+   return NO_RATING;
 }
 
 ?>

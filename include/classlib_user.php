@@ -77,9 +77,9 @@ class User
    function setRating( $rating )
    {
       if( is_null($rating) || !is_numeric($rating) || abs($rating) >= OUT_OF_RATING )
-         $this->Rating = -OUT_OF_RATING;
+         $this->Rating = NO_RATING;
       else
-         $this->Rating = limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, -OUT_OF_RATING );
+         $this->Rating = limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, NO_RATING );
    }
 
    /*! \brief Returns true, if user set (id != 0). */

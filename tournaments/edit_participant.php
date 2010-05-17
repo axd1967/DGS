@@ -532,7 +532,7 @@ function parse_edit_form( &$tp, $tourney, $ttype )
    // parse URL-vars
    if( $is_posted )
    {
-      $old_vals['custom_rating'] = -OUT_OF_RATING;
+      $old_vals['custom_rating'] = NO_RATING;
 
       $tp->setStatus( $vars['status'] );
 
@@ -550,7 +550,7 @@ function parse_edit_form( &$tp, $tourney, $ttype )
          }
       }
       if( get_request_arg('del_rating') )
-         $tp->Rating = -OUT_OF_RATING;
+         $tp->Rating = NO_RATING;
 
       if( $ttype->need_rounds && $tourney->Rounds > 1 )
       {

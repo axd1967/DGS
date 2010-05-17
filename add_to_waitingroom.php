@@ -173,7 +173,7 @@ require_once( 'include/utilities.php' );
       $rating1 = read_rating(@$_POST['rating1']);
       $rating2 = read_rating(@$_POST['rating2']);
 
-      if( $rating1 == -OUT_OF_RATING || $rating2 == -OUT_OF_RATING )
+      if( $rating1 == NO_RATING || $rating2 == NO_RATING )
          error('rank_not_rating');
 
       if( $rating2 < $rating1 )

@@ -429,7 +429,7 @@ class TournamentLadderProps
    function find_ladder_rating_pos( $iterator, $rating )
    {
       if( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED
-            || (string)$rating == '' || (int)$rating <= -OUT_OF_RATING )
+            || (string)$rating == '' || (int)$rating <= NO_RATING )
          return 0;
 
       $cnt_higher = 0; // count of ladder-users with rating >= given-rating
@@ -439,7 +439,7 @@ class TournamentLadderProps
          if( isset($orow['TLP_Rating2']) )
          {
             $tl_rating = $orow['TLP_Rating2'];
-            if( $tl_rating > -OUT_OF_RATING && $rating <= $tl_rating )
+            if( $tl_rating > NO_RATING && $rating <= $tl_rating )
                ++$cnt_higher;
          }
       }
