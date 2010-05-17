@@ -336,7 +336,7 @@ function calc_suggestion( $reg_count, $pool_size, $pool_count, $user_choice=0 )
 {
    static $chall_games = 1; // later: 2 for double-round-robin
    $user_capacity = $pool_size * $pool_count;
-   $pool_size_base = floor( $reg_count / $pool_count );
+   $pool_size_base = ($pool_count > 0) ? floor( $reg_count / $pool_count ) : 1;
    $pool_count_remain = $reg_count - $pool_size_base * $pool_count;
    $pool_count_base = $pool_count - $pool_count_remain;
    $games_count = $pool_count_base * TournamentUtils::calc_pool_games( $pool_size_base, $chall_games )
