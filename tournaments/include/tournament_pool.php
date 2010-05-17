@@ -195,6 +195,21 @@ class TournamentPool
       return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'], $row['X_CountUsers'] ) : array( 0, 0, 0 );
    }
 
+   /*! \brief Returns expected sum of games for all pools for given tournament and round. */
+   function count_tournament_pool_games( $tid, $round )
+   {
+      $query = sprintf( "SELECT Pool, COUNT(*) AS X_Count FROM TournamentPool "
+         . "WHERE tid=%s and Round=%s GROUP BY Pool", (int)$tid, (int)$round );
+      $result = db_query( "TournamentPool::count_tournament_pool_games($tid,$round)", $query );
+
+      $count = 0;
+      while( $row = mysql_fetch_assoc($result) )
+         $count += TournamentUtils::calc_pool_games( $row['X_Count'] );
+      mysql_free_result($result);
+
+      return $count;
+   }
+
    /*!
     * \brief Returns array( pool-entries, pool-count, distinct-user-count ) for given tournament-id
     *        and round (and pool-id if given).

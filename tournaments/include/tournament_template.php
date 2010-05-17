@@ -123,6 +123,12 @@ class TournamentTemplate
       return 0;
    }
 
+   function checkGamesStarted( $tid )
+   {
+      error('invalid_method', "TournamentTemplate.checkGamesStarted({$this->wizard_type},$tid)");
+      return 0;
+   }
+
    /*! \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined. */
    function joinTournament( $tourney, $tp )
    {

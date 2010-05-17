@@ -121,6 +121,11 @@ class TournamentTemplateLadder extends TournamentTemplate
       return TournamentLadder::check_participant_registrations( $tid, $arr_TPs );
    }
 
+   function checkGamesStarted( $tid )
+   {
+      return array(); // games need not be started
+   }
+
    function joinTournament( $tourney, $tp )
    {
       ta_begin();

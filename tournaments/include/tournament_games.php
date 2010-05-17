@@ -322,13 +322,13 @@ class TournamentGames
       return $iterator;
    }
 
-   /*! \brief Counts Tournament-games with given status-array or single status. */
+   /*! \brief Counts Tournament-games with given status-array or single status (empty array for all stati). */
    function count_tournament_games( $tid, $round_id=0, $arr_status=null )
    {
       static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
       $tid = (int)$tid;
       $round_id = (int)$round_id;
-      if( is_nulL($arr_status) )
+      if( is_null($arr_status) )
          $arr_status = $tg_undone_status;
       elseif( !is_array($arr_status) )
          $arr_status = array( $arr_status );
@@ -341,6 +341,25 @@ class TournamentGames
          $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
 
       $row = mysql_single_fetch( "TournamentGames::count_tournament_games($tid,$round_id)", $qsql->get_select() );
+      return ( $row ) ? (int)$row['X_Count'] : 0;
+   }
+
+   /*! \brief Counts Games for consistency-check with Tournament-games. */
+   function count_games_started( $tid, $round_id )
+   {
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('invalid_args', "TournamentGames.count_games_started.check.tid($tid,$round_id)");
+      if( !is_numeric($round_id) || $round_id <= 0 )
+         error('invalid_args', "TournamentGames.count_games_started.check.round_id($tid,$round_id)");
+
+      $qsql = new QuerySQL(
+         SQLP_FIELDS, 'COUNT(*) AS X_Count',
+         SQLP_FROM,
+            'Games AS G',
+            "LEFT JOIN TournamentGames AS TG ON TG.gid=G.ID AND TG.tid=$tid AND TG.Round_ID=$round_id",
+         SQLP_WHERE, "G.tid=$tid" );
+
+      $row = mysql_single_fetch( "TournamentGames::count_games_started($tid,$round_id)", $qsql->get_select() );
       return ( $row ) ? (int)$row['X_Count'] : 0;
    }
 

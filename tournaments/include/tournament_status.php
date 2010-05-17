@@ -215,9 +215,13 @@ class TournamentStatus
       $this->check_basic_conditions_status_change();
 
       // check that all registered TPs are added
-      //TODO(later) condition (for round-robin): all T-games must be ready to start (i.e. inserted and set up)
       $arr_TPs = TournamentParticipant::load_tournament_participants_registered( $this->tid );
       $check_errors = $this->ttype->checkParticipantRegistrations( $this->tid, $arr_TPs );
+      if( count($check_errors) )
+         $this->errors = array_merge( $this->errors, $check_errors );
+
+      // check that all games have been started
+      $check_errors = $this->ttype->checkGamesStarted( $this->tid );
       if( count($check_errors) )
          $this->errors = array_merge( $this->errors, $check_errors );
    }

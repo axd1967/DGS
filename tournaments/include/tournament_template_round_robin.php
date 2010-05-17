@@ -24,6 +24,8 @@ $TranslateGroups[] = "Tournament";
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -116,7 +118,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       if( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
 
-      //TODO check, that there are enough TPs taking care users with TPs.StartRound > 1
+      //TODO check, that there are enough TPs, taking care users of with TPs.StartRound > 1
 
       return $errors;
    }
@@ -143,9 +145,41 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
 
    function checkParticipantRegistrations( $tid, $arr_TPs )
    {
-      //TODO see also tournament_status.php
-      //TODO(later) condition (for round-robin): all T-games must be ready to start (i.e. inserted and set up)
-      return array( 'Error' );
+      // see also tournament_status.php:
+      // - no check for round-robin-tourneys, because participants already seeded in pools
+      return array();
+   }
+
+   function checkGamesStarted( $tid )
+   {
+      // see also tournament_status.php
+      $errors = array();
+
+      $tourney = Tournament::load_tournament( $tid );
+      if( is_null($tourney) )
+         error('unknown_tournament', "TournamentTemplateRoundRobin.checkGamesStarted.find_tourney($tid,$round,{$this->uid})");
+      $round = $tourney->CurrentRound;
+
+      $tround = TournamentRound::load_tournament_round( $tid, $round );
+      if( is_null($tround) )
+         error('bad_tournament', "TournamentTemplateRoundRobin.checkGamesStarted.find_tround($tid,$round,{$this->uid})");
+      if( $tround->Status != TROUND_STATUS_PLAY )
+         $errors[] = sprintf( T_('Expecting current tournament round status [%s] for status-change'),
+                              TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
+
+      // check, that all T-games are started for current round
+      $expected_games = TournamentPool::count_tournament_pool_games( $tid, $round );
+      $count_tgames = TournamentGames::count_tournament_games( $tid, $tround->ID, array() );
+      $count_games_started = TournamentGames::count_games_started( $tid, $tround->ID );
+
+      if( $count_tgames != $expected_games )
+         $errors[] = sprintf( T_('Expected %s tournament-games (TG), but found %s games: Start remaining games first!'),
+            $expected_games, $count_tgames );
+      if( $count_games_started != $expected_games )
+         $errors[] = sprintf( T_('Expected %s games (G), but found %s games: Contact tournament-admin for fix!'),
+            $expected_games, $count_games_started );
+
+      return $errors;
    }
 
 } // end of 'TournamentTemplateRoundRobin'
