@@ -383,7 +383,7 @@ class TournamentGames
             . "Status='".TG_STATUS_SCORE."', "
             . "Score=IF(Challenger_uid=$black_uid,$score,-$score), "
             . "EndTime=FROM_UNIXTIME($NOW), "
-            . "Lastchanged=FROM_UNIXTIME($NOW), "
+            . "Lastchanged=FROM_UNIXTIME($NOW) "
          . " WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
       return $result;
    }
@@ -399,7 +399,7 @@ class TournamentGames
       $result = db_query( "$dbgmsg.update_tournament_game_wait($wait_ticks)",
          "UPDATE $table SET "
             . "Status='".TG_STATUS_DONE."', "
-            . "Lastchanged=FROM_UNIXTIME($NOW), "
+            . "Lastchanged=FROM_UNIXTIME($NOW) "
          . " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks" );
       return $result;
    }
