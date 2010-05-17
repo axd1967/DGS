@@ -57,7 +57,11 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    foreach( Tournament::getTypeText() as $type => $text )
       $type_filter_array[$text] = "T.Type='$type'";
 
-   $status_filter_array = array( T_('All') => '' );
+   $status_filter_array = array(
+         T_('All') => '',
+         T_('Open#T_status')   => "T.Status IN ('".TOURNEY_STATUS_NEW."','".TOURNEY_STATUS_REGISTER."')",
+         T_('Active#T_status') => "T.Status IN ('".TOURNEY_STATUS_PAIR."','".TOURNEY_STATUS_PLAY."')",
+      );
    $idx = 1;
    foreach( Tournament::getStatusText() as $status => $text )
    {
