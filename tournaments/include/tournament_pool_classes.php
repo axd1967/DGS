@@ -73,6 +73,46 @@ class PoolGame
       return ($this->Challenger_uid == $uid) ? $this->Defender_uid : $this->Challenger_uid;
    }
 
+   /*! \brief Returns arr( user-score, points, cell-marker, title, style ) for given user-id. */
+   function calc_result( $uid )
+   {
+      if( is_null($this->Score) )
+      {
+         $chk_score = null;
+         $points = 0;
+         $mark = '#'; // running game
+         $title = T_('Game running');
+         $style = null;
+      }
+      else
+      {
+         $chk_score = ($this->Challenger_uid == $uid) ? $this->Score : -$this->Score;
+
+         //TODO for Mego/Hahn use score instead +-score
+         if( $chk_score < 0 )
+         {
+            $points = 2; // won
+            $title = T_('Game won');
+            $style = 'MatrixWon';
+         }
+         elseif( $chk_score > 0 )
+         {
+            $points = 0; // lost
+            $title = T_('Game lost');
+            $style = 'MatrixLost';
+         }
+         else
+         {
+            $points = 1; // jigo
+            $title = T_('Jigo');
+            $style = 'MatrixJigo';
+         }
+         $mark = $points;
+      }
+
+      return array( $chk_score, $points, $mark, $title, $style );
+   }
+
 } // end of 'PoolGame'
 
 
@@ -136,18 +176,48 @@ class PoolTables
    /*! \brief Sets TournamentGames for pool-tables and count games. */
    function fill_games( $tgames_iterator )
    {
+      $reorder_pools = array(); // pool-no => 1 (=needs re-order of users)
       while( list(,$arr_item) = $tgames_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
 
          $game_score = ($tgame->isScoreStatus()) ? $tgame->Score : null;
          $poolGame = new PoolGame( $tgame->Challenger_uid, $tgame->Defender_uid, $tgame->gid, $game_score );
-         $this->users[$tgame->Challenger_uid]->PoolGames[] = $poolGame;
-         $this->users[$tgame->Defender_uid]->PoolGames[] = $poolGame;
+         $tpool_ch = $this->users[$tgame->Challenger_uid];
+         $tpool_df = $this->users[$tgame->Defender_uid];
+
+         $tpool_ch->PoolGames[] = $poolGame;
+         $tpool_df->PoolGames[] = $poolGame;
+
+         $arr = $poolGame->calc_result( $tgame->Challenger_uid ); // score,points,mark,title,style
+         $tpool_ch->Points += $arr[1];
+         $arr = $poolGame->calc_result( $tgame->Defender_uid );
+         $tpool_df->Points += $arr[1];
+
+         if( !is_null($game_score) )
+            $reorder_pools[$tpool_ch->Pool] = 1;
       }
 
-      //TODO how to calc Rank=Place efficiently? 1. order uid-list by TPool.Points+TieBreakers, 2. (later) if no Points(<0) get order of uid or TPool-ID or Rating instead
-      //TODO -> re-order this->pools
+      // re-order pool-users by TPool.Points (+ TODO tie-breakers)
+      foreach( $reorder_pools as $pool => $tmp )
+         usort( $this->pools[$pool], array( $this, '_compare_user_points' ) ); //by user Points + tie-breaker
+   }
+
+   /*! \internal Comparator-function to sort users of pool. */
+   function _compare_user_points( $a_uid, $b_uid )
+   {
+      $a_points = $this->users[$a_uid]->Points;
+      $b_points = $this->users[$b_uid]->Points;
+      if( $a_points > $b_points )
+         return -1;
+      elseif( $a_points < $b_points )
+         return 1;
+      else
+      {
+         //TODO (later) if no Points(<0) get order of uid or TPool-ID or Rating instead
+         //TODO (later) needs tie-breaker
+         return 0;
+      }
    }
 
    /*!
@@ -466,7 +536,7 @@ class PoolViewer
          $row_arr = array(
             2 => user_reference( REF_LINK, 1, '', $uid, $user->Handle, ''),
             6 => $idx,
-            7 => 0, //TODO $tpool->Points,
+            7 => $tpool->Points, // points
          );
          if( $this->table->Is_Column_Displayed[1] )
             $row_arr[1] = $user->Name;
@@ -491,9 +561,10 @@ class PoolViewer
                $game_url = $base_path."game.php?gid=".$poolGame->gid;
                $col = $map_usercols[$poolGame->get_opponent($uid)];
 
-               //TODO mark color + X=self, 0=lost, 1=jigo, 2=won;; for Hahn use score instead +-score
-               //TODO $cell = Table::build_row_cell( anchor( $game_url, '#', T_('Game running') ), 'MatrixWon/Lost/Jigo' );
-               $cell = anchor( $game_url, '#', T_('Game running') );
+               list( $score, $points, $mark, $title, $style ) = $poolGame->calc_result( $uid );
+               $cell = anchor( $game_url, $mark, $title );
+               if( !is_null($style) )
+                  $cell = Table::build_row_cell( $cell, $style );
 
                $row_arr[$this->poolidx + $col] = $cell;
             }

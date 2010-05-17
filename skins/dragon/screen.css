@@ -2845,10 +2845,10 @@ table#PoolViewerTable td.MatrixWon {
    background: #bbffbb;
 }
 table#PoolViewerTable td.MatrixLost {
-   background: #ffcc99;
+   background: #ff99bb;
 }
 table#PoolViewerTable td.MatrixJigo {
-   background: #bbeedd;
+   background: #aaddee;
 }
 
 
