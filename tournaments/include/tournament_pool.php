@@ -232,13 +232,13 @@ class TournamentPool
          if( !($load_opts & TPOOL_LOADOPT_ONLY_RATING) )
          {
             $qsql->add_part( SQLP_FIELDS,
-               'TPU.ID AS TPU_ID', // MUST have to overwrite TP.ID with Players.ID in User-obj and User->urow(!)
                'TPU.Name AS TPU_Name',
                'TPU.Handle AS TPU_Handle',
                'TPU.Country AS TPU_Country',
                'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess' );
          }
          $qsql->add_part( SQLP_FIELDS,
+            'TPU.ID AS TPU_ID', // MUST have to overwrite TP.ID with Players.ID in User-obj and User->urow(!)
             'TPU.Rating2 AS TPU_Rating2',
             'TPU.RatingStatus AS TPU_RatingStatus',
             'TPU.OnVacation AS TPU_OnVacation',
@@ -535,15 +535,15 @@ class TournamentPool
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $iterator );
-      $arr_counts = $poolTables->calc_pool_summary();
 
-      $pool_summary = array();
-      foreach( $arr_counts as $pool => $pool_usercount )
-         $pool_summary[$pool] = array( $pool_usercount, array(), TournamentUtils::calc_pool_games($pool_usercount) );
-
+      $pool_summary = $poolTables->calc_pool_summary();
       if( $only_summary ) // load only summary
          return array( $errors, $pool_summary );
 
+
+      $arr_counts = array(); // [ pool => #users, ... ]
+      foreach( $pool_summary as $pool => $arr )
+         $arr_counts[$pool] = $arr[0];
 
       $cnt_pool0 = (int)@$arr_counts[0];
       $cnt_real_pools = count($arr_counts) - ( $cnt_pool0 > 0 ? 1 : 0 ); // pool-count without 0-pool
