@@ -168,7 +168,7 @@ class TournamentHelper
     * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
     * \note IMPORTANT NOTE: need HOT-section
     *
-    * \return number of started games or 0 on lock-error.
+    * \return arr( number of started games, expected number of games) or NULL on lock-error.
     */
    function start_tournament_round_games( $tourney, $tround )
    {
@@ -180,7 +180,7 @@ class TournamentHelper
       // lock T-ext
       $t_ext = new TournamentExtension( $tid, TE_PROP_TROUND_START_TGAMES, 0, $NOW );
       if( !$t_ext->insert() ) // need to fail if existing
-         return 0;
+         return null;
 
       // read T-rule
       $trule = TournamentRules::load_tournament_rule( $tid );
@@ -203,6 +203,7 @@ class TournamentHelper
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
       $arr_poolusers = $poolTables->get_pool_users();
+      $expected_games = $poolTables->calc_pool_games_count();
 
       // loop over all pools
       $cnt_pools = count($arr_poolusers);
@@ -235,15 +236,18 @@ class TournamentHelper
       }
       echo_message("</ul></td></tr></table>\n");
 
-      // switch T-round-status PAIR -> PLAY
-      $tround->setStatus( TROUND_STATUS_PLAY );
-      $tround->update();
+      // check expected games-count
+      if( $count_games == $expected_games )
+      {
+         // switch T-round-status PAIR -> PLAY
+         $tround->setStatus( TROUND_STATUS_PLAY );
+         $tround->update();
+      }
 
       // unlock T-ext
       $t_ext->delete();
 
-      // return number of created games
-      return $count_games;
+      return array( $count_games, $expected_games );
    }//start_tournament_round_games
 
    /*!
