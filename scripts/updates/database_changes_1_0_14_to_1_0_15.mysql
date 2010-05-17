@@ -1892,3 +1892,8 @@ ALTER TABLE TournamentPool
    DROP COLUMN GamesRun ;
 
 
+-- added size-field and filter on tournament-list
+ALTER TABLE TournamentRules
+   ADD INDEX Size (Size);
+
+
