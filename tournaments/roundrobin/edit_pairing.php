@@ -120,7 +120,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    $disable_create = '';
-   if( count($errors) )
+   $has_errors = (bool)count($errors);
+   if( $has_errors )
    {
       $disable_create = 'disabled=1';
 
@@ -138,7 +139,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
       $tform->add_row( array(
             'CELL', 2, '', // align submit-buttons
             'SUBMITBUTTONX', 't_pair', T_('Create tournament games'), $disable_create,
-            'TEXT', MED_SPACING . '(' . T_('Start games for all pools in current round') . ')', ));
+            'TEXT', MED_SPACING . T_('Start games for all pools in current round'), ));
+      $tform->add_row( array(
+            'CELL', 2, '', // align submit-buttons
+            'TEXT', '<u>' . T_('Notes') . ':</u>'
+                  . "<br>\n"
+                  . T_('Creating all games may take a while. Please be patient!')
+                  . "<br>\n"
+                  . T_('Once started, the creation process must not be stopped. Progress of the creation will be shown.')
+                  . "<br>\n"
+                  . T_('The games for all pairings will start immediately and can neither be changed nor removed.'), ));
    }
 
    // --------------- Start Page ------------------------------------
@@ -153,15 +163,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    {
       $pool_sum = new PoolSummary( $page, $arr_pool_summary );
       $pstable = $pool_sum->make_table_pool_summary();
-
-      $count_pools = count($arr_pool_summary);
-      $count_users = 0;
-      $count_games = 0;
-      foreach( $arr_pool_summary as $pool => $arr )
-      {
-         $count_users += $arr[0];
-         $count_games += $arr[2];
-      }
+      list( $count_pools, $count_users, $count_games ) = $pool_sum->get_counts();
 
       section('poolSummary', T_('Pool Summary'));
       echo sprintf( T_('Tournament Round #%s has %s pools with %s users going to play in %s games.'),
@@ -169,20 +171,42 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
       $pstable->echo_table();
    }
 
-   if( $do_pair )
+   if( $do_pair && !$has_errors )
    {
-      $thelper = new TournamentHelper();
       ta_begin();
       {//HOT-section to start all T-games for T-round
-         $count_created_games = $thelper->start_tournament_round_games( $tourney, $tround );
+         $thelper = new TournamentHelper();
+         $arr_result = $thelper->start_tournament_round_games( $tourney, $tround );
       }
       ta_end();
+
+      echo "<br><br>\n";
+      if( !is_null($arr_result) )
+      {
+         list( $count_games, $expected_games ) = $arr_result;
+         if( $count_games == $expected_games )
+         {
+            echo sprintf( T_('All %s pool games have been started. Tournament-Round Status has been changed to [%s].'),
+               $count_games, TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
+         }
+         else
+         {
+            $has_errors = true;
+            echo sprintf( T_('An error occured: expected %s games, but %s games has been started.'),
+               $expected_games, $count_games ),
+               "<br>\n",
+               T_('Try again to start the remaining games or contact a tournament-admin for support.');
+         }
+      }
    }
 
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
+   if( $has_errors )
+      $menu_array[T_('Edit game pairing')] =
+         array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
