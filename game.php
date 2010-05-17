@@ -1005,11 +1005,11 @@ function draw_game_info( &$game_row, $board, $tourney )
 
 
    //tournament rows
-   if( !is_null($tourney) )
+   if( ALLOW_TOURNAMENTS && !is_null($tourney) )
    {
       echo "<tr id=\"gameRules\">\n"
          , '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n"
-         , "<td colspan=\"", ($cols-1), "\">", $tourney->build_info(3), "</td>\n"
+         , "<td colspan=\"", ($cols-1), "\">", $tourney->build_info(4), "</td>\n"
          , "</tr>\n"
          , "<tr id=\"gameRules\">\n"
          , "<td></td>\n"
