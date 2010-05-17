@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
-   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_POOL ) );
+   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_POOL, false ) );
    $count_status_errors = count($errors);
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
