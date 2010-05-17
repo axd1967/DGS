@@ -62,22 +62,25 @@ class TournamentHelper
    function process_tournament_game_end( $tourney, $tgame, $check_only )
    {
       $tid = $tourney->ID;
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         return $this->process_tournament_ladder_game_end( $tourney, $tgame, $check_only );
-      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-         error('invalid_method', "TournamentHelper.process_tournament_game_end($tid,{$tourney->Type},{$tgame->ID})");
-      else
+      if( $tourney->Type != TOURNEY_TYPE_LADDER && $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
          error('invalid_args', "TournamentHelper.process_tournament_game_end($tid,{$tourney->Type},{$tgame->ID})");
-   }
 
-   function process_tournament_ladder_game_end( $tourney, $tgame, $check_only )
-   {
       // check if processing needed
       if( $tourney->Status != TOURNEY_STATUS_PLAY ) // process only PLAY-status
          return false;
       if( $check_only )
          return true;
 
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         return $this->process_tournament_ladder_game_end( $tourney, $tgame );
+      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         return $this->process_tournament_round_robin_game_end( $tourney, $tgame );
+      else
+         return false;
+   }
+
+   function process_tournament_ladder_game_end( $tourney, $tgame )
+   {
       $tid = $tourney->ID;
       $tl_props = $this->tcache->load_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid);
       if( is_null($tl_props) )
@@ -118,6 +121,24 @@ class TournamentHelper
 
       return $success;
    }//process_tournament_ladder_game_end
+
+   function process_tournament_round_robin_game_end( $tourney, $tgame )
+   {
+      $tid = $tourney->ID;
+
+      ta_begin();
+      {//HOT-section to process tournament-game-end
+         $tgame->setStatus(TG_STATUS_DONE);
+         $tgame->update();
+
+         // update TP.Finished/Won/Lost for challenger and defender
+         TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Score );
+         TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, -$tgame->Score );
+      }
+      ta_end();
+
+      return true;
+   }
 
    /*! \brief Updates TournamentLadder.Period/History-Rank when rank-update is due, set next update-date. */
    function process_rank_period( $t_ext )
