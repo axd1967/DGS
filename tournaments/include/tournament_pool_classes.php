@@ -177,6 +177,7 @@ class PoolTables
    function fill_games( $tgames_iterator )
    {
       $reorder_pools = array(); // pool-no => 1 (=needs re-order of users)
+      $defeated_opps = array(); // uid => [ opp-uid, ... ];  won(opp 2x) or jigo(opp 1x)
       while( list(,$arr_item) = $tgames_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
@@ -191,11 +192,35 @@ class PoolTables
 
          $arr = $poolGame->calc_result( $tgame->Challenger_uid ); // score,points,mark,title,style
          $tpool_ch->Points += $arr[1];
+         if( !is_null($arr[0]) )
+         {
+            if( $arr[0] < 0 ) $tpool_ch->Wins++;
+            if( $arr[0] < 0 ) $defeated_opps[$tgame->Challenger_uid][] = $tgame->Defender_uid;
+            if( $arr[0] <= 0 ) $defeated_opps[$tgame->Challenger_uid][] = $tgame->Defender_uid; // count win twice
+         }
          $arr = $poolGame->calc_result( $tgame->Defender_uid );
          $tpool_df->Points += $arr[1];
+         if( !is_null($arr[0]) )
+         {
+            if( $arr[0] < 0 ) $tpool_df->Wins++;
+            if( $arr[0] < 0 ) $defeated_opps[$tgame->Defender_uid][] = $tgame->Challenger_uid;
+            if( $arr[0] <= 0 ) $defeated_opps[$tgame->Defender_uid][] = $tgame->Challenger_uid; // count win twice
+         }
 
          if( !is_null($game_score) )
             $reorder_pools[$tpool_ch->Pool] = 1;
+      }
+
+      // calc SODOS
+      foreach( $defeated_opps as $uid => $arr_opps )
+      {
+         $tpool_ch = $this->users[$uid];
+         foreach( $arr_opps as $opp )
+         {
+            $tpool_df = $this->users[$opp];
+            $tpool_ch->SODOS += $tpool_df->Points;
+         }
+         $tpool_ch->SODOS /= 2;
       }
 
       // re-order pool-users by TPool.Points (+ TODO tie-breakers)
@@ -463,15 +488,10 @@ class PoolViewer
          foreach( range(1, $this->pools_max_users) as $pool )
             $this->table->add_tablehead( $idx++, $pool, 'Matrix', TABLE_NO_HIDE );
 
-         $this->table->add_tablehead( 7, T_('Points#header'), 'Number', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 9, T_('#Wins#header'), 'NumberC', 0 );
+         $this->table->add_tablehead( 7, T_('Points#header'), 'NumberC', TABLE_NO_HIDE );
+         $this->table->add_tablehead(10, T_('SODOS#header'), 'NumberC', 0 );
       }
-
-   }
-
-   /*! \brief Prints build table, need make_table() first. */
-   function echo_table()
-   {
-      echo $this->table->echo_table();
    }
 
    /*! \brief Makes table for all pools. */
@@ -537,6 +557,8 @@ class PoolViewer
             2 => user_reference( REF_LINK, 1, '', $uid, $user->Handle, ''),
             6 => $idx,
             7 => $tpool->Points, // points
+            9 => $tpool->Wins, // number of wins
+            10 => $tpool->SODOS,
          );
          if( $this->table->Is_Column_Displayed[1] )
             $row_arr[1] = $user->Name;
@@ -572,7 +594,7 @@ class PoolViewer
             // mark line of current-user
             if( $uid == $this->my_id )
             {
-               foreach( range(1,7) as $cell )
+               foreach( range(1,$this->poolidx) as $cell )
                {
                   if( isset($row_arr[$cell]) )
                      $row_arr[$cell] = Table::build_row_cell($row_arr[$cell], 'TourneyUser');
@@ -587,6 +609,12 @@ class PoolViewer
          $this->table->add_row( $row_arr );
       }
    }//make_pool_table
+
+   /*! \brief Prints built table, need make_table() first. */
+   function echo_table()
+   {
+      echo $this->table->echo_table();
+   }
 
 } // end of 'PoolViewer'
 

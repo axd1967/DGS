@@ -69,6 +69,8 @@ class TournamentPool
    var $User; // User-object
    var $PoolGames; // PoolGame-object array
    var $Points;
+   var $Wins;
+   var $SODOS;
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
    function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0 )
@@ -88,6 +90,8 @@ class TournamentPool
          $this->User = new User( $this->uid );
       $this->PoolGames = array();
       $this->Points = 0;
+      $this->Wins = 0;
+      $this->SODOS = 0;
    }
 
    function to_string()
