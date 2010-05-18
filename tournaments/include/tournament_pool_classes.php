@@ -73,6 +73,14 @@ class PoolGame
       return ($this->Challenger_uid == $uid) ? $this->Defender_uid : $this->Challenger_uid;
    }
 
+   function get_score( $uid )
+   {
+      if( is_null($this->Score) )
+         return null;
+      else
+         return ($this->Challenger_uid == $uid) ? $this->Score : -$this->Score;
+   }
+
    /*! \brief Returns arr( user-score, points, cell-marker, title, style ) for given user-id. */
    function calc_result( $uid )
    {
@@ -86,7 +94,7 @@ class PoolGame
       }
       else
       {
-         $chk_score = ($this->Challenger_uid == $uid) ? $this->Score : -$this->Score;
+         $chk_score = $this->get_score($uid);
 
          //TODO for Mego/Hahn use score instead +-score
          if( $chk_score < 0 )
@@ -231,18 +239,38 @@ class PoolTables
    /*! \internal Comparator-function to sort users of pool. */
    function _compare_user_points( $a_uid, $b_uid )
    {
-      $a_points = $this->users[$a_uid]->Points;
-      $b_points = $this->users[$b_uid]->Points;
-      if( $a_points > $b_points )
-         return -1;
-      elseif( $a_points < $b_points )
-         return 1;
-      else
+      $cmp_points = cmp_int( $this->users[$a_uid]->Points, $this->users[$b_uid]->Points );
+      if( $cmp_points != 0 )
+         return -$cmp_points;
+
+      // NOTE: inofficial Tie-Breakers (SODOS), because TD sets pool-ranks
+      // if TD sets order, Rank must be calculated by correct order not by willfare of TD
+
+      /*
+      // Tie-Breaker: Direct Comparison
+      $score = $this->get_score_direct_comparison($a_uid, $b_uid);
+      if( !is_null($score) )
+         return ( $score < 0 ) ? -1 : 1;
+      */
+
+      // Tie-Breaker: SODOS
+      $cmp_sodos = cmp_int( $this->users[$a_uid]->SODOS, $this->users[$b_uid]->SODOS );
+      if( $cmp_sodos != 0 )
+         return -$cmp_sodos;
+
+      // static ordering of users (not intended as tie-breaker)
+      return cmp_int( $a_uid, $b_uid );
+   }
+
+   /*! \brief Returns true if user $uid won in game with $opp (Face-to-face result). */
+   function get_score_direct_comparison( $uid, $opp )
+   {
+      foreach( $this->users[$uid]->PoolGames as $poolGame )
       {
-         //TODO (later) if no Points(<0) get order of uid or TPool-ID or Rating instead
-         //TODO (later) needs tie-breaker
-         return 0;
+         if( $poolGame->get_opponent($uid) == $opp )
+            return $poolGame->get_score($uid);
       }
+      return null;
    }
 
    /*!
@@ -479,7 +507,7 @@ class PoolViewer
          $this->table->add_tablehead( 4, T_('Tournament Rating#pool_header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#pool_header'), 'Image', 0 );
 
-      $idx = 11;
+      $idx = 13;
       $this->poolidx = $idx - 1;
       if( !($this->options & PVOPT_NO_RESULT) )
       {
@@ -491,6 +519,8 @@ class PoolViewer
          $this->table->add_tablehead( 9, T_('#Wins#header'), 'NumberC', 0 );
          $this->table->add_tablehead( 7, T_('Points#header'), 'NumberC', TABLE_NO_HIDE );
          $this->table->add_tablehead(10, T_('SODOS#header'), 'NumberC', 0 );
+         $this->table->add_tablehead(11, T_('Rank#header'), 'TRank', TABLE_NO_HIDE );
+         $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE );
       }
    }
 
@@ -556,9 +586,11 @@ class PoolViewer
          $row_arr = array(
             2 => user_reference( REF_LINK, 1, '', $uid, $user->Handle, ''),
             6 => $idx,
-            7 => $tpool->Points, // points
-            9 => $tpool->Wins, // number of wins
+            7 => $tpool->Points,
+            9 => $tpool->Wins,
             10 => $tpool->SODOS,
+            11 => $tpool->formatRank(),
+            12 => $tpool->echoRankImage(),
          );
          if( $this->table->Is_Column_Displayed[1] )
             $row_arr[1] = $user->Name;
