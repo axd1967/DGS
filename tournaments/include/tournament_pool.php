@@ -74,7 +74,7 @@ class TournamentPool
    var $SODOS;
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
-   function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $rank=TPOOL_NO_RANK )
+   function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $rank=TPOOLRK_NO_RANK )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -103,9 +103,9 @@ class TournamentPool
 
    function formatRank()
    {
-      if( $this->Rank == TPOOL_RETREAT )
+      if( $this->Rank == TPOOLRK_RETREAT )
          return NO_VALUE;
-      elseif( $this->Rank > TPOOL_NO_RANK )
+      elseif( $this->Rank > TPOOLRK_RANK_ZONE )
          return abs($this->Rank);
       else
          return '';
