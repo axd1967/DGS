@@ -187,16 +187,17 @@ class TournamentStatus
       $iterator = new ListIterator( 'TournamentStatus.check_conditions_status_PAIR',
             new QuerySQL( SQLP_WHERE, sprintf( "TP.Status='%s'", mysql_addslashes(TP_STATUS_REGISTER)) ) );
       $iterator = TournamentParticipant::load_tournament_participants($iterator, $this->tid);
-      //TODO(later) optimization to reduce load: limit to certain amount of erroneous users
       while( list(,$arr_item) = $iterator->getListIterator() )
       {
          list( $tp, $orow ) = $arr_item;
          list( $reg_errors, $reg_warnings ) =
             $this->tprops->checkUserRegistration($this->tourney, $tp->hasRating(), $tp->User, TCHKTYPE_TD);
+         $count = 50; // check all, but limit error-output to some users
          foreach( $reg_errors as $err )
          {
             $err_link = anchor( $base_path."tournaments/edit_participant.php?tid={$this->tid}".URI_AMP."uid={$tp->uid}", $tp->User->Handle );
             $this->errors[] = make_html_safe( sprintf( T_('Error for user %s'), "[$err_link]"), 'line') . ": $err";
+            if( $count-- <= 0 ) break;
          }
       }
 
