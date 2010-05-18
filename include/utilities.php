@@ -272,4 +272,15 @@ function concat_str( $str1, $sep, $str2 )
    return $result;
 }
 
+/*! \brief Returns -1 (a<b), 1 (a>b), 0 (a=b). */
+function cmp_int( $a, $b )
+{
+   if( $a < $b )
+      return -1;
+   elseif( $a == $b )
+      return 0;
+   else
+      return 1;
+}
+
 ?>
