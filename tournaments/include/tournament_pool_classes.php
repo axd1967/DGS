@@ -189,30 +189,33 @@ class PoolTables
       while( list(,$arr_item) = $tgames_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
+         $ch_uid = $tgame->Challenger_uid;
+         $df_uid = $tgame->Defender_uid;
+         $tpool_ch = $this->users[$ch_uid];
+         $tpool_df = $this->users[$df_uid];
 
          $game_score = ($tgame->isScoreStatus()) ? $tgame->Score : null;
-         $poolGame = new PoolGame( $tgame->Challenger_uid, $tgame->Defender_uid, $tgame->gid, $game_score );
-         $tpool_ch = $this->users[$tgame->Challenger_uid];
-         $tpool_df = $this->users[$tgame->Defender_uid];
+         $poolGame = new PoolGame( $ch_uid, $df_uid, $tgame->gid, $game_score );
 
          $tpool_ch->PoolGames[] = $poolGame;
          $tpool_df->PoolGames[] = $poolGame;
 
-         $arr = $poolGame->calc_result( $tgame->Challenger_uid ); // score,points,mark,title,style
+         $arr = $poolGame->calc_result( $ch_uid ); // score,points,mark,title,style
          $tpool_ch->Points += $arr[1];
          if( !is_null($arr[0]) )
          {
             if( $arr[0] < 0 ) $tpool_ch->Wins++;
-            if( $arr[0] < 0 ) $defeated_opps[$tgame->Challenger_uid][] = $tgame->Defender_uid;
-            if( $arr[0] <= 0 ) $defeated_opps[$tgame->Challenger_uid][] = $tgame->Defender_uid; // count win twice
+            if( $arr[0] < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
+            if( $arr[0] <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double
          }
-         $arr = $poolGame->calc_result( $tgame->Defender_uid );
+
+         $arr = $poolGame->calc_result( $df_uid );
          $tpool_df->Points += $arr[1];
          if( !is_null($arr[0]) )
          {
             if( $arr[0] < 0 ) $tpool_df->Wins++;
-            if( $arr[0] < 0 ) $defeated_opps[$tgame->Defender_uid][] = $tgame->Challenger_uid;
-            if( $arr[0] <= 0 ) $defeated_opps[$tgame->Defender_uid][] = $tgame->Challenger_uid; // count win twice
+            if( $arr[0] < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
+            if( $arr[0] <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double
          }
 
          if( !is_null($game_score) )
@@ -234,7 +237,7 @@ class PoolTables
       // re-order pool-users by TPool.Points (+ TODO tie-breakers)
       foreach( $reorder_pools as $pool => $tmp )
          usort( $this->pools[$pool], array( $this, '_compare_user_points' ) ); //by user Points + tie-breaker
-   }
+   }//fill_games
 
    /*! \internal Comparator-function to sort users of pool. */
    function _compare_user_points( $a_uid, $b_uid )
