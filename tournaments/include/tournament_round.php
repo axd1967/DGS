@@ -190,7 +190,10 @@ class TournamentRound
       $arr_props[] = sprintf( T_("You may only retreat from the tournament round while not in status [%s]."),
          TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
 
-      return array( T_('Configuration of the current tournament round') . ':', $arr_props );
+      $arr_props[] = sprintf( '%s: %s', T_('Pool Count#tround'), $this->Pools );
+
+      return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
+            . ':', $arr_props );
    }//build_notes_props
 
 
