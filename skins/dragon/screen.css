@@ -980,6 +980,11 @@ table.Table td.Center {
    text-align: center;
 }
 
+table.Table td.TRank {
+   text-align: center;
+   font-weight: bold;
+}
+
 table.Table th.Button {
 /* min-width problem, see MinWidth
    min-width: 100px;
