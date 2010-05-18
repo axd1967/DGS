@@ -53,7 +53,7 @@ global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
-   FTYPE_INT,   'ID', 'tid', 'Round', 'Pool', 'uid'
+   FTYPE_INT,   'ID', 'tid', 'Round', 'Pool', 'uid', 'Rank'
    );
 
 class TournamentPool
@@ -63,6 +63,7 @@ class TournamentPool
    var $Round;
    var $Pool;
    var $uid;
+   var $Rank;
 
    // non-DB fields
 
@@ -73,13 +74,14 @@ class TournamentPool
    var $SODOS;
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
-   function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0 )
+   function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $rank=TPOOL_NO_RANK )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->Round = (int)$round;
       $this->Pool = (int)$pool;
       $this->uid = (int)$uid;
+      $this->Rank = (int)$rank;
       // non-DB fields
       if( is_a($uid, 'User') )
       {
@@ -97,6 +99,21 @@ class TournamentPool
    function to_string()
    {
       return print_r( $this, true );
+   }
+
+   function formatRank()
+   {
+      if( $this->Rank == TPOOL_RETREAT )
+         return NO_VALUE;
+      elseif( $this->Rank > TPOOL_NO_RANK )
+         return abs($this->Rank);
+      else
+         return '';
+   }
+
+   function echoRankImage()
+   {
+      return ( $this->Rank > 0 ) ? echo_image_tourney_next_round() : '';
    }
 
    /*! \brief Inserts or updates tournament-pool in database. */
@@ -139,6 +156,7 @@ class TournamentPool
       $data->set_value( 'Round', $this->Round );
       $data->set_value( 'Pool', $this->Pool );
       $data->set_value( 'uid', $this->uid );
+      $data->set_value( 'Rank', $this->Rank );
       return $data;
    }
 
@@ -167,7 +185,8 @@ class TournamentPool
             @$row['tid'],
             @$row['Round'],
             @$row['Pool'],
-            @$row['uid']
+            @$row['uid'],
+            @$row['Rank']
          );
       return $trd;
    }

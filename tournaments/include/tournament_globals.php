@@ -161,4 +161,9 @@ define('TROUND_SLICE_ROUND_ROBIN', 1);
 define('TROUND_SLICE_FILLUP_POOLS', 2);
 define('TROUND_SLICE_MANUAL', 3);
 
+// ---------- Tournament Pool Stuff -------------------------------
+
+define('TPOOL_NO_RANK', -100); // unset pool-rank
+define('TPOOL_RETREAT', 0); // retreat from next round
+
 ?>

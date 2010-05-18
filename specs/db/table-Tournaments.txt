@@ -740,7 +740,7 @@ Notes:
  Round    | tinyint(3) unsigned  | NULL
  Pool     | smallint(5) unsigned | NULL
  uid      | int(11)              | 0
-
+ Rank     | tinyint(4)           | -100
 
 
 ## Fields:
@@ -753,4 +753,13 @@ Notes:
 
 * uid : FK to TournamentParticipant.uid = Players.ID
 
+* Rank : place of users within one pool
+   - -100 = Rank not set yet, not shown
+   -    0 = no rank, shown as NO_VALUE
+   -   <0 = Rank, user does not proceed to next round or appears in T-result,
+            shown as abs(Rank)
+   -   >0 = Rank, user does proceed to next round or appears in T-result
+   - abs(Rank) 1 is highest rank
+      - used to specify next pool in next-round if tourney continued
+      - used to specify final place if tourney ends
 

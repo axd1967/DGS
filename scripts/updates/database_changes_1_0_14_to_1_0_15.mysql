@@ -1897,3 +1897,9 @@ ALTER TABLE TournamentRules
    ADD INDEX Size (Size);
 
 
+-- added Rank to store users place within tournament-pool
+ALTER TABLE TournamentPool
+   ADD Rank tinyint NOT NULL DEFAULT '-100',
+   ADD INDEX Rank (Rank) ;
+
+

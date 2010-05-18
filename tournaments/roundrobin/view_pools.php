@@ -111,7 +111,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    echo sprintf( T_('Round summary: %s games started, %s finished, %s running'),
                  $counts['all'], $counts['finished'], $counts['run'] ),
-      "<br>\n";
+      "<br>\n",
+      sprintf( T_('Pools are ranked by Points with Tie-breakers: %s'), T_('SODOS') ), "<br>\n";
 
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
    if( $my_tpool )
