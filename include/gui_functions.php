@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+$TranslateGroups[] = "Common";
+
 require_once( 'include/globals.php' );
 require_once( 'include/std_functions.php' );
 require_once( 'include/time_functions.php' );
@@ -270,6 +272,13 @@ function echo_image_table( $url, $title, $withSep=true )
       . anchor( $url,
          image( $base_path.'images/table.gif', $title, null, 'class="InTextImage"' ),
          $title );
+}
+
+/*! \brief Returns image-tag for tournament-round (next-round). */
+function echo_image_tourney_next_round()
+{
+   global $base_path;
+   return image( $base_path.'images/next.gif', T_('Next Round#tourney'), null, 'class="InTextImage"' );
 }
 
 /*!
