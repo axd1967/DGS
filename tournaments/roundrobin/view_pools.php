@@ -130,8 +130,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
    if( $allow_edit_tourney )
    {
-      $menu_array[T_('Edit pools')] =
-         array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' );
+      if( $tround->Status == TROUND_STATUS_POOL )
+         $menu_array[T_('Edit pools')] =
+            array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' );
+      if( $tround->Status == TROUND_STATUS_PLAY )
+         $menu_array[T_('Edit ranks')] =
+            array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    }
