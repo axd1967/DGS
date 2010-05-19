@@ -669,9 +669,13 @@ class TournamentPool
 
    function get_edit_tournament_status()
    {
-      static $statuslist = array(
-         TOURNEY_STATUS_PAIR
-      );
+      static $statuslist = array( TOURNEY_STATUS_PAIR );
+      return $statuslist;
+   }
+
+   function get_edit_ranks_tournament_status()
+   {
+      static $statuslist = array( TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 

@@ -244,7 +244,10 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" )
             . '<li>'
             . make_admin_tgame( $tid ) . MED_SPACING . '(' . T_('also see game info pages') . ')'
-            . subList( array( T_('End game, Add time#mngt') ));
+            . subList( array( T_('End game, Add time#mngt') ))
+            . '<li>'
+            . make_menu_link( T_('Edit ranks'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
+            . subList( array( T_('Pool-rank, next-round flagging#mngt') ));
    }
 
    return '';
