@@ -165,8 +165,11 @@ define('TROUND_SLICE_MANUAL', 3);
 
 // TournamentPool.Rank-values
 define('TPOOLRK_NO_RANK', -100); // unset pool-rank
-define('TPOOLRK_GAME_END', -99); // marks, that T-game has ended
 define('TPOOLRK_RANK_ZONE', -90); // reserved rank-zone -100..-90, >-90 zone with ranks
 define('TPOOLRK_RETREAT', 0); // temp-marked as retreat from next round
+
+define('TIEBREAKER_POINTS', 1);
+define('TIEBREAKER_SODOS',  2);
+define('TIEBREAKER_WINS',   3);
 
 ?>
