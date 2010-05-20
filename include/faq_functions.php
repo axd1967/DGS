@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+$TranslateGroups[] = "FAQ";
+
 
 /**
  * $level=0 print the start of the container and intialize the function
