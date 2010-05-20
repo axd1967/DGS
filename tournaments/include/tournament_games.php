@@ -46,7 +46,7 @@ global $ENTITY_TOURNAMENT_GAMES; //PHP5
 $ENTITY_TOURNAMENT_GAMES = new Entity( 'TournamentGames',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'tid', 'Round_ID', 'gid', 'TicksDue', 'Flags',
+      FTYPE_INT,  'ID', 'tid', 'Round_ID', 'Pool', 'gid', 'TicksDue', 'Flags',
                   'Challenger_uid', 'Challenger_rid', 'Defender_uid', 'Defender_rid',
       FTYPE_FLOAT, 'Score',
       FTYPE_DATE, 'Lastchanged', 'StartTime', 'EndTime',
@@ -58,6 +58,7 @@ class TournamentGames
    var $ID;
    var $tid;
    var $Round_ID;
+   var $Pool;
    var $gid;
    var $Status;
    var $TicksDue;
@@ -77,13 +78,14 @@ class TournamentGames
    var $Challenger_tladder;
 
    /*! \brief Constructs TournamentGames-object with specified arguments. */
-   function TournamentGames( $id=0, $tid=0, $round_id=0, $gid=0, $status=TG_STATUS_INIT,
+   function TournamentGames( $id=0, $tid=0, $round_id=0, $pool=0, $gid=0, $status=TG_STATUS_INIT,
          $ticks_due=0, $flags=0, $lastchanged=0, $challenger_uid=0, $challenger_rid=0,
          $defender_uid=0, $defender_rid=0, $start_time=0, $end_time=0, $score=0.0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
       $this->Round_ID = (int)$round_id;
+      $this->Pool = (int)$pool;
       $this->gid = (int)$gid;
       $this->setStatus( $status );
       $this->TicksDue = (int)$ticks_due;
@@ -173,6 +175,7 @@ class TournamentGames
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Round_ID', $this->Round_ID );
+      $data->set_value( 'Pool', $this->Pool );
       $data->set_value( 'gid', $this->gid );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'TicksDue', $this->TicksDue );
@@ -233,6 +236,7 @@ class TournamentGames
             @$row['ID'],
             @$row['tid'],
             @$row['Round_ID'],
+            @$row['Pool'],
             @$row['gid'],
             @$row['Status'],
             @$row['TicksDue'],
@@ -295,9 +299,10 @@ class TournamentGames
    /*!
     * \brief Returns ListIterator with TournamentGames-objects for given tournament-id and TournamentGames-status.
     * \param $round_id optional TournamentRound.ID
+    * \param $pool 0 = load all pools, otherwise load specific pool or pools if array of pools
     * \param $status null=no restriction on status, single-status or array with status to restrict on
     */
-   function load_tournament_games( $iterator, $tid, $round_id=0, $status=null )
+   function load_tournament_games( $iterator, $tid, $round_id=0, $pool=0, $status=null )
    {
       $qsql = TournamentGames::build_query_sql( $tid );
       if( is_array($status) )
@@ -306,9 +311,13 @@ class TournamentGames
          $qsql->add_part( SQLP_WHERE, "TG.Status='" . mysql_addslashes($status) . "'" );
       if( $round_id > 0 )
          $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
+      if( is_array($pool) )
+         $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TG.Pool', $pool, /*is-str*/false ) );
+      elseif( $pool > 0 )
+         $qsql->add_part( SQLP_WHERE, "TG.Pool='$pool'" );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentGames::load_tournament_games($tid,$round_id)", $query );
+      $result = db_query( "TournamentGames::load_tournament_games($tid,$round_id,$pool)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
@@ -322,8 +331,12 @@ class TournamentGames
       return $iterator;
    }
 
-   /*! \brief Counts Tournament-games with given status-array or single status (empty array for all stati). */
-   function count_tournament_games( $tid, $round_id=0, $arr_status=null )
+   /*!
+    * \brief Counts Tournament-games with given status-array or single status (empty array for all stati).
+    * \param $pool_group if true, return array( pool => array( status => count, ...), ...);
+    *        otherwise return scalar count
+    */
+   function count_tournament_games( $tid, $round_id=0, $arr_status=null, $pool_group=false )
    {
       static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
       $tid = (int)$tid;
@@ -340,8 +353,24 @@ class TournamentGames
       if( $round_id > 0 )
          $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
 
-      $row = mysql_single_fetch( "TournamentGames::count_tournament_games($tid,$round_id)", $qsql->get_select() );
-      return ( $row ) ? (int)$row['X_Count'] : 0;
+      if( $pool_group ) // group by Pool, Status
+      {
+         $qsql->add_part( SQLP_FIELDS, 'Pool', 'Status' );
+         $qsql->add_part( SQLP_GROUP, 'Pool', 'Status' );
+         $result = db_query( "TournamentGames::count_tournament_games.group($tid,$round_id)", $qsql->get_select() );
+
+         $arr = array();
+         while( $row = mysql_fetch_array( $result ) )
+            $arr[$row['Pool']][$row['Status']] = $row['X_Count'];
+         mysql_free_result($result);
+
+         return $arr;
+      }
+      else
+      {
+         $row = mysql_single_fetch( "TournamentGames::count_tournament_games($tid,$round_id)", $qsql->get_select() );
+         return ( $row ) ? (int)$row['X_Count'] : 0;
+      }
    }
 
    /*! \brief Counts Games for consistency-check with Tournament-games. */

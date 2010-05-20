@@ -72,6 +72,7 @@ class TournamentPool
    var $Points;
    var $Wins;
    var $SODOS;
+   var $CalcRank;
 
    /*! \brief Constructs TournamentPool-object with specified arguments. */
    function TournamentPool( $id=0, $tid=0, $round=1, $pool=1, $uid=0, $rank=TPOOLRK_NO_RANK )
@@ -94,6 +95,7 @@ class TournamentPool
       $this->Points = 0;
       $this->Wins = 0;
       $this->SODOS = 0;
+      $this->CalcRank = 0;
    }
 
    function to_string()
@@ -101,14 +103,28 @@ class TournamentPool
       return print_r( $this, true );
    }
 
-   function formatRank()
+   function get_cmp_rank()
    {
       if( $this->Rank == TPOOLRK_RETREAT )
-         return NO_VALUE;
-      elseif( $this->Rank > TPOOLRK_RANK_ZONE )
-         return abs($this->Rank);
+         return 127; // lowest prio
+      elseif( $this->Rank == TPOOLRK_NO_RANK )
+         return $this->CalcRank;
       else
-         return '';
+         return abs($this->Rank);
+   }
+
+   function formatRank( $incl_calc_rank=false )
+   {
+      if( $this->Rank == TPOOLRK_RETREAT )
+         $s = NO_VALUE;
+      elseif( $this->Rank > TPOOLRK_RANK_ZONE )
+         $s = abs($this->Rank);
+      else
+         $s = '';
+
+      if( $incl_calc_rank && $this->CalcRank > 0 && $this->CalcRank != abs($this->Rank) )
+         $s .= ' ' . span('Calc', sprintf( '(%s)', $this->CalcRank ));
+      return trim($s);
    }
 
    function echoRankImage()
@@ -163,7 +179,10 @@ class TournamentPool
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Returns db-fields to be used for query of TournamentPool-objects for given tournament-id. */
+   /*!
+    * \brief Returns db-fields to be used for query of TournamentPool-objects for given tournament-id.
+    * \param $pool 0 = all pools, otherwise specific pool or pools if array of pools
+    */
    function build_query_sql( $tid=0, $round=0, $pool=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newQuerySQL('TPOOL');
@@ -171,7 +190,9 @@ class TournamentPool
          $qsql->add_part( SQLP_WHERE, "TPOOL.tid='$tid'" );
       if( $round > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.Round='$round'" );
-      if( $pool > 0 )
+      if( is_array($pool) )
+         $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TPOOL.Pool', $pool, /*is-str*/false ) );
+      elseif( $pool > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.Pool='$pool'" );
       return $qsql;
    }
@@ -220,6 +241,28 @@ class TournamentPool
       return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'], $row['X_CountUsers'] ) : array( 0, 0, 0 );
    }
 
+   /*!
+    * \brief Returns array( pool => user-count ) for given tournament-id and round.
+    * \param $rank null=count-all, TPOOLRK_NO_RANK = count-all-unset-rank, other value = count-all with Rank>value
+    */
+   function count_tournament_pool_users( $tid, $round, $rank=null )
+   {
+      if( !is_null($rank) && is_numeric($rank) )
+         $where_rank = ( $rank == TPOOLRK_NO_RANK ) ? "AND Rank <= $rank" : "AND Rank > $rank";
+      else
+         $where_rank = '';
+      $query = sprintf( "SELECT Pool, COUNT(*) AS X_Count FROM TournamentPool "
+         . "WHERE tid=%s and Round=%s $where_rank GROUP BY Pool", (int)$tid, (int)$round );
+      $result = db_query( "TournamentPool::count_tournament_pool_users($tid,$round,$rank)", $query );
+
+      $arr = array();
+      while( $row = mysql_fetch_assoc($result) )
+         $arr[$row['Pool']] = $row['X_Count'];
+      mysql_free_result($result);
+
+      return $arr;
+   }
+
    /*! \brief Returns expected sum of games for all pools for given tournament and round. */
    function count_tournament_pool_games( $tid, $round )
    {
@@ -254,7 +297,7 @@ class TournamentPool
 
    /*!
     * \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id.
-    * \param $pool 0 = load all pools, otherwise load specific pool
+    * \param $pool 0 = load all pools, otherwise load specific pool or pools if array of pools
     * \param $with_user false = don't load user, true = load user-data,
     *        otherwise: rating-use-mode = load T-rating + TP-register-time
     * \return uid-indexed iterator with items: TournamentPool + .User + .User.urow[TP_X_RegisterTime|TP_Rating]
@@ -666,6 +709,37 @@ class TournamentPool
 
       return array( $errors, $pool_summary );
    }//check_pools
+
+   /*!
+    * \brief Updates TournamentPool.Rank with given rank for specified TournamentPool.ID(s).
+    * \param $tpool_id single ID or array with IDs to update rank
+    */
+   function update_tournament_pool_ranks( $tpool_id, $rank )
+   {
+      if( is_array($tpool_id) )
+      {
+         $cnt = count($tpool_id);
+         if( $cnt <= 0 )
+            return 0;
+         $qpart_tpools = build_query_in_clause( 'ID', $tpool_id, /*is-str*/false );
+      }
+      elseif( is_numeric($tpool_id) )
+      {
+         $cnt = 1;
+         $qpart_tpools = 'ID='.$tpool_id;
+      }
+      else
+      {
+         error('invalid_args', "TournamentPool::update_tournament_pool_ranks.check.tpool($tpool_id,$rank)");
+         return 0;
+      }
+      $rank = (int)$rank;
+
+      $result = db_query( "TournamentPool::update_tournament_pool_ranks.update($tpool_id,$rank)",
+         "UPDATE TournamentPool SET Rank=$rank " .
+         "WHERE $qpart_tpools AND Rank<".TPOOLRK_RANK_ZONE." LIMIT $cnt" );
+      return $result;
+   }//update_tournament_pool_ranks
 
    function get_edit_tournament_status()
    {

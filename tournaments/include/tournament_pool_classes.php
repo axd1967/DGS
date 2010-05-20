@@ -127,6 +127,217 @@ class PoolGame
 
 
  /*!
+  * \class PoolRankCalculator
+  *
+  * \brief Static helper-class to calculate rank of pool-users applying tie-breakers if needed.
+  */
+class PoolRankCalculator
+{
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief Returns (static) Tie-Breaker for given level (starting with 0).
+    * \param $level null= return count of tie-breakers, otherwise TIEBREAKER_... according to level
+    */
+   function get_tiebreaker( $level )
+   {
+      // index = order level: => tie-breaker
+      static $map = array( TIEBREAKER_POINTS, TIEBREAKER_SODOS );
+      if( is_null($level) )
+         return count($map);
+      else
+         return (isset($map[$level])) ? $map[$level] : /*unknown*/0;
+   }
+
+   /*!
+    * \brief Calculates rank of given users from stored data and apply tie-breakers if needed.
+    * \param $arr_tpools [ uid => TPool, ... ]: array-reference with TournamentPool-data needed
+    *        to calculate rank for each users; TPool->CalcRank will be filled with rank (starting at 1);
+    *        requires properly initialized TPool-fields: Points, Wins, SODOS, poolGames
+    * \param $users users to calculate ranks applying tie-breakers given by order of
+    *        get_tiebreaker(level)-func
+    *
+    * \note Just sorting by Points/Wins/SODOS could also be done with a simple sort-function,
+    *       but (later) tie-breakers like iterative Direct-Comparison are more complex.
+    *       Also a sort-function only sorts, but don't SET ranks (the tie-breaking would only
+    *       happen between two elements being compared, which is insufficient for some tie-breakers).
+    */
+   function calc_ranks( &$arr_tpools, $users )
+   {
+      $tie_level = 0;
+      $user_ranks = PoolRankCalculator::build_user_ranks( $arr_tpools, $users,
+         PoolRankCalculator::get_tiebreaker($tie_level) );
+
+      // Note on algorithm:
+      // - if more tie-breakers must be applied, identify sub-groups with same-rank
+      //   and apply tie-breaking on those recursively (without recursion)
+      $arr_stop_tiebreak = array(); // [ uid => 1, ...]: no tie-breaking if set for uid
+      $max_tiebreaker = PoolRankCalculator::get_tiebreaker(null) - 1;
+      for( $tie_level++; $tie_level <= $max_tiebreaker; $tie_level++ )
+      {
+         if( count($arr_stop_tiebreak) == count($users) ) // no more subgroups without tie-break-stop
+            break;
+         $same_ranks = PoolRankCalculator::build_same_ranks_groups( $user_ranks );
+         if( is_null($same_ranks) ) // completely ordered = all ranks appear only once
+            break;
+
+         foreach( $same_ranks as $arr_users ) // tie-break subgroups with same rank
+         {
+            $stop_tiebreaking = true;
+            if( count($arr_users) > 1 ) // subgroup only if >1 members
+            {
+               // set ranks (starting with 0) for subgroup of users
+               $groupuser_ranks = PoolRankCalculator::build_user_ranks( $arr_tpools,
+                  array_keys($arr_users), PoolRankCalculator::get_tiebreaker($tie_level) );
+               if( count( array_count_values($groupuser_ranks) ) > 1 ) // tie-breaking successful
+               {
+                  // adjust ranks in main-result for new-ranks (make "hole" by increasing remaining ranks)
+                  $same_rank_val = current( $arr_users );
+                  $max_rank_new = max( $groupuser_ranks );
+                  foreach( $user_ranks as $uid => $rank )
+                  {
+                     if( $rank > $same_rank_val )
+                        $user_ranks[$uid] += $max_rank_new;
+                  }
+
+                  // copy new ranks to main-result $user_ranks
+                  foreach( $groupuser_ranks as $uid => $rank_new )
+                     $user_ranks[$uid] = $same_rank_val + $rank_new;
+               }
+               else // tie-breaking failed for current tie-breaker (still a draw)
+               {
+                  if( $tie_level >= $max_tiebreaker )
+                     $stop_tiebreaking = false; // continue tie-breaking if there are more tie-breakers
+               }
+            }
+
+            if( $stop_tiebreaking )
+            {
+               foreach( $arr_users as $uid => $rank )
+                  $arr_stop_tiebreak[$uid] = 1;
+            }
+         }
+      }
+
+      // copy final ranks into TPool->CalcRank for given users
+      foreach( $user_ranks as $uid => $rank )
+         $arr_tpools[$uid]->CalcRank = $rank + 1;
+
+   }//calc_ranks
+
+   /*!
+    * \brief Returns all user-subgroups with same-rank value;
+    *        used to identify groups of users that need a tie-break.
+    * \param $users expect users-array to be sorted by value: [ uid => rank, ... ]
+    * \return null if no ties (=same rank) found;
+    *         otherwise return array of sub-array( uid => rank, ... ) all with same rank
+    *
+    * \note Example: [ u1=>1, u2=>2, u3=>2, u4=>3, u5=>3 ]
+    *             -> [ [u1=>1], [u2=>2, u3=>2], [u4=>3, u5=>3] ]
+    */
+   function build_same_ranks_groups( $users )
+   {
+      // find ties = rank-values appearing several times
+      $arr_valcount = array_count_values( $users ); // [ rank => count ], e.g. 1 => #1, 2 => #2, 3 => #2
+      if( count($arr_valcount) == count($users) )
+         return null;
+
+      $result = array();
+      foreach( $arr_valcount as $pivot_rank => $cnt )
+         $result[] = array_intersect( $users, array($pivot_rank) );
+      return $result;
+   }
+
+   /*!
+    * \brief Assigns rank to given $users according to specified "tie-breaker value-base".
+    * \param $arr_tpools [ uid => TPool, ... ]: array mapping uid in $users to TournamentPool-object
+    *        containing the required data to determine rank for users
+    * \param $users [ uid, ... ]: list of users expected to have the same rank
+    *        (or initially having no rank, which is also "having the same rank")
+    * \param $tie_breaker Determine ranks determined by using tie-breaker (TIEBREAKER_...)
+    * \return [ uid => rank, ... ]: array mapping user ($uid) to rank (starting at 0)
+    *         ordered by ascending rank
+    */
+   function build_user_ranks( $arr_tpools, $users, $tie_breaker )
+   {
+      $arr = array();
+      $result = array();
+
+      switch( (int)$tie_breaker )
+      {
+         case TIEBREAKER_POINTS:
+         {
+            // build mapping (unique value -> to rank)
+            foreach( $users as $uid )
+               $arr[] = (int) ( 2 * $arr_tpools[$uid]->Points ); // avoid float-keys
+            $arr = PoolRankCalculator::build_value_rank_map( $arr, true );
+
+            // assign rank to users according to mapped-values
+            foreach( $users as $uid )
+               $result[$uid] = $arr[(int)( 2 * $arr_tpools[$uid]->Points )];
+            break;
+         }
+         case TIEBREAKER_SODOS:
+         {
+            foreach( $users as $uid )
+               $arr[] = (int) ( 2 * $arr_tpools[$uid]->SODOS ); // avoid float-keys
+            $arr = PoolRankCalculator::build_value_rank_map( $arr, true );
+
+            foreach( $users as $uid )
+               $result[$uid] = $arr[(int)( 2 * $arr_tpools[$uid]->SODOS )];
+            break;
+         }
+         case TIEBREAKER_WINS:
+         {
+            foreach( $users as $uid )
+               $arr[] = $arr_tpools[$uid]->Wins;
+            $arr = PoolRankCalculator::build_value_rank_map( $arr, true );
+
+            foreach( $users as $uid )
+               $result[$uid] = $arr[$arr_tpools[$uid]->Wins];
+            break;
+         }
+         default: // no tie-breaking
+         {
+            foreach( $users as $uid )
+               $result[$uid] = 0;
+            break;
+         }
+      }
+
+      asort( $result, SORT_NUMERIC ); // sort by rank
+      return $result;
+   }//build_user_ranks
+
+   /*!
+    * \brief Returns array with mapping of (unique) value to according rank.
+    * \param $reverse if true, highest-value (instead of lowest value) starts with rank ascending from 0
+    * \return [ value => rank, ... ]: rank starting at 0
+    */
+   function build_value_rank_map( $arr, $reverse )
+   {
+      // uniq before sort, because default sort-flag SORT_STRING for PHP >=5.2.10
+      // (but even if applied on numbers, arr is unique afterwards)
+      $arr = array_unique($arr);
+
+      if( $reverse )
+         rsort( $arr, SORT_NUMERIC );
+      else
+         sort( $arr, SORT_NUMERIC );
+
+      $rank = 0;
+      $rank_map = array();
+      foreach( $arr as $val )
+         $rank_map[$val] = $rank++;
+      return $rank_map;
+   }
+
+} // end of 'PoolRankCalculator'
+
+
+
+
+ /*!
   * \class PoolTables
   *
   * \brief Container with all the pool users, games and results for one tournament-round
@@ -234,47 +445,33 @@ class PoolTables
          $tpool_ch->SODOS /= 2;
       }
 
-      // re-order pool-users by TPool.Points (+ TODO tie-breakers)
+      // re-order pool-users
       foreach( $reorder_pools as $pool => $tmp )
-         usort( $this->pools[$pool], array( $this, '_compare_user_points' ) ); //by user Points + tie-breaker
+      {
+         // calculate rank for users determined by tie-breakers
+         PoolRankCalculator::calc_ranks( $this->users, $this->pools[$pool] );
+
+         usort( $this->pools[$pool], array( $this, '_compare_user_ranks' ) ); //by TPool-fields.Rank/CalcRank
+      }
    }//fill_games
 
    /*! \internal Comparator-function to sort users of pool. */
-   function _compare_user_points( $a_uid, $b_uid )
+   function _compare_user_ranks( $a_uid, $b_uid )
    {
-      $cmp_points = cmp_int( $this->users[$a_uid]->Points, $this->users[$b_uid]->Points );
-      if( $cmp_points != 0 )
-         return -$cmp_points;
+      $a_tpool = $this->users[$a_uid];
+      $b_tpool = $this->users[$b_uid];
 
-      // NOTE: inofficial Tie-Breakers (SODOS), because TD sets pool-ranks
-      // if TD sets order, Rank must be calculated by correct order not by willfare of TD
+      $cmp_rank = cmp_int( $a_tpool->get_cmp_rank(), $b_tpool->get_cmp_rank() );
+      if( $cmp_rank != 0 )
+         return $cmp_rank;
 
-      /*
-      // Tie-Breaker: Direct Comparison
-      $score = $this->get_score_direct_comparison($a_uid, $b_uid);
-      if( !is_null($score) )
-         return ( $score < 0 ) ? -1 : 1;
-      */
+      // Tie-Breaker: CalcRank (even if eventually used in cmp_rank implicitly)
+      $cmp_calcrank = cmp_int( $a_tpool->CalcRank, $b_tpool->CalcRank );
+      if( $cmp_calcrank != 0 )
+         return $cmp_calcrank;
 
-      // Tie-Breaker: SODOS
-      $cmp_sodos = cmp_int( $this->users[$a_uid]->SODOS, $this->users[$b_uid]->SODOS );
-      if( $cmp_sodos != 0 )
-         return -$cmp_sodos;
-
-      // static ordering of users (not intended as tie-breaker)
-      return cmp_int( $a_uid, $b_uid );
-   }
-
-   /*! \brief Returns true if user $uid won in game with $opp (Face-to-face result). */
-   function get_score_direct_comparison( $uid, $opp )
-   {
-      foreach( $this->users[$uid]->PoolGames as $poolGame )
-      {
-         if( $poolGame->get_opponent($uid) == $opp )
-            return $poolGame->get_score($uid);
-      }
-      return null;
-   }
+      return cmp_int( $a_uid, $b_uid ); // static ordering of users to assure same order
+   }//compare_user_ranks
 
    /*!
     * Returns arr( all => count-games, run => running-games, finished => finished-games,
@@ -519,10 +716,10 @@ class PoolViewer
          foreach( range(1, $this->pools_max_users) as $pool )
             $this->table->add_tablehead( $idx++, $pool, 'Matrix', TABLE_NO_HIDE );
 
-         $this->table->add_tablehead( 9, T_('#Wins#header'), 'NumberC', 0 );
-         $this->table->add_tablehead( 7, T_('Points#header'), 'NumberC', TABLE_NO_HIDE );
-         $this->table->add_tablehead(10, T_('SODOS#header'), 'NumberC', 0 );
-         $this->table->add_tablehead(11, T_('Rank#header'), 'TRank', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 9, T_('#Wins#pool_header'), 'NumberC', 0 );
+         $this->table->add_tablehead( 7, T_('Points#pool_header'), 'NumberC', TABLE_NO_HIDE );
+         $this->table->add_tablehead(10, T_('SODOS#pool_header'), 'NumberC', 0 );
+         $this->table->add_tablehead(11, T_('Rank#pool_header'), 'TRank', TABLE_NO_HIDE );
          $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE );
       }
    }
@@ -592,7 +789,7 @@ class PoolViewer
             7 => $tpool->Points,
             9 => $tpool->Wins,
             10 => $tpool->SODOS,
-            11 => $tpool->formatRank(),
+            11 => $tpool->formatRank( /*incl-CalcRank*/true ),
             12 => $tpool->echoRankImage(),
          );
          if( $this->table->Is_Column_Displayed[1] )

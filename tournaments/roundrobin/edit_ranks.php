@@ -22,10 +22,13 @@ $TranslateGroups[] = "Tournament";
 chdir('../..');
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
+require_once 'include/gui_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool.php';
+require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -50,6 +53,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
 /* Actual REQUEST calls used:
      tid=                     : edit tournament pool ranks
+     t_fill&tid=              : fill ranks for all finished pools
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -83,9 +87,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    // ---------- Process actions ------------------------------------------------
 
+   $result_notes = null;
    if( count($errors) == 0 )
    {
-      //TODO
+      if( @$_REQUEST['t_fill'] )
+      {
+         $result_notes = TournamentHelper::fill_ranks_tournament_pool( $tround );
+      }
    }
 
    // --------------- Tournament-Pool-Ranks EDIT form --------------------
@@ -104,7 +112,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'DESCRIPTION', T_('Round Status#tround'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
-   if( count($errors) )
+   $has_errors = count($errors);
+   if( $has_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -113,10 +122,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       $tform->add_empty_row();
    }
 
-   // Fill Ranks -----------------------------
+   // Actions choices ------------------------
 
+   $disable_submit = ($has_errors) ? 'disabled=1' : '';
    $tform->add_row( array( 'HR' ));
-   $tform->add_row( array( 'HEADER', T_('Fill Ranks') ));
+
+   $tform->add_row( array(
+         'CELL', 2, '',
+         'SUBMITBUTTONX', 't_fill', T_('Fill Ranks'), $disable_submit,
+         'TEXT', SMALL_SPACING . T_('Fill ranks for finished pools.'), ));
 
 
    $title = T_('Tournament Pool Ranks Editor');
@@ -125,10 +139,17 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    $tform->echo_string();
 
+   if( !is_null($result_notes) )
+   {
+      echo_notes( 'edittournamentpoolrankTable', T_('Action Result Notes'), $result_notes );
+   }
+
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
+   $menu_array[T_('Edit ranks')] =
+      array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 

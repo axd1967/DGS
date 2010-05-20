@@ -244,7 +244,7 @@ class TournamentHelper
             foreach( $arr_users as $df_uid )
             {
                $df_tpool = $poolTables->get_user_tournament_pool( $df_uid );
-               if( TournamentHelper::create_pairing_game( $trule, $tround->ID, $user_ch, $df_tpool->User ) )
+               if( TournamentHelper::create_pairing_game( $trule, $tround->ID, $pool, $user_ch, $df_tpool->User ) )
                   $count_games++;
 
                if( !($count_games % 25) )
@@ -272,14 +272,15 @@ class TournamentHelper
    }//start_tournament_round_games
 
    /*!
-    * \brief Creates tournament game for specific pairing of two users.
+    * \brief Creates tournament game for specific pairing of two users for round-robin-tourneys.
     * \param $trule TournamentRules-object containing tourney-id tid
     * \param $tround_id TournamentRound-ID
+    * \param $pool TournamentPool.Pool number
     * \param $user_ch 1st user (challenger) as User-object with ID and urow->['TP_ID'] (=rid) set
     * \param $user_df 2nd user (defender) as User-object (dito as $user_ch)
     * \return TournamentGames-object or null on error (shouldn't happen because "exceptions" on errors).
     */
-   function create_pairing_game( $trule, $tround_id, $user_ch, $user_df )
+   function create_pairing_game( $trule, $tround_id, $pool, $user_ch, $user_df )
    {
       $gid = $trule->create_game( $user_ch, $user_df );
       if( !$gid )
@@ -293,6 +294,7 @@ class TournamentHelper
 
       $tg->gid = $gid;
       $tg->Round_ID = $tround_id;
+      $tg->Pool = $pool;
       $tg->setStatus( TG_STATUS_PLAY );
       $tg->StartTime = $GLOBALS['NOW'];
       $tg->insert();
@@ -450,7 +452,78 @@ class TournamentHelper
       ta_end();
 
       return $success;
-   }
+   }//set_tournament_round
+
+   /*!
+    * \brief Fills ranks of finished pools updating TournamentPool.Rank for given tourney-round.
+    * \param $tround TournamentRound-object
+    * \return array of actions taken
+    */
+   function fill_ranks_tournament_pool( $tround )
+   {
+      $tid = $tround->tid;
+      $round = $tround->Round;
+      $arr_pools_to_finish = array(); // [ pool, ... ]
+      $result = array();
+
+      // 1. identify pools to finish
+      $arr_tgames = TournamentGames::count_tournament_games( $tid, $tround->ID, array(), /*pool-group*/true );
+      $arr_finished_pools = array(); // [ pool, ... ]
+      foreach( $arr_tgames as $pool => $arr_status )
+      {
+         if( !array_key_exists(TG_STATUS_PLAY, $arr_status) )
+            $arr_finished_pools[] = $pool;
+      }
+
+      $arr_pools_no_rank = TournamentPool::count_tournament_pool_users( $tid, $round, TPOOLRK_NO_RANK );
+      foreach( $arr_finished_pools as $pool )
+      {
+         if( @$arr_pools_no_rank[$pool] )
+            $arr_pools_to_finish[] = $pool;
+      }
+      $count_finish = count($arr_pools_to_finish);
+      $result[] = sprintf( T_('Identified %s pools to finish by setting ranks for pools: %s'),
+         $count_finish, ($count_finish ? implode(', ', $arr_pools_to_finish) : NO_VALUE) );
+
+      // 2. calculate ranks for users of identified (finished) pools
+      if( $count_finish )
+      {
+         $tpool_iterator = new ListIterator( 'Tournament.edit_ranks.load_pools' );
+         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round,
+            $arr_pools_to_finish, /*load-opts*/0 );
+         $poolTables = new PoolTables( $tround->Pools );
+         $poolTables->fill_pools( $tpool_iterator );
+
+         $tg_iterator = new ListIterator( 'Tournament.edit_ranks.load_tgames' );
+         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID,
+            $arr_pools_to_finish, /*all-stati*/null );
+         $poolTables->fill_games( $tg_iterator );
+
+         // 3. finish identified pools (update rank)
+         $arr_updates = array(); // [ rank => [ TPool.ID, ... ], ... ]
+         foreach( $poolTables->users as $uid => $tpool )
+         {
+            if( $tpool->Rank == TPOOLRK_NO_RANK )
+               $arr_updates[$tpool->CalcRank][] = $tpool->ID;
+         }
+
+         ta_begin();
+         {//HOT-section to update user-ranks for finished pools
+            $count_done = 0;
+            foreach( $arr_updates as $rank => $arr_tpools )
+            {
+               if( TournamentPool::update_tournament_pool_ranks($arr_tpools, -$rank) )
+                  $count_done++;
+            }
+         }
+         ta_end();
+
+         if( $count_done )
+            $result[] = T_('Pools finished.');
+      }
+
+      return $result;
+   }//fill_ranks_tournament_pool
 
 } // end of 'TournamentHelper'
 
