@@ -17,8 +17,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Game";
-
 require_once( 'include/coords.php' );
 require_once( 'include/goban_handler_sl.php' );
 require_once( 'include/goban_handler_gfx.php' );

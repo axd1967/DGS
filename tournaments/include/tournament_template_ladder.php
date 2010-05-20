@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
-$TranslateGroups[] = "Tournament";
+//$TranslateGroups[] = "Tournament";
 
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
