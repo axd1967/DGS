@@ -618,6 +618,7 @@ Description:
  ID             | int(11)                                   | NULL
  tid            | int(11)                                   | NULL
  Round_ID       | int(11)                                   | 0
+ Pool           | smallint(5) unsigned                      | 0
  gid            | int(11)                                   | 0
  Status         | enum('INIT','PLAY','SCORE','WAIT','DONE') | INIT
  TicksDue       | int(11)                                   | 0
@@ -645,6 +646,10 @@ Description:
         could meet again in later rounds. T-game most often used to process
         T-game-end. Round-no makes a bad index, so used TRound.ID
 
+* Pool : pool number
+   - 0 for ladder-type tournaments
+   - for round-robin-type tournaments: corresponding TournamentPool.Pool for T-game
+   - note: field is needed to speed up db-queries on filling-ranks of finished pools
 
 * gid : FK to Games.ID, 0 = unset yet
 

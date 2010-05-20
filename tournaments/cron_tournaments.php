@@ -64,7 +64,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    // ---------- handle tournament-game ending by score/resignation/jigo/timeout
 
    $tg_iterator = new ListIterator( 'cron_tournament.load_tgames.score', null, $tg_order );
-   $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, 0, TG_STATUS_SCORE );
+   $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, 0, 0, TG_STATUS_SCORE );
 
    while( list(,$arr_item) = $tg_iterator->getListIterator() )
    {

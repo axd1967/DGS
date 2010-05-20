@@ -171,7 +171,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       else
       {
          $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
-         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, 0,
+         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, 0, 0,
                array(TG_STATUS_PLAY, TG_STATUS_WAIT, TG_STATUS_SCORE) );
 
          // add ladder-info (challenge-range)

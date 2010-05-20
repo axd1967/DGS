@@ -1903,3 +1903,10 @@ ALTER TABLE TournamentPool
    ADD INDEX Rank (Rank) ;
 
 
+-- added TournamentGames.Pool for pool-resulting
+ALTER TABLE TournamentGames
+   ADD Pool smallint unsigned NOT NULL DEFAULT '0' AFTER Round_ID,
+   DROP INDEX tidRound,
+   ADD INDEX tidRoundPool (tid,Round_ID,Pool) ;
+
+
