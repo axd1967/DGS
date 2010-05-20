@@ -118,7 +118,7 @@ if( $fdemo == 1 )
 
    $maxrows = get_request_arg( 'maxrows' );
    $form->add_row( array(
-         'DESCRIPTION', T_('Show Rows'),
+         'DESCRIPTION', 'Show Rows',
          'SELECTBOX',   'maxrows', 1, build_maxrows_array($maxrows), $maxrows, false ));
 
    $q1 = $qsql->duplicate();
