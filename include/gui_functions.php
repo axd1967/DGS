@@ -100,7 +100,7 @@ function TD_button( $title, $href, $isrc, $ialt)
 }
 
 /*! \brief Prints notes in formatted table if there are notes. */
-function echo_notes( $table_id, $title, $notes, $pre_sep=true )
+function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
 {
    if( !is_array($notes) || count($notes) == 0 )
       return;
@@ -122,7 +122,7 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true )
          echo "</ul>\n";
       }
       else
-         echo '  <li>', make_html_safe($note, 'line'), "\n";
+         echo '  <li>', ( $html_safe ? make_html_safe($note, 'line') : $note ), "\n";
    }
    echo "</ul>\n", "</td></tr></table>\n";
 }
