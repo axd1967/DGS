@@ -91,7 +91,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $poolTables->fill_pools( $tpool_iterator );
 
    $tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
-   $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, /*all-stati*/null );
+   $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, 0, /*all-stati*/null );
    $poolTables->fill_games( $tg_iterator );
    $counts = $poolTables->count_games();
 
@@ -111,8 +111,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    echo sprintf( T_('Round summary: %s games started, %s finished, %s running'),
                  $counts['all'], $counts['finished'], $counts['run'] ),
-      "<br>\n",
-      sprintf( T_('Pools are ranked by Points with Tie-breakers: %s'), T_('SODOS') ), "<br>\n";
+      "<br>\n";
 
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
    if( $my_tpool )
@@ -123,6 +122,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $poolViewer->init_table();
    $poolViewer->make_table();
    $poolViewer->echo_table();
+
+   echo_notes( 'edittournamentpoolnotesTable', T_('Tournament pool notes'), build_pool_notes(), true, false );
 
 
    $menu_array = array();
@@ -142,4 +143,34 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    end_page(@$menu_array);
 }
+
+
+/*! \brief Returns array with notes about tournament pools. */
+function build_pool_notes()
+{
+   $notes = array();
+   $notes[] = sprintf( T_('Pools are ranked by Points with Tie-breakers: %s'), T_('SODOS') );
+
+   $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
+   $img_next_round = echo_image_tourney_next_round();
+   $notes[] = sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game'), T_('Place#pool_header') )
+      . sprintf( ', %s, %s, %s, %s',
+                 span('MatrixSelf', T_('self#pool_table'), $mfmt),
+                 span('MatrixWon', T_('game won#pool_table'), $mfmt),
+                 span('MatrixLost', T_('game lost#pool_table'), $mfmt),
+                 span('MatrixJigo', T_('game draw#pool_table'), $mfmt) );
+   $notes[] = sprintf( T_('[%s] = number of wins for user'), T_('#Wins#pool_header') );
+   $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#pool_header') );
+   $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#pool_header') );
+   $notes[] = array(
+      sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"'),
+               T_('Rank#pool_header'), $img_next_round ),
+      T_('R = (optional) rank set by tournament director, really final only at end of tournament round'),
+      T_('R = \'---\' = user retreating from next round (temporary mark)'),
+      T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R'),
+      sprintf( T_('%s = marks user to advance to next round, or mark for final result'), $img_next_round ),
+   );
+
+   return $notes;
+}//build_pool_notes
 ?>
