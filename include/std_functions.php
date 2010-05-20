@@ -2831,6 +2831,7 @@ function section( $id='', $header='', $anchorName='' )
    }
 }
 
+// $link can be arr( url => desc, ... ); $linkdesc then is separator
 function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
 {
    static $started = false;
@@ -2850,7 +2851,17 @@ function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
    }
 
    if( $active )
-      echo "<dd><a href=\"$link\">$linkdesc</a>";
+   {
+      if( is_array($link) )
+      {
+         $arr = array();
+         foreach( $link as $link_url => $link_desc )
+            $arr[] = "<a href=\"$link_url\">$link_desc</a>";
+         echo '<dd>', implode($linkdesc, $arr);
+      }
+      else
+         echo "<dd><a href=\"$link\">$linkdesc</a>";
+   }
    else
       echo "<dd class=Inactive><span>$linkdesc</span>";
    if( !empty($extra) )

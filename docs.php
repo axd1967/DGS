@@ -41,7 +41,12 @@ $GLOBALS['ThePage'] = new Page('Docs');
    add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
    add_link_page_link("links.php", T_('Links'), T_('Link collection'));
    add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
-   add_link_page_link("statistics.php", T_('Statistics'), T_("Statistics about Dragon"));
+
+   $arr_stats = array( "statistics.php" => T_('Statistics') );
+   if( strpos(HOSTBASE,'dragongoserver.net') !== false )
+      $arr_stats[HOSTBASE.'stat/'] = T_('Web-Statistics');
+   add_link_page_link( $arr_stats, ', ', T_("Statistics about Dragon"));
+
    add_link_page_link("http://senseis.xmp.net/?DGSWishlist", T_('DGS Wish list'),
                      T_('Features and requests DGS users dream of'));
 /* Note: Goodies are not part of DGS, but a user-to-user feature.
