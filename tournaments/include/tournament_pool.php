@@ -71,6 +71,7 @@ class TournamentPool
    var $PoolGames; // PoolGame-object array
    var $Points;
    var $Wins;
+   var $Losses;
    var $SODOS;
    var $CalcRank;
 
@@ -94,6 +95,7 @@ class TournamentPool
       $this->PoolGames = array();
       $this->Points = 0;
       $this->Wins = 0;
+      $this->Losses = 0;
       $this->SODOS = 0;
       $this->CalcRank = 0;
    }

@@ -415,6 +415,7 @@ class PoolTables
          $tpool_ch->Points += $arr[1];
          if( !is_null($arr[0]) )
          {
+            if( $arr[0] > 0 ) $tpool_ch->Losses++;
             if( $arr[0] < 0 ) $tpool_ch->Wins++;
             if( $arr[0] < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
             if( $arr[0] <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double
@@ -424,6 +425,7 @@ class PoolTables
          $tpool_df->Points += $arr[1];
          if( !is_null($arr[0]) )
          {
+            if( $arr[0] > 0 ) $tpool_ch->Losses++;
             if( $arr[0] < 0 ) $tpool_df->Wins++;
             if( $arr[0] < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
             if( $arr[0] <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double
@@ -790,7 +792,7 @@ class PoolViewer
             2 => user_reference( REF_LINK, 1, '', $uid, $user->Handle, ''),
             6 => $idx,
             7 => $tpool->Points,
-            9 => $tpool->Wins,
+            9 => $tpool->Wins . ' : ' . $tpool->Losses,
             10 => $tpool->SODOS,
             11 => $tpool->formatRank( /*incl-CalcRank*/true ),
             12 => $tpool->echoRankImage(),
