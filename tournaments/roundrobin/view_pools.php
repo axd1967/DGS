@@ -55,6 +55,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( $tid < 0 ) $tid = 0;
    $round = (int) @$_REQUEST['round'];
    if( $round < 0 ) $round = 0;
+   $edit = (get_request_arg('edit', 0)) ? 1 : 0;
 
    $tourney = Tournament::load_tournament($tid);
    if( is_null($tourney) )
@@ -66,7 +67,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    // create/edit allowed?
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
-   if( !$allow_edit_tourney )
+   if( $edit && !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.pool_view.find_tournament($tid)");
 
    // load existing T-round
@@ -119,7 +120,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       echo sprintf( T_('You are playing in Pool %s.'), $my_tpool->Pool ), "<br>\n";
    echo "<br>\n";
 
-   $poolViewer = new PoolViewer( $tid, $page, $poolTables, ( $need_trating ? 0 : PVOPT_NO_TRATING ) );
+   $poolViewer = new PoolViewer( $tid, $page, $poolTables,
+      ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
+   if( $edit )
+      $poolViewer->setEditCallback( 'pool_user_edit_rank' );
    $poolViewer->init_table();
    $poolViewer->make_table();
    $poolViewer->echo_table();
@@ -146,6 +150,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 }
 
 
+// callback-func for edit-column in pools
+function pool_user_edit_rank( &$poolviewer, $uid )
+{
+   global $base_path, $tid;
+   return anchor( $base_path."tournaments/roundrobin/edit_ranks.php?tid=$tid".URI_AMP."uid=$uid",
+         image( $base_path.'images/edit.gif', T_('Edit Rank'), null, 'class="InTextImage"' ) );
+}
+
 /*! \brief Returns array with notes about tournament pools. */
 function build_pool_notes()
 {
@@ -155,12 +167,15 @@ function build_pool_notes()
 
    $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
    $img_next_round = echo_image_tourney_next_round();
-   $notes[] = sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game'), T_('Place#pool_header') )
-      . sprintf( ', %s, %s, %s, %s',
-                 span('MatrixSelf', T_('self#pool_table'), $mfmt),
-                 span('MatrixWon', T_('game won#pool_table'), $mfmt),
-                 span('MatrixLost', T_('game lost#pool_table'), $mfmt),
-                 span('MatrixJigo', T_('game draw#pool_table'), $mfmt) );
+   $notes[] =
+      sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s'),
+         T_('Place#pool_header'), span('MatrixSelf', T_('self#pool_table'), $mfmt) )
+      . ",<br>\n"
+      . sprintf( T_('\'%s\' on colored background (%s)'), T_('Points#pool_header'),
+            sprintf( ' %s %s %s ',
+               span('MatrixWon', T_('game won#pool_table'), $mfmt),
+               span('MatrixLost', T_('game lost#pool_table'), $mfmt),
+               span('MatrixJigo', T_('game draw#pool_table'), $mfmt) ));
    $notes[] = sprintf( T_('[%s] = number of wins for user'), T_('#Wins#pool_header') );
    $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#pool_header') );
    $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#pool_header') );
