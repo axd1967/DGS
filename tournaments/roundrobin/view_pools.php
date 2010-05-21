@@ -89,6 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 ) );
    $poolTables = new PoolTables( $tround->Pools );
    $poolTables->fill_pools( $tpool_iterator );
+   $count_players = $tpool_iterator->getItemCount();
 
    $tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, 0, /*all-stati*/null );
@@ -109,8 +110,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          "</tr></table>\n";
    }
 
-   echo sprintf( T_('Round summary: %s games started, %s finished, %s running'),
-                 $counts['all'], $counts['finished'], $counts['run'] ),
+   echo sprintf( T_('Round summary (%s players): %s games started, %s finished, %s running'),
+                 $count_players, $counts['all'], $counts['finished'], $counts['run'] ),
       "<br>\n";
 
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
@@ -149,7 +150,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 function build_pool_notes()
 {
    $notes = array();
-   $notes[] = sprintf( T_('Pools are ranked by Points with Tie-breakers: %s'), T_('SODOS') );
+   $notes[] = sprintf( T_('Pools are ranked by Tie-breakers: %s'),
+      implode(', ', array( T_('Points#tiebreaker'), T_('SODOS#tiebreaker') ) ));
 
    $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
    $img_next_round = echo_image_tourney_next_round();
