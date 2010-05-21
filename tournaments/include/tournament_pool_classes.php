@@ -646,7 +646,8 @@ define('PVOPT_NO_COLCFG',  0x02); // don't load table-column-config
 define('PVOPT_NO_EMPTY',   0x04); // don't show empty pools
 define('PVOPT_EMPTY_SEL',  0x08); // show "selected" empty-pools (directly called with make_pool_table-func)
 define('PVOPT_NO_TRATING', 0x10); // don't show T-rating (is same as user-rating)
-define('PVOPT_EDIT_COL',   0x20); // add edit-actions table-column
+define('PVOPT_EDIT_COL',   0x20); // add edit-actions table-column for pool-edit
+define('PVOPT_EDIT_RANK',  0x40); // add edit-actions table-column for rank-edit
 
 class PoolViewer
 {
@@ -722,6 +723,8 @@ class PoolViewer
          $this->table->add_tablehead(11, T_('Rank#pool_header'), 'TRank', TABLE_NO_HIDE );
          $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE );
       }
+      if( ($this->options & PVOPT_EDIT_RANK) && !($this->options & PVOPT_EDIT_COL) )
+         $this->table->add_tablehead( 8, T_('Edit#pool_header'), 'Image', TABLE_NO_HIDE );
    }
 
    /*! \brief Makes table for all pools. */
@@ -753,7 +756,7 @@ class PoolViewer
       $cnt_users = count($arr_users);
       $show_results = ( $pool > 0 ) && !( $this->options & PVOPT_NO_RESULT );
       $show_trating = !( $this->options & PVOPT_NO_TRATING );
-      $show_edit_col = ( $this->options & PVOPT_EDIT_COL ) && !is_null($this->edit_callback);
+      $show_edit_col = ( $this->options & (PVOPT_EDIT_COL|PVOPT_EDIT_RANK) ) && !is_null($this->edit_callback);
 
       // header
       if( !$this->first_pool )

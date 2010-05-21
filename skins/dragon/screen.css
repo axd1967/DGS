@@ -2862,6 +2862,10 @@ table#PoolViewerTable span.Calc {
    font-weight: normal;
 }
 
+span.TRank {
+   font-weight: bold;
+}
+
 
 /* ------------------------- */
 /* FAQ pages */
