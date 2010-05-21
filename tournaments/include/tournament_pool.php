@@ -252,7 +252,7 @@ class TournamentPool
       else
          $where_rank = '';
       $query = sprintf( "SELECT Pool, COUNT(*) AS X_Count FROM TournamentPool "
-         . "WHERE tid=%s and Round=%s $where_rank GROUP BY Pool", (int)$tid, (int)$round );
+         . "WHERE tid=%s AND Round=%s $where_rank GROUP BY Pool", (int)$tid, (int)$round );
       $result = db_query( "TournamentPool::count_tournament_pool_users($tid,$round,$rank)", $query );
 
       $arr = array();
@@ -263,11 +263,26 @@ class TournamentPool
       return $arr;
    }
 
+   /*! \brief Returns array( rank => count ) for given tournament-id and round. */
+   function count_tournament_pool_ranks( $tid, $round )
+   {
+      $query = sprintf( "SELECT Rank, COUNT(*) AS X_Count FROM TournamentPool "
+         . "WHERE tid=%s AND Round=%s GROUP BY Rank", (int)$tid, (int)$round );
+      $result = db_query( "TournamentPool::count_tournament_pool_ranks($tid,$round)", $query );
+
+      $arr = array();
+      while( $row = mysql_fetch_assoc($result) )
+         $arr[$row['Rank']] = $row['X_Count'];
+      mysql_free_result($result);
+
+      return $arr;
+   }
+
    /*! \brief Returns expected sum of games for all pools for given tournament and round. */
    function count_tournament_pool_games( $tid, $round )
    {
       $query = sprintf( "SELECT Pool, COUNT(*) AS X_Count FROM TournamentPool "
-         . "WHERE tid=%s and Round=%s GROUP BY Pool", (int)$tid, (int)$round );
+         . "WHERE tid=%s AND Round=%s GROUP BY Pool", (int)$tid, (int)$round );
       $result = db_query( "TournamentPool::count_tournament_pool_games($tid,$round)", $query );
 
       $count = 0;

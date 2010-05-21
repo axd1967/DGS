@@ -850,4 +850,102 @@ class PoolViewer
 
 } // end of 'PoolViewer'
 
+
+
+
+ /*!
+  * \class RankSummary
+  *
+  * \brief Utility methods for rank-count-summary for one tournament-round
+  */
+class RankSummary
+{
+   var $rank_summary; // rank|TPOOLRK_NO_RANK/RETREAT => [ count, NextRound-count ]
+   var $tp_count;
+   var $table; // Table-object
+
+   /*!
+    * \brief Constructs RankSummary.
+    * \param $rank_counts [ TournamentPool.Rank => count, ... ]
+    */
+   function RankSummary( $page, $rank_counts, $tp_count=0 )
+   {
+      $rstable = new Table( 'TPoolSummary', $page, null, 'rs',
+         TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
+
+      // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      $rstable->add_tablehead( 1, T_('Rank#ranksum_header'), 'TRank' );
+      $rstable->add_tablehead( 2, T_('Count#ranksum_header'), 'NumberC' );
+      $rstable->add_tablehead( 3, T_('NR-Count#ranksum_header'), 'NumberC' );
+      $this->table = $rstable;
+
+      $arr = array();
+      foreach( $rank_counts as $rank => $count )
+      {
+         $key = ( $rank < TPOOLRK_RANK_ZONE ) ? TPOOLRK_NO_RANK : abs($rank);
+         if( !isset($arr[$key]) )
+            $arr[$key] = array( 0, 0 );
+         $arr[$key][0] += $count;
+         if( $rank > 0 )
+            $arr[$key][1] += $count;
+      }
+      $this->rank_summary = $arr;
+      $this->tp_count = (int)$tp_count;
+   }
+
+   function build_notes()
+   {
+      $notes = array();
+      $notes[] = T_('Rank \'TP\' = tournament-participants registered for next-round');
+      $notes[] = sprintf( T_('Rank \'%s\' = rank not set yet for pool-users'), T_('unset#ranksum') );
+      $notes[] = sprintf( T_('%s = count of users with given rank set'), T_('Count#ranksum_header') );
+      $notes[] = sprintf( T_('%s = count of users advancing to Next-Round, or marked for final result'),
+         T_('NR-Count#ranksum_header') );
+      return $notes;
+   }
+
+   function make_table_rank_summary()
+   {
+      uksort( $this->rank_summary, array($this, '_compare_ranks') );
+
+      // TP-count
+      $this->table->add_row( array(
+            1 => 'TP',
+            2 => NO_VALUE,
+            3 => ($this->tp_count ? $this->tp_count : ''),
+         ));
+      $count_nextround = $this->tp_count;
+      $count_users = 0;
+
+      foreach( $this->rank_summary as $rank => $arr ) // arr = count_rank, count_nextround
+      {
+         $count_nextround += $arr[1];
+         $count_users += $arr[0];
+         $this->table->add_row( array(
+               1 => ($rank < TPOOLRK_RANK_ZONE) ? T_('unset#ranksum') : $rank,
+               2 => $arr[0],
+               3 => ($arr[1] ? $arr[1] : ''),
+            ));
+      }
+
+      // summary row
+      $this->table->add_row( array(
+            1 => T_('Sum#ranksum'),
+            2 => $count_users,
+            3 => $count_nextround,
+            'extra_class' => 'Sum', ));
+
+      return $this->table;
+   }//make_table_rank_summary
+
+   function _compare_ranks( $a, $b )
+   {
+      // rank order: 1, 2, 3, ..., 0, -100
+      $a2 = ($a != 0) ? abs($a) : -TPOOLRK_RANK_ZONE;
+      $b2 = ($b != 0) ? abs($b) : -TPOOLRK_RANK_ZONE;
+      return cmp_int( $a2, $b2 );
+   }
+
+} // end of 'RankSummary'
+
 ?>

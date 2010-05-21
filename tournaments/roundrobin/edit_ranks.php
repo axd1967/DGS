@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_round.php';
@@ -53,6 +54,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
 /* Actual REQUEST calls used:
      tid=                     : edit tournament pool ranks
+     t_stats&tid=             : show rank stats
      t_fill&tid=              : fill ranks for all finished pools
 */
 
@@ -88,9 +90,20 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    // ---------- Process actions ------------------------------------------------
 
    $result_notes = null;
+   $rstable = null;
    if( count($errors) == 0 )
    {
-      if( @$_REQUEST['t_fill'] )
+      if( @$_REQUEST['t_stats'] )
+      {
+         $tp_count = 0; //TODO load #next-round-RPs
+
+         // count ranks for current round over all pools
+         $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );
+         $rank_summary = new RankSummary( $page, $rank_counts, $tp_count );
+         $rstable = $rank_summary->make_table_rank_summary();
+         $result_notes = $rank_summary->build_notes();
+      }
+      elseif( @$_REQUEST['t_fill'] )
       {
          $result_notes = TournamentHelper::fill_ranks_tournament_pool( $tround );
       }
@@ -128,9 +141,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $tform->add_row( array( 'HR' ));
 
    $tform->add_row( array(
-         'CELL', 2, '',
+         'CELL', 1, '',
+         'SUBMITBUTTONX', 't_stats', T_('Show Rank Stats'), $disable_submit,
+         'CELL', 1, '',
+         'TEXT', T_('Show counts of all ranks (incl. next-round participants).'), ));
+
+   $tform->add_row( array(
+         'CELL', 1, '',
          'SUBMITBUTTONX', 't_fill', T_('Fill Ranks'), $disable_submit,
-         'TEXT', SMALL_SPACING . T_('Fill ranks for finished pools.'), ));
+         'CELL', 1, '',
+         'TEXT', T_('Fill ranks for finished pools.'), ));
 
 
    $title = T_('Tournament Pool Ranks Editor');
@@ -139,10 +159,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    $tform->echo_string();
 
+   section( 'actionResult', T_('Action Results') );
+   if( !is_null($rstable) )
+      $rstable->echo_table();
    if( !is_null($result_notes) )
-   {
-      echo_notes( 'edittournamentpoolrankTable', T_('Action Result Notes'), $result_notes );
-   }
+      echo_notes( 'edittournamentpoolrankTable', '', $result_notes );
 
 
    $menu_array = array();
