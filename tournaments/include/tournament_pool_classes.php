@@ -893,6 +893,18 @@ class RankSummary
       $this->tp_count = (int)$tp_count;
    }
 
+   function get_ranks()
+   {
+      $arr = array();
+      foreach( $this->rank_summary as $rank => $tmp )
+      {
+         if( $rank >= 0 )
+            $arr[] = $rank;
+      }
+      sort( $arr, SORT_NUMERIC );
+      return $arr;
+   }
+
    function build_notes()
    {
       $notes = array();

@@ -756,6 +756,86 @@ class TournamentPool
       return $result;
    }//update_tournament_pool_ranks
 
+   /*!
+    * \brief Executes rank-actions on TournamentPool.Rank for specified tournament-round.
+    * \param $action one of RKACT_... to set/clear next-round-flag, clear/reset rank;
+    *        RKACT_SET_NEXT_RND   = sets next-round-flag = ABS(Rank) for Ranks < 0
+    *        RKACT_CLEAR_NEXT_RND = clears next-round-flags = -ABS(Rank) for Ranks > 0
+    *        RKACT_CLEAR_RANKS    = sets Rank=0
+    *        RKACT_RESET_RANKS    = sets Rank=TPOOLRK_NO_RANK to allow filling ranks anew
+    * \param $rank_from ''=all ranks, otherwise numeric rank
+    * \param $rank_to ''=same as rank_from (single rank), otherwise numeric rank
+    * \param $pool ''=all pools, otherwise specific pool
+    */
+   function execute_rank_action( $tid, $round, $action, $rank_from, $rank_to, $pool )
+   {
+      if( $action < 1 || $action > 4 )
+         error('invalid_args', "TournamentPool.execute_rank_action.check.action($tid,$round,$action)");
+      if( (string)$rank_from != '' && ( !is_numeric($rank_from) || $rank_from < 0 ))
+         error('invalid_args', "TournamentPool.execute_rank_action.check.rank_from($tid,$round,$rank_from)");
+      if( (string)$rank_to != '' && ( !is_numeric($rank_to) || $rank_to < 0 ))
+         error('invalid_args', "TournamentPool.execute_rank_action.check.rank_to($tid,$round,$rank_to)");
+      if( (string)$pool != '' && !is_numeric($pool) )
+         error('invalid_args', "TournamentPool.execute_rank_action.check.pool($tid,$round,$pool)");
+
+      $qpart_rank = ''; // where-clause
+      if( is_numeric($rank_from) && !is_numeric($rank_to) )
+         $rank_to = $rank_from;
+      if( $action == RKACT_SET_NEXT_RND )
+      {
+         if( !is_numeric($rank_from) )
+            $qpart_rank = " AND Rank < 0";
+         else
+         {
+            $rank_from = -$rank_from;
+            $rank_to = -$rank_to;
+         }
+      }
+      elseif( $action == RKACT_CLEAR_NEXT_RND && !is_numeric($rank_from) )
+         $qpart_rank = " AND Rank > 0";
+      elseif( ($action == RKACT_CLEAR_RANKS || $action == RKACT_RESET_RANKS) && is_numeric($rank_from) )
+      {
+         if( $rank_from == $rank_to )
+            $qpart_rank = " AND Rank IN (-$rank_from,$rank_from)";
+         else
+         {
+            $rank_min = min( $rank_from, $rank_to );
+            $rank_max = max( $rank_from, $rank_to );
+            $qpart_rank = ' AND ' . build_query_in_clause('Rank',
+               array_merge( range($rank_min,$rank_max), range(-$rank_max,-$rank_min) ),
+               /*is-str*/false );
+         }
+      }
+
+      if( !$qpart_rank && is_numeric($rank_from) )
+      {
+         if( $rank_from == $rank_to )
+            $qpart_rank = " AND Rank=$rank_from";
+         else
+         {
+            $rank_min = min( $rank_from, $rank_to );
+            $rank_max = max( $rank_from, $rank_to );
+            $qpart_rank = " AND Rank BETWEEN $rank_min AND $rank_max";
+         }
+      }
+
+      if( $action == RKACT_SET_NEXT_RND )
+         $rankval = 'ABS(Rank)'; // where Rank < 0
+      elseif( $action == RKACT_CLEAR_NEXT_RND )
+         $rankval = '-ABS(Rank)'; // where Rank > 0
+      elseif( $action == RKACT_CLEAR_RANKS )
+         $rankval = '0';
+      else //if( $action == RKACT_RESET_RANKS )
+         $rankval = TPOOLRK_NO_RANK;
+
+      $query = "UPDATE TournamentPool SET Rank=$rankval "
+         . "WHERE tid=$tid AND Round=$round "
+         . ( is_numeric($pool) ? " AND Pool=$pool" : '' )
+         . " AND Rank >".TPOOLRK_RANK_ZONE // don't touch UNSET-ranks
+         . $qpart_rank;
+      return db_query( "TournamentPool.execute_rank_action.update($tid,$round,$action,$rank_from,$rank_to,$pool)", $query );
+   }//execute_rank_action_on_tournament_pools
+
    function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR );

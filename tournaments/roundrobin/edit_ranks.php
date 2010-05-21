@@ -37,6 +37,7 @@ require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
+
 {
    connect2mysql();
 
@@ -56,6 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
      tid=                     : edit tournament pool ranks
      t_stats&tid=             : show rank stats
      t_fill&tid=              : fill ranks for all finished pools
+     t_exec&tid=&action=&rank_from=&rank_to=&pool=    : execute action on ranks
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -93,7 +95,17 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $rstable = null;
    if( count($errors) == 0 )
    {
-      if( @$_REQUEST['t_stats'] )
+      if( @$_REQUEST['t_exec'] ) // execute rank-actions
+      {
+         // args: action=&rank_from=&rank_to=&pool=
+         $action    = (int)get_request_arg('action');
+         $rank_from = get_request_arg('rank_from');
+         $rank_to   = get_request_arg('rank_to');
+         $act_pool  = get_request_arg('pool');
+         TournamentPool::execute_rank_action( $tid, $round, $action, $rank_from, $rank_to, $act_pool );
+      }
+
+      if( @$_REQUEST['t_stats'] || @$_REQUEST['t_exec'] )
       {
          $tp_count = 0; //TODO load #next-round-RPs
 
@@ -144,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'CELL', 1, '',
          'SUBMITBUTTONX', 't_stats', T_('Show Rank Stats'), $disable_submit,
          'CELL', 1, '',
-         'TEXT', T_('Show counts of all ranks (incl. next-round participants).'), ));
+         'TEXT', T_('Show counts of all ranks + Show rank-actions.'), ));
 
    $tform->add_row( array(
          'CELL', 1, '',
@@ -152,6 +164,31 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'CELL', 1, '',
          'TEXT', T_('Fill ranks for finished pools.'), ));
 
+   if( @$_REQUEST['t_stats'] || @$_REQUEST['t_exec'] )
+   {
+      $arr_actions = array(
+         RKACT_SET_NEXT_RND   => T_('Set Next-Round#rank_edit'),
+         RKACT_CLEAR_NEXT_RND => T_('Clear Next-Round#rank_edit'),
+         RKACT_CLEAR_RANKS    => T_('Clear Ranks#rank_edit'),
+         RKACT_RESET_RANKS    => T_('Reset Ranks#rank_edit'),
+      );
+      $arr_ranks = array_value_to_key_and_value( $rank_summary->get_ranks() );
+      $arr_ranks_to = array( '' => '=' ) + $arr_ranks;
+      $arr_ranks = array( '' => T_('All#ranks') ) + $arr_ranks;
+      $arr_pools = array( '' => T_('All#ranks') ) + array_value_to_key_and_value( range(1, $tround->Pools) );
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', RKACT_SET_NEXT_RND), false,
+            'TEXT', T_('for users with ranks#rank_edit') . MED_SPACING,
+            'SELECTBOX', 'rank_from', 1, $arr_ranks, get_request_arg('rank_from',''), false,
+            'TEXT', '...' . MED_SPACING,
+            'SELECTBOX', 'rank_to', 1, $arr_ranks_to, get_request_arg('rank_to',''), false,
+            'TEXT', T_('on pool#rank_edit') . MED_SPACING,
+            'SELECTBOX', 'pool', 1, $arr_pools, get_request_arg('pool'), false,
+            'TEXT', ' ',
+            'SUBMITBUTTONX', 't_exec', T_('Execute'), $disable_submit, ));
+   }
 
    $title = T_('Tournament Pool Ranks Editor');
    start_page( $title, true, $logged_in, $player_row );

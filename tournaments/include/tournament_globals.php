@@ -172,4 +172,9 @@ define('TIEBREAKER_POINTS', 1);
 define('TIEBREAKER_SODOS',  2);
 define('TIEBREAKER_WINS',   3);
 
+define('RKACT_SET_NEXT_RND',   1); // mark user to advance to next-round
+define('RKACT_CLEAR_NEXT_RND', 2); // user will NOT advance to next-round
+define('RKACT_CLEAR_RANKS',    3); // set Rank=0 for user
+define('RKACT_RESET_RANKS',    4); // unset Rank for user
+
 ?>
