@@ -1393,8 +1393,8 @@ class Form
       foreach( $value_array as $value => $info )
       {
          $result .= "<OPTION value=\"$value\"";
-         if( ($multiple ? array_key_exists($value,$selected)
-                        : ($value == $selected) ) )
+         if( ($multiple ? array_key_exists((string)$value,$selected)
+                        : ((string)$value == $selected) ) )
             $result .= " selected";
 
          // Filter out HTML code
@@ -1429,7 +1429,7 @@ class Form
       foreach( $value_array as $value => $info )
       {
          $result .= "<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
-         if($value == $selected)
+         if((string)$value == $selected)
             $result .= " checked";
 
          $result .= $this->get_input_attbs($use_disable);
