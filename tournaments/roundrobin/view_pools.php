@@ -173,9 +173,9 @@ function build_pool_notes()
       . ",<br>\n"
       . sprintf( T_('\'%s\' on colored background (%s)'), T_('Points#pool_header'),
             sprintf( ' %s %s %s ',
-               span('MatrixWon', T_('game won#pool_table'), $mfmt),
-               span('MatrixLost', T_('game lost#pool_table'), $mfmt),
-               span('MatrixJigo', T_('game draw#pool_table'), $mfmt) ));
+               span('MatrixWon', T_('game won#pool_table')   . ' = 2', $mfmt),
+               span('MatrixLost', T_('game lost#pool_table') . ' = 0', $mfmt),
+               span('MatrixJigo', T_('game draw#pool_table') . ' = 1', $mfmt) ));
    $notes[] = sprintf( T_('[%s] in format "wins : losses" = number of wins and losses for user'), T_('#Wins#pool_header') );
    $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#pool_header') );
    $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#pool_header') );
