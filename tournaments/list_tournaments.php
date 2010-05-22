@@ -102,12 +102,16 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $tfilter->add_filter( 2, 'Selection', $scope_filter_array, true );
    $tfilter->add_filter( 3, 'Selection', $type_filter_array, true );
    $tfilter->add_filter( 4, 'Selection', $status_filter_array, true );
+   $filter_title =&
+      $tfilter->add_filter( 5, 'Text', 'T.Title #OP #VAL', true,
+         array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));
    $tfilter->add_filter( 6, 'Selection', $owner_filter_array, true );
    $tfilter->add_filter( 8, 'RelativeDate', 'T.StartTime', true,
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ));
    $tfilter->add_filter(13, 'Numeric', 'TRULE.Size', true,
          array( FC_SIZE => 3 ));
    $tfilter->init();
+   $rx_term = implode('|', $filter_title->get_rx_terms() );
 
    // init table
    $ttable->register_filter( $tfilter );
@@ -203,7 +207,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       if( $ttable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = Tournament::getStatusText( $tourney->Status );
       if( $ttable->Is_Column_Displayed[ 5] )
-         $row_str[ 5] = make_html_safe( $tourney->Title );
+         $row_str[ 5] = make_html_safe( $tourney->Title, false, $rx_term );
       if( $ttable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = user_reference( REF_LINK, 1, '', $tourney->Owner_ID, $tourney->Owner_Handle, '' );
       if( $ttable->Is_Column_Displayed[ 7] )
