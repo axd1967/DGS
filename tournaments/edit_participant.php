@@ -613,12 +613,14 @@ function send_register_notification( $type, $tp, $my_id )
          break;
       case TP_STATUS_APPLY.'_invite':
          $subj = T_('Verification of registration for tournament #%s');
-         $body = T_('Your application for %s has been verified by tournament director %s and changed to an invitation needing your verification.');
+         $body = T_('Your application for %s has been verified by tournament director %s and changed to an invitation, which needs your verification.');
+         $body2 = anchor( SUB_PATH."tournaments/register.php?tid=$tid", T_('Edit tournament registration') );
          $msg  = T_('Application of user [%s] changed to invitation!');
          break;
       case TP_STATUS_REGISTER.'_invite':
          $subj = T_('Verification of registration for tournament #%s');
-         $body = T_('Your registration for %s has been verified by tournament director %s and changed to an invitation needing your verification.');
+         $body = T_('Your registration for %s has been verified by tournament director %s and changed to an invitation, which needs your verification.');
+         $body2 = anchor( SUB_PATH."tournaments/register.php?tid=$tid", T_('Edit tournament registration') );
          $msg  = T_('Registration of user [%s] changed to invitation!');
          break;
       default:
