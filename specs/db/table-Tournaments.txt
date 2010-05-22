@@ -160,6 +160,7 @@ Description:
  Flags        | smallint(5) unsigned              | 0
  Rating       | double                            | -9999
  StartRound   | tinyint(3) unsigned               | 1
+ NextRound    | tinyint(3) unsigned               | 0
  Created      | datetime                          | 0000-00-00 00:00:00
  Lastchanged  | datetime                          | 0000-00-00 00:00:00
  ChangedBy    | varchar(54)                       |
@@ -233,6 +234,9 @@ Description:
 * Rating : Rating used for T, depends on TournamentProperties.RatingUseMode
 
 * StartRound : Round user wants to start in for T
+
+* NextRound : Round user is going to play in for T
+   - player is included in pooling for round: TP.NextRound == T.CurrentRound
 
 * Created : date of initial application/registration/invitation for T
 

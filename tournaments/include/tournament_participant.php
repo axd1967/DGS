@@ -49,7 +49,7 @@ $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'Finished', 'Won', 'Lost',
+      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'NextRound', 'Finished', 'Won', 'Lost',
       FTYPE_FLOAT, 'Rating',
       FTYPE_TEXT, 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
       FTYPE_DATE, 'Created', 'Lastchanged',
@@ -65,6 +65,7 @@ class TournamentParticipant
    var $Flags;
    var $Rating; // NO_RATING | valid-rating
    var $StartRound;
+   var $NextRound;
    var $Created;
    var $Lastchanged;
    var $ChangedBy;
@@ -82,7 +83,7 @@ class TournamentParticipant
 
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    function TournamentParticipant( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
-         $rating=NULL, $start_round=1, $created=0, $lastchanged=0, $changed_by='',
+         $rating=NULL, $start_round=1, $next_round=0, $created=0, $lastchanged=0, $changed_by='',
          $comment='', $notes='', $user_message='', $admin_message='', $finished=0, $won=0, $lost=0 )
    {
       $this->ID = (int)$id;
@@ -92,6 +93,7 @@ class TournamentParticipant
       $this->Flags = (int)$flags;
       $this->setRating( $rating );
       $this->setStartRound( $start_round );
+      $this->NextRound = (int)$next_round;
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
       $this->ChangedBy = $changed_by;
@@ -138,6 +140,7 @@ class TournamentParticipant
             . sprintf( ",Flags=[0x%x]", $this->Flags)
             . ", Rating=[{$this->Rating}]"
             . ", StartRound=[{$this->StartRound}]"
+            . ", NextRound=[{$this->NextRound}]"
             . ", Created=[{$this->Created}]"
             . ", Lastchanged=[{$this->Lastchanged}]"
             . ", ChangedBy=[{$this->ChangedBy}]"
@@ -259,6 +262,7 @@ class TournamentParticipant
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Rating', $this->Rating );
       $data->set_value( 'StartRound', $this->StartRound );
+      $data->set_value( 'NextRound', $this->NextRound );
       if( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
@@ -339,6 +343,7 @@ class TournamentParticipant
             @$row['Flags'],
             @$row['Rating'],
             @$row['StartRound'],
+            @$row['NextRound'],
             @$row['X_Created'],
             @$row['X_Lastchanged'],
             @$row['ChangedBy'],

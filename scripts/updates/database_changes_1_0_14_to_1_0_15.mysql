@@ -1910,3 +1910,8 @@ ALTER TABLE TournamentGames
    ADD INDEX tidRoundPool (tid,Round_ID,Pool) ;
 
 
+-- added field for start/next-round handling for tournament-participant
+ALTER TABLE TournamentParticipant
+   ADD NextRound tinyint unsigned NOT NULL DEFAULT '0' AFTER StartRound ;
+
+
