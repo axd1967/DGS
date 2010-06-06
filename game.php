@@ -252,14 +252,16 @@ function get_alt_arg( $n1, $n2)
    {
       switch( (string)$action )
       {
-         case 'choose_move': //single input pass
-            if( !$is_running_game ) //after resume
+         case 'choose_move': //single input pass; resume playing in scoring-mode
+         {
+            if( !$is_running_game )
                error('invalid_action',"game.choose_move.check_status($gid,$Status)");
 
             $validation_step = false;
             break;
+         }
 
-         case 'domove': //for validation after 'choose_move'
+         case 'domove': //for validation after 'choose_move' and for normal move on board
          {
             if( !$is_running_game ) //after resume
                error('invalid_action',"game.domove.check_status($gid,$Status)");
@@ -286,17 +288,10 @@ function get_alt_arg( $n1, $n2)
 
             $TheBoard->set_move_mark( $colnr, $rownr);
             //$coord must be kept for validation by confirm.php
-
-            // auto-comment option
-            if( defined('AUTO_COMMENT_UID') && AUTO_COMMENT_UID && ($Black_ID == AUTO_COMMENT_UID || $White_ID == AUTO_COMMENT_UID) )
-            {
-               if( (string)trim($message) == '' )
-                  $message = "<c>\n\n</c>";
-            }
             break;
          }//case 'domove'
 
-         case 'handicap': //multiple input step + validation
+         case 'handicap': //multiple input step + validation, to input free handicap-stones
          {
             if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==0 ) )
                error('invalid_action',"game.handicap.check_status($gid,$Status)");
@@ -347,7 +342,7 @@ function get_alt_arg( $n1, $n2)
             $validation_step = true;
             break;
 
-         case 'pass': //for validation
+         case 'pass': //for validation, pass-move
             if( $Status != 'PLAY' && $Status != 'PASS' )
                error('invalid_action', "game.pass.check_status($gid,$Status)");
 
@@ -356,7 +351,7 @@ function get_alt_arg( $n1, $n2)
             $extra_infos[T_('Assure that all boundaries of your territory are closed before ending the game.')] = 'Important';
             break;
 
-         case 'delete': //for validation
+         case 'delete': //for validation, delete-game
             if( !$may_del_game )
                error('invalid_action',"game.delete.check_status($gid,$Status,$my_id)");
 
@@ -364,7 +359,7 @@ function get_alt_arg( $n1, $n2)
             $extra_infos[T_('Deleting game')] = 'Important';
             break;
 
-         case 'remove': //multiple input step
+         case 'remove': //multiple input step, dead-stone-marking in scoring-mode
          {
             if( $Status != 'SCORE' && $Status != 'SCORE2' )
                error('invalid_action', "game.remove.check_status($gid,$Status)");
@@ -385,7 +380,7 @@ function get_alt_arg( $n1, $n2)
             break;
          }// case 'remove'
 
-         case 'done': //for validation after 'remove'
+         case 'done': //for validation after 'remove', done marking dead-stones in scoring-mode
          {
             if( $Status != 'SCORE' && $Status != 'SCORE2' )
                error('invalid_action', "game.done.check_status($gid,$Status)");
@@ -403,7 +398,18 @@ function get_alt_arg( $n1, $n2)
             break;
       }//switch $action
    }// !$just_looking
-   if( $validation_step ) $may_play = false;
+
+   if( $validation_step )
+   {
+      $may_play = false;
+
+      // auto-comment option
+      if( defined('AUTO_COMMENT_UID') && AUTO_COMMENT_UID && ($Black_ID == AUTO_COMMENT_UID || $White_ID == AUTO_COMMENT_UID) )
+      {
+         if( (string)trim($message) == '' )
+            $message = "<c>\n\n</c>";
+      }
+   }
 
 
 /*
