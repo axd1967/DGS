@@ -19,6 +19,332 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-06-06 juga
+
+   * include/board.php (Board.draw_board):
+   - added CSS-id 'lastMove' for last-move-image to support removing
+     last-move-marker via JavaScript/Greasemonkey
+
+   * game.php:
+   - fix bug for AUTO_COMMENT-tags for sensei-account:
+     add "<c></c>"-tags for all actions needing validation step on game-page
+   - added action-comments
+
+2010-05-22 juga
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant,
+       ~.to_string, ~.fillEntityData, ~.new_from_row),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added field TournamentParticipant.NextRound for start/next-round handling
+     for tournament-participants
+-----------
+-- added field for start/next-round handling for tournament-participant
+ALTER TABLE TournamentParticipant
+   ADD NextRound tinyint unsigned NOT NULL DEFAULT '0' AFTER StartRound ;
+-----------
+
+   * tournaments/edit_participant.php (send_register_notification):
+   - added clearer message and tournament-registration-edit-link
+     for user-verification-message
+
+   * tournaments/list_tournaments.php:
+   - added substring-filter on Tournament-title
+
+   * tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - added Point-values for game won/lost/jigo for pool-notes
+
+2010-05-21 juga
+
+   * tournaments/include/tournament_pool_classes.php (PoolTables.fill_games;
+       PoolViewer.make_pool_table),
+     tournaments/include/tournament_pool.php (class TournamentPool),
+     tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - added number of losses in #Wins-column in format "wins:losses"
+
+   * tournaments/include/tournament_pool.php (TournamentPool.echoRankImage,
+       ~.load_tournament_pool_user, ~.update_tournament_pool_ranks, ~.execute_rank_action,
+     tournaments/include/tournament_pool_classes.php (class PoolViewer,
+       ~.init_table, ~.make_pool_table),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/view_pools.php (pool_user_edit_rank, build_pool_notes),
+     skins/dragon/screen.css:
+   - added rank-edit for single pool-user
+     - for rank-editor:
+       - don't show bulk-rank-edit for single-user rank-edit
+       - hide single-rank-edit on fill-ranks action
+       - changed view-pool link to open pool-view in edit-mode
+     - for pool-view:
+       - added edit-mode showing edit-link to edit-ranks-page for user-rank-edit
+       - forbid edit-mode for normal viewers
+       - adjusted pool-notes: clearer matrix description
+   - renamed const and texts for unsetting rank: RKACT_RESET_RANKS -> RKACT_REMOVE_RANKS
+
+   * tournaments/include/tournament_pool.php (TournamentPool.execute_rank_action),
+     tournaments/include/tournament_pool_classes.php (RankSummary.get_ranks),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/edit_ranks.php:
+   - added rank-actions to bulk-update TournamentPool.Rank on pool-users for tournament-round
+     - set next-round-flag Rank>0
+     - clear next-round-flag Rank<0
+     - clear rank Rank=0
+     - reset rank Rank=-100 to allow filling ranks anew
+
+   * include/form_functions.php (Form.print_insert_select_box, ~.print_insert_radio_buttonsx):
+   - bugfix: fix '' <=> 0 comparison for item-selections on selectbox and checkbox
+
+   * tournaments/include/tournament_pool_classes.php (class RankSummary,
+       ~.build_notes, ~.make_table_rank_summary, ~._compare_ranks),
+     tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_ranks),
+     tournaments/roundrobin/edit_ranks.php:
+   - added rank-statistics showing rank-counts over all pools for current tournament-round
+
+   * tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - added players-count to round-summary
+   - adjusted notes about currently used tie-breakers
+
+2010-05-20 juga
+
+   * include/std_functions.php (add_link_page_link), docs.php, site_map.php:
+   - added link to web-statistics http://www.dragongoserver.net/stat/ if on live-server
+
+   * tournaments/include/tournament_pool_classes.php (class PoolRankCalculator, ~.get_tiebreaker,
+       ~.calc_ranks, ~.build_same_ranks_groups, ~.build_user_ranks, ~.build_value_rank_map;
+       PoolTables.fill_games, ~._compare_user_ranks;
+       PoolViewer.init_table, ~.make_pool_table),
+     tournaments/include/tournament_pool.php (class TournamentPool, ~.get_cmp_rank,
+       ~.formatRank, ~.build_query_sql, ~.count_tournament_pool_users,
+       ~.update_tournament_pool_ranks),
+     tournaments/include/tournament_games.php (class TournamentGames, ~.fillEntityData,
+       ~.new_from_row, ~.load_tournament_games, ~.count_tournament_games),
+     tournaments/include/tournament_helper.php (TournamentHelper.start_tournament_round_games,
+       ~.create_pairing_game, ~.fill_ranks_tournament_pool),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/view_pools.php (build_pool_notes),
+     tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css:
+   - pool-rank-editor: added action to fill ranks for all finished pools
+   - finish tournament-pools by setting rank for users in pools for which all games have ended
+     - added field TournamentGames.Pool for pool-resulting
+     - identify pools to finish, calculate and update ranks for pool-users
+     - added rank and calculated-rank in pool-view in format "Rank (calc-rank)"
+     - added class PoolRankCalculator to calculate rank of pool-users
+       and applying tie-breakers if needed
+       - use static tie-breakers for now: Points, SODOS
+       - replaced Points-"sorter" with Rank-"sorter" generated with more generalized
+         PoolRankCalculator by separating rank-calculation and pool-view-order,
+         the latter additionally ordered by uid on final ties for pool-view
+       - set calculated-rank in TournamentPool->CalcRank
+       - added unused implementation of tie-breaker: Wins (number of wins)
+       - cleanup: removed unused function get_score_direct_comparison(),
+         because not iterative Direct-Comparison
+   - changes for pool-view:
+     - added rank and calculated-rank in pool-view in format "Rank (calc-rank)"
+     - show calculated-rank in pool-view with normal font
+     - added notes about tournament-pools with legend about pool-table-matrix
+     - used different translation-texts for pool-table-headers
+-----------
+-- added TournamentGames.Pool for pool-resulting
+ALTER TABLE TournamentGames
+   ADD Pool smallint unsigned NOT NULL DEFAULT '0' AFTER Round_ID,
+   DROP INDEX tidRound,
+   ADD INDEX tidRoundPool (tid,Round_ID,Pool) ;
+-----------
+
+   * include/gui_functions.php (echo_notes):
+   - added html-safe argument to echo_notes()-func
+
+   * tournaments/include/tournament_template_ladder.php,
+     tournaments/include/tournament_extension.php,
+     include/classlib_game.php, include/classlib_goban.php,
+     include/classlib_userpicture.php, include/faq_functions.php,
+     include/form_functions.php, include/goban_handler_gfx.php,
+     include/goban_handler_sl.php, confirm.php:
+   - fix: added missing TranslateGroups[] for pages with translated text T_(..)
+   - fix: removed TranslateGroups[] for pages without translated text T_(..)
+   - fixed translation-group: Game -> Goban for goban-handlers
+
+2010-05-19 juga
+
+   * tournaments/include/tournament_pool.php (TournamentPool.get_edit_ranks_tournament_status),
+     tournaments/manage_tournament.php,
+     tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/view_pools.php:
+   - started Tournament-Pool-Ranks-editor
+
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.formatRank),
+     tournaments/include/tournament_globals.php:
+   - renamed/added consts for TournamentPool.Rank
+
+2010-05-18 juga
+
+   * tournaments/include/tournament_pool_classes.php (PoolGame.get_score, ~.calc_result;
+       PoolTables._compare_user_points, ~.get_score_direct_comparison;
+       PoolViewer.init_table, ~.make_pool_table),
+     include/utilities.php (cmp_int):
+   - added Tie-breaker SODOS to sort users in pool
+   - added (commented) Tie-breaker DirectComparison to sort users in pool
+   - refactored integer-comparison-func into 'utilities.php'
+
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.formatRank,
+       ~.echoRankImage, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_globals.php,
+     include/gui_functions.php (echo_image_tourney_next_round),
+     tournaments/roundrobin/view_pools.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css:
+   - added TournamentPool.Rank to store users place (=rank) within pool
+   - added Rank and NextRound-flag showing next-round-image in pool-view tables
+-----------
+-- added Rank to store users place within tournament-pool
+ALTER TABLE TournamentPool
+   ADD Rank tinyint NOT NULL DEFAULT '-100',
+   ADD INDEX Rank (Rank) ;
+-----------
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR):
+   - limited error-output for REGISTER->PAIR status-change to some users, but checking all
+
+   * tournaments/include/tournament_pool_classes.php (PoolTables.fill_games,
+       ~.init_table, ~.make_pool_table),
+     tournaments/include/tournament_pool.php (class TournamentPool):
+   - added info to pool-view:
+     - #Wins = number of wins
+     - SODOS = sum of defeated opponents score (points of loser, 1/2 point of opponent for jigo)
+
+   * tournaments/include/tournament_round.php:
+   - show more round-info: round-no + pool-count
+
+2010-05-17 juga
+
+   * tournaments/list_tournaments.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     skins/dragon/screen.css:
+   - added table-columns to show board-size with filter, rated, ruleset,
+     time-limit and max-participants as tournament-size from TournamentRules-table
+-----------
+-- added size-field and filter on tournament-list
+ALTER TABLE TournamentRules
+   ADD INDEX Size (Size) ;
+-----------
+
+   * tournaments/include/tournament_pool_classes.php (PoolGame.calc_result;
+       PoolTables.fill_games, ~._compare_user_points;
+       PoolViewer.make_pool_table),
+     tournaments/include/tournament_pool.php (class TournamentPool),
+     skins/dragon/screen.css:
+   - show ended-game results in pool-view: won=green, lost=redish, jigo=blueish
+   - sort users in pools by user-points received for game-score
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end,
+       ~.process_tournament_ladder_game_end, ~.process_tournament_round_robin_game_end):
+   - process tournament-game-end for round-robin-tournaments
+
+   * tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_end,
+       ~.update_tournament_game_wait):
+   - bugfix: corrected invalid SQL-update-query after former cleanup, remove ','
+
+   * tournaments/manage_tournament.php (make_links_ttype_specific):
+   - added PLAY-phase admin-links: view pools, show tourney-games, admin T-game
+
+   * include/std_functions.php (echo_dragon_top_bar),
+     include/globals.php, skins/dragon/screen.css:
+   - remind user of being mighty tournament-admin in DGS-top-bar
+   - remind user of site being in maintenance-mode
+
+   * tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PLAY),
+     tournaments/include/tournament_games.php (TournamentGames.count_tournament_games,
+       ~.count_games_started),
+     tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_games),
+     tournaments/include/tournament_template.php (TournamentTemplate.checkGamesStarted),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkGamesStarted),
+     tournaments/include/tournament_template_round_robin.php (
+       TournamentTemplateRoundRobin.checkParticipantRegistrations, ~.checkGamesStarted):
+   - count games/tournament-games for consistency-check on tournament-status-change PAIR->PLAY,
+     check that all games have been started for current tourney-round of round-robin-tourney
+
+   * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_conditions_status_PLAY):
+   - allow Tournament-Round-Status change PAIR->PLAY only for admin
+
+   * include/classlib_user.php, include/make_game.php, include/rating.php,
+     tournaments/edit_participant.php, tournaments/register.php,
+     tournaments/include/tournament_ladder_props.php,
+     tournaments/include/tournament_participant.php,
+     tournaments/include/tournament_utils.php,
+     add_to_waitingroom.php:
+   - replaced const -OUT_OF_RATING -> NO_RATING
+     unless negative-const clearer for understanding
+
+   * include/cache_clock.php (class ClockCache, ~.load_clock_ticks),
+     include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/make_game.php (create_game),
+     include/time_functions.php (get_clock_ticks, time_left_ticksdate),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.load_clock_ticks):
+   - optimization: cache Clocks.Ticks for starting all tournament-pool-games,
+     Clock-ticks loaded three times per game
+
+   * tournaments/include/tournament_pool_classes.php (PoolTables.calc_pool_summary, ~.calc_pool_games_count; PollSummary.get_counts),
+     tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools, ~.check_pools),
+     tournaments/include/tournament_helper.php (TournamentHelper.start_tournament_round_games),
+     tournaments/roundrobin/edit_pairing.php:
+   - bugfix #2 for creating pair-games for round-robin-tourneys:
+     replaced wrong TournamentPool.ID in TPool->User->urow with correct Players.ID for uid
+   - bugfix: changed Tourney-Round status only if expected number of games have been started
+   - added notes about creation-process and ok/error-result after performing creation-process
+   - refactored setup of pool-summary to calculate all expected pool-games in PoolTables-class
+   - refactored counting of pools/users/games into poolSummary-class
+
+   * tournaments/include/tournament_pool_classes.php (class PoolTables):
+   - bugfix: replaced range(1,0) with normal for-loop
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.calc_pool_count),
+     tournaments/roundrobin/define_pools.php (calc_suggestion):
+   - bugfix: handle division-by-zero on pool-values
+
+   * tournaments/roundrobin/edit_pools.php:
+   - don't allow editing for T-admin
+
+   * tournaments/include/tournament_games.php (TournamentGames.getScoreForUser),
+     include/std_functions.php (score2text), gameinfo.php:
+   - fixed long tourney-titles by wrapping it
+   - fixed unknown tourney-score: -OUT_OF_RATING (bad const for score) -> null (unknown score)
+
+   * game.php (draw_game_info):
+   - fixed tourney-info replacing title with tourney-ID + status
+
+2010-05-16 juga
+
+   * tournaments/include/tournament_pool_classes.php (class PoolGame, ~.get_opponent;
+       class PoolTables.get_user_col_map, ~.fill_games, ~.count_games;
+       class PoolViewer.make_pool_table),
+     tournaments/roundrobin/view_pools.php:
+   - view pools:
+     - added links to started games in pool-cross-tables
+     - added round-summary with games-count for tournament-round
+     - minor cleanup (checks, optimization)
+   - bugfix in PoolGame-constructor for Score-attribute
+
+   * tournaments/include/tournament_pool.php (class TournamentPool, ~.load_tournament_pools):
+   - bugfix for creating pair-games for round-robin-tourneys: replaced wrong
+     TournamentPool.ID in TPool->User->urow with correct Players.ID for uid
+   - bugfix: setting TPool.User-attribute in constructor
+   - cleanup: removed unused const TPOOL_LOADOPT_TP_RID,
+     removed double query-part Players.Country
+
+   * tournaments/include/tournament_games.php (TournamentGames.load_tournament_games),
+     tournaments/cron_tournaments.php,
+     tournaments/ladder/view.php:
+   - added round-id in signature of TournamentGames::load_tournament_games()
+
+   * tournaments/roundrobin/edit_pairing.php:
+   - added HOT-section around staring tournament-round games
+
 2010-05-15 juga
 
    * scripts/admin-export-games_info.php, NEWS:
@@ -8523,8 +8849,8 @@ copy /images/favicon.ico into the root folder
 
    * include/form_functions.php (create_form_string,
      print_insert_text_input, print_insert_textarea):
-   - fixed the textarea_safe() problem in the forms
-     (because of the new PHP5) (fix located in create_form_string())
+   - fixed the textarea_safe() problem in the forms,
+     because of the new PHP5; fix located in create_form_string()
    - changed the not obvious $safe_text var-name to $make_texts_safe
 
    * scripts/data_report.php, scripts/data_export.php,
@@ -8678,6 +9004,8 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2010-01-01: bug fix update (by JUG) as DGS 1.0.14.k
 2010-02-24: uploaded quick-play-enhancement (by JUG) as DGS 1.0.14.l
 2010-05-10: uploaded experimental auto-comment for DGS-sensei (by JUG) as DGS 1.0.14.m
+2010-06-04: bug fix update (by JUG) as DGS 1.0.14.n
+2010-06-06: uploaded last-move-id enhancement (by JUG) as DGS 1.0.14.o
 
 2008-12-14 juga
 

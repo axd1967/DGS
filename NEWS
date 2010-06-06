@@ -66,7 +66,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
       * Tournament Round Pool Editor (edit pools)
       * Tournament Round Pairing Editor
-      * Tournament Pool view page
+      * Tournament Round Rank Editor (finishing pools)
+      * Tournament Pool view page with crosstables
+         * Tie-Breaker (static): Points, SODOS
 
       * Added Tournaments-link into main-menu (access-key [t])
       * Added Tournament invitation on users, opponents and contacts page
@@ -347,7 +349,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added link to <home statistics.php>statistics</home> page on docs and site-map page
       * Updated <home site_map.php>site map page</home>
       * Added table of contents for <home news.php>news page</home>
-      * Added gosensations.com, corrected outdated links on <home links.php>Links page</home>
+      * Added gosensations.com + DGS web-stats, corrected outdated links on <home links.php>Links page</home>
       * Removed <home todo.php>todo-list</home>: moved content to <http://senseis.xmp.net/?DGSWishlist |DGS-Wishlist on Sensei&apos;s Library>
 
       * <home people.php>People page</home>:
@@ -444,7 +446,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Displaying the group-names
 
    * Changes for Admins:
-      * Added tournament-admin to fix problems with tournaments
+      * Added tournament-admin to fix problems with tournaments,
+        show in top-bar as reminder
       * Added voting-admin to add new features to vote on
       * Added Adminlog entries for admin user changes, login-denied and
         if admin-level too low for script execution
@@ -459,6 +462,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
       * Added indexes on Errorlog to allow better searches for problems
       * Added forum consistency script
+      * Added reminder in top-bar of being in maintenance-mode
       * Removed translations from the admin pages
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
