@@ -425,7 +425,7 @@ class PoolTables
          $tpool_df->Points += $arr[1];
          if( !is_null($arr[0]) )
          {
-            if( $arr[0] > 0 ) $tpool_ch->Losses++;
+            if( $arr[0] > 0 ) $tpool_df->Losses++;
             if( $arr[0] < 0 ) $tpool_df->Wins++;
             if( $arr[0] < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
             if( $arr[0] <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double
