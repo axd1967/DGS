@@ -235,7 +235,7 @@ function make_links_ttype_specific( $tourney, $tstat )
                               T_('Edit pools (assign users to pools)#mngt') ))
             . '<li>'
             . make_menu_link( T_('Edit game pairing'), array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Edit game pairing (starting games for all pools)#mngt') ));
+            . subList( array( T_('Starting games for all pools#mngt') ));
 
       if( $tstat == TOURNEY_STATUS_PLAY )
          return '<li>'
@@ -247,7 +247,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . subList( array( T_('End game, Add time#mngt') ))
             . '<li>'
             . make_menu_link( T_('Edit ranks'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Pool-rank, next-round flagging#mngt') ));
+            . subList( array( T_('Set pool-ranks, next-round flagging#mngt') ));
    }
 
    return '';
