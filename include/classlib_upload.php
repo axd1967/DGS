@@ -182,7 +182,7 @@ class ImageFileUpload
       if( $errorcode != UPLOAD_ERR_FORM_SIZE && $this->max_upload_size > 0
             && $filesize > $this->max_upload_size )
       {
-         $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max.'
+         $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. '
                . 'file size of [%s bytes] specified for the input-form.'),
                $this->file_src_clientfile, $this->max_upload_size );
          $this->need_resize = true;
@@ -193,7 +193,7 @@ class ImageFileUpload
    }
 
    /*!
-    * \brief Checks image-properties of uploaded file, that is check image-type
+    * \brief Checks image-properties of uploaded file, i.e. check image-type
     *        against expected image-types and check image dimensions (width and height).
     * \param expected_imagetypes array with allowed IMAGETYPE_...
     * \note Sets this->need_resize/image_x/image_y/image_type
