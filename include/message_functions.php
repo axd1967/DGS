@@ -380,9 +380,9 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    {
       // adjust komi
       $jigo_modes = array(
-         'KEEP_KOMI'  => T_('Keep komi'),
-         'ALLOW_JIGO' => T_('Allow Jigo'),
-         'NO_JIGO'    => T_('No Jigo'),
+         'KEEP_KOMI'  => T_('Unchanged komi#jigo_mode'),
+         'ALLOW_JIGO' => T_('Allow Jigo#jigo_mode'),
+         'NO_JIGO'    => T_('No Jigo#jigo_mode'),
       );
       $mform->add_row( array(
             'DESCRIPTION', T_('Komi'),
