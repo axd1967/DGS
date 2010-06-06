@@ -642,6 +642,7 @@ class Board
                   }
                }
 
+               $img_id = '';
                if( !$marked )
                {
                   if( !$empty && ( $stone == BLACK || $stone == WHITE )
@@ -650,6 +651,7 @@ class Board
                   { //last move mark
                      $type .= 'm';
                      $alt = ( $stone == BLACK ? '#' : '@' );
+                     $img_id = 'lastMove';
                      $marked = true;
                   }
                   elseif( $mrk )
@@ -674,11 +676,14 @@ class Board
                if( $tit )
                   $alt.= "\" title=\"$tit";
 
+               if( $img_id )
+                  $img_id = "\" id=\"$img_id";
+
                if( $may_play && !$no_click &&
                    ( ($empty && $on_empty) || (!$empty && $on_not_empty) ) )
-                  echo "$move_start$letter_c$letter_r$move_alt$alt$move_src$type$move_end";
+                  echo "$move_start$letter_c$letter_r$move_alt$alt$img_id$move_src$type$move_end";
                else
-                  echo "$nomove_start$alt$nomove_src$type$nomove_end";
+                  echo "$nomove_start$alt$img_id$nomove_src$type$nomove_end";
 
                $letter_c++;
                $letter++; if( $letter == 'i' ) $letter++;
