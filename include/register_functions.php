@@ -190,24 +190,28 @@ class UserRegistration
 
       $code = make_session_code();
 
-      $result = db_query( "Registration.register_user.insert_player({$this->uhandle})",
-         "INSERT INTO Players SET " .
-            "Handle='".mysql_addslashes($this->uhandle)."', " .
-            "Name='".mysql_addslashes($this->name)."', " .
-            "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($this->password)."'), " .
-            ($this->email ? "Email='".mysql_addslashes($this->email)."', " : '' ) .
-            "Registerdate=FROM_UNIXTIME($NOW), " .
-            "Sessioncode='$code', " .
-            "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );
+      ta_begin();
+      {//HOT-section for registering new player
+         $result = db_query( "Registration.register_user.insert_player({$this->uhandle})",
+            "INSERT INTO Players SET " .
+               "Handle='".mysql_addslashes($this->uhandle)."', " .
+               "Name='".mysql_addslashes($this->name)."', " .
+               "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($this->password)."'), " .
+               ($this->email ? "Email='".mysql_addslashes($this->email)."', " : '' ) .
+               "Registerdate=FROM_UNIXTIME($NOW), " .
+               "Sessioncode='$code', " .
+               "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );
 
-      $new_id = mysql_insert_id();
+         $new_id = mysql_insert_id();
 
-      if( mysql_affected_rows() != 1 )
-         error('mysql_insert_player', "Registration.register_user.insert_player2({$this->uhandle})");
+         if( mysql_affected_rows() != 1 )
+            error('mysql_insert_player', "Registration.register_user.insert_player2({$this->uhandle})");
 
-      ConfigPages::insert_default( $new_id );
-      ConfigBoard::insert_default( $new_id );
-      UserQuota::insert_default( $new_id );
+         ConfigPages::insert_default( $new_id );
+         ConfigBoard::insert_default( $new_id );
+         UserQuota::insert_default( $new_id );
+      }
+      ta_end();
 
       if( $set_cookie )
          set_login_cookie( $this->uhandle, $code );
