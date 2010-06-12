@@ -1,0 +1,253 @@
+# Topic: Quick-Suite
+# Description: Alternative interface to DGS operations
+# FAQ (robot-interface): http://www.dragongoserver.net/faq.php?read=t&cat=215#Entry219
+# Author: Jens-Uwe Gaspar, DGS 'juga'
+
+## /*
+## Dragon Go Server
+## Copyright (C) 2001-2010  Erik Ouchterlony, Jens-Uwe Gaspar
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU Affero General Public License as
+## published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
+##
+## You should have received a copy of the GNU Affero General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## */
+
+
+Topics:
+
+   1. Introduction
+   2. Login, Request and Response
+   3. Objects
+      a. "game" - playing a started game
+   4. Classes and Files
+   5. Possible Future Enhancements
+
+
+#-------- (1) Introduction ----------------------------------------------------
+
+The Quick-Suite provides an alternative interface to the DGS objects and operations.
+It accepts generic-formatted input and results in a JSON-formatted output.
+
+DGS "objects" represent different sections of the server:
+
+   - user         : users, contacts, player, profile
+   - game-offer   : waitingroom, invitation
+   - game         : playing game
+   - message
+   - forum        : forums, threads, posts
+   - help         : FAQ
+
+Each "object" has a different set of "commands", than can be executed to get
+information about the "object" or perform operations on the "object".
+
+
+
+#-------- (2) Login, Request and Response -------------------------------------
+
+A "command" is sent to the server via a GET or POST HTTP-request. The response is
+sent back with MIME-type "application/json" and contains the respective result
+for the requests command. The quick-script always expects a login-cookie in the
+HTTP-headers, which can be created with:
+
+   login.php?quick_mode=1&userid=HANDLE&passwd=PASSWORD
+
+
+The standard request format looks like:
+
+   quick_do.php?obj=<OBJNAME>&cmd=<COMMAND>&arg=...
+
+
+The standard minimal response is a JSON-formatted text with an error-code:
+
+   {
+      "Error": "error_code"
+   }
+
+An empty 'error_code' indicates a successful operation, i.e. no errors have occured:
+
+   {
+      "Error": ""
+   }
+
+The response may contain additional object- and command-specific return-values.
+
+   {
+      "Error": "",
+      "Output1": ... ,
+      "Output2": ...
+   }
+
+
+References:
+   * JSON - RFC 4627 - The application/json Media Type for JavaScript Object Notation (JSON)
+     http://tools.ietf.org/html/rfc4627
+     http://en.wikipedia.org/wiki/Json
+
+
+#-------- (3) Objects ---------------------------------------------------------
+
+The currently supported DGS "objects" are:
+
+   a) "game" - playing a started game
+
+#-------- (3a) Objects - "game" -----------------------------------------------
+
+Request:
+
+   quick_do.php?obj=game&cmd=<COMMAND>&mode=<MODE>&gid=<GAME_ID>&color=<COLOR>&ctx=<CONTEXT>&move=<MOVES>&msg=<MESSAGE>
+
+Options:
+
+   <COMMAND> = "delete" | "set_handicap" | "move" | "resign" | "score"
+
+   <MODE>    = "sgf" | "lab"
+      - "sgf" : moves are given in sgf-coordinates, e.g. "bc",
+                specified in http://www.red-bean.com/sgf/go.html
+
+      - "lab" : moves are given in board-coordinates (labels), e.g. "b17"
+                be aware, that board-coordinates skip the 'i'-character
+
+   <GAME_ID> = integer
+      - reference game to perform game-operation on
+
+   <COLOR>   = "B" | "W"
+      - color of player to perform operation for (same as Color from quick_status.php)
+
+   <CONTEXT> = move
+      - move = single move-coordinate in specified MODE-format
+      - providing context for game-operation to avoid errorneous states
+        like duplicate move committment
+
+   <MOVES>   = move | moves | "pass"
+      - move = single move-coordinate in specified MODE-format
+      - moves = list of coordinates in specified MODE-format in one string
+        without delimiters, e.g. "bcpqmoeq" (sgf) or "b17q3n5e3" (lab)
+
+   <MESSAGE> = message
+      - optional game-message on game-operation
+
+
+Commands:
+
+   "delete" : deletes specified game
+      - required opts: GAME_ID
+      - optional opts: MESSAGE
+
+   "set_handicap" : sets handicap stones at start of game
+      - required opts: MODE, GAME_ID, MOVE
+         - MOVE = moves : list of coordinates of the handicap-stone placement
+      - optional opts: MESSAGE
+
+   "move" :
+      - required opts: MODE, GAME_ID, COLOR, CONTEXT, MOVES
+         - COLOR : color of player to submit a move
+         - CONTEXT : previous move, "" (empty) if first move
+         - MOVES = move : single move to submit, move="pass" for passing move
+      - optional opts: MESSAGE
+
+   "resign" : resigns specified game
+      - required opts: GAME_ID, COLOR
+      - optional opts: MESSAGE
+
+   "score" :
+      - required opts: MODE, GAME_ID, COLOR, MOVE
+         - MOVE = moves : list of coordinates of stones marked as dead
+      - optional opts: MESSAGE
+
+
+Possible errors:
+   "" : operation successful
+
+   //TODO Known errors from current implementation 'confirm.php' and 'quick_play.php':
+   //TODO => adjust it for new 'quick_do.php'
+      # errors from (old) 'quick_play.php'
+      already_played
+      database_corrupted
+      game_finished
+      game_not_started
+      illegal_position
+      internal_error
+      invalid_action
+      login_denied
+      move_problem
+      mysql_insert_move
+      mysql_query_failed
+      mysql_update_game
+      no_game_nr
+      not_logged_in
+      not_your_turn
+      unknown_game
+
+      # additional errors from 'confirm.php'
+      confirm_add_time
+      early_pass
+      mysql_insert_message
+      opponent_not_found
+      wrong_number_of_handicap_stone
+
+
+Examples of game-playing cycle:
+
+   # login
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # setting handicap stones
+   quick_do.php?obj=game&cmd=set_handicap&mode=lab&gid=12345&color=B&move=q16b4&msg=Onegaishimasu
+
+   # regular (first) move
+   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=W&move=q3
+
+   # regular move
+   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=B&ctx=q3&move=c17
+
+   # pass moves
+   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=W&ctx=c17&move=pass
+   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=B&ctx=pass&move=pass
+
+   # scoring-phase
+   quick_do.php?obj=game&cmd=score&mode=lab&gid=12345&color=W&move=q16d4
+   quick_do.php?obj=game&cmd=score&mode=lab&gid=12345&color=B&move=c17q3
+
+   # resume playing (on disagreement)
+   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=W&ctx=score&move=r14
+
+   # resign
+   quick_do.php?obj=game&cmd=resign&gid=12345&color=B
+
+
+   # delete (only on first 10 moves)
+   quick_do.php?obj=game&cmd=delete&gid=12345
+
+
+#-------- (4) Classes and Files -----------------------------------------------
+
+This section shortly describes the framework-classes and files in use.
+For more details you may also check the source-code documentation of the classes,
+their variables and functions.
+
+   - quick_do.php:
+     Facade to quick-suite to delegate commands on objects to quick-handlers.
+
+   - include/quick/...
+     Containing all quick-handlers.
+
+
+#-------- (5) Possible Future Enhancements ------------------------------------
+# Priority (1=high, 5=low, ?=unknown) is added, e.g. Prio(1)
+
+This section outlines some ideas that came to mind regarding the quick-suite,
+but are not necessarily going to be implemented (soon or at all).
+
+
+* Prio(?): add more handlers for remaining DGS objects and operations
+
+
