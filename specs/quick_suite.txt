@@ -200,6 +200,15 @@ Examples of game-playing cycle:
    # login
    login.php?quick_mode=1&userid=user&passwd=userpassword
 
+   # retrieve list of games to play in
+   quick_status.php
+   quick_status.php?user=user
+   quick_status.php?uid=123
+
+   # download game with moves, marked-dead-stones (MA-property), game-parameters
+   sgf.php?gid=12345&owned_comments=1&quick_mode=1
+
+
    # setting handicap stones
    quick_do.php?obj=game&cmd=set_handicap&mode=lab&gid=12345&color=B&move=q16b4&msg=Onegaishimasu
 
