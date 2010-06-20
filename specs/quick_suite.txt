@@ -66,22 +66,24 @@ The standard request format looks like:
    quick_do.php?obj=<OBJNAME>&cmd=<COMMAND>&arg=...
 
 
-The standard minimal response is a JSON-formatted text with an error-code:
+The standard minimal response is a JSON-formatted text with an error-code,
+there can be an optional 'error_msg' element:
 
    {
-      "Error": "error_code"
+      "error": "error_code",
+      "error_msg": "error message"
    }
 
 An empty 'error_code' indicates a successful operation, i.e. no errors have occured:
 
    {
-      "Error": ""
+      "error": ""
    }
 
 The response may contain additional object- and command-specific return-values.
 
    {
-      "Error": "",
+      "error": "",
       "Output1": ... ,
       "Output2": ...
    }
@@ -103,34 +105,34 @@ The currently supported DGS "objects" are:
 
 Request:
 
-   quick_do.php?obj=game&cmd=<COMMAND>&mode=<MODE>&gid=<GAME_ID>&color=<COLOR>&ctx=<CONTEXT>&move=<MOVES>&msg=<MESSAGE>
+   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&ctx=<CONTEXT>&move=<MOVES>&msg=<MESSAGE>
 
 Options:
 
    <COMMAND> = "delete" | "set_handicap" | "move" | "resign" | "score"
 
-   <MODE>    = "sgf" | "lab"
-      - "sgf" : moves are given in sgf-coordinates, e.g. "bc",
-                specified in http://www.red-bean.com/sgf/go.html
-
-      - "lab" : moves are given in board-coordinates (labels), e.g. "b17"
-                be aware, that board-coordinates skip the 'i'-character
-
    <GAME_ID> = integer
       - reference game to perform game-operation on
 
-   <COLOR>   = "B" | "W"
-      - color of player to perform operation for (same as Color from quick_status.php)
+   <CONTEXT> = context
+      - context = current move-number,
+        providing context for game-operation to avoid errorneous states:
+        - (a) multi-players account with simultaneous logins or
+        - (b) (duplicate move commitment) if one player hit twice the validation button
+          during a net lag, and/or
+        - (c) if the opponent had already played between the two calls
 
-   <CONTEXT> = move
-      - move = single move-coordinate in specified MODE-format
-      - providing context for game-operation to avoid errorneous states
-        like duplicate move committment
+   <MOVES> = move | moves | "pass"
+      - move = single move-coordinate in specified mode-format
+      - moves = list of coordinates in specified mode-format in comma-separated string,
+        e.g. "bc,pq,mo,eq" (sgf) or "b17,q3,n5,e3" (lab)
 
-   <MOVES>   = move | moves | "pass"
-      - move = single move-coordinate in specified MODE-format
-      - moves = list of coordinates in specified MODE-format in one string
-        without delimiters, e.g. "bcpqmoeq" (sgf) or "b17q3n5e3" (lab)
+      - there are two mode-formats:
+          - moves are given in SGF-coordinates, e.g. "bc",
+            specified in http://www.red-bean.com/sgf/go.html
+
+          - moves are given in board-coordinates (labels), e.g. "b17"
+            be aware, that board-coordinates skip the 'i'-character
 
    <MESSAGE> = message
       - optional game-message on game-operation
@@ -139,27 +141,25 @@ Options:
 Commands:
 
    "delete" : deletes specified game
-      - required opts: GAME_ID
+      - required opts: GAME_ID, CONTEXT
       - optional opts: MESSAGE
 
    "set_handicap" : sets handicap stones at start of game
-      - required opts: MODE, GAME_ID, MOVE
+      - required opts: GAME_ID, CONTEXT, MOVE
          - MOVE = moves : list of coordinates of the handicap-stone placement
       - optional opts: MESSAGE
 
    "move" :
-      - required opts: MODE, GAME_ID, COLOR, CONTEXT, MOVES
-         - COLOR : color of player to submit a move
-         - CONTEXT : previous move, "" (empty) if first move
+      - required opts: GAME_ID, CONTEXT, MOVES
          - MOVES = move : single move to submit, move="pass" for passing move
       - optional opts: MESSAGE
 
    "resign" : resigns specified game
-      - required opts: GAME_ID, COLOR
+      - required opts: GAME_ID, CONTEXT
       - optional opts: MESSAGE
 
    "score" :
-      - required opts: MODE, GAME_ID, COLOR, MOVE
+      - required opts: GAME_ID, CONTEXT, MOVE
          - MOVE = moves : list of coordinates of stones marked as dead
       - optional opts: MESSAGE
 
@@ -194,6 +194,21 @@ Possible errors:
       opponent_not_found
       wrong_number_of_handicap_stone
 
+---
+   mysql_query_failed   - db load error
+   login_denied - login denied
+   fever_vault - login
+   receiver_not_found - login, on sending msg
+   internal_error - login, on sending msg
+   mysql_insert_message - login, on sending msg
+   mail_failure - login, on sending mail
+   server_down
+
+   invalid_command
+   invalid_args
+   unknown_game
+   game_not_started
+   game_finished
 
 Examples of game-playing cycle:
 
@@ -210,31 +225,31 @@ Examples of game-playing cycle:
 
 
    # setting handicap stones
-   quick_do.php?obj=game&cmd=set_handicap&mode=lab&gid=12345&color=B&move=q16b4&msg=Onegaishimasu
+   quick_do.php?obj=game&cmd=set_handicap&gid=12345&ctx=0&move=q16,b4&msg=Onegaishimasu
 
    # regular (first) move
-   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=W&move=q3
+   quick_do.php?obj=game&cmd=move&gid=12345&ctx=0&move=q3
 
    # regular move
-   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=B&ctx=q3&move=c17
+   quick_do.php?obj=game&cmd=move&gid=12345&ctx=1&move=c17
 
    # pass moves
-   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=W&ctx=c17&move=pass
-   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=B&ctx=pass&move=pass
+   quick_do.php?obj=game&cmd=move&gid=12345&ctx=2&move=pass
+   quick_do.php?obj=game&cmd=move&gid=12345&ctx=3&move=pass
 
    # scoring-phase
-   quick_do.php?obj=game&cmd=score&mode=lab&gid=12345&color=W&move=q16d4
-   quick_do.php?obj=game&cmd=score&mode=lab&gid=12345&color=B&move=c17q3
+   quick_do.php?obj=game&cmd=score&gid=12345&ctx=4&move=q16,d4
+   quick_do.php?obj=game&cmd=score&gid=12345&ctx=5&move=c17,q3
 
    # resume playing (on disagreement)
-   quick_do.php?obj=game&cmd=move&mode=lab&gid=12345&color=W&ctx=score&move=r14
+   quick_do.php?obj=game&cmd=move&gid=12345&ctx=5&move=r14
 
    # resign
-   quick_do.php?obj=game&cmd=resign&gid=12345&color=B
+   quick_do.php?obj=game&cmd=resign&gid=12345&ctx=6
 
 
    # delete (only on first 10 moves)
-   quick_do.php?obj=game&cmd=delete&gid=12345
+   quick_do.php?obj=game&cmd=delete&gid=12345&ctx=6
 
 
 #-------- (4) Classes and Files -----------------------------------------------
