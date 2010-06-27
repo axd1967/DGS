@@ -19,6 +19,90 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-06-27 juga
+
+   * quick_status.php:
+   - added Games.Moves to quick-status as context for quick-game-suite
+
+   * include/quick/quick_handler.php (class QuickObject, ~.setArg, ~.getArg;
+       class QuickHandler, ~.getArg, ~.getResult, ~.checkCommand, ~.checkArgMandatory,
+       ~.parse, ~.check, ~.prepare, ~.process),
+     include/quick/quick_suite.php (class QuickSuite, ~.getQuickHandler),
+     scripts/update_translation_pages.php,
+     quick_do.php:
+   - added extendable quick-suite framework as specified in 'specs/quick_suite.txt'
+     as new alternative interface to various DGS-functions
+
+   * include/error_functions.php (class DgsErrors, ~.set_mode, ~.add_error):
+   - added ERROR_MODE_QUICK_SUITE to output errors in JSON-format
+
+   * include/std_functions.php (who_is_logged, is_logged_in):
+   - adjusted login to be used for quick-suite:
+     - added options for login-check for use in quick-suite
+       - allow to skip update on player-activity
+       - allow to skip reset of email-notify on login-check
+     - avoid jumping to other pages for quick-suite login-option but returning error instead
+     - check for fever-fault-error for quick-suite
+     - avoid IP- and browser-update for quick-suite usage
+     - update Players.Lastaccess only for web-login
+     - update Players.LastQuickAccess only for quick-suite login
+     - avoid checking for new features and new messages as long as they are not
+       made available via the quick-suite
+   - load Players.LastQuickAccess as X_LastQuickAccess on login
+   - minor text-adjustment for fever-vault
+
+   * include/error_codes.php (ErrorCode.init):
+   - added error-codes for quick-suite:
+     server_down, bad_host, fever_vault, invalid_coord, invalid_command
+
+   * include/json_pear.php (class Services_JSON),
+     include/quick_common.php (dgs_json_encode):
+   - added external JSON-library
+     - some servers still need PHP4 and can't rely on PHP5-embedded JSON feature
+     - used Pear-JSON because very stable, "forgiving" parser and fast for encoding,
+       see http://gggeek.altervista.org/sw/article_20061113.html
+   - added wrapper-function dgs_json_encode() to stay independent from JSON-encoder
+
+   * userinfo.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - added Players.LastQuickAccess for quick-suite usage
+   - showed in user-info for admins
+-----------
+-- added Players.LastQuickAccess for quick-suite usage
+ALTER TABLE Players
+   ADD LastQuickAccess datetime NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER Lastaccess ;
+UPDATE Players
+   SET LastQuickAccess = Registerdate ;
+-----------
+
+   * include/db/ratinglog.php (class Ratinglog, ~.to_string, ~.persist, ~.insert,
+       ~.update, ~.delete, ~.fillEntityData, ~.build_query_sql, ~.new_from_row,
+       ~.load_ratinglog_with_query, ~.load_ratinglogs),
+     include/rating.php (change_rating, update_rating2),
+     include/connect2mysql.php,
+     game_calc.php:
+   - sync from stable-branch:
+     - added script game_calc.php for showing rating-calculations of finished game,
+       more for debugging, so not included on site-map, also see
+       http://www.dragongoserver.net/forum/read.php?forum=4&thread=28053#28062
+     - show debug-output in change_rating() and update_rating2() used for game_calc
+       on set DBG_RATING
+
+   * confirm.php:
+   - removed redundant login-check
+
+   * show_games.php:
+   - check for ALLOW_TOURNAMENTS on showing tournaments-info in games-list
+
+   * scripts/data_export.php,
+     specs/db/dragon-ddl.sql:
+   - sync with db
+
+2010-06-12 juga
+
+   * specs/quick_suite.txt:
+   - specs for new quick-suite for playing game with alternative interface
+
 2010-06-06 juga
 
    * include/board.php (Board.draw_board):
@@ -9006,6 +9090,7 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2010-05-10: uploaded experimental auto-comment for DGS-sensei (by JUG) as DGS 1.0.14.m
 2010-06-04: bug fix update (by JUG) as DGS 1.0.14.n
 2010-06-06: uploaded last-move-id enhancement (by JUG) as DGS 1.0.14.o
+2010-06-07: bug fix update (by JUG) as DGS 1.0.14.p
 
 2008-12-14 juga
 
