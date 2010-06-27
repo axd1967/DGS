@@ -43,7 +43,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $my_id = $player_row['ID'];
 
    $ext_tid = (int)@$_REQUEST['tid']; // tourney
-   if( $ext_tid < 0 ) $ext_tid = 0;
+   if( !ALLOW_TOURNAMENTS || $ext_tid < 0 ) $ext_tid = 0;
 
    $observe = @$_GET['observe']; // all | user (only my_id)
    $observe_all = false;
@@ -144,8 +144,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter( 1, 'Numeric', 'Games.ID', true, array( FC_SIZE => 8 ) );
    if( $finished && !$all ) //FU
       $gfilter->add_filter(41, 'Boolean', 'Games.Flags>0 AND (Games.Flags & 2)', true );
-   $gfilter->add_filter(32, 'Boolean', 'Games.tid>0', true,
-         array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
+   if( ALLOW_TOURNAMENTS )
+      $gfilter->add_filter(32, 'Boolean', 'Games.tid>0', true,
+            array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
    $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true,
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true,
@@ -740,7 +741,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[32] )
-         $grow_strings[32] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid,true);
+         $grow_strings[32] = echo_image_gameinfo($ID)
+            . ( ALLOW_TOURNAMENTS ? echo_image_tournament_info($tid,true) : '' );
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
       if( $observe_all )
