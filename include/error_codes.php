@@ -96,6 +96,7 @@ class ErrorCode
          $arr_logid['game_delete_invitation'] = 1;
          $arr_logid['invalid_action'] = 1;
          $arr_logid['invalid_args'] = 1;
+         $arr_logid['invalid_command'] = 1;
          $arr_logid['invalid_method'] = 1;
          $arr_logid['invalid_filter'] = 1;
          $arr_logid['ip_blocked_guest_login'] = 1;
@@ -124,6 +125,15 @@ class ErrorCode
 
          $arr['internal_error'] = // default-error-text
             T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
+
+         $arr['server_down'] =
+            T_("Sorry, the Dragon Go Server is down for maintenance.");
+
+         $arr['bad_host'] =
+            T_("Bad hostname used for request.");
+
+         $arr['fever_vault'] =
+            T_("The activity of your account grew too high. Temporary access restriction is in place.");
 
          $arr['early_pass'] =
             T_("Sorry, you may not pass before all handicap stones are placed.");
@@ -313,6 +323,9 @@ class ErrorCode
          $arr['suicide'] =
             T_("Sorry, this stone would have killed itself, but suicide is not allowed under this ruleset.");
 
+         $arr['invalid_coord'] =
+            T_("The specified move-coordinates are invalid.");
+
          $arr['unknown_game'] =
             T_("Sorry, I can't find that game.");
 
@@ -472,6 +485,9 @@ class ErrorCode
 
          $arr['invalid_args'] =
             T_("Sorry, invalid arguments used.");
+
+         $arr['invalid_command'] =
+            T_("Sorry, invalid quick-suite command used.");
 
          $arr['invalid_method'] =
             T_("Sorry, there's a problem with a class-method.");
