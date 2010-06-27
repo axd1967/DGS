@@ -364,7 +364,7 @@ class Games
    }
 
    /*!
-    * \brief Loads and returns Games-object for given tournament-ID, challenger- and defender-uid.
+    * \brief Loads and returns Games-object for given games-ID.
     * \return NULL if nothing found; Games otherwise
     */
    function load_game( $gid )
