@@ -139,7 +139,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 
    $action = @$_REQUEST['action'];
    $stay_on_board = @$_REQUEST['stay'];
-   $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
+   $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
 
    $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
 
