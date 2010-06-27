@@ -104,7 +104,7 @@ class Profile
    function set_type( $type )
    {
       if( !is_numeric($type) || $type < 1 || $type > MAX_PROFTYPE )
-         error('invalid_arg', "profile.set_type($type)");
+         error('invalid_args', "profile.set_type($type)");
       $this->type = (int) $type;
    }
 
