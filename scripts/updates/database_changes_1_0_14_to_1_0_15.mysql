@@ -1915,3 +1915,10 @@ ALTER TABLE TournamentParticipant
    ADD NextRound tinyint unsigned NOT NULL DEFAULT '0' AFTER StartRound ;
 
 
+-- added Players.LastQuickAccess for quick-suite usage
+ALTER TABLE Players
+   ADD LastQuickAccess datetime NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER Lastaccess ;
+UPDATE Players
+   SET LastQuickAccess = Registerdate ;
+
+

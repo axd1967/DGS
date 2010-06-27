@@ -57,6 +57,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
       .",UNIX_TIMESTAMP(Registerdate) AS X_Registerdate"
       .",UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess"
+      .",UNIX_TIMESTAMP(LastQuickAccess) AS X_LastQuickAccess"
       .",UNIX_TIMESTAMP(LastMove) AS X_LastMove"
       ." FROM Players WHERE $where" );
 
@@ -118,6 +119,8 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                         ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
       $lastaccess = (@$row['X_Lastaccess'] > 0
                         ? date(DATE_FMT2, $row['X_Lastaccess']) : '' );
+      $lastquickaccess = (@$row['X_LastQuickAccess'] > 0
+                        ? date(DATE_FMT2, $row['X_LastQuickAccess']) : NO_VALUE );
       $lastmove = (@$row['X_LastMove'] > 0
                         ? date(DATE_FMT2, $row['X_LastMove']) : '' );
       $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
@@ -153,6 +156,11 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
       $itable2->add_sinfo( T_('Registration date'), $registerdate );
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
+      if( $is_admin )
+         $itable1->add_row( array(
+                  'rattb' => 'class="DebugInfo"',
+                  'sname' => T_('Last quick access'),
+                  'sinfo' => $lastquickaccess ));
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
 
       $itable1->add_sinfo( anchor( "edit_vacation.php", T_('Vacation days left') ),
