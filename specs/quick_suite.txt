@@ -125,7 +125,7 @@ Options:
    <MOVES> = move | moves | "pass"
       - move = single move-coordinate in specified mode-format
       - moves = list of coordinates in specified mode-format in comma-separated string,
-        e.g. "bc,pq,mo,eq" (sgf) or "b17,q3,n5,e3" (lab)
+        e.g. "bc,pq,mo,eq" (sgf) or "b17,q3,n5,e3" (label)
 
       - there are two mode-formats:
           - moves are given in SGF-coordinates, e.g. "bc",
