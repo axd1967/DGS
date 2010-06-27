@@ -26,6 +26,8 @@ if( !defined('DBG_QUERY') )
    define('DBG_QUERY', 0); //0=no-debug, 1=print-query, 2=print-retry-count
 if( !defined('DBG_TEST') )
    define('DBG_TEST', 0); //0=no-debug, 1=allow-some-stuff-for-testing
+if( !defined('DBG_RATING') )
+   define('DBG_RATING', 0); //0=no-debug, 1=print-rating-calculations
 
 
 // fetch-types for mysql_single_fetch-function

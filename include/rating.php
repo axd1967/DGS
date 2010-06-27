@@ -125,7 +125,7 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 {
    $e = 0.014;
 
-   $D = $rating_W - $rating_B;
+   $D = $old_D = $rating_W - $rating_B;
 
    if( $handicap < 1 )
       $handicap = 1;
@@ -157,8 +157,20 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
    $conW = con_value($rating_W) * $sizefactor * $factor;
    $conB = con_value($rating_B) * $sizefactor * $factor;
 
+   $old_rating_W = $rating_W;
+   $old_rating_B = $rating_B;
    $rating_W += $conW * ($result - $SEW);
    $rating_B += $conB * (1-$result - $SEB);
+
+   if( DBG_RATING )
+   {
+      static $fmt = "   %s: SE=%1.6f, con=%3.6f, rating=[%4.6f -> %4.6f], diff = %3.6f\n";
+      echo sprintf("change_rating: factor=%1.6f, sizefactor=%1.6f, result=%s, H=%1.6f, old_D=%3.6f, D=%3.6f\n",
+                   $factor, $sizefactor, $result, $H, $old_D, $D),
+         sprintf($fmt, 'White', $SEW, $conW, $old_rating_W, $rating_W, $rating_W - $old_rating_W),
+         sprintf($fmt, 'Black', $SEB, $conB, $old_rating_B, $rating_B, $rating_B - $old_rating_B),
+         "\n";
+   }
 }
 
 // (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating, size)
@@ -278,8 +290,14 @@ obsolete */
 //
 // EGF rating, see above URIs for documentation
 //
+// param simul: if true, don't write into db (used for rating-calcs only)
+//
+// param game_row: only if simul=true for overwriting loaded fields from Games-table:
+//    Moves, Handicap, Rated=Y|N, Score, Size, Komi, (Lastchanged),
+//    b/wRatingStatus, b/wRating, b/wRatingMin/Max, Black/White_ID
+//
 // return: 0=rated-game, 1=not-rated (deletable), 2=not-rated
-function update_rating2($gid, $check_done=true)
+function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 {
    global $NOW;
 
@@ -303,14 +321,30 @@ function update_rating2($gid, $check_done=true)
    $row = mysql_fetch_assoc( $result );
    extract($row);
 
+   if( $simul && !is_null($game_row) ) // overwrite in simul-mode
+      extract($game_row);
+
+   if( DBG_RATING )
+   {
+      static $fmt2 = "   uid [%6d] %s-Rating: Game-Current [%1.6f], Min [%1.6f], Max [%1.6f], Start(unused) [%1.6f]\n";
+      echo "Rating Init ...\n",
+         sprintf("   Size %s, Handicap %s, Komi %s, Score [%s]\n", $Size, $Handicap, $Komi,
+                 ($Score < 0 ? 'Black won' : ($Score > 0 ? 'White won' : 'Jigo'))),
+         sprintf($fmt2, $White_ID, 'White', $wRating, $wRatingMin, $wRatingMax, $White_Start_Rating),
+         sprintf($fmt2, $Black_ID, 'Black', $bRating, $bRatingMin, $bRatingMax, $Black_Start_Rating);
+   }
+
    $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
    if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
    {
-      db_query( 'update_rating2.set_rated_N',
-         "UPDATE Games SET Rated='N'" .
+      if( !$simul )
+      {
+         db_query( 'update_rating2.set_rated_N',
+            "UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
                   " WHERE ID=$gid LIMIT 1" );
+      }
 
       if( $too_few_moves )
          return 1; //not rated game, deletable
@@ -344,30 +378,38 @@ function update_rating2($gid, $check_done=true)
    $wFactor = 1/$bFactor;
    $maxminFactor = 0.5;
 
+   if( DBG_RATING ) echo sprintf("   White-Rating-Factor [%1.6f]\n   Black-Rating-Factor [%1.6f]\n", $wFactor, $bFactor );
+
    // Update ratings
 
+   if( DBG_RATING ) echo "\nWhite-Rating ...\n";
    $bTmp = $bOld;
    change_rating($wRating, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
    if( $wRating < MIN_RATING )
       $wRating = MIN_RATING;
 
+   if( DBG_RATING ) echo "White-RatingMax...\n";
    $wFactor *= $maxminFactor;
    $bTmp = $bOld;
    change_rating($wRatingMax, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
+   if( DBG_RATING ) echo "White-RatingMin...\n";
    $bTmp = $bOld;
    change_rating($wRatingMin, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
 
+   if( DBG_RATING ) echo "\nBlack-Rating ...\n";
    $wTmp = $wOld;
    change_rating($wTmp, $bRating, $game_result, $Size, $Komi, $Handicap, $bFactor);
    if( $bRating < MIN_RATING )
       $bRating = MIN_RATING;
 
+   if( DBG_RATING ) echo "Black-Rating-Max ...\n";
    $bFactor *= $maxminFactor;
    $wTmp = $wOld;
    change_rating($wTmp, $bRatingMax, $game_result, $Size, $Komi, $Handicap, $bFactor);
 
+   if( DBG_RATING ) echo "Black-Rating-Min ...\n";
    $wTmp = $wOld;
    change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap, $bFactor);
 
@@ -392,28 +434,40 @@ function update_rating2($gid, $check_done=true)
       $wRatingMin = ($wRating - $wRatingMax * $k) / (1-$k);
 
 
-   db_query( 'update_rating2.set_rated_Done',
-      "UPDATE Games SET Rated='Done', " .
+   if( !$simul )
+   {
+      db_query( 'update_rating2.set_rated_Done',
+         "UPDATE Games SET Rated='Done', " .
                 "Black_End_Rating=$bRating, White_End_Rating=$wRating " .
                 "WHERE ID=$gid LIMIT 1" );
 
-   db_query( 'update_rating2.set_black_rating',
-      "UPDATE Players SET Rating2=$bRating, " .
+      db_query( 'update_rating2.set_black_rating',
+         "UPDATE Players SET Rating2=$bRating, " .
                 "RatingMin=$bRatingMin, RatingMax=$bRatingMax " .
                 "WHERE ID=$Black_ID LIMIT 1" );
 
-   db_query( 'update_rating2.set_white_rating',
-      "UPDATE Players SET Rating2=$wRating, " .
+      db_query( 'update_rating2.set_white_rating',
+         "UPDATE Players SET Rating2=$wRating, " .
                 "RatingMin=$wRatingMin, RatingMax=$wRatingMax " .
                 "WHERE ID=$White_ID LIMIT 1" );
 
-   db_query( 'update_rating2.ratinglog',
-      'INSERT INTO Ratinglog' .
+      db_query( 'update_rating2.ratinglog',
+         'INSERT INTO Ratinglog' .
                '(uid,gid,Rating,RatingMin,RatingMax,RatingDiff,Time) VALUES ' .
                "($Black_ID, $gid, $bRating, $bRatingMin, $bRatingMax, " .
                ($bRating - $bOld) . ", '$Lastchanged'), " .
                "($White_ID, $gid, $wRating, $wRatingMin, $wRatingMax, " .
                ($wRating - $wOld) . ", '$Lastchanged') " );
+   }
+
+   if( DBG_RATING )
+   {
+      static $fmt = "   Result %s-Rating: Start [%1.6f] => <b>End [%1.6f], Diff [%3.6f]</b>,  Min [%1.6f], Max [%1.6f]\n";
+      echo "<b>Rating Results of update_rating2():</b>\n",
+         sprintf($fmt, 'White', $wOld, $wRating, $wRating - $wOld, $wRatingMin, $wRatingMax),
+         sprintf($fmt, 'Black', $bOld, $bRating, $bRating - $bOld, $bRatingMin, $bRatingMax),
+         "\n";
+   }
 
    return 0; //rated game
 } //update_rating2
