@@ -25,6 +25,10 @@ define('ERROR_MODE_JUMP', 1);
 define('ERROR_MODE_PRINT', 2);
 define('ERROR_MODE_COLLECT', 3);
 define('ERROR_MODE_TEST', 4);
+define('ERROR_MODE_QUICK_SUITE', 5);
+
+define('ERROR_FORMAT_TEXT', 1);
+define('ERROR_FORMAT_JSON', 2);
 
 class DgsErrors
 {
@@ -33,16 +37,17 @@ class DgsErrors
    var $log_errors;
    var $collect_errors;
    var $print_errors;
+   var $error_format;
 
    var $error_list;
 
    function DgsErrors()
    {
       $this->error_list = array();
-      $this->set_mode( ERROR_MODE_JUMP);
+      $this->set_mode(ERROR_MODE_JUMP);
    }
 
-   function set_mode($m)
+   function set_mode( $m )
    {
       $p= $this->mode;
       $m= (int)$m;
@@ -54,6 +59,7 @@ class DgsErrors
             $this->log_errors = true;
             $this->collect_errors = false;
             $this->print_errors = true;
+            $this->error_format = ERROR_FORMAT_TEXT;
             break;
          case ERROR_MODE_COLLECT:
             $this->mode = $m;
@@ -61,6 +67,7 @@ class DgsErrors
             $this->log_errors = true;
             $this->collect_errors = true;
             $this->print_errors = false;
+            $this->error_format = ERROR_FORMAT_TEXT;
             break;
          case ERROR_MODE_TEST:
             $this->mode = $m;
@@ -68,6 +75,15 @@ class DgsErrors
             $this->log_errors = false;
             $this->collect_errors = true;
             $this->print_errors = false;
+            $this->error_format = ERROR_FORMAT_TEXT;
+            break;
+         case ERROR_MODE_QUICK_SUITE:
+            $this->mode = $m;
+            $this->errors_are_fatal = true;
+            $this->log_errors = true;
+            $this->collect_errors = false;
+            $this->print_errors = true;
+            $this->error_format = ERROR_FORMAT_JSON;
             break;
 
          default:
@@ -77,6 +93,7 @@ class DgsErrors
             $this->log_errors = true;
             $this->collect_errors = false;
             $this->print_errors = false;
+            $this->error_format = ERROR_FORMAT_TEXT;
             break;
       }
       return $p;
@@ -148,7 +165,18 @@ class DgsErrors
          $this->error_list[] = array($err, $debugmsg, $warn);
 
       if( $this->print_errors || $warn  )
-         echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
+      {
+         if( $this->error_format == ERROR_FORMAT_TEXT )
+            echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
+         else //if( $this->error_format == ERROR_FORMAT_JSON )
+         {
+            if( !$warn )
+            {
+               //TODO? header( 'Content-Type: application/json' );
+               echo dgs_json_encode( array( 'error' => $err, 'error_msg' => $debugmsg ) );
+            }
+         }
+      }
 
       if( !$warn && $this->mode == ERROR_MODE_JUMP )
       {
