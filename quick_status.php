@@ -176,6 +176,7 @@ else
        "White_Maintime, White_Byotime, White_Byoperiods, " .
        "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
        "LastTicks, Clock.Ticks, " . //always my clock because always my turn (status page)
+       "Games.Moves, " .
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
        "FROM Games " .
          "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$my_id) " .
@@ -207,10 +208,10 @@ else
                      $my_Byoperiods, $row['Byotime'], $row['Byoperiods'],
                      TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
-      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, tid
-      echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s', %s\n",
+      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid
+      echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s', %s, %s\n",
                     'G', $row['ID'], slashed(@$row['oHandle']), $clrs{@$row['Color']},
-                    date($datfmt, @$row['date']), $time_remaining, $row['tid'] );
+                    date($datfmt, @$row['date']), $time_remaining, $row['Moves'], $row['tid'] );
    }
    mysql_free_result($result);
 
