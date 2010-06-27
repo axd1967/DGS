@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 05, 2010 at 09:30 PM
+-- Generation Time: Jun 27, 2010 at 09:21 AM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.10
 
@@ -515,6 +515,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Sessioncode` varchar(41) NOT NULL default '',
   `Sessionexpire` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastaccess` datetime NOT NULL default '0000-00-00 00:00:00',
+  `LastQuickAccess` datetime NOT NULL default '0000-00-00 00:00:00',
   `LastMove` datetime NOT NULL default '0000-00-00 00:00:00',
   `Registerdate` date NOT NULL,
   `Hits` int(11) NOT NULL default '0',
@@ -762,6 +763,8 @@ CREATE TABLE IF NOT EXISTS `TournamentExtension` (
 CREATE TABLE IF NOT EXISTS `TournamentGames` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
+  `Round_ID` int(11) NOT NULL default '0',
+  `Pool` smallint(5) unsigned NOT NULL default '0',
   `gid` int(11) NOT NULL default '0',
   `Status` enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',
   `TicksDue` int(11) NOT NULL default '0',
@@ -778,8 +781,8 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   KEY `Challenger_uid` (`Challenger_uid`),
   KEY `Defender_uid` (`Defender_uid`),
   KEY `gid` (`gid`),
-  KEY `tid` (`tid`),
-  KEY `Status_Ticks` (`Status`,`TicksDue`)
+  KEY `Status_Ticks` (`Status`,`TicksDue`),
+  KEY `tidRoundPool` (`tid`,`Round_ID`,`Pool`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -850,6 +853,7 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
   `Flags` smallint(5) unsigned NOT NULL default '0',
   `Rating` float NOT NULL default '-9999',
   `StartRound` tinyint(3) unsigned NOT NULL default '1',
+  `NextRound` tinyint(3) unsigned NOT NULL default '0',
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
@@ -877,10 +881,11 @@ CREATE TABLE IF NOT EXISTS `TournamentPool` (
   `Round` tinyint(3) unsigned NOT NULL,
   `Pool` smallint(5) unsigned NOT NULL,
   `uid` int(11) NOT NULL default '0',
-  `GamesRun` tinyint(3) unsigned NOT NULL default '0',
+  `Rank` tinyint(4) NOT NULL default '-100',
   PRIMARY KEY  (`ID`),
   KEY `tidRoundPool` (`tid`,`Round`,`Pool`),
-  KEY `uid` (`uid`)
+  KEY `uid` (`uid`),
+  KEY `Rank` (`Rank`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -959,7 +964,8 @@ CREATE TABLE IF NOT EXISTS `TournamentRules` (
   `Rated` enum('N','Y') NOT NULL default 'N',
   `Notes` text NOT NULL,
   PRIMARY KEY  (`ID`),
-  KEY `tid` (`tid`)
+  KEY `tid` (`tid`),
+  KEY `Size` (`Size`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
