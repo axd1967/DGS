@@ -2333,7 +2333,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    return 0; //not found
 } //get_request_user
 
-function who_is_logged( &$player_row)
+function who_is_logged( &$player_row, $quick_suite=false )
 {
    $handle = safe_getcookie('handle');
    $sessioncode = safe_getcookie('sessioncode');
@@ -2342,7 +2342,7 @@ function who_is_logged( &$player_row)
 
    // because of include_all_translate_groups() must be called from main dir
    chdir( $main_path);
-   $player_id = is_logged_in($handle, $sessioncode, $player_row);
+   $player_id = is_logged_in($handle, $sessioncode, $player_row, $quick_suite);
    chdir( $curdir);
    return $player_id;
 }
@@ -2364,24 +2364,38 @@ define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
 define('VAULT_CNT_X', VAULT_CNT*10); //activity count (larger)
 define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
 
+// login-options
+define('LOGIN_QUICK_SUITE', 0x01);
+define('LOGIN_UPD_ACTIVITY', 0x02);
+define('LOGIN_RESET_NOTIFY', 0x04);
+define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
+
 /**
- * Check if the player $handle can be logged in
- * returns 0 if $handle can't be logged in
- * else fill the $player_row array with its characteristics,
- * load the player language definitions, set his timezone
- * and finally returns his ID (i.e. >0)
+ * \brief Check if the player $handle can be logged in
+ * \return returns 0 if $handle can't be logged in;
+ *    or for quick_suite==true if jump_to other page would have been initiated
+ * \note else fill the $player_row array with its characteristics,
+ *    load the player language definitions, set his timezone
+ *    and finally returns his ID (i.e. >0)
  **/
-function is_logged_in($handle, $scode, &$player_row) //must be called from main dir
+function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_OPTS ) //must be called from main dir
 {
    global $hostname_jump, $NOW, $dbcnx;
    global $ActivityForHit, $ActivityMax;
+   $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
 
    $player_row = array( 'ID' => 0 );
 
    if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != HOSTNAME )
    {
       list($protocol) = explode(HOSTNAME, HOSTBASE);
-      jump_to( $protocol . HOSTNAME . $_SERVER['PHP_SELF'], true );
+      if( $is_quick_suite )
+      {
+         error('bad_host', "is_logged_in($handle)");
+         return 0; // should not be reached normally
+      }
+      else
+         jump_to( $protocol . HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
    if( empty($handle) || empty($dbcnx) )
@@ -2395,6 +2409,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
           .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
           .',UNIX_TIMESTAMP(LastMove) AS X_LastMove'
           .',UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess'
+          .',UNIX_TIMESTAMP(LastQuickAccess) AS X_LastQuickAccess'
           .',UNIX_TIMESTAMP(ForumReadTime) AS X_ForumReadTime'
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
@@ -2428,7 +2443,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    $query = "UPDATE Players SET Hits=Hits+1";
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   if( $ip && $player_row['IP'] !== $ip )
+   if( !$is_quick_suite && $ip && $player_row['IP'] !== $ip )
    {
       $query.= ",IP='$ip'";
       $player_row['IP'] = $ip;
@@ -2436,15 +2451,23 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
 
    if( !$session_expired )
    {
-      $query.= ",Activity=LEAST($ActivityMax,$ActivityForHit+Activity)"
-              .",Lastaccess=FROM_UNIXTIME($NOW)"
-              .",Notify='NONE'";
+      if( $login_opts & LOGIN_UPD_ACTIVITY )
+         $query .= ",Activity=LEAST($ActivityMax,$ActivityForHit+Activity)";
+      if( $login_opts & LOGIN_RESET_NOTIFY )
+         $query .= ",Notify='NONE'";
 
-      $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
-      if( $player_row['Browser'] !== $browser )
+      if( $is_quick_suite )
+         $query .= ",LastQuickAccess=FROM_UNIXTIME($NOW)";
+      else
       {
-         $query.= ",Browser='".mysql_addslashes($browser)."'";
-         $player_row['Browser'] = $browser;
+         $query .= ",Lastaccess=FROM_UNIXTIME($NOW)";
+
+         $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
+         if( $player_row['Browser'] !== $browser )
+         {
+            $query.= ",Browser='".mysql_addslashes($browser)."'";
+            $player_row['Browser'] = $browser;
+         }
       }
    }
 
@@ -2454,7 +2477,7 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
       //can be translated if desired (translations have just been set):
-      $vault_fmt= T_("The activity of the account '%s' grew to high"
+      $vault_fmt= T_("The activity of the account '%s' grew too high"
                  ." and swallowed up our bandwidth and resources."
                  ."<br>Please, correct this behaviour."
                  ."<br>This account is blocked until %s.");
@@ -2522,20 +2545,23 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
    }
 
    // check aggregated counts
-   $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
-   if( $count_msg_new >= 0 )
+   if( !$is_quick_suite )
    {
-      $player_row['CountMsgNew'] = $count_msg_new;
-      $query .= ",CountMsgNew=$count_msg_new";
-   }
-
-   if( ALLOW_FEATURE_VOTE )
-   {
-      $count_feat_new = count_feature_new( $uid, $player_row['CountFeatNew'] );
+      $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
       if( $count_msg_new >= 0 )
       {
-         $player_row['CountFeatNew'] = $count_feat_new;
-         $query .= ",CountFeatNew=$count_feat_new";
+         $player_row['CountMsgNew'] = $count_msg_new;
+         $query .= ",CountMsgNew=$count_msg_new";
+      }
+
+      if( ALLOW_FEATURE_VOTE )
+      {
+         $count_feat_new = count_feature_new( $uid, $player_row['CountFeatNew'] );
+         if( $count_msg_new >= 0 )
+         {
+            $player_row['CountFeatNew'] = $count_feat_new;
+            $query .= ",CountFeatNew=$count_feat_new";
+         }
       }
    }
 
@@ -2555,7 +2581,13 @@ function is_logged_in($handle, $scode, &$player_row) //must be called from main 
             break;
 
          default:
-            jump_to("index.php");
+            if( $is_quick_suite )
+            {
+               error('fever_vault', "is_logged_in($uid)");
+               return 0; // should not be reached normally
+            }
+            else
+               jump_to("index.php");
             break;
       }
 /* options:
