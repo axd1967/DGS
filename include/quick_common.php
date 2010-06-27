@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once( 'include/globals.php' );
+require_once( "include/json_pear.php" );
 require_once( "include/error_functions.php" );
 require_once( "include/connect2mysql.php" );
 
@@ -417,6 +418,18 @@ function check_subnet_ip( $subnet, $ip )
    }
 
    return 0; // no match
+}
+
+
+global $JSON;
+$JSON = new Services_JSON(); // PEAR-json library
+
+// NOTES: Lightweight JSON encoder using PEAR-JSON
+//        working also for PHP4 (and < PHP 5.2 with built-in json-funcs)
+function dgs_json_encode( $var )
+{
+   global $JSON;
+   return $JSON->encode( $var );
 }
 
 ?>
