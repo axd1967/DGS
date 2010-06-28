@@ -473,7 +473,10 @@ General instructions for developers:
    * LOCK TABLES - is used to lock a single table when there are multiple changes
      on the same table that should be performed within one transaction.
 
-     In the source, make up a block to clearer mark the scope of the table-lock.
+     Use with care, because with the current MyISAM-table-engine it will block
+     ALL operations including SELECTs on the table!!
+
+     In the source, make up a block to more clearly mark the scope of the table-lock.
      Also try to execute the db-operations as quickly as possible to minimize the
      time the table is being locked:
 
@@ -497,7 +500,7 @@ General instructions for developers:
       This prevents that the abortion of the client connection to stop the execution
       of the script running, and with it breaking the SQL-statements.
 
-      Like this at least the DB-updates in best-case are all executed.
+      Like this in best-case at least the DB-updates are all executed.
       Be aware, that this is no REAL transaction, but the closest we can get
       without switching to another table-engine (like InnoDB for example) with
       real transactions.
