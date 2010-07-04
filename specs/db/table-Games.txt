@@ -47,10 +47,10 @@ Description:
  Rated              | enum('N','Y','Done')                 | N
  StdHandicap        | enum('N','Y')                        | N
  WeekendClock       | enum('N','Y')                        | Y
- Black_Start_Rating | float                                | -9999
- White_Start_Rating | float                                | -9999
- Black_End_Rating   | float                                | -9999
- White_End_Rating   | float                                | -9999
+ Black_Start_Rating | double                               | -9999
+ White_Start_Rating | double                               | -9999
+ Black_End_Rating   | double                               | -9999
+ White_End_Rating   | double                               | -9999
 
 
 ## Fields:

@@ -1922,3 +1922,44 @@ UPDATE Players
    SET LastQuickAccess = Registerdate ;
 
 
+-- [field-size] COL TournamentProperties.UserMinRating : double -> float -> smallint
+-- [field-size] COL TournamentProperties.UserMaxRating : double -> float -> smallint
+ALTER TABLE TournamentProperties
+   MODIFY `UserMinRating` smallint NOT NULL default '-9999',
+   MODIFY `UserMaxRating` smallint NOT NULL default '-9999' ;
+
+-- [field-size] COL Waitingroom.Ratingmin : double -> float -> smallint
+-- [field-size] COL Waitingroom.Ratingmax : double -> float -> smallint
+ALTER TABLE Waitingroom
+   MODIFY `Ratingmin` smallint NOT NULL default '-9999',
+   MODIFY `Ratingmax` smallint NOT NULL default '-9999' ;
+
+
+-- revert precision [field-size] COL Games.* : double -> float -> double
+ALTER TABLE Games
+   MODIFY `Black_Start_Rating` double NOT NULL default '-9999',
+   MODIFY `White_Start_Rating` double NOT NULL default '-9999',
+   MODIFY `Black_End_Rating` double NOT NULL default '-9999',
+   MODIFY `White_End_Rating` double NOT NULL default '-9999' ;
+
+-- revert precision [field-size] COL Players.* : double -> float -> double
+-- NOTE: float is enough precision for fields: VacationDays, OnVacation
+ALTER TABLE Players
+   MODIFY `Rating` double default NULL,
+   MODIFY `Rating2` double default NULL,
+   MODIFY `RatingMin` double default NULL,
+   MODIFY `RatingMax` double default NULL,
+   MODIFY `InitialRating` double NOT NULL default '-9999' ;
+
+-- revert precision [field-size] COL Ratinglog.* : double -> float -> double
+-- NOTE: float is enough precision for field: RatingDiff
+ALTER TABLE Ratinglog
+   MODIFY `Rating` double NOT NULL,
+   MODIFY `RatingMin` double NOT NULL,
+   MODIFY `RatingMax` double NOT NULL ;
+
+-- revert precision [field-size] COL TournamentParticipant.* : double -> float -> double
+ALTER TABLE TournamentParticipant
+   MODIFY `Rating` double NOT NULL default '-9999' ;
+
+
