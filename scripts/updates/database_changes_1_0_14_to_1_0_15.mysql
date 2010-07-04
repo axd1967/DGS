@@ -229,11 +229,6 @@ ALTER TABLE Observers
 
 -- [field-size] COL Players.Adminlevel : int -> smallint unsigned
 -- [field-size] COL Players.AdminOptions : int -> smallint unsigned
--- [field-size] COL Players.Rating : double -> float
--- [field-size] COL Players.Rating2 : double -> float
--- [field-size] COL Players.RatingMin : double -> float
--- [field-size] COL Players.RatingMax : double -> float
--- [field-size] COL Players.InitialRating : double -> float
 -- [field-size] COL Players.VacationDays : double -> float
 -- [field-size] COL Players.OnVacation : double -> float
 -- [field-size] COL Players.Woodcolor : int -> tinyint unsigned
@@ -260,11 +255,6 @@ ALTER TABLE Observers
 ALTER TABLE Players
    CHANGE Adminlevel Adminlevel smallint unsigned NOT NULL default '0',
    CHANGE AdminOptions AdminOptions smallint unsigned NOT NULL default '0',
-   CHANGE Rating Rating float default NULL,
-   CHANGE Rating2 Rating2 float default NULL,
-   CHANGE RatingMin RatingMin float default NULL,
-   CHANGE RatingMax RatingMax float default NULL,
-   CHANGE InitialRating InitialRating float default NULL,
    CHANGE VacationDays VacationDays float NOT NULL default '14',
    CHANGE OnVacation OnVacation float NOT NULL default '0',
    CHANGE Woodcolor Woodcolor tinyint unsigned NOT NULL default '1',
@@ -305,16 +295,10 @@ ALTER TABLE RatingChange
    CHANGE uid uid int NOT NULL,
    CHANGE gid gid int NOT NULL ;
 
--- [field-size] COL Ratinglog.Rating : double -> float
--- [field-size] COL Ratinglog.RatingMin : double -> float
--- [field-size] COL Ratinglog.RatingMax : double -> float
 -- [field-size] COL Ratinglog.RatingDiff : double -> float
 -- [no-def] Ratinglog.uid int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Ratinglog.gid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Ratinglog
-   CHANGE Rating Rating float default NULL,
-   CHANGE RatingMin RatingMin float default NULL,
-   CHANGE RatingMax RatingMax float default NULL,
    CHANGE RatingDiff RatingDiff float default NULL,
    CHANGE uid uid int NOT NULL,
    CHANGE gid gid int NOT NULL ;
@@ -1024,10 +1008,6 @@ ALTER TABLE ForumRead
 -- [field-size] COL Games.Byoperiods : int -> tinyint
 -- [field-size] COL Games.Black_Byoperiods : int -> tinyint
 -- [field-size] COL Games.White_Byoperiods : int -> tinyint
--- [field-size] COL Games.Black_Start_Rating : double -> float
--- [field-size] COL Games.White_Start_Rating : double -> float
--- [field-size] COL Games.Black_End_Rating : double -> float
--- [field-size] COL Games.White_End_Rating : double -> float
 -- [no-def] Games.Black_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Games.White_ID int(11) NOT NULL default '0' -> no default [ok]
 -- NOTE: ca. 80 warnings of data-loss, because of exorbitant large main/byo-time/byo-periods,
@@ -1049,10 +1029,6 @@ ALTER TABLE Games
    CHANGE Byoperiods Byoperiods tinyint NOT NULL default '0',
    CHANGE Black_Byoperiods Black_Byoperiods tinyint NOT NULL default '-1',
    CHANGE White_Byoperiods White_Byoperiods tinyint NOT NULL default '-1',
-   CHANGE Black_Start_Rating Black_Start_Rating float NOT NULL default '-9999',
-   CHANGE White_Start_Rating White_Start_Rating float NOT NULL default '-9999',
-   CHANGE Black_End_Rating Black_End_Rating float NOT NULL default '-9999',
-   CHANGE White_End_Rating White_End_Rating float NOT NULL default '-9999',
    CHANGE Black_ID Black_ID int NOT NULL,
    CHANGE White_ID White_ID int NOT NULL ;
 
@@ -1090,10 +1066,6 @@ ALTER TABLE Tournament
    CHANGE Title Title varchar(255) NOT NULL,
    CHANGE Owner_ID Owner_ID int NOT NULL,
    CHANGE Created Created datetime NOT NULL ;
-
--- [field-size] COL TournamentParticipant.Rating : double -> float
-ALTER TABLE TournamentParticipant
-   CHANGE Rating Rating float NOT NULL default '-9999' ;
 
 -- [field-size] COL TournamentProperties.UserMinRating : double -> float
 -- [field-size] COL TournamentProperties.UserMaxRating : double -> float
@@ -1255,16 +1227,16 @@ ALTER TABLE Ratinglog
 UPDATE Players
    SET InitialRating='-9999' WHERE InitialRating IS NULL ;
 ALTER TABLE Players
-   CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
+   CHANGE InitialRating InitialRating double NOT NULL default '-9999' ;
 
 -- [not-null] Ratinglog.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
 -- following query-result should be 0
 SELECT COUNT(*) FROM Ratinglog
    WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
 ALTER TABLE Ratinglog
-   CHANGE Rating Rating float NOT NULL,
-   CHANGE RatingMin RatingMin float NOT NULL,
-   CHANGE RatingMax RatingMax float NOT NULL,
+   CHANGE Rating Rating double NOT NULL,
+   CHANGE RatingMin RatingMin double NOT NULL,
+   CHANGE RatingMax RatingMax double NOT NULL,
    CHANGE RatingDiff RatingDiff float NOT NULL ;
 
 
@@ -1933,33 +1905,5 @@ ALTER TABLE TournamentProperties
 ALTER TABLE Waitingroom
    MODIFY `Ratingmin` smallint NOT NULL default '-9999',
    MODIFY `Ratingmax` smallint NOT NULL default '-9999' ;
-
-
--- revert precision [field-size] COL Games.* : double -> float -> double
-ALTER TABLE Games
-   MODIFY `Black_Start_Rating` double NOT NULL default '-9999',
-   MODIFY `White_Start_Rating` double NOT NULL default '-9999',
-   MODIFY `Black_End_Rating` double NOT NULL default '-9999',
-   MODIFY `White_End_Rating` double NOT NULL default '-9999' ;
-
--- revert precision [field-size] COL Players.* : double -> float -> double
--- NOTE: float is enough precision for fields: VacationDays, OnVacation
-ALTER TABLE Players
-   MODIFY `Rating` double default NULL,
-   MODIFY `Rating2` double default NULL,
-   MODIFY `RatingMin` double default NULL,
-   MODIFY `RatingMax` double default NULL,
-   MODIFY `InitialRating` double NOT NULL default '-9999' ;
-
--- revert precision [field-size] COL Ratinglog.* : double -> float -> double
--- NOTE: float is enough precision for field: RatingDiff
-ALTER TABLE Ratinglog
-   MODIFY `Rating` double NOT NULL,
-   MODIFY `RatingMin` double NOT NULL,
-   MODIFY `RatingMax` double NOT NULL ;
-
--- revert precision [field-size] COL TournamentParticipant.* : double -> float -> double
-ALTER TABLE TournamentParticipant
-   MODIFY `Rating` double NOT NULL default '-9999' ;
 
 

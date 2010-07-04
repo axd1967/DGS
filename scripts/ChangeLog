@@ -19,44 +19,28 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-07-05 juga
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/ChangeLog:
+   - removed/adjusted DDL-changes from ChangeLog and scripts/updates/
+     for reverted field-precisions:
+     - Games.Black/White_Start/End_Rating
+     - Players.Rating,Rating2,RatingMin/Max,InitialRating
+     - Ratinglog.Rating,Ratingmin/max
+     - TournamentParticipant.Rating
+
 2010-07-04 juga
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/dragon-ddl.sql, specs/db/table-Games.txt:
    - revert double->float changes to original after realizing that it precision
-	  has been lost for fields:
+     has been lost for fields:
      - Games.Black/White_Start/End_Rating
      - Players.Rating,Rating2,RatingMin/Max,InitialRating
      - Ratinglog.Rating,Ratingmin/max
      - TournamentParticipant.Rating
------------
--- revert precision [field-size] COL Games.* : double -> float -> double
-ALTER TABLE Games
-   MODIFY `Black_Start_Rating` double NOT NULL default '-9999',
-   MODIFY `White_Start_Rating` double NOT NULL default '-9999',
-   MODIFY `Black_End_Rating` double NOT NULL default '-9999',
-   MODIFY `White_End_Rating` double NOT NULL default '-9999' ;
-
--- revert precision [field-size] COL Players.* : double -> float -> double
--- NOTE: float is enough precision for fields: VacationDays, OnVacation
-ALTER TABLE Players
-   MODIFY `Rating` double default NULL,
-   MODIFY `Rating2` double default NULL,
-   MODIFY `RatingMin` double default NULL,
-   MODIFY `RatingMax` double default NULL,
-   MODIFY `InitialRating` double NOT NULL default '-9999' ;
-
--- revert precision [field-size] COL Ratinglog.* : double -> float -> double
--- NOTE: float is enough precision for field: RatingDiff
-ALTER TABLE Ratinglog
-   MODIFY `Rating` double NOT NULL,
-   MODIFY `RatingMin` double NOT NULL,
-   MODIFY `RatingMax` double NOT NULL ;
-
--- revert precision [field-size] COL TournamentParticipant.* : double -> float -> double
-ALTER TABLE TournamentParticipant
-   MODIFY `Rating` double NOT NULL default '-9999' ;
------------
+   - removed/adjusted DDL-changes from ChangeLog and scripts/updates/
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
@@ -4673,17 +4657,17 @@ ALTER TABLE Messages
 UPDATE Players
    SET InitialRating='-9999' WHERE InitialRating IS NULL ;
 ALTER TABLE Players
-   CHANGE InitialRating InitialRating float NOT NULL default '-9999' ;
+   CHANGE InitialRating InitialRating double NOT NULL default '-9999' ;
 
 -- [not-null] Ratinglog.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
 -- following query-result should be 0
 SELECT COUNT(*) FROM Ratinglog
    WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
 ALTER TABLE Ratinglog
-   CHANGE Rating Rating float NOT NULL,
-   CHANGE RatingMin RatingMin float NOT NULL,
-   CHANGE RatingMax RatingMax float NOT NULL,
-   CHANGE RatingDiff RatingDiff float NOT NULL ;
+   MODIFY Rating double NOT NULL,
+   MODIFY RatingMin double NOT NULL,
+   MODIFY RatingMax double NOT NULL,
+   MODIFY RatingDiff float NOT NULL ;
 -----------
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
