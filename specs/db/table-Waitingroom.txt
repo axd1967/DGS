@@ -40,8 +40,8 @@ Important Note:
  StdHandicap   | enum('N','Y')                            | N
  WeekendClock  | enum('N','Y')                            | Y
  MustBeRated   | enum('N','Y')                            | N
- Ratingmin     | double                                   | -9999
- Ratingmax     | double                                   | -9999
+ Ratingmin     | smallint(6)                              | -9999
+ Ratingmax     | smallint(6)                              | -9999
  MinRatedGames | smallint(6)                              | 0
  SameOpponent  | tinyint(4)                               | 0
  Comment       | varchar(40)                              |
@@ -138,6 +138,7 @@ Important Note:
    - if 'Y', RatingMin and RatingMax are used to restrict rating range
 
 * Ratingmin, Ratingmax : rating range challengers rating has to be in
+   - only integer-precision required
 
 * MinRatedGames : number of minimum rated finished games of challenger
 

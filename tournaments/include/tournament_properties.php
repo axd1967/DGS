@@ -49,7 +49,7 @@ $ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
       FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'UserMinGamesFinished', 'UserMinGamesRated',
-      FTYPE_FLOAT, 'UserMinRating', 'UserMaxRating',
+                  'UserMinRating', 'UserMaxRating',
       FTYPE_TEXT, 'Notes',
       FTYPE_DATE, 'Lastchanged', 'RegisterEndTime',
       FTYPE_ENUM, 'RatingUseMode', 'UserRated'
@@ -102,12 +102,12 @@ class TournamentProperties
 
    function setUserMinRating( $rating )
    {
-      $this->UserMinRating = TournamentUtils::normalizeRating( $rating );
+      $this->UserMinRating = (int) TournamentUtils::normalizeRating( $rating );
    }
 
    function setUserMaxRating( $rating )
    {
-      $this->UserMaxRating = TournamentUtils::normalizeRating( $rating );
+      $this->UserMaxRating = (int) TournamentUtils::normalizeRating( $rating );
    }
 
    function to_string()
