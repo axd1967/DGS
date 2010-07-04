@@ -39,6 +39,7 @@ O A   Handle               | varchar(16)                                 | NO   
  S    Sessioncode          | varchar(41)                                 | NO   |
  S    Sessionexpire        | datetime                                    | YES  | NULL
 OS    Lastaccess           | datetime                                    | YES  | NULL
+ S    LastQuickAccess      | datetime                                    | NO   | 0000-00-00 00:00:00
 OS    LastMove             | datetime                                    | YES  | NULL
 O=    Registerdate         | date                                        | YES  | NULL
  S    Hits                 | int(11)                                     | NO   | 0
@@ -71,6 +72,7 @@ Ou    Open                 | varchar(40)                                 | NO   
  u    Lang                 | varchar(20)                                 | NO   | C
 OSA   VacationDays         | double                                      | NO   | 14
 OSA   OnVacation           | double                                      | NO   | 0
+ S    UseVacation          | tinyint(3) unsigned                         | NO   | 0
 OS    Running              | int(11)                                     | NO   | 0
 OS    Finished             | int(11)                                     | NO   | 0
 OS    RatedGames           | int(11)                                     | NO   | 0
