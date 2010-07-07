@@ -19,6 +19,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-07-08 juga
+
+   * include/std_functions.php, NEWS:
+   - added markup-tag: <strike>text</strike> to strike out text
+
 2010-07-05 juga
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,

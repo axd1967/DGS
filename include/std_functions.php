@@ -1580,7 +1580,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends (or empty):
 global $html_code_closed; //PHP5
-$html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|color|';
+$html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|strike|color|';
 $html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'];
 $html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
 $html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
@@ -1590,7 +1590,7 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 
   // ** no '|' at ends:
 global $html_code; //PHP5
-$html_code['cell'] = 'note|b|i|u|strong|em|tt|color';
+$html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
    .'goban|mailto|https?|news|game_?|tourney_?|user_?|send_?|image';
