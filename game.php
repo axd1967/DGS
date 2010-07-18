@@ -129,12 +129,14 @@ function get_alt_arg( $n1, $n2)
       error('unknown_game', "game.check.invited($gid)");
 
    $tourney = null;
-   if( $tid > 0 )
+   if( ALLOW_TOURNAMENTS && ($tid > 0) )
    {
       $tourney = Tournament::load_tournament($tid);
       if( is_null($tourney) )
          error('unknown_tournament', "game.find_tournament($gid,$tid)");
    }
+
+   $score_mode = getRulesetScoring($Ruleset);
 
    if( @$_REQUEST['movechange'] )
       $move = (int)@$_REQUEST['gotomove'];
@@ -242,7 +244,7 @@ function get_alt_arg( $n1, $n2)
       {
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
-            $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING, $coord); //ajusted globals: $stonestring
+            $game_score = check_remove( $TheBoard, $score_mode, $coord); //adjusted globals: $stonestring
             $game_score->calculate_score();
          }
          $extra_infos[score2text($Score, true)] = 'Score';
@@ -271,7 +273,7 @@ function get_alt_arg( $n1, $n2)
                if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
             }
             check_move( $TheBoard, $coord, $to_move);
-            //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+            //adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
             //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
             $game_row['Black_Prisoners'] = $Black_Prisoners;
             $game_row['White_Prisoners'] = $White_Prisoners;
@@ -365,7 +367,7 @@ function get_alt_arg( $n1, $n2)
                error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
-            $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING, $coord); //ajusted globals: $stonestring
+            $game_score = check_remove( $TheBoard, $score_mode, $coord); //adjusted globals: $stonestring
             $score = $game_score->calculate_score();
 
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
@@ -386,7 +388,7 @@ function get_alt_arg( $n1, $n2)
                error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
-            $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING ); //ajusted globals: $stonestring
+            $game_score = check_remove( $TheBoard, $score_mode ); //adjusted globals: $stonestring
             $score = $game_score->calculate_score();
 
             $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
@@ -542,7 +544,7 @@ function get_alt_arg( $n1, $n2)
          echo "<br>\n";
       }
    }
-   GameScore::draw_score_box( $game_score, getRulesetScoring($Ruleset) );
+   GameScore::draw_score_box( $game_score, $score_mode );
    echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;
