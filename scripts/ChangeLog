@@ -19,6 +19,22 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-07-19 juga
+
+   * include/quick/quick_game.php (class QuickGameHandler, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.prepareMoves, ~.update_clock),
+     include/quick/quick_handler.php (class QuickObject;
+       class QuickHandler, ~.canHandle, ~.parseURL, ~.prepare, ~.matchCommand, ~.checkArgMandatory),
+     include/quick/quick_suite.php (QuickSuite.getQuickHandler),
+     include/board.php (Board.add_handicap_stones),
+     quick_do.php:
+   - started game-quick-handler with actions (copied from confirm.php):
+     delete, set-handicap, play move, pass-move, resign, scoring-mode
+
+   * confirm.php, game.php:
+   - bugfix: determine score-mode from Games.Ruleset
+   - check for ALLOW_TOURNAMENTS
+
 2010-07-08 juga
 
    * include/std_functions.php, NEWS:
