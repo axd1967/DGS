@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2010  Erik Ouchterlony, Jens-Uwe Gaspar
+Copyright (C) 2001-2010  Erik Ouchterlony, Jens-Uwe Gaspar, Rod Ival
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -17,12 +17,17 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+require_once 'include/error_functions.php';
+
  /*!
   * \file quick_handler.php
   *
   * \brief Alternative "quick" interface: base class for handling specific DGS-object.
   * \see specs/quick_suite.txt
   */
+
+// quick-objects
+define('QOBJ_GAME', 'game');
 
 
 
@@ -35,25 +40,23 @@ class QuickObject
 {
    var $obj;
    var $cmd;
-   var $args;
    var $result;
 
    function QuickObject( $obj, $cmd )
    {
       $this->obj = $obj;
       $this->cmd = $cmd;
-      $this->args = array();
       $this->result = array( 'error' => '' );
    }
 
-   function setArg( $key, $val )
+   function getResult()
    {
-      $this->args[$key] = $val;
+      return $this->result;
    }
 
-   function getArg( $key )
+   function addResult( $field, $value )
    {
-      return (isset($this->args[$key])) ? $this->args[$key] : null;
+      $this->result[$field] = $value;
    }
 
 } // end of 'QuickObject'
@@ -70,62 +73,52 @@ class QuickHandler
    var $my_id;
    var $quick_object;
 
-   function QuickHandler()
+   function QuickHandler( $quick_object )
    {
       global $player_row;
       $this->my_id = (int)$player_row['ID'];
-      $this->quick_object = null;
-   }
-
-   function getArg( $key )
-   {
-      return $this->quick_object->getArg($key);
+      $this->quick_object = $quick_object;
    }
 
    function getResult()
    {
-      return $this->quick_object->result;
+      return $this->quick_object->getResult();
    }
 
    /*! \brief throw error for unknown command. */
    function checkCommand( $dbgmsg, $regex_cmds )
    {
-      if( !preg_match("/^($regex_cmds)$/", $this->quick_object->cmd) )
-         error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,{$this->quick_object->cmd})");
-   }
-
-   /*! \brief Ensures, that given args appear in URL-args; throw error if arg missing. */
-   function checkArgMandatory( $dbgmsg, $key, $allow_empty=false )
-   {
-      $val = $this->quick_object->getArg($key);
-      if( is_null($val) )
-         error('invalid_args', "QuickHandler.checkArgMandatory.miss_arg($dbgmsg,$key)");
-      elseif( !$allow_empty && (string)$val == '' )
-         error('invalid_args', "QuickHandler.checkArgMandatory.empty_arg($dbgmsg,$key,$allow_empty)");
+      $cmd = $this->quick_object->cmd;
+      if( !QuickHandler::matchCommand($regex_cmds, $cmd) )
+         error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,$cmd))");
    }
 
 
    // ---------- Interface ----------------------------------------
 
+   /*! \brief Returns true, if handler-implementation can handle given object and command. */
+   function canHandle( $obj, $cmd ) // static
+   {
+      return false; // base-class
+   }
+
    /*!
-    * \brief Parses handler-specific URL-arguments into QuickObject and/or into handler-object.
-    * \note method MUST NOT fail with error, use check() to verify arguments
+    * \brief Parses handler-specific arguments from URL into handler-object.
+    * \note this separate method allows to initialize Handler from other source
+    * \note Method should not fire error.
     */
-   function parse( $quick_object )
+   function parseURL()
    {
-      $this->quick_object = $quick_object;
+      // abstract: requires implementation
    }
 
-   /*! \brief Checks syntax and verifies object and command and fires error(..) on found error. */
-   function check()
-   {
-      // may not be needed
-   }
-
-   /*! \brief Prepares processing of command for object; may fire error(..) and perform db-operations. */
+   /*!
+    * \brief Parses and checks handler-specific URL-arguments into QuickObject and/or into handler-object,
+    *        and prepares processing of command for object; may fire error(..) and perform db-operations.
+    */
    function prepare()
    {
-      // may not be needed
+      // abstract: requires implementation
    }
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -134,6 +127,24 @@ class QuickHandler
       $obj = @$_REQUEST['obj'];
       error('invalid_method', "QuickHandler.process($obj)");
       return 0;
+   }
+
+
+   // ---------- Static functions ---------------------------------
+
+   /*! \brief Returns true, if command matches one of supported commands. */
+   function matchCommand( $regex_supported_cmds, $cmd )
+   {
+      return preg_match( "/^($regex_supported_cmds)$/", $cmd );
+   }
+
+   /*! \brief Ensures, that given args appear in URL-args; throw error if arg missing. */
+   function checkArgMandatory( $dbgmsg, $key, $val, $allow_empty=false )
+   {
+      if( is_null($val) )
+         error('invalid_args', "QuickHandler::checkArgMandatory.miss_arg($dbgmsg,$key)");
+      elseif( !$allow_empty && (string)$val == '' )
+         error('invalid_args', "QuickHandler::checkArgMandatory.empty_arg($dbgmsg,$key)");
    }
 
 } // end of 'QuickHandler'

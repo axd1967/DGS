@@ -38,6 +38,8 @@ else
 
    // call quick-handler
    $quick_handler = QuickSuite::getQuickHandler();
+   $quick_handler->parseURL(); // get args from URL
+   $quick_handler->prepare();
    $quick_handler->process();
    $result = $quick_handler->getResult();
    //$result = array( 'error' => '' ); // success

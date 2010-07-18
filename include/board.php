@@ -188,6 +188,23 @@ class Board
    } //load_from_db
 
 
+   /*!
+    * \brief Adds handicap stones to board-array.
+    * \param $coords list with coordinates-array: [ (x,y), ... ]
+    */
+   function add_handicap_stones( $coords )
+   {
+      foreach( $coords as $coord )
+      {
+         list( $x, $y ) = $coord;
+         if( !isset($x) || !isset($y) || @$array[$x][$y] != NONE )
+            error('illegal_position', "board.add_handicap_stones({$this->gid},$x,$y)");
+
+         $this->array[$x][$y] = BLACK;
+      }
+   }
+
+
    function set_move_mark( $x=-1, $y=-1)
    {
       $this->movemrkx= $x;

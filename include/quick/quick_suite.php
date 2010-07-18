@@ -18,16 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once 'include/quick_common.php';
-//TODO require_once 'include/quick/quick_game.php';
+require_once 'include/quick/quick_game.php';
 
  /*!
   * \file quick_suite.php
   *
   * \brief Alternative "quick" interface to DGS functionality.
   */
-
-// quick-objects
-define('QOBJ_GAME', 'game');
 
 
 
@@ -40,22 +37,31 @@ class QuickSuite
 {
    // ------------ static functions ----------------------------
 
-   function getQuickHandler( $obj=null )
+   /*!
+    * \brief Returns QuickHandler for given object and command (or taken from URL if args==null).
+    * \note Fires error if no handler found.
+    */
+   function getQuickHandler( $obj=null, $cmd=null )
    {
+      // Handler must implement static interface-method canHandle(obj,cmd)
+      static $quick_handler_list = array(
+         'QuickHandlerGame',
+      );
+
       if( is_null($obj) )
          $obj = get_request_arg('obj');
+      if( is_null($cmd) )
+         $cmd = get_request_arg('cmd');
+      $quick_obj = new QuickObject( $obj, $cmd );
 
-      /* TODO
-      if( $obj == QOBJ_GAME )
-         $quick_handler = new QuickHandlerGame();
-      else
-      */
-         error('invalid_args', "QuickSuite.getQuickHandler($obj)");
-
-      $quick_obj = new QuickObject( $obj, get_request_arg('cmd') );
-      $quick_handler->parse( $quick_obj );
-      $quick_handler->check();
-      $quick_handler->prepare();
+      $quick_handler = null;
+      foreach( $quick_handler_list as $handler_class )
+      {
+         if( call_user_func( array($handler_class, 'canHandle'), $obj, $cmd ) ) // Handler::canHandle(obj,cmd)
+            $quick_handler = new $handler_class( $quick_obj );
+      }
+      if( is_null($quick_handler) )
+         error('invalid_args', "QuickSuite.getQuickHandler.no_handler($obj,$cmd)");
 
       return $quick_handler;
    }
