@@ -463,7 +463,7 @@ This is why:
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
-         $game_score = check_remove( $TheBoard, GSMODE_TERRITORY_SCORING); //ajusted globals: $stonestring
+         $game_score = check_remove( $TheBoard, getRulesetScoring($Ruleset) ); //adjusted globals: $stonestring
          $score = $game_score->calculate_score();
 
          $l = strlen( $stonestring );
