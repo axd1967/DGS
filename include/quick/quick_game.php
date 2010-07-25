@@ -66,6 +66,7 @@ class QuickHandlerGame extends QuickHandler
    var $message;
 
    var $game_row;
+   var $TheBoard;
    var $to_move;
    var $action;
 
@@ -78,6 +79,7 @@ class QuickHandlerGame extends QuickHandler
       $this->is_pass_move = false;
 
       $this->game_row = null;
+      $this->TheBoard = null;
       $this->to_move = null;
       $this->action = null;
    }
@@ -169,7 +171,7 @@ class QuickHandlerGame extends QuickHandler
          error('already_played', "QuickHandlerGame.prepare.check.ctx.move_id($gid,{$this->context},$Moves)");
 
 
-      // check for invalid-action on command
+      // check for invalid-action
 
       $this->action = $cmd;
       if( $cmd == GAMECMD_DELETE )
@@ -206,6 +208,11 @@ class QuickHandlerGame extends QuickHandler
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Status)");
       }
+
+      $this->TheBoard = new Board();
+      $no_marked_dead = ( $this->action == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
+      if( !$this->TheBoard->load_from_db( $this->game_row, 0, $no_marked_dead) )
+         error('internal_error', "QuickHandlerGame.prepare.load_board($gid,$no_marked_dead)");
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -221,11 +228,6 @@ class QuickHandlerGame extends QuickHandler
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
 
       list( $time_query, $hours ) = $this->update_clock();
-
-      $TheBoard = new Board();
-      $no_marked_dead = ( $this->action == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
-      if( !$TheBoard->load_from_db( $this->game_row, 0, $no_marked_dead) )
-         error('internal_error', "QuickHandlerGame.process.board.load_from_db($gid)");
 
       $message_raw = trim($this->message);
       if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
@@ -262,12 +264,13 @@ class QuickHandlerGame extends QuickHandler
       $Moves++;
       $game_finished = false;
 
-      switch( (string)$this->action )
+      $action = $this->action;
+      switch( (string)$action )
       {
          case GAMECMD_DELETE:
          {
             /*
-              No LIMIT for DELETE FROM Moves, because the number of records of Moves
+              No LIMIT for 'DELETE FROM Moves', because the number of Moves-records
               could be greater than the number of moves if:
               - there are prisoners
               - a sequence like PASS/PASS/SCORE.../RESUME had already occured
@@ -279,7 +282,7 @@ class QuickHandlerGame extends QuickHandler
             $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
 
             // mark reference in other double-game to indicate referring game has vanished
-            $dbl_gid = @$this->game_row['DoubleGame_ID'];
+            $dbl_gid = (int)@$this->game_row['DoubleGame_ID'];
             if( $dbl_gid > 0 )
                $doublegame_query = "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1";
 
@@ -289,7 +292,7 @@ class QuickHandlerGame extends QuickHandler
 
          case GAMECMD_SET_HANDICAP: //moves = list of coordinates of the handicap-stone placement
          {
-            $TheBoard->add_handicap_stones( $this->moves ); // check coords
+            $this->TheBoard->add_handicap_stones( $this->moves ); // check coords
 
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
             for( $i=1; $i <= $Handicap; $i++ )
@@ -316,7 +319,7 @@ class QuickHandlerGame extends QuickHandler
             {//to fix the old way Ko detect. Could be removed when no more old way games.
                if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
             }
-            check_move( $TheBoard, $coord, $this->to_move);
+            check_move( $this->TheBoard, $coord, $this->to_move);
             //adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
             //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
@@ -332,7 +335,7 @@ class QuickHandlerGame extends QuickHandler
 
             if( strlen($prisoner_string) != $nr_prisoners*2
                   || ( $stonestring && $prisoner_string != $stonestring) )
-               error('move_problem', "confirm.domove.prisoner($gid)");
+               error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,$nr_prisoners,$stonestring,$prisoner_string)");
 
             $move_query .= "($gid, $Moves, {$this->to_move}, $colnr, $rownr, $hours) ";
 
@@ -401,7 +404,7 @@ class QuickHandlerGame extends QuickHandler
          {
             //TODO // required opts: MOVE = moves : list of coordinates of stones marked as dead
             $stonestring = (string)@$_REQUEST['stonestring'];
-            $game_score = check_remove( $TheBoard, getRulesetScoring($Ruleset) ); //adjusted globals: $stonestring
+            $game_score = check_remove( $this->TheBoard, getRulesetScoring($Ruleset) ); //adjusted globals: $stonestring
             $score = $game_score->calculate_score();
 
             $l = strlen( $stonestring );
@@ -437,7 +440,7 @@ class QuickHandlerGame extends QuickHandler
          }//score
 
          default:
-            error('invalid_action', "confirm.noaction($gid,$Status)");
+            error('invalid_action', "QuickHandlerGame.process.noaction($gid,$action,$Status)");
             break;
       }//switch $action
 
@@ -457,19 +460,19 @@ class QuickHandlerGame extends QuickHandler
       {//HOT-section to update game-action
 
          //See *** HOT_SECTION *** above
-         $result = db_query( "confirm.update_game($gid,{$this->action})", $game_query . $game_clause );
+         $result = db_query( "QuickHandlerGame.process.update_game($gid,$action})", $game_query . $game_clause );
          if( mysql_affected_rows() != 1 )
-            error('mysql_update_game', "confirm.update_game2($gid,{$this->action})");
+            error('mysql_update_game', "QuickHandlerGame.process.update_game2($gid,$action})");
 
-         $result = db_query( "confirm.update_moves($gid,{$this->action})", $move_query );
+         $result = db_query( "QuickHandlerGame.process.update_moves($gid,$action})", $move_query );
          if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
-            error('mysql_insert_move', "confirm.update_moves2($gid,{$this->action})");
+            error('mysql_insert_move', "QuickHandlerGame.process.update_moves2($gid,$action})");
 
          if( $message_query )
          {
-            $result = db_query( "confirm.message_query($gid,{$this->action})", $message_query );
+            $result = db_query( "QuickHandlerGame.process.insert_movemessage($gid,$action})", $message_query );
             if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
-               error('mysql_insert_move', "confirm.message_query2($gid,{$this->action})");
+               error('mysql_insert_move', "QuickHandlerGame.process.insert_movemessage2($gid,$action})");
          }
 
 
@@ -477,15 +480,15 @@ class QuickHandlerGame extends QuickHandler
          {
             // signal game-end for tournament
             if( $tid > 0 )
-               TournamentGames::update_tournament_game_end( "confirm.tourney_game_end.{$this->action}",
+               TournamentGames::update_tournament_game_end( "QuickHandlerGame.process.tourney_game_end.$action}",
                   $tid, $gid, $Black_ID, $score );
 
             // send message to opponent about the result
 
-            $opponent_row = mysql_single_fetch( "confirm.find_opponent($gid,$White_ID,$Black_ID)",
+            $opponent_row = mysql_single_fetch( "QuickHandlerGame.process.find_opponent($gid,$White_ID,$Black_ID)",
                   "SELECT ID,Handle,Name FROM Players " .
                   "WHERE ID=" . ($White_ID + $Black_ID - $this->my_id) . " LIMIT 1" )
-               or error('opponent_not_found', "confirm.find_opponent2($gid,$White_ID,$Black_ID)");
+               or error('opponent_not_found', "QuickHandlerGame.process.find_opponent2($gid,$White_ID,$Black_ID)");
 
             if( $this->my_id == $Black_ID )
             {
@@ -505,15 +508,15 @@ class QuickHandlerGame extends QuickHandler
 
             if( $this->action == GAMECMD_DELETE )
             {
-               db_query( "confirm.update_players_delete($gid,$Black_ID,$White_ID)",
+               db_query( "QuickHandlerGame.process.delete.update_players($gid,$Black_ID,$White_ID)",
                   "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
 
-               db_query( "confirm.delete.gamenote($gid)",
+               db_query( "QuickHandlerGame.process.delete_gamenotes($gid,$action})",
                   "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
 
                // mark reference in other double-game to indicate referring game has vanished
                if( $doublegame_query )
-                  db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
+                  db_query( "QuickHandlerGame.process.delete.update_doublegame($gid,$action})", $doublegame_query );
 
                $Subject = 'Game deleted';
                //reference: game is deleted => no link
@@ -531,13 +534,13 @@ class QuickHandlerGame extends QuickHandler
                          ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                               ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
                          ) . " WHERE ID=$White_ID LIMIT 1" ;
-               db_query( "confirm.update_players_finished.W($gid,$White_ID)", $query );
+               db_query( "QuickHandlerGame.process.update_players_finished.W($gid,$action,$White_ID)", $query );
 
                $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
                          ($rated_status ? '' : ", RatedGames=RatedGames+1" .
                               ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
                          ) . " WHERE ID=$Black_ID LIMIT 1" ;
-               db_query( "confirm.update_players_finished.B($gid,$Black_ID)", $query );
+               db_query( "QuickHandlerGame.process.update_players_finished.B($gid,$action,$Black_ID)", $query );
 
                $Subject = 'Game result'; // note: don't translate
                $Text = "The result in the game:<center>"
@@ -590,7 +593,7 @@ class QuickHandlerGame extends QuickHandler
 if(1){ //new
          notify( 'confirm', $next_to_move_ID);
 }else{ //old
-         db_query( 'confirm.notify_opponent',
+         db_query( "QuickHandlerGame.process.notify_opponent($gid,$action,$next_to_move_ID})",
             "UPDATE Players SET Notify='NEXT' " .
             "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
             "AND FIND_IN_SET('ON',SendEmail) LIMIT 1" );
@@ -599,7 +602,7 @@ if(1){ //new
 
          // Increase moves and activity
 
-         db_query( 'confirm.activity',
+         db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
             "UPDATE Players SET Moves=Moves+1" . // NOTE: TODO count delete/set_handicap as ONE move?
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
                ",LastMove=FROM_UNIXTIME($NOW)" .
