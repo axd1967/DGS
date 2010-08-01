@@ -47,7 +47,6 @@ define('ADMOPT_DENY_EDIT_BIO',         0x0004);
 //define('ADMOPT_DENY_START_GAME', 0x0008); // deny: new/join game in waitroom, invite; being invited allowed
 //define('ADMOPT_DENY_SEND_MSG',   0x0010);
 //define('ADMOPT_DENY_UPD_FORUM',  0x0020); // deny: new/edits in forums
-define('ADMOPT_SHOW_TIME',             0x0040); // shows time in page bottom bar
 define('ADMOPT_HIDE_BIO',              0x0080); // hide user bio
 define('ADMOPT_FGROUP_ADMIN',          0x0100); // user can see ADMIN-forums
 define('ADMOPT_FGROUP_DEV',            0x0200); // user can see DEV-forums

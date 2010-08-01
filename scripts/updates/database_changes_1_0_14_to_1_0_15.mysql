@@ -1907,3 +1907,8 @@ ALTER TABLE Waitingroom
    MODIFY `Ratingmax` smallint NOT NULL default '-9999' ;
 
 
+-- removed admin-option show-time (always showed now)
+UPDATE Players
+   SET AdminOptions=AdminOptions & ~0x40 WHERE AdminOptions > 0 ;
+
+

@@ -63,7 +63,6 @@ require_once( "include/table_columns.php" );
       ADMOPT_DENY_TOURNEY_CREATE    => array( 'DENY_TNEY_CREATE', T_('Deny create tournament (user can not create new tournaments)') ),
       ADMOPT_DENY_TOURNEY_REGISTER  => array( 'DENY_TNEY_REG', T_('Deny tournament registration (user can not register to any new tournament)') ),
       ADMOPT_HIDE_BIO               => array( 'HIDE_BIO',      T_('Hide bio and picture (users bio and picture is hidden)') ),
-      ADMOPT_SHOW_TIME              => array( 'SHOW_TIME',     T_('Show "time needed" for page-requests (in bottom bar)') ),
       ADMOPT_FGROUP_ADMIN           => array( 'FGR_ADMIN',     T_('View ADMIN-forums (which are normally hidden)') ),
       ADMOPT_FGROUP_DEV             => array( 'FGR_DEV',       T_('View DEV-forums (which are normally hidden)') ),
    );

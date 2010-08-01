@@ -95,7 +95,6 @@ require_once( "include/form_functions.php" );
       ADMOPT_DENY_TOURNEY_CREATE    => array( 'fl_admopt5', 'DENY_TNEY_CREATE', T_('Deny tournament creation') ),
       ADMOPT_DENY_TOURNEY_REGISTER  => array( 'fl_admopt6', 'DENY_TNEY_REG',  T_('Deny tournament registration') ),
       ADMOPT_HIDE_BIO               => array( 'fl_admopt7', 'HIDE_BIO',       T_('Hide bio and user picture') ),
-      ADMOPT_SHOW_TIME              => array( 'fl_admopt8', 'SHOW_TIME',      T_('Show time') ),
       ADMOPT_FGROUP_ADMIN           => array( 'fl_admopt09', 'FGR_ADMIN',     T_('View ADMIN-forums') ),
       ADMOPT_FGROUP_DEV             => array( 'fl_admopt10', 'FGR_DEV',       T_('View DEV-forums') ),
    );

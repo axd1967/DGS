@@ -511,6 +511,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
    * Increased size of bio and message text boxes
 
+   * Show page created time for everyone in bottom bar
+
    * People page:
       * Changed main FAQ editor
       * Added list of forum moderators

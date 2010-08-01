@@ -656,7 +656,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
         . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)
         . "</span>";
 
-   if( !$printable && (@$player_row['AdminOptions'] & ADMOPT_SHOW_TIME) )
+   if( !$printable )
    {
       echo "<br><span class=PageLapse>"
         . T_('Page created in') . ' <span id="pageLapse">'
