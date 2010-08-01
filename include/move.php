@@ -31,7 +31,7 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 
    global $prisoners, $nr_prisoners, $colnr, $rownr;
 
-   list($colnr,$rownr) = sgf2number_coords($coord, $Size);
+   list($colnr,$rownr) = (is_array($coord)) ? $coord : sgf2number_coords($coord, $Size);
 
    if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
    {

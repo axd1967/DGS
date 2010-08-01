@@ -64,6 +64,7 @@ class QuickHandlerGame extends QuickHandler
    var $moves; // coords-array, if null -> parse from url_move
    var $is_pass_move;
    var $message;
+   var $stonestring;
 
    var $game_row;
    var $TheBoard;
@@ -77,6 +78,7 @@ class QuickHandlerGame extends QuickHandler
       $this->url_moves = '';
       $this->moves = null;
       $this->is_pass_move = false;
+      $this->stonestring = null;
 
       $this->game_row = null;
       $this->TheBoard = null;
@@ -108,7 +110,7 @@ class QuickHandlerGame extends QuickHandler
 
       // check gid
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_GID, $this->gid );
-      if( $this->gid <= 0 )
+      if( !is_numeric($this->gid) || $this->gid <= 0 )
          error('unknown_game', "QuickHandlerGame.check({$this->gid})");
       $gid = $this->gid;
       $dbgmsg = "game.prepare($gid)";
@@ -183,7 +185,7 @@ class QuickHandlerGame extends QuickHandler
       }
       elseif( $cmd == GAMECMD_SET_HANDICAP )
       {
-         if( $Status != GAME_STATUS_PLAY || $Handicap == 0 || $Moves > 0 )
+         if( $Status != GAME_STATUS_PLAY || $Handicap == 0 || $Moves > 0 || $this->to_move != BLACK )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Status,$Handicap,$Moves)");
          if( count($this->moves) != $Handicap )
             error('wrong_number_of_handicap_stone', "QuickHandlerGame.prepare.check.move_count($gid,$cmd,$Handicap,{$this->url_moves})");
@@ -198,6 +200,11 @@ class QuickHandlerGame extends QuickHandler
                error('early_pass', "QuickHandlerGame.prepare.check.pass($gid,$Handicap,$Moves)");
             if( $Status != GAME_STATUS_PLAY && $Status != GAME_STATUS_PASS )
                error('invalid_action', "QuickHandlerGame.prepare.check.pass.status($gid,$cmd,$Status)");
+         }
+         else
+         {
+            if( count($this->moves) != 1 )
+               error('invalid_args', "QuickHandlerGame.prepare.check.move_count($gid,$cmd)");
          }
       }
       elseif( $cmd == GAMECMD_RESIGN )
@@ -290,8 +297,9 @@ class QuickHandlerGame extends QuickHandler
             break;
          }//delete
 
-         case GAMECMD_SET_HANDICAP: //moves = list of coordinates of the handicap-stone placement
+         case GAMECMD_SET_HANDICAP:
          {
+            // NOTE: moves = list of coordinates of the handicap-stone placement
             $this->TheBoard->add_handicap_stones( $this->moves ); // check coords
 
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
@@ -302,42 +310,41 @@ class QuickHandlerGame extends QuickHandler
             }
 
             $game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
-                "Last_X=$colnr, " .
-                "Last_Y=$rownr, " .
-                "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
-                "ToMove_ID=$White_ID, ";
+                "Last_X=$x, " .
+                "Last_Y=$y, " .
+                "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
+                "ToMove_ID=$next_to_move_ID, ";
             break;
          }//set_handicap
 
-         case GAMECMD_MOVE: //stonestring is the list of prisoners
+         case GAMECMD_MOVE:
          {
-            //TODO // required opts: GAME_ID, CONTEXT, MOVES, - MOVES = move : single move to submit, move="pass" for passing move
-            $coord = @$_REQUEST['coord'];
-            $stonestring = @$_REQUEST['stonestring'];
+            // NOTE: moves = single move to submit, move="pass" for passing move
+            // NOTE: (optional) this->stonestring is the list of prisoners (to verify)
             $next_status = GAME_STATUS_PLAY;
 
             {//to fix the old way Ko detect. Could be removed when no more old way games.
                if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
             }
-            check_move( $this->TheBoard, $coord, $this->to_move);
+            check_move( $this->TheBoard, $this->moves[0], $this->to_move);
             //adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
             //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
 
             $prisoner_string = '';
-            foreach($prisoners as $tmp)
+            foreach($prisoners as $coord)
             {
-               list($x,$y) = $tmp;
+               list( $x, $y ) = $coord;
                $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
                $prisoner_string .= number2sgf_coords($x, $y, $Size);
             }
 
             if( strlen($prisoner_string) != $nr_prisoners*2
-                  || ( $stonestring && $prisoner_string != $stonestring) )
-               error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,$nr_prisoners,$stonestring,$prisoner_string)");
+                  || ( $this->stonestring && $prisoner_string != $this->stonestring) )
+               error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,$nr_prisoners,$prisoner_string,{$this->stonestring})");
 
-            $move_query .= "($gid, $Moves, {$this->to_move}, $colnr, $rownr, $hours) ";
+            $move_query .= "($gid, $Moves, {$this->to_move}, $x, $y, $hours) ";
 
             $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X=$colnr, " . //used with mail notifications
@@ -400,21 +407,22 @@ class QuickHandlerGame extends QuickHandler
             break;
          }//resign
 
-         case GAMECMD_SCORE: //stonestring is the list of toggled points
+         case GAMECMD_SCORE:
          {
             //TODO // required opts: MOVE = moves : list of coordinates of stones marked as dead
+            // NOTE: stonestring is the list of toggled points
             $stonestring = (string)@$_REQUEST['stonestring'];
             $game_score = check_remove( $this->TheBoard, getRulesetScoring($Ruleset) ); //adjusted globals: $stonestring
             $score = $game_score->calculate_score();
 
             $l = strlen( $stonestring );
-
-            $next_status = GAME_STATUS_SCORE2;
-            if( $Status == GAME_STATUS_SCORE2 &&  $l < 2 )
+            if( $Status == GAME_STATUS_SCORE2 && $l < 2 )
             {
                $next_status = GAME_STATUS_FINISHED;
                $game_finished = true;
             }
+            else
+               $next_status = GAME_STATUS_SCORE2;
 
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
             $mark_stone = ( $this->to_move == BLACK ) ? MARKED_BY_BLACK : MARKED_BY_WHITE;
@@ -603,7 +611,7 @@ if(1){ //new
          // Increase moves and activity
 
          db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
-            "UPDATE Players SET Moves=Moves+1" . // NOTE: TODO count delete/set_handicap as ONE move?
+            "UPDATE Players SET Moves=Moves+1" . // NOTE: TODO count delete/set_handicap as (one) move?
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
                ",LastMove=FROM_UNIXTIME($NOW)" .
             " WHERE ID={$this->my_id} LIMIT 1" );
