@@ -19,6 +19,29 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-08-01 juga
+
+   * include/std_functions.php (end_page),
+     include/quick_common.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     admin_show_users.php, admin_users.php, NEWS:
+   - show page created time for everyone in bottom bar,
+     removed Players.AdminOptions ADMOPT_SHOW_TIME
+-----------
+-- removed admin-option show-time (always showed now)
+UPDATE Players
+   SET AdminOptions=AdminOptions & ~0x40 WHERE AdminOptions > 0 ;
+-----------
+
+   * include/quick/quick_game.php (class QuickGame, ~.prepare, ~.process),
+     include/move.php (check_move):
+   - fix quick-game-handling: setting of handicap-stones and normal game-moving
+
+2010-07-25 juga
+
+   * include/quick/quick_game.php (QuickGame.prepare, ~.process):
+   - adjust all error-labels
+
 2010-07-19 juga
 
    * include/quick/quick_game.php (class QuickGameHandler, ~.canHandle,
@@ -9157,6 +9180,9 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2010-06-04: bug fix update (by JUG) as DGS 1.0.14.n
 2010-06-06: uploaded last-move-id enhancement (by JUG) as DGS 1.0.14.o
 2010-06-07: bug fix update (by JUG) as DGS 1.0.14.p
+2010-06-09: uploaded enhancement (by JUG) as DGS 1.0.14.q
+2010-06-19: uploaded enhancement (by JUG) as DGS 1.0.14.r
+2010-07-27: enable page-create-time by JUG) as DGS 1.0.14.s
 
 2008-12-14 juga
 
