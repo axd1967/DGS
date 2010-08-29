@@ -308,7 +308,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *   SendEmail, Notify, MenuDirection, Adminlevel, Timezone, Nightstart, ClockUsed, ClockChanged,
  *   Rating, RatingMin, RatingMax, Rating2, InitialRating, RatingStatus, Open, Lang,
  *   VacationDays, OnVacation, Button, Running, Finished, RatedGames,
- *   Won, Lost, Translator, IP, Browser, Country, MayPostOnForum, TableMaxRows
+ *   Won, Lost, Translator, IP, Browser, Country, TableMaxRows
  *
  * Observers (OB) AS Obs:
  *   ID, uid, gid

@@ -377,7 +377,6 @@ switch( (string)FRIENDLY_SHORT_NAME )
    case 'DGS':
       //$defs_???['Messages']['To_ID'] = ''; //still exist in DGS
       //$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
-      //$defs_aft['Players']['MayPostOnForum'] = 'Adminlevel';
       //$defs_aft['Players']['Rating2'] = 'Rating';
       //$defs_bef['ConfigPages']['StatusFolders'] = 'Running';
       //$defs_aft['Waitingroom']['Handicap'] = 'Komi';
