@@ -115,12 +115,11 @@ disable_cache();
          . " FROM Players AS P"
          . " LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id"
          . " WHERE P.Handle='".mysql_addslashes($tohdl)."'"
-         //. " HAVING C_denied=0"
          ;
    $opponent_row = mysql_single_fetch( "send_message.find_receiver($tohdl)", $query);
    if( !$opponent_row )
       error('receiver_not_found', "send_message.find_receiver2($tohdl)");
-   if( $opponent_row['C_denied'] )
+   if( $opponent_row['C_denied'] && !($player_row['admin_level'] & ADMIN_DEVELOPER) )
    {
       if( $type == 'INVITATION' )
          $msg = T_('Invitation rejected!');
