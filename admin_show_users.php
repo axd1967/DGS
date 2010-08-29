@@ -65,6 +65,8 @@ require_once( "include/table_columns.php" );
       ADMOPT_HIDE_BIO               => array( 'HIDE_BIO',      T_('Hide bio and picture (users bio and picture is hidden)') ),
       ADMOPT_FGROUP_ADMIN           => array( 'FGR_ADMIN',     T_('View ADMIN-forums (which are normally hidden)') ),
       ADMOPT_FGROUP_DEV             => array( 'FGR_DEV',       T_('View DEV-forums (which are normally hidden)') ),
+      ADMOPT_FORUM_NO_POST          => array( 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
+      ADMOPT_FORUM_MOD_POST         => array( 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
    );
 
    // fields to load
@@ -76,13 +78,13 @@ require_once( "include/table_columns.php" );
    //---------------
    section( 'adminuser', T_('Admin users') );
    $table = create_table( $edit_user, $page, true, 'admin_show_users.find_admins',
-      "SELECT $query_fields FROM Players WHERE Adminlevel<>0 ORDER BY ID" );
+      "SELECT $query_fields FROM Players WHERE Adminlevel<>0 AND ID > ".GUESTS_ID_MAX." ORDER BY ID" );
    $table->echo_table();
 
    //---------------
    section( 'adminuser', T_('Administrated users') );
    $table = create_table( $edit_user, $page, false, 'admin_show_users.find_administrated',
-      "SELECT $query_fields FROM Players WHERE Adminlevel=0 AND AdminOptions>0 ORDER BY ID" );
+      "SELECT $query_fields FROM Players WHERE Adminlevel=0 AND AdminOptions>0 AND ID > ".GUESTS_ID_MAX." ORDER BY ID" );
    $table->echo_table();
 
    //--------------- Legends

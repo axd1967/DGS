@@ -43,7 +43,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 {
    global $NOW;
 
-   if( $player_row['MayPostOnForum'] == 'N' )
+   if( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) )
       return array( 0, T_('Sorry, you are not allowed to post on the forum') );
 
    $uid = @$player_row['ID'];
@@ -67,7 +67,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
-   $moderated = (($forum_opts & FORUMOPT_MODERATED) || ($player_row['MayPostOnForum'] == 'M'));
+   $moderated = (($forum_opts & FORUMOPT_MODERATED) || ($player_row['AdminOptions'] & ADMOPT_FORUM_MOD_POST));
 
    // -------   Edit old post  ---------- (use-case U07)
    if( $edit > 0 )

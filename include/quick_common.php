@@ -53,6 +53,8 @@ define('ADMOPT_FGROUP_DEV',            0x0200); // user can see DEV-forums
 define('ADMOPT_DENY_VOTE',             0x0400); // deny: voting on features
 define('ADMOPT_DENY_TOURNEY_CREATE',   0x0800); // deny: voting on features
 define('ADMOPT_DENY_TOURNEY_REGISTER', 0x1000); // deny: voting on features
+define('ADMOPT_FORUM_NO_POST',         0x2000); // deny: forum posting at all (no new post, no edit)
+define('ADMOPT_FORUM_MOD_POST',        0x4000); // deny: all new/edited forum posts are moderated
 
 
 function setTZ( $tz='GMT')

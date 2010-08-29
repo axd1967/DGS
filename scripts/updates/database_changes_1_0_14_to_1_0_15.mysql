@@ -1912,3 +1912,12 @@ UPDATE Players
    SET AdminOptions=AdminOptions & ~0x40 WHERE AdminOptions > 0 ;
 
 
+-- replaced Players.MayPostOnForum with user admin-options
+UPDATE Players
+   SET AdminOptions = AdminOptions | 0x4000 WHERE MayPostOnForum='M' ;
+UPDATE Players
+   SET AdminOptions = AdminOptions | 0x2000 WHERE MayPostOnForum='N' ;
+ALTER TABLE Players
+   DROP COLUMN MayPostOnForum ;
+
+

@@ -63,9 +63,6 @@ require_once( "include/form_functions.php" );
       'OnVacation'      => 'int*',
       'UseVacation'     => 'int*',
       'AdminOptions'    => 'mask',
-      'MayPostOnForum'  => array( 'Y' => 'Y = can post',
-                                  'N' => 'N = can NOT post',
-                                  'M' => 'M = post moderated' ),
       'AdminNote'       => 'text:60,100',
       'BlockReason'     => 'textarea:60,6',
    );
@@ -97,6 +94,8 @@ require_once( "include/form_functions.php" );
       ADMOPT_HIDE_BIO               => array( 'fl_admopt7', 'HIDE_BIO',       T_('Hide bio and user picture') ),
       ADMOPT_FGROUP_ADMIN           => array( 'fl_admopt09', 'FGR_ADMIN',     T_('View ADMIN-forums') ),
       ADMOPT_FGROUP_DEV             => array( 'fl_admopt10', 'FGR_DEV',       T_('View DEV-forums') ),
+      ADMOPT_FORUM_NO_POST          => array( 'fl_admopt11', 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
+      ADMOPT_FORUM_MOD_POST         => array( 'fl_admopt12', 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
    );
 
    // set field-values to change
@@ -319,9 +318,6 @@ function update_user( $uid, $user, $fv )
 
    if( !preg_match( "/^(\d+)$/", $fv['UseVacation'] ) || (int)$fv['UseVacation'] >= 31 )
       return 'Bad syntax for UseVacation-field (must be positive real number below 31 days)';
-
-   if( !preg_match( "/^[YNM]$/", $fv['MayPostOnForum'] ) )
-      return 'Bad value for MayPostOnForum-field (must be one of [Y,N,M])';
 
    global $arr_mask_type;
    $bitmaskall = 0;

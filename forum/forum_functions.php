@@ -496,7 +496,7 @@ class DisplayForum
    function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='' )
    {
       global $player_row;
-      if( $player_row['MayPostOnForum'] == 'N' ) // user not allowed to post
+      if( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) ) // user not allowed to post
          return;
 
       if( !Forum::allow_posting($player_row, $this->forum_opts) )
@@ -653,7 +653,7 @@ class DisplayForum
       $pid = $post->id;
       $thread_url = $post->build_url_post(''); //post_url ended by #$pid
       $term_url = ( $this->rx_term != '' ) ? URI_AMP."xterm=".urlencode($this->rx_term) : '';
-      $user_may_post = ( $player_row['MayPostOnForum'] != 'N' ); // use allowed to post?
+      $user_may_post = !($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST); // use allowed to post?
 
       $post_reference = '';
       $cols = 2; //one for the subject header, one for the possible approved/hidden state

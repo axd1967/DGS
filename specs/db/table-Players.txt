@@ -57,7 +57,6 @@ Ou    Rank                 | varchar(40)                                 | YES  
   A   Adminlevel           | int(11)                                     | NO   | 0
   A   AdminOptions         | int(11) unsigned                            | NO   | 0
   A   AdminNote            | varchar(100)                                | NO   |
-  A   MayPostOnForum       | enum('N','Y','M')                           | NO   | Y
 Ou    Timezone             | varchar(40)                                 | NO   | GMT
  u    Nightstart           | int(11)                                     | NO   | 22
  S    ClockUsed            | int(11)                                     | NO   | 22

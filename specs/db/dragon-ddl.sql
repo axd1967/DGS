@@ -533,7 +533,6 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Adminlevel` smallint(5) unsigned NOT NULL default '0',
   `AdminOptions` smallint(5) unsigned NOT NULL default '0',
   `AdminNote` varchar(100) NOT NULL default '',
-  `MayPostOnForum` enum('N','Y','M') NOT NULL default 'Y',
   `Timezone` varchar(40) NOT NULL default 'GMT',
   `Nightstart` smallint(6) NOT NULL default '22',
   `ClockUsed` smallint(6) NOT NULL default '22',

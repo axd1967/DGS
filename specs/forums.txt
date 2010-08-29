@@ -642,7 +642,7 @@ Posts($fid,$tid):
     Hits=0, Time=$NOW, Lastchanged=Time, Depth=1, AnswerNr=1,
     crc32=crc32(Text)
 
-  - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
+  - moderated (if forum moderated or user is moderated (ADMOPT_FORUM_MOD_POST)):
     LastPost=0, PostsInThread=0, Approved='P'
 
   - not moderated:
@@ -664,7 +664,7 @@ Posts($fid,$tid):
 * insert Posts (with old subject/text):
   Time=$NOW, Parent_ID=$pid, Forum_ID=$fid, User_ID=$uid, PosIndex=''
 
-  - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
+  - moderated (if forum moderated or user is moderated (ADMOPT_FORUM_MOD_POST)):
     Approved='P'
 
 * if moderated but non-moderated before edit:
@@ -682,7 +682,7 @@ Posts($fid,$tid):
     Depth=Posts[ID=$spid].Depth+1, AnswerNr=max[Parent_ID=$spid](Posts.AnswerNr) + 1,
     PosIndex=CALC, crc32=crc32(Text)
 
-  - moderated (if forum moderated or user is moderated (MayPostOnForum='M')):
+  - moderated (if forum moderated or user is moderated (ADMOPT_FORUM_MOD_POST)):
     Approved='P'
 
   - not moderated:
