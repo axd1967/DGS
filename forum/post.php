@@ -201,7 +201,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 
 //      if( $allow_go_diagrams) save_diagrams($GoDiagrams);
 
-      $flog_actsuffix = ( $Thread_ID == $New_ID ) ? ':new_thread' : ':reply';
+      $flog_actsuffix = ( $Thread_ID == $New_ID ) ? FORUMLOGACT_SUFFIX_NEW_THREAD : FORUMLOGACT_SUFFIX_REPLY;
       if( $moderated ) // hidden post
       {
          add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_PEND_POST . $flog_actsuffix );

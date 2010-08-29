@@ -50,8 +50,9 @@ require_once( "forum/forum_functions.php" );
       array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => 60 ));
    $flfilter->add_filter( 4, 'Selection',
       array( T_('All#filter')           => '',
-             T_('New post#filter')      => "Action LIKE 'new_%'",
-             T_('Edit post#filter')     => "Action LIKE 'edit_%'",
+             T_('New thread#filter')    => "Action LIKE 'new\\_%".FORUMLOGACT_SUFFIX_NEW_THREAD."'",
+             T_('New post#filter')      => "Action LIKE 'new\\_%'",
+             T_('Edit post#filter')     => "Action LIKE 'edit\\_%'",
              T_('Moderate post#filter') => "Action IN ('"
                   . FORUMLOGACT_APPROVE_POST
                   . "','". FORUMLOGACT_REJECT_POST

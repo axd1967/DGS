@@ -74,6 +74,9 @@ define('FORUMLOGACT_APPROVE_POST',  'approve_post');
 define('FORUMLOGACT_REJECT_POST',   'reject_post');
 define('FORUMLOGACT_SHOW_POST',     'show_post');
 define('FORUMLOGACT_HIDE_POST',     'hide_post');
+// * new_(pend_)post:(new_thread|reply)
+define('FORUMLOGACT_SUFFIX_NEW_THREAD', ':new_thread');
+define('FORUMLOGACT_SUFFIX_REPLY',      ':reply');
 
 
 
