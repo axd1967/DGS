@@ -73,11 +73,8 @@ require_once( "include/form_functions.php" );
 
    $email_form->add_row( array(
          'CELL', 2, '',
-         'TEXT', /*T_*/('Please keep in mind, that the email is protected by DGS\' Privacy Policy!'), ));
-   $email_form->add_row( array(
-         'CELL', 2, '',
-         'TEXT', /*T_*/('See also') . ':' . MED_SPACING
-               . anchor( $base_path."policy.php", /*T_*/('DGS Privacy Policy')), ));
+         'TEXT', sprintf(/*T_*/('Please keep in mind, that the email is protected by the %s'),
+                         anchor( $base_path."policy.php", /*T_*/('DGS Privacy Policy'))), ));
    $email_form->add_empty_row();
 
    $email_form->add_row( array(
