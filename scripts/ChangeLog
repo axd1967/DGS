@@ -19,6 +19,41 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-08-30 juga
+
+   * forum/forum_functions.php (class DisplayForum.forum_message_box, ~.draw_post),
+     forum/post.php (post_message), include/quick_common.php,
+     admin_users.php (update_user), admin_show_users.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt, specs/forums.txt:
+   - replaced Players.MayPostOnForum with user admin-options
+     - show forum-posts denied/moderated on page with administrated users
+     - ADMOPT_FORUM_NO_POST = deny new and edit of forum posts
+     - ADMOPT_FORUM_MOD_POST = moderate all new & edited forum posts
+   - don't show guest-user on administrated-users-page
+-----------
+-- replaced Players.MayPostOnForum with user admin-options
+UPDATE Players
+   SET AdminOptions = AdminOptions | 0x4000 WHERE MayPostOnForum='M' ;
+UPDATE Players
+   SET AdminOptions = AdminOptions | 0x2000 WHERE MayPostOnForum='N' ;
+ALTER TABLE Players
+   DROP COLUMN MayPostOnForum ;
+-----------
+
+2010-08-29 juga
+
+   * admin_password.php:
+   - clean up of texts mentioning policy for showing user-email
+
+   * send_message.php:
+   - user with admin-level ADMIN_DEVELOPER can send-message
+     even if recipient has contacts-system-flag REJECT_MESSAGE
+
+   * forum/post.php (post_message), forum/forum_functions.php,
+     forum/admin_show_forumlog.php:
+   - added filter-option for new-threads
+
 2010-08-01 juga
 
    * include/std_functions.php (end_page),
