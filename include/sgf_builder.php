@@ -101,6 +101,9 @@ FG    figure for printing  -           integer : mask, see http://www.red-bean.c
 PM    print number         -           0-2, default "1"
 VW    view board part      -           list of points
 
+# private DGS properties:
+XM    move_id              game-info   see specs/quick_suite.txt (3a)
+
 */
 
 
@@ -556,6 +559,9 @@ class SgfBuilder
          "\nBR[" . SgfBuilder::sgf_echo_rating($Blackrating) . ']' .
          "\nWR[" . SgfBuilder::sgf_echo_rating($Whiterating) . ']'
          );
+
+      // move-id
+      $this->echo_sgf("\nXM[$Moves]");
 
       // general comment: game-id, rated-game, start/end-ratings
       $w_rating_start = ( is_valid_rating($White_Start_Rating) ) ? SgfBuilder::sgf_echo_rating($White_Start_Rating,true) : '';
