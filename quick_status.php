@@ -150,11 +150,15 @@ else
 
       $result = db_query( 'quick_status.find_messages', $query );
 
+      // message-header: type=M, Messages.ID, correspondent.Handle, message.Subject, message.Date
+      echo "# 'M', message_id, sender, subject, message_date\n";
+
       while( $row = mysql_fetch_assoc($result) )
       {
          $nothing_found = false;
          if( !@$row['sender'] ) $row['sender']='[Server message]';
-         //Message.ID, correspondent.Handle, message.subject, message.date
+
+         // Message.ID, correspondent.Handle, message.subject, message.date
          //N.B.: Subject is still in the correspondent's encoding.
          echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
             slashed(@$row['Subject']) . "', '" .
@@ -185,6 +189,9 @@ else
        "ORDER BY Games.LastChanged ASC, Games.ID";
 
    $result = db_query( 'quick_status.find_games', $query );
+
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid
+   echo "# 'G', game_id, opponent_handle, player_color, lastmove_date, time_remaining, move_id, tournament_id\n";
 
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
