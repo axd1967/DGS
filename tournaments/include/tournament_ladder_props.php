@@ -328,7 +328,7 @@ class TournamentLadderProps
 
       // game-end handling
       $arr = array( T_('On game-end the following action is performed') );
-      $arr[] = sprintf( '%s: %s', T_('if challengers wins by score or resignation'),
+      $arr[] = sprintf( '%s: %s', T_('if challenger wins by score or resignation'),
                         TournamentLadderProps::getGameEndText($this->GameEndNormal) );
       $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout'),
                         TournamentLadderProps::getGameEndText($this->GameEndTimeoutWin) );
