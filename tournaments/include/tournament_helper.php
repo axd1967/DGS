@@ -175,11 +175,11 @@ class TournamentHelper
 
       // set challenger & defender rating according to rating-use-mode
       $ch_uid = $user_ch->ID;
-      $ch_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_ch, $tprops->RatingUseMode );
+      $ch_rating = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode );
       $user_ch->urow['Rating2'] = $ch_rating;
 
       $df_uid = $user_df->ID;
-      $df_rating = TournamentHelper::get_tournament_rating( $this->tid, $user_df, $tprops->RatingUseMode );
+      $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
       $user_df->urow['Rating2'] = $df_rating;
 
       return $trules->create_game( $user_ch, $user_df );
