@@ -1,6 +1,8 @@
 # Topic: Quick-Suite
 # Description: Alternative interface to DGS operations
 # FAQ (robot-interface): http://www.dragongoserver.net/faq.php?read=t&cat=215#Entry219
+# Forum-discussions:
+# - http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755
 # Author: Jens-Uwe Gaspar, DGS 'juga'
 
 ## /*
@@ -56,10 +58,12 @@ information about the "object" or perform operations on the "object".
 A "command" is sent to the server via a GET or POST HTTP-request. The response is
 sent back with MIME-type "application/json" and contains the respective result
 for the requests command. The quick-script always expects a login-cookie in the
-HTTP-headers, which can be created with:
+HTTP-headers for authentication, which can be created with:
 
    login.php?quick_mode=1&userid=HANDLE&passwd=PASSWORD
 
+Authentication is one purpose, the other is to allow an user-based quota (and for
+that the user must be known and must be authenticated to avoid abuse).
 
 The standard request format looks like:
 
@@ -105,18 +109,20 @@ The currently supported DGS "objects" are:
 
 Request:
 
-   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&ctx=<CONTEXT>&move=<MOVES>&msg=<MESSAGE>
+   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>
 
 Options:
 
-   <COMMAND> = "delete" | "set_handicap" | "move" | "resign" | "score"
+   <COMMAND> = "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
 
    <GAME_ID> = integer
       - reference game to perform game-operation on
 
-   <CONTEXT> = context
-      - context = current move-number,
-        providing context for game-operation to avoid errorneous states:
+   <MOVE_ID> = context for move
+      - move_id = current DGS-move-number as stored in db in Games.Moves,
+        which also counts in handicap-stones and pass/scoring-"moves".
+
+        Providing context for game-operation to avoid errorneous states like:
         - (a) multi-players account with simultaneous logins or
         - (b) (duplicate move commitment) if one player hit twice the validation button
           during a net lag, and/or
@@ -130,6 +136,7 @@ Options:
       - there are two mode-formats:
           - moves are given in SGF-coordinates, e.g. "bc",
             specified in http://www.red-bean.com/sgf/go.html
+            This is also used as default if the mode-format could not be determined.
 
           - moves are given in board-coordinates (labels), e.g. "b17"
             be aware, that board-coordinates skip the 'i'-character
@@ -141,26 +148,50 @@ Options:
 Commands:
 
    "delete" : deletes specified game
-      - required opts: GAME_ID, CONTEXT
+      - required opts: GAME_ID, MOVE_ID
       - optional opts: MESSAGE
 
    "set_handicap" : sets handicap stones at start of game
-      - required opts: GAME_ID, CONTEXT, MOVE
+      - required opts: GAME_ID, MOVE_ID, MOVE
          - MOVE = moves : list of coordinates of the handicap-stone placement
       - optional opts: MESSAGE
 
    "move" :
-      - required opts: GAME_ID, CONTEXT, MOVES
+      - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVES = move : single move to submit, move="pass" for passing move
       - optional opts: MESSAGE
 
    "resign" : resigns specified game
-      - required opts: GAME_ID, CONTEXT
+      - required opts: GAME_ID, MOVE_ID
       - optional opts: MESSAGE
 
-   "score" :
-      - required opts: GAME_ID, CONTEXT, MOVE
-         - MOVE = moves : list of coordinates of stones marked as dead
+   "status_score" : verify final game-score
+      - required opts: GAME_ID, MOVE_ID, MOVE
+         - MOVE = coords : list of coordinates that 'state' should be "switched"
+      - optional opts: MESSAGE -> will be ignored
+
+      - Result (JSON) =
+         {
+            "score" : "0" | "W+7" | "B+2.5", # 0=jigo
+            "board_status" : {
+               "dame"            : "...", # coords*
+               "neutral"         : "...", # coords* (switchable)
+               "white_stones"    : "bc,...", # coords*
+               "black_stones"    : "aa,...", # coords*
+               "white_dead"      : "...", # coords*
+               "black_dead"      : "...", # coords*
+               "white_territory" : "...", # coords*
+               "black_territory" : "...", # coords*
+            }
+         }
+
+      - Errors:
+         - invalid_action : if game not in scoring-status
+         - invalid_switch : if state of coordindate can not be switched
+
+   "score" : assess dead/alive-status of stones, submitting score
+      - required opts: GAME_ID, MOVE_ID, MOVE
+         - MOVE = coords : list of coordinates that 'state' should be "switched"
       - optional opts: MESSAGE
 
 
@@ -212,44 +243,71 @@ Possible errors:
 
 Examples of game-playing cycle:
 
-   # login
+   # login setting cookie in HTTP-header storing: handle, sessioncode
    login.php?quick_mode=1&userid=user&passwd=userpassword
 
    # retrieve list of games to play in
+   # (syntax given in commented line starting with '# comment')
    quick_status.php
    quick_status.php?user=user
    quick_status.php?uid=123
 
-   # download game with moves, marked-dead-stones (MA-property), game-parameters
+   # download game with moves
+   # - marked-dead-stones stored in MA-property
+   # - move_id stored in XM-private-property
+   # - other game-parameters
+   #
+   # parameters:
+   #    quick_mode=0|1       : 1 = ignore errors
+   #    gid=1234|game1234    : game-id
+   #    no_cache=0|1         : 1 = disable cache (expire-header)
+   #    owned_comments=0|1|N : 1 = if set try to return private comments (for players only) including private notes on game,
+   #                           0 = return only public comments
+   #                           N = return NO comments or notes
+   #    inline=0|1           : 1 = use Content-Disposition type of "inline" to directly start assigned application
+   #    bulk=0|1             : 1 = use special filename-pattern (omit handicap if =0 and result if unfinished game):
+   #                           DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
    sgf.php?gid=12345&owned_comments=1&quick_mode=1
 
 
-   # setting handicap stones
-   quick_do.php?obj=game&cmd=set_handicap&gid=12345&ctx=0&move=q16,b4&msg=Onegaishimasu
+   # (optional) setting handicap stones
+   quick_do.php?obj=game&cmd=set_handicap&gid=12345&move_id=0&move=q16,b4&msg=Onegaishimasu
 
-   # regular (first) move
-   quick_do.php?obj=game&cmd=move&gid=12345&ctx=0&move=q3
+   # (first) regular move (move_id=0)
+   quick_do.php?obj=game&cmd=move&gid=12345&move_id=0&move=q3
 
    # regular move
-   quick_do.php?obj=game&cmd=move&gid=12345&ctx=1&move=c17
+   quick_do.php?obj=game&cmd=move&gid=12345&move_id=1&move=c17
 
    # pass moves
-   quick_do.php?obj=game&cmd=move&gid=12345&ctx=2&move=pass
-   quick_do.php?obj=game&cmd=move&gid=12345&ctx=3&move=pass
+   quick_do.php?obj=game&cmd=move&gid=12345&move_id=2&move=pass
+   quick_do.php?obj=game&cmd=move&gid=12345&move_id=3&move=pass
 
-   # scoring-phase
-   quick_do.php?obj=game&cmd=score&gid=12345&ctx=4&move=q16,d4
-   quick_do.php?obj=game&cmd=score&gid=12345&ctx=5&move=c17,q3
 
-   # resume playing (on disagreement)
-   quick_do.php?obj=game&cmd=move&gid=12345&ctx=5&move=r14
+   # scoring-phase: verify score & assess dead/alive-status
+   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=4
+   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=4&move=c17,q3
+   quick_do.php?obj=game&cmd=score&gid=12345&move_id=4&move=c17,q3
+
+   # scoring-phase: verify score + disagree on score
+   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=5
+   quick_do.php?obj=game&cmd=score&gid=12345&move_id=5&move=q16,d4
+
+   # scoring-phase: verify score + agree on score
+   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=5
+   quick_do.php?obj=game&cmd=score&gid=12345&move_id=5&move=
+
+   # scoring-phase: resume playing (on disagreement)
+   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=5
+   quick_do.php?obj=game&cmd=move&gid=12345&move_id=5&move=r14
+
 
    # resign
-   quick_do.php?obj=game&cmd=resign&gid=12345&ctx=6
+   quick_do.php?obj=game&cmd=resign&gid=12345&move_id=6
 
 
    # delete (only on first 10 moves)
-   quick_do.php?obj=game&cmd=delete&gid=12345&ctx=6
+   quick_do.php?obj=game&cmd=delete&gid=12345&move_id=6
 
 
 #-------- (4) Classes and Files -----------------------------------------------
