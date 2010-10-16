@@ -91,7 +91,7 @@ class QuickHandlerGame extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return ( $obj == QOBJ_GAME ) && QuickGameHandler::matchCommand(GAME_COMMANDS, $cmd);
+      return ( $obj == QOBJ_GAME ) && QuickHandler::matchCommand(GAME_COMMANDS, $cmd);
    }
 
    function parseURL()
@@ -105,6 +105,7 @@ class QuickHandlerGame extends QuickHandler
    function prepare()
    {
       // see specs/quick_suite.txt (3a)
+      $dbgmsg = "game.prepare({$this->gid})";
       $this->checkCommand( $dbgmsg, GAME_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
@@ -113,7 +114,6 @@ class QuickHandlerGame extends QuickHandler
       if( !is_numeric($this->gid) || $this->gid <= 0 )
          error('unknown_game', "QuickHandlerGame.check({$this->gid})");
       $gid = $this->gid;
-      $dbgmsg = "game.prepare($gid)";
 
       // check move(s) + context (moves-id)
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_CONTEXT, $this->context );
