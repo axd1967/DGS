@@ -112,15 +112,12 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'vacation_left', floor(@$urow['VacationDays']) );
       $this->addResultKey( 'vacation_on',
          TimeFormat::echo_onvacation( @$urow['OnVacation'], TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT, '' ) );
-      $this->addResultKey( 'register_date',
-         (@$urow['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $urow['X_Registerdate']) : '' ) );
-      $this->addResultKey( 'last_access',
-         (@$urow['X_Lastaccess'] > 0 ? date(DATE_FMT2, $urow['X_Lastaccess']) : '' ) );
-      $this->addResultKey( 'last_move',
-         (@$urow['X_LastMove'] > 0 ? date(DATE_FMT2, $urow['X_LastMove']) : '' ) );
+      $this->addResultKey( 'register_date', QuickHandler::formatDate(@$urow['X_Registerdate'], /*long*/false) );
+      $this->addResultKey( 'last_access', QuickHandler::formatDate(@$urow['X_Lastaccess']) );
+      $this->addResultKey( 'last_move', QuickHandler::formatDate(@$urow['X_LastMove']) );
       $this->addResultKey( 'rating_status', strtoupper($this->user->RatingStatus) );
-      $this->addResultKey( 'rating_elo', $this->user->Rating );
       $this->addResultKey( 'rating', echo_rating($this->user->Rating, 1, 0, true, 1) );
+      $this->addResultKey( 'rating_elo', echo_rating_elo($this->user->Rating) );
       $this->addResultKey( 'rank', @$urow['Rank'] );
       $this->addResultKey( 'open_match', @$urow['Open'] );
       $this->addResultKey( 'games_running', (int)$this->user->urow['Running'] );

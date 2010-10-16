@@ -153,6 +153,12 @@ class QuickHandler
          error('invalid_args', "QuickHandler::checkArgMandatory.empty_arg($dbgmsg,$key)");
    }
 
+   /*! \brief Formats datetime with standard quick-date-formats: long-fmt=YYYY-MM-DD hh:mm:ss, short-fmt=YYYY-MM-DD. */
+   function formatDate( $datetime, $long_fmt=true )
+   {
+      return ( $datetime > 0 ) ? date(($long_fmt) ? DATE_FMT_QUICK : DATE_FMT_QUICK_YMD, $datetime) : '';
+   }
+
 } // end of 'QuickHandler'
 
 ?>
