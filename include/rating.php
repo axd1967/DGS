@@ -702,6 +702,12 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    return $string;
 }
 
+// used for quick-suite
+function echo_rating_elo( $rating )
+{
+   return (is_valid_rating($rating)) ? $rating : '';
+}
+
 
 // decode "21k", "1KYU", "1 dan", "1 kyu ( +15% )", "1gup-15%", ...
 define('RATING_PATTERN', '/^\s*([1-9][0-9]*)\s*(k|d|kyu|dan|gup)\s*(\(?\s*([-+]?[0-9]+\s*)%\s*\)?\s*)?$/');
