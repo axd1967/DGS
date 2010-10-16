@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/quick_common.php';
 require_once 'include/quick/quick_game.php';
+require_once 'include/quick/quick_user.php';
 
  /*!
   * \file quick_suite.php
@@ -46,6 +47,7 @@ class QuickSuite
       // Handler must implement static interface-method canHandle(obj,cmd)
       static $quick_handler_list = array(
          'QuickHandlerGame',
+         'QuickHandlerUser',
       );
 
       if( is_null($obj) )

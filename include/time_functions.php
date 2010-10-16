@@ -428,6 +428,7 @@ define('TIMEFMT_ADDTYPE',  0x0008 ); // omit byo-type <-> include byo-type
 define('TIMEFMT_ADDEXTRA', 0x0010 ); // omit extra-time (byo-yomi) <-> include extra-time
 define('TIMEFMT_ZERO',     0x0020 ); // use zero time <-> return special-zero-value on zero
 define('TIMEFMT_ABBEXTRA', 0x0040 ); // abbreviate extra-time <-> full extra-specs
+define('TIMEFMT_QUICK',    0x0080 ); // time-format for quick-suite (also see specs/quick_suite.txt)
 
 /*!
  * \brief Static helper class to format Dragon time.
@@ -521,12 +522,12 @@ class TimeFormat
          return '';
    }
 
-   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_QUICK
    function echo_onvacation( $days, $fmtflags=0, $zero_value=NO_VALUE )
    {
       $hours = round($days*24);
       $str = TimeFormat::_echo_time( $hours, 24, $fmtflags, $zero_value );
-      if( $hours > 0 || ($fmtflags & TIMEFMT_ZERO) )
+      if( !($fmtflags & TIMEFMT_QUICK) && ( $hours > 0 || ($fmtflags & TIMEFMT_ZERO) ) )
          $str .= ' ' . ( ($fmtflags & TIMEFMT_ENGL) ? 'left' : T_('left#2') ); //FIXME: -> engl -> '%s left' (wait for transl-label)
 
       return TimeFormat::_replace_space($str,$fmtflags);
@@ -701,7 +702,7 @@ class TimeFormat
    /** \internal */
    function _replace_space( $str, $opts )
    {
-      if( $opts & TIMEFMT_HTMLSPC )
+      if( !($opts & TIMEFMT_QUICK) && ($opts & TIMEFMT_HTMLSPC) )
          return str_replace( ' ', '&nbsp;', trim($str) );
       else
          return trim($str);

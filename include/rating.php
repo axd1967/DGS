@@ -668,6 +668,9 @@ function getRatingArray()
    return $rating_array;
 }
 
+// input: show_percent = true|1|false (1 = like true but no HTML-space)
+// input: short = true|1|false (1 = like true, but use abbreviations 'k/d' for kyu/dan and no translation)
+//        needed for quick-suite
 // return '' for invalid rating
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false, $short=false)
 {
@@ -681,9 +684,9 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
 
    $string = '';
    if( $rank_val > 20.5 )
-      $string .= ( $rank_val - 20 ) . ($short ? $T_('dan#short') : $spc . $T_('dan'));
+      $string .= ( $rank_val - 20 ) . ( $short === true ? $T_('dan#short') : ($short ? 'd' : $spc . $T_('dan')) );
    else
-      $string .= ( 21 - $rank_val ) . ($short ? $T_('kyu#short') : $spc . $T_('kyu'));
+      $string .= ( 21 - $rank_val ) . ( $short === true ? $T_('kyu#short') : ($short ? 'k' : $spc . $T_('kyu')) );
 
    if( $show_percent )
    {

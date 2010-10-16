@@ -30,6 +30,7 @@ Topics:
    2. Login, Request and Response
    3. Objects
       a. "game" - playing a started game
+      b. "user" - user info
    4. Classes and Files
    5. Possible Future Enhancements
 
@@ -104,6 +105,7 @@ References:
 The currently supported DGS "objects" are:
 
    a) "game" - playing a started game
+   b) "user" - user info
 
 #-------- (3a) Objects - "game" -----------------------------------------------
 
@@ -308,6 +310,67 @@ Examples of game-playing cycle:
 
    # delete (only on first 10 moves)
    quick_do.php?obj=game&cmd=delete&gid=12345&move_id=6
+
+
+#-------- (3b) Objects - "user" -----------------------------------------------
+
+Request:
+
+   quick_do.php?obj=user&cmd=<COMMAND>&uid|user=<USER_ID|HANDLE>
+
+Options:
+
+   <COMMAND> = "info"
+
+   <USER_ID> = integer
+   <USER_HANDLE> = string
+      - reference user to perform user-operation on
+        - USER_ID is the unique user-id, e.g. http://www.dragongoserver.net/userinfo.php?uid=1
+        - USER_HANDLE is the unique user-id, e.g. http://www.dragongoserver.net/userinfo.php?user=guest
+
+
+Commands:
+
+   "info" : returns public user-info
+      - required opts: USER_ID|HANDLE
+
+      - Result (JSON) =
+
+         {
+            "id" : 1,                  # USER_ID
+            "handle" : "guest",        # USER_HANDLE
+            "type" : "",               # user types (comma-separated): pro teacher bot
+            "name" : "name",           # user name
+            "country" : "se",          # DGS country-code, e.g. http://www.dragongoserver.net/images/flags/se.gif
+            "vacation_left" : "25",    # vacation days left
+            "vacation_on" : "2d 7h",   # on-vacation ("" = not-on vac.)
+            "register_date" : "YYYY-MM-DD",     # register-date
+            "last_access" : "YYYY-MM-DD hh:mm", # date of last access (website; in users time-zone; can be empty)
+            "last_move" : "YYYY-MM-DD hh:mm",   # date of last move (in users time-zone; can be empty)
+            "rating_status" : "RATED",         # NONE | INIT | RATED
+            "rating_elo" : "1643.88952636719", # DGS elo-rating
+            "rating" : "5k (+46%)",            # DGS rating
+            "rank" : "5k EGF",                 # user rank-info (contains HTML)
+            "open_match" : "ask later",        # user open-for-match-info (contains HTML)
+            "games_running" : "5",   # number of running games
+            "games_finished" : "50", # number of finished games
+            "games_rated" : "10",    # number of (finished) rated games
+            "games_won" : "8",       # number of (finished rated) won games
+            "games_lost" : "2",      # number of (finished rated) lost games
+         }
+
+      - Errors:
+         - invalid_args : bad parameters (missing user-id)
+         - unknown_user : unknown user-id specified
+
+
+Examples of game-playing cycle:
+
+   # login setting cookie in HTTP-header storing: handle, sessioncode
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # retrieve user-info
+   quick_do.php?obj=user&cmd=info&user=guest
 
 
 #-------- (4) Classes and Files -----------------------------------------------

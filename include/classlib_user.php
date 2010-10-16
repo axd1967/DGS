@@ -140,11 +140,15 @@ class User
    /*! \brief Returns db-fields to be used for query of User-object. */
    function build_query_sql()
    {
-      // Players: ID,Name,Handle,Type,Lastaccess,Country,Rating2,RatingStatus,RatedGames,Finished,AdminOptions,Adminlevel
+      // Players: ID,Name,Handle,Type,Lastaccess,LastQuickAccess,LastMove,Registerdate,Country,
+      //          Rating2,RatingStatus,RatedGames,Finished,AdminOptions,Adminlevel
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'P.*',
-         'UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess' );
+         'UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess',
+         'UNIX_TIMESTAMP(P.LastQuickAccess) AS X_LastQuickAccess',
+         'UNIX_TIMESTAMP(P.LastMove) AS X_LastMove',
+         'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
       $qsql->add_part( SQLP_FROM, 'Players AS P' );
       return $qsql;
    }

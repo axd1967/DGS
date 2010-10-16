@@ -28,6 +28,7 @@ require_once 'include/error_functions.php';
 
 // quick-objects
 define('QOBJ_GAME', 'game');
+define('QOBJ_USER', 'user');
 
 
 
@@ -83,6 +84,11 @@ class QuickHandler
    function getResult()
    {
       return $this->quick_object->getResult();
+   }
+
+   function addResultKey( $key, $value )
+   {
+      $this->quick_object->result[$key] = $value;
    }
 
    /*! \brief throw error for unknown command. */
