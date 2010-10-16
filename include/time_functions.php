@@ -336,7 +336,7 @@ function get_time_remaining_warning_class( $hours )
  * \brief Builds time-remaining info.
  * \param $grow = Games-row with (White|Black)_(Maintime|Byotime|Byoperiods),
  *              X_Ticks, LastTicks, Maintime, Byotype, Byotime, Byoperiods
- * \param $color BLACK | WHITE
+ * \param $color BLACK | WHITE - for which player of game to calculate remaining time
  * \param $is_to_move true if color-user is to move (taking current ticks into account)
  * \return array( attbs => CSS-arr, text => remaining-time-str )
  */
@@ -354,10 +354,11 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
 
    time_remaining($elapsed_hours, $userMaintime, $userByotime, $userByoperiods,
       $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
+
    $hours_remtime = time_remaining_value( $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
       $userMaintime, $userByotime, $userByoperiods );
-
    $class_remtime = get_time_remaining_warning_class( $hours_remtime );
+
    $rem_time = TimeFormat::echo_time_remaining( $userMaintime, $grow['Byotype'], $userByotime,
       $userByoperiods, $grow['Byotime'], $grow['Byoperiods'], $timefmt );
 
