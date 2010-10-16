@@ -116,16 +116,16 @@ else
          error('not_logged_in','quick_status.expired');
       $logged_in = true;
       setTZ( $player_row['Timezone']);
-      $datfmt = 'Y-m-d H:i';
+      $datfmt = 'Y-m-d H:i:s';
    }
    else
    {
       $logged_in = false;
       setTZ( 'GMT');
-      $datfmt = 'Y-m-d H:i \G\M\T';
+      $datfmt = 'Y-m-d H:i:s \G\M\T';
    }
 
-   $my_id = $player_row['ID'];
+   $player_id = $player_row['ID'];
 
    $nothing_found = true;
 
@@ -143,7 +143,7 @@ else
          "LEFT JOIN MessageCorrespondents AS other " .
            "ON other.mid=me.mid AND other.Sender!=me.Sender " .
          "LEFT JOIN Players ON Players.ID=other.uid " .
-         "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
+         "WHERE me.uid=$player_id AND me.Folder_nr=".FOLDER_NEW." " .
                  "AND Messages.ID=me.mid " .
                  "AND me.Sender IN('N','S') " . //exclude message to myself
          "ORDER BY Messages.Time DESC";
@@ -174,19 +174,19 @@ else
 
    // Games to play?
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, tid, (White_ID=$my_id)+0 AS Color, " .
+   $query = "SELECT Black_ID,White_ID,Games.ID, tid, " .
        "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
        "Maintime, Byotype, Byotime, Byoperiods, " .
        "White_Maintime, White_Byotime, White_Byoperiods, " .
        "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
-       "LastTicks, Clock.Ticks, " . //always my clock because always my turn (status page)
+       "LastTicks, COALESCE(Clock.Ticks,0) AS X_Ticks, " .
        "Games.Moves, " .
        "Games.Status, " .
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
        "FROM Games " .
-         "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$my_id) " .
+         "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$player_id) " .
          "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
-       "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME . " " .
+       "WHERE ToMove_ID=$player_id AND Status" . IS_RUNNING_GAME . " " .
        "ORDER BY Games.LastChanged ASC, Games.ID";
 
    $result = db_query( 'quick_status.find_games', $query );
@@ -194,27 +194,15 @@ else
    // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid
    echo "# G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id\n";
 
-   $clrs="BW"; //player's color... so color to play.
+   $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
 
-      // calculate time-remaining
-      $is_white = (int)@$row['Color'];
-      $my_Maintime   = ( $is_white ? $row['White_Maintime'] : $row['Black_Maintime'] );
-      $my_Byotime    = ( $is_white ? $row['White_Byotime'] : $row['Black_Byotime'] );
-      $my_Byoperiods = ( $is_white ? $row['White_Byoperiods'] : $row['Black_Byoperiods'] );
-
-      //if( !(($Color+1) & 2) ) //is it my turn? (always set in status page)
-      $hours = ticks_to_hours($row['Ticks'] - $row['LastTicks']);
-
-      time_remaining($hours, $my_Maintime, $my_Byotime, $my_Byoperiods,
-                     $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'], false);
-
-      $time_remaining =
-         TimeFormat::echo_time_remaining( $my_Maintime, $row['Byotype'], $my_Byotime,
-                     $my_Byoperiods, $row['Byotime'], $row['Byoperiods'],
-                     TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
+      $player_color = ($player_id == $row['White_ID']) ? WHITE : BLACK;
+      $time_remaining = build_time_remaining( $row, $player_color,
+            /*is_to_move*/true, // always users turn
+            TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
       $game_status = ( preg_match("/^(PLAY|PASS|SCORE|SCORE2)$/i", $row['Status']) )
          ? strtoupper($row['Status'])
@@ -222,8 +210,8 @@ else
 
       // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid, GameStatus
       echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s\n",
-                    $row['ID'], slashed(@$row['oHandle']), $clrs{@$row['Color']},
-                    date($datfmt, @$row['date']), $time_remaining,
+                    $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
+                    date($datfmt, @$row['date']), $time_remaining['text'],
                     $game_status, $row['Moves'], $row['tid'] );
    }
    mysql_free_result($result);
