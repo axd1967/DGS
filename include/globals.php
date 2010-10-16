@@ -79,6 +79,27 @@ define('RULESET_CHINESE',  'CHINESE'); // using territory-scoring
 define('CHECK_RULESETS', 'JAPANESE|CHINESE');
 
 
+define('MAX_SEKI_MARK', 2);
+
+//----- Board array
+define("NONE", 0); //i.e. DAME, Moves(Stone=NONE,PosX/PosY=coord,Hours=0)
+define("BLACK", 1);
+define("WHITE", 2);
+define('STONE_TD_ADDTIME', -1); //dummy-val (not stored in DB)
+
+define("OFFSET_TERRITORY", 0x04); //keep it a power of 2
+define("DAME", OFFSET_TERRITORY+NONE);
+define("BLACK_TERRITORY", OFFSET_TERRITORY+BLACK);
+define("WHITE_TERRITORY", OFFSET_TERRITORY+WHITE);
+
+define("OFFSET_MARKED", 0x08); //keep it a power of 2
+define("MARKED_DAME", OFFSET_MARKED+NONE);
+define("BLACK_DEAD", OFFSET_MARKED+BLACK);
+define("WHITE_DEAD", OFFSET_MARKED+WHITE);
+
+define("FLAG_NOCLICK", 0x10); //keep it a power of 2
+//----- Board(end)
+
 // ---------- Folder stuff ----------------------------------------
 
 // folder for "destroyed" messages (former was: Folder_nr=NULL)

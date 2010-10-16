@@ -181,28 +181,6 @@ define('SUBJECT_HTML', false); //HTML parsing for subjects of posts and messages
 
 define('DELETE_LIMIT', 10);
 
-define('MAX_SEKI_MARK', 2);
-
-//-----
-//Board array
-define("NONE", 0); //i.e. DAME, Moves(Stone=NONE,PosX/PosY=coord,Hours=0)
-define("BLACK", 1);
-define("WHITE", 2);
-define('STONE_TD_ADDTIME', -1); //dummy-val (not stored in DB)
-
-define("OFFSET_TERRITORY", 0x04); //keep it a power of 2
-define("DAME", OFFSET_TERRITORY+NONE);
-define("BLACK_TERRITORY", OFFSET_TERRITORY+BLACK);
-define("WHITE_TERRITORY", OFFSET_TERRITORY+WHITE);
-
-define("OFFSET_MARKED", 0x08); //keep it a power of 2
-define("MARKED_DAME", OFFSET_MARKED+NONE);
-define("BLACK_DEAD", OFFSET_MARKED+BLACK);
-define("WHITE_DEAD", OFFSET_MARKED+WHITE);
-
-define("FLAG_NOCLICK", 0x10); //keep it a power of 2
-//-----
-
 //-- Database values --
 
 //Moves table: particular Stone values
@@ -2090,24 +2068,25 @@ function yesno( $yes)
    return ( $yes && strtolower(substr($yes,0,1))!='n' ) ? T_('Yes') : T_('No');
 }
 
-function score2text($score, $verbose, $keep_english=false)
+function score2text($score, $verbose, $keep_english=false, $quick=false)
 {
+   if( $quick ) $verbose = false;
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
    if( is_null($score) || !isset($score) || abs($score) > SCORE_TIME )
-      return "?";
+      return ($quick) ? "" : "?";
 
    if( $score == 0 )
-      return ( $keep_english ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
+      return ($quick) ? '0' : ( $keep_english ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
 
    $color = ($verbose
              ? ( $score > 0 ? $T_('White') : $T_('Black') )
              : ( $score > 0 ? 'W' : 'B' ));
 
    if( abs($score) == SCORE_TIME )
-      return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . "+Time" );
+      return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . ($quick ? "+T" : "+Time") );
    elseif( abs($score) == SCORE_RESIGN )
-      return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . "+Resign" );
+      return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . ($quick ? "+R" : "+Resign") );
    else
       return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score))
                : $color . '+' . abs($score) );
