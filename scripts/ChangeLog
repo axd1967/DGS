@@ -19,6 +19,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-10-16 juga
+
+   * NEWS:
+   - game/user-handler for quick-suite, quick-status, SGF-download
+
+   * include/quick/quick_user.php (class QuickHandlerUser, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.convertUserType),
+     include/quick/quick_handler.php (class QuickHandler, ~.addResultKey),
+     include/quick/quick_suite.php (class QuickSuite, ~.getQuickHandler),
+     include/time_functions.php (class TimeFormat, ~.echo_onvacation, ~._replace_space),
+     include/classlib_user.php (User.build_query_sql),
+     include/rating.php (echo_rating),
+     specs/quick_suite.txt (3b):
+   - added user-quick-suite to retrieve public information about a user
+
+   * quick_status.php:
+   - added game-status PLAY|PASS|SCORE|SCORE2 to quick-status
+   - used tighter format (removed unnecessary spaces and quotes)
+
+2010-10-03 juga
+
+   * quick_status.php:
+   - added header lines with format for message- and game-info-lines
+
+   * include/sgf_builder.php (class SgfBuilder, ~.build_sgf_start):
+   - added move_id (=Games.Moves) as private SGF-property XM[move_id]
+
+   * specs/quick_suite.txt:
+   - sync'ed with forum-discussion, added more details
+     - ctx -> move_id
+     - specs for game scoring-step status_score|score commands
+     - sgf.php parameters
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.create_game_from_tournament_rules):
+   - bugfix: remove this-reference
+
 2010-08-30 juga
 
    * forum/forum_functions.php (class DisplayForum.forum_message_box, ~.draw_post),
