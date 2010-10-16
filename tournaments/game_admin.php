@@ -425,6 +425,7 @@ function draw_add_time( $tgame, $game, $allow_add_time )
    global $page, $vars;
    $game_data = $game->fillEntityData();
    $game_row = $game_data->make_row();
+   $game_row['X_Ticks'] = get_clock_ticks( $game->ClockUsed, /*refresh_cache*/false );
 
    $opp = calc_opponent( $game, @$vars['color'] );
    $allow_edit = (is_null($opp))
