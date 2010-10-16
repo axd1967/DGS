@@ -44,7 +44,7 @@ DGS "objects" represent different sections of the server:
 
    - user         : users, contacts, player, profile
    - game-offer   : waitingroom, invitation
-   - game         : playing game
+   - game         : playing game, game-info
    - message
    - forum        : forums, threads, posts
    - help         : FAQ
@@ -104,7 +104,7 @@ References:
 
 The currently supported DGS "objects" are:
 
-   a) "game" - playing a started game
+   a) "game" - playing a started game, game-info
    b) "user" - user info
 
 #-------- (3a) Objects - "game" -----------------------------------------------
@@ -115,7 +115,7 @@ Request:
 
 Options:
 
-   <COMMAND> = "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
+   <COMMAND> = "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score" | "info"
 
    <GAME_ID> = integer
       - reference game to perform game-operation on
@@ -195,6 +195,57 @@ Commands:
       - required opts: GAME_ID, MOVE_ID, MOVE
          - MOVE = coords : list of coordinates that 'state' should be "switched"
       - optional opts: MESSAGE
+
+   "info" : retrieve game-information
+      - required opts: GAME_ID
+
+      - Result (JSON) =
+         {
+            "id" : "123456", # game-id
+            "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted
+            "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
+            "status" : "PLAY", # game-status: "" | PLAY | PASS | SCORE | SCORE2 | FINISHED
+            "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages)
+            "score" : "", # score for finished game only (same format as for status_score-command above)
+
+            "rated" : "1", # 0=unrated, 1=rated
+            "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
+            "size" : "19", # board-size
+            "komi" : "6.5", # komi
+            "handicap" : "0", # handicap-stones
+            "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
+
+            "time_started" : "YYYY-MM-DD hh:mm:ss", # game started time
+            "time_lastmove" : "YYYY-MM-DD hh:mm:ss", # last-moved (also game-end-time if finished)
+            "time_weekend_clock" : "1", # 1=time-running on weekend, 0=otherwise
+            "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
+            "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like notation in waiting-room)
+
+            "move_id" : "75", # move-id, required as context for playing via game-quick-suite
+            "move_color" : "B", # B=black-to-move, W=white-to-move
+            "move_uid" : "111", # user-id to move next
+            "move_last" : "bc", # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring)
+            "move_ko" : "0", # 1=ko, 0=no-ko in last-move
+
+            "black_uid" : "111", # black-user-id
+            "black_prisoners" : "3", # black-prisoners
+            "black_remtime" : "C: 1d 10h (+ 15d / 8)", # black remaining-time (same format as for quick-status)
+            "black_rating_start" : "3k (-7%)", # black start-rating
+            "black_rating_start_elo" : "1792.59326171875", # black start-rating ELO
+            "black_rating_end" : "3k (-7%)", # black end-rating (after game finished)
+            "black_rating_end_elo" : "1792.59326171875", # black start-rating ELO (after game finished)
+
+            "white_uid" : "222", # white-user-id
+            "white_prisoners" : "3", # white-prisoners
+            "white_remtime" : "C: 1d 10h (+ 15d / 8)", # white remaining-time (same format as for quick-status)
+            "white_rating_start" : "3k (-7%)", # white start-rating
+            "white_rating_end" : "3k (-7%)", # white end-rating (after game finished)
+            "white_rating_elo_start" : "1792.59326171875", # white start-rating ELO
+            "white_rating_elo_end" : "1792.59326171875", # white start-rating ELO (after game finished)
+         }
+
+      - Errors:
+         - unknown_game : invalid game on DGS
 
 
 Possible errors:
@@ -345,11 +396,11 @@ Commands:
             "vacation_left" : "25",    # vacation days left
             "vacation_on" : "2d 7h",   # on-vacation ("" = not-on vac.)
             "register_date" : "YYYY-MM-DD",     # register-date
-            "last_access" : "YYYY-MM-DD hh:mm", # date of last access (website; in users time-zone; can be empty)
-            "last_move" : "YYYY-MM-DD hh:mm",   # date of last move (in users time-zone; can be empty)
+            "last_access" : "YYYY-MM-DD hh:mm:ss", # date of last access (website; in users time-zone; can be empty)
+            "last_move" : "YYYY-MM-DD hh:mm:ss",   # date of last move (in users time-zone; can be empty)
             "rating_status" : "RATED",         # NONE | INIT | RATED
-            "rating_elo" : "1643.88952636719", # DGS elo-rating
-            "rating" : "5k (+46%)",            # DGS rating
+            "rating" : "5k (+46%)",            # DGS rating | ""
+            "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
             "rank" : "5k EGF",                 # user rank-info (contains HTML)
             "open_match" : "ask later",        # user open-for-match-info (contains HTML)
             "games_running" : "5",   # number of running games
