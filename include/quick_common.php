@@ -96,6 +96,8 @@ define('DATE_FMT5', 'D, Y-m-d H:i T');
 define('DATE_FMT6', 'd-M-Y H:i');
 define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
 define('DATE_FMT_YMD', 'Y-m-d');
+define('DATE_FMT_QUICK_YMD', 'Y-m-d'); // quick-suite date-format
+define('DATE_FMT_QUICK', 'Y-m-d H:i:s'); // quick-suite datetime-format
 
 define('SESSION_DURATION', 3600*12*61); // 1 month
 define('TICK_FREQUENCY', 12); // ticks/hour (every 5 minutes)
