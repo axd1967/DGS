@@ -292,12 +292,19 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added URL-arg 'inline' to directly open SGF in assigned browser-application
       * Added URL-arg 'bulk' using different filename for bulk-download (for admin)
 
-   * Quick-Suite (new alternative interface) for robots and other DGS-clients:
-      * Added game-handler to play game including scoring-steps
-      * Added user-handler to retrieve public information about user
+   * Quick-Suite (new alternative interface <code>quick_do.php</code>) for robots and other DGS-clients:
+      * Added game-handler to
+         * play game including scoring-steps
+         * retrieve information about game
+      * Added user-handler to
+         * retrieve public information about user
+      * Added message-handler to
+         * retrieve information about private message
 
    * <home_ quick_status.php>Quick Status</home>:
-      * Changed format of quick-status: removed unnecessary spaces and quotes
+      * Changed format of quick-status:
+         * Removed unnecessary spaces and quotes
+         * Changed date-format using same as quick-suite to include seconds
       * Added commented header-line with format for message- and game-info
       * Added time-remaining column
          * Enhanced remaining-time format with extra-time-info

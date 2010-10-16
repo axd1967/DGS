@@ -19,7 +19,47 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-10-17 juga
+
+   * include/message_functions.php (get_folders),
+     include/quick/quick_suite.php (class QuickSuite),
+     include/quick/quick_handler.php,
+     include/quick/quick_message.php,
+     specs/quick_suite.txt (3c), NEWS:
+   - added message-quick-suite to retrieve information about a private message
+     with folder-info
+
 2010-10-16 juga
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.prepare, ~.process,
+       ~.process_cmd_play, ~.process_cmd_info, ~.convertGameFlags),
+     specs/quick_suite.txt, NEWS:
+   - added command "info" to retrieve game-info as specifid in specs/quick_suite.txt (3a)
+
+   * tournaments/game_admin.php (draw_add_time), status.php:
+   - bugfix: using correct Clock.Ticks for time-remaining calculation for user
+
+   * quick_status.php:
+   - use standard-time-format also writing secs: "YYYY-MM-DD hh:mm:ss[ ZZZ]"
+   - cleanup: refactored time-remaining calculation using build_time_remaining-method
+   - minor (renamed my_id -> player_id)
+
+   * include/quick/quick_handler.php (QuickHandler.formatDate),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/rating.php (echo_rating_elo),
+     include/quick_common.php,
+     specs/quick_suite.txt:
+   - added standard date-formats for quick-suite including secs
+   - added convenience-method for quick-suite to format-date and format-rating-elo
+
+   * quick_do.php:
+   - return JSON-result with HTTP-Content-Type 'application/json',
+     and as 'text/plain' if argument 'test' given
+
+   * include/std_functions.php (score2text),
+     include/globals.php:
+   - moved board-array constants from include/std_functions.php to include/globals.php
+   - adjusted score2text()-method for quick-suite returning shorter score-text
 
    * NEWS:
    - game/user-handler for quick-suite, quick-status, SGF-download
