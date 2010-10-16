@@ -29,6 +29,7 @@ require_once 'include/error_functions.php';
 // quick-objects
 define('QOBJ_GAME', 'game');
 define('QOBJ_USER', 'user');
+define('QOBJ_MESSAGE', 'message');
 
 
 

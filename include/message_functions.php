@@ -1096,12 +1096,21 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
 }
 
 // FOLDER_DESTROYED is NOT in standard-folders
-function get_folders($uid, $remove_all_received=true)
+function get_folders($uid, $remove_all_received=true, $folder_nr=null)
 {
    global $STANDARD_FOLDERS;
 
-   $result = db_query( 'get_folders',
-      "SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr" );
+   if( !is_null($folder_nr) && is_numeric($folder_nr) )
+   {
+      $result = db_query( 'get_folders',
+         "SELECT * FROM Folders " .
+         "WHERE uid=$uid AND Folder_nr='$folder_nr' LIMIT 1" );
+   }
+   else
+   {
+      $result = db_query( 'get_folders',
+         "SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr" );
+   }
 
    $fldrs = $STANDARD_FOLDERS;
 
@@ -1313,7 +1322,7 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY me.mi
       'M.Type', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
       'UNIX_TIMESTAMP(M.Time) AS Time',
       "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
-          "+IF(me.Replied='Y' or other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
+          "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
       'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
       "IF(me.Sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
       'otherP.ID AS other_ID',

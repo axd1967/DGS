@@ -31,6 +31,7 @@ Topics:
    3. Objects
       a. "game" - playing a started game
       b. "user" - user info
+      c. "message" - message info
    4. Classes and Files
    5. Possible Future Enhancements
 
@@ -422,6 +423,62 @@ Examples of game-playing cycle:
 
    # retrieve user-info
    quick_do.php?obj=user&cmd=info&user=guest
+
+
+#-------- (3c) Objects - "message" --------------------------------------------
+
+Request:
+
+   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>
+
+Options:
+
+   <COMMAND> = "info"
+
+   <MESSAGE_ID> = integer
+      - message-id referencing private DGS-message to perform message-operation on
+
+
+Commands:
+
+   "info" : returns private message
+      - required opts: MESSAGE_ID
+
+      - Result (JSON) = // also see specs/db/table-Messages.txt
+
+         {
+            "id" : 1,          # message-id
+            "uid_from" : 111,  # user-id of sender, 0=server-message
+            "uid_to" : 222,    # user-id of receiver
+            "type" : "NORMAL", # message-type (see specs/db/)
+            "folder" : {
+               "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
+               "name" : "New",          # folder-name (lang-dependent)
+               "color_bg" : "F7F5E3FF", # folder background-color (incl. alpha-channel) in hex-format
+               "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
+            },
+            "time_created" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
+            "thread" : 0,       # message-id of first message in a message-thread, 0=system-message
+            "level" : 0,        # thread-level of message-thread (starting at 0)
+            "message_prev" : 0, # message-id of message that has been replied to
+            "message_hasnext" : 1, # 0=no-answer for current message, 1=there are answer(s) to this message
+            "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
+            "subject" : "boo",  # subject of message
+            "text" : "haha",    # content of message
+         }
+
+      - Errors:
+         - invalid_args : bad parameters (missing user-id)
+         - unknown_message : unknown message-id specified
+
+
+Examples of game-playing cycle:
+
+   # login setting cookie in HTTP-header storing: handle, sessioncode
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # retrieve message
+   quick_do.php?obj=message&cmd=info&mid=1234567
 
 
 #-------- (4) Classes and Files -----------------------------------------------
