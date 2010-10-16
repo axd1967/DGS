@@ -151,7 +151,7 @@ else
       $result = db_query( 'quick_status.find_messages', $query );
 
       // message-header: type=M, Messages.ID, correspondent.Handle, message.Subject, message.Date
-      echo "# 'M', message_id, sender, subject, message_date\n";
+      echo "# M,message_id,'sender','subject','message_date'\n";
 
       while( $row = mysql_fetch_assoc($result) )
       {
@@ -160,9 +160,9 @@ else
 
          // Message.ID, correspondent.Handle, message.subject, message.date
          //N.B.: Subject is still in the correspondent's encoding.
-         echo "'M', {$row['mid']}, '".slashed(@$row['sender'])."', '" .
-            slashed(@$row['Subject']) . "', '" .
-            date($datfmt, @$row['date']) . "'\n";
+         echo sprintf( "M,%s,'%s','%s','%s'\n",
+                       $row['mid'], slashed(@$row['sender']), slashed(@$row['Subject']),
+                       date($datfmt, @$row['date']) );
       }
 
    } //$logged_in
@@ -181,6 +181,7 @@ else
        "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
        "LastTicks, Clock.Ticks, " . //always my clock because always my turn (status page)
        "Games.Moves, " .
+       "Games.Status, " .
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
        "FROM Games " .
          "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$my_id) " .
@@ -190,8 +191,8 @@ else
 
    $result = db_query( 'quick_status.find_games', $query );
 
-   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid
-   echo "# 'G', game_id, opponent_handle, player_color, lastmove_date, time_remaining, move_id, tournament_id\n";
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid
+   echo "# G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id\n";
 
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
@@ -215,10 +216,15 @@ else
                      $my_Byoperiods, $row['Byotime'], $row['Byoperiods'],
                      TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
-      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid
-      echo sprintf( "'%s', %d, '%s', '%s', '%s', '%s', %s, %s\n",
-                    'G', $row['ID'], slashed(@$row['oHandle']), $clrs{@$row['Color']},
-                    date($datfmt, @$row['date']), $time_remaining, $row['Moves'], $row['tid'] );
+      $game_status = ( preg_match("/^(PLAY|PASS|SCORE|SCORE2)$/i", $row['Status']) )
+         ? strtoupper($row['Status'])
+         : '';
+
+      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid, GameStatus
+      echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s\n",
+                    $row['ID'], slashed(@$row['oHandle']), $clrs{@$row['Color']},
+                    date($datfmt, @$row['date']), $time_remaining,
+                    $game_status, $row['Moves'], $row['tid'] );
    }
    mysql_free_result($result);
 
