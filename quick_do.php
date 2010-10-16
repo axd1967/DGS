@@ -42,10 +42,12 @@ else
    $quick_handler->prepare();
    $quick_handler->process();
    $result = $quick_handler->getResult();
-   //$result = array( 'error' => '' ); // success
 
    // output HTTP-header
-   //TODO? header( 'Content-Type: application/json' );
+   if( get_request_arg('test') )
+      header('Content-Type: text/plain;charset=utf-8');
+   else
+      header('Content-Type: application/json');
    echo dgs_json_encode( $result );
 }
 ?>
