@@ -529,7 +529,7 @@ Commands:
             - RATED = played rated game (has a rating)
 
 
-Examples of game-playing cycle:
+Examples for user-commands:
 
    # login setting cookie in HTTP-header storing: handle, sessioncode
    login.php?quick_mode=1&userid=user&passwd=userpassword
@@ -593,7 +593,7 @@ Commands:
          }
 
 
-Examples of game-playing cycle:
+Examples for message-commands:
 
    # login setting cookie in HTTP-header storing: handle, sessioncode
    login.php?quick_mode=1&userid=user&passwd=userpassword
@@ -845,7 +845,7 @@ Response:
    and game-info. The output-format follows the following syntax:
 
       - line starting with '#' are comments in general
-      - line starting with '##' conaints the format of a specific line-type,
+      - line starting with '##' contains the format of a specific line-type,
         different line-types with different amount of fields are possible
       - empty lines should be skipped
       - other lines contain data
@@ -1174,7 +1174,7 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
          - for TYPE=FIS: "test_echo_time_remaining_fischer()"
 
 
-   - Format of EXTRATIME for type=JAP:
+   - Format for type=JAP:
 
       - "J: TIME (-)"            = TIME=absolute remaining-MAINTIME (no EXTRATIME); OR
                                    TIME=remaining-EXTRATIME, main-time is up, no byo-yomi-period left
@@ -1191,7 +1191,7 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
          - "J: 1d (+ 2d * 4)"       ; remaining time of started byo-yomi-period, has still main-time (maybe by added time)
          - "J: 1d 3h (2d * 4)"      ; remaining time of started byo-yomi-period, remaining extra-time, main-time is up
 
-   - Format of EXTRATIME for type=CAN:
+   - Format for type=CAN:
 
       - "C: TIME (-)"            = TIME=absolute remaining-MAINTIME (no EXTRATIME)
 
@@ -1205,7 +1205,7 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
          - "C: 10d 7h (+ 6d / 4)"   ; remaining-maintime, byo-yomi not started yet
          - "C: 1d 3h / 2 (6d / 4)"  ; remaining-extra-time, in byoyomi
 
-   - Format of EXTRATIME for type=FIS:
+   - Format for type=FIS:
 
       - "F: TIME (-)"            = TIME=absolute remaining-MAINTIME (no EXTRATIME)
 
