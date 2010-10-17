@@ -151,7 +151,7 @@ else
       $result = db_query( 'quick_status.find_messages', $query );
 
       // message-header: type=M, Messages.ID, correspondent.Handle, message.Subject, message.Date
-      echo "# M,message_id,'sender','subject','message_date'\n";
+      echo "## M,message_id,'sender','subject','message_date'\n";
 
       while( $row = mysql_fetch_assoc($result) )
       {
@@ -192,7 +192,7 @@ else
    $result = db_query( 'quick_status.find_games', $query );
 
    // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid
-   echo "# G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id\n";
+   echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id\n";
 
    $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    while( $row = mysql_fetch_assoc($result) )
