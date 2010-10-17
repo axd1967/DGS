@@ -10,7 +10,7 @@ Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-s
 Developers INFO:
 
 2009-02-11 juga
-   Tournaments
+   Tournaments, Quick-Suite
 
 2007-12-23 rodival
    Code Cleanup, New Features
@@ -20,6 +20,17 @@ ChangeLog
 ------------------------------------------------------------------
 
 2010-10-17 juga
+
+   * quick_status.php:
+   - changed prefix for header-lines: # -> ##
+
+   * specs/quick_suite.txt:
+   - extended documentation with
+     - supporting tools (sgf.php, quick_status.php, quick_play.php, RSS/WAP-feed)
+     - purpose/errors for objects-commands
+     - formats-section for: date, time-limits, remaining-time
+     - logout, HTTP-output
+   - allow SGF-coordinates without comma-separator
 
    * include/message_functions.php (get_folders),
      include/quick/quick_suite.php (class QuickSuite),
