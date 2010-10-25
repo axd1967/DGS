@@ -21,6 +21,8 @@ require_once 'include/quick_common.php';
 require_once 'include/quick/quick_game.php';
 require_once 'include/quick/quick_user.php';
 require_once 'include/quick/quick_message.php';
+require_once 'include/quick/quick_folder.php';
+require_once 'include/quick/quick_contact.php';
 
  /*!
   * \file quick_suite.php
@@ -50,6 +52,8 @@ class QuickSuite
          'QuickHandlerGame',
          'QuickHandlerUser',
          'QuickHandlerMessage',
+         'QuickHandlerFolder',
+         'QuickHandlerContact',
       );
 
       if( is_null($obj) )
