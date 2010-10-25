@@ -109,6 +109,7 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'type', QuickHandlerUser::convertUserType($this->user->Type) );
       $this->addResultKey( 'name', $this->user->Name );
       $this->addResultKey( 'country', $this->user->Country );
+      $this->addResultKey( 'picture', $this->user->urow['UserPicture'] );
       $this->addResultKey( 'vacation_left', floor(@$urow['VacationDays']) );
       $this->addResultKey( 'vacation_on',
          TimeFormat::echo_onvacation( @$urow['OnVacation'], TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT, '' ) );
