@@ -25,6 +25,7 @@ require_once 'include/move.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'include/time_functions.php';
 require_once 'include/rating.php';
+require_once 'include/classlib_user.php';
 
  /*!
   * \file quick_game.php
@@ -34,9 +35,9 @@ require_once 'include/rating.php';
   */
 
 // see specs/quick_suite.txt (3a)
-// gid=<GAME_ID>&ctx=<CONTEXT>&move=<MOVES>&msg=<MESSAGE>
+// gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>
 define('GAMEOPT_GID',     'gid');
-define('GAMEOPT_CONTEXT', 'ctx');
+define('GAMEOPT_MOVEID',  'move_id');
 define('GAMEOPT_MOVES',   'move');
 define('GAMEOPT_MESSAGE', 'msg');
 
@@ -48,7 +49,8 @@ define('GAMECMD_MOVE',   'move');
 define('GAMECMD_RESIGN', 'resign');
 define('GAMECMD_SCORE',  'score');
 define('GAMECMD_INFO',   'info');
-define('GAME_COMMANDS', 'delete|set_handicap|move|resign|score|info');
+define('GAMECMD_GET_NOTES', 'get_notes');
+define('GAME_COMMANDS', 'delete|set_handicap|move|resign|score|info|get_notes');
 
 // cmd => action
 define('GAMEACT_PASS', 'pass');
@@ -62,7 +64,7 @@ define('GAMEACT_PASS', 'pass');
 class QuickHandlerGame extends QuickHandler
 {
    var $gid;
-   var $context;
+   var $move_id;
    var $url_moves; // if null, expect 'moves' and 'is_pass_move' correctly initialized
    var $moves; // coords-array, if null -> parse from url_move
    var $is_pass_move;
@@ -73,6 +75,9 @@ class QuickHandlerGame extends QuickHandler
    var $TheBoard;
    var $to_move;
    var $action;
+
+   var $gamenotes;
+   var $user_rows;
 
    function QuickHandlerGame( $quick_object )
    {
@@ -87,6 +92,9 @@ class QuickHandlerGame extends QuickHandler
       $this->TheBoard = null;
       $this->to_move = null;
       $this->action = null;
+
+      $this->gamenotes = null;
+      $this->user_rows = null;
    }
 
 
@@ -100,15 +108,18 @@ class QuickHandlerGame extends QuickHandler
    function parseURL()
    {
       $this->gid = (int)get_request_arg(GAMEOPT_GID);
-      $this->context = get_request_arg(GAMEOPT_CONTEXT);
+      $this->move_id = (int)get_request_arg(GAMEOPT_MOVEID);
       $this->message = get_request_arg(GAMEOPT_MESSAGE);
       $this->url_moves = get_request_arg(GAMEOPT_MOVES);
    }
 
    function prepare()
    {
+      global $player_row;
+      $uid = (int)@$player_row['ID'];
+
       // see specs/quick_suite.txt (3a)
-      $dbgmsg = "game.prepare({$this->gid})";
+      $dbgmsg = "QuickHandlerGame.prepare($uid,{$this->gid})";
       $this->checkCommand( $dbgmsg, GAME_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
@@ -118,9 +129,9 @@ class QuickHandlerGame extends QuickHandler
          error('unknown_game', "QuickHandlerGame.check({$this->gid})");
       $gid = $this->gid;
 
-      // check move(s) + context (moves-id)
-      if( $cmd != GAMECMD_INFO )
-         QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_CONTEXT, $this->context );
+      // check move(s) + context (move-id)
+      if( $cmd != GAMECMD_INFO && $cmd != GAMECMD_GET_NOTES )
+         QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
       if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_SCORE )
       {
          if( is_null($this->url_moves) )
@@ -136,7 +147,7 @@ class QuickHandlerGame extends QuickHandler
       }
 
 
-      // prepare command: del, resign; set_handi, move, score, info
+      // prepare command: del, resign; set_handi, move, score; info, get_notes
 
       if( $cmd == GAMECMD_INFO )
       {
@@ -149,6 +160,18 @@ class QuickHandlerGame extends QuickHandler
                     ."FROM Games AS G LEFT JOIN Clock ON Clock.ID=G.ClockUsed "
                     ."WHERE G.ID=$gid LIMIT 1" )
                or error('unknown_game', "QuickHandlerGame.prepare.find_game4($gid)");
+
+         if( $this->is_with_option(QWITH_USER_ID) )
+            $this->user_rows = User::load_quick_userinfo( array(
+               (int)$this->game_row['Black_ID'], (int)$this->game_row['White_ID'] ));
+         return;
+      }
+      elseif( $cmd == GAMECMD_GET_NOTES )
+      {
+         $gn_row = mysql_single_fetch( "QuickHandlerGame.prepare.find_gamenotes($gid,$uid)",
+                  "SELECT Notes FROM GamesNotes WHERE gid={$gid} AND uid='$uid' LIMIT 1" );
+         if( is_array($gn_row) )
+            $this->gamenotes = @$gn_row['Notes'];
          return;
       }
 
@@ -182,13 +205,18 @@ class QuickHandlerGame extends QuickHandler
       else
          error('database_corrupted', "QuickHandlerGame.prepare.check.to_move($gid)");
 
+      //TODO add/change error-code for the following: -> not_game_player
       if( $this->my_id != $Black_ID && $this->my_id != $White_ID )
          error('not_your_turn', "QuickHandlerGame.prepare.check.not_your_game($gid)");
-      if( $my_id != $ToMove_ID )
-         error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID)");
+      //TODO allow delete also if not to move, same for resign
+      if( $cmd != GAMECMD_DELETE && $cmd != GAMECMD_RESIGN )
+      {
+         if( $my_id != $ToMove_ID )
+            error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID)");
+      }
 
-      if( (int)$this->context != $Moves )
-         error('already_played', "QuickHandlerGame.prepare.check.ctx.move_id($gid,{$this->context},$Moves)");
+      if( (int)$this->move_id != $Moves )
+         error('already_played', "QuickHandlerGame.prepare.check.move_id.move_id($gid,{$this->move_id},$Moves)");
 
 
       // check for invalid-action
@@ -246,6 +274,8 @@ class QuickHandlerGame extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == GAMECMD_INFO )
          $this->process_cmd_info();
+      elseif( $cmd == GAMECMD_GET_NOTES )
+         $this->addResultKey( 'notes', (is_null($this->gamenotes) ? "" : $this->gamenotes) );
       else
          $this->process_cmd_play();
    }
@@ -686,19 +716,20 @@ if(1){ //new
       {
          $icol = ($col == BLACK) ? 'Black' : 'White';
          $prefix = strtolower($icol);
+         $uid = (int)$row[$icol.'_ID'];
          $time_remaining = build_time_remaining( $row, $col,
-               /*is_to_move*/ ( $row[$icol.'_ID'] == $row['ToMove_ID'] ),
+               /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
                TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ADDEXTRA|TIMEFMT_ZERO );
 
-         $this->addResultKey( $prefix.'_uid', (int)$row[$icol.'_ID'] );
-         $this->addResultKey( $prefix.'_prisoners', (int)$row[$icol.'_Prisoners'] );
-         $this->addResultKey( $prefix.'_remtime', $time_remaining['text'] );
-         $this->addResultKey( $prefix.'_rating_start',
-            echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1) );
-         $this->addResultKey( $prefix.'_rating_start_elo', echo_rating_elo($row[$icol.'_Start_Rating']) );
-         $this->addResultKey( $prefix.'_rating_end',
-            echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1) );
-         $this->addResultKey( $prefix.'_rating_end_elo', echo_rating_elo($row[$icol.'_End_Rating']) );
+         $this->addResultKey( $prefix.'_user', $this->build_obj_user($uid, $this->user_rows) );
+         $this->addResultKey( $prefix.'_gameinfo', array(
+            'prisoners'        => (int)$row[$icol.'_Prisoners'],
+            'remtime'          => $time_remaining['text'],
+            'rating_start'     => echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
+            'rating_start_elo' => echo_rating_elo($row[$icol.'_Start_Rating']),
+            'rating_end'       => echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
+            'rating_end_elo'   => echo_rating_elo($row[$icol.'_End_Rating']),
+         ));
       }
    }//process_cmd_info
 
@@ -722,6 +753,7 @@ if(1){ //new
       $is_label_format = preg_match("/\\d/", $this->url_moves); // label | sgf format
 
       $arr_double = array(); // check for doublettes
+      //TODO handle sgf-coords w/o comma-sep
       $arr_coords = explode(',', $this->url_moves);
       foreach( $arr_coords as $coord )
       {
