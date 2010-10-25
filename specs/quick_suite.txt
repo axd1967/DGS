@@ -39,6 +39,8 @@ Topics:
       a. "game"    - playing a started game
       b. "user"    - user info
       c. "message" - message info
+      d. "folder"  - message-folders
+      e. "contact" - contacts
 
    4. Supporting Tools
       - [SGF] SGF-download "sgf.php"
@@ -76,10 +78,12 @@ It accepts generic-formatted input and results in a JSON-formatted output.
 
 DGS "objects" represent different sections of the server:
 
-   - user         : users, contacts, player, profile
+   - user         : users, player, profile
+   - contact      : contacts
    - game-offer   : waitingroom, invitation
    - game         : playing game, game-info
    - message      : private messages
+   - folder       : folders for private messages
    - forum        : forums, threads, posts
    - help         : FAQ
 
@@ -179,6 +183,8 @@ The currently supported DGS "objects" are:
    a) "game"    - playing a started game, game-info
    b) "user"    - user-info
    c) "message" - message-info
+   d) "folder"  - message-folders
+   e) "contact" - contacts
 
 Notes:
    - "corresponding pages" = pages of web-interface to perform similar operations
@@ -209,11 +215,11 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>
+   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>
 
 Options:
 
-   <COMMAND> = "info" | "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
+   <COMMAND> = "info" | "get_notes" | "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
 
    <GAME_ID> = integer
       - reference game to perform game-operation on
@@ -252,11 +258,16 @@ Options:
    <MESSAGE> = message
       - optional game-message on game-operation
 
+   <WITH> = optional with-option to deep-load recursive data (see commands)
+
 
 Commands:
 
    "info" : retrieve game-information
       - required opts: GAME_ID
+
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name) for white and black user
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -291,23 +302,48 @@ Commands:
             "move_last" : "bc", # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring)
             "move_ko" : "0", # 1=ko, 0=no-ko in last-move
 
-            "black_uid" : "111", # black-user-id
-            "black_prisoners" : "3", # black-prisoners
-            "black_remtime" : "C: 1d 10h (+ 15d / 8)", # black remaining-time (same format as for quick-status)
-            "black_rating_start" : "3k (-7%)", # black start-rating
-            "black_rating_start_elo" : "1792.59326171875", # black start-rating ELO
-            "black_rating_end" : "3k (-7%)", # black end-rating (after game finished)
-            "black_rating_end_elo" : "1792.59326171875", # black start-rating ELO (after game finished)
+            "black_user" : {        # black-user object-info
+               "id" : 111,                # USER_ID
+               # the following fields only if WITH-option contain 'user_id'
+               "handle" : "black-handle", # USER_HANDLE
+               "name" : "black-name",     # user name
+            },
+            "black_gameinfo" : {    # game-info of black-user
+               "prisoners" : "3",                       # prisoners
+               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status)
+               "rating_start" : "3k (-7%)",             # start-rating
+               "rating_start_elo" : "1792.59326171875", # start-rating ELO
+               "rating_end" : "3k (-7%)",               # end-rating (after game finished)
+               "rating_end_elo" : "1792.59326171875",   # start-rating ELO (after game finished)
+            },
 
-            "white_uid" : "222", # white-user-id
-            "white_prisoners" : "3", # white-prisoners
-            "white_remtime" : "C: 1d 10h (+ 15d / 8)", # white remaining-time (same format as for quick-status)
-            "white_rating_start" : "3k (-7%)", # white start-rating
-            "white_rating_end" : "3k (-7%)", # white end-rating (after game finished)
-            "white_rating_elo_start" : "1792.59326171875", # white start-rating ELO
-            "white_rating_elo_end" : "1792.59326171875", # white start-rating ELO (after game finished)
+            "white_user" : {        # white-user object-info
+               "id" : 111,                # USER_ID
+               # the following fields only if WITH-option contain 'user_id'
+               "handle" : "white-handle", # USER_HANDLE
+               "name" : "white-name",     # user name
+            },
+            "white_gameinfo" : {    # game-info of white-user
+               "prisoners" : "3",                       # prisoners
+               "remtime" : "C: 11h / 2 (15d / 8)",      # remaining-time (same format as for quick-status)
+               "rating_start" : "3k (-7%)",             # start-rating
+               "rating_end" : "3k (-7%)",               # end-rating (after game finished)
+               "rating_elo_start" : "1792.59326171875", # start-rating ELO
+               "rating_elo_end" : "1792.59326171875",   # start-rating ELO (after game finished)
+            }
          }
 
+   "get_notes" : retrieve game-notes
+      - required opts: GAME_ID
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+         - unknown_game : invalid game
+
+      - Result (JSON) =
+         {
+            "notes" : "",      # users game-notes (only for logged-in user)
+         }
 
    "delete" : deletes specified game
       - required opts: GAME_ID, MOVE_ID
@@ -504,6 +540,7 @@ Commands:
             "type" : "",               # user types (comma-separated): pro teacher bot
             "name" : "name",           # user name
             "country" : "se",          # DGS country-code, e.g. http://www.dragongoserver.net/images/flags/se.gif
+            "picture" : "",            # picture-filename, e.g. http://localhost/dev/userpic/5318.png?t=YYYYMMDDhhmmss
             "vacation_left" : "25",    # vacation days left
             "vacation_on" : "2d 7h",   # on-vacation ("" = not-on vac.)
             "register_date" : "YYYY-MM-DD",     # register-date
@@ -549,7 +586,7 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>
+   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&with=<WITH>
 
 Options:
 
@@ -558,27 +595,51 @@ Options:
    <MESSAGE_ID> = integer
       - message-id referencing private DGS-message to perform message-operation on
 
+   <WITH> = optional with-option to deep-load recursive data (see commands)
+
 
 Commands:
 
    "info" : returns private message
       - required opts: MESSAGE_ID
 
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
+         - 'folder'  : additionally return folder-data (name + color_bg + color_fg) for message
+
+      - Important Notes:
+         * message-type INVITATION & DISPUTED currently not supported by quick-suite,
+           because that needs game-settings as well => ignore them
+
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
-         - invalid_args : bad parameters (missing user-id)
+         - invalid_args : bad parameters (missing message-id)
          - unknown_message : unknown message-id specified
 
       - Result (JSON) = // also see specs/db/table-Messages.txt
 
          {
             "id" : 1,          # message-id
-            "uid_from" : 111,  # user-id of sender, 0=server-message
-            "uid_to" : 222,    # user-id of receiver
-            "type" : "NORMAL", # message-type (see specs/db/)
+            "user_from" : {
+               "id" : 111,          # user-id of sender, 0=server-message
+               # the following fields only if WITH-option contain 'user_id'
+               "handle" : "user1",  # USER_HANDLE
+               "name" : "name1",    # user name
+            },
+            "user_to" : {
+               "id" : 222,          # user-id of receiver
+               # the following fields only if WITH-option contain 'user_id'
+               "handle" : "user2",  # USER_HANDLE
+               "name" : "name2",    # user name
+            },
+            "type" : "NORMAL", # message-type (see specs/db/):
+                               # types = NORMAL | INVITATION | DISPUTED | RESULT
+                               # not supported by quick-suite: INVITATION | DISPUTED
             "folder" : {
                "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
+               # the following fields only if WITH-option contain 'folder'
                "name" : "New",          # folder-name (lang-dependent)
+               "system" : 1,            # 1=system-folder, 0=user-folder
                "color_bg" : "F7F5E3FF", # folder background-color (incl. alpha-channel) in hex-format
                "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
             },
@@ -587,6 +648,7 @@ Commands:
             "level" : 0,        # thread-level of message-thread (starting at 0)
             "message_prev" : 0, # message-id of message that has been replied to
             "message_hasnext" : 1, # 0=no-answer for current message, 1=there are answer(s) to this message
+            "needs_reply" : 1,  # 1=message-needs-reply, 0=normal message
             "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
             "subject" : "boo",  # subject of message
             "text" : "haha",    # content of message
@@ -600,6 +662,130 @@ Examples for message-commands:
 
    # retrieve message
    quick_do.php?obj=message&cmd=info&mid=1234567
+
+
+#-------- (3d) Objects - "folder" ---------------------------------------------
+
+Purpose:
+
+   The quick-suite for the folder-object allows to
+
+      - retrieve information about folders to store private messages in;
+        corresponding pages: "list_messages.php", "edit_folders.php"
+
+Request:
+
+   quick_do.php?obj=folder&cmd=<COMMAND>
+
+Options:
+
+   <COMMAND> = "list"
+
+
+Commands:
+
+   "list" : returns list of message-folders in natural order
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+      - Result (JSON) = // also see specs/db/table-Messages.txt
+
+         {
+            "list_object" : "folder",  # list of object-types
+            "list_size" : 5,           # list-size total
+            "list_offset" : 0,         # start offset of list-part (for paging)
+            "list_limit" : 0,          # number of entries per page
+            "list_order" : "",         # order of list (field-names, comma-separated), ""=standard-order
+            "list_result" : [          # array with found objects matching list-search
+               {
+                  "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
+                  "name" : "New",          # folder-name (lang-dependent)
+                  "system" : 1,            # 1=system-folder, 0=user-folder
+                  "color_bg" : "F7F5E3FF", # folder background-color (incl. alpha-channel) in hex-format
+                  "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
+                  "on_status" : 1,         # 1=shown on status-page, 0=folder-content only shown in message-list
+               },
+               ...
+            ]
+         }
+
+
+Examples for folder-commands:
+
+   # login setting cookie in HTTP-header storing: handle, sessioncode
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # retrieve folders
+   quick_do.php?obj=folder&cmd=list
+
+
+#-------- (3e) Objects - "contact" --------------------------------------------
+
+Purpose:
+
+   The quick-suite for the contact-object allows to
+
+      - retrieve information about a users contacts
+        corresponding pages: "list_contacts.php"
+
+Request:
+
+   quick_do.php?obj=contact&cmd=<COMMAND>
+
+Options:
+
+   <COMMAND> = "list"
+
+Commands:
+
+   "list" : returns list of contacts
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+      - Result (JSON) = // also see specs/db/table-Messages.txt
+
+         {
+            "list_object" : "contact",
+            "list_size" : 3,
+            "list_offset" : 0,
+            "list_limit" : 0,
+            "list_order" : "contact_user.name+", # order of list + direction '+|-' (field-names, comma-separated), ""=standard-order
+            "list_result" : [
+               {
+                  "contact_user" : {
+                     "id" : 1,            # user-id of contact
+                     "handle" : "guest",  # USER_HANDLE
+                     "name" : "Guest",    # user name
+                     # for the following fields -> see "info"-command for user-object (3b)
+                     "type" : "",
+                     "country" : "se",
+                     "picture" : "",
+                     "last_access" : "YYYY-MM-DD hh:mm:ss",
+                     "last_move" : "YYYY-MM-DD hh:mm:ss",
+                     "rating_status" : "RATED",
+                     "rating" : "5k (+46%)",
+                     "rating_elo" : "1643.88952636719",
+                  },
+                  "system_flags" : "",    # system flags (comma-separated): WAITINGROOM REJECT_MESSAGE REJECT_INVITE WR_HIDE_GAMES
+                  "user_flags" : "",      # user flags (comma-separated): BUDDY FRIEND STUDENT TEACHER FAN ADMIN TROLL MISC
+                  "created_at" : "YYYY-MM-DD hh:mm:ss", # contact created date
+                  "updated_at" : "YYYY-MM-DD hh:mm:ss", # contact last-updated date
+                  "notes" : "my-note"     # optional contact-notes
+               },
+               ...
+            ]
+         }
+
+
+Examples for contact-commands:
+
+   # login setting cookie in HTTP-header storing: handle, sessioncode
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # retrieve all contacts
+   quick_do.php?obj=contact&cmd=list
 
 
 #-------- (4) Supporting Tools ------------------------------------------------
@@ -1048,9 +1234,9 @@ Example:
    sgf.php?gid=12345&owned_comments=1&quick_mode=1
 
    # use quick-play to do your moves
-   quick_play.php?gid=12345&handle=user&board_prev=a19&board_move=t1&color=W&message='eat-this!'
+   quick_play.php?gid=12345&handle=user&board_prev=a19&board_move=t1&color=W&message=eat_this
      or
-   quick_play.php?gid=12345&handle=user&sgf_prev=aa&board_move=tt&color=W&message='eat-this!'
+   quick_play.php?gid=12345&handle=user&sgf_prev=aa&board_move=tt&color=W&message=eat_this
 
 
 #-------- (5) Errors ----------------------------------------------------------
@@ -1150,9 +1336,16 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
       - see "include/time_functions.php", method "echo_time_limit()"
       - see "scripts/tests/TimeFormatTest.php", test-method "test_echo_time_limit()"
 
-      - "J: 7d 3h + 2d * 5"   ; "J: 7d 3h" (absolute)    ; "J: 2d * 5" (only extra-time)
-      - "C: 7d 3h + 9d / 3"   ; "C: 7d 3h" (absolute)    ; "C: 9d / 3" (only extra-time)
-      - "F: 7d 3h + 2d"       ; "F: 7d 3h" (absolute)    ; (only with main-time)
+      - "J: 7d 3h + 2d * 5"
+      - "J: 7d 3h"            (absolute)
+      - "J: 2d * 5"           (only extra-time)
+
+      - "C: 7d 3h + 9d / 3"
+      - "C: 7d 3h"            (absolute)
+      - "C: 9d / 3"           (only extra-time)
+
+      - "F: 7d 3h + 2d"
+      - "F: 7d 3h"            (absolute)
 
 
 * Format of [TR] Time-remaining:
