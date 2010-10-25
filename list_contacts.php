@@ -159,20 +159,7 @@ require_once( 'include/classlib_userpicture.php' );
       ) );
 
    // build SQL-query
-   $qsql = new QuerySQL();
-   $qsql->add_part( SQLP_FIELDS,
-      'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.Rating2', 'P.UserPicture',
-      'UNIX_TIMESTAMP(P.Lastaccess) AS lastaccessU',
-      'C.cid', 'C.SystemFlags', 'C.UserFlags AS ContactsUserFlags', 'C.Notes',
-      'C.Created', 'C.Lastchanged',
-      'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS createdU',
-      'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS lastchangedU' );
-   $qsql->add_part( SQLP_FROM,
-      'Contacts AS C',
-      'INNER JOIN Players AS P ON C.cid = P.ID' );
-   $qsql->add_part( SQLP_WHERE,
-      "C.uid=$my_id AND C.cid>".GUESTS_ID_MAX ); //exclude guest
-
+   $qsql = Contact::build_querysql_contact( $my_id );
    $query_scfilter = $scfilter->get_query(GETFILTER_ALL); // clause-parts for static filter
    $query_cfilter  = $ctable->get_query(); // clause-parts for filter
    $order = $ctable->current_order_string();
@@ -237,7 +224,7 @@ require_once( 'include/classlib_userpicture.php' );
       if( $ctable->Is_Column_Displayed[ 4] )
          $crow_strings[ 4] = echo_rating(@$row['Rating2'],true,$cid);
       if( $ctable->Is_Column_Displayed[ 5] )
-         $crow_strings[ 5] = ($row['lastaccessU']>0 ? date(DATE_FMT2, $row['lastaccessU']) : '');
+         $crow_strings[ 5] = ($row['X_Lastaccess']>0 ? date(DATE_FMT2, $row['X_Lastaccess']) : '');
       if( $ctable->Is_Column_Displayed[ 6] )
       {
          $str = Contact::format_system_flags($row['SystemFlags'], ',<br>');
@@ -256,19 +243,13 @@ require_once( 'include/classlib_userpicture.php' );
          $crow_strings[ 8] = $note;
       }
       if( $ctable->Is_Column_Displayed[10] )
-      {
-         $crow_strings[10] =
-            ($row['createdU']>0 ? date(DATE_FMT2, $row['createdU']) : '');
-      }
+         $crow_strings[10] = ($row['CX_Created']>0 ? date(DATE_FMT2, $row['CX_Created']) : '');
       if( $ctable->Is_Column_Displayed[11] )
-      {
-         $crow_strings[11] =
-            ($row['lastchangedU']>0 ? date(DATE_FMT2, $row['lastchangedU']) : '');
-      }
+         $crow_strings[11] = ($row['CX_Lastchanged']>0 ? date(DATE_FMT2, $row['CX_Lastchanged']) : '');
       if( $ctable->Is_Column_Displayed[14] )
       {
-         $is_online = ($NOW - @$row['lastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
-         $crow_strings[14] = echo_image_online( $is_online, @$row['lastaccessU'], false );
+         $is_online = ($NOW - @$row['X_Lastaccess']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+         $crow_strings[14] = echo_image_online( $is_online, @$row['X_Lastaccess'], false );
       }
 
       $ctable->add_row( $crow_strings );

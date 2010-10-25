@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
+require_once 'include/std_classes.php';
+
 
 // system-flags (bitmask for database): 16bit
 define('CSYSFLAG_WAITINGROOM',    0x0001); // hide my games in waiting-room from contact
@@ -64,6 +66,8 @@ class Contact
    /*! \brief User-customized note about contact (max 255 chars, linefeeds allowed). */
    var $note;
 
+   var $contact_user_row;
+
    /*!
     * \brief Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $cid may be 0 to add a new contact
@@ -79,6 +83,8 @@ class Contact
       $this->created = (int) $created;
       $this->lastchanged = (int) $lastchanged;
       $this->set_note( $note );
+
+      $this->contact_user_row = null;
    }
 
    /*!
@@ -91,32 +97,6 @@ class Contact
 
       // uid=set, cid=0, sysflags=userflags=0, created=NOW, lastchanged, note=''
       $contact = new Contact( $uid, $cid,  0, 0,  $NOW, 0, '' );
-      return $contact;
-   }
-
-   /*!
-    * \brief Returns Contact-object for specified user $uid and contact $cid;
-    *        returns null if no contact listed for user.
-    */
-   function load_contact( $uid, $cid )
-   {
-      if( !is_numeric($uid) || !is_numeric($cid) )
-         error('invalid_user', "contact.load_contact($uid,$cid)");
-
-      $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
-            "SELECT uid,cid,SystemFlags,UserFlags,Notes, " .
-               "UNIX_TIMESTAMP(Created) AS X_Created, " .
-               "UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged " .
-            "FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
-      if( !$row )
-         return null;
-
-      $contact = new Contact(
-            $row['uid'], $row['cid'],
-            $row['SystemFlags'], $row['UserFlags'],
-            $row['X_Created'], $row['X_Lastchanged'],
-            $row['Notes'] );
-
       return $contact;
    }
 
@@ -231,6 +211,83 @@ class Contact
 
    // ---------- Static Class functions ----------------------------
 
+   function build_querysql_contact( $uid )
+   {
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS,
+         'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.UserPicture',
+         'P.RatingStatus', 'P.Rating2',
+         'UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess',
+         'UNIX_TIMESTAMP(P.LastMove) AS X_LastMove',
+         'C.uid', 'C.cid', 'C.SystemFlags', 'C.UserFlags AS ContactsUserFlags', 'C.Notes',
+         'C.Created', 'C.Lastchanged',
+         'IFNULL(UNIX_TIMESTAMP(C.Created),0) AS CX_Created',
+         'IFNULL(UNIX_TIMESTAMP(C.Lastchanged),0) AS CX_Lastchanged' );
+      $qsql->add_part( SQLP_FROM,
+         'Contacts AS C',
+         'INNER JOIN Players AS P ON C.cid = P.ID' );
+      $qsql->add_part( SQLP_WHERE,
+         "C.uid=$uid AND C.cid>".GUESTS_ID_MAX ); //exclude guest
+      return $qsql;
+   }
+
+   /*!
+    * \brief Returns Contact-object for specified user $uid and contact $cid;
+    *        returns null if no contact listed for user.
+    */
+   function load_contact( $uid, $cid )
+   {
+      if( !is_numeric($uid) || !is_numeric($cid) )
+         error('invalid_user', "contact.load_contact($uid,$cid)");
+
+      $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
+            "SELECT uid,cid,SystemFlags,UserFlags,Notes, " .
+               "UNIX_TIMESTAMP(Created) AS X_Created, " .
+               "UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged " .
+            "FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
+      if( !$row )
+         return null;
+
+      $contact = new Contact(
+            $row['uid'], $row['cid'],
+            $row['SystemFlags'], $row['UserFlags'],
+            $row['X_Created'], $row['X_Lastchanged'],
+            $row['Notes'] );
+
+      return $contact;
+   }
+
+   /*!
+    * \brief Returns array of Contact-objects for quick-suite.
+    * \see #build_querysql_contact()
+    */
+   function load_quick_contacts( $uid, $qsql )
+   {
+      static $arr_userfields = array( 'Type', 'Name', 'Handle', 'Country',
+         'X_Lastaccess', 'X_LastMove', 'UserPicture', 'RatingStatus', 'Rating2' );
+
+      $query = $qsql->get_select();
+      $result = db_query( "contact.load_quick_contacts($uid)", $query );
+      $out = array();
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         $contact = new Contact(
+               $row['uid'], $row['cid'],
+               $row['SystemFlags'], $row['ContactsUserFlags'],
+               $row['CX_Created'], $row['CX_Lastchanged'],
+               $row['Notes'] );
+
+         $contact->contact_user_row = array();
+         foreach( $arr_userfields as $key )
+            $contact->contact_user_row[$key] = $row[$key];
+
+         $out[] = $contact;
+      }
+      mysql_free_result($result);
+
+      return $out;
+   }//load_quick_contacts
+
    /*! \brief Static function returning
     *   1: $cid is a defined contact of $uid.
     *   0: $cid is not yet a contact of $uid, but he may become.
@@ -253,18 +310,18 @@ class Contact
     * \brief Returns separated list of translated texts for specified system-flags;
     *        separator specified as $sep.
     */
-   function format_system_flags( $flagmask, $sep=', ' )
+   function format_system_flags( $flagmask, $sep=', ', $quick=false )
    {
-      return Contact::format_flags( Contact::getContactSystemFlags(), $flagmask, $sep );
+      return Contact::format_flags( Contact::getContactSystemFlags($quick), $flagmask, $sep );
    }
 
    /*!
     * \brief Returns separated list of translated texts for specified user-flags;
     *        separator specified as $sep.
     */
-   function format_user_flags( $flagmask, $sep=', ' )
+   function format_user_flags( $flagmask, $sep=', ', $quick=false )
    {
-      return Contact::format_flags( Contact::getContactUserFlags(), $flagmask, $sep );
+      return Contact::format_flags( Contact::getContactUserFlags($quick), $flagmask, $sep );
    }
 
    /*!
@@ -282,24 +339,38 @@ class Contact
    }
 
    /*! \brief Returns globals (lazy init) for contact-user-flags. */
-   function getContactUserFlags()
+   function getContactUserFlags( $quick=false )
    {
       global $ARR_GLOBALS_CONTACT;
 
       // lazy-init of texts
-      $key = 'USERFLAGS';
+      $key = 'USERFLAGS' . ($quick ? '_QUICK' : '');
       if( !isset($ARR_GLOBALS_CONTACT[$key]) )
       {
          $arr = array();
          // userflag => ( form_elem_name, translation )
-         $arr[CUSERFLAG_BUDDY]   = array( 'ufl_buddy',   T_('Buddy') );
-         $arr[CUSERFLAG_FRIEND]  = array( 'ufl_friend',  T_('Friend') );
-         $arr[CUSERFLAG_STUDENT] = array( 'ufl_student', T_('Student') );
-         $arr[CUSERFLAG_TEACHER] = array( 'ufl_teacher', T_('Teacher') );
-         $arr[CUSERFLAG_FAN]     = array( 'ufl_fan',     T_('Fan') );
-         $arr[CUSERFLAG_TROLL]   = array( 'ufl_troll',   T_('Troll') );
-         $arr[CUSERFLAG_ADMIN]   = array( 'ufl_admin',   T_('Site Crew') );
-         $arr[CUSERFLAG_MISC]    = array( 'ufl_misc',    T_('Miscellaneous') );
+         if( $quick )
+         {
+            $arr[CUSERFLAG_BUDDY]   = 'BUDDY';
+            $arr[CUSERFLAG_FRIEND]  = 'FRIEND';
+            $arr[CUSERFLAG_STUDENT] = 'STUDENT';
+            $arr[CUSERFLAG_TEACHER] = 'TEACHER';
+            $arr[CUSERFLAG_FAN]     = 'FAN';
+            $arr[CUSERFLAG_TROLL]   = 'TROLL';
+            $arr[CUSERFLAG_ADMIN]   = 'ADMIN';
+            $arr[CUSERFLAG_MISC]    = 'MISC';
+         }
+         else
+         {
+            $arr[CUSERFLAG_BUDDY]   = array( 'ufl_buddy',   T_('Buddy') );
+            $arr[CUSERFLAG_FRIEND]  = array( 'ufl_friend',  T_('Friend') );
+            $arr[CUSERFLAG_STUDENT] = array( 'ufl_student', T_('Student') );
+            $arr[CUSERFLAG_TEACHER] = array( 'ufl_teacher', T_('Teacher') );
+            $arr[CUSERFLAG_FAN]     = array( 'ufl_fan',     T_('Fan') );
+            $arr[CUSERFLAG_TROLL]   = array( 'ufl_troll',   T_('Troll') );
+            $arr[CUSERFLAG_ADMIN]   = array( 'ufl_admin',   T_('Site Crew') );
+            $arr[CUSERFLAG_MISC]    = array( 'ufl_misc',    T_('Miscellaneous') );
+         }
          $ARR_GLOBALS_CONTACT[$key] = $arr;
       }
 
@@ -307,20 +378,30 @@ class Contact
    }
 
    /*! \brief Returns globals (lazy init) for contact-system-flags. */
-   function getContactSystemFlags()
+   function getContactSystemFlags( $quick=false )
    {
       global $ARR_GLOBALS_CONTACT;
 
       // lazy-init of texts
-      $key = 'SYSTEMFLAGS';
+      $key = 'SYSTEMFLAGS' . ($quick ? '_QUICK' : '');
       if( !isset($ARR_GLOBALS_CONTACT[$key]) )
       {
          $arr = array();
          // sysflag => ( form_elem_name, translation )
-         $arr[CSYSFLAG_WR_HIDE_GAMES]  = array( 'sfl_wr_hide',    T_('Hide waitingroom games') );
-         $arr[CSYSFLAG_WAITINGROOM]    = array( 'sfl_wr_protect', T_('Protect waitingroom games') );
-         $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_msg', T_('Reject messages') );
-         $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_inv', T_('Reject invitations') );
+         if( $quick )
+         {
+            $arr[CSYSFLAG_WR_HIDE_GAMES]  = 'WR_HIDE_GAMES';
+            $arr[CSYSFLAG_WAITINGROOM]    = 'WAITINGROOM';
+            $arr[CSYSFLAG_REJECT_MESSAGE] = 'REJECT_MESSAGE';
+            $arr[CSYSFLAG_REJECT_INVITE]  = 'REJECT_INVITE';
+         }
+         else
+         {
+            $arr[CSYSFLAG_WR_HIDE_GAMES]  = array( 'sfl_wr_hide',    T_('Hide waitingroom games') );
+            $arr[CSYSFLAG_WAITINGROOM]    = array( 'sfl_wr_protect', T_('Protect waitingroom games') );
+            $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_msg', T_('Reject messages') );
+            $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_inv', T_('Reject invitations') );
+         }
          $ARR_GLOBALS_CONTACT[$key] = $arr;
       }
 
