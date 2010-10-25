@@ -19,6 +19,43 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-10-25 juga
+
+   * include/quick/quick_contact.php (class QuickHandlerContact, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_list, ~.build_obj_contact,
+       ~.build_obj_contact_user),
+     include/quick/quick_folder.php (class QuickHandlerFolder, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_list, ~.build_obj_folder),
+     include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare,
+     include/quick/quick_handler.php (class QuickHandler, ~.is_with_option,
+       ~.build_obj_user, ~.add_list),
+     include/quick/quick_message.php (class QuickHandlerMessage, ~.prepare,
+       ~.process_cmd_info, ~.load_folder,,
+     include/quick/quick_suite.php (class QuickSuite, ~.getQuickHandler),
+     include/quick/quick_user.php (QuickHandlerUser.process_cmd_info),
+     include/contacts.php (class Contact, ~.build_querysql_contact, ~.load_contact,
+       ~.load_quick_contacts, ~.format_system_flags, ~.format_user_flags,
+       ~.getContactUserFlags, ~.getContactSystemFlags),
+     include/classlib_userconfig.php (ConfigPages.get_status_folder_visibility),
+     include/classlib_user.php (User.load_quick_userinfo),
+     specs/quick_suite.txt, list_contacts.php, NEWS:
+   - added folder-quick-suite (3d) to retrieve list of folders with list-command
+   - added contact-quick-suite (3e) to retrieve list of contacts with list-command
+   - added WITH-option to support deep-loading of some nested objects
+   - added result-list-handling with standard result-list-fields: list_object|size|offset|limit|order|result
+   - adjusted game-quick-suite:
+     - added WITH-option to support nested user-objects for info-command
+     - renamed ctx-option -> move_id-option
+     - changed result-format for info-command to support nested objects/info for black/white user/gameinfo
+     - added get_notes-command to retrieve private notes of game
+     - added TODOs for game-play-commands / detele&resign-command
+   - adjusted user-quick-suite:
+     - added field 'picture' for info-command
+   - adjusted message-quick-suite:
+     - added WITH-option to support nested user-/folder-objects for info-command
+     - added field 'needs_reply' for info-command
+     - changed result-format for info-command to support nested objects/info for user_from/to and folder
+
 2010-10-17 juga
 
    * quick_status.php:

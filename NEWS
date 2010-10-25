@@ -294,12 +294,17 @@ Copyright (C) 2001-2010  Erik Ouchterlony
 
    * Quick-Suite (new alternative interface <code>quick_do.php</code>) for robots and other DGS-clients:
       * Added game-handler to
+         * retrieve information about game, with nested user-objects
+         * retrieve own private notes of game
          * play game including scoring-steps
-         * retrieve information about game
       * Added user-handler to
          * retrieve public information about user
       * Added message-handler to
-         * retrieve information about private message
+         * retrieve information about private message, with nested user-/folder-objects
+      * Added folder-handler to
+         * retrieve information about message-folders
+      * Added contact-handler to
+         * retrieve information about own contacts
 
    * <home_ quick_status.php>Quick Status</home>:
       * Changed format of quick-status:
