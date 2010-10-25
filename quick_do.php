@@ -44,7 +44,7 @@ else
    $result = $quick_handler->getResult();
 
    // output HTTP-header
-   if( get_request_arg('test') )
+   if( get_request_arg(QOPT_TEST) )
       header('Content-Type: text/plain;charset=utf-8');
    else
       header('Content-Type: application/json');
