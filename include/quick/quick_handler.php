@@ -30,6 +30,16 @@ require_once 'include/error_functions.php';
 define('QOBJ_GAME', 'game');
 define('QOBJ_USER', 'user');
 define('QOBJ_MESSAGE', 'message');
+define('QOBJ_FOLDER', 'folder');
+define('QOBJ_CONTACT', 'contact');
+
+// general quick-options
+define('QOPT_WITH', 'with');  // recursive (=deep-) loading of some objects
+define('QOPT_TEST', 'test');  // output JSON in "plain/text" content-type
+
+// with-options
+define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
+define('QWITH_FOLDER',  'folder');  // include main folder-fields: id, name, system, color_bg, color_fg
 
 
 
@@ -74,12 +84,18 @@ class QuickHandler
 {
    var $my_id;
    var $quick_object;
+   var $with_option;
 
    function QuickHandler( $quick_object )
    {
       global $player_row;
       $this->my_id = (int)$player_row['ID'];
       $this->quick_object = $quick_object;
+
+      $this->with_option = array();
+      $with_arr = explode(',', @$_REQUEST[QOPT_WITH]);
+      foreach( $with_arr as $opt )
+         $this->with_option[$opt] = 1;
    }
 
    function getResult()
@@ -92,12 +108,41 @@ class QuickHandler
       $this->quick_object->result[$key] = $value;
    }
 
+   /*! \brief Returns true if specified with-option value has been specified. */
+   function is_with_option( $with )
+   {
+      return isset($this->with_option[$with]);
+   }
+
    /*! \brief throw error for unknown command. */
    function checkCommand( $dbgmsg, $regex_cmds )
    {
       $cmd = $this->quick_object->cmd;
       if( !QuickHandler::matchCommand($regex_cmds, $cmd) )
          error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,$cmd))");
+   }
+
+   /*! \brief Returns map for user-object; with handle/name-fields only if WITH-option QWITH_USER_ID used. */
+   function build_obj_user( $uid, $user_rows=null, $always=false )
+   {
+      $userinfo = array( 'id' => $uid );
+      if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_rows) && is_array($user_rows[$uid]) )
+      {
+         $userinfo['handle'] = $user_rows[$uid]['Handle'];
+         $userinfo['name'] = $user_rows[$uid]['Name'];
+      }
+      return $userinfo;
+   }
+
+   /*! \brief Adds list-result into result-map. */
+   function add_list( $object_name, $list, $ordered_by='', $offset=0, $limit=0 )
+   {
+      $this->addResultKey( 'list_object', $object_name );
+      $this->addResultKey( 'list_size', count($list) );
+      $this->addResultKey( 'list_offset', (int)$offset );
+      $this->addResultKey( 'list_limit', (int)$limit );
+      $this->addResultKey( 'list_order', $ordered_by );
+      $this->addResultKey( 'list_result', $list );
    }
 
 
