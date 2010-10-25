@@ -237,6 +237,23 @@ class User
       return $result;
    }
 
+   /*! \brief Returns non-null array( uid => { ID / Handle / Name => val }, ... ) for given users. */
+   function load_quick_userinfo( $arr_uid )
+   {
+      $out = array();
+      $size = count($arr_uid);
+      if( $size )
+      {
+         $users = implode(',', $arr_uid);
+         $result = db_query( "User.load_quick_userinfo($users)",
+               "SELECT ID, Handle, Name FROM Players WHERE ID IN ($users) LIMIT $size" );
+         while( $row = mysql_fetch_assoc($result) )
+            $out[$row['ID']] = $row;
+         mysql_free_result($result);
+      }
+      return $out;
+   }//load_quick_userinfo
+
 } // end of 'User'
 
 ?>
