@@ -391,18 +391,24 @@ class ConfigPages
    }
 
    /*!
-    * \brief Returns visibility-state for new- and reply-folder.
-    * \param $folder_nr FOLDER_NEW or FOLDER_REPLY
-    * \return 1 if given folder should be shown or 0 if to hide; -1 if folder != FOLDER_NEW|REPLY
+    * \brief Returns visibility-state for folders (including new- and reply-folder).
+    * \param $folder_nr FOLDER_NEW or FOLDER_REPLY, or other folder-nr (if all=true)
+    * \param $all true=also checks other folders
+    * \return 1 if given folder should be shown or 0 if to hide; -1 if $all and folder != FOLDER_NEW|REPLY
     */
-   function get_status_folder_visibility( $folder_nr )
+   function get_status_folder_visibility( $folder_nr, $all=false )
    {
       if( $folder_nr == FOLDER_NEW )
          return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW ) ? 1 : 0;
       elseif( $folder_nr == FOLDER_REPLY )
          return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_REPLY ) ? 1 : 0;
       else
-         return -1;
+      {
+         if( $all && (string)$folder_nr != '' )
+            return (strpos(",{$this->status_folders},", ",$folder_nr,") === false) ? 0 : 1;
+         else
+            return -1;
+      }
    }
 
    /*!
