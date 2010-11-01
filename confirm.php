@@ -48,29 +48,28 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    // like for status-games on status-page
    $def_where_nextgame =
       "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
-   if( $player_row['NextGameOrder'] == 'MOVES' )
+   switch( (string)$player_row['NextGameOrder'] )
    {
-      $qsql->add_part( SQLP_WHERE,
-         "( Moves < $Moves OR (Moves=$Moves AND $def_where_nextgame ))" );
-   }
-   elseif( $player_row['NextGameOrder'] == 'PRIO' )
-   {
-      $prio = NextGameOrder::load_game_priority( $gid, $uid );
-      $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
-      $qsql->add_part( SQLP_FROM,
-         "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
-      $qsql->add_part( SQLP_WHERE,
-         "( COALESCE(GP.Priority,0) < $prio OR "
-            . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
-   }
-   elseif( $player_row['NextGameOrder'] == 'TIMELEFT' )
-   {
-      $qsql->add_part( SQLP_WHERE,
-         "( TimeOutDate > $TimeOutDate OR (TimeOutDate=$TimeOutDate AND $def_where_nextgame ))" );
-   }
-   else // default 'LASTMOVED'
-   {
-      $qsql->add_part( SQLP_WHERE, $def_where_nextgame );
+      case NGO_MOVES:
+         $qsql->add_part( SQLP_WHERE,
+            "( Moves < $Moves OR (Moves=$Moves AND $def_where_nextgame ))" );
+         break;
+      case NGO_PRIO:
+         $prio = NextGameOrder::load_game_priority( $gid, $uid );
+         $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
+         $qsql->add_part( SQLP_FROM,
+            "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
+         $qsql->add_part( SQLP_WHERE,
+            "( COALESCE(GP.Priority,0) < $prio OR "
+               . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
+         break;
+      case NGO_TIMELEFT:
+         $qsql->add_part( SQLP_WHERE,
+            "( TimeOutDate > $TimeOutDate OR (TimeOutDate=$TimeOutDate AND $def_where_nextgame ))" );
+         break;
+      default: //case NGO_LASTMOVED
+         $qsql->add_part( SQLP_WHERE, $def_where_nextgame );
+         break;
    }
 
    $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );

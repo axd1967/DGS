@@ -138,7 +138,7 @@ if( (string)$folder_nr_querystr != '' )
    $show_notes = (LIST_GAMENOTE_LEN>0);
    $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
 
-   $show_prio = ($player_row['NextGameOrder'] == 'PRIO');
+   $show_prio = ($player_row['NextGameOrder'] == NGO_PRIO);
    $load_prio = ($show_prio || $gtable->is_column_displayed(17) );
 
    // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
@@ -166,13 +166,13 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
 
    // static order for status-games (coupled with "next game" on game-page)
-   if( $player_row['NextGameOrder'] == 'LASTMOVED' )
+   if( $player_row['NextGameOrder'] == NGO_LASTMOVED )
       $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
-   elseif( $player_row['NextGameOrder'] == 'MOVES' )
+   elseif( $player_row['NextGameOrder'] == NGO_MOVES )
       $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged
-   elseif( $player_row['NextGameOrder'] == 'PRIO' )
+   elseif( $player_row['NextGameOrder'] == NGO_PRIO )
       $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
-   elseif( $player_row['NextGameOrder'] == 'TIMELEFT' )
+   elseif( $player_row['NextGameOrder'] == NGO_TIMELEFT )
       $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
    //$order = $gtable->current_order_string('ID-');
    $gtable->make_sort_images();
