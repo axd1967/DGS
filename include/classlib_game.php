@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-require_once( "include/time_functions.php" );
+require_once 'include/globals.php';
+require_once 'include/time_functions.php';
 
 
  /*!
@@ -401,20 +402,10 @@ class GameScore
   *        and GamesPriority-table.
   */
 
-// SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
-// NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
-global $ARR_NEXT_GAME_ORDER; //PHP5
-$ARR_NEXT_GAME_ORDER = array(
-   // idx => [ Players.NextGameOrder-value, order-string ]
-   1 => array( 'LASTMOVED', '%G.Lastchanged ASC, %G.ID DESC' ),
-   2 => array( 'MOVES',     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC' ),
-   3 => array( 'PRIO',      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC' ),
-   4 => array( 'TIMELEFT',  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC' ),
-   'LASTMOVED' => 1,
-   'MOVES'     => 2,
-   'PRIO'      => 3,
-   'TIMELEFT'  => 4,
-);
+define('NGO_LASTMOVED', 'LASTMOVED');
+define('NGO_MOVES', 'MOVES');
+define('NGO_PRIO', 'PRIO');
+define('NGO_TIMELEFT', 'TIMELEFT');
 
 class NextGameOrder
 {
@@ -442,7 +433,19 @@ class NextGameOrder
     */
    function get_next_game_order( $tablename, $idx, $sql_order=false )
    {
-      global $ARR_NEXT_GAME_ORDER;
+      // SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
+      // NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
+      static $ARR_NEXT_GAME_ORDER = array(
+         // idx => [ Players.NextGameOrder-value, order-string ]
+         1 => array( NGO_LASTMOVED, '%G.Lastchanged ASC, %G.ID DESC' ),
+         2 => array( NGO_MOVES,     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC' ),
+         3 => array( NGO_PRIO,      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC' ),
+         4 => array( NGO_TIMELEFT,  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC' ),
+         NGO_LASTMOVED => 1,
+         NGO_MOVES     => 2,
+         NGO_PRIO      => 3,
+         NGO_TIMELEFT  => 4,
+      );
 
       $idx_value = $idx;
       if( !is_numeric($idx) ) // map enum-val to selection-index or order-string
@@ -455,8 +458,16 @@ class NextGameOrder
       $arr_idx = ($sql_order) ? 1 : 0;
       $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][$arr_idx];
       return str_replace( '%G', $tablename, $order_fmt );
-   }
+   }//get_next_game_order
 
+   /*! \brief Returns loaded Players.NextGameOrder for given user; or null otherwise. */
+   function load_user_next_game_order( $uid )
+   {
+      $uid = (int) $uid;
+      $user_row = mysql_single_col( "NextGameOrder::load_user_next_game_order.find($uid)",
+         "SELECT NextGameOrder FROM Players WHERE ID=$uid LIMIT 1" );
+      return ( $user_row ) ? $user_row[0] : null;
+   }
 
    /*!
     * \brief Loads priority from GamesPriority-table for given game and user.
@@ -494,7 +505,7 @@ class NextGameOrder
             "INSERT INTO GamesPriority (gid,uid,Priority) VALUES ($gid,$uid,$new_prio) " .
             "ON DUPLICATE KEY UPDATE Priority=VALUES(Priority)" );
       }
-   }
+   }//persist_game_priority
 
    /*! \brief Deletes all GamesPriority-table-entries for given game-id. */
    function delete_game_priorities( $gid )
@@ -543,7 +554,7 @@ class NextGameOrder
       $timeout_date = time_left_ticksdate( $hours_left );
 
       return $timeout_date;
-   }
+   }//make_timeout_date
 
 } //end 'NextGameOrder'
 
