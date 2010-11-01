@@ -47,10 +47,9 @@ define('GAMECMD_DELETE', 'delete');
 define('GAMECMD_SET_HANDICAP', 'set_handicap');
 define('GAMECMD_MOVE',   'move');
 define('GAMECMD_RESIGN', 'resign');
+define('GAMECMD_STATUS_SCORE', 'status_score');
 define('GAMECMD_SCORE',  'score');
-define('GAMECMD_INFO',   'info');
-define('GAMECMD_GET_NOTES', 'get_notes');
-define('GAME_COMMANDS', 'delete|set_handicap|move|resign|score|info|get_notes');
+define('GAME_COMMANDS', 'delete|set_handicap|move|resign|status_score|score');
 
 // cmd => action
 define('GAMEACT_PASS', 'pass');
@@ -76,9 +75,6 @@ class QuickHandlerGame extends QuickHandler
    var $to_move;
    var $action;
 
-   var $gamenotes;
-   var $user_rows;
-
    function QuickHandlerGame( $quick_object )
    {
       parent::QuickHandler( $quick_object );
@@ -92,9 +88,6 @@ class QuickHandlerGame extends QuickHandler
       $this->TheBoard = null;
       $this->to_move = null;
       $this->action = null;
-
-      $this->gamenotes = null;
-      $this->user_rows = null;
    }
 
 
@@ -102,7 +95,7 @@ class QuickHandlerGame extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return ( $obj == QOBJ_GAME ) && QuickHandler::matchCommand(GAME_COMMANDS, $cmd);
+      return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAME_COMMANDS, $cmd);
    }
 
    function parseURL()
@@ -113,6 +106,7 @@ class QuickHandlerGame extends QuickHandler
       $this->url_moves = get_request_arg(GAMEOPT_MOVES);
    }
 
+   //TODO TODO TODO add status_score-command !!!
    function prepare()
    {
       global $player_row;
@@ -130,12 +124,13 @@ class QuickHandlerGame extends QuickHandler
       $gid = $this->gid;
 
       // check move(s) + context (move-id)
-      if( $cmd != GAMECMD_INFO && $cmd != GAMECMD_GET_NOTES )
-         QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
-      if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_SCORE )
+      QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
+      if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_STATUS_SCORE | $cmd == GAMECMD_SCORE )
       {
+         //TODO why url_moves name (URL ??)
          if( is_null($this->url_moves) )
          {
+            //TODO how can this->moves be an array ?? ... 1st need prepareMoves()-func
             if( !is_array($this->moves) )
                error('invalid_args', "QuickHandlerGame::checkArgMandatory.miss_arg($dbgmsg,".GAMEOPT_MOVES.")");
          }
@@ -147,33 +142,7 @@ class QuickHandlerGame extends QuickHandler
       }
 
 
-      // prepare command: del, resign; set_handi, move, score; info, get_notes
-
-      if( $cmd == GAMECMD_INFO )
-      {
-         $this->game_row = mysql_single_fetch( "QuickHandlerGame.prepare.find_game3($gid)",
-                    "SELECT G.*, "
-                    ."G.Flags+0 AS X_Flags "
-                    .",UNIX_TIMESTAMP(G.Starttime) AS X_Starttime "
-                    .",UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
-                    .",COALESCE(Clock.Ticks,0) AS X_Ticks "
-                    ."FROM Games AS G LEFT JOIN Clock ON Clock.ID=G.ClockUsed "
-                    ."WHERE G.ID=$gid LIMIT 1" )
-               or error('unknown_game', "QuickHandlerGame.prepare.find_game4($gid)");
-
-         if( $this->is_with_option(QWITH_USER_ID) )
-            $this->user_rows = User::load_quick_userinfo( array(
-               (int)$this->game_row['Black_ID'], (int)$this->game_row['White_ID'] ));
-         return;
-      }
-      elseif( $cmd == GAMECMD_GET_NOTES )
-      {
-         $gn_row = mysql_single_fetch( "QuickHandlerGame.prepare.find_gamenotes($gid,$uid)",
-                  "SELECT Notes FROM GamesNotes WHERE gid={$gid} AND uid='$uid' LIMIT 1" );
-         if( is_array($gn_row) )
-            $this->gamenotes = @$gn_row['Notes'];
-         return;
-      }
+      // prepare command: del, resign; set_handi, move, score
 
       $this->game_row = mysql_single_fetch( "QuickHandlerGame.prepare.find_game($gid)",
                  "SELECT Games.*, " .
@@ -193,10 +162,13 @@ class QuickHandlerGame extends QuickHandler
          error('move_problem', "QuickHandlerGame.prepare.check.pass_move($gid,$cmd)");
 
 
+      // affirm, that game is running
       if( $Status == GAME_STATUS_INVITED )
          error('game_not_started', "QuickHandlerGame.prepare.check.status.invited($gid)");
       elseif( $Status == GAME_STATUS_FINISHED )
          error('game_finished', "QuickHandlerGame.prepare.check.status.finished($gid)");
+      elseif( !isRunningGame($Status) )
+         error('invalid_game_status', "QuickHandlerGame.prepare.check.game_status($gid,$Status)");
 
       if( $Black_ID == $ToMove_ID )
          $this->to_move = BLACK;
@@ -205,11 +177,9 @@ class QuickHandlerGame extends QuickHandler
       else
          error('database_corrupted', "QuickHandlerGame.prepare.check.to_move($gid)");
 
-      //TODO add/change error-code for the following: -> not_game_player
       if( $this->my_id != $Black_ID && $this->my_id != $White_ID )
-         error('not_your_turn', "QuickHandlerGame.prepare.check.not_your_game($gid)");
-      //TODO allow delete also if not to move, same for resign
-      if( $cmd != GAMECMD_DELETE && $cmd != GAMECMD_RESIGN )
+         error('not_game_player', "QuickHandlerGame.prepare.check.not_your_game($gid)");
+      if( !($cmd == GAMECMD_DELETE || $cmd == GAMECMD_RESIGN) ) // allow delete|resign even if not-to-move
       {
          if( $my_id != $ToMove_ID )
             error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID)");
@@ -272,15 +242,10 @@ class QuickHandlerGame extends QuickHandler
    function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == GAMECMD_INFO )
-         $this->process_cmd_info();
-      elseif( $cmd == GAMECMD_GET_NOTES )
-         $this->addResultKey( 'notes', (is_null($this->gamenotes) ? "" : $this->gamenotes) );
-      else
-         $this->process_cmd_play();
+      $this->process_cmd_play(); //TODO later split into separate commands for clarity
    }
 
-   function process_cmd_play()
+   function process_cmd()
    {
       static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
       global $player_row, $NOW;
@@ -676,63 +641,6 @@ if(1){ //new
       ta_end();
    }//process_cmd_play
 
-   function process_cmd_info()
-   {
-      global $player_row;
-      $row = $this->game_row;
-      $color = ($row['ToMove_ID'] == $row['Black_ID']) ? BLACK : WHITE;
-
-      $this->addResultKey( 'id', (int)$row['ID'] );
-      $this->addResultKey( 'double_id', (int)$row['DoubleGame_ID'] );
-      $this->addResultKey( 'tournament_id', (int)$row['tid'] );
-      $this->addResultKey( 'status', strtoupper($row['Status']) );
-      $this->addResultKey( 'flags', QuickHandlerGame::convertGameFlags($row['X_Flags']) );
-      $this->addResultKey( 'score', ( $row['Status'] == 'FINISHED' )
-            ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
-            : "" );
-      $this->addResultKey( 'rated', ($row['Rated'] == 'N') ? 0 : 1 );
-      $this->addResultKey( 'ruleset', strtoupper($row['Ruleset']) );
-      $this->addResultKey( 'size', (int)$row['Size'] );
-      $this->addResultKey( 'komi', (float)$row['Komi'] );
-      $this->addResultKey( 'handicap', (int)$row['Handicap'] );
-      $this->addResultKey( 'handicap_mode', ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' );
-
-      $this->addResultKey( 'time_started', QuickHandler::formatDate(@$row['X_Starttime']) );
-      $this->addResultKey( 'time_lastmove', QuickHandler::formatDate(@$row['X_Lastchanged']) );
-      $this->addResultKey( 'time_weekend_clock', ($row['WeekendClock'] == 'Y') ? 1 : 0 );
-      $this->addResultKey( 'time_mode', strtoupper($row['Byotype']) );
-      $this->addResultKey( 'time_limit',
-         TimeFormat::echo_time_limit(
-            $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
-            TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE) );
-
-      $this->addResultKey( 'move_id', (int)$row['Moves'] );
-      $this->addResultKey( 'move_color', ($color == BLACK) ? 'B' : 'W' );
-      $this->addResultKey( 'move_uid', (int)$row['ToMove_ID'] );
-      $this->addResultKey( 'move_last', strtolower($row['Last_Move']) );
-      $this->addResultKey( 'move_ko', ($row['X_Flags'] & GAMEFLAGS_KO) ? 1 : 0 );
-
-      foreach( array( BLACK, WHITE ) as $col )
-      {
-         $icol = ($col == BLACK) ? 'Black' : 'White';
-         $prefix = strtolower($icol);
-         $uid = (int)$row[$icol.'_ID'];
-         $time_remaining = build_time_remaining( $row, $col,
-               /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
-               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ADDEXTRA|TIMEFMT_ZERO );
-
-         $this->addResultKey( $prefix.'_user', $this->build_obj_user($uid, $this->user_rows) );
-         $this->addResultKey( $prefix.'_gameinfo', array(
-            'prisoners'        => (int)$row[$icol.'_Prisoners'],
-            'remtime'          => $time_remaining['text'],
-            'rating_start'     => echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
-            'rating_start_elo' => echo_rating_elo($row[$icol.'_Start_Rating']),
-            'rating_end'       => echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
-            'rating_end_elo'   => echo_rating_elo($row[$icol.'_End_Rating']),
-         ));
-      }
-   }//process_cmd_info
-
    /*! \brief Checks syntax and splits moves into array this->moves removing double coords, or detect pass-move. */
    function prepareMoves()
    {
@@ -822,17 +730,6 @@ if(1){ //new
 
       return array( $time_query, $hours );
    }//update_clock
-
-
-   // ------------ static functions ----------------------------
-
-   function convertGameFlags( $flags )
-   {
-      $out = array();
-      if( $flags & GAMEFLAGS_HIDDEN_MSG )
-         $out[] = 'HIDDENMSG';
-      return implode(',', $out);
-   }
 
 } // end of 'QuickHandlerGame'
 
