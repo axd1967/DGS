@@ -153,6 +153,9 @@ class ErrorCode
          $arr['invalid_action'] =
             T_("This type of action is either unknown or can't be used in this state of the game.");
 
+         $arr['invalid_game_status'] =
+            T_("Sorry, the game is in the wrong state to perform this operation.");
+
          $arr['invite_self'] =
             T_("Sorry, you can't invite yourself.");
 
@@ -281,6 +284,9 @@ class ErrorCode
 
          $arr['upload_failed'] =
             T_("Sorry, the file upload failed.");
+
+         $arr['not_game_player'] =
+            T_("Sorry, you are not a player in this game.");
 
          $arr['not_your_turn'] =
             T_("Sorry, it's not your turn.");
