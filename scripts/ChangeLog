@@ -19,6 +19,65 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-01 juga
+
+   * include/quick/quick_game_info.php (class QuickHandlerGameInfo, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_info, ~.convertGameFlags),
+     include/quick/quick_game_list.php (class QuickHandlerGameList, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.build_game_info),
+     include/quick/quick_game.php (class QuickHandlerGame, ~.prepare, ~.process),
+     include/quick/quick_suite.php (class QuickSuite, ~.getQuickHandler),
+     include/error_codes.php (ErrorCode.init),
+     specs/quick_suite.txt, NEWS:
+   - added QuickHandlerGameList with "list"-command for game-object for different views:
+     - 'status' = status-games for user
+     - 'running' = running-games for user
+     - 'finished' = finished-games for user
+     - 'observing' = games user is observing
+     - 'observed' = all observed games
+   - allow "delete" & "resign"-command even if not-to-move just like for web-interface
+   - return error 'invalid_game_status' if not a running-game
+   - return error 'not_game_player' if user is not a player of a game
+   - refactored "info" & "get_notes"-command from QuickHandlerGame into
+     separate QuickHandlerGameInfo
+   - added some checks for game-obj "status_score"-command
+   - minor refactoring
+     - moved standard-list-command
+     - renamed matchCommand->matchRegex
+     - order of checking quick-handlers
+
+   * include/quick/quick_handler.php (class QuickObject, ~.initResult;
+       class QuickHandler, ~.check_list_style, ~.build_obj_user2, ~.add_list,
+       ~.matchRegex, ~.buildObjectArray),
+     include/quick/quick_contact.php (class QuickHandlerContact),
+     include/quick/quick_folder.php (class QuickHandlerFolder),
+     include/quick/quick_message.php (class QuickHandlerMessage),
+     include/quick/quick_user.php (class QuickHandlerUser),
+     specs/quick_suite.txt:
+   - added specs for returning list of objects with list-style parameter (section (2d))
+   - added standard-list-commands "info" & "list"
+   - added standard list-style parameter "lstyle" for TABLE|JSON-style list-output
+   - added standard version into JSON-output as specified in quick-suite-specs (2c)
+   - renamed method: matchCommand->matchRegex
+
+   * include/classlib_game.php (class NextGameOrder, ~.get_next_game_order,
+       ~.load_user_next_game_order),
+     confirm.php, status.php:
+   - added method to load Players.NextGameOrder for user
+   - minor refactoring for NextGameOrder-handling (consts, if->switch)
+
+   * include/error_functions.php (DgsErrors.add_error),
+     include/quick_common.php (isRunningGame),
+     include/globals.php:
+   - added standard version into JSON-output as specified in quick-suite-specs (2c)
+   - method to check for running game-status
+
+   * specs/db/table-Messages.txt:
+   - adjusted docu for obsoleted types 'ACCEPTED, DECLINED, DELETED'
+
+   * include/classlib_user.php (User.load_user):
+   - minor change and safety-check
+
 2010-10-25 juga
 
    * include/quick/quick_contact.php (class QuickHandlerContact, ~.canHandle,

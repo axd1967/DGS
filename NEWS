@@ -296,7 +296,9 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added game-handler to
          * retrieve information about game, with nested user-objects
          * retrieve own private notes of game
+         * retrieve list of games with views: status, running, finished, observing, observed
          * play game including scoring-steps
+         * delete game
       * Added user-handler to
          * retrieve public information about user
       * Added message-handler to
