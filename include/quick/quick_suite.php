@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/quick_common.php';
 require_once 'include/quick/quick_game.php';
+require_once 'include/quick/quick_game_info.php';
+require_once 'include/quick/quick_game_list.php';
 require_once 'include/quick/quick_user.php';
 require_once 'include/quick/quick_message.php';
 require_once 'include/quick/quick_folder.php';
@@ -47,13 +49,17 @@ class QuickSuite
     */
    function getQuickHandler( $obj=null, $cmd=null )
    {
-      // Handler must implement static interface-method canHandle(obj,cmd)
+      // NOTE: Handler must implement static interface-method canHandle(obj,cmd)
+      //   List of handlers is checked if obj/cmd is supported;
+      //   Order should be kept according to most frequent usage.
       static $quick_handler_list = array(
-         'QuickHandlerGame',
-         'QuickHandlerUser',
-         'QuickHandlerMessage',
-         'QuickHandlerFolder',
-         'QuickHandlerContact',
+         'QuickHandlerGame',        // game: delete | set_handicap | move | resign | status_score | score
+         'QuickHandlerGameList',    // game: list
+         'QuickHandlerMessage',     // message: info
+         'QuickHandlerUser',        // user: info
+         'QuickHandlerGameInfo',    // game: info | get_notes
+         'QuickHandlerFolder',      // folder: list
+         'QuickHandlerContact',     // contact: list
       );
 
       if( is_null($obj) )
