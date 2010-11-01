@@ -33,13 +33,22 @@ define('QOBJ_MESSAGE', 'message');
 define('QOBJ_FOLDER', 'folder');
 define('QOBJ_CONTACT', 'contact');
 
+// general quick-commands
+define('QCMD_INFO', 'info');  // get info about single object
+define('QCMD_LIST', 'list');  // retrieve list of objects
+
 // general quick-options
 define('QOPT_WITH', 'with');  // recursive (=deep-) loading of some objects
 define('QOPT_TEST', 'test');  // output JSON in "plain/text" content-type
+define('QOPT_LIST_STYLE', 'lstyle');  // output-style for result-list: table (=default) | json
 
 // with-options
 define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
 define('QWITH_FOLDER',  'folder');  // include main folder-fields: id, name, system, color_bg, color_fg
+
+// listtype-option
+define('QLIST_STYLE_TABLE', 'table'); // default
+define('QLIST_STYLE_JSON', 'json');
 
 
 
@@ -58,7 +67,7 @@ class QuickObject
    {
       $this->obj = $obj;
       $this->cmd = $cmd;
-      $this->result = array( 'error' => '' );
+      $this->initResult( false );
    }
 
    function getResult()
@@ -69,6 +78,20 @@ class QuickObject
    function addResult( $field, $value )
    {
       $this->result[$field] = $value;
+   }
+
+   /*! \brief Inits result-array for special handling of nested using of QuickHandlers. */
+   function initResult( $standardResult )
+   {
+      if( $standardResult )
+      {
+         $this->result = array(
+            'version' => QUICK_SUITE_VERSION,
+            'error' => '',
+         );
+      }
+      else
+         $this->result = array();
    }
 
 } // end of 'QuickObject'
@@ -85,6 +108,7 @@ class QuickHandler
    var $my_id;
    var $quick_object;
    var $with_option;
+   var $list_style_option;
 
    function QuickHandler( $quick_object )
    {
@@ -96,6 +120,10 @@ class QuickHandler
       $with_arr = explode(',', @$_REQUEST[QOPT_WITH]);
       foreach( $with_arr as $opt )
          $this->with_option[$opt] = 1;
+
+      $this->list_style_option = @$_REQUEST[QOPT_LIST_STYLE];
+      if( $this->list_style_option != QLIST_STYLE_JSON && $this->list_style_option != QLIST_STYLE_TABLE )
+         $this->list_style_option = QLIST_STYLE_TABLE;
    }
 
    function getResult()
@@ -114,11 +142,16 @@ class QuickHandler
       return isset($this->with_option[$with]);
    }
 
+   function check_list_style( $ltype=QLIST_STYLE_TABLE )
+   {
+      return ($this->list_style_option == $ltype);
+   }
+
    /*! \brief throw error for unknown command. */
    function checkCommand( $dbgmsg, $regex_cmds )
    {
       $cmd = $this->quick_object->cmd;
-      if( !QuickHandler::matchCommand($regex_cmds, $cmd) )
+      if( !QuickHandler::matchRegex($regex_cmds, $cmd) )
          error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,$cmd))");
    }
 
@@ -134,6 +167,18 @@ class QuickHandler
       return $userinfo;
    }
 
+   /*! \brief Returns map for user-object; with handle/name-fields only if WITH-option QWITH_USER_ID used. */
+   function build_obj_user2( $uid, $user_row=null, $prefix='' )
+   {
+      $userinfo = array( 'id' => $uid );
+      if( $this->is_with_option(QWITH_USER_ID) && is_array($user_row) )
+      {
+         $userinfo['handle'] = $user_row[$prefix.'Handle'];
+         $userinfo['name'] = $user_row[$prefix.'Name'];
+      }
+      return $userinfo;
+   }
+
    /*! \brief Adds list-result into result-map. */
    function add_list( $object_name, $list, $ordered_by='', $offset=0, $limit=0 )
    {
@@ -141,9 +186,22 @@ class QuickHandler
       $this->addResultKey( 'list_size', count($list) );
       $this->addResultKey( 'list_offset', (int)$offset );
       $this->addResultKey( 'list_limit', (int)$limit );
+      $this->addResultKey( 'list_has_next', 0);
       $this->addResultKey( 'list_order', $ordered_by );
-      $this->addResultKey( 'list_result', $list );
-   }
+
+      if( count($list) && $this->check_list_style() ) // list-style = table
+      {
+         $out = array();
+         foreach( $list as $item )
+            $out[] = QuickHandler::buildObjectArray( $item, /*keys*/false );
+
+         $this->addResultKey( 'list_header',
+            QuickHandler::buildObjectArray( $list[0], /*keys*/true ) );
+         $this->addResultKey( 'list_result', $out );
+      }
+      else // list-style = json
+         $this->addResultKey( 'list_result', $list );
+   }//add_list
 
 
    // ---------- Interface ----------------------------------------
@@ -184,10 +242,10 @@ class QuickHandler
 
    // ---------- Static functions ---------------------------------
 
-   /*! \brief Returns true, if command matches one of supported commands. */
-   function matchCommand( $regex_supported_cmds, $cmd )
+   /*! \brief Returns true, if given value matches regex. */
+   function matchRegex( $regex, $value )
    {
-      return preg_match( "/^($regex_supported_cmds)$/", $cmd );
+      return preg_match( "/^($regex)$/", $value );
    }
 
    /*! \brief Ensures, that given args appear in URL-args; throw error if arg missing. */
@@ -203,6 +261,29 @@ class QuickHandler
    function formatDate( $datetime, $long_fmt=true )
    {
       return ( $datetime > 0 ) ? date(($long_fmt) ? DATE_FMT_QUICK : DATE_FMT_QUICK_YMD, $datetime) : '';
+   }
+
+   /*!
+    * \brief Converts object into flat array for keys (get_keys=true) or values (get_keys=false).
+    * \note Only works correctly, if all map-entries (key+value) are set in object,
+    *       especially if this method is used to convert a list of objects.
+    */
+   function buildObjectArray( $obj, $get_keys, $prefix='' )
+   {
+      $out = array();
+      foreach( array_keys($obj) as $key )
+      {
+         $val = $obj[$key];
+         if( is_array($val) )
+         {
+            $arr = QuickHandler::buildObjectArray($val, $get_keys, "$prefix$key.");
+            foreach( $arr as $elem )
+               $out[] = $elem;
+         }
+         else
+            $out[] = ($get_keys) ? $prefix.$key : $val;
+      }
+      return $out;
    }
 
 } // end of 'QuickHandler'
