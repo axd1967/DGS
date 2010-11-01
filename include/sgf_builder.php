@@ -523,7 +523,10 @@ class SgfBuilder
             . "_{$f_rated}{$f_size}{$f_handi}{$f_komi}{$f_result}_{$this->game_row['Whitehandle']}-{$this->game_row['Blackhandle']}";
       }
       else
+      {
+         // <white_user>-<black_user>-<gid>-YYYYMMDD.sgf
          $filename = "{$this->game_row['Whitehandle']}-{$this->game_row['Blackhandle']}-{$this->gid}-" . date('Ymd', $this->game_row['timestamp']);
+      }
 
       return $filename;
    }
@@ -928,6 +931,7 @@ class SgfBuilder
 
    function sgf_echo_rating( $rating, $show_percent=false )
    {
+      //TODO use new echo_rating-args (like quick-suite)
       $rating_str = echo_rating( $rating, $show_percent, false, true, true );
       if( (string)$rating_str == '' )
          return '?';
