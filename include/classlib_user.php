@@ -217,9 +217,9 @@ class User
    function load_user( $uid )
    {
       $result = NULL;
-      if( $uid > 0 )
+      if( is_numeric($uid) && $uid > 0 )
       {
-         $query_part = new QuerySQL( SQLP_WHERE, sprintf( "P.ID='%s'", $uid ) );
+         $query_part = new QuerySQL( SQLP_WHERE, "P.ID=$uid" );
          $result = User::load_user_query( $query_part, "User.load_user($uid)" );
       }
       return $result;
