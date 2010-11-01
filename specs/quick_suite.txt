@@ -34,6 +34,10 @@ Topics:
       - [MIGR] Migration Strategy
 
    2. Login, Request and Response
+      a. Login & Logout
+      b. Request
+      c. Standard Response
+      d. List Response
 
    3. Objects
       a. "game"    - playing a started game
@@ -66,6 +70,7 @@ Topics:
 #############  TODO TODO TODO  ###############
 
 Issues to specify:
+   - how to control paging (offset, limit, has_next)
    - charsets, see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
    - json-option also accepting JSON as input-arguments !?
    - refactor error-codes, see section (5) !?
@@ -116,10 +121,17 @@ Migration strategy of the former into the new approach will cover the steps:
 
 #-------- (2) Login, Request and Response -------------------------------------
 
+References:
+   * JSON - RFC 4627 - The application/json Media Type for JavaScript Object Notation (JSON)
+     http://tools.ietf.org/html/rfc4627
+     http://en.wikipedia.org/wiki/Json
+
+#-------- (2a) Login & Logout -------------------------------------------------
+
 A "command" is sent to the server via a GET or POST HTTP-request. The response is
-sent back with MIME-type "application/json" and contains the respective result
-for the requests command. The quick-script always expects a login-cookie in the
-HTTP-headers for authentication, which can be created with:
+normally sent back with MIME-type "application/json" and contains the respective
+result for the requests command. The quick-script always expects a login-cookie
+in the HTTP-headers for authentication, which can be created with:
 
    # for possible errors (see "Login Errors" below)
    login.php?quick_mode=1&userid=HANDLE&passwd=PASSWORD
@@ -134,6 +146,8 @@ Authentication is one purpose for the login, the other is to allow an user-based
 quota (and for that the user must be known and must be authenticated to avoid abuse).
 
 
+#-------- (2b) Request --------------------------------------------------------
+
 The standard request format looks like:
 
    # json-mode returning 'application/json' content-type
@@ -147,33 +161,130 @@ The HTTP-Content-Type of the result is "application/json", except when the optio
 instead.
 
 
-The standard minimal response is a JSON-formatted text with an error-code,
-there can be an optional 'error_msg' element:
+#-------- (2c) Standard Reponse -----------------------------------------------
+
+The standard minimal response is a JSON-formatted text with a quick-suite-version
+and an error-code, there can be an optional 'error_msg' element:
 
    {
+      "version": "1.0.15:13",      # DGS_VERSION:QUICK_VERSION
       "error": "error_code",
       "error_msg": "error message"
    }
 
+The version-info includes the current DGS_VERSION and the QUICK_VERSION defined in
+"include/globals.php". The QUICK_VERSION is increased with every release.
+
 An empty 'error_code' indicates a successful operation, i.e. no errors have occured:
 
    {
+      "version": "1.0.15:13",
       "error": ""
    }
 
 The response may contain additional object- and command-specific return-values.
 
    {
+      "version": "1.0.15:13",
       "error": "",
-      "Output1": ... ,
-      "Output2": ...
+
+      "output1": "simple text-value",              # simple scalar value
+
+      "output2": {                                 # object
+         "id": 123,
+         "object": {                               # nested object
+            "key": "val"
+         }
+      },
+
+      "output3": [ 1, 2, 3, "ape", "bear" ]        # array-value
    }
 
 
-References:
-   * JSON - RFC 4627 - The application/json Media Type for JavaScript Object Notation (JSON)
-     http://tools.ietf.org/html/rfc4627
-     http://en.wikipedia.org/wiki/Json
+#-------- (2d) List Reponse ---------------------------------------------------
+
+The quick-suite can also return list of object entries. In this case, the result
+always contains several mandatory and some optional standard fields:
+
+   {
+      "list_object": "game",        # object-name, corresponds to obj-option
+      "list_size": 2,               # total list-size
+      "list_offset": 0,             # list offset for paging a result
+      "list_limit": 20,             # number of entries per page; 0=all entries returned
+      "list_has_next": 0,           # 1=has next-page, 0=last page retrieved
+      "list_order": "key1+,key2-",  # list order, can be empty, +=ASCending, -=DESCending
+      "list_header": [ "key1", "key2", ... ],   # (optional); field-names for TABLE-style
+      "list_result": [ item1, item2, ... ]      # list-entries (array | objects)
+   }
+
+   * NOTE about "list_header" (see also example below):
+      - this field is only used for TABLE-style
+      - and only if list contains at least one item
+      - keys of nested objects are written using '.', e.g. "game.message.user.name"
+
+The output of objects in a full JSON-format can be quite large, because an object
+is normally represented as map of keys with their respective values for EACH item
+in the object-list.
+
+Therefore, the quick-suite provides two different formats to return a list of objects,
+which can be controlled with the parameter 'lstyle' (list-style):
+
+   1. TABLE-style : lstyle=table (default)
+   2. JSON-style  : lstyle=json
+
+JSON-style may be easier to handle than TABLE-style for JavaScript-based clients,
+because it can just be used as object. TABLE-style needs some special handling
+to access an object-field, though it should be easily possible to convert
+a TABLE-style list into a object-based list on client-side.
+
+One disadvantage for JSON-style is, that the output-size can be considerably
+larger for big lists (factor 2-10 or more), depending on the number of fields
+within a single list-object-item.
+
+Example for TABLE-style:
+
+   {
+      "list_object": "game",
+      "list_size": 2,
+      "list_offset": 0,
+      "list_limit": 0,
+      "list_has_next": 0,
+      "list_order": "",
+
+      "list_header": [ "id", "user.id", "user.handle" ],
+      "list_result": [
+         [ 111, 1, "guest" ],    # object #1
+         [ 222, 2, "ejlo" ]      # object #2
+      ]
+   }
+
+Example for JSON-style:
+
+   {
+      "list_object": "game",
+      "list_size": 2,
+      "list_offset": 0,
+      "list_limit": 0,
+      "list_has_next": 0,
+      "list_order": "",
+
+      "list_result": [
+         {                 # object #1
+            "id": 111,
+            "user": {
+               "id": 1,
+               "handle": 'guest',
+            }
+         },
+         {                 # object #2
+            "id": 222,
+            "user": {
+               "id": 2,
+               "handle": 'ejlo',
+            }
+         }
+      ]
+   }
 
 
 #-------- (3) Objects ---------------------------------------------------------
@@ -201,6 +312,9 @@ Purpose:
       - retrieve information about a game;
         corresponding pages: "game.php", "gameinfo.php"
 
+      - retrieve list of games;
+        corresponding pages: "status.php", "quick_status.php", "show_games.php"
+
       - play the full-cycle of a game after it has been initiated:
         corresponding pages: "game.php", "confirm.php"
 
@@ -217,9 +331,11 @@ Request:
 
    quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>
 
+   quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&lstyle=<LIST_STYLE>&uid=<USER_ID>
+
 Options:
 
-   <COMMAND> = "info" | "get_notes" | "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
+   <COMMAND> = "info" | "get_notes" | "list" | "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
 
    <GAME_ID> = integer
       - reference game to perform game-operation on
@@ -258,13 +374,22 @@ Options:
    <MESSAGE> = message
       - optional game-message on game-operation
 
+   <VIEW> = view for game-list
+
    <WITH> = optional with-option to deep-load recursive data (see commands)
+
+   <LIST_STYLE> = see list-style in section (2d)
+
+   <USER_ID> = integer | 'mine'
+      - user-id (integer)
+      - 'mine' = logged-in user
 
 
 Commands:
 
    "info" : retrieve game-information
       - required opts: GAME_ID
+      - optional opts: WITH
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for white and black user
@@ -345,6 +470,40 @@ Commands:
             "notes" : "",      # users game-notes (only for logged-in user)
          }
 
+
+   "list" : retrieve list of games
+      - required opts: VIEW
+      - optional opts: USER_ID, LSTYLE, WITH
+
+      - VIEW-option:
+         - 'status'    : ask for running games where to move in for given USER_ID
+         - 'running'   : ask for running games for logged-in user  (uid=mine)
+         - 'finished'  : ask for finished games for logged-in user (uid=mine)
+         - 'observing' : ask for games observed by logged-in user  (uid=mine)
+         - 'observed'  : ask for all observed games
+
+      - USER_ID-option:
+         - empty | 0 = default, for most views the default-USER_ID is 'mine'
+         - 'mine'    = use logged-in user-id
+         - integer   = use other user-id (can be logged-in user-id)
+
+         - NOTE: not all value allowed for all views
+
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name) for game-players
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+      - Result (JSON) = result-list see section (2d) with list of objects dependent on view:
+         - only fields are listed here, check semantics on section (3a), see "info"-command
+
+         * VIEW='status' | 'running' | 'finished' | 'observing' | 'observed':
+           id, tournament_id, status, time_lastmove, move_id, move_color,
+           black|white_user (nested object according to WITH-option),
+           black|white_gameinfo.remtime
+
+
    "delete" : deletes specified game
       - required opts: GAME_ID, MOVE_ID
       - optional opts: MESSAGE
@@ -355,7 +514,7 @@ Commands:
          - invalid_action : tried to delete game after first 10 moves
 
    "set_handicap" : sets handicap stones at start of game
-      - required opts: GAME_ID, MOVE_ID, MOVE
+      - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = moves : list of coordinates of the handicap-stone placement
       - optional opts: MESSAGE
 
@@ -390,7 +549,7 @@ Commands:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAME], [E-GAMEMOVE]
 
    "status_score" : verify final game-score
-      - required opts: GAME_ID, MOVE_ID, MOVE
+      - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates that 'state' should be "switched"
       - optional opts: MESSAGE -> will be ignored
 
@@ -416,7 +575,7 @@ Commands:
          }
 
    "score" : assess dead/alive-status of stones, submitting score
-      - required opts: GAME_ID, MOVE_ID, MOVE
+      - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates of which the 'state' should be "switched"
       - optional opts: MESSAGE
 
@@ -602,6 +761,7 @@ Commands:
 
    "info" : returns private message
       - required opts: MESSAGE_ID
+      - optional opts: WITH
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
@@ -643,7 +803,7 @@ Commands:
                "color_bg" : "F7F5E3FF", # folder background-color (incl. alpha-channel) in hex-format
                "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
             },
-            "time_created" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
+            "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
             "thread" : 0,       # message-id of first message in a message-thread, 0=system-message
             "level" : 0,        # thread-level of message-thread (starting at 0)
             "message_prev" : 0, # message-id of message that has been replied to
@@ -696,7 +856,7 @@ Commands:
             "list_size" : 5,           # list-size total
             "list_offset" : 0,         # start offset of list-part (for paging)
             "list_limit" : 0,          # number of entries per page
-            "list_order" : "",         # order of list (field-names, comma-separated), ""=standard-order
+            "list_order" : "",         # order of list (field-names, comma-separated), ""=no-order
             "list_result" : [          # array with found objects matching list-search
                {
                   "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
@@ -1266,6 +1426,7 @@ Errors:
       - unknown_game : invalid game
       - game_not_started : game has not started yet (still in invitation-mode)
       - game_finished : game is already finished (move/operation not possible)
+      - invalid_game_status : game is in wrong status to perform requested operation
       - database_corrupted : player-to-move can not be determined -> contact admin
       - already_played : 'move_id' context for current move in game is no longer valid
       - not_game_player : you are not a player of the game
