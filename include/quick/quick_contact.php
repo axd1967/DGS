@@ -29,7 +29,6 @@ require_once 'include/contacts.php';
   */
 
 // see specs/quick_suite.txt (3e)
-define('CONTACTCMD_LIST', 'list');
 define('CONTACT_COMMANDS', 'list');
 
 
@@ -53,7 +52,7 @@ class QuickHandlerContact extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return ( $obj == QOBJ_CONTACT ) && QuickHandler::matchCommand(CONTACT_COMMANDS, $cmd);
+      return ( $obj == QOBJ_CONTACT ) && QuickHandler::matchRegex(CONTACT_COMMANDS, $cmd);
    }
 
    function parseURL()
@@ -72,7 +71,7 @@ class QuickHandlerContact extends QuickHandler
 
       // prepare command: list
 
-      if( $cmd == CONTACTCMD_LIST )
+      if( $cmd == QCMD_LIST )
       {
          $qsql = Contact::build_querysql_contact( $uid );
          $qsql->add_part( SQLP_ORDER, "P.Name ASC" );
@@ -87,7 +86,7 @@ class QuickHandlerContact extends QuickHandler
    function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == CONTACTCMD_LIST )
+      if( $cmd == QCMD_LIST )
          $this->process_cmd_list();
    }//process
 

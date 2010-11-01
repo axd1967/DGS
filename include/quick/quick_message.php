@@ -66,7 +66,7 @@ class QuickHandlerMessage extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return ( $obj == QOBJ_MESSAGE ) && QuickHandler::matchCommand(MESSAGE_COMMANDS, $cmd);
+      return ( $obj == QOBJ_MESSAGE ) && QuickHandler::matchRegex(MESSAGE_COMMANDS, $cmd);
    }
 
    function parseURL()
@@ -151,7 +151,7 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'folder',
          QuickHandlerFolder::build_obj_folder(
             (int)$this->msg_row['Folder_nr'], $this->folder, $this->is_with_option(QWITH_FOLDER)) );
-      $this->addResultKey( 'time_created', QuickHandler::formatDate(@$urow['X_Time']) );
+      $this->addResultKey( 'created_at', QuickHandler::formatDate(@$urow['X_Time']) );
       $this->addResultKey( 'thread', (int)$row['Thread'] );
       $this->addResultKey( 'level', (int)$row['Level'] );
       $this->addResultKey( 'message_prev', (int)$row['ReplyTo'] );

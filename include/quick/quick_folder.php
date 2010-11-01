@@ -30,7 +30,6 @@ require_once 'include/classlib_userconfig.php';
   */
 
 // see specs/quick_suite.txt (3d)
-define('FOLDERCMD_LIST', 'list');
 define('FOLDER_COMMANDS', 'list');
 
 
@@ -56,7 +55,7 @@ class QuickHandlerFolder extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return ( $obj == QOBJ_FOLDER ) && QuickHandler::matchCommand(FOLDER_COMMANDS, $cmd);
+      return ( $obj == QOBJ_FOLDER ) && QuickHandler::matchRegex(FOLDER_COMMANDS, $cmd);
    }
 
    function parseURL()
@@ -77,7 +76,7 @@ class QuickHandlerFolder extends QuickHandler
 
       // prepare command: list
 
-      if( $cmd == FOLDERCMD_LIST )
+      if( $cmd == QCMD_LIST )
       {
          $this->cfg_pages = ConfigPages::load_config_pages( $uid, CFGCOLS_STATUS_GAMES );
          $this->folders = get_folders( $uid, /*remove-all-received-folder*/true );
@@ -91,7 +90,7 @@ class QuickHandlerFolder extends QuickHandler
    function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == FOLDERCMD_LIST )
+      if( $cmd == QCMD_LIST )
          $this->process_cmd_list();
    }
 

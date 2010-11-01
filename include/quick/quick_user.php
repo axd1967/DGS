@@ -63,7 +63,7 @@ class QuickHandlerUser extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return ( $obj == QOBJ_USER ) && QuickHandler::matchCommand(USER_COMMANDS, $cmd);
+      return ( $obj == QOBJ_USER ) && QuickHandler::matchRegex(USER_COMMANDS, $cmd);
    }
 
    function parseURL()
