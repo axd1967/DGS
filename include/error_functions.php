@@ -173,7 +173,11 @@ class DgsErrors
             if( !$warn )
             {
                //TODO? header( 'Content-Type: application/json' );
-               echo dgs_json_encode( array( 'error' => $err, 'error_msg' => $debugmsg ) );
+               echo dgs_json_encode( array(
+                  'version' => QUICK_SUITE_VERSION,
+                  'error' => $err,
+                  'error_msg' => $debugmsg,
+               ));
             }
          }
       }

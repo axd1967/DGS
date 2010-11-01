@@ -36,8 +36,6 @@ $is_maintenance = $is_down;
 global $chained; //PHP5
 $chained = 0;
 
-define('DGS_VERSION', '1.0.15');
-
 
 // options settable by admins (user-capabilities)
 // NOTE: also adjust admin_users.php and admin_show_users.php on adding new options
@@ -421,6 +419,11 @@ function check_subnet_ip( $subnet, $ip )
    }
 
    return 0; // no match
+}//check_subnet_ip
+
+function isRunningGame( $status )
+{
+   return preg_match("/^(".CHECK_GAME_STATUS_RUNNING.")$/", $status);
 }
 
 

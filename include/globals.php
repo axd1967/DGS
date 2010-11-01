@@ -25,6 +25,11 @@ require_once 'include/config-local.php';
  * \brief Definitions and declarations of DGS globally used vars and constants.
  */
 
+define('DGS_VERSION', '1.0.15');
+
+// global version of quick-suite: increased with each release
+define('QUICK_VERSION', 1);
+define('QUICK_SUITE_VERSION', DGS_VERSION.':'.QUICK_VERSION);
 
 // ---------- General stuff----------------------------------------
 
@@ -63,6 +68,7 @@ define('GAME_STATUS_SCORE', 'SCORE');
 define('GAME_STATUS_SCORE2', 'SCORE2');
 define('GAME_STATUS_FINISHED', 'FINISHED');
 define('CHECK_GAME_STATUS', 'INVITED|PLAY|PASS|SCORE|SCORE2|FINISHED');
+define('CHECK_GAME_STATUS_RUNNING', 'PLAY|PASS|SCORE|SCORE2');
 
 //keep next constants powers of 2
 define('GAMEFLAGS_KO', 0x01);
