@@ -77,7 +77,7 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    }
 
 
-   //ToMove_ID=$tomove will hold handitype until ACCEPTED
+   //ToMove_ID=$tomove will hold handitype until game-setting accepted
    switch( (string)$handicap_type )
    {
       case HTYPE_CONV:
