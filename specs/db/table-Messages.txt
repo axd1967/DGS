@@ -15,17 +15,18 @@ Important Notes:
       - "assigning" all related messages for game-offer or after-game-messages is difficult to impossible
       - need redundant (but different work) to handle game-offers (waiting-room <-> message system)
 
- Field   | Type                                                                            | Default
----------+---------------------------------------------------------------------------------+---------------------
- ID      | int(11)                                                                         | NULL
- Type    | enum('NORMAL','INVITATION','ACCEPTED','DECLINED','DELETED','DISPUTED','RESULT') | NORMAL
- Thread  | int(11)                                                                         | 0
- Level   | smallint(6)                                                                     | 0
- ReplyTo | int(11)                                                                         | 0
- Game_ID | int(11)                                                                         | 0
- Time    | datetime                                                                        | 0000-00-00 00:00:00
- Subject | varchar(80)                                                                     |
- Text    | text                                                                            | NULL
+ Field   | Type                                            | Default
+---------+-------------------------------------------------+---------------------
+ ID      | int(11)                                         | NULL
+ Type    | enum('NORMAL','INVITATION','DISPUTED','RESULT') | NORMAL
+ Thread  | int(11)                                         | 0
+ Level   | smallint(6)                                     | 0
+ ReplyTo | int(11)                                         | 0
+ Game_ID | int(11)                                         | 0
+ Time    | datetime                                        | 0000-00-00 00:00:00
+ Subject | varchar(80)                                     |
+ Text    | text                                            | NULL
+
 
 ## Fields:
 
@@ -34,12 +35,14 @@ Important Notes:
 * Type : message-type
    - NORMAL       : normal message between two users
    - INVITATION   : invitation message (from other users)
+   - DISPUTED     : disputed invitation (by other user)
+   - RESULT       : game-result message (from system)
+
+   # obsolete types: ACCEPTED, DECLINED, DELETED (removed from sources)
    - ACCEPTED     : accepted invitation (by other user)
    - DECLINED     : rejeced invitation (by other user)
    - DELETED      : old form of deleted message, new manners are to move it
                     into delete-folder (see MessageCorrespondents)
-   - DISPUTED     : disputed invitation (by other user)
-   - RESULT       : game-result message (from system)
 
 * Thread : message-ID of first message in a message-thread
    - system-messages have no thread -> Thread=0
