@@ -70,6 +70,7 @@ Topics:
 #############  TODO TODO TODO  ###############
 
 Issues to specify:
+   - how to handle DGS-tags in text (messages/posts/etc) on client-side ?
    - how to control paging (offset, limit, has_next)
    - charsets, see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
    - json-option also accepting JSON as input-arguments !?
@@ -309,7 +310,7 @@ Purpose:
 
    The quick-suite for the game-object allows the following operations on a game:
 
-      - retrieve information about a game;
+      - retrieve information about a game (info, game-notes);
         corresponding pages: "game.php", "gameinfo.php"
 
       - retrieve list of games;
@@ -596,6 +597,7 @@ Examples of game-playing cycle:
    quick_status.php
    quick_status.php?user=user
    quick_status.php?uid=123
+   do_quick.php?obj=game&cmd=list&view=status&uid=123&lstyle=table
 
    # download game with moves
    # - marked-dead-stones stored in MA-property
@@ -653,6 +655,13 @@ Examples of game-playing cycle:
 
    # delete (only on first 10 moves)
    quick_do.php?obj=game&cmd=delete&gid=12345&move_id=6
+
+
+   # get game-notes
+   do_quick.php?obj=game&cmd=get_notes&gid=12345
+
+   # retrieve list of my running-games in JSON-style list-format
+   do_quick.php?obj=game&cmd=list&view=running&uid=mine&lstyle=json&with=user_id
 
 
 #-------- (3b) Objects - "user" -----------------------------------------------
