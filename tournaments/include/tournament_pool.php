@@ -435,9 +435,9 @@ class TournamentPool
                'TP.uid',
                'TPOOL.ID', 'TPOOL.Pool', 'IFNULL(TPOOL.ID,0) AS X_HasPool',
             SQLP_FROM,
-               'TournamentParticipant AS TP',
+               'TournamentParticipant AS TP', //TODO load only for current-round !?
                "LEFT JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid "
-                  . "AND TPOOL.tid=$tid AND TPOOL.Round=$round", // must not be in WHERE for outer-join
+                  . "AND TPOOL.tid=$tid AND TPOOL.Round=$round", // must not be in main-WHERE
             SQLP_WHERE,
                "TP.tid=$tid",
                "TP.Status='".TP_STATUS_REGISTER."'"
@@ -511,7 +511,7 @@ class TournamentPool
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round );
 
       // find all registered TPs (optimized)
-      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order );
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order ); // TODO only for current-round
 
       // add all TPs to pools
       $NOW = $GLOBALS['NOW'];
@@ -585,7 +585,7 @@ class TournamentPool
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round );
 
       // find all registered TPs (optimized)
-      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, TOURNEY_SEEDORDER_NONE );
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, TOURNEY_SEEDORDER_NONE ); //TODO only for current-round
 
       // add all missing TPs to pools
       $NOW = $GLOBALS['NOW'];

@@ -210,7 +210,7 @@ class TournamentProperties
       // limit participants
       if( $this->MaxParticipants > 0 )
       {
-         if( is_null($tourney->TP_Counts) )
+         if( is_null($tourney->TP_Counts) ) //TODO check for TP.StartRound=1 !?
             $tourney->setTP_Counts(
                TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER) );
 

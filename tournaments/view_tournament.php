@@ -185,6 +185,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // number of registered users
    echo sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),
       "<br>\n<ul>";
+   //TODO show also count of users for round > 1 !?
    foreach( $tp_counts as $t_status => $cnt )
    {
       echo "  <li>",

@@ -93,7 +93,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
-   $tp_counts = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
+   $tp_counts = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER ); // TODO only for current-round
    $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
    $min_pool_count = min( TROUND_MAX_POOLCOUNT, TournamentUtils::calc_pool_count($reg_count, $tround->MaxPoolSize) );
    $max_pool_count = min( TROUND_MAX_POOLCOUNT, TournamentUtils::calc_pool_count($reg_count, $tround->MinPoolSize) );

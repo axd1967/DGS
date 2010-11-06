@@ -223,6 +223,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             if( !$vars['_has_custom_rating'] ) // copy only if no customized-rating
                $tp->Rating = $tp->User->Rating;
          }
+         $tp->NextRound = $tp->StartRound; //copy on REGISTER
 
          $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
 

@@ -171,10 +171,10 @@ class TournamentStatus
       $this->_load_tprops();
       $this->_load_tround();
       $min_participants = $this->ttype->calcTournamentMinParticipants( $this->tprops, $this->tround );
-      $tp_counts = TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER);
+      $tp_counts = TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER); //TODO count TP for StartRound=CurrentRound
       $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
       if( $min_participants > 0 && $reg_count < $min_participants )
-         $this->errors[] = sprintf(
+         $this->errors[] = sprintf( //TODO ... "for users registered to start in round X"
                T_('Tournament min. participant limit (%s users) has not been reached yet: %s registrations are missing.'),
                $min_participants, $min_participants - $reg_count );
       if( $this->tprops->MaxParticipants > 0 && $reg_count > $this->tprops->MaxParticipants )
@@ -182,7 +182,7 @@ class TournamentStatus
                T_('Tournament max. participant limit (%s users) has been exceeded by %s registrations.'),
                $this->tprops->MaxParticipants, $reg_count - $this->tprops->MaxParticipants );
 
-      // check restrictions for all registered users
+      // check restrictions for all registered users (incl. for future rounds)
       global $base_path;
       $iterator = new ListIterator( 'TournamentStatus.check_conditions_status_PAIR',
             new QuerySQL( SQLP_WHERE, sprintf( "TP.Status='%s'", mysql_addslashes(TP_STATUS_REGISTER)) ) );
@@ -191,7 +191,7 @@ class TournamentStatus
       {
          list( $tp, $orow ) = $arr_item;
          list( $reg_errors, $reg_warnings ) =
-            $this->tprops->checkUserRegistration($this->tourney, $tp->hasRating(), $tp->User, TCHKTYPE_TD);
+            $this->tprops->checkUserRegistration($this->tourney, $tp->hasRating(), $tp->User, TCHKTYPE_TD); //TODO check for which round?
          $count = 50; // check all, but limit error-output to some users
          foreach( $reg_errors as $err )
          {
@@ -216,7 +216,7 @@ class TournamentStatus
       $this->check_basic_conditions_status_change();
 
       // check that all registered TPs are added
-      $arr_TPs = TournamentParticipant::load_tournament_participants_registered( $this->tid );
+      $arr_TPs = TournamentParticipant::load_tournament_participants_registered( $this->tid ); //TODO load only for current-round
       $check_errors = $this->ttype->checkParticipantRegistrations( $this->tid, $arr_TPs );
       if( count($check_errors) )
          $this->errors = array_merge( $this->errors, $check_errors );

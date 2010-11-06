@@ -182,6 +182,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          if( !$vars['_has_custom_rating'] ) // copy only if no customized-rating
             $tp->Rating = $tp->User->Rating;
       }
+      $tp->NextRound = $tp->StartRound; //copy on REGISTER
 
       $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
