@@ -115,7 +115,7 @@ class QuickHandlerGameList extends QuickHandler
       if( !is_numeric($uid) )
          error('invalid_args', "$dbgmsg.check.view.uid");
 
-      //TODO handle offset + limit on lists before implementing uid=all
+      //TODO handle offset + limit on lists before implementing uid=all; status=no-limit
       //TODO handle uid=all
 
       // prepare command: list
