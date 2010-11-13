@@ -61,18 +61,24 @@ define('VACATION_CLOCK', -1); // keep it < 0
 
 // ---------- Games stuff -----------------------------------------
 
+define('GAME_STATUS_SETUP', 'SETUP');
 define('GAME_STATUS_INVITED', 'INVITED');
 define('GAME_STATUS_PLAY', 'PLAY');
 define('GAME_STATUS_PASS', 'PASS');
 define('GAME_STATUS_SCORE', 'SCORE');
 define('GAME_STATUS_SCORE2', 'SCORE2');
 define('GAME_STATUS_FINISHED', 'FINISHED');
-define('CHECK_GAME_STATUS', 'INVITED|PLAY|PASS|SCORE|SCORE2|FINISHED');
+define('CHECK_GAME_STATUS', 'SETUP|INVITED|PLAY|PASS|SCORE|SCORE2|FINISHED');
 define('CHECK_GAME_STATUS_RUNNING', 'PLAY|PASS|SCORE|SCORE2');
 
 //keep next constants powers of 2
 define('GAMEFLAGS_KO', 0x01);
 define('GAMEFLAGS_HIDDEN_MSG', 0x02);
+
+// enum Games.GameType
+define('GAMETYPE_GO',      'GO');
+define('GAMETYPE_TEAM_GO', 'TEAM_GO');
+define('GAMETYPE_ZEN_GO',  'ZEN_GO');
 
 //Games table: particular Score values
 define('SCORE_RESIGN', 1000);
@@ -83,6 +89,12 @@ define('SCORE_MAX', min(SCORE_RESIGN,SCORE_TIME) - 1); // =min(SCORE_...) - 1
 define('RULESET_JAPANESE', 'JAPANESE'); // using area-scoring
 define('RULESET_CHINESE',  'CHINESE'); // using territory-scoring
 define('CHECK_RULESETS', 'JAPANESE|CHINESE');
+
+// game-settings view-mode
+define('GSETVIEW_SIMPLE', 0);
+define('GSETVIEW_EXPERT', 1);
+define('GSETVIEW_MPGAME', 2); // multi-player
+define('MAX_GSETVIEW', 2);
 
 
 define('MAX_SEKI_MARK', 2);
