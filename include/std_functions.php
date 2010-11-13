@@ -2900,27 +2900,32 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
 
    $gid = (int)$gid;
    $legal = ( $gid > 0 );
+   $game_type = GAMETYPE_GO;
+   $status = GAME_STATUS_PLAY;
    if( $legal && ($whitename===false || $blackname===false) )
    {
-     $query = 'SELECT black.Name as blackname, white.Name as whitename ' .
-              'FROM (Games, Players as white, Players as black) ' .
-              "WHERE Games.ID=$gid " .
-              ' AND white.ID=Games.White_ID ' .
-              ' AND black.ID=Games.Black_ID ' .
-              'LIMIT 1' ;
-     if( $row=mysql_single_fetch( 'game_reference', $query ) )
-     {
-       if( $whitename===false )
-         $whitename = $row['whitename'];
-       if( $blackname===false )
-         $blackname = $row['blackname'];
-       $safe_it = true;
-     }
-     else
-       $legal = false;
+      $query = 'SELECT Games.GameType, Games.Status, black.Name as blackname, white.Name as whitename ' .
+               'FROM Games ' .
+                  'INNER JOIN Players as black ON black.ID=Games.Black_ID ' .
+                  'LEFT JOIN Players as white ON white.ID=Games.White_ID ' . // multi-player-game
+               "WHERE Games.ID=$gid LIMIT 1" ;
+      if( $row=mysql_single_fetch( 'game_reference', $query ) )
+      {
+         if( $whitename===false )
+            $whitename = $row['whitename'];
+         if( $blackname===false )
+            $blackname = $row['blackname'];
+         $safe_it = true;
+         $game_type = $row['GameType'];
+         $status = $row['Status'];
+      }
+      else
+         $legal = false;
    }
    $whitename = trim($whitename);
    $blackname = trim($blackname);
+   $is_std_go = ($game_type == GAMETYPE_GO);
+
    if( $whitename )
       $whitename = "$whitename (W)";
    if( $blackname )
@@ -2931,13 +2936,17 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
       $whitename = "$whitename vs. $blackname";
    else
       $whitename = "$whitename$blackname";
+   if( !$is_std_go )
+      $whitename = "Game #$gid: $whitename";
    if( $safe_it )
       $whitename = make_html_safe($whitename);
    if( $move>0 )
       $whitename.= " ,$move";
    if( $link && $legal )
    {
-      $url = "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "");
+      $url = ( $is_std_go || $status != GAME_STATUS_SETUP )
+         ? "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "")
+         : "game_players.php?gid=$gid";
       $url = 'A href="' . $base_path. $url . '"';
       if( $link & REF_LINK_BLANK )
         $url .= ' target="_blank"';
@@ -3195,11 +3204,11 @@ function delete_all_observers( $gid, $notify, $Text='' )
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
 
 global $ENUM_GAMES_STATUS; //PHP5
-$ENUM_GAMES_STATUS = array( 'INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED' ); //FIXME used?
+$ENUM_GAMES_STATUS = array( GAME_STATUS_SETUP, GAME_STATUS_INVITED, GAME_STATUS_PLAY,
+   GAME_STATUS_PASS, GAME_STATUS_SCORE, GAME_STATUS_SCORE2, GAME_STATUS_FINISHED );
 
 /*!
- * Builds IN-SQL-part for some enum-array containing all possible values
- * for a table-column.
+ * Builds IN-SQL-part for some enum-array containing all possible values for a table-column.
  * \param $arr_enum non-empty array with all possible values for a table-column
  * var-args params enum-values that shouldn't match on table-column;
  *        must not contain all elements of enum(!)
