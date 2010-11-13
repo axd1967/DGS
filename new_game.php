@@ -26,6 +26,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/table_columns.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/message_functions.php' );
+require_once( 'include/game_functions.php' );
 require_once( 'include/utilities.php' );
 
 {
@@ -36,6 +37,10 @@ require_once( 'include/utilities.php' );
       error('not_logged_in');
    $my_id = $player_row['ID'];
 
+   $viewmode = (int) get_request_arg('view', GSETVIEW_SIMPLE);
+   if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
+      $viewmode = GSETVIEW_SIMPLE;
+
    $my_rating = @$player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
       && is_numeric($my_rating) && $my_rating >= MIN_RATING );
@@ -43,12 +48,15 @@ require_once( 'include/utilities.php' );
    $page = "new_game.php?";
    $title = T_('Add new game to waiting room');
    start_page($title, true, $logged_in, $player_row );
-   echo "<h3 class=Header>". $title . "</h3>\n";
+   echo "<h3 class=Header>", sprintf( "%s (%s)", $title, get_gamesettings_viewmode($viewmode) ), "</h3>\n";
 
-   add_new_game_form( 'addgame', $iamrated); //==> ID='addgameForm'
+   add_new_game_form( 'addgame', $viewmode, $iamrated); //==> ID='addgameForm'
 
 
    $menu_array = array();
+   $menu_array[T_('New game')] = 'new_game.php';
+   $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT;
+   $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME;
    $menu_array[T_('Waiting room')] = 'waiting_room.php';
    $menu_array[T_('Invite')] = 'message.php?mode=Invite';
 
@@ -56,36 +64,11 @@ require_once( 'include/utilities.php' );
 }
 
 
-function add_new_game_form( $form_id, $iamrated)
+function add_new_game_form( $form_id, $viewmode, $iamrated)
 {
    $addgame_form = new Form( $form_id, 'add_to_waitingroom.php', FORM_POST );
 
-   //$addgame_form->add_row( array( 'HEADER', T_('Add new game') ) );
-
-   $vals = array_value_to_key_and_value( range(1, NEWGAME_MAX_GAMES) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
-                                  'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
-
-   game_settings_form($addgame_form, GSET_WAITINGROOM, $iamrated);
-
-   $rating_array = getRatingArray();
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
-                                  'CHECKBOX', 'must_be_rated', 'Y', "", false,
-                                  'TEXT', sptext(T_('If yes, rating between'),1),
-                                  'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
-                                  'TEXT', sptext(T_('and')),
-                                  'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Min. rated finished games'),
-                                  'TEXTINPUT', 'min_rated_games', 5, 5, '',
-                                  'TEXT', MINI_SPACING . T_('(optional)'), ));
-   $same_opp_array = build_accept_same_opponent_array(array( 0,  -1, -2, -3,  3, 7, 14 ));
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
-                                  'SELECTBOX', 'same_opp', 1, $same_opp_array, '0', false, ));
-
-
-   $addgame_form->add_row( array( 'SPACE' ) );
-   $addgame_form->add_row( array( 'DESCRIPTION', T_('Comment'),
-                                  'TEXTINPUT', 'comment', 40, 40, "" ) );
+   game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated);
 
    $addgame_form->add_row( array( 'SPACE' ) );
    $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );
