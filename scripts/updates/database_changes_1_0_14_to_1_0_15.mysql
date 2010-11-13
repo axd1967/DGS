@@ -1921,3 +1921,35 @@ ALTER TABLE Players
    DROP COLUMN MayPostOnForum ;
 
 
+-- added multi-player-game: Team-Go, Zen-Go
+ALTER TABLE Waitingroom
+   ADD GameType enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO' AFTER Time ;
+ALTER TABLE Waitingroom
+   ADD GamePlayers char(5) NOT NULL default '' AFTER GameType ;
+ALTER TABLE Waitingroom
+   ADD gid int NOT NULL default 0 AFTER uid ;
+
+-- added multi-player-game: Team-Go, Zen-Go
+ALTER TABLE Games
+   ADD GameType enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO' AFTER ToMove_ID ;
+ALTER TABLE Games
+   ADD GamePlayers char(5) NOT NULL default '' AFTER GameType ;
+ALTER TABLE Games
+   ADD MoveCounter smallint unsigned NOT NULL default 0 AFTER GamePlayers ;
+ALTER TABLE Games
+   MODIFY Status enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED' ;
+
+-- added multi-player-game: Team-Go, Zen-Go
+CREATE TABLE GamePlayers (
+   ID int NOT NULL auto_increment,
+   gid int NOT NULL,
+   GroupColor enum('BW','B','W','G1','G2') NOT NULL default 'BW',
+   GroupOrder tinyint signed NOT NULL default 0,
+   uid int NOT NULL default 0,
+   Flags smallint unsigned NOT NULL default 0,
+   PRIMARY KEY (ID),
+   KEY gidGroup (gid,GroupColor,GroupOrder),
+   KEY uid (uid)
+) ENGINE=MyISAM ;
+
+
