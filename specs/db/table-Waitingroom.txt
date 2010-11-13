@@ -20,8 +20,11 @@ Important Note:
 ---------------+------------------------------------------+---------------------
  ID            | int(11)                                  | NULL
  uid           | int(11)                                  | 0
+ gid           | int(11)                                  | 0
  nrGames       | int(11)                                  | 1
  Time          | datetime                                 | 0000-00-00 00:00:00
+ GameType      | enum('GO','TEAM_GO','ZEN_GO')            | GO
+ GamePlayers   | varchar(5)                               |
  Ruleset       | enum('JAPANESE','CHINESE')               | JAPANESE
  Size          | int(11)                                  | 19
  Komi          | decimal(6,1)                             | 6.5
@@ -53,10 +56,31 @@ Important Note:
 * uid : foreign key to Players.ID
    - player placing a game-offer
 
-* nrGames : int, number of game-offers with same setting
-   - max = 20
+* gid : foreign key to Games.ID
+   - 0 for standard-go-game
+   - game-id (>0) for team-go/zen-go SETUP-status (ready to be joined)
+
+* nrGames : int, count of entities
+   - for game-type 'GO' : number of game-offers with same setting
+      - max = 10
+   - for game-type 'TEAM_GO / ZEN_GO' : number of reserved joins for game
+      - (implicit) number of games always = 1
+      - limited by game-type in Games.GameType
+      - decreaed when one player joins MP-game taking one reserved placeholder
 
 * Time : creation-date of game-offer
+
+* GameType : game-type
+   - GO = standard Go (1:1)
+   - TEAM_GO = Team-Go (N:M) with N+M > 2, two teams of 1..N and 1..M players,
+     each team has a fix color (B|W)
+   - ZEN_GO = Multi-player Go (N) with odd N > 2, N players with switching colors
+
+* GamePlayers : matching for game with number of players
+   - GameType is determined from GamePlayers-info
+   - 1:1 | 2 = Go (standard Go)
+   - N:M = Team-Go, N+M > 2, 2:2 = Rengo
+   - N = Zen-Go, N > 2
 
 * Ruleset : supported rulesets on DGS
    - JAPANESE = using territory-scoring (default)
