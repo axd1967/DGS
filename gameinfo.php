@@ -36,11 +36,10 @@ if( ALLOW_TOURNAMENTS ) {
 $GLOBALS['ThePage'] = new Page('GameInfo');
 
 
-// Status: enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED')
-// -> INVITED, RUNNING, FINISHED
+// map Games.Status -> SETUP, INVITED, "RUNNING", FINISHED
 function build_game_status( $status )
 {
-   return ( $status === 'INVITED' || $status === 'FINISHED' ) ? $status : 'RUNNING';
+   return isRunningGame($status) ? 'RUNNING' : $status;
 }
 
 function build_rating_diff( $rating_diff )
@@ -104,6 +103,8 @@ function build_rating_diff( $rating_diff )
    $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
    if( !$grow )
       error('unknown_game', "gameinfo.find2($gid)");
+   if( !isRunningGame($grow['Status']) )
+      error('invalid_game_status', "gameinfo.find3($gid,{$grow['Status']})");
 
    $tid = (int) @$grow['tid'];
    $tourney = $tgmae = null;
@@ -121,13 +122,14 @@ function build_rating_diff( $rating_diff )
 
    // init some vars
    $is_my_game = ( $my_id == $grow['Black_ID'] || $my_id == $grow['White_ID'] );
-   $arr_status = array(
-      'INVITED'  => T_('Inviting'),
-      'RUNNING'  => T_('Running'),
-      'FINISHED' => T_('Finished'),
+   $arr_status = array( // see build_game_status()
+      GAME_STATUS_SETUP    => T_('Setup'),
+      GAME_STATUS_INVITED  => T_('Inviting'),
+      'RUNNING'            => T_('Running'),
+      GAME_STATUS_FINISHED => T_('Finished'),
       );
    $status = build_game_status($grow['Status']);
-   $game_finished = ( $grow['Status'] === 'FINISHED' );
+   $game_finished = ( $grow['Status'] === GAME_STATUS_FINISHED );
 
    $to_move = get_to_move( $grow, 'gameinfo.bad_ToMove_ID' );
 
@@ -159,6 +161,11 @@ function build_rating_diff( $rating_diff )
                     T_('Show invitation') )
          );
    }
+   $itable->add_sinfo(
+         T_('Game Type'),
+         MultiPlayerGame::format_game_type($grow['GameType'], $grow['GamePlayers'])
+            . ( ($grow['GameType'] != GAMETYPE_GO ) ? MED_SPACING . echo_image_game_players($gid) : '' )
+         );
    $itable->add_sinfo(
          T_('Status'),
          $arr_status[$status]
@@ -457,6 +464,8 @@ function build_rating_diff( $rating_diff )
 
    $menu_array = array();
    $menu_array[T_('Show game')] = 'game.php?gid='.$gid;
+   if( $grow['GameType'] != GAMETYPE_GO )
+      $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    if( $tid && !is_null($tourney) )
    {
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
