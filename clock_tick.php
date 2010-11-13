@@ -146,7 +146,7 @@ if(1){//new
       .' WHERE Clock.Ticks - Games.LastTicks > '.TICK_FREQUENCY
          ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
       ." AND Status" . IS_RUNNING_GAME
-      //slower: ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
+      //slower: ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
       );
 }else{//old
    // TODO: This query is sometimes slow and may return more than 10000 rows!
@@ -159,7 +159,7 @@ if(1){//new
             //if both are <=0, the game will never finish by time:
             //. ' AND ( Maintime>0 OR Byotime>0 )'
             //slower: "AND Status" . IS_RUNNING_GAME
-            . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED'"
+            . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
             ;
    $result = db_query( 'clock_tick.find_timeout_games', $query );
 }//new/old
@@ -172,7 +172,7 @@ if(1){//new
       extract($row);
 
       //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
-      $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
+      $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
 
       $hours = ticks_to_hours($ticks - $LastTicks);
 
@@ -191,7 +191,7 @@ if(1){//new
          $time_is_up = ( $White_Maintime == 0 && $White_Byotime == 0 );
       }
       else
-         continue; //$ToMove_ID ==0 if INVITED or FINISHED
+         continue;
 
 
       if( $time_is_up )
@@ -215,9 +215,7 @@ if(1){//new
                 "ToMove_ID=0, " .
                 "Score=$score, " .
                 "Lastchanged=FROM_UNIXTIME($NOW)" ;
-
             db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
-
             if( @mysql_affected_rows() != 1)
             {
                error('mysql_update_game',"clock_tick.time_is_up2($gid)");
