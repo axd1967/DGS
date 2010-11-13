@@ -33,10 +33,13 @@ require_once 'include/countries.php';
 $GLOBALS['ThePage'] = new Page('GamePlayers');
 
 
-define('CMD_ADD_WAITINGROOM_GAME',  'wr_add');
-define('CMD_CHANGE_GROUPS',         'chg_gr');
+// commands / use-cases
+define('CMD_ADD_WAITINGROOM_GAME', 'wr_add'); // add game in waiting-room
+define('CMD_CHANGE_COLOR', 'chg_col'); // set group-color
+define('CMD_CHANGE_ORDER', 'chg_ord'); // set group-order
 
 define('KEY_GROUP_COLOR', 'gpc');
+define('KEY_GROUP_ORDER', 'gpo');
 
 {
    #$DEBUG_SQL = true;
@@ -57,13 +60,14 @@ define('KEY_GROUP_COLOR', 'gpc');
      cmd=wr_add&gid=&...       : show add-new-game-to-waiting-room
      cmd=wr_add&gid=&save...   : execute add new-game to waiting-room with args:
                                  slots, must_be_rated, rating1, rating2, min_rated_games, comment
-     cmd=chg_gr&gid=&...       : show change-group settings
-     cmd=chg_gr&gid=&save...   : update GroupColor on change-group with args: gpc<ID>
+
+     cmd=chg_col&gid=&...      : show change-group-color settings
+     cmd=chg_col&gid=&save...  : update GroupColor on change-group with args: gpc<ID>
+
+     cmd=chg_ord&gid=&...      : show change-group-order settings
+     cmd=chg_ord&gid=&save...  : update GroupOrder on change-group with args: gpo<ID>
 */
    $cmd = get_request_arg('cmd');
-
-   //TODO handle handle GroupOrder
-   //TODO handle game-settings
 
 
    // load data
@@ -87,16 +91,23 @@ define('KEY_GROUP_COLOR', 'gpc');
       else
          $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
    }
-   elseif( $allow_edit && $cmd == CMD_CHANGE_GROUPS ) // change groups (color)
+   elseif( $allow_edit && $cmd == CMD_CHANGE_COLOR ) // change groups (color)
    {
       if( get_request_arg('save') )
          change_group_color($gid);
       else
-         $extform = build_form_change_groups( $gid, $cmd );
+         $extform = build_form_change_group( $gid, $cmd, 'changegroupcolor' );
+   }
+   elseif( $allow_edit && $cmd == CMD_CHANGE_ORDER ) // change groups (order)
+   {
+      if( get_request_arg('save') )
+         change_group_order($gid, $grow['GameType']);
+      else
+         $extform = build_form_change_group( $gid, $cmd, 'changegrouporder' );
    }
 
    $arr_ratings = calc_group_ratings();
-   $utable = build_table_game_players( $arr_game_players, $cmd, $extform );
+   $utable = build_table_game_players( $grow, $arr_game_players, $cmd, $extform );
 
 
    // ------------------------
@@ -132,7 +143,8 @@ define('KEY_GROUP_COLOR', 'gpc');
    {
       if( $cnt_free_slots )
          $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
-      $menu_array[T_('Change groups')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_GROUPS;
+      $menu_array[T_('Change color')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
+      $menu_array[T_('Change order')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_ORDER;
    }
 
    end_page(@$menu_array);
@@ -313,17 +325,20 @@ function calc_group_ratings()
    return $arr_ratings;
 }//calc_group_ratings
 
-function build_table_game_players( $arr_gp, $cmd, &$form )
+function build_table_game_players( $grow, $arr_gp, $cmd, &$form )
 {
    global $base_path;
-   $chg_group = ($cmd == CMD_CHANGE_GROUPS) && $form;
-   $arr_group_colors = ($chg_group) ? GamePlayer::get_group_color_text() : null;
+   $chg_group_color = ($cmd == CMD_CHANGE_COLOR) && $form;
+   $chg_group_order = ($cmd == CMD_CHANGE_ORDER) && $form;
+   $arr_group_colors = ($chg_group_color) ? GamePlayer::get_group_color_text() : null;
 
    $utable = new Table( 'GamePlayers', 'game_players.php' );
    $utable->use_show_rows( false );
+   if( $chg_group_order )
+      $utable->add_tablehead(10, T_('Set Order#header'), '', TABLE_NO_HIDE, '');
    $utable->add_tablehead( 1, '#', 'Number' );
-   if( $chg_group )
-      $utable->add_tablehead( 9, T_('Set Group#header'), 'Image', TABLE_NO_HIDE, '');
+   if( $chg_group_color )
+      $utable->add_tablehead( 9, T_('Set Group#header'), '', TABLE_NO_HIDE, '');
    $utable->add_tablehead( 2, T_('Color#header'), 'Image' );
    $utable->add_tablehead( 3, T_('Player#header'), 'User' );
    $utable->add_tablehead( 5, T_('Country#header'), 'Image' );
@@ -331,6 +346,8 @@ function build_table_game_players( $arr_gp, $cmd, &$form )
    $utable->add_tablehead( 6, T_('Last access#header'), 'Date' );
    $utable->add_tablehead( 7, T_('Flags#header'), 'ImagesLeft' );
    $utable->add_tablehead( 8, T_('Status#header'), 'ImagesLeft' );
+
+   $group_max_players = MultiPlayerGame::determine_groups_player_count( $grow['GamePlayers'] );
 
    $idx = 0;
    $last_group = null;
@@ -344,7 +361,7 @@ function build_table_game_players( $arr_gp, $cmd, &$form )
       }
 
       $row_str = array(
-         1 => $gp->GroupOrder . '.',
+         1 => ($gp->GroupOrder > 0 ) ? $gp->GroupOrder . '.' : NO_VALUE,
          2 => GamePlayer::build_image_group_color( $gp->GroupColor ),
       );
       if( $gp->uid )
@@ -359,11 +376,21 @@ function build_table_game_players( $arr_gp, $cmd, &$form )
       $row_str[7] = build_user_flags( $gp );
       $row_str[8] = build_user_status( $gp );
 
-      if( $chg_group && $gp->uid > GUESTS_ID_MAX ) // command: change-groups
+      if( $chg_group_color && $gp->uid > GUESTS_ID_MAX ) // command: set-group-color
       {
          $gpkey = KEY_GROUP_COLOR.$gp->id;
          $row_str[9] = $form->print_insert_select_box( $gpkey, 1, $arr_group_colors,
             get_request_arg($gpkey, $gp->GroupColor) );
+      }
+      if( $chg_group_order && $gp->uid > GUESTS_ID_MAX ) // command: set-group-order
+      {
+         if( allow_change_group_order($grow['GameType'], $gp->GroupColor) )
+         {
+            $gpkey = KEY_GROUP_ORDER.$gp->id;
+            $arr_group_order = array( 0 => NO_VALUE ) + build_num_range_map( 1, $group_max_players );
+            $row_str[10] = $form->print_insert_select_box( $gpkey, 1, $arr_group_order,
+               get_request_arg($gpkey, $gp->GroupOrder) );
+         }
       }
 
       $utable->add_row( $row_str );
@@ -372,6 +399,12 @@ function build_table_game_players( $arr_gp, $cmd, &$form )
 
    return $utable;
 }//build_table_game_players
+
+function allow_change_group_order( $game_type, $group_color )
+{
+   return ( $game_type == GAMETYPE_TEAM_GO && $group_color != GPCOL_BW )
+       || ( $game_type == GAMETYPE_ZEN_GO  && $group_color == GPCOL_BW );
+}
 
 function build_form_add_waiting_room( $gid, $slot_count, $cmd )
 {
@@ -395,9 +428,9 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd )
    return $form;
 }//build_form_add_waiting_room
 
-function build_form_change_groups( $gid, $cmd )
+function build_form_change_group( $gid, $cmd, $formname )
 {
-   $form = new Form( 'changegroups', 'game_players.php', FORM_GET, false );
+   $form = new Form( $formname, 'game_players.php', FORM_GET, false );
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
 
@@ -405,7 +438,7 @@ function build_form_change_groups( $gid, $cmd )
    $form->add_row( array( 'TAB', 'CELL', 1, '',
                           'SUBMITBUTTON', 'save', T_('Update#submit') ));
    return $form;
-}
+}//build_form_change_group
 
 function add_waiting_room_mpgame( $grow, $uid )
 {
@@ -484,5 +517,29 @@ function change_group_color( $gid )
    if( $cnt_upd > 0 )
       set_request_arg('sysmsg', T_('Groups updated!') );
 }//change_group_color
+
+function change_group_order( $gid, $gametype )
+{
+   global $arr_game_players;
+
+   // if changed, update group-order in database + table
+   $cnt_upd = 0;
+   foreach( $arr_game_players as $gp )
+   {
+      $new_order = (int)get_request_arg(KEY_GROUP_ORDER.$gp->id);
+      if( $gp->uid > GUESTS_ID_MAX && $new_order != $gp->GroupOrder
+            && allow_change_group_order($gametype, $gp->GroupColor) )
+      {
+         db_query( "game_players.change_group_order.gp_upd($gid)",
+            "UPDATE GamePlayers SET GroupOrder='" . mysql_addslashes($new_order) . "' " .
+            "WHERE ID={$gp->id} AND uid>0 LIMIT 1" );
+         $gp->groupOrder = $new_order;
+         $cnt_upd++;
+      }
+   }
+
+   if( $cnt_upd > 0 ) // reload to get new order
+      jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=" . urlencode(T_('Groups updated!')) );
+}//change_group_order
 
 ?>

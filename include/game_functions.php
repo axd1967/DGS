@@ -373,6 +373,12 @@ class MultiPlayerGame
       return MultiPlayerGame::determine_game_type( $game_players, true );
    }
 
+   /*! \brief Returns max number of required players in all groups. */
+   function determine_groups_player_count( $game_players )
+   {
+      return max( explode(':', $game_players) );
+   }
+
    function get_game_type( $game_type=null )
    {
       static $ARR_GAME_TYPES = null;

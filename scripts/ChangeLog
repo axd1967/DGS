@@ -19,6 +19,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-14 juga
+
+   * game_players.php (build_table_game_players, allow_change_group_order, change_group_order),
+     include/game_functions.php (MultiPlayerGame.determine_groups_player_count):
+   - extended change-groups editor to update GamePlayers.GroupOrder for joined users
+
 2010-11-13 juga
 
    * include/game_functions.php (GamePlayer.get_group_color),
