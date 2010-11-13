@@ -196,7 +196,7 @@ define('MSGBOXROWS_INVITE', 6);
 
          if( $Type == 'INVITATION' )
          {
-            if( $Status=='INVITED' && ($Replied != 'Y') )
+            if( $Status == GAME_STATUS_INVITED && ($Replied != 'Y') )
                $submode = ( $to_me ) ? 'ShowInvite' : 'ShowMyInvite';
             else if( is_null($Status) )
                $submode = 'AlreadyDeclined';
@@ -374,9 +374,9 @@ define('MSGBOXROWS_INVITE', 6);
                             null, null, null, false, $rx_term);
 
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_DISPUTE, $iamrated, 'redraw', @$_POST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings);
          else
-            game_settings_form($message_form, GSET_MSG_DISPUTE, $iamrated, $my_id, $Game_ID, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, $my_id, $Game_ID, $map_ratings);
 
          $message_form->add_row( array(
                'HEADER', T_('Dispute settings'),
@@ -403,9 +403,9 @@ define('MSGBOXROWS_INVITE', 6);
       case 'Invite':
       {
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_INVITE, $iamrated, 'redraw', @$_POST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings);
          else
-            game_settings_form($message_form, GSET_MSG_INVITE, $iamrated, null, null, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, null, null, $map_ratings);
 
          $message_form->add_row( array(
                'HEADER', T_('Invitation message'),
