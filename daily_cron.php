@@ -57,9 +57,21 @@ if( !$is_down )
    if( $delete_waitingroom_entries )
    {
       // Delete old waitingroom list entries
-      $timelimit = $NOW - $waitingroom_timelimit*24*3600;
-      db_query( 'daily_cron.waitingroom',
-         "DELETE FROM Waitingroom WHERE UNIX_TIMESTAMP(Time)<$timelimit" );
+      $wroom_query = "WHERE Time < NOW() - INTERVAL $waitingroom_timelimit DAY";
+      $result = db_query( 'daily_cron.waitingroom.find',
+         "SELECT gid, nrGames, GameType, Status FROM Waitingroom $wroom_query AND gid>0 and nrGames>0" );
+      $arr_gids = array();
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         if( $row['GameType'] != GAMETYPE_GO && $row['Status'] == GAME_STATUS_SETUP )
+            $arr_gids[(int)$row['gid']] = (int)$row['nrGames'];
+      }
+      mysql_free_result($result);
+
+      // Delete old waitingroom list entries with GamePlayers for non-std game-types
+      db_query( 'daily_cron.waitingroom', "DELETE FROM Waitingroom $wroom_query" );
+      foreach( $arr_gids as $gid => $nrGames )
+         MultiPlayerGame::revoke_offer_game_players($gid, $nrGames, GPFLAG_WAITINGROOM);
 
       // Delete WaitingroomJoined entries without Waitingroom-entry
       db_query( 'daily_cron.waitingroom_joined',
