@@ -161,6 +161,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    $gfilter->add_filter(43, 'Selection', build_ruleset_filter_array(), true);
+   $gfilter->add_filter(44, 'Selection', MultiPlayerGame::build_game_type_filter_array(), true);
 
    if( !$observe && !$all ) //FU+RU
    {
@@ -379,6 +380,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 41: >  FU (Indicator if there are (hidden) game-comments)
  * 42:    TournamentGames.Status
  * 43:    Ruleset
+ * 44:    GameType
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -468,6 +470,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       }
    }
 
+   $gtable->add_tablehead(44, T_('GameType#header'), '', 0, 'GameType+');
    $gtable->add_tablehead(43, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
    $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
@@ -899,6 +902,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
       if( $gtable->Is_Column_Displayed[43] )
          $grow_strings[43] = getRulesetText($Ruleset);
+      if( $gtable->Is_Column_Displayed[44] )
+      {
+         $grow_strings[44] = MultiPlayerGame::format_game_type($GameType, $GamePlayers);
+         if( $GameType != GAMETYPE_GO )
+            $grow_strings[44] .= ' ' . echo_image_game_players($ID);
+      }
 
       if( $finished ) //FU+FA
       {

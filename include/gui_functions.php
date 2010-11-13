@@ -281,6 +281,14 @@ function echo_image_tourney_next_round()
    return image( $base_path.'images/next.gif', T_('Next Round#tourney'), null, 'class="InTextImage"' );
 }
 
+/*! \brief Returns image-tag for tournament-round (next-round). */
+function echo_image_game_players( $gid )
+{
+   global $base_path;
+   return anchor( $base_path."game_players.php?gid=$gid",
+      image( $base_path.'images/team.gif', T_('Show game-players'), null, 'class="InTextImage"' ));
+}
+
 /*!
  * \brief Formats string: <SPACES><TAG_L>str<TAG_R><SPACES>
  * \note spacing('text', 1, 'b'); -> ' <b>text</b> '
