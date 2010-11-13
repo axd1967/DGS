@@ -37,6 +37,14 @@ define('GPFLAG_WAITINGROOM', 0x0008); // join user via waiting-room
 define('GPFLAG_INVITATION',  0x0010); // join user via invitation
 define('GPFLAG_SLOT_TAKEN',  (GPFLAG_JOINED|GPFLAG_RESERVED) );
 
+// GamePlayers.GroupColor
+define('GPCOL_B',  'B');
+define('GPCOL_W',  'W');
+define('GPCOL_G1', 'G1');
+define('GPCOL_G2', 'G2');
+define('GPCOL_BW', 'BW');
+define('GPCOL_DEFAULT', GPCOL_BW);
+
 // enum Waitingroom.JigoMode
 define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
 define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
@@ -540,7 +548,23 @@ class GamePlayer
          );
       }
       return @$arr_col_images[$group_color];
-   }//getGroupColorImageUrl
+   }//build_image_group_color
+
+   function get_group_colors()
+   {
+      static $arr_group_cols = null;
+      if( is_null($arr_group_cols) )
+      {
+         $arr_group_cols = array(
+            'BW'  => T_('Unset#gpcol'),
+            'B'   => T_('Black#gpcol'),
+            'W'   => T_('White#gpcol'),
+            'G1'  => T_('Group #1#gpcol'),
+            'G2'  => T_('Group #2#gpcol'),
+         );
+      }
+      return $arr_group_cols;
+   }//get_group_colors
 
 } // end 'GamePlayer'
 

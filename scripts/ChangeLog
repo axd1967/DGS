@@ -21,6 +21,14 @@ ChangeLog
 
 2010-11-13 juga
 
+   * include/game_functions.php (class GamePlayers, ~.get_group_colors),
+     game_players.php (build_table_game_players, build_form_change_groups,
+       add_waiting_room_mpgame, change_group_color),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Games.txt, skins/dragon/screen.css:
+   - added change-groups editor to update GamePlayers.GroupColor for joined users
+   - changed order of GamePlayers.GroupColor to favor B/W over G1/G2 over BW (unset)
+
    * include/db/games.php (Games.is_status_running),
      include/sgf_builder.php (class SgfBuilder),
      scripts/game_consistency.php, scripts/player_consistency.php,
@@ -121,7 +129,7 @@ ALTER TABLE Games
 CREATE TABLE GamePlayers (
    ID int NOT NULL auto_increment,
    gid int NOT NULL,
-   GroupColor enum('BW','B','W','G1','G2') NOT NULL default 'BW',
+   GroupColor enum('B','W','G1','G2','BW') NOT NULL default 'BW',
    GroupOrder tinyint signed NOT NULL default 0,
    uid int NOT NULL default 0,
    Flags smallint unsigned NOT NULL default 0,

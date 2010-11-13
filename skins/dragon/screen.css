@@ -2884,6 +2884,16 @@ span.TRank {
 
 
 /* ------------------------- */
+/* Multi-player-game pages */
+/* ------------------------- */
+
+table#GamePlayersTable tr.Empty {
+   background: #F7F5E3;
+   height: 5px;
+}
+
+
+/* ------------------------- */
 /* FAQ pages */
 /* ------------------------- */
 

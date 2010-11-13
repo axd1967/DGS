@@ -199,7 +199,7 @@ Description:
 ------------+------------------------------+---------
  ID         | int(11)                      | NULL
  gid        | int(11)                      | NULL
- GroupColor | enum('BW','B','W','G1','G2') | BW
+ GroupColor | enum('B','W','G1','G2','BW') | BW
  GroupOrder | tinyint(4)                   | 0
  uid        | int(11)                      | 0
  Flags      | smallint(5) unsigned         | 0

@@ -33,7 +33,10 @@ require_once 'include/countries.php';
 $GLOBALS['ThePage'] = new Page('GamePlayers');
 
 
-define('CMD_WR_ADD', 'wr_add');
+define('CMD_ADD_WAITINGROOM_GAME',  'wr_add');
+define('CMD_CHANGE_GROUPS',         'chg_gr');
+
+define('KEY_GROUP_COLOR', 'gpc');
 
 {
    #$DEBUG_SQL = true;
@@ -54,10 +57,11 @@ define('CMD_WR_ADD', 'wr_add');
      cmd=wr_add&gid=&...       : show add-new-game-to-waiting-room
      cmd=wr_add&gid=&save...   : execute add new-game to waiting-room with args:
                                  slots, must_be_rated, rating1, rating2, min_rated_games, comment
+     cmd=chg_gr&gid=&...       : show change-group settings
+     cmd=chg_gr&gid=&save...   : update GroupColor on change-group with args: gpc<ID>
 */
    $cmd = get_request_arg('cmd');
 
-   //TODO handle GroupColor
    //TODO handle handle GroupOrder
    //TODO handle game-settings
 
@@ -74,20 +78,24 @@ define('CMD_WR_ADD', 'wr_add');
 
    // ------------------------
 
-   $form = null;
+   $form = $extform = null;
 
-   if( $allow_edit && $cmd == CMD_WR_ADD && $cnt_free_slots > 0 ) // add to waiting-room
+   if( $allow_edit && $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
    {
       if( get_request_arg('save') )
-      {
          add_waiting_room_mpgame( $grow, $my_id );
-         set_request_arg('sysmsg', T_('Game added!') );
-      }
       else
          $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
    }
+   elseif( $allow_edit && $cmd == CMD_CHANGE_GROUPS ) // change groups (color)
+   {
+      if( get_request_arg('save') )
+         change_group_color($gid);
+      else
+         $extform = build_form_change_groups( $gid, $cmd );
+   }
 
-   $utable = build_table_game_players( $arr_game_players );
+   $utable = build_table_game_players( $arr_game_players, $cmd, $extform );
 
 
    // ------------------------
@@ -101,9 +109,14 @@ define('CMD_WR_ADD', 'wr_add');
    $itable_game_settings = build_game_settings( $grow );
    echo $itable_game_settings->make_table(), "<br>\n";
 
+   // use extform | form
+   if( !is_null($extform) )
+      echo $extform->print_start_default();
    if( !is_null($utable) )
       $utable->echo_table();
-   if( !is_null($form) )
+   if( !is_null($extform) )
+      echo $extform->get_form_string(), $extform->print_end();
+   elseif( !is_null($form) )
       $form->echo_string();
 
 
@@ -117,7 +130,8 @@ define('CMD_WR_ADD', 'wr_add');
    if( $allow_edit && $status == GAME_STATUS_SETUP )
    {
       if( $cnt_free_slots )
-         $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_WR_ADD;
+         $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
+      $menu_array[T_('Change groups')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_GROUPS;
    }
 
    end_page(@$menu_array);
@@ -240,13 +254,17 @@ function load_game_players( $gid )
    return $arr_gp;
 }//load_game_players
 
-function build_table_game_players( $arr_gp )
+function build_table_game_players( $arr_gp, $cmd, &$form )
 {
    global $base_path;
+   $chg_group = ($cmd == CMD_CHANGE_GROUPS) && $form;
+   $arr_group_colors = ($chg_group) ? GamePlayer::get_group_colors() : null;
 
-   $utable = new Table( 'gameplayers', 'game_players.php' );
+   $utable = new Table( 'GamePlayers', 'game_players.php' );
    $utable->use_show_rows( false );
    $utable->add_tablehead( 1, '#', 'Number' );
+   if( $chg_group )
+      $utable->add_tablehead( 8, T_('Set Group#header'), 'Image', TABLE_NO_HIDE, '');
    $utable->add_tablehead( 2, T_('Color#header'), 'Image' );
    $utable->add_tablehead( 3, T_('Player#header'), 'User' );
    $utable->add_tablehead( 5, T_('Country#header'), 'Image' );
@@ -255,9 +273,16 @@ function build_table_game_players( $arr_gp )
    $utable->add_tablehead( 7, T_('Status#header'), 'ImagesLeft' );
 
    $idx = 0;
+   $last_group = null;
    foreach( $arr_gp as $gp )
    {
       $idx++;
+      if( !is_null($last_group) && $gp->GroupColor != $last_group )
+      {//add some separator without chaning row-col for next content-row
+         $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
+         $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
+      }
+
       $row_str = array(
          1 => $gp->GroupOrder . '.',
          2 => GamePlayer::build_image_group_color( $gp->GroupColor ),
@@ -273,7 +298,15 @@ function build_table_game_players( $arr_gp )
          $row_str[3] = NO_VALUE;
       $row_str[7] = build_user_status( $gp );
 
+      if( $chg_group && $gp->uid > GUESTS_ID_MAX ) // command: change-groups
+      {
+         $gpkey = KEY_GROUP_COLOR.$gp->id;
+         $row_str[8] = $form->print_insert_select_box( $gpkey, 1, $arr_group_colors,
+            get_request_arg($gpkey, $gp->GroupColor) );
+      }
+
       $utable->add_row( $row_str );
+      $last_group = $gp->GroupColor;
    }
 
    return $utable;
@@ -300,6 +333,18 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd )
 
    return $form;
 }//build_form_add_waiting_room
+
+function build_form_change_groups( $gid, $cmd )
+{
+   $form = new Form( 'changegroups', 'game_players.php', FORM_GET, false );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'cmd', $cmd );
+
+   $form->add_row( array( 'SPACE' ) );
+   $form->add_row( array( 'TAB', 'CELL', 1, '',
+                          'SUBMITBUTTON', 'save', T_('Update#submit') ));
+   return $form;
+}
 
 function add_waiting_room_mpgame( $grow, $uid )
 {
@@ -352,6 +397,31 @@ function add_waiting_room_mpgame( $grow, $uid )
          "LIMIT $slots" );
    }
    ta_end();
+
+   set_request_arg('sysmsg', T_('Game added!') );
 }//add_waiting_room_mpgame
+
+function change_group_color( $gid )
+{
+   global $arr_game_players;
+
+   // if changed, update group-color in database + table
+   $cnt_upd = 0;
+   foreach( $arr_game_players as $gp )
+   {
+      $new_grcol = get_request_arg(KEY_GROUP_COLOR.$gp->id);
+      if( $gp->uid > GUESTS_ID_MAX && $new_grcol != $gp->GroupColor )
+      {
+         db_query( "game_players.change_group_color.gp_upd($gid)",
+            "UPDATE GamePlayers SET GroupColor='" . mysql_addslashes($new_grcol) . "' " .
+            "WHERE ID={$gp->id} AND uid>0 LIMIT 1" );
+         $gp->setGroupColor($new_grcol);
+         $cnt_upd++;
+      }
+   }
+
+   if( $cnt_upd > 0 )
+      set_request_arg('sysmsg', T_('Groups updated!') );
+}//change_group_color
 
 ?>
