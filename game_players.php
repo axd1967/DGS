@@ -95,6 +95,7 @@ define('KEY_GROUP_COLOR', 'gpc');
          $extform = build_form_change_groups( $gid, $cmd );
    }
 
+   $arr_ratings = calc_group_ratings();
    $utable = build_table_game_players( $arr_game_players, $cmd, $extform );
 
 
@@ -140,6 +141,8 @@ define('KEY_GROUP_COLOR', 'gpc');
 
 function build_game_settings( $grow )
 {
+   global $arr_ratings;
+
    $itable = new Table_info('game_settings', TABLEOPT_LABEL_COLON);
    $itable->add_sinfo(
          T_('Game settings'),
@@ -149,8 +152,6 @@ function build_game_settings( $grow )
                T_('Ruleset'), getRulesetText($grow['Ruleset']),
                T_('Rated game'), yesno($grow['Rated']) // normally never Rated
          ));
-   //TODO show correct/calculated handicap-settings for current game-players with chosen handicap-type if possible -> may require manual-setting
-   //TODO maybe always allow "dispute" setting manual handicap/komi
    $itable->add_sinfo(
          T_('Handicap settings'),
          sprintf( "%s: %s, %s: %s, %s: %s",
@@ -165,10 +166,37 @@ function build_game_settings( $grow )
                      TIMEFMT_SHORT|TIMEFMT_HTMLSPC|TIMEFMT_ADDTYPE ),
                ( $grow['WeekendClock'] == 'Y' ? 'Clock running on weekend' : 'Clock stopped on weekend' )
          ));
+
+   if( count($arr_ratings) )
+   {
+      $arr = array();
+      build_group_rating( $arr, GPCOL_B, GPCOL_W );
+      build_group_rating( $arr, GPCOL_G1, GPCOL_G2 );
+      $itable->add_sinfo(
+            T_('Group ratings'), implode("<br>\n", $arr) );
+   }
    return $itable;
 }//build_game_settings
 
-function build_user_status( $gp )
+function build_group_rating( &$arr, $grcol1, $grcol2 )
+{
+   global $arr_ratings;
+   if( isset($arr_ratings[$grcol1]) || isset($arr_ratings[$grcol2]) )
+   {
+      $buf = '';
+      foreach( array( $grcol1, $grcol2 ) as $gr_col )
+      {
+         $buf .= sprintf( "<b>%s:</b> %s",
+               GamePlayer::get_group_color_text($gr_col),
+               ( isset($arr_ratings[$gr_col]) ) ? echo_rating( $arr_ratings[$gr_col] ) : NO_VALUE );
+         if( $gr_col == $grcol1 )
+            $buf .= ', ';
+      }
+      $arr[] = $buf;
+   }
+}//build_group_rating
+
+function build_user_flags( $gp )
 {
    $arr = array();
    if( $gp->Flags & GPFLAG_MASTER )
@@ -184,6 +212,12 @@ function build_user_status( $gp )
       else
          $arr[] = T_('Joined#gpflag');
    }
+   return implode(', ', $arr);
+}//build_user_flags
+
+function build_user_status( $gp )
+{
+   $arr = array();
    if( $gp->uid > 0 )
    {
       $onVac = $gp->user->urow['OnVacation'];
@@ -223,7 +257,7 @@ function load_game_players( $gid )
 
    $result = db_query( "game_players.find.game_players($gid)", //TODO optimize/cleanup
       "SELECT GP.*, " .
-         "P.Name, P.Handle, P.Rating2, P.Country, P.OnVacation, " .
+         "P.Name, P.Handle, P.Rating2, P.RatingStatus, P.Country, P.OnVacation, " .
          "UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess " .
       "FROM GamePlayers AS GP LEFT JOIN Players AS P ON P.ID=GP.uid " .
       "WHERE gid=$gid ORDER BY GroupColor ASC, GroupOrder ASC" );
@@ -235,7 +269,7 @@ function load_game_players( $gid )
       if( $uid > 0 )
       {
          $user = new User( $uid, $row['Name'], $row['Handle'], 0, $row['X_Lastaccess'],
-            $row['Country'], $row['Rating2'] );
+            $row['Country'], $row['Rating2'], $row['RatingStatus'] );
          $user->urow = array( 'OnVacation' => $row['OnVacation'] );
       }
       else
@@ -244,6 +278,7 @@ function load_game_players( $gid )
       $gp = GamePlayer::build_game_player( $row['ID'], $row['gid'], $row['GroupColor'],
          $row['GroupOrder'], $row['Flags'], $uid, $user );
       $arr_gp[] = $gp;
+
       if( $uid > 0 )
          $arr_users[$uid] = $gp;
       if( ($gp->Flags & GPFLAG_SLOT_TAKEN) == 0 )
@@ -254,23 +289,48 @@ function load_game_players( $gid )
    return $arr_gp;
 }//load_game_players
 
+// return: $arr_ratings[$group_color] = average-rating
+function calc_group_ratings()
+{
+   global $arr_game_players;
+
+   $calc_ratings = array();
+   foreach( $arr_game_players as $gp )
+   {
+      if( !is_null($gp->user) && $gp->user->hasRating() )
+         $calc_ratings[$gp->GroupColor][] = $gp->user->Rating;
+   }
+
+   // calc average rating for groups B/W
+   $arr_ratings = array();
+   foreach( $calc_ratings as $gr_col => $arr )
+   {
+      $cnt = count($arr);
+      if( $gr_col != GPCOL_BW && $cnt )
+         $arr_ratings[$gr_col] = array_sum($arr) / $cnt;
+   }
+
+   return $arr_ratings;
+}//calc_group_ratings
+
 function build_table_game_players( $arr_gp, $cmd, &$form )
 {
    global $base_path;
    $chg_group = ($cmd == CMD_CHANGE_GROUPS) && $form;
-   $arr_group_colors = ($chg_group) ? GamePlayer::get_group_colors() : null;
+   $arr_group_colors = ($chg_group) ? GamePlayer::get_group_color_text() : null;
 
    $utable = new Table( 'GamePlayers', 'game_players.php' );
    $utable->use_show_rows( false );
    $utable->add_tablehead( 1, '#', 'Number' );
    if( $chg_group )
-      $utable->add_tablehead( 8, T_('Set Group#header'), 'Image', TABLE_NO_HIDE, '');
+      $utable->add_tablehead( 9, T_('Set Group#header'), 'Image', TABLE_NO_HIDE, '');
    $utable->add_tablehead( 2, T_('Color#header'), 'Image' );
    $utable->add_tablehead( 3, T_('Player#header'), 'User' );
    $utable->add_tablehead( 5, T_('Country#header'), 'Image' );
    $utable->add_tablehead( 4, T_('Rating#header'), 'Rating' );
    $utable->add_tablehead( 6, T_('Last access#header'), 'Date' );
-   $utable->add_tablehead( 7, T_('Status#header'), 'ImagesLeft' );
+   $utable->add_tablehead( 7, T_('Flags#header'), 'ImagesLeft' );
+   $utable->add_tablehead( 8, T_('Status#header'), 'ImagesLeft' );
 
    $idx = 0;
    $last_group = null;
@@ -296,12 +356,13 @@ function build_table_game_players( $arr_gp, $cmd, &$form )
       }
       else
          $row_str[3] = NO_VALUE;
-      $row_str[7] = build_user_status( $gp );
+      $row_str[7] = build_user_flags( $gp );
+      $row_str[8] = build_user_status( $gp );
 
       if( $chg_group && $gp->uid > GUESTS_ID_MAX ) // command: change-groups
       {
          $gpkey = KEY_GROUP_COLOR.$gp->id;
-         $row_str[8] = $form->print_insert_select_box( $gpkey, 1, $arr_group_colors,
+         $row_str[9] = $form->print_insert_select_box( $gpkey, 1, $arr_group_colors,
             get_request_arg($gpkey, $gp->GroupColor) );
       }
 

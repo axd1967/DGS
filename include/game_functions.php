@@ -550,7 +550,7 @@ class GamePlayer
       return @$arr_col_images[$group_color];
    }//build_image_group_color
 
-   function get_group_colors()
+   function get_group_color_text( $group_color=null )
    {
       static $arr_group_cols = null;
       if( is_null($arr_group_cols) )
@@ -563,8 +563,8 @@ class GamePlayer
             'G2'  => T_('Group #2#gpcol'),
          );
       }
-      return $arr_group_cols;
-   }//get_group_colors
+      return (is_null($group_color)) ? $arr_group_cols : @$arr_group_cols[$group_color];
+   }//get_group_color_text
 
 } // end 'GamePlayer'
 

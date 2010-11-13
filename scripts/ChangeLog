@@ -21,6 +21,12 @@ ChangeLog
 
 2010-11-13 juga
 
+   * include/game_functions.php (GamePlayer.get_group_color),
+     game_players.php (build_game_settings, build_group_rating, build_user_flags,
+       build_user_status, load_game_players, calc_group_ratings, build_table_game_players):
+   - show average-rating for B/W- and G1/G2-group for multi-player-game in game-settings
+   - splitted status-column into Flags & Status column
+
    * include/game_functions.php (class GamePlayers, ~.get_group_colors),
      game_players.php (build_table_game_players, build_form_change_groups,
        add_waiting_room_mpgame, change_group_color),
