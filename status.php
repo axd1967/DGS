@@ -127,6 +127,7 @@ if( (string)$folder_nr_querystr != '' )
 } // show messages
 
 
+
 { // show games
    $uid = $my_id;
 
@@ -152,6 +153,7 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
    $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
    $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
+   $gtable->add_tablehead(19, T_('GameType#header'), '', 0, 'GameType+');
    $gtable->add_tablehead(18, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
    $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
@@ -178,8 +180,6 @@ if( (string)$folder_nr_querystr != '' )
    $gtable->make_sort_images();
    $order = ' ORDER BY ' .
       NextGameOrder::get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
-
-   $limit = ''; //$gtable->current_limit_string();
    $gtable->use_show_rows(false);
 
 
@@ -199,7 +199,7 @@ if( (string)$folder_nr_querystr != '' )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
       ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"
-      ."$order$limit";
+      . $order;
 
 
    if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
@@ -216,9 +216,10 @@ if( (string)$folder_nr_querystr != '' )
    {
       $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //defined below
 
-      $gtable->set_found_rows( mysql_found_rows("status.find.my_games($my_id)") );
+      $cnt_rows = 0;
       while( $row = mysql_fetch_assoc( $result ) )
       {
+         $cnt_rows++;
          $Rating=NULL;
          extract($row);
 
@@ -272,15 +273,72 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
          if( $gtable->Is_Column_Displayed[18] )
             $grow_strings[18] = getRulesetText($Ruleset);
+         if( $gtable->Is_Column_Displayed[19] )
+            $grow_strings[19] = MultiPlayerGame::format_game_type( $GameType, $GamePlayers )
+               . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) );
 
          $gtable->add_row( $grow_strings );
       }
-
+      $gtable->set_found_rows( $cnt_rows );
       $gtable->echo_table();
    }
    mysql_free_result($result);
    //unset($gtable);
-}
+}// status-games
+
+
+
+{ // show multi-player-games
+   $mpgtable = new Table( 'mpgame', "status.php", null, '', $table_mode|TABLE_ROWS_NAVI );
+
+   $mpgtable->add_or_del_column();
+
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $mpgtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $mpgtable->add_tablehead( 2, T_('GameType#header'), '', TABLE_NO_HIDE, 'GameType+');
+   $mpgtable->add_tablehead( 3, T_('Ruleset#header'), '', 0, 'Ruleset-');
+   $mpgtable->add_tablehead( 4, T_('Size#header'), 'Number', 0, 'Size-');
+   $mpgtable->add_tablehead( 5, T_('Last change#header'), 'Date', 0, 'Lastchanged-');
+   $mpgtable->add_tablehead( 6, T_('Status#header'), '', TABLE_NO_HIDE );
+
+   $mpgtable->set_default_sort( 5/*, 1*/); //on Lastchanged,ID
+   $order = $mpgtable->current_order_string('ID-');
+   $mpgtable->use_show_rows(false);
+
+   $query = "SELECT G.ID, G.Black_ID, G.ToMove_ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, "
+      . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged, "
+      . "GP.Flags "
+      . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
+      . "WHERE GP.uid=$uid AND G.Status='SETUP'"
+      . $order;
+
+   if( $DEBUG_SQL ) echo "QUERY-MP-GAMES: " . make_html_safe($query) ."<br>\n";
+   $result = db_query( "status.find_mp_games($uid)", $query );
+   if( @mysql_num_rows($result) > 0 )
+   {
+      section( 'MPGames', T_('Your multi-player-games to manage:'));
+
+      $cnt_rows = 0;
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         $cnt_rows++;
+         $row_arr = array(
+            1 => button_TD_anchor( "game_players.php?gid=".$row['ID'], $row['ID'] ),
+            2 => MultiPlayerGame::format_game_type( $row['GameType'], $row['GamePlayers'] ),
+            3 => getRulesetText($row['Ruleset']),
+            4 => $row['Size'],
+            5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',
+            6 => '',
+         );
+         $mpgtable->add_row( $row_arr );
+      }
+      $mpgtable->set_found_rows( $cnt_rows );
+      $mpgtable->echo_table();
+   }
+   mysql_free_result($result);
+   unset($mpgtable);
+}// multi-player-games
+
 
 
 { // show pending posts
