@@ -19,6 +19,121 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-13 juga
+
+   * include/db/games.php (Games.is_status_running),
+     include/sgf_builder.php (class SgfBuilder),
+     scripts/game_consistency.php, scripts/player_consistency.php,
+     scripts/tests/GameAddTimeTest.php, code_examples/query_sql.php,
+     code_examples/test_clock_tick.php,
+     game_comments.php, send_message.php:
+   - code cleanup to handle Games.Status
+
+   * include/std_functions.php (game_reference):
+   - adjust representation of <game>-tag for multi-player-game-type
+     - add game-id
+     - link to game-players-page for multi-player-game on SETUP-game-status
+
+   * include/quick/quick_game.php (class QuickHandlerGame),
+     include/quick/quick_game_info.php (class QuickHandlerGameInfo),
+     include/quick/quick_game_list.php (class QuickHandlerGameList),
+     specs/quick_suite.txt, quick_status.php, quick_play.php:
+   - added game-type for multi-player-game: Go (standard), Team-Go (N:M), Zen-Go
+     - added game_type for game-object, commands: info, list
+     - added game_type for quick-status
+
+   * include/game_functions.php (class MultiPlayerGame.determine_game_type,
+       ~.determine_player_count, ~.get_game_type, ~.format_game_type,
+       ~.build_game_type_filter_array, ~.delete_game, ~.revoke_offer_game_players,
+       ~.count_game_players, ~.check_count_game_players, ~.init_multi_player_game,
+       ~.join_waitingroom_game;
+       class GamePlayer, ~.setGroupColor, ~.build_game_player, ~.build_image_group_color;
+       get_gamesettings_viewmode, parse_waiting_room_rating_range,
+       append_form_add_waiting_room_game, echo_accept_same_opponent, build_accept_same_opponent_array),
+     game_players.php (build_game_settings, build_user_status, load_game, load_game_players,
+       build_table_game_players, build_form_add_waiting_room, add_waiting_room_mpgame),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/error_codes.php (ErrorCode.init),
+     include/globals.php,
+     include/gui_functions.php (echo_image_game_players),
+     include/quick_common.php (set_request_arg),
+     include/std_functions.php,
+     include/utilities.php (build_num_range_map),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Games.txt, specs/db/table-Waitingroom.txt,
+     tournaments/edit_rules.php,
+     add_to_waitingroom.php, clock_tick.php, confirm.php, daily_cron.php,
+     game.php (draw_game_info), gameinfo.php, join_waitingroom_game.php,
+     message.php, new_game.php (add_new_game_form), show_games.php, site_map.php,
+     status.php, waiting_room.php, skins/dragon/screen.css, NEWS:
+   - added game-type for multi-player-game:
+     - Go = standard game-type
+     - Team-Go (N:M) = two teams of 1..N,M players take a match
+     - Zen-Go (N) = one group of players alternate colors
+   - added multi-player-games:
+     - new game-type: Team-Go, Zen-Go
+       - max. 16 players in multi-player-game allowed
+     - delete-game forbidden for multi-player-game
+     - added game-players-page to setup and manage multi-player-game
+       - show joined game-players of multi-player-game
+       - show game-settings as overview for all game-players
+     - added place-holder game to setup multi-player-game
+       - added Games.Status=SETUP
+       - code cleanup to handle Games.Status
+       - throw error 'game_not_started' if game on wrong INVITED/SETUP-status to show game-page
+       - throw error 'invalid_game_status' if game on wrong INVITED/SETUP-status to show page
+     - add game-offer to waiting-room on reserved slots to invite new players
+     - delete expired waiting-room-entries
+       - delete waiting-room entry with GamePlayers-entries
+     - join waiting-room game-offer for multi-player-game
+       - added game-type in message to game-offerer
+       - WaitingRoom.nrGames for multi-player-game = number of requested players
+     - game-master is allowed to change settings, invite other players
+     - added multi-player-game info and links to game-players-page
+     - added more error-codes for joining games from waiting-room
+     - added class MultiPlayerGame, class GamePlayer to handle multi-player-game
+   - added simple, expert and multi-player view-mode for different game-settings
+     - simple view: rudimentary game-settings
+     - expert view: advanced game-settings like adjust-handicap/komi & more restrictions for waiting-room
+     - multi-player view: game-settings to start multi-player-game of game-type Team-Go (N:M) or Zen-Go (N)
+   - code cleanup, refactoring to avoid redundant code (moved funcs),
+   - optimize found-rows counting manually on status-page
+-----------
+-- added multi-player-game: Team-Go, Zen-Go
+ALTER TABLE Waitingroom
+   ADD GameType enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO' AFTER Time ;
+ALTER TABLE Waitingroom
+   ADD GamePlayers char(5) NOT NULL default '' AFTER GameType ;
+ALTER TABLE Waitingroom
+   ADD gid int NOT NULL default 0 AFTER uid ;
+
+-- added multi-player-game: Team-Go, Zen-Go
+ALTER TABLE Games
+   ADD GameType enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO' AFTER ToMove_ID ;
+ALTER TABLE Games
+   ADD GamePlayers char(5) NOT NULL default '' AFTER GameType ;
+ALTER TABLE Games
+   ADD MoveCounter smallint unsigned NOT NULL default 0 AFTER GamePlayers ;
+ALTER TABLE Games
+   MODIFY Status enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED' ;
+
+-- added multi-player-game: Team-Go, Zen-Go
+CREATE TABLE GamePlayers (
+   ID int NOT NULL auto_increment,
+   gid int NOT NULL,
+   GroupColor enum('BW','B','W','G1','G2') NOT NULL default 'BW',
+   GroupOrder tinyint signed NOT NULL default 0,
+   uid int NOT NULL default 0,
+   Flags smallint unsigned NOT NULL default 0,
+   PRIMARY KEY (ID),
+   KEY gidGroup (gid,GroupColor,GroupOrder),
+   KEY uid (uid)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/table_columns.php (Table.make_add_column_form):
+   - bugfix: show no column selected in select-box to avoid adding column with every filter-search
+
 2010-11-01 juga
 
    * include/quick/quick_game_info.php (class QuickHandlerGameInfo, ~.canHandle,
