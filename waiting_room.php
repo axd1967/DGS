@@ -111,6 +111,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
    $wrfilter->add_filter(19, 'Selection', build_ruleset_filter_array(), true);
+   $wrfilter->add_filter(20, 'Selection', MultiPlayerGame::build_game_type_filter_array(), true);
    $wrfilter->init();
    $f_range =& $wrfilter->get_filter(8);
    $suitable = $f_range->get_value(); // !suitable == all
@@ -131,6 +132,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'other_country+');
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'other_rating-');
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
+   $wrtable->add_tablehead(20, T_('GameType#header'), '', 0, 'GameType+');
    $wrtable->add_tablehead(19, T_('Ruleset#header'), '', 0, 'Ruleset+');
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
@@ -254,6 +256,9 @@ require_once( 'include/classlib_userconfig.php' );
          $other_rating = NULL;
          extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodsameopp
          $is_my_game = ( $uid == $player_row['ID'] );
+         $mp_player_count = ($GameType == GAMETYPE_GO)
+            ? 0
+            : MultiPlayerGame::determine_player_count($GamePlayers);
 
          if( $idinfo == (int)$ID )
             $info_row = $row;
@@ -322,7 +327,7 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[ 9] = TimeFormat::echo_time_limit(
                   $Maintime, $Byotype, $Byotime, $Byoperiods, TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
          if( $wrtable->Is_Column_Displayed[10] )
-            $wrow_strings[10] = $nrGames;
+            $wrow_strings[10] = ($mp_player_count) ? 1 : $nrGames;
          if( $wrtable->Is_Column_Displayed[11] )
             $wrow_strings[11] = yesno( $Rated);
          if( $wrtable->Is_Column_Displayed[12] )
@@ -336,7 +341,7 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
          if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
          {
-            if( !$is_my_game )
+            if( !$is_my_game && $GameType == GAMETYPE_GO )
             {
                $colstr = determine_color( $Handicaptype, $is_my_game, $iamblack );
                $resultHandicap = adjust_handicap( $infoHandi, $AdjHandicap, $MinHandicap, $MaxHandicap );
@@ -344,6 +349,11 @@ require_once( 'include/classlib_userconfig.php' );
                $settings_str = ($resultHandicap > 0)
                   ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$resultHandicap, $resultKomi )
                   : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $resultKomi );
+            }
+            elseif( $GameType != GAMETYPE_GO )
+            {
+               $settings_str = MINI_SPACING . echo_image_game_players( $gid )
+                  . MINI_SPACING . sprintf( '(%s/%s)', $nrGames, $mp_player_count);
             }
             else
                $settings_str = '';
@@ -353,9 +363,11 @@ require_once( 'include/classlib_userconfig.php' );
          }
          if( $wrtable->Is_Column_Displayed[19] )
             $wrow_strings[19] = getRulesetText($Ruleset);
+         if( $wrtable->Is_Column_Displayed[20] )
+            $wrow_strings[20] = MultiPlayerGame::format_game_type($GameType, $GamePlayers);
 
          $wrtable->add_row( $wrow_strings );
-      }
+      }//while
 
       // print table
       echo $wrtable->make_table();
@@ -388,7 +400,7 @@ require_once( 'include/classlib_userconfig.php' );
 
 
    $menu_array = array();
-   $menu_array[T_('Add new game')] = 'new_game.php';
+   $menu_array[T_('New game')] = 'new_game.php';
    $menu_array[T_('Show all waiting games')] = $baseURLMenu.'good=0';
    $menu_array[T_('Show suitable games only')] = $baseURLMenu.'good=1';
 
