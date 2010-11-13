@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Usage: php code_examples/query_sql.php
  */
 
+require_once( "include/quick_common.php" );
 require_once( "include/std_classes.php" );
 
 function error( $msg ) { echo "ERROR: $msg\n"; }
@@ -71,7 +72,7 @@ function error( $msg ) { echo "ERROR: $msg\n"; }
       SQLP_UNION_WHERE,
             'G.White_ID=4711 AND P.ID=G.Black_ID',
             'G.Black_ID=4711 AND P.ID=G.White_ID',
-      SQLP_WHERE,  "G.Status IN ('PLAY','PASS','SCORE','SCORE2')",
+      SQLP_WHERE,  'G.Status'.IS_RUNNING_GAME,
       SQLP_ORDER,  'Lastchanged DESC', 'ID'
    );
 

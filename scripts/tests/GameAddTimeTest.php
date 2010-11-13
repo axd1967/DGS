@@ -55,7 +55,7 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
       $this->grow = array( // Games-row
          'ID'                 => 4711,
          'tid'                => 0,
-         'Status'             => 'PLAY',
+         'Status'             => GAME_STATUS_PLAY,
          // T=JAP, M=210, B=15, P=10; B(111): m=210,b=0,p=-1, W(222): m=210,b=0,p=-1
          'Byotype'            => BYOTYPE_JAPANESE,
          'Maintime'           => 14 * 15, // 14d
@@ -258,11 +258,11 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
       $this->assertTrue( GameAddTime::allow_add_time_opponent( $this->grow, 222 ));
 
       $gamerow = array() + $this->grow; // clone array to mess data
-      $gamerow['Status'] = 'FINISHED';
+      $gamerow['Status'] = GAME_STATUS_FINISHED;
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
-      $gamerow['Status'] = 'INVITED';
+      $gamerow['Status'] = GAME_STATUS_INVITED;
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
-      $gamerow['Status'] = 'PLAY';
+      $gamerow['Status'] = GAME_STATUS_PLAY;
 
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 3333 ));
 

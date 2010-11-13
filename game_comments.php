@@ -77,7 +77,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    $str = game_reference( 0, 1, '', 0, 0, $game['Whitename'], $game['Blackname']);
    $str.= " - #$gid";
-   $str.= ' - '.( $game['Status'] == 'FINISHED' ? T_('Finished') : T_('Running'));
+   $str.= ' - '.( $game['Status'] == GAME_STATUS_FINISHED ? T_('Finished') : T_('Running'));
    echo "<h3 class=Header>$str</h3>";
 
 

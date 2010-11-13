@@ -181,8 +181,7 @@ class Games
 
    function is_status_running()
    {
-      return ($this->Status == GAME_STATUS_PLAY || $this->Status == GAME_STATUS_PASS
-         || $this->Status == GAME_STATUS_SCORE || $this->Status == GAME_STATUS_SCORE2 );
+      return isRunningGame($this->Status);
    }
 
    function to_string()

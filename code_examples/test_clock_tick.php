@@ -55,7 +55,7 @@ function test( $qver, $nr, $print=true )
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                'black.Name as blackname, white.Name as whitename ' .
                'FROM (Games, Clock, Players as white, Players as black) ' .
-               "WHERE Status!='INVITED' AND Status!='FINISHED' " .
+               'WHERE Status'.IS_RUNNING_GAME .
                'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                'AND Clock.ID=Games.ClockUsed ' .
                "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
@@ -67,7 +67,7 @@ function test( $qver, $nr, $print=true )
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                'black.Name as blackname, white.Name as whitename ' .
                'FROM (Games, Clock, Players as white, Players as black) ' .
-               "WHERE Status IN ('PLAY','PASS','SCORE','SCORE2') " .
+               'WHERE Status'.IS_RUNNING_GAME .
                'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
                'AND Clock.ID=Games.ClockUsed ' .
                "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .

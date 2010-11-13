@@ -271,7 +271,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    //First search for games with bad player ID
    $query = "SELECT $sqlbuf ID,White_ID,Black_ID"
           . " FROM Games"
-          . " WHERE Status!='INVITED'"
+          . " WHERE Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED )
             . " AND (White_ID<=0 OR Black_ID<=0 OR White_ID=Black_ID)"
           . " ORDER BY ID DESC"
           ;

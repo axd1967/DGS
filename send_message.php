@@ -159,7 +159,7 @@ disable_cache();
 
       if( !$game_row )
          error('invited_to_unknown_game',"send_message.accept($gid)");
-      if( $game_row['Status'] != 'INVITED' )
+      if( $game_row['Status'] != GAME_STATUS_INVITED )
          error('game_already_accepted',"send_message.accept($gid)");
 
       //ToMove_ID hold handitype since INVITATION

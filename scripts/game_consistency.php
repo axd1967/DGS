@@ -114,7 +114,7 @@ echo ">>>> Most of them needs manual fixes.";
    else if( 1 ) //long... could be skipped to check the others
    {
       $query = "SELECT ID"
-         . " FROM Games WHERE Status!='INVITED'"
+         . " FROM Games WHERE Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED )
          . "$where ORDER BY Games.ID$limit";
 
       echo "\n<br>query: $query;\n";
@@ -177,7 +177,8 @@ echo ">>>> Most of them needs manual fixes.";
 
    $query = "SELECT ID,Starttime,Lastchanged"
       //. ",DATE_SUB(Lastchanged,INTERVAL '1 MONTH') as FakeStart"
-      . " FROM Games WHERE Status!='INVITED' AND Starttime>Lastchanged"
+      . " FROM Games WHERE Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED )
+         . " AND Starttime>Lastchanged"
       . "$where ORDER BY Games.ID$limit";
 
    echo "\n<br>query: $query;\n";
@@ -258,7 +259,7 @@ echo ">>>> Most of them needs manual fixes.";
       $errmsg = '';
       if( $missgame_gid == 0 )
          $errmsg = "Found GamesPriority without Games-entry -> removing";
-      elseif( $status == 'INVITED' || $status == 'FINISHED' )
+      elseif( !isRunningGame($status) )
          $errmsg = "Found GamesPriority in non-running Games-status -> removing";
       if( $errmsg )
       {
@@ -428,7 +429,7 @@ function check_consistency( $gid)
       return "Wrong number of prisoners removed!";
    }
 
-   if( $Status!='FINISHED' )
+   if( isRunningGame($Status) || $Status == GAME_STATUS_INVITED )
    {
       $handinr = ($Handicap < 2 ? 1 : $Handicap );
       $black_to_move = (($Moves < $handinr) || ($Moves-$handinr)%2 == 1 );
@@ -453,7 +454,7 @@ function check_consistency( $gid)
          return "Wrong ClockUsed! Can't be $ClockUsed.";
       }
    }
-   else //$Status=='FINISHED'
+   elseif( $Status == GAME_STATUS_FINISHED )
    {
 /* TODO? see time-out cleanup in clock_tick.php
       $few_moves = DELETE_LIMIT+$Handicap;

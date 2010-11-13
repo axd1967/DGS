@@ -465,7 +465,7 @@ class SgfBuilder
 
       // possibly skip some moves
       $this->sgf_trim_nr = $this->moves_iterator->ResultRows - 1 ;
-      if( $this->game_row['Status'] == 'FINISHED' && isset($this->game_row['Score']) )
+      if( $this->game_row['Status'] == GAME_STATUS_FINISHED && isset($this->game_row['Score']) )
       {
          $score = $this->game_row['Score'];
 
@@ -509,7 +509,7 @@ class SgfBuilder
          $f_handi = ( $this->game_row['Handicap'] > 0 ) ? 'H' . $this->game_row['Handicap'] : '';
          $f_komi = 'K' . str_replace( '.', ',', $this->game_row['Komi'] );
          $f_result = '';
-         if( $this->game_row['Status'] == 'FINISHED' )
+         if( $this->game_row['Status'] == GAME_STATUS_FINISHED )
          {
             $f_result = '=' . ( $this->game_row['Score'] < 0 ? 'B' : 'W' );
             if( abs($this->game_row['Score']) == SCORE_TIME )
@@ -579,7 +579,7 @@ class SgfBuilder
                ? sprintf( "\nBlack Start Rating: %s - ELO %d",
                             SgfBuilder::sgf_echo_rating($Black_Start_Rating,true), $Black_Start_Rating )
                : "\nBlack Start Rating: ?" );
-      if( $Status == 'FINISHED' && isset($Score) )
+      if( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
          $general_comment .=
             ( is_valid_rating($White_End_Rating)
@@ -613,7 +613,7 @@ class SgfBuilder
       if( $Handicap > 0 && $this->use_HA )
          $this->echo_sgf( "\nHA[$Handicap]" );
 
-      if( $Status == 'FINISHED' && isset($Score) )
+      if( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
          $this->echo_sgf( "\nRE[" . SgfBuilder::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]" );
       }
@@ -697,7 +697,7 @@ class SgfBuilder
                //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
                if( $owned_comments == BLACK || $owned_comments == WHITE )
                {
-                  if( $Status != 'FINISHED' && $owned_comments != $Stone )
+                  if( $Status != GAME_STATUS_FINISHED && $owned_comments != $Stone )
                      $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
 
                   if( $Text )
@@ -705,7 +705,7 @@ class SgfBuilder
                }
                else //SGF query from an observer
                {
-                  if( $Status != 'FINISHED' )
+                  if( $Status != GAME_STATUS_FINISHED )
                      $Text = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text);
 
                   $nr_matches = preg_match_all(
@@ -820,7 +820,7 @@ class SgfBuilder
 
    function build_sgf_result()
    {
-      if( $this->game_row['Status'] == 'FINISHED' )
+      if( $this->game_row['Status'] == GAME_STATUS_FINISHED )
       {
          $this->echo_sgf( "\n;" ); // Node start
          $this->sgf_echo_prop($this->next_color);
