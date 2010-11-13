@@ -163,8 +163,8 @@ class QuickHandlerGame extends QuickHandler
 
 
       // affirm, that game is running
-      if( $Status == GAME_STATUS_INVITED )
-         error('game_not_started', "QuickHandlerGame.prepare.check.status.invited($gid)");
+      if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
+         error('game_not_started', "QuickHandlerGame.prepare.check.status($gid,$Status)");
       elseif( $Status == GAME_STATUS_FINISHED )
          error('game_finished', "QuickHandlerGame.prepare.check.status.finished($gid)");
       elseif( !isRunningGame($Status) )
@@ -195,7 +195,7 @@ class QuickHandlerGame extends QuickHandler
       if( $cmd == GAMECMD_DELETE )
       {
          $too_few_moves = ( $Moves < DELETE_LIMIT + $Handicap );
-         $may_del_game  = $too_few_moves && ( $tid == 0 );
+         $may_del_game  = $too_few_moves && ( $tid == 0 ) && ($GameType == GAMETYPE_GO);
          if( !$may_del_game )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Handicap,$Moves,$tid)");
       }
@@ -287,7 +287,7 @@ class QuickHandlerGame extends QuickHandler
       - the Games table modification must always modify the Moves field (see $game_query)
       - this modification is always done in first place and checked before continuation
       *********************** */
-      $game_clause = " WHERE ID=$gid AND Status!='".GAME_STATUS_FINISHED."' AND Moves=$Moves LIMIT 1";
+      $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
       $message_query = '';
       $doublegame_query = '';
       $Moves++;

@@ -22,6 +22,7 @@ require_once 'include/std_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'include/time_functions.php';
 require_once 'include/rating.php';
+require_once 'include/game_functions.php';
 
 
  /*!
@@ -137,10 +138,11 @@ class QuickHandlerGameInfo extends QuickHandler
       $this->addResultKey( 'tournament_id', (int)$row['tid'] );
       $this->addResultKey( 'status', strtoupper($row['Status']) );
       $this->addResultKey( 'flags', QuickHandlerGameInfo::convertGameFlags($row['X_Flags']) );
-      $this->addResultKey( 'score', ( $row['Status'] == 'FINISHED' )
+      $this->addResultKey( 'score', ( $row['Status'] == GAME_STATUS_FINISHED )
             ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
             : "" );
       $this->addResultKey( 'rated', ($row['Rated'] == 'N') ? 0 : 1 );
+      $this->addResultKey( 'game_type', MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true) );
       $this->addResultKey( 'ruleset', strtoupper($row['Ruleset']) );
       $this->addResultKey( 'size', (int)$row['Size'] );
       $this->addResultKey( 'komi', (float)$row['Komi'] );

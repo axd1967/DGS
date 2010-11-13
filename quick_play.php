@@ -80,26 +80,22 @@ else
    $Last_X = $Last_Y = -1;
    extract($game_row);
 
-   if( $Status == 'INVITED' )
-      error('game_not_started', "quick_play.check_status.invited($gid)");
-   else if( $Status == 'FINISHED' )
+   if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
+      error('game_not_started', "quick_play.check_status.bad($gid,$Status)");
+   else if( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "quick_play.check_status.finished($gid)");
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    else if( $White_ID == $ToMove_ID )
       $to_move = WHITE;
-/*
-   else if( !$ToMove_ID ) //=0 if INVITED or FINISHED
-      error('not_your_turn', "confirm.bad_ToMove_ID($gid)");
-*/
    else
       error('database_corrupted', "quick_play.check_tomove($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
    if( $my_id != $ToMove_ID )
       error('not_your_turn', "quick_play.check_tomove2($gid,$ToMove_ID)");
 
-   if( $Status!='PLAY' //exclude SCORE,PASS steps and INVITED or FINISHED
+   if( $Status != GAME_STATUS_PLAY //exclude SCORE,PASS steps and SETUP,INVITED,FINISHED
          || !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
          || ($Handicap>1 && $Moves<=$Handicap) ) //exclude first white move after handicap stones
    {
@@ -192,7 +188,7 @@ else
       $time_query = '';
    }
 
-   $no_marked_dead = true; //( $Status == 'PLAY' || $Status == 'PASS' || $action == 'move' );
+   $no_marked_dead = true; //( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'move' );
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
@@ -221,13 +217,13 @@ This is why:
 - the Games table modification must always modify the Moves field (see $game_query)
 - this modification is always done in first place and checked before continuation
 *********************** */
-   $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
+   $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
    $Moves++;
 
 
    //case 'domove':
    {
-      if( $Status != 'PLAY' )
+      if( $Status != GAME_STATUS_PLAY )
          error('invalid_action', "quick_play.err5($gid)");
 
       $coord = number2sgf_coords( $query_X, $query_Y, $Size);

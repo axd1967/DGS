@@ -120,19 +120,15 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       do_add_time( $game_row, $my_id); // jump back
    }
 
-   if( $Status == 'INVITED' )
-      error('game_not_started', "confirm.check.invited($gid)");
-   elseif( $Status == 'FINISHED' )
+   if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
+      error('game_not_started', "confirm.check.bad_status($gid,$Status)");
+   elseif( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "confirm.check.finished($gid)");
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    elseif( $White_ID == $ToMove_ID )
       $to_move = WHITE;
-/*
-   else if( !$ToMove_ID ) //=0 if INVITED or FINISHED
-      error('not_your_turn', "confirm.bad_ToMove_ID($gid)");
-*/
    else
       error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
 
@@ -140,10 +136,11 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    $stay_on_board = @$_REQUEST['stay'];
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
 
-   $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
+   $is_running_game = isRunningGame($Status);
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 );
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 )
+      && ($GameType == GAMETYPE_GO);
 
    $may_resign_game = $my_game && $is_running_game;
    if( $action == 'resign' )
@@ -220,7 +217,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       $time_query = '';
    }
 
-   $no_marked_dead = ( $Status == 'PLAY' || $Status == 'PASS' || $action == 'domove' );
+   $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'domove' );
 
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
@@ -256,7 +253,7 @@ This is why:
 - the Games table modification must always modify the Moves field (see $game_query)
 - this modification is always done in first place and checked before continuation
 *********************** */
-   $game_clause = " WHERE ID=$gid AND Status!='FINISHED' AND Moves=$Moves LIMIT 1";
+   $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
    $doublegame_query = '';
    $Moves++;
 
@@ -334,10 +331,10 @@ This is why:
          if( $Moves < $Handicap )
             error('early_pass', "confirm.pass($gid,$Moves,$Handicap)");
 
-         if( $Status == 'PLAY' )
-            $next_status = 'PASS';
-         else if( $Status == 'PASS' )
-            $next_status = 'SCORE';
+         if( $Status == GAME_STATUS_PLAY )
+            $next_status = GAME_STATUS_PASS;
+         else if( $Status == GAME_STATUS_PASS )
+            $next_status = GAME_STATUS_SCORE;
          else
             error('invalid_action', "confirm.pass.check_status($gid,$Status)");
 
@@ -364,7 +361,7 @@ This is why:
 
       case 'handicap': //stonestring is the list of handicap stones
       {
-         if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==1 ) )
+         if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==1 ) )
             error('invalid_action', "confirm.handicap.check_status($gid,$Status,$Handicap,$Moves)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
@@ -458,7 +455,7 @@ This is why:
 
       case 'done': //stonestring is the list of toggled points
       {
-         if( $Status != 'SCORE' && $Status != 'SCORE2' )
+         if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
@@ -467,10 +464,10 @@ This is why:
 
          $l = strlen( $stonestring );
 
-         $next_status = 'SCORE2';
-         if( $Status == 'SCORE2' &&  $l < 2 )
+         $next_status = GAME_STATUS_SCORE2;
+         if( $Status == GAME_STATUS_SCORE2 &&  $l < 2 )
          {
-            $next_status = 'FINISHED';
+            $next_status = GAME_STATUS_FINISHED;
             $game_finished = true;
          }
 
@@ -493,7 +490,7 @@ This is why:
              "Last_X=".POSX_SCORE.", " .
              "Status='$next_status', ";
 
-         if( $next_status != 'FINISHED' )
+         if( $next_status != GAME_STATUS_FINISHED )
             $game_query .= "ToMove_ID=$next_to_move_ID, ";
          else
             $game_query .= "ToMove_ID=0, ";

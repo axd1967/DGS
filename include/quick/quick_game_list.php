@@ -148,14 +148,14 @@ class QuickHandlerGameList extends QuickHandler
       elseif( $view == GAMELIST_OPTVAL_VIEW_RUNNING )
       {
          $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, 'Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_RUNNING_GAME );
          $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
          $qsql->useUnionAll();
       }
       elseif( $view == GAMELIST_OPTVAL_VIEW_FINISHED )
       {
          $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, "Status='".GAME_STATUS_FINISHED."'" );
+         $qsql->add_part( SQLP_WHERE, "G.Status='FINISHED'" );
          $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
          $qsql->useUnionAll();
       }
@@ -226,9 +226,10 @@ class QuickHandlerGameList extends QuickHandler
       $out['id'] = (int)$row['ID'];
       //$out['double_id', (int)$row['DoubleGame_ID'];
       $out['tournament_id'] = (int)$row['tid'];
+      $out['game_type'] = MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true);
       $out['status'] = strtoupper($row['Status']);
       //$out['flags'] = QuickHandlerGameInfo::convertGameFlags($row['X_Flags']);
-      //$out['score'] = ( $row['Status'] == 'FINISHED' )
+      //$out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )
             //? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
             //: "";
       //$out['rated'] = ($row['Rated'] == 'N') ? 0 : 1;
