@@ -395,6 +395,12 @@ class ErrorCode
          $arr['waitingroom_not_same_opponent'] =
             T_("Sorry, on this game offer there are counter- or time-based restrictions for challenges from the same opponent.");
 
+         $arr['waitingroom_join_error'] =
+            T_("Sorry, you couldn't join this waiting room game because of an internal error. Please contact an admin.");
+
+         $arr['waitingroom_join_too_late'] =
+            T_("Sorry, you are too late to join this waiting room game.");
+
          $arr['wrong_number_of_handicap_stone'] =
             T_("Wrong number of handicap stones");
 
