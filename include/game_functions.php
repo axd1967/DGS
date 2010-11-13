@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//$TranslateGroups[] = "Game";
+$TranslateGroups[] = "Game";
 
 require_once( 'include/globals.php' );
 require_once( 'include/time_functions.php' );
@@ -27,10 +27,21 @@ require_once( 'include/utilities.php' );
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
 
+define('MAX_GAME_PLAYERS', 16);
+
+// GamePlayers.Flags
+define('GPFLAG_MASTER',      0x0001); // game-master
+define('GPFLAG_JOINED',      0x0002); // joined game, user set
+define('GPFLAG_RESERVED',    0x0004); // 1 = WR or INV started, waiting for join; 0 = user joined if WR or INV set
+define('GPFLAG_WAITINGROOM', 0x0008); // join user via waiting-room
+define('GPFLAG_INVITATION',  0x0010); // join user via invitation
+define('GPFLAG_SLOT_TAKEN',  (GPFLAG_JOINED|GPFLAG_RESERVED) );
+
 // enum Waitingroom.JigoMode
 define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
 define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
 define('JIGOMODE_NO_JIGO',    'NO_JIGO');
+define('CHECK_JIGOMODE', 'KEEP_KOMI|ALLOW_JIGO|NO_JIGO');
 
 // see Waitingroom.Handicaptype in specs/db/table-Waitingroom.txt
 define('HTYPE_CONV',    'conv'); // conventional handicap
@@ -317,6 +328,225 @@ class GameAddTime
 
 
 
+
+/**
+ * \brief Class to handle multi-player-game.
+ */
+class MultiPlayerGame
+{
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief Returns GAMETYPE for game-players or number of required players (if $count=true);
+    *        null (0 if $count set) on wrong format or bad number of players.
+    */
+   function determine_game_type( $game_players, $count=false )
+   {
+      if( trim($game_players) == '' || $game_players == '1:1' || $game_players == '2' )
+         return ($count) ? 2 : GAMETYPE_GO;
+      elseif( is_numeric($game_players) )
+      {
+         if( $game_players > 2 && $game_players <= MAX_GAME_PLAYERS && ($game_players & 1) ) // odd
+            return ($count) ? $game_players : GAMETYPE_ZEN_GO;
+      }
+      elseif( preg_match("/^\d+:\d+$/", $game_players) )
+      {
+         $arr = explode(':', $game_players);
+         $cnt_players = $arr[0] + $arr[1];
+         if( $cnt_players > 2 && $cnt_players <= MAX_GAME_PLAYERS )
+            return ($count) ? $cnt_players : GAMETYPE_TEAM_GO;
+      }
+      return ($count) ? 0 : null;
+   }
+
+   /*! \brief Returns number of required players. */
+   function determine_player_count( $game_players )
+   {
+      return MultiPlayerGame::determine_game_type( $game_players, true );
+   }
+
+   function get_game_type( $game_type=null )
+   {
+      static $ARR_GAME_TYPES = null;
+      if( is_null($ARR_GAME_TYPES) )
+      {
+         $ARR_GAME_TYPES = array(
+            GAMETYPE_GO       => T_('Go#gametype'),
+            GAMETYPE_TEAM_GO  => T_('Team-Go#gametype'),
+            GAMETYPE_ZEN_GO   => T_('Zen-Go#gametype'),
+         );
+      }
+      return is_null($game_type) ? $ARR_GAME_TYPES : @$ARR_GAME_TYPES[$game_type];
+   }//get_game_type
+
+   function format_game_type( $game_type, $game_players, $quick=false )
+   {
+      if( $game_type == GAMETYPE_GO )
+         return ($quick) ? $game_type : MultiPlayerGame::get_game_type($game_type);
+      else
+         return ($quick)
+            ? "$game_type($game_players)" // see quick-suite
+            : sprintf( '%s (%s)', MultiPlayerGame::get_game_type($game_type), $game_players );
+   }
+
+   function build_game_type_filter_array( $prefix='' )
+   {
+      return array(
+         T_('All') => '',
+         MultiPlayerGame::get_game_type(GAMETYPE_GO)      => $prefix."GameType='".GAMETYPE_GO."'",
+         MultiPlayerGame::get_game_type(GAMETYPE_TEAM_GO) => $prefix."GameType='".GAMETYPE_TEAM_GO."'",
+         MultiPlayerGame::get_game_type(GAMETYPE_ZEN_GO)  => $prefix."GameType='".GAMETYPE_ZEN_GO."'",
+         T_('Rengo#gametype') => $prefix."GameType='".GAMETYPE_TEAM_GO."' AND {$prefix}GamePlayers='2:2'",
+      );
+   }
+
+   /*! \brief Deletes table-entries for multi-player game: Games, GamePlayers. */
+   function delete_game( $gid )
+   {
+      if( !is_numeric($gid) && $gid <= 0 )
+         return;
+
+      ta_begin();
+      {//HOT-section to delete multi-player-game table-entries
+         db_query( "MultiPlayerGame::delete_game.games($gid)",
+            "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+         db_query( "MultiPlayerGame::delete_game.gameplayers($gid)",
+            "DELETE FROM GamePlayers WHERE gid=$gid" ); // can be > 1
+         db_query( "MultiPlayerGame::delete_game.wroom($gid)",
+            "DELETE FROM Waitingroom WHERE gid=$gid" ); // can be > 1
+      }
+      ta_end();
+   }
+
+   /*!
+    * \brief "Deletes" (by updating) specified number of game-players for given game-id and flag-typed placeholder.
+    * \param $gp_flag GPFLAG_WAITINGROOM | GPFLAG_INVITE
+    */
+   function revoke_offer_game_players( $gid, $del_count, $gp_flag )
+   {
+      if( is_numeric($gid) && $gid > 0 && $del_count > 0 && $gp_flag > 0 )
+      {
+         // remove join-reservation for waiting-room or invitation
+         $gpf_check = GPFLAG_RESERVED | $gp_flag;
+         db_query( "MultiPlayerGame::revoke_offer_game_players.update_gp($gid,$del_count,$gp_flag)",
+            "UPDATE GamePlayers SET Flags=Flags & ~".(GPFLAG_RESERVED|GPFLAG_WAITINGROOM|GPFLAG_INVITATION)
+               . " WHERE gid=$gid AND uid=0 AND (Flags & $gpf_check) = $gpf_check LIMIT $del_count" );
+      }
+   }
+
+   /*! \brief Returns number of game-players for given game-id. */
+   function count_game_players( $gid )
+   {
+      $row = mysql_single_fetch( "MultiPlayerGame::count_game_players($gid)",
+            "SELECT COUNT(*) AS X_Count FROM GamePlayers WHERE gid=$gid" );
+      return ($row) ? (int)@$row['X_Count'] : 0;
+   }
+
+   /*!
+    * \brief Returns diff to required number of players that joined MP-game.
+    * \return 0 (=required number reached), <0 (missing players), >0 (too much players)
+    */
+   function check_count_game_players( $gid, $expected_player_count )
+   {
+      $player_count = MultiPlayerGame::count_game_players( $gid );
+      return ( $player_count - $expected_player_count );
+   }
+
+   /*! \brief Inserts game-players entries for given game-id and game-master $uid. */
+   function init_multi_player_game( $dbgmsg, $gid, $uid, $gp_count )
+   {
+      if( $gp_count <= 2 )
+         error('invalid_args', "$dbgmsg.init_multi_player_game.check.gp_count($gid,$uid,$gp_count)");
+
+      $query = "INSERT GamePlayers (gid,uid,Flags) VALUES ";
+      $query .= "($gid,$uid,".(GPFLAG_MASTER|GPFLAG_JOINED).")";
+      for( $i=2; $i <= $gp_count; $i++ )
+         $query .= ", ($gid,0,0)";
+
+      db_query( "$dbgmsg.init_multi_player_game.insert_gp($gid,$uid,$gp_count)",
+         $query, 'mysql_start_game' );
+   }
+
+   /*! \brief Joins waiting-room MP-game for given user and check for race-conditions. */
+   function join_waitingroom_game( $dbgmsg, $gid, $uid )
+   {
+      // check race-condition if other joined first
+      db_query( "$dbgmsg.join_waitingroom_game.update_game_players($gid,$uid)",
+         "UPDATE GamePlayers SET uid=$uid, " .
+            "Flags=(Flags & ~".GPFLAG_RESERVED.") | ".GPFLAG_JOINED." " .
+         "WHERE gid=$gid AND uid=0 AND (Flags & ".(GPFLAG_RESERVED|GPFLAG_WAITINGROOM).") LIMIT 1",
+         'waitingroom_join_error' );
+      if( mysql_affected_rows() != 1)
+         error('waitingroom_join_too_late', "$dbgmsg.join_waitingroom_game($gid,$uid)");
+   }//join_waitingroom_game
+
+} //end 'MultiPlayerGame'
+
+
+/**
+ * \brief Class to model GamePlayers-entity.
+ */
+class GamePlayer
+{
+   var $id;
+   var $gid;
+   var $GroupColor;
+   var $GroupOrder;
+   var $Flags;
+   var $uid;
+
+   var $user;
+
+   function GamePlayer( $id, $gid, $group_color='BW', $group_order=0, $flags=0, $uid=0 )
+   {
+      $this->id = (int)$id;
+      $this->gid = (int)$gid;
+      $this->setGroupColor( $group_color );
+      $this->GroupOrder = (int)$group_order;
+      $this->Flags = (int)$flags;
+      $this->uid = (int)$uid;
+   }
+
+   function setGroupColor( $group_color )
+   {
+      if( !preg_match("/^(BW|B|W|G[12])$/", $group_color) )
+         error('invalid_args', "GamePlayer.setGroupColor($group_color)");
+      $this->GroupColor = $group_color;
+   }
+
+
+   // ------------ static functions ----------------------------
+
+   function build_game_player( $id, $gid, $group_color, $group_order, $flags, $uid, $user )
+   {
+      $gp = new GamePlayer( $id, $gid, $group_color, $group_order, $flags, $uid );
+      $gp->user = $user;
+      return $gp;
+   }
+
+   function build_image_group_color( $group_color )
+   {
+      static $arr_col_images = null;
+      if( is_null($arr_col_images) )
+      {
+         global $base_path;
+
+         $arr_col_images = array(
+            'BW'  => image( $base_path.'17/y.gif', T_('Black/White or unset#gpcol'), null ),
+            'B'   => image( $base_path.'17/b.gif', T_('Black#gpcol'), null ),
+            'W'   => image( $base_path.'17/w.gif', T_('White#gpcol'), null ),
+            'G1'  => image( $base_path.'17/bw.gif', T_('Group #1#gpcol'), null ),
+            'G2'  => image( $base_path.'17/wb.gif', T_('Group #2#gpcol'), null ),
+         );
+      }
+      return @$arr_col_images[$group_color];
+   }//getGroupColorImageUrl
+
+} // end 'GamePlayer'
+
+
+
+
 // returns adjusted komi within limits, also checking for valid limits
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
 {
@@ -446,6 +676,121 @@ function getRulesetScoring( $ruleset )
       RULESET_CHINESE  => GSMODE_AREA_SCORING,
    );
    return $arr[$ruleset];
+}
+
+function get_gamesettings_viewmode( $viewmode )
+{
+   static $ARR = null;
+   if( is_null($ARR) )
+   {
+      $ARR = array(
+         GSETVIEW_SIMPLE => T_('simple settings#gsview'),
+         GSETVIEW_EXPERT => T_('expert settings#gsview'),
+         GSETVIEW_MPGAME => T_('multi-player settings#gsview'),
+      );
+   }
+   return @$ARR[$viewmode];
+}
+
+// return arr( $must_be_rated, $rating1, $rating2 ) ready for db-insert
+function parse_waiting_room_rating_range()
+{
+   if( (string)get_request_arg('must_be_rated', 'Y') != 'Y' )
+   {
+      $MustBeRated = 'N';
+      //to keep a good column sorting:
+      $rating1 = $rating2 = OUT_OF_RATING;
+   }
+   else
+   {
+      $MustBeRated = 'Y';
+      $rating1 = read_rating( (string)get_request_arg('rating1') );
+      $rating2 = read_rating( (string)get_request_arg('rating2') );
+
+      if( $rating1 == NO_RATING || $rating2 == NO_RATING )
+         error('rank_not_rating', "parse_waiting_room_rating_range.check($rating1,$rating2)");
+
+      if( $rating2 < $rating1 )
+         swap( $rating1, $rating2 );
+
+      $rating2 += 50;
+      $rating1 -= 50;
+   }
+
+   return array( $MustBeRated, $rating1, $rating2 );
+}//parse_waiting_room_rating_range
+
+// add form-elements required for new-game for waiting-room
+// INPUT: must_be_rated, rating1, rating2, min_rated_games, comment
+function append_form_add_waiting_room_game( &$mform, $viewmode )
+{
+   $rating_array = getRatingArray();
+   $mform->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
+                           'CHECKBOX', 'must_be_rated', 'Y', "", false,
+                           'TEXT', sptext(T_('If yes, rating between'),1),
+                           'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
+                           'TEXT', sptext(T_('and')),
+                           'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
+
+   if( $viewmode != GSETVIEW_SIMPLE )
+      $mform->add_row( array( 'DESCRIPTION', T_('Min. rated finished games'),
+                              'TEXTINPUT', 'min_rated_games', 5, 5, '',
+                              'TEXT', MINI_SPACING . T_('(optional)'), ));
+
+   if( $viewmode == GSETVIEW_EXPERT )
+   {
+      $same_opp_array = build_accept_same_opponent_array(array( 0,  -1, -2, -3,  3, 7, 14 ));
+      $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
+                              'SELECTBOX', 'same_opp', 1, $same_opp_array, '0', false, ));
+   }
+
+   $mform->add_row( array( 'SPACE' ) );
+   $mform->add_row( array( 'DESCRIPTION', T_('Comment'),
+                           'TEXTINPUT', 'comment', 40, 40, "" ) );
+}//append_form_add_waiting_room_game
+
+// WaitingRoom.SameOpponent: 0=always, <0=n times, >0=after n days
+function echo_accept_same_opponent( $same_opp, $game_row=null )
+{
+   if( $same_opp == 0 )
+      return T_('always#same_opp');
+
+   if( $same_opp < 0 )
+   {
+      if ($same_opp == -1)
+         $out = T_('1 time#same_opp');
+      else //if ($same_opp < 0)
+         $out = sprintf( T_('%s times#same_opp'), -$same_opp );
+      if( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
+      {
+         $join_fmt = ($game_row['JoinedCount'] > 1)
+            ? T_('joined %s games#same_opp') : T_('joined %s game#same_opp');
+         $out .= ' (' . sprintf( $join_fmt, $game_row['JoinedCount'] ) . ')';
+      }
+   }
+   else
+   {
+      global $NOW;
+      if ($same_opp == 1)
+         $out = T_('after 1 day#same_opp');
+      else //if ($same_opp > 0)
+         $out = sprintf( T_('after %s days#same_opp'), $same_opp );
+      if( is_array($game_row) && isset($game_row['X_ExpireDate'])
+            && ($game_row['X_ExpireDate'] > $NOW) )
+      {
+         $out .= ' (' . sprintf( T_('wait till %s#same_opp'),
+            date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';
+      }
+   }
+   return $out;
+}//echo_accept_same_opponent
+
+function build_accept_same_opponent_array( $arr )
+{
+   $out = array();
+   foreach( $arr as $same_opp )
+      $out[$same_opp] = echo_accept_same_opponent($same_opp);
+   return $out;
 }
 
 ?>
