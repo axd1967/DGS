@@ -190,7 +190,7 @@ class Form
    /*! \brief A variable responsible for holding all different form elements. */
    var $form_elements;
 
-   /*! \brief Echo the <from ...> element immediately. */
+   /*! \brief Echo the <form ...> element immediately. */
    var $echo_form_start_now;
 
    /*! \brief If set, the following input fields will have the 'disabled' attribut. */
