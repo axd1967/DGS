@@ -35,12 +35,15 @@ require_once( 'include/utilities.php' );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   $my_id = (int)$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
          && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+
+   $viewmode = (int) @$_POST['viewmode'];
 
    $cat_handicap_type = @$_POST['cat_htype'];
    switch( (string)$cat_handicap_type )
@@ -95,8 +98,9 @@ require_once( 'include/utilities.php' );
       $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
 
    $jigo_mode = (string)@$_POST['jigo_mode'];
-   if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO
-         && $jigo_mode != JIGOMODE_NO_JIGO )
+   if( $jigo_mode == '' )
+      $jigo_mode = JIGOMODE_KEEP_KOMI;
+   elseif( !preg_match("/^(".CHECK_JIGOMODE.")$/", $jigo_mode) )
       error('invalid_args', "add_to_waitingroom.check.jigo_mode($jigo_mode)");
 
    // handicap adjustment
@@ -113,10 +117,17 @@ require_once( 'include/utilities.php' );
    if( $max_handicap >= 0 && $min_handicap > $max_handicap )
       swap( $min_handicap, $max_handicap );
 
+   // multi-player
+   $game_players = (string)@$_POST['game_players'];
+   $game_type = MultiPlayerGame::determine_game_type($game_players);
+   if( is_null($game_type) )
+      error('invalid_args', "add_to_waitingroom.check.game_players($game_players)");
+   $is_std_go = ( $game_type == GAMETYPE_GO );
+   if( $is_std_go && $viewmode == GSETVIEW_MPGAME )
+      error('invalid_args', "add_to_waitingroom.check.game_players.viewmode($viewmode,$game_players)");
+
 
    $nrGames = max( 1, (int)@$_POST['nrGames']);
-   if( $nrGames < 1 )
-      $nrGames = 1;
    if( $nrGames > NEWGAME_MAX_GAMES )
       error('invalid_args', "add_to_waitingroom.check.nr_games($nrGames)");
 
@@ -147,80 +158,119 @@ require_once( 'include/utilities.php' );
       error('time_limit_too_small');
 
 
-   if( ($rated=@$_POST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
+   if( ($rated = @$_POST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
       $rated = 'N';
 
-   if( ENA_STDHANDICAP )
-   {
-      if( ($stdhandicap=@$_POST['stdhandicap']) != 'Y' )
-         $stdhandicap = 'N';
-   }
-   else
+   if( ENA_STDHANDICAP || (($stdhandicap = @$_POST['stdhandicap']) != 'Y' ) )
       $stdhandicap = 'N';
 
-   if( ($weekendclock=@$_POST['weekendclock']) != 'Y' )
+   if( ($weekendclock = @$_POST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
-   if( @$_POST['must_be_rated'] != 'Y' )
-   {
-      $MustBeRated = 'N';
-      //to keep a good column sorting:
-      $rating1 = $rating2 = OUT_OF_RATING;
-   }
-   else
-   {
-      $MustBeRated = 'Y';
-      $rating1 = read_rating(@$_POST['rating1']);
-      $rating2 = read_rating(@$_POST['rating2']);
-
-      if( $rating1 == NO_RATING || $rating2 == NO_RATING )
-         error('rank_not_rating');
-
-      if( $rating2 < $rating1 )
-         swap( $rating1, $rating2 );
-
-      $rating2 += 50;
-      $rating1 -= 50;
-   }
+   list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
 
    $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 10000, 0 );
 
    $same_opponent = (int)@$_POST['same_opp'];
 
 
-   $query = "INSERT INTO Waitingroom SET " .
-      "uid=" . $player_row['ID'] . ', ' .
-      "nrGames=$nrGames, " .
-      "Time=FROM_UNIXTIME($NOW), " .
-      "Ruleset='" . mysql_addslashes($ruleset) . "', " .
-      "Size=$size, " .
-      "Komi=ROUND(2*($komi))/2, " .
-      "Handicap=$handicap, " .
-      "Handicaptype='" . mysql_addslashes($handicap_type) . "', " .
-      "AdjKomi=$adj_komi, " .
-      "JigoMode='" . mysql_addslashes($jigo_mode) . "', " .
-      "AdjHandicap=$adj_handicap, " .
-      "MinHandicap=$min_handicap, " .
-      ($max_handicap < 0 ? '' : "MaxHandicap=$max_handicap, " ) .
-      "Maintime=$hours, " .
-      "Byotype='$byoyomitype', " .
-      "Byotime=$byohours, " .
-      "Byoperiods=$byoperiods, " .
-      "WeekendClock='$weekendclock', " .
-      "Rated='$rated', " .
-      "StdHandicap='$stdhandicap', " .
-      "MustBeRated='$MustBeRated', " .
-      "Ratingmin=$rating1, " .
-      "Ratingmax=$rating2, " .
-      "MinRatedGames=$min_rated_games, " .
-      "SameOpponent=$same_opponent, " .
-      "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
+   // insert game (standard-game or multi-player-game)
 
-   db_query( 'add_to_waitingroom.insert', $query );
-   db_close();
+   if( !$is_std_go ) // use defaults for MP-game
+   {
+      //$nrGames = 1;
+      $handicap_type = HTYPE_NIGIRI;
+      $handicap = 0;
+      $komi = 6.5;
+      $rated = 'N';
+      //$min_rated_games = 0;
+      //$same_opponent = -1; // same-opp only ONCE for Team-/Zen-Go
+   }
+
+   // add waiting-room game
+   $query_game = $query_wroom = '';
+   if( !$is_std_go ) // mp-game
+   {
+      $query_game = "INSERT INTO Games SET " .
+         "Black_ID=$my_id, " . // game-master
+         "White_ID=0, " .
+         "ToMove_ID=$my_id, " . // appear as status-game
+         "Starttime=FROM_UNIXTIME($NOW), " .
+         "Lastchanged=FROM_UNIXTIME($NOW), " .
+         "GameType='" . mysql_addslashes($game_type) . "', " .
+         "GamePlayers='" . mysql_addslashes($game_players) . "', " .
+         "Ruleset='" . mysql_addslashes($ruleset) . "', " .
+         "Size=$size, " .
+         "Handicap=$handicap, " .
+         "Komi=ROUND(2*($komi))/2, " .
+         "Status='".GAME_STATUS_SETUP."', " .
+         "Maintime=$hours, " .
+         "Byotype='$byoyomitype', " .
+         "Byotime=$byohours, " .
+         "Byoperiods=$byoperiods, " .
+         "Black_Maintime=$hours, " .
+         "White_Maintime=$hours, " .
+         "WeekendClock='$weekendclock', " .
+         "StdHandicap='$stdhandicap', " .
+         "Rated='$rated'";
+   }
+   else // std-game
+   {
+      $query_wroom = "INSERT INTO Waitingroom SET " .
+         "uid=$my_id, " .
+         "nrGames=$nrGames, " .
+         "Time=FROM_UNIXTIME($NOW), " .
+         "GameType='" . mysql_addslashes($game_type) . "', " .
+         "Ruleset='" . mysql_addslashes($ruleset) . "', " .
+         "Size=$size, " .
+         "Komi=ROUND(2*($komi))/2, " .
+         "Handicap=$handicap, " .
+         "Handicaptype='" . mysql_addslashes($handicap_type) . "', " .
+         "AdjKomi=$adj_komi, " .
+         "JigoMode='" . mysql_addslashes($jigo_mode) . "', " .
+         "AdjHandicap=$adj_handicap, " .
+         "MinHandicap=$min_handicap, " .
+         ($max_handicap < 0 ? '' : "MaxHandicap=$max_handicap, " ) .
+         "Maintime=$hours, " .
+         "Byotype='$byoyomitype', " .
+         "Byotime=$byohours, " .
+         "Byoperiods=$byoperiods, " .
+         "WeekendClock='$weekendclock', " .
+         "Rated='$rated', " .
+         "StdHandicap='$stdhandicap', " .
+         "MustBeRated='$MustBeRated', " .
+         "Ratingmin=$rating1, " .
+         "Ratingmax=$rating2, " .
+         "MinRatedGames=$min_rated_games, " .
+         "SameOpponent=$same_opponent, " .
+         "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
+   }
+
+   ta_begin();
+   {//HOT-section for creating waiting-room game
+      $gid = 0;
+      if( $query_wroom )
+         db_query( 'add_to_waitingroom.insert.waitingroom', $query_wroom );
+      else if( $query_game )
+      {
+         $result = db_query( 'add_to_waitingroom.insert.game', $query_game, 'mysql_insert_game' );
+         if( mysql_affected_rows() != 1)
+            error('mysql_start_game', 'add_to_waitingroom.insert.game2');
+         $gid = mysql_insert_id();
+         if( $gid <= 0 )
+            error('internal_error', "add_to_waitingroom.insert.game.err($gid)");
+
+         MultiPlayerGame::init_multi_player_game( "add_to_waitingroom",
+            $gid, $my_id, MultiPlayerGame::determine_player_count($game_players) );
+      }
+   }
+   ta_end();
 
    $msg = urlencode(T_('Game added!'));
 
-   jump_to("waiting_room.php?showall=1".URI_AMP."sysmsg=$msg");
+   if( $gid > 0 )
+      jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=$msg");
+   else
+      jump_to("waiting_room.php?showall=1".URI_AMP."sysmsg=$msg");
 }
 ?>
