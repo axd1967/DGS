@@ -409,6 +409,7 @@ Commands:
             "score" : "", # score for finished game only (same format as for status_score-command above)
 
             "rated" : "1", # 0=unrated, 1=rated
+            "game_type" : "GO", # GO | TEAM_GO(N:M) | ZEN_GO (N); N,M >= 1
             "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
             "size" : "19", # board-size
             "komi" : "6.5", # komi
@@ -499,10 +500,13 @@ Commands:
       - Result (JSON) = result-list see section (2d) with list of objects dependent on view:
          - only fields are listed here, check semantics on section (3a), see "info"-command
 
-         * VIEW='status' | 'running' | 'finished' | 'observing' | 'observed':
-           id, tournament_id, status, time_lastmove, move_id, move_color,
+         * VIEW = 'status'
+           id, tournament_id, game_type, status, time_lastmove, move_id, move_color,
            black|white_user (nested object according to WITH-option),
            black|white_gameinfo.remtime
+
+         * VIEW = 'running' | 'finished' | 'observing' | 'observed':
+           - TODO: not defined ATM -> see 'status'
 
 
    "delete" : deletes specified game
@@ -1224,7 +1228,7 @@ Response:
          message_date : date when message has been sent
 
       # header-line with format of game-data-line
-      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id"
+      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type"
 
          game_id         : game-id, e.g. http://www.dragongoserver.net/game.php?gid=317416
          opponent_handle : user-id (handle) of users opponent
@@ -1240,15 +1244,20 @@ Response:
          move_id         : required for move-context, see section (3a)
          tournament_id   : tournament-id, e.g. http://www.dragongoserver.net/tournaments/view_tournament.php?tid=19,
                            0 if game is not part of a tournament
+         game_type       : game-type and game-players info, format:
+                           - GO
+                           - TEAM_GO(N:M)
+                           - ZEN_GO(N)
+
 
    Example output:
 
       ## M,message_id,'sender','subject','message_date'
       M,1595525,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
-      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id
-      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0
-      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0
-      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19
+      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type
+      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,'GO'
+      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,'GO'
+      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,'TEAM_GO (2:2)'
 
 Errors:
 
