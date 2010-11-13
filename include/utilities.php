@@ -109,6 +109,14 @@ function array_value_to_key_and_value( $array )
    return $new_array;
 }
 
+function build_num_range_map( $start, $count )
+{
+   $arr = array();
+   for( $i=0; $i < $count; $i++, $start++ )
+      $arr[$start] = $start;
+   return $arr;
+}
+
 // returns string-representation of flat map: "key=[val], ..."
 // NOTE: similar to PHP-funcs var_export() and print_r()
 function map_to_string( $map, $sep=', ' )

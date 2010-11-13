@@ -63,17 +63,29 @@ function init_standard_folders()
  *     GSET_MSG_INVITE | GSET_MSG_DISPUTE = for message.php
  *     GSET_WAITINGROOM = for waiting_room.php / new_game.php
  *     GSET_TOURNAMENT_LADDER, GSET_TOURNAMENT_ROUNDROBIN = for tournaments/edit_rules.php
+ * \param $viewmode:
+ *     GSETVIEW_SIMPLE = simple view with some hidden settings
+ *     GSETVIEW_EXPERT = advanced view with all possible settings (no multi-player-stuff); auto for tourney
+ *     GSETVIEW_MPGAME = view with settings allowed for multi-player-game; auto for MP-game-type
  * \param $map_ratings:
  *     if set, contain map with keys (rating1, rating2) ->
  *     then add probable game-settings for conventional/proper-handicap-type
  * \param $my_ID user-id for invite/dispute, then $gid is game-id;
  *        my_ID='redraw' for invite/dispute/tourney and $gid then is the $_POST[] of the form asking preview
  */
-function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
+function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
 {
    if( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
       $formstyle = GSET_MSG_INVITE;
+   if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
+      $viewmode = GSETVIEW_SIMPLE;
+   if( $viewmode == GSETVIEW_MPGAME && $formstyle != GSET_WAITINGROOM )
+      $viewmode = GSETVIEW_SIMPLE;
+
    $is_fstyle_tourney = ( $formstyle == GSET_TOURNAMENT_LADDER || $formstyle == GSET_TOURNAMENT_ROUNDROBIN );
+   if( $is_fstyle_tourney )
+      $viewmode = GSETVIEW_EXPERT;
+   $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
 
    $allowed = true;
 
@@ -90,6 +102,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $AdjustHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
+   $GamePlayers = '';
    $Maintime = 1;
    $MaintimeUnit = 'months';
    // NOTE: take note, that '36 hours' eval to '2d + 6h' because of sleeping time
@@ -105,6 +118,13 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    $WeekendClock = true;
    $StdHandicap = true;
    $Rated = true;
+   if( $is_view_mpgame ) // defaults for MP-game
+   {
+      $GamePlayers = '2:2'; //rengo
+      $Handitype = HTYPE_NIGIRI;
+      $CategoryHandiType = CAT_HTYPE_MANUAL;
+      $Rated = false;
+   }
 
    if( $my_ID==='redraw' && is_array($gid) )
    {
@@ -141,6 +161,9 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
       if( isset($gid['byoyomitype']) )
          $Byotype = (string)$gid['byoyomitype'];
+
+      if( isset($gid['game_players']) )
+         $GamePlayers = (string)$gid['game_players'];
 
       // NOTE on time-hours: 36 hours eval to 2d + 6h (because of sleeping time)
 
@@ -259,6 +282,15 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    // Draw game-settings form
 
+   $mform->add_hidden( 'viewmode', $viewmode );
+
+   if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
+   {
+      $vals = array_value_to_key_and_value( range(1, NEWGAME_MAX_GAMES) );
+      $mform->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
+                              'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
+   }
+
    $mform->add_row( array( 'SPACE' ) );
    $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
                            'SELECTBOX', 'ruleset', 1, getRulesetText(), $Ruleset, false ) );
@@ -269,82 +301,89 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
 
    $handi_stones=array( 0 => 0 );
    for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
-     $handi_stones[$bs]=$bs;
+      $handi_stones[$bs]=$bs;
 
 
    $mform->add_row( array( 'SPACE' ) );
 
    // Conventional & Proper handicap
-   $trc = T_('Conventional handicap (komi 0.5 if not even)');
-   $trp = T_('Proper handicap (komi adjusted by system)');
-   if( $iamrated )
-   {// user has a rating
-      $sugg_conv = '';
-      $sugg_prop = '';
-      if( is_array($map_ratings) )
-      {
-         $r1 = $map_ratings['rating1'];
-         $r2 = $map_ratings['rating2'];
-         $arr_conv_sugg = suggest_conventional( $r1, $r2, $Size );
-         $arr_prop_sugg = suggest_proper( $r1, $r2, $Size );
-         $sugg_conv = '<span class="Suggestion">' .
-            sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
-         $sugg_prop = '<span class="Suggestion">' .
-            sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
-      }
+   if( !$is_view_mpgame )
+   {
+      $trc = T_('Conventional handicap (komi 0.5 if not even)');
+      $trp = T_('Proper handicap (komi adjusted by system)');
+      if( $iamrated )
+      {// user has a rating
+         $sugg_conv = '';
+         $sugg_prop = '';
+         if( is_array($map_ratings) )
+         {
+            $r1 = $map_ratings['rating1'];
+            $r2 = $map_ratings['rating2'];
+            $arr_conv_sugg = suggest_conventional( $r1, $r2, $Size );
+            $arr_prop_sugg = suggest_proper( $r1, $r2, $Size );
+            $sugg_conv = '<span class="Suggestion">' .
+               sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
+            $sugg_prop = '<span class="Suggestion">' .
+               sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
+         }
 
-      $mform->add_row( array(
-            'DESCRIPTION', $trc,
-            'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType,
-            'TEXT', $sugg_conv ));
-      $mform->add_row( array(
-            'DESCRIPTION', $trp,
-            'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_PROPER => '' ), $CategoryHandiType,
-            'TEXT', $sugg_prop ));
-   }
-   else
-   {// user-unrated
-      if( $formstyle == GSET_MSG_DISPUTE && ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER ) )
-      {
-         $descr_str = ( $Handitype == HTYPE_CONV ) ? $trc : $rtp; // No initial rating
          $mform->add_row( array(
-               'DESCRIPTION', $descr_str,
-               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1), ));
-         $Handitype = HTYPE_NIGIRI; // default
-         $CategoryHandiType = get_category_handicaptype( $Handitype );
-         $allowed = false;
+               'DESCRIPTION', $trc,
+               'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType,
+               'TEXT', $sugg_conv ));
+         $mform->add_row( array(
+               'DESCRIPTION', $trp,
+               'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_PROPER => '' ), $CategoryHandiType,
+               'TEXT', $sugg_prop ));
       }
-   }
+      else
+      {// user-unrated
+         if( $formstyle == GSET_MSG_DISPUTE && ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER ) )
+         {
+            $descr_str = ( $Handitype == HTYPE_CONV ) ? $trc : $rtp; // No initial rating
+            $mform->add_row( array(
+                  'DESCRIPTION', $descr_str,
+                  'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1), ));
+            $Handitype = HTYPE_NIGIRI; // default
+            $CategoryHandiType = get_category_handicaptype( $Handitype );
+            $allowed = false;
+         }
+      }
+   }//conv/proper-HType
 
    // Manual game: nigiri, double, black, white
-   $color_arr = array(
-         HTYPE_NIGIRI => T_('Nigiri#htman'),
-         HTYPE_DOUBLE => T_('Double#htman'),
-         HTYPE_BLACK  => T_('Black#htman'),
-         HTYPE_WHITE  => T_('White#htman'),
-      );
-   if( $is_fstyle_tourney )
-      unset($color_arr[HTYPE_DOUBLE]);
+   if( !$is_view_mpgame )
+   {
+      $color_arr = array(
+            HTYPE_NIGIRI => T_('Nigiri#htman'),
+            HTYPE_DOUBLE => T_('Double#htman'),
+            HTYPE_BLACK  => T_('Black#htman'),
+            HTYPE_WHITE  => T_('White#htman'),
+         );
+      if( $is_fstyle_tourney || $is_view_mpgame )
+         unset($color_arr[HTYPE_DOUBLE]);
 
-   if( $formstyle == GSET_TOURNAMENT_LADDER )
-      $color_txt = T_('Color Challenger#T_ladder');
-   elseif( $formstyle == GSET_TOURNAMENT_ROUNDROBIN )
-      $color_txt = T_('Color Stronger#T_RRobin');
-   else
-      $color_txt = T_('My color');
+      if( $formstyle == GSET_TOURNAMENT_LADDER )
+         $color_txt = T_('Color Challenger#T_ladder');
+      elseif( $formstyle == GSET_TOURNAMENT_ROUNDROBIN )
+         $color_txt = T_('Color Stronger#T_RRobin');
+      else
+         $color_txt = T_('My color');
 
-   $mform->add_row( array(
-      'DESCRIPTION', T_('Manual setting (even or handicap game)'),
-      'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType,
-      'TEXT', sptext($color_txt,1),
-      'SELECTBOX', 'color_m', 1, $color_arr, $Color_m, false,
-      'TEXT', sptext(T_('Handicap'),1),
-      'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
-      'TEXT', sptext(T_('Komi'),1),
-      'TEXTINPUT', 'komi_m', 5, 5, $Komi_m, ));
+      $mform->add_row( array(
+         'DESCRIPTION', T_('Manual setting (even or handicap game)'),
+         'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType,
+         'TEXT', sptext($color_txt,1),
+         'SELECTBOX', 'color_m', 1, $color_arr, $Color_m, false,
+         'TEXT', sptext(T_('Handicap'),1),
+         'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
+         'TEXT', sptext(T_('Komi'),1),
+         'TEXTINPUT', 'komi_m', 5, 5, $Komi_m, ));
+   }//manual HType
 
 
-   if( $formstyle == GSET_WAITINGROOM || $is_fstyle_tourney )
+   $expert_view = ( $is_fstyle_tourney || ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_EXPERT) );
+   if( $expert_view )
    {
       // adjust handicap stones
       $adj_handi_stones = array();
@@ -366,7 +405,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
    if( ENA_STDHANDICAP )
    {
       $arr = array();
-      if( $formstyle == GSET_WAITINGROOM || $is_fstyle_tourney )
+      if( $expert_view )
          $arr[] = 'TAB';
       else
          array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
@@ -376,7 +415,7 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
       $mform->add_row($arr);
    }
 
-   if( $formstyle == GSET_WAITINGROOM || $is_fstyle_tourney )
+   if( $expert_view )
    {
       // adjust komi
       $jigo_modes = array(
@@ -391,6 +430,17 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
             'TEXT', sptext(T_('Jigo mode'), 1),
             'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
          ));
+   }
+
+
+   if( $formstyle == GSET_WAITINGROOM && $is_view_mpgame )
+   {
+      $mform->add_row( array( 'HEADER', T_('Multi-player settings') ) );
+
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Game Players'),
+            'TEXTINPUT', 'game_players', 6, 5, $GamePlayers,
+            'TEXT', MINI_SPACING.T_('2:2 (Rengo), 3 (Zen-Go)'), ));
    }
 
 
@@ -442,23 +492,29 @@ function game_settings_form(&$mform, $formstyle, $iamrated=true, $my_ID=NULL, $g
          'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock,
          'TEXT', sprintf( '(%s)', T_('UTC timezone') ), ));
 
-   if( $formstyle == GSET_WAITINGROOM )
-      $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
-
-   if( $iamrated )
+   if( !$is_view_mpgame )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
-                              'CHECKBOX', 'rated', 'Y', "", $Rated ) );
+      if( $formstyle == GSET_WAITINGROOM )
+         $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
+
+      if( $iamrated )
+      {
+         $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
+                                 'CHECKBOX', 'rated', 'Y', "", $Rated ) );
+      }
+      else if( $formstyle == GSET_MSG_DISPUTE && $Rated )
+      {// user unrated
+         $mform->add_row( array(
+               'DESCRIPTION', T_('Rated game'),
+               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
+               //'HIDDEN', 'rated', '',
+            ));
+         $allowed = false;
+      }//rated
    }
-   else if( $formstyle == GSET_MSG_DISPUTE && $Rated )
-   {// user unrated
-      $mform->add_row( array(
-            'DESCRIPTION', T_('Rated game'),
-            'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
-            //'HIDDEN', 'rated', '',
-         ));
-      $allowed = false;
-   }
+
+   if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
+      append_form_add_waiting_room_game( $mform, $viewmode );
 
    return $allowed;
 } // end of 'game_settings_form'
@@ -608,7 +664,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
-   //   Games: Status, Game_mid(=mid), Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
+   //   Games: Status, Game_mid(=mid), GameType, GamePlayers, Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
    //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, myColor
    extract($game_row);
 
@@ -693,7 +749,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( $tablestyle == GSET_WAITINGROOM )
    {
       $itable->add_scaption(T_('Info'));
-      $itable->add_sinfo( T_('Number of games'), $nrGames );
+      $itable->add_sinfo(
+            (( $GameType == GAMETYPE_GO ) ? T_('Number of games') : T_('Number of game-players')),
+            $nrGames );
       $itable->add_sinfo(
             T_('Player'),
             user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) );
@@ -703,6 +761,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
 
    if( $tablestyle != GSET_TOURNAMENT_LADDER )
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+
+   if( $tablestyle == GSET_WAITINGROOM )
+      $itable->add_sinfo( T_('Game Type'), MultiPlayerGame::format_game_type($GameType, $GamePlayers) );
+
    $itable->add_sinfo( T_('Ruleset'), getRulesetText($Ruleset) );
    $itable->add_sinfo( T_('Size'), $Size );
 
@@ -980,50 +1042,6 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
       $out[] = sprintf( '[%s]', T_('Hidden#wroom') );
 
    return ( count($out) ? implode(', ', $out) : NO_VALUE );
-}
-
-// WaitingRoom.SameOpponent: 0=always, <0=n times, >0=after n days
-function echo_accept_same_opponent( $same_opp, $game_row=null )
-{
-   if( $same_opp == 0 )
-      return T_('always#same_opp');
-
-   if( $same_opp < 0 )
-   {
-      if ($same_opp == -1)
-         $out = T_('1 time#same_opp');
-      else //if ($same_opp < 0)
-         $out = sprintf( T_('%s times#same_opp'), -$same_opp );
-      if( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
-      {
-         $join_fmt = ($game_row['JoinedCount'] > 1)
-            ? T_('joined %s games#same_opp') : T_('joined %s game#same_opp');
-         $out .= ' (' . sprintf( $join_fmt, $game_row['JoinedCount'] ) . ')';
-      }
-   }
-   else
-   {
-      global $NOW;
-      if ($same_opp == 1)
-         $out = T_('after 1 day#same_opp');
-      else //if ($same_opp > 0)
-         $out = sprintf( T_('after %s days#same_opp'), $same_opp );
-      if( is_array($game_row) && isset($game_row['X_ExpireDate'])
-            && ($game_row['X_ExpireDate'] > $NOW) )
-      {
-         $out .= ' (' . sprintf( T_('wait till %s#same_opp'),
-            date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';
-      }
-   }
-   return $out;
-}
-
-function build_accept_same_opponent_array( $arr )
-{
-   $out = array();
-   foreach( $arr as $same_opp )
-      $out[$same_opp] = echo_accept_same_opponent($same_opp);
-   return $out;
 }
 
 function build_suggestion_shortinfo( $suggest_result )
