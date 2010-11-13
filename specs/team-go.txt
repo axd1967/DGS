@@ -34,14 +34,17 @@ Cycling switching colors on each step (implementation alternatives):
 
 - big problems:
    - time counted for TEAM (color) !! not players -> so 2 timers (B+W)
+     => but already there in Games-table, just use current Players-clock-lastticks
+
    - which timezone to use for timers? - alternatives:
-     - a) TZ selected by player-to-move (most simple)
+     - a) TZ selected by player-to-move (most simple) !!!
      - b) TZ of game-master
      - c) TZs set by game-master
      - d) TZ of server
+
    - handle players on vacation:
       - L: if one player on vacation -> team on vacation
-      - L: if one player on vacation -> time stalled for game
+      - L: if one player on vacation -> time stalled for game as long as it's the player to move !!!
       - L: if one player on vacation -> other players can move for him (skip-player-on-vacation)
         - game stalls on vacation
         - can be game-option, or
@@ -50,11 +53,21 @@ Cycling switching colors on each step (implementation alternatives):
       - problem is, that a player on vacation can still play normally
       - problem is, that a team may consist of 1..n players against different number of opponents, so the bigger team may compensate time with more vacation
 
+#-------- Restrictions -----------------------------------------
+
+* game-settings for Team-Go + Zen-Go for waiting-room game:
+   - no double-games (handicap-type = DOUBLE)
+   - NrGames := 1
+   - Rated := No
+   - SameOpponent := -1 (user can't join same game more than once)
+
+
 #-------- Related features -------------------------------------
 
 * Beware of invitation-DISPUTEs !!
   - invited-player can dispute with game-master, but there are different players
   => check, if invitation is a good way to start team-games (may be restricted to "special" waiting-room)
+  => no invitation to start Team-Go game !!
 
 * Q: Are all players equal or is there a game-master ?
   => IMHO for setup game there is a game-master (the one inviting others or posting game-offer)
@@ -78,7 +91,7 @@ Cycling switching colors on each step (implementation alternatives):
 
 * Game-properties for TeamGo:
   - (condition): players must be unique (trust!); at least 3 players
-  - define DGS-maximum of attending players: 16
+  - define DGS-maximum of attending players: 20
   - allow player-skipping: by game-master, by admin, if on vacation, if requested
   - type: TeamGo, RenGo, ZenGo
   - match-mode: equal team-size, min/max-team-size
@@ -87,16 +100,17 @@ Cycling switching colors on each step (implementation alternatives):
   - game-settings: board-size, ruleset, handicap/komi/color, handicap-placement, time-setting
 
 * Game-lists:
-  - not sufficient to list by B|W-id alone, list by Team OR representative OR last moved player
+  - not sufficient(why?) to list by B|W-id alone, list by Team OR representative OR last moved player
   - handle opponents-page
   - handle pages with all/user/my finished/running/observed/observing games
 
-* Nice would be revised game-page with full game-message-list in <div>-tag
+* Nice would be revised game-page with full game-message-list in scrollable <div>-tag
 
 * Nice would be additional "public" game-chat (similar to wanted review-comments):
   any number at any time by everyone, but restricted to players to be "public"
 
 * Need multi-receivers-message
+  -> can use forums instead for now
 
 * Need way to ask partner if it's okay to resign
 
@@ -110,4 +124,6 @@ Cycling switching colors on each step (implementation alternatives):
 * Rengo-SGF-download: include who's moving name -> use what SGF-props ?
 
 * Rengo: disallow team-talk, but how? -> not possible (only by trust)
+
+* Vacation-handling: can name substitute-user !?
 
