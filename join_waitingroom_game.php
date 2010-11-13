@@ -74,10 +74,17 @@ require_once( "include/contacts.php" );
       db_query( "join_waitingroom_game.delete($wr_id)",
          "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
-      $msg = urlencode(T_('Game deleted!'));
+      $gid = @$game_row['gid'];
+      if( $gid )
+         MultiPlayerGame::revoke_offer_game_players( $gid, $game_row['nrGames'], GPFLAG_WAITINGROOM );
 
-      jump_to("waiting_room.php?sysmsg=$msg");
+      $msg = urlencode(T_('Game deleted!'));
+      if( $gid )
+         jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=$msg");
+      else
+         jump_to("waiting_room.php?sysmsg=$msg");
    }
+
 
    //else... joining game
 
@@ -155,20 +162,34 @@ require_once( "include/contacts.php" );
 
    //TODO: HOT_SECTION ???
    $gids = array();
-   if( $i_am_black || $double )
-      $gids[] = create_game($player_row, $opponent_row, $game_row);
-   else
-      $gids[] = create_game($opponent_row, $player_row, $game_row);
-   $gid = $gids[0];
-   //keep this after the regular one ($gid => consistency with send_message)
-   if( $double )
+   $is_std_go = ( $game_row['GameType'] == GAMETYPE_GO );
+   if( $is_std_go )
    {
-      // provide a link between the two paired "double" games
-      $game_row['double_gid'] = $gid;
-      $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row);
+      if( $i_am_black || $double )
+         $gids[] = create_game($player_row, $opponent_row, $game_row);
+      else
+         $gids[] = create_game($opponent_row, $player_row, $game_row);
+      $gid = $gids[0];
+      //keep this after the regular one ($gid => consistency with send_message)
+      if( $double )
+      {
+         // provide a link between the two paired "double" games
+         $game_row['double_gid'] = $gid;
+         $double_gid2 = create_game($opponent_row, $player_row, $game_row);
+         $gids[] = $double_gid2;
 
-      db_query( "join_waitingroom_game.update_double2($gid)",
-         "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+         db_query( "join_waitingroom_game.update_double2($gid)",
+            "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+      }
+   }
+   else // join multi-player-game
+   {
+      $gid = $game_row['gid']; // use existing game for Team-/Zen-Go
+      if( $gid <= 0 )
+         error('internal_error', "join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
+
+      MultiPlayerGame::join_waitingroom_game( "join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
+      $gids[] = $gid;
    }
 
    $cnt = count($gids);
@@ -226,7 +247,8 @@ require_once( "include/contacts.php" );
    $message = ( empty($game_row['Comment']) ) ? '' : "Comment: {$game_row['Comment']}\n\n";
    $message .= sprintf( "%s has joined your waiting room game.\n",
       user_reference( REF_LINK, 1, '', $player_row) );
-   $message .= "\nGames:\n";
+   $message .= sprintf( "\nGames of type [%s]:\n",
+      MultiPlayerGame::get_game_type($game_row['GameType']) );
    foreach( $gids as $gid )
       $message .= "* <game $gid>\n";
 
