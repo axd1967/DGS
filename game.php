@@ -125,8 +125,8 @@ function get_alt_arg( $n1, $n2)
 
    extract($game_row);
 
-   if( $Status == 'INVITED' )
-      error('unknown_game', "game.check.invited($gid)");
+   if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
+      error('game_not_started', "game.check.bad_status($gid,$Status)");
 
    $tourney = null;
    if( ALLOW_TOURNAMENTS && ($tid > 0) )
@@ -143,7 +143,7 @@ function get_alt_arg( $n1, $n2)
    if( $move<=0 )
       $move = $Moves;
 
-   if( $Status == 'FINISHED' || $move < $Moves )
+   if( $Status == GAME_STATUS_FINISHED || $move < $Moves )
       $may_play = false;
    else
    {
@@ -152,16 +152,16 @@ function get_alt_arg( $n1, $n2)
       {
          if( !$action )
          {
-            if( $Status == 'PLAY' )
+            if( $Status == GAME_STATUS_PLAY )
             {
                if( $Handicap>1 && $Moves==0 )
                   $action = 'handicap';
                else
                   $action = 'choose_move';
             }
-            else if( $Status == 'PASS' )
+            else if( $Status == GAME_STATUS_PASS )
                $action = 'choose_move';
-            else if( $Status == 'SCORE' || $Status == 'SCORE2' )
+            else if( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 )
                $action = 'remove';
          }
       }
@@ -174,7 +174,7 @@ function get_alt_arg( $n1, $n2)
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
 
-   if( !$logged_in || $my_game || ($Status == 'FINISHED') )
+   if( !$logged_in || $my_game || ($Status == GAME_STATUS_FINISHED) )
       $my_observe = null;
    else
    {
@@ -188,10 +188,11 @@ function get_alt_arg( $n1, $n2)
    $has_observers = has_observers( $gid);
 
 
-   $is_running_game = ($Status == 'PLAY' || $Status == 'PASS' || $Status == 'SCORE' || $Status == 'SCORE2' );
+   $is_running_game = isRunningGame($Status);
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 );
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 )
+      && ($GameType == GAMETYPE_GO);
 
    $may_resign_game = ( $action == 'choose_move') || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
 
@@ -202,7 +203,7 @@ function get_alt_arg( $n1, $n2)
    else if( $ToMove_ID )
       error('database_corrupted', "game.bad_ToMove_ID($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
-   if( $Status != 'FINISHED' && ($Maintime > 0 || $Byotime > 0) )
+   if( $Status != GAME_STATUS_FINISHED && ($Maintime > 0 || $Byotime > 0) )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
       $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
@@ -224,7 +225,7 @@ function get_alt_arg( $n1, $n2)
    $may_add_time = $my_game && GameAddTime::allow_add_time_opponent($game_row, $my_id);
 
 
-   $no_marked_dead = ( $Status == 'PLAY' || $Status == 'PASS' ||
+   $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
                        $action == 'choose_move' || $action == 'domove' );
 
    $TheBoard = new Board( );
@@ -240,7 +241,7 @@ function get_alt_arg( $n1, $n2)
    {
       $validation_step = false;
       $may_play = false;
-      if( $Status == 'FINISHED' )
+      if( $Status == GAME_STATUS_FINISHED )
       {
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
@@ -295,7 +296,7 @@ function get_alt_arg( $n1, $n2)
 
          case 'handicap': //multiple input step + validation, to input free handicap-stones
          {
-            if( $Status != 'PLAY' || !( $Handicap>1 && $Moves==0 ) )
+            if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==0 ) )
                error('invalid_action',"game.handicap.check_status($gid,$Status)");
 
             $paterr = '';
@@ -345,7 +346,7 @@ function get_alt_arg( $n1, $n2)
             break;
 
          case 'pass': //for validation, pass-move
-            if( $Status != 'PLAY' && $Status != 'PASS' )
+            if( $Status != GAME_STATUS_PLAY && $Status != GAME_STATUS_PASS )
                error('invalid_action', "game.pass.check_status($gid,$Status)");
 
             $validation_step = true;
@@ -363,7 +364,7 @@ function get_alt_arg( $n1, $n2)
 
          case 'remove': //multiple input step, dead-stone-marking in scoring-mode
          {
-            if( $Status != 'SCORE' && $Status != 'SCORE2' )
+            if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
                error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
@@ -384,7 +385,7 @@ function get_alt_arg( $n1, $n2)
 
          case 'done': //for validation after 'remove', done marking dead-stones in scoring-mode
          {
-            if( $Status != 'SCORE' && $Status != 'SCORE2' )
+            if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
                error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
@@ -431,7 +432,7 @@ function get_alt_arg( $n1, $n2)
  : yes   : -    :: gameh  : gameh  : F+gameh ::
 */
 
-   if( $Status == 'FINISHED' )
+   if( $Status == GAME_STATUS_FINISHED )
       $html_mode= 'gameh';
    else
       $html_mode= 'game';
@@ -630,7 +631,7 @@ function get_alt_arg( $n1, $n2)
               , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
                        'target' => FRIENDLY_SHORT_NAME.'_game_comments'
               ));
-   if( $Status == 'FINISHED' && $GameFlags & GAMEFLAGS_HIDDEN_MSG )
+   if( $Status == GAME_STATUS_FINISHED && $GameFlags & GAMEFLAGS_HIDDEN_MSG )
       echo MED_SPACING . echo_image_gamecomment( $gid );
 
    echo "\n</td></tr>\n</table>"; //board & associates table }--------
@@ -664,7 +665,7 @@ function get_alt_arg( $n1, $n2)
    {
       if( $action == 'choose_move' )
       {
-         if( $Status != 'SCORE' && $Status != 'SCORE2' )
+         if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=pass";
       }
       else if( $action == 'remove' )
@@ -678,7 +679,7 @@ function get_alt_arg( $n1, $n2)
       {
          ; // none (at the moment)
       }
-      else if( $Status == 'FINISHED' && $my_game && $opponent_ID > 0) //&& $just_looking
+      else if( $Status == GAME_STATUS_FINISHED && $my_game && $opponent_ID > 0) //&& $just_looking
       {
          $menu_array[T_('Send message to user')] = "message.php?mode=NewMessage".URI_AMP."uid=$opponent_ID" ;
          $menu_array[T_('Invite this user')] = "message.php?mode=Invite".URI_AMP."uid=$opponent_ID" ;
@@ -711,6 +712,8 @@ function get_alt_arg( $n1, $n2)
    }
 
    $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
+   if( $GameType != GAMETYPE_GO )
+      $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
 
    end_page(@$menu_array);
 }// main
@@ -965,12 +968,12 @@ function draw_game_info( &$game_row, $board, $tourney )
    echo '<td class=Ratings>'
       , echo_game_rating( $game_row['Black_ID'],
             $game_row['Black_Start_Rating'],
-            ($game_row['Status']==='FINISHED') ? $game_row['Black_End_Rating'] : $game_row['Blackrating'] )
+            ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row['Black_End_Rating'] : $game_row['Blackrating'] )
       , "</td>\n";
    echo '<td class=Prisoners>', T_('Prisoners'), ': ', $game_row['Black_Prisoners'], "</td>\n";
    echo "</tr>\n";
 
-   if( $game_row['Status'] != 'FINISHED' )
+   if( $game_row['Status'] != GAME_STATUS_FINISHED )
    {
       echo '<tr id="blackTime">', "\n";
       echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
@@ -994,13 +997,13 @@ function draw_game_info( &$game_row, $board, $tourney )
    echo '<td class=Ratings>'
       , echo_game_rating( $game_row['White_ID'],
             $game_row['White_Start_Rating'],
-            ($game_row['Status']==='FINISHED') ? $game_row['White_End_Rating'] : $game_row['Whiterating'] )
+            ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row['White_End_Rating'] : $game_row['Whiterating'] )
       , "</td>\n";
    echo '<td class=Prisoners>', T_('Prisoners'), ': ', $game_row['White_Prisoners'], "</td>\n";
    echo "</tr>\n";
 
 
-   if( $game_row['Status'] != 'FINISHED' )
+   if( $game_row['Status'] != GAME_STATUS_FINISHED )
    {
       echo '<tr id="whiteTime">', "\n";
       echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
@@ -1022,6 +1025,17 @@ function draw_game_info( &$game_row, $board, $tourney )
          , "<tr id=\"gameRules\">\n"
          , "<td></td>\n"
          , "<td colspan=\"$cols\">", T_('Title#tourney'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
+         , "</tr>\n";
+   }
+
+   //multi-player-game rows
+   if( $game_row['GameType'] != GAMETYPE_GO )
+   {
+      echo "<tr id=\"gameRules\">\n"
+         , '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n"
+         , "<td colspan=\"", ($cols-1), "\">",
+            T_('Game Type').': ',
+            MultiPlayerGame::format_game_type($game_row['GameType'], $game_row['GamePlayers']), "</td>\n"
          , "</tr>\n";
    }
 
