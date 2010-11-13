@@ -1497,7 +1497,7 @@ class Table
          $this->Removed_Columns[ 0 ] = '';
          $this->Removed_Columns[ -1 ] = T_('All columns');
          $ac_string = $ac_form->print_insert_select_box(
-               $this->Prefix.'add', '1', $this->Removed_Columns, '', false);
+               $this->Prefix.'add', '1', $this->Removed_Columns, 0, false);
          $ac_string.= $ac_form->print_insert_submit_button(
                $this->Prefix.TFORM_ACTION_ADDCOL, T_('Add Column'));
       }
