@@ -168,6 +168,11 @@ function get_request_arg( $name, $def='', $list=NULL)
    return $val;
 }
 
+function set_request_arg( $name, $val )
+{
+   $_REQUEST[$name] = $val;
+}
+
 // languages and encodings...
 
 define('LANG_TRANSL_CHAR', ','); //do not use '-'

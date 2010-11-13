@@ -2196,6 +2196,22 @@ table.MessageForm tr td.Cancel {
 }
 
 
+table#game_settingsTableInfos {
+   border: 0px solid blue;
+   border-spacing: 0px;
+   border-style: hidden;
+   empty-cells: show;
+}
+table#game_settingsTableInfos td {
+   border: 0px solid blue;
+   border-style: hidden;
+   font-size: smaller;
+}
+table#game_settingsTableInfos td.Rubric {
+   text-align: right;
+}
+
+
 /* ------------------------- */
 /* game comments table (class=Table) */
 /* ------------------------- */
