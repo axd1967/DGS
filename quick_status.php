@@ -21,6 +21,7 @@ require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
 require_once( "include/translation_functions.php" );
 require_once( "include/time_functions.php" );
+require_once( "include/game_functions.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -180,8 +181,7 @@ else
        "White_Maintime, White_Byotime, White_Byoperiods, " .
        "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
        "LastTicks, COALESCE(Clock.Ticks,0) AS X_Ticks, " .
-       "Games.Moves, " .
-       "Games.Status, " .
+       "Games.Moves, Games.Status, Games.GameType, Games.GamePlayers, " .
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
        "FROM Games " .
          "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$player_id) " .
@@ -191,8 +191,8 @@ else
 
    $result = db_query( 'quick_status.find_games', $query );
 
-   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid
-   echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id\n";
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, game_type
+   echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type\n";
 
    $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    while( $row = mysql_fetch_assoc($result) )
@@ -204,15 +204,15 @@ else
             /*is_to_move*/true, // always users turn
             TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
 
-      $game_status = ( preg_match("/^(PLAY|PASS|SCORE|SCORE2)$/i", $row['Status']) )
-         ? strtoupper($row['Status'])
-         : '';
+      $chk_game_status = strtoupper($row['Status']);
+      $game_status = isRunningGame($chk_game_status) ? $chk_game_status : '';
 
-      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, Moves, tid, GameStatus
-      echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s\n",
+      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, Moves, tid, GameType
+      echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,'%s'\n",
                     $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
                     date($datfmt, @$row['date']), $time_remaining['text'],
-                    $game_status, $row['Moves'], $row['tid'] );
+                    $game_status, $row['Moves'], $row['tid'],
+                    MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true) );
    }
    mysql_free_result($result);
 
