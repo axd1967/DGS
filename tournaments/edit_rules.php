@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    }
 
    $formstyle = ($tourney->Type == TOURNEY_TYPE_LADDER) ? GSET_TOURNAMENT_LADDER : GSET_TOURNAMENT_ROUNDROBIN;
-   game_settings_form( $trform, $formstyle, true/*$iamrated*/, 'redraw', $vars );
+   game_settings_form( $trform, $formstyle, GSETVIEW_FULL, true/*$iamrated*/, 'redraw', $vars );
 
    $trform->add_empty_row();
    $trform->add_row( array(
