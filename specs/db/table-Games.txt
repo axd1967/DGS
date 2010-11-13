@@ -19,10 +19,13 @@ Description:
  Black_ID           | int(11)                              | NULL
  White_ID           | int(11)                              | NULL
  ToMove_ID          | int(11)                              | 0
+ GameType           | enum('GO','TEAM_GO','ZEN_GO')        | GO
+ GamePlayers        | char(5)                              |
+ MoveCounter        | smallint(5) unsigned                 | 0
  Size               | tinyint(3) unsigned                  | 19
  Komi               | decimal(6,1)                         | 6.5
  Handicap           | tinyint(3) unsigned                  | 0
- Status             | enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') | INVITED
+ Status             | enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') | INVITED
  Moves              | smallint(5) unsigned                 | 0
  Black_Prisoners    | smallint(5) unsigned                 | 0
  White_Prisoners    | smallint(5) unsigned                 | 0
@@ -78,9 +81,19 @@ Description:
 * ToMove_ID : foreign key to Players.ID
    - field-value points to player, that has to move next in game
 
+* GameType : game-type, see Waitingroom.GameType
+
+* GamePlayers : matching of players for game
+   - format: "1:1" (Go), "N:M" (Team-Go), "N" (Zen-Go)
+
+* MoveCounter : counter/cursor/index to check who is next to move for multi-player-game
+   - starts at 0, use modulo-counter using info from GamePlayers-field to find next
+     player to move in GamePlayers-table
+
 * Size, Komi, Handicap : settings for game (board-size, komi, handicap-stones)
 
 * Status : current status for game
+   - SETUP: game-entry is used to configure game-players for multi-player-game
    - INVITED: game-entry is used to hold game-settings for invitational game negotiation
    - PLAY: running game, playing mode
    - PASS: running game, player has passed (transition to scoring-step)
@@ -172,4 +185,48 @@ Description:
 * uid : foreign key to Players.ID
 
 * Priority : integer-value with priority
+
+
+
+###########################################################################
+## --- GamePlayers ---
+
+Description:
+   Table to model multi-player-games like Team-Go and Zen-Go.
+   - uid non-UNIQUE per game-id, allow to have same player more than once per group
+
+ Field      | Type                         | Default
+------------+------------------------------+---------
+ ID         | int(11)                      | NULL
+ gid        | int(11)                      | NULL
+ GroupColor | enum('BW','B','W','G1','G2') | BW
+ GroupOrder | tinyint(4)                   | 0
+ uid        | int(11)                      | 0
+ Flags      | smallint(5) unsigned         | 0
+
+
+## Fields:
+
+* ID : primary key, game-player-ID
+   - same uid allowed more than once per game-id, and so for delete we need PK
+     to identify (single) correct entity
+
+* gid : foreign key to Games.ID
+
+* GroupColor : team/group-color of user for multi-player-game
+   - BW = both colors (unset AND used for Zen-Go)
+   - B = black-group
+   - W = white-group
+   - G1 = user in same group 1, but without assigned color
+   - G2 = user in same group 2, but without assigned color
+
+* GroupOrder : order within team/group
+   - range: 1..n for each team/group
+   - < 0 = inactive ex-group-member,
+     replaced by admin on game-players request, e.g. if game is stalled
+
+* uid : foreign key to Players.ID
+
+* Flags : flags for game-player
+   - see 'include/game_functions.php' GPFLAG_...
 
