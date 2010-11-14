@@ -10,7 +10,7 @@ Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-s
 Developers INFO:
 
 2009-02-11 juga
-   Tournaments, Quick-Suite
+   Tournaments, Team-Go/Zen-Go, Quick-Suite
 
 2007-12-23 rodival
    Code Cleanup, New Features
@@ -20,6 +20,45 @@ ChangeLog
 ------------------------------------------------------------------
 
 2010-11-14 juga
+
+   * include/game_functions.php (parse_waiting_room_rating_range,
+       append_form_add_waiting_room_game),
+     include/message_functions.php (game_info_table),
+     include/error_codes.php (ErrorCode.init),
+     game_players.php (add_waiting_room_mpgame), new_game.php,
+     waiting_room.php (determine_color), NEWS:
+   - waiting-room / new-game: player-rating required (RatingStatus != NONE)
+     for multi-player-game
+   - waiting-room: show multi-player-game with manual handicap-type and tooltips
+     about color-set-by-game-master
+
+   * include/game_functions.php (GamePlayer.getGroupColorOrder, ~.get_group_color_order;
+       parse_waiting_room_rating_range, build_arr_handicap_stones,
+       build_suggestion_shortinfo, get_colortext_probable),
+     include/message_functions.php (game_settings_form),
+     game_players.php (build_game_settings, build_group_rating, calc_group_ratings,
+       count_group_colors, build_table_game_players, build_form_add_waiting_room,
+       build_form_change_group, build_form_change_order, change_group_color,
+       change_group_order, build_tableinfo_handicap_suggestion, update_handicap_komi,
+       use_handicap_suggestion, get_group_color_game_player_id, reorder_game_players,
+       _sort_game_players):
+   - extended change-groups editor to update handicap-settings of multi-player-game
+     - edit of handicap & komi only allowed if all required game-players joined
+     - added update for handicap-stones and komi
+     - added previewing for changing color and handicap-settings
+     - added handicap-suggestion for conventional and proper handicap for average ratings
+     - changed 'Change color'-link in bottom-menu if handicap editing is allowed to
+       'Change color & handicap' for Team-Go and to 'Change handicap' for Zen-Go
+   - allow changing of color only for Team-Go, forbidden for Zen-Go
+   - re-order game-players list for previewing and after update without reloading data
+   - show average-ratings for each group in separate line
+   - bugfix updating GamePlayers.GroupColor field-name-typo
+   - bugfix parsing must-be-rated in multi-player waiting-room-game form
+   - refactored (moved) some funcs to prevent redundant code
+
+   * add_to_waitingroom.php:
+   - bugfix: undo refactoring to set standard-handicap
+   - bugfix: parse rating-range only for standard-go game-type
 
    * include/quick/quick_game.php (QuickHandlerGame.prepare),
      confirm.php, game.php, quick_play.php:

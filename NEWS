@@ -76,7 +76,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added number of finished, won and lost tournament-games for tournament-participants
       * Delete-Game and Add-Time forbidden for Tournament game
 
-   * <home new_game.php?view=2>Multi-player game</home>:
+   * <home new_game.php?view=2>Multi-player game</home> (player-rating required):
       * Team-Go (N:M) = two teams of 1..N,M players taking a match
       * Zen-Go (N)    = one group of players alternating colors
 
