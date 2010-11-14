@@ -783,8 +783,17 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       {
          if( $Handitype == HTYPE_NIGIRI )
          {
-            $subtype = ($Handicap == 0) ? T_('Even game with nigiri') : T_('Handicap game with nigiri');
-            $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class );
+            if( $GameType == GAMETYPE_GO )
+            {
+               $subtype = ($Handicap == 0) ? T_('Even game with nigiri') : T_('Handicap game with nigiri');
+               $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class );
+            }
+            else // mp-game
+            {
+               $subtype = T_('Color set by game-master#color');
+               $colortxt = image( $base_path.'17/y.gif',
+                  T_('Color set by game-master for multi-player-game#color'), null, $color_class );
+            }
          }
          elseif( $Handitype == HTYPE_DOUBLE )
          {

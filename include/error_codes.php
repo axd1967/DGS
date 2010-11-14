@@ -235,6 +235,9 @@ class ErrorCode
          $arr['no_initial_rating'] =
             T_("Sorry, you and your opponent need to set an initial rating, otherwise I can't find a suitable handicap");
 
+         $arr['multi_player_need_initial_rating'] =
+            T_("Sorry, you need an initial rating to start a multi-player-game.");
+
          $arr['no_uid'] =
             T_("Sorry, I need to know for which user to show the data.");
 

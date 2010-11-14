@@ -553,9 +553,10 @@ function add_waiting_room_mpgame( $grow, $uid )
 {
    global $NOW, $cnt_free_slots, $arr_free_slots;
    $gid = (int)$grow['ID'];
+   $is_mpgame = ( $grow['GameType'] != GAMETYPE_GO );
 
    $slots = limit( (int)get_request_arg('slots', 1), 1, $cnt_free_slots, 1 );
-   list( $must_be_rated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
+   list( $must_be_rated, $rating1, $rating2 ) = parse_waiting_room_rating_range( $is_mpgame );
    $min_rated_games = limit( (int)get_request_arg('min_rated_games', 0), 0, 10000, 0 );
    $comment = trim( get_request_arg('comment') );
 

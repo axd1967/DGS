@@ -40,6 +40,9 @@ require_once( 'include/utilities.php' );
    $viewmode = (int) get_request_arg('view', GSETVIEW_SIMPLE);
    if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
       $viewmode = GSETVIEW_SIMPLE;
+   if( $viewmode != GSETVIEW_SIMPLE && @$player_row['RatingStatus'] == RATING_NONE )
+      error('multi_player_need_initial_rating',
+            "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
 
    $my_rating = @$player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
@@ -56,7 +59,8 @@ require_once( 'include/utilities.php' );
    $menu_array = array();
    $menu_array[T_('New game')] = 'new_game.php';
    $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT;
-   $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME;
+   if( @$player_row['RatingStatus'] != RATING_NONE )
+      $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME;
    $menu_array[T_('Waiting room')] = 'waiting_room.php';
    $menu_array[T_('Invite')] = 'message.php?mode=Invite';
 

@@ -53,6 +53,7 @@ require_once( 'include/classlib_userconfig.php' );
       HTYPE_DOUBLE => T_('Double game'),
       HTYPE_BLACK  => T_('Color Black'),
       HTYPE_WHITE  => T_('Color White'),
+      HTYPEMP_MANUAL => T_('Manual'),
    );
 
    // config for handicap-filter
@@ -259,6 +260,8 @@ require_once( 'include/classlib_userconfig.php' );
          $mp_player_count = ($GameType == GAMETYPE_GO)
             ? 0
             : MultiPlayerGame::determine_player_count($GamePlayers);
+         if( $GameType != GAMETYPE_GO )
+            $Handicaptype = HTYPEMP_MANUAL;
 
          if( $idinfo == (int)$ID )
             $info_row = $row;
@@ -458,6 +461,10 @@ function determine_color( $Handicaptype, $is_my_game, $iamblack )
       else
          $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You play Black#color') );
    }
+   elseif( $Handicaptype == HTYPE_WHITE )
+   {
+      $colstr = image( $base_path.'17/y.gif', T_('Manual#color'), T_('Color set by game-master for multi-player-game#color') );
+   }
    elseif( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
    {
       if( $iamblack )
@@ -471,6 +478,6 @@ function determine_color( $Handicaptype, $is_my_game, $iamblack )
    if( $colstr && $Handicaptype != HTYPE_DOUBLE )
       $colstr = insert_width(5) . $colstr;
    return $colstr;
-}
+}//determine_color
 
 ?>

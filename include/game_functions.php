@@ -58,6 +58,7 @@ define('HTYPE_NIGIRI',  'nigiri'); // manual, color nigiri
 define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
+define('HTYPEMP_MANUAL', 'manual'); // manual, only used for multi-player-game in waiting-room
 
 define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
 define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
@@ -745,9 +746,11 @@ function get_gamesettings_viewmode( $viewmode )
 }
 
 // return arr( $must_be_rated, $rating1, $rating2 ) ready for db-insert
-function parse_waiting_room_rating_range()
+// note: multi-player-game requires rated game-players (RatingStatus != NONE),
+//       see also append_form_add_waiting_room_game()-func
+function parse_waiting_room_rating_range( $is_multi_player_game=false )
 {
-   if( (string)get_request_arg('must_be_rated') != 'Y' )
+   if( !$is_multi_player_game && (string)get_request_arg('must_be_rated') != 'Y' )
    {
       $MustBeRated = 'N';
       //to keep a good column sorting:
@@ -776,9 +779,11 @@ function parse_waiting_room_rating_range()
 // INPUT: must_be_rated, rating1, rating2, min_rated_games, comment
 function append_form_add_waiting_room_game( &$mform, $viewmode )
 {
+   // note: multi-player-game requires rated game-players (RatingStatus != NONE)
+   $req_rated = ($viewmode == GSETVIEW_MPGAME );
    $rating_array = getRatingArray();
    $mform->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
-                           'CHECKBOX', 'must_be_rated', 'Y', "", false,
+                           'CHECKBOXX', 'must_be_rated', 'Y', "", $req_rated, ($req_rated ? 'disabled=1' : ''),
                            'TEXT', sptext(T_('If yes, rating between'),1),
                            'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
                            'TEXT', sptext(T_('and')),
