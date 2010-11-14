@@ -172,12 +172,15 @@ define('KEY_GROUP_ORDER', 'gpo');
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    if( $allow_edit && $status == GAME_STATUS_SETUP )
    {
+      if( $cnt_free_slots )
+         $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
+
       $chg_col_title = ($enable_edit_HK)
          ? ( $game_type == GAMETYPE_ZEN_GO ? T_('Change handicap') : T_('Change color & handicap') )
          : T_('Change color');
-      if( $cnt_free_slots )
-         $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
-      $menu_array[$chg_col_title] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
+      if( $enable_edit_HK || $game_type == GAMETYPE_TEAM_GO )
+         $menu_array[$chg_col_title] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
+
       $menu_array[T_('Change order')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_ORDER;
    }
 
