@@ -92,6 +92,9 @@ else
    else
       error('database_corrupted', "quick_play.check_tomove($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
+   if( $Moves < $Handicap )
+      error('invalid_action', "quick_play.check.set_handicap.not_supported($gid,$my_id,$Moves,$Handicap)");
+
    if( $my_id != $ToMove_ID )
       error('not_your_turn', "quick_play.check_tomove2($gid,$ToMove_ID)");
 

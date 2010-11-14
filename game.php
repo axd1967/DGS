@@ -203,6 +203,9 @@ function get_alt_arg( $n1, $n2)
    else if( $ToMove_ID )
       error('database_corrupted', "game.bad_ToMove_ID($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
+   if( $Moves < $Handicap && ($action == 'choose_move' || $action == 'domove' ) )
+      error('invalid_action', "game.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
+
    if( $Status != GAME_STATUS_FINISHED && ($Maintime > 0 || $Byotime > 0) )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations

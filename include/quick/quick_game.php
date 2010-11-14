@@ -219,6 +219,8 @@ class QuickHandlerGame extends QuickHandler
          }
          else
          {
+            if( $Moves < $Handicap )
+               error('invalid_action', "QuickHandlerGame.prepare.check.miss_handicap($gid,$uid,$cmd,$Moves,$Handicap)");
             if( count($this->moves) != 1 )
                error('invalid_args', "QuickHandlerGame.prepare.check.move_count($gid,$cmd)");
          }

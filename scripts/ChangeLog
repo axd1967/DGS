@@ -21,6 +21,12 @@ ChangeLog
 
 2010-11-14 juga
 
+   * include/quick/quick_game.php (QuickHandlerGame.prepare),
+     confirm.php, game.php, quick_play.php:
+   - sync from stable-branch:
+     - bugfix: throw error on move-actions 'choose_move' & 'domove'
+       if expecting to set handicap-stones
+
    * game_players.php (build_table_game_players, allow_change_group_order, change_group_order),
      include/game_functions.php (MultiPlayerGame.determine_groups_player_count):
    - extended change-groups editor to update GamePlayers.GroupOrder for joined users
@@ -9536,6 +9542,7 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2010-06-09: uploaded enhancement (by JUG) as DGS 1.0.14.q
 2010-06-19: uploaded enhancement (by JUG) as DGS 1.0.14.r
 2010-07-27: enable page-create-time by JUG) as DGS 1.0.14.s
+2010-11-14: bug fix update (by JUG) as DGS 1.0.14.t
 
 2008-12-14 juga
 

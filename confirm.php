@@ -133,6 +133,9 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
 
    $action = @$_REQUEST['action'];
+   if( $Moves < $Handicap && $action == 'domove' )
+      error('invalid_action', "confirm.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
+
    $stay_on_board = @$_REQUEST['stay'];
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
 
