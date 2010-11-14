@@ -528,6 +528,11 @@ class GamePlayer
       $this->GroupColor = $group_color;
    }
 
+   function getGroupColorOrder()
+   {
+      return GamePlayer::get_group_color_order( $this->GroupColor );
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -572,6 +577,22 @@ class GamePlayer
       return (is_null($group_color)) ? $arr_group_cols : @$arr_group_cols[$group_color];
    }//get_group_color_text
 
+   function get_group_color_order( $group_color )
+   {
+      static $arr_grcol_order = null;
+      if( is_null($arr_grcol_order) )
+      {
+         $arr_grcol_order = array(
+            'B'   => 0,
+            'W'   => 1,
+            'G1'  => 2,
+            'G2'  => 3,
+            'BW'  => 4,
+         );
+      }
+      return $arr_grcol_order[$group_color];
+   }//get_group_color_order
+
 } // end 'GamePlayer'
 
 
@@ -596,6 +617,7 @@ function adjust_komi( $komi, $adj_komi, $jigo_mode )
       $komi += ($komi < 0) ? -0.5 : 0.5;
 
    // assure valid limits after applying jigo-mode
+   $komi = (float) round( 2 * $komi ) / 2;
    if( $komi < -MAX_KOMI_RANGE )
       $komi += 1.0;
    elseif( $komi > MAX_KOMI_RANGE )
@@ -624,7 +646,7 @@ function adjust_handicap( $handicap, $adj_handicap, $min_handicap=0, $max_handic
    elseif( $handicap > $max_handicap )
       $handicap = $max_handicap;
 
-   return $handicap;
+   return (int)$handicap;
 }
 
 /*! \brief Determines who is to move (BLACK|WHITE), expects game-row with fields ID,Black_ID,White_ID,ToMove_ID. */
@@ -725,7 +747,7 @@ function get_gamesettings_viewmode( $viewmode )
 // return arr( $must_be_rated, $rating1, $rating2 ) ready for db-insert
 function parse_waiting_room_rating_range()
 {
-   if( (string)get_request_arg('must_be_rated', 'Y') != 'Y' )
+   if( (string)get_request_arg('must_be_rated') != 'Y' )
    {
       $MustBeRated = 'N';
       //to keep a good column sorting:
@@ -821,6 +843,34 @@ function build_accept_same_opponent_array( $arr )
    foreach( $arr as $same_opp )
       $out[$same_opp] = echo_accept_same_opponent($same_opp);
    return $out;
+}
+
+function build_arr_handicap_stones()
+{
+   $handi_stones = array( 0 => 0 );
+   for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
+      $handi_stones[$bs] = $bs;
+   return $handi_stones;
+}
+
+function build_suggestion_shortinfo( $suggest_result, $mpgame=false )
+{
+   list( $handi, $komi, $iamblack ) = $suggest_result;
+   $info = sprintf(
+      ($mpgame)
+         ? T_('... your Color is probably %1$s with Handicap %2$s, Komi %3$.1f')
+         : T_('... your Color would be %1$s with Handicap %2$s, Komi %3$.1f'),
+      get_colortext_probable( $iamblack ), $handi, $komi );
+   return $info;
+}
+
+function get_colortext_probable( $iamblack )
+{
+   global $base_path;
+   $color_class = 'class="InTextStone"';
+   return ( $iamblack )
+      ? image( $base_path.'17/b.gif', T_('Black'), null, $color_class)
+      : image( $base_path.'17/w.gif', T_('White'), null, $color_class);
 }
 
 ?>

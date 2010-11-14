@@ -299,11 +299,6 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
                            'SELECTBOX', 'size', 1, $value_array, $Size, false ) );
 
-   $handi_stones=array( 0 => 0 );
-   for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
-      $handi_stones[$bs]=$bs;
-
-
    $mform->add_row( array( 'SPACE' ) );
 
    // Conventional & Proper handicap
@@ -352,6 +347,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    }//conv/proper-HType
 
    // Manual game: nigiri, double, black, white
+   $handi_stones = build_arr_handicap_stones();
    if( !$is_view_mpgame )
    {
       $color_arr = array(
@@ -1042,23 +1038,6 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
       $out[] = sprintf( '[%s]', T_('Hidden#wroom') );
 
    return ( count($out) ? implode(', ', $out) : NO_VALUE );
-}
-
-function build_suggestion_shortinfo( $suggest_result )
-{
-   list( $handi, $komi, $iamblack ) = $suggest_result;
-   $info = sprintf( T_('... your Color is probably %1$s with Handicap %2$s, Komi %3$.1f'),
-      get_colortext_probable( $iamblack ), $handi, $komi );
-   return $info;
-}
-
-function get_colortext_probable( $iamblack )
-{
-   global $base_path;
-   $color_class = 'class="InTextStone"';
-   return ( $iamblack )
-      ? image( $base_path.'17/b.gif', T_('Black'), null, $color_class)
-      : image( $base_path.'17/w.gif', T_('White'), null, $color_class);
 }
 
 

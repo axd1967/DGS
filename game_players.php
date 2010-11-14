@@ -38,6 +38,11 @@ define('CMD_ADD_WAITINGROOM_GAME', 'wr_add'); // add game in waiting-room
 define('CMD_CHANGE_COLOR', 'chg_col'); // set group-color
 define('CMD_CHANGE_ORDER', 'chg_ord'); // set group-order
 
+define('FACT_SAVE', 'save');
+define('FACT_PREVIEW', 'preview');
+define('FACT_USE_CONV', 'use_conv');
+define('FACT_USE_PROP', 'use_prop');
+
 define('KEY_GROUP_COLOR', 'gpc');
 define('KEY_GROUP_ORDER', 'gpo');
 
@@ -74,7 +79,9 @@ define('KEY_GROUP_ORDER', 'gpo');
    $grow = load_game( $gid );
    $arr_game_players = load_game_players( $gid ); // -> $arr_users, $arr_free_slots
    $status = $grow['Status'];
+   $game_type = $grow['GameType'];
    $cnt_free_slots = count($arr_free_slots);
+   $enable_edit_HK = ( count($arr_users) == count($arr_game_players) ); // HK = handicap + komi
 
    // waiting-room-game: edit allowed for game-master (user who started game)
    $allow_edit = ( $status == GAME_STATUS_SETUP ) && ( $grow['ToMove_ID'] == $my_id )
@@ -83,28 +90,48 @@ define('KEY_GROUP_ORDER', 'gpo');
    // ------------------------
 
    $form = $extform = null;
+   if( $allow_edit )
+   {
+      $is_preview = get_request_arg(FACT_PREVIEW);
+      $is_save = get_request_arg(FACT_SAVE);
 
-   if( $allow_edit && $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
-   {
-      if( get_request_arg('save') )
-         add_waiting_room_mpgame( $grow, $my_id );
-      else
-         $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
-   }
-   elseif( $allow_edit && $cmd == CMD_CHANGE_COLOR ) // change groups (color)
-   {
-      if( get_request_arg('save') )
-         change_group_color($gid);
-      else
-         $extform = build_form_change_group( $gid, $cmd, 'changegroupcolor' );
-   }
-   elseif( $allow_edit && $cmd == CMD_CHANGE_ORDER ) // change groups (order)
-   {
-      if( get_request_arg('save') )
-         change_group_order($gid, $grow['GameType']);
-      else
-         $extform = build_form_change_group( $gid, $cmd, 'changegrouporder' );
-   }
+      if( $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
+      {
+         if( $is_save )
+            add_waiting_room_mpgame( $grow, $my_id );
+         else
+            $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
+      }
+      elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
+      {
+         if( get_request_arg(FACT_USE_CONV) || get_request_arg(FACT_USE_PROP) )
+         {
+            $is_preview = true;
+            use_handicap_suggestion( $grow );
+         }
+         else
+         {
+            if( $is_preview || ($is_save && $game_type != GAMETYPE_ZEN_GO) )
+               change_group_color( $gid, $is_preview );
+            if( $is_preview || $is_save )
+               update_handicap_komi( $grow, $gid, $is_preview,
+                  get_request_arg('handicap', 0), get_request_arg('komi', 6.5) );
+         }
+
+         if( !$is_save )
+         {
+            $extform = new Form( 'changegroupcolor', 'game_players.php', FORM_GET, false );
+            $itable_handicap_suggestion = build_form_change_group_with_handicap( $extform, $grow, $cmd, $enable_edit_HK );
+         }
+      }
+      elseif( $cmd == CMD_CHANGE_ORDER ) // change groups (order)
+      {
+         if( $is_save )
+            change_group_order($gid, $grow['GameType']);
+         else
+            $extform = build_form_change_order( $grow, $gid, $cmd );
+      }
+   }//allow_edit
 
    $arr_ratings = calc_group_ratings();
    $utable = build_table_game_players( $grow, $arr_game_players, $cmd, $extform );
@@ -126,6 +153,10 @@ define('KEY_GROUP_ORDER', 'gpo');
       echo $extform->print_start_default();
    if( !is_null($utable) )
       $utable->echo_table();
+
+   if( @$itable_handicap_suggestion )
+      echo "<br>\n", $itable_handicap_suggestion->make_table();
+
    if( !is_null($extform) )
       echo $extform->get_form_string(), $extform->print_end();
    elseif( !is_null($form) )
@@ -141,9 +172,12 @@ define('KEY_GROUP_ORDER', 'gpo');
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    if( $allow_edit && $status == GAME_STATUS_SETUP )
    {
+      $chg_col_title = ($enable_edit_HK)
+         ? ( $game_type == GAMETYPE_ZEN_GO ? T_('Change handicap') : T_('Change color & handicap') )
+         : T_('Change color');
       if( $cnt_free_slots )
          $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
-      $menu_array[T_('Change color')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
+      $menu_array[$chg_col_title] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
       $menu_array[T_('Change order')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_ORDER;
    }
 
@@ -181,31 +215,27 @@ function build_game_settings( $grow )
 
    if( count($arr_ratings) )
    {
-      $arr = array();
-      build_group_rating( $arr, GPCOL_B, GPCOL_W );
-      build_group_rating( $arr, GPCOL_G1, GPCOL_G2 );
       $itable->add_sinfo(
-            T_('Group ratings'), implode("<br>\n", $arr) );
+            T_('Group ratings'), implode("<br>\n", build_group_rating()) );
    }
    return $itable;
 }//build_game_settings
 
-function build_group_rating( &$arr, $grcol1, $grcol2 )
+function build_group_rating()
 {
    global $arr_ratings;
-   if( isset($arr_ratings[$grcol1]) || isset($arr_ratings[$grcol2]) )
+
+   $arr = array();
+   foreach( array( GPCOL_B, GPCOL_W, GPCOL_G1, GPCOL_G2, GPCOL_BW ) as $gr_col )
    {
-      $buf = '';
-      foreach( array( $grcol1, $grcol2 ) as $gr_col )
+      if( isset($arr_ratings[$gr_col]) )
       {
-         $buf .= sprintf( "<b>%s:</b> %s",
-               GamePlayer::get_group_color_text($gr_col),
-               ( isset($arr_ratings[$gr_col]) ) ? echo_rating( $arr_ratings[$gr_col] ) : NO_VALUE );
-         if( $gr_col == $grcol1 )
-            $buf .= ', ';
+         $arr[] = sprintf( "<b>%s:</b> %s",
+                  ( $gr_col != GPCOL_BW ? GamePlayer::get_group_color_text($gr_col) : T_('All#gpcol') ),
+                  ( isset($arr_ratings[$gr_col]) ) ? echo_rating( $arr_ratings[$gr_col] ) : NO_VALUE );
       }
-      $arr[] = $buf;
    }
+   return $arr;
 }//build_group_rating
 
 function build_user_flags( $gp )
@@ -267,7 +297,7 @@ function load_game_players( $gid )
    $arr_users = array();
    $arr_free_slots = array();
 
-   $result = db_query( "game_players.find.game_players($gid)", //TODO optimize/cleanup
+   $result = db_query( "game_players.find.game_players($gid)",
       "SELECT GP.*, " .
          "P.Name, P.Handle, P.Rating2, P.RatingStatus, P.Country, P.OnVacation, " .
          "UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess " .
@@ -318,17 +348,28 @@ function calc_group_ratings()
    foreach( $calc_ratings as $gr_col => $arr )
    {
       $cnt = count($arr);
-      if( $gr_col != GPCOL_BW && $cnt )
+      if( $cnt )
          $arr_ratings[$gr_col] = array_sum($arr) / $cnt;
    }
 
    return $arr_ratings;
 }//calc_group_ratings
 
+// return arr( group-colors that appear at least once, ... )
+function count_group_colors()
+{
+   global $arr_game_players;
+
+   $arr = array();
+   foreach( $arr_game_players as $gp )
+      $arr[$gp->GroupColor] = 1;
+   return array_keys($arr);
+}//count_group_colors
+
 function build_table_game_players( $grow, $arr_gp, $cmd, &$form )
 {
    global $base_path;
-   $chg_group_color = ($cmd == CMD_CHANGE_COLOR) && $form;
+   $chg_group_color = ($cmd == CMD_CHANGE_COLOR) && $form && ($grow['GameType'] == GAMETYPE_TEAM_GO);
    $chg_group_order = ($cmd == CMD_CHANGE_ORDER) && $form;
    $arr_group_colors = ($chg_group_color) ? GamePlayer::get_group_color_text() : null;
 
@@ -355,7 +396,7 @@ function build_table_game_players( $grow, $arr_gp, $cmd, &$form )
    {
       $idx++;
       if( !is_null($last_group) && $gp->GroupColor != $last_group )
-      {//add some separator without chaning row-col for next content-row
+      {//add some separator with 2 rows, so without changing row-col for next content-row
          $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
          $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
       }
@@ -423,22 +464,90 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd )
 
    $form->add_row( array( 'SPACE' ) );
    $form->add_row( array( 'TAB', 'CELL', 1, '',
-                          'SUBMITBUTTON', 'save', T_('Add Game') ));
+                          'SUBMITBUTTON', FACT_SAVE, T_('Add Game') ));
 
    return $form;
 }//build_form_add_waiting_room
 
-function build_form_change_group( $gid, $cmd, $formname )
+function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edit_HK )
 {
-   $form = new Form( $formname, 'game_players.php', FORM_GET, false );
+   $game_type = $grow['GameType'];
+   $arr_color_keys = count_group_colors();
+
+   $itable = null;
+   if( $enable_edit_HK && $game_type == GAMETYPE_TEAM_GO && count($arr_color_keys) == 2 )
+   {
+      $show_edit_hk = true;
+      $arr_ratings = calc_group_ratings();
+      $rating1 = $arr_ratings[$arr_color_keys[0]];
+      $rating2 = $arr_ratings[$arr_color_keys[1]];
+      $arr_conv_sugg = suggest_conventional( $rating1, $rating2, $grow['Size'] ); // H,K,i'm-black
+      $arr_prop_sugg = suggest_proper( $rating1, $rating2, $grow['Size'] );
+
+      $arr_gp_id = array(
+            implode(',', get_group_color_game_player_id( $arr_color_keys[0] )),
+            implode(',', get_group_color_game_player_id( $arr_color_keys[1] )) );
+
+      $form->add_row( array(
+            'HIDDEN', 'conv_b', $arr_conv_sugg[2] ? $arr_gp_id[0] : $arr_gp_id[1],
+            'HIDDEN', 'conv_w', $arr_conv_sugg[2] ? $arr_gp_id[1] : $arr_gp_id[0],
+            'HIDDEN', 'conv_h', $arr_conv_sugg[0],
+            'HIDDEN', 'conv_k', $arr_conv_sugg[1],
+            'HIDDEN', 'prop_b', $arr_prop_sugg[2] ? $arr_gp_id[0] : $arr_gp_id[1],
+            'HIDDEN', 'prop_w', $arr_prop_sugg[2] ? $arr_gp_id[1] : $arr_gp_id[0],
+            'HIDDEN', 'prop_h', $arr_prop_sugg[0],
+            'HIDDEN', 'prop_k', $arr_prop_sugg[1],
+         ));
+
+      $itable = build_tableinfo_handicap_suggestion( $form, $arr_color_keys[0],
+         $arr_conv_sugg, $arr_prop_sugg );
+   }
+   elseif( $enable_edit_HK && $game_type == GAMETYPE_ZEN_GO && count($arr_color_keys) == 1 )
+      $show_edit_hk = true;
+   else
+      $show_edit_hk = false;
+
+   build_form_change_group( $form, $grow, $cmd, $show_edit_hk );
+
+   return $itable;
+}//build_form_change_group_with_handicap
+
+function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
+{
+   $gid = $grow['ID'];
+
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
 
    $form->add_row( array( 'SPACE' ) );
-   $form->add_row( array( 'TAB', 'CELL', 1, '',
-                          'SUBMITBUTTON', 'save', T_('Update#submit') ));
+
+   if( $edit_hk )
+   {
+      $arr_handicap = build_arr_handicap_stones();
+      $val_handicap = $grow['Handicap'];
+      $form->add_row( array( 'TEXT', sptext(T_('Handicap'),1),
+                             'SELECTBOX', 'handicap', 1, $arr_handicap, $val_handicap, false,
+                             'TEXT', sptext(T_('Komi'),1),
+                             'TEXTINPUT', 'komi', 5, 5, $grow['Komi'], ));
+      $form->add_row( array( 'SPACE' ) );
+   }
+
+   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit'),
+                          'TEXT', SMALL_SPACING,
+                          'SUBMITBUTTON', FACT_PREVIEW, T_('Preview#submit') ));
    return $form;
 }//build_form_change_group
+
+function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
+{
+   $form = new Form( 'changegrouporder', 'game_players.php', FORM_GET, false );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'cmd', $cmd );
+
+   $form->add_row( array( 'SPACE' ) );
+   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit') ));
+   return $form;
+}//build_form_change_order
 
 function add_waiting_room_mpgame( $grow, $uid )
 {
@@ -495,27 +604,34 @@ function add_waiting_room_mpgame( $grow, $uid )
    set_request_arg('sysmsg', T_('Game added!') );
 }//add_waiting_room_mpgame
 
-function change_group_color( $gid )
+function change_group_color( $gid, $preview )
 {
    global $arr_game_players;
 
    // if changed, update group-color in database + table
    $cnt_upd = 0;
+   $need_reorder = false;
    foreach( $arr_game_players as $gp )
    {
       $new_grcol = get_request_arg(KEY_GROUP_COLOR.$gp->id);
-      if( $gp->uid > GUESTS_ID_MAX && $new_grcol != $gp->GroupColor )
+      if( (string)$new_grcol != '' && $gp->uid > GUESTS_ID_MAX && $new_grcol != $gp->GroupColor )
       {
-         db_query( "game_players.change_group_color.gp_upd($gid)",
-            "UPDATE GamePlayers SET GroupColor='" . mysql_addslashes($new_grcol) . "' " .
-            "WHERE ID={$gp->id} AND uid>0 LIMIT 1" );
+         if( !$preview )
+         {
+            db_query( "game_players.change_group_color.gp_upd($gid)",
+               "UPDATE GamePlayers SET GroupColor='" . mysql_addslashes($new_grcol) . "' " .
+               "WHERE ID={$gp->id} AND uid>0 LIMIT 1" );
+            $cnt_upd++;
+         }
          $gp->setGroupColor($new_grcol);
-         $cnt_upd++;
+         $need_reorder = true;
       }
    }
 
    if( $cnt_upd > 0 )
       set_request_arg('sysmsg', T_('Groups updated!') );
+   if( $need_reorder )
+      reorder_game_players();
 }//change_group_color
 
 function change_group_order( $gid, $gametype )
@@ -531,15 +647,115 @@ function change_group_order( $gid, $gametype )
             && allow_change_group_order($gametype, $gp->GroupColor) )
       {
          db_query( "game_players.change_group_order.gp_upd($gid)",
-            "UPDATE GamePlayers SET GroupOrder='" . mysql_addslashes($new_order) . "' " .
-            "WHERE ID={$gp->id} AND uid>0 LIMIT 1" );
-         $gp->groupOrder = $new_order;
+            "UPDATE GamePlayers SET GroupOrder=$new_order WHERE ID={$gp->id} AND uid>0 LIMIT 1" );
+         $gp->GroupOrder = $new_order;
          $cnt_upd++;
       }
    }
 
    if( $cnt_upd > 0 ) // reload to get new order
-      jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=" . urlencode(T_('Groups updated!')) );
+   {
+      set_request_arg('sysmsg', T_('Groups updated!') );
+      reorder_game_players();
+   }
 }//change_group_order
+
+function build_tableinfo_handicap_suggestion( &$form, $group, $arr_conv_sugg, $arr_prop_sugg )
+{
+   $itable = new Table_info('suggestHK');
+   $itable->add_scaption(
+         sprintf( T_('Handicap suggestion for group [%s]'),
+                  GamePlayer::get_group_color_text($group) ));
+   $itable->add_sinfo(
+         T_('Conventional handicap'),
+         array(
+            sptext( build_suggestion_shortinfo($arr_conv_sugg), true ),
+            $form->print_insert_submit_button(FACT_USE_CONV, T_('Preview#submit') )
+         ));
+   $itable->add_sinfo(
+         T_('Proper handicap'),
+         array(
+            sptext( build_suggestion_shortinfo($arr_prop_sugg), true ),
+            $form->print_insert_submit_button(FACT_USE_PROP, T_('Preview#submit') )
+         ));
+   return $itable;
+}//build_tableinfo_handicap_suggestion
+
+function update_handicap_komi( &$grow, $gid, $preview, $handicap, $komi )
+{
+   $handicap = adjust_handicap( (int)$handicap, 0 );
+   $komi = adjust_komi( (float)$komi, 0, JIGOMODE_KEEP_KOMI );
+
+   if( !$preview )
+   {
+      db_query( "game_players.update_handicap_komi.games_upd($gid,$handicap,$komi)",
+         "UPDATE Games SET Handicap=$handicap, Komi=$komi WHERE ID=$gid LIMIT 1" );
+   }
+   $grow['Handicap'] = $handicap;
+   $grow['Komi'] = $komi;
+}//update_handicap_komi
+
+function use_handicap_suggestion( &$grow )
+{
+   global $arr_game_players;
+
+   if( get_request_arg(FACT_USE_CONV) )
+      $prefix = 'conv_';
+   elseif( get_request_arg(FACT_USE_PROP) )
+      $prefix = 'prop_';
+   else
+      return;
+
+   // 1. update color: use conv_b/w = GRCOL: change GRCOL -> b/w
+   $arr = array();
+   foreach( explode(',', get_request_arg($prefix.'b')) as $gp_id )
+      $arr[$gp_id] = GPCOL_B;
+   foreach( explode(',', get_request_arg($prefix.'w')) as $gp_id )
+      $arr[$gp_id] = GPCOL_W;
+
+   $need_reorder = false;
+   foreach( $arr_game_players as $gp )
+   {
+      if( isset($arr[$gp->id]) )
+      {
+         if( $gp->GroupColor != $arr[$gp->id] )
+            $need_reorder = true;
+         $gp->GroupColor = $arr[$gp->id];
+         set_request_arg( KEY_GROUP_COLOR.$gp->id, $gp->GroupColor );
+      }
+   }
+
+   // 2. update H+K
+   $grow['Handicap'] = adjust_handicap( (int)get_request_arg($prefix.'h'), 0 );
+   $grow['Komi'] = adjust_komi( (float)get_request_arg($prefix.'k'), 0, JIGOMODE_KEEP_KOMI );
+
+   if( $need_reorder )
+      reorder_game_players();
+}//use_handicap_suggestion
+
+function get_group_color_game_player_id( $group_color )
+{
+   global $arr_game_players;
+
+   $arr = array();
+   foreach( $arr_game_players as $gp )
+   {
+      if( $gp->GroupColor == $group_color )
+         $arr[] = $gp->id;
+   }
+   return $arr;
+}//get_group_color_game_player_id
+
+function reorder_game_players()
+{
+   global $arr_game_players;
+   usort( $arr_game_players, '_sort_game_players' ); // by GroupColor ASC, GroupOrder ASC
+}
+
+function _sort_game_players( $gp1, $gp2 )
+{
+   $cmp_group_color = cmp_int( $gp1->getGroupColorOrder(), $gp2->getGroupColorOrder() );
+   return ($cmp_group_color == 0 ) ? cmp_int( $gp1->GroupOrder, $gp2->GroupOrder ) : $cmp_group_color;
+}
 
 ?>
