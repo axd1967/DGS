@@ -161,13 +161,19 @@ require_once( 'include/utilities.php' );
    if( ($rated = @$_POST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
       $rated = 'N';
 
-   if( ENA_STDHANDICAP || (($stdhandicap = @$_POST['stdhandicap']) != 'Y' ) )
+   if( ENA_STDHANDICAP )
+   {
+      if( ($stdhandicap=@$_POST['stdhandicap']) != 'Y' )
+         $stdhandicap = 'N';
+   }
+   else
       $stdhandicap = 'N';
 
    if( ($weekendclock = @$_POST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
-   list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
+   if( $is_std_go )
+      list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
 
    $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 10000, 0 );
 
