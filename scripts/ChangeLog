@@ -19,6 +19,25 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-17 juga
+
+   * game_players.php (update_handicap_komi):
+   - update Games.Lastchanged on handicap/komi-update
+
+   * include/game_functions.php (MultiPlayerGame.determine_groups_player_count,
+       ~.get_game_type),
+     game_players.php (build_table_game_players, check_game_setup,
+       build_arr_group_color_texts, buildErrorListString),
+     skins/dragon/screen.css:
+   - added pre-start checks with errors and warnings
+   - show also group-color text in game-players-table
+   - minor cleanup
+
+2010-11-15 juga
+
+   * game_players.php:
+   - hide 'Change color' for Zen-Go if handicap-edit not enabled
+
 2010-11-14 juga
 
    * include/game_functions.php (parse_waiting_room_rating_range,
