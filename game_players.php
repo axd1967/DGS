@@ -37,6 +37,7 @@ $GLOBALS['ThePage'] = new Page('GamePlayers');
 define('CMD_ADD_WAITINGROOM_GAME', 'wr_add'); // add game in waiting-room
 define('CMD_CHANGE_COLOR', 'chg_col'); // set group-color
 define('CMD_CHANGE_ORDER', 'chg_ord'); // set group-order
+define('CMD_START_GAME', 'start'); // start game
 
 define('FACT_SAVE', 'save');
 define('FACT_PREVIEW', 'preview');
@@ -71,6 +72,8 @@ define('KEY_GROUP_ORDER', 'gpo');
 
      cmd=chg_ord&gid=&...      : show change-group-order settings
      cmd=chg_ord&gid=&save...  : update GroupOrder on change-group with args: gpo<ID>
+
+     cmd=start&gid=&...        : start game, check setup
 */
    $cmd = get_request_arg('cmd');
 
@@ -90,51 +93,81 @@ define('KEY_GROUP_ORDER', 'gpo');
    // ------------------------
 
    $form = $extform = null;
-   if( $allow_edit )
+   $errors = $warnings = null;
+   if( $status == GAME_STATUS_SETUP )
    {
-      $is_preview = get_request_arg(FACT_PREVIEW);
-      $is_save = get_request_arg(FACT_SAVE);
+      if( $allow_edit )
+      {
+         $is_preview = get_request_arg(FACT_PREVIEW);
+         $is_save = get_request_arg(FACT_SAVE);
 
-      if( $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
-      {
-         if( $is_save )
-            add_waiting_room_mpgame( $grow, $my_id );
-         else
-            $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
-      }
-      elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
-      {
-         if( get_request_arg(FACT_USE_CONV) || get_request_arg(FACT_USE_PROP) )
+         if( $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
          {
-            $is_preview = true;
-            use_handicap_suggestion( $grow );
+            if( $is_save )
+               add_waiting_room_mpgame( $grow, $my_id );
+            else
+               $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
          }
-         else
+         elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
          {
-            if( $is_preview || ($is_save && $game_type != GAMETYPE_ZEN_GO) )
-               change_group_color( $gid, $is_preview );
-            if( $is_preview || $is_save )
-               update_handicap_komi( $grow, $gid, $is_preview,
-                  get_request_arg('handicap', 0), get_request_arg('komi', 6.5) );
-         }
+            if( get_request_arg(FACT_USE_CONV) || get_request_arg(FACT_USE_PROP) )
+            {
+               $is_preview = true;
+               use_handicap_suggestion( $grow );
+            }
+            else
+            {
+               if( $is_preview || ($is_save && $game_type != GAMETYPE_ZEN_GO) )
+                  change_group_color( $gid, $is_preview );
+               if( $is_preview || $is_save )
+                  update_handicap_komi( $grow, $gid, $is_preview,
+                     get_request_arg('handicap', 0), get_request_arg('komi', 6.5) );
+            }
 
-         if( !$is_save )
-         {
-            $extform = new Form( 'changegroupcolor', 'game_players.php', FORM_GET, false );
-            $itable_handicap_suggestion = build_form_change_group_with_handicap( $extform, $grow, $cmd, $enable_edit_HK );
+            if( !$is_save )
+            {
+               $extform = new Form( 'changegroupcolor', 'game_players.php', FORM_GET, false );
+               $itable_handicap_suggestion = build_form_change_group_with_handicap( $extform, $grow, $cmd, $enable_edit_HK );
+            }
          }
-      }
-      elseif( $cmd == CMD_CHANGE_ORDER ) // change groups (order)
+         elseif( $cmd == CMD_CHANGE_ORDER ) // change groups (order)
+         {
+            if( $is_save )
+               change_group_order($gid, $grow['GameType']);
+            else
+               $extform = build_form_change_order( $grow, $gid, $cmd );
+         }
+      }//allow_edit
+
+      if( $cmd == CMD_START_GAME ) // check/start game
       {
-         if( $is_save )
-            change_group_order($gid, $grow['GameType']);
-         else
-            $extform = build_form_change_order( $grow, $gid, $cmd );
+         list( $errors, $warnings ) = check_game_setup( $game_type, $grow['GamePlayers'] );
+         $cnt_err = count($errors);
+         $cnt_warn = count($warnings);
+         if( $cnt_err + $cnt_warn )
+            $extform = new Form( 'startgame', 'game_players.php', FORM_POST, false );
+         if( $cnt_err )
+         {
+            $extform->add_empty_row();
+            $extform->add_row( array(
+                  'DESCRIPTION', T_('Errors'),
+                  'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+         }
+         if( $cnt_warn )
+         {
+            $extform->add_empty_row();
+            $extform = new Form( 'startgame', 'game_players.php', FORM_POST, false );
+            $extform->add_row( array(
+                  'DESCRIPTION', T_('Warnings'),
+                  'TEXT', buildErrorListString(T_('There are some warnings'), $warnings) ));
+         }
+         if( $cnt_err + $cnt_warn )
+            $extform->add_empty_row();
       }
-   }//allow_edit
+   }//setup-status
 
    $arr_ratings = calc_group_ratings();
-   $utable = build_table_game_players( $grow, $arr_game_players, $cmd, $extform );
+   $utable = build_table_game_players( $grow, $cmd, $extform );
 
 
    // ------------------------
@@ -182,7 +215,10 @@ define('KEY_GROUP_ORDER', 'gpo');
          $menu_array[$chg_col_title] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
 
       $menu_array[T_('Change order')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_ORDER;
+      $menu_array[T_('Start game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_START_GAME;
    }
+   else if( $status == GAME_STATUS_SETUP )
+      $menu_array[T_('Check game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_START_GAME;
 
    end_page(@$menu_array);
 }//main
@@ -293,7 +329,7 @@ function load_game( $gid )
 }//load_game
 
 // RETURN: [ GamePlayer, ... ]
-// global OUTPUT: $cnt_free_slots, $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer
+// global OUTPUT: $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer
 function load_game_players( $gid )
 {
    global $arr_users, $arr_free_slots;
@@ -369,9 +405,9 @@ function count_group_colors()
    return array_keys($arr);
 }//count_group_colors
 
-function build_table_game_players( $grow, $arr_gp, $cmd, &$form )
+function build_table_game_players( $grow, $cmd, &$form )
 {
-   global $base_path;
+   global $arr_game_players, $base_path;
    $chg_group_color = ($cmd == CMD_CHANGE_COLOR) && $form && ($grow['GameType'] == GAMETYPE_TEAM_GO);
    $chg_group_order = ($cmd == CMD_CHANGE_ORDER) && $form;
    $arr_group_colors = ($chg_group_color) ? GamePlayer::get_group_color_text() : null;
@@ -383,19 +419,19 @@ function build_table_game_players( $grow, $arr_gp, $cmd, &$form )
    $utable->add_tablehead( 1, '#', 'Number' );
    if( $chg_group_color )
       $utable->add_tablehead( 9, T_('Set Group#header'), '', TABLE_NO_HIDE, '');
-   $utable->add_tablehead( 2, T_('Color#header'), 'Image' );
+   $utable->add_tablehead( 2, T_('Color#headermp'), 'ImageGroupColor' );
    $utable->add_tablehead( 3, T_('Player#header'), 'User' );
    $utable->add_tablehead( 5, T_('Country#header'), 'Image' );
    $utable->add_tablehead( 4, T_('Rating#header'), 'Rating' );
    $utable->add_tablehead( 6, T_('Last access#header'), 'Date' );
-   $utable->add_tablehead( 7, T_('Flags#header'), 'ImagesLeft' );
-   $utable->add_tablehead( 8, T_('Status#header'), 'ImagesLeft' );
+   $utable->add_tablehead( 7, T_('Flags#headermp'), 'ImagesLeft' );
+   $utable->add_tablehead( 8, T_('Status#headermp'), 'ImagesLeft' );
 
    $group_max_players = MultiPlayerGame::determine_groups_player_count( $grow['GamePlayers'] );
 
    $idx = 0;
    $last_group = null;
-   foreach( $arr_gp as $gp )
+   foreach( $arr_game_players as $gp )
    {
       $idx++;
       if( !is_null($last_group) && $gp->GroupColor != $last_group )
@@ -406,7 +442,8 @@ function build_table_game_players( $grow, $arr_gp, $cmd, &$form )
 
       $row_str = array(
          1 => ($gp->GroupOrder > 0 ) ? $gp->GroupOrder . '.' : NO_VALUE,
-         2 => GamePlayer::build_image_group_color( $gp->GroupColor ),
+         2 => GamePlayer::build_image_group_color($gp->GroupColor) .
+              MINI_SPACING . GamePlayer::get_group_color_text($gp->GroupColor),
       );
       if( $gp->uid )
       {
@@ -455,7 +492,7 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd )
    $form = new Form( 'addgame', 'game_players.php', FORM_POST );
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
-   $form->add_row( array( 'SPACE' ) );
+   $form->add_empty_row();
    $form->add_row( array( 'HEADER', T_('Add new game to waiting room') ) );
 
    // how many slots to use: 1..N
@@ -465,7 +502,7 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd )
 
    append_form_add_waiting_room_game( $form, GSETVIEW_MPGAME );
 
-   $form->add_row( array( 'SPACE' ) );
+   $form->add_empty_row();
    $form->add_row( array( 'TAB', 'CELL', 1, '',
                           'SUBMITBUTTON', FACT_SAVE, T_('Add Game') ));
 
@@ -522,7 +559,7 @@ function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
 
-   $form->add_row( array( 'SPACE' ) );
+   $form->add_empty_row();
 
    if( $edit_hk )
    {
@@ -532,7 +569,7 @@ function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
                              'SELECTBOX', 'handicap', 1, $arr_handicap, $val_handicap, false,
                              'TEXT', sptext(T_('Komi'),1),
                              'TEXTINPUT', 'komi', 5, 5, $grow['Komi'], ));
-      $form->add_row( array( 'SPACE' ) );
+      $form->add_empty_row();
    }
 
    $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit'),
@@ -547,7 +584,7 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
 
-   $form->add_row( array( 'SPACE' ) );
+   $form->add_empty_row();
    $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit') ));
    return $form;
 }//build_form_change_order
@@ -760,6 +797,126 @@ function _sort_game_players( $gp1, $gp2 )
 {
    $cmp_group_color = cmp_int( $gp1->getGroupColorOrder(), $gp2->getGroupColorOrder() );
    return ($cmp_group_color == 0 ) ? cmp_int( $gp1->GroupOrder, $gp2->GroupOrder ) : $cmp_group_color;
+}
+
+// check what would prevent the start of the game
+// returns arr( [error..], [warnings...] )
+function check_game_setup( $game_type, $game_players )
+{
+   global $arr_game_players, $arr_users;
+
+   $errors = array();
+   $warnings = array();
+
+   $cnt_reserved = $cnt_joined = 0;
+   $arr_uid = array(); // uid => count
+   $arr_grcol = array(); // groupcolor => count
+   $arr_order = array(); // groupcolor => [ group-orders, ... ] (ordered)
+   foreach( $arr_game_players as $gp )
+   {
+      if( $gp->uid > 0 )
+      {
+         if( $gp->Flags & GPFLAG_JOINED )
+            $cnt_joined++;
+         if( $gp->Flags & GPFLAG_RESERVED )
+            $cnt_reserved++;
+         if( !$gp->user->hasRating() ) // CHECK: all users must have a rating
+            $errors[] = sprintf( T_('User [%s] has no rating'), $gp->user->Handle );
+         if( isset($arr_uid[$gp->uid]) )
+            $arr_uid[$gp->uid]++;
+         else
+            $arr_uid[$gp->uid] = 1;
+      }
+      if( isset($arr_grcol[$gp->GroupColor]) )
+         $arr_grcol[$gp->GroupColor]++;
+      else
+         $arr_grcol[$gp->GroupColor] = 1;
+      $arr_order[$gp->GroupColor][] = $gp->GroupOrder;
+   }
+
+   // CHECK: all users must be joined, no reserved slots any more
+   if( $cnt_joined != count($arr_game_players) )
+      $errors[] = T_('Some game-players are missing');
+   if( $cnt_reserved > 0 )
+      $errors[] = T_('Not all reservation-slots have been joined by players');
+
+   // CHECK: warning, if same user appears more than once
+   foreach( $arr_uid as $uid => $cnt )
+   {
+      if( $arr_uid[$uid] > 1 )
+         $warnings[] = sprintf( T_('Player [%s] joined the game more than once'),
+            $arr_users[$uid]->user->Handle );
+   }
+
+   $arr_group_cnt = MultiPlayerGame::determine_groups_player_count( $game_players, false );
+   $arr_grcol_vals = array_values( $arr_grcol );
+   $arr_grcol_keys = array_keys( $arr_grcol );
+   $arr_grcol_keys_text = build_arr_group_color_texts( $arr_grcol_keys );
+   if( $game_type == GAMETYPE_TEAM_GO )
+   {
+      // CHECK: need both group-colors: B + W
+      if( count($arr_grcol) == 2 && isset($arr_grcol[GPCOL_B]) && isset($arr_grcol[GPCOL_W]) )
+      {
+         // CHECK: GroupColor-count per group must match GamePlayers-config
+         if( min($arr_grcol_vals) != $arr_group_cnt[0] || max($arr_grcol_vals) != $arr_group_cnt[1] )
+            $errors[] = sprintf( T_('Numbers of players (%s for %s, %s for %s) do not match the game-config [%s]'),
+               $arr_grcol[GPCOL_B], GamePlayer::get_group_color_text(GPCOL_B),
+               $arr_grcol[GPCOL_W], GamePlayer::get_group_color_text(GPCOL_W),
+               $game_players );
+      }
+      else
+         $errors[] = sprintf( T_('Groups [%s, %s] are required, but found [%s]'),
+            GamePlayer::get_group_color_text(GPCOL_B),
+            GamePlayer::get_group_color_text(GPCOL_W),
+            implode(', ', $arr_grcol_keys_text) );
+   }
+   else //if( $game_type == GAMETYPE_ZEN_GO )
+   {
+      // CHECK: need one group-color: BW
+      if( count($arr_grcol) == 1 && isset($arr_grcol[GPCOL_BW]) )
+      {
+         // CHECK: GroupColor-count per group must match GamePlayers-config
+         if( $arr_grcol_vals[0] != $arr_group_cnt[0] )
+            $errors[] = sprintf( T_('Number of players (%s for %s) does not match the game-config [%s]'),
+               $arr_grcol[GPCOL_BW], GamePlayer::get_group_color_text(GPCOL_BW),
+               MultiPlayerGame::format_game_type($game_type, $game_players) );
+      }
+      else
+         $errors[] = sprintf( T_('Only %s-group is allowed, but found [%s]'),
+            GamePlayer::get_group_color_text(GPCOL_BW),
+            implode(', ', $arr_grcol_keys_text) );
+   }
+
+   // CHECK: GroupOrder must be consecutive (1,2,3,4...), starting at 1, unique per group(s)
+   foreach( $arr_order as $grcol => $arr )
+   {
+      $cnt = count($arr);
+      $grcol_text = GamePlayer::get_group_color_text($grcol);
+      if( $arr[0] == 0 )
+         $errors[] = sprintf( T_('Order of group [%s] must be set'), $grcol_text );
+      elseif( $arr[0] != 1 )
+         $errors[] = sprintf( T_('Order of group [%s] must start at 1'), $grcol_text );
+      elseif( array_sum($arr) != ($cnt * ($cnt+1) / 2) )
+         $errors[] = sprintf( T_('Order of group [%s] must be unique and consecutive: 1,2,3, ...'), $grcol_text );
+   }
+
+   return array( $errors, $warnings );
+}//check_game_setup
+
+function build_arr_group_color_texts( $arr_group_colors )
+{
+   $arr = array();
+   foreach( $arr_group_colors as $grcol )
+      $arr[] = GamePlayer::get_group_color_text($grcol);
+   return $arr;
+}
+
+function buildErrorListString( $errmsg, $errors )
+{
+   if( count($errors) )
+      return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
+   else
+      return '';
 }
 
 ?>

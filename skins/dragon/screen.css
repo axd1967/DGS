@@ -2887,6 +2887,11 @@ span.TRank {
 /* Multi-player-game pages */
 /* ------------------------- */
 
+table.Table td.ImageGroupColor {
+   text-align: left;
+   font-size: smaller;
+}
+
 table#GamePlayersTable tr.Empty {
    background: #F7F5E3;
    height: 5px;

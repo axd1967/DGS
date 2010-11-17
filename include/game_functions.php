@@ -375,9 +375,10 @@ class MultiPlayerGame
    }
 
    /*! \brief Returns max number of required players in all groups. */
-   function determine_groups_player_count( $game_players )
+   function determine_groups_player_count( $game_players, $max=true )
    {
-      return max( explode(':', $game_players) );
+      $arr = explode(':', $game_players);
+      return ($max) ? max($arr) : array( min($arr), max($arr) );
    }
 
    function get_game_type( $game_type=null )
@@ -568,7 +569,7 @@ class GamePlayer
       if( is_null($arr_group_cols) )
       {
          $arr_group_cols = array(
-            'BW'  => T_('Unset#gpcol'),
+            'BW'  => T_('BW#gpcol'),
             'B'   => T_('Black#gpcol'),
             'W'   => T_('White#gpcol'),
             'G1'  => T_('Group #1#gpcol'),
