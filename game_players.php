@@ -724,16 +724,20 @@ function build_tableinfo_handicap_suggestion( &$form, $group, $arr_conv_sugg, $a
 
 function update_handicap_komi( &$grow, $gid, $preview, $handicap, $komi )
 {
+   global $NOW;
+
    $handicap = adjust_handicap( (int)$handicap, 0 );
    $komi = adjust_komi( (float)$komi, 0, JIGOMODE_KEEP_KOMI );
 
    if( !$preview )
    {
       db_query( "game_players.update_handicap_komi.games_upd($gid,$handicap,$komi)",
-         "UPDATE Games SET Handicap=$handicap, Komi=$komi WHERE ID=$gid LIMIT 1" );
+         "UPDATE Games SET Handicap=$handicap, Komi=$komi, Lastchanged=FROM_UNIXTIME($NOW) "
+            . "WHERE ID=$gid LIMIT 1" );
    }
    $grow['Handicap'] = $handicap;
    $grow['Komi'] = $komi;
+   $grow['Lastchanged'] = $NOW;
 }//update_handicap_komi
 
 function use_handicap_suggestion( &$grow )
