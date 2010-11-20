@@ -229,7 +229,7 @@ function build_rating_diff( $rating_diff )
             echo_rating( @$grow['White_Rating'], true, $grow['White_ID'] ),
          ));
    $itable->add_sinfo(
-         T_('Start rating'),
+         ($grow['GameType'] == GAMETYPE_GO) ? T_('Start rating') : T_('Group start rating'),
          array(
             echo_rating( @$grow['Black_Start_Rating']),
             echo_rating( @$grow['White_Start_Rating']),
