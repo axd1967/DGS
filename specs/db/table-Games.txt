@@ -21,7 +21,6 @@ Description:
  ToMove_ID          | int(11)                              | 0
  GameType           | enum('GO','TEAM_GO','ZEN_GO')        | GO
  GamePlayers        | char(5)                              |
- MoveCounter        | smallint(5) unsigned                 | 0
  Size               | tinyint(3) unsigned                  | 19
  Komi               | decimal(6,1)                         | 6.5
  Handicap           | tinyint(3) unsigned                  | 0
@@ -86,10 +85,6 @@ Description:
 * GamePlayers : matching of players for game
    - format: "1:1" (Go), "N:M" (Team-Go), "N" (Zen-Go)
 
-* MoveCounter : counter/cursor/index to check who is next to move for multi-player-game
-   - starts at 0, use modulo-counter using info from GamePlayers-field to find next
-     player to move in GamePlayers-table
-
 * Size, Komi, Handicap : settings for game (board-size, komi, handicap-stones)
 
 * Status : current status for game
@@ -102,6 +97,10 @@ Description:
    - FINISHED: finished game, game has finished, ratings adjusted eventually
 
 * Moves : number of moves in game, including handicap-stones
+   - for multi-player-games use as counter/cursor/index to check who is next to move
+     - starts at 0, use modulo-counter using info from GamePlayers-field to find next
+       player to move in GamePlayers-table
+     - handicap-stones must be substracted
 
 * Black_Prisoners, White_Prisoners : number of Black and White (stone) prisoners
 

@@ -1935,8 +1935,6 @@ ALTER TABLE Games
 ALTER TABLE Games
    ADD GamePlayers char(5) NOT NULL default '' AFTER GameType ;
 ALTER TABLE Games
-   ADD MoveCounter smallint unsigned NOT NULL default 0 AFTER GamePlayers ;
-ALTER TABLE Games
    MODIFY Status enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED' ;
 
 -- added multi-player-game: Team-Go, Zen-Go
