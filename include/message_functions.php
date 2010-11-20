@@ -452,7 +452,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
-   if( $viewmode != GSETVIEW_SIMPLE )
+   $show_only_fischer_time = ( $formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_SIMPLE );
+   if( !$show_only_fischer_time )
    {
       $mform->add_row( array(
             'DESCRIPTION', T_('Japanese byoyomi'),
@@ -479,7 +480,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    // Fischer-time
    $row_fischer = array(
          'DESCRIPTION', T_('Fischer time') );
-   if( $viewmode == GSETVIEW_SIMPLE )
+   if( $show_only_fischer_time )
       $mform->add_hidden( 'byoyomitype', BYOTYPE_FISCHER );
    else
       array_push( $row_fischer,
