@@ -223,6 +223,15 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       }
    }
 
+   // multi-player-game
+   $game_type = ( isset($game_info_row['GameType']) ) ? $game_info_row['GameType'] : GAMETYPE_GO;
+   if( isset($game_info_row['GamePlayers']) )
+      $game_players = $game_info_row['GamePlayers'];
+   else if( $game_type == GAMETYPE_GO )
+      $game_players = '';
+   else
+      error('invalid_args', "create_game.miss_game_players($gid,$game_type)");
+
    if( isset($game_info_row['tid']) ) // tournament-id
       $tid = (int)$game_info_row['tid'];
    else
@@ -308,6 +317,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "Black_ID=" . $black_row["ID"] . ", " .
       "White_ID=" . $white_row["ID"] . ", " .
       "ToMove_ID=$tomove, " .
+      "GameType='" . mysql_addslashes($game_type) . "', " .
+      "GamePlayers='" . mysql_addslashes($game_players) . "', " .
       "Ruleset='" . mysql_addslashes($game_info_row['Ruleset']) . "', " .
       "Status='PLAY', " .
       "Moves=$moves, " .
@@ -331,14 +342,15 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "StdHandicap='$stdhandicap', " .
       "Rated='" . $game_info_row["Rated"] . "'";
 
-   if( $gid > 0 )
-   { //game prepared by the invitation process
-      db_query( "create_game.update($gid)",
-         "UPDATE Games SET $set_query WHERE ID=$gid AND Status='INVITED' LIMIT 1" );
+   if( $gid > 0 ) // game prepared by the invitation process or multi-player-game-setup
+   {
+      $prev_status = ($game_type == GAMETYPE_GO) ? GAME_STATUS_INVITED : GAME_STATUS_SETUP;
+      db_query( "create_game.update($gid,$game_type)",
+         "UPDATE Games SET $set_query WHERE ID=$gid AND Status='$prev_status' LIMIT 1" );
       if( mysql_affected_rows() != 1)
-         error('mysql_start_game', "create_game.update2($gid)");
+         error('mysql_start_game', "create_game.update2($gid,$game_type)");
    }
-   else
+   else // new game
    {
       db_query( 'create_game.insert',
          "INSERT INTO Games SET $set_query" );
@@ -357,6 +369,16 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
          //error because it's too late to have a manual placement
          //as the game is already initialized for the white play
          error('internal_error', "create_game.std_handicap($gid)");
+      }
+
+      // Black has set handicap-stones -> setup 2nd-next player in multi-player-game
+      if( $game_type != GAMETYPE_GO )
+      {
+         list( $group_color, $group_order )
+            = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves + 1, $handicap );
+         $next_black_id = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+         db_query( "create_game.update_games.next2_gp($gid,$game_type,$next_black_id)",
+            "UPDATE Games SET Black_ID=$next_black_id WHERE ID=$gid LIMIT 1" );
       }
    }
 

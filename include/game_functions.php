@@ -496,6 +496,44 @@ class MultiPlayerGame
          error('waitingroom_join_too_late', "$dbgmsg.join_waitingroom_game($gid,$uid)");
    }//join_waitingroom_game
 
+   /*!
+    * \brief Returns arr( GroupColor, GroupOrder ) to identify current game-player to move.
+    * \param $game_players Games.GamePlayers = game-players-info
+    * \param $game_moves Games.Moves = move-counter starting at 0
+    * \param $handicap Games.Handicap = number of handicap-stones.
+    */
+   function calc_game_player_for_move( $game_players, $game_moves, $handicap )
+   {
+      if( $handicap > 0 )
+         $moves = ( $game_moves < $handicap ) ? 0 : $game_moves - $handicap + 1;
+      else
+         $moves = $game_moves;
+
+      $arr = explode(':', $game_players);
+      if( count($arr) == 2 ) // Team-Go
+      {
+         if( $moves & 1 ) // odd = WHITE
+            return array( GPCOL_W, ( ( ($moves - 1) >> 1 ) % (int)$arr[1] ) + 1 );
+         else // even = BLACK
+            return array( GPCOL_B, ( ( $moves >> 1 ) % (int)$arr[0] ) + 1 );
+      }
+      else // Zen-Go
+         return array( GPCOL_BW, ($moves % (int)$game_players) + 1 );
+   }//calc_game_player_for_move
+
+   /*! \brief Returns Players.ID for given game-id, group-color and group-order. */
+   function load_uid_for_move( $gid, $group_color, $group_order )
+   {
+      $sql_gr_col = mysql_addslashes($group_color);
+      $sql_gr_order = (int)$group_order;
+      $row = mysql_single_fetch( "MultiPlayerGame::load_uid_for_move($gid,$group_color,$group_order)",
+            "SELECT uid FROM GamePlayers " .
+            "WHERE gid=$gid AND GroupColor='$sql_gr_col' AND GroupOrder=$sql_gr_order LIMIT 1" );
+      if( !$row )
+         error('internal_error', "MultiPlayerGame::load_uid_for_move($gid,$group_color,$group_order)");
+      return (int)@$row['uid'];
+   }//load_uid_for_move
+
 } //end 'MultiPlayerGame'
 
 

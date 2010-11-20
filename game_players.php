@@ -29,6 +29,7 @@ require_once 'include/game_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
 require_once 'include/countries.php';
+require_once 'include/make_game.php';
 
 $GLOBALS['ThePage'] = new Page('GamePlayers');
 
@@ -141,28 +142,12 @@ define('KEY_GROUP_ORDER', 'gpo');
 
       if( $cmd == CMD_START_GAME ) // check/start game
       {
-         list( $errors, $warnings ) = check_game_setup( $game_type, $grow['GamePlayers'] );
+         list( $errors, $warnings, $new_game_players ) = check_game_setup( $game_type, $grow['GamePlayers'] );
          $cnt_err = count($errors);
-         $cnt_warn = count($warnings);
-         if( $cnt_err + $cnt_warn )
-            $extform = new Form( 'startgame', 'game_players.php', FORM_POST, false );
-         if( $cnt_err )
-         {
-            $extform->add_empty_row();
-            $extform->add_row( array(
-                  'DESCRIPTION', T_('Errors'),
-                  'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
-         }
-         if( $cnt_warn )
-         {
-            $extform->add_empty_row();
-            $extform = new Form( 'startgame', 'game_players.php', FORM_POST, false );
-            $extform->add_row( array(
-                  'DESCRIPTION', T_('Warnings'),
-                  'TEXT', buildErrorListString(T_('There are some warnings'), $warnings) ));
-         }
-         if( $cnt_err + $cnt_warn )
-            $extform->add_empty_row();
+         if( $is_save )
+            start_multi_player_game( $grow, $new_game_players );
+         else
+            $extform = build_form_start_game( $gid, $cmd, $errors, $warnings );
       }
    }//setup-status
 
@@ -173,10 +158,11 @@ define('KEY_GROUP_ORDER', 'gpo');
    // ------------------------
 
    $title = T_('Game-Players information');
+   $title_page = build_page_title( $title, $grow['Status'] );
    start_page( $title, true, $logged_in, $player_row );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
-   echo "<h3 class=Header>$title</h3>\n";
+   echo "<h3 class=Header>$title_page</h3>\n";
 
    $itable_game_settings = build_game_settings( $grow );
    echo $itable_game_settings->make_table(), "<br>\n";
@@ -338,7 +324,7 @@ function load_game_players( $gid )
 
    $result = db_query( "game_players.find.game_players($gid)",
       "SELECT GP.*, " .
-         "P.Name, P.Handle, P.Rating2, P.RatingStatus, P.Country, P.OnVacation, " .
+         "P.Name, P.Handle, P.Rating2, P.RatingStatus, P.Country, P.OnVacation, P.ClockUsed, " .
          "UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess " .
       "FROM GamePlayers AS GP LEFT JOIN Players AS P ON P.ID=GP.uid " .
       "WHERE gid=$gid ORDER BY GroupColor ASC, GroupOrder ASC" );
@@ -351,7 +337,10 @@ function load_game_players( $gid )
       {
          $user = new User( $uid, $row['Name'], $row['Handle'], 0, $row['X_Lastaccess'],
             $row['Country'], $row['Rating2'], $row['RatingStatus'] );
-         $user->urow = array( 'OnVacation' => $row['OnVacation'] );
+         $user->urow = array(
+               'OnVacation' => $row['OnVacation'],
+               'ClockUsed'  => $row['ClockUsed'],
+            );
       }
       else
          $user = null;
@@ -440,8 +429,16 @@ function build_table_game_players( $grow, $cmd, &$form )
          $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
       }
 
+      $tomove = '';
+      if( $gp->uid == $grow['ToMove_ID'] && isRunningGame($grow['Status']) )
+      {
+         $img = ($grow['ToMove_ID'] == $grow['Black_ID']) ? 'bm.gif' : 'wm.gif';
+         $tomove = image( $base_path.'17/'.$img, T_('Player to move'), null, 'class="InTextImage"' )
+            . SMALL_SPACING;
+      }
+
       $row_str = array(
-         1 => ($gp->GroupOrder > 0 ) ? $gp->GroupOrder . '.' : NO_VALUE,
+         1 => $tomove . ( ($gp->GroupOrder > 0 ) ? $gp->GroupOrder . '.' : NO_VALUE ),
          2 => GamePlayer::build_image_group_color($gp->GroupColor) .
               MINI_SPACING . GamePlayer::get_group_color_text($gp->GroupColor),
       );
@@ -588,6 +585,46 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
    $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit') ));
    return $form;
 }//build_form_change_order
+
+function build_form_start_game( $gid, $cmd, $errors, $warnings )
+{
+   global $allow_edit;
+
+   $form = new Form( 'startgame', 'game_players.php', FORM_GET, false );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'cmd', $cmd );
+
+   $cnt_err = count($errors);
+   if( $cnt_err )
+   {
+      $form->add_empty_row();
+      $form->add_row( array(
+            'DESCRIPTION', T_('Errors'),
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+   }
+   if( count($warnings) )
+   {
+      $form->add_empty_row();
+      $form->add_row( array(
+            'DESCRIPTION', T_('Warnings'),
+            'TEXT', buildErrorListString(T_('There are some warnings'), $warnings) ));
+   }
+
+   $form->add_empty_row();
+   if( $cnt_err == 0 ) // allowed to start game, ignore warnings
+   {
+      $form->add_row( array(
+            'TEXT', T_('Do you agree to start the game now?'), ));
+      if( $allow_edit ) // game-master
+      {
+         $form->add_row( array(
+               'CELL', 1, '',
+               'SUBMITBUTTON', FACT_SAVE, T_('Start Game') ));
+      }
+   }
+
+   return $form;
+}//build_form_start_game
 
 function add_waiting_room_mpgame( $grow, $uid )
 {
@@ -804,13 +841,14 @@ function _sort_game_players( $gp1, $gp2 )
 }
 
 // check what would prevent the start of the game
-// returns arr( [error..], [warnings...] )
+// returns arr( [error..], [warnings...], new_game_players )
 function check_game_setup( $game_type, $game_players )
 {
    global $arr_game_players, $arr_users;
 
    $errors = array();
    $warnings = array();
+   $new_game_players = $game_players;
 
    $cnt_reserved = $cnt_joined = 0;
    $arr_uid = array(); // uid => count
@@ -867,6 +905,12 @@ function check_game_setup( $game_type, $game_players )
                $arr_grcol[GPCOL_B], GamePlayer::get_group_color_text(GPCOL_B),
                $arr_grcol[GPCOL_W], GamePlayer::get_group_color_text(GPCOL_W),
                $game_players );
+         else
+         {
+            // determine new 'GamePlayers'-info in order B:W (needed for playing)
+            if( $arr_group_cnt[0] != $arr_group_cnt[1] && $arr_grcol[GPCOL_B] != $arr_group_cnt[0] )
+               $new_game_players = sprintf( '%d:%d', $arr_group_cnt[1], $arr_group_cnt[0] );
+         }
       }
       else
          $errors[] = sprintf( T_('Groups [%s, %s] are required, but found [%s]'),
@@ -904,7 +948,7 @@ function check_game_setup( $game_type, $game_players )
          $errors[] = sprintf( T_('Order of group [%s] must be unique and consecutive: 1,2,3, ...'), $grcol_text );
    }
 
-   return array( $errors, $warnings );
+   return array( $errors, $warnings, $new_game_players );
 }//check_game_setup
 
 function build_arr_group_color_texts( $arr_group_colors )
@@ -921,6 +965,75 @@ function buildErrorListString( $errmsg, $errors )
       return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
    else
       return '';
+}
+
+function start_multi_player_game( $grow, $upd_game_players )
+{
+   global $arr_game_players;
+   $gid = $grow['ID'];
+   $handicap = $grow['Handicap'];
+   $game_type = $grow['GameType'];
+
+   $arr_ratings = calc_group_ratings();
+
+   list( $group_color, $group_order )
+      = MultiPlayerGame::calc_game_player_for_move( $upd_game_players, 0, $handicap );
+   $black_id = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+   $black_row = build_start_game_user_row( $black_id );
+   $black_row['Rating2'] = $arr_ratings[($game_type == GAMETYPE_ZEN_GO) ? GPCOL_BW : GPCOL_B];
+
+   list( $group_color, $group_order )
+      = MultiPlayerGame::calc_game_player_for_move( $upd_game_players, ( $handicap > 0 ? $handicap : 1 ), $handicap );
+   $white_id = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+   $white_row = build_start_game_user_row( $white_id );
+   $white_row['Rating2'] = $arr_ratings[($game_type == GAMETYPE_ZEN_GO) ? GPCOL_BW : GPCOL_W];
+
+   $gdata = array() + $grow;
+   $gdata['Black_ID'] = $black_row['ID'];
+   $gdata['White_ID'] = $white_row['ID'];
+   $gdata['Rated'] = 'N';
+   $gdata['GamePlayers'] = $upd_game_players; // correct GamePlayers for right-playing-order
+
+   ta_begin();
+   {//HOT-section for starting multi-player-game
+      create_game($black_row, $white_row, $gdata, $gid );
+
+      // update Players for all game-players: Running++
+      db_query( "game_players.start_multi_player_game.players_upd_run($gid)",
+         "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
+            . "SET P.Running=P.Running+1 WHERE GP.gid=$gid" );
+   }
+   ta_end();
+
+   jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=".urlencode(T_('Game started!')));
+}//start_multi_player_game
+
+function build_start_game_user_row( $uid )
+{
+   global $arr_users;
+
+   if( !isset($arr_users[$uid]) )
+      error('internal_error', "game_players.build_start_game_user_row($uid)");
+   $gp = $arr_users[$uid];
+
+   return array(
+      'ID'           => $gp->uid,
+      'RatingStatus' => RATING_RATED,
+      'Rating2'      => $gp->user->Rating,
+      'OnVacation'   => $gp->user->urow['OnVacation'],
+      'ClockUsed'    => $gp->user->urow['ClockUsed'],
+   );
+}//build_start_game_user_row
+
+function build_page_title( $title, $status )
+{
+   if( $status == GAME_STATUS_SETUP )
+      $status_str = T_('Game setup');
+   elseif( $status == GAME_STATUS_FINISHED )
+      $status_str = T_('Game finished');
+   else
+      $status_str = T_('Game running');
+   return sprintf( '%s - (%s)', $title, $status_str );
 }
 
 ?>
