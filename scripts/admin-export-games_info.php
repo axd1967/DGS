@@ -26,6 +26,7 @@ function error( $err, $debugmsg=NULL )
 
 require_once 'include/std_functions.php';
 require_once 'include/rating.php';
+require_once 'include/game_functions.php';
 
 
 {
@@ -142,7 +143,7 @@ function build_game_info( $row=null )
 {
    if( is_null($row) ) // headers
    {
-      return "GameID;StartTime;EndTime;Size;Moves;Rated;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
+      return "GameID;StartTime;EndTime;Size;Moves;Rated;GameType;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
    }
    else
    {
@@ -153,6 +154,7 @@ function build_game_info( $row=null )
          $row['Size'],
          $row['Moves'],
          ($row['Rated'] == 'N') ? 0 : 1,
+         MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true),
          ($row['Ruleset'] == 'CHINESE') ? 'CH' : 'JP',
          $row['Handicap'],
          $row['Komi'],

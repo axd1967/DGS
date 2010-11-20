@@ -54,9 +54,9 @@ $ENTITY_GAMES = new Entity( 'Games',
                   'ClockUsed', 'TimeOutDate',
       FTYPE_FLOAT, 'Komi', 'Score', 'Black_Start_Rating', 'White_Start_Rating', 'Black_End_Rating',
                    'White_End_Rating',
-      FTYPE_TEXT, 'Last_Move',
+      FTYPE_TEXT, 'GamePlayers', 'Last_Move',
       FTYPE_DATE, 'Starttime', 'Lastchanged',
-      FTYPE_ENUM, 'Status', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
+      FTYPE_ENUM, 'Status', 'GameType', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
    );
 
 class Games
@@ -70,6 +70,8 @@ class Games
    var $Black_ID;
    var $White_ID;
    var $ToMove_ID;
+   var $GameType;
+   var $GamePlayers;
    var $Size;
    var $Komi;
    var $Handicap;
@@ -105,7 +107,8 @@ class Games
 
    /*! \brief Constructs Games-object with specified arguments. */
    function Games( $id=0, $tid=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
-                   $black_id=0, $white_id=0, $tomove_id=0, $size=19, $komi=6.5, $handicap=0,
+                   $black_id=0, $white_id=0, $tomove_id=0, $game_type=GAMETYPE_GO, $game_players='',
+                   $size=19, $komi=6.5, $handicap=0,
                    $status=GAME_STATUS_INVITED, $moves=0, $black_prisoners=0, $white_prisoners=0,
                    $last_x=-1, $last_y=-1, $last_move='', $flags=0, $score=0.0, $maintime=0,
                    $byotype=BYOTYPE_JAPANESE, $byotime=0, $byoperiods=0, $black_maintime=0,
@@ -124,6 +127,8 @@ class Games
       $this->Black_ID = (int)$black_id;
       $this->White_ID = (int)$white_id;
       $this->ToMove_ID = (int)$tomove_id;
+      $this->setGameType( $game_type );
+      $this->GamePlayers = $game_players;
       $this->Size = (int)$size;
       $this->Komi = (float)$komi;
       $this->Handicap = (int)$handicap;
@@ -163,6 +168,13 @@ class Games
       if( !preg_match( "/^(".CHECK_GAME_STATUS.")$/", $status ) )
          error('invalid_args', "Games.setStatus($status)");
       $this->Status = $status;
+   }
+
+   function setGameType( $game_type )
+   {
+      if( !preg_match( "/^(".CHECK_GAMETYPE.")$/", $game_type ) )
+         error('invalid_args', "Games.setGameType($game_type)");
+      $this->GameType = $game_type;
    }
 
    function setByotype( $byotype )
@@ -238,6 +250,8 @@ class Games
       $data->set_value( 'Black_ID', $this->Black_ID );
       $data->set_value( 'White_ID', $this->White_ID );
       $data->set_value( 'ToMove_ID', $this->ToMove_ID );
+      $data->set_value( 'GameType', $this->GameType );
+      $data->set_value( 'GamePlayers', $this->GamePlayers );
       $data->set_value( 'Size', $this->Size );
       $data->set_value( 'Komi', $this->Komi );
       $data->set_value( 'Handicap', $this->Handicap );
@@ -326,6 +340,8 @@ class Games
             @$row['Black_ID'],
             @$row['White_ID'],
             @$row['ToMove_ID'],
+            @$row['GameType'],
+            @$row['GamePlayers'],
             @$row['Size'],
             @$row['Komi'],
             @$row['Handicap'],

@@ -79,6 +79,11 @@ function export_game( $gid )
    if( $sql_moves[0] <= 0 )
       return array( false, $sql_moves[1] );
 
+   // skip ID
+   $sql_gp = insert_set( 'GamePlayers', "SELECT * FROM GamePlayers WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
+   if( $sql_gp[0] <= 0 )
+      return array( false, $gp[1] );
+
    $sql_ratinglog = insert_set( 'Ratinglog', "SELECT * FROM Ratinglog WHERE gid='$gid' LIMIT 2", false, array( 'ID' ) );
    if( $sql_ratinglog[0] < 0 ) // optional
       return array( false, $sql_ratinglog[1] );
@@ -100,6 +105,8 @@ function export_game( $gid )
       "-- Table Moves\n",
          sprintf( "-- DELETE FROM %s WHERE gid='$gid'", quoteit('Moves') ), "\n",
          $sql_moves[2], "\n",
+      "-- Table GamePlayers\n",
+         $sql_gp[2], "\n",
       "-- Table Ratinglog\n",
          sprintf( "-- DELETE FROM %s WHERE gid='$gid'", quoteit('Ratinglog') ), "\n",
          $sql_ratinglog[2], "\n",

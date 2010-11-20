@@ -79,6 +79,7 @@ define('GAMEFLAGS_HIDDEN_MSG', 0x02);
 define('GAMETYPE_GO',      'GO');
 define('GAMETYPE_TEAM_GO', 'TEAM_GO');
 define('GAMETYPE_ZEN_GO',  'ZEN_GO');
+define('CHECK_GAMETYPE',  'GO|TEAM_GO|ZEN_GO');
 
 //Games table: particular Score values
 define('SCORE_RESIGN', 1000);
