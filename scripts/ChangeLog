@@ -19,6 +19,34 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-20 juga
+
+   * gameinfo.php:
+   - adjusted text for group-start-rating for multi-player-game
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Games.txt:
+   - removed field Games.MoveCounter using existing Games.Moves instead
+
+   * game_players.php (load_game_players, build_table_game_players, build_form_start_game,
+       check_game_setup, start_multi_player_game, build_start_game_user_row, build_page_title),
+     include/game_functions.php (MultiPlayerGame.calc_game_player_for_move, ~.load_uid_for_move),
+     include/make_game.php (create_game):
+   - added start multi-player-game with pre-checks
+     - start game after agreeing to start by game-master
+     - calculate 2nd-next player if standard-handicap set
+     - update Games.GamePlayers for right playing order Black:White for Team-Go
+     - show player-to-move in game-players-table as image in Nr-column
+     - show game-status in page-title
+
+   * include/db/games.php (class Games, ~.setGameType, ~.fillEntityData, ~.new_from_row),
+     include/globals.php,
+     scripts/sql_game_export.php (export_game),
+     scripts/admin-export-games_info.php,
+     scripts/data_export.php:
+   - added multi-player-fields: GameType, GamePlayers
+   - added GamePlayers-table where missing
+
 2010-11-17 juga
 
    * game_players.php (update_handicap_komi):
@@ -196,8 +224,6 @@ ALTER TABLE Games
    ADD GameType enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO' AFTER ToMove_ID ;
 ALTER TABLE Games
    ADD GamePlayers char(5) NOT NULL default '' AFTER GameType ;
-ALTER TABLE Games
-   ADD MoveCounter smallint unsigned NOT NULL default 0 AFTER GamePlayers ;
 ALTER TABLE Games
    MODIFY Status enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED' ;
 
