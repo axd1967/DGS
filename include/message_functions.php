@@ -452,34 +452,43 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
-   $mform->add_row( array(
-         'DESCRIPTION', T_('Japanese byoyomi'),
-         //'CELL', 1, 'nowrap',
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
-         'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
-         'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
-         'TEXT', sptext(T_('with')),
-         'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
-         'TEXT', sptext(T_('extra periods')),
-      ));
+   if( $viewmode != GSETVIEW_SIMPLE )
+   {
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Japanese byoyomi'),
+            //'CELL', 1, 'nowrap',
+            'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
+            'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
+            'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
+            'TEXT', sptext(T_('with')),
+            'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
+            'TEXT', sptext(T_('extra periods')),
+         ));
 
-   $mform->add_row( array(
-         'DESCRIPTION', T_('Canadian byoyomi'),
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
-         'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
-         'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
-         'TEXT', sptext(T_('for')),
-         'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
-         'TEXT', sptext(T_('stones')),
-      ));
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Canadian byoyomi'),
+            'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
+            'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
+            'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
+            'TEXT', sptext(T_('for')),
+            'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
+            'TEXT', sptext(T_('stones')),
+         ));
+   }
 
-   $mform->add_row( array(
-         'DESCRIPTION', T_('Fischer time'),
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
+   // Fischer-time
+   $row_fischer = array(
+         'DESCRIPTION', T_('Fischer time') );
+   if( $viewmode == GSETVIEW_SIMPLE )
+      $mform->add_hidden( 'byoyomitype', BYOTYPE_FISCHER );
+   else
+      array_push( $row_fischer,
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype );
+   array_push( $row_fischer,
          'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
          'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
-         'TEXT', sptext(T_('extra per move')),
-      ));
+         'TEXT', sptext(T_('extra per move')) );
+   $mform->add_row( $row_fischer );
 
    $mform->add_row( array( 'SPACE' ) );
 
