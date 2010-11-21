@@ -285,8 +285,10 @@ function echo_image_tourney_next_round()
 function echo_image_game_players( $gid )
 {
    global $base_path;
-   return anchor( $base_path."game_players.php?gid=$gid",
-      image( $base_path.'images/team.gif', T_('Show game-players'), null, 'class="InTextImage"' ));
+   $img = image( $base_path.'images/team.gif',
+      ($gid < 0) ? T_('Show multi-player-games') : T_('Show game-players'),
+      null, 'class="InTextImage"' );
+   return ($gid > 0) ? anchor( $base_path."game_players.php?gid=$gid", $img ) : $img;
 }
 
 /*!

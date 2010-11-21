@@ -30,6 +30,7 @@ require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'tournaments/include/tournament_games.php' );
+require_once( 'include/filterlib_gametype.php' );
 
 $GLOBALS['ThePage'] = new Page('GamesList');
 
@@ -45,11 +46,13 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $ext_tid = (int)@$_REQUEST['tid']; // tourney
    if( !ALLOW_TOURNAMENTS || $ext_tid < 0 ) $ext_tid = 0;
 
+   $mp_game = (int)get_request_arg(FGTNAME_MPGAME); // multi-player-game
+
    $observe = @$_GET['observe']; // all | user (only my_id)
    $observe_all = false;
    if( $observe ) //OB=OU+OA
    {
-      $observe = ( is_numeric($observe) && $observe == $my_id ) ? $observe : 'all';
+      $observe = ( is_numeric($observe) && $observe == $my_id ) ? $my_id : 'all';
       $observe_all = !is_numeric($observe); //OA
       $finished = false; //by definition
       $uid = $my_id; //by definition
@@ -64,17 +67,17 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          if( !get_request_user( $uid, $uhandle) )
          {
-            $uid= $my_id;
-            $user_row=& $player_row;
+            $uid = $my_id;
+            $user_row =& $player_row;
          }
          else
          {
             if( $uhandle )
                $where = "Handle='".mysql_addslashes($uhandle)."'";
             else if( $uid > 0 )
-               $where = "ID=$uid";
+               $where = "ID=" . (int)$uid;
             else
-               error('no_uid');
+               error('no_uid', "show_games.find_player.uid($uid,$uhandle)");
 
             $user_row = mysql_single_fetch( "show_games.find_player($uid,$uhandle)",
                   "SELECT ID, Name, Handle, Rating2 FROM Players WHERE $where" )
@@ -87,6 +90,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $is_mine = ($my_id == $uid); // my games-list
    $is_other = ( $uid > 0 && !$is_mine );
    $running = !$observe && !$finished;
+   $allow_mpgame = !( $all || $observe || $ext_tid > 0 );
+   if( !$allow_mpgame )
+      $mp_game = false;
 
    $page = 'show_games.php?';
    if( $observe )
@@ -134,6 +140,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $named_filters = 'rated|won';
    if( !$observe && !$all ) //FU+RU
       $named_filters .= '|opp_hdl';
+   if( $allow_mpgame )
+      $named_filters .= '|'.FGTNAME_MPGAME;
    $search_profile->register_regex_save_args( $named_filters ); // named-filters FC_FNAME
    $gtable = new Table( $tableid, $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $gtable->set_profile_handler( $search_profile );
@@ -161,7 +169,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    $gfilter->add_filter(43, 'Selection', build_ruleset_filter_array(), true);
-   $gfilter->add_filter(44, 'Selection', MultiPlayerGame::build_game_type_filter_array(), true);
+   $gfilter->add_filter(44, 'GameType', MultiPlayerGame::build_game_type_filter_array(), true,
+         array( FC_MPGAME => $allow_mpgame ));
 
    if( !$observe && !$all ) //FU+RU
    {
@@ -282,6 +291,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *   - FU=finished-user, FA=finished-all
  *   - RU=running-user, RA=running-all
  *
+ *   - NOTE: for FU+RU there's a special view-restriction to show only multi-player-games (mp=1)
+ *
  *****
  * Database-columns FROM:
  * Notes:
@@ -296,8 +307,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *   Actually (FU+RU) may use the ?UNION
  *
  * Games (OB+FU+RU+FA+RA) AS Games:
- *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, Ruleset, Size, Komi, Handicap,
- *   Status, Moves, Black_Prisoners, White_Prisoners, Last_X, Last_Y, Last_Move, Flags, Score,
+ *   ID, Starttime, Lastchanged, mid, Black_ID, White_ID, ToMove_ID, GameType, GamePlayers, Ruleset,
+ *   Size, Komi, Handicap, Status, Moves,
+ *   Black_Prisoners, White_Prisoners, Last_X, Last_Y, Last_Move, Flags, Score,
  *   Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime,
  *   Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed,
  *   Rated, StdHandicap, WeekendClock, Black_Start_Rating, White_Start_Rating,
@@ -322,6 +334,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *
  * TournamentGames (OB+FU+RU+FA+RA) AS TG:
  *   Status
+ *
+ * GamePlayers (RU) AS GP:
+ *   gid, uid
  *
  *****
  * Views-columns usage:
@@ -608,6 +623,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             . "IF(Games.White_ID=Games.ToMove_ID,1,IF(Games.Black_ID=Games.ToMove_ID,0,0x20)) AS X_Color" );
       $qsql->add_part( SQLP_FROM, 'Games', 'Players AS Opp' );
 
+      if( $mp_game )
+      {
+         $qsql->add_part( SQLP_FROM, 'INNER JOIN GamePlayers AS GP ON GP.gid=Games.ID' );
+         $qsql->add_part( SQLP_WHERE, "GP.uid=$uid" );
+      }
+
       if( $load_notes ) //FU+RU ?UNION
       {
          $qsql->add_part( SQLP_FIELDS, "GN.Notes AS X_Note" );
@@ -617,16 +638,27 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
       if( $finished ) //FU ?UNION
       {
+         if( $mp_game )
+         {
+            $qsql->add_part( SQLP_FIELDS,
+               "Games.Score AS X_Score", // seen as Black
+               -OUT_OF_RATING." AS oppEndRating", // opp is always user
+               -OUT_OF_RATING." AS userEndRating" );
+         }
+         else
+         {
+            $qsql->add_part( SQLP_FIELDS,
+               "IF(Games.Black_ID=$uid, -Games.Score, Games.Score) AS X_Score",
+               "IF(Games.Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS oppEndRating",
+               "IF(Games.White_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS userEndRating" );
+         }
          $qsql->add_part( SQLP_FIELDS,
-            "IF(Games.Black_ID=$uid, -Games.Score, Games.Score) AS X_Score",
-            "IF(Games.Black_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS oppEndRating",
-            "IF(Games.White_ID=$uid, Games.White_End_Rating, Games.Black_End_Rating) AS userEndRating",
             'oppRlog.RatingDiff AS oppRatingDiff' );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=Games.ID AND oppRlog.uid=$uid" );
          $qsql->add_part( SQLP_WHERE, "Games.Status='FINISHED'" );
 
-         if( $load_user_ratingdiff )
+         if( $load_user_ratingdiff && !$mp_game ) // opp is always user for MP-game
          {
             $qsql->add_part( SQLP_FIELDS,
                'userRlog.RatingDiff AS userRatingDiff' );
@@ -646,7 +678,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          }
       }
 
-      if( ALLOW_SQL_UNION ) //FU+RU ?UNION
+      if( $mp_game )
+         $qsql->add_part( SQLP_WHERE, "Opp.ID=$uid" );
+      else if( ALLOW_SQL_UNION ) //FU+RU ?UNION
       {
          $qsql->add_part( SQLP_UNION_WHERE,
             "Games.White_ID=$uid AND Opp.ID=Games.Black_ID",
@@ -706,6 +740,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          . anchor( $base_path."tournaments/view_tournament.php?tid=$ext_tid",
                    T_('Tournament') . ' #' . $ext_tid ) . ')';
    }
+   if( $mp_game )
+      $title2 .= SEP_SPACING . '(' . T_('multi-player-games only') . ')';
 
 
    start_page( $title1, true, $logged_in, $player_row,
@@ -730,6 +766,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       'w_b' => T_('[%s] has White, Black to move#hover'),
       'b_w' => T_('[%s] has Black, White to move#hover'),
       'b_b' => T_('[%s] has Black, Black to move#hover'),
+      'b'   => T_('Black to move#hover'),
+      'w'   => T_('White to move#hover'),
    );
 
    while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
@@ -739,6 +777,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $oppEndRating = $blackEndRating = $whiteEndRating = NULL;
       $oppRatingDiff = $blackDiff = $whiteDiff = NULL;
       extract($row);
+      $is_mp_game = ($GameType != GAMETYPE_GO);
 
       $grow_strings = array();
       if( $gtable->Is_Column_Displayed[1] )
@@ -807,20 +846,29 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $grow_strings[4] = "<A href=\"userinfo.php?uid=$oppID\">" . $oppHandle . "</a>";
          if( $gtable->Is_Column_Displayed[5] )
          {
-            if( $X_Color & 0x2 ) //my color
-               $colors = 'w';
-            else
-               $colors = 'b';
-            if( !($X_Color & 0x20) )
+            if( $is_mp_game )
             {
-               if( $X_Color & 0x1 ) //to move color
-                  $colors.= '_w';
-               else
-                  $colors.= '_b';
+               if( !($X_Color & 0x20) )
+                  $colors = ( $X_Color & 0x1 ) ? 'w' : 'b'; //to move color
+               $hover_title = $arr_titles_colors[$colors];
             }
-            $hover_title = ( isset($arr_titles_colors[$colors]) )
-               ? sprintf( $arr_titles_colors[$colors], $oppHandle ) : '';
-            $grow_strings[5] = image( "17/$colors.gif", $colors, $hover_title );
+            else
+            {
+               if( $X_Color & 0x2 ) //my color
+                  $colors = 'w';
+               else
+                  $colors = 'b';
+               if( !($X_Color & 0x20) )
+               {
+                  if( $X_Color & 0x1 ) //to move color
+                     $colors.= '_w';
+                  else
+                     $colors.= '_b';
+               }
+               $hover_title = ( isset($arr_titles_colors[$colors]) )
+                  ? sprintf( $arr_titles_colors[$colors], $oppHandle ) : '';
+            }
+            $grow_strings[5] = image( $base_path."17/$colors.gif", $colors, $hover_title );
          }
          if( $gtable->Is_Column_Displayed[23] )
             $grow_strings[23] = echo_rating($oppStartRating,true,$oppID);
