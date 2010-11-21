@@ -3156,16 +3156,20 @@ function is_on_observe_list( $gid, $uid )
    return $res;
 }
 
-function toggle_observe_list( $gid, $uid )
+function toggle_observe_list( $gid, $uid, $toggle_yes )
 {
-   $res = is_on_observe_list( $gid, $uid );
-   if( $res )
-      db_query( 'toggle_observe_list.delete',
-         "DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
-   else
-      db_query( 'toggle_observe_list.insert',
-         "INSERT INTO Observers SET gid=$gid, uid=$uid");
-   return !$res;
+   $my_observe = is_on_observe_list( $gid, $uid );
+   if( $toggle_yes == ($my_observe ? 'N' : 'Y') )
+   {
+      if( $my_observe )
+         db_query( 'toggle_observe_list.delete',
+            "DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
+      else
+         db_query( 'toggle_observe_list.insert',
+            "INSERT INTO Observers SET gid=$gid, uid=$uid");
+      $my_observe = !$my_observe;
+   }
+   return $my_observe;
 }
 
 //$Text must NOT be escaped by mysql_addslashes()

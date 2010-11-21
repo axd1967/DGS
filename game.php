@@ -174,17 +174,13 @@ function get_alt_arg( $n1, $n2)
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
 
-   if( !$logged_in || $my_game || ($Status == GAME_STATUS_FINISHED) )
+   // toggle observing (also allowed for my-game)
+   if( $logged_in && ($Status != GAME_STATUS_FINISHED) && @$_REQUEST['toggleobserve'] )
+      $my_observe = toggle_observe_list($gid, $my_id, @$_REQUEST['toggleobserve'] ); // Y|N
+   elseif( !$logged_in || $my_game || ($Status == GAME_STATUS_FINISHED) )
       $my_observe = null;
    else
-   {
       $my_observe = is_on_observe_list( $gid, $my_id);
-      if( @$_REQUEST['toggleobserve'] == ($my_observe ? 'N' : 'Y') )
-      {
-         toggle_observe_list($gid, $my_id); // NOTE: this again calls is_on_observe_list() !
-         $my_observe = !$my_observe;
-      }
-   }
    $has_observers = has_observers( $gid);
 
 
@@ -702,7 +698,7 @@ function get_alt_arg( $n1, $n2)
       if( $my_game && $Moves>0 && !$has_sgf_alias )
          $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
 
-      if( isset($my_observe) )
+      if( !is_null($my_observe) )
       {
          if( $my_observe )
             $menu_array[T_('Remove from observe list')] = "game.php?gid=$gid".URI_AMP."toggleobserve=N";
