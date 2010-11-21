@@ -502,13 +502,15 @@ class MultiPlayerGame
     * \param $game_players Games.GamePlayers = game-players-info
     * \param $game_moves Games.Moves = move-counter starting at 0
     * \param $handicap Games.Handicap = number of handicap-stones.
+    * \param $add_moves how many moves in the future (setting-handicap = 1 move)
     */
-   function calc_game_player_for_move( $game_players, $game_moves, $handicap )
+   function calc_game_player_for_move( $game_players, $game_moves, $handicap, $add_moves=0 )
    {
       if( $handicap > 0 )
          $moves = ( $game_moves < $handicap ) ? 0 : $game_moves - $handicap + 1;
       else
          $moves = $game_moves;
+      $moves += $add_moves;
 
       $arr = explode(':', $game_players);
       if( count($arr) == 2 ) // Team-Go

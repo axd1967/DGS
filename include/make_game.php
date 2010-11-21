@@ -375,7 +375,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       if( $game_type != GAMETYPE_GO )
       {
          list( $group_color, $group_order )
-            = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves + 1, $handicap );
+            = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );
          $next_black_id = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
          db_query( "create_game.update_games.next2_gp($gid,$game_type,$next_black_id)",
             "UPDATE Games SET Black_ID=$next_black_id WHERE ID=$gid LIMIT 1" );
