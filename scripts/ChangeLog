@@ -19,7 +19,30 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-21 juga
+
+   * include/gui_functions.php (echo_image_game_players), show_games.php:
+   - show running and finished multi-player-games for specific user
+     with special multi-player-game view (mp=1),
+     restrict data of some columns: Colors, Opponent (use Black-player instead)
+   - cleanup (security-fixes)
+
+   * include/filterlib_gametype.php (class FilterGameType, ~.use_prefix_fieldname,
+       ~.parse_value, ~.get_input_element),
+     include/filter.php (Filter.init, ~.use_prefix_fieldname):
+   - added filter for Games.GameType combining selectbox with checkbox-switch
+     to enable search for multi-player-games
+
+   * include/game_functions.php (build_game_type_filter_array):
+   - added non-standard-Go for game-type-filter
+
+   * include/std_functions.php (toggle_observe_list), game.php:
+   - bugfix: allow observe-toggle for own-game, even without direct action-link for toggling
+
 2010-11-20 juga
+
+   * include/message_functions.php (game_settings_form):
+   - show only Fischer-time for waiting-room simple-game-settings
 
    * gameinfo.php:
    - adjusted text for group-start-rating for multi-player-game
