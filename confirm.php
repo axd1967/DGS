@@ -155,6 +155,10 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
          $to_move = WHITE+BLACK-$to_move;
    }
 
+   $is_mpgame = ($GameType != GAMETYPE_GO);
+   if( $is_mpgame && ($action == 'resign' || $action == 'done') )
+      error('invalid_action', "confirm.check.action.mpgame($gid,$my_id,$GameType,$action)");
+
    if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
 
@@ -225,6 +229,15 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    $TheBoard = new Board( );
    if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
       error('internal_error', "confirm.board.load_from_db($gid)");
+
+   $mp_query = '';
+   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == 'handicap') )
+   {
+      list( $group_color, $group_order )
+         = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
+      $mp_uid = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+      $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
+   }
 
    $message_raw = trim(get_request_arg('message'));
    if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
@@ -325,7 +338,7 @@ This is why:
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'domove'
 
@@ -358,7 +371,7 @@ This is why:
              "ToMove_ID=$next_to_move_ID, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'pass'
 
@@ -396,7 +409,7 @@ This is why:
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'handicap'
 

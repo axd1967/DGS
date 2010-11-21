@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament_games.php';
 require_once 'include/time_functions.php';
 require_once 'include/rating.php';
 require_once 'include/classlib_user.php';
+require_once 'include/game_functions.php';
 
  /*!
   * \file quick_game.php
@@ -191,6 +192,7 @@ class QuickHandlerGame extends QuickHandler
 
       // check for invalid-action
 
+      $is_mpgame = ($GameType != GAMETYPE_GO);
       $this->action = $cmd;
       if( $cmd == GAMECMD_DELETE )
       {
@@ -226,12 +228,16 @@ class QuickHandlerGame extends QuickHandler
          }
       }
       elseif( $cmd == GAMECMD_RESIGN )
-      {// no checks
+      {
+         if( $is_mpgame )
+            error('invalid_action', "QuickHandlerGame.prepare.check.mpgame.action($gid,$uid,$cmd)");
       }
       elseif( $cmd == GAMECMD_SCORE )
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Status)");
+         if( $is_mpgame )
+            error('invalid_action', "QuickHandlerGame.prepare.check.mpgame.action($gid,$uid,$cmd)");
       }
 
       $this->TheBoard = new Board();
@@ -259,6 +265,15 @@ class QuickHandlerGame extends QuickHandler
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
 
       list( $time_query, $hours ) = $this->update_clock();
+
+      $mp_query = '';
+      if( $is_mpgame && ($cmd == GAMECMD_MOVE || $cmd == GAMECMD_SET_HANDICAP) )
+      {
+         list( $group_color, $group_order )
+            = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
+         $mp_uid = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+         $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
+      }
 
       $message_raw = trim($this->message);
       if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
@@ -478,7 +493,7 @@ class QuickHandlerGame extends QuickHandler
 
       if( $cmd != GAMECMD_DELETE )
       {
-         $game_query .= $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+         $game_query .= $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          if( $message )
          {
