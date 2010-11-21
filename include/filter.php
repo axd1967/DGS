@@ -59,6 +59,7 @@ require_once( 'include/classlib_bitset.php' );
   *
   * \see   FilterCountry     (see include/filterlib_country.php)
   * \see   FilterMysqlMatch  (see include/filterlib_mysqlmatch.php)
+  * \see   FilterGameType    (see include/filterlib_gametype.php)
   */
 
  /*!
@@ -450,10 +451,11 @@ class SearchFilter
                $elems = $filter->get_element_names();
                foreach( $elems as $fname )
                {
+                  $use_prefix_field = ( $use_prefix ) ? $filter->use_prefix_fieldname($fname) : $use_prefix;
                   if( $this->is_reset )
                      $qvalue = null; // reset value, independent from is_init(!)
                   else
-                     $qvalue = $this->get_saved_arg( $fname, $use_prefix ); // string | array
+                     $qvalue = $this->get_saved_arg( $fname, $use_prefix_field ); // string | array
 
                   // reset to default, if no value and in init-state
                   if( $qvalue == '' && !$this->is_init && !$need_clear )
@@ -468,7 +470,7 @@ class SearchFilter
             }
          }
       }
-   }
+   }//init
 
    /*!
     * \brief Set access keys for search and reset of filters:
@@ -1388,6 +1390,12 @@ class Filter
    function get_element_names()
    {
       return $this->elem_names;
+   }
+
+   /*! \brief Returns true, if prefix should be used for field-name. */
+   function use_prefix_fieldname( $fname )
+   {
+      return true;
    }
 
    /*!
