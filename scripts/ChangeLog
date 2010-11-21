@@ -19,6 +19,19 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2010-11-22 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd),
+     confirm.php:
+   - set next but one game-player for multi-player-game for actions:
+     set-handicap, pass, move
+   - forbid resign + done-score for multi-player-game
+
+   * include/game_functions.php (MultiPlayerGame.calc_game_player_for_move),
+     include/make_game.php (create_game),
+     game_players.php (start_multi_player_game):
+   - bugfix: determine future players correctly handling moves for handicap-games
+
 2010-11-21 juga
 
    * include/gui_functions.php (echo_image_game_players), show_games.php:
