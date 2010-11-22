@@ -21,6 +21,10 @@ ChangeLog
 
 2010-11-22 juga
 
+   * include/game_functions.php (MultiPlayerGame.is_game_player), game.php:
+   - multi-player-game: allow edit of private-game-notes for all game-players,
+     not only for current black/white-players
+
    * include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd),
      confirm.php:
    - set next but one game-player for multi-player-game for actions:

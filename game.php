@@ -173,6 +173,8 @@ function get_alt_arg( $n1, $n2)
       $just_looking = false;
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
+   $is_mp_game = ( $GameType != GAMETYPE_GO );
+   $my_mpgame = ( !$my_game && $is_mp_game ) ? MultiPlayerGame::is_game_player($gid, $my_id) : $my_game;
 
    // toggle observing (also allowed for my-game)
    if( $logged_in && ($Status != GAME_STATUS_FINISHED) && @$_REQUEST['toggleobserve'] )
@@ -187,8 +189,7 @@ function get_alt_arg( $n1, $n2)
    $is_running_game = isRunningGame($Status);
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 )
-      && ($GameType == GAMETYPE_GO);
+   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 ) && !$is_mp_game;
 
    $may_resign_game = ( $action == 'choose_move') || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
 
@@ -436,20 +437,29 @@ function get_alt_arg( $n1, $n2)
    else
       $html_mode= 'game';
 
-   if( $my_game )
+   if( $my_game || $my_mpgame )
    {
-      if( $my_id == $Black_ID )
+      if( $my_mpgame )
       {
-         $my_color= 'B';
-         $opponent_ID= $White_ID;
-         $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
+         $opponent_ID = 0;
+         $movemsg = game_tag_filter($movemsg);
+         $movemsg = make_html_safe($movemsg, $html_mode);
       }
-      else //if( $my_id == $White_ID )
+      else
       {
-         $my_color= 'W';
-         $opponent_ID= $Black_ID;
-         $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
-      }
+         if( $my_id == $Black_ID )
+         {
+            $my_color= 'B';
+            $opponent_ID= $White_ID;
+            $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
+         }
+         else //if( $my_id == $White_ID )
+         {
+            $my_color= 'W';
+            $opponent_ID= $Black_ID;
+            $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
+         }
+      }//mp
 
       $cfgsize_notes = $cfg_board->get_cfgsize_notes( $Size );
       $notesheight = $cfg_board->get_notes_height( $cfgsize_notes );
@@ -507,7 +517,7 @@ function get_alt_arg( $n1, $n2)
       $movemsg = make_html_safe($movemsg, $html_mode );
       $show_notes = false;
       $noteshide = 'Y';
-   }
+   }//notes
 
    if( ENA_MOVENUMBERS )
    {
@@ -630,7 +640,7 @@ function get_alt_arg( $n1, $n2)
               , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
                        'target' => FRIENDLY_SHORT_NAME.'_game_comments'
               ));
-   if( $Status == GAME_STATUS_FINISHED && $GameFlags & GAMEFLAGS_HIDDEN_MSG )
+   if( $Status == GAME_STATUS_FINISHED && ($GameFlags & GAMEFLAGS_HIDDEN_MSG) )
       echo MED_SPACING . echo_image_gamecomment( $gid );
 
    echo "\n</td></tr>\n</table>"; //board & associates table }--------
@@ -711,7 +721,7 @@ function get_alt_arg( $n1, $n2)
    }
 
    $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
-   if( $GameType != GAMETYPE_GO )
+   if( $is_mp_game )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
 
    end_page(@$menu_array);

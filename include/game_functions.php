@@ -459,6 +459,14 @@ class MultiPlayerGame
       return ($row) ? (int)@$row['X_Count'] : 0;
    }
 
+   /*! \brief Returns true if uid is game-player for given game-id. */
+   function is_game_player( $gid, $uid )
+   {
+      $row = mysql_single_fetch( "MultiPlayerGame::is_game_player($gid,$uid)",
+            "SELECT ID FROM GamePlayers WHERE gid=".((int)$gid)." AND uid=".((int)$uid)." LIMIT 1" );
+      return ($row) ? 1 : 0;
+   }
+
    /*!
     * \brief Returns diff to required number of players that joined MP-game.
     * \return 0 (=required number reached), <0 (missing players), >0 (too much players)
