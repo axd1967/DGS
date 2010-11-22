@@ -289,9 +289,9 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $vals = array_value_to_key_and_value( range(1, NEWGAME_MAX_GAMES) );
       $mform->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                               'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
+      $mform->add_row( array( 'SPACE' ) );
    }
 
-   $mform->add_row( array( 'SPACE' ) );
    $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
                            'SELECTBOX', 'ruleset', 1, getRulesetText(), $Ruleset, false ) );
 
