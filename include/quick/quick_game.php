@@ -636,19 +636,9 @@ class QuickHandlerGame extends QuickHandler
 
 
          // Notify opponent about move
-
-if(1){ //new
-         notify( 'confirm', $next_to_move_ID);
-}else{ //old
-         db_query( "QuickHandlerGame.process.notify_opponent($gid,$action,$next_to_move_ID})",
-            "UPDATE Players SET Notify='NEXT' " .
-            "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
-            "AND FIND_IN_SET('ON',SendEmail) LIMIT 1" );
-} //old/new
-
+         notify( "QuickHandlerGame.process.notify_opponent($gid,$action,$next_to_move_ID})", $next_to_move_ID );
 
          // Increase moves and activity
-
          db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
             "UPDATE Players SET Moves=Moves+1" . // NOTE: TODO count delete/set_handicap as (one) move?
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .

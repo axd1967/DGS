@@ -314,21 +314,10 @@ This is why:
    }
 
 
+   // Notify opponent about move
+   notify( "quick_play.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
 
-
-// Notify opponent about move
-
-   db_query( "quick_play.notify_opponent($gid,$next_to_move_ID)",
-      "UPDATE Players SET Notify='NEXT'"
-      ." WHERE ID=$next_to_move_ID AND ID!=$my_id"
-         ." AND FIND_IN_SET('ON',SendEmail)"
-         //." AND FIND_IN_SET('MOVE',SendEmail)"
-         //." AND SendEmail LIKE '%ON%'"
-         ." AND Notify='NONE' LIMIT 1" );
-
-
-// Increase moves and activity
-
+   // Increase moves and activity
    db_query( "quick_play.update_player($gid,$my_id)",
       "UPDATE Players SET Moves=Moves+1"
          .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"

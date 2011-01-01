@@ -681,22 +681,9 @@ This is why:
 
 
       // Notify opponent about move
-
-      //if( $next_to_move_ID != $my_id ) //always true
-if(1){ //new
-         notify( 'confirm', $next_to_move_ID);
-}else{ //old
-         db_query( 'confirm.notify_opponent',
-            "UPDATE Players SET Notify='NEXT' " .
-                      "WHERE ID='$next_to_move_ID' AND Notify='NONE' " .
-                      "AND FIND_IN_SET('ON',SendEmail) LIMIT 1" );
-                      //"AND SendEmail LIKE '%ON%' LIMIT 1")
-} //old/new
-
-
+      notify( "confirm.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
 
       // Increase moves and activity
-
       db_query( 'confirm.activity',
             "UPDATE Players SET Moves=Moves+1"
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
