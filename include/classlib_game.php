@@ -510,9 +510,8 @@ class NextGameOrder
    /*! \brief Deletes all GamesPriority-table-entries for given game-id. */
    function delete_game_priorities( $gid )
    {
-      // for now only 2 players, change with RENGO
-      db_query( "NextGameOrder::persist_game_priority.delete_all($gid)",
-         "DELETE FROM GamesPriority WHERE gid=$gid LIMIT 2" );
+      db_query( "NextGameOrder::delete_game_priorities.delete_all($gid)",
+         "DELETE FROM GamesPriority WHERE gid=$gid" ); // no 'LIMIT' because of multi-player-go
    }
 
    /*!

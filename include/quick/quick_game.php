@@ -303,8 +303,7 @@ class QuickHandlerGame extends QuickHandler
       - this modification is always done in first place and checked before continuation
       *********************** */
       $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
-      $message_query = '';
-      $doublegame_query = '';
+      $game_query = $doublegame_query = $move_query = $message_query = '';
       $Moves++;
       $game_finished = false;
 
@@ -313,23 +312,6 @@ class QuickHandlerGame extends QuickHandler
       {
          case GAMECMD_DELETE:
          {
-            /*
-              No LIMIT for 'DELETE FROM Moves', because the number of Moves-records
-              could be greater than the number of moves if:
-              - there are prisoners
-              - a sequence like PASS/PASS/SCORE.../RESUME had already occured
-              - time has been added to opponent
-              => so some garbage records could remain!
-            */
-            $move_query = "DELETE FROM Moves WHERE gid=$gid";
-            $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
-            $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
-
-            // mark reference in other double-game to indicate referring game has vanished
-            $dbl_gid = (int)@$this->game_row['DoubleGame_ID'];
-            if( $dbl_gid > 0 )
-               $doublegame_query = "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1";
-
             $game_finished = true;
             break;
          }//delete
@@ -507,13 +489,19 @@ class QuickHandlerGame extends QuickHandler
       {//HOT-section to update game-action
 
          //See *** HOT_SECTION *** above
-         $result = db_query( "QuickHandlerGame.process.update_game($gid,$action})", $game_query . $game_clause );
-         if( mysql_affected_rows() != 1 )
-            error('mysql_update_game', "QuickHandlerGame.process.update_game2($gid,$action})");
+         if( $game_query )
+         {
+            $result = db_query( "QuickHandlerGame.process.update_game($gid,$action})", $game_query . $game_clause );
+            if( mysql_affected_rows() != 1 )
+               error('mysql_update_game', "QuickHandlerGame.process.update_game2($gid,$action})");
+         }
 
-         $result = db_query( "QuickHandlerGame.process.update_moves($gid,$action})", $move_query );
-         if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
-            error('mysql_insert_move', "QuickHandlerGame.process.update_moves2($gid,$action})");
+         if( $move_query )
+         {
+            $result = db_query( "QuickHandlerGame.process.update_moves($gid,$action})", $move_query );
+            if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
+               error('mysql_insert_move', "QuickHandlerGame.process.update_moves2($gid,$action})");
+         }
 
          if( $message_query )
          {
@@ -555,23 +543,13 @@ class QuickHandlerGame extends QuickHandler
 
             if( $this->action == GAMECMD_DELETE )
             {
-               db_query( "QuickHandlerGame.process.delete.update_players($gid,$Black_ID,$White_ID)",
-                  "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
-
-               db_query( "QuickHandlerGame.process.delete_gamenotes($gid,$action})",
-                  "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
-
-               // mark reference in other double-game to indicate referring game has vanished
-               if( $doublegame_query )
-                  db_query( "QuickHandlerGame.process.delete.update_doublegame($gid,$action})", $doublegame_query );
+               GameHelper::delete_running_game( $gid );
 
                $Subject = 'Game deleted';
                //reference: game is deleted => no link
                $Text = "The game:<center>"
                      . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname)
                      . "</center>has been deleted by your opponent.<br>";
-
-               delete_all_observers($gid, false);
             }
             else
             {
@@ -603,10 +581,10 @@ class QuickHandlerGame extends QuickHandler
                      . "</center>" ;
 
                delete_all_observers($gid, $rated_status!=1, $tmpText);
-            }
 
-            // GamesPriority-entries are kept for running games only, delete for finished games too
-            NextGameOrder::delete_game_priorities( $gid );
+               // GamesPriority-entries are kept for running games only, delete for finished games too
+               NextGameOrder::delete_game_priorities( $gid );
+            }
 
             //Send a message to the opponent
 

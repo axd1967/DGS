@@ -246,7 +246,6 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
       $message_raw = '';
    $message = mysql_addslashes($message_raw);
-   $message_query = '';
 
    if( $message && preg_match( "#</?h(idden)?>#is", $message) )
       $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
@@ -276,9 +275,8 @@ This is why:
 - this modification is always done in first place and checked before continuation
 *********************** */
    $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
-   $doublegame_query = '';
+   $game_query = $doublegame_query = $move_query = $message_query = '';
    $Moves++;
-
 
 
    switch( (string)$action )
@@ -450,24 +448,6 @@ This is why:
          if( !$may_del_game )
             error('invalid_action', "confirm.delete($gid,$my_id,$Status)");
 
-/*
-  Here, the previous line was:
-         $move_query = "DELETE FROM Moves WHERE gid=$gid LIMIT $Moves";
-  But, the number of records of Moves could be greater than the number of moves if:
-  - there are prisoners
-  - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
-  - time has been added to opponent
-  So some garbage records could remains alone because of the LIMIT.
-*/
-         $move_query = "DELETE FROM Moves WHERE gid=$gid";
-         $message_query = "DELETE FROM MoveMessages WHERE gid=$gid LIMIT $Moves";
-         $game_query = "DELETE FROM Games" ; //See *** HOT_SECTION ***
-
-         // mark reference in other double-game to indicate referring game has vanished
-         $dbl_gid = @$game_row['DoubleGame_ID'];
-         if( $dbl_gid > 0 )
-            $doublegame_query = "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1";
-
          $game_finished = true;
          break;
       }//switch for 'delete'
@@ -532,15 +512,19 @@ This is why:
    {//HOT-section to update game-action
 
       //See *** HOT_SECTION *** above
-      $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
-      if( mysql_affected_rows() != 1 )
-         error('mysql_update_game', "confirm.update_game2($gid,$action)");
+      if( $game_query )
+      {
+         $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
+         if( mysql_affected_rows() != 1 )
+            error('mysql_update_game', "confirm.update_game2($gid,$action)");
+      }
 
-      $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
-      if( mysql_affected_rows() < 1 && $action != 'delete' )
-         error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
-
-
+      if( $move_query )
+      {
+         $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
+         if( mysql_affected_rows() < 1 && $action != 'delete' )
+            error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
+      }
 
       if( $message_query )
       {
@@ -582,16 +566,7 @@ This is why:
 
          if( $action == 'delete' )
          {
-            //TODO: HOT_SECTION ???
-            db_query( "confirm.update_players_delete($gid,$Black_ID,$White_ID)",
-               "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
-
-            db_query( "confirm.delete.gamenote($gid)",
-               "DELETE FROM GamesNotes WHERE gid=$gid LIMIT 2" );
-
-            // mark reference in other double-game to indicate referring game has vanished
-            if( $doublegame_query )
-               db_query("confirm.delete.doublegame.update($gid)", $doublegame_query );
+            GameHelper::delete_running_game( $gid );
 
             $Subject = 'Game deleted';
             //reference: game is deleted => no link
@@ -599,7 +574,6 @@ This is why:
                   . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname)
                   . "</center>has been deleted by your opponent.<br>";
 
-            delete_all_observers($gid, false);
             $stay_on_board = false; // no game to stay on
          }
          else
@@ -633,10 +607,10 @@ This is why:
                   . "</center>" ;
 
             delete_all_observers($gid, $rated_status!=1, $tmp);
-         }
 
-         // GamesPriority-entries are kept for running games only, delete for finished games too
-         NextGameOrder::delete_game_priorities( $gid );
+            // GamesPriority-entries are kept for running games only, delete for finished games too
+            NextGameOrder::delete_game_priorities( $gid );
+         }
 
          //Send a message to the opponent
 
@@ -685,7 +659,7 @@ This is why:
 
       // Increase moves and activity
       db_query( 'confirm.activity',
-            "UPDATE Players SET Moves=Moves+1"
+            "UPDATE Players SET Moves=Moves+1" // NOTE: TODO count delete/set_handicap as (one) move?
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
             .",LastMove=FROM_UNIXTIME($NOW)"
             ." WHERE ID=$my_id LIMIT 1" );

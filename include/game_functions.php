@@ -417,7 +417,7 @@ class MultiPlayerGame
       );
    }
 
-   /*! \brief Deletes table-entries for multi-player game: Games, GamePlayers. */
+   /*! \brief Deletes table-entries for multi-player game: Games, GamePlayers, Waitingroom. */
    function delete_game( $gid )
    {
       if( !is_numeric($gid) && $gid <= 0 )
@@ -433,7 +433,7 @@ class MultiPlayerGame
             "DELETE FROM Waitingroom WHERE gid=$gid" ); // can be > 1
       }
       ta_end();
-   }
+   }//delete_game
 
    /*!
     * \brief "Deletes" (by updating) specified number of game-players for given game-id and flag-typed placeholder.
@@ -682,6 +682,73 @@ class GamePlayer
    }//reset_flags
 
 } // end 'GamePlayer'
+
+
+
+
+/**
+ * \brief Class to handle general game-actions.
+ */
+class GameHelper
+{
+   /*!
+    * \brief Deletes non-tourney game and all related tables for given game-id.
+    * \param $upd_players if true, also decrease Players.Running
+    * \param $grow game-row can be provided to save additional query
+    * \return true on success, false on invalid args or tourney-game.
+    */
+   function delete_running_game( $gid, $upd_players=true, $grow=null )
+   {
+      if( !is_numeric($gid) && $gid <= 0 )
+         return false;
+
+      if( is_null($grow) )
+         $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.tid($gid)",
+            "SELECT tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
+      if( !$grow || $grow['tid'] > 0 )
+         return false;
+
+      ta_begin();
+      {//HOT-section to delete game table-entries
+         // mark reference in other double-game to indicate referring game has vanished
+         $dbl_gid = (int)@$grow['DoubleGame_ID'];
+         if( $dbl_gid > 0 )
+            db_query( "GameHelper::delete_running_game.doublegame($gid)",
+               "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1" );
+
+         if( $upd_players )
+         {
+            if( $grow['GameType'] == GAMETYPE_GO )
+            {
+               $Black_ID = (int)@$grow['Black_ID'];
+               $White_ID = (int)@$grow['White_ID'];
+               db_query( "GameHelper::delete_running_game.upd_players($gid,$Black_ID,$White_ID)",
+                  "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
+            }
+            else
+               MultiPlayerGame::update_players_end_mpgame( $gid );
+         }
+
+         NextGameOrder::delete_game_priorities($gid);
+         db_query( "GameHelper::delete_running_game.observers($gid)",
+            "DELETE FROM Observers WHERE ID=$gid" );
+         db_query( "GameHelper::delete_running_game.notes($gid)",
+            "DELETE FROM GamesNotes WHERE gid=$gid" );
+         db_query( "GameHelper::delete_running_game.movemsg($gid)",
+            "DELETE FROM MoveMessages WHERE gid=$gid" );
+         db_query( "GameHelper::delete_running_game.moves($gid)",
+            "DELETE FROM Moves WHERE gid=$gid" );
+         db_query( "GameHelper::delete_running_game.gameplayers($gid)",
+            "DELETE FROM GamePlayers WHERE gid=$gid" );
+         db_query( "GameHelper::delete_running_game.games($gid)",
+            "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+      }
+      ta_end();
+
+      return true;
+   }//delete_running_game
+
+} // end 'GameHelper'
 
 
 

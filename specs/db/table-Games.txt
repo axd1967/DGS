@@ -194,6 +194,7 @@ Description:
    Table to model multi-player-games like Team-Go and Zen-Go.
    - uid non-UNIQUE per game-id, allow to have same player more than once per group
 
+
  Field      | Type                         | Default
 ------------+------------------------------+---------
  ID         | int(11)                      | NULL
@@ -228,4 +229,36 @@ Description:
 
 * Flags : flags for game-player
    - see 'include/game_functions.php' GPFLAG_...
+
+
+
+###########################################################################
+## --- Moves ---
+
+Description:
+   - table storing all moves, setting-handicap, prisoners, PASS/SCORE-sequence,
+     ADD-TIME-entries
+
+Notes:
+   - the number of records of Moves could be greater than the number of
+     corresponding Games.Moves if:
+      - there are prisoners
+      - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
+      - time has been added to opponent
+
+
+ Field  | Type                 | Default
+--------+----------------------+---------
+ ID     | int(11)              | NULL
+ gid    | int(11)              | NULL
+ MoveNr | smallint(5) unsigned | NULL
+ Stone  | tinyint(3) unsigned  | 0
+ PosX   | tinyint(4)           | NULL
+ PosY   | tinyint(4)           | NULL
+ Hours  | smallint(5) unsigned | NULL
+
+
+## Fields:
+
+TODO TODO TODO
 
