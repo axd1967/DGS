@@ -532,18 +532,21 @@ class MultiPlayerGame
          return array( GPCOL_BW, ($moves % (int)$game_players) + 1 );
    }//calc_game_player_for_move
 
-   /*! \brief Returns Players.ID for given game-id, group-color and group-order. */
-   function load_uid_for_move( $gid, $group_color, $group_order )
+   function update_players_start_mpgame( $gid )
    {
-      $sql_gr_col = mysql_addslashes($group_color);
-      $sql_gr_order = (int)$group_order;
-      $row = mysql_single_fetch( "MultiPlayerGame::load_uid_for_move($gid,$group_color,$group_order)",
-            "SELECT uid FROM GamePlayers " .
-            "WHERE gid=$gid AND GroupColor='$sql_gr_col' AND GroupOrder=$sql_gr_order LIMIT 1" );
-      if( !$row )
-         error('internal_error', "MultiPlayerGame::load_uid_for_move($gid,$group_color,$group_order)");
-      return (int)@$row['uid'];
-   }//load_uid_for_move
+      // update Players for all game-players: Running++
+      db_query( "MultiPlayerGame::update_players_start_mpgame($gid)",
+         "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
+            . "SET P.Running=P.Running+1 WHERE GP.gid=$gid" );
+   }//update_players_start_mpgame
+
+   function update_players_end_mpgame( $gid )
+   {
+      // update Players for all game-players: Running--, Finished++
+      db_query( "MultiPlayerGame::update_players_end_mpgame($gid)",
+         "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
+            . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 WHERE GP.gid=$gid" );
+   }//update_players_end_mpgame
 
 } //end 'MultiPlayerGame'
 
@@ -594,6 +597,32 @@ class GamePlayer
       return $gp;
    }
 
+   /*! \brief Returns GamePlayer-object for given game-id, group-color and group-order. */
+   function load_game_player( $gid, $group_color, $group_order )
+   {
+      $sql_gr_col = mysql_addslashes($group_color);
+      $sql_gr_order = (int)$group_order;
+      $row = mysql_single_fetch( "GamePlayer::load_game_player($gid,$group_color,$group_order)",
+            "SELECT * FROM GamePlayers " .
+            "WHERE gid=$gid AND GroupColor='$sql_gr_col' AND GroupOrder=$sql_gr_order LIMIT 1" );
+      if( !$row )
+         error('internal_error', "GamePlayer::load_game_player($gid,$group_color,$group_order)");
+      return new GamePlayer( $row['ID'], $row['gid'], $row['GroupColor'], $row['GroupOrder'], $row['Flags'], $row['uid'] );
+   }//load_game_player
+
+   /*! \brief Returns Players.ID for given game-id, group-color and group-order. */
+   function load_uid_for_move( $gid, $group_color, $group_order )
+   {
+      $sql_gr_col = mysql_addslashes($group_color);
+      $sql_gr_order = (int)$group_order;
+      $row = mysql_single_fetch( "GamePlayer::load_uid_for_move($gid,$group_color,$group_order)",
+            "SELECT uid FROM GamePlayers " .
+            "WHERE gid=$gid AND GroupColor='$sql_gr_col' AND GroupOrder=$sql_gr_order LIMIT 1" );
+      if( !$row )
+         error('internal_error', "GamePlayer::load_uid_for_move($gid,$group_color,$group_order)");
+      return (int)@$row['uid'];
+   }//load_uid_for_move
+
    function build_image_group_color( $group_color )
    {
       static $arr_col_images = null;
@@ -643,6 +672,14 @@ class GamePlayer
       }
       return $arr_grcol_order[$group_color];
    }//get_group_color_order
+
+   /*! \brief Clears flags of game-players-table for given game. */
+   function reset_flags( $gid, $flags )
+   {
+      db_query( "GamePlayer::reset_flags.update($gid,$flags)",
+         "UPDATE GamePlayers SET Flags=Flags & ~$flags " .
+         "WHERE gid=$gid AND (Flags & $flags) > 0" );
+   }//reset_flags
 
 } // end 'GamePlayer'
 
