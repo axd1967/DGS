@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once( "include/std_functions.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 //require_once( "include/rating.php" );
@@ -199,6 +200,17 @@ else
 
    //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
 
+   $mp_query = '';
+   $is_mpgame = ($GameType != GAMETYPE_GO);
+   if( $is_mpgame && $action == 'domove' )
+   {
+      list( $group_color, $group_order )
+         = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
+      $mp_gp = GamePlayer::load_game_player( $gid, $group_color, $group_order );
+      $mp_uid = $mp_gp->uid;
+      $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
+   }
+
 
 
 /* **********************
@@ -277,8 +289,8 @@ This is why:
 
       $game_query .= "ToMove_ID=$next_to_move_ID, " .
           "Flags=$GameFlags, " .
-          $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
-   }
+          $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+   }//domove
 
 
    //See *** HOT_SECTION *** above
@@ -296,6 +308,7 @@ This is why:
       if( mysql_affected_rows() < 1 && $action != 'delete' )
          error('mysql_insert_move', "quick_play.update_movemessage2($gid,$action)");
    }
+
 
 
 
