@@ -191,7 +191,8 @@ function get_alt_arg( $n1, $n2)
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
    $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 ) && !$is_mp_game;
 
-   $may_resign_game = ( $action == 'choose_move') || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
+   $may_resign_game = ( $action == 'choose_move')
+      || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -336,6 +337,8 @@ function get_alt_arg( $n1, $n2)
 
             $validation_step = true;
             $extra_infos[T_('Resigning')] = 'Important';
+            if( $is_mp_game )
+               $extra_infos[T_('You should have the consent of your team-members for resigning a multi-player-game!')] = 'Important';
             break;
 
          case 'add_time': //add-time for opponent
@@ -351,7 +354,7 @@ function get_alt_arg( $n1, $n2)
 
             $validation_step = true;
             $extra_infos[T_('Passing')] = 'Info';
-            $extra_infos[T_('Assure that all boundaries of your territory are closed before ending the game.')] = 'Important';
+            $extra_infos[T_('Assure that all boundaries of your territory are closed before ending the game!')] = 'Important';
             break;
 
          case 'delete': //for validation, delete-game
