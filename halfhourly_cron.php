@@ -127,7 +127,7 @@ if( !$is_down )
 
    $result = db_query( 'halfhourly_cron.find_notifications',
             "SELECT ID as uid, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players"
-            ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
+            ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>''");
             //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'");
 
 
