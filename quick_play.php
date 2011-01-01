@@ -170,9 +170,7 @@ else
       }
 
       if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
-      {
          $next_clockused = VACATION_CLOCK;
-      }
       else
       {
          $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
