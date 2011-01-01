@@ -554,18 +554,8 @@ class QuickHandlerGame extends QuickHandler
             else
             {
                $rated_status = update_rating2($gid); //0=rated game
-
-               $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                         ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                              ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                         ) . " WHERE ID=$White_ID LIMIT 1" ;
-               db_query( "QuickHandlerGame.process.update_players_finished.W($gid,$action,$White_ID)", $query );
-
-               $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                         ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                              ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                         ) . " WHERE ID=$Black_ID LIMIT 1" ;
-               db_query( "QuickHandlerGame.process.update_players_finished.B($gid,$action,$Black_ID)", $query );
+               GameHelper::update_players_end_game( "QuickHandlerGame.process.game_finished",
+                  $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
                $Subject = 'Game result'; // note: don't translate
                $Text = "The result in the game:<center>"
@@ -584,15 +574,12 @@ class QuickHandlerGame extends QuickHandler
 
                // GamesPriority-entries are kept for running games only, delete for finished games too
                NextGameOrder::delete_game_priorities( $gid );
-            }
 
-            //Send a message to the opponent
-
-            if( $this->action != GAMECMD_DELETE )
-            {
                if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
                   $Text .= "<p><b>Info:</b> The game has hidden comments!";
             }
+
+            //Send a message to the opponent
 
             // NOTE: server messages does not allow a reply, so add an *in message* reference to this player.
             $Text .= "<p>Send a message to:<center>"

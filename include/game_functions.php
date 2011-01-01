@@ -748,6 +748,30 @@ class GameHelper
       return true;
    }//delete_running_game
 
+   /*! \brief Updates game-stats in Players-table for simple or multi-player game. */
+   function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status=1, $score=null, $black_id=0, $white_id=0 )
+   {
+      if( !is_numeric($gid) && $gid <= 0 )
+         return;
+
+      if( $game_type == GAMETYPE_GO )
+      {
+         db_query( $dbgmsg."GameHelper::update_players_end_game.W($gid,$white_id)",
+            "UPDATE Players SET Running=Running-1, Finished=Finished+1"
+            .($rated_status ? '' : ", RatedGames=RatedGames+1"
+               .($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
+             ). " WHERE ID=$white_id LIMIT 1" );
+
+         db_query( $dbgmsg."GameHelper::update_players_end_game.B($gid,$black_id)",
+            "UPDATE Players SET Running=Running-1, Finished=Finished+1"
+            .($rated_status ? '' : ", RatedGames=RatedGames+1"
+               .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
+             ). " WHERE ID=$black_id LIMIT 1" );
+      }
+      else // multi-player-go
+         MultiPlayerGame::update_players_end_mpgame( $gid );
+   }//update_players_end_game
+
 } // end 'GameHelper'
 
 

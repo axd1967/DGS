@@ -246,6 +246,20 @@ Notes:
       - a sequence like PASS/PASS/SCORE.../RESUME had already occured.
       - time has been added to opponent
 
+//FIXME(?) on game-end by time-out/resignation !???
+/* To store the last $hours info (never used, to be checked)
+         $to_move= ( $ToMove_ID == $Black_ID ? BLACK : WHITE );
+         db_query( "clock_tick.update_moves($gid)",
+            "INSERT INTO Moves SET " .
+             "gid=$gid, " .
+             "MoveNr=$Moves+1, " . //CAUTION: problem it's > Games.Moves
+             "Stone=$to_move, " .
+             "PosX=".POSX_TIME.", PosY=0, " .
+             "Hours=$hours" );
+         if( mysql_affected_rows() < 1 )
+            error('mysql_insert_move', "clock_tick.update_moves($gid)");
+*/
+
 
  Field  | Type                 | Default
 --------+----------------------+---------

@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/classlib_game.php' );
+require_once( 'include/game_functions.php' );
 require_once 'tournaments/include/tournament_games.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
@@ -197,6 +198,7 @@ if(1){//new
       if( $time_is_up )
       {
          //TODO: Delete games with too few moves ???
+
          $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
          $prow = mysql_single_fetch( "clock_tick.find_timeout_players($White_ID,$Black_ID)",
             'SELECT black.Handle as blackhandle, white.Handle as whitehandle'
@@ -227,52 +229,32 @@ if(1){//new
                TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout",
                   $tid, $gid, $Black_ID, $score );
 
-//FIXME(?)
-/* To store the last $hours info (never used, to be checked)
-         $to_move= ( $ToMove_ID == $Black_ID ? BLACK : WHITE );
-         db_query( "clock_tick.update_moves($gid)",
-            "INSERT INTO Moves SET " .
-             "gid=$gid, " .
-             "MoveNr=$Moves+1, " . //CAUTION: problem it's > Games.Moves
-             "Stone=$to_move, " .
-             "PosX=".POSX_TIME.", PosY=0, " .
-             "Hours=$hours" );
-         if( mysql_affected_rows() < 1 )
-            error('mysql_insert_move', "clock_tick.update_moves($gid)");
-*/
-
             // Send messages to the players
             $Text = "The result in the game:<center>"
                   . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
                   . "</center>was:<center>"
                   . score2text($score,true,true)
                   . "</center>";
+
+            //TODO TODO don't send hidden-info to observers !!
             if( $X_GameFlags & GAMEFLAGS_HIDDEN_MSG )
                $Text .= "<p><b>Info:</b> The game has hidden comments!";
+
+            //TODO TODO add all game-players
             $Text.= "<p>Send a message to:<center>"
                   . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
                   . "<br>"
                   . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                   . "</center>" ;
 
+            //TODO TODO send to all game-players
             send_message( 'clock_tick', $Text, 'Game result'
                ,array($Black_ID,$White_ID), '', /*notify*/true
                , 0, 'RESULT', $gid);
 
             $rated_status = update_rating2($gid); //0=rated game
-
-            // Change some stats
-            db_query( "clock_tick.timeup_update_white($gid)",
-               "UPDATE Players SET Running=Running-1, Finished=Finished+1"
-               .($rated_status ? '' : ", RatedGames=RatedGames+1"
-                  .($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                ). " WHERE ID=$White_ID LIMIT 1" );
-
-            db_query( "clock_tick.timeup_update_black($gid)",
-               "UPDATE Players SET Running=Running-1, Finished=Finished+1"
-               .($rated_status ? '' : ", RatedGames=RatedGames+1"
-                  .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                ). " WHERE ID=$Black_ID LIMIT 1" );
+            GameHelper::update_players_end_game( "clock_tick.timeup",
+               $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
             delete_all_observers($gid, $rated_status!=1, $Text);
 

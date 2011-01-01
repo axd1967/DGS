@@ -111,14 +111,10 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    extract($game_row);
 
    if( @$_REQUEST['nextskip'] )
-   {
       jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
-   }
 
    if( @$_REQUEST['nextaddtime'] )
-   {
       do_add_time( $game_row, $my_id); // jump back
-   }
 
    if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
       error('game_not_started', "confirm.check.bad_status($gid,$Status)");
@@ -202,9 +198,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       }
 
       if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
-      {
          $next_clockused = VACATION_CLOCK; //and LastTicks=0, see below
-      }
       else
       {
          $next_clockused = ( $next_to_move == BLACK ? $X_BlackClock : $X_WhiteClock );
@@ -307,11 +301,8 @@ This is why:
          }
 
 
-         if( strlen($prisoner_string) != $nr_prisoners*2
-               || ( $stonestring && $prisoner_string != $stonestring) )
-         {
+         if( strlen($prisoner_string) != $nr_prisoners*2 || ( $stonestring && $prisoner_string != $stonestring) )
             error('move_problem', "confirm.domove.prisoner($gid)");
-         }
 
          $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
 
@@ -480,10 +471,8 @@ This is why:
 
          $move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
 
-
          if( $message )
             $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
-
 
          $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_SCORE.", " .
@@ -578,20 +567,9 @@ This is why:
          }
          else
          {
-            //TODO: HOT_SECTION ???
             $rated_status = update_rating2($gid); //0=rated game
-
-            $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                       ($score > 0 ? ", Won=Won+1" : ($score < 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$White_ID LIMIT 1" ;
-            db_query( "confirm.update_players_finished.W($gid,$White_ID)", $query );
-
-            $query = "UPDATE Players SET Running=Running-1, Finished=Finished+1" .
-                      ($rated_status ? '' : ", RatedGames=RatedGames+1" .
-                       ($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
-                      ) . " WHERE ID=$Black_ID LIMIT 1" ;
-            db_query( "confirm.update_players_finished.B($gid,$Black_ID)", $query );
+            GameHelper::update_players_end_game( "confirm.game_finished",
+               $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
             $Subject = 'Game result';
             $Text = "The result in the game:<center>"
@@ -610,40 +588,22 @@ This is why:
 
             // GamesPriority-entries are kept for running games only, delete for finished games too
             NextGameOrder::delete_game_priorities( $gid );
-         }
 
-         //Send a message to the opponent
-
-         if( $action != 'delete' )
-         {
             if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
                $Text .= "<p><b>Info:</b> The game has hidden comments!";
          }
 
-         $message_from_server_way = true; //else simulate a message from this player
-         //nervertheless, the clock_tick.php messages are always sent by the server
-         //so it's better to keep $message_from_server_way = true
-         if( $message_from_server_way )
-         {
-            //The server messages does not allow a reply,
-            // so add a *in message* reference to this player.
-            $Text.= "<p>Send a message to:<center>"
-                  . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
-                  . "</center>" ;
-         }
+         //Send a message to the opponent
+
+         // NOTE: server messages does not allow a reply, so add an *in message* reference to this player.
+         $Text.= "<p>Send a message to:<center>"
+               . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
+               . "</center>" ;
 
          if( $message_raw )
          {
-            if( $message_from_server_way )
-            {
-               //A server message will only be read by this player
-               $Text .= "<p>Your opponent wrote:<p></p>" . $message_raw;
-            }
-            else
-            {
-               //Because both players will read this message
-               $Text .= "<p>The final message was:<p></p>" . $message_raw;
-            }
+            //A server message will only be read by this player
+            $Text .= "<p>Your opponent wrote:<p></p>" . $message_raw;
          }
 
          send_message( 'confirm', $Text, $Subject
@@ -671,13 +631,9 @@ This is why:
    // Jump somewhere
 
    if( @$_REQUEST['nextstatus'] )
-   {
       jump_to("status.php");
-   }
-   else if( @$_REQUEST['nextgame'] && !$stay_on_board )
-   {
+   elseif( @$_REQUEST['nextgame'] && !$stay_on_board )
       jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
-   }
 
    jump_to("game.php?gid=$gid");
 }
