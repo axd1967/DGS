@@ -19,6 +19,40 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-01-01 juga
+
+   * game_players.php (check_game_setup, build_table_game_players,
+       build_form_start_game, build_arr_group_color_texts):
+   - changed warnings to errors for game-setup-check, if player joined game more than once
+   - show also 2nd-next to-move with right-arrow on game-players-list
+   - bugfixes for editing
+
+   * include/game_functions.php (MultiPlayerGame.update_players_start_mpgame,
+       ~.update_players_end_mpgame; GamePlayer.load_game_player, ~.load_uid_for_move,
+       ~.reset_flags),
+     include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd),
+     include/make_game.php (create_game),
+     confirm.php, game_players.php:
+   - allow resign for both players (also for multi-player-game)
+   - refactored func: MultiPlayerGame::load_uid_for_move -> GamePlayer::load_game_player
+   - refactored func into: MultiPlayerGame::update_players_start_mpgame()
+   - cleanup: use existing vars
+
+   * game.php:
+   - show note to ask for consent with team-member for resignation of MP-game
+
+   * show_games.php:
+   - changed column-header for multi-player-game for finished-user-games-list
+
+   * quick_play.php:
+   - bugfix: set 2nd-next-player in multi-player-game on moving
+
+   * halfhourly_cron.php:
+   - optimize query for notification by checking on Email>''
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - dropped some tables (already) in production-database
+
 2010-11-22 juga
 
    * include/game_functions.php (MultiPlayerGame.is_game_player), game.php:
@@ -220,8 +254,8 @@ ChangeLog
      status.php, waiting_room.php, skins/dragon/screen.css, NEWS:
    - added game-type for multi-player-game:
      - Go = standard game-type
-     - Team-Go (N:M) = two teams of 1..N,M players take a match
-     - Zen-Go (N) = one group of players alternate colors
+     - Team-Go (N:M) = two teams of 1..N and 1..M players take a match
+     - Zen-Go (N) = one group of players with alternating colors
    - added multi-player-games:
      - new game-type: Team-Go, Zen-Go
        - max. 16 players in multi-player-game allowed
