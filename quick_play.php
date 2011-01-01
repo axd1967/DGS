@@ -142,11 +142,6 @@ else
 
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
-   $message = trim(@$_REQUEST['message']);
-   if( (string)$message != '' )
-      $message = mysql_addslashes($message);
-   $message_query = '';
-
 
 // Update clock
 
@@ -211,6 +206,13 @@ else
       $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
    }
 
+   $message_raw = trim(@$_REQUEST['message']);
+   if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
+      $message_raw = '';
+   $message = mysql_addslashes($message_raw);
+
+   if( $message && preg_match( "#</?h(idden)?>#is", $message) )
+      $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
 
 
 /* **********************

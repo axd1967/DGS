@@ -246,6 +246,9 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    $message = mysql_addslashes($message_raw);
    $message_query = '';
 
+   if( $message && preg_match( "#</?h(idden)?>#is", $message) )
+      $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
+
    $game_finished = false;
 
 
@@ -334,9 +337,6 @@ This is why:
          else
             $GameFlags &= ~GAMEFLAGS_KO;
 
-         if( $message && preg_match( "#</?h(idden)?>#is", $message) )
-            $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
-
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
@@ -409,6 +409,7 @@ This is why:
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
+             "Flags=$GameFlags, " .
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'handicap'
@@ -435,7 +436,7 @@ This is why:
              "Status='FINISHED', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
-             //"Flags=0, " . //Not useful
+             "Flags=$GameFlags, " .
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          $game_finished = true;
@@ -510,7 +511,6 @@ This is why:
             $game_query .= "ToMove_ID=$next_to_move_ID, ";
          else
             $game_query .= "ToMove_ID=0, ";
-
 
          $game_query .=
              "Score=$score, " .

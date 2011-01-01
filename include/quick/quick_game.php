@@ -348,6 +348,7 @@ class QuickHandlerGame extends QuickHandler
                 "Last_X=$x, " .
                 "Last_Y=$y, " .
                 "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
+                "Flags=$GameFlags, ";
                 "ToMove_ID=$next_to_move_ID, ";
             break;
          }//set_handicap
@@ -418,9 +419,9 @@ class QuickHandlerGame extends QuickHandler
             $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X=".POSX_PASS.", " .
                 "Status='$next_status', " .
-                "ToMove_ID=$next_to_move_ID, ";
-                //"Last_Move='$Last_Move', "; //Not a move, re-use last one
-                //"Flags=$GameFlags, " . //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
+                "ToMove_ID=$next_to_move_ID, " .
+                //"Last_Move='$Last_Move', " . //Not a move, re-use last one
+                "Flags=$GameFlags, "; //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
             break;
          }//pass
 
@@ -436,7 +437,8 @@ class QuickHandlerGame extends QuickHandler
                 "Last_X=".POSX_RESIGN.", " .
                 "Status='$next_status', " .
                 "ToMove_ID=0, " .
-                "Score=$score, ";
+                "Score=$score, " .
+                "Flags=$GameFlags, ";
 
             $game_finished = true;
             break;
@@ -471,9 +473,9 @@ class QuickHandlerGame extends QuickHandler
             $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X=".POSX_SCORE.", " .
                 "Status='$next_status', " .
-                "Score=$score, ";
-                //"Last_Move='$Last_Move', "; //Not a move, re-use last one
-                //"Flags=$GameFlags, "; //Don't reset KO-Flag else SCORE,RESUME could break a Ko
+                "Score=$score, " .
+                //"Last_Move='$Last_Move', " . //Not a move, re-use last one
+                "Flags=$GameFlags, "; //Don't reset KO-Flag else SCORE,RESUME could break a Ko
 
             if( $next_status != GAME_STATUS_FINISHED )
                $game_query .= "ToMove_ID=$next_to_move_ID, ";

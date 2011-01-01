@@ -21,6 +21,12 @@ ChangeLog
 
 2011-01-01 juga
 
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     confirm.php, quick_play.php:
+   - fix setting of hidden-message in Games.Flags for ALL game-actions
+     for ALL play-interfaces
+   - fix empty-public-comment-handling where missing
+
    * game_players.php (check_game_setup, build_table_game_players,
        build_form_start_game, build_arr_group_color_texts):
    - changed warnings to errors for game-setup-check, if player joined game more than once
