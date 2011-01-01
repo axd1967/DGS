@@ -125,6 +125,8 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    elseif( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "confirm.check.finished($gid)");
 
+   if( $ToMove_ID == 0 )
+      error('game_finished', "confirm.bad_ToMove_ID.gamend($gid)");
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
    elseif( $White_ID == $ToMove_ID )

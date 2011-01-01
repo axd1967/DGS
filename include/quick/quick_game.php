@@ -170,6 +170,8 @@ class QuickHandlerGame extends QuickHandler
       elseif( !isRunningGame($Status) )
          error('invalid_game_status', "QuickHandlerGame.prepare.check.game_status($gid,$Status)");
 
+      if( $ToMove_ID == 0 )
+         error('game_finished', "QuickHandlerGame.prepare.bad_ToMove_ID.gamend($gid)");
       if( $Black_ID == $ToMove_ID )
          $this->to_move = BLACK;
       elseif( $White_ID == $ToMove_ID )
