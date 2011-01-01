@@ -449,7 +449,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       }
       else //FU ?UNION
       {
-         $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'oppName+');
+         $player_title = ($mp_game) ? T_('Name#header') : T_('Opponent#header');
+         $gtable->add_tablehead( 3, $player_title, 'User', 0, 'oppName+');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'oppHandle+');
          $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(24, T_('End rating#header'), 'Rating', 0, 'oppEndRating-');
@@ -476,7 +477,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       }
       else //RU ?UNION
       {
-         $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'oppName+');
+         $player_title = ($mp_game) ? T_('Name#header') : T_('Opponent#header');
+         $gtable->add_tablehead( 3, $player_title, 'User', 0, 'oppName+');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'oppHandle+');
          $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'oppRating-');
