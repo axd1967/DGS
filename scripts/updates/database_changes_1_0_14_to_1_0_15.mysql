@@ -118,26 +118,23 @@ ALTER TABLE Messages
    DROP COLUMN To_ID ;
 
 -- [unused] cleanup (only on) live-server DB (removing old games and forum tables), saving 370 MB -> CLEANUP
--- clarify with site-owner first before executing (can speedup DB-backup)
-DROP TABLE Games2               --   0.2 MB
-DROP TABLE dragondisc           --  88.2 MB
-DROP TABLE dragondisc_bodies    -- 206.7 MB
-DROP TABLE faqdisc              --   4.0 MB
-DROP TABLE faqdisc_bodies       --  10.6 MB
-DROP TABLE forums               --   0.1 MB
-DROP TABLE godisc               --   7.0 MB
-DROP TABLE godisc_bodies        --  17.3 MB
-DROP TABLE news                 --   0.8 MB
-DROP TABLE news_bodies          --   1.8 MB
-DROP TABLE opponents            --   2.7 MB
-DROP TABLE opponents_bodies     --   5.3 MB
-DROP TABLE support              --   5.0 MB
-DROP TABLE support_bodies       --  10.8 MB
-DROP TABLE transl               --   2.9 MB
-DROP TABLE transl_bodies        --   6.2 MB
--- to be sure dropping the right (there's also a Forums-table): rename, check, cleanup -> CLEANUP
-RENAME TABLE forums to old_forums
-DROP TABLE old_forums           --   0.1 MB
+-- done in live-server-db [12-Dec-2010/JUG]
+-- DROP TABLE Games2               --   0.2 MB
+-- DROP TABLE dragondisc           --  88.2 MB
+-- DROP TABLE dragondisc_bodies    -- 206.7 MB
+-- DROP TABLE faqdisc              --   4.0 MB
+-- DROP TABLE faqdisc_bodies       --  10.6 MB
+-- DROP TABLE forums               --   0.1 MB
+-- DROP TABLE godisc               --   7.0 MB
+-- DROP TABLE godisc_bodies        --  17.3 MB
+-- DROP TABLE news                 --   0.8 MB
+-- DROP TABLE news_bodies          --   1.8 MB
+-- DROP TABLE opponents            --   2.7 MB
+-- DROP TABLE opponents_bodies     --   5.3 MB
+-- DROP TABLE support              --   5.0 MB
+-- DROP TABLE support_bodies       --  10.8 MB
+-- DROP TABLE transl               --   2.9 MB
+-- DROP TABLE transl_bodies        --   6.2 MB
 
 -- [unused] cleanup unused RatingChange-table (maybe later)
 -- [unused] note: referenced in 'include/rating.php#update_rating()', though not used any more
