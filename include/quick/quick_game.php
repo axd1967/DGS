@@ -110,8 +110,7 @@ class QuickHandlerGame extends QuickHandler
    //TODO TODO TODO add status_score-command !!!
    function prepare()
    {
-      global $player_row;
-      $uid = (int)@$player_row['ID'];
+      $uid = (int) @$this->my_id;
 
       // see specs/quick_suite.txt (3a)
       $dbgmsg = "QuickHandlerGame.prepare($uid,{$this->gid})";
@@ -178,12 +177,12 @@ class QuickHandlerGame extends QuickHandler
       else
          error('database_corrupted', "QuickHandlerGame.prepare.check.to_move($gid)");
 
-      if( $this->my_id != $Black_ID && $this->my_id != $White_ID )
-         error('not_game_player', "QuickHandlerGame.prepare.check.not_your_game($gid)");
+      if( $uid != $Black_ID && $uid != $White_ID )
+         error('not_game_player', "QuickHandlerGame.prepare.check.not_your_game($gid,$uid)");
       if( !($cmd == GAMECMD_DELETE || $cmd == GAMECMD_RESIGN) ) // allow delete|resign even if not-to-move
       {
-         if( $my_id != $ToMove_ID )
-            error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID)");
+         if( $uid != $ToMove_ID )
+            error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID,$uid)");
       }
 
       if( (int)$this->move_id != $Moves )
@@ -197,7 +196,7 @@ class QuickHandlerGame extends QuickHandler
       if( $cmd == GAMECMD_DELETE )
       {
          $too_few_moves = ( $Moves < DELETE_LIMIT + $Handicap );
-         $may_del_game  = $too_few_moves && ( $tid == 0 ) && ($GameType == GAMETYPE_GO);
+         $may_del_game  = $too_few_moves && ( $tid == 0 ) && !$is_mpgame;
          if( !$may_del_game )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Handicap,$Moves,$tid)");
       }
@@ -226,11 +225,6 @@ class QuickHandlerGame extends QuickHandler
             if( count($this->moves) != 1 )
                error('invalid_args', "QuickHandlerGame.prepare.check.move_count($gid,$cmd)");
          }
-      }
-      elseif( $cmd == GAMECMD_RESIGN )
-      {
-         if( $is_mpgame )
-            error('invalid_action', "QuickHandlerGame.prepare.check.mpgame.action($gid,$uid,$cmd)");
       }
       elseif( $cmd == GAMECMD_SCORE )
       {
@@ -267,11 +261,13 @@ class QuickHandlerGame extends QuickHandler
       list( $time_query, $hours ) = $this->update_clock();
 
       $mp_query = '';
+      $is_mpgame = ($GameType != GAMETYPE_GO);
       if( $is_mpgame && ($cmd == GAMECMD_MOVE || $cmd == GAMECMD_SET_HANDICAP) )
       {
          list( $group_color, $group_order )
             = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
-         $mp_uid = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+         $mp_gp = GamePlayer::load_game_player( $gid, $group_color, $group_order );
+         $mp_uid = $mp_gp->uid;
          $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
       }
 
@@ -423,8 +419,8 @@ class QuickHandlerGame extends QuickHandler
                 "Last_X=".POSX_PASS.", " .
                 "Status='$next_status', " .
                 "ToMove_ID=$next_to_move_ID, ";
-                //"Last_Move='$Last_Move', " . //Not a move, re-use last one
-                //"Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+                //"Last_Move='$Last_Move', "; //Not a move, re-use last one
+                //"Flags=$GameFlags, " . //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
             break;
          }//pass
 
@@ -476,8 +472,8 @@ class QuickHandlerGame extends QuickHandler
                 "Last_X=".POSX_SCORE.", " .
                 "Status='$next_status', " .
                 "Score=$score, ";
-                //"Last_Move='$Last_Move', " . //Not a move, re-use last one
-                //"Flags=$GameFlags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
+                //"Last_Move='$Last_Move', "; //Not a move, re-use last one
+                //"Flags=$GameFlags, "; //Don't reset KO-Flag else SCORE,RESUME could break a Ko
 
             if( $next_status != GAME_STATUS_FINISHED )
                $game_query .= "ToMove_ID=$next_to_move_ID, ";
