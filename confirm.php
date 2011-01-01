@@ -138,6 +138,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 
    $stay_on_board = @$_REQUEST['stay'];
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
+   $is_mpgame = ( $GameType != GAMETYPE_GO );
 
    $is_running_game = isRunningGame($Status);
 
@@ -155,7 +156,6 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
          $to_move = WHITE+BLACK-$to_move;
    }
 
-   $is_mpgame = ($GameType != GAMETYPE_GO);
    if( $is_mpgame && ($action == 'resign' || $action == 'done') )
       error('invalid_action', "confirm.check.action.mpgame($gid,$my_id,$GameType,$action)");
 
@@ -235,7 +235,8 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    {
       list( $group_color, $group_order )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
-      $mp_uid = MultiPlayerGame::load_uid_for_move( $gid, $group_color, $group_order );
+      $mp_gp = GamePlayer::load_game_player( $gid, $group_color, $group_order );
+      $mp_uid = $mp_gp->uid;
       $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
    }
 
@@ -370,7 +371,7 @@ This is why:
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
-             "Flags=$GameFlags, " . //Don't reset Flags else PASS,PASS,RESUME could break a Ko
+             "Flags=$GameFlags, " . //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'pass'
@@ -385,7 +386,6 @@ This is why:
 
          if( strlen( $stonestring ) != 2 * $Handicap )
             error('wrong_number_of_handicap_stone', "confirm.check.handicap($gid,$Handicap,$stonestring)");
-
 
          $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
@@ -515,7 +515,7 @@ This is why:
          $game_query .=
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
-             "Flags=$GameFlags, " . //Don't reset Flags else SCORE,RESUME could break a Ko
+             "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
              $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'done'
