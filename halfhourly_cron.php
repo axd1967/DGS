@@ -126,7 +126,7 @@ if( !$is_down )
 // more infos if other SendEmail flags are set
 
    $result = db_query( 'halfhourly_cron.find_notifications',
-            "SELECT ID as uid, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players"
+            "SELECT ID as uid, Handle, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players"
             ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>''");
             //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'");
 
@@ -141,10 +141,9 @@ if( !$is_down )
          continue;
       }
 
-      $msg = "A message or game move is waiting for you at:\n "
+      $msg = sprintf( "A message or game move is waiting for you [ %s ] at:\n ", $Handle )
                 . mail_link('',"status.php")."\n"
-           . "(No more notifications will be send until your reconnection)\n"
-           ;
+           . "(No more notifications will be send until your reconnection)\n";
 
       // Find games
 
