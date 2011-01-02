@@ -102,7 +102,7 @@ require_once( "include/rating.php" );
       if( $do_it )
       {
          $rated_status = update_rating2($row["gid"], false/*=check_done*/); //0=rated game
-         if( $rated_status == 0 )
+         if( $rated_status == RATEDSTATUS_RATED )
             $count++;
          else
             echo '--';
