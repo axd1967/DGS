@@ -21,6 +21,11 @@ $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" ); // consts
 
+// rated-status for update_rating2()
+define('RATEDSTATUS_RATED',     0);
+define('RATEDSTATUS_DELETABLE', 1);
+define('RATEDSTATUS_UNRATED',   2);
+
 
 // table for interpolating rating
 global $IGS_TABLE; //PHP5
@@ -246,9 +251,10 @@ function update_rating($gid)
    $row = mysql_fetch_array( $result );
    extract($row);
 
-   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
+   $too_few_moves = ($tid == 0) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
    // here $Rated=='N' is always false. See rating2 to update
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
+         || $GameType != GAMETYPE_GO )
    {
       db_query( 'update_rating.set_rated_N',
          "UPDATE Games SET Rated='N' WHERE ID=$gid" );
@@ -296,7 +302,7 @@ obsolete */
 //    Moves, Handicap, Rated=Y|N, Score, Size, Komi, (Lastchanged),
 //    b/wRatingStatus, b/wRating, b/wRatingMin/Max, Black/White_ID
 //
-// return: 0=rated-game, 1=not-rated (deletable), 2=not-rated
+// return: -1=error, or: RATEDSTATUS_...: 0=..RATED=rated-game, 1=..DELETABLE=not-rated, 2=..UNRATED=not-rated
 function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 {
    global $NOW;
@@ -334,8 +340,9 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
          sprintf($fmt2, $Black_ID, 'Black', $bRating, $bRatingMin, $bRatingMax, $Black_Start_Rating);
    }
 
-   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
+   $too_few_moves = ($tid == 0) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
+         || $GameType != GAMETYPE_GO )
    {
       if( !$simul )
       {
@@ -347,9 +354,9 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
       }
 
       if( $too_few_moves )
-         return 1; //not rated game, deletable
+         return RATEDSTATUS_DELETABLE; //not rated game, deletable
       else
-         return 2; //not rated game
+         return RATEDSTATUS_UNRATED; //not rated game
    }
 
    $game_result = 0.5;
@@ -469,7 +476,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
          "\n";
    }
 
-   return 0; //rated game
+   return RATEDSTATUS_RATED; //rated game
 } //update_rating2
 
 
@@ -508,8 +515,9 @@ function update_rating_glicko($gid, $check_done=true)
    $row = mysql_fetch_assoc( $result );
    extract($row);
 
-   $too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED )
+   $too_few_moves = ($tid == 0) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
+   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
+         || $GameType != GAMETYPE_GO )
    {
       db_query( 0 /* "update_rating_glicko.update_rated_endrating($gid)" */,
          "UPDATE Games SET Rated='N'" .

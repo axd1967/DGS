@@ -252,11 +252,11 @@ if(1){//new
                ,array($Black_ID,$White_ID), '', /*notify*/true
                , 0, 'RESULT', $gid);
 
-            $rated_status = update_rating2($gid); //0=rated game
+            $rated_status = update_rating2($gid);
             GameHelper::update_players_end_game( "clock_tick.timeup",
                $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
-            delete_all_observers($gid, $rated_status!=1, $Text);
+            delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $Text);
 
             // GamesPriority-entries are kept for running games only, delete for finished games too
             NextGameOrder::delete_game_priorities( $gid );
