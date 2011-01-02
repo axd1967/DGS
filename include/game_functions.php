@@ -23,6 +23,7 @@ require_once( 'include/globals.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'include/classlib_game.php' );
 require_once( 'include/utilities.php' );
+require_once( 'include/std_functions.php' );
 
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
@@ -749,7 +750,7 @@ class GameHelper
    }//delete_running_game
 
    /*! \brief Updates game-stats in Players-table for simple or multi-player game. */
-   function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status=1, $score=null, $black_id=0, $white_id=0 )
+   function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score, $black_id, $white_id )
    {
       if( !is_numeric($gid) && $gid <= 0 )
          return;
