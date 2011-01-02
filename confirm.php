@@ -558,10 +558,11 @@ This is why:
             GameHelper::delete_running_game( $gid );
 
             $Subject = 'Game deleted';
-            //reference: game is deleted => no link
             $Text = "The game:<center>"
-                  . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname)
-                  . "</center>has been deleted by your opponent.<br>";
+                  . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname) // game is deleted => no link
+                  . "</center>has been deleted by player:<center>"
+                  . send_reference( REF_LINK, 1, '', $player_row )
+                  . "</center>";
 
             $stay_on_board = false; // no game to stay on
          }
@@ -578,38 +579,35 @@ This is why:
                   . score2text($score,true,true)
                   . "</center>";
 
-            $tmp = $Text . "<p>Send a message to:<center>"
+            $observerText = $Text . "<p>Send a message to:<center>"
                   . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
                   . "<br>"
                   . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
                   . "</center>" ;
 
-            delete_all_observers($gid, $rated_status!=1, $tmp);
+            delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $observerText);
 
             // GamesPriority-entries are kept for running games only, delete for finished games too
             NextGameOrder::delete_game_priorities( $gid );
 
             if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
                $Text .= "<p><b>Info:</b> The game has hidden comments!";
+
+            // NOTE: server messages does not allow a reply, so add an *in message* reference to this player.
+            $Text.= "<p>Send a message to:<center>"
+                  . send_reference( REF_LINK, 1, '', $player_row )
+                  . "</center>" ;
          }
 
          //Send a message to the opponent
 
-         // NOTE: server messages does not allow a reply, so add an *in message* reference to this player.
-         $Text.= "<p>Send a message to:<center>"
-               . send_reference( REF_LINK, 1, '', $my_id, $player_row['Name'], $player_row['Handle'])
-               . "</center>" ;
-
          if( $message_raw )
-         {
-            //A server message will only be read by this player
-            $Text .= "<p>Your opponent wrote:<p></p>" . $message_raw;
-         }
+            $Text .= "<p>The player wrote:<p></p>" . $message_raw;
 
          send_message( 'confirm', $Text, $Subject
-            ,$opponent_row['ID'], ''
+            , /*to*/$opponent_row['ID'], ''
             , /*notify*/false //the move itself is always notified, see below
-            ,( $message_from_server_way ? 0 : $my_id )
+            , /*system-msg*/0
             , 'RESULT', $gid);
       }
 
