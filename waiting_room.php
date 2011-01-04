@@ -133,7 +133,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'other_country+');
    $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'other_rating-');
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
-   $wrtable->add_tablehead(20, T_('GameType#header'), '', 0, 'GameType+');
+   $wrtable->add_tablehead(20, T_('GameType#header'), '', TABLE_NO_HIDE, 'GameType+');
    $wrtable->add_tablehead(19, T_('Ruleset#header'), '', 0, 'Ruleset+');
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
