@@ -304,6 +304,7 @@ class QuickHandlerGame extends QuickHandler
       *********************** */
       $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
       $game_query = $doublegame_query = $move_query = $message_query = '';
+      $score = null;
       $Moves++;
       $game_finished = false;
 
@@ -518,39 +519,14 @@ class QuickHandlerGame extends QuickHandler
                TournamentGames::update_tournament_game_end( "QuickHandlerGame.process.tourney_game_end.$action}",
                   $tid, $gid, $Black_ID, $score );
 
-            // send message to opponent about the result
-
-            $opponent_row = mysql_single_fetch( "QuickHandlerGame.process.find_opponent($gid,$White_ID,$Black_ID)",
-                  "SELECT ID,Handle,Name FROM Players " .
-                  "WHERE ID=" . ($White_ID + $Black_ID - $this->my_id) . " LIMIT 1" )
-               or error('opponent_not_found', "QuickHandlerGame.process.find_opponent2($gid,$White_ID,$Black_ID)");
-
-            if( $this->my_id == $Black_ID )
-            {
-               $blackname = $player_row['Name'];
-               $whitename = $opponent_row['Name'];
-               $blackhandle = $player_row['Handle'];
-               $whitehandle = $opponent_row['Handle'];
-            }
-            else
-            {
-               $whitename = $player_row['Name'];
-               $blackname = $opponent_row['Name'];
-               $whitehandle = $player_row['Handle'];
-               $blackhandle = $opponent_row['Handle'];
-            }
-
+            // send message to my opponent / all-players / observers about the result
+            $game_notify = new GameNotify( $gid, $my_id, $GameType, $GameFlags, $Black_ID, $White_ID,
+               $score, $message_raw );
 
             if( $this->action == GAMECMD_DELETE )
             {
                GameHelper::delete_running_game( $gid );
-
-               $Subject = 'Game deleted';
-               $Text = "The game:<center>"
-                     . game_reference( 0, 1, '', $gid, 0, $whitename, $blackname) // game is deleted => no link
-                     . "</center>has been deleted by player:<center>"
-                     . send_reference( REF_LINK, 1, '', $player_row )
-                     . "</center>";
+               list( $Subject, $Text ) = $game_notify->get_text_game_deleted();
             }
             else
             {
@@ -558,44 +534,21 @@ class QuickHandlerGame extends QuickHandler
                GameHelper::update_players_end_game( "QuickHandlerGame.process.game_finished",
                   $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
-               $Subject = 'Game result'; // note: don't translate
-               $Text = "The result in the game:<center>"
-                     . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
-                     . "</center>was:<center>"
-                     . score2text($score,true,true)
-                     . "</center>";
-
-               $tmpText = $Text . "<p>Send a message to:<center>"
-                     . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
-                     . "<br>"
-                     . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
-                     . "</center>" ;
-
-               delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $tmpText);
+               list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result();
 
                // GamesPriority-entries are kept for running games only, delete for finished games too
                NextGameOrder::delete_game_priorities( $gid );
 
-               if( $GameFlags & GAMEFLAGS_HIDDEN_MSG )
-                  $Text .= "<p><b>Info:</b> The game has hidden comments!";
-
-               // NOTE: server messages does not allow a reply, so add an *in message* reference to this player.
-               $Text .= "<p>Send a message to:<center>"
-                     . send_reference( REF_LINK, 1, '', $this->my_id, $player_row['Name'], $player_row['Handle'])
-                     . "</center>" ;
+               delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $tmpText);
             }
 
-            //Send a message to the opponent
-
-            if( $message_raw )
-               $Text .= "<p>The player wrote:<p></p>" . $message_raw;
-
-            send_message( 'confirm', $Text, $Subject
-               , /*to*/$opponent_row['ID'], ''
+            // Send a message to the opponent
+            send_message( "QuickHandlerGame.process.game_finished.msg($gid)", $Text, $Subject
+               , /*to*/$game_notify->get_recipients(), ''
                , /*notify*/false //the move itself is always notified, see below
                , /*system-msg*/0
-               , 'RESULT', $gid);
-         }//game_finished
+               , 'RESULT', $gid );
+         }//game-finished
 
 
          // Notify opponent about move

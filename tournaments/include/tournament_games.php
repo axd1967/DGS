@@ -404,6 +404,8 @@ class TournamentGames
          error('invalid_args', "TournamentGames.update_tournament_game_end.check.gid($tid,$gid)");
       if( !is_numeric($black_uid) || $black_uid <= GUESTS_ID_MAX )
          error('invalid_args', "TournamentGames.update_tournament_game_end.check.black_uid($tid,$gid,$black_uid)");
+      if( is_null($score) )
+         return 0;
 
       global $NOW;
       $table = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->table;

@@ -778,6 +778,135 @@ class GameHelper
 
 
 
+/**
+ * \brief Class to build game-related notifications.
+ */
+class GameNotify
+{
+   var $gid;
+   var $uid;
+   var $game_type;
+   var $game_flags;
+   var $black_id;
+   var $white_id;
+   var $score;
+   var $message;
+
+   var $players; // [ uid => [ ID/Name/Handle => ...], ... ]
+   var $black_name;
+   var $white_name;
+   var $players_text;
+
+   /*! \brief Constructs GameNotify also loading player-info from db. */
+   function GameNotify( $gid, $uid, $game_type, $game_flags, $black_id, $white_id, $score, $message )
+   {
+      $this->gid = (int)$gid;
+      $this->uid = (int)$uid;
+      $this->game_type = $game_type;
+      $this->game_flags = (int)$game_flags;
+      $this->black_id = (int)$black_id;
+      $this->white_id = (int)$white_id;
+      $this->score = $score;
+      $this->message = $message;
+
+      $this->_load_players();
+      $this->black_name = @$this->players[$black_id]['Name'];
+      $this->white_name = @$this->players[$white_id]['Name'];
+      $this->players_text = $this->_build_text_players();
+   }
+
+   /*! \brief Loads players (for simple-game B|W, for multi-player-game all players). */
+   function _load_players()
+   {
+      $this->players = array();
+
+      if( $this->game_type == GAMETYPE_GO )
+      {
+         $result = db_query( "GameNotify.find_players({$this->gid})",
+            "SELECT ID, Handle, Name FROM Players WHERE ID IN ({$this->black_id},{$this->white_id}) LIMIT 2" );
+      }
+      else // mp-game
+      {
+         $result = db_query( "GameNotify.find_mpg_players({$this->gid})",
+            "SELECT ID, Handle, Name " .
+            "FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
+            "WHERE GP.gid={$this->gid}" );
+      }
+
+      while( $row = mysql_fetch_array( $result ) )
+         $this->players[$row['ID']] = $row;
+      mysql_free_result($result);
+   }//_load_players
+
+   function _build_text_players()
+   {
+      // NOTE: server messages does not allow a reply, so add an *in message* reference to players
+      $arr = array();
+      foreach( $this->players as $user_row )
+         $arr[] = send_reference( REF_LINK, 1, '', $user_row );
+      return "<p>Send a message to:<center>" . implode('<br>', $arr) . "</center>";
+   }//_build_text_players
+
+   /*! \brief Returns subject and text for message to players if game got deleted. */
+   function get_text_game_deleted()
+   {
+      global $player_row;
+
+      $subject = 'Game deleted';
+      $text = "The game:<center>"
+            . game_reference( 0, 1, '', $this->gid, 0, $this->white_name, $this->black_name) // game is deleted => no link
+            . "</center>has been deleted by player:<center>"
+            . send_reference( REF_LINK, 1, '', $player_row )
+            . "</center>"
+            . $this->players_text;
+
+      if( $this->message )
+         $text .= "<p>The player wrote:<p></p>" . $this->message;
+
+      return array( $subject, $text );
+   }//get_text_game_deleted
+
+   /*! \brief Returns subject and text (and observer-text) for message to players/observers with normal game-result. */
+   function get_text_game_result()
+   {
+      if( is_null($this->score) )
+         error('invalid_args', "GameNotify.get_text_game_result.check.score({$this->gid})");
+
+      $subject = 'Game result';
+      $text = "The result in the game:<center>"
+            . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->white_name, $this->black_name)
+            . "</center>was:<center>"
+            . score2text($this->score, true, true)
+            . "</center>";
+
+      $info_text = ( $this->game_flags & GAMEFLAGS_HIDDEN_MSG )
+         ? "<p><b>Info:</b> The game has hidden comments!"
+         : '';
+
+      $player_text = $this->players_text;
+      if( $this->message )
+         $player_text .= "<p>The player wrote:<p></p>" . $this->message;
+
+      return array( $subject, $text.$info_text.$player_text, $text.$player_text );
+   }//get_text_game_result
+
+   /*!
+    * \brief Returns list of Players.IDs to which message should be sent (to all for time-out,
+    *        otherwise only for others than current-user for resign/result/delete).
+    */
+   function get_recipients()
+   {
+      $arr = array_keys( $this->players );
+      if( abs($this->score) != SCORE_TIME )
+         unset($arr[$this->uid]);
+      return $arr;
+   }//get_recipients
+
+} // end 'GameNotify'
+
+
+
+
 // returns adjusted komi within limits, also checking for valid limits
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
 {

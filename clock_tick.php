@@ -197,26 +197,21 @@ if(1){//new
 
       if( $time_is_up )
       {
-         //TODO: Delete games with too few moves ???
+         //TODO: Delete games with too few moves ??? (if so -> send delete-game-msg)
 
-         $score = ( $ToMove_ID == $Black_ID ? SCORE_TIME : -SCORE_TIME );
-         $prow = mysql_single_fetch( "clock_tick.find_timeout_players($White_ID,$Black_ID)",
-            'SELECT black.Handle as blackhandle, white.Handle as whitehandle'
-               .', black.Name as blackname, white.Name as whitename'
-            .' FROM (Players as white, Players as black)' // no JOIN (only to save 1 query) -> TODO: use Players where ID IN(..) in prep for TeamGo
-            ." WHERE white.ID=$White_ID AND black.ID=$Black_ID" );
-         if( !$prow )
-            error('unknown_user', "clock_tick.find_timeout_players2($White_ID,$Black_ID)");
-         extract($prow);
+         // send message to my opponent / all-players / observers about the result
+         $score = ( $ToMove_ID == $Black_ID ) ? SCORE_TIME : -SCORE_TIME;
+         $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
+             "Last_X=".POSX_TIME.", " .
+             "ToMove_ID=0, " .
+             "Score=$score, " .
+             "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
-         //TODO: HOT_SECTION ???
+         $game_notify = new GameNotify( $gid, $my_id, $GameType, $X_GameFlags, $Black_ID, $White_ID, $score, '' );
+         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result();
+
          ta_begin();
          {//HOT-section to save game-timeout
-            $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
-                "Last_X=".POSX_TIME.", " .
-                "ToMove_ID=0, " .
-                "Score=$score, " .
-                "Lastchanged=FROM_UNIXTIME($NOW)" ;
             db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
             if( @mysql_affected_rows() != 1)
             {
@@ -229,40 +224,22 @@ if(1){//new
                TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout",
                   $tid, $gid, $Black_ID, $score );
 
-            // Send messages to the players
-            $Text = "The result in the game:<center>"
-                  . game_reference( REF_LINK, 1, '', $gid, 0, $whitename, $blackname)
-                  . "</center>was:<center>"
-                  . score2text($score,true,true)
-                  . "</center>";
-
-            //TODO TODO don't send hidden-info to observers !!
-            if( $X_GameFlags & GAMEFLAGS_HIDDEN_MSG )
-               $Text .= "<p><b>Info:</b> The game has hidden comments!";
-
-            //TODO TODO add all game-players
-            $Text.= "<p>Send a message to:<center>"
-                  . send_reference( REF_LINK, 1, '', $White_ID, $whitename, $whitehandle)
-                  . "<br>"
-                  . send_reference( REF_LINK, 1, '', $Black_ID, $blackname, $blackhandle)
-                  . "</center>" ;
-
-            //TODO TODO send to all game-players
-            send_message( 'clock_tick', $Text, 'Game result'
-               ,array($Black_ID,$White_ID), '', /*notify*/true
-               , 0, 'RESULT', $gid);
-
             $rated_status = update_rating2($gid);
             GameHelper::update_players_end_game( "clock_tick.timeup",
                $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
-            delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $Text);
+            send_message( "clock_tick($gid)", $Text, 'Game result'
+               , /*to*/$game_notify->get_recipients(), ''
+               , /*notify*/true
+               , /*system-msg*/0, 'RESULT', $gid );
 
             // GamesPriority-entries are kept for running games only, delete for finished games too
             NextGameOrder::delete_game_priorities( $gid );
+
+            delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $observerText);
          }
          ta_end();
-      }
+      }//time-out
    }
    mysql_free_result($result);
    //unset($ticks);
