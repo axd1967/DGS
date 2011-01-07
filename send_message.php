@@ -75,10 +75,6 @@ disable_cache();
       }
 
       jump_to("list_messages.php?folder=$new_folder$page");
-      /*
-      $msg = urlencode(T_//('Message moved!'));
-      jump_to("status.php?sysmsg=$msg");
-      */
    }
 
 
@@ -96,10 +92,7 @@ disable_cache();
       if( !is_numeric( $disputegid) )
          $disputegid = 0;
    }
-   //some problems with "or" instead of "||" here:
-   $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0)
-               //not needed: || ($type == "INVITATION")
-               ? true : false );
+   $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0) ); //not needed: || ($type == "INVITATION")
 
 
    // find receiver of the message
