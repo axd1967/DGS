@@ -232,7 +232,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
    }
    if( count($reg_errors) || count($reg_warnings) )
    {
@@ -241,11 +241,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
       if( count($reg_errors) )
          $tpform->add_row( array(
-               'OWNHTML', TournamentUtils::buildErrorListString(
+               'OWNHTML', buildErrorListString(
                           T_('[Errors]: You are not allowed to register for this tournament'), $reg_errors, 2) ));
       if( count($reg_warnings) )
          $tpform->add_row( array(
-               'OWNHTML', TournamentUtils::buildErrorListString(
+               'OWNHTML', buildErrorListString(
                           T_('[Warnings]: You are normally not allowed to register anew for this tournament'), $reg_warnings, 2) ));
    }
 

@@ -963,14 +963,6 @@ function build_arr_group_color_texts( $arr_group_colors )
    return $arr;
 }
 
-function buildErrorListString( $errmsg, $errors )
-{
-   if( count($errors) )
-      return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
-   else
-      return '';
-}
-
 function start_multi_player_game( $grow, $upd_game_players )
 {
    global $arr_game_players;

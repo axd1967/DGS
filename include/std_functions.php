@@ -1217,6 +1217,7 @@ function send_message( $debugmsg, $text='', $subject=''
       if( !$var )
          continue;
 
+      // make receivers unique, exclude guests
       $query= "SELECT ID,Notify,SendEmail FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
       $result = db_query( "$debugmsg.get$field($var)", $query);
       while( ($row=mysql_fetch_assoc($result)) )
@@ -1234,6 +1235,7 @@ function send_message( $debugmsg, $text='', $subject=''
    if( !$to_myself && $reccnt <= 0 )
       error('receiver_not_found', "$debugmsg.rec0($from_id,$subject)");
 
+   //TODO how to display msg with multi-receivers !?
    /**
     * Actually, only the messages from server can have multiple
     * receivers because they are NOT read BY the server.
@@ -3411,5 +3413,23 @@ function strip_gamenotes( $note )
    // strip special-chars (including tabs/LF and following text)
    return trim( substr( preg_replace('/[\x00-\x1f].*$/s','',$note) , 0, LIST_GAMENOTE_LEN) );
 }
+
+function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $lineclass='TWarning' )
+{
+   if( count($errors) == 0 )
+      return '';
+
+   if( $colspan <= 0 )
+      return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
+   else
+   {
+      $out = "\n<ul>";
+      foreach( $errors as $err )
+         $out .= "<li>" . span($lineclass, ($safe ? make_html_safe($err, 'line') : $err)) . "\n";
+      $out .= "</ul>\n";
+      $out = span('ErrorMsg', ( $errmsg ? "$errmsg:<br>\n" : '' )) . $out;
+      return "<td colspan=\"$colspan\">$out</td>";
+   }
+}//buildErrorListString
 
 ?>

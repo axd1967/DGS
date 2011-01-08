@@ -152,7 +152,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    {
       $tdform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
    }
 
    if( $uid <= 0 ) // ask for user to add/edit
@@ -162,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
             'TEXTINPUT',    'user', 16, 16, textarea_safe($user),
             'SUBMITBUTTON', 'td_check', T_('Check user') ));
       if( count($tduser_errors) )
-         $tdform->add_row( array( 'TAB', 'TEXT', TournamentUtils::buildErrorListString( '', $tduser_errors ) ));
+         $tdform->add_row( array( 'TAB', 'TEXT', buildErrorListString( '', $tduser_errors ) ));
    }
    else // edit user (no change of user-id allowed)
    {

@@ -115,24 +115,6 @@ class TournamentUtils
       return $arr_map[$wizard_type];
    }
 
-   function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true )
-   {
-      if( count($errors) == 0 )
-         return '';
-
-      if( $colspan <= 0 )
-         return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
-      else
-      {
-         $out = "\n<ul>";
-         foreach( $errors as $err )
-            $out .= "<li>" . span('TWarning', ($safe ? make_html_safe($err, 'line') : $err)) . "\n";
-         $out .= "</ul>\n";
-         $out = span('ErrorMsg', ( $errmsg ? "$errmsg:<br>\n" : '' )) . $out;
-         return "<td colspan=\"$colspan\">$out</td>";
-      }
-   }
-
    function buildLastchangedBy( $lastchanged, $changed_by )
    {
       return date(DATEFMT_TOURNAMENT, $lastchanged) . MED_SPACING

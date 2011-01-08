@@ -107,7 +107,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( count($errors) )
    {
       echo "<table><tr>",
-         TournamentUtils::buildErrorListString( T_('There are some errors'), $errors, 1, false ),
+         buildErrorListString( T_('There are some errors'), $errors, 1, false ),
          "</tr></table>\n";
    }
 

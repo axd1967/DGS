@@ -275,7 +275,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString( T_('There are some errors'), $errors ) ));
+            'TEXT', buildErrorListString( T_('There are some errors'), $errors ) ));
       $tpform->add_empty_row();
    }
    if( count($lock_warnings) )
@@ -283,7 +283,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Warning'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some warnings'), $lock_warnings) ));
+            'TEXT', buildErrorListString(T_('There are some warnings'), $lock_warnings) ));
    }
    if( count($reg_errors) || count($reg_warnings) )
    {
@@ -291,12 +291,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
       if( count($reg_errors) )
          $tpform->add_row( array(
-               'OWNHTML', TournamentUtils::buildErrorListString(
+               'OWNHTML', buildErrorListString(
                           T_('[Errors]: User is not allowed to register for this tournament'), $reg_errors, 2) ));
       if( count($reg_warnings) )
       {
          $tpform->add_row( array(
-               'OWNHTML', TournamentUtils::buildErrorListString(
+               'OWNHTML', buildErrorListString(
                           T_('[Warnings]: User is normally not allowed to register for this tournament'), $reg_warnings, 2) ));
          if( !$rid && count($reg_errors) == 0 ) // no ignore on error, else ignore only for NEW-reg
             $tpform->add_row( array(

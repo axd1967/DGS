@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $tstatus->errors) ));
+            'TEXT', buildErrorListString(T_('There are some errors'), $tstatus->errors) ));
       $tform->add_empty_row();
    }
 

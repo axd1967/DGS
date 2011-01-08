@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    {
       $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', TournamentUtils::buildErrorListString(T_('There are some errors'), $errors) ));
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
    }
 
    $formstyle = ($tourney->Type == TOURNEY_TYPE_LADDER) ? GSET_TOURNAMENT_LADDER : GSET_TOURNAMENT_ROUNDROBIN;
