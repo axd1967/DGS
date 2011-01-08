@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/game_functions.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'include/classlib_game.php' );
+require_once( 'include/rating.php' );
 
 
 // Inserts INVITATION-game or updates DISPUTE-game
@@ -200,6 +201,95 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 
    return $gid;
 } //make_invite_game
+
+/*! \brief Accepts an invitational game making it a running game. */
+function accept_invite_game( $gid, $player_row, $opponent_row )
+{
+   $my_id = $player_row['ID'];
+   $opponent_ID = $opponent_row['ID'];
+   $dbg = "accept_invite_game($gid,$my_id,$opponent_ID)";
+
+   $game_row = mysql_single_fetch( 'send_message.accept',
+      "SELECT Status,Black_ID,White_ID,ToMove_ID,Ruleset,Size,Handicap,Komi,Maintime,Byotype,Byotime,Byoperiods," .
+         "Rated,StdHandicap,WeekendClock " .
+      "FROM Games WHERE ID=$gid LIMIT 1" );
+   if( !$game_row )
+      error('invited_to_unknown_game', "$dbg.accept.findgame");
+   if( $game_row['Status'] != GAME_STATUS_INVITED )
+      error('game_already_accepted', "$dbg.accept.badstat");
+
+   //ToMove_ID hold handitype since INVITATION
+   $handitype = $game_row['ToMove_ID'];
+   $size = $game_row['Size'];
+
+   $my_rating = $player_row['Rating2'];
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
+         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $opprating = $opponent_row['Rating2'];
+   $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE
+         && is_numeric($opprating) && $opprating >= MIN_RATING );
+
+
+   $double = false;
+   switch( (int)$handitype )
+   {
+      case INVITE_HANDI_CONV:
+         if( !$iamrated || !$opprated )
+            error('no_initial_rating', "$dbgmsg.check.conv_H.rating");
+         list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
+            suggest_conventional( $my_rating, $opprating, $size);
+         break;
+
+      case INVITE_HANDI_PROPER:
+         if( !$iamrated || !$opprated )
+            error('no_initial_rating', "$dbgmsg.check.prop.rating");
+         list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
+            suggest_proper( $my_rating, $opprating, $size);
+         break;
+
+      case INVITE_HANDI_NIGIRI:
+         mt_srand ((double) microtime() * 1000000);
+         $i_am_black = mt_rand(0,1);
+         break;
+
+      case INVITE_HANDI_DOUBLE:
+         $double = true;
+         $i_am_black = true;
+         break;
+
+      default: // 'manual': any positive value
+         $i_am_black = ( $game_row["Black_ID"] == $my_id );
+         break;
+   }
+
+   ta_begin();
+   {//HOT-SECTION to transform game:
+      // create_game() must check the Status='INVITED' state of the game to avoid
+      // that multiple clicks lead to a bad Running count increase below.
+      $gids = array();
+      if( $i_am_black || $double )
+         $gids[] = create_game($player_row, $opponent_row, $game_row, $gid);
+      else
+         $gids[] = create_game($opponent_row, $player_row, $game_row, $gid);
+      //always after the "already in database" one (after $gid had been checked)
+      if( $double )
+      {
+         // provide a link between the two paired "double" games
+         $game_row['double_gid'] = $gid;
+         $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row);
+
+         db_query( "$dbg.update_double2",
+            "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+      }
+
+      $cnt = count($gids);
+      db_query( "$dbg.upd_player",
+         "UPDATE Players SET Running=Running+$cnt" .
+            ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
+            " WHERE (ID=$my_id OR ID=$opponent_ID) LIMIT 2" );
+   }
+   ta_end();
+}//accept_invite_game
 
 
 // Creates a running game, black/white_row are prefilled with chosen players

@@ -749,6 +749,23 @@ class GameHelper
       return true;
    }//delete_running_game
 
+   /*! \brief Deletes INVITED-game; return true for success; false on failure. */
+   function delete_invitation_game( $dbgmsg, $gid, $uid1, $uid2 )
+   {
+      db_query( "GameHelper::delete_invitation_game.delgame.$dbgmsg($gid)",
+         "DELETE FROM Games WHERE ID=$gid AND Status='INVITED' " .
+            "AND ( Black_ID=$uid1 OR White_ID=$uid1 ) " .
+            "AND ( Black_ID=$uid2 OR White_ID=$uid2 ) " .
+            "LIMIT 1" );
+      if( mysql_affected_rows() != 1)
+      {
+         error('game_delete_invitation', "GameHelper::delete_invitation_game.delres.$dbgmsg($gid)");
+         return false;
+      }
+      else
+         return true;
+   }//delete_invitation_game
+
    /*! \brief Updates game-stats in Players-table for simple or multi-player game. */
    function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score, $black_id, $white_id )
    {
