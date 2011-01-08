@@ -71,7 +71,7 @@ define('MSGBOXROWS_INVITE', 6);
          else
          {
             $row = mysql_single_fetch( 'message.handle',
-               "SELECT Handle FROM Players WHERE ID=$uid" );
+               "SELECT Handle FROM Players WHERE ID=$uid LIMIT 1" );
             if( $row )
                $uhandle = $row['Handle'];
          }
@@ -118,16 +118,16 @@ define('MSGBOXROWS_INVITE', 6);
          .",Ruleset, Size, Komi, Handicap, Rated, WeekendClock, StdHandicap"
          .",Maintime, Byotype, Byotime, Byoperiods"
          .",ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS myColor"
-         ." FROM (Messages, MessageCorrespondents AS me) " .
-          "LEFT JOIN MessageCorrespondents AS other " .
-            "ON other.mid=$mid AND other.Sender!=me.Sender " .
+         ." FROM Messages " .
+            "INNER JOIN MessageCorrespondents AS me ON me.mid=$mid and me.uid=$my_id " .
+            "LEFT JOIN MessageCorrespondents AS other ON other.mid=$mid AND other.Sender!=me.Sender " .
           "LEFT JOIN Players ON Players.ID=other.uid " .
           "LEFT JOIN Games ON Games.ID=Game_ID " .
           "LEFT JOIN MessageCorrespondents AS previous " .
             "ON Messages.ReplyTo>0 AND previous.mid=Messages.ReplyTo AND previous.uid=$my_id " .
-          "WHERE Messages.ID=$mid AND me.mid=$mid AND me.uid=$my_id " .
+          "WHERE Messages.ID=$mid " .
           //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
-          "ORDER BY Sender" ;
+          "ORDER BY Sender LIMIT 1";
 
       /**
        * TODO: msg multi-receivers
