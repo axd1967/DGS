@@ -393,7 +393,7 @@ define('MSGBOXROWS_INVITE', 6);
    if( $has_errors && ($send_message || $preview) )
    {
       echo "<br>\n<table><tr>",
-         buildErrorListString( T_('There have been some errors'), $errors, 1 ),
+         buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
          "</tr></table>";
    }
 
@@ -529,6 +529,9 @@ function handle_change_folder( $my_id, $folders, $new_folder, $type )
 function read_message_receiver( &$dgs_message, $type, $invitation_step, $to_handle )
 {
    static $handle_cache = array();
+
+   if( empty($to_handle) )
+      return T_('Missing message receiver');
 
    if( !isset($handle_cache[$to_handle]) )
    {
