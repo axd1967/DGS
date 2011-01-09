@@ -94,21 +94,7 @@ class QuickHandlerMessage extends QuickHandler
       if( $cmd == MESSAGECMD_INFO )
       {
          /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
-         $this->msg_row = mysql_single_fetch( "$dbgmsg.find_message",
-                  "SELECT M.* " .
-                  ",UNIX_TIMESTAMP(M.Time) AS X_Time " .
-                  ",IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
-                     "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS X_Flow " .
-                  ",other.uid AS other_ID " .
-                  ",me.Replied, me.Sender, me.Folder_nr " .
-                  "FROM Messages AS M " .
-                  "INNER JOIN MessageCorrespondents AS me ON me.mid=$mid AND me.uid=$my_id " .
-                  "LEFT JOIN MessageCorrespondents AS other ON other.mid=$mid AND other.Sender!=me.Sender " .
-                  "LEFT JOIN MessageCorrespondents AS previous " .
-                     "ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid=$my_id " .
-                  "WHERE M.ID=$mid " .
-                  "LIMIT 1" )
-               or error('unknown_message', "$dbgmsg.find_message2");
+         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, false );
 
          if( $this->is_with_option(QWITH_USER_ID) )
             $this->user_rows = User::load_quick_userinfo( array(
@@ -134,7 +120,7 @@ class QuickHandlerMessage extends QuickHandler
       global $player_row;
       $row = $this->msg_row;
       $my_id = $player_row['ID'];
-      $other_uid = (int)$row['other_ID'];
+      $other_uid = (int)$row['other_id'];
       switch( $row['Sender'] ) // also see get_message_directions()
       {
          case 'M': $uid_from = $my_id; $uid_to = $my_id; break; // myself

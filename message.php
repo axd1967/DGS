@@ -19,13 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Messages";
 
-require_once( "include/std_functions.php" );
-require_once( 'include/game_functions.php' );
-require_once( "include/message_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/rating.php" );
-require_once( "include/make_game.php" );
-require_once( "include/contacts.php" );
+require_once 'include/std_functions.php';
+require_once 'include/error_codes.php';
+require_once 'include/game_functions.php';
+require_once 'include/message_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/rating.php';
+require_once 'include/make_game.php';
+require_once 'include/contacts.php';
 
 
 define('MSGBOXROWS_NORMAL', 12);
@@ -49,14 +50,6 @@ define('MSGBOXROWS_INVITE', 6);
    if( !$logged_in )
       error("not_logged_in");
 
-   if( $handle_msg_action )
-   {
-      handle_send_message();
-      exit; // for safety
-   }
-
-   $show_suggestions = true;
-
 /* Actual GET calls used (to identify the ways to handle them):
    if(message.php?mode=...) //with mode
       NewMessage           : from menu (or site_map)
@@ -76,39 +69,27 @@ define('MSGBOXROWS_INVITE', 6);
    Where uid=ID is used, user=handle could be substitued, default from HTTP_REFERER.
 */
 
-   $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
+   init_standard_folders();
+   $my_id = $player_row['ID'];
+   $folders = get_folders($my_id);
+   $type = get_request_arg('type', 'NORMAL');
+
+   $dgs_message = new DgsMessage();
+   $errors = array();
+   if( $handle_msg_action )
+      $errors[] = handle_send_message( $dgs_message );
 
    $default_uhandle = get_request_arg('to');
    if( !$default_uhandle )
-   {
-      get_request_user( $uid, $uhandle, true);
-      if( !$uhandle && $uid > 0 )
-      {
-         if( $uid == $player_row["ID"] )
-            $uhandle = $player_row['Handle'];
-         else
-         {
-            $row = mysql_single_fetch( 'message.handle',
-               "SELECT Handle FROM Players WHERE ID=$uid LIMIT 1" );
-            if( $row )
-               $uhandle = $row['Handle'];
-         }
-      }
-      $default_uhandle = $uhandle;
-      unset($uid);
-      unset($uhandle);
-   }
+      $default_uhandle = read_user_from_request();
 
-   $my_id = $player_row["ID"];
-   $my_rating = $player_row["Rating2"];
-   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
-         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $my_rating = $player_row['Rating2'];
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
 
-   init_standard_folders();
-   $folders = get_folders($my_id);
 
    $default_subject = get_request_arg('subject');
    $default_message = get_request_arg('message');
+   $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
    $mid = (int)@$_REQUEST['mid'];
    $mode = @$_REQUEST['mode'];
@@ -116,72 +97,27 @@ define('MSGBOXROWS_INVITE', 6);
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
    elseif( @$_REQUEST['mode_dispute'] )
       $mode = 'Dispute';
+   $can_reply = false;
 
    $submode = $mode;
    if( $mode == 'ShowMessage' || $mode == 'Dispute' )
    {
-      if( !($mid > 0) )
-         error("unknown_message", "message.miss_message($mid)");
-
-      /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
-      $query = "SELECT Messages.*"
-         .",UNIX_TIMESTAMP(Messages.Time) AS date"
-         .",IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)"
-         . "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow"
-         .",me.Replied, me.Sender, me.Folder_nr"
-         .",Players.ID AS other_id,Players.Handle AS other_handle"
-         .",Players.Name AS other_name,Players.Rating2 AS other_rating"
-         .",Players.RatingStatus AS other_ratingstatus"
-         .",Games.Status,Games.mid AS Game_mid"
-         .",Ruleset, Size, Komi, Handicap, Rated, WeekendClock, StdHandicap"
-         .",Maintime, Byotype, Byotime, Byoperiods"
-         .",ToMove_ID, IF(White_ID=$my_id," . WHITE . "," . BLACK . ") AS myColor"
-         ." FROM Messages " .
-            "INNER JOIN MessageCorrespondents AS me ON me.mid=$mid and me.uid=$my_id " .
-            "LEFT JOIN MessageCorrespondents AS other ON other.mid=$mid AND other.Sender!=me.Sender " .
-          "LEFT JOIN Players ON Players.ID=other.uid " .
-          "LEFT JOIN Games ON Games.ID=Game_ID " .
-          "LEFT JOIN MessageCorrespondents AS previous " .
-            "ON Messages.ReplyTo>0 AND previous.mid=Messages.ReplyTo AND previous.uid=$my_id " .
-          "WHERE Messages.ID=$mid " .
-          //sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
-          "ORDER BY Sender LIMIT 1";
-
-      /**
-       * TODO: msg multi-receivers
-       * Actually, this query and the following code does not support
-       * multiple receivers (i.e. more than one "other" LEFT JOINed row).
-       * Multiple receivers are just allowed when it is a message from
-       * the server (ID=0) because the message is not read BY the server.
-       * See also: send_message
-       **/
-      $msg_row = mysql_single_fetch( "message.find($mid)", $query);
-      if( !$msg_row )
-         error('unknown_message', "message.find.not_found($mid)");
-
+      $msg_row = DgsMessage::load_message( "message", $mid, $my_id, true );
       extract($msg_row);
-
 
       if( $Sender === 'M' ) //message to myself
       {
-         $other_name = $player_row["Name"];
          $other_id = $my_id;
          $other_handle = $player_row["Handle"];
+         $other_name = $player_row["Name"];
       }
       else if( $other_id <= 0 )
       {
+         $other_id = 0;
+         $other_handle = '';
          $other_name = '['.T_('Server message').']';
-         $other_id = 0;
-         $other_handle = '';
       }
-      if( empty($other_name) )
-      {
-         $other_name = NO_VALUE;
-         $other_id = 0;
-         $other_handle = '';
-      }
-
-      $other_name = make_html_safe($other_name);
+      $other_name = ( empty($other_name) ) ? NO_VALUE : make_html_safe($other_name);
 
       $can_reply = ( $Sender != 'Y' && $other_id>0 && $other_handle); //exclude system messages
       $to_me = ( $Sender != 'Y' ); //include system and myself messages
@@ -199,16 +135,9 @@ define('MSGBOXROWS_INVITE', 6);
          if( $Folder_nr == FOLDER_NEW )
          {
             // Remove NEW flag
-
-            $Folder_nr = ( $Type == 'INVITATION' ? FOLDER_REPLY : FOLDER_MAIN );
-
-            db_query( "message.update_mess_corr($my_id,$mid,$Sender)",
-               "UPDATE MessageCorrespondents SET Folder_nr=$Folder_nr " .
-               "WHERE mid=$mid AND uid=$my_id AND Sender='$Sender' LIMIT 1" );
-            if( mysql_affected_rows() != 1)
-               error("mysql_message_info", "message.update_mess_corr2($mid,$my_id,$Sender)");
-
-            update_count_message_new( "message.update_mess_corr.upd_cnt_msg_new($my_id)",
+            $Folder_nr = ( $Type == 'INVITATION' ) ? FOLDER_REPLY : FOLDER_MAIN;
+            DgsMessage::update_message_folder( $mid, $my_id, $Sender, $Folder_nr );
+            update_count_message_new( "message.update_message_folder.upd_cnt_msg_new($my_id)",
                $my_id, COUNTNEW_RECALC );
          }
 
@@ -222,33 +151,43 @@ define('MSGBOXROWS_INVITE', 6);
                $submode = 'AlreadyAccepted';
          }
          else if( $Type == 'DISPUTED' )
-         {
             $submode = 'InviteDisputed';
-         }
       }
    }// $mode == 'ShowMessage' || $mode == 'Dispute'
 
+   // more checks
+   if( $mode == 'NewMessage' || $mode == 'Invite' || $can_reply )
+   {
+      if( $default_uhandle )
+      {
+         $error = read_message_receiver( $dgs_message, $type, false, $default_uhandle );
+         if( $error )
+            $errors[] = $error;
+      }
+      else
+      {
+         if( $mode == 'NewMessage' )
+            $errors[] = T_('Missing message receiver');
+      }
+
+      if( (string)$default_subject == '' )
+         $errors[] = T_('Missing message subject');
+   }//NewMessage
 
    // prepare to show conv/proper-handitype-suggestions
    $map_ratings = NULL;
-   if( $submode === 'Dispute' || $submode === 'Invite' )
+   if( ($submode === 'Dispute' || $submode === 'Invite') && $iamrated )
    {
-      if( $show_suggestions && $iamrated && $default_uhandle != $player_row['Handle'] )
+      $other_row = $dgs_message->get_recipient(); // not set if self-invited or other error
+      if( !is_null($other_row) )
       {
-         $other_row = mysql_single_fetch( 'message.invite_suggest.'.$submode,
-            'SELECT Rating2, RatingStatus FROM Players ' .
-            'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
-         if( $other_row )
-         {
-            $other_rating = (int)@$other_row['Rating2'];
-            if( @$other_row['RatingStatus'] != RATING_NONE
-                  && is_numeric($other_rating) && $other_rating >= MIN_RATING )
-            {// other is rated
-               $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
-            }
-         }
+         $other_rating = (int)@$other_row['Rating2'];
+         if( @$other_row['RatingStatus'] != RATING_NONE && is_valid_rating($other_rating) ) // other is rated
+            $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
       }
    }
+
+   $has_errors = ( count($errors) > 0 );
 
 
    start_page("Message - $submode", true, $logged_in, $player_row );
@@ -256,7 +195,6 @@ define('MSGBOXROWS_INVITE', 6);
    echo "<center>\n";
 
    $message_form = new Form('messageform', 'message.php#preview', FORM_POST, true );
-   //by default:
    $message_form->add_hidden( 'mode', $mode);
    $message_form->add_hidden( 'mid', $mid);
    $message_form->add_hidden( 'senderid', $my_id);
@@ -268,10 +206,10 @@ define('MSGBOXROWS_INVITE', 6);
       case 'AlreadyAccepted':
       case 'InviteDisputed':
       {
-         message_info_table($mid, $date, $to_me,
+         message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $Thread, $ReplyTo, $flow,
+                            $Thread, $ReplyTo, $X_Flow,
                             $folders, $Folder_nr, $message_form, $Replied=='M', $rx_term);
 
          if( $submode == 'AlreadyAccepted' )
@@ -346,10 +284,10 @@ define('MSGBOXROWS_INVITE', 6);
       case 'ShowInvite':
       case 'ShowMyInvite':
       {
-         message_info_table($mid, $date, $to_me,
+         message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $Thread, $ReplyTo, $flow,
+                            $Thread, $ReplyTo, $X_Flow,
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
@@ -385,10 +323,10 @@ define('MSGBOXROWS_INVITE', 6);
 
       case 'Dispute':
       {
-         message_info_table($mid, $date, $to_me,
+         message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $Thread, $ReplyTo, $flow, //no folders, so no move
+                            $Thread, $ReplyTo, $X_Flow, //no folders, so no move
                             null, null, null, false, $rx_term);
 
          if( $preview )
@@ -451,27 +389,23 @@ define('MSGBOXROWS_INVITE', 6);
 
    $message_form->echo_string(1);
 
-   if( $preview )
+
+   if( $has_errors && ($send_message || $preview) )
    {
-      echo "\n<h3 id='preview' class=Header>" .
-         T_('Message preview') . "</h3>\n";
+      echo "<br>\n<table><tr>",
+         buildErrorListString( T_('There have been some errors'), $errors, 1 ),
+         "</tr></table>";
+   }
+
+   if( $preview || ($send_message && $has_errors) )
+   {
+      $user_row = $dgs_message->build_recipient_user_row();
+      echo "\n<h3 id='preview' class=Header>", T_('Message preview'), "</h3>\n";
+
       //$mid==0 means preview - display a *to_me* like message
-
-      $row = mysql_single_fetch( 'message.preview',
-         'SELECT ID, Handle, Name FROM Players ' .
-         'WHERE Handle="' . mysql_addslashes($default_uhandle) . '"' );
-      if( !$row )
-      {
-         $row['Name'] = '<span class=InlineWarning>' . T_('Receiver not found') . '</span>';
-         $row['ID'] = 0;
-         $row['Handle'] = '';
-      }
-      else
-         $row['Name'] = make_html_safe($row['Name']);
-
       message_info_table( 0 /* preview */, $NOW, false,
-                         $row['ID'], $row['Name'], $row['Handle'],
-                         $default_subject, $default_message);
+                          $user_row['ID'], $user_row['Name'], $user_row['Handle'],
+                          $default_subject, $default_message);
    }
 
    echo "\n</center>\n";
@@ -481,48 +415,30 @@ define('MSGBOXROWS_INVITE', 6);
 
 
 
-function handle_send_message()
+/*!
+ * \brief Checks and performs message-actions.
+ * \return does NOT return on success but jump to status-page;
+ *         on check-failure returns error-string for previewing
+ */
+function handle_send_message( &$dgs_message )
 {
-   global $player_row;
+   global $player_row, $folders, $type;
 
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      return ErrorCode::get_error_text('not_allowed_for_guest');
 
-   $sender_id = (int)@$_REQUEST['senderid'];
-   if( $sender_id > 0 && $my_id != $sender_id )
-      error('user_mismatch', "send_message.check.user($my_id,$sender_id)");
-
-   $tohdl = get_request_arg('to');
-   $subject = get_request_arg('subject');
-   $message = get_request_arg('message');
-   $type = get_request_arg('type', 'NORMAL');
-
-   init_standard_folders();
-   $folders = get_folders($my_id);
-   $new_folder = get_request_arg('folder');
+   $new_folder = (int)get_request_arg('folder');
 
    if( isset($_REQUEST['foldermove']) )
    {
-      $foldermove_mid = get_request_arg('foldermove_mid');
-      $current_folder = get_request_arg('current_folder');
-      if( change_folders($my_id, $folders, array($foldermove_mid), $new_folder, $current_folder, $type == 'INVITATION') <= 0 )
-         $new_folder = ( $current_folder ) ? $current_folder : FOLDER_ALL_RECEIVED;
-
-      $page = "";
-      foreach( $_REQUEST as $key => $val )
-      {
-         if( $val == 'Y' && preg_match("/^mark\d+$/i", $key) )
-            $page.= URI_AMP."$key=Y" ;
-      }
-
-      jump_to("list_messages.php?folder=$new_folder$page");
+      handle_change_folder( $my_id, $folders, $new_folder, $type );
+      exit; // for safety
    }
 
-
-   if( strtolower($tohdl) == 'guest' )
-      error('guest_may_not_receive_messages');
-
+   $sender_id = (int)@$_REQUEST['senderid'];
+   if( $sender_id > 0 && $my_id != $sender_id )
+      return ErrorCode::get_error_text('user_mismatch');
 
    $prev_mid = max( 0, (int)@$_REQUEST['reply']); //ID of message replied.
    $accepttype = isset($_REQUEST['send_accept']);
@@ -530,42 +446,25 @@ function handle_send_message()
    $disputegid = -1;
    if( $type == "INVITATION" )
    {
-      $disputegid = @$_REQUEST['disputegid'];
+      $disputegid = (int)@$_REQUEST['disputegid'];
       if( !is_numeric( $disputegid) )
          $disputegid = 0;
    }
    $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0) ); //not needed: || ($type == "INVITATION")
 
-
    // find receiver of the message
 
-   /**
-    * CSYSFLAG_REJECT_INVITE only blocks the invitations at starting point
-    * CSYSFLAG_REJECT_MESSAGE blocks the messages except those from the invitation sequence
-    **/
-   $tmp= ( $type == 'INVITATION' ? CSYSFLAG_REJECT_INVITE
-            : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE ));
-   $query= "SELECT P.ID,P.ClockUsed,P.OnVacation,P.Rating2,P.RatingStatus"
-         . ",IF(ISNULL(C.uid),0,C.SystemFlags & $tmp) AS C_denied"
-         . " FROM Players AS P"
-         . " LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id"
-         . " WHERE P.Handle='".mysql_addslashes($tohdl)."'";
-   $opponent_row = mysql_single_fetch( "send_message.find_receiver($tohdl)", $query);
-   if( !$opponent_row )
-      error('receiver_not_found', "send_message.find_receiver2($tohdl)");
-   if( $opponent_row['C_denied'] && !($player_row['admin_level'] & ADMIN_DEVELOPER) )
-   {
-      $msg = ( $type == 'INVITATION' ) ? T_('Invitation rejected!') : T_('Message rejected!');
-      jump_to("status.php?sysmsg=".urlencode($msg));
-   }
-
+   $tohdl = get_request_arg('to');
+   $error = read_message_receiver( $dgs_message, $type, $invitation_step, $tohdl );
+   if( $error )
+      return $error;
+   $opponent_row = $dgs_message->get_recipient();
    $opponent_ID = $opponent_row['ID'];
-   $to_me = ( $my_id == $opponent_ID ); //Message to myself
-   if( $to_me && $type == 'INVITATION' )
-      error('invite_self');
-
 
    // Update database
+
+   $subject = get_request_arg('subject');
+   $message = get_request_arg('message');
 
    if( $type == "INVITATION" )
    {
@@ -589,8 +488,7 @@ function handle_send_message()
    else
       $gid = 0;
 
-
-   // Update database
+   // Send message
 
    $msg_gid = ( $type == 'INVITATION' ) ? $gid : 0;
 
@@ -604,5 +502,63 @@ function handle_send_message()
 
    jump_to("status.php?sysmsg=".urlencode(T_('Message sent!')));
 }//handle_send_message
+
+function handle_change_folder( $my_id, $folders, $new_folder, $type )
+{
+   $foldermove_mid = (int)get_request_arg('foldermove_mid');
+   $current_folder = (int)get_request_arg('current_folder');
+   $need_reply = ( $type == 'INVITATION' );
+
+   if( change_folders($my_id, $folders, array($foldermove_mid), $new_folder, $current_folder, $need_reply) <= 0 )
+      $new_folder = ( $current_folder ) ? $current_folder : FOLDER_ALL_RECEIVED;
+
+   $page = "";
+   foreach( $_REQUEST as $key => $val )
+   {
+      if( $val == 'Y' && preg_match("/^mark\d+$/i", $key) )
+         $page.= URI_AMP."$key=Y" ;
+   }
+   jump_to("list_messages.php?folder=$new_folder$page");
+}//handle_change_folder
+
+/*!
+ * \brief Loads and checks message-receiver (only once for same handle).
+ * \return error-str on failure; or else '' on success
+ * \note user-row can be retrieved from $dgs_message->get_recipient()
+ */
+function read_message_receiver( &$dgs_message, $type, $invitation_step, $to_handle )
+{
+   static $handle_cache = array();
+
+   if( !isset($handle_cache[$to_handle]) )
+   {
+      $handle_cache[$to_handle] = 1; // handle checked
+      $user_row = DgsMessage::load_message_receiver( $type, $invitation_step, $to_handle );
+      if( !is_array($user_row) )
+         return $user_row; //error-str
+      $dgs_message->add_recipient( $user_row );
+   }
+
+   return ''; //no-error
+}//read_message_receiver
+
+function read_user_from_request()
+{
+   global $player_row;
+
+   get_request_user( $uid, $uhandle, true);
+   if( !$uhandle && $uid > 0 )
+   {
+      if( $uid == $player_row['ID'] )
+         $uhandle = $player_row['Handle'];
+      else
+      {
+         $row = mysql_single_fetch( 'message.handle', "SELECT Handle FROM Players WHERE ID=$uid LIMIT 1" );
+         if( $row )
+            $uhandle = $row['Handle'];
+      }
+   }
+   return $uhandle;
+}//read_user_from_request
 
 ?>

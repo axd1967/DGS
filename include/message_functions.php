@@ -19,13 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Messages";
 
+require_once 'include/std_classes.php';
+require_once 'include/gui_functions.php';
+require_once 'include/table_infos.php';
+require_once "include/rating.php";
+require_once 'include/game_functions.php';
+require_once 'include/time_functions.php';
+require_once 'include/utilities.php';
+require_once 'include/error_codes.php';
 
-require_once( 'include/gui_functions.php' );
-require_once( 'include/table_infos.php' );
-require_once( "include/rating.php" );
-require_once( 'include/game_functions.php' );
-require_once( 'include/time_functions.php' );
-require_once( 'include/utilities.php' );
 
 define('INVITE_HANDI_CONV',   -1);
 define('INVITE_HANDI_PROPER', -2);
@@ -45,15 +47,19 @@ define('FOLDER_COLS_MODULO', 8); //number of columns of "tab" layouts
 function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
-   $STANDARD_FOLDERS = array(  // arr=( Name, BGColor, FGColor ); $bg_color value (#f7f5e3)
-      //FOLDER_DESTROYED => array(T_//('Destroyed'), 'ff88ee00', '000000'), // non-visible folder!!
-      FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'), // pseudo-folder (grouping other folders)
-      FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
-      FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
-      FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
-      FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
-      FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'),
+
+   if( !isset($STANDARD_FOLDERS[FOLDER_NEW]) )
+   {
+      $STANDARD_FOLDERS = array(  // arr=( Name, BGColor, FGColor ); $bg_color value (#f7f5e3)
+         //FOLDER_DESTROYED => array(T_//('Destroyed'), 'ff88ee00', '000000'), // non-visible folder!!
+         FOLDER_ALL_RECEIVED => array(T_('All Received'),'00000000','000000'), // pseudo-folder (grouping other folders)
+         FOLDER_MAIN => array(T_('Main'), '00000000', '000000'),
+         FOLDER_NEW => array(T_('New'), 'aaffaa90', '000000'),
+         FOLDER_REPLY => array(T_('Reply!'), 'ffaaaa80', '000000'),
+         FOLDER_DELETED => array(T_('Trashcan'), 'ff88ee00', '000000'),
+         FOLDER_SENT => array(T_('Sent'), '00000000', '0000ff'),
       );
+   }
 }
 
 
@@ -567,7 +573,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
    // warn on empty subject
    $subj_fmt = $subject;
    if( (string)$subject == '' )
-      $subj_fmt = '<span class=InlineWarning>' . T_('(no subject)') . '</span>';
+      $subj_fmt = span('InlineWarning', T_('(no subject)') );
 
    echo "<tr class=Subject>",
       "<td class=Rubric>", T_('Subject'), ":</td>",
@@ -1318,6 +1324,164 @@ function get_message_directions()
    );
 }
 
+
+
+
+/*!
+ * \brief Object to store and handle a single message.
+ */
+class DgsMessage
+{
+   var $recipients;
+
+   function DgsMessage()
+   {
+      $this->recipients = array();
+   }
+
+   /*! \brief Returns true, if there is exactly ONE recipient. */
+   function has_recipient()
+   {
+      return (count($this->recipients) == 1);
+   }
+
+   function get_recipient()
+   {
+      return ($this->has_recipient()) ? $this->recipients[0] : null;
+   }
+
+   function add_recipient( $user_row )
+   {
+      $this->recipients[] = $user_row;
+   }
+
+   function build_recipient_user_row()
+   {
+      $user_row = $this->get_recipient();
+      if( is_null($user_row) )
+         $user_row = array( 'ID' => 0, 'Handle' => '', 'Name' => span('InlineWarning', T_('Receiver not found')) );
+      else
+         $user_row['Name'] = make_html_safe($user_row['Name']);
+      return $user_row;
+   }
+
+
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief Loads single message for message-id and current user-id.
+    * \param $with_fulldata true = load with other-player-info and game-info (if game-message)
+    */
+   function load_message( $dbgmsg, $mid, $uid, $with_fulldata )
+   {
+      if( $mid <= 0 )
+         error('unknown_message', "$dbgmsg.DgsMessage::load_message.check.mid($mid)");
+
+      /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'M.*',
+            'UNIX_TIMESTAMP(M.Time) AS X_Time',
+            "IF(NOT ISNULL(prev.mid),".FLOW_ANSWER.",0)+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS X_Flow",
+            'me.Replied', 'me.Sender', 'me.Folder_nr',
+            'other.uid AS other_id',
+         SQLP_FROM,
+            'Messages AS M',
+            "INNER JOIN MessageCorrespondents AS me ON me.mid=$mid and me.uid=$uid",
+            "LEFT JOIN MessageCorrespondents AS other ON other.mid=$mid AND other.Sender!=me.Sender",
+            "LEFT JOIN MessageCorrespondents AS prev ON M.ReplyTo>0 AND prev.mid=M.ReplyTo AND prev.uid=$uid",
+         SQLP_WHERE,
+            "M.ID=$mid",
+         // sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
+         SQLP_ORDER, 'Sender', // me.Sender
+         SQLP_LIMIT, '1'
+      );
+      if( $with_fulldata )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'P.Handle AS other_handle', 'P.Name AS other_name',
+            'P.Rating2 AS other_rating', 'P.RatingStatus AS other_ratingstatus',
+            'G.mid AS Game_mid', 'G.Status', 'G.Ruleset', 'G.Size', 'G.Komi', 'G.Handicap',
+            'G.Rated', 'G.WeekendClock', 'G.StdHandicap', 'G.Maintime', 'G.Byotype', 'G.Byotime',
+            'G.Byoperiods', 'G.ToMove_ID', "IF(White_ID=$uid,".WHITE.",".BLACK.") AS myColor" );
+         $qsql->add_part( SQLP_FROM,
+            "LEFT JOIN Players AS P ON P.ID=other.uid",
+            "LEFT JOIN Games AS G ON G.ID=M.Game_ID" );
+      }
+
+      /**
+       * TODO: msg multi-receivers
+       * Actually, this query and the following code does not support
+       * multiple receivers (i.e. more than one "other" LEFT JOINed row).
+       * Multiple receivers are just allowed when it is a message from
+       * the server (ID=0) because the message is not read BY the server.
+       * See also: send_message
+       **/
+      $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage::load_message.find($mid)", $qsql->get_select() );
+      if( !$msg_row )
+         error('unknown_message', "$dbgmsg.DgsMessage::load_message.find.not_found($mid)");
+
+      return $msg_row;
+   }//load_message
+
+   /*!
+    * \brief Finds receiver of the message and make some validity-checks.
+    * \param $type Message.Type
+    * \param $invitation_step true, if sending-message is part of invitation-ending/disputing
+    * \param $to_handle user-id of recipient
+    * \return user-row-array, or else error-string on failure
+    */
+   function load_message_receiver( $type, $invitation_step, $to_handle )
+   {
+      global $player_row;
+      $my_id = (int)@$player_row['ID']; // sender
+
+      if( strtolower($to_handle) == 'guest' )
+         return ErrorCode::get_error_text('guest_may_not_receive_messages');
+      if( $type == 'INVITATION' && $player_row['Handle'] == $to_handle )
+         return ErrorCode::get_error_text('invite_self');
+
+      // CSYSFLAG_REJECT_INVITE only blocks the invitations at starting point
+      // CSYSFLAG_REJECT_MESSAGE blocks the messages except those from the invitation sequence
+      $ctmp = ( $type == 'INVITATION' )
+         ? CSYSFLAG_REJECT_INVITE
+         : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE );
+      $user_row = mysql_single_fetch( "message.load_message_receiver($my_id,$type,$invitation_step,$to_handle)",
+            "SELECT P.ID, P.Handle, P.Name, P.ClockUsed, P.OnVacation, P.Rating2, P.RatingStatus, " .
+               "IF(ISNULL(C.uid),0,C.SystemFlags & $ctmp) AS C_denied " .
+            "FROM Players AS P " .
+               "LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id " .
+            "WHERE P.Handle='".mysql_addslashes($to_handle)."' LIMIT 1" );
+      if( !$user_row )
+         return sprintf( T_('Unknown message receiver [%s]'), $to_handle );
+
+      // message can not be rejected for some admins
+      if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM)) )
+      {
+         $msgtmpl = ( $type == 'INVITATION' )
+            ? T_('Invitation rejected by user [%s] !')
+            : T_('Message rejected by user [%s] !');
+         return sprintf( $msgtmpl, $to_handle );
+      }
+
+      return $user_row;
+   }//load_message_receiver
+
+   function update_message_folder( $mid, $uid, $Sender, $new_folder )
+   {
+      $dbgmsg = "DgsMessage.update_message_folder($mid,$uid,$Sender,$new_folder)";
+      db_query( "$dbgmsg.1",
+         "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
+         "WHERE mid=$mid AND uid=$uid AND Sender='$Sender' LIMIT 1" );
+      if( mysql_affected_rows() != 1)
+         error("mysql_message_info", "$dbgmsg.2" );
+   }//update_message_folder
+
+}// end 'DgsMessage'
+
+
+
+
 // param extra_querysql: QuerySQL-object to extend query
 // return array( result, merged-QuerySQL )
 // NOTE: $order (default sort on me.mid equals to sort on date) !!
@@ -1510,7 +1674,7 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
    //$mtable->Page.= $page ;
 
    return $can_move_messages ;
-} //message_list_body
+}//message_list_body
 
 /*!
  * \brief Builds user-string for message-list.
@@ -1541,6 +1705,6 @@ function message_build_user_string( &$row, $my_row, $full_details )
       $user_str = $row['other_name']; // server-msg or unknown
 
    return $user_str;
-}
+}//message_build_user_string
 
 ?>
