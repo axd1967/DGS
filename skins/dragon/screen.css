@@ -1403,9 +1403,6 @@ table.MessageInfos td {
 table.MessageInfos td.Rubric {
    color: black;
    font-weight: bold;
-}
-
-table.MessageInfos tr.Message td.Rubric {
    vertical-align: top;
 }
 
@@ -1486,6 +1483,10 @@ form#msgSearchForm td.Description {
    padding: 4px;
    width: auto;
    text-align: left;
+   vertical-align: top;
+}
+
+form#msgSearchForm tr {
    vertical-align: top;
 }
 
