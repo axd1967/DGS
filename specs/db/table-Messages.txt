@@ -15,10 +15,50 @@ Important Notes:
       - "assigning" all related messages for game-offer or after-game-messages is difficult to impossible
       - need redundant (but different work) to handle game-offers (waiting-room <-> message system)
 
+Notes about "Multiple-receiver (bulk) messages":
+
+   Actually, the DGS-message-code does normally not support
+   multiple receivers (i.e. more than one "other" LEFT JOINed row);
+      see also DgsMessage.load_message()-func in "include/message_functions.php"
+
+   Multiple receivers are allowed when it is a message from
+   the server (ID=0) because the message is not read BY the server.
+
+   However in DGS 1.0.15 support for multi-receiver (bulk-)messages has been added.
+   Bulk-messages are marked with MSGFLAG_BULK-flag set in Messages.Flags.
+   Some of the DGS message-related pages escpecially with message-lists
+   may behave not very intuitive because of the fact, that there is only
+   one Messages-entry for a bulk-message. That produces some "strange" effects:
+
+     - a bulk-message is listed several times in message-lists, though it's good
+       that way, because you can see all the recipients of the bulk-message
+
+     - only the FIRST (initial) message in a message-thread can be a bulk-message
+
+     - navigating between message-related pages for a bulk-message of a dedicated
+       recipient might lose the reference to the recipient returning to (any) one
+       of the message-receivers
+
+     - a bulk-message for a dedicated receiver can NOT be moved to another folder
+       or destroyed (from Trashcan) without effecting also all other receivers,
+       because there is only one message-sender, where the "folder" is stored.
+       However, in message-lists with actions on toggle-marked messages all
+       checkbox-markers are reduced to but one for bulk-messages to avoid confusion.
+
+     - invitations can NOT have multiple receivers, because each invitation needs
+       a Games-entry and so there would be no "link" with the related (one) message
+
+     - a bulk-message can NOT be sent to oneself (that would wreck the data-model
+       used for messages to myself)
+
+   See also: send_message()-func in "include/std_functions.php"
+
+
  Field   | Type                                            | Default
 ---------+-------------------------------------------------+---------------------
  ID      | int(11)                                         | NULL
  Type    | enum('NORMAL','INVITATION','DISPUTED','RESULT') | NORMAL
+ Flags   | tinyint(3) unsigned                             | 0
  Thread  | int(11)                                         | 0
  Level   | smallint(6)                                     | 0
  ReplyTo | int(11)                                         | 0
@@ -43,6 +83,9 @@ Important Notes:
    - DECLINED     : rejeced invitation (by other user)
    - DELETED      : old form of deleted message, new manners are to move it
                     into delete-folder (see MessageCorrespondents)
+
+* Flags : message-flags
+   - 0x01 = marking bulk-message with multiple receivers
 
 * Thread : message-ID of first message in a message-thread
    - system-messages have no thread -> Thread=0

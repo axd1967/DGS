@@ -119,7 +119,7 @@ define("WHITE_DEAD", OFFSET_MARKED+WHITE);
 define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 //----- Board(end)
 
-// ---------- Folder stuff ----------------------------------------
+// ---------- Folder & Message stuff ------------------------------
 
 // folder for "destroyed" messages (former was: Folder_nr=NULL)
 // '-4'-value in regard to FOLDER_DELETED and to keep < FOLDER_NONE
@@ -135,6 +135,8 @@ define('FOLDER_DELETED', 4); // Trashcan-folder
 define('FOLDER_SENT', 5);
 //User folders must be >= USER_FOLDERS
 define('USER_FOLDERS', 6);
+
+define('MSGFLAG_BULK', 0x01); // multi-receiver (bulk) message
 
 
 // ---------- Filter stuff ----------------------------------------

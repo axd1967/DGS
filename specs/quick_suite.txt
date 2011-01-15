@@ -758,7 +758,7 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&with=<WITH>
+   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&oid=<OTHER_UID>&with=<WITH>
 
 Options:
 
@@ -767,6 +767,10 @@ Options:
    <MESSAGE_ID> = integer
       - message-id referencing private DGS-message to perform message-operation on
 
+   <OTHER_UID> = integer
+      - user-id for bulk-message, optional for non-bulk-message
+      - 0 = default-value, for bulk-message use first recipient
+
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
 
@@ -774,7 +778,7 @@ Commands:
 
    "info" : returns private message
       - required opts: MESSAGE_ID
-      - optional opts: WITH
+      - optional opts: OTHER_UID (for bulk-message), WITH
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
@@ -808,6 +812,7 @@ Commands:
             "type" : "NORMAL", # message-type (see specs/db/):
                                # types = NORMAL | INVITATION | DISPUTED | RESULT
                                # not supported by quick-suite: INVITATION | DISPUTED
+            "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
             "folder" : {
                "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
                # the following fields only if WITH-option contain 'folder'
@@ -835,6 +840,9 @@ Examples for message-commands:
 
    # retrieve message
    quick_do.php?obj=message&cmd=info&mid=1234567
+
+   # retrieve bulk-message for certain recipient
+   quick_do.php?obj=message&cmd=info&mid=1234567&oid=2
 
 
 #-------- (3d) Objects - "folder" ---------------------------------------------

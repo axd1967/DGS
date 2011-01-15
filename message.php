@@ -32,6 +32,8 @@ require_once 'include/contacts.php';
 define('MSGBOXROWS_NORMAL', 12);
 define('MSGBOXROWS_INVITE', 6);
 
+define('MAX_MSG_RECEIVERS', 16);
+
 {
    $send_message = ( @$_REQUEST['send_message']
                   || @$_REQUEST['send_accept']
@@ -75,13 +77,14 @@ define('MSGBOXROWS_INVITE', 6);
    $type = get_request_arg('type', 'NORMAL');
 
    $dgs_message = new DgsMessage();
-   $errors = array();
    if( $handle_msg_action )
-      $errors[] = handle_send_message( $dgs_message );
+      $errors = handle_send_message( $dgs_message );
+   else
+      $errors = array();
 
-   $default_uhandle = get_request_arg('to');
-   if( !$default_uhandle )
-      $default_uhandle = read_user_from_request();
+   $arg_to = get_request_arg('to'); // single or multi-receivers
+   if( !$arg_to )
+      $arg_to = read_user_from_request(); // single
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
@@ -92,6 +95,7 @@ define('MSGBOXROWS_INVITE', 6);
    $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
    $mid = (int)@$_REQUEST['mid'];
+   $other_uid = (int)@$_REQUEST['oid']; // for bulk-message
    $mode = @$_REQUEST['mode'];
    if( !$mode )
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
@@ -102,7 +106,7 @@ define('MSGBOXROWS_INVITE', 6);
    $submode = $mode;
    if( $mode == 'ShowMessage' || $mode == 'Dispute' )
    {
-      $msg_row = DgsMessage::load_message( "message", $mid, $my_id, true );
+      $msg_row = DgsMessage::load_message( "message", $mid, $my_id, $other_uid, true );
       extract($msg_row);
 
       if( $Sender === 'M' ) //message to myself
@@ -158,11 +162,10 @@ define('MSGBOXROWS_INVITE', 6);
    // more checks
    if( $mode == 'NewMessage' || $mode == 'Invite' || $can_reply )
    {
-      if( $default_uhandle )
+      if( $arg_to )
       {
-         $error = read_message_receiver( $dgs_message, $type, false, $default_uhandle );
-         if( $error )
-            $errors[] = $error;
+         if( read_message_receivers( $dgs_message, $type, false, $arg_to ) )
+            $errors = array_merge( $errors, $dgs_message->errors );
       }
       else
       {
@@ -209,7 +212,7 @@ define('MSGBOXROWS_INVITE', 6);
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $Thread, $ReplyTo, $X_Flow,
+                            $Flags, $Thread, $ReplyTo, $X_Flow,
                             $folders, $Folder_nr, $message_form, $Replied=='M', $rx_term);
 
          if( $submode == 'AlreadyAccepted' )
@@ -262,7 +265,7 @@ define('MSGBOXROWS_INVITE', 6);
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
-               'TEXTINPUT', 'to', 25, 40, $default_uhandle,
+               'TEXTINPUT', 'to', 50, 275, $arg_to,
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Subject'),
@@ -287,7 +290,7 @@ define('MSGBOXROWS_INVITE', 6);
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $Thread, $ReplyTo, $X_Flow,
+                            $Flags, $Thread, $ReplyTo, $X_Flow,
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
@@ -326,7 +329,7 @@ define('MSGBOXROWS_INVITE', 6);
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
-                            $Thread, $ReplyTo, $X_Flow, //no folders, so no move
+                            $Flags, $Thread, $ReplyTo, $X_Flow, //no folders, so no move
                             null, null, null, false, $rx_term);
 
          if( $preview )
@@ -368,7 +371,7 @@ define('MSGBOXROWS_INVITE', 6);
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
-               'TEXTINPUT', 'to', 25, 40, $default_uhandle,
+               'TEXTINPUT', 'to', 25, 275, $arg_to, // max-len only to hold bad-vals
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
@@ -399,13 +402,22 @@ define('MSGBOXROWS_INVITE', 6);
 
    if( $preview || ($send_message && $has_errors) )
    {
-      $user_row = $dgs_message->build_recipient_user_row();
       echo "\n<h3 id='preview' class=Header>", T_('Message preview'), "</h3>\n";
 
       //$mid==0 means preview - display a *to_me* like message
-      message_info_table( 0 /* preview */, $NOW, false,
-                          $user_row['ID'], $user_row['Name'], $user_row['Handle'],
-                          $default_subject, $default_message);
+      if( $dgs_message->has_recipient() ) // single-receiver
+      {
+         $user_row = $dgs_message->build_recipient_user_row();
+         message_info_table( 0 /* preview */, $NOW, false,
+                             $user_row['ID'], $user_row['Name'], $user_row['Handle'],
+                             $default_subject, $default_message, 0 );
+      }
+      else // multi-receiver (bulk)
+      {
+         message_info_table( 0 /* preview */, $NOW, false,
+                             $dgs_message->recipients, '', '',
+                             $default_subject, $default_message, MSGFLAG_BULK );
+      }
    }
 
    echo "\n</center>\n";
@@ -418,7 +430,7 @@ define('MSGBOXROWS_INVITE', 6);
 /*!
  * \brief Checks and performs message-actions.
  * \return does NOT return on success but jump to status-page;
- *         on check-failure returns error-string for previewing
+ *         on check-failure returns error-array for previewing
  */
 function handle_send_message( &$dgs_message )
 {
@@ -426,7 +438,7 @@ function handle_send_message( &$dgs_message )
 
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      return ErrorCode::get_error_text('not_allowed_for_guest');
+      return array( ErrorCode::get_error_text('not_allowed_for_guest') );
 
    $new_folder = (int)get_request_arg('folder');
 
@@ -438,7 +450,7 @@ function handle_send_message( &$dgs_message )
 
    $sender_id = (int)@$_REQUEST['senderid'];
    if( $sender_id > 0 && $my_id != $sender_id )
-      return ErrorCode::get_error_text('user_mismatch');
+      return array( ErrorCode::get_error_text('user_mismatch') );
 
    $prev_mid = max( 0, (int)@$_REQUEST['reply']); //ID of message replied.
    $accepttype = isset($_REQUEST['send_accept']);
@@ -454,48 +466,56 @@ function handle_send_message( &$dgs_message )
 
    // find receiver of the message
 
-   $tohdl = get_request_arg('to');
-   $error = read_message_receiver( $dgs_message, $type, $invitation_step, $tohdl );
-   if( $error )
-      return $error;
-   $opponent_row = $dgs_message->get_recipient();
-   $opponent_ID = $opponent_row['ID'];
+   $arg_to = get_request_arg('to'); // single or multi-receivers
+   if( read_message_receivers( $dgs_message, $type, $invitation_step, $arg_to ) )
+      return $dgs_message->errors;
 
    // Update database
 
    $subject = get_request_arg('subject');
    $message = get_request_arg('message');
 
-   if( $type == "INVITATION" )
+   $msg_gid = 0;
+   if( $dgs_message->has_recipient() ) // single-receiver
    {
-      $gid = make_invite_game($player_row, $opponent_row, $disputegid);
-      $subject = ( $disputegid > 0 ) ? "Game invitation dispute" : "Game invitation";
+      $opponent_row = $dgs_message->get_recipient();
+      $opponent_ID = $opponent_row['ID'];
+
+      if( $type == 'INVITATION' )
+      {
+         $msg_gid = make_invite_game($player_row, $opponent_row, $disputegid);
+         $subject = ( $disputegid > 0 ) ? 'Game invitation dispute' : 'Game invitation';
+      }
+      else if( $accepttype )
+      {
+         $msg_gid = (int)@$_REQUEST['gid'];
+         accept_invite_game( $msg_gid, $player_row, $opponent_row );
+         $subject = 'Game invitation accepted';
+      }
+      else if( $declinetype )
+      {
+         // game will be deleted
+         $msg_gid = (int)@$_REQUEST['gid'];
+         if( !GameHelper::delete_invitation_game( 'send_message.decline', $msg_gid, $my_id, $opponent_ID ) )
+            exit;
+         $subject = 'Game invitation decline';
+      }
+
+      $to_uids = $opponent_ID;
    }
-   else if( $accepttype )
+   else // multi-receiver (bulk)
    {
-      $gid = (int)@$_REQUEST['gid'];
-      accept_invite_game( $gid, $player_row, $opponent_row );
-      $subject = "Game invitation accepted";
+      $to_uids = array();
+      foreach( $dgs_message->recipients as $user_row )
+         $to_uids[] = (int)@$user_row['ID'];
    }
-   else if( $declinetype )
-   {
-      $gid = (int)@$_REQUEST['gid'];
-      if( !GameHelper::delete_invitation_game( 'send_message.decline', $gid, $my_id, $opponent_ID ) )
-         exit;
-      $gid = -1; //deleted
-      $subject = "Game invitation decline";
-   }
-   else
-      $gid = 0;
 
    // Send message
 
-   $msg_gid = ( $type == 'INVITATION' ) ? $gid : 0;
-
    send_message( 'send_message', $message, $subject
-      , $opponent_ID, '', true //$opponent_row['Notify'] == 'NONE'
+      , $to_uids, '', true //$opponent_row['Notify'] == 'NONE'
       , $my_id, $type, $msg_gid
-      , $prev_mid, $disputegid > 0 ?'DISPUTED' :''
+      , $prev_mid, ($disputegid > 0 ? 'DISPUTED' : '')
       , isset($folders[$new_folder]) ? $new_folder
          : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
       );
@@ -521,29 +541,53 @@ function handle_change_folder( $my_id, $folders, $new_folder, $type )
    jump_to("list_messages.php?folder=$new_folder$page");
 }//handle_change_folder
 
-/*!
- * \brief Loads and checks message-receiver (only once for same handle).
- * \return error-str on failure; or else '' on success
- * \note user-row can be retrieved from $dgs_message->get_recipient()
- */
-function read_message_receiver( &$dgs_message, $type, $invitation_step, $to_handle )
+// return: false=success, otherwise failure
+function read_message_receivers( &$dgs_msg, $type, $invitation_step, &$to_handles )
 {
-   static $handle_cache = array();
+   static $cache = array();
 
-   if( empty($to_handle) )
-      return T_('Missing message receiver');
+   $to_handles = strtolower( str_replace(',', ' ', trim($to_handles)) );
+   $arr_to = array_unique( preg_split( "/\s+/", $to_handles, null, PREG_SPLIT_NO_EMPTY ) );
+   $cnt_to = count($arr_to);
+   sort($arr_to);
+   $to_handles = implode(' ', $arr_to); // lower-case
+   $dgs_msg->clear_errors();
 
-   if( !isset($handle_cache[$to_handle]) )
+   if( !isset($cache[$to_handles]) ) // need lower-case for check
    {
-      $handle_cache[$to_handle] = 1; // handle checked
-      $user_row = DgsMessage::load_message_receiver( $type, $invitation_step, $to_handle );
-      if( !is_array($user_row) )
-         return $user_row; //error-str
-      $dgs_message->add_recipient( $user_row );
+      $cache[$to_handles] = 1; // handle(s) checked
+
+      if( $cnt_to < 1 )
+         return $dgs_msg->add_error( T_('Missing message receiver') );
+      elseif( $cnt_to > MAX_MSG_RECEIVERS )
+         return $dgs_msg->add_error( sprintf( T_('Too much receivers (max. %s)'), MAX_MSG_RECEIVERS ) );
+      else // single | multi
+      {
+         if( $cnt_to > 1 && $type == 'INVITATION' )
+            return $dgs_msg->add_error( T_('Only one receiver for invitation allowed!') );
+
+         global $player_row;
+         $my_id = (int)@$player_row['ID']; // sender
+
+         list( $arr_receivers, $errors ) =
+            DgsMessage::load_message_receivers( $type, $invitation_step, $arr_to );
+         foreach( $errors as $error )
+            $dgs_msg->add_error( $error );
+
+         $arr_handles = array();
+         foreach( $arr_receivers as $handle => $user_row )
+         {
+            if( $user_row['ID'] == $my_id )
+               $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_self') );
+            $dgs_msg->add_recipient( $user_row );
+            $arr_handles[] = $user_row['Handle']; // original case
+         }
+         $to_handles = implode(' ', $arr_handles); // reset original case
+      }
    }
 
-   return ''; //no-error
-}//read_message_receiver
+   return (count($dgs_msg->errors) > 0 );
+}//read_message_receivers
 
 function read_user_from_request()
 {

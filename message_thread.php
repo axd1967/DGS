@@ -37,6 +37,7 @@ require_once( 'include/message_functions.php' );
 
 /* Actual GET calls used (to identify the ways to handle them):
    message_thread.php?mid= : show message thread with given message-id in focus
+      &oid=                  [optional] other-uid for bulk-messages from ShowMessage
 */
 
    init_standard_folders();
@@ -44,6 +45,7 @@ require_once( 'include/message_functions.php' );
 
    $thread = (int)get_request_arg('thread');
    $mid = (int)get_request_arg('mid');
+   $other_uid = (int)get_request_arg('oid');
    $with_text = get_request_arg('text', 0);
    if( $mid <= 0 || $thread <= 0 )
       error('unknown_message', "message_thread.find_msg($mid,$thread)" );
@@ -65,7 +67,7 @@ require_once( 'include/message_functions.php' );
    // see also the note about MessageCorrespondents.mid==0 in message_list_query()
    $qsql = new QuerySQL(
       SQLP_FIELDS,
-         'M.ID', 'M.Type', 'M.Level', 'M.ReplyTo', 'M.Subject', 'M.Game_ID',
+         'M.ID', 'M.Type', 'M.Flags', 'M.Level', 'M.ReplyTo', 'M.Subject', 'M.Game_ID',
          'UNIX_TIMESTAMP(M.Time) AS X_Time',
          'me.Folder_nr', 'me.Sender',
          'POther.ID AS other_ID', 'POther.Handle AS other_handle', 'POther.Name AS other_name',
@@ -113,7 +115,7 @@ require_once( 'include/message_functions.php' );
 
    // thread-list can be very long, so add switch also on top
    $menu = array();
-   $url_args = "thread=$thread".URI_AMP."mid=$mid#mid$mid";
+   $url_args = "thread=$thread".URI_AMP."mid=$mid".URI_AMP."oid=$other_uid#mid$mid";
    if( $with_text )
       $menu[T_('Hide message texts')] = $page.'text=0'.URI_AMP.$url_args;
    else
@@ -135,21 +137,27 @@ require_once( 'include/message_functions.php' );
    $menu_array += $menu;
 
    end_page(@$menu_array);
-}
+}//main
 
+
+//callback for traversing threadlist
 function echo_message_row( $threadlist, &$mtable )
 {
-   global $base_path, $player_row, $my_folders, $arr_directions, $mid, $with_text;
+   global $base_path, $player_row, $my_folders, $arr_directions, $mid, $other_uid, $with_text;
 
    $item = $threadlist->getItem();
    $level = $threadlist->getLevel();
    $bgcolor = $mtable->blend_next_row_color_hex();
-   $curr_msg = ( $item['ID'] == $mid )
-      ? "<a name=\"mid$mid\">"
-            . anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid",
+
+   $oid = (int)$item['other_ID'];
+   $oid_url = ( (@$item['Flags'] & MSGFLAG_BULK) && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
+   if( $item['ID'] == $mid && (!$other_uid || $other_uid == $oid) )
+      $curr_msg = "<a name=\"mid$mid\">"
+            . anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid{$oid_url}",
                   image( $base_path.'images/msg.gif', T_('Current message'), null, 'class="InTextImage"' ))
-            . MINI_SPACING
-      : '';
+            . MINI_SPACING;
+   else
+      $curr_msg = '';
    $max_indent = min( 20, $level );
 
    $row_str = array();
@@ -159,7 +167,7 @@ function echo_message_row( $threadlist, &$mtable )
    $row_str[4] = $curr_msg . $level;
    $row_str[5] =
       ($level > $max_indent ? '...'.MINI_SPACING : '' ) . str_repeat( MED_SPACING, $max_indent )
-      . anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid={$item['ID']}",
+      . anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid={$item['ID']}{$oid_url}",
             make_html_safe( $item['Subject'], SUBJECT_HTML ) );
    $row_str[6] = date(DATE_FMT, $item['X_Time']);
 
@@ -174,6 +182,6 @@ function echo_message_row( $threadlist, &$mtable )
    }
 
    $mtable->add_row($row_str);
-}
+}//echo_message_row
 
 ?>

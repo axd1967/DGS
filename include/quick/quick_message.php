@@ -33,6 +33,7 @@ require_once 'include/classlib_user.php';
 // see specs/quick_suite.txt (3c)
 // mid=<MESSAGE_ID>
 define('MESSAGEOPT_MID',  'mid');
+define('MESSAGEOPT_OID',  'oid');
 
 define('MESSAGECMD_INFO', 'info');
 define('MESSAGE_COMMANDS', 'info');
@@ -46,6 +47,7 @@ define('MESSAGE_COMMANDS', 'info');
 class QuickHandlerMessage extends QuickHandler
 {
    var $mid;
+   var $oid; // for bulk-msg
 
    var $msg_row;
    var $user_rows;
@@ -55,6 +57,7 @@ class QuickHandlerMessage extends QuickHandler
    {
       parent::QuickHandler( $quick_object );
       $this->mid = 0;
+      $this->oid = 0;
 
       $this->msg_row = null;
       $this->user_rows = null;
@@ -72,6 +75,7 @@ class QuickHandlerMessage extends QuickHandler
    function parseURL()
    {
       $this->mid = (int)get_request_arg(MESSAGEOPT_MID);
+      $this->oid = (int)get_request_arg(MESSAGEOPT_OID);
    }
 
    function prepare()
@@ -87,6 +91,8 @@ class QuickHandlerMessage extends QuickHandler
       // check mid
       if( (string)$this->mid == '' || !is_numeric($this->mid) || $this->mid <= 0 )
          error('invalid_args', "$dbgmsg.bad_message");
+      if( (string)$this->oid != '' && !is_numeric($this->oid) )
+         error('invalid_args', "$dbgmsg.bad_uid.oid");
       $mid = $this->mid;
 
       // prepare command: info
@@ -94,7 +100,7 @@ class QuickHandlerMessage extends QuickHandler
       if( $cmd == MESSAGECMD_INFO )
       {
          /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
-         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, false );
+         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->oid, false );
 
          if( $this->is_with_option(QWITH_USER_ID) )
             $this->user_rows = User::load_quick_userinfo( array(
@@ -134,6 +140,7 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows) );
       $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows) );
       $this->addResultKey( 'type', strtoupper($row['Type']) );
+      $this->addResultKey( 'flags', QuickHandlerMessage::convertMessageFlags($row['Flags']) );
       $this->addResultKey( 'folder',
          QuickHandlerFolder::build_obj_folder(
             (int)$this->msg_row['Folder_nr'], $this->folder, $this->is_with_option(QWITH_FOLDER)) );
@@ -168,6 +175,17 @@ class QuickHandlerMessage extends QuickHandler
       }
       return $arr;
    }//load_folder
+
+
+   // ------------ static functions ----------------------------
+
+   function convertMessageFlags( $flags )
+   {
+      $out = array();
+      if( $flags & MSGFLAG_BULK )
+         $out[] = 'BULK';
+      return implode(',', $out);
+   }
 
 } // end of 'QuickHandlerMessage'
 

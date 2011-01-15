@@ -44,6 +44,7 @@ define('CHECK_GSET', 'waitingroom|tournament_ladder|tournament_roundrobin|invite
 
 define('FOLDER_COLS_MODULO', 8); //number of columns of "tab" layouts
 
+
 function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
@@ -532,8 +533,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 } // end of 'game_settings_form'
 
 
-define('FLOW_ANSWER'  ,0x1);
-define('FLOW_ANSWERED',0x2);
+define('FLOW_ANSWER',   0x1);
+define('FLOW_ANSWERED', 0x2);
 
 global $msg_icones; //PHP5
 $msg_icones = array(
@@ -543,19 +544,40 @@ $msg_icones = array(
       FLOW_ANSWER|FLOW_ANSWERED => array('images/msg_2r.gif','&gt;-&gt;'),
    );
 
+// $other_id: uid or array( [ ID/Handle/Name => ..., ...]; the latter ignoring other_name/handle
 function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                             $other_id, $other_name, $other_handle, //must be html_safe
                             $subject, $text, //must NOT be html_safe
-                            $thread=0, $reply_mid=0, $flow=0,
+                            $flags=0, $thread=0, $reply_mid=0, $flow=0,
                             $folders=null, $folder_nr=null, $form=null, $delayed_move=false,
                             $rx_term='')
 {
    global $msg_icones, $bg_color, $base_path;
 
-   if( $other_id > 0 )
+   if( is_array($other_id) ) // multi-receiver (bulk) message
+   {
+      $arr = array();
+      foreach( $other_id as $urow )
+         $arr[] = user_reference( REF_LINK, 0, '', $urow );
+      $name = implode("<br>\n", $arr);
+   }
+   elseif( $other_id > 0 )
       $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
    else
       $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
+
+   $oid_url = ''; // other-uid URL-part
+   $is_bulk = ($flags & MSGFLAG_BULK);
+   if( $is_bulk && $mid > 0 )
+   {
+      $oid_url = ($other_id > 0) ? URI_AMP."oid=$other_id" : '';
+      $bulk_info = T_('Bulk-Message with other receivers');
+      if( $thread > 0 )
+         $bulk_info = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url#mid$mid", $bulk_info );
+      $bulk_info = SMALL_SPACING . "[ $bulk_info ]";
+   }
+   else
+      $bulk_info = '';
 
    $cols = 2;
    echo "<table class=MessageInfos>\n",
@@ -564,7 +586,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td colspan=$cols>", date(DATE_FMT, $date), "</td></tr>\n",
       "<tr class=Correspondent>",
       "<td class=Rubric>", ($to_me ? T_('From') : T_('To') ), ":</td>\n",
-      "<td colspan=$cols>$name</td>",
+      "<td colspan=$cols>$name$bulk_info</td>",
       "</tr>\n";
 
    $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
@@ -582,20 +604,20 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td class=Rubric>", T_('Message'), ":" ;
 
    $str0 = $str = '';
-   if( $flow & FLOW_ANSWER && $reply_mid > 0 )
+   if( ($flow & FLOW_ANSWER) && $reply_mid > 0 )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
       $str.= "<a href=\"message.php?mode=ShowMessage".URI_AMP."mid=$reply_mid\">" .
              "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Previous message") . "\"></a>&nbsp;";
    }
-   if( $flow & FLOW_ANSWERED && $mid > 0)
+   if( ($flow & FLOW_ANSWERED) && $mid > 0)
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
              "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Next messages") . "\"></a>&nbsp;";
    }
-   if( $str && $thread > 0 ) // $str set if msg is answer or has answer
-      $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid#mid$mid",
+   if( ($str || $is_bulk) && $thread > 0 ) // $str set if msg is answer or has answer
+      $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url#mid$mid",
          image( $base_path.'images/thread.gif', T_('Message thread') ),
          T_('Show message thread') ) . MINI_SPACING;
    if( $thread > 0 && $thread != $mid )
@@ -1333,16 +1355,23 @@ function get_message_directions()
 class DgsMessage
 {
    var $recipients;
+   var $errors;
 
    function DgsMessage()
    {
       $this->recipients = array();
+      $this->errors = array();
    }
 
    /*! \brief Returns true, if there is exactly ONE recipient. */
    function has_recipient()
    {
       return (count($this->recipients) == 1);
+   }
+
+   function count_recipients()
+   {
+      return count($this->recipients);
    }
 
    function get_recipient()
@@ -1353,6 +1382,18 @@ class DgsMessage
    function add_recipient( $user_row )
    {
       $this->recipients[] = $user_row;
+   }
+
+   function clear_errors()
+   {
+      $this->errors = array();
+   }
+
+   function add_error( $error )
+   {
+      if( $error )
+         $this->errors[] = $error;
+      return $error;
    }
 
    function build_recipient_user_row()
@@ -1370,19 +1411,34 @@ class DgsMessage
 
    /*!
     * \brief Loads single message for message-id and current user-id.
+    * \param $other_uid other-uid needed for bulk-message to identify correct message;
+    *        optional for non-bulk-message
     * \param $with_fulldata true = load with other-player-info and game-info (if game-message)
+    * \return message-row; multi-receiver message determined by Flags-field
     */
-   function load_message( $dbgmsg, $mid, $uid, $with_fulldata )
+   function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
    {
       if( $mid <= 0 )
          error('unknown_message', "$dbgmsg.DgsMessage::load_message.check.mid($mid)");
+
+      /**
+       * Actually, the DGS-message-code does normally not support
+       * multiple receivers (i.e. more than one "other" LEFT JOINed row).
+       * Multiple receivers are allowed when it is a message from
+       * the server (ID=0) because the message is not read BY the server.
+       *
+       * However in DGS 1.0.15 support for multi-receiver (bulk-)messages has been added.
+       * See also: specs/db/table-Messages.txt
+       * See also: send_message()
+       **/
 
       /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
       $qsql = new QuerySQL(
          SQLP_FIELDS,
             'M.*',
             'UNIX_TIMESTAMP(M.Time) AS X_Time',
-            "IF(NOT ISNULL(prev.mid),".FLOW_ANSWER.",0)+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS X_Flow",
+            "IF(NOT ISNULL(prev.mid),".FLOW_ANSWER.",0)" .
+               "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS X_Flow",
             'me.Replied', 'me.Sender', 'me.Folder_nr',
             'other.uid AS other_id',
          SQLP_FROM,
@@ -1396,6 +1452,8 @@ class DgsMessage
          SQLP_ORDER, 'Sender', // me.Sender
          SQLP_LIMIT, '1'
       );
+      if( $other_uid > 0 )
+         $qsql->add_part( SQLP_WHERE, "other.uid=$other_uid" );
       if( $with_fulldata )
       {
          $qsql->add_part( SQLP_FIELDS,
@@ -1409,14 +1467,6 @@ class DgsMessage
             "LEFT JOIN Games AS G ON G.ID=M.Game_ID" );
       }
 
-      /**
-       * TODO: msg multi-receivers
-       * Actually, this query and the following code does not support
-       * multiple receivers (i.e. more than one "other" LEFT JOINed row).
-       * Multiple receivers are just allowed when it is a message from
-       * the server (ID=0) because the message is not read BY the server.
-       * See also: send_message
-       **/
       $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage::load_message.find($mid)", $qsql->get_select() );
       if( !$msg_row )
          error('unknown_message', "$dbgmsg.DgsMessage::load_message.find.not_found($mid)");
@@ -1425,47 +1475,77 @@ class DgsMessage
    }//load_message
 
    /*!
-    * \brief Finds receiver of the message and make some validity-checks.
+    * \brief Finds receivers of the message and make some validity-checks.
     * \param $type Message.Type
     * \param $invitation_step true, if sending-message is part of invitation-ending/disputing
-    * \param $to_handle user-id of recipient
-    * \return user-row-array, or else error-string on failure
+    * \param $to_handles non-empty (unique) array with user-id of recipients
+    * \return array( [ handle => user-row, ... ], error|empty-array )
     */
-   function load_message_receiver( $type, $invitation_step, $to_handle )
+   function load_message_receivers( $type, $invitation_step, $to_handles )
    {
       global $player_row;
       $my_id = (int)@$player_row['ID']; // sender
+      if( !is_array($to_handles) || count($to_handles) == 0 )
+         error('invalid_args', "DgsMessage::load_message_receivers.check.to($my_id,$type,$invitation_step)");
+      $to_handles = array_unique($to_handles);
+      $to_handles = explode(' ', strtolower(implode(' ', $to_handles))); // lower-case to find all handles
+      $arr_receivers = array();
+      $errors = array();
 
-      if( strtolower($to_handle) == 'guest' )
-         return ErrorCode::get_error_text('guest_may_not_receive_messages');
-      if( $type == 'INVITATION' && $player_row['Handle'] == $to_handle )
-         return ErrorCode::get_error_text('invite_self');
+      $chk_guest = $chk_invself = false;
+      $arr_qhandles = array();
+      foreach( $to_handles as $handle )
+      {
+         if( $handle == 'guest' ) // check strtolower(handle)
+            $chk_guest = true;
+         if( $type == 'INVITATION' && $player_row['Handle'] == $handle )
+            $chk_invself = true;
+         $arr_qhandles[] = mysql_addslashes($handle);
+      }
+      if( $chk_guest )
+         $errors[] = ErrorCode::get_error_text('guest_may_not_receive_messages');
+      if( $chk_invself )
+         $errors[] = ErrorCode::get_error_text('invite_self');
+      if( count($errors) )
+         return array( $arr_receivers, $errors );
 
       // CSYSFLAG_REJECT_INVITE only blocks the invitations at starting point
       // CSYSFLAG_REJECT_MESSAGE blocks the messages except those from the invitation sequence
       $ctmp = ( $type == 'INVITATION' )
          ? CSYSFLAG_REJECT_INVITE
          : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE );
-      $user_row = mysql_single_fetch( "message.load_message_receiver($my_id,$type,$invitation_step,$to_handle)",
+      $result = db_query( "DgsMessage::load_message_receivers.find($my_id,$type,$invitation_step)",
             "SELECT P.ID, P.Handle, P.Name, P.ClockUsed, P.OnVacation, P.Rating2, P.RatingStatus, " .
                "IF(ISNULL(C.uid),0,C.SystemFlags & $ctmp) AS C_denied " .
             "FROM Players AS P " .
                "LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id " .
-            "WHERE P.Handle='".mysql_addslashes($to_handle)."' LIMIT 1" );
-      if( !$user_row )
-         return sprintf( T_('Unknown message receiver [%s]'), $to_handle );
+            "WHERE P.Handle IN ('" . implode("','", $arr_qhandles) . "') " .
+            "LIMIT " . count($to_handles) );
+      while( $row = mysql_fetch_assoc($result) )
+         $arr_receivers[strtolower($row['Handle'])] = $row;
+      mysql_free_result($result);
 
-      // message can not be rejected for some admins
-      if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM)) )
+      // checks for unknown users and rejects-msg/inv
+      foreach( $to_handles as $handle )
       {
-         $msgtmpl = ( $type == 'INVITATION' )
-            ? T_('Invitation rejected by user [%s] !')
-            : T_('Message rejected by user [%s] !');
-         return sprintf( $msgtmpl, $to_handle );
+         if( !isset($arr_receivers[$handle]) ) // handle must be lower-case to check
+            $errors[] = sprintf( T_('Unknown message receiver [%s]'), $handle );
+         else
+         {
+            // message can not be rejected for some admins
+            $user_row = $arr_receivers[$handle];
+            if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM)) )
+            {
+               $msgtmpl = ( $type == 'INVITATION' )
+                  ? T_('Invitation rejected by user [%s] !')
+                  : T_('Message rejected by user [%s] !');
+               return sprintf( $msgtmpl, $handle );
+            }
+         }
       }
 
-      return $user_row;
-   }//load_message_receiver
+      return array( $arr_receivers, $errors );
+   }//load_message_receivers
 
    function update_message_folder( $mid, $uid, $Sender, $new_folder )
    {
@@ -1499,7 +1579,7 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY me.mi
  **/
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
-      'M.Type', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
+      'M.Type', 'M.Flags', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
       'UNIX_TIMESTAMP(M.Time) AS Time',
       "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
           "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
@@ -1589,10 +1669,13 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
    $dirs = get_message_directions();
 
    $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
+   $arr_marks = array(); // mid => 1
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $mid = $row["mid"];
+      $oid = $row['other_ID'];
+      $is_bulk = ( $row['Flags'] & MSGFLAG_BULK );
 
       $folder_nr = $row['folder'];
       $deleted = ( $folder_nr == FOLDER_DESTROYED );
@@ -1600,7 +1683,8 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
       $thread = $row['Thread'];
 
       // link to message
-      $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid{$url_terms}";
+      $oid_url = ( $is_bulk && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
+      $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid$oid_url$url_terms";
 
       $mrow_strings = array();
       $mrow_strings[ 1] = array(
@@ -1615,8 +1699,9 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
       $subject = make_html_safe( $row['Subject'], SUBJECT_HTML, $rx_term);
       $mrow_strings[ 3] = anchor( $msg_url, $subject );
 
-      list($ico,$alt) = $msg_icones[$row['flow']];
-      $mrow_strings[ 8] = anchor( $msg_url, image( $ico, $alt, $tits[$row['flow']] ));
+      $flowval = $row['flow'];
+      list($ico,$alt) = $msg_icones[$flowval];
+      $mrow_strings[ 8] = anchor( $msg_url, image( $ico, $alt, $tits[$flowval] ));
 
       $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
@@ -1638,7 +1723,7 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
       $mrow_strings[10] = '';
       if( $thread )
       {
-         $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid",
+         $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url",
                image( $base_path.'images/thread.gif', T_('Message thread') ),
                T_('Show message thread') );
 
@@ -1654,7 +1739,7 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
          {// message needs reply (so forbid marking and force inspection)
             $mrow_strings[ 5] = '';
          }
-         else
+         elseif( !isset($arr_marks[$mid]) ) // for bulk-msg only mark first
          {
             $can_move_messages = true;
             $n = $mtable->Prefix."mark$mid";
@@ -1662,6 +1747,12 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
             //if( $checked ) $page.= "$n=Y".URI_AMP;
             $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'"
                . ($checked ? ' checked' : '') . '>';
+            $arr_marks[$mid] = 1;
+         }
+         else if( $is_bulk )
+         {
+            $mrow_strings[ 5] = image( $base_path.'images/up_bulk.gif',
+                  T_('Use toggle above for this bulk-message'), null );
          }
       }
       $mtable->add_row( $mrow_strings );
@@ -1673,7 +1764,7 @@ function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_
    // that change the order or the page because the marks will not stay on display.
    //$mtable->Page.= $page ;
 
-   return $can_move_messages ;
+   return $can_move_messages;
 }//message_list_body
 
 /*!

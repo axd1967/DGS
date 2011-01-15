@@ -159,6 +159,9 @@ class ErrorCode
          $arr['invite_self'] =
             T_("Sorry, you can't invite yourself.");
 
+         $arr['bulkmessage_self'] =
+            T_('Message to myself is forbidden for bulk message.');
+
          $arr['invited_to_unknown_game'] =
             T_("Sorry, can't find the game you are invited to. Already declined?");
 
