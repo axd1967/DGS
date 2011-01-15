@@ -179,7 +179,7 @@ require_once( "include/filter.php" );
       /****
        *      Actually, toggle marks does not destroy sort
        *      but sort, page move and add/del column destroy marks.
-       * (unless a double *toggle marks* that transfert marks in URL)
+       * (unless a double *toggle marks* that transfer marks in URL)
        * (but then, the URL limited length may not be enough)
        * See message_list_head/body() to re-insert the marks in the URL
        ****/
