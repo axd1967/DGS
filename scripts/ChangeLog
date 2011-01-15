@@ -19,7 +19,193 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-01-15 juga
+
+   * include/message_functions.php (message_info_table, message_list_query, message_list_body;
+       class DgsMessage, ~.count_recipients, ~.clear_errors, ~.add_error, ~.load_message,
+       ~.load_message_receivers),
+     include/quick/quick_message.php (class QuickHandlerMessage, ~.parseURL, ~.prepare,
+       ~.process_cmd_info, ~.convertMessageFlags),
+     include/std_functions.php (send_message),
+     include/error_codes.php (ErrorCode.init), include/globals.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/table-Messages.txt, specs/quick_suite.txt,
+     message.php (handle_send_message, read_message_receivers),
+     message_thread.php (echo_message_row), NEWS:
+   - added support for multi-receiver bulk-message
+     - msg to myself forbidden for bulk-message
+     - max. 16 message-receivers
+     - add link with other-uid 'oid' to identify bulk-message with same message-id
+     - bulk-messages are marked with MSGFLAG_BULK-flag set in new db-field Messages.Flags
+     - see also: specs/db/table-Messages.txt
+       Some of the DGS message-related pages escpecially with message-lists
+       may behave not very intuitive because of the fact, that there is only
+       one Messages-entry for a bulk-message. That produces some "strange" effects:
+       - a bulk-message is listed several times in message-lists, though it's good
+         that way, because you can see all the recipients of the bulk-message
+       - only the FIRST (initial) message in a message-thread can be a bulk-message
+       - navigating between message-related pages for a bulk-message of a dedicated
+         recipient might sometimes lose the reference to the recipient returning
+         to (any) one of the message-receivers
+       - a bulk-message for a dedicated receiver can NOT be moved to another folder
+         or destroyed (from Trashcan) without effecting also all other receivers,
+         because there is only one message-sender, where the "folder" is stored.
+         However, in message-lists with actions on toggle-marked messages all
+         checkbox-markers are reduced to but one for bulk-messages to avoid confusion.
+       - invitations can NOT have multiple receivers, because each invitation needs
+         a Games-entry and so there would be no "link" with the related (one) message
+       - a bulk-message can NOT be sent to oneself (that would wreck the data-model
+         used for messages to myself)
+   - fix bug for accepted/declined invitation-messages: set Messages.Game_ID and Type=INVITATION
+-----------
+copy /images/up_bulk.gif
+
+-- fix Game_ID and Type of wrong accepted/declined invitation-messages adding Game_ID and correcting Type
+-- * 1. count (ca. 270.000 rows - 15s)
+SELECT COUNT(*) FROM Messages AS M WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 ;
+-- * 2. fix
+UPDATE Messages AS M, Messages AS MSRC
+   SET M.Type='INVITATION', M.Game_ID=MSRC.Game_ID
+   WHERE M.ReplyTo=MSRC.ID AND M.Subject LIKE 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
+-- * 3. control-count, repeat step (2) till count is 0 (ca. 4min)
+SELECT COUNT(*) FROM Messages AS M INNER JOIN Messages AS MSRC ON MSRC.ID=M.ReplyTo WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
+
+-- fix Type of wrong invitation-messages with game-id
+-- * 1. count (perhaps 0 in production)
+SELECT COUNT(*) FROM Messages WHERE Game_ID>0 AND Type='NORMAL' AND Subject LIKE 'Game invitation%' ;
+-- * 2. fix
+UPDATE Messages SET Type='INVITATION' WHERE Game_ID>0 AND Type='NORMAL' AND Subject LIKE 'Game invitation%' ;
+
+-- added message-flags to mark as bulk with multiple receivers
+ALTER TABLE Messages
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER Type ;
+-----------
+
+   * scripts/data_export.php:
+   - added table for multi-player-go: GamePlayers
+
+   * message.php (read_message_receiver):
+   - added check for empty-receiver, and unique error-texts
+
+   * include/message_functions.php (init_standard_folders, message_info_table;
+       class DgsMessage, ~.has_recipient, ~.get_recipient, ~.add_recipient,
+       ~.build_recipient_user_row, ~.load_message, ~.load_message_receiver,
+       ~.update_message_folder),
+     include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info),
+     message.php (handle_send_message, handle_change_folder, read_message_receiver,
+       read_user_from_request):
+   - for preview and sending-message:
+     - show error-list instead of jumping to error-page
+     - already check for reject-message/invitation on preview
+     - added checks for missing subject, missing message receiver
+     - ignore reject-message/invitation of message-receiver
+       for developer-admins and forum-managers
+   - avoid double loading and checking of message-receiver by using check-cache
+   - used common code where possible by extracting methods locally and into
+     DgsMessage-class in message_functions.php, also for use in quick-suite message-handler
+   - cleanup: avoid double init for standard-folders, minor formatting-cleanup
+
+   * skins/dragon/screen.css:
+   - use CSS vertical-top-alignment for message-info-table table-rows
+
+2011-01-08 juga
+
+   * include/std_functions.php (buildErrorListString),
+     tournaments/include/tournament_utils.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/edit_rules.php, tournaments/edit_status.php,
+     tournaments/edit_tournament.php, tournaments/game_admin.php, tournaments/ladder/admin.php,
+     tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php, tournaments/ladder/retreat.php,
+     tournaments/ladder/view.php, tournaments/register.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/view_pools.php,
+     game_players.php:
+   - refactored TournamentUtils::buildErrorListString() into std_functions.php
+
+   * message.php (handle_send_message),
+     message_selector.php (REMOVED), send_message.php (REMOVED):
+   - refactored message_selector.php and send_message.php into message.php
+     in preparation for multi-receiver-message and error-checks without losing data
+
+   * include/game_functions.php (GameHelper.delete_invitation_game),
+     include/make_game.php (accept_invite_game),
+     send_message.php:
+   - cleanup:
+     - refactored accepting-invitation into make_game.php accept_invite_game()-func
+     - refactored rejecting-invitation into game_functions.php delete_invitation_game()-func
+     - formatting, removed old comments
+
+   * message.php:
+   - SQL-cleanup: replace FROM (T1,T2) -> INNER-JOIN, added LIMITs
+
+2011-01-04 juga
+
+   * include/game_functions.php (class GameNotify, ~._load_players, ~._build_text_players,
+       ~.get_text_game_deleted, ~.get_text_game_result, ~.get_recipients),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_end),
+     clock_tick.php, confirm.php:
+   - cleanup for handling game-end for multi-player-game:
+     - refactor handling of game-end for simple AND multi-player-game into GameNotify-class
+       for use-cases game-deletion, game-end (i.e. one of game-resignation, game-timeout,
+       game-score)
+     - changed game-end-message always including references to all game-players,
+       sending to all game-players
+     - changed game-deletion-message including player that deleted the game
+     - changed game-result-message to observers to not include hidden-message-info
+
+   * waiting_room.php:
+   - made Game-Type column static
+
+2011-01-02 juga
+
+   * halfhourly_cron.php:
+   - bugfix: add user-handle of player for notification-only mails
+
+   * include/rating.php (update_rating, update_rating2, update_rating_glicko),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     scripts/recalculate_ratings2.php,
+     clock_tick.php, confirm.php:
+   - add player that deleted game in info-message to other players
+   - bugfix for rating-update:
+     - don't make tourney-game unrated if too-few-moves
+     - multi-player-game can not be rated
+   - cleanup:
+     - introduced consts for update_ratingX() RATEDSTATUS_..-result
+     - changed server-message with game-message to prepare for multi-player-game:
+       "opponent" -> "the player" wrote
+
+   * include/game_functions.php (GameHelper.update_players_end_game):
+   - remove default-values for update_players_end_game()
+
+   * include/game_functions.php (GameHelper.update_players_end_game),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     specs/db/table-Games.txt, clock_tick.php, confirm.php:
+   - cleanup:
+     - refactored updating Players.Running/Finished/etc into GameHelper-class
+     - remove unused code
+     - moved some FIXME/NOTEs into specs/db/table-Games.txt
+
 2011-01-01 juga
+
+   * include/game_functions.php (GameHelper.delete_running_game),
+     include/classlib_game.php (NextGameOrder.delete_game_priorities),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     specs/db/table-Games.txt, confirm.php:
+   - cleanup: refactored delete-running-game into GameHelper-class
+     and extended for simple- and multi-player-game
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     confirm.php, quick_play.php:
+   - cleanup: removed old notify-opponent code, only using new notify(..)
+
+   * include/quick/quick_game.php (QuickHandlerGame.prepare),
+     confirm.php, quick_play.php:
+   - add additional check for game-finished instead of database_corrupted
 
    * include/quick/quick_game.php (QuickHandlerGame.process_cmd),
      confirm.php, quick_play.php:

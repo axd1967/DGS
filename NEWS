@@ -1,9 +1,9 @@
 DragonGoServer NEWS -- Release Notes. History of user-visible changes.
-Copyright (C) 2001-2010  Erik Ouchterlony
+Copyright (C) 2001-2011  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2010-???-??] - DGS 1.0.15  (Tournaments, Multi-Player game, Game settings, Users, Forum, Voting)
+#release DGS_1_0_15 [2011-???-??] - DGS 1.0.15  (Tournaments, Multi-Player game, Game settings, Users, Forum, Voting)
 
    New features and Major changes:
 
@@ -174,12 +174,20 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Show count of NEW messages in main-menu with link to show them if there are some
       * Messages in NEW- and REPLY-folder can now be moved too when no reply is needed
       * Show folders above message-list always with links to allow refresh
+      * Added option to stay in folder after moving messages
 
       * Added new page with message-thread for a message,
         Show or hide all message-texts within message-thread,
         Destroyed messages are shown too (with folder '---')
       * Show linked icon to message-thread (<image thread.gif>) for single message and on pages with message-lists
       * Show linked icon to initial message in thread (<image msg_first.gif>) on reply message
+
+   * <home message.php?mode=NewMessage>Send Message</home>:
+      * Added support for multi-receiver bulk-message (only for initial message)
+      * Show errors without leaving message-page
+      * Show reject-message/invitation of recipient in preview
+      * Added checks for missing subject & missing receiver
+      * Changed default for empty subject: ??? -> (no subject)
 
    * Searching capabilities:
       * Added <home faq.php>search on FAQ</home>
@@ -277,6 +285,10 @@ Copyright (C) 2001-2010  Erik Ouchterlony
          * Adjusted hint-text of colors-image for other users
       * Replaced "Show my observed games" -> "Games I'm observing"
 
+      * Game-notifications (changed for multi-player-game):
+         * Added references to all game-players in game-end-message
+         * Added player, that deleted game in game-deletion-message
+
    * Game page:
       * Added way to stay on board after submitting move,
         Removed submit-move-button returning to status page,
@@ -331,10 +343,6 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added columns to support game-quick-suite: move-id, game-status
       * Added tournament-id column
       * Added URL-arg 'no_cache' to disable cache
-
-   * <home list_messages.php>Messages</home>:
-      * Added option to stay in folder after moving messages
-      * Changed default for empty subject: ??? -> (no subject)
 
    * <home users.php>Users</home>:
       * Added user-type:
@@ -427,6 +435,8 @@ Copyright (C) 2001-2010  Erik Ouchterlony
    * fixed default games order of quick-status (show last-moved game first)
    * fixed double HTML-escaping of texts on contact-edit
    * fixed "missing" new posts while replying (forum-read data corrected)
+   * fixed missing game-reference for accepted & declined invitation-messages
+   * fixed notification-only-mails by adding user-handle as account-id
 
 
    Code improvements:
@@ -470,6 +480,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added option on forum search page to allow searching for hidden posts
         independent from moderator state
       * Added search for all/own shown/hidden/pending-approval messages
+      * Do not reject message or invitation from forum-moderator even if user has set contact system-flag
       * Enhanced Forumlog:
          * Added current approved status (S=shown, H=hidden, M=needs-moderation)
          * Added all moderator-actions and new-threads for searching
@@ -501,7 +512,7 @@ Copyright (C) 2001-2010  Erik Ouchterlony
       * Added indexes on Errorlog to improve searching for problems
       * Added reminder in top-bar of being in maintenance-mode
       * Added forum consistency script
-      * Do not reject message from ADMIN_DEVELOPER even if user has set contact system-flag
+      * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
       * Removed translations from the admin pages
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
