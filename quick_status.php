@@ -139,7 +139,6 @@ else
 
       $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
          "Messages.Subject, Players.Handle AS sender " .
-         //"Messages.Subject, Players.Name AS sender " .
          "FROM (Messages, MessageCorrespondents AS me) " .
          "LEFT JOIN MessageCorrespondents AS other " .
            "ON other.mid=me.mid AND other.Sender!=me.Sender " .
