@@ -1201,54 +1201,44 @@ function send_message( $debugmsg, $text='', $subject=''
    if( !isset($prev_mid) || !is_numeric($prev_mid) || $prev_mid < 0 )
       $prev_mid = 0;
 
-   $to_myself= false;
-   $receivers= array();
-   //if( eregi( 'mysql', get_resource_type($to_ids)) )
+   $to_myself = false;
+   $receivers = array();
    foreach( array( 'ID' => &$to_ids, 'Handle' => &$to_handles ) as $field => $var )
    {
-      if( is_array($var) )
-         $var= implode(',', $var);
-      $var= preg_split('/[\s,]+/', $var);
-      $varcnt= count($var);
+      if( is_null($var) || (string)$var == '' )
+         continue;
+      if( !is_array($var) )
+         $var = preg_split('/[\s,]+/', $var);
+      $varcnt = count($var);
       if( $varcnt <= 0 )
          continue;
 
-      $var= implode("','", ( $field == 'ID' ? $var : array_map('mysql_addslashes', $var) ));
+      $var = implode("','", ( $field == 'ID' ? $var : array_map('mysql_addslashes', $var) ));
       if( !$var )
          continue;
 
       // make receivers unique, exclude guests
-      $query= "SELECT ID,Notify,SendEmail FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
+      $query = "SELECT ID,Notify,SendEmail FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
       $result = db_query( "$debugmsg.get$field($var)", $query);
-      while( ($row=mysql_fetch_assoc($result)) )
+      while( $row = mysql_fetch_assoc($result) )
       {
-         $uid= $row['ID'];
+         $uid = $row['ID'];
          if( $from_id > 0 && $uid == $from_id )
-            $to_myself= true;
+            $to_myself = true;
          elseif( $uid > GUESTS_ID_MAX ) //exclude guest
-            $receivers[$uid]= $row;
+            $receivers[$uid] = $row;
       }
       mysql_free_result($result);
    }
-   $reccnt= count($receivers);
-   //TODO: handle $reccnt != $varcnt ???
+   $reccnt = count($receivers);
    if( !$to_myself && $reccnt <= 0 )
       error('receiver_not_found', "$debugmsg.rec0($from_id,$subject)");
 
-   //TODO how to display msg with multi-receivers !?
-   /**
-    * Actually, only the messages from server can have multiple
-    * receivers because they are NOT read BY the server.
-    * The code to display a message can't manage more than one
-    * correspondent.
-    * See also: message.php
-    **/
-   if( $from_id > 0 && $reccnt+($to_myself?1:0) > 1 )
-      error('receiver_not_found', "$debugmsg.rec1($from_id,$subject)");
-
-   //actually not supported: sending a message to myself and other in the same pack
+   // not supported: sending a bulk-message to myself and other in the same pack
    if( $to_myself && $reccnt > 0 )
-      error('internal_error', "$debugmsg.rec2($from_id,$subject)");
+      error('bulkmessage_self', "$debugmsg.rec2($from_id,$subject)");
+
+   $msg_flags = ($reccnt > 1) ? MSGFLAG_BULK : 0;
 
    // determine message-thread info
    $thread = 0;
@@ -1265,11 +1255,11 @@ function send_message( $debugmsg, $text='', $subject=''
    }
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
-          .", Type='$type', Thread='$thread', Level='$thread_level'"
+          .", Type='$type', Flags='$msg_flags'"
+          .", Thread='$thread', Level='$thread_level'"
           .", ReplyTo=$prev_mid, Game_ID=$gid"
           .", Subject='$subject', Text='$text'" ;
    db_query( "$debugmsg.message", $query);
-
    if( mysql_affected_rows() != 1 )
       error('mysql_insert_message', "$debugmsg.message");
 
