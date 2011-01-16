@@ -337,8 +337,20 @@ function get_alt_arg( $n1, $n2)
 
             $validation_step = true;
             $extra_infos[T_('Resigning')] = 'Important';
-            if( $is_mp_game )
+            if( $is_mp_game && !MultiPlayerGame::is_single_player( $GamePlayers, ($Black_ID == $my_id) ) )
+            {
                $extra_infos[T_('You should have the consent of your team-members for resigning a multi-player-game!')] = 'Important';
+
+               if( $GameType == GAMETYPE_TEAM_GO )
+                  $grcol = ($Black_ID == $my_id) ? GPCOL_B : GPCOL_W;
+               else
+                  $grcol = ''; // all for ZenGo
+               $str = image( $base_path."images/msg.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
+                  . anchor( "message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_RESIGN
+                              . URI_AMP."mpcol=$grcol".URI_AMP."mpmove=$Moves".URI_AMP."preview=1",
+                            T_('Ask your team-members') );
+               $extra_infos[$str] = 'Important';
+            }
             break;
 
          case 'add_time': //add-time for opponent

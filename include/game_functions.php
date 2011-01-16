@@ -46,6 +46,10 @@ define('GPCOL_G2', 'G2');
 define('GPCOL_BW', 'BW');
 define('GPCOL_DEFAULT', GPCOL_BW);
 
+// multi-player-game message-type
+define('MPGMSG_STARTGAME', 1);
+define('MPGMSG_RESIGN', 2);
+
 // enum Waitingroom.JigoMode
 define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
 define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
@@ -382,6 +386,15 @@ class MultiPlayerGame
       return ($max) ? max($arr) : array( min($arr), max($arr) );
    }
 
+   function is_single_player( $game_players, $is_black )
+   {
+      $arr = explode(':', $game_players);
+      if( count($arr) == 2 ) // TeamGo
+         return ( $is_black ) ? ( $arr[0] == 1 ) : ( $arr[1] == 1 );
+      else
+         return false; // ZenGo
+   }
+
    function get_game_type( $game_type=null )
    {
       static $ARR_GAME_TYPES = null;
@@ -549,6 +562,25 @@ class MultiPlayerGame
             . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 WHERE GP.gid=$gid" );
    }//update_players_end_mpgame
 
+   function get_message_defaults( $mpg_type, $mpg_gid, $mpg_move=0 )
+   {
+      switch( (int)$mpg_type )
+      {
+         case MPGMSG_RESIGN:
+            return array(
+               T_('May I resign?#mpg'),
+               "<game $mpg_gid,$mpg_move>\n"
+            );
+
+         case MPGMSG_STARTGAME:
+         default:
+            return array(
+               T_('Everybody ready to start game?#mpg'),
+               "<game $mpg_gid>\n"
+            );
+      }
+   }//get_message_defaults
+
 } //end 'MultiPlayerGame'
 
 
@@ -623,6 +655,30 @@ class GamePlayer
          error('internal_error', "GamePlayer::load_uid_for_move($gid,$group_color,$group_order)");
       return (int)@$row['uid'];
    }//load_uid_for_move
+
+   /*! \brief Returns list of Players.Handle for given game-id (and group-color). */
+   function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false )
+   {
+      global $player_row;
+
+      if( !is_numeric($gid) || $gid <= 0 )
+         error('invalid_args', "GamePlayers::load_users_for_mpgame.check.gid($gid,$group_color)");
+      if( (string)$group_color != '' && !preg_match("/^(BW|B|W|G[12])$/", $group_color) )
+         error('invalid_args', "GamePlayers::load_users_for_mpgame.check.grcol($gid,$group_color)");
+
+      $qpart_grcol = ($group_color) ? " AND GP.GroupColor='$group_color'" : '';
+      $result = db_query( "GamePlayer::load_users_for_mpgame.find($gid,$group_color)",
+            "SELECT P.Handle FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
+            "WHERE GP.gid=$gid $qpart_grcol" );
+      $out = array();
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         if( !($skip_myself && $player_row['Handle'] == $row['Handle']) )
+            $out[] = $row['Handle'];
+      }
+      mysql_free_result($result);
+      return $out;
+   }//load_users_for_mpgame
 
    function build_image_group_color( $group_color )
    {

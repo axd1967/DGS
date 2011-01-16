@@ -241,6 +241,9 @@ class ErrorCode
          $arr['multi_player_need_initial_rating'] =
             T_("Sorry, you need an initial rating to start a multi-player-game.");
 
+         $arr['multiplayer_no_users'] =
+            T_('Sorry, I can\'t find any users for the multi-player-game.');
+
          $arr['no_uid'] =
             T_("Sorry, I need to know for which user to show the data.");
 

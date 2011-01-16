@@ -32,7 +32,7 @@ require_once 'include/contacts.php';
 define('MSGBOXROWS_NORMAL', 12);
 define('MSGBOXROWS_INVITE', 6);
 
-define('MAX_MSG_RECEIVERS', 16);
+define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
 {
    $send_message = ( @$_REQUEST['send_message']
@@ -56,6 +56,7 @@ define('MAX_MSG_RECEIVERS', 16);
    if(message.php?mode=...) //with mode
       NewMessage           : from menu (or site_map)
       NewMessage&uid=      : from user info
+      NewMessage&mpmt=&mpgid=&mpcol=&mpmove= : multi-message for multi-player-game
       ShowMessage&mid=     : from message_list_body() or message_info_table() or list_messages or here
       Invite               : from menu (or site_map or introduction)
       Invite&uid=          : from user_info or show_games
@@ -75,24 +76,13 @@ define('MAX_MSG_RECEIVERS', 16);
    $my_id = $player_row['ID'];
    $folders = get_folders($my_id);
    $type = get_request_arg('type', 'NORMAL');
+   $mpg_gid = $mpg_type = 0;
 
    $dgs_message = new DgsMessage();
    if( $handle_msg_action )
       $errors = handle_send_message( $dgs_message );
    else
       $errors = array();
-
-   $arg_to = get_request_arg('to'); // single or multi-receivers
-   if( !$arg_to )
-      $arg_to = read_user_from_request(); // single
-
-   $my_rating = $player_row['Rating2'];
-   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
-
-
-   $default_subject = get_request_arg('subject');
-   $default_message = get_request_arg('message');
-   $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
    $mid = (int)@$_REQUEST['mid'];
    $other_uid = (int)@$_REQUEST['oid']; // for bulk-message
@@ -102,6 +92,28 @@ define('MAX_MSG_RECEIVERS', 16);
    elseif( @$_REQUEST['mode_dispute'] )
       $mode = 'Dispute';
    $can_reply = false;
+
+   $arg_to = get_request_arg('to'); // single or multi-receivers
+   if( !$arg_to && $mode == 'NewMessage' )
+      list( $arg_to, $mpg_type, $mpg_gid, $mpg_move ) = read_mpgame_request(); // handle multi-player-game msg-request
+   if( !$arg_to )
+      $arg_to = read_user_from_request(); // single
+
+   $my_rating = $player_row['Rating2'];
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
+
+
+   if( @$mpg_gid )
+   {
+      list( $default_subject, $default_message ) =
+         MultiPlayerGame::get_message_defaults( $mpg_type, $mpg_gid, $mpg_move );
+   }
+   else
+   {
+      $default_subject = get_request_arg('subject');
+      $default_message = get_request_arg('message');
+   }
+   $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
    $submode = $mode;
    if( $mode == 'ShowMessage' || $mode == 'Dispute' )
@@ -607,5 +619,25 @@ function read_user_from_request()
    }
    return $uhandle;
 }//read_user_from_request
+
+// read and check mpgame-request-info; returns: [ arg_to, mpg_msgtype, mpg_gid, mpg_move ]
+function read_mpgame_request()
+{
+   $gid = (int)get_request_arg('mpgid');
+   if( $gid <= 0 )
+      return array( '', 0, 0, 0 );
+
+   $col = get_request_arg('mpcol');
+   $type = (int)get_request_arg('mpmt');
+   if( $type != MPGMSG_STARTGAME && $type != MPGMSG_RESIGN )
+      error('invalid_args', "message.read_mpgame_request.check.mpmsgtype($gid,$col,$type)");
+
+   $handles = GamePlayer::load_users_for_mpgame( $gid, $col, /*skip-myself*/true );
+   if( count($handles) == 0 )
+      error('multiplayer_no_users', "message.read_mpgame_request.chk.handles($gid,$col)");
+
+   $move = (int)get_request_arg('mpmove');
+   return array( implode(' ', $handles), $type, $gid, $move );
+}//read_mpgame_request
 
 ?>

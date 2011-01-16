@@ -600,7 +600,7 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
 
 function build_form_start_game( $gid, $cmd, $errors )
 {
-   global $allow_edit;
+   global $allow_edit, $base_path;
 
    $form = new Form( 'startgame', 'game_players.php', FORM_GET, false );
    $form->add_hidden( 'gid', $gid );
@@ -618,6 +618,12 @@ function build_form_start_game( $gid, $cmd, $errors )
    $form->add_empty_row();
    if( $cnt_err == 0 ) // allowed to start game
    {
+      $form->add_row( array(
+            'TEXT', image( $base_path."images/msg.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
+                  . anchor( "message.php?mode=NewMessage".URI_AMP."mpgid=$gid"
+                              . URI_AMP."mpmt=".MPGMSG_STARTGAME.URI_AMP."preview=1",
+                            T_('Send message to all game-players') ), ));
+      $form->add_empty_row();
       $form->add_row( array(
             'TEXT', T_('Do you agree to start the game now?'), ));
       if( $allow_edit ) // game-master
