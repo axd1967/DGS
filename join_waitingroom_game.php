@@ -65,6 +65,7 @@ require_once( "include/contacts.php" );
       error('waitingroom_game_not_found', "join_waitingroom_game.find_game2($wr_id,$my_id)");
 
    $opponent_ID = $game_row['uid'];
+   $gid = (int)@$game_row['gid'];
 
    if( @$_REQUEST['delete'] == 't' )
    {
@@ -74,7 +75,6 @@ require_once( "include/contacts.php" );
       db_query( "join_waitingroom_game.delete($wr_id)",
          "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
-      $gid = @$game_row['gid'];
       if( $gid )
          MultiPlayerGame::revoke_offer_game_players( $gid, $game_row['nrGames'], GPFLAG_WAITINGROOM );
 
@@ -100,17 +100,22 @@ require_once( "include/contacts.php" );
       error('waitingroom_own_game');
 
    if( $game_row['MustBeRated'] == 'Y' &&
-       !($player_row['Rating2'] >= $game_row['Ratingmin']
-         && $player_row['Rating2'] <= $game_row['Ratingmax']) )
+       !($player_row['Rating2'] >= $game_row['Ratingmin'] && $player_row['Rating2'] <= $game_row['Ratingmax']) )
       error('waitingroom_not_in_rating_range');
 
    if( !$game_row['goodmingames'] )
       error('waitingroom_not_enough_rated_fin_games',
-         "join_waitingroom_game.min_rated_fin_games({$game_row['MinRatedGames']})");
+         "join_waitingroom_game.min_rated_fin_games($gid,$my_id,{$game_row['MinRatedGames']})");
 
    if( !$game_row['goodsameopp'] )
       error('waitingroom_not_same_opponent',
-         "join_waitingroom_game.same_opponent({$game_row['SameOpponent']})");
+         "join_waitingroom_game.same_opponent($gid,$my_id,{$game_row['SameOpponent']})");
+
+   if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
+   {
+      if( GamePlayer::exists_game_player($gid, $my_id) )
+         error('waitingroom_not_same_opponent', "join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
+   }
 
    $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 

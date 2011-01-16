@@ -81,7 +81,7 @@ define('KEY_GROUP_ORDER', 'gpo');
 
    // load data
    $grow = load_game( $gid );
-   $arr_game_players = load_game_players( $gid ); // -> $arr_users, $arr_free_slots
+   $arr_game_players = load_game_players( $gid ); // -> $arr_users, $arr_free_slots, $has_wroom_entry
    $status = $grow['Status'];
    $game_type = $grow['GameType'];
    $cnt_free_slots = count($arr_free_slots);
@@ -104,10 +104,10 @@ define('KEY_GROUP_ORDER', 'gpo');
       {
          if( $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
          {
-            if( $is_save )
+            if( $is_save && !$has_wroom_entry )
                add_waiting_room_mpgame( $grow, $my_id );
             else
-               $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd );
+               $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd, $has_wroom_entry );
          }
          elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
          {
@@ -318,12 +318,13 @@ function load_game( $gid )
 }//load_game
 
 // RETURN: [ GamePlayer, ... ]
-// global OUTPUT: $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer
+// global OUTPUT: $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer, $has_wroom_entry = T|F
 function load_game_players( $gid )
 {
-   global $arr_users, $arr_free_slots;
+   global $arr_users, $arr_free_slots, $has_wroom_entry;
    $arr_users = array();
    $arr_free_slots = array();
+   $has_wroom_entry = false;
 
    $result = db_query( "game_players.find.game_players($gid)",
       "SELECT GP.*, " .
@@ -356,6 +357,8 @@ function load_game_players( $gid )
          $arr_users[$uid] = $gp;
       if( ($gp->Flags & GPFLAG_SLOT_TAKEN) == 0 )
          $arr_free_slots[] = $gp;
+      if( ($gp->Flags & (GPFLAG_RESERVED|GPFLAG_WAITINGROOM)) == (GPFLAG_RESERVED|GPFLAG_WAITINGROOM) )
+         $has_wroom_entry = true;
    }
    mysql_free_result($result);
 
@@ -496,13 +499,31 @@ function allow_change_group_order( $game_type, $group_color )
        || ( $game_type == GAMETYPE_ZEN_GO  && $group_color == GPCOL_BW );
 }
 
-function build_form_add_waiting_room( $gid, $slot_count, $cmd )
+function build_form_add_waiting_room( $gid, $slot_count, $cmd, $has_wroom_entry )
 {
    $form = new Form( 'addgame', 'game_players.php', FORM_POST );
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
    $form->add_empty_row();
-   $form->add_row( array( 'HEADER', T_('Add new game to waiting room') ) );
+   $form->add_row( array( 'HEADER', T_('Add new game to waiting room') ));
+
+   if( $has_wroom_entry )
+   {
+      $wrow = mysql_single_fetch( "game_players.build_form_add_waiting_room.find_wroom($gid)",
+         "SELECT ID FROM Waitingroom WHERE gid=$gid LIMIT 1" );
+      if( $wrow )
+      {
+         $wr_id = (int)$wrow['ID'];
+         $form->add_row( array( 'TEXT',
+               T_('There can only be one waiting-room entry for a multi-player-game!')
+               . "<br>\n"
+               . T_('To change it you have to re-add it after deleting the existing one.')
+               . "<br><br>\n" . SMALL_SPACING.SMALL_SPACING
+               . anchor( "waiting_room.php?info=$wr_id#joingameForm", T_('Show waiting-room entry (to delete)' ) )
+               ));
+         return $form;
+      }
+   }
 
    // how many slots to use: 1..N
    $arr_slots = build_num_range_map( 1, $slot_count );

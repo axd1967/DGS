@@ -419,25 +419,32 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
    game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated);
 
    $is_my_game = ($game_row['other_id'] == $player_row['ID']);
+   $gid = (int)$game_row['gid'];
+   if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
+      $can_join = !GamePlayer::exists_game_player( $gid, (int)$player_row['ID'] );
+   else
+      $can_join = true;
 
-   $game_form->add_hidden( 'id', $game_row['ID']);
+   $game_form->add_hidden( 'id', $game_row['ID'] ); // wroom-id
    if( $is_my_game )
    {
       $game_form->add_row( array(
             'HIDDEN', 'delete', 't',
             'SUBMITBUTTON', 'deletebut', T_('Delete'),
-         ) );
+         ));
    }
-   else if( $game_row['haverating'] && $game_row['goodrating']
-         && $game_row['goodmingames'] && $game_row['goodsameopp'] )
+   else if( $can_join && $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames']
+         && $game_row['goodsameopp'] )
    {
       $game_form->add_row( array(
-            'SUBMITBUTTONX', 'join', T_('Join'),
-                        array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
-         ) );
+            'SUBMITBUTTONX', 'join', T_('Join'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+         ));
    }
+
    $game_form->echo_string(1);
-}
+   if( !$is_my_game && !$can_join )
+      echo span('MPGWarning', T_('Already joined this multi-player-game!'));
+}//add_old_game_form
 
 function determine_color( $Handicaptype, $is_my_game, $iamblack )
 {

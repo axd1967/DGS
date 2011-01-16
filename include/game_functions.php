@@ -656,6 +656,14 @@ class GamePlayer
       return (int)@$row['uid'];
    }//load_uid_for_move
 
+   /*! \brief Returns true, if GamePlayer-entry exists for given game-id and user-id. */
+   function exists_game_player( $gid, $uid )
+   {
+      $row = mysql_single_fetch( "GamePlayer::load_game_player_by_uid($gid,$uid)",
+            "SELECT ID FROM GamePlayers WHERE gid=$gid AND uid=$uid LIMIT 1" );
+      return (bool) $row;
+   }//exists_game_player
+
    /*! \brief Returns list of Players.Handle for given game-id (and group-color). */
    function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false )
    {

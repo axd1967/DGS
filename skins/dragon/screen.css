@@ -292,6 +292,11 @@ span.FormWarning {
    color: darkred;
 }
 
+span.MPGWarning {
+   font-weight: bold;
+   color: darkred;
+}
+
 span.Maintenance {
    font-weight: bold;
    background: red;
