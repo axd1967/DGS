@@ -80,9 +80,13 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Team-Go (N:M) = two teams of 1..N,M players taking a match
       * Zen-Go (N)    = one group of players alternating colors
 
-      * added game-players-page to setup and manage multi-player-game
-      * delete-game forbidden for multi-player-game
+      * Added game-players-page to setup and manage multi-player-game
+      * Delete-game forbidden for multi-player-game
       * max. 16 players
+
+      * Ask other players for consent by sending bulk-message to:
+         * ask all game-players to start game
+         * ask other team-members if resignation is acceptable
 
    * Game page:
       * Delete game on opponents turn (within first 10 moves)

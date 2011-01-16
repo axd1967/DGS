@@ -19,6 +19,16 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-01-16 juga
+
+   * include/game_functions.php (class MultiPlayerGame.is_single_player, ~.get_message_defaults;
+       class GamePlayer.load_users_for_mpgame),
+     include/error_codes.php (ErrorCode.init),
+     game_players.php (build_form_start_game),
+     game.php, message.php (read_mpgame_request), NEWS:
+   - go to send-message-page to ask for resignation or start a game using bulk-message,
+     only ask if there are more than one game-players in same team
+
 2011-01-15 juga
 
    * include/message_functions.php (message_info_table, message_list_query, message_list_body;
