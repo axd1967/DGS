@@ -576,8 +576,6 @@ function get_alt_arg( $n1, $n2)
    $TheBoard->draw_board( $may_play, $action, $stonestring);
    //TODO: javascript move buttons && numbers hide
 
-   db_close(); // text with DGS-markup needs DB-access
-
    //messages about actions
    if( $validation_step )
       $extra_infos[T_('Hit "Submit" to confirm')] = 'Guidance';
@@ -982,8 +980,9 @@ function draw_game_info( &$game_row, $board, $tourney )
 
    //black rows
    $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'] );
+   $blackStoneImg = image( "{$base_path}17/b.gif", T_('Black'), null, 'class="InTextStone"' );
    echo '<tr id="blackInfo">', "\n";
-   echo "<td class=Color>", image( "{$base_path}17/b.gif", T_('Black'), null, 'class="InTextStone"' ), "</td>\n";
+   echo "<td class=Color>$blackStoneImg</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle']),
       ( $blackOffTime ? SMALL_SPACING . $blackOffTime : '' ),
@@ -1011,8 +1010,9 @@ function draw_game_info( &$game_row, $board, $tourney )
 
    //white rows
    $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'] );
+   $whiteStoneImg = image( "{$base_path}17/w.gif", T_('White'), null, 'class="InTextStone"' );
    echo '<tr id="whiteInfo">', "\n";
-   echo "<td class=Color>", image( "{$base_path}17/w.gif", T_('White'), null, 'class="InTextStone"' ), "</td>\n";
+   echo "<td class=Color>$whiteStoneImg</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle']),
       ( $whiteOffTime ? SMALL_SPACING . $whiteOffTime : '' ),
@@ -1055,12 +1055,33 @@ function draw_game_info( &$game_row, $board, $tourney )
    //multi-player-game rows
    if( $game_row['GameType'] != GAMETYPE_GO )
    {
+      global $move, $player_row;
+
+      list( $group_color, $group_order, $move_color ) =
+         MultiPlayerGame::calc_game_player_for_move(
+            $game_row['GamePlayers'], $move, $game_row['Handicap'], -1 );
+      $mpg_uid = GamePlayer::load_uid_for_move( $game_row['ID'], $group_color, $group_order );
+
       echo "<tr id=\"gameRules\">\n"
          , '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n"
          , "<td colspan=\"", ($cols-1), "\">",
             T_('Game Type').': ',
             MultiPlayerGame::format_game_type($game_row['GameType'], $game_row['GamePlayers']), "</td>\n"
          , "</tr>\n";
+
+      if( $mpg_uid > 0 )
+      {
+         echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
+            "<dl class=BoardInfos><dd>",
+               T_('Last move by:'), SMALL_SPACING,
+                  ($move_color == GPCOL_B ? $blackStoneImg : $whiteStoneImg),
+                  MINI_SPACING,
+                  user_reference( REF_LINK, 1, '', $mpg_uid ),
+                  SMALL_SPACING,
+                  echo_rating( @$player_row['Rating2'], true, $player_row['ID'] ),
+            "</dd></dl>\n",
+            "</td></tr>\n";
+      }
    }
 
    //game rows
