@@ -19,15 +19,40 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-01-24 juga
+
+   * include/game_functions.php (MultiPlayerGame.calc_game_player_for_move),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     include/make_game.php (create_game),
+     game_players.php (build_table_game_players, start_multi_player_game),
+     game.php (draw_game_info),
+     confirm.php, quick_play.php:
+   - show moving-player in board-info-box on viewing specific move on game-page
+
+   * include/connect2mysql.php (db_close),
+     game.php:
+   - removed db_close(), because ...
+     - 1. took two days debugging to find that connection still needed, so at wrong place
+     - 2. DGS-tag resolving in messages may still need connection
+   - added debug-log of db_close()
+
 2011-01-16 juga
+
+   * include/game_functions.php (GamePlayer.exists_game_player),
+     game_players.php (load_game_players, build_form_add_waiting_room),
+     join_waitingroom_game.php, waiting_room.php,
+     skins/dragon/screen.css:
+   - bugfix: assure that player can join multi-player-game only once
+     by avoiding more than one waiting-room-entry for MP-game
 
    * include/game_functions.php (class MultiPlayerGame.is_single_player, ~.get_message_defaults;
        class GamePlayer.load_users_for_mpgame),
      include/error_codes.php (ErrorCode.init),
      game_players.php (build_form_start_game),
      game.php, message.php (read_mpgame_request), NEWS:
-   - go to send-message-page to ask for resignation or start a game using bulk-message,
-     only ask if there are more than one game-players in same team
+   - go to send-message-page to ask for resignation or start a game using bulk-message
+     - only ask for resignation, if there are more than one game-players in same team
+     - start-game-message to all game-players
 
 2011-01-15 juga
 
