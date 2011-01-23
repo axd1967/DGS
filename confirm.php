@@ -229,7 +229,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    $mp_query = '';
    if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == 'handicap') )
    {
-      list( $group_color, $group_order )
+      list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
       $mp_gp = GamePlayer::load_game_player( $gid, $group_color, $group_order );
       $mp_uid = $mp_gp->uid;

@@ -520,11 +520,11 @@ class MultiPlayerGame
    }//join_waitingroom_game
 
    /*!
-    * \brief Returns arr( GroupColor, GroupOrder ) to identify current game-player to move.
+    * \brief Returns arr( GroupColor, GroupOrder, MoveColor ) to identify current game-player to move.
     * \param $game_players Games.GamePlayers = game-players-info
     * \param $game_moves Games.Moves = move-counter starting at 0
     * \param $handicap Games.Handicap = number of handicap-stones.
-    * \param $add_moves how many moves in the future (setting-handicap = 1 move)
+    * \param $add_moves how many moves in the future (setting-handicap = 1 move); can be <0
     */
    function calc_game_player_for_move( $game_players, $game_moves, $handicap, $add_moves=0 )
    {
@@ -533,17 +533,20 @@ class MultiPlayerGame
       else
          $moves = $game_moves;
       $moves += $add_moves;
+      if( $moves < 0 )
+         $moves = 0;
+      $movecol = ($moves & 1) ? GPCOL_W : GPCOL_B;
 
       $arr = explode(':', $game_players);
       if( count($arr) == 2 ) // Team-Go
       {
          if( $moves & 1 ) // odd = WHITE
-            return array( GPCOL_W, ( ( ($moves - 1) >> 1 ) % (int)$arr[1] ) + 1 );
+            return array( GPCOL_W, ( ( ($moves - 1) >> 1 ) % (int)$arr[1] ) + 1, $movecol );
          else // even = BLACK
-            return array( GPCOL_B, ( ( $moves >> 1 ) % (int)$arr[0] ) + 1 );
+            return array( GPCOL_B, ( ( $moves >> 1 ) % (int)$arr[0] ) + 1, $movecol );
       }
       else // Zen-Go
-         return array( GPCOL_BW, ($moves % (int)$game_players) + 1 );
+         return array( GPCOL_BW, ($moves % (int)$game_players) + 1, $movecol );
    }//calc_game_player_for_move
 
    function update_players_start_mpgame( $gid )

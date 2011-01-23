@@ -464,7 +464,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       // Black has set handicap-stones -> setup 2nd-next player in multi-player-game
       if( $game_type != GAMETYPE_GO )
       {
-         list( $group_color, $group_order )
+         list( $group_color, $group_order, $gpmove_color )
             = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );
          $next_black_id = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
          db_query( "create_game.update_games.next2_gp($gid,$game_type,$next_black_id)",

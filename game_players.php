@@ -407,7 +407,7 @@ function build_table_game_players( $grow, $cmd, &$form )
    $chg_group_order = ($cmd == CMD_CHANGE_ORDER) && $form;
    $arr_group_colors = ($chg_group_color) ? GamePlayer::get_group_color_text() : null;
 
-   list( $next_gr_col, $next_gr_order )
+   list( $next_gr_col, $next_gr_order, $gpmove_color )
       = MultiPlayerGame::calc_game_player_for_move( $grow['GamePlayers'], $grow['Moves'], $grow['Handicap'], 1 );
 
    $utable = new Table( 'GamePlayers', 'game_players.php' );
@@ -999,13 +999,13 @@ function start_multi_player_game( $grow, $upd_game_players )
 
    $arr_ratings = calc_group_ratings();
 
-   list( $group_color, $group_order )
+   list( $group_color, $group_order, $gpmove_color )
       = MultiPlayerGame::calc_game_player_for_move( $upd_game_players, 0, $handicap, 0 );
    $black_id = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
    $black_row = build_start_game_user_row( $black_id );
    $black_row['Rating2'] = $arr_ratings[($game_type == GAMETYPE_ZEN_GO) ? GPCOL_BW : GPCOL_B];
 
-   list( $group_color, $group_order )
+   list( $group_color, $group_order, $gpmove_color )
       = MultiPlayerGame::calc_game_player_for_move( $upd_game_players, 0, $handicap, 1 );
    $white_id = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
    $white_row = build_start_game_user_row( $white_id );
