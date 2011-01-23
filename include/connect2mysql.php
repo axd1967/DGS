@@ -130,7 +130,7 @@ function admin_log( $uid, $handle, $err)
 function db_close()
 {
    global $dbcnx;
-   //error_log("db_close with dbcnx=$dbcnx");
+   if( DBG_QUERY>1 ) error_log("db_close(): dbcnx=[$dbcnx]");
    if( $dbcnx ) // $dbcnx is a resource
       @mysql_close( $dbcnx);
    $dbcnx= 0;
