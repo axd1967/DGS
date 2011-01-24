@@ -128,7 +128,7 @@ class Feature
       if( is_null($subject) )
          $this->subject = '';
       else
-         $this->subject = substr( preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) ), 255);
+         $this->subject = substr( preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) ), 0, 255);
    }
 
    /*! \brief Returns true, if feature can be voted on (NEW status); no user-specific checks. */
