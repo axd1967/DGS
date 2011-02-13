@@ -634,7 +634,7 @@ function send_register_notification( $type, $tp, $my_id )
             "$sep<b>" . T_('Last user message:') . "</b>\n" . $tp->UserMessage . "\n" .
             "$sep<b>" . T_('Last admin message:') . "</b>\n" . $tp->AdminMessage ),
       sprintf( $subj, $tid ),
-      $uid, '', true,
+      $uid, '', /*notify*/true,
       0/*sys-msg*/, 'NORMAL', 0 );
 
    return urlencode( sprintf( "$msg " . T_('Message sent to user!#tourney'), $tp->User->Handle ) );

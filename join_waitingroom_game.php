@@ -261,7 +261,7 @@ require_once( "include/contacts.php" );
       $message .= "* <game $gid>\n";
 
    send_message( 'join_waitingroom_game', $message, $subject
-      , $opponent_ID, '', true
+      , $opponent_ID, '', /*notify*/true
       , 0, 'NORMAL', $gid);
 
 

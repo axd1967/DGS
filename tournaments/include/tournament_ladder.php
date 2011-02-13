@@ -855,7 +855,7 @@ class TournamentLadder
       return send_message( "$dbgmsg.notify($tid,$uid)",
          trim( $body . "\n" . TournamentLadder::get_notes_user_removed() ),
          sprintf( T_('Removal from tournament #%s'), $tid ),
-         $uid, '', true,
+         $uid, '', /*notify*/true,
          0/*sys-msg*/, 'NORMAL', 0 );
    }
 
