@@ -1285,12 +1285,11 @@ function send_message( $debugmsg, $text='', $subject=''
          "UPDATE Messages SET Thread='$mid', Level=0 WHERE ID='$mid' LIMIT 1" );
    }
 
-   $need_reply= ( ($from_id > 0 && $type == 'INVITATION') ?'M' :'N' );
-
+   $need_reply_val = ( $from_id > 0 && $type == 'INVITATION' ) ? 'M' : 'N';
    foreach( $receivers as $uid => $row ) //exclude to myself
    {
       if( $from_id > 0 )
-         $query[]= "$mid,$uid,'N','$need_reply',".FOLDER_NEW;
+         $query[]= "$mid,$uid,'N','$need_reply_val',".FOLDER_NEW;
       else //system messages
          $query[]= "$mid,$uid,'S','N',".FOLDER_NEW;
       $receivers_folder_new[] = $uid;
@@ -2505,7 +2504,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          if( $uid > GUESTS_ID_MAX )
             $handles[]= $handle;
          if( count($handles) > 0 )
-            send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false, 0);
+            send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );
 
          $email= $player_row['Email'];
          if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
@@ -2949,7 +2948,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    if( $safe_it )
       $whitename = make_html_safe($whitename);
    if( $move>0 )
-      $whitename.= " ,$move";
+      $whitename .= sprintf( ', %s #%s', T_('Move#game'), $move );
    if( $link && $legal )
    {
       $url = ( $is_std_go || $status != GAME_STATUS_SETUP )
@@ -2970,7 +2969,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
         $whitename = "<$url>$whitename</A>" ;
    }
    return $whitename;
-}
+}//game_reference
 
 // format: Tournament #n [title]
 function tournament_reference( $link, $safe_it, $class, $tid )
@@ -3201,8 +3200,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
             $to_ids[] = $row['pid'];
 
          send_message( "delete_all_observers($gid)", $Text, $Subject
-            ,$to_ids, '', /*notify*/false
-            , 0, 'NORMAL', $gid);
+            , $to_ids, '', /*notify*/false
+            , /*sys-msg*/0, 'NORMAL', $gid);
       }
       mysql_free_result($result);
    }
