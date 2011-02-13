@@ -280,7 +280,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * &lt;tourney id> : showing link to corresponding tournament page
       * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
         (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
-      * &lt;game gid[,move]> : Changed format for move-number in game reference
+      * &lt;game gid[,move]> : Added game-type and changed format for move-number
 
 
    Minor changes:
