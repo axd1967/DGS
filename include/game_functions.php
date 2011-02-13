@@ -667,8 +667,12 @@ class GamePlayer
       return (bool) $row;
    }//exists_game_player
 
-   /*! \brief Returns list of Players.Handle for given game-id (and group-color). */
-   function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false )
+   /*!
+    * \brief Returns list of Players.Handle for given game-id (and group-color).
+    * \param $arr_users if non-null array given, save as arr_users["$group_color:$group_order"]
+    *        = ( GroupColor/GroupOrder/uid/Handle/Name/Rating2/Sessioncode/Sessionexpire => values, ... )
+    */
+   function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false, &$arr_users=null )
    {
       global $player_row;
 
@@ -679,17 +683,30 @@ class GamePlayer
 
       $qpart_grcol = ($group_color) ? " AND GP.GroupColor='$group_color'" : '';
       $result = db_query( "GamePlayer::load_users_for_mpgame.find($gid,$group_color)",
-            "SELECT P.Handle FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
+            "SELECT GP.GroupColor, GP.GroupOrder, GP.uid, " .
+               "P.Handle, P.Name, P.Rating2, P.Sessioncode, " .
+               "UNIX_TIMESTAMP(P.Sessionexpire) AS X_Sessionexpire " .
+            "FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
             "WHERE GP.gid=$gid $qpart_grcol" );
       $out = array();
       while( $row = mysql_fetch_array( $result ) )
       {
          if( !($skip_myself && $player_row['Handle'] == $row['Handle']) )
+         {
             $out[] = $row['Handle'];
+            if( is_array($arr_users) )
+               $arr_users["{$row['GroupColor']}:{$row['GroupOrder']}"] = $row;
+         }
       }
       mysql_free_result($result);
       return $out;
    }//load_users_for_mpgame
+
+   /*! \brief Returns user-map ( uid/Handle/etc => vals ) as created in arr_users by load_users_for_mpgame()-method. */
+   function get_user_info( &$arr_users, $group_color, $group_order )
+   {
+      return @$arr_users["{$group_color}:{$group_order}"];
+   }//get_user_info
 
    function build_image_group_color( $group_color )
    {

@@ -22,6 +22,7 @@ require_once 'include/quick_common.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/rating.php';
+require_once 'include/game_functions.php';
 
 
 /* SGF specs (version 4):
@@ -130,6 +131,12 @@ class SgfBuilder
    var $sgf_pass_highlight;
    var $sgf_score_highlight;
 
+   // multi-player-game options
+   var $mpg_node_add_user;
+   var $mpg_users;
+   var $mpg_active_user;
+   var $is_mpgame;
+
    // load data from database
 
    var $gid;
@@ -179,6 +186,12 @@ class SgfBuilder
       //0=no highlight, 1=with Name property, 2=in comments, 3=both
       $this->sgf_pass_highlight = 0;
       $this->sgf_score_highlight = 0;
+
+      // multi-player-game options
+      $this->mpg_node_add_user = true;
+      $this->mpg_users = array();
+      $this->mpg_active_user = null;
+      $this->is_mpgame = false;
 
 
       $this->gid = $gid;
@@ -237,9 +250,9 @@ class SgfBuilder
 
    function sgf_echo_comment( $com, $trim=true )
    {
-      if( !$com )
+      $comment_trimmed = ($trim) ? trim($com) : $com;
+      if( (string)$comment_trimmed == '' )
          return false;
-      $comment_trimmed = ($trim) ? ltrim( $com, "\r\n" ) : $com;
       $this->echo_sgf( "\nC[" .
          str_replace( "]","\\]",
             str_replace("\\","\\\\", reverse_htmlentities($comment_trimmed) ))
@@ -420,14 +433,41 @@ class SgfBuilder
          'white.Name AS Whitename, ' .
          'white.Handle AS Whitehandle, ' .
          "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
-         'FROM (Games, Players AS black, Players AS white) ' .
-         "WHERE Games.ID={$this->gid} AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1"
+         'FROM Games ' .
+            'LEFT JOIN Players AS black ON black.ID=Games.Black_ID ' .
+            'LEFT JOIN Players AS white ON white.ID=Games.White_ID ' .
+         "WHERE Games.ID={$this->gid} LIMIT 1"
          );
       if( @mysql_num_rows($result) != 1 )
          error('unknown_game', "SgfBuilder.load_game_info2({$this->gid})");
+      $grow = mysql_fetch_array($result);
 
-      $this->game_row = mysql_fetch_array($result);
+      $status = $grow['Status'];
+      if( !($status == GAME_STATUS_PLAY || $status == GAME_STATUS_PASS || $status == GAME_STATUS_SCORE
+            || $status == GAME_STATUS_SCORE2 || $status == GAME_STATUS_FINISHED) )
+         error('invalid_game_status', "SgfBuilder.load_game_info.check.status({$this->gid},$status)");
+
+      $this->game_row = $grow;
+      $this->is_mpgame = ( $this->game_row['GameType'] != GAMETYPE_GO );
+      if( $this->is_mpgame )
+         GamePlayer::load_users_for_mpgame( $this->gid, '', false, $this->mpg_users );
+
       return $this->game_row;
+   }
+
+   function find_mpg_user( $handle )
+   {
+      $result = null;
+      foreach( $this->mpg_users as $key => $arr )
+      {
+         if( $arr['Handle'] == $handle )
+         {
+            $result = $arr;
+            break;
+         }
+      }
+      $this->mpg_active_user = $result;
+      return $result;
    }
 
    function load_player_game_notes( $uid )
@@ -531,7 +571,7 @@ class SgfBuilder
       return $filename;
    }
 
-   // owned_comments: BLACK|WHITE=viewed by B/W-player, DAME=viewed by other user
+   // owned_comments: BLACK|WHITE=viewed by B/W-player (or game-player for MP-game), DAME=viewed by other user
    function build_sgf( $filename, $owned_comments )
    {
       $this->build_sgf_start( $filename );
@@ -553,8 +593,8 @@ class SgfBuilder
          . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
          . "\nGN[" . SgfBuilder::sgf_simpletext($filename) . "]"
          . "\nSO[".HOSTBASE."game.php?gid={$this->gid}]"
-         . "\nPB[" . SgfBuilder::sgf_simpletext("$Blackname ($Blackhandle)") . "]"
-         . "\nPW[" . SgfBuilder::sgf_simpletext("$Whitename ($Whitehandle)") . "]"
+         . "\nPB[" . SgfBuilder::sgf_simpletext($this->buildPlayerName(BLACK), false) . "]"
+         . "\nPW[" . SgfBuilder::sgf_simpletext($this->buildPlayerName(WHITE), false) . "]"
          );
 
       // ratings
@@ -562,6 +602,35 @@ class SgfBuilder
          "\nBR[" . SgfBuilder::sgf_echo_rating($Blackrating) . ']' .
          "\nWR[" . SgfBuilder::sgf_echo_rating($Whiterating) . ']'
          );
+      if( $this->is_mpgame )
+      {
+         $teams = array(); // group-color => [ user, ... ]
+         $mpg_general_comment = "\n\nGame Players (Order. Color: Name (Handle), Current Rating):";
+         $last_order = 0;
+         foreach( $this->mpg_users as $key => $arr )
+         {
+            $gr_col = $arr['GroupColor'];
+            $gr_order = $arr['GroupOrder'];
+            $teams[$gr_col][] = $arr['Handle'];
+
+            if( $gr_order <= $last_order )
+               $mpg_general_comment .= "\n";
+            $last_order = $gr_order;
+            $mpg_general_comment .=
+               sprintf( "\n   %d. %s: %s (%s), %s - ELO %d", $gr_order, $gr_col, $arr['Name'], $arr['Handle'],
+                        SgfBuilder::sgf_echo_rating($arr['Rating2'],true), $arr['Rating2'] );
+         }
+         if( $GameType == GAMETYPE_ZEN_GO )
+            $this->echo_sgf("\nWT[" . SgfBuilder::sgf_simpletext(implode(' ', $teams[GPCOL_BW])) . ']');
+         else //TEAM_GO
+         {
+            $this->echo_sgf("\nBT[" . SgfBuilder::sgf_simpletext(implode(' ', $teams[GPCOL_B])) . ']');
+            $this->echo_sgf("\nWT[" . SgfBuilder::sgf_simpletext(implode(' ', $teams[GPCOL_W])) . ']');
+         }
+         $game_players = $GamePlayers;
+      }
+      else
+         $game_players = '1:1';
 
       // move-id
       $this->echo_sgf("\nXM[$Moves]");
@@ -569,6 +638,7 @@ class SgfBuilder
       // general comment: game-id, rated-game, start/end-ratings
       $w_rating_start = ( is_valid_rating($White_Start_Rating) ) ? SgfBuilder::sgf_echo_rating($White_Start_Rating,true) : '';
       $general_comment = "Game ID: {$this->gid}"
+         . "\nGame Type: $GameType ($game_players)"
          . "\nRated: ". ( $Rated=='N' ? 'N' : 'Y' )
          . "\n"
          . ( is_valid_rating($White_Start_Rating)
@@ -591,6 +661,8 @@ class SgfBuilder
                             SgfBuilder::sgf_echo_rating($Black_End_Rating,true), $Black_End_Rating )
                : "\nBlack End Rating: ?" );
       }
+      if( $this->is_mpgame )
+         $general_comment .= $mpg_general_comment;
       $this->echo_sgf( "\nGC[$general_comment]" );
 
       // NOTE: time-properties are noted in seconds, which on turn-based servers
@@ -695,33 +767,58 @@ class SgfBuilder
                $this->array[$PosX][$PosY] = $Stone;
 
                //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-               if( $owned_comments == BLACK || $owned_comments == WHITE )
+               if( $Handicap == 0 || $MoveNr >= $Handicap )
                {
-                  if( $Status != GAME_STATUS_FINISHED && $owned_comments != $Stone )
-                     $Text = trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text));
-
-                  if( $Text )
-                     $this->node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname ) . ': ' . $Text;
-               }
-               else //SGF query from an observer
-               {
-                  if( $Status != GAME_STATUS_FINISHED )
-                     $Text = preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $Text);
-
-                  $nr_matches = preg_match_all(
-                        "'(<c(omment)? *>(.*?)</c(omment)? *>)".
-                        "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
-                        , $Text, $matches );
-                  for( $i=0; $i < $nr_matches; $i++ )
+                  if( $this->is_mpgame )
                   {
-                     $Text = trim($matches[3][$i]);
-                     if( !$Text )
-                        $Text = trim($matches[7][$i]);
-                     if( $Text )
-                        $this->node_com .= "\n" . ( $Stone == WHITE ? $Whitename : $Blackname ) . ': ' . $Text;
+                     // get player of current move
+                     list( $group_color, $group_order, $move_color ) =
+                        MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $MoveNr, $Handicap, -1 );
+                     $mpg_user = GamePlayer::get_user_info( $this->mpg_users, $group_color, $group_order );
+                     $player_txt = SgfBuilder::formatPlayerName($mpg_user);
+
+                     if( is_array($this->mpg_active_user) ) // is game-player of MP-game
+                     {
+                        $is_move_player = ( is_array($mpg_user) && $mpg_user['uid'] == $this->mpg_active_user['uid'] );
+                        if( $Status != GAME_STATUS_FINISHED && !$is_move_player )
+                           $Text = remove_hidden_game_tags($Text);
+
+                        if( (string)$Text != '' )
+                           $this->node_com .= "\n$player_txt: $Text";
+                        else if( $this->mpg_node_add_user )
+                           $this->node_com .= "\n$player_txt";
+                     }
+                     else // observer
+                     {
+                        if( $Status != GAME_STATUS_FINISHED )
+                           $Text = remove_hidden_game_tags($Text);
+
+                        $Text = game_tag_filter( $Text, /*incl-tags*/false );
+                        if( (string)$Text != '' )
+                           $this->node_com .= "\n$player_txt: $Text";
+                        else if( $this->mpg_node_add_user )
+                           $this->node_com .= "\n$player_txt";
+                     }
                   }
-               }
-               $Text = '';
+                  else if( $owned_comments == BLACK || $owned_comments == WHITE )
+                  {
+                     if( $Status != GAME_STATUS_FINISHED && $owned_comments != $Stone )
+                        $Text = remove_hidden_game_tags($Text);
+
+                     if( (string)$Text != '' )
+                        $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
+                  }
+                  else //SGF query from an observer
+                  {
+                     if( $Status != GAME_STATUS_FINISHED )
+                        $Text = remove_hidden_game_tags($Text);
+
+                     $Text = game_tag_filter( $Text, /*incl-tags*/false );
+                     if( (string)$Text != '' )
+                        $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
+                  }
+                  $Text = '';
+               }//move-msg
 
                if( $MoveNr <= $Handicap && $this->use_AB_for_handicap )
                {// handicap
@@ -876,15 +973,33 @@ class SgfBuilder
 
    function build_sgf_end( $owned_comments )
    {
-      $notes = ( $owned_comments == BLACK || $owned_comments == WHITE ) ? rtrim($this->player_notes) : '';
-      if( !empty($notes) )
-         $this->node_com .= "\n\nNotes - " . ( $owned_comments == WHITE ? $this->game_row['Whitename'] : $this->game_row['Blackname'] )
-                          . ":\n" . $notes ;
+      $notes = ( $owned_comments == BLACK || $owned_comments == WHITE ) ? trim($this->player_notes) : '';
+      if( (string)$notes != '' )
+      {
+         $player_txt = $this->buildPlayerName( $owned_comments, $this->is_mpgame );
+         $this->node_com .= "\n\nNotes - $player_txt:\n" . $notes ;
+      }
 
       $this->sgf_echo_comment( $this->node_com, false ); // no trim
       $this->node_com = '';
 
       $this->echo_sgf( "\n)\n" );
+   }
+
+   function buildPlayerName( $stone=DAME, $is_mpgame )
+   {
+      if( $is_mpgame )
+      {
+         return (is_array($this->mpg_active_user))
+            ? sprintf( '%s (%s)', $this->mpg_active_user['Name'], $this->mpg_active_user['Handle'] )
+            : '[?]';
+      }
+      else
+      {
+         return ( $stone == WHITE )
+            ? sprintf( '%s (%s)', $this->game_row['Whitename'], $this->game_row['Whitehandle'] )
+            : sprintf( '%s (%s)', $this->game_row['Blackname'], $this->game_row['Blackhandle'] );
+      }
    }
 
 
@@ -955,6 +1070,11 @@ class SgfBuilder
          RULESET_CHINESE  => 'Chinese',
       );
       return ( !is_null($ruleset) && isset($arr[$ruleset]) ) ? $arr[$ruleset] : 'Japanese';
+   }
+
+   function formatPlayerName( $arr )
+   {
+      return (is_array($arr)) ? sprintf( '%s (%s)', $arr['Name'], $arr['Handle'] ) : '';
    }
 
 } // end of 'SgfBuilder'

@@ -981,7 +981,7 @@ Purpose:
 
 Request:
 
-   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>
+   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&mpg=<MPG>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>
 
 Important Notes:
 
@@ -1007,6 +1007,9 @@ Options:
       - 1 = try to return private comments (for players only),
         including private notes on game
       - N = return NO comments or notes at all
+
+   <MPG> = int          ; default = 0, flags for multi-player-game only
+      - 1 (bit 0) = don't include user-info on each move-node
 
    <QMODE> = 0 | 1      ; default = 0
       - 0 = exit on error (default)
@@ -1044,8 +1047,8 @@ Response (SGF-properties):
    in alphabetical order:
 
       # SGF-standard properties:
-      AB, AP, B, BR, BW, C, DT, FF, GC, GM, GN, HA, KM, MA, MN, N, OT, PB, PC,
-      PL, PW, RE, RU, SO, SZ, TB, TW, W
+      AB, AP, B, BR, BT, BW, C, DT, FF, GC, GM, GN, HA, KM, MA, MN, N, OT, PB, PC,
+      PL, PW, RE, RU, SO, SZ, TB, TW, W, WT
 
       # DGS-non-standard properties:
       XM
@@ -1077,6 +1080,10 @@ Response (SGF-properties):
       BR[6k]
       WR[6k]
 
+      # Team-Players: only for multi-player-game, space-separated
+      BT[jug]
+      WT[Ba_alza]
+
       # non-standard property with "move_id" required for quick-suite (3a)
       # providing a "context" for playing the next move
       XM[245]
@@ -1084,12 +1091,20 @@ Response (SGF-properties):
       # free-text game-comment (normally not indented)
       # - "White|Black End Rating:" only included for finished game
       GC[Game ID: 310100
+         Game Type: Go (1:1)           # values: GO (1:1) | TEAM_GO (N:M) | ZEN_GO (N)
          Rated: Y                      # values: Y | N
 
          White Start Rating: 7k (-29%) - ELO 1371
          Black Start Rating: 8k (-18%) - ELO 1282
          White End Rating: 6k (-4%) - ELO 1496
-         Black End Rating: 6k (-2%) - ELO 1497]
+         Black End Rating: 6k (-2%) - ELO 1497
+
+         # only for multi-player-game (Team-/Zen-Go)
+         Game Players (Order. Color: Name (Handle), Current Rating):
+            1. B JUG (jug), 6k (-2%) - ELO 1497             # group:  B | W | BW
+
+            1. W Ba_alza (Ba_alza), 6k (-4%) - ELO 1496     # player: Name (Handle), current rating
+         ]
 
       OT[90 days + 1 day per move and 10 extra periods]
       RU[Japanese]                     # ruleset: Japanese | Chinese
@@ -1099,6 +1114,7 @@ Response (SGF-properties):
       RE[B+7.5]                        # result only for finished game
 
       # game-moves (with comments)
+      # - prefix '[Handle]' for multi-player-game added on each move (if not deactivated by MPG-option)
       AB[cc][ee][gg]                   # handicap stones (optional prop)
       MN[1]                            # correct move-number
       B[qd]

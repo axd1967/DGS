@@ -431,7 +431,8 @@ function get_alt_arg( $n1, $n2)
 
 
 /*
- : Viewing of game messages while read or downloaded (sgf):
+ : Viewing of game messages while read (game-, game-comments-page) or downloaded (sgf):
+   (Opponent also includes all game-players of multi-player-game)
  : Game  : Text ::         Viewed by         :: sgf+comments by : sgf only :
  : Ended : Tag  :: Writer : Oppon. : Others  :: Writer : Oppon. : any ones :
  : ----- : ---- :: ------ : ------ : ------- :: ------ : ------ : -------- :
@@ -454,27 +455,25 @@ function get_alt_arg( $n1, $n2)
 
    if( $my_game || $my_mpgame )
    {
-      if( $my_mpgame )
+      if( $my_id == $Black_ID )
       {
-         $opponent_ID = 0;
-         $movemsg = game_tag_filter($movemsg);
-         $movemsg = make_html_safe($movemsg, $html_mode);
+         $my_color = 'B';
+         $opponent_ID = $White_ID;
+         $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
+      }
+      elseif( $my_id == $White_ID )
+      {
+         $my_color = 'W';
+         $opponent_ID = $Black_ID;
+         $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
       }
       else
       {
-         if( $my_id == $Black_ID )
-         {
-            $my_color= 'B';
-            $opponent_ID= $White_ID;
-            $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
-         }
-         else //if( $my_id == $White_ID )
-         {
-            $my_color= 'W';
-            $opponent_ID= $Black_ID;
-            $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
-         }
-      }//mp
+         $opponent_ID = 0;
+         if( !$my_mpgame )
+            $movemsg = game_tag_filter($movemsg);
+         $movemsg = make_html_safe($movemsg, $html_mode);
+      }
 
       $cfgsize_notes = $cfg_board->get_cfgsize_notes( $Size );
       $notesheight = $cfg_board->get_notes_height( $cfgsize_notes );

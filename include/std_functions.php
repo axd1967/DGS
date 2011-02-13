@@ -2035,9 +2035,25 @@ function textarea_safe( $msg, $charenc=false)
    return $msg;
 }
 
-//keep the parts readable by an observer
-function game_tag_filter( $msg)
+function remove_hidden_game_tags( $msg )
 {
+   return trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
+}
+
+//keep the parts readable by an observer
+function game_tag_filter( $msg, $includeTags=true )
+{
+   if( $includeTags )
+   {
+      $idx_c = 1;
+      $idx_h = 5;
+   }
+   else
+   {
+      $idx_c = 3;
+      $idx_h = 7;
+   }
+
    $nr_matches = preg_match_all(
          "%(<c(omment)? *>(.*?)</c(omment)? *>)".
          "|(<h(idden)? *>(.*?)</h(idden)? *>)%is"
@@ -2045,10 +2061,10 @@ function game_tag_filter( $msg)
    $str = '';
    for($i=0; $i<$nr_matches; $i++)
    {
-      $msg = trim($matches[1][$i]);
-      if( !$msg )
-         $msg = trim($matches[5][$i]);
-      if(  $msg )
+      $msg = trim($matches[$idx_c][$i]);
+      if( (string)$msg == '' )
+         $msg = trim($matches[$idx_h][$i]);
+      if( (string)$msg != '' )
          $str .= "\n" . $msg ;
    }
    return trim($str);

@@ -25,9 +25,10 @@ require_once 'include/sgf_builder.php';
       quick_mode=0|1       : 1 = ignore errors
       gid=1234|game1234    : game-id
       no_cache=0|1         : 1 = disable cache (expire-header)
-      owned_comments=0|1|N : 1 = if set try to return private comments (for players only) including private notes on game,
+      owned_comments=0|1|N : 1 = if set try to return private comments (for game-players only) including private notes on game,
                              0 = return only public comments
                              N = return NO comments or notes
+      mpg=<INT>            : flags for multi-player-game: 0 = default, 1 (bit #0) = no-user-per-node
       inline=0|1           : 1 = use Content-Disposition type of "inline" to directly start assigned application
       bulk=0|1             : 1 = use special filename-pattern (omit handicap if =0 and result if unfinished game):
                              DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
@@ -44,7 +45,7 @@ if( $quick_mode )
    connect2mysql();
 
    // parse args
-   $gid = (int)@$_GET['gid'];
+   $gid = (int)@$_REQUEST['gid'];
    if( $gid <= 0 )
    {
       if( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $tmp) )
@@ -54,10 +55,10 @@ if( $quick_mode )
    if( $gid <= 0 )
       error('unknown_game', "sgf.check.game($gid)");
 
-   $use_cache = !((bool)@$_GET['no_cache']);
+   $use_cache = !((bool)@$_REQUEST['no_cache']);
    #$use_cache = false;
 
-   $owned_comments = @$_GET['owned_comments'];
+   $owned_comments = @$_REQUEST['owned_comments'];
    $no_comments = false;
    if( strtolower($owned_comments) == 'n' )
    {
@@ -65,18 +66,37 @@ if( $quick_mode )
       $no_comments = true;
    }
 
+   $opt_mpg = (int)@$_REQUEST['mpg'];
+
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
+   if( $opt_mpg & 1 )
+      $sgf->mpg_node_add_user = false;
+
    $row = $sgf->load_game_info();
    extract($row);
 
-   $filename = $sgf->build_filename_sgf( @$_GET['bulk'] );
+   $filename = $sgf->build_filename_sgf( @$_REQUEST['bulk'] );
 
-   // owned_comments: BLACK|WHITE=viewed by B/W-player, DAME=viewed by other user
+   // owned_comments: BLACK|WHITE=viewed by B/W-game-player (also for MP-game), DAME=viewed by other user
    $owned_uid = 0;
    if( $owned_comments )
    {
       $owned_comments = DAME;
-      if( $Blackhandle == safe_getcookie('handle') )
+      $cookie_handle = safe_getcookie('handle');
+      if( $sgf->is_mpgame )
+      {
+         $sgf->find_mpg_user( $cookie_handle );
+         if( is_array($sgf->mpg_active_user) )
+         {
+            if( $sgf->mpg_active_user['Sessioncode'] == safe_getcookie('sessioncode')
+                  && $sgf->mpg_active_user['X_Sessionexpire'] >= $NOW )
+            {
+               $owned_uid = $sgf->mpg_active_user[0];
+               $owned_comments = BLACK; // <>DAME
+            }
+         }
+      }
+      elseif( $Blackhandle == $cookie_handle )
       {
          if( $Blackscode == safe_getcookie('sessioncode') && $Blackexpire >= $NOW )
          {
@@ -84,7 +104,7 @@ if( $quick_mode )
             $owned_uid = $Black_uid;
          }
       }
-      elseif( $Whitehandle == safe_getcookie('handle') )
+      elseif( $Whitehandle == $cookie_handle )
       {
          if( $Whitescode == safe_getcookie('sessioncode') && $Whiteexpire >= $NOW )
          {
@@ -106,7 +126,7 @@ if( $quick_mode )
    // output HTTP-header
    header( 'Content-Type: application/x-go-sgf' );
    // default for content-disposition is "attachment" because of "inline"-problems for some mobile-devices
-   $disposition_type = ( @$_GET['inline'] ) ? 'inline' : 'attachment';
+   $disposition_type = ( @$_REQUEST['inline'] ) ? 'inline' : 'attachment';
    header( "Content-Disposition: $disposition_type; filename=\"$filename.sgf\"" );
    header( "Content-Description: PHP Generated Data" );
 
