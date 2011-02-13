@@ -300,7 +300,6 @@ if( $player_row['GamesMPG'] > 0 )
    $mpgtable->add_tablehead( 3, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $mpgtable->add_tablehead( 4, T_('Size#header'), 'Number', 0, 'Size-');
    $mpgtable->add_tablehead( 5, T_('Last change#header'), 'Date', 0, 'Lastchanged-');
-   $mpgtable->add_tablehead( 6, T_('Status#header'), '', TABLE_NO_HIDE );
 
    $mpgtable->set_default_sort( 5/*, 1*/); //on Lastchanged,ID
    $order = $mpgtable->current_order_string('ID-');
@@ -328,7 +327,6 @@ if( $player_row['GamesMPG'] > 0 )
             3 => getRulesetText($row['Ruleset']),
             4 => $row['Size'],
             5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',
-            6 => '', //TODO status !?
          );
          $mpgtable->add_row( $row_arr );
       }

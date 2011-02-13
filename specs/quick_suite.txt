@@ -404,7 +404,7 @@ Commands:
             "id" : "123456", # game-id
             "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted
             "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
-            "status" : "PLAY", # game-status: "" | PLAY | PASS | SCORE | SCORE2 | FINISHED
+            "status" : "PLAY", # game-status: "" | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages)
             "score" : "", # score for finished game only (same format as for status_score-command above)
 
@@ -1280,14 +1280,13 @@ Response:
                            - ZEN_GO(N)
 
       # header-line with format of multi-player-game-data-line
-      "## MPG,game_id,game_type,ruleset,size,lastchanged_date,status"
+      "## MPG,game_id,game_type,ruleset,size,lastchanged_date"
 
          game_id           : see game-data
          game_type         : see game-data
          ruleset           : JAPANESE | CHINESE
          size              : board-size [int]
          lastchanged_date  : date of last-change in format "YYYY-MM-DD hh:mm:ss"
-         status            : TODO
 
    Example output:
 
@@ -1297,8 +1296,8 @@ Response:
       G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,'GO'
       G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,'GO'
       G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,'TEAM_GO (2:2)'
-      ## MPG,game_id,game_type,ruleset,size,lastchanged_date,status
-      MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00',''
+      ## MPG,game_id,game_type,ruleset,size,'lastchanged_date'
+      MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00'
 
 Errors:
 

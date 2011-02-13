@@ -226,22 +226,19 @@ else
 
       $result = db_query( "quick_status.find_mp_games($player_id)", $query );
 
-      // MP-game-header: type=MPG, game.ID, game_type, Ruleset, Size, Lastchanged, MPG-status
-      echo "## MPG,game_id,game_type,ruleset,size,'lastchanged_date','status'\n";
+      // MP-game-header: type=MPG, game.ID, game_type, Ruleset, Size, Lastchanged
+      echo "## MPG,game_id,game_type,ruleset,size,'lastchanged_date'\n";
 
       while( $row = mysql_fetch_assoc($result) )
       {
          $nothing_found = false;
 
-         $mpgame_status = ''; //TODO see also specs + status-page; read GP.Flags !?
-
          // type, game.ID, game_type, Ruleset, Size, Lastchanged, MPG-status
-         echo sprintf( "MPG,%s,%s,%s,%s,'%s','%s'\n",
+         echo sprintf( "MPG,%s,%s,%s,%s,'%s'\n",
                        $row['ID'],
                        MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true),
                        $row['Ruleset'], $row['Size'],
-                       ($row['X_Lastchanged'] > 0) ? date(DATE_FMT_QUICK, $row['X_Lastchanged']) : '',
-                       $mpgame_status );
+                       ($row['X_Lastchanged'] > 0) ? date(DATE_FMT_QUICK, $row['X_Lastchanged']) : '' );
       }
       mysql_free_result($result);
    }
