@@ -40,6 +40,7 @@ if( !isset($page_microtime) )
 
 require_once( "include/page_functions.php" );
 require_once( "include/gui_functions.php" );
+require_once( "include/game_texts.php" );
 
 require_once( "include/translation_functions.php" );
 require_once( "include/classlib_matrix.php" );
@@ -2908,10 +2909,12 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
    $gid = (int)$gid;
    $legal = ( $gid > 0 );
    $game_type = GAMETYPE_GO;
+   $game_players = '';
    $status = GAME_STATUS_PLAY;
    if( $legal && ($whitename===false || $blackname===false) )
    {
-      $query = 'SELECT Games.GameType, Games.Status, black.Name as blackname, white.Name as whitename ' .
+      $query = 'SELECT Games.GameType, Games.Status, Games.GamePlayers, ' .
+                  'black.Name as blackname, white.Name as whitename ' .
                'FROM Games ' .
                   'INNER JOIN Players as black ON black.ID=Games.Black_ID ' .
                   'LEFT JOIN Players as white ON white.ID=Games.White_ID ' . // multi-player-game
@@ -2924,6 +2927,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
             $blackname = $row['blackname'];
          $safe_it = true;
          $game_type = $row['GameType'];
+         $game_players = $row['GamePlayers'];
          $status = $row['Status'];
       }
       else
@@ -2937,38 +2941,37 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
       $whitename = "$whitename (W)";
    if( $blackname )
       $blackname = "$blackname (B)";
+
+   $gtype_text = GameTexts::format_game_type( $game_type, $game_players );
    if( !$whitename && !$blackname )
-      $whitename = "Game#$gid" ;
+      $text = "{$gtype_text}-game #$gid" ;
    elseif( $whitename && $blackname )
-      $whitename = "$whitename vs. $blackname";
+      $text = "{$gtype_text}: $whitename vs. $blackname";
    else
-      $whitename = "$whitename$blackname";
-   if( !$is_std_go )
-      $whitename = "Game #$gid: $whitename";
+      $text = "{$gtype_text}: $whitename$blackname";
+
    if( $safe_it )
-      $whitename = make_html_safe($whitename);
+      $text = make_html_safe($text);
    if( $move>0 )
-      $whitename .= sprintf( ', %s #%s', T_('Move#game'), $move );
+      $text .= sprintf( ', %s #%s', T_('Move#gametag'), $move );
+
    if( $link && $legal )
    {
       $url = ( $is_std_go || $status != GAME_STATUS_SETUP )
          ? "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "")
          : "game_players.php?gid=$gid";
-      $url = 'A href="' . $base_path. $url . '"';
+      $url = "A href=\"$base_path$url\" class=Game$class";
       if( $link & REF_LINK_BLANK )
-        $url .= ' target="_blank"';
-      $class = 'Game'.$class;
-      if( $class )
-        $url .= " class=$class";
+         $url .= ' target="_blank"';
       if( $link & REF_LINK_ALLOWED )
       {
-        $url = str_replace('"', ALLOWED_QUOT, $url);
-        $whitename = ALLOWED_LT.$url.ALLOWED_GT.$whitename.ALLOWED_LT."/A".ALLOWED_GT ;
+         $url = str_replace('"', ALLOWED_QUOT, $url);
+         $text = ALLOWED_LT.$url.ALLOWED_GT.$text.ALLOWED_LT."/A".ALLOWED_GT ;
       }
       else
-        $whitename = "<$url>$whitename</A>" ;
+         $text = "<$url>$text</A>" ;
    }
-   return $whitename;
+   return $text;
 }//game_reference
 
 // format: Tournament #n [title]
