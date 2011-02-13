@@ -530,7 +530,13 @@ class QuickHandlerGame extends QuickHandler
             }
             else
             {
-               $rated_status = update_rating2($gid);
+               if( $is_mpgame )
+               {
+                  $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
+                  $rated_status = update_rating2($gid, true, false, $arr_ratings);
+               }
+               else
+                  $rated_status = update_rating2($gid);
                GameHelper::update_players_end_game( "QuickHandlerGame.process.game_finished",
                   $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 

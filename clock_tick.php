@@ -224,7 +224,13 @@ if(1){//new
                TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout",
                   $tid, $gid, $Black_ID, $score );
 
-            $rated_status = update_rating2($gid);
+            if( $GameType != GAMETYPE_GO )
+            {
+               $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
+               $rated_status = update_rating2($gid, true, false, $arr_ratings);
+            }
+            else
+               $rated_status = update_rating2($gid);
             GameHelper::update_players_end_game( "clock_tick.timeup",
                $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 

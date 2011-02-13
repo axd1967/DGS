@@ -320,14 +320,12 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
       "AND white.ID=White_ID AND black.ID=Black_ID";
 
    $result = db_query( 'update_rating2.find_game', $query );
-
    if( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found or rate already done
-
    $row = mysql_fetch_assoc( $result );
    extract($row);
 
-   if( $simul && !is_null($game_row) ) // overwrite in simul-mode
+   if( !is_null($game_row) ) // overwrite (for simul-mode & MP-game)
       extract($game_row);
 
    if( DBG_RATING )
@@ -949,6 +947,6 @@ function convert_to_rating($string, $type, $no_error=false)
       return $rating;
    error('rating_out_of_range');
    return NO_RATING;
-}
+}//convert_to_rating
 
 ?>

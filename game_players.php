@@ -151,7 +151,7 @@ define('KEY_GROUP_ORDER', 'gpo');
       }
    }//setup-status
 
-   $arr_ratings = calc_group_ratings();
+   $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players);
    $utable = build_table_game_players( $grow, $cmd, $extform );
 
 
@@ -365,30 +365,6 @@ function load_game_players( $gid )
    return $arr_gp;
 }//load_game_players
 
-// return: $arr_ratings[$group_color] = average-rating
-function calc_group_ratings()
-{
-   global $arr_game_players;
-
-   $calc_ratings = array();
-   foreach( $arr_game_players as $gp )
-   {
-      if( !is_null($gp->user) && $gp->user->hasRating() )
-         $calc_ratings[$gp->GroupColor][] = $gp->user->Rating;
-   }
-
-   // calc average rating for groups B/W
-   $arr_ratings = array();
-   foreach( $calc_ratings as $gr_col => $arr )
-   {
-      $cnt = count($arr);
-      if( $cnt )
-         $arr_ratings[$gr_col] = array_sum($arr) / $cnt;
-   }
-
-   return $arr_ratings;
-}//calc_group_ratings
-
 // return arr( group-colors that appear at least once, ... )
 function count_group_colors()
 {
@@ -547,8 +523,10 @@ function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edi
    $itable = null;
    if( $enable_edit_HK && $game_type == GAMETYPE_TEAM_GO && count($arr_color_keys) == 2 )
    {
+      global $arr_game_players;
+
       $show_edit_hk = true;
-      $arr_ratings = calc_group_ratings();
+      $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players);
       $rating1 = $arr_ratings[$arr_color_keys[0]];
       $rating2 = $arr_ratings[$arr_color_keys[1]];
       $arr_conv_sugg = suggest_conventional( $rating1, $rating2, $grow['Size'] ); // H,K,i'm-black
@@ -997,7 +975,7 @@ function start_multi_player_game( $grow, $upd_game_players )
    $handicap = $grow['Handicap'];
    $game_type = $grow['GameType'];
 
-   $arr_ratings = calc_group_ratings();
+   $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players);
 
    list( $group_color, $group_order, $gpmove_color )
       = MultiPlayerGame::calc_game_player_for_move( $upd_game_players, 0, $handicap, 0 );
