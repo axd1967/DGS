@@ -135,6 +135,9 @@ Description:
 * Sender
 
 * Replied
+   - N = message need no reply
+   - M = message need reply
+   - Y = message has been replied
 
 
 
