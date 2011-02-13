@@ -245,7 +245,7 @@ define('KEY_GROUP_ORDER', 'gpo');
    if( $status == GAME_STATUS_SETUP )
    {
       if( $has_wroom_entry && $cnt_free_slots == 0 )
-         $menu_array[T_('Edit waiting-room offer#mpg')] = "waiting_room.php?gid=$gid#joingameForm";
+         $menu_array[T_('Show waiting-room entry#mpg')] = "waiting_room.php?gid=$gid#joingameForm";
 
       if( $allow_edit )
       {
