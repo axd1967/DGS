@@ -121,7 +121,7 @@ require_once( "features/lib_votes.php" );
 
       // FeatureVote-fields
       if( $vtable->Is_Column_Displayed[10] )
-         $frow_strings[10] = $row['sumPoints'];
+         $frow_strings[10] = FeatureVote::formatPoints( $row['sumPoints'] );
       if( $vtable->Is_Column_Displayed[11] )
          $frow_strings[11] = $row['countVotes'];
       if( $vtable->Is_Column_Displayed[12] )

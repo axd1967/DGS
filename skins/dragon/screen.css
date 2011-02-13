@@ -3144,6 +3144,18 @@ table#biomoveTableInfos img {
 
 
 /* ------------------------- */
+/* voting */
+/* ------------------------- */
+
+span.Negative {
+   color: red;
+}
+span.Positive {
+   color: blue;
+}
+
+
+/* ------------------------- */
 /* message allowed tags */
 /* ------------------------- */
 

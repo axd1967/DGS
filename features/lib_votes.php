@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-require_once( 'include/std_classes.php' );
-require_once( 'include/classlib_userquota.php' ); // for FEATURE_POINTS_MAX_VALUE
+require_once 'include/std_classes.php';
+require_once 'include/classlib_userquota.php'; // for FEATURE_POINTS_MAX_VALUE
+require_once 'include/gui_functions.php';
 
 
 /*!
@@ -702,6 +703,16 @@ class FeatureVote
    function getFeaturePointsText( $points )
    {
       return sprintf( T_('You have %s points available for voting on features.'), $points );
+   }
+
+   function formatPoints( $points )
+   {
+      if( $points < 0 )
+         return span('Negative', $points);
+      elseif( $points > 0 )
+         return span('Positive', MINI_SPACING . $points);
+      else
+         return MINI_SPACING . $points;
    }
 
 } // end of 'FeatureVote'

@@ -151,7 +151,7 @@ require_once( "features/lib_votes.php" );
       if( !is_null($fvote) )
       {
          if( $ftable->Is_Column_Displayed[8] )
-            $frow_strings[8] = $fvote->points;
+            $frow_strings[8] = FeatureVote::formatPoints( $fvote->points );
          if( $ftable->Is_Column_Displayed[9] )
             $frow_strings[9] = ($fvote->lastchanged > 0 ? date(DATE_FMT2, $fvote->lastchanged) : '' );
       }
