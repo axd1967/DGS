@@ -99,14 +99,13 @@ else
 
 
    $player_row = mysql_single_fetch( "quick_status.find_player($uid,$uhandle)",
-                  "SELECT ID, Timezone, AdminOptions, " .
+                  "SELECT ID, Timezone, AdminOptions, GamesMPG, " .
                   'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
                   'FROM Players WHERE ' .
                   ( $idmode=='uid'
                         ? "ID=".((int)$uid)
                         : "Handle='".mysql_addslashes($uhandle)."'"
                   ) );
-
    if( !$player_row )
       error('unknown_user', "quick_status.find_player2($uid,$uhandle)");
 
@@ -117,24 +116,23 @@ else
          error('not_logged_in','quick_status.expired');
       $logged_in = true;
       setTZ( $player_row['Timezone']);
-      $datfmt = 'Y-m-d H:i:s';
+      $datfmt = DATE_FMT_QUICK;
    }
    else
    {
       $logged_in = false;
       setTZ( 'GMT');
-      $datfmt = 'Y-m-d H:i:s \G\M\T';
+      $datfmt = DATE_FMT_QUICK.' \G\M\T';
    }
 
-   $player_id = $player_row['ID'];
+   $player_id = @$player_row['ID'];
+   if( $logged_in && (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      error('login_denied', "quick_status($player_id)");
 
    $nothing_found = true;
 
    if( $logged_in )
    {
-      if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-         error('login_denied');
-
       // New messages?
 
       $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
@@ -165,7 +163,7 @@ else
                        date($datfmt, @$row['date']) );
       }
 
-   } //$logged_in
+   }
    else
    {
       warning('messages list not shown');
@@ -214,6 +212,39 @@ else
                     MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true) );
    }
    mysql_free_result($result);
+
+
+   // Multi-player-Games to manage?
+
+   if( $logged_in && $player_row['GamesMPG'] > 0 )
+   {
+      $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, GP.Flags, "
+         . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
+         . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
+         . "WHERE GP.uid=$player_id AND G.Status='SETUP' "
+         . "ORDER BY GP.gid";
+
+      $result = db_query( "quick_status.find_mp_games($player_id)", $query );
+
+      // MP-game-header: type=MPG, game.ID, game_type, Ruleset, Size, Lastchanged, MPG-status
+      echo "## MPG,game_id,game_type,ruleset,size,'lastchanged_date','status'\n";
+
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         $nothing_found = false;
+
+         $mpgame_status = ''; //TODO see also specs + status-page; read GP.Flags !?
+
+         // type, game.ID, game_type, Ruleset, Size, Lastchanged, MPG-status
+         echo sprintf( "MPG,%s,%s,%s,%s,'%s','%s'\n",
+                       $row['ID'],
+                       MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true),
+                       $row['Ruleset'], $row['Size'],
+                       ($row['X_Lastchanged'] > 0) ? date(DATE_FMT_QUICK, $row['X_Lastchanged']) : '',
+                       $mpgame_status );
+      }
+      mysql_free_result($result);
+   }
 
 
    if( $nothing_found )

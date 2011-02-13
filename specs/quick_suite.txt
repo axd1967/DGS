@@ -1190,6 +1190,8 @@ Purpose:
 
       - retrieve a list of games the specified user is next to move in
 
+      - retrieve a list of multi-player-games to manage
+
 Request:
 
    quick_status.php?uid|user=<USER_ID|HANDLE>&no_cache=<CACHE>
@@ -1201,7 +1203,10 @@ Important Notes:
 
    * If you are not logged in (no session cookies set),
      then you only have access to your status-game.
-     Private messages are not included (that would require authentication).
+
+     Data that requires authentication:
+     - Private messages are not included
+     - Multi-player game data is not included
 
 Options:
 
@@ -1230,6 +1235,7 @@ Response:
       - line starting with '#' are comments in general
       - line starting with '##' contains the format of a specific line-type,
         different line-types with different amount of fields are possible
+      - line starting with '[#' are warnings, e.g. "[#Warning: messages_list_not_shown; ]"
       - empty lines should be skipped
       - other lines contain data
       - if there are no data-lines, then the result-set is empty
@@ -1273,6 +1279,15 @@ Response:
                            - TEAM_GO(N:M)
                            - ZEN_GO(N)
 
+      # header-line with format of multi-player-game-data-line
+      "## MPG,game_id,game_type,ruleset,size,lastchanged_date,status"
+
+         game_id           : see game-data
+         game_type         : see game-data
+         ruleset           : JAPANESE | CHINESE
+         size              : board-size [int]
+         lastchanged_date  : date of last-change in format "YYYY-MM-DD hh:mm:ss"
+         status            : TODO
 
    Example output:
 
@@ -1282,6 +1297,8 @@ Response:
       G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,'GO'
       G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,'GO'
       G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,'TEAM_GO (2:2)'
+      ## MPG,game_id,game_type,ruleset,size,lastchanged_date,status
+      MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00',''
 
 Errors:
 
