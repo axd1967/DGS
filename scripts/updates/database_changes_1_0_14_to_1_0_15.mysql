@@ -894,6 +894,11 @@ ALTER TABLE Waitingroom
    ADD INDEX Handicaptype (Handicaptype);
 
 
+-- show Settings-column in waiting-room
+UPDATE ConfigPages
+   SET ColumnsWaitingroom=ColumnsWaitingroom | 0x20000 ;
+
+
 -- added double-game reference
 ALTER TABLE Games
    ADD DoubleGame_ID int(11) NOT NULL DEFAULT '0' AFTER mid ;

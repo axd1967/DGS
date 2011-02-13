@@ -6243,6 +6243,11 @@ ALTER TABLE Games
    * waiting_room.php, NEWS:
    - Game-settings: move standard-handicap-placement from Handicap-column
      to Game-Settings-column as "Free-handicap" if no standard-placement used
+-----------
+-- show Settings-column in waiting-room
+UPDATE ConfigPages
+   SET ColumnsWaitingroom=ColumnsWaitingroom | 0x20000 ;
+-----------
 
 2009-06-13 juga
 
