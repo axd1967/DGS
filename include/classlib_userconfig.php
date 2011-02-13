@@ -728,7 +728,7 @@ class ConfigTableColumns
       }
 
       $bitset = BitSet::read_from_int_array( $arr_parse );
-      //error_log($bitset->to_string());
+      //error_log($bitset->get_hex_format());
       return $bitset;
    }
 
