@@ -241,8 +241,17 @@ class ErrorCode
          $arr['multi_player_need_initial_rating'] =
             T_("Sorry, you need an initial rating to start a multi-player-game.");
 
-         $arr['multiplayer_no_users'] =
+         $arr['multi_player_no_users'] =
             T_('Sorry, I can\'t find any users for the multi-player-game.');
+
+         $arr['multi_player_master_mismatch'] =
+            T_("Sorry, for this operation you need to be the game-master of the multi-player-game.");
+
+         $arr['multi_player_unknown_user'] =
+            T_('Sorry, the user is not registered for the multi-player-game.');
+
+         $arr['guest_no_invite'] =
+            T_('Sorry, the guest-user can not be invited.');
 
          $arr['no_uid'] =
             T_("Sorry, I need to know for which user to show the data.");
