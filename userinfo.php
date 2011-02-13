@@ -79,14 +79,16 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $bio_result = NULL; // hide bio
    }
 
-   $count_mpg = 0; // count MP-games of user
+   $count_mpg_run = 0; // count MP-games of user
    $show_mpg = ( $my_info || $is_admin );
    if( $show_mpg )
    {
       $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
-         "SELECT COUNT(*) AS X_Count FROM GamePlayers WHERE uid=$uid LIMIT 1" );
+         "SELECT COUNT(*) AS X_Count " .
+         "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid " .
+         "WHERE GP.uid=$uid AND G.Status ".IS_RUNNING_GAME." LIMIT 1" );
       if( $gp_row )
-         $count_mpg = (int)$gp_row['X_Count'];
+         $count_mpg_run = (int)$gp_row['X_Count'];
    }
 
    $has_contact = Contact::has_contact($my_id, $uid);
@@ -197,7 +199,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          $itable2->add_row( array(
                'rattb' => ($is_admin && !$my_info) ? 'class="DebugInfo"' : '',
                'sname' => anchor( $run_mpg_link, T_('MP-games')),
-               'sinfo' => sprintf( T_('%s (Running), %s (Setup)#mpg'), $count_mpg - $row['GamesMPG'], $row['GamesMPG'] ) ));
+               'sinfo' => sprintf( T_('%s (Running), %s (Setup)#mpg'), $count_mpg_run, $row['GamesMPG'] ) ));
       }
 
       // show user-info
