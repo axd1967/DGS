@@ -194,10 +194,10 @@ require_once( 'include/utilities.php' );
    }
 
    // add waiting-room game
-   $query_game = $query_wroom = '';
+   $query_mpgame = $query_wroom = '';
    if( !$is_std_go ) // mp-game
    {
-      $query_game = "INSERT INTO Games SET " .
+      $query_mpgame = "INSERT INTO Games SET " .
          "Black_ID=$my_id, " . // game-master
          "White_ID=0, " .
          "ToMove_ID=$my_id, " . // appear as status-game
@@ -257,9 +257,9 @@ require_once( 'include/utilities.php' );
       $gid = 0;
       if( $query_wroom )
          db_query( 'add_to_waitingroom.insert.waitingroom', $query_wroom );
-      else if( $query_game )
+      else if( $query_mpgame )
       {
-         $result = db_query( 'add_to_waitingroom.insert.game', $query_game, 'mysql_insert_game' );
+         $result = db_query( 'add_to_waitingroom.insert.game', $query_mpgame, 'mysql_insert_game' );
          if( mysql_affected_rows() != 1)
             error('mysql_start_game', 'add_to_waitingroom.insert.game2');
          $gid = mysql_insert_id();
