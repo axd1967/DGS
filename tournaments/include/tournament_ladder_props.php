@@ -180,7 +180,7 @@ class TournamentLadderProps
       return $entityData->delete( "TournamentLadderProps.delete(%s)" );
    }
 
-   function fillEntityData( &$data=null )
+   function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER_PROPS']->newEntityData();

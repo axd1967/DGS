@@ -174,7 +174,7 @@ class TournamentLadder
       return $entityData->delete( "TournamentLadder.delete(%s)" );
    }
 
-   function fillEntityData( &$data=null )
+   function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
@@ -565,10 +565,10 @@ class TournamentLadder
 
       // add all TPs to ladder
       $NOW = $GLOBALS['NOW'];
-      $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
+      $entity_tladder = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
       $arr_inserts = array();
 
-      $table = $data->entity->table;
+      $table = $entity_tladder->entity->table;
       db_lock( "TournamentLadder::seed_ladder($tid,$seed_order)",
          "$table WRITE, $table AS TL READ" );
       {//LOCK TournamentLadder
@@ -596,8 +596,8 @@ class TournamentLadder
                $tladder->RankChanged = $NOW;
             }
 
-            $tladder->fillEntityData( $data );
-            $arr_inserts[] = $data->build_sql_insert_values();
+            $data_tladder = $tladder->fillEntityData( $entity_tladder );
+            $arr_inserts[] = $data_tladder->build_sql_insert_values();
             ++$rank;
          }
          unset($arr_TPs);
@@ -605,7 +605,7 @@ class TournamentLadder
 
          // insert all registered TPs to ladder
          $cnt = count($arr_inserts);
-         $seed_query = $data->build_sql_insert_values(true) . implode(',', $arr_inserts)
+         $seed_query = $entity_tladder->build_sql_insert_values(true) . implode(',', $arr_inserts)
             . " ON DUPLICATE KEY UPDATE Rank=VALUES(Rank), BestRank=VALUES(BestRank), "
             . " RankChanged=VALUES(RankChanged)";
          $result = db_query( "TournamentLadder::seed_ladder.insert($tid,$seed_order,$reorder,#$cnt)",

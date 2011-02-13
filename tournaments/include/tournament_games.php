@@ -168,7 +168,7 @@ class TournamentGames
       return $entityData->delete( "TournamentGames.delete(%s)" );
    }
 
-   function fillEntityData( &$data=null )
+   function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->newEntityData();

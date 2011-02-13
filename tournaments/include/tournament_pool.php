@@ -165,7 +165,7 @@ class TournamentPool
       return $entityData->delete( "TournamentPool::delete(%s)" );
    }
 
-   function fillEntityData( &$data=null )
+   function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
@@ -515,7 +515,7 @@ class TournamentPool
 
       // add all TPs to pools
       $NOW = $GLOBALS['NOW'];
-      $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
+      $entity_tpool = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
       $arr_pools = array(); // [ pool-id => entries ], also for pool-id=0
       foreach( range(0, $tround->Pools) as $pool_id )
@@ -545,18 +545,18 @@ class TournamentPool
             $tpool->Pool = $pool;
          $arr_pools[$pool]++;
 
-         $tpool->fillEntityData( $data );
-         $arr_inserts[] = $data->build_sql_insert_values(false, /*with-PK*/true);
+         $data_tpool = $tpool->fillEntityData( $entity_tpool );
+         $arr_inserts[] = $data_tpool->build_sql_insert_values(false, /*with-PK*/true);
       }
       unset($arr_TPs);
       unset($tpool_iterator);
 
       // insert all registered TPs to pools
       $cnt = count($arr_inserts);
-      $seed_query = $data->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
+      $seed_query = $entity_tpool->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
          . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
 
-      $table = $data->entity->table;
+      $table = $entity_tpool->entity->table;
       db_lock( "TournamentPool::seed_pools($tid,$round,$seed_order,$slice_mode)",
          "$table WRITE" );
       {//LOCK TournamentPool
@@ -589,7 +589,7 @@ class TournamentPool
 
       // add all missing TPs to pools
       $NOW = $GLOBALS['NOW'];
-      $data = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
+      $entity_tpool = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newEntityData();
       $arr_inserts = array();
 
       $pool = 0; // like for TROUND_SLICE_MANUAL
@@ -602,18 +602,18 @@ class TournamentPool
             continue;
 
          $tpool = new TournamentPool( 0, $tid, $round, $pool, $uid );
-         $tpool->fillEntityData( $data );
-         $arr_inserts[] = $data->build_sql_insert_values(false, /*with-PK*/true);
+         $data_tpool = $tpool->fillEntityData( $entity_tpool );
+         $arr_inserts[] = $data_tpool->build_sql_insert_values(false, /*with-PK*/true);
       }
       unset($arr_TPs);
       unset($tpool_iterator);
 
       // insert all missing registered TPs to pool #0
       $cnt = count($arr_inserts);
-      $seed_query = $data->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
+      $seed_query = $entity_tpool->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
          . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
 
-      $table = $data->entity->table;
+      $table = $entity_tpool->entity->table;
       db_lock( "TournamentPool::add_missing_registered_users($tid,$round)", "$table WRITE" );
       {//LOCK TournamentPool
          $result = db_query( "TournamentPool::add_missing_registered_users.insert($tid,$round,#$cnt)", $seed_query );

@@ -110,7 +110,7 @@ class Ratinglog
       return $entityData->delete( "Ratinglog.delete(%s)" );
    }
 
-   function fillEntityData( &$data=null )
+   function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_RATINGLOG']->newEntityData();

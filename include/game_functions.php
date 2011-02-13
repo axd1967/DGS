@@ -738,7 +738,7 @@ class GamePlayer
     * \param $arr_users if non-null array given, save as arr_users["$group_color:$group_order"]
     *        = ( GroupColor/GroupOrder/uid/Handle/Name/Rating2/Sessioncode/Sessionexpire => values, ... )
     */
-   function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false, &$arr_users=null )
+   function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false, &$arr_users )
    {
       global $player_row;
 

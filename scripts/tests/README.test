@@ -1,3 +1,6 @@
+#
+# Test-Suite requires PHP-version >= 5
+#
 
 # run test
 # - use -d option to set PHP-ini 'include_path' or

@@ -161,7 +161,7 @@ class Games
       $this->White_Start_Rating = (float)$white_start_rating;
       $this->Black_End_Rating = (float)$black_end_rating;
       $this->White_End_Rating = (float)$white_end_rating;
-   }
+   }//constructor
 
    function setStatus( $status )
    {
@@ -237,7 +237,7 @@ class Games
       return $entityData->delete( "Games.delete(%s)" );
    }
 
-   function fillEntityData( &$data=null )
+   function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_GAMES']->newEntityData();
@@ -285,7 +285,7 @@ class Games
       $data->set_value( 'Black_End_Rating', $this->Black_End_Rating );
       $data->set_value( 'White_End_Rating', $this->White_End_Rating );
       return $data;
-   }
+   }//fillEntityData
 
 
    // ------------ static functions ----------------------------
@@ -376,7 +376,7 @@ class Games
             @$row['White_End_Rating']
          );
       return $g;
-   }
+   }//new_from_row
 
    /*!
     * \brief Loads and returns Games-object for given games-ID.
@@ -419,7 +419,7 @@ class Games
       if( !isset($ARR_GLOBALS_GAMES[$key][$status]) )
          error('invalid_args', "Games.getStatusText($status)");
       return $ARR_GLOBALS_GAMES[$key][$status];
-   }
+   }//getStatusText
 
 } // end of 'Games'
 ?>
