@@ -66,6 +66,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $uid = (int)$row['ID'];
    $user_handle = $row['Handle'];
    $hide_bio = (@$row['AdminOptions'] & ADMOPT_HIDE_BIO);
+   $my_info = ( $my_id == $uid );
 
    // load bio
    $bio_result = db_query( "userinfo.find_bio($uid)",
@@ -78,9 +79,18 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $bio_result = NULL; // hide bio
    }
 
+   $count_mpg = 0; // count MP-games of user
+   $show_mpg = ( $my_info || $is_admin );
+   if( $show_mpg )
+   {
+      $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
+         "SELECT COUNT(*) AS X_Count FROM GamePlayers WHERE uid=$uid LIMIT 1" );
+      if( $gp_row )
+         $count_mpg = (int)$gp_row['X_Count'];
+   }
+
    $has_contact = Contact::has_contact($my_id, $uid);
 
-   $my_info = ( $my_id == $uid );
    $name_safe = make_html_safe($row['Name']);
    $handle_safe = $row['Handle'];
 
@@ -95,6 +105,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          T_('Account blocked - Login denied') );
 
    $run_link = "show_games.php?uid=$uid";
+   $run_mpg_link = "show_games.php?uid=$uid".URI_AMP.'mp=1';
    $fin_link = $run_link.URI_AMP.'finished=1';
    $rat_link = $fin_link.URI_AMP.'rated=1'.REQF_URL.'rated'; //Rated=yes
    $won_link = $rat_link.URI_AMP.'won=1'.REQF_URL.'rated,won'; //Won?=Won
@@ -181,6 +192,13 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
       $itable2->add_sinfo( T_('Percent'), $percent );
+      if( $show_mpg )
+      {
+         $itable2->add_row( array(
+               'rattb' => ($is_admin && !$my_info) ? 'class="DebugInfo"' : '',
+               'sname' => anchor( $run_mpg_link, T_('MP-games')),
+               'sinfo' => sprintf( T_('%s (Running), %s (Setup)#mpg'), $count_mpg - $row['GamesMPG'], $row['GamesMPG'] ) ));
+      }
 
       // show user-info
       if( $twoCols )
