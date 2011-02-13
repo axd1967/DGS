@@ -26,7 +26,7 @@ require_once 'include/translation_functions.php';
 /**
  * \brief Static class with some global game-texts.
  */
-class GameText
+class GameTexts
 {
    // ------------ static functions ----------------------------
 
