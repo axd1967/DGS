@@ -21,6 +21,29 @@ ChangeLog
 
 2011-02-06 juga
 
+   * include/game_functions.php (MultiPlayerGame.get_message_defaults):
+   - for MPG-message-templates use <game_..> with new-window-link
+
+   * game.php (draw_game_info):
+   - bugfix: show last-moved player for multi-player-game only after 1st move
+
+   * include/game_texts.php (class GameTexts, ~.get_game_type, ~.format_game_type),
+     include/game_functions.php, include/message_functions.php,
+     include/quick/quick_game_info.php, include/quick/quick_game_list.php,
+     scripts/admin-export-games_info.php,
+     game.php, game_players.php, gameinfo.php, join_waitingroom_game.php,
+     message.php, quick_status.php, show_games.php, status.php, waiting_room.php:
+   - refactored MultiPlayerGame::format_game_type/get_game_type to GameTexts-class in 'include/game_texts.php'
+
+   * site_map.php:
+   - added new pages for multi-player-game handling
+
+   * include/std_functions.php (game_reference):
+   - adjusted format of <game>-tag: added game-type
+
+   * game_players.php (accept_invite):
+   - bugfix: increase players MP-game count on accepting-invite
+
    * quick_status.php, status.php, specs/quick_suite.txt:
    - cleanup: removed game_players unused Status-field for multi-player-games
 
