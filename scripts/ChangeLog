@@ -19,6 +19,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-02-08 juga
+
+   * game_players.php:
+   - changed link-text for showing waiting-room-offer to accommodate
+     game-master & non-edit-allowed users alike
+
+   * scripts/browser_stats.php:
+   - updated with new browser-types (opera, Konqueror, MSIE, iPhone/etc)
+
 2011-02-07 juga
 
    * scripts/updates/fix_game_comments-1_0_15.php (load_games_with_hidden_comment):
