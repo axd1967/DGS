@@ -387,14 +387,14 @@ ALTER TABLE Waitingroom
 
 -- change Players table-columns-handling
 ALTER TABLE Players
-   CHANGE UsersColumns UsersColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE GamesColumns GamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE RunningGamesColumns RunningGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE FinishedGamesColumns FinishedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE ObservedGamesColumns ObservedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE WaitingroomColumns WaitingroomColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE TournamentsColumns TournamentsColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
-   CHANGE ContactColumns ContactColumns INT( 11 ) DEFAULT '-1' NOT NULL ;
+   MODIFY UsersColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY GamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY RunningGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY FinishedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY ObservedGamesColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY WaitingroomColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY TournamentsColumns INT( 11 ) DEFAULT '-1' NOT NULL ,
+   MODIFY ContactColumns INT( 11 ) DEFAULT '-1' NOT NULL ;
 
 
 -- change Players.Activity: float -> integer
