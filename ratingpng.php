@@ -308,7 +308,7 @@ function get_rating_data($uid)
    // note: Ratinglog-entries exists only for rated games
    $query = "SELECT InitialRating AS Rating, ";
    if( ENA_WIN_PIE )
-      $query .= "Running, Finished, RatedGames, Won, Lost,";
+      $query .= "Finished, RatedGames, Won, Lost,";
    $query .=
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
