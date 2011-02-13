@@ -19,7 +19,30 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-01-30 juga
+
+   * include/sgf_builder.php (class SgfBuilder, ~.sgf_echo_comment, ~.load_game_info,
+       ~.find_mpg_user, ~.build_sgf, ~.build_sgf_moves, ~.buildPlayerName, ~.formatPlayerName),
+     include/game_functions.php (GamePlayers.load_users_for_mpgame, ~.get_user_info),
+     include/std_functions.php (remove_hidden_game_tags, game_tag_filter),
+     specs/quick_suite.txt,
+     game.php,
+     game_comments.php,
+     sgf.php:
+   - show "players"-related game-info for ALL players of multi-player-game:
+     - for game-page and game-comments-page
+     - for SGF-download:
+       - added moved-player on each node,
+         added URL-argument 'mpg' for disable that
+       - show player-comments and private-notes for ALL game-players
+       - added info about multi-player-game in game-comment-tag: players, game-type
+       - return error for game on SETUP-status
+       - changed $_GET -> $_REQUEST to allow POST-requests as well
+
 2011-01-24 juga
+
+   * features/lib_votes.php (Feature.set_subject):
+   - bugfix: feature-subject was not shown, because of wrong length-cutting
 
    * include/game_functions.php (MultiPlayerGame.calc_game_player_for_move),
      include/quick/quick_game.php (QuickHandlerGame.process_cmd),
@@ -27,7 +50,7 @@ ChangeLog
      game_players.php (build_table_game_players, start_multi_player_game),
      game.php (draw_game_info),
      confirm.php, quick_play.php:
-   - show moving-player in board-info-box on viewing specific move on game-page
+   - show moving-player in board-info-box on viewing specific move on game-page for MP-game
 
    * include/connect2mysql.php (db_close),
      game.php:

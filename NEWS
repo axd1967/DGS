@@ -312,6 +312,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added application-info AP[DGS:version]
       * Added source-info SO[DGS-game URL]
       * Added DGS-specific SGF-property XM[move_id] to support game-quick-suite
+      * Added game-type and player-info for multi-player-game in general comments and on each node
       * Included private game notes in last game-node
       * Included PASS-moves
       * Used 3rd PASS-move as scoring node for better RESUME-handling
@@ -320,8 +321,9 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added URL-arg 'no_cache' to disable cache
       * Added URL-arg 'inline' to directly open SGF in assigned browser-application
       * Added URL-arg 'bulk' using different filename for bulk-download (for admin)
+      * Added URL-arg 'mpg' for multi-player-game to disable showing player-name in all nodes
 
-   * Quick-Suite (new alternative interface <code>quick_do.php</code>) for robots and other DGS-clients:
+   * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
       * Added game-handler to
          * retrieve information about game, with nested user-objects
          * retrieve own private notes of game
