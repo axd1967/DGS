@@ -52,9 +52,10 @@ require_once( "include/rating.php" );
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
-           die("<BR>$s;<BR>" . mysql_error() );
-        echo " --- fixed. ";
+         if( !mysql_query( $s) )
+            die("<BR>$s;<BR>" . mysql_error() );
+         if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
+         echo " --- fixed. ";
       }
       echo "<p>*** Fixes errors ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
@@ -62,7 +63,10 @@ require_once( "include/rating.php" );
    }
    else
    {
-      function dbg_query($s) { echo " --- query:<BR>$s; ";}
+      function dbg_query($s) {
+         echo " --- query:<BR>$s; ";
+         if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
+      }
       $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
@@ -101,6 +105,7 @@ require_once( "include/rating.php" );
       echo ' ' . $row["gid"];
       if( $do_it )
       {
+         //TODO handle MP-games
          $rated_status = update_rating2($row["gid"], false/*=check_done*/); //0=rated game
          if( $rated_status == RATEDSTATUS_RATED )
             $count++;
