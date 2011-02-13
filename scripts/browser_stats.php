@@ -79,7 +79,9 @@ function echo_browsers(&$Browsers)
       {
          if( $nr == 1 )
             echo "\n--------------";
-         echo "\n$name: {$b[1]}   " . sprintf("%.2f",100*$b[1]/$total) . "%";
+         $s = "$name: {$b[1]}   " . sprintf("%.2f",100*$b[1]/$total) . "%";
+         if( $nr == 0 ) $s = "<b>$s</b>";
+         echo "\n", $s;
          $nr++;
       }
       echo "\n\n";
@@ -106,11 +108,13 @@ function echo_browsers(&$Browsers)
                            'Opera 6' => array('opera.6',0),
                            'Opera 7' => array('opera.7',0),
                            'Opera 8' => array('opera.8',0),
-                           'Opera 9' => array('opera.9',0)),
+                           'Opera 9' => array('opera.9',0),
+                           'Opera 10' => array('opera.10',0)),
 
                      array('Konqueror' => array('konqueror|safari',0),
                            'Konqueror 2' => array('konqueror.?2',0),
                            'Konqueror 3' => array('konqueror.?3',0),
+                           'Konqueror 4' => array('konqueror.?4',0),
                            'Safari' => array('safari',0)),
 
                      array('MSIE' => array('msie',0),
@@ -119,6 +123,8 @@ function echo_browsers(&$Browsers)
                            'MSIE 5' => array('msie 5',0),
                            'MSIE 6' => array('msie 6',0),
                            'MSIE 7' => array('msie 7',0),
+                           'MSIE 8' => array('msie 8',0),
+                           'MSIE 9' => array('msie 9',0),
                            'MSIE Other' => array('msie',0)),
 
                      array('Netscape 4' => array('mozilla.?4',0)),
@@ -133,6 +139,11 @@ function echo_browsers(&$Browsers)
                            'Phoenix' => array('phoenix',0),
                            'Camino' => array('chimera|camino',0),
                            'Gecko Other' => array('gecko|mozilla',0)),
+
+                     array('Apple' => array('(apple|iphone|ipad|mac)',0),
+                           'iPhone' => array('iPhone;',0),
+                           'iPad' => array('iPad(.touch)?;',0),
+                           'Mac' => array('(MacBookPro|iMac)',0)),
 
                      array('AntFresco' => array('antfresco',0)),
                      array('OmniWeb' => array('omniweb',0)),
@@ -188,7 +199,9 @@ function echo_browsers(&$Browsers)
                  array('Unix' => array('unix',0)),
 
                  array('Mobile phone' => array('nokia|ericsson',0),
+                       'iPhone' => array('iPhone',0),
                        'Nokia' => array('nokia',0),
+                       'Samsung' => array('samsung',0),
                        'SonyEricsson' => array('ericsson',0)),
 
                  array('Mac' => array('mac',0),
