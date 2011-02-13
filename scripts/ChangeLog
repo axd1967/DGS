@@ -19,6 +19,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-02-07 juga
+
+   * scripts/updates/fix_game_comments-1_0_15.php (load_games_with_hidden_comment):
+   - fix only games without missing hidden-comment-flag
+   - added db-query to error-log for debugging
+
 2011-02-06 juga
 
    * include/game_functions.php (MultiPlayerGame.get_message_defaults):

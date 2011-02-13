@@ -44,8 +44,9 @@ require_once( "include/std_functions.php" );
    if( $do_it )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+         if( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
+         if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
       _echo(
          "<p>*** Fixes hidden game comments flag ***"
@@ -54,7 +55,10 @@ require_once( "include/std_functions.php" );
    }
    else
    {
-      function dbg_query($s) { _echo( "<BR>$s; "); }
+      function dbg_query($s) {
+         _echo( "<BR>$s; ");
+         if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
+      }
       $tmp = array_merge($page_args,array('do_it' => 1));
       _echo(
          "<p>(just show needed queries)"
@@ -69,20 +73,26 @@ require_once( "include/std_functions.php" );
 
    _echo( "<hr>Find games with hidden game comments ..." );
 
+   $arr_games = load_games_with_hidden_comment( GAMEFLAGS_HIDDEN_MSG ); // gid => 1
+
    $query = "SELECT DISTINCT gid FROM MoveMessages WHERE Text RLIKE '</?h(idden)?>'";
    $result = mysql_query( $query ) or die(mysql_error());
 
    $games_cnt = @mysql_num_rows($result);
    $curr_cnt = 0;
-   _echo( "<br>Found $games_cnt games to process and set hidden-comments-flag ...\n" );
+   _echo( "<br>Found $games_cnt games to check and potentially set hidden-comments-flag ...\n" );
 
    // update Games.Flags
+   $cnt_fix = 0;
    while( $row = mysql_fetch_assoc( $result ) )
    {
       $gid = $row['gid'];
-      update_games_flags( $gid, GAMEFLAGS_HIDDEN_MSG );
+      if( !isset($arr_games[$gid]) )
+         $cnt_fix += update_games_flags( $gid, GAMEFLAGS_HIDDEN_MSG );
    }
    mysql_free_result($result);
+
+   _echo( "<br>Found $cnt_fix games that required fixing ...\n" );
 
    if( $do_it )
       _echo('Games hidden-comments-flag fix finished.');
@@ -104,6 +114,18 @@ function update_games_flags( $gid, $flagval )
       _echo( "<br><br>... $curr_cnt of $games_cnt updated ...\n" );
    $update_query = "UPDATE Games SET Flags=Flags | $flagval WHERE ID='$gid' LIMIT 1";
    dbg_query($update_query);
+   return 1;
 }
+
+function load_games_with_hidden_comment( $flagval )
+{
+   $arr = array();
+   $query = "SELECT ID FROM Games WHERE (Flags & $flagval) > 0";
+   $result = mysql_query( $query ) or die(mysql_error());
+   while( $row = mysql_fetch_assoc( $result ) )
+      $arr[$row['ID']] = 1;
+   mysql_free_result($result);
+   return $arr;
+}//load_games_with_hidden_comment
 
 ?>
