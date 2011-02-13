@@ -2903,6 +2903,16 @@ table#GamePlayersTable tr.Empty {
    height: 5px;
 }
 
+table#GamePlayersTable a.ButIcon {
+   margin: 0px 2px;
+   padding: 0px;
+}
+table#GamePlayersTable a.ButIcon img {
+   margin: 0px;
+   width: 16px;
+   height: 16px;
+}
+
 
 /* ------------------------- */
 /* FAQ pages */

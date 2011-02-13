@@ -30,17 +30,23 @@ require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
 require_once 'include/countries.php';
 require_once 'include/make_game.php';
+require_once 'include/error_codes.php';
 
 $GLOBALS['ThePage'] = new Page('GamePlayers');
 
 
 // commands / use-cases
 define('CMD_ADD_WAITINGROOM_GAME', 'wr_add'); // add game in waiting-room
+define('CMD_INVITE', 'inv'); // personal invitation
 define('CMD_CHANGE_COLOR', 'chg_col'); // set group-color
 define('CMD_CHANGE_ORDER', 'chg_ord'); // set group-order
 define('CMD_START_GAME', 'start'); // start game
+define('CMD_DEL_INVITE', 'delinv'); // delete reserved (not yet joined) invitation
+define('CMD_ACK_INVITE', 'ackinv'); // accept invitation
 
 define('FACT_SAVE', 'save');
+define('FACT_REJECT', 'reject');
+define('FACT_CANCEL', 'cancel');
 define('FACT_PREVIEW', 'preview');
 define('FACT_USE_CONV', 'use_conv');
 define('FACT_USE_PROP', 'use_prop');
@@ -75,13 +81,27 @@ define('KEY_GROUP_ORDER', 'gpo');
      cmd=chg_ord&gid=&save...  : update GroupOrder on change-group with args: gpo<ID>
 
      cmd=start&gid=&...        : start game, check setup
+
+     cmd=inv&gid=&to=&...      : invite user
+     cmd=inv&gid=&to=&save...  : execute invitation of user
+
+     cmd=ackinv&gid=&save...   : approve invitation by invited-user
+
+     cmd=delinv&gid=&uid=&...       : delete reservation with user-invitation
+     cmd=delinv&gid=&uid=&save...   : execution of deleting reserved invitation
+     cmd=delinv&gid=&uid=&cancel... : cancel operation
+
 */
    $cmd = get_request_arg('cmd');
+   if( get_request_arg(FACT_CANCEL) )
+      jump_to("game_players.php?gid=$gid");
 
 
    // load data
    $grow = load_game( $gid );
-   $arr_game_players = load_game_players( $gid ); // -> $arr_users, $arr_free_slots, $has_wroom_entry
+   // load game-players + set vars: $arr_users, $arr_free_slots, $has_wroom_entry, $ack_invite_uid, $master_uid
+   $arr_game_players = load_game_players( $gid );
+
    $status = $grow['Status'];
    $game_type = $grow['GameType'];
    $cnt_free_slots = count($arr_free_slots);
@@ -108,6 +128,24 @@ define('KEY_GROUP_ORDER', 'gpo');
                add_waiting_room_mpgame( $grow, $my_id );
             else
                $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd, $has_wroom_entry );
+         }
+         elseif( $cmd == CMD_INVITE ) // invitation
+         {
+            $to_handle = get_request_arg('to');
+            list( $errors, $to_uid, $to_handle ) = check_invite( $to_handle );
+            if( $is_save && count($errors) == 0 )
+               add_invitation_mpgame( $gid, $to_uid );
+            else
+               $form = build_form_invite( $gid, $to_handle, $errors );
+         }
+         elseif( $cmd == CMD_DEL_INVITE ) // delete-reservation of user-invitation
+         {
+            $uid = (int)get_request_arg('uid');
+            $errors = check_delete_invite( $uid );
+            if( $is_save && count($errors) == 0 )
+               delete_invite( $gid, $uid );
+            else
+               $form = build_form_delete_invite( $gid, $uid, $errors );
          }
          elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
          {
@@ -144,10 +182,25 @@ define('KEY_GROUP_ORDER', 'gpo');
       {
          list( $errors, $new_game_players ) = check_game_setup( $game_type, $grow['GamePlayers'] );
          $cnt_err = count($errors);
-         if( $is_save )
+         if( $allow_edit && $is_save && $cnt_err == 0 )
             start_multi_player_game( $grow, $new_game_players );
          else
             $extform = build_form_start_game( $gid, $cmd, $errors );
+      }
+      elseif( $cmd == CMD_ACK_INVITE ) // accept user-invite
+      {
+         $errors = check_accept_invite( $my_id );
+         $cnt_err = count($errors);
+         if( $cnt_err == 0 && $is_save )
+            accept_invite( $gid, $my_id );
+         elseif( $cnt_err == 0 && get_request_arg(FACT_REJECT) )
+            reject_invite( $gid, $my_id );
+         else
+            $form = build_form_accept_invite( $gid, $my_id, $errors );
+      }
+      elseif( $ack_invite_uid == $my_id ) // accept user-invite (show form)
+      {
+         $form = build_form_accept_invite( $gid, $my_id );
       }
    }//setup-status
 
@@ -191,10 +244,16 @@ define('KEY_GROUP_ORDER', 'gpo');
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    if( $status == GAME_STATUS_SETUP )
    {
+      if( $has_wroom_entry && $cnt_free_slots == 0 )
+         $menu_array[T_('Edit waiting-room offer#mpg')] = "waiting_room.php?gid=$gid#joingameForm";
+
       if( $allow_edit )
       {
          if( $cnt_free_slots )
+         {
             $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
+            $menu_array[T_('Invite')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_INVITE;
+         }
 
          $chg_col_title = ($enable_edit_HK)
             ? ( $game_type == GAMETYPE_ZEN_GO ? T_('Change handicap') : T_('Change color & handicap') )
@@ -285,17 +344,32 @@ function build_user_flags( $gp )
    return implode(', ', $arr);
 }//build_user_flags
 
-function build_user_status( $gp )
+function build_user_actions( $gp )
 {
+   global $gid, $base_path, $allow_edit, $my_id;
+
    $arr = array();
-   if( $gp->uid > 0 )
+   $uid = $gp->uid;
+   if( $uid > 0 )
    {
-      $onVac = $gp->user->urow['OnVacation'];
-      if( $onVac > 0 )
-         $arr[] = echo_image_vacation( $onVac, TimeFormat::echo_onvacation($onVac) );
+      $gid = $gp->gid;
+      if( $my_id != $uid )
+         $arr[] = anchor("message.php?mode=NewMessage".URI_AMP."uid=$uid",
+            image( $base_path.'images/send.gif', 'M' ), T_('Send message'), 'class="ButIcon"' );
+      if( $allow_edit && !($gp->Flags & GPFLAG_MASTER) )
+      {
+         if( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
+         {
+            $arr[] = anchor("message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_INVITE .
+                     URI_AMP."mpuid=$uid".URI_AMP."preview=1",
+                  image( $base_path.'images/invite.gif', 'I' ), T_('Send invitation message'), 'class="ButIcon"' );
+            $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_INVITE.URI_AMP."uid=$uid",
+               image( $base_path.'images/trashcan.gif', 'X' ), T_('Delete reservation#mpg'), 'class="ButIcon"' );
+         }
+      }
    }
-   return implode(', ', $arr);
-}//build_user_status
+   return implode('', $arr);
+}//build_user_actions
 
 function load_game( $gid )
 {
@@ -318,13 +392,15 @@ function load_game( $gid )
 }//load_game
 
 // RETURN: [ GamePlayer, ... ]
-// global OUTPUT: $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer, $has_wroom_entry = T|F
+// global OUTPUT: $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer,
+//                $has_wroom_entry = true|false, $ack_invite_uid = 0|uid, $master_uid = uid
 function load_game_players( $gid )
 {
-   global $arr_users, $arr_free_slots, $has_wroom_entry;
+   global $my_id, $arr_users, $arr_free_slots, $has_wroom_entry, $ack_invite_uid, $master_uid;
    $arr_users = array();
    $arr_free_slots = array();
    $has_wroom_entry = false;
+   $ack_invite_uid = $master_uid = 0;
 
    $result = db_query( "game_players.find.game_players($gid)",
       "SELECT GP.*, " .
@@ -354,10 +430,16 @@ function load_game_players( $gid )
       $arr_gp[] = $gp;
 
       if( $uid > 0 )
+      {
          $arr_users[$uid] = $gp;
-      if( ($gp->Flags & GPFLAG_SLOT_TAKEN) == 0 )
+         if( $my_id == $uid && ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
+            $ack_invite_uid = $uid;
+         if( $master_uid == 0 && $gp->Flags & GPFLAG_MASTER )
+            $master_uid = $uid;
+      }
+      if( ($gp->Flags & GPFLAGS_SLOT_TAKEN) == 0 )
          $arr_free_slots[] = $gp;
-      if( ($gp->Flags & (GPFLAG_RESERVED|GPFLAG_WAITINGROOM)) == (GPFLAG_RESERVED|GPFLAG_WAITINGROOM) )
+      if( ($gp->Flags & GPFLAGS_RESERVED_WAITINGROOM) == GPFLAGS_RESERVED_WAITINGROOM )
          $has_wroom_entry = true;
    }
    mysql_free_result($result);
@@ -399,7 +481,7 @@ function build_table_game_players( $grow, $cmd, &$form )
    $utable->add_tablehead( 4, T_('Rating#header'), 'Rating' );
    $utable->add_tablehead( 6, T_('Last access#header'), 'Date' );
    $utable->add_tablehead( 7, T_('Flags#headermp'), 'ImagesLeft' );
-   $utable->add_tablehead( 8, T_('Status#headermp'), 'ImagesLeft' );
+   $utable->add_tablehead( 8, T_('Actions#headermp'), 'ImagesLeft' );
 
    $group_max_players = MultiPlayerGame::determine_groups_player_count( $grow['GamePlayers'] );
 
@@ -443,7 +525,7 @@ function build_table_game_players( $grow, $cmd, &$form )
       else
          $row_str[3] = NO_VALUE;
       $row_str[7] = build_user_flags( $gp );
-      $row_str[8] = build_user_status( $gp );
+      $row_str[8] = build_user_actions( $gp );
 
       if( $chg_group_color && $gp->uid > GUESTS_ID_MAX ) // command: set-group-color
       {
@@ -481,7 +563,7 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd, $has_wroom_entry 
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
    $form->add_empty_row();
-   $form->add_row( array( 'HEADER', T_('Add new game to waiting room') ));
+   $form->add_row( array( 'HEADER', T_('Add new game to waiting room#mpg') ));
 
    if( $has_wroom_entry )
    {
@@ -493,9 +575,9 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd, $has_wroom_entry 
          $form->add_row( array( 'TEXT',
                T_('There can only be one waiting-room entry for a multi-player-game!')
                . "<br>\n"
-               . T_('To change it you have to re-add it after deleting the existing one.')
+               . T_('To change it you have to re-add it after deleting the existing one.#mpg')
                . "<br><br>\n" . SMALL_SPACING.SMALL_SPACING
-               . anchor( "waiting_room.php?info=$wr_id#joingameForm", T_('Show waiting-room entry (to delete)' ) )
+               . anchor( "waiting_room.php?info=$wr_id#joingameForm", T_('Show waiting-room entry (to delete)#mpg') )
                ));
          return $form;
       }
@@ -514,6 +596,87 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd, $has_wroom_entry 
 
    return $form;
 }//build_form_add_waiting_room
+
+function build_form_invite( $gid, $to_handle, $errors )
+{
+   $form = new Form( 'invite', 'game_players.php', FORM_POST );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'cmd', CMD_INVITE );
+
+   show_errors( $form, $errors );
+
+   $form->add_empty_row();
+   $form->add_row( array( 'HEADER', T_('Invite to multi-player-game#mpg') ));
+
+   $form->add_row( array( 'DESCRIPTION', T_('To (userid)'),
+                          'TEXTINPUT', 'to', 20, 16, $to_handle,
+                          'TEXT', sprintf( ' (%s)', T_('only rated user#mpg')) ));
+
+   $form->add_row( array( 'TAB', 'CELL', 1, '',
+                          'SUBMITBUTTON', FACT_SAVE, T_('Invite') ));
+
+   return $form;
+}//build_form_invite
+
+function build_form_delete_invite( $gid, $uid, $errors )
+{
+   $cnt_err = show_errors( $form, $errors );
+   if( $cnt_err > 0 )
+      return null;
+
+   $form = new Form( 'delinvite', 'game_players.php', FORM_POST );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'uid', $uid );
+   $form->add_hidden( 'cmd', CMD_DEL_INVITE );
+
+   $form->add_empty_row();
+   $form->add_row( array( 'HEADER', T_('Delete reserved invitation#mpg') ));
+
+   $form->add_row( array( 'TEXT', sprintf( T_('User [%s] will be notified about this deletion.#mpg'),
+                                           user_reference(0, 1, '', $uid) ) ));
+   $form->add_row( array( 'TEXT', T_('Are you sure to delete the reserved invitation of this user ?#mpg') ));
+
+   $form->add_row( array( 'CELL', 1, '',
+                          'SUBMITBUTTON', FACT_SAVE, T_('Yes'),
+                          'SUBMITBUTTON', FACT_CANCEL, T_('No'), ));
+
+   return $form;
+}//build_form_delete_invite
+
+function build_form_accept_invite( $gid, $uid, $errors=null )
+{
+   global $master_uid;
+
+   $cnt_err = show_errors( $form, $errors );
+   if( $cnt_err > 0 )
+      return null;
+
+   $form = new Form( 'ackinvite', 'game_players.php', FORM_POST );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'cmd', CMD_ACK_INVITE );
+
+   $form->add_empty_row();
+   $form->add_row( array( 'HEADER', T_('Approval of invitation#mpg') ));
+
+   $form->add_row( array( 'TEXT', T_('You have been invited to this multi-player-game.#mpg') ));
+   $form->add_empty_row();
+   $form->add_row( array( 'TEXT', T_('Please carefully review the game- and time-settings:#mpg') ));
+   $form->add_row( array( 'TEXT', '* ' . T_('You are free to discuss the variable settings with the game-master before you accept.#mpg') ));
+   $form->add_row( array( 'TEXT', '* ' . T_('However, the grouping, color and handicap for the game can only be changed by the game-master.#mpg') ));
+   $form->add_empty_row();
+   $form->add_row( array( 'TEXT', T_('You can either accept or reject this invitation.#mpg') ));
+   $form->add_row( array( 'TEXT', sprintf( T_('The game-master [%s] will be notified about your decision.#mpg'),
+                                           user_reference(0, 1, '', $master_uid) ) ));
+   $form->add_empty_row();
+   $form->add_row( array( 'TEXT', T_('Do you accept the invitation?#mpg') ));
+
+   $form->add_row( array( 'CELL', 1, '',
+                          'SUBMITBUTTON', FACT_SAVE, T_('Accept'),
+                          'SUBMITBUTTON', FACT_REJECT, T_('Reject'), ));
+   $form->add_empty_row();
+
+   return $form;
+}//build_form_accept_invite
 
 function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edit_HK )
 {
@@ -599,34 +762,27 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
 
 function build_form_start_game( $gid, $cmd, $errors )
 {
-   global $allow_edit, $base_path;
+   global $base_path, $allow_edit;
 
    $form = new Form( 'startgame', 'game_players.php', FORM_GET, false );
    $form->add_hidden( 'gid', $gid );
    $form->add_hidden( 'cmd', $cmd );
 
-   $cnt_err = count($errors);
-   if( $cnt_err )
-   {
-      $form->add_empty_row();
-      $form->add_row( array(
-            'DESCRIPTION', T_('Errors'),
-            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
-   }
-
-   $form->add_empty_row();
+   $cnt_err = show_errors( $form, $errors );
    if( $cnt_err == 0 ) // allowed to start game
    {
+      $form->add_empty_row();
       $form->add_row( array(
             'TEXT', image( $base_path."images/msg.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
                   . anchor( "message.php?mode=NewMessage".URI_AMP."mpgid=$gid"
                               . URI_AMP."mpmt=".MPGMSG_STARTGAME.URI_AMP."preview=1",
-                            T_('Send message to all game-players') ), ));
-      $form->add_empty_row();
-      $form->add_row( array(
-            'TEXT', T_('Do you agree to start the game now?'), ));
-      if( $allow_edit ) // game-master
+                            T_('Send message to all game-players#mpg') ), ));
+
+      if( $allow_edit )
       {
+         $form->add_empty_row();
+         $form->add_row( array(
+               'TEXT', T_('Do you agree to start the game now?#mpg'), ));
          $form->add_row( array(
                'CELL', 1, '',
                'SUBMITBUTTON', FACT_SAVE, T_('Start Game') ));
@@ -675,7 +831,7 @@ function add_waiting_room_mpgame( $grow, $uid )
    $arr_upd = array();
    for( $i=0; $i < $slots; $i++ )
    {
-      $arr_free_slots[$i]->Flags |= GPFLAG_RESERVED | GPFLAG_WAITINGROOM;
+      $arr_free_slots[$i]->Flags |= GPFLAGS_RESERVED_WAITINGROOM;
       $arr_upd[] = $arr_free_slots[$i]->id;
    }
 
@@ -683,14 +839,104 @@ function add_waiting_room_mpgame( $grow, $uid )
    {//HOT-section for creating waiting-room game
       db_query( "game_players.add_waiting_room_mpgame.insert_wroom($gid,$slots)", $query_wroom );
       db_query( "game_players.add_waiting_room_mpgame.gp_upd_flags($gid,$slots)",
-         "UPDATE GamePlayers SET Flags = Flags | ".(GPFLAG_RESERVED | GPFLAG_WAITINGROOM)." " .
-         "WHERE ID IN (" . implode(',', $arr_upd) . ") AND (Flags & ".GPFLAG_SLOT_TAKEN.") = 0 " .
+         "UPDATE GamePlayers SET Flags = Flags | ".GPFLAGS_RESERVED_WAITINGROOM." " .
+         "WHERE ID IN (" . implode(',', $arr_upd) . ") AND (Flags & ".GPFLAGS_SLOT_TAKEN.") = 0 " .
          "LIMIT $slots" );
    }
    ta_end();
 
    set_request_arg('sysmsg', T_('Game added!') );
 }//add_waiting_room_mpgame
+
+function add_invitation_mpgame( $gid, $inv_uid )
+{
+   global $arr_free_slots;
+
+   // update free slots: set RESERVED + INV; change flags in table
+   $arr_free_slots[0]->Flags |= GPFLAGS_RESERVED_INVITATION;
+   $upd_gp_id = $arr_free_slots[0]->id;
+
+   ta_begin();
+   {//HOT-section for creating invitation
+      db_query( "game_players.add_invitation_mpgame.gp_upd_flags($gid,$inv_uid)",
+         "UPDATE GamePlayers SET uid=$inv_uid, " .
+            "Flags = Flags | ".GPFLAGS_RESERVED_INVITATION." " .
+         "WHERE ID=$upd_gp_id AND uid=0 AND (Flags & ".GPFLAGS_SLOT_TAKEN.") = 0 " .
+         "LIMIT 1" );
+   }
+   ta_end();
+
+   jump_to("message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_INVITE .
+           URI_AMP."mpuid=$inv_uid".URI_AMP."preview=1".URI_AMP .
+           "sysmsg=".urlencode(T_('Invitation reservation added for multi-player-game!')));
+}//add_invitation_mpgame
+
+function delete_invite( $gid, $uid )
+{
+   global $master_uid;
+
+   ta_begin();
+   {//HOT-section for removing reserved invitation
+      // 1. delete reserved invitation
+      GamePlayer::delete_reserved_invitation( $gid, $uid );
+
+      // 2. notify user
+      send_message( "game_players.delete_invite.notify_user($gid,$uid)",
+         sprintf( T_('Game-master %s deleted your invitation for the game %s.#mpg'),
+                  "<user $master_uid>", "<game $gid>" ),
+         'Invitation for multi-player-game removed',
+         $uid, '', /*notify*/true );
+   }
+   ta_end();
+
+   jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=".urlencode(T_('Invitation reservation deleted!#mpg')));
+}//delete_invite
+
+function accept_invite( $gid, $uid )
+{
+   global $master_uid;
+
+   ta_begin();
+   {//HOT-section for invited-user accepting reserved invitation
+      // 1. joining reserved invitation
+      db_query( "game_players.accept_invite.gp_upd($gid,$uid)",
+         "UPDATE GamePlayers SET Flags = (Flags & ~".GPFLAG_RESERVED.") | ".GPFLAG_JOINED." " .
+         "WHERE gid=$gid AND uid=$uid AND " .
+            "(Flags & ".GPFLAGS_RESERVED_INVITATION.") = ".GPFLAGS_RESERVED_INVITATION." " .
+         "LIMIT 1" );
+
+      // 2. notify game-master
+      send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",
+         sprintf( T_('User %s has accepted your invitation to the multi-player game %s.#mpg'),
+                  "<user $uid>", "<game $gid>" ),
+         'Invitation for multi-player-game accepted',
+         $master_uid, '', /*notify*/true );
+   }
+   ta_end();
+
+   jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=".urlencode(T_('Invitation accepted!#mpg')));
+}//accept_invite
+
+function reject_invite( $gid, $uid )
+{
+   global $master_uid;
+
+   ta_begin();
+   {//HOT-section for invited-user rejecting reserved invitation
+      // 1. delete reserved invitation
+      GamePlayer::delete_reserved_invitation( $gid, $uid );
+
+      // 2. notify game-master
+      send_message( "game_players.reject_invite.notify_user($gid,$uid,$master_uid)",
+         sprintf( T_('User %s has rejected your invitation to the multi-player game %s.#mpg'),
+                  "<user $uid>", "<game $gid>" ),
+         'Invitation for multi-player-game rejected',
+         $master_uid, '', /*notify*/true );
+   }
+   ta_end();
+
+   jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=".urlencode(T_('Invitation rejected!#mpg')));
+}//reject_invite
 
 function change_group_color( $gid, $preview )
 {
@@ -752,7 +998,7 @@ function build_tableinfo_handicap_suggestion( &$form, $group, $arr_conv_sugg, $a
 {
    $itable = new Table_info('suggestHK');
    $itable->add_scaption(
-         sprintf( T_('Handicap suggestion for group [%s]'),
+         sprintf( T_('Handicap suggestion for group [%s]#mpg'),
                   GamePlayer::get_group_color_text($group) ));
    $itable->add_sinfo(
          T_('Conventional handicap'),
@@ -850,6 +1096,89 @@ function _sort_game_players( $gp1, $gp2 )
    return ($cmp_group_color == 0 ) ? cmp_int( $gp1->GroupOrder, $gp2->GroupOrder ) : $cmp_group_color;
 }
 
+// check what would prevent the invitation of a user for multi-player-game
+// returns arr( [error..], invite-uid, invite-handle )
+function check_invite( $invite_handle )
+{
+   global $arr_game_players;
+
+   $errors = array();
+   if( (string)$invite_handle == '' ) // nothing to check
+      return array( $errors, 0, $invite_handle );
+
+   // load user
+   $invite_user = User::load_user_by_handle( $invite_handle );
+   if( is_null($invite_user) && is_numeric($invite_handle) )
+      $invite_user = User::load_user( (int)$invite_handle );
+   if( is_null($invite_user) )
+   {
+      $errors[] = ErrorCode::get_error_text('unknown_user');
+      return array( $errors, 0, $invite_handle );
+   }
+   $invite_uid = $invite_user->ID;
+   $invite_handle = $invite_user->Handle;
+
+   // CHECKS: need free slot, only join game once, rated user, no guest
+   $arr_uid = array(); // uid => 1
+   foreach( $arr_game_players as $gp )
+   {
+      if( $gp->uid > 0 )
+         $arr_uid[$gp->uid] = 1;
+   }
+   if( count($arr_uid) == count($arr_game_players) )
+      $errors[] = T_('No free slot available for invitation of user#mpg');
+   if( $invite_uid <= GUESTS_ID_MAX )
+      $errors[] = ErrorCode::get_error_text('guest_no_invite');
+   if( !$invite_user->hasRating() )
+      $errors[] = sprintf( T_('User [%s] has no rating#mpg'), $invite_handle );
+   if( isset($arr_uid[$invite_uid]) )
+      $errors[] = sprintf( T_('User [%s] already invited or joined the game#mpg'), $invite_handle );
+
+   return array( $errors, $invite_uid, $invite_handle );
+}//check_invite
+
+// check what would prevent the deletion of reserved-invitation of given user
+// returns [error..]
+function check_delete_invite( $uid )
+{
+   global $arr_game_players;
+
+   $errors = array();
+
+   // CHECKS for delete: invite-reservation exists, user not joined yet
+   $found = false;
+   $arr_uid = array(); // uid => 1
+   foreach( $arr_game_players as $gp )
+   {
+      if( $gp->uid == $uid )
+      {
+         $found = true;
+         if( $gp->Flags & GPFLAG_JOINED )
+            $errors[] = T_('User to delete has already joined the game.#mpg');
+         if( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) != GPFLAGS_RESERVED_INVITATION )
+            $errors[] = T_('No reserved invitation found for user.#mpg');
+      }
+   }
+   if( !$found )
+      $errors[] = T_('Reservation of user to be deleted can not be found.#mpg');
+
+   return $errors;
+}//check_delete_invite
+
+// check what would prevent approval of reserved-invitation by invited user
+// returns [error..]
+function check_accept_invite( $uid )
+{
+   global $ack_invite_uid;
+
+   // CHECKS for approval: need invitation-reservation-slot
+   $errors = array();
+   if( $ack_invite_uid == 0 || $ack_invite_uid != $uid )
+      $errors[] = T_('There is no reserved invitation for you to approve.#mpg');
+
+   return $errors;
+}//check_accept_invite
+
 // check what would prevent the start of the game
 // returns arr( [error..], new_game_players )
 function check_game_setup( $game_type, $game_players )
@@ -872,7 +1201,7 @@ function check_game_setup( $game_type, $game_players )
          if( $gp->Flags & GPFLAG_RESERVED )
             $cnt_reserved++;
          if( !$gp->user->hasRating() ) // CHECK: all users must have a rating
-            $errors[] = sprintf( T_('User [%s] has no rating'), $gp->user->Handle );
+            $errors[] = sprintf( T_('User [%s] has no rating#mpg'), $gp->user->Handle );
          if( isset($arr_uid[$gp->uid]) )
             $arr_uid[$gp->uid]++;
          else
@@ -887,15 +1216,15 @@ function check_game_setup( $game_type, $game_players )
 
    // CHECK: all users must be joined, no reserved slots any more
    if( $cnt_joined != count($arr_game_players) )
-      $errors[] = T_('Some game-players are missing');
+      $errors[] = T_('Some game-players are missing#mpg');
    if( $cnt_reserved > 0 )
-      $errors[] = T_('Not all reservation-slots have been joined by players');
+      $errors[] = T_('Not all reservation-slots have been joined by players#mpg');
 
    // CHECK: error, if same user appears more than once
    foreach( $arr_uid as $uid => $cnt )
    {
       if( $arr_uid[$uid] > 1 )
-         $errors[] = sprintf( T_('Player [%s] joined the game more than once'),
+         $errors[] = sprintf( T_('Player [%s] joined the game more than once#mpg'),
             $arr_users[$uid]->user->Handle );
    }
 
@@ -910,7 +1239,7 @@ function check_game_setup( $game_type, $game_players )
       {
          // CHECK: GroupColor-count per group must match GamePlayers-config
          if( min($arr_grcol_vals) != $arr_group_cnt[0] || max($arr_grcol_vals) != $arr_group_cnt[1] )
-            $errors[] = sprintf( T_('Numbers of players (%s for %s, %s for %s) do not match the game-config [%s]'),
+            $errors[] = sprintf( T_('Numbers of players (%s for %s, %s for %s) do not match the game-config [%s]#mpg'),
                $arr_grcol[GPCOL_B], GamePlayer::get_group_color_text(GPCOL_B),
                $arr_grcol[GPCOL_W], GamePlayer::get_group_color_text(GPCOL_W),
                $game_players );
@@ -922,7 +1251,7 @@ function check_game_setup( $game_type, $game_players )
          }
       }
       else
-         $errors[] = sprintf( T_('Groups [%s, %s] are required, but found [%s]'),
+         $errors[] = sprintf( T_('Groups [%s, %s] are required, but found [%s]#mpg'),
             GamePlayer::get_group_color_text(GPCOL_B),
             GamePlayer::get_group_color_text(GPCOL_W),
             implode(', ', $arr_grcol_keys_text) );
@@ -934,12 +1263,12 @@ function check_game_setup( $game_type, $game_players )
       {
          // CHECK: GroupColor-count per group must match GamePlayers-config
          if( $arr_grcol_vals[0] != $arr_group_cnt[0] )
-            $errors[] = sprintf( T_('Number of players (%s for %s) does not match the game-config [%s]'),
+            $errors[] = sprintf( T_('Number of players (%s for %s) does not match the game-config [%s]#mpg'),
                $arr_grcol[GPCOL_BW], GamePlayer::get_group_color_text(GPCOL_BW),
                MultiPlayerGame::format_game_type($game_type, $game_players) );
       }
       else
-         $errors[] = sprintf( T_('Only %s-group is allowed, but found [%s]'),
+         $errors[] = sprintf( T_('Only %s-group is allowed, but found [%s]#mpg'),
             GamePlayer::get_group_color_text(GPCOL_BW),
             implode(', ', $arr_grcol_keys_text) );
    }
@@ -950,11 +1279,11 @@ function check_game_setup( $game_type, $game_players )
       $cnt = count($arr);
       $grcol_text = GamePlayer::get_group_color_text($grcol);
       if( $arr[0] == 0 )
-         $errors[] = sprintf( T_('Order of group [%s] must be set'), $grcol_text );
+         $errors[] = sprintf( T_('Order of group [%s] must be set#mpg'), $grcol_text );
       elseif( $arr[0] != 1 )
-         $errors[] = sprintf( T_('Order of group [%s] must start at 1'), $grcol_text );
+         $errors[] = sprintf( T_('Order of group [%s] must start at 1#mpg'), $grcol_text );
       elseif( array_sum($arr) != ($cnt * ($cnt+1) / 2) )
-         $errors[] = sprintf( T_('Order of group [%s] must be unique and consecutive: 1,2,3, ...'), $grcol_text );
+         $errors[] = sprintf( T_('Order of group [%s] must be unique and consecutive: 1,2,3, ...#mpg'), $grcol_text );
    }
 
    return array( $errors, $new_game_players );
@@ -1032,5 +1361,21 @@ function build_page_title( $title, $status )
       $status_str = T_('Game running');
    return sprintf( '%s - (%s)', $title, $status_str );
 }
+
+function show_errors( &$form, $errors )
+{
+   if( is_null($errors) )
+      return 0;
+
+   $cnt_err = count($errors);
+   if( $cnt_err )
+   {
+      $form->add_empty_row();
+      $form->add_row( array(
+            'DESCRIPTION', T_('Errors'),
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+   }
+   return $cnt_err;
+}//show_errors
 
 ?>

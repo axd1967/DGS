@@ -36,7 +36,9 @@ define('GPFLAG_JOINED',      0x0002); // joined game, user set
 define('GPFLAG_RESERVED',    0x0004); // 1 = WR or INV started, waiting for join; 0 = user joined if WR or INV set
 define('GPFLAG_WAITINGROOM', 0x0008); // join user via waiting-room
 define('GPFLAG_INVITATION',  0x0010); // join user via invitation
-define('GPFLAG_SLOT_TAKEN',  (GPFLAG_JOINED|GPFLAG_RESERVED) );
+define('GPFLAGS_SLOT_TAKEN',  (GPFLAG_JOINED|GPFLAG_RESERVED) );
+define('GPFLAGS_RESERVED_WAITINGROOM', (GPFLAG_RESERVED|GPFLAG_WAITINGROOM) );
+define('GPFLAGS_RESERVED_INVITATION', (GPFLAG_RESERVED|GPFLAG_INVITATION) );
 
 // GamePlayers.GroupColor
 define('GPCOL_B',  'B');
@@ -49,6 +51,7 @@ define('GPCOL_DEFAULT', GPCOL_BW);
 // multi-player-game message-type
 define('MPGMSG_STARTGAME', 1);
 define('MPGMSG_RESIGN', 2);
+define('MPGMSG_INVITE', 3);
 
 // enum Waitingroom.JigoMode
 define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
@@ -433,7 +436,7 @@ class MultiPlayerGame
 
    /*!
     * \brief "Deletes" (by updating) specified number of game-players for given game-id and flag-typed placeholder.
-    * \param $gp_flag GPFLAG_WAITINGROOM | GPFLAG_INVITE
+    * \param $gp_flag GPFLAG_WAITINGROOM | GPFLAG_INVITATION
     */
    function revoke_offer_game_players( $gid, $del_count, $gp_flag )
    {
@@ -556,14 +559,37 @@ class MultiPlayerGame
             . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 $qpart_del WHERE GP.gid=$gid" );
    }//update_players_end_mpgame
 
-   function get_message_defaults( $mpg_type, $mpg_gid, $mpg_move=0 )
+   /*!
+    * \brief Returns default-templates for messages for MP-games with subject and body-text.
+    * \param $mpg_arr array with additional keys:
+    *    for mpg_type=MPGMSG_RESIGN:
+    *       'move' = move for mpg_type=MPGMSG_RESIGN
+    *    for mpg_type=MPGMSG_INVITE:
+    *       'from_handle' = user-id (=handle) of game-master
+    *       'game_type' = "$GameType ($GamePlayers)"
+    */
+   function get_message_defaults( $mpg_type, $mpg_gid, $mpg_arr )
    {
       switch( (int)$mpg_type )
       {
          case MPGMSG_RESIGN:
+            $move = (int)$mpg_arr['move'];
             return array(
                T_('May I resign?#mpg'),
-               "<game $mpg_gid,$mpg_move>\n"
+               "<game $mpg_gid,$move>\n"
+            );
+
+         case MPGMSG_INVITE:
+            $from_handle = @$mpg_arr['from_handle'];
+            $game_type   = @$mpg_arr['game_type'];
+            return array(
+               // subject
+               sprintf( T_('Invitation to multi-player-game from [%s]#mpg'), $from_handle ),
+               // body
+               sprintf( T_('Game-master %s invites you to a %s multi-player-game.#mpg'), "<user =$from_handle>", $game_type ) . "\n\n" .
+               sprintf( T_('You can accept or reject the invitation on setup-page of game: %s#mpg'), "<game $mpg_gid>" ) . "\n\n" .
+               T_('To reject the invitation, please inform the game-master by replying to this message.#mpg') . "\n" .
+               T_('You may also want to discuss what team, color or playing order you prefer in the game (see FAQ for more details).#mpg') . "\n\n"
             );
 
          case MPGMSG_STARTGAME:
@@ -699,6 +725,16 @@ class GamePlayer
       return new GamePlayer( $row['ID'], $row['gid'], $row['GroupColor'], $row['GroupOrder'], $row['Flags'], $row['uid'] );
    }//load_game_player
 
+   /*! \brief Returns GamePlayer-object for given game-id and user-id. */
+   function load_game_player_by_uid( $gid, $uid )
+   {
+      $row = mysql_single_fetch( "GamePlayer::load_game_player_by_uid($gid,$uid)",
+            "SELECT * FROM GamePlayers WHERE gid=$gid AND uid=$uid LIMIT 1" );
+      return ( $row )
+         ? new GamePlayer( $row['ID'], $row['gid'], $row['GroupColor'], $row['GroupOrder'], $row['Flags'], $row['uid'] )
+         : null;
+   }//load_game_player_by_uid
+
    /*! \brief Returns Players.ID for given game-id, group-color and group-order. */
    function load_uid_for_move( $gid, $group_color, $group_order )
    {
@@ -818,6 +854,15 @@ class GamePlayer
          "UPDATE GamePlayers SET Flags=Flags & ~$flags " .
          "WHERE gid=$gid AND (Flags & $flags) > 0" );
    }//reset_flags
+
+   function delete_reserved_invitation( $gid, $uid )
+   {
+      db_query( "GamePlayer::delete_reserved_invitation.gp_upd($gid,$uid)",
+         "UPDATE GamePlayers SET uid=0, GroupColor='".GPCOL_DEFAULT."', GroupOrder=0, Flags=0 " .
+         "WHERE gid=$gid AND uid=$uid AND " .
+            "(Flags & ".GPFLAGS_RESERVED_INVITATION.") = ".GPFLAGS_RESERVED_INVITATION." " .
+         "LIMIT 1" );
+   }//delete_reserved_invitation
 
 } // end 'GamePlayer'
 
