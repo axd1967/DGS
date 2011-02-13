@@ -288,6 +288,7 @@ if( (string)$folder_nr_querystr != '' )
 
 
 
+if( $player_row['GamesMPG'] > 0 )
 { // show multi-player-games
    $mpgtable = new Table( 'mpgame', "status.php", null, '', $table_mode|TABLE_ROWS_NAVI );
 
@@ -305,9 +306,8 @@ if( (string)$folder_nr_querystr != '' )
    $order = $mpgtable->current_order_string('ID-');
    $mpgtable->use_show_rows(false);
 
-   $query = "SELECT G.ID, G.Black_ID, G.ToMove_ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, "
-      . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged, "
-      . "GP.Flags "
+   $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, GP.Flags, "
+      . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
       . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
       . "WHERE GP.uid=$uid AND G.Status='SETUP'"
       . $order;
@@ -328,7 +328,7 @@ if( (string)$folder_nr_querystr != '' )
             3 => getRulesetText($row['Ruleset']),
             4 => $row['Size'],
             5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',
-            6 => '',
+            6 => '', //TODO status !?
          );
          $mpgtable->add_row( $row_arr );
       }

@@ -72,11 +72,12 @@ Ou    Open                 | varchar(40)                                 | NO   
 OSA   VacationDays         | double                                      | NO   | 14
 OSA   OnVacation           | double                                      | NO   | 0
  S    UseVacation          | tinyint(3) unsigned                         | NO   | 0
-OS    Running              | int(11)                                     | NO   | 0
-OS    Finished             | int(11)                                     | NO   | 0
-OS    RatedGames           | int(11)                                     | NO   | 0
-OS    Won                  | int(11)                                     | NO   | 0
-OS    Lost                 | int(11)                                     | NO   | 0
+OS    Running              | smallint(5) unsigned                        | NO   | 0
+OS    Finished             | mediumint(8) unsigned                       | NO   | 0
+OS    RatedGames           | mediumint(8) unsigned                       | NO   | 0
+OS    Won                  | mediumint(8) unsigned                       | NO   | 0
+OS    Lost                 | mediumint(8) unsigned                       | NO   | 0
+OS    GamesMPG             | smallint(5) unsigned                        | NO   | 0
   A   Translator           | varchar(80)                                 | NO   |
  S    IP                   | varchar(16)                                 | NO   |
  S    Browser              | varchar(100)                                | NO   |
@@ -138,6 +139,13 @@ Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   
 -------------------------------------------------
 # Description of fields:
 
+* Running : number of running games (including MP-games)
+   - MP-games in SETUP-mode are not counted with Running, see GamesMPG-field
+
+* GamesMPG : number of MP-games in SETUP-mode, used to optimize status-loading
+
+
+-------------------------------------------------
 TABLE Players:
    ID int(11) NOT NULL auto_increment, -- numerical user-id 'uid'
    Handle varchar(16) NOT NULL default '', -- textual user-handle

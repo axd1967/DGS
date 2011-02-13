@@ -199,9 +199,12 @@ require_once( "include/contacts.php" );
 
    $cnt = count($gids);
    db_query( 'join_waitingroom_game.update_players',
-      "UPDATE Players SET Running=Running+$cnt" .
-                ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
-                " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
+      "UPDATE Players SET " .
+               ( $is_std_go
+                     ? ", Running=Running+$cnt"
+                     : ", GamesMPG=GamesMPG+$cnt" ) .
+               ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
+               " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
 
 
    // Reduce number of games left in the waiting room

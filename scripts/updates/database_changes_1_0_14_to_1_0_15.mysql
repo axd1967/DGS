@@ -1969,3 +1969,8 @@ ALTER TABLE Messages
    ADD Flags tinyint unsigned NOT NULL default '0' AFTER Type ;
 
 
+-- number of setup MP-games to optimize status-loading
+ALTER TABLE Players
+   ADD GamesMPG smallint unsigned NOT NULL default '0' AFTER Lost ;
+
+
