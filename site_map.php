@@ -101,13 +101,16 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
          item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
          item(T_('My tournaments'), "tournaments/list_tournaments.php?user=".urlencode($uhandle), true);
+         item(T_('My running multi-player-games'), "show_games.php?uid=$id".URI_AMP."mp=1", true);
+         item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
          item(T_('Show messages'), "message.php?mode=ShowMessage", false);
          item(T_('Show game (follow id)'), "game.php", false, true);
          { $item_level++;
             item(T_('Add time for opponent'), "game.php", false);
             item(T_('Download SGF of game'), "sgf.php", false);
             item(T_('Show observers'), "users.php", false);
-            item(T_('Show game info'), "gameinfo.php", false, true);
+            item(T_('Show game info'), "gameinfo.php", false);
+            item(T_('Show game-players'), "game_players.php", false, true);
          } $item_level--;
       } $item_level--;
 
@@ -164,6 +167,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('My rated games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".REQF_URL.'rated', true);
          item(T_('My won games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=1".REQF_URL.'rated,won', true);
          item(T_('My lost games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."rated=1".URI_AMP."won=2".REQF_URL.'rated,won', true);
+         item(T_('My running multi-player-games'), "show_games.php?uid=$id".URI_AMP."mp=1", true);
          item(T_('Edit profile'), "edit_profile.php", true);
          item(T_('Edit biographical info'), "edit_bio.php", true);
          item(T_('Edit user picture'), "edit_picture.php", true);
@@ -225,6 +229,8 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Users finished games'), "show_games.php?finished=1", false);
          item(T_('My running games'), "show_games.php?uid=$id", true);
          item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
+         item(T_('My running multi-player-games'), "show_games.php?uid=$id".URI_AMP."mp=1", true);
+         item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
          item(T_('All running games'), "show_games.php?uid=all", true);
          item(T_('All finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
          item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
