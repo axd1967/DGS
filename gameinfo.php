@@ -163,7 +163,7 @@ function build_rating_diff( $rating_diff )
    }
    $itable->add_sinfo(
          T_('Game Type'),
-         MultiPlayerGame::format_game_type($grow['GameType'], $grow['GamePlayers'])
+         GameTexts::format_game_type($grow['GameType'], $grow['GamePlayers'])
             . ( ($grow['GameType'] != GAMETYPE_GO ) ? MED_SPACING . echo_image_game_players($gid) : '' )
          );
    $itable->add_sinfo(

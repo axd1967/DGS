@@ -226,7 +226,7 @@ class QuickHandlerGameList extends QuickHandler
       $out['id'] = (int)$row['ID'];
       //$out['double_id', (int)$row['DoubleGame_ID'];
       $out['tournament_id'] = (int)$row['tid'];
-      $out['game_type'] = MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true);
+      $out['game_type'] = GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true);
       $out['status'] = strtoupper($row['Status']);
       //$out['flags'] = QuickHandlerGameInfo::convertGameFlags($row['X_Flags']);
       //$out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )

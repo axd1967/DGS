@@ -373,7 +373,7 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[19] )
             $wrow_strings[19] = getRulesetText($Ruleset);
          if( $wrtable->Is_Column_Displayed[20] )
-            $wrow_strings[20] = MultiPlayerGame::format_game_type($GameType, $GamePlayers);
+            $wrow_strings[20] = GameTexts::format_game_type($GameType, $GamePlayers);
 
          $wrtable->add_row( $wrow_strings );
       }//while

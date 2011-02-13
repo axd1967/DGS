@@ -797,7 +797,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
 
    if( $tablestyle == GSET_WAITINGROOM )
-      $itable->add_sinfo( T_('Game Type'), MultiPlayerGame::format_game_type($GameType, $GamePlayers) );
+      $itable->add_sinfo( T_('Game Type'), GameTexts::format_game_type($GameType, $GamePlayers) );
 
    $itable->add_sinfo( T_('Ruleset'), getRulesetText($Ruleset) );
    $itable->add_sinfo( T_('Size'), $Size );

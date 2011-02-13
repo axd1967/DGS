@@ -280,7 +280,7 @@ function build_game_settings( $grow )
    $itable->add_sinfo(
          T_('Game settings'),
          sprintf( "%s, %d x %d, %s: %s, %s: %s",
-               MultiPlayerGame::format_game_type($grow['GameType'], $grow['GamePlayers']),
+               GameTexts::format_game_type($grow['GameType'], $grow['GamePlayers']),
                $grow['Size'], $grow['Size'],
                T_('Ruleset'), getRulesetText($grow['Ruleset']),
                T_('Rated game'), yesno($grow['Rated']) // normally never Rated
@@ -1269,7 +1269,7 @@ function check_game_setup( $game_type, $game_players )
          if( $arr_grcol_vals[0] != $arr_group_cnt[0] )
             $errors[] = sprintf( T_('Number of players (%s for %s) does not match the game-config [%s]#mpg'),
                $arr_grcol[GPCOL_BW], GamePlayer::get_group_color_text(GPCOL_BW),
-               MultiPlayerGame::format_game_type($game_type, $game_players) );
+               GameTexts::format_game_type($game_type, $game_players) );
       }
       else
          $errors[] = sprintf( T_('Only %s-group is allowed, but found [%s]#mpg'),

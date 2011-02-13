@@ -1065,10 +1065,10 @@ function draw_game_info( &$game_row, $board, $tourney )
          , '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n"
          , "<td colspan=\"", ($cols-1), "\">",
             T_('Game Type').': ',
-            MultiPlayerGame::format_game_type($game_row['GameType'], $game_row['GamePlayers']), "</td>\n"
+            GameTexts::format_game_type($game_row['GameType'], $game_row['GamePlayers']), "</td>\n"
          , "</tr>\n";
 
-      if( $mpg_uid > 0 )
+      if( $game_row['Moves'] > 0 && $mpg_uid > 0 )
       {
          echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
             "<dl class=BoardInfos><dd>",

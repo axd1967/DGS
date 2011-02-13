@@ -209,7 +209,7 @@ else
                     $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
                     date($datfmt, @$row['date']), $time_remaining['text'],
                     $game_status, $row['Moves'], $row['tid'],
-                    MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true) );
+                    GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true) );
    }
    mysql_free_result($result);
 
@@ -236,7 +236,7 @@ else
          // type, game.ID, game_type, Ruleset, Size, Lastchanged, MPG-status
          echo sprintf( "MPG,%s,%s,%s,%s,'%s'\n",
                        $row['ID'],
-                       MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true),
+                       GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
                        $row['Ruleset'], $row['Size'],
                        ($row['X_Lastchanged'] > 0) ? date(DATE_FMT_QUICK, $row['X_Lastchanged']) : '' );
       }

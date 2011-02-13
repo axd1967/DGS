@@ -689,7 +689,7 @@ function read_mpgame_request()
          error('multi_player_master_mismatch', "message.read_mpgame_request.load.game($gid,$type)");
 
       $mpg_arr['from_handle'] = $player_row['Handle'];
-      $mpg_arr['game_type']   = MultiPlayerGame::format_game_type( $game_row['GameType'], $game_row['GamePlayers'] );
+      $mpg_arr['game_type']   = GameTexts::format_game_type( $game_row['GameType'], $game_row['GamePlayers'] );
    }
    elseif( $type == MPGMSG_RESIGN )
       $mpg_arr['move'] = $move; // for Resign

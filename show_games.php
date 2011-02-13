@@ -954,7 +954,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $grow_strings[43] = getRulesetText($Ruleset);
       if( $gtable->Is_Column_Displayed[44] )
       {
-         $grow_strings[44] = MultiPlayerGame::format_game_type($GameType, $GamePlayers);
+         $grow_strings[44] = GameTexts::format_game_type($GameType, $GamePlayers);
          if( $GameType != GAMETYPE_GO )
             $grow_strings[44] .= ' ' . echo_image_game_players($ID);
       }

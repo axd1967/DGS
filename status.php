@@ -274,7 +274,7 @@ if( (string)$folder_nr_querystr != '' )
          if( $gtable->Is_Column_Displayed[18] )
             $grow_strings[18] = getRulesetText($Ruleset);
          if( $gtable->Is_Column_Displayed[19] )
-            $grow_strings[19] = MultiPlayerGame::format_game_type( $GameType, $GamePlayers )
+            $grow_strings[19] = GameTexts::format_game_type( $GameType, $GamePlayers )
                . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) );
 
          $gtable->add_row( $grow_strings );
@@ -323,7 +323,7 @@ if( $player_row['GamesMPG'] > 0 )
          $cnt_rows++;
          $row_arr = array(
             1 => button_TD_anchor( "game_players.php?gid=".$row['ID'], $row['ID'] ),
-            2 => MultiPlayerGame::format_game_type( $row['GameType'], $row['GamePlayers'] ),
+            2 => GameTexts::format_game_type( $row['GameType'], $row['GamePlayers'] ),
             3 => getRulesetText($row['Ruleset']),
             4 => $row['Size'],
             5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',

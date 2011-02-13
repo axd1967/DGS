@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-require_once( 'include/globals.php' );
-require_once( 'include/time_functions.php' );
-require_once( 'include/classlib_game.php' );
-require_once( 'include/utilities.php' );
-require_once( 'include/std_functions.php' );
+require_once 'include/globals.php';
+require_once 'include/time_functions.php';
+require_once 'include/classlib_game.php';
+require_once 'include/utilities.php';
+require_once 'include/std_functions.php';
+require_once 'include/game_texts.php';
 
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
@@ -398,37 +399,13 @@ class MultiPlayerGame
          return false; // ZenGo
    }
 
-   function get_game_type( $game_type=null )
-   {
-      static $ARR_GAME_TYPES = null;
-      if( is_null($ARR_GAME_TYPES) )
-      {
-         $ARR_GAME_TYPES = array(
-            GAMETYPE_GO       => T_('Go#gametype'),
-            GAMETYPE_TEAM_GO  => T_('Team-Go#gametype'),
-            GAMETYPE_ZEN_GO   => T_('Zen-Go#gametype'),
-         );
-      }
-      return is_null($game_type) ? $ARR_GAME_TYPES : @$ARR_GAME_TYPES[$game_type];
-   }//get_game_type
-
-   function format_game_type( $game_type, $game_players, $quick=false )
-   {
-      if( $game_type == GAMETYPE_GO )
-         return ($quick) ? $game_type : MultiPlayerGame::get_game_type($game_type);
-      else
-         return ($quick)
-            ? "$game_type($game_players)" // see quick-suite
-            : sprintf( '%s (%s)', MultiPlayerGame::get_game_type($game_type), $game_players );
-   }
-
    function build_game_type_filter_array( $prefix='' )
    {
       return array(
          T_('All') => '',
-         MultiPlayerGame::get_game_type(GAMETYPE_GO)      => $prefix."GameType='".GAMETYPE_GO."'",
-         MultiPlayerGame::get_game_type(GAMETYPE_TEAM_GO) => $prefix."GameType='".GAMETYPE_TEAM_GO."'",
-         MultiPlayerGame::get_game_type(GAMETYPE_ZEN_GO)  => $prefix."GameType='".GAMETYPE_ZEN_GO."'",
+         GameTexts::get_game_type(GAMETYPE_GO)      => $prefix."GameType='".GAMETYPE_GO."'",
+         GameTexts::get_game_type(GAMETYPE_TEAM_GO) => $prefix."GameType='".GAMETYPE_TEAM_GO."'",
+         GameTexts::get_game_type(GAMETYPE_ZEN_GO)  => $prefix."GameType='".GAMETYPE_ZEN_GO."'",
          T_('Rengo#gametype') => $prefix."GameType='".GAMETYPE_TEAM_GO."' AND {$prefix}GamePlayers='2:2'",
          T_('Non-Std#gametype') => $prefix."GameType IN ('".GAMETYPE_TEAM_GO."','".GAMETYPE_ZEN_GO."')",
       );
@@ -576,7 +553,7 @@ class MultiPlayerGame
             $move = (int)$mpg_arr['move'];
             return array(
                T_('May I resign?#mpg'),
-               "<game $mpg_gid,$move>\n"
+               "<game_ $mpg_gid,$move>\n"
             );
 
          case MPGMSG_INVITE:
@@ -587,7 +564,7 @@ class MultiPlayerGame
                sprintf( T_('Invitation to multi-player-game from [%s]#mpg'), $from_handle ),
                // body
                sprintf( T_('Game-master %s invites you to a %s multi-player-game.#mpg'), "<user =$from_handle>", $game_type ) . "\n\n" .
-               sprintf( T_('You can accept or reject the invitation on setup-page of game: %s#mpg'), "<game $mpg_gid>" ) . "\n\n" .
+               sprintf( T_('You can accept or reject the invitation on setup-page of game: %s#mpg'), "<game_ $mpg_gid>" ) . "\n\n" .
                T_('To reject the invitation, please inform the game-master by replying to this message.#mpg') . "\n" .
                T_('You may also want to discuss what team, color or playing order you prefer in the game (see FAQ for more details).#mpg') . "\n\n"
             );
@@ -596,7 +573,7 @@ class MultiPlayerGame
          default:
             return array(
                T_('Everybody ready to start game?#mpg'),
-               "<game $mpg_gid>\n"
+               "<game_ $mpg_gid>\n"
             );
       }
    }//get_message_defaults
@@ -874,6 +851,7 @@ class GamePlayer
  */
 class GameHelper
 {
+
    /*!
     * \brief Deletes non-tourney game and all related tables for given game-id.
     * \param $upd_players if true, also decrease Players.Running

@@ -142,7 +142,7 @@ class QuickHandlerGameInfo extends QuickHandler
             ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
             : "" );
       $this->addResultKey( 'rated', ($row['Rated'] == 'N') ? 0 : 1 );
-      $this->addResultKey( 'game_type', MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true) );
+      $this->addResultKey( 'game_type', GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true) );
       $this->addResultKey( 'ruleset', strtoupper($row['Ruleset']) );
       $this->addResultKey( 'size', (int)$row['Size'] );
       $this->addResultKey( 'komi', (float)$row['Komi'] );

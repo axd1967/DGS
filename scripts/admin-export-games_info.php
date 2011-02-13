@@ -154,7 +154,7 @@ function build_game_info( $row=null )
          $row['Size'],
          $row['Moves'],
          ($row['Rated'] == 'N') ? 0 : 1,
-         MultiPlayerGame::format_game_type($row['GameType'], $row['GamePlayers'], true),
+         GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
          ($row['Ruleset'] == 'CHINESE') ? 'CH' : 'JP',
          $row['Handicap'],
          $row['Komi'],

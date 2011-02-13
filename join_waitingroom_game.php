@@ -256,7 +256,7 @@ require_once( "include/contacts.php" );
    $message .= sprintf( "%s has joined your waiting room game.\n",
       user_reference( REF_LINK, 1, '', $player_row) );
    $message .= sprintf( "\nGames of type [%s]:\n",
-      MultiPlayerGame::get_game_type($game_row['GameType']) );
+      GameTexts::get_game_type($game_row['GameType']) );
    foreach( $gids as $gid )
       $message .= "* <game $gid>\n";
 
