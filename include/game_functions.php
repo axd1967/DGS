@@ -431,24 +431,6 @@ class MultiPlayerGame
       );
    }
 
-   /*! \brief Deletes table-entries for multi-player game: Games, GamePlayers, Waitingroom. */
-   function delete_game( $gid )
-   {
-      if( !is_numeric($gid) && $gid <= 0 )
-         return;
-
-      ta_begin();
-      {//HOT-section to delete multi-player-game table-entries
-         db_query( "MultiPlayerGame::delete_game.games($gid)",
-            "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
-         db_query( "MultiPlayerGame::delete_game.gameplayers($gid)",
-            "DELETE FROM GamePlayers WHERE gid=$gid" ); // can be > 1
-         db_query( "MultiPlayerGame::delete_game.wroom($gid)",
-            "DELETE FROM Waitingroom WHERE gid=$gid" ); // can be > 1
-      }
-      ta_end();
-   }//delete_game
-
    /*!
     * \brief "Deletes" (by updating) specified number of game-players for given game-id and flag-typed placeholder.
     * \param $gp_flag GPFLAG_WAITINGROOM | GPFLAG_INVITE
@@ -491,7 +473,7 @@ class MultiPlayerGame
       return ( $player_count - $expected_player_count );
    }
 
-   /*! \brief Inserts game-players entries for given game-id and game-master $uid. */
+   /*! \brief Inserts game-players entries for given game-id and game-master $uid, and increate Players.GamesMPG. */
    function init_multi_player_game( $dbgmsg, $gid, $uid, $gp_count )
    {
       if( $gp_count <= 2 )
@@ -504,6 +486,10 @@ class MultiPlayerGame
 
       db_query( "$dbgmsg.init_multi_player_game.insert_gp($gid,$uid,$gp_count)",
          $query, 'mysql_start_game' );
+
+      // update Players for all starting players: GamesMPG++
+      db_query( "MultiPlayerGame::init_multi_player_game($gid,$uid)",
+         "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
    }
 
    /*! \brief Joins waiting-room MP-game for given user and check for race-conditions. */
@@ -554,15 +540,20 @@ class MultiPlayerGame
       // update Players for all game-players: Running++
       db_query( "MultiPlayerGame::update_players_start_mpgame($gid)",
          "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
-            . "SET P.Running=P.Running+1 WHERE GP.gid=$gid" );
+            . "SET P.Running=P.Running+1, P.GamesMPG=P.GamesMPG-1 WHERE GP.gid=$gid" );
    }//update_players_start_mpgame
 
-   function update_players_end_mpgame( $gid )
+   /*!
+    * \brief Updates player on end of MP-game for given game-id.
+    * \param $game_in_setup_mode true, if Players.GamesMPG should be decreased (e.g. on game-deletion)
+    */
+   function update_players_end_mpgame( $gid, $game_in_setup_mode )
    {
-      // update Players for all game-players: Running--, Finished++
-      db_query( "MultiPlayerGame::update_players_end_mpgame($gid)",
+      // update Players for all game-players: Running--, Finished++; GamesMPG-- if $delete
+      $qpart_del = ($game_in_setup_mode) ? ", P.GamesMPG=P.GamesMPG-1 " : '';
+      db_query( "MultiPlayerGame::update_players_end_mpgame($gid,$game_in_setup_mode)",
          "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
-            . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 WHERE GP.gid=$gid" );
+            . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 $qpart_del WHERE GP.gid=$gid" );
    }//update_players_end_mpgame
 
    function get_message_defaults( $mpg_type, $mpg_gid, $mpg_move=0 )
@@ -583,6 +574,68 @@ class MultiPlayerGame
             );
       }
    }//get_message_defaults
+
+   /*!
+    * \brief Returns array( b|wRating => group-rating ) for set game-end-rating.
+    * \param $gamedata array of GamePlayer-objects with loaded User-object (with RatingStatus + Rating2)
+    * \param $rating_update if true, return in format for rating-update: $arr_rating['b/wRating'] = rating
+    * \return $arr_ratings[$group_color] = average-rating, or $arr_rating['b/wRating'] if $rating_udpate set
+    */
+   function calc_average_group_ratings( $gamedata, $rating_update=false )
+   {
+      $calc_ratings = array();
+      if( is_array($gamedata) )
+      {
+         foreach( $gamedata as $gp )
+         {
+            if( !is_null($gp->user) && $gp->user->hasRating() )
+               $calc_ratings[$gp->GroupColor][] = $gp->user->Rating;
+         }
+      }
+      elseif( !is_numeric($gamedata) || $gamedata <= 0 )
+         error('invalid_args', "MultiPlayerGame::calc_average_group_ratings.check.gid($gamedata)");
+      else
+      {
+         $result = db_query( "MultiPlayerGame::calc_average_group_ratings.find($gamedata)",
+            "SELECT GP.GroupColor, P.Rating2, P.RatingStatus " .
+            "FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
+            "WHERE gid=$gamedata" );
+
+         while( $row = mysql_fetch_assoc($result) )
+         {
+            if( $row['RatingStatus'] == RATING_INIT || $row['RatingStatus'] == RATING_RATED ) // user has rating
+            {
+               if( is_valid_rating($row['Rating2']) )
+                  $calc_ratings[$row['GroupColor']][] = $row['Rating2'];
+            }
+         }
+         mysql_free_result($result);
+      }
+
+      // calc average rating for groups B/W | BW
+      $arr_ratings = array();
+      foreach( $calc_ratings as $gr_col => $arr )
+      {
+         $cnt = count($arr);
+         if( $cnt )
+            $arr_ratings[$gr_col] = array_sum($arr) / $cnt;
+      }
+
+      if( $rating_update ) // convert result into format needed for rating-update
+      {
+         $upd_ratings = array();
+         if( isset($arr_ratings[GPCOL_BW]) )
+            $upd_ratings['bRating'] = $upd_ratings['wRating'] = $arr_ratings[GPCOL_BW];
+         else
+         {
+            $upd_ratings['bRating'] = $arr_ratings[GPCOL_B];
+            $upd_ratings['wRating'] = $arr_ratings[GPCOL_W];
+         }
+         return $upd_ratings;
+      }
+      else
+         return $arr_ratings;
+   }//calc_average_group_ratings
 
 } //end 'MultiPlayerGame'
 
@@ -789,7 +842,7 @@ class GameHelper
 
       if( is_null($grow) )
          $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.tid($gid)",
-            "SELECT tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
+            "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
       if( !$grow || $grow['tid'] > 0 )
          return false;
 
@@ -811,7 +864,7 @@ class GameHelper
                   "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
             }
             else
-               MultiPlayerGame::update_players_end_mpgame( $gid );
+               MultiPlayerGame::update_players_end_mpgame( $gid, ($grow['Status'] == GAME_STATUS_SETUP) );
          }
 
          NextGameOrder::delete_game_priorities($gid);
@@ -871,7 +924,7 @@ class GameHelper
              ). " WHERE ID=$black_id LIMIT 1" );
       }
       else // multi-player-go
-         MultiPlayerGame::update_players_end_mpgame( $gid );
+         MultiPlayerGame::update_players_end_mpgame( $gid, /*setup*/false );
    }//update_players_end_game
 
 } // end 'GameHelper'
