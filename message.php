@@ -27,6 +27,7 @@ require_once 'include/form_functions.php';
 require_once 'include/rating.php';
 require_once 'include/make_game.php';
 require_once 'include/contacts.php';
+require_once 'include/classlib_user.php';
 
 
 define('MSGBOXROWS_NORMAL', 12);
@@ -56,11 +57,15 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    if(message.php?mode=...) //with mode
       NewMessage           : from menu (or site_map)
       NewMessage&uid=      : from user info
-      NewMessage&mpmt=&mpgid=&mpcol=&mpmove= : multi-message for multi-player-game
+      NewMessage&mpmt=&mpgid=&...  : special-message for multi-player-game
+         mpmt=1                    : multi-message  for MPG-start_game
+         mpmt=2 & mpgcol=&mpmove=  : multi-message  for MPG-resign
+         mpmt=3 & mpuid=           : single-message for MPG-invite
       ShowMessage&mid=     : from message_list_body() or message_info_table() or list_messages or here
       Invite               : from menu (or site_map or introduction)
       Invite&uid=          : from user_info or show_games
       Dispute&mid=         : from here
+
    else if(message.php?...) //without mode
       mid=                 : from notifications or here
                            => ShowMessage&mid=
@@ -76,13 +81,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $my_id = $player_row['ID'];
    $folders = get_folders($my_id);
    $type = get_request_arg('type', 'NORMAL');
-   $mpg_gid = $mpg_type = 0;
-
-   $dgs_message = new DgsMessage();
-   if( $handle_msg_action )
-      $errors = handle_send_message( $dgs_message );
-   else
-      $errors = array();
+   $mpg_gid = 0;
 
    $mid = (int)@$_REQUEST['mid'];
    $other_uid = (int)@$_REQUEST['oid']; // for bulk-message
@@ -93,25 +92,30 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       $mode = 'Dispute';
    $can_reply = false;
 
+   $mpg_type = (int)get_request_arg('mpmt');
    $arg_to = get_request_arg('to'); // single or multi-receivers
-   if( !$arg_to && $mode == 'NewMessage' )
-      list( $arg_to, $mpg_type, $mpg_gid, $mpg_move ) = read_mpgame_request(); // handle multi-player-game msg-request
+   $has_arg_to = ( (string)trim($arg_to) != '' );
+   if( (!$arg_to && $mode == 'NewMessage') || ($mpg_type == MPGMSG_INVITE) )
+      list( $arg_to, $mpg_type, $mpg_gid, $mpg_arr ) = read_mpgame_request(); // handle multi-player-game msg-request
    if( !$arg_to )
       $arg_to = read_user_from_request(); // single
+
+   $dgs_message = new DgsMessage();
+   if( $handle_msg_action )
+      $errors = handle_send_message( $dgs_message, $mpg_type, $arg_to );
+   else
+      $errors = array();
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
 
 
-   if( @$mpg_gid )
+   $default_subject = get_request_arg('subject');
+   $default_message = get_request_arg('message');
+   if( $mpg_type > 0 && (@$mpg_gid || !$has_arg_to) && (empty($default_subject) && empty($default_message)) )
    {
       list( $default_subject, $default_message ) =
-         MultiPlayerGame::get_message_defaults( $mpg_type, $mpg_gid, $mpg_move );
-   }
-   else
-   {
-      $default_subject = get_request_arg('subject');
-      $default_message = get_request_arg('message');
+         MultiPlayerGame::get_message_defaults( $mpg_type, $mpg_gid, $mpg_arr );
    }
    $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
@@ -272,12 +276,22 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
       case 'NewMessage':
       {
+         if( $mpg_type == MPGMSG_INVITE )
+         {
+            $disable_edit = 'disabled=1';
+            $message_form->add_hidden( 'mpmt', $mpg_type );
+            $message_form->add_hidden( 'mpgid', $mpg_gid );
+            $message_form->add_hidden( 'mpuid', (int)get_request_arg('mpuid') );
+         }
+         else
+            $disable_edit = '';
+
          $message_form->add_row( array(
                'HEADER', T_('New message'),
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
-               'TEXTINPUT', 'to', 50, 275, $arg_to,
+               'TEXTINPUTX', 'to', 50, 275, $arg_to, $disable_edit,
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Subject'),
@@ -441,10 +455,11 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
 /*!
  * \brief Checks and performs message-actions.
- * \return does NOT return on success but jump to status-page;
+ * \param $arg_to single or multi-receivers
+ * \return does NOT return on success but jump to status-page (or to game-player-page for MPG-invite);
  *         on check-failure returns error-array for previewing
  */
-function handle_send_message( &$dgs_message )
+function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
 {
    global $player_row, $folders, $type;
 
@@ -477,15 +492,19 @@ function handle_send_message( &$dgs_message )
    $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0) ); //not needed: || ($type == "INVITATION")
 
    // find receiver of the message
-
-   $arg_to = get_request_arg('to'); // single or multi-receivers
    if( read_message_receivers( $dgs_message, $type, $invitation_step, $arg_to ) )
       return $dgs_message->errors;
 
-   // Update database
-
-   $subject = get_request_arg('subject');
+   $subject = trim(get_request_arg('subject'));
    $message = get_request_arg('message');
+
+   if( (string)$subject == '' )
+   {
+      $dgs_message->add_error( T_('Missing message subject') );
+      return $dgs_message->errors;
+   }
+
+   // Update database
 
    $msg_gid = 0;
    if( $dgs_message->has_recipient() ) // single-receiver
@@ -512,6 +531,10 @@ function handle_send_message( &$dgs_message )
             exit;
          $subject = 'Game invitation decline';
       }
+      else if( $mpg_type == MPGMSG_INVITE )
+      {
+         $msg_gid = (int)@$_REQUEST['mpgid'];
+      }
 
       $to_uids = $opponent_ID;
    }
@@ -525,14 +548,16 @@ function handle_send_message( &$dgs_message )
    // Send message
 
    send_message( 'send_message', $message, $subject
-      , $to_uids, '', true //$opponent_row['Notify'] == 'NONE'
+      , $to_uids, '', /*notify: $opponent_row['Notify'] == 'NONE'*/true
       , $my_id, $type, $msg_gid
       , $prev_mid, ($disputegid > 0 ? 'DISPUTED' : '')
-      , isset($folders[$new_folder]) ? $new_folder
-         : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
+      , isset($folders[$new_folder]) ? $new_folder : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
       );
 
-   jump_to("status.php?sysmsg=".urlencode(T_('Message sent!')));
+   if( $mpg_type == MPGMSG_INVITE && $msg_gid > 0 )
+      jump_to("game_players.php?gid=$msg_gid".URI_AMP."sysmsg=".urlencode(T_('Message sent!')));
+   else
+      jump_to("status.php?sysmsg=".urlencode(T_('Message sent!')));
 }//handle_send_message
 
 function handle_change_folder( $my_id, $folders, $new_folder, $type )
@@ -589,7 +614,7 @@ function read_message_receivers( &$dgs_msg, $type, $invitation_step, &$to_handle
          $arr_handles = array();
          foreach( $arr_receivers as $handle => $user_row )
          {
-            if( $user_row['ID'] == $my_id )
+            if( $user_row['ID'] == $my_id && $cnt_to > 1 )
                $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_self') );
             $dgs_msg->add_recipient( $user_row );
             $arr_handles[] = $user_row['Handle']; // original case
@@ -620,7 +645,8 @@ function read_user_from_request()
    return $uhandle;
 }//read_user_from_request
 
-// read and check mpgame-request-info; returns: [ arg_to, mpg_msgtype, mpg_gid, mpg_move ]
+// read and check mpgame-request-info; returns: [ arg_to, mpg_msgtype, mpg_gid, mpg_arr ]
+// mpg_arr as required for MultiPlayerGame::get_message_defaults()
 function read_mpgame_request()
 {
    $gid = (int)get_request_arg('mpgid');
@@ -629,15 +655,46 @@ function read_mpgame_request()
 
    $col = get_request_arg('mpcol');
    $type = (int)get_request_arg('mpmt');
-   if( $type != MPGMSG_STARTGAME && $type != MPGMSG_RESIGN )
+   if( $type != MPGMSG_STARTGAME && $type != MPGMSG_RESIGN && $type != MPGMSG_INVITE )
       error('invalid_args', "message.read_mpgame_request.check.mpmsgtype($gid,$col,$type)");
 
-   $handles = GamePlayer::load_users_for_mpgame( $gid, $col, /*skip-myself*/true );
+   if( $type == MPGMSG_INVITE )
+   {
+      $mpg_uid = (int)get_request_arg('mpuid');
+      $mpg_gp = GamePlayer::load_game_player_by_uid( $gid, $mpg_uid );
+      if( is_null($mpg_gp) )
+         error('multi_player_unknown_user', "message.read_mpgame_request.check.mpuid($gid,$type,$mpg_uid)");
+      $arr_users = User::load_quick_userinfo( array( $mpg_uid ) );
+      if( !isset($arr_users[$mpg_uid]) )
+         error('internal_error', "message.read_mpgame_request.check.mpuid($gid,$type,$mpg_uid)");
+      $handles = array( $arr_users[$mpg_uid]['Handle'] );
+   }
+   else
+      $handles = GamePlayer::load_users_for_mpgame( $gid, $col, /*skip-myself*/true );
    if( count($handles) == 0 )
-      error('multiplayer_no_users', "message.read_mpgame_request.chk.handles($gid,$col)");
+      error('multi_player_no_users', "message.read_mpgame_request.chk.handles($gid,$type,$col)");
 
    $move = (int)get_request_arg('mpmove');
-   return array( implode(' ', $handles), $type, $gid, $move );
+   $mpg_arr = array(); // for Resign
+
+   if( $type == MPGMSG_INVITE )
+   {
+      global $player_row;
+
+      $game_row = mysql_single_fetch( "message.read_mpgame_request.check.game($gid,$type)",
+            "SELECT GameType, GamePlayers, ToMove_ID FROM Games WHERE ID=$gid LIMIT 1" );
+      if( !$game_row )
+         error('unknown_game', "message.read_mpgame_request.load.game($gid,$type)");
+      if( $player_row['ID'] != $game_row['ToMove_ID'] )
+         error('multi_player_master_mismatch', "message.read_mpgame_request.load.game($gid,$type)");
+
+      $mpg_arr['from_handle'] = $player_row['Handle'];
+      $mpg_arr['game_type']   = MultiPlayerGame::format_game_type( $game_row['GameType'], $game_row['GamePlayers'] );
+   }
+   elseif( $type == MPGMSG_RESIGN )
+      $mpg_arr['move'] = $move; // for Resign
+
+   return array( implode(' ', $handles), $type, $gid, $mpg_arr );
 }//read_mpgame_request
 
 ?>
