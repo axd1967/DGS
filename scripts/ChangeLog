@@ -19,6 +19,28 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-02-13 juga
+
+   * userinfo.php:
+   - bugfix showing counts of multi-player-games:
+     show only setup + running games, finished games excluded
+
+   * include/game_functions.php (Games.load_users_for_mpgame),
+     include/db/games.php (Games.fillEntityData),
+     include/db/ratinglog.php (Ratinglog.fillEntityData),
+     tournaments/include/tournament_games.php (TournamentGames.fillEntityData),
+     tournaments/include/tournament_ladder.php (TournamentLadder.fillEntityData, ~.seed_ladder),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fillEntityData),
+     tournaments/include/tournament_pool.php (TournamentPool.fillEntityData, ~.seed_pools,
+       ~.add_missing_registered_users),
+     message.php (read_mpgame_request),
+     scripts/tests/README.test:
+   - fix PHP4-incompatibility: can NOT use arg-reference assigned to null: &$arg=null
+   - test-suite requires PHP-version >= 5.x
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - replaced all SQL CHANGE-command to MODIFY-command if column-name not changed
+
 2011-02-08 juga
 
    * game_players.php:
