@@ -21,12 +21,12 @@
 
 -- [field-order] sync Players-table
 ALTER TABLE Players
-   CHANGE MayPostOnForum MayPostOnForum enum('N','Y','M') NOT NULL default 'Y' AFTER AdminNote,
-   CHANGE Rating2 Rating2 double default NULL AFTER Rating ;
+   MODIFY MayPostOnForum enum('N','Y','M') NOT NULL default 'Y' AFTER AdminNote,
+   MODIFY Rating2 double default NULL AFTER Rating ;
 
 -- [field-order] sync Waitingroom-table
 ALTER TABLE Waitingroom
-   CHANGE Handicap Handicap int(11) NOT NULL default '0' AFTER Komi ;
+   MODIFY Handicap int(11) NOT NULL default '0' AFTER Komi ;
 
 
 ###  ------ Optimize table-indexes of DGS-servers -----------------------------------
@@ -39,7 +39,7 @@ ALTER TABLE Bio
 
 -- [field-size] COL Errorlog.Message : text -> varchar(32)
 ALTER TABLE Errorlog
-   CHANGE Message Message varchar(32) NOT NULL ;
+   MODIFY Message varchar(32) NOT NULL ;
 -- [index] add Errorlog-indexes to be able to search for errors
 -- [index] IDX Errorlog.Message -> prefix-index Message(8)
 -- [index] IDX Errorlog.Date
@@ -67,13 +67,13 @@ ALTER TABLE MessageCorrespondents
 -- [no-def] Folders.uid int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Folders.Name varchar(40) NOT NULL default '' -> no default [ok]
 ALTER TABLE Folders
-   CHANGE Folder_nr Folder_nr tinyint NOT NULL default '0',
-   CHANGE uid uid int NOT NULL,
-   CHANGE Name Name varchar(40) NOT NULL ;
+   MODIFY Folder_nr tinyint NOT NULL default '0',
+   MODIFY uid int NOT NULL,
+   MODIFY Name varchar(40) NOT NULL ;
 -- [field-size] COL MessageCorrespondents.Folder_nr : int -> tinyint (foreign-key of Folders.Folder_nr)
 -- [no-def] MessageCorrespondents.Folder_nr default NULL -> no default [ok]
 ALTER TABLE MessageCorrespondents
-   CHANGE Folder_nr Folder_nr tinyint ;
+   MODIFY Folder_nr tinyint ;
 -- [index] optimize MessageCorrespondents-index -> remove double-index 'Folder_nr(Folder_nr,uid)' (part 2)
 ALTER TABLE MessageCorrespondents
    ADD INDEX Folder_nr (Folder_nr) ;
@@ -90,12 +90,12 @@ ALTER TABLE Moves
 -- [not-null] Moves.Hours smallint(5) unsigned default NULL -> default 0 -> NOT NULL [ok]
 -- [no-def] Moves.gid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Moves
-   CHANGE MoveNr MoveNr smallint unsigned NOT NULL,
-   CHANGE Stone Stone tinyint unsigned NOT NULL default '0',
-   CHANGE PosX PosX tinyint NOT NULL,
-   CHANGE PosY PosY tinyint NOT NULL,
-   CHANGE Hours Hours smallint unsigned NOT NULL,
-   CHANGE gid gid int NOT NULL ;
+   MODIFY MoveNr smallint unsigned NOT NULL,
+   MODIFY Stone tinyint unsigned NOT NULL default '0',
+   MODIFY PosX tinyint NOT NULL,
+   MODIFY PosY tinyint NOT NULL,
+   MODIFY Hours smallint unsigned NOT NULL,
+   MODIFY gid int NOT NULL ;
 -- [index] fix wrong Moves-index 'gid(gid,ID)' (part 2)
 ALTER TABLE Moves
    ADD INDEX gid (gid,MoveNr) ;
@@ -148,52 +148,52 @@ ALTER TABLE Messages
 -- [no-def] Bio.Category varchar(40) NOT NULL default '' -> no default [ok]
 -- [field-size] COL Bio.SortOrder : int -> smallint unsigned
 ALTER TABLE Bio
-   CHANGE uid uid int NOT NULL,
-   CHANGE Category Category varchar(40) NOT NULL,
-   CHANGE SortOrder SortOrder smallint unsigned NOT NULL default '0' ;
+   MODIFY uid int NOT NULL,
+   MODIFY Category varchar(40) NOT NULL,
+   MODIFY SortOrder smallint unsigned NOT NULL default '0' ;
 
 -- [field-size] COL Clock.ID : int -> smallint + foreign-keys
 -- [no-def] Clock.ID int(11) NOT NULL default '0' -> no default [ok]
 -- [not-null] Clock.Ticks int(11) default '0' -> NOT NULL [ok]
 ALTER TABLE Clock
-   CHANGE ID ID smallint NOT NULL,
-   CHANGE Ticks Ticks int NOT NULL default '0' ;
+   MODIFY ID smallint NOT NULL,
+   MODIFY Ticks int NOT NULL default '0' ;
 -- [field-size] COL Games.ClockUsed : int -> smallint (foreign-key of Clock.ID)
 ALTER TABLE Games
-   CHANGE ClockUsed ClockUsed smallint NOT NULL default '0' ;
+   MODIFY ClockUsed smallint NOT NULL default '0' ;
 -- [field-size] COL Players.Nightstart : int -> smallint (foreign-key of Clock.ID)
 -- [field-size] COL Players.ClockUsed : int -> smallint (foreign-key of Clock.ID)
 ALTER TABLE Players
-   CHANGE Nightstart Nightstart smallint NOT NULL default '22',
-   CHANGE ClockUsed ClockUsed smallint NOT NULL default '22' ;
+   MODIFY Nightstart smallint NOT NULL default '22',
+   MODIFY ClockUsed smallint NOT NULL default '22' ;
 
 -- [no-def] Contacts.uid int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Contacts.cid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Contacts
-   CHANGE uid uid int NOT NULL,
-   CHANGE cid cid int NOT NULL ;
+   MODIFY uid int NOT NULL,
+   MODIFY cid int NOT NULL ;
 
 -- [field-size] COL FAQ.Level : int -> tinyint unsigned
 -- [field-size] COL FAQ.SortOrder : int -> smallint unsigned
 ALTER TABLE FAQ
-   CHANGE Level Level tinyint unsigned NOT NULL default '0',
-   CHANGE SortOrder SortOrder smallint NOT NULL default '0' ;
+   MODIFY Level tinyint unsigned NOT NULL default '0',
+   MODIFY SortOrder smallint NOT NULL default '0' ;
 
 -- [not-null] FAQlog.Question text -> NOT NULL [ok]
 -- [not-null] FAQlog.Answer text -> NOT NULL [ok]
 ALTER TABLE FAQlog
-   CHANGE Question Question text NOT NULL,
-   CHANGE Answer Answer text NOT NULL ;
+   MODIFY Question text NOT NULL,
+   MODIFY Answer text NOT NULL ;
 
 -- [no-def] Forumlog.User_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Forumlog.Thread_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Forumlog.Post_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Forumlog.Action varchar(40) NOT NULL default '' -> no default [ok]
 ALTER TABLE Forumlog
-   CHANGE User_ID User_ID int NOT NULL,
-   CHANGE Thread_ID Thread_ID int NOT NULL,
-   CHANGE Post_ID Post_ID int NOT NULL,
-   CHANGE Action Action varchar(40) NOT NULL ;
+   MODIFY User_ID int NOT NULL,
+   MODIFY Thread_ID int NOT NULL,
+   MODIFY Post_ID int NOT NULL,
+   MODIFY Action varchar(40) NOT NULL ;
 
 -- [field-size] COL GoDiagrams.Size : int -> tinyint unsigned
 -- [field-size] COL GoDiagrams.View_Left : int -> tinyint
@@ -206,23 +206,23 @@ ALTER TABLE Forumlog
 -- [not-null] GoDiagrams.View_Up int(11) default NULL -> default 0 -> NOT NULL [ok]
 -- [not-null] GoDiagrams.View_Down int(11) default NULL -> default 0 -> NOT NULL [ok]
 ALTER TABLE GoDiagrams
-   CHANGE Size Size tinyint unsigned NOT NULL,
-   CHANGE View_Left View_Left tinyint NOT NULL default '0',
-   CHANGE View_Right View_Right tinyint NOT NULL default '0',
-   CHANGE View_Up View_Up tinyint NOT NULL default '0',
-   CHANGE View_Down View_Down tinyint NOT NULL default '0' ;
+   MODIFY Size tinyint unsigned NOT NULL,
+   MODIFY View_Left tinyint NOT NULL default '0',
+   MODIFY View_Right tinyint NOT NULL default '0',
+   MODIFY View_Up tinyint NOT NULL default '0',
+   MODIFY View_Down tinyint NOT NULL default '0' ;
 
 -- [unused] MoveMessages-table (remove game-id auto-increment)
 -- [not-null] MoveMessages.Text text -> NOT NULL [ok]
 ALTER TABLE MoveMessages
-   CHANGE gid gid int(11) NOT NULL,
-   CHANGE Text Text text NOT NULL ;
+   MODIFY gid int(11) NOT NULL,
+   MODIFY Text text NOT NULL ;
 
 -- [not-null] Observers.uid int(11) default NULL -> NOT NULL -> no default [ok]
 -- [not-null] Observers.gid int(11) default NULL -> NOT NULL -> no default [ok]
 ALTER TABLE Observers
-   CHANGE uid uid int NOT NULL,
-   CHANGE gid gid int NOT NULL ;
+   MODIFY uid int NOT NULL,
+   MODIFY gid int NOT NULL ;
 
 -- [field-size] COL Players.Adminlevel : int -> smallint unsigned
 -- [field-size] COL Players.AdminOptions : int -> smallint unsigned
@@ -250,29 +250,29 @@ ALTER TABLE Observers
 -- [unused] Players.NotesSmallMode -> fix enum (removed unused 'OFF'-value)
 -- [unused] Players.NotesLargeMode -> fix enum (removed unused 'OFF'-value)
 ALTER TABLE Players
-   CHANGE Adminlevel Adminlevel smallint unsigned NOT NULL default '0',
-   CHANGE AdminOptions AdminOptions smallint unsigned NOT NULL default '0',
-   CHANGE VacationDays VacationDays float NOT NULL default '14',
-   CHANGE OnVacation OnVacation float NOT NULL default '0',
-   CHANGE Woodcolor Woodcolor tinyint unsigned NOT NULL default '1',
-   CHANGE Boardcoords Boardcoords smallint unsigned NOT NULL default '31',
-   CHANGE Button Button tinyint unsigned NOT NULL default '0',
-   CHANGE Running Running smallint unsigned NOT NULL default '0',
-   CHANGE Finished Finished mediumint unsigned NOT NULL default '0',
-   CHANGE RatedGames RatedGames mediumint unsigned NOT NULL default '0',
-   CHANGE Won Won mediumint unsigned NOT NULL default '0',
-   CHANGE Lost Lost mediumint unsigned NOT NULL default '0',
-   CHANGE Handle Handle varchar(16) NOT NULL,
-   CHANGE Password Password varchar(41) NOT NULL,
-   CHANGE Registerdate Registerdate date,
-   CHANGE Moves Moves int NOT NULL default '0',
-   CHANGE Email Email varchar(80) NOT NULL default '',
-   CHANGE Rank Rank varchar(40) NOT NULL default '',
-   CHANGE Open Open varchar(40) NOT NULL default '',
-   CHANGE Browser Browser varchar(100) NOT NULL default '',
-   CHANGE Country Country char(2) NOT NULL default '',
-   CHANGE NotesSmallMode NotesSmallMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
-   CHANGE NotesLargeMode NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT' ;
+   MODIFY Adminlevel smallint unsigned NOT NULL default '0',
+   MODIFY AdminOptions smallint unsigned NOT NULL default '0',
+   MODIFY VacationDays float NOT NULL default '14',
+   MODIFY OnVacation float NOT NULL default '0',
+   MODIFY Woodcolor tinyint unsigned NOT NULL default '1',
+   MODIFY Boardcoords smallint unsigned NOT NULL default '31',
+   MODIFY Button tinyint unsigned NOT NULL default '0',
+   MODIFY Running smallint unsigned NOT NULL default '0',
+   MODIFY Finished mediumint unsigned NOT NULL default '0',
+   MODIFY RatedGames mediumint unsigned NOT NULL default '0',
+   MODIFY Won mediumint unsigned NOT NULL default '0',
+   MODIFY Lost mediumint unsigned NOT NULL default '0',
+   MODIFY Handle varchar(16) NOT NULL,
+   MODIFY Password varchar(41) NOT NULL,
+   MODIFY Registerdate date,
+   MODIFY Moves int NOT NULL default '0',
+   MODIFY Email varchar(80) NOT NULL default '',
+   MODIFY Rank varchar(40) NOT NULL default '',
+   MODIFY Open varchar(40) NOT NULL default '',
+   MODIFY Browser varchar(100) NOT NULL default '',
+   MODIFY Country char(2) NOT NULL default '',
+   MODIFY NotesSmallMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT',
+   MODIFY NotesLargeMode enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') NOT NULL default 'RIGHT' ;
 
 -- [field-size] COL Posts.AnswerNr : int -> mediumint unsigned
 -- [field-size] COL Posts.Depth : int -> tinyint unsigned
@@ -280,25 +280,25 @@ ALTER TABLE Players
 -- [no-def] Posts.Forum_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Posts.User_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Posts
-   CHANGE AnswerNr AnswerNr mediumint unsigned NOT NULL default '0',
-   CHANGE Depth Depth tinyint unsigned NOT NULL default '0',
-   CHANGE PostsInThread PostsInThread mediumint unsigned NOT NULL default '0',
-   CHANGE Forum_ID Forum_ID int NOT NULL,
-   CHANGE User_ID User_ID int NOT NULL ;
+   MODIFY AnswerNr mediumint unsigned NOT NULL default '0',
+   MODIFY Depth tinyint unsigned NOT NULL default '0',
+   MODIFY PostsInThread mediumint unsigned NOT NULL default '0',
+   MODIFY Forum_ID int NOT NULL,
+   MODIFY User_ID int NOT NULL ;
 
 -- [no-def] RatingChange.uid int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] RatingChange.gid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE RatingChange
-   CHANGE uid uid int NOT NULL,
-   CHANGE gid gid int NOT NULL ;
+   MODIFY uid int NOT NULL,
+   MODIFY gid int NOT NULL ;
 
 -- [field-size] COL Ratinglog.RatingDiff : double -> float
 -- [no-def] Ratinglog.uid int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Ratinglog.gid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Ratinglog
-   CHANGE RatingDiff RatingDiff float default NULL,
-   CHANGE uid uid int NOT NULL,
-   CHANGE gid gid int NOT NULL ;
+   MODIFY RatingDiff float default NULL,
+   MODIFY uid int NOT NULL,
+   MODIFY gid int NOT NULL ;
 
 -- [not-null] Statistics.Time datetime default NULL -> no default -> NOT NULL [ok]
 -- [not-null] Statistics.Hits int(11) default NULL -> no default -> NOT NULL [ok]
@@ -311,50 +311,50 @@ ALTER TABLE Ratinglog
 -- [not-null] Statistics.GamesRunning int(11) default NULL -> no default -> NOT NULL [ok]
 -- [not-null] Statistics.Activity int(11) default NULL -> no default -> NOT NULL [ok]
 ALTER TABLE Statistics
-   CHANGE Time Time datetime NOT NULL,
-   CHANGE Hits Hits int NOT NULL,
-   CHANGE Users Users int NOT NULL,
-   CHANGE Moves Moves int NOT NULL,
-   CHANGE MovesFinished MovesFinished int NOT NULL,
-   CHANGE MovesRunning MovesRunning int NOT NULL,
-   CHANGE Games Games int NOT NULL,
-   CHANGE GamesFinished GamesFinished int NOT NULL,
-   CHANGE GamesRunning GamesRunning int NOT NULL,
-   CHANGE Activity Activity int NOT NULL ;
+   MODIFY Time datetime NOT NULL,
+   MODIFY Hits int NOT NULL,
+   MODIFY Users int NOT NULL,
+   MODIFY Moves int NOT NULL,
+   MODIFY MovesFinished int NOT NULL,
+   MODIFY MovesRunning int NOT NULL,
+   MODIFY Games int NOT NULL,
+   MODIFY GamesFinished int NOT NULL,
+   MODIFY GamesRunning int NOT NULL,
+   MODIFY Activity int NOT NULL ;
 
 -- [no-def] TranslationFoundInGroup.Text_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] TranslationFoundInGroup.Group_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE TranslationFoundInGroup
-   CHANGE Text_ID Text_ID int NOT NULL,
-   CHANGE Group_ID Group_ID int NOT NULL ;
+   MODIFY Text_ID int NOT NULL,
+   MODIFY Group_ID int NOT NULL ;
 
 -- [no-def] TranslationGroups.Groupname varchar(32) NOT NULL default '' -> no default [ok]
 ALTER TABLE TranslationGroups
-   CHANGE Groupname Groupname varchar(32) NOT NULL ;
+   MODIFY Groupname varchar(32) NOT NULL ;
 
 -- [not-null] TranslationLanguages.Language varchar(32) default NULL -> no default -> NOT NULL [ok]
 -- [not-null] TranslationLanguages.Name varchar(32) default NULL -> no default -> NOT NULL [ok]
 ALTER TABLE TranslationLanguages
-   CHANGE Language Language varchar(32) NOT NULL,
-   CHANGE Name Name varchar(32) NOT NULL ;
+   MODIFY Language varchar(32) NOT NULL,
+   MODIFY Name varchar(32) NOT NULL ;
 
 -- [not-null] TranslationPages.Page varchar(64) default NULL -> no default -> NOT NULL [ok]
 -- [not-null] TranslationPages.Group_ID int(11) default NULL -> no default -> NOT NULL [ok]
 ALTER TABLE TranslationPages
-   CHANGE Page Page varchar(64) NOT NULL,
-   CHANGE Group_ID Group_ID int NOT NULL ;
+   MODIFY Page varchar(64) NOT NULL,
+   MODIFY Group_ID int NOT NULL ;
 
 -- [not-null] Translationlog.Player_ID int(11) default NULL -> no default -> NOT NULL [ok]
 -- [not-null] Translationlog.Language_ID int(11) default NULL -> no default -> NOT NULL [ok]
 ALTER TABLE Translationlog
-   CHANGE Player_ID Player_ID int NOT NULL,
-   CHANGE Language_ID Language_ID int NOT NULL ;
+   MODIFY Player_ID int NOT NULL,
+   MODIFY Language_ID int NOT NULL ;
 
 -- [no-def] Translations.Original_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Translations.Language_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Translations
-   CHANGE Original_ID Original_ID int NOT NULL,
-   CHANGE Language_ID Language_ID int NOT NULL ;
+   MODIFY Original_ID int NOT NULL,
+   MODIFY Language_ID int NOT NULL ;
 
 -- [field-size] COL Waitingroom.nrGames : int -> tinyint unsigned
 -- [field-size] COL Waitingroom.Size : int -> tinyint unsigned
@@ -368,17 +368,17 @@ ALTER TABLE Translations
 -- [field-size] COL Waitingroom.MaxHandicap : tinyint -> tinyint unsigned
 -- [no-def] Waitingroom.uid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Waitingroom
-   CHANGE nrGames nrGames tinyint unsigned NOT NULL default '1',
-   CHANGE Size Size tinyint unsigned NOT NULL default '19',
-   CHANGE Handicap Handicap tinyint unsigned NOT NULL default '0',
-   CHANGE Maintime Maintime smallint NOT NULL default '0',
-   CHANGE Byotime Byotime smallint NOT NULL default '0',
-   CHANGE Byoperiods Byoperiods tinyint NOT NULL default '0',
-   CHANGE Ratingmin Ratingmin float NOT NULL default '-9999',
-   CHANGE Ratingmax Ratingmax float NOT NULL default '-9999',
-   CHANGE MinHandicap MinHandicap tinyint unsigned NOT NULL default '0',
-   CHANGE MaxHandicap MaxHandicap tinyint unsigned NOT NULL default '127',
-   CHANGE uid uid int NOT NULL ;
+   MODIFY nrGames tinyint unsigned NOT NULL default '1',
+   MODIFY Size tinyint unsigned NOT NULL default '19',
+   MODIFY Handicap tinyint unsigned NOT NULL default '0',
+   MODIFY Maintime smallint NOT NULL default '0',
+   MODIFY Byotime smallint NOT NULL default '0',
+   MODIFY Byoperiods tinyint NOT NULL default '0',
+   MODIFY Ratingmin float NOT NULL default '-9999',
+   MODIFY Ratingmax float NOT NULL default '-9999',
+   MODIFY MinHandicap tinyint unsigned NOT NULL default '0',
+   MODIFY MaxHandicap tinyint unsigned NOT NULL default '127',
+   MODIFY uid int NOT NULL ;
 
 
 
@@ -401,7 +401,7 @@ ALTER TABLE Players
 UPDATE Players
    SET Activity=FLOOR(1000*Activity) WHERE Activity>0;
 ALTER TABLE Players
-   CHANGE Activity Activity INT(11) NOT NULL DEFAULT '15000';
+   MODIFY Activity INT(11) NOT NULL DEFAULT '15000';
 
 
 -- enable JavaScript usage for old players (as actually):
@@ -490,7 +490,7 @@ ALTER TABLE `Players`
 
 -- replace Posts.PendingApproval -> Approved (enum 'P')
 ALTER TABLE `Posts`
-   CHANGE COLUMN Approved Approved enum('Y','N','P') NOT NULL DEFAULT 'Y';
+   MODIFY Approved enum('Y','N','P') NOT NULL DEFAULT 'Y';
 UPDATE Posts
    SET Approved='P' WHERE PendingApproval='Y';
 
@@ -535,7 +535,7 @@ ALTER TABLE `FeatureVote`
 
 -- Feature-voting: refactoring
 ALTER TABLE `FeatureList`
-   CHANGE Status Status enum('NEW','WORK','DONE','LIVE','NACK') NOT NULL DEFAULT 'NEW' ;
+   MODIFY Status enum('NEW','WORK','DONE','LIVE','NACK') NOT NULL DEFAULT 'NEW' ;
 ALTER TABLE `FeatureList`
    DROP INDEX Editor_ID ;
 
@@ -558,10 +558,10 @@ UPDATE Players
 
 -- group (global) user-profile fields in Players-table
 ALTER TABLE `Players`
-   CHANGE Button Button tinyint unsigned NOT NULL default '0' AFTER UserFlags,
-   CHANGE TableMaxRows TableMaxRows smallint(5) unsigned NOT NULL default '20'  AFTER UserFlags,
-   CHANGE MenuDirection MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL' AFTER UserFlags,
-   CHANGE SkinName SkinName varchar(32) NOT NULL default '' AFTER UserFlags ;
+   MODIFY Button tinyint unsigned NOT NULL default '0' AFTER UserFlags,
+   MODIFY TableMaxRows smallint(5) unsigned NOT NULL default '20'  AFTER UserFlags,
+   MODIFY MenuDirection enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL' AFTER UserFlags,
+   MODIFY SkinName varchar(32) NOT NULL default '' AFTER UserFlags ;
 
 
 -- split Players-table into GUI-related config-tables (board-related)
@@ -830,7 +830,7 @@ ALTER TABLE Players
 
 -- allow longer Feature-subject
 ALTER TABLE FeatureList
-   CHANGE Subject Subject varchar(255) NOT NULL ;
+   MODIFY Subject varchar(255) NOT NULL ;
 
 
 -- added table for points-management and quota-like fields
@@ -883,13 +883,13 @@ CREATE TABLE WaitingroomJoined (
 
 -- cleanup table Waitingroom removing (unused) enum-value 'Done'
 ALTER TABLE Waitingroom
-   CHANGE Rated Rated enum('N','Y') NOT NULL default 'N',
-   CHANGE MustBeRated MustBeRated enum('N','Y') NOT NULL default 'N' ;
+   MODIFY Rated enum('N','Y') NOT NULL default 'N',
+   MODIFY MustBeRated enum('N','Y') NOT NULL default 'N' ;
 
 
 -- added manual coloring black/white
 ALTER TABLE Waitingroom
-   CHANGE Handicaptype Handicaptype enum('conv','proper','nigiri','double','black','white') NOT NULL default 'conv' ;
+   MODIFY Handicaptype enum('conv','proper','nigiri','double','black','white') NOT NULL default 'conv' ;
 ALTER TABLE Waitingroom
    ADD INDEX Handicaptype (Handicaptype);
 
@@ -950,25 +950,25 @@ SELECT COUNT(*) FROM Messages WHERE ReplyTo>0 AND Thread=0 ;
 -- [field-size] COL ConfigBoard.Boardcoords : int -> smallint unsigned
 -- [no-def] ConfigBoard.User_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE ConfigBoard
-   CHANGE Woodcolor Woodcolor tinyint unsigned NOT NULL default '1',
-   CHANGE Boardcoords Boardcoords smallint unsigned NOT NULL default '31',
-   CHANGE User_ID User_ID int NOT NULL ;
+   MODIFY Woodcolor tinyint unsigned NOT NULL default '1',
+   MODIFY Boardcoords smallint unsigned NOT NULL default '31',
+   MODIFY User_ID int NOT NULL ;
 
 -- [no-def] ConfigPages.User_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE ConfigPages
-   CHANGE User_ID User_ID int NOT NULL ;
+   MODIFY User_ID int NOT NULL ;
 
 -- [no-def] FeatureList.Editor_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] FeatureList.Created datetime NOT NULL default '0000-00-00 00:00:00' -> no default [ok]
 ALTER TABLE FeatureList
-   CHANGE Editor_ID Editor_ID int NOT NULL,
-   CHANGE Created Created datetime NOT NULL ;
+   MODIFY Editor_ID int NOT NULL,
+   MODIFY Created datetime NOT NULL ;
 
 -- [field-size] COL FeatureVote.Points : int -> tinyint
 -- [no-def] FeatureVote.Voter_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE FeatureVote
-   CHANGE Points Points tinyint NOT NULL default '0',
-   CHANGE Voter_ID Voter_ID int NOT NULL ;
+   MODIFY Points tinyint NOT NULL default '0',
+   MODIFY Voter_ID int NOT NULL ;
 
 -- [field-size] COL Forums.ID : int -> smallint + foreign-keys
 -- [field-size] COL Forums.SortOrder : int -> smallint unsigned
@@ -978,21 +978,21 @@ ALTER TABLE FeatureVote
 -- [not-null] Forums.Description varchar(255) default NULL -> default '' -> NOT NULL [ok]
 -- [not-null] Forums.LastPost int(11) default NULL default '0' -> NOT NULL [ok]
 ALTER TABLE Forums
-   CHANGE ID ID smallint NOT NULL auto_increment,
-   CHANGE SortOrder SortOrder smallint unsigned NOT NULL default '0',
-   CHANGE PostsInForum PostsInForum mediumint unsigned NOT NULL default '0',
-   CHANGE ThreadsInForum ThreadsInForum mediumint unsigned NOT NULL default '0',
-   CHANGE Name Name varchar(40) NOT NULL default '',
-   CHANGE Description Description varchar(255) NOT NULL default '',
-   CHANGE LastPost LastPost int NOT NULL default '0' ;
+   MODIFY ID smallint NOT NULL auto_increment,
+   MODIFY SortOrder smallint unsigned NOT NULL default '0',
+   MODIFY PostsInForum mediumint unsigned NOT NULL default '0',
+   MODIFY ThreadsInForum mediumint unsigned NOT NULL default '0',
+   MODIFY Name varchar(40) NOT NULL default '',
+   MODIFY Description varchar(255) NOT NULL default '',
+   MODIFY LastPost int NOT NULL default '0' ;
 -- [field-size] COL Posts.Forum_ID : int -> smallint (foreign-key of Forums.ID)
 ALTER TABLE Posts
-   CHANGE Forum_ID Forum_ID smallint NOT NULL default '0' ;
+   MODIFY Forum_ID smallint NOT NULL default '0' ;
 -- [field-size] COL ForumRead.Forum_ID : int -> smallint (foreign-key of Forums.ID)
 -- [no-def] ForumRead.User_ID int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE ForumRead
-   CHANGE Forum_ID Forum_ID smallint NOT NULL default '0',
-   CHANGE User_ID User_ID int NOT NULL ;
+   MODIFY Forum_ID smallint NOT NULL default '0',
+   MODIFY User_ID int NOT NULL ;
 
 -- [field-size] COL Games.Size : int -> tinyint unsigned
 -- [field-size] COL Games.Handicap : int -> tinyint unsigned
@@ -1015,30 +1015,30 @@ ALTER TABLE ForumRead
 -- NOTE: ca. 80 warnings of data-loss, because of exorbitant large main/byo-time/byo-periods,
 --       will be limited to data-type specific max-value
 ALTER TABLE Games
-   CHANGE Size Size tinyint unsigned NOT NULL default '19',
-   CHANGE Handicap Handicap tinyint unsigned NOT NULL default '0',
-   CHANGE Moves Moves smallint unsigned NOT NULL default '0',
-   CHANGE Black_Prisoners Black_Prisoners smallint unsigned NOT NULL default '0',
-   CHANGE White_Prisoners White_Prisoners smallint unsigned NOT NULL default '0',
-   CHANGE Last_X Last_X tinyint NOT NULL default '-1',
-   CHANGE Last_Y Last_Y tinyint NOT NULL default '-1',
-   CHANGE Maintime Maintime smallint NOT NULL default '0',
-   CHANGE Black_Maintime Black_Maintime smallint NOT NULL default '0',
-   CHANGE White_Maintime White_Maintime smallint NOT NULL default '0',
-   CHANGE Byotime Byotime smallint NOT NULL default '0',
-   CHANGE Black_Byotime Black_Byotime smallint NOT NULL default '0',
-   CHANGE White_Byotime White_Byotime smallint NOT NULL default '0',
-   CHANGE Byoperiods Byoperiods tinyint NOT NULL default '0',
-   CHANGE Black_Byoperiods Black_Byoperiods tinyint NOT NULL default '-1',
-   CHANGE White_Byoperiods White_Byoperiods tinyint NOT NULL default '-1',
-   CHANGE Black_ID Black_ID int NOT NULL,
-   CHANGE White_ID White_ID int NOT NULL ;
+   MODIFY Size tinyint unsigned NOT NULL default '19',
+   MODIFY Handicap tinyint unsigned NOT NULL default '0',
+   MODIFY Moves smallint unsigned NOT NULL default '0',
+   MODIFY Black_Prisoners smallint unsigned NOT NULL default '0',
+   MODIFY White_Prisoners smallint unsigned NOT NULL default '0',
+   MODIFY Last_X tinyint NOT NULL default '-1',
+   MODIFY Last_Y tinyint NOT NULL default '-1',
+   MODIFY Maintime smallint NOT NULL default '0',
+   MODIFY Black_Maintime smallint NOT NULL default '0',
+   MODIFY White_Maintime smallint NOT NULL default '0',
+   MODIFY Byotime smallint NOT NULL default '0',
+   MODIFY Black_Byotime smallint NOT NULL default '0',
+   MODIFY White_Byotime smallint NOT NULL default '0',
+   MODIFY Byoperiods tinyint NOT NULL default '0',
+   MODIFY Black_Byoperiods tinyint NOT NULL default '-1',
+   MODIFY White_Byoperiods tinyint NOT NULL default '-1',
+   MODIFY Black_ID int NOT NULL,
+   MODIFY White_ID int NOT NULL ;
 
 -- [no-def] GamesNotes.gid int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] GamesNotes.player enum('B','W') NOT NULL default 'B' -> no default [ok]
 ALTER TABLE GamesNotes
-   CHANGE gid gid int NOT NULL,
-   CHANGE player player enum('B','W') NOT NULL ;
+   MODIFY gid int NOT NULL,
+   MODIFY player enum('B','W') NOT NULL ;
 
 -- [index] removed index for removed field IDX Posts.PendingApproval
 ALTER TABLE Posts
@@ -1051,9 +1051,9 @@ ALTER TABLE Posts
 -- [no-def] Profiles.User_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Profiles.Type smallint(5) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Profiles
-   CHANGE SortOrder SortOrder smallint NOT NULL default '1',
-   CHANGE User_ID User_ID int NOT NULL,
-   CHANGE Type Type smallint NOT NULL ;
+   MODIFY SortOrder smallint NOT NULL default '1',
+   MODIFY User_ID int NOT NULL,
+   MODIFY Type smallint NOT NULL ;
 
 -- [field-size] COL Tournament.Rounds : int -> tinyint unsigned
 -- [field-size] COL Tournament.CurrentRound : int -> tinyint unsigned
@@ -1062,18 +1062,18 @@ ALTER TABLE Profiles
 -- [no-def] Tournament.Owner_ID int(11) NOT NULL default '0' -> no default [ok]
 -- [no-def] Tournament.Created datetime NOT NULL default '0000-00-00 00:00:00' -> no default [ok]
 ALTER TABLE Tournament
-   CHANGE Rounds Rounds tinyint unsigned NOT NULL default '1',
-   CHANGE CurrentRound CurrentRound tinyint unsigned NOT NULL default '1',
-   CHANGE Type Type enum('ROUNDROBIN') NOT NULL,
-   CHANGE Title Title varchar(255) NOT NULL,
-   CHANGE Owner_ID Owner_ID int NOT NULL,
-   CHANGE Created Created datetime NOT NULL ;
+   MODIFY Rounds tinyint unsigned NOT NULL default '1',
+   MODIFY CurrentRound tinyint unsigned NOT NULL default '1',
+   MODIFY Type enum('ROUNDROBIN') NOT NULL,
+   MODIFY Title varchar(255) NOT NULL,
+   MODIFY Owner_ID int NOT NULL,
+   MODIFY Created datetime NOT NULL ;
 
 -- [field-size] COL TournamentProperties.UserMinRating : double -> float
 -- [field-size] COL TournamentProperties.UserMaxRating : double -> float
 ALTER TABLE TournamentProperties
-   CHANGE UserMinRating UserMinRating float NOT NULL default '-9999',
-   CHANGE UserMaxRating UserMaxRating float NOT NULL default '-9999' ;
+   MODIFY UserMinRating float NOT NULL default '-9999',
+   MODIFY UserMaxRating float NOT NULL default '-9999' ;
 
 -- [field-size] COL TournamentRules.Size : int -> tinyint unsigned
 -- [field-size] COL TournamentRules.Handicap : int -> tinyint unsigned
@@ -1083,13 +1083,13 @@ ALTER TABLE TournamentProperties
 -- [field-size] COL TournamentRules.Byotime : int -> smallint
 -- [field-size] COL TournamentRules.Byoperiods : int -> tinyint
 ALTER TABLE TournamentRules
-   CHANGE Size Size tinyint unsigned NOT NULL default '19',
-   CHANGE Handicap Handicap tinyint unsigned NOT NULL default '0',
-   CHANGE MinHandicap MinHandicap tinyint unsigned NOT NULL default '0',
-   CHANGE MaxHandicap MaxHandicap tinyint unsigned NOT NULL default '127',
-   CHANGE Maintime Maintime smallint NOT NULL default '0',
-   CHANGE Byotime Byotime smallint NOT NULL default '0',
-   CHANGE Byoperiods Byoperiods tinyint NOT NULL default '0' ;
+   MODIFY Size tinyint unsigned NOT NULL default '19',
+   MODIFY Handicap tinyint unsigned NOT NULL default '0',
+   MODIFY MinHandicap tinyint unsigned NOT NULL default '0',
+   MODIFY MaxHandicap tinyint unsigned NOT NULL default '127',
+   MODIFY Maintime smallint NOT NULL default '0',
+   MODIFY Byotime smallint NOT NULL default '0',
+   MODIFY Byoperiods tinyint NOT NULL default '0' ;
 
 -- [index] analyze data distribution for query-optimizer
 ANALYZE TABLE Bio ;
@@ -1126,7 +1126,7 @@ ALTER TABLE Messages
 
 -- enlarge field-size of Players.Open 40 -> 60
 ALTER TABLE Players
-   CHANGE Open Open varchar(60) NOT NULL default '' ;
+   MODIFY Open varchar(60) NOT NULL default '' ;
 
 
 -- change GamesNotes.player-enum to user-id (e.g. for later Rengo has more than one B and W player)
@@ -1159,32 +1159,32 @@ SELECT COUNT(*) FROM MessageCorrespondents WHERE Folder_nr < 0 ;
 UPDATE MessageCorrespondents
    SET Folder_nr=-4 WHERE Folder_nr IS NULL ;
 ALTER TABLE MessageCorrespondents
-   CHANGE Folder_nr Folder_nr tinyint NOT NULL ;
+   MODIFY Folder_nr tinyint NOT NULL ;
 
 
 -- [not-null] Players.Registerdate -> NOT NULL -> no default [mandatory field]
 -- the following query-result should be empty
 SELECT COUNT(*) FROM Players WHERE Registerdate IS NULL ;
 ALTER TABLE Players
-   CHANGE Registerdate Registerdate date NOT NULL ;
+   MODIFY Registerdate date NOT NULL ;
 
 -- [not-null] Players.Sessionexpire -> NOT NULL -> default '0' [ok]
 UPDATE Players
    SET Sessionexpire=0 WHERE Sessionexpire IS NULL ;
 ALTER TABLE Players
-   CHANGE Sessionexpire Sessionexpire datetime NOT NULL default 0 ;
+   MODIFY Sessionexpire datetime NOT NULL default 0 ;
 
 -- [not-null] Players.LastMove -> NOT NULL -> default '0' [ok]
 UPDATE Players
    SET LastMove=0 WHERE LastMove IS NULL ;
 ALTER TABLE Players
-   CHANGE LastMove LastMove datetime NOT NULL default 0 ;
+   MODIFY LastMove datetime NOT NULL default 0 ;
 
 -- [not-null] Players.Lastaccess -> NOT NULL -> default '0' [ok]
 UPDATE Players
    SET Lastaccess=0 WHERE Lastaccess IS NULL ;
 ALTER TABLE Players
-   CHANGE Lastaccess Lastaccess datetime NOT NULL default 0 ;
+   MODIFY Lastaccess datetime NOT NULL default 0 ;
 
 
 -- [unused] cleanup Translationlog-table (fields not used and not referenced) -> CLEANUP
@@ -1199,23 +1199,23 @@ ALTER TABLE Translationlog
 UPDATE Translationlog
    SET Original_ID=0 WHERE Original_ID IS NULL ;
 ALTER TABLE Translationlog
-   CHANGE Original_ID Original_ID int(11) NOT NULL default 0 ;
+   MODIFY Original_ID int(11) NOT NULL default 0 ;
 
 
 -- [not-null] TranslationTexts.Ref_ID -> NOT NULL -> default '0' [ok]
 UPDATE TranslationTexts
    SET Ref_ID=0 WHERE Ref_ID IS NULL ;
 ALTER TABLE TranslationTexts
-   CHANGE Ref_ID Ref_ID int(11) NOT NULL default 0 ;
+   MODIFY Ref_ID int(11) NOT NULL default 0 ;
 
 
 -- [not-null] Players.RatingStatus -> NOT NULL -> default 'NONE' (enhance enum) [ok]
 ALTER TABLE Players
-   CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') default 'NONE' ;
+   MODIFY RatingStatus enum('NONE','INIT','RATED') default 'NONE' ;
 UPDATE Players
    SET RatingStatus='NONE' WHERE RatingStatus IS NULL OR RatingStatus='' ;
 ALTER TABLE Players
-   CHANGE RatingStatus RatingStatus enum('NONE','INIT','RATED') NOT NULL default 'NONE' ;
+   MODIFY RatingStatus enum('NONE','INIT','RATED') NOT NULL default 'NONE' ;
 
 
 -- added index to accelerate building of rating-graph (for ORDER BY Time)
@@ -1229,17 +1229,17 @@ ALTER TABLE Ratinglog
 UPDATE Players
    SET InitialRating='-9999' WHERE InitialRating IS NULL ;
 ALTER TABLE Players
-   CHANGE InitialRating InitialRating double NOT NULL default '-9999' ;
+   MODIFY InitialRating double NOT NULL default '-9999' ;
 
 -- [not-null] Ratinglog.Rating/RatingMin/RatingMax/RatingDiff -> NOT NULL -> no default [mandatory fields]
 -- following query-result should be 0
 SELECT COUNT(*) FROM Ratinglog
    WHERE Rating IS NULL OR RatingMin IS NULL OR RatingMax IS NULL OR RatingDiff IS NULL ;
 ALTER TABLE Ratinglog
-   CHANGE Rating Rating double NOT NULL,
-   CHANGE RatingMin RatingMin double NOT NULL,
-   CHANGE RatingMax RatingMax double NOT NULL,
-   CHANGE RatingDiff RatingDiff float NOT NULL ;
+   MODIFY Rating double NOT NULL,
+   MODIFY RatingMin double NOT NULL,
+   MODIFY RatingMax double NOT NULL,
+   MODIFY RatingDiff float NOT NULL ;
 
 
 -- [unused] remove unused enum-values of Messages.Type (ACCEPTED,DECLINED,DELETED), cleanup wrong table-values
@@ -1256,7 +1256,7 @@ SELECT COUNT(*),Type FROM Messages GROUP BY Type ;
 
 -- cleanup Messages.Type enum (ca. 2min)
 ALTER TABLE Messages
-   CHANGE Type Type enum('NORMAL','INVITATION','DISPUTED','RESULT') NOT NULL default 'NORMAL' ;
+   MODIFY Type enum('NORMAL','INVITATION','DISPUTED','RESULT') NOT NULL default 'NORMAL' ;
 
 
 -- deactivate game-notes in table-columns as default (to reduce server-load) for games-list (status, my running/finished games)
@@ -1317,7 +1317,7 @@ ALTER TABLE Players
 
 -- add indicator for hidden-comments within move-messages
 ALTER TABLE Games
-   CHANGE Flags Flags set('Ko','HiddenMsg') NOT NULL default '' ;
+   MODIFY Flags set('Ko','HiddenMsg') NOT NULL default '' ;
 -- execute fix-script (with do_it=1 right away), because db-statement takes quite some time:
 --    'scripts/updates/fix_game_comments-1_0_15.php?do_it=1'
 
@@ -1358,7 +1358,7 @@ CREATE TABLE GamesPriority (
 ) ENGINE=MyISAM;
 
 ALTER TABLE Players
-   CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO') NOT NULL DEFAULT 'LASTMOVED' ;
+   MODIFY NextGameOrder enum('LASTMOVED','MOVES','PRIO') NOT NULL DEFAULT 'LASTMOVED' ;
 
 -- deactivate status-game priority column by default
 UPDATE ConfigPages SET ColumnsStatusGames=ColumnsStatusGames & ~0x10000 ;
@@ -1368,7 +1368,7 @@ UPDATE ConfigPages SET ColumnsStatusGames=ColumnsStatusGames & ~0x10000 ;
 ALTER TABLE Games
    ADD TimeOutDate int NOT NULL DEFAULT '0' AFTER ClockUsed ;
 ALTER TABLE Players
-   CHANGE NextGameOrder NextGameOrder enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL DEFAULT 'LASTMOVED' ;
+   MODIFY NextGameOrder enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL DEFAULT 'LASTMOVED' ;
 
 -- Clock for remaining-time ordering
 INSERT INTO Clock SET ID=204,Lastchanged=0 ;
@@ -1401,7 +1401,7 @@ SELECT * FROM Forumreads WHERE Forum_ID=0 ;
 
 -- [not-null] cleanup Forumreads.Time datetime default NULL -> no default -> NOT NULL
 ALTER TABLE Forumreads
-   CHANGE Time Time datetime NOT NULL ;
+   MODIFY Time datetime NOT NULL ;
 
 -- NEW-flag for forum-list
 ALTER TABLE Forumreads
@@ -1417,7 +1417,7 @@ ALTER TABLE Players
 
 -- increase Browser-field length: 100->150
 ALTER TABLE Players
-   CHANGE Browser Browser varchar(150) NOT NULL DEFAULT '';
+   MODIFY Browser varchar(150) NOT NULL DEFAULT '';
 
 
 -- bugfix: leading and trailing spaces are not allowed within T_(..) translation-texts
@@ -1440,17 +1440,17 @@ ALTER TABLE Errorlog
 -- create official "DGS-ladder" for tournament-wizard
 ALTER TABLE Tournament
    ADD WizardType tinyint NOT NULL AFTER Type,
-   CHANGE Type Type enum('LADDER','ROUNDROBIN') NOT NULL ;
+   MODIFY Type enum('LADDER','ROUNDROBIN') NOT NULL ;
 
 
 -- added tournament delete-status
 ALTER TABLE Tournament
-   CHANGE Status Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') NOT NULL default 'NEW' ;
+   MODIFY Status enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') NOT NULL default 'NEW' ;
 
 
 -- removed RatingUseMode 'ENTER_FIX'
 ALTER TABLE TournamentProperties
-   CHANGE RatingUseMode RatingUseMode enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM' ;
+   MODIFY RatingUseMode enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM' ;
 
 
 -- added changed-by field
@@ -1561,13 +1561,13 @@ SHOW TABLE STATUS LIKE 'Waitingroom' ;
 
 -- [field-size] COL Waitingroom.AdjKomi : dec(6,1) -> dec(4,1)
 ALTER TABLE Waitingroom
-   CHANGE AdjKomi AdjKomi decimal(4,1) NOT NULL default '0.0' ;
+   MODIFY AdjKomi decimal(4,1) NOT NULL default '0.0' ;
 
 -- [field-size] COL TournamentRules.Komi : dec(6,1) -> dec(4,1)
 -- [field-size] COL TournamentRules.AdjKomi : dec(6,1) -> dec(4,1)
 ALTER TABLE TournamentRules
-   CHANGE Komi Komi decimal(4,1) NOT NULL default '6.5',
-   CHANGE AdjKomi AdjKomi decimal(4,1) NOT NULL default '0.0' ;
+   MODIFY Komi decimal(4,1) NOT NULL default '6.5',
+   MODIFY AdjKomi decimal(4,1) NOT NULL default '0.0' ;
 
 
 -- added table for tournament games
@@ -1637,7 +1637,7 @@ ALTER TABLE TournamentLadderProps
 
 -- added SCORE-status for signaling game-end
 ALTER TABLE TournamentGames
-   CHANGE Status Status enum('INIT','PLAY','SCORE','DONE') NOT NULL DEFAULT 'INIT',
+   MODIFY Status enum('INIT','PLAY','SCORE','DONE') NOT NULL DEFAULT 'INIT',
    ADD INDEX gid (gid) ;
 
 -- Clock for tournament-cron
@@ -1662,7 +1662,7 @@ ALTER TABLE TournamentLadderProps
    ADD ChallengeRematchWait smallint unsigned NOT NULL DEFAULT '0' AFTER ChallengeRangeAbsolute ;
 
 ALTER TABLE TournamentGames
-   CHANGE Status Status enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',
+   MODIFY Status enum('INIT','PLAY','SCORE','WAIT','DONE') NOT NULL default 'INIT',
    ADD TicksDue int NOT NULL DEFAULT '0' AFTER Status,
    DROP INDEX Status,
    ADD INDEX Status_Ticks (Status,TicksDue) ;
@@ -1688,7 +1688,7 @@ ALTER TABLE TournamentLadderProps
 
 -- added manual handicap-types BLACK/WHITE for tournaments
 ALTER TABLE TournamentRules
-   CHANGE Handicaptype Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV' ;
+   MODIFY Handicaptype enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') NOT NULL default 'CONV' ;
 
 
 -- added flags to handle admin-rights for TD
