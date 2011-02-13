@@ -453,7 +453,7 @@ class MultiPlayerGame
       return ( $player_count - $expected_player_count );
    }
 
-   /*! \brief Inserts game-players entries for given game-id and game-master $uid, and increate Players.GamesMPG. */
+   /*! \brief Inserts game-players entries for given game-id and game-master $uid, and increase Players.GamesMPG. */
    function init_multi_player_game( $dbgmsg, $gid, $uid, $gp_count )
    {
       if( $gp_count <= 2 )
