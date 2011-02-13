@@ -75,6 +75,12 @@ require_once( 'include/classlib_userconfig.php' );
    $idinfo = (int)@$_GET['info'];
    if( $idinfo < 0)
       $idinfo = 0;
+   else
+   {
+      $gid = (int)get_request_arg('gid');
+      if( $gid >= 0 )
+         $idinfo = load_waitingroom_info( $gid );
+   }
 
    $page = "waiting_room.php?";
    if( $idinfo )
@@ -443,7 +449,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
 
    $game_form->echo_string(1);
    if( !$is_my_game && !$can_join )
-      echo span('MPGWarning', T_('Already joined this multi-player-game!'));
+      echo span('MPGWarning', T_('Already invited to or joined this multi-player-game!'));
 }//add_old_game_form
 
 function determine_color( $Handicaptype, $is_my_game, $iamblack )
@@ -486,5 +492,13 @@ function determine_color( $Handicaptype, $is_my_game, $iamblack )
       $colstr = insert_width(5) . $colstr;
    return $colstr;
 }//determine_color
+
+// find waiting-room-id for given game-id
+function load_waitingroom_info( $gid )
+{
+   $row = mysql_single_fetch( "waiting_room.load_wroom($gid)",
+      "SELECT ID FROM Waitingroom WHERE gid=$gid LIMIT 1" );
+   return ($row) ? $row['ID'] : 0;
+}//load_wroom
 
 ?>
