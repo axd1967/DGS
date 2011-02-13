@@ -19,6 +19,45 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-02-06 juga
+
+   * quick_status.php, status.php, specs/quick_suite.txt:
+   - cleanup: removed game_players unused Status-field for multi-player-games
+
+   * include/game_functions.php (MultiPlayerGame.get_message_defaults;
+       GamePlayer.load_game_player_by_uid, ~.delete_reserved_invitation),
+     include/error_codes.php (ErrorCode.init),
+     game_players.php (build_user_actions, load_game_players, build_table_game_players,
+       build_form_add_waiting_room, build_form_invite, build_form_delete_invite,
+       build_form_accept_invite, build_form_start_game, add_waiting_room_mpgame,
+       add_invitation_mpgame, delete_invite, accept_invite, reject_invite, check_invite,
+       check_delete_invite, check_accept_invite, show_errors),
+     message.php (handle_send_message, read_message_receivers, read_mpgame_request),
+     waiting_room.php (load_waitingroom_info),
+     skins/dragon/screen.css:
+   - added invite of single-player to multi-player-game
+     - invitation-process:
+       - game-master invites player making invitation-reservation, stored in GamePlayers-table
+       - game-master sends invitation for MP-game using "normal" message with template-text
+       - invite-player can approve or reject invitation on game-player-page
+       - reminder-message can be generated
+     - prevent user from joining same MP-game twice
+   - game-players-page:
+     - added commands: invite, delete-invite, accept/reject-invite
+     - safety-check for start-game, allow only for game-master
+     - added link to edit corresponding waiting-room-offer if existing
+     - added specific actions on game-players-entry: send-message, invite-message, delete-invitation
+     - cleanup: removed game_players Status-field
+     - cleanup: mark translation-texts with '#mpg'
+   - message-page:
+     - jump to game-players-page after sending MP-game-invitation-message
+
+   * include/error_codes.php (ErrorCode.init):
+   - renamed error-code: multiplayer_no_users -> multi_player_no_users
+
+   * include/std_functions.php (send_message, game_reference):
+   - changed <game gid,move> : added 'Move #' in game-text
+
 2011-01-30 juga
 
    * include/game_functions.php (MultiPlayerGame.calc_average_group_ratings),
