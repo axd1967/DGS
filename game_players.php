@@ -905,7 +905,11 @@ function accept_invite( $gid, $uid )
             "(Flags & ".GPFLAGS_RESERVED_INVITATION.") = ".GPFLAGS_RESERVED_INVITATION." " .
          "LIMIT 1" );
 
-      // 2. notify game-master
+      // 2. increase players MP-game count
+      db_query( "game_players.accept_invite.update_players($gid,$uid)",
+         "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
+
+      // 3. notify game-master
       send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",
          sprintf( T_('User %s has accepted your invitation to the multi-player game %s.#mpg'),
                   "<user $uid>", "<game $gid>" ),
