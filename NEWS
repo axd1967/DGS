@@ -81,8 +81,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Zen-Go (N)    = one group of players alternating colors
 
       * Added game-players-page to setup and manage multi-player-game
+         * Show games to setup on status- and quick-status-page (MPG-type)
       * Delete-game forbidden for multi-player-game
       * max. 16 players
+      * Use game-players average rating per team as start/end-rating for Black/White-player
 
       * Ask other players for consent by sending bulk-message to:
          * ask all game-players to start game
@@ -173,6 +175,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Show icon (<image picture.gif>) if user has a picture on pages: users, opponents, contacts
       * Show user-info page in two columns (less game- and more-game-related info)
       * Mark Dragon executives with admin-icon (<image admin.gif>)
+      * Show running & setup multi-player-games for myself
+         * Added link to games-list-page only showing multi-player-games
 
    * <home list_messages.php>Messages</home>:
       * Show count of NEW messages in main-menu with link to show them if there are some
@@ -348,6 +352,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Enhanced remaining-time format with extra-time-info
       * Added columns to support game-quick-suite: move-id, game-status
       * Added tournament-id column
+      * Added list of multi-player-games to manage (type 'MPG')
       * Added URL-arg 'no_cache' to disable cache
 
    * <home users.php>Users</home>:
