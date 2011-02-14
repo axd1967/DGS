@@ -1,0 +1,295 @@
+# Topic: Multi-Player-game (Team-Go, Zen-Go, Rengo)
+# Description: Playing game with more than two players
+#
+# URL: http://www.dragongoserver.net/forum/read.php?forum=5&thread=9423#9423
+#      http://www.dragongoserver.net/forum/read.php?forum=6&thread=25718#25735
+# Author: Jens-Uwe Gaspar, DGS 'juga'
+
+## /*
+## Dragon Go Server
+## Copyright (C) 2001-2011  Erik Ouchterlony, Jens-Uwe Gaspar
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU Affero General Public License as
+## published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
+##
+## You should have received a copy of the GNU Affero General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## */
+
+Topics:
+
+   1. Introduction
+   2. Users Guide (how to play MP-game)
+      a. Setup MP-game
+      b. Play MP-game
+   3. Classes and Files (implementation details)
+
+
+#-------- (1) Introduction ----------------------------------------------------
+
+A "multi-player-game" (= MPG / MP-game) on DGS is an unrated game played by more
+than two unique players, alternatingly playing Black and White moves in two teams
+or in one team.
+
+The most commonly form of a MP-game is Pair-Go, also known as Rengo, which is a
+special form of Team-Go (2:2).
+
+There are three game-types to differ:
+
+   Go (1:1)      = standard 2-player game: Black vs White
+
+   Team-Go (N:M) = two teams (Black vs White) with in sum more than 2 players,
+                   each team consists of 1-n players, with N + M > 2
+
+   Zen-Go (N)    = one team with more than 2 players alternating Black & White play,
+                   N must be odd, with N > 2
+
+The players must be unique per game, so no player can join a MP-game more than once.
+Also all players must have a valid rating to calculate average ratings of the teams.
+Even though a MP-game is unrated, a users rating is required.
+
+At maximum, 16 players can participate in a MP-game.
+
+Out of Scope:
+   This approach does not support team-accounts, though the team-data is stored.
+   This means, there is no explicit history of the accomplishments of teams.
+   This would make no sense for Zen-Go, only for Team-Go.
+   It is still possible to share an account, but there is no direct support
+   by the server for it. This approach has been chosen, because of easier
+   implementation avoding all "team"-stuff (incl. ratings, team-handling).
+
+References:
+   - http://senseis.xmp.net/?Rengo
+   - http://senseis.xmp.net/?ZenGo
+
+
+#-------- (2) Users Guide -----------------------------------------------------
+
+The "official rules" you can read on: http://senseis.xmp.net/?Rengo
+Normally during a MP-game it's not allowed to speak with each other about the games to play.
+The only practical allowed consultation on DGS is to ask if you can resign the game.
+And though it may be officially forbidden, such talkings can not be prevented anyway.
+However, it's considered to be much more fun in a MP-game NOT to speak about the moves
+in advance.
+
+#-------- (2a) Setup MP-game --------------------------------------------------
+
+* Create new MP-game:
+
+  1. Select "New multi-player-game" on the "new_game"-page
+
+  2. Specify game-settings: All these settings can NOT be changed later !!
+
+     - ruleset, board-size
+
+     - handicap-stone placement:
+       regardless of handicapped game or not
+
+     - game-type & game-players:
+       Choose number of players and type of MP-game, e.g:
+
+          3   => Zen-Go with 3 players
+          5   => Zen-Go with 5 players
+
+          2:2 => Team-Go with 4 players, 2 vs 2, aka "Rengo" (or Pair-Go)
+          1:3 => Team-Go with 4 players, 1 vs 3
+
+     - time-settings
+
+   3. Add game: This will create a new MP-game in SETUP-mode and forward you to
+      the "game-players"-page to manage the MP-game.
+
+      The player that created a MP-game is referred to as "game-master" and
+      marked as such on the "game-players"-page.
+
+   * Additional Infos:
+      - All MP-games you "manage" are listed on the status-page as long as they
+        are in SETUP-mode, i.e. not started and running yet
+      - The "userinfo"-page shows the current number of MP-games in setup/running-mode
+      - For MP-games in SETUP-mode the game-page and game-info-page are not available
+      - Game in SETUP-mode can not be deleted
+
+
+* Find users to play with with "game-players"-page:
+  The game-master already joined the game taking a slot, and is marked as "master".
+
+  There are two ways to find willing players for your MP-game in SETUP-mode:
+
+     [I] - Invite a specific (single) known player
+     [W] - Add a game-offer in the waiting-room
+
+  [I] and [W] can also be used at the same time, though if you want to start
+  a MP-game with your usual buddy, first use [I], set up groups, then start
+  with adding a game-offer in the waiting-room [W], so the users can see against
+  they have to play in which groups. Naturally you can also use only [I],
+  if you known all the players that want to join your MP-game.
+
+* [I] Invite a specific (single) known player:
+
+  1. Show "game-players"-page and select "Invite"
+
+  2. Specify the user-id of the user you want to invite
+     - the user is checked, errors are listed, e.g. user must have a rating
+     - if the user is valid, a reservation is added and you will be forwarded
+       to the "send-message"-page to inform the user about the invitation
+     - A template-text is shown together with a preview. You may edit the text
+       (or translate it) as you like, but be sure the main information about
+       the invitation is included in some form.
+     - Sending the message will forward the message to the invited user
+       as normal message.
+
+  3. The invited user hopefully sees the message.
+     When the invited user enters the "game-players"-page and a slot is reserved
+     for his invitation, he will automatically be asked to join the MP-game.
+     Then the invited user can:
+
+     a) accept the invitation, or
+     b) reject the invitation
+
+     Additionally he might want to reply to your invitation-message with additional
+     information or questions before or after acceptance/rejection.
+
+  4. When the user does not respond or as long as the invited user has not
+     accepted/rejected the invitation, the game-master can:
+
+     c) send a reminder, or
+        To send a reminder, from the "game-players"-page click on the "Invite"-image
+        in the Actions-column for the specific reserved-slot of the invited user.
+
+     d) delete the reserved invitation
+        To delete the reservation, click on the "Trashcan"-image in the
+        Actions-column for the invited user. You will be asked for confirmation
+        of the deletion.
+
+* [W] Add a game-offer in the waiting-room:
+
+  1. Show "game-players"-page and select "Add to waiting-room"
+
+     - Specify how many user-slots you may wish to offer in the waiting-room
+     - If you want, specify some more game-settings for:
+       rating-range, number of rated finished games, waiting-room comment
+     - After "adding" a game-offer, a waiting-room entry is added.
+       In the waiting-rooms 'Info'-page and in the Settings-column,
+       a link to the corresponding "game-players"-page is shown
+
+     - Only one waiting-room offer can be created at one time (easier implementation)
+       to restrict to one set of game-offer-settings.
+     - To use different game-offers, the former waiting-room game-offer has to be
+       fulfilled first.
+     - The waiting-room entry can be deleted at any time.
+       The entry can be easily found via the "game-players"-page (maybe reload first).
+
+  2. When a user matches the game-offer criteria, he/she can join the MP-game-offer
+     and will automatically be added in a free (reserved) waiting-room-slot.
+
+
+* Choose group-color and handicap for players:
+
+  Notes:
+  - Only the game-master can change the color and order of players.
+    So the players have to discuss with the game-master about the player-settings.
+
+  There are 5 different group-colors:
+
+      BW = black or white
+      B  = black
+      W  = white
+      G1 = group 1
+      G2 = group 2
+
+  The group-colors G1 and G2 can be useful to setup a certain team of starting
+  players for Team-Go without setting a specific color yet. For Zen-Go only BW
+  makes sense, because there's only one team for all players.
+
+  For Team-Go before the game can start, the colors for all players must be set
+  to either B or W. In "Change Color & Handicap" (for Team-Go) the game-master
+  has to choose the groups (setting color) and choosing the handicap-stones and
+  komi for the MP-game. If B/W or G1/G2 are chosen, the average-ratings of the
+  players and handicap suggestions are shown, which may help in building teams.
+
+  For Zen-Go only the handicap-stones and komi can be chosen.
+
+
+* Choose group-order for players:
+
+  Notes:
+  - Only the game-master can change the color and order of players.
+    So the players have to discuss with the game-master about the player-settings.
+
+  Before the game can be started, the playing order for each team must be specified.
+  This can be done following the "Change order" on the "game-players"-page.
+
+
+* Start game:
+
+  To start the game, the game-master should follow the link "Start game"
+  on the "game-players"-page. Some errors might be shown, preventing that
+  the game can be started. In that case, fix them first.
+
+  1. Before starting the game, the game-master may want to send a bulk-message
+     to all game-players by selecting the link "Send message to all game-players".
+     You may edit the message before sending it.
+     After sending a multi-receiver bulk-message is sent to all given game-players.
+
+  2. "Start game" finally starts the game and leaves the SETUP-mode for the MP-game.
+     Every game-player will be notified with a server-message about the game-start.
+
+
+#-------- (2b) Play MP-game ---------------------------------------------------
+
+* Status-page, quick-status
+* game-players-page for running-game
+* List MP-games
+
+* Vacation
+      - a player on vacation can still play normally
+      - problem is, that a team may consist of 1..n players against different number of opponents, so the bigger team may compensate time with more vacation
+
+* Move in MP-game
+   - SGF: players in node
+   - game-comments: additional player
+* Resign MP-game
+* Delete MP-game
+* End MP-game
+   - Need adjusted scoring-step for multi-players (all players must pass/approve)
+
+* Restrictions:
+  - max. 16 players
+  - no double-games (handicap-type = DOUBLE)
+
+
+
+
+#-------- (3) Classes and Files -----------------------------------------------
+
+- table-design
+
+
+- time counted for TEAM (color) !! not players -> so 2 timers (B+W)
+  => but already there in Games-table, just use current Players-clock-lastticks
+
+- time-zone cheat
+
+- game-lists:
+  - not sufficient(why?) to list by B|W-id alone, list by Team OR representative OR last moved player
+  - handle opponents-page: not handled
+  - handle pages with all/user/my finished/running/observed/observing games: not handled
+
+
+#-------- Related features -------------------------------------
+
+* Q: is Admin functionality needed to exchange players (if player "escaped") ? - need GAME_ADMIN
+
+* Q: stats about played TeamGo-games ? development of "teams" ?
+
+- kind of "chat" between players could be useful (message system, related to game);; Nice would be additional "public" game-chat (similar to wanted review-comments): any number at any time by everyone, but restricted to players to be "public"
+- Game-properties for TeamGo: allow player-skipping: by game-master, by admin, if on vacation, if requested
+- No conditional moves for TeamGo-games!
+
