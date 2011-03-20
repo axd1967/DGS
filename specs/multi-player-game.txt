@@ -267,24 +267,145 @@ in advance.
 
 #-------- (2b) Info MP-game ---------------------------------------------------
 
-#TODO
+Use-cases:
+   - Show MP-games in SETUP-mode -> see (1) Status-page, (2) Quick-Status-page
+   - Show GameType -> see (1) Status-page, (2) Quick-Status-page, (3) Game-info-page
+   - Show list of MP-games -> see (4) Games-List-page
+   - Show info about MP-game in SETUP-mode or running/finished MP-game -> see next section [2c]
 
-* Status-page, quick-status
-* game-players-page for running-game
-* List MP-games
-  - not sufficient(why?) to list by B|W-id alone, list by Team OR representative OR last moved player
+
+* (1) Status-page "status.php":
+   - GameType has been added for games to move in
+   - section with MP-games in SETUP-mode has been added,
+     visible for all participating game-players of MP-game
+
+* (2) Quick-Status-page "quick_status.php":
+   - GameType has been added for games to move in
+   - section with MP-games in SETUP-mode has been added,
+     visible for all participating game-players of MP-game
+     -> see "specs/quick-suite.txt" (chapter 4.QST)
+
+* (3) Game-Info-page "gameinfo.php":
+   - GameType has been added showing game-type and game-player-count
+
+* (4) Games-List-page "show_games.php":
+   - MP-games are shown on normal games-list, but only if current player appears
+     as Black- or White-player; otherwise MP-game is not showing up.
+   - MP-games on SETUP-status are NOT shown in games-lists, only running MP-games
+
+   - The full list of running (=started) or finished MP-games, a checkbox with
+     a graphical symbol (of a group of 2 people) has been added in the added
+     GameType-column-header. If checked and searched, only the full list of ones
+     MP-games (where you participate) is listed. The title shows this "mode" with
+     an appended text "(multi-player-games only)".
+
+     This choice may lead to confusion when searching for MP-games.
+     However, the choice for this separate search was done, because otherwise
+     an additional join to the GamePlayers-table would have been needed
+     to be done for every query on the usual games-list, which already is
+     quite big and may be time consuming.
+
+     - (3a) To search for a user-specific MP-game (MY/USER running/finished games),
+       the checkbox in the GameType-column-header needs to be checked.
+
+     - (3b) To search for a user-unspecific MP-game (ALL running/finished games),
+       use the selection-box of the GameType-column to find "Non-std" games.
 
 
 #-------- (2c) Play MP-game ---------------------------------------------------
 
-#TODO
-* Move in MP-game
-   - SGF: players in node
-   - game-comments: additional player
-* Resign MP-game
-* Delete MP-game
-* End MP-game
-   - Need adjusted scoring-step for multi-players (all players must pass/approve)
+Use-cases:
+   - Show info about MP-game -> see (1) Game-Players-page
+   - Show game-comments of MP-game -> see (2) Game-comments-page
+   - Download SGF of MP-game -> see (3) SGF-download
+   - Play move, Resign, Delete, End MP-game -> see (4) Game-page, (5) Quick-suite
+
+
+* (1) Game-Players-page "game_players.php":
+   - This page shows ...
+      - most important game-information at top:
+         - game-settings with GameType/GamePlayers, Size, Ruleset, Rated
+         - handicap-settings with Komi, Handicap, Standard Handicap Placement
+         - time-settings
+         - group-ratings with average rating of participating players of groups/teams
+
+      - all participating players in a MP-game, or free slots for players
+        in SETUP-mode; shown in game-player-list with fields:
+         - '#': playing order within group/team as numbers starting with 1.
+           For a running game, ...
+            - a Black/White-stone with a circle indicates the player to move
+            - a right-directed double-arrow indicates the 2nd-next player to move
+         - Color: playing color of player forming group/team
+         - Player, Country, Rating, Last access: player-info
+         - Flags:
+            - Master: flag marking player as "game-master" in control of MP-game-management
+            - Joined: master joined MP-game as player
+            - Reserved[WR]: reserved player-slot for waiting-room-joining
+              to MP-game
+            - Reserved[INV]: reserved player-slot for invitation to join MP-game
+              for specific player
+            - Joined[WR|INV]: player joined per waiting-room or invitation
+         - Actions: additional actions during setup and playing
+            - Send message : send message to player
+            - Send invitation message : send (reminder) for invited player
+            - Delete reservation : delete slot-reservation for invitation
+
+* (2) Game-comments-page "game_comments.php":
+   - For MP-games the game-comments-page additional shows the player,
+     that made the move/comment.
+
+* (3) SGF-Download "sgf.php":
+   - see also chapter (4.SGF) in "specs/quick_suite.txt"
+
+   - For a MP-game the downloaded SGF contains additional information:
+      - the player who moved is added in each game-node in format "name (user-id)"
+        even if there is no move-message.
+        This behaviour can be deactivated with a new option "mpg=1".
+      - the user-IDs (space-separated) of the teams is added in SGF-properties WT/BT
+      - Start/End-rating represents the average group-rating of the MP-game
+      - Game Players (Order. Color: Name (Handle), Current Rating) is added in
+        SGF-game-information.
+
+* (4) Game-page "game.php":
+   - MP-game is shown on status-page of player which is next to play.
+   - Current player of MP-game is shown with a black/white-stone on the
+     Game-Players-page.
+   - Playing in a MP-game by submitting a move, changes also the 2nd-next
+     player to move replacing the current player.
+
+   - Resigning a MP-game:
+     By official rules in Rengo, the current player wanting to resign,
+     is inclined to ask his team-partner if it is ok with the phrase
+     "May I resign?", on which the partner may answer with only "Yes" or "No".
+
+     DGS is not enforcing this rule, but adds a note with a link
+     to send a bulk-message to the other players of the same group/team
+     to ask for resignation. But this lies in the discretion of the player
+     to move. The link leads to showing a preview of a bulk-message to the
+     correct partner-players with a link to the game.
+
+     For Rengo it's pretty clear (only one answer), but for other MP-games
+     with more than two partners in the same team, there might appear both
+     answers (Yes & No). The interpretation of that is not enforced by DGS,
+     which would be too complicated and unflexible bound to a specific
+     ruling, and therefore left to decide for the one who asked about
+     resignation.
+
+   - Deleting a MP-game is NOT allowed at the moment.
+
+     Reasoning: One player shouldn't "destroy" a game, that all agreed upon.
+     If the player does not want to play, he should say so before the game
+     is started or refuse from joining in the first place.
+     Maybe this policy will be changed later.
+
+   - Ending a game is done by the player to move in a normal way.
+     Normally one could expect that also before ending a MP-game, the player
+     to move asks his team-partners if that is ok or if the game should continue.
+     However, this was not done out of simplicity reasons. It may be still added
+     to another bulk-message to ask for that.
+
+* (5) Quick-suite "quick_do.php" and "quick_play.php":
+   - see "specs/quick_suite.txt" for info about "MP-game" or "multi-player-game"
 
 
 #-------- (3) Design, Classes and Files ---------------------------------------
