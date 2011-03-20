@@ -28,8 +28,9 @@ Topics:
    1. Introduction
    2. Users Guide (how to play MP-game)
       a. Setup MP-game
-      b. Play MP-game
-   3. Classes and Files (implementation details)
+      b. Info MP-game
+      c. Play MP-game
+   3. Design, Classes and Files (implementation details)
 
 
 #-------- (1) Introduction ----------------------------------------------------
@@ -38,7 +39,7 @@ A "multi-player-game" (= MPG / MP-game) on DGS is an unrated game played by more
 than two unique players, alternatingly playing Black and White moves in two teams
 or in one team.
 
-The most commonly form of a MP-game is Pair-Go, also known as Rengo, which is a
+The most common form of a MP-game is Pair-Go, also known as Rengo, which is a
 special form of Team-Go (2:2).
 
 There are three game-types to differ:
@@ -53,14 +54,29 @@ There are three game-types to differ:
 
 The players must be unique per game, so no player can join a MP-game more than once.
 Also all players must have a valid rating to calculate average ratings of the teams.
-Even though a MP-game is unrated, a users rating is required.
+So, even though a MP-game is unrated, a users rating is required.
 
-At maximum, 16 players can participate in a MP-game.
+Restrictions:
+   * At maximum, 16 players can participate in a MP-game.
+   * Tournaments are NOT supported with multi-player-games.
+   * Double games are NOT supported for multi-player-games.
+   * No team-accounts are supported (also see below "out of scope").
+   * Multi-player-games are not (always) shown in the normal game-lists
+     like all/user/my finished/running/observed/observing games,
+     because the games normally selected by the black- or white-player are only
+     some of ALL the players within a multi-player-game.
+     To compensate there is a special search to list multi-player-games.
+   * Opponents-page is only supported for standard Go-games,
+     but NOT for multi-player-games.
+   * Multi-player-game can NOT be deleted.
+   * Conditional moves are NOT supported for multi-player-games.
+
 
 Out of Scope:
-   This approach does not support team-accounts, though the team-data is stored.
+   This approach does not support team-accounts, though the team-data is preserved.
    This means, there is no explicit history of the accomplishments of teams.
    This would make no sense for Zen-Go, only for Team-Go.
+
    It is still possible to share an account, but there is no direct support
    by the server for it. This approach has been chosen, because of easier
    implementation avoding all "team"-stuff (incl. ratings, team-handling).
@@ -72,7 +88,8 @@ References:
 
 #-------- (2) Users Guide -----------------------------------------------------
 
-The "official rules" you can read on: http://senseis.xmp.net/?Rengo
+The "official rules" you can be found on: http://senseis.xmp.net/?Rengo
+
 Normally during a MP-game it's not allowed to speak with each other about the games to play.
 The only practical allowed consultation on DGS is to ask if you can resign the game.
 And though it may be officially forbidden, such talkings can not be prevented anyway.
@@ -107,12 +124,13 @@ in advance.
       the "game-players"-page to manage the MP-game.
 
       The player that created a MP-game is referred to as "game-master" and
-      marked as such on the "game-players"-page.
+      marked as such ("Master") on the "game-players"-page.
 
    * Additional Infos:
       - All MP-games you "manage" are listed on the status-page as long as they
         are in SETUP-mode, i.e. not started and running yet
-      - The "userinfo"-page shows the current number of MP-games in setup/running-mode
+      - The "userinfo"-page shows the current number of MP-games in setup/running-mode,
+        but only for oneself or viewed by admins
       - For MP-games in SETUP-mode the game-page and game-info-page are not available
       - Game in SETUP-mode can not be deleted
 
@@ -125,11 +143,14 @@ in advance.
      [I] - Invite a specific (single) known player
      [W] - Add a game-offer in the waiting-room
 
-  [I] and [W] can also be used at the same time, though if you want to start
-  a MP-game with your usual buddy, first use [I], set up groups, then start
-  with adding a game-offer in the waiting-room [W], so the users can see against
-  they have to play in which groups. Naturally you can also use only [I],
-  if you known all the players that want to join your MP-game.
+  Important Note:
+      [I] and [W] can also be used at the same time, though if you want
+      to start a MP-game with your usual buddy, first use [I], set up groups,
+      then start with adding a game-offer in the waiting-room [W], so the users
+      can see against whom they have to play and in which groups.
+      Naturally you can also use only [I], if you know all the players that
+      want to join your MP-game.
+
 
 * [I] Invite a specific (single) known player:
 
@@ -146,12 +167,12 @@ in advance.
        as normal message.
 
   3. The invited user hopefully sees the message.
-     When the invited user enters the "game-players"-page and a slot is reserved
-     for his invitation, he will automatically be asked to join the MP-game.
-     Then the invited user can:
+     When the invited user follow the link in the message and with that entering
+     the "game-players"-page, he sees a reserved slot for his invitation.
+     He will automatically be asked to join the MP-game. Then the invited user can:
 
-     a) accept the invitation, or
-     b) reject the invitation
+        a) accept the invitation, or
+        b) reject the invitation
 
      Additionally he might want to reply to your invitation-message with additional
      information or questions before or after acceptance/rejection.
@@ -159,14 +180,16 @@ in advance.
   4. When the user does not respond or as long as the invited user has not
      accepted/rejected the invitation, the game-master can:
 
-     c) send a reminder, or
+     c) send a reminder:
         To send a reminder, from the "game-players"-page click on the "Invite"-image
         in the Actions-column for the specific reserved-slot of the invited user.
+        Re-enter/edit some text and send the message.
 
-     d) delete the reserved invitation
+     d) delete the reserved invitation:
         To delete the reservation, click on the "Trashcan"-image in the
         Actions-column for the invited user. You will be asked for confirmation
         of the deletion.
+
 
 * [W] Add a game-offer in the waiting-room:
 
@@ -180,9 +203,9 @@ in advance.
        a link to the corresponding "game-players"-page is shown
 
      - Only one waiting-room offer can be created at one time (easier implementation)
-       to restrict to one set of game-offer-settings.
-     - To use different game-offers, the former waiting-room game-offer has to be
-       fulfilled first.
+       restricted to one set of game-offer-settings.
+     - To use a different game-offers, a former waiting-room game-offer has to be
+       fulfilled or deleted first.
      - The waiting-room entry can be deleted at any time.
        The entry can be easily found via the "game-players"-page (maybe reload first).
 
@@ -204,14 +227,14 @@ in advance.
       G1 = group 1
       G2 = group 2
 
-  The group-colors G1 and G2 can be useful to setup a certain team of starting
-  players for Team-Go without setting a specific color yet. For Zen-Go only BW
+  The group-colors 'G1' and 'G2' can be useful to setup a certain team of starting
+  players for Team-Go without setting a particular color yet. For Zen-Go only 'BW'
   makes sense, because there's only one team for all players.
 
   For Team-Go before the game can start, the colors for all players must be set
-  to either B or W. In "Change Color & Handicap" (for Team-Go) the game-master
+  to either 'B' or 'W'. In "Change Color & Handicap" (for Team-Go) the game-master
   has to choose the groups (setting color) and choosing the handicap-stones and
-  komi for the MP-game. If B/W or G1/G2 are chosen, the average-ratings of the
+  komi for the MP-game. If 'B/W' or 'G1/G2' are chosen, the average-ratings of the
   players and handicap suggestions are shown, which may help in building teams.
 
   For Zen-Go only the handicap-stones and komi can be chosen.
@@ -236,22 +259,25 @@ in advance.
   1. Before starting the game, the game-master may want to send a bulk-message
      to all game-players by selecting the link "Send message to all game-players".
      You may edit the message before sending it.
-     After sending a multi-receiver bulk-message is sent to all given game-players.
+     After sending, a multi-receiver bulk-message is sent to all given game-players.
 
   2. "Start game" finally starts the game and leaves the SETUP-mode for the MP-game.
      Every game-player will be notified with a server-message about the game-start.
 
 
-#-------- (2b) Play MP-game ---------------------------------------------------
+#-------- (2b) Info MP-game ---------------------------------------------------
+
+#TODO
 
 * Status-page, quick-status
 * game-players-page for running-game
 * List MP-games
+  - not sufficient(why?) to list by B|W-id alone, list by Team OR representative OR last moved player
 
-* Vacation
-      - a player on vacation can still play normally
-      - problem is, that a team may consist of 1..n players against different number of opponents, so the bigger team may compensate time with more vacation
 
+#-------- (2c) Play MP-game ---------------------------------------------------
+
+#TODO
 * Move in MP-game
    - SGF: players in node
    - game-comments: additional player
@@ -260,36 +286,89 @@ in advance.
 * End MP-game
    - Need adjusted scoring-step for multi-players (all players must pass/approve)
 
-* Restrictions:
-  - max. 16 players
-  - no double-games (handicap-type = DOUBLE)
 
+#-------- (3) Design, Classes and Files ---------------------------------------
 
+* Table-Design:
+  - needed to store
+      - game-type (Go/Zen-Go/Team-Go) and number of players
+      - count of: MP-games on SETUP-status, running MP-games
 
+   * Games-table: added fields 'GameType' & 'GamePlayers',
+     for description see "specs/db/table-Games.txt"
 
-#-------- (3) Classes and Files -----------------------------------------------
+   * GamePlayers-table: for description see "specs/db/table-Games.txt"
 
-- table-design
+   * Players-table: added field 'GamesMPG'
+     for description see "specs/db/table-Players.txt"
 
+   * Waitingroom-table: added fields 'GameType' & 'GamePlayers',
+     for description see "specs/db/table-Waitingroom.txt" and "specs/db/table-Games.txt"
 
-- time counted for TEAM (color) !! not players -> so 2 timers (B+W)
-  => but already there in Games-table, just use current Players-clock-lastticks
+* Design behind playing MP-games:
+   - The most important data is the field 'Games.Moves', which is increased
+     with every move and therefore is used in combination with the
+     'Handicap/GamePlayers'-fields and 'GamePlayers'-table to know which player
+     is next to move in a MP-game. The player to move is calculated by
+     "MultiPlayerGame::calc_game_player_for_move(..)" and the returned values
+     have a direct correspondence with the players saved in the "GamePlayers"-table.
 
-- time-zone cheat
+     So while moving the Black/White_ID in the "Games"-table is overwritten with
+     the next and 2nd-next-player to move while the game goes along.
 
-- game-lists:
-  - not sufficient(why?) to list by B|W-id alone, list by Team OR representative OR last moved player
-  - handle opponents-page: not handled
-  - handle pages with all/user/my finished/running/observed/observing games: not handled
+   - Official Rengo-rules requires, that the players of one team don't talk with
+     one another, except when asking for resignation (or if ok to end a game).
+     This can NOT be enforced on DGS anyway, so it is not prevented.
+     But in order to some form of easier talking between the players with the
+     game-master, a way to send bulk-messages has been added. Normally this
+     should be restricted to ask if anybody is ready to start the MP-game or
+     to allow asking the other team-members if resignation is ok.
+     However, this lies in the discretion of the player to move, if he/she asks
+     or not (a note with a link serves as a reminder to do so), but this is
+     not enforced.
+
+     Additionally the bulk-message feature can also be used for other purposes,
+     though it is restricted for the initial sending of a message; it can not be
+     used in a way similar to a "Reply-to-all" known from sending an email.
+
+   - Playing MP-games is also supported via the quick-do- and quick-play-suite.
+
+* Timing and vacation-handling for multi-player-game:
+   - the choice not supporting real team-accounts allowed to use the existing
+     time-handling for the black- and white-player of a game. That means,
+     that while playing a MP-game, the Black and White-player are altered
+     to reflect the current player to move. With this, the time-handling
+     of the black/white-player is naturally used.
+
+   - some back-draws are, that time-zone-changes could be used to cheat on time
+     for teams with more than one player. This is not prevented as MP-games are
+     meant for fun anyway and are always unrated.
+
+     Also a player on vacation can play normally. So one problem is, that a team
+     may consist of 1..N players against a different number of opponents, so the
+     bigger team has the advantage of having more "free" time by the possibility
+     of having more vacation.
+     However, a MP-game is just for fun and unrated, so no special measures are
+     taken to prevent vacation-abuse.
+
+* Classes / Files:
+   * "game_players.php" - page dedicated to setup/manage MP-games
+
+   * class MultiPlayerGame - utility class to handle/support MP-games
+   * class GamePlayer - Class to model 'GamePlayers'-entity
+   * class GameHelper - general utility class to handle games
 
 
 #-------- Related features -------------------------------------
 
-* Q: is Admin functionality needed to exchange players (if player "escaped") ? - need GAME_ADMIN
+* Q: is Admin functionality needed to exchange players (e.g. if player "escaped") ?
 
-* Q: stats about played TeamGo-games ? development of "teams" ?
+* Q: stats about played TeamGo-games ? development of "teams" (regarding team-accounts) ?
 
-- kind of "chat" between players could be useful (message system, related to game);; Nice would be additional "public" game-chat (similar to wanted review-comments): any number at any time by everyone, but restricted to players to be "public"
-- Game-properties for TeamGo: allow player-skipping: by game-master, by admin, if on vacation, if requested
-- No conditional moves for TeamGo-games!
+* NTH: kind of "chat" between players could be useful (message system, related to game);
+  Nice would be additional "public" game-chat (similar to wanted review-comments):
+  any number at any time by everyone, but restricted to players to be "public"
+
+* NTH: Game-properties for MP-games:
+  allow player-skipping: by game-master, by admin; if on vacation, if requested
 
