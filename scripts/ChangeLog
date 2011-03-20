@@ -19,6 +19,30 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-03-20 juga
+
+   * join_waitingroom_game.php:
+   - bugfix SQL to join MP-game
+
+   * message.php (read_mpgame_request):
+   - bugfix for PHP4
+
+   * waiting_room.php:
+   - bugfix: showing waiting-room-info only if game-id given
+
+   * specs/multi-player-game.txt:
+   - restrictions, better texts, design, time, vacation, NTH
+   - use-cases: info MP-game, play MP-game
+
+   * specs/db/table-Games.txt, specs/db/table-Waitingroom.txt:
+   - fix GameType/GamePlayers info
+
+2011-02-14 juga
+
+   * specs/multi-player-game.txt, specs/team-go.txt (removed):
+   - added documentation about multi-player-game (Team-Go/Zen-Go)
+   - replaced team-go.txt
+
 2011-02-13 juga
 
    * userinfo.php:
