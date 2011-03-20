@@ -78,7 +78,7 @@ require_once( 'include/classlib_userconfig.php' );
    else
    {
       $gid = (int)get_request_arg('gid');
-      if( $gid >= 0 )
+      if( $gid > 0 )
          $idinfo = load_waitingroom_info( $gid );
    }
 
