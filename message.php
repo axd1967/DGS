@@ -670,7 +670,10 @@ function read_mpgame_request()
       $handles = array( $arr_users[$mpg_uid]['Handle'] );
    }
    else
-      $handles = GamePlayer::load_users_for_mpgame( $gid, $col, /*skip-myself*/true, null );
+   {
+      $tmp_arr = array();
+      $handles = GamePlayer::load_users_for_mpgame( $gid, $col, /*skip-myself*/true, $tmp_arr );
+   }
    if( count($handles) == 0 )
       error('multi_player_no_users', "message.read_mpgame_request.chk.handles($gid,$type,$col)");
 
