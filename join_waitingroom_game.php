@@ -201,8 +201,8 @@ require_once( "include/contacts.php" );
    db_query( 'join_waitingroom_game.update_players',
       "UPDATE Players SET " .
                ( $is_std_go
-                     ? ", Running=Running+$cnt"
-                     : ", GamesMPG=GamesMPG+$cnt" ) .
+                     ? "Running=Running+$cnt"
+                     : "GamesMPG=GamesMPG+$cnt" ) .
                ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
                " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
 
