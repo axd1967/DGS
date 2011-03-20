@@ -80,10 +80,23 @@ Description:
 * ToMove_ID : foreign key to Players.ID
    - field-value points to player, that has to move next in game
 
-* GameType : game-type, see Waitingroom.GameType
+* GameType : game-type, see also Waitingroom.GameType
+   - GO = standard Go (1:1)
+   - TEAM_GO = Team-Go (N:M) with N+M > 2, two teams of 1..N and 1..M players,
+     each team has a fix color (B|W)
+   - ZEN_GO = Multi-player Go (N) with odd N > 2, N players with switching colors
 
-* GamePlayers : matching of players for game
+* GamePlayers : matching of players for game, see also Waitingroom.GamePlayers
    - format: "1:1" (Go), "N:M" (Team-Go), "N" (Zen-Go)
+   - GameType is determined from GamePlayers-info
+   - 1:1 | 2 = Go (standard Go)
+   - N:M = Team-Go, N+M > 2, 2:2 = Rengo
+   - N = Zen-Go, N > 2
+
+   - IMPORTANT NOTE:
+     When a MP-game is started (leaving SETUP-status), the 'GamePlayers'-fields
+     may need to be updated into order 'B:W', which is needed for playing.
+     see also: game_players.php#check_game_setup()
 
 * Size, Komi, Handicap : settings for game (board-size, komi, handicap-stones)
 

@@ -70,17 +70,9 @@ Important Note:
 
 * Time : creation-date of game-offer
 
-* GameType : game-type
-   - GO = standard Go (1:1)
-   - TEAM_GO = Team-Go (N:M) with N+M > 2, two teams of 1..N and 1..M players,
-     each team has a fix color (B|W)
-   - ZEN_GO = Multi-player Go (N) with odd N > 2, N players with switching colors
+* GameType : game-type, see also Games.GameType
 
-* GamePlayers : matching for game with number of players
-   - GameType is determined from GamePlayers-info
-   - 1:1 | 2 = Go (standard Go)
-   - N:M = Team-Go, N+M > 2, 2:2 = Rengo
-   - N = Zen-Go, N > 2
+* GamePlayers : matching for game with number of players, see also Games.GamePlayers
 
 * Ruleset : supported rulesets on DGS
    - JAPANESE = using territory-scoring (default)
