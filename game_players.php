@@ -43,6 +43,7 @@ define('CMD_CHANGE_ORDER', 'chg_ord'); // set group-order
 define('CMD_START_GAME', 'start'); // start game
 define('CMD_DEL_INVITE', 'delinv'); // delete reserved (not yet joined) invitation
 define('CMD_ACK_INVITE', 'ackinv'); // accept invitation
+define('CMD_DEL_JOINED', 'deljoined'); // delete joined player
 
 define('FACT_SAVE', 'save');
 define('FACT_REJECT', 'reject');
@@ -90,6 +91,10 @@ define('KEY_GROUP_ORDER', 'gpo');
      cmd=delinv&gid=&uid=&...       : delete reservation with user-invitation
      cmd=delinv&gid=&uid=&save...   : execution of deleting reserved invitation
      cmd=delinv&gid=&uid=&cancel... : cancel operation
+
+     cmd=deljoined&gid=&uid=&...       : delete joined player
+     cmd=deljoined&gid=&uid=&save...   : execution of deleting joined player
+     cmd=deljoined&gid=&uid=&cancel... : cancel operation
 
 */
    $cmd = get_request_arg('cmd');
@@ -146,6 +151,15 @@ define('KEY_GROUP_ORDER', 'gpo');
                delete_invite( $gid, $uid );
             else
                $form = build_form_delete_invite( $gid, $uid, $errors );
+         }
+         elseif( $cmd == CMD_DEL_JOINED ) // delete joined player
+         {
+            $uid = (int)get_request_arg('uid');
+            $errors = check_delete_joined_player( $uid );
+            if( $is_save && count($errors) == 0 )
+               delete_joined_player( $gid, $uid );
+            else
+               $form = build_form_delete_joined_player( $gid, $uid, $errors );
          }
          elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
          {
@@ -365,6 +379,11 @@ function build_user_actions( $gp )
                   image( $base_path.'images/invite.gif', 'I' ), T_('Send invitation message'), 'class="ButIcon"' );
             $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_INVITE.URI_AMP."uid=$uid",
                image( $base_path.'images/trashcan.gif', 'X' ), T_('Delete reservation#mpg'), 'class="ButIcon"' );
+         }
+         if( $gp->Flags & GPFLAG_JOINED )
+         {
+            $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_JOINED.URI_AMP."uid=$uid",
+               image( $base_path.'images/trashcan.gif', 'X' ), T_('Delete joined player#mpg'), 'class="ButIcon"' );
          }
       }
    }
@@ -643,6 +662,31 @@ function build_form_delete_invite( $gid, $uid, $errors )
    return $form;
 }//build_form_delete_invite
 
+function build_form_delete_joined_player( $gid, $uid, $errors )
+{
+   $cnt_err = show_errors( $form, $errors );
+   if( $cnt_err > 0 )
+      return null;
+
+   $form = new Form( 'deljoined', 'game_players.php', FORM_POST );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'uid', $uid );
+   $form->add_hidden( 'cmd', CMD_DEL_JOINED );
+
+   $form->add_empty_row();
+   $form->add_row( array( 'HEADER', T_('Delete joined player#mpg') ));
+
+   $form->add_row( array( 'TEXT', sprintf( T_('User [%s] will be notified about this deletion.#mpg'),
+                                           user_reference(0, 1, '', $uid) ) ));
+   $form->add_row( array( 'TEXT', T_('Are you sure to delete this joined player ?#mpg') ));
+
+   $form->add_row( array( 'CELL', 1, '',
+                          'SUBMITBUTTON', FACT_SAVE, T_('Yes'),
+                          'SUBMITBUTTON', FACT_CANCEL, T_('No'), ));
+
+   return $form;
+}//build_form_delete_joined_player
+
 function build_form_accept_invite( $gid, $uid, $errors=null )
 {
    global $master_uid;
@@ -881,7 +925,7 @@ function delete_invite( $gid, $uid )
       GamePlayer::delete_reserved_invitation( $gid, $uid );
 
       // 2. notify user
-      send_message( "game_players.delete_invite.notify_user($gid,$uid)",
+      send_message( "game_players.delete_invite.notify_user($gid,$uid,$master_uid)",
          sprintf( T_('Game-master %s deleted your invitation for the game %s.#mpg'),
                   "<user $master_uid>", "<game $gid>" ),
          'Invitation for multi-player-game removed',
@@ -941,6 +985,27 @@ function reject_invite( $gid, $uid )
 
    jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=".urlencode(T_('Invitation rejected!#mpg')));
 }//reject_invite
+
+function delete_joined_player( $gid, $uid )
+{
+   global $master_uid;
+
+   ta_begin();
+   {//HOT-section for removing joined player
+      // 1. delete joined player
+      GamePlayer::delete_joined_player( $gid, $uid );
+
+      // 2. notify user
+      send_message( "game_players.delete_joined_player.notify_user($gid,$uid,$master_uid)",
+         sprintf( T_('Game-master %s revoked your participation for the game %s.#mpg'),
+                  "<user $master_uid>", "<game $gid>" ),
+         'Player of multi-player-game removed',
+         $uid, '', /*notify*/true );
+   }
+   ta_end();
+
+   jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=".urlencode(T_('Joined player removed!#mpg')));
+}//delete_joined_player
 
 function change_group_color( $gid, $preview )
 {
@@ -1122,12 +1187,14 @@ function check_invite( $invite_handle )
    $invite_uid = $invite_user->ID;
    $invite_handle = $invite_user->Handle;
 
-   // CHECKS: need free slot, only join game once, rated user, no guest
+   // CHECKS: need free slot, only join game once, rated user, no guest, not game-master
    $arr_uid = array(); // uid => 1
    foreach( $arr_game_players as $gp )
    {
       if( $gp->uid > 0 )
          $arr_uid[$gp->uid] = 1;
+      if( $gp->uid == $invite_uid && ($gp->Flags & GPFLAG_MASTER) )
+         $errors[] = T_('Game-master already joined the game and can not be invited.#mpg');
    }
    if( count($arr_uid) == count($arr_game_players) )
       $errors[] = T_('No free slot available for invitation of user#mpg');
@@ -1149,14 +1216,15 @@ function check_delete_invite( $uid )
 
    $errors = array();
 
-   // CHECKS for delete: invite-reservation exists, user not joined yet
+   // CHECKS for delete: invite-reservation exists, user not joined yet, not game-master
    $found = false;
-   $arr_uid = array(); // uid => 1
    foreach( $arr_game_players as $gp )
    {
       if( $gp->uid == $uid )
       {
          $found = true;
+         if( $gp->Flags & GPFLAG_MASTER )
+            $errors[] = T_('Game-master should not have reservation and can not be deleted.#mpg');
          if( $gp->Flags & GPFLAG_JOINED )
             $errors[] = T_('User to delete has already joined the game.#mpg');
          if( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) != GPFLAGS_RESERVED_INVITATION )
@@ -1182,6 +1250,33 @@ function check_accept_invite( $uid )
 
    return $errors;
 }//check_accept_invite
+
+// check what would prevent the deletion of a joined player of given user
+// returns [error..]
+function check_delete_joined_player( $uid )
+{
+   global $arr_game_players;
+
+   $errors = array();
+
+   // CHECKS for delete: player is joined, not game-master
+   $found = false;
+   foreach( $arr_game_players as $gp )
+   {
+      if( $gp->uid == $uid )
+      {
+         $found = true;
+         if( $gp->Flags & GPFLAG_MASTER )
+            $errors[] = T_('Game-master is required and can not be deleted with this action.#mpg');
+         if( !($gp->Flags & GPFLAG_JOINED) )
+            $errors[] = T_('User to delete has not joined the game.#mpg');
+      }
+   }
+   if( !$found )
+      $errors[] = T_('Joined player to be deleted can not be found.#mpg');
+
+   return $errors;
+}//check_delete_joined_player
 
 // check what would prevent the start of the game
 // returns arr( [error..], new_game_players )
