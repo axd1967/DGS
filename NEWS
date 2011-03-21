@@ -84,9 +84,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added game-players-page to setup and manage multi-player-game
          * Added invitation-reservation of single player, that can be deleted, approved or rejected
          * Added game-offers in waiting-room for multi-player-game
+         * Added removal of joined game-player
       * Show games to setup on status- and quick-status-page (MPG-type)
       * Use game-players average rating per team stored as Start/End-rating for Black/White-player
-      * Delete-game forbidden for multi-player-game
+      * Deleting running game is forbidden for multi-player-game
 
       * Ask other players for consent by sending bulk-message to:
          * ask all game-players to start game

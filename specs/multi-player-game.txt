@@ -98,6 +98,17 @@ in advance.
 
 #-------- (2a) Setup MP-game --------------------------------------------------
 
+Described Use-cases:
+   - Create new MP-game
+   - Find users to play with with "game-players"-page
+     - [I] Invite a specific (single) known player
+     - [W] Add a game-offer in the waiting-room
+   - Remove a joined player
+   - Choose group-color and handicap for players
+   - Choose group-order for players
+   - Start game
+
+
 * Create new MP-game:
 
   1. Select "New multi-player-game" on the "new_game"-page
@@ -213,6 +224,18 @@ in advance.
      and will automatically be added in a free (reserved) waiting-room-slot.
 
 
+* Remove a joined player:
+
+  A user may notify the game-master about to be removed from the MP-game,
+  or the game-master no longer wants the participation of an already joined
+  player (for whatever reason). In the latter case politeness dictates, that
+  the game-master informs the to-be-removed player about this decision.
+
+  To remove a joined player, click on the "Trashcan"-image in the Actions-column
+  for the joined player you want to remove. You will be asked for confirmation
+  of the removal.
+
+
 * Choose group-color and handicap for players:
 
   Notes:
@@ -261,13 +284,17 @@ in advance.
      You may edit the message before sending it.
      After sending, a multi-receiver bulk-message is sent to all given game-players.
 
+     This would be the last chance to back off from the game by telling the game-master,
+     which is able to remove an already joined player. After this point, no player
+     can be removed and the MP-game can NOT be deleted.
+
   2. "Start game" finally starts the game and leaves the SETUP-mode for the MP-game.
      Every game-player will be notified with a server-message about the game-start.
 
 
 #-------- (2b) Info MP-game ---------------------------------------------------
 
-Use-cases:
+Described Use-cases:
    - Show MP-games in SETUP-mode -> see (1) Status-page, (2) Quick-Status-page
    - Show GameType -> see (1) Status-page, (2) Quick-Status-page, (3) Game-info-page
    - Show list of MP-games -> see (4) Games-List-page
@@ -314,7 +341,7 @@ Use-cases:
 
 #-------- (2c) Play MP-game ---------------------------------------------------
 
-Use-cases:
+Described Use-cases:
    - Show info about MP-game -> see (1) Game-Players-page
    - Show game-comments of MP-game -> see (2) Game-comments-page
    - Download SGF of MP-game -> see (3) SGF-download
@@ -397,6 +424,11 @@ Use-cases:
      If the player does not want to play, he should say so before the game
      is started or refuse from joining in the first place.
      Maybe this policy will be changed later.
+
+     If a player wants to be removed from the MP-game it's only possible while
+     the game has not been started in SETUP-mode. The player should send a private
+     message to the game-master for removal, which the game-master can do on the
+     Game-Players-page (see also section (2a)).
 
    - Ending a game is done by the player to move in a normal way.
      Normally one could expect that also before ending a MP-game, the player

@@ -21,6 +21,13 @@ ChangeLog
 
 2011-03-21 juga
 
+   * include/game_functions.php (GamePlayer.delete_joined_player),
+     game_players.php (build_user_actions, build_form_delete_joined_player,
+       delete_joined_player, check_invite, check_delete_invite, check_delete_joined_player),
+     specs/multi-player-game.txt, NEWS:
+   - game-master may delete a game-player in SETUP-mode of MP-game
+   - bugfix: protect game-master from unwanted deletions
+
    * include/game_functions.php (GameHelper.delete_running_game),
      include/gui_functions.php (echo_image_tournament_info),
      include/make_game.php (create_game),
