@@ -322,6 +322,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    else
       error('invalid_args', "create_game.miss_game_players($gid,$game_type)");
 
+   if( !ALLOW_TOURNAMENTS )
+      error('feature_disabled', 'Tournament.create_game');
    if( isset($game_info_row['tid']) ) // tournament-id
       $tid = (int)$game_info_row['tid'];
    else

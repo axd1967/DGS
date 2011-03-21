@@ -864,9 +864,9 @@ class GameHelper
          return false;
 
       if( is_null($grow) )
-         $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.tid($gid)",
+         $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.gid($gid)",
             "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
-      if( !$grow || $grow['tid'] > 0 )
+      if( !$grow || (int)@$grow['tid'] > 0 )
          return false;
 
       ta_begin();

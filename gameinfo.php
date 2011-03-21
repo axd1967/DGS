@@ -107,8 +107,8 @@ function build_rating_diff( $rating_diff )
       error('invalid_game_status', "gameinfo.find3($gid,{$grow['Status']})");
 
    $tid = (int) @$grow['tid'];
-   $tourney = $tgmae = null;
-   if( $tid <= 0 )
+   $tourney = $tgame = null;
+   if( !ALLOW_TOURNAMENTS || $tid <= 0 )
       $tid = 0;
    else
    {
@@ -369,7 +369,7 @@ function build_rating_diff( $rating_diff )
    // ------------------------
    // build table-info: tournament info
 
-   if( $tid && !is_null($tourney) )
+   if( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
       $itable = new Table_info('tourney');
       $itable->add_caption( T_('Tournament info') );
@@ -466,7 +466,7 @@ function build_rating_diff( $rating_diff )
    $menu_array[T_('Show game')] = 'game.php?gid='.$gid;
    if( $grow['GameType'] != GAMETYPE_GO )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
-   if( $tid && !is_null($tourney) )
+   if( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
          $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";

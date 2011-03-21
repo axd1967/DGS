@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    if( !$logged_in )
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'TournamentLadderProps.edit_props');
+      error('feature_disabled', 'Tournament.ladder.edit_props');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )

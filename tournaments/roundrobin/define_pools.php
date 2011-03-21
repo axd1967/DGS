@@ -42,7 +42,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    if( !$logged_in )
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.define_pools');
+      error('feature_disabled', 'Tournament.roundrobin.define_pools');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )

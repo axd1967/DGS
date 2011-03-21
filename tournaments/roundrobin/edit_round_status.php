@@ -39,7 +39,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    if( !$logged_in )
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.edit_round_status');
+      error('feature_disabled', 'Tournament.roundrobin.edit_round_status');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )

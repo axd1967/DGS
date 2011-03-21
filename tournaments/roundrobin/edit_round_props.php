@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    if( !$logged_in )
       error('not_logged_in');
    if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.edit_round_props');
+      error('feature_disabled', 'Tournament.roundrobin.edit_round_props');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )

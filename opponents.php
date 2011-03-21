@@ -63,7 +63,7 @@ require_once( 'include/classlib_userpicture.php' );
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
    }
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
-   if( $tid < 0 ) $tid = 0;
+   if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_OPPONENTS );
 

@@ -19,6 +19,19 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-03-21 juga
+
+   * include/game_functions.php (GameHelper.delete_running_game),
+     include/gui_functions.php (echo_image_tournament_info),
+     include/make_game.php (create_game),
+     tournaments/ladder/edit_props.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     gameinfo.php, list_contacts.php, opponents.php, show_games.php, users.php:
+   - disabled all tournament-features if ALLOW_TOURNAMENTS disabled
+
 2011-03-20 juga
 
    * join_waitingroom_game.php:

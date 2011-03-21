@@ -238,7 +238,7 @@ function echo_image_gameinfo( $gid, $with_sep=false )
 /*! \brief Returns image to tournament-info page for given tournament-id. */
 function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
 {
-   if( $tid > 0 )
+   if( ALLOW_TOURNAMENTS && $tid > 0 )
    {
       global $base_path;
       $img_str = image( $base_path.'images/tourney.gif',

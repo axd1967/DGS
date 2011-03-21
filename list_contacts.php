@@ -46,7 +46,7 @@ require_once( 'include/classlib_userpicture.php' );
    $page = "list_contacts.php?";
 
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
-   if( $tid < 0 ) $tid = 0;
+   if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    $arr_chk_sysflags = array();
    foreach( Contact::getContactSystemFlags() as $sysflag => $arr ) // arr=( form_elem_name, flag-text )

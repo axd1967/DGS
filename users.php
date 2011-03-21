@@ -49,7 +49,7 @@ require_once( 'include/classlib_userpicture.php' );
    $observe_gid = (int)get_request_arg('observe');
 
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
-   if( $tid < 0 ) $tid = 0;
+   if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    // config for usertype-filter
    $query_usertype = 'Type>0 AND (Type & %d)';

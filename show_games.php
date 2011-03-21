@@ -785,8 +785,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[32] )
-         $grow_strings[32] = echo_image_gameinfo($ID)
-            . ( ALLOW_TOURNAMENTS ? echo_image_tournament_info($tid,true) : '' );
+         $grow_strings[32] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid,true);
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
       if( $observe_all )
