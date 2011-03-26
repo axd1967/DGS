@@ -32,6 +32,7 @@ require_once( "include/form_functions.php" );
 
 
    start_page(T_("Edit password"), true, $logged_in, $player_row );
+   echo "<h3 class=Header>", T_('Change password'), "</h3>\n";
 
    echo "<CENTER>\n";
 
