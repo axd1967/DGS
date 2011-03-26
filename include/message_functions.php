@@ -443,7 +443,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row( array(
             'DESCRIPTION', T_('Game Players'),
             'TEXTINPUT', 'game_players', 6, 5, $GamePlayers,
-            'TEXT', MINI_SPACING.T_('2:2 (Rengo), 3 (Zen-Go)'), ));
+            'TEXT', MINI_SPACING.T_('e.g. 2:2 (Rengo), 3 (Zen-Go)'), ));
    }
 
 
