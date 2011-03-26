@@ -775,6 +775,7 @@ function getRatingTypes()
       'igs'          => T_('IGS rank#ratingtype'),
       //'igsrating' => T_('IGS rating#ratingtype'),
       'iytgg'        => T_('IYT rank#ratingtype'),
+      'ficgs'        => T_('FICGS rank#ratingtype'),
       'japan'        => T_('Japanese rank#ratingtype'),
       'china'        => T_('Chinese rank#ratingtype'),
       'korea'        => T_('Korean rank#ratingtype'),
@@ -879,6 +880,11 @@ function convert_to_rating($string, $type, $no_error=false)
             if( $rating != NO_RATING )
                $rating += 100;  // one stone stronger
          }
+         break;
+
+      case 'ficgs':
+         if( $kyu > 0 )
+            $rating = rank_to_rating($val, $kyu);
          break;
 
       case 'kgs': // rank
