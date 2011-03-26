@@ -376,8 +376,9 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Changed order, grouping and description of hover-options
       * Introducing JavaScript management in profile setting
       * Enlarged length of field 'Open for matches' to 60 chars
-      * Initial Rating: removed converting of NNGS-rank/rating
-      * Initial Rating: added KGS-rank and DGS-rating conversion
+      * Initial Rating:
+         * added KGS-rank, DGS-rating and FICGS-rank conversion
+         * removed converting of NNGS-rank/rating
 
    * <home index.php?logout=t>Login page</home>:
       * Show special main-menu for users not logged in and new users
