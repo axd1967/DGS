@@ -132,39 +132,19 @@ require_once( 'include/utilities.php' );
          );
       if( @$player_row['RatingStatus'] == RATING_NONE )
          array_push( $row,
-               'TEXT', '<span class="FormWarning">'.T_('Must be filled to start a rated game').'</span>' );
+               'TEXT', span('FormWarning', T_('Must be filled to start a rated game')) );
       $profile_form->add_row( $row);
    }
    else
    {
       $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
-                                     'TEXT', echo_rating($player_row["Rating2"],2,0,0 ) ) );
+                                     'TEXT', echo_rating($player_row["Rating2"],2,0,0 ) ));
    }
    $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
-                                  'TEXTINPUT', 'rank', 32, 40, $player_row["Rank"] ) );
+                                  'TEXTINPUT', 'rank', 32, 40, $player_row["Rank"],
+                                  'TEXT', span('FormWarning', T_('only informal')) ));
    $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches?'),
                                   'TEXTINPUT', 'open', 32, 60, $player_row["Open"] ) );
-
-   if( strpos($player_row["SendEmail"], 'BOARD') !== false )
-      $notify_msg_idx = 3;
-   elseif( strpos($player_row["SendEmail"], 'MOVE') !== false )
-      $notify_msg_idx = 2;
-   elseif( strpos($player_row["SendEmail"], 'ON') !== false )
-      $notify_msg_idx = 1;
-   else
-      $notify_msg_idx = 0;
-
-   $profile_form->add_row( array(
-         'DESCRIPTION', T_('Email notifications'),
-         'SELECTBOX', 'emailnotify', 1, $notify_msg, $notify_msg_idx, false ) );
-   $row = array(
-         'DESCRIPTION', T_('Email'),
-         'TEXTINPUT', 'email', 32, 80, $player_row['Email'] );
-   if( !trim($player_row['Email']) )
-      array_push( $row,
-            'TEXT', '<span class="FormWarning">'
-                  . T_('Must be filled to receive a new password or a notification').'</span>' );
-   $profile_form->add_row( $row);
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Country'),
@@ -183,16 +163,50 @@ require_once( 'include/utilities.php' );
    else
       $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
 
+   if( strpos($player_row["SendEmail"], 'BOARD') !== false )
+      $notify_msg_idx = 3;
+   elseif( strpos($player_row["SendEmail"], 'MOVE') !== false )
+      $notify_msg_idx = 2;
+   elseif( strpos($player_row["SendEmail"], 'ON') !== false )
+      $notify_msg_idx = 1;
+   else
+      $notify_msg_idx = 0;
+
+   $profile_form->add_empty_row();
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Email notifications'),
+         'SELECTBOX', 'emailnotify', 1, $notify_msg, $notify_msg_idx, false ) );
+   $row = array(
+         'DESCRIPTION', T_('Email'),
+         'TEXTINPUT', 'email', 32, 80, $player_row['Email'] );
+   if( !trim($player_row['Email']) )
+      array_push( $row,
+            'TEXT', span('FormWarning', T_('Must be filled to receive a new password or a notification')) );
+   $profile_form->add_row( $row);
+
    //--- Followings may be browser settings ---
 
    $profile_form->add_row( array( 'SPACE' ) );
-
    $profile_form->add_row( array( 'HR' ) );
 
 
+   $profile_form->add_row( array( 'HEADER', T_('Appearance') ) );
 
-   $profile_form->add_row( array( 'HEADER', T_('Appearence') ) );
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Table max rows'),
+         'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows, $player_row['TableMaxRows'], false,
+         'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
+      ));
 
+   if( ALLOW_JAVASCRIPT )
+   {
+      $userflags = (int)$player_row['UserFlags'];
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Enable JavaScript'),
+            'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
+   }
+
+   $profile_form->add_empty_row();
    if( (@$player_row['admin_level'] & ADMIN_SKINNER) )
    {
       $profile_form->add_row( array(
@@ -229,21 +243,6 @@ require_once( 'include/utilities.php' );
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Game id button'),
          'TEXT', $button_code, ));
-
-   $profile_form->add_row( array(
-         'DESCRIPTION', T_('Table max rows'),
-         'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows, $player_row['TableMaxRows'], false,
-         'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
-      ));
-
-   if( ALLOW_JAVASCRIPT )
-   {
-      $userflags = (int)$player_row['UserFlags'];
-      $profile_form->add_row( array(
-            'DESCRIPTION', T_('Enable JavaScript'),
-            'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
-   }
-
 
 
    $profile_form->add_row( array( 'HEADER', T_('Board graphics') ) );
