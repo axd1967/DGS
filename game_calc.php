@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-define('DBG_RATING', 1);
+define('DBG_RATING', 1); // print new users rating
 
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
@@ -46,7 +46,7 @@ require_once( "include/table_columns.php" );
    $gid = (int)get_request_arg('gid');
    if( $gid <= 0 ) $gid = 0;
 
-   $game_row = null;
+   $game = $game_row = $rlog_b = $rlog_w = null;
    if( @$_REQUEST['show'] && $gid )
    {
       $game = Games::load_game( $gid );
@@ -69,6 +69,9 @@ require_once( "include/table_columns.php" );
       }
    }//show
 
+   $is_running = ( !is_null($game) && isRunningGame($game->Status) );
+
+
    $title = T_('Game calculations');
    start_page( $title, true, $logged_in, $player_row );
 
@@ -76,7 +79,7 @@ require_once( "include/table_columns.php" );
 
    $gcform = new Form('gcform', $page, FORM_GET, true);
    $gcform->add_row( array(
-      'DESCRIPTION', T_('(finished) Game ID'),
+      'DESCRIPTION', T_('Game ID'),
       'TEXTINPUT',   'gid', 10, 10, $gid,
       'SUBMITBUTTON', 'show', T_('Show Rating Calculations'),
       ));
@@ -84,8 +87,10 @@ require_once( "include/table_columns.php" );
    $gcform->echo_string(1);
 
    section( 'result', T_('Result') );
-   if( !is_null($game_row) )
+   if( !is_null($game) ) // show players-rating-results for finished or running game
    {
+      echo "Game: ", make_html_safe("<game $gid>", true), "\n";
+
       echo "<table><tr><td><pre>\n";
       //echo print_r( $game_row, true), "\n\n";
       echo "Source-Code: ",
@@ -93,11 +98,20 @@ require_once( "include/table_columns.php" );
          ", ",
          anchor('http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/rating.php?revision=1.84&view=markup&pathrev=HEAD#l119', 'change_rating'),
          "\n\n";
-      $result = update_rating2( $gid, /*check-done*/false, /*simul*/true, $game_row );
 
-      echo "RESULT update_rating2 = $result    (note: 0=rated-game, 1=can-be-deleted, 2=not-rated)\n";
+      if( $is_running )
+      {
+         print_rating_update( $game, array( 'Score' =>  1 ) );
+         print_rating_update( $game, array( 'Score' => -1 ) );
+         print_rating_update( $game, array( 'Score' =>  0 ) );
+      }
+      else
+         print_rating_update( $game, $game_row );
+
       echo "</pre></td></tr></table>\n";
-      echo_ratinglogs( $rlog_b, $rlog_w );
+
+      if( !$is_running )
+         echo_ratinglogs( $rlog_b, $rlog_w );
    }
 
 
@@ -167,4 +181,38 @@ function echo_ratinglogs( $rlog_b, $rlog_w )
    section('rlog_result', 'Ratinglogs from database:');
    $table->echo_table();
 }
+
+function convert_rating_result( $result )
+{
+   if( $result == 0 )
+      return '(RATED-game)';
+   elseif( $result == 1 )
+      return '(game can be deleted)';
+   elseif( $result == 2 )
+      return '(game not rated)';
+   return '???';
+}//convert_rating_result
+
+function print_rating_update( $game, $game_row )
+{
+   // build title
+   $score = $game->Score;
+   if( isset($game_row['Score']) )
+      $score = $game_row['Score'];
+   if( $score < 0 )
+      $title = 'Black wins';
+   elseif( $score > 0 )
+      $title = 'White wins';
+   else
+      $title = 'Jigo';
+
+   echo "<hr><h3>$title</h3>\n";
+
+   // rating-debug logged by method-call
+   $result = update_rating2( $game->ID, /*check-done*/false, /*simul*/true, $game_row );
+   $result_descr = convert_rating_result($result);
+   echo "<b>RESULT for [$title]</b> update_rating2 = $result <b>$result_descr</b>\n",
+      "<font size=smaller>(Note: 0=rated-game, 1=can-be-deleted, 2=not-rated)</font>\n\n";
+}
+
 ?>
