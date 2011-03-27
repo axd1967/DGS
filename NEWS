@@ -90,8 +90,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Deleting running game is forbidden for multi-player-game
 
       * Ask other players for consent by sending bulk-message to:
-         * ask all game-players to start game
-         * ask other team-members if resignation is acceptable
+         * Ask all game-players to start game
+         * Ask other team-members if resignation is acceptable
 
    * Game page:
       * Delete game on opponents turn (within first 10 moves)
@@ -120,18 +120,16 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Changed default for Standard Handicap Placement to: ON
          * Changed default for Time settings to: Fischer time with 30d + 1d
          * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
-           Now stronger player gets White color and only make Nigiri
-           if both players have same rating
+           Now stronger player gets White color and only make Nigiri if both players have same rating
 
       * <home waiting_room.php>Waiting room</home>:
          * Moved adding of a new game offer for the waiting room to a separate page:
            Added <home new_game.php>New game</home> page into main-menu (access-key [n])
          * Show probable game-settings for challenger with color, handicap and komi
          * Simplified filter for "suitable" waiting games, added notes
-         * Additionally show "(FH)" (=free handicap) in Settings-column,
-           if standard-placement is not used
+         * Additionally show "(FH)" (=free handicap) in Settings-column, if standard-placement is not used
          * Differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
-         * Remove sorting of Restrictions-column
+         * Removed sorting of Restrictions-column
          * Removed reply-box when joining waiting-room-game
          * Enhanced notify about joined waiting-room game with list of started game(s)
 
@@ -146,7 +144,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Added adjustment of komi by value and jigo mode (allow or reject Jigo)
          * Added (optional) minimum number of rated finished games
          * Added MANUAL-game with fix color WHITE and BLACK in waitingroom,
-           Merged 'Even game with Nigiri' and 'Double game' with MANUAL-game
+           Moved 'Even game with Nigiri' and 'Double game' into MANUAL-game option
          * Added optional waiting-room restriction per game-offer to avoid same opponent joining
            too many games: challenger has to wait some days or can be restricted by number of games
 
@@ -173,8 +171,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Show a users timezone, local time and night start
       * Show icon for Vacation (<image vacation.gif>) and Night time (<image night.gif>)
       * Added <home userinfo.php#pic>user picture</home> on user-info page
-         * Added page to <home edit_picture.php>edit user picture</home> (limited size),
-           Supported image-types: GIF, JPEG, PNG
+         * Added page to <home edit_picture.php>edit user picture</home> (limited size) and supported image-types: GIF, JPEG, PNG
          * Show icon (<image picture.gif>) if user has a picture on pages: users, opponents, contacts
       * Show user-info page in two columns (less game- and more-game-related info)
       * Mark Dragon executives with admin-icon (<image admin.gif>)
@@ -201,20 +198,19 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Changed default for empty subject: ??? -> (no subject)
 
    * Searching capabilities:
-      * Added <home faq.php>search on FAQ</home>
+      * Added <home faq.php>Search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
          * users, opponents, waiting room, search messages, contacts, feature-votes, tournaments
          * observers of a game, my/all observed games
          * all/my/other finished and running games
-      * Added absolute timeunit-choice for filters on Contacts, Message search, Games
-        and Errorlog pages
+      * Added absolute timeunit-choice for filters on Contacts, Message search, Games, Errorlog pages
 
    * Navigation:
       * Added system bookmarks in top Dragon bar
-      * Added <home site_map.php>site-map page</home> into main-menu
+      * Added <home site_map.php>Site-map page</home> into main-menu
 
    * <home status.php>Status page</home>:
-      * Reduced user info on status page, but show vacation if on vacation
+      * Reduced user info on status page, but show if on vacation
       * NEW and REPLY message folders can be hidden -> change on <home edit_folders.php>edit folders page</home>
       * Added column on status games with icon (<image online.gif>) for users being "online",
         i.e. last access time within 10 mins ago
@@ -271,7 +267,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * <home features/list_features.php>Voting on features</home> including feature status management
-      * <home features/list_votes.php>Show features votes</home>, added as Vote-link in main-menu
+      * <home features/list_votes.php>Show feature votes</home>, added as Vote-link in main-menu
       * Show count of NEW features in main-menu with link to vote upon them if there are some
 
    * Markup tags:
@@ -304,7 +300,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added way to stay on board after submitting move,
         Removed submit-move-button returning to status page,
         Changed move-submit-button: 'Submit and go to next game' -> 'Submit move'
-      * Show icon when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
+      * Show icons when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
       * Replaced 'OnVacation'-text by vacation-icon
       * Show SGF-move-number near view-moves list
       * Changed "move"-selectbox (view-moves list) containing only a subset of moves now
@@ -381,7 +377,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
            with <home edit_rating.php>Rank Converter</home> even if user has established rating
          * Added rank conversions: KGS, DGS-rating, OGS, OGS-rating, FICGS, Tygem, WBaduk
-         * Adjusted rank conversions oriented on http://senseis.xmp.net/?RankWorldwideComparison for:
+         * Adjusted rank conversions oriented on <http://senseis.xmp.net/?RankWorldwideComparison> for:
            Euro-rank, Euro-rating, AGA, AGA-rating, China, Korea
          * Removed rank conversion: NNGS-rank, NNGS-rating
 
@@ -403,16 +399,15 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
    * Table Lists:
       * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
-      * Enable full page-navigation (experimental) with pages- & entries-info
-        for pages: Status games, Waiting room, Tournaments, Tournament participants,
-        Users, Opponents, Games, Observed games, Votes, Features
+      * Enable full page-navigation (experimental) with pages- & entries-info for pages:
+        Status games, Waiting room, Tournaments, Tournament participants, Users, Opponents, Games, Observed games, Votes, Features
       * Changed some default sort-directions
       * Used clearer header names
 
    * <home docs.php>Docs</home>:
-      * Added link to <home statistics.php>statistics</home> page on docs and site-map page
-      * Updated <home site_map.php>site map page</home>
-      * Added table of contents for <home news.php>news page</home>
+      * Added link to <home statistics.php>Statistics page</home> on Docs and Site-map page
+      * Updated <home site_map.php>Site-map page</home>
+      * Added table of contents for <home news.php>News page</home>
       * Added gosensations.com + DGS web-stats, corrected outdated links on <home links.php>Links page</home>
       * Removed <home todo.php>todo-list</home>: moved content to <http://senseis.xmp.net/?DGSWishlist |DGS-Wishlist on Sensei&apos;s Library>
 
@@ -482,7 +477,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
    Administrative changes:
 
-   * Added <home donation.php>donation page</home> (deactivated when target reached)
+   * Added <home donation.php>Donation page</home> (deactivated when target reached)
 
    * <home statistics.php>Statistics page</home>:
       * Added statistic view with <home statistics.php?stats=1>user countries</home> also showing all existing flags
