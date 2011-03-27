@@ -376,9 +376,14 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Changed order, grouping and description of hover-options
       * Introducing JavaScript management in profile setting
       * Enlarged length of field 'Open for matches' to 60 chars
-      * Initial Rating:
-         * added KGS-rank, DGS-rating and FICGS-rank conversion
-         * removed converting of NNGS-rank/rating
+
+      * <home edit_rating.php>Rating change</home>:
+         * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
+           with <home edit_rating.php>Rank Converter</home> even if user has established rating
+         * Added rank conversions: KGS, DGS-rating, OGS, OGS-rating, FICGS, Tygem, WBaduk
+         * Adjusted rank conversions oriented on http://senseis.xmp.net/?RankWorldwideComparison for:
+           Euro-rank, Euro-rating, AGA, AGA-rating, China, Korea
+         * Removed rank conversion: NNGS-rank, NNGS-rating
 
    * <home index.php?logout=t>Login page</home>:
       * Show special main-menu for users not logged in and new users
@@ -534,7 +539,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Different CSS-layout for most admin-actions
       * Added admin-script for bulk SGF-downloads
       * Added admin-script for game-info export
-      * Added <home game_calc.php>page to show rating-calculations</home> for finished game on game-info page
+      * Added <home game_calc.php>page to show rating-calculations</home> on game-info page for finished and running game
 
 
    Server config:

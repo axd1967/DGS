@@ -19,6 +19,49 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-03-27 juga
+
+   * edit_rating.php, edit_profile.php, change_profile.php, site_map.php,
+     userinfo.php:
+   - refactored update of rating & rank-info into 'edit_rating.php'-page
+     with more rank/rating-related information, especially rating-changes
+   - edit-profile: added bottom-links to edit all user-related stuff:
+     rating, rank-info, password, bio, user-picture, message-folders
+
+   * include/rating.php ($IGS_TABLE, $KGS_TABLE, getRatingTypes, convert_to_rating):
+   - overworked rank-conversion between other rating-types and DGS oriented
+     on http://senseis.xmp.net/?RankWorldwideComparison used own judgement
+     on conversion if base-data insufficient.
+     - added more rating-types: ogs, ogs-rating, tygem, wbaduk
+     - overworked rating-types: euro-rating, euro-rank, aga, aga-rating, china, korea
+     - limited rating to boundaries +/-50 around MIN/MAX_RATING
+     - re-arranged rating-types
+
+   * include/rating.php (update_rating2),
+     game_calc.php (convert_rating_result, print_rating_update),
+     gameinfo.php, NEWS:
+   - enabled game_calc.php to show rating-diffs for running-games
+     with potential outcomes: B wins, W wins, Jigo
+   - added link to game-calc-page for admin on game-info-page
+
+   * edit_folders.php:
+   - removed bottom-link to show user-info (use main-menu)
+
+2011-03-26 juga
+
+   * edit_profile.php:
+   - re-arrangments of email+notifications, tablemaxrows/javascript
+   - minor changes (text, spans, v-space, typo)
+
+   * include/rating.php (getRatingTypes, convert_to_rating), NEWS:
+   - added rank-conversion for FICGS-server
+
+   * include/message_functions.php (game_settings_form):
+   - example-text for MP-game game-players
+
+   * edit_password.php:
+   - added section-title
+
 2011-03-21 juga
 
    * include/game_functions.php (GamePlayer.delete_joined_player),
@@ -37,7 +80,7 @@ ChangeLog
      tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
      tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
      gameinfo.php, list_contacts.php, opponents.php, show_games.php, users.php:
-   - disabled all tournament-features if ALLOW_TOURNAMENTS disabled
+   - disabled most tournament-features if ALLOW_TOURNAMENTS disabled
 
 2011-03-20 juga
 
