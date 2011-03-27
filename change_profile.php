@@ -19,10 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( "include/std_functions.php" );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/countries.php' );
-require_once( "include/rating.php" );
+require_once 'include/std_functions.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/countries.php';
 
 {
    disable_cache();
@@ -101,7 +100,6 @@ require_once( "include/rating.php" );
    $query = "UPDATE Players SET " .
       "Name='" . mysql_addslashes($name) . "', " .
       "Email='" . mysql_addslashes($email) . "', " .
-      "Rank='" . mysql_addslashes(trim(get_request_arg('rank'))) . "', " .
       "Open='" . mysql_addslashes(trim(get_request_arg('open'))) . "', " .
       "SendEmail='$sendemail', ";
 
@@ -175,25 +173,6 @@ require_once( "include/rating.php" );
          || ( $language !== $player_row['Lang'] && language_exists($language) ) )
    {
        $query .= "Lang='" . $language . "', ";
-   }
-
-
-   $ratingtype = get_request_arg('ratingtype') ;
-   $newrating = convert_to_rating(get_request_arg('rating'), $ratingtype);
-   $oldrating = $player_row["Rating2"];
-
-   if( $player_row["RatingStatus"] != 'RATED'
-         && (is_numeric($newrating) && $newrating >= MIN_RATING)
-         && ( $ratingtype != 'dragonrank'
-            || !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
-            || abs($newrating - $oldrating) > 0.005 ) )
-   {
-      $query .= "Rating=$newrating, " .
-         "InitialRating=$newrating, " .
-         "Rating2=$newrating, " .
-         "RatingMax=$newrating+200+GREATEST(1600-($newrating),0)*2/15, " .
-         "RatingMin=$newrating-200-GREATEST(1600-($newrating),0)*2/15, " .
-         "RatingStatus='".RATING_INIT."', ";
    }
 
    $timezone = get_request_arg('timezone') ;
