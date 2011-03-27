@@ -30,19 +30,23 @@ define('RATEDSTATUS_UNRATED',   2);
 // table for interpolating rating
 global $IGS_TABLE; //PHP5
 $IGS_TABLE = array(
-   array( 'KEY' =>  200, 'VAL' =>  500 ),
-   array( 'KEY' =>  900, 'VAL' => 1000 ),
-   array( 'KEY' => 1500, 'VAL' => 1500 ),
-   array( 'KEY' => 2400, 'VAL' => 2400 ), // 4d
+   array( 'KEY' =>  200, 'VAL' =>  100 ), // 19k +1
+   array( 'KEY' =>  700, 'VAL' =>  600 ), // 14k +1
+   array( 'KEY' =>  800, 'VAL' =>  800 ), // 13k =
+   array( 'KEY' => 1300, 'VAL' => 1300 ), // 8k =
+   array( 'KEY' => 1400, 'VAL' => 1300 ), // 7k +1
+   array( 'KEY' => 2400, 'VAL' => 2300 ), // 4d -1 DGS
 );
 
 // table for interpolating rating
 global $KGS_TABLE; //PHP5
 $KGS_TABLE = array(
-   array( 'KEY' =>  400, 'VAL' =>    0 ),
-   array( 'KEY' => 1300, 'VAL' => 1100 ), // 8k
-   array( 'KEY' => 2000, 'VAL' => 1900 ), // 1k
-   array( 'KEY' => 2700, 'VAL' => 2600 ), // 7d -> 6d
+   array( 'KEY' =>  100, 'VAL' => -700 ), // 20k +8
+   array( 'KEY' =>  600, 'VAL' =>    0 ), // 15k +6
+   array( 'KEY' => 1400, 'VAL' => 1000 ), // 7k +4
+   array( 'KEY' => 1500, 'VAL' => 1200 ), // 6k +3
+   array( 'KEY' => 2400, 'VAL' => 2200 ), // 4d -2
+   array( 'KEY' => 2700, 'VAL' => 2600 ), // 7d -1 DGS
 );
 
 global $A_TABLE; //PHP5
@@ -315,9 +319,9 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
       "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
       "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
       "FROM (Games, Players as white, Players as black) " .
-      "WHERE Status='FINISHED' AND Games.ID=$gid " .
-      ( $check_done ? "AND Rated!='Done' " : '' ) .
-      "AND white.ID=White_ID AND black.ID=Black_ID";
+      "WHERE Games.ID=$gid AND white.ID=White_ID AND black.ID=Black_ID" .
+         ( $simul ? '' : "AND Status='FINISHED' " ) .
+         ( $check_done ? "AND Rated!='Done' " : '' );
 
    $result = db_query( 'update_rating2.find_game', $query );
    if( @mysql_num_rows($result) != 1 )
@@ -338,7 +342,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
          sprintf($fmt2, $Black_ID, 'Black', $bRating, $bRatingMin, $bRatingMax, $Black_Start_Rating);
    }
 
-   $too_few_moves = ($tid == 0) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
+   $too_few_moves = ( $tid == 0 && !$simul ) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
    if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
          || $GameType != GAMETYPE_GO )
    {
@@ -767,18 +771,24 @@ function getRatingTypes()
    return array(
       'dragonrank'   => T_('Dragon rank#ratingtype'),
       'dragonrating' => T_('Dragon rating#ratingtype'),
+      // Rating-lists:
       'eurorank'     => T_('Euro rank (EGF)#ratingtype'),
       'eurorating'   => T_('Euro rating (EGF)#ratingtype'),
       'aga'          => T_('AGA rank#ratingtype'),
       'agarating'    => T_('AGA rating#ratingtype'),
-      'kgs'          => T_('KGS rank#ratingtype'),
-      'igs'          => T_('IGS rank#ratingtype'),
-      //'igsrating' => T_('IGS rating#ratingtype'),
-      'iytgg'        => T_('IYT rank#ratingtype'),
-      'ficgs'        => T_('FICGS rank#ratingtype'),
       'japan'        => T_('Japanese rank#ratingtype'),
       'china'        => T_('Chinese rank#ratingtype'),
       'korea'        => T_('Korean rank#ratingtype'),
+      // Servers:
+      'kgs'          => T_('KGS rank#ratingtype'),
+      'igs'          => T_('IGS rank#ratingtype'),
+      //'igsrating' => T_('IGS rating#ratingtype'),
+      'ogs'          => T_('OGS rank#ratingtype'),
+      'ogsrating'    => T_('OGS rating#ratingtype'),
+      'ficgs'        => T_('FICGS rank#ratingtype'),
+      'iytgg'        => T_('IYT rank#ratingtype'),
+      'tygem'        => T_('Tygem rank#ratingtype'),
+      'wbaduk'       => T_('WBaduk rank#ratingtype'),
    );
 }
 
@@ -824,11 +834,27 @@ function convert_to_rating($string, $type, $no_error=false)
          $needrank = false;
          if( $kyu <= 0 )
             $rating = $val;
+         if( $rating != NO_RATING )
+         {
+            if( $rating >= -400 && $rating <= 300 ) // 25k..18k
+               $rating -= 100.0;
+            elseif( $rating >=800 && $rating <= 1200 ) // 13k-9k
+               $rating += 100.0;
+         }
          break;
 
       case 'eurorank':
          if( $kyu > 0 )
+         {
             $rating = rank_to_rating($val, $kyu);
+            if( $rating != NO_RATING )
+            {
+               if( $rating >= -400 && $rating <= 300 ) // 25k..18k
+                  $rating -= 100.0;
+               elseif( $rating >=800 && $rating <= 1200 ) // 13k-9k
+                  $rating += 100.0;
+            }
+         }
          break;
 
       case 'aga':
@@ -836,7 +862,7 @@ function convert_to_rating($string, $type, $no_error=false)
          {
             $rating = rank_to_rating($val, $kyu);
             if( $rating != NO_RATING )
-               $rating -= 200.0;  // aga two stones weaker ?
+               $rating -= 300.0;  // aga three stones weaker ?
          }
          break;
 
@@ -844,8 +870,8 @@ function convert_to_rating($string, $type, $no_error=false)
          $needrank = false;
          if( $kyu <= 0 )
          {
-            $rating = $val*100 + ( $val > 0 ? 1950 : 2150 );
-            $rating -= 200.0;  // aga two stones weaker ?
+            $rating = $val*100 + ( $val > 0 ? 1950 : 2150 ); // 1k : 2d
+            $rating -= 300.0;  // aga three stones weaker ?
          }
          break;
 
@@ -899,6 +925,39 @@ function convert_to_rating($string, $type, $no_error=false)
          }
          break;
 
+      case 'ogs':
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != NO_RATING )
+               $rating -= 100;
+         }
+         break;
+
+      case 'ogsrating':
+         $needrank = false;
+         if( $kyu <= 0 )
+            $rating = $val - 100.0;
+         break;
+
+      case 'tygem':
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != NO_RATING )
+               $rating -= 100;
+         }
+         break;
+
+      case 'wbaduk':
+         if( $kyu > 0 )
+         {
+            $rating = rank_to_rating($val, $kyu);
+            if( $rating != NO_RATING )
+               $rating -= 200;
+         }
+         break;
+
       case 'japan':
          if( $kyu > 0 )
          {
@@ -912,8 +971,8 @@ function convert_to_rating($string, $type, $no_error=false)
          if( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
-               $rating += 100;  // one stone stronger
+            if( $rating != NO_RATING && ($rating <= 400 || $rating >= 1400) ) // <=17k, >=7k
+               $rating -= 100;  // one stone weaker <=17k | >=7k
          }
          break;
 
@@ -922,7 +981,12 @@ function convert_to_rating($string, $type, $no_error=false)
          {
             $rating = rank_to_rating($val, $kyu);
             if( $rating != NO_RATING )
-               $rating += 400;  // four stones stronger
+            {
+               if( $rating > 1100 )
+                  $rating += 100; // one stone stronger >10k
+               else
+                  $rating += 200; // two stones stronger <=10k
+            }
          }
          break;
 
@@ -940,10 +1004,9 @@ function convert_to_rating($string, $type, $no_error=false)
    }
 
    //valid rating, so ends with a limited bound corrections, else error
-   if( $rating > MAX_START_RATING && $rating-50 <= MAX_START_RATING )
+   if( $rating-50 > MAX_START_RATING )
       $rating = MAX_START_RATING;
-
-   if( $rating < MIN_RATING && $rating+50 >= MIN_RATING )
+   if( $rating+50 < MIN_RATING )
       $rating = MIN_RATING;
 
    if( $rating >= MIN_RATING && $rating <= MAX_START_RATING )
