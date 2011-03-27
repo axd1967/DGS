@@ -23,7 +23,6 @@ require_once( "include/std_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/timezones.php" );
 require_once( "include/countries.php" );
-require_once( "include/rating.php" );
 require_once( "include/form_functions.php" );
 require_once( 'include/utilities.php' );
 
@@ -122,27 +121,6 @@ require_once( 'include/utilities.php' );
                                   'TEXT', $player_row["Handle"] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
                                   'TEXTINPUT', 'name', 32, 40, $player_row["Name"] ) );
-
-   if( $player_row['RatingStatus'] != 'RATED' )
-   {
-      $row = array(
-            'DESCRIPTION', T_('Rating'),
-            'TEXTINPUT', 'rating', 16, 16, echo_rating($player_row['Rating2'],2,0,1),
-            'SELECTBOX', 'ratingtype', 1, getRatingTypes(), 'dragonrank', false,
-         );
-      if( @$player_row['RatingStatus'] == RATING_NONE )
-         array_push( $row,
-               'TEXT', span('FormWarning', T_('Must be filled to start a rated game')) );
-      $profile_form->add_row( $row);
-   }
-   else
-   {
-      $profile_form->add_row( array( 'DESCRIPTION', T_('Rating'),
-                                     'TEXT', echo_rating($player_row["Rating2"],2,0,0 ) ));
-   }
-   $profile_form->add_row( array( 'DESCRIPTION', T_('Rank info'),
-                                  'TEXTINPUT', 'rank', 32, 40, $player_row["Rank"],
-                                  'TEXT', span('FormWarning', T_('only informal')) ));
    $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches?'),
                                   'TEXTINPUT', 'open', 32, 60, $player_row["Open"] ) );
 
@@ -351,23 +329,31 @@ require_once( 'include/utilities.php' );
    //--- End of browser settings ---
 
 
-
-   $profile_form->add_row( array( 'SPACE' ) );
-   $profile_form->add_row( array( 'SPACE' ) );
+   $profile_form->add_empty_row();
+   $profile_form->add_empty_row();
 
    $profile_form->add_row( array(
          'TAB',
          'CHECKBOX', 'locally', 1, sptext(T_('Change appearences for this browser only')),
                safe_getcookie("prefs".$my_id) > '' ));
 
-   $profile_form->add_row( array( 'HR' ) );
-   $profile_form->add_row( array( 'SPACE' ) );
+   $profile_form->add_empty_row();
 
    $profile_form->add_row( array(
          'SUBMITBUTTONX', 'action', T_('Change profile'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ), ));
+   $profile_form->add_empty_row();
 
    $profile_form->echo_string(1);
 
-   end_page();
+
+   $menu_array = array();
+   $menu_array[T_('Change rating & rank')] = 'edit_rating.php';
+   $menu_array[T_('Change password')] = 'edit_password.php';
+   $menu_array[T_('Edit bio')] = 'edit_bio.php';
+   if( USERPIC_FOLDER != '' )
+      $menu_array[T_('Edit user picture')] = 'edit_picture.php';
+   $menu_array[T_('Edit message folders')] = 'edit_folders.php';
+
+   end_page(@$menu_array);
 }
 ?>
