@@ -465,11 +465,11 @@ function build_rating_diff( $rating_diff )
    $menu_array = array();
    $menu_array[T_('Show game')] = "game.php?gid=$gid";
    if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
-   {
       $menu_array[T_('Show game-calc')] =
-         array( 'url' => 'game_calc.php?show=1'.URI_AMP."gid=$gid",
-                'class' => 'AdminLink' );
-   }
+         array( 'url' => 'game_calc.php?show=1'.URI_AMP."gid=$gid", 'class' => 'AdminLink' );
+   if( @$player_row['admin_level'] & ADMIN_GAME )
+      $menu_array[T_('Admin game')] =
+         array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
    if( $grow['GameType'] != GAMETYPE_GO )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    if( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
