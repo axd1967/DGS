@@ -36,17 +36,18 @@ require_once( "include/table_columns.php" );
    if( !($player_level & ADMIN_SUPERADMIN) )
       error('adminlevel_too_low');
 
-   $admin_tasks = array( // admin-level-id => arr( admin-bitmask, admin-text )
+   $admin_tasks = array( // admin-level-id => arr( admin-bitmask, (alphabetic-order) admin-text ),
          'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),
-         'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
-         'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
-         'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
+         'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
+         'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
          'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
+         'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
+         'Game'   => array( ADMIN_GAME, /*T_*/('Game')),
+         'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
          'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
          'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
+         'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
          'Vote'   => array( ADMIN_VOTE, /*T_*/('Voting')),
-         'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
-         'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
       );
 
    // Make sure all previous admins gets into the Admin array
