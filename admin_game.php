@@ -26,6 +26,8 @@ require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 require_once 'include/db/games.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_games.php';
 
 $GLOBALS['ThePage'] = new Page('GameAdmin');
 
@@ -48,6 +50,7 @@ define('GA_RES_TIMOUT', 3);
 /* Actual REQUEST calls used
      gid=                : load game
      gend_save&gid=      : update game-score/status for game ending game
+     grated_save&gid=    : toggle game-Rated-status for game
 */
 
    $gid = (int) @$_REQUEST['gid'];
@@ -55,6 +58,18 @@ define('GA_RES_TIMOUT', 3);
       error('unknown_game'); // need gid (use link in game-info-page)
 
    $game = Games::load_game($gid);
+   if( is_null($game) )
+      error('unknown_game', "admin_game.find_game($gid)");
+
+   $tourney = $tgame = null;
+   if( !is_null($game) && $game->tid > 0 )
+   {
+      $tid = $game->tid;
+      $tourney = Tournament::load_tournament($tid);
+      if( is_null($tourney) )
+         error('unknown_tournament', "admin_game.find_tournament($tid)");
+      $tgame = TournamentGames::load_tournament_game_by_gid($gid);
+   }
 
    // init
    $errors = array();
@@ -69,10 +84,16 @@ define('GA_RES_TIMOUT', 3);
    {
       if( @$_REQUEST['gend_save'] )
       {
-         // TODO: check for finished games, check for tourney-games, check valid score
-         //TODO end-game
-         $sys_msg = urlencode( T_('Game result set!#gameadm') );
-         jump_to("$page?gid=$gid".URI_AMP."sysmsg=$sys_msg");
+         // TODO: check for finished games, check for tourney-games -> see cron for timeout
+         //TODO end-game, write admin-log
+         jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game result set!#gameadm')) );
+      }
+      elseif( @$_REQUEST['grated_save'] )
+      {
+         $toggled_rated = toggle_rated( $game->Rated );
+         db_query( "admin_game.toggle_rated($gid,$game_rated)",
+            "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
+         jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game rated-status updated!#gameadm')) );
       }
    }
 
@@ -89,9 +110,26 @@ define('GA_RES_TIMOUT', 3);
          'DESCRIPTION', T_('Game ID#gameadm'),
          'TEXT',        anchor($base_path."game.php?gid=$gid", "#$gid"),
          'TEXT',        echo_image_gameinfo($gid, true) ));
+
+   if( !is_null($tourney) )
+   {
+      $iform->add_row( array(
+            'DESCRIPTION', T_('Tournament ID'),
+            'TEXT',        $tourney->build_info(4), ));
+   }
+   if( !is_null($tgame) )
+   {
+      $iform->add_row( array(
+            'DESCRIPTION', T_('Tournament Game Status'),
+            'TEXT',        TournamentGames::getStatusText($tgame->Status) ));
+   }
+
    $iform->add_row( array(
          'DESCRIPTION', T_('Game Status#gameadm'),
          'TEXT',        $game->Status ));
+   $iform->add_row( array(
+         'DESCRIPTION', T_('Rated#gameadm'),
+         'TEXT',        yesno($game->Rated) ));
    $iform->add_row( array(
          'DESCRIPTION', T_('Black player#gameadm'),
          'TEXT',        $user_black->user_reference() . SEP_SPACING .
@@ -115,18 +153,15 @@ define('GA_RES_TIMOUT', 3);
 
    // ADMIN: End game ------------------
 
-   draw_game_end( $game );
+   if( isRunningGame($game->Status) )
+      draw_game_admin_form( $game );
 
-
-   $menu_array = array();
-   $menu_array[T_('Admin game')] = array( 'url' => $page, 'class' => 'AdminLink' );
-
-   end_page(@$menu_array);
-}
+   end_page();
+}//main
 
 
 // return [ vars-hash, errorlist ]
-function parse_edit_form( $game )
+function parse_edit_form( &$game )
 {
    $errors = array();
    $gid = $game->ID;
@@ -138,27 +173,15 @@ function parse_edit_form( $game )
       'result'    => '', // game-end
    );
 
-   // init for game-end
-   $game_score = ( $game->Status == GAME_STATUS_FINISHED ) ? $game->Score : null;
-   if( !is_null($game_score) )
-   {
-      $vars['color'] = ($game_score <= 0) ? BLACK : WHITE;
-      $vars['score'] = '';
-      if( abs($game->Score) == SCORE_RESIGN )
-         $vars['result'] = GA_RES_RESIGN;
-      elseif( abs($game->Score) == SCORE_TIME )
-         $vars['result'] = GA_RES_TIMOUT;
-      else
-      {
-         $vars['result'] = GA_RES_SCORE;
-         $vars['score'] = abs($game_score);
-      }
-   }
-
-   $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+
+   // checks
+   if( !isRunningGame($game->Status) )
+      $errors[] = T_('Game-result can only be changed for running game!#gameadm');
+   if( $game->tid > 0 && @$_REQUEST['grated_save'] )
+      $errors[] = T_('Rated-status can not be changed for tournament-game!#gameadm');
 
    // parse URL-vars
    $mask_gend = 0;
@@ -223,12 +246,15 @@ function parse_edit_form( $game )
       }
       else
          $errors[] = T_('Missing color, result and score for game result#gameadm');
+
+      if( count($errors) == 0 )
+         $game->Score = $game_score;
    }//game-end
 
    return array( $vars, $errors );
 }//parse_edit_form
 
-function draw_game_end( $game )
+function draw_game_admin_form( $game )
 {
    global $page, $vars;
 
@@ -263,7 +289,26 @@ function draw_game_end( $game )
    $gaform->add_row( array(
          'SUBMITBUTTON', 'gend_save', T_('Save game result#gameadm'), ));
 
+   // ---------- Change rated-status ----------
+
+   if( $game->tid == 0 )
+   {
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'HEADER', T_('Change game rated-status#gameadm'), ));
+      $gaform->add_row( array(
+            'DESCRIPTION', T_('Rated#gameadm'),
+            'TEXT', sprintf( '%s => %s', yesno($game->Rated), yesno(toggle_rated($game->Rated)) ), ));
+      $gaform->add_row( array(
+            'SUBMITBUTTON', 'grated_save', T_('Toggle game rated-status#gameadm'), ));
+   }
+
    $gaform->echo_string();
-}//draw_game_end
+}//draw_game_admin_form
+
+function toggle_rated( $yesno )
+{
+   return ($yesno == 'Y') ? 'N' : 'Y';
+}
 
 ?>
