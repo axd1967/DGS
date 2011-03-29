@@ -51,11 +51,17 @@ define('GA_RES_TIMOUT', 3);
      gid=                : load game
      gend_save&gid=      : update game-score/status for game ending game
      grated_save&gid=    : toggle game-Rated-status for game
+     gdel&gid=           : delete game (ask for confirmation)
+     gdel_save&gid=      : delete game, execution
+     cancel&gid=         : cancel operation, reload page
 */
 
    $gid = (int) @$_REQUEST['gid'];
    if( $gid <= 0 )
       error('unknown_game'); // need gid (use link in game-info-page)
+
+   if( @$_REQUEST['cancel'] )
+      jump_to("$page?gid=$gid");
 
    $game = Games::load_game($gid);
    if( is_null($game) )
@@ -93,7 +99,18 @@ define('GA_RES_TIMOUT', 3);
          $toggled_rated = toggle_rated( $game->Rated );
          db_query( "admin_game.toggle_rated($gid,$game_rated)",
             "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
+         //TODO write admin-log
          jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game rated-status updated!#gameadm')) );
+      }
+      elseif( @$_REQUEST['gdel_save'] )
+      {
+         //TODO if( GameHelper::delete_running_game($gid) )
+         {
+            //TODO write admin-log, notify about deletion
+            $message = sprintf( T_('Game #%s deleted!#gameadm'), $gid );
+            //TODO jump to where? (game is deleted)
+            jump_to("admin.php?sysmsg=".urlencode($message));
+         }
       }
    }
 
@@ -182,6 +199,8 @@ function parse_edit_form( &$game )
       $errors[] = T_('Game-result can only be changed for running game!#gameadm');
    if( $game->tid > 0 && @$_REQUEST['grated_save'] )
       $errors[] = T_('Rated-status can not be changed for tournament-game!#gameadm');
+   if( $game->tid > 0 && (@$_REQUEST['gdel'] || @$_REQUEST['gdel_save']) )
+      $errors[] = T_('Tournament-game can not be deleted!#gameadm');
 
    // parse URL-vars
    $mask_gend = 0;
@@ -261,38 +280,44 @@ function draw_game_admin_form( $game )
    $gaform = new Form( 'gameadmin', $page, FORM_GET );
    $gaform->add_hidden( 'gid', $game->ID );
 
-   $gaform->add_row( array(
-         'CELL', 2, '',
-         'HEADER', T_('Set game result#gameadm'), ));
-   $gaform->add_row( array(
-         'CELL', 2, '',
-         'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!#gameadm')), ));
+   // ---------- Set game-result ----------
 
-   $gaform->add_row( array(
-         'CELL', 1, '',
-         'RADIOBUTTONS', 'color', array( BLACK => T_('Black') ), @$vars['color'],
-         'TEXT', SMALL_SPACING . T_('wins by#gameadm') . SMALL_SPACING,
-         'CELL', 1, '',
-         'RADIOBUTTONS', 'result', array( GA_RES_SCORE => T_('Score#gameadm') ), @$vars['result'],
-         'TEXT', MED_SPACING,
-         'TEXTINPUT', 'score', 6, 6, @$vars['score'],
-         'TEXT', sprintf( ' (%s)', T_('0=Jigo#gameadm') ), ));
-   $gaform->add_row( array(
-         'RADIOBUTTONS', 'color', array( WHITE => T_('White') ), @$vars['color'],
-         'CELL', 1, '',
-         'RADIOBUTTONS', 'result', array( GA_RES_RESIGN => T_('Resignation#gameadm') ), @$vars['result'], ));
-   $gaform->add_row( array(
-         'TAB',
-         'RADIOBUTTONS', 'result', array( GA_RES_TIMOUT => T_('Timeout#gameadm') ), @$vars['result'], ));
+   if( !@$_REQUEST['gdel'] )
+   {
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'HEADER', T_('Set game result#gameadm'), ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!#gameadm')), ));
 
-   $gaform->add_empty_row();
-   $gaform->add_row( array(
-         'SUBMITBUTTON', 'gend_save', T_('Save game result#gameadm'), ));
+      $gaform->add_row( array(
+            'CELL', 1, '',
+            'RADIOBUTTONS', 'color', array( BLACK => T_('Black') ), @$vars['color'],
+            'TEXT', SMALL_SPACING . T_('wins by#gameadm') . SMALL_SPACING,
+            'CELL', 1, '',
+            'RADIOBUTTONS', 'result', array( GA_RES_SCORE => T_('Score#gameadm') ), @$vars['result'],
+            'TEXT', MED_SPACING,
+            'TEXTINPUT', 'score', 6, 6, @$vars['score'],
+            'TEXT', sprintf( ' (%s)', T_('0=Jigo#gameadm') ), ));
+      $gaform->add_row( array(
+            'RADIOBUTTONS', 'color', array( WHITE => T_('White') ), @$vars['color'],
+            'CELL', 1, '',
+            'RADIOBUTTONS', 'result', array( GA_RES_RESIGN => T_('Resignation#gameadm') ), @$vars['result'], ));
+      $gaform->add_row( array(
+            'TAB',
+            'RADIOBUTTONS', 'result', array( GA_RES_TIMOUT => T_('Timeout#gameadm') ), @$vars['result'], ));
+
+      $gaform->add_empty_row();
+      $gaform->add_row( array(
+            'SUBMITBUTTON', 'gend_save', T_('Save game result#gameadm'), ));
+   }
 
    // ---------- Change rated-status ----------
 
-   if( $game->tid == 0 )
+   if( $game->tid == 0 && !@$_REQUEST['gdel'] )
    {
+      $gaform->add_row( array( 'HR' ));
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Change game rated-status#gameadm'), ));
@@ -303,6 +328,41 @@ function draw_game_admin_form( $game )
             'SUBMITBUTTON', 'grated_save', T_('Toggle game rated-status#gameadm'), ));
    }
 
+   // ---------- Delete game ----------
+
+   if( $game->tid == 0 )
+   {
+      $too_few_moves = ( $game->Moves < DELETE_LIMIT + $game->Handicap );
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'HEADER', T_('Delete game#gameadm'), ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', sprintf( T_('Game has %s moves with handicap %s.#gameadm'), $game->Moves, $game->Handicap ), ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', ' => ' .
+                    ($too_few_moves
+                        ? T_('Players can delete game too!#gameadm')
+                        : T_('Only admin can delete game!#gameadm')), ));
+      if( @$_REQUEST['gdel'] ) // ask for confirmation
+      {
+         $gaform->add_row( array(
+               'CELL', 2, '',
+               'BR',
+               'TEXT', span('FormWarning', T_('Do you really want to delete the game?#gameadm')), ));
+         $gaform->add_row( array(
+               'SUBMITBUTTON', 'gdel_save', T_('Yes#gameadm'),
+               'SUBMITBUTTON', 'cancel', T_('No#gameadm'), ));
+      }
+      else
+      {
+         $gaform->add_row( array(
+               'SUBMITBUTTON', 'gdel', T_('Delete game#gameadm'), ));
+      }
+   }
+
+   $gaform->add_empty_row();
    $gaform->echo_string();
 }//draw_game_admin_form
 
