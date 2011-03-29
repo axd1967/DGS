@@ -103,7 +103,7 @@ function build_rating_diff( $rating_diff )
    $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
    if( !$grow )
       error('unknown_game', "gameinfo.find2($gid)");
-   if( !isRunningGame($grow['Status']) )
+   if( $grow['Status'] == GAME_STATUS_SETUP )
       error('invalid_game_status', "gameinfo.find3($gid,{$grow['Status']})");
 
    $tid = (int) @$grow['tid'];
