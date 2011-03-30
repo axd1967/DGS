@@ -281,7 +281,7 @@ function echo_image_tourney_next_round()
    return image( $base_path.'images/next.gif', T_('Next Round#tourney'), null, 'class="InTextImage"' );
 }
 
-/*! \brief Returns image-tag for tournament-round (next-round). */
+/*! \brief Returns image-tag for MP-game (linked to game-players-page if game-id > 0 given). */
 function echo_image_game_players( $gid )
 {
    global $base_path;
