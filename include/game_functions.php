@@ -969,7 +969,7 @@ class GameHelper
 class GameNotify
 {
    var $gid;
-   var $uid;
+   var $uid; // can be 0 for admin (<> players)
    var $game_type;
    var $game_flags;
    var $black_id;
@@ -1033,14 +1033,14 @@ class GameNotify
    }//_build_text_players
 
    /*! \brief Returns subject and text for message to players if game got deleted. */
-   function get_text_game_deleted()
+   function get_text_game_deleted( $is_admin=false )
    {
       global $player_row;
 
       $subject = 'Game deleted';
       $text = "The game:<center>"
             . game_reference( 0, 1, '', $this->gid, 0, $this->white_name, $this->black_name) // game is deleted => no link
-            . "</center>has been deleted by player:<center>"
+            . "</center>has been deleted by ". ($is_admin ? 'admin' : 'player') .":<center>"
             . send_reference( REF_LINK, 1, '', $player_row )
             . "</center>"
             . $this->players_text;
@@ -1082,7 +1082,7 @@ class GameNotify
    function get_recipients()
    {
       $arr = array_keys( $this->players );
-      if( abs($this->score) != SCORE_TIME )
+      if( $this->uid > 0 && abs($this->score) != SCORE_TIME )
          unset($arr[$this->uid]);
       return $arr;
    }//get_recipients
