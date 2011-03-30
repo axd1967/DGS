@@ -44,16 +44,17 @@ define('GA_RES_TIMOUT', 3);
       error('not_logged_in');
    if( !(@$player_row['admin_level'] & ADMIN_GAME) )
       error('adminlevel_too_low');
+   $my_id = $player_row['ID'];
 
    $page = "admin_game.php";
 
 /* Actual REQUEST calls used
-     gid=                : load game
-     gend_save&gid=      : update game-score/status for game ending game
-     grated_save&gid=    : toggle game-Rated-status for game
-     gdel&gid=           : delete game (ask for confirmation)
-     gdel_save&gid=      : delete game, execution
-     cancel&gid=         : cancel operation, reload page
+     gid=                     : load game
+     gend_save&gid=           : update game-score/status for game ending game
+     grated_save&gid=         : toggle game-Rated-status for game
+     gdel&gid=&delmsg=        : delete game (ask for confirmation)
+     gdel_save&gid=&delmsg=   : delete game, execution
+     cancel&gid=              : cancel operation, reload page
 */
 
    $gid = (int) @$_REQUEST['gid'];
@@ -90,8 +91,9 @@ define('GA_RES_TIMOUT', 3);
    {
       if( @$_REQUEST['gend_save'] )
       {
-         // TODO: check for finished games, check for tourney-games -> see cron for timeout
-         //TODO end-game, write admin-log
+         // TODO -> see cron for timeout, end game
+         admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[score][B/W win;jigo]" );
+
          jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game result set!#gameadm')) );
       }
       elseif( @$_REQUEST['grated_save'] )
@@ -99,16 +101,30 @@ define('GA_RES_TIMOUT', 3);
          $toggled_rated = toggle_rated( $game->Rated );
          db_query( "admin_game.toggle_rated($gid,$game_rated)",
             "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
-         //TODO write admin-log
+         admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggle_rated]" );
+
          jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game rated-status updated!#gameadm')) );
       }
       elseif( @$_REQUEST['gdel_save'] )
       {
-         //TODO if( GameHelper::delete_running_game($gid) )
+         // send message to my opponent / all-players / observers about the result
+         $game_notify = new GameNotify( $gid, /*adm*/0, $game->GameType, $game->Flags,
+            $game->Black_ID, $game->White_ID, $game->Score, trim(get_request_arg('delmsg')) );
+
+         if( GameHelper::delete_running_game($gid) )
          {
-            //TODO write admin-log, notify about deletion
+            admin_log( $my_id, $player_row['Handle'],
+               "Deleted game #$gid by admin: {$game->GameType}({$game->GamePlayers})[{$game->Status}], " .
+               "S{$game->Size}, H{$game->Handicap}, B{$game->Black_ID}, W{$game->White_ID}, " .
+               "#M={$game->Moves}, R[{$game->Rated}]" );
+
+            // notify all players about deletion
+            list( $Subject, $Text ) = $game_notify->get_text_game_deleted( /*is-adm*/true );
+            send_message( 'confirm', $Text, $Subject,
+               /*to*/$game_notify->get_recipients(), '',
+               /*notify*/false, /*system-msg*/0, 'RESULT', $gid );
+
             $message = sprintf( T_('Game #%s deleted!#gameadm'), $gid );
-            //TODO jump to where? (game is deleted)
             jump_to("admin.php?sysmsg=".urlencode($message));
          }
       }
@@ -142,19 +158,24 @@ define('GA_RES_TIMOUT', 3);
    }
 
    $iform->add_row( array(
-         'DESCRIPTION', T_('Game Status#gameadm'),
-         'TEXT',        $game->Status ));
+         'DESCRIPTION', T_('Game Type & Status#gameadm'),
+         'TEXT', sprintf( '%s [%s]',
+                          GameTexts::format_game_type( $game->GameType, $game->GamePlayers )
+                              . ($game->GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players($gid)),
+                          $game->Status ), ));
    $iform->add_row( array(
          'DESCRIPTION', T_('Rated#gameadm'),
          'TEXT',        yesno($game->Rated) ));
-   $iform->add_row( array(
-         'DESCRIPTION', T_('Black player#gameadm'),
-         'TEXT',        $user_black->user_reference() . SEP_SPACING .
-                        echo_rating($user_black->Rating, true, $user_black->ID), ));
-   $iform->add_row( array(
-         'DESCRIPTION', T_('White player#gameadm'),
-         'TEXT',        $user_white->user_reference() . SEP_SPACING .
-                        echo_rating($user_white->Rating, true, $user_white->ID), ));
+   if( !is_null($user_black) )
+      $iform->add_row( array(
+            'DESCRIPTION', T_('Black player#gameadm'),
+            'TEXT',        $user_black->user_reference() . SEP_SPACING .
+                           echo_rating($user_black->Rating, true, $user_black->ID), ));
+   if( !is_null($user_white) )
+      $iform->add_row( array(
+            'DESCRIPTION', T_('White player#gameadm'),
+            'TEXT',        $user_white->user_reference() . SEP_SPACING .
+                           echo_rating($user_white->Rating, true, $user_white->ID), ));
 
    if( count($errors) )
    {
@@ -170,7 +191,7 @@ define('GA_RES_TIMOUT', 3);
 
    // ADMIN: End game ------------------
 
-   if( isRunningGame($game->Status) )
+   if( $game->Status != GAME_STATUS_FINISHED )
       draw_game_admin_form( $game );
 
    end_page();
@@ -188,6 +209,7 @@ function parse_edit_form( &$game )
       'color'     => '', // game-end
       'score'     => '', // game-end
       'result'    => '', // game-end
+      'delmsg'    => '', // game-delete
    );
 
    // read URL-vals into vars
@@ -195,16 +217,23 @@ function parse_edit_form( &$game )
       $vars[$key] = get_request_arg( $key, $val );
 
    // checks
-   if( !isRunningGame($game->Status) )
+   if( $game->Status == GAME_STATUS_FINISHED )
+      $errors[] = T_('Finished game can not be changed!#gameadm');
+   if( @$_REQUEST['gend_save'] && !isRunningGame($game->Status) )
       $errors[] = T_('Game-result can only be changed for running game!#gameadm');
-   if( $game->tid > 0 && @$_REQUEST['grated_save'] )
-      $errors[] = T_('Rated-status can not be changed for tournament-game!#gameadm');
-   if( $game->tid > 0 && (@$_REQUEST['gdel'] || @$_REQUEST['gdel_save']) )
+   if( @$_REQUEST['grated_save'] )
+   {
+      if( $game->tid > 0 )
+         $errors[] = T_('Rated-status can not be changed for tournament-game!#gameadm');
+      if( $game->GameType != GAMETYPE_GO )
+         $errors[] = T_('Rated-status can not be changed for multi-player-game!#gameadm');
+   }
+   if( (@$_REQUEST['gdel'] || @$_REQUEST['gdel_save']) && $game->tid > 0 )
       $errors[] = T_('Tournament-game can not be deleted!#gameadm');
 
    // parse URL-vars
    $mask_gend = 0;
-   if( @$_REQUEST['gend_save'] )
+   if( @$_REQUEST['gend_save'] ) // set game-result
    {
       $new_value = $vars['color'];
       if( (string)$new_value != '' )
@@ -282,7 +311,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Set game-result ----------
 
-   if( !@$_REQUEST['gdel'] )
+   if( !@$_REQUEST['gdel'] && isRunningGame($game->Status) )
    {
       $gaform->add_row( array(
             'CELL', 2, '',
@@ -311,13 +340,17 @@ function draw_game_admin_form( $game )
       $gaform->add_empty_row();
       $gaform->add_row( array(
             'SUBMITBUTTON', 'gend_save', T_('Save game result#gameadm'), ));
+      $draw_hr = true;
    }
+   else
+      $draw_hr = false;
 
    // ---------- Change rated-status ----------
 
-   if( $game->tid == 0 && !@$_REQUEST['gdel'] )
+   if( !@$_REQUEST['gdel'] && ($game->tid == 0 || $game->GameType == GAMETYPE_GO) )
    {
-      $gaform->add_row( array( 'HR' ));
+      if( $draw_hr )
+         $gaform->add_row( array( 'HR' ));
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Change game rated-status#gameadm'), ));
@@ -326,13 +359,18 @@ function draw_game_admin_form( $game )
             'TEXT', sprintf( '%s => %s', yesno($game->Rated), yesno(toggle_rated($game->Rated)) ), ));
       $gaform->add_row( array(
             'SUBMITBUTTON', 'grated_save', T_('Toggle game rated-status#gameadm'), ));
+      $draw_hr = true;
    }
+   else
+      $draw_hr = false;
 
    // ---------- Delete game ----------
 
-   if( $game->tid == 0 )
+   if( $game->tid == 0 || $game->GameType == GAMETYPE_GO )
    {
       $too_few_moves = ( $game->Moves < DELETE_LIMIT + $game->Handicap );
+      if( $draw_hr )
+         $gaform->add_row( array( 'HR' ));
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Delete game#gameadm'), ));
@@ -342,9 +380,15 @@ function draw_game_admin_form( $game )
       $gaform->add_row( array(
             'CELL', 2, '',
             'TEXT', ' => ' .
-                    ($too_few_moves
+                    ( ( $too_few_moves && $game->GameType == GAMETYPE_GO )
                         ? T_('Players can delete game too!#gameadm')
                         : T_('Only admin can delete game!#gameadm')), ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'BR', 'TEXT', T_('Message to players#gameadm').':', ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'TEXTAREA', 'delmsg', 50, 2, @$vars['delmsg'], ));
       if( @$_REQUEST['gdel'] ) // ask for confirmation
       {
          $gaform->add_row( array(
