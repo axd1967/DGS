@@ -128,7 +128,7 @@ define('GA_RES_TIMOUT', 3);
             jump_to("admin.php?sysmsg=".urlencode($message));
          }
       }
-   }
+   }//actions
 
 
    $title = T_('Game Admin#gameadm');
@@ -347,7 +347,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Change rated-status ----------
 
-   if( !@$_REQUEST['gdel'] && ($game->tid == 0 || $game->GameType == GAMETYPE_GO) )
+   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->GameType == GAMETYPE_GO )
    {
       if( $draw_hr )
          $gaform->add_row( array( 'HR' ));
@@ -366,7 +366,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Delete game ----------
 
-   if( $game->tid == 0 || $game->GameType == GAMETYPE_GO )
+   if( $game->tid == 0 )
    {
       $too_few_moves = ( $game->Moves < DELETE_LIMIT + $game->Handicap );
       if( $draw_hr )
