@@ -280,6 +280,10 @@ define('KEY_GROUP_ORDER', 'gpo');
       }
       else
          $menu_array[T_('Check game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_START_GAME;
+
+      if( @$player_row['admin_level'] & ADMIN_GAME )
+         $menu_array[T_('Admin game')] =
+            array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
    }
 
    end_page(@$menu_array);
