@@ -91,8 +91,16 @@ define('GA_RES_TIMOUT', 3);
    {
       if( @$_REQUEST['gend_save'] )
       {
-         // TODO -> see cron for timeout, end game
-         admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[score][B/W win;jigo]" );
+         $game_finalizer = new GameFinalizer( /*adm*/0, $gid, $game->tid, $game->GameType, $game->Flags,
+            $game->Black_ID, $game->White_ID, $game->Moves );
+         $score_text = ((int)$game->Score == 0) ? 'jigo' : ( $game->Score < 0 ? 'B' : 'W' ) . ' win';
+
+         ta_begin();
+         {//HOT-section to finish game
+            $game_finalizer->finish_game( "admin_game", /*del*/false, null, $game->Score, /*msg*/'' );
+            admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[{$game->Score}][$score_text]" );
+         }
+         ta_end();
 
          jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game result set!#gameadm')) );
       }

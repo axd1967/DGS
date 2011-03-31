@@ -22,7 +22,6 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/classlib_game.php' );
 require_once( 'include/game_functions.php' );
-require_once 'tournaments/include/tournament_games.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -199,50 +198,14 @@ if(1){//new
       {
          //TODO: Delete games with too few moves ??? (if so -> send delete-game-msg)
 
-         // send message to my opponent / all-players / observers about the result
          $score = ( $ToMove_ID == $Black_ID ) ? SCORE_TIME : -SCORE_TIME;
-         $game_query = "UPDATE Games SET Status='FINISHED', " . //See *** HOT_SECTION ***
-             "Last_X=".POSX_TIME.", " .
-             "ToMove_ID=0, " .
-             "Score=$score, " .
-             "Lastchanged=FROM_UNIXTIME($NOW)" ;
-
-         $game_notify = new GameNotify( $gid, $my_id, $GameType, $X_GameFlags, $Black_ID, $White_ID, $score, '' );
-         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result();
+         $game_finalizer = new GameFinalizer( /*cron*/-1, $gid, $tid, $GameType, $X_GameFlags,
+            $Black_ID, $White_ID, $Moves );
 
          ta_begin();
          {//HOT-section to save game-timeout
-            db_query( "clock_tick.time_is_up($gid)", $game_query.$game_clause );
-            if( @mysql_affected_rows() != 1)
-            {
-               error('mysql_update_game',"clock_tick.time_is_up2($gid)");
-               continue;
-            }
-
-            // signal game-end for tournament
-            if( $tid > 0 )
-               TournamentGames::update_tournament_game_end( "clock_tick.tourney_game_end.timeout",
-                  $tid, $gid, $Black_ID, $score );
-
-            if( $GameType != GAMETYPE_GO )
-            {
-               $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
-               $rated_status = update_rating2($gid, true, false, $arr_ratings);
-            }
-            else
-               $rated_status = update_rating2($gid);
-            GameHelper::update_players_end_game( "clock_tick.timeup",
-               $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
-
-            send_message( "clock_tick($gid)", $Text, 'Game result'
-               , /*to*/$game_notify->get_recipients(), ''
-               , /*notify*/true
-               , /*system-msg*/0, 'RESULT', $gid );
-
-            // GamesPriority-entries are kept for running games only, delete for finished games too
-            NextGameOrder::delete_game_priorities( $gid );
-
-            delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $observerText);
+            // send message to my opponent / all-players / observers about the result
+            $game_finalizer->finish_game( "clock_tick.time_is_up", /*del*/false, null, $score, '' );
          }
          ta_end();
       }//time-out

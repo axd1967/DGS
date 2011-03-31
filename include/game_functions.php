@@ -25,6 +25,7 @@ require_once 'include/classlib_game.php';
 require_once 'include/utilities.php';
 require_once 'include/std_functions.php';
 require_once 'include/game_texts.php';
+require_once 'tournaments/include/tournament_games.php';
 
 
 define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by user
@@ -959,6 +960,134 @@ class GameHelper
    }//update_players_end_game
 
 } // end 'GameHelper'
+
+
+
+
+
+/**
+ * \brief Class to handle game-deletion and game-finishing.
+ */
+class GameFinalizer
+{
+   var $my_id; // for game-notify: <0=cron(timeout), 0=admin
+   var $gid;
+   var $tid;
+   var $GameType;
+   var $GameFlags;
+   var $Black_id;
+   var $White_id;
+   var $Moves;
+   var $skip_game_query;
+
+   function GameFinalizer( $my_id, $gid, $tid, $game_type, $game_flags, $black_id, $white_id, $moves )
+   {
+      $this->my_id = (int)$my_id;
+      $this->gid = (int)$gid;
+      $this->tid = (int)$tid;
+      $this->GameType = $game_type;
+      $this->GameFlags = (int)$game_flags;
+      $this->Black_ID = (int)$black_id;
+      $this->White_ID = (int)$white_id;
+      $this->Moves = (int)$moves;
+      $this->skip_game_query = false;
+   }
+
+   function skip_game_query()
+   {
+      $this->skip_game_query = true;
+   }
+
+   /**
+    * \brief Finishes or deletes game.
+    * \param $do_delete true=delete game, false=end-game
+    * \param $game_updquery null=build default query, SQL-Games-update-query
+    * \param $game_score score to end game with
+    * \param $message message added in game-notify to players
+    */
+   function finish_game( $dbgmsg, $do_delete, $game_updquery, $game_score, $message='' )
+   {
+      global $NOW;
+      $gid = $this->gid;
+      $dbgmsg = "GameFinalizer::finish_game($gid).$dbgmsg";
+
+      // update Games-entry
+      if( !$this->skip_game_query && !$do_delete )
+      {
+         if( is_null($game_updquery) )
+         {
+            $game_updquery = "UPDATE Games SET Status='".GAME_STATUS_FINISHED."', " .
+               "Last_X=". GameFinalizer::convert_score_to_posx($game_score) .", " .
+               "ToMove_ID=0, " .
+               "Score=$game_score, " .
+               "Lastchanged=FROM_UNIXTIME($NOW) " .
+               "WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves={$this->Moves} LIMIT 1";
+         }
+
+         $result = db_query( "$dbgmsg.upd_game", $game_updquery );
+         if( mysql_affected_rows() != 1 )
+            error('mysql_update_game', "$dbgmsg.upd_game2");
+      }
+
+      // signal game-end for tournament
+      if( $this->tid > 0 )
+         TournamentGames::update_tournament_game_end( "$dbgmsg.tourney_game_end",
+            $this->tid, $gid, $this->Black_ID, $game_score );
+
+      // send message to my opponent / all-players / observers about the result
+      $game_notify = new GameNotify( $gid, $this->my_id, $this->GameType, $this->GameFlags,
+         $this->Black_ID, $this->White_ID, $game_score, $message );
+
+      if( $do_delete )
+      {
+         GameHelper::delete_running_game( $gid );
+
+         $by_admin = ( $this->my_id == 0 );
+         list( $Subject, $Text ) = $game_notify->get_text_game_deleted( $by_admin );
+      }
+      else
+      {
+         if( $this->GameType != GAMETYPE_GO ) // MP-game
+         {
+            $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
+            $rated_status = update_rating2($gid, true, false, $arr_ratings);
+         }
+         else
+            $rated_status = update_rating2($gid);
+         GameHelper::update_players_end_game( $dbgmsg,
+            $gid, $this->GameType, $rated_status, $game_score, $this->Black_ID, $this->White_ID );
+
+         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result();
+
+         // GamesPriority-entries are kept for running games only, delete for finished games too
+         NextGameOrder::delete_game_priorities( $gid );
+
+         delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $observerText);
+      }
+
+      // Send a message to the opponent
+      send_message( "$dbgmsg.msg", $Text, $Subject
+         , /*to*/$game_notify->get_recipients(), ''
+         , /*notify*/false //the move itself is always notified, see below
+         , /*system-msg*/0
+         , 'RESULT', $gid );
+   }//finish_game
+
+
+   // ------------ static functions ----------------------------
+
+   function convert_score_to_posx( $score )
+   {
+      if( abs($score) == SCORE_RESIGN )
+         return POSX_RESIGN;
+      elseif( abs($score) == SCORE_TIME )
+         return POSX_TIME;
+      else
+         return POSX_SCORE;
+   }//convert_score_to_posx
+
+} // end 'GameFinalizer
+
 
 
 

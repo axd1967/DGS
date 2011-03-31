@@ -26,7 +26,6 @@ require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
 require_once( 'include/classlib_game.php' );
-require_once 'tournaments/include/tournament_games.php';
 
 
 
@@ -523,54 +522,21 @@ This is why:
             error('mysql_insert_move', "confirm.message_query2($gid,$action)");
       }
 
-
       if( $game_finished )
       {
-         // signal game-end for tournament
-         if( $tid > 0 )
-            TournamentGames::update_tournament_game_end( "confirm.tourney_game_end.$action",
-               $tid, $gid, $Black_ID, $score );
+         $game_finalizer = new GameFinalizer( $my_id, $gid, $tid, $GameType, $GameFlags,
+            $Black_ID, $White_ID, $Moves );
 
-         // send message to my opponent / all-players / observers about the result
-         $game_notify = new GameNotify( $gid, $my_id, $GameType, $GameFlags, $Black_ID, $White_ID,
-            $score, $message_raw );
-
-         if( $action == 'delete' )
-         {
-            GameHelper::delete_running_game( $gid );
-            list( $Subject, $Text ) = $game_notify->get_text_game_deleted();
+         $do_delete = ( $action == 'delete' );
+         if( $do_delete )
             $stay_on_board = false; // no game to stay on
-         }
-         else
-         {
-            if( $is_mpgame )
-            {
-               $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
-               $rated_status = update_rating2($gid, true, false, $arr_ratings);
-            }
-            else
-               $rated_status = update_rating2($gid);
-            GameHelper::update_players_end_game( "confirm.game_finished",
-               $gid, $GameType, $rated_status, $score, $Black_ID, $White_ID );
 
-            list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result();
-
-            // GamesPriority-entries are kept for running games only, delete for finished games too
-            NextGameOrder::delete_game_priorities( $gid );
-
-            delete_all_observers($gid, ($rated_status != RATEDSTATUS_DELETABLE), $observerText);
-         }
-
-         // Send a message to the opponent
-         send_message( 'confirm', $Text, $Subject
-            , /*to*/$game_notify->get_recipients(), ''
-            , /*notify*/false //the move itself is always notified, see below
-            , /*system-msg*/0
-            , 'RESULT', $gid );
-      }//game-finished
-
+         $game_finalizer->skip_game_query();
+         $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw );
+      }
 
       // Notify opponent about move
+      //TODO notify when game deleted ???
       notify( "confirm.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
 
       // Increase moves and activity
