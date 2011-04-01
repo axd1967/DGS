@@ -50,7 +50,7 @@ define('GA_RES_TIMOUT', 3);
 
 /* Actual REQUEST calls used
      gid=                     : load game
-     gend_save&gid=           : update game-score/status for game ending game
+     gend_save&gid=&resmsg=   : update game-score/status for game ending game
      grated_save&gid=         : toggle game-Rated-status for game
      gdel&gid=&delmsg=        : delete game (ask for confirmation)
      gdel_save&gid=&delmsg=   : delete game, execution
@@ -97,7 +97,8 @@ define('GA_RES_TIMOUT', 3);
 
          ta_begin();
          {//HOT-section to finish game
-            $game_finalizer->finish_game( "admin_game", /*del*/false, null, $game->Score, /*msg*/'' );
+            $game_finalizer->finish_game( "admin_game", /*del*/false, null, $game->Score,
+               trim(get_request_arg('resmsg')) );
             admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[{$game->Score}][$score_text]" );
          }
          ta_end();
@@ -217,6 +218,7 @@ function parse_edit_form( &$game )
       'color'     => '', // game-end
       'score'     => '', // game-end
       'result'    => '', // game-end
+      'resmsg'    => '', // game-end
       'delmsg'    => '', // game-delete
    );
 
@@ -344,6 +346,12 @@ function draw_game_admin_form( $game )
       $gaform->add_row( array(
             'TAB',
             'RADIOBUTTONS', 'result', array( GA_RES_TIMOUT => T_('Timeout#gameadm') ), @$vars['result'], ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'BR', 'TEXT', T_('Message to players#gameadm').':', ));
+      $gaform->add_row( array(
+            'CELL', 2, '',
+            'TEXTAREA', 'resmsg', 50, 2, @$vars['resmsg'], ));
 
       $gaform->add_empty_row();
       $gaform->add_row( array(
