@@ -1009,16 +1009,20 @@ class GameFinalizer
    {
       global $NOW;
       $gid = $this->gid;
+      $by_admin = ( $this->my_id == 0 );
       $dbgmsg = "GameFinalizer::finish_game($gid).$dbgmsg";
 
       // update Games-entry
       if( !$this->skip_game_query && !$do_delete )
       {
+         if( $by_admin )
+            $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
          if( is_null($game_updquery) )
          {
             $game_updquery = "UPDATE Games SET Status='".GAME_STATUS_FINISHED."', " .
                "Last_X=". GameFinalizer::convert_score_to_posx($game_score) .", " .
                "ToMove_ID=0, " .
+               "Flags={$this->GameFlags}, " .
                "Score=$game_score, " .
                "Lastchanged=FROM_UNIXTIME($NOW) " .
                "WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves={$this->Moves} LIMIT 1";
@@ -1041,8 +1045,6 @@ class GameFinalizer
       if( $do_delete )
       {
          GameHelper::delete_running_game( $gid );
-
-         $by_admin = ( $this->my_id == 0 );
          list( $Subject, $Text ) = $game_notify->get_text_game_deleted( $by_admin );
       }
       else

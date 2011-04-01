@@ -31,7 +31,7 @@ Description:
  Last_X             | tinyint(4)                           | -1
  Last_Y             | tinyint(4)                           | -1
  Last_Move          | char(2)                              |
- Flags              | set('Ko','HiddenMsg')                |
+ Flags              | set('Ko','HiddenMsg','AdmResult')    |
  Score              | decimal(7,1)                         | 0.0
  Maintime           | smallint(6)                          | 0
  Byotype            | enum('JAP','CAN','FIS')              | JAP
@@ -122,6 +122,7 @@ Description:
 * Flags : game-flags indicating certain state of game
    - Ko: last move has taken a single stone, used to check for Ko
    - HiddenMsg: one of the game-messages contain a hidden message ("<h>...</h>")
+   - AdmResult: game-result was set by admin
 
 * Score : score of game for finished game
    - 0 = jigo

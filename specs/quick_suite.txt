@@ -1093,6 +1093,7 @@ Response (SGF-properties):
       GC[Game ID: 310100
          Game Type: Go (1:1)           # values: GO (1:1) | TEAM_GO (N:M) | ZEN_GO (N)
          Rated: Y                      # values: Y | N
+         Note: game-result set by admin   # Note-lines 0..n
 
          White Start Rating: 7k (-29%) - ELO 1371
          Black Start Rating: 8k (-18%) - ELO 1282

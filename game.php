@@ -249,7 +249,8 @@ function get_alt_arg( $n1, $n2)
             $game_score = check_remove( $TheBoard, $score_mode, $coord); //adjusted globals: $stonestring
             $game_score->calculate_score();
          }
-         $extra_infos[score2text($Score, true)] = 'Score';
+         $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
+         $extra_infos[score2text($Score, true) . $admResult] = 'Score';
       }
    }
    else

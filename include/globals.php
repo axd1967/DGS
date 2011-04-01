@@ -74,6 +74,7 @@ define('CHECK_GAME_STATUS_RUNNING', 'PLAY|PASS|SCORE|SCORE2');
 //keep next constants powers of 2
 define('GAMEFLAGS_KO', 0x01);
 define('GAMEFLAGS_HIDDEN_MSG', 0x02);
+define('GAMEFLAGS_ADMIN_RESULT', 0x04);
 
 // enum Games.GameType
 define('GAMETYPE_GO',      'GO');

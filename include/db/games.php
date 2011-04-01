@@ -295,6 +295,7 @@ class Games
       static $map_flags = array(
          'KO'        => GAMEFLAGS_KO,
          'HIDDENMSG' => GAMEFLAGS_HIDDEN_MSG,
+         'ADMRESULT' => GAMEFLAGS_ADMIN_RESULT,
       );
 
       $flags = 0;
@@ -314,6 +315,8 @@ class Games
          $arr[] = 'Ko';
       if( $flags & GAMEFLAGS_HIDDEN_MSG )
          $arr[] = 'HiddenMsg';
+      if( $flags & GAMEFLAGS_ADMIN_RESULT )
+         $arr[] = 'AdmResult';
       return implode(',', $arr);
    }
 

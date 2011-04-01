@@ -86,6 +86,7 @@ function build_rating_diff( $rating_diff )
       'WP.ClockUsed AS White_ClockUsed',
       'BRL.RatingDiff AS Black_RatingDiff',
       'WRL.RatingDiff AS White_RatingDiff',
+      'Games.Flags+0 AS X_Flags',
       'UNIX_TIMESTAMP(Starttime) AS X_Starttime',
       'UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated"
@@ -172,7 +173,10 @@ function build_rating_diff( $rating_diff )
             . ( $is_admin ? " (<span class=\"DebugInfo\">{$grow['Status']}</span>)" : '')
       );
    if( $game_finished )
-      $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false));
+   {
+      $admResult = ( $grow['X_Flags'] & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('by admin#game')) : '';
+      $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false) . $admResult);
+   }
    $itable->add_sinfo( T_('Start time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
    $itable->add_sinfo( T_('Lastchanged'), date(DATE_FMT3, @$grow['X_Lastchanged']) );
    $itable->add_sinfo( T_('Ruleset'),     getRulesetText($grow['Ruleset']) );

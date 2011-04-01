@@ -1979,3 +1979,7 @@ ALTER TABLE Players
    ADD GamesMPG smallint unsigned NOT NULL default '0' AFTER Lost ;
 
 
+-- add indicator for game-result set by admin
+ALTER TABLE Games
+   MODIFY Flags set('Ko','HiddenMsg','AdmResult') NOT NULL default '' ;
+

@@ -640,6 +640,7 @@ class SgfBuilder
       $general_comment = "Game ID: {$this->gid}"
          . "\nGame Type: $GameType ($game_players)"
          . "\nRated: ". ( $Rated=='N' ? 'N' : 'Y' )
+         . ( ($GameFlags & GAMEFLAGS_ADMIN_RESULT) ? "\nNote: game-result set by admin" : '' )
          . "\n"
          . ( is_valid_rating($White_Start_Rating)
                ? sprintf( "\nWhite Start Rating: %s - ELO %d",
