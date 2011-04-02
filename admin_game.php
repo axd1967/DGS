@@ -28,6 +28,7 @@ require_once 'include/game_functions.php';
 require_once 'include/db/games.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_rules.php';
 
 $GLOBALS['ThePage'] = new Page('GameAdmin');
 
@@ -91,9 +92,9 @@ define('GA_RES_TIMOUT', 3);
    {
       if( @$_REQUEST['gend_save'] )
       {
-         $game_finalizer = new GameFinalizer( /*adm*/0, $gid, $game->tid, $game->GameType, $game->Flags,
-            $game->Black_ID, $game->White_ID, $game->Moves );
-         $score_text = ((int)$game->Score == 0) ? 'jigo' : ( $game->Score < 0 ? 'B' : 'W' ) . ' win';
+         $game_finalizer = new GameFinalizer( ACTBY_ADMIN, $my_id, $gid, $game->tid,
+            $game->GameType, $game->Flags, $game->Black_ID, $game->White_ID, $game->Moves );
+         $score_text = ($game->Score == 0.0) ? 'jigo' : ( $game->Score < 0 ? 'B' : 'W' ) . ' win';
 
          ta_begin();
          {//HOT-section to finish game
@@ -110,7 +111,7 @@ define('GA_RES_TIMOUT', 3);
          $toggled_rated = toggle_rated( $game->Rated );
          db_query( "admin_game.toggle_rated($gid,$game_rated)",
             "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
-         admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggle_rated]" );
+         admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]" );
 
          jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game rated-status updated!#gameadm')) );
       }
@@ -128,7 +129,7 @@ define('GA_RES_TIMOUT', 3);
                "#M={$game->Moves}, R[{$game->Rated}]" );
 
             // notify all players about deletion
-            list( $Subject, $Text ) = $game_notify->get_text_game_deleted( /*is-adm*/true );
+            list( $Subject, $Text ) = $game_notify->get_text_game_deleted( ACTBY_ADMIN );
             send_message( 'confirm', $Text, $Subject,
                /*to*/$game_notify->get_recipients(), '',
                /*notify*/false, /*system-msg*/0, 'RESULT', $gid );
@@ -157,7 +158,7 @@ define('GA_RES_TIMOUT', 3);
    {
       $iform->add_row( array(
             'DESCRIPTION', T_('Tournament ID'),
-            'TEXT',        $tourney->build_info(4), ));
+            'TEXT',        $tourney->build_info(4) . echo_image_tournament_info($tid, true), ));
    }
    if( !is_null($tgame) )
    {
@@ -270,8 +271,25 @@ function parse_edit_form( &$game )
       $new_value = trim($vars['score']);
       if( (string)$new_value != '' )
       {
+         $score_errors = array();
          if( !preg_match("/^\\d+(\\.[05])?$/", $new_value) || $new_value > SCORE_MAX )
-            $errors[] = sprintf( T_('Expecting number in format %s.5 for game score#gameadm'), SCORE_MAX );
+            $score_errors[] = sprintf( T_('Expecting number in format %s.5 for game score#gameadm'), SCORE_MAX );
+         elseif( $game->tid > 0 )
+         {
+            $trule = TournamentRules::load_tournament_rule( $game->tid );
+            if( is_null($trule) )
+               error('bad_tournament', "admin_game.find_tournament_rules($tid)");
+
+            $jigo_behaviour = $trule->determineJigoBehaviour();
+            $chk_score = floor( abs( 2 * (float)$new_value ) );
+            if( $jigo_behaviour > 0 && !($chk_score & 1) )
+               $score_errors[] = T_('Tournament-rules forbid Jigo, so game score must be a float ending on .5#gameadm');
+            elseif( $jigo_behaviour == 0 && ($chk_score & 1) )
+               $score_errors[] = T_('Tournament-rules enforces Jigo, so game score must be an integer, not ending on .5#gameadm');
+         }
+
+         if( count($score_errors) > 0 )
+            $errors = array_merge( $errors, $score_errors );
          else
          {
             $vars['score'] = (float)$new_value;
@@ -321,8 +339,10 @@ function draw_game_admin_form( $game )
 
    // ---------- Set game-result ----------
 
+   $draw_hr = false;
    if( !@$_REQUEST['gdel'] && isRunningGame($game->Status) )
    {
+      $draw_hr = true;
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Set game result#gameadm'), ));
@@ -356,10 +376,7 @@ function draw_game_admin_form( $game )
       $gaform->add_empty_row();
       $gaform->add_row( array(
             'SUBMITBUTTON', 'gend_save', T_('Save game result#gameadm'), ));
-      $draw_hr = true;
    }
-   else
-      $draw_hr = false;
 
    // ---------- Change rated-status ----------
 
@@ -367,6 +384,8 @@ function draw_game_admin_form( $game )
    {
       if( $draw_hr )
          $gaform->add_row( array( 'HR' ));
+      $draw_hr = true;
+
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Change game rated-status#gameadm'), ));
@@ -377,8 +396,6 @@ function draw_game_admin_form( $game )
             'SUBMITBUTTON', 'grated_save', T_('Toggle game rated-status#gameadm'), ));
       $draw_hr = true;
    }
-   else
-      $draw_hr = false;
 
    // ---------- Delete game ----------
 
@@ -387,6 +404,8 @@ function draw_game_admin_form( $game )
       $too_few_moves = ( $game->Moves < DELETE_LIMIT + $game->Handicap );
       if( $draw_hr )
          $gaform->add_row( array( 'HR' ));
+      $draw_hr = true;
+
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Delete game#gameadm'), ));
