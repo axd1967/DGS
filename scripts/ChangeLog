@@ -19,6 +19,104 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-02 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     clock_tick.php, confirm.php:
+   - fix message to players for game-deletion and setting game-result differ
+     between executioner admin/cron/player
+
+   * include/game_functions.php (class GameFinalizer, ~.finish_game; GameNotify._load_players, ~.get_text_game_deleted, ~.get_text_game_result),
+     tournaments/include/tournament_rules.php (TournamentRules.determineJigoBehaviour),
+     admin_game.php (parse_edit_form, draw_game_admin_form), NEWS:
+   - fix message to players for game-deletion and setting game-result differ
+     between executioner admin/cron/player
+   - added check for setting game-result for tournament-games matching
+     jigo-tournament-rules
+   - added link to tournament on added tourney-icon
+   - bugfixes: don't round float-score to int, varname-use for adminlog,
+     separator-line, SQL-fixes
+
+   * include/sgf_builder.php (SgfBuilder.load_game_info, ~.build_sgf_start,
+       ~.build_sgf_result):
+   - added set-by-admin in result-node for SGF-download
+   - bugfixes: select Games.Flags as int, fix wrong args for func-call
+
+   * gameinfo.php:
+   - show admin-set-result with warning-CSS
+
+   * tournaments/game_admin.php (draw_game_end, draw_add_time):
+   - re-format form-parts similar to admin-game-page
+   - bugfix: pass global $vars
+
+2011-04-01 juga
+
+   * admin_game.php (parse_edit_form, draw_game_admin_form):
+   - added message by admin to all game-players on setting game-result
+
+   * include/game_functions.php (GameFinalizer.finish_game),
+     include/globals.php (GAMEFLAGS_ADMIN_RESULT),
+     include/sgf_builder.php (SgfBuilder.build_sgf_start),
+     include/db/games.php (Games.parseFlags, ~.buildFlags),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Games.txt, specs/quick_suite.txt,
+     game.php, gameinfo.php:
+   - set Games.Flags GAMEFLAGS_ADMIN_RESULT if admin finishes game with result
+   - show 'game-result set by admin' on game-page, game-info-page, on comments as Note in SGF-download
+-----------
+-- add indicator for game-result set by admin
+ALTER TABLE Games
+   MODIFY Flags set('Ko','HiddenMsg','AdmResult') NOT NULL default '' ;
+-----------
+
+2011-03-31 juga
+
+   * include/game_functions.php (class GameFinalizer, ~.skip_game_query, ~.finish_game,
+       ~.convert_score_to_posx),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     admin_game.php, clock_tick.php, confirm.php:
+   - implemented finish game by admin by refactoring game-finish into GameFinalizer-class
+   - refactored: confirm-page, quick-game-handling, cron-time-out-handling
+
+2011-03-30 juga
+
+   * include/game_functions.php (class GameNotify, ~.get_text_game_deleted,
+       ~.get_recipients),
+     admin_game.php (parse_edit_form, draw_game_admin_form):
+   - send notify to all game-players if admin deletes game with optional message
+   - allow game-admin for MP-games:
+     - set game-result only for running game
+     - disable rated-status change for tournament- and MP-games
+     - delete game only for running games and MP-games on SETUP-status,
+       i.e. disabled only for finished games
+     - show game-type for MP-games
+   - show game-admin form-parts only if allowed
+   - write admin-log on all admin-changes on game
+
+   * game_players.php:
+   - add admin-link to game-admin for MP-game in SETUP-mode
+
+2011-03-29 juga
+
+   * admin_game.php (parse_edit_form, draw_game_admin_form, toggle_rated):
+   - added toggling of Games.Rated for running non-tournament game
+   - added game-delete for running non-tourney-game with asking for confirmation
+   - allow setting of game-result only for running games
+   - show tournament-info if tournament-game
+
+   * gameinfo.php:
+   - bugfix: disable game-info-page only for games on SETUP-status,
+     but allow for FINISHED games
+
+   * admin_game.php (parse_edit_form, draw_game_end), gameinfo.php:
+   - started admin-game-page to end game with specific result allowed by ADMIN_GAME-role
+   - copied/adjusted admin-page from 'tournaments/game_admin.php'
+
+   * include/std_functions.php (ADMIN_GAME),
+     admin_admins.php:
+   - added admin-role ADMIN_GAME to change game-settings
+   - ordered admin-roles alphabetically by text
+
 2011-03-27 juga
 
    * edit_rating.php, edit_profile.php, change_profile.php, site_map.php,
