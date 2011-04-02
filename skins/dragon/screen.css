@@ -3063,7 +3063,10 @@ table#adminsTable td span.Flags {
    font-size: 80%;
 }
 
-table#adminsTable, table#faqlogTable, table#errorlogTable td {
+table#adminsTable,
+table#faqlogTable,
+table#errorlogTable td,
+table#adminlogTable td {
    vertical-align: top;
 }
 
