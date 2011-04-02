@@ -55,6 +55,17 @@ define('MPGMSG_STARTGAME', 1);
 define('MPGMSG_RESIGN', 2);
 define('MPGMSG_INVITE', 3);
 
+// for GameNotify
+define('ACTBY_PLAYER', 0);
+define('ACTBY_ADMIN',  1);
+define('ACTBY_CRON',   2);
+global $MAP_ACTBY_SUBJECT; //PHP5;
+$MAP_ACTBY_SUBJECT = array(
+   ACTBY_PLAYER => 'player',
+   ACTBY_ADMIN  => 'ADMIN',
+   ACTBY_CRON   => 'CRON',
+);
+
 // enum Waitingroom.JigoMode
 define('JIGOMODE_KEEP_KOMI',  'KEEP_KOMI');
 define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
@@ -970,6 +981,7 @@ class GameHelper
  */
 class GameFinalizer
 {
+   var $action_by; // ACTBY_...
    var $my_id; // for game-notify: <0=cron(timeout), 0=admin
    var $gid;
    var $tid;
@@ -980,8 +992,9 @@ class GameFinalizer
    var $Moves;
    var $skip_game_query;
 
-   function GameFinalizer( $my_id, $gid, $tid, $game_type, $game_flags, $black_id, $white_id, $moves )
+   function GameFinalizer( $action_by, $my_id, $gid, $tid, $game_type, $game_flags, $black_id, $white_id, $moves )
    {
+      $this->action_by = $action_by;
       $this->my_id = (int)$my_id;
       $this->gid = (int)$gid;
       $this->tid = (int)$tid;
@@ -1009,13 +1022,12 @@ class GameFinalizer
    {
       global $NOW;
       $gid = $this->gid;
-      $by_admin = ( $this->my_id == 0 );
       $dbgmsg = "GameFinalizer::finish_game($gid).$dbgmsg";
 
       // update Games-entry
       if( !$this->skip_game_query && !$do_delete )
       {
-         if( $by_admin )
+         if( $this->action_by == ACTBY_ADMIN )
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
          if( is_null($game_updquery) )
          {
@@ -1045,7 +1057,7 @@ class GameFinalizer
       if( $do_delete )
       {
          GameHelper::delete_running_game( $gid );
-         list( $Subject, $Text ) = $game_notify->get_text_game_deleted( $by_admin );
+         list( $Subject, $Text ) = $game_notify->get_text_game_deleted( $this->action_by );
       }
       else
       {
@@ -1059,7 +1071,7 @@ class GameFinalizer
          GameHelper::update_players_end_game( $dbgmsg,
             $gid, $this->GameType, $rated_status, $game_score, $this->Black_ID, $this->White_ID );
 
-         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result();
+         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result( $this->action_by );
 
          // GamesPriority-entries are kept for running games only, delete for finished games too
          NextGameOrder::delete_game_priorities( $gid );
@@ -1144,7 +1156,7 @@ class GameNotify
       else // mp-game
       {
          $result = db_query( "GameNotify.find_mpg_players({$this->gid})",
-            "SELECT ID, Handle, Name " .
+            "SELECT P.ID, P.Handle, P.Name " .
             "FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
             "WHERE GP.gid={$this->gid}" );
       }
@@ -1164,31 +1176,42 @@ class GameNotify
    }//_build_text_players
 
    /*! \brief Returns subject and text for message to players if game got deleted. */
-   function get_text_game_deleted( $is_admin=false )
+   function get_text_game_deleted( $action_by=ACTBY_PLAYER )
    {
-      global $player_row;
+      global $player_row, $MAP_ACTBY_SUBJECT;
 
       $subject = 'Game deleted';
+      if( $action_by == ACTBY_ADMIN || $action_by == ACTBY_CRON )
+         $subject .= sprintf(' (by %s)', $MAP_ACTBY_SUBJECT[$action_by]);
+      elseif( $action_by != ACTBY_PLAYER )
+         $action_by = ACTBY_PLAYER;
+
       $text = "The game:<center>"
-            . game_reference( 0, 1, '', $this->gid, 0, $this->white_name, $this->black_name) // game is deleted => no link
-            . "</center>has been deleted by ". ($is_admin ? 'admin' : 'player') .":<center>"
+            . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->white_name, $this->black_name) // game is deleted => no link
+            . "</center>has been deleted by {$MAP_ACTBY_SUBJECT[$action_by]}:<center>"
             . send_reference( REF_LINK, 1, '', $player_row )
             . "</center>"
             . $this->players_text;
 
       if( $this->message )
-         $text .= "<p>The player wrote:<p></p>" . $this->message;
+         $text .= "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message;
 
       return array( $subject, $text );
    }//get_text_game_deleted
 
    /*! \brief Returns subject and text (and observer-text) for message to players/observers with normal game-result. */
-   function get_text_game_result()
+   function get_text_game_result( $action_by=ACTBY_PLAYER )
    {
+      global $MAP_ACTBY_SUBJECT;
       if( is_null($this->score) )
          error('invalid_args', "GameNotify.get_text_game_result.check.score({$this->gid})");
 
       $subject = 'Game result';
+      if( $action_by == ACTBY_ADMIN )
+         $subject .= sprintf(' (by %s)', $MAP_ACTBY_SUBJECT[$action_by]);
+      elseif( $action_by != ACTBY_PLAYER && $action_by != ACTBY_CRON )
+         $action_by = ACTBY_PLAYER;
+
       $text = "The result in the game:<center>"
             . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->white_name, $this->black_name)
             . "</center>was:<center>"
@@ -1201,7 +1224,7 @@ class GameNotify
 
       $player_text = $this->players_text;
       if( $this->message )
-         $player_text .= "<p>The player wrote:<p></p>" . $this->message;
+         $player_text .= "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message;
 
       return array( $subject, $text.$info_text.$player_text, $text.$player_text );
    }//get_text_game_result
