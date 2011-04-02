@@ -319,7 +319,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
       "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
       "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
       "FROM (Games, Players as white, Players as black) " .
-      "WHERE Games.ID=$gid AND white.ID=White_ID AND black.ID=Black_ID" .
+      "WHERE Games.ID=$gid AND white.ID=White_ID AND black.ID=Black_ID " .
          ( $simul ? '' : "AND Status='FINISHED' " ) .
          ( $check_done ? "AND Rated!='Done' " : '' );
 
