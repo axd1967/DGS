@@ -26,6 +26,9 @@ define('RATEDSTATUS_RATED',     0);
 define('RATEDSTATUS_DELETABLE', 1);
 define('RATEDSTATUS_UNRATED',   2);
 
+define('RCADM_RESET_CONFIDENCE', 0x01);
+define('RCADM_CHANGE_RATING',    0x02);
+
 
 // table for interpolating rating
 global $IGS_TABLE; //PHP5
@@ -482,6 +485,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 } //update_rating2
 
 
+/* not in use
 //
 // Glicko-2, see http://www.glicko.com/glicko2.doc/example.html
 //
@@ -521,7 +525,7 @@ function update_rating_glicko($gid, $check_done=true)
    if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
          || $GameType != GAMETYPE_GO )
    {
-      db_query( 0 /* "update_rating_glicko.update_rated_endrating($gid)" */,
+      db_query( 0 // "update_rating_glicko.update_rated_endrating($gid)"
          "UPDATE Games SET Rated='N'" .
                   ( is_numeric($bRating) ? ", Black_End_Rating=$bRating" : '' ) .
                   ( is_numeric($wRating) ? ", White_End_Rating=$wRating" : '' ) .
@@ -655,6 +659,7 @@ function update_rating_glicko($gid, $check_done=true)
 
    return 0; //rated game
 } //update_rating_glicko
+*/
 
 // returns true, if given DGS-rating is valid
 function is_valid_rating( $dgs_rating, $check_min=true )
@@ -1017,5 +1022,28 @@ function convert_to_rating($string, $type, $no_error=false)
    error('rating_out_of_range');
    return NO_RATING;
 }//convert_to_rating
+
+/*!
+ * \brief Updates players Ratings and insert entries to allow rating-recalculation.
+ * \param $changes RCADM_RESET_CONFIDENCE and/or RCADM_CHANGE_RATING
+ */
+function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max )
+{
+   global $NOW;
+   if( !is_numeric($changes) || !($changes & (RCADM_RESET_CONFIDENCE|RCADM_CHANGE_RATING)) )
+      error('invalid_args', "change_user_rating.check.changes($uid,$changes,$rating)");
+   if( !is_valid_rating($rating) )
+      error('invalid_args', "change_user_rating.check.rating($uid,$changes,$rating)");
+
+   db_query( "change_user_rating.update_players($uid,$rating)",
+      "UPDATE Players SET " .
+      "Rating=$rating, Rating2=$rating, RatingMin=$rating_min, RatingMax=$rating_max " .
+      "WHERE ID=$uid LIMIT 1" );
+
+   $new_rating = ( $changes & RCADM_CHANGE_RATING ) ? $rating : NO_RATING;
+   db_query( "change_user_rating.insert_rating_chg($uid,$rating,$reset_confidence)",
+      "INSERT RatingChangeAdmin (uid,Created,Changes,Rating) " .
+      "VALUES ($uid,FROM_UNIXTIME($NOW),$changes,$new_rating)" );
+}//change_user_rating
 
 ?>
