@@ -210,6 +210,8 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
 
    $notes = array();
+   $notes[] = T_("WARNING: No rating-updates on change of daylight-saving-time to avoid side-effects on rating-recalculations, because time of rating-changes and game-ends must be synchronized.#rankadm");
+   $notes[] = null;
    $notes[] = sprintf( T_("Check notes about rating-change on page %s.#rankadm"), anchor("edit_rating.php", T_('Change rating & rank')) );
    $notes[] = T_("Rating-change is OK if ranking-diff >6k.#rankadm");
    $notes[] = T_("Reset of confidence-interval is OK if ranking-diff >3k and SHOULD always be used if rating is changed.#rankadm");
@@ -249,7 +251,7 @@ function load_old_rating_changes( $uid )
 
    $iterator = new ListIterator( 'AdminRating', null, 'ORDER BY Created DESC' );
    $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator, $uid );
-   $rcatable->set_found_rows( mysql_found_rows('admin_rating.list_ratingchangeadmin.found_rows') );
+   $rcatable->set_found_rows( $iterator->getItemCount() );
 
    while( list(,$arr_item) = $iterator->getListIterator() )
    {
