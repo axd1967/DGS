@@ -361,7 +361,7 @@ function parse_edit_form( &$tgame, $game )
 
 function draw_game_end( $tgame )
 {
-   global $page;
+   global $page, $vars;
    $allow_edit = ( $tgame->Status == TG_STATUS_PLAY );
    $disabled = ( !$allow_edit ) ? 'disabled=1' : '';
 
@@ -370,14 +370,15 @@ function draw_game_end( $tgame )
    $tform->add_hidden( 'gid', $tgame->gid );
 
    $tform->add_row( array(
-         'CELL', 3, '',
+         'CELL', 2, '',
          'HEADER', T_('End Tournament Game') ));
+   $tform->add_row( array(
+         'CELL', 2, '',
+         'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
 
    $tform->add_row( array(
          'TEXT', ($allow_edit ? T_('Set game result') : T_('View game result') ).':', ));
    $tform->add_row( array(
-         'CELL', 1, '',
-         'TEXT', str_repeat(SMALL_SPACING,3) . T_('Winner is#TG_admin').': ',
          'CELL', 1, '',
          'RADIOBUTTONSX', 'color', array( BLACK => T_('Black') ), @$vars['color'], $disabled,
          'TEXT', SMALL_SPACING . T_('wins by#TG_admin') . SMALL_SPACING,
@@ -387,21 +388,18 @@ function draw_game_end( $tgame )
          'TEXTINPUTX', 'score', 6, 6, @$vars['score'], $disabled,
          'TEXT', sprintf( ' (%s)', T_('0=Jigo#TG_admin') ), ));
    $tform->add_row( array(
-         'TAB',
          'RADIOBUTTONSX', 'color', array( WHITE => T_('White') ), @$vars['color'], $disabled,
          'CELL', 1, '',
          'RADIOBUTTONSX', 'result', array( GA_RES_RESIGN => T_('Resignation#TG_admin') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
-         'TAB', 'TAB',
+         'TAB',
          'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout#TG_admin') ), @$vars['result'], $disabled, ));
 
    if( $allow_edit )
    {
+      $tform->add_empty_row();
       $tform->add_row( array(
-            'CELL', 3, '',
-            'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
-      $tform->add_row( array(
-            'CELL', 3, '', // align submit-buttons
+            'CELL', 2, '', // align submit-buttons
             'SUBMITBUTTON', 'gend_save', T_('Save game result#TG_admin'), ));
    }
 
@@ -445,18 +443,15 @@ function draw_add_time( $tgame, $game, $allow_add_time )
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Time limit'),
-         'CELL', 2, '',
          'TEXT', TimeFormat::echo_time_limit( $game->Maintime, $game->Byotype, $game->Byotime, $game->Byoperiods ), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Add time for'),
          'RADIOBUTTONS', 'color', array( BLACK => T_('Black') ), @$vars['color'],
-         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $black_remtime['text'],
-         'TAB', ));
+         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $black_remtime['text'], ));
    $tform->add_row( array(
          'TAB',
          'RADIOBUTTONS', 'color', array( WHITE => T_('White') ), @$vars['color'],
-         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $white_remtime['text'],
-         'TAB', ));
+         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $white_remtime['text'], ));
    $tform->add_empty_row();
 
    if( $allow_edit )
@@ -464,10 +459,10 @@ function draw_add_time( $tgame, $game, $allow_add_time )
       $info = GameAddTime::make_add_time_info( $game_row, ($black_to_move) ? BLACK : WHITE );
 
       $tform->add_row( array(
-            'CELL', 3, '',
+            'CELL', 2, '',
             'TEXT', T_('Choose how much additional time you wish to give the selected player').':', ));
       $tform->add_row( array(
-            'TAB', 'CELL', 2, '',
+            'TAB',
             'SELECTBOX', 'add_days', 1, $info['days'], @$vars['add_days'], false,
             'TEXT', MINI_SPACING . T_('added to maintime.'), ));
 
@@ -475,16 +470,15 @@ function draw_add_time( $tgame, $game, $allow_add_time )
       if( $info['byo_reset'] )
       {
          $tform->add_row( array(
-               'TAB', 'CELL', 2, '',
+               'TAB', 'CELL', 1, '',
                'CHECKBOX', 'reset_byoyomi', 1, T_('Reset byoyomi settings when re-entering'), @$vars['reset_byoyomi'], ));
          $tform->add_row( array(
-               'TAB', 'CELL', 2, '',
+               'TAB', 'CELL', 1, '',
                'TEXT', T_('Note: Current byoyomi period is resetted regardless of full reset.'), ));
       }
    }
 
    $tform->add_row( array(
-         'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 'addtime_save', T_('Add time#TG_admin'), ));
 
    $tform->add_empty_row();
