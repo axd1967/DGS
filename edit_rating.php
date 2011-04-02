@@ -94,7 +94,7 @@ require_once 'include/rating.php';
    else
    {
       $rform->add_row( array( 'DESCRIPTION', T_('Rating'),
-                              'TEXT', echo_rating($player_row['Rating2'], true, 0, false ) ));
+                              'TEXT', echo_rating($player_row['Rating2'], true, $my_id, false ) ));
    }
    $rform->add_row( array( 'DESCRIPTION', T_('Rank info'),
                            'TEXTINPUT', 'rank', 32, 40, $player_row['Rank'], ));
@@ -147,7 +147,7 @@ require_once 'include/rating.php';
 
    $notes = array();
    $notes[] = array(
-      T_("You need to <b>specify a 'Rating'</b> if you want to <b>play RATED games</b>:#ranknotes"),
+      T_("You need to <b>specify a 'Rating'</b> if you want to <b>play RATED games</b>#ranknotes"),
          T_("Choose your rating wisely, because this can normally not be changed after you started a rated game.#ranknotes"),
          T_("If you know your rank from another source, e.g. from another Go-Server or from an official rating-list, " .
             "you may use the Rank Converter to find an appropriate rank on DGS.#ranknotes"),
@@ -162,14 +162,17 @@ require_once 'include/rating.php';
    $notes[] = T_("<b>'Rank info'</b> is only an informal field, which can be used to refer to other rank-systems, " .
                  "e.g. KGS, EGF, 3d pro, etc.#ranknotes");
    $notes[] = array(
-      T_("<b>Changing an established Rating</b> can only be done on certain conditions:#ranknotes"),
+      T_("<b>Changing an established Rating</b> can only be done on certain conditions#ranknotes"),
          T_("Keep in mind, that playing many games letting the rating-system adjust your rating is the preferred way.#ranknotes"),
          T_("A rating reset/change can normally be asked once a year.#ranknotes"),
-         T_("Please add a request in the Support-forum with infos about: your target rank, sources that verify your claim " .
-            "preferrably with matching user-IDs (e.g. other go-server, official rating-lists, recommendations from a " .
-            "player/teacher higher ranked than yourself). A game-admin will then check your application for rating-change.#ranknotes"),
          T_("If the ranking-diff is >3k, you may ask for a reset of your rating confidence level to let the rating-system adjust faster.#ranknotes"),
          T_("If the ranking-diff is >6k, you may ask for a rating-change.#ranknotes"),
+         sprintf(
+            T_("Add a request in the Support-forum with subject \"%s\". A game-admin will then check and process your application.<br>\n" .
+               "Please provide infos about: your target rank, sources that verify your claim preferrably with matching user-IDs, " .
+               "e.g. other go-server, official rating-lists, recommendations from a player/teacher higher ranked than yourself. " .
+               "For ranks or ratings from other servers, please first use the rank-converter above.#ranknotes"),
+            T_('Request for rating-change#ranknotes') ),
       );
    $rform->add_empty_row();
    echo_notes( 'editratingnotes', T_('Important notes about Rating & Rank changes'), $notes );
