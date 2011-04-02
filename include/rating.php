@@ -1027,7 +1027,7 @@ function convert_to_rating($string, $type, $no_error=false)
  * \brief Updates players Ratings and insert entries to allow rating-recalculation.
  * \param $changes RCADM_RESET_CONFIDENCE and/or RCADM_CHANGE_RATING
  */
-function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max )
+function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max, $with_rca=true )
 {
    global $NOW;
    if( !is_numeric($changes) || !($changes & (RCADM_RESET_CONFIDENCE|RCADM_CHANGE_RATING)) )
@@ -1037,13 +1037,16 @@ function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max )
 
    db_query( "change_user_rating.update_players($uid,$rating)",
       "UPDATE Players SET " .
-      "Rating=$rating, Rating2=$rating, RatingMin=$rating_min, RatingMax=$rating_max " .
+      "Rating2=$rating, RatingMin=$rating_min, RatingMax=$rating_max " .
       "WHERE ID=$uid LIMIT 1" );
 
-   $new_rating = ( $changes & RCADM_CHANGE_RATING ) ? $rating : NO_RATING;
-   db_query( "change_user_rating.insert_rating_chg($uid,$rating,$reset_confidence)",
-      "INSERT RatingChangeAdmin (uid,Created,Changes,Rating) " .
-      "VALUES ($uid,FROM_UNIXTIME($NOW),$changes,$new_rating)" );
+   if( $with_rca )
+   {
+      $new_rating = ( $changes & RCADM_CHANGE_RATING ) ? $rating : NO_RATING;
+      db_query( "change_user_rating.insert_rating_chg($uid,$rating,$reset_confidence)",
+         "INSERT RatingChangeAdmin (uid,Created,Changes,Rating) " .
+         "VALUES ($uid,FROM_UNIXTIME($NOW),$changes,$new_rating)" );
+   }
 }//change_user_rating
 
 // format RatingChangeAdmin.Changes as string

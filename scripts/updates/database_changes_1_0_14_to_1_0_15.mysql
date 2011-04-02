@@ -1992,7 +1992,8 @@ CREATE TABLE RatingChangeAdmin (
    Changes tinyint NOT NULL default 0,
    Rating double NOT NULL default '-9999',
    PRIMARY KEY (ID),
-   KEY uid (uid)
+   KEY uid (uid),
+   KEY Created (Created)
 ) ENGINE=MyISAM ;
 
 
