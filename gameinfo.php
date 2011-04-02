@@ -174,7 +174,9 @@ function build_rating_diff( $rating_diff )
       );
    if( $game_finished )
    {
-      $admResult = ( $grow['X_Flags'] & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('by admin#game')) : '';
+      $admResult = ( $grow['X_Flags'] & GAMEFLAGS_ADMIN_RESULT )
+         ? span('ScoreWarning', sprintf(' (%s)', T_('set by admin#game')))
+         : '';
       $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false) . $admResult);
    }
    $itable->add_sinfo( T_('Start time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
