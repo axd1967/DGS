@@ -48,15 +48,15 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    // if( !$logged_in )
    //    error("not_logged_in");
 
-   // all months defined in -> 'statisticspng.php'
-   $TW_ = 'T_'; // for non-const translation-texts
-
    //disable translations in graph if not latin
    if( eregi( '^iso-8859-', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';
-      $datelabel = create_function('$x', 'return $TW_(date("M",$x)).date("\\nY",$x);' ); // (*)
+
+      // Translation-NOTE: all months for T_(date..) defined in -> 'statisticspng.php'
+      // $TW_ = 'T_'; // for non-const translation-texts
+      $datelabel = create_function('$x', '$TW_ = "T_"; return $TW_(date("M",$x)).date("\\nY",$x);' );
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,0);' );
    }
    else
