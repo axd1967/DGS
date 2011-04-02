@@ -23,6 +23,8 @@ require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/rating.php';
+require_once 'include/rank_converter.php';
+
 
 {
    connect2mysql();
@@ -106,34 +108,9 @@ require_once 'include/rating.php';
    $rform->add_empty_row();
    $rform->add_row( array( 'HR' ));
 
-
    // ---------- Rank Converter Form -----------------------------------------
 
-   $rcform = new Form( 'convrank', $page, FORM_GET );
-   $rcform->add_row( array( 'HEADER', T_('DGS Rank Converter'), ));
-   $rcform->add_row( array(
-         'TEXT', T_('See also') . ': ' . anchor('http://senseis.xmp.net/?RankWorldwideComparison'), ));
-
-   $converted_rank = '';
-   $conv_rating = trim( get_request_arg('conv_rating') );
-   if( @$_REQUEST['convert'] && (string)$conv_rating != '' )
-   {
-      $conv_ratingtype = get_request_arg('conv_ratingtype');
-      $conv_newrating = convert_to_rating($conv_rating, $conv_ratingtype);
-      $converted_rank = ($conv_newrating != NO_RATING)
-         ? sprintf( "=> %s: %s<br>\n=> %s: %d",
-                    T_('DGS-rank'), echo_rating($conv_newrating, true, 0, true),
-                    T_('DGS-ELO'), $conv_newrating )
-         : T_('No valid rating');
-   }
-   $rcform->add_empty_row();
-   $rcform->add_row( array(
-         'TEXTINPUT', 'conv_rating', 16, 16, get_request_arg('conv_rating'),
-         'SELECTBOX', 'conv_ratingtype', 1, getRatingTypes(), get_request_arg('conv_ratingtype'), false,
-         'SUBMITBUTTON', 'convert', T_('Convert'), ));
-   if( $converted_rank )
-      $rcform->add_row( array( 'TEXT', $converted_rank, ));
-
+   $rcform = RankConverter::buildForm( $page, FORM_GET );
 
    // ---------- Main ----------
 

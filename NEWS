@@ -375,8 +375,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
       * <home edit_rating.php>Rating change</home>:
          * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
-           with <home edit_rating.php>Rank Converter</home> even if user has established rating.
-           Rank converter also available for guest-user.
+           with rank-converter even if user has established rating.
          * Added rank conversions: KGS, DGS-rating, OGS, OGS-rating, FICGS, Tygem, WBaduk
          * Adjusted rank conversions oriented on <http://senseis.xmp.net/?RankWorldwideComparison> for:
            Euro-rank, Euro-rating, AGA, AGA-rating, China, Korea
@@ -406,6 +405,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Used clearer header names
 
    * <home docs.php>Docs</home>:
+      * Added page with <home rank_converter.php>DGS Rank Converter</home>, no login required
       * Added link to <home statistics.php>Statistics page</home> on Docs and Site-map page
       * Updated <home site_map.php>Site-map page</home>
       * Added table of contents for <home news.php>News page</home>

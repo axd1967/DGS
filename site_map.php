@@ -269,6 +269,7 @@ function itemL($text, $link='', $working=true, $last=false)
          itemL(T_('Statistics'), "statistics.php", true);
          if( strpos(HOSTBASE,'dragongoserver.net') !== false )
             itemL(T_('Web-Statistics'), HOSTBASE."stat/", true);
+         itemL(T_('DGS Rank Converter'), "rank_converter.php", true);
          itemL(T_('DGS Wish list'), "http://senseis.xmp.net/?DGSWishlist", true);
          itemL(T_('Installation instructions'), "install.php", true);
          itemL(T_('Download dragon sources'), "snapshot.php", true);

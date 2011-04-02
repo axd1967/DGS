@@ -46,6 +46,8 @@ $GLOBALS['ThePage'] = new Page('Docs');
    if( strpos(HOSTBASE,'dragongoserver.net') !== false )
       $arr_stats[HOSTBASE.'stat/'] = T_('Web-Statistics');
    add_link_page_link( $arr_stats, ', ', T_("Statistics about Dragon"));
+   add_link_page_link("rank_converter.php", T_('DGS Rank Converter'),
+                     T_('Converts other ranks & ratings to DGS-rank'));
 
    add_link_page_link("http://senseis.xmp.net/?DGSWishlist", T_('DGS Wish list'),
                      T_('Features and requests DGS users dream of'));
