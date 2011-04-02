@@ -10,7 +10,7 @@ Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-s
 Developers INFO:
 
 2009-02-11 juga
-   Tournaments, Team-Go/Zen-Go, Quick-Suite
+   Tournaments, Quick-Suite
 
 2007-12-23 rodival
    Code Cleanup, New Features
@@ -21,12 +21,69 @@ ChangeLog
 
 2011-04-02 juga
 
+   * include/rating.php (change_user_rating),
+     scripts/recalculate_ratings2.php (find_rating_changes, change_user_ratings_for_recalc),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - adjusted recalc_rating2-script to read and process RatingChangeAdmin-table-entries
+     synchronizing rating-changes with game-end
+   - added key for RatingChangeAdmin.Created to optimize future rating-recalculations
+
+   * admin_rating.php (load_old_rating_changes):
+   - added warning about avoiding rating-changes on DST-change
+   - cleanup: replaced FOUND_ROWS()-SQL-call with existing row-count
+
+   * include/db/ratingchangeadmin.php (class RatingChangeAdmin, ~.to_string, ~.persist,
+       ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row,
+       ~.load_ratingchangeadmin_with_query, ~.load_ratingchangeadmin),
+     include/rating.php (format_ratingchangeadmin_changes),
+     admin_rating.php (load_old_rating_changes),
+     skins/dragon/screen.css, NEWS:
+   - admin-rating: show former rating-changes of edited user
+
+   * userinfo.php:
+   - added admin-link right besides rating on user-info-page to change user-rating
+     with admin-rating-page
+
+   * include/rating.php (change_user_rating),
+     admin_rating.php (diff, percent),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Ratings.txt, scripts/data_export.php, NEWS:
+   - added admin-rating-page to change user-rating directly and/or
+     resetting confidence-interval
+   - added RatingChangeAdmin-table to permanently store rating-changes
+   - cleanup: comment unused update_rating_glicko-func
+-----------
+-- added table with rating-changes by admin
+CREATE TABLE RatingChangeAdmin (
+   ID int NOT NULL auto_increment,
+   uid int NOT NULL,
+   Created datetime NOT NULL default '0000-00-00 00:00:00',
+   Changes tinyint NOT NULL default 0,
+   Rating double NOT NULL default '-9999',
+   PRIMARY KEY (ID),
+   KEY uid (uid),
+   KEY Created (Created)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/rank_converter.php (RankConverter),
+     rank_converter.php, docs.php, edit_rating.php, site_map.php, NEWS:
+   - refactored separate DGS-rank-converter to convert other ranks & ratings to DGS-rank
+
+   * edit_rating.php:
+   - show link for users rating-graph
+   - clearer notes about rating-change
+
+   * ratingpng.php:
+   - bugfix for non-const translation-texts
+
    * include/quick/quick_game.php (QuickHandlerGame.process_cmd),
      clock_tick.php, confirm.php:
    - fix message to players for game-deletion and setting game-result differ
      between executioner admin/cron/player
 
-   * include/game_functions.php (class GameFinalizer, ~.finish_game; GameNotify._load_players, ~.get_text_game_deleted, ~.get_text_game_result),
+   * include/game_functions.php (class GameFinalizer, ~.finish_game;
+       GameNotify._load_players, ~.get_text_game_deleted, ~.get_text_game_result),
      tournaments/include/tournament_rules.php (TournamentRules.determineJigoBehaviour),
      admin_game.php (parse_edit_form, draw_game_admin_form), NEWS:
    - fix message to players for game-deletion and setting game-result differ
