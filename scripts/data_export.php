@@ -286,6 +286,7 @@ function get_tables( $database)
             'Posts',
             'Profiles',
             'RatingChange', // only used in "old" update_rating()-func, but keeping for now
+            'RatingChangeAdmin',
             'Ratinglog',
             'Statistics',
             'Tournament',
