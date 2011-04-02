@@ -24,6 +24,8 @@ require_once 'include/form_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/rating.php';
 require_once 'include/classlib_user.php';
+require_once 'include/db/ratingchangeadmin.php';
+require_once 'include/table_columns.php';
 
 $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
@@ -37,6 +39,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    if( !(@$player_row['admin_level'] & ADMIN_GAME) )
       error('adminlevel_too_low');
    $my_id = $player_row['ID'];
+
+   $page = "admin_rating.php";
+   $title = T_('Admin editor of DGS-rating#rankadm');
 
 /* Actual REQUEST calls used:
      (no args)          : ask for user
@@ -90,7 +95,10 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
          $errors[] = sprintf( T_('Rating [%s] is invalid#rankadm'), $upd_user['Rating'] );
       if( $changes == 0 && (@$_REQUEST['preview'] || @$_REQUEST['save']) )
          $errors[] = T_('No rating-change or it is too small.#rankadm');
+
+      $rcatable = load_old_rating_changes( $uid );
    }
+
 
    // ---------- Process actions ------------------------------------------------
 
@@ -115,9 +123,6 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
       }
    }//actions
 
-
-   $page = "admin_rating.php";
-   $title = T_('Admin editor of DGS-rating#rankadm');
 
    // ---------- Rank Edit Form ----------------------------------------------
 
@@ -197,6 +202,12 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    $rform->echo_string();
 
+   if( !is_nulL($rcatable) )
+   {
+      section('old_ratingchanges', T_('Former rating-changes of user#rankadm'));
+      $rcatable->echo_table();
+   }
+
 
    $notes = array();
    $notes[] = sprintf( T_("Check notes about rating-change on page %s.#rankadm"), anchor("edit_rating.php", T_('Change rating & rank')) );
@@ -208,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    $menu_array[T_('')] = "$page?uid=$uid";
 
    end_page(@$menu_array);
-}
+}//main
 
 
 function diff( $diff, $fmt='%d' )
@@ -221,5 +232,39 @@ function percent( $old, $new )
 {
    return sprintf( '%d%%', 100 * ($new / $old) );
 }
+
+function load_old_rating_changes( $uid )
+{
+   global $page;
+   if( !$uid )
+      return null;
+
+   $rcatable = new Table( 'ratingchanges', $page, null, '',
+      TABLE_NO_HIDE|TABLE_NO_SORT|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
+
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $rcatable->add_tablehead( 1, T_('Created#rankadm'), 'Date', 0, 'Created-');
+   $rcatable->add_tablehead( 2, T_('Changes#rankadm'), 'Enum' );
+   $rcatable->add_tablehead( 3, T_('Rating#rankadm'), 'Rating' );
+
+   $iterator = new ListIterator( 'AdminRating', null, 'ORDER BY Created DESC' );
+   $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator, $uid );
+   $rcatable->set_found_rows( mysql_found_rows('admin_rating.list_ratingchangeadmin.found_rows') );
+
+   while( list(,$arr_item) = $iterator->getListIterator() )
+   {
+      list( $rca, $orow ) = $arr_item;
+      $rcatable->add_row( array(
+            1 => ($rca->Created > 0) ? date(DATE_FMT2, $rca->Created) : '',
+            2 => format_ratingchangeadmin_changes($rca->Changes, ' + '),
+            3 => ($rca->Changes & RCADM_CHANGE_RATING )
+                    ? sprintf( '%s = ELO %f', echo_rating($rca->Rating, true, 0, false), $rca->Rating )
+                    : NO_VALUE,
+            'extra_class' => 'TCells',
+         ));
+   }
+
+   return $rcatable;
+}//load_old_rating_changes
 
 ?>

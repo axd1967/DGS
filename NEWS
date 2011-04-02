@@ -521,7 +521,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Finish game by setting game-result, Change game rated-status, Delete game
          * Notify players about game-end and game-deletion
          * Setting game-result flags the game
-      * Added admin-rated-page to change user-rating directly and/or resetting confidence-interval
+      * Added admin-rating-page to change user-rating directly and/or resetting confidence-interval,
+        Showing former rating-changes of user
 
       * Added admin-link "Admin game" on game-info-page to admin-game-page
       * Added admin-link "Admin user" on user-info page to admin-user-page

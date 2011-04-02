@@ -3080,6 +3080,13 @@ body.Scripts table#Scripts th {
    padding-right: 1em;
 }
 
+
+table#ratingchangesTable th,
+table#ratingchangesTable tr.TCells td {
+   border: 1px solid black;
+}
+
+
 /* ------------------------- */
 /* edit profile page */
 /* ------------------------- */

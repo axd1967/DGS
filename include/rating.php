@@ -1046,4 +1046,15 @@ function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max )
       "VALUES ($uid,FROM_UNIXTIME($NOW),$changes,$new_rating)" );
 }//change_user_rating
 
+// format RatingChangeAdmin.Changes as string
+function format_ratingchangeadmin_changes( $changes, $sep=', ' )
+{
+   $out = array();
+   if( $changes & RCADM_RESET_CONFIDENCE )
+      $out[] = 'RESET_CONFIDENCE';
+   if( $changes & RCADM_CHANGE_RATING )
+      $out[] = 'CHANGE_RATING';
+   return implode($sep, $out);
+}
+
 ?>
