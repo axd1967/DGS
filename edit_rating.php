@@ -151,7 +151,6 @@ require_once 'include/rank_converter.php';
                "For ranks or ratings from other servers, please first use the rank-converter above.#ranknotes"),
             T_('Request for rating-change#ranknotes') ),
       );
-   $rform->add_empty_row();
    echo_notes( 'editratingnotes', T_('Important notes about Rating & Rank changes'), $notes );
 
    end_page();
