@@ -515,16 +515,19 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added VOTING_ADMIN-role to add new features to vote on
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
+      * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
 
-      * Added admin-link "Admin game" on game-info-page to admin-game-page
-      * Added admin-link "Admin user" on user-info page to admin-user-page
-      * Added <home game_calc.php>page to show rating-calculations</home>
-        for finished and running game with admin-link on game-info-page
       * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
          * Finish game by setting game-result, Change game rated-status, Delete game
          * Notify players about game-end and game-deletion
          * Setting game-result flags the game
-      * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
+      * Added admin-rated-page to change user-rating directly and/or resetting confidence-interval
+
+      * Added admin-link "Admin game" on game-info-page to admin-game-page
+      * Added admin-link "Admin user" on user-info page to admin-user-page
+      * Added admin-link right to user-rating on user-info-page to admin-rating-page
+      * Added <home game_calc.php>page to show rating-calculations</home>
+        for finished and running game with admin-link on game-info-page
 
       * Added Adminlog entries for admin user changes, login-denied and if admin-level too low for script execution
       * Added user-ID and original request for better debugging in Errorlog

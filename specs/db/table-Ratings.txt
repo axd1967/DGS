@@ -1,0 +1,42 @@
+###
+### Description of mysql tables:  RatingChangeAdmin
+###
+
+Here you'll find some infos about all the rating tables.
+
+Important Notes:
+
+
+###########################################################################
+## --- RatingChangeAdmin ---
+
+Description:
+   Table containing rating-changes done by admin.
+   Needed because rating-changes need to be taken into account
+   on rating-recalculations.
+
+   Possible rating-changes are reset of confidence-interval relative to rating,
+   and change of Players.Rating2 itself. Reset of confidence-interval will apply
+   after rating-change (if there is one, see Changes-field).
+
+ Field   | Type       | Default
+---------+------------+---------------------
+ ID      | int(11)    | NULL
+ uid     | int(11)    | NULL
+ Created | datetime   | 0000-00-00 00:00:00
+ Changes | tinyint(4) | 0
+ Rating  | double     | -9999
+
+
+## Fields:
+
+* uid : FK to Players.ID
+
+* Created : date of change
+
+* Changes : TODO
+   - 1 = bit set if rating-confidence-interval has been resetted
+   - 2 = bit set if rating has been changed, then Rating-field is meaningful
+
+* Rating : new rating changed at Created-time if (Changes & 2) set
+
