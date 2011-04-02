@@ -463,6 +463,35 @@ class TournamentRules
    }
 
    /*!
+    * \brief Checks what score for tournament-game with this tournamet-rules is allowed.
+    * \return Returns 0 if only x.0 is allowed, 1 if x.5 allowed, otherwise -1 if x.5 and x.0 allowed.
+    */
+   function determineJigoBehaviour()
+   {
+      if( $this->JigoMode == JIGOMODE_ALLOW_JIGO )
+         return 0;
+      if( $this->JigoMode == JIGOMODE_NO_JIGO )
+         return 1;
+
+      if( $this->Handicaptype == TRULE_HANDITYPE_CONV || $this->Handicaptype == TRULE_HANDITYPE_PROPER )
+         return -1; // can be x.0|x.5 for CONV|PROPER and AdjkustKomi doesn't change that
+
+      if( $this->Handicaptype == TRULE_HANDITYPE_NIGIRI
+            || $this->Handicaptype == TRULE_HANDITYPE_BLACK
+            || $this->Handicaptype == TRULE_HANDITYPE_WHITE )
+      { // manual-handicap-type
+         $chk_komi = floor( abs( 2 * (float)($this->Komi + $this->AdjKomi) ) );
+         if( $chk_komi & 1 )
+            return 1; // can be only x.5
+         else
+            return 0; // can be only x.0
+      }
+
+      // unknown rule-type
+      error('invalid_args', 'TournamentRules.determineJigoBehaviour()');
+   }
+
+   /*!
     * \brief Creates normal game and updates all game-stuff.
     * \param $user_ch User-object of challenger with set urow['Rating2'] (according to rating-use-mode)
     * \param $user_df User-object of defender with set urow['Rating2'] (dito)
