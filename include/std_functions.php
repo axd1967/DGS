@@ -659,7 +659,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
             , "&nbsp;&nbsp;&nbsp;";
 
       echo anchor( $base_path."index.php?logout=t",
-                   ( $player_row['ID'] > 0 ) ? T_('Logout') : T_('Login'),
+                   ( @$player_row['ID'] > 0 ) ? T_('Logout') : T_('Login'),
                    '', array( 'accesskey' => ACCKEY_MENU_LOGOUT ));
 
       echo "</td>",
