@@ -41,6 +41,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
    $my_id = $player_row['ID'];
    $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+   $is_game_admin = (@$player_row['admin_level'] & ADMIN_GAME);
 
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
@@ -163,9 +164,18 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                   ) );
       }
 
+      if( $is_game_admin )
+      {
+         $admin_rating = SMALL_SPACING . span('AdminLink',
+            anchor("admin_rating.php?uid=$uid",
+               image( $base_path.'images/edit.gif', 'E' ),
+               T_('Admin user rating#rankadm'), 'class="ButIcon"' ));
+      }
+      else
+         $admin_rating = '';
       $itable1->add_sinfo( T_('Open for matches?'), make_html_safe(@$row['Open'],INFO_HTML) );
       $itable1->add_sinfo( T_('Activity'),  $activity );
-      $itable1->add_sinfo( T_('Rating'),    echo_rating(@$row['Rating2'],true,$row['ID']) );
+      $itable1->add_sinfo( T_('Rating'),    echo_rating(@$row['Rating2'],true,$row['ID']) . $admin_rating );
       $itable1->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
       $itable2->add_sinfo( T_('Registration date'), $registerdate );
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
