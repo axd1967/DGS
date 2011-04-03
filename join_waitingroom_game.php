@@ -165,108 +165,110 @@ require_once( "include/contacts.php" );
          break;
    }
 
-   //TODO: HOT_SECTION ???
-   $gids = array();
-   $is_std_go = ( $game_row['GameType'] == GAMETYPE_GO );
-   if( $is_std_go )
-   {
-      if( $i_am_black || $double )
-         $gids[] = create_game($player_row, $opponent_row, $game_row);
-      else
-         $gids[] = create_game($opponent_row, $player_row, $game_row);
-      $gid = $gids[0];
-      //keep this after the regular one ($gid => consistency with send_message)
-      if( $double )
+   ta_begin();
+   {//HOT-section to join waiting-room game-offer
+      $gids = array();
+      $is_std_go = ( $game_row['GameType'] == GAMETYPE_GO );
+      if( $is_std_go )
       {
-         // provide a link between the two paired "double" games
-         $game_row['double_gid'] = $gid;
-         $double_gid2 = create_game($opponent_row, $player_row, $game_row);
-         $gids[] = $double_gid2;
+         if( $i_am_black || $double )
+            $gids[] = create_game($player_row, $opponent_row, $game_row);
+         else
+            $gids[] = create_game($opponent_row, $player_row, $game_row);
+         $gid = $gids[0];
+         //keep this after the regular one ($gid => consistency with send_message)
+         if( $double )
+         {
+            // provide a link between the two paired "double" games
+            $game_row['double_gid'] = $gid;
+            $double_gid2 = create_game($opponent_row, $player_row, $game_row);
+            $gids[] = $double_gid2;
 
-         db_query( "join_waitingroom_game.update_double2($gid)",
-            "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+            db_query( "join_waitingroom_game.update_double2($gid)",
+               "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+         }
       }
-   }
-   else // join multi-player-game
-   {
-      $gid = $game_row['gid']; // use existing game for Team-/Zen-Go
-      if( $gid <= 0 )
-         error('internal_error', "join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
+      else // join multi-player-game
+      {
+         $gid = $game_row['gid']; // use existing game for Team-/Zen-Go
+         if( $gid <= 0 )
+            error('internal_error', "join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
 
-      MultiPlayerGame::join_waitingroom_game( "join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
-      $gids[] = $gid;
-   }
+         MultiPlayerGame::join_waitingroom_game( "join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
+         $gids[] = $gid;
+      }
 
-   $cnt = count($gids);
-   db_query( 'join_waitingroom_game.update_players',
-      "UPDATE Players SET " .
-               ( $is_std_go
-                     ? "Running=Running+$cnt"
-                     : "GamesMPG=GamesMPG+$cnt" ) .
-               ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
-               " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
-
-
-   // Reduce number of games left in the waiting room
-
-   if( $game_row['nrGames'] > 1 )
-   {
-      db_query( 'join_waitingroom_game.reduce',
-         "UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id AND nrGames>0 LIMIT 1" );
-   }
-   else
-   {
-      db_query( 'join_waitingroom_game.reduce_delete',
-         "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
-   }
+      $cnt = count($gids);
+      db_query( 'join_waitingroom_game.update_players',
+         "UPDATE Players SET " .
+                  ( $is_std_go
+                        ? "Running=Running+$cnt"
+                        : "GamesMPG=GamesMPG+$cnt" ) .
+                  ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
+                  " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
 
 
-   // Update WaitingroomJoined
-   // NOTE: restriction on count and time are mutual exclusive
+      // Reduce number of games left in the waiting room
 
-   $same_opp = $game_row['SameOpponent'];
-   $query_so = '';
-   if( $same_opp < 0 ) // restriction on count
-   {
-      if( $game_row['X_wrj_exists'] )
-         $query_so = 'UPDATE WaitingroomJoined SET JoinedCount=JoinedCount+1 '
-            . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
+      if( $game_row['nrGames'] > 1 )
+      {
+         db_query( 'join_waitingroom_game.reduce',
+            "UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id AND nrGames>0 LIMIT 1" );
+      }
       else
-         $query_so = 'INSERT INTO WaitingroomJoined '
-            . "SET opp_id=$my_id, wroom_id=$wr_id, JoinedCount=1";
+      {
+         db_query( 'join_waitingroom_game.reduce_delete',
+            "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
+      }
+
+
+      // Update WaitingroomJoined
+      // NOTE: restriction on count and time are mutual exclusive
+
+      $same_opp = $game_row['SameOpponent'];
+      $query_so = '';
+      if( $same_opp < 0 ) // restriction on count
+      {
+         if( $game_row['X_wrj_exists'] )
+            $query_so = 'UPDATE WaitingroomJoined SET JoinedCount=JoinedCount+1 '
+               . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
+         else
+            $query_so = 'INSERT INTO WaitingroomJoined '
+               . "SET opp_id=$my_id, wroom_id=$wr_id, JoinedCount=1";
+      }
+      elseif( $same_opp > 0 ) // restriction on time
+      {
+         $expire_date = $NOW + $same_opp * SECS_PER_DAY;
+         $query_wrjexp = "WaitingroomJoined SET ExpireDate=FROM_UNIXTIME($expire_date)";
+         if( $game_row['X_wrj_exists'] ) // faster than REPLACE-INTO
+            $query_so = 'UPDATE ' . $query_wrjexp . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
+         else
+            $query_so = 'INSERT INTO ' . $query_wrjexp . ", opp_id=$my_id, wroom_id=$wr_id";
+      }
+      if( $query_so )
+         db_query( "join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
+
+
+
+      // Send message to notify opponent
+
+      $subject = 'Your waiting room game has been joined.'; // maxlen=80
+      $message = ( empty($game_row['Comment']) ) ? '' : "Comment: {$game_row['Comment']}\n\n";
+      $message .= sprintf( "%s has joined your waiting room game.\n",
+         user_reference( REF_LINK, 1, '', $player_row) );
+      $message .= sprintf( "\nGames of type [%s]:\n",
+         GameTexts::get_game_type($game_row['GameType']) );
+      foreach( $gids as $gid )
+         $message .= "* <game $gid>\n";
+
+      send_message( 'join_waitingroom_game', $message, $subject
+         , $opponent_ID, '', /*notify*/true
+         , 0, 'NORMAL', $gid);
    }
-   elseif( $same_opp > 0 ) // restriction on time
-   {
-      $expire_date = $NOW + $same_opp * SECS_PER_DAY;
-      $query_wrjexp = "WaitingroomJoined SET ExpireDate=FROM_UNIXTIME($expire_date)";
-      if( $game_row['X_wrj_exists'] ) // faster than REPLACE-INTO
-         $query_so = 'UPDATE ' . $query_wrjexp . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
-      else
-         $query_so = 'INSERT INTO ' . $query_wrjexp . ", opp_id=$my_id, wroom_id=$wr_id";
-   }
-   if( $query_so )
-      db_query( "join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
-
-
-
-   // Send message to notify opponent
-
-   $subject = 'Your waiting room game has been joined.'; // maxlen=80
-   $message = ( empty($game_row['Comment']) ) ? '' : "Comment: {$game_row['Comment']}\n\n";
-   $message .= sprintf( "%s has joined your waiting room game.\n",
-      user_reference( REF_LINK, 1, '', $player_row) );
-   $message .= sprintf( "\nGames of type [%s]:\n",
-      GameTexts::get_game_type($game_row['GameType']) );
-   foreach( $gids as $gid )
-      $message .= "* <game $gid>\n";
-
-   send_message( 'join_waitingroom_game', $message, $subject
-      , $opponent_ID, '', /*notify*/true
-      , 0, 'NORMAL', $gid);
+   ta_end();
 
 
    $msg = urlencode(T_('Game joined!'));
-
    jump_to("status.php?sysmsg=$msg");
 }
 ?>
