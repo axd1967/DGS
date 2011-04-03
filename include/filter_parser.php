@@ -244,7 +244,7 @@ class BasicParser
     * \brief parses value with specified flags, updates: value, flags, errormsg, p_start/p_end/p_value/p_flags.
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse( $value, $flags = 0)
+   function parse( $value, $flags = 0 )
    {
       // concrete parser needs to implement this abstract method
       error('invalid_filter', "filter_parser.parse.miss_implementation(".get_class($this).")");
@@ -319,7 +319,7 @@ class NumericParser extends BasicParser
     * \brief Parses value with specified $flags
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse($value, $flags)
+   function parse( $value, $flags = 0 )
    {
       $this->init_parse($value, $flags);
       if( $this->value == '' )
@@ -428,7 +428,7 @@ class TextParser extends BasicParser
     * \brief Parses value with specified $flags
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse($value, $flags)
+   function parse( $value, $flags = 0 )
    {
       $this->init_parse($value, $flags);
       if( $this->value == '' )
