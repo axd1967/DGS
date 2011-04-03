@@ -211,9 +211,8 @@ class TournamentLadder
          error('invalid_args', "TournamentLadder.update_incoming_challenges.check.diff({$this->rid},$diff)");
 
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-      $op = ($diff > 0) ? "+$diff" : '-'.abs($diff);
       $result = db_query( "TournamentLadder.update_incoming_challenges.update({$this->rid},$diff)",
-         "UPDATE $table SET ChallengesIn=ChallengesIn $op "
+         "UPDATE $table SET ChallengesIn=ChallengesIn+($diff) " // maybe diff<0
             . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
       if( $result )
          $this->ChallengesIn += $diff;
@@ -227,9 +226,8 @@ class TournamentLadder
          error('invalid_args', "TournamentLadder.update_outgoing_challenges.check.diff({$this->rid},$diff)");
 
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-      $op = ($diff > 0) ? "+$diff" : '-'.abs($diff);
       $result = db_query( "TournamentLadder.update_outgoing_challenges.update({$this->rid},$diff)",
-         "UPDATE $table SET ChallengesOut=ChallengesOut $op "
+         "UPDATE $table SET ChallengesOut=ChallengesOut+($diff) " // maybe diff<0
             . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
       if( $result )
          $this->ChallengesOut += $diff;
