@@ -143,7 +143,8 @@ require_once( "include/filter.php" );
    $marked_form->set_tabindex(1);
    $marked_form->attach_table( $mtable);
 
-   message_list_head( $mtable, $current_folder, /*no_mark*/ false, /*full_details*/ false );
+   $msglist_builder = new MessageListBuilder( $mtable, $current_folder, /*no_mark*/false, /*full_details*/false );
+   $msglist_builder->message_list_head();
    $mtable->set_default_sort( 4); //on date
    $order = $mtable->current_order_string();
    $limit = $mtable->current_limit_string();
@@ -168,8 +169,7 @@ require_once( "include/filter.php" );
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   $can_move_messages =
-      message_list_body( $mtable, $result, $show_rows, $my_folders, $toggle_marks, $rx_term);
+   $can_move_messages = $msglist_builder->message_list_body( $result, $show_rows, $my_folders, $toggle_marks, $rx_term);
 
    $mtable->echo_table();
    //echo "<br>\n";

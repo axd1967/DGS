@@ -118,10 +118,6 @@ class Table
    /*! \brief optional features of the table. */
    var $Mode;
 
-   /*! \brief a place to store some external infos (array) */
-   //TODO refactor, don't use Table.ExtMode as "global var" to exchange args with other methods!!
-   var $ExtMode;
-
    /*! \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
     * array( $column_nr1 => $column_elem1,
@@ -196,7 +192,6 @@ class Table
       $this->ExternalForm = NULL;
       $this->TableForm = NULL;
       $this->ExtendTableFormFunc = NULL;
-      $this->ExtMode = array();
       $this->Removed_Columns = NULL;
       $this->Shown_Columns = 0;
       $this->Tableheads = array();

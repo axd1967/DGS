@@ -100,8 +100,9 @@ if( (string)$folder_nr_querystr != '' )
    $mtable = new Table( 'message', 'status.php', '', 'MSG', $table_mode|TABLE_NO_HIDE );
 
    //$mtable->add_or_del_column();
-   message_list_head( $mtable, FOLDER_NONE /*FOLDER_ALL_RECEIVED*/
-         , /*no_sort=*/true, /*no_mark=*/true ) ;
+   $msglist_builder = new MessageListBuilder( $mtable, FOLDER_NONE /*FOLDER_ALL_RECEIVED*/,
+      /*no_sort=no_mark*/true, /*full*/true );
+   $msglist_builder->message_list_head();
    //no_sort must stay true because of the fixed LIMIT and no prev/next feature
 
    $mtable->set_default_sort( 4); //on 'date' (to display the sort-image)
@@ -117,8 +118,7 @@ if( (string)$folder_nr_querystr != '' )
 
       section( 'Message', T_('New messages'));
 
-      message_list_body( $mtable, $result, 20, $my_folders) ; // also frees $result
-
+      $msglist_builder->message_list_body( $result, 20, $my_folders) ; // also frees $result
       $mtable->echo_table();
    }
    else

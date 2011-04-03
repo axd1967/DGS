@@ -123,8 +123,8 @@ require_once( "include/classlib_profile.php" );
    $mtable->register_filter( $mfilter );
    $mtable->add_or_del_column();
 
-   message_list_head( $mtable, FOLDER_NONE
-      , /*no_mark*/ true, /*full-details*/ true );
+   $msglist_builder = new MessageListBuilder( $mtable, FOLDER_NONE, /*no_mark*/true, /*full-details*/true );
+   $msglist_builder->message_list_head();
    $mtable->set_default_sort( 4); //on 'date'
 
    // External-Search-Form
@@ -178,8 +178,7 @@ require_once( "include/classlib_profile.php" );
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   message_list_body( $mtable, $result, $show_rows, $my_folders
-      , /*toggle_marks*/false, $rx_term);
+   $msglist_builder->message_list_body( $result, $show_rows, $my_folders, /*toggle_marks*/false, $rx_term);
 
    // print form with table
    $extform_string = $smform->get_form_string(); // static form

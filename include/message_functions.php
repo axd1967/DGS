@@ -1604,198 +1604,211 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY me.mi
    return array( $result, $qsql );
 }
 
-// param full_details: if true, show additional fields for message-search
-function message_list_head( &$mtable, $current_folder, $no_mark=true, $full_details=false )
+
+
+
+class MessageListBuilder
 {
-   global $base_path, $msg_icones;
+   var $table;
+   var $current_folder;
+   var $no_mark;
+   var $full_details;
 
-   //TODO refactor, don't use Table.ExtMode as "global var" to exchange args to with other methods!!
-   $mtable->ExtMode['no_mark']= $no_mark;
-   $mtable->ExtMode['full_details']= $full_details;
-   $mtable->ExtMode['current_folder']= $current_folder;
-
-   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $mtable->add_tablehead( 1, T_('Folder#header'), 'Folder',
-         ($current_folder>FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
-   $mtable->add_tablehead( 9, new TableHead( T_('Message thread#header'),
-         'images/thread.gif', T_('Show message thread') ), 'Image', 0, 'Thread+' );
-
-   if( $full_details )
+   // \param full_details: if true, show additional fields for message-search
+   function MessageListBuilder( &$table, $current_folder, $no_mark=true, $full_details=false )
    {
-      // additional fields for search-messages
-      $mtable->add_tablehead( 6, T_('Type#header'), '', TABLE_NO_HIDE, 'M.Type+');
-      $mtable->add_tablehead( 7, T_('Direction#header'), 'MsgDir', 0, 'Sender+');
-      $mtable->add_tablehead( 2, T_('Correspondent#header'), 'User', 0, 'other_name+');
+      $this->table = $table;
+      $this->current_folder = $current_folder;
+      $this->no_mark = $no_mark;
+      $this->full_details = $full_details;
    }
-   else
-      $mtable->add_tablehead( 2,
-            ($current_folder == FOLDER_SENT) ? T_('To#header') : T_('From#header'),
-            'User', 0, 'other_name+');
 
-   $mtable->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
-   list($ico,$alt) = $msg_icones[0];
-   $mtable->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
-   $mtable->add_tablehead(10, new TableHead( T_('First message in thread#header'),
-         'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
-   $mtable->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
-   if( !$no_mark )
-      $mtable->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
-
-} //message_list_head
-
-// param result: typically coming from message_list_query()
-// param rx_terms: rx with terms to be marked within text
-// NOTE: frees given mysql $result
-function message_list_body( &$mtable, $result, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
-{
-   global $base_path, $msg_icones, $player_row;
-
-   //TODO refactor, don't use ExtMode as "global var" to exchange args to with other methods!
-   $no_mark= @$mtable->ExtMode['no_mark'];
-   $full_details= @$mtable->ExtMode['full_details'];
-   //$current_folder= @$mtable->ExtMode['current_folder'];
-
-   $can_move_messages = false;
-   //$page = ''; //not used, see below
-
-   $p = T_('Answer');
-   $n = T_('Replied');
-   $tits = array(
-      0                         => T_('Message'),
-      FLOW_ANSWER               => $p ,
-                  FLOW_ANSWERED => $n ,
-      FLOW_ANSWER|FLOW_ANSWERED => "$p - $n" ,
-      );
-   $dirs = get_message_directions();
-
-   $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
-   $arr_marks = array(); // mid => 1
-
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   function message_list_head()
    {
-      $mid = $row["mid"];
-      $oid = $row['other_ID'];
-      $is_bulk = ( $row['Flags'] & MSGFLAG_BULK );
+      global $base_path, $msg_icones;
 
-      $folder_nr = $row['folder'];
-      $deleted = ( $folder_nr == FOLDER_DESTROYED );
-      $bgcolor = $mtable->blend_next_row_color_hex();
-      $thread = $row['Thread'];
+      // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      $this->table->add_tablehead( 1, T_('Folder#header'), 'Folder',
+            ($this->current_folder > FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
+      $this->table->add_tablehead( 9, new TableHead( T_('Message thread#header'),
+            'images/thread.gif', T_('Show message thread') ), 'Image', 0, 'Thread+' );
 
-      // link to message
-      $oid_url = ( $is_bulk && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
-      $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid$oid_url$url_terms";
+      if( $this->full_details )
+      {
+         // additional fields for search-messages
+         $this->table->add_tablehead( 6, T_('Type#header'), '', TABLE_NO_HIDE, 'M.Type+');
+         $this->table->add_tablehead( 7, T_('Direction#header'), 'MsgDir', 0, 'Sender+');
+         $this->table->add_tablehead( 2, T_('Correspondent#header'), 'User', 0, 'other_name+');
+      }
+      else
+         $this->table->add_tablehead( 2,
+               ($this->current_folder == FOLDER_SENT) ? T_('To#header') : T_('From#header'),
+               'User', 0, 'other_name+');
 
-      $mrow_strings = array();
-      $mrow_strings[ 1] = array(
-         'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
+      $this->table->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
+      list($ico,$alt) = $msg_icones[0];
+      $this->table->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
+      $this->table->add_tablehead(10, new TableHead( T_('First message in thread#header'),
+            'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
+      $this->table->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
+      if( !$this->no_mark )
+         $this->table->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
+   }//message_list_head
+
+   // param result: typically coming from message_list_query()
+   // param rx_terms: rx with terms to be marked within text
+   // NOTE: frees given mysql $result
+   function message_list_body( $result, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
+   {
+      global $base_path, $msg_icones, $player_row;
+
+      $can_move_messages = false;
+      //$page = ''; //not used, see below
+
+      $p = T_('Answer');
+      $n = T_('Replied');
+      $tits = array(
+         0                         => T_('Message'),
+         FLOW_ANSWER               => $p ,
+                     FLOW_ANSWERED => $n ,
+         FLOW_ANSWER|FLOW_ANSWERED => "$p - $n" ,
+         );
+      $dirs = get_message_directions();
+
+      $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
+      $arr_marks = array(); // mid => 1
+
+      while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+      {
+         $mid = $row["mid"];
+         $oid = $row['other_ID'];
+         $is_bulk = ( $row['Flags'] & MSGFLAG_BULK );
+
+         $folder_nr = $row['folder'];
+         $deleted = ( $folder_nr == FOLDER_DESTROYED );
+         $bgcolor = $this->table->blend_next_row_color_hex();
+         $thread = $row['Thread'];
+
+         // link to message
+         $oid_url = ( $is_bulk && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
+         $msg_url = 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid$oid_url$url_terms";
+
+         $mrow_strings = array();
+         $mrow_strings[ 1] = array(
+            'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
+
+         // link to user
+         $str = MessageListBuilder::message_build_user_string( $row, $player_row, $this->full_details );
+         if( !$this->full_details && ($row['Sender'] === 'Y') )
+            $str = T_('To') . ': ' . $str;
+         $mrow_strings[ 2] = $str;
+
+         $subject = make_html_safe( $row['Subject'], SUBJECT_HTML, $rx_term);
+         $mrow_strings[ 3] = anchor( $msg_url, $subject );
+
+         $flowval = $row['flow'];
+         list($ico,$alt) = $msg_icones[$flowval];
+         $mrow_strings[ 8] = anchor( $msg_url, image( $ico, $alt, $tits[$flowval] ));
+
+         $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
+
+         // additional fields for search-messages
+         if( $this->full_details )
+         {
+            static $MSG_TYPES = array( // keep them untranslated(!)
+                  'NORMAL'     => 'Normal',
+                  'INVITATION' => 'Invitation',
+                  'DISPUTED'   => 'Dispute',
+                  'RESULT'     => 'Result',
+               );
+            $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];
+
+            $mrow_strings[ 7] = $dirs[$row['Sender']];
+         }
+
+         $mrow_strings[ 9] = '';
+         $mrow_strings[10] = '';
+         if( $thread )
+         {
+            $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url",
+                  image( $base_path.'images/thread.gif', T_('Message thread') ),
+                  T_('Show message thread') );
+
+            if( $thread != $mid )
+               $mrow_strings[10] = anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$thread",
+                     image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
+                     T_('Show initial message in thread') );
+         }
+
+         if( !$this->no_mark )
+         {
+            if( $row['Replied'] == 'M' )
+            {// message needs reply (so forbid marking and force inspection)
+               $mrow_strings[ 5] = '';
+            }
+            elseif( !isset($arr_marks[$mid]) ) // for bulk-msg only mark first
+            {
+               $can_move_messages = true;
+               $n = $this->table->Prefix."mark$mid";
+               $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
+               //if( $checked ) $page.= "$n=Y".URI_AMP;
+               $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'"
+                  . ($checked ? ' checked' : '') . '>';
+               $arr_marks[$mid] = 1;
+            }
+            else if( $is_bulk )
+            {
+               $mrow_strings[ 5] = image( $base_path.'images/up_bulk.gif',
+                     T_('Use toggle above for this bulk-message'), null );
+            }
+         }
+         $this->table->add_row( $mrow_strings );
+      }
+      mysql_free_result($result);
+
+      // NOTE:
+      // insertion of the marks in the URL of sort, page move and add/del column.
+      // it's useless to add marks to the URLs while they are only used with actions
+      // that change the order or the page because the marks will not stay on display.
+      //$this->table->Page.= $page ;
+
+      return $can_move_messages;
+   }//message_list_body
+
+
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief Builds user-string for message-list.
+    * \param $row expected fields: Sender, other_ID, other_name, other_handle
+    * \param $my_row most often $player_row
+    */
+   function message_build_user_string( &$row, $my_row, $full_details )
+   {
+      if( $row['Sender'] === 'M' ) // Message to myself
+         $row['other_name'] = '(' . T_('Myself') . ')';
+      else if( $row['other_ID'] <= 0 )
+         $row['other_name'] = '[' . T_('Server message') . ']';
+      if( empty($row['other_name']) )
+         $row['other_name'] = NO_VALUE;
 
       // link to user
-      $str = message_build_user_string( $row, $player_row, $full_details );
-      if( !$full_details && ($row['Sender'] === 'Y') )
-         $str = T_('To') . ': ' . $str;
-      $mrow_strings[ 2] = $str;
-
-      $subject = make_html_safe( $row['Subject'], SUBJECT_HTML, $rx_term);
-      $mrow_strings[ 3] = anchor( $msg_url, $subject );
-
-      $flowval = $row['flow'];
-      list($ico,$alt) = $msg_icones[$flowval];
-      $mrow_strings[ 8] = anchor( $msg_url, image( $ico, $alt, $tits[$flowval] ));
-
-      $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
-
-      // additional fields for search-messages
-      if( $full_details )
+      if( $row['Sender'] === 'M' ) // Message to myself
       {
-         static $MSG_TYPES = array( // keep them untranslated{!)
-               'NORMAL'     => 'Normal',
-               'INVITATION' => 'Invitation',
-               'DISPUTED'   => 'Dispute',
-               'RESULT'     => 'Result',
-            );
-         $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];
-
-         $mrow_strings[ 7] = $dirs[$row['Sender']];
+         if( $full_details )
+            $user_str = user_reference( REF_LINK, 1, '', $my_row );
+         else
+            $user_str = $row['other_name'];
       }
-
-      $mrow_strings[ 9] = '';
-      $mrow_strings[10] = '';
-      if( $thread )
-      {
-         $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url",
-               image( $base_path.'images/thread.gif', T_('Message thread') ),
-               T_('Show message thread') );
-
-         if( $thread != $mid )
-            $mrow_strings[10] = anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$thread",
-                  image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
-                  T_('Show initial message in thread') );
-      }
-
-      if( !$no_mark )
-      {
-         if( $row['Replied'] == 'M' )
-         {// message needs reply (so forbid marking and force inspection)
-            $mrow_strings[ 5] = '';
-         }
-         elseif( !isset($arr_marks[$mid]) ) // for bulk-msg only mark first
-         {
-            $can_move_messages = true;
-            $n = $mtable->Prefix."mark$mid";
-            $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
-            //if( $checked ) $page.= "$n=Y".URI_AMP;
-            $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'"
-               . ($checked ? ' checked' : '') . '>';
-            $arr_marks[$mid] = 1;
-         }
-         else if( $is_bulk )
-         {
-            $mrow_strings[ 5] = image( $base_path.'images/up_bulk.gif',
-                  T_('Use toggle above for this bulk-message'), null );
-         }
-      }
-      $mtable->add_row( $mrow_strings );
-   }
-   mysql_free_result($result);
-
-   //insertion of the marks in the URL of sort, page move and add/del column.
-   //it's useless to add marks to the URLs while they are only used with actions
-   // that change the order or the page because the marks will not stay on display.
-   //$mtable->Page.= $page ;
-
-   return $can_move_messages;
-}//message_list_body
-
-/*!
- * \brief Builds user-string for message-list.
- * \param $row expected fields: Sender, other_ID, other_name, other_handle
- * \param $my_row most often $player_row
- */
-function message_build_user_string( &$row, $my_row, $full_details )
-{
-   if( $row['Sender'] === 'M' ) // Message to myself
-      $row['other_name'] = '(' . T_('Myself') . ')';
-   else if( $row['other_ID'] <= 0 )
-      $row['other_name'] = '[' . T_('Server message') . ']';
-   if( empty($row['other_name']) )
-      $row['other_name'] = NO_VALUE;
-
-   // link to user
-   if( $row['Sender'] === 'M' ) // Message to myself
-   {
-      if( $full_details )
-         $user_str = user_reference( REF_LINK, 1, '', $my_row );
+      else if( $row['other_ID'] > 0 )
+         $user_str = user_reference( REF_LINK, 1, '',
+            $row['other_ID'], $row['other_name'], $row['other_handle'] );
       else
-         $user_str = $row['other_name'];
-   }
-   else if( $row['other_ID'] > 0 )
-      $user_str = user_reference( REF_LINK, 1, '',
-         $row['other_ID'], $row['other_name'], $row['other_handle'] );
-   else
-      $user_str = $row['other_name']; // server-msg or unknown
+         $user_str = $row['other_name']; // server-msg or unknown
 
-   return $user_str;
-}//message_build_user_string
+      return $user_str;
+   }//message_build_user_string
+
+} // end of 'MessageListBuilder'
 
 ?>

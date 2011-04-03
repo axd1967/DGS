@@ -163,7 +163,7 @@ function echo_message_row( $threadlist, &$mtable )
    $row_str = array();
    $row_str[1] = array( 'owntd' => echo_folder_box($my_folders, $item['Folder_nr'], $bgcolor) );
    $row_str[2] = $arr_directions[$item['Sender']];
-   $row_str[3] = message_build_user_string( $item, $player_row, true );
+   $row_str[3] = MessageListBuilder::message_build_user_string( $item, $player_row, true );
    $row_str[4] = $curr_msg . $level;
    $row_str[5] =
       ($level > $max_indent ? '...'.MINI_SPACING : '' ) . str_repeat( MED_SPACING, $max_indent )
