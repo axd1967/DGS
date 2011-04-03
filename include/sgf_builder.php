@@ -444,8 +444,7 @@ class SgfBuilder
       $grow = mysql_fetch_array($result);
 
       $status = $grow['Status'];
-      if( !($status == GAME_STATUS_PLAY || $status == GAME_STATUS_PASS || $status == GAME_STATUS_SCORE
-            || $status == GAME_STATUS_SCORE2 || $status == GAME_STATUS_FINISHED) )
+      if( !isRunningGame($status) && $status != GAME_STATUS_FINISHED )
          error('invalid_game_status', "SgfBuilder.load_game_info.check.status({$this->gid},$status)");
 
       $this->game_row = $grow;
@@ -454,7 +453,7 @@ class SgfBuilder
          GamePlayer::load_users_for_mpgame( $this->gid, '', false, $this->mpg_users );
 
       return $this->game_row;
-   }
+   }//load_game_info
 
    function find_mpg_user( $handle )
    {

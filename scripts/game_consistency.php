@@ -464,6 +464,10 @@ function check_consistency( $gid)
       }
 */
    }
+   elseif( $Status == GAME_STATUS_SETUP )
+   {
+      //TODO handle MP-game
+   }
 
    return ''; //no error
 } //check_consistency

@@ -263,7 +263,7 @@ class GameAddTime
    function allow_add_time_opponent( $game_row, $uid, $is_tdir=false )
    {
       // must be a running-game
-      if( $game_row['Status'] == GAME_STATUS_FINISHED || $game_row['Status'] == GAME_STATUS_INVITED )
+      if( !isRunningGame($game_row['Status']) )
          return false;
 
       // must be one of my games (to give time to my opponent)

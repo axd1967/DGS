@@ -51,6 +51,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1" );
    if( !$game )
       error('unknown_game', "game_comments.find_game($gid)");
+   if( $game['Status'] == GAME_STATUS_SETUP )
+      error('invalid_game_status', "game_comments.find_game($gid)");
    $game_players = $game['GamePlayers'];
    $handicap = $game['Handicap'];
 
@@ -64,7 +66,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $is_mp_game = ( $game['GameType'] != GAMETYPE_GO );
    $my_mpgame = ( !$my_game && $is_mp_game ) ? MultiPlayerGame::is_game_player($gid, $my_id) : $my_game;
 
-   if( $game['Status'] == 'FINISHED' )
+   if( $game['Status'] == GAME_STATUS_FINISHED )
       $html_mode= 'gameh';
    else
       $html_mode= 'game';
