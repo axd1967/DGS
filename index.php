@@ -90,10 +90,8 @@ require_once( "include/form_functions.php" );
    $login_form->add_row( array(
          'DESCRIPTION', T_('Password'),
          'PASSWORD', 'passwd',16,16, '',
-         //'TD',
-         'CELL', 99, 'align="left"', //TODO: change the 99
+         'TEXT', MED_SPACING,
          'SUBMITBUTTON', 'login', T_('Log in'),
-         //'HIDDEN', 'url', 'status.php',
       ));
 
   $login_form->echo_string(1);
