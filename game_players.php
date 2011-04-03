@@ -953,11 +953,14 @@ function accept_invite( $gid, $uid )
             "(Flags & ".GPFLAGS_RESERVED_INVITATION.") = ".GPFLAGS_RESERVED_INVITATION." " .
          "LIMIT 1" );
 
-      // 2. increase players MP-game count
+      // 2. increase joined-players
+      MultiPlayerGame::change_joined_players( "game_players.accept_invite", $gid, 1 );
+
+      // 3. increase players MP-game count
       db_query( "game_players.accept_invite.update_players($gid,$uid)",
          "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
 
-      // 3. notify game-master
+      // 4. notify game-master
       send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",
          sprintf( T_('User %s has accepted your invitation to the multi-player game %s.#mpg'),
                   "<user $uid>", "<game $gid>" ),
@@ -999,7 +1002,10 @@ function delete_joined_player( $gid, $uid )
       // 1. delete joined player
       GamePlayer::delete_joined_player( $gid, $uid );
 
-      // 2. notify user
+      // 2. decrease joined-players
+      MultiPlayerGame::change_joined_players( "game_players.delete_joined_player", $gid, -1 );
+
+      // 3. notify user
       send_message( "game_players.delete_joined_player.notify_user($gid,$uid,$master_uid)",
          sprintf( T_('Game-master %s revoked your participation for the game %s.#mpg'),
                   "<user $master_uid>", "<game $gid>" ),

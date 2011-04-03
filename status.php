@@ -297,6 +297,7 @@ if( $player_row['GamesMPG'] > 0 )
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $mpgtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $mpgtable->add_tablehead( 2, T_('GameType#header'), '', TABLE_NO_HIDE, 'GameType+');
+   $mpgtable->add_tablehead( 6, T_('Joined#header'), 'NumberC', 0, 'Moves+');
    $mpgtable->add_tablehead( 3, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $mpgtable->add_tablehead( 4, T_('Size#header'), 'Number', 0, 'Size-');
    $mpgtable->add_tablehead( 5, T_('Last change#header'), 'Date', 0, 'Lastchanged-');
@@ -305,7 +306,7 @@ if( $player_row['GamesMPG'] > 0 )
    $order = $mpgtable->current_order_string('ID-');
    $mpgtable->use_show_rows(false);
 
-   $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, GP.Flags, "
+   $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
       . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
       . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
       . "WHERE GP.uid=$uid AND G.Status='SETUP'"
@@ -321,12 +322,19 @@ if( $player_row['GamesMPG'] > 0 )
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $cnt_rows++;
+
+         $cnt_players = MultiPlayerGame::determine_player_count($row['GamePlayers']);
+         $joined_players = sprintf( '%d / %d', $row['X_Joined'], $cnt_players );
+         if( $row['X_Joined'] == $cnt_players )
+            $joined_players = span('MPGWarning', $joined_players);
+
          $row_arr = array(
             1 => button_TD_anchor( "game_players.php?gid=".$row['ID'], $row['ID'] ),
             2 => GameTexts::format_game_type( $row['GameType'], $row['GamePlayers'] ),
             3 => getRulesetText($row['Ruleset']),
             4 => $row['Size'],
             5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',
+            6 => $joined_players,
          );
          $mpgtable->add_row( $row_arr );
       }

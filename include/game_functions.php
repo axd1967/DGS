@@ -479,8 +479,10 @@ class MultiPlayerGame
       db_query( "$dbgmsg.init_multi_player_game.insert_gp($gid,$uid,$gp_count)",
          $query, 'mysql_start_game' );
 
+      MultiPlayerGame::change_joined_players( $dbgmsg, $gid, 1 );
+
       // update Players for all starting players: GamesMPG++
-      db_query( "MultiPlayerGame::init_multi_player_game($gid,$uid)",
+      db_query( "$dbgmsg.init_multi_player_game.upd_players.inc_mpg($gid,$uid)",
          "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
    }
 
@@ -495,7 +497,17 @@ class MultiPlayerGame
          'waitingroom_join_error' );
       if( mysql_affected_rows() != 1)
          error('waitingroom_join_too_late', "$dbgmsg.join_waitingroom_game($gid,$uid)");
+
+      MultiPlayerGame::change_joined_players( $dbgmsg, $gid, 1 );
    }//join_waitingroom_game
+
+   /*! \brief Changes number of joined players of MP-game (store in Games.Moves). */
+   function change_joined_players( $dbgmsg, $gid, $diff )
+   {
+      $diff = (int)$diff;
+      db_query( "$dbgmsg.change_joined_players.upd_games($gid,$diff)",
+         "UPDATE Games SET Moves=Moves+($diff) WHERE ID=$gid AND Status='".GAME_STATUS_SETUP."' LIMIT 1" );
+   }//change_joined_players
 
    /*!
     * \brief Returns arr( GroupColor, GroupOrder, MoveColor ) to identify current game-player to move.
