@@ -94,17 +94,11 @@ if( FRIENDLY_SHORT_NAME == 'DGS' )
 else
    $menu_bg_color='"#C9410C"'; //devel server
 
-//{ N.B.: only used for folder transparency but CSS incompatible
+// NOTE: only used for folder transparency, but CSS incompatible
 global $table_row_color1, $table_row_color2; //PHP5
 $table_row_color1='"#FFFFFF"';
 $table_row_color2='"#E0E8ED"';
-//}
-// obsolete since CSS //FIXME remove
-//$table_head_color='"#CCCCCC"';
-//$table_row_color_del1='"#FFCFCF"';
-//$table_row_color_del2='"#F0B8BD"';
-//$h3_color='"#800000"';
-//$sgf_color='"#d50047"';
+
 
 //----- } layout : change in dragon.css too!
 
@@ -207,10 +201,13 @@ define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
-// b0=standard placement, b1=with black validation skip, b2=all placements
+
+//TODO simplify ENABLE_STDHANDICAP !?
+// b0=0x1 (standard placement), b1=0x2 (with black validation skip), b2=0x4 (all placements)
 // both b1 and b2 set is not fully handled (error if incomplete pattern)
-define('ENA_STDHANDICAP',0x3);
-define('ENA_MOVENUMBERS',1);
+define('ENABLE_STDHANDICAP', 0x3);
+
+define('ENA_MOVENUMBERS', 1);
 define('MAX_MOVENUMBERS', 500);
 
 
@@ -1631,12 +1628,12 @@ function parse_atbs_safe( &$trail, &$bad)
    }
    if( !$bad && $head )
    {
-/* TODO check for newer/more attributes!
-This part fix a security hole. One was able to execute a javascript code
-(if read by some browsers: IExplorer, for instance) with something like:
-<b style="background:url('javascript:eval(document.all.mycode.xcode)')"
-   id="mycode" xcode="alert('Hello!!!')">Hello!</b>
-*/
+      /* TODO check for newer/more attributes!
+      This part fix a security hole. One was able to execute a javascript code
+      (if read by some browsers: IExplorer, for instance) with something like:
+      <b style="background:url('javascript:eval(document.all.mycode.xcode)')"
+         id="mycode" xcode="alert('Hello!!!')">Hello!</b>
+      */
       $quote =
           '\\bjavascript\\s*:'   //main reject
          .'|\\.inner'            //like .innerHTML
@@ -2138,7 +2135,7 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 //    make_url('test.php?a=1', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo'
 // Also handle value-arrays:
 //    make_url('arr.php', array('a' => array( 44, 55 ))  gives  'arr.php?a[]=44&a[]=55'
-// TODO: next step could be to handle the '#' part of the url:
+// TODO(if needed): next step could be to handle the '#' part of the url:
 //    make_url('test.php?a=1#id', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo#id'
 function make_url( $url, $args, $end_sep=false)
 {
@@ -2484,7 +2481,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $vaultcnt--;
          $query.= ",VaultCnt=$vaultcnt";
       }
-      //TODO: maybe exclude the multi-users accounts
+      //TODO: maybe exclude the multi-users accounts !?
       elseif( $NOW < $vaulttime ) //fever too high
       //to exclude guest, add: && $uid > GUESTS_ID_MAX
       {
