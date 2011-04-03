@@ -39,8 +39,7 @@ require_once( "include/register_functions.php" );
       $errors = $reg->check_registration_blocked();
       if( !$errors )
       {
-         $reg->register_blocked_user(
-            /*FIXME forum_id support-forum: need adjustment for DGS-clone */ 2 );
+         $reg->register_blocked_user( FORUM_ID_SUPPORT );
          jump_to('index.php?sysmsg=' .
             T_('Request to register new account has been sent to an admin. '
                . 'This can take some time. If everything is OK, '

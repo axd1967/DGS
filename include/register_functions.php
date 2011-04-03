@@ -222,6 +222,8 @@ class UserRegistration
    function register_blocked_user( $forum_id )
    {
       global $NOW;
+      if( !is_numeric($forum_id) || $forum_id <= 0 )
+         error('invalid_args', "UserRegistration.register_blocked_user($forum_id)");
 
       $ip = (string)@$_SERVER['REMOTE_ADDR'];
 

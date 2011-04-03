@@ -165,6 +165,9 @@ define('ALLOW_FEATURE_VOTE', true);
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
 
+// Forums.ID of Support-forum (required for some error-conditions)
+define('FORUM_ID_SUPPORT', 2);
+
 // Games-list: Configuring number of (starting) chars from private game-notes
 // as Notes-column in status-game-list and my-games-list
 // - set to 0 to disable
