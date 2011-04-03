@@ -89,7 +89,6 @@ require_once( "include/make_translationfiles.php" );
          $contents = php_strip_whitespace($Filename); // strips also LFs
       else
       {
-         //FIXME: what is $main_path ?
          $fd = fopen( $main_path . $Filename, 'r' )
             or error( 'couldnt_open_file', "generate_translation_texts.open_file($Filename)");
          $contents = fread($fd, filesize($main_path . $Filename));

@@ -86,7 +86,7 @@ require_once( "include/form_functions.php" );
    { // show matching faq-entries
       // NOTES:
       // - read whole FAQ from DB, then match on translations read from file.
-      // - read data from file can be cached //TODO
+      // - read data from file can be cached //TODO(later if needed)
       // - as long as no UTF8 for all languages in the DB, db-search is unreliable.
 
       $query =

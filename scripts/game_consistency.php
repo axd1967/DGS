@@ -339,7 +339,7 @@ function check_consistency( $gid)
       {
          if( $PosX == POSX_ADDTIME )
          {
-            //TODO: include time-info, fields see const-def
+            //TODO(if SGF supports): include time-info, fields see const-def
             continue;
          }
 

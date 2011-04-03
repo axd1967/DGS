@@ -59,7 +59,7 @@ else
    if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row['Expire'] < $NOW )
       error('not_logged_in','qp2');
 
-   //TODO: fever vault check ???
+   //TODO: fever vault check ??? -> migrate to quick_do-suite
    //setTZ( $player_row['Timezone']);
 
    $my_id = $player_row['ID'];

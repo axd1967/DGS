@@ -541,7 +541,7 @@ This is why:
 
       // Increase moves and activity
       db_query( 'confirm.activity',
-            "UPDATE Players SET Moves=Moves+1" // NOTE: TODO count delete/set_handicap as (one) move?
+            "UPDATE Players SET Moves=Moves+1" // NOTE: count also delete + set-handicap as one move
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
             .",LastMove=FROM_UNIXTIME($NOW)"
             ." WHERE ID=$my_id LIMIT 1" );

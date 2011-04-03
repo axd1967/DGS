@@ -297,7 +297,6 @@ function get_stat_data()
                ",MIN(Activity) AS minActiv,MAX(Activity) AS maxActiv" .
                ",MIN(Hits) AS minHits,MAX(Hits) AS maxHits" .
                " FROM Statistics" );
-
    if( @mysql_num_rows( $result ) != 1 )
       exit;
 
@@ -305,7 +304,7 @@ function get_stat_data()
    extract($max_row);
    mysql_free_result($result);
 
-   //TODO why load twice ? 1st pass for aggregating, but could be done in PHP too!
+   //TODO(optimize) why load twice ? 1st pass loading aggregates could be calculated in PHP!
    $result = db_query( 'statisticspng.load_data',
          "SELECT *,UNIX_TIMESTAMP(Time) as times FROM Statistics ORDER BY Time" );
 

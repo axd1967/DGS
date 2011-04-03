@@ -96,7 +96,7 @@ require_once( "include/classlib_profile.php" );
    // table-filters
    $mfilter->add_filter( 2, 'Text', // can't search for myself with this filter, because otherP maybe null and therefore removing rows from SQL-result(!)
          'other_Handle',
-         // TODO: could use filter on both, but would need dynamic UNION to avoid 'OR':
+         // NOTE: could use filter on both, but would need dynamic UNION to avoid 'OR':
          //'(other_name #OP #VAL OR other_Handle #OP #VAL)',
          true,
          array( FC_SIZE => 14, FC_ADD_HAVING => 1,

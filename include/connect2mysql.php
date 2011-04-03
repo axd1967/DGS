@@ -142,7 +142,8 @@ function connect2mysql($no_errors=false)
 
    // user can stop the output, but not the script
    // Because we will use MySQL, this will help to complete the *multiple queries* transactions.
-   //TODO use around HOT-sections to avoid "transaction"-breaks, but allow users to stop requests (slow queries)
+   // NOTE: TODO use HOT-sections with ta_begin/ta_end when writing into multiple tables
+   //       to avoid "transaction"-breaks, but allow users to stop requests (slow queries)
    //$old_ignore = @ignore_user_abort(true);
    //@ignore_user_abort($old_ignore);
 
@@ -166,8 +167,7 @@ function connect2mysql($no_errors=false)
    {
       $err= 'mysql_connect_failed';
       if( $no_errors ) return $err;
-      //TODO: error() with no err_log()
-      error($err);
+      error($err); //TODO: error() with no err_log(), because no DB
    }
 
    if( !@mysql_select_db(DB_NAME) )
@@ -177,8 +177,7 @@ function connect2mysql($no_errors=false)
       $err= 'mysql_select_db_failed';
       if( $no_errors )
          return $err;
-      //TODO: error() with no err_log()
-      error($err);
+      error($err); //TODO: error() with no err_log(), because no DB
    }
 
    if( DBG_QUERY>1 ) error_log("connect2mysql($no_errors): dbcnx=[$dbcnx] on attempt #$rcnt/".DB_CONNECT_RETRY_COUNT);

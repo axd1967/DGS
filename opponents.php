@@ -565,10 +565,9 @@ function print_players_table( $p, $uid, $opp, $fin )
    $SPC = ''; //'&nbsp;';
 
    $rowpatt = "  <tr><td class=Rubric>%s</td><td>%s</td><td>%s</td></tr>\n";
-   #$rowpatt = "  <tr> <td><b>%s</b></td>  <td>%s</td>  <td>%s</td>  </tr>\n";
 
    $r = "<table id=playersInfos class=Infos>\n";
-   //TODO; review it:
+   //TODO CSS; review it:
    //$r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
 
    // header
@@ -641,7 +640,7 @@ function print_stats_table( $p, $B, $W, $fin )
    $trclass_num = 'class="Number"';
 
    $r = "<table id=gameStats class=Infos>\n";
-   //TODO; review it:
+   //TODO CSS; review it:
    //$r .= "<colgroup><col class=ColRubric><col class=ColInfo><col class=ColInfo></colgroup>\n";
 
    // header

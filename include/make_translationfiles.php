@@ -206,9 +206,8 @@ function translations_query( $translate_lang, $untranslated, $group
 
    if( $untranslated )
    {
-      $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
-      // TODO: enhance the query around this 'OR' clause
+      $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
    }
 
    if( $group != 'allgroups' )

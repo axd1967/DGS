@@ -303,6 +303,7 @@ class GameAddTime
     *        allowed range is 0 hour .. MAX_ADD_DAYS
     * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
     * \param $by_td_uid user-id of tournament-director, which adds time
+    * \note caller have to build HOT-section around this call
     * \return number of hours added (may be 0), if time has been successfully added
     *        for opponent of player (uid) in specified game (gid).
     *        -1|-2 if only byo-yomi has been resetted (-1=full-reset, -2=part-reset).
@@ -329,7 +330,7 @@ class GameAddTime
       }
 
 
-      //TODO HOT-SECTION to avoid double-clicks
+      // NOTE: HOT-SECTION to avoid double-clicks must be done by caller
       $gid = $game_row['ID'];
       $game_query = "UPDATE Games SET ".substr($game_addtime->game_query,1)
                   . " WHERE ID=$gid AND Status" . IS_RUNNING_GAME . " LIMIT 1";

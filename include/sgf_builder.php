@@ -1051,8 +1051,7 @@ class SgfBuilder
 
    function sgf_echo_rating( $rating, $show_percent=false )
    {
-      //TODO use new echo_rating-args (like quick-suite)
-      $rating_str = echo_rating( $rating, $show_percent, false, true, true );
+      $rating_str = echo_rating( $rating, $show_percent, /*uid*/0, /*engl*/true, /*short*/1 );
       if( (string)$rating_str == '' )
          return '?';
       $rating_str = str_ireplace( 'dan#short', 'd', $rating_str );

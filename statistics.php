@@ -106,15 +106,12 @@ function show_stats_default()
       echo '<p>Activity: ', round($row['activity']), "</p>\n";
    }
 
-   //echo '<p></p>Loadavg: ' . `cat /proc/loadavg`; //only under Linux like systems and with safe_mode=off
-   if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
+   // NOTE: only works under Linux-like systems and with safe_mode=off
+   if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
    {
-      //FIXME: Only working for Linux ?
       $tmp = '/proc/loadavg';
       if( ($tmp=trim(@read_from_file($tmp))) )
-      {
          echo '<p><span class=DebugInfo>Loadavg: ', $tmp, '</span></p>';
-      }
    }
 
    $args= array();

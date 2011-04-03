@@ -526,7 +526,7 @@ class QuickHandlerGame extends QuickHandler
 
          // Increase moves and activity
          db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
-            "UPDATE Players SET Moves=Moves+1" . // NOTE: TODO count delete/set_handicap as (one) move?
+            "UPDATE Players SET Moves=Moves+1" . // NOTE: count also delete + set-handicap as one move
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
                ",LastMove=FROM_UNIXTIME($NOW)" .
             " WHERE ID={$this->my_id} LIMIT 1" );
