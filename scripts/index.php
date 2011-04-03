@@ -60,6 +60,7 @@ require_once( "include/std_functions.php" );
             'forum_consistency.php'    => "Check consistency of Forums-data",
             'game_consistency.php'     => "Check consistency of Games-data",
             'message_consistency.php'  => "Check consistency of Message-data",
+            'tournament_consistency.php'  => "Check consistency of Tournament-data",
             'translation_consistency.php' => "Check consistency of Translation-data",
             'fix_games_timeleft.php'   => "Fix Games.TimeOutDate for running games (after long maintenance)",
 
