@@ -155,6 +155,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    if( ALLOW_TOURNAMENTS )
       $gfilter->add_filter(32, 'Boolean', 'Games.tid>0', true,
             array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
+   if( $ext_tid > 0 )
+      $gfilter->add_filter(42, 'Selection', TournamentGames::buildStatusFilterArray('TG.'), true);
    $gfilter->add_filter( 6, 'Numeric', 'Games.Size', true,
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 7, 'Numeric', 'Games.Handicap', true,

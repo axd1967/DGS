@@ -460,6 +460,16 @@ class TournamentGames
       return $ARR_GLOBALS_TOURNAMENT_GAMES[$key][$status];
    }
 
+   /*! \brief Returns array for Selection-filter on TournamentGames.Status. */
+   function buildStatusFilterArray( $prefix='' )
+   {
+      $arr = array( T_('All') => '' );
+      foreach( TournamentGames::getStatusText() as $tg_status => $tg_text )
+         $arr[$tg_text] = $prefix."Status='$tg_status'";
+      $arr[T_('None')] = $prefix.'Status IS NULL';
+      return $arr;
+   }
+
    function get_admin_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
