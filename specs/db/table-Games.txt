@@ -110,7 +110,14 @@ Description:
    - FINISHED: finished game, game has finished, ratings adjusted eventually
 
 * Moves : number of moves in game, including handicap-stones
-   - for multi-player-games use as counter/cursor/index to check who is next to move
+   - for normal games (GameType=GO) if game is running:
+     used as moves-counter including handicap-stones, pass-moves and score-steps
+
+   - for multi-player-games (GameType<>GO) if Games.Status=SETUP:
+     used as counter of joined players, shown on status-page in MP-games-list
+
+   - for multi-player-games (GameType<>GO) if game is running:
+     used as counter/cursor/index to check who is next to move
      - starts at 0, use modulo-counter using info from GamePlayers-field to find next
        player to move in GamePlayers-table
      - handicap-stones must be substracted
