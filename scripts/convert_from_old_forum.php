@@ -37,7 +37,7 @@ require_once( 'forum/forum_functions.php' );
 
    start_html('convert_from_old_forum', 0);
 
-echo '>>>> Should not be used now. Do not run it before a check ' .
+echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it before a check ' .
    "(run script 'scripts/forum_consistency.php' afterwards to fix all counters and triggers). " .
    "Caution: no 'do_it' option"; end_html(); exit;
 
