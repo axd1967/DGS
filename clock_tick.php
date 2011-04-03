@@ -112,7 +112,7 @@ if( !$is_down )
 
    // Check if any game has timed out
 
-/* TODO BUG in old & new version: !?
+/* TODO(keep as note?) BUG in old & new version: !?
   if maintenance spans more than a whole hour and graces the sleeping-clocks,
   the time-window has passed to detect time-outs within that hour.
   So time-outs are delayed by a full day till the games with the respective clock is checked again!
@@ -121,7 +121,7 @@ if( !$is_down )
      as there is no Clock.ID<0 any more)
   => remove Clock.Lastchanged=$NOW to match all clock-timeouts
  */
-if(1){//new
+if(1){//new //TODO cleanup old-code (if not longer needed)
 /*
  In a first approximation, as $has_moved==false (see time_remaining()),
   $main>$hours will just produce $main-=$hours which will never
@@ -140,20 +140,20 @@ if(1){//new
  This is a table scan, but indeed reduces the number of affected rows.
 */
    $result = db_query( 'clock_tick.find_timeout_games',
-      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags AS X_GameFlags"
+      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags+0 AS X_GameFlags"
       ." FROM Games"
       ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
-      .' WHERE Clock.Ticks - Games.LastTicks > '.TICK_FREQUENCY
+      ." WHERE Clock.ID >= 0 AND" // older DGS-clones may still have clocks<0
+      ." Clock.Ticks - Games.LastTicks > ".TICK_FREQUENCY
          ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
       ." AND Status" . IS_RUNNING_GAME
       //slower: ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
       );
 }else{//old
-   // TODO: This query is sometimes slow and may return more than 10000 rows!
-
-   $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags AS X_GameFlags'
+   // NOTE: This query is sometimes slow and may return more than 10000 rows!
+   $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags+0 AS X_GameFlags'
             . ' FROM (Games, Clock)'
-            . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)"
+            . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)" // FIXME: remove to match all clock-timeouts(?)
             . ' AND Clock.ID>=0' // not VACATION_CLOCK
             . ' AND Games.ClockUsed=Clock.ID'
             //if both are <=0, the game will never finish by time:
@@ -196,7 +196,7 @@ if(1){//new
 
       if( $time_is_up )
       {
-         //TODO: Delete games with too few moves ??? (if so -> send delete-game-msg)
+         //TODO(feature): Delete games with too few moves ??? (if so -> send delete-game-msg)
 
          $score = ( $ToMove_ID == $Black_ID ) ? SCORE_TIME : -SCORE_TIME;
          $game_finalizer = new GameFinalizer( ACTBY_CRON, /*cron*/0, $gid, $tid, $GameType, $X_GameFlags,
