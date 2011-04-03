@@ -2778,7 +2778,7 @@ class FilterRelativeDate extends Filter
          $query = $this->build_base_query($this->dbfield, false);
          $sql_templ = $query->get_part(SQLP_WHERETMPL);
          $sql_op = ( $this->range_mode == FRD_RANGE_END ) ? "<=" : ">=";
-         $sql_date = "FROM_UNIXTIME($NOW) - INTERVAL (" . $this->p_value . "){$FRDTU_interval_sql[$tu]}";
+         $sql_date = "FROM_UNIXTIME($NOW) - INTERVAL (" . $this->p_value . ") {$FRDTU_interval_sql[$tu]}";
          $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
          $query->add_part( $parttype, fill_sql_template( $sql_templ, $sql_op, $sql_date ) );
       }
