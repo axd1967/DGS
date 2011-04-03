@@ -91,7 +91,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       error('tournament_edit_not_allowed', "Tournament.edit_participant($tid,$my_id)");
    $is_admin = TournamentUtils::isAdmin();
 
-   $errors = $tstatus->check_edit_status( TournamentParticipant::get_edit_tournament_status() );
+   $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status );
 
    // load-user, change-user?
    if( @$_REQUEST['tp_showuser_uid'] )
@@ -226,6 +226,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tp->NextRound = $tp->StartRound; //copy on REGISTER
 
          $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
+         TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
          // send notification (if needed)
          if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK

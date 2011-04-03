@@ -305,13 +305,6 @@ class TournamentParticipant
       return $out;
    }
 
-   /*! \brief Deletes TournamentParticipant-entry for given tournament- and reg-id. */
-   function delete_tournament_participant( $tid, $rid )
-   {
-      $tp = new TournamentParticipant( $rid, $tid );
-      return $tp->delete( "TournamentParticipant::delete_tournament_participant(%s,$tid)" );
-   }
-
    /*! \brief Returns db-fields to be used for query of TournamentParticipant-object. */
    function build_query_sql()
    {
@@ -361,11 +354,14 @@ class TournamentParticipant
    /*!
     * \brief Checks, if user is participant for given tournament and status
     *        (TP_STATUS_...) within; returns status if given status is null; false if no entry found.
+    * \param $rid TournamentParticipant.ID overrules $uid (which should be 0 then)
+    * \param $status returns true if TP exists on given $status; false otherwise
     */
-   function isTournamentParticipant( $tid, $uid, $status=null )
+   function isTournamentParticipant( $tid, $uid, $rid=0, $status=null )
    {
-      $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid)",
-         sprintf( "SELECT Status FROM TournamentParticipant WHERE tid='%s' AND uid='%s' LIMIT 1", $tid, $uid ) );
+      $tp_query = (is_numeric($rid) && $rid > 0) ? "ID='$rid'" : "uid='$uid'";
+      $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid,$rid)",
+         sprintf( "SELECT Status FROM TournamentParticipant WHERE tid='%s' AND $tp_query LIMIT 1", $tid ) );
       if( is_null($status) )
          return ($row) ? @$row['Status'] : false;
       else
@@ -510,6 +506,28 @@ class TournamentParticipant
          $data->set_query_value( 'Lost', "Lost+1" );
 
       return $data->update( "TournamentParticipant::update_game_end_stats($tid,$rid,$score)" );
+   }
+
+   /*! \brief Updates Tournament.RegisteredTP if needed by comparing old/new TP-status. */
+   function update_tournament_registeredTP( $tid, $old_tp_status, $new_tp_status )
+   {
+      if( $old_tp_status != TP_STATUS_REGISTER && $new_tp_status == TP_STATUS_REGISTER )
+         Tournament::update_tournament_registeredTP( $tid, 1 );
+      elseif( $old_tp_status == TP_STATUS_REGISTER && $new_tp_status != $old_tp_status )
+         Tournament::update_tournament_registeredTP( $tid, -1 );
+   }
+
+   /*!
+    * \brief Deletes TournamentParticipant-entry for given tournament- and reg-id.
+    * \note Updates Tournament.RegisteredTP if TP was REGISTERed.
+    */
+   function delete_tournament_participant( $tid, $rid )
+   {
+      $is_registered = TournamentParticipant::isTournamentParticipant( $tid, 0, $rid, TP_STATUS_REGISTER );
+      $tp = new TournamentParticipant( $rid, $tid );
+      $result = $tp->delete( "TournamentParticipant::delete_tournament_participant(%s,$tid)" );
+      Tournament::update_tournament_registeredTP( $tid, -1 );
+      return $result;
    }
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */

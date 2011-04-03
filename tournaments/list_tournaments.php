@@ -135,7 +135,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       $ttable->add_tablehead(12, T_('Flags#headert'), '', 0, 'Flags-');
    $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
    $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
-   $ttable->add_tablehead(17, T_('Tournament-Size#headert'), 'NumberC', TABLE_NO_SORT);
+   $ttable->add_tablehead(17, T_('Tournament-Size#headert'), 'Number', TABLE_NO_SORT);
    $ttable->add_tablehead( 6, T_('Owner#headert'), 'User', 0, 'X_OwnerHandle+');
    $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
@@ -239,7 +239,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $row_str[16] = TimeFormat::echo_time_limit( $orow['Maintime'], $orow['Byotype'],
             $orow['Byotime'], $orow['Byoperiods'], TIMEFMT_SHORT|TIMEFMT_ADDTYPE|TIMEFMT_ADDTYPE );
       if( $ttable->Is_Column_Displayed[17] )
-         $row_str[17] = ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE;
+         $row_str[17] = sprintf( '%s / %s', $tourney->RegisteredTP,
+            ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE );
 
       $ttable->add_row( $row_str );
    }

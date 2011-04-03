@@ -50,7 +50,7 @@ $ENTITY_TOURNAMENT = new Entity( 'Tournament',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Flags', 'Rounds', 'CurrentRound',
+      FTYPE_INT,  'ID', 'Owner_ID', 'WizardType', 'Flags', 'Rounds', 'CurrentRound', 'RegisteredTP',
       FTYPE_TEXT, 'Title', 'Description', 'LockNote',
       FTYPE_DATE, 'Created', 'Lastchanged', 'StartTime', 'EndTime',
       FTYPE_ENUM, 'Scope', 'Type', 'Status'
@@ -75,6 +75,7 @@ class Tournament
    var $EndTime;
    var $Rounds;
    var $CurrentRound;
+   var $RegisteredTP;
    var $LockNote;
 
    // non-DB vars
@@ -86,7 +87,7 @@ class Tournament
                         $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
                         $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW, $flags=0,
                         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
-                        $rounds=1, $current_round=1, $lock_note='' )
+                        $rounds=1, $current_round=1, $registeredTP=0, $lock_note='' )
    {
       $this->ID = (int)$id;
       $this->setScope( $scope );
@@ -105,6 +106,7 @@ class Tournament
       $this->EndTime = (int)$endtime;
       $this->Rounds = (int)$rounds;
       $this->CurrentRound = (int)$current_round;
+      $this->RegisteredTP = (int)$registeredTP;
       $this->LockNote = $lock_note;
       // non-DB
       $this->TP_Counts = NULL;
@@ -265,6 +267,7 @@ class Tournament
          $data->set_value( 'EndTime', $this->EndTime );
       $data->set_value( 'Rounds', $this->Rounds );
       $data->set_value( 'CurrentRound', $this->CurrentRound );
+      $data->set_value( 'RegisteredTP', $this->RegisteredTP );
       $data->set_value( 'LockNote', $this->LockNote );
       return $data;
    }
@@ -489,6 +492,7 @@ class Tournament
             @$row['X_EndTime'],
             @$row['Rounds'],
             @$row['CurrentRound'],
+            @$row['RegisteredTP'],
             @$row['LockNote']
          );
       return $tournament;
@@ -531,6 +535,17 @@ class Tournament
       return $iterator;
    }
 
+   /*! \brief Increases/decreases Tournament.RegisteredTP for given tournament. */
+   function update_tournament_registeredTP( $tid, $diff )
+   {
+      if( !is_numeric($tid) || !is_numeric($diff) )
+         error('invalid_args', "Tournament::update_tournament_registeredTP($tid,$diff)");
+      if( $diff )
+      {
+         db_query( "Tournament::update_tournament_registeredTP($tid,$diff)",
+            "UPDATE Tournament SET RegisteredTP=RegisteredTP+($diff) WHERE ID=$tid LIMIT 1" );
+      }
+   }
 
    /*! \brief Returns scope-text or all scope-texts (if arg=null). */
    function getScopeText( $scope=null )

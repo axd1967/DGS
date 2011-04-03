@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if( is_null($tprops) )
       error('bad_tournament', "Tournament.register.miss_properties($tid,$my_id)");
 
-   $errors = $tstatus->check_edit_status( TournamentParticipant::get_edit_tournament_status(), false );
+   $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
 
    // existing application ? (check matching tid & uid if loaded by rid)
    $tp = TournamentParticipant::load_tournament_participant( $tid, $my_id, $rid, true, true );
@@ -146,6 +146,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          $tp->Status = TP_STATUS_REGISTER;
          $tp->Flags |= TP_FLAGS_ACK_INVITE;
          $ttype->joinTournament( $tourney, $tp ); // update
+         TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+
          jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
                . urlencode(T_('Invitation accepted!')) );
       }
@@ -156,6 +158,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          $tp->Status = TP_STATUS_APPLY;
          $tp->Flags &= ~TP_FLAGS_ACK_APPLY;
          $tp->persist(); // update
+         TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+
          jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
                . urlencode(T_('Invitation declined and transformed into application!')) );
       }
@@ -185,6 +189,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tp->NextRound = $tp->StartRound; //copy on REGISTER
 
       $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
+      TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid={$tp->ID}".URI_AMP."sysmsg="
             . urlencode(T_('Registration saved!')) );
    }

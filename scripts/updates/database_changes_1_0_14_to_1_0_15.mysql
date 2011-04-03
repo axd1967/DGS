@@ -1997,3 +1997,8 @@ CREATE TABLE RatingChangeAdmin (
 ) ENGINE=MyISAM ;
 
 
+-- added aggregate of tournaments registered participants in Tournament-table
+ALTER TABLE Tournament
+   ADD RegisteredTP smallint NOT NULL default '0' AFTER CurrentRound ;
+
+
