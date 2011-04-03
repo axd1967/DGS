@@ -81,9 +81,8 @@ require_once( 'include/std_functions.php' );
   * <li> ROW       -- Force the class specified for the row.
   * </ul>
   *
-  * \todo To be able to use the type functions separately
+  * \TODO To be able to use the type functions separately
   *       (probably possible already but not tested).
-  * \todo Breaks within radiobuttons.
   *
   */
 
@@ -661,15 +660,6 @@ class Form
    {
       //$this->add_row( array( 'TEXT', '&nbsp;' ));
       $this->add_row( array( 'SPACE' )); //better for colspan
-   }
-
-   /*!
-    * \brief Add another form into this.
-    *
-    * \todo Needs to be done.
-    */
-   function add_form( $other_form, $line_no )
-   {
    }
 
    /*! \brief Set $line_no_step */
