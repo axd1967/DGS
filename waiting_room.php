@@ -148,8 +148,8 @@ require_once( 'include/classlib_userconfig.php' );
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );
-   $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames-');
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
+   $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames-');
    $wrtable->add_tablehead(12, T_('Weekend Clock#header'), '', 0, 'WeekendClock-');
    // NOTE: User can choose:
    // View "merged" "Handicap + StdPlacement (in Settings column),
