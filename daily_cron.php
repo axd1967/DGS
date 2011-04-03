@@ -83,9 +83,8 @@ if( !$is_down )
 
 // Update statistics
 
-if(1){//new
 /*
-TODO: add infos from mysql_stat() which returns an array:
+TODO(better stats): add infos from mysql_stat() which returns an array:
 [0] => Uptime: 5380
 [1] => Threads: 2
 [2] => Questions: 1321299
@@ -99,77 +98,32 @@ and maybe send an email to admin(s)? in case of daily_delta too high
 SELECT * FROM Statistics ORDER BY ID DESC LIMIT 2
 if num_rows==2 {compute differences and checks}
 */
-
    $today_stats= array();
    foreach( array(
       'finished' =>
-         "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished"
-         ." FROM Games WHERE Status='FINISHED'",
+         "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished FROM Games WHERE Status='FINISHED'",
       'running' =>
-         "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning"
-         ." FROM Games WHERE Status" . IS_RUNNING_GAME,
+         "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning FROM Games WHERE Status".IS_RUNNING_GAME,
       'users' =>
-         "SELECT SUM(Hits) AS Hits, Count(*) AS Users, SUM(Activity)/$ActivityForHit AS Activity"
-         ." FROM Players",
+         "SELECT SUM(Hits) AS Hits, COUNT(*) AS Users, SUM(Activity)/$ActivityForHit AS Activity FROM Players",
       ) as $key => $query )
    {
       $row = mysql_single_fetch( "daily_cron.statistics.$key", $query);
       if( $row )
-         $today_stats= array_merge( $today_stats, $row);
+         $today_stats = array_merge( $today_stats, $row);
    }
 
-   $row= array(
+   $row = array(
       "Moves=({$today_stats['MovesFinished']}+{$today_stats['MovesRunning']})",
       "Games=({$today_stats['GamesFinished']}+{$today_stats['GamesRunning']})",
-      "Time=FROM_UNIXTIME($NOW)"
+      "Time=FROM_UNIXTIME($NOW)",
       );
-   foreach( $today_stats as $key => $query )
-   {
-      $row[]= "$key=$query";
-   }
-   $query= implode(',', $row);
+   foreach( $today_stats as $key => $val )
+      $row[] = "$key=$val";
+   $query = implode(',', $row);
 
    db_query( 'daily_cron.statistics_insert',
       "INSERT INTO Statistics SET $query" );
-
-}else{//old //TODO check! remove !?
-   $q_finished = "SELECT SUM(Moves) as MovesFinished, COUNT(*) as GamesFinished FROM Games " .
-       "WHERE Status='FINISHED'";
-   $q_running = "SELECT SUM(Moves) as MovesRunning, COUNT(*) as GamesRunning FROM Games " .
-       "WHERE Status" . IS_RUNNING_GAME;
-   $q_users = "SELECT SUM(Hits) as Hits, Count(*) as Users, SUM(Activity)/$ActivityForHit as Activity FROM Players";
-
-   $result = db_query( 'daily_cron.statistics_moves_finished', $q_finished );
-   if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_assoc($result));
-   mysql_free_result($result);
-
-   $result = db_query( 'daily_cron.statistics_moves_running', $q_running );
-
-   if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_assoc($result));
-   mysql_free_result($result);
-
-   $result = db_query( 'daily_cron.statistics_users', $q_users );
-
-   if( @mysql_num_rows($result) > 0 )
-      extract( mysql_fetch_assoc($result));
-   mysql_free_result($result);
-
-   db_query( 'daily_cron.statistics_insert',
-      "INSERT INTO Statistics SET"
-               ." Time=FROM_UNIXTIME($NOW)" //could become a Date= timestamp field
-               .",Hits=" . (int)$Hits
-               .",Users=" . (int)$Users
-               .",Moves=" . (int)($MovesFinished+$MovesRunning)
-               .",MovesFinished=" . (int)$MovesFinished
-               .",MovesRunning=" . (int)$MovesRunning
-               .",Games=" . (int)($GamesRunning+$GamesFinished)
-               .",GamesFinished=" . (int)$GamesFinished
-               .",GamesRunning=" . (int)$GamesRunning
-               .",Activity=" . (int)$Activity );
-
-}//new/old
 
 
 
@@ -182,9 +136,9 @@ if num_rows==2 {compute differences and checks}
          " AND User_ID>0 AND Forum_ID>0" ); // secondary restrictions
 
 
+
 // Apply recently changed night hours
 
-if(1){//new
    $result = db_query( 'daily_cron.night_hours',
       "SELECT ID, Timezone, Nightstart, ClockUsed FROM Players WHERE ClockChanged='Y'" );
    // note: DST-adjustments are checked in include/std_functions.php is_logged_in()
@@ -195,53 +149,24 @@ if(1){//new
       while( $row = mysql_fetch_assoc($result) )
       {
          setTZ( $row['Timezone']); //for get_clock_used()
-         $newclock= get_clock_used( $row['Nightstart']);
+         $newclock = get_clock_used($row['Nightstart']);
          $uid = $row['ID'];
-         db_query( "daily_cron.night_hours.update($uid)",
-               "UPDATE Players SET ClockChanged='N',ClockUsed=$newclock"
-               . " WHERE ID=$uid LIMIT 1" )
-            or error('mysql_query_failed', "daily_cron.night_hours.update2($uid)");
+
+         // NightStart may be unchanged, but we have to reset ClockChanged
+         db_query( "daily_cron.night_hours.update($uid,$newclock)",
+               "UPDATE Players SET ClockChanged='N',ClockUsed=$newclock WHERE ID=$uid LIMIT 1" )
+            or error('mysql_query_failed', "daily_cron.night_hours.update2($uid,$newclock)");
       }
       setTZ($otz); //reset to previous
    }
    mysql_free_result($result);
-}else{//older and bugged //TODO remove !?
-   $result = db_query( 'daily_cron.night_hours',
-      "SELECT ID, Nightstart, ClockUsed, Timezone " .
-      "FROM Players WHERE ClockChanged='Y' OR ID=1 ORDER BY ID" );
-   //$result always contains guest(first!) and the other ClockChanged='Y'
-
-   if( @mysql_num_rows( $result) > 0 )
-   {
-      $row = mysql_fetch_assoc($result); //always "guest"
-      setTZ( $row['Timezone']); //always GMT (guest default)
-
-      // Changed to/from summertime?
-      if( $row['ClockUsed'] !== get_clock_used($row['Nightstart']) )
-      {
-         //adjust the whole community (ClockChanged='Y' or not)
-         $result = db_query( 'daily_cron.summertime_check',
-            "SELECT ID, Nightstart, ClockUsed, Timezone FROM Players" );
-      }
-
-      while( $row = mysql_fetch_assoc($result) )
-      {
-         setTZ( $row['Timezone']);
-         db_query( 'daily_cron.summertime_update',
-            "UPDATE Players " .
-                     "SET ClockChanged='N', " .
-                     "ClockUsed='" . get_clock_used($row['Nightstart']) . "' " .
-                     "WHERE ID='" . $row['ID'] . "' LIMIT 1" );
-      }
-   }
-   mysql_free_result($result);
-}//new/old
 
 
 
 // Increase feature-points
 
    UserQuota::increase_update_feature_points();
+
 
 
    // ---------- END --------------------------------
