@@ -23,8 +23,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/graph.php" );
 
-//Display the number of games played below the dates.
-define('SHOW_NRGAMES', true);
+// NOTE: always display the number of games played below the dates.
+
 //Display the win/lost/unrated pie.
 define('ENA_WIN_PIE', true);
 //Default display of the win/lost/unrated pie.
@@ -67,8 +67,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,1);' );
    }
 
-   //actually, $show_by_number can't work without SHOW_NRGAMES. TODO
-   $show_by_number = SHOW_NRGAMES && GRAPH_RATING_BY_NUM_ENABLED && ((bool)@$_GET['bynumber']);
+   $show_by_number = GRAPH_RATING_BY_NUM_ENABLED && ((bool)@$_GET['bynumber']);
    $show_win_pie = ENA_WIN_PIE && (SHOW_WIN_PIE xor ((bool)@$_GET['winpie']));
 
 
@@ -113,7 +112,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $nr_points = count($ratings);
 
    //$startnumber is the number of games before the graph start
-   if( !SHOW_NRGAMES || !isset($number) || count($number) < 1 )
+   if( !isset($number) || count($number) < 1 )
    {
       $startnumber = $endnumber = -1;
    }
@@ -151,7 +150,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $marge_left  = $gr->border+10 +$x;
    $marge_right = max(10,DASH_MODULO+2); //better if > DASH_MODULO
    $marge_top   = max(10,DASH_MODULO+2); //better if > DASH_MODULO
-   $marge_bottom= $gr->border+ (SHOW_NRGAMES?3:2)*$gr->labelMetrics['LINEH'];
+   $marge_bottom= $gr->border + 3 * $gr->labelMetrics['LINEH']; // show-numbers: 3 else 2
 
    $gr->setgraphbox( $marge_left, $marge_top, $gr->width-$marge_right, $gr->height-$marge_bottom );
 
@@ -208,15 +207,14 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
          $y = $gr->boxbottom+3 +1*$gr->labelMetrics['LINEH'];
          $gr->gridX( $startnumber, $step, $y, 'nbr2date', $black, '', $red );
       }
-      if( SHOW_NRGAMES )
+
+      // show numbers
+      $y = $gr->boxbottom+3;
+      $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color);
+      if( $startnumber >= 0 )
       {
-         $y = $gr->boxbottom+3;
-         $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color);
-         if( $startnumber >= 0 )
-         {
-            $x= $x['x'] +$gr->labelMetrics['WIDTH'];
-            $gr->gridX( $startnumber, $step, $y, '', $number_color, '', $red, 0, $x );
-         }
+         $x= $x['x'] +$gr->labelMetrics['WIDTH'];
+         $gr->gridX( $startnumber, $step, $y, '', $number_color, '', $red, 0, $x );
       }
    }
    else //!(GRAPH_RATING_BY_NUM_ENABLED && $show_by_number)
@@ -232,24 +230,22 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
          "return mktime(0,0,0,\$x,1,$year,0);" );
       $gr->gridX( $month, $step, $gr->boxbottom+3, $datelabel, $black, $dategrid, $red );
 
-      if( SHOW_NRGAMES )
+      // show numbers
+      $y = $gr->boxbottom+3 +2*$gr->labelMetrics['LINEH'];
+      $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color );
+      if( $startnumber >= 0 )
       {
-         $y = $gr->boxbottom+3 +2*$gr->labelMetrics['LINEH'];
-         $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color );
-         if( $startnumber >= 0 )
-         {
-            function date2nbr($v){
-               global $time, $number;
-               $n= array_bsearch($v, $time);
-               if( $n > 0 )
-                  $n--;
-               else
-                  $n= 0;
-               return round($number[$n]);
-            }
-            $x= $x['x'] +$gr->labelMetrics['WIDTH'];
-            $gr->gridX( $month, $step, $y, 'date2nbr', $number_color, $dategrid, $red, 0, $x );
+         function date2nbr($v){
+            global $time, $number;
+            $n= array_bsearch($v, $time);
+            if( $n > 0 )
+               $n--;
+            else
+               $n= 0;
+            return round($number[$n]);
          }
+         $x= $x['x'] +$gr->labelMetrics['WIDTH'];
+         $gr->gridX( $month, $step, $y, 'date2nbr', $number_color, $dategrid, $red, 0, $x );
       }
    }
 
