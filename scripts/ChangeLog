@@ -19,7 +19,120 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2011-04-02 juga
+2011-04-03 juga
+
+   * tournaments/include/tournament_games.php (TournamentGames.buildStatusFilterArray),
+     show_games.php:
+   - added filter for TournamentGames.Status for tournament-games
+
+   * include/message_functions.php (class MessageListBuilder, ~.message_list_head,
+       ~.message_list_body, ~.message_build_user_string),
+     include/table_columns.php (class Table),
+     list_messages.php, message_thread.php, search_messages.php, status.php:
+   - fixed TODO by refactoring vars stored in ExtMode-array in Table-object
+     into class MessageListBuilder to pass vars between methods
+
+   * include/game_functions.php (GameAddTime.allow_add_time_opponent),
+     include/sgf_builder.php (SgfBuilder.load_game_info),
+     game_comments.php:
+   - fix missing handling of new games-status 'SETUP' in NOT-checks
+     like Games.Status != 'FINISHED/INVITED'
+
+   * include/classlib_userconfig.php, include/connect2mysql.php,
+     include/game_functions.php, include/make_translationfiles.php,
+     include/quick/quick_game.php, include/sgf_builder.php,
+     scripts/game_consistency.php, scripts/generate_translation_texts.php,
+     confirm.php, faq.php, opponents.php, quick_play.php, search_messages.php,
+     statistics.php, statisticspng.php, wap/status.php:
+   - checked/changed all TODOs, fixed TODO by changing to NOTE or by removing it
+
+   * scripts/convert_from_old_forum.php:
+   - added note to prevent script from being used without fixing TODOs
+
+   * clock_tick.php:
+   - bugfixes/TODOs for timeout-detection:
+     added Clock.ID>=0, select Games.Flags as int, added notes
+
+   * daily_cron.php:
+   - fixed TODOs:
+     - removed old code to write daily-statistics
+     - removed old code to handle night-start-change
+
+   * include/register_functions.php (UserRegistration.register_blocked_user),
+     include/config.php (FORUM_ID_SUPPORT),
+     do_registration_blocked.php:
+   - fixed TODO by adding global-config with forum-id of support-forum
+
+   * include/form_functions.php:
+   - fixed TODOs by removing unused add_form()-func, removing NTH-feature
+
+   * index.php:
+   - fixed TODO by cleaning up form-items
+
+   * join_waitingroom_game.php:
+   - fixed TODO by addding HOT-section for joining waiting-room
+
+   * ratingpng.php:
+   - fixed TODO by removing 'implicit' SHOW_NRGAMES-const
+
+   * include/std_functions.php:
+   - fixed TODOs by removing unused vars, changed some TODOs
+
+   * include/make_game.php, include/message_functions.php,
+     include/sgf_parser.php, include/std_functions.php,
+     tournaments/include/tournament_rules.php,
+     tournaments/view_tournament.php,
+     add_to_waitingroom.php, game.php, waiting_room.php:
+   - renamed ENA_STDHANDICAP -> ENABLE_STDHANDICAP, concentrating TODOs
+
+   * scripts/update_translation_pages.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/data_export.php:
+   - fixed TODO by removing TranslationPages.ID-field using Page-field as primary-key
+-----------
+-- drop unused column TranslationPages.ID
+ALTER TABLE TranslationPages
+   DROP COLUMN ID,
+   ADD PRIMARY KEY (Page) ;
+-----------
+
+   * scripts/tournament_consistency.php, scripts/index.php:
+   - added admin consistency-script to fix Tournament.RegisteredTP-field
+
+   * tournaments/include/tournament.php (class Tournament, ~.fillEntityData,
+       ~.new_from_row, ~.update_tournament_registeredTP),
+     tournaments/include/tournament_participant.php (TournamentParticipant.isTournamentParticipant,
+       ~.update_tournament_registeredTP, ~.delete_tournament_participant),
+     tournaments/edit_participant.php,
+     tournaments/list_tournaments.php,
+     tournaments/register.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - added aggregate of number of registered participants of a tournament
+     for tournament-list, stored in new field Tournament.RegisteredTP
+-----------
+-- added aggregate of tournaments registered participants in Tournament-table
+ALTER TABLE Tournament
+   ADD RegisteredTP smallint NOT NULL default '0' AFTER CurrentRound ;
+-----------
+
+   * tournaments/include/tournament_factory.php (TournamentFactory.getTournamentTypes),
+     tournaments/include/tournament_globals.php,
+     include/config.php (ALLOW_TOURNAMENTS_ROUND_ROBIN),
+     tournaments/wizard.php, NEWS:
+   - added config-switch to disable ROUND-ROBIN tournaments for production,
+     because implementation is unfinished,
+   - tourney-wizard: separate different tournament-types with line
+
+   * include/game_functions.php (MultiPlayerGame.init_multi_player_game,
+       ~.join_waitingroom_game, ~.change_joined_players),
+     game_players.php (accept_invite, delete_joined_player),
+     specs/db/table-Games.txt, status.php:
+   - use Games.Moves to store number of joined-players of MP-game showing
+     on status-page on MP-game-list
+
+   * waiting_room.php:
+   - changed order of Rated-column -> after time-limit
 
    * include/rating.php (change_user_rating),
      scripts/recalculate_ratings2.php (find_rating_changes, change_user_ratings_for_recalc),
@@ -31,6 +144,8 @@ ChangeLog
    * admin_rating.php (load_old_rating_changes):
    - added warning about avoiding rating-changes on DST-change
    - cleanup: replaced FOUND_ROWS()-SQL-call with existing row-count
+
+2011-04-02 juga
 
    * include/db/ratingchangeadmin.php (class RatingChangeAdmin, ~.to_string, ~.persist,
        ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row,
