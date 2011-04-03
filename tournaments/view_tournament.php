@@ -185,7 +185,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // number of registered users
    echo sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),
       "<br>\n<ul>";
-   //TODO show also count of users for round > 1 !?
+   //TODO(RR) show also count of users for round > 1 !?
    foreach( $tp_counts as $t_status => $cnt )
    {
       echo "  <li>",
@@ -311,7 +311,7 @@ function echo_tournament_rules( $tourney, $trule )
       $itable->add_sinfo( T_('Handicap adjustment#trules_handi'), implode(', ', $adj_handi) );
    if( count($adj_komi) )
       $itable->add_sinfo( T_('Komi adjustment#trules_komi'), implode(', ', $adj_komi) );
-   if( ENA_STDHANDICAP )
+   if( ENABLE_STDHANDICAP )
       $itable->add_sinfo( T_('Standard placement#trules_handi'), yesno($trule->StdHandicap) );
    $itable->add_sinfo( T_('Main time#trules'), TimeFormat::echo_time($trule->Maintime)
          . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)#trules') : '' ));

@@ -405,7 +405,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
                               ));
    }
 
-   if( ENA_STDHANDICAP )
+   if( ENABLE_STDHANDICAP )
    {
       $arr = array();
       if( $expert_view )
@@ -895,7 +895,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
          $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
    }
 
-   if( ENA_STDHANDICAP )
+   if( ENABLE_STDHANDICAP )
       $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
    if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment

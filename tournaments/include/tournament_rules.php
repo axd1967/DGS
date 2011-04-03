@@ -393,7 +393,7 @@ class TournamentRules
 
       $rated = ( @$vars['rated'] == 'Y' );
 
-      if( ENA_STDHANDICAP )
+      if( ENABLE_STDHANDICAP )
          $stdhandicap = ( @$vars['stdhandicap'] == 'Y' );
       else
          $stdhandicap = false;

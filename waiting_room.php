@@ -113,7 +113,7 @@ require_once( 'include/classlib_userconfig.php' );
          true);
    $wrfilter->add_filter(11, 'RatedSelect', 'Rated', true);
    $wrfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
-   if( ENA_STDHANDICAP )
+   if( ENABLE_STDHANDICAP )
       $wrfilter->add_filter(13, 'BoolSelect', 'StdHandicap', true);
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
@@ -154,7 +154,7 @@ require_once( 'include/classlib_userconfig.php' );
    // NOTE: User can choose:
    // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:
-   if( ENA_STDHANDICAP )
+   if( ENABLE_STDHANDICAP )
       $wrtable->add_tablehead(13, T_('Standard placement#header'), '', 0, 'StdHandicap-');
 
    $wrtable->set_default_sort( 3, 2); //on other_rating,other_handle
@@ -341,7 +341,7 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[11] = yesno( $Rated);
          if( $wrtable->Is_Column_Displayed[12] )
             $wrow_strings[12] = yesno( $WeekendClock);
-         if( ENA_STDHANDICAP )
+         if( ENABLE_STDHANDICAP )
          {
             if( $wrtable->Is_Column_Displayed[13] )
                $wrow_strings[13] = yesno( $StdHandicap);
@@ -366,7 +366,7 @@ require_once( 'include/classlib_userconfig.php' );
             }
             else
                $settings_str = '';
-            if( ENA_STDHANDICAP && ($StdHandicap !== 'Y') )
+            if( ENABLE_STDHANDICAP && ($StdHandicap !== 'Y') )
                $settings_str .= ($settings_str ? ' ' : '') . T_('(Free Handicap)#handicap_tablewr');
             $wrow_strings[18] = $settings_str;
          }

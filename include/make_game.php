@@ -376,7 +376,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    if( $stdhandicap != 'Y' || !standard_handicap_is_possible($size, $moves ) )
       $stdhandicap = 'N';
 
-   if( ENA_STDHANDICAP&2 && $stdhandicap == 'Y' && $moves > 1 )
+   if( (ENABLE_STDHANDICAP & 2) && $stdhandicap == 'Y' && $moves > 1 )
       $skip_handicap_validation = true;
    else
       $skip_handicap_validation = false;
@@ -452,7 +452,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    if( $gid <= 0 )
       error('internal_error', "create_game.err2($gid)");
 
-   //ENA_STDHANDICAP:
+   //ENABLE_STDHANDICAP:
    // both b1 and b2 set is not fully handled (error if incomplete pattern)
    if( $skip_handicap_validation )
    {
@@ -479,13 +479,12 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
 function standard_handicap_is_possible($size, $hcp)
 {
-   if( ENA_STDHANDICAP&4 ) //allow everything
+   if( ENABLE_STDHANDICAP & 4 ) //allow everything
       return true;
    return( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
 }
 
-//TODO resolve following into clearer construction
-if( ENA_STDHANDICAP & 2 ) { //skip black validation
+if( ENABLE_STDHANDICAP & 2 ) { //skip black validation
 //for get_handicap_pattern:
 require_once('include/sgf_parser.php');
 require_once('include/coords.php');
@@ -534,6 +533,6 @@ function make_standard_placement_of_handicap_stones(
    return true;
 }
 
-} //ENA_STDHANDICAP&2
+} //ENABLE_STDHANDICAP & 2
 
 ?>

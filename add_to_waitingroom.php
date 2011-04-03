@@ -161,7 +161,7 @@ require_once( 'include/utilities.php' );
    if( ($rated = @$_POST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
       $rated = 'N';
 
-   if( ENA_STDHANDICAP )
+   if( ENABLE_STDHANDICAP )
    {
       if( ($stdhandicap=@$_POST['stdhandicap']) != 'Y' )
          $stdhandicap = 'N';

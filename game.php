@@ -41,7 +41,7 @@ require_once( "include/move.php" );
 require_once( 'include/classlib_game.php' );
 require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
-if( ENA_STDHANDICAP ) {
+if( ENABLE_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
 if( ALLOW_TOURNAMENTS ) {
@@ -303,7 +303,7 @@ function get_alt_arg( $n1, $n2)
 
             $paterr = '';
             $patdone = 0;
-            if( ENA_STDHANDICAP && !$stonestring && !$coord
+            if( ENABLE_STDHANDICAP && !$stonestring && !$coord
                   && ( $StdHandicap=='Y' || @$_REQUEST['stdhandicap'] ) )
             {
                $extra_infos[T_('A standard placement of handicap stones has been requested.')] = 'Info';
@@ -319,7 +319,7 @@ function get_alt_arg( $n1, $n2)
             {
                $validation_step = false;
                $extra_infos[T_('Place your handicap stones, please!')] = 'Info';
-               if( ENA_STDHANDICAP && !$patdone && strlen($stonestring)<2 )
+               if( ENABLE_STDHANDICAP && !$patdone && strlen($stonestring)<2 )
                {
                   $strtmp = "<a href=\"game.php?gid=$gid".URI_AMP."stdhandicap=t\">"
                      . T_('Standard placement') . "</a>";

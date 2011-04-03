@@ -325,7 +325,8 @@ function sgf_parse_key( $sgf, &$i, $l)
    return $key;
 }
 
-if( defined('ENA_STDHANDICAP') && ENA_STDHANDICAP ) { //TODO clearer structure
+
+if( defined('ENABLE_STDHANDICAP') && ENABLE_STDHANDICAP ) {
 
 function handicap_push( &$vars, &$var, $nb)
 {
@@ -400,6 +401,6 @@ function get_handicap_pattern( $size, $handicap, &$err)
    return $stonestring;
 }
 
-} // ENA_STDHANDICAP
+}//ENABLE_STDHANDICAP
 
 ?>
