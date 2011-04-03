@@ -2002,3 +2002,9 @@ ALTER TABLE Tournament
    ADD RegisteredTP smallint NOT NULL default '0' AFTER CurrentRound ;
 
 
+-- drop unused column TranslationPages.ID
+ALTER TABLE TranslationPages
+   DROP COLUMN ID,
+   ADD PRIMARY KEY (Page) ;
+
+

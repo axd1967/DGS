@@ -846,8 +846,8 @@ Text_ID,Group_ID
 #
 # Dumping data for table 'TranslationPages'
 #
-INSERT INTO TranslationPages VALUES (3,'error.php',8);
-ID,Page,Group_ID
+INSERT INTO TranslationPages VALUES ('error.php',8);
+Page,Group_ID
 */
    $tables = array(
       // table => array( fields, where, order )

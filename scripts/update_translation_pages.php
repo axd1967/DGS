@@ -240,8 +240,7 @@ function group_string( $id)
       if( !isset($translationpages_found[$row['Page']]) )
       {
          echo "<hr>Should be deleted: " . $row['Page'] . "<br>\n";
-         //TODO: could we drop the ID column of TranslationPages: it is only used in this script, isn't it?
-         dbg_query("DELETE FROM TranslationPages WHERE ID=" . $row['ID'] . " LIMIT 1");
+         dbg_query("DELETE FROM TranslationPages WHERE Page='" . mysql_addslashes($row['Page']) . "' LIMIT 1");
       }
       else
       {
@@ -255,11 +254,10 @@ function group_string( $id)
          $ref[1] = true;
          if( $ref[0] !== $row['Group_ID'] )
          {
-            echo "<hr>Group changed: " . $row['Page']
-               . ": " . group_string( $row['Group_ID'])
-               . " --> " . group_string( $ref[0]) . "<br>\n";
+            echo sprintf( "<hr>Group changed: %s: %s --> %s<br>\n",
+                          $row['Page'], group_string($row['Group_ID']), group_string($ref[0]) );
             dbg_query("UPDATE TranslationPages SET Group_ID=" . $ref[0] .
-                      " WHERE ID=" . $row['ID'] . " LIMIT 1");
+                      " WHERE Page='" . mysql_addslashes($row['Page']) . "' LIMIT 1");
          }
       }
    }
@@ -270,8 +268,7 @@ function group_string( $id)
    {
       if( $val[1] === false )
       {
-         echo "<hr>To be added: " . $page
-               . " --> " . group_string( $val[0]) . "<br>\n";
+         echo "<hr>To be added: $page --> ", group_string($val[0]), "<br>\n";
          dbg_query("INSERT INTO TranslationPages " .
             "SET Page='" . mysql_addslashes($page) . "', Group_ID=" . $val[0]);
       }
