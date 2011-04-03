@@ -61,13 +61,15 @@ class TournamentFactory
    /*! \brief Returns list with all defined wizard-types in order to be showed for tourney-wizard. */
    function getTournamentTypes()
    {
-      static $arr_types = array(
-         TOURNEY_WIZTYPE_DGS_LADDER,
-         TOURNEY_WIZTYPE_PUBLIC_LADDER,
-         TOURNEY_WIZTYPE_PRIVATE_LADDER,
-         TOURNEY_WIZTYPE_DGS_ROUNDROBIN,
+      $ttypes = array(
+         TOURNEY_WIZTYPE_DGS_LADDER       => TWIZT_LADDER | TWIZ_DGS,
+         TOURNEY_WIZTYPE_PUBLIC_LADDER    => TWIZT_LADDER | TWIZ_PUBLIC,
+         TOURNEY_WIZTYPE_PRIVATE_LADDER   => TWIZT_LADDER | TWIZ_PRIVATE,
+         TOURNEY_WIZTYPE_DGS_ROUNDROBIN   => TWIZT_ROUND_ROBIN | TWIZ_DGS,
       );
-      return $arr_types;
+      if( !ALLOW_TOURNAMENTS_ROUND_ROBIN )
+         unset($ttypes[TOURNEY_WIZTYPE_DGS_ROUNDROBIN]);
+      return $ttypes;
    }
 
 } // end of 'TournamentFactory'

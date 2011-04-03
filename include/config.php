@@ -148,6 +148,7 @@ define('ALLOW_JAVASCRIPT', true);
 
 // Allow usage of tournaments
 define('ALLOW_TOURNAMENTS', false);
+define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.
 
 // Allow usage of GoDiagrams (only working with JavaScript)
 define('ALLOW_GO_DIAGRAMS', false);

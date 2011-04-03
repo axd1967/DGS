@@ -75,10 +75,14 @@ require_once 'tournaments/include/tournament_factory.php';
    $tform = new Form( 'wizard', $page, FORM_POST );
 
    $tform->add_row( array( 'HEADER', T_('Choose type of tournament') ));
-   foreach( TournamentFactory::getTournamentTypes() as $wiztype )
+   $last_wiz_flags = 0;
+   foreach( TournamentFactory::getTournamentTypes() as $wiztype => $wiz_flags )
    {
       $new_ttype = TournamentFactory::getTournament($wiztype);
+      if( $last_wiz_flags > 0 && ( ($last_wiz_flags & TWIZT_MASK) != ($wiz_flags & TWIZT_MASK) ) )
+         $tform->add_empty_row();
       $tform->add_row( build_tourney_type_radio($new_ttype, $type, $is_admin) );
+      $last_wiz_flags = $wiz_flags;
    }
 
    $tform->add_empty_row();

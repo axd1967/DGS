@@ -44,6 +44,14 @@ define('TOURNEY_WIZTYPE_PRIVATE_LADDER', 3);
 define('TOURNEY_WIZTYPE_DGS_ROUNDROBIN', 4);
 define('MAX_TOURNEY_WIZARD_TYPE', 4);
 
+// bitmasks for wizard: bits 0-3 reserved for modes/opts, bits 4-7 for types
+define('TWIZ_DGS',     0x03);
+define('TWIZ_PUBLIC',  0x02);
+define('TWIZ_PRIVATE', 0x01);
+define('TWIZT_MASK',        0xF0); // reserved bits
+define('TWIZT_LADDER',      0x10);
+define('TWIZT_ROUND_ROBIN', 0x20);
+
 // also adjust TournamentStatus::check_status_change()
 define('TOURNEY_STATUS_ADMIN',    'ADM');
 define('TOURNEY_STATUS_NEW',      'NEW');
