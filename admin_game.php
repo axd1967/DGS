@@ -93,7 +93,7 @@ define('GA_RES_TIMOUT', 3);
       if( @$_REQUEST['gend_save'] )
       {
          $game_finalizer = new GameFinalizer( ACTBY_ADMIN, $my_id, $gid, $game->tid,
-            $game->GameType, $game->Flags, $game->Black_ID, $game->White_ID, $game->Moves );
+            $game->Status, $game->GameType, $game->Flags, $game->Black_ID, $game->White_ID, $game->Moves );
          $score_text = ($game->Score == 0.0) ? 'jigo' : ( $game->Score < 0 ? 'B' : 'W' ) . ' win';
 
          ta_begin();
@@ -118,10 +118,14 @@ define('GA_RES_TIMOUT', 3);
       elseif( @$_REQUEST['gdel_save'] )
       {
          // send message to my opponent / all-players / observers about the result
-         $game_notify = new GameNotify( $gid, /*adm*/0, $game->GameType, $game->Flags,
+         $game_notify = new GameNotify( $gid, /*adm*/0, $game->Status, $game->GameType, $game->Flags,
             $game->Black_ID, $game->White_ID, $game->Score, trim(get_request_arg('delmsg')) );
 
-         if( GameHelper::delete_running_game($gid) )
+         if( $game->Status == GAME_STATUS_FINISHED )
+            $del_result = GameHelper::delete_finished_unrated_game($gid);
+         else
+            $del_result = GameHelper::delete_running_game($gid);
+         if( $del_result )
          {
             admin_log( $my_id, $player_row['Handle'],
                "Deleted game #$gid by admin: {$game->GameType}({$game->GamePlayers})[{$game->Status}], " .
@@ -201,8 +205,7 @@ define('GA_RES_TIMOUT', 3);
 
    // ADMIN: End game ------------------
 
-   if( $game->Status != GAME_STATUS_FINISHED )
-      draw_game_admin_form( $game );
+   draw_game_admin_form( $game );
 
    end_page();
 }//main
@@ -229,7 +232,12 @@ function parse_edit_form( &$game )
 
    // checks
    if( $game->Status == GAME_STATUS_FINISHED )
-      $errors[] = T_('Finished game can not be changed!#gameadm');
+   {
+      if( $game->tid > 0 )
+         $errors[] = T_('Finished tournament-game can not be changed!#gameadm');
+      elseif( $game->Rated != 'N' )
+         $errors[] = T_('Finished rated game can not be changed!#gameadm');
+   }
    if( @$_REQUEST['gend_save'] && !isRunningGame($game->Status) )
       $errors[] = T_('Game-result can only be changed for running game!#gameadm');
    if( @$_REQUEST['grated_save'] )
@@ -239,8 +247,13 @@ function parse_edit_form( &$game )
       if( $game->GameType != GAMETYPE_GO )
          $errors[] = T_('Rated-status can not be changed for multi-player-game!#gameadm');
    }
-   if( (@$_REQUEST['gdel'] || @$_REQUEST['gdel_save']) && $game->tid > 0 )
-      $errors[] = T_('Tournament-game can not be deleted!#gameadm');
+   if( @$_REQUEST['gdel'] || @$_REQUEST['gdel_save'] )
+   {
+      if( $game->tid > 0 )
+         $errors[] = T_('Tournament-game can not be deleted!#gameadm');
+      elseif( $game->Status == GAME_STATUS_FINISHED && $game->Rated != 'N' )
+         $errors[] = T_('Finished rated game can not be deleted!#gameadm');
+   }
 
    // parse URL-vars
    $mask_gend = 0;
@@ -380,7 +393,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Change rated-status ----------
 
-   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->GameType == GAMETYPE_GO )
+   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->GameType == GAMETYPE_GO && isRunningGame($game->Status) )
    {
       if( $draw_hr )
          $gaform->add_row( array( 'HR' ));
@@ -399,7 +412,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Delete game ----------
 
-   if( $game->tid == 0 )
+   if( $game->tid == 0 || ($game->Status == GAME_STATUS_FINISHED && $game->tid == 0 && $game->Rated == 'N') )
    {
       $too_few_moves = ( $game->Moves < DELETE_LIMIT + $game->Handicap );
       if( $draw_hr )
@@ -415,7 +428,7 @@ function draw_game_admin_form( $game )
       $gaform->add_row( array(
             'CELL', 2, '',
             'TEXT', ' => ' .
-                    ( ( $too_few_moves && $game->GameType == GAMETYPE_GO )
+                    ( ( $too_few_moves && $game->GameType == GAMETYPE_GO && isRunningGame($game->Status) )
                         ? T_('Players can delete game too!#gameadm')
                         : T_('Only admin can delete game!#gameadm')), ));
       $gaform->add_row( array(

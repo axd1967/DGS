@@ -19,6 +19,17 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-07 juga
+
+   * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game,
+       ~.remove_double_game_reference, ~._delete_base_game_tables;
+       class GameFinalizer, ~.finish_game;
+       class GameNotify, ~.get_text_game_deleted),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     admin_game.php (parse_edit_form, draw_game_admin_form),
+     clock_tick.php, confirm.php, NEWS:
+   - game-admin: allow to delete finished unrated non-tournament games
+
 2011-04-03 juga
 
    * tournaments/include/tournament_games.php (TournamentGames.buildStatusFilterArray),
@@ -121,7 +132,7 @@ ALTER TABLE Tournament
      include/config.php (ALLOW_TOURNAMENTS_ROUND_ROBIN),
      tournaments/wizard.php, NEWS:
    - added config-switch to disable ROUND-ROBIN tournaments for production,
-     because implementation is unfinished,
+     because implementation is unfinished
    - tourney-wizard: separate different tournament-types with line
 
    * include/game_functions.php (MultiPlayerGame.init_multi_player_game,

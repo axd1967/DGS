@@ -889,7 +889,7 @@ class GameHelper
     * \brief Deletes non-tourney game and all related tables for given game-id.
     * \param $upd_players if true, also decrease Players.Running
     * \param $grow game-row can be provided to save additional query
-    * \return true on success, false on invalid args or tourney-game.
+    * \return true on success, false on invalid args or invalid game to delete (finished, tourney)
     */
    function delete_running_game( $gid, $upd_players=true, $grow=null )
    {
@@ -901,14 +901,15 @@ class GameHelper
             "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
       if( !$grow || (int)@$grow['tid'] > 0 )
          return false;
+      elseif( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game
+      {
+         error('invalid_args', "GameHelper::delete_running_game.check.status($gid,{$grow['Status']})");
+         return false; // if passing through on error()
+      }
 
       ta_begin();
-      {//HOT-section to delete game table-entries
-         // mark reference in other double-game to indicate referring game has vanished
-         $dbl_gid = (int)@$grow['DoubleGame_ID'];
-         if( $dbl_gid > 0 )
-            db_query( "GameHelper::delete_running_game.doublegame($gid)",
-               "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$dbl_gid LIMIT 1" );
+      {//HOT-section to delete game table-entries for running game
+         GameHelper::remove_double_game_reference( $gid, (int)@$grow['DoubleGame_ID'] );
 
          if( $upd_players )
          {
@@ -923,24 +924,92 @@ class GameHelper
                MultiPlayerGame::update_players_end_mpgame( $gid, ($grow['Status'] == GAME_STATUS_SETUP) );
          }
 
-         NextGameOrder::delete_game_priorities($gid);
-         db_query( "GameHelper::delete_running_game.observers($gid)",
-            "DELETE FROM Observers WHERE ID=$gid" );
-         db_query( "GameHelper::delete_running_game.notes($gid)",
-            "DELETE FROM GamesNotes WHERE gid=$gid" );
-         db_query( "GameHelper::delete_running_game.movemsg($gid)",
-            "DELETE FROM MoveMessages WHERE gid=$gid" );
-         db_query( "GameHelper::delete_running_game.moves($gid)",
-            "DELETE FROM Moves WHERE gid=$gid" );
-         db_query( "GameHelper::delete_running_game.gameplayers($gid)",
-            "DELETE FROM GamePlayers WHERE gid=$gid" );
-         db_query( "GameHelper::delete_running_game.games($gid)",
-            "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+         GameHelper::_delete_base_game_tables( $gid );
       }
       ta_end();
 
       return true;
    }//delete_running_game
+
+   /*!
+    * \brief Deletes finished non-tourney unrated game and all related tables for given game-id.
+    * \note Players-table will be updated (decrease Players.Finished/etc)
+    * \return true on success, false on invalid args or invalid game to delete (not finished, tourney, rated game)
+    */
+   function delete_finished_unrated_game( $gid )
+   {
+      if( !is_numeric($gid) && $gid <= 0 )
+         return false;
+
+      $grow = mysql_single_fetch( "GameHelper::delete_finished_unrated_game.check.gid($gid)",
+         "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID, Rated " .
+         "FROM Games WHERE ID=$gid LIMIT 1");
+      if( is_null($grow) )
+         return false;
+      elseif( @$grow['Status'] != GAME_STATUS_FINISHED ) // must be finished game
+      {
+         error('invalid_args', "GameHelper::delete_finished_unrated_game.check.status($gid,{$grow['Status']})");
+         return false; // if passing through on error()
+      }
+      elseif( (int)@$grow['tid'] > 0 )
+         return false;
+      elseif( @$grow['Rated'] != 'N' )
+         return false;
+
+      ta_begin();
+      {//HOT-section to delete game table-entries for finished game
+         GameHelper::remove_double_game_reference( $gid, (int)@$grow['DoubleGame_ID'] );
+
+         if( $grow['GameType'] == GAMETYPE_GO )
+         {
+            $Black_ID = (int)@$grow['Black_ID'];
+            $White_ID = (int)@$grow['White_ID'];
+            db_query( "GameHelper::delete_finished_unrated_game.upd_players($gid,$Black_ID,$White_ID)",
+               "UPDATE Players SET Finished=Finished-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
+         }
+         else
+         {
+            db_query( "GameHelper::delete_finished_unrated_game.upd_mgplayers($gid)",
+               "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
+                  . "SET P.Finished=P.Finished-1 WHERE GP.gid=$gid" );
+         }
+
+         GameHelper::_delete_base_game_tables( $gid );
+      }
+      ta_end();
+
+      return true;
+   }//delete_finished_unrated_game
+
+   /*! \brief Marks reference in other double-game to indicate referring game has vanished. */
+   function remove_double_game_reference( $gid, $double_gid )
+   {
+      $double_gid = (int)$double_gid;
+      if( $double_gid > 0 )
+         db_query( "GameHelper::remove_double_game_reference.doublegame($gid)",
+            "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$double_gid LIMIT 1" );
+   }//remove_double_game_reference
+
+   /*!
+    * \brief Deletes basic game-related table-entries for given game-id.
+    * \internal
+    */
+   function _delete_base_game_tables( $gid )
+   {
+      NextGameOrder::delete_game_priorities($gid);
+      db_query( "GameHelper::_delete_base_game_tables.observers($gid)",
+         "DELETE FROM Observers WHERE ID=$gid" );
+      db_query( "GameHelper::_delete_base_game_tables.notes($gid)",
+         "DELETE FROM GamesNotes WHERE gid=$gid" );
+      db_query( "GameHelper::_delete_base_game_tables.movemsg($gid)",
+         "DELETE FROM MoveMessages WHERE gid=$gid" );
+      db_query( "GameHelper::_delete_base_game_tables.moves($gid)",
+         "DELETE FROM Moves WHERE gid=$gid" );
+      db_query( "GameHelper::_delete_base_game_tables.gameplayers($gid)",
+         "DELETE FROM GamePlayers WHERE gid=$gid" );
+      db_query( "GameHelper::_delete_base_game_tables.games($gid)",
+         "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+   }//delete_base_game_tables
 
    /*! \brief Deletes INVITED-game; return true for success; false on failure. */
    function delete_invitation_game( $dbgmsg, $gid, $uid1, $uid2 )
@@ -998,6 +1067,7 @@ class GameFinalizer
    var $my_id; // for game-notify: <0=cron(timeout), 0=admin
    var $gid;
    var $tid;
+   var $Status;
    var $GameType;
    var $GameFlags;
    var $Black_id;
@@ -1005,12 +1075,14 @@ class GameFinalizer
    var $Moves;
    var $skip_game_query;
 
-   function GameFinalizer( $action_by, $my_id, $gid, $tid, $game_type, $game_flags, $black_id, $white_id, $moves )
+   function GameFinalizer( $action_by, $my_id, $gid, $tid, $game_status, $game_type, $game_flags,
+                           $black_id, $white_id, $moves )
    {
       $this->action_by = $action_by;
       $this->my_id = (int)$my_id;
       $this->gid = (int)$gid;
       $this->tid = (int)$tid;
+      $this->Status = $game_status;
       $this->GameType = $game_type;
       $this->GameFlags = (int)$game_flags;
       $this->Black_ID = (int)$black_id;
@@ -1064,7 +1136,7 @@ class GameFinalizer
             $this->tid, $gid, $this->Black_ID, $game_score );
 
       // send message to my opponent / all-players / observers about the result
-      $game_notify = new GameNotify( $gid, $this->my_id, $this->GameType, $this->GameFlags,
+      $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GameFlags,
          $this->Black_ID, $this->White_ID, $game_score, $message );
 
       if( $do_delete )
@@ -1126,6 +1198,7 @@ class GameNotify
 {
    var $gid;
    var $uid; // can be 0 for admin (<> players)
+   var $game_status;
    var $game_type;
    var $game_flags;
    var $black_id;
@@ -1139,10 +1212,11 @@ class GameNotify
    var $players_text;
 
    /*! \brief Constructs GameNotify also loading player-info from db. */
-   function GameNotify( $gid, $uid, $game_type, $game_flags, $black_id, $white_id, $score, $message )
+   function GameNotify( $gid, $uid, $game_status, $game_type, $game_flags, $black_id, $white_id, $score, $message )
    {
       $this->gid = (int)$gid;
       $this->uid = (int)$uid;
+      $this->game_status = $game_status;
       $this->game_type = $game_type;
       $this->game_flags = (int)$game_flags;
       $this->black_id = (int)$black_id;
@@ -1199,7 +1273,14 @@ class GameNotify
       elseif( $action_by != ACTBY_PLAYER )
          $action_by = ACTBY_PLAYER;
 
-      $text = "The game:<center>"
+      if( $this->game_status == GAME_STATUS_FINISHED )
+         $gstatus = 'finished ';
+      elseif( $this->game_status == GAME_STATUS_SETUP )
+         $gstatus = 'setup-';
+      else
+         $gstatus = 'running ';
+
+      $text = "The ".$gstatus."game:<center>"
             . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->white_name, $this->black_name) // game is deleted => no link
             . "</center>has been deleted by {$MAP_ACTBY_SUBJECT[$action_by]}:<center>"
             . send_reference( REF_LINK, 1, '', $player_row )

@@ -518,9 +518,9 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
 
       * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
-         * Finish game by setting game-result, Change game rated-status, Delete game
+         * Finish game by setting game-result, Change game rated-status, Delete running & finished game
          * Notify players about game-end and game-deletion
-         * Setting game-result flags the game
+         * Setting game-result-flag for the game
       * Added admin-rating-page to change user-rating directly and/or resetting confidence-interval,
          * Show former rating-changes of user
          * Adjusted rating-recalculation-script to process admin-rating-changes
