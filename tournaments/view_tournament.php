@@ -28,6 +28,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
+require_once( 'tournaments/include/tournament_gui_helper.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
@@ -56,6 +57,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
    // init
+   $page = "view_tournament.php?tid=$tid";
+   $cnt_tstandings = $ttype->getCountTournamentStandings($tourney->Status);
 
    // TP-count
    $tp_counts = TournamentParticipant::count_tournament_participants( $tid );
@@ -102,6 +105,10 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       MINI_SPACING,
       T_('There are different sections:#tourney'), "\n<ul>",
          "\n<li>", anchor( "$base_page_tourney#title", T_('Tournament description') ),
+         "\n<li>", anchor( "$base_page_tourney#status", T_('Tournament status') ),
+         ( $cnt_tstandings > 0
+            ? "\n<li>" . anchor( "$base_page_tourney#standings", T_('Tournament standings') )
+            : ''),
          "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament ruleset') ),
          "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament registration information') ),
          "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament games') ),
@@ -141,7 +148,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Status --------------------
 
-   echo "<hr>\n", '<a name="result">', "\n";
+   echo "<hr>\n", '<a name="status">', "\n";
    section( 'tournament', T_('Tournament Status#T_view') );
 
    $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
@@ -164,6 +171,16 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    echo $itable->make_table();
 
+   // --------------- Standings -------------------------------------
+
+   if( $cnt_tstandings > 0 )
+   {
+      echo '<a name="standings">', "\n";
+      section( 'tournament', sprintf( T_('Tournament Standings (TOP %s)#T_view'), $cnt_tstandings ) );
+
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         echo TournamentGuiHelper::build_tournament_ladder_standings( $page, $tid, $cnt_tstandings );
+   }
 
    // --------------- Rules -----------------------------------------
 

@@ -962,5 +962,19 @@ class TournamentLadder
       return ($isTD) ? $statuslist_TD : $statuslist_user;
    }
 
+   function build_tournament_ladder_iterator( $tid, $query_sql, $limit=0 )
+   {
+      $iterator = new ListIterator( 'TournamentLadder.build_tournament_ladder_iterator.load_ladder',
+         $query_sql, 'ORDER BY Rank ASC', ($limit > 0 ? "LIMIT $limit" : '') );
+      $iterator->addQuerySQLMerge( new QuerySQL(
+            SQLP_FIELDS, 'TLP.ID AS TLP_ID', 'TLP.Name AS TLP_Name', 'TLP.Handle AS TLP_Handle',
+                         'TLP.Country AS TLP_Country', 'TLP.Rating2 AS TLP_Rating2',
+                         'UNIX_TIMESTAMP(TLP.Lastaccess) AS TLP_X_Lastaccess',
+            SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
+         ));
+      $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
+      return $iterator;
+   }
+
 } // end of 'TournamentLadder'
 ?>

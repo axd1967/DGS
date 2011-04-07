@@ -43,6 +43,7 @@ class TournamentTemplate
    var $need_rounds;
    var $allow_register_tourney_status;
    var $need_admin_create_tourney;
+   var $showcount_tournament_standings;
    var $limits;
 
    /*! \brief Constructs template for different tournament-types. */
@@ -58,6 +59,7 @@ class TournamentTemplate
       $this->need_rounds = false;
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
       $this->need_admin_create_tourney = true;
+      $this->showcount_tournament_standings = 0;
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, TP_MAX_COUNT );
    }
 
@@ -85,6 +87,13 @@ class TournamentTemplate
       $tourney->Title = $title;
       $tourney->Owner_ID = $this->uid;
       return $tourney;
+   }
+
+   /*! \brief Returns number of standings to show for tournament. */
+   function getCountTournamentStandings( $t_status )
+   {
+      return ( $t_status == TOURNEY_STATUS_PLAY || $t_status == TOURNEY_STATUS_CLOSED )
+         ? $this->showcount_tournament_standings : 0;
    }
 
 
