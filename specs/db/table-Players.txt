@@ -115,25 +115,34 @@ Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   
 
 # Fields for pages-related GUI-config in ConfigPages-table:
 
- 1    StatusFlags               | smallint(6)         | NO   | 3
- 1    StatusFolders             | varchar(40)         | NO   |
- 1    ForumFlags                | tinyint(3) unsigned | NO   | 8
- 1    ColumnsStatusGames        | int(11)             | NO   | -1
- 1    ColumnsWaitingroom        | int(11)             | NO   | -1
- 1    ColumnsUsers              | int(11)             | NO   | -1
- 1    ColumnsOpponents          | int(11)             | NO   | -1
- 1    ColumnsContacts           | int(11)             | NO   | -1
- 1    ColumnsGamesRunningAll    | int(11)             | NO   | -1
- 1    ColumnsGamesRunningAll2   | int(11)             | NO   | -1
- 1    ColumnsGamesRunningUser   | int(11)             | NO   | -1
- 1    ColumnsGamesRunningUser2  | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedAll   | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedAll2  | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedUser  | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedUser2 | int(11)             | NO   | -1
- 1    ColumnsGamesObserved      | int(11)             | NO   | -1
- 1    ColumnsGamesObserved2     | int(11)             | NO   | -1
- 1    ColumnsTournaments        | int(11)             | NO   | -1
+ 1    StatusFlags                     | smallint(6)         | NO   | 3
+ 1    StatusFolders                   | varchar(40)         | NO   |
+ 1    ForumFlags                      | tinyint(3) unsigned | NO   | 8
+ 1    ColumnsStatusGames              | int(11)             | NO   | -1
+ 1    ColumnsStatusTournaments        | int(11)             | NO   | -1
+ 1    ColumnsWaitingroom              | int(11)             | NO   | -1
+ 1    ColumnsUsers                    | int(11)             | NO   | -1
+ 1    ColumnsOpponents                | int(11)             | NO   | -1
+ 1    ColumnsContacts                 | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningAll          | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningAll2         | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningUser         | int(11)             | NO   | -1
+ 1    ColumnsGamesRunningUser2        | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedAll         | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedAll2        | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedUser        | int(11)             | NO   | -1
+ 1    ColumnsGamesFinishedUser2       | int(11)             | NO   | -1
+ 1    ColumnsGamesObserved            | int(11)             | NO   | -1
+ 1    ColumnsGamesObserved2           | int(11)             | NO   | -1
+ 1    ColumnsGamesObservedAll         | int(11)             | NO   | -1
+ 1    ColumnsGamesObservedAll2        | int(11)             | NO   | -1
+ 1    ColumnsFeatureList              | int(11)             | NO   | -1
+ 1    ColumnsTournaments              | int(11)             | NO   | -1
+ 1    ColumnsTournamentParticipants   | int(11)             | NO   | -1
+ 1    ColumnsTDTournamentParticipants | int(11)             | NO   | -1
+ 1    ColumnsTournamentResults        | int(11)             | NO   | -1
+ 1    ColumnsTournamentLadderView     | int(11)             | NO   | -1
+ 1    ColumnsTournamentPoolView       | int(11)             | NO   | -1
 
 
 -------------------------------------------------

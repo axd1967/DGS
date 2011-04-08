@@ -334,6 +334,7 @@ define('CFGCOLS_FEATURE_LIST',            'ColumnsFeatureList');
 define('CFGCOLS_TOURNAMENTS',             'ColumnsTournaments');
 define('CFGCOLS_TOURNAMENT_PARTICIPANTS', 'ColumnsTournamentParticipants');
 define('CFGCOLS_TD_TOURNAMENT_PARTICIPANTS', 'ColumnsTDTournamentParticipants');
+define('CFGCOLS_TOURNAMENT_RESULTS',      'ColumnsTournamentResults');
 define('CFGCOLS_TOURNAMENT_LADDER_VIEW',  'ColumnsTournamentLadderView');
 define('CFGCOLS_TOURNAMENT_POOL_VIEW',    'ColumnsTournamentPoolView');
 // col_name => number of ints in DB (needed for writing)
@@ -355,6 +356,7 @@ $SIZECONFIG_CFGCOLS = array(
    CFGCOLS_TOURNAMENTS              => 1,
    CFGCOLS_TOURNAMENT_PARTICIPANTS  => 1,
    CFGCOLS_TD_TOURNAMENT_PARTICIPANTS  => 1,
+   CFGCOLS_TOURNAMENT_RESULTS       => 1,
    CFGCOLS_TOURNAMENT_LADDER_VIEW   => 1,
    CFGCOLS_TOURNAMENT_POOL_VIEW     => 1,
    );

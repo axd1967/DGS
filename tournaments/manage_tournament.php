@@ -190,7 +190,7 @@ function make_links_ttype_specific( $tourney, $tstat )
          return '<li>'
             . make_menu_link( T_('Edit Ladder properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('challenge-range, max. defenses, max. challenges#mngt'),
-                              T_('game-end-handling, user-absence-handling, rank-period length#mngt') ));
+                              T_('game-end-handling, user-absence-handling, rank-period length, crown-king#mngt'), ));
 
       if( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'

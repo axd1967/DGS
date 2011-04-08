@@ -27,6 +27,7 @@ require_once 'include/std_functions.php';
 require_once 'include/countries.php';
 require_once 'include/rating.php';
 require_once 'include/time_functions.php';
+require_once 'include/classlib_userconfig.php';
 require_once 'tournaments/include/tournament_ladder.php';
 
  /*!
@@ -54,7 +55,6 @@ class TournamentGuiHelper
       // NOTE: see also tournaments/ladder/view.php
 
       $ltable = new Table( 'tournament_ladder', $page, null, '', 0 );
-         //TODO TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
       $ltable->use_show_rows(false);
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -98,6 +98,77 @@ class TournamentGuiHelper
 
       return $ltable->make_table();
    }//build_tournament_ladder_standings
+
+   function build_tournament_results( $page, $tourney )
+   {
+      global $player_row;
+      $my_id = $player_row['ID'];
+      $tid = $tourney->ID;
+
+      // check + load tournament-results
+      $iterator = new ListIterator( 'TournamentGuiHelper.build_tournament_results.load_tresult',
+         null, 'ORDER BY Rank ASC, ID ASC' );
+      $iterator->addQuerySQLMerge( new QuerySQL(
+            SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
+                         'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
+            SQLP_FROM,   'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid'
+         ));
+      $iterator = TournamentResult::load_tournament_results( $iterator, $tid );
+
+      if( $iterator->getItemCount() == 0 )
+         return T_('No tournament results yet.#T_result');
+
+      // create table
+      $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_RESULTS );
+
+      $table = new Table( 'tournament_results', $page, $cfg_tblcols, '',
+         TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
+      $table->use_show_rows(false);
+      $table->add_or_del_column();
+
+      // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      $table->add_tablehead( 6, T_('Rank#tres_header'), 'Number', TABLE_NO_HIDE );
+      $table->add_tablehead( 1, T_('Name#header'), 'User', TABLE_NO_HIDE);
+      $table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE);
+      $table->add_tablehead( 3, T_('Country#header'), 'Image', 0);
+      $table->add_tablehead( 4, T_('Current Rating#tres_header'), 'Rating', 0);
+      $table->add_tablehead( 5, T_('Result Rating#tres_header'), 'Rating', 0);
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         $table->add_tablehead( 7, T_('Rank Kept#T_ladder'), '', 0);
+      $table->add_tablehead( 8, T_('Result Date#tres_header'), '', 0);
+
+      while( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $tresult, $orow ) = $arr_item;
+         $uid = $tresult->uid;
+         $user = User::new_from_row($orow, 'TRP_');
+         $is_mine = ( $my_id == $uid );
+
+         $row_str = array();
+
+         if( $table->Is_Column_Displayed[ 1] )
+            $row_str[ 1] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
+         if( $table->Is_Column_Displayed[ 2] )
+            $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $user->Handle, '');
+         if( $table->Is_Column_Displayed[ 3] )
+            $row_str[ 3] = getCountryFlagImage( $user->Country );
+         if( $table->Is_Column_Displayed[ 4] )
+            $row_str[ 4] = echo_rating( $user->Rating, true, $uid);
+         if( $table->Is_Column_Displayed[ 5] )
+            $row_str[ 5] = echo_rating( $tresult->Rating, true, 0);
+         if( $table->Is_Column_Displayed[ 6] )
+            $row_str[ 6] = $tresult->Rank . '.';
+         if( @$table->Is_Column_Displayed[ 7] )
+            $row_str[ 7] = TimeFormat::echo_time_diff( $tresult->EndTime, $tresult->StartTime, 24, TIMEFMT_SHORT, '' );
+         if( $table->Is_Column_Displayed[ 8] )
+            $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT2, $tresult->EndTime) : '';
+         if( $is_mine )
+            $row_str['extra_class'] = 'TourneyUser';
+         $table->add_row( $row_str );
+      }
+
+      return $table->make_table();
+   }//build_tournament_results
 
 } // end of 'TournamentGuiHelper'
 

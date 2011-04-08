@@ -709,6 +709,33 @@ class TimeFormat
          return trim($str);
    }
 
+   /*!
+    * \brief Returns number of hours parsed from "99d 99h" or "999" (hours); null on error.
+    * \note Examples: "2d 3h 7h" = 2*24 + 3 + 7 hours, "7" = 7 hours
+    */
+   function parse_time_days_hours( $str )
+   {
+      $str = strtolower(trim($str));
+      if( (string)$str == '' )
+         return 0;
+      elseif( is_numeric($str) && $str >= 0 )
+         return (int)$str;
+
+      $hours = 0;
+      $parts = preg_split( "/\s+/", strtolower(trim($str)) );
+      foreach( $parts as $part )
+      {
+         unset($matches);
+         if( !preg_match("/^(\d+)(h|d)?$/", $part, $matches) )
+            return NULL; // error
+         if( $matches[2] == 'd' )
+            $hours += 24 * (int)$matches[1];
+         elseif( $matches[2] == 'h' || (string)$matches[2] == '' )
+            $hours += (int)$matches[1];
+      }
+      return $hours;
+   }//parse_time_days_hours
+
 } //end 'TimeFormat'
 
 ?>

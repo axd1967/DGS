@@ -151,6 +151,8 @@ define('TLADDER_MAX_CHRNG_RATING', 32767);
 define('TLADDER_MAX_CHRNG_ABS', 2000);
 define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
 
+define('TRESULTTYPE_KING_OF_THE_HILL', 1); // ladder-king
+
 // ---------- Tournament Round Stuff ------------------------------
 
 define('TROUND_STATUS_INIT', 'INIT');

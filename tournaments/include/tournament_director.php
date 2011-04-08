@@ -222,6 +222,23 @@ class TournamentDirector
       return $iterator;
    }
 
+   /*! \brief Returns list of uid of tournament-directors for given tournament. */
+   function load_tournament_directors_uid( $tid )
+   {
+      $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
+      $qsql->clear_parts(SQLP_FIELDS);
+      $qsql->add_part( SQLP_FIELDS, 'TD.uid' );
+      $qsql->add_part( SQLP_WHERE, "TD.tid='$tid'" );
+      $result = db_query( "TournamentDirector.load_tournament_directors_uid($tid)", $qsql->get_select() );
+
+      $out = array();
+      while( $row = mysql_fetch_array($result) )
+         $out[] = $row['uid'];
+      mysql_free_result($result);
+
+      return $out;
+   }
+
    /*!
     * \brief Identify user from given user-info (uid or handle).
     * \return row-array with ID/Name/Handle/Rating/X_Lastaccess; null if nothing found

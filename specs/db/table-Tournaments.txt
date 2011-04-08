@@ -540,6 +540,7 @@ Description:
  GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')    | CH_LAST
  UserAbsenceDays        | tinyint(3) unsigned                     | 0
  RankPeriodLength       | tinyint(3) unsigned                     | 1
+ CrownKingHours         | smallint(5) unsigned                    | 0
 
 
 ## Fields:
@@ -616,6 +617,9 @@ Description:
    - unit is number of months
    - each new period at start of month, the ladder-tournament current ranks
      are copied to PeriodRank-field and former PeriodRank copied to HistoryRank-field
+
+* CrownKingHours : number of hours player must keep top-rank to be crowned king (of the hill)
+   - 0 = no automatic crowning of king
 
 
 ###########################################################################
@@ -778,4 +782,54 @@ Notes:
    - abs(Rank) 1 is highest rank
       - used to specify next pool in next-round if tourney continued
       - used to specify final place if tourney ends
+
+
+###########################################################################
+## --- TournamentResult ---
+
+Description:
+   Table to store final results (ranks/places of players) of tournament.
+
+Notes:
+
+ Field     | Type                 | Default
+-----------+----------------------+---------------------
+ ID        | int(11)              | NULL
+ tid       | int(11)              | NULL
+ uid       | int(11)              | NULL
+ rid       | int(11)              | 0
+ Rating    | double               | -9999
+ Type      | tinyint(3) unsigned  | 0
+ StartTime | datetime             | 0000-00-00 00:00:00
+ EndTime   | datetime             | 0000-00-00 00:00:00
+ Round     | tinyint(3) unsigned  | 1
+ Rank      | smallint(5) unsigned | 0
+ RankKept  | smallint(5) unsigned | 0
+
+
+## Fields:
+
+* tid : FK to Tournament.ID
+
+* uid : FK to TournamentResult.uid = Players.ID
+
+* rid : FK to TournamentResult.rid = TournamentParticipant.ID
+
+* Rating : current rating of player Players.Rating2 at time of storing result
+
+* Type : type of tournament-result
+   - 1 = King (of ladder)
+
+* StartTime : start-time for entry
+
+* EndTime : start-time for entry
+
+* Round : round number
+   - always 1 for tournament-ladder
+
+* Rank : place of users for T-result
+
+* RankKept : number of hours, rank is kept
+   - only used for tournament-ladder
+
 

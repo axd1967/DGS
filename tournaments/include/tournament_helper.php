@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/connect2mysql.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_extension.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
@@ -34,6 +35,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -524,6 +526,94 @@ class TournamentHelper
 
       return $result;
    }//fill_ranks_tournament_pool
+
+
+   /*!
+    * \brief Checks if a king is to be crowned for a ladder-tournament.
+    * \return ListIterator with data to crown ladder-king.
+    * \see #process_tournament_ladder_crown_king()
+    */
+   function load_ladder_crown_kings( $iterator=null )
+   {
+      global $NOW;
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'T.ID AS tid',
+            'TL.uid',
+            'TL.rid',
+            'UNIX_TIMESTAMP(TL.RankChanged) AS X_RankChanged',
+            'TLP.CrownKingHours',
+            'P.Rating2',
+            'T.Owner_ID AS owner_uid',
+         SQLP_FROM,
+            'Tournament AS T',
+            'INNER JOIN TournamentLadderProps AS TLP ON TLP.tid=T.ID',
+            'INNER JOIN TournamentLadder AS TL ON TL.tid=T.ID',
+            'INNER JOIN Players AS P ON P.ID=TL.uid',
+         SQLP_WHERE,
+            "T.Status='".TOURNEY_STATUS_PLAY."'",
+            "T.Type='".TOURNEY_TYPE_LADDER."'",
+            'TLP.CrownKingHours > 0',
+            'TL.Rank=1',
+            'TL.RankChanged > 0',
+            "FROM_UNIXTIME($NOW) - INTERVAL TLP.CrownKingHours HOUR > TL.RankChanged"
+         );
+
+      if( is_null($iterator) )
+         $iterator = new ListIterator( 'TournamentHelper::load_ladder_crown_kings' );
+      $iterator->addQuerySQLMerge( $qsql );
+      $result = db_query( "TournamentHelper::load_ladder_crown_kings", $iterator->buildQuery() );
+      $iterator->setResultRows( mysql_num_rows($result) );
+
+      while( $row = mysql_fetch_array($result) )
+         $iterator->addItem( null, $row );
+      mysql_free_result($result);
+
+      return $iterator;
+   }//load_ladder_crown_kings
+
+   /*!
+    * \brief Crowns King with information given in $row.
+    * \param $row map with fields: tid, uid, rid, X_RankChanged, CrownKingHours, Rating2, owner_uid
+    * \see #load_ladder_crown_kings()
+    */
+   function process_tournament_ladder_crown_king( $row )
+   {
+      global $NOW;
+
+      $tid = (int)$row['tid'];
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('invalid_args', "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)");
+
+      $rank_kept_hours = (int)( ($NOW - $row['X_RankChanged']) / SECS_PER_HOUR);
+      $tresult = new TournamentResult( 0, $tid, $row['uid'], $row['rid'], $row['Rating2'],
+         TRESULTTYPE_KING_OF_THE_HILL, /*start*/$row['X_RankChanged'], /*end*/$NOW,
+         /*round*/1, /*rank*/1, $rank_kept_hours );
+
+      $nfy_uids = TournamentDirector::load_tournament_directors_uid( $tid );
+      $nfy_uids[] = $row['owner_uid'];
+
+      ta_begin();
+      {//HOT-section to insert crowned-king for ladder-tournament as tournament-result
+         $tresult->persist(); // add T-result
+
+         // reset TL.RankChanged
+         TournamentLadder::process_crown_king_reset_rank( $tid, $row['rid'] );
+
+         // notify TDs + owner
+         send_message( "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)",
+            sprintf( T_("For %s user [ %s ] has kept the top rank for [%s], so the user is crowned as \"King of the Hill\"."),
+                     "<tourney $tid>",
+                     "<user {$row['uid']}>",
+                     TimeFormat::echo_time_diff( $NOW, $row['X_RankChanged'], 24, TIMEFMT_ZERO, '' ) ) .
+            "\n\n" .
+            T_('This notification has been sent to the tournament-owner and to all tournament-directors.'),
+            sprintf( T_('King of the Hill crowned for tournament #%s'), $tid ),
+            $nfy_uids, '', /*notify*/true,
+            /*sys-msg*/0, 'NORMAL', 0 );
+      }
+      ta_end();
+   }//process_tournament_ladder_crown_king
 
 } // end of 'TournamentHelper'
 

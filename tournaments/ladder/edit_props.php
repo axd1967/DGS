@@ -23,6 +23,7 @@ chdir('../..');
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
+require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
@@ -193,7 +194,17 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Rank-archive Period Length'),
          'TEXTINPUT',   'rankplen', 4, 4, $vars['rankplen'],
-         'TEXT',        MED_SPACING . T_('months'), ));
+         'TEXT',        T_('months'), ));
+   $tform->add_empty_row();
+
+   // crowning king
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Crown King'),
+         'TEXTINPUT',   'crownking', 8, 8, $vars['crownking'],
+         'TEXT',
+            sprintf( '[%s], %s',
+               TimeFormat::_echo_time( $tl_props->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ),
+               T_('time in hours top rank must be kept, format: "99d 99h"') ), ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
@@ -258,6 +269,7 @@ function parse_edit_form( &$tlp, $t_limits )
       'gend_timeout_l'  => $tlp->GameEndTimeoutLoss,
       'uabs_days'       => $tlp->UserAbsenceDays,
       'rankplen'        => $tlp->RankPeriodLength,
+      'crownking'       => $tlp->CrownKingHours,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -389,6 +401,13 @@ function parse_edit_form( &$tlp, $t_limits )
          $errors[] = sprintf( T_('Expecting number for rank-archive period length in range %s months'),
                               TournamentUtils::build_range_text(1, 255) );
 
+      $new_value = $vars['crownking'];
+      $parsed_hours = TimeFormat::parse_time_days_hours( $new_value );
+      if( !is_null($parsed_hours) )
+         $tlp->CrownKingHours = $parsed_hours;
+      else
+         $errors[] = T_('Expecting time for crowning king.');
+
 
       $tlp->setGameEndNormal( $vars['gend_normal'] );
       $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
@@ -412,6 +431,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('GameEnd#edits');
       if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('UserAbsence#edits');
       if( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('RankPeriodLength#edits');
+      if( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('CrownKing#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

@@ -34,6 +34,7 @@ require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'tournaments/include/tournament_ladder.php' );
 require_once( 'tournaments/include/tournament_ladder_props.php' );
+require_once( 'tournaments/include/tournament_result.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('Tournament');
@@ -59,6 +60,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // init
    $page = "view_tournament.php?tid=$tid";
    $cnt_tstandings = $ttype->getCountTournamentStandings($tourney->Status);
+   $show_tresult = TournamentResult::show_tournament_result( $tourney->Status );
 
    // TP-count
    $tp_counts = TournamentParticipant::count_tournament_participants( $tid );
@@ -112,7 +114,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament ruleset') ),
          "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament registration information') ),
          "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament games') ),
-         //TODO "\n<li>", anchor( "$base_page_tourney#result", T_('Tournament results') ),
+         ( $show_tresult
+            ? "\n<li>" . anchor( "$base_page_tourney#result", T_('Tournament results') )
+            : ''),
       "</ul>\n",
       make_html_safe(
          T_('When you have a question about the tournament, please send a message '
@@ -185,7 +189,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // --------------- Rules -----------------------------------------
 
    echo "<hr>\n", '<a name="rules">', "\n";
-   section( 'tournament', T_('Rules#T_view') );
+   section( 'tournament', T_('Tournament Rules#T_view') );
 
    if( !is_null($trule) )
       echo_tournament_rules( $tourney, $trule );
@@ -194,7 +198,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // --------------- Registration ----------------------------------
 
    echo "<hr>\n", '<a name="registration">', "\n";
-   section( 'tournament', T_('Registration#T_view') );
+   section( 'tournament', T_('Tournament Registration#T_view') );
 
    if( !is_null($tprops) )
       echo_tournament_registration( $tprops );
@@ -230,7 +234,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // --------------- Games -----------------------------------------
 
    echo "<hr>\n", '<a name="games">', "\n";
-   section( 'tournament', T_('Games#T_view') );
+   section( 'tournament', T_('Tournament Games#T_view') );
 
    // show tourney-type-specific properties
    $tt_notes = null;
@@ -262,14 +266,15 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Results ---------------------------------------
 
-   /*
-   echo "<hr>\n", '<a name="result">', "\n";
-   section( 'tournament', T_('Results#T_view') );
+   if( $show_tresult )
+   {
+      echo "<hr>\n", '<a name="result">', "\n";
+      section( 'tournament', T_('Tournament Results#T_view') );
 
-   echo
-      "[TODO] Results (Show Winners, Show intermediate results (link))",
-      "\n";
-   */
+      echo "<center>",
+         TournamentGuiHelper::build_tournament_results( $page, $tourney ),
+         "</center><br>\n";
+   }
 
 
    end_page();

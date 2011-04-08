@@ -99,7 +99,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
       ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
    if( $row )
    {
-      if( DBG_TEST || $row['timediff'] >= 3600*24 ) // one day-check
+      if( DBG_TEST || $row['timediff'] >= 24*SECS_PER_HOUR ) // one day-check
       {
          db_query( 'cron_tournament.daily.next_run_date',
             "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
@@ -108,6 +108,24 @@ if( ALLOW_TOURNAMENTS && !$is_down )
       }
    }
 
+   // ---------- jobs running hourly -------------------
+
+   // NOTE: added special hourly-jobs here to avoid the complexity of cron-locking
+   //       of hourly_cron/tournament-cron-scripts
+
+   $row = mysql_single_fetch( 'cron_tournament.hourly.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
+   if( $row )
+   {
+      if( DBG_TEST || $row['timediff'] >= 1*SECS_PER_HOUR ) // hourly-check
+      {
+         db_query( 'cron_tournament.hourly.next_run_date',
+            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
+
+         run_hourly();
+      }
+   }
 
    // ---------- END --------------------------------
 
@@ -163,6 +181,31 @@ function run_once_daily()
       $thelper->tcache->release_tournament_cron_lock();
    }
    ta_end();
-
 }//run_once_daily
+
+function run_hourly()
+{
+   global $thelper;
+
+   // ---------- Check for crowning of "King of the Hill"
+
+   $tres_iterator = TournamentHelper::load_ladder_crown_kings(
+      new ListIterator( 'cron_tournament.load_ladder_crown_kings' ));
+
+   ta_begin();
+   {//HOT-section to crown kings for ladder-tournaments
+      while( list(,$arr_item) = $tres_iterator->getListIterator() )
+      {
+         list( ,$orow ) = $arr_item;
+         $tid = $orow['tid'];
+
+         $thelper->tcache->release_tournament_cron_lock( $tid );
+         if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+            TournamentHelper::process_tournament_ladder_crown_king( $orow );
+      }
+      $thelper->tcache->release_tournament_cron_lock();
+   }
+   ta_end();
+}//run_hourly
+
 ?>

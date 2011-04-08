@@ -2008,3 +2008,33 @@ ALTER TABLE TranslationPages
    ADD PRIMARY KEY (Page) ;
 
 
+-- added table for tournament-results
+CREATE TABLE TournamentResult (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   uid int NOT NULL,
+   rid int NOT NULL default 0,
+   Rating double NOT NULL default '-9999',
+   Type tinyint unsigned NOT NULL default 0,
+   StartTime datetime NOT NULL default '0000-00-00 00:00:00',
+   EndTime datetime NOT NULL default '0000-00-00 00:00:00',
+   Round tinyint unsigned NOT NULL default '1',
+   Rank smallint unsigned NOT NULL default '0',
+   RankKept smallint unsigned NOT NULL default '0',
+   PRIMARY KEY (ID),
+   KEY tidRank (tid,Rank),
+   KEY uid (uid)
+) ENGINE=MyISAM ;
+
+-- added config for crowning of ladder-king
+ALTER TABLE TournamentLadderProps
+   ADD CrownKingHours smallint unsigned NOT NULL default 0 ;
+
+-- Clock for (hourly) tournament-cron
+INSERT INTO Clock SET ID=207, Lastchanged=0 ;
+
+-- table-column-set for tournament-results
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentResults int NOT NULL DEFAULT -1 AFTER ColumnsTDTournamentParticipants ;
+
+

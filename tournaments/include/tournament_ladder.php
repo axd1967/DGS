@@ -150,8 +150,8 @@ class TournamentLadder
 
       if( is_null($timefmt) )
          $timefmt = TIMEFMT_SHORT|TIMEFMT_ZERO;
-      return TimeFormat::echo_time(
-         round(($GLOBALS['NOW'] - $this->RankChanged)/SECS_PER_HOUR), $timefmt, '0' );
+      return TimeFormat::_echo_time(
+         (int)(($GLOBALS['NOW'] - $this->RankChanged)/SECS_PER_HOUR), 24, $timefmt, '0' );
    }
 
    function insert()
@@ -894,6 +894,18 @@ class TournamentLadder
 
       return db_query( "TournamentLadder::process_rank_period($tid)",
          "UPDATE TournamentLadder SET HistoryRank=PeriodRank, PeriodRank=Rank WHERE tid=$tid" );
+   }
+
+   function process_crown_king_reset_rank( $tid, $rid )
+   {
+      global $NOW;
+      if( !is_numeric($tid) || $tid <= 0 )
+         error('invalid_args', "TournamentLadder::process_crown_king.check.tid($tid,$rid)");
+      if( !is_numeric($rid) || $rid <= 0 )
+         error('invalid_args', "TournamentLadder::process_crown_king.check.rid($tid,$rid)");
+
+      return db_query( "TournamentLadder::process_crown_king($tid,$rid)",
+         "UPDATE TournamentLadder SET RankChanged=FROM_UNIXTIME($NOW) WHERE tid=$tid AND rid=$rid LIMIT 1" );
    }
 
    /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
