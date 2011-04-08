@@ -19,7 +19,79 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-08 juga
+
+   * tournaments/include/tournament_result.php (class TournamentResult, ~.to_string,
+       ~.persist, ~.insert, ~.update, ~.delete, ~.fillEntityData, ~.build_query_sql,
+       ~.new_from_row, ~.load_tournament_results, ~.show_tournament_result),
+     tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder.php (TournamentLadder.build_rank_kept,
+       ~.process_crown_king_reset_rank),
+     tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_crown_kings,
+       ~.process_tournament_ladder_crown_king),
+     tournaments/include/tournament_director.php (TournamentDirector.load_tournament_directors_uid),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_results),
+     tournaments/include/tournament_globals.php,
+     include/time_functions.php (TimeFormat.parse_time_days_hours),
+     include/globals.php (CLOCK_CRON_TOURNEY_HOURLY),
+     include/classlib_userconfig.php (ConfigPages-const),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-data.sql, specs/db/table-Players.txt, specs/db/table-Tournaments.txt,
+     tournaments/cron_tournaments.php (run_hourly),
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/view_tournament.php, NEWS:
+   - added TournamentResult-table to store tournament-results
+     - showing tournament-results on tournament-info-page if there are some
+       in column-configurable table stored in ConfigPages-table
+     - added "King of the Hill" for ladder-tournament crowning a user to King
+       when he keeps the top-rank for a configurable amount of time,
+       resetting TournamentLadder.RankChanged and notifying T-owner and tournament-directors
+       about the crowning, check every hour for king-crowning in tournament-cron-script
+   - bugfix: wrong hour-per-day basis for formatting "rank-kept" for ladder-tournament
+-----------
+-- added table for tournament-results
+CREATE TABLE TournamentResult (
+   ID int NOT NULL auto_increment,
+   tid int NOT NULL,
+   uid int NOT NULL,
+   rid int NOT NULL default 0,
+   Rating double NOT NULL default '-9999',
+   Type tinyint unsigned NOT NULL default 0,
+   StartTime datetime NOT NULL default '0000-00-00 00:00:00',
+   EndTime datetime NOT NULL default '0000-00-00 00:00:00',
+   Round tinyint unsigned NOT NULL default '1',
+   Rank smallint unsigned NOT NULL default '0',
+   RankKept smallint unsigned NOT NULL default '0',
+   PRIMARY KEY (ID),
+   KEY tidRank (tid,Rank),
+   KEY uid (uid)
+) ENGINE=MyISAM ;
+
+-- added config for crowning of ladder-king
+ALTER TABLE TournamentLadderProps
+   ADD CrownKingHours smallint unsigned NOT NULL default 0 ;
+
+-- Clock for (hourly) tournament-cron
+INSERT INTO Clock SET ID=207, Lastchanged=0 ;
+
+-- table-column-set for tournament-results
+ALTER TABLE ConfigPages
+   ADD ColumnsTournamentResults int NOT NULL DEFAULT -1 AFTER ColumnsTDTournamentParticipants ;
+-----------
+
 2011-04-07 juga
+
+   * tournaments/include/tournament_gui_helper.php (class TournamentGuiHelper,
+       ~.build_tournament_ladder_standings),
+     tournaments/include/tournament_ladder.php (TournamentLadder.build_tournament_ladder_iterator),
+     tournaments/include/tournament_template.php (class TournamentTemplate,
+       ~.getCountTournamentStandings),
+     tournaments/include/tournament_template_ladder.php (class TournamentTemplateLadder),
+     tournaments/ladder/view.php, tournaments/view_tournament.php, NEWS:
+   - tournament-ladder: show tournament-standings for tourney on status=PLAY|CLOSED,
+     show TOP 5, statically configured in tournament-template
 
    * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game,
        ~.remove_double_game_reference, ~._delete_base_game_tables;
