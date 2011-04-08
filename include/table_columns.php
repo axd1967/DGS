@@ -1001,7 +1001,7 @@ class Table
       $nr = (int)@$tablehead['Nr'];
       if( $nr < 0 || ($nr == 0 && !($this->Mode && TABLE_ROW_NUM)) )
          return '';
-      $is_std = is_null($arr_opts); // std-call couting Shown_Columns
+      $is_std = is_null($arr_opts); // std-call counting Shown_Columns
 
       if( !$this->Is_Column_Displayed[$nr] )
       {
