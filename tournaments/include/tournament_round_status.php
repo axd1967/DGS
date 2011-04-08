@@ -162,7 +162,7 @@ class TournamentRoundStatus
       if( $this->curr_status != TROUND_STATUS_PLAY )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_PLAY );
 
-      //TODO PLAY -> DONE status change
+      //TODO(RR) PLAY -> DONE status change
       $this->errors[] = 'status-transition not implemented yet';
    }
 
