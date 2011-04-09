@@ -536,8 +536,8 @@ This is why:
       }
 
       // Notify opponent about move
-      //TODO notify when game deleted ???
-      notify( "confirm.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
+      if( !$do_delete )
+         notify( "confirm.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
 
       // Increase moves and activity
       db_query( 'confirm.activity',
