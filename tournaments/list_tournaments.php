@@ -253,8 +253,13 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $menu_array[T_('Show all tournaments')] = 'tournaments/list_tournaments.php';
    $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
    $menu_array[T_('Directoring tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
-   if( !(@$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_CREATE) )
-      $menu_array[T_('Create new tournament')] = 'tournaments/wizard.php';
+   $create_tourney = TournamentUtils::check_create_tournament();
+   if( $create_tourney )
+   {
+      $menu_array[T_('Create new tournament')] = ($create_tourney == 1)
+         ? array( 'url' => 'tournaments/wizard.php', 'class' => 'AdminLink' )
+         : 'tournaments/wizard.php';
+   }
 
    end_page(@$menu_array);
 }

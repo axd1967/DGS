@@ -707,16 +707,6 @@ class Tournament
       return span('TLockWarn', sprintf( Tournament::getFlagsText($flag, 'LOCK'), Tournament::getFlagsText($flag)) );
    }
 
-   /*! \brief Returns true if given user can create a new tournament. */
-   function allow_create( $uid )
-   {
-      if( $uid <= GUESTS_ID_MAX )
-         return false;
-
-      // anyone can create Ts except guests
-      return true;
-   }
-
    function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );

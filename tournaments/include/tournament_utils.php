@@ -55,6 +55,40 @@ class TournamentUtils
       return ( @$player_row['admin_level'] & ADMIN_TOURNAMENT );
    }
 
+   /*!
+    * \brief Checks if current user can create a new tournament.
+    * \param $label if set, error with given label-prefix is thrown if create not allowed
+    * \return >0 if user can create tournament (1=only-admin-is-allowed, 2=user-is-allowed-too),
+    *         0 if user can not create tournament
+    */
+   function check_create_tournament( $label='' )
+   {
+      global $player_row;
+
+      if( @$player_row['ID'] <= GUESTS_ID_MAX )
+      {
+         if( $label )
+            error('not_allowed_for_guest', "$label.create.guest");
+         return 0;
+      }
+
+      if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_CREATE )
+      {
+         if( $label )
+            error('tournament_create_denied', "$label.create.denied");
+         return 0;
+      }
+
+      if( !TournamentUtils::isAdmin() && !ALLOW_TOURNAMENTS_CREATE_BY_USER )
+      {
+         if( $label )
+            error('tournament_create_only_by_admin', "$label.create.admin_only");
+         return 0;
+      }
+
+      return (ALLOW_TOURNAMENTS_CREATE_BY_USER) ? 2 : 1;
+   }//check_create_tournament
+
    function formatDate( $date, $defval='', $datefmt=DATEFMT_TOURNAMENT )
    {
       return ($date) ? date($datefmt, $date) : $defval;

@@ -34,16 +34,10 @@ require_once 'tournaments/include/tournament_factory.php';
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.wizard');
 
+   // create allowed?
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
-
-   // create/edit allowed?
-   if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_CREATE )
-      error('tournament_create_denied');
-   if( !Tournament::allow_create($my_id) )
-      error('tournament_edit_not_allowed', "tournament_wizard.create($my_id)");
    $is_admin = TournamentUtils::isAdmin();
+   $create_tourney = TournamentUtils::check_create_tournament('Tournament.wizard');
 
 /* Actual REQUEST calls used:
      (no args)     : add new tournament
@@ -59,7 +53,7 @@ require_once 'tournaments/include/tournament_factory.php';
    {
       // check if user is allowed to create tournament
       if( $ttype->need_admin_create_tourney && !$is_admin )
-         error('tournament_create_not_allowed', "tournament_wizard.create.non_admin($my_id,$type)");
+         error('tournament_create_not_allowed', "Tournament.wizard.create.non_admin($my_id,$type)");
 
       $tid = $ttype->createTournament();
       jump_to("tournaments/manage_tournament.php?tid=$tid".URI_AMP
@@ -98,7 +92,9 @@ require_once 'tournaments/include/tournament_factory.php';
 
 
    $menu_array = array();
-   $menu_array[T_('Create new tournament')] = 'tournaments/wizard.php';
+   $menu_array[T_('Create new tournament')] = ($create_tourney == 1)
+      ? array( 'url' => 'tournaments/wizard.php', 'class' => 'AdminLink' )
+      : 'tournaments/wizard.php';
 
    end_page(@$menu_array);
 }
@@ -107,10 +103,8 @@ require_once 'tournaments/include/tournament_factory.php';
 function build_tourney_type_radio( $ttype, $type, $is_admin )
 {
    $radio_defs = array( $ttype->wizard_type => $ttype->title );
-   if( $ttype->need_admin_create_tourney && !$is_admin )
-      $result = array( 'RADIOBUTTONSX', 'type', $radio_defs, $type, 'disabled=1' );
-   else
-      $result = array( 'RADIOBUTTONS', 'type', $radio_defs, $type );
-   return $result;
+   $disabled = ( $ttype->need_admin_create_tourney && !$is_admin ) ? 'disabled=1' : '';
+   return array( 'RADIOBUTTONSX', 'type', $radio_defs, $type, $disabled );
 }//build_tourney_type_radio
+
 ?>

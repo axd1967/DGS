@@ -150,6 +150,9 @@ define('ALLOW_JAVASCRIPT', true);
 define('ALLOW_TOURNAMENTS', false);
 define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.
 
+// Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
+define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);
+
 // Allow usage of GoDiagrams (only working with JavaScript)
 define('ALLOW_GO_DIAGRAMS', false);
 

@@ -468,6 +468,9 @@ class ErrorCode
          $arr['tournament_create_denied'] =
             T_('Sorry, you are not allowed to create a new tournament. This feature has been blocked by admins.');
 
+         $arr['tournament_create_only_by_admin'] =
+            T_('Sorry, only a tournament admin can create a new tournament.');
+
          $arr['tournament_register_denied'] =
             T_('Sorry, you are not allowed to register for a tournament. This feature has been blocked by admins.');
 

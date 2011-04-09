@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Docs";
 
-require_once( "include/std_functions.php" );
+require_once 'include/std_functions.php';
+require_once 'tournaments/include/tournament_utils.php';
+
 $GLOBALS['ThePage'] = new Page('SiteMap');
 
 
@@ -126,7 +128,8 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Show all tournaments'), "tournaments/list_tournaments.php", true);
          item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
          item(T_('Directoring tournaments'), "tournaments/list_tournaments.php?tdir=$id", true);
-         item(T_('Create new tournament'), "tournaments/wizard.php", true);
+         if( TournamentUtils::check_create_tournament() )
+            item(T_('Create new tournament'), "tournaments/wizard.php", true);
          item(T_('View tournament'), "tournaments/view_tournament.php", false, true);
          { $item_level++;
             item(T_('Tournament directors'), "tournaments/list_directors.php", false);
