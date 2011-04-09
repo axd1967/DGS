@@ -125,23 +125,27 @@ require_once( "include/make_translationfiles.php" );
       }
    } //foreach translation phrases
 
-   if( $replace_set )
-      // note: Translations needs PRIMARY KEY (Language_ID,Original_ID):
-      db_query( 'update_translation.replace',
-         "REPLACE INTO Translations " .
-                   "(Original_ID,Language_ID,Text,Translated) VALUES " .
-                   substr($replace_set,1) );
+   ta_begin();
+   {//HOT-section to update translations
+      if( $replace_set )
+         // note: Translations needs PRIMARY KEY (Language_ID,Original_ID):
+         db_query( 'update_translation.replace',
+            "REPLACE INTO Translations " .
+                      "(Original_ID,Language_ID,Text,Translated) VALUES " .
+                      substr($replace_set,1) );
 
-   if( $log_set )
-      db_query( 'update_translation.log',
-         "INSERT INTO Translationlog " .
-                   "(Player_ID,Original_ID,Language_ID,Translation) VALUES " .
-                   substr($log_set,1) ); //+ Date= timestamp
+      if( $log_set )
+         db_query( 'update_translation.log',
+            "INSERT INTO Translationlog " .
+                      "(Player_ID,Original_ID,Language_ID,Translation) VALUES " .
+                      substr($log_set,1) ); //+ Date= timestamp
 
-   if( $done_set )
-      db_query( 'update_translation.done',
-         "UPDATE TranslationTexts SET Translatable='Done' " .
-                   "WHERE ID IN (" . substr($done_set,1) . ')' );
+      if( $done_set )
+         db_query( 'update_translation.done',
+            "UPDATE TranslationTexts SET Translatable='Done' " .
+                      "WHERE ID IN (" . substr($done_set,1) . ')' );
+   }
+   ta_end();
 
    make_include_files($translate_lang); //must be called from main dir
 

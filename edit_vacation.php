@@ -93,22 +93,26 @@ require_once( "include/form_functions.php" );
       elseif( isset($_POST['start_vacation'])
             && $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
       {
-         // LastTicks will handle -(time spent) at the moment of the start of vacations
-         // in the reference of the ClockUsed by the game
-         db_query( 'edit_vacation.update_games',
-            "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
-               . " SET Games.ClockUsed=" .VACATION_CLOCK
-                  . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
-               . " WHERE Games.Status" . IS_RUNNING_GAME
-               . " AND Games.ToMove_ID=$my_id"
-               . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
-            );
+         ta_begin();
+         {//HOT-section to start vacation (for player and his games)
+            // LastTicks will handle -(time spent) at the moment of the start of vacations
+            // in the reference of the ClockUsed by the game
+            db_query( 'edit_vacation.update_games',
+               "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
+                  . " SET Games.ClockUsed=" .VACATION_CLOCK
+                     . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
+                  . " WHERE Games.Status" . IS_RUNNING_GAME
+                  . " AND Games.ToMove_ID=$my_id"
+                  . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
+               );
 
-         db_query( 'edit_vacation.update_player',
-            "UPDATE Players SET VacationDays=VacationDays-($vacationlength)"
-               . ", OnVacation=$vacationlength"
-               . ", UseVacation=$vacationlength"
-            . " WHERE ID=$my_id AND VacationDays >= ($vacationlength) LIMIT 1" );
+            db_query( 'edit_vacation.update_player',
+               "UPDATE Players SET VacationDays=VacationDays-($vacationlength)"
+                  . ", OnVacation=$vacationlength"
+                  . ", UseVacation=$vacationlength"
+               . " WHERE ID=$my_id AND VacationDays >= ($vacationlength) LIMIT 1" );
+         }
+         ta_end();
 
          $msg = urlencode(T_('Have a nice vacation!'));
          jump_to("status.php?sysmsg=$msg");

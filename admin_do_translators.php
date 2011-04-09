@@ -126,22 +126,26 @@ function retry_admin( $msg)
                      ."\n" . $tmp);
 
 
-      $tmp = mysql_addslashes( $browsercode . LANG_CHARSET_CHAR . $charenc );
-      db_query( 'admin_do_translators.add.insert',
-         "INSERT INTO TranslationLanguages SET " .
-            "Name='" . mysql_addslashes($langname) . "', " .
-            "Language='$tmp'" );
+      ta_begin();
+      {//HOT-section to add language for translator
+         $tmp = mysql_addslashes( $browsercode . LANG_CHARSET_CHAR . $charenc );
+         db_query( 'admin_do_translators.add.insert',
+            "INSERT INTO TranslationLanguages SET " .
+               "Name='" . mysql_addslashes($langname) . "', " .
+               "Language='$tmp'" );
 
-      make_known_languages(); //must be called from main dir
+         make_known_languages(); //must be called from main dir
 
-      //insert the name of language to be translated
-      $row = mysql_single_fetch( 'admin_do_translators.add.find_group',
-            "SELECT ID FROM TranslationGroups WHERE Groupname='Users'")
-         or error('internal_error','admin_do_translators.add.find_group2');
+         //insert the name of language to be translated
+         $row = mysql_single_fetch( 'admin_do_translators.add.find_group',
+               "SELECT ID FROM TranslationGroups WHERE Groupname='Users'")
+            or error('internal_error','admin_do_translators.add.find_group2');
 
-      $Group_ID = $row['ID'];
+         $Group_ID = $row['ID'];
 
-      $tmp = add_text_to_translate('admin_do_translators.add', $langname, $Group_ID);
+         $tmp = add_text_to_translate('admin_do_translators.add', $langname, $Group_ID);
+      }
+      ta_end();
 
       retry_admin( sprintf( "Added language %s with code %s and character-encoding %s."
                                  , $langname, $browsercode, $charenc ));
@@ -207,29 +211,32 @@ function retry_admin( $msg)
       if( $new_langs == $old_langs )
          retry_admin( $msg);
 
-      db_query( "admin_do_translators.user.update($transluser,$new_langs)",
-         "UPDATE Players SET Translator='$new_langs'"
-            . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
+      ta_begin();
+      {//HOT-section to update languages of translator
+         db_query( "admin_do_translators.user.update($transluser,$new_langs)",
+            "UPDATE Players SET Translator='$new_langs'"
+               . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
+         if( mysql_affected_rows() != 1 )
+            error('internal_error', "admin_do_translators.user.update2($transluser,$new_langs)");
 
-      if( mysql_affected_rows() != 1 )
-         error('internal_error', "admin_do_translators.user.update2($transluser,$new_langs)");
+         // Check result
+         $tmp = mysql_single_fetch( "admin_do_translators.user.translator($transluser)",
+            "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
+         if( !$tmp )
+            $update_it.= '.1';
+         else if( !isset($tmp['Translator']) )
+            $update_it.= '.2';
+         else if( $tmp['Translator'] != $new_langs )
+            $update_it.= '.3'; //surely, the field truncats the string
+         else
+            retry_admin( $msg);
 
-      // Check result
-      $tmp = mysql_single_fetch( "admin_do_translators.user.translator($transluser)",
-         "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
-      if( !$tmp )
-         $update_it.= '.1';
-      else if( !isset($tmp['Translator']) )
-         $update_it.= '.2';
-      else if( $tmp['Translator'] != $new_langs )
-         $update_it.= '.3'; //surely, the field truncats the string
-      else
-         retry_admin( $msg);
-
-      // Something went wrong. Restore to old set then error
-      db_query( "admin_do_translators.user.revert($transluser,$old_langs)",
-         "UPDATE Players SET Translator='$old_langs'"
-            . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
+         // Something went wrong. Restore to old set then error
+         db_query( "admin_do_translators.user.revert($transluser,$old_langs)",
+            "UPDATE Players SET Translator='$old_langs'"
+               . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
+      }
+      ta_end();
 
       error('couldnt_update_translation', "admin_do_translators.update_failed");
    }

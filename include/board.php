@@ -1135,10 +1135,14 @@ class Board
          error("mysql_data_corruption",
             "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
 
-      db_query( "board.fix_corrupted_move_table.delete_moves($gid)",
-         "DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr" );
-      db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
-         "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
+      ta_begin();
+      {//HOT-section to fix Moves-table
+         db_query( "board.fix_corrupted_move_table.delete_moves($gid)",
+            "DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr" );
+         db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
+            "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
+      }
+      ta_end();
    }
 } //class Board
 

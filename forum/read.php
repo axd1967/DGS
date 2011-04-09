@@ -47,9 +47,7 @@ require_once( 'forum/post.php' );
       . URI_AMP."thread=$thread"
       . ( $rx_term != '' ? URI_AMP."xterm=$rx_term" : '');
    if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
-   {
       jump_to( 'forum/'.$toggle_baseurl );
-   }
    $show_overview = ( $cfg_pages->get_forum_flags() & FORUMFLAG_POSTVIEW_OVERVIEW );
 
    $arg_moderator = get_request_arg('moderator');
@@ -79,7 +77,12 @@ require_once( 'forum/post.php' );
    $post_errmsg = '';
    if( isset($_POST['post']) )
    {
-      list( $pmsg_id, $msg ) = post_message($player_row, $cfg_board, $forum->options, $thread);
+      ta_begin(); //caller-TA
+      {//HOT-section to post (=add/edit) message
+         list( $pmsg_id, $msg ) = post_message($player_row, $cfg_board, $forum->options, $thread);
+      }
+      ta_end();
+
       if( $pmsg_id )
       {// added/edited post successfully
          // maybe there are new posts during reply, so omit jump to reply, but jump to top instead
@@ -120,16 +123,20 @@ require_once( 'forum/post.php' );
       $modpid = get_request_arg('modpid', 0); // post-id
       if( $arg_moderator == '' && $modpid > 0 )
       {
-         $modact = get_request_arg('modact'); // moderate-action
-         if( $modact == 'show' )
-            show_post( $forum_id, $thread, $modpid );
-         elseif( $modact == 'hide' )
-            hide_post( $forum_id, $thread, $modpid );
-         elseif( $modact == 'approve' )
-            approve_post( $forum_id, $thread, $modpid );
-         elseif( $modact == 'reject' )
-            reject_post( $forum_id, $thread, $modpid );
-         $allow_mark_read = false;
+         ta_begin(); //caller-TA
+         {//HOT-section to moderate post
+            $modact = get_request_arg('modact'); // moderate-action
+            if( $modact == 'show' )
+               show_post( $forum_id, $thread, $modpid );
+            elseif( $modact == 'hide' )
+               hide_post( $forum_id, $thread, $modpid );
+            elseif( $modact == 'approve' )
+               approve_post( $forum_id, $thread, $modpid );
+            elseif( $modact == 'reject' )
+               reject_post( $forum_id, $thread, $modpid );
+            $allow_mark_read = false;
+         }
+         ta_end();
       }
    }
 

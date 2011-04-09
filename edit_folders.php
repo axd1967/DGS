@@ -96,6 +96,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    // Update folders
 
+   $folder_query = '';
    $old_status_flags = $cfg_pages->get_status_flags();
    foreach( $_POST as $key => $val )
    {
@@ -171,13 +172,13 @@ function make_folder_form_row(&$form, $name, $nr,
 
       if( $delete )
       {
-         $query = "DELETE FROM Folders WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
+         $folder_query = "DELETE FROM Folders WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
       }
       else if( $update )
       {
          list($oldname, $oldbgcolor, $oldfgcolor) = $folders[$nr];
 
-         $query = "UPDATE Folders SET ";
+         $folder_query = "UPDATE Folders SET ";
          $updates = array();
          if( $name != $oldname ) $updates[]= "Name='".mysql_addslashes($name)."'";
          if( $bgcolor != $oldbgcolor ) $updates[]= "BGColor='$bgcolor'";
@@ -186,35 +187,40 @@ function make_folder_form_row(&$form, $name, $nr,
          if( !(count($updates) > 0) )
             continue;
 
-         $query .= implode(",", $updates);
-         $query .= " WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
+         $folder_query .= implode(",", $updates);
+         $folder_query .= " WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
       }
       else
       {
-         $query = "INSERT INTO Folders SET " .
+         $folder_query = "INSERT INTO Folders SET " .
             "uid=$my_id, " .
             "Folder_nr=$nr, " .
             "Name='".mysql_addslashes($name)."', " .
             "BGColor='$bgcolor', " .
             "FGColor='$fgcolor' ";
       }
-
-      db_query( "edit_folders.main($my_id)", $query );
-
-      if( !$sysmsg )
-         $sysmsg = T_('Folders adjusted!');
    } //foreach folders in $_POST
 
 
-   asort($statusfolders);
-   if( $statusfolders != $old_statusfolders || $cfg_pages->get_status_flags() != $old_status_flags )
-   {
-      $cfg_pages->set_status_folders( implode(',', $statusfolders) );
-      $cfg_pages->update_status_folders();
+   ta_begin();
+   {//HOT-section to update folders
+      if( $folder_query )
+      {
+         db_query( "edit_folders.main($my_id)", $folder_query ); // table Folders
+         if( !$sysmsg )
+            $sysmsg = T_('Folders adjusted!');
+      }
 
-      if( !$sysmsg )
-         $sysmsg = T_('Folders adjusted!');
+      asort($statusfolders);
+      if( $statusfolders != $old_statusfolders || $cfg_pages->get_status_flags() != $old_status_flags )
+      {
+         $cfg_pages->set_status_folders( implode(',', $statusfolders) );
+         $cfg_pages->update_status_folders();
+         if( !$sysmsg )
+            $sysmsg = T_('Folders adjusted!');
+      }
    }
+   ta_end();
 
 
    //reset folders infos

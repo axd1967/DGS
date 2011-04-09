@@ -76,16 +76,20 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
          $dir = $dir>0 ? 1 : -1;
          $start+= $dir;
 
-         //shift the neighbours backward, reference by SortOrder
-         db_query( "forum_admin.move.update_sortorder1($start:$end)",
-               "UPDATE Forums SET SortOrder=SortOrder-($dir)"
-                     . " WHERE SortOrder BETWEEN "
-                        .($start>$end?"$end AND $start":"$start AND $end")
-                     . " LIMIT $cnt" );
+         ta_begin();
+         {//HOT-section to move forum-entry
+            //shift the neighbours backward, reference by SortOrder
+            db_query( "forum_admin.move.update_sortorder1($start:$end)",
+                  "UPDATE Forums SET SortOrder=SortOrder-($dir)"
+                        . " WHERE SortOrder BETWEEN "
+                           .($start>$end?"$end AND $start":"$start AND $end")
+                        . " LIMIT $cnt" );
 
-         //move the entry forward, reference by ID
-         db_query( "forum_admin.move.update_sortorder2($fid,$end)",
-               "UPDATE Forums SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
+            //move the entry forward, reference by ID
+            db_query( "forum_admin.move.update_sortorder2($fid,$end)",
+                  "UPDATE Forums SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
+         }
+         ta_end();
       }
       jump_to($abspage); //clean URL
    } //move
@@ -147,10 +151,14 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
             jump_to("$abspage?sysmsg=$msg");
          }
 
-         db_query( "forum_admin.do_edit.delete($fid)",
-               "DELETE FROM Forums WHERE ID=$fid LIMIT 1" );
-         db_query( "forum_admin.do_edit.update_sortorder",
-               "UPDATE Forums SET SortOrder=SortOrder-1 WHERE SortOrder>" . $row["SortOrder"] );
+         ta_begin();
+         {//HOT-section to delete forum
+            db_query( "forum_admin.do_edit.delete($fid)",
+                  "DELETE FROM Forums WHERE ID=$fid LIMIT 1" );
+            db_query( "forum_admin.do_edit.update_sortorder",
+                  "UPDATE Forums SET SortOrder=SortOrder-1 WHERE SortOrder>" . $row["SortOrder"] );
+         }
+         ta_end();
       }
       else
       { //Update
@@ -222,15 +230,19 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
       else
          $SortOrder = 0;
 
-      db_query( 'forum_admin.update_sortorder',
-            'UPDATE Forums SET SortOrder=SortOrder+1 WHERE SortOrder>' . $SortOrder );
+      ta_begin();
+      {//HOT-section to insert forum
+         db_query( 'forum_admin.update_sortorder',
+               'UPDATE Forums SET SortOrder=SortOrder+1 WHERE SortOrder>' . $SortOrder );
 
-      db_query( 'forum_admin.insert',
-            "INSERT INTO Forums SET"
-               . " Name='".mysql_addslashes($name)."'"
-               . ",Description='".mysql_addslashes($description)."'"
-               . ",Options=" . build_forum_options( @$_REQUEST )
-               . ",SortOrder=" . ($SortOrder+1) );
+         db_query( 'forum_admin.insert',
+               "INSERT INTO Forums SET"
+                  . " Name='".mysql_addslashes($name)."'"
+                  . ",Description='".mysql_addslashes($description)."'"
+                  . ",Options=" . build_forum_options( @$_REQUEST )
+                  . ",SortOrder=" . ($SortOrder+1) );
+      }
+      ta_end();
 
       jump_to($abspage); //clean URL
    } //do_new

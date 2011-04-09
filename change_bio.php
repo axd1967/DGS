@@ -58,8 +58,7 @@ require_once( "include/std_functions.php" );
          $EnteredText = trim(get_request_arg("text$bid"));
          if( $EnteredText == "" )
          {
-            $query = "DELETE FROM Bio WHERE ID=$bid LIMIT 1";
-            db_query( "change_bio.delete_bio[$bid]", $query );
+            db_query( "change_bio.delete_bio[$bid]", "DELETE FROM Bio WHERE ID=$bid LIMIT 1" );
             continue;
          }
       }
@@ -97,65 +96,69 @@ require_once( "include/std_functions.php" );
       }
    }
 
-   // update existing DB-entries
-   foreach( $bios as $idx => $row )
-   {
-      $bid= $row['ID'];
+   ta_begin();
+   {//HOT-section to update bio-entries
+      // update existing DB-entries
+      foreach( $bios as $idx => $row )
+      {
+         $bid= $row['ID'];
 
+         if( $change_it )
+         {
+            $EnteredText = trim(get_request_arg("text$bid"));
+            $EnteredCategory = trim(get_request_arg("category$bid"));
+            if( $EnteredCategory == '' )
+               $EnteredCategory = '='.trim(get_request_arg("other$bid"));
+
+            if( $EnteredText == $row['Text']
+                  && $EnteredCategory == $row['Category']
+                  && $row['SortOrder'] == $row['newpos'] )
+               continue;
+
+            $query = 'UPDATE Bio SET ' .
+               'Text="'.mysql_addslashes($EnteredText).'"' .
+               ', Category="'.mysql_addslashes($EnteredCategory).'"' .
+               ', SortOrder="'.$row['newpos'].'"' .
+               " WHERE ID=$bid AND uid=$my_id LIMIT 1";
+         }
+         else
+         {
+            if( $row['SortOrder'] == $row['newpos'] )
+               continue;
+
+            $query = 'UPDATE Bio SET ' .
+               //', Text="'.mysql_addslashes($row['Text']).'"' .
+               //', Category="'.mysql_addslashes($row['Category']).'"' .
+               ', SortOrder="'.$row['newpos'].'"' .
+               " WHERE ID=$bid AND uid=$my_id LIMIT 1";
+         }
+
+         db_query( "change_bio.alter_bio[$bid]", $query );
+      }
+
+      // add new entries
+      $idx = get_request_arg("newcnt");
       if( $change_it )
+      for( $bid=1; $bid <= $idx; $bid++ )
       {
-         $EnteredText = trim(get_request_arg("text$bid"));
-         $EnteredCategory = trim(get_request_arg("category$bid"));
+         $EnteredText = trim(get_request_arg("newtext$bid"));
+         $EnteredCategory = trim(get_request_arg("newcategory$bid"));
+
          if( $EnteredCategory == '' )
-            $EnteredCategory = '='.trim(get_request_arg("other$bid"));
+            $EnteredCategory = '='.trim(get_request_arg("newother$bid"));
 
-         if( $EnteredText == $row['Text']
-               && $EnteredCategory == $row['Category']
-               && $row['SortOrder'] == $row['newpos'] )
+         if( $EnteredText == "" )
             continue;
 
-         $query = 'UPDATE Bio SET ' .
-            'Text="'.mysql_addslashes($EnteredText).'"' .
-            ', Category="'.mysql_addslashes($EnteredCategory).'"' .
-            ', SortOrder="'.$row['newpos'].'"' .
-            " WHERE ID=$bid AND uid=$my_id LIMIT 1";
+         $query = "INSERT INTO Bio SET uid=$my_id" .
+               ', Text="'.mysql_addslashes($EnteredText).'"' .
+               ', Category="'.mysql_addslashes($EnteredCategory).'"' .
+               ', SortOrder="'.(++$max_pos).'"';
+
+         db_query( 'change_bio.insert_bio', $query );
       }
-      else
-      {
-         if( $row['SortOrder'] == $row['newpos'] )
-            continue;
-
-         $query = 'UPDATE Bio SET ' .
-            //', Text="'.mysql_addslashes($row['Text']).'"' .
-            //', Category="'.mysql_addslashes($row['Category']).'"' .
-            ', SortOrder="'.$row['newpos'].'"' .
-            " WHERE ID=$bid AND uid=$my_id LIMIT 1";
-      }
-
-      db_query( "change_bio.alter_bio[$bid]", $query );
    }
-
-   // add new entries
-   $idx = get_request_arg("newcnt");
-   if( $change_it )
-   for( $bid=1; $bid <= $idx; $bid++ )
-   {
-      $EnteredText = trim(get_request_arg("newtext$bid"));
-      $EnteredCategory = trim(get_request_arg("newcategory$bid"));
-
-      if( $EnteredCategory == '' )
-         $EnteredCategory = '='.trim(get_request_arg("newother$bid"));
-
-      if( $EnteredText == "" )
-         continue;
-
-      $query = "INSERT INTO Bio SET uid=$my_id" .
-            ', Text="'.mysql_addslashes($EnteredText).'"' .
-            ', Category="'.mysql_addslashes($EnteredCategory).'"' .
-            ', SortOrder="'.(++$max_pos).'"';
-
-      db_query( 'change_bio.insert_bio', $query );
-   }
+   ta_end();
 
 
    if( !$change_it )

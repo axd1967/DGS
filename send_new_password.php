@@ -81,20 +81,8 @@ require_once( "include/std_functions.php" );
 // Now generate new password:
 
    $newpasswd = generate_random_password();
-
-   $Email= trim($row['Email']);
-
-   admin_log( @$player_row['ID'], @$player_row['Handle'],
-         "send a new password to $pswduser at $Email.");
-
-// Save password in database
-
-   $result = db_query( "send_new_password.update($pswduser)",
-         "UPDATE Players " .
-         "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
-         "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
-
-   $msg=
+   $Email = trim($row['Email']);
+   $msg =
 "You (or possibly someone else) has requested a new password\n" .
 " for the account: $pswduser\n" . //the handle of the requesting account
 " and it has been randomly chosen as: $newpasswd\n" .
@@ -105,9 +93,23 @@ Both the old and the new password will also be valid until
 
 ' . HOSTBASE;
 
-   verify_email( 'send_new_password', $Email);
+// Save password in database
 
-   send_email("send_new_password Uid:$pswduser Text:$msg", $Email, 0, $msg);
+   ta_begin();
+   {//HOT-section to save new password
+      admin_log( @$player_row['ID'], @$player_row['Handle'],
+         "send a new password to $pswduser at $Email.");
+
+      $result = db_query( "send_new_password.update($pswduser)",
+            "UPDATE Players " .
+            "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
+            "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
+
+      verify_email( 'send_new_password', $Email);
+
+      send_email("send_new_password Uid:$pswduser Text:$msg", $Email, 0, $msg);
+   }
+   ta_end();
 
    $msg = urlencode(T_("New password sent!"));
    if( $logged_in )

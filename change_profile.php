@@ -189,15 +189,18 @@ require_once 'include/countries.php';
        "Nightstart=" . $nightstart .
        " WHERE ID=$my_id LIMIT 1";
 
-   // table (Players)
-   db_query( "change_profile($my_id)", $query );
+   ta_begin();
+   {//HOT-section to update players profile
+      // table (Players)
+      db_query( "change_profile($my_id)", $query );
 
-   // table (ConfigBoard)
-   if( $save_config_board )
-      $cfg_board->update_all();
+      // table (ConfigBoard)
+      if( $save_config_board )
+         $cfg_board->update_all();
+   }
+   ta_end();
 
    $msg = urlencode(T_('Profile updated!'));
-
    jump_to("userinfo.php?uid=" . $player_row['ID'] .URI_AMP."sysmsg=$msg");
 }
 ?>

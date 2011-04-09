@@ -250,19 +250,21 @@ class UserRegistration
                "crc32=" . crc32($Text) . ", " .
                "PosIndex='**'";
 
-      $result = db_query( "Registration.register_blocked_user.insert_new_post({$this->uhandle})", $query );
+      ta_begin();
+      {//HOT-section to register blocked user
+         $result = db_query( "Registration.register_blocked_user.insert_new_post({$this->uhandle})", $query );
+         if( mysql_affected_rows() != 1)
+            error('mysql_insert_post', "Registration.register_blocked_user.insert_new_post2({$this->uhandle})");
 
-      if( mysql_affected_rows() != 1)
-         error('mysql_insert_post', "Registration.register_blocked_user.insert_new_post2({$this->uhandle})");
+         $new_id = mysql_insert_id();
+         db_query( "Registration.register_blocked_user.new_thread($new_id)",
+            "UPDATE Posts SET Thread_ID=ID, LastPost=ID WHERE ID=$new_id LIMIT 1" );
+         if( mysql_affected_rows() != 1)
+            error('mysql_insert_post', "Registration.register_blocked_user.new_thread2($new_id)");
 
-      $new_id = mysql_insert_id();
-      db_query( "Registration.register_blocked_user.new_thread($new_id)",
-         "UPDATE Posts SET Thread_ID=ID, LastPost=ID WHERE ID=$new_id LIMIT 1" );
-
-      if( mysql_affected_rows() != 1)
-         error('mysql_insert_post', "Registration.register_blocked_user.new_thread2($new_id)");
-
-      add_forum_log( $new_id, $new_id, FORUMLOGACT_NEW_PEND_POST . ':new_thread' );
+         add_forum_log( $new_id, $new_id, FORUMLOGACT_NEW_PEND_POST . ':new_thread' );
+      }
+      ta_end();
    } //register_blocked_user
 
 } // end of 'UserRegistration'

@@ -265,60 +265,64 @@ function create_godiagrams( &$text, $cfg_board )
       }
 
 
-      if( !($ID > 0) || empty($row['Saved']) ||
-          ($row['Saved']=='Y' && (!preg_match('/^\s*id=\d+\s*$/i', $m) || $altered=='Y')))
-      {
-         if( $ID > 0 )
+      ta_begin();
+      {//HOT-section to create go-diagram
+         if( !($ID > 0) || empty($row['Saved']) ||
+             ($row['Saved']=='Y' && (!preg_match('/^\s*id=\d+\s*$/i', $m) || $altered=='Y')))
          {
-            $diag = $diagrams[$ID];
-            $diag->set_values_from_post($ID);
+            if( $ID > 0 )
+            {
+               $diag = $diagrams[$ID];
+               $diag->set_values_from_post($ID);
+            }
+            else
+            {
+               $diag = new GoDiagram( $cfg_board );
+               $diag->set_values_from_goban_tag($m);
+            }
+
+            db_query( 'godiagram.create_godiagrams.insert',
+               "INSERT INTO GoDiagrams SET " .
+                        "Size={$diag->Size}, " .
+                        "View_Left={$diag->Left}, " .
+                        "View_Right={$diag->Right}, " .
+                        "View_Down={$diag->Down}, " .
+                        "View_Up={$diag->Up}, " .
+                        "Date=FROM_UNIXTIME($NOW)" );
+
+            $New_ID = mysql_insert_id();
+            $diagrams[$New_ID] = $diag;
+            if( $ID > 0 )
+               unset($diagrams[$ID]);
+            $ID = $New_ID;
+
+            $save_data = true;
          }
          else
          {
-            $diag = new GoDiagram( $cfg_board );
-            $diag->set_values_from_goban_tag($m);
+            if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
+            {
+               $diagrams[$ID]->set_values_from_goban_tag($m);
+               $save_data = true;
+            }
+
+            if( $altered == 'Y' )
+            {
+               $diagrams[$ID]->set_values_from_post($ID);
+               $save_data = true;
+            }
          }
 
-         db_query( 'godiagram.create_godiagrams.insert',
-            "INSERT INTO GoDiagrams SET " .
-                     "Size={$diag->Size}, " .
-                     "View_Left={$diag->Left}, " .
-                     "View_Right={$diag->Right}, " .
-                     "View_Down={$diag->Down}, " .
-                     "View_Up={$diag->Up}, " .
-                     "Date=FROM_UNIXTIME($NOW)" );
+         $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
 
-         $New_ID = mysql_insert_id();
-         $diagrams[$New_ID] = $diag;
-         if( $ID > 0 )
-            unset($diagrams[$ID]);
-         $ID = $New_ID;
-
-         $save_data = true;
-      }
-      else
-      {
-         if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
+         if( $save_data )
          {
-            $diagrams[$ID]->set_values_from_goban_tag($m);
-            $save_data = true;
-         }
-
-         if( $altered == 'Y' )
-         {
-            $diagrams[$ID]->set_values_from_post($ID);
-            $save_data = true;
+            db_query( 'godiagram.create_godiagrams.save',
+               'UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
+               "WHERE ID=$ID AND Saved='N' LIMIT 1" );
          }
       }
-
-      $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
-
-      if( $save_data )
-      {
-         db_query( 'godiagram.create_godiagrams.save',
-            'UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
-            "WHERE ID=$ID AND Saved='N' LIMIT 1" );
-      }
+      ta_end();
    } //endfor
 
    return $diagrams;

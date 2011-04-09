@@ -182,8 +182,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    {
       if( $rid && $is_delete && $authorise_delete && @$_REQUEST['confirm'] && count($errors) == 0 ) // confirm delete TP-reg
       {
-         TournamentParticipant::delete_tournament_participant( $tid, $rid );
-         $sys_msg = send_register_notification( 'delete', $tp, $my_id );
+         ta_begin();
+         {//HOT-section to delete tournament-participant
+            TournamentParticipant::delete_tournament_participant( $tid, $rid );
+            $sys_msg = send_register_notification( 'delete', $tp, $my_id );
+         }
+         ta_end();
          jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
 
@@ -225,19 +229,23 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          }
          $tp->NextRound = $tp->StartRound; //copy on REGISTER
 
-         $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
-         TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+         ta_begin();
+         {//HOT-section to update tournament-registration
+            $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
+            TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
-         // send notification (if needed)
-         if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK
-            $sys_msg = send_register_notification( 'ack_apply', $tp, $my_id );
-         elseif( $old_status != $tp->Status && $tp->Status == TP_STATUS_INVITE ) // customized -> INVITE
-         {
-            $ntype = ( $rid ) ? $old_status.'_invite' : 'new_invite';
-            $sys_msg = send_register_notification( $ntype, $tp, $my_id );
+            // send notification (if needed)
+            if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK
+               $sys_msg = send_register_notification( 'ack_apply', $tp, $my_id );
+            elseif( $old_status != $tp->Status && $tp->Status == TP_STATUS_INVITE ) // customized -> INVITE
+            {
+               $ntype = ( $rid ) ? $old_status.'_invite' : 'new_invite';
+               $sys_msg = send_register_notification( $ntype, $tp, $my_id );
+            }
+            else
+               $sys_msg = urlencode( T_('Registration saved!') );
          }
-         else
-            $sys_msg = urlencode( T_('Registration saved!') );
+         ta_end();
 
          jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }

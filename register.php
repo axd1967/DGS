@@ -40,12 +40,16 @@ require_once( "include/register_functions.php" );
    $errors = 0;
    if( @$_REQUEST['register'] ) // register user
    {
-      $errors = $reg->check_registration_normal();
-      if( !$errors )
-      {
-         $reg->register_user();
-         jump_to("status.php");
+      ta_begin();
+      {//HOT-section to register user
+         $errors = $reg->check_registration_normal();
+         if( !$errors )
+         {
+            $reg->register_user();
+            jump_to("status.php");
+         }
       }
+      ta_end();
    }
 
 

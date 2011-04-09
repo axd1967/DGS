@@ -184,17 +184,21 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    else
       $query = "INSERT INTO Games SET $query";
 
-   $result = db_query( "make_invite_game.update_game($disputegid)",
-      $query,
-      'mysql_insert_game' );
+   ta_begin();
+   {//HOT-section to make invite-game
+      $result = db_query( "make_invite_game.update_game($disputegid)",
+         $query,
+         'mysql_insert_game' );
 
-   if( mysql_affected_rows() != 1)
-      error('mysql_start_game', "make_invite_game.update_game2($disputegid)");
+      if( mysql_affected_rows() != 1)
+         error('mysql_start_game', "make_invite_game.update_game2($disputegid)");
 
-   if( $disputegid > 0 )
-      $gid = $disputegid;
-   else
-      $gid = mysql_insert_id();
+      if( $disputegid > 0 )
+         $gid = $disputegid;
+      else
+         $gid = mysql_insert_id();
+   }
+   ta_end();
 
    if( $gid <= 0 )
       error('internal_error', "make_invite_game.err2($gid)");
@@ -292,10 +296,14 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
 }//accept_invite_game
 
 
-// Creates a running game, black/white_row are prefilled with chosen players
-// always return a valid game ID from the database, else call error()
-// NOTE: game_info_row['double_gid'] can be set to write reference to twin double-game
-// NOTE: game_info_row['tid'] = tournament-id
+/*!
+ * \brief Creates a running game, black/white_row are prefilled with chosen players
+ *        always return a valid game ID from the database, else call error().
+ * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+ *
+ * \note game_info_row['double_gid'] can be set to write reference to twin double-game
+ * \note game_info_row['tid'] = tournament-id
+ */
 function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 {
    global $NOW;
@@ -490,6 +498,7 @@ require_once('include/sgf_parser.php');
 require_once('include/coords.php');
 
 //return false if no placement is done but is still possible
+// IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
 function make_standard_placement_of_handicap_stones(
             $size, $hcp, $gid, $allow_incomplete_pattern=false)
 {
@@ -531,7 +540,7 @@ function make_standard_placement_of_handicap_stones(
       return false;
 
    return true;
-}
+}//make_standard_placement_of_handicap_stones
 
 } //ENABLE_STDHANDICAP & 2
 

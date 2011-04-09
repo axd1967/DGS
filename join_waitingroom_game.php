@@ -72,11 +72,15 @@ require_once( "include/contacts.php" );
       if( $my_id != $opponent_ID )
          error('waitingroom_delete_not_own', "join_waitingroom_game.check.user($opponent_ID)");
 
-      db_query( "join_waitingroom_game.delete($wr_id)",
-         "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
+      ta_begin();
+      {//HOT-section to delete waiting-room offer
+         db_query( "join_waitingroom_game.delete($wr_id)",
+            "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
-      if( $gid )
-         MultiPlayerGame::revoke_offer_game_players( $gid, $game_row['nrGames'], GPFLAG_WAITINGROOM );
+         if( $gid )
+            MultiPlayerGame::revoke_offer_game_players( $gid, $game_row['nrGames'], GPFLAG_WAITINGROOM );
+      }
+      ta_end();
 
       $msg = urlencode(T_('Game deleted!'));
       if( $gid )

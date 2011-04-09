@@ -117,27 +117,31 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
 
    echo "<p></p>Game:";
    $count=0; $tot=0;
-   while( $row = mysql_fetch_assoc( $result ) )
-   {
-      echo ' ', $row['gid'];
-      $rating_changes = find_rating_changes( $row['X_Lastchanged'], $arr_rca );
-
-      if( $do_it )
+   ta_begin();
+   {//HOT-section to recalculate user-ratings
+      while( $row = mysql_fetch_assoc( $result ) )
       {
-         // reset user-rating
-         if( !is_null($rating_changes) )
-            change_user_ratings_for_recalc( $rating_changes );
+         echo ' ', $row['gid'];
+         $rating_changes = find_rating_changes( $row['X_Lastchanged'], $arr_rca );
 
-         // NOTE: MP-games are always unrated and are handled in update_rating2()-func
-         $rated_status = update_rating2($row["gid"], false/*=check_done*/); //0=rated game
-         if( $rated_status == RATEDSTATUS_RATED )
-            $count++;
-         else
-            echo '--';
+         if( $do_it )
+         {
+            // reset user-rating
+            if( !is_null($rating_changes) )
+               change_user_ratings_for_recalc( $rating_changes );
+
+            // NOTE: MP-games are always unrated and are handled in update_rating2()-func
+            $rated_status = update_rating2($row["gid"], false/*=check_done*/); //0=rated game
+            if( $rated_status == RATEDSTATUS_RATED )
+               $count++;
+            else
+               echo '--';
+         }
+         $tot++;
       }
-      $tot++;
+      mysql_free_result($result);
    }
-   mysql_free_result($result);
+   ta_end();
    echo "\n<p></p>Finished!<br>$count/$tot rated games.\n";
 
 

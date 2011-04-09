@@ -295,32 +295,35 @@ This is why:
    }//domove
 
 
-   //See *** HOT_SECTION *** above
-   $result = db_query( "quick_play.update_game($gid)", $game_query . $game_clause );
-   if( mysql_affected_rows() != 1 )
-      error('mysql_update_game', "quick_play.update_game2($gid)");
+   ta_begin();
+   {//HOT-section to play move in game
+      //See *** HOT_SECTION *** above
+      $result = db_query( "quick_play.update_game($gid)", $game_query . $game_clause );
+      if( mysql_affected_rows() != 1 )
+         error('mysql_update_game', "quick_play.update_game2($gid)");
 
-   $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
-   if( mysql_affected_rows() < 1 && $action != 'delete' )
-      error('mysql_insert_move', "quick_play.update_moves2($gid,$action)");
-
-   if( $message_query )
-   {
-      $result = db_query( "quick_play.update_movemessage1($gid)", $message_query );
+      $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
       if( mysql_affected_rows() < 1 && $action != 'delete' )
-         error('mysql_insert_move', "quick_play.update_movemessage2($gid,$action)");
+         error('mysql_insert_move', "quick_play.update_moves2($gid,$action)");
+
+      if( $message_query )
+      {
+         $result = db_query( "quick_play.update_movemessage1($gid)", $message_query );
+         if( mysql_affected_rows() < 1 && $action != 'delete' )
+            error('mysql_insert_move', "quick_play.update_movemessage2($gid,$action)");
+      }
+
+      // Notify opponent about move
+      notify( "quick_play.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
+
+      // Increase moves and activity
+      db_query( "quick_play.update_player($gid,$my_id)",
+         "UPDATE Players SET Moves=Moves+1"
+            .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
+            .",LastMove=FROM_UNIXTIME($NOW)"
+         ." WHERE ID=$my_id LIMIT 1" );
    }
-
-
-   // Notify opponent about move
-   notify( "quick_play.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
-
-   // Increase moves and activity
-   db_query( "quick_play.update_player($gid,$my_id)",
-      "UPDATE Players SET Moves=Moves+1"
-         .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
-         .",LastMove=FROM_UNIXTIME($NOW)"
-      ." WHERE ID=$my_id LIMIT 1" );
+   ta_end();
 
 
 // No Jump somewhere

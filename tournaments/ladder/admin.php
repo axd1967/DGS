@@ -157,21 +157,25 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       $remove_all = (bool)@$_REQUEST['ta_deluserall'];
       if( (@$_REQUEST['ta_deluser'] || $remove_all) && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
       {
-         if( $tladder_user->remove_user_from_ladder( $remove_all ) )
-         {
-            if( $remove_all )
+         ta_begin();
+         {//HOT-section to remove user from ladder
+            if( $tladder_user->remove_user_from_ladder( $remove_all ) )
             {
-               TournamentLadder::notify_removed_user( "Tournament.ladder_admin.notify($tid,$uid,$my_id)", $tid, $uid,
-                  sprintf( T_('You have been removed from %s by tournament director (or admin).#tourney'),
-                           "<tourney $tid>", "<user $uid>" ));
-            }
+               if( $remove_all )
+               {
+                  TournamentLadder::notify_removed_user( "Tournament.ladder_admin.notify($tid,$uid,$my_id)", $tid, $uid,
+                     sprintf( T_('You have been removed from %s by tournament director (or admin).#tourney'),
+                              "<tourney $tid>", "<user $uid>" ));
+               }
 
-            $txtfmt = ($remove_all)
-               ? T_('User [%s] completely removed from this ladder-tournament!#tourney')
-               : T_('User [%s] removed from ladder!#tourney');
-            $sys_msg = urlencode( sprintf( $txtfmt, $user->Handle) . ' ' . T_('User has been notified!') );
-            jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+               $txtfmt = ($remove_all)
+                  ? T_('User [%s] completely removed from this ladder-tournament!#tourney')
+                  : T_('User [%s] removed from ladder!#tourney');
+               $sys_msg = urlencode( sprintf( $txtfmt, $user->Handle) . ' ' . T_('User has been notified!') );
+               jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+            }
          }
+         ta_end();
       }
    }
 

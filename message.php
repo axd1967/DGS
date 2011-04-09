@@ -102,7 +102,13 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
    $dgs_message = new DgsMessage();
    if( $handle_msg_action )
-      $errors = handle_send_message( $dgs_message, $mpg_type, $arg_to );
+   {
+      ta_begin();
+      {//HOT-section to handle message
+         $errors = handle_send_message( $dgs_message, $mpg_type, $arg_to );
+      }
+      ta_end();
+   }
    else
       $errors = array();
 
@@ -156,9 +162,13 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          {
             // Remove NEW flag
             $Folder_nr = ( $Type == 'INVITATION' ) ? FOLDER_REPLY : FOLDER_MAIN;
-            DgsMessage::update_message_folder( $mid, $my_id, $Sender, $Folder_nr );
-            update_count_message_new( "message.update_message_folder.upd_cnt_msg_new($my_id)",
-               $my_id, COUNTNEW_RECALC );
+            ta_begin();
+            {//HOT-section to move message away from NEW-folder
+               DgsMessage::update_message_folder( $mid, $my_id, $Sender, $Folder_nr );
+               update_count_message_new( "message.update_message_folder.upd_cnt_msg_new($my_id)",
+                  $my_id, COUNTNEW_RECALC );
+            }
+            ta_end();
          }
 
          if( $Type == 'INVITATION' )

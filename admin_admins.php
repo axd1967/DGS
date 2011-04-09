@@ -113,11 +113,15 @@ require_once( "include/table_columns.php" );
          $adm_level = (int)$adm_level;
          if( $adm_level != $AdminOldLevel[$uid] )
          {
-            admin_log( $my_id, @$player_row['Handle'],
-               sprintf("grants %s from 0x%x to 0x%x.", (string)$uid, $AdminOldLevel[$uid], $adm_level) );
+            ta_begin();
+            {//HOT-section to update player admin-level
+               admin_log( $my_id, @$player_row['Handle'],
+                  sprintf("grants %s from 0x%x to 0x%x.", (string)$uid, $AdminOldLevel[$uid], $adm_level) );
 
-            db_query( "admin_admins.update_admin($my_id,$uid,$adm_level)",
-               "UPDATE Players SET Adminlevel=$adm_level WHERE ID=$uid LIMIT 1" );
+               db_query( "admin_admins.update_admin($my_id,$uid,$adm_level)",
+                  "UPDATE Players SET Adminlevel=$adm_level WHERE ID=$uid LIMIT 1" );
+            }
+            ta_end();
          }
       }
 

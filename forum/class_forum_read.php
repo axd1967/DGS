@@ -89,7 +89,10 @@ class ForumRead
       mysql_free_result($result);
    }
 
-   /*! \brief Replaces Forumreads-db-entry with time and new-flag for specified fid/tid-key. */
+   /*!
+    * \brief Replaces Forumreads-db-entry with time and new-flag for specified fid/tid-key.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
+    */
    function replace_row_forumread( $dbgmsg, $fid, $tid, $time, $has_new=false )
    {
       // IMPORTANT NOTE:
@@ -112,10 +115,14 @@ class ForumRead
    {
       if( $this->fid > 0 && $thread_id > 0 && $mark_time >= $this->min_date )
       {
-         $this->replace_row_forumread( "ForumRead.mark_thread_read",
-            $this->fid, $thread_id, $mark_time );
-         ForumRead::trigger_recalc_forum_read_update( $this->uid, $this->fid );
-         ForumRead::trigger_recalc_global_read_update( $this->uid );
+         ta_begin();
+         {//HOT-section to mark thread read
+            $this->replace_row_forumread( "ForumRead.mark_thread_read",
+               $this->fid, $thread_id, $mark_time );
+            ForumRead::trigger_recalc_forum_read_update( $this->uid, $this->fid );
+            ForumRead::trigger_recalc_global_read_update( $this->uid );
+         }
+         ta_end();
       }
    }
 
@@ -161,34 +168,38 @@ class ForumRead
       }
       mysql_free_result($result);
 
-      if( count($upd_arr) ) // update existing Forumreads-entries
-      {
-         $upd_threads = implode(',', $upd_arr);
-         db_query( "ForumRead.mark_forum_read.update(({$this->uid},{$this->fid})",
-            "UPDATE Forumreads SET Time=GREATEST(Time,FROM_UNIXTIME($mark_time)) " .
-            "WHERE User_ID={$this->uid} AND Forum_ID={$this->fid} AND Thread_ID>0 AND " .
-               "Thread_ID IN ($upd_threads)" );
-      }
-
-      if( count($ins_arr) ) // insert new Forumreads-entries for NEW-threads
-      {
-         $query = "INSERT INTO Forumreads (User_ID,Forum_ID,Thread_ID,Time) VALUES ";
-
-         $first = true;
-         foreach( $ins_arr as $thread_id )
+      ta_begin();
+      {//HOT-section to mark forum as read
+         if( count($upd_arr) ) // update existing Forumreads-entries
          {
-            if( !$first ) $query .= ', ';
-            $first = false;
-            $query .= "({$this->uid},{$this->fid},$thread_id,FROM_UNIXTIME($mark_time))";
+            $upd_threads = implode(',', $upd_arr);
+            db_query( "ForumRead.mark_forum_read.update(({$this->uid},{$this->fid})",
+               "UPDATE Forumreads SET Time=GREATEST(Time,FROM_UNIXTIME($mark_time)) " .
+               "WHERE User_ID={$this->uid} AND Forum_ID={$this->fid} AND Thread_ID>0 AND " .
+                  "Thread_ID IN ($upd_threads)" );
          }
 
-         // use ON-DUPLICATE to avoid race-condiditions
-         db_query( "ForumRead.mark_forum_read.insert(({$this->uid},{$this->fid})",
-            $query . " ON DUPLICATE KEY UPDATE Time=GREATEST(Time,VALUES(Time))" );
-      }
+         if( count($ins_arr) ) // insert new Forumreads-entries for NEW-threads
+         {
+            $query = "INSERT INTO Forumreads (User_ID,Forum_ID,Thread_ID,Time) VALUES ";
 
-      ForumRead::trigger_recalc_forum_read_update( $this->uid, $this->fid );
-      ForumRead::trigger_recalc_global_read_update( $this->uid );
+            $first = true;
+            foreach( $ins_arr as $thread_id )
+            {
+               if( !$first ) $query .= ', ';
+               $first = false;
+               $query .= "({$this->uid},{$this->fid},$thread_id,FROM_UNIXTIME($mark_time))";
+            }
+
+            // use ON-DUPLICATE to avoid race-condiditions
+            db_query( "ForumRead.mark_forum_read.insert(({$this->uid},{$this->fid})",
+               $query . " ON DUPLICATE KEY UPDATE Time=GREATEST(Time,VALUES(Time))" );
+         }
+
+         ForumRead::trigger_recalc_forum_read_update( $this->uid, $this->fid );
+         ForumRead::trigger_recalc_global_read_update( $this->uid );
+      }
+      ta_end();
    } //mark_forum_read
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
@@ -308,7 +319,7 @@ class ForumRead
       if( $fr_time <= 0 || $global_updated > $fr_time )
       {
          $global_has_new = ForumRead::has_new_posts_in_all_forums( $forum_opts );
-         $success_update = ForumRead::update_global_forum_read( "load_global_new",
+         $success_update = ForumRead::update_global_forum_read( "load_global_new", // no TA
             $user_id, $global_updated, $global_has_new );
          if( $success_update )
          {
@@ -355,7 +366,10 @@ class ForumRead
       }
    }
 
-   /*! \brief Updates Forumreads to initiate recalculation for global-forum NEW-flag-state. */
+   /*!
+    * \brief Updates Forumreads to initiate recalculation for global-forum NEW-flag-state.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
+    */
    function trigger_recalc_global_read_update( $uid )
    {
       // force trigger updating with older updated-date on next load-global

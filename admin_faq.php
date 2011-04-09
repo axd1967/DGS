@@ -141,17 +141,21 @@ $info_box = '<ul>
          $dir = $dir>0 ? 1 : -1;
          $start+= $dir;
 
-         //shift the neighbours backward, reference by SortOrder
-         db_query( 'admin_faq.move.update_sortorder1',
-            "UPDATE FAQ SET SortOrder=SortOrder-($dir)"
-                     . " WHERE SortOrder BETWEEN "
-                        .($start>$end?"$end AND $start":"$start AND $end")
-                     . " AND Parent=$parent"
-                     . " LIMIT $cnt" );
+         ta_begin();
+         {//HOT-section to move FAQ-entry
+            //shift the neighbours backward, reference by SortOrder
+            db_query( 'admin_faq.move.update_sortorder1',
+               "UPDATE FAQ SET SortOrder=SortOrder-($dir)"
+                        . " WHERE SortOrder BETWEEN "
+                           .($start>$end?"$end AND $start":"$start AND $end")
+                        . " AND Parent=$parent"
+                        . " LIMIT $cnt" );
 
-         //move the entry forward, reference by ID
-         db_query( 'admin_faq.move.update_sortorder2',
-            "UPDATE FAQ SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
+            //move the entry forward, reference by ID
+            db_query( 'admin_faq.move.update_sortorder2',
+               "UPDATE FAQ SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
+         }
+         ta_end();
       }
       jump_to("$page?id=$fid#e$fid"); //clean URL
    } //move
@@ -190,15 +194,19 @@ $info_box = '<ul>
          else
             $max = 1;
 
-         //shift down the neighbours above
-         db_query( 'admin_faq.bigmove.update_sortorder1',
-            "UPDATE FAQ SET SortOrder=SortOrder-1"
-                  . " WHERE Parent=" . $row['Parent']
-                  . " AND SortOrder>" . $row['SortOrder'] );
+         ta_begin();
+         {//HOT-section to move FAQ-entry to new category
+            //shift down the neighbours above
+            db_query( 'admin_faq.bigmove.update_sortorder1',
+               "UPDATE FAQ SET SortOrder=SortOrder-1"
+                     . " WHERE Parent=" . $row['Parent']
+                     . " AND SortOrder>" . $row['SortOrder'] );
 
-         //move the entry in the new category
-         db_query( 'admin_faq.bigmove.update_sortorder2',
-            "UPDATE FAQ SET Parent=$newparent, SortOrder=$max WHERE ID=$fid LIMIT 1" );
+            //move the entry in the new category
+            db_query( 'admin_faq.bigmove.update_sortorder2',
+               "UPDATE FAQ SET Parent=$newparent, SortOrder=$max WHERE ID=$fid LIMIT 1" );
+         }
+         ta_end();
       }
       jump_to("$page?id=$fid#e$fid"); //clean URL
    } //bigmove
@@ -214,24 +222,28 @@ $info_box = '<ul>
 
       if( ($action=='Y') xor $faqhide )
       {
-         $query = "UPDATE FAQ " .
-                  "SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' " .
-                  "WHERE ID=" . $row['ID'] . ' LIMIT 1';
+         ta_begin();
+         {//HOT-section to toggle hidden FAQ-entry
+            $query = "UPDATE FAQ " .
+                     "SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' " .
+                     "WHERE ID=" . $row['ID'] . ' LIMIT 1';
 
-         db_query( 'admin_faq.hidden_update', $query );
+            db_query( 'admin_faq.hidden_update', $query );
 
-         $transl = transl_toggle_state( $row);
-         if( $faqhide && $transl == 'Y' )
-         {
-            //remove it from translation. No need to adjust Translations.Translated
-            $query = "UPDATE TranslationTexts " .
-                     "SET Translatable='N' " .
-                     "WHERE ID=" . $row['Question'] .
-                     ( $row['Level'] == 1 ? ' LIMIT 1'
-                        : " OR ID=" . $row['Answer'] . " LIMIT 2" );
+            $transl = transl_toggle_state( $row);
+            if( $faqhide && $transl == 'Y' )
+            {
+               //remove it from translation. No need to adjust Translations.Translated
+               $query = "UPDATE TranslationTexts " .
+                        "SET Translatable='N' " .
+                        "WHERE ID=" . $row['Question'] .
+                        ( $row['Level'] == 1 ? ' LIMIT 1'
+                           : " OR ID=" . $row['Answer'] . " LIMIT 2" );
 
-            db_query( 'admin_faq.hidden_flags', $query );
+               db_query( 'admin_faq.hidden_flags', $query );
+            }
          }
+         ta_end();
       }
       //jump_to($page); //clean URL
    } //toggleH
@@ -384,21 +396,25 @@ $info_box = '<ul>
             jump_to("$page?sysmsg=$msg");
          }
 
-         db_query( 'admin_faq.do_edit.delete',
-            "DELETE FROM FAQ WHERE ID=$fid LIMIT 1" );
-         db_query( 'admin_faq.do_edit.update_sortorder',
-            "UPDATE FAQ SET SortOrder=SortOrder-1 " .
-                     "WHERE Parent=" . $row['Parent'] .
-                     " AND SortOrder>" . $row['SortOrder'] );
+         ta_begin();
+         {//HOT-section to delete FAQ-entry
+            db_query( 'admin_faq.do_edit.delete',
+               "DELETE FROM FAQ WHERE ID=$fid LIMIT 1" );
+            db_query( 'admin_faq.do_edit.update_sortorder',
+               "UPDATE FAQ SET SortOrder=SortOrder-1 " .
+                        "WHERE Parent=" . $row['Parent'] .
+                        " AND SortOrder>" . $row['SortOrder'] );
 
-         db_query( 'admin_faq.do_edit.delete_tranlsgrps',
-            "DELETE FROM TranslationFoundInGroup " .
-                     "WHERE Text_ID='$QID' " .
-                     "OR Text_ID='$AID'" );
-         db_query( 'admin_faq.do_edit.delete_tranlstexts',
-            "DELETE FROM TranslationTexts " .
-                     "WHERE ID='$QID' " .
-                     "OR ID='$AID'" );
+            db_query( 'admin_faq.do_edit.delete_tranlsgrps',
+               "DELETE FROM TranslationFoundInGroup " .
+                        "WHERE Text_ID='$QID' " .
+                        "OR Text_ID='$AID'" );
+            db_query( 'admin_faq.do_edit.delete_tranlstexts',
+               "DELETE FROM TranslationTexts " .
+                        "WHERE ID='$QID' " .
+                        "OR ID='$AID'" );
+         }
+         ta_end();
 
          $ref_id = $row['Parent']; // anchor-ref to former, parent category
       }
@@ -410,61 +426,65 @@ $info_box = '<ul>
             jump_to("$page?sysmsg=$msg");
          }
 
-         $Qchanged = ( @$_REQUEST['Qchanged'] === 'Y' //only if not hidden
-                     && $question && $row['QTranslatable'] === 'Done' );
-         if( $row['Q'] != $question || $Qchanged )
-         {
-            if( $Qchanged )
+         ta_begin();
+         {//HOT-section to update FAQ-entry
+            $Qchanged = ( @$_REQUEST['Qchanged'] === 'Y' //only if not hidden
+                        && $question && $row['QTranslatable'] === 'Done' );
+            if( $row['Q'] != $question || $Qchanged )
             {
-               $Qchanged = ", Translatable='Changed'";
-               db_query( 'admin_faq.do_edit.update_Qflags',
-                  "UPDATE Translations SET Translated='N'"
-                     . " WHERE Original_ID=$QID" );
-               $log|= 0x4;
+               if( $Qchanged )
+               {
+                  $Qchanged = ", Translatable='Changed'";
+                  db_query( 'admin_faq.do_edit.update_Qflags',
+                     "UPDATE Translations SET Translated='N'"
+                        . " WHERE Original_ID=$QID" );
+                  $log|= 0x4;
+               }
+               else
+                  $Qchanged = '';
+
+               $Qsql = $question;
+               $Qsql = latin1_safe($Qsql);
+               $Qsql = mysql_addslashes($Qsql);
+               db_query( 'admin_faq.do_edit.update_Qtexts',
+                  "UPDATE TranslationTexts SET Text='$Qsql'$Qchanged WHERE ID=$QID LIMIT 1" );
+               $log|= 0x1;
             }
             else
-               $Qchanged = '';
+               $Qsql = '';
 
-            $Qsql = $question;
-            $Qsql = latin1_safe($Qsql);
-            $Qsql = mysql_addslashes($Qsql);
-            db_query( 'admin_faq.do_edit.update_Qtexts',
-               "UPDATE TranslationTexts SET Text='$Qsql'$Qchanged WHERE ID=$QID LIMIT 1" );
-            $log|= 0x1;
-         }
-         else
-            $Qsql = '';
-
-         $Achanged = ( @$_REQUEST['Achanged'] === 'Y' //only if not hidden
-                     && $answer && $row['ATranslatable'] === 'Done' );
-         if( $AID>0 && ( $row['A'] != $answer || $Achanged ) )
-         {
-            if( $Achanged )
+            $Achanged = ( @$_REQUEST['Achanged'] === 'Y' //only if not hidden
+                        && $answer && $row['ATranslatable'] === 'Done' );
+            if( $AID>0 && ( $row['A'] != $answer || $Achanged ) )
             {
-               $Achanged = ", Translatable='Changed'";
-               db_query( 'admin_faq.do_edit.update_Aflags',
-                  "UPDATE Translations SET Translated='N' WHERE Original_ID=$AID" );
-               $log|= 0x8;
+               if( $Achanged )
+               {
+                  $Achanged = ", Translatable='Changed'";
+                  db_query( 'admin_faq.do_edit.update_Aflags',
+                     "UPDATE Translations SET Translated='N' WHERE Original_ID=$AID" );
+                  $log|= 0x8;
+               }
+               else
+                  $Achanged = '';
+
+               $Asql = $answer;
+               $Asql = latin1_safe($Asql);
+               $Asql = mysql_addslashes($Asql);
+               db_query( 'admin_faq.do_edit.update_Atexts',
+                  "UPDATE TranslationTexts SET Text='$Asql'$Achanged WHERE ID=$AID LIMIT 1" );
+               $log|= 0x2;
             }
             else
-               $Achanged = '';
+               $Asql = '';
 
-            $Asql = $answer;
-            $Asql = latin1_safe($Asql);
-            $Asql = mysql_addslashes($Asql);
-            db_query( 'admin_faq.do_edit.update_Atexts',
-               "UPDATE TranslationTexts SET Text='$Asql'$Achanged WHERE ID=$AID LIMIT 1" );
-            $log|= 0x2;
+            if( $log )
+            {
+               db_query( 'admin_faq.do_edit.faqlog',
+                  "INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
+                        . ", Question='$Qsql', Answer='$Asql'" ); //+ Date= timestamp
+            }
          }
-         else
-            $Asql = '';
-
-         if( $log )
-         {
-            db_query( 'admin_faq.do_edit.faqlog',
-               "INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
-                     . ", Question='$Qsql', Answer='$Asql'" ); //+ Date= timestamp
-         }
+         ta_end();
       }
 
       if( $log ) //i.e. modified except deleted
@@ -557,81 +577,85 @@ $info_box = '<ul>
          jump_to("$page?sysmsg=$msg");
       }
 
-      $query = "SELECT * FROM FAQ WHERE ID=$fid";
-      $row = mysql_single_fetch( "admin_faq.do_new.find1($fid)", $query );
-      if( $fid==1 && (!$row || $row['Hidden']=='Y') )
-      {
-         //adjust the seed. must be Hidden='N' even if invisible
-         db_query( "admin_faq.do_new.replace_seed($fid)",
-            "REPLACE INTO FAQ (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
-                     . " VALUES (1,1,0,0,0,0,'N')" );
-         //reload it:
-         $row = mysql_single_fetch( "admin_faq.do_new.find2($fid)", $query );
-      }
-      if( !$row )
-         error('admin_no_such_entry', "admin_faq.do_new.find3($fid)");
-
-      if( $row['Level'] == 0 ) // First category
-         $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 1);
-      elseif( $row['Level'] == 1 && $action == 'e' ) // First entry
-         $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 2);
-
-      $FAQ_group = get_faq_group_id();
-
-      $ref_id = $fid; // anchor-ref
-      if( $question )
-      {
-         db_query( 'admin_faq.do_new.update_sortorder',
-            "UPDATE FAQ SET SortOrder=SortOrder+1 " .
-                     'WHERE Parent=' . $row['Parent'] . ' ' .
-                     'AND SortOrder>' . $row['SortOrder'] );
-
-         db_query( 'admin_faq.do_new.insert',
-            "INSERT INTO FAQ SET " .
-                     "SortOrder=" . ($row['SortOrder']+1) . ', ' .
-                     "Parent=" . $row['Parent'] . ', ' .
-                     "Level=" . $row['Level'] );
-
-         $faq_id = mysql_insert_id();
-         $ref_id = $faq_id;
-
-         $Qsql = $question;
-         $Qsql = latin1_safe($Qsql);
-         $Qsql = mysql_addslashes($Qsql);
-         db_query( 'admin_faq.do_new.transltexts1',
-            "INSERT INTO TranslationTexts SET Text='$Qsql'" .
-                     ", Ref_ID=$faq_id, Translatable = 'N' " );
-
-         $q_id = mysql_insert_id();
-         db_query( 'admin_faq.do_new.translfoundingrp1',
-            "INSERT INTO TranslationFoundInGroup " .
-                     "SET Text_ID=$q_id, Group_ID=$FAQ_group" );
-
-         $a_id = 0;
-         if( $row['Level'] > 1 )
+      ta_begin();
+      {//HOT-section to add new FAQ-entry
+         $query = "SELECT * FROM FAQ WHERE ID=$fid";
+         $row = mysql_single_fetch( "admin_faq.do_new.find1($fid)", $query );
+         if( $fid==1 && (!$row || $row['Hidden']=='Y') )
          {
-            $Asql = $answer;
-            $Asql = latin1_safe($Asql);
-            $Asql = mysql_addslashes($Asql);
-            db_query( 'admin_faq.do_new.transltexts2',
-               "INSERT INTO TranslationTexts SET Text='$Asql'" .
+            //adjust the seed. must be Hidden='N' even if invisible
+            db_query( "admin_faq.do_new.replace_seed($fid)",
+               "REPLACE INTO FAQ (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
+                        . " VALUES (1,1,0,0,0,0,'N')" );
+            //reload it:
+            $row = mysql_single_fetch( "admin_faq.do_new.find2($fid)", $query );
+         }
+         if( !$row )
+            error('admin_no_such_entry', "admin_faq.do_new.find3($fid)");
+
+         if( $row['Level'] == 0 ) // First category
+            $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 1);
+         elseif( $row['Level'] == 1 && $action == 'e' ) // First entry
+            $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 2);
+
+         $FAQ_group = get_faq_group_id();
+
+         $ref_id = $fid; // anchor-ref
+         if( $question )
+         {
+            db_query( 'admin_faq.do_new.update_sortorder',
+               "UPDATE FAQ SET SortOrder=SortOrder+1 " .
+                        'WHERE Parent=' . $row['Parent'] . ' ' .
+                        'AND SortOrder>' . $row['SortOrder'] );
+
+            db_query( 'admin_faq.do_new.insert',
+               "INSERT INTO FAQ SET " .
+                        "SortOrder=" . ($row['SortOrder']+1) . ', ' .
+                        "Parent=" . $row['Parent'] . ', ' .
+                        "Level=" . $row['Level'] );
+
+            $faq_id = mysql_insert_id();
+            $ref_id = $faq_id;
+
+            $Qsql = $question;
+            $Qsql = latin1_safe($Qsql);
+            $Qsql = mysql_addslashes($Qsql);
+            db_query( 'admin_faq.do_new.transltexts1',
+               "INSERT INTO TranslationTexts SET Text='$Qsql'" .
                         ", Ref_ID=$faq_id, Translatable = 'N' " );
 
-            $a_id = mysql_insert_id();
-            db_query( 'admin_faq.do_new.translfoundingrp2)',
+            $q_id = mysql_insert_id();
+            db_query( 'admin_faq.do_new.translfoundingrp1',
                "INSERT INTO TranslationFoundInGroup " .
-                        "SET Text_ID=$a_id, Group_ID=$FAQ_group" );
+                        "SET Text_ID=$q_id, Group_ID=$FAQ_group" );
+
+            $a_id = 0;
+            if( $row['Level'] > 1 )
+            {
+               $Asql = $answer;
+               $Asql = latin1_safe($Asql);
+               $Asql = mysql_addslashes($Asql);
+               db_query( 'admin_faq.do_new.transltexts2',
+                  "INSERT INTO TranslationTexts SET Text='$Asql'" .
+                           ", Ref_ID=$faq_id, Translatable = 'N' " );
+
+               $a_id = mysql_insert_id();
+               db_query( 'admin_faq.do_new.translfoundingrp2)',
+                  "INSERT INTO TranslationFoundInGroup " .
+                           "SET Text_ID=$a_id, Group_ID=$FAQ_group" );
+            }
+            else
+               $Asql = '';
+
+            db_query( 'admin_faq.do_new.update',
+               "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" );
+
+            db_query( 'admin_faq.do_new.faqlog',
+               "INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
+                     . ", Question='$Qsql', Answer='$Asql'" ); //+ Date= timestamp
          }
-         else
-            $Asql = '';
-
-         db_query( 'admin_faq.do_new.update',
-            "UPDATE FAQ SET Answer=$a_id, Question=$q_id WHERE ID=$faq_id LIMIT 1" );
-
-         db_query( 'admin_faq.do_new.faqlog',
-            "INSERT INTO FAQlog SET FAQID=$fid, uid=" . $player_row["ID"]
-                  . ", Question='$Qsql', Answer='$Asql'" ); //+ Date= timestamp
       }
+      ta_end();
 
       jump_to( "$page?id=$ref_id#e$ref_id" ); //clean URL (focus on new entry)
    } //do_new
