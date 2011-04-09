@@ -114,8 +114,8 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
          ta_begin();
          {//HOT-SECTION for admin changing user-rating
-            change_user_rating( $uid, $changes, $upd_user['Rating'], $upd_user['RatingMin'], $upd_user['RatingMax'] );
             admin_log( $my_id, $user->Handle, sprintf( "Change rating: %s", implode(', ', $diff) ) );
+            change_user_rating( $uid, $changes, $upd_user['Rating'], $upd_user['RatingMin'], $upd_user['RatingMax'] );
          }
          ta_end();
 
