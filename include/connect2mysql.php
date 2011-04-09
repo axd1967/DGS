@@ -142,8 +142,11 @@ function connect2mysql($no_errors=false)
 
    // user can stop the output, but not the script
    // Because we will use MySQL, this will help to complete the *multiple queries* transactions.
-   // NOTE: TODO use HOT-sections with ta_begin/ta_end when writing into multiple tables
+   //
+   // IMPORTANT NOTE:
+   //       use HOT-sections with ta_begin/ta_end when writing into multiple tables
    //       to avoid "transaction"-breaks, but allow users to stop requests (slow queries)
+   //
    //$old_ignore = @ignore_user_abort(true);
    //@ignore_user_abort($old_ignore);
 
@@ -217,13 +220,16 @@ function ta_end( $new_ignore_user_abort=null )
 
 function db_lock( $debugmsg, $locktables )
 {
+   ta_begin(); // starting HOT-section
    return db_query( "db_lock($locktables).$debugmsg", 'LOCK TABLES '.$locktables );
 }
 
 // note: ending session implicitly unlocks all tables
 function db_unlock()
 {
-   return db_query( "db_unlock()", 'UNLOCK TABLES' );
+   $result = db_query( "db_unlock()", 'UNLOCK TABLES' );
+   ta_end(); // ending HOT-section
+   return $result;
 }
 
 function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )

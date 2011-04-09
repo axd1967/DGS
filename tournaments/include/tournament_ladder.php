@@ -240,25 +240,21 @@ class TournamentLadder
     */
    function remove_user_from_ladder( $remove_all, $upd_rank=false )
    {
-      ta_begin();
-      {//HOT-section to remove user from ladder and eventually from TournamentParticipant-table
-         $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-         $table2 = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table; // needed for nested-lock for process-game-end
-         db_lock( "TournamentLadder.remove_user_from_ladder({$this->tid},{$this->rid})",
-            "$table WRITE, $table AS TL READ, $table2 WRITE" );
-         {//LOCK TournamentLadder
-            $this->delete();
-            $is_deleted = ( TournamentLadder::load_rank($this->tid, $this->rid) == 0 );
-            if( $is_deleted )
-               TournamentLadder::move_up_ladder_part($this->tid, $upd_rank, $this->Rank, 0);
-         }
+      //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $table2 = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table; // needed for nested-lock for process-game-end
+      db_lock( "TournamentLadder.remove_user_from_ladder({$this->tid},{$this->rid})",
+         "$table WRITE, $table AS TL READ, $table2 WRITE" );
+      {//LOCK TournamentLadder
+         $this->delete();
+         $is_deleted = ( TournamentLadder::load_rank($this->tid, $this->rid) == 0 );
+         if( $is_deleted )
+            TournamentLadder::move_up_ladder_part($this->tid, $upd_rank, $this->Rank, 0);
 
          if( $remove_all && $is_deleted )
             TournamentParticipant::delete_tournament_participant($this->tid, $this->rid);
-
-         db_unlock();
       }
-      ta_end();
+      db_unlock();
 
       return $is_deleted;
    }//remove_user_from_ladder
@@ -269,6 +265,7 @@ class TournamentLadder
       if( $this->Rank == $new_rank ) // no rank-change
          return true;
 
+      //HOT-section to change user-rank
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       db_lock( "TournamentLadder.change_user_rank({$this->tid},$new_rank)",
          "$table WRITE, $table AS TL READ" );
@@ -282,16 +279,13 @@ class TournamentLadder
             $success = $this->switch_user_rank( $tl2, false );
          else
          {
-            ta_begin();
-            {//HOT-section to update ladder
-               if( $this->Rank > $new_rank ) // user-move-up
-                  TournamentLadder::move_down_ladder_part( $this->tid, false, $new_rank, $this->Rank - 1 );
-               else // user-move-down
-                  TournamentLadder::move_up_ladder_part( $this->tid, false, $this->Rank + 1, $new_rank );
+            //HOT-section to update ladder
+            if( $this->Rank > $new_rank ) // user-move-up
+               TournamentLadder::move_down_ladder_part( $this->tid, false, $new_rank, $this->Rank - 1 );
+            else // user-move-down
+               TournamentLadder::move_up_ladder_part( $this->tid, false, $this->Rank + 1, $new_rank );
 
-               $success = $this->update_rank( $new_rank, false );
-            }
-            ta_end();
+            $success = $this->update_rank( $new_rank, false );
          }
       }
       db_unlock();
@@ -688,15 +682,12 @@ class TournamentLadder
       $ch_rid = $tgame->Challenger_rid;
       $df_rid = $tgame->Defender_rid;
 
+      //HOT-section to update ladder (besides reading)
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       db_lock( "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,$game_end_action)",
          "$table WRITE, $table AS TL READ" );
       {//LOCK TournamentLadder
-         ta_begin();
-         {//HOT-section to update ladder (besides reading)
-            $success = TournamentLadder::_process_game_end( $tid, $ch_rid, $df_rid, $game_end_action );
-         }
-         ta_end();
+         $success = TournamentLadder::_process_game_end( $tid, $ch_rid, $df_rid, $game_end_action );
       }
       db_unlock();
 
@@ -706,6 +697,7 @@ class TournamentLadder
    /*!
     * \brief (INTERNAL) processing tournament-game-end, called from process_game_end()-func with already locked TL-table.
     * \internal
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     * \note Special change-user-rank, handling missing challenger/defender cases, also updating BestRank + RankChanged-fields
     */
    function _process_game_end( $tid, $ch_rid, $df_rid, $game_end_action )
@@ -859,7 +851,7 @@ class TournamentLadder
 
    /*!
     * \brief Processes long absence of user not being online by removing user from ladder.
-    * \note expecting to run into HOT-section
+    * \note IMPORTANT NOTE: expecting to run in HOT-section
     */
    function process_user_absence( $tid, $uid, $user_abs_days )
    {
