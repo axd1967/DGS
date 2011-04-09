@@ -98,9 +98,9 @@ define('GA_RES_TIMOUT', 3);
 
          ta_begin();
          {//HOT-section to finish game
+            admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[{$game->Score}][$score_text]" );
             $game_finalizer->finish_game( "admin_game", /*del*/false, null, $game->Score,
                trim(get_request_arg('resmsg')) );
-            admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[{$game->Score}][$score_text]" );
          }
          ta_end();
 
@@ -109,9 +109,14 @@ define('GA_RES_TIMOUT', 3);
       elseif( @$_REQUEST['grated_save'] )
       {
          $toggled_rated = toggle_rated( $game->Rated );
-         db_query( "admin_game.toggle_rated($gid,$game_rated)",
-            "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
-         admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]" );
+
+         ta_begin();
+         {//HOT-section to change game-rated-status
+            admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]" );
+            db_query( "admin_game.toggle_rated($gid,$game_rated)",
+               "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
+         }
+         ta_end();
 
          jump_to("$page?gid=$gid".URI_AMP.'sysmsg='.urlencode(T_('Game rated-status updated!#gameadm')) );
       }
@@ -121,26 +126,31 @@ define('GA_RES_TIMOUT', 3);
          $game_notify = new GameNotify( $gid, /*adm*/0, $game->Status, $game->GameType, $game->Flags,
             $game->Black_ID, $game->White_ID, $game->Score, trim(get_request_arg('delmsg')) );
 
-         if( $game->Status == GAME_STATUS_FINISHED )
-            $del_result = GameHelper::delete_finished_unrated_game($gid);
-         else
-            $del_result = GameHelper::delete_running_game($gid);
-         if( $del_result )
-         {
-            admin_log( $my_id, $player_row['Handle'],
-               "Deleted game #$gid by admin: {$game->GameType}({$game->GamePlayers})[{$game->Status}], " .
-               "S{$game->Size}, H{$game->Handicap}, B{$game->Black_ID}, W{$game->White_ID}, " .
-               "#M={$game->Moves}, R[{$game->Rated}]" );
+         ta_begin();
+         {//HOT-section to ...
+            if( $game->Status == GAME_STATUS_FINISHED )
+               $del_result = GameHelper::delete_finished_unrated_game($gid);
+            else
+               $del_result = GameHelper::delete_running_game($gid);
 
-            // notify all players about deletion
-            list( $Subject, $Text ) = $game_notify->get_text_game_deleted( ACTBY_ADMIN );
-            send_message( 'confirm', $Text, $Subject,
-               /*to*/$game_notify->get_recipients(), '',
-               /*notify*/false, /*system-msg*/0, 'RESULT', $gid );
+            if( $del_result )
+            {
+               admin_log( $my_id, $player_row['Handle'],
+                  "Deleted game #$gid by admin: {$game->GameType}({$game->GamePlayers})[{$game->Status}], " .
+                  "S{$game->Size}, H{$game->Handicap}, B{$game->Black_ID}, W{$game->White_ID}, " .
+                  "#M={$game->Moves}, R[{$game->Rated}]" );
 
-            $message = sprintf( T_('Game #%s deleted!#gameadm'), $gid );
-            jump_to("admin.php?sysmsg=".urlencode($message));
+               // notify all players about deletion
+               list( $Subject, $Text ) = $game_notify->get_text_game_deleted( ACTBY_ADMIN );
+               send_message( 'confirm', $Text, $Subject,
+                  /*to*/$game_notify->get_recipients(), '',
+                  /*notify*/false, /*system-msg*/0, 'RESULT', $gid );
+
+               $message = sprintf( T_('Game #%s deleted!#gameadm'), $gid );
+               jump_to("admin.php?sysmsg=".urlencode($message));
+            }
          }
+         ta_end();
       }
    }//actions
 

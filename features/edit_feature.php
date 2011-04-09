@@ -84,8 +84,12 @@ require_once( "features/lib_votes.php" );
    $is_feature_delete = ( $fid && @$_REQUEST['feature_delete'] );
    if( $is_feature_delete && @$_REQUEST['confirm'] )
    {
-      if( $feature->delete_feature() > 0 && $feature->status == FEATSTAT_NEW )
-         update_count_feature_new( "edit_feature.delete_feature($fid)", 0, -1 ); // one NEW less for all users
+      ta_begin();
+      {//HOT-section to delete feature
+         if( $feature->delete_feature() > 0 && $feature->status == FEATSTAT_NEW )
+            update_count_feature_new( "edit_feature.delete_feature($fid)", 0, -1 ); // one NEW less for all users
+      }
+      ta_end();
 
       jump_to("features/list_features.php?sysmsg=". urlencode(T_('Feature removed!')) );
    }
@@ -106,13 +110,17 @@ require_once( "features/lib_votes.php" );
          if( $is_super_admin )
             $feature->set_status( $new_status );
 
-         $feature->update_feature();
-         $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
+         ta_begin();
+         {//HOT-section to update feature
+            $feature->update_feature();
+            $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
 
-         if( $new_status == FEATSTAT_NEW && ( $fid == 0 || $old_status != $new_status ) )
-            update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one NEW more for all users
-         elseif( $old_status == FEATSTAT_NEW && $fid > 0 && $old_status != $new_status )
-            update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one NEW less for all users
+            if( $new_status == FEATSTAT_NEW && ( $fid == 0 || $old_status != $new_status ) )
+               update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one NEW more for all users
+            elseif( $old_status == FEATSTAT_NEW && $fid > 0 && $old_status != $new_status )
+               update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one NEW less for all users
+         }
+         ta_end();
 
          $sysmsg = ( $is_super_admin && $added_points > 0 )
             ? sprintf( T_('Feature saved! %s feature-points returned to voters!'), $added_points )
