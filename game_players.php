@@ -911,6 +911,8 @@ function add_invitation_mpgame( $gid, $inv_uid )
             "Flags = Flags | ".GPFLAGS_RESERVED_INVITATION." " .
          "WHERE ID=$upd_gp_id AND uid=0 AND (Flags & ".GPFLAGS_SLOT_TAKEN.") = 0 " .
          "LIMIT 1" );
+
+      MultiPlayerGame::change_player_mpg_count( "game_players.add_invitation_mpgame", $gid, $inv_uid, 1 );
    }
    ta_end();
 
@@ -956,11 +958,7 @@ function accept_invite( $gid, $uid )
       // 2. increase joined-players
       MultiPlayerGame::change_joined_players( "game_players.accept_invite", $gid, 1 );
 
-      // 3. increase players MP-game count
-      db_query( "game_players.accept_invite.update_players($gid,$uid)",
-         "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
-
-      // 4. notify game-master
+      // 3. notify game-master
       send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",
          sprintf( T_('User %s has accepted your invitation to the multi-player game %s.#mpg'),
                   "<user $uid>", "<game $gid>" ),

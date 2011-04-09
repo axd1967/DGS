@@ -20,10 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Checks and fixes errors in Running, Finished, Won and Lost fields in the database.
 
-chdir( '../' );
-require_once( "include/std_functions.php" );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/classlib_userquota.php' );
+chdir('..');
+require_once 'include/std_functions.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/classlib_userquota.php';
+require_once 'include/game_functions.php';
 
 define('DEBUG',0);
 
@@ -438,6 +439,15 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>Misc Done.";
+
+
+//-----------------
+
+   //TODO TODO fix Players.GamesMPG
+   //loop over result of:
+   //  SELECT GP.uid, COUNT(*) AS X_Count FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid WHERE G.Status='SETUP' AND ((GP.Flags & ".GPFLAG_JOINED.") or (GP.Flags & ".GPFLAGS_RESERVED_INVITATION.")=".GPFLAGS_RESERVED_INVITATION.") GROUP BY GP.uid
+   //  UPDATE Players SET GamesMPG=$X_Count WHERE ID=$uid LIMIT 1
+
 
 
 //----------------- Player-related tables (ConfigBoard, ConfigPages, UserQuota)

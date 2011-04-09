@@ -151,7 +151,16 @@ Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   
 * Running : number of running games (including MP-games)
    - MP-games in SETUP-mode are not counted with Running, see GamesMPG-field
 
-* GamesMPG : number of MP-games in SETUP-mode, used to optimize status-loading
+* GamesMPG : number of MP-games for user in SETUP-mode, used to optimize status-loading
+   - if > 0 : load and show MP-games user is joined or has reservation in
+   - +1 if user creates new MP-game as game-master
+   - +1 if invite-reservation as game-player for user is added by game-master
+   - +1 if user joins waiting-room-reservation
+   - -1 if invite-reservation is removed by game-master
+   - -1 if invite-reservation is rejected by invited player
+   - -1 if joined user is removed by game-master
+   - -1 for all joined users if setup-MP-game is started
+   - no change if invite-reservation is accepted by user
 
 
 -------------------------------------------------

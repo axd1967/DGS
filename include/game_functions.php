@@ -468,7 +468,7 @@ class MultiPlayerGame
    }
 
    /*!
-    * \brief Inserts game-players entries for given game-id and game-master $uid, and increase Players.GamesMPG.
+    * \brief Inserts game-players entries for given game-id and game-master $uid.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function init_multi_player_game( $dbgmsg, $gid, $uid, $gp_count )
@@ -484,11 +484,8 @@ class MultiPlayerGame
       db_query( "$dbgmsg.init_multi_player_game.insert_gp($gid,$uid,$gp_count)",
          $query, 'mysql_start_game' );
 
+      MultiPlayerGame::change_player_mpg_count( "$dbgmsg.init_multi_player_game", $gid, $uid, 1 );
       MultiPlayerGame::change_joined_players( $dbgmsg, $gid, 1 );
-
-      // update Players for all starting players: GamesMPG++
-      db_query( "$dbgmsg.init_multi_player_game.upd_players.inc_mpg($gid,$uid)",
-         "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
    }
 
    /*!
@@ -506,6 +503,7 @@ class MultiPlayerGame
       if( mysql_affected_rows() != 1)
          error('waitingroom_join_too_late', "$dbgmsg.join_waitingroom_game($gid,$uid)");
 
+      MultiPlayerGame::change_player_mpg_count( "$dbgmsg.join_waitingroom_game", $gid, $uid, 1 );
       MultiPlayerGame::change_joined_players( $dbgmsg, $gid, 1 );
    }//join_waitingroom_game
 
@@ -547,9 +545,16 @@ class MultiPlayerGame
          return array( GPCOL_BW, ($moves % (int)$game_players) + 1, $movecol );
    }//calc_game_player_for_move
 
+   function change_player_mpg_count( $dbgmsg, $gid, $uid, $diff )
+   {
+      db_query( "$dbgmsg.change_player_mpg_count($gid,$uid,$diff)",
+         "UPDATE Players SET GamesMPG=GamesMPG+($diff) WHERE ID=$uid LIMIT 1" );
+   }//change_player_mpg_count
+
+   /*! \brief Starts MP-game for all participating (joined) players. */
    function update_players_start_mpgame( $gid )
    {
-      // update Players for all game-players: Running++
+      // update Players for all game-players: Running++, GamesMPG--
       db_query( "MultiPlayerGame::update_players_start_mpgame($gid)",
          "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
             . "SET P.Running=P.Running+1, P.GamesMPG=P.GamesMPG-1 WHERE GP.gid=$gid" );
@@ -557,12 +562,17 @@ class MultiPlayerGame
 
    /*!
     * \brief Updates player on end of MP-game for given game-id.
-    * \param $game_in_setup_mode true, if Players.GamesMPG should be decreased (e.g. on game-deletion)
+    * \param $game_in_setup_mode true, if Players.GamesMPG must be synchronized because game in setup-mode
     */
    function update_players_end_mpgame( $gid, $game_in_setup_mode )
    {
-      // update Players for all game-players: Running--, Finished++; GamesMPG-- if $delete
-      $qpart_del = ($game_in_setup_mode) ? ", P.GamesMPG=P.GamesMPG-1 " : '';
+      // update Players for all game-players: GamesMPG-- if game in SETUP-mode (for joined or reserved-invitation)
+      $qpart_del = ($game_in_setup_mode)
+         ? ", P.GamesMPG=P.GamesMPG - IF( ( (GP.Flags & ".GPFLAG_JOINED.") OR " .
+               "((GP.Flags & ".GPFLAGS_RESERVED_INVITATION.")=".GPFLAGS_RESERVED_INVITATION.") ), 1, 0) "
+         : '';
+
+      // update Players for all game-players: Running--, Finished++;
       db_query( "MultiPlayerGame::update_players_end_mpgame($gid,$game_in_setup_mode)",
          "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
             . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 $qpart_del WHERE GP.gid=$gid" );
@@ -856,6 +866,10 @@ class GamePlayer
       return $arr_grcol_order[$group_color];
    }//get_group_color_order
 
+   /*!
+    * \brief Deletes reserved invitation for MP-game.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function delete_reserved_invitation( $gid, $uid )
    {
       db_query( "GamePlayer::delete_reserved_invitation.gp_upd($gid,$uid)",
@@ -863,14 +877,22 @@ class GamePlayer
          "WHERE gid=$gid AND uid=$uid AND " .
             "(Flags & ".GPFLAGS_RESERVED_INVITATION.") = ".GPFLAGS_RESERVED_INVITATION." " .
          "LIMIT 1" );
+
+      MultiPlayerGame::change_player_mpg_count( "$dbgmsg.delete_reserved_invitation", $gid, $uid, -1 );
    }//delete_reserved_invitation
 
+   /*!
+    * \brief Deletes joined game-player of MP-game.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function delete_joined_player( $gid, $uid )
    {
       db_query( "GamePlayer::delete_joined_player.gp_upd($gid,$uid)",
          "UPDATE GamePlayers SET uid=0, GroupColor='".GPCOL_DEFAULT."', GroupOrder=0, Flags=0 " .
          "WHERE gid=$gid AND uid=$uid AND (Flags & ".GPFLAG_JOINED.") > 0 " .
          "LIMIT 1" );
+
+      MultiPlayerGame::change_player_mpg_count( "$dbgmsg.delete_joined_player", $gid, $uid, -1 );
    }//delete_joined_player
 
 } // end 'GamePlayer'
@@ -1100,7 +1122,7 @@ class GameFinalizer
 
    /**
     * \brief Finishes or deletes game.
-    * \param $do_delete true=delete game, false=end-game
+    * \param $do_delete true=delete-running-game, false=end-running-game
     * \param $game_updquery null=build default query, SQL-Games-update-query
     * \param $game_score score to end game with
     * \param $message message added in game-notify to players
