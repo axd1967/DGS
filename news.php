@@ -60,12 +60,12 @@ function build_TOC( $text )
    $toc = build_TOC( $contents );
 
    $contents = make_html_safe( $contents, true ); // adds <br>'s
+   $contents = preg_replace("/##(.*?)((\&nbsp;)?<br>)+/is", "", $contents); // remove comments
 
    // format: "#release anchor-name [release-date] - DGS-version"
    $contents = preg_replace("/#release\\s+(\w+?)\\s+(.*?)<br>/is",
       "\n<a name=\"\\1\"></a><span class=\"ReleaseTitle\">\\2</span>\n",
       $contents);
-   $contents = preg_replace("/##(.*?)((\&nbsp;)?<br>)+/is", "", $contents); // remove comments
 
    // add TOC
    $contents = preg_replace("/%TOC%(<br>)?/is", $toc, $contents);
