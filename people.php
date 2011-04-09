@@ -132,7 +132,7 @@ function get_executives( $level )
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_FAQ);
    $FAQexclude = array( 'ejlo', 'rodival' );
 
-   $result = db_query( 'people.faq_admins',
+   $result = db_query( 'people.find_faq_admins',
       "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
       " FROM Players" .
       " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FAQ . ") > 0" .
@@ -174,7 +174,7 @@ function get_executives( $level )
 
    $MODexclude = array( 'ejlo', 'rodival' );
 
-   $result = db_query( 'people.forum_moderators',
+   $result = db_query( 'people.find_forum_moderators',
       "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level" .
       " FROM Players" .
       " WHERE Adminlevel>0 AND (Adminlevel & " . ADMIN_FORUM . ") > 0" .
@@ -204,7 +204,7 @@ function get_executives( $level )
    echo sprintf( T_('(have been online within the last %s weeks)'), $active_weeks )
       , ":<br>&nbsp;\n";
 
-   $result = db_query( 'people.executives',
+   $result = db_query( 'people.find_executives',
       "SELECT ID,Handle,Name,Adminlevel+0 AS admin_level,".
             " BIT_COUNT(Adminlevel+0) AS X_AdmLevBitCount," .
             " UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess" .
@@ -243,7 +243,7 @@ function get_executives( $level )
    $TW_ = 'T_'; // for non-const translation-texts
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
-   $result = db_query( 'people.translators',
+   $result = db_query( 'people.find_translators',
       "SELECT ID,Handle,Name,Translator" .
       " FROM Players" .
       " WHERE Translator>''" .

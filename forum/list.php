@@ -49,9 +49,7 @@ require_once( 'forum/forum_functions.php' );
       . ( $maxrows>0 ? URI_AMP."maxrows=$maxrows" : '' )
       . ( $offset>0 ? URI_AMP."offset=$offset" : '');
    if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
-   {
       jump_to( 'forum/'.$toggle_baseurl );
-   }
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_THREAD_SHOWAUTHOR );
 
    $forum = Forum::load_forum( $forum_id );

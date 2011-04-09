@@ -495,6 +495,8 @@ class TournamentRules
     * \brief Creates normal game and updates all game-stuff.
     * \param $user_ch User-object of challenger with set urow['Rating2'] (according to rating-use-mode)
     * \param $user_df User-object of defender with set urow['Rating2'] (dito)
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
     * \note Expect set var this.TourneyType
     */
    function create_game( $user_ch, $user_df )

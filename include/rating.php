@@ -1026,6 +1026,8 @@ function convert_to_rating($string, $type, $no_error=false)
 /*!
  * \brief Updates players Ratings and insert entries to allow rating-recalculation.
  * \param $changes RCADM_RESET_CONFIDENCE and/or RCADM_CHANGE_RATING
+ *
+ * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
  */
 function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max, $with_rca=true )
 {

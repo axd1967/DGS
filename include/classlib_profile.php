@@ -283,9 +283,7 @@ class Profile
 
       $arr_out = array();
       while( ($row = mysql_fetch_assoc( $result )) )
-      {
          $arr_out[] = Profile::new_from_row($row);
-      }
       mysql_free_result($result);
 
       return $arr_out;
@@ -496,7 +494,7 @@ class SearchProfile
             break;
       }
       //error_log("SearchProfile.handle_action($prof_action): ".$this->to_string());
-   }
+   }//handle_action
 
    /*! \brief Saves profile: save values from _REQUEST for registered arg-names. */
    function save_profile( $save_default )

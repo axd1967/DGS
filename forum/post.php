@@ -35,6 +35,8 @@ function hit_thread( $thread )
 
 /*!
  * \brief Saves post-message for use-cases U06/U07/U08
+ * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+ *
  * \return array( id, msg ); if id=inserted/updated-Post.ID: msg contains success-message,
  *         if id=0: msg contains error-message (post not saved!)
  * \see specs/forums.txt
@@ -242,6 +244,7 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
 
 
 // use-case A04 (approve post on pending-approval)
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function approve_post( $fid, $tid, $pid )
 {
    global $NOW;
@@ -293,6 +296,7 @@ function approve_post( $fid, $tid, $pid )
 }//approve_post
 
 // use-case A05 (reject post on pending-approval)
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function reject_post( $fid, $tid, $pid )
 {
    db_query( "reject_post.update_post($pid)",
@@ -304,6 +308,7 @@ function reject_post( $fid, $tid, $pid )
 }
 
 // use-case A06 (hide shown post)
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function hide_post( $fid, $tid, $pid )
 {
    // hide post
@@ -319,6 +324,7 @@ function hide_post( $fid, $tid, $pid )
 
 // used for use-cases (U07,A06)
 // - call only if post is shown and should be hidden
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function hide_post_update_trigger( $fid, $tid, $pid )
 {
    global $NOW;
@@ -363,6 +369,7 @@ function hide_post_update_trigger( $fid, $tid, $pid )
 } //hide_post_update_trigger
 
 // use-case A07 (show hidden post)
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function show_post( $fid, $tid, $pid )
 {
    global $NOW;
@@ -417,6 +424,7 @@ function show_post( $fid, $tid, $pid )
 }//show_post
 
 
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function recalc_thread_lastpost( $tid )
 {
    global $NOW;
@@ -435,6 +443,7 @@ function recalc_thread_lastpost( $tid )
       . "WHERE ID='$tid' LIMIT 1" );
 }
 
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function recalc_forum_lastpost( $fid )
 {
    $row =

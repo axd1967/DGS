@@ -142,7 +142,10 @@ class TournamentHelper
       return true;
    }
 
-   /*! \brief Updates TournamentLadder.Period/History-Rank when rank-update is due, set next update-date. */
+   /*!
+    * \brief Updates TournamentLadder.Period/History-Rank when rank-update is due, set next update-date.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function process_rank_period( $t_ext )
    {
       $tid = $t_ext->tid;
@@ -189,7 +192,7 @@ class TournamentHelper
 
    /*!
     * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
-    * \note IMPORTANT NOTE: need HOT-section
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     *
     * \return arr( number of started games, expected number of games) or NULL on lock-error.
     */
@@ -281,6 +284,8 @@ class TournamentHelper
     * \param $user_ch 1st user (challenger) as User-object with ID and urow->['TP_ID'] (=rid) set
     * \param $user_df 2nd user (defender) as User-object (dito as $user_ch)
     * \return TournamentGames-object or null on error (shouldn't happen because "exceptions" on errors).
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function create_pairing_game( $trule, $tround_id, $pool, $user_ch, $user_df )
    {

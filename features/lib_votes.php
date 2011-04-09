@@ -224,6 +224,8 @@ class Feature
    /*!
     * \brief Updates current FeatureVote-data into database (may replace existing featurevote
     *        and sets IP and lastchanged=NOW).
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
+    *
     * \return number of points to add to UserQuota-feature-points (can be negative)
     */
    function update_vote( $voter, $points )

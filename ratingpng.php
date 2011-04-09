@@ -310,7 +310,7 @@ function get_rating_data($uid)
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
       "UNIX_TIMESTAMP(Registerdate) AS seconds " .
       "FROM Players WHERE ID=$uid LIMIT 1";
-   $result = db_query( 'ratingpng.initial', $query );
+   $result = db_query( 'ratingpng.find_initial', $query );
 
    if( @mysql_num_rows($result) != 1 )
       exit;
@@ -326,7 +326,7 @@ function get_rating_data($uid)
       $owner_row = $min_row;
    }
 
-   $result = db_query( 'ratingpng.max_time',
+   $result = db_query( 'ratingpng.find_max_time',
       "SELECT UNIX_TIMESTAMP(MAX(Time)) AS seconds FROM Ratinglog WHERE uid=$uid LIMIT 1" );
 
    $max_row = mysql_fetch_assoc($result);

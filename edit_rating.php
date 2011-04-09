@@ -71,7 +71,7 @@ require_once 'include/rank_converter.php';
          $message = T_('Rank & rating updated!');
       }
 
-      db_query( "edit_rating.update($my_id)", $upd_query . " WHERE ID=$my_id LIMIT 1" );
+      db_query( "edit_rating.update($my_id)", $upd_query . " WHERE ID=$my_id LIMIT 1" ); // table Players
 
       jump_to("edit_rating.php?sysmsg=".urlencode($message));
    }

@@ -76,7 +76,7 @@ function show_stats_default()
    $q2 = "SELECT SUM(Moves) AS moves, COUNT(*) AS count FROM Games";
    $q3 = "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players";
 
-   $result = db_query( 'statistics.games.moves', $q1 );
+   $result = db_query( 'statistics.games.count_moves', $q1 );
 
    echo "<table border=1>\n"
       , "<tr><th>Status</th><th>Moves</th><th>Games</th></tr>\n";
@@ -146,7 +146,7 @@ function show_stats_user_countries()
    make_menu( $userstatsmenu, false );
 
 
-   $result = db_query( 'statistics.users.countries',
+   $result = db_query( 'statistics.users.count_countries',
       "SELECT Country, COUNT(*) AS X_Count " .
       "FROM Players " .
       ( $weeks > 0 ? "WHERE Lastaccess>=FROM_UNIXTIME($last_access) " : '' ) .

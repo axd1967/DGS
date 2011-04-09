@@ -38,9 +38,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    $toggleflag = (int)@$_REQUEST['toggleflag'] + 0;
    $toggle_baseurl = 'index.php';
    if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
-   {
       jump_to( 'forum/'.$toggle_baseurl );
-   }
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_FORUM_SHOWAUTHOR );
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator']);

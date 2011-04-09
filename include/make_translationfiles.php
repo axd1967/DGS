@@ -220,6 +220,7 @@ function translations_query( $translate_lang, $untranslated, $group
 } //translations_query
 
 
+// IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
 function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
 {
    $string= trim($string);
