@@ -218,7 +218,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    echo_notes( 'adminratingnotes', T_('Important notes about Rating changes#rankadm'), $notes );
 
    $menu_array = array();
-   $menu_array[T_('')] = "$page?uid=$uid";
+   $menu_array[T_('Refresh#rankadm')] = "$page?uid=$uid";
 
    end_page(@$menu_array);
 }//main
