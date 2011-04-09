@@ -339,9 +339,10 @@ function hide_post_update_trigger( $fid, $tid, $pid )
 
    $row =
       mysql_single_fetch( "hide_post_update_trigger.find_forum($tid)",
-         "SELECT LastPost FROM Forums WHERE ID=$fid LIMIT 1" )
+         "SELECT LastPost, ThreadsInForum FROM Forums WHERE ID=$fid LIMIT 1" )
       or error('unknown_forum', "hide_post_update_trigger.find_forum2($fid)");
    $forum_lastpost = $row['LastPost'];
+   $forum_cntthreads = $row['ThreadsInForum'];
 
    // thread-trigger
    db_query( "hide_post_update_trigger.trigger_thread($tid,$pid)",
@@ -364,7 +365,7 @@ function hide_post_update_trigger( $fid, $tid, $pid )
    if( $pid == $thread_lastpost && $thread_cntposts > 0 )
       recalc_thread_lastpost($tid);
 
-   if( $pid == $forum_lastpost )
+   if( $pid == $forum_lastpost && $forum_cntthreads > 0 )
       recalc_forum_lastpost($fid);
 } //hide_post_update_trigger
 

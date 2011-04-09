@@ -799,7 +799,7 @@ Posts($fid,$tid):
 * Forums($fid).Updated=GREATEST(Updated,$NOW) (post could be a NEW one)
 * if $ptid == 0: Forums($fid).ThreadsInForum--
 * if $pid == Forums($fid).LastPost:
-  - recalc Forums($fid).LastPost
+  if Forums($fid).ThreadsInForum>0: recalc Forums($fid).LastPost
 
 * Global.Updated=GREATEST(Updated,$NOW) (post could be a NEW one)
 
