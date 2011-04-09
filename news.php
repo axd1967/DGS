@@ -46,20 +46,30 @@ function build_TOC( $text )
 
    $logged_in = who_is_logged( $player_row);
 
+   /* FORMAT of 'NEWS'-file:
+      * DGS-tags can be used: <home ..> <image ...> etc.
+      * Text will be put into <pre>-tags, so each space counts.
+
+      "%TOC%"                   : add table-of-contents
+      "## comment-line"         : will be removed
+      "#release version text"   : makes header-line, will be added to TOC
+   */
+
    // read & format NEWS-page
    $contents = @read_from_file('NEWS');
    $toc = build_TOC( $contents );
 
-   $contents = make_html_safe( $contents, true );
+   $contents = make_html_safe( $contents, true ); // adds <br>'s
 
    // format: "#release anchor-name [release-date] - DGS-version"
    $contents = preg_replace("/#release\\s+(\w+?)\\s+(.*?)<br>/is",
       "\n<a name=\"\\1\"></a><span class=\"ReleaseTitle\">\\2</span>\n",
       $contents);
+   $contents = preg_replace("/##(.*?)((\&nbsp;)?<br>)+/is", "", $contents); // remove comments
 
    // add TOC
    $contents = preg_replace("/%TOC%(<br>)?/is", $toc, $contents);
-   $contents = preg_replace("/<br>/is", "\n", $contents);
+   $contents = preg_replace("/(\&nbsp;)?<br>/is", "\n", $contents);
 
    start_page('DragonGoServer NEWS', true, $logged_in, $player_row );
 
