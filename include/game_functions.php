@@ -1165,11 +1165,9 @@ class GameFinalizer
       }
 
       // Send a message to the opponent
-      send_message( "$dbgmsg.msg", $Text, $Subject
-         , /*to*/$game_notify->get_recipients(), ''
-         , /*notify*/false //the move itself is always notified, see below
-         , /*system-msg*/0
-         , 'RESULT', $gid );
+      send_message( "$dbgmsg.msg", $Text, $Subject,
+         $game_notify->get_recipients(), '',
+         /*notify*/true, /*system-msg*/0, 'RESULT', $gid );
    }//finish_game
 
 

@@ -522,7 +522,8 @@ class QuickHandlerGame extends QuickHandler
          }
 
          // Notify opponent about move
-         notify( "QuickHandlerGame.process.notify_opponent($gid,$action,$next_to_move_ID})", $next_to_move_ID );
+         if( !$do_delete )
+            notify( "QuickHandlerGame.process.notify_opponent($gid,$action,$next_to_move_ID})", $next_to_move_ID );
 
          // Increase moves and activity
          db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
@@ -532,7 +533,7 @@ class QuickHandlerGame extends QuickHandler
             " WHERE ID={$this->my_id} LIMIT 1" );
       }
       ta_end();
-   }//process_cmd_play
+   }//process_cmd
 
    /*! \brief Checks syntax and splits moves into array this->moves removing double coords, or detect pass-move. */
    function prepareMoves()
