@@ -1342,32 +1342,23 @@ function send_message( $debugmsg, $text='', $subject=''
       $ids= array();
       foreach( $receivers as $uid => $row )
       {
-         if( $row['Notify'] == 'NONE'
-               && is_numeric(strpos($row['SendEmail'], 'ON'))
-               //&& is_numeric(strpos($row['SendEmail'], 'MESSAGE'))
-               )
-            $ids[]= $uid;
+         if( $row['Notify'] == 'NONE' && is_numeric(strpos($row['SendEmail'], 'ON')) )
+            $ids[]= $uid; // optimize: notify only eligible
       }
-      $cnt= count($ids);
-      if( $cnt > 0 )
-      {
-         $ids= implode(',', $ids);
-         db_query( "$debugmsg.mess_notify",
-            "UPDATE Players SET Notify='NEXT'"
-            ." WHERE ID IN ($ids) AND Notify='NONE'"
-            ." AND FIND_IN_SET('ON',SendEmail)"
-            //." AND FIND_IN_SET('MESSAGE',SendEmail)"
-            //." AND SendEmail LIKE '%ON%'"
-            // LIMIT $cnt
-            );
-      }
+      if( count($ids) > 0 )
+         notify( $debugmsg, $ids );
    }
 
    return $mid; //>0: no error
 } //send_message
 
-//$type is one element of the SET of SendEmail ('MOVE','MESSAGE' ...)
-//start the notification process for thoses from $ids having $type set.
+/*!
+ * \brief Sets Players.Notify-field (something to notify) for given uids.
+ *        Starts the notification process for thoses from $ids having $type set.
+ * \param $type is one element of the SET of SendEmail ('MOVE','MESSAGE' ...)
+ * \param $ids id(s), or array of id(s)
+ * \return ''=no-error, else error-string, e.g. 'no IDs'
+ */
 function notify( $debugmsg, $ids, $type='')
 {
    if( !is_array($ids) )
@@ -1378,7 +1369,7 @@ function notify( $debugmsg, $ids, $type='')
    $ids = array();
    foreach( $query as $cnt )
       if( ($cnt=(int)$cnt) > GUESTS_ID_MAX ) //exclude guest
-         $ids[$cnt] = $cnt;
+         $ids[$cnt] = $cnt; //unique
 
    $cnt= count($ids);
    if( $cnt <= 0 )
@@ -1390,9 +1381,7 @@ function notify( $debugmsg, $ids, $type='')
       ." WHERE ID IN ($ids) AND Notify='NONE'"
       ." AND FIND_IN_SET('ON',SendEmail)"
       .($type ? " AND FIND_IN_SET('$type',SendEmail)" : '')
-      //." AND SendEmail LIKE '%ON%'"
-      // LIMIT $cnt
-      );
+      ." LIMIT $cnt" );
 
    return ''; //no error
 } //notify
@@ -3199,12 +3188,14 @@ function delete_all_observers( $gid, $notify, $Text='' )
          $to_ids = array();
          while( $row = mysql_fetch_array( $result ) )
             $to_ids[] = $row['pid'];
+         mysql_free_result($result);
 
          send_message( "delete_all_observers($gid)", $Text, $Subject
             , $to_ids, '', /*notify*/false
             , /*sys-msg*/0, 'NORMAL', $gid);
       }
-      mysql_free_result($result);
+      else
+         mysql_free_result($result);
    }
 
    db_query( 'delete_all_observers.delete',
