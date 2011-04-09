@@ -77,6 +77,7 @@ function build_icon( $icon_name, $text )
 function get_executives( $level )
 {
    $out = array();
+   // NOTE: don't include: ADMIN_TRANSLATORS, ADMIN_DATABASE, ADMIN_SKINNER
    if( $level & ADMIN_SUPERADMIN )
       $out[] = T_('Admin manager#admin');
    if( $level & ADMIN_DEVELOPER )
@@ -89,6 +90,8 @@ function get_executives( $level )
       $out[] = T_('Forum moderator#admin');
    if( $level & ADMIN_TOURNAMENT )
       $out[] = T_('Tournaments#admin');
+   if( $level & ADMIN_GAME )
+      $out[] = T_('Game & Rating#admin');
    if( $level & ADMIN_VOTE )
       $out[] = T_('Votes#admin');
    return array( count($out), implode(', ', $out) );

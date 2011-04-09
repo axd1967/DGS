@@ -219,7 +219,7 @@ define('USERFLAG_JAVASCRIPT_ENABLED', 0x001);
 
 //-----
 // admin-roles
-// NOTE: also adjust admin_show_users.php on adding new roles
+// NOTE: when adding new roles also adjust: admin_show_users.php, people.php#get_executives()
 define("ADMIN_TRANSLATORS",0x01);
 define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
