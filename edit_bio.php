@@ -175,8 +175,7 @@ function find_category_box_text($cat)
    }
 
 
-   $menu_array[T_('Show userinfo')] = "userinfo.php?uid=$my_id";
-
+   $menu_array = array();
    if( !$editorder )
       $page = ( $row_cnt > 1 ) ? make_url($page, array( 'editorder' => '1') ) : '';
    if( $page )

@@ -359,7 +359,6 @@ if( $player_row['GamesMPG'] > 0 )
 
 
    $menu_array = array(
-         T_('My user info') => "userinfo.php?uid=$my_id",
          T_('My running games') => "show_games.php?uid=$my_id",
          T_('My finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",
          T_('Games I\'m observing') => "show_games.php?observe=$my_id",

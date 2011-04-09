@@ -26,54 +26,6 @@ require_once( "include/form_functions.php" );
 require_once( "include/message_functions.php" );
 
 
-function make_folder_form_row(&$form, $name, $nr,
-                              $bgred, $bggreen, $bgblue, $bgalpha, $fgred, $fggreen, $fgblue,
-                              $onstatuspage)
-{
-
-   $fcol = RGBA($fgred, $fggreen, $fgblue);
-
-   $name_cel = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">';
-   if( empty($name) )
-      $name_cel.= "<font color=\"#$fcol\">" . T_('Folder name') . '</font></td>';
-   else
-      $name_cel.= "<a style=\"color:'#$fcol'\" href=\"list_messages.php?folder=$nr\">" .
-                     make_html_safe($name) . '</a></td>';
-
-
-   $array = array( 'OWNHTML', $name_cel,
-                   'TEXTINPUT', "folder$nr", 32, 32, $name,
-                   'DESCRIPTION', T_('Background'),
-                   'DESCRIPTION', T_('Red'),
-                   'TEXTINPUT', "bgred$nr", 3, 5, "$bgred",
-                   'DESCRIPTION', T_('Green'),
-                   'TEXTINPUT', "bggreen$nr", 3, 5, "$bggreen",
-                   'DESCRIPTION', T_('Blue'),
-                   'TEXTINPUT', "bgblue$nr", 3, 5, "$bgblue",
-                   'DESCRIPTION', T_('Alpha'),
-                   'TEXTINPUT', "bgalpha$nr", 3, 5, "$bgalpha" );
-
-   $form->add_row( $array );
-
-   if( ConfigPages::is_system_status_folder($nr) || $nr >= USER_FOLDERS )
-      $array = array( 'TAB',
-                      'CHECKBOX', "onstatuspage$nr", 't',
-                      T_('Show on status page'), $onstatuspage );
-   else
-      $array = array( 'OWNHTML', '<td colspan=2></td>' );
-
-   array_push( $array, 'DESCRIPTION', T_('Foreground'),
-               'DESCRIPTION', T_('Red'),
-               'TEXTINPUT', "fgred$nr", 3, 5, "$fgred",
-               'DESCRIPTION', T_('Green'),
-               'TEXTINPUT', "fggreen$nr", 3, 5, "$fggreen",
-               'DESCRIPTION', T_('Blue'),
-               'TEXTINPUT', "fgblue$nr", 3, 5, "$fgblue");
-
-   $form->add_row( $array );
-   $form->add_row( array('SPACE'));
-}
-
 {
    connect2mysql();
 
@@ -269,15 +221,62 @@ function make_folder_form_row(&$form, $name, $nr,
                           'SUBMITBUTTONX', 'action', T_('Update'),
                               array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                           ) );
+   $form->add_empty_row();
 
    $form->echo_string(1);
 
    echo "</center>\n";
 
-   $menu_array = array(
-         T_('Show messages') => 'list_messages.php',
-      );
+   end_page();
+}//main
 
-   end_page(@$menu_array);
-}
+
+function make_folder_form_row(&$form, $name, $nr,
+                              $bgred, $bggreen, $bgblue, $bgalpha, $fgred, $fggreen, $fgblue,
+                              $onstatuspage)
+{
+
+   $fcol = RGBA($fgred, $fggreen, $fgblue);
+
+   $name_cel = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">';
+   if( empty($name) )
+      $name_cel.= "<font color=\"#$fcol\">" . T_('Folder name') . '</font></td>';
+   else
+      $name_cel.= "<a style=\"color:'#$fcol'\" href=\"list_messages.php?folder=$nr\">" .
+                     make_html_safe($name) . '</a></td>';
+
+
+   $array = array( 'OWNHTML', $name_cel,
+                   'TEXTINPUT', "folder$nr", 32, 32, $name,
+                   'DESCRIPTION', T_('Background'),
+                   'DESCRIPTION', T_('Red'),
+                   'TEXTINPUT', "bgred$nr", 3, 5, "$bgred",
+                   'DESCRIPTION', T_('Green'),
+                   'TEXTINPUT', "bggreen$nr", 3, 5, "$bggreen",
+                   'DESCRIPTION', T_('Blue'),
+                   'TEXTINPUT', "bgblue$nr", 3, 5, "$bgblue",
+                   'DESCRIPTION', T_('Alpha'),
+                   'TEXTINPUT', "bgalpha$nr", 3, 5, "$bgalpha" );
+
+   $form->add_row( $array );
+
+   if( ConfigPages::is_system_status_folder($nr) || $nr >= USER_FOLDERS )
+      $array = array( 'TAB',
+                      'CHECKBOX', "onstatuspage$nr", 't',
+                      T_('Show on status page'), $onstatuspage );
+   else
+      $array = array( 'OWNHTML', '<td colspan=2></td>' );
+
+   array_push( $array, 'DESCRIPTION', T_('Foreground'),
+               'DESCRIPTION', T_('Red'),
+               'TEXTINPUT', "fgred$nr", 3, 5, "$fgred",
+               'DESCRIPTION', T_('Green'),
+               'TEXTINPUT', "fggreen$nr", 3, 5, "$fggreen",
+               'DESCRIPTION', T_('Blue'),
+               'TEXTINPUT', "fgblue$nr", 3, 5, "$fgblue");
+
+   $form->add_row( $array );
+   $form->add_row( array('SPACE'));
+}//make_folder_form_row
+
 ?>
