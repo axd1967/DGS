@@ -303,11 +303,12 @@ class GameAddTime
     *        allowed range is 0 hour .. MAX_ADD_DAYS
     * \param $reset_byo if true, also byo-yomi will be resetted (for JAP/CAN)
     * \param $by_td_uid user-id of tournament-director, which adds time
-    * \note caller have to build HOT-section around this call
     * \return number of hours added (may be 0), if time has been successfully added
     *        for opponent of player (uid) in specified game (gid).
     *        -1|-2 if only byo-yomi has been resetted (-1=full-reset, -2=part-reset).
     *        Otherwise error-string is returned.
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function add_time_opponent( &$game_row, $uid, $add_hours, $reset_byo=false, $by_td_uid=0 )
    {
@@ -466,7 +467,10 @@ class MultiPlayerGame
       return ( $player_count - $expected_player_count );
    }
 
-   /*! \brief Inserts game-players entries for given game-id and game-master $uid, and increase Players.GamesMPG. */
+   /*!
+    * \brief Inserts game-players entries for given game-id and game-master $uid, and increase Players.GamesMPG.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function init_multi_player_game( $dbgmsg, $gid, $uid, $gp_count )
    {
       if( $gp_count <= 2 )
@@ -487,7 +491,10 @@ class MultiPlayerGame
          "UPDATE Players SET GamesMPG=GamesMPG+1 WHERE ID=$uid LIMIT 1" );
    }
 
-   /*! \brief Joins waiting-room MP-game for given user and check for race-conditions. */
+   /*!
+    * \brief Joins waiting-room MP-game for given user and check for race-conditions.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
+    */
    function join_waitingroom_game( $dbgmsg, $gid, $uid )
    {
       // check race-condition if other joined first
@@ -849,14 +856,6 @@ class GamePlayer
       return $arr_grcol_order[$group_color];
    }//get_group_color_order
 
-   /*! \brief Clears flags of game-players-table for given game. */
-   function reset_flags( $gid, $flags )
-   {
-      db_query( "GamePlayer::reset_flags.update($gid,$flags)",
-         "UPDATE GamePlayers SET Flags=Flags & ~$flags " .
-         "WHERE gid=$gid AND (Flags & $flags) > 0" );
-   }//reset_flags
-
    function delete_reserved_invitation( $gid, $uid )
    {
       db_query( "GamePlayer::delete_reserved_invitation.gp_upd($gid,$uid)",
@@ -1028,7 +1027,10 @@ class GameHelper
          return true;
    }//delete_invitation_game
 
-   /*! \brief Updates game-stats in Players-table for simple or multi-player game. */
+   /*!
+    * \brief Updates game-stats in Players-table for simple or multi-player game.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score, $black_id, $white_id )
    {
       if( !is_numeric($gid) && $gid <= 0 )
@@ -1102,6 +1104,8 @@ class GameFinalizer
     * \param $game_updquery null=build default query, SQL-Games-update-query
     * \param $game_score score to end game with
     * \param $message message added in game-notify to players
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function finish_game( $dbgmsg, $do_delete, $game_updquery, $game_score, $message='' )
    {
