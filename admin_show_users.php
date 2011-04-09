@@ -131,7 +131,7 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
 {
    global $ARR_ADMLEVELS, $ARR_ADMOPTS;
 
-   $atable = new Table( 'admins', $page, '', '', TABLE_NO_SIZE );
+   $atable = new Table( 'adminusers', $page, '', '', TABLE_NO_SIZE );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $atable->add_tablehead( 1, T_('User#header'), 'User');
    $atable->add_tablehead( 2, T_('Last access#header'), 'Date');

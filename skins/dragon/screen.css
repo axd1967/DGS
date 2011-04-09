@@ -3059,14 +3059,13 @@ form#adminuserForm td span.LegendDescr {
    font-size: 80%;
 }
 
-table#adminsTable td span.Flags {
+table#adminusersTable td span.Flags {
    font-size: 80%;
 }
-
-table#adminsTable,
-table#faqlogTable,
-table#errorlogTable td,
-table#adminlogTable td {
+table#adminusersTable tr,
+table#faqlogTable tr,
+table#errorlogTable tr,
+table#adminlogTable tr {
    vertical-align: top;
 }
 
