@@ -367,7 +367,9 @@ function get_alt_arg( $n1, $n2)
 
             $validation_step = true;
             $extra_infos[T_('Passing')] = 'Info';
-            $extra_infos[T_('Assure that all boundaries of your territory are closed before ending the game!')] = 'Important';
+            $extra_infos[T_('Ensure that all boundaries of your territory are closed before ending the game!')] = 'Important';
+            if( $score_mode == GSMODE_AREA_SCORING )
+               $extra_infos[T_('This game uses area-scoring, so ensure you don\'t leave an odd number of dame points!')] = 'Important';
             break;
 
          case 'delete': //for validation, delete-game
