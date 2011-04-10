@@ -202,7 +202,7 @@ function basic_safe( $str )
 {
    return str_replace(
          array( '<', '>', '"', "'" ),
-         array( '&lt;', '&gt;', '&quot;', '&#039;' ),
+         array( '&lt;', '&gt;', '&quot;', '&apos;' ),
          $str );
 }
 
