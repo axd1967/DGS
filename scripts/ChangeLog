@@ -19,6 +19,102 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-10 juga
+
+   * include/quick/quick_game.php (QuickGameHandler.prepare, ~.process_cmd),
+     confirm.php:
+   - bugfix: ending MP-game with score or by resignation
+   - bugfix: fix undeclared var
+
+   * game.php:
+   - added hint about area-scoring when passing
+
+   * show_games.php:
+   - bugfix: fix undeclared var $color for MP-game for which current user
+     is not Black/White_ID
+
+   * include/game_functions.php (MultiPlayerGame.init_multi_player_game,
+       ~.join_waitingroom_game, ~.change_player_mpg_count, ~.update_players_end_mpgame;
+       GamePlayer.delete_reserved_invitation, ~.delete_joined_player),
+     specs/db/table-Players.txt, scripts/player_consistency.php,
+     game_players.php (add_invitation_mpgame, accept_invite),
+     join_waitingroom_game.php:
+   - bugfix: change Players.GamesMPG when:
+     - game-master creates MP-game, starts MP-game, invites user, removes invitation,
+       removes joined player
+     - user joins waiting-room-reservation, accepts invitation, rejects invitation
+     - game-admin deletes MP-game on setup-mode
+   - added TODO for player-consistency-script to fix Players.GamesMPG
+
+2011-04-09 juga
+
+   * edit_bio.php, edit_folders.php, status.php:
+   - remove bottom-links that are also available in the main-menu
+
+   * news.php:
+   - fix: remove comments before handling '#release'-data (to allow #release in comments)
+
+   * site_map.php:
+   - added some missing links
+
+   * forum/post.php (hide_post_update_trigger), specs/forums.txt:
+   - potential optimization recalculating Forums.LastPost for use-case A06
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.check_create_tournament),
+     tournaments/include/tournament.php (removed Tournament.allow_create),
+     include/config.php (ALLOW_TOURNAMENTS_CREATE_BY_USER),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/list_tournaments.php, tournaments/wizard.php, site_map.php:
+   - added server-config ALLOW_TOURNAMENTS_CREATE_BY_USER to control
+     if only-admin or any user can create a new tournament
+   - replaced Tournament::allow_create() with TournamentUtils::check_create_tournament()
+
+   * include/std_functions.php, people.php (get_executives):
+   - fix showing game-admins
+
+   * admin_show_users.php, skins/dragon/screen.css:
+   - CSS-cleanup: vertical align of table-rows for showing admin-info
+
+   * tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder.php,
+     tournaments/include/tournament_rules.php, include/connect2mysql.php (db_lock, db_unlock),
+     include/board.php, include/classlib_profile.php, include/game_functions.php,
+     include/GoDiagram.php, include/make_game.php, include/make_translationfiles.php,
+     include/message_functions.php, include/rating.php, include/register_functions.php,
+     features/lib_votes.php, forum/class_forum_read.php, forum/post.php,
+     tournaments/edit_participant.php, tournaments/ladder/admin.php, tournaments/register.php,
+     forum/admin.php, forum/index.php, forum/list.php, forum/read.php,
+     features/edit_feature.php, features/vote_feature.php, scripts/recalculate_ratings2.php,
+     admin_admins.php, admin_do_translators.php, admin_faq.php, admin_game.php,
+     admin_rating.php, admin_users.php, change_bio.php, change_password.php,
+     change_profile.php, edit_folders.php, edit_rating.php, edit_vacation.php,
+     join_waitingroom_game.php, message.php, people.php, quick_play.php, ratingpng.php,
+     register.php, send_new_password.php, statistics.php, update_translation.php:
+   - added HOT-sections where it made sense using enclosure of ta_begin/ta_end()
+   - added HOT-sections for db_lock/db_unlock() using enclosure of ta_begin/ta_end(),
+     removed enclosure ta_begin/ta_end() for db_lock-enclosure
+   - write admin-log before admin-action if possible
+   - cleanup: added note if TA-enclosure needed, clearer error-labels,
+     commenting, minor formatting
+
+   * include/game_functions.php:
+   - removed unused methods: GamePlayer::reset_flags()
+
+   * confirm.php:
+   - fix: no move-notify on game-deletion
+   - notify message on finish-game independently from game-moving
+
+   * include/game_functions.php (GameFinalizer.finish_game),
+     include/quick/quick_game.php (QuickGameHandler.process_cmd):
+   - notify message on finish-game independently from game-moving
+
+   * include/std_functions.php (send_message, notify, delete_all_observers):
+   - cleanup: refactor redundant code -> call notify() in send_message()
+   - optimize db-result cleanup
+
+   * news.php:
+   - allow comments that are removed with format: "## comment-line"
+   - added doc with NEWS-format
+
 2011-04-08 juga
 
    * tournaments/include/tournament_result.php (class TournamentResult, ~.to_string,
