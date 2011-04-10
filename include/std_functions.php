@@ -2889,53 +2889,59 @@ function activity_string( $act_lvl)
 }
 
 
-function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=false, $blackname=false)
+/*!
+ * \brief Returns web-link with reference to given game.
+ * \param $extra (optional but best to fully-provided) array with fields,
+ *        that if not given are loaded for game (if game exists):
+ *        Whitename, Blackname, GameType, GamePlayers, Status=game-status
+ */
+function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
 {
    global $base_path;
 
    $gid = (int)$gid;
    $legal = ( $gid > 0 );
-   $game_type = GAMETYPE_GO;
-   $game_players = '';
-   $status = GAME_STATUS_PLAY;
-   if( $legal && ($whitename===false || $blackname===false) )
+   if( !is_array($extra) )
+      $extra = array();
+   if( $legal && count($extra) < 5 )
    {
-      $query = 'SELECT Games.GameType, Games.Status, Games.GamePlayers, ' .
-                  'black.Name as blackname, white.Name as whitename ' .
-               'FROM Games ' .
-                  'INNER JOIN Players as black ON black.ID=Games.Black_ID ' .
-                  'LEFT JOIN Players as white ON white.ID=Games.White_ID ' . // multi-player-game
-               "WHERE Games.ID=$gid LIMIT 1" ;
-      if( $row=mysql_single_fetch( 'game_reference', $query ) )
+      $game_row = mysql_single_fetch( "game_reference.find_game($gid)",
+         'SELECT G.GameType, G.Status, G.GamePlayers, black.Name AS Blackname, white.Name AS Whitename ' .
+         'FROM Games AS G ' .
+            'INNER JOIN Players as black ON black.ID=G.Black_ID ' .
+            'LEFT JOIN Players as white ON white.ID=G.White_ID ' . // LEFT-join for MP-game
+         "WHERE G.ID=$gid LIMIT 1" );
+      if( $game_row )
       {
-         if( $whitename===false )
-            $whitename = $row['whitename'];
-         if( $blackname===false )
-            $blackname = $row['blackname'];
+         foreach( array( 'Blackname', 'Whitename', 'GameType', 'GamePlayers', 'Status' ) as $key )
+         {
+            if( !@$extra[$key] )
+               $extra[$key] = $game_row[$key];
+         }
          $safe_it = true;
-         $game_type = $row['GameType'];
-         $game_players = $row['GamePlayers'];
-         $status = $row['Status'];
       }
       else
          $legal = false;
    }
-   $whitename = trim($whitename);
-   $blackname = trim($blackname);
-   $is_std_go = ($game_type == GAMETYPE_GO);
+   $blackname = trim(@$extra['Blackname']);
+   $whitename = trim(@$extra['Whitename']);
+   $game_type = @$extra['GameType'];
+   $is_std_go = !$game_type || ($game_type == GAMETYPE_GO);
 
-   if( $whitename )
-      $whitename = "$whitename (W)";
    if( $blackname )
       $blackname = "$blackname (B)";
+   if( $whitename )
+      $whitename = "$whitename (W)";
 
-   $gtype_text = GameTexts::format_game_type( $game_type, $game_players );
+   $gtype_text = ($game_type)
+      ? GameTexts::format_game_type( $game_type, @$extra['GamePlayers'] )
+      : '';
    if( !$whitename && !$blackname )
-      $text = "{$gtype_text}-game #$gid" ;
+      $text = ($gtype_text ? "{$gtype_text}-" : '') . "game #$gid" ;
    elseif( $whitename && $blackname )
-      $text = "{$gtype_text}: $whitename vs. $blackname";
+      $text = ($gtype_text ? "{$gtype_text}: " : '') . "$whitename vs. $blackname";
    else
-      $text = "{$gtype_text}: $whitename$blackname";
+      $text = ($gtype_text ? "{$gtype_text}: " : '') . "$whitename$blackname";
 
    if( $safe_it )
       $text = make_html_safe($text);
@@ -2944,7 +2950,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $whitename=fals
 
    if( $link && $legal )
    {
-      $url = ( $is_std_go || $status != GAME_STATUS_SETUP )
+      $url = ( $is_std_go || @$extra['Status'] != GAME_STATUS_SETUP )
          ? "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "")
          : "game_players.php?gid=$gid";
       $url = "A href=\"$base_path$url\" class=Game$class";

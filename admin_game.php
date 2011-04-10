@@ -92,8 +92,8 @@ define('GA_RES_TIMOUT', 3);
    {
       if( @$_REQUEST['gend_save'] )
       {
-         $game_finalizer = new GameFinalizer( ACTBY_ADMIN, $my_id, $gid, $game->tid,
-            $game->Status, $game->GameType, $game->Flags, $game->Black_ID, $game->White_ID, $game->Moves );
+         $game_finalizer = new GameFinalizer( ACTBY_ADMIN, $my_id, $gid, $game->tid, $game->Status,
+            $game->GameType, $game->GamePlayers, $game->Flags, $game->Black_ID, $game->White_ID, $game->Moves );
          $score_text = ($game->Score == 0.0) ? 'jigo' : ( $game->Score < 0 ? 'B' : 'W' ) . ' win';
 
          ta_begin();
@@ -123,8 +123,8 @@ define('GA_RES_TIMOUT', 3);
       elseif( @$_REQUEST['gdel_save'] )
       {
          // send message to my opponent / all-players / observers about the result
-         $game_notify = new GameNotify( $gid, /*adm*/0, $game->Status, $game->GameType, $game->Flags,
-            $game->Black_ID, $game->White_ID, $game->Score, trim(get_request_arg('delmsg')) );
+         $game_notify = new GameNotify( $gid, /*adm*/0, $game->Status, $game->GameType, $game->GamePlayers,
+            $game->Flags, $game->Black_ID, $game->White_ID, $game->Score, trim(get_request_arg('delmsg')) );
 
          ta_begin();
          {//HOT-section to ...

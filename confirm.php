@@ -522,8 +522,8 @@ This is why:
       $do_delete = false;
       if( $game_finished )
       {
-         $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid, $Status, $GameType, $GameFlags,
-            $Black_ID, $White_ID, $Moves );
+         $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid, $Status, $GameType, $GamePlayers,
+            $GameFlags, $Black_ID, $White_ID, $Moves );
 
          $do_delete = ( $action == 'delete' );
          if( $do_delete )

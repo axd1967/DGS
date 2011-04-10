@@ -1093,14 +1093,15 @@ class GameFinalizer
    var $tid;
    var $Status;
    var $GameType;
+   var $GamePlayers;
    var $GameFlags;
    var $Black_id;
    var $White_id;
    var $Moves;
    var $skip_game_query;
 
-   function GameFinalizer( $action_by, $my_id, $gid, $tid, $game_status, $game_type, $game_flags,
-                           $black_id, $white_id, $moves )
+   function GameFinalizer( $action_by, $my_id, $gid, $tid, $game_status, $game_type, $game_players,
+         $game_flags, $black_id, $white_id, $moves )
    {
       $this->action_by = $action_by;
       $this->my_id = (int)$my_id;
@@ -1108,6 +1109,7 @@ class GameFinalizer
       $this->tid = (int)$tid;
       $this->Status = $game_status;
       $this->GameType = $game_type;
+      $this->GamePlayers = $game_players;
       $this->GameFlags = (int)$game_flags;
       $this->Black_ID = (int)$black_id;
       $this->White_ID = (int)$white_id;
@@ -1162,8 +1164,8 @@ class GameFinalizer
             $this->tid, $gid, $this->Black_ID, $game_score );
 
       // send message to my opponent / all-players / observers about the result
-      $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GameFlags,
-         $this->Black_ID, $this->White_ID, $game_score, $message );
+      $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GamePlayers,
+         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $message );
 
       if( $do_delete )
       {
@@ -1224,6 +1226,7 @@ class GameNotify
    var $uid; // can be 0 for admin (<> players)
    var $game_status;
    var $game_type;
+   var $game_players;
    var $game_flags;
    var $black_id;
    var $white_id;
@@ -1236,12 +1239,14 @@ class GameNotify
    var $players_text;
 
    /*! \brief Constructs GameNotify also loading player-info from db. */
-   function GameNotify( $gid, $uid, $game_status, $game_type, $game_flags, $black_id, $white_id, $score, $message )
+   function GameNotify( $gid, $uid, $game_status, $game_type, $game_players, $game_flags,
+         $black_id, $white_id, $score, $message )
    {
       $this->gid = (int)$gid;
       $this->uid = (int)$uid;
       $this->game_status = $game_status;
       $this->game_type = $game_type;
+      $this->game_players = $game_players;
       $this->game_flags = (int)$game_flags;
       $this->black_id = (int)$black_id;
       $this->white_id = (int)$white_id;
@@ -1286,6 +1291,15 @@ class GameNotify
       return "<p>Send a message to:<center>" . implode('<br>', $arr) . "</center>";
    }//_build_text_players
 
+   function build_game_ref_array()
+   {
+      return array(
+         'Blackname' => $this->black_name, 'Whitename' => $this->white_name,
+         'GameType' => $this->game_type, 'GamePlayers' => $this->game_players,
+         'Status' => $this->game_status,
+         );
+   }
+
    /*! \brief Returns subject and text for message to players if game got deleted. */
    function get_text_game_deleted( $action_by=ACTBY_PLAYER )
    {
@@ -1305,7 +1319,8 @@ class GameNotify
          $gstatus = 'running ';
 
       $text = "The ".$gstatus."game:<center>"
-            . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->white_name, $this->black_name) // game is deleted => no link
+            // game will be deleted => can't use <game>
+            . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->build_game_ref_array() )
             . "</center>has been deleted by {$MAP_ACTBY_SUBJECT[$action_by]}:<center>"
             . send_reference( REF_LINK, 1, '', $player_row )
             . "</center>"
@@ -1331,7 +1346,7 @@ class GameNotify
          $action_by = ACTBY_PLAYER;
 
       $text = "The result in the game:<center>"
-            . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->white_name, $this->black_name)
+            . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->build_game_ref_array() )
             . "</center>was:<center>"
             . score2text($this->score, true, true)
             . "</center>";

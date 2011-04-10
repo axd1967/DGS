@@ -200,7 +200,7 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
 
          $score = ( $ToMove_ID == $Black_ID ) ? SCORE_TIME : -SCORE_TIME;
          $game_finalizer = new GameFinalizer( ACTBY_CRON, /*cron*/0, $gid, $tid,
-            $Status, $GameType, $X_GameFlags, $Black_ID, $White_ID, $Moves );
+            $Status, $GameType, $GamePlayers, $X_GameFlags, $Black_ID, $White_ID, $Moves );
 
          ta_begin();
          {//HOT-section to save game-timeout
