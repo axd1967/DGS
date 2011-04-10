@@ -231,8 +231,6 @@ class QuickHandlerGame extends QuickHandler
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Status)");
-         if( $is_mpgame )
-            error('invalid_action', "QuickHandlerGame.prepare.check.mpgame.action($gid,$uid,$cmd)");
       }
 
       $this->TheBoard = new Board();
@@ -510,6 +508,7 @@ class QuickHandlerGame extends QuickHandler
                error('mysql_insert_move', "QuickHandlerGame.process.insert_movemessage2($gid,$action})");
          }
 
+         $do_delete = false;
          if( $game_finished )
          {
             $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid,

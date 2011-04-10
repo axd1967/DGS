@@ -153,9 +153,6 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
          $to_move = WHITE+BLACK-$to_move;
    }
 
-   if( $is_mpgame && ($action == 'resign' || $action == 'done') )
-      error('invalid_action', "confirm.check.action.mpgame($gid,$my_id,$GameType,$action)");
-
    if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
 
@@ -226,7 +223,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $mp_query = '';
-   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == 'handicap') )
+   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == 'handicap' || $action == 'done') )
    {
       list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -487,7 +484,7 @@ This is why:
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'done'
 
@@ -522,6 +519,7 @@ This is why:
             error('mysql_insert_move', "confirm.message_query2($gid,$action)");
       }
 
+      $do_delete = false;
       if( $game_finished )
       {
          $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid, $Status, $GameType, $GameFlags,
