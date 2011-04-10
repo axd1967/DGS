@@ -848,7 +848,12 @@ $info_box = '<ul>
       echo "</table>\n";
    } //show_list
 
-   end_page();
+
+   $menu_array = array(
+      T_('Show FAQ log') => "admin_show_faqlog.php",
+   );
+
+   end_page(@$menu_array);
 }
 
 

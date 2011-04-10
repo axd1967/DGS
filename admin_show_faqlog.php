@@ -96,7 +96,11 @@ require_once( "include/table_columns.php" );
    echo "<br>\n",
       "NOTE: Log shows changed FAQ-entries with user, time and new text.<br>\n";
 
-   end_page();
+   $menu_array = array(
+      /*T_*/'Edit FAQ' => "admin_faq.php",
+      );
+
+   end_page(@$menu_array);
 }
 
 ?>
