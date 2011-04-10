@@ -21,6 +21,28 @@ ChangeLog
 
 2011-04-10 juga
 
+   * admin_faq.php, admin_show_faqlog.php:
+   - added bottom-link to FAQ-log from FAQ-editor and vice-versa
+
+   * include/sgf_builder.php (SgfBuilder.sgf_echo_comment):
+   - bugfix: enforce last-node in SGF, even if trimmed empty
+
+   * game_comments.php:
+   - added number of moves and number of comments above table
+   - show full game-reference to game with link back
+
+   * include/game_functions.php (class GameFinalizer, ~.finish_game;
+       class GameNotify, ~.build_game_ref_array, ~.get_text_game_deleted, ~.get_text_game_result),
+     include/quick/quick_game.php (QuickGameHandler.process_cmd),
+     include/std_functions.php (game_reference),
+     admin_game.php, clock_tick.php, confirm.php, game_comments.php:
+   - bugfix: fix format of game_reference()-output for multi-player-games,
+     can now provide more pre-loaded game-data and will load what is missing
+     and better handle if some fields are not available for deleted games
+
+   * include/utilities.php (basic_safe):
+   - fix HTML-entity: replaced apostrophe '&#039;' with more human-readable '&apos;'
+
    * include/quick/quick_game.php (QuickGameHandler.prepare, ~.process_cmd),
      confirm.php:
    - bugfix: ending MP-game with score or by resignation
