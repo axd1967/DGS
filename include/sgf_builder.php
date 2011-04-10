@@ -248,14 +248,14 @@ class SgfBuilder
          $this->echo_sgf( $prop );
    }
 
-   function sgf_echo_comment( $com, $trim=true )
+   function sgf_echo_comment( $comment, $check_empty=true )
    {
-      $comment_trimmed = ($trim) ? trim($com) : $com;
-      if( (string)$comment_trimmed == '' )
+      $comment = trim($comment);
+      if( $check_empty && (string)$comment == '' )
          return false;
       $this->echo_sgf( "\nC[" .
          str_replace( "]","\\]",
-            str_replace("\\","\\\\", reverse_htmlentities($comment_trimmed) ))
+            str_replace("\\","\\\\", reverse_htmlentities($comment) ))
          . "]" );
       return true;
    }
@@ -984,7 +984,7 @@ class SgfBuilder
          $this->node_com .= "\n\nNotes - $player_txt:\n" . $notes ;
       }
 
-      $this->sgf_echo_comment( $this->node_com, false ); // no trim
+      $this->sgf_echo_comment( $this->node_com, false ); // no empty-check
       $this->node_com = '';
 
       $this->echo_sgf( "\n)\n" );
