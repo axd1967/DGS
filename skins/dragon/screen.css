@@ -1650,6 +1650,11 @@ dl.DocLink a {
    color: blue;
 }
 
+dl.DocLinkNarrow dd {
+   text-align: left;
+   margin: 0px auto 0.3em auto;
+}
+
 body.Links table#pageLayout td#pageBody div.Section {
    width: 85%;
 }

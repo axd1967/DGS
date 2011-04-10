@@ -27,11 +27,12 @@ $GLOBALS['ThePage'] = new Page('Links');
 
    $logged_in = who_is_logged( $player_row);
 
-   start_page(T_('Links'), true, $logged_in, $player_row,
-      "a.blue:visited{color:purple;}" );
+   start_page(T_('Links'), true, $logged_in, $player_row, "a.blue:visited{color:purple;}" );
+   echo "<h3 class=Header>", T_('Link collection'), "</h3>\n";
 
    section( 'General', T_('General Info'));
 
+   $link_class = 'DocLinkNarrow';
    add_link_page_link("http://senseis.xmp.net",
                      T_('Sensei\'s Library'),
                      T_('A collaboration web site. Read and contribute!'));
@@ -51,7 +52,6 @@ $GLOBALS['ThePage'] = new Page('Links');
                      T_('Go Sensations'), T_('Go News and Sensations from other Go servers'));
    add_link_page_link("http://senseis.xmp.net/?HikaruNoGo",
                      T_('Hikaru no Go'), T_('A manga about go. Recommended!'));
-
    add_link_page_link();
 
 
@@ -69,7 +69,6 @@ $GLOBALS['ThePage'] = new Page('Links');
    add_link_page_link('http://web.archive.org/web/20070101004300/http://www.sentex.net/~mmcadams/teachgo/',
                      T_('How to Teach Go'),
                      T_('This is all you need to get started. Very basic stuff'));
-
    add_link_page_link();
 
 
@@ -85,7 +84,6 @@ $GLOBALS['ThePage'] = new Page('Links');
    add_link_page_link("http://senseis.xmp.net/?EssentialGoTerms",
                      T_('Common Japanese Go Terms'),
                      T_('You have to know what other players are talking about.'));
-
    add_link_page_link();
 
 
@@ -97,7 +95,6 @@ $GLOBALS['ThePage'] = new Page('Links');
    add_link_page_link("http://gobase.org/information/history/",
                      T_('The Extended History'),
                      T_('In case you\'re an aspiring know-it-all.'));
-
    add_link_page_link();
 
 
@@ -111,7 +108,6 @@ $GLOBALS['ThePage'] = new Page('Links');
    add_link_page_link("http://www.yutopian.com/go/", 'Yutopian');
    add_link_page_link("http://www.samarkand.net/", 'Samarkand');
    add_link_page_link("http://www.schaakengo.nl/", 'Het Paard', T_('European shop'));
-
    add_link_page_link();
 
 
@@ -130,7 +126,6 @@ $GLOBALS['ThePage'] = new Page('Links');
                      'IGS', T_('A large server for realtime play'));
    add_link_page_link("http://senseis.xmp.net/?GoServers",
                      T_('Server list'), T_('A more complete list of servers'));
-
    add_link_page_link();
 
    end_page();
