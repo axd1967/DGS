@@ -849,11 +849,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $grow_strings[4] = "<A href=\"userinfo.php?uid=$oppID\">" . $oppHandle . "</a>";
          if( $gtable->Is_Column_Displayed[5] )
          {
+            $colors = '';
             if( $is_mp_game )
             {
                if( !($X_Color & 0x20) )
                   $colors = ( $X_Color & 0x1 ) ? 'w' : 'b'; //to move color
-               $hover_title = $arr_titles_colors[$colors];
+               $hover_title = @$arr_titles_colors[$colors];
             }
             else
             {
@@ -871,7 +872,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                $hover_title = ( isset($arr_titles_colors[$colors]) )
                   ? sprintf( $arr_titles_colors[$colors], $oppHandle ) : '';
             }
-            $grow_strings[5] = image( $base_path."17/$colors.gif", $colors, $hover_title );
+            $grow_strings[5] = ( (string)$colors != '' )
+               ? image( $base_path."17/$colors.gif", $colors, $hover_title )
+               : NO_VALUE;
          }
          if( $gtable->Is_Column_Displayed[23] )
             $grow_strings[23] = echo_rating($oppStartRating,true,$oppID);
