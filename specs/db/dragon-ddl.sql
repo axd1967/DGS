@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 05, 2010 at 12:18 AM
+-- Generation Time: Apr 10, 2011 at 09:27 PM
 -- Server version: 5.0.51
--- PHP Version: 5.2.4-2ubuntu5.10
+-- PHP Version: 5.2.4-2ubuntu5.14
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS `ConfigPages` (
   `ColumnsTournaments` int(11) NOT NULL default '-1',
   `ColumnsTournamentParticipants` int(11) NOT NULL default '-1',
   `ColumnsTDTournamentParticipants` int(11) NOT NULL default '-1',
+  `ColumnsTournamentResults` int(11) NOT NULL default '-1',
   `ColumnsTournamentLadderView` int(11) NOT NULL default '-1',
   `ColumnsTournamentPoolView` int(11) NOT NULL default '-1',
   PRIMARY KEY  (`User_ID`)
@@ -303,6 +304,24 @@ CREATE TABLE IF NOT EXISTS `Forums` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `GamePlayers`
+--
+
+CREATE TABLE IF NOT EXISTS `GamePlayers` (
+  `ID` int(11) NOT NULL auto_increment,
+  `gid` int(11) NOT NULL,
+  `GroupColor` enum('B','W','G1','G2','BW') NOT NULL default 'BW',
+  `GroupOrder` tinyint(4) NOT NULL default '0',
+  `uid` int(11) NOT NULL default '0',
+  `Flags` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`ID`),
+  KEY `gidGroup` (`gid`,`GroupColor`,`GroupOrder`),
+  KEY `uid` (`uid`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Games`
 --
 
@@ -316,18 +335,20 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `Black_ID` int(11) NOT NULL,
   `White_ID` int(11) NOT NULL,
   `ToMove_ID` int(11) NOT NULL default '0',
+  `GameType` enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO',
+  `GamePlayers` char(5) NOT NULL default '',
   `Ruleset` enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(4,1) NOT NULL default '6.5',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',
-  `Status` enum('INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
+  `Status` enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED',
   `Moves` smallint(5) unsigned NOT NULL default '0',
   `Black_Prisoners` smallint(5) unsigned NOT NULL default '0',
   `White_Prisoners` smallint(5) unsigned NOT NULL default '0',
   `Last_X` tinyint(4) NOT NULL default '-1',
   `Last_Y` tinyint(4) NOT NULL default '-1',
   `Last_Move` char(2) NOT NULL default '',
-  `Flags` set('Ko','HiddenMsg') NOT NULL default '',
+  `Flags` set('Ko','HiddenMsg','AdmResult') NOT NULL default '',
   `Score` decimal(5,1) NOT NULL default '0.0',
   `Maintime` smallint(6) NOT NULL default '0',
   `Byotype` enum('JAP','CAN','FIS') NOT NULL default 'JAP',
@@ -440,6 +461,7 @@ CREATE TABLE IF NOT EXISTS `MessageCorrespondents` (
 CREATE TABLE IF NOT EXISTS `Messages` (
   `ID` int(11) NOT NULL auto_increment,
   `Type` enum('NORMAL','INVITATION','DISPUTED','RESULT') NOT NULL default 'NORMAL',
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
   `Thread` int(11) NOT NULL default '0',
   `Level` smallint(6) NOT NULL default '0',
   `ReplyTo` int(11) NOT NULL default '0',
@@ -553,6 +575,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `RatedGames` mediumint(8) unsigned NOT NULL default '0',
   `Won` mediumint(8) unsigned NOT NULL default '0',
   `Lost` mediumint(8) unsigned NOT NULL default '0',
+  `GamesMPG` smallint(5) unsigned NOT NULL default '0',
   `Translator` varchar(80) NOT NULL default '',
   `IP` varchar(16) NOT NULL default '',
   `Browser` varchar(150) NOT NULL default '',
@@ -655,6 +678,23 @@ CREATE TABLE IF NOT EXISTS `RatingChange` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `RatingChangeAdmin`
+--
+
+CREATE TABLE IF NOT EXISTS `RatingChangeAdmin` (
+  `ID` int(11) NOT NULL auto_increment,
+  `uid` int(11) NOT NULL,
+  `Created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Changes` tinyint(4) NOT NULL default '0',
+  `Rating` double NOT NULL default '-9999',
+  PRIMARY KEY  (`ID`),
+  KEY `uid` (`uid`),
+  KEY `Created` (`Created`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Ratinglog`
 --
 
@@ -716,6 +756,7 @@ CREATE TABLE IF NOT EXISTS `Tournament` (
   `EndTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `Rounds` tinyint(3) unsigned NOT NULL default '1',
   `CurrentRound` tinyint(3) unsigned NOT NULL default '1',
+  `RegisteredTP` smallint(6) NOT NULL default '0',
   `LockNote` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `Status` (`Status`),
@@ -834,6 +875,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `GameEndTimeoutLoss` enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL default 'CH_LAST',
   `UserAbsenceDays` tinyint(3) unsigned NOT NULL default '0',
   `RankPeriodLength` tinyint(3) unsigned NOT NULL default '1',
+  `CrownKingHours` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`tid`),
   KEY `UserAbsenceDays` (`UserAbsenceDays`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -909,6 +951,29 @@ CREATE TABLE IF NOT EXISTS `TournamentProperties` (
   `Notes` text NOT NULL,
   PRIMARY KEY  (`tid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `TournamentResult`
+--
+
+CREATE TABLE IF NOT EXISTS `TournamentResult` (
+  `ID` int(11) NOT NULL auto_increment,
+  `tid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `rid` int(11) NOT NULL default '0',
+  `Rating` double NOT NULL default '-9999',
+  `Type` tinyint(3) unsigned NOT NULL default '0',
+  `StartTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `EndTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Round` tinyint(3) unsigned NOT NULL default '1',
+  `Rank` smallint(5) unsigned NOT NULL default '0',
+  `RankKept` smallint(5) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`ID`),
+  KEY `tidRank` (`tid`,`Rank`),
+  KEY `uid` (`uid`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1011,11 +1076,10 @@ CREATE TABLE IF NOT EXISTS `TranslationLanguages` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslationPages` (
-  `ID` int(11) NOT NULL auto_increment,
   `Page` varchar(64) NOT NULL,
   `Group_ID` int(11) NOT NULL,
-  PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+  PRIMARY KEY  (`Page`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1086,8 +1150,11 @@ CREATE TABLE IF NOT EXISTS `UserQuota` (
 CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL,
+  `gid` int(11) NOT NULL default '0',
   `nrGames` tinyint(3) unsigned NOT NULL default '1',
   `Time` datetime NOT NULL default '0000-00-00 00:00:00',
+  `GameType` enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO',
+  `GamePlayers` char(5) NOT NULL default '',
   `Ruleset` enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(4,1) NOT NULL default '6.5',
