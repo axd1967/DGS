@@ -334,7 +334,8 @@ function parse_edit_form( &$trd )
 //     for given pool-size and pool-count
 function calc_suggestion( $reg_count, $pool_size, $pool_count, $user_choice=0 )
 {
-   static $chall_games = 1; // later: 2 for double-round-robin
+   $chall_games = 1; // later: 2 for double-round-robin
+
    $user_capacity = $pool_size * $pool_count;
    $pool_size_base = ($pool_count > 0) ? floor( $reg_count / $pool_count ) : 1;
    $pool_count_remain = $reg_count - $pool_size_base * $pool_count;
