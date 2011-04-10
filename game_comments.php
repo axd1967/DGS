@@ -44,11 +44,10 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       error('unknown_game');
 
    $game = mysql_single_fetch( 'game_comments.find_game',
-      'SELECT Games.Status, Games.GameType, Games.GamePlayers, Games.Handicap' .
-         ', Games.Black_ID, Games.White_ID' .
+      'SELECT G.Status, G.GameType, G.GamePlayers, G.Handicap, G.Moves, G.Black_ID, G.White_ID' .
          ', black.Name AS Blackname, white.Name AS Whitename' .
-      ' FROM (Games, Players AS black, Players AS white)' .
-      " WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1" );
+      ' FROM (Games AS G, Players AS black, Players AS white)' .
+      " WHERE G.ID=$gid AND G.Black_ID=black.ID AND G.White_ID=white.ID LIMIT 1" );
    if( !$game )
       error('unknown_game', "game_comments.find_game($gid)");
    if( $game['Status'] == GAME_STATUS_SETUP )
@@ -88,9 +87,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    start_html(T_('Comments'), true, @$player_row['SkinName']);
 
-   $str = game_reference( 0, 1, '', 0, 0, $game['Whitename'], $game['Blackname']);
-   $str.= " - #$gid";
-   $str.= ' - '.( $game['Status'] == GAME_STATUS_FINISHED ? T_('Finished') : T_('Running'));
+   $str = game_reference( REF_LINK, 1, '', $gid, 0, $game )
+      . " - #$gid - " . ( $game['Status'] == GAME_STATUS_FINISHED ? T_('Finished') : T_('Running') );
    echo "<h3 class=Header>$str</h3>";
 
 
@@ -102,6 +100,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $ctable->add_tablehead(3, T_('Player') );
    $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
+   $cnt_comments = 0;
    while( $row = mysql_fetch_assoc($result) )
    {
       $crow_strings = array();
@@ -110,6 +109,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
          $Text = game_tag_filter( $Text);
       $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
       if( empty($Text) ) continue;
+      $cnt_comments++;
 
       $color_class = ' class="InTextStone"';
       if( $row['Stone'] == BLACK )
@@ -134,6 +134,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    }
    mysql_free_result($result);
 
+   echo spacing(sprintf( T_('(%s moves, %s comments)'), (int)$game['Moves'], $cnt_comments ), 0, 'center'), "\n";
    $ctable->echo_table();
 
    end_html();
