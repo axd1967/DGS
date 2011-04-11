@@ -46,6 +46,8 @@ $GLOBALS['ThePage'] = new Page('Admin');
                      '', $admin_level & ADMIN_TRANSLATORS);
    add_link_page_link('admin_faq.php', /*T_*/('Edit FAQ'),
                      '', $admin_level & ADMIN_FAQ);
+   add_link_page_link('admin_faq.php?ot='.TXTOBJTYPE_LINKS, /*T_*/('Edit Links'),
+                     '', $admin_level & ADMIN_FAQ);
    add_link_page_link('forum/admin.php', /*T_*/('Admin forums'),
                      '', $admin_level & ADMIN_DEVELOPER);
    add_link_page_link('admin_users.php', T_('Edit user attributes'),

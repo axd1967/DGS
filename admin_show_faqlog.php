@@ -54,7 +54,7 @@ require_once( "include/table_columns.php" );
    $atable->add_tablehead( 2, T_('User#header'), 'User');
    $atable->add_tablehead( 3, T_('Time#header'), 'User');
    $atable->add_tablehead( 4, T_('FAQ ID#header'), 'ID');
-   $atable->add_tablehead( 5, T_('Question#header'));
+   $atable->add_tablehead( 5, T_('Question & Reference#header'));
    $atable->add_tablehead( 6, T_('Answer#header'));
 
    $result = db_query( 'admin_show_errorlog.find_data',
@@ -84,7 +84,8 @@ require_once( "include/table_columns.php" );
          $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['FAQID']) . '</a>';
       }
       if( $atable->Is_Column_Displayed[5] )
-         $arow_str[5] = make_html_safe( @$row['Question'], 'cell' );
+         $arow_str[5] = make_html_safe( @$row['Question'], 'cell' )
+            . (@$row['Reference'] ? "<br>\n" . $row['Reference'] : '' );
       if( $atable->Is_Column_Displayed[6] )
          $arow_str[6] = make_html_safe( wordwrap(@$row['Answer'], 60, "\n", false), 'faq' );
       $atable->add_row( $arow_str );
@@ -98,6 +99,7 @@ require_once( "include/table_columns.php" );
 
    $menu_array = array(
       /*T_*/'Edit FAQ' => "admin_faq.php",
+      /*T_*/'Edit Links' => "admin_faq.php?ot=".TXTOBJTYPE_LINKS,
       );
 
    end_page(@$menu_array);

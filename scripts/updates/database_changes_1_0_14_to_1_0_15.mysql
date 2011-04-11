@@ -2038,3 +2038,23 @@ ALTER TABLE ConfigPages
    ADD ColumnsTournamentResults int NOT NULL DEFAULT -1 AFTER ColumnsTDTournamentParticipants ;
 
 
+-- added Reference-field to allow edit links with FAQ-editor
+ALTER TABLE FAQ
+   ADD Reference varchar(255) NOT NULL default '' ;
+ALTER TABLE FAQlog
+   ADD Reference varchar(255) NOT NULL default '' AFTER Answer ;
+
+-- added table to store links with URL, text and extra-description
+CREATE TABLE Links (
+  ID int NOT NULL auto_increment,
+  Parent int NOT NULL default '0',
+  Level tinyint unsigned NOT NULL default '0',
+  SortOrder smallint NOT NULL default '0',
+  Question int NOT NULL default '0',
+  Answer int NOT NULL default '0',
+  Hidden enum('N','Y') NOT NULL default 'N',
+  Reference varchar(255) NOT NULL default '',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+
+

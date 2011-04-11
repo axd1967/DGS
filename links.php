@@ -30,9 +30,20 @@ $GLOBALS['ThePage'] = new Page('Links');
    start_page(T_('Links'), true, $logged_in, $player_row, "a.blue:visited{color:purple;}" );
    echo "<h3 class=Header>", T_('Link collection'), "</h3>\n";
 
+   $link_class = 'DocLinkNarrow';
+
+   // show Links from database, or static links if no entries found in db
+   if( !load_links() )
+      make_static_links();
+
+   end_page();
+}//main
+
+
+function make_static_links()
+{
    section( 'General', T_('General Info'));
 
-   $link_class = 'DocLinkNarrow';
    add_link_page_link("http://senseis.xmp.net",
                      T_('Sensei\'s Library'),
                      T_('A collaboration web site. Read and contribute!'));
@@ -127,8 +138,37 @@ $GLOBALS['ThePage'] = new Page('Links');
    add_link_page_link("http://senseis.xmp.net/?GoServers",
                      T_('Server list'), T_('A more complete list of servers'));
    add_link_page_link();
+}//make_static_links
 
-   end_page();
-}
+function load_links()
+{ // show only faq-titles
+   $result = db_query( 'links.load_links',
+      "SELECT entry.*, Question.Text AS Q, Answer.Text AS A, " .
+      "IF(entry.Level=1, entry.SortOrder, parent.SortOrder) AS CatOrder " .
+      "FROM Links AS entry " .
+         "INNER JOIN Links AS parent ON parent.ID=entry.Parent " .
+         "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
+         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+      "WHERE entry.Level BETWEEN 1 AND 2 " .
+      "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
+
+   $last_level = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      if( $last_level > 0 && $row['Level'] != $last_level )
+         add_link_page_link();
+
+      if( $row['Level'] == 1 ) // section
+         section( 'LinkTitle'.$row['SortOrder'], $row['Q'] );
+      elseif( $row['Level'] == 2 ) // link-entry
+         add_link_page_link( $row['Reference'], $row['Q'], $row['A'] );
+      $last_level = $row['Level'];
+   }
+   if( $last_level > 0 )
+      add_link_page_link();
+   mysql_free_result($result);
+
+   return (bool)$last_level;
+}//load_links
 
 ?>

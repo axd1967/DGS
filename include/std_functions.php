@@ -202,6 +202,11 @@ define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
 
+// admin text-object-type, used in admin_faq.php
+define('TXTOBJTYPE_FAQ',   0); // edit FAQ-table
+define('TXTOBJTYPE_LINKS', 1); // edit Links-table
+
+
 //TODO simplify ENABLE_STDHANDICAP !?
 // b0=0x1 (standard placement), b1=0x2 (with black validation skip), b2=0x4 (all placements)
 // both b1 and b2 set is not fully handled (error if incomplete pattern)
@@ -2840,6 +2845,7 @@ function section( $id='', $header='', $anchorName='' )
 // $link can be arr( url => desc, ... ); $linkdesc then is separator
 function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
 {
+   global $link_class;
    static $started = false;
 
    if( $link === false )
@@ -2852,7 +2858,8 @@ function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
 
    if( !$started )
    {
-      echo "<dl class=DocLink>\n";
+      $class = (@$link_class) ? $link_class : 'DocLink';
+      echo "<dl class=\"$class\">\n";
       $started = true;
    }
 
