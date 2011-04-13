@@ -291,4 +291,30 @@ function cmp_int( $a, $b )
       return 1;
 }
 
+/**
+ * [Rod] I've noticed that we can't know what is the encoding used at input time
+ * by a user. For instance, with my FireFox browser 1.0.7, I may force the
+ * encoding of the displayed page. Doing this, the same data in the same
+ * input field may be received in various way by PHP:
+ * -with ISO-8859-1 forced: "ü"(u-umlaut) is received as 1 byte (HEX:"\xFC")
+ * -with UTF-8 forced: the same "ü" is received as 2 bytes (HEX:"\xC3\xBC")
+ * Maybe this makes sense, but, as I've not found any information which could
+ * say us what was the "encoding used at input time", this leaves us with
+ * the unpleasant conclusion: we can't be sure to decode a string from
+ * $_RESQUEST[] in the right way.
+ * See also make_translationfiles.php
+ * At least, the following function will keep the string AscII7, just
+ * disturbing the display until the admin will enter a better HTML entity.
+ **/
+function latin1_safe( $str )
+{
+   //return $str;
+   $res= preg_replace(
+      "%([\\x80-\\xff])%ise",
+      //"'[\\1]'",
+      "'&#'.ord('\\1').';'",
+      $str);
+   return $res;
+}
+
 ?>

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "FAQ";
 
+require_once 'include/utilities.php';
 
 /**
  * $level=0 print the start of the container and intialize the function

@@ -227,14 +227,7 @@ function add_text_to_translate( $debugmsg, $string, $Group_ID, $do_it=true)
    if( !$string || $Group_ID <= 0 )
       return false;
 
-   // see the explanations for the latin1_safe() function in admin_faq.php
-   $string= preg_replace(
-         "%([\\x80-\\xff])%ise",
-         "'&#'.ord('\\1').';'",
-         $string);
-
-   $string= mysql_addslashes($string);
-
+   $string = mysql_addslashes( latin1_safe($string) );
    $res = db_query( $debugmsg.'.find_transltext',
       "SELECT ID FROM TranslationTexts WHERE Text='$string'" );
 
