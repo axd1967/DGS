@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2011  Erik Ouchterlony, Rod Ival
+Copyright (C) 2001-2011  Erik Ouchterlony, Rod Ival, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -19,24 +19,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Start";
 
-require_once( "include/std_functions.php" );
+require_once 'include/std_functions.php';
+require_once 'include/admin_faq_functions.php';
+
 $GLOBALS['ThePage'] = new Page('Intro');
+
 
 {
    connect2mysql();
-
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged($player_row);
 
    start_page(T_('Introduction'), true, $logged_in, $player_row );
 
-   section( 'Intro', T_('Introduction to Dragon'));
+   // show Intro from database, or static intro if no entries found in db
+   if( !load_intro() )
+      show_static_intro();
 
-   echo sprintf( T_("Welcome to %s, a %sfree%s " .
-          "server for playing %sgo%s, where the games tends to 'drag on'.")
-          , FRIENDLY_LONG_NAME, '<a href="licence.php">', '</a>'
-          , '<a href="links.php">', '</a>' ) . "\n";
+   end_page();
+}//main
 
-   echo "<p></p>\n";
+
+function show_static_intro()
+{
+   section('Intro', T_('Introduction to Dragon') );
+
+   echo sprintf( T_("Welcome to %s, a %sfree%s server for playing %sgo%s, where the games tends to 'drag on'."),
+          FRIENDLY_LONG_NAME, '<a href="licence.php">', '</a>', '<a href="links.php">', '</a>' );
+
+   echo "<p></p>\n" ;
 
    echo T_("You can look at it as kind of play-by-email, " .
           "where a web-interface is used to make the board look prettier." .
@@ -65,7 +75,44 @@ $GLOBALS['ThePage'] = new Page('Intro');
       . ' of the <a href="/forum/index.php">forums</a>.')
       , "<p></p>\n"
       , T_("Once again welcome, and enjoy your visit here!") . "\n";
+}//show_static_intro
 
-   end_page();
-}
+function load_intro()
+{
+   $TW_ = 'T_'; // for non-const translation-texts
+
+   $result = db_query( 'intro.load_intro',
+      "SELECT entry.Level, entry.SortOrder, entry.Reference, " .
+         "Question.Text AS Q, Answer.Text AS A, " .
+         "IF(entry.Level=1, entry.SortOrder, parent.SortOrder) AS CatOrder " .
+      "FROM Intro AS entry " .
+         "INNER JOIN Intro AS parent ON parent.ID=entry.Parent " .
+         "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
+         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+      "WHERE (entry.Level BETWEEN 1 AND 2) " .
+         "AND entry.Hidden='N' AND parent.Hidden='N'" . //need a viewable root
+      "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
+
+   $last_level = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      if( $row['Level'] == 1 ) // section
+      {
+         if( $last_level > 0 )
+            echo "</dl>\n";
+         section( 'IntroTitle'.$row['SortOrder'], $TW_($row['Q']) );
+         echo "<dl>\n";
+      }
+      elseif( $row['Level'] == 2 ) // link-entry
+         echo "<dt>", $TW_($row['Q']), "</dt>\n<dd>", $TW_($row['A']), "</dd>\n";
+
+      $last_level = $row['Level'];
+   }
+   if( $last_level > 0 )
+      echo "</dl>\n";
+   mysql_free_result($result);
+
+   return (bool)$last_level;
+}//load_intro
+
 ?>

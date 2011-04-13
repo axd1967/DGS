@@ -2058,3 +2058,17 @@ CREATE TABLE Links (
 ) ENGINE=MyISAM ;
 
 
+-- added table to store introduction-entries
+CREATE TABLE Intro (
+  ID int NOT NULL auto_increment,
+  Parent int NOT NULL default '0',
+  Level tinyint unsigned NOT NULL default '0',
+  SortOrder smallint NOT NULL default '0',
+  Question int NOT NULL default '0',
+  Answer int NOT NULL default '0',
+  Hidden enum('N','Y') NOT NULL default 'N',
+  Reference varchar(255) NOT NULL default '',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+
+

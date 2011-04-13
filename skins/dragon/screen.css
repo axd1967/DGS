@@ -1737,9 +1737,17 @@ body.SiteMap table.SiteMap td.Indent img {
    height: 25px;
 }
 
-body.Intro table#pageLayout td#pageBody div.Section {
+body.Intro table#pageLayout td#pageBody div.Section,
+body.FAQAdmin table#pageLayout td#pageBody div#sectIntroPreview {
    width: 85%;
    text-align: left;
+}
+body.Intro table#pageLayout td#pageBody div.Section dl dt,
+body.FAQAdmin table#pageLayout td#pageBody div#sectIntroPreview dl dt {
+   font-size: 115%;
+   font-weight: bold;
+   margin: 1em 0px 0px 0px;
+   padding-bottom: 0.5em;
 }
 
 body.News table#pageLayout td#pageBody div.ReleaseTOC * {

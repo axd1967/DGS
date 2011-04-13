@@ -99,6 +99,7 @@ require_once( "include/table_columns.php" );
 
    $menu_array = array(
       /*T_*/'Edit FAQ' => "admin_faq.php",
+      /*T_*/'Edit Introduction' => "admin_faq.php?ot=".TXTOBJTYPE_INTRO,
       /*T_*/'Edit Links' => "admin_faq.php?ot=".TXTOBJTYPE_LINKS,
       );
 
