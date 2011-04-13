@@ -513,6 +513,9 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added the 'N'=Native pseudo-language to browser settings section
       * Displaying the group-names
 
+   * Changes for FAQ-editors:
+      * Added editor "Admin Links" for <home links.php>links page</home>
+
    * Changes for Admins:
       * Added GAME_ADMIN-role to change game-settings,
       * Added TOURNAMENT_ADMIN-role to fix problems with tournaments,

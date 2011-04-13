@@ -19,7 +19,78 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-13 juga
+
+   * scripts/translation_consistency.php:
+   - added check for orphan translation-texts for Links-table
+
+   * links.php (make_static_links, _section, _add_link_page_link, nop,
+       save_link_section, save_link_entry, load_links):
+   - bugfix: use translations when loading Links from DB
+   - bugfix: hide categories and entries if marked as hidden in DB
+   - adjusted page to seed database with former Links-entries if no Links-table
+     exists, show static links instead then
+   - use one method for both: create Links in DB, and statically show them
+
+   * include/admin_faq_functions.php (class AdminFAQ, ~.move_faq_entry_same_level,
+       ~.move_faq_entry_to_new_category, ~.toggle_hidden_faq_entry, ~.get_faq_entry_row,
+       ~.transl_toggle_state, ~.toggle_translatable_faq_entry, ~.delete_faq_entry,
+       ~.update_faq_entry, ~.save_new_faq_entry),
+     admin_faq.php:
+   - cleanup: refactored SQL-writes/related into class AdminFAQ in 'admin_faq_functions.php'
+   - cleanup: refactored latin1_safe() into 'include/utilities.php'
+   - bugfix: fix error-detection for Reference-field
+   - added bottom-link 'Refresh' to reload page
+
+   * include/make_translationfiles.php (add_text_to_translate),
+     include/utilities.php (latin1_safe),
+     include/faq_functions.php:
+   - cleanup: refactored latin1_safe() from 'admin_faq.php' into 'include/utilities.php'
+
+2011-04-11 juga
+
+   * admin_faq.php (get_faq_group_id, get_entry_row, show_preview, check_url, check_reference),
+     include/std_functions.php (add_link_page_link),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     admin_show_faqlog.php, admin.php, links.php:
+   - adjusted admin_faq-page to allow editing of Links-table to store/edit entries
+     of links-page in database
+   - added FAQ/Links/FAQlog.Reference-field to store URL of link with error-check
+     preventing save-entry, but only preview allowed on error
+   - show links on links-page if there are some entries in Links-table
+     otherwise show static links
+   - minor changes: formatting, SQL, DocLinks-CSS
+-----------
+-- added Reference-field to allow edit links with FAQ-editor
+ALTER TABLE FAQ
+   ADD Reference varchar(255) NOT NULL default '' ;
+ALTER TABLE FAQlog
+   ADD Reference varchar(255) NOT NULL default '' AFTER Answer ;
+
+-- added table to store links with URL, text and extra-description
+CREATE TABLE Links (
+  ID int NOT NULL auto_increment,
+  Parent int NOT NULL default '0',
+  Level tinyint unsigned NOT NULL default '0',
+  SortOrder smallint NOT NULL default '0',
+  Question int NOT NULL default '0',
+  Answer int NOT NULL default '0',
+  Hidden enum('N','Y') NOT NULL default 'N',
+  Reference varchar(255) NOT NULL default '',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+-----------
+
 2011-04-10 juga
+
+   * links.php, skins/dragon/screen.css:
+   - added page-title, used CSS-narrower-lines
+
+   * site_map.php:
+   - fix: show "my tournaments"-link only if tournaments allowed
+
+   * specs/db/dragon-ddl.sql:
+   - sync'ed with current DB-DDL
 
    * admin_faq.php, admin_show_faqlog.php:
    - added bottom-link to FAQ-log from FAQ-editor and vice-versa
