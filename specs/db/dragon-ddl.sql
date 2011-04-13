@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 10, 2011 at 09:27 PM
+-- Generation Time: Apr 13, 2011 at 11:16 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.14
 
@@ -16,6 +16,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- CREATE DATABASE `dragon` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 -- USE `dragon`;
+
 
 -- --------------------------------------------------------
 
@@ -176,6 +177,7 @@ CREATE TABLE IF NOT EXISTS `FAQ` (
   `Question` int(11) NOT NULL default '0',
   `Answer` int(11) NOT NULL default '0',
   `Hidden` enum('N','Y') NOT NULL default 'N',
+  `Reference` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
@@ -191,6 +193,7 @@ CREATE TABLE IF NOT EXISTS `FAQlog` (
   `FAQID` int(11) NOT NULL default '0',
   `Question` text NOT NULL,
   `Answer` text NOT NULL,
+  `Reference` varchar(255) NOT NULL default '',
   `Date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
@@ -429,6 +432,42 @@ CREATE TABLE IF NOT EXISTS `GoDiagrams` (
   `Saved` enum('Y','N') NOT NULL default 'N',
   `Data` text NOT NULL,
   `SGF` text NOT NULL,
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Intro`
+--
+
+CREATE TABLE IF NOT EXISTS `Intro` (
+  `ID` int(11) NOT NULL auto_increment,
+  `Parent` int(11) NOT NULL default '0',
+  `Level` tinyint(3) unsigned NOT NULL default '0',
+  `SortOrder` smallint(6) NOT NULL default '0',
+  `Question` int(11) NOT NULL default '0',
+  `Answer` int(11) NOT NULL default '0',
+  `Hidden` enum('N','Y') NOT NULL default 'N',
+  `Reference` varchar(255) NOT NULL default '',
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Links`
+--
+
+CREATE TABLE IF NOT EXISTS `Links` (
+  `ID` int(11) NOT NULL auto_increment,
+  `Parent` int(11) NOT NULL default '0',
+  `Level` tinyint(3) unsigned NOT NULL default '0',
+  `SortOrder` smallint(6) NOT NULL default '0',
+  `Question` int(11) NOT NULL default '0',
+  `Answer` int(11) NOT NULL default '0',
+  `Hidden` enum('N','Y') NOT NULL default 'N',
+  `Reference` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
