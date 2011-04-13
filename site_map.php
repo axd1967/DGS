@@ -118,9 +118,6 @@ function itemL($text, $link='', $working=true, $last=false)
       } $item_level--;
 
       item(T_('Waiting room'), "waiting_room.php", true);
-      { $item_level++;
-         item(T_('New game'), "new_game.php", true, true);
-      } $item_level--;
 
       if( ALLOW_TOURNAMENTS )
       {
@@ -256,7 +253,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Search forums'), "forum/search.php", true, true);
       } $item_level--;
 
-      itemL(T_('FAQ'), "faq.php", true);
+      itemL(T_('Help (FAQ)'), "faq.php", true);
 
       itemL(T_('Site map'), "site_map.php", true);
 
@@ -268,7 +265,7 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Donation'), 'donation.php', true);
          itemL(T_('News, Release notes'), "news.php", true);
          itemL(T_('Site map'), "site_map.php", true);
-         itemL(T_('FAQ'), "faq.php", true);
+         itemL(T_('Help') . ' - ' . T_('FAQ'), "faq.php", true);
          //item(T_//('Goodies'), "goodies/index.php", true); // not a DGS-feature
          itemL(T_('Links'), "links.php", true);
          itemL(T_('People'), "people.php", true);

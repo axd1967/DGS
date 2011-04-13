@@ -504,7 +504,7 @@ function make_dragon_main_menu_logged_out()
 
    $menu->add( 2,1, array( T_('Introduction'), 'introduction.php', array()));
    $menu->add( 2,2, array( T_('Policy'),       'policy.php',       array()));
-   $menu->add( 2,3, array( T_('FAQ'),          'faq.php',          array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 2,3, array( T_('Help'),         'faq.php',          array( 'accesskey' => ACCKEY_MENU_FAQ )));
 
    $menu->add( 3,1, array( T_('Docs'),         'docs.php',         array( 'accesskey' => ACCKEY_MENU_DOCS )));
    $menu->add( 3,2, array( T_('Site map'),     'site_map.php',     array()));
@@ -552,7 +552,7 @@ function make_dragon_main_menu( $player_row )
       $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 4,1, $arr_forums );
-   $menu->add( 4,2, array( T_('FAQ'),      'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 4,2, array( T_('Help'),     'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
    $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
    $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 

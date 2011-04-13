@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('Docs');
       add_link_page_link('donation.php', T_('Donation'), T_('Support DGS with a donation'));
    add_link_page_link("news.php", T_('News'), T_('Release notes'));
    add_link_page_link('site_map.php', T_('Site map'), T_('Page structure of site'));
-   add_link_page_link("faq.php", T_('Frequently Asked Questions'), T_('with answers'));
+   add_link_page_link("faq.php", T_('Help') . ' - ' . T_('FAQ') . ' - ' . T_('Frequently Asked Questions'), T_('Site help & users guide'));
    add_link_page_link("links.php", T_('Links'), T_('Link collection'));
    add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
 

@@ -111,7 +111,7 @@ define('USERPIC_FOLDER', 'userpic/');
 // Define access keys
 // - keep empty with value '' to define no access key
 // - keys 0..9 are reserved for bottom page-links
-// - unused keys: ahjky
+// - unused keys: ajkqy
 
 // access keys always visible in menus
 define('ACCKEY_MENU_STATUS',     's');
@@ -126,7 +126,7 @@ define('ACCKEY_MENU_USERS',      'u');
 define('ACCKEY_MENU_CONTACTS',   'c');
 define('ACCKEY_MENU_GAMES',      'g');
 define('ACCKEY_MENU_FORUMS',     'f');
-define('ACCKEY_MENU_FAQ',        'q');
+define('ACCKEY_MENU_FAQ',        'h'); // main-menu: Help
 define('ACCKEY_MENU_DOCS',       'd');
 define('ACCKEY_MENU_VOTE',       'v');
 define('ACCKEY_MENU_TRANSLATE',  'l');
