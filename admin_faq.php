@@ -24,7 +24,9 @@ require_once( "include/gui_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
 require_once( "include/faq_functions.php" );
+require_once( "include/admin_faq_functions.php" );
 require_once( "include/filter_parser.php" );
+
 $GLOBALS['ThePage'] = new Page('FAQAdmin');
 
 
@@ -149,42 +151,8 @@ $info_box = '<ul>
    if( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
    {
       $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
-      $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
-
-      $row = mysql_single_fetch( "admin_faq.move.find($fid,$action)",
-                "SELECT * FROM $dbtable WHERE ID=$fid")
-          or error('admin_no_such_entry', "admin_faq.move.find2($fid,$action)");
-      $parent = $row['Parent'];
-
-      $row2 = mysql_single_fetch( "admin_faq.move.max($action,$parent)",
-                "SELECT COUNT(*) AS max FROM $dbtable WHERE Parent=$parent")
-          or error('mysql_query_failed', "admin_faq.move.max2($action,$parent)");
-      $max = $row2['max'];
-
-      $start = $row['SortOrder'];
-      $end = max( 1, min( $max, $start + $dir));
-      $cnt = abs($end - $start);
-      if( $cnt )
-      {
-         $dir = $dir>0 ? 1 : -1;
-         $start+= $dir;
-
-         ta_begin();
-         {//HOT-section to move FAQ-entry
-            //shift the neighbours backward, reference by SortOrder
-            db_query( 'admin_faq.move.update_sortorder1',
-               "UPDATE $dbtable SET SortOrder=SortOrder-($dir)"
-                        . " WHERE SortOrder BETWEEN "
-                           .($start>$end?"$end AND $start":"$start AND $end")
-                        . " AND Parent=$parent"
-                        . " LIMIT $cnt" );
-
-            //move the entry forward, reference by ID
-            db_query( 'admin_faq.move.update_sortorder2',
-               "UPDATE $dbtable SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
-         }
-         ta_end();
-      }
+      $dir = ($action == 'd') ? $dir : -$dir; //because ID top < ID bottom
+      AdminFAQ::move_faq_entry_same_level( "admin_faq($action)", $dbtable, $fid, $dir );
       jump_to($page.URI_AMP."id=$fid#e$fid"); //clean URL
    } //move
 
@@ -194,46 +162,7 @@ $info_box = '<ul>
    // args: id, move=uu|dd
    elseif( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
    {
-      $query = "SELECT Entry.SortOrder,Entry.Parent,Parent.SortOrder AS ParentOrder"
-            . " FROM $dbtable AS Entry,$dbtable AS Parent"
-            . " WHERE Entry.ID=$fid AND Parent.ID=Entry.Parent";
-
-      $row= mysql_single_fetch( "admin_faq.bigmove.find($fid,$action)", $query)
-         or error('admin_no_such_entry', "admin_faq.bigmove.find2($fid,$action)");
-
-      $query = "SELECT ID FROM $dbtable WHERE Level=1 AND SortOrder"
-            . ( $action == 'dd'
-               ? '>' . $row['ParentOrder'] . ' ORDER BY SortOrder'
-               : '<' . $row['ParentOrder'] . ' ORDER BY SortOrder DESC' )
-            . ' LIMIT 1';
-
-      if( $newparent=mysql_single_fetch('admin_faq.bigmove.newparent', $query) )
-      {
-         $newparent = $newparent['ID'];
-
-         if( $max=mysql_single_fetch( 'admin_faq.bigmove.max_sortorder',
-               "SELECT MAX(SortOrder)+1 AS max FROM $dbtable WHERE Parent=$newparent LIMIT 1") )
-         {
-            $max = $max['max'];
-            if( !is_numeric($max) || $max<1 ) $max = 1;
-         }
-         else
-            $max = 1;
-
-         ta_begin();
-         {//HOT-section to move FAQ-entry to new category
-            //shift down the neighbours above
-            db_query( 'admin_faq.bigmove.update_sortorder1',
-               "UPDATE $dbtable SET SortOrder=SortOrder-1"
-                     . " WHERE Parent=" . $row['Parent']
-                     . " AND SortOrder>" . $row['SortOrder'] );
-
-            //move the entry in the new category
-            db_query( 'admin_faq.bigmove.update_sortorder2',
-               "UPDATE $dbtable SET Parent=$newparent, SortOrder=$max WHERE ID=$fid LIMIT 1" );
-         }
-         ta_end();
-      }
+      AdminFAQ::move_faq_entry_to_new_category( "admin_faq($action)", $dbtable, $fid, ($action == 'dd' ? 1 : -1 ) );
       jump_to($page.URI_AMP."id=$fid#e$fid"); //clean URL
    } //bigmove
 
@@ -243,35 +172,7 @@ $info_box = '<ul>
    // args: id, toggleH=Y|N
    elseif( ($action=@$_REQUEST['toggleH']) )
    {
-      $row = get_entry_row( $fid );
-      $faqhide = ( @$row['Hidden'] == 'Y' );
-
-      if( ($action=='Y') xor $faqhide )
-      {
-         ta_begin();
-         {//HOT-section to toggle hidden FAQ-entry
-            $query = "UPDATE $dbtable " .
-                     "SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' " .
-                     "WHERE ID=" . $row['ID'] . ' LIMIT 1';
-
-            db_query( 'admin_faq.hidden_update', $query );
-
-            $transl = transl_toggle_state( $row);
-            if( $faqhide && $transl == 'Y' )
-            {
-               //remove it from translation. No need to adjust Translations.Translated
-               $query = "UPDATE TranslationTexts " .
-                        "SET Translatable='N' " .
-                        "WHERE ID=" . $row['Question'] .
-                        ( $row['Level'] == 1
-                           ? ' LIMIT 1'
-                           : " OR ID=" . $row['Answer'] . " LIMIT 2" );
-
-               db_query( 'admin_faq.hidden_flags', $query );
-            }
-         }
-         ta_end();
-      }
+      AdminFAQ::toggle_hidden_faq_entry( "admin_faq", $dbtable, $fid );
       //jump_to($page); //clean URL
    } //toggleH
 
@@ -281,22 +182,14 @@ $info_box = '<ul>
    // args: id, toggleT=Y|N
    elseif( ($action=@$_REQUEST['toggleT']) )
    {
-      $row = get_entry_row( $fid );
-      $transl = transl_toggle_state( $row);
+      $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
+      $transl = AdminFAQ::transl_toggle_state($row);
       if( !$transl )
          jump_to($page.URI_AMP.'sysmsg='.urlencode('Error: entry already translated'));
 
       if( ($action=='Y') xor ($transl == 'Y') )
       {
-         //not yet translated: may toggle it. No need to adjust Translations.Translated
-         $query = "UPDATE TranslationTexts " .
-                  "SET Translatable='" . ($transl == 'Y' ? 'N' : 'Y' ) . "' " .
-                  "WHERE ID=" . $row['Question'] .
-                  ( $row['Level'] == 1
-                     ? ' LIMIT 1'
-                     : " OR ID=" . $row['Answer'] . " LIMIT 2" );
-         db_query( 'admin_faq.transl', $query );
-
+         AdminFAQ::toggle_translatable_faq_entry( "admin_faq", $dbtable, $row, $transl );
          make_include_files(null, $tr_group); //must be called from main dir
       }
       //jump_to($page); //clean URL
@@ -319,7 +212,7 @@ $info_box = '<ul>
 
       $show_list = false;
 
-      $row = get_entry_row( $fid );
+      $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
       $faqhide = ( @$row['Hidden'] == 'Y' );
 
       if( @$_REQUEST['preview'] )
@@ -414,120 +307,40 @@ $info_box = '<ul>
    elseif( @$_REQUEST['do_edit']
          && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
-      $row = get_entry_row( $fid );
-      $QID = $row['Question'];
-      $AID = $row['Answer'];
-
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
       $reference = trim( get_request_arg('reference') );
 
+      $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
+
       $log = 0;
       $ref_id = $fid; // anchor-ref
+
       // Delete or update ?
       if( !$question && !$answer && !$reference )
       { // Delete
-         if( !transl_toggle_state( $row) ) //can't be toggled
+         if( !AdminFAQ::transl_toggle_state($row) ) //can't be toggled
             jump_to($page.URI_AMP."sysmsg=".urlencode('Error: entry already translated'));
 
-         $exists_category = mysql_single_fetch( 'admin_faq.do_edit.empty',
-            "SELECT ID FROM $dbtable WHERE Parent=$fid LIMIT 1");
-         if( $row['Level'] <= 1 && $exists_category )
+         if( !AdminFAQ::delete_faq_entry( "admin_faq", $dbtable, $fid, $row ) )
             jump_to($page.URI_AMP."sysmsg=".urlencode('Error: category not empty'));
-
-         ta_begin();
-         {//HOT-section to delete FAQ-entry
-            db_query( 'admin_faq.do_edit.delete',
-               "DELETE FROM $dbtable WHERE ID=$fid LIMIT 1" );
-            db_query( 'admin_faq.do_edit.update_sortorder',
-               "UPDATE $dbtable SET SortOrder=SortOrder-1 " .
-               "WHERE Parent={$row['Parent']} AND SortOrder > " . $row['SortOrder'] );
-
-            db_query( 'admin_faq.do_edit.delete_tranlsgrps',
-               "DELETE FROM TranslationFoundInGroup WHERE Text_ID IN ('$QID','$AID') LIMIT 2" );
-            db_query( 'admin_faq.do_edit.delete_tranlstexts',
-               "DELETE FROM TranslationTexts WHERE ID IN ('$QID','$AID') LIMIT 2" );
-         }
-         ta_end();
 
          $ref_id = $row['Parent']; // anchor-ref to former, parent category
       }
       else
       { //Update
-         if( count($errors) || !$question || ($objtype == TXTOBJTYPE_LINKS && !$reference) )
+         if( count($errors) || !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
             jump_to($page.URI_AMP."sysmsg=".urlencode('Error: an entry must be given'));
 
-         ta_begin();
-         {//HOT-section to update FAQ-entry
-            $ReferenceSql = mysql_addslashes($reference);
-            if( $row['Reference'] != $reference )
-            {
-               db_query( 'admin_faq.do_edit.update_reference',
-                  "UPDATE $dbtable SET Reference='$ReferenceSql' WHERE ID=$fid LIMIT 1" );
-               $log |= 0x8;
-            }
-
-            $Qchanged = ( @$_REQUEST['Qchanged'] === 'Y' //only if not hidden
-                        && $question && $row['QTranslatable'] === 'Done' );
-            if( $row['Q'] != $question || $Qchanged )
-            {
-               if( $Qchanged )
-               {
-                  $Qchanged = ", Translatable='Changed'";
-                  db_query( 'admin_faq.do_edit.update_Qflags',
-                     "UPDATE Translations SET Translated='N' WHERE Original_ID=$QID" );
-                  $log|= 0x4;
-               }
-               else
-                  $Qchanged = '';
-
-               $Qsql = $question;
-               $Qsql = latin1_safe($Qsql);
-               $Qsql = mysql_addslashes($Qsql);
-               db_query( 'admin_faq.do_edit.update_Qtexts',
-                  "UPDATE TranslationTexts SET Text='$Qsql'$Qchanged WHERE ID=$QID LIMIT 1" );
-               $log|= 0x1;
-            }
-            else
-               $Qsql = '';
-
-            $Achanged = ( @$_REQUEST['Achanged'] === 'Y' //only if not hidden
-                        && $answer && $row['ATranslatable'] === 'Done' );
-            if( $AID>0 && ( $row['A'] != $answer || $Achanged ) )
-            {
-               if( $Achanged )
-               {
-                  $Achanged = ", Translatable='Changed'";
-                  db_query( 'admin_faq.do_edit.update_Aflags',
-                     "UPDATE Translations SET Translated='N' WHERE Original_ID=$AID" );
-                  $log|= 0x8;
-               }
-               else
-                  $Achanged = '';
-
-               $Asql = $answer;
-               $Asql = latin1_safe($Asql);
-               $Asql = mysql_addslashes($Asql);
-               db_query( 'admin_faq.do_edit.update_Atexts',
-                  "UPDATE TranslationTexts SET Text='$Asql'$Achanged WHERE ID=$AID LIMIT 1" );
-               $log|= 0x2;
-            }
-            else
-               $Asql = '';
-
-            if( $log )
-            {
-               db_query( 'admin_faq.do_edit.faqlog',
-                  "INSERT INTO FAQlog SET FAQID=$fid, uid=$my_id, Question='$Qsql', Answer='$Asql', " .
-                  "Reference='$ReferenceSql'" ); //+ Date= timestamp
-            }
-         }
-         ta_end();
+         $log = AdminFAQ::update_faq_entry( "admin_faq", $dbtable, $fid, $row,
+            ( @$_REQUEST['Qchanged'] === 'Y' ), //only if not hidden
+            ( @$_REQUEST['Achanged'] === 'Y' ), //only if not hidden
+            $question, $answer, $reference );
       }
 
       if( $log & 0x7 ) //i.e. modified except deleted, 0x8=reference (not translated)
       {
-         if( $row['QTranslatable'] !== 'N' || ( $AID>0 && $row['ATranslatable'] !== 'N' ) )
+         if( $row['QTranslatable'] !== 'N' || ( $row['Answer'] > 0 && $row['ATranslatable'] !== 'N' ) )
             make_include_files(null, $tr_group); //must be called from main dir
       }
 
@@ -610,7 +423,7 @@ $info_box = '<ul>
                            ));
       $edit_form->echo_string(1);
 
-      show_preview( $action=='c' ? 1 : 2, $question, $answer, $reference, "e$fid");
+      show_preview( ($action=='c' ? 1 : 2), $question, $answer, $reference, "e$fid");
    } //new
 
 
@@ -625,83 +438,11 @@ $info_box = '<ul>
       $answer = trim( get_request_arg('answer') );
       $reference = trim( get_request_arg('reference') );
 
-      if( !$question || ($objtype == TXTOBJTYPE_LINKS && !$reference) )
+      if( !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
          jump_to($page.URI_AMP."sysmsg=".urlencode('Error: an entry must be given'));
 
-      ta_begin();
-      {//HOT-section to add new FAQ-entry
-         $query = "SELECT * FROM $dbtable WHERE ID=$fid LIMIT 1";
-         $row = mysql_single_fetch( "admin_faq.do_new.find1($fid)", $query );
-         if( $fid==1 && (!$row || $row['Hidden']=='Y') )
-         {
-            //adjust the seed. must be Hidden='N' even if invisible
-            db_query( "admin_faq.do_new.replace_seed($fid)",
-               "REPLACE INTO $dbtable (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
-                        . " VALUES (1,1,0,0,0,0,'N')" );
-            //reload it:
-            $row = mysql_single_fetch( "admin_faq.do_new.find2($fid)", $query );
-         }
-         if( !$row )
-            error('admin_no_such_entry', "admin_faq.do_new.find3($fid)");
-
-         if( $row['Level'] == 0 ) // First category
-            $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 1);
-         elseif( $row['Level'] == 1 && $action == 'e' ) // First entry
-            $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 2);
-
-         $tr_group_id = get_faq_group_id();
-
-         $ref_id = $fid; // anchor-ref
-         $ReferenceSql = mysql_addslashes($reference);
-
-         db_query( 'admin_faq.do_new.update_sortorder',
-            "UPDATE $dbtable SET SortOrder=SortOrder+1 " .
-                     'WHERE Parent=' . $row['Parent'] . ' ' .
-                     'AND SortOrder>' . $row['SortOrder'] );
-
-         db_query( 'admin_faq.do_new.insert',
-            "INSERT INTO $dbtable SET " .
-                     "SortOrder=" . ($row['SortOrder']+1) . ', ' .
-                     "Parent={$row['Parent']}, " .
-                     "Level={$row['Level']}, " .
-                     "Reference='$ReferenceSql'" );
-         $faq_id = mysql_insert_id();
-         $ref_id = $faq_id;
-
-         $Qsql = $question;
-         $Qsql = latin1_safe($Qsql);
-         $Qsql = mysql_addslashes($Qsql);
-         db_query( 'admin_faq.do_new.transltexts1',
-            "INSERT INTO TranslationTexts SET Text='$Qsql', Ref_ID=$faq_id, Translatable='N'" );
-
-         $q_id = mysql_insert_id();
-         db_query( 'admin_faq.do_new.translfoundingrp1',
-            "INSERT INTO TranslationFoundInGroup SET Text_ID=$q_id, Group_ID=$tr_group_id" );
-
-         $a_id = 0;
-         if( $row['Level'] > 1 )
-         {
-            $Asql = $answer;
-            $Asql = latin1_safe($Asql);
-            $Asql = mysql_addslashes($Asql);
-            db_query( 'admin_faq.do_new.transltexts2',
-               "INSERT INTO TranslationTexts SET Text='$Asql', Ref_ID=$faq_id, Translatable='N'" );
-
-            $a_id = mysql_insert_id();
-            db_query( 'admin_faq.do_new.translfoundingrp2)',
-               "INSERT INTO TranslationFoundInGroup SET Text_ID=$a_id, Group_ID=$tr_group_id" );
-         }
-         else
-            $Asql = '';
-
-         db_query( 'admin_faq.do_new.update',
-            "UPDATE $dbtable SET Question=$q_id, Answer=$a_id WHERE ID=$faq_id LIMIT 1" );
-
-         db_query( 'admin_faq.do_new.faqlog',
-            "INSERT INTO FAQlog SET FAQID=$fid, uid=$my_id, Question='$Qsql', Answer='$Asql', " .
-            "Reference='$ReferenceSql'" ); //+ Date= timestamp
-      }
-      ta_end();
+      AdminFAQ::save_new_faq_entry( 'admin_faq', $dbtable, $tr_group, $fid, ($action == 'c'),
+         $question, $answer, $reference );
 
       jump_to( $page.URI_AMP."id=$ref_id#e$ref_id" ); //clean URL (focus on new entry)
    } //do_new
@@ -794,7 +535,7 @@ $info_box = '<ul>
       {
          $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
          $faqhide = ( @$row['Hidden'] == 'Y' );
-         $transl = transl_toggle_state( $row);
+         $transl = AdminFAQ::transl_toggle_state($row);
 
          $entry_ref = "#e{$row['ID']}";
 
@@ -896,77 +637,29 @@ $info_box = '<ul>
 
 
    $menu_array = array(
+      T_('Refresh') => $page,
       T_('Show FAQ log') => "admin_show_faqlog.php",
    );
 
    end_page(@$menu_array);
-}
+}//main
 
-
-function get_faq_group_id()
-{
-   global $tr_group;
-
-   $row = mysql_single_fetch( 'admin_faq.get_faq_group_id',
-            "SELECT ID FROM TranslationGroups WHERE Groupname='$tr_group'" )
-      or error('internal_error', 'admin_faq.get_faq_group_id');
-
-   return $row['ID'];
-}
-
-// returns row with fields: FAQ/Links.* + Q + A + QTranslatable + ATranslatable
-function get_entry_row( $id )
-{
-   global $dbtable;
-
-   $row = mysql_single_fetch( "admin_faq.get_entry_row($id)",
-        "SELECT DBT.*, Question.Text AS Q, Answer.Text AS A".
-        ", Question.Translatable AS QTranslatable".
-        ", Answer.Translatable AS ATranslatable ".
-        "FROM ($dbtable AS DBT, TranslationTexts AS Question) " .
-        "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=DBT.Answer " .
-        "WHERE DBT.ID='$id' AND Question.ID=DBT.Question" )
-      or error('internal_error', "admin_faq.get_entry_row($id)");
-
-   return $row;
-}
-
-//$row = row from get_entry_row(), for example
-function transl_toggle_state( $row)
-{
-   //Warning: for toggle, Answer follow Question
-   //         but they could be translated independently
-   if( $row['Question'] <= 0 )
-      return ''; //can't be toggled
-   $transl = @$row['QTranslatable'];
-   if( $transl == 'Done' || $transl == 'Changed' )
-      return ''; //can't be toggled
-   if( $row['Answer']>0 )
-   {
-      $transl = @$row['ATranslatable'];
-      if( $transl == 'Done' || $transl == 'Changed' )
-         return ''; //can't be toggled
-   }
-   if( $transl === 'Y' || $transl === 'N' )
-      return $transl; //toggle state
-   return ''; //can't be toggled
-}
 
 function show_preview( $level, $question, $answer, $reference, $id='preview', $rx_term='' )
 {
    global $objtype;
 
-   if( $objtype == TXTOBJTYPE_LINKS ) // Links-view
+   if( $objtype == TXTOBJTYPE_LINKS ) // Links-view, see also links.php
    {
       if( $level == 1 )
          section('faq_preview', $question );
       else
       {
-         add_link_page_link($reference, $question, $answer );
+         add_link_page_link( $reference, $question, $answer );
          add_link_page_link();
       }
    }
-   else // FAQ-view
+   else // FAQ-view, see also faq.php
    {
       echo "<table class=FAQ><tr><td class=FAQread>\n";
       echo faq_item_html( 0);
@@ -976,33 +669,7 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
       echo faq_item_html(-1);
       echo "</td></tr></table>\n";
    }
-}
-
-/**
- * I've noticed that we can't know what is the encoding used at input time
- * by a user. For instance, with my FireFox browser 1.0.7, I may force the
- * encoding of the displayed page. Doing this, the same data in the same
- * input field may be received in various way by PHP:
- * -with ISO-8859-1 forced: "ü"(u-umlaut) is received as 1 byte (HEX:"\xFC")
- * -with UTF-8 forced: the same "ü" is received as 2 bytes (HEX:"\xC3\xBC")
- * Maybe this make sens, but, as I've not found any information which could
- * say us what was the "encoding used at input time", this leave us with
- * the unpleasant conclusion: we can't be sure to decode a string from
- * $_RESQUEST[] in the right way.
- * See also make_translationfiles.php
- * At least, the following function will keep the string AscII7, just
- * disturbing the display until the admin will enter a better HTML entity.
- **/
-function latin1_safe( $str )
-{
-   //return $str;
-   $res= preg_replace(
-      "%([\\x80-\\xff])%ise",
-      //"'[\\1]'",
-      "'&#'.ord('\\1').';'",
-      $str);
-   return $res;
-}
+}//show_preview
 
 function check_url( $str )
 {
