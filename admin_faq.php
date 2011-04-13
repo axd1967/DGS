@@ -65,13 +65,15 @@ $info_box = '<ul>
 </ul>';
 
 /*
- * This page is used to edit two different sets of entries:
+ * This page is used to edit three different sets of entries:
    - table FAQ with entries for faq.php
+   - table Intro with entries for introduction.php
    - table Links with entries for links.php
 
-   - both tables share the same field-structure in the database,
+   - all three tables share the same field-structure in the database,
      even so the meaning of the fields is a bit different:
      - FAQ:   Question / Answer, Reference (unused)
+     - Intro: Question (header-text), Answer (description), Reference (unused)
      - Links: Question (link-text), Answer (extra-description), Reference (link-URL)
 
  * Translatable flag meaning - See also translate.php
@@ -116,13 +118,24 @@ $info_box = '<ul>
       $url_term = '';
 
    $objtype = (int)get_request_arg('ot');
-   if( $objtype == TXTOBJTYPE_LINKS )
+   if( $objtype == TXTOBJTYPE_INTRO )
+   {
+      $dbtable = 'Intro';
+      $adm_title = 'Introduction';
+      $tr_group = 'Start';
+      $label_head = 'Title';
+      $label_cont = 'Description';
+      $label_ref = '';
+      $rows_cont = 20;
+   }
+   elseif( $objtype == TXTOBJTYPE_LINKS )
    {
       $dbtable = $adm_title = 'Links';
       $tr_group = 'Docs';
       $label_head = 'Link Text';
       $label_cont = 'Description';
       $label_ref = 'Reference (URL)';
+      $rows_cont = 3;
    }
    else // FAQ
    {
@@ -130,6 +143,7 @@ $info_box = '<ul>
       $label_head = 'Question';
       $label_cont = 'Answer';
       $label_ref = '';
+      $rows_cont = 20;
    }
 
    // read/write move-distance for entries using cookie
@@ -236,8 +250,8 @@ $info_box = '<ul>
 
       if( count($errors) )
       {
-         $edit_form->add_row( array( 'DESCRIPTION', T_('Errors'),
-                                     'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+         $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Errors'),
+                                     'TEXT', buildErrorListString(/*T_*/('There are some errors'), $errors) ));
          $edit_form->add_empty_row();
       }
 
@@ -270,7 +284,7 @@ $info_box = '<ul>
                                         'Mark entry as changed for translators', false) );
          }
          $edit_form->add_row( array( 'DESCRIPTION', $label_cont,
-                                     'TEXTAREA', 'answer', 80, ( $objtype == TXTOBJTYPE_LINKS ? 3 : 20 ), $answer ) );
+                                     'TEXTAREA', 'answer', 80, $rows_cont, $answer ) );
          if( !$faqhide && $row['ATranslatable'] === 'Done' )
          {
             $edit_form->add_row( array( 'TAB',
@@ -386,8 +400,8 @@ $info_box = '<ul>
 
       if( count($errors) )
       {
-         $edit_form->add_row( array( 'DESCRIPTION', T_('Errors'),
-                                     'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+         $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Errors'),
+                                     'TEXT', buildErrorListString(/*T_*/('There are some errors'), $errors) ));
          $edit_form->add_empty_row();
       }
 
@@ -408,7 +422,7 @@ $info_box = '<ul>
          $edit_form->add_row( array( 'DESCRIPTION', $label_head,
                                      'TEXTINPUT', 'question', 80, 80, $question ) );
          $edit_form->add_row( array( 'DESCRIPTION', $label_cont,
-                                     'TEXTAREA', 'answer', 80, ( $objtype == TXTOBJTYPE_LINKS ? 3 : 20 ), $answer ) );
+                                     'TEXTAREA', 'answer', 80, $rows_cont, $answer ) );
       }
 
       $edit_form->add_row( array(
@@ -637,8 +651,8 @@ $info_box = '<ul>
 
 
    $menu_array = array(
-      T_('Refresh') => $page,
-      T_('Show FAQ log') => "admin_show_faqlog.php",
+      /*T_*/('Refresh') => $page,
+      /*T_*/('Show FAQ log') => "admin_show_faqlog.php",
    );
 
    end_page(@$menu_array);
@@ -649,10 +663,20 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
 {
    global $objtype;
 
-   if( $objtype == TXTOBJTYPE_LINKS ) // Links-view, see also links.php
+   if( $objtype == TXTOBJTYPE_INTRO ) // Intro-view, see also introduction.php
    {
       if( $level == 1 )
-         section('faq_preview', $question );
+         section('IntroPreview', $question );
+      else
+      {
+         section('IntroPreview', /*T_*/('Preview') );
+         echo "<dl><dt>$question</dt>\n<dd>$answer</dd></dl>\n";
+      }
+   }
+   elseif( $objtype == TXTOBJTYPE_LINKS ) // Links-view, see also links.php
+   {
+      if( $level == 1 )
+         section('LinksPreview', $question );
       else
       {
          add_link_page_link( $reference, $question, $answer );
@@ -688,6 +712,6 @@ function check_reference( &$errors, $objtype, $reference )
       else
          $errors[] = 'Reference with URL is missing';
    }
-}
+}//check_reference
 
 ?>
