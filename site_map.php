@@ -62,12 +62,14 @@ function echo_item($text, $link='', $show_link, $working=true, $last=false)
    echo "</td></tr>\n";
 } //echo_item
 
+// need login to show link
 function item($text, $link='', $working=true, $last=false)
 {
    global $logged_in;
    return echo_item( $text, $link, $logged_in, $working, $last);
 }
 
+// don't need login, always show link
 function itemL($text, $link='', $working=true, $last=false)
 {
    return echo_item( $text, $link, true, $working, $last);
@@ -243,6 +245,12 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Invite user'), "message.php?mode=Invite", false, true);
       } $item_level--;
 
+      itemL(T_('Introduction'), "introduction.php", true);
+
+      itemL(T_('Help / FAQ'), "faq.php", true);
+
+      itemL(T_('Site map'), "site_map.php", true);
+
       item(T_('Forum'), "forum/index.php", true);
       { $item_level++;
          item(T_('Thread list'), "forum/list.php", false);
@@ -253,9 +261,15 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Search forums'), "forum/search.php", true, true);
       } $item_level--;
 
-      itemL(T_('Help (FAQ)'), "faq.php", true);
-
-      itemL(T_('Site map'), "site_map.php", true);
+      if( ALLOW_FEATURE_VOTE )
+      {
+         item(T_('Vote'), "features/list_votes.php", true);
+         { $item_level++;
+            item(T_('Show feature votes'), "features/list_votes.php", true);
+            item(T_('Vote on features'), "features/list_features.php", true);
+            item(T_('Vote on feature'), "features/vote_feature.php", false, true);
+         } $item_level--;
+      }
 
       itemL(T_('Documentation'), "docs.php", true);
       { $item_level++;
@@ -265,7 +279,7 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Donation'), 'donation.php', true);
          itemL(T_('News, Release notes'), "news.php", true);
          itemL(T_('Site map'), "site_map.php", true);
-         itemL(T_('Help') . ' - ' . T_('FAQ'), "faq.php", true);
+         itemL(T_('Help / FAQ'), "faq.php", true);
          //item(T_//('Goodies'), "goodies/index.php", true); // not a DGS-feature
          itemL(T_('Links'), "links.php", true);
          itemL(T_('People'), "people.php", true);
@@ -278,16 +292,6 @@ function itemL($text, $link='', $working=true, $last=false)
          itemL(T_('Download dragon sources'), "snapshot.php", true);
          itemL(T_('License'), "licence.php", true, true);
       } $item_level--;
-
-      if( ALLOW_FEATURE_VOTE )
-      {
-         item(T_('Vote'), "features/list_votes.php", true);
-         { $item_level++;
-            item(T_('Show feature votes'), "features/list_votes.php", true);
-            item(T_('Vote on features'), "features/list_features.php", true);
-            item(T_('Vote on feature'), "features/vote_feature.php", false, true);
-         } $item_level--;
-      }
 
       if( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);
