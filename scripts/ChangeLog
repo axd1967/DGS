@@ -21,6 +21,45 @@ ChangeLog
 
 2011-04-13 juga
 
+   * admin_faq.php:
+   - commented out translation-calls T_(..) on FAQ-admin-page
+
+   * introduction.php (show_static_intro, load_intro),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     admin.php, admin_faq.php (show_preview), admin_show_faqlog.php,
+     admin_show_users.php, skins/dragon/screen.css:
+   - adjusted admin_faq-page to allow editing of Intro-table by FAQ-editors
+     to store/edit entries of introduction-page in database
+   - show entries on introduction-page if there are some entries in Intro-table,
+     otherwise show default introduction-text
+-----------
+-- added table to store introduction-entries
+CREATE TABLE Intro (
+  ID int NOT NULL auto_increment,
+  Parent int NOT NULL default '0',
+  Level tinyint unsigned NOT NULL default '0',
+  SortOrder smallint NOT NULL default '0',
+  Question int NOT NULL default '0',
+  Answer int NOT NULL default '0',
+  Hidden enum('N','Y') NOT NULL default 'N',
+  Reference varchar(255) NOT NULL default '',
+  PRIMARY KEY (ID)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/std_functions.php (TXTOBJTYPE_INTRO, make_dragon_main_menu),
+     site_map.php:
+   - renamed main-menu/site-map 'Help' -> 'Help / FAQ'
+   - added/rearranged main-menu-links into groups:
+     - Introduction, Help/FAQ, Site map
+     - Forums, Features, Goban-Editor, Docs
+
+   * include/std_functions.php (make_dragon_main_menu_logged_out, make_dragon_main_menu),
+     include/config.php (ACCKEY_MENU_FAQ),
+     docs.php, site_map.php:
+   - renamed/extended 'FAQ' on site to 'Help' in main-menu and on some pages
+   - changed access-key for FAQ from q -> h (Help)
+
    * scripts/translation_consistency.php:
    - added check for orphan translation-texts for Links-table
 

@@ -211,8 +211,11 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added absolute timeunit-choice for filters on Contacts, Message search, Games, Errorlog pages
 
    * Navigation:
-      * Added system bookmarks in top Dragon bar
+      * Added <home introduction.php>Introduction page</home> into main-menu
       * Added <home site_map.php>Site-map page</home> into main-menu
+      * Renamed FAQ-page to <home faq.php>Help / FAQ</home> in main-menu, changed access-key from [q] to [h]
+      * Rearranged <home forums/>Forums</home> and <home docs.php>Docs</home> in main-menu
+      * Added system bookmarks in top Dragon bar
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show if on vacation
@@ -514,6 +517,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Displaying the group-names
 
    * Changes for FAQ-editors:
+      * Added editor "Admin Introduction" for <home introduction.php>Introduction page</home>
       * Added editor "Admin Links" for <home links.php>links page</home>
 
    * Changes for Admins:
