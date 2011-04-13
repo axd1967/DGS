@@ -72,6 +72,41 @@ echo ">>>> Most of them needs manual fixes.";
 
 
 //---------
+   echo "<hr>Links orphean texts (TranslationTexts=>Links but Links!=>TranslationTexts):";
+
+   $query = "SELECT TranslationTexts.ID as TID,TranslationTexts.*,Links.*"
+     ." FROM TranslationTexts"
+     ." LEFT JOIN Links ON TranslationTexts.Ref_ID=Links.ID"
+     ." WHERE TranslationTexts.Ref_ID>0"
+     ." ORDER BY TranslationTexts.ID";
+   $result = mysql_query( $query ) or die(mysql_error());
+
+   while( ($row = mysql_fetch_assoc( $result )) )
+   {
+      $TID = (int)@$row['TID'];
+      $QID = (int)@$row['Question'];
+      $AID = (int)@$row['Answer'];
+      if( $QID!=$TID && $AID!=$TID )
+      {
+         if( $do_it )
+         {
+            echo "<br> >>> CAN'T BE FIXED\n";
+            break;
+         }
+         echo "<br>Text.$TID =&gt; Links." . $row['Ref_ID']
+            . " =&gt; Text.$QID + Text.$AID" ;
+         /*
+         dbg_query("UPDATE TranslationTexts SET Ref_ID=0 " .
+                      "WHERE ID=;;;; LIMIT 1" );
+         */
+      }
+   }
+   mysql_free_result($result);
+
+   echo "<br>Links orphean texts done.\n";
+
+
+//---------
    echo "<hr>FAQ orphean texts (TranslationTexts=>FAQ but FAQ!=>TranslationTexts):";
 
    $query = "SELECT TranslationTexts.ID as TID,TranslationTexts.*,FAQ.*"
