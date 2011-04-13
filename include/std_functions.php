@@ -204,7 +204,8 @@ define('MAX_HANDICAP',21);
 
 // admin text-object-type, used in admin_faq.php
 define('TXTOBJTYPE_FAQ',   0); // edit FAQ-table
-define('TXTOBJTYPE_LINKS', 1); // edit Links-table
+define('TXTOBJTYPE_INTRO', 1); // edit Intro-table
+define('TXTOBJTYPE_LINKS', 2); // edit Links-table
 
 
 //TODO simplify ENABLE_STDHANDICAP !?
@@ -545,17 +546,17 @@ function make_dragon_main_menu( $player_row )
    $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
    $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
+   $menu->add( 4,1, array( T_('Introduction'), 'introduction.php', array()));
+   $menu->add( 4,2, array( T_('Help / FAQ'), 'faq.php',        array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
+
    $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
    if( $has_forum_new )
    {
       $arr_forums[] = '&nbsp;';
       $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
-   $menu->add( 4,1, $arr_forums );
-   $menu->add( 4,2, array( T_('Help'),     'faq.php',         array( 'accesskey' => ACCKEY_MENU_FAQ )));
-   $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
-   $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
-
+   $menu->add( 5,1, $arr_forums );
    if( ALLOW_FEATURE_VOTE )
    {
       $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
@@ -565,10 +566,11 @@ function make_dragon_main_menu( $player_row )
          $arr_feats[] = '&nbsp;';
          $arr_feats[] = array( $cnt_feat_new_str, 'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
       }
-      $menu->add( 5,1, $arr_feats );
+      $menu->add( 5,2, $arr_feats );
    }
    if( ALLOW_GOBAN_EDITOR )
-      $menu->add( 5,2, array( T_('Goban Editor'), 'goban_editor.php', array()));
+      $menu->add( 5,3, array( T_('Goban Editor'), 'goban_editor.php', array()));
+   $menu->add( 5,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
    return $menu;
 } //make_dragon_main_menu
