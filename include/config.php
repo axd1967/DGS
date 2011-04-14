@@ -165,6 +165,9 @@ define('ALLOW_QUOTING', false);
 // Feature-voting: no voting-stuff shown/accessible if disabled
 define('ALLOW_FEATURE_VOTE', true);
 
+// Allow usage of new quick-do-suite
+define('ALLOW_QUICK_DO', false);
+
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
 
