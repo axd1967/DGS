@@ -571,14 +571,15 @@ Copyright (C) 2001-2011  Erik Ouchterlony
    * Changed all config in server config using constants
 
    * Moved configuration into server config:
-      * ALLOW_QUOTING, ALLOW_JAVASCRIPT, ALLOW_FEATURE_VOTE
+      * ALLOW_QUOTING (disabled), ALLOW_JAVASCRIPT, ALLOW_FEATURE_VOTE
       * Definition of all access keys
       * Forum NEW config
-      * Added config-switch for ALLOW_GO_DIAGRAMS (needs JavaScript)
-      * Added config-switch for ALLOW_GOBAN_EDITOR
+      * Added config-switch for ALLOW_GO_DIAGRAMS (needs JavaScript), disabled
+      * Added config-switch for ALLOW_GOBAN_EDITOR, disabled
+      * Added config-switch for ALLOW_QUICK_DO, disabled
       * Added config-switch for ALLOW_TOURNAMENTS
-      * Added config-switch for ALLOW_TOURNAMENTS_ROUND_ROBIN
-      * Added config-switch for ALLOW_TOURNAMENTS_CREATE_BY_USER
+      * Added config-switch for ALLOW_TOURNAMENTS_ROUND_ROBIN, disabled
+      * Added config-switch for ALLOW_TOURNAMENTS_CREATE_BY_USER, disabled
       * Added config-switch for ALLOW_SQL_CALC_ROWS
       * Default password encryption (SHA1 now)
       * Added database-connect retry
