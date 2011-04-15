@@ -2819,7 +2819,7 @@ function centered_container( $open=true)
    }
 }
 
-function section( $id='', $header='', $anchorName='' )
+function section( $id='', $header='', $anchorName='', $with_hr_sep=false )
 {
    static $section = '';
 
@@ -2833,10 +2833,12 @@ function section( $id='', $header='', $anchorName='' )
    }
    if( $id )
    { //section request, open it
-      if( $anchorName )
-         echo "<a name=\"$anchorName\">";
       $section = attb_quote('sect'.$id);
       echo "\n<div id=$section class=Section>";
+      if( $with_hr_sep )
+         echo "<hr>\n";
+      if( $anchorName )
+         echo "<a name=\"$anchorName\">\n";
       if( $header )
          echo "<h3 class=Header>$header</h3>";
       else
