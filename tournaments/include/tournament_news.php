@@ -92,7 +92,7 @@ class TournamentNews
 
    function setStatus( $status )
    {
-      if( !is_null($status) && !preg_match( "/^(".CHECK_TNEWS_STATUS.")$/", $status ) )
+      if( !preg_match( "/^(".CHECK_TNEWS_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentNews.setStatus($status)");
       $this->Status = $status;
    }

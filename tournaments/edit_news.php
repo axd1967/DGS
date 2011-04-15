@@ -24,9 +24,7 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_news.php' );
-require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
@@ -75,9 +73,10 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
       if( $tnews_id )
          error('bad_tournament_news', "TournamentNews.edit_news.edit($tid,$tnews_id)");
       $tnews = new TournamentNews( 0, $tid, $my_id );
-      $tnews->setStatus( TNEWS_STATUS_SHOW );
       $tnews->Published = $NOW;
    }
+   $tnews_old_status = $tnews->Status;
+   $arr_status = TournamentNews::getStatusText();
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tnews, $is_admin );
@@ -104,6 +103,13 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   $tnform->add_row( array(
+         'DESCRIPTION', T_('Tournament Status#tourney'),
+         'TEXT',        Tournament::getStatusText($tourney->Status), ));
+   if( $tnews->Lastchanged )
+      $tnform->add_row( array(
+            'DESCRIPTION', T_('Last changed'),
+            'TEXT',        TournamentUtils::buildLastchangedBy($tnews->Lastchanged, $tnews->ChangedBy) ));
 
    $tnform->add_row( array( 'HR' ));
 
@@ -115,6 +121,17 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
       $tnform->add_empty_row();
    }
 
+   $tnform->add_row( array(
+         'DESCRIPTION', T_('Current Status#tnews'),
+         'TEXT',        TournamentNews::getStatusText($tnews_old_status) ));
+   $tnform->add_row( array(
+         'TAB',
+         'SELECTBOX',    'status', 1, $arr_status, $vars['status'], false, ));
+
+   $tnform->add_row( array(
+         'DESCRIPTION', T_('Publish Date'),
+         'TEXTINPUT',   'publish', 20, 30, $vars['publish'],
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
    $tnform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));
@@ -171,6 +188,8 @@ function parse_edit_form( &$tnews, $is_admin )
 
    // read from props or set defaults
    $vars = array(
+      'status'          => $tnews->Status,
+      'publish'         => TournamentUtils::formatDate($tnews->Published),
       'subject'         => $tnews->Subject,
       'text'            => $tnews->Text,
    );
@@ -183,6 +202,19 @@ function parse_edit_form( &$tnews, $is_admin )
    // parse URL-vars
    if( $is_posted )
    {
+      $old_vals['publish'] = $tnews->Published;
+
+      $tnews->setStatus($vars['status']);
+
+      $parsed_value = TournamentUtils::parseDate( T_('Publish date for news#tnews'), $vars['publish'] );
+      if( is_numeric($parsed_value) )
+      {
+         $tnews->Published = $parsed_value;
+         $vars['publish'] = TournamentUtils::formatDate($tnews->Published);
+      }
+      else
+         $errors[] = $parsed_value;
+
       $new_value = trim($vars['subject']);
       if( strlen($new_value) < 8 )
          $errors[] = T_('Tournament-News subject missing or too short');
@@ -194,6 +226,8 @@ function parse_edit_form( &$tnews, $is_admin )
 
 
       // determine edits
+      if( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status#edits');
+      if( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish-date#edits');
       if( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject#edits');
       if( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text#edits');
    }

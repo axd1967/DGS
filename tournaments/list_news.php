@@ -57,6 +57,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $status_filter_array = array( T_('All') => '' );
    foreach( TournamentNews::getStatusText() as $status => $text )
       $status_filter_array[$text] = "TN.Status='$status'";
+   if( !$allow_edit_tourney )
+      unset($status_filter_array[TNEWS_STATUS_NEW]);
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_NEWS );
@@ -104,6 +106,11 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $tntable->get_query(),
          $tntable->current_order_string(),
          $tntable->current_limit_string() );
+   if( !$allow_edit_tourney ) // normal users
+   {
+      $iterator->addQuerySQLMerge( new QuerySQL(
+         SQLP_WHERE, "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')") );
+   }
    $iterator = TournamentNews::load_tournament_news( $iterator, $tid );
 
    $show_rows = $tntable->compute_show_rows( $iterator->ResultRows );
