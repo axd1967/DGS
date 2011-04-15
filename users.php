@@ -93,9 +93,10 @@ require_once( 'include/classlib_userpicture.php' );
    $ufilter->add_filter(13, 'Boolean', "P.Activity>$ActiveLevel1", true,
          array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1,
                 FC_DEFAULT => ($observe_gid ? 0 : 1) ) );
-   $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true);
+   $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS ) );
    $ufilter->add_filter(15, 'RelativeDate', 'P.LastMove', true,
-         array( FC_TIME_UNITS => FRDTU_DHM ));
+         array( FC_TIME_UNITS => FRDTU_DHM|FRDTU_ABS ));
    $ufilter->add_filter(16, 'Country', 'P.Country', false,
          array( FC_HIDE => 1 ));
    $ufilter->add_filter(17, 'Numeric', 'P.RatedGames', true,

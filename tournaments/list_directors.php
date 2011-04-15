@@ -60,7 +60,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
    // table filters
    $tdfilter->add_filter(3, 'Rating',  'P.Rating2', true);
-   $tdfilter->add_filter(4, 'RelativeDate', 'TDPL.Lastaccess', true);
+   $tdfilter->add_filter(4, 'RelativeDate', 'TDPL.Lastaccess', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS ) );
    $tdfilter->init();
 
    // init table

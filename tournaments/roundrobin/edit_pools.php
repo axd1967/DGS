@@ -377,7 +377,8 @@ function make_pool_unassigned_table( $tid, &$uatable, &$uafilter )
    if( $needs_trating )
       $uafilter->add_filter( 4, 'Rating', 'TP_Rating', true);
    $uafilter->add_filter( 5, 'Country', 'TPU.Country', false, array( FC_HIDE => 1 ));
-   $uafilter->add_filter( 7, 'RelativeDate', 'TPU.Lastaccess', true);
+   $uafilter->add_filter( 7, 'RelativeDate', 'TPU.Lastaccess', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS ) );
 
    $uafilter->init(); // parse current value from _GET
 

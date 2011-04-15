@@ -85,7 +85,8 @@ require_once( 'include/classlib_userpicture.php' );
    $cfilter->add_filter( 3, 'Country', 'P.Country', false,
          array( FC_HIDE => 1 ));
    $cfilter->add_filter( 4, 'Rating',  'P.Rating2', true);
-   $cfilter->add_filter( 5, 'RelativeDate', 'P.Lastaccess', true);
+   $cfilter->add_filter( 5, 'RelativeDate', 'P.Lastaccess', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS ) );
    $filter_note =&
       $cfilter->add_filter( 8, 'Text', 'C.Notes #OP #VAL', true,
          array( FC_SIZE => 20, FC_SUBSTRING => 1, FC_START_WILD => 1, FC_SQL_TEMPLATE => 1 ));
