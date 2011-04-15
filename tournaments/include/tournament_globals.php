@@ -133,9 +133,8 @@ define('TNEWS_STATUS_DELETE',  'DELETE');
 define('CHECK_TNEWS_STATUS', 'NEW|SHOW|ARCHIVE|DELETE');
 
 // also adjust TournamentNews::getFlagsText()
-define('TNEWS_FLAG_HIDDEN',     0x01); // T-news hidden on T-list/T-info-pages
-define('TNEWS_FLAG_DIRECTOR',   0x02); // T-news only visible to TDs/T-owner
-define('TNEWS_FLAG_PRIVATE',    0x04); // T-news only visible to TPs/TDs/T-owner of T
+define('TNEWS_FLAG_HIDDEN',     0x01); // T-news hidden on T-list/T-info-pages for non-TDs
+define('TNEWS_FLAG_PRIVATE',    0x02); // T-news only visible to TPs/TDs/T-owner of T
 
 // ---------- Tournament Ladder Props -----------------------------
 

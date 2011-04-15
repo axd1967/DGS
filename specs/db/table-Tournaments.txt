@@ -873,9 +873,8 @@ Notes:
 * Flags : bitmask with tournament-news-flags
    - values defined in 'tournaments/include/tournament_globals.php' as TNEWS_FLAG_...,
      also see descriptions in 'tournaments/include/tournament_news.php' getFlagsText()-func
-   - 0x01 (=HIDDEN): T-news hidden on T-list/T-info-pages
-   - 0x02 (=DIRECTOR): T-news only visible to TDs/T-owner
-   - 0x04 (=PRIVATE): T-news only visible to TPs/TDs/T-owner of T
+   - 0x01 (=HIDDEN): T-news hidden on T-list/T-info-pages for non-TDs
+   - 0x02 (=PRIVATE): T-news only visible to TPs/TDs/T-owner of T
 
 * Subject : subject/title of T-news
 

@@ -295,7 +295,6 @@ class TournamentNews
          $arr = array();
          $arr[TNEWS_FLAG_HIDDEN]    = T_('Hidden#TN_flag');
          $arr[TNEWS_FLAG_PRIVATE]   = T_('Private#TN_flag');
-         $arr[TNEWS_FLAG_DIRECTOR]  = T_('Director#TN_flag');
          $ARR_GLOBALS_TOURNAMENT_NEWS['FLAGS'] = $arr;
       }
       else
