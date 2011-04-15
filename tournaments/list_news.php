@@ -27,6 +27,7 @@ require_once( 'include/filter.php' );
 require_once( 'include/classlib_profile.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_news.php' );
+require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentNewsList');
@@ -50,6 +51,9 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $is_participant = ($allow_edit_tourney)
+      ? true
+      : TournamentParticipant::isTournamentParticipant( $tid, $my_id );
 
    $page = "list_news.php?";
 
@@ -104,11 +108,14 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $tntable->get_query(),
          $tntable->current_order_string(),
          $tntable->current_limit_string() );
-   if( !$allow_edit_tourney ) // hide some news for non-TDs (=normal users)
+   if( !$allow_edit_tourney ) // hide some news for non-TDs / non-TPs
    {
-      $iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,
+      $qsql = new QuerySQL( SQLP_WHERE,
          "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')",
-         "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" ));
+         "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" );
+      if( !$is_participant )
+         $qsql->add_part( SQLP_WHERE, "(TN.Flags & ".TNEWS_FLAG_PRIVATE.") = 0" );
+      $iterator->addQuerySQLMerge( $qsql );
    }
    $iterator = TournamentNews::load_tournament_news( $iterator, $tid );
 

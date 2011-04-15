@@ -68,12 +68,17 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tourney->setTP_Counts($tp_counts);
    $tp_count_all = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
    unset($tp_counts[TPCOUNT_STATUS_ALL]);
+   $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
+   $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
 
-   $news_iterator = new ListIterator( 'Tournament.view.news.SHOW',
-         new QuerySQL( SQLP_WHERE,
-            "TN.Status='".TNEWS_STATUS_SHOW."'",
-            "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" ), // not hidden
-         'ORDER BY TN.Published DESC' );
+   $news_qsql = new QuerySQL(
+      SQLP_WHERE,
+         "TN.Status='".TNEWS_STATUS_SHOW."'",
+         "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0", // not hidden
+      SQLP_ORDER, 'TN.Published DESC' );
+   if( !$allow_edit_tourney && !$reg_user_status )
+      $news_qsql->add_part( SQLP_WHERE, "(TN.Flags & ".TNEWS_FLAG_PRIVATE.") = 0" );
+   $news_iterator = new ListIterator( 'Tournament.view.news.SHOW', $news_qsql );
    $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
@@ -191,8 +196,6 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    section( 'TournamentStatus', T_('Tournament Status#T_view'), 'status', true );
 
-   $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
-   $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
    $arr_locks = check_locks( $tourney );
 
    $itable = new Table_info('tstatus', TABLEOPT_LABEL_COLON);

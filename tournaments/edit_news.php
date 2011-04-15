@@ -78,7 +78,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnews_old_status = $tnews->Status;
    $arr_status = TournamentNews::getStatusText();
    $arr_flags = array(
-      TNEWS_FLAG_HIDDEN => 'flag_hidden',
+      TNEWS_FLAG_HIDDEN  => 'flag_hidden',
+      TNEWS_FLAG_PRIVATE => 'flag_priv',
    );
 
    // check + parse edit-form
