@@ -70,7 +70,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    unset($tp_counts[TPCOUNT_STATUS_ALL]);
 
    $news_iterator = new ListIterator( 'Tournament.view.news.SHOW',
-         new QuerySQL( SQLP_WHERE, "TN.Status='".TNEWS_STATUS_SHOW."'" ),
+         new QuerySQL( SQLP_WHERE,
+            "TN.Status='".TNEWS_STATUS_SHOW."'",
+            "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" ), // not hidden
          'ORDER BY TN.Published DESC' );
    $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 

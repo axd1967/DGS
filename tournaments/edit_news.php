@@ -77,6 +77,9 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    }
    $tnews_old_status = $tnews->Status;
    $arr_status = TournamentNews::getStatusText();
+   $arr_flags = array(
+      TNEWS_FLAG_HIDDEN => 'flag_hidden',
+   );
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tnews, $is_admin );
@@ -127,6 +130,16 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnform->add_row( array(
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $vars['status'], false, ));
+
+   $first = true;
+   foreach( $arr_flags as $flag => $name )
+   {
+      $arr = ($first) ? array( 'DESCRIPTION', T_('Flags') ) : array( 'TAB' );
+      $first = false;
+      array_push( $arr,
+         'CHECKBOX', $name, 1, TournamentNews::getFlagsText($flag), ($tnews->Flags & $flag) );
+      $tnform->add_row( $arr );
+   }
 
    $tnform->add_row( array(
          'DESCRIPTION', T_('Publish Date'),
@@ -182,6 +195,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tnews, $is_admin )
 {
+   global $arr_flags;
+
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tn_save'] || @$_REQUEST['tn_preview'] );
@@ -189,6 +204,7 @@ function parse_edit_form( &$tnews, $is_admin )
    // read from props or set defaults
    $vars = array(
       'status'          => $tnews->Status,
+      'flags'           => $tnews->Flags,
       'publish'         => TournamentUtils::formatDate($tnews->Published),
       'subject'         => $tnews->Subject,
       'text'            => $tnews->Text,
@@ -198,6 +214,12 @@ function parse_edit_form( &$tnews, $is_admin )
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( $is_posted )
+   {
+      foreach( array_values($arr_flags) as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // parse URL-vars
    if( $is_posted )
@@ -205,6 +227,14 @@ function parse_edit_form( &$tnews, $is_admin )
       $old_vals['publish'] = $tnews->Published;
 
       $tnews->setStatus($vars['status']);
+
+      $new_value = 0;
+      foreach( $arr_flags as $flag => $name )
+      {
+         if( $vars[$name] )
+            $new_value |= $flag;
+      }
+      $tnews->Flags = $new_value;
 
       $parsed_value = TournamentUtils::parseDate( T_('Publish date for news#tnews'), $vars['publish'] );
       if( is_numeric($parsed_value) )
@@ -227,6 +257,7 @@ function parse_edit_form( &$tnews, $is_admin )
 
       // determine edits
       if( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status#edits');
+      if( $old_vals['flags'] != $tnews->Flags ) $edits[] = T_('Flags#edits');
       if( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish-date#edits');
       if( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject#edits');
       if( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text#edits');

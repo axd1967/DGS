@@ -104,9 +104,12 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $tntable->get_query(),
          $tntable->current_order_string(),
          $tntable->current_limit_string() );
-   if( !$allow_edit_tourney ) // normal users
-      $iterator->addQuerySQLMerge( new QuerySQL(
-         SQLP_WHERE, "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')") );
+   if( !$allow_edit_tourney ) // hide some news for non-TDs (=normal users)
+   {
+      $iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,
+         "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')",
+         "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" ));
+   }
    $iterator = TournamentNews::load_tournament_news( $iterator, $tid );
 
    $show_rows = $tntable->compute_show_rows( $iterator->ResultRows );
