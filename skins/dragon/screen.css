@@ -2788,6 +2788,14 @@ table#tstatusTableInfos td {
    padding: 3px;
 }
 
+table#tournamentNewsTable tr td {
+   vertical-align: top;
+}
+
+div.TournamentNews {
+   text-align: left;
+}
+
 ul.TAdminLinks {
    line-height: 1.4em;
 }

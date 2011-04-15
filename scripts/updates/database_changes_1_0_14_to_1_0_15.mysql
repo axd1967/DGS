@@ -2072,3 +2072,21 @@ CREATE TABLE Intro (
 ) ENGINE=MyISAM ;
 
 
+-- added table to store tournament news
+CREATE TABLE TournamentNews (
+  ID int NOT NULL auto_increment,
+  tid int NOT NULL,
+  uid int NOT NULL,
+  Status enum('NEW','SHOW','ARCHIVE') NOT NULL default 'NEW',
+  Flags tinyint unsigned NOT NULL default 0,
+  Published datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  ChangedBy varchar(54) NOT NULL default '',
+  Subject varchar(255) NOT NULL,
+  Text text NOT NULL default '',
+  PRIMARY KEY  (ID),
+  KEY tidPublished (tid,Published),
+  KEY Status (Status)
+) ENGINE=MyISAM ;
+
+

@@ -486,6 +486,9 @@ class ErrorCode
          $arr['tournament_create_error'] =
             T_("Sorry, some errors occured on tournament creation.");
 
+         $arr['bad_tournament_news'] =
+            T_("Sorry, there's something wrong with the tournament-news. Please contact a tournament admin.");
+
          $arr['tournament_director_edit_not_allowed'] =
             T_("Sorry, you are not allowed to add, edit or delete a tournament director for this tournament.");
 

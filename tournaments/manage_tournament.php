@@ -137,6 +137,9 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                                  T_('user-related: user rating-range, min. games#mngt') )),
          '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
                  subList( array( T_('Change game-settings: ruleset, board size, handicap-settings, time-settings, rated#mngt') )),
+         '<li>', make_menu_link( T_('Edit news'), array( 'url' => "tournaments/edit_news.php?tid=$tid", 'class' => 'TAdmin' )),
+                 SEP_SPACING,
+                 make_menu_link( T_('Show tournament news'), "tournaments/list_news.php?tid=$tid" ),
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_NEW ),
       '</ul>',
 

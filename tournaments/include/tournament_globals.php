@@ -124,6 +124,18 @@ define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
 
 define('TG_FLAG_GAME_END_TD', 0x0001); // T-game ended by TD
 
+// ---------- Tournament News Stuff -------------------------------
+
+define('TNEWS_STATUS_NEW',     'NEW');
+define('TNEWS_STATUS_SHOW',    'SHOW');
+define('TNEWS_STATUS_ARCHIVE', 'ARCHIVE');
+define('CHECK_TNEWS_STATUS', 'NEW|SHOW|ARCHIVE');
+
+// also adjust TournamentNews::getFlagsText()
+define('TNEWS_FLAG_HIDDEN',     0x01); // T-news hidden on T-list/T-info-pages
+define('TNEWS_FLAG_DIRECTOR',   0x02); // T-news only visible to TDs/T-owner
+define('TNEWS_FLAG_PRIVATE',    0x04); // T-news only visible to TPs/TDs/T-owner of T
+
 // ---------- Tournament Ladder Props -----------------------------
 
 // action to do for handling game-end in tournament for case

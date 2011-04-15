@@ -329,7 +329,7 @@ Description:
 
  Field        | Type                                                    | Default
 --------------+---------------------------------------------------------+---------------------
- ID           | int(11)                                                 | NULL
+ ID           | int(11)                                                 | NULL, auto_increment
  tid          | int(11)                                                 | NULL
  Lastchanged  | datetime                                                | 0000-00-00 00:00:00
  ChangedBy    | varchar(54)                                             |
@@ -418,7 +418,7 @@ Description:
 
  Field        | Type                                     | Default
 --------------+------------------------------------------+---------------------
- ID           | int(11)                                  | NULL
+ ID           | int(11)                                  | NULL, auto_increment
  tid          | int(11)                                  | NULL
  Round        | tinyint(3) unsigned                      | 1
  Status       | enum('INIT','POOL','PAIR','PLAY','DONE') | INIT
@@ -630,7 +630,7 @@ Description:
 
  Field          | Type                                      | Default
 ----------------+-------------------------------------------+---------------------
- ID             | int(11)                                   | NULL
+ ID             | int(11)                                   | NULL, auto_increment
  tid            | int(11)                                   | NULL
  Round_ID       | int(11)                                   | 0
  Pool           | smallint(5) unsigned                      | 0
@@ -726,7 +726,10 @@ Description:
 * tid : FK to Tournament.ID
 
 * Property : key for property-extension
-   - 1 = date-property with next date to update Ladder-Tournament Rank-history
+   - 1 = date-property with next date to update Ladder-Tournament Rank-history,
+         initialized to first day of current month,
+         handled in cron by adding TournamentLadderProps.RankPeriodLength months and
+         copying TournamentLadder.PeriodRank to HistoryRank and Rank to PeriodRank-field
    - 2 = date-property with date when TD has started to create all (pool-)games
          for current round. Extension-entry only serves as "token" and "lock"
          to prevent others to do the same at the same time. The row will be
@@ -755,7 +758,7 @@ Notes:
 
  Field    | Type                 | Default
 ----------+----------------------+---------
- ID       | int(11)              | NULL
+ ID       | int(11)              | NULL, auto_increment
  tid      | int(11)              | NULL
  Round    | tinyint(3) unsigned  | NULL
  Pool     | smallint(5) unsigned | NULL
@@ -794,7 +797,7 @@ Notes:
 
  Field     | Type                 | Default
 -----------+----------------------+---------------------
- ID        | int(11)              | NULL
+ ID        | int(11)              | NULL, auto_increment
  tid       | int(11)              | NULL
  uid       | int(11)              | NULL
  rid       | int(11)              | 0
@@ -832,4 +835,51 @@ Notes:
 * RankKept : number of hours, rank is kept
    - only used for tournament-ladder
 
+
+###########################################################################
+## --- TournamentNews ---
+
+Description:
+   Table to store tournament news (T-news) of tournament.
+
+Notes:
+
+ Field       | Type                         | Default
+-------------+------------------------------+---------------------
+ ID          | int(11)                      | NULL, auto_increment
+ tid         | int(11)                      | NULL
+ uid         | int(11)                      | NULL
+ Status      | enum('NEW','SHOW','ARCHIVE') | NEW
+ Flags       | tinyint(3) unsigned          | 0
+ Subject     | varchar(255)                 | NULL
+ Text        | text                         | NULL
+ Lastchanged | datetime                     | 0000-00-00 00:00:00
+ ChangedBy   | varchar(54)                  |
+
+
+## Fields:
+
+* tid : FK to Tournament.ID
+
+* uid : FK to TournamentResult.uid = Players.ID
+
+* Status : current process-state of the T-news
+   - NEW = T-news (preparing for publishing), not shown to users
+   - SHOW = T-news ready for publishing, shown to users on T-info-page
+   - ARCHIVE = older T-news published, shown to users on T-news-list, but not on T-info-page
+
+* Flags : bitmask with tournament-news-flags
+   - values defined in 'tournaments/include/tournament_globals.php' as TNEWS_FLAG_...,
+     also see descriptions in 'tournaments/include/tournament_news.php' getFlagsText()-func
+   - 0x01 (=HIDDEN): T-news hidden on T-list/T-info-pages
+   - 0x02 (=DIRECTOR): T-news only visible to TDs/T-owner
+   - 0x04 (=PRIVATE): T-news only visible to TPs/TDs/T-owner of T
+
+* Subject : subject/title of T-news
+
+* Text : main-text of T-news (optional)
+
+* Lastchanged : date of last-update of T-news (on Status, Flags, Title, Description)
+
+* ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
