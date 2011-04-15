@@ -49,7 +49,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tid = (int) @$_REQUEST['tid'];
    $tourney = Tournament::load_tournament( $tid );
    if( is_null($tourney) )
-      error('unknown_tournament', "list_participants.find_tournament($tid)");
+      error('unknown_tournament', "Tournament.list_participants.find_tournament($tid)");
 
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
