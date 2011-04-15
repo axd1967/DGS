@@ -22,9 +22,10 @@ chdir('..');
 require_once 'include/globals.php';
 require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament.php';
-require_once 'tournaments/include/tournament_helper.php';
-require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_news.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -181,6 +182,11 @@ function run_once_daily()
       $thelper->tcache->release_tournament_cron_lock();
    }
    ta_end();
+
+   // ---------- Delete old tournament-news on DELETE-status
+
+   TournamentNews::process_tournament_news_deleted( 7 ); // 7days
+
 }//run_once_daily
 
 function run_hourly()

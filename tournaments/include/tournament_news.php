@@ -247,6 +247,18 @@ class TournamentNews
       return $iterator;
    }
 
+   /*! \brief Deletes all tournament-news on DELETE-status older than given number days (can be negative). */
+   function process_tournament_news_deleted( $days_age )
+   {
+      global $NOW;
+      if( !is_numeric($days_age) )
+         error('invalid_args', "TournamentNews::process_tournament_news_deleted($days_age)");
+
+      db_query( "TournamentNews.process_tournament_news_deleted($days_age)",
+         "DELETE FROM TournamentNews WHERE Status='".TNEWS_STATUS_DELETE."' AND " .
+            "Lastchanged < FROM_UNIXTIME($NOW) - INTERVAL $days_age DAY" );
+   }
+
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null )
    {
@@ -259,6 +271,7 @@ class TournamentNews
          $arr[TNEWS_STATUS_NEW]     = T_('New#TN_status');
          $arr[TNEWS_STATUS_SHOW]    = T_('Show#TN_status');
          $arr[TNEWS_STATUS_ARCHIVE] = T_('Archive#TN_status');
+         $arr[TNEWS_STATUS_DELETE]  = T_('Delete#TN_status');
          $ARR_GLOBALS_TOURNAMENT_NEWS['STATUS'] = $arr;
       }
 

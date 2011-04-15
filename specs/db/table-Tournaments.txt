@@ -844,17 +844,18 @@ Description:
 
 Notes:
 
- Field       | Type                         | Default
--------------+------------------------------+---------------------
- ID          | int(11)                      | NULL, auto_increment
- tid         | int(11)                      | NULL
- uid         | int(11)                      | NULL
- Status      | enum('NEW','SHOW','ARCHIVE') | NEW
- Flags       | tinyint(3) unsigned          | 0
- Subject     | varchar(255)                 | NULL
- Text        | text                         | NULL
- Lastchanged | datetime                     | 0000-00-00 00:00:00
- ChangedBy   | varchar(54)                  |
+ Field       | Type                                  | Default
+-------------+---------------------------------------+---------------------
+ ID          | int(11)                               | NULL,auto_increment
+ tid         | int(11)                               | NULL
+ uid         | int(11)                               | NULL
+ Status      | enum('NEW','SHOW','ARCHIVE','DELETE') | NEW
+ Flags       | tinyint(3) unsigned                   | 0
+ Published   | datetime                              | 0000-00-00 00:00:00
+ Lastchanged | datetime                              | 0000-00-00 00:00:00
+ ChangedBy   | varchar(54)                           |
+ Subject     | varchar(255)                          | NULL
+ Text        | text                                  | NULL
 
 
 ## Fields:
@@ -867,6 +868,7 @@ Notes:
    - NEW = T-news (preparing for publishing), not shown to users
    - SHOW = T-news ready for publishing, shown to users on T-info-page
    - ARCHIVE = older T-news published, shown to users on T-news-list, but not on T-info-page
+   - DELETE = T-news on this status will be deleted after one week by cron
 
 * Flags : bitmask with tournament-news-flags
    - values defined in 'tournaments/include/tournament_globals.php' as TNEWS_FLAG_...,

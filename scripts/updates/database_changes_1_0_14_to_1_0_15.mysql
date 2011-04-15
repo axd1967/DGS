@@ -2090,3 +2090,8 @@ CREATE TABLE TournamentNews (
 ) ENGINE=MyISAM ;
 
 
+-- added DELETE-status to delete tournament-news
+ALTER TABLE TournamentNews
+   MODIFY Status enum('NEW','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW' ;
+
+

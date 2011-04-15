@@ -129,7 +129,8 @@ define('TG_FLAG_GAME_END_TD', 0x0001); // T-game ended by TD
 define('TNEWS_STATUS_NEW',     'NEW');
 define('TNEWS_STATUS_SHOW',    'SHOW');
 define('TNEWS_STATUS_ARCHIVE', 'ARCHIVE');
-define('CHECK_TNEWS_STATUS', 'NEW|SHOW|ARCHIVE');
+define('TNEWS_STATUS_DELETE',  'DELETE');
+define('CHECK_TNEWS_STATUS', 'NEW|SHOW|ARCHIVE|DELETE');
 
 // also adjust TournamentNews::getFlagsText()
 define('TNEWS_FLAG_HIDDEN',     0x01); // T-news hidden on T-list/T-info-pages
