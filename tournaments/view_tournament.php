@@ -29,12 +29,13 @@ require_once( 'include/game_functions.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_gui_helper.php' );
-require_once( 'tournaments/include/tournament_participant.php' );
-require_once( 'tournaments/include/tournament_properties.php' );
-require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'tournaments/include/tournament_ladder.php' );
 require_once( 'tournaments/include/tournament_ladder_props.php' );
+require_once( 'tournaments/include/tournament_news.php' );
+require_once( 'tournaments/include/tournament_participant.php' );
+require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_result.php' );
+require_once( 'tournaments/include/tournament_rules.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('Tournament');
@@ -67,6 +68,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tourney->setTP_Counts($tp_counts);
    $tp_count_all = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
    unset($tp_counts[TPCOUNT_STATUS_ALL]);
+
+   $news_iterator = new ListIterator( 'Tournament.view.news.SHOW',
+         new QuerySQL( SQLP_WHERE, "TN.Status='".TNEWS_STATUS_SHOW."'" ),
+         'ORDER BY TN.Published DESC' );
+   $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
    $trule  = TournamentRules::load_tournament_rule( $tid );
@@ -101,12 +107,13 @@ $GLOBALS['ThePage'] = new Page('Tournament');
                      Tournament::getTypeText($tourney->Type),
                      sprintf( T_('Tournament #%s - General Information'), $tid ));
    $base_page_tourney = $base_path . $page_tourney;
-   section( 'info', $title );
+   section( 'TournamentInfo', $title );
    echo
       T_('This page contains all necessary information and links to participate in the tournament.'),
       MINI_SPACING,
       T_('There are different sections:#tourney'), "\n<ul>",
          "\n<li>", anchor( "$base_page_tourney#title", T_('Tournament description') ),
+         "\n<li>", anchor( "$base_page_tourney#news", T_('Tournament news') ),
          "\n<li>", anchor( "$base_page_tourney#status", T_('Tournament status') ),
          ( $cnt_tstandings > 0
             ? "\n<li>" . anchor( "$base_page_tourney#standings", T_('Tournament standings') )
@@ -137,6 +144,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
    }
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
+   $sectmenu[T_('Refresh tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if( $allow_edit_tourney )
       $sectmenu[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
@@ -150,10 +158,36 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       make_html_safe($tourney->Description, true),
       "\n";
 
+   // --------------- News ----------------------
+
+   section( 'TournamentNews', T_('Tournament News#T_view'), 'news' );
+
+   if( $news_iterator->getItemCount() )
+   {
+      while( list(,$arr_item) = $news_iterator->getListIterator() )
+      {
+         list( $tnews, $orow ) = $arr_item;
+
+         echo "<dd><div class=\"TournamentNews\">",
+            sprintf( "[%s] by %s: %s<br>\n%s",
+                     date(DATE_FMT2, $tnews->Lastchanged), $tnews->User->user_reference(),
+                     make_html_safe($tnews->Subject, true), make_html_safe($tnews->Text, true) ),
+            "</div><br>\n";
+      }
+   }
+   else
+      echo "<center>", T_('No tournament news yet.#tnews'), "</center><br>\n";
+
+   // ------------- Section Menu
+
+   $sectmenu = array();
+   $sectmenu[T_('Tournament news archive#tnews')] = "tournaments/list_news.php?tid=$tid";
+
+   make_menu( $sectmenu, false);
+
    // --------------- Status --------------------
 
-   echo "<hr>\n", '<a name="status">', "\n";
-   section( 'tournament', T_('Tournament Status#T_view') );
+   section( 'TournamentStatus', T_('Tournament Status#T_view'), 'status', true );
 
    $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
@@ -179,8 +213,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    if( $cnt_tstandings > 0 )
    {
-      echo '<a name="standings">', "\n";
-      section( 'tournament', sprintf( T_('Tournament Standings (TOP %s)#T_view'), $cnt_tstandings ) );
+      section( 'TournamentStandings', sprintf( T_('Tournament Standings (TOP %s)#T_view'), $cnt_tstandings ),
+         'standings' );
 
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
          echo TournamentGuiHelper::build_tournament_ladder_standings( $page, $tid, $cnt_tstandings );
@@ -188,8 +222,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Rules -----------------------------------------
 
-   echo "<hr>\n", '<a name="rules">', "\n";
-   section( 'tournament', T_('Tournament Rules#T_view') );
+   section( 'TournamentRules', T_('Tournament Rules#T_view'), 'rules', true );
 
    if( !is_null($trule) )
       echo_tournament_rules( $tourney, $trule );
@@ -197,8 +230,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Registration ----------------------------------
 
-   echo "<hr>\n", '<a name="registration">', "\n";
-   section( 'tournament', T_('Tournament Registration#T_view') );
+   section( 'TournamentRegistration', T_('Tournament Registration#T_view'), 'registration', true );
 
    if( !is_null($tprops) )
       echo_tournament_registration( $tprops );
@@ -233,8 +265,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Games -----------------------------------------
 
-   echo "<hr>\n", '<a name="games">', "\n";
-   section( 'tournament', T_('Tournament Games#T_view') );
+   section( 'TournamentGames', T_('Tournament Games#T_view'), 'games', true );
 
    // show tourney-type-specific properties
    $tt_notes = null;
@@ -268,8 +299,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    if( $show_tresult )
    {
-      echo "<hr>\n", '<a name="result">', "\n";
-      section( 'tournament', T_('Tournament Results#T_view') );
+      section( 'TournamentResult', T_('Tournament Results#T_view'), 'result', true );
 
       echo "<center>",
          TournamentGuiHelper::build_tournament_results( $page, $tourney ),
