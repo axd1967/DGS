@@ -560,9 +560,10 @@ class TournamentHelper
             "T.Status='".TOURNEY_STATUS_PLAY."'",
             "T.Type='".TOURNEY_TYPE_LADDER."'",
             'TLP.CrownKingHours > 0',
+            "TLP.CrownKingStart <= FROM_UNIXTIME($NOW)",
             'TL.Rank=1',
             'TL.RankChanged > 0',
-            "FROM_UNIXTIME($NOW) - INTERVAL TLP.CrownKingHours HOUR > TL.RankChanged"
+            "TL.RankChanged < FROM_UNIXTIME($NOW) - INTERVAL TLP.CrownKingHours HOUR"
          );
 
       if( is_null($iterator) )

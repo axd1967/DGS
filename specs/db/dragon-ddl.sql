@@ -914,6 +914,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `UserAbsenceDays` tinyint(3) unsigned NOT NULL default '0',
   `RankPeriodLength` tinyint(3) unsigned NOT NULL default '1',
   `CrownKingHours` smallint(5) unsigned NOT NULL default '0',
+  `CrownKingStart` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`tid`),
   KEY `UserAbsenceDays` (`UserAbsenceDays`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;

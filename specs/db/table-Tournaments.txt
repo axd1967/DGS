@@ -541,6 +541,7 @@ Description:
  UserAbsenceDays        | tinyint(3) unsigned                     | 0
  RankPeriodLength       | tinyint(3) unsigned                     | 1
  CrownKingHours         | smallint(5) unsigned                    | 0
+ CrownKingStart         | datetime                                | 0000-00-00 00:00:00
 
 
 ## Fields:
@@ -619,7 +620,10 @@ Description:
      are copied to PeriodRank-field and former PeriodRank copied to HistoryRank-field
 
 * CrownKingHours : number of hours player must keep top-rank to be crowned king (of the hill)
-   - 0 = no automatic crowning of king
+   - 0 = no automatic crowning of king, then also CrownKingStart must be 0
+
+* CrownKingStart : date from when CRON should check for king-crowning
+   - 0 = no automatic crowning of king, then also CrownKingHours must be 0
 
 
 ###########################################################################

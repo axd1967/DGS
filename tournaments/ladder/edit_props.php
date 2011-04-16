@@ -205,6 +205,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
             sprintf( '[%s], %s',
                TimeFormat::_echo_time( $tl_props->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ),
                T_('time in hours top rank must be kept, format: "99d 99h"') ), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Crown King Check time'),
+         'TEXTINPUT',   'crownstart', 20, 20, $vars['crownstart'],
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
@@ -270,6 +274,7 @@ function parse_edit_form( &$tlp, $t_limits )
       'uabs_days'       => $tlp->UserAbsenceDays,
       'rankplen'        => $tlp->RankPeriodLength,
       'crownking'       => $tlp->CrownKingHours,
+      'crownstart'      => TournamentUtils::formatDate($tlp->CrownKingStart),
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -281,6 +286,7 @@ function parse_edit_form( &$tlp, $t_limits )
    if( $is_posted )
    {
       $old_vals['chall_range_rat'] = $tlp->ChallengeRangeRating;
+      $old_vals['crownstart'] = $tlp->CrownKingStart;
 
       $new_value = $vars['chall_range_abs'];
       if( TournamentUtils::isNumberOrEmpty($new_value, true)
@@ -408,6 +414,15 @@ function parse_edit_form( &$tlp, $t_limits )
       else
          $errors[] = T_('Expecting time for crowning king.');
 
+      $parsed_value = TournamentUtils::parseDate( T_('Crown King Check time'), $vars['crownstart'] );
+      if( is_numeric($parsed_value) )
+      {
+         $tlp->CrownKingStart = $parsed_value;
+         $vars['crownstart'] = TournamentUtils::formatDate($tlp->CrownKingStart);
+      }
+      else
+         $errors[] = $parsed_value;
+
 
       $tlp->setGameEndNormal( $vars['gend_normal'] );
       $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
@@ -432,6 +447,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('UserAbsence#edits');
       if( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('RankPeriodLength#edits');
       if( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('CrownKing#edits');
+      if( $old_vals['crownstart'] != $tlp->CrownKingStart ) $edits[] = T_('CrownKing-Check-time#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

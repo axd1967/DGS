@@ -2095,3 +2095,10 @@ ALTER TABLE TournamentNews
    MODIFY Status enum('NEW','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW' ;
 
 
+-- added date to first check for crowning of ladder-king
+ALTER TABLE TournamentLadderProps
+   ADD CrownKingStart datetime NOT NULL default '0000-00-00 00:00:00' ;
+UPDATE TournamentLadderProps
+   SET CrownKingStart=NOW() WHERE CrownKingHours > 0 ;
+
+

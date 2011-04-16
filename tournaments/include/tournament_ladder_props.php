@@ -58,7 +58,7 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
                   'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
                   'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength', 'CrownKingHours',
-      FTYPE_DATE, 'Lastchanged',
+      FTYPE_DATE, 'Lastchanged', 'CrownKingStart',
       FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
    );
 
@@ -84,6 +84,7 @@ class TournamentLadderProps
    var $UserAbsenceDays;
    var $RankPeriodLength;
    var $CrownKingHours;
+   var $CrownKingStart;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
@@ -93,7 +94,7 @@ class TournamentLadderProps
          $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
-         $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0 )
+         $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0, $crown_king_start=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -115,6 +116,7 @@ class TournamentLadderProps
       $this->UserAbsenceDays = (int)$user_absence_days;
       $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
       $this->CrownKingHours = (int)$crown_king_hours;
+      $this->CrownKingStart = (int)$crown_king_start;
    }
 
    function to_string()
@@ -206,6 +208,7 @@ class TournamentLadderProps
       $data->set_value( 'UserAbsenceDays', $this->UserAbsenceDays );
       $data->set_value( 'RankPeriodLength', $this->RankPeriodLength );
       $data->set_value( 'CrownKingHours', $this->CrownKingHours );
+      $data->set_value( 'CrownKingStart', $this->CrownKingStart );
       return $data;
    }
 
@@ -264,6 +267,8 @@ class TournamentLadderProps
       if( $this->CrownKingHours < 0 || $this->RankPeriodLength > 50000 )
          $errors[] = sprintf( T_('Crowning of king time must be in range %s hours.'),
             TournamentUtils::build_range_text(0, 50000) );
+      if( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
+         $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).');
 
       return $errors;
    }//check_properties
@@ -358,7 +363,8 @@ class TournamentLadderProps
       // crowning king
       if( $this->CrownKingHours > 0 )
          $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.'),
-            TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) );
+            TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) ) . "\n" .
+            sprintf( T_('The check for this starts at [%s].'), date(DATEFMT_TOURNAMENT, $this->CrownKingStart) );
 
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }//build_notes_props
@@ -628,7 +634,8 @@ class TournamentLadderProps
             @$row['GameEndTimeoutLoss'],
             @$row['UserAbsenceDays'],
             @$row['RankPeriodLength'],
-            @$row['CrownKingHours']
+            @$row['CrownKingHours'],
+            @$row['X_CrownKingStart']
          );
       return $tlp;
    }
