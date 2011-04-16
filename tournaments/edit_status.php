@@ -66,6 +66,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
    // init
    $arr_status = Tournament::getStatusText();
+   $is_admin = TournamentUtils::isAdmin();
 
    // check + parse edit-form + check status
    list( $vars, $edits ) = parse_edit_form($tourney);
@@ -73,13 +74,15 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    $new_status = $vars['status'];
    $tstatus->check_status_change($new_status);
    $tourney->setStatus($new_status);
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $tstatus->add_error( $tourney->buildAdminLockText() );
 
    // save tournament-object with values from edit-form (if no errors and something changed)
    $allow_confirm = ( !$tstatus->has_error() || $tstatus->is_admin );
    if( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm )
    {
+      if( $tourney->Status == TOURNEY_STATUS_CLOSED ) // set end-time
+         $tourney->EndTime = $NOW;
       $tourney->persist();
       jump_to("tournaments/edit_status.php?tid=$tid".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament status saved!')) );
