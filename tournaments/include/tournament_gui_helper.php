@@ -106,8 +106,14 @@ class TournamentGuiHelper
       $tid = $tourney->ID;
 
       // check + load tournament-results
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         $order = 'ORDER BY Rank ASC, RankKept DESC, EndTime DESC';
+      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         $order = 'ORDER BY Round DESC, Rank ASC, EndTime DESC';
+      else
+         $order = 'ORDER BY ID';
       $iterator = new ListIterator( 'TournamentGuiHelper.build_tournament_results.load_tresult',
-         null, 'ORDER BY Rank ASC, ID ASC' );
+         null, $order );
       $iterator->addQuerySQLMerge( new QuerySQL(
             SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
                          'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
