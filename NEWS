@@ -58,7 +58,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Crown-King
       * Tournament Ladder view page showing current ladder standings
          * Added pop-up with rank-change information for each user (if JavaScript enabled)
-      * Tournament Ladder admin-interface to prepare and edit ladder
+      * Tournament Ladder admin-interface to prepare and edit ladder and crown king
       * Tournament Ladder challenge page to confirm challenge starting tournament game
          * Show probable game-settings for challenge
       * Tournament user notifications:
