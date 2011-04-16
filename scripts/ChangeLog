@@ -21,6 +21,40 @@ ChangeLog
 
 2011-04-16 juga
 
+   * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_results):
+   - changed type-dependent order for tournament-results
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_crown_kings),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     specs/db/dragon-ddl.sql:
+   - added date TournamentLadderProps.CrownKingStart storing when first
+     to check for crowning of ladder-king
+-----------
+-- added date to first check for crowning of ladder-king
+ALTER TABLE TournamentLadderProps
+   ADD CrownKingStart datetime NOT NULL default '0000-00-00 00:00:00' ;
+UPDATE TournamentLadderProps
+   SET CrownKingStart=NOW() WHERE CrownKingHours > 0 ;
+-----------
+
+   * tournaments/list_directors.php:
+   - show tournament-owner
+
+   * tournaments/include/tournament.php (Tournament.formatRound):
+   - changed formatting of tournament-round: only 1 for ladder or one-rounded round-robin
+
+   * tournaments/edit_status.php:
+   - bugfix: set Tournament.EndTime when changing tournament-status to CLOSED
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_crown_kings,
+       ~.process_tournament_ladder_crown_king),
+     tournaments/ladder/admin.php (add_form_edit_user):
+   - added crowning of ladder-king by TD/owner if auto-crowning disabled in ladder-properties
+
    * tournaments/include/tournament_news.php (TournamentNews.build_tournament_news),
      tournaments/edit_news.php, tournaments/list_news.php, tournaments/view_tournament.php,
      skins/dragon/screen.css, specs/db/dragon-ddl.sql, NEWS:
