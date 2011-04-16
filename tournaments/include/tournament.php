@@ -192,10 +192,17 @@ class Tournament
    function formatRound( $short=false )
    {
       $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
-      if( $short )
-         return $this->CurrentRound . ' / ' . $rounds_str;
-      else
-         return sprintf( T_('%s of %s rounds'), $this->CurrentRound, $rounds_str );
+      if( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         if( $this->Rounds == 1 )
+            return ( $short ) ? 1 : T_('1 round#tourney');
+         if( $short )
+            return $this->CurrentRound . ' / ' . $rounds_str;
+         else
+            return sprintf( T_('%s of %s rounds'), $this->CurrentRound, $rounds_str );
+      }
+      else //if( $this->Type == TOURNEY_TYPE_LADDER )
+         return ( $short ) ? 1 : T_('1 round#tourney');
    }
 
    function getRoundLimitText()
