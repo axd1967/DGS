@@ -100,6 +100,13 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
+   $tform = new Form( 'tournament', $page, FORM_POST );
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Owner#tourney'),
+         'TEXT',        ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, '', $tourney->Owner_ID ) : NO_VALUE ) ));
+   $tform->echo_string();
+   echo "<br>\n";
+
 
    $show_rows = $tdtable->compute_show_rows( $iterator->ResultRows );
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
