@@ -546,6 +546,7 @@ class TournamentHelper
             'T.ID AS tid',
             'TL.uid',
             'TL.rid',
+            'TL.Rank',
             'UNIX_TIMESTAMP(TL.RankChanged) AS X_RankChanged',
             'TLP.CrownKingHours',
             'P.Rating2',
@@ -579,24 +580,44 @@ class TournamentHelper
 
    /*!
     * \brief Crowns King with information given in $row.
-    * \param $row map with fields: tid, uid, rid, X_RankChanged, CrownKingHours, Rating2, owner_uid
+    * \param $row map with fields: tid, uid, rid, Rank, X_RankChanged, CrownKingHours, Rating2, owner_uid
     * \see #load_ladder_crown_kings()
     */
-   function process_tournament_ladder_crown_king( $row )
+   function process_tournament_ladder_crown_king( $row, $by_tdir_uid=0 )
    {
       global $NOW;
 
       $tid = (int)$row['tid'];
       if( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)");
+      if( !is_numeric($by_tdir_uid) || $by_tdir_uid < 0 )
+         error('invalid_args', "TournamentHelper::process_tournament_ladder_crown_king.check.tdir_uid($tid,$by_tdir_uid)");
 
       $rank_kept_hours = (int)( ($NOW - $row['X_RankChanged']) / SECS_PER_HOUR);
       $tresult = new TournamentResult( 0, $tid, $row['uid'], $row['rid'], $row['Rating2'],
          TRESULTTYPE_KING_OF_THE_HILL, /*start*/$row['X_RankChanged'], /*end*/$NOW,
-         /*round*/1, /*rank*/1, $rank_kept_hours );
+         /*round*/1, $row['Rank'], $rank_kept_hours );
 
       $nfy_uids = TournamentDirector::load_tournament_directors_uid( $tid );
       $nfy_uids[] = $row['owner_uid'];
+
+      // build message-text for TD/owner notify
+      $msg_text = '';
+      if( $by_tdir_uid > 0 )
+         $ufmt = ( ($by_tdir_uid == $row['owner_uid']) ? T_('Owner#tourney') : T_('Tournament director#tourney') )
+            . " <user $by_tdir_uid>";
+      else
+         $ufmt = 'CRON';
+      $msg_text .=
+         sprintf( T_('Tournament result changed by %s.'), $ufmt ) .
+         "\n\n" .
+         sprintf( T_("For %s user [ %s ] has kept the rank #%s for [%s], so the user is crowned as \"King of the Hill\"."),
+                  "<tourney $tid>",
+                  "<user {$row['uid']}>",
+                  $row['Rank'],
+                  TimeFormat::echo_time_diff( $NOW, $row['X_RankChanged'], 24, TIMEFMT_ZERO, '' ) ) .
+         "\n\n" .
+         T_('This notification has been sent to the tournament-owner and to all tournament-directors.');
 
       ta_begin();
       {//HOT-section to insert crowned-king for ladder-tournament as tournament-result
@@ -607,13 +628,7 @@ class TournamentHelper
 
          // notify TDs + owner
          send_message( "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)",
-            sprintf( T_("For %s user [ %s ] has kept the top rank for [%s], so the user is crowned as \"King of the Hill\"."),
-                     "<tourney $tid>",
-                     "<user {$row['uid']}>",
-                     TimeFormat::echo_time_diff( $NOW, $row['X_RankChanged'], 24, TIMEFMT_ZERO, '' ) ) .
-            "\n\n" .
-            T_('This notification has been sent to the tournament-owner and to all tournament-directors.'),
-            sprintf( T_('King of the Hill crowned for tournament #%s'), $tid ),
+            $msg_text, sprintf( T_('King of the Hill crowned for tournament #%s'), $tid ),
             $nfy_uids, '', /*notify*/true,
             /*sys-msg*/0, 'NORMAL', 0 );
       }

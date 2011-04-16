@@ -24,11 +24,13 @@ require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
-require_once 'tournaments/include/tournament_factory.php';
-require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
@@ -58,6 +60,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
      ta_delete&tid=              : delete T-ladder (to seed again, need confirm)
      ta_delete&confirm=1&tid=    : delete T-ladder (confirmed)
      ta_cancel&tid=              : cancel ladder-deletion
+     ta_crownking&tid=&uid=      : crown user as king of the hill
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -82,6 +85,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $tprops = TournamentProperties::load_tournament_properties($tid);
    if( is_null($tprops) )
       error('bad_tournament', "Tournament.ladder_admin.miss_properties($tid,$my_id)");
+
+   $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
+   if( is_null($tl_props) )
+      error('bad_tournament', "Tournament.ladder_admin.miss_ladder_props($tid,$my_id)");
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_edit_tournament_status() );
    $allow_admin = TournamentLadder::allow_edit_ladder($tourney, $errors); // check-locks
@@ -176,6 +183,24 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             }
          }
          ta_end();
+      }
+
+      if( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
+            && $tl_props->CrownKingHours == 0 )
+      {
+         TournamentHelper::process_tournament_ladder_crown_king( array(
+               'tid'             => $tid,
+               'uid'             => $uid,
+               'rid'             => $tladder_user->rid,
+               'Rank'            => $tladder_user->Rank,
+               'X_RankChanged'   => $tladder_user->RankChanged,
+               'CrownKingHours'  => $tl_props->CrownKingHours,
+               'Rating2'         => $user->Rating,
+               'owner_uid'       => $tourney->Owner_ID, ),
+            $my_id );
+
+         $sys_msg = urlencode( sprintf( T_('User [%s] crowned as king for this ladder!#tourney'), $user->Handle ));
+         jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
    }
 
@@ -286,7 +311,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          if( $authorise_add_user )
             add_form_edit_user( $tform, $user,
                'ta_adduser', T_('Add user [%s] to ladder'),
-               T_('Add registered tournament participant to ladder (at bottom).') );
+               T_('Add registered tournament participant to ladder (at bottom).'),
+               /*notify*/1 );
          else
             $tform->add_row( array(
                   'CELL', 2, '',
@@ -297,15 +323,36 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          add_form_edit_user( $tform, $user,
             'ta_deluser', T_('Remove user [%s] from ladder'),
             T_('Remove tournament participant from ladder and eventually remove user registration too.'),
-            /*notify*/false,
+            /*notify*/1,
             T_('User will only be removed from ladder. Tournament user registration is kept.') );
 
          $tform->add_empty_row();
          add_form_edit_user( $tform, $user,
             'ta_deluserall', T_('Remove user [%s] completely'),
             T_('User will be removed from ladder and tournament user registration will be removed too.'),
-            /*notify*/true );
+            /*notify*/2 );
       }
+      $tform->add_empty_row();
+   }
+
+   // ADMIN: Crown King ----------------
+
+   $tform->add_row( array( 'HR' ));
+   $tform->add_row( array( 'HEADER', T_('Crown King of the Hill') ));
+   if( !$is_delete && !is_null($user) && !is_null($tladder_user) && $authorise_edit_user
+         && $tl_props->CrownKingHours == 0 ) // valid user and no auto-crowning
+   {
+      add_form_edit_user( $tform, $user,
+         'ta_crownking', T_("Crown user [%s] as 'King of the Hill'"),
+         T_('User will be crowned as king. This is stored as tournament result.'),
+         /*notify*/0,
+         T_('User will NOT be notified of this. All tournament directors and owner will be notified.') );
+   }
+   elseif( !$is_delete && $tl_props->CrownKingHours > 0 )
+   {
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', T_('Crowning of King is done automatically for this ladder tournament.'), ));
    }
    $tform->add_empty_row();
 
@@ -330,7 +377,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 }
 
 
-function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=false, $extra='' )
+function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=1, $extra='' )
 {
    global $allow_admin;
 
@@ -341,11 +388,14 @@ function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=f
       $form->add_row( array(
             'CELL', 2, '',
             'TEXT', $extra ));
-   $form->add_row( array(
-         'CELL', 2, '',
-         'TEXT', ( $notify
-                     ? T_('User will be notified of removal.#tourney')
-                     : T_('User will NOT be notified of removal.#tourney') ) ));
+   if( $notify > 0 )
+   {
+      $form->add_row( array(
+            'CELL', 2, '',
+            'TEXT', ( $notify == 2
+                        ? T_('User will be notified of removal.#tourney')
+                        : T_('User will NOT be notified of removal.#tourney') ) ));
+   }
    $form->add_row( array(
          'CELL', 2, '',
          'SUBMITBUTTONX', $action, sprintf( $act_fmt, $user->Handle ), ($allow_admin ? '' : 'disabled=1') ));
