@@ -167,12 +167,10 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
 
    if( @$_REQUEST['tn_preview'] || $tnews->Subject . $tnews->Text != '' )
    {
+      $tnform->add_empty_row();
       $tnform->add_row( array(
-            'DESCRIPTION', T_('Preview Subject'),
-            'TEXT', make_html_safe($tnews->Subject, true) ));
-      $tnform->add_row( array(
-            'DESCRIPTION', T_('Preview Text'),
-            'TEXT', make_html_safe($tnews->Text, true) ));
+            'DESCRIPTION', T_('Preview'),
+            'OWNHTML', '<td class="Preview">' . TournamentNews::build_tournament_news($tnews) . '</td>', ));
    }
 
 

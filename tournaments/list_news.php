@@ -62,6 +62,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    foreach( TournamentNews::getStatusText() as $status => $text )
       $status_filter_array[$text] = "TN.Status='$status'";
 
+   $with_text = get_request_arg('text', 0);
+
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENT_NEWS );
    $tnfilter = new SearchFilter( '', $search_profile );
@@ -87,6 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    // page vars
    $page_vars = new RequestParameters();
    $page_vars->add_entry( 'tid', $tid );
+   $page_vars->add_entry( 'text', ($with_text ? 1 : 0) );
    $tntable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -101,6 +104,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $tntable->add_tablehead( 5, T_('Published#tnews'), 'Date', 0, 'Published-');
    $tntable->add_tablehead( 6, T_('Subject#tnews'), null, TABLE_NO_SORT);
    $tntable->add_tablehead( 7, T_('Updated#tnews'), 'Date', 0, 'Lastchanged-');
+   $cnt_tablecols = $tntable->get_column_count();
 
    $tntable->set_default_sort( 5 ); //on Published
 
@@ -129,6 +133,18 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
+
+   $menu = array();
+   $baseURLMenu = "tournaments/{$page}tid=$tid".URI_AMP .
+      $tntable->current_rows_string(1) .
+      $tntable->current_sort_string(1) .
+      $tntable->current_filter_string(1) .
+      $tntable->current_from_string(1);
+   if( $with_text )
+      $menu[T_('Hide news texts')] = $baseURLMenu.'text=0';
+   else
+      $menu[T_('Show news texts')] = $baseURLMenu.'text=1';
+   make_menu( $menu, false);
 
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
@@ -161,9 +177,18 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       if( @$tntable->Is_Column_Displayed[ 5] )
          $row_str[ 5] = ($tnews->Published > 0) ? date(DATE_FMT2, $tnews->Published) : '';
       if( @$tntable->Is_Column_Displayed[ 6] )
-         $row_str[ 6] = $tnews->Subject . "<br>\n" . $tnews->Text;
+         $row_str[ 6] = make_html_safe(wordwrap($tnews->Subject, 60), true);
       if( @$tntable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = ($tnews->Lastchanged > 0) ? date(DATE_FMT2, $tnews->Lastchanged) : '';
+
+      if( $with_text )
+      {
+         $row_str['extra_row_class'] = 'TournamentNewsList';
+         $row_str['extra_row'] =
+            '<td colspan="1"></td>' .
+            '<td colspan="' . ($cnt_tablecols-1) . '">' .
+                  TournamentNews::build_tournament_news($tnews) . '</div></td>';
+      }
 
       $tntable->add_row( $row_str );
    }

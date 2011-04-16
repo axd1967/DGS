@@ -174,12 +174,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       while( list(,$arr_item) = $news_iterator->getListIterator() )
       {
          list( $tnews, $orow ) = $arr_item;
-
-         echo "<dd><div class=\"TournamentNews\">",
-            sprintf( "[%s] by %s: %s<br>\n%s",
-                     date(DATE_FMT2, $tnews->Lastchanged), $tnews->User->user_reference(),
-                     make_html_safe($tnews->Subject, true), make_html_safe($tnews->Text, true) ),
-            "</div><br>\n";
+         echo TournamentNews::build_tournament_news( $tnews );
       }
    }
    else
