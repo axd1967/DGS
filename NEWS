@@ -24,8 +24,12 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * "Directoring tournaments"-view with ID-button linked to manage tournament
 
       * Tournament Info page to show all important information of a tournament
-         * description, status, (preliminrary) standings, ruleset, registration, games, results
+         * description, news, status, (preliminrary) standings, ruleset, registration, games, results
       * Tournament Manager to edit and control tournament
+      * Tournament Editor to change tournament start-time, title, description
+      * Tournament News Editor to add, edit, delete tournament-news
+         * Private news = only shown to tournament-participants
+         * Hidden news = only visible to tournament-directors
       * Tournament Director can be allowed special admin-rights
          * End tournament-game prematurely, shown on game-info page
          * Add time to players of tournament-game

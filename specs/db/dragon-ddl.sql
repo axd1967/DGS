@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 13, 2011 at 11:16 PM
+-- Generation Time: Apr 16, 2011 at 01:10 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.14
 
@@ -16,7 +16,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 -- CREATE DATABASE `dragon` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 -- USE `dragon`;
-
 
 -- --------------------------------------------------------
 
@@ -918,6 +917,28 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   PRIMARY KEY  (`tid`),
   KEY `UserAbsenceDays` (`UserAbsenceDays`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `TournamentNews`
+--
+
+CREATE TABLE IF NOT EXISTS `TournamentNews` (
+  `ID` int(11) NOT NULL auto_increment,
+  `tid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `Status` enum('NEW','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
+  `Published` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  `ChangedBy` varchar(54) NOT NULL default '',
+  `Subject` varchar(255) NOT NULL,
+  `Text` text NOT NULL,
+  PRIMARY KEY  (`ID`),
+  KEY `tidPublished` (`tid`,`Published`),
+  KEY `Status` (`Status`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

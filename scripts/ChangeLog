@@ -19,13 +19,106 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-16 juga
+
+   * tournaments/include/tournament_news.php (TournamentNews.build_tournament_news),
+     tournaments/edit_news.php, tournaments/list_news.php, tournaments/view_tournament.php,
+     skins/dragon/screen.css, specs/db/dragon-ddl.sql, NEWS:
+   - prettify showing of single full tournament-news using CSS
+     for tournament-info, news-list and news-editor-preview
+   - tournament-news-list: added toggle-link to show and hide news-text
+
+2011-04-15 juga
+
+   * tournaments/edit_news.php, tournaments/list_news.php,
+     tournaments/view_tournament.php:
+   - show tournament-news for non-TPs/non-TDs only if PRIVATE-flag is not set
+
+   * tournaments/edit_news.php (parse_edit_form),
+     tournaments/list_news.php,
+     tournaments/view_tournament.php:
+   - show tournament-news for non-TDs only if HIDDEN-flag is not set
+
+   * tournaments/include/tournament_news.php (TournamentNews.process_tournament_news_deleted,
+       ~.getStatusText),
+     tournaments/include/tournament_globals.php,
+     tournaments/cron_tournaments.php (run_once_daily),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt:
+   - delete tournament-news on DELETE-status that haven't been changed since 7 days
+-----------
+-- added DELETE-status to delete tournament-news
+ALTER TABLE TournamentNews
+   MODIFY Status enum('NEW','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW' ;
+-----------
+
+   * tournaments/include/tournament_news.php (TournamentNews.setStatus),
+     tournaments/edit_news.php (parse_edit_form),
+     tournaments/list_news.php:
+   - adjusted tournament-news editor for
+     - changing of tournament news status
+     - changing publish-date of tournament news
+     - show tournament-news lastchanged and changedby-fields and tournament-status
+   - show all tournament-news only to TDs, only SHOW-/ARCHIVE status for other users
+
+   * tournaments/list_directors.php, tournaments/roundrobin/edit_pools.php,
+     list_contacts.php, opponents.php, users.php:
+   - enhanced date-filters by absolute-date-mode
+
+   * tournaments/include/tournament_news.php (class TournamentNews, ~.setStatus,
+       ~.to_string, ~.persist, ~.insert, ~.update, ~.delete, ~.checkData,
+       ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_tournament_news_entry,
+       ~.load_tournament_news, ~.getStatusText, ~.getFlagsText),
+     tournaments/include/tournament_globals.php,
+     include/classlib_profile.php (PROFTYPE_FILTER_TOURNAMENT_NEWS),
+     include/error_codes.php (ErrorCode.init),
+     include/std_functions.php (section),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css,
+     tournaments/edit_news.php (parse_edit_form),
+     tournaments/list_news.php,
+     tournaments/manage_tournament.php,
+     tournaments/view_tournament.php:
+   - added tournament-news
+     - show news (SHOW-status) on tournament-info-page
+     - added tournament-news-page to list tournament-news archive
+     - started editor for tournament-news
+     - added db-table TournamentNews to store tournament news
+   - tournament-info: added refresh-link to reload page
+-----------
+-- added table to store tournament news
+CREATE TABLE TournamentNews (
+  ID int NOT NULL auto_increment,
+  tid int NOT NULL,
+  uid int NOT NULL,
+  Status enum('NEW','SHOW','ARCHIVE') NOT NULL default 'NEW',
+  Flags tinyint unsigned NOT NULL default 0,
+  Published datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  ChangedBy varchar(54) NOT NULL default '',
+  Subject varchar(255) NOT NULL,
+  Text text NOT NULL default '',
+  PRIMARY KEY  (ID),
+  KEY tidPublished (tid,Published),
+  KEY Status (Status)
+) ENGINE=MyISAM ;
+-----------
+
+2011-04-14 juga
+
+   * include/config.php (ALLOW_QUICK_DO),
+     quick_do.php:
+   - added config-switch ALLOW_QUICK_DO to disable quick-do-suite for production,
+     because implementation is unfinished
+
 2011-04-13 juga
 
    * admin_faq.php:
    - commented out translation-calls T_(..) on FAQ-admin-page
 
    * introduction.php (show_static_intro, load_intro),
-     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql,
      admin.php, admin_faq.php (show_preview), admin_show_faqlog.php,
      admin_show_users.php, skins/dragon/screen.css:
    - adjusted admin_faq-page to allow editing of Intro-table by FAQ-editors
