@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  /* Author: Jens-Uwe Gaspar */
 
 
-$TranslateGroups[] = "Common";
+$TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
 
