@@ -549,6 +549,7 @@ function make_dragon_main_menu( $player_row )
    $menu->add( 4,1, array( T_('Introduction'), 'introduction.php', array()));
    $menu->add( 4,2, array( T_('Help / FAQ'), 'faq.php',        array( 'accesskey' => ACCKEY_MENU_FAQ )));
    $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
+   $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
    $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
    if( $has_forum_new )
@@ -557,6 +558,7 @@ function make_dragon_main_menu( $player_row )
       $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,1, $arr_forums );
+   $menu->add( 5,2, array( T_('Bulletins'), 'list_bulletins.php', array()));
    if( ALLOW_FEATURE_VOTE )
    {
       $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
@@ -566,11 +568,10 @@ function make_dragon_main_menu( $player_row )
          $arr_feats[] = '&nbsp;';
          $arr_feats[] = array( $cnt_feat_new_str, 'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
       }
-      $menu->add( 5,2, $arr_feats );
+      $menu->add( 5,3, $arr_feats );
    }
    if( ALLOW_GOBAN_EDITOR )
-      $menu->add( 5,3, array( T_('Goban Editor'), 'goban_editor.php', array()));
-   $menu->add( 5,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
+      $menu->add( 5,4, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
    return $menu;
 } //make_dragon_main_menu
@@ -3445,5 +3446,28 @@ function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $linecl
       return "<td colspan=\"$colspan\">$out</td>";
    }
 }//buildErrorListString
+
+/*!
+ * \brief Parses given date-string (expect given format [YYYY-MM-DD hh:mm])
+ *        into UNIX-timestamp; or return error-string.
+ *        Returns 0 if no date-string given.
+ */
+function parseDate( $msg, $date_str )
+{
+   $result = 0;
+   $date_str = trim($date_str);
+   if( $date_str != '' )
+   {
+      if( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
+      {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5
+         list(, $year, $month, $day, $hour, $min ) = $matches;
+         $result = mktime( 0+$hour, 0+$min, 0, 0+$month, 0+$day, 0+$year );
+      }
+      else
+         $result = sprintf( T_('Dateformat of [%s] is wrong, expected [%s] for [%s]'),
+            $date_str, FMT_PARSE_DATE, $msg );
+   }
+   return $result;
+}//parseDate
 
 ?>
