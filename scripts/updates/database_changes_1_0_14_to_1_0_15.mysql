@@ -2133,3 +2133,8 @@ CREATE TABLE BulletinRead (
 ) ENGINE=MyISAM ;
 
 
+-- add read-counter for Bulletins
+ALTER TABLE Bulletin
+   ADD CountReads mediumint unsigned NOT NULL default '0' AFTER tid ;
+
+

@@ -38,6 +38,7 @@ Description:
  PublishTime | datetime                                                  | 0000-00-00 00:00:00
  ExpireTime  | datetime                                                  | 0000-00-00 00:00:00
  tid         | int(11)                                                   | 0
+ CountReads  | mediumint(8) unsigned                                     | 0
  AdminNote   | varchar(255)                                              |
  Subject     | varchar(255)                                              | NULL
  Text        | text                                                      | NULL
@@ -78,6 +79,8 @@ Description:
 * tid : FK to Tournament.ID
    - 0 = no reference to tournament (default)
    - >0 = tournament-id for Bulletin.Category: TNEWS
+
+* CountReads : counter, increased by each user marking bulletin as read
 
 * AdminNote : optional note by admin to bulletin-author on rejected bulletin
    - gives author chance to correct bulletin

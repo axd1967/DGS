@@ -74,7 +74,7 @@ global $ENTITY_BULLETIN; //PHP5
 $ENTITY_BULLETIN = new Entity( 'Bulletin',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'uid', 'tid',
+      FTYPE_INT,  'ID', 'uid', 'tid', 'CountReads',
       FTYPE_ENUM, 'Category', 'Status', 'TargetType',
       FTYPE_TEXT, 'AdminNote', 'Subject', 'Text',
       FTYPE_DATE, 'PublishTime', 'ExpireTime', 'Lastchanged'
@@ -90,6 +90,7 @@ class Bulletin
    var $PublishTime;
    var $ExpireTime;
    var $tid;
+   var $CountReads;
    var $AdminNote;
    var $Subject;
    var $Text;
@@ -102,7 +103,8 @@ class Bulletin
    /*! \brief Constructs Bulletin-object with specified arguments. */
    function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
             $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $publish_time=0,
-            $expire_time=0, $tid=0, $admin_note='', $subject='', $text='', $lastchanged=0 )
+            $expire_time=0, $tid=0, $count_reads=0, $admin_note='', $subject='', $text='',
+            $lastchanged=0 )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -112,6 +114,7 @@ class Bulletin
       $this->PublishTime = (int)$publish_time;
       $this->ExpireTime = (int)$expire_time;
       $this->tid = (int)$tid;
+      $this->CountReads = (int)$count_reads;
       $this->AdminNote = $admin_note;
       $this->Subject = $subject;
       $this->Text = $text;
@@ -187,6 +190,7 @@ class Bulletin
       $data->set_value( 'PublishTime', $this->PublishTime );
       $data->set_value( 'ExpireTime', $this->ExpireTime );
       $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'CountReads', $this->CountReads );
       $data->set_value( 'AdminNote', $this->AdminNote );
       $data->set_value( 'Subject', $this->Subject );
       $data->set_value( 'Text', $this->Text );
@@ -253,6 +257,7 @@ class Bulletin
             @$row['X_PublishTime'],
             @$row['X_ExpireTime'],
             @$row['tid'],
+            @$row['CountReads'],
             @$row['AdminNote'],
             @$row['Subject'],
             @$row['Text'],
@@ -413,6 +418,9 @@ class Bulletin
                Bulletin::update_count_players( "Bulletin::mark_bulletin_as_read($bid,$uid)",
                   BULLETIN_STATUS_SHOW, $bulletin->TargetType, $uid );
                Bulletin::update_count_bulletin_new( "Bulletin::mark_bulletin_as_read($bid,$uid)", COUNTNEW_RECALC );
+
+               db_query( "Bulletin::mark_bulletin_as_read.inc_read($bid)",
+                  "UPDATE Bulletin SET CountReads=CountReads+1 WHERE ID=$bid LIMIT 1" );
             }
          }
       }
@@ -507,18 +515,30 @@ class Bulletin
       return true;
    }//update_count_players
 
+   /*! \brief Deletes all existing BulletinRead-entries for given bulletin-id. */
+   function reset_bulletin_read( $bid )
+   {
+      db_query( "Bulletin::reset_bulletin_read($bid)",
+         "DELETE FROM BulletinRead WHERE bid=$bid" );
+   }//reset_bulletin_read
+
    /*! \brief Prints formatted Bulletin with CSS-style with author, publish-time, text. */
    function build_view_bulletin( $bulletin, $mark_url='' )
    {
+      global $rx_term;
+
       $category = Bulletin::getCategoryText($bulletin->Category);
-      $title = make_html_safe($bulletin->Subject, true);
-      $text = make_html_safe($bulletin->Text, true);
+      $title = make_html_safe($bulletin->Subject, true, $rx_term);
+      $title = preg_replace( "/[\r\n]+/", '<br>', $title ); //reduce multiple LF to one <br>
+      $text = make_html_safe($bulletin->Text, true, $rx_term);
+      $text = preg_replace( "/[\r\n]+/", '<br>', $text ); //reduce multiple LF to one <br>
       $publish_text = sprintf( T_('[%s] by %s#bulletin'),
          date(DATE_FMT2, $bulletin->PublishTime), $bulletin->User->user_reference() );
       if( $mark_url )
       {
          global $base_path;
-         $mark_link = anchor( $base_path.$mark_url.URI_AMP."mr={$bulletin->ID}", T_('Mark as read#bulletin') );
+         $mark_link = anchor( $base_path.$mark_url.URI_AMP."mr={$bulletin->ID}",
+            T_('Mark as read#bulletin'), T_('Mark bulletin as read#bulletin') );
          $div_mark = "<div class=\"MarkRead\">$mark_link</div>";
       }
       else

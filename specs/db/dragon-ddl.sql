@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS `Bulletin` (
   `PublishTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `ExpireTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `tid` int(11) NOT NULL default '0',
+  `CountReads` mediumint(8) unsigned NOT NULL default '0',
   `AdminNote` varchar(255) NOT NULL default '',
   `Subject` varchar(255) NOT NULL,
   `Text` text NOT NULL,

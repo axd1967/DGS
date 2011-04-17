@@ -74,6 +74,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       {//HOT-section to save bulletin and set players bulletin-count
          $bulletin->persist();
          $bid = $bulletin->ID;
+         if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
+            Bulletin::reset_bulletin_read( $bid );
          Bulletin::update_count_players( "admin_bullet($bid)", $bulletin->Status, $bulletin->TargetType );
       }
       ta_end();
@@ -96,6 +98,9 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        formatDate($bulletin->Lastchanged), ));
    }
+   $bform->add_row( array(
+         'DESCRIPTION', T_('Hits (read marks)'),
+         'TEXT',        $bulletin->CountReads, ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Admin Note'),
          'TEXT',        span('FormWarning', $bulletin->AdminNote), ));
@@ -175,7 +180,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
 
    $menu_array = array();
-   $menu_array[T_('Bulletins')] = "list_bulletins.php";
+   $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2";
+   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1";
    $menu_array[T_('New admin bulletin')] =
       array( 'url' => "admin_bulletin.php", 'class' => 'AdminLink' );
 
