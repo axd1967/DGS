@@ -46,10 +46,17 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // config for filters
    $status_filter_array = array( T_('All') => '' );
+   $idx_status_default = 0;
+   $cnt = count($status_filter_array);
    foreach( Bulletin::getStatusText() as $status => $text )
    {
       if( $is_admin || $status == BULLETIN_STATUS_SHOW || $status == BULLETIN_STATUS_ARCHIVE )
+      {
+         if( $status == BULLETIN_STATUS_SHOW )
+            $idx_status_default = $cnt;
+         $cnt++;
          $status_filter_array[$text] = "B.Status='$status'";
+      }
    }
    $category_filter_array = array( T_('All') => '' );
    foreach( Bulletin::getCategoryText() as $category => $text )
@@ -69,7 +76,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // table filters
    $bfilter->add_filter( 2, 'Text', 'BP.Handle', true);
-   $bfilter->add_filter( 3, 'Selection', $status_filter_array, true);
+   $bfilter->add_filter( 3, 'Selection', $status_filter_array, true,
+         array( FC_DEFAULT => $idx_status_default ) );
    $bfilter->add_filter( 4, 'Selection', $category_filter_array, true);
    $bfilter->add_filter( 5, 'RelativeDate', 'B.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ) );
@@ -94,6 +102,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', 0, 'PublishTime-');
    $btable->add_tablehead( 6, T_('Subject#bulletin'), null, TABLE_NO_SORT);
+   $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');
    $btable->add_tablehead( 7, T_('Updated#bulletin'), 'Date', 0, 'Lastchanged-');
    $cnt_tablecols = $btable->get_column_count() - ($is_admin ? 1 : 0);
 
@@ -150,13 +159,15 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       if( @$btable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = Bulletin::getCategoryText( $bulletin->Category );
       if( @$btable->Is_Column_Displayed[ 5] )
-         $row_str[ 5] = ($bulletin->PublishTime > 0) ? date(DATE_FMT2, $bulletin->PublishTime) : '';
+         $row_str[ 5] = formatDate($bulletin->PublishTime);
       if( @$btable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = make_html_safe(wordwrap($bulletin->Subject, 60), true);
       if( @$btable->Is_Column_Displayed[ 7] )
-         $row_str[ 7] = ($bulletin->Lastchanged > 0) ? date(DATE_FMT2, $bulletin->Lastchanged) : '';
+         $row_str[ 7] = formatDate($bulletin->Lastchanged);
       if( @$btable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = Bulletin::getTargetTypeText( $bulletin->TargetType );
+      if( @$btable->Is_Column_Displayed[ 9] )
+         $row_str[ 9] = formatDate($bulletin->ExpireTime, NO_VALUE);
 
       if( $with_text )
       {
