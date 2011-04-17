@@ -68,7 +68,8 @@ CREATE TABLE IF NOT EXISTS `Bulletin` (
   `Subject` varchar(255) NOT NULL,
   `Text` text NOT NULL,
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `Status` (`Status`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
