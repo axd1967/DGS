@@ -194,37 +194,6 @@ class Bulletin
       return $data;
    }
 
-   /*!
-    * \brief Updates Players.CountBulletinNew according to this Bulletin target and
-    *        status (only updated on SHOW-status).
-    * \return true, if update required; false otherwise
-    *
-    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
-    *
-    * \note to avoid updating ALL players, restrict update to players with last-access
-    *       up to session-expire, and login.php resets counter too on session-expire
-    * \see also count_bulletin_new() in 'include/std_functions.php'
-    */
-   function update_count_players()
-   {
-      global $NOW;
-
-      if( $this->Status != BULLETIN_STATUS_SHOW )
-         return false;
-
-      if( $this->TargetType == BULLETIN_TRG_ALL )
-      {
-         $upd_time = $NOW - SESSION_DURATION;
-         db_query( "Bulletin::update_count_players.upd_all({$this->ID})",
-            "UPDATE Players SET CountBulletinNew=-1 " .
-            "WHERE Lastaccess >= FROM_UNIXTIME($upd_time)" );
-      }
-      else
-         error('invalid_args', "Bulletin::update_count_players({$this->ID},{$this->TargetType})");
-
-      return true;
-   }//update_count_players
-
 
    // ------------ static functions ----------------------------
 
@@ -410,6 +379,57 @@ class Bulletin
 
       return $bulletin;
    }//new_bulletin
+
+   /*! \brief Change status of expired bulletins. */
+   function process_expired_bulletins()
+   {
+      global $NOW;
+      foreach( array( BULLETIN_TRG_ALL ) as $target_type )
+      {
+         db_query( "Bulletin::process_expired_bulletins.upd_bulletin($target_type)",
+            "UPDATE Bulletin SET " .
+               "Status='".BULLETIN_STATUS_ARCHIVE."', " .
+               "AdminNote=TRIM(CONCAT('EXPIRED ',AdminNote)) " .
+            "WHERE Status='".BULLETIN_STATUS_SHOW."' AND TargetType='$target_type' AND " .
+               "ExpireTime > 0 AND ExpireTime < FROM_UNIXTIME($NOW)" );
+
+         if( mysql_affected_rows() > 0 )
+            Bulletin::update_count_players( "Bulletin::process_expired_bulletins",
+               BULLETIN_STATUS_SHOW, $target_type );
+      }
+   }//process_expire_bulletins
+
+   /*!
+    * \brief Updates Players.CountBulletinNew according for given Bulletin-data (only updated on SHOW-status).
+    * \param $status BULLETIN_STATUS_...
+    * \param $target_type BULLETIN_TRG_...
+    * \return true, if update required; false otherwise
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    *
+    * \note to avoid updating ALL players, restrict update to players with last-access
+    *       up to session-expire, and login.php resets counter too on session-expire
+    * \see also count_bulletin_new() in 'include/std_functions.php'
+    */
+   function update_count_players( $dbgmsg, $status, $target_type )
+   {
+      global $NOW;
+
+      if( $status != BULLETIN_STATUS_SHOW )
+         return false;
+
+      $dbgmsg .= "Bulletin::update_count_players($status,$target_type)";
+      if( $target_type == BULLETIN_TRG_ALL )
+      {
+         $upd_time = $NOW - SESSION_DURATION;
+         db_query( "$dbgmsg.upd_all",
+            "UPDATE Players SET CountBulletinNew=-1 WHERE Lastaccess >= FROM_UNIXTIME($upd_time)" );
+      }
+      else
+         error('invalid_args', "$dbgmsg.check.target_type");
+
+      return true;
+   }//update_count_players
 
    /*! \brief Prints formatted Bulletin with CSS-style with author, publish-time, text. */
    function build_view_bulletin( $bulletin )

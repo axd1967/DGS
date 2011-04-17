@@ -428,6 +428,7 @@ class MultiPlayerGame
    /*!
     * \brief "Deletes" (by updating) specified number of game-players for given game-id and flag-typed placeholder.
     * \param $gp_flag GPFLAG_WAITINGROOM | GPFLAG_INVITATION
+    * \return true if slots removed; false if nothing updated
     */
    function revoke_offer_game_players( $gid, $del_count, $gp_flag )
    {
@@ -438,7 +439,10 @@ class MultiPlayerGame
          db_query( "MultiPlayerGame::revoke_offer_game_players.update_gp($gid,$del_count,$gp_flag)",
             "UPDATE GamePlayers SET Flags=Flags & ~".(GPFLAG_RESERVED|GPFLAG_WAITINGROOM|GPFLAG_INVITATION)
                . " WHERE gid=$gid AND uid=0 AND (Flags & $gpf_check) = $gpf_check LIMIT $del_count" );
+         return true;
       }
+      else
+         return false;
    }
 
    /*! \brief Returns number of game-players for given game-id. */

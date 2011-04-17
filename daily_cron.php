@@ -18,8 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-require_once( "include/std_functions.php" );
-require_once( "include/classlib_userquota.php" );
+require_once 'include/std_functions.php';
+require_once 'include/game_functions.php';
+require_once 'include/classlib_userquota.php';
+require_once 'include/db/bulletin.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -56,26 +58,51 @@ if( !$is_down )
 
    if( $delete_waitingroom_entries )
    {
-      // Delete old waitingroom list entries
-      $wroom_query = "WHERE Time < NOW() - INTERVAL $waitingroom_timelimit DAY";
-      $result = db_query( 'daily_cron.waitingroom.find',
-         "SELECT gid, nrGames, GameType, Status FROM Waitingroom $wroom_query AND gid>0 and nrGames>0" );
-      $arr_gids = array();
-      while( $row = mysql_fetch_assoc($result) )
-      {
-         if( $row['GameType'] != GAMETYPE_GO && $row['Status'] == GAME_STATUS_SETUP )
-            $arr_gids[(int)$row['gid']] = (int)$row['nrGames'];
+      ta_begin();
+      {//HOT-section to delete old waitingroom entries
+         $wroom_query = "WHERE WR.Time < FROM_UNIXTIME($NOW) - INTERVAL $waitingroom_timelimit DAY";
+
+         // delete old waitingroom entries for std-go game-types
+         db_query( 'daily_cron.waitingroom.del_type_go',
+            "DELETE WR FROM Waitingroom AS WR $wroom_query AND WR.GameType='".GAMETYPE_GO."'" );
+
+         // Find old waitingroom entries for MP-games
+         $result = db_query( 'daily_cron.waitingroom.find_mpg',
+            "SELECT WR.ID, WR.gid, WR.nrGames, WR.GameType, WR.uid, WR.Comment, G.Status " .
+            "FROM Waitingroom AS WR " .
+               "INNER JOIN Games AS G ON G.ID=WR.gid " .
+            "$wroom_query AND WR.gid>0 AND WR.nrGames>0 AND " .
+               "WR.GameType<>'".GAMETYPE_GO."' AND G.Status='".GAME_STATUS_SETUP."'" );
+         while( $row = mysql_fetch_assoc($result) )
+         {
+            $wr_id = (int)$row['ID'];
+            $gid = (int)$row['gid'];
+            $nrGames = (int)$row['nrGames'];
+            $master_uid = (int)$row['uid'];
+
+            if( MultiPlayerGame::revoke_offer_game_players($gid, $nrGames, GPFLAG_WAITINGROOM) )
+            {
+               db_query( "daily_cron.waitingroom.del_mpg($wr_id,$gid)",
+                  "DELETE FROM Waitingroom WHERE ID=$wr_id AND GameType<>'".GAMETYPE_GO."' LIMIT 1" );
+
+               // notify game-master about deletion
+               send_message( "daily_cron.waitingroom.del_mpg.notify_master($wr_id,$gid,$master_uid)",
+                  sprintf( T_('The daily CRON deleted your waiting-room entry older than %s days '
+                              . 'with %s reserved slots for the multi-player-game %s.#mpg'),
+                           $waitingroom_timelimit, $nrGames, "<game $gid>" ) .
+                  "\n\n" .
+                  T_('Comment') . ': ' . @$row['Comment'],
+                  'Waiting-room entries for multi-player-game removed',
+                  $master_uid, '', /*notify*/true );
+            }
+         }
+         mysql_free_result($result);
+
+         // delete WaitingroomJoined entries without Waitingroom-entry
+         db_query( 'daily_cron.waitingroom_joined',
+            "DELETE FROM WaitingroomJoined WHERE wroom_id NOT IN (SELECT ID FROM Waitingroom)" );
       }
-      mysql_free_result($result);
-
-      // Delete old waitingroom list entries with GamePlayers for non-std game-types
-      db_query( 'daily_cron.waitingroom', "DELETE FROM Waitingroom $wroom_query" );
-      foreach( $arr_gids as $gid => $nrGames )
-         MultiPlayerGame::revoke_offer_game_players($gid, $nrGames, GPFLAG_WAITINGROOM);
-
-      // Delete WaitingroomJoined entries without Waitingroom-entry
-      db_query( 'daily_cron.waitingroom_joined',
-         "DELETE FROM WaitingroomJoined WHERE wroom_id NOT IN (SELECT ID FROM Waitingroom)" );
+      ta_end();
    }
 
 
@@ -167,6 +194,10 @@ if num_rows==2 {compute differences and checks}
 
    UserQuota::increase_update_feature_points();
 
+
+// Expire Bulletins
+
+   Bulletin::process_expired_bulletins();
 
 
    // ---------- END --------------------------------
