@@ -174,8 +174,8 @@ class TournamentNews
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Returns db-fields to be used for query of TournamentNews-object. */
-   function build_query_sql()
+   /*! \brief Returns db-fields to be used for query of TournamentNews-object for given IDs. */
+   function build_query_sql( $tnews_id=0, $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_NEWS']->newQuerySQL('TN');
       $qsql->add_part( SQLP_FIELDS,
@@ -184,6 +184,38 @@ class TournamentNews
          'TNP.Handle AS TNP_Handle' );
       $qsql->add_part( SQLP_FROM,
          'INNER JOIN Players AS TNP ON TNP.ID=TN.uid' );
+      if( $tnews_id > 0 )
+         $qsql->add_part( SQLP_WHERE, "TN.ID=$tnews_id" );
+      if( $tid > 0 )
+         $qsql->add_part( SQLP_WHERE, "TN.tid=$tid" );
+      return $qsql;
+   }
+
+   /*!
+    * \brief Returns QuerySQL with restrictions to view tournament-news to what user is allowed to view.
+    * \param $tnews_id TournamentNews.ID, can be 0
+    * \param $tid Tournament.ID, can be 0
+    * \param $tnews_status select on this TournamentNews.Status, null to find all (according to user-rights)
+    * \param $is_admin true, if user is TD/T-owner/T-admin; false = normal user
+    * \param $is_tparticipant true, if user is TP
+    */
+   function build_view_query_sql( $tnews_id, $tid, $tnews_status, $is_admin, $is_tparticipant )
+   {
+      $qsql = new QuerySQL();
+      if( $tnews_id > 0 )
+         $qsql->add_part( SQLP_WHERE, "TN.ID=$tnews_id" );
+      if( $tid > 0 )
+         $qsql->add_part( SQLP_WHERE, "TN.tid=$tid" );
+      if( !$is_admin ) // hide some news for non-TDs / non-TPs
+      {
+         $qsql->add_part( SQLP_WHERE,
+            "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')",
+            "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" );
+         if( !$is_tparticipant )
+            $qsql->add_part( SQLP_WHERE, "(TN.Flags & ".TNEWS_FLAG_PRIVATE.") = 0" );
+      }
+      if( !is_null($tnews_status) )
+         $qsql->add_part( SQLP_WHERE, "TN.Status='$tnews_status'" );
       return $qsql;
    }
 
@@ -207,33 +239,22 @@ class TournamentNews
       return $tn;
    }
 
-   /*! \brief Loads and returns TournamentNews-object for given tournament-news-ID; NULL if nothing found. */
-   function load_tournament_news_entry( $tnews_id, $tid=0 )
+   /*! \brief Loads and returns TournamentNews-object for given tournament-news-QuerySQL; NULL if nothing found. */
+   function load_tournament_news_entry_by_query( $qsql )
    {
-      $result = NULL;
-      if( $tnews_id > 0 )
-      {
-         $qsql = TournamentNews::build_query_sql();
-         $qsql->add_part( SQLP_WHERE, "TN.ID='$tnews_id'" );
-         if( $tid > 0 )
-            $qsql->add_part( SQLP_WHERE, "TN.tid='$tid'" );
-         $qsql->add_part( SQLP_LIMIT, '1' );
-
-         $row = mysql_single_fetch( "TournamentNews.load_tournament_news($tnews_id,$tid)", $qsql->get_select() );
-         if( $row )
-            $result = TournamentNews::new_from_row( $row );
-      }
-      return $result;
+      $qsql->add_part( SQLP_LIMIT, '1' );
+      $row = mysql_single_fetch( "TournamentNews.load_tournament_news_entry_by_query()",
+         $qsql->get_select() );
+      return ( $row ) ? TournamentNews::new_from_row( $row ) : NULL;
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentNews-objects of given tournament. */
    function load_tournament_news( $iterator, $tid )
    {
-      $qsql = TournamentNews::build_query_sql();
-      $qsql->add_part( SQLP_WHERE, "TN.tid='$tid'" );
+      $qsql = TournamentNews::build_query_sql( 0, $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentNews.load_tournament_participants($tid)", $query );
+      $result = db_query( "TournamentNews.load_tournament_news($tid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
