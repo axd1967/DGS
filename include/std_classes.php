@@ -479,11 +479,13 @@ class QuerySQL
    }
 
    /*!
-    * \brief Merges passed QuerySQL in current one, if merging possible.
-    * Return false otherwise and merge hasn't been started.
-    * signature: bool success = merge( QuerySQL );
-    * param $qsql: may be empty or null (-> then skipped and true returned)
-    * note: SQLP_GROUP|LIMIT are set, if current unset or the same part is used; otherwise error
+    * \brief Merges passed QuerySQL in current one.
+    * \param $qsql may be empty or null (-> then skipped and true returned)
+    * \return true if merging is possible; false otherwise and merge hasn't been started.
+    *
+    * \note SQLP_GROUP|LIMIT are set, if current unset or the same part is used; otherwise error
+    *
+    * Example: bool success = merge( QuerySQL );
     */
    function merge( $qsql )
    {
