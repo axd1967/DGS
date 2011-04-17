@@ -2125,3 +2125,11 @@ ALTER TABLE Players
    ADD CountBulletinNew smallint NOT NULL default '-1' AFTER CountFeatNew ;
 
 
+-- added BulletinRead-table to store if user has read bulletins
+CREATE TABLE BulletinRead (
+  bid int NOT NULL,
+  uid int NOT NULL,
+  PRIMARY KEY (bid,uid)
+) ENGINE=MyISAM ;
+
+

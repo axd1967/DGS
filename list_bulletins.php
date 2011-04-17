@@ -44,6 +44,17 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    $page = "list_bulletins.php?";
 
+/* Actual REQUEST calls used:
+     ''                       : show bulletins (without text)
+     text=1|0                 : show bulletins with/without text
+     mr=bid                   : mark bulletin with Bulletin.ID=bid as read
+*/
+
+   // mark bulletin as read
+   $markread = (int)get_request_arg('mr');
+   if( $markread > 0 )
+      Bulletin::mark_bulletin_as_read( $markread );
+
    // config for filters
    $status_filter_array = array( T_('All') => '' );
    $idx_status_default = 0;
@@ -64,12 +75,18 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $targettype_filter_array = array( T_('All') => '' );
    foreach( Bulletin::getTargetTypeText() as $ttype => $text )
       $targettype_filter_array[$text] = "B.TargetType='$ttype'";
+   $read_filter_array = array(
+         T_('Unread#bulletinread') => 'BR.bid IS NULL',
+         T_('Read#bulletinread')   => 'BR.bid > 0',
+         T_('All') => '',
+      );
 
-   $with_text = get_request_arg('text', 0);
+   $with_text = (get_request_arg('text', 0)) ? 1 : 0;
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_BULLETINS );
    $bfilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'read' ); // named-filters FC_FNAME
    $btable = new Table( 'bulletins', $page, null, '', TABLE_ROWS_NAVI );
    $btable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
@@ -82,6 +99,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $bfilter->add_filter( 5, 'RelativeDate', 'B.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ) );
    $bfilter->add_filter( 8, 'Selection', $targettype_filter_array, true);
+   $bfilter->add_filter(10, 'Selection', $read_filter_array, true,
+         array( FC_FNAME => 'read', FC_STATIC => 1, FC_DEFAULT => 0 ) );
    $bfilter->init();
 
    // init table
@@ -90,7 +109,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // page vars
    $page_vars = new RequestParameters();
-   $page_vars->add_entry( 'text', ($with_text ? 1 : 0) );
+   $page_vars->add_entry( 'text', $with_text );
    $btable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -101,6 +120,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 3, T_('Status#bulletin'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', 0, 'PublishTime-');
+   $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read-' );
    $btable->add_tablehead( 6, T_('Subject#bulletin'), null, TABLE_NO_SORT);
    $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');
    $btable->add_tablehead( 7, T_('Updated#bulletin'), 'Date', 0, 'Lastchanged-');
@@ -112,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $btable->get_query(),
          $btable->current_order_string(),
          $btable->current_limit_string() );
-   $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( $is_admin ) );
+   $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( $is_admin, /*read*/$my_id ) );
    $iterator = Bulletin::load_bulletins( $iterator );
 
    $show_rows = $btable->compute_show_rows( $iterator->ResultRows );
@@ -168,14 +188,23 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $row_str[ 8] = Bulletin::getTargetTypeText( $bulletin->TargetType );
       if( @$btable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = formatDate($bulletin->ExpireTime, NO_VALUE);
+      if( @$btable->Is_Column_Displayed[10] )
+      {
+         $row_str[10] = (@$orow['BR_Read'])
+            ? image( $base_path.'images/yes.gif', T_('Bulletin marked as read'), null, 'class="InTextImage"' )
+            : image( $base_path.'images/no.gif', T_('Bulletin unread'), null, 'class="InTextImage"' );
+      }
 
       if( $with_text )
       {
+         $mark_as_read_url = ( !@$orow['BR_Read'] && $bulletin->Status == BULLETIN_STATUS_SHOW )
+            ? $baseURLMenu.'text='.$with_text
+            : '';
          $row_str['extra_row_class'] = 'BulletinList';
          $row_str['extra_row'] =
             ( $is_admin ? '<td colspan="1"></td>' : '' ) .
             "<td colspan=\"$cnt_tablecols\">" .
-                  Bulletin::build_view_bulletin($bulletin) . '</div></td>';
+                  Bulletin::build_view_bulletin($bulletin, $mark_as_read_url) . '</div></td>';
       }
 
       $btable->add_row( $row_str );
@@ -186,7 +215,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
 
    $menu_array = array();
-   $menu_array[T_('Bulletins')] = "list_bulletins.php";
+   $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2";
+   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1";
    if( $is_admin )
    {
       $menu_array[T_('New admin bulletin')] =

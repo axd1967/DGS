@@ -3253,9 +3253,13 @@ div.Bulletin div.Title {
 }
 div.Bulletin div.Text {
    text-align: left;
-   margin: 0.5em 0px 0px 0px;
+   margin-top: 0.5em;
    padding-left: 2em;
    clear: left;
+}
+div.Bulletin div.MarkRead {
+   text-align: left;
+   margin-top: 1em;
 }
 
 

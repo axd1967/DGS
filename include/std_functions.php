@@ -559,12 +559,12 @@ function make_dragon_main_menu( $player_row )
       $arr_forums[] = array( span('MainMenuCount', '(*)'), 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,1, $arr_forums );
-   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php', array()) );
+   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php?read=2', array()) );
    if( $cnt_bulletin_new > 0 )
    {
       $arr_bulletins[] = MINI_SPACING;
       $arr_bulletins[] = array( span('MainMenuCount', $cnt_bulletin_new, '(%s)' ),
-         'list_bulletins.php', array( 'class' => 'MainMenuCount' ) );
+         'list_bulletins.php?text=1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,2, $arr_bulletins );
    if( ALLOW_FEATURE_VOTE )
@@ -2662,7 +2662,8 @@ function count_bulletin_new( $uid, $curr_count=-1 )
    $row = mysql_single_fetch( "count_bulletin_new($uid)",
       "SELECT COUNT(*) AS X_Count " .
       "FROM Bulletin AS B " .
-      "WHERE B.Status='SHOW'" );
+         "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$uid " .
+      "WHERE B.Status='SHOW' AND BR.bid IS NULL" );
    return ($row) ? $row['X_Count'] : -1;
 }
 

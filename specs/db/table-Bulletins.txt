@@ -88,3 +88,22 @@ Description:
 
 * Lastchanged : date of last-update of bulleting
 
+
+###########################################################################
+## --- BulletinRead ---
+
+Description:
+   Table to store if user has read bulletin.
+
+ Field | Type    | Default
+-------+---------+---------
+ bid   | int(11) | NULL
+ uid   | int(11) | NULL
+
+
+## Fields:
+
+* bid : bulletin-id, FK to Bulletin.ID
+
+* uid : user having marked bulletin as read, FK to Players.ID
+

@@ -75,6 +75,18 @@ CREATE TABLE IF NOT EXISTS `Bulletin` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `BulletinRead`
+--
+
+CREATE TABLE IF NOT EXISTS `BulletinRead` (
+  `bid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  PRIMARY KEY  (`bid`,`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Clock`
 --
 
