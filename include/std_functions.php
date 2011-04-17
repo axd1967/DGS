@@ -505,7 +505,7 @@ function make_dragon_main_menu_logged_out()
 
    $menu->add( 2,1, array( T_('Introduction'), 'introduction.php', array()));
    $menu->add( 2,2, array( T_('Policy'),       'policy.php',       array()));
-   $menu->add( 2,3, array( T_('Help'),         'faq.php',          array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 2,3, array( T_('Help / FAQ'),   'faq.php',          array( 'accesskey' => ACCKEY_MENU_FAQ )));
 
    $menu->add( 3,1, array( T_('Docs'),         'docs.php',         array( 'accesskey' => ACCKEY_MENU_DOCS )));
    $menu->add( 3,2, array( T_('Site map'),     'site_map.php',     array()));
@@ -518,6 +518,7 @@ function make_dragon_main_menu( $player_row )
 {
    $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
    $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
+   $cnt_bulletin_new = (isset($player_row['CountBulletinNew'])) ? (int)$player_row['CountBulletinNew'] : -1;
    $has_forum_new = load_global_forum_new();
 
    $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
@@ -533,9 +534,9 @@ function make_dragon_main_menu( $player_row )
    $arr_msgs = array( array( T_('Messages'), 'list_messages.php', array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
    if( $cnt_msg_new > 0 )
    {
-      $cnt_msg_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_msg_new );
-      $arr_msgs[] = '&nbsp;';
-      $arr_msgs[] = array( $cnt_msg_new_str, 'list_messages.php?folder='.FOLDER_NEW, array( 'class' => 'MainMenuCount' ) );
+      $arr_msgs[] = MINI_SPACING;
+      $arr_msgs[] = array( span('MainMenuCount', $cnt_msg_new, '(%s)' ),
+         'list_messages.php?folder='.FOLDER_NEW, array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 2,1, $arr_msgs );
    $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
@@ -554,19 +555,26 @@ function make_dragon_main_menu( $player_row )
    $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
    if( $has_forum_new )
    {
-      $arr_forums[] = '&nbsp;';
-      $arr_forums[] = array( '<span class="MainMenuCount">(*)</span>', 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
+      $arr_forums[] = MINI_SPACING;
+      $arr_forums[] = array( span('MainMenuCount', '(*)'), 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,1, $arr_forums );
-   $menu->add( 5,2, array( T_('Bulletins'), 'list_bulletins.php', array()));
+   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php', array()) );
+   if( $cnt_bulletin_new > 0 )
+   {
+      $arr_bulletins[] = MINI_SPACING;
+      $arr_bulletins[] = array( span('MainMenuCount', $cnt_bulletin_new, '(%s)' ),
+         'list_bulletins.php', array( 'class' => 'MainMenuCount' ) );
+   }
+   $menu->add( 5,2, $arr_bulletins );
    if( ALLOW_FEATURE_VOTE )
    {
       $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
       if( $cnt_feat_new > 0 )
       {
-         $cnt_feat_new_str = sprintf( '<span class="MainMenuCount">(%s)</span>', $cnt_feat_new );
-         $arr_feats[] = '&nbsp;';
-         $arr_feats[] = array( $cnt_feat_new_str, 'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
+         $arr_feats[] = MINI_SPACING;
+         $arr_feats[] = array( span('MainMenuCount', $cnt_feat_new, '(%s)' ),
+            'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
       }
       $menu->add( 5,3, $arr_feats );
    }
@@ -2545,6 +2553,13 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
             $query .= ",CountFeatNew=$count_feat_new";
          }
       }
+
+      $count_bulletin_new = count_bulletin_new( $uid, $player_row['CountBulletinNew'] );
+      if( $count_bulletin_new >= 0 )
+      {
+         $player_row['CountBulletinNew'] = $count_bulletin_new;
+         $query .= ",CountBulletinNew=$count_bulletin_new";
+      }
    }
 
 
@@ -2611,39 +2626,6 @@ function count_messages_new( $uid, $curr_count=-1 )
 }
 
 /*!
- * \brief Updates or resets Players.CountMsgNew.
- * \param $diff null|omit to reset to -1 (=recalc later); COUNTNEW_RECALC to recalc now;
- *        otherwise increase or decrease counter
- */
-define('COUNTNEW_RECALC', 'recalc');
-function update_count_message_new( $dbgmsg, $uid, $diff=null )
-{
-   if( !is_numeric($uid) )
-      error( 'invalid_args', "$dbgmsg.check.uid($uid)" );
-
-   if( is_null($diff) )
-   {
-      db_query( "$dbgmsg.reset($uid)",
-         "UPDATE Players SET CountMsgNew=-1 WHERE ID='$uid' LIMIT 1" );
-   }
-   elseif( is_numeric($diff) && $diff != 0 )
-   {
-      $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
-      db_query( "$dbgmsg.upd($uid,$diff)",
-         "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
-   }
-   elseif( (string)$diff == COUNTNEW_RECALC )
-   {
-      global $player_row;
-      $count_new = count_messages_new( $uid );
-      if( @$player_row['ID'] == $uid )
-         $player_row['CountMsgNew'] = $count_new;
-      db_query( "$dbgmsg.recalc($uid)",
-         "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
-   }
-}
-
-/*!
  * \brief Counts new features for given user-id if current count < 0 (=needs-update).
  * \param $curr_count force counting if <0 or omitted
  * \return new features count (>=0) for given user-id; or -1 on error
@@ -2666,43 +2648,22 @@ function count_feature_new( $uid, $curr_count=-1 )
 }
 
 /*!
- * \brief Updates or resets Players.CountFeatNew.
- * \param $uid 0 update all users
- * \param $diff null|omit to reset to -1 (=recalc later);
- *        COUNTNEW_RECALC to recalc now (for specific user-id only);
- *        otherwise increase or decrease counter
+ * \brief Counts new bulletins for given user-id if current count < 0 (=needs-update).
+ * \param $curr_count force counting if <0 or omitted
+ * \return new bulletin count (>=0) for given user-id; or -1 on error
  */
-function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
+function count_bulletin_new( $uid, $curr_count=-1 )
 {
-   if( !ALLOW_FEATURE_VOTE )
-      return;
-   if( !is_numeric($uid) )
-      error( 'invalid_args', "$dbgmsg.check.uid($uid)" );
+   if( $curr_count >= 0 )
+      return $curr_count;
+   if( !is_numeric($uid) || $uid <= 0 )
+      error( 'invalid_args', "count_bulletin_new.check.uid($uid)" );
 
-   if( is_null($diff) )
-   {
-      $query = "UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0";
-      if( $uid > 0 )
-         $query .= " AND ID='$uid' LIMIT 1";
-      db_query( "$dbgmsg.reset($uid)", $query );
-   }
-   elseif( is_numeric($diff) && $diff != 0 )
-   {
-      $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
-      $query = "UPDATE Players SET CountFeatNew=CountFeatNew$diffstr WHERE CountFeatNew>=0";
-      if( $uid > 0 )
-         $query .= " AND ID='$uid' LIMIT 1";
-      db_query( "$dbgmsg.upd($uid,$diff)", $query );
-   }
-   elseif( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
-   {
-      global $player_row;
-      $count_new = count_features_new( $uid );
-      if( @$player_row['ID'] == $uid )
-         $player_row['CountFeatNew'] = $count_new;
-      db_query( "$dbgmsg.recalc($uid)",
-         "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
-   }
+   $row = mysql_single_fetch( "count_bulletin_new($uid)",
+      "SELECT COUNT(*) AS X_Count " .
+      "FROM Bulletin AS B " .
+      "WHERE B.Status='SHOW'" );
+   return ($row) ? $row['X_Count'] : -1;
 }
 
 /*!
