@@ -121,7 +121,7 @@ require_once( "include/table_columns.php" );
 
    $menu_array = array();
    if( $edit_user )
-      $menu_array[T_('Edit user attributes')] = 'admin_users.php';
+      $menu_array[T_('Edit User Attributes')] = 'admin_users.php';
 
    end_page(@$menu_array);
 }
@@ -152,7 +152,7 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
          {
             $edit_link = anchor( 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode(@$row['Handle']),
                image( 'images/edit.gif', 'E'),
-               T_('Edit user attributes'), 'class=ButIcon') . '&nbsp;';
+               T_('Edit User Attributes'), 'class=ButIcon') . '&nbsp;';
          }
          $arow_str[1] = $edit_link . user_reference( REF_LINK, 1, '', $row );
       }

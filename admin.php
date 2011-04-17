@@ -40,9 +40,9 @@ $GLOBALS['ThePage'] = new Page('Admin');
    section( 'Admin', /*T_*/('Administration'));
    centered_container();
 
-   add_link_page_link('admin_password.php', /*T_*/('New password'),
+   add_link_page_link('admin_password.php', /*T_*/('New Password'),
                      '', $admin_level & ADMIN_PASSWORD);
-   add_link_page_link('admin_translators.php', /*T_*/('Manage translators'),
+   add_link_page_link('admin_translators.php', /*T_*/('Manage Translators'),
                      '', $admin_level & ADMIN_TRANSLATORS);
    add_link_page_link('admin_faq.php', /*T_*/('Edit FAQ'),
                      '', $admin_level & ADMIN_FAQ);
@@ -52,27 +52,27 @@ $GLOBALS['ThePage'] = new Page('Admin');
                      '', $admin_level & ADMIN_FAQ);
    add_link_page_link('admin_bulletin.php', /*T_*/('Admin Bulletin'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('forum/admin.php', /*T_*/('Admin forums'),
+   add_link_page_link('forum/admin.php', /*T_*/('Admin Forums'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('admin_users.php', T_('Edit user attributes'),
+   add_link_page_link('admin_users.php', T_('Edit User Attributes'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('admin_admins.php', T_('Edit admin staff'),
+   add_link_page_link('admin_admins.php', T_('Edit Admin Staff'),
                      '', $admin_level & ADMIN_SUPERADMIN);
-   //add_link_page_link('admin_requests.php', /*T_*///('Handle user requests'), '', false);
+   //add_link_page_link('admin_requests.php', /*T_*///('Handle User Requests'), '', false);
 
    echo "<br><br>\n";
 
-   add_link_page_link('admin_show_faqlog.php', T_('Show FAQ log'),
+   add_link_page_link('admin_show_faqlog.php', T_('Show FAQ Log'),
                      '', $admin_level & ADMIN_FAQ);
-   add_link_page_link('forum/admin_show_forumlog.php', T_('Show forum log'),
+   add_link_page_link('forum/admin_show_forumlog.php', T_('Show Forum Log'),
                      '', $admin_level & ADMIN_FORUM);
-   add_link_page_link('admin_show_users.php', T_('Show administrated users'),
+   add_link_page_link('admin_show_users.php', T_('Show Administrated Users'),
                      '', $admin_level & ADMINGROUP_EXECUTIVE);
-   add_link_page_link('admin_show_errorlog.php', T_('Show error log'),
+   add_link_page_link('admin_show_errorlog.php', T_('Show Error Log'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('admin_show_adminlog.php', T_('Show admin log'),
+   add_link_page_link('admin_show_adminlog.php', T_('Show Admin Log'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('scripts/index.php', T_('Show admin scripts'),
+   add_link_page_link('scripts/index.php', T_('Show Admin Scripts'),
                      '', $admin_level & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER));
 
    add_link_page_link();

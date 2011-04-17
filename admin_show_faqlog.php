@@ -41,9 +41,9 @@ require_once( "include/table_columns.php" );
    // init
    $page = 'admin_show_faqlog.php';
 
-   start_page(T_('Show faq log'), true, $logged_in, $player_row);
+   start_page(T_('Show FAQ Log'), true, $logged_in, $player_row);
 
-   section( 'faqlog', T_('FAQ log') );
+   section( 'faqlog', T_('FAQ Log') );
 
    $atable = new Table( 'faqlog', $page, '' );
    $atable->add_or_del_column();

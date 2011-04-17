@@ -137,7 +137,7 @@ require_once( "include/table_columns.php" );
    $atable = new Table( 'admin', '', '', '', TABLE_NO_SIZE );
 
 
-   start_page(/*T_*/("Admin").' - './*T_*/('Edit admin staff'), true, $logged_in, $player_row );
+   start_page(/*T_*/("Admin").' - './*T_*/('Edit Admin Staff'), true, $logged_in, $player_row );
    echo "<h3 class=Header>" . /*T_*/('Admins') . "</h3>\n";
 
 

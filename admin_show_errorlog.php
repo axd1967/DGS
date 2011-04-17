@@ -156,8 +156,8 @@ require_once( "include/filter.php" );
    mysql_free_result($result);
 
 
-   start_page(T_('Show error log'), true, $logged_in, $player_row);
-   section( 'errorlog', T_('Error log') );
+   start_page(T_('Show Error Log'), true, $logged_in, $player_row);
+   section( 'errorlog', T_('Error Log') );
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_elfilter->get_select()) ."<br>";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 

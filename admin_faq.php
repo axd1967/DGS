@@ -652,7 +652,7 @@ $info_box = '<ul>
 
    $menu_array = array(
       /*T_*/('Refresh') => $page,
-      /*T_*/('Show FAQ log') => "admin_show_faqlog.php",
+      /*T_*/('Show FAQ Log') => "admin_show_faqlog.php",
    );
 
    end_page(@$menu_array);

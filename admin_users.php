@@ -271,7 +271,7 @@ require_once( "include/form_functions.php" );
    $uform->echo_string();
 
    $menu_array = array();
-   $menu_array[T_('Show administrated users')] = 'admin_show_users.php';
+   $menu_array[T_('Show Administrated Users')] = 'admin_show_users.php';
    if( @$player_row['admin_level'] & ADMIN_DATABASE )
       $menu_array[T_('Check Block-IP config')] = 'scripts/check_block_ip.php';
 

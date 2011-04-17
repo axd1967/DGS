@@ -133,7 +133,7 @@ function display_posts_pending_approval()
       $disp_forum->cols = $cols = 4;
       $disp_forum->headline = array(
          T_('Posts pending approval') => "colspan=".($cols-1),
-         anchor( 'forum/admin_show_forumlog.php', T_('Show forum log') ) => '',
+         anchor( 'forum/admin_show_forumlog.php', T_('Show Forum Log') ) => '',
       );
       $disp_forum->links = LINKPAGE_STATUS;
       $disp_forum->forum_start_table('Pending');

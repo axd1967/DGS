@@ -42,7 +42,7 @@ require_once( "include/table_columns.php" );
    // init
    $page = 'admin_show_adminlog.php';
 
-   start_page(T_('Show admin log'), true, $logged_in, $player_row);
+   start_page(T_('Show Admin Log'), true, $logged_in, $player_row);
 
    section( 'adminlog', T_('Admin log') );
 
