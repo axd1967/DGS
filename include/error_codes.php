@@ -486,6 +486,9 @@ class ErrorCode
          $arr['tournament_create_error'] =
             T_("Sorry, some errors occured on tournament creation.");
 
+         $arr['unknown_tournament_news'] =
+            T_("Sorry, I couldn't find the given tournament news or you are not allowed to view this tournament news entry.");
+
          $arr['bad_tournament_news'] =
             T_("Sorry, there's something wrong with the tournament-news. Please contact a tournament admin.");
 

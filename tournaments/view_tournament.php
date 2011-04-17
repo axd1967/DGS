@@ -71,13 +71,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
 
-   $news_qsql = new QuerySQL(
-      SQLP_WHERE,
-         "TN.Status='".TNEWS_STATUS_SHOW."'",
-         "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0", // not hidden
-      SQLP_ORDER, 'TN.Published DESC' );
-   if( !$allow_edit_tourney && !$reg_user_status )
-      $news_qsql->add_part( SQLP_WHERE, "(TN.Flags & ".TNEWS_FLAG_PRIVATE.") = 0" );
+   $news_qsql = TournamentNews::build_view_query_sql(
+      /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $allow_edit_tourney, $reg_user_status );
+   $news_qsql->add_part( SQLP_ORDER, 'TN.Published DESC' );
    $news_iterator = new ListIterator( 'Tournament.view.news.SHOW', $news_qsql );
    $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 

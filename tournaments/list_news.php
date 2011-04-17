@@ -102,6 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       $tntable->add_tablehead( 4, T_('Flags#tnews'), 'Enum', 0, 'Flags+');
    }
    $tntable->add_tablehead( 5, T_('Published#tnews'), 'Date', 0, 'Published-');
+   $tntable->add_tablehead( 8, new TableHead( T_('View Tournament News#tnews'), 'images/info.gif'), 'Image', 0);
    $tntable->add_tablehead( 6, T_('Subject#tnews'), null, TABLE_NO_SORT);
    $tntable->add_tablehead( 7, T_('Updated#tnews'), 'Date', 0, 'Lastchanged-');
    $cnt_tablecols = $tntable->get_column_count();
@@ -112,15 +113,9 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $tntable->get_query(),
          $tntable->current_order_string(),
          $tntable->current_limit_string() );
-   if( !$allow_edit_tourney ) // hide some news for non-TDs / non-TPs
-   {
-      $qsql = new QuerySQL( SQLP_WHERE,
-         "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')",
-         "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" );
-      if( !$is_participant )
-         $qsql->add_part( SQLP_WHERE, "(TN.Flags & ".TNEWS_FLAG_PRIVATE.") = 0" );
-      $iterator->addQuerySQLMerge( $qsql );
-   }
+   $iterator->addQuerySQLMerge(
+      TournamentNews::build_view_query_sql( /*tn*/0, /*tid*/0, /*tn-stat*/null,
+         $allow_edit_tourney, $is_participant ) );
    $iterator = TournamentNews::load_tournament_news( $iterator, $tid );
 
    $show_rows = $tntable->compute_show_rows( $iterator->ResultRows );
@@ -147,13 +142,14 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    make_menu( $menu, false);
 
 
+   $img_str = image( $base_path.'images/info.gif', T_('View Tournament News#tnews'), null, 'class="InTextImage"');
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tnews, $orow ) = $arr_item;
       $uid = $tnews->uid;
       $row_str = array();
 
-      if( $allow_edit_tourney && $tntable->Is_Column_Displayed[1] )
+      if( $allow_edit_tourney && @$tntable->Is_Column_Displayed[1] )
       {
          $links = anchor( $base_path."tournaments/edit_news.php?tid=$tid".URI_AMP."tnid={$tnews->ID}",
                image( $base_path.'images/edit.gif', 'E'),
@@ -180,6 +176,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $row_str[ 6] = make_html_safe(wordwrap($tnews->Subject, 60), true);
       if( @$tntable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = ($tnews->Lastchanged > 0) ? date(DATE_FMT2, $tnews->Lastchanged) : '';
+      if( @$tntable->Is_Column_Displayed[ 8] )
+         $row_str[ 8] = anchor( $base_path."tournaments/view_news.php?tid=$tid".URI_AMP."tn={$tnews->ID}", $img_str );
 
       if( $with_text )
       {

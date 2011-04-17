@@ -67,7 +67,13 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
       error('tournament_edit_not_allowed', "TournamentNews.edit_news.edit($tid,$my_id)");
 
    // init
-   $tnews = TournamentNews::load_tournament_news_entry( $tnews_id, $tid ); // existing T-news ?
+   if( $tnews_id > 0 )
+   {
+      $qsql = TournamentNews::build_query_sql( $tnews_id, $tid );
+      $tnews = TournamentNews::load_tournament_news_entry_by_query( $qsql ); // existing T-news ?
+   }
+   else
+      $tnews = null;
    if( is_null($tnews) )
    {
       if( $tnews_id )
