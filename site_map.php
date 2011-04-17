@@ -143,6 +143,8 @@ function itemL($text, $link='', $working=true, $last=false)
             { $item_level++;
                item(T_('Change status'), "tournaments/edit_status.php", false);
                item(T_('Edit tournament'), "tournaments/edit_tournament.php", false);
+               item(T_('Add news#tnews'), "tournaments/edit_news.php", false);
+               item(T_('Show tournament news'), "tournaments/list_news.php", false);
                item(T_('Add tournament director'), "tournaments/edit_directors.php", false);
                item(T_('Show tournament directors'), "tournaments/list_directors.php", false);
                item(T_('Edit registration properties'), "tournaments/edit_properties.php", false);
@@ -251,26 +253,6 @@ function itemL($text, $link='', $working=true, $last=false)
 
       itemL(T_('Site map'), "site_map.php", true);
 
-      item(T_('Forum'), "forum/index.php", true);
-      { $item_level++;
-         item(T_('Thread list'), "forum/list.php", false);
-         { $item_level++;
-            item(T_('Read forum'), "forum/read.php", false); //?forum=fid&thread=tid
-            item(T_('New topic'), "forum/read.php", false, true); //?forum=fid without threadid
-         } $item_level--;
-         item(T_('Search forums'), "forum/search.php", true, true);
-      } $item_level--;
-
-      if( ALLOW_FEATURE_VOTE )
-      {
-         item(T_('Vote'), "features/list_votes.php", true);
-         { $item_level++;
-            item(T_('Show feature votes'), "features/list_votes.php", true);
-            item(T_('Vote on features'), "features/list_features.php", true);
-            item(T_('Vote on feature'), "features/vote_feature.php", false, true);
-         } $item_level--;
-      }
-
       itemL(T_('Documentation'), "docs.php", true);
       { $item_level++;
          itemL(T_('Introduction'), "introduction.php", true);
@@ -292,6 +274,28 @@ function itemL($text, $link='', $working=true, $last=false)
          itemL(T_('Download dragon sources'), "snapshot.php", true);
          itemL(T_('License'), "licence.php", true, true);
       } $item_level--;
+
+      item(T_('Forum'), "forum/index.php", true);
+      { $item_level++;
+         item(T_('Thread list'), "forum/list.php", false);
+         { $item_level++;
+            item(T_('Read forum'), "forum/read.php", false); //?forum=fid&thread=tid
+            item(T_('New topic'), "forum/read.php", false, true); //?forum=fid without threadid
+         } $item_level--;
+         item(T_('Search forums'), "forum/search.php", true, true);
+      } $item_level--;
+
+      itemL(T_('Bulletins'), "list_bulletins.php", true);
+
+      if( ALLOW_FEATURE_VOTE )
+      {
+         item(T_('Vote'), "features/list_votes.php", true);
+         { $item_level++;
+            item(T_('Show feature votes'), "features/list_votes.php", true);
+            item(T_('Vote on features'), "features/list_features.php", true);
+            item(T_('Vote on feature'), "features/vote_feature.php", false, true);
+         } $item_level--;
+      }
 
       if( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);
