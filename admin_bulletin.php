@@ -73,11 +73,11 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       ta_begin();
       {//HOT-section to save bulletin and set players bulletin-count
          $bulletin->persist();
-         $bulletin->update_count_players();
+         $bid = $bulletin->ID;
+         Bulletin::update_count_players( "admin_bullet($bid)", $bulletin->Status, $bulletin->TargetType );
       }
       ta_end();
 
-      $bid = $bulletin->ID;
       jump_to("admin_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
    }
 
@@ -95,9 +95,12 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        formatDate($bulletin->Lastchanged), ));
-
-      $bform->add_row( array( 'HR' ));
    }
+   $bform->add_row( array(
+         'DESCRIPTION', T_('Admin Note'),
+         'TEXT',        span('FormWarning', $bulletin->AdminNote), ));
+
+   $bform->add_row( array( 'HR' ));
 
    if( count($errors) )
    {
@@ -133,12 +136,10 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          'DESCRIPTION', T_('Publish Time'),
          'TEXTINPUT',   'publish_time', 20, 30, $vars['publish_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE)), ));
-   /* //TODO
    $bform->add_row( array(
          'DESCRIPTION', T_('Expire Time'),
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
-    */
    $bform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));
@@ -195,7 +196,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       'status'          => $bulletin->Status,
       'target_type'     => $bulletin->TargetType,
       'publish_time'    => formatDate($bulletin->PublishTime),
-      //TODO'expire_time'     => formatDate($bulletin->ExpireTime),
+      'expire_time'     => formatDate($bulletin->ExpireTime),
       'subject'         => $bulletin->Subject,
       'text'            => $bulletin->Text,
    );
@@ -209,7 +210,7 @@ function parse_edit_form( &$bulletin, $is_admin )
    if( $is_posted )
    {
       $old_vals['publish_time'] = $bulletin->PublishTime;
-      //TODO $old_vals['expire_time'] = $bulletin->ExpireTime;
+      $old_vals['expire_time'] = $bulletin->ExpireTime;
 
       $bulletin->setCategory($vars['category']);
       $bulletin->setStatus($vars['status']);
@@ -227,8 +228,9 @@ function parse_edit_form( &$bulletin, $is_admin )
       }
       else
          $errors[] = $parsed_value;
+      if( $bulletin->PublishTime == 0 )
+         $errors[] = T_('Missing Publish time#bulletin');
 
-      /* TODO
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
       {
@@ -237,7 +239,6 @@ function parse_edit_form( &$bulletin, $is_admin )
       }
       else
          $errors[] = $parsed_value;
-      */
 
       $new_value = trim($vars['subject']);
       if( strlen($new_value) < 8 )
@@ -254,7 +255,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       if( $old_vals['status'] != $bulletin->Status ) $edits[] = T_('Status#edits');
       if( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
       if( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('PublishTime#edits');
-      //TODO if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
+      if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
       if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
       if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');
    }
