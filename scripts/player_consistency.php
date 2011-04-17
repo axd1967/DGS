@@ -530,7 +530,6 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       echo "\n<br>--- $err error(s) found.";
 
    echo "\n<br>MessageNew count Done.";
-
    echo "\n<br>";
 
 
@@ -562,6 +561,38 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    }
 
    echo "\n<br>FeatureNew count Done.";
+   echo "\n<br>";
+
+
+   // fix Players.CountBulletinNew
+   $query = "SELECT ID, CountBulletinNew FROM Players WHERE CountBulletinNew>=0 " .
+            uid_clause( 'ID', 'AND' ) .
+            "ORDER BY ID $limit";
+   $result = explain_query($query)
+      or die("CountBulletinNew.A: " . mysql_error());
+   $err = 0;
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      $uid = $row['ID'];
+      $CountBulletinNew = $row['CountBulletinNew'];
+
+      $count_bulletin_new = count_bulletin_new( $uid ); // force-recalc
+      if( $count_bulletin_new >= 0 && $count_bulletin_new != $CountBulletinNew )
+      {
+         echo "\n<br>ID: $uid fix CountBulletinNew [$CountBulletinNew] -> [$count_bulletin_new].";
+         $err++;
+      }
+   }
+   mysql_free_result($result);
+   if( $err )
+   {
+      // reset all to recalc on user-reloading
+      dbg_query("UPDATE Players SET CountBulletinNew=-1 WHERE CountBulletinNew>=0 LIMIT $err");
+      echo "\n<br>--- $err error(s) found.";
+   }
+
+   echo "\n<br>BulletinNew count Done.";
+
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>Players main-menu counts Done.";

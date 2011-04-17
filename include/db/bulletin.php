@@ -194,6 +194,37 @@ class Bulletin
       return $data;
    }
 
+   /*!
+    * \brief Updates Players.CountBulletinNew according to this Bulletin target and
+    *        status (only updated on SHOW-status).
+    * \return true, if update required; false otherwise
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    *
+    * \note to avoid updating ALL players, restrict update to players with last-access
+    *       up to session-expire, and login.php resets counter too on session-expire
+    * \see also count_bulletin_new() in 'include/std_functions.php'
+    */
+   function update_count_players()
+   {
+      global $NOW;
+
+      if( $this->Status != BULLETIN_STATUS_SHOW )
+         return false;
+
+      if( $this->TargetType == BULLETIN_TRG_ALL )
+      {
+         $upd_time = $NOW - SESSION_DURATION;
+         db_query( "Bulletin::update_count_players.upd_all({$this->ID})",
+            "UPDATE Players SET CountBulletinNew=-1 " .
+            "WHERE Lastaccess >= FROM_UNIXTIME($upd_time)" );
+      }
+      else
+         error('invalid_args', "Bulletin::update_count_players({$this->ID},{$this->TargetType})");
+
+      return true;
+   }//update_count_players
+
 
    // ------------ static functions ----------------------------
 

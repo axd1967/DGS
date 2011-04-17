@@ -2120,3 +2120,8 @@ CREATE TABLE Bulletin (
 ) ENGINE=MyISAM ;
 
 
+-- quick-read-count for NEW-bulletins for user
+ALTER TABLE Players
+   ADD CountBulletinNew smallint NOT NULL default '-1' AFTER CountFeatNew ;
+
+

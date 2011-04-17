@@ -70,7 +70,13 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    // save bulletin-object with values from edit-form
    if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
    {
-      $bulletin->persist();
+      ta_begin();
+      {//HOT-section to save bulletin and set players bulletin-count
+         $bulletin->persist();
+         $bulletin->update_count_players();
+      }
+      ta_end();
+
       $bid = $bulletin->ID;
       jump_to("admin_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
    }
@@ -83,6 +89,15 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
+
+   if( $bulletin->Lastchanged > 0 )
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Last changed'),
+            'TEXT',        formatDate($bulletin->Lastchanged), ));
+
+      $bform->add_row( array( 'HR' ));
+   }
 
    if( count($errors) )
    {

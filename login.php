@@ -74,7 +74,8 @@ if( $quick_mode )
          db_query( 'login.update_player',
             "UPDATE Players SET " .
                       "Sessioncode='$code', " .
-                      'Sessionexpire=FROM_UNIXTIME(' . ($NOW + SESSION_DURATION) . ') ' .
+                      'Sessionexpire=FROM_UNIXTIME(' . ($NOW + SESSION_DURATION) . '), ' .
+                      'CountBulletinNew=-1 ' .
                       "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
       }
 
