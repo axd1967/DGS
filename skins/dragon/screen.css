@@ -3259,7 +3259,14 @@ div.Bulletin div.Text {
 }
 div.Bulletin div.MarkRead {
    text-align: left;
+   font-weight: bold;
    margin-top: 1em;
+}
+div.Bulletin div.MarkRead a {
+   color: darkblue;
+}
+div.Bulletin div.MarkRead a:hover {
+   color: blue;
 }
 
 
