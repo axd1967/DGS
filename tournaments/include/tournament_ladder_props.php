@@ -364,7 +364,7 @@ class TournamentLadderProps
       if( $this->CrownKingHours > 0 )
          $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.'),
             TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) ) . "\n" .
-            sprintf( T_('The check for this starts at [%s].'), date(DATEFMT_TOURNAMENT, $this->CrownKingStart) );
+            sprintf( T_('The check for this starts at [%s].'), date(DATE_FMT, $this->CrownKingStart) );
 
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }//build_notes_props

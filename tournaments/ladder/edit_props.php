@@ -208,7 +208,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Crown King Check time'),
          'TEXTINPUT',   'crownstart', 20, 20, $vars['crownstart'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
@@ -274,7 +274,7 @@ function parse_edit_form( &$tlp, $t_limits )
       'uabs_days'       => $tlp->UserAbsenceDays,
       'rankplen'        => $tlp->RankPeriodLength,
       'crownking'       => $tlp->CrownKingHours,
-      'crownstart'      => TournamentUtils::formatDate($tlp->CrownKingStart),
+      'crownstart'      => formatDate($tlp->CrownKingStart),
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -414,11 +414,11 @@ function parse_edit_form( &$tlp, $t_limits )
       else
          $errors[] = T_('Expecting time for crowning king.');
 
-      $parsed_value = TournamentUtils::parseDate( T_('Crown King Check time'), $vars['crownstart'] );
+      $parsed_value = parseDate( T_('Crown King Check time'), $vars['crownstart'] );
       if( is_numeric($parsed_value) )
       {
          $tlp->CrownKingStart = $parsed_value;
-         $vars['crownstart'] = TournamentUtils::formatDate($tlp->CrownKingStart);
+         $vars['crownstart'] = formatDate($tlp->CrownKingStart);
       }
       else
          $errors[] = $parsed_value;

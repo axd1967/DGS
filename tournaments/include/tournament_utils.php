@@ -33,10 +33,6 @@ require_once 'tournaments/include/tournament_globals.php';
   */
 
 
-define('TOURNEY_DATEFMT',    'YYYY-MM-DD hh:mm' ); // user-input for parsing
-define('DATEFMT_TOURNAMENT', 'Y-m-d H:i'); // for output
-
-
  /*!
   * \class TournamentUtils
   *
@@ -89,34 +85,6 @@ class TournamentUtils
       return (ALLOW_TOURNAMENTS_CREATE_BY_USER) ? 2 : 1;
    }//check_create_tournament
 
-   function formatDate( $date, $defval='', $datefmt=DATEFMT_TOURNAMENT )
-   {
-      return ($date) ? date($datefmt, $date) : $defval;
-   }
-
-   /*!
-    * \brief Parses given date-string (expect format TOURNEY_DATEFMT)
-    *        into UNIX-timestamp; or return error-string.
-    *        Returns 0 if no date-string given.
-    */
-   function parseDate( $msg, $date_str )
-   {
-      $result = 0;
-      $date_str = trim($date_str);
-      if( $date_str != '' )
-      {
-         if( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
-         {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5
-            list(, $year, $month, $day, $hour, $min ) = $matches;
-            $result = mktime( 0+$hour, 0+$min, 0, 0+$month, 0+$day, 0+$year );
-         }
-         else
-            $result = sprintf( T_('Dateformat of [%s] is wrong, expected [%s] for [%s]'),
-               $date_str, TOURNEY_DATEFMT, $msg );
-      }
-      return $result;
-   }
-
    /*!
     * \brief Returns normalized rating within boundaries of
     *        -OUT_OF_RATING < MIN_RATING <= $rating < OUT_OF_RATING.
@@ -151,7 +119,7 @@ class TournamentUtils
 
    function buildLastchangedBy( $lastchanged, $changed_by )
    {
-      return date(DATEFMT_TOURNAMENT, $lastchanged) . MED_SPACING
+      return date(DATE_FMT, $lastchanged) . MED_SPACING
            . sprintf( T_('( changed by %s )#tourney'), ( $changed_by ? trim($changed_by) : NO_VALUE ) );
    }
 

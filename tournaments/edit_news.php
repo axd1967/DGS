@@ -151,13 +151,13 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnform->add_row( array(
          'DESCRIPTION', T_('Publish Date'),
          'TEXTINPUT',   'publish', 20, 30, $vars['publish'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tnform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));
    $tnform->add_row( array(
          'DESCRIPTION', T_('Text'),
-         'TEXTAREA',    'text', 70, 15, $vars['text'] ));
+         'TEXTAREA',    'text', 70, 10, $vars['text'] ));
 
    $tnform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
@@ -210,7 +210,7 @@ function parse_edit_form( &$tnews, $is_admin )
    $vars = array(
       'status'          => $tnews->Status,
       'flags'           => $tnews->Flags,
-      'publish'         => TournamentUtils::formatDate($tnews->Published),
+      'publish'         => formatDate($tnews->Published),
       'subject'         => $tnews->Subject,
       'text'            => $tnews->Text,
    );
@@ -241,11 +241,11 @@ function parse_edit_form( &$tnews, $is_admin )
       }
       $tnews->Flags = $new_value;
 
-      $parsed_value = TournamentUtils::parseDate( T_('Publish date for news#tnews'), $vars['publish'] );
+      $parsed_value = parseDate( T_('Publish date for news#tnews'), $vars['publish'] );
       if( is_numeric($parsed_value) )
       {
          $tnews->Published = $parsed_value;
-         $vars['publish'] = TournamentUtils::formatDate($tnews->Published);
+         $vars['publish'] = formatDate($tnews->Published);
       }
       else
          $errors[] = $parsed_value;

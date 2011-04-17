@@ -96,7 +96,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    $t_ext = TournamentExtension::load_tournament_extension( $tid, TE_PROP_TROUND_START_TGAMES );
    if( !is_null($t_ext) )
       $errors[] = sprintf( T_('Creating tournament games is in work already (started at [%s] by %s ).'),
-         date(DATEFMT_TOURNAMENT, $t_ext->DateValue), $t_ext->ChangedBy );
+         date(DATE_FMT, $t_ext->DateValue), $t_ext->ChangedBy );
 
    $arr_pool_summary = null;
    if( count($errors) == 0 && !$do_pair )

@@ -103,7 +103,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
          'DESCRIPTION', T_('Created'),
-         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
+         'TEXT',        date(DATE_FMT, $tourney->Created) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));

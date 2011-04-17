@@ -101,7 +101,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'TEXT',        user_reference( REF_LINK, 1, '', $tourney->Owner_ID ), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Created'),
-         'TEXT',        date(DATEFMT_TOURNAMENT, $tourney->Created) ));
+         'TEXT',        date(DATE_FMT, $tourney->Created) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
@@ -157,10 +157,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Start time'),
          'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('End time'),
-         'TEXT',        TournamentUtils::formatDate($tourney->EndTime, NO_VALUE) ));
+         'TEXT',        formatDate($tourney->EndTime, NO_VALUE) ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Title'),
@@ -220,7 +220,7 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
    $vars = array(
       'owner'           => $tney->Owner_Handle,
       'scope'           => $tney->Scope,
-      'start_time'      => TournamentUtils::formatDate($tney->StartTime),
+      'start_time'      => formatDate($tney->StartTime),
       'title'           => $tney->Title,
       'descr'           => $tney->Description,
    );
@@ -261,11 +261,11 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
             $tney->setScope( $new_value );
       }
 
-      $parsed_value = TournamentUtils::parseDate( T_('Start time for tournament'), $vars['start_time'] );
+      $parsed_value = parseDate( T_('Start time for tournament'), $vars['start_time'] );
       if( is_numeric($parsed_value) )
       {
          $tney->StartTime = $parsed_value;
-         $vars['start_time'] = TournamentUtils::formatDate($tney->StartTime);
+         $vars['start_time'] = formatDate($tney->StartTime);
       }
       else
          $errors[] = $parsed_value;

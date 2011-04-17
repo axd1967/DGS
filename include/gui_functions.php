@@ -311,4 +311,9 @@ function span( $class, $str, $strfmt='%s' )
    return sprintf( "<span class=\"$class\">$strfmt</span>", $str );
 }
 
+function formatDate( $date, $defval='', $datefmt=DATE_FMT )
+{
+   return ($date) ? date($datefmt, $date) : $defval;
+}
+
 ?>

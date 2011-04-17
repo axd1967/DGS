@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
 require_once 'include/classlib_user.php';
+require_once 'include/gui_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -204,8 +205,7 @@ class TournamentProperties
       // limit register end-time
       global $NOW;
       if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
-         $warnings[] = sprintf( T_('Registration phase ended on [%s].'),
-                                TournamentUtils::formatDate($this->RegisterEndTime) );
+         $warnings[] = sprintf( T_('Registration phase ended on [%s].'), formatDate($this->RegisterEndTime) );
 
       // limit participants
       if( $this->MaxParticipants > 0 )

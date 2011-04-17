@@ -108,10 +108,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    $tform->add_row( array( 'HEADER', T_('Ladder user info') ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Started'),
-         'TEXT',        date(DATEFMT_TOURNAMENT, $tladder->Created) ));
+         'TEXT',        date(DATE_FMT, $tladder->Created) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Rank changed'),
-         'TEXT',        date(DATEFMT_TOURNAMENT, $tladder->RankChanged ) ));
+         'TEXT',        date(DATE_FMT, $tladder->RankChanged ) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Rank'),
          'TEXT',        $tladder->Rank ));

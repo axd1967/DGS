@@ -385,8 +385,7 @@ function echo_tournament_registration( $tprops )
 
    // limit register end-time
    if( $tprops->RegisterEndTime )
-      $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]'),
-            TournamentUtils::formatDate($tprops->RegisterEndTime) );
+      $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]'), formatDate($tprops->RegisterEndTime) );
 
    // limit participants
    if( $tprops->MinParticipants > 0 && $tprops->MaxParticipants > 0 )

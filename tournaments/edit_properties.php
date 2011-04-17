@@ -121,7 +121,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Register end time'),
          'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), TOURNEY_DATEFMT )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Restrict participants'),
@@ -202,7 +202,7 @@ function parse_edit_form( &$tpr, $t_limits )
 
    // read from props or set defaults
    $vars = array(
-      'reg_end_time'       => TournamentUtils::formatDate($tpr->RegisterEndTime),
+      'reg_end_time'       => formatDate($tpr->RegisterEndTime),
       'min_participants'   => $tpr->MinParticipants,
       'max_participants'   => $tpr->MaxParticipants,
       'rating_use_mode'    => $tpr->RatingUseMode,
@@ -232,11 +232,11 @@ function parse_edit_form( &$tpr, $t_limits )
       $old_vals['user_min_rating'] = $tpr->UserMinRating;
       $old_vals['user_max_rating'] = $tpr->UserMaxRating;
 
-      $parsed_value = TournamentUtils::parseDate( T_('End time for registration'), $vars['reg_end_time'] );
+      $parsed_value = parseDate( T_('End time for registration'), $vars['reg_end_time'] );
       if( is_numeric($parsed_value) )
       {
          $tpr->RegisterEndTime = $parsed_value;
-         $vars['reg_end_time'] = TournamentUtils::formatDate($tpr->RegisterEndTime);
+         $vars['reg_end_time'] = formatDate($tpr->RegisterEndTime);
       }
       else
          $errors[] = $parsed_value;
