@@ -313,7 +313,7 @@ function span( $class, $str, $strfmt='%s' )
 
 function formatDate( $date, $defval='', $datefmt=DATE_FMT )
 {
-   return ($date) ? date($datefmt, $date) : $defval;
+   return ($date > 0) ? date($datefmt, $date) : $defval;
 }
 
 ?>
