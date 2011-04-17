@@ -481,6 +481,48 @@ class Feature
       return Feature::new_from_row( $row );
    }
 
+   /*!
+    * \brief Updates or resets Players.CountFeatNew.
+    * \param $uid 0 update all users
+    * \param $diff null|omit to reset to -1 (=recalc later);
+    *        COUNTNEW_RECALC to recalc now (for specific user-id only);
+    *        otherwise increase or decrease counter
+    */
+   function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
+   {
+      if( !ALLOW_FEATURE_VOTE )
+         return;
+
+      $dbgmsg .= "Feature.update_count_feature_new($uid,$diff)";
+      if( !is_numeric($uid) )
+         error( 'invalid_args', "$dbgmsg.check.uid" );
+
+      if( is_null($diff) )
+      {
+         $query = "UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0";
+         if( $uid > 0 )
+            $query .= " AND ID='$uid' LIMIT 1";
+         db_query( "$dbgmsg.reset", $query );
+      }
+      elseif( is_numeric($diff) && $diff != 0 )
+      {
+         $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
+         $query = "UPDATE Players SET CountFeatNew=CountFeatNew$diffstr WHERE CountFeatNew>=0";
+         if( $uid > 0 )
+            $query .= " AND ID='$uid' LIMIT 1";
+         db_query( "$dbgmsg.upd", $query );
+      }
+      elseif( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
+      {
+         global $player_row;
+         $count_new = count_features_new( $uid );
+         if( @$player_row['ID'] == $uid )
+            $player_row['CountFeatNew'] = $count_new;
+         db_query( "$dbgmsg.recalc",
+            "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
+      }
+   }//update_count_feature_new
+
 } // end of 'Feature'
 
 

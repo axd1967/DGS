@@ -87,7 +87,7 @@ require_once( "features/lib_votes.php" );
       ta_begin();
       {//HOT-section to delete feature
          if( $feature->delete_feature() > 0 && $feature->status == FEATSTAT_NEW )
-            update_count_feature_new( "edit_feature.delete_feature($fid)", 0, -1 ); // one NEW less for all users
+            Feature::update_count_feature_new( "edit_feature.delete_feature($fid)", 0, -1 ); // one NEW less for all users
       }
       ta_end();
 
@@ -116,9 +116,9 @@ require_once( "features/lib_votes.php" );
             $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
 
             if( $new_status == FEATSTAT_NEW && ( $fid == 0 || $old_status != $new_status ) )
-               update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one NEW more for all users
+               Feature::update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one NEW more for all users
             elseif( $old_status == FEATSTAT_NEW && $fid > 0 && $old_status != $new_status )
-               update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one NEW less for all users
+               Feature::update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one NEW less for all users
          }
          ta_end();
 

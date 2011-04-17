@@ -91,7 +91,7 @@ require_once( "features/lib_votes.php" );
          $user_quota->update_feature_points();
 
          if( is_null($fvote) ) // is new vote by user
-            update_count_feature_new( "vote_feature.save_vote($fid,$my_id)", $my_id, -1 ); // one NEW less
+            Feature::update_count_feature_new( "vote_feature.save_vote($fid)", $my_id, -1 ); // one NEW less
       }
       ta_end();
 
