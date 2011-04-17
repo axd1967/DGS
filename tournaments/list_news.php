@@ -105,7 +105,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $tntable->add_tablehead( 8, new TableHead( T_('View Tournament News#tnews'), 'images/info.gif'), 'Image', 0);
    $tntable->add_tablehead( 6, T_('Subject#tnews'), null, TABLE_NO_SORT);
    $tntable->add_tablehead( 7, T_('Updated#tnews'), 'Date', 0, 'Lastchanged-');
-   $cnt_tablecols = $tntable->get_column_count();
+   $cnt_tablecols = $tntable->get_column_count() - ($allow_edit_tourney ? 1 : 0);
 
    $tntable->set_default_sort( 5 ); //on Published
 
@@ -154,13 +154,6 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $links = anchor( $base_path."tournaments/edit_news.php?tid=$tid".URI_AMP."tnid={$tnews->ID}",
                image( $base_path.'images/edit.gif', 'E'),
                T_('Edit tournament news#tnews'), 'class=ButIcon');
-         if( $is_admin )
-         {
-            $links .= MED_SPACING;
-            $links .= anchor( $base_path."tournaments/edit_news.php?tid=$tid".URI_AMP."tnid={$tnews->ID}".URI_AMP."tn_del=1",
-               image( $base_path.'images/trashcan.gif', 'D'),
-               T_('Delete tournament news#tnews'), 'class=ButIcon');
-         }
          $row_str[1] = $links;
       }
 
@@ -183,8 +176,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       {
          $row_str['extra_row_class'] = 'TournamentNewsList';
          $row_str['extra_row'] =
-            '<td colspan="1"></td>' .
-            '<td colspan="' . ($cnt_tablecols-1) . '">' .
+            ( $allow_edit_tourney ? '<td colspan="1"></td>' : '' ) .
+            "<td colspan=\"$cnt_tablecols\">" .
                   TournamentNews::build_tournament_news($tnews) . '</div></td>';
       }
 
