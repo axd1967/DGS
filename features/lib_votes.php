@@ -506,8 +506,7 @@ class Feature
       }
       elseif( is_numeric($diff) && $diff != 0 )
       {
-         $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
-         $query = "UPDATE Players SET CountFeatNew=CountFeatNew$diffstr WHERE CountFeatNew>=0";
+         $query = "UPDATE Players SET CountFeatNew=CountFeatNew+($diff) WHERE CountFeatNew>=0";
          if( $uid > 0 )
             $query .= " AND ID='$uid' LIMIT 1";
          db_query( "$dbgmsg.upd", $query );

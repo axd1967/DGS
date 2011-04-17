@@ -1267,9 +1267,8 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
    }
    elseif( is_numeric($diff) && $diff != 0 )
    {
-      $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
       db_query( "$dbgmsg.upd",
-         "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
+         "UPDATE Players SET CountMsgNew=CountMsgNew+($diff) WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
    }
    elseif( (string)$diff == COUNTNEW_RECALC )
    {
