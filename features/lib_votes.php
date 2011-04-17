@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
  /* Author: Jens-Uwe Gaspar */
 
-$TranslateGroups[] = "Common";
+$TranslateGroups[] = "Feature";
 
 require_once 'include/std_classes.php';
 require_once 'include/classlib_userquota.php'; // for FEATURE_POINTS_MAX_VALUE
