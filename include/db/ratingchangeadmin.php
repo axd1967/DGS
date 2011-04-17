@@ -138,7 +138,7 @@ class RatingChangeAdmin
    /*!
     * \brief Loads and returns RatingChangeAdmin-object for given games-id limited to 1 result-entry.
     * \param $query_qsql QuerySQL restricting entries, expecting one result
-    * \return NULL if nothing found; Games otherwise
+    * \return NULL if nothing found; RatingChangeAdmin otherwise
     */
    function load_ratingchangeadmin_with_query( $query_qsql )
    {
