@@ -52,6 +52,28 @@ CREATE TABLE IF NOT EXISTS `Bio` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Bulletin`
+--
+
+CREATE TABLE IF NOT EXISTS `Bulletin` (
+  `ID` int(11) NOT NULL auto_increment,
+  `uid` int(11) NOT NULL,
+  `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
+  `Status` enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
+  `TargetType` enum('UNSET','ALL','TD','TP','UL') NOT NULL default 'UNSET',
+  `PublishTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `ExpireTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `tid` int(11) NOT NULL default '0',
+  `AdminNote` varchar(255) NOT NULL default '',
+  `Subject` varchar(255) NOT NULL,
+  `Text` text NOT NULL,
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Clock`
 --
 

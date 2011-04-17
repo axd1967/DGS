@@ -1,0 +1,90 @@
+###
+### Description of mysql tables:  Bulletin
+###
+
+Here you'll find some infos about all the bulletin-board tables.
+
+Legend:
+   - B  = Bulletin
+   - TD = Tournament Director
+   - TP = Tournament Participant (registered player)
+   - UL = user-list
+   - tid = tournament-id
+
+Important Notes:
+   - Life-Cycle of Bulletin (author = admin):
+      - author = admin: NEW -> SHOW -> ARCHIVE (on expire-date or by admin)
+      - author = non-admin:
+         - (a)  NEW -> PENDING : ADM-ACK -> SHOW -> ARCHIVE (on expire-date or by admin)
+         - (b1) NEW -> PENDING : ADM-NACK -> HIDDEN (back-to-author with AdminNote) -> PENDING
+         - (b2) NEW -> PENDING : ADM-NACK -> DELETE
+
+
+###########################################################################
+## --- Bulletin ---
+
+Description:
+   Table to store bulletins, mainly used for maintenance-announcements to all users,
+   that shouldn't be handled with the private-message system and is more "prominently"
+   than the forums.
+
+ Field       | Type                                                      | Default
+-------------+-----------------------------------------------------------+---------------------
+ ID          | int(11)                                                   | NULL, auto_increment
+ uid         | int(11)                                                   | NULL
+ Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') | PRIV_MSG
+ Status      | enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE')  | NEW
+ TargetType  | enum('UNSET','ALL','TD','TP','UL')                        | UNSET
+ PublishTime | datetime                                                  | 0000-00-00 00:00:00
+ ExpireTime  | datetime                                                  | 0000-00-00 00:00:00
+ tid         | int(11)                                                   | 0
+ AdminNote   | varchar(255)                                              |
+ Subject     | varchar(255)                                              | NULL
+ Text        | text                                                      | NULL
+ Lastchanged | datetime                                                  | 0000-00-00 00:00:00
+
+
+## Fields:
+
+* uid : author of bulletin, FK to Players.ID
+
+* Category : bulletin-type, can be filtered upon by (future) user-profile
+   - MAINT = maintenance announcement
+   - ADM_MSG = message by admin
+   - TOURNEY = announcements for new tournaments (no tid yet)
+   - TNEWS = announcement for specific tournament, e.g. tournament-news
+   - PRIV_MSG = private announcement
+   - AD = advertisement
+
+* Status :
+   - NEW = new bulletin-entry
+   - PENDING = pending bulletin, needs ACK or NACK by admin to publish
+   - HIDDEN = hidden bulletin, only visible to admin and author on bulletin-editor
+   - SHOW = show bulletin publically to targeted group
+   - ARCHIVE = archived bulletin, only showed on archive-page
+   - DELETE = bulletin, that should be deleted
+
+* TargetType :
+   - UNSET = needs assignment (by admin) or by category later
+   - ALL = bulletin shown to ALL DGS-users (Ref_ID := 0)
+   - TD = bulletin shown to tournament-director of referenced tournament (Ref_ID := tid)
+   - TP = bulletin shown to tournament-participants of referenced tournament (Ref_ID := tid)
+   - UL = bulletin shown to User-List (Ref_ID := 0)
+
+* PublishTime : defines order of bulletins
+
+* ExpireTime : cron sets bulletin-entry to ARCHIVED-status if ExpireTime has past
+
+* tid : FK to Tournament.ID
+   - 0 = no reference to tournament (default)
+   - >0 = tournament-id for Bulletin.Category: TNEWS
+
+* AdminNote : optional note by admin to bulletin-author on rejected bulletin
+   - gives author chance to correct bulletin
+
+* Subject : subject/title of bulletin
+
+* Text : main-text of bulletin (optional)
+
+* Lastchanged : date of last-update of bulleting
+

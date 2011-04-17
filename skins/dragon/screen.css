@@ -2805,7 +2805,7 @@ form#tournamenteditnewsForm td.Preview div.TournamentNews, /*edit-news*/
 table tr.TournamentNewsList div.TournamentNews { /*list-news*/
    white-space: normal;
    width: 800px;
-   margin: 0px 10px 0.7em 0px;
+   margin: 0px 10px 0.7em 10px;
 }
 div.TournamentNews div.Title {
    text-align: left;
@@ -3209,6 +3209,53 @@ table#biomoveTableInfos img {
    border: 0px solid black;
    margin: 4px 4px 0px 4px;
    vertical-align: top;
+}
+
+
+/* ------------------------- */
+/* Bulletins */
+/* ------------------------- */
+
+div.Bulletin {
+   text-align: center;
+   width: 80%;
+   margin: 0px 10% 1em 10%;
+   padding: 5px 8px;
+   /*background: #F7ECD0;*/
+   background: #E6E9F7;
+   border: 1px dotted black;
+}
+form#bulletinEditForm td.Preview div.Bulletin, /*edit*/
+table tr.BulletinList div.Bulletin { /*lists*/
+   white-space: normal;
+   width: 800px;
+   margin: 0px 10px 0.7em 10px;
+}
+div.Bulletin div.Category {
+   text-align: right;
+   font-weight: bold;
+   font-size: smaller;
+   text-decoration: underline;
+   color: darkred;
+   padding-bottom: 5px;
+   float: left;
+}
+div.Bulletin div.PublishTime {
+   text-align: right;
+   font-weight: bold;
+   font-size: smaller;
+}
+div.Bulletin div.Title {
+   text-align: left;
+   font-style: italic;
+   font-weight: bold;
+   clear: left;
+}
+div.Bulletin div.Text {
+   text-align: left;
+   margin: 0.5em 0px 0px 0px;
+   padding-left: 2em;
+   clear: left;
 }
 
 
