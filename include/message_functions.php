@@ -1242,12 +1242,45 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
       $rows_updated = mysql_affected_rows() ;
 
       if( $rows_updated > 0 )
-         update_count_message_new( "change_folders.update.upd_cnt_msg_new($uid)", $uid, COUNTNEW_RECALC );
+         update_count_message_new( "change_folders.update.upd_cnt_msg_new", $uid, COUNTNEW_RECALC );
    }
    ta_end();
 
    return $rows_updated;
 }//change_folders
+
+/*!
+ * \brief Updates or resets Players.CountMsgNew.
+ * \param $diff null|omit to reset to -1 (=recalc later); COUNTNEW_RECALC to recalc now;
+ *        otherwise increase or decrease counter
+ */
+function update_count_message_new( $dbgmsg, $uid, $diff=null )
+{
+   $dbgmsg .= "update_count_message_new($uid,$diff)";
+   if( !is_numeric($uid) )
+      error( 'invalid_args', "$dbgmsg.check.uid" );
+
+   if( is_null($diff) )
+   {
+      db_query( "$dbgmsg.reset",
+         "UPDATE Players SET CountMsgNew=-1 WHERE ID='$uid' LIMIT 1" );
+   }
+   elseif( is_numeric($diff) && $diff != 0 )
+   {
+      $diffstr = (($diff < 0) ? '-' : '+') . abs($diff);
+      db_query( "$dbgmsg.upd",
+         "UPDATE Players SET CountMsgNew=CountMsgNew$diffstr WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
+   }
+   elseif( (string)$diff == COUNTNEW_RECALC )
+   {
+      global $player_row;
+      $count_new = count_messages_new( $uid );
+      if( @$player_row['ID'] == $uid )
+         $player_row['CountMsgNew'] = $count_new;
+      db_query( "$dbgmsg.recalc",
+         "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
+   }
+}//update_count_message_new
 
 /*!
  * \brief Builds string with user folders in table with links to browse respective folder.
