@@ -39,8 +39,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $my_id = $player_row['ID'];
 
    $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
-   //TODO for testing
-   //$is_admin = false;
+   //$is_admin = false; //TODO for testing
 
    $page = "list_bulletins.php?";
 
@@ -98,10 +97,14 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $bfilter->add_filter( 4, 'Selection', $category_filter_array, true);
    $bfilter->add_filter( 5, 'RelativeDate', 'B.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ) );
+   $filter_text =&
+      $bfilter->add_filter( 6, 'Text', "CONCAT(B.Subject,' ',B.Text) #OP #VAL", true,
+            array( FC_SIZE => 15, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));
    $bfilter->add_filter( 8, 'Selection', $targettype_filter_array, true);
    $bfilter->add_filter(10, 'Selection', $read_filter_array, true,
          array( FC_FNAME => 'read', FC_STATIC => 1, FC_DEFAULT => 0 ) );
    $bfilter->init();
+   $rx_term = implode('|', $filter_text->get_rx_terms() );
 
    // init table
    $btable->register_filter( $bfilter );
@@ -122,6 +125,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', 0, 'PublishTime-');
    $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read-' );
    $btable->add_tablehead( 6, T_('Subject#bulletin'), null, TABLE_NO_SORT);
+   $btable->add_tablehead(11, T_('Hits#bulletin'), 'Number', 0, 'CountReads-' );
    $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');
    $btable->add_tablehead( 7, T_('Updated#bulletin'), 'Date', 0, 'Lastchanged-');
    $cnt_tablecols = $btable->get_column_count() - ($is_admin ? 1 : 0);
@@ -181,7 +185,10 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       if( @$btable->Is_Column_Displayed[ 5] )
          $row_str[ 5] = formatDate($bulletin->PublishTime);
       if( @$btable->Is_Column_Displayed[ 6] )
-         $row_str[ 6] = make_html_safe(wordwrap($bulletin->Subject, 60), true);
+      {
+         $subject = make_html_safe( wordwrap($bulletin->Subject, 60), true, $rx_term );
+         $row_str[ 6] = preg_replace( "/[\r\n]+/", '<br>', $subject ); //reduce multiple LF to one <br>
+      }
       if( @$btable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = formatDate($bulletin->Lastchanged);
       if( @$btable->Is_Column_Displayed[ 8] )
@@ -194,6 +201,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
             ? image( $base_path.'images/yes.gif', T_('Bulletin marked as read'), null, 'class="InTextImage"' )
             : image( $base_path.'images/no.gif', T_('Bulletin unread'), null, 'class="InTextImage"' );
       }
+      if( @$btable->Is_Column_Displayed[11] )
+         $row_str[11] = $bulletin->CountReads;
 
       if( $with_text )
       {
