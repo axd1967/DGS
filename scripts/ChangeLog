@@ -19,6 +19,162 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-18 juga
+
+   * include/db/bulletin.php (class Bulletin, ~.fillEntityData, ~.new_from_row,
+       ~.mark_bulletin_as_read, ~.reset_bulletin_read, ~.build_view_bulletin),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     skins/dragon/screen.css, admin_bulletin.php, list_bulletins.php:
+   - remove existing BulletinReads if admin changes bulletin to SHOW-status from other status
+   - added read-mark-counter Bulletin.CountReads, increased when user marks bulletin as read
+   - added search-filter on Bulletin-subject/text matching terms
+   - prettify bulletin mark-as-read-link
+-----------
+-- add read-counter for Bulletins
+ALTER TABLE Bulletin
+   ADD CountReads mediumint unsigned NOT NULL default '0' AFTER tid ;
+-----------
+
+   * include/db/bulletin.php (Bulletin.build_query_sql, ~.build_view_query_sql,
+       ~.load_bulletin, ~.mark_bulletin_as_read, ~.update_count_bulletin_new,
+       ~.update_count_players, ~.build_view_bulletin),
+     include/std_functions.php (make_dragon_main_menu, count_bulletin_new),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     skins/dragon/screen.css, list_bulletins.php, site_map.php:
+   - added mark-as-read of unread bulletins, update bulletin-count in main-menu accordingly
+   - added links to show only unread bulletins and to show all "visible" bulletins
+-----------
+-- added BulletinRead-table to store if user has read bulletins
+CREATE TABLE BulletinRead (
+  bid int NOT NULL,
+  uid int NOT NULL,
+  PRIMARY KEY (bid,uid)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/message_functions.php (update_count_message_new),
+     features/lib_votes.php (update_count_feature_new):
+   - cleanup: simpler SQL for diff-update
+
+2011-04-17 juga
+
+   * include/db/bulletin.php (Bulletin.process_expired_bulletins, ~.update_count_players),
+     include/game_functions.php (MultiPlayerGame.revoke_offer_game_players),
+     admin_bulletin.php (parse_edit_form), list_bulletins.php, daily_cron.php:
+   - bulletins:
+     - added expire-time-handling for bulletins: change bulletin to ARCHIVE-status if expired
+     - refactored Bulletin.update_count_players() as static-func for daily-cron
+     - admin-bulletin: bugfix adding check on missing publish-time, show admin-note
+     - list-bulletins: show bulletins on SHOW-status with filter-default
+   - daily-cron: bugfix for cleanup of old waiting-room entries
+     - fix for standard-go games
+     - fix for MP-games, notifying game-master about deletion
+
+   * include/std_functions.php (removed update_count_feature_new, removed update_count_message_new),
+     include/message_functions.php (update_count_message_new),
+     features/lib_votes.php (Feature.update_count_feature_new),
+     include/globals.php (COUNTNEW_RECALC),
+     features/edit_feature.php, features/vote_feature.php:
+   - moved update_count_feature_new()-func from 'include/std_functions.php' to 'features/lib_votes.php'
+   - moved update_count_message_new()-func from 'include/std_functions.php' to 'include/message_functions.php'
+
+   * include/std_functions.php (make_dragon_main_menu, is_logged_in, count_bulletin_new),
+     include/db/bulletin.php (Bulletin.update_count_players),
+     include/quick_common.php (SESSION_DURATION),
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,,
+     scripts/player_consistency.php, admin_bulletin.php, login.php:
+   - bulletins:
+     - added bulletin-count in main-menu stored in Players.CountBulletinNew
+     - update main-menu-count Players.CountBulletinNew on bulletin-update if required
+     - update only players with last-access within session-expire to optimize,
+       reset CountBulletinNew on login after session-expire
+     - admin-bulletin: show bulletin-lastchanged data on edit
+     - added fix of Players.CountBulletinNew in players-consistency-script
+-----------
+-- quick-read-count for NEW-bulletins for user
+ALTER TABLE Players
+   ADD CountBulletinNew smallint NOT NULL default '-1' AFTER CountFeatNew ;
+-----------
+
+   * include/db/bulletin.php (class Bulletin, ~.to_string, ~.setCategory, ~.setStatus, ~.setTargetType,
+       ~.persist, ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.build_view_query_sql,
+       ~.new_from_row, ~.load_bulletin, ~.load_bulletins, ~.getCategoryText, ~.getStatusText,
+       ~.getTargetTypeText, ~.new_bulletin, ~.build_view_bulletin),
+     include/classlib_profile.php (PROFTYPE_FILTER_BULLETINS),
+     include/std_functions.php (make_dragon_main_menu),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Bulletins.txt, specs/db/dragon-ddl.sql,
+     admin.php, admin_bulletin.php, list_bulletins.php, site_map.php,
+     skins/dragon/screen.css, NEWS:
+   - added Bulletins for global announcements more prominently than forums
+     - added Bulletin-table to store bulletins
+     - added admin-page to edit bulletin
+     - added bulletin-list-page to view bulletins for users and admin
+     - added Bulletins-link in main-menu, moved Docs-link in help-group
+-----------
+-- added Bulletin-table to store bulletins
+CREATE TABLE Bulletin (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Category enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
+  Status enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
+  TargetType enum('UNSET','ALL','TD','TP','UL') NOT NULL default 'UNSET',
+  PublishTime datetime NOT NULL default '0000-00-00 00:00:00',
+  ExpireTime datetime NOT NULL default '0000-00-00 00:00:00',
+  tid int NOT NULL default 0,
+  AdminNote varchar(255) NOT NULL default '',
+  Subject varchar(255) NOT NULL,
+  Text text NOT NULL default '',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (ID),
+  KEY Status (Status)
+) ENGINE=MyISAM ;
+-----------
+
+   * tournaments/list_news.php:
+   - changed viewing news-text in table independent from admin/TD-view
+     with additional table-columns
+   - removed not-needed deletion of tournament-news,
+     any TD can do it by changing news-status on edit-news-page
+
+   * tournaments/include/tournament_utils.php (class TournamentUtils),
+     tournaments/include/tournament_ladder_props.php,
+     tournaments/include/tournament_properties.php,
+     include/gui_functions.php (formatDate),
+     include/std_functions.php (parseDate),
+     include/quick_common.php,
+     tournaments/ladder/edit_props.php,
+     tournaments/ladder/retreat.php,
+     tournaments/roundrobin/edit_pairing.php,
+     tournaments/edit_news.php,
+     tournaments/edit_properties.php,
+     tournaments/edit_status.php,
+     tournaments/edit_tournament.php,
+     tournaments/view_tournament.php:
+   - cleanup/refactoring:
+     - refactored TournamentUtils::parseDate() using global DATE_FMT/FMT_PARSE_DATE
+     - refactored TournamentUtils::formatDate() using global DATE_FMT
+     - replaced TOURNEY_DATEFMT by using standard DATE_FMT
+
+   * tournaments/include/tournament_news.php (TournamentNews.build_query_sql,
+       ~.build_view_query_sql, ~.load_tournament_news_entry_by_query, ~.load_tournament_news),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/edit_news.php, tournaments/list_news.php,
+     tournaments/view_news.php, tournaments/view_tournament.php:
+   - added page to view single tournament-news linked from news-list on info-image
+
+   * include/page_functions.php:
+   - removed TranslateGroups, because no translations
+
+   * include/classlib_profile.php, include/classlib_upload.php,
+     features/lib_votes.php, features/list_features.php,
+     features/list_votes.php, features/vote_feature.php,
+     rank_converter.php:
+   - changed TranslateGroups: Common -> Game / Feature / Users
+
 2011-04-16 juga
 
    * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_results):
