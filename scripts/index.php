@@ -68,6 +68,7 @@ require_once( "include/std_functions.php" );
             'phpinfo.php'              => "Shows PHP-info",
             'phpinfo.php?module=1&config=1&env=1&var=1' => "Shows PHP-info with ENV and variables (sensitive)",
             'apc_cache_info.php'       => "Show info for APC cache",
+            'server-info.php'          => "Shows Server-info (CPU, Memory)",
             'browser_stats.php'        => "Build browser statistics on all players",
       ),
 
