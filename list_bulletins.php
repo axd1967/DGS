@@ -68,12 +68,18 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $status_filter_array[$text] = "B.Status='$status'";
       }
    }
+
    $category_filter_array = array( T_('All') => '' );
    foreach( Bulletin::getCategoryText() as $category => $text )
       $category_filter_array[$text] = "B.Category='$category'";
+
    $targettype_filter_array = array( T_('All') => '' );
    foreach( Bulletin::getTargetTypeText() as $ttype => $text )
-      $targettype_filter_array[$text] = "B.TargetType='$ttype'";
+   {
+      if( $ttype != BULLETIN_TRG_UNSET )
+         $targettype_filter_array[$text] = "B.TargetType='$ttype'";
+   }
+
    $read_filter_array = array(
          T_('Unread#bulletinread') => 'BR.bid IS NULL',
          T_('Read#bulletinread')   => 'BR.bid > 0',
