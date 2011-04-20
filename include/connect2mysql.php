@@ -64,13 +64,10 @@ function disable_cache($stamp=NULL, $expire=NULL)
       $expire = $stamp-3600;  // Force revalidation
 
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-   header('Expires: ' . gmdate(GMDATE_FMT, $expire));
+   header('Expires: ' . gmdate(GMDATE_FMT, $expire)); // HTTP/1.0 (replaced with max-age)
    header('Last-Modified: ' . gmdate(GMDATE_FMT, $stamp));
    if( !$expire || $expire<=$NOW )
-   {
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
-      header('Pragma: no-cache');                                              // HTTP/1.0
-   }
 }
 
 
