@@ -936,6 +936,11 @@ class GameHelper
       {//HOT-section to delete game table-entries for running game
          GameHelper::remove_double_game_reference( $gid, (int)@$grow['DoubleGame_ID'] );
 
+         // delete potentially assigned waiting-room-entry (max. 1)
+         if( $grow['GameType'] != GAMETYPE_GO )
+            db_query( "GameHelper::delete_running_game.del_wroom($gid)",
+               "DELETE FROM Waitingroom WHERE gid=$gid LIMIT 1" );
+
          if( $upd_players )
          {
             if( $grow['GameType'] == GAMETYPE_GO )
@@ -1034,7 +1039,7 @@ class GameHelper
          "DELETE FROM GamePlayers WHERE gid=$gid" );
       db_query( "GameHelper::_delete_base_game_tables.games($gid)",
          "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
-   }//delete_base_game_tables
+   }//_delete_base_game_tables
 
    /*! \brief Deletes INVITED-game; return true for success; false on failure. */
    function delete_invitation_game( $dbgmsg, $gid, $uid1, $uid2 )
