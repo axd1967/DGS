@@ -363,6 +363,7 @@ span.ErrorMsg {
 }
 
 span.AdminOption,
+span.AdminTitle,
 .AdminLink {
    font-style: italic;
    background: #bcffab; /* light green */
@@ -3232,13 +3233,20 @@ table tr.BulletinList div.Bulletin { /*lists*/
    margin: 0px 10px 0.7em 10px;
 }
 div.Bulletin div.Category {
-   text-align: right;
-   font-weight: bold;
+   text-align: left;
    font-size: smaller;
-   text-decoration: underline;
-   color: darkred;
    padding-bottom: 5px;
    float: left;
+}
+div.Bulletin div.Category span.Category {
+   font-weight: bold;
+   text-decoration: underline;
+   color: darkred;
+   margin-right: auto;
+}
+div.Bulletin div.Category span.Tourney {
+   text-align: right;
+   margin-left: 3em;
 }
 div.Bulletin div.PublishTime {
    text-align: right;

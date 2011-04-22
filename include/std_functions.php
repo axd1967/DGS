@@ -565,7 +565,7 @@ function make_dragon_main_menu( $player_row )
    {
       $arr_bulletins[] = MINI_SPACING;
       $arr_bulletins[] = array( span('MainMenuCount', $cnt_bulletin_new, '(%s)' ),
-         'list_bulletins.php?text=1', array( 'class' => 'MainMenuCount' ) );
+         'list_bulletins.php?text=1'.URI_AMP.'view=1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,2, $arr_bulletins );
    if( ALLOW_FEATURE_VOTE )

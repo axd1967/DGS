@@ -36,11 +36,10 @@ require_once 'include/classlib_user.php';
 define('BULLETIN_CAT_MAINT',           'MAINT');
 define('BULLETIN_CAT_ADMIN_MSG',       'ADM_MSG');
 define('BULLETIN_CAT_TOURNAMENT',      'TOURNEY');
-//TODO define('BULLETIN_CAT_TOURNAMENT_NEWS', 'TNEWS');
+define('BULLETIN_CAT_TOURNAMENT_NEWS', 'TNEWS');
 define('BULLETIN_CAT_PRIVATE_MSG',     'PRIV_MSG');
 define('BULLETIN_CAT_SPAM',            'AD');
-define('CHECK_BULLETIN_CATEGORY', 'MAINT|ADM_MSG|TOURNEY|PRIV_MSG|AD');
-//TODO define('CHECK_BULLETIN_CATEGORY', 'MAINT|ADM_MSG|TOURNEY|TNEWS|PRIV_MSG|AD');
+define('CHECK_BULLETIN_CATEGORY', 'MAINT|ADM_MSG|TOURNEY|TNEWS|PRIV_MSG|AD');
 
 define('BULLETIN_STATUS_NEW',     'NEW');
 //TODO define('BULLETIN_STATUS_PENDING', 'PENDING');
@@ -51,13 +50,12 @@ define('BULLETIN_STATUS_DELETE',  'DELETE');
 define('CHECK_BULLETIN_STATUS', 'NEW|SHOW|ARCHIVE|DELETE');
 //TODO define('CHECK_BULLETIN_STATUS', 'NEW|PENDING|HIDDEN|SHOW|ARCHIVE|DELETE');
 
-define('BULLETIN_TRG_UNSET', 'UNSET'); // needs assignment, not defined in DB (only application-default)
-define('BULLETIN_TRG_ALL', 'ALL');
-//TODO define('BULLETIN_TRG_TD',  'TD'); // tourney-director
-//TODO define('BULLETIN_TRG_TP',  'TP'); // tourney-participant
+define('BULLETIN_TRG_UNSET',    'UNSET'); // needs assignment, not defined in DB (only application-default)
+define('BULLETIN_TRG_ALL',      'ALL');
+define('BULLETIN_TRG_TD',       'TD'); // tourney-director
+define('BULLETIN_TRG_TP',       'TP'); // tourney-participant
 define('BULLETIN_TRG_USERLIST', 'UL');
-define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|UL');
-//TODO define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL');
+define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL');
 
 
  /*!
@@ -65,10 +63,6 @@ define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|UL');
   *
   * \brief Class to manage Bulletin-table
   */
-
-// lazy-init in Bulletin::get..Text()-funcs
-global $ARR_GLOBALS_BULLETIN; //PHP5
-$ARR_GLOBALS_BULLETIN = array();
 
 global $ENTITY_BULLETIN; //PHP5
 $ENTITY_BULLETIN = new Entity( 'Bulletin',
@@ -102,6 +96,7 @@ class Bulletin
    var $UserList; // [ uid, ...] for TargetType=UL
    var $UserListHandles; // [ Handle, =1234, ...] for TargetType=UL (with '='-prefix for numeric handles)
    var $UserListUserRefs; // [ [ ID/Handle/Name => val ], ... ]
+   var $Tournament; // Tournament-object for $tid | null
 
    /*! \brief Constructs Bulletin-object with specified arguments. */
    function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
@@ -127,6 +122,7 @@ class Bulletin
       $this->UserList = array();
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();
+      $this->Tournament = null;
    }
 
    function to_string()
@@ -252,24 +248,18 @@ class Bulletin
     * \param $is_admin true, if user is admin; false = normal user
     * \param $uid current user-id Players.ID
     * \param $count_new true to count new-bulletins (for main-menu); false for list-bulletins
-    * \param $show_read true to have 'BR_Read'-field indicating if bulletin read (1) or unread (0 = BR.bid IS NULL)
     * \param $show_target_type BULLETIN_TRG_... = query restricted to specific target-type or '' for all target-types.
-    *        'BTTUL_View'-field indicating if bulletin is shown or not;
-    *        BTTUL_View-values: 0 = don't show, 1 = show entry (but is no user-list), 2 = show entry (is user-list)
+    *        'B_View'-field indicating if bulletin is shown or not, values: 0 = don't show, 1 = show entry
     */
-   function build_view_query_sql( $is_admin, $uid, $count_new=false, $show_read=true, $show_target_type='' )
+   function build_view_query_sql( $is_admin, $uid, $count_new, $show_target_type='' )
    {
       $qsql = new QuerySQL();
+      if( $count_new )
+         $show_target_type = '';
 
       if( $count_new )
       {
-         $qsql->add_part( SQLP_FIELDS,
-            "SUM(CASE B.TargetType " .
-               "WHEN '".BULLETIN_TRG_ALL."' THEN 1 " .
-               "WHEN '".BULLETIN_TRG_USERLIST."' THEN IF(BT.bid IS NULL,0,1) " .
-               "ELSE 0 END) AS X_Count" );
-         $qsql->add_part( SQLP_FROM,
-            "Bulletin AS B" );
+         $qsql->add_part( SQLP_FROM, "Bulletin AS B" );
          $qsql->add_part( SQLP_WHERE,
             "B.Status='".BULLETIN_STATUS_SHOW."'",
             "BR.bid IS NULL" ); // count only unread
@@ -277,41 +267,74 @@ class Bulletin
       else
       {
          if( !$is_admin ) // hide some bulletins
-            $qsql->add_part( SQLP_WHERE,
-               "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')" );
+            $qsql->add_part( SQLP_WHERE, "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')" );
       }
 
       // BR_Read = 1 = mark-as-read, 0 = unread (=BR.bid IS NULL)
-      $qsql->add_part( SQLP_FROM,
-         "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$uid" );
+      $qsql->add_part( SQLP_FROM, "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$uid" );
       if( !$count_new )
-         $qsql->add_part( SQLP_FIELDS,
-            ($show_read) ? 'IFNULL(BR.bid,0) AS BR_Read' : '0 AS BR_Read' );
+         $qsql->add_part( SQLP_FIELDS, 'IFNULL(BR.bid,0) AS BR_Read' );
 
-      // handle TargetType=UL (userlist)
-      if( !$count_new && $show_target_type == BULLETIN_TRG_USERLIST ) // restricted to user-list only
+      // handle target-types (UNSET not possible)
+      if( $show_target_type == BULLETIN_TRG_TP ) // restricted to TargetType=TP (tournament-participant)
       {
-         $qsql->add_part( SQLP_FIELDS, "2 AS BTTUL_View" );
+         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
+         $qsql->add_part( SQLP_FROM,   "INNER JOIN TournamentParticipant AS BTP ON BTP.tid=B.tid AND BTP.uid=$uid" );
+         $qsql->add_part( SQLP_WHERE,
+            "B.TargetType='$show_target_type'",
+            "B.tid > 0" );
+      }
+      elseif( $show_target_type == BULLETIN_TRG_TD ) // restricted to TargetType=DL (tournament-owner & director)
+      {
+         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
+         $qsql->add_part( SQLP_FROM,
+            "LEFT JOIN TournamentDirector AS BTD ON BTD.tid=B.tid AND BTD.uid=$uid",
+            "LEFT JOIN Tournament AS BTN ON BTN.ID=B.tid AND BTN.Owner_ID=$uid" );
+         $qsql->add_part( SQLP_WHERE,
+            "B.TargetType='$show_target_type'",
+            "B.tid > 0",
+            "(BTD.tid IS NOT NULL OR BTN.ID IS NOT NULL)" );
+      }
+      elseif( $show_target_type == BULLETIN_TRG_USERLIST ) // restricted to TargetType=UL (userlist)
+      {
+         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
          $qsql->add_part( SQLP_FROM,   "INNER JOIN BulletinTarget AS BT ON BT.bid=B.ID AND BT.uid=$uid" );
          $qsql->add_part( SQLP_WHERE,  "B.TargetType='$show_target_type'" );
       }
-      elseif( !$count_new && $show_target_type ) // restricted, but not to user-list
+      elseif( $show_target_type == BULLETIN_TRG_ALL ) // restricted to TargetType=ALL (all-users)
       {
-         // other target-type, so no UL shown; UNSET not possible in DB
-         $qsql->add_part( SQLP_FIELDS, "1 AS BTTUL_View" );
+         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
       }
-      else // all target-types
+      else // show all target-types
       {
-         if( !$count_new )
-            $qsql->add_part( SQLP_FIELDS,
-               "IF(B.TargetType='".BULLETIN_TRG_USERLIST."',IF(BT.uid IS NULL,0,2),1) AS BTTUL_View" );
+         $view_sql =
+            "CASE B.TargetType " .
+               "WHEN '".BULLETIN_TRG_ALL."' THEN 1 " .
+               "WHEN '".BULLETIN_TRG_TP."' THEN IF(BTP.tid IS NULL,0,1) " .
+               "WHEN '".BULLETIN_TRG_TD."' THEN IF(BTD.tid IS NULL,IF(BTN.ID IS NULL,0,1),1) " .
+               "WHEN '".BULLETIN_TRG_USERLIST."' THEN IF(BT.bid IS NULL,0,1) " .
+               "ELSE 0 END";
+         if( $count_new )
+            $qsql->add_part( SQLP_FIELDS, "SUM($view_sql) AS X_Count" );
+         else
+            $qsql->add_part( SQLP_FIELDS, "($view_sql) AS B_View" );
+
          $qsql->add_part( SQLP_FROM,
+            // target-type=TP
+            "LEFT JOIN TournamentParticipant AS BTP " .
+               "ON BTP.tid=B.tid AND BTP.uid=$uid AND B.TargetType='".BULLETIN_TRG_TP."' AND B.tid > 0",
+            // target-type=TD
+            "LEFT JOIN TournamentDirector AS BTD " .
+               "ON BTD.tid=B.tid AND BTD.uid=$uid AND B.TargetType='".BULLETIN_TRG_TD."' AND B.tid > 0",
+            "LEFT JOIN Tournament AS BTN " .
+               "ON BTN.ID=B.tid AND BTN.Owner_ID=$uid AND B.TargetType='".BULLETIN_TRG_TD."' AND B.tid > 0",
+            // target-type=UL
             "LEFT JOIN BulletinTarget AS BT " .
                "ON BT.bid=B.ID AND BT.uid=$uid AND B.TargetType='".BULLETIN_TRG_USERLIST."'" );
       }
 
-      if( !$count_new && !$is_admin && !$show_target_type )
-         $qsql->add_part( SQLP_HAVING, "BTTUL_View > 0" );
+      if( !$count_new && !$is_admin )
+         $qsql->add_part( SQLP_HAVING, "B_View > 0" );
 
       return $qsql;
    }//build_view_query_sql
@@ -371,86 +394,6 @@ class Bulletin
       mysql_free_result($result);
 
       return $iterator;
-   }
-
-   /*! \brief Returns category-text or all category-texts (if arg=null). */
-   function getCategoryText( $category=null )
-   {
-      global $ARR_GLOBALS_BULLETIN;
-
-      // lazy-init of texts
-      $key = 'CAT';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
-      {
-         $arr = array();
-         $arr[BULLETIN_CAT_MAINT]            = T_('Maintenance#B_cat');
-         $arr[BULLETIN_CAT_ADMIN_MSG]        = T_('Admin Announcement#B_cat');
-         $arr[BULLETIN_CAT_TOURNAMENT]       = T_('Tournament Announcement#B_cat');
-         //TODO $arr[BULLETIN_CAT_TOURNAMENT_NEWS]  = T_('Tournament News#B_cat');
-         $arr[BULLETIN_CAT_PRIVATE_MSG]      = T_('Private Announcement#B_cat');
-         $arr[BULLETIN_CAT_SPAM]             = T_('Advertisement#B_cat');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
-      }
-
-      if( is_null($category) )
-         return $ARR_GLOBALS_BULLETIN[$key];
-
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$category]) )
-         error('invalid_args', "Bulletin.getCategoryText($category,$key)");
-      return $ARR_GLOBALS_BULLETIN[$key][$category];
-   }
-
-   /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getStatusText( $status=null )
-   {
-      global $ARR_GLOBALS_BULLETIN;
-
-      // lazy-init of texts
-      $key = 'STATUS';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
-      {
-         $arr = array();
-         $arr[BULLETIN_STATUS_NEW]     = T_('New#B_status');
-         //TODO $arr[BULLETIN_STATUS_PENDING] = T_('Pending#B_status');
-         //TODO $arr[BULLETIN_STATUS_HIDDEN]  = T_('Hidden#B_status');
-         $arr[BULLETIN_STATUS_SHOW]    = T_('Show#B_status');
-         $arr[BULLETIN_STATUS_ARCHIVE] = T_('Archive#B_status');
-         $arr[BULLETIN_STATUS_DELETE]  = T_('Delete#B_status');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
-      }
-
-      if( is_null($status) )
-         return $ARR_GLOBALS_BULLETIN[$key];
-
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$status]) )
-         error('invalid_args', "Bulletin.getStatusText($status,$key)");
-      return $ARR_GLOBALS_BULLETIN[$key][$status];
-   }
-
-   /*! \brief Returns target-type-text or all target-type-texts (if arg=null). */
-   function getTargetTypeText( $trg_type=null )
-   {
-      global $ARR_GLOBALS_BULLETIN;
-
-      // lazy-init of texts
-      $key = 'TRGTYPE';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
-      {
-         $arr = array();
-         $arr[BULLETIN_TRG_UNSET]      = T_('Unset#B_trg');
-         $arr[BULLETIN_TRG_ALL]        = T_('All Users#B_trg');
-         //TODO $arr[BULLETIN_TRG_TD]   = T_('T-Dir#B_trg');
-         //TODO $arr[BULLETIN_TRG_TP]   = T_('T-Part#B_trg');
-         $arr[BULLETIN_TRG_USERLIST]   = T_('UserList#B_trg');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
-      }
-
-      if( is_null($trg_type) )
-         return $ARR_GLOBALS_BULLETIN[$key];
-
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$trg_type]) )
-         error('invalid_args', "Bulletin.getTargetTypeText($trg_type,$key)");
-      return $ARR_GLOBALS_BULLETIN[$key][$trg_type];
    }
 
    /*! \brief Returns new Bulletin-object for user. */
@@ -611,14 +554,14 @@ class Bulletin
       else
          $qpart_uid = '';
 
-      if( $target_type == BULLETIN_TRG_ALL || $target_type == BULLETIN_TRG_USERLIST )
+      if( $target_type != BULLETIN_TRG_UNSET && preg_match( "/^(".CHECK_BULLETIN_TARGET_TYPE.")$/", $target_type ) )
       {
          $upd_time = $NOW - SESSION_DURATION;
          db_query( "$dbgmsg.upd_all",
             "UPDATE Players SET CountBulletinNew=-1 WHERE Lastaccess >= FROM_UNIXTIME($upd_time) $qpart_uid" );
       }
       else
-         error('invalid_args', "$dbgmsg.check.target_type");
+         error('invalid_args', "$dbgmsg.check.target_type($target_type)");
 
       return true;
    }//update_count_players
@@ -629,38 +572,6 @@ class Bulletin
       db_query( "Bulletin::reset_bulletin_read($bid)",
          "DELETE FROM BulletinRead WHERE bid=$bid" );
    }//reset_bulletin_read
-
-   /*! \brief Prints formatted Bulletin with CSS-style with author, publish-time, text. */
-   function build_view_bulletin( $bulletin, $mark_url='' )
-   {
-      global $rx_term;
-
-      $category = Bulletin::getCategoryText($bulletin->Category);
-      $title = make_html_safe($bulletin->Subject, true, $rx_term);
-      $title = preg_replace( "/[\r\n]+/", '<br>', $title ); //reduce multiple LF to one <br>
-      $text = make_html_safe($bulletin->Text, true, $rx_term);
-      $text = preg_replace( "/[\r\n]+/", '<br>', $text ); //reduce multiple LF to one <br>
-      $publish_text = sprintf( T_('[%s] by %s#bulletin'),
-         date(DATE_FMT2, $bulletin->PublishTime), $bulletin->User->user_reference() );
-      if( $mark_url )
-      {
-         global $base_path;
-         $mark_link = anchor( $base_path.$mark_url.URI_AMP."mr={$bulletin->ID}",
-            T_('Mark as read#bulletin'), T_('Mark bulletin as read#bulletin') );
-         $div_mark = "<div class=\"MarkRead\">$mark_link</div>";
-      }
-      else
-         $div_mark = '';
-
-      return
-         "<div class=\"Bulletin\">\n" .
-            "<div class=\"Category\">$category:</div>" .
-            "<div class=\"PublishTime\">$publish_text</div>" .
-            "<div class=\"Title\">$title</div>" .
-            "<div class=\"Text\">$text</div>" .
-            $div_mark .
-         "</div>\n";
-   }
 
 } // end of 'Bulletin'
 ?>

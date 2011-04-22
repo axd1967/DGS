@@ -25,6 +25,7 @@ require_once 'include/table_columns.php';
 require_once 'include/filter.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/db/bulletin.php';
+require_once 'include/gui_bulletin.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinList');
 
@@ -58,7 +59,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $status_filter_array = array( T_('All') => '' );
    $idx_status_default = 0;
    $cnt = count($status_filter_array);
-   foreach( Bulletin::getStatusText() as $status => $text )
+   foreach( GuiBulletin::getStatusText() as $status => $text )
    {
       if( $is_admin || $status == BULLETIN_STATUS_SHOW || $status == BULLETIN_STATUS_ARCHIVE )
       {
@@ -70,13 +71,13 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    }
 
    $category_filter_array = array( T_('All') => '' );
-   foreach( Bulletin::getCategoryText() as $category => $text )
+   foreach( GuiBulletin::getCategoryText() as $category => $text )
       $category_filter_array[$text] = "B.Category='$category'";
 
    $targettype_filter_array = array( T_('All Types#B_trg') => '' );
    $idxmap_ttypes = array( '' => '', 0 => '' ); // first-entry = all
    $cnt = 1;
-   foreach( Bulletin::getTargetTypeText() as $ttype => $text )
+   foreach( GuiBulletin::getTargetTypeText() as $ttype => $text )
    {
       if( $ttype == BULLETIN_TRG_UNSET )
          continue;
@@ -91,8 +92,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       );
    $adminview_filter_array = array(
          T_('All') => '',
-         T_('Mine#bulletin') => 'BTTUL_View > 0',
-         T_('Other#bulletin') => 'BTTUL_View = 0',
+         T_('Mine#bulletin')  => 'B_View > 0', //idx=1
+         T_('Other#bulletin') => 'B_View = 0',
       );
 
    $with_text = (get_request_arg('text', 0)) ? 1 : 0;
@@ -100,7 +101,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_BULLETINS );
    $bfilter = new SearchFilter( '', $search_profile );
-   $search_profile->register_regex_save_args( 'read' ); // named-filters FC_FNAME
+   $search_profile->register_regex_save_args( 'read|view' ); // named-filters FC_FNAME
    $btable = new Table( 'bulletins', $page, null, '', TABLE_ROWS_NAVI );
    $btable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
@@ -119,7 +120,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          array( FC_FNAME => 'read', FC_STATIC => 1, FC_DEFAULT => 0 ) );
    if( $is_admin )
       $bfilter->add_filter(12, 'Selection', $adminview_filter_array, true,
-            array( FC_ADD_HAVING => 1 ) );
+            array( FC_FNAME => 'view', FC_STATIC => 1, FC_ADD_HAVING => 1 ) );
    $bfilter->init();
    $filter_text =& $bfilter->get_filter(6);
    $filter_target_type =& $bfilter->get_filter(8);
@@ -137,14 +138,15 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    if( $is_admin )
       $btable->add_tablehead( 1, T_('Actions#bulletin'), 'Image', TABLE_NO_HIDE, '');
-   $btable->add_tablehead( 2, T_('Author#bulletin'), 'User', 0, 'Handle+');
-   $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
-   $btable->add_tablehead( 3, T_('Status#bulletin'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
+   $btable->add_tablehead( 3, T_('Status#bulletin'), 'Enum', TABLE_NO_HIDE, 'Status+');
+   $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
+   $btable->add_tablehead( 2, T_('Author#bulletin'), 'User', 0, 'Handle+');
    $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', 0, 'PublishTime-');
    $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read-' );
    if( $is_admin )
       $btable->add_tablehead(12, T_('View#bulletin'), 'Image', TABLE_NO_SORT|TABLE_NO_HIDE );
+   $btable->add_tablehead(13, new TableHead( T_('Information#bulletin'), 'images/info.gif'), 'ImagesLeft', 0 );
    $btable->add_tablehead( 6, T_('Subject#bulletin'), null, TABLE_NO_SORT);
    $btable->add_tablehead(11, T_('Hits#bulletin'), 'Number', 0, 'CountReads-' );
    $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');
@@ -158,7 +160,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $btable->current_order_string(),
          $btable->current_limit_string() );
    $iterator->addQuerySQLMerge(
-      Bulletin::build_view_query_sql( $is_admin, $my_id, /*count*/false, /*read*/true,
+      Bulletin::build_view_query_sql( $is_admin, $my_id, /*count*/false,
          $idxmap_ttypes[ $filter_target_type->get_value() ] ));
    $iterator = Bulletin::load_bulletins( $iterator );
 
@@ -166,10 +168,12 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->set_found_rows( mysql_found_rows('Bulletin.list.found_rows') );
 
 
-   $title = T_('Bulletin Archive');
+   $title = T_('Bulletin Board');
    start_page($title, true, $logged_in, $player_row );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
+   if( $is_admin )
+      $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin View')) );
    section('Bulletin', $title );
 
    $menu = array();
@@ -202,9 +206,9 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       if( @$btable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $bulletin->User->Handle, '');
       if( @$btable->Is_Column_Displayed[ 3] )
-         $row_str[ 3] = Bulletin::getStatusText( $bulletin->Status );
+         $row_str[ 3] = GuiBulletin::getStatusText( $bulletin->Status );
       if( @$btable->Is_Column_Displayed[ 4] )
-         $row_str[ 4] = Bulletin::getCategoryText( $bulletin->Category );
+         $row_str[ 4] = GuiBulletin::getCategoryText( $bulletin->Category );
       if( @$btable->Is_Column_Displayed[ 5] )
          $row_str[ 5] = formatDate($bulletin->PublishTime);
       if( @$btable->Is_Column_Displayed[ 6] )
@@ -215,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       if( @$btable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = formatDate($bulletin->Lastchanged);
       if( @$btable->Is_Column_Displayed[ 8] )
-         $row_str[ 8] = Bulletin::getTargetTypeText( $bulletin->TargetType );
+         $row_str[ 8] = GuiBulletin::getTargetTypeText( $bulletin->TargetType );
       if( @$btable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = formatDate($bulletin->ExpireTime, NO_VALUE);
       if( @$btable->Is_Column_Displayed[10] )
@@ -227,7 +231,13 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       if( @$btable->Is_Column_Displayed[11] )
          $row_str[11] = $bulletin->CountReads;
       if( $is_admin && @$btable->Is_Column_Displayed[12] )
-         $row_str[12] = (@$orow['BTTUL_View']) ? 1 : 0;
+      {
+         $row_str[12] = (@$orow['B_View'])
+            ? image( $base_path.'images/yes.gif', T_('Viewable as user#bulletin'), null, 'class="InTextImage"' )
+            : image( $base_path.'images/no.gif', T_('Viewable by admin, but not by you as user#bulletin'), null, 'class="InTextImage"' );
+      }
+      if( @$btable->Is_Column_Displayed[13] )
+         $row_str[13] = ( $bulletin->tid > 0 ) ? echo_image_tournament_info($bulletin->tid) : '';
 
       if( $with_text )
       {
@@ -238,7 +248,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $row_str['extra_row'] =
             ( $is_admin ? '<td colspan="1"></td>' : '' ) .
             "<td colspan=\"$cnt_tablecols\">" .
-                  Bulletin::build_view_bulletin($bulletin, $mark_as_read_url) . '</div></td>';
+                  GuiBulletin::build_view_bulletin($bulletin, $mark_as_read_url) . '</div></td>';
       }
 
       $btable->add_row( $row_str );
@@ -250,7 +260,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    $menu_array = array();
    $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2";
-   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1";
+   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1".URI_AMP."view=1";
    if( $is_admin )
    {
       $menu_array[T_('New admin bulletin')] =

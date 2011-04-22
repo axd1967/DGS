@@ -288,7 +288,7 @@ function itemL($text, $link='', $working=true, $last=false)
       itemL(T_('Bulletins'), "list_bulletins.php?text=0", true);
       { $item_level++;
          itemL(T_('All Bulletins without text'), "list_bulletins.php?read=2", true);
-         itemL(T_('New Bulletins with text'), "list_bulletins.php?text=1", true, true);
+         itemL(T_('New Bulletins with text'), "list_bulletins.php?text=1".URI_AMP."view=1", true, true);
       } $item_level--;
 
       if( ALLOW_FEATURE_VOTE )
