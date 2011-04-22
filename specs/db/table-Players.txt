@@ -89,62 +89,62 @@ Ou    Country              | char(2)                                     | NO   
 
 # Fields for (global) GUI-config in Players-table:
 
-Z     UserFlags            | int(11)                                     | NO   | 0
-Z     SkinName             | varchar(32)                                 | NO   |
-Z     MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
-Z     TableMaxRows         | smallint(5) unsigned                        | NO   | 20
-Z     Button               | int(11)                                     | NO   | 0
-Z     UserPicture          | varchar(48)                                 | NO   |
-Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   | LASTMOVED
+Zu    UserFlags            | int(11)                                     | NO   | 0
+Zu    SkinName             | varchar(32)                                 | NO   |
+Zu    MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
+Zu    TableMaxRows         | smallint(5) unsigned                        | NO   | 20
+Zu    Button               | int(11)                                     | NO   | 0
+Zu    UserPicture          | varchar(48)                                 | NO   |
+Zu    NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   | LASTMOVED
 
 
 # Fields for board-related GUI-config in ConfigBoard-table:
 
- G    Stonesize        | tinyint(3) unsigned                         | NO   | 25
- G    Woodcolor        | int(11)                                     | NO   | 1
- G    Boardcoords      | int(11)                                     | NO   | 31
- G    MoveNumbers      | smallint(5) unsigned                        | NO   | 0
- G    MoveModulo       | smallint(5) unsigned                        | NO   | 0
- G    NotesSmallHeight | tinyint(3) unsigned                         | NO   | 25
- G    NotesSmallWidth  | tinyint(3) unsigned                         | NO   | 30
- G    NotesSmallMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
- G    NotesLargeHeight | tinyint(3) unsigned                         | NO   | 25
- G    NotesLargeWidth  | tinyint(3) unsigned                         | NO   | 30
- G    NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
- G    NotesCutoff      | tinyint(3) unsigned                         | NO   | 13
+ Gu   Stonesize        | tinyint(3) unsigned                         | NO   | 25
+ Gu   Woodcolor        | int(11)                                     | NO   | 1
+ Gu   Boardcoords      | int(11)                                     | NO   | 31
+ Gu   MoveNumbers      | smallint(5) unsigned                        | NO   | 0
+ Gu   MoveModulo       | smallint(5) unsigned                        | NO   | 0
+ Gu   NotesSmallHeight | tinyint(3) unsigned                         | NO   | 25
+ Gu   NotesSmallWidth  | tinyint(3) unsigned                         | NO   | 30
+ Gu   NotesSmallMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
+ Gu   NotesLargeHeight | tinyint(3) unsigned                         | NO   | 25
+ Gu   NotesLargeWidth  | tinyint(3) unsigned                         | NO   | 30
+ Gu   NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
+ Gu   NotesCutoff      | tinyint(3) unsigned                         | NO   | 13
 
 
 # Fields for pages-related GUI-config in ConfigPages-table:
 
- 1    StatusFlags                     | smallint(6)         | NO   | 3
- 1    StatusFolders                   | varchar(40)         | NO   |
- 1    ForumFlags                      | tinyint(3) unsigned | NO   | 8
- 1    ColumnsStatusGames              | int(11)             | NO   | -1
- 1    ColumnsStatusTournaments        | int(11)             | NO   | -1
- 1    ColumnsWaitingroom              | int(11)             | NO   | -1
- 1    ColumnsUsers                    | int(11)             | NO   | -1
- 1    ColumnsOpponents                | int(11)             | NO   | -1
- 1    ColumnsContacts                 | int(11)             | NO   | -1
- 1    ColumnsGamesRunningAll          | int(11)             | NO   | -1
- 1    ColumnsGamesRunningAll2         | int(11)             | NO   | -1
- 1    ColumnsGamesRunningUser         | int(11)             | NO   | -1
- 1    ColumnsGamesRunningUser2        | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedAll         | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedAll2        | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedUser        | int(11)             | NO   | -1
- 1    ColumnsGamesFinishedUser2       | int(11)             | NO   | -1
- 1    ColumnsGamesObserved            | int(11)             | NO   | -1
- 1    ColumnsGamesObserved2           | int(11)             | NO   | -1
- 1    ColumnsGamesObservedAll         | int(11)             | NO   | -1
- 1    ColumnsGamesObservedAll2        | int(11)             | NO   | -1
- 1    ColumnsBulletinList             | int(11)             | NO   | -1
- 1    ColumnsFeatureList              | int(11)             | NO   | -1
- 1    ColumnsTournaments              | int(11)             | NO   | -1
- 1    ColumnsTournamentParticipants   | int(11)             | NO   | -1
- 1    ColumnsTDTournamentParticipants | int(11)             | NO   | -1
- 1    ColumnsTournamentResults        | int(11)             | NO   | -1
- 1    ColumnsTournamentLadderView     | int(11)             | NO   | -1
- 1    ColumnsTournamentPoolView       | int(11)             | NO   | -1
+ 1u   StatusFlags                     | smallint(6)         | NO   | 3
+ 1u   StatusFolders                   | varchar(40)         | NO   |
+ 1u   ForumFlags                      | tinyint(3) unsigned | NO   | 8
+ 1u   ColumnsStatusGames              | int(11)             | NO   | -1
+ 1u   ColumnsStatusTournaments        | int(11)             | NO   | -1
+ 1u   ColumnsWaitingroom              | int(11)             | NO   | -1
+ 1u   ColumnsUsers                    | int(11)             | NO   | -1
+ 1u   ColumnsOpponents                | int(11)             | NO   | -1
+ 1u   ColumnsContacts                 | int(11)             | NO   | -1
+ 1u   ColumnsGamesRunningAll          | int(11)             | NO   | -1
+ 1u   ColumnsGamesRunningAll2         | int(11)             | NO   | -1
+ 1u   ColumnsGamesRunningUser         | int(11)             | NO   | -1
+ 1u   ColumnsGamesRunningUser2        | int(11)             | NO   | -1
+ 1u   ColumnsGamesFinishedAll         | int(11)             | NO   | -1
+ 1u   ColumnsGamesFinishedAll2        | int(11)             | NO   | -1
+ 1u   ColumnsGamesFinishedUser        | int(11)             | NO   | -1
+ 1u   ColumnsGamesFinishedUser2       | int(11)             | NO   | -1
+ 1u   ColumnsGamesObserved            | int(11)             | NO   | -1
+ 1u   ColumnsGamesObserved2           | int(11)             | NO   | -1
+ 1u   ColumnsGamesObservedAll         | int(11)             | NO   | -1
+ 1u   ColumnsGamesObservedAll2        | int(11)             | NO   | -1
+ 1u   ColumnsBulletinList             | int(11)             | NO   | -1
+ 1u   ColumnsFeatureList              | int(11)             | NO   | -1
+ 1u   ColumnsTournaments              | int(11)             | NO   | -1
+ 1u   ColumnsTournamentParticipants   | int(11)             | NO   | -1
+ 1u   ColumnsTDTournamentParticipants | int(11)             | NO   | -1
+ 1u   ColumnsTournamentResults        | int(11)             | NO   | -1
+ 1u   ColumnsTournamentLadderView     | int(11)             | NO   | -1
+ 1u   ColumnsTournamentPoolView       | int(11)             | NO   | -1
 
 
 -------------------------------------------------
