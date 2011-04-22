@@ -51,12 +51,12 @@ define('BULLETIN_STATUS_DELETE',  'DELETE');
 define('CHECK_BULLETIN_STATUS', 'NEW|SHOW|ARCHIVE|DELETE');
 //TODO define('CHECK_BULLETIN_STATUS', 'NEW|PENDING|HIDDEN|SHOW|ARCHIVE|DELETE');
 
-define('BULLETIN_TRG_UNSET', 'UNSET'); // needs assignment
+define('BULLETIN_TRG_UNSET', 'UNSET'); // needs assignment, not defined in DB (only application-default)
 define('BULLETIN_TRG_ALL', 'ALL');
 //TODO define('BULLETIN_TRG_TD',  'TD'); // tourney-director
 //TODO define('BULLETIN_TRG_TP',  'TP'); // tourney-participant
-//TODO define('BULLETIN_TRG_UL',  'UL'); // user-list
-define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL');
+define('BULLETIN_TRG_USERLIST', 'UL');
+define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|UL');
 //TODO define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL');
 
 
@@ -99,6 +99,9 @@ class Bulletin
    // non-DB fields
 
    var $User; // User-object
+   var $UserList; // [ uid, ...] for TargetType=UL
+   var $UserListHandles; // [ Handle, =1234, ...] for TargetType=UL (with '='-prefix for numeric handles)
+   var $UserListUserRefs; // [ [ ID/Handle/Name => val ], ... ]
 
    /*! \brief Constructs Bulletin-object with specified arguments. */
    function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
@@ -121,6 +124,9 @@ class Bulletin
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->UserList = array();
+      $this->UserListHandles = array();
+      $this->UserListUserRefs = array();
    }
 
    function to_string()
@@ -198,6 +204,28 @@ class Bulletin
       return $data;
    }
 
+   function loadUserList()
+   {
+      $this->UserList = array();
+      $this->UserListHandles = array();
+      $this->UserListUserRefs = array();
+
+      if( $this->ID > 0 )
+      {
+         $result = db_query( "Bulletin.loadUserList({$this->ID})",
+            "SELECT BT.uid as ID, P.Handle, P.Name FROM BulletinTarget AS BT " .
+               "INNER JOIN Players AS P ON P.ID=BT.uid " .
+            "WHERE BT.bid={$this->ID} ORDER BY BT.uid" );
+         while( $row = mysql_fetch_array( $result ) )
+         {
+            $this->UserList[] = $row['ID'];
+            $this->UserListHandles[] = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
+            $this->UserListUserRefs[] = $row;
+         }
+         mysql_free_result($result);
+      }
+   }//loadUserList
+
 
    // ------------ static functions ----------------------------
 
@@ -222,26 +250,71 @@ class Bulletin
    /*!
     * \brief Returns QuerySQL with restrictions to view bulletins to what user is allowed to view.
     * \param $is_admin true, if user is admin; false = normal user
-    * \param $read_uid user-id to return field BR_Read indicating if bulletin is marked as read; 0 otherwise
-    * \param $show_read false, if query should only select unread bulletins (works only with set $read_uid)
+    * \param $uid current user-id Players.ID
+    * \param $count_new true to count new-bulletins (for main-menu); false for list-bulletins
+    * \param $show_read true to have 'BR_Read'-field indicating if bulletin read (1) or unread (0 = BR.bid IS NULL)
+    * \param $show_target_type BULLETIN_TRG_... = query restricted to specific target-type or '' for all target-types.
+    *        'BTTUL_View'-field indicating if bulletin is shown or not;
+    *        BTTUL_View-values: 0 = don't show, 1 = show entry (but is no user-list), 2 = show entry (is user-list)
     */
-   function build_view_query_sql( $is_admin, $read_uid=0, $show_read=true )
+   function build_view_query_sql( $is_admin, $uid, $count_new=false, $show_read=true, $show_target_type='' )
    {
       $qsql = new QuerySQL();
-      if( !$is_admin ) // hide some bulletins
-         $qsql->add_part( SQLP_WHERE,
-            "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')" );
-      if( $read_uid > 0 )
+
+      if( $count_new )
       {
          $qsql->add_part( SQLP_FIELDS,
-            "IFNULL(BR.bid,0) AS BR_Read" );
+            "SUM(CASE B.TargetType " .
+               "WHEN '".BULLETIN_TRG_ALL."' THEN 1 " .
+               "WHEN '".BULLETIN_TRG_USERLIST."' THEN IF(BT.bid IS NULL,0,1) " .
+               "ELSE 0 END) AS X_Count" );
          $qsql->add_part( SQLP_FROM,
-            "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$read_uid" );
+            "Bulletin AS B" );
+         $qsql->add_part( SQLP_WHERE,
+            "B.Status='".BULLETIN_STATUS_SHOW."'",
+            "BR.bid IS NULL" ); // count only unread
       }
       else
-         $qsql->add_part( SQLP_FIELDS, '0 AS BR_Read' );
+      {
+         if( !$is_admin ) // hide some bulletins
+            $qsql->add_part( SQLP_WHERE,
+               "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')" );
+      }
+
+      // BR_Read = 1 = mark-as-read, 0 = unread (=BR.bid IS NULL)
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$uid" );
+      if( !$count_new )
+         $qsql->add_part( SQLP_FIELDS,
+            ($show_read) ? 'IFNULL(BR.bid,0) AS BR_Read' : '0 AS BR_Read' );
+
+      // handle TargetType=UL (userlist)
+      if( !$count_new && $show_target_type == BULLETIN_TRG_USERLIST ) // restricted to user-list only
+      {
+         $qsql->add_part( SQLP_FIELDS, "2 AS BTTUL_View" );
+         $qsql->add_part( SQLP_FROM,   "INNER JOIN BulletinTarget AS BT ON BT.bid=B.ID AND BT.uid=$uid" );
+         $qsql->add_part( SQLP_WHERE,  "B.TargetType='$show_target_type'" );
+      }
+      elseif( !$count_new && $show_target_type ) // restricted, but not to user-list
+      {
+         // other target-type, so no UL shown; UNSET not possible in DB
+         $qsql->add_part( SQLP_FIELDS, "1 AS BTTUL_View" );
+      }
+      else // all target-types
+      {
+         if( !$count_new )
+            $qsql->add_part( SQLP_FIELDS,
+               "IF(B.TargetType='".BULLETIN_TRG_USERLIST."',IF(BT.uid IS NULL,0,2),1) AS BTTUL_View" );
+         $qsql->add_part( SQLP_FROM,
+            "LEFT JOIN BulletinTarget AS BT " .
+               "ON BT.bid=B.ID AND BT.uid=$uid AND B.TargetType='".BULLETIN_TRG_USERLIST."'" );
+      }
+
+      if( !$count_new && !$is_admin && !$show_target_type )
+         $qsql->add_part( SQLP_HAVING, "BTTUL_View > 0" );
+
       return $qsql;
-   }
+   }//build_view_query_sql
 
    /*! \brief Returns Bulletin-object created from specified (db-)row. */
    function new_from_row( $row )
@@ -364,11 +437,11 @@ class Bulletin
       if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
       {
          $arr = array();
-         $arr[BULLETIN_TRG_UNSET] = T_('Unset#B_trg');
-         $arr[BULLETIN_TRG_ALL]  = T_('All#B_trg');
+         $arr[BULLETIN_TRG_UNSET]      = T_('Unset#B_trg');
+         $arr[BULLETIN_TRG_ALL]        = T_('All Users#B_trg');
          //TODO $arr[BULLETIN_TRG_TD]   = T_('T-Dir#B_trg');
          //TODO $arr[BULLETIN_TRG_TP]   = T_('T-Part#B_trg');
-         //TODO $arr[BULLETIN_TRG_UL]   = T_('UserList#B_trg');
+         $arr[BULLETIN_TRG_USERLIST]   = T_('UserList#B_trg');
          $ARR_GLOBALS_BULLETIN[$key] = $arr;
       }
 
@@ -391,8 +464,9 @@ class Bulletin
       // for admin
       $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
       $bulletin = new Bulletin( 0, $uid, $user );
-      $bulletin->PublishTime = $GLOBALS['NOW'];
       $bulletin->setCategory( BULLETIN_CAT_ADMIN_MSG );
+      $bulletin->PublishTime = $GLOBALS['NOW'];
+      $bulletin->ExpireTime = $bulletin->PublishTime + 30 * SECS_PER_DAY; // default +30d
 
       return $bulletin;
    }//new_bulletin
@@ -426,6 +500,35 @@ class Bulletin
       }
       ta_end();
    }//mark_bulletin_as_read
+
+   /*!
+    * \brief Persists user-list for bulletin in BulletinTarget-table.
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
+   function persist_bulletin_userlist( $bid, $uids )
+   {
+      if( !is_numeric($bid) || $bid <= 0 )
+         error('invalid_args', "Bulletin::persist_bulletin_userlist.check.bid($bid)");
+      if( !is_array($uids) || count($uids) == 0 )
+         error('invalid_args', "Bulletin::persist_bulletin_userlist.check.uids($bid)");
+
+      $uids = array_unique($uids);
+      foreach( $uids as $uid )
+      {
+         if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+            error('invalid_args', "Bulletin::persist_bulletin_userlist.check.uids.bad_uid($bid,$uid)");
+      }
+      $uids_sql = implode(',', $uids);
+
+      db_query( "Bulletin::persist_bulletin_userlist.del($bid)",
+         "DELETE FROM BulletinTarget WHERE bid=$bid AND uid NOT IN ($uids_sql)" );
+
+      $cnt_uids = count($uids);
+      db_query( "Bulletin::persist_bulletin_userlist.add($bid,$cnt_uids)",
+         "INSERT IGNORE BulletinTarget (bid,uid) " .
+         "SELECT $bid, ID FROM Players WHERE ID IN ($uids_sql) LIMIT $cnt_uids" );
+   }//persist_bulletin_userlist
 
    /*! \brief Change status of expired bulletins. */
    function process_expired_bulletins()
@@ -484,7 +587,7 @@ class Bulletin
     * \brief Updates Players.CountBulletinNew according for given Bulletin-data (only updated on SHOW-status).
     * \param $status BULLETIN_STATUS_...
     * \param $target_type BULLETIN_TRG_...
-    * \param $uid restrict update to given user-id; 0 otherwise
+    * \param $uid restrict update to given user-id; can be uid-array; 0 otherwise
     * \return true, if update required; false otherwise
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
@@ -501,9 +604,14 @@ class Bulletin
          return false;
 
       $dbgmsg .= "Bulletin::update_count_players($status,$target_type)";
-      $qpart_uid = (is_numeric($uid) && $uid > 0) ? " AND ID=$uid LIMIT 1" : '';
+      if( is_numeric($uid) && $uid > 0 )
+         $qpart_uid = " AND ID=$uid LIMIT 1";
+      elseif( is_array($uid) && count($uid) > 0 )
+         $qpart_uid = " AND ID IN (".implode(',', $uid).") LIMIT " . count($uid);
+      else
+         $qpart_uid = '';
 
-      if( $target_type == BULLETIN_TRG_ALL )
+      if( $target_type == BULLETIN_TRG_ALL || $target_type == BULLETIN_TRG_USERLIST )
       {
          $upd_time = $NOW - SESSION_DURATION;
          db_query( "$dbgmsg.upd_all",

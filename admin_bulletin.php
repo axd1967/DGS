@@ -55,6 +55,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $bulletin = ( $bid > 0 ) ? Bulletin::load_bulletin($bid) : null;
    if( is_null($bulletin) )
       $bulletin = Bulletin::new_bulletin( $my_id, $is_admin );
+   else
+      $bulletin->loadUserList();
 
    $b_old_status = $bulletin->Status;
    $b_old_category = $bulletin->Category;
@@ -71,12 +73,18 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
    {
       ta_begin();
-      {//HOT-section to save bulletin and set players bulletin-count
+      {//HOT-section to save bulletin-data
          $bulletin->persist();
          $bid = $bulletin->ID;
+
+         if( $bulletin->TargetType == BULLETIN_TRG_USERLIST )
+            Bulletin::persist_bulletin_userlist( $bid, $bulletin->UserList );
+
          if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
             Bulletin::reset_bulletin_read( $bid );
-         Bulletin::update_count_players( "admin_bullet($bid)", $bulletin->Status, $bulletin->TargetType );
+
+         Bulletin::update_count_players( "admin_bullet($bid)", $bulletin->Status, $bulletin->TargetType,
+            ( $bulletin->TargetType == BULLETIN_TRG_USERLIST ? $bulletin->UserList : 0 ) );
       }
       ta_end();
 
@@ -135,6 +143,16 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $bform->add_row( array(
          'TAB',
          'SELECTBOX',    'target_type', 1, $arr_target_types, $vars['target_type'], false, ));
+   if( $vars['target_type'] == BULLETIN_TRG_USERLIST || (string)trim(get_request_arg('user_list')) != '' )
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('User List#bulletin'),
+            'TEXT',        sprintf( T_('only for target-type [%s], user-id (text or numeric)#bulletin_userlist'),
+                                    Bulletin::getTargetTypeText($vars['target_type']) ), ));
+      $bform->add_row( array(
+            'TAB',
+            'TEXTAREA',    'user_list', 80, 3, $vars['user_list'], ));
+   }
 
    $bform->add_empty_row();
    $bform->add_row( array(
@@ -144,7 +162,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $bform->add_row( array(
          'DESCRIPTION', T_('Expire Time'),
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE ) .
+                                  ', ' . T_('can be empty#bulletin_expire')), ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));
@@ -170,6 +189,19 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'DESCRIPTION', T_('Preview'),
             'OWNHTML', '<td class="Preview">' . Bulletin::build_view_bulletin($bulletin) . '</td>', ));
+      if( $vars['target_type'] == BULLETIN_TRG_USERLIST && $vars['user_list'] != '' )
+      {
+         if( is_array($bulletin->UserListUserRefs) )
+         {
+            $arr = array();
+            foreach( $bulletin->UserListUserRefs as $urow )
+               $arr[] = user_reference( REF_LINK, 1, '', $urow ) . "<br>\n";
+
+            $bform->add_row( array(
+                  'DESCRIPTION', T_('Target Users#bulletin'),
+                  'TEXT', rtrim(implode('', $arr)), ));
+         }
+      }
    }
 
 
@@ -189,6 +221,78 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 }
 
 
+// return [ handle-arr, uid-arr, errors ]
+function check_user_list( $user_list )
+{
+   $errors = array();
+   $arr_uid = array();
+   $arr_handle = array();
+   $arr_miss = array();
+   foreach( preg_split("/[\\s,;]+/", $user_list) as $u )
+   {
+      if( $u[0] == '=' ) // =1234 (support for numeric handle), allowed for non-numeric-handle too
+      {
+         $is_handle = true;
+         $u = substr($u, 1);
+      }
+      else
+         $is_handle = false;
+
+      if( !is_numeric($u) && illegal_chars($u) )
+         $errors[] = sprintf( T_('Illegal characters used in user [%s]#bulletin_userlist'), $u );
+      else
+      {
+         if( $is_handle || !is_numeric($u) )
+            $arr_handle[] = $u;
+         else
+            $arr_uid[] = $u;
+         $arr_miss[strtolower($u)] = 1;
+      }
+   }
+
+   $handles = array();
+   $uids = array();
+   $urefs = array();
+   if( count($arr_uid) > 0 )
+   {
+      $result = db_query( "admin_bulletin.check_user_list.uids()",
+         "SELECT ID, Handle, Name FROM Players " .
+         "WHERE ID IN (".implode(',', $arr_uid).") LIMIT " . count($arr_uid) );
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $uid = $row['ID'];
+         $uids[] = $uid;
+         $handles[$uid] = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
+         $urefs[$uid] = $row;
+         unset($arr_miss[$uid]);
+      }
+      mysql_free_result($result);
+   }
+   if( count($arr_handle) > 0 )
+   {
+      $result = db_query( "admin_bulletin.check_user_list.handles()",
+         "SELECT ID, Handle, Name FROM Players " .
+         "WHERE Handle IN ('".implode("','", $arr_handle)."') LIMIT " . count($arr_handle) );
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $uid = $row['ID'];
+         $handle = $row['Handle'];
+         $uids[] = $uid;
+         $handles[$uid] = ( (is_numeric($handle)) ? '=' : '' ) . $handle;
+         $urefs[$uid] = $row;
+         unset($arr_miss[strtolower($handle)]);
+      }
+      mysql_free_result($result);
+   }
+
+   if( count($arr_miss) > 0 )
+      $errors[] = sprintf( T_('Unknown users found [%s]#bulletin_userlist'), implode(', ', array_keys($arr_miss) ));
+   else
+      ksort( $handles, SORT_NUMERIC );
+
+   return array( array_unique(array_values($handles)), array_unique($uids), array_values($urefs), $errors );
+}//check_user_list
+
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$bulletin, $is_admin )
 {
@@ -205,6 +309,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       'expire_time'     => formatDate($bulletin->ExpireTime),
       'subject'         => $bulletin->Subject,
       'text'            => $bulletin->Text,
+      'user_list'       => implode(' ', $bulletin->UserListHandles ),
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -222,9 +327,28 @@ function parse_edit_form( &$bulletin, $is_admin )
       $bulletin->setStatus($vars['status']);
 
       $bulletin->setTargetType($vars['target_type']);
-      if( $bulletin->TargetType == BULLETIN_TRG_UNSET )
-         $errors[] = sprintf( T_('Bulletin target-type [%s] is only for safety and must be changed!'),
+      if( $bulletin->TargetType == BULLETIN_TRG_UNSET ) // not defined in BD, must be set
+         $errors[] = sprintf( T_('Bulletin target-type [%s] is only an initial value and must be changed!'),
             Bulletin::getTargetTypeText(BULLETIN_TRG_UNSET) );
+
+      $new_value = trim($vars['user_list']);
+      if( (string)$new_value != '' )
+      {
+         if( $bulletin->TargetType != BULLETIN_TRG_USERLIST )
+            $errors[] = T_('User-list must be cleared when the target-type is changed#bulletin');
+
+         list( $arr_handles, $arr_uids, $arr_urefs, $check_errors ) = check_user_list( $new_value );
+         if( count($check_errors) > 0 )
+            $errors = array_merge( $errors, $check_errors );
+         else
+         {
+            $bulletin->UserList = $arr_uids;
+            $bulletin->UserListHandles = $arr_handles;
+            $bulletin->UserListUserRefs = $arr_urefs;
+            $vars['user_list'] = implode(' ', $arr_handles); // re-format
+         }
+      }
+
 
       $parsed_value = parseDate( T_('Publish time for bulletin'), $vars['publish_time'] );
       if( is_numeric($parsed_value) )
@@ -260,6 +384,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       if( $old_vals['category'] != $bulletin->Category ) $edits[] = T_('Category#edits');
       if( $old_vals['status'] != $bulletin->Status ) $edits[] = T_('Status#edits');
       if( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
+      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('UserList#edits');
       if( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('PublishTime#edits');
       if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
       if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');

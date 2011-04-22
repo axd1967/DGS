@@ -73,17 +73,26 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    foreach( Bulletin::getCategoryText() as $category => $text )
       $category_filter_array[$text] = "B.Category='$category'";
 
-   $targettype_filter_array = array( T_('All') => '' );
+   $targettype_filter_array = array( T_('All Types#B_trg') => '' );
+   $idxmap_ttypes = array( '' => '', 0 => '' ); // first-entry = all
+   $cnt = 1;
    foreach( Bulletin::getTargetTypeText() as $ttype => $text )
    {
-      if( $ttype != BULLETIN_TRG_UNSET )
-         $targettype_filter_array[$text] = "B.TargetType='$ttype'";
+      if( $ttype == BULLETIN_TRG_UNSET )
+         continue;
+      $idxmap_ttypes[$cnt++] = $ttype;
+      $targettype_filter_array[$text] = "B.TargetType='$ttype'";
    }
 
    $read_filter_array = array(
          T_('Unread#bulletinread') => 'BR.bid IS NULL',
          T_('Read#bulletinread')   => 'BR.bid > 0',
          T_('All') => '',
+      );
+   $adminview_filter_array = array(
+         T_('All') => '',
+         T_('Mine#bulletin') => 'BTTUL_View > 0',
+         T_('Other#bulletin') => 'BTTUL_View = 0',
       );
 
    $with_text = (get_request_arg('text', 0)) ? 1 : 0;
@@ -103,13 +112,17 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $bfilter->add_filter( 4, 'Selection', $category_filter_array, true);
    $bfilter->add_filter( 5, 'RelativeDate', 'B.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ) );
-   $filter_text =&
-      $bfilter->add_filter( 6, 'Text', "CONCAT(B.Subject,' ',B.Text) #OP #VAL", true,
-            array( FC_SIZE => 15, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));
-   $bfilter->add_filter( 8, 'Selection', $targettype_filter_array, true);
+   $bfilter->add_filter( 6, 'Text', "CONCAT(B.Subject,' ',B.Text) #OP #VAL", true,
+         array( FC_SIZE => 15, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));
+   $bfilter->add_filter( 8, 'Selection', $targettype_filter_array, true );
    $bfilter->add_filter(10, 'Selection', $read_filter_array, true,
          array( FC_FNAME => 'read', FC_STATIC => 1, FC_DEFAULT => 0 ) );
+   if( $is_admin )
+      $bfilter->add_filter(12, 'Selection', $adminview_filter_array, true,
+            array( FC_ADD_HAVING => 1 ) );
    $bfilter->init();
+   $filter_text =& $bfilter->get_filter(6);
+   $filter_target_type =& $bfilter->get_filter(8);
    $rx_term = implode('|', $filter_text->get_rx_terms() );
 
    // init table
@@ -130,6 +143,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', 0, 'PublishTime-');
    $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read-' );
+   if( $is_admin )
+      $btable->add_tablehead(12, T_('View#bulletin'), 'Image', TABLE_NO_SORT|TABLE_NO_HIDE );
    $btable->add_tablehead( 6, T_('Subject#bulletin'), null, TABLE_NO_SORT);
    $btable->add_tablehead(11, T_('Hits#bulletin'), 'Number', 0, 'CountReads-' );
    $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');
@@ -142,7 +157,9 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $btable->get_query(),
          $btable->current_order_string(),
          $btable->current_limit_string() );
-   $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( $is_admin, /*read*/$my_id ) );
+   $iterator->addQuerySQLMerge(
+      Bulletin::build_view_query_sql( $is_admin, $my_id, /*count*/false, /*read*/true,
+         $idxmap_ttypes[ $filter_target_type->get_value() ] ));
    $iterator = Bulletin::load_bulletins( $iterator );
 
    $show_rows = $btable->compute_show_rows( $iterator->ResultRows );
@@ -209,6 +226,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       }
       if( @$btable->Is_Column_Displayed[11] )
          $row_str[11] = $bulletin->CountReads;
+      if( $is_admin && @$btable->Is_Column_Displayed[12] )
+         $row_str[12] = (@$orow['BTTUL_View']) ? 1 : 0;
 
       if( $with_text )
       {
