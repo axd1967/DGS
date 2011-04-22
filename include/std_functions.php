@@ -45,6 +45,7 @@ require_once( "include/game_texts.php" );
 require_once( "include/translation_functions.php" );
 require_once( "include/classlib_matrix.php" );
 require_once( "forum/class_forum_read.php" );
+require_once( "include/db/bulletin.php" );
 
 
 // Server birth date:
@@ -2659,11 +2660,8 @@ function count_bulletin_new( $uid, $curr_count=-1 )
    if( !is_numeric($uid) || $uid <= 0 )
       error( 'invalid_args', "count_bulletin_new.check.uid($uid)" );
 
-   $row = mysql_single_fetch( "count_bulletin_new($uid)",
-      "SELECT COUNT(*) AS X_Count " .
-      "FROM Bulletin AS B " .
-         "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$uid " .
-      "WHERE B.Status='SHOW' AND BR.bid IS NULL" );
+   $qsql = Bulletin::build_view_query_sql( /*adm*/false, $uid, /*count*/true );
+   $row = mysql_single_fetch( "count_bulletin_new($uid)", $qsql->get_select() );
    return ($row) ? $row['X_Count'] : -1;
 }
 
