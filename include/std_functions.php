@@ -2555,7 +2555,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          }
       }
 
-      $count_bulletin_new = count_bulletin_new( $uid, $player_row['CountBulletinNew'] );
+      $count_bulletin_new = Bulletin::count_bulletin_new( $player_row['CountBulletinNew'] );
       if( $count_bulletin_new >= 0 )
       {
          $player_row['CountBulletinNew'] = $count_bulletin_new;
@@ -2645,23 +2645,6 @@ function count_feature_new( $uid, $curr_count=-1 )
       "FROM FeatureList AS FL " .
          "LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid AND FV.Voter_ID='$uid' " .
       "WHERE FL.Status='NEW' AND ISNULL(FV.fid)" );
-   return ($row) ? $row['X_Count'] : -1;
-}
-
-/*!
- * \brief Counts new bulletins for given user-id if current count < 0 (=needs-update).
- * \param $curr_count force counting if <0 or omitted
- * \return new bulletin count (>=0) for given user-id; or -1 on error
- */
-function count_bulletin_new( $uid, $curr_count=-1 )
-{
-   if( $curr_count >= 0 )
-      return $curr_count;
-   if( !is_numeric($uid) || $uid <= 0 )
-      error( 'invalid_args', "count_bulletin_new.check.uid($uid)" );
-
-   $qsql = Bulletin::build_view_query_sql( /*adm*/false, $uid, /*count*/true );
-   $row = mysql_single_fetch( "count_bulletin_new($uid)", $qsql->get_select() );
    return ($row) ? $row['X_Count'] : -1;
 }
 
