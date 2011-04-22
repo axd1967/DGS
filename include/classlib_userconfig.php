@@ -330,6 +330,7 @@ define('CFGCOLS_GAMES_FINISHED_ALL',      'ColumnsGamesFinishedAll');
 define('CFGCOLS_GAMES_FINISHED_USER',     'ColumnsGamesFinishedUser');
 define('CFGCOLS_GAMES_OBSERVED',          'ColumnsGamesObserved');
 define('CFGCOLS_GAMES_OBSERVED_ALL',      'ColumnsGamesObservedAll');
+define('CFGCOLS_BULLETIN_LIST',           'ColumnsBulletinList');
 define('CFGCOLS_FEATURE_LIST',            'ColumnsFeatureList');
 define('CFGCOLS_TOURNAMENTS',             'ColumnsTournaments');
 define('CFGCOLS_TOURNAMENT_PARTICIPANTS', 'ColumnsTournamentParticipants');
@@ -337,29 +338,6 @@ define('CFGCOLS_TD_TOURNAMENT_PARTICIPANTS', 'ColumnsTDTournamentParticipants');
 define('CFGCOLS_TOURNAMENT_RESULTS',      'ColumnsTournamentResults');
 define('CFGCOLS_TOURNAMENT_LADDER_VIEW',  'ColumnsTournamentLadderView');
 define('CFGCOLS_TOURNAMENT_POOL_VIEW',    'ColumnsTournamentPoolView');
-// col_name => number of ints in DB (needed for writing)
-global $SIZECONFIG_CFGCOLS; //PHP5
-$SIZECONFIG_CFGCOLS = array(
-   CFGCOLS_STATUS_GAMES             => 1,
-   CFGCOLS_STATUS_TOURNAMENTS       => 1,
-   CFGCOLS_WAITINGROOM              => 1,
-   CFGCOLS_USERS                    => 1,
-   CFGCOLS_OPPONENTS                => 1,
-   CFGCOLS_CONTACTS                 => 1,
-   CFGCOLS_GAMES_RUNNING_ALL        => 2, // >30 bit
-   CFGCOLS_GAMES_RUNNING_USER       => 2, // >30 bit
-   CFGCOLS_GAMES_FINISHED_ALL       => 2, // >30 bit
-   CFGCOLS_GAMES_FINISHED_USER      => 2, // >30 bit
-   CFGCOLS_GAMES_OBSERVED           => 2, // >30 bit
-   CFGCOLS_GAMES_OBSERVED_ALL       => 2, // >30 bit
-   CFGCOLS_FEATURE_LIST             => 1,
-   CFGCOLS_TOURNAMENTS              => 1,
-   CFGCOLS_TOURNAMENT_PARTICIPANTS  => 1,
-   CFGCOLS_TD_TOURNAMENT_PARTICIPANTS  => 1,
-   CFGCOLS_TOURNAMENT_RESULTS       => 1,
-   CFGCOLS_TOURNAMENT_LADDER_VIEW   => 1,
-   CFGCOLS_TOURNAMENT_POOL_VIEW     => 1,
-   );
 
 class ConfigPages
 {
@@ -514,11 +492,9 @@ class ConfigPages
    /*! \brief (static) Loads ConfigPages-data for given user (without column-sets). */
    function load_config_pages( $uid, $col_name='' )
    {
-      ConfigPages::_check_user_id( $uid, "ConfigPages::load_config_pages($uid)" );
-
-      global $SIZECONFIG_CFGCOLS;
-      if( $col_name && !isset($SIZECONFIG_CFGCOLS[$col_name]) )
-         error('invalid_args', "ConfigPages::load_config_pages.check.col_name($col_name)");
+      $dbgmsg = "ConfigPages::load_config_pages($uid)";
+      ConfigPages::_check_user_id( $uid, $dbgmsg );
+      $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
       $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
       if( $col_name )
@@ -537,13 +513,12 @@ class ConfigPages
 
       if( $col_name )
       {
-         $bitset = ConfigTableColumns::read_columns_bitset(
-               $row, $col_name, $SIZECONFIG_CFGCOLS[$col_name] );
+         $bitset = ConfigTableColumns::read_columns_bitset( $row, $col_name, $cfg_size );
          $config->table_columns = new ConfigTableColumns( $uid, $col_name, $bitset );
       }
 
       return $config;
-   }
+   }//load_config_pages
 
    /*!
     * \brief (static) Updates ContigPages-table for given user_id
@@ -568,7 +543,7 @@ class ConfigPages
             db_query( $errmsg,
                "UPDATE ConfigPages SET $sqlpart WHERE User_ID='$user_id' LIMIT 1" );
       }
-   }
+   }//_update_query
 
    /*! \brief (static) Inserts default ConfigPages. */
    function insert_default( $user_id )
@@ -612,22 +587,27 @@ class ConfigTableColumns
    /*! \brief Maximum number of bits, that can be stored for column; BITSET_MAXSIZE if no column given. */
    var $maxsize;
 
-   /*! \brief Constructs ConfigTableColumns-object with specified arguments. */
+   /*!
+    * \brief Constructs ConfigTableColumns-object with specified arguments.
+    * \param $col_name field of ConfigPages-table; or '' for static (not stored) table-columns
+    */
    function ConfigTableColumns( $user_id, $col_name, $bitset )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigTableColumns');
+
       $this->user_id = (int)$user_id;
-
-      global $SIZECONFIG_CFGCOLS;
-      if( $col_name != '' && !isset($SIZECONFIG_CFGCOLS[$col_name]) )
-         error('invalid_args', "ConfigTableColumns.check.col_name($col_name)");
-      $this->col_name = $col_name;
-
-      $this->maxsize  = ( $this->col_name != '' )
-         ? $SIZECONFIG_CFGCOLS[$col_name] * BITSET_EXPORT_INTBITS
-         : BITSET_MAXSIZE;
-
       $this->set_bitset( $bitset );
+      if( $col_name )
+      {
+         $cfg_size = ConfigTableColumns::get_config_size($col_name, 'constructor');
+         $this->col_name = $col_name;
+         $this->maxsize = $cfg_size * BITSET_EXPORT_INTBITS;
+      }
+      else
+      {
+         $this->col_name = ''; // 0/false -> ''
+         $this->maxsize = BITSET_MAXSIZE;
+      }
    }
 
    function get_user_id()
@@ -686,10 +666,7 @@ class ConfigTableColumns
    function load_config( $uid, $col_name )
    {
       ConfigPages::_check_user_id( $uid, 'ConfigTableColumns::load_config');
-
-      global $SIZECONFIG_CFGCOLS;
-      if( !isset($SIZECONFIG_CFGCOLS[$col_name]) )
-         error('invalid_args', "ConfigTableColumns::load_config.check.col_name($uid,$col_name)");
+      $cfg_size = ConfigTableColumns::get_config_size($col_name, "load_config($uid)");
 
       $fieldset = 'User_ID';
       $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
@@ -699,7 +676,7 @@ class ConfigTableColumns
          return null;
 
       // read + parse column-set into BitSet and build config
-      $bitset = ConfigTableColumns::read_columns_bitset( $row, $col_name, $SIZECONFIG_CFGCOLS[$col_name] );
+      $bitset = ConfigTableColumns::read_columns_bitset( $row, $col_name, $cfg_size );
       $config = new ConfigTableColumns( $uid, $col_name, $bitset );
       return $config;
    }
@@ -707,10 +684,9 @@ class ConfigTableColumns
    // return fieldset as SQL-fields-string
    function build_fieldset( $col_name )
    {
-      global $SIZECONFIG_CFGCOLS;
-
+      $cfg_size = ConfigTableColumns::get_config_size($col_name, 'build_fieldset');
       $fieldset = $col_name;
-      for( $idx=2; $idx <= $SIZECONFIG_CFGCOLS[$col_name]; $idx++ )
+      for( $idx=2; $idx <= $cfg_size; $idx++ )
          $fieldset .= ",$col_name$idx";
       return $fieldset;
    }
@@ -740,18 +716,52 @@ class ConfigTableColumns
     */
    function write_columns_bitset( $col_name, $bitset )
    {
-      global $SIZECONFIG_CFGCOLS;
-
       $arr_write = $bitset->get_int_array();
-      $count = $SIZECONFIG_CFGCOLS[$col_name];
+      $cfg_size = ConfigTableColumns::get_config_size($col_name, 'write_columns_bitset');
       $result = array();
-      for( $idx = 1; $idx <= $count; $idx++)
+      for( $idx = 1; $idx <= $cfg_size; $idx++)
       {
          $fieldname = $col_name . ( $idx == 1 ? '' : $idx);
          $result[$fieldname] = (int)@$arr_write[$idx-1];
       }
       return $result;
    }
+
+   /*!
+    * \brief Returns number of integers in DB for given column-name in ConfigPages-table.
+    * \param $col_name column-name in ConfigPages-table CFGCOLS_...; Throws error for undefined column
+    */
+   function get_config_size( $col_name, $dbgmsg='' )
+   {
+      static $cfg_size = array(
+         // col_name => number of integers in DB (needed for writing)
+         CFGCOLS_STATUS_GAMES             => 1,
+         CFGCOLS_STATUS_TOURNAMENTS       => 1,
+         CFGCOLS_WAITINGROOM              => 1,
+         CFGCOLS_USERS                    => 1,
+         CFGCOLS_OPPONENTS                => 1,
+         CFGCOLS_CONTACTS                 => 1,
+         CFGCOLS_GAMES_RUNNING_ALL        => 2, // >30 bit
+         CFGCOLS_GAMES_RUNNING_USER       => 2, // >30 bit
+         CFGCOLS_GAMES_FINISHED_ALL       => 2, // >30 bit
+         CFGCOLS_GAMES_FINISHED_USER      => 2, // >30 bit
+         CFGCOLS_GAMES_OBSERVED           => 2, // >30 bit
+         CFGCOLS_GAMES_OBSERVED_ALL       => 2, // >30 bit
+         CFGCOLS_BULLETIN_LIST            => 1,
+         CFGCOLS_FEATURE_LIST             => 1,
+         CFGCOLS_TOURNAMENTS              => 1,
+         CFGCOLS_TOURNAMENT_PARTICIPANTS  => 1,
+         CFGCOLS_TD_TOURNAMENT_PARTICIPANTS  => 1,
+         CFGCOLS_TOURNAMENT_RESULTS       => 1,
+         CFGCOLS_TOURNAMENT_LADDER_VIEW   => 1,
+         CFGCOLS_TOURNAMENT_POOL_VIEW     => 1,
+      );
+
+      if( !isset($cfg_size[$col_name]) )
+         error('invalid_args', "ConfigTableColumns[$dbgmsg]::get_config_size.check.col($col_name)");
+
+      return $cfg_size[$col_name];
+   }//get_config_size
 
 } // end of 'ConfigTableColumns'
 
