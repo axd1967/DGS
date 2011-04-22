@@ -34,7 +34,7 @@ Description:
  uid         | int(11)                                                   | NULL
  Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') | PRIV_MSG
  Status      | enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE')  | NEW
- TargetType  | enum('UNSET','ALL','TD','TP','UL')                        | UNSET
+ TargetType  | enum('ALL','TD','TP','UL')                                | NULL
  PublishTime | datetime                                                  | 0000-00-00 00:00:00
  ExpireTime  | datetime                                                  | 0000-00-00 00:00:00
  tid         | int(11)                                                   | 0
@@ -66,11 +66,11 @@ Description:
    - DELETE = bulletin, that should be deleted
 
 * TargetType :
-   - UNSET = needs assignment (by admin) or by category later
    - ALL = bulletin shown to ALL DGS-users (Ref_ID := 0)
    - TD = bulletin shown to tournament-director of referenced tournament (Ref_ID := tid)
    - TP = bulletin shown to tournament-participants of referenced tournament (Ref_ID := tid)
    - UL = bulletin shown to User-List (Ref_ID := 0)
+   - NOTE: no default defined in DB, because it MUST be set by application
 
 * PublishTime : defines order of bulletins
 
