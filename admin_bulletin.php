@@ -24,6 +24,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
+require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinAdmin');
@@ -109,26 +110,26 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin ID'),
          'TEXT',        ($bid ? $bid : T_('NEW bulletin#bulletin')), ));
+   if( $bid || $vars['author'] == $bulletin->User->Handle )
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Bulletin Author'),
+            'TEXT',        $bulletin->User->user_reference(), ));
    if( $bulletin->Lastchanged > 0 )
-   {
       $bform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        formatDate($bulletin->Lastchanged), ));
-   }
    if( !is_null($bulletin->Tournament) )
-   {
       $bform->add_row( array(
             'DESCRIPTION', T_('Tournament#bulletin'),
             'TEXT',        $bulletin->Tournament->build_info(1), ));
-   }
    if( $bid )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Hits (read marks)'),
             'TEXT',        $bulletin->CountReads, ));
-      $bform->add_row( array(
+      /* TODO $bform->add_row( array(
             'DESCRIPTION', T_('Admin Note'),
-            'TEXT',        span('FormWarning', $bulletin->AdminNote), ));
+            'TEXT',        span('FormWarning', $bulletin->AdminNote), )); */
    }
 
    $bform->add_row( array( 'HR' ));
@@ -181,6 +182,9 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    }
 
    $bform->add_empty_row();
+   $bform->add_row( array(
+         'DESCRIPTION', T_('Author'),
+         'TEXTINPUT',   'author', 16, 20, $vars['author'], ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Publish Time'),
          'TEXTINPUT',   'publish_time', 20, 30, $vars['publish_time'],
@@ -331,6 +335,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       'category'        => $bulletin->Category,
       'status'          => $bulletin->Status,
       'target_type'     => $bulletin->TargetType,
+      'author'          => $bulletin->User->Handle,
       'publish_time'    => formatDate($bulletin->PublishTime),
       'expire_time'     => formatDate($bulletin->ExpireTime),
       'subject'         => $bulletin->Subject,
@@ -414,6 +419,24 @@ function parse_edit_form( &$bulletin, $is_admin )
       }
 
 
+      $new_value = trim($vars['author']);
+      if( (string)$new_value == '' )
+         $errors[] = T_('Missing bulletin author');
+      else
+      {
+         $user = User::load_user_by_handle( $new_value );
+         if( is_null($user) && is_numeric($new_value) && $new_value > GUESTS_ID_MAX )
+            $user = User::load_user( $new_value );
+         if( is_null($user) )
+            $errors[] = sprintf( T_('No user found for author [%s]#bulletin'), $new_value );
+         else
+         {
+            $bulletin->uid = $user->ID;
+            $bulletin->User = $user;
+            $vars['author'] = $user->Handle;
+         }
+      }
+
       $parsed_value = parseDate( T_('Publish time for bulletin'), $vars['publish_time'] );
       if( is_numeric($parsed_value) )
       {
@@ -450,6 +473,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       if( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
       if( $old_vals['tnews_tid'] != $bulletin->tid ) $edits[] = T_('Tournament-ID#edits');
       if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('UserList#edits');
+      if( $old_vals['author'] != $vars['author'] ) $edits[] = T_('Author#edits');
       if( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('PublishTime#edits');
       if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
       if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
