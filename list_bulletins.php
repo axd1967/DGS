@@ -23,9 +23,10 @@ require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/table_columns.php';
 require_once 'include/filter.php';
-require_once 'include/classlib_profile.php';
 require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
+require_once 'include/classlib_profile.php';
+require_once 'include/classlib_userconfig.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinList');
 
@@ -38,6 +39,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    if( !$logged_in )
       error('not_logged_in');
    $my_id = $player_row['ID'];
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_BULLETIN_LIST );
 
    $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
    //$is_admin = false; //TODO for testing
@@ -102,7 +104,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_BULLETINS );
    $bfilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'read|view' ); // named-filters FC_FNAME
-   $btable = new Table( 'bulletins', $page, null, '', TABLE_ROWS_NAVI );
+   $btable = new Table( 'bulletins', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $btable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -137,16 +139,16 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    if( $is_admin )
-      $btable->add_tablehead( 1, T_('Actions#bulletin'), 'Image', TABLE_NO_HIDE, '');
+      $btable->add_tablehead( 1, T_('Actions#bulletin'), 'Image', TABLE_NO_HIDE|TABLE_NO_SORT);
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 3, T_('Status#bulletin'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
    $btable->add_tablehead( 2, T_('Author#bulletin'), 'User', 0, 'Handle+');
-   $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', 0, 'PublishTime-');
-   $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read-' );
+   $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', TABLE_NO_HIDE, 'PublishTime-');
+   $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read+' );
    if( $is_admin )
-      $btable->add_tablehead(12, T_('View#bulletin'), 'Image', TABLE_NO_SORT|TABLE_NO_HIDE );
-   $btable->add_tablehead(13, new TableHead( T_('Information#bulletin'), 'images/info.gif'), 'ImagesLeft', 0 );
+      $btable->add_tablehead(12, T_('View#bulletin'), 'Image', TABLE_NO_HIDE, 'B_View+' );
+   $btable->add_tablehead(13, new TableHead( T_('Information#bulletin'), 'images/info.gif'), 'ImagesLeft', 0);
    $btable->add_tablehead( 6, T_('Subject#bulletin'), null, TABLE_NO_SORT);
    $btable->add_tablehead(11, T_('Hits#bulletin'), 'Number', 0, 'CountReads-' );
    $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');

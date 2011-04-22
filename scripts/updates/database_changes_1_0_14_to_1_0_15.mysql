@@ -2138,3 +2138,8 @@ ALTER TABLE Bulletin
    ADD CountReads mediumint unsigned NOT NULL default '0' AFTER tid ;
 
 
+-- table-column-set for bulletin-list
+ALTER TABLE ConfigPages
+   ADD ColumnsBulletinList int NOT NULL default -1 AFTER ColumnsGamesObservedAll2 ;
+
+

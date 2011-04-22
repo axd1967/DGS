@@ -137,6 +137,7 @@ Z     NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   
  1    ColumnsGamesObserved2           | int(11)             | NO   | -1
  1    ColumnsGamesObservedAll         | int(11)             | NO   | -1
  1    ColumnsGamesObservedAll2        | int(11)             | NO   | -1
+ 1    ColumnsBulletinList             | int(11)             | NO   | -1
  1    ColumnsFeatureList              | int(11)             | NO   | -1
  1    ColumnsTournaments              | int(11)             | NO   | -1
  1    ColumnsTournamentParticipants   | int(11)             | NO   | -1

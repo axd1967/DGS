@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 16, 2011 at 01:10 PM
+-- Generation Time: Apr 22, 2011 at 05:57 PM
 -- Server version: 5.0.51
 -- PHP Version: 5.2.4-2ubuntu5.14
 
@@ -88,6 +88,18 @@ CREATE TABLE IF NOT EXISTS `BulletinRead` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `BulletinTarget`
+--
+
+CREATE TABLE IF NOT EXISTS `BulletinTarget` (
+  `bid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  PRIMARY KEY  (`bid`,`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Clock`
 --
 
@@ -150,6 +162,7 @@ CREATE TABLE IF NOT EXISTS `ConfigPages` (
   `ColumnsGamesObserved2` int(11) NOT NULL default '-1',
   `ColumnsGamesObservedAll` int(11) NOT NULL default '-1',
   `ColumnsGamesObservedAll2` int(11) NOT NULL default '-1',
+  `ColumnsBulletinList` int(11) NOT NULL default '-1',
   `ColumnsFeatureList` int(11) NOT NULL default '-1',
   `ColumnsTournaments` int(11) NOT NULL default '-1',
   `ColumnsTournamentParticipants` int(11) NOT NULL default '-1',
