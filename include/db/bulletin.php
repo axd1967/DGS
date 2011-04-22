@@ -57,6 +57,11 @@ define('BULLETIN_TRG_TP',       'TP'); // tourney-participant
 define('BULLETIN_TRG_USERLIST', 'UL');
 define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL');
 
+// stored in bitmask Players.SkipBulletin
+define('BULLETIN_SKIPCAT_TOURNAMENT',  0x01);
+define('BULLETIN_SKIPCAT_PRIVATE_MSG', 0x02);
+define('BULLETIN_SKIPCAT_SPAM',        0x04);
+
 
  /*!
   * \class Bulletin
@@ -244,15 +249,20 @@ class Bulletin
    }
 
    /*!
-    * \brief Returns QuerySQL with restrictions to view bulletins to what user is allowed to view.
+    * \brief Returns QuerySQL with restrictions to view bulletins to what current user is allowed to view,
+    *        skipping bulletins according to user-prefs 'SkipBulletin' except for $is_admin.
     * \param $is_admin true, if user is admin; false = normal user
-    * \param $uid current user-id Players.ID
     * \param $count_new true to count new-bulletins (for main-menu); false for list-bulletins
     * \param $show_target_type BULLETIN_TRG_... = query restricted to specific target-type or '' for all target-types.
     *        'B_View'-field indicating if bulletin is shown or not, values: 0 = don't show, 1 = show entry
     */
-   function build_view_query_sql( $is_admin, $uid, $count_new, $show_target_type='' )
+   function build_view_query_sql( $is_admin, $count_new, $show_target_type='' )
    {
+      global $player_row;
+      $uid = (int)@$player_row['ID'];
+      if( $uid <= 0 )
+         error('invalid_args', "Bulletin::build_view_query_sql.check.uid($is_admin,$count_new,$show_target_type)");
+
       $qsql = new QuerySQL();
       if( $count_new )
          $show_target_type = '';
@@ -268,6 +278,20 @@ class Bulletin
       {
          if( !$is_admin ) // hide some bulletins
             $qsql->add_part( SQLP_WHERE, "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')" );
+      }
+
+      // ignore all bulletins user configured to skip
+      $skip_bullcat = (int)$player_row['SkipBulletin'];
+      if( !$is_admin && $skip_bullcat > 0 )
+      {
+         $find_categories = array( BULLETIN_CAT_MAINT, BULLETIN_CAT_ADMIN_MSG, BULLETIN_CAT_TOURNAMENT_NEWS );
+         if( !($skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT) )
+            $find_categories[] = BULLETIN_CAT_TOURNAMENT;
+         if( !($skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG) )
+            $find_categories[] = BULLETIN_CAT_PRIVATE_MSG;
+         if( !($skip_bullcat & BULLETIN_SKIPCAT_SPAM) )
+            $find_categories[] = BULLETIN_CAT_SPAM;
+         $qsql->add_part( SQLP_WHERE, "B.Category IN ('".implode("','", $find_categories)."')" );
       }
 
       // BR_Read = 1 = mark-as-read, 0 = unread (=BR.bid IS NULL)
@@ -519,12 +543,27 @@ class Bulletin
       }
       elseif( (string)$diff == COUNTNEW_RECALC )
       {
-         $count_new = count_bulletin_new( $uid );
+         $count_new = Bulletin::count_bulletin_new( -1 );
          $player_row['CountBulletinNew'] = $count_new;
          db_query( "$dbgmsg.recalc",
             "UPDATE Players SET CountBulletinNew=$count_new WHERE ID='$uid' LIMIT 1" );
       }
    }//update_count_bulletin_new
+
+   /*!
+    * \brief Counts new bulletins for current user if current count < 0 (=needs-update).
+    * \param $curr_count force counting if <0 or omitted
+    * \return new bulletin count (>=0) for given user-id; or -1 on error
+    */
+   function count_bulletin_new( $curr_count=-1 )
+   {
+      if( $curr_count >= 0 )
+         return $curr_count;
+
+      $qsql = Bulletin::build_view_query_sql( /*adm*/false, /*count*/true );
+      $row = mysql_single_fetch( 'Bulletin::count_bulletin_new', $qsql->get_select() );
+      return ($row) ? $row['X_Count'] : -1;
+   }
 
    /*!
     * \brief Updates Players.CountBulletinNew according for given Bulletin-data (only updated on SHOW-status).

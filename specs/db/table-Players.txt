@@ -96,7 +96,7 @@ Zu    TableMaxRows         | smallint(5) unsigned                        | NO   
 Zu    Button               | int(11)                                     | NO   | 0
 Zu    UserPicture          | varchar(48)                                 | NO   |
 Zu    NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   | LASTMOVED
-
+Zu    SkipBulletin         | tinyint(3) unsigned                         | NO   | 4
 
 # Fields for board-related GUI-config in ConfigBoard-table:
 
@@ -112,7 +112,6 @@ Zu    NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   
  Gu   NotesLargeWidth  | tinyint(3) unsigned                         | NO   | 30
  Gu   NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
  Gu   NotesCutoff      | tinyint(3) unsigned                         | NO   | 13
-
 
 # Fields for pages-related GUI-config in ConfigPages-table:
 

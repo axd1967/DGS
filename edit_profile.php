@@ -25,6 +25,8 @@ require_once( "include/timezones.php" );
 require_once( "include/countries.php" );
 require_once( "include/form_functions.php" );
 require_once( 'include/utilities.php' );
+require_once( 'include/db/bulletin.php' );
+require_once( 'include/gui_bulletin.php' );
 
 // Reminder: to friendly reset the language:
 // {HOSTBASE}edit_profile.php?language=C
@@ -161,6 +163,19 @@ require_once( 'include/utilities.php' );
       array_push( $row,
             'TEXT', span('FormWarning', T_('Must be filled to receive a new password or a notification')) );
    $profile_form->add_row( $row);
+
+   $skipbull = (int)@$player_row['SkipBulletin'];
+   $profile_form->add_empty_row();
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Show Bulletin Categories'),
+         'CHECKBOX',    'skipbull'.BULLETIN_SKIPCAT_TOURNAMENT, 1,
+            GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT), !($skipbull & BULLETIN_SKIPCAT_TOURNAMENT) ));
+   $profile_form->add_row( array(
+         'TAB', 'CHECKBOX', 'skipbull'.BULLETIN_SKIPCAT_PRIVATE_MSG, 1,
+            GuiBulletin::getCategoryText(BULLETIN_CAT_PRIVATE_MSG), !($skipbull & BULLETIN_SKIPCAT_PRIVATE_MSG) ));
+   $profile_form->add_row( array(
+         'TAB', 'CHECKBOX', 'skipbull'.BULLETIN_SKIPCAT_SPAM, 1,
+            GuiBulletin::getCategoryText(BULLETIN_CAT_SPAM), !($skipbull & BULLETIN_SKIPCAT_SPAM) ));
 
    //--- Followings may be browser settings ---
 

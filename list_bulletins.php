@@ -64,6 +64,9 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // config for filters
    $status_filter_array = array( T_('All') => '' );
+   if( $is_admin )
+      $status_filter_array[T_('Viewable#B_status')] =
+         "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')";
    $idx_status_default = 0;
    $cnt = count($status_filter_array);
    foreach( GuiBulletin::getStatusText() as $status => $text )
@@ -168,8 +171,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $btable->current_order_string(),
          $btable->current_limit_string() );
    $iterator->addQuerySQLMerge(
-      Bulletin::build_view_query_sql( $is_admin, $my_id, /*count*/false,
-         $idxmap_ttypes[ $filter_target_type->get_value() ] ));
+      Bulletin::build_view_query_sql( $is_admin, /*count*/false, $idxmap_ttypes[ $filter_target_type->get_value() ] ));
    $iterator = Bulletin::load_bulletins( $iterator );
 
    $show_rows = $btable->compute_show_rows( $iterator->ResultRows );
@@ -269,13 +271,11 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
 
    $menu_array = array();
-   $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2".URI_AMP."no_adm=$no_adm";
-   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=$no_adm";
+   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=1";
    if( $was_admin )
    {
-      if( !$is_admin )
-         $menu_array[T_('All Bulletins')] =
-            array( 'url' => "list_bulletins.php?read=2", 'class' => 'AdminLink' );
+      $menu_array[T_('All Bulletins')] =
+         array( 'url' => "list_bulletins.php?read=2", 'class' => 'AdminLink' );
       $menu_array[T_('New admin bulletin')] =
          array( 'url' => "admin_bulletin.php", 'class' => 'AdminLink' );
    }

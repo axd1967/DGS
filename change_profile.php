@@ -22,6 +22,7 @@ $TranslateGroups[] = "Users";
 require_once 'include/std_functions.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/countries.php';
+require_once 'include/db/bulletin.php';
 
 {
    disable_cache();
@@ -57,6 +58,11 @@ require_once 'include/countries.php';
             $sendemail .= ',BOARD';
       }
    }
+
+   $skipbulletin = 0;
+   foreach( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
+      $skipbulletin |= ( !@$_GET['skipbull'.$mask] ? $mask : 0 );
+   $reset_bulletin_count = ( (int)@$player_row['Skipbulletin'] != $skipbulletin );
 
    $woodcolor = (int)@$_GET['woodcolor'];
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
@@ -101,7 +107,10 @@ require_once 'include/countries.php';
       "Name='" . mysql_addslashes($name) . "', " .
       "Email='" . mysql_addslashes($email) . "', " .
       "Open='" . mysql_addslashes(trim(get_request_arg('open'))) . "', " .
-      "SendEmail='$sendemail', ";
+      "SendEmail='$sendemail', " .
+      "SkipBulletin=$skipbulletin, ";
+   if( $reset_bulletin_count )
+      $query .= "CountBulletinNew=-1, ";
 
    $country = trim(get_request_arg('country')) ;
    if( empty($country) )

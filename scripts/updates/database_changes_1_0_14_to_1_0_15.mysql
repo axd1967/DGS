@@ -2143,3 +2143,8 @@ ALTER TABLE ConfigPages
    ADD ColumnsBulletinList int NOT NULL default -1 AFTER ColumnsGamesObservedAll2 ;
 
 
+-- added user-config to skip bulletin-categories
+ALTER TABLE Players
+   ADD SkipBulletin tinyint unsigned NOT NULL default 0x4 ;
+
+
