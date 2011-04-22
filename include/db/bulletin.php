@@ -100,7 +100,7 @@ class Bulletin
    var $User; // User-object
    var $UserList; // [ uid, ...] for TargetType=UL
    var $UserListHandles; // [ Handle, =1234, ...] for TargetType=UL (with '='-prefix for numeric handles)
-   var $UserListUserRefs; // [ [ ID/Handle/Name => val ], ... ]
+   var $UserListUserRefs; // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
    var $Tournament; // Tournament-object for $tid | null
 
    /*! \brief Constructs Bulletin-object with specified arguments. */
@@ -214,14 +214,17 @@ class Bulletin
       if( $this->ID > 0 )
       {
          $result = db_query( "Bulletin.loadUserList({$this->ID})",
-            "SELECT BT.uid as ID, P.Handle, P.Name FROM BulletinTarget AS BT " .
+            "SELECT BT.uid as ID, P.Handle, P.Name, IFNULL(C.uid,0) AS C_RejectMsg " .
+            "FROM BulletinTarget AS BT " .
                "INNER JOIN Players AS P ON P.ID=BT.uid " .
+               "LEFT JOIN Contacts AS C " .
+                  "ON C.uid=BT.uid AND C.cid={$this->uid} AND (C.SystemFlags & ".CSYSFLAG_REJECT_MESSAGE.") " .
             "WHERE BT.bid={$this->ID} ORDER BY BT.uid" );
          while( $row = mysql_fetch_array( $result ) )
          {
             $this->UserList[] = $row['ID'];
             $this->UserListHandles[] = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
-            $this->UserListUserRefs[] = $row;
+            $this->UserListUserRefs[$row['ID']] = $row;
          }
          mysql_free_result($result);
       }

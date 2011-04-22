@@ -73,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $arr_target_types = GuiBulletin::getTargetTypeText();
 
    // check + parse edit-form
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $bulletin, $is_admin );
+   list( $vars, $edits, $arr_user_msg_rejected, $input_errors ) = parse_edit_form( $bulletin, $is_admin );
    $errors = $input_errors;
 
    // save bulletin-object with values from edit-form
@@ -179,6 +179,18 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'TAB',
             'TEXTAREA',    'user_list', 80, 3, $vars['user_list'], ));
+
+      if( count($arr_user_msg_rejected) )
+      {
+         $bform->add_row( array(
+               'DESCRIPTION', span('FormWarning', T_('User List Warning#bulletin')),
+               'CHECKBOX',    'warn_reject', 1, T_('Ignore User List Warning#bulletin'), $vars['warn_reject'], ));
+         $bform->add_row( array(
+               'TAB', 'TEXT', span('FormWarning',
+                  sprintf( T_('Users [%s] have reject message contact-setting for bulletin-author [%s]'),
+                           implode(' ', $arr_user_msg_rejected),
+                           $bulletin->User->Handle )), ));
+      }
    }
 
    $bform->add_empty_row();
@@ -224,12 +236,18 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          if( is_array($bulletin->UserListUserRefs) )
          {
             $arr = array();
-            foreach( $bulletin->UserListUserRefs as $urow )
-               $arr[] = user_reference( REF_LINK, 1, '', $urow ) . "<br>\n";
+            foreach( $bulletin->UserListUserRefs as $uid => $urow )
+            {
+               $arr[] = user_reference( REF_LINK, 1, '', $urow ) .
+                  ( @$urow['C_RejectMsg']
+                     ? span('FormWarning', T_('User has reject-message contact-setting with bulletin-author#bulletin'), ' - %s' )
+                     : '' ) .
+                  "<br>\n";
+            }
 
             $bform->add_row( array(
                   'DESCRIPTION', T_('Target Users#bulletin'),
-                  'TEXT', rtrim(implode('', $arr)), ));
+                  'TEXT', implode('', $arr) ));
          }
       }
    }
@@ -251,8 +269,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 }
 
 
-// return [ handle-arr, uid-arr, errors ]
-function check_user_list( $user_list )
+// return [ handle-arr, uid-arr, User-row-arr, handle-reject-map( Handle => 1 ), errors ]
+function check_user_list( $user_list, $author_uid )
 {
    $errors = array();
    $arr_uid = array();
@@ -283,51 +301,59 @@ function check_user_list( $user_list )
    $handles = array();
    $uids = array();
    $urefs = array();
+   $rejectmsg = array();
+   $user_sql = "SELECT P.ID, P.Handle, P.Name, IFNULL(C.uid,0) AS C_RejectMsg FROM Players AS P " .
+      "LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$author_uid AND (C.SystemFlags & ".CSYSFLAG_REJECT_MESSAGE.")";
    if( count($arr_uid) > 0 )
    {
-      $result = db_query( "admin_bulletin.check_user_list.uids()",
-         "SELECT ID, Handle, Name FROM Players " .
-         "WHERE ID IN (".implode(',', $arr_uid).") LIMIT " . count($arr_uid) );
+      $result = db_query( "admin_bulletin.check_user_list.uids($author_uid)",
+         "$user_sql WHERE P.ID IN (".implode(',', $arr_uid).") LIMIT " . count($arr_uid) );
       while( $row = mysql_fetch_array( $result ) )
       {
          $uid = $row['ID'];
          $uids[] = $uid;
-         $handles[$uid] = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
+         $handles[$uid] = $view_handle = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
          $urefs[$uid] = $row;
+         if( $row['C_RejectMsg'] )
+            $rejectmsg[$view_handle] = 1;
          unset($arr_miss[$uid]);
       }
       mysql_free_result($result);
    }
    if( count($arr_handle) > 0 )
    {
-      $result = db_query( "admin_bulletin.check_user_list.handles()",
-         "SELECT ID, Handle, Name FROM Players " .
-         "WHERE Handle IN ('".implode("','", $arr_handle)."') LIMIT " . count($arr_handle) );
+      $result = db_query( "admin_bulletin.check_user_list.handles($author_uid)",
+         "$user_sql WHERE P.Handle IN ('".implode("','", $arr_handle)."') LIMIT " . count($arr_handle) );
       while( $row = mysql_fetch_array( $result ) )
       {
          $uid = $row['ID'];
          $handle = $row['Handle'];
          $uids[] = $uid;
-         $handles[$uid] = ( (is_numeric($handle)) ? '=' : '' ) . $handle;
+         $handles[$uid] = $view_handle = ( (is_numeric($handle)) ? '=' : '' ) . $handle;
          $urefs[$uid] = $row;
+         if( $row['C_RejectMsg'] )
+            $rejectmsg[$view_handle] = 1;
          unset($arr_miss[strtolower($handle)]);
       }
       mysql_free_result($result);
    }
 
+   ksort( $handles, SORT_NUMERIC );
+   ksort( $uids, SORT_NUMERIC );
+   ksort( $urefs, SORT_NUMERIC );
+
    if( count($arr_miss) > 0 )
       $errors[] = sprintf( T_('Unknown users found [%s]#bulletin_userlist'), implode(', ', array_keys($arr_miss) ));
-   else
-      ksort( $handles, SORT_NUMERIC );
 
-   return array( array_unique(array_values($handles)), array_unique($uids), array_values($urefs), $errors );
+   return array( array_unique(array_values($handles)), array_unique($uids), $urefs, array_keys($rejectmsg), $errors );
 }//check_user_list
 
-// return [ vars-hash, edits-arr, errorlist ]
+// return [ vars-hash, edits-arr, handle-msg-rejected-map, errorlist ]
 function parse_edit_form( &$bulletin, $is_admin )
 {
    $edits = array();
    $errors = array();
+   $arr_rejected = array();
    $is_posted = ( @$_REQUEST['save'] || @$_REQUEST['preview'] );
 
    // read from props or set defaults
@@ -342,12 +368,19 @@ function parse_edit_form( &$bulletin, $is_admin )
       'text'            => $bulletin->Text,
       'user_list'       => implode(' ', $bulletin->UserListHandles ),
       'tnews_tid'       => $bulletin->tid,
+      'warn_reject'     => 0,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( $is_posted )
+   {
+      foreach( array( 'warn_reject' ) as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // parse URL-vars
    if( $is_posted )
@@ -400,25 +433,8 @@ function parse_edit_form( &$bulletin, $is_admin )
                GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT_NEWS) );
       }
 
-      $new_value = trim($vars['user_list']);
-      if( (string)$new_value != '' )
-      {
-         if( $bulletin->TargetType != BULLETIN_TRG_USERLIST )
-            $errors[] = T_('User-list must be cleared when the target-type is changed#bulletin');
 
-         list( $arr_handles, $arr_uids, $arr_urefs, $check_errors ) = check_user_list( $new_value );
-         if( count($check_errors) > 0 )
-            $errors = array_merge( $errors, $check_errors );
-         else
-         {
-            $bulletin->UserList = $arr_uids;
-            $bulletin->UserListHandles = $arr_handles;
-            $bulletin->UserListUserRefs = $arr_urefs;
-            $vars['user_list'] = implode(' ', $arr_handles); // re-format
-         }
-      }
-
-
+      // NOTE: must be parsed before user-list
       $new_value = trim($vars['author']);
       if( (string)$new_value == '' )
          $errors[] = T_('Missing bulletin author');
@@ -436,6 +452,27 @@ function parse_edit_form( &$bulletin, $is_admin )
             $vars['author'] = $user->Handle;
          }
       }
+
+      $new_value = trim($vars['user_list']);
+      if( (string)$new_value != '' )
+      {
+         if( $bulletin->TargetType != BULLETIN_TRG_USERLIST )
+            $errors[] = T_('User-list must be cleared when the target-type is changed#bulletin');
+
+         list( $arr_handles, $arr_uids, $arr_urefs, $arr_rejected, $check_errors ) =
+            check_user_list( $new_value, $bulletin->uid );
+         if( count($check_errors) > 0 )
+            $errors = array_merge( $errors, $check_errors );
+         else
+         {
+            $bulletin->UserList = $arr_uids;
+            $bulletin->UserListHandles = $arr_handles;
+            $bulletin->UserListUserRefs = $arr_urefs;
+            $vars['user_list'] = implode(' ', $arr_handles); // re-format
+         }
+      }
+      if( count($arr_rejected) && !$vars['warn_reject'] ) // don't show on preview
+         $errors[] = T_('There are User List Warnings which must be checked for saving bulletin!');
 
       $parsed_value = parseDate( T_('Publish time for bulletin'), $vars['publish_time'] );
       if( is_numeric($parsed_value) )
@@ -480,7 +517,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');
    }
 
-   return array( $vars, array_unique($edits), $errors );
+   return array( $vars, array_unique($edits), $arr_rejected, $errors );
 }//parse_edit_form
 
 ?>

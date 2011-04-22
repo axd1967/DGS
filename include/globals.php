@@ -162,4 +162,12 @@ define('RATING_NONE',  'NONE'); // no rating set
 define('RATING_INIT',  'INIT'); // rating set, but can be changed (no rated games yet)
 define('RATING_RATED', 'RATED'); // rating established (rated game exists)
 
+// ---------- User stuff ------------------------------------------
+
+// Contacts.SystemFlags (bitmask for database): 16bit
+define('CSYSFLAG_WAITINGROOM',    0x0001); // hide my games in waiting-room from contact
+define('CSYSFLAG_REJECT_MESSAGE', 0x0002); // don't accept message from contact
+define('CSYSFLAG_REJECT_INVITE',  0x0004); // don't accept invitation from contact
+define('CSYSFLAG_WR_HIDE_GAMES',  0x0008); // hide games of user in waiting-room (e.g. paid games)
+
 ?>

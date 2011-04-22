@@ -19,21 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
+require_once 'include/globals.php';
 require_once 'include/std_classes.php';
 
 
-// system-flags (bitmask for database): 16bit
-define('CSYSFLAG_WAITINGROOM',    0x0001); // hide my games in waiting-room from contact
-define('CSYSFLAG_REJECT_MESSAGE', 0x0002); // don't accept message from contact
-define('CSYSFLAG_REJECT_INVITE',  0x0004); // don't accept invitation from contact
-define('CSYSFLAG_WR_HIDE_GAMES',  0x0008); // hide games of user in waiting-room (e.g. paid games)
-
-// user-flags (bitmask for database): 32bit
+// Contacts.UserFlags (bitmask for database): 32bit
 define('CUSERFLAG_BUDDY',   0x00000001); // contact is good friend of mine
 define('CUSERFLAG_FRIEND',  0x00000002); // friend-like relation with contact
 define('CUSERFLAG_STUDENT', 0x00000004); // contact is my student
 define('CUSERFLAG_TEACHER', 0x00000008); // contact is my teacher
-define('CUSERFLAG_FAN',     0x00000010); // í'm a fan of contact
+define('CUSERFLAG_FAN',     0x00000010); // I'm a fan of contact
 define('CUSERFLAG_ADMIN',   0x00000020); // contact is member of admin-crew
 define('CUSERFLAG_TROLL',   0x00000040); // contact is a troll
 define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (allow special search on notes)
