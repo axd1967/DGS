@@ -291,6 +291,12 @@ function cmp_int( $a, $b )
       return 1;
 }
 
+/*! \brief Cuts string after $len chars, append $hardcut if set and str-len > $len. */
+function cut_str( $str, $len, $hardcut='...' )
+{
+   return substr($str, 0, $len) . ($hardcut && strlen($str) > $len ? $hardcut : '' );
+}
+
 /**
  * [Rod] I've noticed that we can't know what is the encoding used at input time
  * by a user. For instance, with my FireFox browser 1.0.7, I may force the
