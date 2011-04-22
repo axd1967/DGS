@@ -399,15 +399,21 @@ class Tournament
                          make_html_safe( $this->Title, true),
                          $extra );
 
-      //if( $version == 4 )
-      return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
-                      Tournament::getScopeText($this->Scope),
-                      Tournament::getTypeText($this->Type),
-                      T_('Tournament'),
-                      $this->ID,
-                      T_('Status#tourney'),
-                      Tournament::getStatusText($this->Status) );
-   }
+      if( $version == 4 )
+         return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
+                         Tournament::getScopeText($this->Scope),
+                         Tournament::getTypeText($this->Type),
+                         T_('Tournament'),
+                         $this->ID,
+                         T_('Status#tourney'),
+                         Tournament::getStatusText($this->Status) );
+
+      //if( $version == 5 ) // extra=max-title-len
+      return span('Tourney', sprintf( '%s %s - %s', // linked: (img) Tournament - Title
+                        echo_image_tournament_info($this->ID),
+                        anchor( $base_path."tournaments/view_tournament.php?tid=".$this->ID, T_('Tournament') ),
+                        make_html_safe( (is_numeric($extra) ? cut_str($this->Title, $extra) : $this->Title), true) ));
+   }//build_info
 
    function build_role_info()
    {
