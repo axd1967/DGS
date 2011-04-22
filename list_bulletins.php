@@ -41,14 +41,19 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_BULLETIN_LIST );
 
-   $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
-   //$is_admin = false; //TODO for testing
+   $was_admin = $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+   $no_adm = (@$_REQUEST['no_adm']) ? 1 : 0;
+   if( $no_adm )
+      $is_admin = false;
 
    $page = "list_bulletins.php?";
 
 /* Actual REQUEST calls used:
      ''                       : show bulletins (without text)
      text=1|0                 : show bulletins with/without text
+     read=0|1|2               : show bulletins (0=unread, 1=read, 2=all)
+     view=0|1|2               : show bulletins for admin (0=all, 1=mine, 2=others)
+     no_adm=0|1               : show bulletins (0=admin-mode, 1=user-mode for admin)
      mr=bid                   : mark bulletin with Bulletin.ID=bid as read
 */
 
@@ -135,6 +140,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    // page vars
    $page_vars = new RequestParameters();
    $page_vars->add_entry( 'text', $with_text );
+   $page_vars->add_entry( 'no_adm', $no_adm );
    $btable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -175,11 +181,13 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    if( $is_admin )
-      $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin View')) );
+      $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin View#bulletin')) );
+   elseif( $was_admin )
+      $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin User-View#bulletin')) );
    section('Bulletin', $title );
 
    $menu = array();
-   $baseURLMenu = $page .
+   $baseURLMenu = $page . "no_adm=$no_adm" . URI_AMP .
       $btable->current_rows_string(1) .
       $btable->current_sort_string(1) .
       $btable->current_filter_string(1) .
@@ -261,10 +269,13 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
 
    $menu_array = array();
-   $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2";
-   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1".URI_AMP."view=1";
-   if( $is_admin )
+   $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2".URI_AMP."no_adm=$no_adm";
+   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=$no_adm";
+   if( $was_admin )
    {
+      if( !$is_admin )
+         $menu_array[T_('All Bulletins')] =
+            array( 'url' => "list_bulletins.php?read=2", 'class' => 'AdminLink' );
       $menu_array[T_('New admin bulletin')] =
          array( 'url' => "admin_bulletin.php", 'class' => 'AdminLink' );
    }

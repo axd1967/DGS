@@ -238,8 +238,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
 
    $menu_array = array();
-   $menu_array[T_('Bulletins')] = "list_bulletins.php?read=2";
-   $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1";
+   $menu_array[T_('All Bulletins')] =
+      array( 'url' => "list_bulletins.php?read=2", 'class' => 'AdminLink' );
    $menu_array[T_('New admin bulletin')] =
       array( 'url' => "admin_bulletin.php", 'class' => 'AdminLink' );
 

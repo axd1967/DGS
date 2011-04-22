@@ -560,12 +560,12 @@ function make_dragon_main_menu( $player_row )
       $arr_forums[] = array( span('MainMenuCount', '(*)'), 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,1, $arr_forums );
-   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php?read=2', array()) );
+   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php?read=2'.URI_AMP.'no_adm=1', array()) );
    if( $cnt_bulletin_new > 0 )
    {
       $arr_bulletins[] = MINI_SPACING;
       $arr_bulletins[] = array( span('MainMenuCount', $cnt_bulletin_new, '(%s)' ),
-         'list_bulletins.php?text=1'.URI_AMP.'view=1', array( 'class' => 'MainMenuCount' ) );
+         'list_bulletins.php?text=1'.URI_AMP.'view=1'.URI_AMP.'no_adm=1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,2, $arr_bulletins );
    if( ALLOW_FEATURE_VOTE )
