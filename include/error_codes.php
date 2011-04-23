@@ -40,7 +40,7 @@ class ErrorCode
    function echo_error_text( $error_code, $error_log_id )
    {
       if( $error_log_id && ErrorCode::is_shown_error_log_id( $error_code ) )
-         echo " [ERRLOG{$error_log_id}]: ";
+         echo span('ErrorMsg', " [ERRLOG $error_log_id] ($error_code): ");
       echo ErrorCode::get_error_text( $error_code );
    }
 
@@ -52,7 +52,7 @@ class ErrorCode
       if( isset($ARR_GLOBALS_ERRORS['TEXT'][$error_code]) )
          return $ARR_GLOBALS_ERRORS['TEXT'][$error_code];
       else
-         return @$ARR_GLOBALS_ERRORS['TEXT']['internal_error'] . " ($error_code)"; // default-error
+         return " ($error_code) " . @$ARR_GLOBALS_ERRORS['TEXT']['internal_error']; // default-error
    }
 
    function is_shown_error_log_id( $error_code )
@@ -108,6 +108,7 @@ class ErrorCode
          $arr_logid['mysql_insert_message'] = 1;
          $arr_logid['mysql_insert_move'] = 1;
          $arr_logid['mysql_insert_player'] = 1;
+         $arr_logid['mysql_insert_post'] = 1;
          $arr_logid['mysql_query_failed'] = 1;
          $arr_logid['mysql_select_db_failed'] = 1;
          $arr_logid['mysql_start_game'] = 1;
@@ -122,6 +123,8 @@ class ErrorCode
          $arr_secret['bad_mail_address'] = 1; // contains email
          $arr_secret['mail_failure'] = 1; // contains email
 
+         // IMPORTANT NOTE:
+         //   when adding new error-codes also check need_db_errorlog()-func in 'error.php' !!
 
          $arr['internal_error'] = // default-error-text
             T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
@@ -161,6 +164,9 @@ class ErrorCode
 
          $arr['bulkmessage_self'] =
             T_('Message to myself is forbidden for bulk message.');
+
+         $arr['bulkmessage_forbidden'] =
+            T_('Sorry, you are not allowed to send a bulk message.');
 
          $arr['invited_to_unknown_game'] =
             T_("Sorry, can't find the game you are invited to. Already declined?");
@@ -221,7 +227,7 @@ class ErrorCode
             T_("Sorry, you have to supply a name.");
 
          $arr['newpassword_already_sent'] =
-            T_("A new password has already been sent to this user, please use that password instead of sending another one.");
+            T_("A new password has already been sent to this user. Please use that password instead of sending another one.");
 
          $arr['no_email:support'] =
             T_("Please log in as guest and use the support forum to get help (provide your user-id and your email).");
@@ -248,7 +254,16 @@ class ErrorCode
             T_("Sorry, for this operation you need to be the game-master of the multi-player-game.");
 
          $arr['multi_player_unknown_user'] =
-            T_('Sorry, the user is not registered for the multi-player-game.');
+            T_('Sorry, the user is not registered or invited for the multi-player-game.');
+
+         $arr['multi_player_msg_miss_game'] =
+            T_('Missing game-id for multi-player-game message.');
+
+         $arr['multi_player_msg_no_mpg'] =
+            T_('Multi-player-game message can only be created for a multi-player-game.');
+
+         $arr['multi_player_invite_unknown_user'] =
+            T_('This shouldn\'t happen. Found unknown invited user for multi-player-game message. Please contact an admin.');
 
          $arr['guest_no_invite'] =
             T_('Sorry, the guest-user can not be invited.');
