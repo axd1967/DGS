@@ -40,7 +40,7 @@ require_once( "include/error_codes.php" );
       {
          $userid = @$player_row['Handle'];
          $BlockReason = @$player_row['BlockReason'];
-         $is_admin = ( @$player_row['admin_level'] & ADMINGROUP_EXECUTIVE );
+         $is_admin = ( @$player_row['admin_level'] & (ADMIN_DATABASE|ADMIN_DEVELOPER) );
       }
    }
    else
@@ -97,13 +97,13 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    }
 
    start_page("Error", true, $logged_in, $player_row );
-   echo '&nbsp;<br>';
+   echo "<br>\n";
 
 
    // NOTE:
    // - When adding a new error-code, add output of errorlog_id if it is helpful
    //   to know the Errorlog.ID to identify a problem.
-   //   Having a ID relieves support of searching in big Errorlog-table.
+   //   Having an ID relieves support of searching in big Errorlog-table.
    // - It's not always useful to log errorlog_id,
    //   e.g. not for errors indicating a false behaviour of a user
 
@@ -113,6 +113,10 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 
    db_close();
 
+   // also output detailed debug-msg
+   if( !is_null($debugmsg) && !$hide_dbgmsg && (string)$debugmsg != '' )
+      echo '<p>', span('ErrorMsg', 'Error details: '), basic_safe($debugmsg), '</p>';
+
    $mysqlerror = get_request_arg('mysqlerror');
    if( $mysqlerror )
    {
@@ -120,14 +124,9 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
          array( MYSQLHOST, DB_NAME, MYSQLUSER, MYSQLPASSWORD),
          array( '[*host*]', '[*db*]', '[*user*]', '[*pwd*]'),
          $mysqlerror);
-      echo "<p>MySQL error: ".basic_safe($mysqlerror)."</p>";
+      echo '<p>', span('ErrorMsg', 'MySQL error: '), basic_safe($mysqlerror), '</p>';
    }
 
-   // also output detailed debug-msg
-   if( !is_null($debugmsg) && !$hide_dbgmsg && (string)$debugmsg != '' )
-      echo "<p>Error details: [$debugmsg]</p>";
-
-   echo '<p></p>';
    end_page();
 }
 
@@ -138,8 +137,8 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
 {
    $hide_debugmsg = false;
 
-   Errorcode::echo_error_text($error_code, $errorlog_id);
-   if( Errorcode::is_sensitive($error_code) )
+   ErrorCode::echo_error_text($error_code, $errorlog_id);
+   if( ErrorCode::is_sensitive($error_code) )
       $hide_debugmsg = true;
 
    switch( (string)$error_code )
@@ -159,14 +158,14 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
 
          if( (string)$block_reason != '' )
          {
-            Errorcode::echo_error_text( 'login_denied:blocked_with_reason', $errorlog_id );
+            ErrorCode::echo_error_text( 'login_denied:blocked_with_reason', $errorlog_id );
             echo "<br><br>\n",
                '<table><tr><td>',
                   make_html_safe($block_reason, 'msg'),
                "</td></tr></table><br>\n";
          }
          else
-            Errorcode::echo_error_text( 'login_denied:blocked', $errorlog_id );
+            ErrorCode::echo_error_text( 'login_denied:blocked', $errorlog_id );
          break;
       }//login_denied
 
@@ -175,7 +174,6 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
          if( (string)$userid != '' )
             admin_log( 0, $userid, $error_code );
          break;
-
    } //end-switch
 
    return $hide_debugmsg;
