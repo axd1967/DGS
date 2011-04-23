@@ -52,7 +52,7 @@ require_once( "include/register_functions.php" );
    start_page( $title, true, false, $player_row );
    echo "<h3 class=\"Header\">$title</h3>\n";
 
-   Errorcode::echo_error_text('ip_blocked_register', $errorlog_id);
+   ErrorCode::echo_error_text('ip_blocked_register', $errorlog_id);
    echo "<br><br>\n",
          T_('To register a new account despite the IP-block, a user account can be created by an admin.'),
          "<br>\n",
