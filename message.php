@@ -52,6 +52,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error("not_logged_in");
+   $is_bulk_admin = ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME) );
 
 /* Actual GET calls used (to identify the ways to handle them):
    if(message.php?mode=...) //with mode
@@ -59,7 +60,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       NewMessage&uid=      : from user info
       NewMessage&mpmt=&mpgid=&...  : special-message for multi-player-game
          mpmt=1                    : multi-message  for MPG-start_game
-         mpmt=2 & mpgcol=&mpmove=  : multi-message  for MPG-resign
+         mpmt=2 & mpcol=&mpmove=   : multi-message  for MPG-resign
          mpmt=3 & mpuid=           : single-message for MPG-invite
       ShowMessage&mid=     : from message_list_body() or message_info_table() or list_messages or here
       Invite               : from menu (or site_map or introduction)
@@ -81,7 +82,8 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $my_id = $player_row['ID'];
    $folders = get_folders($my_id);
    $type = get_request_arg('type', 'NORMAL');
-   $mpg_gid = 0;
+   $mpg_gid = (int)get_request_arg('mpgid');
+   $mpg_type = (int)get_request_arg('mpmt');
 
    $mid = (int)@$_REQUEST['mid'];
    $other_uid = (int)@$_REQUEST['oid']; // for bulk-message
@@ -92,11 +94,15 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       $mode = 'Dispute';
    $can_reply = false;
 
-   $mpg_type = (int)get_request_arg('mpmt');
    $arg_to = get_request_arg('to'); // single or multi-receivers
    $has_arg_to = ( (string)trim($arg_to) != '' );
-   if( (!$arg_to && $mode == 'NewMessage') || ($mpg_type == MPGMSG_INVITE) )
-      list( $arg_to, $mpg_type, $mpg_gid, $mpg_arr ) = read_mpgame_request(); // handle multi-player-game msg-request
+   if( $mpg_type > 0 && (!$arg_to && $mode == 'NewMessage') )
+   {
+      // handle multi-player-game msg-request
+      list( $arg_to, $arr_mpg_users, $mpg_arr ) = read_mpgame_request();
+   }
+   else
+      $arr_mpg_users = null;
    if( !$arg_to )
       $arg_to = read_user_from_request(); // single
 
@@ -218,15 +224,19 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
    $has_errors = ( count($errors) > 0 );
 
-
    start_page("Message - $submode", true, $logged_in, $player_row );
 
    echo "<center>\n";
 
    $message_form = new Form('messageform', 'message.php#preview', FORM_POST, true );
-   $message_form->add_hidden( 'mode', $mode);
-   $message_form->add_hidden( 'mid', $mid);
-   $message_form->add_hidden( 'senderid', $my_id);
+   $message_form->add_hidden('mode', $mode);
+   $message_form->add_hidden('mid', $mid);
+   $message_form->add_hidden('senderid', $my_id);
+   if( $mpg_type > 0 )
+   {
+      foreach( array( 'mpmt', 'mpgid', 'mpcol', 'mpmove', 'mpuid' ) as $hidden_key )
+         $message_form->add_hidden( $hidden_key, get_request_arg($hidden_key) );
+   }
 
    switch( (string)$submode )
    {
@@ -286,22 +296,12 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
       case 'NewMessage':
       {
-         if( $mpg_type == MPGMSG_INVITE )
-         {
-            $disable_edit = 'disabled=1';
-            $message_form->add_hidden( 'mpmt', $mpg_type );
-            $message_form->add_hidden( 'mpgid', $mpg_gid );
-            $message_form->add_hidden( 'mpuid', (int)get_request_arg('mpuid') );
-         }
-         else
-            $disable_edit = '';
-
          $message_form->add_row( array(
-               'HEADER', T_('New message'),
+               'HEADER', ($mpg_type > 0) ? T_('New multi-player-game message') : T_('New message'),
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
-               'TEXTINPUTX', 'to', 50, 275, $arg_to, $disable_edit,
+               'TEXTINPUTX', 'to', 50, 275, $arg_to, ( $mpg_type == MPGMSG_INVITE ? 'disabled=1' : '' ),
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Subject'),
@@ -464,7 +464,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
 
 /*!
- * \brief Checks and performs message-actions.
+ * \brief Checks and if no error occured performs message-actions.
  * \param $arg_to single or multi-receivers
  * \return does NOT return on success but jump to status-page (or to game-player-page for MPG-invite);
  *         on check-failure returns error-array for previewing
@@ -589,7 +589,7 @@ function handle_change_folder( $my_id, $folders, $new_folder, $type )
 }//handle_change_folder
 
 // return: false=success, otherwise failure
-function read_message_receivers( &$dgs_msg, $type, $invitation_step, &$to_handles )
+function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )
 {
    static $cache = array();
 
@@ -602,6 +602,8 @@ function read_message_receivers( &$dgs_msg, $type, $invitation_step, &$to_handle
 
    if( !isset($cache[$to_handles]) ) // need lower-case for check
    {
+      global $player_row, $is_bulk_admin, $arr_mpg_users, $mpg_type, $mpg_gid;
+
       $cache[$to_handles] = 1; // handle(s) checked
 
       if( $cnt_to < 1 )
@@ -610,37 +612,61 @@ function read_message_receivers( &$dgs_msg, $type, $invitation_step, &$to_handle
          return $dgs_msg->add_error( sprintf( T_('Too much receivers (max. %s)'), MAX_MSG_RECEIVERS ) );
       else // single | multi
       {
-         if( $cnt_to > 1 && $type == 'INVITATION' )
+         if( $cnt_to > 1 && $msg_type == 'INVITATION' )
             return $dgs_msg->add_error( T_('Only one receiver for invitation allowed!') );
 
-         global $player_row;
-         $my_id = (int)@$player_row['ID']; // sender
-
+         $sender_uid = (int)@$player_row['ID']; // sender
          list( $arr_receivers, $errors ) =
-            DgsMessage::load_message_receivers( $type, $invitation_step, $arr_to );
-         foreach( $errors as $error )
-            $dgs_msg->add_error( $error );
+            DgsMessage::load_message_receivers( $msg_type, $invitation_step, $arr_to );
+         $dgs_msg->add_errors( $errors );
+
+         if( $mpg_type > 0 && $mpg_gid > 0 && is_null($arr_mpg_users) )
+         {
+            $mpg_col = get_request_arg('mpcol');
+            $arr_mpg_users = GamePlayer::load_users_for_mpgame( $mpg_gid, $mpg_col, /*skip-myself*/true, $tmp_arr );
+         }
 
          $arr_handles = array();
          foreach( $arr_receivers as $handle => $user_row )
          {
-            if( $user_row['ID'] == $my_id && $cnt_to > 1 )
+            $uid = $user_row['ID'];
+            if( $uid == $sender_uid && $cnt_to > 1 )
                $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_self') );
+
             $dgs_msg->add_recipient( $user_row );
             $arr_handles[] = $user_row['Handle']; // original case
+
+            // MPG-message only allows MPG-players as recipients
+            if( $mpg_type > 0 && $mpg_gid > 0 )
+            {
+               $is_mpg_player = ( is_array($arr_mpg_users) )
+                  ? isset($arr_mpg_users[$uid])
+                  : GamePlayer::exists_game_player($mpg_gid, $uid); // fallback-check
+               if( !$is_mpg_player )
+                  $dgs_msg->add_error(
+                     sprintf( T_('User [%s] is no participant of multi-player-game.'), $user_row['Handle'] ));
+            }
          }
          $to_handles = implode(' ', $arr_handles); // reset original case
+
+         // bulk-message only allowed for MPG|admin as sender
+         if( $dgs_msg->count_recipients() > 1 )
+         {
+            $check_flags = ( $mpg_type == MPGMSG_INVITE ) ? GPFLAG_MASTER : 0;
+            if( !$is_bulk_admin && !( $mpg_type > 0 && GamePlayer::exists_game_player($mpg_gid, $sender_uid, $check_flags) ) )
+               $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_forbidden') );
+         }
       }
    }
 
-   return (count($dgs_msg->errors) > 0 );
+   return ( $dgs_msg->count_errors() > 0 );
 }//read_message_receivers
 
 function read_user_from_request()
 {
    global $player_row;
 
-   get_request_user( $uid, $uhandle, true);
+   get_request_user( $uid, $uhandle, true); // set globals: $uid, $uhandle
    if( !$uhandle && $uid > 0 )
    {
       if( $uid == $player_row['ID'] )
@@ -655,59 +681,73 @@ function read_user_from_request()
    return $uhandle;
 }//read_user_from_request
 
-// read and check mpgame-request-info; returns: [ arg_to, mpg_msgtype, mpg_gid, mpg_arr ]
+// read and check mpgame-request-info; returns: [ arg_to, $arr_mgp_handles, mpg_arr ]
 // mpg_arr as required for MultiPlayerGame::get_message_defaults()
+// needs globals: mpg_gid, mpg_type
 function read_mpgame_request()
 {
-   $gid = (int)get_request_arg('mpgid');
-   if( $gid <= 0 )
-      return array( '', 0, 0, 0 );
+   global $player_row, $mpg_gid, $mpg_type;
 
    $col = get_request_arg('mpcol');
-   $type = (int)get_request_arg('mpmt');
-   if( $type != MPGMSG_STARTGAME && $type != MPGMSG_RESIGN && $type != MPGMSG_INVITE )
-      error('invalid_args', "message.read_mpgame_request.check.mpmsgtype($gid,$col,$type)");
+   $dbgmsg = "message.read_mpgame_request($mpg_gid,$mpg_type,$col)";
+   if( $mpg_type != MPGMSG_STARTGAME && $mpg_type != MPGMSG_RESIGN && $mpg_type != MPGMSG_INVITE )
+      error('invalid_args', "$dbgmsg.check.mpg_type");
 
-   if( $type == MPGMSG_INVITE )
+   if( $mpg_gid <= 0 )
+      error('multi_player_msg_miss_game', "$dbgmsg.check.game");
+   $game_row = mysql_single_fetch( "$dbgmsg.load_game",
+         "SELECT GameType, GamePlayers, ToMove_ID, Status FROM Games WHERE ID=$mpg_gid LIMIT 1" );
+   if( !$game_row )
+      error('unknown_game', "$dbgmsg.load_game2");
+   if( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
+      error('multi_player_msg_no_mpg', "$dbgmsg.load_game2");
+   $game_status = $game_row['Status'];
+
+   if( $mpg_type == MPGMSG_INVITE )
    {
       $mpg_uid = (int)get_request_arg('mpuid');
-      $mpg_gp = GamePlayer::load_game_player_by_uid( $gid, $mpg_uid );
+      $mpg_gp = GamePlayer::load_game_player_by_uid( $mpg_gid, $mpg_uid );
       if( is_null($mpg_gp) )
-         error('multi_player_unknown_user', "message.read_mpgame_request.check.mpuid($gid,$type,$mpg_uid)");
+         error('multi_player_unknown_user', "$dbgmsg.check.mpuid");
+
       $arr_users = User::load_quick_userinfo( array( $mpg_uid ) );
       if( !isset($arr_users[$mpg_uid]) )
-         error('internal_error', "message.read_mpgame_request.check.mpuid($gid,$type,$mpg_uid)");
-      $handles = array( $arr_users[$mpg_uid]['Handle'] );
+         error('multi_player_invite_unknown_user', "$dbgmsg.check.mpuid($mpg_uid)");
+
+      $handles = array( $mpg_uid => $arr_users[$mpg_uid]['Handle'] );
    }
-   else
+   else // MPGMSG_STARTGAME | MPGMSG_RESIGN
    {
-      $tmp_arr = array();
-      $handles = GamePlayer::load_users_for_mpgame( $gid, $col, /*skip-myself*/true, $tmp_arr );
+      $handles = GamePlayer::load_users_for_mpgame( $mpg_gid, $col, /*skip-myself*/true, $tmp_arr );
    }
    if( count($handles) == 0 )
-      error('multi_player_no_users', "message.read_mpgame_request.chk.handles($gid,$type,$col)");
+      error('multi_player_no_users', "$dbgmsg.check.handles");
 
-   $move = (int)get_request_arg('mpmove');
    $mpg_arr = array(); // for Resign
-
-   if( $type == MPGMSG_INVITE )
+   if( $mpg_type == MPGMSG_INVITE )
    {
-      global $player_row;
-
-      $game_row = mysql_single_fetch( "message.read_mpgame_request.check.game($gid,$type)",
-            "SELECT GameType, GamePlayers, ToMove_ID FROM Games WHERE ID=$gid LIMIT 1" );
-      if( !$game_row )
-         error('unknown_game', "message.read_mpgame_request.load.game($gid,$type)");
+      if( $game_status != GAME_STATUS_SETUP )
+         error('invalid_game_status', "$dbgmsg.check.invite.status($game_status)");
       if( $player_row['ID'] != $game_row['ToMove_ID'] )
-         error('multi_player_master_mismatch', "message.read_mpgame_request.load.game($gid,$type)");
+         error('multi_player_master_mismatch', "$dbgmsg.check.invite.master($game_status)");
 
       $mpg_arr['from_handle'] = $player_row['Handle'];
       $mpg_arr['game_type']   = GameTexts::format_game_type( $game_row['GameType'], $game_row['GamePlayers'] );
    }
-   elseif( $type == MPGMSG_RESIGN )
-      $mpg_arr['move'] = $move; // for Resign
+   elseif( $mpg_type == MPGMSG_RESIGN )
+   {
+      if( !isRunningGame($game_status) )
+         error('invalid_game_status', "$dbgmsg.check.resign.status($game_status)");
 
-   return array( implode(' ', $handles), $type, $gid, $mpg_arr );
+      $mpg_arr['move'] = (int)get_request_arg('mpmove'); // for Resign
+   }
+   elseif( $mpg_type == MPGMSG_STARTGAME )
+   {
+      if( $game_status != GAME_STATUS_SETUP )
+         error('invalid_game_status', "$dbgmsg.check.startgame.status($game_status)");
+   }
+
+   return array( implode(' ', array_values($handles)), $handles, $mpg_arr );
 }//read_mpgame_request
 
 ?>

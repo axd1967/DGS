@@ -618,7 +618,7 @@ class MultiPlayerGame
          case MPGMSG_STARTGAME:
          default:
             return array(
-               T_('Everybody ready to start game?#mpg'),
+               T_('Everybody ready to start the game?#mpg'),
                "<game_ $mpg_gid>\n"
             );
       }
@@ -771,18 +771,21 @@ class GamePlayer
       return (int)@$row['uid'];
    }//load_uid_for_move
 
-   /*! \brief Returns true, if GamePlayer-entry exists for given game-id and user-id. */
-   function exists_game_player( $gid, $uid )
+   /*! \brief Returns true, if GamePlayer-entry exists for given game-id and user-id (and flags). */
+   function exists_game_player( $gid, $uid, $flags=0 )
    {
-      $row = mysql_single_fetch( "GamePlayer::load_game_player_by_uid($gid,$uid)",
-            "SELECT ID FROM GamePlayers WHERE gid=$gid AND uid=$uid LIMIT 1" );
-      return (bool) $row;
+      $row = mysql_single_fetch( "GamePlayer::exists_game_player($gid,$uid,$flags)",
+            "SELECT Flags FROM GamePlayers WHERE gid=$gid AND uid=$uid LIMIT 1" );
+      return ( $row && $flags > 0 )
+         ? ($row['Flags'] & $flags)
+         : (bool) $row;
    }//exists_game_player
 
    /*!
-    * \brief Returns list of Players.Handle for given game-id (and group-color).
-    * \param $arr_users if non-null array given, save as arr_users["$group_color:$group_order"]
+    * \brief Returns array of Players.Handle for given game-id (and group-color).
+    * \param $arr_users if non-null array given, clear it, and save as arr_users["$group_color:$group_order"]
     *        = ( GroupColor/GroupOrder/uid/Handle/Name/Rating2/Sessioncode/Sessionexpire => values, ... )
+    * \return [ Players.ID => Players.Handle, ... ]
     */
    function load_users_for_mpgame( $gid, $group_color='', $skip_myself=false, &$arr_users )
    {
@@ -800,15 +803,14 @@ class GamePlayer
                "UNIX_TIMESTAMP(P.Sessionexpire) AS X_Sessionexpire " .
             "FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
             "WHERE GP.gid=$gid $qpart_grcol" );
-      $out = array();
+      $out = array(); # uid => Handle
+      $arr_users = array(); // clear
       while( $row = mysql_fetch_array( $result ) )
       {
-         if( !($skip_myself && $player_row['Handle'] == $row['Handle']) )
-         {
-            $out[] = $row['Handle'];
-            if( is_array($arr_users) )
-               $arr_users["{$row['GroupColor']}:{$row['GroupOrder']}"] = $row;
-         }
+         if( $skip_myself && $player_row['Handle'] == $row['Handle'] )
+            continue;
+         $out[$row['uid']] = $row['Handle'];
+         $arr_users["{$row['GroupColor']}:{$row['GroupOrder']}"] = $row;
       }
       mysql_free_result($result);
       return $out;

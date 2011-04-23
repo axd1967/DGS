@@ -1422,11 +1422,25 @@ class DgsMessage
       $this->errors = array();
    }
 
+   function count_errors()
+   {
+      return count($this->errors);
+   }
+
    function add_error( $error )
    {
       if( $error )
          $this->errors[] = $error;
       return $error;
+   }
+
+   function add_errors( $errors )
+   {
+      if( is_array($errors) )
+      {
+         foreach( $errors as $err )
+            $this->add_error($err);
+      }
    }
 
    function build_recipient_user_row()
