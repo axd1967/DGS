@@ -34,10 +34,11 @@ Description:
  uid         | int(11)                                                   | NULL
  Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') | PRIV_MSG
  Status      | enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE')  | NEW
- TargetType  | enum('ALL','TD','TP','UL')                                | NULL
+ TargetType  | enum('ALL','TD','TP','UL','MPG')                          | NULL
  PublishTime | datetime                                                  | 0000-00-00 00:00:00
  ExpireTime  | datetime                                                  | 0000-00-00 00:00:00
  tid         | int(11)                                                   | 0
+ gid         | int(11)                                                   | 0
  CountReads  | mediumint(8) unsigned                                     | 0
  AdminNote   | varchar(255)                                              |
  Subject     | varchar(255)                                              | NULL
@@ -78,7 +79,11 @@ Description:
 
 * tid : FK to Tournament.ID
    - 0 = no reference to tournament (default)
-   - >0 = tournament-id for Bulletin.Category: TNEWS
+   - >0 = tournament-id for Bulletin.TargetType=TP|TD + Bulletin.Category=TNEWS
+
+* gid : FK to Games.ID
+   - 0 = no reference to game (default)
+   - >0 = game-id for Bulletin.TargetType=MPG
 
 * CountReads : counter, increased by each user marking bulletin as read
 

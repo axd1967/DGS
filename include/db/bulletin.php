@@ -55,7 +55,8 @@ define('BULLETIN_TRG_ALL',      'ALL');
 define('BULLETIN_TRG_TD',       'TD'); // tourney-director
 define('BULLETIN_TRG_TP',       'TP'); // tourney-participant
 define('BULLETIN_TRG_USERLIST', 'UL');
-define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL');
+define('BULLETIN_TRG_MPG',      'MPG'); // multi-player-game
+define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL|MPG');
 
 // stored in bitmask Players.SkipBulletin
 define('BULLETIN_SKIPCAT_TOURNAMENT',  0x01);
@@ -73,7 +74,7 @@ global $ENTITY_BULLETIN; //PHP5
 $ENTITY_BULLETIN = new Entity( 'Bulletin',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'uid', 'tid', 'CountReads',
+      FTYPE_INT,  'ID', 'uid', 'tid', 'gid', 'CountReads',
       FTYPE_ENUM, 'Category', 'Status', 'TargetType',
       FTYPE_TEXT, 'AdminNote', 'Subject', 'Text',
       FTYPE_DATE, 'PublishTime', 'ExpireTime', 'Lastchanged'
@@ -89,6 +90,7 @@ class Bulletin
    var $PublishTime;
    var $ExpireTime;
    var $tid;
+   var $gid;
    var $CountReads;
    var $AdminNote;
    var $Subject;
@@ -106,7 +108,7 @@ class Bulletin
    /*! \brief Constructs Bulletin-object with specified arguments. */
    function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
             $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $publish_time=0,
-            $expire_time=0, $tid=0, $count_reads=0, $admin_note='', $subject='', $text='',
+            $expire_time=0, $tid=0, $gid=0, $count_reads=0, $admin_note='', $subject='', $text='',
             $lastchanged=0 )
    {
       $this->ID = (int)$id;
@@ -117,6 +119,7 @@ class Bulletin
       $this->PublishTime = (int)$publish_time;
       $this->ExpireTime = (int)$expire_time;
       $this->tid = (int)$tid;
+      $this->gid = (int)$gid;
       $this->CountReads = (int)$count_reads;
       $this->AdminNote = $admin_note;
       $this->Subject = $subject;
@@ -197,6 +200,7 @@ class Bulletin
       $data->set_value( 'PublishTime', $this->PublishTime );
       $data->set_value( 'ExpireTime', $this->ExpireTime );
       $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'gid', $this->gid );
       $data->set_value( 'CountReads', $this->CountReads );
       $data->set_value( 'AdminNote', $this->AdminNote );
       $data->set_value( 'Subject', $this->Subject );
@@ -332,6 +336,17 @@ class Bulletin
       {
          $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
       }
+      elseif( $show_target_type == BULLETIN_TRG_MPG ) // restricted to TargetType=MPG (multi-player-game)
+      {
+         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
+         $qsql->add_part( SQLP_FROM,
+            "INNER JOIN Games AS G ON G.ID=B.gid",
+            "INNER JOIN GamePlayers AS GP ON GP.gid=G.ID AND GP.uid=$uid" );
+         $qsql->add_part( SQLP_WHERE,
+            "B.TargetType='$show_target_type'",
+            "B.gid > 0",
+            "G.GameType IN ('".GAMETYPE_TEAM_GO."','".GAMETYPE_ZEN_GO."')" );
+      }
       else // show all target-types
       {
          $view_sql =
@@ -340,6 +355,7 @@ class Bulletin
                "WHEN '".BULLETIN_TRG_TP."' THEN IF(BTP.tid IS NULL,0,1) " .
                "WHEN '".BULLETIN_TRG_TD."' THEN IF(BTD.tid IS NULL,IF(BTN.ID IS NULL,0,1),1) " .
                "WHEN '".BULLETIN_TRG_USERLIST."' THEN IF(BT.bid IS NULL,0,1) " .
+               "WHEN '".BULLETIN_TRG_MPG."' THEN IF(GP.gid IS NULL,0,1) " .
                "ELSE 0 END";
          if( $count_new )
             $qsql->add_part( SQLP_FIELDS, "SUM($view_sql) AS X_Count" );
@@ -357,7 +373,13 @@ class Bulletin
                "ON BTN.ID=B.tid AND BTN.Owner_ID=$uid AND B.TargetType='".BULLETIN_TRG_TD."' AND B.tid > 0",
             // target-type=UL
             "LEFT JOIN BulletinTarget AS BT " .
-               "ON BT.bid=B.ID AND BT.uid=$uid AND B.TargetType='".BULLETIN_TRG_USERLIST."'" );
+               "ON BT.bid=B.ID AND BT.uid=$uid AND B.TargetType='".BULLETIN_TRG_USERLIST."'",
+            // target-type=MPG
+            "LEFT JOIN Games AS G " .
+               "ON G.ID=B.gid AND B.TargetType='".BULLETIN_TRG_MPG."' AND B.gid > 0 " .
+                  "AND G.GameType IN ('".GAMETYPE_TEAM_GO."','".GAMETYPE_ZEN_GO."')",
+            "LEFT JOIN GamePlayers AS GP " .
+               "ON GP.gid=G.ID AND GP.uid=$uid AND B.gid > 0" );
       }
 
       if( !$count_new && !$is_admin )
@@ -380,6 +402,7 @@ class Bulletin
             @$row['X_PublishTime'],
             @$row['X_ExpireTime'],
             @$row['tid'],
+            @$row['gid'],
             @$row['CountReads'],
             @$row['AdminNote'],
             @$row['Subject'],
@@ -614,6 +637,14 @@ class Bulletin
       db_query( "Bulletin::reset_bulletin_read($bid)",
          "DELETE FROM BulletinRead WHERE bid=$bid" );
    }//reset_bulletin_read
+
+   /*! \brief Returns row-arr or null if no game found. */
+   function load_multi_player_game( $gid )
+   {
+      $game_row = mysql_single_fetch( "Bulletin::load_multi_player_game($gid)",
+         "SELECT ID, GameType, Status FROM Games where ID=$gid LIMIT 1" );
+      return ($game_row) ? $game_row : null;
+   }
 
 } // end of 'Bulletin'
 ?>

@@ -5,7 +5,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
-PublishTime by the Free Software Foundation, either version 3 of the
+published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -249,7 +249,15 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
             : image( $base_path.'images/no.gif', T_('Viewable by admin, but not by you as user#bulletin'), null, 'class="InTextImage"' );
       }
       if( @$btable->Is_Column_Displayed[13] )
-         $row_str[13] = ( $bulletin->tid > 0 ) ? echo_image_tournament_info($bulletin->tid) : '';
+      {
+         if( $bulletin->tid > 0 )
+            $info = echo_image_tournament_info($bulletin->tid);
+         elseif( $bulletin->gid > 0 )
+            $info = echo_image_game_players($bulletin->gid);
+         else
+            $info = '';
+         $row_str[13] = $info;
+      }
 
       if( $with_text )
       {

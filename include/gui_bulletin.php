@@ -111,6 +111,7 @@ class GuiBulletin
          $arr[BULLETIN_TRG_TD]       = T_('T-Director#B_trg');
          $arr[BULLETIN_TRG_TP]       = T_('T-Participant#B_trg');
          $arr[BULLETIN_TRG_USERLIST] = T_('UserList#B_trg');
+         $arr[BULLETIN_TRG_MPG]      = T_('MP-Game#B_trg');
          $ARR_GLOBALS_BULLETIN[$key] = $arr;
       }
 
@@ -134,14 +135,22 @@ class GuiBulletin
       $text = preg_replace( "/[\r\n]+/", '<br>', $text ); //reduce multiple LF to one <br>
       $publish_text = sprintf( T_('[%s] by %s#bulletin'),
          date(DATE_FMT2, $bulletin->PublishTime), $bulletin->User->user_reference() );
+
       if( $bulletin->tid > 0 )
       {
          if( is_null($bulletin->Tournament) )
             $bulletin->Tournament = Tournament::load_tournament($bulletin->tid);
-         $tourney_text = $bulletin->Tournament->build_info(5, 30);
+         $ref_text = span('Reference', $bulletin->Tournament->build_info(5, 30) );
+      }
+      elseif( $bulletin->gid > 0 )
+      {
+         $ref_text = span('Reference',
+            sprintf( '%s %s', // linked: (img) Game-info
+                     echo_image_game_players($bulletin->gid),
+                     game_reference( REF_LINK, 1, '', $bulletin->gid, 0, array( 'Status' => GAME_STATUS_SETUP ) ) ));
       }
       else
-         $tourney_text = '';
+         $ref_text = '';
 
       if( $mark_url )
       {
@@ -155,7 +164,7 @@ class GuiBulletin
 
       return
          "<div class=\"Bulletin\">\n" .
-            "<div class=\"Category\">$category$tourney_text</div>" .
+            "<div class=\"Category\">{$category}{$ref_text}</div>" .
             "<div class=\"PublishTime\">$publish_text</div>" .
             "<div class=\"Title\">$title</div>" .
             "<div class=\"Text\">$text</div>" .

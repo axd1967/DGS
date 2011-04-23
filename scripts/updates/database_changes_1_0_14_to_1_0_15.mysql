@@ -2148,3 +2148,9 @@ ALTER TABLE Players
    ADD SkipBulletin tinyint unsigned NOT NULL default 0x4 ;
 
 
+-- added target-type for bulletin with multi-player-game
+ALTER TABLE Bulletin
+   MODIFY TargetType enum('ALL','TD','TP','UL','MPG') NOT NULL,
+   ADD gid int NOT NULL default 0 AFTER tid ;
+
+
