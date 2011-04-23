@@ -226,8 +226,6 @@ function err_log( $handle, $err, $debugmsg=NULL)
    $mysqlerror = @mysql_error();
 
    global $dbcnx, $player_row;
-   if( !@$dbcnx )
-      connect2mysql(true);
 
    $uri = "error.php?err=" . urlencode($err);
    if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
@@ -240,29 +238,72 @@ function err_log( $handle, $err, $debugmsg=NULL)
    $request = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
    $request = substr( $request, strlen(SUB_PATH));
 
-   $errorlog_query = "INSERT INTO Errorlog SET"
+   if( !empty($mysqlerror) )
+   {
+      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
+      $err.= ' / '. $mysqlerror;
+   }
+
+   if( need_db_errorlog($err) )
+   {
+      if( !@$dbcnx )
+         connect2mysql(true);
+
+      $errorlog_query = "INSERT INTO Errorlog SET"
                      . " uid='$uid'"
                      . ", Handle='".mysql_addslashes($handle)."'"
                      . ", Message='".mysql_addslashes($err)."'"
                      . ", Request='".mysql_addslashes($request)."'"
                      . ", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
+      if( !empty($mysqlerror) )
+         $errorlog_query .= ", MysqlError='".mysql_addslashes($mysqlerror)."'";
+      if( is_string($debugmsg) )
+         $errorlog_query .= ", Debug='".mysql_addslashes($debugmsg)."'";
 
-   if( !empty($mysqlerror) )
-   {
-      $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-      $errorlog_query .= ", MysqlError='".mysql_addslashes($mysqlerror)."'";
-      $err.= ' / '. $mysqlerror;
-   }
-   if( is_string($debugmsg) )
-      $errorlog_query .= ", Debug='".mysql_addslashes($debugmsg)."'";
-
-   if( $dbcnx )
-   {
-      if( @mysql_query( $errorlog_query ) !== false )
-         $uri .= URI_AMP."eid=" . mysql_insert_id();
+      if( $dbcnx )
+      {
+         if( @mysql_query( $errorlog_query ) !== false )
+            $uri .= URI_AMP."eid=" . mysql_insert_id();
+      }
    }
 
    return array( $err, $uri);
 } //err_log
+
+
+/*!
+ * \brief Returns true if errorlog should be written in Errorlog-table; false otherwise.
+ * \see ErrorCode::init() for list of error-codes
+ */
+function need_db_errorlog( $errcode )
+{
+   static $skip_dblog = array(
+         'bulkmessage_self' => 1,
+         'cookies_disabled' => 1,
+         'early_pass' => 1,
+         'guest_may_not_receive_messages' => 1,
+         'invite_self' => 1,
+         'multi_player_master_mismatch' => 1,
+         'multi_player_need_initial_rating' => 1,
+         'multi_player_no_users' => 1,
+         'mysql_connect_failed' => 1,
+         'name_not_given' => 1,
+         'password_illegal_chars' => 1,
+         'password_mismatch' => 1,
+         'password_too_short' => 1,
+         'rank_not_rating' => 1,
+         'rating_not_rank' => 1,
+         'rating_out_of_range' => 1,
+         'registration_policy_not_checked' => 1,
+         'server_down' => 1,
+         'userid_illegal_chars' => 1,
+         'value_not_numeric' => 1,
+         'waitingroom_not_enough_rated_fin_games' => 1,
+         'waitingroom_not_in_rating_range' => 1,
+         'waitingroom_not_same_opponent' => 1,
+         'waitingroom_own_game' => 1,
+      );
+   return !isset($skip_dblog[$errcode]);
+}//need_db_errorlog
 
 ?>
