@@ -234,6 +234,13 @@ class Bulletin
       }
    }//loadUserList
 
+   /*! \brief Wrapper to update_bulletin_count_players()-func for this bulletin. */
+   function update_count_players( $dbgmsg, $uid=0 )
+   {
+      return update_bulletin_count_players( $dbgmsg, $bulletin->Status, $bulletin->TargetType,
+         $uid, $bulletin->ID, $bulletin->tid, $bulletin->gid );
+   }
+
 
    // ------------ static functions ----------------------------
 
@@ -482,8 +489,7 @@ class Bulletin
             $bulletin = Bulletin::load_bulletin( $bid, /*with_player*/false );
             if( !is_null($bulletin) )
             {
-               Bulletin::update_count_players( "Bulletin::mark_bulletin_as_read($bid,$uid)",
-                  BULLETIN_STATUS_SHOW, $bulletin->TargetType, $uid );
+               $bulletin->update_count_players( 'Bulletin::mark_bulletin_as_read', $uid );
                Bulletin::update_count_bulletin_new( "Bulletin::mark_bulletin_as_read($bid,$uid)", COUNTNEW_RECALC );
 
                db_query( "Bulletin::mark_bulletin_as_read.inc_read($bid)",
@@ -523,36 +529,36 @@ class Bulletin
          "SELECT $bid, ID FROM Players WHERE ID IN ($uids_sql) LIMIT $cnt_uids" );
    }//persist_bulletin_userlist
 
-   /*! \brief Change status of expired bulletins. */
+   /*! \brief Change status of expired bulletins of all target-types. */
    function process_expired_bulletins()
    {
       global $NOW;
-      foreach( array( BULLETIN_TRG_ALL ) as $target_type )
-      {
-         db_query( "Bulletin::process_expired_bulletins.upd_bulletin($target_type)",
-            "UPDATE Bulletin SET " .
-               "Status='".BULLETIN_STATUS_ARCHIVE."', " .
-               "AdminNote=TRIM(CONCAT('EXPIRED ',AdminNote)) " .
-            "WHERE Status='".BULLETIN_STATUS_SHOW."' AND TargetType='$target_type' AND " .
-               "ExpireTime > 0 AND ExpireTime < FROM_UNIXTIME($NOW)" );
 
-         if( mysql_affected_rows() > 0 )
-            Bulletin::update_count_players( "Bulletin::process_expired_bulletins",
-               BULLETIN_STATUS_SHOW, $target_type );
-      }
+      db_query( "Bulletin::process_expired_bulletins.upd_bulletin()",
+         "UPDATE Bulletin SET " .
+            "Status='".BULLETIN_STATUS_ARCHIVE."', " .
+            "AdminNote=TRIM(CONCAT('EXPIRED ',AdminNote)) " .
+         "WHERE Status='".BULLETIN_STATUS_SHOW."' AND " .
+            "ExpireTime > 0 AND ExpireTime < FROM_UNIXTIME($NOW)" );
+
+      if( mysql_affected_rows() > 0 )
+         Bulletin::update_bulletin_count_players( 'Bulletin::process_expired_bulletins',
+            BULLETIN_STATUS_SHOW, BULLETIN_TRG_ALL );
    }//process_expire_bulletins
 
    /*!
     * \brief Updates or resets Players.CountBulletinNew for current user.
+    * \param $uid Players.ID to update; 0 = current logged-in player
     * \param $diff null|omit to reset to -1 (=recalc later); COUNTNEW_RECALC to recalc now;
     *        otherwise increase or decrease counter
     */
-   function update_count_bulletin_new( $dbgmsg, $diff=null )
+   function update_count_bulletin_new( $dbgmsg, $uid=0, $diff=null )
    {
       global $player_row;
 
-      $uid = (int)@$player_row['ID'];
-      $dbgmsg .= "update_count_bulletin_new($uid,$diff)";
+      if( $uid <= 0 )
+         $uid = (int)@$player_row['ID'];
+      $dbgmsg .= "Bulletin::update_count_bulletin_new($uid,$diff)";
       if( $uid <= 0 )
          error( 'invalid_args', "$dbgmsg.check.uid" );
 
@@ -595,7 +601,7 @@ class Bulletin
     * \brief Updates Players.CountBulletinNew according for given Bulletin-data (only updated on SHOW-status).
     * \param $status BULLETIN_STATUS_...
     * \param $target_type BULLETIN_TRG_...
-    * \param $uid restrict update to given user-id; can be uid-array; 0 otherwise
+    * \param $uid restrict update to given user-id; can be uid-array; 0 otherwise for all users
     * \return true, if update required; false otherwise
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
@@ -604,32 +610,59 @@ class Bulletin
     *       up to session-expire, and login.php resets counter too on session-expire
     * \see also count_bulletin_new() in 'include/std_functions.php'
     */
-   function update_count_players( $dbgmsg, $status, $target_type, $uid=0 )
+   function update_bulletin_count_players( $dbgmsg, $status, $target_type, $uid=0, $bid=0, $tid=0, $gid=0 )
    {
       global $NOW;
 
       if( $status != BULLETIN_STATUS_SHOW )
          return false;
 
-      $dbgmsg .= "Bulletin::update_count_players($status,$target_type)";
+      $dbgmsg .= "Bulletin::update_bulletin_count_players($status,$target_type,$uid)";
       if( is_numeric($uid) && $uid > 0 )
-         $qpart_uid = " AND ID=$uid LIMIT 1";
+         $qpart_uid = " AND P.ID=$uid LIMIT 1";
       elseif( is_array($uid) && count($uid) > 0 )
-         $qpart_uid = " AND ID IN (".implode(',', $uid).") LIMIT " . count($uid);
+         $qpart_uid = " AND P.ID IN (".implode(',', $uid).") LIMIT " . count($uid);
       else
          $qpart_uid = '';
 
-      if( $target_type != BULLETIN_TRG_UNSET && preg_match( "/^(".CHECK_BULLETIN_TARGET_TYPE.")$/", $target_type ) )
+      if( $target_type == BULLETIN_TRG_TD && $tid > 0 )
       {
-         $upd_time = $NOW - SESSION_DURATION;
-         db_query( "$dbgmsg.upd_all",
-            "UPDATE Players SET CountBulletinNew=-1 WHERE Lastaccess >= FROM_UNIXTIME($upd_time) $qpart_uid" );
+         db_query( "$dbgmsg.upd_td($tid)",
+            "UPDATE Players AS P INNER JOIN TournamentDirector AS TD ON TD.uid=P.ID " .
+            "SET P.CountBulletinNew=-1 WHERE TD.tid=$tid $qpart_uid" );
+         db_query( "$dbgmsg.upd_towner($tid)",
+            "UPDATE Players AS P INNER JOIN Tournament AS T ON T.Owner_ID=P.ID " .
+            "SET P.CountBulletinNew=-1 WHERE T.ID=$tid $qpart_uid LIMIT 1" );
       }
-      else
+      elseif( $target_type == BULLETIN_TRG_TP && $tid > 0 )
+      {
+         db_query( "$dbgmsg.upd_tp($tid)",
+            "UPDATE Players AS P INNER JOIN TournamentParticipant AS TP ON TP.uid=P.ID " .
+            "SET P.CountBulletinNew=-1 WHERE TP.tid=$tid $qpart_uid" );
+      }
+      elseif( $target_type == BULLETIN_TRG_USERLIST && $bid > 0 )
+      {
+         db_query( "$dbgmsg.upd_userlist($bid)",
+            "UPDATE Players AS P INNER JOIN BulletinTarget AS BT ON BT.uid=P.ID " .
+            "SET P.CountBulletinNew=-1 WHERE BT.bid=$bid $qpart_uid" );
+      }
+      elseif( $target_type == BULLETIN_TRG_MPG && $gid > 0 )
+      {
+         db_query( "$dbgmsg.upd_mpg($gid)",
+            "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID " .
+            "SET P.CountBulletinNew=-1 WHERE GP.gid=$gid $qpart_uid" );
+      }
+      elseif( $target_type == BULLETIN_TRG_UNSET ) // should not occur
          error('invalid_args', "$dbgmsg.check.target_type($target_type)");
+      else //if( $target_type == BULLETIN_TRG_ALL || $tid/bid/gid <=0 for respective target-type
+      {
+         db_query( "$dbgmsg.upd_all",
+            "UPDATE Players AS P SET P.CountBulletinNew=-1 " .
+            "WHERE P.Lastaccess >= FROM_UNIXTIME(" . ($NOW - SESSION_DURATION) . ") $qpart_uid" );
+      }
 
       return true;
-   }//update_count_players
+   }//update_bulletin_count_players
 
    /*! \brief Deletes all existing BulletinRead-entries for given bulletin-id. */
    function reset_bulletin_read( $bid )
