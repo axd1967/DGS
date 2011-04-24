@@ -25,6 +25,7 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/error_codes.php' );
+require_once( 'include/db/bulletin..php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
@@ -186,8 +187,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          {//HOT-section to delete tournament-participant
             TournamentParticipant::delete_tournament_participant( $tid, $rid );
             $sys_msg = send_register_notification( 'delete', $tp, $my_id );
+            Bulletin::update_count_bulletin_new( "Tournament.edit_participant.del_tp($tid)", $uid );
          }
          ta_end();
+
          jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
 
@@ -244,6 +247,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             }
             else
                $sys_msg = urlencode( T_('Registration saved!') );
+
+            if( $rid == 0 ) // new TP
+               Bulletin::update_count_bulletin_new( "Tournament.edit_participant.add_tp($tid)", $uid );
          }
          ta_end();
 

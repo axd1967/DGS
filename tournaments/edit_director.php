@@ -24,6 +24,7 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
+require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_director.php' );
 require_once( 'tournaments/include/tournament_status.php' );
@@ -110,7 +111,13 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
    if( $uid && $owner_allow_edit && @$_REQUEST['td_delete'] && @$_REQUEST['confirm'] && count($errors) == 0 ) // delete TD
    {
-      $director->delete();
+      ta_begin();
+      {//HOT-section to save tournament-director
+         $director->delete();
+         Bulletin::update_count_bulletin_new( "Tournament.edit_dir.del_td($tid)", $uid );
+      }
+      ta_end();
+
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
             . urlencode(T_('Tournament director removed!')) );
    }
@@ -128,7 +135,15 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    // persist TD in database
    if( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 )
    {
-      $director->persist();
+      ta_begin();
+      {//HOT-section to save tournament-director
+         $director->persist();
+
+         if( !is_null($tduser_row) ) // new TD
+            Bulletin::update_count_bulletin_new( "Tournament.edit_dir.add_td($tid)", $uid );
+      }
+      ta_end();
+
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
             . urlencode(T_('Tournament director saved!')) );
    }

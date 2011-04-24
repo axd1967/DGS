@@ -24,6 +24,7 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
+require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
@@ -95,7 +96,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    if( $rid && $is_delete && $authorise_delete && @$_REQUEST['confirm'] && count($errors) == 0 ) // confirm delete TP-reg
    {
-      TournamentParticipant::delete_tournament_participant( $tid, $rid );
+      ta_begin();
+      {//HOT-section to delete TP
+         TournamentParticipant::delete_tournament_participant( $tid, $rid );
+         Bulletin::update_count_bulletin_new( "Tournament.register.del_tp($tid)", $uid );
+      }
+      ta_end();
+
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."sysmsg="
             . urlencode( sprintf( T_('Registration for user [%s] removed!'), @$player_row['Handle'] )) );
    }
@@ -200,6 +207,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       {//HOT-section to update tourney-registration
          $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
          TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+
+         if( $rid == 0 ) // new TP
+            Bulletin::update_count_bulletin_new( "Tournament.register.add_tp($tid)", $uid );
       }
       ta_end();
 
