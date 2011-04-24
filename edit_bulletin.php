@@ -126,6 +126,9 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin Author'),
          'TEXT',        $bulletin->User->user_reference(), ));
+   $bform->add_row( array(
+         'DESCRIPTION', T_('Publish Time'),
+         'TEXT',        formatDate($bulletin->PublishTime), ));
    if( $bulletin->Lastchanged > 0 )
       $bform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
@@ -168,10 +171,6 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
 
    $bform->add_empty_row();
-   $bform->add_row( array(
-         'DESCRIPTION', T_('Publish Time'),
-         'TEXTINPUT',   'publish_time', 20, 30, $vars['publish_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE)), ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Expire Time'),
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
@@ -229,7 +228,6 @@ function parse_edit_form( &$bulletin )
 
    // read from props or set defaults
    $vars = array(
-      'publish_time'    => formatDate($bulletin->PublishTime),
       'expire_time'     => formatDate($bulletin->ExpireTime),
       'subject'         => $bulletin->Subject,
       'text'            => $bulletin->Text,
@@ -244,7 +242,6 @@ function parse_edit_form( &$bulletin )
    // parse URL-vars
    if( $is_posted )
    {
-      $old_vals['publish_time'] = $bulletin->PublishTime;
       $old_vals['expire_time'] = $bulletin->ExpireTime;
 
       // check/correct gid
@@ -259,17 +256,6 @@ function parse_edit_form( &$bulletin )
             $errors[] = sprintf( T_('Game-ID [%s] must reference a multi-player-game!'), $bulletin->gid );
       }
 
-
-      $parsed_value = parseDate( T_('Publish time for bulletin'), $vars['publish_time'] );
-      if( is_numeric($parsed_value) )
-      {
-         $bulletin->PublishTime = $parsed_value;
-         $vars['publish_time'] = formatDate($bulletin->PublishTime);
-      }
-      else
-         $errors[] = $parsed_value;
-      if( $bulletin->PublishTime == 0 )
-         $errors[] = T_('Missing Publish time#bulletin');
 
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
@@ -292,7 +278,6 @@ function parse_edit_form( &$bulletin )
 
       // determine edits
       if( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game-ID#edits');
-      if( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('PublishTime#edits');
       if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
       if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
       if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');
