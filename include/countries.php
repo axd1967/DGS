@@ -320,11 +320,14 @@ function getCountryText( $code=null )
          'zw' => T_('Zimbabwe'),
 
          // use user-defined codes in ISO-3166-1 for specials: (qm..qz, xa..xz, zz)
-         'xe' => T_('Earth'), // not a nation
-         'xo' => T_('Esperanto'), // international language
-         'xi' => T_('Interlingua'), // international language
-         'xk' => T_('Klingon Empire'), // not a nation ... but who knows for sure?
-         'xf' => T_('United Federation of Planets'), // not a nation ... yet
+         'xb' => T_('Basque'), // DGS-language
+         'xc' => T_('Catalan'), // DGS-language
+         'xe' => T_('Earth'), // non-empty non-country-"default"
+         'xn' => T_('Lingua Franca Nova'), // DGS-language
+         'xo' => T_('Esperanto'), // DGS-language
+         'xi' => T_('Interlingua'), // DGS-language
+         'xk' => T_('Klingon Empire'), // fierce fighters, not a nation ... but who knows for sure?
+         'xf' => T_('United Federation of Planets'), // calm folk, not a nation ... but soon?
       );
       $ARR_GLOBALS_COUNTRIES[$key] = $arr;
    }

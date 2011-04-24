@@ -191,3 +191,9 @@ copy /images/game_comment.gif
 -----------
 copy /images/up_bulk.gif
 
+-----------
+# added flags
+copy /images/flags/xb.gif
+copy /images/flags/xc.gif
+copy /images/flags/xn.gif
+
