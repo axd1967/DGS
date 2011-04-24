@@ -40,24 +40,27 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
 
-   $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+   $is_admin = Bulletin::is_bulletin_admin();
    if( !$is_admin )
       error('adminlevel_too_low', "admin_bulletin");
 
 /* Actual REQUEST calls used:
-     ''                       : add new bulletin
+     ''                       : add new admin bulletin
+     n_gid=                   : add new MPG-bulletin
      bid=                     : edit existing bulletin
      preview&bid=             : preview for bulletin-save
      save&bid=                : save new/updated bulletin
 */
 
-   $bid = (int) @$_REQUEST['bid'];
+   $bid = (int) get_request_arg('bid');
    if( $bid < 0 ) $bid = 0;
+   $n_gid = (int) get_request_arg('n_gid');
+   if( $n_gid < 0 ) $n_gid = 0;
 
    // init
    $bulletin = ( $bid > 0 ) ? Bulletin::load_bulletin($bid) : null;
    if( is_null($bulletin) )
-      $bulletin = Bulletin::new_bulletin( $is_admin );
+      $bulletin = Bulletin::new_bulletin( $is_admin, $n_gid );
    else
    {
       $bulletin->loadUserList();
@@ -434,7 +437,7 @@ function parse_edit_form( &$bulletin )
          $bulletin->tid = 0;
          $bulletin->Tournament = null;
       }
-      if( $bulletin->tid > 0 && !$has_ttype_tourney )
+      if( (int)$new_value > 0 && !$has_ttype_tourney )
       {
          if( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS )
             $errors[] = sprintf( T_('Target Type must be set to [%s or %s] if Category is [%s]!'),
@@ -467,7 +470,7 @@ function parse_edit_form( &$bulletin )
       }
       else
          $bulletin->gid = 0;
-      if( $bulletin->gid > 0 && !$need_gid )
+      if( (int)$new_value > 0 && !$need_gid )
       {
          $errors[] = sprintf( T_('Game-ID [%s] must be cleared when target-type is not [%s]!'),
             $new_value, GuiBulletin::getTargetTypeText(BULLETIN_TRG_MPG) );

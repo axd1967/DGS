@@ -25,6 +25,7 @@ require_once 'include/form_functions.php';
 require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
 require_once 'include/classlib_user.php';
+require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinEdit');
@@ -41,7 +42,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
       error('not_allowed_for_guest');
 
 /* Actual REQUEST calls used:
-     gid=                     : add new bulletin TargetType=MPG
+     n_gid=                   : add new bulletin TargetType=MPG
 
      bid=                     : edit existing bulletin
      preview&bid=             : preview for bulletin-save
@@ -50,10 +51,17 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
    $bid = (int) get_request_arg('bid');
    if( $bid < 0 ) $bid = 0;
-   $gid = (int) get_request_arg('gid');
-   if( $gid < 0 ) $gid = 0;
+   $n_gid = (int) get_request_arg('n_gid');
+   if( $n_gid < 0 ) $n_gid = 0;
 
-   // init
+   // check args
+   if( $bid == 0 )
+   {
+      if( $n_gid == 0 )
+         error('invalid_args', "edit_bulletin.check.gid($bid,$n_gid)");
+   }
+
+   // init new bulletin
    if( $bid > 0 )
    {
       $bulletin = Bulletin::load_bulletin($bid);
@@ -63,30 +71,18 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
          error('bulletin_edit_not_allowed', "edit_bulletin.check.edit.author($bid)");
       if( $bulletin->Status == BULLETIN_STATUS_DELETE || $bulletin->Status == BULLETIN_STATUS_ARCHIVE )
          error('bulletin_edit_not_allowed', "edit_bulletin.check.edit.status($bid,{$bulletin->Status})");
-
-      $gid = $bulletin->gid; // DB-data has prio
    }
    else
-      $bulletin = Bulletin::new_bulletin( /*adm*/false );
+      $bulletin = Bulletin::new_bulletin( /*adm*/false, $n_gid );
 
-   // init new bulletin
    $b_old_status = $bulletin->Status;
-   if( $bid == 0 )
-   {
-      if( $gid > 0 ) // MPG-bulletin, no admin-ACK needed
-      {
-         $bulletin->setStatus( BULLETIN_STATUS_SHOW );
-         $bulletin->setTargetType( BULLETIN_TRG_MPG );
-         $bulletin->gid = $gid;
-      }
-      else
-         error('invalid_args', "edit_bulletin.check.gid($bid,$gid)");
-   }
+   $gid = $bulletin->gid; // DB-data has prio
 
 
    // check + parse edit-form
+   $errors = check_bulletin_input( $bulletin, $my_id );
    list( $vars, $edits, $input_errors ) = parse_edit_form( $bulletin );
-   $errors = $input_errors;
+   $errors = array_merge( $errors, $input_errors );
 
    // save bulletin-object with values from edit-form
    if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
@@ -115,9 +111,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
    if( $bid == 0 )
-   {
       $bform->add_hidden( 'gid', $bulletin->gid );
-   }
 
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin ID'),
@@ -219,6 +213,30 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 }//main
 
 
+// return [ errorlist ]
+function check_bulletin_input( &$bulletin, $my_id )
+{
+   $errors = array();
+   $gid = $bulletin->gid;
+
+   // check/correct gid
+   if( $bulletin->TargetType != BULLETIN_TRG_MPG )
+      $bulletin->gid = 0;
+   elseif( $gid > 0 )
+   {
+      $game_row = Bulletin::load_multi_player_game($gid);
+      if( is_null($game_row) )
+         $errors[] = sprintf( T_('No game found for game-ID [%s]!'), $gid );
+      elseif( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
+         $errors[] = sprintf( T_('Game-ID [%s] must reference a multi-player-game!'), $gid );
+
+      if( !MultiPlayerGame::is_game_player($gid, $my_id) )
+         $errors[] = sprintf( T_('Only participants of multi-player-game [%s] can create a MPG-bulletin.'), $gid );
+   }
+
+   return $errors;
+}//check_bulletin_input
+
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$bulletin )
 {
@@ -231,7 +249,6 @@ function parse_edit_form( &$bulletin )
       'expire_time'     => formatDate($bulletin->ExpireTime),
       'subject'         => $bulletin->Subject,
       'text'            => $bulletin->Text,
-      'gid'             => $bulletin->gid,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -243,19 +260,6 @@ function parse_edit_form( &$bulletin )
    if( $is_posted )
    {
       $old_vals['expire_time'] = $bulletin->ExpireTime;
-
-      // check/correct gid
-      if( $bulletin->TargetType != BULLETIN_TRG_MPG )
-         $bulletin->gid = 0;
-      else if( $bulletin->gid > 0 )
-      {
-         $game_row = Bulletin::load_multi_player_game($bulletin->gid);
-         if( is_null($game_row) )
-            $errors[] = sprintf( T_('No game found for game-ID [%s]!'), $bulletin->gid );
-         elseif( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
-            $errors[] = sprintf( T_('Game-ID [%s] must reference a multi-player-game!'), $bulletin->gid );
-      }
-
 
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
@@ -277,7 +281,6 @@ function parse_edit_form( &$bulletin )
 
 
       // determine edits
-      if( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game-ID#edits');
       if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
       if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
       if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');

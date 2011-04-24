@@ -485,13 +485,18 @@ class Bulletin
       return $iterator;
    }
 
-   /*! \brief Returns new Bulletin-object for user. */
-   function new_bulletin( $is_admin )
+   /*!
+    * \brief Returns new Bulletin-object for user and args.
+    * \param $gid if set, creates MPG-target-type bulletin
+    */
+   function new_bulletin( $is_admin, $gid=0 )
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-         error('invalid_args', "Bulletin.new_bulletin($uid,$is_admin)");
+         error('invalid_args', "Bulletin.new_bulletin.check.uid($uid,$is_admin,$gid)");
+      if( !is_numeric($gid) || $gid < 0 )
+         error('invalid_args', "Bulletin.new_bulletin.check.gid($uid,$is_admin,$gid)");
 
       $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
       $bulletin = new Bulletin( 0, $uid, $user );
@@ -502,6 +507,13 @@ class Bulletin
          $bulletin->setCategory( BULLETIN_CAT_ADMIN_MSG );
       else
          $bulletin->setCategory( BULLETIN_CAT_PRIVATE_MSG );
+
+      if( $gid > 0 ) // MPG-bulletin
+      {
+         $bulletin->setStatus( BULLETIN_STATUS_SHOW ); // no admin-ACK needed
+         $bulletin->setTargetType( BULLETIN_TRG_MPG );
+         $bulletin->gid = $gid;
+      }
 
       return $bulletin;
    }//new_bulletin
@@ -712,6 +724,13 @@ class Bulletin
       $game_row = mysql_single_fetch( "Bulletin::load_multi_player_game($gid)",
          "SELECT ID, GameType, Status FROM Games where ID=$gid LIMIT 1" );
       return ($game_row) ? $game_row : null;
+   }
+
+   /*! \brief Returns true if current players is bulletin-admin. */
+   function is_bulletin_admin()
+   {
+      global $player_row;
+      return (@$player_row['admin_level'] & ADMIN_DEVELOPER);
    }
 
 } // end of 'Bulletin'

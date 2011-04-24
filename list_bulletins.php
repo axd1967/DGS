@@ -41,7 +41,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_BULLETIN_LIST );
 
-   $was_admin = $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+   $was_admin = $is_admin = Bulletin::is_bulletin_admin();
    $mine = (@$_REQUEST['mine']) ? 1 : 0;
    $no_adm = ($mine || @$_REQUEST['no_adm']) ? 1 : 0;
    if( $no_adm )
