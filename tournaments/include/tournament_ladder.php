@@ -243,8 +243,9 @@ class TournamentLadder
       //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $table2 = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table; // needed for nested-lock for process-game-end
+      $table3 = $GLOBALS['ENTITY_TOURNAMENT']->table; // needed for nested-lock for delete-TP
       db_lock( "TournamentLadder.remove_user_from_ladder({$this->tid},{$this->rid})",
-         "$table WRITE, $table AS TL READ, $table2 WRITE" );
+         "$table WRITE, $table AS TL READ, $table2 WRITE, $table3 WRITE" );
       {//LOCK TournamentLadder
          $this->delete();
          $is_deleted = ( TournamentLadder::load_rank($this->tid, $this->rid) == 0 );
@@ -255,6 +256,11 @@ class TournamentLadder
             TournamentParticipant::delete_tournament_participant($this->tid, $this->rid);
       }
       db_unlock();
+
+      // reset Players.CountBulletinNew
+      if( $remove_all && $is_deleted && $this->uid > 0 )
+         db_query( "TournamentLadder.remove_user_from_ladder.upd_cntbullnew({$this->tid},{$this->uid})",
+            "UPDATE Players SET CountBulletinNew=-1 WHERE ID='{$this->uid}' LIMIT 1" );
 
       return $is_deleted;
    }//remove_user_from_ladder
@@ -764,7 +770,7 @@ class TournamentLadder
 
          case TGEND_CHALLENGER_DELETE:
          {
-            $success = $tladder_ch->remove_user_from_ladder( true, true/*upd-rank*/ );
+            $success = $tladder_ch->remove_user_from_ladder( /*rem-all*/true, /*upd-rank*/true );
             $logmsg = "CH.Rank={$tladder_ch->Rank}>DEL";
 
             if( $success )
@@ -814,7 +820,7 @@ class TournamentLadder
 
          case TGEND_DEFENDER_DELETE:
          {
-            $success = $tladder_df->remove_user_from_ladder( true, true/*upd-rank*/ );
+            $success = $tladder_df->remove_user_from_ladder( /*rem-all*/true, /*upd-rank*/true );
             $logmsg = "DF.Rank={$tladder_df->Rank}>DEL";
 
             if( $success ) // notify removed user
@@ -861,7 +867,7 @@ class TournamentLadder
          return true;
 
       // remove user from ladder
-      $success = $tladder->remove_user_from_ladder( true, true/*upd-rank*/ );
+      $success = $tladder->remove_user_from_ladder( /*rem-all*/true, /*upd-rank*/true );
       $logmsg = "U.Rank={$tladder->Rank}>DEL";
 
       if( DBG_QUERY )
