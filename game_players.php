@@ -256,6 +256,7 @@ define('KEY_GROUP_ORDER', 'gpo');
       $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
+   $menu_array[T_('New bulletin')] = "edit_bulletin.php?gid=$gid";
    if( $status == GAME_STATUS_SETUP )
    {
       if( $has_wroom_entry && $cnt_free_slots == 0 )

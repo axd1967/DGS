@@ -3217,6 +3217,11 @@ table#biomoveTableInfos img {
 /* Bulletins */
 /* ------------------------- */
 
+table#bulletinsTable tr td span.SkipCategory {
+   color: darkred;
+   font-style: italic;
+}
+
 div.Bulletin {
    text-align: center;
    width: 80%;

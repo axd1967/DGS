@@ -237,9 +237,41 @@ class Bulletin
    /*! \brief Wrapper to update_bulletin_count_players()-func for this bulletin. */
    function update_count_players( $dbgmsg, $uid=0 )
    {
-      return update_bulletin_count_players( $dbgmsg, $bulletin->Status, $bulletin->TargetType,
+      return Bulletin::update_bulletin_count_players( $dbgmsg, $bulletin->Status, $bulletin->TargetType,
          $uid, $bulletin->ID, $bulletin->tid, $bulletin->gid );
    }
+
+   /*! \brief Returns true if this Bulletin can be edited by user. */
+   function allow_bulletin_user_edit( $uid )
+   {
+      if( $this->uid != $uid ) // not author
+         return false;
+      if( $this->Status == BULLETIN_STATUS_ARCHIVE || $this->Status == BULLETIN_STATUS_DELETE )
+         return false;
+
+      if( $this->TargetType == BULLETIN_TRG_MPG && $this->Category == BULLETIN_CAT_PRIVATE_MSG && $this->gid > 0 )
+         return true;
+
+      return false;
+   }//allow_edit_bulletin
+
+   /*! \brief Returns true if this Bulletin.Category should be skipped according to Players.SkipBulletin-flags. */
+   function skipCategory()
+   {
+      global $player_row;
+
+      $skip_bullcat = (int)$player_row['SkipBulletin'];
+      if( $skip_bullcat > 0 )
+      {
+         if( $this->Category == BULLETIN_CAT_TOURNAMENT )
+            return ( $skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT );
+         if( $this->Category == BULLETIN_CAT_PRIVATE_MSG )
+            return ( $skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG );
+         if( $this->Category == BULLETIN_CAT_SPAM )
+            return ( $skip_bullcat & BULLETIN_SKIPCAT_SPAM );
+      }
+      return false;
+   }//skipCategory
 
 
    // ------------ static functions ----------------------------
@@ -458,15 +490,18 @@ class Bulletin
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX || !$is_admin )
+      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          error('invalid_args', "Bulletin.new_bulletin($uid,$is_admin)");
 
-      // for admin
       $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
       $bulletin = new Bulletin( 0, $uid, $user );
-      $bulletin->setCategory( BULLETIN_CAT_ADMIN_MSG );
       $bulletin->PublishTime = $GLOBALS['NOW'];
       $bulletin->ExpireTime = $bulletin->PublishTime + 30 * SECS_PER_DAY; // default +30d
+
+      if( $is_admin )
+         $bulletin->setCategory( BULLETIN_CAT_ADMIN_MSG );
+      else
+         $bulletin->setCategory( BULLETIN_CAT_PRIVATE_MSG );
 
       return $bulletin;
    }//new_bulletin

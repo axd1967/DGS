@@ -57,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    // init
    $bulletin = ( $bid > 0 ) ? Bulletin::load_bulletin($bid) : null;
    if( is_null($bulletin) )
-      $bulletin = Bulletin::new_bulletin( $my_id, $is_admin );
+      $bulletin = Bulletin::new_bulletin( $is_admin );
    else
    {
       $bulletin->loadUserList();
@@ -73,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $arr_target_types = GuiBulletin::getTargetTypeText();
 
    // check + parse edit-form
-   list( $vars, $edits, $arr_user_msg_rejected, $input_errors ) = parse_edit_form( $bulletin, $is_admin );
+   list( $vars, $edits, $arr_user_msg_rejected, $input_errors ) = parse_edit_form( $bulletin );
    $errors = $input_errors;
 
    // save bulletin-object with values from edit-form
@@ -101,14 +101,15 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $title = T_('Admin Bulletin');
 
 
-   // ---------- Tournament EDIT form ------------------------------
+   // ---------- Bulletin EDIT form --------------------------------
 
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
 
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin ID'),
-         'TEXT',        ($bid ? $bid : T_('NEW bulletin#bulletin')), ));
+         'TEXT',        ($bid ? anchor( $base_path."admin_bulletin.php?bid=$bid", $bid )
+                              : T_('NEW bulletin#bulletin')), ));
    if( $bid || $vars['author'] == $bulletin->User->Handle )
       $bform->add_row( array(
             'DESCRIPTION', T_('Bulletin Author'),
@@ -272,7 +273,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       array( 'url' => "admin_bulletin.php", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // return [ handle-arr, uid-arr, User-row-arr, handle-reject-map( Handle => 1 ), errors ]
@@ -355,7 +356,7 @@ function check_user_list( $user_list, $author_uid )
 }//check_user_list
 
 // return [ vars-hash, edits-arr, handle-msg-rejected-map, errorlist ]
-function parse_edit_form( &$bulletin, $is_admin )
+function parse_edit_form( &$bulletin )
 {
    $edits = array();
    $errors = array();
@@ -406,7 +407,7 @@ function parse_edit_form( &$bulletin, $is_admin )
       $new_value = trim($vars['tnews_tid']);
       $has_ttype_tourney = ( $bulletin->TargetType == BULLETIN_TRG_TP || $bulletin->TargetType == BULLETIN_TRG_TD );
       $need_tid = ( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS ) || $has_ttype_tourney;
-      if( (string)$new_value == '' || (int)$new_value <= 0 )
+      if( $has_ttype_tourney && ( (string)$new_value == '' || (int)$new_value <= 0 ) )
       {
          if( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS )
             $errors[] = sprintf( T_('Bulletin category [%s] requires a tournament-ID!'),
@@ -428,7 +429,12 @@ function parse_edit_form( &$bulletin, $is_admin )
             $bulletin->Tournament = $tourney;
          }
       }
-      if( is_numeric($new_value) && $new_value > 0 && !$has_ttype_tourney )
+      else
+      {
+         $bulletin->tid = 0;
+         $bulletin->Tournament = null;
+      }
+      if( $bulletin->tid > 0 && !$has_ttype_tourney )
       {
          if( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS )
             $errors[] = sprintf( T_('Target Type must be set to [%s or %s] if Category is [%s]!'),
@@ -442,11 +448,10 @@ function parse_edit_form( &$bulletin, $is_admin )
 
       $new_value = trim($vars['gid']);
       $need_gid = ( $bulletin->TargetType == BULLETIN_TRG_MPG );
-      if( (string)$new_value == '' || (int)$new_value <= 0 )
+      if( $need_gid && ( (string)$new_value == '' || (int)$new_value <= 0 ) )
       {
-         if( $need_gid )
-            $errors[] = sprintf( T_('Bulletin target-type [%s] requires a game-ID!'),
-               GuiBulletin::getTargetTypeText($bulletin->TargetType) );
+         $errors[] = sprintf( T_('Bulletin target-type [%s] requires a game-ID!'),
+            GuiBulletin::getTargetTypeText($bulletin->TargetType) );
       }
       elseif( !is_numeric($new_value) )
          $errors[] = T_('Game-ID must be numeric!');
@@ -460,10 +465,12 @@ function parse_edit_form( &$bulletin, $is_admin )
          else
             $bulletin->gid = $new_value;
       }
-      if( is_numeric($new_value) && $new_value > 0 && !$need_gid )
+      else
+         $bulletin->gid = 0;
+      if( $bulletin->gid > 0 && !$need_gid )
       {
-         $errors[] = sprintf( T_('Game-ID must be cleared when target-type is not [%s]!'),
-            GuiBulletin::getTargetTypeText(BULLETIN_TRG_MPG) );
+         $errors[] = sprintf( T_('Game-ID [%s] must be cleared when target-type is not [%s]!'),
+            $new_value, GuiBulletin::getTargetTypeText(BULLETIN_TRG_MPG) );
       }
 
 

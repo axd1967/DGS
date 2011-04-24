@@ -8,6 +8,7 @@ Legend:
    - B  = Bulletin
    - TD = Tournament Director
    - TP = Tournament Participant (registered player)
+   - T  = Tournament, e.g. T-owner
    - UL = user-list
    - tid = tournament-id
 
@@ -18,6 +19,32 @@ Important Notes:
          - (a)  NEW -> PENDING : ADM-ACK -> SHOW -> ARCHIVE (on expire-date or by admin)
          - (b1) NEW -> PENDING : ADM-NACK -> HIDDEN (back-to-author with AdminNote) -> PENDING
          - (b2) NEW -> PENDING : ADM-NACK -> DELETE
+
+Permission-Matrix for writing bulletins:
+   Who (user-type) is allowed to write what (Category) bulletins addressed
+   to whom (TargetType) ?
+
+   - Category = MAINT : server maintenance announcements
+     create allowed by Admin; Target: ALL, UL, MPG
+
+   - Category = ADM_MSG : admin announcements, game-/user-admin-stuff, etc
+     create allowed by Admin; Target: ALL, UL, MPG
+
+   - Category = TOURNEY : tournament announcement on DGS, for non-DGS tournaments use tournament-forum
+     create allowed by Admin; Target: ALL, UL, (MPG)
+     create allowed by user;  Target: ALL, UL
+
+   - Category = TNEWS : tournament-specific news / announcements
+     create allowed by Admin, TD, T-owner; Target: TD (private T-news), TP (public T-news)
+
+   - Category = PRIV_MSG : user-to-users messages (non-Ads)
+     create allowed by Admin; Target: ALL, UL, TD, TP, MPG
+     create allowed by user;  Target: UL
+     create allowed by GP;    Target: MPG
+
+   - Category = AD : user-to-users advertisements (=pay me money for something Go-related)
+     create allowed by Admin; Target: ALL, UL, (MPG)
+     create allowed by user;  Target: ALL, UL
 
 
 ###########################################################################
@@ -57,6 +84,7 @@ Description:
    - TNEWS = announcement for specific tournament, e.g. tournament-news
    - PRIV_MSG = private announcement
    - AD = advertisement
+   - NOTE: also see permission-matrix above table-fields
 
 * Status :
    - NEW = new bulletin-entry
@@ -97,6 +125,7 @@ Description:
 * Lastchanged : date of last-update of bulleting
 
 
+
 ###########################################################################
 ## --- BulletinRead ---
 
@@ -114,4 +143,24 @@ Description:
 * bid : bulletin-id, FK to Bulletin.ID
 
 * uid : user having marked bulletin as read, FK to Players.ID
+
+
+
+###########################################################################
+## --- BulletinTarget ---
+
+Description:
+   Table to store recipients for bulletin of TargetType=UL (user-list).
+
+ Field | Type    | Default
+-------+---------+---------
+ bid   | int(11) | NULL
+ uid   | int(11) | NULL
+
+
+## Fields:
+
+* bid : bulletin-id, FK to Bulletin.ID
+
+* uid : recipient of bulletin of TargetType=UL (user-list), FK to Players.ID
 
