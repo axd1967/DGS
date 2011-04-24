@@ -853,7 +853,7 @@ see section (2) Classes and Files.
         $filter = new SearchFilter();
         $f1 =& $filter->add_filter( 1, 'Numeric', 'P.ID', true);
         $filter->init(); # parse URL-vars
-        $f1->parse_value( $parsed_value );
+        $f1->parse_value( $fname, $parsed_value );
 
 * Can I use filters that depend on the values in other filters ?
 
