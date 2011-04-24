@@ -90,8 +90,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
             Bulletin::reset_bulletin_read( $bid );
 
-         Bulletin::update_count_players( "admin_bullet($bid)", $bulletin->Status, $bulletin->TargetType,
-            ( $bulletin->TargetType == BULLETIN_TRG_USERLIST ? $bulletin->UserList : 0 ) );
+         $bulletin->update_count_players('admin_bullet');
       }
       ta_end();
 
