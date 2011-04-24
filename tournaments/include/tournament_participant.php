@@ -520,6 +520,8 @@ class TournamentParticipant
    /*!
     * \brief Deletes TournamentParticipant-entry for given tournament- and reg-id.
     * \note Updates Tournament.RegisteredTP if TP was REGISTERed.
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function delete_tournament_participant( $tid, $rid )
    {
