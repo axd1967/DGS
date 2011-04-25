@@ -80,7 +80,7 @@ class ConfigBoard
                          $notes_large_height=25, $notes_large_width=30, $notes_large_mode='RIGHT',
                          $notes_cutoff=13 )
    {
-      ConfigPages::_check_user_id( $user_id, 'ConfigBoard');
+      ConfigPages::_check_user_id( $user_id, 'ConfigBoard', /*allow-0*/true );
 
       $this->user_id = (int)$user_id;
       $this->notes_height = array();
@@ -225,7 +225,7 @@ class ConfigBoard
    /*! \brief Updates current ConfigBoard-data into database. */
    function update_all()
    {
-      ConfigPages::_check_user_id( $this->user_id, 'ConfigBoard::update_all');
+      ConfigPages::_check_user_id( $this->user_id, 'ConfigBoard::update_all', /*allow0*/false );
 
       $update_query = 'UPDATE ConfigBoard SET'
          . '  Stonesize=' . $this->stone_size
@@ -474,9 +474,9 @@ class ConfigPages
    // ------------ static functions ----------------------------
 
    /*! \internal (static) */
-   function _check_user_id( $user_id, $loc )
+   function _check_user_id( $user_id, $loc, $allow0=false )
    {
-      if( !is_numeric($user_id) || $user_id <= 0 )
+      if( !is_numeric($user_id) || $user_id < 0 || ( !$allow0 && $user_id == 0 ) )
          error('invalid_user', "$loc.check.user_id($user_id)");
    }
 
