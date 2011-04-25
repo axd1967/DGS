@@ -2159,3 +2159,8 @@ ALTER TABLE Bulletin
    ADD Flags tinyint unsigned NOT NULL default 0 AFTER TargetType ;
 
 
+-- added LockVersion-field for optimistic locking
+ALTER TABLE Bulletin
+   ADD LockVersion tinyint unsigned NOT NULL default 0 AFTER uid ;
+
+

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `Bio` (
 CREATE TABLE IF NOT EXISTS `Bulletin` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL,
+  `LockVersion` tinyint(3) unsigned NOT NULL default '0',
   `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
   `Status` enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
   `TargetType` enum('ALL','TD','TP','UL','MPG') NOT NULL,

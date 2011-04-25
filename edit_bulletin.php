@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Bulletin";
 
+require_once 'include/error_codes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
@@ -74,6 +75,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    }
    else
       $bulletin = Bulletin::new_bulletin( /*adm*/false, $n_gid, $n_tid );
+   $bulletin->readLockVersion();
 
    $b_old_status = $bulletin->Status;
    $b_old_target_type = $bulletin->TargetType;
@@ -91,26 +93,33 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    list( $vars, $edits, $input_errors ) = parse_edit_form( $bulletin );
    $errors = array_merge( $errors, $input_errors );
 
-   if( $b_old_status == BULLETIN_STATUS_PENDING ) // no hard-error
-      $errors[] = sprintf( T_('Edit of bulletin on status [%s] is not allowed.'),
-         GuiBulletin::getStatusText($b_old_status) );
-
    // save bulletin-object with values from edit-form
    if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
    {
-      ta_begin();
-      {//HOT-section to save bulletin-data
-         $bulletin->persist();
-         $bid = $bulletin->ID;
+      if( count($edits) == 0 )
+         $errors[] = T_('Sorry, there\'s nothing to save.');
+      else
+      {
+         ta_begin();
+         {//HOT-section to save bulletin-data
+            $bulletin->persist();
+            if( $bid && $bulletin->is_optimistic_lock_clash() )
+               $errors[] = ErrorCode::get_error_text('optlock_clash');
+            else
+            {
+               $bid = $bulletin->ID;
 
-         if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
-            Bulletin::reset_bulletin_read( $bid );
+               if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
+                  Bulletin::reset_bulletin_read( $bid );
 
-         $bulletin->update_count_players('edit_bullet');
+               $bulletin->update_count_players('edit_bullet');
+            }
+         }
+         ta_end();
+
+         if( count($errors) == 0 )
+            jump_to("edit_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
       }
-      ta_end();
-
-      jump_to("edit_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
    }
 
    $page = "edit_bulletin.php";
@@ -121,6 +130,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
+   $bform->add_hidden( FORMFIELD_LOCKVERSION, $bulletin->LockVersion );
    if( $bid == 0 )
    {
       $bform->add_hidden( 'n_gid', $bulletin->gid );
@@ -210,7 +220,6 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
-   $bform->add_empty_row();
    $bform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 'save', T_('Save bulletin'),

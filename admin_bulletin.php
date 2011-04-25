@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Bulletin";
 
+require_once 'include/error_codes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
@@ -73,10 +74,13 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       if( $bulletin->tid > 0 )
          $bulletin->Tournament = Tournament::load_tournament($bulletin->tid);
    }
+   $bulletin->readLockVersion();
 
    $b_old_status = $bulletin->Status;
    $b_old_category = $bulletin->Category;
    $b_old_target_type = $bulletin->TargetType;
+   $b_old_admnote = $bulletin->AdminNote;
+
    $arr_status = GuiBulletin::getStatusText();
    $arr_categories = GuiBulletin::getCategoryText();
    $arr_target_types = GuiBulletin::getTargetTypeText();
@@ -88,22 +92,33 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    // save bulletin-object with values from edit-form
    if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
    {
-      ta_begin();
-      {//HOT-section to save bulletin-data
-         $bulletin->persist();
-         $bid = $bulletin->ID;
+      if( count($edits) == 0 )
+         $errors[] = T_('Sorry, there\'s nothing to save.');
+      else
+      {
+         ta_begin();
+         {//HOT-section to save bulletin-data
+            $bulletin->persist();
+            if( $bid && $bulletin->is_optimistic_lock_clash() )
+               $errors[] = ErrorCode::get_error_text('optlock_clash');
+            else
+            {
+               $bid = $bulletin->ID;
 
-         if( $bulletin->TargetType == BULLETIN_TRG_USERLIST )
-            Bulletin::persist_bulletin_userlist( $bid, $bulletin->UserList );
+               if( $bulletin->TargetType == BULLETIN_TRG_USERLIST )
+                  Bulletin::persist_bulletin_userlist( $bid, $bulletin->UserList );
 
-         if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
-            Bulletin::reset_bulletin_read( $bid );
+               if( $bulletin->CountReads > 0 && $b_old_status != BULLETIN_STATUS_SHOW && $bulletin->Status == BULLETIN_STATUS_SHOW )
+                  Bulletin::reset_bulletin_read( $bid );
 
-         $bulletin->update_count_players('admin_bullet');
+               $bulletin->update_count_players('admin_bullet');
+            }
+         }
+         ta_end();
+
+      if( count($errors) == 0 )
+         jump_to("admin_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
       }
-      ta_end();
-
-      jump_to("admin_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
    }
 
    $page = "admin_bulletin.php";
@@ -114,6 +129,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
+   $bform->add_hidden( FORMFIELD_LOCKVERSION, $bulletin->LockVersion );
    if( $n_uid )
       $bform->add_hidden( 'n_uid', $n_uid );
 
@@ -142,10 +158,10 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'DESCRIPTION', T_('Hits (read marks)'),
             'TEXT',        $bulletin->CountReads, ));
-      if( $bulletin->AdminNote )
+      if( $b_old_admnote )
          $bform->add_row( array(
                'DESCRIPTION', T_('Admin Note'),
-               'TEXT',        span('BulletinAdminNote', $bulletin->AdminNote), ));
+               'TEXT',        span('BulletinAdminNote', $b_old_admnote), ));
    }
 
    $bform->add_row( array( 'HR' ));
@@ -180,8 +196,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          'SELECTBOX',    'target_type', 1, $arr_target_types, $vars['target_type'], false, ));
 
    if( ( $vars['target_type'] == BULLETIN_TRG_TP || $vars['target_type'] == BULLETIN_TRG_TD )
-         || ( $vars['category'] == BULLETIN_CAT_TOURNAMENT_NEWS )
-         || $vars['tnews_tid'] )
+         || $vars['category'] == BULLETIN_CAT_TOURNAMENT_NEWS
+         || $vars['tnews_tid'] || $bulletin->tid > 0 )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Tournament ID#bulletin'),
@@ -209,12 +225,17 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
                            $bulletin->User->Handle )), ));
       }
    }
-   if( $vars['target_type'] == BULLETIN_TRG_MPG || $vars['gid'] )
+   if( $vars['target_type'] == BULLETIN_TRG_MPG || $vars['gid'] || $bulletin->gid > 0 )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Game ID#bulletin'),
             'TEXTINPUT',   'gid', 8, 12, $vars['gid'], ));
    }
+
+   $bform->add_row( array(
+         'DESCRIPTION', T_('Admin Note'),
+         'TEXTINPUT',   'admin_note', 80, 255, $vars['admin_note'] ));
+
 
    $bform->add_empty_row();
    $bform->add_row( array(
@@ -240,7 +261,6 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
 
-   $bform->add_empty_row();
    $bform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
          'SUBMITBUTTON', 'save', T_('Save bulletin'),
@@ -399,6 +419,7 @@ function parse_edit_form( &$bulletin )
       'category'        => $bulletin->Category,
       'status'          => $bulletin->Status,
       'target_type'     => $bulletin->TargetType,
+      'admin_note'      => $bulletin->AdminNote,
       'author'          => $bulletin->User->Handle,
       'publish_time'    => formatDate($bulletin->PublishTime),
       'expire_time'     => formatDate($bulletin->ExpireTime),
@@ -441,10 +462,10 @@ function parse_edit_form( &$bulletin )
       if( $has_ttype_tourney && ( (string)$new_value == '' || (int)$new_value <= 0 ) )
       {
          if( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS )
-            $errors[] = sprintf( T_('Bulletin category [%s] requires a tournament-ID!'),
+            $errors[] = sprintf( T_('Bulletin Category [%s] requires a tournament-ID!'),
                GuiBulletin::getCategoryText($bulletin->Category) );
          if( $has_ttype_tourney )
-            $errors[] = sprintf( T_('Bulletin target-type [%s] requires a tournament-ID!'),
+            $errors[] = sprintf( T_('Bulletin Target-Type [%s] requires a tournament-ID!'),
                GuiBulletin::getTargetTypeText($bulletin->TargetType) );
       }
       elseif( $new_value && !is_numeric($new_value) )
@@ -468,11 +489,11 @@ function parse_edit_form( &$bulletin )
       if( (string)$new_value != '' && (int)$new_value > 0 && !$has_ttype_tourney )
       {
          if( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS )
-            $errors[] = sprintf( T_('Target Type must be set to [%s or %s] if Category is [%s]!'),
+            $errors[] = sprintf( T_('Target-Type must be set to [%s or %s] if Category is [%s]!'),
                GuiBulletin::getTargetTypeText(BULLETIN_TRG_TP), GuiBulletin::getTargetTypeText(BULLETIN_TRG_TD),
                GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT_NEWS) );
          else
-            $errors[] = sprintf( T_('Tournament-ID [%s] must be cleared when target-type is not [%s or %s] and Category is not [%s]!'),
+            $errors[] = sprintf( T_('Tournament-ID [%s] must be cleared when Target-Type is not [%s or %s] and Category is not [%s]!'),
                $new_value,
                GuiBulletin::getTargetTypeText(BULLETIN_TRG_TP), GuiBulletin::getTargetTypeText(BULLETIN_TRG_TD),
                GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT_NEWS) );
@@ -482,7 +503,7 @@ function parse_edit_form( &$bulletin )
       $need_gid = ( $bulletin->TargetType == BULLETIN_TRG_MPG );
       if( $need_gid && ( (string)$new_value == '' || (int)$new_value <= 0 ) )
       {
-         $errors[] = sprintf( T_('Bulletin target-type [%s] requires a game-ID!'),
+         $errors[] = sprintf( T_('Bulletin Target-Type [%s] requires a game-ID!'),
             GuiBulletin::getTargetTypeText($bulletin->TargetType) );
       }
       elseif( $new_value && !is_numeric($new_value) )
@@ -493,7 +514,7 @@ function parse_edit_form( &$bulletin )
          if( is_null($game_row) )
             $errors[] = sprintf( T_('No game found for game-ID [%s]!'), $new_value );
          elseif( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
-            $errors[] = T_('Game-ID must reference a multi-player-game!');
+            $errors[] = sprintf( T_('Game-ID [%s] must reference a multi-player-game!'), $new_value );
          else
             $bulletin->gid = $new_value;
       }
@@ -501,7 +522,7 @@ function parse_edit_form( &$bulletin )
          $bulletin->gid = 0;
       if( (string)$new_value != '' && (int)$new_value > 0 && !$need_gid )
       {
-         $errors[] = sprintf( T_('Game-ID [%s] must be cleared when target-type is not [%s]!'),
+         $errors[] = sprintf( T_('Game-ID [%s] must be cleared when Target-Type is not [%s]!'),
             $new_value, GuiBulletin::getTargetTypeText(BULLETIN_TRG_MPG) );
       }
 
@@ -572,14 +593,27 @@ function parse_edit_form( &$bulletin )
       else
          $bulletin->Subject = $new_value;
 
-      $new_value = trim($vars['text']);
-      $bulletin->Text = $new_value;
+      $bulletin->Text = trim($vars['text']);
+
+      $new_value = trim($vars['admin_note']);
+      $miss_admnote = false;
+      if( ($bulletin->Flags & BULLETIN_FLAG_USER_EDIT) && !$new_value )
+      {
+         if( $bulletin->Status == BULLETIN_STATUS_NEW || $bulletin->Status == BULLETIN_STATUS_PENDING )
+            $miss_admnote = true;
+      }
+      if( $miss_admnote )
+         $errors[] = sprintf( T_('Missing admin-note for user-changeable bulletin on status [%s].'),
+            GuiBulletin::getStatusText($bulletin->Status) );
+      else
+         $bulletin->AdminNote = $new_value;
 
 
       // determine edits
       if( $old_vals['category'] != $bulletin->Category ) $edits[] = T_('Category#edits');
       if( $old_vals['status'] != $bulletin->Status ) $edits[] = T_('Status#edits');
       if( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
+      if( $old_vals['admin_note'] != $bulletin->AdminNote ) $edits[] = T_('Admin-Note#edits');
       if( $old_vals['tnews_tid'] != $bulletin->tid ) $edits[] = T_('Tournament-ID#edits');
       if( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game-ID#edits');
       if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('UserList#edits');

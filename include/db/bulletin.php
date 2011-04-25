@@ -78,6 +78,7 @@ global $ENTITY_BULLETIN; //PHP5
 $ENTITY_BULLETIN = new Entity( 'Bulletin',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
+      FTYPE_OPTLOCK,
       FTYPE_INT,  'ID', 'uid', 'tid', 'gid', 'CountReads', 'Flags',
       FTYPE_ENUM, 'Category', 'Status', 'TargetType',
       FTYPE_TEXT, 'AdminNote', 'Subject', 'Text',
@@ -88,6 +89,7 @@ class Bulletin
 {
    var $ID;
    var $uid;
+   var $LockVersion;
    var $Category;
    var $Status;
    var $TargetType;
@@ -118,6 +120,7 @@ class Bulletin
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
+      $this->LockVersion = null;
       $this->setCategory( $category );
       $this->setStatus( $status );
       $this->setTargetType( $target_type );
@@ -137,6 +140,23 @@ class Bulletin
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();
       $this->Tournament = null;
+   }
+
+   /*! \brief Returns true if LockVersion for optimistic-locking does not match latest version. */
+   function is_optimistic_lock_clash()
+   {
+      if( $this->ID == 0 || is_null($this->LockVersion) || mysql_affected_rows() >= 1 ) //multi-update not supported
+         return false;
+      $row = mysql_single_fetch( "Bulletin.is_optimistic_lock_clash({$this->ID},{$this->LockVersion})",
+         "SELECT ".FIELD_LOCKVERSION." FROM Bulletin WHERE ID={$this->ID} LIMIT 1" );
+      return ( !$row || (int)$row[FIELD_LOCKVERSION] != $this->LockVersion );
+   }
+
+   function readLockVersion()
+   {
+      $lock_version = @$_REQUEST[FORMFIELD_LOCKVERSION];
+      if( (string)$lock_version != '' )
+         $this->LockVersion = (int)$lock_version;
    }
 
    function to_string()
@@ -200,6 +220,8 @@ class Bulletin
          $data = $GLOBALS['ENTITY_BULLETIN']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
+      if( !is_null($this->LockVersion) )
+         $data->set_value( FIELD_LOCKVERSION, $this->LockVersion );
       $data->set_value( 'Category', $this->Category );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'TargetType', $this->TargetType );
@@ -312,6 +334,32 @@ class Bulletin
       if( $bid > 0 )
          $qsql->add_part( SQLP_WHERE, "B.ID=$bid" );
       return $qsql;
+   }
+
+   /*! \brief Returns Bulletin-object created from specified (db-)row. */
+   function new_from_row( $row )
+   {
+      $bull = new Bulletin(
+            // from Bulletin
+            @$row['ID'],
+            @$row['uid'],
+            User::new_from_row( $row, 'BP_' ), // from Players BP
+            @$row['Category'],
+            @$row['Status'],
+            @$row['TargetType'],
+            @$row['Flags'],
+            @$row['X_PublishTime'],
+            @$row['X_ExpireTime'],
+            @$row['tid'],
+            @$row['gid'],
+            @$row['CountReads'],
+            @$row['AdminNote'],
+            @$row['Subject'],
+            @$row['Text'],
+            @$row['X_Lastchanged']
+         );
+      $bull->LockVersion = (int)@$row[FIELD_LOCKVERSION];
+      return $bull;
    }
 
    /*!
@@ -446,31 +494,6 @@ class Bulletin
 
       return $qsql;
    }//build_view_query_sql
-
-   /*! \brief Returns Bulletin-object created from specified (db-)row. */
-   function new_from_row( $row )
-   {
-      $bull = new Bulletin(
-            // from Bulletin
-            @$row['ID'],
-            @$row['uid'],
-            User::new_from_row( $row, 'BP_' ), // from Players BP
-            @$row['Category'],
-            @$row['Status'],
-            @$row['TargetType'],
-            @$row['Flags'],
-            @$row['X_PublishTime'],
-            @$row['X_ExpireTime'],
-            @$row['tid'],
-            @$row['gid'],
-            @$row['CountReads'],
-            @$row['AdminNote'],
-            @$row['Subject'],
-            @$row['Text'],
-            @$row['X_Lastchanged']
-         );
-      return $bull;
-   }
 
    /*!
     * \brief Loads and returns Bulletin-object for given bulletin-id limited to 1 result-entry.

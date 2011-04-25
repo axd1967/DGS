@@ -63,6 +63,7 @@ Description:
 -------------+-----------------------------------------------------------+---------------------
  ID          | int(11)                                                   | NULL, auto_increment
  uid         | int(11)                                                   | NULL
+ LockVersion | tinyint(3) unsigned                                       | 0
  Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') | PRIV_MSG
  Status      | enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE')  | NEW
  TargetType  | enum('ALL','TD','TP','UL','MPG')                          | NULL
@@ -81,6 +82,8 @@ Description:
 ## Fields:
 
 * uid : author of bulletin, FK to Players.ID
+
+* LockVersion : version-field for optimistic locking
 
 * Category : bulletin-type, can be filtered upon by (future) user-profile
    - MAINT = maintenance announcement
