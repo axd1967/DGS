@@ -395,8 +395,7 @@ class ForumRead
 
    function get_min_date()
    {
-      global $NOW;
-      return $NOW - FORUM_SECS_NEW_END;
+      return $GLOBALS['NOW'] - FORUM_SECS_NEW_END;
    }
 
 } // end of 'ForumRead'

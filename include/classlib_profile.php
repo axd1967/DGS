@@ -150,8 +150,6 @@ class Profile
     */
    function update_profile( $check_user=false )
    {
-      global $NOW;
-
       if( $this->user_id <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', "profile.update_profile({$this->user_id})");
 
@@ -233,11 +231,9 @@ class Profile
     */
    function new_profile( $user_id, $type, $prof_id=0 )
    {
-      global $NOW;
-
       // id=set, user_id=?, type=?, sortoder=1, active=false, name='', lastchanged=NOW, text=''
       $profile = new Profile( $prof_id, $user_id, $type );
-      $profile->lastchanged = $NOW;
+      $profile->lastchanged = $GLOBALS['NOW'];
       return $profile;
    }
 
