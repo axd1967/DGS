@@ -167,7 +167,7 @@ function connect2mysql($no_errors=false)
    {
       $err= 'mysql_connect_failed';
       if( $no_errors ) return $err;
-      error($err); //TODO: error() with no err_log(), because no DB
+      error($err); //error() with no err_log(), because no DB, see need_db_errorlog()-func
    }
 
    if( !@mysql_select_db(DB_NAME) )
