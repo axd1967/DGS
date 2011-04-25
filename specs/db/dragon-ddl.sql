@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `Bulletin` (
   `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
   `Status` enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
   `TargetType` enum('ALL','TD','TP','UL','MPG') NOT NULL,
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
   `PublishTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `ExpireTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `tid` int(11) NOT NULL default '0',

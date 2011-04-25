@@ -2154,3 +2154,8 @@ ALTER TABLE Bulletin
    ADD gid int NOT NULL default 0 AFTER tid ;
 
 
+-- added bulletin admin-flags
+ALTER TABLE Bulletin
+   ADD Flags tinyint unsigned NOT NULL default 0 AFTER TargetType ;
+
+

@@ -24,27 +24,31 @@ Permission-Matrix for writing bulletins:
    Who (user-type) is allowed to write what (Category) bulletins addressed
    to whom (TargetType) ?
 
+   - NOTES:
+     - normal user can NOT create bulletin, but Admin must create and assign it
+       to the author setting USER_EDIT-flag. Then user can update it!
+
    - Category = MAINT : server maintenance announcements
-     create allowed by Admin; Target: ALL, UL, MPG
+     - create allowed by Admin; Target: ALL, UL, MPG
 
    - Category = ADM_MSG : admin announcements, game-/user-admin-stuff, etc
-     create allowed by Admin; Target: ALL, UL, MPG
+     - create allowed by Admin; Target: ALL, UL, MPG
 
    - Category = TOURNEY : tournament announcement on DGS, for non-DGS tournaments use tournament-forum
-     create allowed by Admin; Target: ALL, UL, (MPG)
-     create allowed by user;  Target: ALL, UL
+     - create allowed by Admin; Target: ALL, UL, (MPG)
+     - update allowed by user;  Target: ALL, UL
 
    - Category = TNEWS : tournament-specific news / announcements
-     create allowed by Admin, TD, T-owner; Target: TD (private T-news), TP (public T-news)
+     - create allowed by Admin, T-Admin, TD, T-owner; Target: TD (private T-news), TP (public T-news)
 
    - Category = PRIV_MSG : user-to-users messages (non-Ads)
-     create allowed by Admin; Target: ALL, UL, TD, TP, MPG
-     create allowed by user;  Target: UL
-     create allowed by GP;    Target: MPG
+     - create allowed by Admin; Target: ALL, UL, TD, TP, MPG
+     - create allowed by GP;    Target: MPG
+     - update allowed by user;  Target: UL
 
    - Category = AD : user-to-users advertisements (=pay me money for something Go-related)
-     create allowed by Admin; Target: ALL, UL, (MPG)
-     create allowed by user;  Target: ALL, UL
+     - create allowed by Admin; Target: ALL, UL, (MPG)
+     - update allowed by user;  Target: ALL, UL
 
 
 ###########################################################################
@@ -62,6 +66,7 @@ Description:
  Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') | PRIV_MSG
  Status      | enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE')  | NEW
  TargetType  | enum('ALL','TD','TP','UL','MPG')                          | NULL
+ Flags       | tinyint(3) unsigned                                       | 0
  PublishTime | datetime                                                  | 0000-00-00 00:00:00
  ExpireTime  | datetime                                                  | 0000-00-00 00:00:00
  tid         | int(11)                                                   | 0
@@ -100,6 +105,10 @@ Description:
    - TP = bulletin shown to tournament-participants of referenced tournament (Ref_ID := tid)
    - UL = bulletin shown to User-List (Ref_ID := 0)
    - NOTE: no default defined in DB, because it MUST be set by application
+
+* Flags : admin-flags of bulletin
+   - 0x01 = created by admin
+   - 0x02 = changeable by user
 
 * PublishTime : defines order of bulletins
 

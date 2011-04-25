@@ -48,6 +48,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
      ''                       : add new admin bulletin
      n_gid=                   : add new MPG-bulletin
      n_tid=                   : add new TP/TD-bulletin
+     n_uid=$uid|-1|''         : prepare new user-changeable bulletin for user: $uid, -1=some-user, ''=myself
      bid=                     : edit existing bulletin
      preview&bid=             : preview for bulletin-save
      save&bid=                : save new/updated bulletin
@@ -59,11 +60,13 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    if( $n_gid < 0 ) $n_gid = 0;
    $n_tid = (int) get_request_arg('n_tid');
    if( $n_tid < 0 ) $n_tid = 0;
+   $n_uid = (int) get_request_arg('n_uid');
+   if( $n_uid < 0 ) $n_uid = $my_id;
 
    // init
    $bulletin = ( $bid > 0 ) ? Bulletin::load_bulletin($bid) : null;
    if( is_null($bulletin) )
-      $bulletin = Bulletin::new_bulletin( $is_admin, $n_gid, $n_tid );
+      $bulletin = Bulletin::new_bulletin( $is_admin, $n_gid, $n_tid, $n_uid );
    else
    {
       $bulletin->loadUserList();
@@ -111,6 +114,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
+   if( $n_uid )
+      $bform->add_hidden( 'n_uid', $n_uid );
 
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin ID'),
@@ -120,6 +125,10 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'DESCRIPTION', T_('Bulletin Author'),
             'TEXT',        $bulletin->User->user_reference(), ));
+   if( $bulletin->Flags > 0 )
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Bulletin Flags'),
+            'TEXT',        GuiBulletin::formatFlags($bulletin->Flags), ));
    if( $bulletin->Lastchanged > 0 )
       $bform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
@@ -133,9 +142,10 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'DESCRIPTION', T_('Hits (read marks)'),
             'TEXT',        $bulletin->CountReads, ));
-      /* TODO $bform->add_row( array(
-            'DESCRIPTION', T_('Admin Note'),
-            'TEXT',        span('FormWarning', $bulletin->AdminNote), )); */
+      if( $bulletin->AdminNote )
+         $bform->add_row( array(
+               'DESCRIPTION', T_('Admin Note'),
+               'TEXT',        span('BulletinAdminNote', $bulletin->AdminNote), ));
    }
 
    $bform->add_row( array( 'HR' ));
@@ -171,7 +181,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
    if( ( $vars['target_type'] == BULLETIN_TRG_TP || $vars['target_type'] == BULLETIN_TRG_TD )
          || ( $vars['category'] == BULLETIN_CAT_TOURNAMENT_NEWS )
-         || (int)trim(get_request_arg('tnews_tid')) > 0 )
+         || $vars['tnews_tid'] )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Tournament ID#bulletin'),
@@ -199,7 +209,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
                            $bulletin->User->Handle )), ));
       }
    }
-   if( $vars['target_type'] == BULLETIN_TRG_MPG || (int)trim(get_request_arg('gid')) > 0 )
+   if( $vars['target_type'] == BULLETIN_TRG_MPG || $vars['gid'] )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Game ID#bulletin'),
@@ -275,6 +285,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $menu_array = array();
    $menu_array[T_('All Bulletins')] =
       array( 'url' => "list_bulletins.php?read=2", 'class' => 'AdminLink' );
+   $menu_array[T_('New user bulletin')] =
+      array( 'url' => "admin_bulletin.php?n_uid=-1", 'class' => 'AdminLink' );
    $menu_array[T_('New admin bulletin')] =
       array( 'url' => "admin_bulletin.php", 'class' => 'AdminLink' );
 
@@ -351,14 +363,27 @@ function check_user_list( $user_list, $author_uid )
       mysql_free_result($result);
    }
 
+   $uids = array_unique($uids);
    ksort( $handles, SORT_NUMERIC );
    ksort( $uids, SORT_NUMERIC );
    ksort( $urefs, SORT_NUMERIC );
 
    if( count($arr_miss) > 0 )
       $errors[] = sprintf( T_('Unknown users found [%s]#bulletin_userlist'), implode(', ', array_keys($arr_miss) ));
+   if( count($uids) == 1 )
+      $errors[] = T_('Userlist must contain at least two recipients, otherwise send a private message instead.#bulletin_userlist');
 
-   return array( array_unique(array_values($handles)), array_unique($uids), $urefs, array_keys($rejectmsg), $errors );
+   $guests = array();
+   for( $g_uid=1; $g_uid <= GUESTS_ID_MAX; $g_uid++)
+   {
+      if( isset($handles[$g_uid]) )
+         $guests[] = $handles[$g_uid];
+   }
+   if( count($guests) > 0 )
+      $errors[] = sprintf( T_('Guest users [%s] are not allowed in user-list.#bulletin_userlist'),
+         implode(' ', $guests) );
+
+   return array( array_unique(array_values($handles)), $uids, $urefs, array_keys($rejectmsg), $errors );
 }//check_user_list
 
 // return [ vars-hash, edits-arr, handle-msg-rejected-map, errorlist ]
@@ -422,7 +447,7 @@ function parse_edit_form( &$bulletin )
             $errors[] = sprintf( T_('Bulletin target-type [%s] requires a tournament-ID!'),
                GuiBulletin::getTargetTypeText($bulletin->TargetType) );
       }
-      elseif( !is_numeric($new_value) )
+      elseif( $new_value && !is_numeric($new_value) )
          $errors[] = T_('Tournament-ID must be numeric!');
       elseif( $need_tid )
       {
@@ -440,14 +465,15 @@ function parse_edit_form( &$bulletin )
          $bulletin->tid = 0;
          $bulletin->Tournament = null;
       }
-      if( (int)$new_value > 0 && !$has_ttype_tourney )
+      if( (string)$new_value != '' && (int)$new_value > 0 && !$has_ttype_tourney )
       {
          if( $bulletin->Category == BULLETIN_CAT_TOURNAMENT_NEWS )
             $errors[] = sprintf( T_('Target Type must be set to [%s or %s] if Category is [%s]!'),
                GuiBulletin::getTargetTypeText(BULLETIN_TRG_TP), GuiBulletin::getTargetTypeText(BULLETIN_TRG_TD),
                GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT_NEWS) );
          else
-            $errors[] = sprintf( T_('Tournament-ID must be cleared when target-type is not [%s or %s] and Category is not [%s]!'),
+            $errors[] = sprintf( T_('Tournament-ID [%s] must be cleared when target-type is not [%s or %s] and Category is not [%s]!'),
+               $new_value,
                GuiBulletin::getTargetTypeText(BULLETIN_TRG_TP), GuiBulletin::getTargetTypeText(BULLETIN_TRG_TD),
                GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT_NEWS) );
       }
@@ -459,7 +485,7 @@ function parse_edit_form( &$bulletin )
          $errors[] = sprintf( T_('Bulletin target-type [%s] requires a game-ID!'),
             GuiBulletin::getTargetTypeText($bulletin->TargetType) );
       }
-      elseif( !is_numeric($new_value) )
+      elseif( $new_value && !is_numeric($new_value) )
          $errors[] = T_('Game-ID must be numeric!');
       elseif( $need_gid )
       {
@@ -473,7 +499,7 @@ function parse_edit_form( &$bulletin )
       }
       else
          $bulletin->gid = 0;
-      if( (int)$new_value > 0 && !$need_gid )
+      if( (string)$new_value != '' && (int)$new_value > 0 && !$need_gid )
       {
          $errors[] = sprintf( T_('Game-ID [%s] must be cleared when target-type is not [%s]!'),
             $new_value, GuiBulletin::getTargetTypeText(BULLETIN_TRG_MPG) );

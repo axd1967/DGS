@@ -42,12 +42,12 @@ define('BULLETIN_CAT_SPAM',            'AD');
 define('CHECK_BULLETIN_CATEGORY', 'MAINT|ADM_MSG|TOURNEY|TNEWS|PRIV_MSG|AD');
 
 define('BULLETIN_STATUS_NEW',     'NEW');
-//TODO define('BULLETIN_STATUS_PENDING', 'PENDING');
+define('BULLETIN_STATUS_PENDING', 'PENDING');
 //TODO define('BULLETIN_STATUS_HIDDEN',  'HIDDEN');
 define('BULLETIN_STATUS_SHOW',    'SHOW');
 define('BULLETIN_STATUS_ARCHIVE', 'ARCHIVE');
 define('BULLETIN_STATUS_DELETE',  'DELETE');
-define('CHECK_BULLETIN_STATUS', 'NEW|SHOW|ARCHIVE|DELETE');
+define('CHECK_BULLETIN_STATUS', 'NEW|PENDING|SHOW|ARCHIVE|DELETE');
 //TODO define('CHECK_BULLETIN_STATUS', 'NEW|PENDING|HIDDEN|SHOW|ARCHIVE|DELETE');
 
 define('BULLETIN_TRG_UNSET',    'UNSET'); // needs assignment, not defined in DB (only application-default)
@@ -57,6 +57,10 @@ define('BULLETIN_TRG_TP',       'TP'); // tourney-participant
 define('BULLETIN_TRG_USERLIST', 'UL');
 define('BULLETIN_TRG_MPG',      'MPG'); // multi-player-game
 define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL|MPG');
+
+// also adjust GuiBulletin::getFlagsText()
+define('BULLETIN_FLAG_ADMIN_CREATED', 0x01); // bulletin created by admin
+define('BULLETIN_FLAG_USER_EDIT',     0x02); // bulletin can be edited by user
 
 // stored in bitmask Players.SkipBulletin
 define('BULLETIN_SKIPCAT_TOURNAMENT',  0x01);
@@ -74,7 +78,7 @@ global $ENTITY_BULLETIN; //PHP5
 $ENTITY_BULLETIN = new Entity( 'Bulletin',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'uid', 'tid', 'gid', 'CountReads',
+      FTYPE_INT,  'ID', 'uid', 'tid', 'gid', 'CountReads', 'Flags',
       FTYPE_ENUM, 'Category', 'Status', 'TargetType',
       FTYPE_TEXT, 'AdminNote', 'Subject', 'Text',
       FTYPE_DATE, 'PublishTime', 'ExpireTime', 'Lastchanged'
@@ -87,6 +91,7 @@ class Bulletin
    var $Category;
    var $Status;
    var $TargetType;
+   var $Flags;
    var $PublishTime;
    var $ExpireTime;
    var $tid;
@@ -107,15 +112,16 @@ class Bulletin
 
    /*! \brief Constructs Bulletin-object with specified arguments. */
    function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
-            $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $publish_time=0,
-            $expire_time=0, $tid=0, $gid=0, $count_reads=0, $admin_note='', $subject='', $text='',
-            $lastchanged=0 )
+            $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $flags=0,
+            $publish_time=0, $expire_time=0, $tid=0, $gid=0, $count_reads=0, $admin_note='',
+            $subject='', $text='', $lastchanged=0 )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
       $this->setCategory( $category );
       $this->setStatus( $status );
       $this->setTargetType( $target_type );
+      $this->Flags = (int)$flags;
       $this->PublishTime = (int)$publish_time;
       $this->ExpireTime = (int)$expire_time;
       $this->tid = (int)$tid;
@@ -197,6 +203,7 @@ class Bulletin
       $data->set_value( 'Category', $this->Category );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'TargetType', $this->TargetType );
+      $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'PublishTime', $this->PublishTime );
       $data->set_value( 'ExpireTime', $this->ExpireTime );
       $data->set_value( 'tid', $this->tid );
@@ -227,7 +234,7 @@ class Bulletin
          while( $row = mysql_fetch_array( $result ) )
          {
             $this->UserList[] = $row['ID'];
-            $this->UserListHandles[] = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
+            $this->UserListHandles[] = ( is_numeric($row['Handle']) ? '=' : '' ) . $row['Handle'];
             $this->UserListUserRefs[$row['ID']] = $row;
          }
          mysql_free_result($result);
@@ -241,21 +248,31 @@ class Bulletin
          $uid, $this->ID, $this->tid, $this->gid );
    }
 
-   /*! \brief Returns true if this Bulletin can be edited by user. */
-   function allow_bulletin_user_edit( $uid )
+   /*!
+    * \brief Returns true if this Bulletin can be edited by user.
+    * \param $errmsg if set and edit is not allowed, throw error(), otherwise return just false instead
+    */
+   function allow_bulletin_user_edit( $uid, $errmsg='' )
    {
-      if( $this->uid != $uid ) // not author
-         return false;
-      if( $this->Status == BULLETIN_STATUS_ARCHIVE || $this->Status == BULLETIN_STATUS_DELETE )
-         return false;
+      if( $errmsg )
+         $errmsg .= "({$this->ID},{$this->Status},{$this->Flags},$uid)";
 
+      if( $this->uid != $uid ) // not author
+         return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.author") : false;
+      if( $this->Status == BULLETIN_STATUS_ARCHIVE || $this->Status == BULLETIN_STATUS_DELETE )
+         return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.status") : false;
+
+      // check despite easier check on user-edit-flag
       if( $this->TargetType == BULLETIN_TRG_MPG && $this->Category == BULLETIN_CAT_PRIVATE_MSG && $this->gid > 0 )
          return true;
       if( ($this->TargetType == BULLETIN_TRG_TP || $this->TargetType == BULLETIN_TRG_TD )
             && $this->Category == BULLETIN_CAT_TOURNAMENT_NEWS && $this->tid > 0 )
          return true;
 
-      return false;
+      if( $this->Flags & BULLETIN_FLAG_USER_EDIT )
+         return true;
+
+      return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.last_check") : false;
    }//allow_edit_bulletin
 
    /*! \brief Returns true if this Bulletin.Category should be skipped according to Players.SkipBulletin-flags. */
@@ -441,6 +458,7 @@ class Bulletin
             @$row['Category'],
             @$row['Status'],
             @$row['TargetType'],
+            @$row['Flags'],
             @$row['X_PublishTime'],
             @$row['X_ExpireTime'],
             @$row['tid'],
@@ -492,27 +510,49 @@ class Bulletin
     * \brief Returns new Bulletin-object for user and args.
     * \param $gid if set, creates MPG-target-type bulletin
     * \param $tid if set, creates TP-target-type bulletin
+    * \param $new_uid if set, creates new bulletin for user
     */
-   function new_bulletin( $is_admin, $gid=0, $tid=0 )
+   function new_bulletin( $is_admin, $gid=0, $tid=0, $new_uid=0 )
    {
       global $player_row;
+
       $uid = (int)@$player_row['ID'];
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-         error('invalid_args', "Bulletin.new_bulletin.check.uid($uid,$is_admin,$gid,$tid)");
-      if( !is_numeric($gid) || $gid < 0 )
-         error('invalid_args', "Bulletin.new_bulletin.check.gid($uid,$is_admin,$gid,$tid)");
-      if( !is_numeric($tid) || $tid < 0 )
-         error('invalid_args', "Bulletin.new_bulletin.check.tid($uid,$is_admin,$gid,$tid)");
+         error('invalid_args', "Bulletin.new_bulletin.check.uid($uid,$is_admin,$gid,$tid,$new_uid)");
 
-      $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
+      if( !is_numeric($gid) || $gid < 0 )
+         error('invalid_args', "Bulletin.new_bulletin.check.gid($uid,$is_admin,$gid)");
+      if( !is_numeric($tid) || $tid < 0 )
+         error('invalid_args', "Bulletin.new_bulletin.check.tid($uid,$is_admin,$tid)");
+      if( !is_numeric($new_uid) || ($new_uid != 0 && $new_uid <= GUESTS_ID_MAX) )
+         error('invalid_args', "Bulletin.new_bulletin.check.new_uid($uid,$is_admin,$new_uid)");
+      if( !$is_admin && $new_uid == 0 )
+         error('invalid_args', "Bulletin.new_bulletin.check.new_uid0($uid,$is_admin,$new_uid)");
+
+      if( $new_uid == $uid || $new_uid == 0 )
+         $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
+      else
+      {
+         $user = User::load_user( $new_uid );
+         if( is_null($user) )
+            error('unknown_user', "Bulletin.new_bulletin.check.find_user($uid,$new_uid)");
+         $uid = $new_uid;
+      }
+
       $bulletin = new Bulletin( 0, $uid, $user );
       $bulletin->PublishTime = $GLOBALS['NOW'];
       $bulletin->ExpireTime = $bulletin->PublishTime + 30 * SECS_PER_DAY; // default +30d
 
       if( $is_admin )
+      {
          $bulletin->setCategory( BULLETIN_CAT_ADMIN_MSG );
+         $bulletin->Flags = BULLETIN_FLAG_ADMIN_CREATED;
+      }
       else
+      {
          $bulletin->setCategory( BULLETIN_CAT_PRIVATE_MSG );
+         $bulletin->Flags = BULLETIN_FLAG_USER_EDIT;
+      }
 
       if( $gid > 0 ) // MPG-bulletin
       {
@@ -526,6 +566,14 @@ class Bulletin
          $bulletin->setStatus( BULLETIN_STATUS_SHOW ); // no admin-ACK needed
          $bulletin->setTargetType( BULLETIN_TRG_TP );
          $bulletin->tid = $tid;
+      }
+      elseif( $new_uid > 0 ) // prepare bulletin for user
+      {
+         $bulletin->setCategory( BULLETIN_CAT_PRIVATE_MSG );
+         $bulletin->setTargetType( BULLETIN_TRG_ALL );
+         $bulletin->Flags |= BULLETIN_FLAG_USER_EDIT;
+         $bulletin->Subject = "ENTER SUBJECT";
+         $bulletin->Text = "ENTER TEXT";
       }
 
       return $bulletin;

@@ -65,7 +65,7 @@ class GuiBulletin
          return $ARR_GLOBALS_BULLETIN[$key];
 
       if( !isset($ARR_GLOBALS_BULLETIN[$key][$category]) )
-         error('invalid_args', "Bulletin.getCategoryText($category,$key)");
+         error('invalid_args', "GuiBulletin::getCategoryText($category,$key)");
       return $ARR_GLOBALS_BULLETIN[$key][$category];
    }
 
@@ -80,7 +80,7 @@ class GuiBulletin
       {
          $arr = array();
          $arr[BULLETIN_STATUS_NEW]     = T_('New#B_status');
-         //TODO $arr[BULLETIN_STATUS_PENDING] = T_('Pending#B_status');
+         $arr[BULLETIN_STATUS_PENDING] = T_('Pending#B_status');
          //TODO $arr[BULLETIN_STATUS_HIDDEN]  = T_('Hidden#B_status');
          $arr[BULLETIN_STATUS_SHOW]    = T_('Show#B_status');
          $arr[BULLETIN_STATUS_ARCHIVE] = T_('Archive#B_status');
@@ -92,7 +92,7 @@ class GuiBulletin
          return $ARR_GLOBALS_BULLETIN[$key];
 
       if( !isset($ARR_GLOBALS_BULLETIN[$key][$status]) )
-         error('invalid_args', "Bulletin.getStatusText($status,$key)");
+         error('invalid_args', "GuiBulletin::getStatusText($status,$key)");
       return $ARR_GLOBALS_BULLETIN[$key][$status];
    }
 
@@ -119,9 +119,46 @@ class GuiBulletin
          return $ARR_GLOBALS_BULLETIN[$key];
 
       if( !isset($ARR_GLOBALS_BULLETIN[$key][$trg_type]) )
-         error('invalid_args', "Bulletin.getTargetTypeText($trg_type,$key)");
+         error('invalid_args', "GuiBulletin::getTargetTypeText($trg_type,$key)");
       return $ARR_GLOBALS_BULLETIN[$key][$trg_type];
    }
+
+   /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
+   function getFlagsText( $flag=null )
+   {
+      global $ARR_GLOBALS_BULLETIN;
+
+      // lazy-init of texts
+      $key = 'FLAGS';
+      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
+      {
+         $arr = array();
+         $arr[BULLETIN_FLAG_ADMIN_CREATED] = T_('Admin-Created#B_flag');
+         $arr[BULLETIN_FLAG_USER_EDIT]     = T_('User-Changeable#B_flag');
+         $ARR_GLOBALS_BULLETIN[$key] = $arr;
+      }
+
+      if( is_null($flag) )
+         return $ARR_GLOBALS_BULLETIN[$key];
+      if( !isset($ARR_GLOBALS_BULLETIN[$key][$flag]) )
+         error('invalid_args', "GuiBulletin::getFlagsText($flag,$short)");
+      return $ARR_GLOBALS_BULLETIN[$key][$flag];
+   }//getFlagsText
+
+   /*! \brief Returns text-representation of bulletin-flags. */
+   function formatFlags( $flags, $zero_val='', $intersect_flags=0, $class=null )
+   {
+      $check_flags = ( $intersect_flags > 0 ) ? $flags & $intersect_flags : $flags;
+
+      $arr = array();
+      $arr_flags = GuiBulletin::getFlagsText();
+      foreach( $arr_flags as $flag => $flagtext )
+      {
+         if( $check_flags & $flag )
+            $arr[] = ($class) ? span($class, $flagtext) : $flagtext;
+      }
+      return (count($arr)) ? implode(', ', $arr) : $zero_val;
+   }//formatFlags
 
    /*! \brief Prints formatted Bulletin with CSS-style with author, publish-time, text. */
    function build_view_bulletin( $bulletin, $mark_url='' )
