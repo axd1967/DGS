@@ -124,7 +124,7 @@ class ErrorCode
          $arr_secret['mail_failure'] = 1; // contains email
 
          // IMPORTANT NOTE:
-         //   when adding new error-codes also check need_db_errorlog()-func in 'error.php' !!
+         //   when adding new error-codes also check need_db_errorlog()-func in 'include/error_functions.php' !!
 
          $arr['internal_error'] = // default-error-text
             T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
@@ -222,6 +222,9 @@ class ErrorCode
 
          $arr['mysql_start_game'] =
             T_("Sorry, couldn't start the game. Please wait a few minutes and try again.");
+
+         $arr['optlock_clash'] =
+            T_("Sorry, someone changed the data you were about to save (optimistic-locking clash). Please reload and re-enter your changes for an update.");
 
          $arr['name_not_given'] =
             T_("Sorry, you have to supply a name.");
@@ -545,6 +548,9 @@ class ErrorCode
 
          $arr['invalid_method'] =
             T_("Sorry, there's a problem with a class-method.");
+
+         $arr['entity_init_error'] =
+            T_("Sorry, Entity-class initialization is wrong.");
 
          $arr['constraint_votes_delete_feature'] =
             T_("Sorry, feature can't be deleted because of existing votes for feature.");

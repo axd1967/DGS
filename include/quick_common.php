@@ -174,6 +174,23 @@ function set_request_arg( $name, $val )
    $_REQUEST[$name] = $val;
 }
 
+/*! \brief emergency-error-page particular useful for errors in constructors, exists script avoiding redirect-loops. */
+function init_error( $errcode, $debugmsg=null )
+{
+   echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
+      "\n<HTML>\n",
+      "<BODY style=\"background: #F7F5E3;\">\n",
+      "<center>\n",
+      "<h3>Dragon-Go-Server EMERGENCY ERROR PAGE</h3>\n",
+      "<p>Please report this to the DGS-support!</p>\n",
+      "<p><font color=\"darkred\"><b>Error details</b> ($errcode):</font> ",
+      (is_null($debugmsg) ? NO_VALUE : $debugmsg), "</p>",
+      "</center>\n",
+      "\n</BODY>\n</HTML>";
+   exit;
+}//init_error
+
+
 // languages and encodings...
 
 define('LANG_TRANSL_CHAR', ','); //do not use '-'

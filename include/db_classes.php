@@ -39,6 +39,7 @@ $ENTITY_TABLE = new Entity( 'Table',
    FTYPE_DATE,
    FTYPE_ENUM,
    FTYPE_CHBY,
+   FTYPE_OPTLOCK,
    );
 
   */
@@ -52,9 +53,12 @@ define('FTYPE_ENUM',  5);
 define('FTYPE_PKEY',  6); // primary-key of entity
 define('FTYPE_AUTO',  7); // auto-increment field
 define('FTYPE_CHBY',  8); // ChangedBy-field
-define('_FTYPE_MAX',  8);
+define('FTYPE_OPTLOCK', 9); // LockVersion-field for optimistic-locking
+define('_FTYPE_MAX',  9);
 
 define('FIELD_CHANGEDBY', 'ChangedBy');
+define('FIELD_LOCKVERSION', 'LockVersion'); // for optimistic-locking, must be type: tinyint unsigned
+define('FORMFIELD_LOCKVERSION', '_lock_version'); // for optimistic-locking
 
  /*!
   * \class Entity
@@ -73,6 +77,8 @@ class Entity
    var $field_autoinc;
    /*! \brief true, if entity has a ChangedBy-field. */
    var $has_changedby;
+   /*! \brief true, if entity has a LockVersion-field. */
+   var $has_optimistic_locking;
 
    /*! \brief array with date-fields: [ fieldname, ... ] */
    var $date_fields;
@@ -89,6 +95,7 @@ class Entity
       $this->date_fields = array();
       $this->field_autoinc = null;
       $this->has_changedby = false;
+      $this->has_optimistic_locking = false;
 
       // skip arg #0=type-arg to add var-args: fields
       $type = 0;
@@ -100,22 +107,29 @@ class Entity
             if( $arg >= 1 && $arg <= _FTYPE_MAX )
                $type = $arg;
             else
-               error('invalid_args', "Entity.bad_type($i,$arg)");
+               init_error('entity_init_error', "Entity.bad_type($table,$i,$arg)");
 
             if( $type == FTYPE_CHBY )
             {
                $this->fields[FIELD_CHANGEDBY] = $type;
                $this->has_changedby = true;
             }
+            elseif( $type == FTYPE_OPTLOCK )
+            {
+               $this->fields[FIELD_LOCKVERSION] = $type;
+               $this->has_optimistic_locking = true;
+            }
          }
          else
          {
             if( $type == 0)
-               error('invalid_args', "Entity.miss_type($i,$type,$arg)");
+               init_error('entity_init_error', "Entity.miss_type($table,$i,$type,$arg)");
             if( $type == FTYPE_CHBY )
-               error('invalid_args', "Entity.bad_arg.changedby_no_arg($i,$type,$arg)");
+               init_error('entity_init_error', "Entity.bad_arg.changedby_no_arg($table,$i,$type,$arg)");
+            if( $type == FTYPE_OPTLOCK )
+               init_error('entity_init_error', "Entity.bad_arg.optlock_no_arg($table,$i,$type,$arg)");
             if( $arg == '' )
-               error('invalid_args', "Entity.bad_arg($i,$type,$arg)");
+               init_error('entity_init_error', "Entity.bad_arg($table,$i,$type,$arg)");
 
             if( $type == FTYPE_PKEY )
                $this->pkeys[$arg] = 1;
@@ -129,6 +143,10 @@ class Entity
             }
          }
       }
+
+      // reserved-fieldname for optimistic-locking
+      if( isset($this->fields[FIELD_LOCKVERSION]) && !$this->has_optimistic_locking )
+         init_error('entity_init_error', "Entity.miss_optlock($table,".FIELD_LOCKVERSION.")");
    } //constructor Entity
 
    function to_string()
@@ -247,6 +265,9 @@ class EntityData
             error('assert', "$dbgmsg.unknown_field2({$this->entity->table},$field)");
          $arr[$field] = 2;
       }
+
+      if( isset($arr[FIELD_LOCKVERSION]) )
+         unset($arr[FIELD_LOCKVERSION]);
 
       return array_keys( $arr );
    }
@@ -367,7 +388,7 @@ class EntityData
    }
 
    /*! \brief Returns update-query as query-string or array( update-part, where-part, after-where-part ). */
-   function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true )
+   function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true, $incl_optlock=true )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -390,14 +411,19 @@ class EntityData
       if( $incl_chby && $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
          $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
+      if( $incl_optlock && $this->entity->has_optimistic_locking )
+         $arr[] = sprintf( '%s=(%s+1) & 0xFF', FIELD_LOCKVERSION, FIELD_LOCKVERSION ); // 0xFF=tinyint-unsigned
+
       $arr_query = array();
       $arr_query[] = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr);
       $arr_query[] = 'WHERE ' . implode(' AND ', $arr_pkeys);
+      if( $incl_optlock && $this->entity->has_optimistic_locking && isset($this->values[FIELD_LOCKVERSION]) )
+         $arr_query[] = sprintf( 'AND %s=%s', FIELD_LOCKVERSION, (int)$this->values[FIELD_LOCKVERSION] );
       $arr_query[] = ( is_numeric($limit) && $limit > 0 ) ? "LIMIT $limit" : '';
       return ($as_arr) ? $arr_query : rtrim(implode(' ', $arr_query));
    }
 
-   function build_sql_delete( $limit=1 )
+   function build_sql_delete( $limit=1, $incl_optlock=true )
    {
       $arr = array();
       foreach( $this->entity->pkeys as $field => $tmp )
@@ -410,6 +436,8 @@ class EntityData
       }
 
       $query = 'DELETE FROM ' . $this->entity->table . ' WHERE ' . implode(' AND ', $arr);
+      if( $incl_optlock && $this->entity->has_optimistic_locking && isset($this->values[FIELD_LOCKVERSION]) )
+         $query .= sprintf( ' AND %s=%s ', FIELD_LOCKVERSION, (int)$this->values[FIELD_LOCKVERSION] );
       if( is_numeric($limit) && $limit > 0 )
          $query .= " LIMIT $limit";
       return $query;
