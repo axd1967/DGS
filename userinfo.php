@@ -333,6 +333,11 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          array( 'url' => 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle),
                 'class' => 'AdminLink' );
    }
+   if( $uid > GUESTS_ID_MAX && Bulletin::is_bulletin_admin() )
+   {
+      $menu_array[T_('New bulletin')] =
+         array( 'url' => "admin_bulletin.php?n_uid=$uid", 'class' => 'AdminLink' );
+   }
 
    end_page(@$menu_array);
 }
