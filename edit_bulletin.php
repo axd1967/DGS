@@ -261,7 +261,8 @@ function check_bulletin_input( &$bulletin, $my_id )
    $tid = $bulletin->tid;
 
    // check/correct status
-   if( $bulletin->Flags & BULLETIN_FLAG_ADMIN_CREATED || $bulletin->Status == BULLETIN_STATUS_NEW )
+   if( ($bulletin->Flags & BULLETIN_FLAG_ADMIN_CREATED)
+         || $bulletin->Status == BULLETIN_STATUS_NEW || $bulletin->Status == BULLETIN_STATUS_REJECTED )
       $bulletin->Status = BULLETIN_STATUS_PENDING;
    elseif( $bulletin->ID > 0 && $bulletin->Status == BULLETIN_STATUS_SHOW )
       $bulletin->Status = BULLETIN_STATUS_PENDING;

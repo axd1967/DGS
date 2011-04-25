@@ -59,24 +59,24 @@ Description:
    that shouldn't be handled with the private-message system and is more "prominently"
    than the forums.
 
- Field       | Type                                                      | Default
--------------+-----------------------------------------------------------+---------------------
- ID          | int(11)                                                   | NULL, auto_increment
- uid         | int(11)                                                   | NULL
- LockVersion | tinyint(3) unsigned                                       | 0
- Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') | PRIV_MSG
- Status      | enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE')  | NEW
- TargetType  | enum('ALL','TD','TP','UL','MPG')                          | NULL
- Flags       | tinyint(3) unsigned                                       | 0
- PublishTime | datetime                                                  | 0000-00-00 00:00:00
- ExpireTime  | datetime                                                  | 0000-00-00 00:00:00
- tid         | int(11)                                                   | 0
- gid         | int(11)                                                   | 0
- CountReads  | mediumint(8) unsigned                                     | 0
- AdminNote   | varchar(255)                                              |
- Subject     | varchar(255)                                              | NULL
- Text        | text                                                      | NULL
- Lastchanged | datetime                                                  | 0000-00-00 00:00:00
+ Field       | Type                                                        | Default
+-------------+-------------------------------------------------------------+---------------------
+ ID          | int(11)                                                     | NULL, auto_increment
+ uid         | int(11)                                                     | NULL
+ LockVersion | tinyint(3) unsigned                                         | 0
+ Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD')   | PRIV_MSG
+ Status      | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')  | NEW
+ TargetType  | enum('ALL','TD','TP','UL','MPG')                            | NULL
+ Flags       | tinyint(3) unsigned                                         | 0
+ PublishTime | datetime                                                    | 0000-00-00 00:00:00
+ ExpireTime  | datetime                                                    | 0000-00-00 00:00:00
+ tid         | int(11)                                                     | 0
+ gid         | int(11)                                                     | 0
+ CountReads  | mediumint(8) unsigned                                       | 0
+ AdminNote   | varchar(255)                                                |
+ Subject     | varchar(255)                                                | NULL
+ Text        | text                                                        | NULL
+ Lastchanged | datetime                                                    | 0000-00-00 00:00:00
 
 
 ## Fields:
@@ -97,7 +97,9 @@ Description:
 * Status :
    - NEW = new bulletin-entry
    - PENDING = pending bulletin, needs ACK or NACK by admin to publish
-   - HIDDEN = hidden bulletin, only visible to admin and author on bulletin-editor
+   - REJECTED = hidden bulletin, user-change rejected by admin,
+     only visible to admin and author on bulletin-editor,
+     should be accompanied by admin-note about reason for rejection
    - SHOW = show bulletin publically to targeted group
    - ARCHIVE = archived bulletin, only showed on archive-page
    - DELETE = bulletin, that should be deleted

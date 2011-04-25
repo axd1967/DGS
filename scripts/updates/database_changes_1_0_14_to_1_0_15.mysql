@@ -2164,3 +2164,8 @@ ALTER TABLE Bulletin
    ADD LockVersion tinyint unsigned NOT NULL default 0 AFTER uid ;
 
 
+-- renamed Bulletin.Status: HIDDEN -> REJECTED
+ALTER TABLE Bulletin
+   MODIFY Status enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW' ;
+
+

@@ -599,7 +599,8 @@ function parse_edit_form( &$bulletin )
       $miss_admnote = false;
       if( ($bulletin->Flags & BULLETIN_FLAG_USER_EDIT) && !$new_value )
       {
-         if( $bulletin->Status == BULLETIN_STATUS_NEW || $bulletin->Status == BULLETIN_STATUS_PENDING )
+         if( $bulletin->Status == BULLETIN_STATUS_NEW || $bulletin->Status == BULLETIN_STATUS_PENDING
+               || $bulletin->Status == BULLETIN_STATUS_REJECTED )
             $miss_admnote = true;
       }
       if( $miss_admnote )

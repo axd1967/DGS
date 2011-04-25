@@ -79,12 +79,12 @@ class GuiBulletin
       if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
       {
          $arr = array();
-         $arr[BULLETIN_STATUS_NEW]     = T_('New#B_status');
-         $arr[BULLETIN_STATUS_PENDING] = T_('Pending#B_status');
-         //TODO $arr[BULLETIN_STATUS_HIDDEN]  = T_('Hidden#B_status');
-         $arr[BULLETIN_STATUS_SHOW]    = T_('Show#B_status');
-         $arr[BULLETIN_STATUS_ARCHIVE] = T_('Archive#B_status');
-         $arr[BULLETIN_STATUS_DELETE]  = T_('Delete#B_status');
+         $arr[BULLETIN_STATUS_NEW]        = T_('New#B_status');
+         $arr[BULLETIN_STATUS_PENDING]    = T_('Pending#B_status');
+         $arr[BULLETIN_STATUS_REJECTED]   = T_('Rejected#B_status');
+         $arr[BULLETIN_STATUS_SHOW]       = T_('Show#B_status');
+         $arr[BULLETIN_STATUS_ARCHIVE]    = T_('Archive#B_status');
+         $arr[BULLETIN_STATUS_DELETE]     = T_('Delete#B_status');
          $ARR_GLOBALS_BULLETIN[$key] = $arr;
       }
 

@@ -71,7 +71,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    if( $view_edit )
    {
       $status_filter_array[T_('Changeable#B_status')] =
-         "B.Status IN ('".BULLETIN_STATUS_NEW."','".BULLETIN_STATUS_PENDING."','".BULLETIN_STATUS_SHOW."')";
+         "B.Status IN ('".BULLETIN_STATUS_NEW."','".BULLETIN_STATUS_PENDING."','" .
+            BULLETIN_STATUS_REJECTED."','".BULLETIN_STATUS_SHOW."')";
       $status_filter_array[T_('Viewable#B_status')] =
          "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')";
       if( $is_admin )
