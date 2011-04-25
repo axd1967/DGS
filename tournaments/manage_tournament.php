@@ -130,6 +130,11 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          '<li>', make_menu_link( T_('Add news#tnews'), array( 'url' => "tournaments/edit_news.php?tid=$tid", 'class' => 'TAdmin' )),
                  SEP_SPACING,
                  make_menu_link( T_('Show tournament news'), "tournaments/list_news.php?tid=$tid" ),
+                 SEP_SPACING,
+                 make_menu_link( T_('New bulletin'), "edit_bulletin.php?n_tid=$tid" ),
+                 ( Bulletin::is_bulletin_admin()
+                     ? SEP_SPACING . make_menu_link( T_('New admin bulletin'), array( 'url' => "admin_bulletin.php?tid=$tid", 'class' => 'AdminLink' ))
+                     : '' ),
          '<li>', ( $allow_new_del_TD
                      ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))
                      : T_('Add tournament director') ),

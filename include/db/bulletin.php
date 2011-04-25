@@ -237,8 +237,8 @@ class Bulletin
    /*! \brief Wrapper to update_bulletin_count_players()-func for this bulletin. */
    function update_count_players( $dbgmsg, $uid=0 )
    {
-      return Bulletin::update_bulletin_count_players( $dbgmsg, $bulletin->Status, $bulletin->TargetType,
-         $uid, $bulletin->ID, $bulletin->tid, $bulletin->gid );
+      return Bulletin::update_bulletin_count_players( $dbgmsg, $this->Status, $this->TargetType,
+         $uid, $this->ID, $this->tid, $this->gid );
    }
 
    /*! \brief Returns true if this Bulletin can be edited by user. */
@@ -250,6 +250,9 @@ class Bulletin
          return false;
 
       if( $this->TargetType == BULLETIN_TRG_MPG && $this->Category == BULLETIN_CAT_PRIVATE_MSG && $this->gid > 0 )
+         return true;
+      if( ($this->TargetType == BULLETIN_TRG_TP || $this->TargetType == BULLETIN_TRG_TD )
+            && $this->Category == BULLETIN_CAT_TOURNAMENT_NEWS && $this->tid > 0 )
          return true;
 
       return false;
@@ -488,15 +491,18 @@ class Bulletin
    /*!
     * \brief Returns new Bulletin-object for user and args.
     * \param $gid if set, creates MPG-target-type bulletin
+    * \param $tid if set, creates TP-target-type bulletin
     */
-   function new_bulletin( $is_admin, $gid=0 )
+   function new_bulletin( $is_admin, $gid=0, $tid=0 )
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-         error('invalid_args', "Bulletin.new_bulletin.check.uid($uid,$is_admin,$gid)");
+         error('invalid_args', "Bulletin.new_bulletin.check.uid($uid,$is_admin,$gid,$tid)");
       if( !is_numeric($gid) || $gid < 0 )
-         error('invalid_args', "Bulletin.new_bulletin.check.gid($uid,$is_admin,$gid)");
+         error('invalid_args', "Bulletin.new_bulletin.check.gid($uid,$is_admin,$gid,$tid)");
+      if( !is_numeric($tid) || $tid < 0 )
+         error('invalid_args', "Bulletin.new_bulletin.check.tid($uid,$is_admin,$gid,$tid)");
 
       $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
       $bulletin = new Bulletin( 0, $uid, $user );
@@ -513,6 +519,13 @@ class Bulletin
          $bulletin->setStatus( BULLETIN_STATUS_SHOW ); // no admin-ACK needed
          $bulletin->setTargetType( BULLETIN_TRG_MPG );
          $bulletin->gid = $gid;
+      }
+      elseif( $tid > 0 ) // TP-bulletin
+      {
+         $bulletin->setCategory( BULLETIN_CAT_TOURNAMENT_NEWS );
+         $bulletin->setStatus( BULLETIN_STATUS_SHOW ); // no admin-ACK needed
+         $bulletin->setTargetType( BULLETIN_TRG_TP );
+         $bulletin->tid = $tid;
       }
 
       return $bulletin;

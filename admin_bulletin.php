@@ -47,6 +47,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 /* Actual REQUEST calls used:
      ''                       : add new admin bulletin
      n_gid=                   : add new MPG-bulletin
+     n_tid=                   : add new TP/TD-bulletin
      bid=                     : edit existing bulletin
      preview&bid=             : preview for bulletin-save
      save&bid=                : save new/updated bulletin
@@ -56,11 +57,13 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    if( $bid < 0 ) $bid = 0;
    $n_gid = (int) get_request_arg('n_gid');
    if( $n_gid < 0 ) $n_gid = 0;
+   $n_tid = (int) get_request_arg('n_tid');
+   if( $n_tid < 0 ) $n_tid = 0;
 
    // init
    $bulletin = ( $bid > 0 ) ? Bulletin::load_bulletin($bid) : null;
    if( is_null($bulletin) )
-      $bulletin = Bulletin::new_bulletin( $is_admin, $n_gid );
+      $bulletin = Bulletin::new_bulletin( $is_admin, $n_gid, $n_tid );
    else
    {
       $bulletin->loadUserList();

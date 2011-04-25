@@ -43,6 +43,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
 /* Actual REQUEST calls used:
      n_gid=                   : add new bulletin TargetType=MPG
+     n_tid=                   : add new bulletin TargetType=TP|TD
 
      bid=                     : edit existing bulletin
      preview&bid=             : preview for bulletin-save
@@ -53,12 +54,14 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    if( $bid < 0 ) $bid = 0;
    $n_gid = (int) get_request_arg('n_gid');
    if( $n_gid < 0 ) $n_gid = 0;
+   $n_tid = (int) get_request_arg('n_tid');
+   if( $n_tid < 0 ) $n_tid = 0;
 
    // check args
    if( $bid == 0 )
    {
-      if( $n_gid == 0 )
-         error('invalid_args', "edit_bulletin.check.gid($bid,$n_gid)");
+      if( $n_gid == 0 && $n_tid == 0 )
+         error('invalid_args', "edit_bulletin.check.init($bid,$n_gid,$n_tid)");
    }
 
    // init new bulletin
@@ -73,10 +76,17 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
          error('bulletin_edit_not_allowed', "edit_bulletin.check.edit.status($bid,{$bulletin->Status})");
    }
    else
-      $bulletin = Bulletin::new_bulletin( /*adm*/false, $n_gid );
+      $bulletin = Bulletin::new_bulletin( /*adm*/false, $n_gid, $n_tid );
 
    $b_old_status = $bulletin->Status;
-   $gid = $bulletin->gid; // DB-data has prio
+   $b_old_target_type = $bulletin->TargetType;
+
+   $arr_target_types = array();
+   if( $bulletin->tid > 0 )
+   {
+      foreach( array( BULLETIN_TRG_TP, BULLETIN_TRG_TD ) as $ttype )
+         $arr_target_types[$ttype] = GuiBulletin::getTargetTypeText($ttype);
+   }
 
 
    // check + parse edit-form
@@ -111,7 +121,10 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform = new Form( 'bulletinEdit', $page, FORM_POST );
    $bform->add_hidden( 'bid', $bid );
    if( $bid == 0 )
-      $bform->add_hidden( 'gid', $bulletin->gid );
+   {
+      $bform->add_hidden( 'n_gid', $bulletin->gid );
+      $bform->add_hidden( 'n_tid', $bulletin->tid );
+   }
 
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin ID'),
@@ -159,10 +172,21 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
          'DESCRIPTION', T_('Status#bulletin'),
          'TEXT',        GuiBulletin::getStatusText($b_old_status) .
                         ' => ' . GuiBulletin::getStatusText($bulletin->Status) ));
-   $bform->add_row( array(
-         'DESCRIPTION', T_('Target Type#bulletin'),
-         'TEXT',        GuiBulletin::getTargetTypeText($bulletin->TargetType) ));
-
+   if( $bulletin->gid > 0 )
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Target Type#bulletin'),
+            'TEXT',        GuiBulletin::getTargetTypeText($bulletin->TargetType) ));
+   }
+   elseif( $bulletin->tid > 0 )
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Current Target Type#bulletin'),
+            'TEXT',        GuiBulletin::getTargetTypeText($b_old_target_type) ));
+      $bform->add_row( array(
+            'TAB',
+            'SELECTBOX',    'target_type', 1, $arr_target_types, $vars['target_type'], false, ));
+   }
 
    $bform->add_empty_row();
    $bform->add_row( array(
@@ -206,8 +230,10 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
    $menu_array = array();
    $menu_array[T_('My Bulletins')] = "list_bulletins.php?text=0".URI_AMP."read=2".URI_AMP."mine=1".URI_AMP."no_adm=1";
-   if( $gid > 0 )
-      $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
+   if( $bulletin->gid > 0 )
+      $menu_array[T_('Show game-players')] = "game_players.php?gid={$bulletin->gid}";
+   if( $bulletin->tid > 0 )
+      $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid={$bulletin->tid}";
 
    end_page(@$menu_array);
 }//main
@@ -218,6 +244,7 @@ function check_bulletin_input( &$bulletin, $my_id )
 {
    $errors = array();
    $gid = $bulletin->gid;
+   $tid = $bulletin->tid;
 
    // check/correct gid
    if( $bulletin->TargetType != BULLETIN_TRG_MPG )
@@ -234,6 +261,20 @@ function check_bulletin_input( &$bulletin, $my_id )
          $errors[] = sprintf( T_('Only participants of multi-player-game [%s] can create a MPG-bulletin.'), $gid );
    }
 
+   // check/correct tid
+   if( $bulletin->TargetType != BULLETIN_TRG_TP && $bulletin->TargetType != BULLETIN_TRG_TD )
+      $bulletin->tid = 0;
+   elseif( $tid > 0 )
+   {
+      $tourney = Tournament::load_tournament($bulletin->tid);
+      if( is_null($tourney) )
+         $errors[] = sprintf( T_('No tournament found for tournament-ID [%s]!'), $tid );
+      $bulletin->Tournament = $tourney;
+
+      if( !is_null($tourney) && !$tourney->allow_edit_tournaments($my_id) )
+         $errors[] = sprintf( T_('Only the owner or a director of tournament [%s] can create a tournament-news-bulletin.'), $tid );
+   }
+
    return $errors;
 }//check_bulletin_input
 
@@ -246,6 +287,7 @@ function parse_edit_form( &$bulletin )
 
    // read from props or set defaults
    $vars = array(
+      'target_type'     => $bulletin->TargetType,
       'expire_time'     => formatDate($bulletin->ExpireTime),
       'subject'         => $bulletin->Subject,
       'text'            => $bulletin->Text,
@@ -260,6 +302,9 @@ function parse_edit_form( &$bulletin )
    if( $is_posted )
    {
       $old_vals['expire_time'] = $bulletin->ExpireTime;
+
+      if( $bulletin->tid > 0 )
+         $bulletin->setTargetType($vars['target_type']);
 
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
@@ -281,6 +326,7 @@ function parse_edit_form( &$bulletin )
 
 
       // determine edits
+      if( $bulletin->tid > 0 && $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
       if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
       if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
       if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');

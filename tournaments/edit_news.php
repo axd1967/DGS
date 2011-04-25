@@ -89,7 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    );
 
    // check + parse edit-form
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tnews, $is_admin );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tnews );
    $errors = $input_errors;
 
    // save tournament-news-object with values from edit-form
@@ -190,6 +190,10 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament news')] = "tournaments/list_news.php?tid=$tid";
    $menu_array[T_('Add news#tnews')] = "tournaments/edit_news.php?tid=$tid";
+   $menu_array[T_('New bulletin')] = "edit_bulletin.php?n_tid=$tid";
+   if( Bulletin::is_bulletin_admin() )
+      $menu_array[T_('New admin bulletin')] =
+         array( 'url' => "admin_bulletin.php?n_tid=$tid", 'class' => 'AdminLink' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
@@ -198,7 +202,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tnews, $is_admin )
+function parse_edit_form( &$tnews )
 {
    global $arr_flags;
 
