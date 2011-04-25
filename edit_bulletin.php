@@ -70,10 +70,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
       $bulletin = Bulletin::load_bulletin($bid);
       if( is_null($bulletin) )
          error('unknown_bulletin', "edit_bulletin.check.load_bulletin($bid)");
-      if( $bulletin->uid != $my_id )
-         error('bulletin_edit_not_allowed', "edit_bulletin.check.edit.author($bid)");
-      if( $bulletin->Status == BULLETIN_STATUS_DELETE || $bulletin->Status == BULLETIN_STATUS_ARCHIVE )
-         error('bulletin_edit_not_allowed', "edit_bulletin.check.edit.status($bid,{$bulletin->Status})");
+      $bulletin->allow_bulletin_user_edit( $my_id, "edit_bulletin.check.edit");
    }
    else
       $bulletin = Bulletin::new_bulletin( /*adm*/false, $n_gid, $n_tid );
@@ -93,6 +90,10 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $errors = check_bulletin_input( $bulletin, $my_id );
    list( $vars, $edits, $input_errors ) = parse_edit_form( $bulletin );
    $errors = array_merge( $errors, $input_errors );
+
+   if( $b_old_status == BULLETIN_STATUS_PENDING ) // no hard-error
+      $errors[] = sprintf( T_('Edit of bulletin on status [%s] is not allowed.'),
+         GuiBulletin::getStatusText($b_old_status) );
 
    // save bulletin-object with values from edit-form
    if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
@@ -133,6 +134,10 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform->add_row( array(
          'DESCRIPTION', T_('Bulletin Author'),
          'TEXT',        $bulletin->User->user_reference(), ));
+   if( $bulletin->Flags > 0 )
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Bulletin Flags'),
+            'TEXT',        GuiBulletin::formatFlags($bulletin->Flags), ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Publish Time'),
          'TEXT',        formatDate($bulletin->PublishTime), ));
@@ -148,11 +153,11 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
       $bform->add_row( array(
             'DESCRIPTION', T_('Game#bulletin'),
             'TEXT',        game_reference( REF_LINK, 1, '', $bulletin->gid ), ));
-   if( $bid )
+   if( $bid && $bulletin->AdminNote )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Admin Note'),
-            'TEXT',        span('FormWarning', $bulletin->AdminNote), ));
+            'TEXT',        span('BulletinAdminNote', $bulletin->AdminNote), ));
    }
 
    $bform->add_row( array( 'HR' ));
@@ -171,7 +176,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform->add_row( array(
          'DESCRIPTION', T_('Status#bulletin'),
          'TEXT',        GuiBulletin::getStatusText($b_old_status) .
-                        ' => ' . GuiBulletin::getStatusText($bulletin->Status) ));
+                        ' => ' . span('BulletinNewStatus', GuiBulletin::getStatusText($bulletin->Status)) ));
    if( $bulletin->gid > 0 )
    {
       $bform->add_row( array(
@@ -239,12 +244,18 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 }//main
 
 
-// return [ errorlist ]
+// return errorlist
 function check_bulletin_input( &$bulletin, $my_id )
 {
    $errors = array();
    $gid = $bulletin->gid;
    $tid = $bulletin->tid;
+
+   // check/correct status
+   if( $bulletin->Flags & BULLETIN_FLAG_ADMIN_CREATED || $bulletin->Status == BULLETIN_STATUS_NEW )
+      $bulletin->Status = BULLETIN_STATUS_PENDING;
+   elseif( $bulletin->ID > 0 && $bulletin->Status == BULLETIN_STATUS_SHOW )
+      $bulletin->Status = BULLETIN_STATUS_PENDING;
 
    // check/correct gid
    if( $bulletin->TargetType != BULLETIN_TRG_MPG )
@@ -309,8 +320,18 @@ function parse_edit_form( &$bulletin )
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
       {
-         $bulletin->ExpireTime = $parsed_value;
-         $vars['expire_time'] = formatDate($bulletin->ExpireTime);
+         $mindays = 7;
+         $maxdays = 100;
+         if( ($parsed_value < $GLOBALS['NOW'] + $mindays * SECS_PER_DAY )
+               || ($parsed_value > $GLOBALS['NOW'] + $maxdays * SECS_PER_DAY ) )
+         {
+            $errors[] = sprintf( T_('Expire-time must be within %s days.'), "[$mindays..$maxdays]" );
+         }
+         else
+         {
+            $bulletin->ExpireTime = $parsed_value;
+            $vars['expire_time'] = formatDate($bulletin->ExpireTime);
+         }
       }
       else
          $errors[] = $parsed_value;
