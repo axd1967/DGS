@@ -67,16 +67,29 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // config for filters
    $status_filter_array = array( T_('All') => '' );
+   $idx_status_default = 0;
    if( $view_edit )
+   {
+      $status_filter_array[T_('Changeable#B_status')] =
+         "B.Status IN ('".BULLETIN_STATUS_NEW."','".BULLETIN_STATUS_PENDING."','".BULLETIN_STATUS_SHOW."')";
       $status_filter_array[T_('Viewable#B_status')] =
          "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')";
-   $idx_status_default = 0;
+      if( $is_admin )
+      {
+         $status_filter_array[T_('Admin#B_status')] =
+            "B.Status IN ('".BULLETIN_STATUS_PENDING."','".BULLETIN_STATUS_SHOW."')";
+         $idx_status_default = 3;
+      }
+      else //if( $mine )
+         $idx_status_default = 1;
+      $status_filter_array[NO_VALUE] = ''; //sep
+   }
    $cnt = count($status_filter_array);
    foreach( GuiBulletin::getStatusText() as $status => $text )
    {
       if( $view_edit || $status == BULLETIN_STATUS_SHOW || $status == BULLETIN_STATUS_ARCHIVE )
       {
-         if( $status == BULLETIN_STATUS_SHOW )
+         if( $idx_status_default == 0 && $status == BULLETIN_STATUS_SHOW )
             $idx_status_default = $cnt;
          $cnt++;
          $status_filter_array[$text] = "B.Status='$status'";
@@ -161,7 +174,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 3, T_('Status#bulletin'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
-   if( $was_admin || $mine )
+   if( $view_edit )
       $btable->add_tablehead( 1, new TableHead( T_('Edit Bulletin#bulletin'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $btable->add_tablehead( 2, T_('Author#bulletin'), 'User', 0, 'Handle+');
    $btable->add_tablehead( 5, T_('PublishTime#bulletin'), 'Date', TABLE_NO_HIDE, 'PublishTime-');
@@ -173,7 +186,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead(11, T_('Hits#bulletin'), 'Number', 0, 'CountReads-' );
    $btable->add_tablehead( 9, T_('Expires#bulletin'), 'Date', 0, 'ExpireTime+');
    $btable->add_tablehead( 7, T_('Updated#bulletin'), 'Date', 0, 'Lastchanged-');
-   $cnt_tablecols = $btable->get_column_count() - ($was_admin || $mine ? 1 : 0) - ($view_edit ? 1 : 0);
+   $cnt_tablecols = $btable->get_column_count() - ($view_edit ? 2 : 0);
 
    $btable->set_default_sort( 5 ); //on PublishTime
 
@@ -223,21 +236,20 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
       if( @$btable->Is_Column_Displayed[ 1] )
       {
-         $links = '';
-         if( $was_admin )
+         $links = array();
+         if( $is_admin )
          {
             $admin_link = span('AdminLink',
                anchor( $base_path."admin_bulletin.php?bid={$bulletin->ID}",
                   image( $base_path.'images/edit.gif', 'E'), T_('Admin Bulletin'), 'class=ButIcon') );
-            $links = $admin_link;
+            $links[] = $admin_link;
          }
          if( $uid == $my_id && $bulletin->allow_bulletin_user_edit($my_id) )
          {
-            $links .= MINI_SPACING .
-               anchor( $base_path."edit_bulletin.php?bid={$bulletin->ID}",
-                  image( $base_path.'images/edit.gif', 'E'), T_('Edit Bulletin'), 'class=ButIcon');
+            $links[] = anchor( $base_path."edit_bulletin.php?bid={$bulletin->ID}",
+                               image( $base_path.'images/edit.gif', 'E'), T_('Edit Bulletin'), 'class=ButIcon');
          }
-         $row_str[ 1] = $links;
+         $row_str[ 1] = implode(MINI_SPACING, $links);
       }
       if( @$btable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $bulletin->User->Handle, '');
@@ -296,7 +308,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
             : '';
          $row_str['extra_row_class'] = 'BulletinList';
          $row_str['extra_row'] =
-            ( $was_admin || $view_edit ? '<td colspan="1"></td>' : '' ) .
+            ( $view_edit ? '<td colspan="1"></td>' : '' ) .
             "<td colspan=\"$cnt_tablecols\">" .
                   GuiBulletin::build_view_bulletin($bulletin, $mark_as_read_url) . '</div></td>';
       }
