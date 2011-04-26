@@ -19,6 +19,310 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-26 juga
+
+   * include/db/bulletin.php (BULLETIN_STATUS_REJECTED),
+     include/gui_bulletin.php (GuiBulletin.getStatusText),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     admin_bulletin.php (parse_edit_form),
+     edit_bulletin.php (check_bulletin_input),
+     list_bulletins.php:
+   - added Bulletin.Status=REJECTED (renamed from unused HIDDEN-status),
+     which admin can use to indicate user-bulletin-rejection
+-----------
+-- renamed Bulletin.Status: HIDDEN -> REJECTED
+ALTER TABLE Bulletin
+   MODIFY Status enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW' ;
+-----------
+
+2011-04-25 juga
+
+   * include/db/bulletin.php (class Bulletin, ~.is_optimistic_lock_clash,
+       ~.readLockVersion, ~.fillEntityData, ~.new_from_row),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     admin_bulletin.php (parse_edit_form), edit_bulletin.php:
+   - admin-/edit-bulletins:
+     - added optimistic-locking detection on Bulletin-table using db_classes-"standard"
+       FTYPE_OPTLOCK + LockVersion-field to prevent race-condition on update of same
+       bulletin by user- and admin-edit at the same time
+     - added Bulletin.AdminNote for user-changeable bulletins allowing admin
+       to give hint to user what to change
+     - show error if there's nothing to update
+-----------
+-- added LockVersion-field for optimistic locking
+ALTER TABLE Bulletin
+   ADD LockVersion tinyint unsigned NOT NULL default 0 AFTER uid ;
+-----------
+
+   * include/db_classes.php (class Entity, ~.get_fields, ~.build_sql_update, ~.build_sql_delete),
+     include/quick_common.php (init_error),
+     include/error_codes.php (ErrorCode.init),
+     include/error_functions.php (need_db_errorlog):
+   - bugfix: replaced error()-call in globally used constructor by init_error()-exit-call
+     routing error to emergency error-page to avoid HTTP-redirect-loops
+   - added optimistic-locking detection on update/delete-table-entries using db_classes
+     - added "standard" FTYPE_OPTLOCK + LockVersion-field to prevent race-conditions
+       on writing same data-entry
+     - added error-code 'entity_init_error' for constructor-error without db-logging
+     - added special error-code 'optlock_clash' to express optimistic-locking problem
+
+   * include/classlib_userconfig.php (class ConfigPages, ~.update_all, ~._check_user_id):
+   - bugfix: avoid constructor-error()-calls
+
+   * include/db/bulletin.php (class Bulletin, ~.fillEntityData, ~.allow_bulletin_user_edit,
+       ~.new_from_row, ~.new_bulletin),
+     include/gui_bulletin.php (GuiBulletin.getStatusText, ~.getFlagsText, ~.formatFlags),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     admin_bulletin.php (check_user_list, parse_edit_form),
+     edit_bulletin.php (check_bulletin_input, parse_edit_form),
+     list_bulletins.php, userinfo.php, skins/dragon/screen.css:
+   - admin-bulletin:
+     - create user-changeable bulletin to ALL|user-list for specific user only by admin
+     - added Bulletin.Flags-field to mark bulletin as user-changeable and admin-created
+     - enabled bulletin PENDING-status
+     - check user-list for single user and forbidden guest-users
+     - bugfix: hide tournament-id/game-id if not needed
+   - edit-bulletin:
+     - edit user-changeable bulletin created by admin
+     - forbid edit for bulletin on PENDING-status to avoid race-condition
+       with admin verifying it with approval/rejection
+     - check expire-time to be within range + 7-100 days
+   - list-bulletin:
+     - added filter to show user-changeable bulletins
+     - added filter to show SHOW|PENDING-status-bulletins for admin-view
+     - changed default-status-filter for admin/mine-bulletin-view
+-----------
+-- added bulletin admin-flags
+ALTER TABLE Bulletin
+   ADD Flags tinyint unsigned NOT NULL default 0 AFTER TargetType ;
+-----------
+
+   * include/db/bulletin.php (Bulletin.update_count_players, ~.allow_bulletin_user_edit, ~.new_bulletin),
+     admin_bulletin.php,
+     edit_bulletin.php (check_bulletin_input, parse_edit_form),
+     tournaments/edit_news.php,
+     tournaments/manage_tournament.php:
+   - admin-/edit-bulletin:
+     - allow T-Admin, T-Owner, T-Director of tournament to create bulletin
+       of type TP|TD with tournament-id
+     - added link from tournament-manage-page and tournament-news-page
+     - bugfixes, cleanup
+
+   * include/db/bulletin.php (Bulletin.new_bulletin, ~.is_bulletin_admin),
+     admin_bulletin.php (parse_edit_form),
+     edit_bulletin.php (check_bulletin_input, parse_edit_form),
+     game_players.php, list_bulletins.php:
+   - admin-bulletin: added admin-link to add new MPG-bulletin,
+     bugfix checking on unneccessary tid/gid on target-type-change
+   - edit-bulletin: check that MPG-bulletin can only be created by players of MPG
+   - cleanup:
+     - changed URL-arg for game-id for new-bulletin: gid -> n_gid
+     - refactored init of new bulletin into Bulletin::new_bulletin()-func
+     - use Bulletin::is_bulletin_admin()-func
+
+   * edit_bulletin.php (parse_edit_form):
+   - edit-bulletin: disabled free setting of publish-time of bulletin for non-admin
+
+2011-04-24 juga
+
+   * include/db/bulletin.php (Bulletin.update_count_players, ~.allow_bulletin_user_edit,
+       ~.skipCategory, ~.new_bulletin),
+     include/error_codes.php (ErrorCode.init),
+     specs/db/table-Bulletins.txt, skins/dragon/screen.css,
+     admin_bulletin.php (parse_edit_form), edit_bulletin.php (parse_edit_form),
+     game_players.php, list_bulletins.php, site_map.php:
+   - added bulletin-editor for non-admins
+     - edit-bulletin: allowing MPG-players to create bulletin of type MPG with game-id,
+       added link from game-players-page
+     - list-bulletin:
+       - added 'my bulletin'-lists showing bulletins for specific author with edit-link,
+       - show skipped categories with different format and info-image
+       - moved admin-link with edit-link in new edit-column replacing Actions-column
+     - admin-bulletin: added link to reload bulletin on edit
+   - bugfixes: wrong func-args, wrong func-call, reset tid/gid on changing target-type, fixed specs
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder,
+       ~._process_game_end, ~.process_user_absence),
+     tournaments/edit_director.php, tournaments/edit_participant.php,
+     tournaments/register.php:
+   - reset Players.CountBulletinNew for TD/TP-target-type for added/removed TD/TPs in tournaments
+   - bugfix: locking Tournament-table to update aggregated tournament-registered-count
+
+   * include/db/bulletin.php (Bulletin.update_count_players, ~.process_expired_bulletins,
+       ~.update_count_bulletin_new, ~.update_bulletin_count_players),
+     admin_bulletin.php:
+   - bugfix: change Bulletin-status to ARCHIVE of expired bulletins for all target-types
+   - optimized reset of new bulletin for different target-types
+
+   * include/countries.php (getCountryText),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - added user-defined ISO-3166 ccodes for DGS-languages:
+     XB (Basque), XC (Catalan), XN (Lingua Franca Nova)
+   - adjusted non-country-comments
+-----------
+# added flags
+copy /images/flags/xb.gif
+copy /images/flags/xc.gif
+copy /images/flags/xn.gif
+-----------
+
+2011-04-23 juga
+
+   * include/db/bulletin.php (class Bulletin, ~.fillEntityData, ~.build_view_query_sql,
+       ~.new_from_row, ~.load_multi_player_game),
+     include/gui_bulletin.php (GuiBulletin.getTargetTypeText, ~.build_view_bulletin),
+     tournaments/include/tournament.php (Tournament.build_info),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     skins/dragon/screen.css, admin_bulletin.php (parse_edit_form), list_bulletins.php:
+   - added Bulletin.TargetType=MPG and new gid-field for bulletins with MPG-reference
+     - admin-bulletin: added editing of game-id for MPG-target-type, some minor fixes
+     - list-bulletins: show MPG-target-typed bulletins
+     - view-bulletin: add game-player-reference for MPG-target-typed bulletin
+-----------
+-- added target-type for bulletin with multi-player-game
+ALTER TABLE Bulletin
+   MODIFY TargetType enum('ALL','TD','TP','UL','MPG') NOT NULL,
+   ADD gid int NOT NULL default 0 AFTER tid ;
+-----------
+
+   * include/game_functions.php (MultiPlayerGame.get_message_defaults;
+       GamePlayer.exists_game_player, ~.load_users_for_mpgame),
+     include/message_functions.php (DgsMessage.count_errors, ~.add_errors),
+     include/error_codes.php (ErrorCode.init),
+     message.php (read_message_receivers, read_mpgame_request):
+   - restrict sending bulk-message to admins and for multi-player-games
+     - sending MP-game message for message-type start-game/resign restricted to MPG-players
+     - sending MP-game message for message-type invite restricted to MPG-master
+     - sending normal bulk-message restricted to developer-/forum-/game-admin
+     - allow only players of MP-game as recipients for MP-game bulk-message
+     - check game-type/status for sending MP-game message
+     - changed title for new multi-player-game message
+     - defined more detailed error-codes for MPG-message and bulk-message
+   - cleanup: clearer var-names, minor changes
+
+   * include/error_codes.php (ErrorCode.echo_error_text, ~.get_error_text, ~.init),
+     include/error_functions.php (err_log, need_db_errorlog),
+     error.php (handle_error), do_registration_blocked.php:
+   - don't write error into Errorlog-table if not needed, e.g. user-GUI-errors
+   - show debug-msg on error only to db/dev-admin
+   - changed output-format of errors
+   - fixed class-name Errorcode -> ErrorCode
+
+2011-04-22 juga
+
+   * include/db/bulletin.php (Bulletin.loadUserList),
+     include/globals.php (CSYSFLAG_...),
+     include/contacts.php (CSYSFLAG_...),
+     admin_bulletin.php (check_user_list, parse_edit_form):
+   - admin-bulletin:
+     - for user-list bulletin show warning/error that must be checked
+       if receiving user has reject-message contact-setting for bulletin-author
+     - show user-list on preview with same order as in viewing-mode
+   - moved consts for contact-system-flags into 'include/globals.php'
+
+   * admin_bulletin.php (parse_edit_form):
+   - admin-bulletin: admin can change author of bulletin
+
+   * include/db/bulletin.php (BULLETIN_SKIPCAT_...;
+       Bulletin.build_view_query_sql, ~.update_count_bulletin_new, ~.count_bulletin_new),
+     include/std_functions.php (is_logged_in),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     change_profile.php, edit_profile.php, list_bulletins.php:
+   - added user-config Players.SkipBulletin to ignore bulletin-categories
+     - skip-able Bulletin.Category: TOURNAMENT, PRIVATE_MSG, SPAM
+     - reset Players.CountBulletinNew to recalc new-count in main-menu if SkipBulletin-config changed
+   - list-bulletin:
+     - added viewable-status-filter for admin showing SHOW|ARCHIVE bulletin-status
+     - always show 'All bulletins'-link for admin
+     - removed 'Bulletins'-link because in main-menu
+   - refactored count_bulletin_new()-func from 'include/std_functions.php'
+     into 'include/db/bulletin.php'
+-----------
+-- added user-config to skip bulletin-categories
+ALTER TABLE Players
+   ADD SkipBulletin tinyint unsigned NOT NULL default 0x4 ;
+-----------
+
+   * include/std_functions.php (make_dragon_main_menu),
+     admin_bulletin.php, list_bulletins.php, site_map.php:
+   - added option for admins to view only user-viewable bulletins
+
+   * include/classlib_userconfig.php (CFGCOLS_BULLETIN_LIST;
+       class ConfigPages.load_config_pages;
+       class ConfigTableColumns, ~.load_config, ~.build_fieldset,
+         ~.write_columns_bitset, ~.get_config_size),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     list_bulletins.php:
+   - added table-column-set for bulletin-list: CFGCOLS_BULLETIN_LIST
+   - refactored global $SIZECONFIG_CFGCOLS-var into ConfigTableColumns::get_config_size()-func
+-----------
+-- table-column-set for bulletin-list
+ALTER TABLE ConfigPages
+   ADD ColumnsBulletinList int NOT NULL default -1 AFTER ColumnsGamesObservedAll2 ;
+-----------
+
+   * include/db/bulletin.php (class Bulletin, ~.build_view_query_sql,
+       ~.update_count_players),
+     include/gui_bulletin.php (class GuiBulletin, ~.getCategoryText,
+       ~.getStatusText, ~.getTargetTypeText, ~.build_view_bulletin),
+     include/std_functions.php (make_dragon_main_menu),
+     tournaments/include/tournament.php (Tournament.build_info),
+     skins/dragon/screen.css,
+     admin_bulletin.php (parse_edit_form), list_bulletins.php, site_map.php:
+   - added TargetType=TP/TD and Category=TNEWS for bulletins with tournament-reference
+     - admin-bulletin: added editing of tournament-id for TP/TD-target-type
+     - list-bulletins: show TP/TD-target-typed bulletins, admin can view all types
+     - list-bulletins: minor changes:
+       - changed link "unread bulletins" also for admins show only MY-bulletins
+       - changed title for admin-view
+       - changed table-column-orders
+   - refactored GUI-methods from 'include/db/bulletin.php' into 'include/gui_bulletin.php'
+
+   * include/utilities.php (cut_str),
+     forum/forum_functions.php (DisplayForum.draw_overview, ForumPost.to_string):
+   - added cut_str()-func to cut string and optiionally append with left-out-marker '...'
+
+   * include/std_functions.php (count_bulletin_new):
+   - use Bulletin::build_view_query_sql() to count new bulletins for user
+
+   * include/db/bulletin.php (class Bulletin, ~.loadUserList, ~.build_view_query_sql, ~.getTargetTypeText, ~.new_bulletin, ~.persist_bulletin_userlist, ~.update_count_players),
+     admin_bulletin.php (check_user_list, parse_edit_form),
+     list_bulletins.php:
+   - added BulletinTarget-table to store users to which bulletin of TargetType=UL is shown
+     - admin-bulletin: added edit for user-list, show user-list on preview
+     - list-bulletins: show user-list bulletin, added view-column for admin,
+       show all user-list bulletins to admin, or only to addressed users otherwise
+   - new bulletin: added default expire-time 30 days, can be emptied
+-----------
+-- added BulletinTarget-table to store user-list to show specific bulletin to
+CREATE TABLE BulletinTarget (
+  bid int NOT NULL,
+  uid int NOT NULL,
+  PRIMARY KEY (bid,uid)
+) ENGINE=MyISAM ;
+-----------
+
+2011-04-20 juga
+
+   * list_bulletins.php:
+   - removed UNSET-target-type for bulletin-filter
+
+   * include/connect2mysql.php (disable_cache):
+   - disable-cache: removed "Pragma: no-cache" client-request-header
+
+   * include/game_functions.php (GameHelper.delete_running_game):
+   - bugfix for deleting MP-game on SETUP-status:
+     removed attached waiting-room entry for multi-player-game if existing
+
+   * scripts/index.php, scripts/server-info.php:
+   - added server-script to print /proc/cpuinfo & /proc/meminfo of server
+
 2011-04-18 juga
 
    * include/db/bulletin.php (class Bulletin, ~.fillEntityData, ~.new_from_row,
@@ -121,7 +425,7 @@ CREATE TABLE Bulletin (
   uid int NOT NULL,
   Category enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
   Status enum('NEW','PENDING','HIDDEN','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
-  TargetType enum('UNSET','ALL','TD','TP','UL') NOT NULL default 'UNSET',
+  TargetType enum('ALL','TD','TP','UL') NOT NULL,
   PublishTime datetime NOT NULL default '0000-00-00 00:00:00',
   ExpireTime datetime NOT NULL default '0000-00-00 00:00:00',
   tid int NOT NULL default 0,
@@ -6213,7 +6517,9 @@ ALTER TABLE Players
        EH (Western Sahara)
      - fixed country-codes using user-defined ISO-3166 ccodes:
        TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO, IA (Interlingua) -> XI,
-       CI (change pos), MJ (Montenegro) -> ME, __ (Earth) -> XE
+       CI (change pos), MJ (Montenegro) -> ME, __ (Earth) -> XE,
+     - added user-defined ISO-3166 ccodes for some fun "fighting-style" countries:
+       XK (Klingon Empire), XF (United Federation of Planets)
      - fixed names: AG (Antigua and Barbuda) lower-case 'and', BA (Bosnia and Herzegovina) typo,
        BN (Brunei Darussalam) full name, KZ (Kazakhstan) typo, MO (Macao) typo,
        PS (Palestinian Territory) fix-name
