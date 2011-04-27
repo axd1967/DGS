@@ -2138,6 +2138,14 @@ ALTER TABLE Bulletin
    ADD CountReads mediumint unsigned NOT NULL default '0' AFTER tid ;
 
 
+-- added BulletinTarget-table to store user-list to show specific bulletin to
+CREATE TABLE BulletinTarget (
+  bid int NOT NULL,
+  uid int NOT NULL,
+  PRIMARY KEY (bid,uid)
+) ENGINE=MyISAM ;
+
+
 -- table-column-set for bulletin-list
 ALTER TABLE ConfigPages
    ADD ColumnsBulletinList int NOT NULL default -1 AFTER ColumnsGamesObservedAll2 ;
