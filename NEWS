@@ -102,10 +102,19 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Ask other team-members if resignation is acceptable
 
    * <home list_bulletins.php?read=2>Bulletins</home>:
-      * Added Bulletins for global announcements
-      * Added link to <home list_bulletins.php?read=2>Bulletins</home> in main-menu
-      * Added bulletin-counter in main-menu with link to <home list_bulletins.php?text=1>Unread Bulletins</home>
+      * Added Bulletins for global announcements shown on <home list_bulletins.php>Bulletins page</home>
+         * Categories: Maintenance, Admin Announcement, Tournament Announcement, Tournament News,
+           Private Announcement, Advertisement
+         * Recipients (Target-Type):
+           All users, User list, Tournament Participants, Tournament Directors, Players of multi-player-game
+      * Added link to <home list_bulletins.php?read=2&no_adm=1>Bulletins</home> in main-menu
+      * Added bulletin-counter in main-menu with link to <home list_bulletins.php?text=1&view=1&no_adm=1>Unread Bulletins</home>
+      * Added preferences in <home edit_profile.php>user-profile</home> for showing general bulletin categories
       * Added optional expire-time handling for bulletins
+
+      * Added Bulletin-Editor to edit admin-created user-bulletins and to create bulletins by
+         * Tournament Directors for Tournament News on tournament-management pages
+         * Players of multi-player-game for game-related message on game-players-page
 
    * Game page:
       * Delete game on opponents turn (within first 10 moves)
@@ -206,7 +215,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Show linked icon to initial message in thread (<image msg_first.gif>) on reply message
 
    * <home message.php?mode=NewMessage>Send Message</home>:
-      * Added support for multi-receiver bulk-message (only for initial message)
+      * Added support for multi-receiver bulk-message (only for initial message),
+        restricted to players of multi-player-game and admins (developer/forum/game)
       * Show errors without leaving message-page
       * Show reject-message/invitation of recipient in preview
       * Added checks for missing subject & missing receiver
@@ -447,6 +457,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
         Wallis and Futuna, Western Sahara
       * Fixed country-codes: TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO,
         IA (Interlingua) -> XI, MJ (Montenegro) -> ME, __ (Earth) -> XE
+      * Added flags for DGS-languages: Basque, Catalan, Lingua Franca Nova
       * Fixed names: Antigua and Barbuda, Bosnia and Herzegovina, Brunei Darussalam, Kazakhstan,
         Macao, Palestinian Territory
 
@@ -503,7 +514,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Restrict the 'loadavg'-stats to admins view
       * Added 'Activity' curve in the graph (activated in the URL)
 
-   * Output Erroglog-ID on error as [ERRLOG123] for easier debugging and error-location
+   * Output Erroglog-ID on error as [ERRLOG 123] with error-code for easier debugging and error-location
    * Changed handling of some URL-arguments to reduce risk of SQL-injections
    * On game-page modified URI '&toggleobserve=' behaviour to avoid toggling on page refresh
 
@@ -538,6 +549,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level (replaced by admin-option)
       * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
+      * Admin (developer/forum/game) can send multi-receiver bulk-message
 
       * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
          * Finish game by setting game-result, Change game rated-status, Delete running & finished game
@@ -546,7 +558,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added admin-rating-page to change user-rating directly and/or resetting confidence-interval,
          * Show former rating-changes of user
          * Adjusted rating-recalculation-script to process admin-rating-changes
-      * Added admin-bulletin-page to add / edit bulletins
+      * Added admin-bulletin-page
+         * to create / edit admin bulletins
+         * to create bulletin for user, which can then be edited by normal user
+         * to approve / reject / edit bulletins edited by normal user
 
       * Added admin-link "Admin game" on game-info-page to admin-game-page
       * Added admin-link "Admin user" on user-info page to admin-user-page
@@ -558,6 +573,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added user-ID and original request for better debugging in Errorlog
       * Added filters for showing Errorlog
       * Added indexes on Errorlog to improve searching for problems
+      * Don't write Errorlog if not needed, e.g. for some GUI-errors
 
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
@@ -569,6 +585,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added page with list of important <home scripts/index.php>admin-scripts</home> on <home admin.php>admin page</home>
       * Added admin-script for bulk SGF-downloads
       * Added admin-script for game-info export
+      * Added script to print /proc/cpuinfo & /proc/meminfo of server
       * Added email-check for password-admins with privacy policy note
       * Added forum consistency script
       * Added tournament consistency script
