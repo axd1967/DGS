@@ -2623,7 +2623,7 @@ function count_messages_new( $uid, $curr_count=-1 )
 
    $row = mysql_single_fetch( "count_messages_new($uid)",
       "SELECT COUNT(*) AS X_Count FROM MessageCorrespondents WHERE uid='$uid' AND Folder_nr=".FOLDER_NEW );
-   return ($row) ? $row['X_Count'] : -1;
+   return ($row) ? (int)@$row['X_Count'] : -1;
 }
 
 /*!
@@ -2645,7 +2645,7 @@ function count_feature_new( $uid, $curr_count=-1 )
       "FROM FeatureList AS FL " .
          "LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid AND FV.Voter_ID='$uid' " .
       "WHERE FL.Status='NEW' AND ISNULL(FV.fid)" );
-   return ($row) ? $row['X_Count'] : -1;
+   return ($row) ? (int)@$row['X_Count'] : -1;
 }
 
 /*!

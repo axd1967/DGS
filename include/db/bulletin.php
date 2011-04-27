@@ -724,7 +724,7 @@ class Bulletin
 
       $qsql = Bulletin::build_view_query_sql( /*adm*/false, /*count*/true );
       $row = mysql_single_fetch( 'Bulletin::count_bulletin_new', $qsql->get_select() );
-      return ($row) ? $row['X_Count'] : -1;
+      return ($row) ? (int)@$row['X_Count'] : -1;
    }
 
    /*!
