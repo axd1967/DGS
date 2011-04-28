@@ -19,6 +19,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-27 juga
+
+   * include/std_functions.php (count_messages_new, count_feature_new),
+     include/db/bulletin.php (Bulletin.count_bulletin_new):
+   - bugfix: counting must return 0 instead of '' if nothing found
+
 2011-04-26 juga
 
    * include/db/bulletin.php (BULLETIN_STATUS_REJECTED),
