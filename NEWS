@@ -9,6 +9,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
    * <home tournaments/list_tournaments.php>Tournaments</home>:
       * Tournament types: Ladder
+##    * Tournament types: Ladder, Round-Robin
       * Tournament scopes: Dragon, Public, Private
       * Tournament status: Admin, New, Register, Pair, Play, Finished, Delete
 
@@ -17,77 +18,86 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Ladder Tournament with restrictions of 'Public'-scope
          * Ladder Tournament with restrictions of 'Private'-scope (invite-only registration)
 
-         * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
+##       * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
 
       * <home tournaments/list_tournaments.php>Tournament List</home> with different views:
-         * "My tournaments"-view with ID-button linked to view tournament
-         * "Directoring tournaments"-view with ID-button linked to manage tournament
+         * "My tournaments"-view with ID-button linked to view tournaments you are participating
+         * "Directoring tournaments"-view with ID-button linked to manage your tournaments
 
       * Tournament Info page to show all important information of a tournament
          * description, news, status, (preliminrary) standings, ruleset, registration, games, results
+      * Tournament News page
+      * Tournament Directors page showing tournament-owner and tournament-directors
+
       * Tournament Manager to edit and control tournament
-      * Tournament Editor to change tournament start-time, title, description
-      * Tournament News Editor to add, edit, delete tournament-news
-         * Private news = only shown to tournament-participants
-         * Hidden news = only visible to tournament-directors
-      * Tournament Director can be allowed special admin-rights
-         * End tournament-game prematurely, shown on game-info page
-         * Add time to players of tournament-game
-      * Tournament Locks Editor to edit tournament-locks:
-         * Admin-Lock = maintenance-mode for tournament-admins
-         * Register-Lock = prohibits user tournament-registration
-         * TDWork-Lock = maintenance-mode for tournament-directors
-         * Cron-Lock = exclusive lock for cron-based modifications on tournaments
-         * Close-Lock = preparation for transition to finish tournament
-      * Tournament Status Editor to change tournament status with preconditional checks
-      * Tournament Properties editor for registration restrictions on tournament and players
-      * Tournament Rules editor for tournament-games-setting
-      * Tournament Registration for user to register to tournament:
-         * Apply: User can apply to tournament (needs confirmation by tournament director)
-         * Register: User can directly register to tournament
-         * Invite: User can be invited by tournament director (needs confirmation by invited user)
-      * Tournament Participants editor to edit user registrations
+         * Tournament Editor to change tournament start-time, title, description
+         * Tournament News Editor to add, edit, delete tournament-news
+            * Private news = only shown to tournament-participants
+            * Hidden news = only visible to tournament-directors
+         * Tournament News Bulletin Editor to add & edit tournament-bulletin
+         * Tournament Director Editor, Tournament Director can be allowed special admin-rights:
+            * End tournament-game prematurely, shown on game-info page
+            * Add time to players of tournament-game
+         * Tournament Locks Editor to edit tournament-locks:
+            * Admin-Lock = maintenance-mode for tournament-admins
+            * Register-Lock = prohibits user tournament-registration
+            * TDWork-Lock = maintenance-mode for tournament-directors
+            * Cron-Lock = exclusive lock for cron-based modifications on tournaments
+            * Close-Lock = preparation for transition to finish tournament
+         * Tournament Status Editor to change tournament status with preconditional checks
+         * Tournament Properties Editor for registration restrictions on tournament and players
+         * Tournament Rules Editor for tournament-games-setting
 
-      * Tournament Ladder Properties Editor for ladder-specific properties
-         * Challenge range (absolute, relative, rating)
-         * Challenge rematch wait-time
-         * Max. Defenses, Max. Challenges
-         * Game-end handling
-         * Long user-absence handling
-         * Rank-History period-length [in months]
-         * Crown-King
-      * Tournament Ladder view page showing current ladder standings
-         * Added pop-up with rank-change information for each user (if JavaScript enabled)
-      * Tournament Ladder admin-interface to prepare and edit ladder and crown king
-      * Tournament Ladder challenge page to confirm challenge starting tournament game
-         * Show probable game-settings for challenge
-      * Tournament user notifications:
-         * Defender will be notified about game challenge
-         * User will be notified about full removal from tournament
-      * Crown "King of the Hill" for ladder-tournaments as tournament-result
+         * Tournament Registration for user to register to tournament:
+            * Apply: User can apply to tournament (needs confirmation by tournament-director)
+            * Register: User can directly register to tournament
+            * Invite: User can be invited by tournament director (needs confirmation by invited user)
+         * Tournament Participants Editor to edit user registrations
+         * Added Tournament invitation on users, opponents and contacts page for tournament-directors
 
-      * Tournament Rounds Editor
-      * Tournament Round Properties Editor for round-robin-specific properties
-      * Tournament Round Status Editor
-         * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
-      * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
-      * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
-      * Tournament Round Pool Editor (edit pools)
-      * Tournament Round Pairing Editor
-      * Tournament Round Rank Editor (finishing pools)
-      * Tournament Pool view page with crosstables
-         * Tie-Breaker (static): Points, SODOS
+      * Tournament-type specific pages for Ladder-Tournament:
+         * Tournament Ladder Properties Editor for ladder-specific properties
+            * Challenge range (absolute, relative, rating)
+            * Challenge rematch wait-time
+            * Max. Defenses, Max. Challenges
+            * Game-end handling
+            * Long user-absence handling
+            * Rank-History period-length [in months]
+            * Crown-King
 
-      * Added Tournaments-link into main-menu (access-key [t])
-      * Added Tournament invitation on users, opponents and contacts page
-      * Added view of games for specific tournament on games-list pages
-      * Added number of finished, won and lost tournament-games for tournament-participants
-      * Delete-Game and Add-Time forbidden for Tournament game
+         * Tournament Ladder view page showing current ladder standings
+            * Added pop-up with rank-change information for each user (if JavaScript enabled)
+         * Tournament Ladder admin-interface to prepare and edit ladder and crown king
+         * Tournament Ladder challenge page to confirm challenge starting tournament game
+            * Show probable game-settings for challenge
+         * Tournament user notifications:
+            * Defender will be notified about game challenge
+            * User will be notified about full removal from tournament
+         * Crown "King of the Hill" for ladder-tournaments as tournament-result
 
-   * <home new_game.php?view=2>Multi-player game</home> (player-rating required):
+##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
+##       * Tournament Rounds Editor
+##       * Tournament Round Properties Editor for round-robin-specific properties
+##       * Tournament Round Status Editor
+##          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
+##       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
+##       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
+##       * Tournament Round Pool Editor (edit pools)
+##       * Tournament Round Pairing Editor
+##       * Tournament Round Rank Editor (finishing pools)
+##       * Tournament Pool view page with crosstables
+##          * Tie-Breaker (static): Points, SODOS
+
+      * General Changes for Tournaments:
+         * Added Tournaments-link into main-menu (access-key [t])
+         * Added view of games for specific tournament on games-list pages
+         * Added number of finished, won and lost tournament-games for tournament-participants
+         * Delete-Game and Add-Time forbidden for Tournament game
+
+   * <home new_game.php?view=2>Multi-player game</home>:
       * Team-Go (N:M) = two teams of 1..N,M players taking a match
       * Zen-Go (N)    = one group of players alternating colors
-      * max. 16 players, player can join game only once
+      * player-rating required, player can join game only once, max. 16 players
 
       * Added game-players-page to setup and manage multi-player-game
          * Added invitation-reservation of single player, that can be deleted, approved or rejected
@@ -100,6 +110,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Ask other players for consent by sending bulk-message to:
          * Ask all game-players to start game
          * Ask other team-members if resignation is acceptable
+      * Added link to create multi-player-game bulletin
 
    * <home list_bulletins.php?read=2>Bulletins</home>:
       * Added Bulletins for global announcements shown on <home list_bulletins.php>Bulletins page</home>
@@ -119,13 +130,14 @@ Copyright (C) 2001-2011  Erik Ouchterlony
    * Game page:
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
-      * Added new game info page (marked by <image info.gif>)
+      * Added new game info page (marked by <image info.gif> on game-related-pages)
       * Preview game message (access-key [w]=Preview)
       * Show scoring information in scoring step and for finished games
       * Show and notify if there are hidden game comments (<image game_comment.gif>) for a finished game
       * Show hint to close all boundaries before passing
       * Show hint about area-scoring before passing to take odd dame
       * Show tournament info for tournament-game
+      * Show multi-player-game info
 
    * Game info page (new):
       * Access to initial invitation message for game
@@ -153,7 +165,6 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Simplified filter for "suitable" waiting games, added notes
          * Additionally show "(FH)" (=free handicap) in Settings-column, if standard-placement is not used
          * Differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
-         * Removed sorting of Restrictions-column
          * Removed reply-box when joining waiting-room-game
          * Enhanced notify about joined waiting-room game with list of started game(s)
 
@@ -169,8 +180,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Added (optional) minimum number of rated finished games
          * Added MANUAL-game with fix color WHITE and BLACK in waitingroom,
            Moved 'Even game with Nigiri' and 'Double game' into MANUAL-game option
-         * Added optional waiting-room restriction per game-offer to avoid same opponent joining
-           too many games: challenger has to wait some days or can be restricted by number of games
+         * Added optional waiting-room restriction per game-offer to avoid same opponent joining too many games:
+           Challenger has to wait some days or can be restricted by number of games
 
       * <home message.php?mode=Invite>Invitation</home>:
          * Show probable color / handicap / komi for conventional & proper handicap-type on Preview
@@ -200,7 +211,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Show user-info page in two columns (less game- and more-game-related info)
       * Mark Dragon executives with admin-icon (<image admin.gif>)
       * Show running & setup multi-player-games for myself
-         * Added link to games-list-page only showing multi-player-games
+         * Added link to games-list-page showing all my multi-player-games
 
    * <home list_messages.php>Messages</home>:
       * Show count of NEW messages in main-menu with link to show them if there are some
@@ -218,7 +229,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added support for multi-receiver bulk-message (only for initial message),
         restricted to players of multi-player-game and admins (developer/forum/game)
       * Show errors without leaving message-page
-      * Show reject-message/invitation of recipient in preview
+      * Show reject-message/invitation of recipient on Preview
       * Added checks for missing subject & missing receiver
       * Changed default for empty subject: ??? -> (no subject)
 
@@ -228,14 +239,14 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * users, opponents, waiting room, search messages, contacts, feature-votes, tournaments
          * observers of a game, my/all observed games
          * all/my/other finished and running games
-      * Added absolute timeunit-choice for filters on Contacts, Message search, Games, Errorlog pages
+      * Added absolute timeunit-choice for most date-filters
 
    * Navigation:
       * Added <home introduction.php>Introduction page</home> into main-menu
       * Added <home site_map.php>Site-map page</home> into main-menu
       * Renamed FAQ-page to <home faq.php>Help / FAQ</home> in main-menu, changed access-key from [q] to [h]
       * Rearranged <home forums/>Forums</home> and <home docs.php>Docs</home> in main-menu
-      * Added system bookmarks in top Dragon bar
+      * Added System Bookmarks in top Dragon bar
 
    * <home status.php>Status page</home>:
       * Reduced user info on status page, but show if on vacation
@@ -243,18 +254,19 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added column on status games with icon (<image online.gif>) for users being "online",
         i.e. last access time within 10 mins ago
       * Added constrained order for status games on:
-         * last moved (default)
-         * number of moves
-         * priority (editing on game-info page)
-         * remaining time
+         * Last moved (default)
+         * Number of Moves
+         * Priority (edit on game-info page)
+         * Remaining Time
       * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
       * Show icon for Tournament-games (<image tourney.gif>)
+      * Show my multi-player-games in setup-mode
 
    * <home forum/index.php>Forum pages reworked</home>:
       * Show if there are NEW posts in main-menu, forum-list and thread-list
       * Show forum-options near forum-title on thread-list and thread-posts-view page
-      * Added read-only forum option
+      * Added read-only forum-option
       * Changed time range for outdated forum posts from 4 to 12 weeks
       * Removed separation of old and more recent NEW posts
 
@@ -291,7 +303,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
             * previous post (<image f_prevanswer.png>), next post (<image f_nextanswer.png>) and first answer of post (<image f_firstanswer.png>),
             * previous parent post (<image f_prevparent.png>) and next parent post (<image f_nextparent.png>)
          * Fixed viewing of "missing" new posts while replying
-         * Added refresh link in forum-bars to reload thread posts view
+         * Added Refresh-link in forum-bars to reload thread posts view
          * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * <home features/list_features.php>Voting on features</home> including feature status management
@@ -331,11 +343,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Show icons when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
       * Replaced 'OnVacation'-text by vacation-icon
       * Show SGF-move-number near view-moves list
-      * Changed "move"-selectbox (view-moves list) containing only a subset of moves now
-        fixing possible bug on large boards
+      * Changed "move"-selectbox (view-moves list) containing only a subset of moves now fixing possible bug on large boards
       * Mark handicap-setup in view-moves list
       * Added access keys [x]='Next Game', [w]=Preview
-      * Show 'Comments' to right of View-move button
+      * Show 'Comments' near right side of View-move button
       * Increased size of game-message text box
 
    * Game SGF Download:
@@ -354,21 +365,21 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added URL-arg 'bulk' using different filename for bulk-download (for admin)
       * Added URL-arg 'mpg' for multi-player-game to disable showing player-name in all nodes
 
-   * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
-      * Added game-handler to
-         * retrieve information about game, with nested user-objects
-         * retrieve own private notes of game
-         * retrieve list of games with views: status, running, finished, observing, observed
-         * play game including scoring-steps
-         * delete game
-      * Added user-handler to
-         * retrieve public information about user
-      * Added message-handler to
-         * retrieve information about private message, with nested user-/folder-objects
-      * Added folder-handler to
-         * retrieve information about message-folders
-      * Added contact-handler to
-         * retrieve information about own contacts
+## * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
+##    * Added game-handler to
+##       * retrieve information about game, with nested user-objects
+##       * retrieve own private notes of game
+##       * retrieve list of games with views: status, running, finished, observing, observed
+##       * play game including scoring-steps
+##       * delete game
+##    * Added user-handler to
+##       * retrieve public information about user
+##    * Added message-handler to
+##       * retrieve information about private message, with nested user-/folder-objects
+##    * Added folder-handler to
+##       * retrieve information about message-folders
+##    * Added contact-handler to
+##       * retrieve information about own contacts
 
    * <home_ quick_status.php>Quick Status</home>:
       * Changed format of quick-status:
@@ -377,7 +388,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added commented header-line with format for message- and game-info
       * Added time-remaining column
          * Enhanced remaining-time format with extra-time-info
-      * Added columns to support game-quick-suite: move-id, game-status
+      * Added columns to support new game-quick-suite (if enabled): move-id, game-status
       * Added tournament-id column
       * Added list of multi-player-games to manage (type 'MPG')
       * Added URL-arg 'no_cache' to disable cache
@@ -393,17 +404,17 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
       * <home opponents.php>Opponents page</home>:
          * Added column (<image table.gif>) with link to games with current opponent for finished or running games
-         * Highlighted sum-rows and -columns on single opponent-info
+         * Highlighted sum-rows and sum-columns on single opponent-info
 
    * <home edit_profile.php>User Profile</home>:
       * Added move-numbering options: Relative and Reverse numbering
+      * Added JavaScript management in profile setting
       * Changed order, grouping and description of hover-options
-      * Introducing JavaScript management in profile setting
       * Enlarged length of field 'Open for matches' to 60 chars
 
       * <home edit_rating.php>Rating change</home>:
          * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
-           with rank-converter even if user has established rating.
+           with rank-converter even if user has established rating
          * Added rank conversions: KGS, DGS-rating, OGS, OGS-rating, FICGS, Tygem, WBaduk
          * Adjusted rank conversions oriented on <http://senseis.xmp.net/?RankWorldwideComparison> for:
            Euro-rank, Euro-rating, AGA, AGA-rating, China, Korea
@@ -417,17 +428,17 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Preserve entered input-data on check-errors for normal and IP-blocked registration
         (former behaviour was that entered data was lost on check-error)
       * Show ALL check-errors for entered registration-data instead of only one
-      * Ask for optional email to register normal user (recommended)
+      * Ask for optional email to register new user (recommended)
 
    * Filters:
-      * Replaced Filter-Reset with selection to clear, reset, load/save fields
+      * Replaced Filter-Reset with selection to clear, reset, load/save search-profiles
       * Changed access keys for filter-search: [e]=Search (, [z]=Reset )
       * Added warning-message for stopwords-warning of mysql-match-search (mainly for forum-search)
       * Added tooltips for submit buttons
 
    * Table Lists:
       * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
-      * Enable full page-navigation (experimental) with pages- & entries-info for pages:
+      * Added full page-navigation (experimental) with pages- & entries-info for pages (if enabled):
         Status games, Waiting room, Tournaments, Tournament participants, Users, Opponents, Games, Observed games, Votes, Features
       * Changed some default sort-directions
       * Used clearer header names
@@ -457,7 +468,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
         Wallis and Futuna, Western Sahara
       * Fixed country-codes: TP (East Timor) -> TL (Timor Leste), EO (Esperanto) -> XO,
         IA (Interlingua) -> XI, MJ (Montenegro) -> ME, __ (Earth) -> XE
-      * Added flags for DGS-languages: Basque, Catalan, Lingua Franca Nova
+      * Added flags for DGS-languages that are no countries (if missing):
+        Basque, Catalan, Esperanto, Interlingua, Lingua Franca Nova
       * Fixed names: Antigua and Barbuda, Bosnia and Herzegovina, Brunei Darussalam, Kazakhstan,
         Macao, Palestinian Territory
 
@@ -522,8 +534,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Allow add/edit/preview of post in moderator mode and non-moderator mode alike
       * Allow writing posts in read-only forums
       * Show approved state of hidden posts in thread overview and forum-search result
-      * Added option on forum search page to allow searching for hidden posts
-        independent from moderator state
+      * Added option on forum search page to allow searching for hidden posts independent from moderator state
       * Added search for all/own shown/hidden/pending-approval messages
       * Do not reject message or invitation from forum-moderator even if user has set contact system-flag
       * Enhanced Forumlog:
@@ -542,22 +553,24 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added editor "Admin Links" for <home links.php>links page</home>
 
    * Changes for Admins:
-      * Added GAME_ADMIN-role to change game-settings,
+      * Added GAME_ADMIN-role to change game-settings
       * Added TOURNAMENT_ADMIN-role to fix problems with tournaments,
         Show indicator in top-bar as reminder
       * Added VOTING_ADMIN-role to add new features to vote on
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
-      * Removed ADMIN_TIME admin-level (replaced by admin-option)
+      * Removed ADMIN_TIME admin-level, page-creation-time shown for all users now
       * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
-      * Admin (developer/forum/game) can send multi-receiver bulk-message
+      * Admins (developer/forum/game) can send multi-receiver bulk-message
 
       * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
          * Finish game by setting game-result, Change game rated-status, Delete running & finished game
          * Notify players about game-end and game-deletion
          * Setting game-result-flag for the game
-      * Added admin-rating-page to change user-rating directly and/or resetting confidence-interval,
+
+      * Added admin-rating-page to change user-rating directly and/or resetting confidence-interval
          * Show former rating-changes of user
          * Adjusted rating-recalculation-script to process admin-rating-changes
+
       * Added admin-bulletin-page
          * to create / edit admin bulletins
          * to create bulletin for user, which can then be edited by normal user
@@ -578,37 +591,40 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added admin-option DENY_VOTE to forbid user to vote on features
       * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
       * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
-      * Added admin-options DENY_FORUM_NO_POST/MOD_POST to replace MayPostOnForum,
-        showing on administrated-users page
+      * Added admin-options DENY_FORUM_NO_POST/MOD_POST to replace MayPostOnForum, shown on administrated-users page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
 
       * Added page with list of important <home scripts/index.php>admin-scripts</home> on <home admin.php>admin page</home>
       * Added admin-script for bulk SGF-downloads
       * Added admin-script for game-info export
-      * Added script to print /proc/cpuinfo & /proc/meminfo of server
+      * Added script to print CPU & Memory Info of server
       * Added email-check for password-admins with privacy policy note
       * Added forum consistency script
       * Added tournament consistency script
       * Removed translations from the admin pages
-      * Different CSS-layout for most admin-actions
+      * Different CSS-layout for most admin-actions & admin-links
 
 
    Server config:
 
-   * Changed local configuration using template config file
+   * Changed local configuration using config template file
    * Changed all config in server config using constants
 
    * Moved configuration into server config:
-      * ALLOW_QUOTING (disabled), ALLOW_JAVASCRIPT, ALLOW_FEATURE_VOTE
       * Definition of all access keys
       * Forum NEW config
-      * Added config-switch for ALLOW_GO_DIAGRAMS (needs JavaScript), disabled
-      * Added config-switch for ALLOW_GOBAN_EDITOR, disabled
-      * Added config-switch for ALLOW_QUICK_DO, disabled
-      * Added config-switch for ALLOW_TOURNAMENTS
-      * Added config-switch for ALLOW_TOURNAMENTS_ROUND_ROBIN, disabled
-      * Added config-switch for ALLOW_TOURNAMENTS_CREATE_BY_USER, disabled
-      * Added config-switch for ALLOW_SQL_CALC_ROWS
+      * Added config-switches:
+         * ALLOW_FEATURE_VOTE                - enabled
+         * ALLOW_JAVASCRIPT                  - enabled
+         * ALLOW_SQL_CALC_ROWS               - enabled
+         * ALLOW_TOURNAMENTS                 - enabled
+         * ALLOW_GO_DIAGRAMS                 - disabled (needs JavaScript)
+         * ALLOW_GOBAN_EDITOR                - disabled
+         * ALLOW_QUICK_DO                    - disabled
+         * ALLOW_QUOTING                     - disabled
+         * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
+         * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
+         * ENABLE_DONATIONS                  - disabled
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
