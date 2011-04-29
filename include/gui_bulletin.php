@@ -56,6 +56,7 @@ class GuiBulletin
          $arr[BULLETIN_CAT_ADMIN_MSG]        = T_('Admin Announcement#B_cat');
          $arr[BULLETIN_CAT_TOURNAMENT]       = T_('Tournament Announcement#B_cat');
          $arr[BULLETIN_CAT_TOURNAMENT_NEWS]  = T_('Tournament News#B_cat');
+         $arr[BULLETIN_CAT_FEATURE]          = T_('Feature Info#B_cat');
          $arr[BULLETIN_CAT_PRIVATE_MSG]      = T_('Private Announcement#B_cat');
          $arr[BULLETIN_CAT_SPAM]             = T_('Advertisement#B_cat');
          $ARR_GLOBALS_BULLETIN[$key] = $arr;

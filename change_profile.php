@@ -60,7 +60,7 @@ require_once 'include/db/bulletin.php';
    }
 
    $skipbulletin = 0;
-   foreach( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
+   foreach( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_FEATURE, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
       $skipbulletin |= ( !@$_GET['skipbull'.$mask] ? $mask : 0 );
    $reset_bulletin_count = ( (int)@$player_row['Skipbulletin'] != $skipbulletin );
 

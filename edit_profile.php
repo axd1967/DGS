@@ -171,6 +171,9 @@ require_once( 'include/gui_bulletin.php' );
          'CHECKBOX',    'skipbull'.BULLETIN_SKIPCAT_TOURNAMENT, 1,
             GuiBulletin::getCategoryText(BULLETIN_CAT_TOURNAMENT), !($skipbull & BULLETIN_SKIPCAT_TOURNAMENT) ));
    $profile_form->add_row( array(
+         'TAB', 'CHECKBOX', 'skipbull'.BULLETIN_SKIPCAT_FEATURE, 1,
+            GuiBulletin::getCategoryText(BULLETIN_CAT_FEATURE), !($skipbull & BULLETIN_SKIPCAT_FEATURE) ));
+   $profile_form->add_row( array(
          'TAB', 'CHECKBOX', 'skipbull'.BULLETIN_SKIPCAT_PRIVATE_MSG, 1,
             GuiBulletin::getCategoryText(BULLETIN_CAT_PRIVATE_MSG), !($skipbull & BULLETIN_SKIPCAT_PRIVATE_MSG) ));
    $profile_form->add_row( array(

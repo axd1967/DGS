@@ -37,9 +37,10 @@ define('BULLETIN_CAT_MAINT',           'MAINT');
 define('BULLETIN_CAT_ADMIN_MSG',       'ADM_MSG');
 define('BULLETIN_CAT_TOURNAMENT',      'TOURNEY');
 define('BULLETIN_CAT_TOURNAMENT_NEWS', 'TNEWS');
+define('BULLETIN_CAT_FEATURE',         'FEATURE');
 define('BULLETIN_CAT_PRIVATE_MSG',     'PRIV_MSG');
 define('BULLETIN_CAT_SPAM',            'AD');
-define('CHECK_BULLETIN_CATEGORY', 'MAINT|ADM_MSG|TOURNEY|TNEWS|PRIV_MSG|AD');
+define('CHECK_BULLETIN_CATEGORY', 'MAINT|ADM_MSG|TOURNEY|TNEWS|FEATURE|PRIV_MSG|AD');
 
 define('BULLETIN_STATUS_NEW',       'NEW');
 define('BULLETIN_STATUS_PENDING',   'PENDING');
@@ -65,6 +66,7 @@ define('BULLETIN_FLAG_USER_EDIT',     0x02); // bulletin can be edited by user
 define('BULLETIN_SKIPCAT_TOURNAMENT',  0x01);
 define('BULLETIN_SKIPCAT_PRIVATE_MSG', 0x02);
 define('BULLETIN_SKIPCAT_SPAM',        0x04);
+define('BULLETIN_SKIPCAT_FEATURE',     0x08);
 
 
  /*!
@@ -306,6 +308,8 @@ class Bulletin
       {
          if( $this->Category == BULLETIN_CAT_TOURNAMENT )
             return ( $skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT );
+         if( $this->Category == BULLETIN_CAT_FEATURE )
+            return ( $skip_bullcat & BULLETIN_SKIPCAT_FEATURE );
          if( $this->Category == BULLETIN_CAT_PRIVATE_MSG )
             return ( $skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG );
          if( $this->Category == BULLETIN_CAT_SPAM )
@@ -400,6 +404,8 @@ class Bulletin
          $find_categories = array( BULLETIN_CAT_MAINT, BULLETIN_CAT_ADMIN_MSG, BULLETIN_CAT_TOURNAMENT_NEWS );
          if( !($skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT) )
             $find_categories[] = BULLETIN_CAT_TOURNAMENT;
+         if( !($skip_bullcat & BULLETIN_SKIPCAT_FEATURE ) )
+            $find_categories[] = BULLETIN_CAT_FEATURE;
          if( !($skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG) )
             $find_categories[] = BULLETIN_CAT_PRIVATE_MSG;
          if( !($skip_bullcat & BULLETIN_SKIPCAT_SPAM) )

@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `Bulletin` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL,
   `LockVersion` tinyint(3) unsigned NOT NULL default '0',
-  `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
+  `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG',
   `Status` enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW',
   `TargetType` enum('ALL','TD','TP','UL','MPG') NOT NULL,
   `Flags` tinyint(3) unsigned NOT NULL default '0',

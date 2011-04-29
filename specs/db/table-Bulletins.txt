@@ -41,6 +41,9 @@ Permission-Matrix for writing bulletins:
    - Category = TNEWS : tournament-specific news / announcements
      - create allowed by Admin, T-Admin, TD, T-owner; Target: TD (private T-news), TP (public T-news)
 
+   - Category = FEATURE : feature-info
+     - create allowed by Admin; Target: ALL, UL, TD, TP, MPG
+
    - Category = PRIV_MSG : user-to-users messages (non-Ads)
      - create allowed by Admin; Target: ALL, UL, TD, TP, MPG
      - create allowed by GP;    Target: MPG
@@ -59,24 +62,24 @@ Description:
    that shouldn't be handled with the private-message system and is more "prominently"
    than the forums.
 
- Field       | Type                                                        | Default
--------------+-------------------------------------------------------------+---------------------
- ID          | int(11)                                                     | NULL, auto_increment
- uid         | int(11)                                                     | NULL
- LockVersion | tinyint(3) unsigned                                         | 0
- Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','PRIV_MSG','AD')   | PRIV_MSG
- Status      | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')  | NEW
- TargetType  | enum('ALL','TD','TP','UL','MPG')                            | NULL
- Flags       | tinyint(3) unsigned                                         | 0
- PublishTime | datetime                                                    | 0000-00-00 00:00:00
- ExpireTime  | datetime                                                    | 0000-00-00 00:00:00
- tid         | int(11)                                                     | 0
- gid         | int(11)                                                     | 0
- CountReads  | mediumint(8) unsigned                                       | 0
- AdminNote   | varchar(255)                                                |
- Subject     | varchar(255)                                                | NULL
- Text        | text                                                        | NULL
- Lastchanged | datetime                                                    | 0000-00-00 00:00:00
+ Field       | Type                                                                | Default
+-------------+---------------------------------------------------------------------+---------------------
+ ID          | int(11)                                                             | NULL, auto_increment
+ uid         | int(11)                                                             | NULL
+ LockVersion | tinyint(3) unsigned                                                 | 0
+ Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') | PRIV_MSG
+ Status      | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')          | NEW
+ TargetType  | enum('ALL','TD','TP','UL','MPG')                                    | NULL
+ Flags       | tinyint(3) unsigned                                                 | 0
+ PublishTime | datetime                                                            | 0000-00-00 00:00:00
+ ExpireTime  | datetime                                                            | 0000-00-00 00:00:00
+ tid         | int(11)                                                             | 0
+ gid         | int(11)                                                             | 0
+ CountReads  | mediumint(8) unsigned                                               | 0
+ AdminNote   | varchar(255)                                                        |
+ Subject     | varchar(255)                                                        | NULL
+ Text        | text                                                                | NULL
+ Lastchanged | datetime                                                            | 0000-00-00 00:00:00
 
 
 ## Fields:
@@ -90,6 +93,7 @@ Description:
    - ADM_MSG = message by admin
    - TOURNEY = announcements for new tournaments (no tid yet)
    - TNEWS = announcement for specific tournament, e.g. tournament-news
+   - FEATURE = announcement/info about feature, e.g. "did you know this ..."
    - PRIV_MSG = private announcement
    - AD = advertisement
    - NOTE: also see permission-matrix above table-fields
