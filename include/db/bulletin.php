@@ -372,8 +372,9 @@ class Bulletin
     * \param $count_new true to count new-bulletins (for main-menu); false for list-bulletins
     * \param $show_target_type BULLETIN_TRG_... = query restricted to specific target-type or '' for all target-types.
     *        'B_View'-field indicating if bulletin is shown or not, values: 0 = don't show, 1 = show entry
+    * \param $check if true, don't restrict on viewable (B_View > 0)
     */
-   function build_view_query_sql( $is_admin, $count_new, $show_target_type='' )
+   function build_view_query_sql( $is_admin, $count_new, $show_target_type='', $check=false )
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
@@ -494,7 +495,7 @@ class Bulletin
                "ON GP.gid=G.ID AND GP.uid=$uid AND B.gid > 0" );
       }
 
-      if( !$count_new && !$is_admin )
+      if( !$count_new && !$is_admin && !$check )
          $qsql->add_part( SQLP_HAVING, "B_View > 0" );
 
       return $qsql;
@@ -512,6 +513,17 @@ class Bulletin
 
       $row = mysql_single_fetch( "Bulletin::load_bulletin.find_Bulletin($bid)", $qsql->get_select() );
       return ($row) ? Bulletin::new_from_row($row) : NULL;
+   }
+
+   /*! \brief Loads and returns Bulletin-object for given bulletin-QuerySQL; NULL if nothing found. */
+   function load_bulletin_by_query( $qsql, $with_row=false )
+   {
+      $qsql->add_part( SQLP_LIMIT, '1' );
+      $row = mysql_single_fetch( "Bulletin::load_bulletin_by_query()", $qsql->get_select() );
+      if( $with_row )
+         return ($row) ? array( Bulletin::new_from_row($row), $row ) : array( NULL, NULL );
+      else
+         return ($row) ? Bulletin::new_from_row($row) : NULL;
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with Bulletin-objects. */

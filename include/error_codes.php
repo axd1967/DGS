@@ -567,6 +567,9 @@ class ErrorCode
          $arr['unknown_bulletin'] =
             T_("Sorry, I can't find that bulletin.");
 
+         $arr['no_view_bulletin'] =
+            T_("Sorry, you are not allowed to view that bulletin.");
+
          $arr['miss_user_quota'] =
             T_("Sorry, something is wrong with your user data. Please contact an administrator to fix this.");
 
