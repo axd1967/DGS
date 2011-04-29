@@ -22,19 +22,15 @@ $TranslateGroups[] = "Tournament";
 chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/std_classes.php' );
-require_once( 'include/table_columns.php' );
-require_once( 'include/filter.php' );
-require_once( 'include/classlib_profile.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_news.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
-$GLOBALS['ThePage'] = new Page('TournamentNewsList');
+$GLOBALS['ThePage'] = new Page('TournamentNewsView');
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
