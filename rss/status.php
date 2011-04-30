@@ -17,8 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-chdir("../");
+$TranslateGroups[] = "Common";
 
 define('ALLOW_AUTH', true);
 
@@ -48,8 +47,11 @@ function error($err, $debugmsg=NULL)
    exit;
 }
 
+chdir('..');
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
+require_once( "include/game_functions.php" );
+require_once( "include/gui_bulletin.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -89,22 +91,25 @@ for( $i=1; $i<0x20; $i++ )
 unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
 
-// XML only supports these entities: &amp; &lt; &gt; &quot;
-//  but they must be used in text fields
 // see also <![CDATA[#]]> for particular cases.
+// CDATA-section does not need escaping of: & > " $ '$ $' ]
+// - no escape of ']' at end needed, just write ']]]>' as CDATA only recognizes ']]>' as end
+$cdata_trans = array() + $xmltrans;
+$cdata_trans['<'] = '&lt;';
+
+/* FIXME needed (see CDATA-note above) ?
+// XML only supports these entities: &amp; &lt; &gt; &quot;
+//    but they must be used in text fields
 $xmltrans['&'] = '&amp;';
 $xmltrans['<'] = '&lt;';
 $xmltrans['>'] = '&gt;';
 $xmltrans['"'] = '&quot;';
 
-$xmltrans[']'] = '&#'.ord(']').';';
 //XML seems to not like some chars sequences (like "'$$'")
 $xmltrans['\'$'] = '&quot;$';
 $xmltrans['$\''] = '$&quot;';
-/*
-$xmltrans['\''] = '\\\'';
-$xmltrans['$'] = '\$';
-*/
+//$xmltrans['\''] = '\\\'';
+//$xmltrans['$'] = '\$';
 //$xmltrans['\''] = '&#'.ord('\'').';';
 
 switch( (string)CHARSET_MODE )
@@ -126,41 +131,29 @@ switch( (string)CHARSET_MODE )
    default:
       error('internal_error', 'rss.no_charset');
 }
+*/
 
 
 // could not be called twice on the same string
 function rss_safe( $str)
 {
+   global $cdata_trans;
    $str = reverse_htmlentities( $str);
-   global $xmltrans;
-   //XML seems to not like some chars sequances (like "'$$'")
-   return '<![CDATA[' . strtr($str, $xmltrans) . ']]>';
-   //return strtr($str, $xmltrans);
-/*
-   //XML only supports these entities: &amp; &lt; &gt; &quot;
-   return str_replace(
-      array( '&', '"', '<', '>'),
-      array( '&amp;', '&quot;', '&lt;', '&gt;'),
-      $str );
-*/
+   // XML seems to not like some chars sequences (like "'$$'"), so put in CDATA
+   return '<![CDATA[' . strtr($str, $cdata_trans) . ']]>';
 }
 
 // could not be called twice on the same string
 function rss_link( $lnk)
 {
-   //XML does not support some URL chars (like '#')
+   // XML does not support some URL chars (like '#')
    return '<![CDATA[' . $lnk . ']]>';
 }
 
 
-function rss_date( $dat=0)
+function rss_date( $dat=0 )
 {
-   if( !$dat )
-   {
-      global $NOW;
-      $dat= $NOW;
-   }
-   return gmdate( 'D, d M Y H:i:s \G\M\T', $dat);
+   return gmdate( 'D, d M Y H:i:s \G\M\T', ( $dat ? $dat : $GLOBALS['NOW'] ) );
 }
 
 // $tag must be valid and $str must be safe
@@ -173,10 +166,9 @@ function rss_tag( $tag, $str)
 $rss_opened= false;
 function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACHE_MIN)
 {
-   global $encoding_used, $NOW;
+   global $encoding_used, $NOW, $rss_opened;
 
    ob_start("ob_gzhandler");
-   global $rss_opened;
    $rss_opened= true;
 
    $last_modified_stamp= $NOW;
@@ -312,7 +304,6 @@ if( $is_down )
 }
 else
 {
-
    $logged_in = false;
    $loggin_mode = '';
    $uhandle = get_request_arg('userid');
@@ -421,6 +412,41 @@ else
 
    $nothing_found = true;
 
+   // Unread Bulletins
+
+   if( $player_row['CountBulletinNew'] < 0 )
+      Bulletin::update_count_bulletin_new( 'rss_status', $my_id, COUNTNEW_RECALC );
+
+   if( $player_row['CountBulletinNew'] > 0 )
+   {
+      $iterator = new ListIterator( 'rss_status.bulletins.unread',
+         new QuerySQL( SQLP_WHERE,
+               "BR.bid IS NULL", // only unread
+               "B.Status='".BULLETIN_STATUS_SHOW."'" ),
+         'ORDER BY B.PublishTime DESC' );
+      $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
+      $iterator = Bulletin::load_bulletins( $iterator );
+
+      if( $iterator->ResultRows > 0 )
+         $nothing_found = false;
+
+      $cat = 'Status/Bulletin';
+      while( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $bulletin, $orow ) = $arr_item;
+
+         $tit= sprintf( T_('Bulletin to %s with "%s"#rss'),
+                        GuiBulletin::getTargetTypeText($bulletin->TargetType),
+                        GuiBulletin::getCategoryText($bulletin->Category) );
+         $lnk= HOSTBASE.'view_bulletin.php?bid='.$bulletin->ID;
+         $dsc= sprintf( "%s: %s $rss_sep", T_('From#rss_bullauthor'),
+                        user_reference( 0, 1, '', null, $bulletin->User->Name, $bulletin->User->Handle ) ) .
+               T_('Subject#bulletin') . ": {$bulletin->Subject}";
+         rss_item( $tit, $lnk, $dsc, $bulletin->PublishTime, $cat);
+      }
+   } // bulletins
+
+
    // New messages?
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
@@ -448,26 +474,27 @@ else
 
       $mid = (int)@$row['mid'];
 
-      $tit= "Message from $sendname";
+      $tit= sprintf( T_('Message from %s#rss'), $sendname );
       $lnk= HOSTBASE.'message.php?mid='.$mid;
       $dat= @$row['date'];
-      $dsc= "Message: $mid" . $rss_sep .
-            //"Folder: ".FOLDER_NEW . $rss_sep .
-            "From: $sendname" . $rss_sep .
-            "Subject: ".@$row['Subject'];
+      $dsc= sprintf( "%s: $mid $rss_sep", T_('Message#rss') ) .
+            T_('From#rss_message') . ": $sendname $rss_sep" .
+            T_('Subject#rss_message') . ": ".@$row['Subject'];
       rss_item( $tit, $lnk, $dsc, $dat, $cat);
    }
 
 
    // Games to play?
+   $sql_order = NextGameOrder::get_next_game_order( @$player_row['NextGameOrder'], 'Games' ); // enum -> order
 
    $query = "SELECT UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
        "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
+       "Games.GameType, Games.GamePlayers, " .
        "opponent.Name, opponent.Handle " .
        "FROM (Games,Players AS opponent) " .
        "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       "ORDER BY Games.Lastchanged, Games.ID";
+       $sql_order;
 
    $result = db_query( 'rss4', $query );
    $cat= 'Status/Game';
@@ -476,19 +503,20 @@ else
    {
       $nothing_found = false;
       $opponame = @$row['Name'];
-         $opponame.= " (".@$row['Handle'].")";
+      $opponame.= " (".@$row['Handle'].")";
 
       $gid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
+      $game_type = GameTexts::format_game_type($row['GameType'], $row['GamePlayers']);
 
-      $tit= "Game with $opponame";
+      $tit= sprintf( T_('Game of %s with %s#rss'), $game_type, $opponame );
       $lnk= HOSTBASE.'game.php?gid='.$gid;
       $mov= $lnk.URI_AMP.'move='.$move;
       $dat= @$row['date'];
-      $dsc= "Game: $gid" . $rss_sep .
-            "Opponent: $opponame" . $rss_sep .
-            "Color: ".$clrs{@$row['Color']} . $rss_sep .
-            "Move: ".$move;
+      $dsc= T_('Game#rss') . ": $gid $rss_sep" .
+            T_('Opponent') . ": $opponame $rss_sep" .
+            T_('Color') . ": ".$clrs{@$row['Color']} . $rss_sep .
+            T_('Move') . ": ".$move;
       rss_item( $tit, $lnk, $dsc, $dat, $cat, $mov);
    }
 
@@ -496,10 +524,11 @@ else
    if( $nothing_found )
    {
       //rss_warning('empty lists', 'empty lists', HOSTBASE.'status.php');
-      $tit= "Empty lists";
+      $tit= T_('Empty lists#rss');
       $lnk= HOSTBASE.'status.php';
-      $dsc= "No awaiting games" . $rss_sep .
-            "No awaiting messages";
+      $dsc= T_('No new bulletins') . $rss_sep .
+            T_('No awaiting games') . $rss_sep .
+            T_('No awaiting messages');
       rss_item( $tit, $lnk, $dsc);
    }
 
