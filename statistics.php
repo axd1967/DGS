@@ -154,7 +154,7 @@ function show_stats_user_countries()
       "ORDER BY X_Count DESC" );
 
    echo "<table id=\"Statistics\" class=\"Table\">\n"
-      , sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n", T_('Count'), T_('Flag#country'), T_('Country') );
+      , sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n", T_('Count'), T_('Flag#country'), T_('Country-setting') );
 
    $arr_countries = getCountryText();
    $total = 0;
