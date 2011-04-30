@@ -766,10 +766,12 @@ class Bulletin
          return false;
 
       $dbgmsg .= "Bulletin::update_bulletin_count_players($status,$target_type,$uid)";
+
+      // NOTE: no sql-'LIMIT' allowed with multi-table-UPDATE
       if( is_numeric($uid) && $uid > 0 )
-         $qpart_uid = " AND P.ID=$uid LIMIT 1";
+         $qpart_uid = " AND P.ID=$uid";
       elseif( is_array($uid) && count($uid) > 0 )
-         $qpart_uid = " AND P.ID IN (".implode(',', $uid).") LIMIT " . count($uid);
+         $qpart_uid = " AND P.ID IN (".implode(',', $uid).")";
       else
          $qpart_uid = '';
 
@@ -780,7 +782,7 @@ class Bulletin
             "SET P.CountBulletinNew=-1 WHERE TD.tid=$tid $qpart_uid" );
          db_query( "$dbgmsg.upd_towner($tid)",
             "UPDATE Players AS P INNER JOIN Tournament AS T ON T.Owner_ID=P.ID " .
-            "SET P.CountBulletinNew=-1 WHERE T.ID=$tid $qpart_uid LIMIT 1" );
+            "SET P.CountBulletinNew=-1 WHERE T.ID=$tid $qpart_uid" );
       }
       elseif( $target_type == BULLETIN_TRG_TP && $tid > 0 )
       {
