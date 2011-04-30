@@ -2177,7 +2177,7 @@ ALTER TABLE Bulletin
    MODIFY Status enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE') NOT NULL default 'NEW' ;
 
 
-- added bulletin-category for Feature-news
+-- added bulletin-category for Feature-news
 ALTER TABLE Bulletin
    MODIFY `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG' ;
 

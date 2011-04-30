@@ -75,7 +75,7 @@ ChangeLog
    - added Bulletin-category for feature-info, e.g. "Did you know this ...?"
    - allow to skip Bulletin-category feature-info to be configured in user-profile
 -----------
-- added bulletin-category for Feature-news
+-- added bulletin-category for Feature-news
 ALTER TABLE Bulletin
    MODIFY `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG' ;
 -----------
