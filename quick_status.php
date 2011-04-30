@@ -22,6 +22,7 @@ require_once( "include/connect2mysql.php" );
 require_once( "include/translation_functions.php" );
 require_once( "include/time_functions.php" );
 require_once( "include/game_functions.php" );
+require_once( "include/db/bulletin.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -102,7 +103,7 @@ else
 
 
    $player_row = mysql_single_fetch( "quick_status.find_player($uid,$uhandle)",
-                  "SELECT ID, Timezone, AdminOptions, GamesMPG, NextGameOrder, " .
+                  "SELECT ID, Timezone, AdminOptions, CountBulletinNew, SkipBulletin, GamesMPG, NextGameOrder, " .
                   'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
                   'FROM Players WHERE ' .
                   ( $idmode=='uid'
@@ -133,6 +134,40 @@ else
       error('login_denied', "quick_status($player_id)");
 
    $nothing_found = true;
+
+   if( $version == 2 && $logged_in && $player_id > 0 && $player_row['CountBulletinNew'] < 0 )
+      Bulletin::update_count_bulletin_new( 'quick_status', $player_id, COUNTNEW_RECALC );
+
+   if( $version == 2 && $logged_in && $player_row['CountBulletinNew'] > 0 )
+   { // show unread bulletins
+      $iterator = new ListIterator( 'quick_status.bulletins.unread',
+         new QuerySQL( SQLP_WHERE,
+               "BR.bid IS NULL", // only unread
+               "B.Status='".BULLETIN_STATUS_SHOW."'" ),
+         'ORDER BY B.PublishTime DESC' );
+      $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
+      $iterator = Bulletin::load_bulletins( $iterator );
+
+      if( $iterator->ResultRows > 0 )
+         $nothing_found = false;
+
+      // Bulletin-header: type=B, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
+      echo "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'\n";
+
+      while( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $bulletin, $orow ) = $arr_item;
+
+         // type, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
+         echo sprintf( "B,%s,%s,%s,'%s','%s','%s'\n",
+                       $bulletin->ID, $bulletin->TargetType, $bulletin->Category,
+                       ($bulletin->PublishTime > 0) ? date(DATE_FMT_QUICK, $bulletin->PublishTime) : '',
+                       ($bulletin->ExpireTime > 0) ? date(DATE_FMT_QUICK, $bulletin->ExpireTime) : '',
+                       slashed($bulletin->Subject)
+                     );
+      }
+   } // bulletins
+
 
    if( $logged_in )
    {

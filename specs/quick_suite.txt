@@ -1214,7 +1214,9 @@ Options:
    <VERSION> = (optional) version defining format
       - 0 = 1 = quick-status format for DGS-release-version < 1.0.15
          - MPG-entries (multi-player-games): not shown
-         - G-entries (status-games): reduced field-set
+         - B-entries (unread bulletins):     not shown
+         - G-entries (status-games):         reduced field-set, different format
+         - M-entries (new messages):         different format
 
       - 2 = quick-status format for DGS-release-version = 1.0.15
          - current specs describe this format
@@ -1266,6 +1268,16 @@ Response:
         with a preceeding backslash, e.g. '\\' or "\'"
 
    The current format of data-lines in the output is:
+
+      # header-line with format of unread-bulletins
+      "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'"
+
+         bulletin_id    : bulletin-id to get info or view bulletin, e.g. "view_bulletin.php?bid=$bulletin_id"
+         target_type    : see field 'Bulletin.TargetType' in 'specs/db/table-Bulletin.txt'
+         category       : see field 'Bulletin.Category' in 'specs/db/table-Bulletin.txt'
+         publish_time   : publish-time of bulletin, defines order of bulletins
+         expire_time    : bulletin expires on expire-time (auto-read-mark)
+         subject        : bulletin title
 
       # header-line with format of message-data-line
       "## M,message_id,'sender','subject','message_date'"
@@ -1322,6 +1334,8 @@ Response:
 
    Example output:
 
+      ## B,count,bulletin_id,target_type,category,'publish_time','expire_time','subject'
+      B,1,17,ALL,MAINT,'2011-04-30 13:58:00','2011-05-30 13:58:00','very important subject'
       ## M,message_id,'sender','subject','message_date'
       M,1595525,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
       ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,opponent_lastaccess_date
