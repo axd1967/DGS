@@ -19,6 +19,67 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-04-30 juga
+
+   * wap/status.php:
+   - use same next-game-order for games as configured on status-page
+
+   * rss/status.php:
+   - show all unread bulletins of user
+   - use same next-game-order for games as configured on status-page
+   - added game-type to differ multi-player-games from normal games
+   - use translations for used texts in RSS-message
+   - cleanup: CDATA-section needs much less escaping of XML-problematic chars
+
+   * quick_status.php, specs/quick_suite.txt:
+   - added unread-bulletins in quick-status for version=2,
+     recalc and update players new-bulletin-count if required
+
+   * view_bulletin.php:
+   - added mark-as-read handling for single bulletin
+
+   * include/gui_bulletin.php (GuiBulletin.build_view_bulletin),
+     status.php:
+   - show first three unread bulletins on status-page as "Message of the Day"
+
+   * include/db/bulletin.php (Bulletin.update_bulletin_count_players):
+   - bugfix: no sql-LIMIT allowed for multi-table-UPDATE
+
+   * quick_status.php, specs/quick_suite.txt:
+   - added URL-arg 'version' to provide smoother transition to new format with version=2
+     - 'version' is optional (default) using older format & field-display
+     - 'version=2' uses format for DGS-release 1.0.15 including new fields/formats/sections
+
+   * include/classlib_game.php (NextGameOrder.get_next_game_order),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     specs/quick_suite.txt, quick_status.php, confirm.php, status.php:
+   - added game_prio and opponent-lastaccess-date for status-game
+     to allow client to use its own sorting on relevant fields
+   - added ready_to_start for multi-player-games on SETUP-game-status
+   - order games like configured on status-page
+   - added URL-arg 'order' to change order of status-games listed in quick-status
+   - changed (simplified) signature of NextGameOrder::get_next_game_order()
+
+2011-04-29 juga
+
+   * include/db/bulletin.php (Bulletin.build_view_query_sql, ~.load_bulletin_by_query),
+     include/error_codes.php (ErrorCode.init),
+     view_bulletin.php:
+   - added single-view of bulletin, show error if bulletin not allowed to view
+
+   * include/db/bulletin.php (class Bulletin, ~.skipCategory, ~.build_view_query_sql),
+     include/gui_bulletin.php (GuiBulletin.getCategoryText),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Bulletins.txt,
+     change_profile.php, edit_profile.php:
+   - added Bulletin-category for feature-info, e.g. "Did you know this ...?"
+   - allow to skip Bulletin-category feature-info to be configured in user-profile
+-----------
+- added bulletin-category for Feature-news
+ALTER TABLE Bulletin
+   MODIFY `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG' ;
+-----------
+
 2011-04-27 juga
 
    * include/std_functions.php (count_messages_new, count_feature_new),

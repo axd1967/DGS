@@ -115,9 +115,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
    * <home list_bulletins.php?read=2>Bulletins</home>:
       * Added Bulletins for global announcements shown on <home list_bulletins.php>Bulletins page</home>
          * Categories: Maintenance, Admin Announcement, Tournament Announcement, Tournament News,
-           Private Announcement, Advertisement
+           Feature Info, Private Announcement, Advertisement
          * Recipients (Target-Type):
            All users, User list, Tournament Participants, Tournament Directors, Players of multi-player-game
+      * Added config in <home edit_profile.php>user-profile</home> to skip informal bulletin categories
       * Added link to <home list_bulletins.php?read=2&no_adm=1>Bulletins</home> in main-menu
       * Added bulletin-counter in main-menu with link to <home list_bulletins.php?text=1&view=1&no_adm=1>Unread Bulletins</home>
       * Added preferences in <home edit_profile.php>user-profile</home> for showing general bulletin categories
@@ -249,6 +250,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added System Bookmarks in top Dragon bar
 
    * <home status.php>Status page</home>:
+      * Show first three unread bulletins as "Message of the Day"
       * Reduced user info on status page, but show if on vacation
       * NEW and REPLY message folders can be hidden -> change on <home edit_folders.php>edit folders page</home>
       * Added column on status games with icon (<image online.gif>) for users being "online",
@@ -381,17 +383,34 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 ##    * Added contact-handler to
 ##       * retrieve information about own contacts
 
-   * <home_ quick_status.php>Quick Status</home>:
+   * <home_ quick_status.php?version=2>Quick Status</home> (new version):
+      * Added URL-args:
+         * 'no_cache' to disable cache
+         * 'version' to allow smooth client-migration, version=2 (new format)
+         * 'order' to sort games, or disable sorting
       * Changed format of quick-status:
          * Removed unnecessary spaces and quotes
          * Changed date-format using same as quick-suite to include seconds
-      * Added commented header-line with format for message- and game-info
-      * Added time-remaining column
-         * Enhanced remaining-time format with extra-time-info
-      * Added columns to support new game-quick-suite (if enabled): move-id, game-status
-      * Added tournament-id column
-      * Added list of multi-player-games to manage (type 'MPG')
-      * Added URL-arg 'no_cache' to disable cache
+      * Changed data-sections:
+         * Added section with unread bulletins with IDs to view them
+         * Enhanced Games-section:
+            * Enhanced remaining-time with extra-time-info
+            * Added columns to support new game-quick-suite with move-id, game-status
+            * Added column for tournament-games with tournament-id
+            * Added column to allow client more sorting options: game-priority, opponents last-access
+            * Use same next-game-order as configured on status-page, can be overwritten with URL-arg 'order'
+         * Added section with multi-player-games on SETUP-status and if they are ready to start like on status-page
+      * Added commented header-line with format for different data-sections:
+        Bulletins, Messages, Games, Multi-Player-Games
+
+      * <home rss/status.php>RSS status</home>:
+         * Added links to all unread bulletins
+         * Added game-type for status-game
+         * Use same next-game-order as configured on status-page
+         * Use translated texts
+
+      * <home wap/status.php>WAP status</home>:
+         * Use same next-game-order as configured on status-page
 
    * <home users.php>Users</home>:
       * Added user-type:
