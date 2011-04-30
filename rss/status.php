@@ -309,9 +309,7 @@ else
    $uhandle = get_request_arg('userid');
    $passwd = get_request_arg('passwd');
    if( $uhandle && $passwd )
-   {
       $loggin_mode = 'password';
-   }
    else if( ALLOW_AUTH )
    {
       $uhandle = arg_stripslashes((string)@$_SERVER['PHP_AUTH_USER']);
@@ -324,9 +322,7 @@ else
          $loggin_mode = 'authenticate';
       }
       else if( $uhandle && $passwd )
-      {
          $loggin_mode = 'password';
-      }
    }
    if( !$loggin_mode )
    {
@@ -344,7 +340,7 @@ else
    {
       // temp password?
 
-      $result = @db_query( 0 /* "rss.status.find_user.password($uhandle)" */,
+      $result = @db_query( "rss_status.find_user.password($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
@@ -355,19 +351,19 @@ else
          if( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
             $logged_in = true;
          else
-            error("wrong_password");
+            error('wrong_password', "rss_status.check_password($uhandle)");
 
          if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-            error('login_denied');
+            error('login_denied', "rss_status.check.user($uhandle)");
       }
-      //else error("wrong_userid");
+      //else error('wrong_userid', "rss_status.check_user($uhandle)");
    }
 
    if( $loggin_mode=='cookie' )
    {
       // logged in?
 
-      $result = @db_query( 0 /* "rss.status.find_user.login($uhandle)" */,
+      $result = @db_query( "rss_status.find_user.login($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
@@ -375,14 +371,11 @@ else
       {
          $player_row = mysql_fetch_assoc($result);
 
-         if( $player_row['Sessioncode'] === safe_getcookie('sessioncode')
-             && $player_row["Expire"] >= $NOW )
-         {
+         if( $player_row['Sessioncode'] === safe_getcookie('sessioncode') && $player_row["Expire"] >= $NOW )
             $logged_in = true;
-         }
 
          if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-            error('login_denied');
+            error('login_denied', "wap_status.check.cookie.user($uhandle)");
       }
    }
 
@@ -390,13 +383,11 @@ else
    {
       if( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
          rss_auth( 'Unauthorized access forbidden!', $uhandle);
-      error("not_logged_in",'rss1');
+      error("not_logged_in", "rss_status.check_login($uhandle)");
    }
 
 
    setTZ( $player_row['Timezone']);
-
-   //+logging stat adjustments
 
    $my_id = (int)$player_row['ID'];
    $my_name = (string)$player_row['Handle'];
