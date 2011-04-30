@@ -43,7 +43,9 @@ $GLOBALS['ThePage'] = new Page('Status');
    if( get_request_arg('set_order') )
    {
       $value = get_request_arg('stg_order', 1);
-      $next_game_order = NextGameOrder::get_next_game_order( '', $value, false );
+      $next_game_order = NextGameOrder::get_next_game_order( $value );
+      if( !$next_game_order )
+         error('invalid_args', "status.check.stg_order($value)");
       if( $player_row['NextGameOrder'] != $next_game_order )
       {
          db_query( "status.update.next_game_order($uid,$value)",
@@ -178,8 +180,7 @@ if( (string)$folder_nr_querystr != '' )
       $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
    //$order = $gtable->current_order_string('ID-');
    $gtable->make_sort_images();
-   $order = ' ORDER BY ' .
-      NextGameOrder::get_next_game_order( 'Games', $player_row['NextGameOrder'], true ); // enum -> order
+   $order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'Games' ); // enum -> order
    $gtable->use_show_rows(false);
 
 
@@ -377,7 +378,7 @@ function status_games_extend_table_form( &$gtable, &$form )
 
    $result = $form->print_insert_select_box(
          'stg_order', '1', NextGameOrder::get_next_game_orders_selection(),
-         NextGameOrder::get_next_game_order( '', $player_row['NextGameOrder'], false ), // enum -> idx
+         NextGameOrder::get_next_game_order( $player_row['NextGameOrder'] ), // enum -> idx
          false);
    $result .= $form->print_insert_submit_button( 'set_order', T_('Set Order') );
    return $result;

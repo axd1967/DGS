@@ -33,8 +33,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 {
    global $player_row;
 
-   $order = NextGameOrder::get_next_game_order(
-      'Games', $player_row['NextGameOrder'], true ); // enum -> order
+   $order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'Games', false ); // enum -> order
    $qsql = new QuerySQL(
          SQLP_FIELDS, 'ID',
          SQLP_FROM,   'Games',

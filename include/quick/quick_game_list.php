@@ -143,7 +143,7 @@ class QuickHandlerGameList extends QuickHandler
             $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesPriority AS GP ON GP.gid=G.ID AND GP.uid=$uid" );
          }
          $qsql->add_part( SQLP_ORDER,
-            NextGameOrder::get_next_game_order( 'G', $next_game_order, true ) );
+            NextGameOrder::get_next_game_order( $next_game_order, 'G', false ) );
       }
       elseif( $view == GAMELIST_OPTVAL_VIEW_RUNNING )
       {
