@@ -28,6 +28,7 @@ require_once( "include/game_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'include/classlib_game.php' );
+require_once( 'include/gui_bulletin.php' );
 
 $GLOBALS['ThePage'] = new Page('Status');
 
@@ -39,6 +40,8 @@ $GLOBALS['ThePage'] = new Page('Status');
    if( !$logged_in )
       error('not_logged_in');
    $my_id = $player_row['ID'];
+
+   $page = 'status.php';
 
    if( get_request_arg('set_order') )
    {
@@ -52,7 +55,15 @@ $GLOBALS['ThePage'] = new Page('Status');
             "UPDATE Players SET NextGameOrder='".mysql_addslashes($next_game_order) .
             "' WHERE ID=$my_id LIMIT 1" );
       }
-      jump_to('status.php');
+      jump_to($page);
+   }
+
+   // mark bulletin as read + reload (for recount remaining bulletins)
+   $markread = (int)get_request_arg('mr');
+   if( $markread > 0 )
+   {
+      Bulletin::mark_bulletin_as_read( $markread );
+      jump_to($page);
    }
 
    $cfg_pages = ConfigPages::load_config_pages( $my_id, CFGCOLS_STATUS_GAMES );
@@ -62,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('Status');
    // NOTE: game-list can't allow TABLE-SORT until jump_to_next_game() adjusted to follow the sort;
    //       ordering is implemented using explicit "Set Order" saved in Players.NextGameOrder !!
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
-   $gtable = new Table( 'game', "status.php", $cfg_tblcols, '', $table_mode|TABLE_ROWS_NAVI );
+   $gtable = new Table( 'game', $page, $cfg_tblcols, '', $table_mode|TABLE_ROWS_NAVI );
 
    start_page(T_('Status'), true, $logged_in, $player_row,
                button_style($player_row['Button']) );
@@ -94,12 +105,48 @@ $GLOBALS['ThePage'] = new Page('Status');
 } // show user infos
 
 
+if( @$player_row['CountBulletinNew'] > 0 )
+{ // show unread bulletins
+   $limit = 3;
+   $iterator = new ListIterator( 'status.list_bulletin.unread',
+      new QuerySQL( SQLP_WHERE,
+            "BR.bid IS NULL", // only unread
+            "B.Status='".BULLETIN_STATUS_SHOW."'" ),
+      'ORDER BY B.PublishTime DESC',
+      'LIMIT '.($limit+1) );
+   $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
+   $iterator = Bulletin::load_bulletins( $iterator );
+
+   if( $iterator->ResultRows > 0 )
+   {
+      section('bulletin', T_('Message of the Day (unread bulletins)'));
+
+      $show_rows = $limit;
+      while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $bulletin, $orow ) = $arr_item;
+         $mark_as_read_url = ( !@$orow['BR_Read'] && $bulletin->Status == BULLETIN_STATUS_SHOW ) ? $page : '';
+         echo GuiBulletin::build_view_bulletin($bulletin, $mark_as_read_url);
+      }
+
+      if( $iterator->ResultRows > $limit )
+      {
+         echo "<font size=\"+1\">...</font>\n";
+         $sectmenu = array();
+         $sectmenu[ sprintf( T_('Show all (%s) unread bulletins'), $player_row['CountBulletinNew'] ) ] =
+            "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=1";
+         make_menu($sectmenu, false);
+      }
+   }
+} // unread bulletins
+
+
 $folder_nr_querystr = $cfg_pages->get_status_folders_querypart();
 if( (string)$folder_nr_querystr != '' )
 { // show messages
 
    // NOTE: msg-list can't allow TABLE-SORT, because of the fixed LIMIT and no prev/next feature
-   $mtable = new Table( 'message', 'status.php', '', 'MSG', $table_mode|TABLE_NO_HIDE );
+   $mtable = new Table( 'message', $page, '', 'MSG', $table_mode|TABLE_NO_HIDE );
 
    //$mtable->add_or_del_column();
    $msglist_builder = new MessageListBuilder( $mtable, FOLDER_NONE /*FOLDER_ALL_RECEIVED*/,
@@ -291,7 +338,7 @@ if( (string)$folder_nr_querystr != '' )
 
 if( $player_row['GamesMPG'] > 0 )
 { // show multi-player-games
-   $mpgtable = new Table( 'mpgame', "status.php", null, '', $table_mode|TABLE_ROWS_NAVI );
+   $mpgtable = new Table( 'mpgame', $page, null, '', $table_mode|TABLE_ROWS_NAVI );
 
    $mpgtable->add_or_del_column();
 

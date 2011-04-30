@@ -193,7 +193,7 @@ class GuiBulletin
       if( $mark_url )
       {
          global $base_path;
-         $mark_link = anchor( $base_path.$mark_url.URI_AMP."mr={$bulletin->ID}",
+         $mark_link = anchor( make_url( $base_path.$mark_url, array( 'mr' => $bulletin->ID ) ),
             T_('Mark as read#bulletin'), T_('Mark bulletin as read#bulletin') );
          $div_mark = "<div class=\"MarkRead\">$mark_link</div>";
       }
