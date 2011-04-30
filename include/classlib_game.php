@@ -426,12 +426,16 @@ class NextGameOrder
     * \brief Maps NextGameOrder for status-games.
     * \param $idx if numeric (map selection-index to enum-value (sql_order=false) or to order-string;
     *             if string (map enum-value to selection-index ot to order-string)
+    * \param $tablename return SQL 'ORDER BY...' if tablename given; return enum for numeric-index if empty
+    * \return '' for unknown $idx; otherwise return enum-value or SQL-order-by-clause dependent on $tablename
+    *
     * Examples:
-    *   get_next_game_order( 'Games', 3, false ) -> PRIO
-    *   get_next_game_order( '',  'MOVES', false ) -> 2
-    *   get_next_game_order( 'G', 'MOVES', true ) = get_..( 'G', 2, true ) -> sql-order
+    *   get_next_game_order( 3 ) -> PRIO
+    *   get_next_game_order( 'MOVES' ) -> 2
+    *   get_next_game_order( 'MOVES', 'G', true ) = get_..( 2, 'G', true ) -> 'ORDER BY G.Moves, ...'
+    *   get_next_game_order( 'MOVES', 'Games' ) = 'G.Moves, ...'
     */
-   function get_next_game_order( $tablename, $idx, $sql_order=false )
+   function get_next_game_order( $idx, $tablename='', $with_order_by=true )
    {
       // SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
       // NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
@@ -447,17 +451,24 @@ class NextGameOrder
          NGO_TIMELEFT  => 4,
       );
 
+      if( !isset($ARR_NEXT_GAME_ORDER[$idx]) )
+         return '';
+
       $idx_value = $idx;
       if( !is_numeric($idx) ) // map enum-val to selection-index or order-string
       {
          $idx_value = $ARR_NEXT_GAME_ORDER[$idx];
-         if( !$sql_order )
+         if( !$tablename )
             return $idx_value;
       }
 
-      $arr_idx = ($sql_order) ? 1 : 0;
-      $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][$arr_idx];
-      return str_replace( '%G', $tablename, $order_fmt );
+      if( $tablename )
+      {
+         $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][1];
+         return ( $with_order_by ? 'ORDER BY ' : '' ) . str_replace( '%G', $tablename, $order_fmt );
+      }
+      else
+         return $ARR_NEXT_GAME_ORDER[$idx_value][0];
    }//get_next_game_order
 
    /*! \brief Returns loaded Players.NextGameOrder for given user; or null otherwise. */

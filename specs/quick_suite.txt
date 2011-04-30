@@ -1195,7 +1195,7 @@ Purpose:
 
 Request:
 
-   quick_status.php?uid|user=<USER_ID|HANDLE>&no_cache=<CACHE>
+   quick_status.php?uid|user=<USER_ID|HANDLE>&no_cache=<CACHE>&order=<ORDER>
 
 Important Notes:
 
@@ -1227,6 +1227,14 @@ Options:
       - 0 = caching enabled: +5 min expiration
       - 1 = disable caching (expire-header adjusted accordingly)
 
+   <ORDER> = (optional) sort-order for status-games
+      - '' = use default order as configured on status-page
+      - 0 = no-order (that's more gentle to the server, because less sorting)
+      - 1 = LASTMOVED = order by opponent-last-moved-date
+      - 2 = MOVES     = order by number of moves in game
+      - 3 = PRIO      = order by players priority set for game (on game-info page)
+      - 4 = TIMELEFT  = order by players remaining-time
+
 Response:
 
    The output of the "quick_status.php" tool is a document of HTTP-Content-Type
@@ -1243,8 +1251,9 @@ Response:
 
       - a data-line consists of comma-separated fields
       - leading and trailing whitespaces of the fields should be ignored
-      - a field is put into single-quotes "'" when the field-value contains
-        either a single-quote, a space or a backslash '\'
+      - a field is put into single-quotes "'" when
+        a) the field-value contains either a single-quote, a space or a backslash '\', or
+        b) the corresponding field-header is surrounded by single-quotes
       - escape-characters (single-quote, backslash) are escaped
         with a preceeding backslash, e.g. '\\' or "\'"
 
@@ -1259,7 +1268,7 @@ Response:
          message_date : date when message has been sent
 
       # header-line with format of game-data-line
-      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type"
+      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'"
 
          game_id         : game-id, e.g. http://www.dragongoserver.net/game.php?gid=317416
          opponent_handle : user-id (handle) of users opponent
@@ -1279,26 +1288,32 @@ Response:
                            - GO
                            - TEAM_GO(N:M)
                            - ZEN_GO(N)
+         game_prio       : priority set by user for game
+                           - value-range: -32768..32767
+                           - 0 = not-loaded (e.g. for other user) or no prio
+         opponent_lastaccess_date : date of opponents last-access-date in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
 
       # header-line with format of multi-player-game-data-line
-      "## MPG,game_id,game_type,ruleset,size,lastchanged_date"
+      "## MPG,game_id,game_type,ruleset,size,lastchanged_date,ready_to_start"
 
          game_id           : see game-data
          game_type         : see game-data
          ruleset           : JAPANESE | CHINESE
          size              : board-size [int]
          lastchanged_date  : date of last-change in format "YYYY-MM-DD hh:mm:ss"
+         ready_to_start    : 1 = indicates if all players joined, so the game can be started,
+                             0 otherwise
 
    Example output:
 
       ## M,message_id,'sender','subject','message_date'
       M,1595525,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
-      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type
-      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,'GO'
-      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,'GO'
-      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,'TEAM_GO (2:2)'
+      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,opponent_lastaccess_date
+      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,'GO',0,'2007-05-27 15:00:00'
+      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,'GO',5,'2009-03-01 10:00:00'
+      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,'TEAM_GO (2:2)',-2,'2011-04-30 17:38:22'
       ## MPG,game_id,game_type,ruleset,size,'lastchanged_date'
-      MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00'
+      MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00',1
 
 Errors:
 

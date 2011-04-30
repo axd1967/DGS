@@ -99,7 +99,7 @@ else
 
 
    $player_row = mysql_single_fetch( "quick_status.find_player($uid,$uhandle)",
-                  "SELECT ID, Timezone, AdminOptions, GamesMPG, " .
+                  "SELECT ID, Timezone, AdminOptions, GamesMPG, NextGameOrder, " .
                   'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
                   'FROM Players WHERE ' .
                   ( $idmode=='uid'
@@ -171,6 +171,11 @@ else
 
 
    // Games to play?
+   $load_prio = ( $player_id > 0 );
+   $game_order = strtoupper( trim( get_request_arg('order', @$player_row['NextGameOrder']) ));
+   if( (string)$game_order == '' )
+      $game_order = @$player_row['NextGameOrder'];
+   $sql_order = NextGameOrder::get_next_game_order( $game_order, 'Games' ); // enum -> order
 
    $query = "SELECT Black_ID,White_ID,Games.ID, tid, " .
        "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
@@ -179,17 +184,20 @@ else
        "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
        "LastTicks, COALESCE(Clock.Ticks,0) AS X_Ticks, " .
        "Games.Moves, Games.Status, Games.GameType, Games.GamePlayers, " .
-       "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId " .
+       ( $load_prio ? "COALESCE(GP.Priority,0) AS X_Priority, " : "0 AS X_Priority, " ) .
+       "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId, " .
+       "UNIX_TIMESTAMP(opponent.Lastaccess) AS oLastaccess " .
        "FROM Games " .
          "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$player_id) " .
          "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
+         ( $load_prio ? "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$player_id " : '' ) .
        "WHERE ToMove_ID=$player_id AND Status" . IS_RUNNING_GAME . " " .
-       "ORDER BY Games.LastChanged ASC, Games.ID";
+       $sql_order;
 
    $result = db_query( 'quick_status.find_games', $query );
 
-   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, game_type
-   echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type\n";
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
+   echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'\n";
 
    $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    while( $row = mysql_fetch_assoc($result) )
@@ -204,12 +212,15 @@ else
       $chk_game_status = strtoupper($row['Status']);
       $game_status = isRunningGame($chk_game_status) ? $chk_game_status : '';
 
-      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, Moves, tid, GameType
-      echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,'%s'\n",
+      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
+      echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,'%s',%s,'%s'\n",
                     $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
                     date($datfmt, @$row['date']), $time_remaining['text'],
                     $game_status, $row['Moves'], $row['tid'],
-                    GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true) );
+                    GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
+                    (int)@$row['X_Priority'],
+                    date($datfmt, @$row['oLastaccess'])
+                 );
    }
    mysql_free_result($result);
 
@@ -218,7 +229,7 @@ else
 
    if( $logged_in && $player_row['GamesMPG'] > 0 )
    {
-      $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, GP.Flags, "
+      $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
          . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
          . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
          . "WHERE GP.uid=$player_id AND G.Status='SETUP' "
@@ -226,19 +237,22 @@ else
 
       $result = db_query( "quick_status.find_mp_games($player_id)", $query );
 
-      // MP-game-header: type=MPG, game.ID, game_type, Ruleset, Size, Lastchanged
-      echo "## MPG,game_id,game_type,ruleset,size,'lastchanged_date'\n";
+      // MP-game-header: type=MPG, game.ID, game_type, Ruleset, Size, Lastchanged, ReadyToStart
+      echo "## MPG,game_id,game_type,ruleset,size,'lastchanged_date',ready_to_start\n";
 
       while( $row = mysql_fetch_assoc($result) )
       {
          $nothing_found = false;
 
-         // type, game.ID, game_type, Ruleset, Size, Lastchanged, MPG-status
-         echo sprintf( "MPG,%s,%s,%s,%s,'%s'\n",
+         $cnt_players = MultiPlayerGame::determine_player_count($row['GamePlayers']);
+
+         // type, game.ID, game_type, Ruleset, Size, Lastchanged, ReadyToStart
+         echo sprintf( "MPG,%s,%s,%s,%s,'%s',%s\n",
                        $row['ID'],
                        GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
                        $row['Ruleset'], $row['Size'],
-                       ($row['X_Lastchanged'] > 0) ? date(DATE_FMT_QUICK, $row['X_Lastchanged']) : '' );
+                       ($row['X_Lastchanged'] > 0) ? date(DATE_FMT_QUICK, $row['X_Lastchanged']) : '',
+                       ($row['X_Joined'] == $cnt_players) ? 1 : 0 );
       }
       mysql_free_result($result);
    }
