@@ -72,6 +72,9 @@ if( $is_down )
 }
 else
 {
+   // format-version: 0|1 = DGS 1.0.14, 2 = DGS 1.0.15
+   $version = (int)get_request_arg('version');
+
    loc_start_page( !((bool)get_request_arg('no_cache','0')) );
    //disable_cache();
 
@@ -93,7 +96,7 @@ else
          if( $uhandle )
             $idmode= 'cookie';
          else
-            error('no_uid');
+            error('no_uid', "quick_status.miss_user($uid,$uhandle)");
       }
    }
 
@@ -149,7 +152,13 @@ else
       $result = db_query( 'quick_status.find_messages', $query );
 
       // message-header: type=M, Messages.ID, correspondent.Handle, message.Subject, message.Date
-      echo "## M,message_id,'sender','subject','message_date'\n";
+      if( $version == 2 )
+      {
+         echo "## M,message_id,'sender','subject','message_date'\n";
+         $msg_fmt = "M,%s,'%s','%s','%s'\n";
+      }
+      else
+         $msg_fmt = "'M',%s,'%s','%s','%s'\n"; // diff: M <- 'M'
 
       while( $row = mysql_fetch_assoc($result) )
       {
@@ -158,11 +167,10 @@ else
 
          // Message.ID, correspondent.Handle, message.subject, message.date
          //N.B.: Subject is still in the correspondent's encoding.
-         echo sprintf( "M,%s,'%s','%s','%s'\n",
+         echo sprintf( $msg_fmt,
                        $row['mid'], slashed(@$row['sender']), slashed(@$row['Subject']),
                        date($datfmt, @$row['date']) );
       }
-
    }
    else
    {
@@ -196,8 +204,14 @@ else
 
    $result = db_query( 'quick_status.find_games', $query );
 
+   $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
+
    // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
-   echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'\n";
+   if( $version == 2 )
+   {
+      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'\n";
+      $timefmt_flags |= TIMEFMT_ADDEXTRA;
+   }
 
    $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    while( $row = mysql_fetch_assoc($result) )
@@ -205,34 +219,43 @@ else
       $nothing_found = false;
 
       $player_color = ($player_id == $row['White_ID']) ? WHITE : BLACK;
-      $time_remaining = build_time_remaining( $row, $player_color,
-            /*is_to_move*/true, // always users turn
-            TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA );
+      $time_remaining = build_time_remaining( $row, $player_color, /*is_to_move*/true, // always users turn
+            $timefmt_flags );
 
       $chk_game_status = strtoupper($row['Status']);
       $game_status = isRunningGame($chk_game_status) ? $chk_game_status : '';
 
-      // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
-      echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,'%s',%s,'%s'\n",
-                    $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
-                    date($datfmt, @$row['date']), $time_remaining['text'],
-                    $game_status, $row['Moves'], $row['tid'],
-                    GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
-                    (int)@$row['X_Priority'],
-                    date($datfmt, @$row['oLastaccess'])
-                 );
+      if( $version == 2 )
+      {
+         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
+         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,'%s',%s,'%s'\n",
+                       $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
+                       date($datfmt, @$row['date']), $time_remaining['text'],
+                       $game_status, $row['Moves'], $row['tid'],
+                       GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
+                       (int)@$row['X_Priority'],
+                       date($datfmt, @$row['oLastaccess'])
+                     );
+      }
+      else // older-version
+      {
+         // 'type', game.ID, 'opponent.handle', 'player.color', 'Lastmove.date', 'TimeRemaining'
+         echo sprintf( "'G', %d, '%s', '%s', '%s', '%s'\n",
+                       $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
+                       date($datfmt, @$row['date']), $time_remaining['text'] );
+      }
    }
    mysql_free_result($result);
 
 
    // Multi-player-Games to manage?
 
-   if( $logged_in && $player_row['GamesMPG'] > 0 )
+   if( $version == 2 && $logged_in && $player_row['GamesMPG'] > 0 )
    {
       $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
          . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
          . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
-         . "WHERE GP.uid=$player_id AND G.Status='SETUP' "
+         . "WHERE GP.uid=$player_id AND G.Status='".GAME_STATUS_SETUP."' "
          . "ORDER BY GP.gid";
 
       $result = db_query( "quick_status.find_mp_games($player_id)", $query );

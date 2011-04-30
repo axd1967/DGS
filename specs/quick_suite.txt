@@ -598,7 +598,7 @@ Examples of game-playing cycle:
 
    # retrieve list of games to play in
    # (syntax given in commented line starting with '# comment')
-   quick_status.php
+   quick_status.php?order=0
    quick_status.php?user=user
    quick_status.php?uid=123
    do_quick.php?obj=game&cmd=list&view=status&uid=123&lstyle=table
@@ -1195,7 +1195,7 @@ Purpose:
 
 Request:
 
-   quick_status.php?uid|user=<USER_ID|HANDLE>&no_cache=<CACHE>&order=<ORDER>
+   quick_status.php?version=<VERSION>&uid|user=<USER_ID|HANDLE>&no_cache=<CACHE>&order=<ORDER>
 
 Important Notes:
 
@@ -1210,6 +1210,14 @@ Important Notes:
      - Multi-player game data is not included
 
 Options:
+
+   <VERSION> = (optional) version defining format
+      - 0 = 1 = quick-status format for DGS-release-version < 1.0.15
+         - MPG-entries (multi-player-games): not shown
+         - G-entries (status-games): reduced field-set
+
+      - 2 = quick-status format for DGS-release-version = 1.0.15
+         - current specs describe this format
 
    <USER_ID> = integer
    <USER_HANDLE> = string
@@ -1267,7 +1275,7 @@ Response:
          subject      : message-subject
          message_date : date when message has been sent
 
-      # header-line with format of game-data-line
+      # header-line with format of game-data-line (version = 2)
       "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'"
 
          game_id         : game-id, e.g. http://www.dragongoserver.net/game.php?gid=317416
@@ -1275,7 +1283,8 @@ Response:
          player_color    : B | W = current color of player to move
          lastmove_date   : date of last-move in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
          time_remaining  : time-remaining of player-to-move,
-                           format described in section (6b) "TimeLimit-formats"
+                           - version = 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TR] Time-remaining"
+                           - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
          game_status     : PLAY | PASS | SCORE | SCORE2 = current game-status
                            - PLAY   = normal play-mode
                            - PASS   = one player has passed
@@ -1292,6 +1301,13 @@ Response:
                            - value-range: -32768..32767
                            - 0 = not-loaded (e.g. for other user) or no prio
          opponent_lastaccess_date : date of opponents last-access-date in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
+
+      # game-data-lines without header-line for status-games (version < 2)
+      "'G', game_id, 'opponent_handle', player_color, 'lastmove_date', 'time_remaining'"
+
+         time_remaining  : time-remaining of player-to-move (different format to version=2),
+                           - version = 2: see above
+                           - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
 
       # header-line with format of multi-player-game-data-line
       "## MPG,game_id,game_type,ruleset,size,lastchanged_date,ready_to_start"
