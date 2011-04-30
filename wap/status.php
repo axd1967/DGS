@@ -36,6 +36,7 @@ function error($err, $debugmsg=NULL)
 
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
+require_once( "include/classlib_game.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -247,9 +248,7 @@ else
       $uhandle = get_request_arg('userid');
       $passwd = get_request_arg('passwd');
       if( $uhandle && $passwd )
-      {
          $loggin_mode = 'password';
-      }
       else if( !$uhandle && !$passwd )
       {
          $uhandle= safe_getcookie('handle');
@@ -264,7 +263,7 @@ else
 
    if( $loggin_mode )
    {
-      $result = @db_query( 0 /* "wap.status.find_user($uhandle)" */,
+      $result = @db_query( "wap_status.find_user($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
 
@@ -279,21 +278,18 @@ else
             if( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
                $logged_in = true;
             else
-               error("wrong_password");
+               error('wrong_password', "wap_status.check_password($uhandle)");
          }
          else //$loggin_mode=='cookie'
          {
-            if( $player_row['Sessioncode'] === safe_getcookie('sessioncode')
-                && $player_row['Expire'] >= $NOW )
-            {
+            if( $player_row['Sessioncode'] === safe_getcookie('sessioncode') && $player_row['Expire'] >= $NOW )
                $logged_in = true;
-            }
          }
 
          if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-            error('login_denied');
+            error('login_denied', "wap_status.check.user($uhandle)");
       }
-      //else error("wrong_userid");
+      //else error('wrong_userid', "wap_status.check.user($uhandle)");
    }
 
    if( !$logged_in )
@@ -306,7 +302,7 @@ else
       echo $card;
       wap_close();
       exit;
-      //error("not_logged_in",'wap1');
+      //error("not_logged_in", "wap_status.check_login($uhandle)");
    }
 
 
@@ -334,6 +330,7 @@ else
 
 
    // Games to play?
+   $sql_order = NextGameOrder::get_next_game_order( @$player_row['NextGameOrder'], 'Games' ); // enum -> order
 
    $query = "SELECT UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
        "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
@@ -341,7 +338,7 @@ else
        "FROM (Games,Players AS opponent) " .
        "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       "ORDER BY Games.LastChanged, Games.ID";
+       $sql_order;
 
    $resultG = db_query( 'wap4', $query );
    $countG = @mysql_num_rows($resultG);
@@ -361,13 +358,10 @@ else
    // NOTE: keep static access-keys, no const-usage
    $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: " .wap_safe($my_name). "</p>";
    if( $countM>0 )
-   {
       $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
-   }
    else
-   {
       $card.= "Messages: 0<br/>";
-   }
+
    if( $countG>0 )
    {
       $nextMid= 'G1';
