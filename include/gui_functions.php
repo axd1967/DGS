@@ -70,6 +70,7 @@ function button_style( $button_nr=0)
 
 /*!
  * \brief Return the cell part of a button with anchor.
+ * \note Needs button_style(..) in start_page()-func-call
  */
 function button_TD_anchor( $href, $text='', $title='' )
 {
