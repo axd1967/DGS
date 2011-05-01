@@ -343,7 +343,7 @@ class Feature
    function is_admin( $superadmin=false )
    {
       global $player_row;
-      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : (ADMIN_VOTE|ADMIN_DEVELOPER);
+      $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : (ADMIN_FEATURE|ADMIN_DEVELOPER);
       $is_admin = (bool) ( @$player_row['admin_level'] & $chk_adminlevel );
       //return false; // for easy testing
       return $is_admin;
@@ -399,12 +399,12 @@ class Feature
       if( $intro )
       {
          $notes[] = T_('Feature or improvement suggestions are to be discussed in the <home forum/index.php>forums</home> first.');
-         $notes[] = T_('Features can only be added to this list by a vote-admin.');
+         $notes[] = T_('Features can only be added to this list by a feature-admin.');
          $notes[] = null; // empty line
       }
 
       $notes_fstatus = array( T_('Feature status'),
-            sprintf( T_('%s = feature in edit-mode, only for vote-admin'), FEATSTAT_NEW ),
+            sprintf( T_('%s = feature in edit-mode, only for feature-admin'), FEATSTAT_NEW ),
             sprintf( T_('%s = new feature to vote on'), FEATSTAT_VOTE ),
             sprintf( T_('%s = feature implementation started by developer'), FEATSTAT_WORK ),
             sprintf( T_('%s = feature implemented (and tested), but not released yet'), FEATSTAT_DONE ),
@@ -429,8 +429,8 @@ class Feature
       if( @$player_row['ID'] <= GUESTS_ID_MAX )
          return T_('Voting is not allowed for guest user.');
 
-      if( @$player_row['AdminOptions'] & ADMOPT_DENY_VOTE )
-         return T_('Voting has been denied.');
+      if( @$player_row['AdminOptions'] & ADMOPT_DENY_FEATURE_VOTE )
+         return T_('Feature-Voting has been denied.');
 
       // minimum 5 finished+rated games, 500 moves, moved within 30 days
       if( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
