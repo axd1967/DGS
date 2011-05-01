@@ -232,7 +232,7 @@ define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
 define("ADMIN_SUPERADMIN",0x08); // manage admins (add, edit, delete)
 define('ADMIN_TOURNAMENT',0x10);
-define('ADMIN_VOTE',0x20);
+define('ADMIN_VOTE',0x20); // feature & survey
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
 define('ADMIN_DEVELOPER',0x100);
@@ -2642,9 +2642,9 @@ function count_feature_new( $uid, $curr_count=-1 )
 
    $row = mysql_single_fetch( "count_features_new($uid)",
       "SELECT COUNT(*) AS X_Count " .
-      "FROM FeatureList AS FL " .
-         "LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid AND FV.Voter_ID='$uid' " .
-      "WHERE FL.Status='NEW' AND ISNULL(FV.fid)" );
+      "FROM Feature AS F " .
+         "LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid AND FV.Voter_ID='$uid' " .
+      "WHERE F.Status='VOTE' AND ISNULL(FV.fid)" );
    return ($row) ? (int)@$row['X_Count'] : -1;
 }
 
