@@ -114,6 +114,11 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
    {
       if( is_null($note) || (string)$note === '' )
          echo "<p></p>\n";
+      elseif( is_array($note) && isset($note['text']) )
+      {
+         $safe = (bool)@$note['safe'];
+         echo '  <li>', ( $safe ? make_html_safe($note['text'], 'line') : $note['text'] ), "\n";
+      }
       elseif( is_array($note) )
       {
          echo '  <li>', array_shift( $note ), ":\n<ul class=\"SubNotes\">\n"; // note-title
