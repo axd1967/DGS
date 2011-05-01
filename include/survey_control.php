@@ -115,6 +115,15 @@ class SurveyControl
       return $survey;
    }//new_survey
 
+   /*! \brief Returns true if this Survey can be edited by admin. */
+   function allow_survey_edit( $survey )
+   {
+      if( SurveyControl::is_survey_admin() )
+         return true;
+
+      return ( $survey->Status == SURVEY_STATUS_NEW );
+   }//allow_survey_edit
+
    function build_view_survey( $survey, $rx_term='' )
    {
       $title = make_html_safe($survey->Title, true, $rx_term);
