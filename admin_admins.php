@@ -41,13 +41,14 @@ require_once( "include/table_columns.php" );
          'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
          'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
          'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
+         'Feature' => array( ADMIN_FEATURE, /*T_*/('Feature')),
          'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
          'Game'   => array( ADMIN_GAME, /*T_*/('Game')),
          'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
          'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
+         'Survey' => array( ADMIN_SURVEY, /*T_*/('Survey')),
          'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
          'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
-         'Vote'   => array( ADMIN_VOTE, /*T_*/('Voting')),
       );
 
    // Make sure all previous admins gets into the Admin array

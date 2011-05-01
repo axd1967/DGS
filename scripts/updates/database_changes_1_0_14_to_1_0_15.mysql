@@ -2194,3 +2194,43 @@ ALTER TABLE FeatureVote
    DROP COLUMN IP;
 
 
+-- added Survery-tables to store survey, survey-option, survey-vote
+CREATE TABLE Survey (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  SurveyType enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS',
+  Status enum('NEW','ACTIVE','CLOSED','DELETE') NOT NULL default 'NEW',
+  Flags tinyint unsigned NOT NULL default 0,
+  MinPoints tinyint NOT NULL default 0,
+  MaxPoints tinyint NOT NULL default 0,
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  Title varchar(255) NOT NULL,
+  PRIMARY KEY (ID),
+  KEY uid (uid),
+  KEY Status (Status)
+) ENGINE=MyISAM ;
+
+CREATE TABLE SurveyOption (
+  ID int NOT NULL auto_increment,
+  sid int NOT NULL,
+  Tag tinyint unsigned NOT NULL default 0,
+  SortOrder tinyint unsigned NOT NULL default 0,
+  MinPoints tinyint NOT NULL default 0,
+  UserCount mediumint unsigned NOT NULL default 0,
+  Score int NOT NULL default 0,
+  Title varchar(255) NOT NULL,
+  Text text NOT NULL default '',
+  PRIMARY KEY (ID),
+  UNIQUE KEY sidTag (sid,Tag)
+) ENGINE=MyISAM ;
+
+CREATE TABLE SurveyVote (
+  sid int NOT NULL,
+  uid int NOT NULL default 0,
+  Tag tinyint unsigned NOT NULL default 0,
+  Points tinyint NOT NULL default 0,
+  PRIMARY KEY (sid,uid,Tag)
+) ENGINE=MyISAM ;
+
+

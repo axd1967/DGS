@@ -39,6 +39,7 @@ $chained = 0;
 
 // options settable by admins (user-capabilities)
 // NOTE: also adjust admin_users.php and admin_show_users.php on adding new options
+// field Players.AdminOptions
 //define('ADMOPT_BYPASS_IP_BLOCK', 0x001); // by-passes blocked IP for user
 define('ADMOPT_DENY_LOGIN',            0x0002); // deny: server usage, login
 define('ADMOPT_DENY_EDIT_BIO',         0x0004);
@@ -48,11 +49,12 @@ define('ADMOPT_DENY_EDIT_BIO',         0x0004);
 define('ADMOPT_HIDE_BIO',              0x0080); // hide user bio
 define('ADMOPT_FGROUP_ADMIN',          0x0100); // user can see ADMIN-forums
 define('ADMOPT_FGROUP_DEV',            0x0200); // user can see DEV-forums
-define('ADMOPT_DENY_VOTE',             0x0400); // deny: voting on features & surveys
+define('ADMOPT_DENY_FEATURE_VOTE',     0x0400); // deny: voting on features
 define('ADMOPT_DENY_TOURNEY_CREATE',   0x0800); // deny: tournament creation
 define('ADMOPT_DENY_TOURNEY_REGISTER', 0x1000); // deny: tournament registration
 define('ADMOPT_FORUM_NO_POST',         0x2000); // deny: forum posting at all (no new post, no edit)
 define('ADMOPT_FORUM_MOD_POST',        0x4000); // deny: all new/edited forum posts are moderated
+define('ADMOPT_DENY_SURVEY_VOTE',      0x8000); // deny: voting on surveys
 
 
 function setTZ( $tz='GMT')

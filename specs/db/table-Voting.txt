@@ -1,0 +1,218 @@
+###
+### Description of mysql tables:  Voting
+###
+
+Here you'll find some infos about all the voting tables (feature & survey).
+
+
+###########################################################################
+## --- Feature ---
+
+Description:
+   Table to store list of features to vote on.
+
+State-Diagram for feature-status:
+   - normally: NEW -> VOTE -> WORK -> DONE -> LIVE
+   - rejects:  NEW -> NACK, VOTE -> NACK, VOTE -> NEW
+   - revives:  NACK -> *
+   - state-transitions restricted to vote-admin: NEW -> VOTE
+   - dev-admin can do all state-transitions: * -> * though only above make sense
+
+
+| Field       | Type                                           | Null | Key | Default             | Extra          |
++-------------+------------------------------------------------+------+-----+---------------------+----------------+
+| ID          | int(11)                                        | NO   | PRI | NULL                | auto_increment |
+| Status      | enum('NEW','VOTE','WORK','DONE','LIVE','NACK') | NO   | MUL | NEW                 |                |
+| Size        | enum('?','EPIC','XXL','XL','L','M','S')        | NO   |     | ?                   |                |
+| Subject     | varchar(255)                                   | NO   |     | NULL                |                |
+| Description | text                                           | NO   |     | NULL                |                |
+| Editor_ID   | int(11)                                        | NO   |     | NULL                |                |
+| Created     | datetime                                       | NO   |     | NULL                |                |
+| Lastchanged | datetime                                       | NO   |     | 0000-00-00 00:00:00 |                |
+
+
+## Fields:
+
+* uid : user that voted on survey(-option), FK to Players.ID
+
+* Points : points user gave with his/her vote on referenced survey-option
+   - 0 = maybe points given, so no vote is represented by removed entry
+
+* Status : feature-status
+   - NEW  = newly added, edited only by vote-admin
+   - VOTE = feature shown to users, can be voted or rejected (NACK)
+   - WORK = in work by developers
+   - DONE = feature implemented, but not released yet
+   - LIVE = feature released on production-server
+   - NACK = feature rejected (will not be done)
+
+* Size : complexity, story-size, effort needed to implement feature
+   - '?'  = unknown size
+   - EPIC = multiple stories intermingled, very big, >6 months work
+   - XXL  = ca. 3 months work
+   - XL   = ca. 1 month work
+   - L    = ca. 1 week work
+   - M    = ca. 3 days work
+   - S    = ca. 1 day work
+
+* Subject : title of feature request
+
+* Description : detailed description of feature request
+
+* Editor_ID : author of feature request (vote-admin)
+
+* Created : creation-date of feature request
+
+* Lastchanged : date of last-update on feature request
+
+
+
+###########################################################################
+## --- FeatureVote ---
+
+Description:
+   Table to store user-specific vote on feature-request.
+
+| Field       | Type        | Null | Key | Default             | Extra |
++-------------+-------------+------+-----+---------------------+-------+
+| fid         | int(11)     | NO   | PRI | NULL                |       |
+| Voter_ID    | int(11)     | NO   | PRI | NULL                |       |
+| Points      | tinyint(4)  | NO   | MUL | 0                   |       |
+| Lastchanged | datetime    | NO   |     | 0000-00-00 00:00:00 |       |
+
+
+## Fields:
+
+* fid : feature-id use voted on, FK to Feature.ID
+
+* Voter_ID : user that voted, FK to Players.ID
+
+* Points : user-vote in points -FEATVOTE_MAXPOINTS..FEATVOTE_MAXPOINTS for feature
+
+* Lastchanged : last-change-date of user-vote
+
+
+
+###########################################################################
+## --- Survey ---
+
+Description:
+   Table to store surveys.
+   Can be inline-included in forums or everywhere else as link with <survey>-tag.
+
+Important Notes:
+   - Life-Cycle of Survey:
+      - NEW -> ACTIVE -> CLOSED, NEW -> DELETE (moderating)
+
+| Field       | Type                                   | Null | Key | Default             | Extra          |
++-------------+----------------------------------------+------+-----+---------------------+----------------+
+| ID          | int(11)                                | NO   | PRI | NULL                | auto_increment |
+| uid         | int(11)                                | NO   | MUL | NULL                |                |
+| SurveyType  | enum('POINTS','SUM','SINGLE','MULTI')  | NO   |     | POINTS              |                |
+| Status      | enum('NEW','ACTIVE','CLOSED','DELETE') | NO   | MUL | NEW                 |                |
+| Flags       | tinyint(3) unsigned                    | NO   |     | 0                   |                |
+| MinPoints   | tinyint(4)                             | NO   |     | 0                   |                |
+| MaxPoints   | tinyint(4)                             | NO   |     | 0                   |                |
+| Created     | datetime                               | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged | datetime                               | NO   |     | 0000-00-00 00:00:00 |                |
+| Title       | varchar(255)                           | NO   |     | NULL                |                |
+
+
+## Fields:
+
+* uid : author of survey, FK to Players.ID
+
+* SurveyType : survey-type
+   - POINTS = survey consists of options with selectbox to give points in range MinPoints..MaxPoints
+   - SUM    = survey consists of options on which in sum MaxPoints can be given
+   - SINGLE = survey consists of radio-buttons to select ONE of many options
+   - MULTI  = survey consists of checkboxes to select MULTIPLE options
+
+* Status : survey-status
+   - NEW    = survey initialized, not shown yet, in edit-mode
+   - ACTIVE = survey will be shown and can be voted upon, no edit allowed any more
+   - CLOSED = survey results are calculated, no edit allowed, no vote possible any more
+   - DELETE = survey hidden, can be deleted
+
+* Flags : survey-flags, unused ATM
+
+* MinPoints : used for SurveyType=POINTS, otherwise = 0
+* MaxPoints : used for SurveyType=POINTS | SUM, otherwise = 0
+
+* Created : creation-date of survey
+
+* Lastchanged : date of last-update of survey
+
+* Title : main-title of survey, must be non-empty
+
+
+
+###########################################################################
+## --- SurveyOption ---
+
+Description:
+   Table to store list of vote-options for survey.
+
+| Field     | Type                  | Null | Key | Default | Extra          |
++-----------+-----------------------+------+-----+---------+----------------+
+| ID        | int(11)               | NO   | PRI | NULL    | auto_increment |
+| sid       | int(11)               | NO   | MUL | NULL    |                |
+| Tag       | tinyint(3) unsigned   | NO   |     | 0       |                |
+| SortOrder | tinyint(3) unsigned   | NO   |     | 0       |                |
+| MinPoints | tinyint(4)            | NO   |     | 0       |                |
+| UserCount | mediumint(8) unsigned | NO   |     | 0       |                |
+| Score     | int(11)               | NO   |     | 0       |                |
+| Title     | varchar(255)          | NO   |     | NULL    |                |
+| Text      | text                  | NO   |     | NULL    |                |
+
+
+## Fields:
+
+* sid : survey-id, FK to Survey.ID or SurveyOption.sid
+
+* Tag : tag-d user votes on (for survey)
+   - 0 = reserved for summaries
+   - valid value-range 1..255
+
+* SortOrder : sort-order for survey-options 1=high-prio, >1 lower-prio
+
+* MinPoints : number of points to add to Score for this survey-option
+   - 0 for Survey.Type=POINTS|SUM, because available points are given by Survey.Min/MaxPoints
+   - points for Survey.Type=SINGLE|MULTI, usually 1 (but allow weighted options with different points)
+
+* UserCount : aggregated number of all users (that voted on survey)
+
+* Score : aggregated value of all user-votes on this survey-option
+
+* Title : title of survey-option user can vote on, must be non-empty
+
+* Text : additional description of survey-option
+
+
+
+###########################################################################
+## --- SurveyVote ---
+
+Description:
+   Table to store user-specific votes for survey(-options).
+
+| Field  | Type                | Null | Key | Default | Extra |
++--------+---------------------+------+-----+---------+-------+
+| sid    | int(11)             | NO   | PRI | NULL    |       |
+| uid    | int(11)             | NO   | PRI | 0       |       |
+| Tag    | tinyint(3) unsigned | NO   | PRI | 0       |       |
+| Points | tinyint(4)          | NO   |     | 0       |       |
+
+
+## Fields:
+
+* sid : survey-id, FK to Survey.ID or SurveyOption.sid
+
+* uid : user that voted on survey(-option), FK to Players.ID
+
+* Tag : tag user voted on (for survey), FK to SurveyOption.Tag
+
+* Points : points user gave with his/her vote on referenced survey-option
+   - 0 = maybe points given, so no vote is represented by removed entry
+
+

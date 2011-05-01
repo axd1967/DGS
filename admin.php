@@ -52,6 +52,8 @@ $GLOBALS['ThePage'] = new Page('Admin');
                      '', $admin_level & ADMIN_FAQ);
    add_link_page_link('admin_bulletin.php', /*T_*/('Admin Bulletin'),
                      '', $admin_level & ADMIN_DEVELOPER);
+   add_link_page_link('admin_survey.php', /*T_*/('Admin Survey'),
+                     '', $admin_level & ADMIN_SURVEY);
    add_link_page_link('forum/admin.php', /*T_*/('Admin Forums'),
                      '', $admin_level & ADMIN_DEVELOPER);
    add_link_page_link('admin_users.php', T_('Edit User Attributes'),

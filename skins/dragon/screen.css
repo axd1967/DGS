@@ -3310,6 +3310,24 @@ span.VotingRestricted {
    font-weight: bold;
 }
 
+div.Survey {
+   text-align: center;
+   width: 80%;
+   margin: 0px 10% 1em 10%;
+   padding: 5px 8px;
+   background: #C7D0F7;
+   border: 1px dotted black;
+}
+div.Survey div.Title {
+   text-align: left;
+   font-style: italic;
+   font-weight: bold;
+}
+div.Survey div.Options {
+   text-align: left;
+   margin-top: 0.5em;
+}
+
 
 /* ------------------------- */
 /* message allowed tags */

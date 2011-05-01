@@ -232,14 +232,15 @@ define("ADMIN_FAQ",0x02);
 define("ADMIN_FORUM",0x04);
 define("ADMIN_SUPERADMIN",0x08); // manage admins (add, edit, delete)
 define('ADMIN_TOURNAMENT',0x10);
-define('ADMIN_VOTE',0x20); // feature & survey
+define('ADMIN_FEATURE',0x20); // feature-voting
 define("ADMIN_PASSWORD",0x40);
 define('ADMIN_DATABASE',0x80);
 define('ADMIN_DEVELOPER',0x100);
 define('ADMIN_SKINNER',0x200);
 define('ADMIN_GAME',0x400); // game, player-rating
+define('ADMIN_SURVEY',0x800); // survey-voting
 // admin groups
-define('ADMINGROUP_EXECUTIVE', (ADMIN_FAQ|ADMIN_FORUM|ADMIN_VOTE|ADMIN_TOURNAMENT|ADMIN_PASSWORD|ADMIN_DEVELOPER|ADMIN_GAME));
+define('ADMINGROUP_EXECUTIVE', (ADMIN_FAQ|ADMIN_FORUM|ADMIN_FEATURE|ADMIN_SURVEY|ADMIN_TOURNAMENT|ADMIN_PASSWORD|ADMIN_DEVELOPER|ADMIN_GAME));
 //-----
 
 

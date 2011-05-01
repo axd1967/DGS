@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 22, 2011 at 05:57 PM
+-- Generation Time: May 01, 2011 at 05:59 PM
 -- Server version: 5.0.51
--- PHP Version: 5.2.4-2ubuntu5.14
+-- PHP Version: 5.2.4-2ubuntu5.15
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -824,6 +824,62 @@ CREATE TABLE IF NOT EXISTS `Statistics` (
   `Activity` int(11) NOT NULL,
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Survey`
+--
+
+CREATE TABLE IF NOT EXISTS `Survey` (
+  `ID` int(11) NOT NULL auto_increment,
+  `uid` int(11) NOT NULL,
+  `SurveyType` enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS',
+  `Status` enum('NEW','ACTIVE','CLOSED','DELETE') NOT NULL default 'NEW',
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
+  `MinPoints` tinyint(4) NOT NULL default '0',
+  `MaxPoints` tinyint(4) NOT NULL default '0',
+  `Created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Title` varchar(255) NOT NULL,
+  PRIMARY KEY  (`ID`),
+  KEY `uid` (`uid`),
+  KEY `Status` (`Status`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `SurveyOption`
+--
+
+CREATE TABLE IF NOT EXISTS `SurveyOption` (
+  `ID` int(11) NOT NULL auto_increment,
+  `sid` int(11) NOT NULL,
+  `Tag` tinyint(3) unsigned NOT NULL default '0',
+  `SortOrder` tinyint(3) unsigned NOT NULL default '0',
+  `MinPoints` tinyint(4) NOT NULL default '0',
+  `UserCount` mediumint(8) unsigned NOT NULL default '0',
+  `Score` int(11) NOT NULL default '0',
+  `Title` varchar(255) NOT NULL,
+  `Text` text NOT NULL,
+  PRIMARY KEY  (`ID`),
+  UNIQUE KEY `sidTag` (`sid`,`Tag`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `SurveyVote`
+--
+
+CREATE TABLE IF NOT EXISTS `SurveyVote` (
+  `sid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL default '0',
+  `Tag` tinyint(3) unsigned NOT NULL default '0',
+  `Points` tinyint(4) NOT NULL default '0',
+  PRIMARY KEY  (`sid`,`uid`,`Tag`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

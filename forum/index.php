@@ -108,6 +108,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    $disp_forum->forum_end_table();
 
    $menu_array = array();
+   $menu_array[T_('Surveys')] = "list_surveys.php";
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
       $menu_array[T_('Show Forum Log')] =
          array( 'url' => 'forum/admin_show_forumlog.php', 'class' => 'AdminLink' );

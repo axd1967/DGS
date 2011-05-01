@@ -92,8 +92,10 @@ function get_executives( $level )
       $out[] = T_('Tournaments#admin');
    if( $level & ADMIN_GAME )
       $out[] = T_('Game & Rating#admin');
-   if( $level & ADMIN_VOTE )
-      $out[] = T_('Voting#admin');
+   if( $level & ADMIN_FEATURE )
+      $out[] = T_('Feature-Vote#admin');
+   if( $level & ADMIN_SURVEY )
+      $out[] = T_('Survey#admin');
    return array( count($out), implode(', ', $out) );
 }
 

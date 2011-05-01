@@ -293,6 +293,9 @@ function get_tables( $database)
             'RatingChange', // only used in "old" update_rating()-func, but keeping for now
             'RatingChangeAdmin',
             'Ratinglog',
+            'Survey',
+            'SurveyOption',
+            'SurveyVote',
             'Statistics',
             'Tournament',
             'TournamentDirector',

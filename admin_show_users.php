@@ -50,8 +50,9 @@ require_once( "include/table_columns.php" );
       ADMIN_TOURNAMENT     => array( 'TOURNAMENT',       T_('Can administrate tournaments') ),
       ADMIN_FORUM          => array( 'MODERATOR',        T_('Can moderate forum (approve, reject, show, hide posts)') ),
       ADMIN_FAQ            => array( 'FAQ_EDITOR',       T_('Can edit FAQ & Introduction & Links') ),
-      ADMIN_VOTE           => array( 'VOTE',             T_('Can administrate voting') ),
+      ADMIN_FEATURE        => array( 'FEATURE',          T_('Can administrate feature-voting') ),
       ADMIN_SKINNER        => array( 'SKINNER',          T_('Can choose CSS-skin (experimental)') ),
+      ADMIN_SURVEY         => array( 'SURVEY',           T_('Can administrate survey-voting') ),
       ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       T_('Can translate texts') ),
    );
 
@@ -59,7 +60,8 @@ require_once( "include/table_columns.php" );
       //ADMOPT_BYPASS_IP_BLOCK  => array( 'BYPASS_IP_BLOCK', T_('Bypass IP-Block to allow login for accidentally blocked user') ),
       ADMOPT_DENY_LOGIN             => array( 'DENY_LOGIN',    T_('Deny login (user can not use site)') ),
       ADMOPT_DENY_EDIT_BIO          => array( 'DENY_EDIT_BIO', T_('Deny edit bio and user picture (user can not edit bio or user picture)') ),
-      ADMOPT_DENY_VOTE              => array( 'DENY_VOTE',     T_('Deny voting (user can not vote on features)') ),
+      ADMOPT_DENY_FEATURE_VOTE      => array( 'DENY_FEAT_VOTE', T_('Deny feature-voting (user can not vote on features)') ),
+      ADMOPT_DENY_SURVEY_VOTE       => array( 'DENY_SVEY_VOTE', T_('Deny survey-voting (user can not vote on surveys)') ),
       ADMOPT_DENY_TOURNEY_CREATE    => array( 'DENY_TNEY_CREATE', T_('Deny create tournament (user can not create new tournaments)') ),
       ADMOPT_DENY_TOURNEY_REGISTER  => array( 'DENY_TNEY_REG', T_('Deny tournament registration (user can not register to any new tournament)') ),
       ADMOPT_HIDE_BIO               => array( 'HIDE_BIO',      T_('Hide bio and picture (users bio and picture is hidden)') ),
