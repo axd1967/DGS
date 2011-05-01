@@ -2182,3 +2182,15 @@ ALTER TABLE Bulletin
    MODIFY `Category` enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') NOT NULL default 'PRIV_MSG' ;
 
 
+-- feature-cleanup: table-name, feature-status NEW/VOTE, drop IP for votes
+RENAME TABLE FeatureList TO Feature;
+
+ALTER TABLE Feature
+   MODIFY Status enum('NEW','VOTE','WORK','DONE','LIVE','NACK') NOT NULL default 'NEW',
+   ADD Size enum('?','EPIC','XXL','XL','L','M','S') NOT NULL default '?' AFTER Status ;
+UPDATE Feature SET Status='VOTE' WHERE Status='NEW' ;
+
+ALTER TABLE FeatureVote
+   DROP COLUMN IP;
+
+

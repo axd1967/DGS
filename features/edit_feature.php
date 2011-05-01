@@ -96,20 +96,19 @@ require_once( "features/lib_votes.php" );
 
    $old_status = $feature->status;
    $new_status = get_request_arg('new_status', $feature->status);
-   if( ($new_status != $old_status ) && $feature->is_final_status() )
-      error('feature_edit_bad_status', "edit_feature.feature.final_status($fid,$my_id,{$feature->status})");
+   if( !$feature->edit_status_allowed($is_super_admin, $new_status) )
+      error('feature_edit_bad_status', "edit_feature.feature.edit_status($fid,$my_id,{$feature->status},$new_status)");
 
    // insert/update feature-object with values from edit-form if no error
    if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
    {
+      $feature->set_status( $new_status );
+      $feature->set_size( get_request_arg('size') );
       $feature->set_subject( get_request_arg('subject') );
       $feature->set_description( get_request_arg('description') );
 
       if( !@$_REQUEST['feature_preview'] && is_null($errormsg) )
       {
-         if( $is_super_admin )
-            $feature->set_status( $new_status );
-
          ta_begin();
          {//HOT-section to update feature
             $feature->update_feature();
@@ -144,30 +143,34 @@ require_once( "features/lib_votes.php" );
    $fform = new Form( 'feature', $page, FORM_POST );
 
    // edit feature
+
    $fform->add_row( array(
       'DESCRIPTION',  T_('ID'),
       'TEXT',         ($fid ? $fid : NO_VALUE) ));
+
    $arr_status = array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status );
-   if( $is_super_admin && !$feature->is_final_status() )
+   if( $feature->edit_status_allowed($is_super_admin) )
    {
       // status-change
-      $status_values = array_value_to_key_and_value(
-         array( FEATSTAT_NEW, FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ));
-      $chg_note = sprintf( T_('Status-change to [%s] is final !'), FEATSTAT_NACK.'|'.FEATSTAT_LIVE );
+      if( $is_super_admin )
+         $status_values = array_value_to_key_and_value(
+            array( FEATSTAT_NEW, FEATSTAT_VOTE, FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ) );
+      else
+         $status_values = array_value_to_key_and_value( array( FEATSTAT_NEW, FEATSTAT_VOTE ) );
       array_push( $arr_status,
          'TEXT', '&nbsp;-&gt;&nbsp;',
-         'SELECTBOX', 'new_status', 1, $status_values, $new_status, false,
-         'TEXT', SMALL_SPACING . "($chg_note)" );
+         'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
+      if( $is_super_admin )
+         array_push( $arr_status,
+            'TEXT', SMALL_SPACING . sprintf( T_('Status-change to [%s] is final!'), FEATSTAT_NACK.'|'.FEATSTAT_LIVE ));
    }
    $fform->add_row( $arr_status );
-   if( $is_admin )
-   {
-      $fform->add_row( array(
-         'DESCRIPTION', T_('Editor'),
-         'TEXT', user_reference( REF_LINK, 1, '', $player_row ) ));
-   }
+
+   $fform->add_row( array(
+      'DESCRIPTION', T_('Editor'),
+      'TEXT', user_reference( REF_LINK, 1, '', $player_row ) ));
    $fform->add_row( array(
       'DESCRIPTION',  T_('Created'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->created) ));
@@ -211,6 +214,13 @@ require_once( "features/lib_votes.php" );
    }
    else // add or edit
    {
+      $size_values = array_value_to_key_and_value(
+         array( FEATSIZE_UNSET, FEATSIZE_S, FEATSIZE_M, FEATSIZE_L, FEATSIZE_XL, FEATSIZE_XXL, FEATSIZE_EPIC ));
+      $size_values[FEATSIZE_UNSET] = '?';
+
+      $fform->add_row( array(
+         'DESCRIPTION', T_('Size'),
+         'SELECTBOX', 'size', 1, $size_values, $feature->size, false, ));
       $fform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTAREA',   'subject', 80, 4, $feature->subject,
@@ -221,8 +231,7 @@ require_once( "features/lib_votes.php" );
          'TEXTAREA',    'description', 70, 10, $feature->description,
          ));
 
-      if( @$_REQUEST['feature_preview']
-            || ($feature->subject . $feature->description != '') )
+      if( @$_REQUEST['feature_preview'] || ($feature->subject . $feature->description != '') )
       {
          $fform->add_row( array(
             'DESCRIPTION', T_('Preview'),
@@ -252,15 +261,20 @@ require_once( "features/lib_votes.php" );
 
    $notes = array();
    if( $is_admin )
+   {
       array_unshift( $notes,
          T_('Add a category-prefix to the \'Subject\', e.g. "Game: feature description"'),
          T_('Add related URLs using &lt;home&gt;-tag or &lt;http://...&gt; in description.'),
-         T_('Add reason and properly adjust description on status changes.') );
+         T_('Add reason and properly adjust description on status changes.'),
+         T_('Ask a developer for feature size (required effort for implementation).')
+      );
+   }
    echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
 
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
-   $menu_array[T_('Show feature votes')] = "features/list_votes.php";
+   $menu_array[T_('My feature votes')] = "features/list_features.php?my_vote=0";
+   $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
    if( $is_admin )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );

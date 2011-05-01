@@ -34,14 +34,24 @@ require_once 'include/gui_functions.php';
 
 define('FEAT_SUBJECT_WRAPLEN', 55);
 
-// feature.status
-define('FEATSTAT_NEW',  'NEW');  // newly added, can be voted or rejected (NACK)
-define('FEATSTAT_WORK', 'WORK'); // in work by developers
-define('FEATSTAT_DONE', 'DONE'); // feature implemented, but unreleased
-define('FEATSTAT_LIVE', 'LIVE'); // feature released on production-server
-define('FEATSTAT_NACK', 'NACK'); // feature rejected (will not be done)
+// Feature.Status, see 'specs/db/table-Voting.txt'
+define('FEATSTAT_NEW',  'NEW');
+define('FEATSTAT_VOTE', 'VOTE');
+define('FEATSTAT_WORK', 'WORK');
+define('FEATSTAT_DONE', 'DONE');
+define('FEATSTAT_LIVE', 'LIVE');
+define('FEATSTAT_NACK', 'NACK');
 
-// featurevote.points
+// Feature.Size, see 'specs/db/table-Voting.txt'
+define('FEATSIZE_UNSET', '?');
+define('FEATSIZE_EPIC',  'EPIC');
+define('FEATSIZE_XXL',   'XXL');
+define('FEATSIZE_XL',    'XL');
+define('FEATSIZE_L',     'L');
+define('FEATSIZE_M',     'M');
+define('FEATSIZE_S',     'S');
+
+// FeatureVote.Points
 define('FEATVOTE_MAXPOINTS', 5);
 
 // date-format for features
@@ -65,6 +75,8 @@ class Feature
    var $id;
    /*! \brief Status (can be one of FEATSTAT_). */
    var $status;
+   /*! \brief Size of feature (can be one of FEATSIZE_). */
+   var $size;
    /*! \brief Subject-description of feature. */
    var $subject;
    /*! \brief Long description of feature. */
@@ -83,12 +95,14 @@ class Feature
     * \brief Constructs Feature-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $id may be 0 to add a new feature
     */
-   function Feature( $id=0, $status=FEATSTAT_NEW, $subject='', $description='', $editor=0, $created=0, $lastchanged=0 )
+   function Feature( $id=0, $status=FEATSTAT_NEW, $size=FEATSIZE_UNSET, $subject='', $description='', $editor=0,
+                     $created=0, $lastchanged=0 )
    {
       if( !is_numeric($editor) || $editor < 0 )
          error('invalid_user', "feature.Feature.check.editor($id,$editor)");
       $this->id = (int) $id;
       $this->set_status( $status );
+      $this->set_size( $size );
       $this->set_subject( $subject );
       $this->set_description( $description );
       $this->editor = (int) $editor;
@@ -99,16 +113,35 @@ class Feature
    /*! \brief Sets valid status */
    function set_status( $status )
    {
-      if( !preg_match( "/^(NEW|WORK|DONE|LIVE|NACK)$/", $status ) )
+      if( !preg_match( "/^(NEW|VOTE|WORK|DONE|LIVE|NACK)$/", $status ) )
          error('invalid_status', "feature.set_status($status)");
 
       $this->status = $status;
    }
 
-   /*! \brief Returns true, if feature-status is final (and can't be changed). */
-   function is_final_status()
+   /*! \brief Sets valid size */
+   function set_size( $size )
    {
-      return ( $this->status == FEATSTAT_LIVE || $this->status == FEATSTAT_NACK );
+      if( !preg_match( "/^(\\?|EPIC|XXL|XL|L|M|S)$/", $size ) )
+         error('invalid_status', "feature.set_size($size)");
+
+      $this->size = $size;
+   }
+
+   /*! \brief Returns true, if changing status is allowed. */
+   function edit_status_allowed( $is_super_admin, $new_status=null )
+   {
+      if( $this->status == FEATSTAT_LIVE ) // final-status; NACK-status may be revived
+         return false;
+      if( $is_super_admin )
+         return true;
+      if( $this->status != FEATSTAT_NEW )
+         return false;
+
+      if( is_null($new_status) )
+         return true;
+      else
+         return ( $new_status == FEATSTAT_NEW || $new_status == FEATSTAT_VOTE );
    }
 
    /*! \brief Sets description */
@@ -132,10 +165,10 @@ class Feature
          $this->subject = substr( preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) ), 0, 255);
    }
 
-   /*! \brief Returns true, if feature can be voted on (NEW status); no user-specific checks. */
+   /*! \brief Returns true, if feature can be voted on; no user-specific checks. */
    function allow_vote()
    {
-      return (bool) ( $this->status == FEATSTAT_NEW );
+      return (bool) ( $this->status == FEATSTAT_VOTE );
    }
 
    /*!
@@ -144,7 +177,7 @@ class Feature
     */
    function allow_edit()
    {
-      if( Feature::is_super_admin() ) // super-admin can always edit
+      if( Feature::is_super_admin() ) // feature-super-admin can always edit
          return true;
       if( !Feature::is_admin() ) // only admin can edit
          return false;
@@ -163,9 +196,10 @@ class Feature
       $this->editor = @$player_row['ID'];
       $this->lastchanged = $NOW;
 
-      $update_query = 'REPLACE INTO FeatureList SET'
+      $update_query = 'REPLACE INTO Feature SET'
          . ' ID=' . (int)$this->id
          . ", Status='" . mysql_addslashes($this->status) . "'"
+         . ", Size='" . mysql_addslashes($this->size) . "'"
          . ", Subject='" . mysql_addslashes($this->subject) . "'"
          . ", Description='" . mysql_addslashes($this->description) . "'"
          . ', Editor_ID=' . (int)$this->editor
@@ -204,7 +238,7 @@ class Feature
       if( !$this->can_delete_feature() )
          error('constraint_votes_delete_feature', "feature.delete_feature({$this->id})");
 
-      $delete_query = "DELETE FROM FeatureList WHERE ID='{$this->id}' LIMIT 1";
+      $delete_query = "DELETE FROM Feature WHERE ID='{$this->id}' LIMIT 1";
       db_query( "feature.delete_feature({$this->id})", $delete_query );
       return mysql_affected_rows();
    }
@@ -222,8 +256,7 @@ class Feature
    }
 
    /*!
-    * \brief Updates current FeatureVote-data into database (may replace existing featurevote
-    *        and sets IP and lastchanged=NOW).
+    * \brief Updates current FeatureVote-data into database (may replace existing featurevote and lastchanged=NOW).
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
     *
     * \return number of points to add to UserQuota-feature-points (can be negative)
@@ -293,6 +326,7 @@ class Feature
       return "Feature(id={$this->id}): "
          . "status=[{$this->status}], "
          . "subject=[{$this->subject}], "
+         . "size=[{$this->size}], "
          . "description=[{$this->description}], "
          . "editor=[{$this->editor}], "
          . "created=[{$this->created}], lastchanged=[{$this->lastchanged}]"
@@ -325,13 +359,29 @@ class Feature
    function build_filter_selection_status( $fname )
    {
       return array(
-         T_('All#filtervote')      => '',
-         T_('New#filtervote')      => "$fname='".FEATSTAT_NEW."'",
-         T_('Open#filtervote')     => "$fname IN ('".FEATSTAT_NEW."','".FEATSTAT_WORK."','".FEATSTAT_DONE."')",
-         T_('In Work#filtervote')  => "$fname='".FEATSTAT_WORK."'",
-         T_('Done#filtervote')     => "$fname='".FEATSTAT_DONE."'",
-         T_('Online#filtervote')   => "$fname='".FEATSTAT_LIVE."'",
-         T_('Rejected#filtervote') => "$fname='".FEATSTAT_NACK."'",
+         T_('All#featstat')      => '',
+         T_('New#featstat')      => "$fname='".FEATSTAT_NEW."'",
+         T_('Vote#featstat')     => "$fname='".FEATSTAT_VOTE."'",
+         T_('Open#featstat')     => "$fname IN ('".FEATSTAT_VOTE."','".FEATSTAT_WORK."','".FEATSTAT_DONE."')",
+         T_('In Work#featstat')  => "$fname='".FEATSTAT_WORK."'",
+         T_('Done#featstat')     => "$fname='".FEATSTAT_DONE."'",
+         T_('Online#featstat')   => "$fname='".FEATSTAT_LIVE."'",
+         T_('Rejected#featstat') => "$fname='".FEATSTAT_NACK."'",
+      );
+   }
+
+   /*! \brief Returns array used for filter on size for feature/votes-list. */
+   function build_filter_selection_size( $fname )
+   {
+      return array(
+         T_('All#featsize') => '',
+         FEATSIZE_UNSET => "$fname='".FEATSIZE_UNSET."'",
+         FEATSIZE_S     => "$fname='".FEATSIZE_S."'",
+         FEATSIZE_M     => "$fname='".FEATSIZE_M."'",
+         FEATSIZE_L     => "$fname='".FEATSIZE_L."'",
+         FEATSIZE_XL    => "$fname='".FEATSIZE_XL."'",
+         FEATSIZE_XXL   => "$fname='".FEATSIZE_XXL."'",
+         FEATSIZE_EPIC  => "$fname='".FEATSIZE_EPIC."'",
       );
    }
 
@@ -341,41 +391,32 @@ class Feature
       $notes = array();
       if( !is_null($deny_reason) )
       {
-         $notes[] = sprintf( '<color darkred><b>%s:</b></color> %s',
-               T_('Voting restricted'), $deny_reason );
+         $notes[] = array( 'text' =>
+            span('VotingRestricted', T_('Voting restricted'), '%s:') . ' ' . make_html_safe($deny_reason, 'line') );
          $notes[] = null; // empty line
       }
 
       if( $intro )
       {
-         $notes[] = T_('Feature or improvement suggestions are to be discussed in the '
-                     . '<home forum/index.php>forums</home> first.');
+         $notes[] = T_('Feature or improvement suggestions are to be discussed in the <home forum/index.php>forums</home> first.');
          $notes[] = T_('Features can only be added to this list by a vote-admin.');
          $notes[] = null; // empty line
       }
 
-      $intro_open_str = ($intro) // Open
-         ? sprintf( T_('<li>%1$s = show status %2$s + %3$s') . "\n",
-                    T_('Open#filtervote'), FEATSTAT_NEW, FEATSTAT_WORK )
-         : '';
-      $notes[] = sprintf(
-            T_('Feature status:<ul>'
-               . '<li>%1$s = new feature (can be voted upon)'."\n" // NEW
-               . '%9$s' // Open (may be empty)
-               . '<li>%2$s = %3$s = feature implementation started by developer'."\n" // WORK
-               . '<li>%4$s = feature implemented (and tested), but not released yet'."\n" // DONE
-               . '<li>%5$s = %6$s = feature released and online'."\n" // LIVE
-               . '<li>%7$s = %8$s = feature rejected'."\n" // NACK
-               . '</ul>'),
-            FEATSTAT_NEW,
-            FEATSTAT_WORK, T_('In Work#filtervote'),
-            FEATSTAT_DONE,
-            FEATSTAT_LIVE, T_('Online#filtervote'),
-            FEATSTAT_NACK, T_('Rejected#filtervote'),
-            $intro_open_str
+      $notes_fstatus = array( T_('Feature status'),
+            sprintf( T_('%s = feature in edit-mode, only for vote-admin'), FEATSTAT_NEW ),
+            sprintf( T_('%s = new feature to vote on'), FEATSTAT_VOTE ),
+            sprintf( T_('%s = feature implementation started by developer'), FEATSTAT_WORK ),
+            sprintf( T_('%s = feature implemented (and tested), but not released yet'), FEATSTAT_DONE ),
+            sprintf( T_('%s = feature released and online'), FEATSTAT_LIVE ),
+            sprintf( T_('%s = feature rejected (will not or cannot be done)'), FEATSTAT_NACK ),
          );
+      if( $intro )
+         $notes_fstatus[] = sprintf( T_('%s = show status %s + %s + %s'), T_('Open#featstat'), FEATSTAT_VOTE, FEATSTAT_WORK, FEATSTAT_DONE );
+      $notes[] = $notes_fstatus;
+
       return $notes;
-   }
+   }//build_feature_notes
 
    /*!
     * \brief Returns null if current user ($player_row) is allowed to participate in voting;
@@ -389,7 +430,7 @@ class Feature
          return T_('Voting is not allowed for guest user.');
 
       if( @$player_row['AdminOptions'] & ADMOPT_DENY_VOTE )
-         return T_('Voting on features has been denied.');
+         return T_('Voting has been denied.');
 
       // minimum 5 finished+rated games, 500 moves, moved within 30 days
       if( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
@@ -418,8 +459,8 @@ class Feature
       $qsql = new QuerySQL();
       $qsql->add_part_fields( Feature::get_query_fields() );
       $qsql->add_part_fields( FeatureVote::get_query_fields() );
-      $qsql->add_part( SQLP_FROM, 'FeatureList AS FL' );
-      $qsql->add_part( SQLP_FROM, "LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid AND FV.Voter_ID='$user_id'" );
+      $qsql->add_part( SQLP_FROM, 'Feature AS F' );
+      $qsql->add_part( SQLP_FROM, "LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid AND FV.Voter_ID='$user_id'" );
       $query_ffilter = $ftable->get_query(); // clause-parts for filter
       $qsql->merge( $query_ffilter );
 
@@ -430,12 +471,12 @@ class Feature
    function get_query_fields( $short=false )
    {
       if( $short )
-         return array( 'FL.ID', 'FL.Status', 'FL.Subject' );
+         return array( 'F.ID', 'F.Status', 'F.Size', 'F.Subject' );
 
       return array(
-         'FL.ID', 'FL.Status', 'FL.Subject', 'FL.Description', 'FL.Editor_ID',
-         'IFNULL(UNIX_TIMESTAMP(FL.Created),0) AS FLCreatedU',
-         'IFNULL(UNIX_TIMESTAMP(FL.Lastchanged),0) AS FLLastchangedU'
+         'F.ID', 'F.Status', 'F.Size', 'F.Subject', 'F.Description', 'F.Editor_ID',
+         'IFNULL(UNIX_TIMESTAMP(F.Created),0) AS F_CreatedU',
+         'IFNULL(UNIX_TIMESTAMP(F.Lastchanged),0) AS F_LastchangedU'
       );
    }
 
@@ -447,7 +488,7 @@ class Feature
    {
       global $NOW;
 
-      // id=set, status=NEW, subject='', description='', editor=$editor, created=NOW, lastchanged
+      // id=set, status=NEW, size='', subject='', description='', editor=$editor, created=NOW, lastchanged
       $feature = new Feature( $fid );
       $feature->editor  = $editor;
       $feature->created = $NOW;
@@ -458,8 +499,8 @@ class Feature
    function new_from_row( $row )
    {
       $feature = new Feature(
-            $row['ID'], $row['Status'], $row['Subject'], @$row['Description'],
-            @$row['Editor_ID']+0, @$row['FLCreatedU'], @$row['FLLastchangedU'] );
+            $row['ID'], $row['Status'], $row['Size'], $row['Subject'], @$row['Description'],
+            @$row['Editor_ID']+0, @$row['F_CreatedU'], @$row['F_LastchangedU'] );
       return $feature;
    }
 
@@ -474,7 +515,7 @@ class Feature
 
       $fields = implode(',', Feature::get_query_fields());
       $row = mysql_single_fetch("feature::load_feature2($id)",
-            "SELECT $fields FROM FeatureList AS FL WHERE FL.ID='$id' LIMIT 1");
+            "SELECT $fields FROM Feature AS F WHERE F.ID='$id' LIMIT 1");
       if( !$row )
          return null;
 
@@ -541,15 +582,13 @@ class FeatureVote
    var $points;
    /*! \brief Date when feature has been last updated (unix-time). */
    var $lastchanged;
-   /*! \brief IP of voter. */
-   var $ip;
 
 
    /*!
     * \brief Constructs Feature-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $id may be 0 to add a new feature
     */
-   function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0, $ip='' )
+   function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0 )
    {
       if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
          error('invalid_user', "featurevote.FeatureVote($fid,$voter)");
@@ -557,7 +596,6 @@ class FeatureVote
       $this->voter = (int) $voter;
       $this->set_points( $points );
       $this->lastchanged = (int) $lastchanged;
-      $this->ip = $ip;
    }
 
    /*! \brief Sets valid points (<0,0,>0). */
@@ -584,14 +622,12 @@ class FeatureVote
    {
       global $NOW;
       $this->lastchanged = $NOW;
-      $this->ip = (string)@$_SERVER['REMOTE_ADDR'];
 
       $update_query = 'REPLACE INTO FeatureVote SET'
          . ' fid=' . (int)$this->fid
          . ', Voter_ID=' . (int)$this->voter
          . ', Points=' . (int)$this->points
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
-         . ", IP='{$this->ip}'"
          ;
       db_query( "feature.update_vote({$this->fid},{$this->voter},{$this->points})",
          $update_query );
@@ -604,8 +640,7 @@ class FeatureVote
       return "FeatureVote(fid={$this->fid}): "
          . "voter=[{$this->voter}], "
          . "points=[{$this->points}], "
-         . "lastchanged=[{$this->lastchanged}], "
-         . "ip=[{$this->ip}]";
+         . "lastchanged=[{$this->lastchanged}]";
    }
 
 
@@ -646,8 +681,8 @@ class FeatureVote
          'SUM(IF(FV.Points>0,1,0)) AS countYes',
          'SUM(IF(FV.Points<0,1,0)) AS countNo'
          );
-      $qsql->add_part( SQLP_FROM, 'FeatureList AS FL' );
-      $qsql->add_part( SQLP_FROM, 'LEFT JOIN FeatureVote AS FV ON FL.ID=FV.fid' );
+      $qsql->add_part( SQLP_FROM, 'Feature AS F' );
+      $qsql->add_part( SQLP_FROM, 'LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid' );
       $qsql->add_part( SQLP_WHERE, 'FV.Points<>0' ); // abstention from voting
       $qsql->add_part( SQLP_GROUP, 'FV.fid' );
       $qsql->add_part( SQLP_HAVING, 'sumPoints is not null' );
@@ -692,7 +727,6 @@ class FeatureVote
       return array(
          'FV.fid', 'FV.Voter_ID', 'FV.Points',
          'IFNULL(UNIX_TIMESTAMP(FV.Lastchanged),0) AS FVLastchangedU',
-         'FV.IP',
       );
    }
 
@@ -702,7 +736,7 @@ class FeatureVote
     */
    function new_featurevote( $fid, $voter, $points )
    {
-      // fid=set, voter=$voter, points=$points, lastchanged, ip
+      // fid=set, voter=$voter, points=$points, lastchanged
       $fvote = new FeatureVote( $fid, $voter, $points );
       $fvote->voter = $voter;
       return $fvote;
@@ -715,10 +749,7 @@ class FeatureVote
    function new_from_row( $row )
    {
       if( $row['fid'] != 0 )
-      {
-         $fvote = new FeatureVote(
-               $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'], $row['IP'] );
-      }
+         $fvote = new FeatureVote( $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'] );
       else
          $fvote = null;
       return $fvote;

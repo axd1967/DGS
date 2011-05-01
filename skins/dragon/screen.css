@@ -3295,7 +3295,7 @@ div.Bulletin div.MarkRead a:hover {
 
 
 /* ------------------------- */
-/* voting */
+/* Voting (features & surveys) */
 /* ------------------------- */
 
 span.Negative {
@@ -3303,6 +3303,11 @@ span.Negative {
 }
 span.Positive {
    color: blue;
+}
+
+span.VotingRestricted {
+   color: darkred;
+   font-weight: bold;
 }
 
 

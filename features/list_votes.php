@@ -53,15 +53,15 @@ require_once( "features/lib_votes.php" );
    $search_profile->handle_action();
 
    // table filters
-   $vfilter->add_filter( 1, 'Numeric',   'FL.ID', true, array( FC_SIZE => 8 ));
-   $vfilter->add_filter( 3, 'Selection', # filter on status
-         Feature::build_filter_selection_status('FL.Status'),
-         true, array( FC_DEFAULT => 2 )); // def=0..
+   $vfilter->add_filter( 1, 'Numeric',   'F.ID', true, array( FC_SIZE => 8 ));
+   $vfilter->add_filter( 3, 'Selection', Feature::build_filter_selection_status('F.Status'), true,
+         array( FC_DEFAULT => 3 )); // def=0..
    $filter_subject =&
-      $vfilter->add_filter( 4, 'Text', 'FL.Subject', true,
+      $vfilter->add_filter( 4, 'Text', 'F.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
    $vfilter->add_filter(10, 'Numeric',   'sumPoints', true, array( FC_ADD_HAVING => 1 ));
    $vfilter->add_filter(11, 'Numeric',   'countVotes', true, array( FC_ADD_HAVING => 1 ));
+   $vfilter->add_filter(14, 'Selection', Feature::build_filter_selection_size('F.Size'), true );
    $vfilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
 
@@ -71,9 +71,10 @@ require_once( "features/lib_votes.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: col-IDs in sync with list_features.php
-   $vtable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'FL.ID+');
-   $vtable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'FL.Status+');
-   $vtable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'FL.Subject+');
+   $vtable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'F.ID+');
+   $vtable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'F.Status+');
+   $vtable->add_tablehead(14, T_('Size#featheader'),    'Enum', 0, 'F.Size+');
+   $vtable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'F.Subject+');
    $vtable->add_tablehead(10, T_('Points#header'),      'Number', 0, 'sumPoints-');
    $vtable->add_tablehead(11, T_('#Votes#header'),      'Number', 0, 'countVotes-');
    $vtable->add_tablehead(12, T_('#Y#header'),          'Number', 0, 'countYes-');
@@ -92,7 +93,7 @@ require_once( "features/lib_votes.php" );
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
    $vtable->set_found_rows( mysql_found_rows('votelist.found_rows') );
 
-   $title = T_('Feature vote result list');
+   $title = T_('Feature Vote Results');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: ", make_html_safe($query), "<br>\n";
@@ -128,6 +129,8 @@ require_once( "features/lib_votes.php" );
          $frow_strings[12] = $row['countYes'];
       if( $vtable->Is_Column_Displayed[13] )
          $frow_strings[13] = $row['countNo'];
+      if( $vtable->Is_Column_Displayed[14] )
+         $frow_strings[14] = $feature->size;
 
       $vtable->add_row( $frow_strings );
    }
@@ -142,6 +145,8 @@ require_once( "features/lib_votes.php" );
 
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
+   $menu_array[T_('My feature votes')] = "features/list_features.php?my_vote=0";
+   $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
    if( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );

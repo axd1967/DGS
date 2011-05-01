@@ -99,7 +99,7 @@ require_once( "features/lib_votes.php" );
    }
 
    $page = 'vote_feature.php';
-   $title = ( $allow_vote_edit ) ? T_('Feature vote') : T_('Feature vote view');
+   $title = ( $allow_vote_edit ) ? T_('Feature Vote') : T_('Feature Vote View');
 
    $fform = new Form( 'featurevote', $page, FORM_POST );
 
@@ -110,6 +110,9 @@ require_once( "features/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status ));
+   $fform->add_row( array(
+      'DESCRIPTION',  T_('Size#feature'),
+      'TEXT',         $feature->size ));
    if( $is_admin )
    {
       $fform->add_row( array(
@@ -182,7 +185,8 @@ require_once( "features/lib_votes.php" );
 
    $menu_array = array();
    $menu_array[T_('Vote on features')] = "features/list_features.php";
-   $menu_array[T_('Show feature votes')] = "features/list_votes.php";
+   $menu_array[T_('My feature votes')] = "features/list_features.php?my_vote=0";
+   $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
    if( $is_admin )
    {
       $menu_array[T_('Add new feature')] =

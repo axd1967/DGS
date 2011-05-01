@@ -55,20 +55,19 @@ require_once( "features/lib_votes.php" );
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_FEATURES );
    $ffilter = new SearchFilter( '', $search_profile );
-   //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
+   $search_profile->register_regex_save_args( 'my_vote' ); // named-filters FC_FNAME
    $ftable = new Table( 'features', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ftable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
    // table filters
-   $ffilter->add_filter( 1, 'Numeric', 'FL.ID', true, array( FC_SIZE => 8 ));
-   $ffilter->add_filter( 3, 'Selection',     # filter on status
-         Feature::build_filter_selection_status('FL.Status'),
-         true, array( FC_DEFAULT => 1 )); // def=0..
+   $ffilter->add_filter( 1, 'Numeric', 'F.ID', true, array( FC_SIZE => 8 ));
+   $ffilter->add_filter( 3, 'Selection', Feature::build_filter_selection_status('F.Status'), true,
+         array( FC_DEFAULT => 2 )); // def=0..
    $filter_subject =&
-      $ffilter->add_filter( 4, 'Text', 'FL.Subject', true,
+      $ffilter->add_filter( 4, 'Text', 'F.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
-   $ffilter->add_filter( 6, 'RelativeDate', 'FL.Lastchanged', true,
+   $ffilter->add_filter( 6, 'RelativeDate', 'F.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
    $ffilter->add_filter( 8, 'Selection',     # filter on user-voted-state
          array( T_('All#filterfeat')      => '',
@@ -78,7 +77,8 @@ require_once( "features/lib_votes.php" );
                 T_('=0#filterfeat')       => "FV.Points=0",
                 T_('>0#filterfeat')       => "FV.Points>0",
          ),
-         true, array( FC_DEFAULT => 1 )); // def=0..
+         true, array( FC_FNAME => 'my_vote', FC_STATIC => 1, FC_DEFAULT => 1 )); // def=0..
+   $ffilter->add_filter(10, 'Selection', Feature::build_filter_selection_size('F.Size'), true );
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
 
@@ -88,16 +88,17 @@ require_once( "features/lib_votes.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: col-IDs in sync with list_votes.php
-   $ftable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'FL.ID+'); // static
+   $ftable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'F.ID+'); // static
    $ftable->add_tablehead( 2, '',                       'Image', TABLE_NO_HIDE, ''); // edit (static)
-   $ftable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'FL.Status+');
-   $ftable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'FL.Subject+');
-   $ftable->add_tablehead( 8, T_('My Vote#header'),     'NumberC', 0, 'FV.Points-');
+   $ftable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'F.Status+');
+   $ftable->add_tablehead(10, T_('Size#featheader'),    'Enum', 0, 'F.Size+');
+   $ftable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'F.Subject+');
+   $ftable->add_tablehead( 8, T_('My Vote#featheader'), 'NumberC', TABLE_NO_HIDE, 'FV.Points-');
    $ftable->add_tablehead( 9, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
-   $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'FL.Created+');
-   $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'FL.Lastchanged+');
+   $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'F.Created+');
+   $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'F.Lastchanged+');
 
-   $ftable->set_default_sort( 1); //on FeatureList.ID
+   $ftable->set_default_sort( 1); //on Feature.ID
    $order = $ftable->current_order_string();
    $limit = $ftable->current_limit_string();
 
@@ -155,6 +156,8 @@ require_once( "features/lib_votes.php" );
          if( $ftable->Is_Column_Displayed[9] )
             $frow_strings[9] = ($fvote->lastchanged > 0 ? date(DATE_FMT2, $fvote->lastchanged) : '' );
       }
+      if( $ftable->Is_Column_Displayed[10] )
+         $frow_strings[10] = $feature->size;
 
       $ftable->add_row( $frow_strings );
    }
@@ -168,7 +171,9 @@ require_once( "features/lib_votes.php" );
 
 
    $menu_array = array();
-   $menu_array[T_('Show feature votes')] = "features/list_votes.php";
+   $menu_array[T_('Vote on features')] = "features/list_features.php";
+   $menu_array[T_('My feature votes')] = "features/list_features.php?my_vote=0";
+   $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
    if( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );

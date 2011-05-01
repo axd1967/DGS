@@ -252,12 +252,13 @@ CREATE TABLE IF NOT EXISTS `FAQlog` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `FeatureList`
+-- Table structure for table `Feature`
 --
 
-CREATE TABLE IF NOT EXISTS `FeatureList` (
+CREATE TABLE IF NOT EXISTS `Feature` (
   `ID` int(11) NOT NULL auto_increment,
-  `Status` enum('NEW','WORK','DONE','LIVE','NACK') NOT NULL default 'NEW',
+  `Status` enum('NEW','VOTE','WORK','DONE','LIVE','NACK') NOT NULL default 'NEW',
+  `Size` enum('?','EPIC','XXL','XL','L','M','S') NOT NULL default '?',
   `Subject` varchar(255) NOT NULL,
   `Description` text NOT NULL,
   `Editor_ID` int(11) NOT NULL,
@@ -278,7 +279,6 @@ CREATE TABLE IF NOT EXISTS `FeatureVote` (
   `Voter_ID` int(11) NOT NULL,
   `Points` tinyint(4) NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  `IP` varchar(16) NOT NULL default '',
   PRIMARY KEY  (`fid`,`Voter_ID`),
   KEY `Voter_ID` (`Voter_ID`),
   KEY `Points` (`Points`)
