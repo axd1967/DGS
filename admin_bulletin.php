@@ -116,8 +116,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          }
          ta_end();
 
-      if( count($errors) == 0 )
-         jump_to("admin_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
+         if( count($errors) == 0 )
+            jump_to("admin_bulletin.php?bid=$bid".URI_AMP."sysmsg=". urlencode(T_('Bulletin saved!')) );
       }
    }
 
