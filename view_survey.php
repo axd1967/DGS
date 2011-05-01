@@ -59,6 +59,8 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
+   if( SurveyControl::allow_survey_edit($survey) )
+      $menu_array[T_('Edit survey')] = array( 'url' => "admin_survey.php?sid=$sid", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }
