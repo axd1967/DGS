@@ -128,10 +128,12 @@ class SurveyControl
    {
       $title = make_html_safe($survey->Title, true, $rx_term);
       $title = preg_replace( "/[\r\n]+/", '<br>', $title ); //reduce multiple LF to one <br>
+      $updated_time = sprintf( '[%s]', date(DATE_FMT2, $survey->Lastchanged) );
 
       return
          "<div class=\"Survey\">\n" .
             "<div class=\"Title\">$title</div>" .
+            "<div class=\"Time\">$updated_time</div>" .
             "<div class=\"Options\">opts</div>" .
          "</div>\n";
    }//build_view_survey
