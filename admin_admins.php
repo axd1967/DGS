@@ -41,7 +41,7 @@ require_once( "include/table_columns.php" );
          'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
          'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
          'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
-         'Feature' => array( ADMIN_FEATURE, /*T_*/('Feature')),
+         'Feat'   => array( ADMIN_FEATURE, /*T_*/('Feature')),
          'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
          'Game'   => array( ADMIN_GAME, /*T_*/('Game')),
          'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
@@ -50,6 +50,10 @@ require_once( "include/table_columns.php" );
          'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
          'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
       );
+   if( !ALLOW_FEATURE_VOTE )
+      unset($admin_tasks['Feat']);
+   if( !ALLOW_SURVEY_VOTE )
+      unset($admin_tasks['Survey']);
 
    // Make sure all previous admins gets into the Admin array
    $result = db_query( 'admin_admins.find_admins',

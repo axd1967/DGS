@@ -282,8 +282,9 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Read forum'), "forum/read.php", false); //?forum=fid&thread=tid
             item(T_('New topic'), "forum/read.php", false, true); //?forum=fid without threadid
          } $item_level--;
-         item(T_('Search forums'), "forum/search.php", true);
-         item(T_('Surveys'), "list_surveys.php", true, true);
+         item(T_('Search forums'), "forum/search.php", true, !ALLOW_SURVEY_VOTE );
+         if( ALLOW_SURVEY_VOTE )
+            item(T_('Surveys'), "list_surveys.php", true, true);
       } $item_level--;
 
       itemL(T_('Bulletins'), "list_bulletins.php?read=2".URI_AMP."no_adm=1", true);

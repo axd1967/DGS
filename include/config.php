@@ -165,6 +165,9 @@ define('ALLOW_QUOTING', false);
 // Feature-voting: no voting-stuff shown/accessible if disabled
 define('ALLOW_FEATURE_VOTE', true);
 
+// Survey-voting: no voting-stuff shown/accessible if disabled
+define('ALLOW_SURVEY_VOTE', true);
+
 // Allow usage of new quick-do-suite
 define('ALLOW_QUICK_DO', false);
 
