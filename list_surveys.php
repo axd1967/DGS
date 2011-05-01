@@ -88,15 +88,15 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $table->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $table->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'S.ID-');
-   $table->add_tablehead( 3, T_('Type#survey'), 'Enum', TABLE_NO_HIDE, 'S.Type+');
-   $table->add_tablehead( 4, T_('Status#survey'), 'Enum', TABLE_NO_HIDE, 'S.Status+');
+   $table->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $table->add_tablehead( 3, T_('Type#survey'), 'Enum', TABLE_NO_HIDE, 'Type+');
+   $table->add_tablehead( 4, T_('Status#survey'), 'Enum', TABLE_NO_HIDE, 'Status+');
    if( $is_admin )
       $table->add_tablehead( 2, new TableHead( T_('Edit Survey#survey'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
-   $table->add_tablehead( 5, T_('Author#survey'), 'User', 0, 'SP.Handle+');
+   $table->add_tablehead( 5, T_('Author#survey'), 'User', 0, 'SP_Handle+');
    $table->add_tablehead( 6, T_('Title#survey'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
-   $table->add_tablehead( 7, T_('Created#survey'), 'Date', 0, 'S.Created-');
-   $table->add_tablehead( 8, T_('Updated#survey'), 'Date', 0, 'S.Lastchanged-');
+   $table->add_tablehead( 7, T_('Created#survey'), 'Date', 0, 'Created-');
+   $table->add_tablehead( 8, T_('Updated#survey'), 'Date', 0, 'Lastchanged-');
 
    $table->set_default_sort( 7, 1 ); //on Created, ID
 
@@ -104,6 +104,9 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
          $table->get_query(),
          $table->current_order_string(),
          $table->current_limit_string() );
+   if( !$is_admin )
+      $iterator->MergedQuerySQL( new QuerySQL(
+         SQLP_WHERE, "S.Status IN ('".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."')" ) );
    $iterator = Survey::load_surveys( $iterator );
 
    $show_rows = $table->compute_show_rows( $iterator->ResultRows );
