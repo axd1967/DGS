@@ -53,19 +53,18 @@ Notes about "Multiple-receiver (bulk) messages":
 
    See also: send_message()-func in "include/std_functions.php"
 
-
- Field   | Type                                            | Default
----------+-------------------------------------------------+---------------------
- ID      | int(11)                                         | NULL
- Type    | enum('NORMAL','INVITATION','DISPUTED','RESULT') | NORMAL
- Flags   | tinyint(3) unsigned                             | 0
- Thread  | int(11)                                         | 0
- Level   | smallint(6)                                     | 0
- ReplyTo | int(11)                                         | 0
- Game_ID | int(11)                                         | 0
- Time    | datetime                                        | 0000-00-00 00:00:00
- Subject | varchar(80)                                     |
- Text    | text                                            | NULL
+| Field   | Type                                            | Null | Key | Default             | Extra          |
++---------+-------------------------------------------------+------+-----+---------------------+----------------+
+| ID      | int(11)                                         | NO   | PRI | NULL                | auto_increment |
+| Type    | enum('NORMAL','INVITATION','DISPUTED','RESULT') | NO   |     | NORMAL              |                |
+| Flags   | tinyint(3) unsigned                             | NO   |     | 0                   |                |
+| Thread  | int(11)                                         | NO   | MUL | 0                   |                |
+| Level   | smallint(6)                                     | NO   |     | 0                   |                |
+| ReplyTo | int(11)                                         | NO   | MUL | 0                   |                |
+| Game_ID | int(11)                                         | NO   |     | 0                   |                |
+| Time    | datetime                                        | NO   | MUL | 0000-00-00 00:00:00 |                |
+| Subject | varchar(80)                                     | NO   | MUL |                     |                |
+| Text    | text                                            | NO   |     | NULL                |                |
 
 
 ## Fields:
@@ -111,14 +110,14 @@ Notes about "Multiple-receiver (bulk) messages":
 Description:
    Table to keep track of sender and recipients of messages.
 
- Field     | Type                  | Default
------------+-----------------------+---------
- ID        | int(11)               | NULL
- uid       | int(11)               | 0
- mid       | int(11)               | 0
- Folder_nr | int(11)               | NULL
- Sender    | enum('M','N','Y','S') | Y
- Replied   | enum('M','N','Y')     | N
+| Field     | Type                  | Null | Key | Default | Extra          |
++-----------+-----------------------+------+-----+---------+----------------+
+| ID        | int(11)               | NO   | PRI | NULL    | auto_increment |
+| uid       | int(11)               | NO   | MUL | 0       |                |
+| mid       | int(11)               | NO   | MUL | 0       |                |
+| Folder_nr | tinyint(4)            | NO   | MUL | NULL    |                |
+| Sender    | enum('M','N','Y','S') | NO   | MUL | Y       |                |
+| Replied   | enum('M','N','Y')     | NO   |     | N       |                |
 
 
 ## Fields:

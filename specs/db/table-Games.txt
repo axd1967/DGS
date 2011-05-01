@@ -9,50 +9,52 @@ Description:
    Table to store static and dynamic information about game.
    - store invited game, running game, finished game
 
- Field              | Type                                 | Default
---------------------+--------------------------------------+---------------------
- ID                 | int(11)                              | NULL
- Starttime          | datetime                             | 0000-00-00 00:00:00
- Lastchanged        | datetime                             | 0000-00-00 00:00:00
- mid                | int(11)                              | 0
- DoubleGame_ID      | int(11)                              | 0
- Black_ID           | int(11)                              | NULL
- White_ID           | int(11)                              | NULL
- ToMove_ID          | int(11)                              | 0
- GameType           | enum('GO','TEAM_GO','ZEN_GO')        | GO
- GamePlayers        | char(5)                              |
- Size               | tinyint(3) unsigned                  | 19
- Komi               | decimal(6,1)                         | 6.5
- Handicap           | tinyint(3) unsigned                  | 0
- Status             | enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') | INVITED
- Moves              | smallint(5) unsigned                 | 0
- Black_Prisoners    | smallint(5) unsigned                 | 0
- White_Prisoners    | smallint(5) unsigned                 | 0
- Last_X             | tinyint(4)                           | -1
- Last_Y             | tinyint(4)                           | -1
- Last_Move          | char(2)                              |
- Flags              | set('Ko','HiddenMsg','AdmResult')    |
- Score              | decimal(7,1)                         | 0.0
- Maintime           | smallint(6)                          | 0
- Byotype            | enum('JAP','CAN','FIS')              | JAP
- Byotime            | smallint(6)                          | 0
- Byoperiods         | tinyint(4)                           | 0
- Black_Maintime     | smallint(6)                          | 0
- White_Maintime     | smallint(6)                          | 0
- Black_Byotime      | smallint(6)                          | 0
- White_Byotime      | smallint(6)                          | 0
- Black_Byoperiods   | tinyint(4)                           | -1
- White_Byoperiods   | tinyint(4)                           | -1
- LastTicks          | int(11)                              | 0
- ClockUsed          | smallint(6)                          | 0
- TimeOutDate        | int(11)                              | 0
- Rated              | enum('N','Y','Done')                 | N
- StdHandicap        | enum('N','Y')                        | N
- WeekendClock       | enum('N','Y')                        | Y
- Black_Start_Rating | double                               | -9999
- White_Start_Rating | double                               | -9999
- Black_End_Rating   | double                               | -9999
- White_End_Rating   | double                               | -9999
+| Field              | Type                                                              | Null | Key | Default             | Extra          |
++--------------------+-------------------------------------------------------------------+------+-----+---------------------+----------------+
+| ID                 | int(11)                                                           | NO   | PRI | NULL                | auto_increment |
+| tid                | int(11)                                                           | NO   | MUL | 0                   |                |
+| Starttime          | datetime                                                          | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged        | datetime                                                          | NO   | MUL | 0000-00-00 00:00:00 |                |
+| mid                | int(11)                                                           | NO   |     | 0                   |                |
+| DoubleGame_ID      | int(11)                                                           | NO   |     | 0                   |                |
+| Black_ID           | int(11)                                                           | NO   | MUL | NULL                |                |
+| White_ID           | int(11)                                                           | NO   | MUL | NULL                |                |
+| ToMove_ID          | int(11)                                                           | NO   | MUL | 0                   |                |
+| GameType           | enum('GO','TEAM_GO','ZEN_GO')                                     | NO   |     | GO                  |                |
+| GamePlayers        | char(5)                                                           | NO   |     |                     |                |
+| Ruleset            | enum('JAPANESE','CHINESE')                                        | NO   |     | JAPANESE            |                |
+| Size               | tinyint(3) unsigned                                               | NO   | MUL | 19                  |                |
+| Komi               | decimal(4,1)                                                      | NO   |     | 6.5                 |                |
+| Handicap           | tinyint(3) unsigned                                               | NO   | MUL | 0                   |                |
+| Status             | enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') | NO   | MUL | INVITED             |                |
+| Moves              | smallint(5) unsigned                                              | NO   | MUL | 0                   |                |
+| Black_Prisoners    | smallint(5) unsigned                                              | NO   |     | 0                   |                |
+| White_Prisoners    | smallint(5) unsigned                                              | NO   |     | 0                   |                |
+| Last_X             | tinyint(4)                                                        | NO   |     | -1                  |                |
+| Last_Y             | tinyint(4)                                                        | NO   |     | -1                  |                |
+| Last_Move          | char(2)                                                           | NO   |     |                     |                |
+| Flags              | set('Ko','HiddenMsg','AdmResult')                                 | NO   | MUL |                     |                |
+| Score              | decimal(5,1)                                                      | NO   | MUL | 0.0                 |                |
+| Maintime           | smallint(6)                                                       | NO   |     | 0                   |                |
+| Byotype            | enum('JAP','CAN','FIS')                                           | NO   |     | JAP                 |                |
+| Byotime            | smallint(6)                                                       | NO   |     | 0                   |                |
+| Byoperiods         | tinyint(4)                                                        | NO   |     | 0                   |                |
+| Black_Maintime     | smallint(6)                                                       | NO   |     | 0                   |                |
+| White_Maintime     | smallint(6)                                                       | NO   |     | 0                   |                |
+| Black_Byotime      | smallint(6)                                                       | NO   |     | 0                   |                |
+| White_Byotime      | smallint(6)                                                       | NO   |     | 0                   |                |
+| Black_Byoperiods   | tinyint(4)                                                        | NO   |     | -1                  |                |
+| White_Byoperiods   | tinyint(4)                                                        | NO   |     | -1                  |                |
+| LastTicks          | int(11)                                                           | NO   |     | 0                   |                |
+| ClockUsed          | smallint(6)                                                       | NO   | MUL | 0                   |                |
+| TimeOutDate        | int(11)                                                           | NO   |     | 0                   |                |
+| Rated              | enum('N','Y','Done')                                              | NO   |     | N                   |                |
+| StdHandicap        | enum('N','Y')                                                     | NO   |     | N                   |                |
+| WeekendClock       | enum('N','Y')                                                     | NO   |     | Y                   |                |
+| Black_Start_Rating | double                                                            | NO   |     | -9999               |                |
+| White_Start_Rating | double                                                            | NO   |     | -9999               |                |
+| Black_End_Rating   | double                                                            | NO   |     | -9999               |                |
+| White_End_Rating   | double                                                            | NO   |     | -9999               |                |
 
 
 ## Fields:
@@ -190,12 +192,11 @@ Description:
    - table-entry only inserted on demand by user,
      there are games without GamesPriority-entries
 
-
- Field    | Type        | Default
-----------+-------------+-------------
- gid      | int(11)     | NULL
- uid      | int(11)     | NULL
- Priority | smallint(6) | 0
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| gid      | int(11)     | NO   | PRI | NULL    |       |
+| uid      | int(11)     | NO   | PRI | NULL    |       |
+| Priority | smallint(6) | NO   |     | 0       |       |
 
 
 ## Fields:
@@ -215,15 +216,14 @@ Description:
    Table to model multi-player-games like Team-Go and Zen-Go.
    - uid non-UNIQUE per game-id, allow to have same player more than once per group
 
-
- Field      | Type                         | Default
-------------+------------------------------+---------
- ID         | int(11)                      | NULL
- gid        | int(11)                      | NULL
- GroupColor | enum('B','W','G1','G2','BW') | BW
- GroupOrder | tinyint(4)                   | 0
- uid        | int(11)                      | 0
- Flags      | smallint(5) unsigned         | 0
+| Field      | Type                         | Null | Key | Default | Extra          |
++------------+------------------------------+------+-----+---------+----------------+
+| ID         | int(11)                      | NO   | PRI | NULL    | auto_increment |
+| gid        | int(11)                      | NO   | MUL | NULL    |                |
+| GroupColor | enum('B','W','G1','G2','BW') | NO   |     | BW      |                |
+| GroupOrder | tinyint(4)                   | NO   |     | 0       |                |
+| uid        | int(11)                      | NO   | MUL | 0       |                |
+| Flags      | smallint(5) unsigned         | NO   |     | 0       |                |
 
 
 ## Fields:
@@ -281,16 +281,15 @@ Notes:
             error('mysql_insert_move', "clock_tick.update_moves($gid)");
 */
 
-
- Field  | Type                 | Default
---------+----------------------+---------
- ID     | int(11)              | NULL
- gid    | int(11)              | NULL
- MoveNr | smallint(5) unsigned | NULL
- Stone  | tinyint(3) unsigned  | 0
- PosX   | tinyint(4)           | NULL
- PosY   | tinyint(4)           | NULL
- Hours  | smallint(5) unsigned | NULL
+| Field  | Type                 | Null | Key | Default | Extra          |
++--------+----------------------+------+-----+---------+----------------+
+| ID     | int(11)              | NO   | PRI | NULL    | auto_increment |
+| gid    | int(11)              | NO   | MUL | NULL    |                |
+| MoveNr | smallint(5) unsigned | NO   |     | NULL    |                |
+| Stone  | tinyint(3) unsigned  | NO   |     | 0       |                |
+| PosX   | tinyint(4)           | NO   |     | NULL    |                |
+| PosY   | tinyint(4)           | NO   |     | NULL    |                |
+| Hours  | smallint(5) unsigned | NO   |     | NULL    |                |
 
 
 ## Fields:

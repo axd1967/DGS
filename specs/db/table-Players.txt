@@ -30,120 +30,126 @@ variable $player_row to have user-specific details available in page.
 
 # Fields for user-management:
 
-Cat | fieldname            | db-type                                     | NULL | Default
-----+----------------------+---------------------------------------------+------+--------------------
-O=    ID                   | int(11)                                     | NO   | NULL
-O A   Handle               | varchar(16)                                 | NO   |
- u    Password             | varchar(41)                                 | NO   |
- uA   Newpassword          | varchar(41)                                 | NO   |
- S    Sessioncode          | varchar(41)                                 | NO   |
- S    Sessionexpire        | datetime                                    | YES  | NULL
-OS    Lastaccess           | datetime                                    | YES  | NULL
- S    LastQuickAccess      | datetime                                    | NO   | 0000-00-00 00:00:00
-OS    LastMove             | datetime                                    | YES  | NULL
-O=    Registerdate         | date                                        | YES  | NULL
- S    Hits                 | int(11)                                     | NO   | 0
- SA   VaultCnt             | smallint(5) unsigned                        | NO   | 0
- SA   VaultTime            | datetime                                    | NO   | 0000-00-00 00:00:00
- S    Moves                | int(11)                                     | YES  | 0
-OS    Activity             | int(11)                                     | NO   | 15000
-OuA   Name                 | varchar(40)                                 | NO   |
- u    Email                | varchar(80)                                 | YES  | NULL
-Ou    Rank                 | varchar(40)                                 | YES  | NULL
- u    SendEmail            | set('ON','MOVE','BOARD','MESSAGE')          | NO   |
- u    Notify               | enum('NONE','NEXT','NOW','DONE')            | NO   | NONE
- SZ   CountMsgNew          | mediumint(9)                                | NO   | -1
- SZ   CountFeatNew         | smallint(6)                                 | NO   | -1
- SZ   CountBulletinNew     | smallint(6)                                 | NO   | -1
-  A   Adminlevel           | int(11)                                     | NO   | 0
-  A   AdminOptions         | int(11) unsigned                            | NO   | 0
-  A   AdminNote            | varchar(100)                                | NO   |
-Ou    Timezone             | varchar(40)                                 | NO   | GMT
- u    Nightstart           | int(11)                                     | NO   | 22
- S    ClockUsed            | int(11)                                     | NO   | 22
- S    ClockChanged         | enum('N','Y')                               | NO   | Y
- S    Rating               | double                                      | YES  | NULL
-OS    Rating2              | double                                      | YES  | NULL
- S    RatingMin            | double                                      | YES  | NULL
- S    RatingMax            | double                                      | YES  | NULL
- S    InitialRating        | double                                      | YES  | NULL
- S    RatingStatus         | enum('INIT','RATED')                        | YES  | NULL
-Ou    Open                 | varchar(40)                                 | NO   |
- u    Lang                 | varchar(20)                                 | NO   | C
-OSA   VacationDays         | double                                      | NO   | 14
-OSA   OnVacation           | double                                      | NO   | 0
- S    UseVacation          | tinyint(3) unsigned                         | NO   | 0
-OS    Running              | smallint(5) unsigned                        | NO   | 0
-OS    Finished             | mediumint(8) unsigned                       | NO   | 0
-OS    RatedGames           | mediumint(8) unsigned                       | NO   | 0
-OS    Won                  | mediumint(8) unsigned                       | NO   | 0
-OS    Lost                 | mediumint(8) unsigned                       | NO   | 0
-OS    GamesMPG             | smallint(5) unsigned                        | NO   | 0
-  A   Translator           | varchar(80)                                 | NO   |
- S    IP                   | varchar(16)                                 | NO   |
- S    Browser              | varchar(100)                                | NO   |
-Ou    Country              | char(2)                                     | NO   |
-  A   BlockReason          | text                                        | NO   | NULL
- S    ForumReadTime        | datetime                                    | NO   | 0000-00-00 00:00:00
- S    ForumReadNew         | tinyint(4)                                  | NO   | 0
-
+Cat | Field            | Type                                        | Null | Key | Default             | Extra          |
+----+------------------+---------------------------------------------+------+-----+---------------------+----------------+
+O=  | ID               | int(11)                                     | NO   | PRI | NULL                | auto_increment |
+O A | Type             | smallint(5) unsigned                        | NO   | MUL | 0                   |                |
+O A | Handle           | varchar(16)                                 | NO   | UNI | NULL                |                |
+ u  | Password         | varchar(41)                                 | NO   |     | NULL                |                |
+ uA | Newpassword      | varchar(41)                                 | NO   |     |                     |                |
+ S  | Sessioncode      | varchar(41)                                 | NO   |     |                     |                |
+ S  | Sessionexpire    | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
+OS  | Lastaccess       | datetime                                    | NO   | MUL | 0000-00-00 00:00:00 |                |
+ S  | LastQuickAccess  | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
+OS  | LastMove         | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
+O=  | Registerdate     | date                                        | NO   |     | NULL                |                |
+ S  | Hits             | int(11)                                     | NO   |     | 0                   |                |
+ SA | VaultCnt         | smallint(5) unsigned                        | NO   |     | 0                   |                |
+ SA | VaultTime        | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
+ S  | Moves            | int(11)                                     | NO   |     | 0                   |                |
+ S  | Activity         | int(11)                                     | NO   | MUL | 15000               |                |
+OuA | Name             | varchar(40)                                 | NO   | MUL |                     |                |
+ u  | Email            | varchar(80)                                 | NO   |     |                     |                |
+Ou  | Rank             | varchar(40)                                 | NO   |     |                     |                |
+ u  | SendEmail        | set('ON','MOVE','BOARD','MESSAGE')          | NO   |     |                     |                |
+ u  | Notify           | enum('NONE','NEXT','NOW','DONE')            | NO   |     | NONE                |                |
+ SZ | CountMsgNew      | mediumint(9)                                | NO   |     | -1                  |                |
+ SZ | CountFeatNew     | smallint(6)                                 | NO   |     | -1                  |                |
+ SZ | CountBulletinNew | smallint(6)                                 | NO   |     | -1                  |                |
+  A | Adminlevel       | smallint(5) unsigned                        | NO   | MUL | 0                   |                |
+  A | AdminOptions     | smallint(5) unsigned                        | NO   | MUL | 0                   |                |
+  A | AdminNote        | varchar(100)                                | NO   |     |                     |                |
+Ou  | Timezone         | varchar(40)                                 | NO   |     | GMT                 |                |
+Ou  | Nightstart       | smallint(6)                                 | NO   |     | 22                  |                |
+ S  | ClockUsed        | smallint(6)                                 | NO   |     | 22                  |                |
+ S  | ClockChanged     | enum('N','Y')                               | NO   |     | Y                   |                |
+ S  | Rating           | double                                      | YES  |     | NULL                |                |
+OS  | Rating2          | double                                      | YES  | MUL | NULL                |                |
+ S  | RatingMin        | double                                      | YES  |     | NULL                |                |
+ S  | RatingMax        | double                                      | YES  |     | NULL                |                |
+ S  | InitialRating    | double                                      | NO   |     | -9999               |                |
+ S  | RatingStatus     | enum('NONE','INIT','RATED')                 | NO   |     | NONE                |                |
+Ou  | Open             | varchar(60)                                 | NO   |     |                     |                |
+ u  | Lang             | varchar(20)                                 | NO   |     | C                   |                |
+OSA | VacationDays     | float                                       | NO   | MUL | 14                  |                |
+OSA | OnVacation       | float                                       | NO   | MUL | 0                   |                |
+ S  | UseVacation      | tinyint(3) unsigned                         | NO   |     | 0                   |                |
+OS  | Running          | smallint(5) unsigned                        | NO   |     | 0                   |                |
+OS  | Finished         | mediumint(8) unsigned                       | NO   |     | 0                   |                |
+OS  | RatedGames       | mediumint(8) unsigned                       | NO   |     | 0                   |                |
+OS  | Won              | mediumint(8) unsigned                       | NO   |     | 0                   |                |
+OS  | Lost             | mediumint(8) unsigned                       | NO   |     | 0                   |                |
+OS  | GamesMPG         | smallint(5) unsigned                        | NO   |     | 0                   |                |
+  A | Translator       | varchar(80)                                 | NO   |     |                     |                |
+ S  | IP               | varchar(16)                                 | NO   |     |                     |                |
+ S  | Browser          | varchar(150)                                | NO   |     |                     |                |
+Ou  | Country          | char(2)                                     | NO   | MUL |                     |                |
+  A | BlockReason      | text                                        | NO   |     | NULL                |                |
+ S  | ForumReadTime    | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
+ S  | ForumReadNew     | tinyint(4)                                  | NO   |     | 0                   |                |
 # Fields for (global) GUI-config in Players-table:
+Zu  | UserFlags        | int(11)                                     | NO   |     | 0                   |                |
+Zu  | SkinName         | varchar(32)                                 | NO   |     |                     |                |
+Zu  | MenuDirection    | enum('VERTICAL','HORIZONTAL')               | NO   |     | VERTICAL            |                |
+Zu  | TableMaxRows     | smallint(5) unsigned                        | NO   |     | 20                  |                |
+Zu  | Button           | tinyint(3) unsigned                         | NO   |     | 0                   |                |
+Zu  | UserPicture      | varchar(48)                                 | NO   |     |                     |                |
+Zu  | NextGameOrder    | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   |     | LASTMOVED           |                |
+Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |     | 4                   |                |
 
-Zu    UserFlags            | int(11)                                     | NO   | 0
-Zu    SkinName             | varchar(32)                                 | NO   |
-Zu    MenuDirection        | enum('VERTICAL','HORIZONTAL')               | NO   | VERTICAL
-Zu    TableMaxRows         | smallint(5) unsigned                        | NO   | 20
-Zu    Button               | int(11)                                     | NO   | 0
-Zu    UserPicture          | varchar(48)                                 | NO   |
-Zu    NextGameOrder        | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   | LASTMOVED
-Zu    SkipBulletin         | tinyint(3) unsigned                         | NO   | 4
 
-# Fields for board-related GUI-config in ConfigBoard-table:
+# Fields for board-related GUI-config in ConfigBoard-table (category = Gu):
 
- Gu   Stonesize        | tinyint(3) unsigned                         | NO   | 25
- Gu   Woodcolor        | int(11)                                     | NO   | 1
- Gu   Boardcoords      | int(11)                                     | NO   | 31
- Gu   MoveNumbers      | smallint(5) unsigned                        | NO   | 0
- Gu   MoveModulo       | smallint(5) unsigned                        | NO   | 0
- Gu   NotesSmallHeight | tinyint(3) unsigned                         | NO   | 25
- Gu   NotesSmallWidth  | tinyint(3) unsigned                         | NO   | 30
- Gu   NotesSmallMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
- Gu   NotesLargeHeight | tinyint(3) unsigned                         | NO   | 25
- Gu   NotesLargeWidth  | tinyint(3) unsigned                         | NO   | 30
- Gu   NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   | RIGHT
- Gu   NotesCutoff      | tinyint(3) unsigned                         | NO   | 13
+| Field            | Type                                        | Null | Key | Default | Extra |
++------------------+---------------------------------------------+------+-----+---------+-------+
+| User_ID          | int(11)                                     | NO   | PRI | NULL    |       |
+| Stonesize        | tinyint(3) unsigned                         | NO   |     | 25      |       |
+| Woodcolor        | tinyint(3) unsigned                         | NO   |     | 1       |       |
+| Boardcoords      | smallint(5) unsigned                        | NO   |     | 31      |       |
+| MoveNumbers      | smallint(5) unsigned                        | NO   |     | 0       |       |
+| MoveModulo       | smallint(5) unsigned                        | NO   |     | 0       |       |
+| NotesSmallHeight | tinyint(3) unsigned                         | NO   |     | 25      |       |
+| NotesSmallWidth  | tinyint(3) unsigned                         | NO   |     | 30      |       |
+| NotesSmallMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   |     | RIGHT   |       |
+| NotesLargeHeight | tinyint(3) unsigned                         | NO   |     | 25      |       |
+| NotesLargeWidth  | tinyint(3) unsigned                         | NO   |     | 30      |       |
+| NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   |     | RIGHT   |       |
+| NotesCutoff      | tinyint(3) unsigned                         | NO   |     | 13      |       |
 
-# Fields for pages-related GUI-config in ConfigPages-table:
+# Fields for pages-related GUI-config in ConfigPages-table (category = 1u):
 
- 1u   StatusFlags                     | smallint(6)         | NO   | 3
- 1u   StatusFolders                   | varchar(40)         | NO   |
- 1u   ForumFlags                      | tinyint(3) unsigned | NO   | 8
- 1u   ColumnsStatusGames              | int(11)             | NO   | -1
- 1u   ColumnsStatusTournaments        | int(11)             | NO   | -1
- 1u   ColumnsWaitingroom              | int(11)             | NO   | -1
- 1u   ColumnsUsers                    | int(11)             | NO   | -1
- 1u   ColumnsOpponents                | int(11)             | NO   | -1
- 1u   ColumnsContacts                 | int(11)             | NO   | -1
- 1u   ColumnsGamesRunningAll          | int(11)             | NO   | -1
- 1u   ColumnsGamesRunningAll2         | int(11)             | NO   | -1
- 1u   ColumnsGamesRunningUser         | int(11)             | NO   | -1
- 1u   ColumnsGamesRunningUser2        | int(11)             | NO   | -1
- 1u   ColumnsGamesFinishedAll         | int(11)             | NO   | -1
- 1u   ColumnsGamesFinishedAll2        | int(11)             | NO   | -1
- 1u   ColumnsGamesFinishedUser        | int(11)             | NO   | -1
- 1u   ColumnsGamesFinishedUser2       | int(11)             | NO   | -1
- 1u   ColumnsGamesObserved            | int(11)             | NO   | -1
- 1u   ColumnsGamesObserved2           | int(11)             | NO   | -1
- 1u   ColumnsGamesObservedAll         | int(11)             | NO   | -1
- 1u   ColumnsGamesObservedAll2        | int(11)             | NO   | -1
- 1u   ColumnsBulletinList             | int(11)             | NO   | -1
- 1u   ColumnsFeatureList              | int(11)             | NO   | -1
- 1u   ColumnsTournaments              | int(11)             | NO   | -1
- 1u   ColumnsTournamentParticipants   | int(11)             | NO   | -1
- 1u   ColumnsTDTournamentParticipants | int(11)             | NO   | -1
- 1u   ColumnsTournamentResults        | int(11)             | NO   | -1
- 1u   ColumnsTournamentLadderView     | int(11)             | NO   | -1
- 1u   ColumnsTournamentPoolView       | int(11)             | NO   | -1
+| Field                           | Type                | Null | Key | Default | Extra |
++---------------------------------+---------------------+------+-----+---------+-------+
+| User_ID                         | int(11)             | NO   | PRI | NULL    |       |
+| StatusFlags                     | smallint(6)         | NO   |     | 3       |       |
+| StatusFolders                   | varchar(40)         | NO   |     |         |       |
+| ForumFlags                      | tinyint(3) unsigned | NO   |     | 8       |       |
+| ColumnsStatusGames              | int(11)             | NO   |     | -1      |       |
+| ColumnsStatusTournaments        | int(11)             | NO   |     | -1      |       |
+| ColumnsWaitingroom              | int(11)             | NO   |     | -1      |       |
+| ColumnsUsers                    | int(11)             | NO   |     | -1      |       |
+| ColumnsOpponents                | int(11)             | NO   |     | -1      |       |
+| ColumnsContacts                 | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesRunningAll          | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesRunningAll2         | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesRunningUser         | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesRunningUser2        | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesFinishedAll         | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesFinishedAll2        | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesFinishedUser        | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesFinishedUser2       | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesObserved            | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesObserved2           | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesObservedAll         | int(11)             | NO   |     | -1      |       |
+| ColumnsGamesObservedAll2        | int(11)             | NO   |     | -1      |       |
+| ColumnsBulletinList             | int(11)             | NO   |     | -1      |       |
+| ColumnsFeatureList              | int(11)             | NO   |     | -1      |       |
+| ColumnsTournaments              | int(11)             | NO   |     | -1      |       |
+| ColumnsTournamentParticipants   | int(11)             | NO   |     | -1      |       |
+| ColumnsTDTournamentParticipants | int(11)             | NO   |     | -1      |       |
+| ColumnsTournamentResults        | int(11)             | NO   |     | -1      |       |
+| ColumnsTournamentLadderView     | int(11)             | NO   |     | -1      |       |
+| ColumnsTournamentPoolView       | int(11)             | NO   |     | -1      |       |
 
 
 -------------------------------------------------

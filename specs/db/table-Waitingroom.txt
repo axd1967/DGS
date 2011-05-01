@@ -16,38 +16,39 @@ Important Note:
    - Invitations using the Message-system will be removed in the future and
      migrated into the waiting-room.
 
- Field         | Type                                     | Default
----------------+------------------------------------------+---------------------
- ID            | int(11)                                  | NULL
- uid           | int(11)                                  | 0
- gid           | int(11)                                  | 0
- nrGames       | int(11)                                  | 1
- Time          | datetime                                 | 0000-00-00 00:00:00
- GameType      | enum('GO','TEAM_GO','ZEN_GO')            | GO
- GamePlayers   | varchar(5)                               |
- Ruleset       | enum('JAPANESE','CHINESE')               | JAPANESE
- Size          | int(11)                                  | 19
- Komi          | decimal(6,1)                             | 6.5
- Handicap      | int(11)                                  | 0
- Handicaptype  | enum('conv','proper','nigiri','double','black','white')  | conv
- AdjKomi       | decimal(6,1)                             | 0.0
- JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | KEEP_KOMI
- AdjHandicap   | tinyint(4)                               | 0
- MinHandicap   | tinyint(4)                               | 0
- MaxHandicap   | tinyint(4)                               | 127
- Maintime      | int(11)                                  | 0
- Byotype       | enum('JAP','CAN','FIS')                  | JAP
- Byotime       | int(11)                                  | 0
- Byoperiods    | int(11)                                  | 0
- Rated         | enum('N','Y')                            | N
- StdHandicap   | enum('N','Y')                            | N
- WeekendClock  | enum('N','Y')                            | Y
- MustBeRated   | enum('N','Y')                            | N
- Ratingmin     | smallint(6)                              | -9999
- Ratingmax     | smallint(6)                              | -9999
- MinRatedGames | smallint(6)                              | 0
- SameOpponent  | tinyint(4)                               | 0
- Comment       | varchar(40)                              |
+| Field         | Type                                                    | Null | Key | Default             | Extra          |
++---------------+---------------------------------------------------------+------+-----+---------------------+----------------+
+| ID            | int(11)                                                 | NO   | PRI | NULL                | auto_increment |
+| uid           | int(11)                                                 | NO   |     | NULL                |                |
+| gid           | int(11)                                                 | NO   |     | 0                   |                |
+| nrGames       | tinyint(3) unsigned                                     | NO   |     | 1                   |                |
+| Time          | datetime                                                | NO   |     | 0000-00-00 00:00:00 |                |
+| GameType      | enum('GO','TEAM_GO','ZEN_GO')                           | NO   |     | GO                  |                |
+| GamePlayers   | char(5)                                                 | NO   |     |                     |                |
+| Ruleset       | enum('JAPANESE','CHINESE')                              | NO   |     | JAPANESE            |                |
+| Size          | tinyint(3) unsigned                                     | NO   |     | 19                  |                |
+| Komi          | decimal(4,1)                                            | NO   |     | 6.5                 |                |
+| Handicap      | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
+| Handicaptype  | enum('conv','proper','nigiri','double','black','white') | NO   | MUL | conv                |                |
+| AdjKomi       | decimal(4,1)                                            | NO   |     | 0.0                 |                |
+| JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | NO   |     | KEEP_KOMI           |                |
+| AdjHandicap   | tinyint(4)                                              | NO   |     | 0                   |                |
+| MinHandicap   | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
+| MaxHandicap   | tinyint(3) unsigned                                     | NO   |     | 127                 |                |
+| Maintime      | smallint(6)                                             | NO   |     | 0                   |                |
+| Byotype       | enum('JAP','CAN','FIS')                                 | NO   |     | JAP                 |                |
+| Byotime       | smallint(6)                                             | NO   |     | 0                   |                |
+| Byoperiods    | tinyint(4)                                              | NO   |     | 0                   |                |
+| Rated         | enum('N','Y')                                           | NO   |     | N                   |                |
+| StdHandicap   | enum('N','Y')                                           | NO   |     | N                   |                |
+| WeekendClock  | enum('N','Y')                                           | NO   |     | Y                   |                |
+| MustBeRated   | enum('N','Y')                                           | NO   |     | N                   |                |
+| Ratingmin     | smallint(6)                                             | NO   |     | -9999               |                |
+| Ratingmax     | smallint(6)                                             | NO   |     | -9999               |                |
+| MinRatedGames | smallint(6)                                             | NO   |     | 0                   |                |
+| SameOpponent  | tinyint(4)                                              | NO   |     | 0                   |                |
+| Comment       | varchar(40)                                             | NO   |     |                     |                |
+
 
 ## Fields:
 
@@ -183,12 +184,13 @@ Notes:
      wroom_id comes first, because need leading index for cleanup in daily_cron
    - db-entries without existing Waitingroom-reference will be deleted (see daily_cron)
 
- Field       | Type       | Default
--------------+------------+---------------------
- opp_id      | int(11)    | NULL
- wroom_id    | int(11)    | NULL
- JoinedCount | tinyint(4) | 0
- ExpireDate  | datetime   | 0000-00-00 00:00:00
+| Field       | Type       | Null | Key | Default             | Extra |
++-------------+------------+------+-----+---------------------+-------+
+| opp_id      | int(11)    | NO   | PRI | NULL                |       |
+| wroom_id    | int(11)    | NO   | PRI | NULL                |       |
+| JoinedCount | tinyint(4) | NO   |     | 0                   |       |
+| ExpireDate  | datetime   | NO   |     | 0000-00-00 00:00:00 |       |
+
 
 ## Fields:
 

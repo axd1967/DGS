@@ -62,24 +62,24 @@ Description:
    that shouldn't be handled with the private-message system and is more "prominently"
    than the forums.
 
- Field       | Type                                                                | Default
--------------+---------------------------------------------------------------------+---------------------
- ID          | int(11)                                                             | NULL, auto_increment
- uid         | int(11)                                                             | NULL
- LockVersion | tinyint(3) unsigned                                                 | 0
- Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') | PRIV_MSG
- Status      | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')          | NEW
- TargetType  | enum('ALL','TD','TP','UL','MPG')                                    | NULL
- Flags       | tinyint(3) unsigned                                                 | 0
- PublishTime | datetime                                                            | 0000-00-00 00:00:00
- ExpireTime  | datetime                                                            | 0000-00-00 00:00:00
- tid         | int(11)                                                             | 0
- gid         | int(11)                                                             | 0
- CountReads  | mediumint(8) unsigned                                               | 0
- AdminNote   | varchar(255)                                                        |
- Subject     | varchar(255)                                                        | NULL
- Text        | text                                                                | NULL
- Lastchanged | datetime                                                            | 0000-00-00 00:00:00
+| Field       | Type                                                                | Null | Key | Default             | Extra          |
++-------------+---------------------------------------------------------------------+------+-----+---------------------+----------------+
+| ID          | int(11)                                                             | NO   | PRI | NULL                | auto_increment |
+| uid         | int(11)                                                             | NO   |     | NULL                |                |
+| LockVersion | tinyint(3) unsigned                                                 | NO   |     | 0                   |                |
+| Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') | NO   |     | PRIV_MSG            |                |
+| Status      | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')          | NO   | MUL | NEW                 |                |
+| TargetType  | enum('ALL','TD','TP','UL','MPG')                                    | NO   |     | NULL                |                |
+| Flags       | tinyint(3) unsigned                                                 | NO   |     | 0                   |                |
+| PublishTime | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
+| ExpireTime  | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
+| tid         | int(11)                                                             | NO   |     | 0                   |                |
+| gid         | int(11)                                                             | NO   |     | 0                   |                |
+| CountReads  | mediumint(8) unsigned                                               | NO   |     | 0                   |                |
+| AdminNote   | varchar(255)                                                        | NO   |     |                     |                |
+| Subject     | varchar(255)                                                        | NO   |     | NULL                |                |
+| Text        | text                                                                | NO   |     | NULL                |                |
+| Lastchanged | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
 
 
 ## Fields:
@@ -150,10 +150,10 @@ Description:
 Description:
    Table to store if user has read bulletin.
 
- Field | Type    | Default
--------+---------+---------
- bid   | int(11) | NULL
- uid   | int(11) | NULL
+| Field | Type    | Null | Key | Default | Extra |
++-------+---------+------+-----+---------+-------+
+| bid   | int(11) | NO   | PRI | NULL    |       |
+| uid   | int(11) | NO   | PRI | NULL    |       |
 
 
 ## Fields:
@@ -170,10 +170,10 @@ Description:
 Description:
    Table to store recipients for bulletin of TargetType=UL (user-list).
 
- Field | Type    | Default
--------+---------+---------
- bid   | int(11) | NULL
- uid   | int(11) | NULL
+| Field | Type    | Null | Key | Default | Extra |
++-------+---------+------+-----+---------+-------+
+| bid   | int(11) | NO   | PRI | NULL    |       |
+| uid   | int(11) | NO   | PRI | NULL    |       |
 
 
 ## Fields:

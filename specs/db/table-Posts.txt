@@ -19,6 +19,30 @@ Example:
   108    107        100        3        1       Post A.B.A
 
 -------------------------------------------------
+
+| Field         | Type                  | Null | Key | Default             | Extra          |
++---------------+-----------------------+------+-----+---------------------+----------------+
+| ID            | int(11)               | NO   | PRI | NULL                | auto_increment |
+| Forum_ID      | smallint(6)           | NO   | MUL | 0                   |                |
+| Time          | datetime              | NO   | MUL | 0000-00-00 00:00:00 |                |
+| Lastchanged   | datetime              | NO   | MUL | 0000-00-00 00:00:00 |                |
+| Lastedited    | datetime              | NO   |     | 0000-00-00 00:00:00 |                |
+| Subject       | varchar(80)           | NO   | MUL |                     |                |
+| Text          | text                  | NO   |     | NULL                |                |
+| User_ID       | int(11)               | NO   |     | NULL                |                |
+| Parent_ID     | int(11)               | NO   | MUL | 0                   |                |
+| Thread_ID     | int(11)               | NO   | MUL | 0                   |                |
+| AnswerNr      | mediumint(8) unsigned | NO   |     | 0                   |                |
+| Depth         | tinyint(3) unsigned   | NO   |     | 0                   |                |
+| crc32         | int(11)               | YES  |     | NULL                |                |
+| PosIndex      | varchar(80)           | NO   | MUL |                     |                |
+| old_ID        | int(11)               | NO   |     | 0                   |                |
+| Approved      | enum('Y','N','P')     | NO   | MUL | Y                   |                |
+| PostsInThread | mediumint(8) unsigned | NO   |     | 0                   |                |
+| Hits          | int(11)               | NO   |     | 0                   |                |
+| LastPost      | int(11)               | NO   |     | 0                   |                |
+
+
 ## Fields:
 
 * Parent_ID : int (FK id)

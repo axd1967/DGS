@@ -24,26 +24,26 @@ Description:
    Tournament-management-data with scope, type, status, owner, dates
    and description.
 
- Field        | Type                                                 | Default
---------------+------------------------------------------------------+---------------------
- ID           | int(11)                                              | NULL, auto_increment
- Scope        | enum('DRAGON','PUBLIC','PRIVATE')                    | PUBLIC
- Type         | enum('LADDER','ROUNDROBIN')                          | NULL
- WizardType   | tinyint(4)                                           | NULL
- Title        | varchar(255)                                         |
- Description  | text                                                 | NULL
- Owner_ID     | int(11)                                              | 0
- Status       | enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') | NEW
- Flags        | smallint(5) unsigned                                 | 0
- Created      | datetime                                             | 0000-00-00 00:00:00
- Lastchanged  | datetime                                             | 0000-00-00 00:00:00
- ChangedBy    | varchar(54)                                          |
- StartTime    | datetime                                             | 0000-00-00 00:00:00
- EndTime      | datetime                                             | 0000-00-00 00:00:00
- Rounds       | int(11)                                              | 1
- CurrentRound | int(11)                                              | 1
- RegisteredTP | smallint(6)                                          | 0
- LockNote     | varchar(255)                                         |
+| Field        | Type                                                 | Null | Key | Default             | Extra          |
++--------------+------------------------------------------------------+------+-----+---------------------+----------------+
+| ID           | int(11)                                              | NO   | PRI | NULL                | auto_increment |
+| Scope        | enum('DRAGON','PUBLIC','PRIVATE')                    | NO   |     | PUBLIC              |                |
+| Type         | enum('LADDER','ROUNDROBIN')                          | NO   |     | NULL                |                |
+| WizardType   | tinyint(4)                                           | NO   |     | NULL                |                |
+| Title        | varchar(255)                                         | NO   |     | NULL                |                |
+| Description  | text                                                 | NO   |     | NULL                |                |
+| Owner_ID     | int(11)                                              | NO   |     | NULL                |                |
+| Status       | enum('ADM','NEW','REG','PAIR','PLAY','CLOSED','DEL') | NO   | MUL | NEW                 |                |
+| Flags        | smallint(5) unsigned                                 | NO   |     | 0                   |                |
+| Created      | datetime                                             | NO   |     | NULL                |                |
+| Lastchanged  | datetime                                             | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy    | varchar(54)                                          | NO   |     |                     |                |
+| StartTime    | datetime                                             | NO   | MUL | 0000-00-00 00:00:00 |                |
+| EndTime      | datetime                                             | NO   |     | 0000-00-00 00:00:00 |                |
+| Rounds       | tinyint(3) unsigned                                  | NO   |     | 1                   |                |
+| CurrentRound | tinyint(3) unsigned                                  | NO   |     | 1                   |                |
+| RegisteredTP | smallint(6)                                          | NO   |     | 0                   |                |
+| LockNote     | varchar(255)                                         | NO   |     |                     |                |
 
 
 ## Fields:
@@ -129,12 +129,13 @@ Description:
 Description:
    List of TDs for tournament with additional flags and comment about TD.
 
- Field   | Type                 | Default
----------+----------------------+--------
- tid     | int(11)              | NULL
- uid     | int(11)              | NULL
- Flags   | smallint(5) unsigned | 0
- Comment | varchar(255)         |
+| Field   | Type                 | Null | Key | Default | Extra |
++---------+----------------------+------+-----+---------+-------+
+| tid     | int(11)              | NO   | PRI | NULL    |       |
+| uid     | int(11)              | NO   | PRI | NULL    |       |
+| Flags   | smallint(5) unsigned | NO   |     | 0       |       |
+| Comment | varchar(255)         | NO   |     |         |       |
+
 
 ## Fields:
 
@@ -156,27 +157,26 @@ Description:
 Description:
    list with TPs of tournament and user-specific tournament data
 
-
- Field        | Type                              | Default
---------------+-----------------------------------+---------------------
- ID           | int(11)                           | NULL, auto_increment
- tid          | int(11)                           | NULL
- uid          | int(11)                           | NULL
- Status       | enum('APPLY','REGISTER','INVITE') | APPLY
- Flags        | smallint(5) unsigned              | 0
- Rating       | double                            | -9999
- StartRound   | tinyint(3) unsigned               | 1
- NextRound    | tinyint(3) unsigned               | 0
- Created      | datetime                          | 0000-00-00 00:00:00
- Lastchanged  | datetime                          | 0000-00-00 00:00:00
- ChangedBy    | varchar(54)                       |
- Comment      | varchar(60)                       |
- Notes        | text                              | NULL
- UserMessage  | text                              | NULL
- AdminMessage | text                              | NULL
- Finished     | mediumint(8) unsigned             | 0
- Won          | mediumint(8) unsigned             | 0
- Lost         | mediumint(8) unsigned             | 0
+| Field        | Type                              | Null | Key | Default             | Extra          |
++--------------+-----------------------------------+------+-----+---------------------+----------------+
+| ID           | int(11)                           | NO   | PRI | NULL                | auto_increment |
+| tid          | int(11)                           | NO   | MUL | NULL                |                |
+| uid          | int(11)                           | NO   | MUL | NULL                |                |
+| Status       | enum('APPLY','REGISTER','INVITE') | NO   |     | APPLY               |                |
+| Flags        | smallint(5) unsigned              | NO   |     | 0                   |                |
+| Rating       | double                            | NO   |     | -9999               |                |
+| StartRound   | tinyint(3) unsigned               | NO   |     | 1                   |                |
+| NextRound    | tinyint(3) unsigned               | NO   |     | 0                   |                |
+| Created      | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged  | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy    | varchar(54)                       | NO   |     |                     |                |
+| Comment      | varchar(60)                       | NO   |     |                     |                |
+| Notes        | text                              | NO   |     | NULL                |                |
+| UserMessage  | text                              | NO   |     | NULL                |                |
+| AdminMessage | text                              | NO   |     | NULL                |                |
+| Finished     | mediumint(8) unsigned             | NO   |     | 0                   |                |
+| Won          | mediumint(8) unsigned             | NO   |     | 0                   |                |
+| Lost         | mediumint(8) unsigned             | NO   |     | 0                   |                |
 
 
 ## Fields:
@@ -267,21 +267,21 @@ Description:
 Description:
    List of properties of a tournament, that influences registration process.
 
- Field                | Type                                      | Default
-----------------------+-------------------------------------------+---------------------
- tid                  | int(11)                                   | NULL
- Lastchanged          | datetime                                  | 0000-00-00 00:00:00
- ChangedBy            | varchar(54)                               |
- MinParticipants      | smallint(6)                               | 0
- MaxParticipants      | smallint(6)                               | 0
- RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') | COPY_CUSTOM
- RegisterEndTime      | datetime                                  | 0000-00-00 00:00:00
- UserMinRating        | smallint(6)                               | -9999
- UserMaxRating        | smallint(6)                               | -9999
- UserRated            | enum('N','Y')                             | N
- UserMinGamesFinished | smallint(6)                               | 0
- UserMinGamesRated    | smallint(6)                               | 0
- Notes                | text                                      | NULL
+| Field                | Type                                      | Null | Key | Default             | Extra |
++----------------------+-------------------------------------------+------+-----+---------------------+-------+
+| tid                  | int(11)                                   | NO   | PRI | NULL                |       |
+| Lastchanged          | datetime                                  | NO   |     | 0000-00-00 00:00:00 |       |
+| ChangedBy            | varchar(54)                               | NO   |     |                     |       |
+| MinParticipants      | smallint(6)                               | NO   |     | 2                   |       |
+| MaxParticipants      | smallint(6)                               | NO   |     | 0                   |       |
+| RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') | NO   |     | COPY_CUSTOM         |       |
+| RegisterEndTime      | datetime                                  | NO   |     | 0000-00-00 00:00:00 |       |
+| UserMinRating        | smallint(6)                               | NO   |     | -9999               |       |
+| UserMaxRating        | smallint(6)                               | NO   |     | -9999               |       |
+| UserRated            | enum('N','Y')                             | NO   |     | N                   |       |
+| UserMinGamesFinished | smallint(6)                               | NO   |     | 0                   |       |
+| UserMinGamesRated    | smallint(6)                               | NO   |     | 0                   |       |
+| Notes                | text                                      | NO   |     | NULL                |       |
 
 
 ## Fields:
@@ -327,31 +327,31 @@ Description:
 Description:
    Game settings for tournament.
 
- Field        | Type                                                    | Default
---------------+---------------------------------------------------------+---------------------
- ID           | int(11)                                                 | NULL, auto_increment
- tid          | int(11)                                                 | NULL
- Lastchanged  | datetime                                                | 0000-00-00 00:00:00
- ChangedBy    | varchar(54)                                             |
- Flags        | smallint(5) unsigned                                    | 0
- Ruleset      | enum('JAPANESE','CHINESE')                              | JAPANESE
- Size         | int(11)                                                 | 19
- Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | CONV
- AdjKomi      | decimal(4,1)                                            | 0.0
- JigoMode     | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | KEEP_KOMI
- Handicap     | int(11)                                                 | 0
- Komi         | decimal(4,1)                                            | 6.5
- AdjHandicap  | tinyint(4)                                              | 0
- MinHandicap  | tinyint(3) unsigned                                     | 0
- MaxHandicap  | tinyint(3) unsigned                                     | 127
- StdHandicap  | enum('N','Y')                                           | N
- Maintime     | smallint(6)                                             | 0
- Byotype      | enum('JAP','CAN','FIS')                                 | JAP
- Byotime      | smallint(6)                                             | 0
- Byoperiods   | tinyint(4)                                              | 0
- WeekendClock | enum('N','Y')                                           | Y
- Rated        | enum('N','Y')                                           | N
- Notes        | text                                                    | NULL
+| Field        | Type                                                    | Null | Key | Default             | Extra          |
++--------------+---------------------------------------------------------+------+-----+---------------------+----------------+
+| ID           | int(11)                                                 | NO   | PRI | NULL                | auto_increment |
+| tid          | int(11)                                                 | NO   | MUL | NULL                |                |
+| Lastchanged  | datetime                                                | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy    | varchar(54)                                             | NO   |     |                     |                |
+| Flags        | smallint(5) unsigned                                    | NO   |     | 0                   |                |
+| Ruleset      | enum('JAPANESE','CHINESE')                              | NO   |     | JAPANESE            |                |
+| Size         | tinyint(3) unsigned                                     | NO   | MUL | 19                  |                |
+| Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | NO   |     | CONV                |                |
+| AdjKomi      | decimal(4,1)                                            | NO   |     | 0.0                 |                |
+| JigoMode     | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | NO   |     | KEEP_KOMI           |                |
+| Handicap     | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
+| Komi         | decimal(4,1)                                            | NO   |     | 6.5                 |                |
+| AdjHandicap  | tinyint(4)                                              | NO   |     | 0                   |                |
+| MinHandicap  | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
+| MaxHandicap  | tinyint(3) unsigned                                     | NO   |     | 127                 |                |
+| StdHandicap  | enum('N','Y')                                           | NO   |     | N                   |                |
+| Maintime     | smallint(6)                                             | NO   |     | 0                   |                |
+| Byotype      | enum('JAP','CAN','FIS')                                 | NO   |     | JAP                 |                |
+| Byotime      | smallint(6)                                             | NO   |     | 0                   |                |
+| Byoperiods   | tinyint(4)                                              | NO   |     | 0                   |                |
+| WeekendClock | enum('N','Y')                                           | NO   |     | Y                   |                |
+| Rated        | enum('N','Y')                                           | NO   |     | N                   |                |
+| Notes        | text                                                    | NO   |     | NULL                |                |
 
 
 ## Fields:
@@ -416,19 +416,19 @@ Description:
 Description:
    Pool-setup for one tournament round.
 
- Field        | Type                                     | Default
---------------+------------------------------------------+---------------------
- ID           | int(11)                                  | NULL, auto_increment
- tid          | int(11)                                  | NULL
- Round        | tinyint(3) unsigned                      | 1
- Status       | enum('INIT','POOL','PAIR','PLAY','DONE') | INIT
- MinPoolSize  | tinyint(3) unsigned                      | 0
- MaxPoolSize  | tinyint(3) unsigned                      | 0
- MaxPoolCount | smallint(5) unsigned                     | 0
- Pools        | smallint(5) unsigned                     | 0
- PoolSize     | tinyint(3) unsigned                      | 0
- Lastchanged  | datetime                                 | 0000-00-00 00:00:00
- ChangedBy    | varchar(54)                              |
+| Field        | Type                                     | Null | Key | Default             | Extra          |
++--------------+------------------------------------------+------+-----+---------------------+----------------+
+| ID           | int(11)                                  | NO   | PRI | NULL                | auto_increment |
+| tid          | int(11)                                  | NO   | MUL | NULL                |                |
+| Round        | tinyint(3) unsigned                      | NO   |     | 1                   |                |
+| Status       | enum('INIT','POOL','PAIR','PLAY','DONE') | NO   |     | INIT                |                |
+| MinPoolSize  | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| MaxPoolSize  | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| MaxPoolCount | smallint(5) unsigned                     | NO   |     | 0                   |                |
+| Pools        | smallint(5) unsigned                     | NO   |     | 0                   |                |
+| PoolSize     | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| Lastchanged  | datetime                                 | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy    | varchar(54)                              | NO   |     |                     |                |
 
 
 ## Fields:
@@ -464,20 +464,20 @@ Description:
 Description:
    Table to keep track of ladder of ladder-typed tournaments.
 
- Field         | Type                 | Default
----------------+----------------------+---------------------
- tid           | int(11)              | NULL
- rid           | int(11)              | NULL
- uid           | int(11)              | NULL
- Created       | datetime             | 0000-00-00 00:00:00
- RankChanged   | datetime             | 0000-00-00 00:00:00
- Rank          | smallint(5) unsigned | 0
- BestRank      | smallint(5) unsigned | 0
- StartRank     | smallint(5) unsigned | 0
- PeriodRank    | smallint(5) unsigned | 0
- HistoryRank   | smallint(5) unsigned | 0
- ChallengesIn  | tinyint(3) unsigned  | 0
- ChallengesOut | tinyint(3) unsigned  | 0
+| Field         | Type                 | Null | Key | Default             | Extra |
++---------------+----------------------+------+-----+---------------------+-------+
+| tid           | int(11)              | NO   | PRI | NULL                |       |
+| rid           | int(11)              | NO   | PRI | NULL                |       |
+| uid           | int(11)              | NO   | MUL | NULL                |       |
+| Created       | datetime             | NO   |     | 0000-00-00 00:00:00 |       |
+| RankChanged   | datetime             | NO   |     | 0000-00-00 00:00:00 |       |
+| Rank          | smallint(5) unsigned | NO   |     | 0                   |       |
+| BestRank      | smallint(5) unsigned | NO   |     | 0                   |       |
+| StartRank     | smallint(5) unsigned | NO   |     | 0                   |       |
+| PeriodRank    | smallint(5) unsigned | NO   |     | 0                   |       |
+| HistoryRank   | smallint(5) unsigned | NO   |     | 0                   |       |
+| ChallengesIn  | tinyint(3) unsigned  | NO   |     | 0                   |       |
+| ChallengesOut | tinyint(3) unsigned  | NO   |     | 0                   |       |
 
 
 ## Fields:
@@ -519,29 +519,29 @@ Description:
 Description:
    Table for ladder-specific tournament properties.
 
- Field                  | Type                                    | Default
-------------------------+-----------------------------------------+---------------------
- tid                    | int(11)                                 | NULL
- Lastchanged            | datetime                                | 0000-00-00 00:00:00
- ChangedBy              | varchar(54)                             |
- ChallengeRangeAbsolute | smallint(5)                             | 0
- ChallengeRangeRelative | tinyint(3) unsigned                     | 0
- ChallengeRangeRating   | smallint(6)                             | -32768
- ChallengeRematchWait   | smallint(5) unsigned                    | 0
- MaxDefenses            | tinyint(3) unsigned                     | NULL
- MaxDefenses1           | tinyint(3) unsigned                     | 0
- MaxDefenses2           | tinyint(3) unsigned                     | 0
- MaxDefensesStart1      | tinyint(3) unsigned                     | 0
- MaxDefensesStart2      | tinyint(3) unsigned                     | 0
- MaxChallenges          | tinyint(3) unsigned                     | 0
- GameEndNormal          | enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST') | CH_ABOVE
- GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW') | CH_BELOW
- GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | DF_BELOW
- GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')    | CH_LAST
- UserAbsenceDays        | tinyint(3) unsigned                     | 0
- RankPeriodLength       | tinyint(3) unsigned                     | 1
- CrownKingHours         | smallint(5) unsigned                    | 0
- CrownKingStart         | datetime                                | 0000-00-00 00:00:00
+| Field                  | Type                                                                           | Null | Key | Default             | Extra |
++------------------------+--------------------------------------------------------------------------------+------+-----+---------------------+-------+
+| tid                    | int(11)                                                                        | NO   | PRI | NULL                |       |
+| Lastchanged            | datetime                                                                       | NO   |     | 0000-00-00 00:00:00 |       |
+| ChangedBy              | varchar(54)                                                                    | NO   |     |                     |       |
+| ChallengeRangeAbsolute | smallint(6)                                                                    | NO   |     | 0                   |       |
+| ChallengeRangeRelative | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| ChallengeRangeRating   | smallint(6)                                                                    | NO   |     | -32768              |       |
+| ChallengeRematchWait   | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
+| MaxDefenses            | tinyint(3) unsigned                                                            | NO   |     | NULL                |       |
+| MaxDefenses1           | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| MaxDefenses2           | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| MaxDefensesStart1      | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| MaxDefensesStart2      | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| MaxChallenges          | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| GameEndNormal          | enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST')                      | NO   |     | CH_ABOVE            |       |
+| GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | NO   |     | CH_BELOW            |       |
+| GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | NO   |     | DF_BELOW            |       |
+| GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')                                           | NO   |     | CH_LAST             |       |
+| UserAbsenceDays        | tinyint(3) unsigned                                                            | NO   | MUL | 0                   |       |
+| RankPeriodLength       | tinyint(3) unsigned                                                            | NO   |     | 1                   |       |
+| CrownKingHours         | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
+| CrownKingStart         | datetime                                                                       | NO   |     | 0000-00-00 00:00:00 |       |
 
 
 ## Fields:
@@ -632,24 +632,24 @@ Description:
 Description:
    Table to keep track of tournament-games.
 
- Field          | Type                                      | Default
-----------------+-------------------------------------------+---------------------
- ID             | int(11)                                   | NULL, auto_increment
- tid            | int(11)                                   | NULL
- Round_ID       | int(11)                                   | 0
- Pool           | smallint(5) unsigned                      | 0
- gid            | int(11)                                   | 0
- Status         | enum('INIT','PLAY','SCORE','WAIT','DONE') | INIT
- TicksDue       | int(11)                                   | 0
- Flags          | smallint(5) unsigned                      | 0
- Lastchanged    | datetime                                  | 0000-00-00 00:00:00
- Challenger_uid | int(11)                                   | NULL
- Challenger_rid | int(11)                                   | NULL
- Defender_uid   | int(11)                                   | NULL
- Defender_rid   | int(11)                                   | NULL
- StartTime      | datetime                                  | 0000-00-00 00:00:00
- EndTime        | datetime                                  | 0000-00-00 00:00:00
- Score          | decimal(5,1)                              | 0.0
+| Field          | Type                                      | Null | Key | Default             | Extra          |
++----------------+-------------------------------------------+------+-----+---------------------+----------------+
+| ID             | int(11)                                   | NO   | PRI | NULL                | auto_increment |
+| tid            | int(11)                                   | NO   | MUL | NULL                |                |
+| Round_ID       | int(11)                                   | NO   |     | 0                   |                |
+| Pool           | smallint(5) unsigned                      | NO   |     | 0                   |                |
+| gid            | int(11)                                   | NO   | MUL | 0                   |                |
+| Status         | enum('INIT','PLAY','SCORE','WAIT','DONE') | NO   | MUL | INIT                |                |
+| TicksDue       | int(11)                                   | NO   |     | 0                   |                |
+| Flags          | smallint(5) unsigned                      | NO   |     | 0                   |                |
+| Lastchanged    | datetime                                  | NO   |     | 0000-00-00 00:00:00 |                |
+| Challenger_uid | int(11)                                   | NO   | MUL | NULL                |                |
+| Challenger_rid | int(11)                                   | NO   |     | NULL                |                |
+| Defender_uid   | int(11)                                   | NO   | MUL | NULL                |                |
+| Defender_rid   | int(11)                                   | NO   |     | NULL                |                |
+| StartTime      | datetime                                  | NO   |     | 0000-00-00 00:00:00 |                |
+| EndTime        | datetime                                  | NO   |     | 0000-00-00 00:00:00 |                |
+| Score          | decimal(5,1)                              | NO   |     | 0.0                 |                |
 
 
 ## Fields:
@@ -715,14 +715,14 @@ Description:
 Description:
    Table with extended tournament-data.
 
- Field       | Type                 | Default
--------------+----------------------+---------------------
- tid         | int(11)              | NULL
- Property    | smallint(5) unsigned | NULL
- IntValue    | int(11)              | 0
- DateValue   | datetime             | 0000-00-00 00:00:00
- Lastchanged | datetime             | 0000-00-00 00:00:00
- ChangedBy   | varchar(54)          |
+| Field       | Type                 | Null | Key | Default             | Extra |
++-------------+----------------------+------+-----+---------------------+-------+
+| tid         | int(11)              | NO   | PRI | NULL                |       |
+| Property    | smallint(5) unsigned | NO   | PRI | NULL                |       |
+| IntValue    | int(11)              | NO   |     | 0                   |       |
+| DateValue   | datetime             | NO   | MUL | 0000-00-00 00:00:00 |       |
+| Lastchanged | datetime             | NO   |     | 0000-00-00 00:00:00 |       |
+| ChangedBy   | varchar(54)          | NO   |     |                     |       |
 
 
 ## Fields:
@@ -760,14 +760,14 @@ Notes:
      and number of games per round for the same user (later e.g. double or triple round-robin),
      so for 25 max. poolsize and triple-round-robin it would be max. 24 * 3 games
 
- Field    | Type                 | Default
-----------+----------------------+---------
- ID       | int(11)              | NULL, auto_increment
- tid      | int(11)              | NULL
- Round    | tinyint(3) unsigned  | NULL
- Pool     | smallint(5) unsigned | NULL
- uid      | int(11)              | 0
- Rank     | tinyint(4)           | -100
+| Field | Type                 | Null | Key | Default | Extra          |
++-------+----------------------+------+-----+---------+----------------+
+| ID    | int(11)              | NO   | PRI | NULL    | auto_increment |
+| tid   | int(11)              | NO   | MUL | NULL    |                |
+| Round | tinyint(3) unsigned  | NO   |     | NULL    |                |
+| Pool  | smallint(5) unsigned | NO   |     | NULL    |                |
+| uid   | int(11)              | NO   | MUL | 0       |                |
+| Rank  | tinyint(4)           | NO   | MUL | -100    |                |
 
 
 ## Fields:
@@ -797,21 +797,19 @@ Notes:
 Description:
    Table to store final results (ranks/places of players) of tournament.
 
-Notes:
-
- Field     | Type                 | Default
------------+----------------------+---------------------
- ID        | int(11)              | NULL, auto_increment
- tid       | int(11)              | NULL
- uid       | int(11)              | NULL
- rid       | int(11)              | 0
- Rating    | double               | -9999
- Type      | tinyint(3) unsigned  | 0
- StartTime | datetime             | 0000-00-00 00:00:00
- EndTime   | datetime             | 0000-00-00 00:00:00
- Round     | tinyint(3) unsigned  | 1
- Rank      | smallint(5) unsigned | 0
- RankKept  | smallint(5) unsigned | 0
+| Field     | Type                 | Null | Key | Default             | Extra          |
++-----------+----------------------+------+-----+---------------------+----------------+
+| ID        | int(11)              | NO   | PRI | NULL                | auto_increment |
+| tid       | int(11)              | NO   | MUL | NULL                |                |
+| uid       | int(11)              | NO   | MUL | NULL                |                |
+| rid       | int(11)              | NO   |     | 0                   |                |
+| Rating    | double               | NO   |     | -9999               |                |
+| Type      | tinyint(3) unsigned  | NO   |     | 0                   |                |
+| StartTime | datetime             | NO   |     | 0000-00-00 00:00:00 |                |
+| EndTime   | datetime             | NO   |     | 0000-00-00 00:00:00 |                |
+| Round     | tinyint(3) unsigned  | NO   |     | 1                   |                |
+| Rank      | smallint(5) unsigned | NO   |     | 0                   |                |
+| RankKept  | smallint(5) unsigned | NO   |     | 0                   |                |
 
 
 ## Fields:
@@ -846,20 +844,18 @@ Notes:
 Description:
    Table to store tournament news (T-news) of tournament.
 
-Notes:
-
- Field       | Type                                  | Default
--------------+---------------------------------------+---------------------
- ID          | int(11)                               | NULL,auto_increment
- tid         | int(11)                               | NULL
- uid         | int(11)                               | NULL
- Status      | enum('NEW','SHOW','ARCHIVE','DELETE') | NEW
- Flags       | tinyint(3) unsigned                   | 0
- Published   | datetime                              | 0000-00-00 00:00:00
- Lastchanged | datetime                              | 0000-00-00 00:00:00
- ChangedBy   | varchar(54)                           |
- Subject     | varchar(255)                          | NULL
- Text        | text                                  | NULL
+| Field       | Type                                  | Null | Key | Default             | Extra          |
++-------------+---------------------------------------+------+-----+---------------------+----------------+
+| ID          | int(11)                               | NO   | PRI | NULL                | auto_increment |
+| tid         | int(11)                               | NO   | MUL | NULL                |                |
+| uid         | int(11)                               | NO   |     | NULL                |                |
+| Status      | enum('NEW','SHOW','ARCHIVE','DELETE') | NO   | MUL | NEW                 |                |
+| Flags       | tinyint(3) unsigned                   | NO   |     | 0                   |                |
+| Published   | datetime                              | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged | datetime                              | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy   | varchar(54)                           | NO   |     |                     |                |
+| Subject     | varchar(255)                          | NO   |     | NULL                |                |
+| Text        | text                                  | NO   |     | NULL                |                |
 
 
 ## Fields:

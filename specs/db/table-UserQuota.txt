@@ -9,11 +9,11 @@ Description:
    Table to store user-specific quotas:
    - feature-points
 
- Field                | Type        | Default
-----------------------+-------------+---------------------
- uid                  | int(11)     | NULL
- FeaturePoints        | smallint(5) | 25
- FeaturePointsUpdated | datetime    | 0000-00-00 00:00:00
+| Field                | Type        | Null | Key | Default             | Extra |
++----------------------+-------------+------+-----+---------------------+-------+
+| uid                  | int(11)     | NO   | PRI | NULL                |       |
+| FeaturePoints        | smallint(5) | NO   |     | 25                  |       |
+| FeaturePointsUpdated | datetime    | NO   | MUL | 0000-00-00 00:00:00 |       |
 
 
 ## Fields:

@@ -19,13 +19,13 @@ Description:
    and change of Players.Rating2 itself. Reset of confidence-interval will apply
    after rating-change (if there is one, see Changes-field).
 
- Field   | Type       | Default
----------+------------+---------------------
- ID      | int(11)    | NULL
- uid     | int(11)    | NULL
- Created | datetime   | 0000-00-00 00:00:00
- Changes | tinyint(4) | 0
- Rating  | double     | -9999
+| Field   | Type       | Null | Key | Default             | Extra          |
++---------+------------+------+-----+---------------------+----------------+
+| ID      | int(11)    | NO   | PRI | NULL                | auto_increment |
+| uid     | int(11)    | NO   | MUL | NULL                |                |
+| Created | datetime   | NO   | MUL | 0000-00-00 00:00:00 |                |
+| Changes | tinyint(4) | NO   |     | 0                   |                |
+| Rating  | double     | NO   |     | -9999               |                |
 
 
 ## Fields:
