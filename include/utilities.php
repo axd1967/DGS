@@ -323,4 +323,12 @@ function latin1_safe( $str )
    return $res;
 }
 
+function isNumber( $value, $allow_negative=true, $allow_empty=false )
+{
+   if( $allow_empty && (string)$value == '' )
+      return true;
+   $rx_sign = ($allow_negative) ? '\\-?' : '';
+   return preg_match( "/^{$rx_sign}\d+$/", $value );
+}
+
 ?>
