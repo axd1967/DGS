@@ -100,8 +100,7 @@ class TournamentUtils
 
    function isNumberOrEmpty( $value, $allow_negative=false )
    {
-      $rx_sign = ($allow_negative) ? '\\-?' : '';
-      return ((string)$value == '') || preg_match( "/^{$rx_sign}\d+$/", $value );
+      return isNumber( $value, $allow_negative, /*allow-empty*/true );
    }
 
    function getWizardTournamentType( $wizard_type )
@@ -164,11 +163,6 @@ class TournamentUtils
        $arr = localtime( $gm_time, true);
        return gmmktime( /*hour*/ 1, 0, 0, /*month*/ $arr['tm_mon'] + 1 + $month_add,
                         /*day*/ 1, /*year*/ $arr['tm_year'] + 1900, $arr['tm_isdst'] );
-   }
-
-   function build_range_text( $min, $max, $fmt='[%s..%s]', $generic_max=null )
-   {
-      return sprintf( $fmt, $min, $max, $generic_max );
    }
 
    function calc_pool_count( $user_count, $pool_size )
