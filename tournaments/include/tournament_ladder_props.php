@@ -222,19 +222,19 @@ class TournamentLadderProps
          $errors[] = T_('There must be at least one USED challenge range configuration.');
       if( $this->ChallengeRangeRelative < 0 || $this->ChallengeRangeRelative > 100 )
          $errors[] = sprintf( T_('Challenge Range Relative must be in percentage range of %s.'),
-            TournamentUtils::build_range_text(0, 100) );
+            build_range_text(0, 100) );
       if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED
             && abs($this->ChallengeRangeRating) > TLADDER_MAX_CHRNG_RATING )
          $errors[] = sprintf( T_('Challenge Range Rating must be in range of %s.'),
-            TournamentUtils::build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
+            build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
 
       if( $this->MaxDefenses < 1 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
          $errors[] = sprintf( T_('Max. defenses for remaining ranks must be in range %s.'),
-            TournamentUtils::build_range_text(1, TLADDER_MAX_DEFENSES) );
+            build_range_text(1, TLADDER_MAX_DEFENSES) );
       if( $this->MaxDefenses1 < 0 || $this->MaxDefenses1 > TLADDER_MAX_DEFENSES
             || $this->MaxDefenses2 < 0 || $this->MaxDefenses2 > TLADDER_MAX_DEFENSES )
          $errors[] = sprintf( T_('Max. defenses for groups must be in range %s (0 if not used).'),
-            TournamentUtils::build_range_text(0, TLADDER_MAX_DEFENSES) );
+            build_range_text(0, TLADDER_MAX_DEFENSES) );
       if( $this->MaxDefensesStart1 < 0 || $this->MaxDefensesStart2 < 0 )
          $errors[] = T_('Max. defenses start-rank for groups must be 0 (if not used) or >0 otherwise.');
       if( ($this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 == 0) || ($this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 > 0) )
@@ -254,19 +254,19 @@ class TournamentLadderProps
 
       if( $this->MaxChallenges < 0 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
          $errors[] = sprintf( T_('Max. outgoing challenges must be in range %s.'),
-            TournamentUtils::build_range_text(0, TLADDER_MAX_CHALLENGES) );
+            build_range_text(0, TLADDER_MAX_CHALLENGES) );
 
       if( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
          $errors[] = sprintf( T_('User absence must be in range %s days.'),
-            TournamentUtils::build_range_text(0, 255) );
+            build_range_text(0, 255) );
 
       if( $this->RankPeriodLength < 1 || $this->RankPeriodLength > 255 )
          $errors[] = sprintf( T_('Rank-period length must be in range %s months.'),
-            TournamentUtils::build_range_text(1, 255) );
+            build_range_text(1, 255) );
 
       if( $this->CrownKingHours < 0 || $this->RankPeriodLength > 50000 )
          $errors[] = sprintf( T_('Crowning of king time must be in range %s hours.'),
-            TournamentUtils::build_range_text(0, 50000) );
+            build_range_text(0, 50000) );
       if( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
          $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).');
 

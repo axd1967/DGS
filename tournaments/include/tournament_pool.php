@@ -732,7 +732,7 @@ class TournamentPool
       if( $cnt_violate_poolsize > 0 )
          $errors[] = sprintf( T_('There are %s pools violating the valid pool-size range %s.'),
             $cnt_violate_poolsize,
-            TournamentUtils::build_range_text($tround->MinPoolSize, $tround->MaxPoolSize) );
+            build_range_text($tround->MinPoolSize, $tround->MaxPoolSize) );
 
       // check that there are no empty pools
       $cnt_empty = 0;

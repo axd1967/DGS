@@ -179,12 +179,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tform->add_row( array(
          'DESCRIPTION', T_('Base Pool Size#tround'),
          'TEXTINPUT',   'pool_size', 4, 3, $vars['pool_size'],
-         'TEXT',        TournamentUtils::build_range_text( $tround->MinPoolSize, $tround->MaxPoolSize ), ));
+         'TEXT',        build_range_text( $tround->MinPoolSize, $tround->MaxPoolSize ), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Pool Count#tround'),
          'TEXTINPUT',   'pool_count', 4, 4, $vars['pool_count'],
          'TEXT',        ( $adjust_pool ? "<b>$adjust_pool</b>" . SMALL_SPACING : ''),
-         'TEXT',        TournamentUtils::build_range_text( $min_pool_count, $max_pool_count ), ));
+         'TEXT',        build_range_text( $min_pool_count, $max_pool_count ), ));
 
    if( $tround->Status == TROUND_STATUS_POOL && $old_poolcount > 0 )
    {
@@ -308,14 +308,14 @@ function parse_edit_form( &$trd )
          $trd->PoolSize = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for pool size in range %s.'),
-            TournamentUtils::build_range_text($trd->MinPoolSize, $trd->MaxPoolSize) );
+            build_range_text($trd->MinPoolSize, $trd->MaxPoolSize) );
 
       $new_value = $vars['pool_count'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $min_pool_count && $new_value <= $max_pool_count )
          $trd->Pools = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for pool count in range %s.'),
-            TournamentUtils::build_range_text( $min_pool_count, $max_pool_count ) );
+            build_range_text( $min_pool_count, $max_pool_count ) );
 
       if( $vars['addpool'] && $vars['delpool'] )
          $errors[] = T_('Adding and deleting pool are mutual exclusive actions: Choose only one.');

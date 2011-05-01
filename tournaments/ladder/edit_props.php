@@ -294,14 +294,14 @@ function parse_edit_form( &$tlp, $t_limits )
          $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, TLADDER_MAX_CHRNG_ABS, 10 );
       else
          $errors[] = sprintf( T_('Expecting number for absolute challenge range in range %s.'),
-                              TournamentUtils::build_range_text(-1, TLADDER_MAX_CHRNG_ABS) );
+                              build_range_text(-1, TLADDER_MAX_CHRNG_ABS) );
 
       $new_value = $vars['chall_range_rel'];
       if( TournamentUtils::isNumberOrEmpty($new_value, true) )
          $tlp->ChallengeRangeRelative = (int)$new_value;
       else
          $errors[] = sprintf( T_('Expecting number for relative challenge range in percentage range %s.'),
-                              TournamentUtils::build_range_text(0, 100) );
+                              build_range_text(0, 100) );
 
       $new_value = trim($vars['chall_range_rat']);
       $is_error = false;
@@ -313,7 +313,7 @@ function parse_edit_form( &$tlp, $t_limits )
       {
          $is_error = true;
          $errors[] = sprintf( T_('Expecting number for rating challenge range in range %s.'),
-                              TournamentUtils::build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
+                              build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
       }
       if( !$is_error ) // reformat
          $vars['chall_range_rat'] = TournamentLadderProps::formatChallengeRangeRating($tlp->ChallengeRangeRating);
@@ -323,7 +323,7 @@ function parse_edit_form( &$tlp, $t_limits )
          $tlp->ChallengeRematchWaitHours = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for rematch waiting time in hours range %s.'),
-                              TournamentUtils::build_range_text(0, TLADDER_MAX_WAIT_REMATCH) );
+                              build_range_text(0, TLADDER_MAX_WAIT_REMATCH) );
 
 
       $new_value = $vars['max_def'];
@@ -338,7 +338,7 @@ function parse_edit_form( &$tlp, $t_limits )
       else
          $errors[] = sprintf( T_('Expecting number for max. defenses in range %s.'),
                               // check for general MAX, but show specific max
-                              TournamentUtils::build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
+                              build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
 
       $new_value = $vars['max_def1'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_DEFENSES )
@@ -398,14 +398,14 @@ function parse_edit_form( &$tlp, $t_limits )
          $tlp->UserAbsenceDays = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for user absence in range %s days'),
-                              TournamentUtils::build_range_text(0, 255) );
+                              build_range_text(0, 255) );
 
       $new_value = $vars['rankplen'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->RankPeriodLength = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for rank-archive period length in range %s months'),
-                              TournamentUtils::build_range_text(1, 255) );
+                              build_range_text(1, 255) );
 
       $new_value = $vars['crownking'];
       $parsed_hours = TimeFormat::parse_time_days_hours( $new_value );

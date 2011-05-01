@@ -107,7 +107,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $errors[] = T_('Pool parameters must be defined first before you can edit pools assigning users!');
 
    // check select-pools
-   $pool_range_str = TournamentUtils::build_range_text( 1, $tround->Pools );
+   $pool_range_str = build_range_text( 1, $tround->Pools );
    $arr_selpool = array();
    foreach( range(1,3) as $idx )
    {
@@ -493,7 +493,7 @@ function echo_pool_summary( $tround, $arr_pool_sum )
          T_('Define Pools')) ),
       "<br>\n",
       sprintf( T_('Pool Count [%s], Pool-Size range %s, Best chosen Pool-Size [%s]'),
-         $tround->Pools, TournamentUtils::build_range_text($tround->MinPoolSize, $tround->MaxPoolSize),
+         $tround->Pools, build_range_text($tround->MinPoolSize, $tround->MaxPoolSize),
          $tround->PoolSize ),
       "<p></p>\n",
       $pstable->make_table();

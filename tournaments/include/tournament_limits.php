@@ -84,7 +84,7 @@ class TournamentLimits
    /*! \brief Returns text '[min..max]' for given limit-id. */
    function getLimitRangeText( $limit_id )
    {
-      return TournamentUtils::build_range_text( $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id) );
+      return build_range_text( $this->getMinLimit($limit_id), $this->getMaxLimit($limit_id) );
    }
 
    /*! \brief Returns text '[0; min..max [..admin-max]]' for given limit-id (the '0' appears if disabling-feature is allowed). */
@@ -95,7 +95,7 @@ class TournamentLimits
          $limits = $this->limit_config[$limit_id];
          return span('TWarning', sprintf( ' %s: %s',
             T_('Limits'),
-            TournamentUtils::build_range_text(
+            build_range_text(
                ($limits[0] ? '0; ' : '' ) . /*min*/$limits[1], /*max*/$limits[2],
                '[%s..%s [..%s]]',
                TournamentLimits::getStaticMaxLimit($limit_id)) ));
@@ -140,7 +140,7 @@ class TournamentLimits
          elseif(  ( !is_null($min_value) && $value < $min_value )
                || ( !is_null($max_value) && $max_value < $limit_maxval && $value > $max_value ) )
          {
-            $errors[] = sprintf( $errtext_value, TournamentUtils::build_range_text($min_value, $max_value) );
+            $errors[] = sprintf( $errtext_value, build_range_text($min_value, $max_value) );
          }
       }
       return $errors;
@@ -174,7 +174,7 @@ class TournamentLimits
                || ( !is_null($max_value) && $max_value < TLADDER_MAX_DEFENSES && $value > $max_value ) )
          {
             $errors[] = sprintf( T_('Max. defenses%s must be in range %s, but was [%s].'),
-               $group_label, TournamentUtils::build_range_text($min_value, $max_value), $value );
+               $group_label, build_range_text($min_value, $max_value), $value );
          }
       }
       return $errors;

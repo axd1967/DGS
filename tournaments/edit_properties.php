@@ -246,7 +246,7 @@ function parse_edit_form( &$tpr, $t_limits )
          $tpr->MinParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
          $errors[] = sprintf( T_('Expecting number for minimum participants in range %s.'),
-                              TournamentUtils::build_range_text(0, TP_MAX_COUNT) );
+                              build_range_text(0, TP_MAX_COUNT) );
 
       $new_value = $vars['max_participants'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )

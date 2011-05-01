@@ -245,7 +245,7 @@ class TournamentProperties
          elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
             $warnings[] = sprintf( T_('User rating [%s] does not match the required rating range %s.'),
                   echo_rating( $user->Rating ),
-                  TournamentUtils::build_range_text(
+                  build_range_text(
                      echo_rating( $this->UserMinRating, false ),
                      echo_rating( $this->UserMaxRating, false ),
                      '[%s - %s]' ) );

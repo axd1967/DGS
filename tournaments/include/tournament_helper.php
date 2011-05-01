@@ -440,7 +440,7 @@ class TournamentHelper
             Tournament::getStatusText(TOURNEY_STATUS_PAIR) );
       if( $new_round < 1 || $new_round > $tourney->Rounds )
          $errors[] = sprintf( T_('Selected tournament round must be an existing round in range %s.'),
-            TournamentUtils::build_range_text(1, $tourney->Rounds) );
+            build_range_text(1, $tourney->Rounds) );
       if( $tround->Round == $new_round )
          $errors[] = T_('Current tournament round is already set to selected round.');
       if( $tround->Status != TROUND_STATUS_DONE )

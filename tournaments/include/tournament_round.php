@@ -159,16 +159,16 @@ class TournamentRound
 
       if( $this->MinPoolSize < 2 || $this->MinPoolSize > TROUND_MAX_POOLSIZE )
          $errors[] = sprintf( T_('Tournament round min. pool size must be in range %s.'),
-            TournamentUtils::build_range_text(2, TROUND_MAX_POOLSIZE) );
+            build_range_text(2, TROUND_MAX_POOLSIZE) );
       if( $this->MaxPoolSize < 2 || $this->MaxPoolSize > TROUND_MAX_POOLSIZE )
          $errors[] = sprintf( T_('Tournament round max. pool size must be in range %s.'),
-            TournamentUtils::build_range_text(2, TROUND_MAX_POOLSIZE) );
+            build_range_text(2, TROUND_MAX_POOLSIZE) );
       if( $this->MinPoolSize > $this->MaxPoolSize )
          $errors[] = T_('Tournament round min. pool size must be smaller than max. pool size.');
 
       if( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
          $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
-            TournamentUtils::build_range_text(2, TROUND_MAX_POOLCOUNT) );
+            build_range_text(2, TROUND_MAX_POOLCOUNT) );
 
       return $errors;
    }

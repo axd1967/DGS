@@ -322,4 +322,9 @@ function formatDate( $date, $defval='', $datefmt=DATE_FMT )
    return ($date > 0) ? date($datefmt, $date) : $defval;
 }
 
+function build_range_text( $min, $max, $fmt='[%s..%s]', $generic_max=null )
+{
+   return sprintf( $fmt, $min, $max, $generic_max );
+}
+
 ?>
