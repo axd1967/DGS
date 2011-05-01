@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('BulletinView');
 
    $bid = (int) @$_REQUEST['bid'];
    if( $bid < 0 )
-      error('invalid_args', "view_bulletin.check_args($tid,$tnews_id)");
+      error('invalid_args', "view_bulletin.check_args($bid)");
 
    $page = "view_bulletin.php";
 
