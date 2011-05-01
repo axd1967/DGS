@@ -293,11 +293,10 @@ function itemL($text, $link='', $working=true, $last=false)
 
       if( ALLOW_FEATURE_VOTE )
       {
-         item(T_('Vote'), "features/list_votes.php", true);
+         item(T_('Feature Vote Result'), "features/list_votes.php", true);
          { $item_level++;
-            item(T_('Show feature votes'), "features/list_votes.php", true);
             item(T_('Vote on features'), "features/list_features.php", true);
-            item(T_('Vote on feature'), "features/vote_feature.php", false, true);
+            item(T_('My feature votes'), "features/list_features.php?my_vote=0", true, true);
          } $item_level--;
       }
 
