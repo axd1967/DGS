@@ -93,7 +93,7 @@ function get_executives( $level )
    if( $level & ADMIN_GAME )
       $out[] = T_('Game & Rating#admin');
    if( $level & ADMIN_VOTE )
-      $out[] = T_('Votes#admin');
+      $out[] = T_('Voting#admin');
    return array( count($out), implode(', ', $out) );
 }
 
