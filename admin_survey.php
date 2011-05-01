@@ -35,6 +35,8 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in');
+   if( !ALLOW_SURVEY_VOTE )
+      error('feature_disabled', 'admin_survey');
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest');
@@ -57,6 +59,8 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $survey = ( $sid > 0 ) ? Survey::load_survey($sid) : null;
    if( is_null($survey) )
       $survey = SurveyControl::new_survey();
+   elseif( !SurveyControl::allow_survey_edit($survey) )
+      error('survey_edit_not_allowed', "admin_survey.check.edit($sid)");
 
    $s_old_status = $survey->Status;
    $s_old_type = $survey->SurveyType;
@@ -93,7 +97,9 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey ID'),
-         'TEXT',        ($sid ? anchor( $base_path."admin_survey.php?sid=$sid", $sid )
+         'TEXT',        ($sid ? anchor( $base_path."admin_survey.php?sid=$sid", $sid ) . MED_SPACING .
+                                anchor( $base_path."view_survey.php?sid=$sid",
+                                        image( $base_path.'images/info.gif', T_('View Survey'), null, 'class="InTextImage"'))
                               : T_('NEW survey#survey')), ));
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey Author'),
@@ -170,7 +176,8 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
-   $menu_array[T_('New survey')] = array( 'url' => $page, 'class' => 'AdminLink' );
+   $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
+   $menu_array[T_('New survey')] = array( 'url' => "admin_survey.php", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }//main
@@ -240,18 +247,5 @@ function parse_edit_form( &$survey )
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
-
-function isNumber( $value, $allow_negative=true, $allow_empty=false )
-{
-   if( $allow_empty && (string)$value == '' )
-      return true;
-   $rx_sign = ($allow_negative) ? '\\-?' : '';
-   return preg_match( "/^{$rx_sign}\d+$/", $value );
-}
-
-function build_range_text( $min, $max, $fmt='[%s..%s]', $generic_max=null )
-{
-   return sprintf( $fmt, $min, $max, $generic_max );
-}
 
 ?>
