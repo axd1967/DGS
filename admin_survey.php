@@ -280,6 +280,11 @@ function check_survey_options( $survey, $sopt_text )
    if( min($arr_tag_keys) != 1 || max($arr_tag_keys) != count($arr_so) )
       $errors[] = sprintf( T_('Expecting tag-labels to be in range %s.'), build_range_text(1, count($arr_so)) );
 
+   $cnt_so = count($arr_so);
+   if( $cnt_so < 1 || $cnt_so > MAX_SURVEY_OPTIONS )
+      $errors[] = sprintf( T_('Expecting %s survey-options, but there are [%s].'),
+         build_range_text(1, MAX_SURVEY_OPTIONS), $cnt_so );
+
    return array( $arr_so, $errors );
 }//check_survey_options
 

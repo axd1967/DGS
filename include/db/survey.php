@@ -44,6 +44,7 @@ define('SURVEY_STATUS_DELETE', 'DELETE');
 define('CHECK_SURVEY_STATUS', 'NEW|ACTIVE|CLOSED|DELETE');
 
 define('SURVEY_POINTS_MAX', 25);
+define('MAX_SURVEY_OPTIONS', 26); // labels A-Z
 
 
  /*!
