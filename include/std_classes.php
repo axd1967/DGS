@@ -789,6 +789,18 @@ class ListIterator
          $this->Index[$field][$row[$field]] = $arr_item;
    }
 
+   /*! \brief Return array with list of objects (without extra-row). */
+   function getItems( $with_extra=false )
+   {
+      if( $with_extra )
+         return $this->Items;
+
+      $out = array();
+      foreach( $this->Items as $item )
+         $out[] = $item[0];
+      return $out;
+   }
+
    /*! \brief Rescans items and re-filling index. */
    function rescanIndex()
    {
