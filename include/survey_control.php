@@ -222,9 +222,13 @@ class SurveyControl
 
       $vote = '';
       $s_opts = array();
+      $cnt = 0;
       foreach( $survey->SurveyOptions as $so )
       {
          $fname = 'so' . $so->ID;
+         $label = chr( ord('A') + $cnt ) .'.'; // CSS-counters not widely supported
+         $cnt++;
+
          if( $sform && $arr_points )
          {
             $sel_points = $def_points; //TODO use loaded user-config, else default
@@ -233,23 +237,21 @@ class SurveyControl
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
          if( $survey->SurveyType == SURVEY_TYPE_POINTS )
-            $s_opts[] = '   <li>' . $vote . trim($title . $text) . '</li>';
+            $s_opts[] = sprintf( "   <dt>%s<span class=\"Label\">%s</span></dt><dd><div class=\"Data\">%s</div></dd>",
+               $vote, $label, trim($title . $text) );
       }
-      $opts_text = sprintf( "\n  <ol type=\"A\">\n%s\n  </ol>\n", implode("\n", $s_opts) );
+      $opts_text = sprintf( "\n  <dl>\n%s\n  </dl>\n", implode("\n", $s_opts) );
 
       if( $sform )
-      {
          $action_text = $sform->print_insert_submit_button( 'save', T_('Save vote') );
-         $action_text = " <div class=\"Actions\">$action_text</div>\n";
-      }
       else
-         $action_text = '';
+         $action_text = 'Legend'; //TODO (must be non-empty, or CSS would render badly)
 
       $div_survey = "\n<div class=\"Survey\">\n" .
             " <div class=\"Title\">$survey_title</div>\n" .
             " <div class=\"Extra\">$extra_text</div>\n" .
             " <div class=\"Options\">$opts_text</div>\n" .
-            $action_text .
+            " <div class=\"Actions\">$action_text</div>\n" .
          "</div>\n";
 
       if( $sform )

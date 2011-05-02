@@ -3320,7 +3320,6 @@ div.Survey {
    margin: 0px 10% 1em 10%;
    padding: 5px 8px;
    background: #D0D8F7;
-   /*background: #C7D0F7;*/
    border: 1px dotted black;
 }
 div.Survey div.Title {
@@ -3339,12 +3338,23 @@ div.Survey div.Extra span.Status {
 }
 div.Survey div.Options {
    text-align: left;
-   margin-top: 0.5em;
+   clear: left;
+   float: left;
+}
+div.Survey div.Options dt {
+   text-indent: 2em;
+   margin-bottom: 0.3em;
+   padding: 3px 3px;
+   float: left;
    clear: left;
 }
-div.Survey div.Options li {
+div.Survey div.Options dd {
+   margin-bottom: 0.5em;
+   float: left;
+}
+div.Survey div.Options dd > div.Data {
    padding: 3px 3px;
-   margin-bottom: 0.3em;
+   margin-left: -2em;
 }
 div.Survey div.Options span.Title {
    font-weight: bold;
@@ -3353,13 +3363,14 @@ div.Survey div.Options div.Text {
    padding-top: 3px;
 }
 div.Survey div.Actions {
+   clear: left;
    text-align: left;
    font-size: larger;
-   padding: 0px 0px 0.7em 1em;
+   padding: 5px 0px 10px 1em;
 }
-div.Survey * {
-   border: 1px solid blue;
-}
+/*div.Survey * { border: 1px solid blue; }
+div.Survey div { border: 1px solid red; }
+div.Survey dd { border: 1px solid green; }*/
 
 
 /* ------------------------- */
