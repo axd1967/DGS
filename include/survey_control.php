@@ -27,6 +27,7 @@ require_once 'include/db/survey_vote.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
 
 
  /*!
@@ -176,28 +177,90 @@ class SurveyControl
       SurveyOption::persist_survey_options( $sid, $sopts_save ); // add new, update existing
    }//update_merged_survey_options
 
-   function build_view_survey( $survey, $rx_term='' )
+   /*! \brief Returns QuerySQL with restrictions to view surveys to what current user is allowed to view. */
+   function build_view_query_sql()
    {
+      $qsql = new QuerySQL();
+      if( !SurveyControl::is_survey_admin() )
+         $qsql->add_part( SQLP_WHERE, "S.Status IN ('".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."')" );
+      return $qsql;
+   }//build_view_query_sql
+
+   function build_points_array( $min, $max )
+   {
+      if( $min > $max )
+         swap($min, $max);
+
+      $arr = array();
+      if( $min > 0 || $max < 0 )
+         $arr[0] = '&nbsp;0';
+      for( $val = $max; $val >= $min; $val-- )
+         $arr[$val] = ($val <= 0) ? $val : "+$val";
+      if( isset($arr[0]) )
+         $arr[0] = '&nbsp;0';
+
+      return $arr;
+   }//build_points_array
+
+   function build_view_survey( $survey, $page='', $rx_term='' )
+   {
+      $sform = null;
+      if( $page && $survey->ID > 0 && $survey->Status == SURVEY_STATUS_ACTIVE )
+      {
+         $sform = new Form( 'surveyVote', $page, FORM_GET );
+         $sform->add_hidden( 'sid', $survey->ID );
+      }
+
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
       $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>
-      $updated_time = sprintf( '[%s]', date(DATE_FMT2, $survey->Lastchanged) );
+      $extra_text = sprintf( '(%s) [%s]', span('Status', SurveyControl::getStatusText($survey->Status)),
+         date(DATE_FMT2, $survey->Lastchanged) );
 
+      $arr_points = $def_points = 0;
+      if( $survey->SurveyType == SURVEY_TYPE_POINTS )
+         $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
+
+      $vote = '';
       $s_opts = array();
       foreach( $survey->SurveyOptions as $so )
       {
+         $fname = 'so' . $so->ID;
+         if( $sform && $arr_points )
+         {
+            $sel_points = $def_points; //TODO use loaded user-config, else default
+            $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false ) . MED_SPACING;
+         }
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
          if( $survey->SurveyType == SURVEY_TYPE_POINTS )
-            $s_opts[] = '   <li>' . trim($title . $text) . '</li>';
+            $s_opts[] = '   <li>' . $vote . trim($title . $text) . '</li>';
       }
       $opts_text = sprintf( "\n  <ol type=\"A\">\n%s\n  </ol>\n", implode("\n", $s_opts) );
 
-      return
-         "\n<div class=\"Survey\">\n" .
+      if( $sform )
+      {
+         $action_text = $sform->print_insert_submit_button( 'save', T_('Save vote') );
+         $action_text = " <div class=\"Actions\">$action_text</div>\n";
+      }
+      else
+         $action_text = '';
+
+      $div_survey = "\n<div class=\"Survey\">\n" .
             " <div class=\"Title\">$survey_title</div>\n" .
-            " <div class=\"Time\">$updated_time</div>\n" .
+            " <div class=\"Extra\">$extra_text</div>\n" .
             " <div class=\"Options\">$opts_text</div>\n" .
+            $action_text .
          "</div>\n";
+
+      if( $sform )
+      {
+         return $sform->print_start_default()
+            . $div_survey
+            . $sform->get_form_string() // static form
+            . $sform->print_end();
+      }
+      else
+         return $div_survey;
    }//build_view_survey
 
 } // end of 'SurveyControl'

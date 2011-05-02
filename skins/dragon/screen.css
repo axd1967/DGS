@@ -3319,7 +3319,8 @@ div.Survey {
    width: 80%;
    margin: 0px 10% 1em 10%;
    padding: 5px 8px;
-   background: #C7D0F7;
+   background: #D0D8F7;
+   /*background: #C7D0F7;*/
    border: 1px dotted black;
 }
 div.Survey div.Title {
@@ -3328,10 +3329,13 @@ div.Survey div.Title {
    font-weight: bold;
    float: left;
 }
-div.Survey div.Time {
+div.Survey div.Extra {
    text-align: right;
    font-weight: bold;
    font-size: smaller;
+}
+div.Survey div.Extra span.Status {
+   color: darkblue;
 }
 div.Survey div.Options {
    text-align: left;
@@ -3347,6 +3351,14 @@ div.Survey div.Options span.Title {
 }
 div.Survey div.Options div.Text {
    padding-top: 3px;
+}
+div.Survey div.Actions {
+   text-align: left;
+   font-size: larger;
+   padding: 0px 0px 0.7em 1em;
+}
+div.Survey * {
+   border: 1px solid blue;
 }
 
 

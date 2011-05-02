@@ -45,7 +45,8 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
 
    // init
    $qsql = Survey::build_query_sql( $sid );
-   list( $survey, $orow ) = Survey::load_survey_by_query( $qsql, /*withrow*/true );
+   $qsql->merge( SurveyControl::build_view_query_sql() );
+   $survey = Survey::load_survey_by_query( $qsql, /*withrow*/false );
    if( is_null($survey) )
       error('unknown_survey', "view_survey.find_survey($sid)");
 
@@ -56,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
-   echo "<br>\n", SurveyControl::build_view_survey($survey);
+   echo "<br>\n", SurveyControl::build_view_survey($survey, $page);
 
 
    $menu_array = array();
