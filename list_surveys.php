@@ -104,9 +104,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
          $table->get_query(),
          $table->current_order_string(),
          $table->current_limit_string() );
-   if( !$is_admin )
-      $iterator->MergedQuerySQL( new QuerySQL(
-         SQLP_WHERE, "S.Status IN ('".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."')" ) );
+   $iterator->addQuerySQLMerge( SurveyControl::build_view_query_sql() );
    $iterator = Survey::load_surveys( $iterator );
 
    $show_rows = $table->compute_show_rows( $iterator->ResultRows );
