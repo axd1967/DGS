@@ -106,7 +106,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey ID'),
-         'TEXT',        ($sid ? anchor( $base_path."admin_survey.php?sid=$sid", $sid ) . MED_SPACING .
+         'TEXT',        ($sid ? anchor( $base_path."admin_survey.php?sid=$sid", $sid, T_('Reload Survey') ) . MED_SPACING .
                                 anchor( $base_path."view_survey.php?sid=$sid",
                                         image( $base_path.'images/info.gif', T_('View Survey'), null, 'class="InTextImage"'))
                               : T_('NEW survey#survey')), ));
@@ -156,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'TEXTINPUT',   'title', 80, 255, $vars['title'] ));
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey Options'),
-         'TEXTAREA',    'survey_opts', 80, 2 * count($survey->SurveyOptions), $vars['survey_opts'], ));
+         'TEXTAREA',    'survey_opts', 80, min(10, 2*count($survey->SurveyOptions)), $vars['survey_opts'], ));
 
    $sform->add_empty_row();
 
@@ -372,6 +372,8 @@ function parse_edit_form( &$survey )
 
          if( $survey->MinPoints > $survey->MaxPoints )
             $errors[] = T_('Min-points must be smaller than max-points.');
+         if( $survey->MinPoints == $survey->MaxPoints )
+            $errors[] = T_('Use %s-type instead of min-points equals max-points.');
       }
 
       $new_value = trim($vars['title']);
