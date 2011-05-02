@@ -78,6 +78,7 @@ class Survey
    // non-DB fields
 
    var $User; // User-object
+   var $SurveyOptions; // SurveyOption-objects
 
    /*! \brief Constructs Survey-object with specified arguments. */
    function Survey( $id=0, $uid=0, $user=null, $type=SURVEY_TYPE_POINTS, $status=SURVEY_STATUS_NEW,
@@ -95,6 +96,7 @@ class Survey
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->SurveyOptions = array();
    }
 
    function to_string()
@@ -160,6 +162,11 @@ class Survey
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'Title', $this->Title );
       return $data;
+   }
+
+   function need_option_minpoints()
+   {
+      return ( $this->SurveyType == SURVEY_TYPE_SINGLE || $this->SurveyType == SURVEY_TYPE_MULTI );
    }
 
 

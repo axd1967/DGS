@@ -3312,7 +3312,7 @@ span.VotingRestricted {
 
 td.Preview div.Survey {
    width: 100%;
-   margin: 0px 0px 0px 0px;
+   margin: 0px;
 }
 div.Survey {
    text-align: center;
@@ -3337,6 +3337,16 @@ div.Survey div.Options {
    text-align: left;
    margin-top: 0.5em;
    clear: left;
+}
+div.Survey div.Options li {
+   padding: 3px 3px;
+   margin-bottom: 0.3em;
+}
+div.Survey div.Options span.Title {
+   font-weight: bold;
+}
+div.Survey div.Options div.Text {
+   padding-top: 3px;
 }
 
 

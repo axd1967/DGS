@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    $my_id = $player_row['ID'];
 
    $sid = (int) @$_REQUEST['sid'];
-   if( $sid < 0 )
+   if( $sid <= 0 )
       error('invalid_args', "view_survey.check_args($sid)");
 
    $page = "view_survey.php";
@@ -48,6 +48,8 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    list( $survey, $orow ) = Survey::load_survey_by_query( $qsql, /*withrow*/true );
    if( is_null($survey) )
       error('unknown_survey', "view_survey.find_survey($sid)");
+
+   SurveyControl::load_survey_options($survey);
 
 
    $title = sprintf( T_('Survey View #%d'), $sid );

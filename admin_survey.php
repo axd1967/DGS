@@ -61,9 +61,12 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
       $survey = SurveyControl::new_survey();
    elseif( !SurveyControl::allow_survey_edit($survey) )
       error('survey_edit_not_allowed', "admin_survey.check.edit($sid)");
+   else
+      SurveyControl::load_survey_options($survey);
 
    $s_old_status = $survey->Status;
    $s_old_type = $survey->SurveyType;
+   $s_old_sopts = $survey->SurveyOptions;
 
    $arr_types = SurveyControl::getSurveyTypeText();
    $arr_status = SurveyControl::getStatusText();
@@ -79,8 +82,14 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          $errors[] = T_('Sorry, there\'s nothing to save.');
       else
       {
-         $survey->persist();
-         $sid = $survey->ID;
+         ta_begin();
+         {//HOT-section to update survey, survey-options
+            $survey->persist();
+            $sid = $survey->ID;
+
+            SurveyControl::update_merged_survey_options( $sid, $survey->SurveyOptions, @$vars['_del_sopts'] );
+         }
+         ta_end();
 
          jump_to("admin_survey.php?sid=$sid".URI_AMP."sysmsg=". urlencode(T_('Survey saved!')) );
       }
@@ -145,6 +154,9 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $sform->add_row( array(
          'DESCRIPTION', T_('Title'),
          'TEXTINPUT',   'title', 80, 255, $vars['title'] ));
+   $sform->add_row( array(
+         'DESCRIPTION', T_('Survey Options'),
+         'TEXTAREA',    'survey_opts', 80, 2 * count($survey->SurveyOptions), $vars['survey_opts'], ));
 
    $sform->add_empty_row();
 
@@ -159,7 +171,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'SUBMITBUTTON', 'preview', T_('Preview'),
       ));
 
-   if( @$_REQUEST['preview'] || $survey->Title != '' )
+   if( @$_REQUEST['preview'] || $survey->Title != '' || count($survey->SurveyOptions) > 0 )
    {
       $sform->add_empty_row();
       $sform->add_row( array(
@@ -176,11 +188,141 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
-   $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
+   if( $survey->ID )
+      $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
    $menu_array[T_('New survey')] = array( 'url' => "admin_survey.php", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }//main
+
+
+// return [ $arr_survey_opts, $errors ]
+function check_survey_options( $survey, $sopt_text )
+{
+   $arr_so = array();
+   $errors = array();
+
+   $sopt_text = preg_replace("%<\\s*/\\s*opt\\s*>%i", '', $sopt_text); // remove </opt>-end-tag
+   $sopt_text = str_replace("\r", '', $sopt_text); // remove CR
+
+   // preconditional checks before parsing can start
+   if( preg_match("/^.+?<opt/i", $sopt_text) )
+      $errors[] = T_('No text is allowed before &lt;opt>-tag in survey-options-text.');
+   if( !preg_match("/<opt\\b/", $sopt_text) )
+      $errors[] = T_('Missing &lt;opt>-tag in survey-options-text.');
+   if( count($errors) )
+      return array( $arr_so, $errors );
+
+   $sid = $survey->ID;
+   $need_points = $survey->need_option_minpoints();
+   $last_so = null;
+   $prev_text = '';
+   $rem_text = trim($sopt_text);
+   $sort_order = 0;
+   $arr_tags = array(); # tag => 1
+
+   // matches: $1=prev-opt-text, $2=tag, $3=points, $4=title, $5=remaining
+   $regex = "%^(.*?)<opt\\s+(\\S+)\\s+(?:(\S+)\s+)?\"([^\"]*?)\"\\s*>(.*)$%s";
+
+   while( preg_match($regex, $rem_text, $matches) )
+   {
+      list( , $prev_text, $tag, $points, $title, $rem_text ) = $matches;
+      unset($matches);
+      $rem_text = trim($rem_text);
+      $title = trim($title);
+      $sort_order++;
+
+      if( preg_match("/<opt/i", $prev_text) )
+         $errors[] = sprintf( T_('Bad syntax around %s-%s. &lt;opt> found: &lt;opt> incomplete'),
+            $sort_order-1, $sort_order );
+
+      if( !is_null($last_so) && (string)$prev_text != '' )
+         $last_so->Text = trim($prev_text);
+
+      // checks
+      $sopt = $last_so = new SurveyOption( 0, $sid, 0, $sort_order );
+
+      if( isNumber($tag, false) && $tag >= 1 && $tag <= 255 )
+      {
+         if( !isset($arr_tags[$tag]) )
+            $sopt->Tag = (int)$tag;
+         else
+            $errors[] = sprintf( T_('Tag-label [%s] in %s. &lt;opt> already used.'), $tag, $sort_order );
+         $arr_tags[$tag] = 1;
+      }
+      else
+         $errors[] = sprintf( T_('Expecting number for tag-label in %s. &lt;opt> in range %s, but was [%s].'),
+            $sort_order, build_range_text(1,255), $tag );
+
+      if( !$need_points || (string)$points == '' )
+         $sopt->MinPoints = ($need_points) ? 1 : 0; // default
+      elseif( isNumber($points, false) && abs($points) <= SURVEY_POINTS_MAX )
+         $sopt->MinPoints = (int)$points;
+      else
+         $errors[] = sprintf( T_('Expecting number for min-points in %s. &lt;opt> to be in range %s or empty for default, but was [%s].'),
+            $sort_order, build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX), $points );
+
+      if( strlen($title) > 0 )
+         $sopt->Title = $title;
+      else
+         $errors[] = sprintf( T_('Survey-option-title in %s. &lt;opt> is missing.'), $sort_order );
+
+      $arr_so[] = $sopt;
+   }//while
+
+   if( preg_match("/<opt/i", $rem_text) )
+      $errors[] = sprintf( T_('Bad syntax around %s-%s. &lt;opt> found in remaining text: &lt;opt> incomplete'),
+         $sort_order-1, $sort_order );
+   if( !is_null($last_so) && (string)$rem_text != '' )
+      $last_so->Text = trim($rem_text);
+
+   $arr_tag_keys = array_keys($arr_tags);
+   if( min($arr_tag_keys) != 1 || max($arr_tag_keys) != count($arr_so) )
+      $errors[] = sprintf( T_('Expecting tag-labels to be in range %s.'), build_range_text(1, count($arr_so)) );
+
+   return array( $arr_so, $errors );
+}//check_survey_options
+
+
+// return [ arr_merged_survey_opts, arr_del_survey_opts, errors ]
+function merge_survey_options( $survey, $arr_survey_opts )
+{
+   $errors = array();
+   $is_super_admin = SurveyControl::is_survey_admin(true);
+
+   $arr_tags = array(); # tag => 1
+   $arr_merged_so = array();
+   foreach( $arr_survey_opts as $so ) // check updates
+   {
+      $s_so = SurveyControl::findMatchingSurveyOption($survey, $so->Tag);
+      if( is_null($s_so) )
+         $arr_merged_so[] = $so;
+      else
+      {
+         if( !$is_super_admin && $s_so->UserCount > 0 )
+            $errors[] = sprintf( T_('Update of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
+         else
+         {
+            $s_so->copyValues( $so );
+            $arr_merged_so[] = $s_so;
+         }
+      }
+      $arr_tags[$so->Tag] = 1;
+   }
+
+   $arr_del_so = array();
+   foreach( $survey->SurveyOptions as $so ) // check deletes
+   {
+      if( isset($arr_tags[$so->Tag]) )
+         continue;
+      if( $so->UserCount > 0 )
+         $errors[] = sprintf( T_('Delete of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
+      else
+         $arr_del_so[] = $so;
+   }
+
+   return array( $arr_merged_so, $arr_del_so, $errors );
+}//merge_survey_options
 
 
 // return [ vars-hash, edits-arr, errorlist ]
@@ -197,6 +339,8 @@ function parse_edit_form( &$survey )
       'min_points'      => $survey->MinPoints,
       'max_points'      => $survey->MaxPoints,
       'title'           => $survey->Title,
+      'survey_opts'     => SurveyControl::buildSurveyOptionsText($survey),
+      '_del_sopts'      => array(),
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -236,6 +380,25 @@ function parse_edit_form( &$survey )
       else
          $survey->Title = $new_value;
 
+      $new_value = trim($vars['survey_opts']);
+      if( (string)$new_value != '' )
+      {
+         list( $arr_survey_opts, $check_errors ) = check_survey_options( $survey, $new_value );
+         if( count($check_errors) == 0 )
+            list( $arr_survey_opts, $arr_del_sopts, $check_errors ) = merge_survey_options( $survey, $arr_survey_opts );
+         else
+            $arr_del_sopts = array();
+
+         if( count($check_errors) > 0 )
+            $errors = array_merge( $errors, $check_errors );
+         else
+         {
+            $survey->SurveyOptions = $arr_survey_opts;
+            $vars['survey_opts'] = SurveyControl::buildSurveyOptionsText($survey);
+            $vars['_del_sopts'] = $arr_del_sopts;
+         }
+      }
+
 
       // determine edits
       if( $old_vals['type'] != $survey->SurveyType ) $edits[] = T_('Type#edits');
@@ -243,6 +406,7 @@ function parse_edit_form( &$survey )
       if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points#edits');
       if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points#edits');
       if( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title#edits');
+      if( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

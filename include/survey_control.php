@@ -24,7 +24,7 @@ $TranslateGroups[] = "Survey";
 require_once 'include/db/survey.php';
 require_once 'include/db/survey_option.php';
 require_once 'include/db/survey_vote.php';
-require_once 'include/classlib_user.php';
+require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 
@@ -94,11 +94,14 @@ class SurveyControl
    }
 
    /*! \brief Returns true if current players is survey-admin. */
-   function is_survey_admin()
+   function is_survey_admin( $check_super_admin=false )
    {
       global $player_row;
       //TODO return false; //for testing
-      return (@$player_row['admin_level'] & (ADMIN_SURVEY|ADMIN_DEVELOPER));
+      if( $check_super_admin )
+         return (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+      else
+         return (@$player_row['admin_level'] & (ADMIN_SURVEY|ADMIN_DEVELOPER));
    }
 
    /*! \brief Returns new Survey-object for user and args. */
@@ -124,17 +127,76 @@ class SurveyControl
       return ( $survey->Status == SURVEY_STATUS_NEW );
    }//allow_survey_edit
 
+   function load_survey_options( &$survey )
+   {
+      $sid = $survey->ID;
+      $iterator = new ListIterator( "SurveyControl::load_survey_options($sid)" );
+      $iterator = SurveyOption::load_survey_options( $iterator, $sid );
+      $survey->SurveyOptions = $iterator->getItems();
+   }
+
+   /*! \brief Builds markup-text for admin-survey from array of SurveyOption-objects. */
+   function buildSurveyOptionsText( $survey )
+   {
+      $out = array();
+      $need_points = $survey->need_option_minpoints();
+      foreach( $survey->SurveyOptions as $so )
+      {
+         $points = ($need_points) ? ' ' . $so->MinPoints : '';
+         $out[] = trim( sprintf("<opt %s%s \"%s\"> %s", $so->Tag, $points, trim($so->Title), trim($so->Text) ) );
+      }
+      return trim(implode("\r\n\r\n", $out));
+   }//buildSurveyOptionsText
+
+   /*! \brief Return cloned SurveyOption in Survey->SurveyOptions array matching on same Tag-value; null otherwise. */
+   function findMatchingSurveyOption( $survey, $tag )
+   {
+      foreach( $survey->SurveyOptions as $so )
+      {
+         if( $so->Tag == $tag )
+            return SurveyOption::cloneSurveyOption($so);
+      }
+      return null;
+   }
+
+   /*! \brief Adds/updated/deletes SurveyOption-table-entries. */
+   function update_merged_survey_options( $sid, $sopts_save, $sopts_del )
+   {
+      $sid = (int)$sid;
+
+      $arr_del = array();
+      foreach( $sopts_del as $so )
+      {
+         if( $so->ID == 0 )
+            error('invalid_args', "SurveyControl::update_merged_survey_options.check_del($sid)");
+         $arr_del[] = $so->ID;
+      }
+      SurveyOption::delete_survey_options( $sid, $arr_del );
+
+      SurveyOption::persist_survey_options( $sid, $sopts_save ); // add new, update existing
+   }//update_merged_survey_options
+
    function build_view_survey( $survey, $rx_term='' )
    {
-      $title = make_html_safe($survey->Title, true, $rx_term);
-      $title = preg_replace( "/[\r\n]+/", '<br>', $title ); //reduce multiple LF to one <br>
+      $survey_title = make_html_safe($survey->Title, true, $rx_term);
+      $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>
       $updated_time = sprintf( '[%s]', date(DATE_FMT2, $survey->Lastchanged) );
 
+      $s_opts = array();
+      foreach( $survey->SurveyOptions as $so )
+      {
+         $title = span('Title', make_html_safe($so->Title, true) );
+         $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
+         if( $survey->SurveyType == SURVEY_TYPE_POINTS )
+            $s_opts[] = '   <li>' . trim($title . $text) . '</li>';
+      }
+      $opts_text = sprintf( "\n  <ol type=\"A\">\n%s\n  </ol>\n", implode("\n", $s_opts) );
+
       return
-         "<div class=\"Survey\">\n" .
-            "<div class=\"Title\">$title</div>" .
-            "<div class=\"Time\">$updated_time</div>" .
-            "<div class=\"Options\">opts</div>" .
+         "\n<div class=\"Survey\">\n" .
+            " <div class=\"Title\">$survey_title</div>\n" .
+            " <div class=\"Time\">$updated_time</div>\n" .
+            " <div class=\"Options\">$opts_text</div>\n" .
          "</div>\n";
    }//build_view_survey
 
