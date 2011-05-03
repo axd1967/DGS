@@ -51,8 +51,14 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
       error('unknown_survey', "view_survey.find_survey($sid)");
    SurveyControl::load_survey_options($survey, $my_id); // with my-votes
 
+   // checks
+   $errors = array();
+   if( @$_REQUEST['save'] && $survey->Status != SURVEY_STATUS_ACTIVE )
+      $errors[] = sprintf( T_('Voting on survey only possible on %s status.'),
+         SurveyControl::getStatusText(SURVEY_STATUS_ACTIVE) );
+
    // handle save-vote
-   if( @$_REQUEST['save'] )
+   if( @$_REQUEST['save'] && count($errors) == 0 )
    {
       prepare_save_votes( $survey );
       handle_save_votes( $sid, $my_id );
@@ -63,6 +69,16 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    $title = sprintf( T_('Survey View #%d'), $sid );
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>". $title . "</h3>\n";
+
+   if( count($errors) )
+   {
+      $form = new Form( 'surveyView', $page, FORM_GET );
+      $form->add_row( array(
+            'DESCRIPTION', T_('Error'),
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+      $form->add_empty_row();
+      $form->echo_string();
+   }
 
    echo "<br>\n", SurveyControl::build_view_survey($survey, $page);
 
