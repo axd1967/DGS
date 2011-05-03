@@ -46,7 +46,7 @@ $ENTITY_SURVEY_VOTE = new Entity( 'SurveyVote',
 
 class SurveyVote
 {
-   var $SurveyID;
+   var $sid; // survey-id
    var $uid;
    var $Tag;
    var $Points;
@@ -54,7 +54,7 @@ class SurveyVote
    /*! \brief Constructs SurveyVote-object with specified arguments. */
    function SurveyVote( $sid=0, $uid=0, $tag=0, $points=0 )
    {
-      $this->SurveyID = (int)$sid;
+      $this->sid = (int)$sid;
       $this->uid = (int)$uid;
       $this->Tag = (int)$tag;
       $this->Points = (int)$points;
@@ -72,7 +72,7 @@ class SurveyVote
       $query = $entityData->build_sql_insert_values(true)
          . $entityData->build_sql_insert_values()
          . " ON DUPLICATE KEY UPDATE Points=VALUES(Points)";
-      return db_query( "SurveyVote.persist.on_dupl_key({$this->SurveyID},{$this->uid},{$this->Tag},{$this->Points})", $query );
+      return db_query( "SurveyVote.persist.on_dupl_key({$this->sid},{$this->uid},{$this->Tag},{$this->Points})", $query );
    }
 
    function insert()
@@ -91,7 +91,7 @@ class SurveyVote
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY_VOTE']->newEntityData();
-      $data->set_value( 'sid', $this->SurveyID );
+      $data->set_value( 'sid', $this->sid );
       $data->set_value( 'uid', $this->uid );
       $data->set_value( 'Tag', $this->Tag );
       $data->set_value( 'Points', $this->Points );

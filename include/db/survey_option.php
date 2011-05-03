@@ -48,7 +48,7 @@ $ENTITY_SURVEY_OPTION = new Entity( 'SurveyOption',
 class SurveyOption
 {
    var $ID;
-   var $SurveyID;
+   var $sid; // survey-id
    var $Tag;
    var $SortOrder;
    var $MinPoints;
@@ -66,7 +66,7 @@ class SurveyOption
                           $title='', $text='' )
    {
       $this->ID = (int)$id;
-      $this->SurveyID = (int)$sid;
+      $this->sid = (int)$sid;
       $this->Tag = (int)$tag;
       $this->SortOrder = (int)$sort_order;
       $this->MinPoints = (int)$min_points;
@@ -113,7 +113,7 @@ class SurveyOption
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY_OPTION']->newEntityData();
       $data->set_value( 'ID', $this->ID );
-      $data->set_value( 'sid', $this->SurveyID );
+      $data->set_value( 'sid', $this->sid );
       $data->set_value( 'Tag', $this->Tag );
       $data->set_value( 'SortOrder', $this->SortOrder );
       $data->set_value( 'MinPoints', $this->MinPoints );
@@ -173,7 +173,7 @@ class SurveyOption
    /*! \brief Clone all fields from given SurveyOption-object to this object. */
    function cloneSurveyOption( $sopt )
    {
-      return new SurveyOption( $sopt->ID, $sopt->SurveyID, $sopt->Tag, $sopt->SortOrder, $sopt->MinPoints,
+      return new SurveyOption( $sopt->ID, $sopt->sid, $sopt->Tag, $sopt->SortOrder, $sopt->MinPoints,
          $sopt->UserCount, $sopt->Score, $sopt->Title, $sopt->Text );
    }
 
