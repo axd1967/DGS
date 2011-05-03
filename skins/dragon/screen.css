@@ -3359,6 +3359,14 @@ div.Survey div.Options dd > div.Data {
 div.Survey div.Options span.Title {
    font-weight: bold;
 }
+div.Survey div.Options span.UserVote {
+   width: 3em;
+   margin-left: 2em;
+   vertical-align: top;
+   text-align: right;
+   font-size: smaller;
+   color: blue;
+}
 div.Survey div.Options div.Text {
    padding-top: 3px;
 }
@@ -3367,6 +3375,12 @@ div.Survey div.Actions {
    text-align: left;
    font-size: larger;
    padding: 5px 0px 10px 1em;
+}
+div.Survey div.Actions span.Notes {
+   margin-left: 2em;
+   font-size: 80%;
+   font-style: italic;
+   color: blue;
 }
 /*div.Survey * { border: 1px solid blue; }
 div.Survey div { border: 1px solid red; }

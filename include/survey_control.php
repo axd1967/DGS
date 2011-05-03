@@ -235,6 +235,7 @@ class SurveyControl
          $sform = new Form( 'surveyVote', $page, FORM_GET );
          $sform->add_hidden( 'sid', $survey->ID );
       }
+      $show_uservote = ( $survey->Status == SURVEY_STATUS_CLOSED );
 
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
       $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>
@@ -245,13 +246,13 @@ class SurveyControl
       if( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
 
-      $vote = '';
+      $vote = $user_vote = '';
       $s_opts = array();
       $cnt = 0;
       foreach( $survey->SurveyOptions as $so )
       {
          $fname = 'so' . $so->ID;
-         $label = chr( ord('A') + $cnt ) .'.'; // CSS-counters not widely supported
+         $label = span('Label', chr( ord('A') + $cnt ) .'.'); // CSS-counters not widely supported
          $cnt++;
 
          if( $sform && $arr_points )
@@ -259,18 +260,23 @@ class SurveyControl
             $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
             $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false ) . MED_SPACING;
          }
+         if( $show_uservote )
+            $user_vote = span('UserVote', ( !is_null($so->UserVotePoints) ? formatNumber($so->UserVotePoints) : '-' ),
+                   '(%s)', 'title="' . T_('My vote#survey') . '"' );
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
+
          if( $survey->Type == SURVEY_TYPE_POINTS )
-            $s_opts[] = sprintf( "   <dt>%s<span class=\"Label\">%s</span></dt><dd><div class=\"Data\">%s</div></dd>",
-               $vote, $label, trim($title . $text) );
+            $s_opts[] = "   <dt>{$vote}{$label}</dt><dd><div class=\"Data\">{$title}{$user_vote}{$text}</div></dd>";
       }
       $opts_text = sprintf( "\n  <dl>\n%s\n  </dl>\n", implode("\n", $s_opts) );
 
       if( $sform )
          $action_text = $sform->print_insert_submit_button( 'save', T_('Save vote') );
       else
-         $action_text = 'Legend'; //TODO (must be non-empty, or CSS would render badly)
+         $action_text = '';
+      // CSS needs something below floats
+      $action_text .= span('Notes', T_('Notes: Your votes are shown behind the titles.#survey') );
 
       $div_survey = "\n<div class=\"Survey\">\n" .
             " <div class=\"Title\">$survey_title</div>\n" .

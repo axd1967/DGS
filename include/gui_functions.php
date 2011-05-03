@@ -312,14 +312,21 @@ function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
    return "{$spc}{$tag_l}{$str}{$tag_r}{$spc}";
 }
 
-function span( $class, $str, $strfmt='%s' )
+function span( $class, $str, $strfmt='%s', $title='' )
 {
-   return sprintf( "<span class=\"$class\">$strfmt</span>", $str );
+   if( $title )
+      $title = " title=\"$title\"";
+   return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );
 }
 
 function formatDate( $date, $defval='', $datefmt=DATE_FMT )
 {
    return ($date > 0) ? date($datefmt, $date) : $defval;
+}
+
+function formatNumber( $num )
+{
+   return ($num > 0) ? "+$num" : $num;
 }
 
 function build_range_text( $min, $max, $fmt='[%s..%s]', $generic_max=null )
