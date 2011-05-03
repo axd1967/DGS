@@ -33,9 +33,9 @@ State-Diagram for feature-status:
 
 ## Fields:
 
-* uid : user that voted on survey(-option), FK to Players.ID
+* uid : user that voted on feature, FK to Players.ID
 
-* Points : points user gave with his/her vote on referenced survey-option
+* Points : points user gave with his/her vote on referenced feature
    - 0 = maybe points given, so no vote is represented by removed entry
 
 * Status : feature-status
