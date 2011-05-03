@@ -358,7 +358,7 @@ class EntityData
       return $query;
    }
 
-   function build_sql_insert_values( $header=false, $with_PK=false )
+   function build_sql_insert_values( $header=false, $with_PK=false, $skip_fields=null )
    {
       $arr = array();
       if( $header ) // header
@@ -366,7 +366,7 @@ class EntityData
          $query_fmt = 'INSERT INTO ' . $this->entity->table . ' (%s) VALUES ';
          foreach( $this->entity->fields as $field => $ftype ) // in order from entity
          {
-            if( $with_PK || !$this->entity->is_auto_increment($field) )
+            if( !isset($skip_fields[$field]) && ( $with_PK || !$this->entity->is_auto_increment($field) ) )
                $arr[] = $field;
          }
       }
@@ -375,7 +375,7 @@ class EntityData
          $query_fmt = '(%s)';
          foreach( $this->entity->fields as $field => $ftype ) // in order from entity
          {
-            if( $with_PK || !$this->entity->is_auto_increment($field) )
+            if( !isset($skip_fields[$field]) && ( $with_PK || !$this->entity->is_auto_increment($field) ) )
             {
                $sql_val = $this->get_sql_value( $field );
                $arr[] = (is_null($sql_val)) ? "DEFAULT($field)" : $sql_val;
@@ -388,7 +388,7 @@ class EntityData
    }
 
    /*! \brief Returns update-query as query-string or array( update-part, where-part, after-where-part ). */
-   function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true, $incl_optlock=true )
+   function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true, $incl_optlock=true, $skip_fields=null )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -396,6 +396,8 @@ class EntityData
       {
          if( !isset($this->values[$field]) )
             error('assert', "EntityData.build_sql_update.miss_pkey_value({$this->entity->table},$field)");
+         if( isset($skip_fields[$field]) )
+            unset($skip_fields[$field]);
          $sql_val = $this->get_sql_value( $field );
          if( !is_null($sql_val) )
             $arr_pkeys[] = $field . '=' . $sql_val;
@@ -404,7 +406,7 @@ class EntityData
       $arr = array();
       foreach( $this->get_fields("EntityData.build_sql_update") as $field )
       {
-         if( !$this->entity->is_primary_key($field) )
+         if( !isset($skip_fields[$field]) && !$this->entity->is_primary_key($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
 
