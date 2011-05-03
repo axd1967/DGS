@@ -305,7 +305,7 @@ function merge_survey_options( $survey, $arr_survey_opts )
          $arr_merged_so[] = $so;
       else
       {
-         if( !$is_super_admin && $s_so->UserCount > 0 )
+         if( $s_so->UserCount > 0 )
             $errors[] = sprintf( T_('Update of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
          else
          {
