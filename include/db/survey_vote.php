@@ -119,7 +119,7 @@ class SurveyVote
    {
       $s_vote = new SurveyVote(
             // from SurveyVote
-            @$row['SurveyID'],
+            @$row['sid'],
             @$row['uid'],
             @$row['Tag'],
             @$row['Points']
@@ -144,12 +144,12 @@ class SurveyVote
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with SurveyVote-objects. */
-   function load_survey_votes( $iterator )
+   function load_survey_votes( $iterator, $sid, $uid=0 )
    {
-      $qsql = SurveyVote::build_query_sql();
+      $qsql = SurveyVote::build_query_sql( $sid, $uid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "SurveyVote.load_survey_votes", $query );
+      $result = db_query( "SurveyVote.load_survey_votes($sid,$uid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
@@ -162,6 +162,34 @@ class SurveyVote
 
       return $iterator;
    }
+
+   /*!
+    * \brief Adds/updates SurveyVote-table-entries.
+    * \param $arr_upd [ Tag => Points, ... ]
+    */
+   function persist_survey_votes( $sid, $uid, $arr_upd )
+   {
+      if( !is_array($arr_upd) || count($arr_upd) == 0 )
+         return false;
+
+      $data = $GLOBALS['ENTITY_SURVEY_VOTE']->newEntityData();
+      $data->set_value( 'sid', (int)$sid );
+      $data->set_value( 'uid', (int)$uid );
+
+      $arr_inserts = array();
+      foreach( $arr_upd as $tag => $points )
+      {
+         $data->set_value( 'Tag', (int)$tag );
+         $data->set_value( 'Points', (int)$points );
+         $arr_inserts[] = $data->build_sql_insert_values(false, /*with-PK*/true);
+      }
+
+      $query = $data->build_sql_insert_values(true, /*with-PK*/true)
+         . implode(',', $arr_inserts)
+         . ' ON DUPLICATE KEY UPDATE Points=VALUES(Points)';
+
+      return db_query( "SurveyOption::persist_survey_votes.on_dupl_key($sid,$uid)", $query );
+   }//persist_survey_votes
 
 } // end of 'SurveyVote'
 ?>

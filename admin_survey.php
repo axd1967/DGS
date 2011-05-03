@@ -87,7 +87,8 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
             $survey->persist();
             $sid = $survey->ID;
 
-            SurveyControl::update_merged_survey_options( $sid, $survey->SurveyOptions, @$vars['_del_sopts'] );
+            SurveyControl::update_merged_survey_options(
+               $sid, $survey->SurveyOptions, @$vars['_del_sopts'], /*all-fields*/false );
          }
          ta_end();
 

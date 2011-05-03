@@ -57,6 +57,10 @@ class SurveyOption
    var $Title;
    var $Text;
 
+   // non-DB fields
+
+   var $UserVotePoints; // SurveyVote.Points of specific user; null=unset
+
    /*! \brief Constructs SurveyOption-object with specified arguments. */
    function SurveyOption( $id=0, $sid=0, $tag=0, $sort_order=0, $min_points=0, $user_count=0, $score=0,
                           $title='', $text='' )
@@ -70,6 +74,8 @@ class SurveyOption
       $this->Score = (int)$score;
       $this->Title = $title;
       $this->Text = $text;
+      // non-DB fields
+      $this->UserVotePoints = null;
    }
 
    function to_string()
@@ -205,26 +211,52 @@ class SurveyOption
       return $iterator;
    }
 
-   function persist_survey_options( $sid, $arr_sopts )
+   function persist_survey_options( $sid, $arr_sopts, $all_fields=true )
    {
       if( !is_array($arr_sopts) || count($arr_sopts) == 0 )
          return false;
+
+      $skip_fields = ($all_fields) ? null : array( 'UserCount', 'Score' );
 
       $entity_sopt = $GLOBALS['ENTITY_SURVEY_OPTION']->newEntityData();
       $arr_inserts = array();
       foreach( $arr_sopts as $so )
       {
          $data_sopt = $so->fillEntityData( $entity_sopt );
-         $arr_inserts[] = $data_sopt->build_sql_insert_values(false, /*with-PK*/true);
+         $arr_inserts[] = $data_sopt->build_sql_insert_values(false, /*with-PK*/true, $skip_fields);
       }
 
-      $query = $entity_sopt->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
+      $query = $entity_sopt->build_sql_insert_values(true, /*with-PK*/true, $skip_fields)
+         . implode(',', $arr_inserts)
          . ' ON DUPLICATE KEY UPDATE '
          . 'sid=VALUES(sid), Tag=VALUES(Tag), SortOrder=VALUES(SortOrder), MinPoints=VALUES(MinPoints), '
          . 'UserCount=VALUES(UserCount), Score=VALUES(Score), Title=VALUES(Title), Text=VALUES(Text)';
 
       return db_query( "SurveyOption::persist_survey_options.on_dupl_key($sid)", $query );
    }//persist_survey_options
+
+   /*! \brief Updates SurveyOption-entries with $arr_upd = [ ID => [ diff_usercount, diff_score], ... ]. */
+   function update_aggregates_survey_options( $sid, $arr_upd )
+   {
+      if( !is_array($arr_upd) || count($arr_upd) == 0 )
+         return false;
+
+      $sid = (int)$sid;
+
+      $table_sopt = $GLOBALS['ENTITY_SURVEY_OPTION']->table;
+      $arr_inserts = array();
+      foreach( $arr_upd as $id => $arr )
+      {
+         list( $diff_usercount, $diff_score ) = $arr;
+         if( $diff_usercount || $diff_score )
+            $arr_inserts[] = "($id,$diff_usercount,$diff_score)";
+      }
+
+      $query = "INSERT INTO $table_sopt (ID,UserCount,Score) VALUES " . implode(', ', $arr_inserts)
+         . " ON DUPLICATE KEY UPDATE UserCount=UserCount+(VALUES(UserCount)), Score=Score+(VALUES(Score))";
+
+      return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid,$diff_usercount)", $query );
+   }//update_aggregates_survey_options
 
    function delete_survey_options( $sid, $arr_sopts_id )
    {

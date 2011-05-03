@@ -128,12 +128,32 @@ class SurveyControl
       return ( $survey->Status == SURVEY_STATUS_NEW );
    }//allow_survey_edit
 
-   function load_survey_options( &$survey )
+   /*! \brief Loads & fills Survey->SurveyOptions (with UserVotePoints from a users SurveyVote-entries if $uid given). */
+   function load_survey_options( &$survey, $uid=0 )
    {
       $sid = $survey->ID;
-      $iterator = new ListIterator( "SurveyControl::load_survey_options($sid)" );
+      $iterator = new ListIterator( "SurveyControl::load_survey_options($sid,$uid)");
+      if( $uid > 0 ) // with user-vote
+      {
+         $iterator->addQuerySQLMerge( new QuerySQL(
+            SQLP_FIELDS, "IFNULL(SV.Points,".SQL_NO_POINTS.") AS SV_Points",
+            SQLP_FROM,   "LEFT JOIN SurveyVote AS SV ON SV.sid=$sid AND SV.uid=$uid AND SV.Tag=SOPT.Tag" ) );
+      }
       $iterator = SurveyOption::load_survey_options( $iterator, $sid );
-      $survey->SurveyOptions = $iterator->getItems();
+
+      if( $uid > 0 ) // with user-vote
+      {
+         $arr = array();
+         while( list(,$arr_item) = $iterator->getListIterator() )
+         {
+            list( $sopt, $orow ) = $arr_item;
+            $sopt->UserVotePoints = ( @$orow['SV_Points'] == SQL_NO_POINTS ) ? null : (int)@$orow['SV_Points'];
+            $arr[] = $sopt;
+         }
+         $survey->SurveyOptions = $arr;
+      }
+      else
+         $survey->SurveyOptions = $iterator->getItems();
    }
 
    /*! \brief Builds markup-text for admin-survey from array of SurveyOption-objects. */
@@ -160,8 +180,13 @@ class SurveyControl
       return null;
    }
 
-   /*! \brief Adds/updated/deletes SurveyOption-table-entries. */
-   function update_merged_survey_options( $sid, $sopts_save, $sopts_del )
+   /*!
+    * \brief Adds/updates/deletes SurveyOption-table-entries.
+    * \param $sopts_save [ SurveyOption, ... ]
+    * \param $sopts_del [ SurveyOption.ID, ... ]
+    * \param $all_fields true = update all fields, false = skip UserCount/Score-fields for update (use defaults for insert)
+    */
+   function update_merged_survey_options( $sid, $sopts_save, $sopts_del, $all_fields )
    {
       $sid = (int)$sid;
 
@@ -174,14 +199,14 @@ class SurveyControl
       }
       SurveyOption::delete_survey_options( $sid, $arr_del );
 
-      SurveyOption::persist_survey_options( $sid, $sopts_save ); // add new, update existing
+      SurveyOption::persist_survey_options( $sid, $sopts_save, $all_fields ); // add new, update existing
    }//update_merged_survey_options
 
    /*! \brief Returns QuerySQL with restrictions to view surveys to what current user is allowed to view. */
-   function build_view_query_sql()
+   function build_view_query_sql( $is_admin )
    {
       $qsql = new QuerySQL();
-      if( !SurveyControl::is_survey_admin() )
+      if( !$is_admin )
          $qsql->add_part( SQLP_WHERE, "S.Status IN ('".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."')" );
       return $qsql;
    }//build_view_query_sql
@@ -231,7 +256,7 @@ class SurveyControl
 
          if( $sform && $arr_points )
          {
-            $sel_points = $def_points; //TODO use loaded user-config, else default
+            $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
             $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false ) . MED_SPACING;
          }
          $title = span('Title', make_html_safe($so->Title, true) );
