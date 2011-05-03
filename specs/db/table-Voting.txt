@@ -108,7 +108,7 @@ Important Notes:
 +-------------+----------------------------------------+------+-----+---------------------+----------------+
 | ID          | int(11)                                | NO   | PRI | NULL                | auto_increment |
 | uid         | int(11)                                | NO   | MUL | NULL                |                |
-| SurveyType  | enum('POINTS','SUM','SINGLE','MULTI')  | NO   |     | POINTS              |                |
+| Type        | enum('POINTS','SUM','SINGLE','MULTI')  | NO   |     | POINTS              |                |
 | Status      | enum('NEW','ACTIVE','CLOSED','DELETE') | NO   | MUL | NEW                 |                |
 | Flags       | tinyint(3) unsigned                    | NO   |     | 0                   |                |
 | MinPoints   | tinyint(4)                             | NO   |     | 0                   |                |
@@ -122,7 +122,7 @@ Important Notes:
 
 * uid : author of survey, FK to Players.ID
 
-* SurveyType : survey-type
+* Type : survey-type
    - POINTS = survey consists of options with selectbox to give points in range MinPoints..MaxPoints
    - SUM    = survey consists of options on which in sum MaxPoints can be given
    - SINGLE = survey consists of radio-buttons to select ONE of many options
@@ -136,8 +136,8 @@ Important Notes:
 
 * Flags : survey-flags, unused ATM
 
-* MinPoints : used for SurveyType=POINTS, otherwise = 0
-* MaxPoints : used for SurveyType=POINTS | SUM, otherwise = 0
+* MinPoints : used for Type=POINTS, otherwise = 0
+* MaxPoints : used for Type=POINTS | SUM, otherwise = 0
 
 * Created : creation-date of survey
 

@@ -65,10 +65,10 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
       SurveyControl::load_survey_options($survey);
 
    $s_old_status = $survey->Status;
-   $s_old_type = $survey->SurveyType;
+   $s_old_type = $survey->Type;
    $s_old_sopts = $survey->SurveyOptions;
 
-   $arr_types = SurveyControl::getSurveyTypeText();
+   $arr_types = SurveyControl::getTypeText();
    $arr_status = SurveyControl::getStatusText();
 
    // check + parse edit-form
@@ -135,7 +135,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $sform->add_row( array(
          'DESCRIPTION', T_('Current Type#survey'),
-         'TEXT',        SurveyControl::getSurveyTypeText($s_old_type) ));
+         'TEXT',        SurveyControl::getTypeText($s_old_type) ));
    $sform->add_row( array(
          'TAB',
          'SELECTBOX',    'type', 1, $arr_types, $vars['type'], false, ));
@@ -340,7 +340,7 @@ function parse_edit_form( &$survey )
 
    // read from props or set defaults
    $vars = array(
-      'type'            => $survey->SurveyType,
+      'type'            => $survey->Type,
       'status'          => $survey->Status,
       'min_points'      => $survey->MinPoints,
       'max_points'      => $survey->MaxPoints,
@@ -357,10 +357,10 @@ function parse_edit_form( &$survey )
    // parse URL-vars
    if( $is_posted )
    {
-      $survey->setSurveyType($vars['type']);
+      $survey->setType($vars['type']);
       $survey->setStatus($vars['status']);
 
-      if( $survey->SurveyType == SURVEY_TYPE_POINTS )
+      if( $survey->Type == SURVEY_TYPE_POINTS )
       {
          $new_value = $vars['min_points'];
          if( isNumber($new_value) && abs($new_value) <= SURVEY_POINTS_MAX )
@@ -409,7 +409,7 @@ function parse_edit_form( &$survey )
 
 
       // determine edits
-      if( $old_vals['type'] != $survey->SurveyType ) $edits[] = T_('Type#edits');
+      if( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#edits');
       if( $old_vals['status'] != $survey->Status ) $edits[] = T_('Status#edits');
       if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points#edits');
       if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points#edits');

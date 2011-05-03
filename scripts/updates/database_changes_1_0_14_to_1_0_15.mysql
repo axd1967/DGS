@@ -2234,3 +2234,8 @@ CREATE TABLE SurveyVote (
 ) ENGINE=MyISAM ;
 
 
+-- renamed field Survey.SurveyType -> Type
+ALTER TABLE Survey
+   CHANGE SurveyType Type enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS' ;
+
+

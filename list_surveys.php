@@ -57,8 +57,8 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    }
 
    $type_filter_array = array( T_('All') => '' );
-   foreach( SurveyControl::getSurveyTypeText() as $type => $text )
-      $type_filter_array[$text] = "S.SurveyType='$type'";
+   foreach( SurveyControl::getTypeText() as $type => $text )
+      $type_filter_array[$text] = "S.Type='$type'";
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_SURVEYS );
@@ -138,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
          $row_str[ 2] = implode(MINI_SPACING, $links);
       }
       if( @$table->Is_Column_Displayed[ 3] )
-         $row_str[ 3] = SurveyControl::getSurveyTypeText( $survey->SurveyType );
+         $row_str[ 3] = SurveyControl::getTypeText( $survey->Type );
       if( @$table->Is_Column_Displayed[ 4] )
          $row_str[ 4] = SurveyControl::getStatusText( $survey->Status );
       if( @$table->Is_Column_Displayed[ 5] )

@@ -45,7 +45,7 @@ class SurveyControl
    // ------------ static functions ----------------------------
 
    /*! \brief Returns survey-type-text or all type-texts (if arg=null). */
-   function getSurveyTypeText( $type=null )
+   function getTypeText( $type=null )
    {
       global $ARR_GLOBALS_SURVEY;
 
@@ -65,7 +65,7 @@ class SurveyControl
          return $ARR_GLOBALS_SURVEY[$key];
 
       if( !isset($ARR_GLOBALS_SURVEY[$key][$type]) )
-         error('invalid_args', "SurveyControl::getSurveyTypeText($type,$key)");
+         error('invalid_args', "SurveyControl::getTypeText($type,$key)");
       return $ARR_GLOBALS_SURVEY[$key][$type];
    }
 
@@ -242,7 +242,7 @@ class SurveyControl
          date(DATE_FMT2, $survey->Lastchanged) );
 
       $arr_points = $def_points = 0;
-      if( $survey->SurveyType == SURVEY_TYPE_POINTS )
+      if( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
 
       $vote = '';
@@ -261,7 +261,7 @@ class SurveyControl
          }
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
-         if( $survey->SurveyType == SURVEY_TYPE_POINTS )
+         if( $survey->Type == SURVEY_TYPE_POINTS )
             $s_opts[] = sprintf( "   <dt>%s<span class=\"Label\">%s</span></dt><dd><div class=\"Data\">%s</div></dd>",
                $vote, $label, trim($title . $text) );
       }

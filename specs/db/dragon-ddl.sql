@@ -834,7 +834,7 @@ CREATE TABLE IF NOT EXISTS `Statistics` (
 CREATE TABLE IF NOT EXISTS `Survey` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL,
-  `SurveyType` enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS',
+  `Type` enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS',
   `Status` enum('NEW','ACTIVE','CLOSED','DELETE') NOT NULL default 'NEW',
   `Flags` tinyint(3) unsigned NOT NULL default '0',
   `MinPoints` tinyint(4) NOT NULL default '0',

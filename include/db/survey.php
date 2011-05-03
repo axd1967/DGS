@@ -59,7 +59,7 @@ $ENTITY_SURVEY = new Entity( 'Survey',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_INT,  'ID', 'uid', 'Flags', 'MinPoints', 'MaxPoints',
-      FTYPE_ENUM, 'SurveyType', 'Status',
+      FTYPE_ENUM, 'Type', 'Status',
       FTYPE_TEXT, 'Title',
       FTYPE_DATE, 'Created', 'Lastchanged'
    );
@@ -68,7 +68,7 @@ class Survey
 {
    var $ID;
    var $uid;
-   var $SurveyType;
+   var $Type;
    var $Status;
    var $Flags;
    var $MinPoints;
@@ -88,7 +88,7 @@ class Survey
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
-      $this->setSurveyType( $type );
+      $this->setType( $type );
       $this->setStatus( $status );
       $this->Flags = (int)$flags;
       $this->MinPoints = (int)$min_points;
@@ -106,11 +106,11 @@ class Survey
       return print_r($this, true);
    }
 
-   function setSurveyType( $type )
+   function setType( $type )
    {
       if( !preg_match( "/^(".CHECK_SURVEY_TYPE.")$/", $type ) )
-         error('invalid_args', "Survey.setSurveyType($type)");
-      $this->SurveyType = $type;
+         error('invalid_args', "Survey.setType($type)");
+      $this->Type = $type;
    }
 
    function setStatus( $status )
@@ -155,7 +155,7 @@ class Survey
          $data = $GLOBALS['ENTITY_SURVEY']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
-      $data->set_value( 'SurveyType', $this->SurveyType );
+      $data->set_value( 'Type', $this->Type );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'MinPoints', $this->MinPoints );
@@ -168,7 +168,7 @@ class Survey
 
    function need_option_minpoints()
    {
-      return ( $this->SurveyType == SURVEY_TYPE_SINGLE || $this->SurveyType == SURVEY_TYPE_MULTI );
+      return ( $this->Type == SURVEY_TYPE_SINGLE || $this->Type == SURVEY_TYPE_MULTI );
    }
 
 
@@ -200,7 +200,7 @@ class Survey
             @$row['ID'],
             @$row['uid'],
             User::new_from_row( $row, 'SP_' ), // from Players SP
-            @$row['SurveyType'],
+            @$row['Type'],
             @$row['Status'],
             @$row['Flags'],
             @$row['MinPoints'],
