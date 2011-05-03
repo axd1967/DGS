@@ -296,7 +296,7 @@ class Bulletin
          return true;
 
       return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.last_check") : false;
-   }//allow_edit_bulletin
+   }//allow_bulletin_user_edit
 
    /*! \brief Returns true if this Bulletin.Category should be skipped according to Players.SkipBulletin-flags. */
    function skipCategory()
