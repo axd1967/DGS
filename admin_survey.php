@@ -194,7 +194,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
-   if( $survey->ID && Survey::is_status_viewable($survey->Status) )
+   if( $survey->ID && Survey::is_status_viewable($s_old_status) )
       $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
    $menu_array[T_('New survey')] = array( 'url' => "admin_survey.php", 'class' => 'AdminLink' );
 
