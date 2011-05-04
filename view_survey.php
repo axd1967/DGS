@@ -143,7 +143,7 @@ function handle_save_votes( $sid, $uid )
       SurveyOption::update_aggregates_survey_options( $sid, $arr_sopts_upd );
 
       if( $is_newvote )
-         $survey->updateUserCount( 1 );
+         Survey::update_user_count( $sid, 1 );
    }
    ta_end();
 }//handle_save_votes

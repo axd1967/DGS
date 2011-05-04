@@ -151,16 +151,6 @@ class Survey
       return $entityData->update( "Survey.update(%s)" );
    }
 
-   function updateUserCount( $diff )
-   {
-      if( !is_numeric($diff) )
-         error('invalid_args', "Survey.updateUserCount.check.diff({$this->ID},$diff)");
-
-      $table = $GLOBALS['ENTITY_SURVEY']->table;
-      return db_query( "Survey.updateUserCount.upd({$this->ID},$diff)",
-         "UPDATE $table SET UserCount=UserCount+($diff) WHERE ID={$this->ID} LIMIT 1" );
-   }
-
    function fillEntityData( $data=null )
    {
       if( is_null($data) )
@@ -279,6 +269,16 @@ class Survey
    function is_status_viewable( $status )
    {
       return ( $status == SURVEY_STATUS_ACTIVE || $status == SURVEY_STATUS_CLOSED );
+   }
+
+   function update_user_count( $sid, $diff )
+   {
+      if( !is_numeric($diff) )
+         error('invalid_args', "Survey.updateUserCount.check.diff($sid,$diff)");
+
+      $table = $GLOBALS['ENTITY_SURVEY']->table;
+      return db_query( "Survey.updateUserCount.upd($sid,$diff)",
+         "UPDATE $table SET UserCount=UserCount+($diff) WHERE ID=$sid LIMIT 1" );
    }
 
 } // end of 'Survey'
