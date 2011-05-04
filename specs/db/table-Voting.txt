@@ -197,21 +197,18 @@ Description:
 Description:
    Table to store user-specific votes for survey(-options).
 
-| Field  | Type                | Null | Key | Default | Extra |
-+--------+---------------------+------+-----+---------+-------+
-| sid    | int(11)             | NO   | PRI | NULL    |       |
-| uid    | int(11)             | NO   | PRI | 0       |       |
-| Tag    | tinyint(3) unsigned | NO   | PRI | 0       |       |
-| Points | tinyint(4)          | NO   |     | 0       |       |
+| Field  | Type       | Null | Key | Default | Extra |
++--------+------------+------+-----+---------+-------+
+| soid   | int(11)    | NO   | PRI | NULL    |       |
+| uid    | int(11)    | NO   | PRI | 0       |       |
+| Points | tinyint(4) | NO   |     | 0       |       |
 
 
 ## Fields:
 
-* sid : survey-id, FK to Survey.ID or SurveyOption.sid
+* soid : survey-option-id, FK to SurveyOption.ID
 
 * uid : user that voted on survey(-option), FK to Players.ID
-
-* Tag : tag user voted on (for survey), FK to SurveyOption.Tag
 
 * Points : points user gave with his/her vote on referenced survey-option
    - 0 = maybe points given, so no vote is represented by removed entry

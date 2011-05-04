@@ -103,7 +103,7 @@ function prepare_save_votes( $survey )
 
    //TODO handle different Survey-types, following is POINTS-type
 
-   $arr_votes_upd = array(); // Tag => new-vote-points
+   $arr_votes_upd = array(); // SOPT.ID => new-vote-points
    $arr_sopts_upd = array(); // SOPT.ID => diff-score
    $is_newvote = false;
 
@@ -118,7 +118,7 @@ function prepare_save_votes( $survey )
 
       if( is_null($so->UserVotePoints) ) // new vote
       {
-         $arr_votes_upd[$so->Tag] = $points;
+         $arr_votes_upd[$so->ID] = $points;
          $arr_sopts_upd[$so->ID] = $points;
          $is_newvote = true;
       }
@@ -126,7 +126,7 @@ function prepare_save_votes( $survey )
       {
          if( $so->UserVotePoints != $points ) // update existing vote
          {
-            $arr_votes_upd[$so->Tag] = $points;
+            $arr_votes_upd[$so->ID] = $points;
             $arr_sopts_upd[$so->ID] = $points - $so->UserVotePoints;
          }
       }

@@ -138,7 +138,7 @@ class SurveyControl
       {
          $iterator->addQuerySQLMerge( new QuerySQL(
             SQLP_FIELDS, "IFNULL(SV.Points,".SQL_NO_POINTS.") AS SV_Points",
-            SQLP_FROM,   "LEFT JOIN SurveyVote AS SV ON SV.sid=$sid AND SV.uid=$uid AND SV.Tag=SOPT.Tag" ) );
+            SQLP_FROM,   "LEFT JOIN SurveyVote AS SV ON SV.soid=SOPT.ID AND SV.uid=$uid" ) );
       }
 
       $iterator = SurveyOption::load_survey_options( $iterator, $sid, /*sort*/ !$order_result );

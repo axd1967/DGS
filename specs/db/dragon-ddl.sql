@@ -874,11 +874,10 @@ CREATE TABLE IF NOT EXISTS `SurveyOption` (
 --
 
 CREATE TABLE IF NOT EXISTS `SurveyVote` (
-  `sid` int(11) NOT NULL,
+  `soid` int(11) NOT NULL,
   `uid` int(11) NOT NULL default '0',
-  `Tag` tinyint(3) unsigned NOT NULL default '0',
   `Points` tinyint(4) NOT NULL default '0',
-  PRIMARY KEY  (`sid`,`uid`,`Tag`)
+  PRIMARY KEY  (`soid`,`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

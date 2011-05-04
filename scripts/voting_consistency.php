@@ -80,10 +80,12 @@ define('SEPLINE', "\n<p><hr>\n");
    echo "Fix Survey.UserCount ...<br>\n";
 
    $result = db_query( 'voting_consistency.check_survey_usercount',
-      "SELECT SV.sid, S.UserCount, COUNT(DISTINCT SV.uid) AS X_Count " .
-      "FROM SurveyVote AS SV INNER JOIN Survey AS S ON S.ID=SV.sid " .
+      "SELECT S.ID AS sid, S.UserCount, COUNT(DISTINCT SV.uid) AS X_Count " .
+      "FROM SurveyVote AS SV " .
+         "INNER JOIN SurveyOption AS SOPT ON SOPT.ID=SV.soid " .
+         "INNER JOIN Survey AS S ON S.ID=SOPT.sid " .
       "WHERE S.Status IN ('".SURVEY_STATUS_NEW."','".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."') " .
-      "GROUP BY SV.sid HAVING S.UserCount <> X_Count" );
+      "GROUP BY S.ID HAVING S.UserCount <> X_Count" );
    $upd_arr = array();
    while( $row = mysql_fetch_array( $result ) )
    {
@@ -109,9 +111,9 @@ define('SEPLINE', "\n<p><hr>\n");
    echo "Fix SurveyOption.Score ...<br>\n";
 
    $result = db_query( 'voting_consistency.check_surveyoption_score',
-      "SELECT SOPT.ID AS sopt_id, SV.sid, SOPT.Score, SUM(SV.Points) AS X_Score " .
+      "SELECT SOPT.ID AS sopt_id, SOPT.sid, SOPT.Score, SUM(SV.Points) AS X_Score " .
       "FROM SurveyVote AS SV " .
-         "INNER JOIN SurveyOption AS SOPT ON SOPT.sid=SV.sid AND SOPT.Tag=SV.Tag " .
+         "INNER JOIN SurveyOption AS SOPT ON SOPT.ID=SV.soid " .
          "INNER JOIN Survey AS S ON S.ID=SOPT.sid " .
       "WHERE S.Status IN ('".SURVEY_STATUS_NEW."','".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."') " .
       "GROUP BY SOPT.ID HAVING SOPT.Score <> X_Score" );
