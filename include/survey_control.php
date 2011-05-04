@@ -282,7 +282,7 @@ class SurveyControl
       else
          $action_text = '';
       // CSS needs something below floats
-      $notes = sprintf( make_html_safe( T_('Notes: %s and %s are shown behind the option titles.#survey'), true),
+      $notes = sprintf( make_html_safe( T_('Notes: %s, %s#survey'), true),
                         span('UserVote', make_html_safe( T_('Your votes#survey'), true), '(%s)'),
                         span('Result',   make_html_safe( T_('All votes#survey'), true), '(%s)') );
       #$action_text .= span('Notes', make_html_safe($notes, true) );
