@@ -74,9 +74,8 @@ function button_style( $button_nr=0)
  */
 function button_TD_anchor( $href, $text='', $title='' )
 {
-   //return "\n  <td class=Button><a class=Button href=\"$href\">$text</a></td>";
    $titlestr = ($title != '') ? " title=\"$title\"" : '';
-   return "<a class=Button href=\"$href\"$titlestr>$text</a>";
+   return ($href) ? "<a class=Button href=\"$href\"$titlestr>$text</a>" : "<a class=Button$titlestr>$text</a>";
 }
 
 /*!
