@@ -69,6 +69,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $s_old_sopts = $survey->SurveyOptions;
 
    $arr_types = SurveyControl::getTypeText();
+   unset($arr_types[SURVEY_TYPE_MULTI]); // TODO not supported yet
    $arr_status = SurveyControl::getStatusText();
 
    // check + parse edit-form
@@ -125,7 +126,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    if( $sid )
       $sform->add_row( array(
             'DESCRIPTION', T_('Vote User Count#survey'),
-            'TEXT',        ($survey->UserCount > 0) ? span('FormWarning', $survey->UserCount) : $survey->UserCount, ));
+            'TEXT',        $survey->hasUserVotes() ? span('FormWarning', $survey->UserCount) : $survey->UserCount, ));
 
    $sform->add_row( array( 'HR' ));
 
@@ -193,7 +194,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
-   if( $survey->ID )
+   if( $survey->ID && Survey::is_status_viewable($survey->Status) )
       $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
    $menu_array[T_('New survey')] = array( 'url' => "admin_survey.php", 'class' => 'AdminLink' );
 
@@ -300,9 +301,11 @@ function merge_survey_options( $survey, $arr_survey_opts )
 {
    $errors = array();
    $is_super_admin = SurveyControl::is_survey_admin(true);
+   $has_votes = $survey->hasUserVotes();
 
    $arr_tags = array(); # tag => 1
    $arr_merged_so = array();
+   $upd_forbidden = false;
    foreach( $arr_survey_opts as $so ) // check updates
    {
       $s_so = SurveyControl::findMatchingSurveyOption($survey, $so->Tag);
@@ -310,23 +313,22 @@ function merge_survey_options( $survey, $arr_survey_opts )
          $arr_merged_so[] = $so;
       else
       {
-         if( $survey->UserCount > 0 )
-            $errors[] = T_('Update of survey-options not possible: there are user-votes.');
-         else
-         {
-            $s_so->copyValues( $so );
-            $arr_merged_so[] = $s_so;
-         }
+         if( $has_votes && $s_so->copyValues($so, /*check*/true) ) // SOPT changed?
+            $upd_forbidden = true;
+         $s_so->copyValues( $so );
+         $arr_merged_so[] = $s_so;
       }
       $arr_tags[$so->Tag] = 1;
    }
+   if( $upd_forbidden )
+      $errors[] = T_('Update of survey-options not possible: there are user-votes.');
 
    $arr_del_so = array();
    foreach( $survey->SurveyOptions as $so ) // check deletes
    {
       if( isset($arr_tags[$so->Tag]) )
          continue;
-      if( $survey->UserCount > 0 )
+      if( $has_votes )
          $errors[] = sprintf( T_('Delete of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
       else
          $arr_del_so[] = $so;
@@ -415,12 +417,16 @@ function parse_edit_form( &$survey )
 
 
       // determine edits
+      $has_upd_status = ( $old_vals['status'] != $survey->Status );
       if( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#edits');
-      if( $old_vals['status'] != $survey->Status ) $edits[] = T_('Status#edits');
+      if( $has_upd_status ) $edits[] = T_('Status#edits');
       if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points#edits');
       if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points#edits');
       if( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title#edits');
       if( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options#edits');
+
+      if( $survey->hasUserVotes() && count($edits) > 0 && !( count($edits) == 1 && $has_upd_status ) )
+         $errors[] = T_('Update of survey not allowed, because there are user-votes.');
    }
 
    return array( $vars, array_unique($edits), $errors );

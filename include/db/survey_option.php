@@ -120,16 +120,35 @@ class SurveyOption
       return $data;
    }
 
-   /*! \brief Copies non-key-like fields from given SurveyOption-object to this object. */
-   function copyValues( $sopt )
+   /*!
+    * \brief Copies (if $check=false) or checks non-primary-key-like & non-aggregated fields
+    *        from given SurveyOption-object to this object.
+    * \param $check if true, ONLY check (without copy) if values-to-copy has diff; false = no check
+    * \return return true if $check=false, otherwise: return true (need copy) if there is a diff, false otherwise
+    */
+   function copyValues( $sopt, $check=false )
    {
-      // NOTE: no cloning of fields: ID, sid, Tag
+      // NOTE: no checking/cloning of fields: ID, sid, Tag; no check on Score (=aggregated-field)
+      if( $check )
+      {
+         if( $this->SortOrder != (int)$sopt->SortOrder )
+            return true;
+         if( $this->MinPoints != (int)$sopt->MinPoints )
+            return true;
+         if( strcmp($this->Title, $sopt->Title) != 0 )
+            return true;
+         if( strcmp($this->Text, $sopt->Text) != 0 )
+            return true;
+         return false; // no diff, no copy/update needed
+      }
+
       $this->SortOrder = (int)$sopt->SortOrder;
       $this->MinPoints = (int)$sopt->MinPoints;
-      $this->Score = (int)$sopt->Score;
+      //$this->Score = (int)$sopt->Score; // no copy of aggregrated-field
       $this->Title = $sopt->Title;
       $this->Text = $sopt->Text;
-   }
+      return true;
+   }//copyValues
 
    function buildLabel()
    {

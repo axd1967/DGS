@@ -179,6 +179,11 @@ class Survey
       return $data;
    }
 
+   function hasUserVotes()
+   {
+      return ( $this->UserCount > 0 );
+   }
+
    function need_option_minpoints()
    {
       return ( $this->Type == SURVEY_TYPE_SINGLE || $this->Type == SURVEY_TYPE_MULTI );
@@ -269,6 +274,11 @@ class Survey
       mysql_free_result($result);
 
       return $iterator;
+   }
+
+   function is_status_viewable( $status )
+   {
+      return ( $status == SURVEY_STATUS_ACTIVE || $status == SURVEY_STATUS_CLOSED );
    }
 
 } // end of 'Survey'

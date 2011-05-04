@@ -52,7 +52,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $status_filter_array = array( T_('All') => '' );
    foreach( SurveyControl::getStatusText() as $status => $text )
    {
-      if( $is_admin || $status == SURVEY_STATUS_ACTIVE || $status == SURVEY_STATUS_CLOSED )
+      if( $is_admin || Survey::is_status_viewable($status) )
          $status_filter_array[$text] = "S.Status='$status'";
    }
 
@@ -125,7 +125,10 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
       $row_str = array();
 
       if( @$table->Is_Column_Displayed[ 1] )
-         $row_str[ 1] = button_TD_anchor( "view_survey.php?sid={$survey->ID}", $survey->ID );
+      {
+         $href = ( Survey::is_status_viewable($survey->Status) ) ? "view_survey.php?sid={$survey->ID}" : '';
+         $row_str[ 1] = button_TD_anchor( $href, $survey->ID );
+      }
       if( @$table->Is_Column_Displayed[ 2] )
       {
          $links = array();
