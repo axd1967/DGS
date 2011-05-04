@@ -124,7 +124,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
             'TEXT',        formatDate($survey->Lastchanged), ));
    if( $sid )
       $sform->add_row( array(
-            'DESCRIPTION', T_('Vote User Count'),
+            'DESCRIPTION', T_('Vote User Count#survey'),
             'TEXT',        ($survey->UserCount > 0) ? span('FormWarning', $survey->UserCount) : $survey->UserCount, ));
 
    $sform->add_row( array( 'HR' ));

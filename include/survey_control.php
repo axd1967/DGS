@@ -242,7 +242,9 @@ class SurveyControl
 
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
       $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>
-      $extra_text = sprintf( '(%s) [%s]', span('Status', SurveyControl::getStatusText($survey->Status)),
+      $extra_text = sprintf( '(%s)%s [%s]',
+         span('Status', SurveyControl::getStatusText($survey->Status)),
+         ( $show_result ? span('Result', $survey->UserCount, ' #%s', T_('Vote User Count#survey')) : '' ),
          date(DATE_FMT2, $survey->Lastchanged) );
 
       $arr_points = $def_points = 0;

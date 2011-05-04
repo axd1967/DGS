@@ -95,6 +95,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
       $table->add_tablehead( 2, new TableHead( T_('Edit Survey#survey'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $table->add_tablehead( 5, T_('Author#survey'), 'User', 0, 'SP_Handle+');
    $table->add_tablehead( 6, T_('Title#survey'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
+   $table->add_tablehead( 9, T_('#Votes#survey'), 'Number', 0, 'UserCount+' );
    $table->add_tablehead( 7, T_('Created#survey'), 'Date', 0, 'Created-');
    $table->add_tablehead( 8, T_('Updated#survey'), 'Date', 0, 'Lastchanged-');
 
@@ -152,6 +153,8 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
          $row_str[ 7] = formatDate($survey->Created);
       if( @$table->Is_Column_Displayed[ 8] )
          $row_str[ 8] = formatDate($survey->Lastchanged);
+      if( @$table->Is_Column_Displayed[ 9] )
+         $row_str[ 9] = $survey->UserCount;
 
       $table->add_row( $row_str );
    }

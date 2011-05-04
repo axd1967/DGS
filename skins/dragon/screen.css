@@ -3336,6 +3336,10 @@ div.Survey div.Extra {
 div.Survey div.Extra span.Status {
    color: darkblue;
 }
+div.Survey div.Extra span.Result {
+   font-weight: bold;
+   color: darkred;
+}
 div.Survey div.Options {
    text-align: left;
    clear: left;
