@@ -122,6 +122,10 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
       $sform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        formatDate($survey->Lastchanged), ));
+   if( $sid )
+      $sform->add_row( array(
+            'DESCRIPTION', T_('Vote User Count'),
+            'TEXT',        ($survey->UserCount > 0) ? span('FormWarning', $survey->UserCount) : $survey->UserCount, ));
 
    $sform->add_row( array( 'HR' ));
 
@@ -234,14 +238,13 @@ function check_survey_options( $survey, $sopt_text )
       $sort_order++;
 
       if( preg_match("/<opt/i", $prev_text) )
-         $errors[] = sprintf( T_('Bad syntax around %s-%s. &lt;opt> found: &lt;opt> incomplete'),
-            $sort_order-1, $sort_order );
+         $errors[] = sprintf( T_('Bad syntax around %s. &lt;opt> found: &lt;opt> incomplete'), $sort_order );
 
       if( !is_null($last_so) && (string)$prev_text != '' )
          $last_so->Text = trim($prev_text);
 
       // checks
-      $sopt = $last_so = new SurveyOption( 0, $sid, 0, $sort_order );
+      $sopt = $last_so = new SurveyOption( 0, $sid, 0, $sort_order ); // $sid=0 for NEW
 
       if( isNumber($tag, false) && $tag >= 1 && $tag <= 255 )
       {
@@ -272,14 +275,16 @@ function check_survey_options( $survey, $sopt_text )
    }//while
 
    if( preg_match("/<opt/i", $rem_text) )
-      $errors[] = sprintf( T_('Bad syntax around %s-%s. &lt;opt> found in remaining text: &lt;opt> incomplete'),
-         $sort_order-1, $sort_order );
+      $errors[] = T_('Incomplete &lt;opt> found in remaining text');
    if( !is_null($last_so) && (string)$rem_text != '' )
       $last_so->Text = trim($rem_text);
 
    $arr_tag_keys = array_keys($arr_tags);
-   if( min($arr_tag_keys) != 1 || max($arr_tag_keys) != count($arr_so) )
-      $errors[] = sprintf( T_('Expecting tag-labels to be in range %s.'), build_range_text(1, count($arr_so)) );
+   if( count($arr_tag_keys) > 0 ) // needed for min/max()
+   {
+      if( min($arr_tag_keys) != 1 || max($arr_tag_keys) != count($arr_so) )
+         $errors[] = sprintf( T_('Expecting tag-labels to be in range %s.'), build_range_text(1, count($arr_so)) );
+   }
 
    $cnt_so = count($arr_so);
    if( $cnt_so < 1 || $cnt_so > MAX_SURVEY_OPTIONS )
@@ -305,8 +310,8 @@ function merge_survey_options( $survey, $arr_survey_opts )
          $arr_merged_so[] = $so;
       else
       {
-         if( $s_so->UserCount > 0 )
-            $errors[] = sprintf( T_('Update of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
+         if( $survey->UserCount > 0 )
+            $errors[] = T_('Update of survey-options not possible: there are user-votes.');
          else
          {
             $s_so->copyValues( $so );
@@ -321,7 +326,7 @@ function merge_survey_options( $survey, $arr_survey_opts )
    {
       if( isset($arr_tags[$so->Tag]) )
          continue;
-      if( $so->UserCount > 0 )
+      if( $survey->UserCount > 0 )
          $errors[] = sprintf( T_('Delete of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
       else
          $arr_del_so[] = $so;
@@ -379,7 +384,8 @@ function parse_edit_form( &$survey )
          if( $survey->MinPoints > $survey->MaxPoints )
             $errors[] = T_('Min-points must be smaller than max-points.');
          if( $survey->MinPoints == $survey->MaxPoints )
-            $errors[] = T_('Use %s-type instead of min-points equals max-points.');
+            $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
+               SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
       }
 
       $new_value = trim($vars['title']);

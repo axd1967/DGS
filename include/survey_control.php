@@ -57,7 +57,7 @@ class SurveyControl
          $arr[SURVEY_TYPE_POINTS]   = T_('Points#S_type');
          //TODO $arr[SURVEY_TYPE_SUM]      = T_('Sum#S_type');
          //TODO $arr[SURVEY_TYPE_SINGLE]   = T_('Single#S_type');
-         //TODO $arr[SURVEY_TYPE_MULTI]    = T_('Multi#S_type');
+         $arr[SURVEY_TYPE_MULTI]    = T_('Multi#S_type');
          $ARR_GLOBALS_SURVEY[$key] = $arr;
       }
 
@@ -129,17 +129,19 @@ class SurveyControl
    }//allow_survey_edit
 
    /*! \brief Loads & fills Survey->SurveyOptions (with UserVotePoints from a users SurveyVote-entries if $uid given). */
-   function load_survey_options( &$survey, $uid=0 )
+   function load_survey_options( &$survey, $uid=0, $order_result=false )
    {
       $sid = $survey->ID;
-      $iterator = new ListIterator( "SurveyControl::load_survey_options($sid,$uid)");
+      $iterator = new ListIterator( "SurveyControl::load_survey_options($sid,$uid)",
+         ( $order_result ? new QuerySQL( SQLP_ORDER, 'SOPT.Score DESC' ) : null ) );
       if( $uid > 0 ) // with user-vote
       {
          $iterator->addQuerySQLMerge( new QuerySQL(
             SQLP_FIELDS, "IFNULL(SV.Points,".SQL_NO_POINTS.") AS SV_Points",
             SQLP_FROM,   "LEFT JOIN SurveyVote AS SV ON SV.sid=$sid AND SV.uid=$uid AND SV.Tag=SOPT.Tag" ) );
       }
-      $iterator = SurveyOption::load_survey_options( $iterator, $sid );
+
+      $iterator = SurveyOption::load_survey_options( $iterator, $sid, /*sort*/ !$order_result );
 
       if( $uid > 0 ) // with user-vote
       {
@@ -182,11 +184,11 @@ class SurveyControl
 
    /*!
     * \brief Adds/updates/deletes SurveyOption-table-entries.
-    * \param $sopts_save [ SurveyOption, ... ]
+    * \param $sopts_save [ SurveyOption, ... ]; sets sid in given SurveyOptions for NEW entries
     * \param $sopts_del [ SurveyOption.ID, ... ]
-    * \param $all_fields true = update all fields, false = skip UserCount/Score-fields for update (use defaults for insert)
+    * \param $all_fields true = update all fields, false = skip Score-field for update (use defaults for insert)
     */
-   function update_merged_survey_options( $sid, $sopts_save, $sopts_del, $all_fields )
+   function update_merged_survey_options( $sid, &$sopts_save, $sopts_del, $all_fields )
    {
       $sid = (int)$sid;
 
@@ -236,6 +238,7 @@ class SurveyControl
          $sform->add_hidden( 'sid', $survey->ID );
       }
       $show_uservote = ( $survey->Status == SURVEY_STATUS_CLOSED );
+      $show_result = ( SurveyControl::is_survey_admin() || $survey->Status == SURVEY_STATUS_CLOSED );
 
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
       $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>
@@ -246,14 +249,12 @@ class SurveyControl
       if( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
 
-      $vote = $user_vote = '';
+      $vote = $user_vote = $result = '';
       $s_opts = array();
-      $cnt = 0;
       foreach( $survey->SurveyOptions as $so )
       {
          $fname = 'so' . $so->ID;
-         $label = span('Label', chr( ord('A') + $cnt ) .'.'); // CSS-counters not widely supported
-         $cnt++;
+         $label = span('Label', $so->buildLabel() );
 
          if( $sform && $arr_points )
          {
@@ -262,12 +263,15 @@ class SurveyControl
          }
          if( $show_uservote )
             $user_vote = span('UserVote', ( !is_null($so->UserVotePoints) ? formatNumber($so->UserVotePoints) : '-' ),
-                   '(%s)', 'title="' . T_('My vote#survey') . '"' );
+               '(%s)', T_('My vote#survey') );
+         if( $show_result )
+            $result = span('Result', ($survey->UserCount > 0 ? formatNumber($so->Score) : '-'),
+               '( %s )', T_('All votes#survey') );
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
 
          if( $survey->Type == SURVEY_TYPE_POINTS )
-            $s_opts[] = "   <dt>{$vote}{$label}</dt><dd><div class=\"Data\">{$title}{$user_vote}{$text}</div></dd>";
+            $s_opts[] = "   <dt>{$vote}{$label}</dt><dd><div class=\"Data\">{$title}{$user_vote}{$result}{$text}</div></dd>";
       }
       $opts_text = sprintf( "\n  <dl>\n%s\n  </dl>\n", implode("\n", $s_opts) );
 
@@ -276,7 +280,11 @@ class SurveyControl
       else
          $action_text = '';
       // CSS needs something below floats
-      $action_text .= span('Notes', T_('Notes: Your votes are shown behind the titles.#survey') );
+      $notes = sprintf( make_html_safe( T_('Notes: %s and %s are shown behind the option titles.#survey'), true),
+                        span('UserVote', make_html_safe( T_('Your votes#survey'), true), '(%s)'),
+                        span('Result',   make_html_safe( T_('All votes#survey'), true), '(%s)') );
+      #$action_text .= span('Notes', make_html_safe($notes, true) );
+      $action_text .= span('Notes', $notes);
 
       $div_survey = "\n<div class=\"Survey\">\n" .
             " <div class=\"Title\">$survey_title</div>\n" .

@@ -58,7 +58,7 @@ global $ENTITY_SURVEY; //PHP5
 $ENTITY_SURVEY = new Entity( 'Survey',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'uid', 'Flags', 'MinPoints', 'MaxPoints',
+      FTYPE_INT,  'ID', 'uid', 'Flags', 'MinPoints', 'MaxPoints', 'UserCount',
       FTYPE_ENUM, 'Type', 'Status',
       FTYPE_TEXT, 'Title',
       FTYPE_DATE, 'Created', 'Lastchanged'
@@ -73,6 +73,7 @@ class Survey
    var $Flags;
    var $MinPoints;
    var $MaxPoints;
+   var $UserCount;
    var $Title;
    var $Created;
    var $Lastchanged;
@@ -84,7 +85,7 @@ class Survey
 
    /*! \brief Constructs Survey-object with specified arguments. */
    function Survey( $id=0, $uid=0, $user=null, $type=SURVEY_TYPE_POINTS, $status=SURVEY_STATUS_NEW,
-                    $flags=0, $min_points=0, $max_points=0, $title='', $created=0, $lastchanged=0 )
+                    $flags=0, $min_points=0, $max_points=0, $user_count=0, $title='', $created=0, $lastchanged=0 )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -93,6 +94,7 @@ class Survey
       $this->Flags = (int)$flags;
       $this->MinPoints = (int)$min_points;
       $this->MaxPoints = (int)$max_points;
+      $this->UserCount = (int)$user_count;
       $this->Title = $title;
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
@@ -149,6 +151,16 @@ class Survey
       return $entityData->update( "Survey.update(%s)" );
    }
 
+   function updateUserCount( $diff )
+   {
+      if( !is_numeric($diff) )
+         error('invalid_args', "Survey.updateUserCount.check.diff({$this->ID},$diff)");
+
+      $table = $GLOBALS['ENTITY_SURVEY']->table;
+      return db_query( "Survey.updateUserCount.upd({$this->ID},$diff)",
+         "UPDATE $table SET UserCount=UserCount+($diff) WHERE ID={$this->ID} LIMIT 1" );
+   }
+
    function fillEntityData( $data=null )
    {
       if( is_null($data) )
@@ -160,6 +172,7 @@ class Survey
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'MinPoints', $this->MinPoints );
       $data->set_value( 'MaxPoints', $this->MaxPoints );
+      $data->set_value( 'UserCount', $this->UserCount );
       $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'Title', $this->Title );
@@ -205,6 +218,7 @@ class Survey
             @$row['Flags'],
             @$row['MinPoints'],
             @$row['MaxPoints'],
+            @$row['UserCount'],
             @$row['Title'],
             @$row['X_Created'],
             @$row['X_Lastchanged']

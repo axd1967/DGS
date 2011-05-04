@@ -839,6 +839,7 @@ CREATE TABLE IF NOT EXISTS `Survey` (
   `Flags` tinyint(3) unsigned NOT NULL default '0',
   `MinPoints` tinyint(4) NOT NULL default '0',
   `MaxPoints` tinyint(4) NOT NULL default '0',
+  `UserCount` mediumint(8) unsigned NOT NULL default '0',
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `Title` varchar(255) NOT NULL,
@@ -855,13 +856,12 @@ CREATE TABLE IF NOT EXISTS `Survey` (
 
 CREATE TABLE IF NOT EXISTS `SurveyOption` (
   `ID` int(11) NOT NULL auto_increment,
-  `sid` int(11) NOT NULL,
+  `sid` int(11) NOT NULL default '0',
   `Tag` tinyint(3) unsigned NOT NULL default '0',
   `SortOrder` tinyint(3) unsigned NOT NULL default '0',
   `MinPoints` tinyint(4) NOT NULL default '0',
-  `UserCount` mediumint(8) unsigned NOT NULL default '0',
   `Score` int(11) NOT NULL default '0',
-  `Title` varchar(255) NOT NULL,
+  `Title` varchar(255) NOT NULL default '',
   `Text` text NOT NULL,
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `sidTag` (`sid`,`Tag`)

@@ -2239,3 +2239,15 @@ ALTER TABLE Survey
    CHANGE SurveyType Type enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS' ;
 
 
+-- added defaults to avoid warning on INSERT .. ON DUPLICATE KEY ...
+ALTER TABLE SurveyOption
+   MODIFY sid int NOT NULL default 0,
+   MODIFY Title varchar(255) NOT NULL default '' ;
+
+-- refactor SurveyOption.UserCount into Survey-table
+ALTER TABLE SurveyOption
+   DROP COLUMN UserCount ;
+ALTER TABLE Survey
+   ADD UserCount mediumint unsigned not null default '0' AFTER MaxPoints ;
+
+

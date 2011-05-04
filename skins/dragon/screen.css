@@ -3367,6 +3367,15 @@ div.Survey div.Options span.UserVote {
    font-size: smaller;
    color: blue;
 }
+div.Survey div.Options span.Result {
+   width: 3em;
+   margin-left: 1em;
+   vertical-align: top;
+   text-align: right;
+   font-size: smaller;
+   font-weight: bold;
+   color: darkred;
+}
 div.Survey div.Options div.Text {
    padding-top: 3px;
 }
@@ -3380,7 +3389,12 @@ div.Survey div.Actions span.Notes {
    margin-left: 2em;
    font-size: 80%;
    font-style: italic;
+}
+div.Survey div.Actions span.Notes span.UserVote {
    color: blue;
+}
+div.Survey div.Actions span.Notes span.Result {
+   color: darkred;
 }
 /*div.Survey * { border: 1px solid blue; }
 div.Survey div { border: 1px solid red; }

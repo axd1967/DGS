@@ -41,7 +41,7 @@ global $ENTITY_SURVEY_OPTION; //PHP5
 $ENTITY_SURVEY_OPTION = new Entity( 'SurveyOption',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'sid', 'Tag', 'SortOrder', 'MinPoints', 'UserCount', 'Score',
+      FTYPE_INT,  'ID', 'sid', 'Tag', 'SortOrder', 'MinPoints', 'Score',
       FTYPE_TEXT, 'Title', 'Text'
    );
 
@@ -52,7 +52,6 @@ class SurveyOption
    var $Tag;
    var $SortOrder;
    var $MinPoints;
-   var $UserCount;
    var $Score;
    var $Title;
    var $Text;
@@ -62,15 +61,13 @@ class SurveyOption
    var $UserVotePoints; // SurveyVote.Points of specific user; null=unset
 
    /*! \brief Constructs SurveyOption-object with specified arguments. */
-   function SurveyOption( $id=0, $sid=0, $tag=0, $sort_order=0, $min_points=0, $user_count=0, $score=0,
-                          $title='', $text='' )
+   function SurveyOption( $id=0, $sid=0, $tag=0, $sort_order=0, $min_points=0, $score=0, $title='', $text='' )
    {
       $this->ID = (int)$id;
       $this->sid = (int)$sid;
       $this->Tag = (int)$tag;
       $this->SortOrder = (int)$sort_order;
       $this->MinPoints = (int)$min_points;
-      $this->UserCount = (int)$user_count;
       $this->Score = (int)$score;
       $this->Title = $title;
       $this->Text = $text;
@@ -117,7 +114,6 @@ class SurveyOption
       $data->set_value( 'Tag', $this->Tag );
       $data->set_value( 'SortOrder', $this->SortOrder );
       $data->set_value( 'MinPoints', $this->MinPoints );
-      $data->set_value( 'UserCount', $this->UserCount );
       $data->set_value( 'Score', $this->Score );
       $data->set_value( 'Title', $this->Title );
       $data->set_value( 'Text', $this->Text );
@@ -130,24 +126,29 @@ class SurveyOption
       // NOTE: no cloning of fields: ID, sid, Tag
       $this->SortOrder = (int)$sopt->SortOrder;
       $this->MinPoints = (int)$sopt->MinPoints;
-      $this->UserCount = (int)$sopt->UserCount;
       $this->Score = (int)$sopt->Score;
       $this->Title = $sopt->Title;
       $this->Text = $sopt->Text;
+   }
+
+   function buildLabel()
+   {
+      // CSS-counters not widely supported, so use manual labels
+      return chr( ord('A') + $this->SortOrder - 1 ) . '.';
    }
 
 
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of SurveyOption-objects for given survey-id and survey-option-id. */
-   function build_query_sql( $sid, $sopt_id=0 )
+   function build_query_sql( $sid, $sopt_id=0, $with_sort=false )
    {
       $qsql = $GLOBALS['ENTITY_SURVEY_OPTION']->newQuerySQL('SOPT');
       if( $sid > 0 )
          $qsql->add_part( SQLP_WHERE, "SOPT.sid=$sid" );
       if( $sopt_id > 0 )
          $qsql->add_part( SQLP_WHERE, "SOPT.ID=$sopt_id" );
-      else
+      if( $with_sort )
          $qsql->add_part( SQLP_ORDER, 'SOPT.SortOrder ASC' );
       return $qsql;
    }
@@ -162,7 +163,6 @@ class SurveyOption
             @$row['Tag'],
             @$row['SortOrder'],
             @$row['MinPoints'],
-            @$row['UserCount'],
             @$row['Score'],
             @$row['Title'],
             @$row['Text']
@@ -174,7 +174,7 @@ class SurveyOption
    function cloneSurveyOption( $sopt )
    {
       return new SurveyOption( $sopt->ID, $sopt->sid, $sopt->Tag, $sopt->SortOrder, $sopt->MinPoints,
-         $sopt->UserCount, $sopt->Score, $sopt->Title, $sopt->Text );
+         $sopt->Score, $sopt->Title, $sopt->Text );
    }
 
    /*!
@@ -184,6 +184,9 @@ class SurveyOption
     */
    function load_survey_option( $sopt_id )
    {
+      if( !is_numeric($sopt_id) || $sopt_id <= 0 )
+         error('invalid_args', "SurveyOption::load_survey_option($sopt_id)");
+
       $qsql = SurveyOption::build_query_sql( 0, $sopt_id );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
@@ -192,9 +195,9 @@ class SurveyOption
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with SurveyOption-objects. */
-   function load_survey_options( $iterator, $sid )
+   function load_survey_options( $iterator, $sid, $with_sort=true )
    {
-      $qsql = SurveyOption::build_query_sql( $sid, 0 );
+      $qsql = SurveyOption::build_query_sql( $sid, 0, $with_sort );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "SurveyOption.load_survey_options", $query );
@@ -211,17 +214,19 @@ class SurveyOption
       return $iterator;
    }
 
-   function persist_survey_options( $sid, $arr_sopts, $all_fields=true )
+   function persist_survey_options( $sid, &$arr_sopts, $all_fields=true )
    {
       if( !is_array($arr_sopts) || count($arr_sopts) == 0 )
          return false;
 
-      $skip_fields = ($all_fields) ? null : array( 'UserCount', 'Score' );
+      $skip_fields = ($all_fields) ? null : array( 'Score' );
 
       $entity_sopt = $GLOBALS['ENTITY_SURVEY_OPTION']->newEntityData();
       $arr_inserts = array();
       foreach( $arr_sopts as $so )
       {
+         if( $so->sid == 0 )
+            $so->sid = $sid;
          $data_sopt = $so->fillEntityData( $entity_sopt );
          $arr_inserts[] = $data_sopt->build_sql_insert_values(false, /*with-PK*/true, $skip_fields);
       }
@@ -230,12 +235,12 @@ class SurveyOption
          . implode(',', $arr_inserts)
          . ' ON DUPLICATE KEY UPDATE '
          . 'sid=VALUES(sid), Tag=VALUES(Tag), SortOrder=VALUES(SortOrder), MinPoints=VALUES(MinPoints), '
-         . 'UserCount=VALUES(UserCount), Score=VALUES(Score), Title=VALUES(Title), Text=VALUES(Text)';
+         . 'Score=VALUES(Score), Title=VALUES(Title), Text=VALUES(Text)';
 
       return db_query( "SurveyOption::persist_survey_options.on_dupl_key($sid)", $query );
    }//persist_survey_options
 
-   /*! \brief Updates SurveyOption-entries with $arr_upd = [ ID => [ diff_usercount, diff_score], ... ]. */
+   /*! \brief Updates SurveyOption-entries with $arr_upd = [ ID => diff_score, ... ]. */
    function update_aggregates_survey_options( $sid, $arr_upd )
    {
       if( !is_array($arr_upd) || count($arr_upd) == 0 )
@@ -243,19 +248,18 @@ class SurveyOption
 
       $sid = (int)$sid;
 
-      $table_sopt = $GLOBALS['ENTITY_SURVEY_OPTION']->table;
+      $table = $GLOBALS['ENTITY_SURVEY_OPTION']->table;
       $arr_inserts = array();
-      foreach( $arr_upd as $id => $arr )
+      foreach( $arr_upd as $id => $diff_score )
       {
-         list( $diff_usercount, $diff_score ) = $arr;
-         if( $diff_usercount || $diff_score )
-            $arr_inserts[] = "($id,$diff_usercount,$diff_score)";
+         if( $diff_score && is_numeric($diff_score) )
+            $arr_inserts[] = "($id,$diff_score)";
       }
 
-      $query = "INSERT INTO $table_sopt (ID,UserCount,Score) VALUES " . implode(', ', $arr_inserts)
-         . " ON DUPLICATE KEY UPDATE UserCount=UserCount+(VALUES(UserCount)), Score=Score+(VALUES(Score))";
+      $query = "INSERT INTO $table (ID,Score) VALUES " . implode(', ', $arr_inserts)
+         . " ON DUPLICATE KEY UPDATE Score=Score+(VALUES(Score))";
 
-      return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid,$diff_usercount)", $query );
+      return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid)", $query );
    }//update_aggregates_survey_options
 
    function delete_survey_options( $sid, $arr_sopts_id )

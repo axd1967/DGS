@@ -113,6 +113,7 @@ Important Notes:
 | Flags       | tinyint(3) unsigned                    | NO   |     | 0                   |                |
 | MinPoints   | tinyint(4)                             | NO   |     | 0                   |                |
 | MaxPoints   | tinyint(4)                             | NO   |     | 0                   |                |
+| UserCount   | mediumint(8) unsigned                  | NO   |     | 0                   |                |
 | Created     | datetime                               | NO   |     | 0000-00-00 00:00:00 |                |
 | Lastchanged | datetime                               | NO   |     | 0000-00-00 00:00:00 |                |
 | Title       | varchar(255)                           | NO   |     | NULL                |                |
@@ -137,7 +138,10 @@ Important Notes:
 * Flags : survey-flags, unused ATM
 
 * MinPoints : used for Type=POINTS, otherwise = 0
+
 * MaxPoints : used for Type=POINTS | SUM, otherwise = 0
+
+* UserCount : aggregated number of all users (that voted on survey)
 
 * Created : creation-date of survey
 
@@ -160,7 +164,6 @@ Description:
 | Tag       | tinyint(3) unsigned   | NO   |     | 0       |                |
 | SortOrder | tinyint(3) unsigned   | NO   |     | 0       |                |
 | MinPoints | tinyint(4)            | NO   |     | 0       |                |
-| UserCount | mediumint(8) unsigned | NO   |     | 0       |                |
 | Score     | int(11)               | NO   |     | 0       |                |
 | Title     | varchar(255)          | NO   |     | NULL    |                |
 | Text      | text                  | NO   |     | NULL    |                |
@@ -179,8 +182,6 @@ Description:
 * MinPoints : number of points to add to Score for this survey-option
    - 0 for Survey.Type=POINTS|SUM, because available points are given by Survey.Min/MaxPoints
    - points for Survey.Type=SINGLE|MULTI, usually 1 (but allow weighted options with different points)
-
-* UserCount : aggregated number of all users (that voted on survey)
 
 * Score : aggregated value of all user-votes on this survey-option
 

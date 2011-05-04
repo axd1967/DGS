@@ -40,6 +40,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    $sid = (int) @$_REQUEST['sid'];
    if( $sid <= 0 )
       error('invalid_args', "view_survey.check_args($sid)");
+   $show_result = (bool) @$_REQUEST['result'];
 
    $page = "view_survey.php";
 
@@ -49,7 +50,9 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    $survey = Survey::load_survey_by_query( $qsql, /*withrow*/false );
    if( is_null($survey) )
       error('unknown_survey', "view_survey.find_survey($sid)");
-   SurveyControl::load_survey_options($survey, $my_id); // with my-votes
+
+   $sql_sort = ($show_result) ? new QuerySQL( SQLP_ORDER, "SOPT.Score DESC" ) : null;
+   SurveyControl::load_survey_options($survey, $my_id, $sql_sort); // with my-votes
 
    // checks
    $errors = array();
@@ -93,18 +96,16 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
 }//main
 
 
-// sets globals: $arr_votes_upd, $arr_sopts_upd, $old_score, $new_score, $upd_usercount
-// returns errors, or empty array on success
+// sets globals: $arr_votes_upd, $arr_sopts_upd, $is_newvote
 function prepare_save_votes( $survey )
 {
-   global $arr_votes_upd, $arr_sopts_upd, $old_score, $new_score, $upd_usercount;
+   global $arr_votes_upd, $arr_sopts_upd, $is_newvote;
 
    //TODO handle different Survey-types, following is POINTS-type
 
    $arr_votes_upd = array(); // Tag => new-vote-points
-   $arr_sopts_upd = array(); // SOPT.ID => [ diff-usercount, diff-score ]
-   $upd_usercount = false;
-   $old_score = $new_score = 0;
+   $arr_sopts_upd = array(); // SOPT.ID => diff-score
+   $is_newvote = false;
 
    foreach( $survey->SurveyOptions as $so )
    {
@@ -118,40 +119,31 @@ function prepare_save_votes( $survey )
       if( is_null($so->UserVotePoints) ) // new vote
       {
          $arr_votes_upd[$so->Tag] = $points;
-         $arr_sopts_upd[$so->ID] = array( 1, $points );
-         $upd_usercount = true;
+         $arr_sopts_upd[$so->ID] = $points;
+         $is_newvote = true;
       }
       else
       {
-         $old_score += $so->UserVotePoints;
          if( $so->UserVotePoints != $points ) // update existing vote
          {
             $arr_votes_upd[$so->Tag] = $points;
-            $arr_sopts_upd[$so->ID] = array( 0, $points - $so->UserVotePoints );
+            $arr_sopts_upd[$so->ID] = $points - $so->UserVotePoints;
          }
       }
-      $new_score += $points;
    }
 }//prepare_save_votes
 
 function handle_save_votes( $sid, $uid )
 {
-   global $arr_votes_upd, $arr_sopts_upd, $old_score, $new_score, $upd_usercount;
+   global $arr_votes_upd, $arr_sopts_upd, $is_newvote;
 
    ta_begin();
    {//HOT-section to update survey-votes
       SurveyVote::persist_survey_votes( $sid, $uid, $arr_votes_upd );
       SurveyOption::update_aggregates_survey_options( $sid, $arr_sopts_upd );
 
-      /* TODO (later)
-      if( $upd_usercount )
-         $survey->UserCount++;
-      $upd_score = ( $old_score != $new_score );
-      if( $upd_score )
-         $survey->Score += $new_score - $old_score;
-      if( $upd_usercount || $upd_score )
-         $survey->update();
-      */
+      if( $is_newvote )
+         $survey->updateUserCount( 1 );
    }
    ta_end();
 }//handle_save_votes
