@@ -237,11 +237,12 @@ class SurveyControl
          $sform = new Form( 'surveyVote', $page, FORM_GET );
          $sform->add_hidden( 'sid', $survey->ID );
       }
-      $show_uservote = ( $survey->Status == SURVEY_STATUS_CLOSED );
+      $show_uservote = Survey::is_status_viewable($survey->Status);
       $show_result = ( SurveyControl::is_survey_admin() || $survey->Status == SURVEY_STATUS_CLOSED );
 
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
       $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>
+
       $extra_text = sprintf( '(%s)%s [%s]',
          span('Status', SurveyControl::getStatusText($survey->Status)),
          ( $show_result ? span('Result', $survey->UserCount, ' #%s', T_('Vote User Count#survey')) : '' ),
@@ -256,26 +257,33 @@ class SurveyControl
       foreach( $survey->SurveyOptions as $so )
       {
          $fname = 'so' . $so->ID;
-         $label = span('Label', $so->buildLabel() );
+         $label = $so->buildLabel();
 
          if( $sform && $arr_points )
          {
             $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
-            $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false ) . MED_SPACING;
+            $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
          }
          if( $show_uservote )
             $user_vote = span('UserVote', ( !is_null($so->UserVotePoints) ? formatNumber($so->UserVotePoints) : '-' ),
-               '(%s)', T_('My vote#survey') );
+               '[%s]', T_('My vote#survey') );
          if( $show_result )
-            $result = span('Result', ($survey->UserCount > 0 ? formatNumber($so->Score) : '-'),
-               '( %s )', T_('All votes#survey') );
+         {
+            $result = ( $survey->hasUserVotes() )
+               ? span('Result', formatNumber($so->Score), '%s', T_('All votes#survey') )
+               : '';
+         }
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
 
          if( $survey->Type == SURVEY_TYPE_POINTS )
-            $s_opts[] = "   <dt>{$vote}{$label}</dt><dd><div class=\"Data\">{$title}{$user_vote}{$result}{$text}</div></dd>";
+         {
+            $s_opts[] = "   <tr><td class=\"Result\">$result</td> <td class=\"UserVote\">$user_vote</td> " .
+               "<td class=\"FormElem\">$vote</td> <td class=\"Label\">$label</td> " .
+               "<td class=\"Data\">{$title}{$text}</td></tr>";
+         }
       }
-      $opts_text = sprintf( "\n  <dl>\n%s\n  </dl>\n", implode("\n", $s_opts) );
+      $opts_text = sprintf( "\n  <table>\n%s\n  </table>\n", implode("\n", $s_opts) );
 
       if( $sform )
          $action_text = $sform->print_insert_submit_button( 'save', T_('Save vote') );
@@ -283,8 +291,8 @@ class SurveyControl
          $action_text = '';
       // CSS needs something below floats
       $notes = sprintf( make_html_safe( T_('Notes: %s, %s#survey'), true),
-                        span('UserVote', make_html_safe( T_('Your votes#survey'), true), '(%s)'),
-                        span('Result',   make_html_safe( T_('All votes#survey'), true), '(%s)') );
+                        span('Result',   make_html_safe( T_('All votes#survey'), true), '%s'),
+                        span('UserVote', make_html_safe( T_('Your vote#survey'), true), '[%s]') );
       #$action_text .= span('Notes', make_html_safe($notes, true) );
       $action_text .= span('Notes', $notes);
 

@@ -3312,6 +3312,7 @@ span.VotingRestricted {
 
 td.Preview div.Survey {
    width: 100%;
+   max-width: 800px;
    margin: 0px;
 }
 div.Survey {
@@ -3341,56 +3342,46 @@ div.Survey div.Extra span.Result {
    color: darkred;
 }
 div.Survey div.Options {
-   text-align: left;
-   clear: left;
-   float: left;
-}
-div.Survey div.Options dt {
-   text-indent: 2em;
-   margin-bottom: 0.3em;
-   padding: 3px 3px;
-   float: left;
    clear: left;
 }
-div.Survey div.Options dd {
-   margin-bottom: 0.5em;
-   float: left;
+div.Survey div.Options table {
+   margin: 1em auto 1em 1.5em;
 }
-div.Survey div.Options dd > div.Data {
-   padding: 3px 3px;
-   margin-left: -2em;
+div.Survey div.Options table tr {
+   vertical-align: baseline;
 }
-div.Survey div.Options span.Title {
-   font-weight: bold;
-}
-div.Survey div.Options span.UserVote {
-   width: 3em;
-   margin-left: 2em;
-   vertical-align: top;
+div.Survey div.Options table td {
+   padding: 3px 3px 0.8em 0.5em;
    text-align: right;
-   font-size: smaller;
-   color: blue;
 }
-div.Survey div.Options span.Result {
-   width: 3em;
-   margin-left: 1em;
-   vertical-align: top;
-   text-align: right;
+div.Survey div.Options td.Result {
+   white-space: nowrap;
    font-size: smaller;
    font-weight: bold;
    color: darkred;
 }
+div.Survey div.Options td.UserVote {
+   white-space: nowrap;
+   font-size: smaller;
+   color: blue;
+}
+div.Survey div.Options td.Data {
+   text-align: left;
+}
+div.Survey div.Options span.Title {
+   font-weight: bold;
+}
 div.Survey div.Options div.Text {
+   display: block;
    padding-top: 3px;
 }
 div.Survey div.Actions {
-   clear: left;
    text-align: left;
-   font-size: larger;
    padding: 5px 0px 10px 1em;
+   font-size: larger;
 }
 div.Survey div.Actions span.Notes {
-   margin-left: 2em;
+   margin-left: 1.5em;
    font-size: 80%;
    font-style: italic;
 }
@@ -3402,7 +3393,7 @@ div.Survey div.Actions span.Notes span.Result {
 }
 /*div.Survey * { border: 1px solid blue; }
 div.Survey div { border: 1px solid red; }
-div.Survey dd { border: 1px solid green; }*/
+div.Survey td { border: 1px solid green; }*/
 
 
 /* ------------------------- */
