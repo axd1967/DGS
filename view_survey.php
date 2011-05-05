@@ -101,20 +101,14 @@ function prepare_save_votes( $survey )
 {
    global $arr_votes_upd, $arr_sopts_upd, $is_newvote;
 
-   //TODO handle different Survey-types, following is POINTS-type
-
    $arr_votes_upd = array(); // SOPT.ID => new-vote-points
    $arr_sopts_upd = array(); // SOPT.ID => diff-score
    $is_newvote = false;
+# error_log("#URL# ".print_r($_REQUEST,true)); //FIXME
 
    foreach( $survey->SurveyOptions as $so )
    {
-      $key = 'so'.$so->ID;
-      if( !isset($_REQUEST[$key]) )
-         continue;
-      $points = @$_REQUEST[$key];
-      if( !is_numeric($points) )
-         error('invalid_args', "view_survey.prepare_save_votes.check_points($sid,$key,$points)");
+      $points = get_new_points( $survey->ID, $survey->Type, $so );
 
       if( is_null($so->UserVotePoints) ) // new vote
       {
@@ -133,9 +127,41 @@ function prepare_save_votes( $survey )
    }
 }//prepare_save_votes
 
+// parse new points from URL-args
+function get_new_points( $sid, $survey_type, $so )
+{
+   $need_key_val = ( $survey_type == SURVEY_TYPE_POINTS );
+   $key = 'so'.$so->ID;
+   $is_val_set = isset($_REQUEST[$key]);
+   if( $need_key_val && !$is_val_set )
+      error('miss_args', "view_survey.get_new_points($sid,$key,$survey_type,$need_key_val)");
+
+   if( $is_val_set )
+   {
+      $arg_points = @$_REQUEST[$key];
+      if( !is_numeric($arg_points) )
+         error('invalid_args', "view_survey.get_new_points.check_points($sid,$key,$arg_points)");
+   }
+   else
+      $arg_points = null;
+
+   if( $survey_type == SURVEY_TYPE_POINTS )
+      $points = (int)$arg_points; // value from selectbox
+   elseif( $survey_type == SURVEY_TYPE_MULTI )
+      $points = ($arg_points) ? $so->MinPoints : 0;
+   else
+      error('invalid_args', "view_survey.get_new_points.check_type($sid,$key,$survey_type,$arg_points)");
+
+# $p2= is_null($arg_points) ? 'null' : $arg_points; //FIXME
+# error_log("#A sid=$sid need-key=[$need_key_val] is_val_set=[$is_val_set] arg_p=[$p2] => points [$points]"); //FIXME
+   return $points;
+}//get_new_points
+
 function handle_save_votes( $sid, $uid )
 {
    global $arr_votes_upd, $arr_sopts_upd, $is_newvote;
+# error_log("#votes# ".print_r($arr_votes_upd,true)); //FIXME
+# error_log("#sopts# ".print_r($arr_sopts_upd,true)); //FIXME
 
    ta_begin();
    {//HOT-section to update survey-votes

@@ -69,7 +69,6 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $s_old_sopts = $survey->SurveyOptions;
 
    $arr_types = SurveyControl::getTypeText();
-   unset($arr_types[SURVEY_TYPE_MULTI]); // TODO not supported yet
    $arr_status = SurveyControl::getStatusText();
 
    // check + parse edit-form
@@ -227,7 +226,7 @@ function check_survey_options( $survey, $sopt_text )
    $sort_order = 0;
    $arr_tags = array(); # tag => 1
 
-   // matches: $1=prev-opt-text, $2=tag, $3=points, $4=title, $5=remaining
+   // matches: $1=prev-opt-text, $2=tag, [ $3=points ], $4=title, $5=remaining
    $regex = "%^(.*?)<opt\\s+(\\S+)\\s+(?:(\S+)\s+)?\"([^\"]*?)\"\\s*>(.*)$%s";
 
    while( preg_match($regex, $rem_text, $matches) )
@@ -261,11 +260,13 @@ function check_survey_options( $survey, $sopt_text )
 
       if( !$need_points || (string)$points == '' )
          $sopt->MinPoints = ($need_points) ? 1 : 0; // default
-      elseif( isNumber($points, false) && abs($points) <= SURVEY_POINTS_MAX )
+      elseif( isNumber($points) && abs($points) <= SURVEY_POINTS_MAX )
          $sopt->MinPoints = (int)$points;
       else
          $errors[] = sprintf( T_('Expecting number for min-points in %s. &lt;opt> to be in range %s or empty for default, but was [%s].'),
             $sort_order, build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX), $points );
+      if( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
+         $errors[] = sprintf( T_('Value 0 is not allowed for min-points in %s. &lt;opt>.'), $sort_order );
 
       if( strlen($title) > 0 )
          $sopt->Title = $title;
@@ -388,6 +389,16 @@ function parse_edit_form( &$survey )
          if( $survey->MinPoints == $survey->MaxPoints )
             $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
                SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
+      }
+      elseif( $survey->Type == SURVEY_TYPE_MULTI )
+      {
+         $new_value = $vars['min_points'];
+         if( !isNumber($new_value) || $new_value )
+            $errors[] = sprintf( T_('Expecting value 0 for min-points, but was [%s].'), $new_value );
+
+         $new_value = $vars['max_points'];
+         if( !isNumber($new_value) || $new_value )
+            $errors[] = sprintf( T_('Expecting value 0 for max-points, but was [%s].'), $new_value );
       }
 
       $new_value = trim($vars['title']);

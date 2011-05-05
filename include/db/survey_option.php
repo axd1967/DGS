@@ -275,10 +275,15 @@ class SurveyOption
             $arr_inserts[] = "($id,$diff_score)";
       }
 
-      $query = "INSERT INTO $table (ID,Score) VALUES " . implode(', ', $arr_inserts)
-         . " ON DUPLICATE KEY UPDATE Score=Score+(VALUES(Score))";
+      if( count($arr_inserts) > 0 )
+      {
+         $query = "INSERT INTO $table (ID,Score) VALUES " . implode(', ', $arr_inserts)
+            . " ON DUPLICATE KEY UPDATE Score=Score+(VALUES(Score))";
 
-      return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid)", $query );
+         return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid)", $query );
+      }
+      else
+         return true;
    }//update_aggregates_survey_options
 
    function delete_survey_options( $sid, $arr_sopts_id )

@@ -248,9 +248,10 @@ class SurveyControl
          ( $show_result ? span('Result', $survey->UserCount, ' #%s', T_('Vote User Count#survey')) : '' ),
          date(DATE_FMT2, $survey->Lastchanged) );
 
-      $arr_points = $def_points = 0;
       if( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
+      else
+         $arr_points = 0;
 
       $vote = $user_vote = $result = '';
       $s_opts = array();
@@ -259,10 +260,15 @@ class SurveyControl
          $fname = 'so' . $so->ID;
          $label = $so->buildLabel();
 
-         if( $sform && $arr_points )
+         if( $sform )
          {
             $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
-            $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
+            if( $survey->Type == SURVEY_TYPE_POINTS )
+               $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
+            elseif( $survey->Type == SURVEY_TYPE_MULTI )
+               $vote = $sform->print_insert_checkbox( $fname, 1, '', $sel_points, '' );
+            else
+               $vote = '???'; // shouldn't happen
          }
          if( $show_uservote )
             $user_vote = span('UserVote', ( !is_null($so->UserVotePoints) ? formatNumber($so->UserVotePoints) : '-' ),
@@ -276,12 +282,9 @@ class SurveyControl
          $title = span('Title', make_html_safe($so->Title, true) );
          $text  = ($so->Text) ? sprintf( '<div class="Text">%s</div>', make_html_safe($so->Text, true) ) : '';
 
-         if( $survey->Type == SURVEY_TYPE_POINTS )
-         {
-            $s_opts[] = "   <tr><td class=\"Result\">$result</td> <td class=\"UserVote\">$user_vote</td> " .
-               "<td class=\"FormElem\">$vote</td> <td class=\"Label\">$label</td> " .
-               "<td class=\"Data\">{$title}{$text}</td></tr>";
-         }
+         $s_opts[] = "   <tr><td class=\"Result\">$result</td> <td class=\"UserVote\">$user_vote</td> " .
+            "<td class=\"FormElem\">$vote</td> <td class=\"Label\">$label</td> " .
+            "<td class=\"Data\">{$title}{$text}</td></tr>";
       }
       $opts_text = sprintf( "\n  <table>\n%s\n  </table>\n", implode("\n", $s_opts) );
 

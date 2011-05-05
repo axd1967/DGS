@@ -543,6 +543,9 @@ class ErrorCode
          $arr['invalid_args'] =
             T_("Sorry, invalid arguments used.");
 
+         $arr['miss_args'] =
+            T_("Sorry, an argument is missing.");
+
          $arr['invalid_command'] =
             T_("Sorry, invalid quick-suite command used.");
 
