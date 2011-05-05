@@ -56,7 +56,7 @@ class SurveyControl
          $arr = array();
          $arr[SURVEY_TYPE_POINTS]   = T_('Points#S_type');
          //TODO $arr[SURVEY_TYPE_SUM]      = T_('Sum#S_type');
-         //TODO $arr[SURVEY_TYPE_SINGLE]   = T_('Single#S_type');
+         $arr[SURVEY_TYPE_SINGLE]   = T_('Single#S_type');
          $arr[SURVEY_TYPE_MULTI]    = T_('Multi#S_type');
          $ARR_GLOBALS_SURVEY[$key] = $arr;
       }
@@ -267,6 +267,8 @@ class SurveyControl
                $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
             elseif( $survey->Type == SURVEY_TYPE_MULTI )
                $vote = $sform->print_insert_checkbox( $fname, 1, '', $sel_points, '' );
+            elseif( $survey->Type == SURVEY_TYPE_SINGLE )
+               $vote = $sform->print_insert_radio_buttonsx( 'so', array( $so->ID => '' ), ($sel_points ? $so->ID : 0) );
             else
                $vote = '???'; // shouldn't happen
          }

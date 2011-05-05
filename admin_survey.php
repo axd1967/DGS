@@ -161,7 +161,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'TEXTINPUT',   'title', 80, 255, $vars['title'] ));
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey Options'),
-         'TEXTAREA',    'survey_opts', 80, min(10, 2*count($survey->SurveyOptions)), $vars['survey_opts'], ));
+         'TEXTAREA',    'survey_opts', 80, min(12, (int)(2.5*count($survey->SurveyOptions)) ), $vars['survey_opts'], ));
 
    $sform->add_empty_row();
 
@@ -258,15 +258,20 @@ function check_survey_options( $survey, $sopt_text )
          $errors[] = sprintf( T_('Expecting number for tag-label in %s. &lt;opt> in range %s, but was [%s].'),
             $sort_order, build_range_text(1,255), $tag );
 
-      if( !$need_points || (string)$points == '' )
+      if( (string)$points == '' )
          $sopt->MinPoints = ($need_points) ? 1 : 0; // default
       elseif( isNumber($points) && abs($points) <= SURVEY_POINTS_MAX )
          $sopt->MinPoints = (int)$points;
       else
          $errors[] = sprintf( T_('Expecting number for min-points in %s. &lt;opt> to be in range %s or empty for default, but was [%s].'),
             $sort_order, build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX), $points );
-      if( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
+
+      if( $survey->Type == SURVEY_TYPE_POINTS && $sopt->MinPoints != 0 )
+         $errors[] = sprintf( T_('Only value 0 is allowed for min-points in %s. &lt;opt>.'), $sort_order );
+      elseif( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
          $errors[] = sprintf( T_('Value 0 is not allowed for min-points in %s. &lt;opt>.'), $sort_order );
+      elseif( $survey->Type == SURVEY_TYPE_SINGLE && $sopt->MinPoints != 1 )
+         $errors[] = sprintf( T_('Only value 1 is allowed for Min-points in %s. &lt;opt>.'), $sort_order );
 
       if( strlen($title) > 0 )
          $sopt->Title = $title;
@@ -390,7 +395,7 @@ function parse_edit_form( &$survey )
             $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
                SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
       }
-      elseif( $survey->Type == SURVEY_TYPE_MULTI )
+      elseif( $survey->Type == SURVEY_TYPE_MULTI || $survey->Type == SURVEY_TYPE_SINGLE )
       {
          $new_value = $vars['min_points'];
          if( !isNumber($new_value) || $new_value )
