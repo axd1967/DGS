@@ -151,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $vars['status'], false, ));
    $sform->add_row( array(
-         'DESCRIPTION', T_('Points#survey'),
+         'DESCRIPTION', (Survey::is_point_type($survey->Type)) ? T_('Points#survey') : T_('Selections#survey'),
          'TEXT',        T_('Min#survey') . MINI_SPACING,
          'TEXTINPUT',   'min_points', 3, 5, $vars['min_points'],
          'TEXT',        SMALL_SPACING . T_('Max#survey') . MINI_SPACING,
@@ -266,7 +266,7 @@ function check_survey_options( $survey, $sopt_text )
          $errors[] = sprintf( T_('Expecting number for min-points in %s. &lt;opt> to be in range %s or empty for default, but was [%s].'),
             $sort_order, build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX), $points );
 
-      if( ($survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM ) && $sopt->MinPoints != 0 )
+      if( Survey::is_point_type($survey->Type) && $sopt->MinPoints != 0 )
          $errors[] = sprintf( T_('Only value 0 is allowed for min-points in %s. &lt;opt>.'), $sort_order );
       elseif( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
          $errors[] = sprintf( T_('Value 0 is not allowed for min-points in %s. &lt;opt>.'), $sort_order );
@@ -398,7 +398,26 @@ function parse_edit_form( &$survey )
             $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
                SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
       }
-      elseif( $survey->Type == SURVEY_TYPE_MULTI || $survey->Type == SURVEY_TYPE_SINGLE )
+      elseif( $survey->Type == SURVEY_TYPE_MULTI )
+      {
+         $new_value = $vars['min_points'];
+         if( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
+            $survey->MinPoints = (int)$new_value;
+         else
+            $errors[] = sprintf( T_('Expecting number for min-selections in range %s.'),
+                                 build_range_text(0, MAX_SURVEY_OPTIONS) );
+
+         $new_value = $vars['max_points'];
+         if( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
+            $survey->MaxPoints = (int)$new_value;
+         else
+            $errors[] = sprintf( T_('Expecting number for max-selections in range %s.'),
+                                 build_range_text(0, MAX_SURVEY_OPTIONS) );
+
+         if( $survey->MinPoints > $survey->MaxPoints )
+            $errors[] = T_('Min-selections must be smaller than max-selections.');
+      }
+      elseif( $survey->Type == SURVEY_TYPE_SINGLE )
       {
          $new_value = $vars['min_points'];
          if( !isNumber($new_value) || $new_value )
@@ -432,6 +451,14 @@ function parse_edit_form( &$survey )
             $vars['survey_opts'] = SurveyControl::buildSurveyOptionsText($survey);
             $vars['_del_sopts'] = $arr_del_sopts;
          }
+      }
+
+      if( $survey->Type == SURVEY_TYPE_MULTI )
+      {
+         $cnt_sopts = count($survey->SurveyOptions);
+         if( $survey->MaxPoints > $cnt_sopts )
+            $errors[] = sprintf( T_('Value for max-selections [%s] can not exceed number of survey-options [%s].'),
+               $survey->MaxPoints, $cnt_sopts );
       }
 
 

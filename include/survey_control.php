@@ -260,6 +260,11 @@ class SurveyControl
       if( $survey->Type == SURVEY_TYPE_SUM )
          $optheader_text = sprintf( T_('You have to spend %s points (in total) for voting on all options.'),
                                     build_range_text($survey->MinPoints, $survey->MaxPoints) );
+      elseif( $survey->Type == SURVEY_TYPE_MULTI && ( $survey->MinPoints > 0 || $survey->MaxPoints > 0 ) )
+         $optheader_text = sprintf( T_('You can select %s checkbox(es) for your vote.'),
+               ( ($survey->MinPoints == $survey->MaxPoints)
+                  ? $survey->MaxPoints
+                  : "{$survey->MinPoints}-{$survey->MaxPoints}" ) );
       else
          $optheader_text = '';
 
@@ -280,7 +285,7 @@ class SurveyControl
          if( $sform )
          {
             $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
-            if( $survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM )
+            if( Survey::is_point_type($survey->Type) )
                $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
             elseif( $survey->Type == SURVEY_TYPE_MULTI )
                $vote = $sform->print_insert_checkbox( $fname, 1, '', $sel_points, '' );

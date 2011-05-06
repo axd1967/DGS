@@ -125,9 +125,11 @@ Important Notes:
 
 * Type : survey-type
    - POINTS = survey consists of options with selectbox to give points in range MinPoints..MaxPoints
-   - SUM    = survey consists of options on which in sum MaxPoints can be given
-   - SINGLE = survey consists of radio-buttons to select ONE of many options
-   - MULTI  = survey consists of checkboxes to select MULTIPLE options
+   - SUM    = survey consists of options on which in total (sum of points of all options)
+              between MinPoints..MaxPoints can be given
+   - SINGLE = survey consists of radio-buttons to select ONE of many options, MinPoints=MaxPoints=0
+   - MULTI  = survey consists of checkboxes to select MULTIPLE options,
+              number of selections for checkboxes can be restricted with MinPoints..MaxPoints, 0=no-restrictions
 
 * Status : survey-status
    - NEW    = survey initialized, not shown yet, in edit-mode
@@ -137,9 +139,8 @@ Important Notes:
 
 * Flags : survey-flags, unused ATM
 
-* MinPoints : used for Type=POINTS, otherwise = 0
-
-* MaxPoints : used for Type=POINTS | SUM, otherwise = 0
+* MinPoints, MaxPoints : minimum/maximum number of points/selections
+   - see description of Survey.Type
 
 * UserCount : aggregated number of all users (that voted on survey)
 

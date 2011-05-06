@@ -271,6 +271,11 @@ class Survey
       return ( $status == SURVEY_STATUS_ACTIVE || $status == SURVEY_STATUS_CLOSED );
    }
 
+   function is_point_type( $type )
+   {
+      return ( $type == SURVEY_TYPE_POINTS || $type == SURVEY_TYPE_SUM );
+   }
+
    function update_user_count( $sid, $diff )
    {
       if( !is_numeric($diff) )

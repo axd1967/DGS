@@ -110,13 +110,15 @@ function prepare_save_votes( &$survey )
 
    $arr_votes_upd = array(); // SOPT.ID => new-vote-points
    $arr_sopts_upd = array(); // SOPT.ID => diff-score
-   $sum_points = 0;
+   $sum_points = $cnt_selections = 0;
    $is_newvote = false;
 
    foreach( $survey->SurveyOptions as $so )
    {
       $points = get_new_points( $survey->ID, $survey->Type, $so );
       $sum_points += $points;
+      if( $points )
+         $cnt_selections++;
 
       if( is_null($so->UserVotePoints) ) // new vote
       {
@@ -151,6 +153,15 @@ function prepare_save_votes( &$survey )
          $errors[] = sprintf( T_('You must not spend more than %s point(s) in total, but you spent %s point(s).'),
             $survey->MaxPoints, $sum_points );
    }
+   elseif( $survey->Type == SURVEY_TYPE_MULTI )
+   {
+      if( $survey->MinPoints > 0 && $cnt_selections < $survey->MinPoints )
+         $errors[] = sprintf( T_('You must at least select %s checkbox(es), but you only selected %s.'),
+            $survey->MinPoints, $cnt_selections );
+      if( $survey->MaxPoints > 0 && $cnt_selections > $survey->MaxPoints )
+         $errors[] = sprintf( T_('You must not select more than %s checkbox(es), but you selected %s.'),
+            $survey->MaxPoints, $cnt_selections );
+   }
 
    return $errors;
 }//prepare_save_votes
@@ -167,7 +178,7 @@ function get_new_points( $sid, $survey_type, $so )
    $is_points_type = ( $survey_type == SURVEY_TYPE_POINTS || $survey_type == SURVEY_TYPE_SUM );
    $key = 'so'.$so->ID;
    $is_val_set = isset($_REQUEST[$key]);
-   if( /*need-key-val*/$is_points_type && !$is_val_set )
+   if( /*need-key-val*/Survey::is_point_type($survey_type) && !$is_val_set )
       error('miss_args', "view_survey.get_new_points($sid,$key,$survey_type,$need_key_val)");
 
    if( $is_val_set )
