@@ -266,7 +266,7 @@ function check_survey_options( $survey, $sopt_text )
          $errors[] = sprintf( T_('Expecting number for min-points in %s. &lt;opt> to be in range %s or empty for default, but was [%s].'),
             $sort_order, build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX), $points );
 
-      if( $survey->Type == SURVEY_TYPE_POINTS && $sopt->MinPoints != 0 )
+      if( ($survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM ) && $sopt->MinPoints != 0 )
          $errors[] = sprintf( T_('Only value 0 is allowed for min-points in %s. &lt;opt>.'), $sort_order );
       elseif( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
          $errors[] = sprintf( T_('Value 0 is not allowed for min-points in %s. &lt;opt>.'), $sort_order );
@@ -373,25 +373,28 @@ function parse_edit_form( &$survey )
       $survey->setType($vars['type']);
       $survey->setStatus($vars['status']);
 
-      if( $survey->Type == SURVEY_TYPE_POINTS )
+      if( $survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM )
       {
          $new_value = $vars['min_points'];
-         if( isNumber($new_value) && abs($new_value) <= SURVEY_POINTS_MAX )
+         $min_value = ( $survey->Type == SURVEY_TYPE_POINTS ) ? -SURVEY_POINTS_MAX : 0;
+         if( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
             $survey->MinPoints = (int)$new_value;
          else
             $errors[] = sprintf( T_('Expecting number for min-points in range %s.'),
-                                 build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX) );
+                                 build_range_text($min_value, SURVEY_POINTS_MAX) );
 
          $new_value = $vars['max_points'];
-         if( isNumber($new_value) && abs($new_value) <= SURVEY_POINTS_MAX )
+         $min_value = ( $survey->Type == SURVEY_TYPE_POINTS ) ? -SURVEY_POINTS_MAX : 1;
+         if( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
             $survey->MaxPoints = (int)$new_value;
          else
             $errors[] = sprintf( T_('Expecting number for max-points in range %s.'),
-                                 build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX) );
+                                 build_range_text($min_value, SURVEY_POINTS_MAX) );
 
          if( $survey->MinPoints > $survey->MaxPoints )
             $errors[] = T_('Min-points must be smaller than max-points.');
-         if( $survey->MinPoints == $survey->MaxPoints )
+
+         if( $survey->Type == SURVEY_TYPE_POINTS && $survey->MinPoints == $survey->MaxPoints )
             $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
                SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
       }

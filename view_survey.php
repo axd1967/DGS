@@ -63,9 +63,14 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    // handle save-vote
    if( @$_REQUEST['save'] && count($errors) == 0 )
    {
-      prepare_save_votes( $survey );
-      handle_save_votes( $sid, $my_id );
-      jump_to("view_survey.php?sid=$sid");
+      $check_errors = prepare_save_votes( $survey ); // exports global vars
+      if( count($check_errors) > 0 )
+         $errors = array_merge( $errors, $check_errors );
+      else
+      {
+         handle_save_votes( $sid, $my_id ); // import global vars
+         jump_to("view_survey.php?sid=$sid".URI_AMP."sysmsg=".urlencode(T_('Vote saved!')));
+      }
    }//save
 
 
@@ -97,23 +102,28 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
 
 
 // sets globals: $arr_votes_upd, $arr_sopts_upd, $is_newvote
-function prepare_save_votes( $survey )
+// note: also "save" selected values for viewing into $survey
+// returns errors
+function prepare_save_votes( &$survey )
 {
    global $arr_votes_upd, $arr_sopts_upd, $is_newvote;
 
    $arr_votes_upd = array(); // SOPT.ID => new-vote-points
    $arr_sopts_upd = array(); // SOPT.ID => diff-score
+   $sum_points = 0;
    $is_newvote = false;
-# error_log("#URL# ".print_r($_REQUEST,true)); //FIXME
 
    foreach( $survey->SurveyOptions as $so )
    {
       $points = get_new_points( $survey->ID, $survey->Type, $so );
+      $sum_points += $points;
 
       if( is_null($so->UserVotePoints) ) // new vote
       {
          $arr_votes_upd[$so->ID] = $points;
          $arr_sopts_upd[$so->ID] = $points;
+         $so->UserVotePoints = $points;
+         $so->Score += $points;
          $is_newvote = true;
       }
       else
@@ -122,9 +132,27 @@ function prepare_save_votes( $survey )
          {
             $arr_votes_upd[$so->ID] = $points;
             $arr_sopts_upd[$so->ID] = $points - $so->UserVotePoints;
+            $so->UserVotePoints = $points;
+            $so->Score += $arr_sopts_upd[$so->ID];
          }
       }
    }
+
+   if( $is_newvote )
+      $survey->UserCount++;
+
+   $errors = array();
+   if( $survey->Type == SURVEY_TYPE_SUM )
+   {
+      if( $sum_points < $survey->MinPoints )
+         $errors[] = sprintf( T_('You must spend at least %s point(s) in total, but you only spent %s point(s).'),
+            $survey->MinPoints, $sum_points );
+      if( $sum_points > $survey->MaxPoints )
+         $errors[] = sprintf( T_('You must not spend more than %s point(s) in total, but you spent %s point(s).'),
+            $survey->MaxPoints, $sum_points );
+   }
+
+   return $errors;
 }//prepare_save_votes
 
 // parse new points from URL-args
@@ -132,14 +160,14 @@ function get_new_points( $sid, $survey_type, $so )
 {
    if( $survey_type == SURVEY_TYPE_SINGLE )
    {
-      $points = ( (int)@$_REQUEST['so'] == $so->ID ) ? $so->MinPoints : 0; // radio-button selected?
+      $points = ( (int)@$_REQUEST['so'] == $so->ID ) ? $so->MinPoints : 0; // value from radio-button
       return $points;
    }
 
-   $need_key_val = ( $survey_type == SURVEY_TYPE_POINTS );
+   $is_points_type = ( $survey_type == SURVEY_TYPE_POINTS || $survey_type == SURVEY_TYPE_SUM );
    $key = 'so'.$so->ID;
    $is_val_set = isset($_REQUEST[$key]);
-   if( $need_key_val && !$is_val_set )
+   if( /*need-key-val*/$is_points_type && !$is_val_set )
       error('miss_args', "view_survey.get_new_points($sid,$key,$survey_type,$need_key_val)");
 
    if( $is_val_set )
@@ -151,10 +179,10 @@ function get_new_points( $sid, $survey_type, $so )
    else
       $arg_points = null;
 
-   if( $survey_type == SURVEY_TYPE_POINTS )
+   if( $is_points_type )
       $points = (int)$arg_points; // value from selectbox
    elseif( $survey_type == SURVEY_TYPE_MULTI )
-      $points = ($arg_points) ? $so->MinPoints : 0;
+      $points = ($arg_points) ? $so->MinPoints : 0; // value from checkbox
    else
       error('invalid_args', "view_survey.get_new_points.check_type($sid,$key,$survey_type,$arg_points)");
 

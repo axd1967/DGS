@@ -3341,6 +3341,12 @@ div.Survey div.Extra span.Result {
    font-weight: bold;
    color: darkred;
 }
+div.Survey div.OptionHeader {
+   clear: left;
+   text-align: left;
+   margin: 1.5em auto 0em 1.5em;
+   font-style: italic;
+}
 div.Survey div.Options {
    clear: left;
 }

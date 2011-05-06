@@ -55,7 +55,7 @@ class SurveyControl
       {
          $arr = array();
          $arr[SURVEY_TYPE_POINTS]   = T_('Points#S_type');
-         //TODO $arr[SURVEY_TYPE_SUM]      = T_('Sum#S_type');
+         $arr[SURVEY_TYPE_SUM]      = T_('Sum#S_type');
          $arr[SURVEY_TYPE_SINGLE]   = T_('Single#S_type');
          $arr[SURVEY_TYPE_MULTI]    = T_('Multi#S_type');
          $ARR_GLOBALS_SURVEY[$key] = $arr;
@@ -213,18 +213,27 @@ class SurveyControl
       return $qsql;
    }//build_view_query_sql
 
-   function build_points_array( $min, $max )
+   function build_points_array( $min, $max, $with_plus=true, $dir_asc=false )
    {
       if( $min > $max )
          swap($min, $max);
 
       $arr = array();
-      if( $min > 0 || $max < 0 )
-         $arr[0] = '&nbsp;0';
-      for( $val = $max; $val >= $min; $val-- )
-         $arr[$val] = ($val <= 0) ? $val : "+$val";
+      $plus = ($with_plus) ? '+' : MINI_SPACING;
+      if( $min <=0 && $max >= 0 )
+         $arr[0] = MINI_SPACING . 0;
+      if( $dir_asc ) // direction ascending
+      {
+         for( $val = $min; $val <= $max; $val++ )
+            $arr[$val] = ($val <= 0) ? $val : $plus.$val;
+      }
+      else // direction descending
+      {
+         for( $val = $max; $val >= $min; $val-- )
+            $arr[$val] = ($val <= 0) ? $val : $plus.$val;
+      }
       if( isset($arr[0]) )
-         $arr[0] = '&nbsp;0';
+         $arr[0] = MINI_SPACING . 0;
 
       return $arr;
    }//build_points_array
@@ -248,8 +257,16 @@ class SurveyControl
          ( $show_result ? span('Result', $survey->UserCount, ' #%s', T_('Vote User Count#survey')) : '' ),
          date(DATE_FMT2, $survey->Lastchanged) );
 
+      if( $survey->Type == SURVEY_TYPE_SUM )
+         $optheader_text = sprintf( T_('You have to spend %s points (in total) for voting on all options.'),
+                                    build_range_text($survey->MinPoints, $survey->MaxPoints) );
+      else
+         $optheader_text = '';
+
       if( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
+      elseif( $survey->Type == SURVEY_TYPE_SUM )
+         $arr_points = SurveyControl::build_points_array( 0, $survey->MaxPoints, /*with-plus*/false, /*dir-asc*/true );
       else
          $arr_points = 0;
 
@@ -263,7 +280,7 @@ class SurveyControl
          if( $sform )
          {
             $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
-            if( $survey->Type == SURVEY_TYPE_POINTS )
+            if( $survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM )
                $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
             elseif( $survey->Type == SURVEY_TYPE_MULTI )
                $vote = $sform->print_insert_checkbox( $fname, 1, '', $sel_points, '' );
@@ -304,6 +321,7 @@ class SurveyControl
       $div_survey = "\n<div class=\"Survey\">\n" .
             " <div class=\"Title\">$survey_title</div>\n" .
             " <div class=\"Extra\">$extra_text</div>\n" .
+            ($optheader_text ? " <div class=\"OptionHeader\">$optheader_text</div>\n" : '' ).
             " <div class=\"Options\">$opts_text</div>\n" .
             " <div class=\"Actions\">$action_text</div>\n" .
          "</div>\n";
