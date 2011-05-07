@@ -258,7 +258,7 @@ class SurveyControl
          date(DATE_FMT2, $survey->Lastchanged) );
 
       if( $survey->Type == SURVEY_TYPE_SUM )
-         $optheader_text = sprintf( T_('You have to spend %s points (in total) for voting on all options.'),
+         $optheader_text = sprintf( T_('You have to spend %s points in total for voting on all options.'),
                                     build_range_text($survey->MinPoints, $survey->MaxPoints) );
       elseif( $survey->Type == SURVEY_TYPE_MULTI && ( $survey->MinPoints > 0 || $survey->MaxPoints > 0 ) )
          $optheader_text = sprintf( T_('You can select %s checkbox(es) for your vote.'),
