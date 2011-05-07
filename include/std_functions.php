@@ -46,6 +46,7 @@ require_once( "include/translation_functions.php" );
 require_once( "include/classlib_matrix.php" );
 require_once( "forum/class_forum_read.php" );
 require_once( "include/db/bulletin.php" );
+require_once( "include/survey_control.php" );
 
 
 // Server birth date:
@@ -1567,11 +1568,11 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 global $html_code; //PHP5
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
-$html_code['msg'] = 'br|/br|p|/p|li'.$html_code_closed['msg']
-   .'goban|mailto|https?|news|game_?|tourney_?|user_?|send_?|image';
-$html_code['game'] = 'br|/br|p|/p|li'.$html_code_closed['game']
-   .'goban|mailto|https?|news|ftp|game_?|tourney_?|user_?|send_?|image';
-$html_code['faq'] = '\w+|/\w+'; //all not empty words
+$html_code['msg'] = 'br|/br|p|/p|li|hr'.$html_code_closed['msg']
+   .'goban|mailto|https?|news|game_?|tourney_?|survey_?|user_?|send_?|image';
+$html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game']
+   .'goban|mailto|https?|news|ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
+$html_code['faq'] = '\w+|/\w+'; //all non-empty words
 
 
 //** no reg_exp chars nor ampersand nor '%' (see also $html_safe_preg):
@@ -1868,6 +1869,11 @@ $html_safe_preg = array(
 //<tourney tid> => show tournament
  '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
   => "tournament_reference(('\\1'?".REF_LINK_BLANK.":0)+"
+                        .REF_LINK_ALLOWED.",1,'',\\2)",
+
+//<survey sid> => show survey
+ '/'.ALLOWED_LT."survey(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
+  => "survey_reference(('\\1'?".REF_LINK_BLANK.":0)+"
                         .REF_LINK_ALLOWED.",1,'',\\2)",
 
 //<user uid> or <user =uhandle> =>show user info
@@ -2966,6 +2972,53 @@ function tournament_reference( $link, $safe_it, $class, $tid )
    }
 
    return $tourney;
+}
+
+// format: Survey #n [title]
+function survey_reference( $link, $safe_it, $class, $sid )
+{
+   global $base_path;
+
+   $sid = (int)$sid;
+   $legal = ( $sid > 0 );
+   if( $legal )
+   {
+      $query = "SELECT Status, Title FROM Survey WHERE ID='$sid' LIMIT 1";
+      if( $row = mysql_single_fetch( "survey_reference.find_survey($sid)", $query ) )
+      {
+         $status = @$row['Status'];
+         $title = trim(@$row['Title']);
+         $safe_it = true;
+      }
+      else
+         $legal = false;
+   }
+
+   $survey = ($legal)
+      ? sprintf( T_('Survey #%s (%s) [%s]'), $sid, SurveyControl::getStatusText($status), $title )
+      : sprintf( T_('Survey #%s [%s]'), $sid, T_('???#survey') );
+   if( $safe_it )
+      $survey = make_html_safe($survey);
+
+   if( $link && $legal )
+   {
+      $url = $base_path."view_survey.php?sid=$sid";
+      $url = 'A href="' . $url . '"';
+      if( $link & REF_LINK_BLANK )
+         $url .= ' target="_blank"';
+      $class = 'Survey'.$class;
+      if( $class )
+        $url .= " class=$class";
+      if( $link & REF_LINK_ALLOWED )
+      {
+         $url = str_replace('"', ALLOWED_QUOT, $url);
+         $survey = ALLOWED_LT.$url.ALLOWED_GT.$survey.ALLOWED_LT."/A".ALLOWED_GT ;
+      }
+      else
+         $survey = "<$url>$survey</A>";
+   }
+
+   return $survey;
 }
 
 function send_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
