@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $table->add_tablehead( 7, T_('Created#survey'), 'Date', 0, 'Created-');
    $table->add_tablehead( 8, T_('Updated#survey'), 'Date', 0, 'Lastchanged-');
 
-   $table->set_default_sort( 7, 1 ); //on Created, ID
+   $table->set_default_sort( 1 ); //on ID
 
    $iterator = new ListIterator( 'Survey.list',
          $table->get_query(),
