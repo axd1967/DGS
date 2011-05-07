@@ -843,6 +843,7 @@ CREATE TABLE IF NOT EXISTS `Survey` (
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `Title` varchar(255) NOT NULL,
+  `Header` text NOT NULL,
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),
   KEY `Status` (`Status`)

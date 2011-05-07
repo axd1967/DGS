@@ -201,7 +201,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 }//main
 
 
-// return [ $arr_survey_opts, $errors ]
+// return [ $header_text, $arr_survey_opts, $errors ]
 function check_survey_options( $survey, $sopt_text )
 {
    $arr_so = array();
@@ -211,12 +211,14 @@ function check_survey_options( $survey, $sopt_text )
    $sopt_text = str_replace("\r", '', $sopt_text); // remove CR
 
    // preconditional checks before parsing can start
-   if( preg_match("/^.+?<opt/i", $sopt_text) )
-      $errors[] = T_('No text is allowed before &lt;opt>-tag in survey-options-text.');
    if( !preg_match("/<opt\\b/", $sopt_text) )
       $errors[] = T_('Missing &lt;opt>-tag in survey-options-text.');
    if( count($errors) )
       return array( $arr_so, $errors );
+
+   // eat text before first <opt> as header-text
+   if( preg_match("/^.+?<opt/i", $sopt_text) )
+      $errors[] = T_('No text is allowed before &lt;opt>-tag in survey-options-text.');
 
    $sid = $survey->ID;
    $need_points = $survey->need_option_minpoints();
@@ -225,6 +227,15 @@ function check_survey_options( $survey, $sopt_text )
    $rem_text = trim($sopt_text);
    $sort_order = 0;
    $arr_tags = array(); # tag => 1
+
+   // eat text before first <opt> as header-text
+   if( preg_match("/^(.*?)(<opt.*)$/is", $rem_text, $matches) )
+   {
+      $header_text = trim($matches[1]);
+      $rem_text = $matches[2];
+   }
+   else
+      $header_text = '';
 
    // matches: $1=prev-opt-text, $2=tag, [ $3=points ], $4=title, $5=remaining
    $regex = "%^(.*?)<opt\\s+(\\S+)\\s+(?:(\S+)\s+)?\"([^\"]*?)\"\\s*>(.*)$%s";
@@ -298,7 +309,7 @@ function check_survey_options( $survey, $sopt_text )
       $errors[] = sprintf( T_('Expecting %s survey-options, but there are [%s].'),
          build_range_text(1, MAX_SURVEY_OPTIONS), $cnt_so );
 
-   return array( $arr_so, $errors );
+   return array( $header_text, $arr_so, $errors );
 }//check_survey_options
 
 
@@ -437,7 +448,7 @@ function parse_edit_form( &$survey )
       $new_value = trim($vars['survey_opts']);
       if( (string)$new_value != '' )
       {
-         list( $arr_survey_opts, $check_errors ) = check_survey_options( $survey, $new_value );
+         list( $header_text, $arr_survey_opts, $check_errors ) = check_survey_options( $survey, $new_value );
          if( count($check_errors) == 0 )
             list( $arr_survey_opts, $arr_del_sopts, $check_errors ) = merge_survey_options( $survey, $arr_survey_opts );
          else
@@ -447,6 +458,7 @@ function parse_edit_form( &$survey )
             $errors = array_merge( $errors, $check_errors );
          else
          {
+            $survey->Header = $header_text;
             $survey->SurveyOptions = $arr_survey_opts;
             $vars['survey_opts'] = SurveyControl::buildSurveyOptionsText($survey);
             $vars['_del_sopts'] = $arr_del_sopts;

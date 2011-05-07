@@ -60,7 +60,7 @@ $ENTITY_SURVEY = new Entity( 'Survey',
       FTYPE_AUTO, 'ID',
       FTYPE_INT,  'ID', 'uid', 'Flags', 'MinPoints', 'MaxPoints', 'UserCount',
       FTYPE_ENUM, 'Type', 'Status',
-      FTYPE_TEXT, 'Title',
+      FTYPE_TEXT, 'Title', 'Header',
       FTYPE_DATE, 'Created', 'Lastchanged'
    );
 
@@ -75,6 +75,7 @@ class Survey
    var $MaxPoints;
    var $UserCount;
    var $Title;
+   var $Header;
    var $Created;
    var $Lastchanged;
 
@@ -85,7 +86,8 @@ class Survey
 
    /*! \brief Constructs Survey-object with specified arguments. */
    function Survey( $id=0, $uid=0, $user=null, $type=SURVEY_TYPE_POINTS, $status=SURVEY_STATUS_NEW,
-                    $flags=0, $min_points=0, $max_points=0, $user_count=0, $title='', $created=0, $lastchanged=0 )
+                    $flags=0, $min_points=0, $max_points=0, $user_count=0, $title='', $header='',
+                    $created=0, $lastchanged=0 )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -95,7 +97,8 @@ class Survey
       $this->MinPoints = (int)$min_points;
       $this->MaxPoints = (int)$max_points;
       $this->UserCount = (int)$user_count;
-      $this->Title = $title;
+      $this->Title = trim($title);
+      $this->Header = trim($header);
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
@@ -166,6 +169,7 @@ class Survey
       $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'Title', $this->Title );
+      $data->set_value( 'Header', $this->Header );
       return $data;
    }
 
@@ -215,6 +219,7 @@ class Survey
             @$row['MaxPoints'],
             @$row['UserCount'],
             @$row['Title'],
+            @$row['Header'],
             @$row['X_Created'],
             @$row['X_Lastchanged']
          );

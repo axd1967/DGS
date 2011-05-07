@@ -2269,3 +2269,8 @@ INSERT INTO SurveyVote (soid,uid,Points)
 DROP TABLE SurveyVote_old ;
 
 
+-- added survey header-text
+ALTER TABLE Survey
+   ADD Header text NOT NULL ;
+
+

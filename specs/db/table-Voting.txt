@@ -117,6 +117,7 @@ Important Notes:
 | Created     | datetime                               | NO   |     | 0000-00-00 00:00:00 |                |
 | Lastchanged | datetime                               | NO   |     | 0000-00-00 00:00:00 |                |
 | Title       | varchar(255)                           | NO   |     | NULL                |                |
+| Header      | text                                   | NO   |     | NULL                |                |
 
 
 ## Fields:
@@ -149,6 +150,8 @@ Important Notes:
 * Lastchanged : date of last-update of survey
 
 * Title : main-title of survey, must be non-empty
+
+* Header : optional header-text that is shown above survey-options
 
 
 

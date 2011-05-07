@@ -162,6 +162,9 @@ class SurveyControl
    function buildSurveyOptionsText( $survey )
    {
       $out = array();
+      if( (string)$survey->Header != '' )
+         $out[] = $survey->Header;
+
       $need_points = $survey->need_option_minpoints();
       foreach( $survey->SurveyOptions as $so )
       {
@@ -267,6 +270,11 @@ class SurveyControl
                   : "{$survey->MinPoints}-{$survey->MaxPoints}" ) );
       else
          $optheader_text = '';
+
+      if( (string)$survey->Header != '' )
+         $optheader_text = trim($survey->Header . "\n\n" . $optheader_text);
+      if( (string)$optheader_text != '' )
+         $optheader_text = make_html_safe($optheader_text, true);
 
       if( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = SurveyControl::build_points_array( $survey->MinPoints, $survey->MaxPoints );
