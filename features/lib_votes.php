@@ -432,9 +432,9 @@ class Feature
       if( @$player_row['AdminOptions'] & ADMOPT_DENY_FEATURE_VOTE )
          return T_('Feature-Voting has been denied.');
 
-      // minimum 5 finished+rated games, 500 moves, moved within 30 days
+      // minimum X finished+rated games, moved within Y days
       if( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
-            || ($NOW - @$player_row['X_LastMove']) > VOTE_MIN_DAYS_LASTMOVED * 86400 )
+            || @$player_row['X_LastMove'] < $NOW - VOTE_MIN_DAYS_LASTMOVED * SECS_PER_DAY )
       {
          return sprintf( T_('To be able to vote you have to finish %s rated games and '."\n"
                            . 'actively play in games during the last %s days.'),
