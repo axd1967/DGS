@@ -96,6 +96,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $table->add_tablehead( 5, T_('Author#survey'), 'User', 0, 'SP_Handle+');
    $table->add_tablehead( 6, T_('Title#survey'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
    $table->add_tablehead( 9, T_('#Votes#survey'), 'Number', 0, 'UserCount+' );
+   $table->add_tablehead(10, T_('Flags#survey'), 'Enum', 0, 'Flags+' );
    $table->add_tablehead( 7, T_('Created#survey'), 'Date', 0, 'Created-');
    $table->add_tablehead( 8, T_('Updated#survey'), 'Date', 0, 'Lastchanged-');
 
@@ -131,15 +132,14 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
       }
       if( @$table->Is_Column_Displayed[ 2] )
       {
-         $links = array();
+         $links = '';
          if( $is_admin )
          {
-            $admin_link = span('AdminLink',
+            $links .= span('AdminLink',
                anchor( $base_path."admin_survey.php?sid={$survey->ID}",
-                  image( $base_path.'images/edit.gif', 'E'), T_('Admin Survey'), 'class=ButIcon') );
-            $links[] = $admin_link;
+                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Admin Survey')) );
          }
-         $row_str[ 2] = implode(MINI_SPACING, $links);
+         $row_str[ 2] = $links;
       }
       if( @$table->Is_Column_Displayed[ 3] )
          $row_str[ 3] = SurveyControl::getTypeText( $survey->Type );
@@ -158,6 +158,8 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
          $row_str[ 8] = formatDate($survey->Lastchanged);
       if( @$table->Is_Column_Displayed[ 9] )
          $row_str[ 9] = $survey->UserCount;
+      if( @$table->Is_Column_Displayed[10] )
+         $row_str[10] = SurveyControl::formatFlags($survey->Flags);
 
       $table->add_row( $row_str );
    }
