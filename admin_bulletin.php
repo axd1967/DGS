@@ -25,6 +25,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
+require_once 'include/gui_user_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament.php';
 
@@ -274,7 +275,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       $bform->add_row( array(
             'DESCRIPTION', T_('Preview'),
             'OWNHTML', '<td class="Preview">' . GuiBulletin::build_view_bulletin($bulletin) . '</td>', ));
-      if( $vars['target_type'] == BULLETIN_TRG_USERLIST && $vars['user_list'] != '' )
+      if( $vars['target_type'] == BULLETIN_TRG_USERLIST && (string)$vars['user_list'] != '' )
       {
          if( is_array($bulletin->UserListUserRefs) )
          {
@@ -313,98 +314,6 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    end_page(@$menu_array);
 }//main
 
-
-// return [ handle-arr, uid-arr, User-row-arr, handle-reject-map( Handle => 1 ), errors ]
-function check_user_list( $user_list, $author_uid )
-{
-   $errors = array();
-   $arr_uid = array();
-   $arr_handle = array();
-   $arr_miss = array();
-   foreach( preg_split("/[\\s,;]+/", $user_list) as $u )
-   {
-      if( $u[0] == '=' ) // =1234 (support for numeric handle), allowed for non-numeric-handle too
-      {
-         $is_handle = true;
-         $u = substr($u, 1);
-      }
-      else
-         $is_handle = false;
-
-      if( !is_numeric($u) && illegal_chars($u) )
-         $errors[] = sprintf( T_('Illegal characters used in user [%s]#bulletin_userlist'), $u );
-      else
-      {
-         if( $is_handle || !is_numeric($u) )
-            $arr_handle[] = $u;
-         else
-            $arr_uid[] = $u;
-         $arr_miss[strtolower($u)] = 1;
-      }
-   }
-
-   $handles = array();
-   $uids = array();
-   $urefs = array();
-   $rejectmsg = array();
-   $user_sql = "SELECT P.ID, P.Handle, P.Name, IFNULL(C.uid,0) AS C_RejectMsg FROM Players AS P " .
-      "LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$author_uid AND (C.SystemFlags & ".CSYSFLAG_REJECT_MESSAGE.")";
-   if( count($arr_uid) > 0 )
-   {
-      $result = db_query( "admin_bulletin.check_user_list.uids($author_uid)",
-         "$user_sql WHERE P.ID IN (".implode(',', $arr_uid).") LIMIT " . count($arr_uid) );
-      while( $row = mysql_fetch_array( $result ) )
-      {
-         $uid = $row['ID'];
-         $uids[] = $uid;
-         $handles[$uid] = $view_handle = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
-         $urefs[$uid] = $row;
-         if( $row['C_RejectMsg'] )
-            $rejectmsg[$view_handle] = 1;
-         unset($arr_miss[$uid]);
-      }
-      mysql_free_result($result);
-   }
-   if( count($arr_handle) > 0 )
-   {
-      $result = db_query( "admin_bulletin.check_user_list.handles($author_uid)",
-         "$user_sql WHERE P.Handle IN ('".implode("','", $arr_handle)."') LIMIT " . count($arr_handle) );
-      while( $row = mysql_fetch_array( $result ) )
-      {
-         $uid = $row['ID'];
-         $handle = $row['Handle'];
-         $uids[] = $uid;
-         $handles[$uid] = $view_handle = ( (is_numeric($handle)) ? '=' : '' ) . $handle;
-         $urefs[$uid] = $row;
-         if( $row['C_RejectMsg'] )
-            $rejectmsg[$view_handle] = 1;
-         unset($arr_miss[strtolower($handle)]);
-      }
-      mysql_free_result($result);
-   }
-
-   $uids = array_unique($uids);
-   ksort( $handles, SORT_NUMERIC );
-   ksort( $uids, SORT_NUMERIC );
-   ksort( $urefs, SORT_NUMERIC );
-
-   if( count($arr_miss) > 0 )
-      $errors[] = sprintf( T_('Unknown users found [%s]#bulletin_userlist'), implode(', ', array_keys($arr_miss) ));
-   if( count($uids) == 1 )
-      $errors[] = T_('Userlist must contain at least two recipients, otherwise send a private message instead.#bulletin_userlist');
-
-   $guests = array();
-   for( $g_uid=1; $g_uid <= GUESTS_ID_MAX; $g_uid++)
-   {
-      if( isset($handles[$g_uid]) )
-         $guests[] = $handles[$g_uid];
-   }
-   if( count($guests) > 0 )
-      $errors[] = sprintf( T_('Guest users [%s] are not allowed in user-list.#bulletin_userlist'),
-         implode(' ', $guests) );
-
-   return array( array_unique(array_values($handles)), $uids, $urefs, array_keys($rejectmsg), $errors );
-}//check_user_list
 
 // return [ vars-hash, edits-arr, handle-msg-rejected-map, errorlist ]
 function parse_edit_form( &$bulletin )
