@@ -30,6 +30,8 @@ require_once( 'include/time_functions.php' );
  * \brief Collection of GUI-related functions.
  */
 
+define('BUTTON_TEXT', -1); // Players.Button
+
 
 /*!
  * \brief Return the attributes of a warning cellule with class and title-attributes:
@@ -52,30 +54,34 @@ function warning_cell_attb( $title='', $return_array=false )
 }
 
 /*! \brief Return the global style part of a table with buttons. */
-function button_style( $button_nr=0)
+function button_style( $button_nr=0 )
 {
    global $base_path, $button_max, $buttoncolors, $buttonfiles;
 
-   if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
+   if( !is_numeric($button_nr) || $button_nr < BUTTON_TEXT || $button_nr > $button_max  )
       $button_nr = 0;
 
+   if( $button_nr == BUTTON_TEXT )
+      return '';
+
    return
-     "table.Table a.Button {" .
-       " color: {$buttoncolors[$button_nr]};" .
-     "}\n" .
-     "table.Table td.Button {" .
-       " background-image: url({$base_path}images/{$buttonfiles[$button_nr]});" .
-     "}";
+      "table.Table a.Button { color: {$buttoncolors[$button_nr]}; }\n" .
+      "table.Table td.Button { background-image: url({$base_path}images/{$buttonfiles[$button_nr]}); }";
 }
 
 /*!
  * \brief Return the cell part of a button with anchor.
- * \note Needs button_style(..) in start_page()-func-call
+ * \note Needs button_style(..) in start_page()-func-call;
  */
 function button_TD_anchor( $href, $text='', $title='' )
 {
+   global $player_row;
+   $class2 = ( @$player_row['Button'] == BUTTON_TEXT ) ? ' ButtonText' : '';
+
    $titlestr = ($title != '') ? " title=\"$title\"" : '';
-   return ($href) ? "<a class=Button href=\"$href\"$titlestr>$text</a>" : "<a class=Button$titlestr>$text</a>";
+   return ($href)
+      ? "<a class=\"Button$class2\" href=\"$href\"$titlestr>$text</a>"
+      : "<a class=Button$titlestr>$text</a>";
 }
 
 /*!

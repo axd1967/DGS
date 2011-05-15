@@ -2282,3 +2282,8 @@ CREATE TABLE SurveyUser (
 ) ENGINE=MyISAM ;
 
 
+-- allow pure-text ID-button
+ALTER TABLE Players
+   MODIFY Button tinyint signed NOT NULL default '0' ;
+
+

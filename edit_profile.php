@@ -41,8 +41,8 @@ require_once( 'include/gui_bulletin.php' );
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
-   $button_nr = $player_row['Button'];
-   if( !is_numeric($button_nr) || $button_nr < 0 || $button_nr > $button_max  )
+   $button_nr = (int)$player_row['Button'];
+   if( !is_numeric($button_nr) || $button_nr < BUTTON_TEXT || $button_nr > $button_max  )
       $button_nr = 0;
 
    $notify_msg = array(
@@ -217,8 +217,8 @@ require_once( 'include/gui_bulletin.php' );
          'RADIOBUTTONS', 'menudir', $menu_directions, $player_row["MenuDirection"] ) );
 
 
-   $button_code  = "\n<table class=EditProfilButtons><tr>";
-   for($i=0; $i<=$button_max; $i++)
+   $button_code  = "\n<table class=\"EditProfilButtons\"><tr>";
+   for( $i=0; $i<=$button_max; $i++ )
    {
       if( $i % 4 == 0 )
       {
@@ -227,17 +227,18 @@ require_once( 'include/gui_bulletin.php' );
       }
       else
          $button_code .= "<td></td>";
-      $button_style = 'color:' . $buttoncolors[$i] . ';' .
-                  'background-image:url(images/' . $buttonfiles[$i] . ');';
+      $button_style = 'color:' . $buttoncolors[$i] . ';' . 'background-image:url(images/' . $buttonfiles[$i] . ');';
       $button_code .=
-         "<td><input type='radio' name='button' value=$i" .
-               ( $i == $button_nr ? ' checked' : '') . "></td>" .
+         "<td><input type='radio' name='button' value=$i" . ( $i == $button_nr ? ' checked' : '') . "></td>" .
          "<td class=button style='$button_style'>1348</td>";
    }
-   $button_code .= "</tr></table>\n";
+   $button_code .= "</tr>\n<tr>" .
+      '<td><input type="radio" name="button" value="'.BUTTON_TEXT.'"' .
+      ( $button_nr == BUTTON_TEXT ? ' checked' : '') . '></td><td>' . T_('No button') . '</td>';
+   $button_code .= "</tr>\n</table>\n";
 
    $profile_form->add_row( array(
-         'DESCRIPTION', T_('Game id button'),
+         'DESCRIPTION', T_('ID button'),
          'TEXT', $button_code, ));
 
 

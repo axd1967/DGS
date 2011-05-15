@@ -678,7 +678,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `SkinName` varchar(32) NOT NULL default '',
   `MenuDirection` enum('VERTICAL','HORIZONTAL') NOT NULL default 'VERTICAL',
   `TableMaxRows` smallint(5) unsigned NOT NULL default '20',
-  `Button` tinyint(3) unsigned NOT NULL default '0',
+  `Button` tinyint(4) NOT NULL default '0',
   `UserPicture` varchar(48) NOT NULL default '',
   `NextGameOrder` enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED',
   `SkipBulletin` tinyint(3) unsigned NOT NULL default '4',

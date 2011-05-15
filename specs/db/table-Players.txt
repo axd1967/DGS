@@ -92,7 +92,7 @@ Zu  | UserFlags        | int(11)                                     | NO   |   
 Zu  | SkinName         | varchar(32)                                 | NO   |     |                     |                |
 Zu  | MenuDirection    | enum('VERTICAL','HORIZONTAL')               | NO   |     | VERTICAL            |                |
 Zu  | TableMaxRows     | smallint(5) unsigned                        | NO   |     | 20                  |                |
-Zu  | Button           | tinyint(3) unsigned                         | NO   |     | 0                   |                |
+Zu  | Button           | tinyint(4)                                  | NO   |     | 0                   |                |
 Zu  | UserPicture      | varchar(48)                                 | NO   |     |                     |                |
 Zu  | NextGameOrder    | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   |     | LASTMOVED           |                |
 Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |     | 4                   |                |

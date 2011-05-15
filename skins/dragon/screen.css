@@ -1054,6 +1054,9 @@ table.Table a.Button {
 */
 /* endfor */
 }
+table.Table a.ButtonText {
+   text-decoration: underline;
+}
 
 
 /*
