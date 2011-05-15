@@ -565,8 +565,8 @@ class Bulletin
       if( !is_numeric($tid) || $tid < 0 )
          error('invalid_args', "Bulletin.new_bulletin.check.tid($uid,$is_admin,$tid)");
       if( !is_numeric($new_uid) || ($new_uid != 0 && $new_uid <= GUESTS_ID_MAX) )
-         error('invalid_args', "Bulletin.new_bulletin.check.new_uid($uid,$is_admin,$new_uid)");
-      if( !$is_admin && $new_uid == 0 )
+         error('invalid_args', "Bulletin.new_bulletin.check.new_uid_guest($uid,$is_admin,$new_uid)");
+      if( !$is_admin && $new_uid > 0 )
          error('invalid_args', "Bulletin.new_bulletin.check.new_uid0($uid,$is_admin,$new_uid)");
 
       if( $new_uid == $uid || $new_uid == 0 )
