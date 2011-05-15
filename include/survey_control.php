@@ -94,6 +94,42 @@ class SurveyControl
       return $ARR_GLOBALS_SURVEY[$key][$status];
    }
 
+   /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
+   function getFlagsText( $flag=null )
+   {
+      global $ARR_GLOBALS_SURVEY;
+
+      // lazy-init of texts
+      $key = 'FLAGS';
+      if( !isset($ARR_GLOBALS_SURVEY[$key]) )
+      {
+         $arr = array();
+         $arr[SURVEY_FLAG_USERLIST] = T_('User-List#S_flag');
+         $ARR_GLOBALS_SURVEY[$key] = $arr;
+      }
+
+      if( is_null($flag) )
+         return $ARR_GLOBALS_SURVEY[$key];
+      if( !isset($ARR_GLOBALS_SURVEY[$key][$flag]) )
+         error('invalid_args', "SurveyControl::getFlagsText($flag,$short)");
+      return $ARR_GLOBALS_SURVEY[$key][$flag];
+   }//getFlagsText
+
+   /*! \brief Returns text-representation of survey-flags. */
+   function formatFlags( $flags, $zero_val='', $intersect_flags=0, $class=null )
+   {
+      $check_flags = ( $intersect_flags > 0 ) ? $flags & $intersect_flags : $flags;
+
+      $arr = array();
+      $arr_flags = SurveyControl::getFlagsText();
+      foreach( $arr_flags as $flag => $flagtext )
+      {
+         if( $check_flags & $flag )
+            $arr[] = ($class) ? span($class, $flagtext) : $flagtext;
+      }
+      return (count($arr)) ? implode(', ', $arr) : $zero_val;
+   }//formatFlags
+
    /*! \brief Returns true if current players is survey-admin. */
    function is_survey_admin( $check_super_admin=false )
    {
@@ -127,6 +163,37 @@ class SurveyControl
 
       return ( $survey->Status == SURVEY_STATUS_NEW );
    }//allow_survey_edit
+
+   /*! \brief Returns true if current user is eligible to vote on survey; add errors with reason why not allowed. */
+   function allow_survey_vote( $survey, &$errors )
+   {
+      global $player_row, $NOW;
+
+      if( $survey->Status != SURVEY_STATUS_ACTIVE )
+         return false;
+
+      // vote only allowed by users on user-list
+      if( $survey->Flags & SURVEY_FLAG_USERLIST )
+      {
+         if( Survey::exists_survey_user($survey->ID, $player_row['ID']) )
+            return true;
+
+         $errors[] = T_('You are not eligible to vote on this survey because of user-list-restriction.');
+         return false;
+      }
+
+      if( SurveyControl::is_survey_admin() )
+         return true;
+
+      // vote only allowed by users actively playing: 2 finished-games, played in last 30 days
+      if( @$player_row['Finished'] < 2 || @$player_row['X_LastMove'] < $NOW - 30 * SECS_PER_DAY )
+      {
+         $errors[] = T_('To be eligible to vote on this survey you need to actively play in games.');
+         return false;
+      }
+
+      return true;
+   }//allow_survey_vote
 
    /*! \brief Loads & fills Survey->SurveyOptions (with UserVotePoints from a users SurveyVote-entries if $uid given). */
    function load_survey_options( &$survey, $uid=0, $order_result=false )
@@ -241,15 +308,15 @@ class SurveyControl
       return $arr;
    }//build_points_array
 
-   function build_view_survey( $survey, $page='', $rx_term='' )
+   function build_view_survey( $survey, $allow_vote=false, $page='', $rx_term='' )
    {
       $sform = null;
-      if( $page && $survey->ID > 0 && $survey->Status == SURVEY_STATUS_ACTIVE )
+      if( $allow_vote && $page && $survey->ID > 0 && $survey->Status == SURVEY_STATUS_ACTIVE )
       {
          $sform = new Form( 'surveyVote', $page, FORM_GET );
          $sform->add_hidden( 'sid', $survey->ID );
       }
-      $show_uservote = Survey::is_status_viewable($survey->Status);
+      $show_uservote = $allow_vote && Survey::is_status_viewable($survey->Status);
       $show_result = ( SurveyControl::is_survey_admin() || $survey->Status == SURVEY_STATUS_CLOSED );
 
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
@@ -261,13 +328,19 @@ class SurveyControl
          date(DATE_FMT2, $survey->Lastchanged) );
 
       if( $survey->Type == SURVEY_TYPE_SUM )
+      {
          $optheader_text = sprintf( T_('You have to spend %s points in total for voting on all options.'),
-                                    build_range_text($survey->MinPoints, $survey->MaxPoints) );
+            ( $survey->MinPoints == $survey->MaxPoints )
+               ? $survey->MaxPoints
+               : build_range_text($survey->MinPoints, $survey->MaxPoints, '%s-%s') );
+      }
       elseif( $survey->Type == SURVEY_TYPE_MULTI && ( $survey->MinPoints > 0 || $survey->MaxPoints > 0 ) )
+      {
          $optheader_text = sprintf( T_('You can select %s checkbox(es) for your vote.'),
                ( ($survey->MinPoints == $survey->MaxPoints)
                   ? $survey->MaxPoints
                   : "{$survey->MinPoints}-{$survey->MaxPoints}" ) );
+      }
       else
          $optheader_text = '';
 

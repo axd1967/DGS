@@ -60,8 +60,10 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
       $errors[] = sprintf( T_('Voting on survey only possible on %s status.'),
          SurveyControl::getStatusText(SURVEY_STATUS_ACTIVE) );
 
+   $allow_vote = SurveyControl::allow_survey_vote( $survey, $errors );
+
    // handle save-vote
-   if( @$_REQUEST['save'] && count($errors) == 0 )
+   if( @$_REQUEST['save'] && $allow_vote && count($errors) == 0 )
    {
       $check_errors = prepare_save_votes( $survey ); // exports global vars
       if( count($check_errors) > 0 )
@@ -88,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
       $form->echo_string();
    }
 
-   echo "<br>\n", SurveyControl::build_view_survey($survey, $page);
+   echo "<br>\n", SurveyControl::build_view_survey($survey, $allow_vote, $page);
 
 
    $menu_array = array();

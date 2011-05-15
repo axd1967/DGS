@@ -2274,3 +2274,11 @@ ALTER TABLE Survey
    ADD Header text NOT NULL ;
 
 
+-- added SurveyUser-table to store user-list to restrict voting for survey
+CREATE TABLE SurveyUser (
+  sid int NOT NULL,
+  uid int NOT NULL,
+  PRIMARY KEY (sid,uid)
+) ENGINE=MyISAM ;
+
+

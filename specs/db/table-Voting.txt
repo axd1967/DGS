@@ -218,3 +218,21 @@ Description:
    - 0 = maybe points given, so no vote is represented by removed entry
 
 
+###########################################################################
+## --- SurveyUser ---
+
+Description:
+   Table to store users allowed to vote on survey (user-list).
+
+| Field | Type    | Null | Key | Default | Extra |
++-------+---------+------+-----+---------+-------+
+| sid   | int(11) | NO   | PRI | NULL    |       |
+| uid   | int(11) | NO   | PRI | NULL    |       |
+
+
+## Fields:
+
+* sid : survey-id, FK to Survey.ID
+
+* uid : user allowed to vote on survey, FK to Players.ID
+

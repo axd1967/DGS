@@ -25,6 +25,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/survey_control.php';
 require_once 'include/classlib_user.php';
+require_once 'include/gui_user_functions.php';
 
 $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
@@ -62,7 +63,10 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    elseif( !SurveyControl::allow_survey_edit($survey) )
       error('survey_edit_not_allowed', "admin_survey.check.edit($sid)");
    else
+   {
       SurveyControl::load_survey_options($survey);
+      $survey->loadUserList();
+   }
 
    $s_old_status = $survey->Status;
    $s_old_type = $survey->Type;
@@ -89,6 +93,8 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
             SurveyControl::update_merged_survey_options(
                $sid, $survey->SurveyOptions, @$vars['_del_sopts'], /*all-fields*/false );
+
+            Survey::persist_survey_userlist( $sid, $survey->UserList );
          }
          ta_end();
 
@@ -162,6 +168,12 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey Options'),
          'TEXTAREA',    'survey_opts', 80, min(12, (int)(2.5*count($survey->SurveyOptions)) ), $vars['survey_opts'], ));
+   $sform->add_row( array(
+         'DESCRIPTION', T_('User List#survey'),
+         'TEXT',        T_('to restrict users to vote on survey, user-id (text or numeric)#survey_userlist'), ));
+   $sform->add_row( array(
+         'TAB',
+         'TEXTINPUT', 'user_list', 80, -1, $vars['user_list'], ));
 
    $sform->add_empty_row();
 
@@ -182,6 +194,16 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
       $sform->add_row( array(
             'DESCRIPTION', T_('Preview'),
             'OWNHTML', '<td class="Preview">' . SurveyControl::build_view_survey($survey) . '</td>', ));
+      if( (string)$vars['user_list'] != '' && is_array($survey->UserListUserRefs) )
+      {
+         $arr = array();
+         foreach( $survey->UserListUserRefs as $uid => $urow )
+            $arr[] = user_reference( REF_LINK, 1, '', $urow ) . "<br>\n";
+
+         $sform->add_row( array(
+               'DESCRIPTION', T_('Vote Users#survey'),
+               'TEXT', implode('', $arr) ));
+      }
    }
 
 
@@ -366,10 +388,12 @@ function parse_edit_form( &$survey )
    $vars = array(
       'type'            => $survey->Type,
       'status'          => $survey->Status,
+      'flags'           => $survey->Flags,
       'min_points'      => $survey->MinPoints,
       'max_points'      => $survey->MaxPoints,
       'title'           => $survey->Title,
       'survey_opts'     => SurveyControl::buildSurveyOptionsText($survey),
+      'user_list'       => implode(' ', $survey->UserListHandles ),
       '_del_sopts'      => array(),
    );
 
@@ -405,9 +429,18 @@ function parse_edit_form( &$survey )
          if( $survey->MinPoints > $survey->MaxPoints )
             $errors[] = T_('Min-points must be smaller than max-points.');
 
-         if( $survey->Type == SURVEY_TYPE_POINTS && $survey->MinPoints == $survey->MaxPoints )
-            $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
-               SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
+         if( $survey->Type == SURVEY_TYPE_POINTS )
+         {
+            if( $survey->MinPoints == $survey->MaxPoints )
+               $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
+                  SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
+            if( $survey->MaxPoints - $survey->MinPoints == 1 )
+               $errors[] = sprintf( T_('Use %s-type instead if difference between min- & max-points is only 1.'),
+                  SurveyControl::getTypeText(SURVEY_TYPE_SINGLE) .'|'. SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
+         }
+         if( $survey->Type == SURVEY_TYPE_SUM && $survey->MaxPoints == 1 )
+            $errors[] = sprintf( T_('Use %s-type instead if max-points is only 1.'),
+               SurveyControl::getTypeText(SURVEY_TYPE_SINGLE) );
       }
       elseif( $survey->Type == SURVEY_TYPE_MULTI )
       {
@@ -425,8 +458,17 @@ function parse_edit_form( &$survey )
             $errors[] = sprintf( T_('Expecting number for max-selections in range %s.'),
                                  build_range_text(0, MAX_SURVEY_OPTIONS) );
 
-         if( $survey->MinPoints > $survey->MaxPoints )
-            $errors[] = T_('Min-selections must be smaller than max-selections.');
+         if( $survey->MaxPoints > 0 )
+         {
+            if( $survey->MinPoints > $survey->MaxPoints )
+               $errors[] = T_('Min-selections must be smaller than max-selections.');
+            if( $survey->MinPoints == $survey->MaxPoints )
+               $errors[] = T_('Min-selections must not be equal to max-selections: it makes no sense to select all options');
+         }
+
+         if( $survey->MaxPoints == 1 )
+            $errors[] = sprintf( T_('Use %s-type instead if max-selections is only 1.'),
+               SurveyControl::getTypeText(SURVEY_TYPE_SINGLE) );
       }
       elseif( $survey->Type == SURVEY_TYPE_SINGLE )
       {
@@ -473,15 +515,31 @@ function parse_edit_form( &$survey )
                $survey->MaxPoints, $cnt_sopts );
       }
 
+      $new_value = trim($vars['user_list']);
+      list( $arr_handles, $arr_uids, $arr_urefs, $arr_rejected, $check_errors ) = check_user_list( $new_value, 0 );
+      if( count($check_errors) > 0 )
+         $errors = array_merge( $errors, $check_errors );
+      else
+      {
+         $survey->UserList = $arr_uids;
+         $survey->UserListHandles = $arr_handles;
+         $survey->UserListUserRefs = $arr_urefs;
+         $vars['user_list'] = implode(' ', $arr_handles); // re-format
+
+         $survey->setFlag( SURVEY_FLAG_USERLIST, count($survey->UserList) );
+      }
+
 
       // determine edits
       $has_upd_status = ( $old_vals['status'] != $survey->Status );
       if( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#edits');
       if( $has_upd_status ) $edits[] = T_('Status#edits');
+      if( $old_vals['flags'] != $survey->Flags ) $edits[] = T_('Flags#edits');
       if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points#edits');
       if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points#edits');
       if( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title#edits');
       if( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options#edits');
+      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('UserList#edits');
 
       if( $survey->hasUserVotes() && count($edits) > 0 && !( count($edits) == 1 && $has_upd_status ) )
          $errors[] = T_('Update of survey not allowed, because there are user-votes.');

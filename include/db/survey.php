@@ -43,6 +43,8 @@ define('SURVEY_STATUS_CLOSED', 'CLOSED');
 define('SURVEY_STATUS_DELETE', 'DELETE');
 define('CHECK_SURVEY_STATUS', 'NEW|ACTIVE|CLOSED|DELETE');
 
+define('SURVEY_FLAG_USERLIST', 0x01);
+
 define('SURVEY_POINTS_MAX', 25);
 define('MAX_SURVEY_OPTIONS', 26); // labels A-Z
 define('SQL_NO_POINTS', 256); // >range of tinyint
@@ -84,6 +86,10 @@ class Survey
    var $User; // User-object
    var $SurveyOptions; // SurveyOption-objects
 
+   var $UserList; // [ uid, ...]
+   var $UserListHandles; // [ Handle, =1234, ...] (with '='-prefix for numeric handles)
+   var $UserListUserRefs; // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
+
    /*! \brief Constructs Survey-object with specified arguments. */
    function Survey( $id=0, $uid=0, $user=null, $type=SURVEY_TYPE_POINTS, $status=SURVEY_STATUS_NEW,
                     $flags=0, $min_points=0, $max_points=0, $user_count=0, $title='', $header='',
@@ -104,6 +110,9 @@ class Survey
       // non-DB fields
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
       $this->SurveyOptions = array();
+      $this->UserList = array();
+      $this->UserListHandles = array();
+      $this->UserListUserRefs = array();
    }
 
    function to_string()
@@ -123,6 +132,17 @@ class Survey
       if( !preg_match( "/^(".CHECK_SURVEY_STATUS.")$/", $status ) )
          error('invalid_args', "Survey.setStatus($status)");
       $this->Status = $status;
+   }
+
+   function setFlag( $flagmask, $value )
+   {
+      if( $flagmask > 0 )
+      {
+         if( $value )
+            $this->Flags |= $flagmask;
+         else
+            $this->Flags &= ~$flagmask;
+      }
    }
 
    /*! \brief Inserts or updates Survey-entry in database. */
@@ -182,6 +202,28 @@ class Survey
    {
       return ( $this->Type == SURVEY_TYPE_SINGLE || $this->Type == SURVEY_TYPE_MULTI );
    }
+
+   function loadUserList()
+   {
+      $this->UserList = array();
+      $this->UserListHandles = array();
+      $this->UserListUserRefs = array();
+
+      if( $this->ID > 0 )
+      {
+         $result = db_query( "Survey.loadUserList({$this->ID})",
+            "SELECT SU.uid as ID, P.Handle, P.Name " .
+            "FROM SurveyUser AS SU INNER JOIN Players AS P ON P.ID=SU.uid " .
+            "WHERE SU.sid={$this->ID} ORDER BY SU.uid" );
+         while( $row = mysql_fetch_array( $result ) )
+         {
+            $this->UserList[] = $row['ID'];
+            $this->UserListHandles[] = ( is_numeric($row['Handle']) ? '=' : '' ) . $row['Handle'];
+            $this->UserListUserRefs[$row['ID']] = $row;
+         }
+         mysql_free_result($result);
+      }
+   }//loadUserList
 
 
    // ------------ static functions ----------------------------
@@ -290,6 +332,54 @@ class Survey
       return db_query( "Survey.updateUserCount.upd($sid,$diff)",
          "UPDATE $table SET UserCount=UserCount+($diff) WHERE ID=$sid LIMIT 1" );
    }
+
+   /*!
+    * \brief Persists user-list for survey in SurveyUser-table.
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
+   function persist_survey_userlist( $sid, $uids )
+   {
+      if( !is_numeric($sid) || $sid <= 0 )
+         error('invalid_args', "Survey::persist_survey_userlist.check.sid($sid)");
+      if( !is_array($uids) )
+         error('invalid_args', "Survey::persist_survey_userlist.check.uids($sid)");
+
+      $cnt_uids = count($uids);
+      if( $cnt_uids > 0 )
+      {
+         $uids = array_unique($uids);
+         foreach( $uids as $uid )
+         {
+            if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+               error('invalid_args', "Survey::persist_survey_userlist.check.uids.bad_uid($sid,$uid)");
+         }
+         $uids_sql = implode(',', $uids);
+      }
+
+      db_query( "Survey::persist_survey_userlist.del($sid,$cnt_uids)",
+         "DELETE FROM SurveyUser WHERE sid=$sid" . ( $cnt_uids > 0 ? " AND uid NOT IN ($uids_sql)" : '' ) );
+
+      if( $cnt_uids > 0 )
+      {
+         db_query( "Survey::persist_survey_userlist.add($sid,$cnt_uids)",
+            "INSERT IGNORE SurveyUser (sid,uid) " .
+            "SELECT $sid, ID FROM Players WHERE ID IN ($uids_sql) LIMIT $cnt_uids" );
+      }
+   }//persist_survey_userlist
+
+   /*! \brief Returns true if user is on Survey-userlist. */
+   function exists_survey_user( $sid, $uid )
+   {
+      if( !is_numeric($sid) || $sid <= 0 )
+         error('invalid_args', "Survey::exists_survey_user.check.sid($sid,$uid)");
+      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+         error('invalid_args', "Survey::exists_survey_user.check.uid($sid,$uid)");
+
+      $row = mysql_single_fetch( "Survey::exists_survey_user($sid,$uid)",
+         "SELECT 1 FROM SurveyUser WHERE sid=$sid AND uid=$uid LIMIT 1" );
+      return (bool) $row;
+   }//exists_survey_user
 
 } // end of 'Survey'
 ?>

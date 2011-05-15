@@ -295,6 +295,7 @@ function get_tables( $database)
             'Ratinglog',
             'Survey',
             'SurveyOption',
+            'SurveyUser',
             'SurveyVote',
             'Statistics',
             'Tournament',

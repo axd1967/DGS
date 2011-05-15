@@ -871,6 +871,18 @@ CREATE TABLE IF NOT EXISTS `SurveyOption` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `SurveyUser`
+--
+
+CREATE TABLE IF NOT EXISTS `SurveyUser` (
+  `sid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  PRIMARY KEY  (`sid`,`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `SurveyVote`
 --
 
