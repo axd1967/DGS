@@ -712,7 +712,8 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    if( $graph_uid > 0 )
    {
       global $base_path;
-      $string = "<a class=Rating href=\"{$base_path}ratinggraph.php?uid=$graph_uid\">$string</a>";
+      $elo_str = T_('ELO#rating') . sprintf( ' %1.2f', $rating );
+      $string = anchor( $base_path."ratinggraph.php?uid=$graph_uid", $string, $elo_str, 'class="Rating"' );
    }
    return $string;
 }
