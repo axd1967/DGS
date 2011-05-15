@@ -152,8 +152,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       if( $allow_edit_tourney && @$tntable->Is_Column_Displayed[1] )
       {
          $links = anchor( $base_path."tournaments/edit_news.php?tid=$tid".URI_AMP."tnid={$tnews->ID}",
-               image( $base_path.'images/edit.gif', 'E'),
-               T_('Edit tournament news#tnews'), 'class=ButIcon');
+               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament news#tnews'));
          $row_str[1] = $links;
       }
 

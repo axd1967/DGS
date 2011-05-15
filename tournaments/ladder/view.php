@@ -386,13 +386,13 @@ function build_action_row_str( &$tladder, $is_mine, $rid, $run_games_str )
       if( !$allow_admin )
          $row_str = span('LadderWarn', T_('Edit prohibited#T_ladder'));
       else
+      {
          $row_str =
             anchor( $base_path."tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid={$tladder->uid}",
-                  image( $base_path.'images/edit.gif', 'E'),
-                  T_('Admin user'), 'class=ButIcon')
-            . SMALL_SPACING
-            . $tform->print_insert_radio_buttonsx(
-                  'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
+                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Admin user') )
+            . ' '
+            . $tform->print_insert_radio_buttonsx( 'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
+      }
    }
    elseif( $is_mine )
    {

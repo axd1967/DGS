@@ -123,26 +123,17 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
             T_("Request for %s:\n\nEdit subject and text to match your request "
                . "but please keep the reference to the tournament.#tourney"),
             "<tourney $tid>" ));
-         $links  = anchor( $base_path."message.php?mode=NewMessage".URI_AMP
-                     . "uid=$uid".URI_AMP."subject=$msg_subj".URI_AMP."message=$msg_text",
-               image( $base_path.'images/send.gif', 'M'),
-               T_('Send a message'), 'class=ButIcon');
+         $links = array();
+         $links[] = anchor( $base_path."message.php?mode=NewMessage".URI_AMP."uid=$uid".URI_AMP."subject=$msg_subj" .
+                            URI_AMP."message=$msg_text",
+            image( $base_path.'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
          if( $allow_edit || $my_id == $uid )
-         {
-            $links .= SMALL_SPACING;
-            $links .= anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid",
-                  image( $base_path.'images/edit.gif', 'E'),
-                  T_('Edit tournament director'), 'class=ButIcon');
-         }
+            $links[] = anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid",
+               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament director'));
          if( $allow_edit )
-         {
-            $links .= SMALL_SPACING;
-            $links .= anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP
-                              . "uid=$uid".URI_AMP."td_delete=1",
-                  image( $base_path.'images/trashcan.gif', 'X'),
-                  T_('Remove tournament director'), 'class=ButIcon');
-         }
-         $row_str[1] = $links;
+            $links[] = anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."td_delete=1",
+               image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Remove tournament director'));
+         $row_str[1] = implode(' ', $links);
       }
       if( $tdtable->Is_Column_Displayed[2] )
          $row_str[2] = $director->User->user_reference();

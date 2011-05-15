@@ -197,17 +197,13 @@ require_once( 'include/classlib_userpicture.php' );
             : "message.php?mode=Invite".URI_AMP."uid=$cid";
 
          $links  = anchor( "message.php?mode=NewMessage".URI_AMP."uid=$cid",
-               image( 'images/send.gif', 'M'),
-               T_('Send a message'), 'class=ButIcon');
+               image( 'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
          $links .= anchor( $uinvlink,
-               image( 'images/invite.gif', 'I'),
-               T_('Invite'), 'class=ButIcon');
+               image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
          $links .= anchor( "edit_contact.php?cid=$cid",
-               image( 'images/edit.gif', 'E'),
-               T_('Edit contact'), 'class=ButIcon');
+               image( 'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit contact'));
          $links .= anchor( "edit_contact.php?cid=$cid".URI_AMP."contact_delete=1",
-               image( 'images/trashcan.gif', 'X'),
-               T_('Remove contact'), 'class=ButIcon');
+               image( 'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Remove contact'));
          $crow_strings[ 9] = $links;
       }
       if( $ctable->Is_Column_Displayed[ 1] )

@@ -336,6 +336,11 @@ span.Maintenance {
    padding: 0px;
 }
 
+img.Action {
+   margin: 1px 2px 0px 2px;
+   padding: 0px;
+}
+
 table.Table td.GameSettings img,
 img.InTextImage {
    border: 0px solid black;
@@ -367,6 +372,9 @@ span.AdminTitle,
 .AdminLink {
    font-style: italic;
    background: #bcffab; /* light green */
+}
+span.AdminLink img {
+   vertical-align: middle;
 }
 
 
@@ -811,7 +819,7 @@ table.Table tr.Filter td.Number div {
    text-align: right; /* left */
 }
 
-table.Table tr.Filter td.Number select
+table.Table tr.Filter td.Number select,
 table.Table tr.Filter td.Number input {
    margin-left: auto;
    margin-right: 0px;
@@ -1550,17 +1558,6 @@ form#contactForm table.Table tr.Row3 td,
 form#contactForm table.Table tr.Row2 td,
 form#contactForm table.Table tr.Row1 td {
    vertical-align: top;
-}
-
-form#contactForm table.Table a.ButIcon {
-   margin: 0px 2px;
-   padding: 0px;
-}
-
-form#contactForm table.Table a.ButIcon img {
-   margin: 0px;
-   width: 16px;
-   height: 16px;
 }
 
 form#contactForm table.FormClassV {
@@ -2952,16 +2949,6 @@ table.Table td.ImageGroupColor {
 table#GamePlayersTable tr.Empty {
    background: #F7F5E3;
    height: 5px;
-}
-
-table#GamePlayersTable a.ButIcon {
-   margin: 0px 2px;
-   padding: 0px;
-}
-table#GamePlayersTable a.ButIcon img {
-   margin: 0px;
-   width: 16px;
-   height: 16px;
 }
 
 

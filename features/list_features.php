@@ -139,7 +139,7 @@ require_once( "features/lib_votes.php" );
       {
          $frow_strings[2] = anchor( "edit_feature.php?fid=$ID",
                image( "{$base_path}images/edit.gif", 'E'),
-               T_('Edit feature'), 'class=ButIcon');
+               T_('Edit feature'));
       }
       if( $ftable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;

@@ -237,20 +237,19 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
       if( @$btable->Is_Column_Displayed[ 1] )
       {
-         $links = array();
+         $links = '';
          if( $is_admin )
          {
-            $admin_link = span('AdminLink',
+            $links .= span('AdminLink',
                anchor( $base_path."admin_bulletin.php?bid={$bulletin->ID}",
-                  image( $base_path.'images/edit.gif', 'E'), T_('Admin Bulletin'), 'class=ButIcon') );
-            $links[] = $admin_link;
+                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Admin Bulletin')) );
          }
          if( $uid == $my_id && $bulletin->allow_bulletin_user_edit($my_id) )
          {
-            $links[] = anchor( $base_path."edit_bulletin.php?bid={$bulletin->ID}",
-                               image( $base_path.'images/edit.gif', 'E'), T_('Edit Bulletin'), 'class=ButIcon');
+            $links .= anchor( $base_path."edit_bulletin.php?bid={$bulletin->ID}",
+               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit Bulletin'));
          }
-         $row_str[ 1] = implode(MINI_SPACING, $links);
+         $row_str[ 1] = $links;
       }
       if( @$btable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $bulletin->User->Handle, '');

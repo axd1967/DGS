@@ -378,21 +378,21 @@ function build_user_actions( $gp )
       $gid = $gp->gid;
       if( $my_id != $uid )
          $arr[] = anchor("message.php?mode=NewMessage".URI_AMP."uid=$uid",
-            image( $base_path.'images/send.gif', 'M' ), T_('Send message'), 'class="ButIcon"' );
+            image( $base_path.'images/send.gif', 'M', '', 'class="Action"' ), T_('Send message'));
       if( $allow_edit && !($gp->Flags & GPFLAG_MASTER) )
       {
          if( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
          {
             $arr[] = anchor("message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_INVITE .
                      URI_AMP."mpuid=$uid".URI_AMP."preview=1",
-                  image( $base_path.'images/invite.gif', 'I' ), T_('Send invitation message'), 'class="ButIcon"' );
+                  image( $base_path.'images/invite.gif', 'I', '', 'class="Action"' ), T_('Send invitation message'));
             $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_INVITE.URI_AMP."uid=$uid",
-               image( $base_path.'images/trashcan.gif', 'X' ), T_('Delete reservation#mpg'), 'class="ButIcon"' );
+               image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Delete reservation#mpg'));
          }
          if( $gp->Flags & GPFLAG_JOINED )
          {
             $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_JOINED.URI_AMP."uid=$uid",
-               image( $base_path.'images/trashcan.gif', 'X' ), T_('Delete joined player#mpg'), 'class="ButIcon"' );
+               image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Delete joined player#mpg'));
          }
       }
    }

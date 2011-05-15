@@ -152,17 +152,14 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
          $msg_text = urlencode( sprintf(
             T_("Registration info for %s:\n\nEdit subject and text"),
             "<tourney $tid>" ));
-         $links = anchor( $base_path."message.php?mode=NewMessage".URI_AMP
-                     . "uid=$uid".URI_AMP."subject=$msg_subj".URI_AMP."message=$msg_text",
-               image( $base_path.'images/send.gif', 'M'),
-               T_('Send a message'), 'class=ButIcon');
 
-         $links .= SMALL_SPACING;
-         $links .= anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."rid=$rid",
-               image( $base_path.'images/edit.gif', 'E'),
-               T_('Edit user registration'), 'class=ButIcon');
-
-         $row_str[1] = $links;
+         $links = array();
+         $links[] = anchor( $base_path."message.php?mode=NewMessage".URI_AMP."uid=$uid".URI_AMP."subject=$msg_subj" .
+                            URI_AMP."message=$msg_text",
+            image( $base_path.'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
+         $links[] = anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."rid=$rid",
+               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit user registration'));
+         $row_str[1] = implode(' ', $links);
       }
 
       if( $tptable->Is_Column_Displayed[ 2] )
