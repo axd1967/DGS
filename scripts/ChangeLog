@@ -19,6 +19,435 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-05-16 juga
+
+   * admin.php:
+   - added link to create new features to vote on
+
+   * include/survey_control.php (SurveyControl.allow_survey_vote ~.load_survey_options, ~.build_points_array, ~.build_view_survey),
+     include/db/survey.php (class Survey),
+     include/gui_user_functions.php (check_user_list):
+   - view-survey:
+     - show survey-result only after user voted
+     - fix placing of '0' in points-selectbox
+   - deny survey-voting to user if according admin-option set
+
+   * include/gui_functions.php (button_style, button_TD_anchor),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     skins/dragon/screen.css, edit_profile.php:
+   - from wishlist: added no-button option to disable ID-button-graphics
+-----------
+-- allow pure-text ID-button
+ALTER TABLE Players
+   MODIFY Button tinyint signed NOT NULL default '0' ;
+-----------
+
+2011-05-15 juga
+
+   * include/survey_control.php (SurveyControl.getFlagsText, ~.formatFlags,
+       ~.allow_survey_vote, ~.build_view_survey),
+     include/db/survey.php (class Survey, ~.setFlag, ~.loadUserList,
+       ~.persist_survey_userlist, ~.exists_survey_user),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, scripts/data_export.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Voting.txt,
+     admin_survey.php (parse_edit_form), list_surveys.php, view_survey.php:
+   - added SurveyUser-table to store user-list to restrict voting for survey
+   - added restriction to allow survey-voting only for
+     - users with 2 finished games and actively played in a game within the last 30 days
+     - users from specified user-list
+     - admin always allowed except if user-list set
+   - list-survey: added flags showing if survey has restricted user-list
+   - for MULTI-survey-type handle Min/MaxPoints as number of min/max-selections
+   - added some checks on min/max-points for survey-types POINTS/MULTI/SUM
+-----------
+-- added SurveyUser-table to store user-list to restrict voting for survey
+CREATE TABLE SurveyUser (
+  sid int NOT NULL,
+  uid int NOT NULL,
+  PRIMARY KEY (sid,uid)
+) ENGINE=MyISAM ;
+-----------
+
+   * features/list_features.php, skins/dragon/screen.css,
+     tournaments/list_directors.php, tournaments/list_news.php,
+     tournaments/list_participants.php, tournaments/ladder/view.php,
+     game_players.php, list_bulletins.php, list_contacts.php, list_survey.php, userinfo.php:
+   - simplify/fix CSS for icon-images used as actions with AdminLink or inline with text:
+     use img-class 'Action' instead of a-class 'ButIcon'
+
+   * include/gui_user_functions.php (check_user_list),
+     admin_bulletin.php:
+   - refactored check_user_list()-func from admin-bulletin into 'include/gui_user_functions.php'
+     to be used for admin-survey as well
+
+   * include/rating.php (echo_rating):
+   - from wishlist: show ELO-value of DGS-rating as hover-text for link to rating-graph
+
+2011-05-07 juga
+
+   * include/survey_control.php (SurveyControl.buildSurveyOptionsText, ~.build_view_survey),
+     include/db/survey.php (class Survey, ~.fillEntityData, ~.new_from_row),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Voting.txt,
+     admin_survey.php (check_survey_options, parse_edit_form):
+   - added optional header-text for a survey shown between title and survey-options
+-----------
+-- added survey header-text
+ALTER TABLE Survey
+   ADD Header text NOT NULL ;
+-----------
+
+   * list_surveys.php:
+   - changed default-sort of surveys to ID-descending
+
+   * include/std_functions.php (survey_reference):
+   - allowed HTML-tag <hr> for separation-line to be used in messages/games
+   - added DGS-tag <survey id> to reference a survey with status & title
+
+2011-05-06 juga
+
+   * include/survey_control.php (SurveyControl.build_view_survey),
+     include/db/survey.php (Survey.is_point_type),
+     specs/db/table-Voting.txt,
+     admin_survey.php (check_survey_options, parse_edit_form),
+     view_survey.php (prepare_save_votes):
+   - added optional restriction on number of selected checkboxes for survey-MULTI-type
+   - cleanup: added is_point_type()-func to check for point-based survey-types
+
+   * include/survey_control.php (SurveyControl.getTypeText, ~.build_points_array, ~.build_view_survey),
+     admin_survey.php (check_survey_options, parse_edit_form),
+     view_survey.php (prepare_save_votes, get_new_points),
+     skins/dragon/screen.css:
+   - added survey-SUM-type using selectbox-choices with a total-points-sum,
+     survey min-points must be >=0, and min/max-points can be equal
+   - view-survey:
+     - show error on vote-saving if total-sum exceeds allowed min/max-range
+     - show header above options with hint to give votes for SUM-type
+
+2011-05-05 juga
+
+   * include/survey_control.php (SurveyControl.getTypeText, ~.build_view_survey),
+     admin_survey.php (check_survey_options, parse_edit_form),
+     view_survey.php (get_new_points):
+   - added survey-SINGLE-type for single-choice using radio-buttons for survey-options
+
+   * include/db/survey_option.php (SurveyOption.update_aggregates_survey_options),
+     include/survey_control.php (SurveyControl.build_view_survey),
+     include/error_codes.php (ErrorCode.init),
+     admin_survey.php (check_survey_options, parse_edit_form),
+     view_survey.php (prepare_save_votes, get_new_points):
+   - added survey-MULTI-type for multiple-choice using checkboxes for survey-options
+   - bugfix: allow negative survey-options-min-points
+
+   * scripts/voting_consistency.php:
+   - bugfix: correct query using LEFT-join on SurveyVote in survey-consistency-script
+     to fix Survey.UserCount & SurveyOption.Score
+
+2011-05-04 juga
+
+   * include/survey_control.php (SurveyControl.build_view_survey,
+     skins/dragon/screen.css:
+   - view-survey:
+     - show user-vote if survey is viewable, and not only on CLOSED-status
+     - reformatted survey-options in survey-view using <table> giving better
+       control over table-like layout and simplifying it
+
+   * include/db/survey.php (Survey.update_user_count),
+     view_survey.php (handle_save_votes):
+   - bugifx for updating Survey.UserCount
+
+   * admin_survey.php:
+   - bugfix: show view-survey-link on saved status
+
+   * include/db/survey.php (Survey.hasUserVotes, ~.is_status_viewable),
+     include/db/survey_option.php (SurveyOption.copyValues),
+     admin_survey.php (merge_survey_options, parse_edit_form),
+     list_surveys.php:
+   - bugfixes:
+     - survey-viewing only possible if on viewable-status ACTIVE|CLOSED
+     - survey-update not allowed if there are user-votes
+     - allow status-only-update in admin-survey
+
+   * include/gui_functions.php (button_TD_anchor):
+   - added way to draw button-image without link
+
+   * include/db/survey_vote.php (class SurveyVote, ~.persist, ~.fillEntityData, ~.build_query_sql,
+       ~.new_from_row, ~.load_survey_vote, ~.load_survey_votes, ~.persist_survey_votes),
+     include/survey_control.php (SurveyControl.load_survey_options),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Voting.txt,
+     scripts/voting_consistency.php, view_survey.php (prepare_save_votes):
+   - refactoring: normalized FK SurveyVote.sid/Tag to use SurveyVote.soid = SurveyOption.ID
+-----------
+-- normalize FK SurveyVote.sid/Tag to use SurveyVote.soid = SurveyOption.ID
+RENAME TABLE SurveyVote TO SurveyVote_old ;
+
+CREATE TABLE SurveyVote (
+  soid int NOT NULL,
+  uid int NOT NULL default 0,
+  Points tinyint NOT NULL default 0,
+  PRIMARY KEY (soid,uid)
+) ENGINE=MyISAM ;
+
+-- migrate data into new structure
+INSERT INTO SurveyVote (soid,uid,Points)
+   SELECT SOPT.ID, SV.uid, SV.Points
+   FROM SurveyVote_old AS SV INNER JOIN SurveyOption AS SOPT ON SOPT.sid=SV.sid AND SOPT.Tag=SV.Tag ;
+
+DROP TABLE SurveyVote_old ;
+-----------
+
+   * scripts/voting_consistency.php, scripts/index.php:
+   - started consistency-fix-script for feature- & survey data
+
+   * include/survey_control.php (SurveyControl.build_view_survey),
+     skins/dragon/screen.css, admin_survey.php, list_surveys.php:
+   - show vote-user-count on survey-list
+   - show vote-user-count on survey-view in extra-info if result shown
+
+   * include/survey_control.php (SurveyControl.getTypeText, ~.load_survey_options,
+       ~.update_merged_survey_options, ~.build_view_survey),
+     include/db/survey_option.php (class SurveyOption, ~.fillEntityData, ~.buildLabel,
+       ~.build_query_sql, ~.new_from_row, ~.cloneSurveyOption, ~.load_survey_option,
+       ~.load_survey_options, ~.persist_survey_options, ~.update_aggregates_survey_options),
+     include/db/survey.php (class Survey, ~.updateUserCount, ~.fillEntityData, ~.new_from_row),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Voting.txt, skins/dragon/screen.css,
+     admin_survey.php (check_survey_options, merge_survey_options, parse_edit_form),
+     view_survey.php (prepare_save_votes, handle_save_votes):
+   - refactored/added aggregated-value SurveyOption.UserCount into Survey-table
+   - view-survey: show all-votes-score of survey-options on closed-survey and for admins
+   - view-survey: added result-mode with survey-options ordered by highest score
+   - admin-survey: bugfix: set SurveyOption.sid on inserting new survey
+   - fixed error-checks & texts
+-----------
+-- added defaults to avoid warning on INSERT .. ON DUPLICATE KEY ...
+ALTER TABLE SurveyOption
+   MODIFY sid int NOT NULL default 0,
+   MODIFY Title varchar(255) NOT NULL default '' ;
+
+-- refactor SurveyOption.UserCount into Survey-table
+ALTER TABLE SurveyOption
+   DROP COLUMN UserCount ;
+ALTER TABLE Survey
+   ADD UserCount mediumint unsigned not null default '0' AFTER MaxPoints ;
+-----------
+
+2011-05-03 juga
+
+   * include/gui_functions.php (span, formatNumber),
+     include/survey_control.php (SurveyControl.build_view_survey),
+     skins/dragon/screen.css:
+   - view-survey: show user-votes for survey-CLOSED-status behind title,
+     added notes, minor survey-formatting-change
+
+   * admin_survey.php (merge_survey_options):
+   - disallow update of survey-option if there are user-votes also for super-admin,
+     would need cleanup first
+
+   * include/db/survey.php (class Survey, ~.setType, ~.fillEntityData, ~.need_option_minpoints, ~.new_from_row),
+     include/survey_control.php (SurveyControl.getTypeText, ~.build_view_survey),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Voting.txt,
+     admin_survey.php (parse_edit_form), list_surveys.php:
+   - renamed db-field Survey.SurveyType -> Type
+-----------
+-- renamed field Survey.SurveyType -> Type
+ALTER TABLE Survey
+   CHANGE SurveyType Type enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS' ;
+-----------
+
+   * include/db/survey_option.php (class SurveyOption, ~.fillEntityData, ~.cloneSurveyOption),
+     include/db/survey_vote.php (class SurveyVote, ~.persist, ~.fillEntityData):
+   - renamed class-field Survey->SurveyID -> sid (survey-id)
+
+   * include/survey_control.php (SurveyControl.load_survey_options, ~.update_merged_survey_options, ~.build_view_query_sql),
+     include/db/survey_option.php (class SurveyOption, ~.persist_survey_options, ~.update_aggregates_survey_options),
+     include/db/survey_vote.php (SurveyVote. ~.new_from_row, ~.load_survey_votes, ~.persist_survey_votes),
+     include/db/survey.php (SQL_NO_POINTS),
+     view_survey.php (prepare_save_votes, handle_save_votes),
+     admin_survey.php, list_surveys.php:
+   - view-survey:
+     - added showing/saving of survey-votes of user for survey on ACTIVE-status,
+     - updated aggregate-fields in SurveyOption-entries on user-votes
+     - show only surveys on viewable status (ACTIVE|CLOSED)
+     - voting only possible on survey-active-status
+   - admin-survey: skip update of aggregation-fields in SurveyOption-entries
+
+   * include/db_classes.php (Entity.build_sql_insert_values, ~.build_sql_update):
+   - added way to omit some fields from bulk-duplicate-inserts & updates
+
+2011-05-02 juga
+
+   * include/db/survey.php (MAX_SURVEY_OPTIONS),
+     admin_survey.php (check_survey_options):
+   - added check for max-allowed survey-options #26 (labels A-Z)
+
+   * include/survey_control.php (SurveyControl.build_view_query_sql, ~.build_points_array,
+       ~.build_view_survey),
+     list_surveys.php, view_survey.php, skins/dragon/screen.css:
+   - moved non-admin survey-restriction into SurveyControl::build_view_query_sql()-func
+   - view-survey:
+     - added <form>-elements to vote on survey for POINTS-type
+     - show survey-status
+
+   * admin_survey.php (parse_edit_form):
+   - added link-title for reload on survey-id
+   - restricted size of textarea for survey-options
+   - forbid equal min-/max-points for POINTS-survey-type
+
+   * include/survey_control.php (class SurveyControl, ~.is_survey_admin,
+       ~.load_survey_options, ~.buildSurveyOptionsText, ~.findMatchingSurveyOption,
+       ~.update_merged_survey_options, ~.build_view_survey),
+     include/db/survey_option.php (class SurveyOption, ~.fillEntityData, ~.copyValues,
+       ~.build_query_sql, ~.cloneSurveyOption, ~.load_survey_option, ~.load_survey_options,
+       ~.persist_survey_options, ~.delete_survey_options),
+     include/db/survey.php (class Survey, ~.need_option_minpoints),
+     admin_survey.php (check_survey_options, merge_survey_options, parse_edit_form),
+     view_survey.php, skins/dragon/screen.css:
+   - added edit & viewing of survey-options using textarea-field with <opt>-tag
+     which is parsed into SurveyOption-entries
+
+   * include/std_classes.php (ListIterator.getItems):
+   - ListIterator: aded getItems()-func
+
+2011-05-01 juga
+
+   * include/survey_control.php (SurveyControl.build_view_survey),
+     skins/dragon/screen.css, admin_survey.php, view_survey.php:
+   - added links between admin-survey and view-survey
+   - view-survey: show Lastchanged-date
+
+   * list_surveys.php:
+   - bugfix: fix table sort-fields
+   - bugfix: restrict list to viewable surveys for non-admins
+
+   * include/config.php (ALLOW_SURVEY_VOTE),
+     admin.php, admin_admins.php, list_surveys.php, people.php, site_map.php,
+     view_survey.php, forum/index.php:
+   - added server-config ALLOW_SURVEY_VOTE to disable survey-functionality
+
+   * include/survey_control.php (SurveyControl.allow_survey_edit),
+     include/error_codes.php (ErrorCode.init),
+     admin_survey.php:
+   - added check if survey can be edited by admin
+   - refactored isNumber()-func to 'include/utilities.php'
+   - refactored build_range_text()-func to 'include/gui_functions.php'
+
+   * include/gui_functions.php (build_range_text),
+     include/utilities.php (isNumber),
+     tournaments/include/tournament_utils.php (TournamentUtils.isNumberOrEmpty),
+     tournaments/edit_properties.php, tournaments/register.php,
+     tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder_props.php,
+     tournaments/include/tournament_limits.php, tournaments/include/tournament_pool.php,
+     tournaments/include/tournament_properties.php, tournaments/include/tournament_round.php,
+     tournaments/ladder/edit_props.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/define_pools.php, tournaments/roundrobin/edit_pools.php:
+   - refactored isNumber()-func to 'include/utilities.php'
+   - refactored build_range_text()-func to 'include/gui_functions.php'
+
+   * include/survey_control.php (class SurveyControl, ~.getSurveyTypeText, ~.getStatusText,
+       ~.is_survey_admin, ~.new_survey, ~.build_view_survey),
+     include/db/survey.php (class Survey, ~.to_string, ~.setSurveyType, ~.setStatus, ~.persist,
+       ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_survey,
+       ~.load_survey_by_query, ~.load_surveys),
+     include/db/survey_option.php (class SurveyOption, ~.to_string, ~.persist, ~.insert, ~.update,
+       ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_survey_option, ~.load_survey_options),
+     include/db/survey_vote.php (class SurveyVote, ~.to_string, ~.persist, ~.insert, ~.update,
+       ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_survey_vote, ~.load_survey_votes),
+     include/quick_common.php (ADMOPT_DENY_FEATURE_VOTE, ADMOPT_DENY_SURVEY_VOTE),
+     include/std_functions.php (ADMIN_FEATURE, ADMIN_SURVEY),
+     include/classlib_profile.php (PROFTYPE_FILTER_SURVEYS),
+     features/lib_votes.php (Feature.is_admin),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql,
+     specs/db/table-Voting.txt, scripts/data_export.php,
+     skins/dragon/screen.css, forum/index.php,
+     admin_survey.php (parse_edit_form, isNumber, build_range_text),
+     admin.php, admin_admins.php, admin_show_users.php, admin_users.php,
+     list_surveys.php, people.php, site_map.php, view_survey.php:
+   - added surveys than users can vote on
+     - added pages to create/edit, list, view surveys
+     - added survey-admin role to manage surveys
+     - added admin-option to deny voting on surveys
+   - renamed vote-admin -> feature-admin
+-----------
+-- added Survery-tables to store survey, survey-option, survey-vote
+CREATE TABLE Survey (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  SurveyType enum('POINTS','SUM','SINGLE','MULTI') NOT NULL default 'POINTS',
+  Status enum('NEW','ACTIVE','CLOSED','DELETE') NOT NULL default 'NEW',
+  Flags tinyint unsigned NOT NULL default 0,
+  MinPoints tinyint NOT NULL default 0,
+  MaxPoints tinyint NOT NULL default 0,
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  Title varchar(255) NOT NULL,
+  PRIMARY KEY (ID),
+  KEY uid (uid),
+  KEY Status (Status)
+) ENGINE=MyISAM ;
+
+CREATE TABLE SurveyOption (
+  ID int NOT NULL auto_increment,
+  sid int NOT NULL,
+  Tag tinyint unsigned NOT NULL default 0,
+  SortOrder tinyint unsigned NOT NULL default 0,
+  MinPoints tinyint NOT NULL default 0,
+  UserCount mediumint unsigned NOT NULL default 0,
+  Score int NOT NULL default 0,
+  Title varchar(255) NOT NULL,
+  Text text NOT NULL default '',
+  PRIMARY KEY (ID),
+  UNIQUE KEY sidTag (sid,Tag)
+) ENGINE=MyISAM ;
+
+CREATE TABLE SurveyVote (
+  sid int NOT NULL,
+  uid int NOT NULL default 0,
+  Tag tinyint unsigned NOT NULL default 0,
+  Points tinyint NOT NULL default 0,
+  PRIMARY KEY (sid,uid,Tag)
+) ENGINE=MyISAM ;
+-----------
+
+   * features/lib_votes.php (
+       class Feature, ~.set_status, ~.set_size, ~.edit_status_allowed,
+         ~.allow_vote, ~.allow_edit, ~.update_feature, ~.delete_feature, ~.to_string,
+         ~.build_filter_selection_status, ~.build_filter_selection_size, ~.build_feature_notes,
+         ~.allow_vote_check, ~.build_query_feature_list, ~.get_query_fields, ~.new_from_row,
+         ~.load_feature;
+       class FeatureVote, ~.update_vote, ~.to_string, ~.build_query_featurevote_list,
+         ~.get_query_fields, ~.new_from_row),
+     include/std_functions.php (count_feature_new),
+     specs/db/dragon-ddl.sql, scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     features/edit_feature.php, features/list_features.php, features/list_votes.php,
+     features/vote_feature.php, site_map.php, skins/dragon/screen.css:
+   - added feature-size which resembles the effort required to implement a feature
+   - added feature-status VOTE taking place of former NEW-status,
+     NEW-status now represents feature in edit-mode for vote-admin
+   - allow vote-admin to change feature-status NEW -> VOTE
+   - added link to show "my feature votes"
+   - rename table: FeatureList -> Feature
+   - removed field FeatureVote.IP
+   - rework feature-notes
+-----------
+-- feature-cleanup: table-name, feature-status NEW/VOTE, drop IP for votes
+RENAME TABLE FeatureList TO Feature;
+
+ALTER TABLE Feature
+   MODIFY Status enum('NEW','VOTE','WORK','DONE','LIVE','NACK') NOT NULL default 'NEW',
+   ADD Size enum('?','EPIC','XXL','XL','L','M','S') NOT NULL default '?' AFTER Status ;
+UPDATE Feature SET Status='VOTE' WHERE Status='NEW' ;
+
+ALTER TABLE FeatureVote
+   DROP COLUMN IP;
+-----------
+
+   * include/gui_functions.php (echo_notes):
+   - added way to skip make_html_safe() for single text-lines to allow <span>
+
 2011-04-30 juga
 
    * wap/status.php:
