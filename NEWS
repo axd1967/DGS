@@ -310,16 +310,23 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
    * <home features/list_features.php>Voting on features</home> including feature status management
       * <home features/list_votes.php>Show feature votes</home>, added as Vote-link in main-menu
-      * Show count of NEW features in main-menu with link to vote upon them if there are some
+      * Show count of NEW features in main-menu with link to vote on them
+
+   * <home list_surveys.php>Surveys</home>:
+      * Added Surveys that users can vote on with types (Points, Sum, Single-choice, Multiple-choice)
+      * Added link to <home list_surveys.php>Surveys</home> on <home forum/>forums-page</home>
+      * Show survey-result for closed surveys, or after user voted on survey
 
    * Markup tags:
       * &lt;http://url.net |link text> : enhanced link markup with optional text,
         Link text must not contain a single quote "'" -> use "&amp;apos;" instead
       * &lt;strike><strike>text</strike></strike> : strike out text
       * &lt;tourney id> : showing link to corresponding tournament page
+      * &lt;survey id> : showing link to survey with status & title
       * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
         (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
       * &lt;game gid[,move]> : Added game-type and changed format for move-number
+      * &lt;hr> : showing separation-line like HTML &lt;hr>-tag, to be used in messages/games
 
 
    Minor changes:
@@ -420,6 +427,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Show icon (<image online.gif>) for users being "online" (i.e. last access time within 10 mins ago)
         on pages <home users.php>Users</home>, <home opponents.php>Opponents</home> and <home list_contacts.php>Contacts</home>
       * Used button-image for ID-column for users and opponents page
+      * Show ELO-value of DGS-rating as hover-text over user-rating if linked to rating-graph
 
       * <home opponents.php>Opponents page</home>:
          * Added column (<image table.gif>) with link to games with current opponent for finished or running games
@@ -427,6 +435,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
    * <home edit_profile.php>User Profile</home>:
       * Added move-numbering options: Relative and Reverse numbering
+      * Added no-button option to disable ID-button-graphics
       * Added JavaScript management in profile setting
       * Changed order, grouping and description of hover-options
       * Enlarged length of field 'Open for matches' to 60 chars
@@ -575,7 +584,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added GAME_ADMIN-role to change game-settings
       * Added TOURNAMENT_ADMIN-role to fix problems with tournaments,
         Show indicator in top-bar as reminder
-      * Added VOTING_ADMIN-role to add new features to vote on
+      * Added FEATURE_ADMIN-role to manage features to vote on
+      * Added SURVEY_ADMIN-role to manage surveys to vote on
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
       * Removed ADMIN_TIME admin-level, page-creation-time shown for all users now
       * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
@@ -585,15 +595,15 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Finish game by setting game-result, Change game rated-status, Delete running & finished game
          * Notify players about game-end and game-deletion
          * Setting game-result-flag for the game
-
       * Added admin-rating-page to change user-rating directly and/or resetting confidence-interval
          * Show former rating-changes of user
          * Adjusted rating-recalculation-script to process admin-rating-changes
-
       * Added admin-bulletin-page
-         * to create / edit admin bulletins
+         * to create & edit admin bulletins
          * to create bulletin for user, which can then be edited by normal user
          * to approve / reject / edit bulletins edited by normal user
+      * Added admin-feature-page to create & admin features
+      * Added admin-survey-page to create & admin surveys
 
       * Added admin-link "Admin game" on game-info-page to admin-game-page
       * Added admin-link "Admin user" on user-info page to admin-user-page
@@ -607,7 +617,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added indexes on Errorlog to improve searching for problems
       * Don't write Errorlog if not needed, e.g. for some GUI-errors
 
-      * Added admin-option DENY_VOTE to forbid user to vote on features
+      * Added admin-option DENY_FEATURE_VOTE to forbid user to vote on features
+      * Added admin-option DENY_SURVEY_VOTE to forbid user to vote on surveys
       * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
       * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
       * Added admin-options DENY_FORUM_NO_POST/MOD_POST to replace MayPostOnForum, shown on administrated-users page
@@ -620,6 +631,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added email-check for password-admins with privacy policy note
       * Added forum consistency script
       * Added tournament consistency script
+      * Added consistency script for features and surveys
       * Removed translations from the admin pages
       * Different CSS-layout for most admin-actions & admin-links
 
@@ -636,6 +648,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * ALLOW_FEATURE_VOTE                - enabled
          * ALLOW_JAVASCRIPT                  - enabled
          * ALLOW_SQL_CALC_ROWS               - enabled
+         * ALLOW_SURVEY_VOTE                 - enabled
          * ALLOW_TOURNAMENTS                 - enabled
          * ALLOW_GO_DIAGRAMS                 - disabled (needs JavaScript)
          * ALLOW_GOBAN_EDITOR                - disabled
