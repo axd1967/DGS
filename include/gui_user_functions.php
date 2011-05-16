@@ -68,9 +68,10 @@ function check_user_list( $user_list, $author_uid )
    $uids = array();
    $urefs = array();
    $rejectmsg = array();
+   $deny_survey = array();
 
    $qsql = new QuerySQL(
-      SQLP_FIELDS, 'P.ID', 'P.Handle', 'P.Name',
+      SQLP_FIELDS, 'P.ID', 'P.Handle', 'P.Name', 'P.AdminOptions',
       SQLP_FROM,   'Players AS P' );
    if( $author_uid > 0 )
    {
@@ -92,6 +93,8 @@ function check_user_list( $user_list, $author_uid )
          $urefs[$uid] = $row;
          if( $author_uid > 0 && @$row['C_RejectMsg'] )
             $rejectmsg[$view_handle] = 1;
+         if( $author_uid == 0 && (@$row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE) )
+            $deny_survey[$view_handle] = 1;
          unset($arr_miss[$uid]);
       }
       mysql_free_result($result);
@@ -110,6 +113,8 @@ function check_user_list( $user_list, $author_uid )
          $urefs[$uid] = $row;
          if( $author_uid > 0 && @$row['C_RejectMsg'] )
             $rejectmsg[$view_handle] = 1;
+         if( $author_uid == 0 && (@$row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE) )
+            $deny_survey[$view_handle] = 1;
          unset($arr_miss[strtolower($handle)]);
       }
       mysql_free_result($result);
@@ -124,6 +129,9 @@ function check_user_list( $user_list, $author_uid )
       $errors[] = sprintf( T_('Unknown users found [%s]#userlist'), implode(', ', array_keys($arr_miss) ));
    if( $author_uid > 0 && count($uids) == 1 )
       $errors[] = T_('Userlist must contain at least two recipients, otherwise send a private message instead.#userlist');
+   if( count($deny_survey) > 0 )
+      $errors[] = sprintf( T_('Users [%s] are denied to vote on surveys by admin.#userlist'),
+         implode(' ', array_keys($deny_survey)) );
 
    $guests = array();
    for( $g_uid=1; $g_uid <= GUESTS_ID_MAX; $g_uid++)

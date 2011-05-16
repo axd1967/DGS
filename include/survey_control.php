@@ -172,6 +172,12 @@ class SurveyControl
       if( $survey->Status != SURVEY_STATUS_ACTIVE )
          return false;
 
+      if( @$player_row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE )
+      {
+         $errors[] = T_('Survey-Voting has been denied.');
+         return false;
+      }
+
       // vote only allowed by users on user-list
       if( $survey->Flags & SURVEY_FLAG_USERLIST )
       {
@@ -195,7 +201,10 @@ class SurveyControl
       return true;
    }//allow_survey_vote
 
-   /*! \brief Loads & fills Survey->SurveyOptions (with UserVotePoints from a users SurveyVote-entries if $uid given). */
+   /*!
+    * \brief Loads & fills Survey->SurveyOptions; with UserVotePoints/UserVoted from a users SurveyVote-entries
+    *        if $uid given.
+    */
    function load_survey_options( &$survey, $uid=0, $order_result=false )
    {
       $sid = $survey->ID;
@@ -213,17 +222,27 @@ class SurveyControl
       if( $uid > 0 ) // with user-vote
       {
          $arr = array();
+         $survey->UserVoted = false;
          while( list(,$arr_item) = $iterator->getListIterator() )
          {
             list( $sopt, $orow ) = $arr_item;
-            $sopt->UserVotePoints = ( @$orow['SV_Points'] == SQL_NO_POINTS ) ? null : (int)@$orow['SV_Points'];
+            if( @$orow['SV_Points'] == SQL_NO_POINTS )
+               $sopt->UserVotePoints = null;
+            else
+            {
+               $sopt->UserVotePoints = (int)@$orow['SV_Points'];
+               $survey->UserVoted = true;
+            }
             $arr[] = $sopt;
          }
          $survey->SurveyOptions = $arr;
       }
       else
+      {
          $survey->SurveyOptions = $iterator->getItems();
-   }
+         $survey->UserVoted = null;
+      }
+   }//load_survey_options
 
    /*! \brief Builds markup-text for admin-survey from array of SurveyOption-objects. */
    function buildSurveyOptionsText( $survey )
@@ -290,8 +309,6 @@ class SurveyControl
 
       $arr = array();
       $plus = ($with_plus) ? '+' : MINI_SPACING;
-      if( $min <=0 && $max >= 0 )
-         $arr[0] = MINI_SPACING . 0;
       if( $dir_asc ) // direction ascending
       {
          for( $val = $min; $val <= $max; $val++ )
@@ -317,7 +334,8 @@ class SurveyControl
          $sform->add_hidden( 'sid', $survey->ID );
       }
       $show_uservote = $allow_vote && Survey::is_status_viewable($survey->Status);
-      $show_result = ( SurveyControl::is_survey_admin() || $survey->Status == SURVEY_STATUS_CLOSED );
+      $show_result = SurveyControl::is_survey_admin() || ( $survey->Status == SURVEY_STATUS_CLOSED )
+         || ( $survey->Status == SURVEY_STATUS_ACTIVE && $survey->UserVoted );
 
       $survey_title = make_html_safe($survey->Title, true, $rx_term);
       $survey_title = preg_replace( "/[\r\n]+/", '<br>', $survey_title ); //reduce multiple LF to one <br>

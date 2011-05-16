@@ -85,6 +85,7 @@ class Survey
 
    var $User; // User-object
    var $SurveyOptions; // SurveyOption-objects
+   var $UserVoted; // Boolean: null=unset, true = there are votes in DB, false = not voted yet
 
    var $UserList; // [ uid, ...]
    var $UserListHandles; // [ Handle, =1234, ...] (with '='-prefix for numeric handles)
@@ -110,6 +111,7 @@ class Survey
       // non-DB fields
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
       $this->SurveyOptions = array();
+      $this->UserVoted = null;
       $this->UserList = array();
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();
