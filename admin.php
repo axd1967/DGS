@@ -52,6 +52,9 @@ $GLOBALS['ThePage'] = new Page('Admin');
                      '', $admin_level & ADMIN_FAQ);
    add_link_page_link('admin_bulletin.php', /*T_*/('Admin Bulletin'),
                      '', $admin_level & ADMIN_DEVELOPER);
+   if( ALLOW_FEATURE_VOTE )
+      add_link_page_link('features/edit_feature.php', /*T_*/('Admin Feature'),
+                        '', $admin_level & (ADMIN_FEATURE|ADMIN_DEVELOPER) );
    if( ALLOW_SURVEY_VOTE )
       add_link_page_link('admin_survey.php', /*T_*/('Admin Survey'),
                         '', $admin_level & ADMIN_SURVEY);
