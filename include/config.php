@@ -147,7 +147,7 @@ define('ACCKEYP_GAME_COMMENT',   '');
 define('ALLOW_JAVASCRIPT', true);
 
 // Allow usage of tournaments
-define('ALLOW_TOURNAMENTS', false);
+define('ALLOW_TOURNAMENTS', true);
 define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.
 
 // Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
