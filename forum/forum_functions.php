@@ -31,6 +31,7 @@ require_once( 'include/std_classes.php' );
 require_once( "include/form_functions.php" );
 require_once( 'include/classlib_user.php' );
 require_once( 'include/classlib_goban.php' );
+require_once( 'include/rating.php' );
 require_once( 'forum/class_forum_options.php' );
 require_once( 'forum/class_forum_read.php' );
 //if( ALLOW_GO_DIAGRAMS ) require_once( "include/GoDiagram.php" );
@@ -646,7 +647,7 @@ class DisplayForum
       global $NOW, $player_row;
 
       // post-vars needed:
-      //    id, forum_id, thread_id, parent_id, subject, text, author(id,name,handle),
+      //    id, forum_id, thread_id, parent_id, subject, text, author(id,name,handle,rating),
       //    pending_approval, last_edited, last_read
       // post-vars only needed for forum-search: forum_name, score; this->show_score
 
@@ -698,6 +699,7 @@ class DisplayForum
             ,"<a class=PostSubject name='preview'>$sbj</a></td></tr> "
             ,"\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>"
             ,T_('by'),' ' ,user_reference( REF_LINK, 1, '', $player_row)
+            , ', ', echo_rating($player_row['Rating2'], /*show%*/false, $player_row['ID'], /*engl*/false, /*short*/true)
             ,' &nbsp;&nbsp;&nbsp;' ,date(DATE_FMT, $NOW)
             ,"</td></tr>";
       }
@@ -767,9 +769,12 @@ class DisplayForum
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
          $post_reference = date(DATE_FMT, $post->created);
-         echo T_('by') ,' ' , $post->author->user_reference(),
+         $author_rating_str = ( $post->author->hasRating(false) )
+            ? ', ' . echo_rating($post->author->Rating, /*show%*/false, $post->author->ID, /*engl*/false, /*short*/true)
+            : '';
+         echo T_('by'), ' ',
               echo_image_admin( $post->author->AdminLevel ),
-              ' ', SMALL_SPACING, $post_reference;
+              ' ', $post->author->user_reference(), $author_rating_str, SMALL_SPACING, $post_reference;
 
          if( !($drawmode & MASK_DRAWPOST_NO_BODY) )
             echo $this->get_post_edited_string( $post );
@@ -1398,7 +1403,7 @@ class ForumThread
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
-   }
+   }//load_posts
 
    /*!
     * \brief Loads and adds posts (to posts-arr), current active post stored
@@ -1444,7 +1449,7 @@ class ForumThread
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
-   }
+   }//load_revision_history
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    function to_string()
@@ -1773,7 +1778,9 @@ class ForumPost
          'UNIX_TIMESTAMP(P.Time) AS X_Time',
          'UNIX_TIMESTAMP(P.Lastchanged) AS X_Lastchanged',
          'UNIX_TIMESTAMP(P.Lastedited) AS X_Lastedited',
-         'PAuthor.Name AS Author_Name', 'PAuthor.Handle AS Author_Handle',
+         'PAuthor.Name AS Author_Name',
+         'PAuthor.Handle AS Author_Handle',
+         'PAuthor.Rating2 AS Author_Rating',
          'PAuthor.Adminlevel+0 AS Author_AdminLevel' );
       $qsql->add_part( SQLP_FROM,
          'Posts AS P',
@@ -1790,7 +1797,7 @@ class ForumPost
             @$row['Thread_ID'],
             // Author_* not part of Posts-table, but are read if set in row
             User::newForumUser( @$row['User_ID'], @$row['Author_Name'], @$row['Author_Handle'],
-               @$row['Author_AdminLevel'] ),
+               @$row['Author_AdminLevel'], @$row['Author_Rating'] ),
             @$row['LastPost'],
             @$row['PostsInThread'],
             @$row['Hits'],

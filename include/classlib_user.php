@@ -89,12 +89,17 @@ class User
    }
 
    /*! \brief Returns true, if user has set and valid rating. */
-   function hasRating()
+   function hasRating( $check_rating_status=true )
    {
-      if( $this->RatingStatus == RATING_INIT || $this->RatingStatus == RATING_RATED ) // user has rating
+      if( $check_rating_status )
+      {
+         if( $this->RatingStatus == RATING_INIT || $this->RatingStatus == RATING_RATED ) // user has rating
+            return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
+         else // user not rated ( RatingStatus == RATING_NONE )
+            return false;
+      }
+      else
          return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
-      else // user not rated ( RatingStatus == RATING_NONE )
-         return false;
    }
 
    /*! \brief Returns true, if user-rating falls inbetween given rating range (+/- 50%). */
@@ -187,10 +192,11 @@ class User
    }
 
    /*! \brief Constructs a User for forum-users. */
-   function newForumUser( $id=0, $name='', $handle='', $admin_level=0 )
+   function newForumUser( $id=0, $name='', $handle='', $admin_level=0, $rating=null )
    {
       $user = new User( $id, $name, $handle );
       $user->AdminLevel = (int)$admin_level;
+      $user->setRating( $rating );
       return $user;
    }
 
