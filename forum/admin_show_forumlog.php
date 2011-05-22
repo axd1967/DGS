@@ -17,8 +17,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* PURPOSE: Edit user attributes except admin-related fields, needs ADMIN_DEVELOPER rights */
-
 $TranslateGroups[] = "Admin";
 
 chdir('..');
@@ -36,7 +34,7 @@ require_once( "forum/forum_functions.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( !(@$player_row['admin_level'] & ADMIN_FORUM) )
+   if( !Forum::is_admin() )
       error('adminlevel_too_low');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
 

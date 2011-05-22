@@ -1169,6 +1169,12 @@ class Forum
 
    // ---------- Static Class functions ----------------------------
 
+   function is_admin()
+   {
+      global $player_row;
+      return ( @$player_row['admin_level'] & (ADMIN_FORUM|ADMIN_DEVELOPER) );
+   }
+
    /*! \brief Returns true if "writing posts" is allowed for read-only forum for given user. */
    function allow_posting( $user_row, $forum_opts )
    {
@@ -1428,7 +1434,7 @@ class ForumThread
       if( !$post->is_approved() )
       {
          $my_id = $player_row['ID'];
-         if( !$post->is_author($my_id) && !($player_row['admin_level'] & ADMIN_FORUM) )
+         if( !$post->is_author($my_id) && !Forum::is_admin() )
             error('forbidden_post', "ForumThread.load_revision_history.check_viewer($my_id,$post_id)");
       }
 

@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    $menu_array = array();
    if( ALLOW_SURVEY_VOTE )
       $menu_array[T_('Surveys')] = "list_surveys.php";
-   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
+   if( Forum::is_admin() )
       $menu_array[T_('Show Forum Log')] =
          array( 'url' => 'forum/admin_show_forumlog.php', 'class' => 'AdminLink' );
 

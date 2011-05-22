@@ -57,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('Admin');
                         '', $admin_level & (ADMIN_FEATURE|ADMIN_DEVELOPER) );
    if( ALLOW_SURVEY_VOTE )
       add_link_page_link('admin_survey.php', /*T_*/('Admin Survey'),
-                        '', $admin_level & ADMIN_SURVEY);
+                        '', $admin_level & (ADMIN_SURVEY|ADMIN_DEVELOPER));
    add_link_page_link('forum/admin.php', /*T_*/('Admin Forums'),
                      '', $admin_level & ADMIN_DEVELOPER);
    add_link_page_link('admin_users.php', T_('Edit User Attributes'),
@@ -69,9 +69,9 @@ $GLOBALS['ThePage'] = new Page('Admin');
    echo "<br><br>\n";
 
    add_link_page_link('admin_show_faqlog.php', T_('Show FAQ Log'),
-                     '', $admin_level & ADMIN_FAQ);
+                     '', $admin_level & (ADMIN_FAQ|ADMIN_DEVELOPER));
    add_link_page_link('forum/admin_show_forumlog.php', T_('Show Forum Log'),
-                     '', $admin_level & ADMIN_FORUM);
+                     '', $admin_level & (ADMIN_FORUM|ADMIN_DEVELOPER));
    add_link_page_link('admin_show_users.php', T_('Show Administrated Users'),
                      '', $admin_level & ADMINGROUP_EXECUTIVE);
    add_link_page_link('admin_show_errorlog.php', T_('Show Error Log'),

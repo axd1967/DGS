@@ -1579,9 +1579,9 @@ class DgsMessage
             $errors[] = sprintf( T_('Unknown message receiver [%s]'), $handle );
          else
          {
-            // message can not be rejected for some admins
+            // message can not be rejected coming from some admins
             $user_row = $arr_receivers[$handle];
-            if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM)) )
+            if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME)) )
             {
                $msgtmpl = ( $type == 'INVITATION' )
                   ? T_('Invitation rejected by user [%s] !')

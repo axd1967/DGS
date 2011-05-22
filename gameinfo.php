@@ -483,7 +483,7 @@ function build_rating_diff( $rating_diff )
          $menu_array[T_('Manage tournament')] =
             array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    }
-   if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
+   if( $is_admin )
       $menu_array[T_('Show game-calc')] =
          array( 'url' => 'game_calc.php?show=1'.URI_AMP."gid=$gid", 'class' => 'AdminLink' );
    if( @$player_row['admin_level'] & ADMIN_GAME )

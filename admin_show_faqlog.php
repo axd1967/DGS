@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * PURPOSE:
  * Show admins (Adminlevel>0) and administrated users (AdminOptions>0),
- * needs ADMIN_FAQ rights
+ * needs ADMIN_FAQ | DEVELOPER rights
  */
 
 $TranslateGroups[] = "Admin";
@@ -35,7 +35,7 @@ require_once( "include/table_columns.php" );
    if( !$logged_in )
       error('not_logged_in');
 
-   if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
+   if( !(@$player_row['admin_level'] & (ADMIN_FAQ|ADMIN_DEVELOPER)) )
       error('adminlevel_too_low');
 
    // init

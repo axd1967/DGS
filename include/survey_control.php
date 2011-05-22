@@ -131,14 +131,11 @@ class SurveyControl
    }//formatFlags
 
    /*! \brief Returns true if current players is survey-admin. */
-   function is_survey_admin( $check_super_admin=false )
+   function is_survey_admin()
    {
       global $player_row;
       //TODO return false; //for testing
-      if( $check_super_admin )
-         return (@$player_row['admin_level'] & ADMIN_DEVELOPER);
-      else
-         return (@$player_row['admin_level'] & (ADMIN_SURVEY|ADMIN_DEVELOPER));
+      return (@$player_row['admin_level'] & (ADMIN_SURVEY|ADMIN_DEVELOPER));
    }
 
    /*! \brief Returns new Survey-object for user and args. */

@@ -327,7 +327,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       }
    }
 
-   if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
+   if( $is_admin )
    {
       $menu_array[T_('Admin user')] =
          array( 'url' => 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle),
