@@ -238,10 +238,6 @@ function check_survey_options( $survey, $sopt_text )
    if( count($errors) )
       return array( $arr_so, $errors );
 
-   // eat text before first <opt> as header-text
-   if( preg_match("/^.+?<opt/i", $sopt_text) )
-      $errors[] = T_('No text is allowed before &lt;opt>-tag in survey-options-text.');
-
    $sid = $survey->ID;
    $need_points = $survey->need_option_minpoints();
    $last_so = null;
@@ -304,7 +300,7 @@ function check_survey_options( $survey, $sopt_text )
       elseif( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
          $errors[] = sprintf( T_('Value 0 is not allowed for min-points in %s. &lt;opt>.'), $sort_order );
       elseif( $survey->Type == SURVEY_TYPE_SINGLE && $sopt->MinPoints != 1 )
-         $errors[] = sprintf( T_('Only value 1 is allowed for Min-points in %s. &lt;opt>.'), $sort_order );
+         $errors[] = sprintf( T_('Only value 1 is allowed for min-points in %s. &lt;opt>.'), $sort_order );
 
       if( strlen($title) > 0 )
          $sopt->Title = $title;
@@ -339,7 +335,6 @@ function check_survey_options( $survey, $sopt_text )
 function merge_survey_options( $survey, $arr_survey_opts )
 {
    $errors = array();
-   $is_super_admin = SurveyControl::is_survey_admin(true);
    $has_votes = $survey->hasUserVotes();
 
    $arr_tags = array(); # tag => 1
