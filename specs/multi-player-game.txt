@@ -88,7 +88,7 @@ References:
 
 #-------- (2) Users Guide -----------------------------------------------------
 
-The "official rules" you can be found on: http://senseis.xmp.net/?Rengo
+The "official rules" can be found on: http://senseis.xmp.net/?Rengo
 
 Normally during a MP-game it's not allowed to speak with each other about the games to play.
 The only practical allowed consultation on DGS is to ask if you can resign the game.
@@ -367,8 +367,7 @@ Described Use-cases:
          - Flags:
             - Master: flag marking player as "game-master" in control of MP-game-management
             - Joined: master joined MP-game as player
-            - Reserved[WR]: reserved player-slot for waiting-room-joining
-              to MP-game
+            - Reserved[WR]: reserved player-slot for waiting-room-joining to MP-game
             - Reserved[INV]: reserved player-slot for invitation to join MP-game
               for specific player
             - Joined[WR|INV]: player joined per waiting-room or invitation
@@ -434,7 +433,7 @@ Described Use-cases:
      Normally one could expect that also before ending a MP-game, the player
      to move asks his team-partners if that is ok or if the game should continue.
      However, this was not done out of simplicity reasons. It may be still added
-     to another bulk-message to ask for that.
+     with another bulk-message to ask for that.
 
 * (5) Quick-suite "quick_do.php" and "quick_play.php":
    - see "specs/quick_suite.txt" for info about "MP-game" or "multi-player-game"
