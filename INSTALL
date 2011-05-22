@@ -5,7 +5,7 @@ Installation instructions
 Requirements:
 
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
-*) PHP >= 4.1.0 <http://www.php.net>
+*) PHP >= 5.1.0 <http://www.php.net>
 *) MySQL >= 5.0.38 <http://www.mysql.com>
 *) cvs client <http://www.cvshome.org>
 
