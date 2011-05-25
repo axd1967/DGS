@@ -41,7 +41,7 @@ function hit_thread( $thread )
  *         if id=0: msg contains error-message (post not saved!)
  * \see specs/forums.txt
  */
-function post_message($player_row, $cfg_board, $forum_opts, &$thread )
+function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
 {
    global $NOW;
 
@@ -64,6 +64,10 @@ function post_message($player_row, $cfg_board, $forum_opts, &$thread )
    $Subject = trim(get_request_arg('Subject'));
    if( (string)$Subject == '' || (string)$Text == '' )
       return array( 0, T_('Message not saved, because of missing subject and/or text-body.') );
+
+   if( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($Text) ) // lazy-load
+      $cfg_board = ConfigBoard::load_config_board($uid);
+
 //   $allow_go_diagrams = ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() );
 //   if( $allow_go_diagrams) $GoDiagrams = create_godiagrams($Text, $cfg_board);
    $Subject = mysql_addslashes( $Subject);

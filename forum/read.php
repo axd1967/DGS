@@ -70,9 +70,7 @@ require_once( 'forum/post.php' );
 
    // for GoDiagrams
    $preview = isset($_POST['preview']);
-   $cfg_board = null;
-//   if( ALLOW_GO_DIAGRAMS && ( $preview || isset($_POST['post']) ) )
-//      $cfg_board = ConfigBoard::load_config_board($my_id);
+   $cfg_board = null; // only load ConfigBoard if post contains go-diagram
 
    $post_errmsg = '';
    if( isset($_POST['post']) )
@@ -102,6 +100,10 @@ require_once( 'forum/post.php' );
    {
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
+
+      if( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($preview_Text) ) // lazy-load
+         $cfg_board = ConfigBoard::load_config_board($my_id);
+
       if( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
 //      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
@@ -166,9 +168,41 @@ require_once( 'forum/post.php' );
       $headtitle2 => "colspan={$disp_forum->cols}"
    );
 
+
+   // load thread/post-data
+   $revh_post_id = (int)@$_GET['revision_history'];
+   if( $revh_post_id > 0 )
+      $fthread = load_revision_history( $revh_post_id );
+   else
+   {
+      // load user forum-reads
+      $FR = new ForumRead( $my_id, $forum_id, $thread );
+      $FR->load_forum_reads();
+
+      // select all posts of current thread
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_WHERE,
+         "P.Forum_ID=$forum_id",
+         "P.Thread_ID=$thread",
+         "P.PosIndex>''" ); // '' == inactivated (edited)
+      $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
+
+      $fthread = new ForumThread( $FR );
+      $fthread->load_posts( $qsql );
+      $fthread->create_navigation_tree();
+
+      if( !$reply && !$edit && !$preview && $allow_mark_read )
+         $FR->mark_thread_read( $thread, $fthread->last_created ); // use-case U01
+   }
+
+   if( is_null($cfg_board) && $fthread->contains_goban() )
+      $cfg_board = ConfigBoard::load_config_board($my_id);
+   // end of DB-stuff
+
+
    $title = sprintf( '%s - %s', T_('Forum'), $forum->name );
    $style_str = (is_null($cfg_board))
-      ? '' : GobanWriterGfxBoard::style_string( $cfg_board->get_stone_size() );
+      ? '' : GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
    start_page($title, true, $logged_in, $player_row, $style_str );
 
    $fopts_str = $forum->build_options_text( $f_opts );
@@ -177,33 +211,14 @@ require_once( 'forum/post.php' );
 
    $disp_forum->print_moderation_note('99%');
 
-   if( @$_GET['revision_history'] > 0 )
+   if( $revh_post_id > 0 )
    {
-      $revh_fthread = revision_history( $disp_forum, @$_GET['revision_history'] );
+      show_revision_history( $fthread, $disp_forum, $revh_post_id );
       end_page();
-      if( !$revh_fthread->thread_post->is_author($my_id) )
+      if( !$fthread->thread_post->is_author($my_id) )
          hit_thread( $thread ); // use-case U04
       exit;
    }
-
-
-   // load user forum-reads
-   $FR = new ForumRead( $my_id, $forum_id, $thread );
-   $FR->load_forum_reads();
-
-   // select all posts of current thread
-   $qsql = new QuerySQL();
-   $qsql->add_part( SQLP_WHERE,
-      "P.Forum_ID=$forum_id",
-      "P.Thread_ID=$thread",
-      "P.PosIndex>''" ); // '' == inactivated (edited)
-   $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
-   $fthread = new ForumThread( $FR );
-   $fthread->load_posts( $qsql );
-   $fthread->create_navigation_tree();
-   if( !$reply && !$edit && !$preview && $allow_mark_read )
-      $FR->mark_thread_read( $thread, $fthread->last_created ); // use-case U01
-   // end of DB-stuff
 
 
    $post0 = $fthread->thread_post; // initial post of the thread
@@ -346,17 +361,22 @@ require_once( 'forum/post.php' );
       hit_thread( $thread );
 
    end_page();
-}
+}//main
 
-// use-case U04: show revision history of post
+
+// use-case U04: load revision history of post
 // return: loaded ForumThread
-function revision_history( $display_forum, $post_id )
+function load_revision_history( $post_id )
 {
    $revhist_thread = new ForumThread();
    $revhist_thread->load_revision_history( $post_id );
    $revhist_thread->thread_post->last_edited = 0; // don't show last-edit
-   // end of DB-stuff
+   return $revhist_thread;
+}//load_revision_history
 
+// use-case U04: show revision history of post
+function show_revision_history( $revhist_thread, $display_forum, $post_id )
+{
    $display_forum->headline = array(
       T_('Revision history') => "colspan={$display_forum->cols}",
    );
@@ -378,8 +398,6 @@ function revision_history( $display_forum, $post_id )
 
    $display_forum->change_depth( -1 );
    $display_forum->forum_end_table();
-
-   return $revhist_thread;
-} //revision_history
+}//show_revision_history
 
 ?>

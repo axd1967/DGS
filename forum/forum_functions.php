@@ -1457,6 +1457,17 @@ class ForumThread
       mysql_free_result($result);
    }//load_revision_history
 
+   /*! \brief Returns true, if one of loaded posts contains a go-diagram. */
+   function contains_goban()
+   {
+      foreach( $this->posts as $post_id => $post )
+      {
+         if( MarkupHandlerGoban::contains_goban($post->text) )
+            return true;
+      }
+      return false;
+   }
+
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    function to_string()
    {

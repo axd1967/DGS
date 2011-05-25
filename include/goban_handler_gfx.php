@@ -277,8 +277,8 @@ class GobanHandlerGfxBoard
 
       $this->result[] = "</tbody></table>\n";
 
-      return implode('', $this->result);
-   } //write_goban
+      return "<div class=\"GobanGfx\">\n" . implode('', $this->result) . "</div>\n";
+   }//write_goban
 
    function write_image( $x, $y, $value, $label='' )
    {

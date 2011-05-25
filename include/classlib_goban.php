@@ -55,11 +55,22 @@ $ARR_GOBAN_HANDLERS_WRITER = array(
 class MarkupHandlerGoban
 {
 
+   // ---------- Static Class functions ----------------------------
+
    function replace_igoban_tags( $text )
    {
       //<igoban [t|type=]type [...]> => show inline-goban
       return preg_replace( "/<igoban +([\w\s=]+) *>(.*?)<\/igoban *>/ise",
                            "MarkupHandlerGoban::parse_igoban('\\1','\\2','GFX')", $text );
+   }
+
+   /*!
+    * \brief Returns true, if given text contains a Go-diagram (igoban-tag);
+    *        then ConfigBoard must be loaded for woodcolor/stone-size etc.
+    */
+   function contains_goban( $text )
+   {
+      return preg_match( "/<igoban +([\w\s=]+) *>(.*?)<\/igoban *>/ise", $text );
    }
 
    /*!
