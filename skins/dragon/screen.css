@@ -1884,6 +1884,16 @@ body.GobanEdit td.FormClassC {
 /* end form debug */
 
 
+div.GobanGfx {
+   display: inline-block;
+   margin: 1em;
+   border: 1px outset darkblue; /*or: 1px dotted black;*/
+}
+div.GobanGfx table.Goban td {
+   padding: 0px;
+}
+
+
 /* ------------------------- */
 /* board page */
 /* ------------------------- */
@@ -1906,21 +1916,12 @@ table.Goban {
    border-collapse: collapse;
    border-spacing: 0px;
    margin: 0px auto;
-/* removed on 2007-10-12
-   border-collapse: collapse !important;
-   border-spacing: 0px !important;
-   margin: 0px auto !important;
-*/
 }
 
 table.Goban tr {
    border-width: 0px;
    margin: 0px;
    padding: 0px;
-/* removed on 2007-10-12
-   margin: 0px !important;
-   padding: 0px !important;
-*/
 }
 
 table.Goban td {
@@ -1930,11 +1931,6 @@ table.Goban td {
    padding: 0px;
    line-height: 0px;
    white-space: nowrap;
-/* removed on 2007-10-12
-   padding: 0px !important;
-   line-height: 0px !important;
-   white-space: nowrap !important;
-*/
 }
 
 table.Goban a {
@@ -1948,11 +1944,6 @@ table.Goban a {
    text-decoration: none;
    font-weight: normal;
    line-height: 0px;
-/* removed on 2007-10-12
-   margin: 0px !important;
-   padding: 0px !important;
-   line-height: 0px !important;
-*/
 }
 
 table.Goban a img,
@@ -1967,10 +1958,6 @@ table.Goban img {
    border-width: 0px;
    margin: 0px;
    padding: 0px;
-/* removed on 2007-10-12
-   margin: 0px !important;
-   padding: 0px !important;
-*/
 }
 
 span.SgfMove {
