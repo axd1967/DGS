@@ -223,7 +223,7 @@ sub save_image
     #file_png_save( $theImage, $theLayer, $final_size."/".$name.".orig.png", $name."orig.png", 0, 9, 0, 0, 0, 0, 0 );
     gifify ();
     gimp_convert_indexed ($theImage, NO_DITHER, MAKE_PALETTE, 50, 0, 1, "");
-    file_gif_save( $theImage, $theLayer, $final_size."/".$name.".gif", $name.".gif", 0, 0, 0, 0);
+    file_gif_save( RUN_NONINTERACTIVE, $theImage, $theLayer, $final_size."/".$name.".gif", $name.".gif", 0, 0, 0, 0);
     gimp_convert_rgb( $theImage );
     if ($delete == 1)
     {
@@ -559,14 +559,39 @@ foreach $final_size (@Sizes)
         draw_board_lines (undef, 0, 0, 1);
         save_image ("du", 0);
 
+#--------------- Draw markup --------------------
 
+        clear_image ();
+        resize ($size * 8, $size * 8);
+        draw_square (0.52, $thickn);
+        resize ($final_size, $final_size);
+        save_image ("s", 0);
+
+        clear_image ();
+        resize ($size * 8, $size * 8);
+        draw_triangle (0.35, $thickn);
+        resize ($final_size, $final_size);
+        save_image ("t", 0);
+
+        clear_image ();
+        resize ($size * 8, $size * 8);
+        draw_circle (0.58, $thickn);
+        resize ($final_size, $final_size);
+        save_image ("c", 0);
+
+        clear_image ();
+        resize ($size * 8, $size * 8);
+        draw_x_mark (0.45, $thickn * 1.25);
+        resize ($final_size, $final_size);
+        save_image ("x", 0);
 
 #--------------- Draw board letters -------------
 
-        $letter_font_size = $final_size * 0.2 *
-            ( $final_size < 13 ? ( $final_size < 9 ? 6 : 5) : 4) / 5;
-        $letters = "abcdefghijklmnopqrstuvwxyz";
         gimp_context_set_foreground ([0, 0, 0]);
+        $letter_font_size = $final_size * 0.2 *
+            ( $final_size < 13 ? ( $final_size < 9 ? 6 : 5) : 4);
+        resize ($final_size, $final_size);
+        $letters = "abcdefghijklmnopqrstuvwxyz";
 
         for($k=0; $k < 26; $k++)
         {
