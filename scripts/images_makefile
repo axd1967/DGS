@@ -88,3 +88,7 @@ stones: $(STONES_SIZES)
 
 clean:
 	 rm -rf $(SIZES)
+
+cleanall:
+	 rm -rf $(SIZES) *.png
+
