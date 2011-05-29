@@ -1851,8 +1851,7 @@ $html_safe_preg = array(
 
 //<mailto:...>
  '/'.ALLOWED_LT."(mailto:)([^`\\n\\s]+)".ALLOWED_GT.'/is'
-  => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT
-                        ."\\2".ALLOWED_LT."/a".ALLOWED_GT,
+  => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT."\\2".ALLOWED_LT."/a".ALLOWED_GT,
 
 //<http://...>, <https://...>, <news://...>, <ftp://...>
  '%'.ALLOWED_LT."((http:|https:|news:|ftp:)//[^`'\\r\\n\\s]+?)(?:\s+\|([^'\\r\\n]+?))?".ALLOWED_GT.'%ise'
@@ -1863,25 +1862,20 @@ $html_safe_preg = array(
 
 //<game gid[,move]> =>show game
  '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT.'/ise'
-  => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+"
-                        .REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
+  => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
 
 //<tourney tid> => show tournament
  '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
-  => "tournament_reference(('\\1'?".REF_LINK_BLANK.":0)+"
-                        .REF_LINK_ALLOWED.",1,'',\\2)",
+  => "tournament_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2)",
 
 //<survey sid> => show survey
  '/'.ALLOWED_LT."survey(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
-  => "survey_reference(('\\1'?".REF_LINK_BLANK.":0)+"
-                        .REF_LINK_ALLOWED.",1,'',\\2)",
+  => "survey_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2)",
 
 //<user uid> or <user =uhandle> =>show user info
 //<send uid> or <send =uhandle> =>send a message to user
- '/'.ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR
-                        ."?[+".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT.'/ise'
-  => "\\1_reference(('\\2'?".REF_LINK_BLANK.":0)+"
-                        .REF_LINK_ALLOWED.",1,'','\\3')",
+ '/'.ALLOWED_LT."(user|send)(_)? +(".HANDLE_TAG_CHAR."?[+".HANDLE_LEGAL_REGS."]+) *".ALLOWED_GT.'/ise'
+  => "\\1_reference(('\\2'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'','\\3')",
 //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
 //because of HANDLE_LEGAL_REGS, no need of ...,str_replace('\"','"','\\3')...
 
@@ -2010,7 +2004,6 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
    {
       $msg = parse_html_safe( $msg, '', $mark_terms) ;
    }
-
 
    // Filter out HTML code
 
