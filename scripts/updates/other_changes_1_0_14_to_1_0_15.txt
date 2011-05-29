@@ -197,3 +197,30 @@ copy /images/flags/xb.gif
 copy /images/flags/xc.gif
 copy /images/flags/xn.gif
 
+-----------
+# added markup circle/square/triangle/cross & fixed letters-markup a-z
+copy /5/l[a-z].gif
+copy /5/[cstx].gif
+copy /7/l[a-z].gif
+copy /7/[cstx].gif
+copy /9/l[a-z].gif
+copy /9/[cstx].gif
+copy /11/l[a-z].gif
+copy /11/[cstx].gif
+copy /13/l[a-z].gif
+copy /13/[cstx].gif
+copy /17/l[a-z].gif
+copy /17/[cstx].gif
+copy /21/l[a-z].gif
+copy /21/[cstx].gif
+copy /25/l[a-z].gif
+copy /25/[cstx].gif
+copy /29/l[a-z].gif
+copy /29/[cstx].gif
+copy /35/l[a-z].gif
+copy /35/[cstx].gif
+copy /42/l[a-z].gif
+copy /42/[cstx].gif
+copy /50/l[a-z].gif
+copy /50/[cstx].gif
+
