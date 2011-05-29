@@ -114,7 +114,7 @@ class ConfigBoard
    /*! \brief Sets valid stone size [5..50]; if invalid set to default 25. */
    function set_stone_size( $stone_size=25 )
    {
-      if( is_numeric($stone_size) && $stone_size >=5 && $stone_size <= 50 )
+      if( is_numeric($stone_size) && $stone_size >= 5 && $stone_size <= 50 )
          $this->stone_size = (int)$stone_size;
       else
          $this->stone_size = 25;
@@ -246,40 +246,63 @@ class ConfigBoard
          $update_query );
    }
 
+   /*! \brief Fills current values into $player_row. */
+   function fill_player_row()
+   {
+      global $player_row;
+      $player_row['Stonesize'] = $this->stone_size;
+      $player_row['Woodcolor'] = $this->wood_color;
+      $player_row['Boardcoords'] = $this->board_coords;
+      $player_row['MoveNumbers'] = $this->move_numbers;
+      $player_row['MoveModulo'] = $this->move_modulo;
+      $player_row['NotesSmallHeight'] = $this->notes_height[CFGBOARD_NOTES_SMALL];
+      $player_row['NotesSmallWidth'] = $this->notes_width[CFGBOARD_NOTES_SMALL];
+      $player_row['NotesSmallMode'] = $this->notes_mode[CFGBOARD_NOTES_SMALL];
+      $player_row['NotesLargeHeight'] = $this->notes_height[CFGBOARD_NOTES_LARGE];
+      $player_row['NotesLargeWidth'] = $this->notes_width[CFGBOARD_NOTES_LARGE];
+      $player_row['NotesLargeMode'] = $this->notes_mode[CFGBOARD_NOTES_LARGE];
+      $player_row['NotesCutoff'] = $this->notes_cutoff;
+   }
+
    // ------------ static functions ----------------------------
 
    /*! \brief (static) Loads ConfigBoard-data for given user. */
-   function load_config_board( $uid )
+   function load_config_board( $uid, $force_load=false, $upd_player_row=true )
    {
       ConfigPages::_check_user_id( $uid, 'ConfigBoard::load_config_board');
 
-      $row = mysql_single_fetch("ConfigBoard::load_config_board.find($uid)",
-            "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
-      if( !$row )
-         return null;
-
       // read values from cookies if logged in
       global $player_row;
-      $cookie_row = ( isset($player_row['Handle']) && isset($player_row['Stonesize']) )
-         ? $player_row : $row;
+      $src_row = ( isset($player_row['Handle']) && isset($player_row['Stonesize']) ) ? $player_row : NULL;
+      $need_load = is_null($src_row);
+
+      if( $force_load || $need_load )
+      {
+         $src_row = mysql_single_fetch("ConfigBoard::load_config_board.find($uid)",
+               "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
+         if( !$src_row )
+            return null;
+      }
 
       $config = new ConfigBoard(
-            $row['User_ID'],
-            $cookie_row['Stonesize'],
-            $cookie_row['Woodcolor'],
-            $cookie_row['Boardcoords'],
-            $cookie_row['MoveNumbers'],
-            $cookie_row['MoveModulo'],
-            $cookie_row['NotesSmallHeight'],
-            $cookie_row['NotesSmallWidth'],
-            $cookie_row['NotesSmallMode'],
-            $cookie_row['NotesLargeHeight'],
-            $cookie_row['NotesLargeWidth'],
-            $cookie_row['NotesLargeMode'],
-            $cookie_row['NotesCutoff']
+            $uid,
+            @$src_row['Stonesize'],
+            @$src_row['Woodcolor'],
+            @$src_row['Boardcoords'],
+            @$src_row['MoveNumbers'],
+            @$src_row['MoveModulo'],
+            @$src_row['NotesSmallHeight'],
+            @$src_row['NotesSmallWidth'],
+            @$src_row['NotesSmallMode'],
+            @$src_row['NotesLargeHeight'],
+            @$src_row['NotesLargeWidth'],
+            @$src_row['NotesLargeMode'],
+            @$src_row['NotesCutoff']
             );
+      if( $upd_player_row && $need_load )
+         $config->fill_player_row();
       return $config;
-   }
+   }//load_config_board
 
    /*! \brief (static) Inserts default ConfigBoard. */
    function insert_default( $user_id )
