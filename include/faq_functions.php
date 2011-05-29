@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "FAQ";
 
 require_once 'include/utilities.php';
+require_once 'include/classlib_goban.php';
 
 /**
  * $level=0 print the start of the container and intialize the function
@@ -73,6 +74,8 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
          $itm = "<strong class=Question>$tmp</strong>";
 
          $tmp = make_html_safe( $Atext, 'faq', $rx_term );
+         if( MarkupHandlerGoban::contains_goban($tmp) )
+            $tmp = MarkupHandlerGoban::replace_igoban_tags( $tmp );
          if( $tmp )
             $itm.= "<br>\n<div class=Answer>$tmp</div>";
 
