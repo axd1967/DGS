@@ -68,15 +68,19 @@ function board2number_coords($coord, $Size)
    return array(NULL,NULL);
 }
 
+
+//index=size: dist (value=side-distance), pos (value=mask)
+//$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
+static $hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
+static $hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
+
 function is_hoshi($x, $y, $sz, $szy=null)
 {
-   //board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
-   static $hoshi_dist = array(0,0,0,0,0,0,0,0,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4);
-   static $hoshi_pos  = array(0,0,0,0,0,1,0,1,4,5,4,5,4,7,4,7,4,7,4,7,4,7,4,7,4,7);
-   //$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
+   global $hoshi_dist, $hoshi_pos;
 
    if( is_null($szy) ) $szy = $sz;
 
+   //board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
    if( $sz == $szy )
    {
       $hd = $hoshi_dist[$sz];
@@ -93,6 +97,48 @@ function is_hoshi($x, $y, $sz, $szy=null)
       $hy = ($y*2+1 == $szy) ? 1 : ( ($y == $hdy-1 || $y == $szy-$hdy) ? 2 : 0 );
       return ($hoshi_pos[$szx] & $hx) && ($hoshi_pos[$szy] & $hy);
    }
-}
+}//is_hoshi
+
+// returns [ [x,y], ... ]
+function get_hoshi_coords( $size_x, $size_y, $start=0 )
+{
+   global $hoshi_dist, $hoshi_pos;
+
+   $hdx = $hoshi_dist[$size_x];
+   $hdy = $hoshi_dist[$size_y];
+   $hpx = $hoshi_pos[$size_x];
+   $hpy = $hoshi_pos[$size_y];
+
+   $xmid = (( $size_x - 1 ) >> 1 ) + $start;
+   $ymid = (( $size_y - 1 ) >> 1 ) + $start;
+   $xW = $hdx - 1 + $start;
+   $xE = $size_x - $hdx + $start;
+   $yN = $size_y - $hdy + $start;
+   $yS = $hdy - 1 + $start;
+
+   $arr = array();
+
+   if( ($hpx & 1) && ($hpy & 1) ) // center
+      $arr[] = array( $xmid, $ymid );
+   if( $hpx & 2 ) // side
+   {
+      $arr[] = array( $xmid, $yN );
+      $arr[] = array( $xmid, $yS );
+   }
+   if( $hpy & 2 ) // side
+   {
+      $arr[] = array( $xW, $ymid );
+      $arr[] = array( $xE, $ymid );
+   }
+   if( ($hpx & 4) && ($hpy & 4) ) // corners
+   {
+      $arr[] = array( $xW, $yN );
+      $arr[] = array( $xW, $yS );
+      $arr[] = array( $xE, $yN );
+      $arr[] = array( $xE, $yS );
+   }
+
+   return $arr;
+}//get_hoshi_coords
 
 ?>

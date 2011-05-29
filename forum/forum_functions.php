@@ -353,7 +353,11 @@ class DisplayForum
       if( $links & LINK_REFRESH )
       {
          if( $links & LINKPAGE_READ )
+         {
             $url = make_url( 'read.php', array( 'forum' => $fid, 'thread' => $tid ));
+            if( isset($_REQUEST['raw']) )
+               $url .= URI_AMP . 'raw='.$_REQUEST['raw'];
+         }
          elseif( $links & LINKPAGE_LIST )
             $url = make_url( 'list.php', array( 'forum' => $fid, 'maxrows' => $this->max_rows ));
          elseif( $links & LINKPAGE_SEARCH )

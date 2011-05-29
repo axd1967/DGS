@@ -1888,9 +1888,26 @@ div.GobanGfx {
    display: inline-block;
    margin: 1em;
    border: 1px outset darkblue; /*or: 1px dotted black;*/
+   float: left;
 }
-div.GobanGfx table.Goban td {
+div.GobanGfx div.Board table.Goban td {
    padding: 0px;
+}
+div.GobanGfx td.BoardLink {
+   background-color: #ca6a45;
+}
+div.GobanGfx div.Title {
+   text-align: center;
+   font-size: smaller;
+   padding: 5px;
+}
+div.GobanRaw {
+   display: inline-block;
+   margin: 1em;
+   border: 1px dotted black;
+}
+div.GobanEnd {
+   clear: left;
 }
 
 
