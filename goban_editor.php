@@ -84,8 +84,9 @@ EOF_GOBAN;
 
    // setup goban for board-editing
    $goban = new Goban();
-   $goban->setOptionsCoords( GOBB_NORTH|GOBB_SOUTH|GOBB_WEST|GOBB_EAST );
-   $goban->setSize( $board_size );
+   $goban->setOptionsCoords( GOBB_NORTH|GOBB_SOUTH|GOBB_WEST|GOBB_EAST, true );
+   $goban->setSizeX( $board_size );
+   $goban->setSizeY( $board_size );
    $goban->makeBoard( $board_size, $board_size );
    $goban_writer = new GobanHandlerGfxBoard();
    $goban_writer->setImageAttribute( 'onClick="edit_click(%s,%s)"' ); // x,y

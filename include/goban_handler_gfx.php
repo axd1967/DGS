@@ -55,7 +55,7 @@ class GobanHandlerGfxBoard
    var $woodcolor;
    var $imageAttribute; // e.g. "onClick=\"click('%s','%s')\"" ); // x,y
 
-   var $x_size;
+   var $goban;
    var $result; // array
 
    /*! \brief Constructs GobanHandler for outputting DGS go-board. */
@@ -154,12 +154,13 @@ class GobanHandlerGfxBoard
    function write_goban( $goban )
    {
       global $base_path;
+      $this->goban = $goban;
       $this->result = array(); // later concatenated as output-string
 
+      $size_x = $this->goban->max_x;
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
-      $this->x_size = $goban->max_x;
-      $table_width = $stone_size * $goban->max_x;
+      $table_width = $size_x * $stone_size;
 
       // init board-layout options
       $opts_coords = $goban->getOptionsCoords();
@@ -168,15 +169,19 @@ class GobanHandlerGfxBoard
       if( $smooth_edge )
       {
          $border_start = 140 - ( $opts_coords & GOBB_WEST ? $coord_width : 0 );
-         $border_imgs = ceil( ($this->x_size * $stone_size - $border_start) / 150 ) - 1;
-         $border_rem = $this->x_size * $stone_size - $border_start - 150 * $border_imgs;
+         $border_imgs = ceil( ($size_x * $stone_size - $border_start) / 150 ) - 1;
+         $border_rem = $size_x * $stone_size - $border_start - 150 * $border_imgs;
          if( $border_imgs < 0 )
-            $border_rem = $this->x_size * $stone_size;
+            $border_rem = $size_x * $stone_size;
 
          $edge_coord = '<td><img alt=" " height='.EDGE_SIZE.' src="'.$base_path.'images/blank.gif" width=' . $coord_width . "></td>\n";
          $edge_start = '<img alt=" " height='.EDGE_SIZE.' src="'.$base_path.'images/wood' . $this->woodcolor . '_' ;
          $edge_vert = '<img alt=" " height=' . $stone_size . ' width='.EDGE_SIZE.' src="'.$base_path.'images/wood' . $this->woodcolor . '_' ;
       }
+
+      $add_width_west = ( $opts_coords & GOBB_WEST ? $coord_width : 0 ) + ( $smooth_edge ? EDGE_SIZE : 0 );
+      $add_width_east = ( $opts_coords & GOBB_EAST ? $coord_width : 0 ) + ( $smooth_edge ? EDGE_SIZE : 0 );
+      $table_width += $add_width_west + $add_width_east;
 
       $coord_alt = '.gif" alt="';
       $coord_end = "\"></td>\n";
@@ -187,19 +192,24 @@ class GobanHandlerGfxBoard
          $coord_start_letter = "<td class=brdl><img class=brdl src=\"$base_path$stone_size/c";
 
          $s = ( $opts_coords & GOBB_WEST ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-         $add_width = ( $opts_coords & GOBB_WEST ? $coord_width : 0 ) + ( $smooth_edge ? EDGE_SIZE : 0 );
-         $table_width += $add_width;
-         $coord_left = ( $add_width )
-            ? "<td colspan=$s><img src=\"{$base_path}images/blank.gif\" width=$add_width height=$stone_size alt=\" \"></td>\n"
+         $coord_left = ( $s )
+            ? "<td colspan=$s><img src=\"{$base_path}images/blank.gif\" width=$add_width_west height=$stone_size alt=\" \"></td>\n"
             : '';
 
          $s = ( $opts_coords & GOBB_EAST ? 1 : 0 ) + ( $smooth_edge ? 1 : 0 );
-         $add_width = ( $opts_coords & GOBB_EAST ? $coord_width : 0 ) + ( $smooth_edge ? EDGE_SIZE : 0 );
-         $table_width += $add_width;
-         $coord_right = ( $add_width )
-            ? "<td colspan=$s><img src=\"{$base_path}images/blank.gif\" width=$add_width height=$stone_size alt=\" \"></td>\n"
+         $coord_right = ( $s )
+            ? "<td colspan=$s><img src=\"{$base_path}images/blank.gif\" width=$add_width_east height=$stone_size alt=\" \"></td>\n"
             : '';
       }
+
+      $borders = $goban->getOptionsCoords(false);
+      $start_col = 0;
+      if( ($goban->size_x > $goban->max_x && !($borders & GOBB_WEST)) )
+         $start_col = $goban->size_x - $goban->max_x;
+
+      $start_row = $goban->size_y;
+      if( ($goban->size_y > $goban->max_y && !($borders & GOBB_NORTH)) || ($goban->size_y < $goban->max_y ) )
+         $start_row = $goban->max_y;
 
 
       // ---------- Goban ------------------------------------------------
@@ -240,12 +250,12 @@ class GobanHandlerGfxBoard
          . (count($styles) ? ' style="' . implode(' ', $styles) . '"': '') . '><tbody>';
 
       if( $opts_coords & GOBB_NORTH )
-         $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
+         $this->draw_coord_row( $start_col, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
 
       if( $smooth_edge )
          $this->draw_edge_row( $goban, $edge_start.'u', $edge_coord, $border_start, $border_imgs, $border_rem );
 
-      for($rownr = $goban->y_size, $y = 1; $y <= $goban->max_y; $rownr--, $y++ )
+      for( $rownr = $start_row, $y = 1; $y <= $goban->max_y; $rownr--, $y++ )
       {
          $out = '<tr>';
 
@@ -254,8 +264,7 @@ class GobanHandlerGfxBoard
          if( $smooth_edge )
             $out .= '<td>' . $edge_vert . "l.gif\"></td>\n";
 
-         $letter = 'a';
-         for($colnr = 0, $x = 1; $x <= $goban->max_x; $colnr++, $x++ )
+         for( $x = 1; $x <= $goban->max_x; $x++ )
          {
             $arr = $goban->getValue( $x, $y );
 
@@ -271,9 +280,7 @@ class GobanHandlerGfxBoard
                $img = sprintf( $blank_image, " name=\"x{$x}y{$y}\"", $imgAttr );
                $out .= "<td class=\"brdx{$background}\">$img</td>\n";
             }
-
-            if( ++$letter == 'i' ) $letter++;
-         }
+         }//for x
 
          if( $smooth_edge )
             $out .= '<td>' . $edge_vert . "r.gif\"></td>\n";
@@ -282,13 +289,13 @@ class GobanHandlerGfxBoard
 
          $out .= "</tr>\n";
          $this->result[] = $out;
-      }//for
+      }//for y
 
       if( $smooth_edge )
          $this->draw_edge_row( $goban, $edge_start.'d', $edge_coord, $border_start, $border_imgs, $border_rem );
 
       if( $opts_coords & GOBB_SOUTH )
-         $this->draw_coord_row( $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
+         $this->draw_coord_row( $start_col, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
 
       $this->result[] = "</tbody></table>\n";
 
@@ -303,7 +310,7 @@ class GobanHandlerGfxBoard
          . ( $goban->BoardTextInline ? $text_block : '' )
          . "<div class=\"GobanEnd\"></div>\n"
          . ( $goban->BoardTextInline ? '' : $text_block )
-         //. "<br><hr><pre>" . $goban->to_string() . "</pre>\n"; //FIXME: for debugging
+         //. "<br><hr><pre>" . $goban->to_string() . "</pre>\n"; // for debugging
          ;
    }//write_goban
 
@@ -412,20 +419,19 @@ class GobanHandlerGfxBoard
    }//getBoardLineType
 
    // keep in sync with Board
-   function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
+   function draw_coord_row( $start_val, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
    {
       $out = "<tr>\n";
 
       if( $coord_left )
          $out .= $coord_left;
 
-      $colnr = 1;
-      $letter = 'a';
-      while( $colnr <= $this->x_size )
+      $letter = chr(ord('a') + $start_val);
+      for( $colnr=1; $colnr <= $this->goban->max_x; $colnr++ )
       {
+         if( $letter == 'i' ) $letter++;
          $out .= $coord_start_letter . $letter . $coord_alt . $letter . $coord_end;
-         $colnr++;
-         $letter++; if( $letter == 'i' ) $letter++;
+         $letter++;
       }
 
       if( $coord_right )
@@ -440,6 +446,7 @@ class GobanHandlerGfxBoard
    {
       $out = "<tr>\n";
 
+      $size_x = $this->goban->max_x;
       $opts_coords = $goban->getOptionsCoords();
 
       if( $opts_coords & GOBB_WEST )
@@ -447,7 +454,7 @@ class GobanHandlerGfxBoard
 
       $out .= '<td>' . $edge_start . 'l.gif" width='.EDGE_SIZE.'>' . "</td>\n";
 
-      $out .= '<td colspan=' . $this->x_size . ' width=' . $this->x_size * $this->stone_size . '>';
+      $out .= '<td colspan=' . $size_x . ' width=' . $size_x * $this->stone_size . '>';
 
       if( $border_imgs >= 0 )
          $out .= $edge_start . '.gif" width=' . $border_start . '>';
@@ -488,8 +495,9 @@ class GobanHandlerGfxBoard
    function build_rawtext()
    {
       $arg_raw = ( isset($_REQUEST['raw']) ) ? (int)@$_REQUEST['raw'] : null;
+      $orig = preg_replace("/<br>/i", "\n", $this->rawtext);
       return ( (is_null($arg_raw) && (DBG_TEST&2) ) || $arg_raw )
-         ? "<div class=\"GobanRaw\"><pre>" . make_html_safe($this->rawtext, true) . "</pre></div>\n"
+         ? "<div class=\"GobanRaw\"><pre>" . basic_safe($orig) . "</pre></div>\n"
          : '';
    }//build_rawtext
 

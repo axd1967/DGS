@@ -206,6 +206,8 @@ class Goban
 {
    /*! \brief bitmask using GOBB_NORTH|SOUTH|WEST|EAST enabling coordinates on that side of the go-board. */
    var $opts_coords;
+   var $show_coords; // true to show coordinates
+
    /*!
     * \brief Board matrix
     * \note Format (x/y=1..):
@@ -213,10 +215,10 @@ class Goban
     *           = array( layer => int-bitmask, label => number|letter )
     */
    var $matrix;
-   var $max_x;
+   var $max_x; // 1..max_x/y really HAS something on board, can be partial board of size_x/y
    var $max_y;
-   var $size; // kind of x-size/board-size FIXME: cleanup
-   var $y_size; // for starting y-coordinates-label
+   var $size_x;
+   var $size_y; // for starting y-coordinates-label
 
    var $BoardTitle;
    var $BoardText;
@@ -228,7 +230,9 @@ class Goban
    {
       $this->matrix = array();
       $this->opts_coords = 0;
-      $this->max_x = $this->max_y = $this->size = $this->y_size = 1;
+      $this->show_coords = true;
+      $this->max_x = $this->max_y = $this->size_x = $this->size_y = 1;
+
       $this->BoardTitle = null;
       $this->BoardText = null;
       $this->BoardTextInline = true;
@@ -249,22 +253,28 @@ class Goban
             $out[] = sprintf("[%2d,%2d]: V=%03x L=%1s  ( %s )", $x,$y, $arr[GOBMATRIX_VALUE], $arr[GOBMATRIX_LABEL], $val_text );
          }
       }
-      return "Goban({$this->max_x}x{$this->max_y},size={$this->size},ysize={$this->y_size})={\n  ".implode("\n  ", $out)." }\n\n";
+      return "Goban(max={$this->max_x}x{$this->max_y},size={$this->size_x}x{$this->size_y})={\n  ".implode("\n  ", $out)." }\n\n";
    }
 
-   function setOptionsCoords( $coords )
+   function setOptionsCoords( $coords, $showCoords )
    {
       $this->opts_coords = ($coords & GOBB_BITMASK);
+      $this->show_coords = (bool)$showCoords;
    }
 
-   function getOptionsCoords()
+   function getOptionsCoords( $check_show=true )
    {
-      return $this->opts_coords;
+      return ($this->show_coords) ? $this->opts_coords : 0;
    }
 
-   function setSize( $size )
+   function setSizeX( $size_x )
    {
-      $this->size = $size;
+      $this->size_x = $size_x;
+   }
+
+   function setSizeY( $size_y )
+   {
+      $this->size_y = $size_y;
    }
 
 

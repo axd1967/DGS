@@ -108,8 +108,6 @@ class GobanHandlerSL1
    var $borderLines; // border-lines to parse later; [ ypos => line, ... ]
    var $lpos;  // line-pos to parse 0..
    var $ypos;  // board-ypos 1..
-   var $max_x;
-   var $max_y;
    var $erasePoints; // arr( x,y )
    var $text_block;
    var $emptyLines;
@@ -144,8 +142,6 @@ class GobanHandlerSL1
       $this->borderLines = array();
       $this->lpos = 0;
       $this->ypos = 1;
-      $this->max_x = 1;
-      $this->max_y = 1;
 
       $this->text_block = null;
       $this->emptyLines = 0;
@@ -179,20 +175,19 @@ class GobanHandlerSL1
          }
       }
 
-      $this->max_y = $this->ypos - 1;
-
       $this->parse_border_lines();
-      $this->goban->setOptionsCoords( ($this->showCoordinates) ? $this->borders : 0 );
+      $this->goban->setOptionsCoords( $this->borders, $this->showCoordinates );
       $this->setBoardBorders();
 
-      $this->goban->setSize( max($this->goban->max_x, $this->goban->max_y) );
+      $xSize = $ySize = ( !is_null($this->boardSize) ) ? $this->boardSize : 19;
       if( is_null($this->boardSize) && $this->borders == GOBB_MID )
-         $this->boardSize = $this->goban->size;
-
-      $yStart = ( is_null($this->boardSize) ) ? 19 : $this->boardSize;
-      if( ($yStart > $this->goban->max_y && !($this->borders & GOBB_NORTH) ) || ($yStart < $this->goban->max_y) )
-         $yStart = $this->goban->max_y;
-      $this->goban->y_size = $yStart;
+      {
+         $xSize = $this->goban->max_x;
+         $ySize = $this->goban->max_y;
+         $this->boardSize = max( $xSize, $ySize );
+      }
+      $this->goban->setSizeX( $xSize );
+      $this->goban->setSizeY( $ySize );
 
       if( !is_null($this->boardTitle) && (string)$this->boardTitle != '' )
          $this->goban->BoardTitle = $this->parse_SL_text( $this->boardTitle ); // wrapping by fixed table-width
@@ -275,7 +270,7 @@ class GobanHandlerSL1
          $clearLineBorder = false;
          if( $ypos == 1 )
             $gobb_vmask = GOBB_NORTH;
-         elseif( $ypos >= $this->max_y )
+         elseif( $ypos >= $this->goban->max_y )
             $gobb_vmask = GOBB_SOUTH;
          else
             continue; // in-between separation-lines for irregular boards not supported
@@ -312,9 +307,9 @@ class GobanHandlerSL1
    /*! \brief Clears border-bit for whole line. */
    function clearLineBorderBit( $y, $bitvalue )
    {
-      if( $y >=1 && $y <= $this->max_y )
+      if( $y >=1 && $y <= $this->goban->max_y )
       {
-         for( $x=1; $x < $this->max_x; $x++ )
+         for( $x=1; $x < $this->goban->max_x; $x++ )
             $this->goban->clearBoardLinesBit( $x, $y, $bitvalue );
       }
    }//clearLineBorderBit
@@ -464,9 +459,6 @@ class GobanHandlerSL1
          }
       }//end-for
 
-      if( $x > $this->max_x )
-         $this->max_x = $x;
-
       $this->ypos++;
 
       return true;
@@ -512,43 +504,46 @@ class GobanHandlerSL1
          return;
 
       if( $this->borders & GOBB_NORTH ) // first row
-         for( $x=1; $x <= $this->max_x; $x++)
+         for( $x=1; $x <= $this->goban->max_x; $x++)
             $this->goban->clearBoardLinesBit( $x, 1, GOBB_NORTH );
-      if( ($this->borders & GOBB_SOUTH) || (!is_null($this->boardSize) && $this->max_y >= $this->boardSize) ) // last row
-         for( $x=1; $x <= $this->max_x; $x++)
-            $this->goban->clearBoardLinesBit( $x, $this->max_y, GOBB_SOUTH );
+      if( ($this->borders & GOBB_SOUTH) || (!is_null($this->boardSize) && $this->goban->max_y >= $this->boardSize) ) // last row
+         for( $x=1; $x <= $this->goban->max_x; $x++)
+            $this->goban->clearBoardLinesBit( $x, $this->goban->max_y, GOBB_SOUTH );
 
       if( $this->borders & GOBB_WEST ) // first col
-         for( $y=1; $y <= $this->max_y; $y++)
+         for( $y=1; $y <= $this->goban->max_y; $y++)
             $this->goban->clearBoardLinesBit( 1, $y, GOBB_WEST );
-      if( ($this->borders & GOBB_EAST) || (!is_null($this->boardSize) && $this->max_x >= $this->boardSize) ) // last col
-         for( $y=1; $y <= $this->max_y; $y++)
-            $this->goban->clearBoardLinesBit( $this->max_x, $y, GOBB_EAST );
+      if( ($this->borders & GOBB_EAST) || (!is_null($this->boardSize) && $this->goban->max_x >= $this->boardSize) ) // last col
+         for( $y=1; $y <= $this->goban->max_y; $y++)
+            $this->goban->clearBoardLinesBit( $this->goban->max_x, $y, GOBB_EAST );
    }//setBoardBorders
 
    // Ex07: set hoshi-points for board with at least one pair of perpendicular edges
    function setHoshiPoints()
    {
-      if( !($this->borders == GOBB_MID
-            || ($this->borders & (GOBB_NORTH|GOBB_WEST)) || ($this->borders & (GOBB_NORTH|GOBB_EAST))
-            || ($this->borders & (GOBB_SOUTH|GOBB_EAST)) || ($this->borders & (GOBB_SOUTH|GOBB_WEST)) ) )
-         return false; // need perpendicular edges
+      // need at least one pair of perpendicular edges
+      if( $this->borders == 0 )
+         return false;
+      elseif( $this->borders == (GOBB_WEST|GOBB_EAST) || $this->borders == (GOBB_NORTH|GOBB_SOUTH) )
+         return false;
+      elseif( $this->borders == (1 << floor(log($this->borders, 2))) )
+         return false;
 
-      $size = (is_null($this->boardSize)) ? $this->goban->size : $this->boardSize;
-      $size_x = $size_y = $size;
+      $size_x = (is_null($this->boardSize)) ? $this->goban->size_x : $this->boardSize;
+      $size_y = (is_null($this->boardSize)) ? $this->goban->size_y : $this->boardSize;
       if( ($this->borders & (GOBB_WEST|GOBB_EAST)) == (GOBB_WEST|GOBB_EAST) )
          $size_x = $this->goban->max_x;
       if( ($this->borders & (GOBB_NORTH|GOBB_SOUTH)) == (GOBB_NORTH|GOBB_SOUTH) )
          $size_y = $this->goban->max_y;
 
       $arr_hoshi = get_hoshi_coords( $size_x, $size_y, 1 );
-      if( $this->borders & (GOBB_NORTH|GOBB_WEST) == (GOBB_NORTH|GOBB_WEST) ) // |^^
+      if( ($this->borders & (GOBB_NORTH|GOBB_WEST)) == (GOBB_NORTH|GOBB_WEST) ) // |^^
          $this->drawHoshiPoints( $arr_hoshi, 0, 0 );
-      elseif( $this->borders & (GOBB_NORTH|GOBB_EAST) == (GOBB_NORTH|GOBB_EAST) ) // ^^|
+      elseif( ($this->borders & (GOBB_NORTH|GOBB_EAST)) == (GOBB_NORTH|GOBB_EAST) ) // ^^|
          $this->drawHoshiPoints( $arr_hoshi, $this->goban->max_x + 1, 0 );
-      elseif( $this->borders & (GOBB_SOUTH|GOBB_WEST) == (GOBB_SOUTH|GOBB_WEST) ) // |__
+      elseif( ($this->borders & (GOBB_SOUTH|GOBB_WEST)) == (GOBB_SOUTH|GOBB_WEST) ) // |__
          $this->drawHoshiPoints( $arr_hoshi, 0, $this->goban->max_y + 1 );
-      else //if( $this->borders & (GOBB_SOUTH|GOBB_EAST) == (GOBB_SOUTH|GOBB_EAST) ) // __|
+      else //if( ($this->borders & (GOBB_SOUTH|GOBB_EAST)) == (GOBB_SOUTH|GOBB_EAST) ) // __|
          $this->drawHoshiPoints( $arr_hoshi, $this->goban->max_x + 1, $this->goban->max_y + 1 );
 
       return true;
