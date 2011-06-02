@@ -2291,4 +2291,8 @@ ALTER TABLE Players
 ALTER TABLE Games
    ADD Snapshot varchar(216) NOT NULL default '' ;
 
+-- execute fix-script to add Games.Snapshot for ALL games:
+-- (may need to run it several times with smaller limit and start-game-id to skip faulty games):
+--    'scripts/fix_game_snapshot.php?limit=999999&sleep=1'
+
 
