@@ -224,3 +224,10 @@ copy /42/[cstx].gif
 copy /50/l[a-z].gif
 copy /50/[cstx].gif
 
+-----------
+# added game-thumbnail
+copy /images/tbnb.gif
+copy /images/tbnw.gif
+copy /images/tbnd.gif
+copy /images/tbne.gif
+

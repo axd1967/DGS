@@ -316,7 +316,11 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
          }
          if( $gtable->Is_Column_Displayed[15] )
-            $grow_strings[15] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid, true);
+         {
+            $snapshot = ($Snapshot) ? $Snapshot : null;
+            $grow_strings[15] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
+               . echo_image_tournament_info($tid, true);
+         }
          if( $gtable->Is_Column_Displayed[17] )
             $grow_strings[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
          if( $gtable->Is_Column_Displayed[18] )

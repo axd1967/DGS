@@ -239,11 +239,25 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
 }
 
 /*! \brief Returns image to game-info page for given game-id. */
-function echo_image_gameinfo( $gid, $with_sep=false )
+function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot=null )
 {
    global $base_path;
-   $img_str = image( $base_path.'images/info.gif', T_('Game information'), null, 'class="InTextImage"');
-   return ($with_sep ? ' ' : '' ) . anchor( $base_path."gameinfo.php?gid=$gid", $img_str );
+
+   if( is_numeric($board_size) && !is_null($snapshot) && is_javascript_enabled() )
+   {
+      $img_str = image( $base_path.'images/info.gif', '', null, 'class="InTextImage"');
+      $link = anchor( $base_path."gameinfo.php?gid=$gid", $img_str, '',
+         array(
+            'onmouseover' => sprintf( "showGameThumbnail(event,%s,'%s');", $board_size, $snapshot ),
+            'onmouseout'  => 'hideInfo();' ));
+   }
+   else
+   {
+      $img_str = image( $base_path.'images/info.gif', T_('Game information'), null, 'class="InTextImage"');
+      $link = anchor( $base_path."gameinfo.php?gid=$gid", $img_str );
+   }
+
+   return ($with_sep ? ' ' : '' ) . $link;
 }
 
 /*! \brief Returns image to tournament-info page for given tournament-id. */

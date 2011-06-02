@@ -326,6 +326,7 @@ This is why:
 
          $game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
+             "Snapshot='" . $TheBoard->make_game_snapshot() . "', " .
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'domove'
@@ -397,6 +398,7 @@ This is why:
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
              "Flags=$GameFlags, " .
+             "Snapshot='" . $TheBoard->make_game_snapshot() . "', " .
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'handicap'
@@ -483,6 +485,7 @@ This is why:
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
+             "Snapshot='" . $TheBoard->make_game_snapshot() . "', " .
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
          break;
       }//switch for 'done'

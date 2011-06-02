@@ -55,6 +55,7 @@ Description:
 | White_Start_Rating | double                                                            | NO   |     | -9999               |                |
 | Black_End_Rating   | double                                                            | NO   |     | -9999               |                |
 | White_End_Rating   | double                                                            | NO   |     | -9999               |                |
+| Snapshot           | varchar(216)                                                      | NO   |     |                     |                |
 
 
 ## Fields:
@@ -180,6 +181,8 @@ Description:
 * White_Start_Rating, White_End_Rating :
    - start and end rating of White player for rated finished game
 
+* Snapshot : base64-encoded snapshot of game-position
+   - see 'include/board.php' in make_game_snapshot()-function
 
 
 ###########################################################################

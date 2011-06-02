@@ -315,7 +315,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *   Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime,
  *   Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed,
  *   Rated, StdHandicap, WeekendClock, Black_Start_Rating, White_Start_Rating,
- *   Black_End_Rating, White_End_Rating
+ *   Black_End_Rating, White_End_Rating, Snapshot
  *
  * Players (OB+FA+RA) AS white, AS black - (FU+RU) AS Players(+UNION):
  *   ID, Handle, Password, Newpassword, Sessioncode, Sessionexpire, Lastaccess, LastMove,
@@ -787,7 +787,11 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( $gtable->Is_Column_Displayed[1] )
          $grow_strings[1] = button_TD_anchor( "game.php?gid=$ID", $ID);
       if( $gtable->Is_Column_Displayed[32] )
-         $grow_strings[32] = echo_image_gameinfo($ID) . echo_image_tournament_info($tid,true);
+      {
+         $snapshot = ($Snapshot) ? $Snapshot : null;
+         $grow_strings[32] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
+            . echo_image_tournament_info($tid,true);
+      }
       if( $gtable->Is_Column_Displayed[2] )
          $grow_strings[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
       if( $observe_all )

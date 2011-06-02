@@ -23,6 +23,7 @@ require_once( 'include/game_functions.php' );
 require_once( 'include/time_functions.php' );
 require_once( 'include/classlib_game.php' );
 require_once( 'include/rating.php' );
+require_once( 'include/board.php' );
 
 
 // Inserts INVITATION-game or updates DISPUTE-game
@@ -480,7 +481,16 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
          db_query( "create_game.update_games.next2_gp($gid,$game_type,$next_black_id)",
             "UPDATE Games SET Black_ID=$next_black_id WHERE ID=$gid LIMIT 1" );
       }
-   }
+
+      // create game-snapshot for thumbnail (for handicap-stones)
+      $TheBoard = new Board();
+      if( $TheBoard->load_from_db( array( 'ID' => $gid, 'Size' => $size, 'Moves' => $moves ) ) ) // ignore errors
+      {
+         $snapshot = $TheBoard->make_game_snapshot();
+         db_query( "create_game.upd_game.stdh_snapshot($gid,$size)",
+            "UPDATE Games SET Snapshot='$snapshot' WHERE ID=$gid LIMIT 1" );
+      }
+   }//set-std-handicap
 
    return $gid;
 } //create_game

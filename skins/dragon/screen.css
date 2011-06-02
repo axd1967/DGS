@@ -1112,20 +1112,22 @@ div#InfoBox {
    position: absolute;
    visibility: hidden;
    z-index: 20;
-   min-width: 100px;
+   min-width: 50px;
    max-width: 400px;
    padding: 5px;
    border: 1px solid #0C41C9;
    background: #f7f5ff;
    text-align: left;
 }
-
 div#InfoBox table {
    margin: 0px;
 }
-
 div#InfoBox table th {
    font-weight: bold;
+}
+
+div#InfoBox table.GameThumbnail td {
+   padding: 2px;
 }
 
 
@@ -2919,7 +2921,7 @@ table#PoolViewerTable th.Matrix {
 table#PoolViewerTable td.Matrix {
    text-align: center;
    border: 1px dotted black;
-   font-color: black;
+   color: black;
    text-decoration: none;
 }
 table#PoolViewerTable td.TourneyUser {

@@ -424,6 +424,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `White_Start_Rating` double NOT NULL default '-9999',
   `Black_End_Rating` double NOT NULL default '-9999',
   `White_End_Rating` double NOT NULL default '-9999',
+  `Snapshot` varchar(216) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `ToMove_ID` (`ToMove_ID`),
   KEY `Size` (`Size`),

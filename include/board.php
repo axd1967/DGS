@@ -77,7 +77,9 @@ class Board
    // fills $array with positions where the stones are.
    // fills $moves with moves and coordinates.
    // keep the coords, color and message of the move $move.
-   function load_from_db( $game_row, $move=0, $no_marked_dead=true )
+   // param $game_row need fields: ID, Size, Moves
+   // param $fix_stop true = stop and return FALSE if corrupted game found
+   function load_from_db( $game_row, $move=0, $no_marked_dead=true, $load_last_message=true, $fix_stop=false )
    {
       $this->array = NULL;
       $this->moves = array();
@@ -137,7 +139,10 @@ class Board
          {
             if( $MoveNr > $this->max_moves )
             {
-               $this->fix_corrupted_move_table( $gid);
+               if( $fix_stop )
+                  return FALSE;
+               else
+                  $this->fix_corrupted_move_table( $gid);
                break;
             }
             continue;
@@ -172,7 +177,7 @@ class Board
          }
       }
 
-      if( isset($this->moves[$move]) )
+      if( $load_last_message && isset($this->moves[$move]) )
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
@@ -1143,7 +1148,66 @@ class Board
             "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
       }
       ta_end();
-   }
+   }//fix_corrupted_move_table
+
+   /*!
+    * \brief Returns base64-encoded snapshot of game-positions with B/W- and dead-stones (without color).
+    * \return one char in output = 3 positions of 2-bit-values (00=empty, 01=B, 10=W, 11=dead)
+    */
+   function make_game_snapshot()
+   {
+      static $VAL_MAP = array(
+            BLACK       => 1, // 01 (black)
+            WHITE       => 2, // 10 (white)
+            BLACK_DEAD  => 3, // 11 (dead-stone)
+            WHITE_DEAD  => 3, // 11 (dead-stone)
+         );
+      static $BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+      $out = '';
+      $enc_val = $enc_cnt = 0;
+      for( $y = 0; $y < $this->size; $y++ )
+      {
+         for( $x = 0; $x < $this->size; $x++ )
+         {
+            $stone = (int)@$this->array[$x][$y];
+            $val = (int)@$VAL_MAP[$stone]; // undef = 00 (empty-field)
+
+            $enc_val = ($enc_val << 2) + $val;
+            if( ++$enc_cnt == 3 )
+            {
+               $out .= $BASE64[$enc_val];
+               $enc_cnt = $enc_val = 0;
+            }
+         }
+      }
+
+      if( $enc_cnt > 0 )
+      {
+         $enc_val <<= (2 * (3 - $enc_cnt));
+         $out .= $BASE64[$enc_val];
+      }
+
+      $out = rtrim($out, 'A');
+      if( (string)$out != '' )
+      {
+         $out = preg_replace( array(
+               "/AAAAAAAAAAAAAAAA/", // *=16xA
+               "/AAAAAAAA/", // @=8xA
+               "/AAAA/", // #=4xA
+               "/AAA/", // %=3xA
+               "/AA/", // :=2xA
+            ),
+            array(
+               "*", "@", "#",  "%", ":",
+            ), $out );
+      }
+      else
+         $out = 'A';
+
+      return $out;
+   }//make_game_snapshot
+
 } //class Board
 
 ?>

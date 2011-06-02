@@ -2287,3 +2287,8 @@ ALTER TABLE Players
    MODIFY Button tinyint signed NOT NULL default '0' ;
 
 
+-- added field with snapshot of current game-position for showing thumbnail
+ALTER TABLE Games
+   ADD Snapshot varchar(216) NOT NULL default '' ;
+
+

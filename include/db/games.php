@@ -54,7 +54,7 @@ $ENTITY_GAMES = new Entity( 'Games',
                   'ClockUsed', 'TimeOutDate',
       FTYPE_FLOAT, 'Komi', 'Score', 'Black_Start_Rating', 'White_Start_Rating', 'Black_End_Rating',
                    'White_End_Rating',
-      FTYPE_TEXT, 'GamePlayers', 'Last_Move',
+      FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot',
       FTYPE_DATE, 'Starttime', 'Lastchanged',
       FTYPE_ENUM, 'Status', 'GameType', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
    );
@@ -104,6 +104,7 @@ class Games
    var $White_Start_Rating;
    var $Black_End_Rating;
    var $White_End_Rating;
+   var $Snapshot;
 
    /*! \brief Constructs Games-object with specified arguments. */
    function Games( $id=0, $tid=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
@@ -116,7 +117,7 @@ class Games
                    $white_byoperiods=0, $lastticks=0, $clockused=0, $timeoutdate=0, $rated='N',
                    $stdhandicap=true, $weekendclock=true, $black_start_rating=NO_RATING,
                    $white_start_rating=NO_RATING, $black_end_rating=NO_RATING,
-                   $white_end_rating=NO_RATING )
+                   $white_end_rating=NO_RATING, $snapshot='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -161,6 +162,7 @@ class Games
       $this->White_Start_Rating = (float)$white_start_rating;
       $this->Black_End_Rating = (float)$black_end_rating;
       $this->White_End_Rating = (float)$white_end_rating;
+      $this->Snapshot = $snapshot;
    }//constructor
 
    function setStatus( $status )
@@ -284,6 +286,7 @@ class Games
       $data->set_value( 'White_Start_Rating', $this->White_Start_Rating );
       $data->set_value( 'Black_End_Rating', $this->Black_End_Rating );
       $data->set_value( 'White_End_Rating', $this->White_End_Rating );
+      $data->set_value( 'Snapshot', $this->Snapshot );
       return $data;
    }//fillEntityData
 
@@ -376,7 +379,8 @@ class Games
             @$row['Black_Start_Rating'],
             @$row['White_Start_Rating'],
             @$row['Black_End_Rating'],
-            @$row['White_End_Rating']
+            @$row['White_End_Rating'],
+            @$row['Snapshot']
          );
       return $g;
    }//new_from_row
@@ -385,7 +389,7 @@ class Games
     * \brief Loads and returns Games-object for given games-ID.
     * \return NULL if nothing found; Games otherwise
     */
-   function load_game( $gid )
+   function load_game( $gid, $return_row=false )
    {
       if( !is_numeric($gid) || $gid <= 0 )
          error('invalid_args', "Games.load_game.check_gid($gid)");
@@ -395,7 +399,7 @@ class Games
 
       $row = mysql_single_fetch( "Games::load_game.find_game($gid)",
          $qsql->get_select() );
-      return ($row) ? Games::new_from_row($row) : NULL;
+      return ($row) ? ( $return_row ? $row : Games::new_from_row($row) ) : NULL;
    }
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
