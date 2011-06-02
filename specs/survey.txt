@@ -1,0 +1,265 @@
+# Topic: Surveys
+# Description: Survey for tournament-adjudication or in forums
+# Author: Jens-Uwe Gaspar, DGS 'juga'
+
+## /*
+## Dragon Go Server
+## Copyright (C) 2001-2011  Erik Ouchterlony, Jens-Uwe Gaspar
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU Affero General Public License as
+## published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
+##
+## You should have received a copy of the GNU Affero General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## */
+
+Topics:
+
+   1. Introduction
+   2. Users Guide
+      a. Manage Survey (create, update)
+      b. View & Vote Survey
+   3. Design, Classes and Files (implementation details)
+
+
+#-------- (1) Introduction ----------------------------------------------------
+
+Voting on a "survey" can be used to collect opinions or make a public decision
+by majority about a certain topic. The eligible users can select from given
+choices shown as survey-options with an optional descriptive text.
+
+There are four survey-types:
+
+   Points   = survey-options with selection of points within certain range,
+              using selectbox-choices with points
+
+   Sum      = sum of points-selection of survey-options must be within configured point-range,
+              using selectbox-choices with points checked against a total-points-sum
+
+   Single   = choose only one of many survey-options,
+              single-choice using radio-buttons,
+              value of options can serve to give different weight,
+
+   Multi    = multiple choice of survey-options,
+              multiple-choice using checkboxes,
+              value of options can serve to give different weight
+
+Typical use-cases:
+
+   * Vote on certain aspect of a feature,
+     e.g. "Feature ABC" -> (A) keep it as it is, (B) change it
+
+   * Vote on user-preference about something,
+     e.g. "Favourite color for XYZ?" -> (A) red, (B) blue
+
+   * Tournament-adjudication for games that are "decided", but not ended blocking proceedings,
+     e.g. "Adjudication about game 123: expected result?" assigned for vote by adjudicators
+     -> (A) White win, (B) Black wins, (C) Jigo, (D) No result, (E) Game should continue
+
+Restrictions:
+   * Voting on surveys only allowed to users with 2 finished games and
+     actively playing in a game within the last 30 days
+   * Surveys can be created and managed by a survey-admin
+   * Survey-functionality can be disabled for DGS with ALLOW_SURVEY_VOTE in server-config
+
+
+#-------- (2) Users Guide -----------------------------------------------------
+
+#-------- (2a) Manage Survey --------------------------------------------------
+
+Described Use-cases:
+   - Create new survey (type, status, min/max-points/selections, title, options, userlist)
+   - Edit survey
+     - Change survey-status
+     - Change survey (title, header, options with text)
+   - Fix consistency of survey-data
+
+* Create new survey:
+
+  1. Select "Admin survey" on the "admin"-page, or
+     Select "New survey" on the survey-list-page
+
+  2. Specify survey-settings:
+
+     * survey-type and min/max points/selection (depending on survey-type):
+       see field 'Type' of db-table 'Survey' in "specs/db/table-Voting.txt"
+
+     * survey-status:
+       see field 'Status' of db-table 'Survey' in "specs/db/table-Voting.txt"
+       - NEW = survey in creation-mode, can not be voted on
+       - ACTIVE = survey can be voted on, but other fields can not be changed any more
+       - CLOSED = survey can not be voted on any more, voting-results are shown
+       - DELETE = survey is hidden, ready to be deleted
+
+     * survey-title: mandatory title of survey
+
+     * survey-options:
+       - survey can have optional survey-header-text between title and survey-options
+       - max. 26 survey-options per survey allowed (restricted by labels 'A-Z')
+       - each survey-option can have an optional description shown below it
+       - enter at least two survey-options with fields dependent on survey-type
+
+       - syntax for survey-option:
+
+            <opt tag [min_points] "title">description
+
+               - tag = 1..n, unique label/option-number
+               - min_points = point of option adding to score if selected by user-vote,
+                 can be optional, depends on survey-type, has defaults if needed (almost always 1)
+               - title = title of survey-option
+               - description = optional text describing option
+
+               - order of options defined by order of <opt>-tags (not by tag)
+
+         Example for MULTI-type:
+
+            Choose wisely!            -- header-text
+            <opt 1 5 "Dog"> woof
+            <opt 2 3 "Cat"> meow
+            <opt 3 -2 "Goat"> baa
+
+     * survey-userlist (optional):
+       list of user-id (Players.Handle) to restrict voting to a group of users,
+       survey can be viewed by public but only listed users can vote upon it
+
+   3. Preview: to check for errors
+
+   4. Save Survey: to create survey if check revealed no errors
+
+   * Additional Infos:
+      - Surveys (except on status DELETE) are listed on survey-list-page
+      - All surveys can be publically viewed, but may not be advertisted to the public,
+        though they are listed in the survey-list-page. For example for tournament-decisions
+        between tournament-directors.
+
+* Edit survey:
+
+  1. Select "Surveys" on "site-map" or "Forums"-page
+
+  2. For survey-admins an admin edit-link is shown in the survey-list
+
+  3a. Change survey-status,
+  3b. Change survey (title, header, options with text):
+
+     - can be changed any time
+     - other fields can only be changed on NEW-status,
+     - other fields can normally NOT be changed on ACTIVE-status,
+       except if nobody started to vote on it.
+       If there is at least one vote, the content of the survey can not be changed,
+       because it could change the "opinion" of the voter.
+
+       In this case, better create a new survey or delete all votes (new feature needed).
+       So ensure, that all texts and options are cleaned up before ACTIVating a survey.
+
+* Fix consistency of survey-data:
+
+   - only for database-admin
+
+   - There's an admin-script "scripts/voting_consistency.php"
+     to fix consistency of (feature- and) survey-data, see also "scripts/index.php"
+     - fix Survey.UserCount & SurveyOption.Score
+
+
+#-------- (2b) View & Vote Survey ---------------------------------------------
+
+Described Use-cases:
+   - List surveys
+   - View & Vote survey
+   - <survey>-tag
+
+* List surveys:
+
+  1. Select "Surveys" on "site-map" or "Forums"-page
+
+* View & Vote survey:
+
+  1a. Select "Surveys" on "site-map" or "Forums"-page
+  1b. Click on link for <survey>-tag
+
+  2a. Survey on NEW-status:
+
+     - is not displayed to users
+     - is only shown to survey-admin
+
+  2b. Survey on ACTIVE-status:
+
+     - Voting on surveys ...
+       - is only allowed to users with 2 finished games and actively playing
+         in a game within the last 30 days
+       - is always allowed for admin except if there is a user-list
+       - by particular user can be denied by admin with ADMOPT_DENY_SURVEY_VOTE
+       - can be restricted to user-list (if set for survey)
+
+     - survey is listed on survey-list-page
+     - survey can be voted on ACTIVE-status
+     - if user not in set user-list-restriction, survey can only be viewed
+
+     - own user-vote is shown if user already voted on survey
+     - own user-vote (option-choices) can be changed as long as survey is on ACTIVE-status
+
+     - survey-result:
+       - unordered result is shown after user has voted on survey
+       - number of user-votes is shown in extra-info
+
+  2c. Survey on CLOSED-status:
+
+     - survey-result is shown, ordered by highest score on survey-options
+     - no voting possible any more
+
+  2d. Survey on DELETE-status:
+
+     - is not displayed to users
+     - is only shown to survey-admin
+
+* <survey>-tag:
+
+   - Survey can be referenced with a DGS-tag "<survey 123>" showing the status and
+     title with a link to the survey
+   - <survey>-tag can be used anywhere (FAQ, forum, messages, news, bulletins, etc)
+
+
+#-------- (3) Design, Classes and Files ---------------------------------------
+
+* Table-Design:
+   - needed to store
+      - survey meta-data (author, status, title, flags, header)
+      - survey-options (label, order, points, title, description)
+      - survey-users for user-list-restriction
+      - survey vote-data (user-specific-vote, option-specific-score, vote-user-count)
+
+   - db-tables: Survey, SurveyOption, SurveyUser, SurveyVote
+     for description see "specs/db/table-Voting.txt"
+
+* Classes / Files following MVC-approach:
+   * "admin_survey.php"               - (V) page dedicated to setup/manage surveys
+   * "scripts/voting_consistency.php" - (V) fix Survey.UserCount & SurveyOption.Score
+
+   * "view_survey.php"  - (V) page to view and vote on survey
+   * "list_surveys.php" - (V) page listing surveys
+
+   * "include/survey_control.php"   - (C) Controller for survey-stuff (MVC)
+   * "include/db/survey.php"        - (M) entity for Survey-table and SurveyUser-table
+   * "include/db/survey_option.php" - (M) entity for SurveyOption-table
+   * "include/db/survey_vote.php"   - (M) entity for SurveyVote-table
+
+   * class Survey          - entity class to model "Survey"-table and "SurveyUser"-table
+   * class SurveyOption    - entity class to model "SurveyOption"-table
+   * class SurveyVote      - entity class to model "SurveyVote"-table
+   * class SurveyControl   - controller class to handle survey-stuff combining GUI and models
+
+
+#-------- Related features -------------------------------------
+
+* Q: ...
+
+* NTH: (S36c.1) survey as tournament-adjudication
+
+* NTH: (S36c.2) add survey in forum (attached by survey-admin to thread), <survey> referencing survey;; INLINE | LINK;; allowing single survey per post !?
+

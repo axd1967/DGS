@@ -127,7 +127,8 @@ Important Notes:
 * Type : survey-type
    - POINTS = survey consists of options with selectbox to give points in range MinPoints..MaxPoints
    - SUM    = survey consists of options on which in total (sum of points of all options)
-              between MinPoints..MaxPoints can be given
+              between MinPoints..MaxPoints can be given,
+              MinPoints must be >= 0 and Min/MaxPoints can be equal
    - SINGLE = survey consists of radio-buttons to select ONE of many options, MinPoints=MaxPoints=0
    - MULTI  = survey consists of checkboxes to select MULTIPLE options,
               number of selections for checkboxes can be restricted with MinPoints..MaxPoints, 0=no-restrictions
