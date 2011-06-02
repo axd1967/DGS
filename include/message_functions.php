@@ -404,6 +404,14 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
                               'SELECTBOX', 'max_handicap', 1, $handi_stones, $MaxHandicap, false,
                               ));
    }
+   else
+   {
+      $mform->add_row( array(
+            'HIDDEN', 'adj_handicap', $AdjustHandicap,
+            'HIDDEN', 'min_handicap', $MinHandicap,
+            'HIDDEN', 'max_handicap', $MaxHandicap,
+            ));
+   }
 
    if( ENABLE_STDHANDICAP )
    {
@@ -434,6 +442,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
          ));
    }
+   else
+      $mform->add_row( array(
+            'HIDDEN', 'adj_komi',  $AdjustKomi,
+            'HIDDEN', 'jigo_mode', $JigoMode,
+         ));
 
 
    if( $formstyle == GSET_WAITINGROOM && $is_view_mpgame )
