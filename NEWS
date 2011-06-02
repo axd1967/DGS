@@ -198,7 +198,9 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added columns with remaining-time of myself and opponent for my running games.
       * Warn about short remaining-times with colored background (red &lt;3d, yellow &lt;7d)
         on <home status.php>status-games</home> and <home show_games.php>my running games</home>
-      * Added column with link to game info page on all game lists
+      * Added column for all game-lists with:
+         * icon linked to game-info page (<image info.gif>) with showing thumbnail of game on mouse-hovering
+         * icon linked to Tournament-games (<image tourney.gif>)
       * Added searchable column with indicator if there are hidden game comments for my finished games
       * Show Weekendclock for all view-modes
       * Show icon for Tournament-games (<image tourney.gif>)
@@ -260,9 +262,11 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Number of Moves
          * Priority (edit on game-info page)
          * Remaining Time
+      * Added column with:
+         * icon linked to game-info page (<image info.gif>) with showing thumbnail of game on mouse-hovering
+         * icon linked to Tournament-games (<image tourney.gif>)
       * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
-      * Show icon for Tournament-games (<image tourney.gif>)
       * Show my multi-player-games in setup-mode
 
    * <home forum/index.php>Forum pages reworked</home>:
@@ -306,6 +310,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
             * previous parent post (<image f_prevparent.png>) and next parent post (<image f_nextparent.png>)
          * Fixed viewing of "missing" new posts while replying
          * Added Refresh-link in forum-bars to reload thread posts view
+         * Added short-version of rating for post-author
          * Mark Dragon executives with admin-icon (<image admin.gif>)
 
    * <home features/list_features.php>Voting on features</home> including feature status management
@@ -317,7 +322,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added link to <home list_surveys.php>Surveys</home> on <home forum/>forums-page</home>
       * Show survey-result for closed surveys, or after user voted on survey
 
-   * Markup tags:
+   * Markup tags and Images:
       * &lt;http://url.net |link text> : enhanced link markup with optional text,
         Link text must not contain a single quote "'" -> use "&amp;apos;" instead
       * &lt;strike><strike>text</strike></strike> : strike out text
@@ -327,6 +332,25 @@ Copyright (C) 2001-2011  Erik Ouchterlony
         (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
       * &lt;game gid[,move]> : Added game-type and changed format for move-number
       * &lt;hr> : showing separation-line like HTML &lt;hr>-tag, to be used in messages/games
+
+      * &lt;igoban SL1> : Added go-diagram using syntax from Sensei's Library (=SL1)
+         * Allow go-diagram with &lt;igoban>-tag in FAQ &amp; forums
+         * Show raw-format using &lt;igoban>-tag by adding URL-arg 'raw=1' on pages with go-diagrams
+         * Syntax for SL1-format: <http://senseis.xmp.net/?HowDiagramsWork |How Diagrams Work (on Sensei&apos;s Library)>
+            * Show board, markup, board-title, board-text (right side or below)
+            * Show links on board-markup, SL-links, extended by DGS-links "[1|dgs:docs.php]"
+         * Additions &amp; Exceptions of SL1-syntax:
+            * Lines can start with white-spaces, line-prefix '$$' can be omitted
+            * Chars "'" and "\" are not allowed in text
+            * Auto-set hoshi-points if there are perpendicular edges and no hoshi set manually
+            * Easier coordinate-usage using "++"  "+-"  "-+"
+            * Links of "#anchor" refer to DGS local page
+            * Not-supported are arrows and lines "{AR|LN ...}" and some irregular boards with edge-magic
+            * Not-supported are arrows and lines "{AR|LN ...}"
+         * Use player-settings for stone-size, wood-color, boards smooth-edge
+
+      * Added markup-images without board-lines: square (<image board/s.gif>), triangle (<image board/t.gif>), circle (<image board/c.gif>), cross (<image board/x.gif>)
+      * Fixed letter-iamges "l(a-z).gif" for board-markup: (<image board/la.gif> ... <image board/lz.gif>)
 
 
    Minor changes:
@@ -590,6 +614,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Removed ADMIN_TIME admin-level, page-creation-time shown for all users now
       * Do not reject message or invitation from ADMIN_DEVELOPER even if user has set contact system-flag
       * Admins (developer/forum/game) can send multi-receiver bulk-message
+      * Developer-admin is implicit admin for surveys, FAQ, forum
 
       * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
          * Finish game by setting game-result, Change game rated-status, Delete running & finished game
@@ -632,6 +657,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added forum consistency script
       * Added tournament consistency script
       * Added consistency script for features and surveys
+      * Added consistency script to fix game-thumbnails
       * Removed translations from the admin pages
       * Different CSS-layout for most admin-actions & admin-links
 
