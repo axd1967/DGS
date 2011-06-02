@@ -19,6 +19,174 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-06-02 juga
+
+   * specs/survey.txt, specs/db/table-Voting.txt:
+   - added documentation about Surveys
+
+   * scripts/find-classes.pl:
+   - fix for static-classes: extended output by STATIC|OBJ-column
+
+   * include/board.php (Board.load_from_db, ~.make_game_snapshot,
+     include/gui_functions.php (echo_image_gameinfo),
+     include/make_game.php (create_game),
+     include/db/games.php (class Games, ~.fillEntityData, ~.new_from_row, ~.load_game),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     js/common.js (showInfo, showTLRankInfo, showGameThumbnail),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     scripts/fix_game_snapshot.php, scripts/index.php,
+     skins/dragon/screen.css, confirm.php, quick_play.php, show_games.php, status.php:
+   - show thumbnail from Games.Snapshot for games
+     - show thumbnails on gameinfo-icon hovering for status- and show-games-page
+     - added script to fix Games.Snapshot with thumbnail-data
+     - snapshot for thumbnail is stored in Games.Snapshot as special base64-encoded-string
+       optimized on empty-fields, see make_game_snapshot()-func in 'include/board.php'
+     - update Games.Snapshot on move in game
+     - write Games.Snapshot for new game with standard-handicap
+-----------
+# added game-thumbnail
+copy /images/tbnb.gif
+copy /images/tbnw.gif
+copy /images/tbnd.gif
+copy /images/tbne.gif
+
+-- added field with snapshot of current game-position for showing thumbnail
+ALTER TABLE Games
+   ADD Snapshot varchar(216) NOT NULL default '' ;
+
+-- execute fix-script to add Games.Snapshot for ALL games
+-- (may need to run it several times with smaller limit and start-game-id to skip faulty games):
+--    'scripts/fix_game_snapshot.php?limit=999999&sleep=1'
+-----------
+
+   * include/message_functions.php (game_settings_form):
+   - bugfix: use defaults instead of 0 of Adjust/Min/MaxHandicap and AdjustKomi/JigoMode
+     for game-settings simple-view
+
+2011-05-29 juga
+
+   * include/goban_handler_sl.php (class GobanHandlerSL1. ~.read_goban, ~.parse_border_lines,
+       ~.clearLineBorderBit, ~.parse_line, ~.setBoardBorders, ~.setHoshiPoints),
+     include/goban_handler_gfx.php (class GobanHandlerGfxBoard, ~.write_goban,
+       ~.draw_coord_row, ~.draw_edge_row, ~.build_rawtext),
+     include/classlib_goban.php (class Goban, ~.to_string, ~.setOptionsCoords,
+       ~.setSizeX, ~.setSizeY),
+     goban_editor.php:
+   - bugfixes for <igoban>-tag:
+     - fix & cleanup x/y-size handling
+     - fix table-width for skipped/included side-coordinate-blocks
+     - include <igoban>-tag in raw-format-output
+
+   * include/classlib_goban.php (MarkupHandlerGoban.replace_igoban_tags, ~.parse_igoban;
+       class Goban.to_string, ~.addLink, ~.getLink, ~.setBoardLines, ~.eraseBoardPoint,
+       ~.setHoshi, ~.setMarker, ~.value_to_string),
+     include/goban_handler_sl.php (GobanHandlerSL1.read_goban, ~.parse_title_line,
+       ~.parse_text_block, ~.parse_borders, ~.parse_border_lines, ~.clearLineBorderBit,
+       ~.parse_links, ~.parse_line, ~.parse_SL_text, ~.setBoardBorders, ~.setHoshiPoints,
+       ~.drawHoshiPoints),
+     include/goban_handler_gfx.php (GobanHandlerGfxBoard.write_goban, ~.write_image,
+       ~.getBoardLineType, ~.draw_edge_row, ~.build_rawtext),
+     include/coords.php (is_hoshi, get_hoshi_coords),
+     include/faq_functions.php (faq_item_html),
+     forum/forum_functions.php (DisplayForum.make_link_array),
+     skins/dragon/screen.css, goban_editor.php:
+   - implemented parsing of SL1-type (Sensei's Library goban-type) for <igoban>-tag:
+     - show original content with URL-arg 'raw'
+     - added goban-title, text-block to right or below of board
+     - added goban-links on markup-labels, marked with darker background-color
+       for marker on goban
+     - automatically set hoshi-points if possible
+     - use stone-size/wood-color/smooth-edge config for player, loaded from ConfigBoard
+     - use static table-width for goban-board for automatic text-wrapping of board-title
+     - allow usage of <igoban>-tag to display goban for FAQ
+     - fixed example in goban-editor with extended SL1-syntax for borders in <igoban>-tag
+     - bugfixes
+
+   * include/classlib_userconfig.php (ConfigBoard.fill_player_row, ~.load_config_board):
+   - load ConfigBoard from $player_row or from db filling $player_row
+
+2011-05-28 juga
+
+   * scripts/generate_board_images.pl (save_image),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt:
+   - create markup-images without board-lines for square/triangle/circle/cross
+     saved as "s|t|c|x.gif"
+   - fixed creation of letter-images "lX.gif" for X=a..z
+   - fixed new arg for file_gif_save()-call
+-----------
+# added markup circle/square/triangle/cross & fixed letters-markup a-z
+copy /5/l[a-z].gif
+copy /5/[cstx].gif
+copy /7/l[a-z].gif
+copy /7/[cstx].gif
+copy /9/l[a-z].gif
+copy /9/[cstx].gif
+copy /11/l[a-z].gif
+copy /11/[cstx].gif
+copy /13/l[a-z].gif
+copy /13/[cstx].gif
+copy /17/l[a-z].gif
+copy /17/[cstx].gif
+copy /21/l[a-z].gif
+copy /21/[cstx].gif
+copy /25/l[a-z].gif
+copy /25/[cstx].gif
+copy /29/l[a-z].gif
+copy /29/[cstx].gif
+copy /35/l[a-z].gif
+copy /35/[cstx].gif
+copy /42/l[a-z].gif
+copy /42/[cstx].gif
+copy /50/l[a-z].gif
+copy /50/[cstx].gif
+-----------
+
+   * scripts/images_makefile:
+   - added cleanall-target to remove POV-generated big-images too
+
+   * scripts/find-classes.pl:
+   - helper-script to check for classes
+
+2011-05-25 juga
+
+   * include/classlib_goban.php (MarkupHandlerGoban.contains_goban),
+     include/goban_handler_gfx.php (GobanHandlerGfxBoard.write_goban),
+     forum/forum_functions.php (ForumThread.contains_goban),
+     forum/post.php (post_message),
+     forum/read.php (load_revision_history, show_revision_history),
+     skins/dragon/screen.css:
+   - fix CSS for go-diagrams in forums
+   - load ConfigBoard with stonesize/woodcolor only if go-diagram contained
+     in loaded revision-history or thread-posts
+
+2011-05-22 juga
+
+   * INSTALL:
+   - need PHP5
+
+   * admin_survey.php (parse_edit_form):
+   - bugfix: remove wrong eating of header-text for <opt>'s, adjust text, cleanup
+
+   * include/message_functions.php (DgsMessage.load_message_receivers),
+     include/survey_control.php (SurveyControl.is_survey_admin),
+     forum/forum_functions.php (Forum.is_admin, ForumThread.load_revision_history),
+     forum/admin_show_forumlog.php, forum/index.php,
+     admin.php, admin_show_faqlog.php, admin_users.php,
+     gameinfo.php, game_players.php, userinfo.php:
+   - fix admin-capabilities synchronizing admin-pages
+   - added developer as implicit admin for survey/faq/forum
+
+2011-05-21 juga
+
+   * forum/forum_functions.php (DisplayForum.draw_post; ForumPost.build_query_sql, ~.new_from_row),
+     include/classlib_user.php (User.hasRating, ~.newForumUser):
+   - show user-rating for thread-posts
+
+   * include/config.php (ALLOW_TOURNAMENTS):
+   - allow tournaments per default
+
 2011-05-16 juga
 
    * admin.php:
