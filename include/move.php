@@ -147,6 +147,7 @@ function check_handicap( &$board, $coord=false)
 
 // returns GameScore-object
 // NOTE: adjusted globals by check_remove(): $stonestring; only if export_globals=true
+// param $scoring_mode GSMODE_TERRITORY_SCORING | GSMODE_AREA_SCORING
 function check_remove( &$board, $scoring_mode, $coord=false, $export_globals=true )
 {
    $Size= $board->size;
