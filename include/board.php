@@ -922,12 +922,12 @@ class Board
       $some = false;
       for($i=0; $i<4; $i++)
       {
-         $x = $colnr+$this->dirx[$i];
-         $y = $rownr+$this->diry[$i];
+         $x = $colnr + $this->dirx[$i];
+         $y = $rownr + $this->diry[$i];
 
          if( @$this->array[$x][$y] == $col )
          {
-            if( !$this->has_liberty_check( $x, $y, $prisoners, true) )
+            if( !$this->has_liberty_check( $x, $y, $prisoners, true) ) // change $prisoners
                $some = true;
          }
       }
@@ -938,11 +938,10 @@ class Board
 
    function mark_territory( $x, $y )
    {
-
       $c = -1;  // color of territory
 
       $index[$x][$y] = 7;
-      $point_count= 1; //for the current point (theoricaly NONE)
+      $point_count = 1; //for the current point (theoricaly NONE)
 
       while( true )
       {
@@ -955,10 +954,10 @@ class Board
                if( $c == -1 )
                   $c = DAME ;
                else
-                  $c|= OFFSET_TERRITORY ;
+                  $c |= OFFSET_TERRITORY ;
 
-               if( $c==DAME || $point_count>MAX_SEKI_MARK)
-                  $c|= FLAG_NOCLICK ;
+               if( $c == DAME || $point_count > MAX_SEKI_MARK)
+                  $c |= FLAG_NOCLICK ;
 
                foreach( $index as $x => $sub )
                {
@@ -980,11 +979,10 @@ class Board
             $dir = (int)($index[$x][$y] / 8);
             $index[$x][$y] += 8;
 
-            $nx = $x+$this->dirx[$dir];
-            $ny = $y+$this->diry[$dir];
+            $nx = $x + $this->dirx[$dir];
+            $ny = $y + $this->diry[$dir];
 
-            if( ( $nx < 0 ) || ($nx >= $this->size) || ($ny < 0) || ($ny >= $this->size)
-                  || isset($index[$nx][$ny]) )
+            if( ( $nx < 0 ) || ($nx >= $this->size) || ($ny < 0) || ($ny >= $this->size) || isset($index[$nx][$ny]) )
                continue;
 
             $new_color = @$this->array[$nx][$ny];
@@ -1002,14 +1000,19 @@ class Board
                   $c = NONE; // This area will become dame
                else if( $c == -1 )
                   $c = $new_color;
-               else if( $c == (WHITE+BLACK-$new_color) )
+               else if( $c == (WHITE + BLACK - $new_color) )
                   $c = NONE; // This area has both colors as boundary
             }
          }
       }
    } //mark_territory
 
-   function fill_game_score( &$game_score )
+   /*!
+    * \brief Calculates game-score-data.
+    * \return if $with_coords is false, return null; otherwise returns
+    *         [ territory-array, prisoners-array ] with [ coords => SGF-prop, ...] for SGF-download
+    */
+   function fill_game_score( &$game_score, $with_coords=false )
    {
       // mark territory
       for( $x=0; $x<$this->size; $x++)
@@ -1028,6 +1031,9 @@ class Board
          WHITE => 0, WHITE_DEAD => 0, WHITE_TERRITORY => 0,
       );
 
+      $territory = array();
+      $prisoners = array();
+
       for( $x=0; $x<$this->size; $x++)
       {
          for( $y=0; $y<$this->size; $y++)
@@ -1036,6 +1042,25 @@ class Board
             $mark = ( @$this->array[$x][$y] & ~FLAG_NOCLICK );
             if( isset($counts[$mark]) )
                $counts[$mark]++;
+
+            if( $with_coords )
+            {
+               $coord = chr($x + ord('a')) . chr($y + ord('a'));
+               switch( (int)$mark )
+               {
+                  case WHITE_DEAD:
+                     $prisoners[$coord] = 'AE';
+                  case BLACK_TERRITORY:
+                     $territory[$coord] = 'TB';
+                     break;
+
+                  case BLACK_DEAD:
+                     $prisoners[$coord] = 'AE';
+                  case WHITE_TERRITORY:
+                     $territory[$coord] = 'TW';
+                     break;
+               }
+            }
          }
       }
 
@@ -1045,6 +1070,8 @@ class Board
       $game_score->set_territory_all( $counts[BLACK_TERRITORY], $counts[WHITE_TERRITORY] );
       $game_score->set_dame( $counts[DAME] );
       //error_log($game_score->to_string());
+
+      return ( $with_coords ) ? array( $territory, $prisoners ) : null;
    } //fill_game_score
 
 

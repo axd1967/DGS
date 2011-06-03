@@ -194,7 +194,7 @@ class GameScore
    /*!
     * \brief Calculating score for given mode (territory or area scoring).
     * \param $mode null (use mode from constructing this object) or GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING
-    * \param $fill_scoring_info fill scoring-info map if true
+    * \param $fill_scoring_info fill scoring-info map if not-false, 'sgf' for sgf-text scoring-info
     * \return overall score (=score-white - score-black), also set in $this->score
     * NOTE: for format of scoring-info map see code and game.php#draw_score_box()
     */
@@ -212,10 +212,10 @@ class GameScore
          $handi_diff = $this->handicap;
          $score_black = $this->territory[GSCOL_BLACK]
                         + $this->prisoners[GSCOL_BLACK]
-                        - 2 * $this->dead_stones[GSCOL_BLACK];
+                        + 2 * $this->dead_stones[GSCOL_WHITE];
          $score_white = $this->territory[GSCOL_WHITE]
                         + $this->prisoners[GSCOL_WHITE]
-                        - 2 * $this->dead_stones[GSCOL_WHITE]
+                        + 2 * $this->dead_stones[GSCOL_BLACK]
                         + $this->komi;
       }
       else //if( $mode == GSMODE_AREA_SCORING )
@@ -236,6 +236,8 @@ class GameScore
 
       if( $fill_scoring_info )
       {
+         $fill_sgf = ( $fill_scoring_info == 'sgf' );
+
          $map = array(
             'mode_text' => $this->getModeText($mode),
             'mode'  => $mode,
@@ -244,18 +246,48 @@ class GameScore
          );
          $isArea = ( $mode == GSMODE_AREA_SCORING );
 
+         $arr_sgf = array(); // keep texts in english
+         if( $fill_sgf && $isArea )
+            $arr_sgf['Dame'] = ($this->dame == 1) ? '1 stone' : "{$this->dame} stones";
+
+         $fmt_dead = ($isArea) ? '' : '2*';
          foreach( array( GSCOL_BLACK, GSCOL_WHITE ) as $gscol )
          {
-            $gscol_rev = ( $gscol == GSCOL_BLACK ) ? GSCOL_WHITE : GSCOL_BLACK;
+            $gscol_opp = ( $gscol == GSCOL_BLACK ) ? GSCOL_WHITE : GSCOL_BLACK;
             $arr = array(
                'stones'      => sprintf( ( $isArea ? '+%s' : '(%s)' ), $this->stones[$gscol] ),
-               'dead_stones' => ( $isArea )
-                  ? sprintf( '(%s)<br>+%s', $this->dead_stones[$gscol], $this->dead_stones[$gscol_rev] )
-                  : sprintf( '-2*%s', $this->dead_stones[$gscol] ),
+               'dead_stones' => sprintf( "(%s)<br>+{$fmt_dead}%s", $this->dead_stones[$gscol], $this->dead_stones[$gscol_opp] ),
                'prisoners'   => sprintf( ( $isArea ? '(%s)' : '+%s' ), $this->prisoners[$gscol] ),
                'territory'   => sprintf( '+%s', $this->territory[$gscol] ),
             );
             $map[$gscol] = $arr;
+
+            if( $fill_sgf )
+            {
+               $sgf_text = sprintf("%d territories + {$fmt_dead}%d dead %s(%s)",
+                  $this->territory[$gscol],
+                  $this->dead_stones[$gscol_opp], ($this->dead_stones[$gscol_opp] == 1 ? 'stone' : 'stones'),
+                     ($gscol_opp == GSCOL_BLACK ? 'B' : 'W') );
+               $sgf_komi = ( $gscol == GSCOL_WHITE )
+                  ? sprintf( ' %s %s komi', ($this->komi < 0.0 ? '-' : '+'), abs($this->komi) )
+                  : '';
+               if( $isArea )
+               {
+                  $sgf_text .= sprintf(' + %d %s(%s)%s', $this->stones[$gscol],
+                     ($this->stones[$gscol] == 1 ? 'stone' : 'stones'), ($gscol == GSCOL_BLACK ? 'B' : 'W'),
+                     ( $gscol == GSCOL_WHITE
+                        ? $sgf_komi
+                        : sprintf( ' - %d handicap %s', $handi_diff, ($handi_diff == 1 ? 'stone' : 'stones') ) ) );
+               }
+               else
+               {
+                  $sgf_text .= sprintf(' + %d %s%s',
+                     $this->prisoners[$gscol], ($this->prisoners[$gscol] == 1 ? 'prisoner' : 'prisoners'),
+                     $sgf_komi );
+               }
+               $sgf_text .= sprintf(' = %s', ($gscol == GSCOL_BLACK ? $score_black : $score_white) );
+               $arr_sgf[($gscol == GSCOL_WHITE ? 'White' : 'Black')] = $sgf_text;
+            }//sgf
          }
 
          $map['skip_dame'] = $map['skip_stones'] = !$isArea;
@@ -273,11 +305,13 @@ class GameScore
          $map[GSCOL_BLACK]['score'] = $score_black;
          $map[GSCOL_WHITE]['score'] = $score_white;
 
+         $map['sgf_texts'] = $arr_sgf;
+
          $this->scoring_info = $map;
       }
 
       return $this->score;
-   }
+   }//calculate_score
 
    /*! \brief Recalculates score if given mode different from mode of this object. */
    function recalculate_score( $mode, $fill_scoring_info=true )

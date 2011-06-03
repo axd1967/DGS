@@ -23,6 +23,7 @@ require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
+require_once 'include/board.php';
 
 
 /* SGF specs (version 4):
@@ -154,8 +155,6 @@ class SgfBuilder
    var $next_color;
 
    var $prop_type;
-   var $dirx;
-   var $diry;
 
    var $use_buffer; // bool
    var $SGF; // output-buffer
@@ -208,10 +207,6 @@ class SgfBuilder
       $this->next_color = 'B';
 
       $this->prop_type = 'root';
-
-      // {--- from old board.php (before board class)
-      $this->dirx = array( -1,0,1,0 );
-      $this->diry = array( 0,-1,0,1 );
 
       $this->use_buffer = $use_buffer;
       $this->SGF = '';
@@ -297,122 +292,6 @@ class SgfBuilder
 
       return true;
    }
-
-   // note: from old board.php (before board class), incl. dirx/diry-arr
-   function mark_territory( $x, $y, $size, &$array )
-   {
-      $c = -1;  // color of territory
-
-      $index[$x][$y] = 7;
-      $point_count = 1; //for the current point (theoricaly NONE)
-
-      while( true )
-      {
-         if( $index[$x][$y] >= 32 )  // Have looked in all directions
-         {
-            $m = $index[$x][$y] % 8;
-
-            if( $m == 7 )   // At starting point, all checked
-            {
-               if( $c == -1 )
-                  $c = DAME ;
-               else
-                  $c |= OFFSET_TERRITORY ;
-
-               if( $c == DAME || $point_count > MAX_SEKI_MARK )
-                  $c |= FLAG_NOCLICK ;
-
-               while( list($x, $sub) = each($index) )
-               {
-                  while( list($y, $val) = each($sub) )
-                  {
-                     //keep all marks unchanged and reversible
-                     if( @$array[$x][$y] < MARKED_DAME )
-                        $array[$x][$y] = $c;
-                  }
-               }
-
-               return $point_count;
-            }
-
-            $x -= $this->dirx[$m];  // Go back
-            $y -= $this->diry[$m];
-         }
-         else
-         {
-            $dir = (int)($index[$x][$y] / 8);
-            $index[$x][$y] += 8;
-
-            $nx = $x + $this->dirx[$dir];
-            $ny = $y + $this->diry[$dir];
-
-            if( ( $nx < 0 ) || ($nx >= $size) || ($ny < 0) || ($ny >= $size) || isset($index[$nx][$ny]) )
-               continue;
-
-            $new_color = @$array[$nx][$ny];
-
-            if( !$new_color || $new_color == NONE || $new_color >= BLACK_DEAD )
-            {
-               $x = $nx;  // Go to the neighbour
-               $y = $ny;
-               $index[$x][$y] = $dir;
-               $point_count++;
-            }
-            else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
-            {
-               if( $new_color == MARKED_DAME )
-                  $c = NONE; // This area will become dame
-               else if( $c == -1 )
-                  $c = $new_color;
-               else if( $c == (WHITE+BLACK-$new_color) )
-                  $c = NONE; // This area has both colors as boundary
-            }
-         }
-      }
-   }//mark_territory
-
-
-   function sgf_create_territories( $size, &$array,
-         &$black_territory, &$white_territory, &$black_prisoner, &$white_prisoner )
-   {
-      // mark territories
-
-      for( $x=0; $x<$size; $x++)
-      {
-         for( $y=0; $y<$size; $y++)
-         {
-            if( !@$array[$x][$y] || $array[$x][$y] == NONE )
-            {
-               $this->mark_territory( $x, $y, $size, $array );
-            }
-         }
-      }
-
-      // split
-
-      for( $x=0; $x<$size; $x++)
-      {
-         for( $y=0; $y<$size; $y++)
-         {
-            $coord = chr($x + ord('a')) . chr($y + ord('a'));
-            switch( (int)( @$array[$x][$y] & ~FLAG_NOCLICK) )
-            {
-               case WHITE_DEAD:
-                  $black_prisoner[$coord]='AE';
-               case BLACK_TERRITORY:
-                  $black_territory[$coord]='TB';
-                  break;
-
-               case BLACK_DEAD:
-                  $white_prisoner[$coord]='AE';
-               case WHITE_TERRITORY:
-                  $white_territory[$coord]='TW';
-                  break;
-            }
-         }
-      }
-   }//sgf_create_territories
-
 
 
    function load_game_info()
@@ -692,6 +571,7 @@ class SgfBuilder
       }
    }//build_sgf_start
 
+   // see also load_from_db()-func in 'include/board.php'
    function build_sgf_moves( $owned_comments )
    {
       extract($this->game_row);
@@ -729,22 +609,17 @@ class SgfBuilder
                   @$this->array[$PosX][$PosY] ^= OFFSET_MARKED;
 
                if( isset($this->points[$coord]) )
-               {
                   unset($this->points[$coord]);
-               }
                elseif( $this->sgf_trim_nr < 0 )
                {
-                  if( @$this->array[$PosX][$PosY] == MARKED_DAME )
-                     $this->points[$coord] = $marked_dame_prop;
-                  else
-                     $this->points[$coord] = $this->dead_stone_prop;
+                  $this->points[$coord] = ( @$this->array[$PosX][$PosY] == MARKED_DAME )
+                     ? $marked_dame_prop
+                     : $this->dead_stone_prop;
                }
                else
                {
-                  if( @$this->array[$PosX][$PosY] == NONE )
-                     $this->points[$coord] = 'MA';
-                  else
-                     $this->points[$coord] = 'MA';
+                  //if( @$this->array[$PosX][$PosY] == NONE )
+                  $this->points[$coord] = 'MA';
                }
 
                break;
@@ -752,7 +627,7 @@ class SgfBuilder
 
             case NONE:
             { //+prisoners
-               $this->array[$PosX][$PosY] = $Stone;
+               $this->array[$PosX][$PosY] = NONE;
                break;
             }
 
@@ -918,61 +793,49 @@ class SgfBuilder
 
    function build_sgf_result()
    {
-      if( $this->game_row['Status'] == GAME_STATUS_FINISHED )
+      if( $this->game_row['Status'] != GAME_STATUS_FINISHED )
+         return;
+
+      $this->echo_sgf( "\n;" ); // Node start
+      $this->sgf_echo_prop($this->next_color);
+      $this->echo_sgf( "[]" ); // add 3rd pass
+
+      if( $this->include_node_name )
+         $this->echo_sgf( "N[RESULT]" ); //Node start
+      $this->prop_type = '';
+
+      // highlighting result in last comments:
+      if( !isset($this->game_row['Score']) )
+         return;
+
+      $score = $this->game_row['Score'];
+      $this->node_com .= "\n";
+
+      if( abs($score) < SCORE_RESIGN ) // scor-able
       {
-         $this->echo_sgf( "\n;" ); // Node start
-         $this->sgf_echo_prop($this->next_color);
-         $this->echo_sgf( "[]" ); // add 3rd pass
+         $scoring_mode = getRulesetScoring( $this->game_row['Ruleset'] );
+         $game_score = new GameScore( $scoring_mode, $this->game_row['Handicap'], $this->game_row['Komi'] );
+         $game_score->set_prisoners_all( $this->game_row['Black_Prisoners'], $this->game_row['White_Prisoners'] );
 
-         if( $this->include_node_name )
-            $this->echo_sgf( "N[RESULT]" ); //Node start
-         $this->prop_type = '';
+         $board = new Board( $this->gid, $this->game_row['Size'], $this->game_row['Moves'] );
+         $board->array = $this->array;
+         list( $arr_territory, $arr_prisoners ) = $board->fill_game_score( $game_score, /*with-coords*/true );
 
-         // highlighting result in last comments:
-         if( isset($this->game_row['Score']) )
-         {
-            $score = $this->game_row['Score'];
+         //Last dead stones mark
+         if( $this->dead_stone_prop )
+            $this->sgf_echo_point( $arr_prisoners, $this->dead_stone_prop );
 
-            $this->node_com .= "\n";
+         //$points from last skipped SCORE/SCORE2 marked points
+         $this->sgf_echo_point( array_merge( $this->points, $arr_territory ) );
 
-            if( abs($score) < SCORE_RESIGN ) // scor-able
-            {
-               $black_territory = array();
-               $white_territory = array();
-               $black_prisoner = array();
-               $white_prisoner = array();
-               $this->sgf_create_territories( $this->game_row['Size'], $this->array,
-                  $black_territory, $white_territory,
-                  $black_prisoner, $white_prisoner);
-
-               //Last dead stones mark
-               if( $this->dead_stone_prop )
-                  $this->sgf_echo_point( array_merge( $black_prisoner, $white_prisoner ), $this->dead_stone_prop );
-
-               //$points from last skipped SCORE/SCORE2 marked points
-               $this->sgf_echo_point( array_merge( $this->points, $black_territory, $white_territory ) );
-
-               $this->node_com .= "\n" .
-                  SgfBuilder::sgf_count_string( "White"
-                     ,count($white_territory)
-                     ,$this->game_row['White_Prisoners'] + count($white_prisoner)
-                     ,$this->game_row['Komi']
-                  );
-
-               $this->node_com .= "\n" .
-                  SgfBuilder::sgf_count_string( "Black"
-                     ,count($black_territory)
-                     ,$this->game_row['Black_Prisoners'] + count($black_prisoner)
-                  );
-
-               //$this->node_com .= "\n";
-            }
-
-            $this->node_com .= "\nResult: " . score2text($score, false, true);
-            if( $this->game_row['X_Flags'] & GAMEFLAGS_ADMIN_RESULT )
-               $this->node_com .= " (set by admin)";
-         }
+         $game_score->calculate_score( null, 'sgf' );
+         foreach( array_reverse($game_score->scoring_info['sgf_texts']) as $key => $info )
+            $this->node_com .= "\n$key: $info";
       }
+
+      $this->node_com .= "\nResult: " . score2text($score, false, true);
+      if( $this->game_row['X_Flags'] & GAMEFLAGS_ADMIN_RESULT )
+         $this->node_com .= " (set by admin)";
    }//build_sgf_result
 
    function build_sgf_end( $owned_comments )
@@ -1021,31 +884,6 @@ class SgfBuilder
    function switch_move_color( $color )
    {
       return ($color == 'B') ? 'W' : 'B';
-   }
-
-   /* Example:
-    * > White: 66 territory + 6 prisoners + 0.5 komi = 72.5
-    * > Black: 64 territory + 1 prisoner = 65
-    */
-   function sgf_count_string( $color, $territory, $prisoner, $komi=false )
-   {
-      $score = 0;
-      $str = "$color:";
-
-      $str .= " $territory territor" . ($territory > 1 ? "ies" : "y") ;
-      $score += $territory;
-
-      $str .= " + $prisoner prisoner" . ($prisoner > 1 ? "s" : "") ;
-      $score += $prisoner;
-
-      if( is_numeric($komi) )
-      {
-         $str .= " + $komi komi" ;
-         $score += $komi;
-      }
-
-      $str .= " = $score";
-      return $str;
    }
 
    function sgf_echo_rating( $rating, $show_percent=false )
