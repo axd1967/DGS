@@ -246,7 +246,8 @@ function get_alt_arg( $n1, $n2)
       {
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
-            $game_score = check_remove( $TheBoard, $score_mode, $coord); //adjusted globals: $stonestring
+            $score_board = clone $TheBoard;
+            $game_score = check_remove( $score_board, $score_mode, $coord); //adjusted globals: $stonestring
             $game_score->calculate_score();
          }
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
