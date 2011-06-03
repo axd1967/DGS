@@ -37,18 +37,18 @@ ALTER TABLE Bio
 ALTER TABLE Bio
    ADD INDEX uid (uid,SortOrder) ;
 
+-- [index] add Errorlog-indexes to be able to search for errors
+-- [index] IDX Errorlog.Date
+ALTER TABLE Errorlog
+   ADD INDEX Date (Date) ;
+-- [data] cleanup Errorlog (delete old portion of data, e.g. keep 6 months)
+DELETE FROM Errorlog WHERE Date < NOW() - INTERVAL 180 DAY ;
 -- [field-size] COL Errorlog.Message : text -> varchar(32)
 ALTER TABLE Errorlog
    MODIFY Message varchar(32) NOT NULL ;
--- [index] add Errorlog-indexes to be able to search for errors
 -- [index] IDX Errorlog.Message -> prefix-index Message(8)
--- [index] IDX Errorlog.Date
 ALTER TABLE Errorlog
-   ADD INDEX Message (Message(8)),
-   ADD INDEX Date (Date) ;
-
--- [data] cleanup Errorlog (delete old portion of data, e.g. keep 6 months)
-DELETE FROM Errorlog WHERE Date < NOW() - INTERVAL 180 DAY ;
+   ADD INDEX Message (Message(8)) ;
 
 -- [index] IDX Forumlog.Action -> prefix-index Action(4) for searches
 ALTER TABLE Forumlog
@@ -78,9 +78,9 @@ ALTER TABLE MessageCorrespondents
 ALTER TABLE MessageCorrespondents
    ADD INDEX Folder_nr (Folder_nr) ;
 
--- [index] fix wrong Moves-index 'gid(gid,ID)' (part 1)
-ALTER TABLE Moves
-   DROP INDEX gid ;
+
+-- refactor Moves-table without ALTER-table in multiple steps, because table is so large:
+-- [index] fix wrong Moves-index 'gid(gid,ID)' -> 'gid(gid,MoveNr)' (part 1)
 -- [field-size] COL Moves.Stone : smallint -> tinyint unsigned
 -- [field-size] COL Moves.PosX : smallint -> tinyint signed
 -- [field-size] COL Moves.PosY : smallint -> tinyint signed
@@ -89,16 +89,34 @@ ALTER TABLE Moves
 -- [not-null] Moves.PosY smallint(6) default NULL -> no default -> NOT NULL [ok]
 -- [not-null] Moves.Hours smallint(5) unsigned default NULL -> default 0 -> NOT NULL [ok]
 -- [no-def] Moves.gid int(11) NOT NULL default '0' -> no default [ok]
-ALTER TABLE Moves
-   MODIFY MoveNr smallint unsigned NOT NULL,
-   MODIFY Stone tinyint unsigned NOT NULL default '0',
-   MODIFY PosX tinyint NOT NULL,
-   MODIFY PosY tinyint NOT NULL,
-   MODIFY Hours smallint unsigned NOT NULL,
-   MODIFY gid int NOT NULL ;
--- [index] fix wrong Moves-index 'gid(gid,ID)' (part 2)
-ALTER TABLE Moves
+
+-- Create new Moves-table (part 1/5)
+CREATE TABLE MovesNew (
+   ID int NOT NULL auto_increment,
+   gid int NOT NULL,
+   MoveNr smallint unsigned NOT NULL,
+   Stone tinyint unsigned NOT NULL default '0',
+   PosX tinyint NOT NULL,
+   PosY tinyint NOT NULL,
+   Hours smallint unsigned NOT NULL
+) ENGINE=MyISAM ;
+
+-- Copy all data into new structure of Moves-table (part 2/5)
+INSERT INTO MovesNew (ID,gid,MoveNr,Stone,PosX,PosY,Hours)
+    SELECT ID,gid,MoveNr,Stone,PosX,PosY,Hours FROM Moves ;
+
+-- Create indexes for new Moves-table (part 3/5)
+ALTER TABLE MovesNew
+   ADD PRIMARY KEY (ID),
    ADD INDEX gid (gid,MoveNr) ;
+
+-- Replace old with new Moves-table (part 4/5)
+RENAME TABLE Moves TO MovesOld ;
+RENAME TABLE MovesNew TO Moves ;
+
+-- Delete old Moves-table (part 5/5) - after size checks
+-- SHOW TABLE STATUS LIKE 'Moves%' ;
+-- DROP TABLE MovesOld ;
 
 -- [index] IDX Ratinglog.gid -> replace index 'gid(gid,uid)' with gid only
 ALTER TABLE Ratinglog
@@ -107,8 +125,7 @@ ALTER TABLE Ratinglog
    ADD INDEX gid (gid);
 
 
-
-###  ------ Cleanup unused tables of DGS-servers ------------------------------------
+###  ------ Cleanup unused tables/fields of DGS-servers -----------------------------
 
 -- [unused] cleanup Messages-table (fields not longer used and not referenced) -> CLEANUP
 -- [unused] remove unused COL Messages.To_ID
