@@ -293,7 +293,9 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
    {
-      $vals = array_value_to_key_and_value( range(1, NEWGAME_MAX_GAMES) );
+      $maxGamesCheck = new MaxGamesCheck();
+      $max_games = $maxGamesCheck->get_allowed_games(NEWGAME_MAX_GAMES);
+      $vals = array_value_to_key_and_value( range(1, $max_games) );
       $mform->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
                               'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
       $mform->add_row( array( 'SPACE' ) );
@@ -921,7 +923,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( $tablestyle == GSET_WAITINGROOM ) // Restrictions
    {
       $ratinglimit_str = echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
-         $MinRatedGames, null, null, true);
+         $MinRatedGames, null, null, null, true);
       if( $ratinglimit_str != NO_VALUE )
          $itable->add_sinfo(
             T_('Rating restrictions'), $ratinglimit_str,
@@ -1060,11 +1062,12 @@ function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $pr
 /*!
  * \brief Returns restrictions on rating-range, rated-finished-games, acceptance-mode-same-opponent,
  *        contact-hidden option.
+ * \param $OppGoodMaxGames ignore if null
  * \param $SameOpponent ignore if null
  * \param $Hidden ignore if null
  */
 function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames,
-                                $SameOpponent=null, $Hidden=null, $short=false )
+      $OppGoodMaxGames=null, $SameOpponent=null, $Hidden=null, $short=false )
 {
    $out = array();
 
@@ -1085,6 +1088,9 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
       $rg_str = ($short) ? T_('Rated Games[%s]#short') : T_('Rated finished Games[&gt;=%s]');
       $out[] = sprintf( $rg_str, $MinRatedGames );
    }
+
+   if( !is_null($OppGoodMaxGames) && !$OppGoodMaxGames )
+      $out[] = 'MXG';
 
    if( !is_null($SameOpponent) )
    {
@@ -1576,6 +1582,7 @@ class DgsMessage
          : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE );
       $result = db_query( "DgsMessage::load_message_receivers.find($my_id,$type,$invitation_step)",
             "SELECT P.ID, P.Handle, P.Name, P.ClockUsed, P.OnVacation, P.Rating2, P.RatingStatus, " .
+               "(P.Running + P.GamesMPG) AS X_OppGamesCount, " .
                "IF(ISNULL(C.uid),0,C.SystemFlags & $ctmp) AS C_denied " .
             "FROM Players AS P " .
                "LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id " .

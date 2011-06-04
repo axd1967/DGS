@@ -43,8 +43,14 @@ require_once( "include/contacts.php" );
    if( !is_numeric($wr_id) || $wr_id <= 0 )
       error('waitingroom_game_not_found', "join_waitingroom_game.bad_id($wr_id)");
 
+   $maxGamesCheck = new MaxGamesCheck();
+   if( !$maxGamesCheck->allow_game_start() )
+      error('max_games', "join_waitingroom_game.max_games($wr_id,{$maxGamesCheck->count_games})");
+
    $my_rated_games = (int)$player_row['RatedGames'];
    $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
+   $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
+      ? "IF(P.Running + P.GamesMPG < ".MAX_GAMESRUN.",1,0)" : 1;
    $query= "SELECT W.*"
          . ',IF(ISNULL(C.uid),0,C.SystemFlags & '.CSYSFLAG_WAITINGROOM.') AS C_denied'
          . ',IF(ISNULL(WRJ.opp_id),0,1) AS X_wrj_exists'
@@ -54,9 +60,12 @@ require_once( "include/contacts.php" );
                . '(WRJ.JoinedCount < -W.SameOpponent), '
                . "(WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) )) AS goodsameopp"
          . ",$sql_goodmingames AS goodmingames"
+         . ",$sql_goodmaxgames AS goodmaxgames"
+         . ",(P.Running + P.GamesMPG) AS X_OppGamesCount"
          . " FROM Waitingroom AS W"
-         . " LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id"
-         . " LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID"
+            . " LEFT JOIN Players AS P ON P.ID=W.uid"
+            . " LEFT JOIN Contacts AS C ON C.uid=W.uid AND C.cid=$my_id"
+            . " LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID"
          . " WHERE W.ID=$wr_id AND W.nrGames>0"
          . " HAVING C_denied=0"
          ;
@@ -110,6 +119,9 @@ require_once( "include/contacts.php" );
    if( !$game_row['goodmingames'] )
       error('waitingroom_not_enough_rated_fin_games',
          "join_waitingroom_game.min_rated_fin_games($gid,$my_id,{$game_row['MinRatedGames']})");
+
+   if( !$game_row['goodmaxgames'] )
+      error('max_games_opp', "join_waitingroom_game.opp_max_games($gid,$my_id,{$game_row['X_OppGamesCount']})");
 
    if( !$game_row['goodsameopp'] )
       error('waitingroom_not_same_opponent',

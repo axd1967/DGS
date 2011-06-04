@@ -23,9 +23,10 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'include/game_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/error_codes.php' );
-require_once( 'include/db/bulletin..php' );
+require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
@@ -161,6 +162,19 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    list( $reg_errors, $reg_warnings ) = ( !is_null($tprops) )
       ? $tprops->checkUserRegistration($tourney, $tp->hasRating(), $user, TCHKTYPE_TD)
       : array( array(), array() );
+
+   // check user max-games
+   if( !is_null($user) )
+   {
+      $userMaxGamesCheck = new MaxGamesCheck( $user->urow );
+      if( !$rid && !$userMaxGamesCheck->allow_tournament_registration() )
+      {
+         if( $is_admin )
+            $reg_warnings[] = ErrorCode::get_error_text('max_games_user_tourney_reg');
+         else
+            $errors[] = ErrorCode::get_error_text('max_games_user_tourney_reg');
+      }
+   }
 
    list( $lock_errors, $lock_warnings ) = $tourney->checkRegistrationLocks(TCHKTYPE_TD);
    if( count($lock_errors) )

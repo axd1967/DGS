@@ -23,6 +23,7 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
+require_once( 'include/game_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
@@ -114,10 +115,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $old_start_round = $tp->StartRound;
 
    // check + parse edit-form
-   $reg_check_type = ( $rid ? TCHKTYPE_USER_EDIT : TCHKTYPE_USER_NEW );
+   $reg_check_type = ( $rid ) ? TCHKTYPE_USER_EDIT : TCHKTYPE_USER_NEW;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
    list( $reg_errors, $reg_warnings ) =
       $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id, $reg_check_type );
+
+   // check own max-games
+   $maxGamesCheck = new MaxGamesCheck();
+   if( !$rid && !$maxGamesCheck->allow_tournament_registration() )
+      $errors[] = ErrorCode::get_error_text('max_games_tourney_reg');
 
    $need_apply_status = false;
    if( $tp->StartRound > 1 && $tp->StartRound != $old_start_round )
@@ -392,6 +398,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $title = sprintf( T_('Tournament Registration for [%s]'), $tourney->Title );
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
+   echo $maxGamesCheck->get_warn_text();
 
    $tpform->echo_string();
 

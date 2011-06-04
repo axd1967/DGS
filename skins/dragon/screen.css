@@ -292,6 +292,7 @@ span.FormWarning {
    color: darkred;
 }
 
+span.ErrMsgMaxGames,
 span.MPGWarning {
    font-weight: bold;
    color: darkred;
@@ -1399,6 +1400,10 @@ table#UserInfo td.UserInfo {
 
 span.Suggestion {
    font-size: 80%;
+}
+
+span.InviteMsgInfo {
+   color: green;
 }
 
 table.MessageInfos {

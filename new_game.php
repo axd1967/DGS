@@ -53,7 +53,14 @@ require_once( 'include/utilities.php' );
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>", sprintf( "%s (%s)", $title, get_gamesettings_viewmode($viewmode) ), "</h3>\n";
 
-   add_new_game_form( 'addgame', $viewmode, $iamrated); //==> ID='addgameForm'
+   $maxGamesCheck = new MaxGamesCheck();
+   if( $maxGamesCheck->allow_game_start() )
+   {
+      echo $maxGamesCheck->get_warn_text();
+      add_new_game_form( 'addgame', $viewmode, $iamrated); //==> ID='addgameForm'
+   }
+   else
+      echo $maxGamesCheck->get_error_text();
 
 
    $menu_array = array();

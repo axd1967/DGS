@@ -146,6 +146,15 @@ define('ACCKEYP_GAME_COMMENT',   '');
 // Allow JavaScript for some convenience-functionality
 define('ALLOW_JAVASCRIPT', true);
 
+// Max. number of running games with 75%-threshold for warning
+// - starting games in joined tourneys can cross this limit for player
+// - set 0 for unlimited
+define('MAX_GAMESRUN', 200);
+
+// Number of running games to accept tourney-registration
+// - must be <= MAX_GAMESRUN, no effect if MAX_GAMESRUN=0 or ALLOW_TOURNAMENTS=false
+define('MAX_GAMESRUN_TREG', 150);
+
 // Allow usage of tournaments
 define('ALLOW_TOURNAMENTS', true);
 define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.

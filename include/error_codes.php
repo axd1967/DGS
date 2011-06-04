@@ -102,6 +102,7 @@ class ErrorCode
          $arr_logid['ip_blocked_guest_login'] = 1;
          $arr_logid['ip_blocked_register'] = 1;
          $arr_logid['mail_failure'] = 1;
+         $arr_logid['max_games'] = 1;
          $arr_logid['move_problem'] = 1;
          $arr_logid['mysql_connect_failed'] = 1;
          $arr_logid['mysql_insert_game'] = 1;
@@ -176,6 +177,18 @@ class ErrorCode
 
          $arr['game_delete_invitation'] =
             T_("Delete game failed. This is problably not a problem.");
+
+         $arr['max_games'] =
+            T_("Sorry, your limit on started games has exceeded.");
+
+         $arr['max_games_opp'] =
+            T_("Sorry, the limit of your opponent on started games has exceeded.");
+
+         $arr['max_games_tourney_reg'] =
+            T_("Sorry, your limit on started games for tournament registration has exceeded.");
+
+         $arr['max_games_user_tourney_reg'] =
+            T_("The users limit on started games for tournament registration has exceeded.");
 
          $arr['ko'] =
             T_("Sorry, you may not retake a stone which has just captured a stone, " .

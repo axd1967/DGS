@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once( "include/std_functions.php" );
 require_once( 'include/time_functions.php' );
 require_once( "include/message_functions.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/utilities.php' );
 
@@ -127,9 +128,13 @@ require_once( 'include/utilities.php' );
       error('invalid_args', "add_to_waitingroom.check.game_players.viewmode($viewmode,$game_players)");
 
 
+   $maxGamesCheck = new MaxGamesCheck();
+   $max_games = $maxGamesCheck->get_allowed_games(NEWGAME_MAX_GAMES);
    $nrGames = max( 1, (int)@$_POST['nrGames']);
    if( $nrGames > NEWGAME_MAX_GAMES )
       error('invalid_args', "add_to_waitingroom.check.nr_games($nrGames)");
+   elseif( $nrGames > $max_games )
+      error('max_games', "add_to_waitingroom.check.max_games.nr_games($nrGames,$max_games)");
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_POST['size']));
 

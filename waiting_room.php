@@ -203,11 +203,15 @@ require_once( 'include/classlib_userconfig.php' );
    }
    $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
 
+   $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
+      ? "IF(W.uid=$my_id OR (Players.Running + Players.GamesMPG < ".MAX_GAMESRUN."),1,0)" : 1;
+
    $qsql->add_part( SQLP_FIELDS,
       "$calculated AS calculated",
       "$haverating AS haverating",
       "$goodrating AS goodrating",
       "$sql_goodmingames AS goodmingames",
+      "$sql_goodmaxgames AS goodmaxgames",
       'IF(W.SameOpponent=0 OR ISNULL(WRJ.wroom_id), 1, '
          . 'IF(W.SameOpponent<0, '
             . '(WRJ.JoinedCount < -W.SameOpponent), '
@@ -217,6 +221,8 @@ require_once( 'include/classlib_userconfig.php' );
       'Waitingroom AS W',
       'INNER JOIN Players ON W.uid=Players.ID',
       "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID" );
+   if( $suitable && MaxGamesCheck::is_limited() )
+      $qsql->add_part( SQLP_HAVING, 'goodmaxgames' );
 
    // Contacts: make the protected waitingroom games invisible
    $qsql->add_part( SQLP_FIELDS,
@@ -255,13 +261,18 @@ require_once( 'include/classlib_userconfig.php' );
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
 
+   $maxGamesCheck = new MaxGamesCheck();
+   if( !$idinfo )
+      echo $maxGamesCheck->get_warn_text();
+
    $info_row = NULL;
    if( $show_rows > 0 || $wrfilter->has_query() )
    {
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $other_rating = NULL;
-         extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodsameopp
+         extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp
+
          $is_my_game = ( $uid == $player_row['ID'] );
          $mp_player_count = ($GameType == GAMETYPE_GO)
             ? 0
@@ -328,8 +339,8 @@ require_once( 'include/classlib_userconfig.php' );
          {
             $wrow_strings[ 8] = array( 'text' =>
                echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
-                  $MinRatedGames, $SameOpponent, (!$suitable && @$CH_hidden), true) );
-            if( !$goodrating || !$goodmingames || !$goodsameopp || @$CH_hidden )
+                  $MinRatedGames, $goodmaxgames, $SameOpponent, (!$suitable && @$CH_hidden), true) );
+            if( !$goodrating || !$goodmingames || !$goodmaxgames || !$goodsameopp || @$CH_hidden )
                $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
@@ -381,12 +392,14 @@ require_once( 'include/classlib_userconfig.php' );
       // print table
       echo $wrtable->make_table();
 
-      if( !( $idinfo && is_array($info_row) ))
+      $show_info = ( $idinfo && is_array($info_row) );
+      if( !$show_info )
       {
          $restrictions = array(
                T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
                T_('Rating range (user rating must be between the requested rating range), e.g. "25k-2d"#wroom'),
                T_('Number of rated finished games, e.g. "RG[2]"#wroom'),
+               T_('Max. number of opponents started games must not exceed limits, e.g. "MXG"#wroom'),
                T_('Acceptance mode for challenges from same opponent, e.g. "SO[1x]" or "SO[&gt;7d]"#wroom'),
                sprintf( T_('Contact-option \'Hide waiting room games\', marked by "%s"'),
                         sprintf('[%s]', T_('Hidden#wroom')) ),
@@ -404,7 +417,7 @@ require_once( 'include/classlib_userconfig.php' );
    mysql_free_result($result);
 
 
-   if( $idinfo && is_array($info_row) )
+   if( $show_info )
       add_old_game_form( 'joingame', $info_row, $iamrated);
 
 
@@ -419,17 +432,21 @@ require_once( 'include/classlib_userconfig.php' );
 
 function add_old_game_form( $form_id, $game_row, $iamrated)
 {
+   global $player_row, $maxGamesCheck;
+
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 
-   global $player_row;
    game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated);
 
    $is_my_game = ($game_row['other_id'] == $player_row['ID']);
    $gid = (int)$game_row['gid'];
+
    if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
-      $can_join = !GamePlayer::exists_game_player( $gid, (int)$player_row['ID'] );
+      $can_join_mpg = !GamePlayer::exists_game_player( $gid, (int)$player_row['ID'] );
    else
-      $can_join = true;
+      $can_join_mpg = true;
+   $can_join_maxg = $maxGamesCheck->allow_game_start(); //own MAX-games
+   $can_join = $can_join_mpg && $can_join_maxg;
 
    $game_form->add_hidden( 'id', $game_row['ID'] ); // wroom-id
    if( $is_my_game )
@@ -440,7 +457,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
          ));
    }
    else if( $can_join && $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames']
-         && $game_row['goodsameopp'] )
+            && $game_row['goodmaxgames'] && $game_row['goodsameopp'] )
    {
       $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
@@ -448,8 +465,19 @@ function add_old_game_form( $form_id, $game_row, $iamrated)
    }
 
    $game_form->echo_string(1);
-   if( !$is_my_game && !$can_join )
-      echo span('MPGWarning', T_('Already invited to or joined this multi-player-game!'));
+   if( !$is_my_game )
+   {
+      echo "<br>\n";
+      if( $can_join )
+         echo $maxGamesCheck->get_warn_text();
+      elseif( !$can_join_maxg )
+         echo $maxGamesCheck->get_error_text(), "<br>\n", $maxGamesCheck->get_warn_text();
+      elseif( !$can_join_mpg )
+         echo span('MPGWarning', T_('Already invited to or joined this multi-player-game!'));
+
+      if( $can_join_mpg && !$game_row['goodmaxgames'] )
+         echo "<br>\n", span('ErrMsgMaxGames', ErrorCode::get_error_text('max_games_opp'));
+   }
 }//add_old_game_form
 
 function determine_color( $Handicaptype, $is_my_game, $iamblack )

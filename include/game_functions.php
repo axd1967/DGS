@@ -1389,6 +1389,95 @@ class GameNotify
 
 
 
+/**
+ * \brief Class to handle checks on max-games for users.
+ */
+class MaxGamesCheck
+{
+   var $count_games; // number of started/running-games
+
+   function MaxGamesCheck( $urow=null )
+   {
+      global $player_row;
+      if( is_array($urow) )
+         $this->count_games = $urow['Running'] + $urow['GamesMPG'];
+      elseif( is_numeric($urow) )
+         $this->count_games = (int)$urow;
+      else
+         $this->count_games = $player_row['Running'] + $player_row['GamesMPG'];
+   }
+
+   /*! \brief Returns true, if new game is allowed to start regarding max-games-limit. */
+   function allow_game_start()
+   {
+      return ( MAX_GAMESRUN <= 0 || $this->count_games < MAX_GAMESRUN );
+   }
+
+   /*! \brief Returns true, if tourney-registration is allowed (with expected/future new games) regarding max-games-limit. */
+   function allow_tournament_registration()
+   {
+      return ( MAX_GAMESRUN <= 0 || $this->count_games < MaxGamesCheck::_MAX_GAMESRUN_TREG() );
+   }
+
+   /*! \brief Returns amount of allowed games to start from given number. */
+   function get_allowed_games( $num )
+   {
+      if( MAX_GAMESRUN <= 0 ) // unlimited
+         return $num;
+      else
+      {
+         $cnt = MAX_GAMESRUN - $this->count_games;
+         return ($cnt < 0) ? 0 : min($num, $cnt);
+      }
+   }
+
+   function get_error_text( $with_span=true )
+   {
+      $msg = sprintf( T_('Sorry, you are not allowed to start more than %s games!'), MAX_GAMESRUN );
+      return ($with_span) ? span('ErrMsgMaxGames', $msg) : $msg;
+   }
+
+   /*! \brief Returns true, if warning-threshold reached. */
+   function need_warning()
+   {
+      if( MAX_GAMESRUN <= 0 ) // unlimited
+         return false;
+
+      $warn_threshold = round(MAX_GAMESRUN * 75/100); // warning-threshold 75% of MAX_GAMESRUN
+      if( ALLOW_TOURNAMENTS && MAX_GAMESRUN_TREG > 0 )
+         $warn_threshold = min( $warn_threshold, round(MAX_GAMESRUN_TREG * 75/100) ); // 75% for tourney-reg
+
+      return ( $this->count_games >= max(1, $warn_threshold) );
+   }
+
+   function get_warn_text()
+   {
+      if( !$this->need_warning() )
+         return '';
+
+      $msg = sprintf( T_('You already started %s of max. %s games.'), $this->count_games, MAX_GAMESRUN );
+      if( ALLOW_TOURNAMENTS )
+         $msg .= ' ' . sprintf( T_('Tournament registration only allowed for <%s games.'),
+            MaxGamesCheck::_MAX_GAMESRUN_TREG() );
+
+      $class = ($this->count_games >= MAX_GAMESRUN) ? 'ErrMsg' : 'WarnMsg';
+      return span($class, $msg) . "<br><br>\n";
+   }
+
+   function is_limited()
+   {
+      return (MAX_GAMESRUN > 0);
+   }
+
+   // internal
+   function _MAX_GAMESRUN_TREG()
+   {
+      return (MAX_GAMESRUN_TREG > 0) ? MAX_GAMESRUN_TREG : MAX_GAMESRUN;
+   }
+
+} // end 'MaxGamesCheck'
+
+
 
 // returns adjusted komi within limits, also checking for valid limits
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
