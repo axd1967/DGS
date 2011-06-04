@@ -39,8 +39,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $send_message = ( @$_REQUEST['send_message']
                   || @$_REQUEST['send_accept']
                   || @$_REQUEST['send_decline']
-                  || @$_REQUEST['foldermove']
-                  );
+                  || @$_REQUEST['foldermove'] );
    $preview = @$_REQUEST['preview'];
    $handle_msg_action = $send_message && !$preview;
 
@@ -63,6 +62,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          mpmt=2 & mpcol=&mpmove=   : multi-message  for MPG-resign
          mpmt=3 & mpuid=           : single-message for MPG-invite
       ShowMessage&mid=     : from message_list_body() or message_info_table() or list_messages or here
+
       Invite               : from menu (or site_map or introduction)
       Invite&uid=          : from user_info or show_games
       Dispute&mid=         : from here
@@ -106,6 +106,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    if( !$arg_to )
       $arg_to = read_user_from_request(); // single
 
+   $maxGamesCheck = new MaxGamesCheck();
    $dgs_message = new DgsMessage();
    if( $handle_msg_action )
    {
@@ -134,7 +135,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $submode = $mode;
    if( $mode == 'ShowMessage' || $mode == 'Dispute' )
    {
-      $msg_row = DgsMessage::load_message( "message", $mid, $my_id, $other_uid, true );
+      $msg_row = DgsMessage::load_message( "message", $mid, $my_id, $other_uid, /*fulldata*/true );
       extract($msg_row);
 
       if( $Sender === 'M' ) //message to myself
@@ -205,24 +206,43 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
             $errors[] = T_('Missing message receiver');
       }
 
-      if( (string)$default_subject == '' )
+      if( $mode != 'Invite' && (string)$default_subject == '' )
          $errors[] = T_('Missing message subject');
    }//NewMessage
 
    // prepare to show conv/proper-handitype-suggestions
+   $other_row = $dgs_message->get_recipient(); // NULL if self-invited, bulk or other error
    $map_ratings = NULL;
-   if( ($submode === 'Dispute' || $submode === 'Invite') && $iamrated )
+   if( ($submode === 'Dispute' || $submode === 'Invite') && $iamrated && !is_null($other_row) )
    {
-      $other_row = $dgs_message->get_recipient(); // not set if self-invited or other error
-      if( !is_null($other_row) )
-      {
-         $other_rating = (int)@$other_row['Rating2'];
-         if( @$other_row['RatingStatus'] != RATING_NONE && is_valid_rating($other_rating) ) // other is rated
-            $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
-      }
+      $other_rating = (int)@$other_row['Rating2'];
+      if( @$other_row['RatingStatus'] != RATING_NONE && is_valid_rating($other_rating) ) // other is rated
+         $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
    }
 
+   // check own/opp max-games
+   if( preg_match("/^(InviteDisputed|ShowInvite|ShowMyInvite|Invite|Dispute)$/", $submode) )
+   {
+      $opp_row = $other_row;
+      if( is_null($opp_row) && !$arg_to && @$msg_row['other_handle'] )
+      {
+         $arg_to = $msg_row['other_handle'];
+         if( read_message_receivers( $dgs_message, $type, false, $arg_to ) )
+            $errors = array_merge( $errors, $dgs_message->errors );
+         else
+            $opp_row = $dgs_message->get_recipient();
+      }
+
+      $chk_errors = check_max_games($opp_row);
+      $allow_game_start = ( count($chk_errors) == 0 );
+      if( !$allow_game_start )
+         $errors = array_merge( $errors, $chk_errors );
+   }
+   else
+      $allow_game_start = true;
+
    $has_errors = ( count($errors) > 0 );
+
 
    start_page("Message - $submode", true, $logged_in, $player_row );
 
@@ -245,6 +265,8 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       case 'AlreadyAccepted':
       case 'InviteDisputed':
       {
+         section('message', T_('Message View') );
+
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
@@ -253,20 +275,19 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
          if( $submode == 'AlreadyAccepted' )
          {
-            echo '<font color=green>' .
-               sprintf( T_('This %sgame%s invitation has already been accepted.'),
-                        "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) . '</font>';
+            echo span('InviteMsgInfo',
+                      sprintf( T_('This %sgame%s invitation has already been accepted.'),
+                               "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) );
          }
          else if( $submode == 'AlreadyDeclined' )
          {
-            echo '<font color=green>' .
-               T_('This invitation has been declined or the game deleted') . '</font>';
+            echo span('InviteMsgInfo', T_('This invitation has been declined or the game deleted') );
          }
          else if( $submode == 'InviteDisputed' )
          {
-            echo '<font color=green>' .
-               sprintf(T_('The settings for this game invitation has been %sdisputed%s'),
-                       "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) . '</font>';
+            echo span('InviteMsgInfo',
+                      sprintf( T_('The settings for this game invitation has been %sdisputed%s'),
+                               "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) );
          }
 
          if( $can_reply )
@@ -323,6 +344,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       case 'ShowInvite':
       case 'ShowMyInvite':
       {
+         section('invite', T_('Game Invitation') );
+         echo $maxGamesCheck->get_warn_text();
+
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
@@ -335,7 +359,8 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          if( $can_reply )
          {
             $message_form->add_row( array(
-                  'SUBMITBUTTON', 'mode_dispute', T_('Dispute settings'),
+                  'SUBMITBUTTONX', 'mode_dispute', T_('Dispute settings'),
+                              array( 'disabled' => ($allow_game_start ? 0 : 1) ),
                ));
 
             $message_form->add_row( array(
@@ -351,7 +376,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                   'HIDDEN', 'subject', "Game invitation accepted (or declined)",
                   'HIDDEN', 'gid', $Game_ID,
                   'SUBMITBUTTONX', 'send_accept', T_('Accept'),
-                              array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+                              array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => ($allow_game_start ? 0 : 1) ),
                   'SUBMITBUTTON', 'send_decline', T_('Decline'),
                   'SUBMITBUTTONX', 'preview', T_('Preview'),
                               array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
@@ -362,6 +387,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
       case 'Dispute':
       {
+         section('invite', T_('Game Invitation Dispute') );
+         echo $maxGamesCheck->get_warn_text();
+
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
@@ -388,7 +416,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                'HIDDEN', 'type', 'INVITATION',
                'HIDDEN', 'disputegid', $Game_ID,
                'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
-                           array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+                           array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => ($allow_game_start ? 0 : 1) ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
             ));
@@ -397,6 +425,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
       case 'Invite':
       {
+         section('invite', T_('Game Invitation') );
+         echo $maxGamesCheck->get_warn_text();
+
          if( $preview )
             game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings);
          else
@@ -407,7 +438,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('To (userid)'),
-               'TEXTINPUT', 'to', 25, 275, $arg_to, // max-len only to hold bad-vals
+               'TEXTINPUT', 'to', 25, 25, $arg_to,
             ));
          $message_form->add_row( array(
                'DESCRIPTION', T_('Message'),
@@ -418,7 +449,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                'HIDDEN', 'subject', 'Game invitation',
                'HIDDEN', 'type', 'INVITATION',
                'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
-                           array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+                           array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => ($allow_game_start ? 0 : 1) ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
             ));
@@ -429,7 +460,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $message_form->echo_string(1);
 
 
-   if( $has_errors && ($send_message || $preview) )
+   if( $has_errors )
    {
       echo "<br>\n<table><tr>",
          buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
@@ -505,6 +536,19 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
    if( read_message_receivers( $dgs_message, $type, $invitation_step, $arg_to ) )
       return $dgs_message->errors;
 
+   // check own/opp max-games
+   $opponent_row = $dgs_message->get_recipient();
+   if( ($type == 'INVITATION') || $accepttype )
+   {
+      $chk_errors = check_max_games($opponent_row);
+      if( count($chk_errors) )
+      {
+         foreach( $chk_errors as $err )
+            $dgs_message->add_error( $err );
+         return $dgs_message->errors;
+      }
+   }
+
    $subject = trim(get_request_arg('subject'));
    $message = get_request_arg('message');
 
@@ -519,7 +563,6 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
    $msg_gid = 0;
    if( $dgs_message->has_recipient() ) // single-receiver
    {
-      $opponent_row = $dgs_message->get_recipient();
       $opponent_ID = $opponent_row['ID'];
 
       if( $type == 'INVITATION' )
@@ -569,6 +612,25 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
    else
       jump_to("status.php?sysmsg=".urlencode(T_('Message sent!')));
 }//handle_send_message
+
+// return non-null error-arr checking on OWN/opponents max-games
+function check_max_games( $opp_row )
+{
+   global $maxGamesCheck;
+   $errors = array();
+
+   if( !$maxGamesCheck->allow_game_start() )
+      $errors[] = $maxGamesCheck->get_error_text(false);
+
+   if( !is_null($opp_row) )
+   {
+      $oppMaxGamesCheck = new MaxGamesCheck( (int)@$opp_row['X_OppGamesCount'] );
+      if( !$oppMaxGamesCheck->allow_game_start() )
+         $errors[] = ErrorCode::get_error_text('max_games_opp');
+   }
+
+   return $errors;
+}//check_max_games
 
 function handle_change_folder( $my_id, $folders, $new_folder, $type )
 {
