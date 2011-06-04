@@ -256,11 +256,6 @@ define('KEY_GROUP_ORDER', 'gpo');
       $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
-   if( @$arr_users[$my_id] )
-      $menu_array[T_('New bulletin')] = "edit_bulletin.php?n_gid=$gid";
-   if( Bulletin::is_bulletin_admin() )
-      $menu_array[T_('New admin bulletin')] =
-         array( 'url' => "admin_bulletin.php?n_gid=$gid", 'class' => 'AdminLink' );
    if( $status == GAME_STATUS_SETUP )
    {
       if( $has_wroom_entry && $cnt_free_slots == 0 )
@@ -285,10 +280,15 @@ define('KEY_GROUP_ORDER', 'gpo');
       }
       else
          $menu_array[T_('Check game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_START_GAME;
-
-      if( @$player_row['admin_level'] & ADMIN_GAME )
-         $menu_array[T_('Admin game')] = array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
    }
+   // admin-stuff
+   if( @$arr_users[$my_id] )
+      $menu_array[T_('New bulletin')] = "edit_bulletin.php?n_gid=$gid";
+   if( Bulletin::is_bulletin_admin() )
+      $menu_array[T_('New admin bulletin')] =
+         array( 'url' => "admin_bulletin.php?n_gid=$gid", 'class' => 'AdminLink' );
+   if( $status == GAME_STATUS_SETUP && ( @$player_row['admin_level'] & ADMIN_GAME ) )
+      $menu_array[T_('Admin game')] = array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
 }//main
