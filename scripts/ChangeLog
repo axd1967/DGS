@@ -19,6 +19,77 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-06-05 juga
+
+   * game.php:
+   - fix: show scoring-info also for opponent on scoring game-status
+
+   * opponents.php:
+   - fix/optimize: don't load user-list for single-opponent-view
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.build_tournament_ladder_iterator),
+     tournaments/ladder/challenge.php,
+     tournaments/ladder/view.php:
+   - warn about restricted number of started/running games for new own ladder-challenges
+   - bugfix: show action-challenges for ladder-user
+
+   * include/form_functions.php (Form.parse_input_standard_attributes),
+     admin_faq.php:
+   - bugfix: setting form-elements disabled-attribute only if value set
+
+   * message.php:
+   - bugfixes on error-checking on new message
+   - added section-headers for message-view, dispute, invitation
+   - replaced <font> with CSS
+
+   * include/game_functions.php (class MaxGamesCheck, ~.allow_game_start,
+       ~.allow_tournament_registration, ~.get_allowed_games, ~.get_error_text,
+       ~.need_warning, ~.get_warn_text, ~.is_limited, ~._MAX_GAMESRUN_TREG),
+     include/message_functions.php (game_settings_form, echo_game_restrictions;
+       DgsMessage.load_message_receivers),
+     include/error_codes.php (ErrorCode.init),
+     include/config.php (MAX_GAMESRUN, MAX_GAMESRUN_TREG),
+     tournaments/edit_participant.php, tournaments/register.php,
+     skins/dragon/screen.css, add_to_waitingroom.php,
+     join_waitingroom_game.php, message.php (handle_send_message, check_max_games),
+     new_game.php, waiting_room.php (add_old_game_form):
+   - restrict number of started/running games
+     - added server-configuration MAX_GAMESRUN (200) restricting games-count
+       for starting new games
+     - added server-configuration MAX_GAMESRUN_TREG (250) restricting games-count
+       for tournament-registration
+     - counting players Running + MPG-games in SETUP-mode
+     - added checks on own/users/opponents max-games on
+       - adding new-game for waiting-room, restrict game-number for game-offer
+       - joining game-offer in waiting-room,
+         handle as non-suitable if max-games-limit exceeded
+       - sending and disputing invitation, disabling buttons with forbidden actions
+       - new tournament-registration forbidden for user and tournament-director,
+         except editing existing invitation/application/registration or for tournament-admin
+
+   * tournaments/include/types/private_ladder.php (class PrivateLadderTournament):
+   - decreased limits of max. ladder-challenges/defenders: 20 -> 10
+
+   * game_players.php:
+   - put admin-links together
+
+2011-06-03 juga
+
+   * include/sgf_builder.php (class SgfBuilder, ~.build_sgf_result),
+     include/classlib_game.php (GameScore.calculate_score),
+     include/board.php (Board.fill_game_score):
+   - bugfix for calculation of area-scoring for SGF-download:
+     cleanup redundancy in SGF-builder to print ruleset-specific score-result
+     by extending game-score-calculation
+
+   * game.php:
+   - bugfix: don't mark empty territory for score-calculation on FINISHED-game
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - re-write some db-changes, especially on Moves-table using copy
+     instead of working directly on table because it's so large
+   - optimize db-change on Errorlog
+
 2011-06-02 juga
 
    * specs/survey.txt, specs/db/table-Voting.txt:
