@@ -294,16 +294,15 @@ $info_box = '<ul>
       }
 
       $edit_form->add_row( array(
-                           'HIDDEN', 'type', $action,
-                           'HIDDEN', 'preview', 1,
-                           'HIDDEN', 'qterm', textarea_safe($sql_term),
-                           'SUBMITBUTTONX', 'do_edit', 'Save entry',
-                              array( 'accesskey' => ACCKEY_ACT_EXECUTE )
-                                 + (count($errors) ? array('disabled' => 1) : array() ),
-                           'SUBMITBUTTONX', 'edit', 'Preview',
-                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-                           'SUBMITBUTTON', 'back', 'Back to list',
-                           ));
+            'HIDDEN', 'type', $action,
+            'HIDDEN', 'preview', 1,
+            'HIDDEN', 'qterm', textarea_safe($sql_term),
+            'SUBMITBUTTONX', 'do_edit', 'Save entry',
+                  array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => count($errors) ),
+            'SUBMITBUTTONX', 'edit', 'Preview',
+                  array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+            'SUBMITBUTTON', 'back', 'Back to list',
+            ));
       $edit_form->echo_string(1);
 
       if( @$_REQUEST['preview'] )
@@ -426,15 +425,14 @@ $info_box = '<ul>
       }
 
       $edit_form->add_row( array(
-                           'HIDDEN', 'type', $action,
-                           'HIDDEN', 'preview', 1,
-                           'SUBMITBUTTONX', 'do_new', 'Add entry',
-                              array( 'accesskey' => ACCKEY_ACT_EXECUTE )
-                                 + (count($errors) ? array('disabled' => 1) : array() ),
-                           'SUBMITBUTTONX', 'new', 'Preview',
-                              array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-                           'SUBMITBUTTON', 'back', 'Back to list',
-                           ));
+            'HIDDEN', 'type', $action,
+            'HIDDEN', 'preview', 1,
+            'SUBMITBUTTONX', 'do_new', 'Add entry',
+                  array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => count($errors) ),
+            'SUBMITBUTTONX', 'new', 'Preview',
+                  array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+            'SUBMITBUTTON', 'back', 'Back to list',
+            ));
       $edit_form->echo_string(1);
 
       show_preview( ($action=='c' ? 1 : 2), $question, $answer, $reference, "e$fid");
