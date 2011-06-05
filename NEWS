@@ -356,6 +356,8 @@ Copyright (C) 2001-2011  Erik Ouchterlony
    Minor changes:
 
    * Games:
+      * Added restriction on max. running/started games per player and for tournament-registration
+         * Show warning or error if about to exceed limit on starting new games
       * Enhanced remaining-time format with extra-time-info in
          * full form for game-page, game-info and <home_ quick_status.php>quick-status</home>
          * abbreviated form for <home status.php>status games</home> and my running games
@@ -683,6 +685,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
          * ENABLE_DONATIONS                  - disabled
+      * Added restriction on max. running games per player and for tournament-registration
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
