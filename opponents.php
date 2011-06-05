@@ -346,10 +346,15 @@ require_once( 'include/classlib_userpicture.php' );
    }
 
    // query database for user-table
-   $result = db_query( "opponents.find_stats($uid,$opp)", $query );
+   if( $opp )
+      $result = NULL;
+   else
+   {
+      $result = db_query( "opponents.find_stats($uid,$opp)", $query );
 
-   $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
-   $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
+      $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
+      $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
+   }
 
    $link_fmt = ( $finished )
       ? T_('Link to finished games with opponent [%s]')
@@ -392,81 +397,84 @@ require_once( 'include/classlib_userpicture.php' );
       $filterURL .= URI_AMP;
 
    // build user-table
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   if( !is_null($result) )
    {
-      $ID = $row['ID'];
+      while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+      {
+         $ID = $row['ID'];
 
-      $urow_strings = array();
-      if( $utable->Is_Column_Displayed[ 1] )
-      {
-         $ulink = ( $tid )
-            ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$ID"
-            : "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID";
-         $urow_strings[1] = button_TD_anchor( $ulink, $ID );
-      }
-      if( $utable->Is_Column_Displayed[ 2] )
-         $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
-            make_html_safe($row['Name']) . "</A>";
-      if( $utable->Is_Column_Displayed[ 3] )
-         $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
-      if( $utable->Is_Column_Displayed[16] )
-         $urow_strings[16] = getCountryFlagImage( @$row['Country'] );
-      if( $utable->Is_Column_Displayed[ 4] )
-         $urow_strings[ 4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
-      if( $utable->Is_Column_Displayed[ 5] )
-         $urow_strings[ 5] = echo_rating(@$row['Rating2'],true,$ID);
-      if( $utable->Is_Column_Displayed[ 6] )
-         $urow_strings[ 6] = make_html_safe($row['Open'],INFO_HTML);
-      if( $utable->Is_Column_Displayed[ 7] )
-         $urow_strings[ 7] = $row['Games'];
-      if( $utable->Is_Column_Displayed[ 8] )
-         $urow_strings[ 8] = $row['Running'];
-      if( $utable->Is_Column_Displayed[ 9] )
-         $urow_strings[ 9] = $row['Finished'];
-      if( $utable->Is_Column_Displayed[17] )
-         $urow_strings[17] = $row['RatedGames'];
-      if( $utable->Is_Column_Displayed[10] )
-         $urow_strings[10] = $row['Won'];
-      if( $utable->Is_Column_Displayed[11] )
-         $urow_strings[11] = $row['Lost'];
-      if( $utable->Is_Column_Displayed[12] )
-      {
-         $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
-         $urow_strings[12] = $percent;
-      }
-      if( $utable->Is_Column_Displayed[13] )
-      {
-         $activity = activity_string( $row['ActivityLevel']);
-         $urow_strings[13] = $activity;
-      }
-      if( $utable->Is_Column_Displayed[14] )
-      {
-         $lastaccess = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
-         $urow_strings[14] = $lastaccess;
-      }
-      if( $utable->Is_Column_Displayed[15] )
-      {
-         $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
-         $urow_strings[15] = $lastmove;
-      }
-      if( $utable->Is_Column_Displayed[18] )
-         $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
-      if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
-         $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
-      if( $utable->Is_Column_Displayed[20] )
-      {
-         $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
-         $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
-      }
-      if( $utable->Is_Column_Displayed[21] )
-      {
-         // don't use full selection of filter-values to link to opponent-games
-         $urow_strings[21] = build_opp_games_link( $uid, $row['Handle'], $finished );
-      }
+         $urow_strings = array();
+         if( $utable->Is_Column_Displayed[ 1] )
+         {
+            $ulink = ( $tid )
+               ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$ID"
+               : "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID";
+            $urow_strings[1] = button_TD_anchor( $ulink, $ID );
+         }
+         if( $utable->Is_Column_Displayed[ 2] )
+            $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
+               make_html_safe($row['Name']) . "</A>";
+         if( $utable->Is_Column_Displayed[ 3] )
+            $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
+         if( $utable->Is_Column_Displayed[16] )
+            $urow_strings[16] = getCountryFlagImage( @$row['Country'] );
+         if( $utable->Is_Column_Displayed[ 4] )
+            $urow_strings[ 4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
+         if( $utable->Is_Column_Displayed[ 5] )
+            $urow_strings[ 5] = echo_rating(@$row['Rating2'],true,$ID);
+         if( $utable->Is_Column_Displayed[ 6] )
+            $urow_strings[ 6] = make_html_safe($row['Open'],INFO_HTML);
+         if( $utable->Is_Column_Displayed[ 7] )
+            $urow_strings[ 7] = $row['Games'];
+         if( $utable->Is_Column_Displayed[ 8] )
+            $urow_strings[ 8] = $row['Running'];
+         if( $utable->Is_Column_Displayed[ 9] )
+            $urow_strings[ 9] = $row['Finished'];
+         if( $utable->Is_Column_Displayed[17] )
+            $urow_strings[17] = $row['RatedGames'];
+         if( $utable->Is_Column_Displayed[10] )
+            $urow_strings[10] = $row['Won'];
+         if( $utable->Is_Column_Displayed[11] )
+            $urow_strings[11] = $row['Lost'];
+         if( $utable->Is_Column_Displayed[12] )
+         {
+            $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
+            $urow_strings[12] = $percent;
+         }
+         if( $utable->Is_Column_Displayed[13] )
+         {
+            $activity = activity_string( $row['ActivityLevel']);
+            $urow_strings[13] = $activity;
+         }
+         if( $utable->Is_Column_Displayed[14] )
+         {
+            $lastaccess = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
+            $urow_strings[14] = $lastaccess;
+         }
+         if( $utable->Is_Column_Displayed[15] )
+         {
+            $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
+            $urow_strings[15] = $lastmove;
+         }
+         if( $utable->Is_Column_Displayed[18] )
+            $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
+         if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
+            $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
+         if( $utable->Is_Column_Displayed[20] )
+         {
+            $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+            $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
+         }
+         if( $utable->Is_Column_Displayed[21] )
+         {
+            // don't use full selection of filter-values to link to opponent-games
+            $urow_strings[21] = build_opp_games_link( $uid, $row['Handle'], $finished );
+         }
 
-      $utable->add_row( $urow_strings );
-   }
-   mysql_free_result($result);
+         $utable->add_row( $urow_strings );
+      }
+      mysql_free_result($result);
+   }//user-list
 
    // print form with user-table
    if( $opp ) // has opp
