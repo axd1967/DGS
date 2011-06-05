@@ -1621,7 +1621,8 @@ class Form
 
          if( isset($attbs['disabled']) )
          {
-            $str .= ' disabled';
+            if( $attbs['disabled'] )
+               $str .= ' disabled';
             unset($attbs['disabled']);
          }
 
