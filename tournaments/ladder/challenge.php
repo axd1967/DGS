@@ -25,6 +25,7 @@ require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
 require_once 'include/message_functions.php';
+require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament.php';
@@ -201,6 +202,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    $title = T_('Challenge Ladder User');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
+
+   $maxGamesCheck = new MaxGamesCheck();
+   echo $maxGamesCheck->get_warn_text();
 
    $tform->echo_string();
 

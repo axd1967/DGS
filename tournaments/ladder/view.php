@@ -29,6 +29,7 @@ require_once 'include/rating.php';
 require_once 'include/classlib_user.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/time_functions.php';
+require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
@@ -148,7 +149,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(13, T_('Last access#T_ladder'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#T_ladder'), 'Date', 0 );
 
-      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query() );
+      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), 0, /*idx*/true );
 
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
       $ltable->set_rows_per_page( null ); // no navigating
@@ -176,6 +177,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $title = sprintf( T_('Tournament-Ladder #%s'), $tid );
    start_page( $title, true, $logged_in, $player_row, null, null, $js );
    echo "<h2 class=Header>", $tourney->build_info(2), "</h2>\n";
+
+   $maxGamesCheck = new MaxGamesCheck();
+   echo $maxGamesCheck->get_warn_text();
 
    if( $allow_view )
    {
