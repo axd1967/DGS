@@ -253,6 +253,12 @@ function get_alt_arg( $n1, $n2)
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
          $extra_infos[score2text($Score, true) . $admResult] = 'Score';
       }
+      elseif( $move == $Moves && ($Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2) )
+      {
+         $score_board = clone $TheBoard;
+         $game_score = check_remove( $score_board, $score_mode ); //adjusted globals: $stonestring
+         $score = $game_score->calculate_score();
+      }
    }
    else
    {
