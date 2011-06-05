@@ -404,7 +404,7 @@ class TournamentLadderProps
       }
 
       return $tl_user;
-   }
+   }//fill_ladder_challenge_range
 
    /*!
     * \brief Enhances ladder with additional info/data (incoming challenge-games).
@@ -437,7 +437,7 @@ class TournamentLadderProps
             }
          }
       }
-   }
+   }//fill_ladder_running_games
 
    /*!
     * \brief Returns theoretical position for given rating in ladder ordered by user rating.
@@ -464,7 +464,7 @@ class TournamentLadderProps
       $iterator->resetListIterator();
 
       return $cnt_higher;
-   }
+   }//find_ladder_rating_pos
 
    /*!
     * \brief Returns highest allowed challenge rank.
@@ -494,7 +494,7 @@ class TournamentLadderProps
          $rating_high_rank = $ch_rank;
 
       return min( $abs_high_rank, $rel_high_rank, $rating_high_rank );
-   }
+   }//calc_highest_challenge_rank
 
    /*! \brief Returns non-0 number of max. defenses for given ladder-rank. */
    function calc_max_defenses( $rank )
@@ -575,7 +575,7 @@ class TournamentLadderProps
          $action = $this->GameEndJigo;
 
       return $action;
-   }
+   }//calc_game_end_action
 
    /*! \brief Returns TicksDue for rematch-wait, anchored on half-hourly-clock. */
    function calc_ticks_due_rematch_wait( &$tcache )
@@ -638,7 +638,7 @@ class TournamentLadderProps
             @$row['X_CrownKingStart']
          );
       return $tlp;
-   }
+   }//new_from_row
 
    /*! \brief Checks, if tournament ladder-props existing for given tournament. */
    function isTournamentLadderProps( $tid )
