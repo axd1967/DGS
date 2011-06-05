@@ -972,7 +972,7 @@ class TournamentLadder
       return ($isTD) ? $statuslist_TD : $statuslist_user;
    }
 
-   function build_tournament_ladder_iterator( $tid, $query_sql, $limit=0 )
+   function build_tournament_ladder_iterator( $tid, $query_sql, $limit=0, $with_index=false )
    {
       $iterator = new ListIterator( 'TournamentLadder.build_tournament_ladder_iterator.load_ladder',
          $query_sql, 'ORDER BY Rank ASC', ($limit > 0 ? "LIMIT $limit" : '') );
@@ -982,6 +982,8 @@ class TournamentLadder
                          'UNIX_TIMESTAMP(TLP.Lastaccess) AS TLP_X_Lastaccess',
             SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
          ));
+      if( $with_index )
+         $iterator->addIndex( 'uid', 'Rank' );
       $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
       return $iterator;
    }
