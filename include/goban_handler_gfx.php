@@ -41,9 +41,9 @@ if( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);
 
 // see init_statics()
-global $MAP_FORM_MARKERS, $MAP_BOX_MARKERS, $MAP_BOARDLINES; //PHP5
+global $MAP_FORM_MARKERS, $MAP_TERRITORY_MARKERS, $MAP_BOARDLINES; //PHP5
 $MAP_FORM_MARKERS = NULL;
-$MAP_BOX_MARKERS = NULL;
+$MAP_TERRITORY_MARKERS = NULL;
 $MAP_BOARDLINES = NULL;
 
 class GobanHandlerGfxBoard
@@ -85,14 +85,14 @@ class GobanHandlerGfxBoard
    // static, init in static-method to fix include-priority (avoids declaring of this file in "client" before classlib_goban.php)
    function init_statics()
    {
-      global $MAP_BOARDLINES, $MAP_BOX_MARKERS, $MAP_FORM_MARKERS;
-      if( is_null($MAP_BOX_MARKERS) )
+      global $MAP_BOARDLINES, $MAP_TERRITORY_MARKERS, $MAP_FORM_MARKERS;
+      if( is_null($MAP_TERRITORY_MARKERS) )
       {
-         $MAP_BOX_MARKERS = array(
-            GOBM_BOX_B     => 'b',
-            GOBM_BOX_W     => 'w',
-            GOBM_BOX_GRN   => 'd',
-            GOBM_BOX_RED   => 'g',
+         $MAP_TERRITORY_MARKERS = array(
+            GOBM_TERR_B       => 'b',
+            GOBM_TERR_W       => 'w',
+            GOBM_TERR_NEUTRAL => 'd',
+            GOBM_TERR_DAME    => 'g',
          );
       }
 
@@ -330,7 +330,7 @@ class GobanHandlerGfxBoard
       $alt = '';
       $title = '';
 
-      global $MAP_BOX_MARKERS, $MAP_FORM_MARKERS;
+      global $MAP_TERRITORY_MARKERS, $MAP_FORM_MARKERS;
       // mapping and prioritize goban-layer-values to actual images available on DGS
       // starting with most special ... ending with most generalized images
       if( $lMarker == GOBM_NUMBER && $isStoneBW )
@@ -344,17 +344,17 @@ class GobanHandlerGfxBoard
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
          $type .= 'm';
       }
-      elseif( $lMarker == GOBM_BOX_B && $lStone == GOBS_WHITE )
+      elseif( $lMarker == GOBM_TERR_B && $lStone == GOBS_WHITE )
       {
          $type = 'wb';
       }
-      elseif( $lMarker == GOBM_BOX_W && $lStone == GOBS_BLACK )
+      elseif( $lMarker == GOBM_TERR_W && $lStone == GOBS_BLACK )
       {
          $type = 'bw';
       }
-      elseif( ($boxMarker = @$MAP_BOX_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
+      elseif( ($territoryMarker = @$MAP_TERRITORY_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
       {
-         $type = $bLineType . $boxMarker;
+         $type = $bLineType . $territoryMarker;
       }
       elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $isStoneBW )
       {

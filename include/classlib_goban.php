@@ -178,10 +178,10 @@ define('GOBM_CIRCLE',   0x0400);
 define('GOBM_SQUARE',   0x0500); // unfilled
 define('GOBM_TRIANGLE', 0x0600); //
 define('GOBM_CROSS',    0x0700); //
-define('GOBM_BOX_W',    0x0800); // white (filled) box
-define('GOBM_BOX_B',    0x0900); // black (filled) box
-define('GOBM_BOX_GRN',  0x0A00); // green (filled) box
-define('GOBM_BOX_RED',  0x0B00); // red (filled) box
+define('GOBM_TERR_W',   0x0800); // white (filled) box = white territory
+define('GOBM_TERR_B',   0x0900); // black (filled) box = black territory
+define('GOBM_TERR_NEUTRAL', 0x0A00); // green (filled) box = neutral territory
+define('GOBM_TERR_DAME', 0x0B00); // red (filled) box = dame territory
 //define('GOBM_..', 0x0B00..0x0F00); // reserved
 
 // internal
@@ -498,10 +498,10 @@ class Goban
          if( $v == GOBM_SQUARE ) $out[] = 'S';
          if( $v == GOBM_TRIANGLE ) $out[] = 'T';
          if( $v == GOBM_CROSS )  $out[] = 'X';
-         if( $v == GOBM_BOX_W )  $out[] = 'wS';
-         if( $v == GOBM_BOX_B )  $out[] = 'bS';
-         if( $v == GOBM_BOX_GRN ) $out[] = 'gS';
-         if( $v == GOBM_BOX_RED ) $out[] = 'rS';
+         if( $v == GOBM_TERR_W ) $out[] = 'wT';
+         if( $v == GOBM_TERR_B ) $out[] = 'bT';
+         if( $v == GOBM_TERR_NEUTRAL ) $out[] = 'nT';
+         if( $v == GOBM_TERR_DAME ) $out[] = 'dT';
       }
       return implode(' ', $out);
    }//value_to_string
