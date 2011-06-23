@@ -398,7 +398,7 @@ class GobanHandlerGfxBoard
          $imgAttr = ($this->imageAttribute) ? ' '.sprintf( $this->imageAttribute, $x, $y ) : '';
          $out = "<img name=\"x{$x}y{$y}\" class=brdx src=\"{$base_path}{$this->stone_size}/$type.gif\" alt=\"$alt\"$title$imgAttr>";
          if( !is_null($link) )
-            $out = "<a href=\"$link\">$out</a>";
+            $out = "<a href=\"$link\" target=\"_blank\">$out</a>";
          return $out;
       }
       else
