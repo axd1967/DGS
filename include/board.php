@@ -856,8 +856,62 @@ class Board
            "<td width=\"" . $this->stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
    }
 
+   /*!
+    * \brief Returns true if group at position (x,y) has at least one liberty.
+    * \param $start_x/y board-position to check, 0..n
+    * \param $prisoners if $remove is set, pass-back extended prisoners-array if group at x,y has no liberty
+    * \param $remove if true, remove captured stones
+    */
+   function has_liberty_check( $start_x, $start_y, &$prisoners, $remove )
+   {
+      $color = @$this->array[$start_x][$start_y]; // Color of this stone
 
-   function has_liberty_check( $x, $y, &$prisoners, $remove )
+      $arr_xy = array( $start_x, $start_y );
+      $stack = array( $arr_xy );
+      $visited = array(); // potential prisoners and marker if point already checked
+      $visited[$start_x][$start_y] = $arr_xy;
+
+      // scanning all directions starting at start-x/y building up a stack of adjacent points to check
+      while( $arr_xy = array_shift($stack) )
+      {
+         list( $x, $y ) = $arr_xy;
+
+         for( $dir=0; $dir < 4; $dir++) { // scan all directions: W N E S
+            $new_x = $x + $this->dirx[$dir];
+            $new_y = $y + $this->diry[$dir];
+
+            if( ($new_x >= 0 && $new_x < $this->size) && ($new_y >= 0 && $new_y < $this->size) )
+            {
+               $new_color = @$this->array[$new_x][$new_y];
+               if( !$new_color || $new_color == NONE )
+                  return true; // found liberty
+               elseif( $new_color == $color && !@$visited[$new_x][$new_y] )
+               {
+                  $arr_xy = array( $new_x, $new_y );
+                  $stack[] = $arr_xy;
+                  $visited[$new_x][$new_y] = $arr_xy;
+               }
+            }
+         }
+      }
+
+      if( $remove )
+      {
+         foreach( $visited as $x => $arr_y )
+         {
+            foreach( $arr_y as $y => $arr_xy )
+            {
+               $prisoners[] = $arr_xy;
+               unset($this->array[$x][$y]);
+            }
+         }
+      }
+
+      return false;
+   }//has_liberty_check
+
+/* [23-Jun-2011/JUG] has been replaced with new has_liberty_check()
+   function _old_has_liberty_check( $x, $y, &$prisoners, $remove )
    {
       $c = @$this->array[$x][$y]; // Color of this stone
 
@@ -912,7 +966,8 @@ class Board
             }
          }
       }
-   } //has_liberty_check
+   } //_old_has_liberty_check
+*/
 
 
    // checks if stone/move at [colnr/rownr] captures some stone(s)
@@ -920,7 +975,7 @@ class Board
    function check_prisoners( $colnr, $rownr, $col, &$prisoners )
    {
       $some = false;
-      for($i=0; $i<4; $i++)
+      for($i=0; $i<4; $i++) // determine captured stones for ALL directions
       {
          $x = $colnr + $this->dirx[$i];
          $y = $rownr + $this->diry[$i];
@@ -935,13 +990,77 @@ class Board
    } //check_prisoners
 
 
+   /*!
+    * \brief Returns number of marked territory points at position (x,y).
+    * \param $start_x/y board-position to check, 0..n
+    */
+   function mark_territory( $start_x, $start_y )
+   {
+      $color = -1;  // color of territory
 
-   function mark_territory( $x, $y )
+      $stack = array( array( $start_x, $start_y ) );
+      $visited = array(); // marker if point already checked
+      $visited[$start_x][$start_y] = 1;
+
+      // scanning all directions starting at start-x/y building up a stack of adjacent points to check
+      while( $arr_xy = array_shift($stack) )
+      {
+         list( $x, $y ) = $arr_xy;
+
+         for( $dir=0; $dir < 4; $dir++) { // scan all directions: W N E S
+            $new_x = $x + $this->dirx[$dir];
+            $new_y = $y + $this->diry[$dir];
+
+            if( ($new_x >= 0 && $new_x < $this->size) && ($new_y >= 0 && $new_y < $this->size) && !@$visited[$new_x][$new_y] )
+            {
+               $new_color = @$this->array[$new_x][$new_y];
+
+               if( !$new_color || $new_color == NONE || $new_color >= BLACK_DEAD )
+               {
+                  $stack[] = array( $new_x, $new_y );
+                  $visited[$new_x][$new_y] = 1;
+               }
+               else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
+               {
+                  if( $new_color == MARKED_DAME )
+                     $color = NONE; // This area will become dame
+                  else if( $color == -1 )
+                     $color = $new_color;
+                  else if( $color == (WHITE + BLACK - $new_color) )
+                     $color = NONE; // This area has both colors as boundary
+               }
+            }
+         }
+      }
+
+      $point_count = count($visited);
+      if( $color == -1 )
+         $color = DAME ;
+      else
+         $color |= OFFSET_TERRITORY ;
+      if( $color == DAME || $point_count > MAX_SEKI_MARK)
+         $color |= FLAG_NOCLICK;
+
+      foreach( $visited as $x => $arr_y )
+      {
+         foreach( $arr_y as $y => $val )
+         {
+            //keep all marks unchanged and reversible
+            if( @$this->array[$x][$y] < MARKED_DAME )
+               $this->array[$x][$y] = $color;
+         }
+      }
+
+      return $point_count;
+   }//mark_territory
+
+/* [23-Jun-2011/JUG] has been replaced with new mark_territory()
+   function _old_mark_territory( $x, $y )
    {
       $c = -1;  // color of territory
 
       $index[$x][$y] = 7;
-      $point_count = 1; //for the current point (theoricaly NONE)
+      $point_count = 1; //for the current point (theoretically NONE)
 
       while( true )
       {
@@ -1005,7 +1124,8 @@ class Board
             }
          }
       }
-   } //mark_territory
+   } //_old_mark_territory
+ */
 
    /*!
     * \brief Calculates game-score-data.
@@ -1075,7 +1195,71 @@ class Board
    } //fill_game_score
 
 
-   function toggle_marked_area( $x, $y, &$marked, $companion_groups=true )
+   /*!
+    * \brief Toggles marked area for scoring starting at position (x,y).
+    * \param $start_x/y board-position to check, 0..n
+    * \param $marked pass-back marked x/y-points
+    */
+   function toggle_marked_area( $start_x, $start_y, &$marked, $companion_groups=true )
+   {
+      $color = @$this->array[$start_x][$start_y]; // Color of this stone
+
+      /***
+       * Actually, $opposite_dead force an already marked dead neighbour group from the
+       * opposite color to reverse to not dead, but this does not work properly if
+       * $companion_groups is not true, as both groups may be not touching themself.
+       ***/
+      if( $companion_groups && ($color == BLACK || $color == WHITE) )
+         $opposite_dead = WHITE + BLACK_DEAD - $color;
+      else
+         $opposite_dead = -1 ;
+
+      $arr_xy = array( $start_x, $start_y );
+      $stack = array( $arr_xy );
+      $visited = array(); // marker if point already checked
+      $visited[$start_x][$start_y] = $arr_xy;
+
+      // scanning all directions starting at start-x/y building up a stack of adjacent points to check
+      while( $arr_xy = array_shift($stack) )
+      {
+         list( $x, $y ) = $arr_xy;
+
+         for( $dir=0; $dir < 4; $dir++) { // scan all directions: W N E S
+            $new_x = $x + $this->dirx[$dir];
+            $new_y = $y + $this->diry[$dir];
+
+            if( ($new_x >= 0 && $new_x < $this->size) && ($new_y >= 0 && $new_y < $this->size) && !@$visited[$new_x][$new_y] )
+            {
+               $new_color = @$this->array[$new_x][$new_y];
+
+               if( $new_color == $color || ( $companion_groups && $new_color == NONE ) )
+               {
+                  $stack[] = array( $new_x, $new_y, $color );
+                  $visited[$new_x][$new_y] = array( $new_x, $new_y );
+               }
+               elseif( $new_color == $opposite_dead )
+               {
+                  $this->toggle_marked_area2( $new_x, $new_y, $marked, $companion_groups);
+               }
+            }
+         }
+      }
+
+      foreach( $visited as $x => $arr_y )
+      {
+         foreach( $arr_y as $y => $arr_xy )
+         {
+            if( $color == @$this->array[$x][$y] ) {
+               $marked[] = $arr_xy;
+               @$this->array[$x][$y] ^= OFFSET_MARKED;
+            }
+         }
+      }
+   }//toggle_marked_area
+
+
+/* [23-Jun-2011/JUG] has been replaced with new toggle_marked_area()
+   function _old_toggle_marked_area( $x, $y, &$marked, $companion_groups=true )
    {
       $c = @$this->array[$x][$y]; // Color of this stone
 
@@ -1083,7 +1267,7 @@ class Board
        * Actually, $opposite_dead force an already marked dead neighbour group from the
        * opposite color to reverse to not dead, but this does not work properly if
        * $companion_groups is not true, as both groups may be not touching themself.
-       ***/
+       *** /
       if( $companion_groups && ($c == BLACK || $c == WHITE) )
          $opposite_dead = WHITE+BLACK_DEAD-$c ;
       else
@@ -1141,7 +1325,8 @@ class Board
             }
          }
       }
-   } //toggle_marked_area
+   } //_old_toggle_marked_area
+*/
 
 
    // If move update was interupted between two mysql queries, there may
