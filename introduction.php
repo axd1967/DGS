@@ -61,15 +61,6 @@ function show_static_intro()
 
    echo "<p></p>\n";
 
-
-   /* TODO: The following sentence is complete nonsense.
-    *       It should read like the commented out text,
-    *       but we preserved it to spare the translators unneccessary work.
-   echo T_//("More information can be found in the " .
-          "<home faq.php>FAQ</home>. When you have questions " .
-          "you are also encouraged to submit them in one of the " .
-          "<home forum/index.php>forums</home>.") . "\n";
-   */
    echo T_('More information can be found in the <a href="/faq.php">FAQ</a>.'
       . ' When you have questions you are also encouraged to submit them in one'
       . ' of the <a href="/forum/index.php">forums</a>.')
