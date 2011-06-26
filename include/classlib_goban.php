@@ -262,18 +262,14 @@ class Goban
       $this->show_coords = (bool)$showCoords;
    }
 
-   function getOptionsCoords( $check_show=true )
+   function getOptionsCoords()
    {
       return ($this->show_coords) ? $this->opts_coords : 0;
    }
 
-   function setSizeX( $size_x )
+   function setSize( $size_x, $size_y )
    {
       $this->size_x = $size_x;
-   }
-
-   function setSizeY( $size_y )
-   {
       $this->size_y = $size_y;
    }
 
