@@ -1864,6 +1864,39 @@ form#selectgroupForm table.FormClass td.FormHeader h3.Header {
 
 
 /* ------------------------- */
+/* Game editor */
+/* ------------------------- */
+
+/* DEBUG start */
+table#GameEditor td {
+   border: 1px solid green;
+}
+/* DEBUG end */
+
+table#GameEditor {
+   border: 0px solid red;
+   border-collapse: collapse;
+   border-spacing: 0px;
+   margin: 0px auto;
+}
+table#GameEditor tr {
+   border-width: 0px;
+   margin: 0px;
+   padding: 0px;
+}
+
+table#GameEditor table.Goban td {
+   border: 0px solid red;
+}
+table#GameEditor div.GobanGfx {
+   display: block;
+   margin: 0em;
+   border: 0px solid darkblue;
+}
+
+
+
+/* ------------------------- */
 /* Goban editor */
 /* ------------------------- */
 

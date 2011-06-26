@@ -151,9 +151,10 @@ class GobanHandlerGfxBoard
 
    /*!
     * \brief (interface) Transforms given Goban-object into DGS go-board using single images.
+    * \param $skeleton if true create only skeleton (used for JavaScript-based game-editor)
     * \note keep in sync with Board::draw_board(), though this implementation has some specialities!
     */
-   function write_goban( $goban )
+   function write_goban( $goban, $skeleton=false )
    {
       global $base_path;
       $this->goban = $goban;
@@ -165,9 +166,8 @@ class GobanHandlerGfxBoard
       $table_width = $size_x * $stone_size;
 
       // init board-layout options
-      $opts_coords = $goban->getOptionsCoords();
-
-      $smooth_edge = ( ($this->coord_borders & SMOOTH_EDGE) && ($this->woodcolor < 10) );
+      $opts_coords = ($skeleton) ? 0 : $goban->getOptionsCoords();
+      $smooth_edge = ($skeleton) ? 0 : ( ($this->coord_borders & SMOOTH_EDGE) && ($this->woodcolor < 10) );
       if( $smooth_edge )
       {
          $border_start = 140 - ( $opts_coords & GOBB_WEST ? $coord_width : 0 );
@@ -204,7 +204,7 @@ class GobanHandlerGfxBoard
             : '';
       }
 
-      $borders = $goban->getOptionsCoords(false);
+      $borders = $opts_coords;
       $start_col = 0;
       if( ($goban->size_x > $goban->max_x && !($borders & GOBB_WEST)) )
          $start_col = $goban->size_x - $goban->max_x;
@@ -248,7 +248,8 @@ class GobanHandlerGfxBoard
       // sprintf-args: (1) = optional name, (2) = optional additional attribute (e.g. for JavaScript)
       $blank_image = "<img%s alt=\".\" src=\"{$base_path}images/dot.gif\" width=\"$stone_size\" height=\"$stone_size\"%s>";
 
-      $this->result[] = '<table class=Goban' . $woodstring . $cell_size_fix
+      $table_id = ($this->enable_id) ? ' id=Goban' : '';
+      $this->result[] = "<table{$table_id} class=Goban" . $woodstring . $cell_size_fix
          . (count($styles) ? ' style="' . implode(' ', $styles) . '"': '') . '><tbody>';
 
       if( $opts_coords & GOBB_NORTH )
@@ -257,7 +258,7 @@ class GobanHandlerGfxBoard
       if( $smooth_edge )
          $this->draw_edge_row( $goban, $edge_start.'u', $edge_coord, $border_start, $border_imgs, $border_rem );
 
-      for( $rownr = $start_row, $y = 1; $y <= $goban->max_y; $rownr--, $y++ )
+      for( $rownr = $start_row, $y = 1; !$skeleton && $y <= $goban->max_y; $rownr--, $y++ )
       {
          $out = '<tr>';
 
@@ -270,7 +271,7 @@ class GobanHandlerGfxBoard
          {
             $arr = $goban->getValue( $x, $y );
             $cell_id = ($this->enable_id)
-               ? sprintf( "id=%s ", number2sgf_coords( $x-1, $y-1, $this->size_x, $this->size_y ) )
+               ? sprintf( ' id=%s', number2sgf_coords( $x-1, $y-1, $goban->size_x, $goban->size_y ) )
                : '';
 
             $link = ( (string)$arr[GOBMATRIX_LABEL] != '' ) ? $goban->getLink($arr[GOBMATRIX_LABEL]) : null;
@@ -278,12 +279,12 @@ class GobanHandlerGfxBoard
 
             $image = $this->write_image( $x, $y, $arr[GOBMATRIX_VALUE], $arr[GOBMATRIX_LABEL], $link );
             if( $image )
-               $out .= "<td $cell_id class=\"brdx{$background}\">$image</td>\n";
+               $out .= "<td{$cell_id} class=\"brdx{$background}\">$image</td>\n";
             else
             {
                $imgAttr = ($this->imageAttribute) ? ' '.sprintf( $this->imageAttribute, $x, $y ) : '';
                $img = sprintf( $blank_image, " name=\"x{$x}y{$y}\"", $imgAttr );
-               $out .= "<td $cell_id class=\"brdx{$background}\">$img</td>\n";
+               $out .= "<td{$cell_id} class=\"brdx{$background}\">$img</td>\n";
             }
          }//for x
 
@@ -304,17 +305,26 @@ class GobanHandlerGfxBoard
 
       $this->result[] = "</tbody></table>\n";
 
-      $title_div = ( (string)$goban->BoardTitle != '' )
+      $title_div = ( !$skeleton && (string)$goban->BoardTitle != '' )
          ? "<div class=\"Title\">" . make_html_safe($goban->BoardTitle, true) . "</div>\n"
          : '';
-      $text_block = ( (string)$goban->BoardText != '' ) ? "<br>\n" . make_html_safe($goban->BoardText, true) : '';
+      $text_block = ( !$skeleton && (string)$goban->BoardText != '' )
+         ? "<br>\n" . make_html_safe($goban->BoardText, true)
+         : '';
+
+      if( $skeleton )
+         $goban_str = '';
+      else
+      {
+         $goban_str = $this->build_rawtext()
+            . ( $goban->BoardTextInline ? $text_block : '' )
+            . "<div class=\"GobanEnd\"></div>\n"
+            . ( $goban->BoardTextInline ? '' : $text_block );
+      }
 
       return '<div class="GobanGfx" style="width:'.$table_width.'px;"><div class="Board">' . implode('', $this->result) . "</div>"
          . $title_div . "</div>\n"
-         . $this->build_rawtext()
-         . ( $goban->BoardTextInline ? $text_block : '' )
-         . "<div class=\"GobanEnd\"></div>\n"
-         . ( $goban->BoardTextInline ? '' : $text_block )
+         . $goban_str
          //. "<br><hr><pre>" . $goban->to_string() . "</pre>\n"; // for debugging
          ;
    }//write_goban

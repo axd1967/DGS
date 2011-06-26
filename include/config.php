@@ -165,7 +165,8 @@ define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);
 // Allow usage of GoDiagrams (only working with JavaScript)
 define('ALLOW_GO_DIAGRAMS', false);
 
-// Allow usage of Goban-Editor / Game-Viewer
+// Allow usage of Game-Editor / Goban-Editor / Game-Viewer
+define('ALLOW_GAME_EDITOR', false);
 define('ALLOW_GOBAN_EDITOR', false);
 define('ENABLE_GAME_VIEWER', false);
 

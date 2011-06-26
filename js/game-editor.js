@@ -26,6 +26,15 @@ var DBG; //TODO //$("#gameNotes").val(DBG); //TODO DBG
 
 // --------------- Global Functions -------------------------------------------
 
+DGS.game_editor = {
+   loadPage : function() {
+      $(document).ready( DGS.game_editor.initPage );
+   },
+
+   initPage : function() {
+   }
+};
+
 DGS.game = {
    loadPage : function() {
       $(document).ready( DGS.game.initPage );
@@ -141,11 +150,8 @@ DGS.Goban = function() {
 
 $.extend( DGS.Goban.prototype, {
 
-   setSizeX : function( size_x ) {
+   setSize : function( size_x, size_y ) {
       this.size_x = size_x;
-   },
-
-   setSizeY : function( size_y ) {
       this.size_y = size_y;
    },
 
@@ -511,8 +517,7 @@ $.extend( DGS.GameEditor.prototype, {
     *    TODO territory := ( COLOR "T" move+ )+               ; for LATER
     */
    parseMoves : function( size_x, size_y, moves_data ) {
-      this.goban.setSizeX( size_x );
-      this.goban.setSizeY( size_y );
+      this.goban.setSize( size_x, size_y );
       this.goban.makeBoard( size_x, size_y, true );
 
       var game_tree = [], result;
