@@ -302,6 +302,11 @@ function itemL($text, $link='', $working=true, $last=false)
          } $item_level--;
       }
 
+      if( ALLOW_GAME_EDITOR )
+         itemL(T_('Game Editor'), "game_editor.php", true);
+      if( ALLOW_GOBAN_EDITOR )
+         itemL(T_('Goban Editor'), "goban_editor.php", true);
+
       if( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);
       if( @$player_row['Translator'] )
