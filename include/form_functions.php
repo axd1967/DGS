@@ -1604,8 +1604,6 @@ class Form
          }
          else
             $title = '';
-         if( $title )
-            $str .= ' title='.attb_quote($title);
 
          if( isset($attbs['accesskey']) )
          {
@@ -1618,6 +1616,8 @@ class Form
                $str .= ' accesskey='.attb_quote($xkey);
             }
          }
+         if( $title )
+            $str .= ' title='.attb_quote($title);
 
          if( isset($attbs['disabled']) )
          {
@@ -1630,8 +1630,10 @@ class Form
          if( $rx_skipattr )
          {
             foreach( $attbs as $akey => $aval )
-               if( !preg_match( "/^($rx_skipattr)$/i", $akey ) )
+            {
+               if( preg_match( "/^($rx_skipattr)$/i", $akey ) )
                   unset($attbs[$akey]);
+            }
          }
 
          $str .= attb_build($attbs);
