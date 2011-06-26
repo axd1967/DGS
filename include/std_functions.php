@@ -375,6 +375,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          if( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.6.1.min.js\"></script>";
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-ui-1.8.13.custom.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/game-editor.js?t=$ts\"></script>";
          }
          if( ALLOW_GOBAN_EDITOR )
@@ -3310,7 +3311,7 @@ function attb_parse( $attbs)
       return array();
 
    $nr_matches = preg_match_all(
-      "%\\b([a-z][a-z0-9]*)\\s*=\\s*(((['\"])(.*?)\\4)|([a-z0-9]+\\b))%is"
+      "%\\b([a-z][a-z0-9]*)\\s*=\\s*(((['\"])(.*?)\\4)|([a-z_0-9]+\\b))%is"
       , $attbs, $matches );
 
    $attbs = array();
