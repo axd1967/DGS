@@ -355,6 +355,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
              ," title=\"".FRIENDLY_SHORT_NAME." Status RSS Feed\" href=\"/rss/status.php\">";
          break;
       case 'game.php':
+      case 'game_editor.php':
       case 'goban_editor.php':
       case 'forum/read.php':
          $enable_js_game = true;
@@ -371,7 +372,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       if( $enable_js_game )
       {
          $ts = date(DATE_FMT4, $GLOBALS['NOW']);
-         if( ENABLE_GAME_VIEWER )
+         if( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.6.1.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/game-editor.js?t=$ts\"></script>";
@@ -479,15 +480,15 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    {
       echo SEP_SPACING,
          '<select name="jumpto" size="1"',
-               ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ) . '>',
-            '<option value="">&lt;' . T_('Bookmarks#bookmark') . '&gt;</option>',
-            '<option value="S1">' . T_('Latest forum posts#bookmark') . '</option>',
-            '<option value="S2">' . T_('Opponents online#bookmark') . '</option>',
-            '<option value="S3">' . T_('Users online#bookmark') . '</option>',
-            '<option value="S4">' . T_('Edit vacation#bookmark') . '</option>',
-            '<option value="S5">' . T_('Edit profile#bookmark') . '</option>',
+               ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ), ">\n",
+            '<option value="">&lt;', T_('Bookmarks#bookmark'), "&gt;</option>\n",
+            '<option value="S1">', T_('Latest forum posts#bookmark'), "</option>\n",
+            '<option value="S2">', T_('Opponents online#bookmark'), "</option>\n",
+            '<option value="S3">', T_('Users online#bookmark'), "</option>\n",
+            '<option value="S4">', T_('Edit vacation#bookmark'), "</option>\n",
+            '<option value="S5">', T_('Edit profile#bookmark'), "</option>\n",
          '</select>',
-         '<input type="submit" name="show" value="' . T_('Show#bookmark') . '">'
+         '<input type="submit" name="show" value="', T_('Show#bookmark'), '">'
          ;
    }
 
@@ -595,8 +596,10 @@ function make_dragon_main_menu( $player_row )
       }
       $menu->add( 5,3, $arr_feats );
    }
+   if( ALLOW_GAME_EDITOR )
+      $menu->add( 5,4, array( T_('Game Editor'), 'game_editor.php', array()));
    if( ALLOW_GOBAN_EDITOR )
-      $menu->add( 5,4, array( T_('Goban Editor'), 'goban_editor.php', array()));
+      $menu->add( 5,5, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
    return $menu;
 } //make_dragon_main_menu
