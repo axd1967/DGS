@@ -17,37 +17,48 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+window.DGS = {
+   constants: {},
+   data: {},
+   run: {} // runtime
+};
+
+// supporting %s %x %b
 function sprintf() {
-   if( sprintf.arguments.length < 2 )
-      return;
+   if( sprintf.arguments.length < 1 )
+      throw "sprintf(): Missing arguments ["+arguments.join(',')+"]";
 
    var data = sprintf.arguments[0];
-   for( var i=1; i < sprintf.arguments.length; ++i )
-      data = data.replace( /%s/, sprintf.arguments[i] );
+   for( var i=1; i < sprintf.arguments.length; ++i ) {
+      var arg = sprintf.arguments[i];
+      data = data.replace(/(%[sxb])/, function(m) {
+         if( m == '%x' )
+            return arg.toString(16);
+         else if( m == '%b' )
+            return arg.toString(2);
+         else
+            return arg;
+      });
+   }
 
    return data;
 }
 if( !String.sprintf )
    String.sprintf = sprintf;
 
-function toggle_class( obj, cl1, cl2 )
-{
+function toggle_class( obj, cl1, cl2 ) {
    obj.className = ( obj.className == cl1 ) ? cl2 : cl1;
 }
 
-function showInfo( e, contentHTML, y_add )
-{
+function showInfo( e, contentHTML, y_add ) {
    var infoBoxElem = document.getElementById('InfoBox');
    infoBoxElem.innerHTML = contentHTML;
 
    var x, y;
-   if( document.all )
-   {
+   if( document.all ) {
       x = event.clientX + document.body.scrollLeft;
       y = event.clientY + document.body.scrollTop;
-   }
-   else
-   {
+   } else {
       x = e.pageX;
       y = e.pageY;
    }
@@ -71,7 +82,7 @@ function showTLRankInfo( e, rank, best_rank, period_rank, history_rank )
    var diff1 = buildRankDiff( rank, period_rank );
    var diff2 = buildRankDiff( rank, history_rank );
 
-   content = String.sprintf( T_rankInfoFormat, rank, best_rank, diff1, diff2 );
+   var content = String.sprintf( T_rankInfoFormat, rank, best_rank, diff1, diff2 );
    content = "<table><tr><th>" + T_rankInfoTitle + "</th></tr>" + "<tr><td>" + content + "</td></tr></table>";
    showInfo( e, content, 0 );
 }
@@ -79,6 +90,7 @@ function showTLRankInfo( e, rank, best_rank, period_rank, history_rank )
 // see PHP TournamentLadder::build_rank_diff()
 function buildRankDiff( rank, prev_rank )
 {
+   var rank_diff;
    if( rank == prev_rank )
       rank_diff = '=';
    else if( rank < prev_rank )
@@ -91,27 +103,26 @@ function buildRankDiff( rank, prev_rank )
 
 // ---------- Game-Thumbnail -----------------------
 
-var BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-var ARR_THUMBNAIL = new Array(
+DGS.data.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+DGS.data.ARR_THUMBNAIL = [
       // 00=empty, 01=Black, 10=White, 11=Dead-stone
       "<img src=\"images/tbne.gif\" width=7 height=7>",
       "<img src=\"images/tbnb.gif\" width=7 height=7>",
       "<img src=\"images/tbnw.gif\" width=7 height=7>",
       "<img src=\"images/tbnd.gif\" width=7 height=7>"
-   );
+   ];
 
 // shows game-thumbnail for board-size $size and given dgs-base64-encoded game $snapshot
 function showGameThumbnail( e, size, snapshot )
 {
-   var LF = "<br>\n";
-   var SPC = ARR_THUMBNAIL[0];
+   const LF = "<br>\n";
+   const SPC = DGS.data.ARR_THUMBNAIL[0];
    var output = '';
 
-   var data, data1, data2, data3, data, repcount;
+   var data, data1, data2, data3, repcount;
    var p = 0; // board-pos
    var psize = size * size;
-   for( i=0; p < psize && i < snapshot.length; i++ )
-   {
+   for( var i=0; p < psize && i < snapshot.length; i++ ) {
       var ch = snapshot.charAt(i);
 
       data = 0;
@@ -128,43 +139,38 @@ function showGameThumbnail( e, size, snapshot )
       else if( ch == '*' ) // 16xA
          repcount = 16;
       else {
-         data = BASE64_CHARS.indexOf(ch);
+         data = DGS.data.BASE64_CHARS.indexOf(ch);
          data1 = (data >> 4) & 0x3;
          data2 = (data >> 2) & 0x3;
          data3 = data & 0x3;
       }
 
-      if( data == 0 )
-      {
-         for( j=0; j < 3 * repcount; j++ )
-         {
+      if( data == 0 ) {
+         for( var j=0; j < 3 * repcount; j++ ) {
             output += SPC;
             if( ++p % size == 0 ) output += LF;
             if( p >= psize ) break;
          }
-      }
-      else
-      {
-         output += ARR_THUMBNAIL[data1];
+      } else {
+         output += DGS.data.ARR_THUMBNAIL[data1];
          if( ++p % size == 0 ) output += LF;
          if( p >= psize ) break;
-         output += ARR_THUMBNAIL[data2];
+         output += DGS.data.ARR_THUMBNAIL[data2];
          if( ++p % size == 0 ) output += LF;
          if( p >= psize ) break;
-         output += ARR_THUMBNAIL[data3];
+         output += DGS.data.ARR_THUMBNAIL[data3];
          if( ++p % size == 0 ) output += LF;
       }
    }
 
    var first = true;
-   while( p < psize ) // append empties
-   {
+   while( p < psize ) { // append empties
       if( (p++ % size == 0) && !first ) output += LF;
       first = false;
       output += SPC;
    }
 
-   content = "<table class=\"GameThumbnail\" bgcolor=\"#e8a858\"><tr><td>" + output + "</td></tr></table>";
+   var content = "<table class=\"GameThumbnail\" bgcolor=\"#e8a858\"><tr><td>" + output + "</td></tr></table>";
    showInfo( e, content, 10 );
 }//showGameThumbnail
 
