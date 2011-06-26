@@ -422,7 +422,7 @@ class Goban
       if( $width < 2 || $height < 2 )
          error('invalid_args', "Goban::makeBoard.check($width,$height)");
 
-      for( $y=1; $y <= $width; $y++)
+      for( $y=1; $y <= $height; $y++)
       {
          $board_lines = GOBB_MID;
          if( $y == 1 )
@@ -430,7 +430,7 @@ class Goban
          elseif( $y == $height )
             $board_lines &= ~GOBB_SOUTH;
 
-         for( $x=1; $x <= $height; $x++)
+         for( $x=1; $x <= $width; $x++)
          {
             $val = $board_lines;
             if( $x == 1 )
