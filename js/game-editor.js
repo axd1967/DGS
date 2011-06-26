@@ -40,7 +40,7 @@ DGS.game_editor = {
 
       $("#tab_Size input#size_upd").click( function(event) {
          event.preventDefault();
-         DGS.run.gameEditor.execSizeUpdate();
+         DGS.run.gameEditor.actions.size.updateSize();
       });
    }
 };
@@ -685,28 +685,32 @@ $.extend( DGS.GameEditor.prototype, {
       }
    },
 
-   execSizeUpdate : function() {
-      // check inputs
-      var width  = $("#size_w").val();
-      var height = $("#size_h").val();
-      var error = false;
-      if( !width || !parseInt(width,10) || width < 2 || width > 25 ) {
-         $("#size_w").effect("highlight", { color: '#FF0000' }).focus();
-         return false;
-      }
-      if( !height || !parseInt(height,10) || height < 2 || height > 25 ) {
-         $("#size_h").effect("highlight", { color: '#FF0000' }).focus();
-         return false;
-      }
+   actions : {
+      size : { // Size-tab actions
+         updateSize : function() {
+            // check inputs
+            var width  = $("#size_w").val();
+            var height = $("#size_h").val();
+            var error = false;
+            if( !width || !parseInt(width,10) || width < 2 || width > 25 ) {
+               $("#size_w").effect("highlight", { color: '#FF0000' }).focus();
+               return false;
+            }
+            if( !height || !parseInt(height,10) || height < 2 || height > 25 ) {
+               $("#size_h").effect("highlight", { color: '#FF0000' }).focus();
+               return false;
+            }
 
-      // re-init board
-      this.goban.setSize( width, height );
-      this.goban.makeBoard( width, height, true );
-      this.goban.setOptionsCoords( C.GOBB_MID, true );
-      this.board.draw_board_structure( this.goban );
-      this.board.draw_board( this.goban, false );
-      return true;
-   }
+            // re-init board
+            this.goban.setSize( width, height );
+            this.goban.makeBoard( width, height, true );
+            this.goban.setOptionsCoords( C.GOBB_MID, true );
+            this.board.draw_board_structure( this.goban );
+            this.board.draw_board( this.goban, false );
+            return true;
+         } //updateSize
+      } //size
+   } //actions
 
 }); //GameEditor
 
