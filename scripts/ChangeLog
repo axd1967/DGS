@@ -19,6 +19,113 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-06-27 juga
+
+   * js/game-editor.js (DGS.GamEditor):
+   - renamed DGS.GameEditor.execSizeUpdate() to DGS.GameEditor.actions.size.updateSize()
+
+   * js/game-editor.js (DGS.Goban, ~.setOptionsCoords, ~.getOptionsCoords, ~.makeBoard;
+       DGS.Board, ~.draw_board_structure, ~.make_coord_row;
+       DGS.GameEditor, ~.execSizeUpdate),
+     js/jquery-ui-1.8.13.custom.min.js,
+     include/std_functions.php (start_html, attb_parse),
+     skins/dragon/screen.css,
+     game_editor.php (build_tab_Size), game.php:
+   - extended JavaScript-based game-editor
+     - added customized jQuery-UI for Tabs, Effects
+     - added Size-tab in Edit-area
+       - added Size-tab action "New Board" using validated width/height-inputs to create new board of size width x height
+     - added drawing of board-base-structure with board-coordinates controlled by Goban-attributes
+     - use user-configured stone-size and wood-color to redraw-board, smooth-edge will not be supported
+     - bugfix: fix make-board by looping with y/x over correct dimensions height/width (instead of width/height)
+     - added debug-area
+   - bugfix: fix attb_parse() allowing string-attribute-value with '_'
+
+   * include/classlib_goban.php (Goban.makeBoard):
+   - bugfix: fix make-board by looping with y/x over correct dimensions height/width
+     instead of width/height
+
+   * include/form_functions.php (Form.parse_input_standard_attributes):
+   - bugfix: fix skipping of attribute-skipping
+   - bugfix: set title "after" extending it for access-key
+
+   * introduction.php:
+   - remove double text
+
+2011-06-26 juga
+
+   * include/goban_handler_gfx.php (GobanHandlerGfxBoard.write_goban),
+     include/std_functions.php (start_html, echo_dragon_top_bar, make_dragon_main_menu),
+     include/config.php (ALLOW_GAME_EDITOR),
+     js/game-editor.js,
+     skins/dragon/screen.css, game_editor.php:
+   - started JavaScript-based game-editor using jQuery
+     - added server-config ALLOW_GAME_EDITOR to enable game-editor
+     - added Game-Editor in main-menu
+
+   * include/classlib_goban.php (Goban.getOptionsCoords, ~.setSize),
+     include/goban_handler_sl.php (GobanHandlerSL1.read_goban),
+     js/game-editor.js,
+     goban_editor.php:
+   - refactored Goban.setSizeX/Y() into Goban.setSize()
+   - removed needless arg
+
+   * include/board.php (class Board, ~.load_from_db, ~.draw_board, ~.make_js_game_moves),
+     include/config.php (ENABLE_GAME_VIEWER),
+     include/std_functions.php (start_html),
+     js/game-editor.js,
+     js/jquery-1.6.1.min.js,
+     game.php (draw_game_viewer),
+     skins/dragon/screen.css:
+   - added experimental JavaScript-based game-viewer using jQuery-1.6.1
+     - add game-related JavaScript for go-diagrams and game-viewer
+       only on game, goban-editor and forum-read-page
+     - added server-config ENABLE_GAME_VIEWER to enable game-viewer on game-page
+     - added board CSS-id for Goban-table and board-cells on game-page
+     - pass game-moves to game-viewer
+
+   * js/common.js (DGS, sprintf):
+   - added global DGS-"namespace"
+   - extended sprintf() by binary/hex-format-output
+   - fixed jslint-warnings: undeclared vars, double vars,
+   - changed JavaScript-formatting
+
+   * js/jslint-dgs.conf:
+   - added config for JavaScript-checker jslint
+   - check with: "jsl -conf js/jslint-dgs.conf"
+
+   * include/coords.php (number2sgf_coords):
+   - added check for different x/y-sizes to convert (x,y) to SGF-coords
+
+   * include/goban_handler_gfx.php (class GobanHandlerGfxBoard, ~.write_goban, ~.write_image):
+   - added board CSS-id for Goban-table and board-cells on game-page
+   - removed image-title because there are only needed for game-page "markers"-info
+
+2011-06-23 juga
+
+   * include/board.php (Board.has_liberty_check, ~.mark_territory, ~.toggle_marked_area):
+   - re-implemented scanning point-groups of goban with clearer stack-based approach
+     for methods "has_liberty_check, mark_territory, toggle_marked_area",
+     renamed and commented old methods
+
+   * include/goban_handler_gfx.php (GobanHandlerGfxBoard.write_image):
+   - open marker-link of <igoban>-tags SL1-syntax with new window
+
+2011-06-13 juga
+
+   * include/classlib_goban.php (GOBM_TERR_..., Goban.value_to_string),
+     include/goban_handler_gfx.php (class GobanHandlerGfxBoard, ~.init_statics, ~.write_image),
+     include/goban_handler_sl.php (class GobanHandlerSL1, ~.parse_line, ~.parse_SL_text):
+   - extended syntax for <igoban>-tag by territory markers:
+     - added board-markup: * = black-territory, ~ = white-territory, ? = neutral-territory, '=' = dame
+     - added marker-images in text:  T* T~ T? T=
+     - renamed GOBM_BOX_.. -> GOBM_TERR_... for territory markers:
+       black, white, neutral, dame represented by black/white/green/red filled boxes
+
+   * tournaments/ladder/admin.php (add_form_edit_user):
+   - fix ladder-tournament-admin: adjusted admin-text & notifications of removal
+     of user, which is not notified
+
 2011-06-05 juga
 
    * game.php:
