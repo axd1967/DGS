@@ -54,6 +54,7 @@ class GobanHandlerGfxBoard
    var $coord_borders; // use smooth-edge
    var $woodcolor;
    var $imageAttribute; // e.g. "onClick=\"click('%s','%s')\"" ); // x,y
+   var $enable_id; // add CSS-id on board <td>-cells
 
    var $goban;
    var $result; // array
@@ -64,6 +65,7 @@ class GobanHandlerGfxBoard
       GobanHandlerGfxBoard::init_statics();
 
       $this->rawtext = $rawtext;
+      $this->enable_id = false;
 
       global $player_row;
       if( @$player_row['Stonesize'] )
@@ -267,18 +269,21 @@ class GobanHandlerGfxBoard
          for( $x = 1; $x <= $goban->max_x; $x++ )
          {
             $arr = $goban->getValue( $x, $y );
+            $cell_id = ($this->enable_id)
+               ? sprintf( "id=%s ", number2sgf_coords( $x-1, $y-1, $this->size_x, $this->size_y ) )
+               : '';
 
             $link = ( (string)$arr[GOBMATRIX_LABEL] != '' ) ? $goban->getLink($arr[GOBMATRIX_LABEL]) : null;
             $background = ($link) ? ' BoardLink' : '';
 
             $image = $this->write_image( $x, $y, $arr[GOBMATRIX_VALUE], $arr[GOBMATRIX_LABEL], $link );
             if( $image )
-               $out .= "<td class=\"brdx{$background}\">$image</td>\n";
+               $out .= "<td $cell_id class=\"brdx{$background}\">$image</td>\n";
             else
             {
                $imgAttr = ($this->imageAttribute) ? ' '.sprintf( $this->imageAttribute, $x, $y ) : '';
                $img = sprintf( $blank_image, " name=\"x{$x}y{$y}\"", $imgAttr );
-               $out .= "<td class=\"brdx{$background}\">$img</td>\n";
+               $out .= "<td $cell_id class=\"brdx{$background}\">$img</td>\n";
             }
          }//for x
 
@@ -317,7 +322,7 @@ class GobanHandlerGfxBoard
    function write_image( $x, $y, $value, $label='', $link=null )
    {
       if( !($value & (GOBB_BITMASK|GOBS_BITMASK|GOBO_HOSHI|GOBM_BITMASK)) )
-         return '';
+         return ''; // TODO bug? set everything to EMPTY board-cell
 
       // layers
       $lBoard = $value & GOBB_BITMASK;
@@ -328,7 +333,6 @@ class GobanHandlerGfxBoard
       $bLineType = $this->getBoardLineType($lBoard); // only mixable
 
       $alt = '';
-      $title = '';
 
       global $MAP_TERRITORY_MARKERS, $MAP_FORM_MARKERS;
       // mapping and prioritize goban-layer-values to actual images available on DGS
@@ -394,9 +398,8 @@ class GobanHandlerGfxBoard
       if( $type != '' )
       {
          global $base_path;
-         $title_str = ($title != '') ? " title=\"$title\"" : '';
          $imgAttr = ($this->imageAttribute) ? ' '.sprintf( $this->imageAttribute, $x, $y ) : '';
-         $out = "<img name=\"x{$x}y{$y}\" class=brdx src=\"{$base_path}{$this->stone_size}/$type.gif\" alt=\"$alt\"$title$imgAttr>";
+         $out = "<img name=\"x{$x}y{$y}\" class=brdx src=\"{$base_path}{$this->stone_size}/$type.gif\" alt=\"$alt\"$imgAttr>";
          if( !is_null($link) )
             $out = "<a href=\"$link\" target=\"_blank\">$out</a>";
          return $out;
