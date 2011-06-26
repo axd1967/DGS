@@ -119,9 +119,9 @@ function show_goban(nr)
 {
    var x, y, fig;
    var stonesz = stonesize[nr];
-   var woodstring = ( woodcolor[nr] > 10
+   var woodstring = ( woodcolor[nr] > 10 )
          ? 'bgcolor=' + woodbgcolors[woodcolor[nr] - 10]
-         : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"');
+         : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"';
 
    document.write('<table border=0 cellpadding=0 cellspacing=0 '+woodstring+' align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
    for( y=starty[nr]; y<endy[nr]; y++)
@@ -225,7 +225,6 @@ function has_liberty(nr, start_x, start_y, remove)
    c = goban[nr][x][y]; // Color of this stone
 
    index[nr][x][y] = current_index[nr] + 7;
-
 
    while( true )
    {
