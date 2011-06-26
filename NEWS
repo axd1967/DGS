@@ -338,8 +338,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Show raw-format using &lt;igoban>-tag by adding URL-arg 'raw=1' on pages with go-diagrams
          * Syntax for SL1-format: <http://senseis.xmp.net/?HowDiagramsWork |How Diagrams Work (on Sensei&apos;s Library)>
             * Show board, markup, board-title, board-text (right side or below)
-            * Show links on board-markup, SL-links, extended by DGS-links "[1|dgs:docs.php]"
+            * Show links on board-markup, SL-links, extended by DGS-links "[1|dgs:docs.php]", open in new window
          * Additions &amp; Exceptions of SL1-syntax:
+            * Extended syntax by territory-markers: * (<image board/hb.gif>), ~ (<image board/hw.gif>), ? (<image board/hg.gif>), = (<image board/hd.gif>)
+            * Extended syntax by territory-images in text: T* T~ T? T=
             * Lines can start with white-spaces, line-prefix '$$' can be omitted
             * Chars "'" and "\" are not allowed in text
             * Auto-set hoshi-points if there are perpendicular edges and no hoshi set manually
