@@ -346,12 +346,18 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
 
+   $enable_js_game = false;
    switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
    {
       case 'status.php':
          // RSS Autodiscovery:
          echo "\n <link rel=\"alternate\" type=\"application/rss+xml\""
              ," title=\"".FRIENDLY_SHORT_NAME." Status RSS Feed\" href=\"/rss/status.php\">";
+         break;
+      case 'game.php':
+      case 'goban_editor.php':
+      case 'forum/read.php':
+         $enable_js_game = true;
          break;
    }
 
@@ -362,11 +368,19 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    {
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
-      if( ALLOW_GOBAN_EDITOR )
-         echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goban_editor.js\"></script>";
-
-      if( ALLOW_GO_DIAGRAMS )
-         echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
+      if( $enable_js_game )
+      {
+         $ts = date(DATE_FMT4, $GLOBALS['NOW']);
+         if( ENABLE_GAME_VIEWER )
+         {
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.6.1.min.js\"></script>";
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/game-editor.js?t=$ts\"></script>";
+         }
+         if( ALLOW_GOBAN_EDITOR )
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goban_editor.js\"></script>";
+         if( ALLOW_GO_DIAGRAMS )
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
+      }
 
       if( !is_null($javascript) && is_string($javascript) )
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$javascript\n</script>";
