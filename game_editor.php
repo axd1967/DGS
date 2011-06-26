@@ -21,6 +21,7 @@ $TranslateGroups[] = "Goban";
 
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/goban_handler_gfx.php';
 
@@ -39,9 +40,9 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
    $page = "game_editor.php";
-   $title = T_('Game Editor');
+   $title = T_('Game Editor#ged');
 
-   // setup goban for board-editing
+   // setup skeleton-goban for board-editing
    $board_size = 2;
    $goban = new Goban();
    $goban->setOptionsCoords( GOBB_NORTH|GOBB_SOUTH|GOBB_WEST|GOBB_EAST, true );
@@ -49,13 +50,14 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
    $goban->makeBoard( $board_size, $board_size );
    $goban_writer = new GobanHandlerGfxBoard();
    $goban_writer->enable_id = true;
-   $goboard = $goban_writer->write_goban( $goban, /*skeleton*/true );
+   $goboard_skeleton = $goban_writer->write_goban( $goban, /*skeleton*/true );
 
 
    // ---------- Game EDITOR ---------------------------------------
 
    $js = add_js_var( 'base_path', $base_path );
-   $js .= sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d);\n", (int)$cfg_board->get_stone_size() );
+   $js .= sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d);\n",
+      $cfg_board->get_stone_size(), $cfg_board->get_wood_color() );
    $js .= "DGS.game_editor.loadPage();\n";
 
    $style_str = (is_null($cfg_board))
@@ -63,14 +65,40 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
    start_page( $title, true, $logged_in, $player_row, $style_str, null, $js );
 
    echo "<h3 class=Header>$title</h3>\n",
-      "<table id=GameEditor>\n",
-         "<tr><td id=BoardArea>$goboard</td>\n<td id=EditArea>Edit Area</td></tr>\n",
+      "<table id=GameEditor class=GameEditor>\n",
+         "<tr><td id=BoardArea>$goboard_skeleton</td>\n",
+            "<td id=EditArea>",
+               "<div id=tabs>\n",
+                  "<ul>\n",
+                     "<li>", anchor('#tab_Size', T_('Size#ged'), T_('Change board size#ged')), "</li>\n",
+                  "</ul>\n",
+                  "<div id=tab_Size class=tab>\n", build_tab_Size(), "</div>\n",
+               "</div>\n",
+            "</td></tr>\n",
          "<tr><td id=NodeArea colspan=2>Node Area</td></tr>\n",
+         "<tr><td colspan=2><pre id=D></pre></td></tr>", // for debug
       "</table>\n";
 
    $menu_array = array();
 
    end_page(@$menu_array);
+}//main
+
+
+function build_tab_Size()
+{
+   global $page;
+   $form = new Form( 'gameEdit', $page, FORM_GET );
+   $form->add_row( array(
+      'DESCRIPTION', T_('Width#ged'),
+      'TEXTINPUTX',  'size_w', 4, 4, '', 'id=size_w' ));
+   $form->add_row( array(
+      'DESCRIPTION', T_('Height#ged'),
+      'TEXTINPUTX',  'size_h', 4, 4, '', 'id=size_h' ));
+   $form->add_row( array(
+      'CELL', 2, '',
+      'SUBMITBUTTONX', 'size_upd', T_('New Board#ged'), 'id=size_upd' ));
+   return $form->create_form_string();
 }
 
 ?>

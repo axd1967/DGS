@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // NOTE: global DGS-object defined in common.js
 
-var DBG; //TODO //$("#gameNotes").val(DBG); //TODO DBG
+var DBG;
+//$("#gameNotes").val(DBG); //TODO DBG @ game-viewer
+//$("#D").text( $("#Goban").html() ); //TODO DBG @ game-editor
 
 (function($) { // ensure local scope and $ == jQuery
 
@@ -32,6 +34,14 @@ DGS.game_editor = {
    },
 
    initPage : function() {
+      $( function() {
+         $("#tabs").tabs({ disabled: [] });
+      });
+
+      $("#tab_Size input#size_upd").click( function(event) {
+         event.preventDefault();
+         DGS.run.gameEditor.execSizeUpdate();
+      });
    }
 };
 
@@ -137,6 +147,10 @@ var C = DGS.constants.Goban;
 
 // constructs Goban
 DGS.Goban = function() {
+   // bitmask using GOBB_NORTH|SOUTH|WEST|EAST enabling coordinates on that side of the go-board.
+   this.opts_coords = 0;
+   this.show_coords = true; // true to show coordinates
+
    // matrix[y][x] = GOB-bitmask | [ GOB-value-bitmask, number|letter (=label) ]; x/y=1..n
    // NOTE: makeBoard() MUST be called to properly init matrix
    this.matrix = [];
@@ -149,6 +163,15 @@ DGS.Goban = function() {
 };
 
 $.extend( DGS.Goban.prototype, {
+
+   setOptionsCoords : function( coords, showCoords ) {
+      this.opts_coords = (coords & C.GOBB_BITMASK);
+      this.show_coords = showCoords;
+   },
+
+   getOptionsCoords : function() {
+      return (this.show_coords) ? this.opts_coords : 0;
+   },
 
    setSize : function( size_x, size_y ) {
       this.size_x = size_x;
@@ -177,7 +200,7 @@ $.extend( DGS.Goban.prototype, {
          throw "Goban.makeBoard("+width+","+height+","+withHoshi+"): invalid_args width, height";
 
       this.matrix = [];
-      for( var y=1; y <= width; y++) {
+      for( var y=1; y <= height; y++) {
          var board_lines = C.GOBB_MID;
          if( y == 1 )
             board_lines &= ~C.GOBB_NORTH;
@@ -185,7 +208,7 @@ $.extend( DGS.Goban.prototype, {
             board_lines &= ~C.GOBB_SOUTH;
 
          this.matrix[y] = [];
-         for( var x=1; x <= height; x++) {
+         for( var x=1; x <= width; x++) {
             var val = board_lines;
             if( x == 1 )
                val &= ~C.GOBB_WEST;
@@ -383,17 +406,117 @@ DGS.constants.Board = {
                                     C.GOBB_WEST               , '',   // unsupported
                                                   C.GOBB_EAST , '',   // unsupported
                                                             0 , ''    // empty
-   ])
+   ]),
+
+   // see $woodbgcolors in 'include/std_functions.php'
+   ARR_WOODBGCOLORS : [ 'white', /*1*/'#e8c878', '#e8b878', '#e8a858', '#d8b878', '#b88848' ]
 };
 var BC = DGS.constants.Board;
 
 
 // constructs Board
-DGS.Board = function( stone_size ) {
+DGS.Board = function( stone_size, wood_color ) {
    this.stone_size = (stone_size == undefined) ? 25 : stone_size;
+   this.wood_color = wood_color;
 };
 
 $.extend( DGS.Board.prototype, {
+
+   // redraw board-structure without board-content, used after size-change
+   draw_board_structure : function( goban ) {
+      $("#Goban tbody > *").hide().remove();
+      var tbody = $("table#Goban tbody");
+
+      var coord_width = Math.floor( this.stone_size * 31 / 25 );
+      var table_width = goban.max_x * this.stone_size;
+
+      // init board-layout options
+      var opts_coords = goban.getOptionsCoords();
+      var add_width_west = ( opts_coords & C.GOBB_WEST ) ? coord_width : 0;
+      var add_width_east = ( opts_coords & C.GOBB_EAST ) ? coord_width : 0;
+      table_width += add_width_west + add_width_east;
+
+      var coord_alt = '.gif" alt="';
+      var coord_end = "\"></td>\n";
+      var coord_start_number, coord_start_letter, coord_left = '', coord_right = '';
+      if( opts_coords & (C.GOBB_WEST | C.GOBB_EAST) )
+         coord_start_number = "<td class=brdn><img class=brdn src=\"" + base_path + this.stone_size + "/c";
+      if( opts_coords & (C.GOBB_NORTH | C.GOBB_SOUTH) ) {
+         coord_start_letter = "<td class=brdl><img class=brdl src=\"" + base_path + this.stone_size + "/c";
+
+         var coord_tmp = "<td><img src=\"" + base_path + "images/blank.gif\" width=" + add_width_west + " height=" + this.stone_size + " alt=\" \"></td>\n";
+         if( opts_coords & C.GOBB_WEST )
+            coord_left = coord_tmp;
+         if( opts_coords & C.GOBB_EAST )
+            coord_right = coord_tmp;
+      }
+
+      var borders = opts_coords;
+      var start_col = 0;
+      if( (goban.size_x > goban.max_x && !(borders & C.GOBB_WEST)) )
+         start_col = goban.size_x - goban.max_x;
+
+      var start_row = goban.size_y;
+      if( (goban.size_y > goban.max_y && !(borders & C.GOBB_NORTH)) || (goban.size_y < goban.max_y ) )
+         start_row = goban.max_y;
+
+      // ---------- Goban ------------------------------------------------
+
+      var table_styles = {};
+      table_styles['width'] = table_width + "px";
+
+      var table_attr = {};
+      table_attr['border'] = 0;
+      table_attr['cellspacing'] = 0;
+      table_attr['cellpadding'] = 0;
+      if( this.wood_color > 10 ) {
+         $("#Goban").removeAttr('background-image');
+         var bcol = BC.ARR_WOODBGCOLORS[this.wood_color - 10];
+         table_attr['bgcolor'] = bcol;
+         table_styles['background-color'] = bcol;
+      } else {
+         $("#Goban").removeAttr('bgcolor').removeAttr('background-color');
+         table_styles['background-image'] = "url(" + base_path + "images/wood" + this.wood_color + ".gif)";
+      }
+      $("#Goban").css(table_styles).attr(table_attr);
+
+      var blank_image = "<img src=\"" + base_path + "images/dot.gif\">";
+      var row, img;
+
+      if( opts_coords & C.GOBB_NORTH ) {
+         row = this.make_coord_row( goban.max_x, start_col, coord_start_letter, coord_alt, coord_end, coord_left, coord_right );
+         tbody.append( $(row) );
+      }
+
+      for( var rownr = start_row, y = 1; y <= goban.max_y; rownr--, y++ ) {
+         row = ( opts_coords & C.GOBB_WEST ) ? coord_start_number + rownr + coord_alt + rownr + coord_end : '';
+         for( var x = 1; x <= goban.max_x; x++ ) {
+            row += '<td id=' + this.makeSgfCoords(x,y) + " class=brdx>" + blank_image + "</td>\n";
+         }
+         if( opts_coords & C.GOBB_EAST )
+            row += coord_start_number + rownr + coord_alt + rownr + coord_end;
+         $('<tr>' + row + '</tr>').appendTo(tbody);
+      }//for y
+
+      if( opts_coords & C.GOBB_SOUTH ) {
+         row = this.make_coord_row( goban.max_x, start_col, coord_start_letter, coord_alt, coord_end, coord_left, coord_right );
+         tbody.append( $(row) );
+      }
+
+      $("#GameEditor div.GobanGfx").css('width', table_width + 'px');
+      $("#Goban tbody").show();
+   }, //draw_board_structure
+
+   make_coord_row : function( max_x, start_val, coord_start_letter, coord_alt, coord_end, coord_left, coord_right ) {
+      var out = '', letterIdx = 0, letter;
+      for( var colnr = 1; colnr <= max_x; colnr++ ) {
+         if( letterIdx == 8 ) letterIdx++; // skip 8='i'
+         letter = String.fromCharCode(0x61 + start_val + letterIdx); //0x61=a
+         out += coord_start_letter + letter + coord_alt + letter + coord_end;
+         letterIdx++;
+      }
+      return '<tr>' + (coord_left ? coord_left : '') + out + (coord_right ? coord_right : '') + "</tr>\n";
+   }, //make_coord_row
 
    // updates board; rebuild=true to rebuild all td-cells (content replaced)
    draw_board : function( goban, rebuild ) {
@@ -484,8 +607,8 @@ $.extend( DGS.Board.prototype, {
       return BC.MAP_BOARDLINES[board_lines];
    },
 
-   makeSgfCoords : function( x, y ) {
-      return String.fromCharCode(0x60 + x) + String.fromCharCode(0x60 + y); //0x61=a, x/y=1..n
+   makeSgfCoords : function( x, y ) { // x/y=1..n
+      return String.fromCharCode(0x60 + x) + String.fromCharCode(0x60 + y); //0x61=a
    }
 
 }); //Board
@@ -496,9 +619,9 @@ $.extend( DGS.Board.prototype, {
 // ---------- GameEditor -------------------------------------------------------
 
 // constructs GameEditor
-DGS.GameEditor = function( stone_size ) {
+DGS.GameEditor = function( stone_size, wood_color ) {
    this.goban = new DGS.Goban(); // DGS.Goban to keep board-state
-   this.board = new DGS.Board( stone_size ); // DGS.Board for drawing board
+   this.board = new DGS.Board( stone_size, wood_color ); // DGS.Board for drawing board
    this.board_storage = null; // for restoring board
 };
 
@@ -560,6 +683,29 @@ $.extend( DGS.GameEditor.prototype, {
          $("table#Goban").html(this.board_storage);
          this.board_storage = null;
       }
+   },
+
+   execSizeUpdate : function() {
+      // check inputs
+      var width  = $("#size_w").val();
+      var height = $("#size_h").val();
+      var error = false;
+      if( !width || !parseInt(width,10) || width < 2 || width > 25 ) {
+         $("#size_w").effect("highlight", { color: '#FF0000' }).focus();
+         return false;
+      }
+      if( !height || !parseInt(height,10) || height < 2 || height > 25 ) {
+         $("#size_h").effect("highlight", { color: '#FF0000' }).focus();
+         return false;
+      }
+
+      // re-init board
+      this.goban.setSize( width, height );
+      this.goban.makeBoard( width, height, true );
+      this.goban.setOptionsCoords( C.GOBB_MID, true );
+      this.board.draw_board_structure( this.goban );
+      this.board.draw_board( this.goban, false );
+      return true;
    }
 
 }); //GameEditor
