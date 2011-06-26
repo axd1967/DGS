@@ -48,6 +48,8 @@ if( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament.php';
 }
 
+$GLOBALS['ThePage'] = new Page('Game');
+
 
 // abbreviations used to reduce file size
 function get_alt_arg( $n1, $n2)
@@ -556,8 +558,20 @@ function get_alt_arg( $n1, $n2)
       $TheBoard->set_style( $cfg_board );
 
 
+   if( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
+   {
+      $js_moves_data = $TheBoard->make_js_game_moves();
+      $js = add_js_var( 'base_path', $base_path );
+      $js .= sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d);\n", (int)$TheBoard->stone_size );
+      $js .= sprintf( "DGS.run.gameEditor.parseMoves(%s,%s,%s);\n",
+         $Size, $Size, js_safe($TheBoard->make_js_game_moves()) );
+      $js .= "DGS.game.loadPage();\n";
+   }
+   else
+      $js = null;
+
    $title = T_("Game") ." #$gid,$move";
-   start_page($title, 0, $logged_in, $player_row, $TheBoard->style_string());
+   start_page($title, 0, $logged_in, $player_row, $TheBoard->style_string(), null, $js);
 
 
 
@@ -594,10 +608,10 @@ function get_alt_arg( $n1, $n2)
       echo "\n<dl class=ExtraInfos>";
       foreach($extra_infos as $txt => $class)
          echo "<dd".($class ? " class=\"$class\"" : '').">$txt</dd>";
-      echo "</dl>";
+      echo "</dl>\n";
    }
    else
-      echo "\n<br>";
+      echo "<br>\n";
 
    $cols = 2;
    if( $show_notes && $noteshide != 'Y' )
@@ -862,6 +876,8 @@ function draw_moves( $gid, $move, $handicap )
       if( $handicap > 0 )
          $sgf_move -= $handicap;
    }
+
+   draw_game_viewer();
    echo '<span class="SgfMove">', sprintf( T_('(SGF-Move %s)'), $sgf_move ), '</span>&nbsp;';
 
    // add selectbox to show specific move
@@ -874,6 +890,21 @@ function draw_moves( $gid, $move, $handicap )
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">";
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">";
 } //draw_moves
+
+function draw_game_viewer()
+{
+   global $base_path;
+   if( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
+   {
+      echo anchor('#', T_('Browse Game'), '', 'class=GameViewer'),
+         "<span id=\"GameViewer\">",
+            anchor('#', image($base_path.'images/start.gif', T_('First Move'), null), '',    'id=FirstMove'),
+            anchor('#', image($base_path.'images/prev.gif',  T_('Previous Move'), null), '', 'id=PrevMove'),
+            anchor('#', image($base_path.'images/next.gif',  T_('Next Move'), null), '',     'id=NextMove'),
+            anchor('#', image($base_path.'images/end.gif',   T_('Last Move'), null), '',     'id=LastMove'),
+         "</span>\n";
+   }
+}
 
 // returns true, if given move is the final score-move (predecessor = POSX_SCORE too)
 function get_final_score_move( $move )

@@ -1919,8 +1919,23 @@ div.GobanEnd {
 
 
 /* ------------------------- */
-/* board page */
+/* game page / board page */
 /* ------------------------- */
+
+a.GameViewer {
+   font-weight: bold;
+   padding-right: 1em;
+}
+span#GameViewer {
+   display: none;
+   padding: 1em 0.5em 0.7em 1em;
+}
+span#GameViewer img {
+   margin: 0px 0.5em 0px 0.5em;
+   vertical-align: middle;
+}
+
+
 
 /*
  Some simple browsers (like Pocket PC IE or PALM ones) poorly

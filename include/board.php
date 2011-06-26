@@ -39,6 +39,7 @@ class Board
    var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
    var $marks; //array: [$sgf_coord] => $mark
    var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY,$mark)
+   var $js_moves; //array($MoveNr,$Stone,$PosX,$PosY) to build moves for JS-game-editor
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    var $movemrkx, $movemrky, $movecol, $movemsg;
@@ -63,6 +64,7 @@ class Board
       $this->moves = array();
       $this->marks = NULL;
       $this->captures = NULL;
+      $this->js_moves = array();
 
       $this->movemrkx = $this->movemrky = -1;
       $this->movecol = DAME;
@@ -89,6 +91,7 @@ class Board
       $this->movecol = DAME;
       $this->movemsg = '';
       $this->infos = array();
+      $this->js_moves = array();
 
       $gid = $game_row['ID'];
       if( $gid <= 0 )
@@ -133,7 +136,10 @@ class Board
          }
 
          if( $Stone == BLACK || $Stone == WHITE )
+         {
             $this->moves[$MoveNr] = array( $Stone, $PosX, $PosY);
+            $this->js_moves[] = array( $MoveNr, $Stone, $PosX, $PosY );
+         }
 
          if( $MoveNr > $move )
          {
@@ -150,7 +156,11 @@ class Board
 
          if( $Stone <= WHITE ) //including NONE (prisoners)
          {
-            if( $PosX < 0 ) continue; //excluding PASS, RESIGN and SCORE, ADDTIME
+            if( $PosX < 0 )
+            {
+               $this->js_moves[] = array( $MoveNr, $Stone, $PosX, 0 );
+               continue; //excluding PASS, RESIGN and SCORE, ADDTIME
+            }
 
             $this->array[$PosX][$PosY] = $Stone; //including DAME (prisoners)
 
@@ -164,6 +174,7 @@ class Board
                $removed_dead = TRUE;
             }
             $marked_dead[] = array( $PosX, $PosY);
+            $this->js_moves[] = array( $MoveNr, $Stone, $PosX, $PosY );
          }
       }
       mysql_free_result($result);
@@ -429,6 +440,7 @@ class Board
 
 
    // keep in sync with GobanHandlerGfxBoard
+   // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
    function draw_board( $may_play=false, $action='', $stonestring='')
    {
       global $woodbgcolors;
@@ -483,7 +495,7 @@ class Board
             $coord_right = '';
       }
 
-      $nomove_start = "<td class=brdx><img class=brdx alt=\"";
+      $nomove_start = "<td id=%s class=brdx><img class=brdx alt=\"";
       $nomove_src = "\" src=\"$stone_size/";
       $nomove_end = ".gif\"></td>\n";
       if( $may_play )
@@ -493,7 +505,7 @@ class Board
             case 'handicap':
                $on_not_empty = false;
                $on_empty = true;
-               $move_start = "<td class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
+               $move_start = "<td id=%s class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=handicap".URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;
@@ -504,7 +516,7 @@ class Board
                   $on_empty = true;
                else
                   $on_empty = false;
-               $move_start = "<td class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
+               $move_start = "<td id=%s class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=remove".URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;
@@ -512,7 +524,7 @@ class Board
             default:
                $on_not_empty = false;
                $on_empty = true;
-               $move_start = "<td class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=domove".URI_AMP."c=";
+               $move_start = "<td id=%s class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=domove".URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                break;
          }
@@ -545,7 +557,7 @@ class Board
           **/
          $cell_size_fix = ' border=0 cellspacing=0 cellpadding=0';
 
-         echo '<table class=Goban' . $woodstring . $cell_size_fix . '>';
+         echo '<table id=Goban class=Goban' . $woodstring . $cell_size_fix . '>';
 
          echo '<tbody>';
 
@@ -703,13 +715,13 @@ class Board
 
                if( $may_play && !$no_click &&
                    ( ($empty && $on_empty) || (!$empty && $on_not_empty) ) )
-                  echo "$move_start$letter_c$letter_r$move_alt$alt$img_id$move_src$type$move_end";
+                  echo sprintf($move_start, $sgfc) . "$letter_c$letter_r$move_alt$alt$img_id$move_src$type$move_end";
                else
-                  echo "$nomove_start$alt$img_id$nomove_src$type$nomove_end";
+                  echo sprintf($nomove_start, $sgfc) . "$alt$img_id$nomove_src$type$nomove_end";
 
                $letter_c++;
                $letter++; if( $letter == 'i' ) $letter++;
-            }
+            }//colnr
 
             if( $smooth_edge )
                echo '<td>' . $edge_vert . "r.gif\"></td>\n";
@@ -719,7 +731,7 @@ class Board
 
             echo "</tr>\n";
             $letter_r++;
-         }
+         }//rownr
 
          if( $smooth_edge )
             $this->draw_edge_row( $edge_start.'d', $edge_coord,
@@ -1419,6 +1431,37 @@ class Board
 
       return $out;
    }//make_game_snapshot
+
+   /*!
+    * \brief Returns String with moves to be passed to JavaScript-game-editor for building up game-tree.
+    * \return space-separate string with moves, for syntax see GameEditor.parseMoves() in 'js/game-editor.js'
+    * \note prisoners will be calculated, handicap is either done as SETUP or as MOVE
+    */
+   function make_js_game_moves()
+   {
+      $out = array();
+      foreach( $this->js_moves as $arr )
+      {
+         list( $move_nr, $stone, $x, $y ) = $arr;
+         if( $stone == BLACK )
+            $color = 'b';
+         elseif( $stone == WHITE )
+            $color = 'w';
+         else
+            continue; // stone=NONE|MARKED_BY_BLACK/WHITE, x=POSX_RESIGN/TIMEOUT/SCORE
+
+         if( $x == POSX_PASS )
+            $val = '_P';
+         else
+            $val = number2sgf_coords($x,$y, $this->size);
+         $out[] = "{$color}{$val}";
+         //$out[] = "{$move_nr}.{$color}{$val}";
+      }
+
+      $result = implode(' ', $out);
+      //error_log("make_js_game_moves({$this->size}) = [$result]");
+      return $result;
+   }//make_js_game_moves
 
 } //class Board
 
