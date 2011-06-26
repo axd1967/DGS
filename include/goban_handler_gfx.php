@@ -250,7 +250,7 @@ class GobanHandlerGfxBoard
 
       $table_id = ($this->enable_id) ? ' id=Goban' : '';
       $this->result[] = "<table{$table_id} class=Goban" . $woodstring . $cell_size_fix
-         . (count($styles) ? ' style="' . implode(' ', $styles) . '"': '') . '><tbody>';
+         . ' style="' . implode(' ', $styles) . '"><tbody>';
 
       if( $opts_coords & GOBB_NORTH )
          $this->draw_coord_row( $start_col, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
