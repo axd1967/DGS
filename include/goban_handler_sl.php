@@ -193,8 +193,7 @@ class GobanHandlerSL1
          $ySize = $this->goban->max_y;
          $this->boardSize = max( $xSize, $ySize );
       }
-      $this->goban->setSizeX( $xSize );
-      $this->goban->setSizeY( $ySize );
+      $this->goban->setSize( $xSize, $ySize );
 
       if( !is_null($this->boardTitle) && (string)$this->boardTitle != '' )
          $this->goban->BoardTitle = $this->parse_SL_text( $this->boardTitle ); // wrapping by fixed table-width
