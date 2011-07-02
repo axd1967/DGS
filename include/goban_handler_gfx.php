@@ -93,8 +93,8 @@ class GobanHandlerGfxBoard
          $MAP_TERRITORY_MARKERS = array(
             GOBM_TERR_B       => 'b',
             GOBM_TERR_W       => 'w',
-            GOBM_TERR_NEUTRAL => 'd',
-            GOBM_TERR_DAME    => 'g',
+            GOBM_TERR_NEUTRAL => 'g',
+            GOBM_TERR_DAME    => 'd',
          );
       }
 
