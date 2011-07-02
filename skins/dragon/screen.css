@@ -1920,7 +1920,23 @@ table#GameEditor div.tab {
    position: relative;
    top: -1px;
    background-color: #dddddd;
+   padding-top: .3em;
 }
+
+table#GameEditor a.Tool {
+   margin: 0 .2em;
+   padding: 2px 1px 4px 1px;
+   width: 21px;
+   height: 21px;
+}
+table#GameEditor a.Tool img {
+   vertical-align: middle;
+   padding: 2px;
+}
+table#GameEditor a.ToolSelected {
+   border: 1px solid #683888; /* sync with body background */
+}
+
 
 
 

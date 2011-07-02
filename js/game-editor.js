@@ -35,13 +35,21 @@ DGS.game_editor = {
 
    initPage : function() {
       $( function() {
-         $("#tabs").tabs({ disabled: [] });
+         $("#tabs").tabs({ disabled: [], selected: 1 });
       });
 
       $("#tab_Size input#size_upd").click( function(event) {
          event.preventDefault();
          DGS.run.gameEditor.action_size_updateSize();
       });
+
+      $("#tab_Edit a.Tool").click( function(event) {
+         event.preventDefault();
+         DGS.run.gameEditor.action_edit_handle_tool( this );
+      });
+
+
+      DGS.run.gameEditor.testBoard(); //TODO test
    }
 };
 
@@ -86,6 +94,17 @@ DGS.utils = {
 
    highlight : function( selector ) {
       $(selector).effect("highlight", { color: '#FF0000' }).focus();
+   },
+
+   makeSgfCoords : function( x, y ) { // x/y=1..n
+      return String.fromCharCode(0x60 + x) + String.fromCharCode(0x60 + y); //0x61=a
+   },
+
+   // SGF-single-coord: a..y -> 1..25
+   makeNumberCoord : function( sgf_part ) {
+      if( sgf_part < 'a' || sgf_part > 'y' )
+         throw "DGS.utils.makeNumberCoord("+sgf_part+"): invalid args";
+      return sgf_part.charCodeAt(0) - 0x60; //0x61=a
    }
 };
 
@@ -282,6 +301,12 @@ $.extend( DGS.Goban.prototype, {
          return [ 0, '' ];
    },
 
+   getValueSgf : function( coord_sgf ) {
+      var x = DGS.utils.makeNumberCoord( coord_sgf.charAt(0) );
+      var y = DGS.utils.makeNumberCoord( coord_sgf.charAt(1) );
+      return this.getValue(x,y);
+   },
+
    setStone : function( x, y, stone_value ) {
       var upd_arr = this.getValue(x,y);
       upd_arr[C.GOBMATRIX_VALUE] =
@@ -325,41 +350,56 @@ $.extend( DGS.Goban.prototype, {
 
 // constructs GobanChanges
 DGS.GobanChanges = function() {
-   //arr: [ x, y, value_xormask, label_diff ]; x/y=1..n, mask=int, diff=+L -L ""
+   //arr: [ x, y, change-bitmask, value, label_diff ]; x/y=1..n, mask=int, diff=+L - ""
    this.changes = [];
 };
 
 $.extend( DGS.GobanChanges.prototype, {
 
-   // param label_diff: if label-changed "+L|-L" then also xor_mask must contain according bit GOBM_LETTER|NUMBER
-   add_change : function( x, y, xor_mask, label_diff ) {
-      this.changes.push( [ x, y, xor_mask, label_diff ] );
+   // param label_diff: if label-changed "+L|-" then also value-bitmask and value must set/clear according GOBM_LETTER|NUMBER
+   add_change : function( x, y, change_mask, value, label_diff ) {
+      this.changes.push( [ x, y, change_mask, value, label_diff ] );
    },
 
-   // apply GobanChanges in this object on given Goban
+   add_change_sgf : function( sgf_xy, change_mask, value, label_diff ) {
+      var x = DGS.utils.makeNumberCoord( sgf_xy.charAt(0) );
+      var y = DGS.utils.makeNumberCoord( sgf_xy.charAt(1) );
+      this.changes.push( [ x, y, change_mask, value, label_diff ] );
+   },
+
+   has_changes : function() {
+      return (this.changes.length > 0);
+   },
+
+   // apply GobanChanges in this object on given Goban, return number of real updates
    apply_changes : function( goban ) {
-      var chg, x, y, xor_mask, label_diff, arrval, old_value, old_label;
+      var chg, x, y, change_mask, value, label_diff, arrval, old_value, old_label;
+      var count_updates = 0;
       for( var i=0; i < this.changes.length; i++ ) {
          chg = this.changes[i];
-         x = chg[0], y = chg[1], xor_mask = chg[2], label_diff = chg[3];
+         x = chg[0], y = chg[1], change_mask = chg[2], value = chg[3], label_diff = chg[4];
 
-         if( xor_mask || label_diff ) {
+         if( change_mask || label_diff ) {
             arrval = goban.getValue(x,y);
-            old_value = arrval[C.GOBMATRIX_VALUE];
-            old_label = arrval[C.GOBMATRIX_LABEL];
+            old_value = new_value = arrval[C.GOBMATRIX_VALUE];
+            old_label = new_label = arrval[C.GOBMATRIX_LABEL];
 
-            if( xor_mask )
-               arrval[C.GOBMATRIX_VALUE] ^= xor_mask;
+            if( change_mask ) {
+               new_value = (new_value & ~change_mask) | value;
+            }
             if( label_diff ) {
                if( label_diff.charAt(0) == '+' )
-                  arrval[C.GOBMATRIX_LABEL] = label_diff.substr(1);
+                  new_label = label_diff.substr(1);
                else if( label_diff.charAt(0) == '-' )
-                  arrval[C.GOBMATRIX_LABEL] = "";
+                  new_label = "";
             }
-            if( old_value != arrval[C.GOBMATRIX_VALUE] || old_label != arrval[C.GOBMATRIX_LABEL] )
-               goban.setValue( x, y, arrval );
+            if( old_value != new_value || old_label != new_label ) {
+               goban.setValue( x, y, [ new_value, new_label ] );
+               count_updates++;
+            }
          }
       }
+      return count_updates;
    } //apply_changes
 
 }); //GobanChanges
@@ -376,8 +416,8 @@ DGS.constants.Board = {
    MAP_TERRITORY_MARKERS : DGS.utils.build_map([
       C.GOBM_TERR_B       , 'b',
       C.GOBM_TERR_W       , 'w',
-      C.GOBM_TERR_NEUTRAL , 'd',
-      C.GOBM_TERR_DAME    , 'g'
+      C.GOBM_TERR_NEUTRAL , 'g',
+      C.GOBM_TERR_DAME    , 'd'
    ]),
 
    MAP_FORM_MARKERS : DGS.utils.build_map([
@@ -427,7 +467,9 @@ DGS.Board = function( stone_size, wood_color ) {
 $.extend( DGS.Board.prototype, {
 
    // redraw board-structure without board-content, used after size-change
-   draw_board_structure : function( goban ) {
+   draw_board_structure : function( goban, withActions ) {
+      if( withActions == undefined )
+         withActions = false;
       $("#Goban tbody > *").hide().remove();
       var tbody = $("table#Goban tbody");
 
@@ -484,8 +526,10 @@ $.extend( DGS.Board.prototype, {
       }
       $("#Goban").css(table_styles).attr(table_attr);
 
-      var blank_image = "<img src=\"" + base_path + "images/dot.gif\">";
       var row, img;
+      var blank_image = "<img src=\"" + base_path + "images/dot.gif\">";
+      if( withActions )
+         blank_image = '<a href="#">' + blank_image + '</a>';
 
       if( opts_coords & C.GOBB_NORTH ) {
          row = this.make_coord_row( goban.max_x, start_col, coord_start_letter, coord_alt, coord_end, coord_left, coord_right );
@@ -495,7 +539,7 @@ $.extend( DGS.Board.prototype, {
       for( var rownr = start_row, y = 1; y <= goban.max_y; rownr--, y++ ) {
          row = ( opts_coords & C.GOBB_WEST ) ? coord_start_number + rownr + coord_alt + rownr + coord_end : '';
          for( var x = 1; x <= goban.max_x; x++ ) {
-            row += '<td id=' + this.makeSgfCoords(x,y) + " class=brdx>" + blank_image + "</td>\n";
+            row += '<td id=' + DGS.utils.makeSgfCoords(x,y) + " class=brdx>" + blank_image + "</td>\n";
          }
          if( opts_coords & C.GOBB_EAST )
             row += coord_start_number + rownr + coord_alt + rownr + coord_end;
@@ -508,6 +552,12 @@ $.extend( DGS.Board.prototype, {
       }
 
       $("#GameEditor div.GobanGfx").css('width', table_width + 'px');
+      if( withActions )
+      $("#GameEditor td.brdx a").click( function(event) {
+         DGS.run.gameEditor.action_handle_board( this, event );
+         event.preventDefault();
+      });
+
       $("#Goban tbody").show();
    }, //draw_board_structure
 
@@ -598,7 +648,7 @@ $.extend( DGS.Board.prototype, {
          if( !type ) type = 'dot'; // empty-cell default
       }
 
-      var sgf_coord = this.makeSgfCoords(x,y);
+      var sgf_coord = DGS.utils.makeSgfCoords(x,y);
       if( type )
          $("td#" + sgf_coord + " img").attr("src", base_path + this.stone_size + '/' + type + '.gif' );
    }, //write_image
@@ -609,13 +659,146 @@ $.extend( DGS.Board.prototype, {
       if( !mixed && board_lines == (C.GOBB_NORTH|C.GOBB_SOUTH) )
          return 'du';
       return BC.MAP_BOARDLINES[board_lines];
-   },
-
-   makeSgfCoords : function( x, y ) { // x/y=1..n
-      return String.fromCharCode(0x60 + x) + String.fromCharCode(0x60 + y); //0x61=a
    }
 
 }); //Board
+
+
+
+
+// ---------- ChangeCalculator -------------------------------------------------
+
+// constructs ChangeCalculator
+DGS.ChangeCalculator = function() {
+};
+
+$.extend( DGS.ChangeCalculator.prototype, {
+
+   /*
+    * Calculates GobanChanges to place stone with given color on Goban at given sgf-coordinates.
+    * \param $new_stone = C.GOBS_BLACK|WHITE|EMPTY
+    * \note only for allowed combinations:
+    *    - GOBS_EMPTY NOT-OK with GOBM_MARK|NUMBER
+    *    - GOBS_BLACK|WHITE NOT-OK with GOBM_LETTER|TERR_NEUTRAL|TERR_DAME
+    *    - GOBS_BLACK NOT-OK with GOBM_TERR_B
+    *    - GOBS_WHITE NOT-OK with GOBM_TERR_W
+    */
+   calc_goban_change_set_stone : function( goban, coord, new_stone ) {
+      new_stone &= C.GOBS_BITMASK;
+
+      // clear marker for invalid combinations
+      var old_marker = ( goban.getValueSgf( coord )[C.GOBMATRIX_VALUE] & C.GOBM_BITMASK );
+      var gob_mask = C.GOBS_BITMASK;
+      var chg_label = '';
+
+      if( new_stone == C.GOBS_EMPTY ) {
+         if( old_marker == C.GOBM_MARK ) {
+            gob_mask |= C.GOBM_BITMASK;
+         } else if( old_marker == C.GOBM_NUMBER ) {
+            gob_mask |= C.GOBM_BITMASK;
+            chg_label = '-';
+         }
+      } else { // new_stone == B|W
+         if( old_marker == C.GOBM_LETTER ) {
+            gob_mask |= C.GOBM_BITMASK;
+            chg_label = '-';
+         } else if( old_marker == C.GOBM_TERR_NEUTRAL || old_marker == C.GOBM_TERR_DAME ) {
+            gob_mask |= C.GOBM_BITMASK;
+         } else if( new_stone == C.GOBS_BLACK && old_marker == C.GOBM_TERR_B ) {
+            gob_mask |= C.GOBM_BITMASK;
+         } else if( new_stone == C.GOBS_WHITE && old_marker == C.GOBM_TERR_W ) {
+            gob_mask |= C.GOBM_BITMASK;
+         }
+      }
+
+      var goban_changes = new DGS.GobanChanges();
+      goban_changes.add_change_sgf( coord, gob_mask, new_stone, chg_label );
+      return goban_changes;
+   }, //calc_goban_change_set_stone
+
+   /*
+    * Calculates GobanChanges to toggle stone (new_stone) on Goban at given sgf-coordinates.
+    * \param $new_stone = C.GOBS_BLACK|WHITE
+    * \note only for allowed combinations:
+    *    - toggle empty into new-stone color
+    *    - if old-stone is new-stone => toggle to empty-stone; otherwise toggle to new-stone color
+    *    - toggle only into allowed combinations (see calc_goban_change_set_stone-method)
+    */
+   calc_goban_change_toggle_stone : function( goban, coord, new_stone ) {
+      var arrval = goban.getValueSgf( coord );
+      var old_value = (arrval[C.GOBMATRIX_VALUE] & (C.GOBS_BITMASK|C.GOBM_BITMASK));
+      var old_stone  = (old_value & C.GOBS_BITMASK);
+      var old_marker = (old_value & C.GOBM_BITMASK);
+
+      var is_trg_stone = ( old_stone == new_stone );
+      var trg_stone = ( old_stone == C.GOBS_EMPTY || !is_trg_stone ) ? new_stone : C.GOBS_EMPTY;
+
+      // clear marker for invalid combinations
+      var new_value = trg_stone | old_marker;
+      var chg_label = '';
+
+      if( old_marker == C.GOBM_LETTER || ((old_marker == C.GOBM_NUMBER || old_marker == C.GOBM_MARK) && is_trg_stone) ) {
+         new_value &= ~C.GOBM_BITMASK;
+         chg_label = '-';
+      } else if( old_marker == C.GOBM_TERR_B && trg_stone == C.GOBS_BLACK ) {
+         new_value &= ~C.GOBM_BITMASK;
+      } else if( old_marker == C.GOBM_TERR_W && trg_stone == C.GOBS_WHITE ) {
+         new_value &= ~C.GOBM_BITMASK;
+      } else if( old_marker == C.GOBM_TERR_NEUTRAL || old_marker == C.GOBM_TERR_DAME ) {
+         new_value &= ~C.GOBM_BITMASK;
+      }
+
+      var goban_changes = new DGS.GobanChanges();
+      goban_changes.add_change_sgf( coord, C.GOBS_BITMASK | C.GOBM_BITMASK, new_value, chg_label );
+      return goban_changes;
+   }, //calc_goban_change_toggle_stone
+
+   /*
+    * Calculates GobanChanges to toggle marker on Goban at given sgf-coordinates.
+    * \param $new_marker = C.GOBM_MARK|CIRCLE|SQUARE|TRIANGLE|CROSS|TERR_B/W/DAME/NEUTRAL
+    * \note only for allowed combinations:
+    *    - if old-marker is new-marker => toggle to empty-marker; otherwise toggle to new-marker
+    *    - toggle only into allowed combinations (see calc_goban_change_set_stone-method)
+    *    - toggle mark only on B/W-stones
+    */
+   calc_goban_change_toggle_marker : function( goban, coord, new_marker ) {
+      var goban_changes = new DGS.GobanChanges();
+
+      var old_value = goban.getValueSgf( coord )[C.GOBMATRIX_VALUE];
+      var old_stone  = (old_value & C.GOBS_BITMASK);
+      var old_marker = (old_value & C.GOBM_BITMASK);
+
+      // clear marker for invalid combinations
+      var trg_marker = new_marker;
+      var gob_mask = C.GOBM_BITMASK;
+      var chg_label = '';
+
+      if( old_marker == new_marker ) {
+         trg_marker = C.GOBM_EMPTY;
+      } else if( new_marker == C.GOBM_MARK ) {
+         if( old_stone != C.GOBS_BLACK && old_stone != C.GOBS_WHITE )
+            return goban_changes; // no change
+      } else {
+         if( old_marker == C.GOBM_NUMBER || old_marker == C.GOBM_LETTER )
+            chg_label = '-';
+
+         //NOTE: nothing special for: if( new_marker == C.GOBM_CIRCLE || new_marker == C.GOBM_SQUARE || new_marker == C.GOBM_TRIANGLE || new_marker == C.GOBM_CROSS ) {
+         if( new_marker == C.GOBM_TERR_NEUTRAL || new_marker == C.GOBM_TERR_DAME ) {
+            gob_mask |= C.GOBS_BITMASK;
+         } else if( old_stone != C.GOBS_EMPTY && (new_marker == C.GOBM_TERR_B || new_marker == C.GOBM_TERR_W) ) {
+            if( old_stone == C.GOBS_BLACK && new_marker == C.GOBM_TERR_B ) {
+               gob_mask |= C.GOBS_BITMASK; // clear stone
+            } else if( old_stone == C.GOBS_WHITE && new_marker == C.GOBM_TERR_W ) {
+               gob_mask |= C.GOBS_BITMASK; // clear stone
+            }
+         }
+      }
+
+      goban_changes.add_change_sgf( coord, gob_mask, trg_marker, chg_label );
+      return goban_changes;
+   } //calc_goban_change_toggle_marker
+
+}); // ChangeCalculator
 
 
 
@@ -626,7 +809,32 @@ $.extend( DGS.Board.prototype, {
 DGS.GameEditor = function( stone_size, wood_color ) {
    this.goban = new DGS.Goban(); // DGS.Goban to keep board-state
    this.board = new DGS.Board( stone_size, wood_color ); // DGS.Board for drawing board
+   this.calc = new DGS.ChangeCalculator(); // DGS.ChangeCalculator for calculating changes for goban & more
    this.board_storage = null; // for restoring board
+
+   this.edit_tool_selected = null;
+};
+
+DGS.GameEditor.CONFIG = {
+   edit : {
+      stone_tool : DGS.utils.build_map([
+         'b', C.GOBS_BLACK,
+         'w', C.GOBS_WHITE,
+         'clear', C.GOBS_EMPTY
+      ]),
+
+      marker_tool : DGS.utils.build_map([
+         'mark',     C.GOBM_MARK,
+         'circle',   C.GOBM_CIRCLE,
+         'square',   C.GOBM_SQUARE,
+         'triangle', C.GOBM_TRIANGLE,
+         'cross',    C.GOBM_CROSS,
+         'terr_b',   C.GOBM_TERR_B,
+         'terr_w',   C.GOBM_TERR_W,
+         'terr_neutral', C.GOBM_TERR_NEUTRAL,
+         'terr_dame',    C.GOBM_TERR_DAME
+      ])
+   } //edit
 };
 
 $.extend( DGS.GameEditor.prototype, {
@@ -665,17 +873,26 @@ $.extend( DGS.GameEditor.prototype, {
    drawBoard : function() {
       this.goban.clearBoard();
       this.board.draw_board( this.goban, true );
+   },
 
-      //TODO test
+   testBoard : function() { //TODO test
+      this.goban.setSize(9,9);
+      this.goban.makeBoard( this.goban.size_x, this.goban.size_y, true );
+      this.goban.setOptionsCoords( C.GOBB_MID, true );
+      this.board.draw_board_structure( this.goban, true );
+      this.board.draw_board( this.goban, false );
+
+      /*
       var changes = new DGS.GobanChanges();
-      changes.add_change( 4,4, C.GOBS_BLACK | C.GOBM_TRIANGLE, '' );
-      changes.add_change( 6,6, C.GOBS_WHITE | C.GOBM_NUMBER, '+4' );
-      changes.add_change( 8,8, C.GOBM_LETTER, '+u' );
-      changes.add_change( 9,9, C.GOBM_SQUARE | C.GOBO_HOSHI, '' );
-      changes.add_change( 2,2, C.GOBB_MID, '' );
+      changes.add_change( 4,4, C.GOBS_BITMASK | C.GOBM_BITMASK, C.GOBS_BLACK | C.GOBM_TRIANGLE, '' );
+      changes.add_change( 6,6, C.GOBS_BITMASK | C.GOBM_BITMASK, C.GOBS_WHITE | C.GOBM_NUMBER, '+4' );
+      changes.add_change( 8,8, C.GOBM_BITMASK, C.GOBM_LETTER, '+u' );
+      changes.add_change( 9,9, C.GOBM_BITMASK | C.GOBO_HOSHI, C.GOBM_SQUARE | C.GOBO_HOSHI, '' );
+      changes.add_change( 2,2, C.GOBB_BITMASK, C.GOBB_EMPTY, '' );
       changes.apply_changes( this.goban );
 
       this.board.draw_goban_changes( this.goban, changes );
+      */
    },
 
    saveBoard : function() {
@@ -690,7 +907,7 @@ $.extend( DGS.GameEditor.prototype, {
    },
 
 
-   // ---------- Actions on Size-tab -------------------------------------------
+   // ---------- Actions on SIZE-tab -------------------------------------------
 
    action_size_updateSize : function() {
       // check inputs
@@ -713,7 +930,61 @@ $.extend( DGS.GameEditor.prototype, {
       this.board.draw_board_structure( this.goban );
       this.board.draw_board( this.goban, false );
       return true;
-   } //actions
+   },
+
+   // ---------- Actions on EDIT-tab -------------------------------------------
+
+   action_edit_handle_tool : function( $tool ) { // $tool = selected edit-tool
+      if( this.edit_tool_selected == $tool )
+         return;
+
+      if( this.edit_tool_selected != null )
+         $(this.edit_tool_selected).toggleClass('ToolSelected', false);
+      this.edit_tool_selected = $tool;
+      $($tool).toggleClass('ToolSelected', true);
+
+      $("#D").text( $tool.id ); //DBG
+   }, //action_edit_handle_tool
+
+   action_handle_board : function( $point, $event ) { // $point = clicked board-point, $event = event for click
+      var point_id = $($point).parent().attr('id'); // SGF-coord
+      var dbg = point_id;
+
+      if( this.edit_tool_selected != null ) {
+         var tool_id = this.edit_tool_selected.id;
+         var goban_changes, value, subtool;
+
+         // calculate goban-change
+         // --- STONE-tools ---
+         if( (result = tool_id.match(/^edit_tool_(b|w|clear)_stone$/)) ) {
+            subtool = result[1];
+            value = DGS.GameEditor.CONFIG.edit.stone_tool[subtool];
+            goban_changes = this.calc.calc_goban_change_set_stone( this.goban, point_id, value );
+
+         } else if( tool_id == 'edit_tool_toggle_stone' ) {
+            value = ( $event.shiftKey ) ? C.GOBS_WHITE : C.GOBS_BLACK;
+            goban_changes = this.calc.calc_goban_change_toggle_stone( this.goban, point_id, value );
+         }
+         // --- MARKER-tools ---
+         else if( (result = tool_id.match(/^edit_tool_(circle|square|triangle|cross|terr_(b|w|neutral|dame))_marker$/)) ) {
+            subtool = result[1];
+            value = DGS.GameEditor.CONFIG.edit.marker_tool[subtool];
+            goban_changes = this.calc.calc_goban_change_toggle_marker( this.goban, point_id, value );
+         }
+
+         //TODO calculate compensation for goban-change (for undo)
+         //TODO store in editor-history
+
+         // draw-goban-change
+         if( goban_changes.apply_changes( this.goban ) ) {
+            this.board.draw_goban_changes( this.goban, goban_changes );
+         }
+      }
+
+      $("#D").text( dbg ); //DBG
+   }
+
+   // ---------- Actions (END) -------------------------------------------------
 
 }); //GameEditor
 

@@ -38,6 +38,7 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
       error('feature_disabled');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
+   $imgtool_path = $base_path . '21/';
 
    $page = "game_editor.php";
    $title = T_('Game Editor#ged');
@@ -71,8 +72,10 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
                "<div id=tabs>\n",
                   "<ul>\n",
                      "<li>", anchor('#tab_Size', T_('Size#ged'), T_('Change board size#ged')), "</li>\n",
+                     "<li>", anchor('#tab_Edit', T_('Edit#ged'), T_('Edit tools#ged')), "</li>\n",
                   "</ul>\n",
                   "<div id=tab_Size class=tab>\n", build_tab_Size(), "</div>\n",
+                  "<div id=tab_Edit class=tab>\n", build_tab_Edit(), "</div>\n",
                "</div>\n",
             "</td></tr>\n",
          "<tr><td id=NodeArea colspan=2>Node Area</td></tr>\n",
@@ -88,7 +91,7 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
 function build_tab_Size()
 {
    global $page;
-   $form = new Form( 'gameEdit', $page, FORM_GET );
+   $form = new Form( 'gameEditorSize', $page, FORM_GET );
    $form->add_row( array(
       'DESCRIPTION', T_('Width#ged'),
       'TEXTINPUTX',  'size_w', 4, 4, '', 'id=size_w' ));
@@ -98,6 +101,33 @@ function build_tab_Size()
    $form->add_row( array(
       'CELL', 2, '',
       'SUBMITBUTTONX', 'size_upd', T_('New Board#ged'), 'id=size_upd' ));
+   return $form->create_form_string();
+}
+
+function build_tab_Edit()
+{
+   global $page, $imgtool_path, $base_path;
+   $form = new Form( 'gameEditorEdit', $page, FORM_GET );
+   $form->add_row( array(
+      'DESCRIPTION', T_('Stone#ged'),
+      'TEXT', anchor('#', image($imgtool_path.'pb.gif', T_('Toggle Stone (Click=Black, Shift-Click=White)#ged'), null), '', 'id=edit_tool_toggle_stone class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'b.gif', T_('Set Black Stone#ged'), null), '', 'id=edit_tool_b_stone class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'w.gif', T_('Set White Stone#ged'), null), '', 'id=edit_tool_w_stone class=Tool'),
+      'TEXT', anchor('#', image($base_path.'images/no.gif', T_('Clear Stone#ged'), null), '', 'id=edit_tool_clear_stone class=Tool'),
+      //'TEXT', anchor('#', image($imgtool_path.'bm.gif', T_('Toggle Mark Marker#ged'), null), '', 'id=edit_tool_mark_marker class="Tool"'), // only in PLAY-mode
+      ));
+   $form->add_row( array(
+      'DESCRIPTION', T_('Marker#ged'),
+      'TEXT', anchor('#', image($imgtool_path.'c.gif', T_('Toggle Circle Marker#ged'), null), '', 'id=edit_tool_circle_marker class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'s.gif', T_('Toggle Square Marker#ged'), null), '', 'id=edit_tool_square_marker class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'t.gif', T_('Toggle Triangle Marker#ged'), null), '', 'id=edit_tool_triangle_marker class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'x.gif', T_('Toggle Cross Marker#ged'), null), '', 'id=edit_tool_cross_marker class="Tool"'),
+      'TEXT', MED_SPACING,
+      'TEXT', anchor('#', image($imgtool_path.'eb.gif', T_('Toggle Black Territory Marker#ged'), null), '', 'id=edit_tool_terr_b_marker class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'ew.gif', T_('Toggle White Territory Marker#ged'), null), '', 'id=edit_tool_terr_w_marker class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'ed.gif', T_('Toggle Dame Territory Marker#ged'), null), '', 'id=edit_tool_terr_dame_marker class="Tool"'),
+      'TEXT', anchor('#', image($imgtool_path.'eg.gif', T_('Toggle Neutral Territory Marker#ged'), null), '', 'id=edit_tool_terr_neutral_marker class="Tool"'),
+      ));
    return $form->create_form_string();
 }
 
