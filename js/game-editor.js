@@ -461,14 +461,24 @@ $.extend( DGS.Goban.prototype, {
       return this.getValue(x,y)[C.GOBMATRIX_LABEL];
    },
 
-   // returns cloned matrix[y][x] = GOBS_EMPTY|BLACK|WHITE
-   //TODO needed ?
+   // returns cloned matrix[y][x] = GOBS_EMPTY|BLACK|WHITE, Ys all filled, Xs only filled if set
    cloneStoneMatrix : function() {
-      var cmatrix = []; // cloned matrix
-      for( var y=1; y <= this.max_y; y++ )
-         cmatrix[y] = ( this.matrix[y] ) ? this.matrix[y].slice(0) : [];
+      var arrval, cmatrix = []; // cloned matrix
+      for( var y=1; y <= this.max_y; y++ ) {
+         cmatrix[y] = [];
+         if( y in this.matrix ) {
+            for( var x=1; x < this.matrix[y].length; x++ ) {
+               if( x in this.matrix[y] ) {
+                  arrval = this.matrix[y][x];
+                  cmatrix[y][x] = ( typeof(arrval) == 'number' )
+                     ? ( arrval & C.GOBS_BITMASK )
+                     : ( arrval[C.GOBMATRIX_VALUE] & C.GOBS_BITMASK );
+               }
+            }
+         }
+      }
       return cmatrix;
-   }
+   } //cloneStoneMatrix
 
 }); //Goban
 
@@ -1008,36 +1018,144 @@ DGS.ChangeCalculator = function() {
 }; // ChangeCalculator
 
 
-DGS.GameChangeCalculator = function() {
+DGS.GameChangeCalculator = function( goban ) {
+
+   this.goban = goban;
+   this.stone_matrix = null;
+
+   var DIR_X = [ -1,  0, 1, 0 ];
+   var DIR_Y = [  0, -1, 0, 1 ];
 
    /*
     * Calculates GobanChanges to play move on Goban at given sgf-coordinates.
     * \param $color = C.GOBS_BLACK|WHITE
+    *
+    * \note extracted from check_remove()-func in 'include/move.php'
     */
-   this.calc_change_play_move = function( goban, coord, color ) {
+   this.calc_change_play_move = function( coord_sgf, color ) {
       var goban_changes = new DGS.GobanChanges();
       if( color != C.GOBS_BLACK && color != C.GOBS_WHITE ) // only B/W-move
          return goban_changes;
 
-      var old_stone = ( goban.getValueSgf( coord )[C.GOBMATRIX_VALUE] & C.GOBS_BITMASK );
+      var old_stone = ( this.goban.getValueSgf( coord_sgf )[C.GOBMATRIX_VALUE] & C.GOBS_BITMASK );
       if( old_stone != C.GOBS_EMPTY ) // point must be empty
          return goban_changes;
 
-      //TODO handle: captures
-      //TODO handle: prisoners
-      //TODO assure: move on xy is NOT suicide
-      //TODO assure: move on xy is NOT ko
+      var x0 = DGS.utils.makeNumberCoord( coord_sgf.charAt(0) ); //1..
+      var y0 = DGS.utils.makeNumberCoord( coord_sgf.charAt(1) );
+
+      // determine captures
+      this.stone_matrix = this.goban.cloneStoneMatrix();
+      this.stone_matrix[y0][x0] = color;
+      var opp_color = C.GOBS_BLACK + C.GOBS_WHITE - color;
+      var prisoners = this.determine_prisoners( x0, y0, opp_color );
+      var nr_prisoners = prisoners.length;
+      DGS.utils.debug( String.sprintf("A2: xy0=[%s,%s] P=%s", x0, y0, nr_prisoners) );
+
+      // check for suicide
+      if( nr_prisoners == 0 ) {
+         if( !this.has_liberties( x0, y0, [], /*remove*/false) )
+            return goban_changes; // suicide not allowed
+      }
+
+      // check for ko
+      /*
+      //TODO global $Last_Move, $GameFlags; //input only
+      // note: $GameFlags has set Ko-flag if last move has taken a single stone
+      if( nr_prisoners == 1 && (GameFlags & GAMEFLAGS_KO) ) {
+         var xy = prisoners[0];
+         if( Last_Move_xy == xy )
+            return goban_changes; // ko not allowed
+      }
+      */
 
       // draw stone + mark
-      goban_changes.add_change_sgf( coord, C.GOBS_BITMASK | C.GOBM_BITMASK, color | C.GOBM_MARK, '-' );
+      goban_changes.add_change_sgf( coord_sgf, C.GOBS_BITMASK | C.GOBM_BITMASK, color | C.GOBM_MARK, '-' );
 
       // remove "previous" last-move-mark
-      var mark = goban.mark_point;
+      var mark = this.goban.mark_point;
       if( mark != null )
          goban_changes.add_change( mark[0], mark[1], C.GOBM_BITMASK, C.GOBM_EMPTY, '' );
 
+      // remove captured stones
+      for( var i=0; i < prisoners.length; i++ ) {
+         var xy = prisoners[i];
+         goban_changes.add_change( xy[0], xy[1], C.GOBS_BITMASK, C.GOBS_EMPTY, '-' );
+      }
+
+      //TODO handle: prisoners
+
       return goban_changes;
    }; //calc_change_play_move
+
+   // extracted from check_prisoners()-func in 'include/board.php'
+   this.determine_prisoners = function( x0, y0, color ) {
+      var prisoners = [], x, y, stone;
+      for( var dir=0; dir < 4; dir++ ) { // determine captured stones for ALL directions
+         x = x0 + DIR_X[dir];
+         y = y0 + DIR_Y[dir];
+         stone = this.stone_matrix[y][x];
+         if( stone == color )
+            this.has_liberties( x, y, prisoners, /*remove*/true );
+      }
+      return prisoners;
+   }; //determine_prisoners
+
+   /*!
+    * \brief Returns true if group at position (x,y) has at least one liberty.
+    * \param $x0/y0 board-position to check, 0..n
+    * \param $prisoners if $remove is set, pass-back extended prisoners-array if group at x,y has no liberty
+    * \param $remove if true, remove captured stones
+    *
+    * \note extracted from has_liberty_check()-func in 'include/board.php'
+    */
+   this.has_liberties = function( x0, y0, prisoners, remove ) {
+      var color = this.stone_matrix[y0][x0]; // Color of this stone
+
+      var arr_xy = [ x0, y0 ];
+      var stack = [ arr_xy ];
+
+      var visited = []; // potential prisoners and marker if point already checked
+      for( var y=1; y <= this.goban.max_y; y++ )
+         visited[y] = [];
+      visited[y0][x0] = 1;
+
+      // scanning all directions starting at start-x/y building up a stack of adjacent points to check
+      var dir, x, new_x, new_y, new_color;
+      while( ( arr_xy = stack.shift() ) ) {
+         x = arr_xy[0], y = arr_xy[1];
+
+         for( dir=0; dir < 4; dir++ ) { // scan all directions: W N E S
+            new_x = x + DIR_X[dir];
+            new_y = y + DIR_Y[dir];
+
+            if( (new_x >= 1 && new_x <= this.goban.max_x) && (new_y >= 1 && new_y <= this.goban.max_y) ) {
+               new_color = this.stone_matrix[new_y][new_x];
+               if( !new_color || new_color == C.GOBS_EMPTY ) {
+                  return true; // found liberty
+               } else if( new_color == color && !visited[new_y][new_x] ) {
+                  stack.push( [ new_x, new_y ] );
+                  visited[new_y][new_x] = 1;
+               }
+            }
+         }
+      }
+
+      if( remove ) {
+         for( y=1; y < visited.length; y++ ) {
+            if( y in visited ) {
+               for( x=1; x < visited[y].length; x++ ) {
+                  if( x in visited[y] ) {
+                     prisoners.push( [x,y] );
+                     this.stone_matrix[y][x] = C.GOBS_EMPTY;
+                  }
+               }
+            }
+         }
+      }
+
+      return false;
+   }; //has_liberties
 
 }; //GameChangeCalculator
 
@@ -1051,15 +1169,10 @@ DGS.GameEditor = function( stone_size, wood_color ) {
    this.goban = new DGS.Goban(); // DGS.Goban to keep board-state
    this.board = new DGS.Board( stone_size, wood_color ); // DGS.Board for drawing board
    this.calc = new DGS.ChangeCalculator(); // DGS.ChangeCalculator for calculating changes for goban & more
-   this.gamecalc = new DGS.GameChangeCalculator(); // DGS.GameChangeCalculator for calculating play-changes for goban & more
+   this.gamecalc = new DGS.GameChangeCalculator( this.goban ); // DGS.GameChangeCalculator for calculating play-changes for goban & more
    this.board_storage = null; // for restoring board
 
-   this.edit_tool_selected = null;
-   this.play_tool_selected = null;
-   this.play_next_color = C.GOBS_BLACK;
-
-   this.history_undo = []; // GobanChanges-arr for undo
-   this.history_redo = []; // GobanChanges-arr for redo
+   this.init();
 };
 
 DGS.GameEditor.CONFIG = {
@@ -1092,11 +1205,12 @@ DGS.GameEditor.CONFIG = {
 $.extend( DGS.GameEditor.prototype, {
 
    init : function() {
+      this.history_undo = []; // GobanChanges-arr for undo
+      this.history_redo = []; // GobanChanges-arr for redo
+
       this.edit_tool_selected = null;
       this.play_tool_selected = null;
-
-      this.history_undo = [];
-      this.history_redo = [];
+      this.play_next_color = C.GOBS_BLACK;
    },
 
    /*
@@ -1106,10 +1220,11 @@ $.extend( DGS.GameEditor.prototype, {
     *    move_nr   := digit+
     *    color     := "b" | "w"
     *    move      := ( "a".."z" "a".."z" | "_P" )       ; _P = pass
-    *    TODO prisoners := "P" black_prisoners "/" white_prisoners
-    *    TODO setup     := ( COLOR "S" move+ )+
-    *    TODO COLOR     := "B" | "W"
-    *    TODO territory := ( COLOR "T" move+ )+               ; for LATER
+    *    TODO:
+    *    prisoners := "P" black_prisoners "/" white_prisoners
+    *    setup     := ( COLOR "S" move+ )+
+    *    COLOR     := "B" | "W"
+    *    territory := ( COLOR "T" move+ )+               ; for LATER
     */
    parseMoves : function( size_x, size_y, moves_data ) {
       this.goban.setSize( size_x, size_y );
@@ -1173,11 +1288,17 @@ $.extend( DGS.GameEditor.prototype, {
       return $("#tabs").tabs('option', 'selected');
    },
 
+   // also set defaults
    action_handle_show_tab : function( $ui ) {
       if( $ui.index == 1 ) { // Edit-tab
+         if( this.edit_tool_selected == null ) // default-tool
+            $('#edit_tool_toggle_stone').click();
          this.update_label_tool();
          this.update_history_tool();
+
       } else if( $ui.index == 2 ) { // Play-tab
+         if( this.play_tool_selected == null ) // default-tool
+            $('#play_tool_move').click();
          this.update_play_tool_next_color();
          this.update_history_tool();
       }
@@ -1377,7 +1498,7 @@ $.extend( DGS.GameEditor.prototype, {
          // calculate game-changes
          // --- MOVE-tools ---
          if( tool_id == 'play_tool_move' ) {
-            goban_changes = this.gamecalc.calc_change_play_move( this.goban, point_id, this.play_next_color );
+            goban_changes = this.gamecalc.calc_change_play_move( point_id, this.play_next_color );
          }
 
          // draw-goban-change
@@ -1397,7 +1518,7 @@ $.extend( DGS.GameEditor.prototype, {
 
    update_play_tool_next_color : function( toggle ) {
       if( toggle )
-         this.play_next_color = (this.play_next_color == C.GOBS_BLACK) ? C.GOBS_WHITE : C.GOBS_BLACK;
+         this.play_next_color = C.GOBS_BLACK + C.GOBS_WHITE - this.play_next_color;
       var col = (this.play_next_color == C.GOBS_BLACK) ? 'b' : 'w';
       $("#play_tool_move img").attr('src', base_path + '21/' + col + '.gif');
    }

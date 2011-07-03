@@ -1912,6 +1912,7 @@ table#GameEditor div.GobanGfx {
 .ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; }
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: .2em; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
+
 table#GameEditor div#tabs {
    margin: 0px;
    padding: 0px;
@@ -1922,6 +1923,12 @@ table#GameEditor div.tab {
    top: -1px;
    background-color: #dddddd;
    padding-top: .3em;
+}
+table#GameEditor div.tab table.FormClass {
+   margin: 0 auto 0 1em;
+}
+table#GameEditor div.tab table.FormClass tr {
+   line-height: 140%;
 }
 
 table#GameEditor a.Tool {
