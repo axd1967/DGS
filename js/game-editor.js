@@ -111,7 +111,7 @@ DGS.utils = {
    },
 
    debug : function( msg ) {
-      //TODO return;
+      //return; // uncomment to disable debugging
       msg = (msg + "\n" + $("#D").text()).substr(0, 200);
       $("#D").text( msg );
    }
@@ -444,6 +444,7 @@ DGS.GobanChanges = function() {
    //arr: [ x, y, change-bitmask, value, label_diff ]; x/y=1..n, mask=int, diff=+L - ""
    this.changes = [];
    this.undo_changes = []; // needs current Goban for calculation
+   this.snapshot = {}; // [ "x:y" => "val:lab", ...]
 };
 
 $.extend( DGS.GobanChanges.prototype, {
@@ -476,8 +477,10 @@ $.extend( DGS.GobanChanges.prototype, {
    apply_goban_changes : function( goban, changes, create_undo ) {
       var count_updates = 0, chg, x, y, change_mask, value, label_diff, arrval, old_value, old_label, new_value, new_label;
 
-      if( create_undo )
+      if( create_undo ) {
          this.undo_changes = [];
+         this.snapshot = {};
+      }
 
       for( var i=0; i < changes.length; i++ ) {
          chg = changes[i];
@@ -497,13 +500,39 @@ $.extend( DGS.GobanChanges.prototype, {
                count_updates++;
 
                // calculate compensation for undo
-               if( create_undo )
+               if( create_undo ) {
                   this.undo_changes.push( [ x, y, C.GOBALL_BITMASK, old_value, old_label ] );
+                  this.snapshot[x+':'+y] = new_value + ':' + new_label;
+               }
             }
+         } else {
+            changes.splice( i--, 1 ); // remove change without effect
          }
       }
       return count_updates;
-   } //apply_goban_changes
+   }, //apply_goban_changes
+
+   // returns true, if goban-snapshot of this GobanChange equals snaphost of given one.
+   is_equal_goban_snapshot : function( goban_change ) {
+      if( this.snapshot.length != goban_change.snapshot.length )
+         return false;
+      var curr_snapshot = this.build_goban_snapshot( this.snapshot );
+      var cmp_snapshot  = this.build_goban_snapshot( goban_change.snapshot );
+      return (curr_snapshot == cmp_snapshot);
+   },
+
+   // \internal, build string from snapshot-array: x:y=val:lab ...
+   build_goban_snapshot : function( arrmap ) {
+      var keys = [];
+      for( var key in arrmap )
+         keys.push( key );
+      keys.sort();
+
+      var out = [];
+      for( var i=0; i < keys.length; i++ )
+         out.push( keys[i] + '=' + arrmap[keys[i]] );
+      return out.join(' ');
+   }
 
 }); //GobanChanges
 
@@ -696,7 +725,7 @@ $.extend( DGS.Board.prototype, {
       for( var i=0; i < goban_changes.changes.length; i++ ) {
          var arr = goban_changes.changes[i];
          x = arr[0], y = arr[1], key = x+':'+y;
-         if( !visited[key] ) { //TODO why not execute ALL changes on same x/y-coord ?
+         if( !visited[key] ) { //TODO why not execute ALL changes on same x/y-coord ? perhaps should not happen
             arrval = goban.getValue(x,y);
             this.write_image( x, y, arrval[C.GOBMATRIX_VALUE], arrval[C.GOBMATRIX_LABEL] );
             visited[key] = 1;
@@ -949,7 +978,8 @@ DGS.GameEditor = function( stone_size, wood_color ) {
    this.board_storage = null; // for restoring board
 
    this.edit_tool_selected = null;
-   this.history_undo = []; // GobanChanges-arr
+   this.history_undo = []; // GobanChanges-arr for undo
+   this.history_redo = []; // GobanChanges-arr for redo
 };
 
 DGS.GameEditor.CONFIG = {
@@ -1093,16 +1123,26 @@ $.extend( DGS.GameEditor.prototype, {
 
    action_edit_handle_undo_tool : function( $tool ) {
       var dbg = $tool.id;
+      var goban_changes, label_hash;
 
       if( $tool.id == 'edit_tool_undo' ) {
          if( this.history_undo.length > 0 ) {
-            var label_hash = this.goban.goban_labels.get_hash();
-            var goban_changes = this.history_undo.pop();
-
+            goban_changes = this.history_undo.pop();
+            label_hash = this.goban.goban_labels.get_hash();
             if( goban_changes.apply_undo_changes( this.goban ) ) {
                this.board.draw_goban_changes( this.goban, goban_changes );
                this.update_label_tool( label_hash );
-               this.update_history_tool();
+               this.save_change_history( goban_changes, /*undo*/false, /*redo*/false );
+            }
+         }
+      } else if( $tool.id == 'edit_tool_redo' ) {
+         if( this.history_redo.length > 0 ) {
+            goban_changes = this.history_redo.pop();
+            label_hash = this.goban.goban_labels.get_hash();
+            if( goban_changes.apply_changes( this.goban ) ) {
+               this.board.draw_goban_changes( this.goban, goban_changes );
+               this.update_label_tool( label_hash );
+               this.save_change_history( goban_changes, /*undo*/true, /*redo*/true );
             }
          }
       }
@@ -1144,7 +1184,7 @@ $.extend( DGS.GameEditor.prototype, {
          if( goban_changes.apply_changes( this.goban ) ) {
             this.board.draw_goban_changes( this.goban, goban_changes );
             this.update_label_tool( label_hash );
-            this.save_change_history( goban_changes );
+            this.save_change_history( goban_changes, /*undo*/true, /*redo*/false );
          }
       }
 
@@ -1164,13 +1204,26 @@ $.extend( DGS.GameEditor.prototype, {
       }
    },
 
-   save_change_history : function( goban_changes ) {
-      this.history_undo.push( goban_changes );
+   // $undo: true = undo-history should be saved, false = redo-history saved
+   // $redo: true = performing redo (no diff-redo-check performerd), false = normal move
+   save_change_history : function( goban_changes, undo, redo ) {
+      if( undo ) {
+         this.history_undo.push( goban_changes );
+
+         // clear redo-history if current change differs from next-redo
+         if( !redo && this.history_redo.length > 0 ) {
+            if( !goban_changes.is_equal_goban_snapshot( this.history_redo[this.history_redo.length - 1] ) )
+               this.history_redo = [];
+         }
+      } else {
+         this.history_redo.push( goban_changes );
+      }
       this.update_history_tool();
    },
 
    update_history_tool : function() {
       $("#edit_tool_undo_hist").text( String.sprintf("(%s)", this.history_undo.length) );
+      $("#edit_tool_redo_hist").text( String.sprintf("(%s)", this.history_redo.length) );
    }
 
    // ---------- Actions (END) -------------------------------------------------
