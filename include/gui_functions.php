@@ -331,11 +331,15 @@ function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
    return "{$spc}{$tag_l}{$str}{$tag_r}{$spc}";
 }
 
+// \param $class 'id=id attr=...' or else 'classname'
 function span( $class, $str, $strfmt='%s', $title='' )
 {
    if( $title )
       $title = " title=\"$title\"";
-   return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );
+   if( strpos($class,'=') !== false )
+      return sprintf( "<span " . attb_build($class) . $title . ">$strfmt</span>", $str );
+   else
+      return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );
 }
 
 function formatDate( $date, $defval='', $datefmt=DATE_FMT )
