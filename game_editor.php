@@ -133,6 +133,11 @@ function build_tab_Edit()
       'TEXT', anchor('#', span('LabelTool', ''), T_('Toggle Stone Number Label#ged'), 'id=edit_tool_number_label class="Tool Label"'),
       'TEXT', anchor('#', span('LabelTool', ''), T_('Toggle Letter Label#ged'), 'id=edit_tool_letter_label class="Tool Label"'),
       ));
+   $form->add_row( array(
+      'DESCRIPTION', T_('History#ged'),
+      'TEXT', anchor('#', span('LabelTool', 'undo'), '', 'id=edit_tool_undo class=UndoTool') . span('id=edit_tool_undo_hist class=UndoHist', '(0)'),
+      'TEXT', anchor('#', span('LabelTool', 'redo'), '', 'id=edit_tool_redo class=UndoTool') . span('id=edit_tool_redo_hist class=UndoHist', '(0)'),
+      ));
    return $form->create_form_string();
 }//build_tab_Edit
 

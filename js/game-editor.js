@@ -21,8 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 var DBG;
 //$("#gameNotes").val(DBG); //TODO DBG @ game-viewer
-//$("#D").text( $("#Goban").html() ); //TODO DBG @ game-editor
-//$("#D").text( $("#D").text() + '; new text' ); //TODO DBG @ game-editor
 
 (function($) { // ensure local scope and $ == jQuery
 
@@ -47,6 +45,10 @@ DGS.game_editor = {
       $("#tab_Edit a.Tool").click( function(event) {
          event.preventDefault();
          DGS.run.gameEditor.action_edit_handle_tool( this );
+      });
+      $("#tab_Edit a.UndoTool").click( function(event) {
+         event.preventDefault();
+         DGS.run.gameEditor.action_edit_handle_undo_tool( this );
       });
 
 
@@ -109,6 +111,7 @@ DGS.utils = {
    },
 
    debug : function( msg ) {
+      //TODO return;
       msg = (msg + "\n" + $("#D").text()).substr(0, 200);
       $("#D").text( msg );
    }
@@ -221,6 +224,8 @@ DGS.constants.Goban = {
    GOBM_TERR_NEUTRAL : 0x0A00, // green (filled) box = neutral territory
    GOBM_TERR_DAME : 0x0B00, // red (filled) box = dame territory
    //define('GOBM_..', 0x0B00..0x0F00); // reserved
+
+   GOBALL_BITMASK : 0x000F | 0x0080 | 0x0070 | 0x0F00,
 
    // internal
    GOBMATRIX_VALUE : 0, // matrix-idx: layer-value
@@ -438,6 +443,7 @@ $.extend( DGS.Goban.prototype, {
 DGS.GobanChanges = function() {
    //arr: [ x, y, change-bitmask, value, label_diff ]; x/y=1..n, mask=int, diff=+L - ""
    this.changes = [];
+   this.undo_changes = []; // needs current Goban for calculation
 };
 
 $.extend( DGS.GobanChanges.prototype, {
@@ -459,9 +465,22 @@ $.extend( DGS.GobanChanges.prototype, {
 
    // apply GobanChanges in this object on given Goban, return number of real updates
    apply_changes : function( goban ) {
+      return this.apply_goban_changes( goban, this.changes, true );
+   }, //apply_changes
+
+   apply_undo_changes : function( goban ) {
+      return this.apply_goban_changes( goban, this.undo_changes, false );
+   },
+
+   // internal only
+   apply_goban_changes : function( goban, changes, create_undo ) {
       var count_updates = 0, chg, x, y, change_mask, value, label_diff, arrval, old_value, old_label, new_value, new_label;
-      for( var i=0; i < this.changes.length; i++ ) {
-         chg = this.changes[i];
+
+      if( create_undo )
+         this.undo_changes = [];
+
+      for( var i=0; i < changes.length; i++ ) {
+         chg = changes[i];
          x = chg[0], y = chg[1], change_mask = chg[2], value = chg[3], label_diff = chg[4];
 
          if( change_mask || label_diff ) {
@@ -476,11 +495,15 @@ $.extend( DGS.GobanChanges.prototype, {
             if( old_value != new_value || old_label != new_label ) {
                goban.setValue( x, y, [ new_value, new_label ] );
                count_updates++;
+
+               // calculate compensation for undo
+               if( create_undo )
+                  this.undo_changes.push( [ x, y, C.GOBALL_BITMASK, old_value, old_label ] );
             }
          }
       }
       return count_updates;
-   } //apply_changes
+   } //apply_goban_changes
 
 }); //GobanChanges
 
@@ -673,11 +696,11 @@ $.extend( DGS.Board.prototype, {
       for( var i=0; i < goban_changes.changes.length; i++ ) {
          var arr = goban_changes.changes[i];
          x = arr[0], y = arr[1], key = x+':'+y;
-         if( !visited[key] ) {
+         if( !visited[key] ) { //TODO why not execute ALL changes on same x/y-coord ?
             arrval = goban.getValue(x,y);
             this.write_image( x, y, arrval[C.GOBMATRIX_VALUE], arrval[C.GOBMATRIX_LABEL] );
+            visited[key] = 1;
          }
-         visited[key] = 1;
       }
    },
 
@@ -926,6 +949,7 @@ DGS.GameEditor = function( stone_size, wood_color ) {
    this.board_storage = null; // for restoring board
 
    this.edit_tool_selected = null;
+   this.history_undo = []; // GobanChanges-arr
 };
 
 DGS.GameEditor.CONFIG = {
@@ -993,7 +1017,7 @@ $.extend( DGS.GameEditor.prototype, {
       this.board.draw_board( this.goban, true );
    },
 
-   testBoard : function() { //TODO test
+   testBoard : function() {
       this.goban.setSize(9,9);
       this.goban.makeBoard( this.goban.size_x, this.goban.size_y, true );
       this.goban.setOptionsCoords( C.GOBB_MID, true );
@@ -1064,8 +1088,27 @@ $.extend( DGS.GameEditor.prototype, {
       this.edit_tool_selected = $tool;
       $($tool).toggleClass('ToolSelected', true);
 
-      DGS.utils.debug( $tool.id ); //TODO DBG @ game-editor
+      DGS.utils.debug( $tool.id );
    }, //action_edit_handle_tool
+
+   action_edit_handle_undo_tool : function( $tool ) {
+      var dbg = $tool.id;
+
+      if( $tool.id == 'edit_tool_undo' ) {
+         if( this.history_undo.length > 0 ) {
+            var label_hash = this.goban.goban_labels.get_hash();
+            var goban_changes = this.history_undo.pop();
+
+            if( goban_changes.apply_undo_changes( this.goban ) ) {
+               this.board.draw_goban_changes( this.goban, goban_changes );
+               this.update_label_tool( label_hash );
+               this.update_history_tool();
+            }
+         }
+      }
+
+      DGS.utils.debug( dbg );
+   }, //action_edit_handle_undo_tool
 
    action_handle_board : function( $point, $event ) { // $point = clicked board-point, $event = event for click
       var point_id = $($point).parent().attr('id'); // SGF-coord
@@ -1096,18 +1139,16 @@ $.extend( DGS.GameEditor.prototype, {
             goban_changes = this.calc.calc_goban_change_toggle_label( this.goban, point_id, value );
          }
 
-         //TODO calculate compensation for goban-change (for undo)
-         //TODO store in editor-history
-
          // draw-goban-change
          var label_hash = this.goban.goban_labels.get_hash();
          if( goban_changes.apply_changes( this.goban ) ) {
             this.board.draw_goban_changes( this.goban, goban_changes );
             this.update_label_tool( label_hash );
+            this.save_change_history( goban_changes );
          }
       }
 
-      DGS.utils.debug( dbg ); //TODO DBG @ game-editor
+      DGS.utils.debug( dbg );
    }, //action_handle_board
 
    // old_hash=undefined to redraw both Number/Letter-label-tools
@@ -1121,6 +1162,15 @@ $.extend( DGS.GameEditor.prototype, {
          if( next_letter_label )
             $("#edit_tool_letter_label span.LabelTool").text( next_letter_label );
       }
+   },
+
+   save_change_history : function( goban_changes ) {
+      this.history_undo.push( goban_changes );
+      this.update_history_tool();
+   },
+
+   update_history_tool : function() {
+      $("#edit_tool_undo_hist").text( String.sprintf("(%s)", this.history_undo.length) );
    }
 
    // ---------- Actions (END) -------------------------------------------------

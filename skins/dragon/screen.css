@@ -1938,14 +1938,29 @@ table#GameEditor a.Tool img {
 table#GameEditor a.ToolSelected {
    border: 1px solid #683888; /* sync with body background */
 }
+
+table#GameEditor a.UndoTool {
+   text-decoration: none;
+   background-color: #fbd79d;
+   border: 1px dotted #683888; /* sync with body background */
+   margin: 0 .2em;
+   padding: 0 2px;
+   font-weight: bold;
+   color: black;
+}
+table#GameEditor span.UndoHist {
+   margin: 0 1em 0 .2em;
+}
+
 table#GameEditor a.Label {
    text-decoration: none;
    text-align: center;
-   font-weight: bold;
    padding: 0 2px;
+   font-weight: bold;
    color: black;
 }
-table#GameEditor a.Tool span.LabelTool {
+table#GameEditor a.Tool span.LabelTool,
+table#GameEditor a.UndoTool span.LabelTool {
    text-decoration: none;
    margin: 0 4px;
 }
