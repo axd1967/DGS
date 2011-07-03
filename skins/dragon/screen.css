@@ -1890,6 +1890,7 @@ table#GameEditor tr {
 
 table#GameEditor td#EditArea {
    vertical-align: top;
+   width: 400px;
 }
 table#GameEditor table.Goban td {
    border: 0px solid red;
@@ -1924,6 +1925,7 @@ table#GameEditor div.tab {
 }
 
 table#GameEditor a.Tool {
+   text-decoration: none;
    margin: 0 .2em;
    padding: 2px 1px 4px 1px;
    width: 21px;
@@ -1935,6 +1937,17 @@ table#GameEditor a.Tool img {
 }
 table#GameEditor a.ToolSelected {
    border: 1px solid #683888; /* sync with body background */
+}
+table#GameEditor a.Label {
+   text-decoration: none;
+   text-align: center;
+   font-weight: bold;
+   padding: 0 2px;
+   color: black;
+}
+table#GameEditor a.Tool span.LabelTool {
+   text-decoration: none;
+   margin: 0 4px;
 }
 
 

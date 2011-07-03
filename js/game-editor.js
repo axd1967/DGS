@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 var DBG;
 //$("#gameNotes").val(DBG); //TODO DBG @ game-viewer
 //$("#D").text( $("#Goban").html() ); //TODO DBG @ game-editor
+//$("#D").text( $("#D").text() + '; new text' ); //TODO DBG @ game-editor
 
 (function($) { // ensure local scope and $ == jQuery
 
@@ -105,9 +106,76 @@ DGS.utils = {
       if( sgf_part < 'a' || sgf_part > 'y' )
          throw "DGS.utils.makeNumberCoord("+sgf_part+"): invalid args";
       return sgf_part.charCodeAt(0) - 0x60; //0x61=a
+   },
+
+   debug : function( msg ) {
+      msg = (msg + "\n" + $("#D").text()).substr(0, 200);
+      $("#D").text( msg );
    }
+
 };
 
+
+
+// --------------- GobanLabels ------------------------------------------------
+
+DGS.GobanLabels = function() {
+   this.numbers = []; // 1..500 allowed number-labels
+   this.letters = []; // 1..26  allowed letter-labels
+   this.next_number = 1;
+   this.next_letter = 1;
+};
+
+$.extend( DGS.GobanLabels.prototype, {
+
+   set_label : function( label ) {
+      if( label >= 1 && label <= 500 ) {
+         this.numbers[label] = label;
+         while( this.numbers[this.next_number] )
+            this.next_number++;
+      } else if( label >= 'a' && label <= 'z' ) {
+         label = label.charCodeAt(0) - 0x60; //0x61=a
+         this.letters[label] = label;
+         while( this.letters[this.next_letter] )
+            this.next_letter++;
+      } else {
+         throw "DGS.GobalLabels.set_label(" + label + "): invalid label ["+typeof(label)+"] len ["+label.length+"]";
+      }
+   },
+
+   clear_label : function( label ) {
+      var pos;
+      if( label >= 1 && label <= 500 ) {
+         this.numbers[label] = 0;
+         if( label < this.next_number )
+            this.next_number = label;
+      } else if( label >= 'a' && label <= 'z' ) {
+         label = label.charCodeAt(0) - 0x60; //0x61=a
+         this.letters[label] = 0;
+         if( label < this.next_letter )
+            this.next_letter = label;
+      } else {
+         throw "DGS.GobalLabels.clear_label(" + label + "): invalid label ["+typeof(label)+"] len ["+label.length+"]";
+      }
+   },
+
+   // returns next-label for type=GOBM_NUMBER|LETTER or 0 if there are no next-labels
+   get_next_label : function( type ) {
+      if( type == C.GOBM_NUMBER ) {
+         return ( this.next_number <= 500 ) ? this.next_number : 0;
+      } else if( type == C.GOBM_LETTER ) {
+         return ( this.next_letter <= 26 ) ? String.fromCharCode(0x60 + this.next_letter) : 0; //0x61=a
+      } else {
+         throw "DGS.GobalLabels.get_next_label(" + type + "): invalid type";
+      }
+   },
+
+   // returns hash-value for current state, used to check if edit-label-tools need update in GUI
+   get_hash : function () {
+      return this.next_number + 500 * this.next_letter;
+   }
+
+});
 
 
 
@@ -183,6 +251,8 @@ DGS.Goban = function() {
 
    // for starting y-coordinates-label
    this.size_x = this.size_y = 1;
+
+   this.goban_labels = new DGS.GobanLabels();
 };
 
 $.extend( DGS.Goban.prototype, {
@@ -269,19 +339,35 @@ $.extend( DGS.Goban.prototype, {
       }
    }, //isHoshi
 
-   // internal, overwriting layer-value
-   setValue : function( x, y, value, label ) { // optional: label=undef
+   // internal, overwriting layer-value; does NOT set/clear goban_labels
+   setValue : function( x, y, value, label ) { // label optional (=undefined) if value is array
       this.max_x = Math.max( x, this.max_x );
       this.max_y = Math.max( y, this.max_y );
 
-      if( $.isArray(value) )
+      var old_label = this.getMarkerLabel(x,y);
+      var is_arr_value = $.isArray(value);
+      if( is_arr_value )
+         label = value[C.GOBMATRIX_LABEL];
+
+      if( is_arr_value )
          this.matrix[y][x] = value;
       else if( typeof(value) != 'number' )
          throw "Goban.setValue("+x+","+y+","+value+","+label+"): invalid_args value";
-      else if( label == undefined )
-         this.matrix[y][x] = value; // optimization to avoid too many object-instances
-      else
+      else if( label )
          this.matrix[y][x] = [ value, label ];
+      else
+         this.matrix[y][x] = value; // optimization to avoid too many object-instances
+
+      if( old_label != label ) {
+         if( !old_label && label ) {
+            this.goban_labels.set_label( label );
+         } else if( old_label && !label ) {
+            this.goban_labels.clear_label( old_label );
+         } else { // update-label (both-labels != '')
+            this.goban_labels.clear_label( old_label );
+            this.goban_labels.set_label( label );
+         }
+      }
    }, //setValue
 
    hasValue : function( x, y ) {
@@ -319,11 +405,11 @@ $.extend( DGS.Goban.prototype, {
       return (current_arr[C.GOBMATRIX_VALUE] & C.GOBS_BITMASK);
    },
 
-   setMarker : function( x, y, marker_value, label ) { // optional: label=undef
+   setMarker : function( x, y, marker_value, label ) {
       marker_value &= C.GOBM_BITMASK;
       var upd_arr = this.getValue(x,y);
       upd_arr[C.GOBMATRIX_VALUE] = ( upd_arr[C.GOBMATRIX_VALUE] & ~C.GOBM_BITMASK ) | marker_value;
-      upd_arr[C.GOBMATRIX_LABEL] = ( label == undefined ) ? '' : label;
+      upd_arr[C.GOBMATRIX_LABEL] = label;
       this.setValue( x, y, upd_arr );
    },
 
@@ -373,8 +459,7 @@ $.extend( DGS.GobanChanges.prototype, {
 
    // apply GobanChanges in this object on given Goban, return number of real updates
    apply_changes : function( goban ) {
-      var chg, x, y, change_mask, value, label_diff, arrval, old_value, old_label;
-      var count_updates = 0;
+      var count_updates = 0, chg, x, y, change_mask, value, label_diff, arrval, old_value, old_label, new_value, new_label;
       for( var i=0; i < this.changes.length; i++ ) {
          chg = this.changes[i];
          x = chg[0], y = chg[1], change_mask = chg[2], value = chg[3], label_diff = chg[4];
@@ -384,15 +469,10 @@ $.extend( DGS.GobanChanges.prototype, {
             old_value = new_value = arrval[C.GOBMATRIX_VALUE];
             old_label = new_label = arrval[C.GOBMATRIX_LABEL];
 
-            if( change_mask ) {
+            if( change_mask )
                new_value = (new_value & ~change_mask) | value;
-            }
-            if( label_diff ) {
-               if( label_diff.charAt(0) == '+' )
-                  new_label = label_diff.substr(1);
-               else if( label_diff.charAt(0) == '-' )
-                  new_label = "";
-            }
+            new_label = ( label_diff == '-' ) ? '' : label_diff;
+
             if( old_value != new_value || old_label != new_label ) {
                goban.setValue( x, y, [ new_value, new_label ] );
                count_updates++;
@@ -782,7 +862,7 @@ $.extend( DGS.ChangeCalculator.prototype, {
          if( old_marker == C.GOBM_NUMBER || old_marker == C.GOBM_LETTER )
             chg_label = '-';
 
-         //NOTE: nothing special for: if( new_marker == C.GOBM_CIRCLE || new_marker == C.GOBM_SQUARE || new_marker == C.GOBM_TRIANGLE || new_marker == C.GOBM_CROSS ) {
+         //NOTE: nothing special for: if( new_marker == C.GOBM_CIRCLE || new_marker == C.GOBM_SQUARE || new_marker == C.GOBM_TRIANGLE || new_marker == C.GOBM_CROSS )
          if( new_marker == C.GOBM_TERR_NEUTRAL || new_marker == C.GOBM_TERR_DAME ) {
             gob_mask |= C.GOBS_BITMASK;
          } else if( old_stone != C.GOBS_EMPTY && (new_marker == C.GOBM_TERR_B || new_marker == C.GOBM_TERR_W) ) {
@@ -796,7 +876,40 @@ $.extend( DGS.ChangeCalculator.prototype, {
 
       goban_changes.add_change_sgf( coord, gob_mask, trg_marker, chg_label );
       return goban_changes;
-   } //calc_goban_change_toggle_marker
+   }, //calc_goban_change_toggle_marker
+
+   /*
+    * Calculates GobanChanges to toggle number- or letter-label on Goban at given sgf-coordinates.
+    * \param $label_type = C.GOBM_NUMBER|LETTER
+    * \note only for allowed combinations:
+    *    - toggle number-label only on B|W-stone between next-number-label and empty
+    *    - toggle letter-label only on empty-stone between next-letter-label and empty (clear stone if necessary)
+    */
+   calc_goban_change_toggle_label : function( goban, coord, label_type ) {
+      var old_value = goban.getValueSgf( coord )[C.GOBMATRIX_VALUE];
+      var old_stone  = (old_value & C.GOBS_BITMASK);
+      var old_marker = (old_value & C.GOBM_BITMASK);
+
+      // clear marker for invalid combinations
+      var gob_mask = C.GOBM_BITMASK;
+      var chg_label = undefined;
+      var next_label = goban.goban_labels.get_next_label( label_type );
+
+      if( label_type == C.GOBM_NUMBER ) { // number only WITH B/W-stones
+         if( old_stone != C.GOBS_EMPTY )
+            chg_label = ( old_marker == label_type ) ? '-' : next_label;
+      } else if( label_type == C.GOBM_LETTER ) { // letter only WITHOUT B/W-stone
+         gob_mask |= C.GOBS_BITMASK; // clear stone
+         chg_label = ( old_marker == label_type ) ? '-' : next_label;
+      }
+
+      var goban_changes = new DGS.GobanChanges();
+      if( chg_label != undefined ) {
+         var trg_marker = ( chg_label == '-' ) ? C.GOBM_EMPTY : label_type;
+         goban_changes.add_change_sgf( coord, gob_mask, trg_marker, chg_label );
+      }
+      return goban_changes;
+   } //calc_goban_change_toggle_label
 
 }); // ChangeCalculator
 
@@ -833,6 +946,11 @@ DGS.GameEditor.CONFIG = {
          'terr_w',   C.GOBM_TERR_W,
          'terr_neutral', C.GOBM_TERR_NEUTRAL,
          'terr_dame',    C.GOBM_TERR_DAME
+      ]),
+
+      label_tool : DGS.utils.build_map([
+         'number', C.GOBM_NUMBER,
+         'letter', C.GOBM_LETTER
       ])
    } //edit
 };
@@ -882,6 +1000,9 @@ $.extend( DGS.GameEditor.prototype, {
       this.board.draw_board_structure( this.goban, true );
       this.board.draw_board( this.goban, false );
 
+      // init game-editor
+      this.update_label_tool();
+
       /*
       var changes = new DGS.GobanChanges();
       changes.add_change( 4,4, C.GOBS_BITMASK | C.GOBM_BITMASK, C.GOBS_BLACK | C.GOBM_TRIANGLE, '' );
@@ -927,7 +1048,7 @@ $.extend( DGS.GameEditor.prototype, {
       this.goban.setSize( width, height );
       this.goban.makeBoard( width, height, true );
       this.goban.setOptionsCoords( C.GOBB_MID, true );
-      this.board.draw_board_structure( this.goban );
+      this.board.draw_board_structure( this.goban, true );
       this.board.draw_board( this.goban, false );
       return true;
    },
@@ -943,7 +1064,7 @@ $.extend( DGS.GameEditor.prototype, {
       this.edit_tool_selected = $tool;
       $($tool).toggleClass('ToolSelected', true);
 
-      $("#D").text( $tool.id ); //DBG
+      DGS.utils.debug( $tool.id ); //TODO DBG @ game-editor
    }, //action_edit_handle_tool
 
    action_handle_board : function( $point, $event ) { // $point = clicked board-point, $event = event for click
@@ -952,13 +1073,12 @@ $.extend( DGS.GameEditor.prototype, {
 
       if( this.edit_tool_selected != null ) {
          var tool_id = this.edit_tool_selected.id;
-         var goban_changes, value, subtool;
+         var goban_changes, value;
 
          // calculate goban-change
          // --- STONE-tools ---
          if( (result = tool_id.match(/^edit_tool_(b|w|clear)_stone$/)) ) {
-            subtool = result[1];
-            value = DGS.GameEditor.CONFIG.edit.stone_tool[subtool];
+            value = DGS.GameEditor.CONFIG.edit.stone_tool[ result[1] ];
             goban_changes = this.calc.calc_goban_change_set_stone( this.goban, point_id, value );
 
          } else if( tool_id == 'edit_tool_toggle_stone' ) {
@@ -967,21 +1087,40 @@ $.extend( DGS.GameEditor.prototype, {
          }
          // --- MARKER-tools ---
          else if( (result = tool_id.match(/^edit_tool_(circle|square|triangle|cross|terr_(b|w|neutral|dame))_marker$/)) ) {
-            subtool = result[1];
-            value = DGS.GameEditor.CONFIG.edit.marker_tool[subtool];
+            value = DGS.GameEditor.CONFIG.edit.marker_tool[ result[1] ];
             goban_changes = this.calc.calc_goban_change_toggle_marker( this.goban, point_id, value );
+         }
+         // --- LABEL-tools ---
+         else if( (result = tool_id.match(/^edit_tool_(number|letter)_label$/)) ) {
+            value = DGS.GameEditor.CONFIG.edit.label_tool[ result[1] ];
+            goban_changes = this.calc.calc_goban_change_toggle_label( this.goban, point_id, value );
          }
 
          //TODO calculate compensation for goban-change (for undo)
          //TODO store in editor-history
 
          // draw-goban-change
+         var label_hash = this.goban.goban_labels.get_hash();
          if( goban_changes.apply_changes( this.goban ) ) {
             this.board.draw_goban_changes( this.goban, goban_changes );
+            this.update_label_tool( label_hash );
          }
       }
 
-      $("#D").text( dbg ); //DBG
+      DGS.utils.debug( dbg ); //TODO DBG @ game-editor
+   }, //action_handle_board
+
+   // old_hash=undefined to redraw both Number/Letter-label-tools
+   update_label_tool : function( old_hash ) {
+      if( old_hash == undefined || (old_hash != this.goban.goban_labels.get_hash() ) ) {
+         // 0=no-next-label -> keep former label
+         var next_number_label = this.goban.goban_labels.get_next_label( C.GOBM_NUMBER );
+         var next_letter_label = this.goban.goban_labels.get_next_label( C.GOBM_LETTER );
+         if( next_number_label )
+            $("#edit_tool_number_label span.LabelTool").text( next_number_label );
+         if( next_letter_label )
+            $("#edit_tool_letter_label span.LabelTool").text( next_letter_label );
+      }
    }
 
    // ---------- Actions (END) -------------------------------------------------

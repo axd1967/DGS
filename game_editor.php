@@ -128,7 +128,12 @@ function build_tab_Edit()
       'TEXT', anchor('#', image($imgtool_path.'ed.gif', T_('Toggle Dame Territory Marker#ged'), null), '', 'id=edit_tool_terr_dame_marker class="Tool"'),
       'TEXT', anchor('#', image($imgtool_path.'eg.gif', T_('Toggle Neutral Territory Marker#ged'), null), '', 'id=edit_tool_terr_neutral_marker class="Tool"'),
       ));
+   $form->add_row( array(
+      'DESCRIPTION', T_('Label#ged'),
+      'TEXT', anchor('#', span('LabelTool', ''), T_('Toggle Stone Number Label#ged'), 'id=edit_tool_number_label class="Tool Label"'),
+      'TEXT', anchor('#', span('LabelTool', ''), T_('Toggle Letter Label#ged'), 'id=edit_tool_letter_label class="Tool Label"'),
+      ));
    return $form->create_form_string();
-}
+}//build_tab_Edit
 
 ?>
