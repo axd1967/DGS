@@ -73,9 +73,11 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
                   "<ul>\n",
                      "<li>", anchor('#tab_Size', T_('Size#ged'), T_('Change board size#ged')), "</li>\n",
                      "<li>", anchor('#tab_Edit', T_('Edit#ged'), T_('Edit tools#ged')), "</li>\n",
+                     "<li>", anchor('#tab_Play', T_('Play#ged'), T_('Play tools#ged')), "</li>\n",
                   "</ul>\n",
                   "<div id=tab_Size class=tab>\n", build_tab_Size(), "</div>\n",
                   "<div id=tab_Edit class=tab>\n", build_tab_Edit(), "</div>\n",
+                  "<div id=tab_Play class=tab>\n", build_tab_Play(), "</div>\n",
                "</div>\n",
             "</td></tr>\n",
          "<tr><td id=NodeArea colspan=2>Node Area</td></tr>\n",
@@ -140,5 +142,21 @@ function build_tab_Edit()
       ));
    return $form->create_form_string();
 }//build_tab_Edit
+
+function build_tab_Play()
+{
+   global $page, $imgtool_path, $base_path;
+   $form = new Form( 'gameEditorPlay', $page, FORM_GET );
+   $form->add_row( array(
+      'DESCRIPTION', T_('Move#ged'),
+      'TEXT', anchor('#', image($imgtool_path.'b.gif', T_('Play move#ged'), null), '', 'id=play_tool_move class="Tool"'),
+      ));
+   $form->add_row( array(
+      'DESCRIPTION', T_('History#ged'),
+      'TEXT', anchor('#', span('LabelTool', 'undo'), '', 'id=play_tool_undo class=UndoTool') . span('id=play_tool_undo_hist class=UndoHist', '(0)'),
+      'TEXT', anchor('#', span('LabelTool', 'redo'), '', 'id=play_tool_redo class=UndoTool') . span('id=play_tool_redo_hist class=UndoHist', '(0)'),
+      ));
+   return $form->create_form_string();
+}//build_tab_Play
 
 ?>
