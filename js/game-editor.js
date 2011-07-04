@@ -488,7 +488,9 @@ $.extend( DGS.Goban.prototype, {
 // --------------- GobanChanges -----------------------------------------------
 
 // constructs GobanChanges
-DGS.GobanChanges = function() {
+DGS.GobanChanges = function( play_mode ) {
+   this.is_play_mode = (play_mode != undefined) ? play_mode : false;
+
    //arr: [ x, y, change-bitmask, value, label_diff ]; x/y=1..n, mask=int, diff=+L - ""
    this.changes = [];
    this.undo_changes = []; // needs current Goban for calculation
@@ -1033,7 +1035,7 @@ DGS.GameChangeCalculator = function( goban ) {
     * \note extracted from check_remove()-func in 'include/move.php'
     */
    this.calc_change_play_move = function( coord_sgf, color ) {
-      var goban_changes = new DGS.GobanChanges();
+      var goban_changes = new DGS.GobanChanges( true );
       if( color != C.GOBS_BLACK && color != C.GOBS_WHITE ) // only B/W-move
          return goban_changes;
 
@@ -1050,7 +1052,6 @@ DGS.GameChangeCalculator = function( goban ) {
       var opp_color = C.GOBS_BLACK + C.GOBS_WHITE - color;
       var prisoners = this.determine_prisoners( x0, y0, opp_color );
       var nr_prisoners = prisoners.length;
-      DGS.utils.debug( String.sprintf("A2: xy0=[%s,%s] P=%s", x0, y0, nr_prisoners) );
 
       // check for suicide
       if( nr_prisoners == 0 ) {
@@ -1090,13 +1091,14 @@ DGS.GameChangeCalculator = function( goban ) {
 
    // extracted from check_prisoners()-func in 'include/board.php'
    this.determine_prisoners = function( x0, y0, color ) {
-      var prisoners = [], x, y, stone;
+      var prisoners = [], x, y;
       for( var dir=0; dir < 4; dir++ ) { // determine captured stones for ALL directions
          x = x0 + DIR_X[dir];
          y = y0 + DIR_Y[dir];
-         stone = this.stone_matrix[y][x];
-         if( stone == color )
-            this.has_liberties( x, y, prisoners, /*remove*/true );
+         if( x in this.stone_matrix[y] ) {
+            if( this.stone_matrix[y][x] == color )
+               this.has_liberties( x, y, prisoners, /*remove*/true );
+         }
       }
       return prisoners;
    }; //determine_prisoners
@@ -1259,18 +1261,6 @@ $.extend( DGS.GameEditor.prototype, {
 
       // init game-editor
       this.update_label_tool();
-
-      /*
-      var changes = new DGS.GobanChanges();
-      changes.add_change( 4,4, C.GOBS_BITMASK | C.GOBM_BITMASK, C.GOBS_BLACK | C.GOBM_TRIANGLE, '' );
-      changes.add_change( 6,6, C.GOBS_BITMASK | C.GOBM_BITMASK, C.GOBS_WHITE | C.GOBM_NUMBER, '+4' );
-      changes.add_change( 8,8, C.GOBM_BITMASK, C.GOBM_LETTER, '+u' );
-      changes.add_change( 9,9, C.GOBM_BITMASK | C.GOBO_HOSHI, C.GOBM_SQUARE | C.GOBO_HOSHI, '' );
-      changes.add_change( 2,2, C.GOBB_BITMASK, C.GOBB_EMPTY, '' );
-      changes.apply_changes( this.goban );
-
-      this.board.draw_goban_changes( this.goban, changes );
-      */
    },
 
    saveBoard : function() {
@@ -1320,6 +1310,8 @@ $.extend( DGS.GameEditor.prototype, {
             if( goban_changes.apply_undo_changes( this.goban ) ) {
                this.board.draw_goban_changes( this.goban, goban_changes );
                this.update_label_tool( label_hash );
+               if( goban_changes.is_play_mode )
+                  this.update_play_tool_next_color( /*toggle*/true );
                this.save_change_history( goban_changes, /*undo*/false, /*redo*/false );
             }
          }
@@ -1330,6 +1322,8 @@ $.extend( DGS.GameEditor.prototype, {
             if( goban_changes.apply_changes( this.goban ) ) {
                this.board.draw_goban_changes( this.goban, goban_changes );
                this.update_label_tool( label_hash );
+               if( goban_changes.is_play_mode )
+                  this.update_play_tool_next_color( /*toggle*/true );
                this.save_change_history( goban_changes, /*undo*/true, /*redo*/true );
             }
          }
