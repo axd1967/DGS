@@ -461,7 +461,7 @@ $.extend( DGS.Goban.prototype, {
       return this.getValue(x,y)[C.GOBMATRIX_LABEL];
    },
 
-   // returns cloned matrix[y][x] = GOBS_EMPTY|BLACK|WHITE, Ys all filled, Xs only filled if set
+   // returns cloned and filtered matrix[y][x] = GOBS_EMPTY|BLACK|WHITE, Ys all filled, Xs only filled if set
    cloneStoneMatrix : function() {
       var arrval, cmatrix = []; // cloned matrix
       for( var y=1; y <= this.max_y; y++ ) {
@@ -1078,10 +1078,10 @@ DGS.GameChangeCalculator = function( goban ) {
       if( mark != null )
          goban_changes.add_change( mark[0], mark[1], C.GOBM_BITMASK, C.GOBM_EMPTY, '' );
 
-      // remove captured stones
+      // remove captured stones (with all markers)
       for( var i=0; i < prisoners.length; i++ ) {
          var xy = prisoners[i];
-         goban_changes.add_change( xy[0], xy[1], C.GOBS_BITMASK, C.GOBS_EMPTY, '-' );
+         goban_changes.add_change( xy[0], xy[1], C.GOBS_BITMASK|C.GOBM_BITMASK, C.GOBS_EMPTY, '-' );
       }
 
       //TODO handle: prisoners
@@ -1095,7 +1095,7 @@ DGS.GameChangeCalculator = function( goban ) {
       for( var dir=0; dir < 4; dir++ ) { // determine captured stones for ALL directions
          x = x0 + DIR_X[dir];
          y = y0 + DIR_Y[dir];
-         if( x in this.stone_matrix[y] ) {
+         if( (y in this.stone_matrix) && (x in this.stone_matrix[y]) ) {
             if( this.stone_matrix[y][x] == color )
                this.has_liberties( x, y, prisoners, /*remove*/true );
          }
