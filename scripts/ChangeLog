@@ -10,7 +10,7 @@ Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812] on branch [DGS-s
 Developers INFO:
 
 2009-02-11 juga
-   Tournaments, Quick-Suite
+   Tournaments, Quick-Suite, Game-Editor
 
 2007-12-23 rodival
    Code Cleanup, New Features
@@ -19,7 +19,111 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-07-17 juga
+
+   * js/game-editor.js (DGS.GameChangeCalculator.calc_change_play_move, ~.determine_prisoners):
+   - bugfix for game-editor in play-mode: also remove markers for captured stones,
+     number-labeled stones remained
+   - bugfix for index-out-of-range-check
+
+2011-07-04 juga
+
+   * js/game-editor.js (DGS.GameChangeCalculator.calc_change_play_move, ~.determine_prisoners;
+       DGS.GameEditor.action_handle_undo_tool; DGS.GobanChanges):
+   - bugfix JS-Game-Editor: undo/redo did not toggle next-play-color
+
+2011-07-03 juga
+
+   * js/game-editor.js (DGS.Goban.cloneStoneMatrix;
+       DGS.GameEditor, ~.init, ~.action_handle_show_tab, ~.action_play_handle_board,
+         ~.update_play_tool_next_color;
+       DGS.GameChangeCalculator, ~.calc_change_play_move, ~.determine_prisoners, ~.has_liberties),
+     skins/dragon/screen.css:
+   - extended JavaScript-based game-editor
+     - PLAY-mode: implemented capturing of stones on played-move
+     - PLAY-mode: check for forbidden suicide on played-move
+     - set default-tools for EDIT-/PLAY-tab (stone-toggle / move)
+
+   * js/game-editor.js (DGS.GameEditor, ~.init, ~.current_tab, ~.action_handle_show_tab,
+         ~.action_handle_undo_tool, ~.update_history_tool, ~.action_handle_board,
+         ~.action_size_updateSize, ~.action_edit_handle_tool, ~.action_edit_handle_board,
+         ~.action_play_handle_tool, ~.action_play_handle_board, ~.update_play_tool_next_color;
+       DGS.Goban.makeBoard, ~.setValue, ~.cloneStoneMatrix, ~.merge_changes;
+       DGS.GameChangeCalculator.calc_change_play_move; DGS.game_editor.initPage;
+       DGS.GobanLabels, ~.reset; DGS.ChangeCalculator),
+     game_editor.php (build_tab_Play):
+   - extended JavaScript-based game-editor
+     - added PLAY-tab with tools to "play" a game,
+       update single last-move-marker
+     - added move-tool to play move, toggle next-color-to-play
+     - added undo/redo-history-tool shared between Edit- & Play-tab
+     - include DGS.ChangeCalculator.prototype into constructor with this-method-assignments
+     - added DGS.GameChangeCalculator to calculate goban-changes for "playing"
+     - restrict actions to execute only if corresponding tab is shown
+
+   * js/game-editor.js (DGS.GameEditor, ~.action_edit_handle_undo_tool, ~.action_handle_board,
+         ~.save_change_history, ~.update_history_tool
+       DGS.GobanChanges, ~.apply_goban_changes, ~.is_equal_goban_snapshot, ~.build_goban_snapshot):
+   - extended JavaScript-based game-editor
+     - added redo-history-tool for EDIT-mode to redo goban-changes
+     - clear redo-history if varying from next-redo-step
+
+   * js/game-editor.js (DGS.game_editor.initPage; DGS.constants.Goban;
+       DGS.GameEditor, ~.action_edit_handle_undo_tool, ~.action_handle_board, ~.save_change_history,
+         ~.update_history_tool;
+       DGS.GobanChanges, ~.apply_changes, ~.apply_undo_changes, ~.apply_goban_changes),
+     game_editor.php (build_tab_Edit),
+     skins/dragon/screen.css:
+   - extended JavaScript-based game-editor
+     - added undo-history-tool for EDIT-mode to undo goban-changes
+
+   * include/gui_functions.php (span):
+   - allow attributes for span('id=... attr=...')
+
+   * js/game-editor.js (DGS.utils.debug; DGS.Goban, ~.setValue, ~.setMarker;
+       DGS.GobanLabels, ~.set_label, ~.clear_label, ~.get_next_label, ~.get_hash;
+       DGS.GameEditor.testBoard, ~.action_size_updateSize, ~.action_handle_board, ~.update_label_tool;
+       DGS.GameEditor.CONFIG.edit.label_tool;
+       DGS.ChangeCalculator.calc_goban_change_toggle_label;
+       DGS.GobanChanges.apply_changes),
+     game_editor.php (build_tab_Edit),
+     skins/dragon/screen.css:
+   - extended JavaScript-based game-editor
+     - added label-tool for EDIT-mode to toggle letter and stone-numbers on board with auto-increment
+     - bugfix: draw board WITH action-links on new-boardsize
+     - added better debugging
+
+2011-07-02 juga
+
+   * js/game-editor.js (DGS.game_editor.initPage;
+       DGS.utils.makeSgfCoords, ~.makeNumberCoord; DGS.Goban.getValueSgf;
+       DGS.GobanChanges.add_change, ~.add_change_sgf, ~.has_changes, ~.apply_changes;
+       DGS.constants.Board.MAP_TERRITORY_MARKERS; DGS.Board.draw_board_structure, ~.write_image;
+       DGS.ChangeCalculator.calc_goban_change_set_stone, ~.calc_goban_change_toggle_stone,
+         ~.calc_goban_change_toggle_marker;
+       DGS.GameEditor, ~.CONFIG, ~.testBoard, ~.action_edit_handle_tool, ~.action_handle_board),
+     game_editor.php (build_tab_Edit),
+     skins/dragon/screen.css:
+    - extended JavaScript-based game-editor
+      - added Edit-tab in Edit-area with tools
+        - added stone-tool to set/clear/toggle black/white stone
+        - added marker-tool to toggle markers: circle, square, triangle, cross
+        - added marker-tool to toggle markers: territory black/white/neutral/dame
+        - implemented calculation of goban-changes for mark-markers,
+          though reserved as last-move-marker for later PLAY-mode
+      - added action-links to board-cells handling board-actions
+      - added ChangeCalculator to calculate goban-changes for edit-tools
+    - use image-size 21px for edit-tools
+
+   * include/goban_handler_gfx.php (GobanHandlerGfxBoard.init_statics):
+   - switched images for territory-neutral/dame using correct ones
+
 2011-06-27 juga
+
+   * js/game-editor.js (DGS.utils.highlight, DGS.GameEditor):
+   - undoed renamed DGS.GameEditor.actions.size.updateSize() -> DGS.GameEditor.action_size_updateSize(),
+     because no access to this
+   - refactored highlighting into DGS.utils.highlight()
 
    * js/game-editor.js (DGS.GamEditor):
    - renamed DGS.GameEditor.execSizeUpdate() to DGS.GameEditor.actions.size.updateSize()
@@ -30,7 +134,7 @@ ChangeLog
      js/jquery-ui-1.8.13.custom.min.js,
      include/std_functions.php (start_html, attb_parse),
      skins/dragon/screen.css,
-     game_editor.php (build_tab_Size), game.php:
+     game_editor.php (build_tab_Size), game.php, site_map.php:
    - extended JavaScript-based game-editor
      - added customized jQuery-UI for Tabs, Effects
      - added Size-tab in Edit-area
