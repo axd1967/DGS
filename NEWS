@@ -128,6 +128,24 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Tournament Directors for Tournament News on tournament-management pages
          * Players of multi-player-game for game-related message on game-players-page
 
+## * <home game_editor.php>Game-editor</home>:
+##    * added experimental JavaScript-based game-editor using jQuery 1.6.1
+##    * added game-editor in main-menu
+##    * add game-related JavaScript for go-diagrams and game-viewer only on game and forum-read-page
+##    * use user-configured stone-size and wood-color to draw board, smooth-edge not supported
+##
+##    * added tool to create new board on Size-tab
+##    * added tools to edit markers on board on Edit-tab
+##      * added stone-tool to set/clear/toggle black/white stone
+##      * added marker-tool to toggle markers: circle, square, triangle, cross
+##      * added marker-tool to toggle markers: territory black/white/neutral/dame
+##      * added label-tool to toggle letter and stone-numbers on board with auto-increment
+##      * added undo-history-tool to undo goban-changes
+##      * added redo-history-tool to redo goban-changes, clear if varying from next-redo-step
+##    * added tool to play moves in Play-tab
+##      * added playing game-moves with capturing of stones, update last-move-marker
+##      * check for forbidden suicide of played-move
+
    * Game page:
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
@@ -335,7 +353,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
       * &lt;igoban SL1> : Added go-diagram using syntax from Sensei's Library (=SL1)
          * Allow go-diagram with &lt;igoban>-tag in FAQ &amp; forums
-         * Show raw-format using &lt;igoban>-tag by adding URL-arg 'raw=1' on pages with go-diagrams
+         * Show raw-format for &lt;igoban>-tag by adding URL-arg 'raw=1' on pages with go-diagrams
          * Syntax for SL1-format: <http://senseis.xmp.net/?HowDiagramsWork |How Diagrams Work (on Sensei&apos;s Library)>
             * Show board, markup, board-title, board-text (right side or below)
             * Show links on board-markup, SL-links, extended by DGS-links "[1|dgs:docs.php]", open in new window
@@ -344,11 +362,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
             * Extended syntax by territory-images in text: T* T~ T? T=
             * Lines can start with white-spaces, line-prefix '$$' can be omitted
             * Chars "'" and "\" are not allowed in text
-            * Auto-set hoshi-points if there are perpendicular edges and no hoshi set manually
+            * Auto-set hoshi-points if there are perpendicular edges and no manually set hoshi-markers
             * Easier coordinate-usage using "++"  "+-"  "-+"
             * Links of "#anchor" refer to DGS local page
             * Not-supported are arrows and lines "{AR|LN ...}" and some irregular boards with edge-magic
-            * Not-supported are arrows and lines "{AR|LN ...}"
          * Use player-settings for stone-size, wood-color, boards smooth-edge
 
       * Added markup-images without board-lines: square (<image board/s.gif>), triangle (<image board/t.gif>), circle (<image board/c.gif>), cross (<image board/x.gif>)
@@ -437,6 +454,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Added section with multi-player-games on SETUP-status and if they are ready to start like on status-page
       * Added commented header-line with format for different data-sections:
         Bulletins, Messages, Games, Multi-Player-Games
+      * DEPRECATED-Warning: Version 1 is deprecated and will be removed in some future releases
 
       * <home rss/status.php>RSS status</home>:
          * Added links to all unread bulletins
@@ -680,6 +698,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * ALLOW_SQL_CALC_ROWS               - enabled
          * ALLOW_SURVEY_VOTE                 - enabled
          * ALLOW_TOURNAMENTS                 - enabled
+##       * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
          * ALLOW_GO_DIAGRAMS                 - disabled (needs JavaScript)
          * ALLOW_GOBAN_EDITOR                - disabled
          * ALLOW_QUICK_DO                    - disabled
@@ -687,6 +706,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
          * ENABLE_DONATIONS                  - disabled
+##       * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
       * Added restriction on max. running games per player and for tournament-registration
       * Default password encryption (SHA1 now)
       * Added database-connect retry
