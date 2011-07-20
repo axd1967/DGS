@@ -73,7 +73,7 @@ define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
 \$\$ . . . . . . . . , . .
 \$\$ . . . C . S . T . M .
 \$\$ . . . . . . . . . . -
-\$\$ + --- +
+\$\$ ++
 </igoban>
 EOF_GOBAN;
    }
