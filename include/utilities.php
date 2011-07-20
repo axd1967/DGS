@@ -109,11 +109,13 @@ function array_value_to_key_and_value( $array )
    return $new_array;
 }
 
-function build_num_range_map( $start, $count )
+// param $is_count false => $count is "end" of range
+function build_num_range_map( $start, $count, $is_count=true )
 {
    $arr = array();
-   for( $i=0; $i < $count; $i++, $start++ )
-      $arr[$start] = $start;
+   $end_range = ( $is_count ) ? $start + $count - 1 : $count;
+   for( $i=$start; $i <= $end_range; $i++ )
+      $arr[$i] = $i;
    return $arr;
 }
 

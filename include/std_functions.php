@@ -356,8 +356,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          break;
       case 'game.php':
       case 'game_editor.php':
-      case 'goban_editor.php':
       case 'forum/read.php':
+      case 'old_goban_editor.php':
          $enable_js_game = true;
          break;
    }
@@ -378,8 +378,6 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-ui-1.8.13.custom.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/game-editor.js?t=$ts\"></script>";
          }
-         if( ALLOW_GOBAN_EDITOR )
-            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goban_editor.js\"></script>";
          if( ALLOW_GO_DIAGRAMS )
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
       }
