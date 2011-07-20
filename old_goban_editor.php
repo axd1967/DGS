@@ -141,8 +141,8 @@ EOF_GOBAN;
       //jump_to("goban_editor.php?sysmsg=". urlencode(T_('Goban saved!')) );
    }
 
-   $page = "goban_editor.php";
-   $title = T_('Goban editor');
+   $page = "old_goban_editor.php";
+   $title = /*T_*/('OLD Goban editor');
 
 
    // ---------- Goban EDIT form -----------------------------------
