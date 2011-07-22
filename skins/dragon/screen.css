@@ -1973,10 +1973,43 @@ table#GameEditor a.UndoTool span.LabelTool {
 }
 
 
+/* ------------------------- */
+/* Goban Editor */
+/* ------------------------- */
+
+table#GobanEditor td {
+   /*border: 1px solid green;*/
+}
+table#GobanEditor form td {
+   border: 0px solid black;
+}
+
+table#GobanEditor {
+   border: 0px solid red;
+   border-collapse: collapse;
+   border-spacing: 0px;
+   margin: 0px auto;
+}
+
+table#GobanEditor td#PreviewArea {
+   padding: .7em;
+}
+table#GobanEditor td#EditArea {
+   vertical-align: middle;
+   padding: .5em 1em .5em 1em;
+}
+table#GobanEditor table.Goban td {
+   border: 0px solid red;
+}
+table#GobanEditor div.GobanGfx {
+   display: block;
+   margin: 0em;
+   border: 0px dotted black;
+}
 
 
 /* ------------------------- */
-/* Goban editor */
+/* OLD Goban editor */
 /* ------------------------- */
 
 body.GobanEdit img.ToolOff {

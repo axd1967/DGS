@@ -49,8 +49,8 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
 */
 
    // read args
-   $width  = (int)get_request_arg('width', 19);
-   $height = (int)get_request_arg('height', 19);
+   $width  = (int)get_request_arg('width', 9);
+   $height = (int)get_request_arg('height', 9);
    $board_text = trim(get_request_arg('board'));
 
    // setup goban for board-editing
@@ -94,8 +94,9 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
       $gobform->add_row( array(
             'CHAPTER', T_('Edit Area#gobedit'), ));
       $gobform->add_row( array(
-            'TEXTAREA', 'board', 60, $height + 7, $board_text, ));
+            'TEXTAREA', 'board', 10 + 2 * $width, $height + 7, $board_text, ));
       $gobform->add_row( array(
+            'CELL', 1, '',
             'SUBMITBUTTON', 'gob_preview', T_('Preview'), ));
       $gobform->add_row( array(
             'HIDDEN', 'width', $width,
@@ -111,17 +112,27 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
    start_page( $title, true, $logged_in, $player_row, $style_str );
    echo "<h3 class=Header>$title</h3>\n";
 
-   $gobform->echo_string();
-
-   if( !is_null($goban_preview) )
+   if( is_null($goban_preview) )
+      $gobform->echo_string();
+   else
    {
-      section( 'GobanPreview', T_('Preview Area#gobedit') );
-      echo $goban_preview, "<br>\n";
+      echo
+         "<table id=GobanEditor class=GobanEditor>\n",
+            "<tr>",
+               "<td id=PreviewArea>", $goban_preview, "</td>\n",
+               "<td id=EditArea>", $gobform->get_form_string(), "</td>",
+            "</tr>\n",
+         "</table>\n";
    }
 
 
+   $notes = array();
+   $notes[] = T_('');
+   echo_notes( 'gobanEditNotes', T_('Syntax of DGS-tag &lt;igoban SL1>'), $notes );
+
+
    $menu_array = array();
-   $menu_array[T_('New Goban')] = "goban_editor.php";
+   $menu_array[T_('New Goban')] = $page . (is_null($goban_preview) ? '' : "?width=$width".URI_AMP."height=$height");
 
    end_page(@$menu_array);
 }//main
