@@ -514,7 +514,7 @@ function build_participant_notes( $deny_reason=null, $intro=true )
       $notes[] = null; // empty line
    }
 
-   $narr = array( T_('Registration Status') );
+   $narr = array( T_('Registration Status:') );
    $narr[] = sprintf( '%s = %s', NO_VALUE, T_('user is not registered for tournament#tpstat_unreg') );
    $arrst = array();
    $arrst[TP_STATUS_APPLY] = T_('user-application needs verification by tournament director#tpstat_apply');

@@ -323,7 +323,7 @@ function build_properties_notes()
    $notes[] = T_('To disable restrictions, you may use 0-value in (some) fields.');
    $notes[] = null; // empty line
 
-   $narr = array( T_('Rating Use Mode') );
+   $narr = array( T_('Rating Use Mode:') );
    foreach( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
       $narr[] = sprintf( "%s = $descr", TournamentProperties::getRatingUseModeText($usemode) );
    $notes[] = $narr;

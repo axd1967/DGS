@@ -127,7 +127,7 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
       }
       elseif( is_array($note) )
       {
-         echo '  <li>', array_shift( $note ), ":\n<ul class=\"SubNotes\">\n"; // note-title
+         echo '  <li>', array_shift( $note ), "\n<ul class=\"SubNotes\">\n"; // note-title
          foreach( $note as $note_item )
             echo "<li>$note_item\n";
          echo "</ul>\n";

@@ -216,7 +216,7 @@ function build_status_notes()
    //$notes[] = null; // empty line
 
    $stchfmt = "<b>%s > %s:</b> %s";
-   $notes[] = array( T_('Allowed status changes for Tournament Directors with preconditions'),
+   $notes[] = array( T_('Allowed status changes for Tournament Directors with preconditions:'),
          sprintf( $stchfmt,
             Tournament::getStatusText(TOURNEY_STATUS_NEW),
             Tournament::getStatusText(TOURNEY_STATUS_REGISTER),
@@ -239,7 +239,7 @@ function build_status_notes()
       );
    $notes[] = null;
 
-   $notes[] = array( T_('Reserved Status changes for Tournament Admins'),
+   $notes[] = array( T_('Reserved Status changes for Tournament Admins:'),
          sprintf( "<b>* > %s > *%s%s > *:</b><br>\n%s",
             Tournament::getStatusText(TOURNEY_STATUS_ADMIN),
             SEP_SPACING,

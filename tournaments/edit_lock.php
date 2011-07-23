@@ -279,7 +279,7 @@ function build_notes_locking()
    $notes = array();
    //$notes[] = null; // empty line
 
-   $narr = array( T_('Tournament Locks') );
+   $narr = array( T_('Tournament Locks:') );
    foreach( Tournament::getFlagsText(null, false) as $flag => $descr )
       $narr[] = sprintf( "%s = $descr", Tournament::getFlagsText($flag) );
    $notes[] = $narr;

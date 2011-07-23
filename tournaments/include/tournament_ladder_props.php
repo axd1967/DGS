@@ -339,7 +339,7 @@ class TournamentLadderProps
          . "will be continued as normal games without further effect to the tournament.");
 
       // game-end handling
-      $arr = array( T_('On game-end the following action is performed') );
+      $arr = array( T_('On game-end the following action is performed:') );
       $arr[] = sprintf( '%s: %s', T_('if challenger wins by score or resignation'),
                         TournamentLadderProps::getGameEndText($this->GameEndNormal) );
       $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout'),
