@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Users";
+$TranslateGroups[] = "Common";
 
  /* Author: Jens-Uwe Gaspar */
 
@@ -27,18 +27,124 @@ $TranslateGroups[] = "Users";
  * \brief Functions to upload files to server, especially images (ImageFileUpload) at first.
  */
 
-
-/*!
- * \class ImageFileUpload
- *
- * \brief Class to manage the upload of image-files.
- *
- * Support types: JPG, GIF, PNG
- * Support operations: resize
- */
-
 if( !defined('UPLOAD_ERR_EXTENSION') )
    define('UPLOAD_ERR_EXTENSION', 8); // since PHP 5.2.0
+
+/*!
+ * \class FileUpload
+ *
+ * \brief Base-Class to manage the upload of client-files.
+ */
+class FileUpload
+{
+   /*! \brief original input for file-input from form. */
+   var $arr_file;
+   /*! \brief upper limit of file-size allowed to upload and stored. */
+   var $max_upload_size;
+   /*! \brief true, if image correctly uploaded. */
+   var $is_uploaded;
+   /*! \brief array of error-message; empty if no error. */
+   var $errors;
+
+   // browser-info about file-upload source (from $arr_file); size/type should be mistrusted
+   var $file_src_tmpfile;
+   var $file_src_clientfile;
+   var $file_src_size;
+   var $file_src_type;
+
+   function FileUpload( $arr_file, $max_upload_size=0 )
+   {
+      $this->arr_file = $arr_file;
+      $this->max_upload_size = $max_upload_size;
+      $this->is_uploaded = false;
+      $this->errors = array();
+
+      $this->file_src_tmpfile = $arr_file['tmp_name'];
+      $this->file_src_clientfile = $arr_file['name'];
+      $this->file_src_size = $arr_file['size'];
+      $this->file_src_type = $arr_file['type'];
+
+      // general check
+      $this->checkFileUploadError( $arr_file['error'] );
+   }
+
+   /*!
+    * \brief Checks upload error-code from files-array, checks if file has been
+    *        correctly uploaded and check filesize against max-upload-size.
+    * \note Sets $this->is_uploaded if no error with upload encountered.
+    *       Fills $this->errors with error-messages on encountered errors.
+    */
+   function checkFileUploadError( $errorcode )
+   {
+      $this->is_uploaded = false;
+      switch( (int)$errorcode )
+      {
+         case UPLOAD_ERR_OK:
+            if( $this->file_src_clientfile == '' )
+               $this->errors[] = T_('No file specified to upload.');
+            elseif( is_uploaded_file($this->file_src_tmpfile) )
+               $this->is_uploaded = true;
+            break;
+         case UPLOAD_ERR_INI_SIZE:
+            $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. file size set by the server.'),
+                  $this->file_src_clientfile );
+            break;
+        case UPLOAD_ERR_FORM_SIZE:
+            $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. file size of [%s bytes] specified for the input-form.'),
+                  $this->file_src_clientfile, $this->max_upload_size );
+            break;
+        case UPLOAD_ERR_PARTIAL:
+            $this->errors[] = sprintf( T_('The uploaded file [%s] was only partially uploaded.'),
+                  $this->file_src_clientfile );
+            break;
+        case UPLOAD_ERR_NO_FILE:
+            $this->errors[] = T_('No file was uploaded.');
+            break;
+        case UPLOAD_ERR_NO_TMP_DIR:
+            error('upload_miss_temp_folder', "FileUpload.$errorcode({$this->file_src_clientfile})");
+            break;
+        case UPLOAD_ERR_CANT_WRITE:
+            error('upload_failed', "FileUpload.no_write_to_disc.$errorcode({$this->file_src_clientfile})");
+            break;
+        case UPLOAD_ERR_EXTENSION:
+            error('upload_failed', "FileUpload.stopped_by_extension.$errorcode({$this->file_src_clientfile})");
+            break;
+        default:
+            error('upload_failed', "FileUpload.unknown_error.$errorcode({$this->file_src_clientfile})");
+            break;
+      }
+
+      // check file-size (max. upload-size)
+      $filesize = filesize($this->file_src_tmpfile);
+      if( $errorcode != UPLOAD_ERR_FORM_SIZE && $this->max_upload_size > 0
+            && $filesize > $this->max_upload_size )
+      {
+         $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. file size of [%s bytes] specified for the input-form.'),
+               $this->file_src_clientfile, $this->max_upload_size );
+         $this->need_resize = true;
+      }
+
+      if( $this->has_error() )
+         $this->is_uploaded = false;
+   }//checkFileUploadError
+
+   /*! \brief Returns true, if error encountered during image-file-upload; false if no error occured. */
+   function has_error()
+   {
+      return ( count($this->errors) > 0 );
+   }
+
+   /*! \brief Cleans up resources and temp-file. */
+   function cleanup()
+   {
+      if( file_exists($this->file_src_tmpfile) )
+         @unlink($this->file_src_tmpfile);
+   }
+
+} // end of 'FileUpload'
+
+
+
 
 // Sources (but stripped to 'image/*'-mime-types):
 // - http://de2.php.net/manual/en/function.image-type-to-mime-type.php
@@ -64,23 +170,16 @@ $ARR_GLOBAL_UPLOAD_EXTENSION = array(
    //IMAGETYPE_ICO     => 'ico',  // 17 = ICO, image/vnd.microsoft.icon; since PHP 5.3.0
 );
 
-class ImageFileUpload
+/*!
+ * \class ImageFileUpload
+ *
+ * \brief Class to manage the upload of image-files.
+ *
+ * Support types: JPG, GIF, PNG
+ * Support operations: resize
+ */
+class ImageFileUpload extends FileUpload
 {
-   /*! \brief original input for file-input from form. */
-   var $arr_file;
-   /*! \brief upper limit of file-size allowed to upload and stored. */
-   var $max_upload_size;
-   /*! \brief true, if image correctly uploaded. */
-   var $is_uploaded;
-   /*! \brief array of error-message; empty if no error. */
-   var $errors;
-
-   // browser-info about file-upload source (from $arr_file); size/type should be mistrusted
-   var $file_src_tmpfile;
-   var $file_src_clientfile;
-   var $file_src_size;
-   var $file_src_type;
-
    // image-related
    var $max_x;
    var $max_y;
@@ -99,15 +198,7 @@ class ImageFileUpload
     */
    function ImageFileUpload( $arr_file, $max_upload_size=0, $max_x=0, $max_y=0 )
    {
-      $this->arr_file = $arr_file;
-      $this->max_upload_size = $max_upload_size;
-      $this->is_uploaded = false;
-      $this->errors = array();
-
-      $this->file_src_tmpfile = $arr_file['tmp_name'];
-      $this->file_src_clientfile = $arr_file['name'];
-      $this->file_src_size = $arr_file['size'];
-      $this->file_src_type = $arr_file['type'];
+      parent::FileUpload( $arr_file, $max_upload_size );
 
       // image-related
       $this->max_x = round($max_x);
@@ -120,76 +211,7 @@ class ImageFileUpload
       $this->need_resize = false;
 
       // general check
-      $this->checkFileUploadError( $arr_file['error'] );
       $this->checkImageFileUpload( array( IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG ) );
-   }
-
-   /*! \brief Returns true, if error encountered during image-file-upload; false if no error occured. */
-   function has_error()
-   {
-      return ( count($this->errors) > 0 );
-   }
-
-   /*!
-    * \brief Checks upload error-code from files-array, checks if file has been
-    *        correctly uploaded and check filesize against max-upload-size.
-    * \note Sets $this->is_uploaded if no error with upload encountered.
-    *       Fills $this->errors with error-messages on encountered errors.
-    */
-   function checkFileUploadError( $errorcode )
-   {
-      $this->is_uploaded = false;
-      switch( (int)$errorcode )
-      {
-         case UPLOAD_ERR_OK:
-            if( $this->file_src_clientfile == '' )
-               $this->errors[] = T_('No file specified to upload.');
-            elseif( is_uploaded_file($this->file_src_tmpfile) )
-               $this->is_uploaded = true;
-            break;
-         case UPLOAD_ERR_INI_SIZE:
-            $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. '
-                  . 'file size set by the server.'), $this->file_src_clientfile );
-            break;
-        case UPLOAD_ERR_FORM_SIZE:
-            $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. '
-                  . 'file size of [%s bytes] specified for the input-form.'),
-                  $this->file_src_clientfile, $this->max_upload_size );
-            break;
-        case UPLOAD_ERR_PARTIAL:
-            $this->errors[] = sprintf( T_('The uploaded file [%s] was only partially uploaded.'),
-                  $this->file_src_clientfile );
-            break;
-        case UPLOAD_ERR_NO_FILE:
-            $this->errors[] = T_('No file was uploaded.');
-            break;
-        case UPLOAD_ERR_NO_TMP_DIR:
-            error('upload_miss_temp_folder', "ImageFileUpload.$errorcode({$this->file_src_clientfile})");
-            break;
-        case UPLOAD_ERR_CANT_WRITE:
-            error('upload_failed', "ImageFileUpload.no_write_to_disc.$errorcode({$this->file_src_clientfile})");
-            break;
-        case UPLOAD_ERR_EXTENSION:
-            error('upload_failed', "ImageFileUpload.stopped_by_extension.$errorcode({$this->file_src_clientfile})");
-            break;
-        default:
-            error('upload_failed', "ImageFileUpload.unknown_error.$errorcode({$this->file_src_clientfile})");
-            break;
-      }
-
-      // check file-size (max. upload-size)
-      $filesize = filesize($this->file_src_tmpfile);
-      if( $errorcode != UPLOAD_ERR_FORM_SIZE && $this->max_upload_size > 0
-            && $filesize > $this->max_upload_size )
-      {
-         $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. '
-               . 'file size of [%s bytes] specified for the input-form.'),
-               $this->file_src_clientfile, $this->max_upload_size );
-         $this->need_resize = true;
-      }
-
-      if( $this->has_error() )
-         $this->is_uploaded = false;
    }
 
    /*!
@@ -306,8 +328,7 @@ class ImageFileUpload
          @imagedestroy($this->image);
          $this->image = null;
       }
-      if( file_exists($this->file_src_tmpfile) )
-         @unlink($this->file_src_tmpfile);
+      parent::cleanup();
    }
 
    // ------------- static functions ---------------------------
@@ -349,4 +370,5 @@ class ImageFileUpload
    }
 
 } // end of 'ImageFileUpload'
+
 ?>
