@@ -31,6 +31,8 @@ require_once( 'include/classlib_goban.php' );
   */
 
 
+define('SL_HOSTBASE', "http://senseis.xmp.net/?");
+
  /*!
   * \class GobanHandlerSL1
   * \brief Goban-reader and Goban-writer for igoban-type [SL1]: Sensei's Library syntax version 1
@@ -68,10 +70,10 @@ require_once( 'include/classlib_goban.php' );
   *        M            EX        cross
   *        a..z         a..z      letters on empty intersection
   *
-  *        *            T*        black-teritory (DGS-only)
-  *        ~            T~        white-teritory (DGS-only)
-  *        ?            T?        neutral-undecided-teritory (DGS-only)
-  *        =            T=        dame-teritory (DGS-only)
+  *        *            T*        black-territory (DGS-only)
+  *        ~            T~        white-territory (DGS-only)
+  *        ?            T?        neutral-undecided-territory (DGS-only)
+  *        =            T=        dame-territory (DGS-only)
   *
   *   stone with numbers
   *      - 0 = stone with number 10 in diagram
@@ -330,7 +332,7 @@ class GobanHandlerSL1
          if( preg_match("/^dgs:(.*)$/i", $link, $matches) )
             $link = HOSTBASE . $matches[1];
          elseif( !preg_match("/^(#|http)/", $link) )
-            $link = "http://senseis.xmp.net/?$link"; // SL-topic
+            $link = SL_HOSTBASE . $link; // SL-topic
 
          $this->goban->addLink( $label, $link );
          return true;
@@ -457,7 +459,7 @@ class GobanHandlerSL1
          elseif( is_numeric($item) ) // numbered stone
          {
             $num = (int)$item;
-            $move_num = $this->startMoveNumber + $num - 1;
+            $move_num = $this->startMoveNumber + $num - 1 + ( $num == 0 ? 10 : 0 );
             if( $num & 1 ) //odd
                $move_col = ($this->startMoveBlack) ? GOBS_BLACK : GOBS_WHITE;
             else
@@ -506,7 +508,7 @@ class GobanHandlerSL1
             "/\b(?<!!)T([\\\*~?=])/e", // Ex11: T(*|~|?|=)
             "/!(\S)/", // !XYZ
          ), array(
-            "<http://senseis.xmp.net/?\\1 |\\1>", // [topic]
+            "<".SL_HOSTBASE."\\1 |\\1>", // [topic]
             "\"<image board/\" . strtolower('\\1') . \".gif>\"", // BO WO
             "\"<image board/\" . strtolower('\\1') . \"\\2.gif>\"", // B|W1.100
             "\"<image board/\" . strtolower('\\1') . strtolower('\\2') . \".gif>\"", // (B|W)(C|S|T|X)
@@ -581,8 +583,118 @@ class GobanHandlerSL1
    /*! \brief (interface) Transforms given Goban-object into SL1-format. */
    function write_goban( $goban )
    {
+      $CONV_MAP = array( // GOBS_BITMASK | GOBM_BITMASK
+            GOBS_BLACK                 => 'X',
+            GOBS_WHITE                 => 'O',
+            GOBM_CIRCLE | GOBS_BLACK   => 'B',
+            GOBM_CIRCLE | GOBS_WHITE   => 'W',
+            GOBM_CIRCLE                => 'C',
+            GOBM_SQUARE | GOBS_BLACK   => '#',
+            GOBM_SQUARE | GOBS_WHITE   => '@',
+            GOBM_SQUARE                => 'S',
+            GOBM_TRIANGLE | GOBS_BLACK => 'Y',
+            GOBM_TRIANGLE | GOBS_WHITE => 'Q',
+            GOBM_TRIANGLE              => 'T',
+            GOBM_CROSS | GOBS_BLACK    => 'Z',
+            GOBM_CROSS | GOBS_WHITE    => 'P',
+            GOBM_CROSS                 => 'M',
+            GOBM_TERR_B | GOBS_WHITE   => '*', //TODO
+            GOBM_TERR_W | GOBS_BLACK   => '~', //TODO
+            GOBM_TERR_B                => '*',
+            GOBM_TERR_W                => '~',
+            GOBM_TERR_NEUTRAL          => '?',
+            GOBM_TERR_DAME             => '=',
+         );
       $result = array();
-      //TODO implement
+      $result[] = '$$'; // placeholder for title
+
+      // NOTE: only export standard board-lines, no irregular boards
+      // NOTE: export hoshi if set, no detection for auto-hoshi
+
+      // find start-move-number for number-labels
+      $arr_nums = array(); // label-num => is-black
+      for( $y=1; $y <= $goban->max_y; $y++ )
+      {
+         for( $x=1; $x <= $goban->max_x; $x++ )
+         {
+            $arrval = $goban->getValue($x,$y);
+            if( $arrval[GOBMATRIX_VALUE] & GOBM_NUMBER )
+            {
+               $label = $arrval[GOBMATRIX_LABEL];
+               if( $label )
+                  $arr_nums[$label] = ($arrval[GOBMATRIX_VALUE] & GOBS_BLACK);
+            }
+         }
+      }
+      ksort($arr_nums, SORT_NUMERIC);
+      $min_num = (count($arr_nums)) ? array_shift( array_keys($arr_nums) ) : 0;
+      $firstmove_color = '';
+      if( $min_num > 10 )
+      {
+         if( !$arr_nums[$min_num] )
+            $firstmove_color = 'W';
+      }
+
+      $result[] = '$$ ++';
+      for( $y=1; $y <= $goban->max_y; $y++ )
+      {
+         $line = '$$';
+         for( $x=1; $x <= $goban->max_x; $x++ )
+         {
+            $arrval = $goban->getValue($x,$y);
+            $val = $arrval[GOBMATRIX_VALUE];
+            $label = $arrval[GOBMATRIX_LABEL];
+
+            $stone = ($val & GOBS_BITMASK);
+            $marker = ($val & GOBM_BITMASK);
+            $hoshi = ($val & GOBO_HOSHI);
+            $num_label = ($marker == GOBM_NUMBER) ? $label - $min_num + 1 : 0;
+
+            if( $stone != GOBS_EMPTY && $marker == GOBM_NUMBER && $num_label >= 1 && $num_label <= 10 )
+               $line .= ' ' . ($num_label == 10 ? 0 : $num_label);
+            elseif( $stone == GOBS_EMPTY && $marker == GOBM_LETTER && $label >= 'a' && $label <= 'z' )
+               $line .= ' ' . $label;
+            elseif( $conv_val = @$CONV_MAP[$stone | $marker] )
+               $line .= ' ' . $conv_val;
+            elseif( $conv_val = @$CONV_MAP[$stone] )
+               $line .= ' ' . $conv_val;
+            elseif( $stone == GOBS_EMPTY )
+               $line .= ' ' . ($hoshi ? ',' : '.');
+         }
+         $result[] = $line;
+      }
+      $result[] = '$$ ++';
+
+      // LINKS
+      foreach( $goban->BoardLinks as $label => $link )
+      {
+         if( strpos($link, HOSTBASE) === 0 )
+            $link = 'dgs:' . substr($link, strlen(HOSTBASE));
+         elseif( strpos($link, SL_HOSTBASE) === 0 )
+            $link = substr($link, strlen(SL_HOSTBASE));
+         $result[] = "\$\$ [$label|$link]";
+      }
+
+      // TITLE-line
+      if( $firstmove_color )
+         $result[0] .= $firstmove_color;
+      if( $goban->show_coords && $goban->opts_coords != GOBB_EMPTY )
+         $result[0] .= 'c';
+      if( $goban->size_x == $goban->size_y && $goban->max_x == $goban->max_y && $goban->size_x == $goban->max_x )
+         $result[0] .= $goban->size_x;
+      if( $min_num > 0 )
+         $result[0] .= 'm' . $min_num;
+      if( !is_null($goban->BoardTitle) )
+         $result[0] .= ' ' . $goban->BoardTitle;
+
+      // TEXT-block
+      if( !is_null($goban->BoardText) )
+      {
+         if( !$goban->BoardTextInline )
+            $result[] = '%%%%';
+         $result[] = $goban->BoardText;
+      }
+
       return "<igoban SL1>\n" . implode("\n", $result) . "\n</igoban>";
    }
 
