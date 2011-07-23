@@ -48,6 +48,8 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
      gob_new&width=&height=   : make new goban of given size (width x height)
      gob_load&gid=&move=      : load DGS-game as goban for game-id and move (default last-move)
      gob_preview&board=       : preview given goban from 'board'-text
+     gob_swcol&...            : switch Black/White colors
+     gob_flatten&...          : flatten Goban into B/W-stones alone for Shape-game
 */
 
    // read args
@@ -56,6 +58,7 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
    $board_text = trim(get_request_arg('board'));
    $gid = get_request_arg('gid');
    $move = get_request_arg('move');
+   $do_preview = @$_REQUEST['gob_preview'];
 
 
    $goban_preview = NULL;
@@ -71,14 +74,40 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
       $reader = new GobanHandlerDgsGame();
       $goban = $reader->read_goban( sprintf("<game %s%s>", (int)$gid, (is_numeric($move) ? ",$move" : '') ));
       $width = $height = $goban->max_y;
-      $exporter = new GobanHandlerSL1( array( '#1' => 'SL1' ) );
+      $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
       $board_text = $exporter->write_goban( $goban );
       $goban_preview = MarkupHandlerGoban::replace_igoban_tags( $board_text );
    }
+   elseif( @$_REQUEST['gob_swcol'] ) // switch colors
+   {
+      list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
+      if( count($arr_goban) )
+      {
+         $goban = $arr_goban[0];
+         $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
+         $goban->switch_colors();
+         $board_text = $exporter->write_goban( $goban );
+         $do_preview = true;
+      }
+   }
+   elseif( @$_REQUEST['gob_flatten'] && $width == $height ) // flatten to stones
+   {
+      list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
+      if( count($arr_goban) )
+      {
+         $goban = $arr_goban[0];
+         $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
+         $goban->flatten_for_shape_game();
+         $board_text = $exporter->write_goban( $goban );
+         $do_preview = true;
+      }
+   }
 
    // parse <igoban...>-tag (inline)
-   if( (string)$board_text != '' || @$_REQUEST['gob_preview'] )
-      $goban_preview = MarkupHandlerGoban::replace_igoban_tags( $board_text );
+   if( (string)$board_text != '' || $do_preview )
+   {
+      list( $goban_preview, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
+   }
 
 
    // ---------- Goban form ----------------------------------------
@@ -122,9 +151,16 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
             'CHAPTER', T_('Edit Area#gobedit'), ));
       $gobform->add_row( array(
             'TEXTAREA', 'board', 10 + 2 * $width, $height + 7, $board_text, ));
-      $gobform->add_row( array(
+      $arr = array(
             'CELL', 1, '',
-            'SUBMITBUTTON', 'gob_preview', T_('Preview'), ));
+            'SUBMITBUTTON', 'gob_preview', T_('Preview'),
+            'TEXT', SMALL_SPACING,
+            'SUBMITBUTTON', 'gob_swcol', T_('Switch Colors#gobedit'), );
+      if( $width == $height )
+         array_push( $arr,
+            'TEXT', MINI_SPACING,
+            'SUBMITBUTTON', 'gob_flatten', T_('Flatten#gobedit') );
+      $gobform->add_row( $arr );
       $gobform->add_row( array(
             'HIDDEN', 'width', $width,
             'HIDDEN', 'height', $height, ));
