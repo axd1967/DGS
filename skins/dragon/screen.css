@@ -2010,6 +2010,9 @@ table#GobanEditor div.GobanGfx {
 body.GobanEdit ul.Notes tt {
    font-size: larger;
 }
+body.GobanEdit ul.SubNotes {
+   list-style-type: square;
+}
 
 
 /* ------------------------- */
