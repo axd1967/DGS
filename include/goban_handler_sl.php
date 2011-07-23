@@ -41,7 +41,7 @@ require_once( 'include/classlib_goban.php' );
   *
   *   each line starts with '$$' to indicate a go-diagram
   *   a space has meaning
-  *   title-line := first line
+  *   title-line := first line (mandatory)
   *     format of title-line (regex): $$(B|W)?c?(size)?(m\d+)?(title)?
   *     - B|W = gives start of color for numbered stones: W -> first numbered stone is white
   *     - c = enables coordinates (of type A1)
@@ -88,7 +88,6 @@ require_once( 'include/classlib_goban.php' );
   * \note DGS-exceptions to SL-format:
   *   - Ex01: lines can start with white-spaces
   *   - Ex02: line-prefix '$$' can be omitted
-  *   - Ex03: chars "'" and '\' are not allowed in text, will mess up goban
   *   - Ex04: easier coordinate-usage (checking on + | -): "^+" "++" "-+", no spaces allowed in line with border-info
   *   - Ex05: goban-links supports: SL-topics, DGS-thread-anchor "#123", DGS-link "dgs:docs.php", http-links "http://..."
   *   - Ex06: URL-arg 'raw' prints content of original <igoban SL1>-tag; see GobanHandlerGfxBoard.build_rawtext()
@@ -323,7 +322,7 @@ class GobanHandlerSL1
    // internal, parse SL1, returns true if was only a link (nothing more to parse)
    function parse_links( $line )
    {
-      // Ex05: consume line with diagram-links: [ref|link], link=http...|SL-topic; ignore remaining in line
+      // Ex05: consume line with diagram-links: [ref|link], link=dgs:dgsPage|http...|SL-topic; ignore remaining in line
       if( preg_match("/^\[\s*([^|])\s*\|\s*([^\]]+)\s*\]/", $line, $matches) )
       {
          $label = $matches[1];
