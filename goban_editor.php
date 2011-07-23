@@ -25,6 +25,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'include/classlib_goban.php' );
 require_once( 'include/goban_handler_sl.php' );
 require_once( 'include/goban_handler_gfx.php' );
+require_once( 'include/goban_handler_dgsgame.php' );
 
 $GLOBALS['ThePage'] = new Page('GobanEdit');
 
@@ -45,6 +46,7 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
 /* Actual REQUEST calls used:
      (no args)                : new goban
      gob_new&width=&height=   : make new goban of given size (width x height)
+     gob_load&gid=&move=      : load DGS-game as goban for game-id and move (default last-move)
      gob_preview&board=       : preview given goban from 'board'-text
 */
 
@@ -52,18 +54,29 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
    $width  = (int)get_request_arg('width', 9);
    $height = (int)get_request_arg('height', 9);
    $board_text = trim(get_request_arg('board'));
+   $gid = get_request_arg('gid');
+   $move = get_request_arg('move');
 
-   // setup goban for board-editing
-   if( @$_REQUEST['gob_new'] )
+
+   $goban_preview = NULL;
+   if( @$_REQUEST['gob_new'] ) // setup goban for board-editing
    {
       if( $width < MIN_BOARD_SIZE || $width > MAX_BOARD_SIZE || $height < MIN_BOARD_SIZE || $height > MAX_BOARD_SIZE )
          jump_to("$page?width=$width".URI_AMP."height=$height");
 
       $board_text = create_new_igoban( $width, $height );
    }
+   elseif( @$_REQUEST['gob_load_game'] && $gid ) // load DGS-game
+   {
+      $reader = new GobanHandlerDgsGame();
+      $goban = $reader->read_goban( sprintf("<game %s%s>", (int)$gid, (is_numeric($move) ? ",$move" : '') ));
+      $width = $height = $goban->max_y;
+      $exporter = new GobanHandlerSL1( array( '#1' => 'SL1' ) );
+      $board_text = $exporter->write_goban( $goban );
+      $goban_preview = MarkupHandlerGoban::replace_igoban_tags( $board_text );
+   }
 
    // parse <igoban...>-tag (inline)
-   $goban_preview = NULL;
    if( (string)$board_text != '' || @$_REQUEST['gob_preview'] )
       $goban_preview = MarkupHandlerGoban::replace_igoban_tags( $board_text );
 
@@ -88,6 +101,20 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
       $gobform->add_row( array(
             'TAB', 'CELL', 1, '',
             'SUBMITBUTTON', 'gob_new', T_('Create Board#gobedit'), ));
+
+      $gobform->add_empty_row();
+      $gobform->add_row( array(
+            'CHAPTER', T_('Load board from game#gobedit'), ));
+      $gobform->add_empty_row();
+      $gobform->add_row( array(
+            'DESCRIPTION', T_('Game-ID#gobedit'),
+            'TEXTINPUT',   'gid', 8, 16, $gid ));
+      $gobform->add_row( array(
+            'DESCRIPTION', T_('Move#gobedit'),
+            'TEXTINPUT',   'move', 4, 8, $move ));
+      $gobform->add_row( array(
+            'TAB', 'CELL', 1, '',
+            'SUBMITBUTTON', 'gob_load_game', T_('Load DGS-Game#gobedit'), ));
    }
    else
    {
@@ -154,8 +181,8 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
          T_('<tt>Z P - BX WX</tt> : black|white stone with cross#gobedit'),
          T_('<tt>C S T M - EC ES ET EM</tt> : circle square triangle cross#gobedit'),
          T_('<tt>a..z - a..z</tt> : letters on empty intersection#gobedit'),
-         T_('<tt>* ~ - T* T~</tt> : black|white-teritory#gobedit'),
-         T_('<tt>? = - T? T=</tt> : neutral-undecided-teritory, dame-teritory#gobedit'),
+         T_('<tt>* ~ - T* T~</tt> : black|white-territory#gobedit'),
+         T_('<tt>? = - T? T=</tt> : neutral-undecided-territory, dame-territory#gobedit'),
       );
    $notes[] = array( T_('BOARD-format for specialties:#gobedit'),
          T_('<tt>$$ [ref|link]</tt> : add link to <tt>ref</tt>-label on board, e.g. <tt>$$ [a|NadareJoseki]</tt><br>'
