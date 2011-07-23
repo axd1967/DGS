@@ -291,7 +291,7 @@ This is why:
 
       $game_query .= "ToMove_ID=$next_to_move_ID, " .
           "Flags=$GameFlags, " .
-          "Snapshot='" . $TheBoard->make_game_snapshot() . "', " .
+          "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
           $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
    }//domove
 

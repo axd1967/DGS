@@ -143,7 +143,7 @@ function fix_single_game( $gid )
    $board = new Board();
    if( !$board->load_from_db( $game_row, $game->Moves, $no_marked_dead, /*last-msg*/false) )
       error('internal_error', "fix_game_snapshost.load_from_db($gid)");
-   $new_snapshot = $board->make_game_snapshot();
+   $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 
    global $base_path;
 
@@ -204,7 +204,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       $board = new Board();
       if( $board->load_from_db( $game_row, $game_row['Moves'], $no_marked_dead, /*last-msg*/false, /*fix-stop*/true) )
       {
-         $new_snapshot = $board->make_game_snapshot();
+         $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 
          db_query( "fix_game_snapshost.bulkfix.upd_game_snapshot($gid)",
             "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid AND Snapshot='' LIMIT 1" );

@@ -603,4 +603,69 @@ class NextGameOrder
 
 } //end 'NextGameOrder'
 
+
+
+
+ /*!
+  * \class GameSnapshot
+  * \brief Helper-class to build and parse Games.Snapshot for thumbnails and Shape-games.
+  */
+class GameSnapshot
+{
+   static $BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+   /*!
+    * \brief Returns base64-encoded snapshot of game-positions with B/W- and dead-stones (without color).
+    * \param $stone_reader interface with method $stone_reader->read_stone_value(x,y,$with_dead) with x/y=0..size-1
+    *        returning 1 for black-stone, 2 for white-stone and 3 for dead-stone (black|white), 0 for empty-intersection
+    * \param $with_dead true to include dead-stones, false to omit them (used for shape-game)
+    * \return game-snapshot
+    * \note one char in output = 3 positions of 2-bit-values (00=empty, 01=B, 10=W, 11=dead)
+    */
+   function make_game_snapshot( $size, $stone_reader, $with_dead=true )
+   {
+      $out = '';
+      $enc_val = $enc_cnt = 0;
+      for( $y = 0; $y < $size; $y++ )
+      {
+         for( $x = 0; $x < $size; $x++ )
+         {
+            $stone_val = $stone_reader->read_stone_value( $x, $y, $with_dead);
+            $enc_val = ($enc_val << 2) + $stone_val;
+            if( ++$enc_cnt == 3 )
+            {
+               $out .= GameSnapshot::$BASE64[$enc_val];
+               $enc_cnt = $enc_val = 0;
+            }
+         }
+      }
+
+      if( $enc_cnt > 0 )
+      {
+         $enc_val <<= (2 * (3 - $enc_cnt));
+         $out .= GameSnapshot::$BASE64[$enc_val];
+      }
+
+      $out = rtrim($out, 'A');
+      if( (string)$out != '' )
+      {
+         $out = preg_replace( array(
+               "/AAAAAAAAAAAAAAAA/", // *=16xA
+               "/AAAAAAAA/", // @=8xA
+               "/AAAA/", // #=4xA
+               "/AAA/", // %=3xA
+               "/AA/", // :=2xA
+            ),
+            array(
+               "*", "@", "#",  "%", ":",
+            ), $out );
+      }
+      else
+         $out = 'A';
+
+      return $out;
+   }//make_game_snapshot
+
+} //end 'GameSnapshot'
+
 ?>

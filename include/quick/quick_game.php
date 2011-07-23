@@ -331,7 +331,7 @@ class QuickHandlerGame extends QuickHandler
                 "Last_Y=$y, " .
                 "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
                 "Flags=$GameFlags, ";
-                "Snapshot='" . $TheBoard->make_game_snapshot() . "', " .
+                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
                 "ToMove_ID=$next_to_move_ID, ";
             break;
          }//set_handicap
@@ -386,7 +386,7 @@ class QuickHandlerGame extends QuickHandler
 
             $game_query .= "ToMove_ID=$next_to_move_ID, " .
                "Flags=$GameFlags, " .
-               "Snapshot='" . $TheBoard->make_game_snapshot() . "', ";
+               "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
             break;
          }//move
 
@@ -460,7 +460,7 @@ class QuickHandlerGame extends QuickHandler
                 "Score=$score, " .
                 //"Last_Move='$Last_Move', " . //Not a move, re-use last one
                 "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-                "Snapshot='" . $TheBoard->make_game_snapshot() . "', ";
+                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
 
             if( $next_status != GAME_STATUS_FINISHED )
                $game_query .= "ToMove_ID=$next_to_move_ID, ";

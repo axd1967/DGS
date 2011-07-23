@@ -486,7 +486,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       $TheBoard = new Board();
       if( $TheBoard->load_from_db( array( 'ID' => $gid, 'Size' => $size, 'Moves' => $moves ) ) ) // ignore errors
       {
-         $snapshot = $TheBoard->make_game_snapshot();
+         $snapshot = GameSnapshot::make_game_snapshot($size, $TheBoard);
          db_query( "create_game.upd_game.stdh_snapshot($gid,$size)",
             "UPDATE Games SET Snapshot='$snapshot' WHERE ID=$gid LIMIT 1" );
       }
