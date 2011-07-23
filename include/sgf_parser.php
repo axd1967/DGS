@@ -361,8 +361,8 @@ function get_handicap_pattern( $size, $handicap, &$err)
    }
    $game= $game[0]; //keep the first game only
 
-   $nb= 0;
-   $vars= array();
+   $nb = 0;
+   $vars = array();
    handicap_push( $vars, $game, $nb);
 
    while( list($nb,$var)=array_pop($vars) )
@@ -402,5 +402,67 @@ function get_handicap_pattern( $size, $handicap, &$err)
 }
 
 }//ENABLE_STDHANDICAP
+
+
+/*!
+ * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
+ * \return array(
+ *     Error => error-message | '' (=success)
+ *     Size  => size,
+ *     AB|AW => array( sgf-coords,...),   // B/W setup-stones
+ *     Moves => array( 'B|W'.sgf-coor, ... ) )
+ */
+function parse_sgf_for_shape_game( $sgf_data )
+{
+   $game = array();
+   $error = sgf_parser( $sgf_data, $game );
+
+   $out = array( 'Error' => $error, 'Size' => 0, 'AB' => array(), 'AW' => array(), 'Moves' => array() );
+   if( $error )
+      return $out;
+
+   $game = $game[0]; // check 1st game only
+   $movenum = 0; // current move-number
+   $vars = array(); // variations
+   handicap_push( $vars, $game, $movenum );
+   $sgf_size = null;
+
+   while( list($movenum, $var) = array_pop($vars) ) // process variations-stack
+   {
+      // a variation is an array of nodes
+      foreach( $var as $id => $node )
+      {
+         if( $id === SGF_VAR_KEY )
+         {
+            // this particular node is an array of variations, but only take first var (main-branch)
+            handicap_push( $vars, $node[0], $movenum );
+            continue;
+         }
+
+         // a node is an array of properties
+         if( isset($node['B']) || isset($node['W']) )
+         {
+            $key = ( isset($node['B']) ) ? 'B' : 'W';
+            $sgf_coord = @$node[$key][0];
+            $out['Moves'][] = $key . $sgf_coord;
+            $movenum++;
+         }
+         if( isset($node['AB']) )
+         {
+            foreach( @$node['AB'] as $sgf_coord )
+               $out['AB'][] = $sgf_coord;
+         }
+         if( isset($node['AW']) )
+         {
+            foreach( @$node['AW'] as $sgf_coord )
+               $out['AW'][] = $sgf_coord;
+         }
+         if( isset($node['SZ']) && !$out['Size'] )
+            $out['Size'] = (int)$node['SZ'][0];
+      }
+   }
+
+   return $out;
+}//parse_sgf_for_shape_game
 
 ?>
