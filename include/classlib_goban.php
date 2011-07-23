@@ -60,9 +60,22 @@ class MarkupHandlerGoban
    /*! \brief Replaces igoban-tags with graphical-board. */
    function replace_igoban_tags( $text )
    {
+      $repl_text = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $text );
+      return $repl_text[0];
+   }
+
+   /*!
+    * \brief Replaces igoban-tags with graphical-board but also collecting parsed Goban-objects.
+    * \return array( replaced tag-string, array of parsed Goban-objects )
+    */
+   function replace_igoban_tags_collect_goban( $text )
+   {
+      $arr_gobans = array();
+
       //<igoban [t|type=]type [...]> => show inline-goban
-      return preg_replace( "/<igoban +([\w\s=]+) *>(.*?)<\/igoban *>/ise",
-                           "MarkupHandlerGoban::parse_igoban('\\0','\\1','\\2','GFX')", $text );
+      $repl_text = preg_replace( "/<igoban +([\w\s=]+) *>(.*?)<\/igoban *>/ise",
+                           "MarkupHandlerGoban::parse_igoban('\\0','\\1','\\2','GFX',\$arr_gobans)", $text );
+      return array( $repl_text, $arr_gobans );
    }
 
    /*!
@@ -80,7 +93,7 @@ class MarkupHandlerGoban
     * \param $attbs attribute-string of <igoban>-tag with syntax, separated by spaces: (k=v|v)*
     * \param $text payload between start- and end-igoban-tags, can include LFs
     */
-   function parse_igoban( $rawtext, $attbs, $text, $writer_type='GFX' )
+   function parse_igoban( $rawtext, $attbs, $text, $writer_type='GFX', &$arr_gobans )
    {
       // attributes: key=value
       $map_args = MarkupHandlerGoban::attribute_split( $attbs );
@@ -100,6 +113,7 @@ class MarkupHandlerGoban
 
       $goban_reader = new $readerClass( $map_args );
       $goban = $goban_reader->read_goban( $text );
+      $arr_gobans[] = $goban;
 
       $goban_writer = new $writerClass( $rawtext );
       $result = $goban_writer->write_goban( $goban );
@@ -392,6 +406,21 @@ class Goban
       return ($current_arr[GOBMATRIX_VALUE] & GOBS_BITMASK);
    }
 
+   /*! \brief Switches BLACK/WHITE stone-color. */
+   function switchStoneColor( $x, $y )
+   {
+      $upd_arr = $this->getValue($x,$y);
+      $stone = ( $upd_arr[GOBMATRIX_VALUE] & GOBS_BITMASK );
+      if( $stone == GOBS_BLACK )
+         $stone = GOBS_WHITE;
+      elseif( $stone == GOBS_WHITE )
+         $stone = GOBS_BLACK;
+      else
+         return;
+      $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBS_BITMASK) | $stone;
+      $this->setValue( $x, $y, $upd_arr );
+   }
+
 
    function setMarker( $x, $y, $marker_value, $label=NULL )
    {
@@ -448,6 +477,71 @@ class Goban
       $this->max_x = $width;
       $this->max_y = $height;
    }
+
+
+   /*!
+    * \brief interface-method on Goban-class for GameSnapshot-class.
+    * \return 0/1/2/3 for given goban-pos x/y=0..size-1, 0=empty, 1=black, 2=white, 3=dead
+    * \see GameSnapshot#make_game_snapshot()
+    */
+   function read_stone_value( $x, $y, $with_dead=true )
+   {
+      static $VAL_MAP = array(
+            GOBS_BLACK  => 1, // 01 (black)
+            GOBS_WHITE  => 2, // 10 (white)
+            GOBM_TERR_W => 3, // 11 (dead-stone)
+            GOBM_TERR_B => 3, // 11 (dead-stone)
+         );
+
+      $arrval = $this->getValue($x+1,$y+1);
+      $value = $arrval[GOBMATRIX_VALUE];
+      $marker = (int)@$VAL_MAP[ $value & GOBM_BITMASK ];
+      if( $marker )
+         return ($with_dead) ? $marker : 0;
+      return (int)@$VAL_MAP[ $value & GOBS_BITMASK ]; // undef = 00 (empty-field)
+   }//read_stone_value
+
+   function switch_colors()
+   {
+      for( $y = 1; $y <= $this->max_y; $y++ )
+      {
+         for( $x = 1; $x <= $this->max_x; $x++ )
+            $this->switchStoneColor( $x, $y );
+      }
+   }//switch_colors
+
+   /*!
+    * \brief Flattens Goban for shape-game: quadratic board, remove hoshi (use auto-hoshi),
+    *        no irregular boards, only full (not part) boards, remove all markup.
+    */
+   function flatten_for_shape_game()
+   {
+      // no part-board, no irregular board
+      $size = max( $this->size_x, $this->size_y, $this->max_x, $this->max_y );
+      $this->size_x = $this->size_y = $this->max_x = $this->max_y;
+
+      // reset board-lines, no irregular board
+      for( $y = 1; $y <= $size; $y++ )
+      {
+         $board_lines = GOBB_MID;
+         if( $y == 1 )
+            $board_lines &= ~GOBB_NORTH;
+         elseif( $y == $size )
+            $board_lines &= ~GOBB_SOUTH;
+
+         for( $x = 1; $x <= $size; $x++ )
+         {
+            $val = $board_lines;
+            if( $x == 1 )
+               $val &= ~GOBB_WEST;
+            elseif( $x == $size )
+               $val &= ~GOBB_EAST;
+
+            $arrval = $this->getValue($x,$y);
+            $this->matrix[$y][$x] = ($arrval[GOBMATRIX_VALUE] & GOBS_BITMASK) | $board_lines;
+         }
+      }
+   }//flatten_for_shape_game
 
 
    // ------------ static functions ----------------------------
