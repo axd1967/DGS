@@ -628,12 +628,7 @@ class GobanHandlerSL1
       }
       ksort($arr_nums, SORT_NUMERIC);
       $min_num = (count($arr_nums)) ? array_shift( array_keys($arr_nums) ) : 0;
-      $firstmove_color = '';
-      if( $min_num > 10 )
-      {
-         if( !$arr_nums[$min_num] )
-            $firstmove_color = 'W';
-      }
+      $firstmove_color = ( $min_num > 0 && !$arr_nums[$min_num] ) ? 'W' : '';
 
       $result[] = '$$ ++';
       for( $y=1; $y <= $goban->max_y; $y++ )
@@ -682,7 +677,7 @@ class GobanHandlerSL1
          $result[0] .= 'c';
       if( $goban->size_x == $goban->size_y && $goban->max_x == $goban->max_y && $goban->size_x == $goban->max_x )
          $result[0] .= $goban->size_x;
-      if( $min_num > 0 )
+      if( $min_num > 1 )
          $result[0] .= 'm' . $min_num;
       if( !is_null($goban->BoardTitle) )
          $result[0] .= ' ' . $goban->BoardTitle;
