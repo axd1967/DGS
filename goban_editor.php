@@ -23,11 +23,16 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/classlib_goban.php' );
+require_once( 'include/classlib_upload.php' );
 require_once( 'include/goban_handler_sl.php' );
 require_once( 'include/goban_handler_gfx.php' );
 require_once( 'include/goban_handler_dgsgame.php' );
+require_once( 'include/sgf_parser.php' );
+require_once( 'include/coords.php' );
 
 $GLOBALS['ThePage'] = new Page('GobanEdit');
+
+define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
 
 
 {
@@ -47,6 +52,7 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
      (no args)                : new goban
      gob_new&width=&height=   : make new goban of given size (width x height)
      gob_load&gid=&move=      : load DGS-game as goban for game-id and move (default last-move)
+     gob_load_sgf&file_sgf=   : load SGF and flatten into Goban-object
      gob_preview&board=       : preview given goban from 'board'-text
      gob_swcol&...            : switch Black/White colors
      gob_flatten&...          : flatten Goban into B/W-stones alone for Shape-game
@@ -58,10 +64,12 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
    $board_text = trim(get_request_arg('board'));
    $gid = get_request_arg('gid');
    $move = get_request_arg('move');
+
+   // ---------- Process Commands ----------------------------------
+
+   $goban_preview = $errors = NULL;
    $do_preview = @$_REQUEST['gob_preview'];
 
-
-   $goban_preview = NULL;
    if( @$_REQUEST['gob_new'] ) // setup goban for board-editing
    {
       if( $width < MIN_BOARD_SIZE || $width > MAX_BOARD_SIZE || $height < MIN_BOARD_SIZE || $height > MAX_BOARD_SIZE )
@@ -70,38 +78,13 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
       $board_text = create_new_igoban( $width, $height );
    }
    elseif( @$_REQUEST['gob_load_game'] && $gid ) // load DGS-game
-   {
-      $reader = new GobanHandlerDgsGame();
-      $goban = $reader->read_goban( sprintf("<game %s%s>", (int)$gid, (is_numeric($move) ? ",$move" : '') ));
-      $width = $height = $goban->max_y;
-      $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
-      $board_text = $exporter->write_goban( $goban );
-      $goban_preview = MarkupHandlerGoban::replace_igoban_tags( $board_text );
-   }
+      $board_text = load_igoban_from_dgs_game( $gid, $move ); // GLOBALS $do_preview, $width, $height
+   elseif( @$_REQUEST['gob_load_sgf'] && isset($_FILES['file_sgf']) ) // load goban from SGF
+      list( $errors, $board_text ) = load_igoban_from_sgf( $_FILES['file_sgf'] ); // GLOBALS $do_preview, $width, $height
    elseif( @$_REQUEST['gob_swcol'] ) // switch colors
-   {
-      list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
-      if( count($arr_goban) )
-      {
-         $goban = $arr_goban[0];
-         $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
-         $goban->switch_colors();
-         $board_text = $exporter->write_goban( $goban );
-         $do_preview = true;
-      }
-   }
-   elseif( @$_REQUEST['gob_flatten'] && $width == $height ) // flatten to stones
-   {
-      list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
-      if( count($arr_goban) )
-      {
-         $goban = $arr_goban[0];
-         $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
-         $goban->flatten_for_shape_game();
-         $board_text = $exporter->write_goban( $goban );
-         $do_preview = true;
-      }
-   }
+      $board_text = update_igoban( $board_text, 'switch_colors' );
+   elseif( @$_REQUEST['gob_flatten'] ) // flatten to stones
+      $board_text = update_igoban( $board_text, 'flatten_for_shape_game' );
 
    // parse <igoban...>-tag (inline)
    if( (string)$board_text != '' || $do_preview )
@@ -110,9 +93,17 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
    }
 
 
-   // ---------- Goban form ----------------------------------------
+   // ---------- Goban Form ----------------------------------------
 
    $gobform = new Form( 'goban', $page, FORM_POST );
+
+   if( !is_null($errors) && count($errors) )
+   {
+      $gobform->add_empty_row();
+      $gobform->add_row( array(
+            'DESCRIPTION', T_('Errors'),
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+   }
 
    if( is_null($goban_preview) )
    {
@@ -144,6 +135,17 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
       $gobform->add_row( array(
             'TAB', 'CELL', 1, '',
             'SUBMITBUTTON', 'gob_load_game', T_('Load DGS-Game#gobedit'), ));
+
+      $gobform->add_empty_row();
+      $gobform->add_row( array(
+            'CHAPTER', T_('Load board from SGF#gobedit'), ));
+      $gobform->add_empty_row();
+      $gobform->add_row( array(
+            'DESCRIPTION', T_('SGF-file#gobedit'),
+            'FILE',        'file_sgf', 40, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ));
+      $gobform->add_row( array(
+            'TAB', 'CELL', 1, '',
+            'SUBMITBUTTON', 'gob_load_sgf', T_('Upload SGF#gobedit'), ));
    }
    else
    {
@@ -151,16 +153,13 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
             'CHAPTER', T_('Edit Area#gobedit'), ));
       $gobform->add_row( array(
             'TEXTAREA', 'board', 10 + 2 * $width, $height + 7, $board_text, ));
-      $arr = array(
+      $gobform->add_row( array(
             'CELL', 1, '',
             'SUBMITBUTTON', 'gob_preview', T_('Preview'),
             'TEXT', SMALL_SPACING,
-            'SUBMITBUTTON', 'gob_swcol', T_('Switch Colors#gobedit'), );
-      if( $width == $height )
-         array_push( $arr,
+            'SUBMITBUTTON', 'gob_swcol', T_('Switch Colors#gobedit'),
             'TEXT', MINI_SPACING,
-            'SUBMITBUTTON', 'gob_flatten', T_('Flatten#gobedit') );
-      $gobform->add_row( $arr );
+            'SUBMITBUTTON', 'gob_flatten', T_('Flatten#gobedit'), ));
       $gobform->add_row( array(
             'HIDDEN', 'width', $width,
             'HIDDEN', 'height', $height, ));
@@ -187,7 +186,6 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
             "</tr>\n",
          "</table>\n";
    }
-
 
    $notes = array();
    $notes[] = array( T_('<tt>&lt;igoban SL1>TITLE BOARD %%%% TEXT&lt;/igoban></tt> - Go-Diagram with &lt;igoban>-tag#gobedit'),
@@ -250,5 +248,108 @@ function create_new_igoban( $width, $height )
    $igoban_text = sprintf("<igoban SL1>\n\$\$c%s\n{$BORDER}%s{$BORDER}</igoban>\n", $size, $board );
    return $igoban_text;
 }//create_new_igoban
+
+function load_igoban_from_dgs_game( $gid, $move )
+{
+   global $do_preview, $width, $height;
+
+   $reader = new GobanHandlerDgsGame();
+   $goban = $reader->read_goban( sprintf("<game %s%s>", (int)$gid, (is_numeric($move) ? ",$move" : '') ));
+   $width = $height = $goban->max_y;
+   $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
+   $board_text = $exporter->write_goban( $goban );
+   $do_preview = true;
+
+   return $board_text;
+}//load_igoban_from_dgs_game
+
+// switches-color or "flattens" goban and re-creates <igoban>-tag from manipulated Goban
+function update_igoban( $board_text, $goban_operation )
+{
+   global $do_preview;
+
+   if( $goban_operation != 'switch_colors' && $goban_operation != 'flatten_for_shape_game' )
+      error('invalid_method', "goban_editor.update_igoban($goban_operation)");
+
+   list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
+   if( count($arr_goban) )
+   {
+      $goban = $arr_goban[0];
+      $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
+      call_user_func( array( $goban, $goban_operation ) );
+      $board_text = $exporter->write_goban( $goban );
+      $do_preview = true;
+   }
+
+   return $board_text;
+}//update_igoban
+
+function load_igoban_from_sgf( $file_sgf_arr )
+{
+   global $do_preview;
+
+   // upload SGF and parse into Goban
+   $errors = NULL;
+   $upload = new FileUpload( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
+   if( $upload->is_uploaded && !$upload->has_error() )
+   {
+      $sgf_data = @read_from_file( $upload->file_src_tmpfile );
+      if( $sgf_data !== false )
+      {
+         $sgf_parsed = parse_sgf_for_shape_game( $sgf_data );
+         $board_text = create_igoban_from_parsed_sgf( $sgf_parsed );
+         $do_preview = true;
+      }
+   }
+   if( $upload->has_error() )
+      $errors = $upload->errors;
+   @$upload->cleanup();
+
+   return array( $errors, $board_text );
+}//load_igoban_from_sgf
+
+// create <igoban>-tag from SGF parsed with sgf_parser(), see also 'include/sgf_parser.php'
+function create_igoban_from_parsed_sgf( $sgf_parsed )
+{
+   global $width, $height;
+
+   $size = (int)@$sgf_parsed['Size'];
+   if( $size >= MIN_BOARD_SIZE && $size <= MAX_BOARD_SIZE )
+      $width = $height = $size;
+
+   $goban = new Goban();
+   $goban->setOptionsCoords( GOBB_MID, true );
+   $goban->setSize( $size, $size );
+   $goban->makeBoard( $size, $size, /*withHoshi*/true );
+
+   // handle setup B/W-stone
+   foreach( array('AW','AB') as $key )
+   {
+      $stone_val = ($key == 'AB') ? GOBS_BLACK : GOBS_WHITE;
+      foreach( @$sgf_parsed[$key] as $sgf_coord )
+      {
+         list($x,$y) = sgf2number_coords($sgf_coord, $size);
+         $goban->setStone( $x+1, $y+1, $stone_val );
+      }
+   }
+
+   // handle B/W-moves
+   foreach( @$sgf_parsed['Moves'] as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+   {
+      if( $move[0] == 'B' )
+         $stone_val = GOBS_BLACK;
+      elseif( $move[0] == 'W' )
+         $stone_val = GOBS_WHITE;
+      else
+         continue; // unknown value
+
+      list($x,$y) = sgf2number_coords( substr($move,1), $size);
+      $goban->setStone( $x+1, $y+1, $stone_val );
+   }
+
+   $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
+   $board_text = $exporter->write_goban( $goban );
+   return $board_text;
+}//create_igoban_from_parsed_sgf
 
 ?>
