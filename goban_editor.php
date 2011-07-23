@@ -127,8 +127,47 @@ $GLOBALS['ThePage'] = new Page('GobanEdit');
 
 
    $notes = array();
-   $notes[] = T_('');
-   echo_notes( 'gobanEditNotes', T_('Syntax of DGS-tag &lt;igoban SL1>'), $notes );
+   $notes[] = array( T_('<tt>&lt;igoban SL1>TITLE BOARD %%%% TEXT&lt;/igoban></tt> - Go-Diagram with &lt;igoban>-tag#gobedit'),
+         T_('BOARD-lines start with (optional) "$$", a space " " has meaning#gobedit'),
+         T_('TEXT-block is optional, initiated with empty line or "%%%%" below diagram#gobedit'),
+         T_('TEXT-block is shown to right of diagram or below if "%%%%" is present#gobedit'),
+      );
+   $notes[] = array( T_('TITLE-format: <tt>$$[color][c][size][movenum][title]</tt>#gobedit'),
+         T_('<tt>color "B|W"</tt> = color of first numbered stone#gobedit'),
+         T_('<tt>"c"</tt> = enables board coordinates#gobedit'),
+         T_('<tt>size</tt> = board-size#gobedit'),
+         T_('<tt>movenum "m99"</tt> = moves-start-number (default: 1)#gobedit'),
+         T_('<tt>title</tt> = text at board-bottom#gobedit'),
+      );
+   $notes[] = array( T_('BOARD-format for borders and intersections:#gobedit'),
+         T_('<tt>"."</tt> = empty intersection, <tt>","</tt> = hoshi (auto-hoshi if none used on board)#gobedit'),
+         T_('no spaces allowed in border-lines defining edges,<br><tt>"| + -"</tt> = forming edges in 2nd and board-line, <tt>"++ -+ +-"</tt> = short-format edges#gobedit'),
+         T_('<tt>"-"</tt> = clears intersection-lines on board, <tt>"_"</tt> = like <tt>"-"</tt> but not at edges#gobedit'),
+         T_('<tt>"."</tt> = empty intersection, <tt>","</tt> = hoshi (auto-hoshi if none used on board)#gobedit'),
+      );
+   $notes[] = array( T_('BOARD-format for diagram markup: <tt>Diagram-Code - Textual-Code</tt> : Description:#gobedit'),
+         T_('<tt>X O - BO WO</tt> : black stone, white stone#gobedit'),
+         T_('<tt>B|W0..9 - B|W1.100</tt> : numbered black|white stones, W0/B0=W10/B10#gobedit'),
+         T_('<tt>B W - BC WC</tt> : black|white stone with circle#gobedit'),
+         T_('<tt># @ - BS WS</tt> : black|white stone with square#gobedit'),
+         T_('<tt>Y Q - BT WT</tt> : black|white stone with triangle#gobedit'),
+         T_('<tt>Z P - BX WX</tt> : black|white stone with cross#gobedit'),
+         T_('<tt>C S T M - EC ES ET EM</tt> : circle square triangle cross#gobedit'),
+         T_('<tt>a..z - a..z</tt> : letters on empty intersection#gobedit'),
+         T_('<tt>* ~ - T* T~</tt> : black|white-teritory#gobedit'),
+         T_('<tt>? = - T? T=</tt> : neutral-undecided-teritory, dame-teritory#gobedit'),
+      );
+   $notes[] = array( T_('BOARD-format for specialties:#gobedit'),
+         T_('<tt>$$ [ref|link]</tt> : add link to <tt>ref</tt>-label on board, e.g. <tt>$$ [a|NadareJoseki]</tt><br>'
+            . 'link <tt>"dgs:faq.php"</tt> = link to DGS-page<br>'
+            . 'link <tt>"#123"</tt> = link to DGS-thread-anchor in DGS-forums<br>'
+            . 'link <tt>"http://senseis.xmp.net"</tt> = link to external page<br>'
+            . 'link <tt>"NadareJoseki"</tt> = link to wiki-topic on Sensei\'s Library#gobedit'),
+         T_('differences to original SL-format: no big support of irregular boards, easier borders,<br>territory-markup, no lines markup, no arrow markup, no inline-images#gobedit'),
+      );
+   $notes[] = T_('also see Sensei\'s Library: <http://senseis.xmp.net/?HowDiagramsWork>#gobedit');
+
+   echo_notes( 'gobanEditNotes', T_('Syntax description#gobedit'), $notes );
 
 
    $menu_array = array();

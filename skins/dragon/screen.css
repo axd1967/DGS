@@ -2007,6 +2007,10 @@ table#GobanEditor div.GobanGfx {
    border: 0px dotted black;
 }
 
+body.GobanEdit ul.Notes tt {
+   font-size: larger;
+}
+
 
 /* ------------------------- */
 /* OLD Goban editor */
@@ -3020,7 +3024,6 @@ h4.SubHeader {
 ul.Notes {
    line-height: 1.4em;
 }
-
 ul.SubNotes {
    margin: 0.2em auto 0.6em;
    line-height: 1.2em;
