@@ -347,6 +347,7 @@ class GobanHandlerGfxBoard
       global $MAP_TERRITORY_MARKERS, $MAP_FORM_MARKERS;
       // mapping and prioritize goban-layer-values to actual images available on DGS
       // starting with most special ... ending with most generalized images
+      $type = ''; // unknown mapping
       if( $lMarker == GOBM_NUMBER && $isStoneBW )
       {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
@@ -359,53 +360,33 @@ class GobanHandlerGfxBoard
          $type .= 'm';
       }
       elseif( $lMarker == GOBM_TERR_B && $lStone == GOBS_WHITE )
-      {
          $type = 'wb';
-      }
       elseif( $lMarker == GOBM_TERR_W && $lStone == GOBS_BLACK )
-      {
          $type = 'bw';
-      }
       elseif( ($territoryMarker = @$MAP_TERRITORY_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
-      {
          $type = $bLineType . $territoryMarker;
-      }
       elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $isStoneBW )
       {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
          $type .= $formMarker;
       }
       elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $lHoshi )
-      {
          $type = 'h' . $formMarker;
-      }
       elseif( $lMarker == 0 && $isStoneBW )
-      {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
-      }
       elseif( $lMarker == 0 && $lHoshi )
-      {
          $type = 'h';
-      }
       elseif( $lMarker == GOBM_LETTER )
       {
          if( $label >= 'a' && $label <= 'z' )
             $type = 'l' . $label;
       }
       elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
-      {
          $type = $bLineType . $formMarker;
-      }
       elseif( $lMarker == 0 && $lStone == 0 )
-      {
          $type = $this->getBoardLineType($lBoard, false);
-      }
-      else
-      {// unknown mapping
-         $type = '';
-      }
 
-      if( $type != '' )
+      if( (string)$type != '' )
       {
          global $base_path;
          $imgAttr = ($this->imageAttribute) ? ' '.sprintf( $this->imageAttribute, $x, $y ) : '';
