@@ -630,11 +630,11 @@ class GameSnapshot
       {
          for( $x = 0; $x < $size; $x++ )
          {
-            $stone_val = $stone_reader->read_stone_value( $x, $y, $with_dead);
+            $stone_val = $stone_reader->read_stone_value( $x, $y, $with_dead );
             $enc_val = ($enc_val << 2) + $stone_val;
             if( ++$enc_cnt == 3 )
             {
-               $out .= GameSnapshot::$BASE64[$enc_val];
+               $out .= self::$BASE64[$enc_val];
                $enc_cnt = $enc_val = 0;
             }
          }
@@ -643,7 +643,7 @@ class GameSnapshot
       if( $enc_cnt > 0 )
       {
          $enc_val <<= (2 * (3 - $enc_cnt));
-         $out .= GameSnapshot::$BASE64[$enc_val];
+         $out .= self::$BASE64[$enc_val];
       }
 
       $out = rtrim($out, 'A');
