@@ -124,6 +124,8 @@ function showGameThumbnail( e, size, snapshot )
    var psize = size * size;
    for( var i=0; p < psize && i < snapshot.length; i++ ) {
       var ch = snapshot.charAt(i);
+      if( ch == ' ' ) // stop for extended snapshot
+         break;
 
       data = 0;
       if( ch == 'A' ) // 1xA
