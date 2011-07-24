@@ -546,6 +546,26 @@ class Goban
 
    // ------------ static functions ----------------------------
 
+   /*!
+    * \brief Creates Goban from Games-Snapshot, prepared with GameSnapshot::parse_stones_snapshot().
+    * \param $arr_pos_xy array of [ GOBS_BLACK|WHITE, x, y ] with x/y=0..n
+    */
+   function create_goban_from_stones_snapshot( $size, $arr_pos_xy )
+   {
+      $goban = new Goban();
+      $goban->setOptionsCoords( GOBB_MID, true );
+      $goban->setSize( $size, $size );
+      $goban->makeBoard( $size, $size, /*withHoshi*/true );
+
+      foreach( $arr_pos_xy as $arr )
+      {
+         list( $stone, $x, $y ) = $arr;
+         $goban->setStone( $x + 1, $y + 1, $stone );
+      }
+
+      return $goban;
+   }//create_goban_from_stones_snapshot
+
    // static, see also to_string()-func
    function value_to_string( $val )
    {

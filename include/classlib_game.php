@@ -666,6 +666,46 @@ class GameSnapshot
       return $out;
    }//make_game_snapshot
 
+   /*! \brief Returns array with black/white stones and coordinates: [ $black/$white, x,y ] x/y=0..n */
+   function parse_stones_snapshot( $size, $snapshot, $black, $white )
+   {
+      static $SKIPPOS_MAP = array(
+            'A' =>  1, // 1xA
+            ':' =>  2, // 2xA
+            '%' =>  3, // 3xA
+            '#' =>  4, // 4xA
+            '@' =>  8, // 8xA
+            '*' => 16, // 16xA
+         );
+
+      // 00=empty, 01=Black, 10=White, 11=Dead-stone
+      $out = array();
+      $psize = $size * $size;
+      for( $i=0, $p=0; $p < $psize && $i < strlen($snapshot); $i++ )
+      {
+         $ch = $snapshot[$i];
+         if( $ch == ' ' ) // stop on space (extended syntax)
+            break;
+         $skip_pos = @$SKIPPOS_MAP[$ch];
+         if( $skip_pos )
+            $p += 3 * $skip_pos; // skip empties
+         else
+         {
+            $data = strpos(self::$BASE64, $ch);
+            if( $data === false )
+               error('invalid_snapshot', "GameSnapshot.parse_stones_snapshot($size,$ch,$p,$snapshot)");
+            foreach( array( ($data >> 4) & 0x3, ($data >> 2) & 0x3, $data & 0x3 ) as $val )
+            {
+               if( $val == 1 || $val == 2 ) // 1=Black, 2=White, 3=Dead B|W
+                  $out[] = array( ($val == 1 ? $black : $white), $p % $size, (int)($p / $size) );
+               $p++;
+            }
+         }
+      }
+
+      return $out;
+   }//parse_stones_snapshot
+
 } //end 'GameSnapshot'
 
 ?>
