@@ -202,8 +202,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('New game'), "new_game.php", true);
          item(T_('New expert game'), "new_game.php?view=".GSETVIEW_EXPERT, true);
          item(T_('New multi-player-game'), "new_game.php?view=".GSETVIEW_MPGAME, true);
-         item(T_('Waiting room'), "waiting_room.php", true);
-         item(T_('Invite'), "message.php?mode=Invite", true, true);
+         item(T_('Shapes#shape'), "waiting_room.php", true, true);
       } $item_level--;
 
       item(T_('Users'), "users.php", true);

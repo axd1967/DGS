@@ -68,8 +68,7 @@ require_once( 'include/utilities.php' );
    $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT;
    if( @$player_row['RatingStatus'] != RATING_NONE )
       $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME;
-   $menu_array[T_('Waiting room')] = 'waiting_room.php';
-   $menu_array[T_('Invite')] = 'message.php?mode=Invite';
+   $menu_array[T_('Shapes#shape')] = 'list_shapes.php';
 
    end_page(@$menu_array);
 }
