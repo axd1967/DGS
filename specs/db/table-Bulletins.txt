@@ -140,7 +140,7 @@ Description:
 
 * Text : main-text of bulletin (optional)
 
-* Lastchanged : date of last-update of bulleting
+* Lastchanged : date of last-update of bulletin
 
 
 
