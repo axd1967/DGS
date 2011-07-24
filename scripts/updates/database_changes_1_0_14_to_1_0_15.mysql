@@ -2313,3 +2313,20 @@ ALTER TABLE Games
 --    'scripts/fix_game_snapshot.php?limit=999999&sleep=1'
 
 
+-- added Shape-Games
+CREATE TABLE Shape (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Name varchar(40) NOT NULL default '',
+  Size tinyint unsigned NOT NULL,
+  Flags tinyint unsigned NOT NULL default 0,
+  Snapshot varchar(216) NOT NULL default '',
+  Notes text NOT NULL,
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (ID),
+  KEY uid (uid),
+  KEY Name (Name)
+) ENGINE=MyISAM ;
+
+

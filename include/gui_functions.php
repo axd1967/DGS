@@ -260,6 +260,43 @@ function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot
    return ($with_sep ? ' ' : '' ) . $link;
 }
 
+/*!
+ * \brief Returns image to shape-info page for given shape-id.
+ * \param $edit_goban false = link to view-shape-page, true = link to goban-editor
+ */
+function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=false, $with_sep=false )
+{
+   global $base_path;
+   $page_url = $base_path . ( ($edit_goban) ? 'goban_editor.php' : 'view_shape.php' ) . "?shape=$shape_id";
+
+   if( is_numeric($board_size) && !is_null($snapshot) )
+   {
+      $ext_snapshot = "$snapshot S$board_size";
+      $page_url .= URI_AMP."snapshot=".urlencode($ext_snapshot);
+
+      if( is_javascript_enabled() )
+      {
+         $img_str = image( $base_path.'images/shape.gif', '', null, 'class="InTextImage"');
+         $link = anchor( $page_url, $img_str, '',
+            array(
+               'onmouseover' => sprintf( "showGameThumbnail(event,%s,'%s');", $board_size, $snapshot ),
+               'onmouseout'  => 'hideInfo();' ));
+      }
+      else
+      {
+         $img_str = image( $base_path.'images/shape.gif', T_('Shape#shape'), null, 'class="InTextImage"');
+         $link = anchor( $page_url, $img_str );
+      }
+   }
+   else
+   {
+      $img_str = image( $base_path.'images/shape.gif', T_('Shape Information#shape'), null, 'class="InTextImage"');
+      $link = anchor( $page_url, $img_str );
+   }
+
+   return ($with_sep ? ' ' : '' ) . $link;
+}
+
 /*! \brief Returns image to tournament-info page for given tournament-id. */
 function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
 {
@@ -279,14 +316,25 @@ function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
       return '';
 }
 
-/*! \brief Returns image indicating that game have hidden game-comments for given game-id. */
+/*!
+ * \brief Returns image indicating that game have hidden game-comments for given game-id.
+ * \param $gid maybe 0 for shape-info
+ * \param $hidden_comments true (for default text), or text to be used
+ */
 function echo_image_gamecomment( $gid, $hidden_comments=true )
 {
    global $base_path;
    $arr = array();
    if( $hidden_comments )
-      $arr[] = T_('Game has hidden comments');
+      $arr[] = ($hidden_comments === true) ? T_('Game has hidden comments') : $hidden_comments;
    return image( $base_path.'images/game_comment.gif', implode(', ', $arr), null, 'class="InTextImage"');
+}
+
+/*! \brief Returns image indicating there's a note. */
+function echo_image_note( $text, $withSep=true )
+{
+   return ($withSep ? ' ' : '')
+      . image( $GLOBALS['base_path'].'images/note.gif', $text, null, 'class="InTextImage"');
 }
 
 /*! \brief Returns image-tag for table-list with link. */

@@ -1864,6 +1864,15 @@ form#selectgroupForm table.FormClass td.FormHeader h3.Header {
 
 
 /* ------------------------- */
+/* Shape Game */
+/* ------------------------- */
+
+table.ViewShape tr {
+   vertical-align: top;
+}
+
+
+/* ------------------------- */
 /* Game editor */
 /* ------------------------- */
 

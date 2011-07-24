@@ -182,7 +182,7 @@ Description:
    - start and end rating of White player for rated finished game
 
 * Snapshot : base64-encoded snapshot of game-position
-   - see 'include/board.php' in make_game_snapshot()-function
+   - see 'include/classlib_game.php' in GameSnapshot::make_game_snapshot()-function
 
 
 ###########################################################################
@@ -298,4 +298,48 @@ Notes:
 ## Fields:
 
 TODO TODO TODO
+
+
+
+###########################################################################
+## --- Shape ---
+
+Description:
+   Table to store shape-game boards.
+
+| Field       | Type                | Null | Key | Default             | Extra          |
++-------------+---------------------+------+-----+---------------------+----------------+
+| ID          | int(11)             | NO   | PRI | NULL                | auto_increment |
+| uid         | int(11)             | NO   | MUL | NULL                |                |
+| Name        | varchar(40)         | NO   |     |                     |                |
+| Size        | tinyint(3) unsigned | NO   |     | NULL                |                |
+| Flags       | tinyint(3) unsigned | NO   |     | 0                   |                |
+| Notes       | text                | NO   |     | NULL                |                |
+| Snapshot    | varchar(216)        | NO   |     |                     |                |
+| Created     | datetime            | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged | datetime            | NO   |     | 0000-00-00 00:00:00 |                |
+
+
+## Fields:
+
+* ID : primary key
+
+* uid : foreign key to Players.ID
+
+* Name : name of shape, given by user
+
+* Size : board-size 5..25
+
+* Flags : flags for shape
+   - see 'include/game_functions.php' SHPFLAG_...
+   - play-color-white, default black
+
+* Snapshot : base64-encoded snapshot of game-position
+   - see 'include/classlib_game.php' in GameSnapshot::make_game_snapshot()-function
+
+* Notes : user-comment
+
+* Created : creation-date of shape
+
+* Lastchanged : date of last-update of shape
 

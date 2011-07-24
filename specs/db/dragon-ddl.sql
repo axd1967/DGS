@@ -808,6 +808,27 @@ CREATE TABLE IF NOT EXISTS `Ratinglog` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Shape`
+--
+
+CREATE TABLE IF NOT EXISTS `Shape` (
+  `ID` int(11) NOT NULL auto_increment,
+  `uid` int(11) NOT NULL,
+  `Name` varchar(40) NOT NULL default '',
+  `Size` tinyint(3) unsigned NOT NULL,
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
+  `Snapshot` varchar(216) NOT NULL default '',
+  `Notes` text NOT NULL,
+  `Created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`ID`),
+  KEY `uid` (`uid`),
+  KEY `Name` (`Name`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Statistics`
 --
 

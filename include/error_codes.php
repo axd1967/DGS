@@ -384,6 +384,9 @@ class ErrorCode
          $arr['unknown_game'] =
             T_("Sorry, I can't find that game.");
 
+         $arr['unknown_shape'] =
+            T_("Sorry, I can't find that shape.");
+
          $arr['unknown_forum'] =
             T_("Sorry, I couldn't find that forum you wanted to show.");
 
@@ -564,6 +567,12 @@ class ErrorCode
 
          $arr['invalid_method'] =
             T_("Sorry, there's a problem with a class-method.");
+
+         $arr['invalid_snapshot'] =
+            T_("Found an invalid character in game-snapshot.");
+
+         $arr['miss_snapshot_size'] =
+            T_("Missing size for shape-game snapshot.");
 
          $arr['entity_init_error'] =
             T_("Sorry, Entity-class initialization is wrong.");

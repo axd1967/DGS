@@ -52,8 +52,9 @@ define('PROFTYPE_FILTER_TOURNAMENT_PARTICIPANTS', 22);
 define('PROFTYPE_FILTER_TOURNAMENT_NEWS', 23);
 define('PROFTYPE_FILTER_BULLETINS', 24);
 define('PROFTYPE_FILTER_SURVEYS', 25);
+define('PROFTYPE_FILTER_SHAPES', 26);
 // adjust if adding one
-define('MAX_PROFTYPE', 25);
+define('MAX_PROFTYPE', 26);
 
 define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 

@@ -231,3 +231,8 @@ copy /images/tbnw.gif
 copy /images/tbnd.gif
 copy /images/tbne.gif
 
+-----------
+# added images for shape-games
+copy /images/note.gif
+copy /images/shape.gif
+
