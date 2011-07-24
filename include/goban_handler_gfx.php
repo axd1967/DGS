@@ -60,7 +60,7 @@ class GobanHandlerGfxBoard
    var $result; // array
 
    /*! \brief Constructs GobanHandler for outputting DGS go-board. */
-   function GobanHandlerGfxBoard( $rawtext='' )
+   function GobanHandlerGfxBoard( $rawtext='', $stone_size=null )
    {
       GobanHandlerGfxBoard::init_statics();
 
@@ -76,10 +76,12 @@ class GobanHandlerGfxBoard
       }
       else // defaults
       {
-         $this->stone_size = 25;
+         $this->stone_size = 21;
          $this->coord_borders = 0; // use smooth-edge
          $this->woodcolor = 1;
       }
+      if( is_numeric($stone_size) )
+         $this->stone_size = $stone_size;
 
       $this->imageAttribute = '';
    }
