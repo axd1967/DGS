@@ -263,7 +263,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
       echo "<h3 class=Header>$title</h3>\n";
 
       $nbcol = 6;
-      echo "<a name=\"general\"></a><table class=ForumAdmin>\n";
+      echo name_anchor('general'), "<table class=ForumAdmin>\n";
 
       // table-columns:
 

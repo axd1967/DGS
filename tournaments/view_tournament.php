@@ -156,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // --------------- Title ---------------------
 
    echo
-      "<hr>\n", '<a name="title">', "\n",
+      "<hr>\n", name_anchor('title'),
       "<h2 class=Header>" . make_html_safe($tourney->Title, true) . "</h2>\n",
       make_html_safe($tourney->Description, true),
       "\n";

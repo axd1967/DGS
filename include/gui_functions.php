@@ -69,6 +69,11 @@ function button_style( $button_nr=0 )
       "table.Table td.Button { background-image: url({$base_path}images/{$buttonfiles[$button_nr]}); }";
 }
 
+function name_anchor( $name )
+{
+   return "<a name=\"$name\"></a>\n";
+}
+
 /*!
  * \brief Return the cell part of a button with anchor.
  * \note Needs button_style(..) in start_page()-func-call;

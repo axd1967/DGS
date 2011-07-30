@@ -32,8 +32,7 @@ require_once( "include/form_functions.php" );
    $menu_array = array();
 
    echo "<table class=FAQ><tr><td>\n";
-   echo "<h3 class=Header align=left><a name=\"general\">" .
-         T_('Frequently Asked Questions') . "</a></h3>\n";
+   echo "<h3 class=Header align=left><a name=\"general\">", T_('Frequently Asked Questions'), "</a></h3>\n";
 
    // init vars
    $TW_ = 'T_'; // for non-const translation-texts
@@ -183,7 +182,7 @@ require_once( "include/form_functions.php" );
                               : "name=\"Entry{$row['ID']}\""
                            );
             if( $row['Level'] == 1 )
-               echo "<a name=\"Entry{$row['ID']}\"></a>\n";
+               echo name_anchor("Entry{$row['ID']}");
          }
          echo faq_item_html(-1);
       }
@@ -216,7 +215,7 @@ require_once( "include/form_functions.php" );
                               : $tmp.$row['Parent'].'#Entry'.$row['ID'].'"'
                            );
             if( $row['Level'] == 1 )
-               echo "<a name=\"Title{$row['ID']}\"></a>\n";
+               echo name_anchor("Title{$row['ID']}");
          }
          echo faq_item_html(-1);
       }

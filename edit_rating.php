@@ -118,7 +118,7 @@ require_once 'include/rank_converter.php';
    echo "<h3 class=Header>$title</h3>\n";
 
    $rform->echo_string();
-   echo "<a name=\"rankconv\">\n";
+   echo name_anchor('rankconv');
    $rcform->echo_string();
 
 

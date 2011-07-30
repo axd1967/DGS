@@ -2798,7 +2798,7 @@ function section( $id='', $header='', $anchorName='', $with_hr_sep=false )
       if( $with_hr_sep )
          echo "<hr>\n";
       if( $anchorName )
-         echo "<a name=\"$anchorName\">\n";
+         echo name_anchor($anchorName);
       if( $header )
          echo "<h3 class=Header>$header</h3>";
       else

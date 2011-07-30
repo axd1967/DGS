@@ -230,7 +230,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
    if( USERPIC_FOLDER != '' )
    {//User Picture
-      echo '<a name="pic">';
+      echo name_anchor('pic');
       if( is_null($bio_result) )
       {//User picture hidden by admin (together with bio)
          if( $count_bio > 0 )
@@ -246,7 +246,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    }//User Picture
 
 
-   echo '<a name="bio">';
+   echo name_anchor('bio');
    if( is_null($bio_result) )
    {//Bio infos hidden by admin
       if( $count_bio > 0 )

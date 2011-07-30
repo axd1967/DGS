@@ -531,7 +531,7 @@ $info_box = '<ul>
       echo "<h3 class=Header>$title</h3>\n";
 
       $nbcol = 12;
-      echo "<a name=\"general\"></a><table class=FAQAdmin>\n";
+      echo name_anchor('general'), "<table class=FAQAdmin>\n";
 
       // table-columns:
       // curr-entry | match-term | Q/New | A | move-up | ~down | cat-up | ~down | New | Hide | Transl

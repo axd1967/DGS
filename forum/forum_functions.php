@@ -284,8 +284,7 @@ class DisplayForum
    // note: sets cur_depth=-1
    function forum_start_table( $table_id, $ReqParam = null)
    {
-      echo "<a name=\"ftop\">\n",
-           "<table id='forum$table_id' class=Forum>\n";
+      echo name_anchor('ftop'), "<table id='forum$table_id' class=Forum>\n";
       $this->make_link_array( $ReqParam );
 
       if( $this->links & LINK_MASKS )
@@ -321,7 +320,7 @@ class DisplayForum
    {
       if( $bottom_bar && $this->links & LINK_MASKS )
          $this->echo_links('B');
-      echo "</table>\n<a name=\"fbottom\">\n";
+      echo "</table>\n", name_anchor('fbottom');
    }
 
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
@@ -700,11 +699,11 @@ class DisplayForum
          $hdrcols = $cols;
 
          echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>"
-            ,"<a class=PostSubject name='preview'>$sbj</a></td></tr> "
+            ,"<a name=\"preview\" class=\"PostSubject\">$sbj</a></td></tr> "
             ,"\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>"
             ,T_('by'),' ' ,user_reference( REF_LINK, 1, '', $player_row)
             , ', ', echo_rating($player_row['Rating2'], /*show%*/false, $player_row['ID'], /*engl*/false, /*short*/true)
-            ,' &nbsp;&nbsp;&nbsp;' ,date(DATE_FMT, $NOW)
+            , ' ', SMALL_SPACING, date(DATE_FMT, $NOW)
             ,"</td></tr>";
       }
       else
@@ -729,8 +728,7 @@ class DisplayForum
             // [header-row] search-found
             echo "\n<tr class=\"$hdrclass FoundForum\"><td class=FoundForum colspan=$hdrcols>";
             echo '<span class=FoundForum>' ,T_('found in forum')
-               ,' <a href="list.php?forum='
-               ,$post->forum_id ,'">' ,$post->forum_name ,"</a></span>\n";
+               ,' <a href="list.php?forum=', $post->forum_id, '">', $post->forum_name, "</a></span>\n";
             if( $this->show_score )
                echo ' <span class=FoundScore>' ,T_('with')
                   ,' <span>' ,T_('Score') ,' ' ,$post->score ,"</span></span>\n";
@@ -744,10 +742,10 @@ class DisplayForum
 
             //from revision_history or because, when edited, the link will be obsolete
             if( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
-               echo "<a class=PostSubject name=\"$pid\">$subject_modstr</a>";
+               echo "<a name=\"$pid\" class=\"PostSubject\">$subject_modstr</a>";
             else
-               echo '<a class=PostSubject href="', $thread_url, $term_url,
-                  "#$pid\" name=\"$pid\">$subject_modstr</a>", $newstr;
+               echo "<a name=\"$pid\" class=\"PostSubject\" href=\"", $thread_url, $term_url,
+                  "#$pid\">$subject_modstr</a>", $newstr;
          }
 
          // first [header-row] with different content (adding hidden-state)
