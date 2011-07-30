@@ -929,35 +929,34 @@ function draw_message_box( &$message, $stay_on_board )
    $to_status_str = T_('Submit and go to status');
    $stay_checked = (get_request_arg('stay')) ? ' checked' : '';
 
-   echo '<a name="msgbox"></a>'
-      . '<TABLE class=MessageForm>'
-      . '<TR class=Message>'
-      . '<TD class=Rubric>' . T_('Message') . ':</TD>'
-      . '<TD colspan="2"><textarea name="message" tabindex="'.($tabindex++)
-         . '" cols="60" rows="8">'.textarea_safe( $message).'</textarea></TD>'
-      . '</TR>'
-      . '<TR class=Submit>'
-      . '<TD></TD>'
-      . '<TD>'
-         .'<input type="submit" name="nextgame" tabindex="'.($tabindex++)
-            .'" value="'.T_('Submit move') // Submit and go to next game
-            .'" accesskey="'.ACCKEY_ACT_EXECUTE.'" title="[&amp;'.ACCKEY_ACT_EXECUTE.']">'
-         //.'<input type="submit" name="nextstatus" tabindex="'.($tabindex++).'" value="'.$to_status_str.'">'
-         .( $stay_on_board
+   echo name_anchor('msgbox'),
+      '<TABLE class=MessageForm>',
+      '<TR class=Message>',
+      '<TD class=Rubric>', T_('Message'), ':</TD>',
+      '<TD colspan="2"><textarea name="message" tabindex="', ($tabindex++), '" cols="60" rows="8">',
+         textarea_safe($message), '</textarea></TD>',
+      '</TR>',
+      '<TR class=Submit>',
+      '<TD></TD>',
+      '<TD>',
+         '<input type="submit" name="nextgame" tabindex="', ($tabindex++),
+            '" value="', T_('Submit move'), // Submit and go to next game
+            '" accesskey="', ACCKEY_ACT_EXECUTE, '" title="[&amp;', ACCKEY_ACT_EXECUTE, ']">',
+         //'<input type="submit" name="nextstatus" tabindex="', ($tabindex++), '" value="', $to_status_str, '">',
+         ( $stay_on_board
             ? '<input type="checkbox" name="stay" tabindex="'.($tabindex++).' value="1"'.$stay_checked.'>' . T_('Stay on board')
-            : '' )
-         .SMALL_SPACING
-         .'<input type="submit" name="preview" tabindex="'.($tabindex++)
-            .'" value="'.T_('Preview')
-            .'" accesskey="'.ACCKEY_ACT_PREVIEW.'" title="[&amp;'.ACCKEY_ACT_PREVIEW.']">'
-      . '</TD>'
-      . '<TD class="Cancel">'
-         . '<input type=submit name="cancel" tabindex="'.($tabindex++) .'" value="'.T_('Cancel move').'">'
-      . '</TD>'
-      . '</TR>'
-      . '</TABLE>'
-      . "<br>\n"
-      ;
+            : '' ),
+         SMALL_SPACING,
+         '<input type="submit" name="preview" tabindex="', ($tabindex++),
+            '" value="', T_('Preview'),
+            '" accesskey="', ACCKEY_ACT_PREVIEW, '" title="[&amp;', ACCKEY_ACT_PREVIEW, ']">',
+      '</TD>',
+      '<TD class="Cancel">',
+         '<input type=submit name="cancel" tabindex="', ($tabindex++), '" value="', T_('Cancel move'), '">',
+      '</TD>',
+      '</TR>',
+      '</TABLE>',
+      "<br>\n";
 } //draw_message_box
 
 // keep in sync with tournaments/game_admin.php#draw_add_time()-func
