@@ -1681,13 +1681,13 @@ class TableHead
    var $image_attbs;
 
    /*! \brief Constructs TableHead-instance. */
-   function TableHead( $description, $image_url=null, $image_title=null )
+   function TableHead( $description, $image_url=null, $image_title=null, $image_attbs=null )
    {
       $this->description = $description;
       $this->image_url = $image_url;
       $this->image_alt = $description;
       $this->image_title = (is_null($image_title)) ? $description : $image_title;
-      $this->image_attbs = null;
+      $this->image_attbs = $image_attbs;
    }
 
    function isImage()
