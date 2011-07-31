@@ -141,7 +141,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
    $menu_array = array();
    $menu_array[T_('Shapes')] = "list_shapes.php";
-   $menu_array[T_('Goban Editor')] = "goban_editor.php";
+   $menu_array[T_('New Shape (Goban Editor)#shape')] = "goban_editor.php";
 
    end_page(@$menu_array);
 }

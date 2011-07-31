@@ -272,8 +272,8 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
 
 
    $menu_array = array();
-   $menu_array[T_('New Goban')] = $page . (is_null($goban_preview) ? '' : "?width=$width".URI_AMP."height=$height");
    $menu_array[T_('Shapes#shape')] = "list_shapes.php";
+   $menu_array[T_('New Goban')] = $page . (is_null($goban_preview) ? '' : "?width=$width".URI_AMP."height=$height");
 
    end_page(@$menu_array);
 }//main
