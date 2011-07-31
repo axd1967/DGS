@@ -123,6 +123,7 @@ class Table_info
 
    /*! \brief Add an info row to be displayed.
     *  assuming that the strings are not yet "HTML safe"
+    * \param $info value | array( col1, col2, ...) | array( col-arr=array( val, col-attr ), ... )
     * \see $Tablerows
     */
    function add_info( $name='', $info='', $iattb='', $nattb='' )
@@ -138,6 +139,7 @@ class Table_info
 
    /*! \brief Add an info row to be displayed.
     *  assuming that the strings ARE "HTML safe"
+    * \param $sinfo value | array( col1, col2, ...) | array( col-arr=array( val, col-attr ), ... )
     * \see $Tablerows
     */
    function add_sinfo( $sname='', $sinfo='', $iattb='', $nattb='' )
@@ -240,18 +242,17 @@ class Table_info
       $string.= "\n </tr>\n";
 
       return $string;
-   }
+   }//make_tablerow
 
    // Adds table-cell(s): one cell if $unsafe or $safe are non-arrays, multi-cells on arrays
    // param $unsafe: has prio over $safe
    // param $attbs: char '$' replaced with $start
-   function add_cell( $tablerow, $unsafe, $safe, $attbs, $start, $stop, $arymrg=NULL)
+   function add_cell( $tablerow, $unsafe, $safe, $attbs_key, $start, $stop, $arymrg=NULL)
    {
-      $attbs = @$tablerow[$attbs];
+      $attbs = attb_parse(@$tablerow[$attbs_key]);
       if( isset($arymrg) )
-         $attbs = attb_merge( $arymrg, attb_parse($attbs));
-      $attbs = attb_build( @$attbs);
-      $start_str = str_replace('$',$attbs,$start);
+         $attbs = attb_merge( $arymrg, $attbs );
+      $start_str = str_replace('$', attb_build(@$attbs), $start);
 
       $out = array();
       if( isset($tablerow[$unsafe]) )
@@ -259,7 +260,7 @@ class Table_info
          if( is_array($tablerow[$unsafe]) )
          {
             foreach( $tablerow[$unsafe] as $colval )
-               $out[] = $start_str . make_html_safe($colval,INFO_HTML) . $stop;
+               $out[] = $this->build_cell_data($colval, $start, $start_str, $attbs, true) . $stop;
          }
          else
             $out[] = $start_str . make_html_safe($tablerow[$unsafe],INFO_HTML) . $stop;
@@ -269,13 +270,32 @@ class Table_info
          if( is_array($tablerow[$safe]) )
          {
             foreach( $tablerow[$safe] as $colval )
-               $out[] = $start_str . $colval . $stop;
+               $out[] = $this->build_cell_data($colval, $start, $start_str, $attbs, false) . $stop;
          }
          else
             $out[] = $start_str . $tablerow[$safe] . $stop;
       }
       return implode('', $out);
-   }
+   }//add_cell
+
+   // build table-cell: cell can be scalar of array( value, attbs )
+   function build_cell_data( $cell, $start, $start_str, $attbs, $make_safe )
+   {
+      if( is_array($cell) )
+      {
+         if( count($cell) == 2 )
+         {
+            $cell_attbs = attb_build( attb_merge( $attbs, attb_parse($cell[1])) );
+            $start_str = str_replace('$', $cell_attbs, $start);
+            return $start_str . ($make_safe ? make_html_safe($cell[0], INFO_HTML) : $cell[0]);
+         }
+         elseif( count($cell) == 0 )
+            return $start_str;
+         $cell = $cell[0];
+      }
+
+      return $start_str . ($make_safe ? make_html_safe($cell, INFO_HTML) : $cell);
+   }//build_cell_data
 
 } //class Table_info
 
