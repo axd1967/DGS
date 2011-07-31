@@ -83,6 +83,9 @@ class ShapeControl
    /*! \brief Returns HTML for given Shape-object parsing Snapshot. */
    function build_view_shape( $shape, $stone_size=null )
    {
+      if( is_null($shape) )
+         error('invalid_args', "ShapeControl::build_view_shape.miss_shape()");
+
       $arr_xy = GameSnapshot::parse_stones_snapshot( $shape->Size, $shape->Snapshot, GOBS_BLACK, GOBS_WHITE );
       $goban = Goban::create_goban_from_stones_snapshot( $shape->Size, $arr_xy );
 

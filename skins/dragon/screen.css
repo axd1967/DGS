@@ -1871,6 +1871,14 @@ table.ViewShape tr {
    vertical-align: top;
 }
 
+table#shapeTableInfos td {
+   font-size: smaller;
+}
+table#shapeTableInfos td.Diff {
+   font-weight: bold;
+   color: darkred;
+}
+
 
 /* ------------------------- */
 /* Game editor */

@@ -706,6 +706,34 @@ class GameSnapshot
       return $out;
    }//parse_stones_snapshot
 
+   /*!
+    * \brief Returns parsed map from extended snapshot.
+    * \note Extended Format: "AAAA S19 (W|B|'')"
+    * \return [ Snapshot => snapshot-only, Size => size, PlayColorB => 1(def)|0 ]
+    */
+   function parse_extended_snapshot( $ext_snapshot )
+   {
+      $arr = explode(' ', $ext_snapshot);
+      if( count($arr) )
+      {
+         $out = array( //defaults
+               'Snapshot'     => array_shift($arr),
+               'Size'         => 0, // unset
+               'PlayColorB'   => 1,
+            );
+         foreach( $arr as $item )
+         {
+            if( preg_match("/^S(\d+)$/", $item, $matches) )
+               $out['Size'] = (int)@$matches[1];
+            elseif( preg_match("/^([BW])$/", $item, $matches) )
+               $out['PlayColorB'] = (@$matches[1] == 'W') ? 0 : 1;
+         }
+      }
+      else
+         $out = null;
+      return $out;
+   }//parse_extended_snapshot
+
 } //end 'GameSnapshot'
 
 ?>
