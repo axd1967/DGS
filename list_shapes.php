@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    $table->add_tablehead( 7, T_('Created#shape'), 'Date', 0, 'Created-');
    $table->add_tablehead( 8, T_('Updated#shape'), 'Date', 0, 'Lastchanged-');
 
-   $table->set_default_sort( 5, 1 ); //on Name, ID
+   $table->set_default_sort( 4, 1 ); //on Name, ID
 
    $iterator = new ListIterator( 'Shape.list',
          $table->get_query(),
