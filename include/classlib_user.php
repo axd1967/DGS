@@ -189,7 +189,7 @@ class User
       }
 
       return $user;
-   }
+   }//new_from_row
 
    /*! \brief Constructs a User for forum-users. */
    function newForumUser( $id=0, $name='', $handle='', $admin_level=0, $rating=null )
