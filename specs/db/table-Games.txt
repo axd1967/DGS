@@ -326,7 +326,7 @@ Description:
 
 * uid : foreign key to Players.ID
 
-* Name : name of shape, given by user
+* Name : unique name of shape, given by user
 
 * Size : board-size 5..25
 

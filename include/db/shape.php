@@ -48,7 +48,7 @@ $ENTITY_SHAPE = new Entity( 'Shape',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_INT,  'ID', 'uid', 'Size', 'Flags',
-      FTYPE_TEXT, 'Snapshot', 'Notes',
+      FTYPE_TEXT, 'Name', 'Snapshot', 'Notes',
       FTYPE_DATE, 'Created', 'Lastchanged'
    );
 
@@ -185,7 +185,18 @@ class Shape
       $qsql = Shape::build_query_sql( $shape_id, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Shape::load_shape.find_Shape($shape_id)", $qsql->get_select() );
+      $row = mysql_single_fetch( "Shape::load_shape.find_shape($shape_id)", $qsql->get_select() );
+      return ($row) ? Shape::new_from_row($row) : NULL;
+   }
+
+   /*! \brief Loads Shape by name; or return NULL if not found. */
+   function load_shape_by_name( $name, $with_player=false )
+   {
+      $qsql = Shape::build_query_sql( 0, $with_player );
+      $qsql->add_part( SQLP_WHERE, "SHP.Name='".mysql_addslashes($name)."'" );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "Shape::load_shape_by_name.find_shape($name)", $qsql->get_select() );
       return ($row) ? Shape::new_from_row($row) : NULL;
    }
 

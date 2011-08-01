@@ -734,6 +734,23 @@ class GameSnapshot
       return $out;
    }//parse_extended_snapshot
 
+   function build_extended_snapshot( $snapshot, $size, $flags=0 )
+   {
+      $out = "$snapshot S$size";
+      if( $flags & SHAPE_FLAG_PLAYCOLOR_W )
+         $out .= " W";
+      return $out;
+   }//build_extended_snapshot
+
+   /*! \brief Checks non-extended snapshot for valid chars, returns bad chars (or EMPTY if empty) or '' if valid. */
+   function check_snapshot( $snapshot )
+   {
+      if( (string)$snapshot == '' )
+         return T_('EMPTY#shape');
+      else
+         return preg_replace("/[A-Za-z0-9\\+\\/\\*@#%:]/", "", $snapshot);
+   }
+
 } //end 'GameSnapshot'
 
 ?>

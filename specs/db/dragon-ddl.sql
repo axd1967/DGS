@@ -822,8 +822,8 @@ CREATE TABLE IF NOT EXISTS `Shape` (
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`),
-  KEY `uid` (`uid`),
-  KEY `Name` (`Name`)
+  UNIQUE KEY `Name` (`Name`),
+  KEY `uid` (`uid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

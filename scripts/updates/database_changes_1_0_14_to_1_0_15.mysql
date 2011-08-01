@@ -2330,3 +2330,9 @@ CREATE TABLE Shape (
 ) ENGINE=MyISAM ;
 
 
+-- make Shape.Name unique
+ALTER TABLE Shape
+   DROP KEY Name,
+   ADD UNIQUE KEY Name (Name) ;
+
+

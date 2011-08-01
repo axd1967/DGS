@@ -80,6 +80,11 @@ class ShapeControl
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
    }//formatFlags
 
+   function newShape( $snapshot, $size, $flags )
+   {
+      return new Shape( 0, 0, null, '', $size, $flags, $snapshot );
+   }
+
    /*! \brief Returns HTML for given Shape-object parsing Snapshot. */
    function build_view_shape( $shape, $stone_size=null )
    {
@@ -92,6 +97,11 @@ class ShapeControl
       $exporter = new GobanHandlerGfxBoard( '', $stone_size );
       return $exporter->write_goban( $goban );
    }//build_view_shape
+
+   function is_shape_name_used( $name )
+   {
+      return !is_null( Shape::load_shape_by_name($name) );
+   }//is_shape_name_used
 
 } // end of 'ShapeControl'
 ?>
