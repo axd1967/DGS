@@ -403,7 +403,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Change rated-status ----------
 
-   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->GameType == GAMETYPE_GO && isRunningGame($game->Status) )
+   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->ShapeID == 0 && $game->GameType == GAMETYPE_GO && isRunningGame($game->Status) )
    {
       if( $draw_hr )
          $gaform->add_row( array( 'HR' ));
