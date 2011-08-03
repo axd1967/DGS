@@ -24,6 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 require_once 'include/board.php';
+require_once 'include/shape_control.php';
 
 
 /* SGF specs (version 4):
@@ -144,6 +145,7 @@ class SgfBuilder
    var $game_row;
    var $moves_iterator;
    var $player_notes;
+   var $shape_info; // for shape-game
 
    // runtime vars
 
@@ -154,7 +156,7 @@ class SgfBuilder
    var $points;
    var $next_color;
 
-   var $prop_type;
+   var $prop_type; // root | setup | force_node | move
 
    var $use_buffer; // bool
    var $SGF; // output-buffer
@@ -197,6 +199,7 @@ class SgfBuilder
       $this->game_row = array();
       $this->moves_iterator = new ListIterator( "SgfBuilder.load_moves_text($gid)" );
       $this->player_notes = '';
+      $this->shape_info = '';
 
 
       $this->sgf_trim_nr = -1;
@@ -225,7 +228,7 @@ class SgfBuilder
       //if( stristr('-B-W-MN-BL-WL-KO-BM-DO-IT-OB-OW-TE-', $prop.'-') )
       if( stristr('-B-W-MN-', '-'.$prop.'-') )
       {
-         if( $this->prop_type == 'setup' )
+         if( $this->prop_type == 'setup' || $this->prop_type == 'force_node' )
             $this->echo_sgf( "\n;" . $prop );
          else
             $this->echo_sgf( $prop );
@@ -233,7 +236,7 @@ class SgfBuilder
       }
       else if( stristr('-AB-AE-AW-PL-', '-'.$prop.'-') )
       {
-         if( $this->prop_type == 'move' )
+         if( $this->prop_type == 'move' || $this->prop_type == 'force_node' )
             $this->echo_sgf( "\n;" . $prop );
          else
             $this->echo_sgf( $prop );
@@ -330,6 +333,19 @@ class SgfBuilder
       $this->is_mpgame = ( $this->game_row['GameType'] != GAMETYPE_GO );
       if( $this->is_mpgame )
          GamePlayer::load_users_for_mpgame( $this->gid, '', false, $this->mpg_users );
+
+      $shape_snapshot = $this->game_row['ShapeSnapshot'];
+      if( $shape_snapshot )
+      {
+         $shape_id = $this->game_row['ShapeID'];
+         $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
+         if( !is_array($arr_shape) )
+            error('invalid_snapshot', "SgfBuilder.load_game_info.check.shape({$this->gid},$shape_id,$shape_snapshot)");
+
+         $b_first = (bool)@$arr_shape['PlayColorB'];
+         $this->shape_info = ShapeControl::build_snapshot_info(
+            $this->game_row['ShapeID'], $this->game_row['Size'], $shape_snapshot, $b_first, /*incl-img*/false );
+      }
 
       return $this->game_row;
    }//load_game_info
@@ -448,12 +464,13 @@ class SgfBuilder
       }
 
       return $filename;
-   }
+   }//build_filename_sgf
 
    // owned_comments: BLACK|WHITE=viewed by B/W-player (or game-player for MP-game), DAME=viewed by other user
    function build_sgf( $filename, $owned_comments )
    {
       $this->build_sgf_start( $filename );
+      $this->build_sgf_shape_setup(); // handle shape-game
       $this->build_sgf_moves( $owned_comments ); // loop over Moves
       $this->build_sgf_result();
       $this->build_sgf_end( $owned_comments );
@@ -541,6 +558,8 @@ class SgfBuilder
                             SgfBuilder::sgf_echo_rating($Black_End_Rating,true), $Black_End_Rating )
                : "\nBlack End Rating: ?" );
       }
+      if( $this->shape_info )
+         $general_comment .= "\n\n" . $this->shape_info;
       if( $this->is_mpgame )
          $general_comment .= $mpg_general_comment;
       $this->echo_sgf( "\nGC[$general_comment]" );
@@ -570,6 +589,39 @@ class SgfBuilder
          $this->echo_sgf( "\nRE[" . SgfBuilder::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]" );
       }
    }//build_sgf_start
+
+   // build shape-setup position for shape-game
+   function build_sgf_shape_setup()
+   {
+      $shape_id = (int)$this->game_row['ShapeID'];
+      $shape_snapshot = $this->game_row['ShapeSnapshot'];
+      if( $shape_id <= 0 || !$shape_snapshot )
+         return;
+
+      $arr_xy = GameSnapshot::parse_stones_snapshot( $this->game_row['Size'], $shape_snapshot, 'AB', 'AW' );
+      if( count($arr_xy) )
+      {
+         foreach( $arr_xy as $arr_setup )
+         {
+            list( $prop, $PosX, $PosY ) = $arr_setup;
+            $sgf_coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
+            $this->points[$sgf_coord] = $prop;
+         }
+
+         $this->sgf_echo_point( $this->points);
+         $this->points = array();
+
+         $comments = array();
+         if( $this->shape_info )
+            $comments[] = $this->shape_info;
+         if( $shape_id )
+            $comments[] = HOSTBASE."view_shape.php?shape={$shape_id}";
+         if( count($comments) )
+            $this->sgf_echo_comment( implode("\n", $comments) );
+
+         $this->prop_type = 'force_node';
+      }
+   }//build_sgf_setup
 
    // see also load_from_db()-func in 'include/board.php'
    function build_sgf_moves( $owned_comments )
@@ -700,7 +752,7 @@ class SgfBuilder
                {// handicap
                   $this->points[$coord] = 'AB'; //setup property
                   if( $MoveNr < $Handicap)
-                     break;
+                     break; //switch-break
 
                   $this->sgf_echo_point( $this->points);
                   $this->points = array();
