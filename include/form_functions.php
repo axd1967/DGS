@@ -52,6 +52,7 @@ require_once( 'include/std_functions.php' );
   * <li> Hidden
   * <li> Textarea
   * <li> Selectbox
+  * <li> SelectboxX
   * <li> Radiobuttons
   * <li> RadiobuttonsX
   * <li> Checkbox
@@ -309,6 +310,12 @@ class Form
                                   'SpanAllColumns' => false,
                                   'Attbs'   => array('class'=>'FormTextarea') ),
          'SELECTBOX'    => array( 'NumArgs' => 5,
+                                  'NewTD'   => false,
+                                  'StartTD' => true,
+                                  'EndTD'   => false,
+                                  'SpanAllColumns' => false,
+                                  'Attbs'   => array('class'=>'FormSelectbox') ),
+         'SELECTBOXX'   => array( 'NumArgs' => 6,
                                   'NewTD'   => false,
                                   'StartTD' => true,
                                   'EndTD'   => false,
@@ -1047,8 +1054,16 @@ class Form
     */
    function create_string_func_selectbox( &$result, $args )
    {
-      $result .= $this->print_insert_select_box( $args[0], $args[1], $args[2],
-                                                 $args[3], $args[4] );
+      $result .= $this->print_insert_select_boxx( $args[0], $args[1], $args[2], $args[3], $args[4], '' );
+   }
+
+   /*!
+    * \brief Function for making selectbox string extended with attributes in the standard form
+    * \internal
+    */
+   function create_string_func_selectboxx( &$result, $args )
+   {
+      $result .= $this->print_insert_select_boxx( $args[0], $args[1], $args[2], $args[3], $args[4], $args[5] );
    }
 
    /*!
@@ -1357,6 +1372,11 @@ class Form
          $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
    }
 
+   function print_insert_select_box( $name, $size, $value_array, $selected, $multiple=0 )
+   {
+      return $this->print_insert_select_boxx( $name, $size, $value_array, $selected, $multiple );
+   }
+
    /*!
     * \brief This will insert a select box in a standard form.
     *
@@ -1373,12 +1393,14 @@ class Form
     * \param $multiple    If it should be possible to select more than one
     *                     value. $name will be extended to "$name[]"
     */
-   function print_insert_select_box( $name, $size, $value_array, $selected, $multiple=0 )
+   function print_insert_select_boxx( $name, $size, $value_array, $selected, $multiple=0, $attbs='' )
    {
       $result = "<SELECT size=\"$size\" name=\"$name";
       //[] works for either GET or POST forms (else try %5b%5d ?)
       $result.= $multiple ? '[]" multiple' : '"';
-      $result.= $this->get_input_attbs() . ">\n";
+      $result.= $this->get_input_attbs();
+      $result .= Form::parse_input_standard_attributes($attbs);
+      $result .= ">\n";
 
       foreach( $value_array as $value => $info )
       {
