@@ -142,7 +142,7 @@ function get_alt_arg( $n1, $n2)
 
    if( @$_REQUEST['movechange'] )
       $move = (int)@$_REQUEST['gotomove'];
-   if( $move<=0 )
+   if( ($ShapeID > 0 && $move < 0) || ($ShapeID <= 0 && $move <= 0) )
       $move = $Moves;
 
    if( $Status == GAME_STATUS_FINISHED || $move < $Moves )
@@ -778,6 +778,7 @@ function draw_moves( $gid, $move, $handicap )
    $trpas = basic_safe(T_('Pass'));
    $trsco = basic_safe(T_('Scoring'));
    $trres = basic_safe(T_('Resign'));
+   $trsetup_shape = basic_safe(T_('Shape Setup'));
    $trsetup_handi = basic_safe(T_('(H)#viewmove'));
 
    $ctab = '&nbsp;';
@@ -809,6 +810,9 @@ function draw_moves( $gid, $move, $handicap )
       $i= ($move-1) % $step;
    $str= '';
 
+   if( is_array(@$TheBoard->moves[0]) ) // handle shape-game setup
+      $i--;
+
    while( $i++ < $Moves )
    {
       $dlt= abs($move-$i);
@@ -828,6 +832,9 @@ function draw_moves( $gid, $move, $handicap )
                break;
             case POSX_RESIGN :
                $c = $trres;
+               break;
+            case POSX_SETUP:
+               $c = $trsetup_shape;
                break;
             default :
                if( $PosX < 0)
