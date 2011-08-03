@@ -355,16 +355,18 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    {
       $shape_snapshot = $game_info_row['ShapeSnapshot'];
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
-      if( is_array($arr_shape) ) // overwrite with defaults
-         $shape_black_first = (bool)@$arr_shape['PlayColorB'];
-      else
+      if( !is_array($arr_shape) ) // overwrite with defaults
          error('invalid_snapshot', "create_game.check.shape($shape_id,$shape_snapshot)");
+
+      $GameSnapshot = $arr_shape['Snapshot'];
+      $shape_black_first = (bool)@$arr_shape['PlayColorB'];
    }
    else
    {
       $shape_id = 0;
       $shape_snapshot = '';
       $shape_black_first = true;
+      $GameSnapshot = '';
    }
 
    // multi-player-game
@@ -506,6 +508,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       "StdHandicap='$stdhandicap', " .
       "Rated='" . $game_info_row["Rated"] . "', " .
       "ShapeSnapshot='" . mysql_addslashes($shape_snapshot) . "'";
+   if( $shape_id > 0 )
+      $set_query .= ", Snapshot='" . mysql_addslashes($GameSnapshot) . "'";
 
    if( $gid > 0 ) // game prepared by the invitation process or multi-player-game-setup
    {
@@ -547,12 +551,13 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       }
 
       // create game-snapshot for thumbnail (for handicap-stones)
+      $stdhandicap_game_row = array( 'ID' => $gid, 'Size' => $size, 'Moves' => $moves, 'ShapeSnapshot' => '' );
       $TheBoard = new Board();
-      if( $TheBoard->load_from_db( array( 'ID' => $gid, 'Size' => $size, 'Moves' => $moves ) ) ) // ignore errors
+      if( $TheBoard->load_from_db($stdhandicap_game_row) ) // ignore errors
       {
          $snapshot = GameSnapshot::make_game_snapshot($size, $TheBoard);
          db_query( "create_game.upd_game.stdh_snapshot($gid,$size)",
-            "UPDATE Games SET Snapshot='$snapshot' WHERE ID=$gid LIMIT 1" );
+            "UPDATE Games SET Snapshot='" . mysql_addslashes($snapshot) . "' WHERE ID=$gid LIMIT 1" );
       }
    }//set-std-handicap
 
