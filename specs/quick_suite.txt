@@ -1100,6 +1100,9 @@ Response (SGF-properties):
          White End Rating: 6k (-4%) - ELO 1496
          Black End Rating: 6k (-2%) - ELO 1497
 
+         # only for shape-game:
+         Shape #3 (W-First): Sunjang Baduk
+
          # only for multi-player-game (Team-/Zen-Go)
          Game Players (Order. Color: Name (Handle), Current Rating):
             1. B JUG (jug), 6k (-2%) - ELO 1497             # group:  B | W | BW
@@ -1113,6 +1116,13 @@ Response (SGF-properties):
       KM[6.5]
       HA[3]                            # handicap (omitted prop if no handicap)
       RE[B+7.5]                        # result only for finished game
+
+      # shape-game-setup (with shape-info-comment)
+      AB[aa][bb][cc]                   # Black setup stones for shape-game
+      AW[dd][ee][ff]                   # White setup stones for shape-game
+      GC[Shape #3 (W-First): Sunjang Baduk              # shape-info of shape-game with URL to view-shape
+      http://www.dragongoserver.net/view_shape.php?shape=3]
+                                       # (implicitly) enforcing new SGF-node on next-property with ';'-prefix
 
       # game-moves (with comments)
       # - prefix '[Handle]' for multi-player-game added on each move (if not deactivated by MPG-option)
@@ -1288,7 +1298,7 @@ Response:
          message_date : date when message has been sent
 
       # header-line with format of game-data-line (version = 2)
-      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'"
+      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'"
 
          game_id         : game-id, e.g. http://www.dragongoserver.net/game.php?gid=317416
          opponent_handle : user-id (handle) of users opponent
@@ -1305,6 +1315,8 @@ Response:
          move_id         : required for move-context, see section (3a)
          tournament_id   : tournament-id, e.g. http://www.dragongoserver.net/tournaments/view_tournament.php?tid=19,
                            0 if game is not part of a tournament
+         shape_id        : shape-id, e.g. http://www.dragongoserver.net/view_shape.php?shape=3,
+                           0 if game is not a shape-game
          game_type       : game-type and game-players info, format:
                            - GO
                            - TEAM_GO(N:M)
@@ -1338,10 +1350,10 @@ Response:
       B,1,17,ALL,MAINT,'2011-04-30 13:58:00','2011-05-30 13:58:00','very important subject'
       ## M,message_id,'sender','subject','message_date'
       M,1595525,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
-      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,opponent_lastaccess_date
-      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,'GO',0,'2007-05-27 15:00:00'
-      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,'GO',5,'2009-03-01 10:00:00'
-      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,'TEAM_GO (2:2)',-2,'2011-04-30 17:38:22'
+      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,shape_id,game_type,game_prio,opponent_lastaccess_date
+      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,0,'GO',0,'2007-05-27 15:00:00'
+      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,3,'GO',5,'2009-03-01 10:00:00'
+      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,0,'TEAM_GO (2:2)',-2,'2011-04-30 17:38:22'
       ## MPG,game_id,game_type,ruleset,size,'lastchanged_date'
       MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00',1
 
