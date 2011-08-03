@@ -319,6 +319,7 @@ if( (string)$folder_nr_querystr != '' )
          {
             $snapshot = ($Snapshot) ? $Snapshot : null;
             $grow_strings[15] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
+               . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true)
                . echo_image_tournament_info($tid, true);
          }
          if( $gtable->Is_Column_Displayed[17] )

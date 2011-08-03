@@ -315,7 +315,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *   Maintime, Byotype, Byotime, Byoperiods, Black_Maintime, White_Maintime,
  *   Black_Byotime, White_Byotime, Black_Byoperiods, White_Byoperiods, LastTicks, ClockUsed,
  *   Rated, StdHandicap, WeekendClock, Black_Start_Rating, White_Start_Rating,
- *   Black_End_Rating, White_End_Rating, Snapshot
+ *   Black_End_Rating, White_End_Rating, Snapshot, ShapeID, ShapeSnapshot
  *
  * Players (OB+FA+RA) AS white, AS black - (FU+RU) AS Players(+UNION):
  *   ID, Handle, Password, Newpassword, Sessioncode, Sessionexpire, Lastaccess, LastMove,
@@ -385,7 +385,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
- * 32:    (Link to game-info page)
+ * 32:    (Link to game-info page, shape-game-info, tournament-info)
  * 33: >  FU+RU [Notes AS X_Note] (Notes)
  * 34: >  OA [X_ObsCount] (Observer-count)
  * 35: >  OA [X_MeObserved] (My-Games-observed?)
@@ -790,6 +790,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $snapshot = ($Snapshot) ? $Snapshot : null;
          $grow_strings[32] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
+            . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true )
             . echo_image_tournament_info($tid,true);
       }
       if( $gtable->Is_Column_Displayed[2] )

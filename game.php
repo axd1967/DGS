@@ -1126,14 +1126,17 @@ function draw_game_info( &$game_row, $board, $tourney )
 
    //game rows
    $sep = ',' . MED_SPACING;
+   $shape_id = (int)@$game_row['ShapeID'];
    echo '<tr id="gameRules">', "\n";
-   echo '<td class=Color>', echo_image_gameinfo($game_row['ID']), "</td>\n";
+   echo '<td class=Color>',
+         echo_image_gameinfo($game_row['ID']),
+         echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, true),
+      "</td>\n";
    echo "<td colspan=\"", ($cols-1), "\">", T_('Ruleset'), ': ', getRulesetText($game_row['Ruleset']);
    echo $sep, T_('Komi'), ': ', $game_row['Komi'];
    echo $sep, T_('Handicap'), ': ', $game_row['Handicap'];
    echo $sep, T_('Rated game'), ': ',
       ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ), "</td>\n";
-
    echo "</tr>\n";
 
    echo '<tr id="gameTime">', "\n";
@@ -1141,7 +1144,6 @@ function draw_game_info( &$game_row, $board, $tourney )
       TimeFormat::echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
          $game_row['Byotime'], $game_row['Byoperiods']),
       "</td>\n";
-
    echo "</tr>\n";
 
    if( isset($board) )

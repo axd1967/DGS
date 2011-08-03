@@ -107,6 +107,7 @@ function build_rating_diff( $rating_diff )
    if( $grow['Status'] == GAME_STATUS_SETUP )
       error('invalid_game_status', "gameinfo.find3($gid,{$grow['Status']})");
 
+   $shape_id = (int)@$grow['ShapeID'];
    $tid = (int) @$grow['tid'];
    $tourney = $tgame = null;
    if( !ALLOW_TOURNAMENTS || $tid <= 0 )
@@ -142,7 +143,9 @@ function build_rating_diff( $rating_diff )
    $itable->add_caption( T_('Game settings') );
    $itable->add_sinfo(
          T_('Game ID'),
-         anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) . echo_image_gameinfo($gid, true) );
+         anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) .
+         echo_image_gameinfo($gid, true) .
+         echo_image_shapeinfo( $shape_id, $grow['Size'], $grow['ShapeSnapshot'], false, true ) );
    if( $grow['DoubleGame_ID'] )
    {
       $dbl_gid = $grow['DoubleGame_ID'];
