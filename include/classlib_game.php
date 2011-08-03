@@ -693,7 +693,7 @@ class GameSnapshot
          {
             $data = strpos(self::$BASE64, $ch);
             if( $data === false )
-               error('invalid_snapshot', "GameSnapshot.parse_stones_snapshot($size,$ch,$p,$snapshot)");
+               error('invalid_snapshot_char', "GameSnapshot.parse_stones_snapshot($size,$ch,$p,$snapshot)");
             foreach( array( ($data >> 4) & 0x3, ($data >> 2) & 0x3, $data & 0x3 ) as $val )
             {
                if( $val == 1 || $val == 2 ) // 1=Black, 2=White, 3=Dead B|W
@@ -709,7 +709,8 @@ class GameSnapshot
    /*!
     * \brief Returns parsed map from extended snapshot.
     * \note Extended Format: "AAAA S19 (W|B|'')"
-    * \return [ Snapshot => snapshot-only, Size => size, PlayColorB => 1(def)|0 ]
+    * \return [ Snapshot => snapshot-only, Size => size, PlayColorB => 1(def)|0, Error => 'unknown stuff' ]
+    *         Error-key not-empty if unknown item found in format
     */
    function parse_extended_snapshot( $ext_snapshot )
    {
@@ -721,19 +722,25 @@ class GameSnapshot
                'Size'         => 0, // unset
                'PlayColorB'   => 1,
             );
+         $err = '';
          foreach( $arr as $item )
          {
             if( preg_match("/^S(\d+)$/", $item, $matches) )
                $out['Size'] = (int)@$matches[1];
             elseif( preg_match("/^([BW])$/", $item, $matches) )
                $out['PlayColorB'] = (@$matches[1] == 'W') ? 0 : 1;
+            else
+               $err .= " [$err]";
          }
+         if( strlen($err) )
+            $out['Error'] = substr($err, 1);
       }
       else
          $out = null;
       return $out;
    }//parse_extended_snapshot
 
+   // Extended Format: "AAAA S19 (W|B|'')"
    function build_extended_snapshot( $snapshot, $size, $flags=0 )
    {
       $out = "$snapshot S$size";
@@ -750,6 +757,24 @@ class GameSnapshot
       else
          return preg_replace("/[A-Za-z0-9\\+\\/\\*@#%:]/", "", $snapshot);
    }
+
+   /*!
+    * \brief Parses and strictly checks extended-snapshot.
+    * \return output-arr from parse_extended_snapshot()-func, null on error
+    */
+   function parse_check_extended_snapshot( $ext_snapshot )
+   {
+      $arr = GameSnapshot::parse_extended_snapshot( $ext_snapshot );
+      if( is_null($arr) )
+         return null;
+      if( $arr['Size'] < MIN_BOARD_SIZE || $arr['Size'] > MAX_BOARD_SIZE )
+         return null;
+      if( strlen(@$arr['Error']) > 0 )
+         return null;
+      if( GameSnapshot::check_snapshot($arr['Snapshot']) )
+         return null;
+      return $arr;
+   }//parse_check_extended_snapshot
 
 } //end 'GameSnapshot'
 

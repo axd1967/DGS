@@ -271,12 +271,17 @@ function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot
  */
 function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=false, $with_sep=false )
 {
+   if( $shape_id == 0 || (string)$snapshot == '' )
+      return '';
+
    global $base_path;
    $page_url = $base_path . ( ($edit_goban) ? 'goban_editor.php' : 'view_shape.php' ) . "?shape=$shape_id";
 
    if( is_numeric($board_size) && !is_null($snapshot) )
    {
-      $ext_snapshot = "$snapshot S$board_size";
+      $ext_snapshot = (strpos($snapshot, ' ') !== false)
+         ? $snapshot // already extended
+         : "$snapshot S$board_size";
       $page_url .= URI_AMP."snapshot=".urlencode($ext_snapshot);
 
       if( is_javascript_enabled() )

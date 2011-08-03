@@ -27,6 +27,8 @@ require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/utilities.php';
 require_once 'include/error_codes.php';
+require_once 'include/classlib_game.php';
+require_once 'include/shape_control.php';
 
 
 define('INVITE_HANDI_CONV',   -1);
@@ -79,6 +81,7 @@ function init_standard_folders()
  *     then add probable game-settings for conventional/proper-handicap-type
  * \param $my_ID user-id for invite/dispute, then $gid is game-id;
  *        my_ID='redraw' for invite/dispute/tourney and $gid then is the $_POST[] of the form asking preview
+ * \param $gid if null, shape + snapshot args are read from $_REQUEST (normally used for Invite and NewGame)
  */
 function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
 {
@@ -95,8 +98,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
 
    $allowed = true;
+   $shape_init = true;
 
    // Default values: for invite/waitingroom/tournament (dispute comes from DB)
+   $ShapeID = 0;
+   $ShapeSnapshot = '';
    $Size = 19;
    $Handitype = ($iamrated) ? HTYPE_CONV : HTYPE_NIGIRI;
    $Color_m = HTYPE_NIGIRI; // always my-color of current-user (also for dispute)
@@ -132,11 +138,26 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $CategoryHandiType = CAT_HTYPE_MANUAL;
       $Rated = false;
    }
+   if( is_null($gid) ) // handle shape-game
+   {
+      if( ($shape_id = (int)@$_REQUEST['shape']) > 0 )
+      {
+         $ShapeID = $shape_id;
+         $ShapeSnapshot = @$_REQUEST['snapshot'];
+      }
+   }
 
    if( $my_ID==='redraw' && is_array($gid) )
    {
       // If redraw, use values from array $gid
       // ($gid[] is the $_POST[] of the form asking the preview (i.e. this form))
+
+      if( isset($gid['shape']) )
+      {
+         $ShapeID = (int)$gid['shape'];
+         if( $ShapeID > 0 && isset($gid['snapshot']) )
+            $ShapeSnapshot = $gid['snapshot'];
+      }
 
       if( isset($gid['ruleset']) )
          $Ruleset = $gid['ruleset'];
@@ -207,7 +228,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       // If dispute, use values from game $gid tables
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods," .
-                 "Rated,StdHandicap,WeekendClock, " .
+                 "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS myColor " .
                  "FROM (Games,Players) WHERE Games.ID=$gid" .
                  " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
@@ -216,6 +237,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $game_row = mysql_single_fetch( "game_settings_form($gid)", $query );
       if( !$game_row )
          error('unknown_game', "game_settings_form($gid)");
+
+      // shape-game
+      $ShapeID = (int)$game_row['ShapeID'];
+      $ShapeSnapshot = $game_row['ShapeSnapshot'];
+      $shape_init = false;
 
       $Size = $game_row['Size'];
       $Rated = ( $game_row['Rated'] == 'Y' );
@@ -286,10 +312,41 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }
    } //collecting datas
 
+   // handle shape-game implicit settings (ShapeID unset if invalid shape used)
+   if( $ShapeID > 0 )
+   {
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($ShapeSnapshot);
+      if( is_array($arr_shape) ) // overwrite with defaults
+      {
+         $ShapeBlackFirst = (bool)@$arr_shape['PlayColorB'];
+         if( $shape_init )
+         {
+            $Size = (int)$arr_shape['Size'];
+            $StdHandicap = false;
+            $Rated = false;
+         }
+      }
+      else // invalid snapshot
+      {
+         $ShapeID = 0;
+         $ShapeSnapshot = '';
+      }
+   }
+
 
    // Draw game-settings form
 
    $mform->add_hidden( 'viewmode', $viewmode );
+
+   if( $ShapeID ) // shape-game
+   {
+      $mform->add_hidden( 'shape', $ShapeID );
+      $mform->add_hidden( 'snapshot', $ShapeSnapshot );
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Shape Game#shape'),
+            'TEXT', ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ), ));
+      $mform->add_empty_row();
+   }
 
    if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
    {
@@ -306,7 +363,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
-                           'SELECTBOX', 'size', 1, $value_array, $Size, false ) );
+                           'SELECTBOXX', 'size', 1, $value_array, $Size, false, array( 'disabled' => $ShapeID ) ));
 
    $mform->add_row( array( 'SPACE' ) );
 
@@ -423,7 +480,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       else
          array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
       array_push( $arr,
-            'CHECKBOX', 'stdhandicap', 'Y', "", $StdHandicap,
+            'CHECKBOXX', 'stdhandicap', 'Y', "", $StdHandicap, array( 'disabled' => $ShapeID ),
             'TEXT', T_('Standard placement') );
       $mform->add_row($arr);
    }
@@ -528,7 +585,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if( $iamrated )
       {
          $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
-                                 'CHECKBOX', 'rated', 'Y', "", $Rated ) );
+                                 'CHECKBOXX', 'rated', 'Y', "", $Rated, array( 'disabled' => $ShapeID ) ) );
       }
       else if( $formstyle == GSET_MSG_DISPUTE && $Rated )
       {// user unrated
@@ -714,8 +771,18 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
    //   Games: Status, Game_mid(=mid), GameType, GamePlayers, Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
-   //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, myColor
+   //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, ShapeID, ShapeSnapshot, myColor
    extract($game_row);
+
+   // handle shape-games
+   if( $ShapeID > 0 )
+   {
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($ShapeSnapshot);
+      if( is_array($arr_shape) )
+         $ShapeBlackFirst = (booL)@$arr_shape['PlayColorB'];
+      else
+         error('invalid_snapshot', "msg_func.game_info_table($tablestyle,$ShapeID,$ShapeSnapshot)");
+   }
 
    $is_my_game = ( $game_row['other_id'] == $player_row['ID'] );
 
@@ -807,6 +874,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    }
    elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
       $itable->add_scaption(T_('Game Info'));
+
+   if( $ShapeID && $tablestyle == GSET_MSG_INVITE ) // invite & dispute
+      $itable->add_sinfo( T_('Shape Game#shape'),
+            ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
 
    if( $tablestyle != GSET_TOURNAMENT_LADDER )
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
@@ -1525,9 +1596,11 @@ class DgsMessage
          $qsql->add_part( SQLP_FIELDS,
             'P.Handle AS other_handle', 'P.Name AS other_name',
             'P.Rating2 AS other_rating', 'P.RatingStatus AS other_ratingstatus',
-            'G.mid AS Game_mid', 'G.Status', 'G.Ruleset', 'G.Size', 'G.Komi', 'G.Handicap',
+            'G.mid AS Game_mid', 'G.Status', 'G.GameType', 'G.GamePlayers',
+            'G.Ruleset', 'G.Size', 'G.Komi', 'G.Handicap',
             'G.Rated', 'G.WeekendClock', 'G.StdHandicap', 'G.Maintime', 'G.Byotype', 'G.Byotime',
-            'G.Byoperiods', 'G.ToMove_ID', "IF(White_ID=$uid,".WHITE.",".BLACK.") AS myColor" );
+            'G.Byoperiods', 'G.ToMove_ID', 'G.ShapeID', 'G.ShapeSnapshot',
+            "IF(White_ID=$uid,".WHITE.",".BLACK.") AS myColor" );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Players AS P ON P.ID=other.uid",
             "LEFT JOIN Games AS G ON G.ID=M.Game_ID" );

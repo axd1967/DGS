@@ -47,14 +47,14 @@ global $ENTITY_GAMES; //PHP5
 $ENTITY_GAMES = new Entity( 'Games',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'tid', 'mid', 'DoubleGame_ID', 'Black_ID', 'White_ID', 'ToMove_ID', 'Size',
+      FTYPE_INT,  'ID', 'tid', 'ShapeID', 'mid', 'DoubleGame_ID', 'Black_ID', 'White_ID', 'ToMove_ID', 'Size',
                   'Handicap', 'Moves', 'Black_Prisoners', 'White_Prisoners', 'Last_X', 'Last_Y',
                   'Maintime', 'Byotime', 'Byoperiods', 'Black_Maintime', 'White_Maintime',
                   'Black_Byotime', 'White_Byotime', 'Black_Byoperiods', 'White_Byoperiods', 'LastTicks',
                   'ClockUsed', 'TimeOutDate',
       FTYPE_FLOAT, 'Komi', 'Score', 'Black_Start_Rating', 'White_Start_Rating', 'Black_End_Rating',
                    'White_End_Rating',
-      FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot',
+      FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot', 'ShapeSnapshot',
       FTYPE_DATE, 'Starttime', 'Lastchanged',
       FTYPE_ENUM, 'Status', 'GameType', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
    );
@@ -63,6 +63,7 @@ class Games
 {
    var $ID;
    var $tid;
+   var $ShapeID;
    var $Starttime;
    var $Lastchanged;
    var $mid;
@@ -105,9 +106,10 @@ class Games
    var $Black_End_Rating;
    var $White_End_Rating;
    var $Snapshot;
+   var $ShapeSnapshot;
 
    /*! \brief Constructs Games-object with specified arguments. */
-   function Games( $id=0, $tid=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
+   function Games( $id=0, $tid=0, $shape_id=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
                    $black_id=0, $white_id=0, $tomove_id=0, $game_type=GAMETYPE_GO, $game_players='',
                    $size=19, $komi=6.5, $handicap=0,
                    $status=GAME_STATUS_INVITED, $moves=0, $black_prisoners=0, $white_prisoners=0,
@@ -117,10 +119,11 @@ class Games
                    $white_byoperiods=0, $lastticks=0, $clockused=0, $timeoutdate=0, $rated='N',
                    $stdhandicap=true, $weekendclock=true, $black_start_rating=NO_RATING,
                    $white_start_rating=NO_RATING, $black_end_rating=NO_RATING,
-                   $white_end_rating=NO_RATING, $snapshot='' )
+                   $white_end_rating=NO_RATING, $snapshot='', $shape_snapshot='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
+      $this->ShapeID = (int)$shape_id;
       $this->Starttime = (int)$starttime;
       $this->Lastchanged = (int)$lastchanged;
       $this->mid = (int)$mid;
@@ -163,6 +166,7 @@ class Games
       $this->Black_End_Rating = (float)$black_end_rating;
       $this->White_End_Rating = (float)$white_end_rating;
       $this->Snapshot = $snapshot;
+      $this->ShapeSnapshot = $shape_snapshot;
    }//constructor
 
    function setStatus( $status )
@@ -245,6 +249,7 @@ class Games
          $data = $GLOBALS['ENTITY_GAMES']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
+      $data->set_value( 'ShapeID', $this->ShapeID );
       $data->set_value( 'Starttime', $this->Starttime );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'mid', $this->mid );
@@ -287,6 +292,7 @@ class Games
       $data->set_value( 'Black_End_Rating', $this->Black_End_Rating );
       $data->set_value( 'White_End_Rating', $this->White_End_Rating );
       $data->set_value( 'Snapshot', $this->Snapshot );
+      $data->set_value( 'ShapeSnapshot', $this->ShapeSnapshot );
       return $data;
    }//fillEntityData
 
@@ -339,6 +345,7 @@ class Games
             // from Games
             @$row['ID'],
             @$row['tid'],
+            @$row['ShapeID'],
             @$row['Starttime'],
             @$row['Lastchanged'],
             @$row['mid'],
@@ -380,7 +387,8 @@ class Games
             @$row['White_Start_Rating'],
             @$row['Black_End_Rating'],
             @$row['White_End_Rating'],
-            @$row['Snapshot']
+            @$row['Snapshot'],
+            @$row['ShapeSnapshot']
          );
       return $g;
    }//new_from_row

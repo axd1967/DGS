@@ -32,6 +32,9 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
 {
    global $NOW;
 
+   $shape_id = (int)@$_REQUEST['shape'];
+   $shape_snapshot = @$_REQUEST['snapshot'];
+
    $ruleset = @$_REQUEST['ruleset'];
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
 
@@ -121,6 +124,25 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
          break;
    }
 
+   // handle shape-game implicit settings (error if invalid)
+   if( $shape_id > 0 )
+   {
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
+      if( is_array($arr_shape) ) // overwrite with defaults
+      {
+         $size = (int)$arr_shape['Size'];
+         $stdhandicap = 'N';
+         $rated = 'N';
+      }
+      else
+         error('invalid_snapshot', "make_invite_game.check.shape($shape_id,$shape_snapshot)");
+   }
+   else
+   {
+      $shape_id = 0;
+      $shape_snapshot = '';
+   }
+
    if( $ruleset != RULESET_JAPANESE && $ruleset != RULESET_CHINESE )
       error('unknown_ruleset', "make_invite_game.check.ruleset($ruleset)");
 
@@ -166,19 +188,24 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       "White_Maintime=$hours, " .
       "WeekendClock='$weekendclock', " .
       "StdHandicap='$stdhandicap', " .
-      "Rated='$rated'";
+      "Rated='$rated', " .
+      "ShapeID='$shape_id', " .
+      "ShapeSnapshot='" . mysql_addslashes($shape_snapshot) . "'";
 
    if( $disputegid > 0 )
    {
       // Check if dispute game exists
       $row= mysql_single_fetch( "make_game.make_invite_game.dispute($disputegid)",
-                     "SELECT ID, Black_ID, White_ID FROM Games"
+                     "SELECT ID, Black_ID, White_ID, ShapeID, ShapeSnapshot FROM Games"
                     ." WHERE ID=$disputegid AND Status='INVITED'" );
       if( !$row )
          error('unknown_game', "make_invite_game.dispute1($disputegid)");
       if( ( $row['Black_ID']!=$player_row['ID'] || $row['White_ID']!=$opponent_row['ID'] )
        && ( $row['White_ID']!=$player_row['ID'] || $row['Black_ID']!=$opponent_row['ID'] ) )
          error('unknown_game', "make_invite_game.dispute2($disputegid)");
+
+      if( $row['ShapeID'] != $shape_id || $row['ShapeSnapshot'] != $shape_snapshot )
+         error('mismatch_snapshot', "make_invite_game.dispute3($disputegid,$shape_id,$shape_snapshot)");
 
       $query = "UPDATE Games SET $query WHERE ID=$disputegid LIMIT 1";
    }
@@ -216,7 +243,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
 
    $game_row = mysql_single_fetch( 'send_message.accept',
       "SELECT Status,Black_ID,White_ID,ToMove_ID,Ruleset,Size,Handicap,Komi,Maintime,Byotype,Byotime,Byoperiods," .
-         "Rated,StdHandicap,WeekendClock " .
+         "Rated,StdHandicap,WeekendClock,ShapeID,ShapeSnapshot " .
       "FROM Games WHERE ID=$gid LIMIT 1" );
    if( !$game_row )
       error('invited_to_unknown_game', "$dbg.accept.findgame");
@@ -322,6 +349,24 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       }
    }
 
+   // handle shape-game
+   $shape_id = (int)$game_info_row['ShapeID'];
+   if( $shape_id > 0 )
+   {
+      $shape_snapshot = $game_info_row['ShapeSnapshot'];
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
+      if( is_array($arr_shape) ) // overwrite with defaults
+         $shape_black_first = (bool)@$arr_shape['PlayColorB'];
+      else
+         error('invalid_snapshot', "create_game.check.shape($shape_id,$shape_snapshot)");
+   }
+   else
+   {
+      $shape_id = 0;
+      $shape_snapshot = '';
+      $shape_black_first = true;
+   }
+
    // multi-player-game
    $game_type = ( isset($game_info_row['GameType']) ) ? $game_info_row['GameType'] : GAMETYPE_GO;
    if( isset($game_info_row['GamePlayers']) )
@@ -381,7 +426,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $game_info_row['Handicap'] = $handicap; // write back
 
    $stdhandicap = $game_info_row['StdHandicap'];
-   $moves = $game_info_row['Handicap'];
+   $moves = $handicap;
    if( $stdhandicap != 'Y' || !standard_handicap_is_possible($size, $moves ) )
       $stdhandicap = 'N';
 
@@ -390,20 +435,37 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    else
       $skip_handicap_validation = false;
 
+   $shape_need_pass = false;
+   if( $shape_id == 0 )
+      $skip_handicap_validation = false;
 
-   if( $skip_handicap_validation )
+   if( $skip_handicap_validation ) // std-handicap-placement
    {
       //$moves = $moves;
       $tomove = $white_row['ID'];
       $col_to_move = WHITE;
       $clock_used = $clock_used_white;
    }
-   else
+   else // no-handicap OR free-handicap-placement
    {
-      $moves = 0;
-      $tomove = $black_row['ID'];
-      $col_to_move = BLACK;
-      $clock_used = $clock_used_black;
+      if( $shape_id > 0 && !$shape_black_first && $handicap > 0 )
+         $shape_black_first = true; // enforce B-first to set free-handicap
+
+      if( $shape_id > 0 && !$shape_black_first && $handicap == 0 )
+      {
+         $shape_need_pass = true;
+         $moves = 1;
+         $tomove = $white_row['ID'];
+         $col_to_move = WHITE;
+         $clock_used = $clock_used_white;
+      }
+      else
+      {
+         $moves = 0;
+         $tomove = $black_row['ID'];
+         $col_to_move = BLACK;
+         $clock_used = $clock_used_black;
+      }
    }
    $last_ticks = get_clock_ticks( $clock_used, /*refresh-cache*/false );
 
@@ -414,6 +476,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    $set_query =
       "tid=$tid, " .
+      "ShapeID=$shape_id, " .
       "DoubleGame_ID=$double_gid, " .
       "Black_ID=" . $black_row["ID"] . ", " .
       "White_ID=" . $white_row["ID"] . ", " .
@@ -441,7 +504,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
       ($white_rated ? "White_Start_Rating=$rating_white, " : '' ) .
       "WeekendClock='" . $game_info_row["WeekendClock"] . "', " .
       "StdHandicap='$stdhandicap', " .
-      "Rated='" . $game_info_row["Rated"] . "'";
+      "Rated='" . $game_info_row["Rated"] . "', " .
+      "ShapeSnapshot='" . mysql_addslashes($shape_snapshot) . "'";
 
    if( $gid > 0 ) // game prepared by the invitation process or multi-player-game-setup
    {
@@ -465,7 +529,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    // both b1 and b2 set is not fully handled (error if incomplete pattern)
    if( $skip_handicap_validation )
    {
-      if( !make_standard_placement_of_handicap_stones($size, $handicap, $gid) )
+      if( $shape_id == 0 && !make_standard_placement_of_handicap_stones($size, $handicap, $gid) )
       {
          //error because it's too late to have a manual placement
          //as the game is already initialized for the white play
@@ -491,6 +555,24 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
             "UPDATE Games SET Snapshot='$snapshot' WHERE ID=$gid LIMIT 1" );
       }
    }//set-std-handicap
+
+   // handle shape-game (W-first) & MPG-game
+   if( $shape_id > 0 )
+   {
+      if( $shape_need_pass ) // insert PASS-move for B if shape requires W-first to move
+         db_query( "create_game.shape_w1st.pass($gid)",
+            "INSERT INTO Moves SET gid=$gid, MoveNr=1, Stone=".BLACK.", PosX=".POSX_PASS.", PosY=0, Hours=0" );
+
+      // setup 2nd-next player in multi-player-game, if W-first for shape-game
+      if( $game_type != GAMETYPE_GO )
+      {
+         list( $group_color, $group_order, $gpmove_color )
+            = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );
+         $next_black_id = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
+         db_query( "create_game.update_games.shape_w1st.next3_gp($gid,$game_type,$next_black_id)",
+            "UPDATE Games SET Black_ID=$next_black_id WHERE ID=$gid LIMIT 1" );
+      }
+   }
 
    return $gid;
 } //create_game

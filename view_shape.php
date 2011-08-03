@@ -46,7 +46,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
 
    // init
    $stone_size = 17;
-   $url_snapshot = '';
+   $url_snapshot = $url_invite_snapshot = '';
 
    // load shape for shape-id
    $shape = ($shape_id) ? Shape::load_shape($shape_id) : null;
@@ -66,6 +66,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
             'shape'     => $shape,
             'notes'     => ((string)$shape->Notes != '') ? make_html_safe($shape->Notes, true) : NO_VALUE,
          );
+      $url_invite_snapshot = GameSnapshot::build_extended_snapshot( $shape->Snapshot, $shape->Size, $shape->Flags );
    }
    else
       $shape1 = array();
@@ -140,8 +141,9 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    $menu_array[T_('Show in Goban Editor#shape')] =
       "goban_editor.php?shape=$shape_id".URI_AMP."snapshot=$url_snapshot";
    $menu_array[T_('Shapes#shape')] = "list_shapes.php";
-   //TODO new game
-   //TODO invite
+   if( @$shape->ID && $url_invite_snapshot )
+      $menu_array[T_('Invite#shape')] =
+         "message.php?mode=Invite".URI_AMP."shape={$shape->ID}".URI_AMP."snapshot=".urlencode($url_invite_snapshot);
 
    end_page(@$menu_array);
 }//main

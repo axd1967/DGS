@@ -13,6 +13,7 @@ Description:
 +--------------------+-------------------------------------------------------------------+------+-----+---------------------+----------------+
 | ID                 | int(11)                                                           | NO   | PRI | NULL                | auto_increment |
 | tid                | int(11)                                                           | NO   | MUL | 0                   |                |
+| ShapeID            | int(10) unsigned                                                  | NO   |     | 0                   |                |
 | Starttime          | datetime                                                          | NO   |     | 0000-00-00 00:00:00 |                |
 | Lastchanged        | datetime                                                          | NO   | MUL | 0000-00-00 00:00:00 |                |
 | mid                | int(11)                                                           | NO   |     | 0                   |                |
@@ -56,11 +57,19 @@ Description:
 | Black_End_Rating   | double                                                            | NO   |     | -9999               |                |
 | White_End_Rating   | double                                                            | NO   |     | -9999               |                |
 | Snapshot           | varchar(216)                                                      | NO   |     |                     |                |
+| ShapeSnapshot      | varchar(255)                                                      | NO   |     |                     |                |
 
 
 ## Fields:
 
 * ID : primary key, games-ID
+
+* tid : tournament-id, FK to Tournament.ID
+   - 0 = no tournament-game
+
+* ShapeID : shape-id, FK to Shape.ID
+   - 0 = no shape-game (standard)
+   - maybe not sync'ed with ShapeSnapshot-field
 
 * Starttime : timestamp when game has started (clock starts ticking)
    - for invited game it's the creation date,
@@ -183,6 +192,17 @@ Description:
 
 * Snapshot : base64-encoded snapshot of game-position
    - see 'include/classlib_game.php' in GameSnapshot::make_game_snapshot()-function
+
+* ShapeSnapshot : extended snapshot of shape-game
+   - only set if ShapeID != 0
+   - base64-encoded snapshot of shape-game (without dead-stone-markers)
+   - format: "<snapshot> S<size> [W|B]",
+     see GameSnapshot::parse_extended_snapshot() in 'include/classlib_game.php'
+   - not (always) sync'ed with ShapeID-field, i.e. when author changes the shape-data
+     of the shape-id, then the Games.ShapeSnapshot keeps the version with which
+     the game has been started, while the ShapeID keeps the original reference
+     to shape-id => opening the view-shape-page with shape-id AND the current snapshot
+     of the game shows the differences
 
 
 ###########################################################################

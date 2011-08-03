@@ -568,8 +568,14 @@ class ErrorCode
          $arr['invalid_method'] =
             T_("Sorry, there's a problem with a class-method.");
 
-         $arr['invalid_snapshot'] =
+         $arr['invalid_snapshot_char'] =
             T_("Found an invalid character in game-snapshot.");
+
+         $arr['invalid_snapshot'] =
+            T_("Shape snapshot has bad format.");
+
+         $arr['mismatch_snapshot'] =
+            T_("Mismatching shape or snapshot found.");
 
          $arr['miss_snapshot_size'] =
             T_("Missing size for shape-game snapshot.");

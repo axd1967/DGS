@@ -382,6 +382,7 @@ CREATE TABLE IF NOT EXISTS `GamePlayers` (
 CREATE TABLE IF NOT EXISTS `Games` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL default '0',
+  `ShapeID` int(10) unsigned NOT NULL default '0',
   `Starttime` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `mid` int(11) NOT NULL default '0',
@@ -425,6 +426,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `Black_End_Rating` double NOT NULL default '-9999',
   `White_End_Rating` double NOT NULL default '-9999',
   `Snapshot` varchar(216) NOT NULL default '',
+  `ShapeSnapshot` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `ToMove_ID` (`ToMove_ID`),
   KEY `Size` (`Size`),

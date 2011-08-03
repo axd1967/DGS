@@ -103,5 +103,25 @@ class ShapeControl
       return !is_null( Shape::load_shape_by_name($name) );
    }//is_shape_name_used
 
+   function load_shape_name( $shape_id )
+   {
+      if( $shape_id > 0 )
+      {
+         $shape = Shape::load_shape($shape_id, false);
+         if( !is_null($shape) )
+            return $shape->Name;
+      }
+      return '???';
+   }//load_shape_name
+
+   function build_snapshot_info( $shape_id, $size, $snapshot, $b_first )
+   {
+      $shape_name = ShapeControl::load_shape_name($shape_id);
+      $colfirst_text = (is_null($b_first) || $b_first) ? '' : ' (' . T_('W-First#SHP_flag') . ')';
+      return sprintf( '%s %s #%s%s: %s',
+            echo_image_shapeinfo( $shape_id, $size, $snapshot ),
+            T_('Shape#shape'), $shape_id, $colfirst_text, $shape_name );
+   }
+
 } // end of 'ShapeControl'
 ?>
