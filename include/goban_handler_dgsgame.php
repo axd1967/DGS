@@ -94,7 +94,7 @@ class GobanHandlerDgsGame
    function load_board( $gid, $movenum )
    {
       $game_row = mysql_single_fetch( "GobanHandlerDgsGame.load_board($gid,$movenum)",
-         "SELECT ID, Size, Moves FROM Games WHERE ID=$gid LIMIT 1" );
+         "SELECT ID, Size, Moves, ShapeSnapshot FROM Games WHERE ID=$gid LIMIT 1" );
       if( !$game_row )
          error('unknown_game', "GobanHandlerDgsGame.load_board($gid,$movenum)");
 

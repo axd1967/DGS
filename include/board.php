@@ -76,10 +76,10 @@ class Board
    }
 
 
-   // fills $array with positions where the stones are.
+   // fills $array with positions where the stones are (incl. handling of shape-game)
    // fills $moves with moves and coordinates.
    // keep the coords, color and message of the move $move.
-   // param $game_row need fields: ID, Size, Moves
+   // param $game_row need fields: ID, Size, Moves, ShapeSnapshot
    // param $fix_stop true = stop and return FALSE if corrupted game found
    function load_from_db( $game_row, $move=0, $no_marked_dead=true, $load_last_message=true, $fix_stop=false )
    {
@@ -114,12 +114,31 @@ class Board
          return FALSE;
       }
 
-      if( $move<=0 || $move>$this->max_moves )
+      $shape_snapshot = @$game_row['ShapeSnapshot'];
+      if( $move > $this->max_moves || ( $shape_snapshot && $move < 0 ) || ( !$shape_snapshot && $move <= 0 ) )
          $move = $this->max_moves;
+
 
       $marked_dead = array();
       $removed_dead = FALSE;
 
+      // parse init-board from shape-snapshot
+      if( $shape_snapshot )
+      {
+         $arr_xy = GameSnapshot::parse_stones_snapshot( $this->size, $shape_snapshot, BLACK, WHITE );
+         if( count($arr_xy) )
+         {
+            $this->moves[0] = array( BLACK, POSX_SETUP, 0 );
+            foreach( $arr_xy as $arr_setup )
+            {
+               list( $Stone, $PosX, $PosY ) = $arr_setup;
+               $this->array[$PosX][$PosY] = $Stone;
+               $this->js_moves[] = array( 0, $Stone, $PosX, $PosY );
+            }
+         }
+      }
+
+      // load moves
       while( $row = mysql_fetch_assoc($result) )
       {
          extract($row); //$MoveNr, $Stone, $PosX, $PosY, $Hours
@@ -188,7 +207,7 @@ class Board
          }
       }
 
-      if( $load_last_message && isset($this->moves[$move]) )
+      if( $load_last_message && $move > 0 && isset($this->moves[$move]) )
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 

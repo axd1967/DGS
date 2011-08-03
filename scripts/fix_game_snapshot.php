@@ -168,7 +168,7 @@ function fix_single_game( $gid )
 function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sleep )
 {
    $qsql = new QuerySQL(
-      SQLP_FIELDS, 'G.ID', 'G.Status', 'G.Size', 'G.Moves',
+      SQLP_FIELDS, 'G.ID', 'G.Status', 'G.Size', 'G.Moves', 'G.ShapeSnapshot',
       SQLP_FROM,   'Games AS G',
       SQLP_WHERE,  "G.Snapshot=''", // games without snapshot
       SQLP_ORDER,  'G.ID ASC' );

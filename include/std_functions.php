@@ -192,6 +192,7 @@ define('POSX_PASS', -1);   // Pass-move: Stone=BLACK|WHITE, PosY=0, Hours=passed
 define('POSX_SCORE', -2);  // scoring step by Stone=BLACK|WHITE, PosY=0, Hours=passed-time
 define('POSX_RESIGN', -3); // resigned by Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 define('POSX_TIME', -4);   // timeout for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
+define('POSX_SETUP', -5);  // setup for shape-game for Stone=BLACK: PosY=0, Hours=0
 // game commands
 define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=bitmask (bit #1(0|1)=byoyomi-reset, bit #2(0|2)=added-by-TD), Hours=add_hours
 
