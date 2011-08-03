@@ -226,7 +226,7 @@ else
        "White_Maintime, White_Byotime, White_Byoperiods, " .
        "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
        "LastTicks, COALESCE(Clock.Ticks,0) AS X_Ticks, " .
-       "Games.Moves, Games.Status, Games.GameType, Games.GamePlayers, " .
+       "Games.Moves, Games.Status, Games.GameType, Games.GamePlayers, Games.ShapeID, " .
        ( $load_prio ? "COALESCE(GP.Priority,0) AS X_Priority, " : "0 AS X_Priority, " ) .
        "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId, " .
        "UNIX_TIMESTAMP(opponent.Lastaccess) AS oLastaccess " .
@@ -241,10 +241,10 @@ else
 
    $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
-   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
    if( $version == 2 )
    {
-      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,game_type,game_prio,'opponent_lastaccess_date'\n";
+      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'\n";
       $timefmt_flags |= TIMEFMT_ADDEXTRA;
    }
 
@@ -262,11 +262,11 @@ else
 
       if( $version == 2 )
       {
-         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, GameType, GamePrio, opponent.LastAccess.date
-         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,'%s',%s,'%s'\n",
+         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
+         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,'%s',%s,'%s'\n",
                        $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
                        date($datfmt, @$row['date']), $time_remaining['text'],
-                       $game_status, $row['Moves'], $row['tid'],
+                       $game_status, $row['Moves'], $row['tid'], (int)$row['ShapeID'],
                        GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
                        (int)@$row['X_Priority'],
                        date($datfmt, @$row['oLastaccess'])
