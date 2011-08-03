@@ -114,13 +114,12 @@ class ShapeControl
       return '???';
    }//load_shape_name
 
-   function build_snapshot_info( $shape_id, $size, $snapshot, $b_first )
+   function build_snapshot_info( $shape_id, $size, $snapshot, $b_first, $incl_image=true )
    {
       $shape_name = ShapeControl::load_shape_name($shape_id);
       $colfirst_text = (is_null($b_first) || $b_first) ? '' : ' (' . T_('W-First#SHP_flag') . ')';
-      return sprintf( '%s %s #%s%s: %s',
-            echo_image_shapeinfo( $shape_id, $size, $snapshot ),
-            T_('Shape#shape'), $shape_id, $colfirst_text, $shape_name );
+      return ($incl_image ? echo_image_shapeinfo( $shape_id, $size, $snapshot ) . ' ' : '') .
+         sprintf( '%s #%s%s: %s', T_('Shape#shape'), $shape_id, $colfirst_text, $shape_name );
    }
 
 } // end of 'ShapeControl'
