@@ -142,8 +142,12 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
       "goban_editor.php?shape=$shape_id".URI_AMP."snapshot=$url_snapshot";
    $menu_array[T_('Shapes#shape')] = "list_shapes.php";
    if( @$shape->ID && $url_invite_snapshot )
+   {
       $menu_array[T_('Invite#shape')] =
          "message.php?mode=Invite".URI_AMP."shape={$shape->ID}".URI_AMP."snapshot=".urlencode($url_invite_snapshot);
+      $menu_array[T_('New Shape-Game#shape')] =
+         "new_game.php?shape={$shape->ID}".URI_AMP."snapshot=".urlencode($url_invite_snapshot);
+   }
 
    end_page(@$menu_array);
 }//main

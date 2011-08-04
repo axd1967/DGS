@@ -758,7 +758,7 @@ function read_mpgame_request()
    if( $mpg_gid <= 0 )
       error('multi_player_msg_miss_game', "$dbgmsg.check.game");
    $game_row = mysql_single_fetch( "$dbgmsg.load_game",
-         "SELECT GameType, GamePlayers, ToMove_ID, Status FROM Games WHERE ID=$mpg_gid LIMIT 1" );
+         "SELECT GameType, GamePlayers, ToMove_ID, Status, ShapeID FROM Games WHERE ID=$mpg_gid LIMIT 1" );
    if( !$game_row )
       error('unknown_game', "$dbgmsg.load_game2");
    if( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
@@ -786,6 +786,7 @@ function read_mpgame_request()
       error('multi_player_no_users', "$dbgmsg.check.handles");
 
    $mpg_arr = array(); // for Resign
+   $mpg_arr['shape_id'] = (int)@$game_row['ShapeID'];
    if( $mpg_type == MPGMSG_INVITE )
    {
       if( $game_status != GAME_STATUS_SETUP )

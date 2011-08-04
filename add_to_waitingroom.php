@@ -25,6 +25,7 @@ require_once( "include/message_functions.php" );
 require_once( "include/game_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/utilities.php' );
+require_once( 'include/classlib_game.php' );
 
 {
    disable_cache();
@@ -45,6 +46,9 @@ require_once( 'include/utilities.php' );
          && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $viewmode = (int) @$_POST['viewmode'];
+
+   $shape_id = (int)@$_REQUEST['shape'];
+   $shape_snapshot = @$_REQUEST['snapshot'];
 
    $cat_handicap_type = @$_POST['cat_htype'];
    switch( (string)$cat_handicap_type )
@@ -198,6 +202,25 @@ require_once( 'include/utilities.php' );
       //$same_opponent = -1; // same-opp only ONCE for Team-/Zen-Go
    }
 
+   // handle shape-game implicit settings (error if invalid)
+   // NOTE: same handling as for make_invite_game()-func in 'include/make_game.php'
+   if( $shape_id > 0 )
+   {
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
+      if( !is_array($arr_shape) ) // overwrite with defaults
+         error('invalid_snapshot', "make_invite_game.check.shape($shape_id,$shape_snapshot)");
+
+      // implicit defaults for shape-game
+      $size = (int)$arr_shape['Size'];
+      $stdhandicap = 'N';
+      $rated = 'N';
+   }
+   else
+   {
+      $shape_id = 0;
+      $shape_snapshot = '';
+   }
+
    // add waiting-room game
    $query_mpgame = $query_wroom = '';
    if( !$is_std_go ) // mp-game
@@ -208,6 +231,8 @@ require_once( 'include/utilities.php' );
          "ToMove_ID=$my_id, " . // appear as status-game
          "Starttime=FROM_UNIXTIME($NOW), " .
          "Lastchanged=FROM_UNIXTIME($NOW), " .
+         "ShapeID=$shape_id, " .
+         "ShapeSnapshot='" . mysql_addslashes($shape_snapshot) . "', " .
          "GameType='" . mysql_addslashes($game_type) . "', " .
          "GamePlayers='" . mysql_addslashes($game_players) . "', " .
          "Ruleset='" . mysql_addslashes($ruleset) . "', " .
@@ -254,6 +279,8 @@ require_once( 'include/utilities.php' );
          "Ratingmax=$rating2, " .
          "MinRatedGames=$min_rated_games, " .
          "SameOpponent=$same_opponent, " .
+         "ShapeID=$shape_id, " .
+         "ShapeSnapshot='" . mysql_addslashes($shape_snapshot) . "', " .
          "Comment=\"" . mysql_addslashes(trim(get_request_arg('comment'))) . "\"";
    }
 

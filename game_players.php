@@ -31,6 +31,7 @@ require_once 'include/rating.php';
 require_once 'include/countries.php';
 require_once 'include/make_game.php';
 require_once 'include/error_codes.php';
+require_once 'include/shape_control.php';
 
 $GLOBALS['ThePage'] = new Page('GamePlayers');
 
@@ -299,6 +300,15 @@ function build_game_settings( $grow )
    global $arr_ratings;
 
    $itable = new Table_info('game_settings', TABLEOPT_LABEL_COLON);
+   if( @$grow['ShapeID'] > 0 )
+   {
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($grow['ShapeSnapshot']);
+      $ShapeBlackFirst = ( is_array($arr_shape) ) ? (bool)@$arr_shape['PlayColorB'] : true;
+      $itable->add_sinfo(
+            T_('Shape-Game#shape'),
+            ShapeControl::build_snapshot_info(
+               $grow['ShapeID'], $grow['Size'], $grow['ShapeSnapshot'], $ShapeBlackFirst ) );
+   }
    $itable->add_sinfo(
          T_('Game settings'),
          sprintf( "%s, %d x %d, %s: %s, %s: %s",
@@ -877,6 +887,8 @@ function add_waiting_room_mpgame( $grow, $uid )
       "Ratingmax=$rating2, " .
       "MinRatedGames=$min_rated_games, " .
       "SameOpponent=-1, " . // same-opponent can only join once
+      "ShapeID={$grow['ShapeID']}, " .
+      "ShapeSnapshot='" . mysql_addslashes($grow['ShapeSnapshot']) . "', " .
       "Comment=\"" . mysql_addslashes($comment) . "\"";
 
    // update free slots: set RESERVED + WR; change flags in table

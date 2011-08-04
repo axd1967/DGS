@@ -44,6 +44,13 @@ require_once( 'include/utilities.php' );
       error('multi_player_need_initial_rating',
             "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
 
+   // handle shape-game (passing-on for new-games)
+   $shape_id = (int)get_request_arg('shape');
+   $shape_snapshot = get_request_arg('snapshot');
+   $shape_url_suffix = ( $shape_id > 0 && $shape_snapshot )
+      ? URI_AMP."shape=$shape_id".URI_AMP."snapshot=".urlencode($shape_snapshot)
+      : '';
+
    $my_rating = @$player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
       && is_numeric($my_rating) && $my_rating >= MIN_RATING );
@@ -64,10 +71,10 @@ require_once( 'include/utilities.php' );
 
 
    $menu_array = array();
-   $menu_array[T_('New game')] = 'new_game.php';
-   $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT;
+   $menu_array[T_('New game')] = 'new_game.php?' . $shape_url_suffix;
+   $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT . $shape_url_suffix;
    if( @$player_row['RatingStatus'] != RATING_NONE )
-      $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME;
+      $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME . $shape_url_suffix;
    $menu_array[T_('Shapes#shape')] = 'list_shapes.php';
 
    end_page(@$menu_array);
