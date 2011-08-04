@@ -128,14 +128,12 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
    if( $shape_id > 0 )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
-      if( is_array($arr_shape) ) // overwrite with defaults
-      {
-         $size = (int)$arr_shape['Size'];
-         $stdhandicap = 'N';
-         $rated = 'N';
-      }
-      else
+      if( !is_array($arr_shape) ) // overwrite with defaults
          error('invalid_snapshot', "make_invite_game.check.shape($shape_id,$shape_snapshot)");
+
+      $size = (int)$arr_shape['Size'];
+      $stdhandicap = 'N';
+      $rated = 'N';
    }
    else
    {
