@@ -613,7 +613,7 @@ class SgfBuilder
 
          $comments = array();
          if( $this->shape_info )
-            $comments[] = $this->shape_info;
+            $comments[] = sprintf( '%s: %s', T_('Shape-Game Setup#sgf'), $this->shape_info );
          if( $shape_id )
             $comments[] = HOSTBASE."view_shape.php?shape={$shape_id}";
          if( count($comments) )
