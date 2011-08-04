@@ -778,10 +778,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    if( $ShapeID > 0 )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($ShapeSnapshot);
-      if( is_array($arr_shape) )
-         $ShapeBlackFirst = (booL)@$arr_shape['PlayColorB'];
-      else
+      if( !is_array($arr_shape) )
          error('invalid_snapshot', "msg_func.game_info_table($tablestyle,$ShapeID,$ShapeSnapshot)");
+
+      $ShapeBlackFirst = (booL)@$arr_shape['PlayColorB'];
    }
 
    $is_my_game = ( $game_row['other_id'] == $player_row['ID'] );
@@ -875,7 +875,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated)
    elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
       $itable->add_scaption(T_('Game Info'));
 
-   if( $ShapeID && $tablestyle == GSET_MSG_INVITE ) // invite & dispute
+   if( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM) ) // invite & dispute, w-room
       $itable->add_sinfo( T_('Shape Game#shape'),
             ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
 
