@@ -67,6 +67,9 @@ require_once( 'include/classlib_userconfig.php' );
       T_('Manual')         => "Handicaptype IN ('nigiri','double','black','white')",
    );
 
+   $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
+   $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
+
    $my_rating = $player_row['Rating2'];
    $my_rated_games = (int)$player_row['RatedGames'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
@@ -118,7 +121,7 @@ require_once( 'include/classlib_userconfig.php' );
    $wrfilter->add_filter(15, 'Country', 'Players.Country', false,
          array( FC_HIDE => 1 ));
    $wrfilter->add_filter(19, 'Selection', build_ruleset_filter_array(), true);
-   $wrfilter->add_filter(20, 'Selection', MultiPlayerGame::build_game_type_filter_array(), true);
+   $wrfilter->add_filter(20, 'Selection', $game_type_filter_array, true);
    $wrfilter->init();
    $f_range =& $wrfilter->get_filter(8);
    $suitable = $f_range->get_value(); // !suitable == all
@@ -384,7 +387,10 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[19] )
             $wrow_strings[19] = getRulesetText($Ruleset);
          if( $wrtable->Is_Column_Displayed[20] )
-            $wrow_strings[20] = GameTexts::format_game_type($GameType, $GamePlayers);
+         {
+            $wrow_strings[20] = GameTexts::format_game_type($GameType, $GamePlayers) .
+               ( $ShapeID > 0 ? MED_SPACING . echo_image_shapeinfo($ShapeID, $Size, $ShapeSnapshot) : '' );
+         }
 
          $wrtable->add_row( $wrow_strings );
       }//while
