@@ -590,6 +590,7 @@ class MultiPlayerGame
     *    for mpg_type=MPGMSG_INVITE:
     *       'from_handle' = user-id (=handle) of game-master
     *       'game_type' = "$GameType ($GamePlayers)"
+    *       'shape_id' = shape-id
     */
    function get_message_defaults( $mpg_type, $mpg_gid, $mpg_arr )
    {
@@ -605,11 +606,13 @@ class MultiPlayerGame
          case MPGMSG_INVITE:
             $from_handle = @$mpg_arr['from_handle'];
             $game_type   = @$mpg_arr['game_type'];
+            $shape_id    = @$mpg_arr['shape_id'];
             return array(
                // subject
                sprintf( T_('Invitation to multi-player-game from [%s]#mpg'), $from_handle ),
                // body
-               sprintf( T_('Game-master %s invites you to a %s multi-player-game.#mpg'), "<user =$from_handle>", $game_type ) . "\n\n" .
+               sprintf( T_('Game-master %s invites you to a %s multi-player-game.#mpg'), "<user =$from_handle>", $game_type ) . "\n" .
+               ( $shape_id > 0 ? sprintf( T_('This game is a shape-game (Shape #%s)#mpg'), $shape_id ) . "\n" : '' ) . "\n" .
                sprintf( T_('You can accept or reject the invitation on setup-page of game: %s#mpg'), "<game_ $mpg_gid>" ) . "\n\n" .
                T_('To reject the invitation, please inform the game-master by replying to this message.#mpg') . "\n" .
                T_('You may also want to discuss what team, color or playing order you prefer in the game (see FAQ for more details).#mpg') . "\n\n"
