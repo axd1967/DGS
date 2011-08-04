@@ -196,6 +196,8 @@ define('POSX_SETUP', -5);  // setup for shape-game for Stone=BLACK: PosY=0, Hour
 // game commands
 define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=bitmask (bit #1(0|1)=byoyomi-reset, bit #2(0|2)=added-by-TD), Hours=add_hours
 
+define('MOVE_SETUP', 'S'); // setup-move #0 for shape-game; NOTE: '0' already has special meaning (go to last-move)
+
 
 define('DEFAULT_KOMI', 6.5); // change with care only, keep separate from STONE_VALUE
 define('STONE_VALUE',13); // 2 * conventional komi (=DEFAULT_KOMIT), change with care
@@ -1878,8 +1880,8 @@ $html_safe_preg = array(
          . '"'.ALLOWED_LT."/a".ALLOWED_GT.'"',
 
 //<game gid[,move]> =>show game
- '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *([0-9]+))? *".ALLOWED_GT.'/ise'
-  => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2,\\4+0)",
+ '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *(".MOVE_SETUP."|[0-9]+))? *".ALLOWED_GT.'/ise'
+  => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2,'\\4')",
 
 //<tourney tid> => show tournament
  '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
@@ -2863,6 +2865,7 @@ function activity_string( $act_lvl)
 
 /*!
  * \brief Returns web-link with reference to given game.
+ * \param $move can be MOVE_SETUP 'S' for shape-game; otherwise number
  * \param $extra (optional but best to fully-provided) array with fields,
  *        that if not given are loaded for game (if game exists):
  *        Whitename, Blackname, GameType, GamePlayers, Status=game-status
@@ -2872,6 +2875,10 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
    global $base_path;
 
    $gid = (int)$gid;
+   $move = ( strtoupper($move) == MOVE_SETUP )
+      ? MOVE_SETUP
+      : ( is_numeric($move) ? (int)$move : 0 );
+
    $legal = ( $gid > 0 );
    if( !is_array($extra) )
       $extra = array();
@@ -2917,13 +2924,15 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
 
    if( $safe_it )
       $text = make_html_safe($text);
-   if( $move>0 )
+   if( $move === MOVE_SETUP )
+      $text .= ', ' . T_('Shape-Setup#gametag');
+   elseif( $move > 0 )
       $text .= sprintf( ', %s #%s', T_('Move#gametag'), $move );
 
    if( $link && $legal )
    {
       $url = ( $is_std_go || @$extra['Status'] != GAME_STATUS_SETUP )
-         ? "game.php?gid=$gid" . ($move>0 ? URI_AMP."move=$move" : "")
+         ? "game.php?gid=$gid" . (( $move > 0 || $move == MOVE_SETUP) ? URI_AMP."move=$move" : "")
          : "game_players.php?gid=$gid";
       $url = "A href=\"$base_path$url\" class=Game$class";
       if( $link & REF_LINK_BLANK )

@@ -36,7 +36,7 @@ class Board
    var $woodcolor;
 
    var $array; //2D array: [$PosX][$PosY] => $Stone
-   var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY)
+   var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY); first MoveNr=MOVE_SETUP ('S') for shape-game
    var $marks; //array: [$sgf_coord] => $mark
    var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY,$mark)
    var $js_moves; //array($MoveNr,$Stone,$PosX,$PosY) to build moves for JS-game-editor
@@ -79,8 +79,9 @@ class Board
    // fills $array with positions where the stones are (incl. handling of shape-game)
    // fills $moves with moves and coordinates.
    // keep the coords, color and message of the move $move.
-   // param $game_row need fields: ID, Size, Moves, ShapeSnapshot
-   // param $fix_stop true = stop and return FALSE if corrupted game found
+   // \param $move move-number, 0=last-move, MOVE_SETUP=S=initial-setup-for-shape-game
+   // \param $game_row need fields: ID, Size, Moves, ShapeSnapshot
+   // \param $fix_stop true = stop and return FALSE if corrupted game found
    function load_from_db( $game_row, $move=0, $no_marked_dead=true, $load_last_message=true, $fix_stop=false )
    {
       $this->array = NULL;
@@ -101,22 +102,35 @@ class Board
       $this->size = $game_row['Size'];
       $this->max_moves = $game_row['Moves'];
 
-      if( $this->max_moves <= 0 )
+      $shape_snapshot = @$game_row['ShapeSnapshot'];
+      $is_shape = (bool)$shape_snapshot;
+      if( !$is_shape && $this->max_moves <= 0 )
          return TRUE;
 
+      // handle goto-move (incl. shape-game)
+      if( !$is_shape && $move == MOVE_SETUP )
+         error('invalid_args', "board.load_from_db.check.move.no_shape($gid,$move)");
+      if( $is_shape && $move == MOVE_SETUP )
+      {
+         $move = 1;
+         $show_move_setup = true;
+      }
+      else
+         $show_move_setup = false;
+      if( $move <= 0 || $move > $this->max_moves )
+         $move = $this->max_moves;
+
+      // load moves
       $result = db_query( "board.load_from_db.find_moves($gid)",
          "SELECT * FROM Moves WHERE gid=$gid ORDER BY MoveNr" );
       if( !$result )
          return FALSE;
-      if( @mysql_num_rows($result) <= 0 )
+      $cnt_moves = @mysql_num_rows($result);
+      if( (!$is_shape && $cnt_moves <=0) || ($is_shape && $cnt_moves < 0) )
       {
          mysql_free_result($result);
          return FALSE;
       }
-
-      $shape_snapshot = @$game_row['ShapeSnapshot'];
-      if( $move > $this->max_moves || ( $shape_snapshot && $move < 0 ) || ( !$shape_snapshot && $move <= 0 ) )
-         $move = $this->max_moves;
 
 
       $marked_dead = array();
@@ -128,7 +142,7 @@ class Board
          $arr_xy = GameSnapshot::parse_stones_snapshot( $this->size, $shape_snapshot, BLACK, WHITE );
          if( count($arr_xy) )
          {
-            $this->moves[0] = array( BLACK, POSX_SETUP, 0 );
+            $this->moves[MOVE_SETUP] = array( BLACK, POSX_SETUP, 0 );
             foreach( $arr_xy as $arr_setup )
             {
                list( $Stone, $PosX, $PosY ) = $arr_setup;
@@ -195,7 +209,7 @@ class Board
             $marked_dead[] = array( $PosX, $PosY);
             $this->js_moves[] = array( $MoveNr, $Stone, $PosX, $PosY );
          }
-      }
+      }//scan moves
       mysql_free_result($result);
 
       if( !$no_marked_dead && $removed_dead )
@@ -207,7 +221,7 @@ class Board
          }
       }
 
-      if( $load_last_message && $move > 0 && isset($this->moves[$move]) )
+      if( $load_last_message && !$show_move_setup && isset($this->moves[$move]) )
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
@@ -267,6 +281,8 @@ class Board
 
       $start = max( $start, 1);
       $movenums = count($this->moves);
+      if( isset($this->moves[MOVE_SETUP]) ) // shape-game-setup
+         $movenums--;
 
       $is_relative = ($this->coord_borders & COORD_RELATIVE_MOVENUM);
       $is_reverse  = ($this->coord_borders & COORD_REVERSE_MOVENUM);

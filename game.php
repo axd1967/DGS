@@ -76,7 +76,7 @@ function get_alt_arg( $n1, $n2)
 {
    $gid = (int)get_alt_arg( 'gid', 'g');
    $action = (string)get_alt_arg( 'action', 'a');
-   $move = (int)get_alt_arg( 'move', 'm'); //move number
+   $arg_move = get_alt_arg( 'move', 'm'); //move number, incl. MOVE_SETUP for shape-game
    $coord = (string)get_alt_arg( 'coord', 'c');
    $stonestring = (string)get_alt_arg( 'stonestring', 's');
    $preview = (bool)@$_REQUEST['preview'];
@@ -126,6 +126,7 @@ function get_alt_arg( $n1, $n2)
       error('unknown_game', "game.findgame2($gid)");
 
    extract($game_row);
+   $is_shape = ($ShapeID > 0);
 
    if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
       error('game_not_started', "game.check.bad_status($gid,$Status)");
@@ -141,9 +142,25 @@ function get_alt_arg( $n1, $n2)
    $score_mode = getRulesetScoring($Ruleset);
 
    if( @$_REQUEST['movechange'] )
-      $move = (int)@$_REQUEST['gotomove'];
-   if( ($ShapeID > 0 && $move < 0) || ($ShapeID <= 0 && $move <= 0) )
-      $move = $Moves;
+   {
+      $arg_move = @$_REQUEST['gotomove'];
+      if( $arg_move != MOVE_SETUP ) // shape-game
+         $arg_move = (int)$arg_move;
+   }
+   if( !$is_shape && $arg_move == MOVE_SETUP )
+      $arg_move = $Moves;
+   if( $arg_move == MOVE_SETUP ) // shape-game
+   {
+      $move = 0;
+      $move_setup = true;
+   }
+   else
+   {
+      $move = $arg_move = (int)$arg_move;
+      $move_setup = false;
+      if( $move <= 0 )
+         $move = $arg_move = $Moves;
+   }
 
    if( $Status == GAME_STATUS_FINISHED || $move < $Moves )
       $may_play = false;
@@ -232,7 +249,7 @@ function get_alt_arg( $n1, $n2)
                        $action == 'choose_move' || $action == 'domove' );
 
    $TheBoard = new Board( );
-   if( !$TheBoard->load_from_db( $game_row, $move, $no_marked_dead) )
+   if( !$TheBoard->load_from_db( $game_row, $arg_move, $no_marked_dead) )
       error('internal_error', "game.load_from_db($gid)");
    $movecol= $TheBoard->movecol;
    $movemsg= $TheBoard->movemsg;
@@ -571,7 +588,7 @@ function get_alt_arg( $n1, $n2)
    else
       $js = null;
 
-   $title = T_("Game") ." #$gid,$move";
+   $title = T_("Game") ." #$gid,$arg_move";
    start_page($title, 0, $logged_in, $player_row, $TheBoard->style_string(), null, $js);
 
 
@@ -653,9 +670,9 @@ function get_alt_arg( $n1, $n2)
          }
       }
    }
-   else if( $Moves > 1 )
+   else if( $Moves > 1 || $is_shape )
    {
-      draw_moves( $gid, $move, $game_row['Handicap'] );
+      draw_moves( $gid, $arg_move, $game_row['Handicap'] );
       if( $show_notes )
       {
          draw_notes('Y');
@@ -687,7 +704,7 @@ function get_alt_arg( $n1, $n2)
    //$page_hiddens['gid'] = $gid; //set in the URL (allow a cool OK button in the browser)
                      //and more: a hidden gid may already be set by draw_moves()
    $page_hiddens['action'] = $action;
-   $page_hiddens['move'] = $move;
+   $page_hiddens['move'] = $arg_move;
    if( @$coord )
       $page_hiddens['coord'] = $coord;
    if( @$stonestring )
@@ -740,9 +757,10 @@ function get_alt_arg( $n1, $n2)
       if( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
+      //global $has_sgf_alias;
       $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
 
-      if( $my_game && $Moves>0 && !$has_sgf_alias )
+      if( $my_game && ($Moves>0 || $is_shape) && !$has_sgf_alias )
          $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
 
       if( !is_null($my_observe) )
@@ -766,19 +784,26 @@ function get_alt_arg( $n1, $n2)
 
 
 
+// \param $move == global $arg_move including MOVE_SETUP for shape-game
 function draw_moves( $gid, $move, $handicap )
 {
    global $TheBoard, $player_row;
 
    $Size= $TheBoard->size;
    $Moves= $TheBoard->max_moves;
+   if( $move == MOVE_SETUP )
+   {
+      $move = 0;
+      $is_move_setup = true;
+   }
+   else
+      $is_move_setup = false;
 
    //basic_safe() because inside <option></option>
    $trmov = basic_safe(T_('Move'));
    $trpas = basic_safe(T_('Pass'));
    $trsco = basic_safe(T_('Scoring'));
    $trres = basic_safe(T_('Resign'));
-   $trsetup_shape = basic_safe(T_('Shape Setup'));
    $trsetup_handi = basic_safe(T_('(H)#viewmove'));
 
    $ctab = '&nbsp;';
@@ -808,10 +833,16 @@ function draw_moves( $gid, $move, $handicap )
    }
    else
       $i= ($move-1) % $step;
-   $str= '';
 
-   if( is_array(@$TheBoard->moves[0]) ) // handle shape-game setup
-      $i--;
+   if( is_array(@$TheBoard->moves[MOVE_SETUP]) ) // handle shape-game setup
+   {
+      $str = sprintf( "<OPTION value=\"%s\"%s>%s</OPTION>\n",
+                      MOVE_SETUP,
+                      ( $is_move_setup ? ' selected' : '' ),
+                      basic_safe(T_('Setup: Shape#moves')) );
+   }
+   else
+      $str = '';
 
    while( $i++ < $Moves )
    {
@@ -832,9 +863,6 @@ function draw_moves( $gid, $move, $handicap )
                break;
             case POSX_RESIGN :
                $c = $trres;
-               break;
-            case POSX_SETUP:
-               $c = $trsetup_shape;
                break;
             default :
                if( $PosX < 0)
