@@ -1358,6 +1358,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL,
   `gid` int(11) NOT NULL default '0',
+  `ShapeID` int(10) unsigned NOT NULL default '0',
   `nrGames` tinyint(3) unsigned NOT NULL default '1',
   `Time` datetime NOT NULL default '0000-00-00 00:00:00',
   `GameType` enum('GO','TEAM_GO','ZEN_GO') NOT NULL default 'GO',
@@ -1384,6 +1385,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `Ratingmax` smallint(6) NOT NULL default '-9999',
   `MinRatedGames` smallint(6) NOT NULL default '0',
   `SameOpponent` tinyint(4) NOT NULL default '0',
+  `ShapeSnapshot` varchar(255) NOT NULL default '',
   `Comment` varchar(40) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `Handicaptype` (`Handicaptype`)

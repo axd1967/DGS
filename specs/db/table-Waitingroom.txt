@@ -21,6 +21,7 @@ Important Note:
 | ID            | int(11)                                                 | NO   | PRI | NULL                | auto_increment |
 | uid           | int(11)                                                 | NO   |     | NULL                |                |
 | gid           | int(11)                                                 | NO   |     | 0                   |                |
+| ShapeID       | int(10) unsigned                                        | NO   |     | 0                   |                |
 | nrGames       | tinyint(3) unsigned                                     | NO   |     | 1                   |                |
 | Time          | datetime                                                | NO   |     | 0000-00-00 00:00:00 |                |
 | GameType      | enum('GO','TEAM_GO','ZEN_GO')                           | NO   |     | GO                  |                |
@@ -47,6 +48,7 @@ Important Note:
 | Ratingmax     | smallint(6)                                             | NO   |     | -9999               |                |
 | MinRatedGames | smallint(6)                                             | NO   |     | 0                   |                |
 | SameOpponent  | tinyint(4)                                              | NO   |     | 0                   |                |
+| ShapeSnapshot | varchar(255)                                            | NO   |     |                     |                |
 | Comment       | varchar(40)                                             | NO   |     |                     |                |
 
 
@@ -60,6 +62,9 @@ Important Note:
 * gid : foreign key to Games.ID
    - 0 for standard-go-game
    - game-id (>0) for team-go/zen-go SETUP-status (ready to be joined)
+
+* ShapeID : shape-id, FK to Shape.ID
+   - see Games.ShapeID in 'specs/db/table-Games.txt'
 
 * nrGames : int, count of entities
    - for game-type 'GO' : number of game-offers with same setting
@@ -167,6 +172,9 @@ Important Note:
           keeping track of joined number of games with 'WaitingroomJoined.JoinedCount'
    - >0 = restrict same opponent for game-offer to min. time to pass for next join,
           keeping track of joined number of games with 'WaitingroomJoined.ExpiresDate'
+
+* ShapeSnapshot : extended snapshot of shape-game
+   - see Games.ShapeSnapshot in 'specs/db/table-Games.txt'
 
 * Comment : short note (40 chars) of user placing game-offer in waiting-room
 
