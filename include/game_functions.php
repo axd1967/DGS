@@ -1401,13 +1401,15 @@ class MaxGamesCheck
 
    function MaxGamesCheck( $urow=null )
    {
-      global $player_row;
-      if( is_array($urow) )
-         $this->count_games = $urow['Running'] + $urow['GamesMPG'];
-      elseif( is_numeric($urow) )
+      if( is_numeric($urow) )
          $this->count_games = (int)$urow;
       else
-         $this->count_games = $player_row['Running'] + $player_row['GamesMPG'];
+      {
+         global $player_row;
+         if( !is_array($urow) )
+            $urow = $player_row;
+         $this->count_games = (int)@$urow['Running'] + (int)@$urow['GamesMPG'];
+      }
    }
 
    /*! \brief Returns true, if new game is allowed to start regarding max-games-limit. */
