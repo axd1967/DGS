@@ -202,7 +202,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('New game'), "new_game.php", true);
          item(T_('New expert game'), "new_game.php?view=".GSETVIEW_EXPERT, true);
          item(T_('New multi-player-game'), "new_game.php?view=".GSETVIEW_MPGAME, true);
-         item(T_('Shapes#shape'), "waiting_room.php", true, true);
+         item(T_('Shapes#shape'), "list_shapes.php", true, true);
       } $item_level--;
 
       item(T_('Users'), "users.php", true);
@@ -244,6 +244,17 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('All observed games'), "show_games.php?observe=all", true);
          item(T_('Show user info'), "userinfo.php?uid=$id", false);
          item(T_('Invite user'), "message.php?mode=Invite", false, true);
+      } $item_level--;
+
+      item(T_('Shapes#shape'), "list_shapes.php", true);
+      { $item_level++;
+         item(T_('New Shape (Goban Editor)#shape'), "goban_editor.php", true);
+         item(T_('View Shape#shape'), "view_shape.php", false);
+         { $item_level++;
+            item(T_('Invite#shape'), "message.php?mode=Invite", false);
+            item(T_('New Shape-Game#shape'), "new_game.php", false, true);
+         } $item_level--;
+         item(T_('Edit Shape#shape'), "edit_shape.php", false, true);
       } $item_level--;
 
       itemL(T_('Introduction'), "introduction.php", true);
