@@ -388,8 +388,9 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[19] = getRulesetText($Ruleset);
          if( $wrtable->Is_Column_Displayed[20] )
          {
-            $wrow_strings[20] = GameTexts::format_game_type($GameType, $GamePlayers) .
-               ( $ShapeID > 0 ? MED_SPACING . echo_image_shapeinfo($ShapeID, $Size, $ShapeSnapshot) : '' );
+            $wrow_strings[20] =
+               ( $ShapeID > 0 ? echo_image_shapeinfo($ShapeID, $Size, $ShapeSnapshot) . ' ' : '' ) .
+               GameTexts::format_game_type($GameType, $GamePlayers);
          }
 
          $wrtable->add_row( $wrow_strings );
