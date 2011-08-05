@@ -127,6 +127,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $profile_type = PROFTYPE_FILTER_GAMES_RUNNING_OTHER;
    }
 
+   $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
+   $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
+
    // load table-columns
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
 
@@ -171,7 +174,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gfilter->add_filter(14, 'RatedSelect', 'Games.Rated', true,
          array( FC_FNAME => 'rated' ));
    $gfilter->add_filter(43, 'Selection', build_ruleset_filter_array(), true);
-   $gfilter->add_filter(44, 'GameType', MultiPlayerGame::build_game_type_filter_array(), true,
+   $gfilter->add_filter(44, 'GameType', $game_type_filter_array, true,
          array( FC_MPGAME => $allow_mpgame ));
 
    if( !$observe && !$all ) //FU+RU
