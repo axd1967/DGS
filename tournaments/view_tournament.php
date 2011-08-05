@@ -26,6 +26,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'include/table_infos.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
+require_once( 'include/shape_control.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_gui_helper.php' );
@@ -343,6 +344,16 @@ function echo_tournament_rules( $tourney, $trule )
       $adj_handi[] = sprintf( T_('limited by max. %s stones#trules_handi'), $trule->MaxHandicap );
 
    $itable = new Table_info('gamerules', TABLEOPT_LABEL_COLON);
+   if( $trule->ShapeID && $trule->ShapeSnapshot )
+   {
+      $arr_shape = GameSnapshot::parse_check_extended_snapshot($trule->ShapeSnapshot);
+      if( is_array($arr_shape) )
+      {
+         $itable->add_sinfo( T_('Shape-Game#shape'),
+               ShapeControl::build_snapshot_info(
+                  $trule->ShapeID, $arr_shape['Size'], $arr_shape['Snapshot'], $arr_shape['PlayColorB'] ) );
+      }
+   }
    $itable->add_sinfo( T_('Ruleset'), getRulesetText($trule->Ruleset) );
    $itable->add_sinfo( T_('Board Size#trules'), $trule->Size .' x '. $trule->Size );
    $itable->add_sinfo( T_('Handicap Type#trules'),

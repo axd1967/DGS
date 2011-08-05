@@ -24,6 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/message_functions.php';
+require_once 'include/db/shape.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -182,6 +183,8 @@ function parse_edit_form( &$trule )
    if( $is_posted )
    {
       $trule->convertEditForm_to_TournamentRules( $vars, $errors );
+      if( $trule->ShapeSnapshot ) // refresh loaded-shape-snapshot
+         $vars['snapshot'] = $trule->ShapeSnapshot;
 
       // determine edits
       $tr_cat_htype = get_category_handicaptype(strtolower($trule->Handicaptype));
@@ -215,6 +218,8 @@ function parse_edit_form( &$trule )
          $edits[] = T_('Weekend clock#edits');
       if( getBool($old_vals['rated']) != getBool($trule->Rated) ) $edits[] = T_('Rated#edits');
       if( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes#edits');
+      if( ($old_vals['shape'] != $trule->ShapeID) || ($old_vals['snapshot'] != $trule->ShapeSnapshot) )
+         $edits[] = T_('Shape#edits');
    }
 
    return array( $vars, array_unique($edits), $errors );

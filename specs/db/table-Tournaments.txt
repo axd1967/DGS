@@ -327,36 +327,41 @@ Description:
 Description:
    Game settings for tournament.
 
-| Field        | Type                                                    | Null | Key | Default             | Extra          |
-+--------------+---------------------------------------------------------+------+-----+---------------------+----------------+
-| ID           | int(11)                                                 | NO   | PRI | NULL                | auto_increment |
-| tid          | int(11)                                                 | NO   | MUL | NULL                |                |
-| Lastchanged  | datetime                                                | NO   |     | 0000-00-00 00:00:00 |                |
-| ChangedBy    | varchar(54)                                             | NO   |     |                     |                |
-| Flags        | smallint(5) unsigned                                    | NO   |     | 0                   |                |
-| Ruleset      | enum('JAPANESE','CHINESE')                              | NO   |     | JAPANESE            |                |
-| Size         | tinyint(3) unsigned                                     | NO   | MUL | 19                  |                |
-| Handicaptype | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | NO   |     | CONV                |                |
-| AdjKomi      | decimal(4,1)                                            | NO   |     | 0.0                 |                |
-| JigoMode     | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | NO   |     | KEEP_KOMI           |                |
-| Handicap     | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
-| Komi         | decimal(4,1)                                            | NO   |     | 6.5                 |                |
-| AdjHandicap  | tinyint(4)                                              | NO   |     | 0                   |                |
-| MinHandicap  | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
-| MaxHandicap  | tinyint(3) unsigned                                     | NO   |     | 127                 |                |
-| StdHandicap  | enum('N','Y')                                           | NO   |     | N                   |                |
-| Maintime     | smallint(6)                                             | NO   |     | 0                   |                |
-| Byotype      | enum('JAP','CAN','FIS')                                 | NO   |     | JAP                 |                |
-| Byotime      | smallint(6)                                             | NO   |     | 0                   |                |
-| Byoperiods   | tinyint(4)                                              | NO   |     | 0                   |                |
-| WeekendClock | enum('N','Y')                                           | NO   |     | Y                   |                |
-| Rated        | enum('N','Y')                                           | NO   |     | N                   |                |
-| Notes        | text                                                    | NO   |     | NULL                |                |
+| Field         | Type                                                    | Null | Key | Default             | Extra          |
++---------------+---------------------------------------------------------+------+-----+---------------------+----------------+
+| ID            | int(11)                                                 | NO   | PRI | NULL                | auto_increment |
+| tid           | int(11)                                                 | NO   | MUL | NULL                |                |
+| ShapeID       | int(10) unsigned                                        | NO   |     | 0                   |                |
+| Lastchanged   | datetime                                                | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy     | varchar(54)                                             | NO   |     |                     |                |
+| Flags         | smallint(5) unsigned                                    | NO   |     | 0                   |                |
+| Ruleset       | enum('JAPANESE','CHINESE')                              | NO   |     | JAPANESE            |                |
+| Size          | tinyint(3) unsigned                                     | NO   | MUL | 19                  |                |
+| Handicaptype  | enum('CONV','PROPER','NIGIRI','DOUBLE','BLACK','WHITE') | NO   |     | CONV                |                |
+| AdjKomi       | decimal(4,1)                                            | NO   |     | 0.0                 |                |
+| JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | NO   |     | KEEP_KOMI           |                |
+| Handicap      | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
+| Komi          | decimal(4,1)                                            | NO   |     | 6.5                 |                |
+| AdjHandicap   | tinyint(4)                                              | NO   |     | 0                   |                |
+| MinHandicap   | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
+| MaxHandicap   | tinyint(3) unsigned                                     | NO   |     | 127                 |                |
+| StdHandicap   | enum('N','Y')                                           | NO   |     | N                   |                |
+| Maintime      | smallint(6)                                             | NO   |     | 0                   |                |
+| Byotype       | enum('JAP','CAN','FIS')                                 | NO   |     | JAP                 |                |
+| Byotime       | smallint(6)                                             | NO   |     | 0                   |                |
+| Byoperiods    | tinyint(4)                                              | NO   |     | 0                   |                |
+| WeekendClock  | enum('N','Y')                                           | NO   |     | Y                   |                |
+| Rated         | enum('N','Y')                                           | NO   |     | N                   |                |
+| ShapeSnapshot | varchar(255)                                            | NO   |     |                     |                |
+| Notes         | text                                                    | NO   |     | NULL                |                |
 
 
 ## Fields:
 
 * tid : tournament-ID
+
+* ShapeID : shape-id, FK to Shape.ID
+   - see Games.ShapeID in 'specs/db/table-Games.txt'
 
 * Lastchanged : update of table-entry
 
@@ -406,6 +411,9 @@ Description:
 * Rated :
    - Y = games played in T do adjust rating of TPs, need rated user
    - N = otherwise
+
+* ShapeSnapshot : extended snapshot of shape-game
+   - see Games.ShapeSnapshot in 'specs/db/table-Games.txt'
 
 * Notes : additional Notes to be shown for tournament-rules
 

@@ -152,6 +152,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          'TRULE.Size',
          "IF(TRULE.Rated='N','N','Y') AS X_Rated",
          'TRULE.Ruleset',
+         'TRULE.ShapeID', 'TRULE.ShapeSnapshot',
          'TRULE.Maintime', 'TRULE.Byotype', 'TRULE.Byotime', 'TRULE.Byoperiods',
       SQLP_FROM,
          'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID' ));
@@ -207,7 +208,12 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       if( $ttable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = Tournament::getStatusText( $tourney->Status );
       if( $ttable->Is_Column_Displayed[ 5] )
-         $row_str[ 5] = make_html_safe( $tourney->Title, false, $rx_term );
+      {
+         $str = make_html_safe( $tourney->Title, false, $rx_term );
+         if( $orow['ShapeID'] > 0 )
+            $str .= MED_SPACING . echo_image_shapeinfo($orow['ShapeID'], $orow['Size'], $orow['ShapeSnapshot']);
+         $row_str[ 5] = $str;
+      }
       if( $ttable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = user_reference( REF_LINK, 1, '', $tourney->Owner_ID, $tourney->Owner_Handle, '' );
       if( $ttable->Is_Column_Displayed[ 7] )

@@ -2348,3 +2348,9 @@ ALTER TABLE Waitingroom
    ADD ShapeSnapshot varchar(255) NOT NULL default '' AFTER SameOpponent ;
 
 
+-- added fields to handle shape-games
+ALTER TABLE TournamentRules
+   ADD ShapeID int unsigned NOT NULL default '0' AFTER tid,
+   ADD ShapeSnapshot varchar(255) NOT NULL default '' AFTER Rated ;
+
+

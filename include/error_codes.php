@@ -384,6 +384,9 @@ class ErrorCode
          $arr['unknown_game'] =
             T_("Sorry, I can't find that game.");
 
+         $arr['bad_shape_id'] =
+            T_("Sorry, the shape-id is invalid.");
+
          $arr['unknown_shape'] =
             T_("Sorry, I can't find that shape.");
 

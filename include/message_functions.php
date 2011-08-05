@@ -101,7 +101,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $shape_init = true;
 
    // Default values: for invite/waitingroom/tournament (dispute comes from DB)
-   $ShapeID = 0;
+   $ShapeID = $orig_shape_id = 0;
    $ShapeSnapshot = '';
    $Size = 19;
    $Handitype = ($iamrated) ? HTYPE_CONV : HTYPE_NIGIRI;
@@ -154,6 +154,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
       if( isset($gid['shape']) )
       {
+         $orig_shape_id = trim($gid['shape']);
          $ShapeID = (int)$gid['shape'];
          if( $ShapeID > 0 && isset($gid['snapshot']) )
             $ShapeSnapshot = $gid['snapshot'];
@@ -338,10 +339,19 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    $mform->add_hidden( 'viewmode', $viewmode );
 
-   if( $ShapeID ) // shape-game
+   // shape-game
+   if( $is_fstyle_tourney )
    {
-      $mform->add_hidden( 'shape', $ShapeID );
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Shape-Game ID#shape'),
+            'TEXTINPUT', 'shape', 5, 10, $orig_shape_id, ));
+   }
+   if( $ShapeID && $ShapeSnapshot )
+   {
+      if( !$is_fstyle_tourney )
+         $mform->add_hidden( 'shape', $ShapeID );
       $mform->add_hidden( 'snapshot', $ShapeSnapshot );
+
       $mform->add_row( array(
             'DESCRIPTION', T_('Shape Game#shape'),
             'TEXT', ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ), ));

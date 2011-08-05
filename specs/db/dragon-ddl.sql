@@ -1213,6 +1213,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRound` (
 CREATE TABLE IF NOT EXISTS `TournamentRules` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
+  `ShapeID` int(10) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `ChangedBy` varchar(54) NOT NULL default '',
   `Flags` smallint(5) unsigned NOT NULL default '0',
@@ -1233,6 +1234,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRules` (
   `Byoperiods` tinyint(4) NOT NULL default '0',
   `WeekendClock` enum('N','Y') NOT NULL default 'Y',
   `Rated` enum('N','Y') NOT NULL default 'N',
+  `ShapeSnapshot` varchar(255) NOT NULL default '',
   `Notes` text NOT NULL,
   PRIMARY KEY  (`ID`),
   KEY `tid` (`tid`),

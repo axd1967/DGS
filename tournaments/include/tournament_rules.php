@@ -26,6 +26,8 @@ require_once 'include/error_codes.php';
 require_once 'include/game_functions.php';
 require_once 'include/make_game.php';
 require_once 'include/rating.php';
+require_once 'include/db/shape.php';
+require_once 'include/classlib_game.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
 
@@ -60,10 +62,10 @@ $ENTITY_TOURNAMENT_RULES = new Entity( 'TournamentRules',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'tid', 'Flags', 'Size', 'Handicap', 'AdjHandicap', 'MinHandicap', 'MaxHandicap',
+      FTYPE_INT,  'ID', 'tid', 'ShapeID', 'Flags', 'Size', 'Handicap', 'AdjHandicap', 'MinHandicap', 'MaxHandicap',
                   'Maintime', 'Byotime', 'Byoperiods',
       FTYPE_FLOAT, 'AdjKomi', 'Komi',
-      FTYPE_TEXT, 'Notes', 'Ruleset',
+      FTYPE_TEXT, 'Notes', 'Ruleset', 'ShapeSnapshot',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'Handicaptype', 'JigoMode', 'StdHandicap', 'Byotype', 'WeekendClock', 'Rated'
    );
@@ -96,6 +98,8 @@ class TournamentRules
    var $Byoperiods;
    var $WeekendClock;
    var $Rated;
+   var $ShapeID;
+   var $ShapeSnapshot;
 
    // non-DB fields
 
@@ -107,7 +111,7 @@ class TournamentRules
          $handicap=0, $komi=DEFAULT_KOMI, $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
          $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
          $maintime=450, $byotype=BYOTYPE_FISCHER, $byotime=15, $byoperiods=10,
-         $weekendclock=true, $rated=false )
+         $weekendclock=true, $rated=false, $shape_id=0, $shape_snapshot='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -132,6 +136,8 @@ class TournamentRules
       $this->Byoperiods = (int)$byoperiods;
       $this->WeekendClock = (bool)$weekendclock;
       $this->Rated = (bool)$rated;
+      $this->ShapeID = (int)$shape_id;
+      $this->ShapeSnapshot = $shape_snapshot;
       // non-DB fields
       $this->TourneyType = '';
    }
@@ -220,6 +226,8 @@ class TournamentRules
       $data->set_value( 'Byoperiods', $this->Byoperiods );
       $data->set_value( 'WeekendClock', ($this->WeekendClock ? 'Y' : 'N') );
       $data->set_value( 'Rated', ($this->Rated ? 'Y' : 'N') );
+      $data->set_value( 'ShapeID', $this->ShapeID );
+      $data->set_value( 'ShapeSnapshot', $this->ShapeSnapshot );
       return $data;
    }
 
@@ -249,6 +257,8 @@ class TournamentRules
 
       $grow['WeekendClock'] = ($this->WeekendClock) ? 'Y' : 'N';
       $grow['Rated'] = ($this->Rated) ? 'Y' : 'N';
+      $grow['ShapeID'] = $this->ShapeID;
+      $grow['ShapeSnapshot'] = $this->ShapeSnapshot;
       return $grow;
    }
 
@@ -304,6 +314,10 @@ class TournamentRules
 
       $vars['weekendclock'] = ($this->WeekendClock) ? 'Y' : 'N';
       $vars['rated'] = ($this->Rated) ? 'Y' : 'N';
+
+      // shape-game
+      $vars['shape'] = $this->ShapeID;
+      $vars['snapshot'] = $this->ShapeSnapshot;
    }//convertTournamentRules_to_EditForm
 
    /*! \brief Converts and sets (parsed) form-values in this TournamentRules-object. */
@@ -400,6 +414,30 @@ class TournamentRules
 
       $weekendclock = ( @$vars['weekendclock'] == 'Y' );
 
+      // handle shape-game
+      $shape_id = trim(@$vars['shape']);
+      $shape_snapshot = '';
+      if( (string)$shape_id != '' )
+      {
+         if( !is_numeric($shape_id) || $shape_id < 0 )
+            $errors[] = ErrorCode::get_error_text('bad_shape_id');
+         else
+         {
+            $shape = Shape::load_shape($shape_id, false);
+            if( is_null($shape) )
+               $errors[] = ErrorCode::get_error_text('unknown_shape');
+            else
+            {
+               $shape_snapshot = GameSnapshot::build_extended_snapshot( $shape->Snapshot, $shape->Size, $shape->Flags );
+
+               // implicit shape-game defaults
+               $size = $shape->Size;
+               $stdhandicap = false;
+               $rated = false;
+            }
+         }
+      }
+
 
       // parse into this TournamentRules-object
       $this->Notes = @$vars['_tr_notes'];
@@ -420,6 +458,8 @@ class TournamentRules
       $this->Byoperiods = $byoperiods;
       $this->WeekendClock = (bool)$weekendclock;
       $this->Rated = (bool)$rated;
+      $this->ShapeID = (int)$shape_id;
+      $this->ShapeSnapshot = $shape_snapshot;
    } //convertTournamentRules_to_EditForm
 
    // returns array [ $main_hours, $byohours, $byoperiods ]
@@ -612,7 +652,9 @@ class TournamentRules
             @$row['Byotime'],
             @$row['Byoperiods'],
             ( @$row['WeekendClock'] == 'Y' ),
-            ( @$row['Rated'] == 'Y' )
+            ( @$row['Rated'] == 'Y' ),
+            @$row['ShapeID'],
+            @$row['ShapeSnapshot']
          );
       return $tp;
    }
