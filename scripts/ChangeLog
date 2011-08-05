@@ -19,6 +19,340 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-08-05 juga
+
+   * site_map.php, NEWS:
+   - added shape-game-handling
+
+   * tournaments/include/tournament_rules.php (class TournamentRules,
+       ~.fillEntityData, ~.new_from_row, ~.convertTournamentRules_to_GameRow,
+       ~.convertTournamentRules_to_EditForm, ~.convertEditForm_to_TournamentRules),
+     include/message_functions.php (game_settings_form),
+     include/error_codes.php (ErrorCode.init),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/edit_rules.php (parse_edit_form),
+     tournaments/list_tournaments.php, tournaments/manage_tournament.php,
+     tournaments/view_tournament.php (echo_tournament_rules):
+   - added shape-game-handling for tournaments
+     - added input-field for shape-id as direct link from view-shape
+       not possible due to unknown tournament-id there
+     - added TournamentRules.ShapeID and TournamentRules.ShapeSnapshot to store shape-games-data
+-----------
+-- added fields to handle shape-games
+ALTER TABLE TournamentRules
+   ADD ShapeID int unsigned NOT NULL default '0' AFTER tid,
+   ADD ShapeSnapshot varchar(255) NOT NULL default '' AFTER Rated ;
+-----------
+
+   * show_games.php:
+   - added filter on games-list for shape-games on GameType-column
+
+   * include/game_functions.php (class MaxGamesCheck):
+   - minor optimization
+
+   * include/std_functions.php (start_html),
+     js/common.js (DGS.data.ARR_THUMBNAIL),
+     game.php, game_editor.php:
+   - bugfix: to fix game-snapshot-thumbnails in server sub-dirs
+     by refactoring setting of global JavaScript-var base_path into start_html()-func
+
+2011-08-04 juga
+
+   * include/game_functions.php (MultiPlayerGame.get_message_defaults),
+     include/message_functions.php (game_info_table),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Waitingroom.txt, specs/db/dragon-ddl.sql,
+     add_to_waitingroom.php, new_game.php, view_shape.php, waiting_room.php,
+     game_players.php (build_game_settings, add_waiting_room_mpgame),
+     message.php (read_mpgame_request):
+   - added shape-game-handling for waiting-room
+     - added shape-game for waiting-room started from view-shape-page
+       for simple/expert/MPG-new-game-view
+     - added Waitingroom.ShapeID and Waitingroom.ShapeSnapshot to store shape-games-data
+     - added filter on waiting-room for shape-game on GameType-column
+   - added shape-game-handling for multi-player-game
+   - showed shape-game-info on game-players-page
+-----------
+-- added fields to handle shape-games
+ALTER TABLE Waitingroom
+   ADD ShapeID int unsigned NOT NULL default '0' AFTER gid,
+   ADD ShapeSnapshot varchar(255) NOT NULL default '' AFTER SameOpponent ;
+-----------
+
+   * include/board.php (Board.load_from_db, ~.move_marks),
+     include/std_functions.php (MOVE_SETUP, game_reference,,
+     game.php (draw_moves):
+   - fix bug for shape-game handling:
+     - using MOVE_SETUP='S' as move-number to jump to shape-game initial-setup
+     - move #0 or empty-move arg must be reserved for implicit jump to last-move
+     - changed <game gid,move> tag to allow move='S' to jump to shape-setup
+
+   * include/sgf_builder.php (SgfBuilder.build_sgf_shape_setup):
+   - adjusted setup-text for shape-game in SGF
+
+   * include/sgf_builder.php (class SgfBuilder, ~.sgf_echo_prop, ~.load_game_info,
+       ~.build_sgf, ~.build_sgf_start, ~.build_sgf_shape_setup),
+     include/shape_control.php (ShapeControl.build_snapshot_info),
+     specs/quick_suite.txt:
+   - generate SGF-properties AB/AW for setup of shape-game in root-node
+     starting a separate follow-up SGF-node
+   - added comment with shape-info without shape-image and URL to view-shape for shape-game
+   - added prop-type to enforce new SGF-node
+
+   * quick_status.php, specs/quick_suite.txt:
+   - quick-status: added shape-id for status-games for version 2
+
+   * game.php (draw_moves):
+   - game-page: added move #0 with setup for shape-game
+
+   * include/make_game.php (create_game):
+   - fix bug: added initializing of Games.Snapshot for creating shape-game
+
+   * include/board.php (Board.load_from_db),
+     include/goban_handler_dgsgame.php (GobanHandlerDgsGame.load_board),
+     include/make_game.php (create_game),
+     include/std_functions.php (POSX_SETUP),
+     scripts/fix_game_snapshot.php:
+   - initializing board with stone-setup for shape-game
+   - allowed to jump to move #0 with setup for shape-game
+
+2011-08-03 juga
+
+   * admin_game.php:
+   - forbid rated-toggle for shape-games
+
+   * game.php (draw_game_info), gameinfo.php, show_games.php, status.php:
+   - show shape-icon for shape-games with link to view-shape-page
+
+   * include/classlib_game.php (GameSnapshot.parse_stones_snapshot, ~.parse_extended_snapshot, ~.parse_check_extended_snapshot),
+     include/message_functions.php (game_settings_form, game_info_table; DgsMessage.load_message),
+     include/shape_control.php (ShapeControl.load_shape_name, ~.build_snapshot_info),
+     include/make_game.php (make_invite_game, accept_invite_game, create_game),
+     include/db/games.php (class Games, ~.fillEntityData, ~.new_from_row),
+     include/error_codes.php (ErrorCode.init),
+     include/gui_functions.php (echo_image_shapeinfo),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     view_shape.php:
+   - added Games.ShapeID and Games.ShapeSnapshot to store shape-games-data
+   - added shape-game for invitation started from view-shape-page
+   - added handling of shape-game for invitation-dispute
+   - added shape-info in pages showing game-info
+   - added checks on valid shape-snapshot for extended format
+   - use implicit defaults for shape-games: copy board-size, free-handicap-placement, unrated
+   - create invitation-game, adding B-pass-move if no handicap and W-should-start
+     according to shape-game
+-----------
+-- added fields to handle shape-games
+ALTER TABLE Games
+   ADD ShapeID int unsigned NOT NULL default '0' AFTER tid,
+   ADD ShapeSnapshot varchar(255) NOT NULL default '' ;
+-----------
+
+   * include/form_functions.php (class Form, ~.create_string_func_selectboxx,
+       ~.print_insert_select_box, ~.print_insert_select_boxx):
+   - added extended selectbox form-element SELECTBOXX with additional attributes to allow disabling select-box
+
+2011-08-01 juga
+
+   * include/classlib_game.php (GameSnapshot.build_extended_snapshot, ~.check_snapshot),
+     include/shape_control.php (ShapeControl.newShape, ~.is_shape_name_used),
+     include/db/shape.php (class Shape, ~.load_shape_by_name),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     edit_shape.php (parse_edit_form):
+   - added edit-page to create or update Shape with size, flags, notes, snapshot, unique name
+   - bugfixes
+-----------
+-- make Shape.Name unique
+ALTER TABLE Shape
+   DROP KEY Name,
+   ADD UNIQUE KEY Name (Name) ;
+-----------
+
+2011-07-31 juga
+
+   * include/classlib_game.php (GameSnapshot.parse_extended_snapshot),
+     include/shape_control.php (ShapeControl.build_view_shape),
+     skins/dragon/screen.css,
+     view_shape.php (build_info_table, has_shape_diff):
+   - show comparison of shape loaded from db for shape-id with shape passed-in via URL-args,
+     diffs shown in red
+   - replaced text-only-form with Table_infos-class
+   - parse extended game-snapshot for shape-handling: "AAA S19 (W|B|'')"
+
+   * include/table_columns.php (class TableHead):
+   - added image-attributes for TableHead-class
+
+   * include/table_infos.php (Table_infos.add_cell, ~.build_cell_data):
+   - enhanced Table_infos to allow different cell-attributes for each column-value
+
+   * goban_editor.php, list_shapes.php:
+   - unified order of bottom-links for shapes
+
+2011-07-30 juga
+
+   * include/gui_functions.php (name_anchor),
+     include/std_functions.php (section),
+     forum/admin.php, forum/forum_functions.php,
+     tournaments/view_tournament.php, admin_faq.php, edit_rating.php, faq.php,
+     game.php (draw_message_box), message_thread.php, userinfo.php:
+   - fixed & replaced named-anchors by adding </a>-end-tag if missing
+   - replaced string-concat with ',' on echo
+
+2011-07-25 juga
+
+   * js/common.js (showGameThumbnail):
+   - parse extended snapshot-format stopping at first space
+     with additional data like size or first-play-color
+
+   * people.php:
+   - added note-picture from silk-collection for shape-note-info
+
+   * new_game.php, site_map.php:
+   - added link to list-shapes-page
+   - remove links to Waiting-room and Invite, they are already in main-menu
+
+   * include/db/shape.php (class Shape, ~.to_string, ~.persist, ~.insert, ~.update,
+       ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_shape, ~.load_shapes),
+     include/shape_control.php (class ShapeControl, ~.getFlagsText, ~.formatFlags, ~.build_view_shape),
+     include/gui_functions.php (echo_image_shapeinfo, echo_image_gamecomment, echo_image_note),
+     include/classlib_profile.php (PROFTYPE_FILTER_SHAPES),
+     include/error_codes.php (ErrorCode.init),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     skins/dragon/screen.css, list_shapes.php, view_shape.php:
+   - added page to list shapes
+   - added page to view shape
+   - added Shape-table to store shapes, which are used as templates for shape-games
+   - extended snapshot-format width additional data separated by space
+-----------
+# added images for shape-games
+copy /images/note.gif
+copy /images/shape.gif
+
+-- added Shape-Games
+CREATE TABLE Shape (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Name varchar(40) NOT NULL default '',
+  Size tinyint unsigned NOT NULL,
+  Flags tinyint unsigned NOT NULL default 0,
+  Snapshot varchar(216) NOT NULL default '',
+  Notes text NOT NULL,
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (ID),
+  KEY uid (uid),
+  KEY Name (Name)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/classlib_game.php (GameSnapshot.parse_stones_snapshot),
+     include/classlib_goban.php (Goban.create_goban_from_stones_snapshot),
+     goban_editor.php (load_igoban_from_dgs_game, load_igoban_from_shape_game,
+       update_igoban, create_goban_from_extended_snapshot):
+   - added saving of shape redirecting goban-data to edit-shape-page in snapshot-format,
+     disabled on irregular boards
+   - added loading goban from shape-id
+   - added creating goban from extended-snapshot (with size-info), memorize shape-id for save
+   - added checks on URL-args, minor cleanups (globals, layout)
+   - added bottom-link to list-shapes-page
+
+   * include/goban_handler_gfx.php (class GobanHandlerGfxBoard):
+   - added arg to control board-stone-size
+
+2011-07-23 juga
+
+   * include/config.php (ALLOW_GOBAN_EDITOR):
+   - enabled goban-editor to edit <igoban>-tag permanently in server-config
+
+   * site_map.php, forum/index.php:
+   - added bottom-link to goban-editor on forums-list
+
+   * include/sgf_parser.php (parse_sgf_for_shape_game),
+     goban_editor.php (load_igoban_from_dgs_game, update_igoban, load_igoban_from_sgf,
+       create_igoban_from_parsed_sgf):
+   - load Goban from SGF-file with max. size of 30KB, show potential errors
+   - added parser to load Goban from SGF-file
+   - allow flattening also for irregular boards
+   - cleanup: refactored commands into funcs
+
+   * include/classlib_upload.php (class ImageFileUpload, ~.cleanup;
+       class FileUpload, ~.checkFileUploadError, ~.has_error, ~.cleanup):
+   - extracted base-class FileUpload from ImageFileUpload to support file-upload for SGF-file
+   - changed TranslateGroup: Users -> Common because not only image for user-picture any more
+
+   * include/goban_handler_sl.php (GobanHandlerSL1.write_goban):
+   - bugfix: fix handling of first-move-color in title-line of SL1-format
+
+   * include/classlib_goban.php (MarkupHandlerGoban.replace_igoban_tags,
+       ~.replace_igoban_tags_collect_goban, ~.parse_igoban, ~.switchStoneColor,
+       ~.switch_colors, ~.flatten_for_shape_game),
+     goban_editor.php:
+   - added color-switching of stones on Goban
+   - added flattening of stones on Goban in preparation for Shape-game
+
+   * include/classlib_goban.php (Goban.read_stone_value):
+   - added creation of Games.Snapshot from Goban-object in preparation of Shape-game
+
+   * include/board.php (Board.read_stone_value),
+     include/classlib_game.php (class GameSnapshot, ~.make_game_snapshot),
+     include/goban_handler_dgsgame.php (class GobanHandlerDgsGame, ~.read_goban, ~.load_board),
+     include/make_game.php (create_game),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     scripts/fix_game_snapshot.php,
+     confirm.php,
+     quick_play.php:
+   - refactored Board.make_game_snapshot() into GameSnapshot-class to allow
+     to create from Board- and Goban-object
+
+   * include/goban_handler_sl.php (class GobanHandlerSL1, ~.parse_links, ~.parse_line, ~.write_goban),
+     goban_editor.php:
+   - added loading of Goban from DGS-game for last or given move-number and exporting it into igoban-SL1-format
+   - bugfix: fix handling of starting-move-number 10 for SL1-syntax
+
+   * include/goban_handler_gfx.php (GobanHandlerGfxBoard.write_image):
+   - bugfix: handle unknown mapping-type for writing GFX-board
+
+   * goban_editor.php, skins/dragon/screen.css:
+   - added syntax-description notes about <igoban>-tag
+
+   * include/goban_handler_sl.php:
+   - adjusted comments, allowed ' and \ in igoban-title
+
+   * include/gui_functions.php (echo_notes),
+     tournaments/edit_lock.php, tournaments/edit_properties.php,
+     tournaments/edit_status.php, tournaments/register.php,
+     tournaments/include/tournament_ladder_props.php,
+     tournaments/roundrobin/edit_round_status.php:
+   - echo_notes(): removed trailing ':' in subnotes-title
+
+2011-07-22 juga
+
+   * goban_editor.php, skins/dragon/screen.css:
+   - reduced default size of new goban
+   - adjusted size of text-area for editing igoban-tag
+   - re-arranged preview-area and edit-area into horizontal table-layout
+   - new board remembers previous size
+
+2011-07-20 juga
+
+   * include/std_functions.php (start_html),
+     include/utilities.php (build_num_range_map),
+     goban_editor.php (create_new_igoban):
+   - replaced old-go-diagram/goban-editor with editor for <igoban>-tag
+     - create new board of size width x height
+     - preview <igoban SL1>-tag
+
+   * js/goban_editor.js:
+   - removed, will be replaced with game-editor
+
+   * old_goban_editor.php:
+   - renamed from 'goban_editor.php' with complete CVS-log-history
+
 2011-07-17 juga
 
    * js/game-editor.js (DGS.GameChangeCalculator.calc_change_play_move, ~.determine_prisoners):
