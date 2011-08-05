@@ -370,6 +370,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    if( is_javascript_enabled() )
    {
+      $js_base_path = add_js_var( 'base_path', $base_path );
+      echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$js_base_path\n</script>";
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
       if( $enable_js_game )

@@ -105,11 +105,12 @@ function buildRankDiff( rank, prev_rank )
 
 DGS.data.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 DGS.data.ARR_THUMBNAIL = [
+      // global base_path
       // 00=empty, 01=Black, 10=White, 11=Dead-stone
-      "<img src=\"images/tbne.gif\" width=7 height=7>",
-      "<img src=\"images/tbnb.gif\" width=7 height=7>",
-      "<img src=\"images/tbnw.gif\" width=7 height=7>",
-      "<img src=\"images/tbnd.gif\" width=7 height=7>"
+      "<img src=\"" + base_path + "images/tbne.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "images/tbnb.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "images/tbnw.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "images/tbnd.gif\" width=7 height=7>"
    ];
 
 // shows game-thumbnail for board-size $size and given dgs-base64-encoded game $snapshot
