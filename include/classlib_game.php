@@ -606,14 +606,15 @@ class NextGameOrder
 
 
 
+// PHP4 does not allow class-statics yet ;-(
+static $BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
  /*!
   * \class GameSnapshot
   * \brief Helper-class to build and parse Games.Snapshot for thumbnails and Shape-games.
   */
 class GameSnapshot
 {
-   static $BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
    /*!
     * \brief Returns base64-encoded snapshot of game-positions with B/W- and dead-stones (without color).
     * \param $stone_reader interface with method $stone_reader->read_stone_value(x,y,$with_dead) with x/y=0..size-1
@@ -634,7 +635,7 @@ class GameSnapshot
             $enc_val = ($enc_val << 2) + $stone_val;
             if( ++$enc_cnt == 3 )
             {
-               $out .= self::$BASE64[$enc_val];
+               $out .= $BASE64[$enc_val];
                $enc_cnt = $enc_val = 0;
             }
          }
@@ -643,7 +644,7 @@ class GameSnapshot
       if( $enc_cnt > 0 )
       {
          $enc_val <<= (2 * (3 - $enc_cnt));
-         $out .= self::$BASE64[$enc_val];
+         $out .= $BASE64[$enc_val];
       }
 
       $out = rtrim($out, 'A');
@@ -691,7 +692,7 @@ class GameSnapshot
             $p += 3 * $skip_pos; // skip empties
          else
          {
-            $data = strpos(self::$BASE64, $ch);
+            $data = strpos($BASE64, $ch);
             if( $data === false )
                error('invalid_snapshot_char', "GameSnapshot.parse_stones_snapshot($size,$ch,$p,$snapshot)");
             foreach( array( ($data >> 4) & 0x3, ($data >> 2) & 0x3, $data & 0x3 ) as $val )
