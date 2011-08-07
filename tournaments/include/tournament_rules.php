@@ -347,6 +347,7 @@ class TournamentRules
             break;
 
          case HTYPE_DOUBLE:
+         case HTYPE_AUCTION_KOMI:
             // not supported for tournaments -> fallback to default NIGIRI
 
          default: //always available even if waiting room or unrated
@@ -765,7 +766,7 @@ class TournamentRules
       );
       return (isset($map_trule_htype_stdhtype[$trule_htype]))
          ? $map_trule_htype_stdhtype[$trule_htype]
-         : HTYPE_NIGIRI;
+         : HTYPE_NIGIRI; // default
    }
 
    function get_edit_tournament_status()
