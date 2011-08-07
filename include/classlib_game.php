@@ -625,6 +625,8 @@ class GameSnapshot
     */
    function make_game_snapshot( $size, $stone_reader, $with_dead=true )
    {
+      global $BASE64;
+
       $out = '';
       $enc_val = $enc_cnt = 0;
       for( $y = 0; $y < $size; $y++ )
@@ -670,6 +672,7 @@ class GameSnapshot
    /*! \brief Returns array with black/white stones and coordinates: [ $black/$white, x,y ] x/y=0..n */
    function parse_stones_snapshot( $size, $snapshot, $black, $white )
    {
+      global $BASE64;
       static $SKIPPOS_MAP = array(
             'A' =>  1, // 1xA
             ':' =>  2, // 2xA
