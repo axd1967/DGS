@@ -602,8 +602,7 @@ function make_dragon_main_menu( $player_row )
    }
    if( ALLOW_GAME_EDITOR )
       $menu->add( 5,4, array( T_('Game Editor'), 'game_editor.php', array()));
-   if( ALLOW_GOBAN_EDITOR )
-      $menu->add( 5,5, array( T_('Goban Editor'), 'goban_editor.php', array()));
+   $menu->add( 5,5, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
    return $menu;
 } //make_dragon_main_menu

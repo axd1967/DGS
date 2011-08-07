@@ -165,9 +165,9 @@ define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);
 // Allow usage of GoDiagrams (only working with JavaScript)
 define('ALLOW_GO_DIAGRAMS', false);
 
-// Allow usage of Game-Editor / Goban-Editor / Game-Viewer
+// Allow usage of Game-Editor / old-goban-editor / Game-Viewer
 define('ALLOW_GAME_EDITOR', false);
-define('ALLOW_GOBAN_EDITOR', true);
+define('ALLOW_OLD_GOBAN_EDITOR', false);
 define('ENABLE_GAME_VIEWER', false);
 
 // Forum: 'Quote' works as 'Reply', but inits textbox with previous post in <quote>-tags

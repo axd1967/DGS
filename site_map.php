@@ -292,9 +292,8 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Read forum'), "forum/read.php", false); //?forum=fid&thread=tid
             item(T_('New topic'), "forum/read.php", false, true); //?forum=fid without threadid
          } $item_level--;
-         item(T_('Search forums'), "forum/search.php", true, !(ALLOW_SURVEY_VOTE || ALLOW_GOBAN_EDITOR) );
-         if( ALLOW_GOBAN_EDITOR )
-            item(T_('Goban Editor'), "goban_editor.php", true, !ALLOW_SURVEY_VOTE);
+         item(T_('Search forums'), "forum/search.php", true);
+         item(T_('Goban Editor'), "goban_editor.php", true, !ALLOW_SURVEY_VOTE);
          if( ALLOW_SURVEY_VOTE )
             item(T_('Surveys'), "list_surveys.php", true, true);
       } $item_level--;
@@ -316,8 +315,7 @@ function itemL($text, $link='', $working=true, $last=false)
 
       if( ALLOW_GAME_EDITOR )
          itemL(T_('Game Editor'), "game_editor.php", true);
-      if( ALLOW_GOBAN_EDITOR )
-         itemL(T_('Goban Editor'), "goban_editor.php", true);
+      itemL(T_('Goban Editor'), "goban_editor.php", true);
 
       if( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);

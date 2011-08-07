@@ -108,8 +108,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    $disp_forum->forum_end_table();
 
    $menu_array = array();
-   if( ALLOW_GOBAN_EDITOR )
-      $menu_array[T_('Goban Editor')] = "goban_editor.php";
+   $menu_array[T_('Goban Editor')] = "goban_editor.php";
    if( ALLOW_SURVEY_VOTE )
       $menu_array[T_('Surveys')] = "list_surveys.php";
    if( Forum::is_admin() )

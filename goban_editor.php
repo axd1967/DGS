@@ -42,8 +42,6 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in');
-   if( !ALLOW_GOBAN_EDITOR )
-      error('feature_disabled');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
