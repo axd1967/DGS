@@ -144,12 +144,12 @@ function get_alt_arg( $n1, $n2)
    if( @$_REQUEST['movechange'] )
    {
       $arg_move = @$_REQUEST['gotomove'];
-      if( $arg_move != MOVE_SETUP ) // shape-game
+      if( $arg_move !== MOVE_SETUP ) // shape-game
          $arg_move = (int)$arg_move;
    }
-   if( !$is_shape && $arg_move == MOVE_SETUP )
+   if( !$is_shape && $arg_move === MOVE_SETUP )
       $arg_move = $Moves;
-   if( $arg_move == MOVE_SETUP ) // shape-game
+   if( $arg_move === MOVE_SETUP ) // shape-game
    {
       $move = 0;
       $move_setup = true;
@@ -790,7 +790,7 @@ function draw_moves( $gid, $move, $handicap )
 
    $Size= $TheBoard->size;
    $Moves= $TheBoard->max_moves;
-   if( $move == MOVE_SETUP )
+   if( $move === MOVE_SETUP )
    {
       $move = 0;
       $is_move_setup = true;

@@ -108,9 +108,9 @@ class Board
          return TRUE;
 
       // handle goto-move (incl. shape-game)
-      if( !$is_shape && $move == MOVE_SETUP )
+      if( !$is_shape && $move === MOVE_SETUP )
          error('invalid_args', "board.load_from_db.check.move.no_shape($gid,$move)");
-      if( $is_shape && $move == MOVE_SETUP )
+      if( $is_shape && $move === MOVE_SETUP )
       {
          $move = 1;
          $show_move_setup = true;

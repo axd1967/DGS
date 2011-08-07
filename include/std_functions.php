@@ -2876,7 +2876,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
    global $base_path;
 
    $gid = (int)$gid;
-   $move = ( strtoupper($move) == MOVE_SETUP )
+   $move = ( strtoupper($move) === MOVE_SETUP )
       ? MOVE_SETUP
       : ( is_numeric($move) ? (int)$move : 0 );
 
@@ -2933,7 +2933,7 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
    if( $link && $legal )
    {
       $url = ( $is_std_go || @$extra['Status'] != GAME_STATUS_SETUP )
-         ? "game.php?gid=$gid" . (( $move > 0 || $move == MOVE_SETUP) ? URI_AMP."move=$move" : "")
+         ? "game.php?gid=$gid" . (( $move > 0 || $move === MOVE_SETUP) ? URI_AMP."move=$move" : "")
          : "game_players.php?gid=$gid";
       $url = "A href=\"$base_path$url\" class=Game$class";
       if( $link & REF_LINK_BLANK )
