@@ -19,6 +19,50 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-08-08 juga
+
+   * include/message_functions.php (game_settings_form, game_info_table; DgsMessage.load_message),
+     include/make_game.php (make_invite_game, accept_invite_game, create_game),
+     include/game_functions.php (get_auction_komi_note),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Waitingroom.txt,
+     skins/dragon/screen.css, specs/db/table-Games.txt,
+     add_to_waitingroom.php, join_waitingroom_game.php, message.php (handle_send_message),
+     waiting_room.php (add_old_game_form, determine_color):
+   - added auction-komi in new-game expert-view and for invitations & disputes
+     - opponent needs to enter komi-bid for joining waiting-room game or invitation or dispute
+     - keep track of komi-bids of both users for disputes of game-invitation in Games.Black/White_Prisoners
+   - added more checks on komi / komi-bid
+   - bugfixes, smaller layout changes
+-----------
+-- added handicap-type for auction-komi
+ALTER TABLE Waitingroom
+   MODIFY Handicaptype enum('conv','proper','nigiri','double','black','white','auko') NOT NULL default 'conv' ;
+-----------
+
+   * include/board.php (Board.load_from_db),
+     include/std_functions.php (game_reference),
+     game.php:
+   - bugfix: fix moving to SETUP-move of shape-game
+
+   * goban_editor.php (load_igoban_from_sgf):
+   - bugfix: fix upload of missing SGF-file
+
+   * view_shape.php:
+   - bugfix: add shape-note title for all different view-modes
+
+2011-08-07 juga
+
+   * include/classlib_game.php ($BASE64, GameSnapshot.make_game_snapshot, ~.parse_stones_snapshot):
+   - bugfix: refactoring static-var: PHP4 does not allow class-statics yet ;-(
+
+   * include/std_functions.php (make_dragon_main_menu),
+     include/config.php (ALLOW_OLD_GOBAN_EDITOR),
+     forum/index.php, goban_editor.php, old_goban_editor.php, site_map.php:
+   - replaced ALLOW_GOBAN_EDITOR -> ALLOW_OLD_GOBAN_EDITOR, goban-editor always enabled
+
 2011-08-05 juga
 
    * site_map.php, NEWS:
