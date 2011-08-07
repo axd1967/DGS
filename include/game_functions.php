@@ -79,12 +79,15 @@ define('HTYPE_NIGIRI',  'nigiri'); // manual, color nigiri
 define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
+define('HTYPE_AUCTION_KOMI', 'auko'); // auction komi (fair komi)
 define('HTYPEMP_MANUAL', 'manual'); // manual, only used for multi-player-game in waiting-room
 
 define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
 define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
 define('CAT_HTYPE_MANUAL', 'manual'); // manual game setting
-//define('CAT_HTYPE_FAIRKOMI', 'fairkomi'); // fair komi game
+define('CAT_HTYPE_AUCTION_KOMI', HTYPE_AUCTION_KOMI); // auction-komi handicap-type
+
+define('INIT_KOMI_BID', max(999, 2*MAX_KOMI_RANGE+1));
 
 // lazy-init in Tournament::get..Text()-funcs
 global $ARR_GLOBALS_GAME; //PHP5
@@ -1564,9 +1567,14 @@ function get_category_handicaptype( $handitype )
          HTYPE_DOUBLE   => CAT_HTYPE_MANUAL,
          HTYPE_BLACK    => CAT_HTYPE_MANUAL,
          HTYPE_WHITE    => CAT_HTYPE_MANUAL,
-         //HTYPE_AUKO     => CAT_HTYPE_FAIRKOMI,
+         HTYPE_AUCTION_KOMI => CAT_HTYPE_AUCTION_KOMI,
       );
    return @$ARR_GLOBAL_HTYPES[$handitype];
+}
+
+function get_auction_komi_note( $fmt='%s' )
+{
+   return sprintf( $fmt, T_('higher bid gets Black, or nigiri if equal') );
 }
 
 function build_image_double_game( $with_sep=false, $class='' )

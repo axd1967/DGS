@@ -160,7 +160,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          if( !$preview )
          {
             $default_subject = $Subject;
-            $default_message = '';
+            $default_message = ( count($errors) ? $default_message : '' );
          }
          if( strcasecmp(substr($default_subject,0,3), "re:") != 0 )
             $default_subject = "RE: " . $default_subject;
@@ -354,7 +354,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
-         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated);
+         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated, ($can_reply ? $message_form : null) );
 
          if( $can_reply )
          {
@@ -573,7 +573,13 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
       else if( $accepttype )
       {
          $msg_gid = (int)@$_REQUEST['gid'];
-         accept_invite_game( $msg_gid, $player_row, $opponent_row );
+         $komi_bid = trim(@$_REQUEST['komi_bid']);
+         $error = accept_invite_game( $msg_gid, $player_row, $opponent_row, $komi_bid );
+         if( $error === 'err_komi_bid' )
+         {
+            $dgs_message->add_error( T_('Your komi bid for handicap type "Auction Komi" is missing or invalid!') );
+            return $dgs_message->errors;
+         }
          $subject = 'Game invitation accepted';
       }
       else if( $declinetype )

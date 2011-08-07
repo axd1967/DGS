@@ -288,10 +288,19 @@ p.SysMsg {
    font-weight: normal;
 }
 
+span.Note {
+   font-weight: bold;
+}
+span.InfoMsg {
+   color: teal;
+   font-weight: bold;
+}
+
 span.FormWarning {
    color: darkred;
 }
 
+span.ErrMsgKomi,
 span.ErrMsgMaxGames,
 span.MPGWarning {
    font-weight: bold;

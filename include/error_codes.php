@@ -200,6 +200,12 @@ class ErrorCode
          $arr['komi_range'] =
             T_("The komi is out of range, please choose a more reasonable value.");
 
+         $arr['komi_bad_fraction'] =
+            T_("Fractional part of komi can only be .0 or .5.");
+
+         $arr['invalid_komi_bid'] =
+            T_('Your komi bid for handicap type "Auction Komi" is missing or invalid!');
+
          $arr['handicap_range'] =
             T_("The handicap is out of range, please choose a more reasonable value.");
 

@@ -16,40 +16,40 @@ Important Note:
    - Invitations using the Message-system will be removed in the future and
      migrated into the waiting-room.
 
-| Field         | Type                                                    | Null | Key | Default             | Extra          |
-+---------------+---------------------------------------------------------+------+-----+---------------------+----------------+
-| ID            | int(11)                                                 | NO   | PRI | NULL                | auto_increment |
-| uid           | int(11)                                                 | NO   |     | NULL                |                |
-| gid           | int(11)                                                 | NO   |     | 0                   |                |
-| ShapeID       | int(10) unsigned                                        | NO   |     | 0                   |                |
-| nrGames       | tinyint(3) unsigned                                     | NO   |     | 1                   |                |
-| Time          | datetime                                                | NO   |     | 0000-00-00 00:00:00 |                |
-| GameType      | enum('GO','TEAM_GO','ZEN_GO')                           | NO   |     | GO                  |                |
-| GamePlayers   | char(5)                                                 | NO   |     |                     |                |
-| Ruleset       | enum('JAPANESE','CHINESE')                              | NO   |     | JAPANESE            |                |
-| Size          | tinyint(3) unsigned                                     | NO   |     | 19                  |                |
-| Komi          | decimal(4,1)                                            | NO   |     | 6.5                 |                |
-| Handicap      | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
-| Handicaptype  | enum('conv','proper','nigiri','double','black','white') | NO   | MUL | conv                |                |
-| AdjKomi       | decimal(4,1)                                            | NO   |     | 0.0                 |                |
-| JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                | NO   |     | KEEP_KOMI           |                |
-| AdjHandicap   | tinyint(4)                                              | NO   |     | 0                   |                |
-| MinHandicap   | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
-| MaxHandicap   | tinyint(3) unsigned                                     | NO   |     | 127                 |                |
-| Maintime      | smallint(6)                                             | NO   |     | 0                   |                |
-| Byotype       | enum('JAP','CAN','FIS')                                 | NO   |     | JAP                 |                |
-| Byotime       | smallint(6)                                             | NO   |     | 0                   |                |
-| Byoperiods    | tinyint(4)                                              | NO   |     | 0                   |                |
-| Rated         | enum('N','Y')                                           | NO   |     | N                   |                |
-| StdHandicap   | enum('N','Y')                                           | NO   |     | N                   |                |
-| WeekendClock  | enum('N','Y')                                           | NO   |     | Y                   |                |
-| MustBeRated   | enum('N','Y')                                           | NO   |     | N                   |                |
-| Ratingmin     | smallint(6)                                             | NO   |     | -9999               |                |
-| Ratingmax     | smallint(6)                                             | NO   |     | -9999               |                |
-| MinRatedGames | smallint(6)                                             | NO   |     | 0                   |                |
-| SameOpponent  | tinyint(4)                                              | NO   |     | 0                   |                |
-| ShapeSnapshot | varchar(255)                                            | NO   |     |                     |                |
-| Comment       | varchar(40)                                             | NO   |     |                     |                |
+| Field         | Type                                                           | Null | Key | Default             | Extra          |
++---------------+----------------------------------------------------------------+------+-----+---------------------+----------------+
+| ID            | int(11)                                                        | NO   | PRI | NULL                | auto_increment |
+| uid           | int(11)                                                        | NO   |     | NULL                |                |
+| gid           | int(11)                                                        | NO   |     | 0                   |                |
+| ShapeID       | int(10) unsigned                                               | NO   |     | 0                   |                |
+| nrGames       | tinyint(3) unsigned                                            | NO   |     | 1                   |                |
+| Time          | datetime                                                       | NO   |     | 0000-00-00 00:00:00 |                |
+| GameType      | enum('GO','TEAM_GO','ZEN_GO')                                  | NO   |     | GO                  |                |
+| GamePlayers   | char(5)                                                        | NO   |     |                     |                |
+| Ruleset       | enum('JAPANESE','CHINESE')                                     | NO   |     | JAPANESE            |                |
+| Size          | tinyint(3) unsigned                                            | NO   |     | 19                  |                |
+| Komi          | decimal(4,1)                                                   | NO   |     | 6.5                 |                |
+| Handicap      | tinyint(3) unsigned                                            | NO   |     | 0                   |                |
+| Handicaptype  | enum('conv','proper','nigiri','double','black','white','auko') | NO   | MUL | conv                |                |
+| AdjKomi       | decimal(4,1)                                                   | NO   |     | 0.0                 |                |
+| JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                       | NO   |     | KEEP_KOMI           |                |
+| AdjHandicap   | tinyint(4)                                                     | NO   |     | 0                   |                |
+| MinHandicap   | tinyint(3) unsigned                                            | NO   |     | 0                   |                |
+| MaxHandicap   | tinyint(3) unsigned                                            | NO   |     | 127                 |                |
+| Maintime      | smallint(6)                                                    | NO   |     | 0                   |                |
+| Byotype       | enum('JAP','CAN','FIS')                                        | NO   |     | JAP                 |                |
+| Byotime       | smallint(6)                                                    | NO   |     | 0                   |                |
+| Byoperiods    | tinyint(4)                                                     | NO   |     | 0                   |                |
+| Rated         | enum('N','Y')                                                  | NO   |     | N                   |                |
+| StdHandicap   | enum('N','Y')                                                  | NO   |     | N                   |                |
+| WeekendClock  | enum('N','Y')                                                  | NO   |     | Y                   |                |
+| MustBeRated   | enum('N','Y')                                                  | NO   |     | N                   |                |
+| Ratingmin     | smallint(6)                                                    | NO   |     | -9999               |                |
+| Ratingmax     | smallint(6)                                                    | NO   |     | -9999               |                |
+| MinRatedGames | smallint(6)                                                    | NO   |     | 0                   |                |
+| SameOpponent  | tinyint(4)                                                     | NO   |     | 0                   |                |
+| ShapeSnapshot | varchar(255)                                                   | NO   |     |                     |                |
+| Comment       | varchar(40)                                                    | NO   |     |                     |                |
 
 
 ## Fields:
@@ -98,7 +98,7 @@ Important Note:
       - Conventional handicap: conv
       - Proper handicap: proper
       - Manual setting (color-setting): nigiri, double, black, white
-      - [future] Fair komi: div_ykic, div_ikyc, auko, pie_ymic, pie_imyc
+      - Fair komi: auko
 
    - conv = Conventional handicap
    - proper = Proper handicap
@@ -106,13 +106,8 @@ Important Note:
    - double = Double game
    - black = manual game-mode, game-offerer wants to play as Black
    - white = manual game-mode, game-offerer wants to play as White
-
-   - [future] div_ykic = Divide & Choose "You choose Komi, I choose Color" (needs discussion)
-   - [future] div_ikyc = Divide & Choose "I choose Komi, You choose Color"
-   - [future] auko = Auction Komi, both players choose komi, higher bid gets Black
-     giving his bid of komi to White, use nigiri on equal bidding
-   - [future] pie_ymic = Pie Rule "You choose first Move, I choose Color" (needs discussion)
-   - [future] pie_imyc = Pie Rule "I choose first Move, You choose Color"
+   - auko = Auction Komi, both players choose komi, higher bid gets Black
+     giving his bid of komi to White, use nigiri on equal bids
 
 * AdjKomi : Komi adjustment and Jigo-mode
    - Calculated or fix komi is adjusted by value of 'AdjKomi' (+/- komi)

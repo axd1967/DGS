@@ -2354,3 +2354,8 @@ ALTER TABLE TournamentRules
    ADD ShapeSnapshot varchar(255) NOT NULL default '' AFTER Rated ;
 
 
+-- added handicap-type for auction-komi
+ALTER TABLE Waitingroom
+   MODIFY Handicaptype enum('conv','proper','nigiri','double','black','white','auko') NOT NULL default 'conv' ;
+
+

@@ -78,6 +78,12 @@ require_once( 'include/classlib_game.php' );
          $komi = (float)@$_POST['komi_m'];
          break;
 
+      case CAT_HTYPE_AUCTION_KOMI:
+         $handicap_type = HTYPE_AUCTION_KOMI;
+         $handicap = 0;
+         $komi = (float)@$_POST['komi_auko'];
+         break;
+
       default:
          $cat_handicap_type = CAT_HTYPE_MANUAL;
          $handicap_type = HTYPE_NIGIRI;
@@ -88,6 +94,8 @@ require_once( 'include/classlib_game.php' );
 
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
       error('komi_range', "add_to_waitingroom.check.komi($komi)");
+   if( floor(2 * $komi) != 2 * $komi ) // round to x.0|x.5
+      error('komi_bad_fraction', "add_to_waitingroom.check.komi.fraction($komi)");
 
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range', "add_to_waitingroom.check.handicap($handicap)");
@@ -208,7 +216,7 @@ require_once( 'include/classlib_game.php' );
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
       if( !is_array($arr_shape) ) // overwrite with defaults
-         error('invalid_snapshot', "make_invite_game.check.shape($shape_id,$shape_snapshot)");
+         error('invalid_snapshot', "add_to_waitingroom.check.shape($shape_id,$shape_snapshot)");
 
       // implicit defaults for shape-game
       $size = (int)$arr_shape['Size'];

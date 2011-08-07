@@ -1369,7 +1369,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `Size` tinyint(3) unsigned NOT NULL default '19',
   `Komi` decimal(4,1) NOT NULL default '6.5',
   `Handicap` tinyint(3) unsigned NOT NULL default '0',
-  `Handicaptype` enum('conv','proper','nigiri','double','black','white') NOT NULL default 'conv',
+  `Handicaptype` enum('conv','proper','nigiri','double','black','white','auko') NOT NULL default 'conv',
   `AdjKomi` decimal(4,1) NOT NULL default '0.0',
   `JigoMode` enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI',
   `AdjHandicap` tinyint(4) NOT NULL default '0',

@@ -133,6 +133,21 @@ require_once( "include/contacts.php" );
          error('waitingroom_not_same_opponent', "join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
    }
 
+   // check auction komi
+   $handicaptype = $game_row['Handicaptype'];
+   $komi_my_bid = trim(@$_REQUEST['komi_bid']);
+   if( $handicaptype == HTYPE_AUCTION_KOMI )
+   {
+      if( (string)$komi_my_bid == '' || !is_numeric($komi_my_bid) )
+         $komi_err = true;
+      elseif( floor(2 * $komi_my_bid) != 2 * $komi_my_bid ) // x.0|x.5 ?
+         $komi_err = true;
+      else
+         $komi_err = false;
+      if( $komi_err )
+         jump_to("waiting_room.php?info=$wr_id".URI_AMP."err=komi_bid".URI_AMP."komi_bid=".urlencode($komi_my_bid).'#joingameForm');
+   }
+
    $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
    $my_rating = $player_row["Rating2"];
@@ -143,7 +158,7 @@ require_once( "include/contacts.php" );
          && is_numeric($opprating) && $opprating >= MIN_RATING );
 
    $double = false;
-   switch( (string)$game_row['Handicaptype'] )
+   switch( $handicaptype )
    {
       case HTYPE_CONV:
          if( !$iamrated || !$opprated )
@@ -172,8 +187,24 @@ require_once( "include/contacts.php" );
          $i_am_black = true; // game-offerer wants WHITE, so challenger gets BLACK
          break;
 
+      case HTYPE_AUCTION_KOMI:
+         $komi_opp = $game_row['Komi'];
+         if( $komi_my_bid > $komi_opp )
+         {
+            $game_row['Komi'] = $komi_my_bid;
+            $i_am_black = true;
+         }
+         elseif( $komi_my_bid < $komi_opp )
+            $i_am_black = false;
+         else // equal bid -> nigiri
+         {
+            mt_srand((double) microtime() * 1000000);
+            $i_am_black = mt_rand(0,1);
+         }
+         break;
+
       default: //always available even if waiting room or unrated
-         $game_row['Handicaptype'] = HTYPE_NIGIRI;
+         $game_row['Handicaptype'] = $handicaptype = HTYPE_NIGIRI;
          $game_row['Handicap'] = 0;
       case HTYPE_NIGIRI:
          mt_srand((double) microtime() * 1000000);

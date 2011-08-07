@@ -87,10 +87,14 @@ Description:
    - referring to other game if started as double-game
 
 * Black_ID, White_ID : foreign key to Players.ID
-   - representing current Black and White players
+   - for normal-game : representing current Black and White players
+   - for invite-game : Black_ID = user who first started invitation, White_ID = invited-user
+     this will not change as long as game is not started, to be able to store komi-bid
+     for auction-komi in static Black/White_Prisoners-field.
 
 * ToMove_ID : foreign key to Players.ID
-   - field-value points to player, that has to move next in game
+   - for started games = field-value points to player, that has to move next in game
+   - for invite-game and value < 0 : handicap-type, see 'INVITE_HANDI_...' in 'include/message_functions.php'
 
 * GameType : game-type, see also Waitingroom.GameType
    - GO = standard Go (1:1)
@@ -134,7 +138,9 @@ Description:
        player to move in GamePlayers-table
      - handicap-stones must be substracted
 
-* Black_Prisoners, White_Prisoners : number of Black and White (stone) prisoners
+* Black_Prisoners, White_Prisoners
+   - for started games = number of Black and White (stone) prisoners
+   - for invite-games = number of B/W-players komi-bid, only used for fair auction komi
 
 * Last_X, Last_Y, Last_Move : ??
 
