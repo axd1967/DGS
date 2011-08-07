@@ -410,7 +410,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
  *     Error => error-message | '' (=success)
  *     Size  => size,
  *     AB|AW => array( sgf-coords,...),   // B/W setup-stones
- *     Moves => array( 'B|W'.sgf-coor, ... ) )
+ *     Moves => array( 'B|W'.sgf-coord, ... ) )
  */
 function parse_sgf_for_shape_game( $sgf_data )
 {
