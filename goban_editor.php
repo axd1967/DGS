@@ -332,6 +332,7 @@ function load_igoban_from_sgf( $file_sgf_arr )
 
    // upload SGF and parse into Goban
    $errors = NULL;
+   $board_text = NULL;
    $upload = new FileUpload( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
    if( $upload->is_uploaded && !$upload->has_error() )
    {
