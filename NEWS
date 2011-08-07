@@ -193,6 +193,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
             * <home new_game.php?view=1>Expert view</home>: advanced game-settings like adjust-handicap/komi & more restrictions for waiting-room
             * <home new_game.php?view=2>Multi-player view</home>: game-settings to start multi-player-game of game-type Team-Go & Zen-Go
 
+         * Added Fair komi option "Auction-Komi" in <home new_game.php?view=1>Expert view</home>:
+            * Opponent needs to enter komi-bid for joining game in waiting-room or for game-invitation/dispute
+            * Higher bidder gets Black, or Nigiri on equal bids
+            * Not supported for multi-player-games or tournaments
          * Added Ruleset option for Japanese rules (default) and Chinese rules
          * Added adjustment and min/max-limitation of handicap stones
          * Added adjustment of komi by value and jigo mode (allow or reject Jigo)
