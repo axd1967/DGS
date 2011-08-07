@@ -106,14 +106,11 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
 
    // show snapshot-diff
    $view_shape2 = '';
-   $title_row = '';
+   $title_row = sprintf( "<tr><th></th><th class=\"left\">%s</th><th></th></tr>\n", T_('Shape Notes#shape') );
    if( !@$shape1['shape'] ) // only parsed-shape
       $view_shape1 = ShapeControl::build_view_shape($shape2['shape'], $stone_size);
    elseif( !@$shape2['shape'] ) // only db-shape
-   {
       $view_shape1 = ShapeControl::build_view_shape($shape1['shape'], $stone_size);
-      $title_row = sprintf( "<tr><th></th><th>%s</th><th></th></tr>\n", T_('Shape Notes#shape') );
-   }
    else // two shapes
    {
       $view_shape1 = ShapeControl::build_view_shape($shape1['shape'], $stone_size);
