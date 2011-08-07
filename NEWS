@@ -3,7 +3,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2011-???-??] - DGS 1.0.15  (Tournaments, Multi-Player game, Game settings, Users, Forum, Voting)
+#release DGS_1_0_15 [2011-???-??] - DGS 1.0.15  (Tournaments, Multi-Player game, Shape game, Game settings, Users, Forum, Voting)
 
    New features and Major changes:
 
@@ -218,10 +218,10 @@ Copyright (C) 2001-2011  Erik Ouchterlony
         on <home status.php>status-games</home> and <home show_games.php>my running games</home>
       * Added column for all game-lists with:
          * icon linked to game-info page (<image info.gif>) with showing thumbnail of game on mouse-hovering
+         * icon linked to shape-info for shape-game (<image shape.gif>)
          * icon linked to Tournament-games (<image tourney.gif>)
       * Added searchable column with indicator if there are hidden game comments for my finished games
       * Show Weekendclock for all view-modes
-      * Show icon for Tournament-games (<image tourney.gif>)
 
    * <home userinfo.php>User info</home>:
       * Show a users timezone, local time and night start
@@ -340,17 +340,30 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added link to <home list_surveys.php>Surveys</home> on <home forum/>forums-page</home>
       * Show survey-result for closed surveys, or after user voted on survey
 
-   * Markup tags and Images:
-      * &lt;http://url.net |link text> : enhanced link markup with optional text,
-        Link text must not contain a single quote "'" -> use "&amp;apos;" instead
-      * &lt;strike><strike>text</strike></strike> : strike out text
-      * &lt;tourney id> : showing link to corresponding tournament page
-      * &lt;survey id> : showing link to survey with status & title
-      * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
-        (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
-      * &lt;game gid[,move]> : Added game-type and changed format for move-number
-      * &lt;hr> : showing separation-line like HTML &lt;hr>-tag, to be used in messages/games
+   * <home list_shapes.php>Shapes</home>:
+      * Added shape-games starting with an arbitrary board setup of size, stones and color to play first
+      * Show note-icon on shape-list-page to indicate existing note (<image note.gif>)
+      * Added Shape Editor to manage shapes for shape-games,
+        Create and edit board with <home goban_editor.php>Goban Editor</home>
+      * Added Shape Viewer showing comparison of loaded shape-id and/or shape-pattern used in shape-game
+      * Added handling of shape-games for invite, dispute, new-game, waiting-room, multi-player-game,
+        tournaments, game-lists, game-page, quick-suite, SGF-download
+      * Start invitation or new shape-game from view-shape-page
+         * Shape-games imply game-settings: board-size, free handicap placement, unrated game
+         * Add Black pass-move, if no handicap used and White starts first
+      * Added filter-selection for shape-games on game-type-column for games-list and in waiting-room
+      * Show shape-icon for shape-games linked to view-shape-page (<image shape.gif>)
 
+   * <home goban_editor.php>Goban Editor</home>:
+      * Created basic editor to create goban used for
+         * Go-diagrams with &lt;igoban SL1>-tag
+         * Board of shape-games (create & edit)
+      * Create goban of certain board-size (width x height), by parsing game-snapshot,
+        loaded by game-id and move-number, loaded by shape-id, loaded from SGF-file (max. size 30KB)
+      * Added switching of stone colors
+      * Added flattening of stones removing all markup for shape-game board
+
+   * Markup tags and Images:
       * &lt;igoban SL1> : Added go-diagram using syntax from Sensei's Library (=SL1)
          * Allow go-diagram with &lt;igoban>-tag in FAQ &amp; forums
          * Show raw-format for &lt;igoban>-tag by adding URL-arg 'raw=1' on pages with go-diagrams
@@ -361,12 +374,22 @@ Copyright (C) 2001-2011  Erik Ouchterlony
             * Extended syntax by territory-markers: * (<image board/hb.gif>), ~ (<image board/hw.gif>), ? (<image board/hg.gif>), = (<image board/hd.gif>)
             * Extended syntax by territory-images in text: T* T~ T? T=
             * Lines can start with white-spaces, line-prefix '$$' can be omitted
-            * Chars "'" and "\" are not allowed in text
             * Auto-set hoshi-points if there are perpendicular edges and no manually set hoshi-markers
             * Easier coordinate-usage using "++"  "+-"  "-+"
             * Links of "#anchor" refer to DGS local page
             * Not-supported are arrows and lines "{AR|LN ...}" and some irregular boards with edge-magic
          * Use player-settings for stone-size, wood-color, boards smooth-edge
+
+      * &lt;http://url.net |link text> : enhanced link markup with optional text,
+        Link text must not contain a single quote "'" -> use "&amp;apos;" instead
+      * &lt;strike><strike>text</strike></strike> : strike out text
+      * &lt;tourney id> : showing link to corresponding tournament page
+      * &lt;survey id> : showing link to survey with status & title
+      * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
+        (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
+      * &lt;game gid[,move]> : Added game-type and changed format for move-number
+         * &lt;game gid,S> : extended &lt;game>-tag with move=S to jump to board-setup of shape-game
+      * &lt;hr> : showing separation-line like HTML &lt;hr>-tag, to be used in messages/games
 
       * Added markup-images without board-lines: square (<image board/s.gif>), triangle (<image board/t.gif>), circle (<image board/c.gif>), cross (<image board/x.gif>)
       * Fixed letter-iamges "l(a-z).gif" for board-markup: (<image board/la.gif> ... <image board/lz.gif>)
@@ -449,6 +472,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
             * Enhanced remaining-time with extra-time-info
             * Added columns to support new game-quick-suite with move-id, game-status
             * Added column for tournament-games with tournament-id
+            * Added shape-id for shape-games
             * Added column to allow client more sorting options: game-priority, opponents last-access
             * Use same next-game-order as configured on status-page, can be overwritten with URL-arg 'order'
          * Added section with multi-player-games on SETUP-status and if they are ready to start like on status-page
@@ -700,7 +724,6 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * ALLOW_TOURNAMENTS                 - enabled
 ##       * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
          * ALLOW_GO_DIAGRAMS                 - disabled (needs JavaScript)
-         * ALLOW_GOBAN_EDITOR                - disabled
          * ALLOW_QUICK_DO                    - disabled
          * ALLOW_QUOTING                     - disabled
          * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
