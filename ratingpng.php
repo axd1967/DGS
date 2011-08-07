@@ -54,7 +54,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $keep_english= false;
       $T_= 'T_';
 
-      // Translation-NOTE: all months for T_ (date..) defined in -> 'statisticspng.php'
+      // Translation-NOTE: all months for T_(date..) defined in -> 'statisticspng.php'
       // $TW_ = 'T_'; // for non-const translation-texts
       $datelabel = create_function('$x', '$TW_ = "T_"; return $TW_(date("M",$x)).date("\\nY",$x);' );
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,0);' );
