@@ -107,6 +107,8 @@ function make_invite_game(&$player_row, &$opponent_row, $disputegid)
       }
       if( $handicap_type == HTYPE_AUCTION_KOMI )
          $black_prisoners = $white_prisoners = INIT_KOMI_BID;
+      else
+         $black_prisoners = $white_prisoners = 0;
    }
 
 
@@ -495,7 +497,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    $skip_handicap_validation = ( (ENABLE_STDHANDICAP & 2) && $stdhandicap == 'Y' && $moves > 1 );
 
    $shape_need_pass = false;
-   if( $shape_id == 0 )
+   if( $shape_id > 0 )
       $skip_handicap_validation = false;
 
    if( $skip_handicap_validation ) // std-handicap-placement
@@ -590,7 +592,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
 
    //ENABLE_STDHANDICAP:
    // both b1 and b2 set is not fully handled (error if incomplete pattern)
-   if( $skip_handicap_validation )
+   if( $skip_handicap_validation && $shape_id == 0 )
    {
       if( $shape_id == 0 && !make_standard_placement_of_handicap_stones($size, $handicap, $gid) )
       {
@@ -624,17 +626,19 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $gid=0)
    if( $shape_id > 0 )
    {
       if( $shape_need_pass ) // insert PASS-move for B if shape requires W-first to move
+      {
          db_query( "create_game.shape_w1st.pass($gid)",
             "INSERT INTO Moves SET gid=$gid, MoveNr=1, Stone=".BLACK.", PosX=".POSX_PASS.", PosY=0, Hours=0" );
 
-      // setup 2nd-next player in multi-player-game, if W-first for shape-game
-      if( $game_type != GAMETYPE_GO )
-      {
-         list( $group_color, $group_order, $gpmove_color )
-            = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );
-         $next_black_id = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
-         db_query( "create_game.update_games.shape_w1st.next3_gp($gid,$game_type,$next_black_id)",
-            "UPDATE Games SET Black_ID=$next_black_id WHERE ID=$gid LIMIT 1" );
+         // setup 2nd-next player in multi-player-game, if W-first for shape-game
+         if( $game_type != GAMETYPE_GO )
+         {
+            list( $group_color, $group_order, $gpmove_color )
+               = MultiPlayerGame::calc_game_player_for_move( $game_players, $moves, $handicap, 1 );
+            $next_black_id = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
+            db_query( "create_game.update_games.shape_w1st.next3_gp($gid,$game_type,$next_black_id)",
+               "UPDATE Games SET Black_ID=$next_black_id WHERE ID=$gid LIMIT 1" );
+         }
       }
    }
 
