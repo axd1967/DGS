@@ -804,13 +804,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
    $MaxHandicap = MAX_HANDICAP;
 
    // $game_row containing:
-   // - for GSET_WAITINGROOM: Waitingroom.*
+   // - for GSET_WAITINGROOM: Waitingroom.*; WaitingroomJoined.JoinedCount; X_TotalCount
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
    //   Games: Status, Game_mid(=mid), GameType, GamePlayers, Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
    //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, ShapeID, ShapeSnapshot, myColor,
-   //          Black_ID, Black_Prisoners, White_Prisoners
+   //          Black_ID, Black_Prisoners, White_Prisoners; X_TotalCount
    extract($game_row);
 
    // handle shape-games
@@ -926,16 +926,23 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
       $itable->add_sinfo(
             T_('Player'),
             user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) );
+
+      $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+   }
+   elseif( $tablestyle == GSET_MSG_INVITE )
+   {
+      $itable->add_scaption(T_('Opponent info'));
+      $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
+      $itable->add_sinfo( T_('Already started games'), (int)@$game_row['X_TotalCount'] );
+
+      $itable->add_scaption(T_('Game info'));
    }
    elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
-      $itable->add_scaption(T_('Game Info'));
+      $itable->add_scaption(T_('Game info'));
 
    if( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM) ) // invite & dispute, w-room
       $itable->add_sinfo( T_('Shape Game#shape'),
             ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
-
-   if( $tablestyle != GSET_TOURNAMENT_LADDER )
-      $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
 
    if( $tablestyle == GSET_WAITINGROOM )
       $itable->add_sinfo( T_('Game Type'), GameTexts::format_game_type($GameType, $GamePlayers) );
@@ -1032,7 +1039,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
       {
          $itable->add_sinfo( T_('Type'), T_('Auction Komi') );
          $itable->add_sinfo( T_('Handicap'), $Handicap );
-         if( $is_my_game || ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_MSG_DISPUTE) )
+         if( $is_my_game || $tablestyle == GSET_MSG_INVITE )
             $itable->add_sinfo( T_('Komi (my bid)'), ( is_null($Komi) ? NO_VALUE : $Komi ) );
          break;
       }//case CAT_HTYPE_AUCTION_KOMI
@@ -1070,6 +1077,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
             T_('Accept same opponent'), $same_opp_str,
             ( $goodsameopp ? '' : warning_cell_attb( T_('Out of range')) ) );
    }
+
 
    $itable->add_sinfo( T_('Main time'), TimeFormat::echo_time($Maintime) );
    $itable->add_sinfo(
@@ -1256,7 +1264,9 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
 
    if( !is_null($SameOpponent) )
    {
-      if( $SameOpponent < 0 )
+      if( $SameOpponent < SAMEOPP_TOTAL )
+         $out[] = sprintf( 'SOT[%s]', -$SameOpponent + SAMEOPP_TOTAL ); // N total times
+      elseif( $SameOpponent < 0 )
          $out[] = sprintf( 'SO[%sx]', -$SameOpponent ); // N times
       elseif( $SameOpponent > 0 )
          $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days
@@ -1266,7 +1276,7 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
       $out[] = sprintf( '[%s]', T_('Hidden#wroom') );
 
    return ( count($out) ? implode(', ', $out) : NO_VALUE );
-}
+}//echo_game_restrictions
 
 
 function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,

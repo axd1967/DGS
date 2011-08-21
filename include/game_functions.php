@@ -89,6 +89,10 @@ define('CAT_HTYPE_AUCTION_KOMI', HTYPE_AUCTION_KOMI); // auction-komi handicap-t
 
 define('INIT_KOMI_BID', max(999, 2*MAX_KOMI_RANGE+1));
 
+// SQL-clause-part applied for Games.Status to select all running games.
+define('IS_STARTED_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')"); //used for SameOpponent-check
+define('SAMEOPP_TOTAL', -100);
+
 // lazy-init in Tournament::get..Text()-funcs
 global $ARR_GLOBALS_GAME; //PHP5
 $ARR_GLOBALS_GAME = array();
@@ -1093,6 +1097,16 @@ class GameHelper
          MultiPlayerGame::update_players_end_mpgame( $gid, /*setup*/false );
    }//update_players_end_game
 
+   /*! \brief Returns number of started games (used for same-opponent-check). */
+   function count_started_games( $uid, $opp )
+   {
+      $row = mysql_single_fetch( "GameHelper::count_started_games($uid,$opp)",
+            "SELECT ((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$uid AND G1.White_ID=$opp) + " .
+                   " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=$opp AND G2.White_ID=$uid)) " .
+                   "AS X_Count" );
+      return ($row) ? (int)$row['X_Count'] : 0;
+   }
+
 } // end 'GameHelper'
 
 
@@ -1689,7 +1703,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode )
 
    if( $viewmode == GSETVIEW_EXPERT )
    {
-      $same_opp_array = build_accept_same_opponent_array(array( 0,  -1, -2, -3,  3, 7, 14 ));
+      $same_opp_array = build_accept_same_opponent_array(array( 0,  -101, -102, -103,  -1, -2, -3,  3, 7, 14 ));
       $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
                               'SELECTBOX', 'same_opp', 1, $same_opp_array, '0', false, ));
    }
@@ -1699,22 +1713,44 @@ function append_form_add_waiting_room_game( &$mform, $viewmode )
                            'TEXTINPUT', 'comment', 40, 40, "" ) );
 }//append_form_add_waiting_room_game
 
-// WaitingRoom.SameOpponent: 0=always, <0=n times, >0=after n days
+function echo_started_games( $game_count )
+{
+   if( $game_count <= 0 )
+      return '';
+
+   $fmt = ($game_count > 1)
+      ? T_('%s games started#same_opp')
+      : T_('%s game started#same_opp');
+   return sprintf( $fmt, $game_count );
+}
+
+// WaitingRoom.SameOpponent: 0=always, <-101=(-n-100) total times, <0=n times (same game-offer), >0=after n days
+// \param $game_row expecting JoinedCount, X_TotalCount
 function echo_accept_same_opponent( $same_opp, $game_row=null )
 {
    if( $same_opp == 0 )
       return T_('always#same_opp');
 
-   if( $same_opp < 0 )
+   if( $same_opp < SAMEOPP_TOTAL )
+   {
+      if ($same_opp == SAMEOPP_TOTAL-1 )
+         $out = T_('1 total time#same_opp');
+      else
+         $out = sprintf( T_('%s total times#same_opp'), -$same_opp + SAMEOPP_TOTAL );
+      if( is_array($game_row) && (int)@$game_row['X_TotalCount'] > 0 )
+         $out .= ' (' . echo_started_games($game_row['X_TotalCount']) . ')';
+   }
+   elseif( $same_opp < 0 )
    {
       if ($same_opp == -1)
-         $out = T_('1 time#same_opp');
+         $out = T_('1 time (same offer)#same_opp');
       else //if ($same_opp < 0)
-         $out = sprintf( T_('%s times#same_opp'), -$same_opp );
+         $out = sprintf( T_('%s times (same offer)#same_opp'), -$same_opp );
       if( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
       {
          $join_fmt = ($game_row['JoinedCount'] > 1)
-            ? T_('joined %s games#same_opp') : T_('joined %s game#same_opp');
+            ? T_('joined %s games#same_opp')
+            : T_('joined %s game#same_opp');
          $out .= ' (' . sprintf( $join_fmt, $game_row['JoinedCount'] ) . ')';
       }
    }
@@ -1725,8 +1761,7 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
          $out = T_('after 1 day#same_opp');
       else //if ($same_opp > 0)
          $out = sprintf( T_('after %s days#same_opp'), $same_opp );
-      if( is_array($game_row) && isset($game_row['X_ExpireDate'])
-            && ($game_row['X_ExpireDate'] > $NOW) )
+      if( is_array($game_row) && isset($game_row['X_ExpireDate']) && ($game_row['X_ExpireDate'] > $NOW) )
       {
          $out .= ' (' . sprintf( T_('wait till %s#same_opp'),
             date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';

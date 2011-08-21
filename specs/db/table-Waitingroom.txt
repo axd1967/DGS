@@ -98,7 +98,8 @@ Important Note:
       - Conventional handicap: conv
       - Proper handicap: proper
       - Manual setting (color-setting): nigiri, double, black, white
-      - Fair komi: auko
+      - Fair komi: auko_sec, auko_opn, div_ykic, div_ikyc
+      - ?? [future]: pie_ymic, pie_imyc
 
    - conv = Conventional handicap
    - proper = Proper handicap
@@ -106,8 +107,14 @@ Important Note:
    - double = Double game
    - black = manual game-mode, game-offerer wants to play as Black
    - white = manual game-mode, game-offerer wants to play as White
-   - auko = Auction Komi, both players choose komi, higher bid gets Black
+   - auko_sec = Secret Auction Komi, both players choose komi, higher bid gets Black
      giving his bid of komi to White, use nigiri on equal bids
+
+   - [future] auko_opn = Open Auction Komi, like Secret but with open bidding
+   - [future] div_ykic = Divide & Choose "You choose Komi, I choose Color"
+   - [future] div_ikyc = Divide & Choose "I choose Komi, You choose Color"
+   - [future] pie_ymic = Pie Rule "You choose first Move, I choose Color"
+   - [future] pie_imyc = Pie Rule "I choose first Move, You choose Color"
 
 * AdjKomi : Komi adjustment and Jigo-mode
    - Calculated or fix komi is adjusted by value of 'AdjKomi' (+/- komi)
@@ -163,9 +170,11 @@ Important Note:
    - join-status is kept in table 'WaitingroomJoined'
    -  0 = no restriction if same opponent joins more than one game of same game-offer,
           table WaitingroomJoined is not used in this case
+   - < -100 = restrict same opponent for game-offer to max. number of total games,
+          so number of all started games with opponent must be < -N -100
    - <0 = restrict same opponent for game-offer to max. number of times to join,
           keeping track of joined number of games with 'WaitingroomJoined.JoinedCount'
-   - >0 = restrict same opponent for game-offer to min. time to pass for next join,
+   - >0 = restrict same opponent for game-offer to min. time [days] to pass for next join,
           keeping track of joined number of games with 'WaitingroomJoined.ExpiresDate'
 
 * ShapeSnapshot : extended snapshot of shape-game

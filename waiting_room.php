@@ -217,10 +217,17 @@ require_once( 'include/classlib_userconfig.php' );
       "$goodrating AS goodrating",
       "$sql_goodmingames AS goodmingames",
       "$sql_goodmaxgames AS goodmaxgames",
-      'IF(W.SameOpponent=0 OR ISNULL(WRJ.wroom_id), 1, '
-         . 'IF(W.SameOpponent<0, '
-            . '(WRJ.JoinedCount < -W.SameOpponent), '
-            . "(WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) )) AS goodsameopp"
+      "CASE WHEN (W.uid=$my_id OR W.SameOpponent=0 OR (W.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
+           "WHEN (W.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
+               "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=W.uid) + " .
+               " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=W.uid AND G2.White_ID=$my_id)) " .
+               "< -W.SameOpponent + ".SAMEOPP_TOTAL." ) " .
+           "WHEN (W.SameOpponent<0) THEN (WRJ.JoinedCount < -W.SameOpponent) " . // same-offer-times-check
+           "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
+           "END AS goodsameopp",
+      "IF(W.uid=$my_id OR W.SameOpponent > ".SAMEOPP_TOTAL.",0, " .
+           "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=W.uid) + " .
+           " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=W.uid AND G2.White_ID=$my_id)) ) AS X_TotalCount"
       );
    $qsql->add_part( SQLP_FROM,
       'Waitingroom AS W',
@@ -423,7 +430,7 @@ require_once( 'include/classlib_userconfig.php' );
                T_('Rating range (user rating must be between the requested rating range), e.g. "25k-2d"#wroom'),
                T_('Number of rated finished games, e.g. "RG[2]"#wroom'),
                T_('Max. number of opponents started games must not exceed limits, e.g. "MXG"#wroom'),
-               T_('Acceptance mode for challenges from same opponent, e.g. "SO[1x]" or "SO[&gt;7d]"#wroom'),
+               T_('Acceptance mode for challenges from same opponent, e.g. "SOT[1]" (total) or "SO[1x]" or "SO[&gt;7d]"#wroom'),
                sprintf( T_('Contact-option \'Hide waiting room games\', marked by "%s"'),
                         sprintf('[%s]', T_('Hidden#wroom')) ),
             );

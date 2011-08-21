@@ -347,6 +347,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          section('invite', T_('Game Invitation') );
          echo $maxGamesCheck->get_warn_text();
 
+         // load total started games
+         $msg_row['X_TotalCount'] = GameHelper::count_started_games( $my_id, $other_id );
+
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
