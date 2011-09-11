@@ -54,7 +54,7 @@ $ENTITY_GAMES = new Entity( 'Games',
                   'ClockUsed', 'TimeOutDate',
       FTYPE_FLOAT, 'Komi', 'Score', 'Black_Start_Rating', 'White_Start_Rating', 'Black_End_Rating',
                    'White_End_Rating',
-      FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot', 'ShapeSnapshot',
+      FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot', 'ShapeSnapshot', 'GameSetup',
       FTYPE_DATE, 'Starttime', 'Lastchanged',
       FTYPE_ENUM, 'Status', 'GameType', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
    );
@@ -107,6 +107,7 @@ class Games
    var $White_End_Rating;
    var $Snapshot;
    var $ShapeSnapshot;
+   var $GameSetup;
 
    /*! \brief Constructs Games-object with specified arguments. */
    function Games( $id=0, $tid=0, $shape_id=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
@@ -119,7 +120,7 @@ class Games
                    $white_byoperiods=0, $lastticks=0, $clockused=0, $timeoutdate=0, $rated='N',
                    $stdhandicap=true, $weekendclock=true, $black_start_rating=NO_RATING,
                    $white_start_rating=NO_RATING, $black_end_rating=NO_RATING,
-                   $white_end_rating=NO_RATING, $snapshot='', $shape_snapshot='' )
+                   $white_end_rating=NO_RATING, $snapshot='', $shape_snapshot='', $game_setup='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -167,6 +168,7 @@ class Games
       $this->White_End_Rating = (float)$white_end_rating;
       $this->Snapshot = $snapshot;
       $this->ShapeSnapshot = $shape_snapshot;
+      $this->GameSetup = $game_setup;
    }//constructor
 
    function setStatus( $status )
@@ -195,11 +197,6 @@ class Games
       if( !preg_match( "/^(Y|N|Done)$/", $rated ) )
          error('invalid_args', "Games.setRated($rated)");
       $this->Rated = $rated;
-   }
-
-   function is_status_running()
-   {
-      return isRunningGame($this->Status);
    }
 
    function to_string()
@@ -293,6 +290,7 @@ class Games
       $data->set_value( 'White_End_Rating', $this->White_End_Rating );
       $data->set_value( 'Snapshot', $this->Snapshot );
       $data->set_value( 'ShapeSnapshot', $this->ShapeSnapshot );
+      $data->set_value( 'GameSetup', $this->GameSetup );
       return $data;
    }//fillEntityData
 
@@ -388,7 +386,8 @@ class Games
             @$row['Black_End_Rating'],
             @$row['White_End_Rating'],
             @$row['Snapshot'],
-            @$row['ShapeSnapshot']
+            @$row['ShapeSnapshot'],
+            @$row['GameSetup']
          );
       return $g;
    }//new_from_row
@@ -420,6 +419,8 @@ class Games
       if( !isset($ARR_GLOBALS_GAMES[$key]) )
       {
          $arr = array();
+         $arr[GAME_STATUS_KOMI] = T_('Fair Komi Negotiation#G_status');
+         $arr[GAME_STATUS_SETUP] = T_('MPG-Setup#G_status');
          $arr[GAME_STATUS_INVITED] = T_('Invited#G_status');
          $arr[GAME_STATUS_PLAY] = T_('Play#G_status');
          $arr[GAME_STATUS_PASS] = T_('Pass#G_status');

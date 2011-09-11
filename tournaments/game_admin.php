@@ -202,7 +202,7 @@ define('GA_RES_TIMOUT', 3);
 
    // ADMIN: Add time ------------------
 
-   if( $authorise_add_time && $game->is_status_running() )
+   if( $authorise_add_time && isStartedGame($game->Status) )
       draw_add_time( $tgame, $game, $authorise_add_time );
 
 
@@ -214,7 +214,7 @@ define('GA_RES_TIMOUT', 3);
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // return [ vars-hash, edits-arr, errorlist ]
