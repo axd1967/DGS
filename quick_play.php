@@ -45,9 +45,8 @@ else
 
    $uhandle= safe_getcookie('handle');
    $result = @db_query( "quick_play.find_player($uhandle)",
-      'SELECT ID, Timezone, AdminOptions, ' .
-         'UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
-      "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+      'SELECT ID, Timezone, AdminOptions, UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
+      "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
    if( @mysql_num_rows($result) != 1 )
       error('not_logged_in', "quick_play.find_player2($uhandle)");
 
@@ -101,7 +100,7 @@ else
    if( $my_id != $ToMove_ID )
       error('not_your_turn', "quick_play.check_tomove2($gid,$ToMove_ID)");
 
-   if( $Status != GAME_STATUS_PLAY //exclude SCORE,PASS steps and SETUP,INVITED,FINISHED
+   if( $Status != GAME_STATUS_PLAY //exclude SCORE,PASS steps and KOMI,SETUP,INVITED,FINISHED
          || !number2sgf_coords( $Last_X, $Last_Y, $Size) //exclude first move and previous moves like pass,resume...
          || ($Handicap>1 && $Moves<=$Handicap) ) //exclude first white move after handicap stones
    {
@@ -141,56 +140,14 @@ else
    $action = 'domove'; //$action = always 'domove'
 
    $next_to_move = WHITE+BLACK-$to_move;
-
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
-
-// Update clock
-
-   if( $Maintime > 0 || $Byotime > 0)
-   {
-      // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
-
-      if( $to_move == BLACK )
-      {
-         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
-            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
-         $time_query = "Black_Maintime=$Black_Maintime, " .
-             "Black_Byotime=$Black_Byotime, " .
-             "Black_Byoperiods=$Black_Byoperiods, ";
-      }
-      else
-      {
-         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
-            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
-         $time_query = "White_Maintime=$White_Maintime, " .
-             "White_Byotime=$White_Byotime, " .
-             "White_Byoperiods=$White_Byoperiods, ";
-      }
-
-      if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
-         $next_clockused = VACATION_CLOCK;
-      else
-      {
-         $next_clockused = ( $next_to_move == BLACK ? $Blackclock : $Whiteclock );
-         if( $WeekendClock != 'Y' )
-            $next_clockused += WEEKEND_CLOCK_OFFSET;
-      }
-
-      $time_query .= "LastTicks=" . get_clock_ticks($next_clockused) . ", " .
-          "ClockUsed=$next_clockused, ";
-   }
-   else
-   {
-      $hours = 0;
-      $time_query = '';
-   }
-
-   $no_marked_dead = true; //( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'move' );
+   // update clock
+   list( $hours, $upd_clock ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
+   $time_query = $upd_clock->get_query(false, true);
 
    $TheBoard = new Board( );
-   if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
+   if( !$TheBoard->load_from_db($game_row) )
       error('internal_error', "quick_play.load_from_db($gid)");
 
    //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
@@ -274,7 +231,7 @@ This is why:
           "Last_X=$colnr, " . //used with mail notifications
           "Last_Y=$rownr, " .
           "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
-          "Status='PLAY', ";
+          "Status='".GAME_STATUS_PLAY."', ";
 
       if( $nr_prisoners > 0 )
       {
