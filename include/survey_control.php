@@ -134,7 +134,6 @@ class SurveyControl
    function is_survey_admin()
    {
       global $player_row;
-      //TODO return false; //for testing
       return (@$player_row['admin_level'] & (ADMIN_SURVEY|ADMIN_DEVELOPER));
    }
 
