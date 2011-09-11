@@ -28,63 +28,27 @@ require_once( "include/rating.php" );
 require_once( 'include/classlib_game.php' );
 
 
-
-function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
-{
-   global $player_row;
-
-   $order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'Games', false ); // enum -> order
-   $qsql = new QuerySQL(
-         SQLP_FIELDS, 'ID',
-         SQLP_FROM,   'Games',
-         SQLP_WHERE,  "ToMove_ID=$uid", 'Status '.IS_RUNNING_GAME,
-         SQLP_ORDER,  $order,
-         SQLP_LIMIT,  1
-      );
-
-   // restrictions must be oriented on next-game-order-string to keep order
-   // like for status-games on status-page
-   $def_where_nextgame =
-      "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
-   switch( (string)$player_row['NextGameOrder'] )
-   {
-      case NGO_MOVES:
-         $qsql->add_part( SQLP_WHERE,
-            "( Moves < $Moves OR (Moves=$Moves AND $def_where_nextgame ))" );
-         break;
-      case NGO_PRIO:
-         $prio = NextGameOrder::load_game_priority( $gid, $uid );
-         $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
-         $qsql->add_part( SQLP_FROM,
-            "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
-         $qsql->add_part( SQLP_WHERE,
-            "( COALESCE(GP.Priority,0) < $prio OR "
-               . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
-         break;
-      case NGO_TIMELEFT:
-         $qsql->add_part( SQLP_WHERE,
-            "( TimeOutDate > $TimeOutDate OR (TimeOutDate=$TimeOutDate AND $def_where_nextgame ))" );
-         break;
-      default: //case NGO_LASTMOVED
-         $qsql->add_part( SQLP_WHERE, $def_where_nextgame );
-         break;
-   }
-
-   $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );
-   if( !$row )
-      jump_to("status.php");
-
-   jump_to("game.php?gid=" . $row['ID']);
-}//jump_to_next_game
-
-
-
 {
    disable_cache();
 
    $gid = (int)@$_REQUEST['gid'] ;
    if( $gid <= 0 )
       error('unknown_game');
+
+/* Actual REQUEST calls used:  g=gid (mandatory), a=action, m=move, s=stonestring, c=coord
+     cancel             : cancel previous operation (validation-step), show game-page
+     nextskip           : jump to next-game in line
+
+     nextaddtime&add_days=&reset_byoyomi=    : adds time (after submit on game-page)
+     komi_save&komibid=                      : save komi-bid on fair-komi-negotiation
+
+     a=delete           : execute deletion of game
+     a=domove&c=&s=     : execute move
+     a=done&s=          : execute final scoring of game
+     a=handicap&s=      : save placed free handicap-stones
+     a=pass             : execute pass-move
+     a=resign           : execute resignation of game
+*/
 
    if( @$_REQUEST['cancel'] )
       jump_to("game.php?gid=$gid");
@@ -136,12 +100,10 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
    $is_mpgame = ( $GameType != GAMETYPE_GO );
 
-   $is_running_game = isRunningGame($Status);
-
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 )
-      && ($GameType == GAMETYPE_GO);
+   $may_del_game = $my_game && $too_few_moves && isStartedGame($Status) && ( $tid == 0 ) && ($GameType == GAMETYPE_GO);
 
+   $is_running_game = isRunningGame($Status);
    $may_resign_game = $my_game && $is_running_game;
    if( $action == 'resign' )
    {
@@ -151,9 +113,16 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
       if( $my_id != $ToMove_ID )
          $to_move = WHITE+BLACK-$to_move;
    }
+   $next_to_move = WHITE+BLACK-$to_move;
+   $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
    if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
+
+   if( @$_REQUEST['komi_save'] )
+      do_komi_save( $game_row );
+   elseif( $Status == GAME_STATUS_KOMI )
+      error('invalid_action', "confirm.check.status.fairkomi($gid,$action)");
 
 
    //See *** HOT_SECTION *** below
@@ -163,57 +132,10 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    if( $qry_move != $Moves )
       error('already_played', "confirm.check.move($gid,$qry_move,$Moves)");
 
-   $next_to_move = WHITE+BLACK-$to_move;
-   $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
-
-// Update clock
-
-   if( $Maintime > 0 || $Byotime > 0)
-   {
-      // LastTicks may handle -(time spend) at the moment of the start of vacations
-      // time since start of move in the reference of the ClockUsed by the game
-      $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
-
-      if( $to_move == BLACK )
-      {
-         time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
-            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
-         $time_query = "Black_Maintime=$Black_Maintime, " .
-             "Black_Byotime=$Black_Byotime, " .
-             "Black_Byoperiods=$Black_Byoperiods, ";
-      }
-      else
-      {
-         time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
-            $Maintime, $Byotype, $Byotime, $Byoperiods, true);
-         $time_query = "White_Maintime=$White_Maintime, " .
-             "White_Byotime=$White_Byotime, " .
-             "White_Byoperiods=$White_Byoperiods, ";
-      }
-
-      if( ($next_to_move == BLACK ? $Blackonvacation : $Whiteonvacation) > 0 )
-         $next_clockused = VACATION_CLOCK; //and LastTicks=0, see below
-      else
-      {
-         $next_clockused = ( $next_to_move == BLACK ? $X_BlackClock : $X_WhiteClock );
-         if( $WeekendClock != 'Y' )
-            $next_clockused += WEEKEND_CLOCK_OFFSET;
-      }
-
-      $next_lastticks = get_clock_ticks($next_clockused);
-
-      $timeout_date = NextGameOrder::make_timeout_date( $game_row, $next_to_move, $next_lastticks );
-
-      $time_query .= "LastTicks=$next_lastticks, "
-         . "ClockUsed=$next_clockused, "
-         . "TimeOutDate=$timeout_date, ";
-   }
-   else
-   {
-      $hours = 0;
-      $time_query = '';
-   }
+   // update clock
+   list( $hours, $upd_clock ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
+   $time_query = $upd_clock->get_query(false, true);
 
    $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'domove' );
 
@@ -309,7 +231,7 @@ This is why:
              "Last_X=$colnr, " . //used with mail notifications
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
-             "Status='PLAY', ";
+             "Status='".GAME_STATUS_PLAY."', ";
 
          if( $nr_prisoners > 0 )
          {
@@ -415,14 +337,11 @@ This is why:
          if( $message )
             $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         if( $to_move == BLACK )
-            $score = SCORE_RESIGN;
-         else
-            $score = -SCORE_RESIGN;
+         $score = ( $to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
 
          $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_RESIGN.", " .
-             "Status='FINISHED', " .
+             "Status='".GAME_STATUS_FINISHED."', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
              "Flags=$GameFlags, " .
@@ -558,7 +477,9 @@ This is why:
       jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
 
    jump_to("game.php?gid=$gid");
-}
+}//main
+
+
 
 function do_add_time( $game_row, $my_id)
 {
@@ -578,6 +499,94 @@ function do_add_time( $game_row, $my_id)
    jump_to("game.php?gid=$gid"
       . ($add_hours != 0 ? URI_AMP."sysmsg=" . urlencode(T_('Time added!')) : '')
       . '#boardInfos');
-}
+}//do_add_time
+
+function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
+{
+   global $player_row;
+
+   $order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'Games', false ); // enum -> order
+   $qsql = new QuerySQL(
+         SQLP_FIELDS, 'ID',
+         SQLP_FROM,   'Games',
+         SQLP_WHERE,  "ToMove_ID=$uid", 'Status '.IS_STARTED_GAME,
+         SQLP_ORDER,  $order,
+         SQLP_LIMIT,  1
+      );
+
+   // restrictions must be oriented on next-game-order-string to keep order
+   // like for status-games on status-page
+   $def_where_nextgame =
+      "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
+   switch( (string)$player_row['NextGameOrder'] )
+   {
+      case NGO_MOVES:
+         $qsql->add_part( SQLP_WHERE,
+            "( Moves < $Moves OR (Moves=$Moves AND $def_where_nextgame ))" );
+         break;
+      case NGO_PRIO:
+         $prio = NextGameOrder::load_game_priority( $gid, $uid );
+         $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
+         $qsql->add_part( SQLP_FROM,
+            "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
+         $qsql->add_part( SQLP_WHERE,
+            "( COALESCE(GP.Priority,0) < $prio OR "
+               . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
+         break;
+      case NGO_TIMELEFT:
+         $qsql->add_part( SQLP_WHERE,
+            "( TimeOutDate > $TimeOutDate OR (TimeOutDate=$TimeOutDate AND $def_where_nextgame ))" );
+         break;
+      default: //case NGO_LASTMOVED
+         $qsql->add_part( SQLP_WHERE, $def_where_nextgame );
+         break;
+   }
+
+   $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );
+   if( !$row )
+      jump_to("status.php");
+
+   jump_to("game.php?gid=" . $row['ID']);
+}//jump_to_next_game
+
+
+function do_komi_save( $game_row )
+{
+   $gid = $game_row['ID'];
+   $game_setup = GameSetup::new_from_game_setup($game_row['GameSetup']);
+
+   $req_komibid = @$_REQUEST['komibid'];
+   $errors = FairKomiNegotiation::check_komibid($game_setup, $req_komibid);
+   if( count($errors) )
+      jump_to("game.php?gid=$gid".URI_AMP."komibid=".urlencode($req_komibid));
+
+   // checks
+   $Status = $game_row['Status'];
+   $is_fairkomi = $game_setup->is_fairkomi();
+   if( $Status == GAME_STATUS_KOMI && !$is_fairkomi )
+      error('internal_error', "confirm.check.status.no_fairkomi($gid,$Status,{$game_setup->Handicaptype})");
+   if( $is_fairkomi && $Status != GAME_STATUS_KOMI )
+      error('internal_error', "confirm.check.fairkomi.bad_status($gid,$Status,{$game_setup->Handicaptype})");
+
+   // process komi-save
+   $fk = new FairKomiNegotiation($game_setup, $game_row);
+
+   ta_begin();
+   {//HOT-section to process komi-bid-saving (and starting-game)
+      $fk_result = $fk->save_komi( $game_row, $req_komibid );
+   }
+   ta_end();
+
+   if( $fk_result == 0 )
+      $sysmsg = T_('Komi-Bid saved successfully!#fairkomi');
+   elseif( $fk_result == 1 )
+      $sysmsg = T_('Komi-Bid saved successfully, komi & color determined and game started!#fairkomi');
+   else
+      $sysmsg = '';
+   if( $sysmsg )
+      $sysmsg = 'sysmsg='.urlencode($sysmsg);
+
+   jump_to("game.php?gid=$gid".URI_AMP.$sysmsg);
+}//do_komi_save
 
 ?>
