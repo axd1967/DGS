@@ -257,7 +257,9 @@ class QuickHandlerGame extends QuickHandler
       $next_to_move = WHITE + BLACK - $this->to_move;
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
 
-      list( $time_query, $hours ) = $this->update_clock();
+      // update clock
+      list( $hours, $upd_clock ) = GameHelper::update_clock( $this->game_row, $this->to_move, $next_to_move );
+      $time_query = $upd_clock->get_query(false, true);
 
       $mp_query = '';
       $is_mpgame = ($GameType != GAMETYPE_GO);
@@ -570,62 +572,6 @@ class QuickHandlerGame extends QuickHandler
          $arr_double[$coord] = 1;
       }
    }//prepareMoves
-
-   // returns ( $time_query, $hours )
-   function update_clock()
-   {
-      extract($this->game_row);
-
-      if( $Maintime > 0 || $Byotime > 0)
-      {
-         // LastTicks may handle -(time spend) at the moment of the start of vacations
-         // time since start of move in the reference of the ClockUsed by the game
-         $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
-
-         if( $this->to_move == BLACK )
-         {
-            time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
-               $Maintime, $Byotype, $Byotime, $Byoperiods, true);
-            $time_query = "Black_Maintime=$Black_Maintime, " .
-                "Black_Byotime=$Black_Byotime, " .
-                "Black_Byoperiods=$Black_Byoperiods, ";
-         }
-         else
-         {
-            time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
-               $Maintime, $Byotype, $Byotime, $Byoperiods, true);
-            $time_query = "White_Maintime=$White_Maintime, " .
-                "White_Byotime=$White_Byotime, " .
-                "White_Byoperiods=$White_Byoperiods, ";
-         }
-
-         if( ($this->to_move == WHITE ? $Blackonvacation : $Whiteonvacation) > 0 )
-         {
-            $next_clockused = VACATION_CLOCK; //and LastTicks=0, see below
-         }
-         else
-         {
-            $next_clockused = ( $next_to_move == BLACK ) ? $X_BlackClock : $X_WhiteClock;
-            if( $WeekendClock != 'Y' )
-               $next_clockused += WEEKEND_CLOCK_OFFSET;
-         }
-
-         $next_lastticks = get_clock_ticks($next_clockused);
-
-         $timeout_date = NextGameOrder::make_timeout_date( $this->game_row, $next_to_move, $next_lastticks );
-
-         $time_query .= "LastTicks=$next_lastticks, "
-            . "ClockUsed=$next_clockused, "
-            . "TimeOutDate=$timeout_date, ";
-      }
-      else
-      {
-         $hours = 0;
-         $time_query = '';
-      }
-
-      return array( $time_query, $hours );
-   }//update_clock
 
 } // end of 'QuickHandlerGame'
 
