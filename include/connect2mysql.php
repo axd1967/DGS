@@ -395,4 +395,70 @@ function build_query_in_clause( $field, $arr, $is_string=true )
    return $clause;
 }
 
+
+ /*!
+  * \class UpdateQuery
+  *
+  * \brief Class to build SQL-statement to update db-table.
+  */
+class UpdateQuery
+{
+   var $table; // only info, checked on merging
+   var $updates; // [ upd-part, ... ]
+
+   function UpdateQuery( $table )
+   {
+      $this->table = $table;
+      $this->updates = array();
+   }
+
+   function has_updates()
+   {
+      return count($this->updates);
+   }
+
+   function upd_txt( $field, $value )
+   {
+      $this->updates[] = sprintf( "%s='%s'", $field, mysql_addslashes($value) );
+   }
+
+   function upd_num( $field, $value )
+   {
+      $this->updates[] = "$field=$value";
+   }
+
+   /*! \brief For now same as upd_num, but RAW means, just put value as-is into SQL-query. */
+   function upd_raw( $field, $value )
+   {
+      $this->updates[] = "$field=$value";
+   }
+
+   function upd_time( $field, $value=null )
+   {
+      if( is_null($value) )
+         $value = $GLOBALS['NOW'];
+      $this->updates[] = "$field=FROM_UNIXTIME($value)";
+   }
+
+   function upd_bool( $field, $value )
+   {
+      $this->updates[] = sprintf( "%s='%s'", $field, ($value ? 'Y' : 'N') );
+   }
+
+   function merge( $upd_query )
+   {
+      if( $this->table !== $upd_query->table )
+         error('internal_error', "UpdateQuery.merge.conflict({$this->table},{$upd_query->table})");
+      foreach( $upd_query->updates as $update )
+         $this->updates[] = $update;
+   }
+
+   /*! \brief Returns SQL-part to INSERT or UPDATE fields of this UpdateQuery-instance. */
+   function get_query( $sep_start=false, $sep_end=false )
+   {
+      return ($sep_start ? ',' : '') . implode(', ', $this->updates) . ($sep_end ? ',' : '');
+   }
+
+} // end of 'UpdateQuery'
+
 ?>
