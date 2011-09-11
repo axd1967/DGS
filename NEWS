@@ -3,7 +3,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2011-???-??] - DGS 1.0.15  (Tournaments, Multi-Player game, Shape game, Game settings, Users, Forum, Voting)
+#release DGS_1_0_15 [2011-???-??] - DGS 1.0.15  (Tournaments, Game types & settings, Users, Forum, Voting)
 
    New features and Major changes:
 
@@ -169,11 +169,12 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Full remaining time including extra-time
          * Clock status (stopped/running) with reason why
       * Show tournament info for tournament-game
+      * Show fair-komi info with komi-bids, player's turn
 
    * Game settings:
       * General:
          * Changed default for Standard Handicap Placement to: ON
-         * Changed default for Time settings to: Fischer time with 30d + 1d
+         * Changed default for Time settings to: Fischer time with 14d + 1d
          * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
            Now stronger player gets White color and only make Nigiri if both players have same rating
 
@@ -188,26 +189,32 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * Enhanced notify about joined waiting-room game with list of started game(s)
 
       * <home new_game.php>New Game</home>:
-         * Added simple, expert and multi-player view-mode for different game-settings
+         * Added simple, expert, fair-komi and multi-player view-mode for different game-settings:
             * <home new_game.php?view=0>Simple view</home>: rudimentary game-settings
             * <home new_game.php?view=1>Expert view</home>: advanced game-settings like adjust-handicap/komi & more restrictions for waiting-room
+            * <home new_game.php?view=3>Fair-Komi view</home>: game-settings to start game with fair-komi-negotiation
             * <home new_game.php?view=2>Multi-player view</home>: game-settings to start multi-player-game of game-type Team-Go & Zen-Go
 
-         * Added Fair komi option "Auction-Komi" in <home new_game.php?view=1>Expert view</home>:
-            * Opponent needs to enter komi-bid for joining game in waiting-room or for game-invitation/dispute
-            * Higher bidder gets Black, or Nigiri on equal bids
+         * Added Fair-Komi options in <home new_game.php?view=3>Fair-Komi view</home>:
+            * added Auction-Komi with secret komi-bidding:
+               * game is started after both players gave one komi-bid
+               * higher bidder gets Black, or Nigiri on equal bids
             * Not supported for multi-player-games or tournaments
+
          * Added Ruleset option for Japanese rules (default) and Chinese rules
          * Added adjustment and min/max-limitation of handicap stones
          * Added adjustment of komi by value and jigo mode (allow or reject Jigo)
          * Added (optional) minimum number of rated finished games
          * Added MANUAL-game with fix color WHITE and BLACK in waitingroom,
            Moved 'Even game with Nigiri' and 'Double game' into MANUAL-game option
-         * Added optional waiting-room restriction per game-offer to avoid same opponent joining too many games:
-           Challenger has to wait some days or can be restricted by number of games
+         * Added optional waiting-room restriction to avoid same opponent joining too many games:
+           Challenger has to wait some days, can be restricted by number of games per game-offer,
+           or restricted on total number of started games with same opponent
 
       * <home message.php?mode=Invite>Invitation</home>:
+         * Show number of already started games with opponent on receiving invitation & dispute
          * Show probable color / handicap / komi for conventional & proper handicap-type on Preview
+         * Show differences in disputed game-settings between players
          * Reduced size of message text boxes for invitations
 
    * <home show_games.php>Games lists</home>:
@@ -225,6 +232,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * icon linked to shape-info for shape-game (<image shape.gif>)
          * icon linked to Tournament-games (<image tourney.gif>)
       * Added searchable column with indicator if there are hidden game comments for my finished games
+      * Show fair-komi info on game-type for all game-lists (games-list, status, RSS/WAP/Quick-status)
       * Show Weekendclock for all view-modes
 
    * <home userinfo.php>User info</home>:
@@ -734,7 +742,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
          * ENABLE_DONATIONS                  - disabled
 ##       * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
-      * Added restriction on max. running games per player and for tournament-registration
+      * Added restriction on max. running games per player (200) and for tournament-registration (150)
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
@@ -894,6 +902,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
    * fixed problems downloading SGF for some browsers (namely PDA devices):
      (replaced header 'Content-Disposition' from 'inline' to 'attachment',
      so download now always open dialog)
+   * fixed user-id handling for SGF-download & login to behave case-INsensitive
    * fixed hover option with move numbering: don't display numbers on stones
    * fixed display of japanese byoyomi when byoyomi reached
    * fixed tag &lt;user =userid&gt;
