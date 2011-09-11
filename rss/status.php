@@ -315,7 +315,7 @@ else
       $uhandle = arg_stripslashes((string)@$_SERVER['PHP_AUTH_USER']);
       $passwd = arg_stripslashes((string)@$_SERVER['PHP_AUTH_PW']);
       $authid = get_request_arg('authid');
-      if( $authid && $authid !== $uhandle )
+      if( $authid && strcasecmp($authid,$uhandle) != 0 )
       {
          $uhandle = $authid;
          $passwd = '';
@@ -342,7 +342,7 @@ else
 
       $result = @db_query( "rss_status.find_user.password($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -365,7 +365,7 @@ else
 
       $result = @db_query( "rss_status.find_user.login($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -478,12 +478,12 @@ else
    // Games to play?
    $sql_order = NextGameOrder::get_next_game_order( @$player_row['NextGameOrder'], 'Games' ); // enum -> order
 
-   $query = "SELECT UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
+   $query = "SELECT Games.Status, UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
        "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
        "Games.GameType, Games.GamePlayers, " .
        "opponent.Name, opponent.Handle " .
        "FROM (Games,Players AS opponent) " .
-       "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
+       "WHERE ToMove_ID=$my_id AND Status" . IS_STARTED_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        $sql_order;
 
@@ -498,7 +498,10 @@ else
 
       $gid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
+      $game_status = @$row['Status'];
       $game_type = GameTexts::format_game_type($row['GameType'], $row['GamePlayers']);
+      if( $game_status == GAME_STATUS_KOMI )
+          $game_type .= GameTexts::build_fairkomi_gametype($game_status, /*raw*/true);
 
       $tit= sprintf( T_('Game of %s with %s#rss'), $game_type, $opponame );
       $lnk= HOSTBASE.'game.php?gid='.$gid;
