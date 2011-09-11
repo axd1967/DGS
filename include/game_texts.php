@@ -44,6 +44,21 @@ class GameTexts
       return is_null($game_type) ? $ARR_GAME_TYPES : @$ARR_GAME_TYPES[$game_type];
    }//get_game_type
 
+   function get_manual_handicap_types( $htype=null )
+   {
+      static $ARR_GAME_MAN_HTYPES = null;
+      if( is_null($ARR_GAME_MAN_HTYPES) )
+      {
+         $ARR_GAME_MAN_HTYPES = array(
+            HTYPE_NIGIRI => T_('Nigiri#htman'),
+            HTYPE_DOUBLE => T_('Double#htman'),
+            HTYPE_BLACK  => T_('Black#htman'),
+            HTYPE_WHITE  => T_('White#htman'),
+         );
+      }
+      return is_null($htype) ? $ARR_GAME_MAN_HTYPES : @$ARR_GAME_MAN_HTYPES[$htype];
+   }//get_manual_handicap_types
+
    function format_game_type( $game_type, $game_players, $quick=false )
    {
       if( $game_type == GAMETYPE_GO )
@@ -54,6 +69,57 @@ class GameTexts
             : sprintf( '%s (%s)', GameTexts::get_game_type($game_type), $game_players );
    }//format_game_type
 
-} //end 'GameText'
+   function build_fairkomi_gametype( $game_status, $rss=false )
+   {
+      if( $game_status != GAME_STATUS_KOMI )
+         return '';
+      elseif( $rss )
+         return ' (' . T_('Fair Komi Negotiation#fairkomi') . ')';
+      else
+         return MINI_SPACING . span('GameTypeFairKomi', '(' . T_('Fair Komi#fairkomi') . ')');
+   }
+
+   function get_fair_komi_types( $handicap_type=null )
+   {
+      $arr = array(
+            HTYPE_AUCTION_SECRET => T_('Secret Auction Komi#fairkomi'),
+            //HTYPE_OPEN_AUCTION   => T_('Open Auction Komi#fairkomi'), //TODO
+            //HTYPE_YOU_KOMI_I_COLOR => T_('You choose Komi, I choose Color#fairkomi'), //TODO
+            //HTYPE_I_KOMI_YOU_COLOR => T_('I choose Komi, You choose Color#fairkomi'), //TODO
+         );
+
+      if( is_null($handicap_type) )
+         return $arr;
+      else
+         return (isset($arr[$handicap_type])) ? $arr[$handicap_type] : '';
+   }//get_fair_komi_types
+
+   function get_fair_komi_color_note( $handicap_type )
+   {
+      $arr = array(
+            HTYPE_AUCTION_SECRET => T_('Color determined by higher secret bid on komi#fk_color'),
+            //HTYPE_OPEN_AUCTION   => T_('Color determined by higher open bid on komi#fk_color'), //TODO
+            //HTYPE_YOU_KOMI_I_COLOR => T_('One player chooses Komi, Opponent chooses Color#fk_color'), //TODO
+            //HTYPE_I_KOMI_YOU_COLOR => T_('One player chooses Komi, Opponent chooses Color#fk_color'), //TODO
+         );
+      return (isset($arr[$handicap_type])) ? $arr[$handicap_type] : '';
+   }//get_fair_komi_color_note
+
+   function get_jigo_modes( $fair_komi=false, $jigo_mode=null )
+   {
+      $arr = array(
+         JIGOMODE_KEEP_KOMI  => ($fair_komi)
+            ? T_('No Jigo restriction#jigo_mode_fairkomi')
+            : T_('Komi unchanged#jigo_mode'),
+         JIGOMODE_ALLOW_JIGO => T_('Enforce Jigo#jigo_mode'),
+         JIGOMODE_NO_JIGO    => T_('Forbid Jigo#jigo_mode'),
+      );
+      if( is_null($jigo_mode) )
+         return $arr;
+      else
+         return (isset($arr[$jigo_mode])) ? $arr[$jigo_mode] : '';
+   }//get_jigo_modes
+
+} //end 'GameTexts'
 
 ?>

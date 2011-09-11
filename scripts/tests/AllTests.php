@@ -29,6 +29,7 @@ require_once 'GameAddTimeTest.php';
 require_once 'Game_SettingsHelperTest.php';
 require_once 'EntityTest.php';
 require_once 'EntityDataTest.php';
+require_once 'Game_SetupTest.php';
 
 /*!
  * \class AllTests
@@ -53,6 +54,7 @@ class AllTests
       $suite->addTestSuite('Game_SettingsHelperTest');
       $suite->addTestSuite('EntityTest');
       $suite->addTestSuite('EntityDataTest');
+      $suite->addTestSuite('Game_SetupTest');
 
       return $suite;
    }

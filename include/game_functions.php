@@ -25,6 +25,7 @@ require_once 'include/classlib_game.php';
 require_once 'include/utilities.php';
 require_once 'include/std_functions.php';
 require_once 'include/game_texts.php';
+require_once 'include/error_codes.php';
 require_once 'tournaments/include/tournament_games.php';
 
 
@@ -72,31 +73,95 @@ define('JIGOMODE_ALLOW_JIGO', 'ALLOW_JIGO');
 define('JIGOMODE_NO_JIGO',    'NO_JIGO');
 define('CHECK_JIGOMODE', 'KEEP_KOMI|ALLOW_JIGO|NO_JIGO');
 
-// see Waitingroom.Handicaptype in specs/db/table-Waitingroom.txt
+define('SAMEOPP_TOTAL', -100); // base-value for total-game Waitingroom.SameOpponent-check
+
+// handicap-types, see Waitingroom.Handicaptype in specs/db/table-Waitingroom.txt
 define('HTYPE_CONV',    'conv'); // conventional handicap
 define('HTYPE_PROPER',  'proper'); // proper handicap
 define('HTYPE_NIGIRI',  'nigiri'); // manual, color nigiri
 define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
-define('HTYPE_AUCTION_KOMI', 'auko'); // auction komi (fair komi)
+define('HTYPE_AUCTION_SECRET', 'auko_sec'); // fair-komi: secret auction komi
+//define('HTYPE_AUCTION_OPEN', 'auko_opn'); // fair-komi: open auction komi
+//define('HTYPE_YOU_KOMI_I_COLOR', 'div_ykic'); // fair-komi: You cut (choose komi), I choose (color)
+//define('HTYPE_I_KOMI_YOU_COLOR', 'div_ikyc'); // fair-komi: I cut (choose komi), You choose (color)
 define('HTYPEMP_MANUAL', 'manual'); // manual, only used for multi-player-game in waiting-room
+define('CHECK_HTYPES_FAIRKOMI', 'auko_sec|auko_opn|div_ykic|div_ikyc');
 
+// handicap-types for invitations, stored in Games.ToMove_ID, must be <0
+define('INVITE_HANDI_CONV',   -1);
+define('INVITE_HANDI_PROPER', -2);
+define('INVITE_HANDI_NIGIRI', -3);
+define('INVITE_HANDI_DOUBLE', -4);
+define('INVITE_HANDI_FIXCOL', -5);
+define('INVITE_HANDI_AUCTION_SECRET', -6);
+
+// handicap-type categories
 define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
 define('CAT_HTYPE_PROPER', HTYPE_PROPER); // proper handicap-type
 define('CAT_HTYPE_MANUAL', 'manual'); // manual game setting
-define('CAT_HTYPE_AUCTION_KOMI', HTYPE_AUCTION_KOMI); // auction-komi handicap-type
-
-define('INIT_KOMI_BID', max(999, 2*MAX_KOMI_RANGE+1));
-
-// SQL-clause-part applied for Games.Status to select all running games.
-define('IS_STARTED_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')"); //used for SameOpponent-check
-define('SAMEOPP_TOTAL', -100);
+define('CAT_HTYPE_FAIR_KOMI', 'fairkomi'); // fair-komi setting
 
 // lazy-init in Tournament::get..Text()-funcs
 global $ARR_GLOBALS_GAME; //PHP5
 $ARR_GLOBALS_GAME = array();
 
+define('GS_SEP', ':'); // separator for game-setup
+define('GS_SEP_INVITATION', ' '); // separator for invitational game-setup
+
+global $MAP_GAME_SETUP; //PHP5;
+$MAP_GAME_SETUP = array(
+   // map Handicap-types -> encoded GameSetup-handi-type
+   HTYPE_CONV     => 'T1',
+   HTYPE_PROPER   => 'T2',
+   HTYPE_NIGIRI   => 'T3',
+   HTYPE_DOUBLE   => 'T4',
+   HTYPE_BLACK    => 'T5',
+   HTYPE_WHITE    => 'T6',
+   HTYPE_AUCTION_SECRET    => 'T7',
+   //HTYPE_AUCTION_OPEN      => 'T8',
+   //HTYPE_YOU_KOMI_I_COLOR  => 'T9',
+   //HTYPE_I_KOMI_YOU_COLOR  => 'T10',
+
+   // map GameSetup-handi-type -> Handicap-types
+   'T1'  => HTYPE_CONV,
+   'T2'  => HTYPE_PROPER,
+   'T3'  => HTYPE_NIGIRI,
+   'T4'  => HTYPE_DOUBLE,
+   'T5'  => HTYPE_BLACK,
+   'T6'  => HTYPE_WHITE,
+   'T7'  => HTYPE_AUCTION_SECRET,
+   //'T8'  => HTYPE_AUCTION_OPEN,
+   //'T9'  => HTYPE_YOU_KOMI_I_COLOR,
+   //'T10' => HTYPE_I_KOMI_YOU_COLOR,
+
+   // map JigoMode -> encoded GameSetup-jigo-mode
+   JIGOMODE_KEEP_KOMI   => 'J0',
+   JIGOMODE_ALLOW_JIGO  => 'J1',
+   JIGOMODE_NO_JIGO     => 'J2',
+
+   // map GameSetup-jigo-mode -> JigoMode
+   'J0' => JIGOMODE_KEEP_KOMI,
+   'J1' => JIGOMODE_ALLOW_JIGO,
+   'J2' => JIGOMODE_NO_JIGO,
+
+   // map Ruleset -> encoded GameSetup-ruleset
+   RULESET_JAPANESE => 'r1',
+   RULESET_CHINESE  => 'r2',
+
+   'r1' => RULESET_JAPANESE,
+   'r2' => RULESET_CHINESE,
+
+   // map Byotype -> encoded GameSetup-byotype
+   BYOTYPE_JAPANESE => 'tJ',
+   BYOTYPE_CANADIAN => 'tC',
+   BYOTYPE_FISCHER => 'tF',
+
+   'tJ' => BYOTYPE_JAPANESE,
+   'tC' => BYOTYPE_CANADIAN,
+   'tF' => BYOTYPE_FISCHER,
+);//MAP_GAME_SETUP
 
 
 /**
@@ -150,7 +215,7 @@ class GameAddTime
       {
          $gid = $this->game_row;
          $this->game_row = mysql_single_fetch( 'add_time_opponent',
-            "SELECT Games.* from Games WHERE ID=$gid");
+            "SELECT G.* from Games AS G WHERE G.ID=$gid");
          if( !$this->game_row )
             error('unknown_game',"add_time_opponent($gid)");
       }
@@ -259,7 +324,7 @@ class GameAddTime
          $arr_days[$i] = $i . ' ' . (($i>1) ? T_('days') : T_('day'));
 
       return array( 'days' => $arr_days, 'byo_reset' => $allow_reset );
-   }
+   }//make_add_time_info
 
    /*!
     * \brief returns true, if user (uid) (or TD) is allowed to add additional
@@ -269,7 +334,7 @@ class GameAddTime
     */
    function allow_add_time_opponent( $game_row, $uid, $is_tdir=false )
    {
-      // must be a running-game
+      // must be a running-game (not allowed for fair-komi)
       if( !isRunningGame($game_row['Status']) )
          return false;
 
@@ -292,7 +357,7 @@ class GameAddTime
          return false;
 
       return true;
-   }
+   }//allow_add_time_opponent
 
    /*!
     * \brief Adds time to given player updating game-row and save into database.
@@ -923,7 +988,7 @@ class GameHelper
 {
 
    /*!
-    * \brief Deletes non-tourney game and all related tables for given game-id.
+    * \brief Deletes non-tourney game and all related tables for given game-id, if not finished yet.
     * \param $upd_players if true, also decrease Players.Running
     * \param $grow game-row can be provided to save additional query
     * \return true on success, false on invalid args or invalid game to delete (finished, tourney)
@@ -938,7 +1003,7 @@ class GameHelper
             "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
       if( !$grow || (int)@$grow['tid'] > 0 )
          return false;
-      elseif( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game
+      elseif( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game, allow for setup/fair-komi
       {
          error('invalid_args', "GameHelper::delete_running_game.check.status($gid,{$grow['Status']})");
          return false; // if passing through on error()
@@ -1057,7 +1122,7 @@ class GameHelper
    function delete_invitation_game( $dbgmsg, $gid, $uid1, $uid2 )
    {
       db_query( "GameHelper::delete_invitation_game.delgame.$dbgmsg($gid)",
-         "DELETE FROM Games WHERE ID=$gid AND Status='INVITED' " .
+         "DELETE FROM Games WHERE ID=$gid AND Status='".GAME_STATUS_INVITED."' " .
             "AND ( Black_ID=$uid1 OR White_ID=$uid1 ) " .
             "AND ( Black_ID=$uid2 OR White_ID=$uid2 ) " .
             "LIMIT 1" );
@@ -1107,8 +1172,384 @@ class GameHelper
       return ($row) ? (int)$row['X_Count'] : 0;
    }
 
+   /*!
+    * \brief Updates clock-values for game.
+    * \param $grow game-row with mandatory fields:
+    *        Maintime, Byotime, ClockUsed, LastTicks, WeekendClock,
+    *        Black_Byoperiods, Black_Byotime, Black_Maintime, Blackonvacation, X_BlackClock,
+    *        White_Byoperiods, White_Byotime, White_Maintime, Whiteonvacation, X_WhiteClock
+    * \return array( hours, UpdateQuery )
+    */
+   function update_clock( $grow, $to_move, $next_to_move, $do_ticks=true )
+   {
+      $upd_query = new UpdateQuery('Games');
+      $hours = 0;
+      if( $grow['Maintime'] > 0 || $grow['Byotime'] > 0)
+      {
+         if( $do_ticks )
+         {
+            // LastTicks may handle -(time spend) at the moment of the start of vacations
+            // time since start of move in the reference of the ClockUsed by the game
+            $hours = ticks_to_hours(get_clock_ticks($grow['ClockUsed']) - $grow['LastTicks']);
+
+            if( $to_move == BLACK )
+            {
+               time_remaining( $hours,
+                  $grow['Black_Maintime'], $grow['Black_Byotime'], $grow['Black_Byoperiods'],
+                  $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], true);
+               $upd_query->upd_num('Black_Maintime', $grow['Black_Maintime']);
+               $upd_query->upd_num('Black_Byotime', $grow['Black_Byotime']);
+               $upd_query->upd_num('Black_Byoperiods', $grow['Black_Byoperiods']);
+            }
+            else
+            {
+               time_remaining( $hours,
+                  $grow['White_Maintime'], $grow['White_Byotime'], $grow['White_Byoperiods'],
+                  $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], true);
+               $upd_query->upd_num('White_Maintime', $grow['White_Maintime']);
+               $upd_query->upd_num('White_Byotime', $grow['White_Byotime']);
+               $upd_query->upd_num('White_Byoperiods', $grow['White_Byoperiods']);
+            }
+         }//do_ticks
+
+         $next_onvacation = ( $next_to_move == BLACK ) ? $grow['Blackonvacation'] : $grow['Whiteonvacation'];
+         if( $next_onvacation > 0 ) // next-player on vacation
+            $next_clockused = VACATION_CLOCK; //and LastTicks=0, see below
+         else
+         {
+            $next_clockused = ( $next_to_move == BLACK ? $grow['X_BlackClock'] : $grow['X_WhiteClock'] );
+            if( $grow['WeekendClock'] != 'Y' )
+               $next_clockused += WEEKEND_CLOCK_OFFSET;
+         }
+
+         $next_lastticks = get_clock_ticks($next_clockused);
+         $timeout_date = NextGameOrder::make_timeout_date( $grow, $next_to_move, $next_lastticks );
+
+         $upd_query->upd_num('LastTicks', $next_lastticks);
+         $upd_query->upd_num('ClockUsed', $next_clockused);
+         $upd_query->upd_num('TimeOutDate', $timeout_date);
+      }
+      return array( $hours, $upd_query );
+   }//update_clock
+
 } // end 'GameHelper'
 
+
+
+
+/**
+ * \brief Class to handle fair-komi.
+ */
+class FairKomiNegotiation
+{
+   var $gid;
+   var $game_setup; // GameSetup-obj
+   var $game_status; // GAME_STATUS_...
+   var $black_id;
+   var $white_id;
+   var $tomove_id;
+
+   function FairKomiNegotiation( $game_setup, $game_row )
+   {
+      $this->game_setup = $game_setup;
+      $this->read_from_game_row( $game_row );
+   }
+
+   /*! \brief Reads fields from row: ID, Status, Black_ID, White_ID, ToMove_ID. */
+   function read_from_game_row( $grow )
+   {
+      $this->gid = (int)$grow['ID'];
+      $this->game_status = $grow['Status'];
+      $this->black_id = (int)$grow['Black_ID'];
+      $this->white_id = (int)$grow['White_ID'];
+      $this->tomove_id = (int)$grow['ToMove_ID'];
+   }
+
+   function has_both_komibids()
+   {
+      return !is_null($this->game_setup->Komi) && !is_null($this->game_setup->OppKomi);
+   }
+
+   function get_komibid( $uid )
+   {
+      return ( $uid == $this->game_setup->uid )
+         ? $this->game_setup->Komi
+         : $this->game_setup->OppKomi;
+   }
+
+   function set_komibid( $uid, $komibid )
+   {
+      if( $uid != $this->black_id && $uid != $this->white_id )
+         error('invalid_args', "FKN.set_komibid({$this->gid},$uid)");
+      if( $uid == $this->game_setup->uid )
+         $this->game_setup->Komi = $komibid;
+      else
+         $this->game_setup->OppKomi = $komibid;
+   }
+
+   function get_uid_highest_bid()
+   {
+      if( !$this->has_both_komibids() )
+         return 0;
+      if( $this->game_setup->Komi > $this->game_setup->OppKomi )
+         return $this->game_setup->uid;
+      elseif( $this->game_setup->Komi < $this->game_setup->OppKomi )
+         return ( $this->game_setup->uid == $this->black_id ) ? $this->white_id : $this->black_id;
+      else // nigiri
+      {
+         mt_srand ((double) microtime() * 1000000);
+         return ( mt_rand(0,1) ) ? $this->black_id : $this->white_id;
+      }
+   }//get_uid_highest_bid
+
+   /*! \brief Show text for komi-bid of player $player_id to viewer $viewer_uid. */
+   function get_view_komibid( $viewer_uid, $player_id, $form=null, $komibid_input=null )
+   {
+      global $base_path;
+      if( $player_id != $this->black_id && $player_id != $this->white_id )
+         error('invalid_args', "FKN.get_view_komibid.check.player({$this->gid},$viewer_uid,$player_id)");
+
+      $htype = $this->game_setup->Handicaptype;
+      $is_negotiation = ( $this->game_status == GAME_STATUS_KOMI );
+      $komibid = $this->get_komibid( $player_id );
+      $secret_text = T_('Top Secret#fairkomi');
+
+      if( !$is_negotiation || $viewer_uid != $player_id || $player_id != $this->tomove_id || is_null($form) ) // view-only
+      {
+         $hide_komibid = ( $htype == HTYPE_AUCTION_SECRET );
+
+         if( is_null($komibid) )
+            $result = sprintf( '(%s)', T_('No bid yet#fairkomi') );
+         elseif( $is_negotiation && $hide_komibid && $viewer_uid != $player_id )
+            $result = $secret_text;
+         else
+            $result = $komibid;
+
+         if( $is_negotiation && $this->tomove_id == $player_id )
+            $result .= MED_SPACING . image( $base_path.'images/prev.gif', T_('Player to move'), null, 'class=InTextImage' );
+      }
+      else // viewer is player and to-move -> show input-box
+      {
+         $curr_bid = ( is_null($komibid) )
+            ? sprintf( '(%s)', T_('No bid yet#fairkomi') )
+            : sprintf( '%s (%s)', $komibid, T_('Current bid#fairkomi') );
+
+         if( is_null($komibid_input) )
+            $komibid_input = $komibid;
+         $result = $form->print_insert_text_input('komibid', 8, 8, $komibid_input) . SMALL_SPACING . $curr_bid;
+      }
+
+      return $result;
+   }//get_view_komibid
+
+   function echo_fairkomi_table( $form, $user, $show_bid, $my_id )
+   {
+      $htype = $this->game_setup->Handicaptype;
+
+      $form_actions = ($my_id == $this->tomove_id) ? $this->build_form_actions( $form ) : '';
+
+      echo "<table id=\"fairkomiTable\" class=\"Infos\">",
+         "<tr><td class=Caption colspan=2>",
+            span('Caption', GameTexts::get_fair_komi_types($htype)), "<br>\n",
+            '(', GameTexts::get_jigo_modes(true, $this->game_setup->JigoMode), ')',
+         "</td></tr>\n",
+         "<tr class=Header><td>", T_('Player'), "</td><td>", T_('Komi Bid#fairkomi'), "</td></tr>\n",
+         "<tr><td>", $user[0], "</td><td>", $show_bid[0], "</td></tr>\n",
+         "<tr><td>", $user[1], "</td><td>", $show_bid[1], "</td></tr>\n",
+         "</table>\n",
+         span('Center', $form_actions), "<br><br>\n";
+   }//echo_fairkomi_table
+
+   function build_form_actions( $form )
+   {
+      $htype = $this->game_setup->Handicaptype;
+      if( $htype == HTYPE_AUCTION_SECRET )
+         $out = $form->print_insert_submit_button('komi_save', T_('Save Komi Bid') );
+      else
+         $out = '';
+      return $out;
+   }//build_form_actions
+
+   function build_notes()
+   {
+      $htype = $this->game_setup->Handicaptype;
+      $notes = array();
+
+      if( $htype == HTYPE_AUCTION_SECRET )
+      {
+         $notes[] = T_('Players secretly give their respective komi-bid (once per player).#fairkomi');
+         $notes[] = T_('Komi-bids are hidden from the other player.#fairkomi');
+         $notes[] = array(
+            T_('After the 2nd komi-bid, the game will be started:#fairkomi'),
+            T_('The player with the highest bid takes Black and is giving that number of komi to White.#fairkomi'),
+            T_('If the komi-bids are equal, player color is determined by Nigiri.#fairkomi'), );
+      }
+
+      return $notes;
+   }//build_notes
+
+
+   /*!
+    * \brief Saves and process komi-bid dependent on handi-type.
+    * \return 0=saved-komi, 1=saved+started-game; otherwise text-error-code
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
+   function save_komi( $game_row, $komibid )
+   {
+      $to_move = ( $this->tomove_id == $this->black_id ) ? BLACK : WHITE;
+      $next_to_move = BLACK + WHITE - $to_move;
+      $next_tomove_id = ( $this->tomove_id == $this->black_id ) ? $this->white_id : $this->black_id;
+      $my_id = $this->tomove_id;
+
+      list( $hours, $upd_game ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
+      $upd_game->upd_num('ToMove_ID', $next_tomove_id );
+
+      // eventually determine komi/colors + start-game
+      $start_game_new_black = 0;
+      if( $this->game_setup->Handicaptype == HTYPE_AUCTION_SECRET )
+      {
+         // save komi-bid for player to-move
+         $this->set_komibid( $this->tomove_id, $komibid );
+         $upd_game->upd_txt('GameSetup', $this->game_setup->encode());
+
+         if( $this->has_both_komibids() )
+            $start_game_new_black = $this->get_uid_highest_bid();
+      }
+
+      // first update clock-stuff, next to-move-id
+      $upd_game->upd_time('Lastchanged');
+      db_query( "FKN.save_komi.update({$this->gid},{$this->tomove_id},$komibid)",
+         "UPDATE Games SET " . $upd_game->get_query()
+         . " WHERE ID={$this->gid} AND Status='".GAME_STATUS_KOMI."' AND ToMove_ID={$this->tomove_id} LIMIT 1" );
+
+      global $ActivityMax, $ActivityForMove;
+      $upd_player = new UpdateQuery('Players');
+      $upd_player->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForMove+Activity)");
+      $upd_player->upd_time('LastMove');
+      db_query( "FKN.save_komi.upd_activity({$this->gid},$my_id)",
+         "UPDATE Players SET " . $upd_player->get_query() . " WHERE ID=$my_id LIMIT 1" );
+
+      if( $start_game_new_black > 0 )
+      {
+         $this->start_fairkomi_game( $start_game_new_black );
+         $result = 1; // komi-bid saved + started game
+      }
+      else
+         $result = 0; // komi-bid saved
+
+      return $result;
+   }//save_komi
+
+   /*!
+    * \brief Starts fairkomi-game by updating existing game on KOMI-status.
+    * \see also create_game()-func in "include/make_game.php"
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
+   function start_fairkomi_game( $new_black_id )
+   {
+      // re-read Games in order to switch values if B/W-players changed
+      $gid = $this->gid;
+      $dbgmsg = "FKN.start_fairkomi_game($gid,$new_black_id)";
+      $grow = mysql_single_fetch( "$dbgmsg.find_game",
+            "SELECT G.*, " .
+            "black.ClockUsed AS X_BlackClock, " .
+            "white.ClockUsed AS X_WhiteClock, " .
+            "black.OnVacation AS Blackonvacation, " .
+            "white.OnVacation AS Whiteonvacation " .
+            "FROM Games AS G " .
+                "INNER JOIN Players AS black ON black.ID=G.Black_ID " .
+                "INNER JOIN Players AS white ON white.ID=G.White_ID " .
+            "WHERE G.ID=$gid LIMIT 1" )
+         or error('unknown_game', "$dbgmsg.find_game2");
+      $this->read_from_game_row( $grow );
+
+      // checks
+      if( $this->game_status != GAME_STATUS_KOMI )
+         error('internal_error', "$dbgmsg.check.status({$this->game_status})");
+      if( $new_black_id != $this->black_id && $new_black_id != $this->white_id )
+         error('wrong_players', "$dbgmsg.check.players");
+      if( $this->black_id != $this->game_setup->uid )
+         error('wrong_players', "$dbgmsg.check.gs_uid({$this->game_setup->uid})");
+
+      $new_white_id = ( $new_black_id == $this->black_id ) ? $this->white_id : $this->black_id;
+
+      // handle shape-game (need to determine color to start playing)
+      $black_first = true; // fair-komi has NO handicap
+      $shape_id = (int)$grow['ShapeID'];
+      if( $shape_id > 0 )
+      {
+         $shape_snapshot = $grow['ShapeSnapshot'];
+         $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
+         if( !is_array($arr_shape) ) // overwrite with defaults
+            error('invalid_snapshot', "$dbgmsg.check.shape($shape_id,$shape_snapshot)");
+         if( ! (bool)@$arr_shape['PlayColorB'] ) // W-first
+            $black_first = false;
+      }
+      $next_tomove_id = ($black_first) ? $new_black_id : $new_white_id;
+
+      // update game
+
+      $upd_game = new UpdateQuery('Games');
+      $upd_game->upd_num('ToMove_ID', $next_tomove_id);
+      $upd_game->upd_txt('Status', GAME_STATUS_PLAY);
+      $upd_game->upd_num('Komi', $this->get_komibid($new_black_id) );
+
+      if( $new_black_id != $this->black_id ) // switch attributes of B/W-player
+      {
+         $upd_game->upd_num('Black_ID', $new_black_id);
+         $upd_game->upd_num('White_ID', $new_white_id);
+         $upd_game->upd_num('Black_Start_Rating', $grow['White_Start_Rating']);
+         $upd_game->upd_num('White_Start_Rating', $grow['Black_Start_Rating']);
+
+         $upd_game->upd_num('Black_Maintime', $grow['White_Maintime']);
+         $upd_game->upd_num('White_Maintime', $grow['Black_Maintime']);
+         $upd_game->upd_num('Black_Byotime', $grow['White_Byotime']);
+         $upd_game->upd_num('White_Byotime', $grow['Black_Byotime']);
+         $upd_game->upd_num('Black_Byoperiods', $grow['White_Byoperiods']);
+         $upd_game->upd_num('White_Byoperiods', $grow['Black_Byoperiods']);
+
+         $to_move = ( $new_black_id == $next_tomove_id ) ? BLACK : WHITE;
+         $next_to_move = BLACK + WHITE - $to_move;
+         list( $hours, $upd_clock ) = GameHelper::update_clock( $grow, $to_move, $next_to_move, /*ticks*/false );
+         $upd_game->merge( $upd_clock );
+      }
+
+      db_query( "$dbgmsg.update",
+         "UPDATE Games SET " . $upd_game->get_query() . " WHERE ID=$gid AND Status='{$this->game_status}' LIMIT 1" );
+   }//start_fairkomi_game
+
+
+   // ------------ static functions ----------------------------
+
+   /*! \brief Returns error-list checking komi-bid for fair-komi; empty on success. */
+   function check_komibid( $game_setup, $komibid )
+   {
+      $jigomode = $game_setup->JigoMode;
+      $komibid = trim($komibid);
+
+      $errors = array();
+      if( strlen($komibid) == 0 )
+         $errors[] = T_('Missing komi-bid#fairkomi');
+      elseif( !is_numeric($komibid) )
+         $errors[] = T_('Komi-bid must be a numeric value#fairkomi');
+      else
+      {
+         if( floor(2 * $komibid) != 2 * $komibid ) // check for x.0|x.5
+            $errors[] = ErrorCode::get_error_text('komi_bad_fraction');
+
+         $is_fractional = floor(2 * abs($komibid)) & 1;
+         if( $jigomode == JIGOMODE_ALLOW_JIGO && $is_fractional )
+            $errors[] = T_('Jigo is enforced, so komi-bid must not be fractional#fairkomi');
+         elseif( $jigomode == JIGOMODE_NO_JIGO && !$is_fractional )
+            $errors[] = T_('Jigo is forbidden, so komi-bid must be fractional#fairkomi');
+
+         //TODO must be increasing for open-auction
+      }
+
+      return $errors;
+   }//check_komibid
+
+} // end 'FairKomiNegotiation'
 
 
 
@@ -1181,7 +1622,7 @@ class GameFinalizer
                "Flags={$this->GameFlags}, " .
                "Score=$game_score, " .
                "Lastchanged=FROM_UNIXTIME($NOW) " .
-               "WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves={$this->Moves} LIMIT 1";
+               "WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves={$this->Moves} LIMIT 1";
          }
 
          $result = db_query( "$dbgmsg.upd_game", $game_updquery );
@@ -1346,6 +1787,8 @@ class GameNotify
          $gstatus = 'finished ';
       elseif( $this->game_status == GAME_STATUS_SETUP )
          $gstatus = 'setup-';
+      elseif( $this->game_status == GAME_STATUS_KOMI )
+         $gstatus = 'started ';
       else
          $gstatus = 'running ';
 
@@ -1501,6 +1944,497 @@ class MaxGamesCheck
 
 
 
+
+/**
+ * \brief Class to handle game-setup, stored in Games.GameSetup.
+ * \note To support: 1. handle fair-komi negotiation, 2. rematch with same settings, 3. better invitation-handling
+ */
+class GameSetup
+{
+   // fields stored in encoded form in Games.GameSetup
+   // (data required for rematch and komi-negotiation, though not neccessarily for playing game except Handicap/Komi)
+   var $uid;
+   var $Handicaptype; // HTYPE_...
+   var $Handicap;
+   var $AdjustHandicap;
+   var $MinHandicap;
+   var $MaxHandicap;
+   var $Komi; // null=no-komi set yet (used for fair-komi)
+   var $AdjustKomi;
+   var $JigoMode; // JIGOMODE_...
+   var $MustBeRated; // bool
+   var $RatingMin;
+   var $RatingMax;
+   var $MinRatedGames;
+   var $SameOpponent;
+   var $Message;
+
+   // fields for fair-komi negotiation
+   var $OppKomi; // komi-bid of opponent: null=no-komi set yet (used for fair-komi)
+
+   // additional games-fields solely needed to PLAY game (and are therefore already stored in Games-table)
+   // - fields that are set once
+   var $tid;
+   var $ShapeID;
+   var $ShapeSnapshot;
+   var $GameType; // GAMETYPE_...
+   var $GamePlayers;
+   // - fields that are changeable
+   var $Ruleset; // RULESET_...
+   var $Size;
+   var $Rated; // bool
+   var $StdHandicap; // bool
+   var $Maintime;
+   var $Byotype; // BYOTYPE_...
+   var $Byotime;
+   var $Byoperiods;
+   var $WeekendClock; // bool
+
+   function GameSetup( $uid )
+   {
+      $this->set_defaults();
+      $this->uid = $uid;
+   }
+
+   function set_defaults()
+   {
+      // defaults
+      $this->uid = 0;
+      $this->Handicaptype = HTYPE_NIGIRI;
+      $this->Handicap = 0;
+      $this->AdjustHandicap = 0;
+      $this->MinHandicap = 0;
+      $this->MaxHandicap = MAX_HANDICAP;
+      $this->Komi = 0.0;
+      $this->AdjustKomi = 0.0;
+      $this->JigoMode = JIGOMODE_KEEP_KOMI;
+      $this->MustBeRated = true;
+      $this->RatingMin = MIN_RATING;
+      $this->RatingMax = RATING_9DAN;
+      $this->MinRatedGames = 0;
+      $this->SameOpponent = 0;
+      $this->Message = '';
+
+      // other fields
+      $this->OppKomi = null;
+      $this->tid = 0;
+      $this->ShapeID = 0;
+      $this->ShapeSnapshot = '';
+      $this->GameType = GAMETYPE_GO;
+      $this->GamePlayers = '';
+
+      $this->Ruleset = RULESET_JAPANESE;
+      $this->Size = 19;
+      $this->Rated = true;
+      $this->StdHandicap = true;
+      $this->Maintime = time_convert_to_hours( 14, 'days' );
+      $this->Byotype = BYOTYPE_FISCHER;
+      $this->Byotime = time_convert_to_hours( 1, 'days' );
+      $this->Byoperiods = 0;
+      $this->WeekendClock = true;
+   }//set_defaults
+
+   function init_opponent_handicaptype( $opp_id )
+   {
+      $this->uid = $opp_id;
+      $this->Handicaptype = GameSetup::swap_htype_black_white( $this->Handicaptype );
+      $this->Message = '';
+      $this->OppKomi = null;
+   }
+
+   function is_fairkomi()
+   {
+      $cat_htype = get_category_handicaptype($this->Handicaptype);
+      return ( $cat_htype == CAT_HTYPE_FAIR_KOMI );
+   }
+
+   /*! \brief Encodes GameSetup-object into Games.GameSetup encoding/"compressed" game-setup. */
+   function encode( $invitation=false )
+   {
+      global $MAP_GAME_SETUP;
+
+      if( !isset($MAP_GAME_SETUP[$this->Handicaptype]) )
+         error('invalid_args', "GameSetup.encode.htype({$this->uid},{$this->Handicaptype})");
+      if( !isset($MAP_GAME_SETUP[$this->JigoMode]) )
+         error('invalid_args', "GameSetup.encode.jigomode({$this->uid},{$this->JigoMode})");
+      if( $invitation )
+      {
+         if( !isset($MAP_GAME_SETUP[$this->Ruleset]) )
+            error('invalid_args', "GameSetup.encode.ruleset({$this->uid},{$this->Ruleset})");
+         if( !isset($MAP_GAME_SETUP[$this->Byotype]) )
+            error('invalid_args', "GameSetup.encode.byotype({$this->uid},{$this->Byotype})");
+      }
+
+      $out = array();
+      $out[] = $MAP_GAME_SETUP[$this->Handicaptype]; // type: T10
+      $out[] = 'U'.(int)$this->uid; // user: U123
+
+      // handicap-stuff: H21:-21:10:21
+      $out[] = 'H'.(int)$this->Handicap;
+      if( $invitation )
+         array_push($out, 0, 0, 0 );
+      else
+         array_push($out,
+            (int)$this->AdjustHandicap,
+            (int)$this->MinHandicap,
+            (int)$this->MaxHandicap );
+
+      // komi-stuff: K-199.5:-199.5:J2:FK[7]
+      $out[] = (is_null($this->Komi)) ? 'K' : sprintf('K%.1f', (float)$this->Komi);
+      $out[] = ( $invitation ) ? 0 : sprintf('%.1f', (float)$this->AdjustKomi);
+      $out[] = $MAP_GAME_SETUP[$this->JigoMode]; // J<x>
+      if( $invitation )
+         $out[] = 'FK';
+      else
+         $out[] = (is_null($this->OppKomi)) ? 'FK' : sprintf('FK%.1f', (float)$this->OppKomi);
+
+      // restriction-stuff: R1:-900:2900:999:-103
+      if( $invitation )
+         array_push($out, 'R0', 0, 0, 0, 0 );
+      else
+         array_push($out,
+            'R' . ( $this->MustBeRated ? 1 : 0 ),
+            (int)$this->RatingMin,
+            (int)$this->RatingMax,
+            (int)$this->MinRatedGames,
+            (int)$this->SameOpponent );
+
+      if( $invitation )
+      {
+         $out[] = 'C'; // message (empty)
+
+         $out[] = 'I'.(int)$this->Size; // I=invitation-data
+         $out[] = ( $this->Rated ? 1 : 0 );
+         $out[] = $MAP_GAME_SETUP[$this->Ruleset]; // ruleset: r1
+         $out[] = ( $this->StdHandicap ? 1 : 0 );
+
+         // time-stuff: tJ:60:15:5:1
+         $out[] = $MAP_GAME_SETUP[$this->Byotype]; // byoType: tF
+         $out[] = (int)$this->Maintime;
+         $out[] = (int)$this->Byotime;
+         $out[] = (int)$this->Byoperiods;
+         $out[] = ( $this->WeekendClock ? 1 : 0 );
+      }
+      else
+         $out[] = 'C'.$this->Message; // message: Cslow game
+
+      return implode(GS_SEP, $out);
+   }//encode
+
+   /*!
+    * \brief Parses remaining game-fields (that are not required for setup a game) into this GameSetup.
+    * \param $grow parsed fields:
+    *        ShapeID, ShapeSnapshot, GameType, GamePlayers, tid, Ruleset, Size, Rated,
+    *        StdHandicap, Maintime, Byotype, Byotime, Byoperiods, WeekendClock
+    */
+   function read_waitingroom_fields( $grow )
+   {
+      if( isset($grow['tid']) )
+         $this->tid = (int)$grow['tid'];
+
+      if( isset($grow['ShapeID']) )
+         $this->ShapeID = (int)$grow['ShapeID'];
+      if( isset($grow['ShapeSnapshot']) )
+         $this->ShapeSnapshot = $grow['ShapeSnapshot'];
+      if( isset($grow['GameType']) )
+         $this->GameType = $grow['GameType'];
+      if( isset($grow['GamePlayers']) )
+         $this->GamePlayers = $grow['GamePlayers'];
+      if( isset($grow['Ruleset']) )
+         $this->Ruleset = $grow['Ruleset'];
+      if( isset($grow['Size']) )
+         $this->Size = (int)@$grow['Size'];
+      if( isset($grow['Rated']) )
+         $this->Rated = ( $grow['Rated'] == 'Y' );
+      if( isset($grow['StdHandicap']) )
+         $this->StdHandicap = ( $grow['StdHandicap'] == 'Y' );
+
+      if( isset($grow['Maintime']) )
+         $this->Maintime = (int)$grow['Maintime'];
+      if( isset($grow['Byotype']) )
+         $this->Byotype = $grow['Byotype'];
+      if( isset($grow['Byotime']) )
+         $this->Byotime = (int)$grow['Byotime'];
+      if( isset($grow['Byoperiods']) )
+         $this->Byoperiods = (int)$grow['Byoperiods'];
+      if( isset($grow['WeekendClock']) )
+         $this->WeekendClock = ( $grow['WeekendClock'] == 'Y' );
+   }//read_waitingroom_fields
+
+   function to_string( $invitation=false )
+   {
+      $result = "GameSetup: U={$this->uid} T={$this->Handicaptype} " .
+         "H={$this->Handicap}/{$this->AdjustHandicap}/{$this->MinHandicap}-{$this->MaxHandicap} " .
+         "K={$this->Komi}/{$this->AdjustKomi} J={$this->JigoMode} FK={$this->OppKomi} " .
+         "MBR=" . yesno($this->MustBeRated) . " Rating={$this->RatingMin}..{$this->RatingMax} " .
+         "MRG={$this->MinRatedGames} SO={$this->SameOpponent} M=[{$this->Message}]";
+      if( $invitation )
+         $result .= "; S={$this->Size} Rules={$this->Ruleset} Rated=" . yesno($this->Rated) . " StdH=" . yesno($this->StdHandicap) .
+            " Time={$this->Byotype}:{$this->Maintime}/{$this->Byotime}/{$this->Byoperiods}:" . yesno($this->WeekendClock) .
+            " tid={$this->tid} shape={$this->ShapeID}/[{$this->ShapeSnapshot}] " .
+            "gtype={$this->GameType}/{$this->GamePlayers}";
+      return $result;
+   }//to_string
+
+   function format_handicap_type( $handicaptype=null )
+   {
+      if( is_null($handicaptype) )
+         $handicaptype = $this->Handicaptype;
+
+      $cat_htype = get_category_handicaptype($handicaptype);
+      switch( (string)$cat_htype )
+      {
+         case CAT_HTYPE_CONV:
+            return T_('Conventional handicap');
+
+         case CAT_HTYPE_PROPER:
+            return T_('Proper handicap');
+
+         case CAT_HTYPE_FAIR_KOMI:
+            return sprintf( T_('Fair Komi of Type [%s], Jigo-Check [%s]'),
+                            GameTexts::get_fair_komi_types($handicaptype),
+                            GameTexts::get_jigo_modes(/*fk*/true, $this->JigoMode) );
+
+         case CAT_HTYPE_MANUAL:
+         default:
+            return sprintf( T_('Manual setting with My Color [%s], Handicap %s, Komi %s'),
+                            GameTexts::get_manual_handicap_types($handicaptype), $this->Handicap, $this->Komi );
+      }
+   }//format_handicap_type
+
+   function format_time()
+   {
+      return TimeFormat::echo_time_limit( $this->Maintime, $this->Byotype, $this->Byotime, $this->Byoperiods,
+         TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
+   }//format_time
+
+   function format_std_handicap()
+   {
+      return ($this->StdHandicap) ? T_('Standard-Handicap#inv_diff') : T_('Free-Handicap#inv_diff');
+   }//format_std_handicap
+
+
+   // ------------ static functions ----------------------------
+
+   /*! \brief Decodes (=parse) Games.GameSetup value with game-setup into GameSetup-object. */
+   function new_from_game_setup( $game_setup, $invitation=false )
+   {
+      global $MAP_GAME_SETUP;
+      static $RX_KOMI = "-?\\d+(\\.[05])?";
+      static $RX_KOMI2 = "(-?\\d+(\\.[05])?)?"; // can be empty
+
+      $gs = new GameSetup( 0 );
+      $game_setup = trim($game_setup);
+      if( (string)$game_setup == '' )
+         return $gs;
+
+      // Standard:
+      //   "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
+      // Invitation (standard-part shows example):
+      //   "T1:U2:H0:0:0:0:K6.5:0:J2:R0:0:0:0:0:C:I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
+      // NOTE: when adding new game-settings -> adjust regex also matching "old" syntaxes
+      $rx_inv = ($invitation) ? ":I\\d+:[01]:r\\d+:[01]:t[JCF]:\\d+:\\d+:\\d+:[01]\$" : '';
+      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:\\d+:\\d+:\\d+:-?\\d+:C$rx_inv/";
+      if( !preg_match($rx_gs, $game_setup) )
+         error('invalid_args', "GameSetup::new_from_game_setup.check_gs($invitation,$game_setup)");
+      $arr = explode(GS_SEP, $game_setup);
+error_log("new_from_game_setup($invitation,$game_setup): [". implode('] [', $arr)."]"); //TODO-gs
+
+      $gs->Handicaptype = $MAP_GAME_SETUP[ array_shift($arr) ];
+      $gs->uid = (int)substr( array_shift($arr), 1);
+
+      $gs->Handicap = (int)substr( array_shift($arr), 1);
+      $gs->AdjustHandicap = (int)array_shift($arr);
+      $gs->MinHandicap = (int)array_shift($arr);
+      $gs->MaxHandicap = (int)array_shift($arr);
+
+      $komi = substr( array_shift($arr), 1);
+      $gs->Komi = ( strlen($komi) > 0 ) ? (float)$komi : null;
+      $gs->AdjustKomi = (float)array_shift($arr);
+      $gs->JigoMode = $MAP_GAME_SETUP[ array_shift($arr) ];
+      $komi = substr( array_shift($arr), 2);
+      $gs->OppKomi = ( strlen($komi) > 0 ) ? (float)$komi : null;
+
+      $gs->MustBeRated = ( (int)substr( array_shift($arr), 1) != 0 );
+      $gs->RatingMin = (int)array_shift($arr);
+      $gs->RatingMax = (int)array_shift($arr);
+      $gs->MinRatedGames = (int)array_shift($arr);
+      $gs->SameOpponent = (int)array_shift($arr);
+
+      if( $invitation )
+      {
+         $gs->Message = substr( array_shift($arr), 1);
+
+         $gs->Size = (int)substr( array_shift($arr), 1);
+         $gs->Rated = ( (int)array_shift($arr) != 0 );
+         $gs->Ruleset = $MAP_GAME_SETUP[ array_shift($arr) ];
+         $gs->StdHandicap = ( (int)array_shift($arr) != 0 );
+
+         $gs->Byotype = $MAP_GAME_SETUP[ array_shift($arr) ];
+         $gs->Maintime = (int)array_shift($arr);
+         $gs->Byotime = (int)array_shift($arr);
+         $gs->Byoperiods = (int)array_shift($arr);
+         $gs->WeekendClock = ( (int)array_shift($arr) != 0 );
+      }
+      else
+         $gs->Message = substr( implode(GS_SEP, $arr), 1 );
+
+error_log("new_from_game_setup.2: ".$gs->to_string(true)); //TODO-gs
+      return $gs;
+   }//new_from_game_setup
+
+   /*! \brief Encodes invitation GameSetup-objects into Games.GameSetup for invitations and disputes. */
+   function build_invitation_game_setup( $game_setup1, $game_setup2 )
+   {
+      $out = array();
+      if( !is_null($game_setup1) )
+         $out[] = $game_setup1->encode( /*inv*/true );
+      if( !is_null($game_setup2) )
+         $out[] = $game_setup2->encode( /*inv*/true );
+      return implode(GS_SEP_INVITATION, $out );
+   }//build_invitation_game_setup
+
+   /*!
+    * \brief Decodes Games.GameSetup of invitation-type with additional data to make diffs on disputes.
+    * \param $gid only for dbg-info
+    * \return non-null array [ GameSetup-obj for pivot-uid, GameSetup-obj for opponent ],
+    *         elemements may be null (if non-matching game-setup found)
+    */
+   function parse_invitation_game_setup( $pivot_uid, $game_setup, $gid=0 )
+   {
+      $arr_input = explode(GS_SEP_INVITATION, trim($game_setup)); // note: arr( Str ) if gs==empty
+      $cnt_input = count($arr_input);
+      if( $cnt_input > 2 )
+         error('invalid_args', "GameSetup::parse_invitation_game_setup.check.gs($pivot_uid,$cnt_input,$game_setup)");
+
+      $result = array();
+      foreach( $arr_input as $gs_part )
+      {
+         if( (string)$gs_part != '' )
+            $result[] = GameSetup::new_from_game_setup( $gs_part, /*inv*/true );
+      }
+
+      $cnt_gs = count($result);
+      if( $cnt_gs == 0 )
+         array_push( $result, null, null );
+      elseif( $cnt_gs == 1 )
+      {
+         if( $result[0]->uid == $pivot_uid )
+            $result[] = null;
+         else
+            array_unshift( $result, null );
+      }
+      elseif( $cnt_gs == 2 )
+      {
+         if( $result[0]->uid != $pivot_uid && $result[1]->uid != $pivot_uid )
+            error('internal_error', "GameSetup::parse_inv_gs.check.uid($pivot_uid,$gid)");
+         if( $result[1]->uid == $pivot_uid && $result[0]->uid != $pivot_uid )
+            swap( $result[0], $result[1] );
+      }
+
+      return $result;
+   }//parse_invitation_game_setup
+
+   function parse_jigo_mode_from_game_setup( $cat_htype, $pivot_uid, $game_setup, $gid )
+   {
+      $jigo_mode = JIGOMODE_KEEP_KOMI; //default
+
+      if( $cat_htype == CAT_HTYPE_FAIR_KOMI )
+      {
+         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $pivot_uid, $game_setup, $gid );
+         if( !is_null($my_gs) )
+            $jigo_mode = $my_gs->JigoMode;
+      }
+
+      return $jigo_mode;
+   }//parse_jigo_mode_from_game_setup
+
+   /*!
+    * \brief Creates GameSetup parsing fields from games-row (for waiting-room).
+    * \param $grow array with keys: uid, Handicaptype, Handicap, Adj/Min/MaxHandicap, Komi, AdjKomi, JigoMode,
+    *        MustBeRated, RatingMin/Max, MinRatedGames, SameOpponent, Message|Comment
+    */
+   function new_from_game_row( $grow )
+   {
+      $gs = new GameSetup( (int)@$grow['uid'] );
+      $gs->Handicaptype = $grow['Handicaptype'];
+      $gs->Handicap = (int)$grow['Handicap'];
+      $gs->AdjustHandicap = (int)$grow['AdjHandicap'];
+      $gs->MinHandicap = (int)$grow['MinHandicap'];
+      $gs->MaxHandicap = (int)$grow['MaxHandicap'];
+      $gs->Komi = (float)$grow['Komi'];
+      $gs->AdjustKomi = (float)$grow['AdjKomi'];
+      $gs->JigoMode = $grow['JigoMode'];
+      $gs->MustBeRated = ( $grow['MustBeRated'] == 'Y' );
+      $gs->RatingMin = (int)$grow['RatingMin'];
+      $gs->RatingMax = (int)$grow['RatingMax'];
+      $gs->MinRatedGames = (int)$grow['MinRatedGames'];
+      $gs->SameOpponent = (int)$grow['SameOpponent'];
+      if( isset($grow['Message']) )
+         $gs->Message = $grow['Message'];
+      elseif( isset($grow['Comment']) )
+         $gs->Message = $grow['Comment'];
+      return $gs;
+   }//new_from_game_row
+
+   /*!
+    * \briefs Builds diffs between two GameSetup-objects regarding invitation-game-settings.
+    * \return array with diff-arrays: [ setting-title, old-setting, new-setting [, long-diff=0|1]  ]
+    */
+   function build_invitation_diffs( $gs_old, $gs_new )
+   {
+      $out = array();
+
+      if( $gs_old->Ruleset !== $gs_new->Ruleset )
+         $out[] = array( T_('Ruleset'), getRulesetText($gs_old->Ruleset), getRulesetText($gs_new->Ruleset) );
+      if( $gs_old->Size !== $gs_new->Size )
+         $out[] = array( T_('Board size'), $gs_old->Size, $gs_new->Size );
+
+      // handicap-type
+      $htype_new = GameSetup::swap_htype_black_white($gs_new->Handicaptype);
+      $htype_old_text = $gs_old->format_handicap_type();
+      $htype_new_text = $gs_new->format_handicap_type($htype_new);
+      if( $htype_old_text !== $htype_new_text )
+         $out[] = array( T_('Handicap-Type#inv_diff'), $htype_old_text, $htype_new_text, 1 );
+
+      if( $gs_old->StdHandicap !== $gs_new->StdHandicap )
+         $out[] = array( T_('Handicap stones placement#inv_diff'), $gs_old->format_std_handicap(), $gs_new->format_std_handicap() );
+
+      // time
+      $old_time = $gs_old->format_time();
+      $new_time = $gs_new->format_time();
+      if( $old_time !== $new_time )
+         $out[] = array( T_('Time#inv_diff'), $old_time, $new_time );
+
+      if( $gs_old->WeekendClock !== $gs_new->WeekendClock )
+         $out[] = array( T_('Clock runs on weekends'), yesno($gs_old->WeekendClock), yesno($gs_new->WeekendClock) );
+      if( $gs_old->Rated !== $gs_new->Rated )
+         $out[] = array( T_('Rated game'), yesno($gs_old->Rated), yesno($gs_new->Rated) );
+
+      return $out;
+   }//build_invitation_diffs
+
+   function create_opponent_game_setup( $game_setup, $opp_id )
+   {
+      $opp_gs = clone $game_setup;
+      $opp_gs->init_opponent_handicaptype( $opp_id );
+      return $opp_gs;
+   }//create_opponent_game_setup
+
+   function swap_htype_black_white( $handicaptype )
+   {
+      if( $handicaptype == HTYPE_BLACK )
+         return HTYPE_WHITE;
+      elseif( $handicaptype == HTYPE_WHITE )
+         return HTYPE_BLACK;
+      else
+         return $handicaptype;
+   }//swap_htype_black_white
+
+} //end 'GameSetup'
+
+
+
 // returns adjusted komi within limits, also checking for valid limits
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
 {
@@ -1573,23 +2507,53 @@ function get_to_move( $grow, $errmsg )
  */
 function get_category_handicaptype( $handitype )
 {
-   // handicap-types category
-   static $ARR_GLOBAL_HTYPES = array(
+   // handicap-type => handicaptype-category
+   static $ARR_HTYPES = array(
          HTYPE_CONV     => CAT_HTYPE_CONV,
          HTYPE_PROPER   => CAT_HTYPE_PROPER,
          HTYPE_NIGIRI   => CAT_HTYPE_MANUAL,
          HTYPE_DOUBLE   => CAT_HTYPE_MANUAL,
          HTYPE_BLACK    => CAT_HTYPE_MANUAL,
          HTYPE_WHITE    => CAT_HTYPE_MANUAL,
-         HTYPE_AUCTION_KOMI => CAT_HTYPE_AUCTION_KOMI,
+         HTYPE_AUCTION_SECRET => CAT_HTYPE_FAIR_KOMI,
       );
-   return @$ARR_GLOBAL_HTYPES[$handitype];
+   return @$ARR_HTYPES[$handitype];
 }
 
-function get_auction_komi_note( $fmt='%s' )
+function get_invite_handicaptype( $handitype )
 {
-   return sprintf( $fmt, T_('higher bid gets Black, or nigiri if equal') );
+   // handicap-type => invite-handicap-type
+   static $ARR_INVITE_HTYPES = array(
+         HTYPE_CONV     => INVITE_HANDI_CONV,
+         HTYPE_PROPER   => INVITE_HANDI_PROPER,
+         HTYPE_NIGIRI   => INVITE_HANDI_NIGIRI,
+         HTYPE_DOUBLE   => INVITE_HANDI_DOUBLE,
+         HTYPE_BLACK    => INVITE_HANDI_FIXCOL,
+         HTYPE_WHITE    => INVITE_HANDI_FIXCOL,
+         HTYPE_AUCTION_SECRET => INVITE_HANDI_AUCTION_SECRET,
+      );
+   return @$ARR_INVITE_HTYPES[$handitype];
 }
+
+function get_handicaptype_for_invite( $inv_handitype, $is_black_col=null )
+{
+   // invite-handicap-type -> handicap-type
+   static $ARR_HTYPES = array(
+         INVITE_HANDI_CONV    => HTYPE_CONV,
+         INVITE_HANDI_PROPER  => HTYPE_PROPER,
+         INVITE_HANDI_NIGIRI  => HTYPE_NIGIRI,
+         INVITE_HANDI_DOUBLE  => HTYPE_DOUBLE,
+         //INVITE_HANDI_FIXCOL  => '', // calculated mapping (see below)
+         INVITE_HANDI_AUCTION_SECRET => HTYPE_AUCTION_SECRET,
+      );
+
+   if( $inv_handitype != INVITE_HANDI_FIXCOL )
+      return @$ARR_HTYPES[$inv_handitype];
+   elseif( is_null($is_black_col) )
+      error('invalid_args', "get_handicaptype_for_invite.check.is_black_col_null($inv_handitype)");
+   else
+      return ($is_black_col) ? HTYPE_BLACK : HTYPE_WHITE;
+}//get_handicaptype_for_invite
 
 function build_image_double_game( $with_sep=false, $class='' )
 {
@@ -1646,6 +2610,7 @@ function get_gamesettings_viewmode( $viewmode )
       $ARR = array(
          GSETVIEW_SIMPLE => T_('simple settings#gsview'),
          GSETVIEW_EXPERT => T_('expert settings#gsview'),
+         GSETVIEW_FAIRKOMI => T_('fair-komi settings#gsview'),
          GSETVIEW_MPGAME => T_('multi-player settings#gsview'),
       );
    }
@@ -1701,7 +2666,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode )
                               'TEXTINPUT', 'min_rated_games', 5, 5, '',
                               'TEXT', MINI_SPACING . T_('(optional)'), ));
 
-   if( $viewmode == GSETVIEW_EXPERT )
+   if( $viewmode == GSETVIEW_EXPERT || $viewmode == GSETVIEW_FAIRKOMI )
    {
       $same_opp_array = build_accept_same_opponent_array(array( 0,  -101, -102, -103,  -1, -2, -3,  3, 7, 14 ));
       $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
