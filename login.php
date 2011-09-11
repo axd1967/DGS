@@ -47,9 +47,8 @@ if( $quick_mode )
    }
 
    $row = mysql_single_fetch( "login.find_player($uhandle)",
-                  "SELECT Handle, AdminOptions,Password,Newpassword,Sessioncode, " .
-                        "UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-                  "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+         "SELECT Handle, AdminOptions,Password,Newpassword,Sessioncode, UNIX_TIMESTAMP(Sessionexpire) AS Expire " .
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
    if( !$row )
       error('wrong_userid', "login.find_player2($uhandle)");
 
@@ -61,8 +60,7 @@ if( $quick_mode )
 
    if( !@$_REQUEST['cookie_check'] )
    {
-      if( !check_password( $uhandle, $row['Password'],
-                           $row['Newpassword'], $passwd ) )
+      if( !check_password( $uhandle, $row['Password'], $row['Newpassword'], $passwd ) )
       {
          admin_log( 0, $userid, 'wrong_password');
          error("wrong_password", "login.check_password($userid,$uhandle)");
@@ -79,11 +77,11 @@ if( $quick_mode )
                       "WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
       }
 
+      if( $uhandle !== $userid && strcasecmp($uhandle,$userid) == 0 )
+         $uhandle = $userid; // store original user-id as db-check is case-INsensitive
       set_login_cookie( $uhandle, $code );
-      jump_to("login.php?cookie_check=1"
-             . URI_AMP."userid=".urlencode($uhandle)
-             . ( $quick_mode ? URI_AMP."quick_mode=1" : '' )
-             );
+      jump_to("login.php?cookie_check=1".URI_AMP."userid=".urlencode($uhandle)
+             . ( $quick_mode ? URI_AMP."quick_mode=1" : '' ) );
    }
    //else cookie_check
 

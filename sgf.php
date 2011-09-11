@@ -96,7 +96,7 @@ if( $quick_mode )
             }
          }
       }
-      elseif( $Blackhandle == $cookie_handle )
+      elseif( strcasecmp($Blackhandle, $cookie_handle) == 0 )
       {
          if( $Blackscode == safe_getcookie('sessioncode') && $Blackexpire >= $NOW )
          {
@@ -104,7 +104,7 @@ if( $quick_mode )
             $owned_uid = $Black_uid;
          }
       }
-      elseif( $Whitehandle == $cookie_handle )
+      elseif( strcasecmp($Whitehandle, $cookie_handle) == 0 )
       {
          if( $Whitescode == safe_getcookie('sessioncode') && $Whiteexpire >= $NOW )
          {
