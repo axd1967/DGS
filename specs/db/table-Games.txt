@@ -9,55 +9,57 @@ Description:
    Table to store static and dynamic information about game.
    - store invited game, running game, finished game
 
-| Field              | Type                                                              | Null | Key | Default             | Extra          |
-+--------------------+-------------------------------------------------------------------+------+-----+---------------------+----------------+
-| ID                 | int(11)                                                           | NO   | PRI | NULL                | auto_increment |
-| tid                | int(11)                                                           | NO   | MUL | 0                   |                |
-| ShapeID            | int(10) unsigned                                                  | NO   |     | 0                   |                |
-| Starttime          | datetime                                                          | NO   |     | 0000-00-00 00:00:00 |                |
-| Lastchanged        | datetime                                                          | NO   | MUL | 0000-00-00 00:00:00 |                |
-| mid                | int(11)                                                           | NO   |     | 0                   |                |
-| DoubleGame_ID      | int(11)                                                           | NO   |     | 0                   |                |
-| Black_ID           | int(11)                                                           | NO   | MUL | NULL                |                |
-| White_ID           | int(11)                                                           | NO   | MUL | NULL                |                |
-| ToMove_ID          | int(11)                                                           | NO   | MUL | 0                   |                |
-| GameType           | enum('GO','TEAM_GO','ZEN_GO')                                     | NO   |     | GO                  |                |
-| GamePlayers        | char(5)                                                           | NO   |     |                     |                |
-| Ruleset            | enum('JAPANESE','CHINESE')                                        | NO   |     | JAPANESE            |                |
-| Size               | tinyint(3) unsigned                                               | NO   | MUL | 19                  |                |
-| Komi               | decimal(4,1)                                                      | NO   |     | 6.5                 |                |
-| Handicap           | tinyint(3) unsigned                                               | NO   | MUL | 0                   |                |
-| Status             | enum('SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') | NO   | MUL | INVITED             |                |
-| Moves              | smallint(5) unsigned                                              | NO   | MUL | 0                   |                |
-| Black_Prisoners    | smallint(5) unsigned                                              | NO   |     | 0                   |                |
-| White_Prisoners    | smallint(5) unsigned                                              | NO   |     | 0                   |                |
-| Last_X             | tinyint(4)                                                        | NO   |     | -1                  |                |
-| Last_Y             | tinyint(4)                                                        | NO   |     | -1                  |                |
-| Last_Move          | char(2)                                                           | NO   |     |                     |                |
-| Flags              | set('Ko','HiddenMsg','AdmResult')                                 | NO   | MUL |                     |                |
-| Score              | decimal(5,1)                                                      | NO   | MUL | 0.0                 |                |
-| Maintime           | smallint(6)                                                       | NO   |     | 0                   |                |
-| Byotype            | enum('JAP','CAN','FIS')                                           | NO   |     | JAP                 |                |
-| Byotime            | smallint(6)                                                       | NO   |     | 0                   |                |
-| Byoperiods         | tinyint(4)                                                        | NO   |     | 0                   |                |
-| Black_Maintime     | smallint(6)                                                       | NO   |     | 0                   |                |
-| White_Maintime     | smallint(6)                                                       | NO   |     | 0                   |                |
-| Black_Byotime      | smallint(6)                                                       | NO   |     | 0                   |                |
-| White_Byotime      | smallint(6)                                                       | NO   |     | 0                   |                |
-| Black_Byoperiods   | tinyint(4)                                                        | NO   |     | -1                  |                |
-| White_Byoperiods   | tinyint(4)                                                        | NO   |     | -1                  |                |
-| LastTicks          | int(11)                                                           | NO   |     | 0                   |                |
-| ClockUsed          | smallint(6)                                                       | NO   | MUL | 0                   |                |
-| TimeOutDate        | int(11)                                                           | NO   |     | 0                   |                |
-| Rated              | enum('N','Y','Done')                                              | NO   |     | N                   |                |
-| StdHandicap        | enum('N','Y')                                                     | NO   |     | N                   |                |
-| WeekendClock       | enum('N','Y')                                                     | NO   |     | Y                   |                |
-| Black_Start_Rating | double                                                            | NO   |     | -9999               |                |
-| White_Start_Rating | double                                                            | NO   |     | -9999               |                |
-| Black_End_Rating   | double                                                            | NO   |     | -9999               |                |
-| White_End_Rating   | double                                                            | NO   |     | -9999               |                |
-| Snapshot           | varchar(216)                                                      | NO   |     |                     |                |
-| ShapeSnapshot      | varchar(255)                                                      | NO   |     |                     |                |
+| Field              | Type                                             | Null | Key | Default             | Extra          |
++--------------------+--------------------------------------------------+------+-----+---------------------+----------------+
+| ID                 | int(11)                                          | NO   | PRI | NULL                | auto_increment |
+| tid                | int(11)                                          | NO   | MUL | 0                   |                |
+| ShapeID            | int(10) unsigned                                 | NO   |     | 0                   |                |
+| Starttime          | datetime                                         | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged        | datetime                                         | NO   | MUL | 0000-00-00 00:00:00 |                |
+| mid                | int(11)                                          | NO   |     | 0                   |                |
+| DoubleGame_ID      | int(11)                                          | NO   |     | 0                   |                |
+| Black_ID           | int(11)                                          | NO   | MUL | NULL                |                |
+| White_ID           | int(11)                                          | NO   | MUL | NULL                |                |
+| ToMove_ID          | int(11)                                          | NO   | MUL | 0                   |                |
+| GameType           | enum('GO','TEAM_GO','ZEN_GO')                    | NO   |     | GO                  |                |
+| GamePlayers        | char(5)                                          | NO   |     |                     |                |
+| Ruleset            | enum('JAPANESE','CHINESE')                       | NO   |     | JAPANESE            |                |
+| Size               | tinyint(3) unsigned                              | NO   | MUL | 19                  |                |
+| Komi               | decimal(4,1)                                     | NO   |     | 6.5                 |                |
+| Handicap           | tinyint(3) unsigned                              | NO   | MUL | 0                   |                |
+| Status             | enum('KOMI','SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED')
+                                                                        | NO   | MUL | INVITED             |                |
+| Moves              | smallint(5) unsigned                             | NO   | MUL | 0                   |                |
+| Black_Prisoners    | smallint(5) unsigned                             | NO   |     | 0                   |                |
+| White_Prisoners    | smallint(5) unsigned                             | NO   |     | 0                   |                |
+| Last_X             | tinyint(4)                                       | NO   |     | -1                  |                |
+| Last_Y             | tinyint(4)                                       | NO   |     | -1                  |                |
+| Last_Move          | char(2)                                          | NO   |     |                     |                |
+| Flags              | set('Ko','HiddenMsg','AdmResult')                | NO   | MUL |                     |                |
+| Score              | decimal(5,1)                                     | NO   | MUL | 0.0                 |                |
+| Maintime           | smallint(6)                                      | NO   |     | 0                   |                |
+| Byotype            | enum('JAP','CAN','FIS')                          | NO   |     | JAP                 |                |
+| Byotime            | smallint(6)                                      | NO   |     | 0                   |                |
+| Byoperiods         | tinyint(4)                                       | NO   |     | 0                   |                |
+| Black_Maintime     | smallint(6)                                      | NO   |     | 0                   |                |
+| White_Maintime     | smallint(6)                                      | NO   |     | 0                   |                |
+| Black_Byotime      | smallint(6)                                      | NO   |     | 0                   |                |
+| White_Byotime      | smallint(6)                                      | NO   |     | 0                   |                |
+| Black_Byoperiods   | tinyint(4)                                       | NO   |     | -1                  |                |
+| White_Byoperiods   | tinyint(4)                                       | NO   |     | -1                  |                |
+| LastTicks          | int(11)                                          | NO   |     | 0                   |                |
+| ClockUsed          | smallint(6)                                      | NO   | MUL | 0                   |                |
+| TimeOutDate        | int(11)                                          | NO   |     | 0                   |                |
+| Rated              | enum('N','Y','Done')                             | NO   |     | N                   |                |
+| StdHandicap        | enum('N','Y')                                    | NO   |     | N                   |                |
+| WeekendClock       | enum('N','Y')                                    | NO   |     | Y                   |                |
+| Black_Start_Rating | double                                           | NO   |     | -9999               |                |
+| White_Start_Rating | double                                           | NO   |     | -9999               |                |
+| Black_End_Rating   | double                                           | NO   |     | -9999               |                |
+| White_End_Rating   | double                                           | NO   |     | -9999               |                |
+| Snapshot           | varchar(216)                                     | NO   |     |                     |                |
+| ShapeSnapshot      | varchar(255)                                     | NO   |     |                     |                |
+| GameSetup          | varchar(255)                                     | NO   |     |                     |                |
 
 
 ## Fields:
@@ -88,13 +90,25 @@ Description:
 
 * Black_ID, White_ID : foreign key to Players.ID
    - for normal-game : representing current Black and White players
-   - for invite-game : Black_ID = user who first started invitation, White_ID = invited-user
-     this will not change as long as game is not started, to be able to store komi-bid
-     for auction-komi in static Black/White_Prisoners-field.
+
+   - for invite-game :
+      - Black_ID = user who started invitation, White_ID = opponent-user
+      - Black_ID and White_ID are changed on a dispute, if the handicap-type switches
+        from or to the corresponding value HTYPE_WHITE.
+        See also INVITE_HANDI_FIXCOL under ToMove_ID-field.
 
 * ToMove_ID : foreign key to Players.ID
    - for started games = field-value points to player, that has to move next in game
-   - for invite-game and value < 0 : handicap-type, see 'INVITE_HANDI_...' in 'include/message_functions.php'
+
+   - for invite-game:
+      - value < 0 : keeps handicap-type, see consts 'INVITE_HANDI_...' in 'include/message_functions.php'
+      - for value INVITE_HANDI_FIXCOL the handicaptype HTYPE_BLACK/WHITE is calculated
+        by matching the current Black_ID with the logged-in user
+
+   - for game on KOMI-status:
+      - the player who must do the next bidding/choice for negotiating fair-komi
+      - the JigoMode to be able to start a fair-komi after negotiation is saved
+        in the GameSetup-field.
 
 * GameType : game-type, see also Waitingroom.GameType
    - GO = standard Go (1:1)
@@ -117,6 +131,8 @@ Description:
 * Size, Komi, Handicap : settings for game (board-size, komi, handicap-stones)
 
 * Status : current status for game
+   - KOMI: game-entry is used to negotiate fair-komi,
+     fields Black/White_Prisoners are used to store B/W-komi-bids during negotiation
    - SETUP: game-entry is used to configure game-players for multi-player-game
    - INVITED: game-entry is used to hold game-settings for invitational game negotiation
    - PLAY: running game, playing mode
@@ -139,10 +155,15 @@ Description:
      - handicap-stones must be substracted
 
 * Black_Prisoners, White_Prisoners
-   - for started games = number of Black and White (stone) prisoners
-   - for invite-games = number of B/W-players komi-bid, only used for fair auction komi
+   - number of Black and White (stone) prisoners
 
-* Last_X, Last_Y, Last_Move : ??
+* Last_X, Last_Y : legacy-fields ??
+   - purpose unclear. sure it holds the last position, but for what is unclear
+     - a possibility is to check for last-move in the "old" quick_play-suite
+
+* Last_Move : legacy-field
+   - according to comment in 'scripts/game_consistency.php', field-usage is:
+     old way to detect Ko. Could be removed when no more old way games.
 
 * Flags : game-flags indicating certain state of game
    - Ko: last move has taken a single stone, used to check for Ko
@@ -209,6 +230,42 @@ Description:
      the game has been started, while the ShapeID keeps the original reference
      to shape-id => opening the view-shape-page with shape-id AND the current snapshot
      of the game shows the differences
+
+* GameSetup : game-settings to handle rematch, fair-komi-negotiation, invitation
+   - can be empty (for older games or multi-player-games) -> default-handling is used
+
+   - Format:
+      - values separated by ':' (const 'GS_SEP')
+      - groups for Type, User, Handicap, Komi, Restrictions, Comments
+
+      - see class GameSetup in "include/game_functions.php"
+      - "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:FK<oppkomi>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
+         - <htype> : handicap-type
+         - <uid> : user-id (=Players.ID), game started/initiated by given user
+         - <adj*> : [+|-] number
+         - <komi> : komi-bid of user, can be empty, used for fair-komi
+         - <jigomode> : jigo-mode
+         - <oppkomi> : komi-bid of opponent, can be empty, used for fair-komi
+         - <mustBeRated> : 0=false, 1=true
+         - <minRG> : min. rated finished games, see WaitingRoom.MinRatedGames in 'specs/db/table-Waitingroom.txt'
+         - <sameOpp> : see Waitingroom.SameOpponent in 'specs/db/table-Waitingroom.txt'
+         - <msg> : waiting-room-comment or invitation-message (part)
+      - Example: "T1:U123:H0:-2:0:9:K6.5:0:J2:FK:R1:-800:2000:5:-101:Cslow game"
+
+      - for invitations, field 'GameSetup' contains two strings, one for each player:
+         - used to store all game-setup to tell the difference on disputes
+         - will be replaced by only "T..C<msg>" when invitation is accepted
+         - format GameSetup := "T..C:I... T..C:I.." with <msg> empty, part-separator is space ' '
+         - "I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
+            - 'I' stands for invitation-game-setup-part
+            - <size> : board-size
+            - <rated> : 0=unrated, 1=rated
+            - <ruleset> : 1=japanese, 2=chinese
+            - <stdH> : 0=free-handicap, 1=std-handicap
+            - <byoType> : J=japanese-byo-yomi, C=canadian-byo-yomi, F=Fischer-time
+            - <mainT>, <byoTime>, <byoPeriods> : number (=hours)
+            - <wkclock> : 0=clock-stopped-on-weekend, 1=clock-running-on-weekend
+      - Example: "T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r0:0:tF:45:15:0:0"
 
 
 ###########################################################################

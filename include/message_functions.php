@@ -31,12 +31,6 @@ require_once 'include/classlib_game.php';
 require_once 'include/shape_control.php';
 
 
-define('INVITE_HANDI_CONV',   -1);
-define('INVITE_HANDI_PROPER', -2);
-define('INVITE_HANDI_NIGIRI', -3);
-define('INVITE_HANDI_DOUBLE', -4);
-define('INVITE_HANDI_AUCTION_KOMI', -5);
-
 // game-settings form-/table-style defs
 define('GSET_WAITINGROOM', 'waitingroom');
 define('GSET_TOURNAMENT_LADDER', 'tournament_ladder');
@@ -76,6 +70,7 @@ function init_standard_folders()
  * \param $viewmode:
  *     GSETVIEW_SIMPLE = simple view with some hidden settings
  *     GSETVIEW_EXPERT = advanced view with all possible settings (no multi-player-stuff); auto for tourney
+ *     GSETVIEW_FAIRKOMI = fair-komi view with restricted settings (even, no handicap, no adjustments, normal type)
  *     GSETVIEW_MPGAME = view with settings allowed for multi-player-game; auto for MP-game-type
  * \param $map_ratings:
  *     if set, contain map with keys (rating1, rating2) ->
@@ -94,9 +89,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $viewmode = GSETVIEW_SIMPLE;
 
    $is_fstyle_tourney = ( $formstyle == GSET_TOURNAMENT_LADDER || $formstyle == GSET_TOURNAMENT_ROUNDROBIN );
+   $is_fstyle_invite = ( $formstyle == GSET_MSG_INVITE || $formstyle == GSET_MSG_DISPUTE );
    if( $is_fstyle_tourney )
       $viewmode = GSETVIEW_EXPERT;
    $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
+   $is_view_fairkomi = ( $viewmode == GSETVIEW_FAIRKOMI );
 
    $allowed = true;
    $shape_init = true;
@@ -110,7 +107,6 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $CategoryHandiType = get_category_handicaptype( $Handitype );
    $Handicap_m = 0;
    $Komi_m = DEFAULT_KOMI;
-   $Komi_auko = NULL; // unset per default
    $AdjustKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
    $Ruleset = RULESET_JAPANESE; // using territory-scoring
@@ -118,8 +114,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
    $GamePlayers = '';
-   $Maintime = 1;
-   $MaintimeUnit = 'months';
+   $Maintime = 14;
+   $MaintimeUnit = 'days';
    // NOTE: take note, that '36 hours' eval to '2d + 6h' because of sleeping time
    $Byotype = BYOTYPE_FISCHER;
    $Byotime_jap = 1;
@@ -133,6 +129,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $WeekendClock = true;
    $StdHandicap = true;
    $Rated = true;
+
    if( $is_view_mpgame ) // defaults for MP-game
    {
       $GamePlayers = '2:2'; //rengo
@@ -170,21 +167,24 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if( isset($gid['cat_htype']) )
          $CategoryHandiType = (string)$gid['cat_htype'];
       if( isset($gid['color_m']) )
-         $Color_m = (string)$gid['color_m'];
-      $Handitype = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $Color_m : $CategoryHandiType;
+         $Color_m = $gid['color_m'];
+      $FairKomiHanditype = ( isset($gid['fk_htype']) ) ? $gid['fk_htype'] : $Color_m;
+      if( $CategoryHandiType === CAT_HTYPE_MANUAL )
+         $Handitype = $Color_m;
+      elseif( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI )
+         $Handitype = $FairKomiHanditype;
+      else
+         $Handitype = $CategoryHandiType;
 
       if( isset($gid['handicap_m']) )
          $Handicap_m = (int)$gid['handicap_m'];
       if( isset($gid['komi_m']) )
          $Komi_m = (float)$gid['komi_m'];
 
-      if( isset($gid['komi_auko']) )
-         $Komi_auko = trim($gid['komi_auko']);
-
       if( isset($gid['adj_komi']) )
          $AdjustKomi = (float)$gid['adj_komi'];
       if( isset($gid['jigo_mode']) )
-         $JigoMode = (string)$gid['jigo_mode'];
+         $JigoMode = $gid['jigo_mode'];
 
       if( isset($gid['adj_handicap']) )
          $AdjustHandicap = (int)$gid['adj_handicap'];
@@ -194,10 +194,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          $MaxHandicap = min( MAX_HANDICAP, max( 0, (int)$gid['max_handicap'] ));
 
       if( isset($gid['byoyomitype']) )
-         $Byotype = (string)$gid['byoyomitype'];
+         $Byotype = $gid['byoyomitype'];
 
       if( isset($gid['game_players']) )
-         $GamePlayers = (string)$gid['game_players'];
+         $GamePlayers = $gid['game_players'];
 
       // NOTE on time-hours: 36 hours eval to 2d + 6h (because of sleeping time)
 
@@ -223,7 +223,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if( isset($gid['byotimevalue_fis']) )
          $Byotime_fis = (int)$gid['byotimevalue_fis'];
       if( isset($gid['timeunit_fis']) )
-         $ByotimeUnit_fis = (string)$gid['timeunit_fis'];
+         $ByotimeUnit_fis = $gid['timeunit_fis'];
 
       $WeekendClock = ( @$gid['weekendclock'] == 'Y' );
       $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
@@ -234,13 +234,12 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       // If dispute, use values from game $gid tables
       $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods," .
-                 "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, " .
-                 "Black_ID,Black_Prisoners,White_Prisoners, " . // for auction-komi
+                 "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, GameSetup, " .
                  "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS myColor " .
                  "FROM (Games,Players) WHERE Games.ID=$gid" .
                  " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
                  " AND Players.ID=White_ID+Black_ID-$my_ID" .
-                 " AND Status='INVITED'" ;
+                 " AND Status='".GAME_STATUS_INVITED."'" ;
       $game_row = mysql_single_fetch( "game_settings_form($gid)", $query );
       if( !$game_row )
          error('unknown_game', "game_settings_form($gid)");
@@ -254,47 +253,17 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $Rated = ( $game_row['Rated'] == 'Y' );
       $StdHandicap = ( $game_row['StdHandicap'] == 'Y' );
       $WeekendClock = ( $game_row['WeekendClock'] == 'Y' );
+      $Handicap_m = $game_row['Handicap'];
+      $Komi_m = $game_row['Komi'];
 
-      $Color_m = ( $game_row['myColor'] == BLACK ? HTYPE_BLACK : HTYPE_WHITE );
-
-      //ToMove_ID hold handitype since INVITATION
-      switch( (int)$game_row['ToMove_ID'] )
-      {
-         case INVITE_HANDI_CONV:
-            $Handitype = HTYPE_CONV;
-            break;
-
-         case INVITE_HANDI_PROPER:
-            $Handitype = HTYPE_PROPER;
-            break;
-
-         case INVITE_HANDI_NIGIRI:
-            $Handitype = HTYPE_NIGIRI;
-            $Color_m = HTYPE_NIGIRI;
-            $Komi_m = $game_row['Komi'];
-            break;
-
-         case INVITE_HANDI_DOUBLE:
-            $Handitype = HTYPE_DOUBLE;
-            $Color_m = HTYPE_DOUBLE;
-            $Handicap_m = $game_row['Handicap'];
-            $Komi_m = $game_row['Komi'];
-            break;
-
-         case INVITE_HANDI_AUCTION_KOMI:
-            $Handitype = HTYPE_AUCTION_KOMI;
-            $komi_tmp = ( $game_row['Black_ID'] == $my_ID ) ? $game_row['Black_Prisoners'] : $game_row['White_Prisoners'];
-            if( is_null($Komi_auko) && $komi_tmp != INIT_KOMI_BID )
-               $Komi_auko = (float)$komi_tmp / 2.0;
-            break;
-
-         default: //Manual: any positive value
-            $Handitype = $Color_m;
-            $Handicap_m = $game_row['Handicap'];
-            $Komi_m = $game_row['Komi'];
-            break;
-      }
+      //ToMove_ID holds handitype since INVITATION
+      $my_col_black = ( $game_row['myColor'] == BLACK );
+      $Handitype = get_handicaptype_for_invite( (int)$game_row['ToMove_ID'], $my_col_black );
+      if( !$Handitype )
+         $Handitype = HTYPE_NIGIRI; //default
       $CategoryHandiType = get_category_handicaptype( $Handitype );
+      $Color_m = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $Handitype : HTYPE_NIGIRI;
+      $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $game_row['GameSetup'], $gid );
 
       $MaintimeUnit = 'hours';
       $Maintime = $game_row['Maintime'];
@@ -391,7 +360,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $mform->add_row( array( 'SPACE' ) );
 
    // Conventional & Proper handicap
-   if( !$is_view_mpgame )
+   if( !$is_view_mpgame && !$is_view_fairkomi )
    {
       $trc = T_('Conventional handicap (komi 0.5 if not even)');
       $trp = T_('Proper handicap (komi adjusted by system)');
@@ -437,14 +406,9 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    // Manual game: nigiri, double, black, white
    $handi_stones = build_arr_handicap_stones();
-   if( !$is_view_mpgame )
+   if( !$is_view_mpgame && !$is_view_fairkomi )
    {
-      $color_arr = array(
-            HTYPE_NIGIRI => T_('Nigiri#htman'),
-            HTYPE_DOUBLE => T_('Double#htman'),
-            HTYPE_BLACK  => T_('Black#htman'),
-            HTYPE_WHITE  => T_('White#htman'),
-         );
+      $color_arr = GameTexts::get_manual_handicap_types();
       if( $is_fstyle_tourney || $is_view_mpgame )
          unset($color_arr[HTYPE_DOUBLE]);
 
@@ -466,18 +430,21 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXTINPUT', 'komi_m', 5, 5, $Komi_m, ));
    }//manual HType
 
-   // Auction-komi
-   if( ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_EXPERT)
-      || ($formstyle == GSET_MSG_INVITE || $formstyle == GSET_MSG_DISPUTE) )
+
+   // Fair-komi
+   if( $is_view_fairkomi || $is_fstyle_invite )
    {
-      $mform->add_row( array(
-         'DESCRIPTION', T_('Auction Komi') .
-            ($formstyle == GSET_MSG_INVITE ? sprintf(' (%s)', T_('even game#auct_komi')) : ''),
-         'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_AUCTION_KOMI => '' ), $CategoryHandiType,
-         'TEXT', sptext(T_('Komi bid#auct_komi')),
-         'TEXTINPUT', 'komi_auko', 5, 5, ( is_null($Komi_auko) ? '' : $Komi_auko ),
-         'TEXT', get_auction_komi_note('(%s)'), ));
-   }//auction-komi HType
+      $row_arr = array( 'DESCRIPTION', T_('Fair Komi (even game)') );
+      if( $is_view_fairkomi )
+         $mform->add_hidden('cat_htype', CAT_HTYPE_FAIR_KOMI);
+      else
+         array_push( $row_arr, 'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_FAIR_KOMI => '' ), $CategoryHandiType );
+      array_push( $row_arr,
+         'SELECTBOX', 'fk_htype', 1, GameTexts::get_fair_komi_types(), $Handitype, false,
+         'TEXT', sptext(T_('Jigo-Check#fairkomi'), 1),
+         'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(/*fairkomi*/true), $JigoMode, false );
+      $mform->add_row( $row_arr );
+   }
 
 
    $expert_view = ( $is_fstyle_tourney || ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_EXPERT) );
@@ -508,7 +475,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             ));
    }
 
-   if( ENABLE_STDHANDICAP )
+   if( ENABLE_STDHANDICAP && !$is_view_fairkomi )
    {
       $arr = array();
       if( $expert_view )
@@ -524,24 +491,19 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    if( $expert_view )
    {
       // adjust komi
-      $jigo_modes = array(
-         'KEEP_KOMI'  => T_('Unchanged komi#jigo_mode'),
-         'ALLOW_JIGO' => T_('Allow Jigo#jigo_mode'),
-         'NO_JIGO'    => T_('No Jigo#jigo_mode'),
-      );
       $mform->add_row( array(
             'DESCRIPTION', T_('Komi'),
             'TEXT', sptext(T_('Adjust by#komi')),
             'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
             'TEXT', sptext(T_('Jigo mode'), 1),
-            'SELECTBOX', 'jigo_mode', 1, $jigo_modes, $JigoMode, false,
+            'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(/*fairkomi*/false), $JigoMode, false,
          ));
    }
-   else
-      $mform->add_row( array(
-            'HIDDEN', 'adj_komi',  $AdjustKomi,
-            'HIDDEN', 'jigo_mode', $JigoMode,
-         ));
+   elseif( !$is_view_fairkomi && !$is_fstyle_invite )
+   {
+      $mform->add_hidden('adj_komi', $AdjustKomi);
+      $mform->add_hidden('jigo_mode', $JigoMode);
+   }
 
 
    if( $formstyle == GSET_WAITINGROOM && $is_view_mpgame )
@@ -790,11 +752,10 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
  *     GSET_WAITINGROOM = for waiting_room.php
  *     GSET_TOURNAMENT_LADDER = for ladder-tournament challenge
  *     GSET_TOURNAMENT_ROUNDROBIN = for round-robin-tournament
- * \param $gi_form Form-object (mandatory for auction-komi to ask for opponent komi-bid)
  */
-function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_form=null )
+function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
 {
-   global $base_path, $player_row;
+   global $base_path;
 
    $Color = HTYPE_NIGIRI; // default, always represents My-Color (of current player)
    $AdjKomi = 0.0;
@@ -808,9 +769,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
-   //   Games: Status, Game_mid(=mid), GameType, GamePlayers, Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
-   //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, ShapeID, ShapeSnapshot, myColor,
-   //          Black_ID, Black_Prisoners, White_Prisoners; X_TotalCount
+   //   Games: ID, Status, Game_mid(=mid), GameType, GamePlayers, Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
+   //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, ShapeID, ShapeSnapshot, GameSetup, myColor;
+   //          X_TotalCount
    extract($game_row);
 
    // handle shape-games
@@ -823,11 +784,12 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
       $ShapeBlackFirst = (booL)@$arr_shape['PlayColorB'];
    }
 
-   $is_my_game = ( $game_row['other_id'] == $player_row['ID'] );
+   $my_id = $player_row['ID'];
+   $is_my_game = ( $game_row['other_id'] == $my_id );
 
    if( $tablestyle == GSET_WAITINGROOM )
    {
-      $Handitype = (string)$Handicaptype;
+      $Handitype = $Handicaptype;
       $CategoryHandiType = get_category_handicaptype( $Handitype );
       if( $CategoryHandiType == CAT_HTYPE_MANUAL )
          $Color = $Handitype;
@@ -845,64 +807,49 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
          ? ((int)@$player_row['RatedGames'] >= $MinRatedGames)
          : true;
       //$haverating passed in from $game_row
-
-      $komi_bid = get_request_arg('komi_bid'); // auction-komi
    }
    elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
    {
       // for transparency put following into separate fields (see tournaments/ladder/challenge.php)
-      $Handitype  = (string)$X_Handitype;
-      $Color      = (string)$X_Color;
+      $Handitype  = $X_Handitype;
+      $Color      = $X_Color;
       $calculated = (bool)$X_Calculated;
-
       $CategoryHandiType = get_category_handicaptype( $Handitype );
 
       $goodrating = 1;
       $goodmingames = true;
       $haverating = ( $iamrated ) ? 1 : !$calculated;
-
-      $komi_bid = NULL; // auction-komi
    }
    else // invite|dispute
    {
       $tablestyle = GSET_MSG_INVITE;
-      $Color = ($myColor == BLACK) ? HTYPE_BLACK : HTYPE_WHITE;
-      $komi_bid = NULL; // auction-komi
+      $Color = HTYPE_NIGIRI; //default
+      $my_color_black = ($myColor == BLACK);
+      $calculated = false;
 
-      //ToMove_ID hold handitype since INVITATION
-      switch( (int)$game_row['ToMove_ID'] )
+      //ToMove_ID holds handitype since INVITATION
+      $Handitype = get_handicaptype_for_invite( (int)$game_row['ToMove_ID'], $my_color_black );
+      switch( (string)$Handitype )
       {
-         case INVITE_HANDI_CONV:
-            $Handitype = HTYPE_CONV;
+         case HTYPE_CONV:
+         case HTYPE_PROPER:
             $calculated = true;
             break;
-         case INVITE_HANDI_PROPER:
-            $Handitype = HTYPE_PROPER;
-            $calculated = true;
-            break;
-         case INVITE_HANDI_NIGIRI:
-            $Handitype = HTYPE_NIGIRI;
+
+         case HTYPE_NIGIRI:
+         case HTYPE_DOUBLE:
+         case HTYPE_BLACK:
+         case HTYPE_WHITE:
             $Color = $Handitype;
-            $calculated = false;
             break;
-         case INVITE_HANDI_DOUBLE:
-            $Handitype = HTYPE_DOUBLE;
-            $Color = $Handitype;
-            $calculated = false;
+
+         case HTYPE_AUCTION_SECRET:
+            $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( CAT_HTYPE_FAIR_KOMI, $my_id,
+               @$game_row['GameSetup'], $game_row['ID'] );
             break;
-         case INVITE_HANDI_AUCTION_KOMI:
-            $Handitype = HTYPE_AUCTION_KOMI;
-            $Color = HTYPE_NIGIRI;
-            $calculated = false;
-            $komi_tmp = ( $game_row['Black_ID'] == $player_row['ID'] )
-               ? (int)$game_row['Black_Prisoners']
-               : (int)$game_row['White_Prisoners'];
-            $Komi = ( $komi_tmp != INIT_KOMI_BID ) ? (float)$komi_tmp / 2.0 : NULL;
-            $komi_bid = ( isset($_REQUEST['komi_bid']) ) ? trim($_REQUEST['komi_bid']) : $Komi;
-            break;
-         default: //Manual: any positive value
-            $Handitype = ($myColor == BLACK) ? HTYPE_BLACK : HTYPE_WHITE;
-            $calculated = false;
+
+         default: //shouldn't happen
+            $Handitype = $Color = ($my_color_black) ? HTYPE_BLACK : HTYPE_WHITE;
             break;
       }
       $CategoryHandiType = get_category_handicaptype( $Handitype );
@@ -911,6 +858,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
       $goodmingames = true;
       $haverating = ( $iamrated ) ? 1 : !$calculated;
    }
+   $is_fairkomi = ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI );
 
 
    // ---------- start game-info table ------------------------
@@ -993,7 +941,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
             //       so use same choices for waitingroom/invite/dispute
             if( $is_my_game )
             {
-               $subtype = ( $Color == HTYPE_BLACK) ? T_('Color Black') : T_('Color White');
+               $subtype = ( $Color == HTYPE_BLACK ) ? T_('Color Black') : T_('Color White');
                $colortxt =
                   (( $Color == HTYPE_BLACK )
                      ? image( $base_path.'17/b.gif', T_('Black'), null, $color_class)
@@ -1008,7 +956,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
                   $user_w = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
                   $user_b = $player_row;
                }
-               else
+               else //HTYPE_WHITE
                {
                   $subtype = T_('Color Black');
                   $user_w = $player_row;
@@ -1035,14 +983,11 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
          break;
       }//case CAT_HTYPE_MANUAL
 
-      case CAT_HTYPE_AUCTION_KOMI: // Auction komi
+      case CAT_HTYPE_FAIR_KOMI: // Fair Komi
       {
-         $itable->add_sinfo( T_('Type'), T_('Auction Komi') );
-         $itable->add_sinfo( T_('Handicap'), $Handicap );
-         if( $is_my_game || $tablestyle == GSET_MSG_INVITE )
-            $itable->add_sinfo( T_('Komi (my bid)'), ( is_null($Komi) ? NO_VALUE : $Komi ) );
+         $itable->add_sinfo( T_('Type'), sprintf( T_('%s (Fair Komi)'), GameTexts::get_fair_komi_types($Handitype) ) );
          break;
-      }//case CAT_HTYPE_AUCTION_KOMI
+      }//case CAT_HTYPE_FAIR_KOMI
    }//switch $CategoryHandiType
 
    if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
@@ -1052,19 +997,22 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
          $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
    }
 
-   if( ENABLE_STDHANDICAP )
+   if( ENABLE_STDHANDICAP && !$is_fairkomi )
       $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
    if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
    {
-      $adj_komi_str = build_adjust_komi( $AdjKomi, $JigoMode );
-      if( (string)$adj_komi_str != '' )
-         $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
+      if( !$is_fairkomi )
+      {
+         $adj_komi_str = build_adjust_komi( $AdjKomi, $JigoMode );
+         if( (string)$adj_komi_str != '' )
+            $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
+      }
    }
 
    if( $tablestyle == GSET_WAITINGROOM ) // Restrictions
    {
-      $ratinglimit_str = echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
+      $ratinglimit_str = echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax,
          $MinRatedGames, null, null, null, true);
       if( $ratinglimit_str != NO_VALUE )
          $itable->add_sinfo(
@@ -1111,7 +1059,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
          list($infoHandicap,$infoKomi,$info_i_am_black, $is_nigiri) =
             suggest_conventional($player_row['Rating2'], $other_rating, $Size);
       }
-      elseif( $CategoryHandiType == CAT_HTYPE_AUCTION_KOMI )
+      elseif( $is_fairkomi )
       {
          $infoHandicap = $Handicap;
          $infoKomi = 0;
@@ -1135,24 +1083,26 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
          : '';
 
       // adjust komi
-      $infoKomi_old = $infoKomi;
-      $infoKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
-      if( $Handitype != HTYPE_AUCTION_KOMI )
-         $adj_komi_str = ( $infoKomi != $infoKomi_old ) ? sprintf( T_('adjusted from %.1f'), $infoKomi_old ) : '';
-      else // auction-komi
+      if( $is_fairkomi )
+         $adj_komi_str = '';
+      else
       {
-         $adj_komi_str = ( $infoKomi != $infoKomi_old )
-            ? sprintf( T_('will be adjusted by %s%.1f'), ($infoKomi < 0 ? '-' : '+'), abs($infoKomi) )
-            : '';
+         $infoKomi_old = $infoKomi;
+         $infoKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
+         $adj_komi_str = ( $infoKomi != $infoKomi_old ) ? sprintf( T_('adjusted from %.1f'), $infoKomi_old ) : '';
       }
 
-      if( $calculated || $adj_handi_str || $adj_komi_str || ($Handitype == HTYPE_AUCTION_KOMI ) )
+      if( $calculated || $adj_handi_str || $adj_komi_str || $is_fairkomi )
       {
          // determine color
          if( $Handitype == HTYPE_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
-         elseif( $Handitype == HTYPE_AUCTION_KOMI )
-            $colortxt = image( $base_path.'17/y.gif', T_('Auction Komi#color'), T_('Color determined by higher bid on komi#color'), $color_class );
+         elseif( $is_fairkomi )
+         {
+            $color_note = GameTexts::get_fair_komi_color_note($Handitype);
+            $colortxt = image( $base_path.'17/y.gif', GameTexts::get_fair_komi_types($Handitype), null, $color_class )
+               . MED_SPACING . $color_note;
+         }
          elseif( $Handitype == HTYPE_NIGIRI || $is_nigiri )
             $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class);
          else
@@ -1165,29 +1115,18 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $gi_fo
          $itable->add_sinfo( T_('Handicap'),
                $infoHandicap . ($adj_handi_str ? MED_SPACING."($adj_handi_str)" : '' ) );
 
-         if( $Handitype == HTYPE_AUCTION_KOMI && $tablestyle != GSET_TOURNAMENT_LADDER )
-         {
-            if( is_null($gi_form) )
-               $itable->add_sinfo( T_('Auction Komi'), T_('Opponent Komi bid#auct_komi') );
-            else
-            {
-               $itable->add_sinfo( T_('Auction Komi'),
-                     sptext(T_('My Komi bid#auct_komi')) .
-                     $gi_form->print_insert_text_input('komi_bid', 5, 5, ( is_null($komi_bid) ? '' : $komi_bid )) );
-            }
-            if( $adj_komi_str )
-               $itable->add_sinfo( T_('Final Komi'), $adj_komi_str );
-         }
-         else
-         {
-            $itable->add_sinfo( T_('Komi'),
-                  sprintf("%.1f", $infoKomi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' ) );
-         }
+         $komi_text = ( $is_fairkomi )
+            ? T_('negotiated by Fair Komi#fairkomi')
+            : sprintf("%.1f", $infoKomi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
+         $itable->add_sinfo( T_('Komi'), $komi_text );
+
+         if( $is_fairkomi )
+            $itable->add_sinfo( T_('Jigo-Check#fairkomi'), GameTexts::get_jigo_modes(/*fairkomi*/true, $JigoMode) );
       }
    } //Probable settings
 
    $itable->echo_table();
-} // end of 'game_info_table'
+}//game_info_table
 
 // output (with optional parts): prefix +/-adj [jigomode] suffix
 // returns '' if no komi-adjustment; caller must format "empty" value
@@ -1236,7 +1175,7 @@ function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $pr
  * \param $SameOpponent ignore if null
  * \param $Hidden ignore if null
  */
-function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedGames,
+function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedGames,
       $OppGoodMaxGames=null, $SameOpponent=null, $Hidden=null, $short=false )
 {
    $out = array();
@@ -1244,8 +1183,8 @@ function echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax, $MinRatedG
    if( $MustBeRated == 'Y')
    {
       // +/-50 reverse the inflation from add_to_waitingroom.php
-      $r1 = echo_rating( $Ratingmin + 50, false, 0, false, $short );
-      $r2 = echo_rating( $Ratingmax - 50, false, 0, false, $short );
+      $r1 = echo_rating( $RatingMin + 50, false, 0, false, $short );
+      $r2 = echo_rating( $RatingMax - 50, false, 0, false, $short );
       if( $r1 == $r2 )
          $Ratinglimit = sprintf( T_('%s only'), $r1);
       else
@@ -1698,10 +1637,10 @@ class DgsMessage
             'P.Handle AS other_handle', 'P.Name AS other_name',
             'P.Rating2 AS other_rating', 'P.RatingStatus AS other_ratingstatus',
             'G.mid AS Game_mid', 'G.Status', 'G.GameType', 'G.GamePlayers',
-            'G.Black_ID', 'G.Black_Prisoners', 'G.White_Prisoners', // for invite/dispute auction-komi
+            'G.Black_ID', 'G.White_ID', // for invite/dispute fair-komi
             'G.Ruleset', 'G.Size', 'G.Komi', 'G.Handicap',
             'G.Rated', 'G.WeekendClock', 'G.StdHandicap', 'G.Maintime', 'G.Byotype', 'G.Byotime',
-            'G.Byoperiods', 'G.ToMove_ID', 'G.ShapeID', 'G.ShapeSnapshot',
+            'G.Byoperiods', 'G.ToMove_ID', 'G.ShapeID', 'G.ShapeSnapshot', 'G.GameSetup',
             "IF(White_ID=$uid,".WHITE.",".BLACK.") AS myColor" );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Players AS P ON P.ID=other.uid",
