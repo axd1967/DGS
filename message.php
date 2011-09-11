@@ -357,7 +357,12 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
-         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated, ($can_reply ? $message_form : null) );
+         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated );
+
+         // show dispute-diffs to opponent game-settings
+         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
+         if( !is_null($my_gs) && !is_null($opp_gs) )
+            echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
 
          if( $can_reply )
          {
@@ -403,6 +408,19 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings);
          else
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, $my_id, $Game_ID, $map_ratings);
+
+         // show dispute-diffs to opponent game-settings
+         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
+         if( !is_null($opp_gs) )
+         {
+            if( $preview )
+            {
+               $opp_row = array( 'ID' => $other_id, 'RatingStatus' => $other_ratingstatus, 'Rating2' => $other_rating );
+               $my_gs = make_invite_game_setup( $player_row, $opp_row );
+            }
+            if( !is_null($my_gs) )
+               echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
+         }
 
          $message_form->add_row( array(
                'HEADER', T_('Dispute settings'),
@@ -576,13 +594,7 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
       else if( $accepttype )
       {
          $msg_gid = (int)@$_REQUEST['gid'];
-         $komi_bid = trim(@$_REQUEST['komi_bid']);
-         $error = accept_invite_game( $msg_gid, $player_row, $opponent_row, $komi_bid );
-         if( $error === 'err_komi_bid' )
-         {
-            $dgs_message->add_error( T_('Your komi bid for handicap type "Auction Komi" is missing or invalid!') );
-            return $dgs_message->errors;
-         }
+         accept_invite_game( $msg_gid, $player_row, $opponent_row );
          $subject = 'Game invitation accepted';
       }
       else if( $declinetype )
@@ -821,5 +833,27 @@ function read_mpgame_request()
 
    return array( implode(' ', array_values($handles)), $handles, $mpg_arr );
 }//read_mpgame_request
+
+// show diffs in game-settings for invitation-dispute between players
+function echo_dispute_diffs( $my_gs, $opp_gs, $my_handle, $opp_handle, &$msg_form  )
+{
+   $arr_diffs = GameSetup::build_invitation_diffs( $my_gs, $opp_gs );
+   if( count($arr_diffs) )
+   {
+      array_unshift( $arr_diffs, array( T_('Game settings by#inv_diff'),
+         sprintf( '%s (%s)', $my_handle, T_('myself#inv_diff')), $opp_handle ));
+
+      $msg_form->add_row( array('HEADER', T_('Differences of Dispute') ));
+      foreach( $arr_diffs as $diff )
+      {
+         list( $field, $old, $new ) = $diff;
+         $msg_form->add_row( array(
+               'DESCRIPTION', span('IDiffField', $field),
+               'TEXT', sprintf( span('InvDiffs', ( @$diff[3] ? "%s <><br>\n%s" : '%s <> %s')),
+                                span('Old', $old), span('New', $new) ),
+            ));
+      }
+   }
+}//echo_dispute_diffs
 
 ?>
