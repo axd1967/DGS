@@ -73,6 +73,7 @@ require_once( 'include/utilities.php' );
    $menu_array = array();
    $menu_array[T_('New game')] = 'new_game.php?' . $shape_url_suffix;
    $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT . $shape_url_suffix;
+   $menu_array[T_('New fair-komi game')] = 'new_game.php?view='.GSETVIEW_FAIRKOMI . $shape_url_suffix;
    if( @$player_row['RatingStatus'] != RATING_NONE )
       $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME . $shape_url_suffix;
    $menu_array[T_('Shapes#shape')] = 'list_shapes.php';

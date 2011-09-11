@@ -64,6 +64,7 @@ define('VACATION_CLOCK', -1); // keep it < 0
 
 // ---------- Games stuff -----------------------------------------
 
+define('GAME_STATUS_KOMI', 'KOMI');
 define('GAME_STATUS_SETUP', 'SETUP');
 define('GAME_STATUS_INVITED', 'INVITED');
 define('GAME_STATUS_PLAY', 'PLAY');
@@ -71,8 +72,9 @@ define('GAME_STATUS_PASS', 'PASS');
 define('GAME_STATUS_SCORE', 'SCORE');
 define('GAME_STATUS_SCORE2', 'SCORE2');
 define('GAME_STATUS_FINISHED', 'FINISHED');
-define('CHECK_GAME_STATUS', 'SETUP|INVITED|PLAY|PASS|SCORE|SCORE2|FINISHED');
+define('CHECK_GAME_STATUS', 'KOMI|SETUP|INVITED|PLAY|PASS|SCORE|SCORE2|FINISHED');
 define('CHECK_GAME_STATUS_RUNNING', 'PLAY|PASS|SCORE|SCORE2');
+define('CHECK_GAME_STATUS_STARTED', 'KOMI|PLAY|PASS|SCORE|SCORE2');
 
 //keep next constants powers of 2
 define('GAMEFLAGS_KO', 0x01);
@@ -99,7 +101,8 @@ define('CHECK_RULESETS', 'JAPANESE|CHINESE');
 define('GSETVIEW_SIMPLE', 0);
 define('GSETVIEW_EXPERT', 1);
 define('GSETVIEW_MPGAME', 2); // multi-player
-define('MAX_GSETVIEW', 2);
+define('GSETVIEW_FAIRKOMI', 3);
+define('MAX_GSETVIEW', 3);
 
 
 define('MAX_SEKI_MARK', 2);
