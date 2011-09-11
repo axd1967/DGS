@@ -36,7 +36,7 @@ if( ALLOW_TOURNAMENTS ) {
 $GLOBALS['ThePage'] = new Page('GameInfo');
 
 
-// map Games.Status -> SETUP, INVITED, "RUNNING", FINISHED
+// map Games.Status -> KOMI, SETUP, INVITED, "RUNNING", FINISHED
 function build_game_status( $status )
 {
    return isRunningGame($status) ? 'RUNNING' : $status;
@@ -123,17 +123,26 @@ function build_rating_diff( $rating_diff )
 
 
    // init some vars
-   $is_my_game = ( $my_id == $grow['Black_ID'] || $my_id == $grow['White_ID'] );
+   $black_id = $grow['Black_ID'];
+   $white_id = $grow['White_ID'];
+   $is_my_game = ( $my_id == $black_id || $my_id == $white_id );
    $arr_status = array( // see build_game_status()
       GAME_STATUS_SETUP    => T_('Setup'),
       GAME_STATUS_INVITED  => T_('Inviting'),
       'RUNNING'            => T_('Running'),
       GAME_STATUS_FINISHED => T_('Finished'),
+      GAME_STATUS_KOMI     => T_('Komi Negotiation'),
       );
    $status = build_game_status($grow['Status']);
    $game_finished = ( $grow['Status'] === GAME_STATUS_FINISHED );
-
    $to_move = get_to_move( $grow, 'gameinfo.bad_ToMove_ID' );
+
+   $game_setup = GameSetup::new_from_game_setup($grow['GameSetup']);
+   $Handitype = $game_setup->Handicaptype;
+   $cat_htype = get_category_handicaptype($Handitype);
+   $is_fairkomi = ( $cat_htype == CAT_HTYPE_FAIR_KOMI );
+   $is_fairkomi_negotiation = ( $is_fairkomi && $grow['Status'] == GAME_STATUS_KOMI );
+   $fk_htype_text = GameTexts::get_fair_komi_types($Handitype);
 
 
    // ------------------------
@@ -175,6 +184,10 @@ function build_rating_diff( $rating_diff )
          $arr_status[$status]
             . ( $is_admin ? " (<span class=\"DebugInfo\">{$grow['Status']}</span>)" : '')
       );
+   if( $is_fairkomi )
+      $itable->add_sinfo(
+            T_('Fair Komi Type#fairkomi'),
+            $fk_htype_text );
    if( $game_finished )
    {
       $admResult = ( $grow['X_Flags'] & GAMEFLAGS_ADMIN_RESULT )
@@ -187,7 +200,8 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo( T_('Ruleset'),     getRulesetText($grow['Ruleset']) );
    $itable->add_sinfo( T_('Size'),        $grow['Size'] );
    $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
-   $itable->add_sinfo( T_('Komi'),        $grow['Komi'] );
+   $itable->add_sinfo( T_('Komi'),
+      ( $is_fairkomi_negotiation ? T_('negotiated by Fair Komi#fairkomi') : $grow['Komi'] ) );
    $itable->add_sinfo( T_('Rated'),       yesno($grow['X_Rated']) );
    $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) ); // Yes=clock runs on weekend
    $itable->add_sinfo( T_('Standard Handicap'), yesno($grow['StdHandicap']) );
@@ -198,20 +212,40 @@ function build_rating_diff( $rating_diff )
    // ------------------------
    // build table-info: players
 
+   $color_class = 'class="InTextImage"';
+   if( $is_fairkomi )
+   {
+      $fk = new FairKomiNegotiation($game_setup, $grow);
+      $komibid_black = $fk->get_view_komibid( $my_id, $black_id );
+      $komibid_white = $fk->get_view_komibid( $my_id, $white_id );
+   }
+   else
+      $komibid_black = $komibid_white = '';
+   if( $is_fairkomi_negotiation )
+   {
+      $icon_col_b = $icon_col_w = image( $base_path.'17/y.gif', $fk_htype_text,
+         GameTexts::get_fair_komi_color_note($Handitype), $color_class );
+   }
+   else
+   {
+      $icon_col_b = image( $base_path.'17/b.gif', T_('Black'), null, $color_class );
+      $icon_col_w = image( $base_path.'17/w.gif', T_('White'), null, $color_class );
+   }
+
    $itable = new Table_info('players');
    $itable->add_caption( T_('Players') );
    $itable->add_sinfo(
          T_('Color'),
          array(
-            image( "{$base_path}17/b.gif", T_('Black'), null ),
-            image( "{$base_path}17/w.gif", T_('White'), null ),
+            $icon_col_b,
+            $icon_col_w,
          ),
          'class=Colors' );
    $itable->add_sinfo(
          T_('Player'),
          array(
-            user_reference( REF_LINK, 1, '', @$grow['Black_ID'], @$grow['Black_Name'], @$grow['Black_Handle'] ),
-            user_reference( REF_LINK, 1, '', @$grow['White_ID'], @$grow['White_Name'], @$grow['White_Handle'] ),
+            user_reference( REF_LINK, 1, '', $black_id, @$grow['Black_Name'], @$grow['Black_Handle'] ),
+            user_reference( REF_LINK, 1, '', $white_id, @$grow['White_Name'], @$grow['White_Handle'] ),
          ));
    if( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
    {
@@ -234,8 +268,8 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Current rating'),
          array(
-            echo_rating( @$grow['Black_Rating'], true, $grow['Black_ID'] ),
-            echo_rating( @$grow['White_Rating'], true, $grow['White_ID'] ),
+            echo_rating( @$grow['Black_Rating'], true, $black_id ),
+            echo_rating( @$grow['White_Rating'], true, $white_id ),
          ));
    $itable->add_sinfo(
          ($grow['GameType'] == GAMETYPE_GO) ? T_('Start rating') : T_('Group start rating'),
@@ -262,6 +296,16 @@ function build_rating_diff( $rating_diff )
                   build_rating_diff( @$grow['White_RatingDiff'] ),
                ));
       }
+   }
+   if( $komibid_black || $komibid_white )
+   {
+      $itable->add_sinfo(
+            T_('Komi Bid#fairkomi'),
+            array(
+               $komibid_black,
+               $komibid_white,
+            ),
+            'class="KomiBid"' );
    }
    $itable_str_players = $itable->make_table();
    unset($itable);
@@ -290,15 +334,19 @@ function build_rating_diff( $rating_diff )
       }
    }
 
+   $movefmt = T_('%s\'s turn#fairkomi_user');
+   if( $to_move == BLACK )
+      $player_to_move = $icon_col_b . ' ' . ( $is_fairkomi ? sprintf($movefmt, $grow['Black_Handle']) : T_('Black to move') );
+   else
+      $player_to_move = $icon_col_w . ' ' . ( $is_fairkomi ? sprintf($movefmt, $grow['White_Handle']) : T_('White to move') );
+
    $timefmt = TIMEFMT_SHORT | TIMEFMT_ZERO;
    $itable = new Table_info('time');
    $itable->add_caption( T_('Time settings and Remaining time') );
    $itable->add_sinfo(
          T_('Color'),
          array(
-            ( ($to_move == BLACK)
-               ? image( "{$base_path}17/b.gif", T_('Black'), null, 'class="InTextImage"' ) . ' ' . T_('Black to move')
-               : image( "{$base_path}17/w.gif", T_('White'), null, 'class="InTextImage"' ) . ' ' . T_('White to move') ),
+            $player_to_move,
             image( "{$base_path}17/b.gif", T_('Black'), null ),
             image( "{$base_path}17/w.gif", T_('White'), null ),
          ),
@@ -409,14 +457,14 @@ function build_rating_diff( $rating_diff )
                T_('Tourney Game Status#tourney'),
                TournamentGames::getStatusText($tgame->Status) );
 
-         if( $tgame->isScoreStatus() && @$grow['Black_ID'] )
+         if( $tgame->isScoreStatus() && $black_id )
          {
             $arr_flags = array();
             if( $tgame->Flags & TG_FLAG_GAME_END_TD )
                $arr_flags[] = T_('by TD#TG_flag');
             $flags_str = (count($arr_flags)) ? sprintf( ' (%s)', implode(', ', $arr_flags)) : '';
 
-            $tg_score = $tgame->getScoreForUser( $grow['Black_ID'] );
+            $tg_score = $tgame->getScoreForUser( $black_id );
             $tg_score_str = score2text( $tg_score, false );
             if( !$game_finished || ( !is_null($tg_score) && @$grow['Score'] != $tg_score ) )
                $tg_score_str = span('ScoreWarning', $tg_score_str );
