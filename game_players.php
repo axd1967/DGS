@@ -420,7 +420,7 @@ function load_game( $gid )
    if( !$grow )
       error('unknown_game', "game_players.find.game2($gid)");
    $status = $grow['Status'];
-   if( $status == GAME_STATUS_INVITED )
+   if( $status == GAME_STATUS_INVITED || $status == GAME_STATUS_KOMI )
       error('invalid_game_status', "game_players.find.game3($gid,$status)");
    if( $grow['GameType'] != GAMETYPE_TEAM_GO && $grow['GameType'] != GAMETYPE_ZEN_GO )
       error('invalid_game_status', "game_players.find.std_gametype($gid,{$grow['GameType']})");
@@ -883,8 +883,8 @@ function add_waiting_room_mpgame( $grow, $uid )
       "Rated='N', " .
       "StdHandicap='{$grow['StdHandicap']}', " .
       "MustBeRated='$must_be_rated', " .
-      "Ratingmin=$rating1, " .
-      "Ratingmax=$rating2, " .
+      "RatingMin=$rating1, " .
+      "RatingMax=$rating2, " .
       "MinRatedGames=$min_rated_games, " .
       "SameOpponent=-1, " . // same-opponent can only join once
       "ShapeID={$grow['ShapeID']}, " .
@@ -1446,10 +1446,11 @@ function start_multi_player_game( $grow, $upd_game_players )
    $gdata['White_ID'] = $white_row['ID'];
    $gdata['Rated'] = 'N';
    $gdata['GamePlayers'] = $upd_game_players; // correct GamePlayers for right-playing-order
+   $gdata['Handicaptype'] = HTYPE_NIGIRI; //just a default
 
    ta_begin();
    {//HOT-section for starting multi-player-game
-      create_game($black_row, $white_row, $gdata, $gid );
+      create_game($black_row, $white_row, $gdata, null, $gid );
       MultiPlayerGame::update_players_start_mpgame( $gid ); // Players.Running++
    }
    ta_end();
