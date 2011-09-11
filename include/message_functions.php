@@ -193,13 +193,13 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if( isset($gid['max_handicap']) )
          $MaxHandicap = min( MAX_HANDICAP, max( 0, (int)$gid['max_handicap'] ));
 
-      if( isset($gid['byoyomitype']) )
-         $Byotype = $gid['byoyomitype'];
-
       if( isset($gid['game_players']) )
          $GamePlayers = $gid['game_players'];
 
       // NOTE on time-hours: 36 hours eval to 2d + 6h (because of sleeping time)
+
+      if( isset($gid['byoyomitype']) )
+         $Byotype = $gid['byoyomitype'];
 
       if( isset($gid['timevalue']) )
          $Maintime = (int)$gid['timevalue'];
