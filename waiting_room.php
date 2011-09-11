@@ -54,7 +54,7 @@ require_once( 'include/classlib_userconfig.php' );
       HTYPE_BLACK  => T_('Color Black'),
       HTYPE_WHITE  => T_('Color White'),
       HTYPEMP_MANUAL => T_('Manual'),
-      HTYPE_AUCTION_KOMI => T_('Auction Komi'),
+      HTYPE_AUCTION_SECRET => T_('Secret Auction'),
    );
 
    // config for handicap-filter
@@ -66,16 +66,16 @@ require_once( 'include/classlib_userconfig.php' );
       T_('Double')         => "Handicaptype='double'",
       T_('Fix color')      => "Handicaptype IN ('double','black','white')",
       T_('Manual')         => "Handicaptype IN ('nigiri','double','black','white')",
-      T_('Auction Komi')   => "Handicaptype='auko'",
+      T_('Fair Komi')      => "Handicaptype IN ('auko_sec','auko_opn','div_ykic','div_ikyc')",
    );
 
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
    $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
+   $game_type_filter_array[T_('Fair Komi#fairkomi')] = "Handicaptype IN ('auko_sec','auko_opn','div_ykic','div_ikyc')";
 
    $my_rating = $player_row['Rating2'];
    $my_rated_games = (int)$player_row['RatedGames'];
-   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
-         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $idinfo = (int)@$_GET['info'];
    if( $idinfo < 0)
@@ -189,7 +189,7 @@ require_once( 'include/classlib_userconfig.php' );
 // $calculated = ( $Handicaptype == 'conv' || $Handicaptype == 'proper' );
 // $haverating = ( !$calculated || is_numeric($my_rating) );
 // if( $MustBeRated != 'Y' )         $goodrating = true;
-// else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$Ratingmin && $my_rating<=$Ratingmax );
+// else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
 // else                              $goodrating = false;
 // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
 
@@ -198,7 +198,7 @@ require_once( 'include/classlib_userconfig.php' );
    {
       $haverating = "1";
       $goodrating = "IF(W.MustBeRated='Y' AND"
-                  . " ($my_rating<W.Ratingmin OR $my_rating>W.Ratingmax)"
+                  . " ($my_rating<W.RatingMin OR $my_rating>W.RatingMax)"
                   . ",0,1)";
    }
    else
@@ -284,6 +284,8 @@ require_once( 'include/classlib_userconfig.php' );
       {
          $other_rating = NULL;
          extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp
+         $CategoryHanditype = get_category_handicaptype($Handicaptype);
+         $is_fairkomi = ( $CategoryHanditype == CAT_HTYPE_FAIR_KOMI );
 
          $is_my_game = ( $uid == $player_row['ID'] );
          $mp_player_count = ($GameType == GAMETYPE_GO)
@@ -299,7 +301,7 @@ require_once( 'include/classlib_userconfig.php' );
          $infoHandi = $Handicap;
          $infoKomi  = $Komi;
          $iamblack = '';
-         if( $iamrated && !$is_my_game )
+         if( $iamrated && !$is_my_game && !$is_fairkomi ) // conv/proper/manual
          {
             $other_is_rated = ( $other_ratingstatus != RATING_NONE
                   && is_numeric($other_rating) && $other_rating >= MIN_RATING );
@@ -344,8 +346,8 @@ require_once( 'include/classlib_userconfig.php' );
          {
             if( $calculated )
                $k_str = build_adjust_komi( $AdjKomi, $JigoMode, true );
-            elseif( $Handicaptype == HTYPE_AUCTION_KOMI && !$is_my_game )
-               $k_str = T_('Secret#wr_auko');
+            elseif( $is_fairkomi )
+               $k_str = '';
             else
                $k_str = (float)$Komi;
             $wrow_strings[ 6] = ( (string)$k_str != '' ) ? $k_str : NO_VALUE;
@@ -355,7 +357,7 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[ 8] )
          {
             $wrow_strings[ 8] = array( 'text' =>
-               echo_game_restrictions($MustBeRated, $Ratingmin, $Ratingmax,
+               echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax,
                   $MinRatedGames, $goodmaxgames, $SameOpponent, (!$suitable && @$CH_hidden), true) );
             if( !$goodrating || !$goodmingames || !$goodmaxgames || !$goodsameopp || @$CH_hidden )
                $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
@@ -378,32 +380,25 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
          if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
          {
-            if( !$is_my_game && $GameType == GAMETYPE_GO )
+            $colstr = determine_color( $GameType, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack );
+
+            if( !$is_my_game && $GameType == GAMETYPE_GO && !$is_fairkomi )
             {
-               $colstr = determine_color( $Handicaptype, $is_my_game, $iamblack );
                $resultHandicap = adjust_handicap( $infoHandi, $AdjHandicap, $MinHandicap, $MaxHandicap );
                $resultKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
-               if( $Handicaptype == HTYPE_AUCTION_KOMI )
-               {
-                  $settings_str = ($resultHandicap > 0)
-                     ? sprintf( T_('%s H%s Auction Komi#wrsettings'), $colstr, (int)$resultHandicap )
-                     : sprintf( T_('%s Auction Komi#wrsettings'), $colstr );
-               }
-               else
-               {
-                  $settings_str = ($resultHandicap > 0)
-                     ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$resultHandicap, $resultKomi )
-                     : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $resultKomi );
-               }
+               $settings_str = ($resultHandicap > 0)
+                  ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$resultHandicap, $resultKomi )
+                  : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $resultKomi );
             }
+            elseif( $is_fairkomi )
+               $settings_str = $colstr . ' ' . T_('Negotiate#fairkomi_wrsettings');
             elseif( $GameType != GAMETYPE_GO ) // MPG
-            {
-               $settings_str = MINI_SPACING . echo_image_game_players( $gid )
+               $settings_str = $colstr . MINI_SPACING . echo_image_game_players( $gid )
                   . MINI_SPACING . sprintf( '(%s/%s)', $nrGames, $mp_player_count);
-            }
             else
                $settings_str = '';
-            if( ENABLE_STDHANDICAP && ($StdHandicap !== 'Y') )
+
+            if( ENABLE_STDHANDICAP && ($StdHandicap !== 'Y') && !$is_fairkomi )
                $settings_str .= ($settings_str ? ' ' : '') . T_('(Free Handicap)#handicap_tablewr');
             $wrow_strings[18] = $settings_str;
          }
@@ -413,7 +408,8 @@ require_once( 'include/classlib_userconfig.php' );
          {
             $wrow_strings[20] =
                ( $ShapeID > 0 ? echo_image_shapeinfo($ShapeID, $Size, $ShapeSnapshot) . ' ' : '' ) .
-               GameTexts::format_game_type($GameType, $GamePlayers);
+               GameTexts::format_game_type($GameType, $GamePlayers) .
+               ( $is_fairkomi ? GameTexts::build_fairkomi_gametype(GAME_STATUS_KOMI) : '' );
          }
 
          $wrtable->add_row( $wrow_strings );
@@ -470,7 +466,6 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
 
    $is_my_game = ($game_row['other_id'] == $player_row['ID']);
    $gid = (int)$game_row['gid'];
-   $is_auction_komi = ( $game_row['Handicaptype'] == HTYPE_AUCTION_KOMI );
 
    if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
       $can_join_mpg = !GamePlayer::exists_game_player( $gid, (int)$player_row['ID'] );
@@ -487,13 +482,9 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
             'SUBMITBUTTON', 'deletebut', T_('Delete'),
          ));
    }
-   else if( $can_join && $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames']
-            && $game_row['goodmaxgames'] && $game_row['goodsameopp'] )
+   elseif( $can_join && $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames']
+           && $game_row['goodmaxgames'] && $game_row['goodsameopp'] )
    {
-      if( $is_auction_komi && @$_REQUEST['err'] == 'komi_bid' )
-         $game_form->add_row( array(
-            'TEXT', span('ErrMsgKomi', ErrorCode::get_error_text('invalid_komi_bid')), ));
-
       $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
          ));
@@ -503,9 +494,6 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
    if( !$is_my_game )
    {
       echo "<br>\n";
-      if( $is_auction_komi )
-         echo span('Note', T_('Note about "Auction Komi"#auct_komi') . ':'), ' ',
-            span('InfoMsg', get_auction_komi_note()), "<br>\n";
 
       if( $can_join )
          echo $maxGamesCheck->get_warn_text();
@@ -519,11 +507,13 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
    }
 }//add_old_game_form
 
-function determine_color( $Handicaptype, $is_my_game, $iamblack )
+function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack )
 {
    global $base_path;
 
-   if( $Handicaptype == HTYPE_NIGIRI )
+   if( $game_type != GAMETYPE_GO ) //MPG
+      $colstr = image( $base_path.'17/y.gif', T_('Manual#color'), T_('Color set by game-master for multi-player-game#color') );
+   elseif( $Handicaptype == HTYPE_NIGIRI )
       $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color') );
    elseif( $Handicaptype == HTYPE_DOUBLE )
       $colstr = image( $base_path.'17/w_b.gif', T_('B+W#color'), T_('You play Black and White#color') );
@@ -541,10 +531,14 @@ function determine_color( $Handicaptype, $is_my_game, $iamblack )
       else
          $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You play Black#color') );
    }
-   elseif( $Handicaptype == HTYPE_WHITE )
-      $colstr = image( $base_path.'17/y.gif', T_('Manual#color'), T_('Color set by game-master for multi-player-game#color') );
-   elseif( $Handicaptype == HTYPE_AUCTION_KOMI )
-      $colstr = image( $base_path.'17/y.gif', T_('Auction Komi#color'), T_('Color determined by higher bid on komi#color') );
+   elseif( $CategoryHanditype == CAT_HTYPE_FAIR_KOMI )
+   {
+      $color_note = GameTexts::get_fair_komi_color_note($Handicaptype);
+      if( $color_note )
+         $colstr = image( $base_path.'17/y.gif', GameTexts::get_fair_komi_types($Handicaptype), $color_note );
+      else
+         error('internal_error', "wroom.determine_color.bad_htype($Handicaptype,$CategoryHanditype,$is_my_game,$iamblack)");
+   }
    elseif( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
    {
       if( $iamblack )
