@@ -260,7 +260,7 @@ class TournamentRules
       $grow['ShapeID'] = $this->ShapeID;
       $grow['ShapeSnapshot'] = $this->ShapeSnapshot;
       return $grow;
-   }
+   }//convertTournamentRules_to_GameRow
 
    /*!
     * \brief Converts this TournamentRules-object to hashmap to be used as
@@ -347,7 +347,7 @@ class TournamentRules
             break;
 
          case HTYPE_DOUBLE:
-         case HTYPE_AUCTION_KOMI:
+         case HTYPE_AUCTION_SECRET:
             // not supported for tournaments -> fallback to default NIGIRI
 
          default: //always available even if waiting room or unrated
@@ -489,6 +489,22 @@ class TournamentRules
                                     $byotimevalue_fis, $timeunit_fis);
    }
 
+   /*! \brief Converts this TournamentRules-object to GameSetup-object to be used to create game; uid must be set later. */
+   function convertTournamentRules_to_GameSetup()
+   {
+      // store only fields that are no Games-fields already
+      $gs = new GameSetup( /*uid*/0 );
+      $gs->Handicaptype = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
+      $gs->Handicap = (int)$this->Handicap;
+      $gs->Komi = (float)$this->Komi;
+      $gs->AdjKomi = (int)$this->AdjKomi;
+      $gs->JigoMode = $this->JigoMode;
+      $gs->AdjHandicap = (int)$this->AdjHandicap;
+      $gs->MinHandicap = (int)$this->MinHandicap;
+      $gs->MaxHandicap = (int)$this->MaxHandicap;
+      return $gs;
+   }//convertTournamentRules_to_GameSetup
+
    /*! \brief Returns true, if handicap needs to be calculated for this ruleset. */
    function needsCalculatedHandicap()
    {
@@ -545,6 +561,7 @@ class TournamentRules
       $ch_uid = $user_ch->ID;
       $df_uid = $user_df->ID;
 
+      $game_setup = $this->convertTournamentRules_to_GameSetup();
       $game_row = $this->convertTournamentRules_to_GameRow();
       $game_row['tid'] = $this->tid;
 
@@ -552,9 +569,15 @@ class TournamentRules
          $ch_uid, $user_ch->urow['Rating2'],
          $df_uid, $user_df->urow['Rating2'] );
       if( $ch_is_black )
-         $gid = create_game($user_ch->urow, $user_df->urow, $game_row);
+      {
+         $game_setup->uid = $ch_uid;
+         $gid = create_game($user_ch->urow, $user_df->urow, $game_row, $game_setup);
+      }
       else
-         $gid = create_game($user_df->urow, $user_ch->urow, $game_row);
+      {
+         $game_setup->uid = $df_uid;
+         $gid = create_game($user_df->urow, $user_ch->urow, $game_row, $game_setup);
+      }
 
       db_query( "TournamentRules.create_game.update_players({$this->tid},$ch_uid,$df_uid)",
          "UPDATE Players SET Running=Running+1" .
@@ -567,6 +590,8 @@ class TournamentRules
    /*! \brief Prepares game_row setting fields: Handicap/Komi and returning if challenger is black. */
    function prepare_create_game_row( &$game_row, $ch_uid, $ch_rating, $df_uid, $df_rating )
    {
+      $game_row['Handicaptype'] = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
+
       switch( (string)$this->Handicaptype )
       {
          case TRULE_HANDITYPE_CONV:
