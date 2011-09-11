@@ -50,8 +50,9 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       " WHERE G.ID=$gid AND G.Black_ID=black.ID AND G.White_ID=white.ID LIMIT 1" );
    if( !$game )
       error('unknown_game', "game_comments.find_game($gid)");
-   if( $game['Status'] == GAME_STATUS_SETUP )
-      error('invalid_game_status', "game_comments.find_game($gid)");
+   $gstatus = $game['Status'];
+   if( $gstatus == GAME_STATUS_SETUP || $gstatus == GAME_STATUS_INVITED )
+      error('invalid_game_status', "game_comments.find_game($gid,$gstatus)");
    $game_players = $game['GamePlayers'];
    $handicap = $game['Handicap'];
 
@@ -64,11 +65,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    $is_mp_game = ( $game['GameType'] != GAMETYPE_GO );
    $my_mpgame = ( !$my_game && $is_mp_game ) ? MultiPlayerGame::is_game_player($gid, $my_id) : $my_game;
-
-   if( $game['Status'] == GAME_STATUS_FINISHED )
-      $html_mode= 'gameh';
-   else
-      $html_mode= 'game';
+   $html_mode = ( $gstatus == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
 
    $arr_users = array();
    if( $is_mp_game )
@@ -88,7 +85,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    start_html(T_('Comments'), true, @$player_row['SkinName']);
 
    $str = game_reference( REF_LINK, 1, '', $gid, 0, $game )
-      . " - #$gid - " . ( $game['Status'] == GAME_STATUS_FINISHED ? T_('Finished') : T_('Running') );
+      . " - #$gid - " . ( $gstatus == GAME_STATUS_FINISHED ? T_('Finished') : T_('Running') );
    echo "<h3 class=Header>$str</h3>";
 
 
