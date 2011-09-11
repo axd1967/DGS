@@ -245,7 +245,7 @@ if( (string)$folder_nr_querystr != '' )
       .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
       .(!$load_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
       ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
-      ." WHERE ToMove_ID=$uid AND Status".IS_RUNNING_GAME
+      ." WHERE ToMove_ID=$uid AND Status".IS_STARTED_GAME
       ." AND opponent.ID=(Black_ID+White_ID-$uid)"
       . $order;
 
@@ -328,7 +328,8 @@ if( (string)$folder_nr_querystr != '' )
             $grow_strings[18] = getRulesetText($Ruleset);
          if( $gtable->Is_Column_Displayed[19] )
             $grow_strings[19] = GameTexts::format_game_type( $GameType, $GamePlayers )
-               . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) );
+               . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) )
+               . GameTexts::build_fairkomi_gametype($Status);
 
          $gtable->add_row( $grow_strings );
       }
@@ -362,7 +363,7 @@ if( $player_row['GamesMPG'] > 0 )
    $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
       . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
       . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
-      . "WHERE GP.uid=$uid AND G.Status='SETUP'"
+      . "WHERE GP.uid=$uid AND G.Status='".GAME_STATUS_SETUP."'"
       . $order;
 
    if( $DEBUG_SQL ) echo "QUERY-MP-GAMES: " . make_html_safe($query) ."<br>\n";

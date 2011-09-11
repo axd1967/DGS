@@ -129,6 +129,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
    $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
+   $game_type_filter_array[T_('Fair Komi#fairkomi')] = "Status='".GAME_STATUS_KOMI."'";
 
    // load table-columns
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
@@ -400,7 +401,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 41: >  FU (Indicator if there are (hidden) game-comments)
  * 42:    TournamentGames.Status
  * 43:    Ruleset
- * 44:    GameType
+ * 44:    GameType + FairKomi-info
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -608,10 +609,10 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $qsql->add_part( SQLP_FROM,
             'LEFT JOIN Ratinglog AS blog ON blog.gid=Games.ID AND blog.uid=Games.Black_ID',
             'LEFT JOIN Ratinglog AS wlog ON wlog.gid=Games.ID AND wlog.uid=Games.White_ID' );
-         $qsql->add_part( SQLP_WHERE, "Games.Status='FINISHED'" );
+         $qsql->add_part( SQLP_WHERE, "Games.Status='".GAME_STATUS_FINISHED."'" );
       }
       else if( $running ) //RA
-         $qsql->add_part( SQLP_WHERE, 'Games.Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, 'Games.Status' . IS_STARTED_GAME );
    }
    else //FU+RU ?UNION
    {
@@ -663,7 +664,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             'oppRlog.RatingDiff AS oppRatingDiff' );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=Games.ID AND oppRlog.uid=$uid" );
-         $qsql->add_part( SQLP_WHERE, "Games.Status='FINISHED'" );
+         $qsql->add_part( SQLP_WHERE, "Games.Status='".GAME_STATUS_FINISHED."'" );
 
          if( $load_user_ratingdiff && !$mp_game ) // opp is always user for MP-game
          {
@@ -675,7 +676,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       }
       else if( $running ) //RU ?UNION
       {
-         $qsql->add_part( SQLP_WHERE, 'Games.Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, 'Games.Status' . IS_STARTED_GAME );
 
          if( $load_remaining_time ) //RU
          {
@@ -969,6 +970,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $grow_strings[44] = GameTexts::format_game_type($GameType, $GamePlayers);
          if( $GameType != GAMETYPE_GO )
             $grow_strings[44] .= ' ' . echo_image_game_players($ID);
+         $grow_strings[44] .= GameTexts::build_fairkomi_gametype($Status);
       }
 
       if( $finished ) //FU+FA
