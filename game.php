@@ -22,7 +22,8 @@ if( @$_REQUEST['nextgame']
       || @$_REQUEST['nextstatus']
       || @$_REQUEST['cancel']
       || @$_REQUEST['nextskip']
-      || @$_REQUEST['nextaddtime'] )
+      || @$_REQUEST['nextaddtime']
+      || @$_REQUEST['komi_save'] )
 {
 //confirm use $_REQUEST: gid, move, action, coord, stonestring
    include_once( "confirm.php");
@@ -41,6 +42,7 @@ require_once( "include/move.php" );
 require_once( 'include/classlib_game.php' );
 require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
+require_once( 'include/table_infos.php' );
 if( ENABLE_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
@@ -51,29 +53,21 @@ if( ALLOW_TOURNAMENTS ) {
 $GLOBALS['ThePage'] = new Page('Game');
 
 
-// abbreviations used to reduce file size
-function get_alt_arg( $n1, $n2)
 {
-// $_GET must have priority at least for those used in the board links
-// for instance, $_POST['coord'] is the current (last used) coord
-// while $_GET['coord'] is the coord selected in the board (next coord)
+/* Actual REQUEST calls used:  g=gid (mandatory), a=action, m=move, s=stonestring, c=coord
+     gid=&a=''          : show game
+     a=add_time         : show add-time dialog -> confirm-page with 'nextaddtime'-action on submit
+     a=choose_move      : resume playing in scoring-mode
+     a=delete           : show delete-game dialog -> confirm-page on submit
+     a=domove           : show submit-dialog for validation after 'choose_move' and for normal move on board
+     a=done             : show submit-dialog for validation after 'remove', done marking dead-stones in scoring-mode -> confirm-page on submit
+     a=handicap         : multiple input step + validation, to input free handicap-stones
+     a=negotiate_komi&komibid=&fkerr=  : show fair-komi-negotiation dialog
+     a=pass             : pass-move -> confirm-page on submit
+     a=remove           : multiple input step, dead-stone-marking in scoring-mode
+     a=resign           : show resign dialog -> confirm-page on submit
+*/
 
-   if( isset( $_GET[$n1]) )
-      return $_GET[$n1];
-   if( isset( $_GET[$n2]) )
-      return $_GET[$n2];
-
-   if( isset( $_POST[$n1]) )
-      return $_POST[$n1];
-   if( isset( $_POST[$n2]) )
-      return $_POST[$n2];
-
-   return '';
-}
-
-
-
-{
    $gid = (int)get_alt_arg( 'gid', 'g');
    $action = (string)get_alt_arg( 'action', 'a');
    $arg_move = get_alt_arg( 'move', 'm'); //move number, incl. MOVE_SETUP for shape-game
@@ -121,7 +115,6 @@ function get_alt_arg( $n1, $n2)
            "white.RatingStatus AS Whiteratingstatus " .
            "FROM (Games, Players AS black, Players AS white) " .
            "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1";
-
    if( !($game_row=mysql_single_fetch( "game.findgame($gid)", $query)) )
       error('unknown_game', "game.findgame2($gid)");
 
@@ -130,6 +123,12 @@ function get_alt_arg( $n1, $n2)
 
    if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
       error('game_not_started', "game.check.bad_status($gid,$Status)");
+
+   $game_setup = GameSetup::new_from_game_setup($game_row['GameSetup']);
+   $is_fairkomi = $game_setup->is_fairkomi();
+   if( $Status == GAME_STATUS_KOMI && !$is_fairkomi )
+      error('internal_error', "game.check.status_komi.no_fairkomi($gid,$Status,{$game_setup->Handicaptype})");
+   $is_fairkomi_negotiation = ( $is_fairkomi && $Status == GAME_STATUS_KOMI );
 
    $tourney = null;
    if( ALLOW_TOURNAMENTS && ($tid > 0) )
@@ -162,7 +161,13 @@ function get_alt_arg( $n1, $n2)
          $move = $arg_move = $Moves;
    }
 
-   if( $Status == GAME_STATUS_FINISHED || $move < $Moves )
+   if( $Status == GAME_STATUS_KOMI )
+   {
+      $may_play = ( $logged_in && $my_id == $ToMove_ID ) ;
+      if( !$action )
+         $action = 'negotiate_komi';
+   }
+   elseif( $Status == GAME_STATUS_FINISHED || $move < $Moves )
       $may_play = false;
    else
    {
@@ -202,14 +207,13 @@ function get_alt_arg( $n1, $n2)
       $my_observe = null;
    else
       $my_observe = is_on_observe_list( $gid, $my_id);
-   $has_observers = has_observers( $gid);
+   $has_observers = ($is_fairkomi_negotiation) ? false : has_observers($gid);
 
-
-   $is_running_game = isRunningGame($Status);
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && $is_running_game && ( $tid == 0 ) && !$is_mp_game;
+   $may_del_game  = $my_game && $too_few_moves && isStartedGame($Status) && ( $tid == 0 ) && !$is_mp_game;
 
+   $is_running_game = isRunningGame($Status);
    $may_resign_game = ( $action == 'choose_move')
       || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
 
@@ -245,7 +249,7 @@ function get_alt_arg( $n1, $n2)
    $may_add_time = $my_game && GameAddTime::allow_add_time_opponent($game_row, $my_id);
 
 
-   $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
+   $no_marked_dead = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
                        $action == 'choose_move' || $action == 'domove' );
 
    $TheBoard = new Board( );
@@ -440,6 +444,15 @@ function get_alt_arg( $n1, $n2)
             break;
          }//case 'done'
 
+         case 'negotiate_komi': //single input pass; negotiate-fair-komi
+         {
+            if( $Status != GAME_STATUS_KOMI )
+               error('invalid_action', "game.negotiate_komi.check_status($gid,$Status)");
+
+            $validation_step = false;
+            break;
+         }//case 'negotiate_komi'
+
          default:
             error('invalid_action', "game.noaction.check($gid,$action,$Status)");
             break;
@@ -477,10 +490,7 @@ function get_alt_arg( $n1, $n2)
  : yes   : -    :: gameh  : gameh  : F+gameh ::
 */
 
-   if( $Status == GAME_STATUS_FINISHED )
-      $html_mode= 'gameh';
-   else
-      $html_mode= 'game';
+   $html_mode = ( $Status == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
 
    if( $my_game || $my_mpgame )
    {
@@ -514,8 +524,6 @@ function get_alt_arg( $n1, $n2)
       $show_notes = true;
       $notes = '';
       $noteshide = (substr( $notesmode, -3) == 'OFF') ? 'Y' : 'N';
-      if( $noteshide == 'Y' )
-         $notesmode = substr( $notesmode, 0, -3);
 
       $gnrow = mysql_single_fetch( 'game.gamenotes',
          "SELECT Hidden,Notes FROM GamesNotes WHERE gid=$gid AND uid=$my_id LIMIT 1" );
@@ -524,6 +532,10 @@ function get_alt_arg( $n1, $n2)
          $notes = $gnrow['Notes'];
          $noteshide = $gnrow['Hidden'];
       }
+      else if( $is_fairkomi_negotiation )
+         $noteshide = 'Y'; // default off for fair-komi
+      if( $noteshide == 'Y' )
+         $notesmode = substr( $notesmode, 0, -3);
 
       $savenotes = false;
       if( @$_REQUEST['togglenotes'] )
@@ -549,8 +561,7 @@ function get_alt_arg( $n1, $n2)
          // note: GamesNotes needs PRIMARY KEY (gid,player):
          db_query( 'game.replace_gamenote',
                  "REPLACE INTO GamesNotes (gid,uid,Hidden,Notes)"
-               . " VALUES ($gid,$my_id,'$noteshide','"
-                  . mysql_addslashes($notes) . "')" );
+               . " VALUES ($gid,$my_id,'$noteshide','" . mysql_addslashes($notes) . "')" );
       }
    }
    else // !$my_game
@@ -594,6 +605,8 @@ function get_alt_arg( $n1, $n2)
 
    $jumpanchor = ( $validation_step ) ? '#msgbox' : '';
    echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid$jumpanchor\" method=\"POST\">";
+   $gform = new Form( 'game_form', "game.php?gid=$gid$jumpanchor", FORM_POST, false );
+   $gform->set_config(FEC_BLOCK_FORM, true);
    $page_hiddens = array();
    // [ game_form start
 
@@ -613,7 +626,10 @@ function get_alt_arg( $n1, $n2)
    echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;
-   $TheBoard->draw_board( $may_play, $action, $stonestring);
+   if( $is_fairkomi_negotiation )
+      draw_fairkomi_negotiation( $my_id, $gform, $game_row, $game_setup );
+   else
+      $TheBoard->draw_board( $may_play, $action, $stonestring);
    //TODO: javascript move buttons && numbers hide
 
    //messages about actions
@@ -686,13 +702,13 @@ function get_alt_arg( $n1, $n2)
    }
 
    // observers may view the comments in the sgf files, so not restricted to own games
-   echo SMALL_SPACING
-      . anchor( "game_comments.php?gid=$gid"
-              , T_('Comments')
-              , ''
-              , array( 'accesskey' => ACCKEYP_GAME_COMMENT,
-                       'target' => FRIENDLY_SHORT_NAME.'_game_comments'
-              ));
+   if( $Status != GAME_STATUS_KOMI )
+   {
+      echo SMALL_SPACING,
+         anchor( "game_comments.php?gid=$gid", T_('Comments'), '',
+                 array( 'accesskey' => ACCKEYP_GAME_COMMENT,
+                        'target' => FRIENDLY_SHORT_NAME.'_game_comments', ));
+   }
    if( $Status == GAME_STATUS_FINISHED && ($GameFlags & GAMEFLAGS_HIDDEN_MSG) )
       echo MED_SPACING . echo_image_gamecomment( $gid );
 
@@ -715,7 +731,7 @@ function get_alt_arg( $n1, $n2)
    echo "\n</FORM>";
 
    echo "\n<HR>";
-   draw_game_info($game_row, $TheBoard, $tourney); // with board-info
+   draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
    echo "<HR>\n";
 
 
@@ -756,11 +772,14 @@ function get_alt_arg( $n1, $n2)
       if( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
 
-      //global $has_sgf_alias;
-      $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
+      if( !$is_fairkomi_negotiation )
+      {
+         //global $has_sgf_alias;
+         $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
 
-      if( $my_game && ($Moves>0 || $is_shape) && !$has_sgf_alias )
-         $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
+         if( $my_game && ($Moves>0 || $is_shape) && !$has_sgf_alias )
+            $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
+      }
 
       if( !is_null($my_observe) )
       {
@@ -774,6 +793,8 @@ function get_alt_arg( $n1, $n2)
          $menu_array[T_('Show observers')] = "users.php?observe=$gid";
    }
 
+   if( $is_fairkomi_negotiation )
+      $menu_array[T_('Refresh#gamepage')] = "game.php?gid=$gid";
    $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    if( $is_mp_game )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
@@ -782,6 +803,26 @@ function get_alt_arg( $n1, $n2)
 }// main
 
 
+
+// abbreviations used to reduce file size
+function get_alt_arg( $n1, $n2)
+{
+// $_GET must have priority at least for those used in the board links
+// for instance, $_POST['coord'] is the current (last used) coord
+// while $_GET['coord'] is the coord selected in the board (next coord)
+
+   if( isset( $_GET[$n1]) )
+      return $_GET[$n1];
+   if( isset( $_GET[$n2]) )
+      return $_GET[$n2];
+
+   if( isset( $_POST[$n1]) )
+      return $_POST[$n1];
+   if( isset( $_POST[$n2]) )
+      return $_POST[$n2];
+
+   return '';
+}//get_alt_arg
 
 // \param $move == global $arg_move including MOVE_SETUP for shape-game
 function draw_moves( $gid, $move, $handicap )
@@ -1043,7 +1084,7 @@ function draw_add_time( $game_row, $colorToMove )
       </TABLE>';
 } //draw_add_time
 
-function draw_game_info( &$game_row, $board, $tourney )
+function draw_game_info( &$game_row, $game_setup, $board, $tourney )
 {
    global $base_path;
 
@@ -1052,11 +1093,29 @@ function draw_game_info( &$game_row, $board, $tourney )
    $cols = 4;
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
 
+   $color_class = 'class="InTextStone"';
+   if( $game_row['Status'] == GAME_STATUS_KOMI )
+   {
+      $game_is_running = true;
+      $komi = NO_VALUE;
+
+      $Handitype = $game_setup->Handicaptype;
+      $icon_col_b = $icon_col_w = image( $base_path.'17/y.gif', GameTexts::get_fair_komi_types($Handitype),
+         GameTexts::get_fair_komi_color_note($Handitype), $color_class );
+   }
+   else
+   {
+      $game_is_running = isRunningGame($game_row['Status']);
+      $komi = $game_row['Komi'];
+      $icon_col_b = image( $base_path.'17/b.gif', T_('Black'), null, $color_class );
+      $icon_col_w = image( $base_path.'17/w.gif', T_('White'), null, $color_class );
+   }
+
+
    //black rows
    $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'] );
-   $blackStoneImg = image( "{$base_path}17/b.gif", T_('Black'), null, 'class="InTextStone"' );
    echo '<tr id="blackInfo">', "\n";
-   echo "<td class=Color>$blackStoneImg</td>\n";
+   echo "<td class=Color>$icon_col_b</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle']),
       ( $blackOffTime ? SMALL_SPACING . $blackOffTime : '' ),
@@ -1070,7 +1129,7 @@ function draw_game_info( &$game_row, $board, $tourney )
    echo '<td class=Prisoners>', T_('Prisoners'), ': ', $game_row['Black_Prisoners'], "</td>\n";
    echo "</tr>\n";
 
-   if( $game_row['Status'] != GAME_STATUS_FINISHED )
+   if( $game_is_running )
    {
       echo '<tr id="blackTime">', "\n";
       echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
@@ -1084,9 +1143,8 @@ function draw_game_info( &$game_row, $board, $tourney )
 
    //white rows
    $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'] );
-   $whiteStoneImg = image( "{$base_path}17/w.gif", T_('White'), null, 'class="InTextStone"' );
    echo '<tr id="whiteInfo">', "\n";
-   echo "<td class=Color>$whiteStoneImg</td>\n";
+   echo "<td class=Color>$icon_col_w</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle']),
       ( $whiteOffTime ? SMALL_SPACING . $whiteOffTime : '' ),
@@ -1101,7 +1159,7 @@ function draw_game_info( &$game_row, $board, $tourney )
    echo "</tr>\n";
 
 
-   if( $game_row['Status'] != GAME_STATUS_FINISHED )
+   if( $game_is_running )
    {
       echo '<tr id="whiteTime">', "\n";
       echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
@@ -1148,7 +1206,7 @@ function draw_game_info( &$game_row, $board, $tourney )
          echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
             "<dl class=BoardInfos><dd>",
                T_('Last move by:'), SMALL_SPACING,
-                  ($move_color == GPCOL_B ? $blackStoneImg : $whiteStoneImg),
+                  ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
                   MINI_SPACING,
                   user_reference( REF_LINK, 1, '', $mpg_uid ),
                   SMALL_SPACING,
@@ -1167,7 +1225,7 @@ function draw_game_info( &$game_row, $board, $tourney )
          echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, true),
       "</td>\n";
    echo "<td colspan=\"", ($cols-1), "\">", T_('Ruleset'), ': ', getRulesetText($game_row['Ruleset']);
-   echo $sep, T_('Komi'), ': ', $game_row['Komi'];
+   echo $sep, T_('Komi'), ': ', $komi;
    echo $sep, T_('Handicap'), ': ', $game_row['Handicap'];
    echo $sep, T_('Rated game'), ': ',
       ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ), "</td>\n";
@@ -1289,5 +1347,39 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    echo "</td></tr>\n"
       , "</table>\n";
 } //draw_notes
+
+function draw_fairkomi_negotiation( $my_id, &$form, $grow, $game_setup )
+{
+   $fk = new FairKomiNegotiation($game_setup, $grow);
+
+   $black_id = $grow['Black_ID'];
+   $white_id = $grow['White_ID'];
+   $user[0] = user_reference( 0, 1, '', $black_id, @$grow['Blackname'], @$grow['Blackhandle'] );
+   $user[1] = user_reference( 0, 1, '', $white_id, @$grow['Whitename'], @$grow['Whitehandle'] );
+
+   $req_komibid = @$_REQUEST['komibid'];
+   $show_bid[0] = $fk->get_view_komibid( $my_id, $black_id, $form, $req_komibid );
+   $show_bid[1] = $fk->get_view_komibid( $my_id, $white_id, $form, $req_komibid );
+   $errors = ( isset($_REQUEST['komibid']) )
+      ? FairKomiNegotiation::check_komibid($game_setup, $req_komibid)
+      : array();
+
+   section('fairkomi', T_('Komi negotiation for Fair Komi') );
+
+   $fairkomi_type = GameTexts::get_fair_komi_types($game_setup->Handicaptype);
+   echo_notes( 'fk_notes', sprintf( T_('Negotiation process for "%s":#fairkomi'), $fairkomi_type ),
+      $fk->build_notes(), false );
+
+   if( count($errors) )
+   {
+      $form->add_row( array(
+            'DESCRIPTION', T_('Errors'),
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+      $form->add_empty_row();
+      echo $form->create_form_string();
+   }
+
+   $fk->echo_fairkomi_table( $form, $user, $show_bid, $my_id );
+}//draw_fairkomi_negotiation
 
 ?>
