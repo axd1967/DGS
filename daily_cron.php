@@ -100,7 +100,8 @@ if( !$is_down )
 
          // delete WaitingroomJoined entries without Waitingroom-entry
          db_query( 'daily_cron.waitingroom_joined',
-            "DELETE FROM WaitingroomJoined WHERE wroom_id NOT IN (SELECT ID FROM Waitingroom)" );
+            "DELETE WRJ FROM WaitingroomJoined AS WRJ " .
+               "LEFT JOIN Waitingroom AS WR ON WR.ID=WRJ.wroom_id WHERE WR.ID IS NULL" );
       }
       ta_end();
    }
@@ -128,9 +129,9 @@ if num_rows==2 {compute differences and checks}
    $today_stats= array();
    foreach( array(
       'finished' =>
-         "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished FROM Games WHERE Status='FINISHED'",
+         "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished FROM Games WHERE Status='".GAME_STATUS_FINISHED."'",
       'running' =>
-         "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning FROM Games WHERE Status".IS_RUNNING_GAME,
+         "SELECT SUM(Moves) AS MovesRunning, COUNT(*) AS GamesRunning FROM Games WHERE Status".IS_STARTED_GAME,
       'users' =>
          "SELECT SUM(Hits) AS Hits, COUNT(*) AS Users, SUM(Activity)/$ActivityForHit AS Activity FROM Players",
       ) as $key => $query )
