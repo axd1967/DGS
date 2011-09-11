@@ -42,15 +42,13 @@ require_once( 'include/classlib_game.php' );
       error('not_allowed_for_guest');
 
    $my_rating = $player_row['Rating2'];
-   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
-         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
-
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
    $viewmode = (int) @$_POST['viewmode'];
-
    $shape_id = (int)@$_REQUEST['shape'];
    $shape_snapshot = @$_REQUEST['snapshot'];
 
    $cat_handicap_type = @$_POST['cat_htype'];
+   $is_fairkomi = false;
    switch( (string)$cat_handicap_type )
    {
       case CAT_HTYPE_CONV:
@@ -70,7 +68,7 @@ require_once( 'include/classlib_game.php' );
          break;
 
       case CAT_HTYPE_MANUAL:
-         $handicap_type = (string)@$_POST['color_m'];
+         $handicap_type = @$_POST['color_m'];
          if( empty($handicap_type) )
             $handicap_type = HTYPE_NIGIRI;
 
@@ -78,10 +76,13 @@ require_once( 'include/classlib_game.php' );
          $komi = (float)@$_POST['komi_m'];
          break;
 
-      case CAT_HTYPE_AUCTION_KOMI:
-         $handicap_type = HTYPE_AUCTION_KOMI;
+      case CAT_HTYPE_FAIR_KOMI:
+         $is_fairkomi = true;
+         $handicap_type = @$_POST['fk_htype'];
+         if( !preg_match("/^(".CHECK_HTYPES_FAIRKOMI.")$/", $handicap_type) )
+            error('invalid_args', "add_to_waitingroom.check.fairkomi_htype($handicap_type)");
          $handicap = 0;
-         $komi = (float)@$_POST['komi_auko'];
+         $komi = 0.0;
          break;
 
       default:
@@ -94,7 +95,7 @@ require_once( 'include/classlib_game.php' );
 
    if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
       error('komi_range', "add_to_waitingroom.check.komi($komi)");
-   if( floor(2 * $komi) != 2 * $komi ) // round to x.0|x.5
+   if( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
       error('komi_bad_fraction', "add_to_waitingroom.check.komi.fraction($komi)");
 
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
@@ -105,6 +106,8 @@ require_once( 'include/classlib_game.php' );
 
    // komi adjustment
    $adj_komi = (float)@$_POST['adj_komi'];
+   if( $is_fairkomi )
+      $adj_komi = 0;
    if( abs($adj_komi) > MAX_KOMI_RANGE )
       $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
    if( floor(2 * $adj_komi) != 2 * $adj_komi ) // round to x.0|x.5
@@ -118,10 +121,14 @@ require_once( 'include/classlib_game.php' );
 
    // handicap adjustment
    $adj_handicap = (int)@$_POST['adj_handicap'];
+   if( $is_fairkomi )
+      $adj_handicap = 0;
    if( abs($adj_handicap) > MAX_HANDICAP )
       $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
 
    $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$_POST['min_handicap'] ));
+   if( $is_fairkomi )
+      $min_handicap = 0;
 
    $max_handicap = (int)@$_POST['max_handicap'];
    if( $max_handicap > MAX_HANDICAP )
@@ -138,6 +145,14 @@ require_once( 'include/classlib_game.php' );
    $is_std_go = ( $game_type == GAMETYPE_GO );
    if( $is_std_go && $viewmode == GSETVIEW_MPGAME )
       error('invalid_args', "add_to_waitingroom.check.game_players.viewmode($viewmode,$game_players)");
+
+   if( $is_fairkomi ) // fair-komi checks
+   {
+      if( $viewmode != GSETVIEW_FAIRKOMI )
+         error('invalid_args', "add_to_waitingroom.check.fairkomi.viewmode($viewmode,$game_type)");
+      if( !$is_std_go )
+         error('invalid_args', "add_to_waitingroom.check.game_type.fairkomi_no_mpg");
+   }
 
 
    $maxGamesCheck = new MaxGamesCheck();
@@ -192,7 +207,7 @@ require_once( 'include/classlib_game.php' );
    if( $is_std_go )
       list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
 
-   $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 10000, 0 );
+   $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 999, 0 ); // 3-chars max.
 
    $same_opponent = (int)@$_POST['same_opp'];
 
@@ -283,8 +298,8 @@ require_once( 'include/classlib_game.php' );
          "Rated='$rated', " .
          "StdHandicap='$stdhandicap', " .
          "MustBeRated='$MustBeRated', " .
-         "Ratingmin=$rating1, " .
-         "Ratingmax=$rating2, " .
+         "RatingMin=$rating1, " .
+         "RatingMax=$rating2, " .
          "MinRatedGames=$min_rated_games, " .
          "SameOpponent=$same_opponent, " .
          "ShapeID=$shape_id, " .

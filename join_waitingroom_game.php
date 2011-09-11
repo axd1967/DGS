@@ -75,6 +75,8 @@ require_once( "include/contacts.php" );
 
    $opponent_ID = $game_row['uid'];
    $gid = (int)@$game_row['gid'];
+   $handicaptype = $game_row['Handicaptype'];
+   $category_handicaptype = get_category_handicaptype($handicaptype);
 
    if( @$_REQUEST['delete'] == 't' )
    {
@@ -108,12 +110,11 @@ require_once( "include/contacts.php" );
 
    if( !$opponent_row )
       error('waitingroom_game_not_found', "join_waitingroom_game.find_players.opp($opponent_ID)");
-
    if( $my_id == $opponent_ID )
       error('waitingroom_own_game');
 
    if( $game_row['MustBeRated'] == 'Y' &&
-       !($player_row['Rating2'] >= $game_row['Ratingmin'] && $player_row['Rating2'] <= $game_row['Ratingmax']) )
+       !($player_row['Rating2'] >= $game_row['RatingMin'] && $player_row['Rating2'] <= $game_row['RatingMax']) )
       error('waitingroom_not_in_rating_range');
 
    if( !$game_row['goodmingames'] )
@@ -133,32 +134,15 @@ require_once( "include/contacts.php" );
          error('waitingroom_not_same_opponent', "join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
    }
 
-   // check auction komi
-   $handicaptype = $game_row['Handicaptype'];
-   $komi_my_bid = trim(@$_REQUEST['komi_bid']);
-   if( $handicaptype == HTYPE_AUCTION_KOMI )
-   {
-      if( (string)$komi_my_bid == '' || !is_numeric($komi_my_bid) )
-         $komi_err = true;
-      elseif( floor(2 * $komi_my_bid) != 2 * $komi_my_bid ) // x.0|x.5 ?
-         $komi_err = true;
-      else
-         $komi_err = false;
-      if( $komi_err )
-         jump_to("waiting_room.php?info=$wr_id".URI_AMP."err=komi_bid".URI_AMP."komi_bid=".urlencode($komi_my_bid).'#joingameForm');
-   }
-
    $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
-   $my_rating = $player_row["Rating2"];
-   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE
-         && is_numeric($my_rating) && $my_rating >= MIN_RATING );
-   $opprating = $opponent_row["Rating2"];
-   $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE
-         && is_numeric($opprating) && $opprating >= MIN_RATING );
+   $my_rating = $player_row['Rating2'];
+   $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
+   $opprating = $opponent_row['Rating2'];
+   $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE && is_numeric($opprating) && $opprating >= MIN_RATING );
 
    $double = false;
-   switch( $handicaptype )
+   switch( (string)$handicaptype )
    {
       case HTYPE_CONV:
          if( !$iamrated || !$opprated )
@@ -187,20 +171,11 @@ require_once( "include/contacts.php" );
          $i_am_black = true; // game-offerer wants WHITE, so challenger gets BLACK
          break;
 
-      case HTYPE_AUCTION_KOMI:
-         $komi_opp = $game_row['Komi'];
-         if( $komi_my_bid > $komi_opp )
-         {
-            $game_row['Komi'] = $komi_my_bid;
-            $i_am_black = true;
-         }
-         elseif( $komi_my_bid < $komi_opp )
-            $i_am_black = false;
-         else // equal bid -> nigiri
-         {
-            mt_srand((double) microtime() * 1000000);
-            $i_am_black = mt_rand(0,1);
-         }
+      case HTYPE_AUCTION_SECRET:
+      //case HTYPE_AUCTION_OPEN:
+      //case HTYPE_YOU_KOMI_I_COLOR:
+      //case HTYPE_I_KOMI_YOU_COLOR:
+         $i_am_black = false; // waiting-room-offerer is black for fair-komi
          break;
 
       default: //always available even if waiting room or unrated
@@ -210,7 +185,12 @@ require_once( "include/contacts.php" );
          mt_srand((double) microtime() * 1000000);
          $i_am_black = mt_rand(0,1);
          break;
-   }
+   }//handicaptype
+
+   $game_setup = GameSetup::new_from_game_row( $game_row );
+   $game_setup->read_waitingroom_fields( $game_row );
+   if( $category_handicaptype == CAT_HTYPE_FAIR_KOMI )
+      $game_setup->Komi = $game_setup->OppKomi = null; // start with empty komi-bids
 
    ta_begin();
    {//HOT-section to join waiting-room game-offer
@@ -219,16 +199,16 @@ require_once( "include/contacts.php" );
       if( $is_std_go )
       {
          if( $i_am_black || $double )
-            $gids[] = create_game($player_row, $opponent_row, $game_row);
+            $gids[] = create_game($player_row, $opponent_row, $game_row, $game_setup);
          else
-            $gids[] = create_game($opponent_row, $player_row, $game_row);
+            $gids[] = create_game($opponent_row, $player_row, $game_row, $game_setup);
          $gid = $gids[0];
          //keep this after the regular one ($gid => consistency with send_message)
          if( $double )
          {
             // provide a link between the two paired "double" games
             $game_row['double_gid'] = $gid;
-            $double_gid2 = create_game($opponent_row, $player_row, $game_row);
+            $double_gid2 = create_game($opponent_row, $player_row, $game_row, $game_setup);
             $gids[] = $double_gid2;
 
             db_query( "join_waitingroom_game.update_double2($gid)",

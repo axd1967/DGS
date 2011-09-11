@@ -16,40 +16,41 @@ Important Note:
    - Invitations using the Message-system will be removed in the future and
      migrated into the waiting-room.
 
-| Field         | Type                                                           | Null | Key | Default             | Extra          |
-+---------------+----------------------------------------------------------------+------+-----+---------------------+----------------+
-| ID            | int(11)                                                        | NO   | PRI | NULL                | auto_increment |
-| uid           | int(11)                                                        | NO   |     | NULL                |                |
-| gid           | int(11)                                                        | NO   |     | 0                   |                |
-| ShapeID       | int(10) unsigned                                               | NO   |     | 0                   |                |
-| nrGames       | tinyint(3) unsigned                                            | NO   |     | 1                   |                |
-| Time          | datetime                                                       | NO   |     | 0000-00-00 00:00:00 |                |
-| GameType      | enum('GO','TEAM_GO','ZEN_GO')                                  | NO   |     | GO                  |                |
-| GamePlayers   | char(5)                                                        | NO   |     |                     |                |
-| Ruleset       | enum('JAPANESE','CHINESE')                                     | NO   |     | JAPANESE            |                |
-| Size          | tinyint(3) unsigned                                            | NO   |     | 19                  |                |
-| Komi          | decimal(4,1)                                                   | NO   |     | 6.5                 |                |
-| Handicap      | tinyint(3) unsigned                                            | NO   |     | 0                   |                |
-| Handicaptype  | enum('conv','proper','nigiri','double','black','white','auko') | NO   | MUL | conv                |                |
-| AdjKomi       | decimal(4,1)                                                   | NO   |     | 0.0                 |                |
-| JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')                       | NO   |     | KEEP_KOMI           |                |
-| AdjHandicap   | tinyint(4)                                                     | NO   |     | 0                   |                |
-| MinHandicap   | tinyint(3) unsigned                                            | NO   |     | 0                   |                |
-| MaxHandicap   | tinyint(3) unsigned                                            | NO   |     | 127                 |                |
-| Maintime      | smallint(6)                                                    | NO   |     | 0                   |                |
-| Byotype       | enum('JAP','CAN','FIS')                                        | NO   |     | JAP                 |                |
-| Byotime       | smallint(6)                                                    | NO   |     | 0                   |                |
-| Byoperiods    | tinyint(4)                                                     | NO   |     | 0                   |                |
-| Rated         | enum('N','Y')                                                  | NO   |     | N                   |                |
-| StdHandicap   | enum('N','Y')                                                  | NO   |     | N                   |                |
-| WeekendClock  | enum('N','Y')                                                  | NO   |     | Y                   |                |
-| MustBeRated   | enum('N','Y')                                                  | NO   |     | N                   |                |
-| Ratingmin     | smallint(6)                                                    | NO   |     | -9999               |                |
-| Ratingmax     | smallint(6)                                                    | NO   |     | -9999               |                |
-| MinRatedGames | smallint(6)                                                    | NO   |     | 0                   |                |
-| SameOpponent  | tinyint(4)                                                     | NO   |     | 0                   |                |
-| ShapeSnapshot | varchar(255)                                                   | NO   |     |                     |                |
-| Comment       | varchar(40)                                                    | NO   |     |                     |                |
+| Field         | Type                                     | Null | Key | Default             | Extra          |
++---------------+------------------------------------------+------+-----+---------------------+----------------+
+| ID            | int(11)                                  | NO   | PRI | NULL                | auto_increment |
+| uid           | int(11)                                  | NO   |     | NULL                |                |
+| gid           | int(11)                                  | NO   |     | 0                   |                |
+| ShapeID       | int(10) unsigned                         | NO   |     | 0                   |                |
+| nrGames       | tinyint(3) unsigned                      | NO   |     | 1                   |                |
+| Time          | datetime                                 | NO   |     | 0000-00-00 00:00:00 |                |
+| GameType      | enum('GO','TEAM_GO','ZEN_GO')            | NO   |     | GO                  |                |
+| GamePlayers   | char(5)                                  | NO   |     |                     |                |
+| Ruleset       | enum('JAPANESE','CHINESE')               | NO   |     | JAPANESE            |                |
+| Size          | tinyint(3) unsigned                      | NO   |     | 19                  |                |
+| Komi          | decimal(4,1)                             | NO   |     | 6.5                 |                |
+| Handicap      | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| Handicaptype  | enum('conv','proper','nigiri','double','black','white','auko_sec','auko_opn','div_ykic','div_ikyc')
+                                                           | NO   | MUL | conv                |                |
+| AdjKomi       | decimal(4,1)                             | NO   |     | 0.0                 |                |
+| JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | NO   |     | KEEP_KOMI           |                |
+| AdjHandicap   | tinyint(4)                               | NO   |     | 0                   |                |
+| MinHandicap   | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| MaxHandicap   | tinyint(3) unsigned                      | NO   |     | 127                 |                |
+| Maintime      | smallint(6)                              | NO   |     | 0                   |                |
+| Byotype       | enum('JAP','CAN','FIS')                  | NO   |     | JAP                 |                |
+| Byotime       | smallint(6)                              | NO   |     | 0                   |                |
+| Byoperiods    | tinyint(4)                               | NO   |     | 0                   |                |
+| Rated         | enum('N','Y')                            | NO   |     | N                   |                |
+| StdHandicap   | enum('N','Y')                            | NO   |     | N                   |                |
+| WeekendClock  | enum('N','Y')                            | NO   |     | Y                   |                |
+| MustBeRated   | enum('N','Y')                            | NO   |     | N                   |                |
+| RatingMin     | smallint(6)                              | NO   |     | -9999               |                |
+| RatingMax     | smallint(6)                              | NO   |     | -9999               |                |
+| MinRatedGames | smallint(6)                              | NO   |     | 0                   |                |
+| SameOpponent  | tinyint(4)                               | NO   |     | 0                   |                |
+| ShapeSnapshot | varchar(255)                             | NO   |     |                     |                |
+| Comment       | varchar(40)                              | NO   |     |                     |                |
 
 
 ## Fields:
@@ -99,7 +100,6 @@ Important Note:
       - Proper handicap: proper
       - Manual setting (color-setting): nigiri, double, black, white
       - Fair komi: auko_sec, auko_opn, div_ykic, div_ikyc
-      - ?? [future]: pie_ymic, pie_imyc
 
    - conv = Conventional handicap
    - proper = Proper handicap
@@ -161,7 +161,7 @@ Important Note:
    - specifies if challenger (opponent) must have a rating ('Y') or not ('N')
    - if 'Y', RatingMin and RatingMax are used to restrict rating range
 
-* Ratingmin, Ratingmax : rating range challengers rating has to be in
+* RatingMin, RatingMax : rating range challengers rating has to be in
    - only integer-precision required
 
 * MinRatedGames : number of minimum rated finished games of challenger

@@ -2359,3 +2359,23 @@ ALTER TABLE Waitingroom
    MODIFY Handicaptype enum('conv','proper','nigiri','double','black','white','auko') NOT NULL default 'conv' ;
 
 
+-- added handicap-types for auction-komi, divide & choose
+DELETE FROM Waitingroom
+   WHERE Handicaptype='auko' ;
+ALTER TABLE Waitingroom
+   MODIFY Handicaptype enum('conv','proper','nigiri','double','black','white','auko_sec','auko_opn','div_ykic','div_ikyc') NOT NULL default 'conv' ;
+
+-- added new game-status KOMI to negotiate fair-komi
+ALTER TABLE Games
+   MODIFY Status enum('KOMI','SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED' ;
+
+-- store game-setings for rematch/komi-negotiation/invitations
+ALTER TABLE Games
+   ADD GameSetup varchar(255) NOT NULL default '' ;
+
+-- db-cleanup for consistency: renamed fields Waitingroom.Ratingmin/max -> RatingMin/Max
+ALTER TABLE Waitingroom
+   CHANGE Ratingmin RatingMin smallint(6) NOT NULL default '-9999',
+   CHANGE Ratingmax RatingMax smallint(6) NOT NULL default '-9999' ;
+
+
