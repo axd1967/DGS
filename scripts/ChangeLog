@@ -19,6 +19,155 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2011-09-11 juga
+
+   * include/game_functions.php (HTYPE_AUCTION_SECRET, INVITE_HANDI_FIXCOL,
+       INVITE_HANDI_AUCTION_SECRET, CAT_HTYPE_FAIR_KOMI, MAP_GAME_SETUP; class GameAddTime;
+       class FairKomiNegotiation, ~.read_from_game_row, ~.has_both_komibids, ~.get_komibid,
+         ~.set_komibid, ~.get_uid_highest_bid, ~.get_view_komibid, ~.echo_fairkomi_table,
+         ~.build_form_actions, ~.build_notes, ~.save_komi, ~.start_fairkomi_game, ~.check_komibid;
+       class GameSetup, ~.set_defaults, ~.init_opponent_handicaptype, ~.is_fairkomi, ~.encode,
+         ~.read_waitingroom_fields, ~.to_string, ~.format_handicap_type, ~.format_time,
+         ~.format_std_handicap, ~.new_from_game_setup, ~.build_invitation_game_setup,
+         ~.parse_invitation_game_setup, ~.parse_jigo_mode_from_game_setup, ~.new_from_game_row,
+         ~.build_invitation_diffs, ~.create_opponent_game_setup, ~.swap_htype_black_white;
+       GameHelper.update_clock; GameFinalizer.finish_game; GameNotify.get_text_game_deleted;
+       get_category_handicaptype, get_invite_handicaptype, get_handicaptype_for_invite,
+       get_gamesettings_viewmode, append_form_add_waiting_room_game),
+     include/message_functions.php (game_settings_form, game_info_table, echo_game_restrictions;
+       DgsMessage.load_message),
+     include/make_game.php (make_invite_game, make_invite_game_setup, accept_invite_game, create_game),
+     include/game_texts.php (GameTexts.get_manual_handicap_types, ~.build_fairkomi_gametype,
+       ~.get_fair_komi_types, ~.get_fair_komi_color_note, ~.get_jigo_modes),
+     include/db/games.php (class Games, ~.fillEntityData, ~.new_from_row, ~.getStatusText),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules,
+       ~.convertTournamentRules_to_GameSetup, ~.create_game, ~.prepare_create_game_row),
+     include/error_codes.php (ErrorCode.init),
+     include/globals.php (GAME_STATUS_KOMI, GSETVIEW_FAIRKOMI),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     include/quick_common.php (IS_STARTED_GAME, isStartedGame),
+     include/std_functions.php ($ENUM_GAMES_STATUS),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt, specs/db/table-Waitingroom.txt, specs/quick_suite.txt,
+     scripts/fix_game_snapshot.php, scripts/fix_games_timeleft.php, scripts/game_consistency.php,
+     scripts/player_consistency.php, scripts/start_frozen_clocks.php, scripts/tests/AllTests.php,
+     skins/dragon/screen.css, tournaments/game_admin.php,
+     rss/status.php, wap/status.php,
+     game_players.php (load_game, add_waiting_room_mpgame, start_multi_player_game),
+     game.php (get_alt_arg, draw_fairkomi_negotiation, draw_game_info),
+     confirm.php (jump_to_next_game, do_komi_save),
+     message.php (echo_dispute_diffs),
+     waiting_room.php (determine_color),
+     add_to_waitingroom.php, admin_game.php, clock_tick.php, daily_cron.php, edit_vacation.php,
+     game_calc.php, gameinfo.php, halfhourly_cron.php, join_waitingroom_game.php, new_game.php,
+     opponents.php, quick_play.php, quick_status.php, show_games.php, status.php, userinfo.php):
+   - added handling for fair-komi negotiation, starting with secret-auction-komi
+     - added new game-status KOMI to negotiate fair-komi on game-page
+     - added GameSetup-class to handle game-settings stored in Games.GameSetup-field for:
+       - invitation-handling, on disputes and on accepting invitation/dispute-game
+       - used later as config for setting up rematch with same game-settings
+       - read handicap-type and jigo-mode required for fair-komi-negotiation
+       - tournaments: game-setup is stored on starting/creating tourney-games
+       - MPG: no game-setup needed/stored when starting multi-player-game,
+         because config for new-MPG can be created from standard Games-fields
+     - GUI-changes:
+       - new-game-page: added fair-komi-view with jigo-restriction
+       - waiting-room: show fair-komi-info on game-type & game-settings column
+       - game-settings-info: show fair-komi-info including probably game-settings
+         for waiting-room-offers, invitation and disputes
+       - invitation & disputes (incomplete yet):
+       - game-page adjustments for fair-komi-negotiation:
+         - show fair-komi-negotiation dialog if game started on new KOMI-status
+         - for secret-auction-komi ask players in turn for komi-bids,
+           player to "move" (give komi-bid) controlled by Games.ToMove_ID
+         - game is started for secret-auction-komi if both players saved their komi-bids
+         - during fair-komi-negotiation: game can be deleted, no game-observing allowed,
+           initially hide private-notes, hide game-comments-link, no add-time allowed,
+           no SGF-download as there is no game and komi/color are undecided,
+           added 'Refresh'-bottom-link to reload page
+       - game-info-page: show fair-komi handicap-type, adjusted komi and color-icons,
+         show whose turn it is, show players komi-bids if allowed to view
+       - game-list-pages: show fair-komi-info in game-type-filter/column
+       - RSS-Status: show special game-type for games in fair-komi-negotiation status
+
+   - invite/dispute: show diffs in game-settings between players
+   - changed default time-settings for new-game:
+     "Fischer time 30d + 1d" -> "Fischer time with 14d + 1d"
+
+   - cleanup:
+     - bugfix: showing probable game-settings on waiting-room-offer with color-icon for MPG,
+       removing double HTYPE_WHITE-handling
+     - refactored first approach of auction-komi into better handling of fair-komi in general
+       - renamed HTYPE_AUCTION_KOMI -> HTYPE_AUCTION_SECRET for secret-auction-komi
+       - renamed CAT_HTYPE_AUCTION_KOMI -> CAT_HTYPE_FAIR_KOMI introducing new category
+       - use defaults for game-settings like adjust-/min/max-handicap
+     - refactored handling Black/White-fix-color game-setting by replacing ToMove_ID=1
+       with INVITE_HANDI_FIXCOL. Still, HTYPE_BLACK/WHITE is determined by Black/White_ID
+       in Games-table.
+     - refactored clock/time-update into GameHelper::update_clock()-func
+     - db-consistency: renamed fields Waitingroom.Ratingmin/max -> RatingMin/Max
+     - SQL-optimization to avoid NOT-IN -> using JOINed-format instead
+     - formatting/code-cleanup
+-----------
+-- added handicap-types for auction-komi, divide & choose
+DELETE FROM Waitingroom
+   WHERE Handicaptype='auko' ;
+ALTER TABLE Waitingroom
+   MODIFY Handicaptype enum('conv','proper','nigiri','double','black','white','auko_sec','auko_opn','div_ykic','div_ikyc') NOT NULL default 'conv' ;
+
+-- added new game-status KOMI to negotiate fair-komi
+ALTER TABLE Games
+   MODIFY Status enum('KOMI','SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED') NOT NULL default 'INVITED' ;
+
+-- store game-setings for rematch/komi-negotiation/invitations
+ALTER TABLE Games
+   ADD GameSetup varchar(255) NOT NULL default '' ;
+
+-- db-cleanup for consistency: renamed fields Waitingroom.Ratingmin/max -> RatingMin/Max
+ALTER TABLE Waitingroom
+   CHANGE Ratingmin RatingMin smallint(6) NOT NULL default '-9999',
+   CHANGE Ratingmax RatingMax smallint(6) NOT NULL default '-9999' ;
+-----------
+
+   * tournaments/list_tournaments.php:
+   - changed default-order of tournaments to highlight dragon/public/private scope-tourneys:
+     sort by ascending Scope, then descending tournament-ID
+   - cleanup: added Tournament-db-alias to table-columns to avoid ambiguity with other tables
+
+   * include/form_functions.php (class Form, FEC_BLOCK_FORM, ~.create_form_string):
+   - added config FEC_BLOCK_FORM to allow to print form-items in blocks,
+     clearing rows after printing, so that Form-instance can be used for other blocks
+
+   * include/connect2mysql.php (class UpdateQuery, ~.has_updates, ~.upd_txt, ~.upd_num,
+       ~.upd_raw, ~.upd_time, ~.upd_bool, ~.merge, ~.get_query):
+   - added helper-class to build SQL-statement to insert or update entry in db-table
+
+   * login.php, sgf.php, rss/status.php:
+   - fix bug (sync from stable-branch):
+     - on login store original user-id (uhandle) in cookie as db-check is case-INsensitive
+     - compare user-id case-INsensitive to download SGF-comments
+
+   * game_comments.php:
+   - do not show comments for game on INVITED-status
+
+2011-08-21 juga
+
+   * include/game_functions.php (GameHelper.count_started_games;
+       append_form_add_waiting_room_game, echo_started_games, echo_accept_same_opponent),
+     include/message_functions.php (game_info_table, echo_game_restrictions),
+     specs/db/table-Waitingroom.txt, message.php, waiting_room.php:
+   - added waiting-room restriction on total number of started games with same opponent
+     - challenger is restricted by number of started games to join game-offer
+     - optimized waiting-room-query for same-opponent-check
+   - number of already started games is shown for player on receiving invitation/dispute
+   - number of started games does NOT include multi-player-games
+
+   * include/make_game.php (make_invite_game, create_game):
+   - bugfix for auction-komi: set init-value for black/white-prisoners
+   - bugfix for handling White-first with and without handicap-stones
+     for shape-game & multi-player shape-game
+
 2011-08-08 juga
 
    * include/message_functions.php (game_settings_form, game_info_table; DgsMessage.load_message),
@@ -12671,6 +12820,7 @@ Update Release [2008-12-14] - DGS 1.0.14 - CVS-tag [DGS-stable-200812]
 2010-06-19: uploaded enhancement (by JUG) as DGS 1.0.14.r
 2010-07-27: enable page-create-time by JUG) as DGS 1.0.14.s
 2010-11-14: bug fix update (by JUG) as DGS 1.0.14.t
+2011-09-07: bug fix update (by JUG) as DGS 1.0.14.u
 
 2008-12-14 juga
 
