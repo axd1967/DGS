@@ -295,7 +295,7 @@ if( !$is_down )
          ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
          ." SET Games.ClockUsed=IF(Games.WeekendClock='Y',$ClockUsed,$WeekendClockUsed)"
             .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
-         ." WHERE Games.Status" . IS_RUNNING_GAME
+         ." WHERE Games.Status" . IS_STARTED_GAME
          ." AND Games.ToMove_ID=$uid"
          ." AND Games.ClockUsed<0" // VACATION_CLOCK
          );

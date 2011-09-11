@@ -403,7 +403,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Change rated-status ----------
 
-   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->ShapeID == 0 && $game->GameType == GAMETYPE_GO && isRunningGame($game->Status) )
+   if( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->ShapeID == 0 && $game->GameType == GAMETYPE_GO && isStartedGame($game->Status) )
    {
       if( $draw_hr )
          $gaform->add_row( array( 'HR' ));
@@ -438,7 +438,7 @@ function draw_game_admin_form( $game )
       $gaform->add_row( array(
             'CELL', 2, '',
             'TEXT', ' => ' .
-                    ( ( $too_few_moves && $game->GameType == GAMETYPE_GO && isRunningGame($game->Status) )
+                    ( ( $too_few_moves && $game->GameType == GAMETYPE_GO && isStartedGame($game->Status) )
                         ? T_('Players can delete game too!#gameadm')
                         : T_('Only admin can delete game!#gameadm')), ));
       $gaform->add_row( array(

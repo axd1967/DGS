@@ -50,26 +50,27 @@ require_once( "include/table_columns.php" );
    if( @$_REQUEST['show'] && $gid )
    {
       $game = Games::load_game( $gid );
-      if( !is_null($game) && $game->Status == GAME_STATUS_FINISHED )
+      if( !is_null($game) )
       {
-         $rlog = Ratinglog::load_ratinglog_with_query( new QuerySQL( SQLP_WHERE, "RL.gid=$gid", SQLP_ORDER, "RL.ID ASC" ) );
-         $rlog_id = (is_null($rlog)) ? 0 : $rlog->ID;
-         $game_row = array();
-         foreach( array( 'b', 'w' ) as $pfx )
+         if( $game->Status == GAME_STATUS_FINISHED )
          {
-            $uid = ($pfx == 'b') ? $game->Black_ID : $game->White_ID;
-            $rlog_data = load_rating_data( $uid, $rlog_id );
-            $game_row[$pfx.'RatingStatus'] = ($rlog_id > 0) ? RATING_RATED : RATING_INIT;
-            $game_row[$pfx.'Rating'] = $rlog_data->Rating;
-            $game_row[$pfx.'RatingMin'] = $rlog_data->RatingMin;
-            $game_row[$pfx.'RatingMax'] = $rlog_data->RatingMax;
+            $rlog = Ratinglog::load_ratinglog_with_query( new QuerySQL( SQLP_WHERE, "RL.gid=$gid", SQLP_ORDER, "RL.ID ASC" ) );
+            $rlog_id = (is_null($rlog)) ? 0 : $rlog->ID;
+            $game_row = array();
+            foreach( array( 'b', 'w' ) as $pfx )
+            {
+               $uid = ($pfx == 'b') ? $game->Black_ID : $game->White_ID;
+               $rlog_data = load_rating_data( $uid, $rlog_id );
+               $game_row[$pfx.'RatingStatus'] = ($rlog_id > 0) ? RATING_RATED : RATING_INIT;
+               $game_row[$pfx.'Rating'] = $rlog_data->Rating;
+               $game_row[$pfx.'RatingMin'] = $rlog_data->RatingMin;
+               $game_row[$pfx.'RatingMax'] = $rlog_data->RatingMax;
+            }
+            $rlog_b = load_rating_data( $game->Black_ID, $rlog_id, $gid );
+            $rlog_w = load_rating_data( $game->White_ID, $rlog_id, $gid );
          }
-         $rlog_b = load_rating_data( $game->Black_ID, $rlog_id, $gid );
-         $rlog_w = load_rating_data( $game->White_ID, $rlog_id, $gid );
       }
    }//show
-
-   $is_running = ( !is_null($game) && isRunningGame($game->Status) );
 
 
    $title = T_('Game calculations');
@@ -99,14 +100,17 @@ require_once( "include/table_columns.php" );
          anchor('http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/rating.php?revision=1.84&view=markup&pathrev=HEAD#l119', 'change_rating'),
          "\n\n";
 
+      $is_running = isRunningGame($game->Status);
       if( $is_running )
       {
          print_rating_update( $game, array( 'Score' =>  1 ) );
          print_rating_update( $game, array( 'Score' => -1 ) );
          print_rating_update( $game, array( 'Score' =>  0 ) );
       }
-      else
+      elseif( $game->Status == GAME_STATUS_FINISHED )
          print_rating_update( $game, $game_row );
+      else
+         echo "Game-Status = [{$game->Status}]\n";
 
       echo "</pre></td></tr></table>\n";
 
@@ -119,7 +123,7 @@ require_once( "include/table_columns.php" );
       T_('New game calculation') => 'game_calc.php' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // loads RatingMin/Max for given user from previous Ratinglog-entry before rlog_id
@@ -151,7 +155,7 @@ function load_rating_data( $uid, $rlog_id, $gid=0 )
    }
 
    return $rlog;
-}
+}//load_rating_data
 
 function echo_ratinglogs( $rlog_b, $rlog_w )
 {
@@ -180,7 +184,7 @@ function echo_ratinglogs( $rlog_b, $rlog_w )
       "</style>\n";
    section('rlog_result', 'Ratinglogs from database:');
    $table->echo_table();
-}
+}//echo_ratinglogs
 
 function convert_rating_result( $result )
 {
@@ -213,6 +217,6 @@ function print_rating_update( $game, $game_row )
    $result_descr = convert_rating_result($result);
    echo "<b>RESULT for [$title]</b> update_rating2 = $result <b>$result_descr</b>\n",
       "<font size=smaller>(Note: 0=rated-game, 1=can-be-deleted, 2=not-rated)</font>\n\n";
-}
+}//print_rating_update
 
 ?>

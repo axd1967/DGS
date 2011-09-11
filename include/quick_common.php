@@ -115,7 +115,8 @@ define('COOKIE_PREFIX', 'cookie_');
 define('UHANDLE_NAME', 'user'); //see quick_status.php and get_request_user()
 
 /*! SQL-clause-part applied for Games.Status to select all running games. */
-define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')");
+define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')"); // all running-games (play-mode)
+define('IS_STARTED_GAME', " IN ('KOMI','PLAY','PASS','SCORE','SCORE2')"); // running-games + fair-komi-negotiation, also used for SameOpponent-check
 
 //used in daily_cron.php & others (to "mark" forum oldest unread entry)
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * SECS_PER_DAY); // [secs]
@@ -144,15 +145,6 @@ if( get_magic_quotes_gpc() )
 function safe_getcookie($name)
 {
    $cookie = arg_stripslashes((string)@$_COOKIE[COOKIE_PREFIX.$name]);
-/*
-//compatibility with old cookies: to be removed in a while (as partner code lines)
-define('COOKIE_OLD_COMPATIBILITY', 1 && COOKIE_PREFIX>'');
-   if( COOKIE_OLD_COMPATIBILITY && !$cookie )
-   {
-      if( $name=='handle' || $name=='sessioncode' || substr($name,0,5)=='prefs' )
-         $cookie = arg_stripslashes((string)@$_COOKIE[$name]);
-   }
-*/
    return $cookie;
 }
 
@@ -331,7 +323,7 @@ function recover_language( $player_row=null) //must be called from main dir
    $language_used = $language;
 
    return $language_used;
-}
+}//recover_language
 
 
 // can't use html_entity_decode() because of the '&nbsp;' below:
@@ -449,6 +441,11 @@ function check_subnet_ip( $subnet, $ip )
 function isRunningGame( $status )
 {
    return preg_match("/^(".CHECK_GAME_STATUS_RUNNING.")$/", $status);
+}
+
+function isStartedGame( $status )
+{
+   return preg_match("/^(".CHECK_GAME_STATUS_STARTED.")$/", $status);
 }
 
 

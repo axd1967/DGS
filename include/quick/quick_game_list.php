@@ -131,7 +131,7 @@ class QuickHandlerGameList extends QuickHandler
       if( $view == GAMELIST_OPTVAL_VIEW_STATUS )
       {
          $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, "G.ToMove_ID=$uid", 'Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, "G.ToMove_ID=$uid", 'Status' . IS_STARTED_GAME );
 
          // handle next-game-order
          $next_game_order = ($uid == $my_id)
@@ -148,14 +148,14 @@ class QuickHandlerGameList extends QuickHandler
       elseif( $view == GAMELIST_OPTVAL_VIEW_RUNNING )
       {
          $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_RUNNING_GAME );
+         $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_STARTED_GAME );
          $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
          $qsql->useUnionAll();
       }
       elseif( $view == GAMELIST_OPTVAL_VIEW_FINISHED )
       {
          $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, "G.Status='FINISHED'" );
+         $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
          $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
          $qsql->useUnionAll();
       }

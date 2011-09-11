@@ -296,9 +296,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 
 //-----------------
 
-   $diff = cnt_diff( 'Run', 'Running'
-                   , 'Status' . IS_RUNNING_GAME
-                   , "", "");
+   $diff = cnt_diff( 'Run', 'Running', 'Status'.IS_STARTED_GAME, "", "");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
@@ -309,9 +307,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Running Done.";
 
 
-   $diff = cnt_diff( 'Fin', 'Finished'
-                   , "Status='FINISHED'"
-                   , "", "");
+   $diff = cnt_diff( 'Fin', 'Finished', "Status='".GAME_STATUS_FINISHED."'", "", "");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
@@ -322,9 +318,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Finished Done.";
 
 
-   $diff = cnt_diff( 'Rat', 'RatedGames'
-                   , "Status='FINISHED'$is_rated"
-                   , "", "");
+   $diff = cnt_diff( 'Rat', 'RatedGames', "Status='".GAME_STATUS_FINISHED."'$is_rated", "", "");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
@@ -335,9 +329,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>RatedGames Done.";
 
 
-   $diff = cnt_diff( 'Won', 'Won'
-                   , "Status='FINISHED'$is_rated"
-                   , " AND Score<0", " AND Score>0");
+   $diff = cnt_diff( 'Won', 'Won', "Status='".GAME_STATUS_FINISHED."'$is_rated", " AND Score<0", " AND Score>0");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
@@ -348,9 +340,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Won Done.";
 
 
-   $diff = cnt_diff( 'Los', 'Lost'
-                   , "Status='FINISHED'$is_rated"
-                   , " AND Score>0", " AND Score<0");
+   $diff = cnt_diff( 'Los', 'Lost', "Status='".GAME_STATUS_FINISHED."'$is_rated", " AND Score>0", " AND Score<0");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
@@ -362,9 +352,7 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 
 
    //RatedGames = Won + Lost + Jigo consistency
-   $diff = cnt_diff( 'Jig', 'RatedGames-Won-Lost'
-                   , "Status='FINISHED'$is_rated"
-                   , " AND Score=0", " AND Score=0");
+   $diff = cnt_diff( 'Jig', 'RatedGames-Won-Lost', "Status='".GAME_STATUS_FINISHED."'$is_rated", " AND Score=0", " AND Score=0");
    $err = 0;
    foreach( $diff as $ID => $ary )
    {

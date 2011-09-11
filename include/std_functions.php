@@ -213,7 +213,6 @@ define('TXTOBJTYPE_INTRO', 1); // edit Intro-table
 define('TXTOBJTYPE_LINKS', 2); // edit Links-table
 
 
-//TODO simplify ENABLE_STDHANDICAP !?
 // b0=0x1 (standard placement), b1=0x2 (with black validation skip), b2=0x4 (all placements)
 // both b1 and b2 set is not fully handled (error if incomplete pattern)
 define('ENABLE_STDHANDICAP', 0x3);
@@ -3065,7 +3064,7 @@ function send_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
  * :   (if the first char is HANDLE_TAG_CHAR, it is removed)
  * : an array => the reference will use its 'ID' field, and if possible, the
  * :   'Handle' and 'Name' fields if $player_name or $player_handle are absent
- * then the missing arguments will be retrieved from the database if needed.
+ * : then the missing arguments will be retrieved from the database if needed.
  **/
 function user_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
@@ -3242,7 +3241,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
 
 global $ENUM_GAMES_STATUS; //PHP5
-$ENUM_GAMES_STATUS = array( GAME_STATUS_SETUP, GAME_STATUS_INVITED, GAME_STATUS_PLAY,
+$ENUM_GAMES_STATUS = array( GAME_STATUS_KOMI, GAME_STATUS_SETUP, GAME_STATUS_INVITED, GAME_STATUS_PLAY,
    GAME_STATUS_PASS, GAME_STATUS_SCORE, GAME_STATUS_SCORE2, GAME_STATUS_FINISHED );
 
 /*!
@@ -3250,7 +3249,7 @@ $ENUM_GAMES_STATUS = array( GAME_STATUS_SETUP, GAME_STATUS_INVITED, GAME_STATUS_
  * \param $arr_enum non-empty array with all possible values for a table-column
  * var-args params enum-values that shouldn't match on table-column;
  *        must not contain all elements of enum(!)
- * Example: 'Games.Status' . not_in_clause( $ENUM_GAMES_STATUS, 'FINISHED', ... )
+ * Example: 'Games.Status' . not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_FINISHED, ... )
  */
 function not_in_clause( $arr_enum )
 {

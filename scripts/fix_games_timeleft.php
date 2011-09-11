@@ -77,7 +77,7 @@ require_once( "include/classlib_game.php" );
             "INNER JOIN Players AS black ON black.ID=G.Black_ID",
             "INNER JOIN Players AS white ON white.ID=G.White_ID",
          SQLP_WHERE,
-            "Status ".IS_RUNNING_GAME
+            "Status ".IS_STARTED_GAME
       );
    //$qsql->add_part( SQLP_WHERE, "TimeOutDate=0" ); // unset games
    //$qsql->add_part( SQLP_WHERE, "WeekendClock='N'" ); // games with no clock running on weekend

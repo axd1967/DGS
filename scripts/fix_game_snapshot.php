@@ -138,7 +138,10 @@ function fix_single_game( $gid )
       error('unknown_game', "fix_game_snaphost.find_game($gid)");
 
    $game = Games::new_from_row($game_row);
-   $no_marked_dead = ( $game->Status == GAME_STATUS_PLAY || $game->Status == GAME_STATUS_PASS );
+   if( $game->Status == GAME_STATUS_SETUP || $game->Status == GAME_STATUS_INVITED )
+      error('invalid_game_status', "fix_game_snaphost.check.status($gid,{$game->Status})");
+
+   $no_marked_dead = ( $game->Status == GAME_STATUS_KOMI || $game->Status == GAME_STATUS_PLAY || $game->Status == GAME_STATUS_PASS );
 
    $board = new Board();
    if( !$board->load_from_db( $game_row, $game->Moves, $no_marked_dead, /*last-msg*/false) )
@@ -172,12 +175,14 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       SQLP_FROM,   'Games AS G',
       SQLP_WHERE,  "G.Snapshot=''", // games without snapshot
       SQLP_ORDER,  'G.ID ASC' );
+
    if( $status == 'R' ) // running-games
-      $qsql->add_part( SQLP_WHERE, "G.Status".IS_RUNNING_GAME );
+      $qsql->add_part( SQLP_WHERE, "G.Status".IS_STARTED_GAME );
    elseif( $status == 'F' ) // finished-games
       $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
    else
-      $qsql->add_part( SQLP_WHERE, "G.Status IN ('PLAY','PASS','SCORE','SCORE2','FINISHED')");
+      $qsql->add_part( SQLP_WHERE, "G.Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED ) );
+
    if( $uid > 0 )
       $qsql->add_part( SQLP_WHERE, "(G.Black_ID=$uid OR G.White_ID=$uid)" );
    if( $startgid > 0 )
@@ -199,7 +204,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       $cnt++;
       $gid = $game_row['ID'];
       $game_status = $game_row['Status'];
-      $no_marked_dead = ( $game_status == GAME_STATUS_PLAY || $game_status == GAME_STATUS_PASS );
+      $no_marked_dead = ( $game_status == GAME_STATUS_KOMI || $game_status == GAME_STATUS_PLAY || $game_status == GAME_STATUS_PASS );
 
       $board = new Board();
       if( $board->load_from_db( $game_row, $game_row['Moves'], $no_marked_dead, /*last-msg*/false, /*fix-stop*/true) )

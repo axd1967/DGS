@@ -404,7 +404,7 @@ Commands:
             "id" : "123456", # game-id
             "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted
             "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
-            "status" : "PLAY", # game-status: "" | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
+            "status" : "PLAY", # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages)
             "score" : "", # score for finished game only (same format as for status_score-command above)
 
@@ -1307,7 +1307,8 @@ Response:
          time_remaining  : time-remaining of player-to-move,
                            - version = 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TR] Time-remaining"
                            - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
-         game_status     : PLAY | PASS | SCORE | SCORE2 = current game-status
+         game_status     : KOMI | PLAY | PASS | SCORE | SCORE2 = current game-status
+                           - KOMI   = fair-komi negotiation
                            - PLAY   = normal play-mode
                            - PASS   = one player has passed
                            - SCORE  = first player enters scoring step

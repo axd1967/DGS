@@ -114,7 +114,7 @@ echo ">>>> Most of them needs manual fixes.";
    else if( 1 ) //long... could be skipped to check the others
    {
       $query = "SELECT ID"
-         . " FROM Games WHERE Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED )
+         . " FROM Games WHERE Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_KOMI, GAME_STATUS_SETUP, GAME_STATUS_INVITED )
          . "$where ORDER BY Games.ID$limit";
 
       echo "\n<br>query: $query;\n";
@@ -259,8 +259,8 @@ echo ">>>> Most of them needs manual fixes.";
       $errmsg = '';
       if( $missgame_gid == 0 )
          $errmsg = "Found GamesPriority without Games-entry -> removing";
-      elseif( !isRunningGame($status) )
-         $errmsg = "Found GamesPriority in non-running Games-status -> removing";
+      elseif( !isStartedGame($status) )
+         $errmsg = "Found GamesPriority in non-started Games-status -> removing";
       if( $errmsg )
       {
          echo "<br>Game $gid: $errmsg\n";
@@ -431,6 +431,7 @@ function check_consistency( $gid)
 
    if( isRunningGame($Status) || $Status == GAME_STATUS_INVITED )
    {
+      //TODO handle shape-games W-to-start
       $handinr = ($Handicap < 2 ? 1 : $Handicap );
       $black_to_move = (($Moves < $handinr) || ($Moves-$handinr)%2 == 1 );
       $to_move = ( $black_to_move ? $Black_ID : $White_ID );
@@ -465,6 +466,10 @@ function check_consistency( $gid)
 */
    }
    elseif( $Status == GAME_STATUS_SETUP )
+   {
+      //TODO handle MP-game
+   }
+   elseif( $Status == GAME_STATUS_KOMI )
    {
       //TODO handle MP-game
    }

@@ -265,7 +265,7 @@ else
    {
       $result = @db_query( "wap_status.find_user($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
-         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."'" );
+         "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
 
       if( @mysql_num_rows($result) == 1 )
       {
@@ -336,7 +336,7 @@ else
        "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
        "opponent.Name, opponent.Handle " .
        "FROM (Games,Players AS opponent) " .
-       "WHERE ToMove_ID=$my_id AND Status" . IS_RUNNING_GAME .
+       "WHERE ToMove_ID=$my_id AND Status" . IS_STARTED_GAME .
          "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
        $sql_order;
 

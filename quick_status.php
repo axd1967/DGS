@@ -219,6 +219,7 @@ else
    if( (string)$game_order == '' )
       $game_order = @$player_row['NextGameOrder'];
    $sql_order = NextGameOrder::get_next_game_order( $game_order, 'Games' ); // enum -> order
+   $status_op = ( $version < 2 ) ? IS_RUNNING_GAME : IS_STARTED_GAME;
 
    $query = "SELECT Black_ID,White_ID,Games.ID, tid, " .
        "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
@@ -234,7 +235,7 @@ else
          "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$player_id) " .
          "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
          ( $load_prio ? "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$player_id " : '' ) .
-       "WHERE ToMove_ID=$player_id AND Status" . IS_RUNNING_GAME . " " .
+       "WHERE ToMove_ID=$player_id AND Status$status_op " .
        $sql_order;
 
    $result = db_query( 'quick_status.find_games', $query );
@@ -258,7 +259,7 @@ else
             $timefmt_flags );
 
       $chk_game_status = strtoupper($row['Status']);
-      $game_status = isRunningGame($chk_game_status) ? $chk_game_status : '';
+      $game_status = isStartedGame($chk_game_status) ? $chk_game_status : '';
 
       if( $version == 2 )
       {

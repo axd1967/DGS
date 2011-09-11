@@ -101,7 +101,7 @@ require_once( "include/form_functions.php" );
                "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
                   . " SET Games.ClockUsed=" .VACATION_CLOCK
                      . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
-                  . " WHERE Games.Status" . IS_RUNNING_GAME
+                  . " WHERE Games.Status" . IS_STARTED_GAME
                   . " AND Games.ToMove_ID=$my_id"
                   . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
                );

@@ -146,7 +146,7 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
       ." WHERE Clock.ID >= 0 AND" // older DGS-clones may still have clocks<0
       ." Clock.Ticks - Games.LastTicks > ".TICK_FREQUENCY
          ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
-      ." AND Status" . IS_RUNNING_GAME
+      ." AND Status" . IS_STARTED_GAME
       //slower: ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
       );
 }else{//old
@@ -158,7 +158,7 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
             . ' AND Games.ClockUsed=Clock.ID'
             //if both are <=0, the game will never finish by time:
             //. ' AND ( Maintime>0 OR Byotime>0 )'
-            //slower: "AND Status" . IS_RUNNING_GAME
+            //slower: "AND Status" . IS_STARTED_GAME
             . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
             ;
    $result = db_query( 'clock_tick.find_timeout_games', $query );
@@ -172,7 +172,7 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
       extract($row);
 
       //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
-      $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
+      $game_clause = " WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves=$Moves LIMIT 1";
 
       $hours = ticks_to_hours($ticks - $LastTicks);
 

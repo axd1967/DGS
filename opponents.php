@@ -117,8 +117,8 @@ require_once( 'include/classlib_userpicture.php' );
    $usfilter->add_filter( 3, 'Date',         'G.Lastchanged', true );
    $usfilter->add_filter( 4, 'Selection',
          array( T_('All games#filteropp') => '',
-                T_('Running games#filteropp')  => 'G.Status' . IS_RUNNING_GAME,
-                T_('Finished games#filteropp') => "G.Status='FINISHED'" ),
+                T_('Running games#filteropp')  => 'G.Status' . IS_STARTED_GAME,
+                T_('Finished games#filteropp') => "G.Status='".GAME_STATUS_FINISHED."'" ),
          true,
          array( FC_DEFAULT => 2 ) );
    $usfilter->init();

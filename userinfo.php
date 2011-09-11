@@ -87,7 +87,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
          "SELECT COUNT(*) AS X_Count " .
          "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid " .
-         "WHERE GP.uid=$uid AND G.Status ".IS_RUNNING_GAME." LIMIT 1" );
+         "WHERE GP.uid=$uid AND G.Status ".IS_RUNNING_GAME." LIMIT 1" ); // no fair-komi for MPG
       if( $gp_row )
          $count_mpg_run = (int)$gp_row['X_Count'];
    }
