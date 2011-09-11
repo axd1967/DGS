@@ -73,7 +73,7 @@ require_once 'include/game_functions.php';
       SQLP_FROM,
          'Games AS G',
       SQLP_WHERE,
-         "G.Status='FINISHED'",
+         "G.Status='".GAME_STATUS_FINISHED."'",
       SQLP_ORDER,
          'G.Lastchanged ASC' // needs sort by date (year)
    );

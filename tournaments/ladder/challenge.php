@@ -252,6 +252,8 @@ function show_game_info( $tid, $user_ch, $user_df, $trule, $tprops )
 
    $ch_rating = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode );
    $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
+
+   $game_row = array();
    $ch_is_black = $trule->prepare_create_game_row( $game_row, $user_ch->ID, $ch_rating, $user_df->ID, $df_rating );
 
    $game_row = $trule->convertTournamentRules_to_GameRow();

@@ -311,11 +311,11 @@ class SgfBuilder
          'black.ID AS Black_uid, ' .
          'black.Name AS Blackname, ' .
          'black.Handle AS Blackhandle, ' .
-         "IF(Games.Status='FINISHED', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
+         "IF(Games.Status='".GAME_STATUS_FINISHED."', Games.Black_End_Rating, black.Rating2 ) AS Blackrating, " .
          'white.ID AS White_uid, ' .
          'white.Name AS Whitename, ' .
          'white.Handle AS Whitehandle, ' .
-         "IF(Games.Status='FINISHED', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
+         "IF(Games.Status='".GAME_STATUS_FINISHED."', Games.White_End_Rating, white.Rating2 ) AS Whiterating " .
          'FROM Games ' .
             'LEFT JOIN Players AS black ON black.ID=Games.Black_ID ' .
             'LEFT JOIN Players AS white ON white.ID=Games.White_ID ' .
@@ -326,7 +326,7 @@ class SgfBuilder
       $grow = mysql_fetch_array($result);
 
       $status = $grow['Status'];
-      if( !isRunningGame($status) && $status != GAME_STATUS_FINISHED )
+      if( !isRunningGame($status) && $status != GAME_STATUS_FINISHED ) // not for fair-komi
          error('invalid_game_status', "SgfBuilder.load_game_info.check.status({$this->gid},$status)");
 
       $this->game_row = $grow;

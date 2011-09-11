@@ -253,16 +253,16 @@ function check_result_message( $user_id=false)
 {
    echo "<hr>Game result messages:";
 
-//Find old way *game result essages*, i.e. the last comment of a game.
+//Find old way *game result messages*, i.e. the last comment of a game.
    $query = "SELECT M.ID as mid, M.Type, M.Game_ID as gid, M.Subject"
       .", me.uid as uid, me.ID as me_mcID"
       .", G.Status, G.Score"
       ." FROM (Messages AS M, Games as G)"
       ." LEFT JOIN MessageCorrespondents AS me"
          ." ON M.ID=me.mid"
-      ." WHERE M.Type NOT IN('INVITATION','DISPUTED','RESULT') AND M.Game_ID>0"
+      ." WHERE M.Type='NORMAL' AND M.Game_ID>0"
          ." AND M.Subject LIKE '%esult%' AND LEFT(M.Subject,3)!='RE:'"
-         ." AND G.ID=M.Game_ID AND G.Status='FINISHED'"
+         ." AND G.ID=M.Game_ID AND G.Status='".GAME_STATUS_FINISHED."'"
          .( $user_id>0 ? " AND me.uid=$user_id" : "" )
       ." ORDER BY me.uid, M.ID";
 

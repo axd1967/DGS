@@ -75,7 +75,7 @@ require_once 'include/sgf_builder.php';
          'G.Moves > 10',
          'G.Size = 9',
          'G.Score BETWEEN -1000 AND 1000', // no Timeouts
-         "G.Status='FINISHED'",
+         "G.Status='".GAME_STATUS_FINISHED."'",
       SQLP_ORDER,
          'G.ID ASC'
    );
