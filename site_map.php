@@ -115,6 +115,10 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Download SGF of game'), "sgf.php", false);
             item(T_('Show observers'), "users.php", false);
             item(T_('Show game info'), "gameinfo.php", false);
+            { $item_level++;
+               item(T_('Rematch#rematch'), "game_rematch.php?mode=".REMATCH_INVITE, false);
+               item(T_('Copy new game#rematch'), "game_rematch.php".REMATCH_NEWGAME, false, true);
+            } $item_level--;
             item(T_('Show game-players'), "game_players.php", false, true);
          } $item_level--;
       } $item_level--;

@@ -86,7 +86,10 @@ function add_new_game_form( $form_id, $viewmode, $iamrated)
 {
    $addgame_form = new Form( $form_id, 'add_to_waitingroom.php', FORM_POST );
 
-   game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated);
+   if( @$_REQUEST['rematch'] )
+      game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated, 'redraw', $_REQUEST );
+   else
+      game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated);
 
    $addgame_form->add_row( array( 'SPACE' ) );
    $addgame_form->add_row( array( 'SUBMITBUTTON', 'add_game', T_('Add Game') ) );

@@ -395,6 +395,11 @@ function build_query_in_clause( $field, $arr, $is_string=true )
    return $clause;
 }
 
+function bool_YN( $value )
+{
+   return ($value) ? 'Y' : 'N';
+}
+
 
  /*!
   * \class UpdateQuery

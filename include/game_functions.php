@@ -2217,7 +2217,7 @@ class GameSetup
    // ------------ static functions ----------------------------
 
    /*! \brief Decodes (=parse) Games.GameSetup value with game-setup into GameSetup-object. */
-   function new_from_game_setup( $game_setup, $invitation=false )
+   function new_from_game_setup( $game_setup, $invitation=false, $null_on_empty=false )
    {
       global $MAP_GAME_SETUP;
       static $RX_KOMI = "-?\\d+(\\.[05])?";
@@ -2226,7 +2226,7 @@ class GameSetup
       $gs = new GameSetup( 0 );
       $game_setup = trim($game_setup);
       if( (string)$game_setup == '' )
-         return $gs;
+         return ($null_on_empty) ? null : $gs;
 
       // Standard:
       //   "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
@@ -2432,6 +2432,34 @@ error_log("new_from_game_setup.2: ".$gs->to_string(true)); //TODO-gs
    }//swap_htype_black_white
 
 } //end 'GameSetup'
+
+
+
+
+/**
+ * \brief Class to handle invite-rematch and new-game from existing game/game-setup.
+ */
+class GameRematch
+{
+   function add_rematch_links( &$arr_menu, $gid, $game_status, $game_type, $tid )
+   {
+      global $base_path;
+
+      $allow_newgame = $allow_invite = false;
+      if( $game_type != GAMETYPE_GO ) // MPG
+         $allow_newgame = true;
+      elseif( $tid > 0 ) // tournament
+         $allow_invite = $allow_newgame = true;
+      elseif( $game_status != GAME_STATUS_INVITED ) // normal-game
+         $allow_invite = $allow_newgame = true;
+
+      if( $allow_invite )
+         $arr_menu[T_('Rematch#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_INVITE .URI_AMP."gid=$gid";
+      if( $allow_newgame )
+         $arr_menu[T_('Copy new game#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_NEWGAME .URI_AMP."gid=$gid";
+   }//add_rematch_links
+
+} //end 'GameRematch'
 
 
 
@@ -2652,30 +2680,54 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false )
 function append_form_add_waiting_room_game( &$mform, $viewmode )
 {
    // note: multi-player-game requires rated game-players (RatingStatus != NONE)
-   $req_rated = ($viewmode == GSETVIEW_MPGAME );
    $rating_array = getRatingArray();
+
+   $rating_min = '30 kyu';
+   $rating_max = '9 dan';
+   if( @$_REQUEST['rematch'] ) // read init-vals from URL for rematch
+   {
+      $req_rated = ( @$_REQUEST['mb_rated'] == 'Y' );
+      $url_rat_min = (isset($_REQUEST['rat1'])) ? (int) $_REQUEST['rat1'] : OUT_OF_RATING;
+      $url_rat_max = (isset($_REQUEST['rat2'])) ? (int) $_REQUEST['rat2'] : OUT_OF_RATING;
+      if( $url_rat_min < OUT_OF_RATING )
+         $rating_min = echo_rating( $url_rat_min, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/true );
+      if( $url_rat_max < OUT_OF_RATING )
+         $rating_max = echo_rating( $url_rat_max, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/true );
+      $min_rated_games = (int) @$_REQUEST['min_rg'];
+      $same_opponent = (int) @$_REQUEST['same_opp'];
+      $comment = trim(@$_REQUEST['comment']);
+   }
+   else
+   {
+      $req_rated = false;
+      $min_rated_games = $comment = '';
+      $same_opponent = 0;
+   }
+   if( $viewmode == GSETVIEW_MPGAME )
+      $req_rated = true;
+
    $mform->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
                            'CHECKBOXX', 'must_be_rated', 'Y', "", $req_rated, ($req_rated ? 'disabled=1' : ''),
                            'TEXT', sptext(T_('If yes, rating between'),1),
-                           'SELECTBOX', 'rating1', 1, $rating_array, '30 kyu', false,
+                           'SELECTBOX', 'rating1', 1, $rating_array, $rating_min, false,
                            'TEXT', sptext(T_('and')),
-                           'SELECTBOX', 'rating2', 1, $rating_array, '9 dan', false ) );
+                           'SELECTBOX', 'rating2', 1, $rating_array, $rating_max, false ) );
 
    if( $viewmode != GSETVIEW_SIMPLE )
       $mform->add_row( array( 'DESCRIPTION', T_('Min. rated finished games'),
-                              'TEXTINPUT', 'min_rated_games', 5, 5, '',
+                              'TEXTINPUT', 'min_rated_games', 5, 5, $min_rated_games,
                               'TEXT', MINI_SPACING . T_('(optional)'), ));
 
    if( $viewmode == GSETVIEW_EXPERT || $viewmode == GSETVIEW_FAIRKOMI )
    {
       $same_opp_array = build_accept_same_opponent_array(array( 0,  -101, -102, -103,  -1, -2, -3,  3, 7, 14 ));
       $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
-                              'SELECTBOX', 'same_opp', 1, $same_opp_array, '0', false, ));
+                              'SELECTBOX', 'same_opp', 1, $same_opp_array, $same_opponent, false, ));
    }
 
    $mform->add_row( array( 'SPACE' ) );
    $mform->add_row( array( 'DESCRIPTION', T_('Comment'),
-                           'TEXTINPUT', 'comment', 40, 40, "" ) );
+                           'TEXTINPUT', 'comment', 40, 40, $comment ) );
 }//append_form_add_waiting_room_game
 
 function echo_started_games( $game_count )

@@ -104,6 +104,8 @@ define('GSETVIEW_MPGAME', 2); // multi-player
 define('GSETVIEW_FAIRKOMI', 3);
 define('MAX_GSETVIEW', 3);
 
+define('REMATCH_INVITE', 1);
+define('REMATCH_NEWGAME', 2);
 
 define('MAX_SEKI_MARK', 2);
 

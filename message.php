@@ -94,6 +94,14 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       $mode = 'Dispute';
    $can_reply = false;
 
+   $is_rematch = ( $mode == 'Invite' ) && ( (bool) @$_REQUEST['rematch'] );
+   if( $is_rematch )
+   {
+      $mid = $mpg_gid = $mpg_type = 0;
+      $type = 'INVITATION';
+      $preview = true;
+   }
+
    $arg_to = get_request_arg('to'); // single or multi-receivers
    $has_arg_to = ( (string)trim($arg_to) != '' );
    if( $mpg_type > 0 && (!$arg_to && $mode == 'NewMessage') )
@@ -125,6 +133,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
    $default_subject = get_request_arg('subject');
    $default_message = get_request_arg('message');
+   if( $is_rematch && empty($default_subject) )
+      $default_subject = 'Game invitation';
+
    if( $mpg_type > 0 && (@$mpg_gid || !$has_arg_to) && (empty($default_subject) && empty($default_message)) )
    {
       list( $default_subject, $default_message ) =
@@ -450,7 +461,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          echo $maxGamesCheck->get_warn_text();
 
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_REQUEST, $map_ratings);
          else
             game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, null, null, $map_ratings);
 
