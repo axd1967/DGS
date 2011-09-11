@@ -56,7 +56,7 @@ $ENTITY_GAMES = new Entity( 'Games',
                    'White_End_Rating',
       FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot', 'ShapeSnapshot', 'GameSetup',
       FTYPE_DATE, 'Starttime', 'Lastchanged',
-      FTYPE_ENUM, 'Status', 'GameType', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
+      FTYPE_ENUM, 'Status', 'GameType', 'Ruleset', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
    );
 
 class Games
@@ -73,6 +73,7 @@ class Games
    var $ToMove_ID;
    var $GameType;
    var $GamePlayers;
+   var $Ruleset;
    var $Size;
    var $Komi;
    var $Handicap;
@@ -112,7 +113,7 @@ class Games
    /*! \brief Constructs Games-object with specified arguments. */
    function Games( $id=0, $tid=0, $shape_id=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
                    $black_id=0, $white_id=0, $tomove_id=0, $game_type=GAMETYPE_GO, $game_players='',
-                   $size=19, $komi=6.5, $handicap=0,
+                   $ruleset=RULESET_JAPANESE, $size=19, $komi=6.5, $handicap=0,
                    $status=GAME_STATUS_INVITED, $moves=0, $black_prisoners=0, $white_prisoners=0,
                    $last_x=-1, $last_y=-1, $last_move='', $flags=0, $score=0.0, $maintime=0,
                    $byotype=BYOTYPE_JAPANESE, $byotime=0, $byoperiods=0, $black_maintime=0,
@@ -134,6 +135,7 @@ class Games
       $this->ToMove_ID = (int)$tomove_id;
       $this->setGameType( $game_type );
       $this->GamePlayers = $game_players;
+      $this->setRuleset( $ruleset );
       $this->Size = (int)$size;
       $this->Komi = (float)$komi;
       $this->Handicap = (int)$handicap;
@@ -183,6 +185,13 @@ class Games
       if( !preg_match( "/^(".CHECK_GAMETYPE.")$/", $game_type ) )
          error('invalid_args', "Games.setGameType($game_type)");
       $this->GameType = $game_type;
+   }
+
+   function setRuleset( $ruleset )
+   {
+      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+         error('invalid_args', "Games.setRuleset($ruleset)");
+      $this->Ruleset = $ruleset;
    }
 
    function setByotype( $byotype )
@@ -256,6 +265,7 @@ class Games
       $data->set_value( 'ToMove_ID', $this->ToMove_ID );
       $data->set_value( 'GameType', $this->GameType );
       $data->set_value( 'GamePlayers', $this->GamePlayers );
+      $data->set_value( 'Ruleset', $this->Ruleset );
       $data->set_value( 'Size', $this->Size );
       $data->set_value( 'Komi', $this->Komi );
       $data->set_value( 'Handicap', $this->Handicap );
@@ -353,6 +363,7 @@ class Games
             @$row['ToMove_ID'],
             @$row['GameType'],
             @$row['GamePlayers'],
+            @$row['Ruleset'],
             @$row['Size'],
             @$row['Komi'],
             @$row['Handicap'],
