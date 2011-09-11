@@ -405,6 +405,7 @@ function time_convert_to_hours($time, $unit)
    return $time;
 } //time_convert_to_hours
 
+// $unit : hours | days | months
 function time_convert_to_longer_unit(&$time, &$unit)
 {
    if( $unit == 'hours' && $time % 15 == 0 )
