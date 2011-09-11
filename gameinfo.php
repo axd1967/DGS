@@ -104,8 +104,9 @@ function build_rating_diff( $rating_diff )
    $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
    if( !$grow )
       error('unknown_game', "gameinfo.find2($gid)");
-   if( $grow['Status'] == GAME_STATUS_SETUP )
-      error('invalid_game_status', "gameinfo.find3($gid,{$grow['Status']})");
+   $game_status = $grow['Status'];
+   if( $game_status == GAME_STATUS_SETUP || $game_status == GAME_STATUS_INVITED )
+      error('invalid_game_status', "gameinfo.find3($gid,$game_status)");
 
    $shape_id = (int)@$grow['ShapeID'];
    $tid = (int) @$grow['tid'];
@@ -133,16 +134,17 @@ function build_rating_diff( $rating_diff )
       GAME_STATUS_FINISHED => T_('Finished'),
       GAME_STATUS_KOMI     => T_('Komi Negotiation'),
       );
-   $status = build_game_status($grow['Status']);
-   $game_finished = ( $grow['Status'] === GAME_STATUS_FINISHED );
+   $status = build_game_status($game_status);
+   $game_finished = ( $game_status === GAME_STATUS_FINISHED );
    $to_move = get_to_move( $grow, 'gameinfo.bad_ToMove_ID' );
 
    $game_setup = GameSetup::new_from_game_setup($grow['GameSetup']);
    $Handitype = $game_setup->Handicaptype;
    $cat_htype = get_category_handicaptype($Handitype);
    $is_fairkomi = ( $cat_htype == CAT_HTYPE_FAIR_KOMI );
-   $is_fairkomi_negotiation = ( $is_fairkomi && $grow['Status'] == GAME_STATUS_KOMI );
+   $is_fairkomi_negotiation = ( $is_fairkomi && $game_status == GAME_STATUS_KOMI );
    $fk_htype_text = GameTexts::get_fair_komi_types($Handitype);
+   $jigo_mode = $game_setup->JigoMode;
 
 
    // ------------------------
@@ -182,7 +184,7 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Status'),
          $arr_status[$status]
-            . ( $is_admin ? " (<span class=\"DebugInfo\">{$grow['Status']}</span>)" : '')
+            . ( $is_admin ? " (<span class=\"DebugInfo\">$game_status</span>)" : '')
       );
    if( $is_fairkomi )
       $itable->add_sinfo(
@@ -202,6 +204,8 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
    $itable->add_sinfo( T_('Komi'),
       ( $is_fairkomi_negotiation ? T_('negotiated by Fair Komi#fairkomi') : $grow['Komi'] ) );
+   if( $is_fairkomi )
+      $itable->add_sinfo( T_('Jigo-Check#fairkomi'), GameTexts::get_jigo_modes(/*fairkomi*/true, $jigo_mode) );
    $itable->add_sinfo( T_('Rated'),       yesno($grow['X_Rated']) );
    $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) ); // Yes=clock runs on weekend
    $itable->add_sinfo( T_('Standard Handicap'), yesno($grow['StdHandicap']) );
@@ -523,6 +527,7 @@ function build_rating_diff( $rating_diff )
    $menu_array[T_('Show game')] = "game.php?gid=$gid";
    if( $grow['GameType'] != GAMETYPE_GO )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
+   GameRematch::add_rematch_links( $menu_array, $gid, $game_status, $grow['GameType'], $grow['tid'] );
    if( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
@@ -542,6 +547,6 @@ function build_rating_diff( $rating_diff )
          array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
-}
+}//main
 
 ?>
