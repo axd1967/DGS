@@ -81,10 +81,6 @@ require_once( 'include/std_functions.php' );
   * <li> CELL      -- Forces a new cell start with colspan and attributs specified.
   * <li> ROW       -- Force the class specified for the row.
   * </ul>
-  *
-  * \TODO To be able to use the type functions separately
-  *       (probably possible already but not tested).
-  *
   */
 
  /*!
@@ -128,6 +124,7 @@ define('FAREA_ALLH', FAREA_ALL); // form-area get area-config for 'all' H-areas
 // form-element-config
 define('FEC_TR_ATTR', 'tr_attr'); // additional attributes for <tr>-element
 define('FEC_EXTERNAL_FORM', 'form_external_form'); // true, if form start/end externally printed
+define('FEC_BLOCK_FORM', 'block_form'); // true, if print form-items in blocks, clearing rows after printing
 
 // for overwriting form-element-attributes
 define('FEA_NUMARGS',     'NumArgs');
@@ -812,8 +809,10 @@ class Form
          }
       }
 
+      $is_block_form = $this->get_config(FEC_BLOCK_FORM);
+
       // start default-form here because above loop may add additional form-attributes
-      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now )
+      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now && !$is_block_form )
          $rootformstr .= $this->print_start_default();
 
       $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
@@ -828,8 +827,10 @@ class Form
 
       $rootformstr .= "</TABLE>";
 
-      if( !$this->get_config(FEC_EXTERNAL_FORM) )
+      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$is_block_form )
          $rootformstr .= $this->print_end();
+      if( $is_block_form )
+         $this->rows = array();
 
       return $rootformstr;
    } //create_form_string
