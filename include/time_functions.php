@@ -395,6 +395,7 @@ function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
 }
 
 
+// $unit: hours, months, or else days
 function time_convert_to_hours($time, $unit)
 {
    $time = (int)$time;
