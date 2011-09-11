@@ -130,6 +130,9 @@ class ErrorCode
          $arr['internal_error'] = // default-error-text
             T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
 
+         $arr['wrong_players'] =
+            T_("The player-IDs are wrong for this operation. Please send this problem to the support.");
+
          $arr['server_down'] =
             T_("Sorry, the Dragon Go Server is down for maintenance.");
 
@@ -202,9 +205,6 @@ class ErrorCode
 
          $arr['komi_bad_fraction'] =
             T_("Fractional part of komi can only be .0 or .5.");
-
-         $arr['invalid_komi_bid'] =
-            T_('Your komi bid for handicap type "Auction Komi" is missing or invalid!');
 
          $arr['handicap_range'] =
             T_("The handicap is out of range, please choose a more reasonable value.");
@@ -389,6 +389,9 @@ class ErrorCode
 
          $arr['unknown_game'] =
             T_("Sorry, I can't find that game.");
+
+         $arr['wrong_dispute_game'] =
+            T_("Sorry, this game is not matching the initial game players.");
 
          $arr['bad_shape_id'] =
             T_("Sorry, the shape-id is invalid.");
