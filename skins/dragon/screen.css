@@ -288,19 +288,10 @@ p.SysMsg {
    font-weight: normal;
 }
 
-span.Note {
-   font-weight: bold;
-}
-span.InfoMsg {
-   color: teal;
-   font-weight: bold;
-}
-
 span.FormWarning {
    color: darkred;
 }
 
-span.ErrMsgKomi,
 span.ErrMsgMaxGames,
 span.MPGWarning {
    font-weight: bold;
@@ -1265,7 +1256,8 @@ table.Infos .Highlight {
 }
 
 table.Infos td.Colors,
-table.Infos td.Images {
+table.Infos td.Images,
+table.Infos td.KomiBid {
    text-align: center;
 }
 
@@ -1415,6 +1407,20 @@ span.InviteMsgInfo {
    color: green;
 }
 
+span.InvDiffs {
+   font-size: smaller;
+}
+span.IDiffField {
+   font-size: smaller;
+   font-weight: bold;
+}
+span.InvDiffs span.Old {
+   color: black;
+}
+span.InvDiffs span.New {
+   color: blue;
+}
+
 table.MessageInfos {
    table-layout: auto;
    border: 0px solid red;
@@ -1557,6 +1563,14 @@ form#msgSearchForm tr.SelectFolders table.CheckboxArray td {
 /* ************************* */
 /* page level and local specifications */
 /* ************************* */
+
+/* ------------------------- */
+/* game-list pages */
+/* ------------------------- */
+
+span.GameTypeFairKomi {
+   font-size: smaller;
+}
 
 
 /* ------------------------- */
@@ -2433,6 +2447,31 @@ table#game_settingsTableInfos td {
 }
 table#game_settingsTableInfos td.Rubric {
    text-align: right;
+}
+
+
+table#fairkomiTable {
+   margin-bottom: 0.5em;
+}
+table#fairkomiTable td.Caption {
+   text-align: center;
+   padding: 0.5em 0 0.5em 0;
+}
+table#fairkomiTable td.Caption span.Caption {
+   font-weight: bold;
+   color: darkred;
+}
+table#fairkomiTable tr.Header td {
+   font-weight: bold;
+}
+table#fairkomiTable td {
+   padding: 4px 0.5em 2px 0.5em;
+}
+
+body.Game ul.SubNotes {
+   margin: 0.2em auto 0.6em;
+   line-height: 1.2em;
+   font-size: medium;
 }
 
 
