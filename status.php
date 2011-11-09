@@ -39,7 +39,7 @@ $GLOBALS['ThePage'] = new Page('Status');
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in');
-   $my_id = $player_row['ID'];
+   $my_id = $uid = $player_row['ID'];
 
    $page = 'status.php';
 
@@ -74,9 +74,10 @@ $GLOBALS['ThePage'] = new Page('Status');
    //       ordering is implemented using explicit "Set Order" saved in Players.NextGameOrder !!
    $table_mode= TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE; //|TABLE_NO_HIDE
    $gtable = new Table( 'game', $page, $cfg_tblcols, '', $table_mode|TABLE_ROWS_NAVI );
+   $cnt_game_rows = load_games_to_move( $my_id, $gtable );
 
-   start_page(T_('Status'), true, $logged_in, $player_row,
-               button_style($player_row['Button']) );
+   $title = sprintf( '%s (%s)', T_('Status'), $cnt_game_rows );
+   start_page( $title, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    section( 'Status',
       sprintf( T_('Status for %1$s: %2$s'),
@@ -178,165 +179,11 @@ if( (string)$folder_nr_querystr != '' )
 
 
 { // show games
-   $uid = $my_id;
-
-   $gtable->add_or_del_column();
-
-   // NOTE: check after add_or_del_column()-call
-   // only activate if column shown for user to reduce server-load for page
-   // avoiding additional outer-join on GamesNotes-table !!
-   $show_notes = (LIST_GAMENOTE_LEN>0);
-   $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
-
-   $show_prio = ($player_row['NextGameOrder'] == NGO_PRIO);
-   $load_prio = ($show_prio || $gtable->is_column_displayed(17) );
-
-   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
-   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(15, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
-   $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
-   if( $show_notes )
-      $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
-   $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
-   $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
-   $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
-   $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
-   $gtable->add_tablehead(19, T_('GameType#header'), '', 0, 'GameType+');
-   $gtable->add_tablehead(18, T_('Ruleset#header'), '', 0, 'Ruleset-');
-   $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
-   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
-   $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
-   $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
-   $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
-   $gtable->add_tablehead(11, new TableHead( T_('User online#header'),
-      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
-   $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
-   $gtable->add_tablehead(17, T_('Priority#header'), 'Number',
-      ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
-   $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
-
-   // static order for status-games (coupled with "next game" on game-page)
-   if( $player_row['NextGameOrder'] == NGO_LASTMOVED )
-      $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
-   elseif( $player_row['NextGameOrder'] == NGO_MOVES )
-      $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged
-   elseif( $player_row['NextGameOrder'] == NGO_PRIO )
-      $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
-   elseif( $player_row['NextGameOrder'] == NGO_TIMELEFT )
-      $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
-   //$order = $gtable->current_order_string('ID-');
-   $gtable->make_sort_images();
-   $order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'Games' ); // enum -> order
-   $gtable->use_show_rows(false);
-
-
-   $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time"
-      .",IF(Rated='N','N','Y') AS X_Rated"
-      .",opponent.Name,opponent.Handle,opponent.Rating2 AS Rating,opponent.ID AS pid"
-      .",UNIX_TIMESTAMP(opponent.Lastaccess) AS X_OppLastaccess"
-      //extra bits of X_Color are for sorting purposes
-      //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-      .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
-      .",COALESCE(Clock.Ticks,0) AS X_Ticks" //always my clock because always my turn (status page)
-      .(!$load_notes ? '': ",GN.Notes AS X_Note" )
-      .($load_prio ? ",COALESCE(GP.Priority,0) AS X_Priority" : ",0 AS X_Priority")
-      ." FROM (Games,Players AS opponent)"
-      .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
-      .(!$load_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
-      ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
-      ." WHERE ToMove_ID=$uid AND Status".IS_STARTED_GAME
-      ." AND opponent.ID=(Black_ID+White_ID-$uid)"
-      . $order;
-
-
-   if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
-
-   $result = db_query( "status.find_games($uid)", $query );
-
    section( 'Games', T_('Your turn to move in the following games:'));
-
-   if( @mysql_num_rows($result) == 0 )
-   {
-      echo T_('No games found');
-   }
-   else
-   {
-      $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //defined below
-
-      $cnt_rows = 0;
-      while( $row = mysql_fetch_assoc( $result ) )
-      {
-         $cnt_rows++;
-         $Rating=NULL;
-         extract($row);
-
-         $grow_strings = array();
-         //if( $gtable->Is_Column_Displayed[0] )
-            $grow_strings[ 1] = button_TD_anchor( "game.php?gid=$ID", $ID);
-         if( $gtable->Is_Column_Displayed[2] )
-            $grow_strings[ 2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
-         if( $gtable->Is_Column_Displayed[3] )
-            $grow_strings[ 3] = "<A href=\"userinfo.php?uid=$pid\">" .
-               make_html_safe($Name) . "</a>";
-         if( $gtable->Is_Column_Displayed[4] )
-            $grow_strings[ 4] = "<A href=\"userinfo.php?uid=$pid\">$Handle</a>";
-         if( $load_notes && $gtable->Is_Column_Displayed[12] )
-         {
-            // keep the first line up to LIST_GAMENOTE_LEN chars
-            $grow_strings[12] = make_html_safe( strip_gamenotes($X_Note) );
-         }
-         if( $gtable->Is_Column_Displayed[16] )
-            $grow_strings[16] = echo_rating($Rating,true,$pid);
-         if( $gtable->Is_Column_Displayed[5] )
-         {
-            $colors = ( $X_Color & 2 ) ? 'w' : 'b'; //my color
-            $grow_strings[ 5] = "<img src=\"17/$colors.gif\" alt=\"$colors\">";
-         }
-         if( $gtable->Is_Column_Displayed[6] )
-            $grow_strings[ 6] = $Size;
-         if( $gtable->Is_Column_Displayed[7] )
-            $grow_strings[ 7] = $Handicap;
-         if( $gtable->Is_Column_Displayed[8] )
-            $grow_strings[ 8] = $Komi;
-         if( $gtable->Is_Column_Displayed[9] )
-            $grow_strings[ 9] = $Moves;
-         if( $gtable->Is_Column_Displayed[14] )
-            $grow_strings[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
-         if( $gtable->Is_Column_Displayed[13] )
-            $grow_strings[13] = date(DATE_FMT, $Time);
-         if( $gtable->Is_Column_Displayed[10] )
-         {
-            $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
-            $grow_strings[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true );
-         }
-         if( $gtable->Is_Column_Displayed[11] )
-         {
-            $is_online = ($NOW - @$X_OppLastaccess) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
-            $grow_strings[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
-         }
-         if( $gtable->Is_Column_Displayed[15] )
-         {
-            $snapshot = ($Snapshot) ? $Snapshot : null;
-            $grow_strings[15] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
-               . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true)
-               . echo_image_tournament_info($tid, true);
-         }
-         if( $gtable->Is_Column_Displayed[17] )
-            $grow_strings[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
-         if( $gtable->Is_Column_Displayed[18] )
-            $grow_strings[18] = getRulesetText($Ruleset);
-         if( $gtable->Is_Column_Displayed[19] )
-            $grow_strings[19] = GameTexts::format_game_type( $GameType, $GamePlayers )
-               . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) )
-               . GameTexts::build_fairkomi_gametype($Status);
-
-         $gtable->add_row( $grow_strings );
-      }
-      $gtable->set_found_rows( $cnt_rows );
+   if( $cnt_game_rows > 0 )
       $gtable->echo_table();
-   }
-   mysql_free_result($result);
+   else
+      echo T_('No games found');
    //unset($gtable);
 }// status-games
 
@@ -421,8 +268,168 @@ if( $player_row['GamesMPG'] > 0 )
       $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
 
    end_page(@$menu_array);
-}
+}//main
 
+
+
+function load_games_to_move( $uid, &$gtable )
+{
+   global $player_row, $NOW, $DEBUG_SQL;
+
+   $next_game_order = $player_row['NextGameOrder'];
+   $gtable->add_or_del_column();
+
+   // NOTE: check after add_or_del_column()-call
+   // only activate if column shown for user to reduce server-load for page
+   // avoiding additional outer-join on GamesNotes-table !!
+   $show_notes = (LIST_GAMENOTE_LEN>0);
+   $load_notes = ($show_notes && $gtable->is_column_displayed(12) );
+
+   $show_prio = ($next_game_order == NGO_PRIO);
+   $load_prio = ($show_prio || $gtable->is_column_displayed(17) );
+
+   // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
+   $gtable->add_tablehead(15, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
+   $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
+   if( $show_notes )
+      $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
+   $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
+   $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
+   $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
+   $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
+   $gtable->add_tablehead(19, T_('GameType#header'), '', 0, 'GameType+');
+   $gtable->add_tablehead(18, T_('Ruleset#header'), '', 0, 'Ruleset-');
+   $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
+   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
+   $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
+   $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
+   $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
+   $gtable->add_tablehead(11, new TableHead( T_('User online#header'),
+      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
+   $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
+   $gtable->add_tablehead(17, T_('Priority#header'), 'Number',
+      ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
+   $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
+
+   // static order for status-games (coupled with "next game" on game-page)
+   if( $next_game_order == NGO_LASTMOVED )
+      $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
+   elseif( $next_game_order == NGO_MOVES )
+      $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged
+   elseif( $next_game_order == NGO_PRIO )
+      $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
+   elseif( $next_game_order == NGO_TIMELEFT )
+      $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
+   //$order = $gtable->current_order_string('ID-');
+   $gtable->make_sort_images();
+   $order = NextGameOrder::get_next_game_order( $next_game_order, 'Games' ); // enum -> order
+   $gtable->use_show_rows(false);
+
+
+   $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time"
+      .",IF(Rated='N','N','Y') AS X_Rated"
+      .",opponent.Name,opponent.Handle,opponent.Rating2 AS Rating,opponent.ID AS pid"
+      .",UNIX_TIMESTAMP(opponent.Lastaccess) AS X_OppLastaccess"
+      //extra bits of X_Color are for sorting purposes
+      //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
+      .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
+      .",COALESCE(Clock.Ticks,0) AS X_Ticks" //always my clock because always my turn (status page)
+      .(!$load_notes ? '': ",GN.Notes AS X_Note" )
+      .($load_prio ? ",COALESCE(GP.Priority,0) AS X_Priority" : ",0 AS X_Priority")
+      ." FROM (Games,Players AS opponent)"
+      .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
+      .(!$load_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
+      ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
+      ." WHERE ToMove_ID=$uid AND Status".IS_STARTED_GAME
+      ." AND opponent.ID=(Black_ID+White_ID-$uid)"
+      . $order;
+
+
+   if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
+
+   $result = db_query( "status.find_games($uid)", $query );
+
+   $cnt_rows = 0;
+   if( @mysql_num_rows($result) > 0 )
+   {
+      $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //func
+
+      while( $row = mysql_fetch_assoc( $result ) )
+      {
+         $cnt_rows++;
+         $Rating = NULL;
+         extract($row);
+
+         $row_arr = array();
+         //if( $gtable->Is_Column_Displayed[0] )
+            $row_arr[ 1] = button_TD_anchor( "game.php?gid=$ID", $ID);
+         if( $gtable->Is_Column_Displayed[2] )
+            $row_arr[ 2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
+         if( $gtable->Is_Column_Displayed[3] )
+            $row_arr[ 3] = "<A href=\"userinfo.php?uid=$pid\">" .
+               make_html_safe($Name) . "</a>";
+         if( $gtable->Is_Column_Displayed[4] )
+            $row_arr[ 4] = "<A href=\"userinfo.php?uid=$pid\">$Handle</a>";
+         if( $load_notes && $gtable->Is_Column_Displayed[12] )
+         {
+            // keep the first line up to LIST_GAMENOTE_LEN chars
+            $row_arr[12] = make_html_safe( strip_gamenotes($X_Note) );
+         }
+         if( $gtable->Is_Column_Displayed[16] )
+            $row_arr[16] = echo_rating($Rating,true,$pid);
+         if( $gtable->Is_Column_Displayed[5] )
+         {
+            $colors = ( $X_Color & 2 ) ? 'w' : 'b'; //my color
+            $row_arr[ 5] = "<img src=\"17/$colors.gif\" alt=\"$colors\">";
+         }
+         if( $gtable->Is_Column_Displayed[6] )
+            $row_arr[ 6] = $Size;
+         if( $gtable->Is_Column_Displayed[7] )
+            $row_arr[ 7] = $Handicap;
+         if( $gtable->Is_Column_Displayed[8] )
+            $row_arr[ 8] = $Komi;
+         if( $gtable->Is_Column_Displayed[9] )
+            $row_arr[ 9] = $Moves;
+         if( $gtable->Is_Column_Displayed[14] )
+            $row_arr[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
+         if( $gtable->Is_Column_Displayed[13] )
+            $row_arr[13] = date(DATE_FMT, $Time);
+         if( $gtable->Is_Column_Displayed[10] )
+         {
+            $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
+            $row_arr[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true );
+         }
+         if( $gtable->Is_Column_Displayed[11] )
+         {
+            $is_online = ($NOW - @$X_OppLastaccess) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+            $row_arr[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
+         }
+         if( $gtable->Is_Column_Displayed[15] )
+         {
+            $snapshot = ($Snapshot) ? $Snapshot : null;
+            $row_arr[15] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
+               . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true)
+               . echo_image_tournament_info($tid, true);
+         }
+         if( $gtable->Is_Column_Displayed[17] )
+            $row_arr[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
+         if( $gtable->Is_Column_Displayed[18] )
+            $row_arr[18] = getRulesetText($Ruleset);
+         if( $gtable->Is_Column_Displayed[19] )
+            $row_arr[19] = GameTexts::format_game_type( $GameType, $GamePlayers )
+               . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) )
+               . GameTexts::build_fairkomi_gametype($Status);
+
+         $gtable->add_row( $row_arr );
+      }
+      $gtable->set_found_rows( $cnt_rows );
+   }
+   mysql_free_result($result);
+
+   return $cnt_rows;
+}//load_games_to_move
 
 // callback-func for games-status Table-form adding form-elements below table
 function status_games_extend_table_form( &$gtable, &$form )
