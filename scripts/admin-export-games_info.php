@@ -143,7 +143,7 @@ function build_game_info( $row=null )
 {
    if( is_null($row) ) // headers
    {
-      return "GameID;StartTime;EndTime;Size;Moves;Rated;GameType;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
+      return "GameID;Starttime;EndTime;Size;Moves;Rated;GameType;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
    }
    else
    {
