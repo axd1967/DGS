@@ -77,7 +77,7 @@ function make_static_links( $create=false )
          'Frequently asked questions about go for the rec.games.go newsgroup');
    $link('http://www.intergofed.org/members.htm', 'IGF',
          'International Go Federation. Find federations and associations in the world.');
-   $link("http://igo-kisen.hp.infoseek.co.jp/topics.html", 'Go News', 'News and games from the professional scene');
+   $link("http://go-news.blogspot.com/", 'Go News', 'World news about game of Go');
    $link('http://gosensations.com/', 'Go Sensations', 'Go News and Sensations from other Go servers');
    $link("http://senseis.xmp.net/?HikaruNoGo", 'Hikaru no Go', 'A manga about go. Recommended!');
    $linkend();
@@ -90,8 +90,6 @@ function make_static_links( $create=false )
    $link("http://www.britgo.org/intro/intro1.html", 'Introduction',
          'Very well written introduction by the British Go Association.');
    $link("http://www.pandanet.co.jp/English/introduction_of_go/", 'Introduction to Go', 'You can master Go in 10 days');
-   $link('http://web.archive.org/web/20070101004300/http://www.sentex.net/~mmcadams/teachgo/', 'How to Teach Go',
-         'This is all you need to get started. Very basic stuff');
    $linkend();
 
 
@@ -119,7 +117,6 @@ function make_static_links( $create=false )
    $link("http://www.slateandshell.com/", 'Slate & Shell');
    $link("http://www.kiseido.com/", 'Kiseido');
    $link("http://www.yutopian.com/go/", 'Yutopian');
-   $link("http://www.samarkand.net/", 'Samarkand');
    $link("http://www.schaakengo.nl/", 'Het Paard', 'European shop');
    $linkend();
 
