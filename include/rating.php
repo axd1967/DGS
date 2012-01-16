@@ -1063,4 +1063,28 @@ function format_ratingchangeadmin_changes( $changes, $sep=', ' )
    return implode($sep, $out);
 }
 
+// updates Players-rating-fields and more if given in optional $upd_players UpdateQuery
+// param $new_rating if null -> only update rank
+// IMPORTANT NOTE: no check, if RatingStatus != RATING_RATED !! (must be done before)
+function update_player_rating( $uid, $new_rating=null, $upd_players=null )
+{
+   if( !is_numeric($uid) || $uid <= 0 )
+      error('invalid_args', "update_player_rating.check.uid($uid,$new_rating)");
+
+   $upd = ( is_null($upd_players) ) ? new UpdateQuery('Players') : $upd_players;
+   if( !is_null($new_rating) && is_numeric($new_rating) && $new_rating >= MIN_RATING )
+   {
+      $upd->upd_num('Rating', $new_rating);
+      $upd->upd_num('InitialRating', $new_rating);
+      $upd->upd_num('Rating2', $new_rating);
+      $upd->upd_raw('RatingMin', "$new_rating-200-GREATEST(1600-($new_rating),0)*2/15");
+      $upd->upd_raw('RatingMax', "$new_rating+200+GREATEST(1600-($new_rating),0)*2/15");
+      $upd->upd_txt('RatingStatus', RATING_INIT);
+   }
+
+   $upd_query = $upd->get_query();
+   db_query( "update_player_rating.update($uid,$new_rating)",
+      "UPDATE Players SET $upd_query WHERE ID=$uid LIMIT 1" );
+}//update_player_rating
+
 ?>

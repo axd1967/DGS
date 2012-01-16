@@ -46,8 +46,8 @@ require_once 'include/rank_converter.php';
    if( !$is_guest && @$_REQUEST['save'] )
    {
       // update RankInfo
-      $upd_query = "UPDATE Players SET " .
-         "Rank='" . mysql_addslashes(trim(get_request_arg('rank'))) . "' ";
+      $upd_players = new UpdateQuery('Players');
+      $upd_players->upd_txt('Rank', trim(get_request_arg('rank')) );
       $message = T_('Rank updated!');
 
       // update Rating
@@ -61,17 +61,11 @@ require_once 'include/rank_converter.php';
                || abs($newrating - $oldrating) > 0.005 )
                || $player_row['RatingStatus'] == RATING_NONE )
       {
-         $upd_query .= ',' .
-            "Rating=$newrating, " .
-            "InitialRating=$newrating, " .
-            "Rating2=$newrating, " .
-            "RatingMax=$newrating+200+GREATEST(1600-($newrating),0)*2/15, " .
-            "RatingMin=$newrating-200-GREATEST(1600-($newrating),0)*2/15, " .
-            "RatingStatus='".RATING_INIT."' ";
+         update_player_rating( $my_id, $new_rating, $upd_players );
          $message = T_('Rank & rating updated!');
       }
-
-      db_query( "edit_rating.update($my_id)", $upd_query . " WHERE ID=$my_id LIMIT 1" ); // table Players
+      else
+         update_player_rating( $my_id, /*new-rating*/null, $upd_players );
 
       jump_to("edit_rating.php?sysmsg=".urlencode($message));
    }
