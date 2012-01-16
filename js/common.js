@@ -131,7 +131,7 @@ function showGameThumbnail( e, size, snapshot )
       data = 0;
       if( ch == 'A' ) // 1xA
          repcount = 1;
-      if( ch == ':' ) // 2xA
+      else if( ch == ':' ) // 2xA
          repcount = 2;
       else if( ch == '%' ) // 3xA
          repcount = 3;
