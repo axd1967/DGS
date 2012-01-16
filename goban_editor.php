@@ -244,7 +244,7 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
          T_('<tt>"-"</tt> = clears intersection-lines on board, <tt>"_"</tt> = like <tt>"-"</tt> but not at edges#gobedit'),
          T_('<tt>"."</tt> = empty intersection, <tt>","</tt> = hoshi (auto-hoshi if none used on board)#gobedit'),
       );
-   $notes[] = array( T_('BOARD-format for diagram markup: <tt>Diagram-Code - Textual-Code</tt> : Description:#gobedit'),
+   $notes[] = array( T_('BOARD-format for diagram markup: "<tt>Diagram-Code - Textual-Code</tt> : <tt>Description</tt>":#gobedit'),
          T_('<tt>X O - BO WO</tt> : black stone, white stone#gobedit'),
          T_('<tt>B|W0..9 - B|W1.100</tt> : numbered black|white stones, W0/B0=W10/B10#gobedit'),
          T_('<tt>B W - BC WC</tt> : black|white stone with circle#gobedit'),
