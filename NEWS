@@ -159,6 +159,7 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Show multi-player-game info
 
    * Game info page (new):
+      * Added rematch for new game with same settings as invitation (Rematch) or waiting-room (Copy new game)
       * Access to initial invitation message for game
       * Show link to game- and game-info page of corresponding double-game
       * Show all game parameters, e.g. Start time and Weekend clock
@@ -282,8 +283,9 @@ Copyright (C) 2001-2011  Erik Ouchterlony
       * Added System Bookmarks in top Dragon bar
 
    * <home status.php>Status page</home>:
-      * Show first three unread bulletins as "Message of the Day"
+      * Show number of games to move in page-title (browser-tab)
       * Reduced user info on status page, but show if on vacation
+      * Show first three unread bulletins as "Message of the Day"
       * NEW and REPLY message folders can be hidden -> change on <home edit_folders.php>edit folders page</home>
       * Added column on status games with icon (<image online.gif>) for users being "online",
         i.e. last access time within 10 mins ago
