@@ -203,6 +203,7 @@ require_once( "include/contacts.php" );
          else
             $gids[] = create_game($opponent_row, $player_row, $game_row, $game_setup);
          $gid = $gids[0];
+
          //keep this after the regular one ($gid => consistency with send_message)
          if( $double )
          {
@@ -225,13 +226,10 @@ require_once( "include/contacts.php" );
          $gids[] = $gid;
       }
 
-      $cnt = count($gids);
       if( $is_std_go )
       {
-         db_query( 'join_waitingroom_game.update_players',
-            "UPDATE Players SET Running=Running+$cnt" .
-                  ( $game_row['Rated'] == 'Y' ? ", RatingStatus='".RATING_RATED."'" : '' ) .
-                  " WHERE ID IN ($my_id,$opponent_ID) LIMIT 2" );
+         GameHelper::update_players_start_game( 'join_waitingroom_game',
+            $my_id, $opponent_ID, count($gids), ($game_row['Rated'] == 'Y') );
       }
 
 
@@ -290,7 +288,7 @@ require_once( "include/contacts.php" );
 
       send_message( 'join_waitingroom_game', $message, $subject
          , $opponent_ID, '', /*notify*/true
-         , 0, 'NORMAL', $gid);
+         , 0, MSGTYPE_NORMAL );
    }
    ta_end();
 
