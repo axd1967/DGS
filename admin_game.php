@@ -144,7 +144,7 @@ define('GA_RES_TIMOUT', 3);
                list( $Subject, $Text ) = $game_notify->get_text_game_deleted( ACTBY_ADMIN );
                send_message( 'confirm', $Text, $Subject,
                   /*to*/$game_notify->get_recipients(), '',
-                  /*notify*/false, /*system-msg*/0, 'RESULT', $gid );
+                  /*notify*/false, /*system-msg*/0, MSGTYPE_RESULT, $gid );
 
                $message = sprintf( T_('Game #%s deleted!#gameadm'), $gid );
                jump_to("admin.php?sysmsg=".urlencode($message));

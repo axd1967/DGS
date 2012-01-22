@@ -151,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
                            "<user $ch_uid>", "<tourney $tid>", "<game $gid>" )),
             sprintf( T_('Challenge started for tournament #%s'), $tid ),
             $df_uid, '', /*notify*/true,
-            0/*sys-msg*/, 'NORMAL', 0 );
+            0/*sys-msg*/, MSGTYPE_NORMAL );
       }
       ta_end();
 

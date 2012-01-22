@@ -260,7 +260,7 @@ function check_result_message( $user_id=false)
       ." FROM (Messages AS M, Games as G)"
       ." LEFT JOIN MessageCorrespondents AS me"
          ." ON M.ID=me.mid"
-      ." WHERE M.Type='NORMAL' AND M.Game_ID>0"
+      ." WHERE M.Type='".MSGTYPE_NORMAL."' AND M.Game_ID>0"
          ." AND M.Subject LIKE '%esult%' AND LEFT(M.Subject,3)!='RE:'"
          ." AND G.ID=M.Game_ID AND G.Status='".GAME_STATUS_FINISHED."'"
          .( $user_id>0 ? " AND me.uid=$user_id" : "" )
@@ -275,8 +275,7 @@ function check_result_message( $user_id=false)
          echo ' gid='.$row['gid'] .' ='.$row['Score'];
 
       $mid = $row['mid'];
-      dbg_query("UPDATE Messages SET Type='RESULT' " .
-                   "WHERE ID=$mid LIMIT 1" );
+      dbg_query("UPDATE Messages SET Type='".MSGTYPE_RESULT."' WHERE ID=$mid LIMIT 1" );
    }
    mysql_free_result($result);
 

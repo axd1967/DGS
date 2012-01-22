@@ -64,8 +64,8 @@ define('VACATION_CLOCK', -1); // keep it < 0
 
 // ---------- Games stuff -----------------------------------------
 
-define('GAME_STATUS_KOMI', 'KOMI');
-define('GAME_STATUS_SETUP', 'SETUP');
+define('GAME_STATUS_KOMI', 'KOMI'); // fair-komi negotiation
+define('GAME_STATUS_SETUP', 'SETUP'); // setup for multi-player-games
 define('GAME_STATUS_INVITED', 'INVITED');
 define('GAME_STATUS_PLAY', 'PLAY');
 define('GAME_STATUS_PASS', 'PASS');
@@ -145,7 +145,14 @@ define('FOLDER_SENT', 5);
 //User folders must be >= USER_FOLDERS
 define('USER_FOLDERS', 6);
 
+define('MSGTYPE_NORMAL',     'NORMAL');
+define('MSGTYPE_INVITATION', 'INVITATION');
+define('MSGTYPE_DISPUTED',   'DISPUTED');
+define('MSGTYPE_RESULT',     'RESULT');
+
+// message-flags 8 bits: 0xff
 define('MSGFLAG_BULK', 0x01); // multi-receiver (bulk) message
+define('MSGFLAG_DELETE', 0x80); // mark message as candidate for deletion for cleanup
 
 
 // ---------- Filter stuff ----------------------------------------

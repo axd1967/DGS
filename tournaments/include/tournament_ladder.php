@@ -852,7 +852,7 @@ class TournamentLadder
          trim( $body . "\n" . TournamentLadder::get_notes_user_removed() ),
          sprintf( T_('Removal from tournament #%s'), $tid ),
          $uid, '', /*notify*/true,
-         0/*sys-msg*/, 'NORMAL', 0 );
+         0/*sys-msg*/, MSGTYPE_NORMAL );
    }
 
    /*!

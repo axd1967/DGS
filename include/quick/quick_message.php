@@ -100,7 +100,7 @@ class QuickHandlerMessage extends QuickHandler
       if( $cmd == MESSAGECMD_INFO )
       {
          /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
-         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->oid, false );
+         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->oid, /*full*/false );
 
          if( $this->is_with_option(QWITH_USER_ID) )
             $this->user_rows = User::load_quick_userinfo( array(
@@ -149,7 +149,7 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'level', (int)$row['Level'] );
       $this->addResultKey( 'message_prev', (int)$row['ReplyTo'] );
       $this->addResultKey( 'message_hasnext', ($row['X_Flow'] & FLOW_ANSWERED) ? 1 : 0 );
-      $this->addResultKey( 'needs_reply', ($row['Folder_nr'] == FOLDER_NEW && $row['Type'] == 'INVITATION') ? 1 : 0 );
+      $this->addResultKey( 'needs_reply', ($row['Folder_nr'] == FOLDER_NEW && $row['Type'] == MSGTYPE_INVITATION) ? 1 : 0 );
       $this->addResultKey( 'game_id', (int)$row['Game_ID'] );
       $this->addResultKey( 'subject', $row['Subject'] );
       $this->addResultKey( 'text', $row['Text'] );

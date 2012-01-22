@@ -631,7 +631,7 @@ class TournamentHelper
          send_message( "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)",
             $msg_text, sprintf( T_('King of the Hill crowned for tournament #%s'), $tid ),
             $nfy_uids, '', /*notify*/true,
-            /*sys-msg*/0, 'NORMAL', 0 );
+            /*sys-msg*/0, MSGTYPE_NORMAL );
       }
       ta_end();
    }//process_tournament_ladder_crown_king
