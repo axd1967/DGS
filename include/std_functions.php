@@ -1100,10 +1100,15 @@ function generate_random_password()
  */
 function verify_email( $debugmsg, $email, $die_on_error=true )
 {
-   //RFC 2822 - 3.4.1. Addr-spec specification
-   //See http: //www.faqs.org/rfcs/rfc2822
-   //$regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,4}$";
-   $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,4})\$/i";
+   // Syntax email-address:
+   // - RFC 5322 - 3.2.3 : see http://tools.ietf.org/html/rfc5322#section-3.2.3
+   // - see http://en.wikipedia.org/wiki/Email_address#Local_part
+   //   normally also the following chars are allowed: ! # $ % & ' * + - / = ? ^ _ ` { | } ~
+   //   though some systems/organizations do not support all of these.
+   //   DGS using only ...
+   // - RFC 2822 - 3.4.1 : Addr-spec specification, see http: //www.faqs.org/rfcs/rfc2822
+   //   $regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,6}$";
+   $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,6})\$/i";
    $res= preg_match($regexp, $email);
    if( !$res ) // invalid email
    {
@@ -1215,7 +1220,7 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
  **/
 function send_message( $debugmsg, $text='', $subject=''
             , $to_ids='', $to_handles='', $notify=true
-            , $from_id=0, $type='NORMAL', $gid=0
+            , $from_id=0, $type=MSGTYPE_NORMAL, $gid=0
             , $prev_mid=0, $prev_type='', $prev_folder=FOLDER_NONE
             )
 {
@@ -1230,7 +1235,7 @@ function send_message( $debugmsg, $text='', $subject=''
       $subject = T_('(no subject)');
 
    if( !isset($type) || !is_string($type) || !$type )
-      $type = 'NORMAL';
+      $type = MSGTYPE_NORMAL;
    if( !isset($gid) || !is_numeric($gid) || $gid<0 )
       $gid = 0;
    if( !isset($from_id) || !is_numeric($from_id) || $from_id <= GUESTS_ID_MAX ) //exclude guest
@@ -1275,8 +1280,6 @@ function send_message( $debugmsg, $text='', $subject=''
    if( $to_myself && $reccnt > 0 )
       error('bulkmessage_self', "$debugmsg.rec2($from_id,$subject)");
 
-   $msg_flags = ($reccnt > 1) ? MSGFLAG_BULK : 0;
-
    // determine message-thread info
    $thread = 0;
    $thread_level = 0;
@@ -1290,6 +1293,8 @@ function send_message( $debugmsg, $text='', $subject=''
          $thread_level = $prev_msgrow['Level'] + 1;
       }
    }
+
+   $msg_flags = ($reccnt > 1) ? MSGFLAG_BULK : 0;
 
    $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
           .", Type='$type', Flags='$msg_flags'"
@@ -1322,7 +1327,7 @@ function send_message( $debugmsg, $text='', $subject=''
          "UPDATE Messages SET Thread='$mid', Level=0 WHERE ID='$mid' LIMIT 1" );
    }
 
-   $need_reply_val = ( $from_id > 0 && $type == 'INVITATION' ) ? 'M' : 'N';
+   $need_reply_val = ( $from_id > 0 && $type == MSGTYPE_INVITATION ) ? 'M' : 'N';
    foreach( $receivers as $uid => $row ) //exclude to myself
    {
       if( $from_id > 0 )
@@ -1339,7 +1344,6 @@ function send_message( $debugmsg, $text='', $subject=''
              ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
              .' ('.implode('),(', $query).")";
       db_query( "$debugmsg.correspondent", $query );
-
       if( mysql_affected_rows() != $cnt )
          error('mysql_insert_message', "$debugmsg.correspondent");
    }
@@ -1354,9 +1358,9 @@ function send_message( $debugmsg, $text='', $subject=''
 
    //records the last message of the invitation/dispute sequence
    //the type of the previous messages will be changed to 'DISPUTED'
-   if( $gid > 0 && ( $type == 'INVITATION' ) )
+   if( $gid > 0 && $type == MSGTYPE_INVITATION )
    {
-      db_query( "$debugmsg.game_message",
+      db_query( "$debugmsg.game_message($gid)",
          "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
    }
 
@@ -2160,7 +2164,8 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 //    make_url('test.php?a=1', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo'
 // Also handle value-arrays:
 //    make_url('arr.php', array('a' => array( 44, 55 ))  gives  'arr.php?a[]=44&a[]=55'
-// TODO(if needed): next step could be to handle the '#' part of the url:
+//
+// NOTE: (if needed): next step could be to handle the '#' part of the url:
 //    make_url('test.php?a=1#id', array('b' => 'foo'), false)  gives  'test.php?a=1&b=foo#id'
 function make_url( $url, $args, $end_sep=false)
 {
@@ -3226,7 +3231,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
 
          send_message( "delete_all_observers($gid)", $Text, $Subject
             , $to_ids, '', /*notify*/false
-            , /*sys-msg*/0, 'NORMAL', $gid);
+            , /*sys-msg*/0, MSGTYPE_NORMAL, $gid);
       }
       else
          mysql_free_result($result);
@@ -3241,8 +3246,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
 // definitions and functions to help avoid '!=' or 'NOT IN' in SQL-where-clauses:
 
 global $ENUM_GAMES_STATUS; //PHP5
-$ENUM_GAMES_STATUS = array( GAME_STATUS_KOMI, GAME_STATUS_SETUP, GAME_STATUS_INVITED, GAME_STATUS_PLAY,
-   GAME_STATUS_PASS, GAME_STATUS_SCORE, GAME_STATUS_SCORE2, GAME_STATUS_FINISHED );
+$ENUM_GAMES_STATUS = array( GAME_STATUS_KOMI, GAME_STATUS_SETUP, GAME_STATUS_INVITED,
+   GAME_STATUS_PLAY, GAME_STATUS_PASS, GAME_STATUS_SCORE, GAME_STATUS_SCORE2, GAME_STATUS_FINISHED );
 
 /*!
  * Builds IN-SQL-part for some enum-array containing all possible values for a table-column.
