@@ -80,10 +80,10 @@ else
    $Last_X = $Last_Y = -1;
    extract($game_row);
 
-   if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
-      error('game_not_started', "quick_play.check_status.bad($gid,$Status)");
-   else if( $Status == GAME_STATUS_FINISHED )
+   if( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "quick_play.check_status.finished($gid)");
+   elseif( !isRunningGame($Status) )
+      error('game_not_started', "quick_play.check_status.bad($gid,$Status)");
 
    if( $ToMove_ID == 0 )
       error('game_finished', "quick_play.bad_ToMove_ID.gamend($gid)");
