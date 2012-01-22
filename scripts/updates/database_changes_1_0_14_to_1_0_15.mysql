@@ -1970,21 +1970,16 @@ CREATE TABLE GamePlayers (
 ) ENGINE=MyISAM ;
 
 
--- fix Game_ID and Type of wrong accepted/declined invitation-messages adding Game_ID and correcting Type
+-- fix wrong accepted/declined invitation-messages adding Game_ID of parent message (invitation/dispute)
 -- * 1. count (ca. 270.000 rows - 15s)
 SELECT COUNT(*) FROM Messages AS M WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 ;
+# not all of these are invitation-msgs, some are also replies to invitations
 -- * 2. fix
 UPDATE Messages AS M, Messages AS MSRC
-   SET M.Type='INVITATION', M.Game_ID=MSRC.Game_ID
+   SET M.Game_ID=MSRC.Game_ID
    WHERE M.ReplyTo=MSRC.ID AND M.Subject LIKE 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
 -- * 3. control-count, repeat step (2) till count is 0 (ca. 4min)
 SELECT COUNT(*) FROM Messages AS M INNER JOIN Messages AS MSRC ON MSRC.ID=M.ReplyTo WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
-
--- fix Type of wrong invitation-messages with game-id
--- * 1. count (perhaps 0 in production)
-SELECT COUNT(*) FROM Messages WHERE Game_ID>0 AND Type='NORMAL' AND Subject LIKE 'Game invitation%' ;
--- * 2. fix
-UPDATE Messages SET Type='INVITATION' WHERE Game_ID>0 AND Type='NORMAL' AND Subject LIKE 'Game invitation%' ;
 
 -- added message-flags to mark as bulk with multiple receivers
 ALTER TABLE Messages
