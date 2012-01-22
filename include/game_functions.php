@@ -1118,22 +1118,39 @@ class GameHelper
          "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
    }//_delete_base_game_tables
 
-   /*! \brief Deletes INVITED-game; return true for success; false on failure. */
+   /*!
+    * \brief Deletes game-invitation game (on INVITED-status).
+    * \return true for success; false on failure.
+    */
    function delete_invitation_game( $dbgmsg, $gid, $uid1, $uid2 )
    {
-      db_query( "GameHelper::delete_invitation_game.delgame.$dbgmsg($gid)",
+      db_query( "GameHelper::delete_invitation_game.delgame.$dbgmsg($gid,$uid1,$uid2)",
          "DELETE FROM Games WHERE ID=$gid AND Status='".GAME_STATUS_INVITED."' " .
             "AND ( Black_ID=$uid1 OR White_ID=$uid1 ) " .
             "AND ( Black_ID=$uid2 OR White_ID=$uid2 ) " .
             "LIMIT 1" );
       if( mysql_affected_rows() != 1)
       {
-         error('game_delete_invitation', "GameHelper::delete_invitation_game.delres.$dbgmsg($gid)");
+         error('game_delete_invitation', "GameHelper::delete_invitation_game.delres.$dbgmsg($gid,$uid1,$uid2)");
          return false;
       }
       else
          return true;
    }//delete_invitation_game
+
+   function update_players_start_game( $dbgmsg, $uid1, $uid2, $game_count, $rated_game )
+   {
+      $dbgmsg = "GameHelper::update_players_start_game($uid1,$uid2,$game_count,$rated_game).$dbgmsg";
+      if( !is_numeric($uid1) || !is_numeric($uid2) )
+         error('invalid_args', "$dbgmsg.check.uids");
+
+      $upd_players = new UpdateQuery('Players');
+      $upd_players->upd_raw('Running', "Running + " . (int)$game_count );
+      if( $rated_game )
+         $upd_players->upd_txt('RatingStatus', RATING_RATED);
+      db_query( "$dbgmsg.update",
+         "UPDATE Players SET " . $upd_players->get_query() . " WHERE ID IN ($uid1,$uid2) LIMIT 2" );
+   }//update_players_start_game
 
    /*!
     * \brief Updates game-stats in Players-table for simple or multi-player game.
@@ -1667,7 +1684,7 @@ class GameFinalizer
       // Send a message to the opponent
       send_message( "$dbgmsg.msg", $Text, $Subject,
          $game_notify->get_recipients(), '',
-         /*notify*/true, /*system-msg*/0, 'RESULT', $gid );
+         /*notify*/true, /*system-msg*/0, MSGTYPE_RESULT, $gid );
    }//finish_game
 
 
@@ -2296,7 +2313,7 @@ error_log("new_from_game_setup.2: ".$gs->to_string(true)); //TODO-gs
 
    /*!
     * \brief Decodes Games.GameSetup of invitation-type with additional data to make diffs on disputes.
-    * \param $gid only for dbg-info
+    * \param $gid only for dbg-info, can be Games.ID
     * \return non-null array [ GameSetup-obj for pivot-uid, GameSetup-obj for opponent ],
     *         elemements may be null (if non-matching game-setup found)
     */
