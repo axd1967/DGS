@@ -19,6 +19,79 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-01-22 juga
+
+   * include/globals.php (MSGTYPE_...), include/quick/quick_message.php,
+     scripts/message_consistency.php,
+     tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder.php,
+     tournaments/edit_participant.php, tournaments/ladder/challenge.php,
+     admin_game.php, join_waitingroom_game.php, message.php (handle_send_message),
+     search_messages.php:
+   - use consts for MSGTYPEs & GAME-status
+   - minor changes (rename vars, replace global, cleanup, debug-output, comments, layout)
+
+   * quick_play.php:
+   - better safety-checks/error-codes on checking game-status
+
+   * include/make_game.php (make_invite_game, accept_invite_game, create_game,
+       make_standard_placement_of_handicap_stones),
+     include/game_functions.php (GameHelper.update_players_start_game),
+     join_waitingroom_game.php:
+   - refactor SQL-update for updating player-stats on game-start
+     using UpdateQuery-class in GameHelper
+   - better safety-checks/error-codes for invitation-games
+   - minor changes (rename vars, replace global, cleanup, debug-output, comments, layout)
+
+   * include/message_functions.php (game_settings_form, game_info_table; DgsMessage.load_message):
+   - optimize: simplify SQL-query for dispute-check removing Players-join
+   - better safety-checks/error-codes for invitation-games
+   - use consts for MSGTYPEs
+   - minor fixes/changes (defaults, vars, typo, comments)
+
+   * include/std_functions.php (verify_email):
+   - commented on unused email-chars on verify_email-func
+   - use consts for MSGTYPEs
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - fix db-changes for game-invitations
+
+   * specs/db/table-Games.txt, specs/db/table-Messages.txt:
+   - adjusted docs for Game- and Message-related tables/fields
+
+2012-01-16 juga
+
+   * include/rating.php (update_player_rating), edit_rating.php:
+   - refactor SQL-update for rating-update using UpdateQuery-class
+
+2011-11-09 juga
+
+   * status.php (load_games_to_move):
+   - show number of games-to-move in page-title for browser-tabs
+
+   * links.php:
+   - removed broken links, replaced 'Go News'
+
+2011-09-12 juga
+
+   * include/game_functions.php (append_form_add_waiting_room_game;
+       GameSetup.new_from_game_setup; class GameRematch.add_rematch_links),
+     include/globals.php (REMATCH_INVITE, REMATCH_NEWGAME),
+     include/connect2mysql.php (bool_YN),
+     game_rematch.php (build_url_new_game_from_game, build_url_new_game_from_game_setup,
+       build_url_invite_from_game, build_url_invite_from_game_setup, build_url_game_basics,
+       build_url_time, build_url_cat_htype_manual, build_url_handi_komi_rated, build_url_invite_to),
+     new_game.php (add_new_game_form),
+     gameinfo.php, message.php, site_map.php:
+   - added 'Rematch' and 'Copy new game' as bottom-links on game-info-page:
+     - redirect to invitation-page or new-game-page with copied original game-settings if possible
+     - read game-settings from GameSetup-field if present, otherwise calculate from Games-entry
+   - additional changes for game-info-page:
+     - bugfix: show jigo-check-restriction for fair-komi game
+     - bugfix: show better error 'invalid_game_status' for game on INVITATION-status
+
+   * include/db/games.php (class Games, ~.setRuleset, ~.fillEntityData, ~.new_from_row):
+   - bugfix: added missing Games.Ruleset-field
+
 2011-09-11 juga
 
    * include/game_functions.php (HTYPE_AUCTION_SECRET, INVITE_HANDI_FIXCOL,
@@ -2981,21 +3054,16 @@ ALTER TABLE Players
 -----------
 copy /images/up_bulk.gif
 
--- fix Game_ID and Type of wrong accepted/declined invitation-messages adding Game_ID and correcting Type
+-- fix wrong accepted/declined invitation-messages adding Game_ID of parent message (invitation/dispute)
 -- * 1. count (ca. 270.000 rows - 15s)
 SELECT COUNT(*) FROM Messages AS M WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 ;
+# not all of these are invitation-msgs, some are also replies to invitations
 -- * 2. fix
 UPDATE Messages AS M, Messages AS MSRC
-   SET M.Type='INVITATION', M.Game_ID=MSRC.Game_ID
+   SET M.Game_ID=MSRC.Game_ID
    WHERE M.ReplyTo=MSRC.ID AND M.Subject LIKE 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
 -- * 3. control-count, repeat step (2) till count is 0 (ca. 4min)
 SELECT COUNT(*) FROM Messages AS M INNER JOIN Messages AS MSRC ON MSRC.ID=M.ReplyTo WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
-
--- fix Type of wrong invitation-messages with game-id
--- * 1. count (perhaps 0 in production)
-SELECT COUNT(*) FROM Messages WHERE Game_ID>0 AND Type='NORMAL' AND Subject LIKE 'Game invitation%' ;
--- * 2. fix
-UPDATE Messages SET Type='INVITATION' WHERE Game_ID>0 AND Type='NORMAL' AND Subject LIKE 'Game invitation%' ;
 
 -- added message-flags to mark as bulk with multiple receivers
 ALTER TABLE Messages
