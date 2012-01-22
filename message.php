@@ -81,7 +81,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    init_standard_folders();
    $my_id = $player_row['ID'];
    $folders = get_folders($my_id);
-   $type = get_request_arg('type', 'NORMAL');
+   $msg_type = get_request_arg('type', MSGTYPE_NORMAL);
    $mpg_gid = (int)get_request_arg('mpgid');
    $mpg_type = (int)get_request_arg('mpmt');
 
@@ -98,7 +98,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    if( $is_rematch )
    {
       $mid = $mpg_gid = $mpg_type = 0;
-      $type = 'INVITATION';
+      $msg_type = MSGTYPE_INVITATION;
       $preview = true;
    }
 
@@ -120,7 +120,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    {
       ta_begin();
       {//HOT-section to handle message
-         $errors = handle_send_message( $dgs_message, $mpg_type, $arg_to );
+         $errors = handle_send_message( $dgs_message, $mpg_type, $arg_to, $msg_type );
       }
       ta_end();
    }
@@ -179,7 +179,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          if( $Folder_nr == FOLDER_NEW )
          {
             // Remove NEW flag
-            $Folder_nr = ( $Type == 'INVITATION' ) ? FOLDER_REPLY : FOLDER_MAIN;
+            $Folder_nr = ( $msg_type == MSGTYPE_INVITATION ) ? FOLDER_REPLY : FOLDER_MAIN;
             ta_begin();
             {//HOT-section to move message away from NEW-folder
                DgsMessage::update_message_folder( $mid, $my_id, $Sender, $Folder_nr );
@@ -189,17 +189,15 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
             ta_end();
          }
 
-         if( $Type == 'INVITATION' )
+         if( $msg_type == MSGTYPE_INVITATION )
          {
             if( $Status == GAME_STATUS_INVITED && ($Replied != 'Y') )
                $submode = ( $to_me ) ? 'ShowInvite' : 'ShowMyInvite';
-            else if( is_null($Status) )
-               $submode = 'AlreadyDeclined';
             else
-               $submode = 'AlreadyAccepted';
+               $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
          }
-         else if( $Type == 'DISPUTED' )
-            $submode = 'InviteDisputed';
+         else if( $msg_type == MSGTYPE_DISPUTED )
+            $submode = ( @$Game_mid ) ? 'InviteDisputed' : 'AlreadyDeclined';
       }
    }// $mode == 'ShowMessage' || $mode == 'Dispute'
 
@@ -208,7 +206,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    {
       if( $arg_to )
       {
-         if( read_message_receivers( $dgs_message, $type, false, $arg_to ) )
+         if( read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
             $errors = array_merge( $errors, $dgs_message->errors );
       }
       else
@@ -238,7 +236,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       if( is_null($opp_row) && !$arg_to && @$msg_row['other_handle'] )
       {
          $arg_to = $msg_row['other_handle'];
-         if( read_message_receivers( $dgs_message, $type, false, $arg_to ) )
+         if( read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
             $errors = array_merge( $errors, $dgs_message->errors );
          else
             $opp_row = $dgs_message->get_recipient();
@@ -445,7 +443,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                'HIDDEN', 'to', $other_handle,
                'HIDDEN', 'reply', $mid,
                'HIDDEN', 'subject', 'Game invitation dispute',
-               'HIDDEN', 'type', 'INVITATION',
+               'HIDDEN', 'type', MSGTYPE_INVITATION,
                'HIDDEN', 'disputegid', $Game_ID,
                'SUBMITBUTTONX', 'send_message', T_('Send Reply'),
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => ($allow_game_start ? 0 : 1) ),
@@ -479,7 +477,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
          $message_form->add_row( array(
                'HIDDEN', 'subject', 'Game invitation',
-               'HIDDEN', 'type', 'INVITATION',
+               'HIDDEN', 'type', MSGTYPE_INVITATION,
                'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => ($allow_game_start ? 0 : 1) ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
@@ -532,9 +530,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
  * \return does NOT return on success but jump to status-page (or to game-player-page for MPG-invite);
  *         on check-failure returns error-array for previewing
  */
-function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
+function handle_send_message( &$dgs_message, $mpg_type, $arg_to, $msg_type )
 {
-   global $player_row, $folders, $type;
+   global $player_row, $folders;
 
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
@@ -544,7 +542,7 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
 
    if( isset($_REQUEST['foldermove']) )
    {
-      handle_change_folder( $my_id, $folders, $new_folder, $type );
+      handle_change_folder( $my_id, $folders, $new_folder, $msg_type );
       exit; // for safety
    }
 
@@ -556,21 +554,21 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
    $accepttype = isset($_REQUEST['send_accept']);
    $declinetype = isset($_REQUEST['send_decline']);
    $disputegid = -1;
-   if( $type == "INVITATION" )
+   if( $msg_type == MSGTYPE_INVITATION )
    {
       $disputegid = (int)@$_REQUEST['disputegid'];
-      if( !is_numeric( $disputegid) )
+      if( $disputegid < 0 )
          $disputegid = 0;
    }
-   $invitation_step = ( $accepttype || $declinetype || ($disputegid > 0) ); //not needed: || ($type == "INVITATION")
+   $invitation_step = $accepttype || $declinetype || ($disputegid > 0); //not needed: || ($msg_type == MSGTYPE_INVITATION)
 
    // find receiver of the message
-   if( read_message_receivers( $dgs_message, $type, $invitation_step, $arg_to ) )
+   if( read_message_receivers( $dgs_message, $msg_type, $invitation_step, $arg_to ) )
       return $dgs_message->errors;
 
    // check own/opp max-games
    $opponent_row = $dgs_message->get_recipient();
-   if( ($type == 'INVITATION') || $accepttype )
+   if( ($msg_type == MSGTYPE_INVITATION) || $accepttype )
    {
       $chk_errors = check_max_games($opponent_row);
       if( count($chk_errors) )
@@ -597,7 +595,7 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
    {
       $opponent_ID = $opponent_row['ID'];
 
-      if( $type == 'INVITATION' )
+      if( $msg_type == MSGTYPE_INVITATION )
       {
          $msg_gid = make_invite_game($player_row, $opponent_row, $disputegid);
          $subject = ( $disputegid > 0 ) ? 'Game invitation dispute' : 'Game invitation';
@@ -605,7 +603,8 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
       else if( $accepttype )
       {
          $msg_gid = (int)@$_REQUEST['gid'];
-         accept_invite_game( $msg_gid, $player_row, $opponent_row );
+         $gids = accept_invite_game( $msg_gid, $player_row, $opponent_row );
+         $msg_gid = $gids[0];
          $subject = 'Game invitation accepted';
       }
       else if( $declinetype )
@@ -634,8 +633,8 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to )
 
    send_message( 'send_message', $message, $subject
       , $to_uids, '', /*notify: $opponent_row['Notify'] == 'NONE'*/true
-      , $my_id, $type, $msg_gid
-      , $prev_mid, ($disputegid > 0 ? 'DISPUTED' : '')
+      , $my_id, $msg_type, $msg_gid
+      , $prev_mid, ($disputegid > 0 ? MSGTYPE_DISPUTED : '')
       , isset($folders[$new_folder]) ? $new_folder : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
       );
 
@@ -664,11 +663,11 @@ function check_max_games( $opp_row )
    return $errors;
 }//check_max_games
 
-function handle_change_folder( $my_id, $folders, $new_folder, $type )
+function handle_change_folder( $my_id, $folders, $new_folder, $msg_type )
 {
    $foldermove_mid = (int)get_request_arg('foldermove_mid');
    $current_folder = (int)get_request_arg('current_folder');
-   $need_reply = ( $type == 'INVITATION' );
+   $need_reply = ( $msg_type == MSGTYPE_INVITATION );
 
    if( change_folders($my_id, $folders, array($foldermove_mid), $new_folder, $current_folder, $need_reply) <= 0 )
       $new_folder = ( $current_folder ) ? $current_folder : FOLDER_ALL_RECEIVED;
@@ -685,6 +684,7 @@ function handle_change_folder( $my_id, $folders, $new_folder, $type )
 // return: false=success, otherwise failure
 function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )
 {
+   global $player_row, $is_bulk_admin, $arr_mpg_users, $mpg_type, $mpg_gid;
    static $cache = array();
 
    $to_handles = strtolower( str_replace(',', ' ', trim($to_handles)) );
@@ -696,8 +696,6 @@ function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_ha
 
    if( !isset($cache[$to_handles]) ) // need lower-case for check
    {
-      global $player_row, $is_bulk_admin, $arr_mpg_users, $mpg_type, $mpg_gid;
-
       $cache[$to_handles] = 1; // handle(s) checked
 
       if( $cnt_to < 1 )
@@ -706,7 +704,7 @@ function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_ha
          return $dgs_msg->add_error( sprintf( T_('Too much receivers (max. %s)'), MAX_MSG_RECEIVERS ) );
       else // single | multi
       {
-         if( $cnt_to > 1 && $msg_type == 'INVITATION' )
+         if( $cnt_to > 1 && $msg_type == MSGTYPE_INVITATION )
             return $dgs_msg->add_error( T_('Only one receiver for invitation allowed!') );
 
          $sender_uid = (int)@$player_row['ID']; // sender
