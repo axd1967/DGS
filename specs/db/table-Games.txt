@@ -74,7 +74,7 @@ Description:
    - maybe not sync'ed with ShapeSnapshot-field
 
 * Starttime : timestamp when game has started (clock starts ticking)
-   - for invited game it's the creation date,
+   - for invited game it's the creation date (of the invitation),
      which will be updated when the game actually starts
 
 * Lastchanged : timestamp when there was a move-like change to the game
@@ -83,7 +83,7 @@ Description:
 * mid : foreign key to Messages.ID
    - field is 0 if game has been created using waiting-room
    - field is set, if game has been created by an invitation,
-     then referring to the first invitation message
+     then referring to the last invitation message or result-message for finished games
 
 * DoubleGame_ID : foreign key to Games.ID
    - referring to other game if started as double-game
@@ -104,11 +104,18 @@ Description:
       - value < 0 : keeps handicap-type, see consts 'INVITE_HANDI_...' in 'include/message_functions.php'
       - for value INVITE_HANDI_FIXCOL the handicaptype HTYPE_BLACK/WHITE is calculated
         by matching the current Black_ID with the logged-in user
+      - for available handicap-types and more details,
+        see Waitingroom.Handicaptype in 'specs/db/table-Waitingroom.txt'
 
    - for game on KOMI-status:
       - the player who must do the next bidding/choice for negotiating fair-komi
       - the JigoMode to be able to start a fair-komi after negotiation is saved
-        in the GameSetup-field.
+        in the GameSetup-field and must be decoded from that value.
+
+        - JigoMode : Komi adjustment concerning Jigo-check on fair-komi-negotiation
+          - KEEP_KOMI = Komi is not changed regarding Jigo
+          - ALLOW_JIGO = Komi-bid must not be fractional x.0
+          - NO_JIGO = Komi-bid must be fractional x.5
 
 * GameType : game-type, see also Waitingroom.GameType
    - GO = standard Go (1:1)
@@ -128,7 +135,13 @@ Description:
      may need to be updated into order 'B:W', which is needed for playing.
      see also: game_players.php#check_game_setup()
 
-* Size, Komi, Handicap : settings for game (board-size, komi, handicap-stones)
+* Size : board-size for game
+   - within range MIN_BOARD_SIZE..MAX_BOARD_SIZE, which is 5..25
+
+* Komi : komi for game
+
+* Handicap : number of handicap stones for game
+   - within range 0..MAX_HANDICAP, which is 0..21
 
 * Status : current status for game
    - KOMI: game-entry is used to negotiate fair-komi,
@@ -175,11 +188,14 @@ Description:
    - -1000, 1000 = Black(-1000)/White(1000) has won game by resignation
    - -2000, 2000 = Black(-2000)/White(2000) has won game by timeout
 
-* Maintime, Byotype, Byotime, Byoperiods : time-settings for game
-   - Maintime = main-time
-   - Byotype = time-system (japanese, canadian, Fischer)
-   - Byotime = extra-time for time-systems
-   - Byoperiods = extra-periods for time-systems (japanese and canadian), 0 for Fischer
+* Maintime : int, main-time for game
+   - see Waitingroom.Maintime in 'specs/db/table-Waitingroom.txt'
+
+* Byotype : time-mode for game
+   - see Waitingroom.Byotype in 'specs/db/table-Waitingroom.txt'
+
+* Byotime, Byoperiods : extra-time and extra-periods for game, depending on 'Byotype'
+   - see Waitingroom.Byotime/Byoperiods in 'specs/db/table-Waitingroom.txt'
 
 * Black_Maintime, Black_Byotime, Black_Byoperiods : current remaining time for Black player
    - Maintime = remaining main-time,
@@ -202,14 +218,15 @@ Description:
    - used for remaining-time ordering for status-games
 
 * Rated : game-setting
-   - game is rated if field-value == 'Y', non-rated otherwise
+   - game is rated if field-value != 'N' ('Y', 'Done'), non-rated otherwise ('N')
 
 * StdHandicap : game-setting
    - game uses standard handicap stones placement on setup-phase if value == 'Y',
-     free handicap placement otherwise
+     free handicap placement otherwise ('N')
 
-* WeekendClock : time-setting for game
-   - weekend-clock is running if field-value is 'Y'
+* WeekendClock : clock running on weekend
+   - specifies wether clock is running on weekend ('Y') or not running ('N')
+   - see also Waitingroom.WeekendClock in 'specs/db/table-Waitingroom.txt'
 
 * Black_Start_Rating, Black_End_Rating :
    - start and end rating of Black player for rated finished game
@@ -232,29 +249,38 @@ Description:
      of the game shows the differences
 
 * GameSetup : game-settings to handle rematch, fair-komi-negotiation, invitation
-   - can be empty (for older games or multi-player-games) -> default-handling is used
+   - can be empty (for older game-invitations) -> default-handling is used then
 
-   - Format:
+   - for normal games, Format (A) is used
+   - for game-invitations, Format (B) is used
+
+   - General Format:
       - values separated by ':' (const 'GS_SEP')
       - groups for Type, User, Handicap, Komi, Restrictions, Comments
+      - see class GameSetup (encode-/new_from_game_setup-func)
+        and map $MAP_GAME_SETUP in "include/game_functions.php"
 
-      - see class GameSetup in "include/game_functions.php"
+   - (A) Format for started games & game-invitations (1st part):
       - "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:FK<oppkomi>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
          - <htype> : handicap-type
          - <uid> : user-id (=Players.ID), game started/initiated by given user
+         - <handicap> : number of handicap-stones
          - <adj*> : [+|-] number
+         - <minH>, <maxH> : min/max handicap-stones
          - <komi> : komi-bid of user, can be empty, used for fair-komi
          - <jigomode> : jigo-mode
          - <oppkomi> : komi-bid of opponent, can be empty, used for fair-komi
          - <mustBeRated> : 0=false, 1=true
+         - <ratingMin|Max> : min/max-rating for waiting-room
          - <minRG> : min. rated finished games, see WaitingRoom.MinRatedGames in 'specs/db/table-Waitingroom.txt'
          - <sameOpp> : see Waitingroom.SameOpponent in 'specs/db/table-Waitingroom.txt'
          - <msg> : waiting-room-comment or invitation-message (part)
       - Example: "T1:U123:H0:-2:0:9:K6.5:0:J2:FK:R1:-800:2000:5:-101:Cslow game"
 
+   - (B) Format for game-invitations (2nd part):
       - for invitations, field 'GameSetup' contains two strings, one for each player:
          - used to store all game-setup to tell the difference on disputes
-         - will be replaced by only "T..C<msg>" when invitation is accepted
+         - Format (A) is used in Games-table when invitation is accepted
          - format GameSetup := "T..C:I... T..C:I.." with <msg> empty, part-separator is space ' '
          - "I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
             - 'I' stands for invitation-game-setup-part
@@ -266,6 +292,7 @@ Description:
             - <mainT>, <byoTime>, <byoPeriods> : number (=hours)
             - <wkclock> : 0=clock-stopped-on-weekend, 1=clock-running-on-weekend
       - Example: "T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r0:0:tF:45:15:0:0"
+
 
 
 ###########################################################################
@@ -425,4 +452,5 @@ Description:
 * Created : creation-date of shape
 
 * Lastchanged : date of last-update of shape
+
 
