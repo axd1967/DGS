@@ -260,7 +260,7 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
       $gamerow = array() + $this->grow; // clone array to mess data
       $gamerow['Status'] = GAME_STATUS_FINISHED;
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
-      $gamerow['Status'] = GAME_STATUS_INVITED;
+      $gamerow['Status'] = GAME_STATUS_KOMI;
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
       $gamerow['Status'] = GAME_STATUS_PLAY;
 
