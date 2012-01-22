@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2011  Erik Ouchterlony, Ragnar Ouchterlony, Rod Ival
+Copyright (C) 2001-2012  Erik Ouchterlony, Ragnar Ouchterlony, Rod Ival
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

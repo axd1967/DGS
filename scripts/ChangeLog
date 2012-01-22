@@ -21,6 +21,9 @@ ChangeLog
 
 2012-01-22 juga
 
+   * all files:
+   - adjusted Copyright on every file to: 2001-2012
+
    * include/globals.php (MSGTYPE_...), include/quick/quick_message.php,
      scripts/message_consistency.php,
      tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder.php,
