@@ -88,7 +88,7 @@ require_once( "include/classlib_profile.php" );
          true);
    $smfilter->add_filter( 5, 'Boolean',
          new QuerySQL(SQLP_FROM,  "LEFT JOIN Games AS G ON M.Game_ID=G.ID",
-                      SQLP_WHERE, "G.Status='INVITED'"), // not in left-join(!)
+                      SQLP_WHERE, "G.Status='".GAME_STATUS_INVITED."'"), // not in left-join(!)
          true,
          array( FC_LABEL => T_('Show only pending invitations (if message not deleted)') ));
    $smfilter->init(); // parse current value from _GET
