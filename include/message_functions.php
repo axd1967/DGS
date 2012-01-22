@@ -232,17 +232,16 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    else if( $gid > 0 && $my_ID > 0 ) //'Dispute'
    {
       // If dispute, use values from game $gid tables
-      $query = "SELECT Handle,Size,Komi,Handicap,ToMove_ID," .
+      $query = "SELECT Black_ID,White_ID, Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods," .
-                 "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, GameSetup, " .
-                 "IF(White_ID=$my_ID," . WHITE . "," . BLACK . ") AS myColor " .
-                 "FROM (Games,Players) WHERE Games.ID=$gid" .
-                 " AND (White_ID=$my_ID OR Black_ID=$my_ID)" .
-                 " AND Players.ID=White_ID+Black_ID-$my_ID" .
-                 " AND Status='".GAME_STATUS_INVITED."'" ;
+                 "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, GameSetup " .
+                 "FROM Games WHERE ID=$gid AND Status='".GAME_STATUS_INVITED."' LIMIT 1" ;
       $game_row = mysql_single_fetch( "game_settings_form($gid)", $query );
       if( !$game_row )
          error('unknown_game', "game_settings_form($gid)");
+      $black_id = (int)$game_row['Black_ID'];
+      if( $black_id != $my_ID && (int)$game_row['White_ID'] != $my_ID )
+         error('wrong_dispute_game', "game_settings_form.find_gameinv.check.dispute($gid,$my_ID)");
 
       // shape-game
       $ShapeID = (int)$game_row['ShapeID'];
@@ -257,7 +256,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $Komi_m = $game_row['Komi'];
 
       //ToMove_ID holds handitype since INVITATION
-      $my_col_black = ( $game_row['myColor'] == BLACK );
+      $my_col_black = ( $black_id == $my_ID );
       $Handitype = get_handicaptype_for_invite( (int)$game_row['ToMove_ID'], $my_col_black );
       if( !$Handitype )
          $Handitype = HTYPE_NIGIRI; //default
@@ -757,6 +756,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
 {
    global $base_path;
 
+   // defaults (partly overwritten by $game_row)
+   $GameType = GAMETYPE_GO;
+   $GamePlayers = '';
    $Color = HTYPE_NIGIRI; // default, always represents My-Color (of current player)
    $AdjKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
@@ -769,8 +771,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus
-   //   Games: ID, Status, Game_mid(=mid), GameType, GamePlayers, Ruleset, Size, Komi, Handicap, Rated, WeekendClock,
-   //          StdHandicap, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID, ShapeID, ShapeSnapshot, GameSetup, myColor;
+   //   Games: fields mentioned in DgsMessage::load_message-func with full-data;
    //          X_TotalCount
    extract($game_row);
 
@@ -781,7 +782,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
       if( !is_array($arr_shape) )
          error('invalid_snapshot', "msg_func.game_info_table($tablestyle,$ShapeID,$ShapeSnapshot)");
 
-      $ShapeBlackFirst = (booL)@$arr_shape['PlayColorB'];
+      $ShapeBlackFirst = (bool)@$arr_shape['PlayColorB'];
    }
 
    $my_id = $player_row['ID'];
@@ -1592,6 +1593,18 @@ class DgsMessage
     *        optional for non-bulk-message
     * \param $with_fulldata true = load with other-player-info and game-info (if game-message)
     * \return message-row; multi-receiver message determined by Flags-field
+    *    message-row-fields:
+    *       ID, Type, Flags, Thread, Level, ReplyTo, Game_ID, Time, Subject, Text,
+    *       X_Time (=M.Time), X_Flow; Replied, Sender, Folder_nr, other_id
+    *
+    *    additional fields $with_fulldata == true:
+    *       Players: other_handle, other_name, other_rating, other_ratingstatus;
+    *       Games: Game_mid, Status, Black_ID, White_ID, myColor, GameType, GamePlayers,
+    *          Ruleset, Size, Rated, ToMove_ID(=to-derive-htype), Handicap, StdHandicap, Komi,
+    *          Maintime, Byotype, Byotime, Byoperiods, WeekendClock,
+    *          ShapeID, ShapeSnapshot, GameSetup
+    *
+    * \note JigoMode must be calculated from Games.GameSetup, e.g. for fair-komi
     */
    function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
    {
@@ -1631,16 +1644,19 @@ class DgsMessage
       );
       if( $other_uid > 0 )
          $qsql->add_part( SQLP_WHERE, "other.uid=$other_uid" );
+
       if( $with_fulldata )
       {
          $qsql->add_part( SQLP_FIELDS,
             'P.Handle AS other_handle', 'P.Name AS other_name',
             'P.Rating2 AS other_rating', 'P.RatingStatus AS other_ratingstatus',
-            'G.mid AS Game_mid', 'G.Status', 'G.GameType', 'G.GamePlayers',
+            // from Games-table:
+            'G.mid AS Game_mid', 'G.Status',
             'G.Black_ID', 'G.White_ID', // for invite/dispute fair-komi
-            'G.Ruleset', 'G.Size', 'G.Komi', 'G.Handicap',
-            'G.Rated', 'G.WeekendClock', 'G.StdHandicap', 'G.Maintime', 'G.Byotype', 'G.Byotime',
-            'G.Byoperiods', 'G.ToMove_ID', 'G.ShapeID', 'G.ShapeSnapshot', 'G.GameSetup',
+            'G.GameType', 'G.GamePlayers', 'G.Ruleset', 'G.Size', 'G.Rated',
+            'G.ToMove_ID', 'G.Handicap', 'G.StdHandicap', 'G.Komi',
+            'G.Maintime', 'G.Byotype', 'G.Byotime', 'G.Byoperiods', 'G.WeekendClock',
+            'G.ShapeID', 'G.ShapeSnapshot', 'G.GameSetup',
             "IF(White_ID=$uid,".WHITE.",".BLACK.") AS myColor" );
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Players AS P ON P.ID=other.uid",
@@ -1678,7 +1694,7 @@ class DgsMessage
       {
          if( $handle == 'guest' ) // check strtolower(handle)
             $chk_guest = true;
-         if( $type == 'INVITATION' && $player_row['Handle'] == $handle )
+         if( $type == MSGTYPE_INVITATION && $player_row['Handle'] == $handle )
             $chk_invself = true;
          $arr_qhandles[] = mysql_addslashes($handle);
       }
@@ -1691,7 +1707,7 @@ class DgsMessage
 
       // CSYSFLAG_REJECT_INVITE only blocks the invitations at starting point
       // CSYSFLAG_REJECT_MESSAGE blocks the messages except those from the invitation sequence
-      $ctmp = ( $type == 'INVITATION' )
+      $ctmp = ( $type == MSGTYPE_INVITATION )
          ? CSYSFLAG_REJECT_INVITE
          : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE );
       $result = db_query( "DgsMessage::load_message_receivers.find($my_id,$type,$invitation_step)",
@@ -1717,7 +1733,7 @@ class DgsMessage
             $user_row = $arr_receivers[$handle];
             if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME)) )
             {
-               $msgtmpl = ( $type == 'INVITATION' )
+               $msgtmpl = ( $type == MSGTYPE_INVITATION )
                   ? T_('Invitation rejected by user [%s] !')
                   : T_('Message rejected by user [%s] !');
                return sprintf( $msgtmpl, $handle );
@@ -1897,10 +1913,10 @@ class MessageListBuilder
          if( $this->full_details )
          {
             static $MSG_TYPES = array( // keep them untranslated(!)
-                  'NORMAL'     => 'Normal',
-                  'INVITATION' => 'Invitation',
-                  'DISPUTED'   => 'Dispute',
-                  'RESULT'     => 'Result',
+                  MSGTYPE_NORMAL     => 'Normal',
+                  MSGTYPE_INVITATION => 'Invitation',
+                  MSGTYPE_DISPUTED   => 'Dispute',
+                  MSGTYPE_RESULT     => 'Result',
                );
             $mrow_strings[ 6] = $MSG_TYPES[$row['Type']];
 
