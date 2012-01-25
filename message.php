@@ -148,6 +148,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    {
       $msg_row = DgsMessage::load_message( "message", $mid, $my_id, $other_uid, /*fulldata*/true );
       extract($msg_row);
+      $msg_type = $Type; //overwrite type
 
       if( $Sender === 'M' ) //message to myself
       {
