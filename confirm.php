@@ -121,7 +121,7 @@ require_once( 'include/classlib_game.php' );
 
    if( @$_REQUEST['komi_save'] )
       do_komi_save( $game_row );
-   elseif( $Status == GAME_STATUS_KOMI )
+   elseif( $Status == GAME_STATUS_KOMI && $action != 'delete' )
       error('invalid_action', "confirm.check.status.fairkomi($gid,$action)");
 
 
