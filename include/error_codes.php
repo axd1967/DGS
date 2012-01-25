@@ -79,7 +79,7 @@ class ErrorCode
 
    function init()
    {
-      global $ARR_GLOBALS_ERRORS;
+      global $ARR_GLOBALS_ERRORS, $base_path;
 
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_ERRORS['TEXT']) )
@@ -469,7 +469,25 @@ class ErrorCode
             T_("Wrong number of handicap stones");
 
          $arr['wrong_password'] =
-            T_("Sorry, you didn't write your current password correctly.");
+            T_("Sorry, you didn't write your current password correctly.")
+            // the following text has been added at 20-Sep-2011 to give more info how to get a new password.
+            // (happened a lot, that people didn't have or give an email, so there was no way to contact them).
+            . "<br><br>\n"
+            . T_('If you have forgotten your password we can email a new one.')
+            . "<br>\n"
+            . T_('The new password will be randomly generated, but you can of course change it later from the edit profile page.')
+            . "<br>\n"
+            . T_('Until you change it, both new and old passwords will be operational.')
+            . "<br><br>\n"
+            . sprintf( T_('In case you HAVE an email set in your account, you can generate a new one sent to your email with: %s'),
+                       sprintf('<a href="%s">%s</a>', $base_path.'forgot.php', T_('Forgot password?')) )
+            . "<br><br><br>\n"
+            . T_('In case you have NO email set in your account:')
+            . "<br>\n"
+            . T_("Please log in as guest-user and use the Support-forum to get help (provide your login-user-id and your email).")
+            . "<br>\n"
+            . T_('for more details on that see FAQ:')
+            . sprintf(' <a href="%s">%s</a>', $base_path.'faq.php?read=t&cat=12#Entry234', T_('I forgot my password. What can I do?'));
 
          $arr['wrong_rank_type'] =
             T_("Unknown rank type");
