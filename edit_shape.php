@@ -157,6 +157,9 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
          'DESCRIPTION', T_('Size#shape'),
          'SELECTBOX',   'size', 1, $arr_sizes, $vars['size'], false, ));
    $form->add_row( array(
+         'DESCRIPTION', T_('Public Shape#shape'),
+         'CHECKBOX', 'flag_public', 1, T_('Public#shape'), $vars['flag_public'], ));
+   $form->add_row( array(
          'DESCRIPTION', T_('Play Start Color#shape'),
          'RADIOBUTTONS', 'flag_playcol', $arr_flags_playcol, $vars['flag_playcol'], ));
    $form->add_row( array(
@@ -206,12 +209,14 @@ function parse_edit_form( &$shape )
 
    $edits = array();
    $errors = array();
+   $is_posted = ( @$_REQUEST['save'] || @$_REQUEST['preview'] );
 
    // read from props or set defaults
    $vars = array(
       'name'         => $shape->Name,
       'size'         => $shape->Size,
-      'flag_playcol' => ( $shape->Flags & SHAPE_FLAG_PLAYCOLOR_W ),
+      'flag_public'  => (bool)( $shape->Flags & SHAPE_FLAG_PUBLIC ),
+      'flag_playcol' => (bool)( $shape->Flags & SHAPE_FLAG_PLAYCOLOR_W ),
       'notes'        => $shape->Notes,
       'snapshot'     => $shape->Snapshot,
    );
@@ -220,6 +225,12 @@ function parse_edit_form( &$shape )
    // read URL-vals into vars
    foreach( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
+   // handle checkboxes having no key/val in _POST-hash
+   if( $is_posted )
+   {
+      foreach( array( 'flag_public' ) as $key )
+         $vars[$key] = get_request_arg( $key, false );
+   }
 
    // special handling, parsing snapshot/size/flags from extended-snapshot
    if( !@$_REQUEST['size'] && @$_REQUEST['snapshot'] )
@@ -254,7 +265,9 @@ function parse_edit_form( &$shape )
       else
          $shape->Size = (int)$new_value;
 
-      $shape->Flags = (int)$vars['flag_playcol'];
+      $shape->Flags =
+         ( $vars['flag_public'] ? SHAPE_FLAG_PUBLIC : 0 ) |
+         ( $vars['flag_playcol'] ? SHAPE_FLAG_PLAYCOLOR_W : 0 );
       $shape->Notes = trim($vars['notes']);
 
       $new_value = $vars['snapshot'];
@@ -272,7 +285,8 @@ function parse_edit_form( &$shape )
       // determine edits
       if( $old_vals['name'] != $shape->Name ) $edits[] = T_('Name#edits');
       if( $old_vals['size'] != $shape->Size ) $edits[] = T_('Size#edits');
-      if( $old_vals['flag_playcol'] != ($shape->Flags & SHAPE_FLAG_PLAYCOLOR_W)) $edits[] = T_('PlayColor#edits');
+      if( (bool)$old_vals['flag_public'] != (bool)($shape->Flags & SHAPE_FLAG_PUBLIC)) $edits[] = T_('Public#edits');
+      if( (bool)$old_vals['flag_playcol'] != (bool)($shape->Flags & SHAPE_FLAG_PLAYCOLOR_W)) $edits[] = T_('PlayColor#edits');
       if( $old_vals['notes'] != $shape->Notes ) $edits[] = T_('Notes#edits');
       if( $old_vals['snapshot'] != $shape->Snapshot ) $edits[] = T_('Snapshot#edits');
    }

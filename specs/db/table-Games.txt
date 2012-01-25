@@ -444,7 +444,8 @@ Description:
 
 * Flags : flags for shape
    - see 'include/game_functions.php' SHPFLAG_...
-   - play-color-white, default black
+   - 0x01 = play-color-white, default black
+   - 0x02 = public-flag, i.e. visible to all per default
 
 * Snapshot : base64-encoded snapshot of game-position
    - see 'include/classlib_game.php' in GameSnapshot::make_game_snapshot()-function

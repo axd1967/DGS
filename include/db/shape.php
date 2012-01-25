@@ -35,6 +35,7 @@ require_once 'include/classlib_user.php';
 
 // also adjust GuiShape::getFlagsText()
 define('SHAPE_FLAG_PLAYCOLOR_W', 0x01);
+define('SHAPE_FLAG_PUBLIC',      0x02);
 
 
  /*!

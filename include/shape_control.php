@@ -55,6 +55,7 @@ class ShapeControl
       {
          $arr = array();
          $arr[SHAPE_FLAG_PLAYCOLOR_W] = T_('W-First#SHP_flag');
+         $arr[SHAPE_FLAG_PUBLIC] = T_('Public#SHP_flag');
          $ARR_GLOBALS_SHAPE[$key] = $arr;
       }
 

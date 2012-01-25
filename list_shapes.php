@@ -52,10 +52,13 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    $search_profile->handle_action();
 
    // table filters
-   $sfilter->add_filter( 3, 'Text', 'SHPP.Handle', true );
+   $sfilter->add_filter( 3, 'Text', 'SHPP.Handle', true,
+         array( FC_FNAME => 'user' ));
    $sfilter->add_filter( 4, 'Text', "SHP.Name #OP #VAL", true,
          array( FC_SIZE => 15, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));
    $sfilter->add_filter( 5, 'Numeric', 'SHP.Size', true );
+   $sfilter->add_filter( 6, 'Boolean', 'SHP.Flags & '.SHAPE_FLAG_PUBLIC, true,
+         array( FC_FNAME => 'pub', FC_LABEL => ' '.T_('Public#shape'), FC_DEFAULT => 1 ));
    $sfilter->add_filter( 7, 'RelativeDate', 'SHP.Created', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ) );
    $sfilter->add_filter( 8, 'RelativeDate', 'SHP.Lastchanged', true,
@@ -140,7 +143,9 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
 
    $menu_array = array();
-   $menu_array[T_('Shapes')] = "list_shapes.php";
+   $menu_array[T_('Shapes#shape')] = "list_shapes.php";
+   $menu_array[T_('All shapes#shape')] = "list_shapes.php?pub=0";
+   $menu_array[T_('My shapes#shape')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0';
    $menu_array[T_('New Shape (Goban Editor)#shape')] = "goban_editor.php";
 
    end_page(@$menu_array);
