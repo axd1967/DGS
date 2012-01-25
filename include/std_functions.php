@@ -1296,100 +1296,105 @@ function send_message( $debugmsg, $text='', $subject=''
 
    $msg_flags = ($reccnt > 1) ? MSGFLAG_BULK : 0;
 
-   $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
-          .", Type='$type', Flags='$msg_flags'"
-          .", Thread='$thread', Level='$thread_level'"
-          .", ReplyTo=$prev_mid, Game_ID=$gid"
-          .", Subject='$subject', Text='$text'" ;
-   db_query( "$debugmsg.message", $query);
-   if( mysql_affected_rows() != 1 )
-      error('mysql_insert_message', "$debugmsg.message");
 
-   $mid = mysql_insert_id();
-   ksort($receivers);
+   ta_begin();
+   {//HOT-SECTION to save message-data
+      $query= "INSERT INTO Messages SET Time=FROM_UNIXTIME($NOW)"
+             .", Type='$type', Flags='$msg_flags'"
+             .", Thread='$thread', Level='$thread_level'"
+             .", ReplyTo=$prev_mid, Game_ID=$gid"
+             .", Subject='$subject', Text='$text'" ;
+      db_query( "$debugmsg.message", $query);
+      if( mysql_affected_rows() != 1 )
+         error('mysql_insert_message', "$debugmsg.message");
 
-   $query= array();
-   $receivers_folder_new = array();
-   if( $from_id > 0 ) //exclude system messages (no sender)
-   {
-      if( $to_myself )
+      $mid = mysql_insert_id();
+      ksort($receivers);
+
+      $query= array();
+      $receivers_folder_new = array();
+      if( $from_id > 0 ) //exclude system messages (no sender)
       {
-         $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
-         $receivers_folder_new[] = $from_id;
+         if( $to_myself )
+         {
+            $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
+            $receivers_folder_new[] = $from_id;
+         }
+         else
+            $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
       }
-      else
-         $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
-   }
 
-   if( $from_id > 0 && $thread == 0 )
-   {
-      db_query( "$debugmsg.upd_thread($mid,$from_id)",
-         "UPDATE Messages SET Thread='$mid', Level=0 WHERE ID='$mid' LIMIT 1" );
-   }
-
-   $need_reply_val = ( $from_id > 0 && $type == MSGTYPE_INVITATION ) ? 'M' : 'N';
-   foreach( $receivers as $uid => $row ) //exclude to myself
-   {
-      if( $from_id > 0 )
-         $query[]= "$mid,$uid,'N','$need_reply_val',".FOLDER_NEW;
-      else //system messages
-         $query[]= "$mid,$uid,'S','N',".FOLDER_NEW;
-      $receivers_folder_new[] = $uid;
-   }
-
-   $cnt= count($query);
-   if( $cnt > 0 )
-   {
-      $query= "INSERT INTO MessageCorrespondents"
-             ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
-             .' ('.implode('),(', $query).")";
-      db_query( "$debugmsg.correspondent", $query );
-      if( mysql_affected_rows() != $cnt )
-         error('mysql_insert_message', "$debugmsg.correspondent");
-   }
-
-   // update receivers new-message counter
-   if( $cnt_fnew = count($receivers_folder_new) )
-   {
-      $ids = implode( ',', $receivers_folder_new );
-      db_query( "$debugmsg.count_msg_new([$ids])",
-         "UPDATE Players SET CountMsgNew=CountMsgNew+1 WHERE ID IN ($ids) LIMIT $cnt_fnew" );
-   }
-
-   //records the last message of the invitation/dispute sequence
-   //the type of the previous messages will be changed to 'DISPUTED'
-   if( $gid > 0 && $type == MSGTYPE_INVITATION )
-   {
-      db_query( "$debugmsg.game_message($gid)",
-         "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
-   }
-
-   if( $from_id > 0 && $prev_mid > 0 ) //is this an answer?
-   {
-      $query = "UPDATE MessageCorrespondents SET Replied='Y'";
-      if( $prev_folder > FOLDER_ALL_RECEIVED )
-         $query .= ", Folder_nr=$prev_folder";
-      $query.= " WHERE mid=$prev_mid AND uid=$from_id AND Sender!='Y' LIMIT 1";
-      db_query( "$debugmsg.reply_correspondent", $query );
-
-      if( $prev_type )
+      if( $from_id > 0 && $thread == 0 )
       {
-         db_query( "$debugmsg.reply_message",
-            "UPDATE Messages SET Type='$prev_type' WHERE ID=$prev_mid LIMIT 1" );
+         db_query( "$debugmsg.upd_thread($mid,$from_id)",
+            "UPDATE Messages SET Thread='$mid', Level=0 WHERE ID='$mid' LIMIT 1" );
       }
-   }
 
-   if( $notify ) //about message!
-   {
-      $ids= array();
-      foreach( $receivers as $uid => $row )
+      $need_reply_val = ( $from_id > 0 && $type == MSGTYPE_INVITATION ) ? 'M' : 'N';
+      foreach( $receivers as $uid => $row ) //exclude to myself
       {
-         if( $row['Notify'] == 'NONE' && is_numeric(strpos($row['SendEmail'], 'ON')) )
-            $ids[]= $uid; // optimize: notify only eligible
+         if( $from_id > 0 )
+            $query[]= "$mid,$uid,'N','$need_reply_val',".FOLDER_NEW;
+         else //system messages
+            $query[]= "$mid,$uid,'S','N',".FOLDER_NEW;
+         $receivers_folder_new[] = $uid;
       }
-      if( count($ids) > 0 )
-         notify( $debugmsg, $ids );
+
+      $cnt= count($query);
+      if( $cnt > 0 )
+      {
+         $query= "INSERT INTO MessageCorrespondents"
+                ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
+                .' ('.implode('),(', $query).")";
+         db_query( "$debugmsg.correspondent", $query );
+         if( mysql_affected_rows() != $cnt )
+            error('mysql_insert_message', "$debugmsg.correspondent");
+      }
+
+      // update receivers new-message counter
+      if( $cnt_fnew = count($receivers_folder_new) )
+      {
+         $ids = implode( ',', $receivers_folder_new );
+         db_query( "$debugmsg.count_msg_new([$ids])",
+            "UPDATE Players SET CountMsgNew=CountMsgNew+1 WHERE ID IN ($ids) LIMIT $cnt_fnew" );
+      }
+
+      //records the last message of the invitation/dispute sequence
+      //the type of the previous messages will be changed to 'DISPUTED'
+      if( $gid > 0 && $type == MSGTYPE_INVITATION )
+      {
+         db_query( "$debugmsg.game_message($gid)",
+            "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
+      }
+
+      if( $from_id > 0 && $prev_mid > 0 ) //is this an answer?
+      {
+         $query = "UPDATE MessageCorrespondents SET Replied='Y'";
+         if( $prev_folder > FOLDER_ALL_RECEIVED )
+            $query .= ", Folder_nr=$prev_folder";
+         $query.= " WHERE mid=$prev_mid AND uid=$from_id AND Sender!='Y' LIMIT 1";
+         db_query( "$debugmsg.reply_correspondent", $query );
+
+         if( $prev_type )
+         {
+            db_query( "$debugmsg.reply_message",
+               "UPDATE Messages SET Type='$prev_type' WHERE ID=$prev_mid LIMIT 1" );
+         }
+      }
+
+      if( $notify ) //about message!
+      {
+         $ids= array();
+         foreach( $receivers as $uid => $row )
+         {
+            if( $row['Notify'] == 'NONE' && is_numeric(strpos($row['SendEmail'], 'ON')) )
+               $ids[]= $uid; // optimize: notify only eligible
+         }
+         if( count($ids) > 0 )
+            notify( $debugmsg, $ids );
+      }
    }
+   ta_end();
 
    return $mid; //>0: no error
 } //send_message
