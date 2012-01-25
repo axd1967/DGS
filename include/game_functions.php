@@ -2255,7 +2255,7 @@ class GameSetup
       if( !preg_match($rx_gs, $game_setup) )
          error('invalid_args', "GameSetup::new_from_game_setup.check_gs($invitation,$game_setup)");
       $arr = explode(GS_SEP, $game_setup);
-error_log("new_from_game_setup($invitation,$game_setup): [". implode('] [', $arr)."]"); //TODO-gs
+      //error_log("new_from_game_setup($invitation,$game_setup): [". implode('] [', $arr)."]"); //TEST
 
       $gs->Handicaptype = $MAP_GAME_SETUP[ array_shift($arr) ];
       $gs->uid = (int)substr( array_shift($arr), 1);
@@ -2296,7 +2296,7 @@ error_log("new_from_game_setup($invitation,$game_setup): [". implode('] [', $arr
       else
          $gs->Message = substr( implode(GS_SEP, $arr), 1 );
 
-error_log("new_from_game_setup.2: ".$gs->to_string(true)); //TODO-gs
+      //error_log("new_from_game_setup.2: ".$gs->to_string(true)); //TEST
       return $gs;
    }//new_from_game_setup
 
@@ -2458,6 +2458,9 @@ error_log("new_from_game_setup.2: ".$gs->to_string(true)); //TODO-gs
  */
 class GameRematch
 {
+
+   // ------------ static functions ----------------------------
+
    function add_rematch_links( &$arr_menu, $gid, $game_status, $game_type, $tid )
    {
       global $base_path;
