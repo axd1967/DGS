@@ -83,7 +83,7 @@ Description:
 * mid : foreign key to Messages.ID
    - field is 0 if game has been created using waiting-room
    - field is set, if game has been created by an invitation,
-     then referring to the last invitation message or result-message for finished games
+     then referring to the first invitation message or result-message for finished games
 
 * DoubleGame_ID : foreign key to Games.ID
    - referring to other game if started as double-game
@@ -259,6 +259,8 @@ Description:
       - groups for Type, User, Handicap, Komi, Restrictions, Comments
       - see class GameSetup (encode-/new_from_game_setup-func)
         and map $MAP_GAME_SETUP in "include/game_functions.php"
+      - values already stored in Games-table are not encoded, e.g. fields std-H/time-info/size/rated/ruleset;
+        though for invitations there are needed to calculate diffs for invitation-order.
 
    - (A) Format for started games & game-invitations (1st part):
       - "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:FK<oppkomi>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
