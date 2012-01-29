@@ -2374,3 +2374,8 @@ ALTER TABLE Waitingroom
    CHANGE Ratingmax RatingMax smallint(6) NOT NULL default '-9999' ;
 
 
+-- extended Profiles.Name
+ALTER TABLE Profiles
+   MODIFY Name varchar(60) NOT NULL default '' ;
+
+

@@ -749,7 +749,7 @@ CREATE TABLE IF NOT EXISTS `Profiles` (
   `Type` smallint(6) NOT NULL,
   `SortOrder` smallint(6) NOT NULL default '1',
   `Active` enum('Y','N') NOT NULL default 'N',
-  `Name` varchar(40) NOT NULL default '',
+  `Name` varchar(60) NOT NULL default '',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `Text` blob NOT NULL,
   PRIMARY KEY  (`ID`),

@@ -28,6 +28,7 @@ require_once 'include/rating.php';
 require_once 'include/make_game.php';
 require_once 'include/contacts.php';
 require_once 'include/classlib_user.php';
+require_once 'include/classlib_profile.php';
 
 
 define('MSGBOXROWS_NORMAL', 12);
@@ -39,7 +40,8 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $send_message = ( @$_REQUEST['send_message']
                   || @$_REQUEST['send_accept']
                   || @$_REQUEST['send_decline']
-                  || @$_REQUEST['foldermove'] );
+                  || @$_REQUEST['foldermove']
+                  || @$_REQUEST['save_template'] );
    $preview = @$_REQUEST['preview'];
    $handle_msg_action = $send_message && !$preview;
 
@@ -57,6 +59,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    if(message.php?mode=...) //with mode
       NewMessage           : from menu (or site_map)
       NewMessage&uid=      : from user info
+      NewMessage&tmpl=     : load from Profile-template for send-message (combinable with others args)
       NewMessage&mpmt=&mpgid=&...  : special-message for multi-player-game
          mpmt=1                    : multi-message  for MPG-start_game
          mpmt=2 & mpcol=&mpmove=   : multi-message  for MPG-resign
@@ -94,7 +97,22 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       $mode = 'Dispute';
    $can_reply = false;
 
-   $is_rematch = ( $mode == 'Invite' ) && ( (bool) @$_REQUEST['rematch'] );
+   // load template for profile
+   $prof_tmpl_id = (int)@$_REQUEST['tmpl'];
+   $profile = null;
+   if( $prof_tmpl_id > 0 )
+   {
+      $profile = Profile::load_profile( $prof_tmpl_id, $my_id ); // loads only if user-id correct
+      if( is_null($profile) )
+         error('invalid_profile', "message.check.profile($prof_tmpl_id)");
+      if( $profile->Type != PROFTYPE_TMPL_SENDMSG ) //TODO check later when known that send-msg or invite
+         error('invalid_profile', "message.check.profile.type($prof_tmpl_id,{$profile->Type})");
+
+      $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(true) );
+      $profile_template->build_url_message( $_REQUEST );
+   }
+
+   $is_rematch = ( $mode == 'Invite' ) && @$_REQUEST['rematch'];
    if( $is_rematch )
    {
       $mid = $mpg_gid = $mpg_type = 0;
@@ -347,6 +365,8 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+               'TEXT', span('BigSpace'),
+               'SUBMITBUTTON', 'save_template', T_('Save Template'),
             ));
          break;
       }//case NewMessage
@@ -520,7 +540,10 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
    echo "\n</center>\n";
 
-   end_page();
+   $menu_array = array();
+   ProfileTemplate::add_menu_link( $menu_array, $arg_to );
+
+   end_page(@$menu_array);
 }//main
 
 
@@ -546,6 +569,12 @@ function handle_send_message( &$dgs_message, $mpg_type, $arg_to, $msg_type )
       handle_change_folder( $my_id, $folders, $new_folder, $msg_type );
       exit; // for safety
    }
+   elseif( isset($_REQUEST['save_template']) )
+   {
+      handle_save_template( $my_id, $msg_type );
+      exit; // for safety
+   }
+
 
    $sender_id = (int)@$_REQUEST['senderid'];
    if( $sender_id > 0 && $my_id != $sender_id )
@@ -681,6 +710,17 @@ function handle_change_folder( $my_id, $folders, $new_folder, $msg_type )
    }
    jump_to("list_messages.php?folder=$new_folder$page");
 }//handle_change_folder
+
+function handle_save_template( $my_id, $msg_type )
+{
+   if( $msg_type == MSGTYPE_NORMAL )
+      $tmpl = ProfileTemplate::new_template_send_message( $_REQUEST['subject'], $_REQUEST['message'] );
+   else
+      error('invalid_args', "handle_save_template($my_id,$msg_type)");
+
+   jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}".URI_AMP."data=" . urlencode( $tmpl->encode() ) );
+}//handle_save_template
+
 
 // return: false=success, otherwise failure
 function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )

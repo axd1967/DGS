@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once 'include/globals.php';
 require_once 'include/time_functions.php';
 require_once 'include/classlib_game.php';
+require_once 'include/classlib_profile.php';
 require_once 'include/utilities.php';
 require_once 'include/std_functions.php';
 require_once 'include/game_texts.php';
@@ -2450,6 +2451,124 @@ class GameSetup
 
 } //end 'GameSetup'
 
+
+
+define('MAX_PROFILE_TEMPLATES', 30);
+
+/**
+ * \brief Class to handle templates for send-message and game-setup (for invitation and new-game)
+ *        stored in Profiles-table.
+ */
+class ProfileTemplate
+{
+   var $TemplateType; //PROFTYPE_TMPL_...
+
+   var $Subject;
+   var $Text;
+
+
+   /*!
+    * \brief Constructs template with template-type.
+    * \param $template_type one of PROFTYPE_TMPL_...
+    */
+   function ProfileTemplate( $template_type )
+   {
+      if( $template_type != PROFTYPE_TMPL_SENDMSG )
+         error('invalid_args', "ProfileTemplate.new($template_type)");
+      $this->TemplateType = (int)$template_type;
+   }
+
+   /*! \brief Encodes template into blob-value stored in Profiles-table. */
+   function encode()
+   {
+      if( $this->TemplateType == PROFTYPE_TMPL_SENDMSG )
+         return trim("{$this->Subject}\n{$this->Text}");
+      else
+         error('invalid_args', "ProfileTemplate.encode({$this->TemplateType})");
+   }//encode
+
+   function build_profile()
+   {
+      global $player_row;
+
+      $profile = ProfileTemplate::new_default_profile( $player_row['ID'], $this->TemplateType );
+      $profile->set_text( $this->encode() );
+      return $profile;
+   }
+
+   function build_url_message( &$url )
+   {
+      $url['subject'] = $this->Subject;
+      $url['message'] = $this->Text;
+   }//build_url_message
+
+
+   // ------------ static functions ----------------------------
+
+   function new_template_send_message( $subject, $text )
+   {
+      $tmpl = new ProfileTemplate( PROFTYPE_TMPL_SENDMSG );
+      $tmpl->Subject = trim($subject);
+      $tmpl->Text = trim($text);
+      return $tmpl;
+   }
+
+   function decode( $template_type, $value )
+   {
+      $tmpl = new ProfileTemplate( $template_type );
+
+      if( $template_type == PROFTYPE_TMPL_SENDMSG )
+      {
+         $tmpl->TemplateType = $template_type;
+         $lfpos = strpos($value, "\n");
+         if( $lfpos === false )
+         {
+            $tmpl->Subject = trim($value);
+            $tmpl->Text = '';
+         }
+         else
+         {
+            $tmpl->Subject = trim( substr($value, 0, $lfpos) );
+            $tmpl->Text = trim( substr($value, $lfpos + 1) );
+         }
+      }
+      else
+         error('invalid_args', "ProfileTemplate.encode({$this->TemplateType})");
+
+      return $tmpl;
+   }//decode
+
+   function add_menu_link( &$menu, $handle='' )
+   {
+      $handle = trim($handle);
+      if( (string)$handle != '' )
+      {
+         $text = sprintf( T_('Templates with user-id [%s]'), $handle);
+         $menu[$text] = "templates.php?to=".urlencode($handle);
+      }
+      else
+         $menu[T_('Templates')] = "templates.php";
+   }//add_menu_link
+
+   function get_template_type_text( $type )
+   {
+      if( $type == PROFTYPE_TMPL_SENDMSG )
+         return T_('Message#tmpl');
+      elseif( $type == PROFTYPE_TMPL_GAMESETUP )
+         return T_('Game Setup#tmpl');
+      else
+         error('invalid_args', "ProfileTemplate.get_template_type_text($type)");
+   }//get_template_type_text
+
+   function new_default_profile( $uid, $type )
+   {
+      if( $type != PROFTYPE_TMPL_SENDMSG && $type != PROFTYPE_TMPL_GAMESETUP )
+         error('invalid_args', "ProfileTemplate.new_default_profile.check.type($type)");
+
+      return new Profile( 0, $uid, $type, 1, true );
+   }
+
+} // end 'ProfileTemplate'
 
 
 

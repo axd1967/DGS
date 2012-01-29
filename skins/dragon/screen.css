@@ -964,6 +964,14 @@ table.Table td.ImagesLeft {
    text-align: left;
 }
 
+table.Table td.ImagesLeftPadded {
+   text-align: left;
+}
+table.Table td.ImagesLeftPadded img {
+   padding-left:  0.4em;
+   padding-right: 0.4em;
+}
+
 table.Table td.MsgDir {
    text-align: right;
 }
@@ -1392,6 +1400,10 @@ table#UserInfo {
 table#UserInfo td.UserInfo {
    vertical-align: top;
    padding: 0px 1em;
+}
+
+span.BigSpace {
+   padding-left: 50px;
 }
 
 

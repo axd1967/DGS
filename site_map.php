@@ -193,12 +193,13 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Send a message'), "message.php?mode=NewMessage", true);
          item(T_('Invite'), "message.php?mode=Invite", true);
          item(T_('Show message'), "message.php?mode=ShowMessage", false);
-         item(T_('Message list'), "list_messages.php", true, true);
+         item(T_('Message list'), "list_messages.php", true);
          { $item_level++;
             item(T_('Show message thread'), "message_thread.php", false);
             item(T_('Search messages'), "search_messages.php", true);
             item(T_('Edit folders'), "edit_folders.php", true, true);
          } $item_level--;
+         item(T_('Templates'), "templates.php", true, true);
       } $item_level--;
 
       item(T_('New game'), "new_game.php", true);
