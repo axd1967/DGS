@@ -640,6 +640,9 @@ class ErrorCode
          $arr['miss_user_quota'] =
             T_("Sorry, something is wrong with your user data. Please contact an administrator to fix this.");
 
+         $arr['invalid_profile'] =
+            T_("Sorry, this profile is not existing or is not suitable for this operation.");
+
          $ARR_GLOBALS_ERRORS['TEXT'] = $arr;
          $ARR_GLOBALS_ERRORS['LOG_ID'] = $arr_logid;
          $ARR_GLOBALS_ERRORS['SENSITIVE'] = $arr_secret;
