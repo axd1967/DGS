@@ -31,7 +31,7 @@ Description:
    - each kind of profile-type has its different semantics,
      for list of defined types see 'include/classlib_profile.php'
    - PROFTYPE_FILTER_... = profile for search-filter
-   - PROFTYPE_TMPL_...   = profile for templates of send-message & game-setup
+   - PROFTYPE_TMPL_...   = profile for templates of send-message & game-setup (invite/new-game)
 
 * SortOrder : optional sort-order
    - unused at the moment (filter/template are not using it but the default-value)
@@ -52,9 +52,12 @@ Description:
    - PROFTYPE_TMPL_... :
       - handle to send message or invitation to is not stored, but must be selected by client
 
-   - PROFTYPE_TMPL_SENDMSG = format is: "Subject\nMessageText"
-   - PROFTYPE_TMPL_GAMESETUP = format is:
-      - for invite: "GameSetup\nSubject\nMessageText"
-      - for new-game: TODO
+   - PROFTYPE_TMPL_SENDMSG = format for send-message: "Subject\nMessageText"
+
+   - PROFTYPE_TMPL_GAMESETUP_INVITE = format for invitation: "GameSetup\nEXTRA\nSubject\nMessageText"
+      - EXTRA format = "SH<shape-id>:<shape-snapshot>"
+
+   - PROFTYPE_TMPL_GAMESETUP_NEWGAME = format for new-game: "GameSetup\nEXTRA\nSubject\nMessageText"
+      - EXTRA format = "V<view> GP<game-players> SH<shape-id>:<shape-snapshot>"
 
 

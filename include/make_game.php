@@ -259,6 +259,20 @@ function make_invite_game_setup( $my_urow, $opp_urow )
    return $gs;
 }//make_invite_game_setup
 
+function make_invite_template_game_setup( $my_urow )
+{
+   // assume rated players
+   if( $my_urow['RatingStatus'] == RATING_NONE )
+   {
+      $my_urow['RatingStatus'] = RATING_INIT;
+      $my_urow['Rating2'] = MIN_RATING;
+   }
+   $fake_urow = array( 'ID' => $my_urow['ID'] + 1, 'RatingStatus' => RATING_RATED, 'Rating2' => MIN_RATING );
+
+   $gs = make_invite_game_setup( $my_urow, $fake_urow );
+   return $gs;
+}//make_invite_template_game_setup
+
 
 /*! \brief Accepts an invitational game making it a running game; returning array of created game-IDs. */
 function accept_invite_game( $gid, $player_row, $opponent_row )

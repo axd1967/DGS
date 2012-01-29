@@ -964,10 +964,10 @@ table.Table td.ImagesLeft {
    text-align: left;
 }
 
-table.Table td.ImagesLeftPadded {
-   text-align: left;
+table.Table td.ImagesRightPadded {
+   text-align: right;
 }
-table.Table td.ImagesLeftPadded img {
+table.Table td.ImagesRightPadded img {
    padding-left:  0.4em;
    padding-right: 0.4em;
 }

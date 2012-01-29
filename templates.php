@@ -56,6 +56,7 @@ define('FACT_CANCEL', 'cancel');
    $arg_to = trim( get_request_arg('to') );
    $url_to = ( (string)$arg_to != '' ) ? URI_AMP.'to=' . urlencode($arg_to) : '';
 
+
    // ---------- handle actions ----------
 
    if( @$_REQUEST[FACT_CANCEL] )
@@ -64,7 +65,7 @@ define('FACT_CANCEL', 'cancel');
    $count_profiles = $arr_profiles = NULL;
    if( $cmd == CMD_LIST || $cmd == CMD_NEW )
    {
-      $arr_profiles = Profile::load_profiles( $my_id, array( PROFTYPE_TMPL_SENDMSG, PROFTYPE_TMPL_GAMESETUP ), /*templ*/true );
+      $arr_profiles = Profile::load_profiles( $my_id, ProfileTemplate::known_template_types(), /*templ*/true );
       $count_profiles = count($arr_profiles);
    }
 
@@ -126,25 +127,14 @@ function echo_list_templates( $arr_profiles )
 {
    global $page, $url_to;
 
-   $mtable = new Table( 'sendmsg', $page, null, '', TABLE_ROWS_NAVI|TABLE_NO_SORT|TABLE_NO_HIDE );
-   $gtable = new Table( 'gamesetup', $page, null, '', TABLE_ROWS_NAVI|TABLE_NO_SORT|TABLE_NO_HIDE );
-   $mtable->use_show_rows( false );
-   $gtable->use_show_rows( false );
+   $ttable = new Table( 'templates', $page, null, '', TABLE_ROWS_NAVI|TABLE_NO_SORT|TABLE_NO_HIDE );
+   $ttable->use_show_rows( false );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $mtable->add_tablehead( 1, T_('Actions#header'), 'ImagesLeftPadded', 0, '');
-   $mtable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
-   $mtable->add_tablehead( 3, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
-
-   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $gtable->add_tablehead( 1, T_('Actions#header'), 'ImagesLeftPadded', 0, '');
-   $gtable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
-   $gtable->add_tablehead( 3, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
-
-   $tables = array(
-         PROFTYPE_TMPL_SENDMSG   => $mtable,
-         PROFTYPE_TMPL_GAMESETUP => $gtable,
-      );
+   $ttable->add_tablehead( 1, T_('Actions#header'), 'ImagesRightPadded', 0, '');
+   $ttable->add_tablehead( 2, T_('Type#header'), 'Enum', 0, 'Type+');
+   $ttable->add_tablehead( 3, T_('Name#header'), 'User', 0, 'Name+');
+   $ttable->add_tablehead( 4, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
 
    foreach( $arr_profiles as $prof )
    {
@@ -155,31 +145,28 @@ function echo_list_templates( $arr_profiles )
          $links .= anchor( "message.php?mode=NewMessage{$url_to}{$url_tmpl}",
                image( 'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
       }
-      elseif( $prof->Type == PROFTYPE_TMPL_GAMESETUP )
+      elseif( $prof->Type == PROFTYPE_TMPL_INVITE || $prof->Type == PROFTYPE_TMPL_NEWGAME )
       {
          //TODO $tmpl = ProfileTemplate::decode( $prof->Type, $prof->Text );
          //TODO check if allowed for type, e.g. MPG not allowed for invite
          $links .= anchor( "message.php?mode=Invite{$url_to}{$url_tmpl}",
                image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
          //TODO check if allowed for type
-         $links .= anchor( "new_game.php{$url_to}{$url_tmpl}",
-               image( 'images/newgame.gif', 'N', '', 'class="Action"' ), T_('New Game'));
+         //TODO $links .= anchor( "new_game.php{$url_to}{$url_tmpl}",
+               //image( 'images/newgame.gif', 'N', '', 'class="Action"' ), T_('New Game'));
       }
       $links .= anchor( $page."?cmd=".CMD_DELETE . $url_tmpl,
             image( 'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Delete template'));
 
-      $tables[$prof->Type]->add_row( array(
+      $ttable->add_row( array(
             1 => $links,
-            2 => $prof->Name,
-            3 => ($prof->Lastchanged > 0 ? date(DATE_FMT2, $prof->Lastchanged) : '' ),
+            2 => ProfileTemplate::get_template_type_text( $prof->Type ),
+            3 => $prof->Name,
+            4 => ($prof->Lastchanged > 0 ? date(DATE_FMT2, $prof->Lastchanged) : '' ),
          ));
    }
 
-   echo "<h4>", T_('Message Templates'), "</h3>\n";
-   $tables[PROFTYPE_TMPL_SENDMSG]->echo_table();
-
-   echo "<br>\n<h4>", T_('Game Setup Templates'), "</h3>\n";
-   $tables[PROFTYPE_TMPL_GAMESETUP]->echo_table();
+   $ttable->echo_table();
 }//echo_list_templates
 
 
@@ -248,8 +235,13 @@ function check_save_template( $arr_profiles, $name, $replace )
    $errors = array();
 
    $type = (int)@$_REQUEST['type'];
-   if( $type != PROFTYPE_TMPL_SENDMSG && $type != PROFTYPE_TMPL_GAMESETUP )
+   if( !ProfileTemplate::is_valid_type($type) )
       $errors[] = T_('Invalid type for template to save#tmpl');
+
+   $datalen = strlen(@$_REQUEST['data']);
+   if( $datalen > MAX_PROFILE_TEMPLATES_DATA )
+      $errors[] = sprintf( T_('Data to store for template exceeds limit of %s bytes (by %s bytes).#tmpl'),
+         MAX_PROFILE_TEMPLATES_DATA, $datalen - MAX_PROFILE_TEMPLATES_DATA );
 
    if( (string)$name == '' )
       $errors[] = T_('Missing name for template#tmpl');
@@ -315,7 +307,7 @@ function check_delete_template( $uid, $prof_id )
    if( is_null($profile) )
       error('invalid_profile', "templates.check_delete_template.find($prof_id,$uid)");
 
-   if( $profile->Type != PROFTYPE_TMPL_SENDMSG && $profile->Type != PROFTYPE_TMPL_GAMESETUP )
+   if( !ProfileTemplate::is_valid_type($profile->Type) )
       error('invalid_profile', "templates.check_delete_template.check.type($prof_id,$uid,{$profile->Type})");
 
    return $profile;
@@ -340,7 +332,7 @@ function echo_delete_template( $profile )
 
    $form->add_empty_row();
    $form->add_row( array( 'TAB', 'TEXT', T_('Are you sure to delete this template ?#tmpl') ));
-   $form->add_row( array( 'TAB', 'CELL', 1, '',
+   $form->add_row( array( 'TAB', 'CELL', 1, '', // align submit-buttons
                           'SUBMITBUTTON', FACT_SAVE, T_('Yes'),
                           'SUBMITBUTTON', FACT_CANCEL, T_('No'), ));
 

@@ -20,11 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once 'include/globals.php';
+require_once 'include/db/games.php';
 require_once 'include/time_functions.php';
 require_once 'include/classlib_game.php';
 require_once 'include/classlib_profile.php';
+require_once 'include/classlib_user.php';
 require_once 'include/utilities.php';
 require_once 'include/std_functions.php';
+require_once 'include/time_functions.php';
 require_once 'include/game_texts.php';
 require_once 'include/error_codes.php';
 require_once 'tournaments/include/tournament_games.php';
@@ -2139,6 +2142,15 @@ class GameSetup
       return implode(GS_SEP, $out);
    }//encode
 
+   /*! \brief Encodes this GameSetup into GameSetup used for profile-template for invitation and new-game. */
+   function encode_profile_template( $prof_type )
+   {
+      if( $prof_type == PROFTYPE_TMPL_INVITE )
+         return $this->encode( /*inv*/true );
+      else
+         error('invalid_args', "GameSetup.encode_profile_template.check($prof_type)");
+   }//encode_profile_template
+
    /*!
     * \brief Parses remaining game-fields (that are not required for setup a game) into this GameSetup.
     * \param $grow parsed fields:
@@ -2453,7 +2465,201 @@ class GameSetup
 
 
 
-define('MAX_PROFILE_TEMPLATES', 30);
+/**
+ * \brief Class to pre-seed form-fields for invites and game-setup for rematch and templates.
+ */
+class GameSetupBuilder
+{
+   var $my_id;
+   var $game_setup;
+   var $game;
+   var $is_mpg;
+   var $is_template;
+
+   /*!
+    * \brief Constructs GameSetupBuilder.
+    * \param $game Games-object, null, or GameSetup-object (as it has the same field-interface) for fields:
+    *           GamePlayers, ShapeID, ShapeSnapshot, Ruleset, Size, StdHandicap, Handicap, Komi,
+    *           Maintime, Byotype, Byotime, Byoperiods, WeekendClock;
+    *        The following fields do not have common semantics, therefore are treated differently using $is_template:
+    *           DoubleGame_ID, Black_ID, White_ID, Rated
+    */
+   function GameSetupBuilder( $my_id=0, $game_setup=null, $game=null, $is_mpg=false, $is_template=false )
+   {
+      $this->my_id = $my_id;
+      $this->game_setup = $game_setup;
+      $this->game = $game;
+      $this->is_mpg = $is_mpg;
+      $this->is_template = $is_template;
+   }
+
+   function fill_invite_from_game( &$url )
+   {
+      $this->build_url_invite_to( $url );
+      $this->build_url_game_basics( $url );
+      $this->build_url_cat_htype_manual( $url, CAT_HTYPE_MANUAL, null );
+      $this->build_url_handi_komi_rated( $url );
+   }//fill_invite_from_game
+
+   function fill_invite_from_game_setup( &$url )
+   {
+      $cat_htype = get_category_handicaptype( $this->game_setup->Handicaptype );
+
+      $this->build_url_invite_to( $url );
+      $this->build_url_game_basics( $url );
+      $this->build_url_cat_htype_manual( $url, $cat_htype, $this->game_setup->Handicaptype );
+      $this->build_url_handi_komi_rated( $url );
+
+      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : HTYPE_AUCTION_SECRET;
+      $url['jigo_mode'] = $this->game_setup->JigoMode;
+
+      if( !$this->is_template )
+         $url['message'] = $this->game_setup->Message;
+   }//fill_invite_from_game_setup
+
+
+   function fill_new_game_from_game( &$url )
+   {
+      $url['view'] = ( $this->is_mpg ) ? GSETVIEW_MPGAME : GSETVIEW_EXPERT;
+
+      $this->build_url_game_basics( $url );
+      $url['game_players'] = $this->game->GamePlayers;
+
+      if( !$this->is_mpg )
+      {
+         $this->build_url_cat_htype_manual( $url, CAT_HTYPE_MANUAL, null );
+         $this->build_url_handi_komi_rated( $url );
+      }
+   }//fill_new_game_from_game
+
+   function fill_new_game_from_game_setup( &$url )
+   {
+      $cat_htype = get_category_handicaptype( $this->game_setup->Handicaptype );
+
+      $url['view'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? GSETVIEW_FAIRKOMI : GSETVIEW_EXPERT;
+
+      $this->build_url_game_basics( $url );
+      $url['game_players'] = $this->game->GamePlayers;
+
+      $this->build_url_cat_htype_manual( $url, $cat_htype, $this->game_setup->Handicaptype );
+      $this->build_url_handi_komi_rated( $url );
+
+      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : HTYPE_AUCTION_SECRET;
+      $url['adj_komi'] = $this->game_setup->AdjustKomi;
+      $url['jigo_mode'] = $this->game_setup->JigoMode;
+      $url['adj_handicap'] = $this->game_setup->AdjustHandicap;
+      $url['min_handicap'] = $this->game_setup->MinHandicap;
+      $url['max_handicap'] = $this->game_setup->MaxHandicap;
+
+      $url['mb_rated'] = bool_YN( $this->game_setup->MustBeRated );
+      if( $this->game_setup->RatingMin < OUT_OF_RATING )
+         $url['rat1'] = $this->game_setup->RatingMin;
+      if( $this->game_setup->RatingMax < OUT_OF_RATING )
+         $url['rat2'] = $this->game_setup->RatingMax;
+      $url['min_rg'] = $this->game_setup->MinRatedGames;
+      $url['same_opp'] = $this->game_setup->SameOpponent;
+      $url['comment'] = $this->game_setup->Message;
+   }//fill_new_game_from_game_setup
+
+
+   function build_url_game_basics( &$url )
+   {
+      if( $this->game->ShapeID > 0 )
+      {
+         $url['shape'] = $this->game->ShapeID;
+         $url['snapshot'] = $this->game->ShapeSnapshot;
+      }
+
+      $url['ruleset'] = $this->game->Ruleset;
+      $url['size'] = $this->game->Size;
+      $url['stdhandicap'] = bool_YN( $this->game->StdHandicap );
+
+      $this->build_url_time( $url );
+   }//build_url_game_basics
+
+   function build_url_time( &$url )
+   {
+      $MaintimeUnit = 'hours';
+      $Maintime = $this->game->Maintime;
+      time_convert_to_longer_unit($Maintime, $MaintimeUnit);
+      $url['timeunit'] = $MaintimeUnit;
+      $url['timevalue'] = $Maintime;
+
+      $url['byoyomitype'] = $this->game->Byotype;
+      $ByotimeUnit = 'hours';
+      $Byotime = $this->game->Byotime;
+      time_convert_to_longer_unit($Byotime, $ByotimeUnit);
+      $url['byotimevalue_jap'] = $url['byotimevalue_can'] = $url['byotimevalue_fis'] = $Byotime;
+      $url['timeunit_jap'] = $url['timeunit_can'] = $url['timeunit_fis'] = $ByotimeUnit;
+
+      if( $this->game->Byoperiods > 0 )
+         $url['byoperiods_jap'] = $url['byoperiods_can'] = $this->game->Byoperiods;
+
+      $url['weekendclock'] = bool_YN( $this->game->WeekendClock );
+   }//build_url_time
+
+   function build_url_cat_htype_manual( &$url, $cat_htype, $gs_htype )
+   {
+      $url['cat_htype'] = $cat_htype;
+      if( !is_null($gs_htype) && $cat_htype === CAT_HTYPE_MANUAL )
+         $url['color_m'] = $gs_htype;
+      elseif( !$this->is_template && $this->game->DoubleGame_ID != 0 )
+         $url['color_m'] = HTYPE_DOUBLE;
+      elseif( !$this->is_template && $this->my_id == $this->game->Black_ID )
+         $url['color_m'] = HTYPE_BLACK;
+      elseif( !$this->is_template && $this->my_id == $this->game->White_ID )
+         $url['color_m'] = HTYPE_WHITE;
+      else
+         $url['color_m'] = HTYPE_NIGIRI; // default
+   }//build_url_cat_htype_manual
+
+   function build_url_handi_komi_rated( &$url )
+   {
+      if( is_null($this->game_setup) )
+      {
+         $url['handicap_m'] = $this->game->Handicap;
+         $url['komi_m'] = $this->game->Komi;
+      }
+      else
+      {
+         $url['handicap_m'] = $this->game_setup->Handicap;
+         $url['komi_m'] = $this->game_setup->Komi;
+      }
+
+      if( $this->is_template )
+         $url['rated'] = bool_YN( $this->game->Rated );
+      else
+         $url['rated'] = ( $this->game->Rated == 'N' ) ? 'N' : 'Y';
+   }//build_url_handi_komi_rated
+
+   function build_url_invite_to( &$url )
+   {
+      if( $this->is_template ) // skip for template
+         return;
+
+      if( $this->my_id == $this->game->Black_ID )
+         $opp_id = $this->game->White_ID;
+      elseif( $this->my_id == $this->game->White_ID )
+         $opp_id = $this->game->Black_ID;
+      else
+         $opp_id = 0;
+
+      $opp_to = '';
+      if( $opp_id > 0 )
+      {
+         $users = User::load_quick_userinfo( array( $opp_id ) );
+         if( isset($users[$opp_id]) )
+            $opp_to = $users[$opp_id]['Handle'];
+      }
+      $url['to'] = $opp_to;
+   }//build_url_invite_to
+
+} //end 'GameSetupBuilder'
+
+
+
+define('MAX_PROFILE_TEMPLATES', 20);
+define('MAX_PROFILE_TEMPLATES_DATA', 10000); // max byte-len for template
 
 /**
  * \brief Class to handle templates for send-message and game-setup (for invitation and new-game)
@@ -2463,9 +2669,9 @@ class ProfileTemplate
 {
    var $TemplateType; //PROFTYPE_TMPL_...
 
+   var $GameSetup;
    var $Subject;
    var $Text;
-
 
    /*!
     * \brief Constructs template with template-type.
@@ -2473,7 +2679,7 @@ class ProfileTemplate
     */
    function ProfileTemplate( $template_type )
    {
-      if( $template_type != PROFTYPE_TMPL_SENDMSG )
+      if( !ProfileTemplate::is_valid_type($template_type) )
          error('invalid_args', "ProfileTemplate.new($template_type)");
       $this->TemplateType = (int)$template_type;
    }
@@ -2482,9 +2688,17 @@ class ProfileTemplate
    function encode()
    {
       if( $this->TemplateType == PROFTYPE_TMPL_SENDMSG )
-         return trim("{$this->Subject}\n{$this->Text}");
+         $result = "{$this->Subject}\n{$this->Text}";
+      elseif( $this->TemplateType == PROFTYPE_TMPL_INVITE )
+      {
+         $extra = sprintf('SH%s:%s', $this->GameSetup->ShapeID, $this->GameSetup->ShapeSnapshot );
+         $result = $this->GameSetup->encode_profile_template( $this->TemplateType )
+            . "\n$extra\n{$this->Subject}\n{$this->Text}";
+      }
       else
-         error('invalid_args', "ProfileTemplate.encode({$this->TemplateType})");
+         error('invalid_args', "ProfileTemplate.encode.check.type({$this->TemplateType})");
+
+      return trim($result);
    }//encode
 
    function build_profile()
@@ -2496,11 +2710,32 @@ class ProfileTemplate
       return $profile;
    }
 
-   function build_url_message( &$url )
+   function fill( &$url )
+   {
+      if( $this->TemplateType == PROFTYPE_TMPL_SENDMSG )
+         $this->fill_message( $url );
+      elseif( $this->TemplateType == PROFTYPE_TMPL_INVITE )
+      {
+         $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
+         $gs_builder->fill_invite_from_game_setup( $url );
+         $this->fill_message( $url );
+error_log("#3: ".print_r($url,true)); //TODO-prof
+      }
+      else
+         error('invalid_args', "ProfileTemplate.fill({$this->TemplateType})");
+   }//fill
+
+   function fill_message( &$url )
    {
       $url['subject'] = $this->Subject;
       $url['message'] = $this->Text;
-   }//build_url_message
+   }
+
+   function to_string()
+   {
+      $gs_str = (is_null($this->GameSetup)) ? '-' : $this->GameSetup->to_string(/*inv*/true);
+      return "ProfileTemplate({$this->TemplateType}): GameSetup=[$gs_str] Subject=[{$this->Subject}] Text=[$this->Text]";
+   }
 
 
    // ------------ static functions ----------------------------
@@ -2513,30 +2748,55 @@ class ProfileTemplate
       return $tmpl;
    }
 
+   function new_template_game_setup_invite( $subject, $text )
+   {
+      $tmpl = new ProfileTemplate( PROFTYPE_TMPL_INVITE );
+      $tmpl->Subject = trim($subject);
+      $tmpl->Text = trim($text);
+      return $tmpl;
+   }
+
    function decode( $template_type, $value )
    {
       $tmpl = new ProfileTemplate( $template_type );
 
       if( $template_type == PROFTYPE_TMPL_SENDMSG )
       {
-         $tmpl->TemplateType = $template_type;
-         $lfpos = strpos($value, "\n");
-         if( $lfpos === false )
-         {
-            $tmpl->Subject = trim($value);
-            $tmpl->Text = '';
-         }
-         else
-         {
-            $tmpl->Subject = trim( substr($value, 0, $lfpos) );
-            $tmpl->Text = trim( substr($value, $lfpos + 1) );
-         }
+         list( $tmpl->Subject, $tmpl->Text ) = ProfileTemplate::eat_line( $value );
       }
-      else
-         error('invalid_args', "ProfileTemplate.encode({$this->TemplateType})");
+      elseif( $template_type == PROFTYPE_TMPL_INVITE )
+      {
+         list( $gs_line, $rem1 ) = ProfileTemplate::eat_line( $value );
+         list( $extra_line, $rem2 ) = ProfileTemplate::eat_line( $rem1 );
+         list( $tmpl->Subject, $tmpl->Text ) = ProfileTemplate::eat_line( $rem2 );
+
+         if( !preg_match("/^SH\\d+:.*$/", $extra_line) )
+            error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,$extra_line)");
+         list( $shape_id, $shape_snapshot ) = ProfileTemplate::eat_line( $extra_line, ':' );
+         $shape_id = (int)substr($shape_id, 2);
+         if( $shape_id <= 0 )
+         {
+            $shape_id = 0;
+            $shape_snapshot = '';
+         }
+
+         $tmpl->GameSetup = GameSetup::new_from_game_setup( $gs_line, /*inv*/true, /*0OnEmpty*/false );
+         $tmpl->GameSetup->ShapeID = $shape_id;
+         $tmpl->GameSetup->ShapeSnapshot = $shape_snapshot;
+      }
 
       return $tmpl;
    }//decode
+
+   /*! \brief Splits line at next LF and return it as arr(1st-part, remaining-part). */
+   function eat_line( $str, $sep="\n" )
+   {
+      $pos = strpos($str, $sep);
+      if( $pos === false )
+         return array( $str, '' );
+      else
+         return array( trim( substr($str, 0, $pos) ), trim( substr($str, $pos + 1) ) );
+   }
 
    function add_menu_link( &$menu, $handle='' )
    {
@@ -2554,18 +2814,33 @@ class ProfileTemplate
    {
       if( $type == PROFTYPE_TMPL_SENDMSG )
          return T_('Message#tmpl');
-      elseif( $type == PROFTYPE_TMPL_GAMESETUP )
-         return T_('Game Setup#tmpl');
+      elseif( $type == PROFTYPE_TMPL_INVITE )
+         return T_('Invite#tmpl');
+      elseif( $type == PROFTYPE_TMPL_NEWGAME )
+         return T_('New Game#tmpl');
       else
          error('invalid_args', "ProfileTemplate.get_template_type_text($type)");
    }//get_template_type_text
 
    function new_default_profile( $uid, $type )
    {
-      if( $type != PROFTYPE_TMPL_SENDMSG && $type != PROFTYPE_TMPL_GAMESETUP )
+      if( !ProfileTemplate::is_valid_type($type) )
          error('invalid_args', "ProfileTemplate.new_default_profile.check.type($type)");
 
       return new Profile( 0, $uid, $type, 1, true );
+   }
+
+   function is_valid_type( $type )
+   {
+      return ( $type == PROFTYPE_TMPL_SENDMSG
+            || $type == PROFTYPE_TMPL_INVITE
+            || $type == PROFTYPE_TMPL_NEWGAME );
+   }
+
+   function known_template_types()
+   {
+      static $TYPES = array( PROFTYPE_TMPL_SENDMSG, PROFTYPE_TMPL_INVITE, PROFTYPE_TMPL_NEWGAME );
+      return $TYPES;
    }
 
 } // end 'ProfileTemplate'

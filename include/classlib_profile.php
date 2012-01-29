@@ -54,9 +54,10 @@ define('PROFTYPE_FILTER_BULLETINS', 24);
 define('PROFTYPE_FILTER_SURVEYS', 25);
 define('PROFTYPE_FILTER_SHAPES', 26);
 define('PROFTYPE_TMPL_SENDMSG', 27);
-define('PROFTYPE_TMPL_GAMESETUP', 28);
+define('PROFTYPE_TMPL_INVITE', 28);
+define('PROFTYPE_TMPL_NEWGAME', 29);
 // adjust if adding one
-define('MAX_PROFTYPE', 28);
+define('MAX_PROFTYPE', 29);
 
 define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 

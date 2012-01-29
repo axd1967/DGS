@@ -105,11 +105,17 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       $profile = Profile::load_profile( $prof_tmpl_id, $my_id ); // loads only if user-id correct
       if( is_null($profile) )
          error('invalid_profile', "message.check.profile($prof_tmpl_id)");
-      if( $profile->Type != PROFTYPE_TMPL_SENDMSG ) //TODO check later when known that send-msg or invite
-         error('invalid_profile', "message.check.profile.type($prof_tmpl_id,{$profile->Type})");
+error_log("#1: ".$profile->to_string()); //TODO-prof
 
-      $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(true) );
-      $profile_template->build_url_message( $_REQUEST );
+      // check profile-type vs. msg-mode
+      if( !($profile->Type == PROFTYPE_TMPL_SENDMSG && $mode == 'NewMessage')
+            && !($profile->Type == PROFTYPE_TMPL_INVITE && $mode == 'Invite') )
+         error('invalid_profile', "message.check.profile.type($prof_tmpl_id,{$profile->Type},$mode)");
+
+      $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
+error_log("#2: ".$profile_template->to_string()); //TODO-prof
+      $profile_template->fill( $_REQUEST );
+      $preview = true;
    }
 
    $is_rematch = ( $mode == 'Invite' ) && @$_REQUEST['rematch'];
@@ -361,6 +367,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                'TEXTAREA', 'message', 70, MSGBOXROWS_NORMAL, $default_message,
             ));
          $message_form->add_row( array(
+               'TAB', 'CELL', 1, '', // align submit-buttons
                'SUBMITBUTTONX', 'send_message', T_('Send Message'),
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
@@ -499,10 +506,13 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          $message_form->add_row( array(
                'HIDDEN', 'subject', 'Game invitation',
                'HIDDEN', 'type', MSGTYPE_INVITATION,
+               'TAB', 'CELL', 1, '', // align submit-buttons
                'SUBMITBUTTONX', 'send_message', T_('Send Invitation'),
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => ($allow_game_start ? 0 : 1) ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
+               'TEXT', span('BigSpace'),
+               'SUBMITBUTTON', 'save_template', T_('Save Template'),
             ));
          break;
       }//case Invite
@@ -713,12 +723,19 @@ function handle_change_folder( $my_id, $folders, $new_folder, $msg_type )
 
 function handle_save_template( $my_id, $msg_type )
 {
+   global $player_row;
+
    if( $msg_type == MSGTYPE_NORMAL )
       $tmpl = ProfileTemplate::new_template_send_message( $_REQUEST['subject'], $_REQUEST['message'] );
+   elseif( $msg_type == MSGTYPE_INVITATION )
+   {
+      $tmpl = ProfileTemplate::new_template_game_setup_invite( $_REQUEST['subject'], $_REQUEST['message'] );
+      $tmpl->GameSetup = make_invite_template_game_setup( $player_row );
+   }
    else
       error('invalid_args', "handle_save_template($my_id,$msg_type)");
 
-   jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}".URI_AMP."data=" . urlencode( $tmpl->encode() ) );
+   jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}".URI_AMP."data=" . urlencode( $tmpl->encode() ));
 }//handle_save_template
 
 

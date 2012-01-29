@@ -56,24 +56,27 @@ require_once 'include/classlib_user.php';
          error('invalid_args', "game_rematch.check.mpg.rating($mode,$gid,$my_id)");
 
       $mode = REMATCH_NEWGAME;
-      build_url_new_game_from_game( $url, $game, /*MPG*/true );
+      $gs_builder = new GameSetupBuilder( 0, /*gs*/null, $game, /*MPG*/true );
+      $gs_builder->fill_new_game_from_game( $url );
    }
    elseif( $game->tid > 0 || $game->Status != GAME_STATUS_INVITED ) // tourney or normal-game
    {
       $game_setup = GameSetup::new_from_game_setup( $game->GameSetup, /*inv*/false, /*null-empty*/true );
       if( is_null($game_setup) ) // no game-setup available -> use only game-info
       {
+         $gs_builder = new GameSetupBuilder( $my_id, /*gs*/null, $game );
          if( $mode == REMATCH_NEWGAME )
-            build_url_new_game_from_game( $url, $game, /*MPG*/false );
+            $gs_builder->fill_new_game_from_game( $url, /*MPG*/false );
          else //REMATCH_INVITE
-            build_url_invite_from_game( $url, $game );
+            $gs_builder->fill_invite_from_game( $url );
       }
       else // use game-setup
       {
+         $gs_builder = new GameSetupBuilder( $my_id, $game_setup, $game );
          if( $mode == REMATCH_NEWGAME )
-            build_url_new_game_from_game_setup( $url, $game, $game_setup );
+            $gs_builder->fill_new_game_from_game_setup( $url );
          else //REMATCH_INVITE
-            build_url_invite_from_game_setup( $url, $game, $game_setup );
+            $gs_builder->fill_invite_from_game_setup( $url );
       }
    }
    else
@@ -93,164 +96,5 @@ require_once 'include/classlib_user.php';
 
    jump_to($page . implode(URI_AMP, $out));
 }//main
-
-
-
-function build_url_new_game_from_game( &$url, $game, $is_mpg )
-{
-   $url['view'] = ( $is_mpg ) ? GSETVIEW_MPGAME : GSETVIEW_EXPERT;
-
-   build_url_game_basics( $url, $game );
-   $url['game_players'] = $game->GamePlayers;
-
-   if( !$is_mpg )
-   {
-      build_url_cat_htype_manual( $url, $game, CAT_HTYPE_MANUAL, null );
-      build_url_handi_komi_rated( $url, $game, null );
-   }
-}//build_url_new_game_from_game
-
-function build_url_new_game_from_game_setup( &$url, $game, $game_setup )
-{
-   $cat_htype = get_category_handicaptype($game_setup->Handicaptype);
-
-   $url['view'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? GSETVIEW_FAIRKOMI : GSETVIEW_EXPERT;
-
-   build_url_game_basics( $url, $game );
-   $url['game_players'] = $game->GamePlayers;
-
-   build_url_cat_htype_manual( $url, $game, $cat_htype, $game_setup->Handicaptype );
-   build_url_handi_komi_rated( $url, $game, $game_setup );
-
-   $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $game_setup->Handicaptype : HTYPE_AUCTION_SECRET;
-   $url['adj_komi'] = $game_setup->AdjustKomi;
-   $url['jigo_mode'] = $game_setup->JigoMode;
-   $url['adj_handicap'] = $game_setup->AdjustHandicap;
-   $url['min_handicap'] = $game_setup->MinHandicap;
-   $url['max_handicap'] = $game_setup->MaxHandicap;
-
-   $url['mb_rated'] = bool_YN($game_setup->MustBeRated);
-   if( $game_setup->RatingMin < OUT_OF_RATING )
-      $url['rat1'] = $game_setup->RatingMin;
-   if( $game_setup->RatingMax < OUT_OF_RATING )
-      $url['rat2'] = $game_setup->RatingMax;
-   $url['min_rg'] = $game_setup->MinRatedGames;
-   $url['same_opp'] = $game_setup->SameOpponent;
-   $url['comment'] = $game_setup->Message;
-}//build_url_new_game_from_game_setup
-
-
-function build_url_invite_from_game( &$url, $game )
-{
-   build_url_invite_to( $url, $game );
-   build_url_game_basics( $url, $game );
-   build_url_cat_htype_manual( $url, $game, CAT_HTYPE_MANUAL, null );
-   build_url_handi_komi_rated( $url, $game, null );
-}//build_url_invite_from_game
-
-function build_url_invite_from_game_setup( &$url, $game, $game_setup )
-{
-   $cat_htype = get_category_handicaptype($game_setup->Handicaptype);
-
-   build_url_invite_to( $url, $game );
-   build_url_game_basics( $url, $game );
-   build_url_cat_htype_manual( $url, $game, $cat_htype, $game_setup->Handicaptype );
-   build_url_handi_komi_rated( $url, $game, $game_setup );
-
-   $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $game_setup->Handicaptype : HTYPE_AUCTION_SECRET;
-   $url['jigo_mode'] = $game_setup->JigoMode;
-
-   $url['message'] = $game_setup->Message;
-}//build_url_invite_from_game_setup
-
-
-function build_url_game_basics( &$url, $game )
-{
-   if( $game->ShapeID > 0 )
-   {
-      $url['shape'] = $game->ShapeID;
-      $url['snapshot'] = $game->ShapeSnapshot;
-   }
-
-   $url['ruleset'] = $game->Ruleset;
-   $url['size'] = $game->Size;
-   $url['stdhandicap'] = bool_YN($game->StdHandicap);
-
-   build_url_time( $url, $game );
-}//build_url_game_basics
-
-function build_url_time( &$url, $game )
-{
-   $MaintimeUnit = 'hours';
-   $Maintime = $game->Maintime;
-   time_convert_to_longer_unit($Maintime, $MaintimeUnit);
-   $url['timeunit'] = $MaintimeUnit;
-   $url['timevalue'] = $Maintime;
-
-   $url['byoyomitype'] = $game->Byotype;
-   $ByotimeUnit = 'hours';
-   $Byotime = $game->Byotime;
-   time_convert_to_longer_unit($Byotime, $ByotimeUnit);
-   $url['byotimevalue_jap'] = $url['byotimevalue_can'] = $url['byotimevalue_fis'] = $Byotime;
-   $url['timeunit_jap'] = $url['timeunit_can'] = $url['timeunit_fis'] = $ByotimeUnit;
-
-   if( $game->Byoperiods > 0 )
-      $url['byoperiods_jap'] = $url['byoperiods_can'] = $game->Byoperiods;
-
-   $url['weekendclock'] = bool_YN($game->WeekendClock);
-}//build_url_time
-
-function build_url_cat_htype_manual( &$url, $game, $cat_htype, $gs_htype )
-{
-   global $my_id;
-
-   $url['cat_htype'] = $cat_htype;
-   if( !is_null($gs_htype) && $cat_htype === CAT_HTYPE_MANUAL )
-      $url['color_m'] = $gs_htype;
-   elseif( $game->DoubleGame_ID != 0 )
-      $url['color_m'] = HTYPE_DOUBLE;
-   elseif( $my_id == $game->Black_ID )
-      $url['color_m'] = HTYPE_BLACK;
-   elseif( $my_id == $game->White_ID )
-      $url['color_m'] = HTYPE_WHITE;
-   else
-      $url['color_m'] = HTYPE_NIGIRI; // default
-}//build_url_cat_htype_manual
-
-function build_url_handi_komi_rated( &$url, $game, $game_setup )
-{
-   if( is_null($game_setup) )
-   {
-      $url['handicap_m'] = $game->Handicap;
-      $url['komi_m'] = $game->Komi;
-   }
-   else
-   {
-      $url['handicap_m'] = $game_setup->Handicap;
-      $url['komi_m'] = $game_setup->Komi;
-   }
-   $url['rated'] = ( $game->Rated == 'N' ) ? 'N' : 'Y';
-}//build_url_handi_komi_rated
-
-function build_url_invite_to( &$url, $game )
-{
-   global $my_id;
-
-   if( $my_id == $game->Black_ID )
-      $opp_id = $game->White_ID;
-   elseif( $my_id == $game->White_ID )
-      $opp_id = $game->Black_ID;
-   else
-      $opp_id = 0;
-
-   $opp_to = '';
-   if( $opp_id > 0 )
-   {
-      $users = User::load_quick_userinfo( array( $opp_id ) );
-      if( isset($users[$opp_id]) )
-         $opp_to = $users[$opp_id]['Handle'];
-   }
-   $url['to'] = $opp_to;
-}//build_url_invite_to
 
 ?>
