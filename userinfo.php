@@ -285,9 +285,9 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    db_close();
 
 
+   $menu_array = array();
    if( $my_info )
    {
-      $menu_array = array();
       $menu_array[T_('Edit profile')] = 'edit_profile.php';
       $menu_array[T_('Change rating & rank')] = 'edit_rating.php';
       $menu_array[T_('Change password')] = 'edit_password.php';
