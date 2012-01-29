@@ -390,7 +390,7 @@ function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
 }
 
 // \param $class 'id=id attr=...' or else 'classname'
-function span( $class, $str, $strfmt='%s', $title='' )
+function span( $class, $str='', $strfmt='%s', $title='' )
 {
    if( $title )
       $title = " title=\"$title\"";
