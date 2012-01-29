@@ -53,8 +53,10 @@ define('PROFTYPE_FILTER_TOURNAMENT_NEWS', 23);
 define('PROFTYPE_FILTER_BULLETINS', 24);
 define('PROFTYPE_FILTER_SURVEYS', 25);
 define('PROFTYPE_FILTER_SHAPES', 26);
+define('PROFTYPE_TMPL_SENDMSG', 27);
+define('PROFTYPE_TMPL_GAMESETUP', 28);
 // adjust if adding one
-define('MAX_PROFTYPE', 26);
+define('MAX_PROFTYPE', 28);
 
 define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 
@@ -65,43 +67,42 @@ define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
   */
 class Profile
 {
-
    /*! \brief ID (PK from db). */
    var $id;
    /*! \brief user-id for profile. */
-   var $user_id;
+   var $uid;
    /*! \brief type (must be one of PROFTYPE_). */
-   var $type;
+   var $Type;
    /*! \brief sort-order (1..n). */
-   var $sortorder;
+   var $SortOrder;
    /*! \brief bool active (Y|N-enum in DB). */
-   var $active;
+   var $Active;
    /*! \brief user-chosen name */
-   var $name;
+   var $Name;
    /*! \brief Date when profile has been lastchanged (unix-time). */
-   var $lastchanged;
+   var $Lastchanged;
    /*! \brief profile-content/url/address. */
-   var $text;
+   var $Text;
 
    /*!
     * \brief Constructs Profile-object with specified arguments: lastchanged are in UNIX-time.
     *        $id may be 0 to add a new profile
     * \param $type must be non-0
     */
-   function Profile( $id=0, $user_id=0, $type=0, $sortorder=1, $active=false, $name='', $lastchanged=0, $text='' )
+   function Profile( $id=0, $uid=0, $type=0, $sortorder=1, $active=false, $name='', $lastchanged=0, $text='' )
    {
       // allowed for guests, but no DB-writing ops
-      if( !is_numeric($user_id) || $user_id < 0 )
-         error('invalid_user', "profile.Profile($id,$user_id,$type)");
+      if( !is_numeric($uid) || $uid < 0 )
+         error('invalid_user', "profile.Profile($id,$uid,$type)");
 
       $this->set_type( $type );
       $this->id = (int) $id;
-      $this->user_id = (int) $user_id;
-      $this->sortorder = (int) $sortorder;
-      $this->active = (bool) $active;
-      $this->name = $name;
-      $this->lastchanged = (int) $lastchanged;
-      $this->text = $text;
+      $this->uid = (int) $uid;
+      $this->SortOrder = (int) $sortorder;
+      $this->Active = (bool) $active;
+      $this->Name = $name;
+      $this->Lastchanged = (int) $lastchanged;
+      $this->Text = $text;
    }
 
    /*! \brief Sets valid profile-type (exception on invalid type). */
@@ -109,7 +110,7 @@ class Profile
    {
       if( !is_numeric($type) || $type < 1 || $type > MAX_PROFTYPE )
          error('invalid_args', "profile.set_type($type)");
-      $this->type = (int) $type;
+      $this->Type = (int) $type;
    }
 
    /*!
@@ -119,11 +120,11 @@ class Profile
    function set_text( $arr )
    {
       if( is_null($arr) )
-         $this->text = '0'; // representation of NULL
+         $this->Text = '0'; // representation of NULL
       elseif( is_array($arr) )
-         $this->text = build_url( $arr, false, SEP_PROFVAL );
+         $this->Text = build_url( $arr, false, SEP_PROFVAL );
       else
-         $this->text = (string)$arr; // raw-format
+         $this->Text = (string)$arr; // raw-format
    }
 
    /*!
@@ -132,59 +133,61 @@ class Profile
    function get_text( $raw=false )
    {
       if( $raw )
-         return $this->text;
+         return $this->Text;
       else
       {
-         if( is_null($this->text) || (string)$this->text == '0' )
+         if( is_null($this->Text) || (string)$this->Text == '0' )
             return NULL;
          else
          {
             // NOTE: array-value must not be NULL(!)
-            split_url( '?'.$this->text, $prefix, $arr_out, SEP_PROFVAL );
+            split_url( '?'.$this->Text, $prefix, $arr_out, SEP_PROFVAL );
             return $arr_out;
          }
       }
-   }
+   }//get_text
 
    /*!
     * \brief Inserts or updates current profile-data in database (may replace existing profile);
     *        Set id to 0 if you want an insert.
     */
-   function update_profile( $check_user=false )
+   function save_profile( $check_user=false )
    {
-      if( $this->user_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "profile.update_profile({$this->user_id})");
+      if( $this->uid <= GUESTS_ID_MAX )
+         error('not_allowed_for_guest', "profile.save_profile({$this->uid})");
 
       if( $check_user )
       {
-         $row = mysql_single_fetch( "profile.update_profile.find_user({$this->user_id})",
-            "SELECT ID FROM Players WHERE ID={$this->user_id} LIMIT 1" );
+         $row = mysql_single_fetch( "profile.save_profile.find_user({$this->uid})",
+            "SELECT ID FROM Players WHERE ID={$this->uid} LIMIT 1" );
          if( !$row )
-            error('unknown_user', "profile.update_profile.find_user2({$this->user_id})");
+            error('unknown_user', "profile.save_profile.find_user2({$this->uid})");
       }
 
-      $update_query = 'REPLACE INTO Profiles SET'
-         . ' ID=' . (int)$this->id
-         . ', User_ID=' . (int)$this->user_id
-         . ', Type=' . (int)$this->type
-         . ', SortOrder=' . (int)$this->sortorder
-         . ", Active='" . ($this->active ? 'Y' : 'N') . "'" // enum
-         . ", Name='" . mysql_addslashes($this->name) . "'"
-         . ', Lastchanged=FROM_UNIXTIME(' . (int)$this->lastchanged .')'
-         . ", Text='" . mysql_addslashes($this->text) . "'" // blob
-         ;
-      db_query( "profile.update_profile({$this->id},{$this->user_id},{$this->type})",
-         $update_query );
-   }
+      $this->Lastchanged = $GLOBALS['NOW'];
+
+      $upd = new UpdateQuery('Profiles');
+      $upd->upd_num('ID', (int)$this->id );
+      $upd->upd_num('User_ID', (int)$this->uid );
+      $upd->upd_num('Type', (int)$this->Type );
+      $upd->upd_num('SortOrder', (int)$this->SortOrder );
+      $upd->upd_bool('Active', $this->Active );
+      $upd->upd_txt('Name', $this->Name );
+      $upd->upd_time('Lastchanged', (int)$this->Lastchanged );
+      $upd->upd_txt('Text', $this->Text ); // blob
+
+      db_query( "profile.save_profile({$this->id},{$this->uid},{$this->Type})",
+         "REPLACE INTO Profiles SET " . $upd->get_query() );
+   }//save_profile
 
    /*! \brief Deletes current profile from database. */
    function delete_profile()
    {
-      if( $this->user_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "profile.update_profile({$this->user_id})");
+      if( $this->uid <= GUESTS_ID_MAX )
+         error('not_allowed_for_guest', "profile.delete_profile.check({$this->uid})");
 
       if( $this->id > 0 )
-         db_query( "profile.delete_profile({$this->id})",
+         db_query( "profile.delete_profile.del({$this->id})",
             "DELETE FROM Profiles WHERE ID='{$this->id}' LIMIT 1" );
    }
 
@@ -193,12 +196,12 @@ class Profile
    {
       $user_id = (int)$user_id;
       $type = (int)$type;
-      if( $this->user_id <= GUESTS_ID_MAX || $user_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "profile.update_profile($user_id/{$this->user_id},$type)");
+      if( $this->uid <= GUESTS_ID_MAX || $user_id <= GUESTS_ID_MAX )
+         error('not_allowed_for_guest', "profile.delete_all_profiles.check.uid($user_id/{$this->uid},$type)");
       if( $type < 0 || $type > MAX_PROFTYPE )
-         error('invalid_args', "profile.delete_all_profiles($user_id,$type)");
+         error('invalid_args', "profile.delete_all_profiles.check.type($user_id,$type)");
 
-      db_query( "profile.delete_all_profiles($user_id,$type)",
+      db_query( "profile.delete_all_profiles.del($user_id,$type)",
          "DELETE FROM Profiles WHERE User_ID='$user_id' AND Type='$type'" );
    }
 
@@ -206,13 +209,13 @@ class Profile
    function to_string()
    {
       return "Profile(id={$this->id}): "
-         . "user_id=[{$this->user_id}], "
-         . "type=[{$this->type}], "
-         . "sortorder=[{$this->sortorder}], "
-         . "active=[{$this->active}], "
-         . "name=[{$this->name}], "
-         . "lastchanged=[{$this->lastchanged}], "
-         . "text=[{$this->text}]";
+         . "user_id=[{$this->uid}], "
+         . "type=[{$this->Type}], "
+         . "sortorder=[{$this->SortOrder}], "
+         . "active=[{$this->Active}], "
+         . "name=[{$this->Name}], "
+         . "lastchanged=[{$this->Lastchanged}], "
+         . "text=[{$this->Text}]";
    }
 
 
@@ -231,11 +234,11 @@ class Profile
     * \brief Returns Profile-object for specified user and type set
     *        lastchanged=$NOW set and all others in default-state.
     */
-   function new_profile( $user_id, $type, $prof_id=0 )
+   function new_profile( $uid, $type, $prof_id=0 )
    {
-      // id=set, user_id=?, type=?, sortoder=1, active=false, name='', lastchanged=NOW, text=''
-      $profile = new Profile( $prof_id, $user_id, $type );
-      $profile->lastchanged = $GLOBALS['NOW'];
+      // id=set, uid=?, Type=?, SortOrder=1, Active=false, Name='', Lastchanged=NOW, Text=''
+      $profile = new Profile( $prof_id, $uid, $type );
+      $profile->Lastchanged = $GLOBALS['NOW'];
       return $profile;
    }
 
@@ -265,21 +268,34 @@ class Profile
          return NULL;
 
       return Profile::new_from_row( $row );
-   }
+   }//load_profile
 
    /*!
     * \brief Returns list of Profile-objects for specified user-id and type (in SortOrder).
+    * \param $types single type or array of types
+    * \param $load_templates true to order by profile-template related stuff; false to load ONE profile
     * \return empty-array if no profile found.
     */
-   function load_profiles( $user_id, $type )
+   function load_profiles( $user_id, $types, $load_templates=false )
    {
-      if( !is_numeric($user_id) || !is_numeric($type) )
-         error('invalid_args', "Profile::load_profiles($user_id,$type)");
+      if( !is_numeric($user_id) )
+         error('invalid_args', "Profile::load_profiles.check.user($user_id)");
+      if( !is_array($types) )
+      {
+         if( !is_numeric($types) )
+            error('invalid_args', "Profile::load_profiles.check.type($user_id,$types)");
+         else
+            $types = array( $types );
+      }
+      if( is_array($types) && count($types) == 0 )
+         error('invalid_args', "Profile::load_profiles.check.types($user_id,$types)");
 
       $fields = implode(',', Profile::get_query_fields());
-      $result = db_query( "Profile::load_profiles2($user_id,$type)",
-            "SELECT $fields FROM Profiles WHERE User_ID='$user_id' AND Type='$type' " .
-            "ORDER BY SortOrder,ID LIMIT 1" );
+      $sql_types = implode(',', $types);
+      $result = db_query( "Profile::load_profiles2($user_id,$load_templates)",
+            "SELECT $fields FROM Profiles " .
+            "WHERE User_ID='$user_id' AND Type IN ($sql_types) " .
+            "ORDER BY " . ( $load_templates ? "Type,Name,ID" : "SortOrder,ID LIMIT 1" ) );
 
       $arr_out = array();
       while( ($row = mysql_fetch_assoc( $result )) )
@@ -287,7 +303,7 @@ class Profile
       mysql_free_result($result);
 
       return $arr_out;
-   }
+   }//load_profiles
 
 } // end of 'Profile'
 
@@ -404,7 +420,7 @@ class SearchProfile
    function has_profile( $chk_active=false )
    {
       if( !is_null($this->profile) && ($this->profile->id > 0) )
-         $has_profile = ($chk_active) ? $this->profile->active : true;
+         $has_profile = ($chk_active) ? $this->profile->Active : true;
       else
          $has_profile = false;
       return $has_profile;
@@ -506,9 +522,9 @@ class SearchProfile
          $profile = $this->profile;
       else
          $profile = Profile::new_profile( $this->user_id, $this->profile_type );
-      $profile->active = (bool)$save_default;
+      $profile->Active = (bool)$save_default;
       $profile->set_text( $arr_savedata );
-      $profile->update_profile();
+      $profile->save_profile();
       $this->profile = $profile;
 
       $this->set_sysmessage( (bool)$save_default
