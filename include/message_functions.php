@@ -343,9 +343,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    {
       $maxGamesCheck = new MaxGamesCheck();
       $max_games = $maxGamesCheck->get_allowed_games(NEWGAME_MAX_GAMES);
+      $numGames = limit( (int)get_request_arg('nrGames'), 1, $max_games, 1 );
+
       $vals = array_value_to_key_and_value( range(1, $max_games) );
       $mform->add_row( array( 'DESCRIPTION', T_('Number of games to add'),
-                              'SELECTBOX', 'nrGames', 1, $vals, '1', false ) );
+                              'SELECTBOX', 'nrGames', 1, $vals, $numGames, false ) );
       $mform->add_row( array( 'SPACE' ) );
    }
 
@@ -596,7 +598,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    }
 
    if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
-      append_form_add_waiting_room_game( $mform, $viewmode );
+   {
+      // read init-vals from URL for rematch or profile-template
+      append_form_add_waiting_room_game( $mform, $viewmode, ( $my_ID === 'redraw' ) );
+   }
 
    return $allowed;
 } // end of 'game_settings_form'
