@@ -2011,6 +2011,10 @@ class GameSetup
    var $Byoperiods;
    var $WeekendClock; // bool
 
+   // additional fields, only used for save-template of new-game views
+   var $NumGames;
+   var $ViewMode;
+
    function GameSetup( $uid )
    {
       $this->set_defaults();
@@ -2053,6 +2057,9 @@ class GameSetup
       $this->Byotime = time_convert_to_hours( 1, 'days' );
       $this->Byoperiods = 0;
       $this->WeekendClock = true;
+
+      $this->NumGames = 1;
+      $this->ViewMode = NULL;
    }//set_defaults
 
    function init_opponent_handicaptype( $opp_id )
@@ -2069,8 +2076,11 @@ class GameSetup
       return ( $cat_htype == CAT_HTYPE_FAIR_KOMI );
    }
 
-   /*! \brief Encodes GameSetup-object into Games.GameSetup encoding/"compressed" game-setup. */
-   function encode( $invitation=false )
+   /*!
+    * \brief Encodes GameSetup-object into Games.GameSetup encoding/"compressed" game-setup.
+    * \param $is_template true to behave like invitation-encoding + additional new-game-template-encoding
+    */
+   function encode( $invitation=false, $is_template=false )
    {
       global $MAP_GAME_SETUP;
 
@@ -2092,7 +2102,7 @@ class GameSetup
 
       // handicap-stuff: H21:-21:10:21
       $out[] = 'H'.(int)$this->Handicap;
-      if( $invitation )
+      if( $invitation && !$is_template )
          array_push($out, 0, 0, 0 );
       else
          array_push($out,
@@ -2102,15 +2112,15 @@ class GameSetup
 
       // komi-stuff: K-199.5:-199.5:J2:FK[7]
       $out[] = (is_null($this->Komi)) ? 'K' : sprintf('K%.1f', (float)$this->Komi);
-      $out[] = ( $invitation ) ? 0 : sprintf('%.1f', (float)$this->AdjustKomi);
+      $out[] = ( $invitation && !$is_template ) ? 0 : sprintf('%.1f', (float)$this->AdjustKomi);
       $out[] = $MAP_GAME_SETUP[$this->JigoMode]; // J<x>
-      if( $invitation )
+      if( $invitation && !$is_template )
          $out[] = 'FK';
       else
          $out[] = (is_null($this->OppKomi)) ? 'FK' : sprintf('FK%.1f', (float)$this->OppKomi);
 
       // restriction-stuff: R1:-900:2900:999:-103
-      if( $invitation )
+      if( $invitation && !$is_template )
          array_push($out, 'R0', 0, 0, 0, 0 );
       else
          array_push($out,
@@ -2120,7 +2130,7 @@ class GameSetup
             (int)$this->MinRatedGames,
             (int)$this->SameOpponent );
 
-      if( $invitation )
+      if( $invitation || $is_template )
       {
          $out[] = 'C'; // message (empty)
 
@@ -2146,7 +2156,9 @@ class GameSetup
    function encode_profile_template( $prof_type )
    {
       if( $prof_type == PROFTYPE_TMPL_INVITE )
-         return $this->encode( /*inv*/true );
+         return $this->encode( /*inv*/true, /*tmpl*/false );
+      elseif( $prof_type == PROFTYPE_TMPL_NEWGAME )
+         return $this->encode( /*inv*/true, /*tmpl*/true );
       else
          error('invalid_args', "GameSetup.encode_profile_template.check($prof_type)");
    }//encode_profile_template
@@ -2203,6 +2215,7 @@ class GameSetup
             " Time={$this->Byotype}:{$this->Maintime}/{$this->Byotime}/{$this->Byoperiods}:" . yesno($this->WeekendClock) .
             " tid={$this->tid} shape={$this->ShapeID}/[{$this->ShapeSnapshot}] " .
             "gtype={$this->GameType}/{$this->GamePlayers}";
+      $result .= "; #G={$this->NumGames} view={$this->ViewMode}";
       return $result;
    }//to_string
 
@@ -2264,7 +2277,7 @@ class GameSetup
       //   "T1:U2:H0:0:0:0:K6.5:0:J2:R0:0:0:0:0:C:I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
       // NOTE: when adding new game-settings -> adjust regex also matching "old" syntaxes
       $rx_inv = ($invitation) ? ":I\\d+:[01]:r\\d+:[01]:t[JCF]:\\d+:\\d+:\\d+:[01]\$" : '';
-      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:\\d+:\\d+:\\d+:-?\\d+:C$rx_inv/";
+      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:-?\\d+:-?\\d+:\\d+:-?\\d+:C$rx_inv/";
       if( !preg_match($rx_gs, $game_setup) )
          error('invalid_args', "GameSetup::new_from_game_setup.check_gs($invitation,$game_setup)");
       $arr = explode(GS_SEP, $game_setup);
@@ -2536,7 +2549,13 @@ class GameSetupBuilder
    {
       $cat_htype = get_category_handicaptype( $this->game_setup->Handicaptype );
 
-      $url['view'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? GSETVIEW_FAIRKOMI : GSETVIEW_EXPERT;
+      if( $this->is_template )
+      {
+         $url['nrGames'] = $this->game_setup->NumGames;
+         $url['view'] = $this->game_setup->ViewMode;
+      }
+      else
+         $url['view'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? GSETVIEW_FAIRKOMI : GSETVIEW_EXPERT;
 
       $this->build_url_game_basics( $url );
       $url['game_players'] = $this->game->GamePlayers;
@@ -2695,6 +2714,14 @@ class ProfileTemplate
          $result = $this->GameSetup->encode_profile_template( $this->TemplateType )
             . "\n$extra\n{$this->Subject}\n{$this->Text}";
       }
+      elseif( $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
+      {
+         $extra = sprintf('V%s G%s GP%s SH%s:%s',
+            $this->GameSetup->ViewMode, $this->GameSetup->NumGames, $this->GameSetup->GamePlayers,
+            $this->GameSetup->ShapeID, $this->GameSetup->ShapeSnapshot );
+         $result = $this->GameSetup->encode_profile_template( $this->TemplateType )
+            . "\n$extra\n{$this->Subject}\n{$this->Text}";
+      }
       else
          error('invalid_args', "ProfileTemplate.encode.check.type({$this->TemplateType})");
 
@@ -2720,6 +2747,13 @@ class ProfileTemplate
          $gs_builder->fill_invite_from_game_setup( $url );
          $this->fill_message( $url );
 error_log("#3: ".print_r($url,true)); //TODO-prof
+      }
+      elseif( $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
+      {
+         $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
+         $gs_builder->fill_new_game_from_game_setup( $url );
+         $url['comment'] = $this->Subject;
+error_log("#4: ".print_r($url,true)); //TODO-prof
       }
       else
          error('invalid_args', "ProfileTemplate.fill({$this->TemplateType})");
@@ -2756,6 +2790,14 @@ error_log("#3: ".print_r($url,true)); //TODO-prof
       return $tmpl;
    }
 
+   function new_template_game_setup_newgame( $comment )
+   {
+      $tmpl = new ProfileTemplate( PROFTYPE_TMPL_NEWGAME );
+      $tmpl->Subject = trim($comment);
+      $tmpl->Text = '';
+      return $tmpl;
+   }
+
    function decode( $template_type, $value )
    {
       $tmpl = new ProfileTemplate( $template_type );
@@ -2764,23 +2806,45 @@ error_log("#3: ".print_r($url,true)); //TODO-prof
       {
          list( $tmpl->Subject, $tmpl->Text ) = ProfileTemplate::eat_line( $value );
       }
-      elseif( $template_type == PROFTYPE_TMPL_INVITE )
+      elseif( $template_type == PROFTYPE_TMPL_INVITE || $template_type == PROFTYPE_TMPL_NEWGAME )
       {
          list( $gs_line, $rem1 ) = ProfileTemplate::eat_line( $value );
          list( $extra_line, $rem2 ) = ProfileTemplate::eat_line( $rem1 );
          list( $tmpl->Subject, $tmpl->Text ) = ProfileTemplate::eat_line( $rem2 );
 
-         if( !preg_match("/^SH\\d+:.*$/", $extra_line) )
-            error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,$extra_line)");
-         list( $shape_id, $shape_snapshot ) = ProfileTemplate::eat_line( $extra_line, ':' );
+         $tmpl->GameSetup = GameSetup::new_from_game_setup( $gs_line, /*inv*/true, /*0OnEmpty*/false );
+
+         // parse extra-format for types -> see 'specs/db/table-Profiles.txt'
+         //TODO-prof parse syntax-unspecific: eat next group and parse it independently of type;; shape must be last b/c snapshot can contain spaces
+         if( $template_type == PROFTYPE_TMPL_INVITE )
+         {
+            if( !preg_match("/^SH\\d+:.*$/", $extra_line) )
+               error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,$extra_line)");
+
+            $extra_remline = $extra_line;
+         }
+         elseif( $template_type == PROFTYPE_TMPL_NEWGAME )
+         {
+            if( !preg_match("/^V\\d+ G\\d+ GP(\\d+|\\d+:\\d+)? SH\\d+:.*$/", $extra_line) )
+               error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,$extra_line)");
+
+            list( $viewmode, $extra_rem1 ) = ProfileTemplate::eat_line( $extra_line, ' ' );
+            $tmpl->GameSetup->ViewMode = (int)substr($viewmode, 1);
+
+            list( $numGames, $extra_rem2 ) = ProfileTemplate::eat_line( $extra_rem1, ' ' );
+            $tmpl->GameSetup->NumGames = (int)substr($numGames, 1);
+
+            list( $game_players, $extra_remline ) = ProfileTemplate::eat_line( $extra_rem2, ' ' );
+            $tmpl->GameSetup->GamePlayers = trim( substr($game_players, 2) );
+         }
+
+         list( $shape_id, $shape_snapshot ) = ProfileTemplate::eat_line( $extra_remline, ':' );
          $shape_id = (int)substr($shape_id, 2);
          if( $shape_id <= 0 )
          {
             $shape_id = 0;
             $shape_snapshot = '';
          }
-
-         $tmpl->GameSetup = GameSetup::new_from_game_setup( $gs_line, /*inv*/true, /*0OnEmpty*/false );
          $tmpl->GameSetup->ShapeID = $shape_id;
          $tmpl->GameSetup->ShapeSnapshot = $shape_snapshot;
       }
@@ -3062,9 +3126,9 @@ function get_gamesettings_viewmode( $viewmode )
 // return arr( $must_be_rated, $rating1, $rating2 ) ready for db-insert
 // note: multi-player-game requires rated game-players (RatingStatus != NONE),
 //       see also append_form_add_waiting_room_game()-func
-function parse_waiting_room_rating_range( $is_multi_player_game=false )
+function parse_waiting_room_rating_range( $is_multi_player_game=false, $arg_rating1=null, $arg_rating2=null )
 {
-   if( !$is_multi_player_game && (string)get_request_arg('must_be_rated') != 'Y' )
+   if( !$is_multi_player_game && get_request_arg('must_be_rated') != 'Y' )
    {
       $MustBeRated = 'N';
       //to keep a good column sorting:
@@ -3073,8 +3137,10 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false )
    else
    {
       $MustBeRated = 'Y';
-      $rating1 = read_rating( (string)get_request_arg('rating1') );
-      $rating2 = read_rating( (string)get_request_arg('rating2') );
+      $rating1 = ( is_null($arg_rating1) ) ? get_request_arg('rating1') : $arg_rating1;
+      $rating2 = ( is_null($arg_rating2) ) ? get_request_arg('rating2') : $arg_rating2;
+      $rating1 = read_rating( $rating1 );
+      $rating2 = read_rating( $rating2 );
 
       if( $rating1 == NO_RATING || $rating2 == NO_RATING )
          error('rank_not_rating', "parse_waiting_room_rating_range.check($rating1,$rating2)");
@@ -3082,8 +3148,8 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false )
       if( $rating2 < $rating1 )
          swap( $rating1, $rating2 );
 
-      $rating2 += 50;
       $rating1 -= 50;
+      $rating2 += 50;
    }
 
    return array( $MustBeRated, $rating1, $rating2 );
@@ -3091,37 +3157,39 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false )
 
 // add form-elements required for new-game for waiting-room
 // INPUT: must_be_rated, rating1, rating2, min_rated_games, comment
-function append_form_add_waiting_room_game( &$mform, $viewmode )
+function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false )
 {
    // note: multi-player-game requires rated game-players (RatingStatus != NONE)
    $rating_array = getRatingArray();
 
    $rating_min = '30 kyu';
    $rating_max = '9 dan';
-   if( @$_REQUEST['rematch'] ) // read init-vals from URL for rematch
+   if( $read_args ) // read init-vals from URL (for rematch / profile-template)
    {
-      $req_rated = ( @$_REQUEST['mb_rated'] == 'Y' );
+      $must_be_rated = ( @$_REQUEST['mb_rated'] == 'Y' );
       $url_rat_min = (isset($_REQUEST['rat1'])) ? (int) $_REQUEST['rat1'] : OUT_OF_RATING;
       $url_rat_max = (isset($_REQUEST['rat2'])) ? (int) $_REQUEST['rat2'] : OUT_OF_RATING;
       if( $url_rat_min < OUT_OF_RATING )
-         $rating_min = echo_rating( $url_rat_min, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/true );
+         $rating_min = echo_rating( $url_rat_min, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
       if( $url_rat_max < OUT_OF_RATING )
-         $rating_max = echo_rating( $url_rat_max, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/true );
+         $rating_max = echo_rating( $url_rat_max, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
       $min_rated_games = (int) @$_REQUEST['min_rg'];
       $same_opponent = (int) @$_REQUEST['same_opp'];
       $comment = trim(@$_REQUEST['comment']);
    }
    else
    {
-      $req_rated = false;
+      $must_be_rated = false;
       $min_rated_games = $comment = '';
       $same_opponent = 0;
    }
    if( $viewmode == GSETVIEW_MPGAME )
-      $req_rated = true;
+      $must_be_rated = $disable_mbrated = true;
+   else
+      $disable_mbrated = false;
 
    $mform->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
-                           'CHECKBOXX', 'must_be_rated', 'Y', "", $req_rated, ($req_rated ? 'disabled=1' : ''),
+                           'CHECKBOXX', 'must_be_rated', 'Y', "", $must_be_rated, ($disable_mbrated ? 'disabled=1' : ''),
                            'TEXT', sptext(T_('If yes, rating between'),1),
                            'SELECTBOX', 'rating1', 1, $rating_array, $rating_min, false,
                            'TEXT', sptext(T_('and')),
