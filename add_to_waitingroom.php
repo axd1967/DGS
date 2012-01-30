@@ -101,6 +101,9 @@ require_once( 'include/classlib_game.php' );
    if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
       error('handicap_range', "add_to_waitingroom.check.handicap($handicap)");
 
+   if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
+      error('invalid_args', "add_to_waitingroom.check.viewmode($viewmode)");
+
    // ruleset
    $ruleset = @$_POST['ruleset'];
 
@@ -206,9 +209,13 @@ require_once( 'include/classlib_game.php' );
 
    if( $is_std_go )
       list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
+   else
+   {
+      // enforce defaults for template-saving
+      list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range( /*mpg*/true, '30 kyu', '9 dan' );
+   }
 
    $min_rated_games = limit( (int)@$_POST['min_rated_games'], 0, 999, 0 ); // 3-chars max.
-
    $same_opponent = (int)@$_POST['same_opp'];
 
 
@@ -243,6 +250,55 @@ require_once( 'include/classlib_game.php' );
       $shape_id = 0;
       $shape_snapshot = '';
    }
+
+
+   // handle save-template
+   if( @$_REQUEST['save_template'] )
+   {
+      // convert form-values into GameSetup to save as template
+      $gs = new GameSetup( 0 );
+      $gs->Handicaptype = $handicap_type; // HTYPE_...
+      $gs->Handicap = $handicap;
+      $gs->AdjustHandicap = $adj_handicap;
+      $gs->MinHandicap = $min_handicap;
+      $gs->MaxHandicap = ( $max_handicap < 0 ) ? 0 : $max_handicap;
+      $gs->Komi = $komi;
+      $gs->AdjustKomi = $adj_komi;
+      $gs->JigoMode = $jigo_mode; // JIGOMODE_...
+      $gs->MustBeRated = ( $MustBeRated == 'Y' ); // bool
+      $gs->RatingMin = $rating1;
+      $gs->RatingMax = $rating2;
+      $gs->MinRatedGames = $min_rated_games;
+      $gs->SameOpponent = $same_opponent;
+
+      if( $cat_handicap_type == CAT_HTYPE_FAIR_KOMI )
+         $gs->Komi = $gs->OppKomi = null; // start with empty komi-bids
+
+      // additional games-fields to PLAY game
+      $gs->ShapeID = $shape_id;
+      $gs->ShapeSnapshot = $shape_snapshot;
+      $gs->GamePlayers = $game_players;
+      $gs->Ruleset = $ruleset; // RULESET_...
+      $gs->Size = $size;
+      $gs->Rated = ( $rated != 'N' ); // bool
+      $gs->StdHandicap = ( $stdhandicap == 'Y' ); // bool
+      $gs->Maintime = $hours;
+      $gs->Byotype = $byoyomitype; // BYOTYPE_...
+      $gs->Byotime = $byohours;
+      $gs->Byoperiods = $byoperiods;
+      $gs->WeekendClock = ( $weekendclock == 'Y' ); // bool
+
+      // new-game fields
+      $gs->NumGames = $nrGames;
+      $gs->ViewMode = $viewmode;
+
+      $comment = trim( @$_REQUEST['comment'] );
+      $tmpl = ProfileTemplate::new_template_game_setup_newgame( $comment );
+      $tmpl->GameSetup = $gs;
+
+      jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}".URI_AMP."data=" . urlencode( $tmpl->encode() ));
+   }//save-template
+
 
    // add waiting-room game
    $query_mpgame = $query_wroom = '';

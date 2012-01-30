@@ -139,23 +139,25 @@ function echo_list_templates( $arr_profiles )
    foreach( $arr_profiles as $prof )
    {
       $links = '';
-      $url_tmpl = URI_AMP."tmpl={$prof->id}";
+      $url_tmpl = "tmpl={$prof->id}";
       if( $prof->Type == PROFTYPE_TMPL_SENDMSG )
       {
-         $links .= anchor( "message.php?mode=NewMessage{$url_to}{$url_tmpl}",
+         $links .= anchor( "message.php?mode=NewMessage{$url_to}" . URI_AMP . $url_tmpl,
                image( 'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
       }
-      elseif( $prof->Type == PROFTYPE_TMPL_INVITE || $prof->Type == PROFTYPE_TMPL_NEWGAME )
+      elseif( $prof->Type == PROFTYPE_TMPL_INVITE )
       {
          //TODO $tmpl = ProfileTemplate::decode( $prof->Type, $prof->Text );
          //TODO check if allowed for type, e.g. MPG not allowed for invite
-         $links .= anchor( "message.php?mode=Invite{$url_to}{$url_tmpl}",
+         $links .= anchor( "message.php?mode=Invite{$url_to}" . URI_AMP . $url_tmpl,
                image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
-         //TODO check if allowed for type
-         //TODO $links .= anchor( "new_game.php{$url_to}{$url_tmpl}",
-               //image( 'images/newgame.gif', 'N', '', 'class="Action"' ), T_('New Game'));
       }
-      $links .= anchor( $page."?cmd=".CMD_DELETE . $url_tmpl,
+      elseif( $prof->Type == PROFTYPE_TMPL_NEWGAME )
+      {
+         $links .= anchor( "new_game.php?$url_tmpl",
+               image( 'images/newgame.gif', 'N', '', 'class="Action"' ), T_('New Game'));
+      }
+      $links .= anchor( $page."?cmd=".CMD_DELETE . URI_AMP . $url_tmpl,
             image( 'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Delete template'));
 
       $ttable->add_row( array(

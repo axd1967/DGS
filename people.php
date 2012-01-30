@@ -321,6 +321,7 @@ function get_executives( $level )
       . build_icon('thread.gif', sprintf( T_('Thread overview created from [%s]'), 'text_align_right'))
       . build_icon('game_comment.gif', sprintf( T_('Hidden game comments created from [%s]'), 'user_comment'))
       . build_icon('note.gif', sprintf( T_('Note created from [%s]'), 'script'))
+      . build_icon('newgame.gif', sprintf( T_('Plus created from [%s]'), 'add'))
       ;
    add_contributor_link(
       sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
