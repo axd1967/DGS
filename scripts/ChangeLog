@@ -19,6 +19,144 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-01-31 juga
+
+   * include/game_functions.php (ProfileTemplate.fill_invite_with_new_game,
+       ~.is_valid_new_game_template_for_invite, ~.is_valid_template_raw_check),
+     templates.php (echo_list_templates), message.php:
+   - templates: load new-game-templates also for invite, except for MP-game
+
+   * include/game_functions.php (ProfileTemplate.fill, ~.fill_new_game_with_invite),
+     new_game.php, templates.php:
+   - templates: load invite-templates also for new-game views
+
+   * templates.php (check_save_template, echo_save_template):
+   - save-template: if name is missing, auto-fill name-field
+     with name of entry to be replaced
+
+   * include/game_functions.php (MAX_PROFILE_TEMPLATES):
+   - increased limit of max-profile-templates: 20 -> 30
+
+   * include/game_functions.php (ProfileTemplate.decode):
+   - profile-template decoding: parse syntax-unspecific: eat next group and
+     parse it independently of type; shape must be last b/c snapshot can contain spaces
+
+   * include/game_functions.php (class GameSetup, ~.set_defaults, ~.encode, ~.to_string,
+         ~.encode_profile_template, ~.new_from_game_setup, ~.fill_new_game_from_game_setup;
+       ProfileTemplate.encode, ~.fill, ~.new_template_game_setup_newgame, ~.decode;
+       parse_waiting_room_rating_range, append_form_add_waiting_room_game),
+     include/message_functions.php (game_settings_form),
+     specs/db/table-Profiles.txt,
+     add_to_waitingroom.php, new_game.php (add_new_game_form),
+     people.php, templates.php:
+   - added save-template for new-game views redirecting to templates-page to save
+     - added save-template button
+     - added template-encoding and decoding for new-game form-settings,
+       using game-setup-encoding + extra-encoding for new-game-related data + message-encoding
+     - new-game: allow loading new-game template on all views even
+       if saved from different view using bottom-links to other new-game views
+     - new-game: re-organized bottom-links, added link to template-list
+     - templates: added icon (plus-sign) for adding new-game
+   - bugfix: decoding game-setup with negative value for ratings<0
+   - bugfix: filling new-game ratings with echo_rating() for correct rating-formatting
+   - bugfix: reading numGames for new-game page from URL
+
+2012-01-30 juga
+
+   * include/game_functions.php (GameSetup.encode_profile_template;
+       class GameSetupBuilder, ~.fill_invite_from_game, ~.fill_invite_from_game_setup,
+         ~.fill_new_game_from_game, ~.fill_new_game_from_game_setup, ~.build_url_game_basics,
+         ~.build_url_time, ~.build_url_cat_htype_manual, ~.build_url_handi_komi_rated,
+         ~.build_url_invite_to;
+       class ProfileTemplate, ~.encode, ~.fill, ~.fill_message, ~.to_string,
+         ~.new_template_game_setup_invite, ~.decode, ~.eat_line, ~.get_template_type_text,
+         ~.new_default_profile, ~.is_valid_type, ~.known_template_types),
+     include/classlib_profile.php (PROFTYPE_TMPL_INVITE, PROFTYPE_TMPL_NEWGAME),
+     include/make_game.php (make_invite_template_game_setup),
+     specs/db/table-Profiles.txt, skins/dragon/screen.css,
+     templates.php (echo_list_templates, check_save_template, check_delete_template),
+     message.php (handle_save_template),
+     game_rematch.php:
+   - added save-template for invite-message redirecting to templates-page to save
+     - merged different templates-types into one template-list
+     - added checks on saving template: max. payload of 10kB
+     - added template-encoding and decoding for invite-message
+       using game-setup-encoding + extra-encoding for shape-id & shape-snapshot + message-encoding
+     - refactored build-url-funcs from 'game_rematch.php' into class GameSetupBuilder
+       in 'include/game_functions.php' to be used for template-loading as well
+     - refactored: game-setup-templates splitted into profile-types PROFTYPE_TMPL_INVITE/NEWGAME
+
+2012-01-29 juga
+
+   * include/classlib_profile.php (class Profile.*, ~.load_profiles;
+       SearchProfile.has_profile, ~.save_profile),
+     include/game_functions.php (class ProfileTemplate, ~.encode, ~.build_profile,
+       ~.build_url_message, ~.new_template_send_message, ~.decode, ~.add_menu_link,
+       ~.get_template_type_text, ~.new_default_profile),
+     include/error_codes.php (ErrorCode.init),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Profiles.txt,
+     specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css,
+     templates.php (echo_list_templates, echo_save_template, check_save_template,
+       save_template, check_delete_template, echo_delete_template),
+     message.php (handle_save_template),
+     site_map.php:
+   - added feature to save templates for send-message & game-setup:
+     - added page to manage templates
+     - show list of templates for send-message & game-setup
+     - templates stored as profile-types PROFTYPE_TMPL_SENDMSG & PROFTYPE_TMPL_GAMESETUP
+     - forward user-id for loading template to be used in combination after selecting recipient user
+     - added checks on saving template: mandatory unique name, max. entries of templates (20)
+     - added deletion of templates
+     - extended Profiles.Name: 40 -> 60 chars
+   - message-page:
+     - added save-template button for sending-message,
+       redirecting to templates-page via form-GET-method,
+       which also restricts length of template (browser-specific)
+     - load template for send-message given via 'tmpl'-arg in URL
+     - added bottom-link to templates-list
+   - refactored Profile-stuff:
+     - refactored Profile-class: renamed attributes into camel-case names
+     - renamed func: Profile.update_profile() -> Profile.save_profile()
+     - refactored SQL for save-profile using UpdateQuery-class
+     - auto-update Lastchanged-field on save-profile
+     - adjusted load_profiles() to accept array-type and return templates in different order than profile-std-order
+-----------
+-- extended Profiles.Name
+ALTER TABLE Profiles
+   MODIFY Name varchar(60) NOT NULL default '' ;
+-----------
+
+   * include/gui_functions.php (span):
+   - added empty-default on span-value
+
+2012-01-25 juga
+
+   * include/shape_control.php (ShapeControl.getFlagsText),
+     include/db/shape.php (SHAPE_FLAG_PUBLIC),
+     specs/db/table-Games.txt,
+     edit_shape.php (parse_edit_form), list_shapes.php, site_map.php:
+   - added public-flag for shape, default OFF on new shape
+   - shape-list:
+     - default view shows only public shapes
+     - added bottom-link showing all-shapes including public
+     - added bottom-link showing only my shapes (public and private)
+
+   * include/error_codes.php (ErrorCode.init):
+   - sync'ed changes from stable-branch by adding more text for error-code 'wrong_password'
+     explaining what to do when forgotten password as many users wanted another a new one,
+     but didn't know how to do it (support-forum giving email and user-id)
+
+   * include/std_functions.php (send_message):
+   - added HOT-section within send_message() where user shouldn't interrupt
+
+   * confirm.php:
+   - bugfix: allow deletion of game in fair-komi-negotiation
+
+   * message.php:
+   - bugfix for recent cleanup: set correct message-type to decide upon for submode
+
 2012-01-22 juga
 
    * all files:
