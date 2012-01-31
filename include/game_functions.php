@@ -2746,14 +2746,12 @@ class ProfileTemplate
          $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
          $gs_builder->fill_invite_from_game_setup( $url );
          $this->fill_message( $url );
-error_log("#3: ".print_r($url,true)); //TODO-prof
       }
       elseif( $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
       {
          $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
          $gs_builder->fill_new_game_from_game_setup( $url );
          $url['comment'] = $this->Subject;
-error_log("#4: ".print_r($url,true)); //TODO-prof
       }
       else
          error('invalid_args', "ProfileTemplate.fill({$this->TemplateType})");
@@ -2798,6 +2796,7 @@ error_log("#4: ".print_r($url,true)); //TODO-prof
       return $tmpl;
    }
 
+   /*! \brief Parses profile-raw-value into game-setup and other fields dependent on template-type. */
    function decode( $template_type, $value )
    {
       $tmpl = new ProfileTemplate( $template_type );
@@ -2815,39 +2814,38 @@ error_log("#4: ".print_r($url,true)); //TODO-prof
          $tmpl->GameSetup = GameSetup::new_from_game_setup( $gs_line, /*inv*/true, /*0OnEmpty*/false );
 
          // parse extra-format for types -> see 'specs/db/table-Profiles.txt'
-         //TODO-prof parse syntax-unspecific: eat next group and parse it independently of type;; shape must be last b/c snapshot can contain spaces
-         if( $template_type == PROFTYPE_TMPL_INVITE )
+         $pline = $extra_line;
+         while( (string)$pline != '' )
          {
-            if( !preg_match("/^SH\\d+:.*$/", $extra_line) )
-               error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,$extra_line)");
+            if( preg_match("/^SH\\d+:.*$/", $pline) ) // new-game + invite
+            {
+               list( $shape_id, $shape_snapshot ) = ProfileTemplate::eat_line( $pline, ':' );
+               $shape_id = (int)substr($shape_id, 2);
+               if( $shape_id <= 0 )
+               {
+                  $shape_id = 0;
+                  $shape_snapshot = '';
+               }
+               $tmpl->GameSetup->ShapeID = $shape_id;
+               $tmpl->GameSetup->ShapeSnapshot = $shape_snapshot;
 
-            $extra_remline = $extra_line;
-         }
-         elseif( $template_type == PROFTYPE_TMPL_NEWGAME )
-         {
-            if( !preg_match("/^V\\d+ G\\d+ GP(\\d+|\\d+:\\d+)? SH\\d+:.*$/", $extra_line) )
-               error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,$extra_line)");
+               $pline = '';
+               break; // shape must be last group
+            }
 
-            list( $viewmode, $extra_rem1 ) = ProfileTemplate::eat_line( $extra_line, ' ' );
-            $tmpl->GameSetup->ViewMode = (int)substr($viewmode, 1);
+            $input = $pline; // note: must use copied value for list(..) =
+            list( $val, $pline ) = ProfileTemplate::eat_line( $input, ' ' ); // eat next group
 
-            list( $numGames, $extra_rem2 ) = ProfileTemplate::eat_line( $extra_rem1, ' ' );
-            $tmpl->GameSetup->NumGames = (int)substr($numGames, 1);
-
-            list( $game_players, $extra_remline ) = ProfileTemplate::eat_line( $extra_rem2, ' ' );
-            $tmpl->GameSetup->GamePlayers = trim( substr($game_players, 2) );
-         }
-
-         list( $shape_id, $shape_snapshot ) = ProfileTemplate::eat_line( $extra_remline, ':' );
-         $shape_id = (int)substr($shape_id, 2);
-         if( $shape_id <= 0 )
-         {
-            $shape_id = 0;
-            $shape_snapshot = '';
-         }
-         $tmpl->GameSetup->ShapeID = $shape_id;
-         $tmpl->GameSetup->ShapeSnapshot = $shape_snapshot;
-      }
+            if( preg_match("/^V\\d+$/", $val) ) // new-game: viewmode
+               $tmpl->GameSetup->ViewMode = (int)substr($val, 1);
+            elseif( preg_match("/^G\\d+$/", $val) ) // new-game: num-games
+               $tmpl->GameSetup->NumGames = (int)substr($val, 1);
+            elseif( preg_match("/^GP(\\d+|\\d+:\\d+)?$/", $val) ) // new-game: game-players
+               $tmpl->GameSetup->GamePlayers = trim( substr($val, 2) );
+            else
+               error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,[$val],[$pline],[$extra_line])");
+         }//while
+      }//invite/new-game
 
       return $tmpl;
    }//decode
