@@ -46,14 +46,12 @@ require_once( 'include/utilities.php' );
       $profile = Profile::load_profile( $prof_tmpl_id, $my_id ); // loads only if user-id correct
       if( is_null($profile) )
          error('invalid_profile', "new_game.check.profile($prof_tmpl_id)");
-error_log("#5: ".$profile->to_string()); //TODO-prof
 
       // check profile-type vs. msg-mode
       if( $profile->Type != PROFTYPE_TMPL_NEWGAME )
          error('invalid_profile', "new_game.check.profile.type($prof_tmpl_id,{$profile->Type})");
 
       $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
-error_log("#6: ".$profile_template->to_string()); //TODO-prof
       $profile_template->fill( $_REQUEST );
       $need_redraw = true;
 

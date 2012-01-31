@@ -105,7 +105,6 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
       $profile = Profile::load_profile( $prof_tmpl_id, $my_id ); // loads only if user-id correct
       if( is_null($profile) )
          error('invalid_profile', "message.check.profile($prof_tmpl_id)");
-error_log("#1: ".$profile->to_string()); //TODO-prof
 
       // check profile-type vs. msg-mode
       if( !($profile->Type == PROFTYPE_TMPL_SENDMSG && $mode == 'NewMessage')
@@ -113,7 +112,6 @@ error_log("#1: ".$profile->to_string()); //TODO-prof
          error('invalid_profile', "message.check.profile.type($prof_tmpl_id,{$profile->Type},$mode)");
 
       $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
-error_log("#2: ".$profile_template->to_string()); //TODO-prof
       $profile_template->fill( $_REQUEST );
       $preview = true;
    }
