@@ -2737,25 +2737,38 @@ class ProfileTemplate
       return $profile;
    }
 
-   function fill( &$url )
+   function fill( &$url, $use_type=null )
    {
-      if( $this->TemplateType == PROFTYPE_TMPL_SENDMSG )
+      if( is_null($use_type) )
+         $use_type = $this->TemplateType;
+
+      if( $use_type == PROFTYPE_TMPL_SENDMSG )
          $this->fill_message( $url );
-      elseif( $this->TemplateType == PROFTYPE_TMPL_INVITE )
+      elseif( $use_type == PROFTYPE_TMPL_INVITE )
       {
          $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
          $gs_builder->fill_invite_from_game_setup( $url );
          $this->fill_message( $url );
       }
-      elseif( $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
+      elseif( $use_type == PROFTYPE_TMPL_NEWGAME )
       {
          $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
          $gs_builder->fill_new_game_from_game_setup( $url );
          $url['comment'] = $this->Subject;
       }
       else
-         error('invalid_args', "ProfileTemplate.fill({$this->TemplateType})");
+         error('invalid_args', "ProfileTemplate.fill({$this->TemplateType},$use_type)");
    }//fill
+
+   /*! \brief Fills new-game form-values with invite-template-type data. */
+   function fill_new_game_with_invite( &$url, $use_type )
+   {
+      if( $use_type == PROFTYPE_TMPL_NEWGAME && $this->TemplateType == PROFTYPE_TMPL_INVITE )
+      {
+         list( $line, $tmp ) = ProfileTemplate::eat_line( $this->Text ); // take 1st line
+         $url['comment'] = ( strlen($line) > 40 ) ? substr($line,0,40) : $line;
+      }
+   }
 
    function fill_message( &$url )
    {

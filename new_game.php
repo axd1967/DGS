@@ -47,12 +47,14 @@ require_once( 'include/utilities.php' );
       if( is_null($profile) )
          error('invalid_profile', "new_game.check.profile($prof_tmpl_id)");
 
-      // check profile-type vs. msg-mode
-      if( $profile->Type != PROFTYPE_TMPL_NEWGAME )
+      // check profile-type vs. msg-mode (also allow invite-templates)
+      if( $profile->Type != PROFTYPE_TMPL_NEWGAME && $profile->Type != PROFTYPE_TMPL_INVITE )
          error('invalid_profile', "new_game.check.profile.type($prof_tmpl_id,{$profile->Type})");
 
       $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
-      $profile_template->fill( $_REQUEST );
+      $profile_template->fill( $_REQUEST, PROFTYPE_TMPL_NEWGAME );
+      if( $profile->Type == PROFTYPE_TMPL_INVITE )
+         $profile_template->fill_new_game_with_invite( $_REQUEST, PROFTYPE_TMPL_NEWGAME );
       $need_redraw = true;
 
       // allow template-conversion for other views
