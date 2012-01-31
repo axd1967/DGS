@@ -2770,10 +2770,32 @@ class ProfileTemplate
       }
    }
 
+   function fill_invite_with_new_game( &$url, $use_type )
+   {
+      if( $use_type == PROFTYPE_TMPL_INVITE && $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
+      {
+         $url['message'] = $this->Subject;
+      }
+   }
+
    function fill_message( &$url )
    {
       $url['subject'] = $this->Subject;
       $url['message'] = $this->Text;
+   }
+
+   /*!
+    * \brief Returns true if current decoded new-game-template can be used as template for invite.
+    * \see is_valid_template_raw_check()
+    */
+   function is_valid_new_game_template_for_invite()
+   {
+      if( $this->TemplateType == PROFTYPE_TMPL_NEWGAME && !is_null($this->GameSetup) )
+      {
+         if( $this->GameSetup->ViewMode == GSETVIEW_MPGAME )
+            return false;
+      }
+      return true;
    }
 
    function to_string()
@@ -2808,6 +2830,21 @@ class ProfileTemplate
       $tmpl->Text = '';
       return $tmpl;
    }
+
+   /*!
+    * \brief Returns false, if value from Profile.Text of given template-type can be used for $use_type.
+    * \see #is_valid_new_game_template_for_invite()
+    */
+   function is_valid_template_raw_check( $template_type, $use_type, $value )
+   {
+      if( $template_type == PROFTYPE_TMPL_NEWGAME && $use_type == PROFTYPE_TMPL_INVITE )
+      {
+         // MPG not supported for invite
+         if( preg_match("/^[^\\n]+\\nV".GSETVIEW_MPGAME."\\b/", $value) )
+            return false;
+      }
+      return true;
+   }//is_valid_template_raw_check
 
    /*! \brief Parses profile-raw-value into game-setup and other fields dependent on template-type. */
    function decode( $template_type, $value )

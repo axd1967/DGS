@@ -107,12 +107,20 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          error('invalid_profile', "message.check.profile($prof_tmpl_id)");
 
       // check profile-type vs. msg-mode
-      if( !($profile->Type == PROFTYPE_TMPL_SENDMSG && $mode == 'NewMessage')
-            && !($profile->Type == PROFTYPE_TMPL_INVITE && $mode == 'Invite') )
+      $ok = ( $profile->Type == PROFTYPE_TMPL_SENDMSG && $mode == 'NewMessage' )
+         || ( $profile->Type == PROFTYPE_TMPL_INVITE  && $mode == 'Invite' )
+         || ( $profile->Type == PROFTYPE_TMPL_NEWGAME && $mode == 'Invite' );
+      if( !$ok )
          error('invalid_profile', "message.check.profile.type($prof_tmpl_id,{$profile->Type},$mode)");
 
       $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
-      $profile_template->fill( $_REQUEST );
+      if( !$profile_template->is_valid_new_game_template_for_invite() )
+         error('invalid_profile', "message.check.profile_newg4inv($prof_tmpl_id,{$profile->Type},$mode)");
+
+      $profile_template->fill( $_REQUEST, PROFTYPE_TMPL_INVITE );
+      if( $profile->Type == PROFTYPE_TMPL_NEWGAME )
+         $profile_template->fill_invite_with_new_game( $_REQUEST, PROFTYPE_TMPL_INVITE );
+
       $preview = true;
    }
 

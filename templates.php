@@ -157,6 +157,11 @@ function echo_list_templates( $arr_profiles )
       }
       elseif( $prof->Type == PROFTYPE_TMPL_NEWGAME )
       {
+         if( ProfileTemplate::is_valid_template_raw_check( $prof->Type, PROFTYPE_TMPL_INVITE, $prof->Text ) )
+         {
+            $links .= anchor( "message.php?mode=Invite{$url_to}" . URI_AMP . $url_tmpl,
+                  image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
+         }
          $links .= anchor( "new_game.php?$url_tmpl",
                image( 'images/newgame.gif', 'N', '', 'class="Action"' ), T_('New Game'));
       }
