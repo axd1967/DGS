@@ -2677,7 +2677,7 @@ class GameSetupBuilder
 
 
 
-define('MAX_PROFILE_TEMPLATES', 20);
+define('MAX_PROFILE_TEMPLATES', 30);
 define('MAX_PROFILE_TEMPLATES_DATA', 10000); // max byte-len for template
 
 /**
