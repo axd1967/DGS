@@ -218,6 +218,14 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Show differences in disputed game-settings between players
          * Reduced size of message text boxes for invitations
 
+      * <home templates.php>Templates</home>:
+         * Added page to show template-list and manage saving of templates for
+           sending message (<image send.gif>), invitation (<image invite.gif>), new-game (<image newgame.gif>)
+         * Forward user-id for loading template of send-message and invitation
+         * Templates restrictions: max. 30 templates, max. 10kB text, unique name per user
+         * Templates for new-game can be opened in all new-game views
+         * Templates for invite & new-game can also be opened for the other type (except multi-player-game view)
+
    * <home show_games.php>Games lists</home>:
       * Added "Notes" column on My-Games list showing leading part of private game notes (deactivated by default)
       * <home show_games.php?observe=all>Show all observed games</home> with own search-profile and column set,
@@ -357,6 +365,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * <home list_shapes.php>Shapes</home>:
       * Added shape-games starting with an arbitrary board setup of size, stones and color to play first
       * Show note-icon on shape-list-page to indicate existing note (<image note.gif>)
+      * Show views of 'All shapes' and 'My shapes' for shape-list, default is showing only public shapes
       * Added Shape Editor to manage shapes for shape-games,
         Create and edit board with <home goban_editor.php>Goban Editor</home>
       * Added Shape Viewer showing comparison of loaded shape-id and/or shape-pattern used in shape-game
