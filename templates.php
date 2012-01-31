@@ -72,11 +72,14 @@ define('FACT_CANCEL', 'cancel');
    $is_save = @$_REQUEST[FACT_SAVE];
 
    $errors = NULL;
+   $auto_name = @$_REQUEST['name'];
    if( $cmd == CMD_NEW && $is_save )
    {
       $name = trim( get_request_arg('name') );
       $replace = (int)@$_REQUEST['replace'];
-      $errors = check_save_template( $arr_profiles, $name, $replace );
+      list( $errors, $replace_name ) = check_save_template( $arr_profiles, $name, $replace );
+      if( !is_null($replace_name) )
+         $auto_name = $replace_name;
 
       if( count($errors) == 0 ) // save
       {
@@ -109,11 +112,11 @@ define('FACT_CANCEL', 'cancel');
    if( $cmd == CMD_LIST )
       echo_list_templates( $arr_profiles );
    elseif( $cmd == CMD_NEW )
-      echo_save_template( $arr_profiles, $errors );
+      echo_save_template( $arr_profiles, $errors, $auto_name );
    elseif( $cmd == CMD_DELETE && !$is_save )
       echo_delete_template( $del_prof );
 
-   //echo "<hr>\n<center><pre>\n", print_r($_REQUEST, false), "</pre></center>\n"; //TODO debug
+   //echo "<hr>\n<center><pre>\n", print_r($_REQUEST, false), "</pre></center>\n"; //DEBUG
 
    $menu_array = array();
    ProfileTemplate::add_menu_link( $menu_array, $arg_to );
@@ -147,8 +150,6 @@ function echo_list_templates( $arr_profiles )
       }
       elseif( $prof->Type == PROFTYPE_TMPL_INVITE )
       {
-         //TODO $tmpl = ProfileTemplate::decode( $prof->Type, $prof->Text );
-         //TODO check if allowed for type, e.g. MPG not allowed for invite
          $links .= anchor( "message.php?mode=Invite{$url_to}" . URI_AMP . $url_tmpl,
                image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
       }
@@ -173,7 +174,7 @@ function echo_list_templates( $arr_profiles )
 
 
 // form with fields to save-template
-function echo_save_template( $arr_profiles, $errors )
+function echo_save_template( $arr_profiles, $errors, $new_name )
 {
    global $page;
 
@@ -202,7 +203,7 @@ function echo_save_template( $arr_profiles, $errors )
 
    $form->add_row( array(
          'DESCRIPTION', T_('Name#tmpl'),
-         'TEXTINPUT', 'name', 60, 70, @$_REQUEST['name'],
+         'TEXTINPUT', 'name', 60, 70, $new_name,
          'SUBMITBUTTON', FACT_SAVE, T_('Save Template'), ));
 
    $form->add_empty_row();
@@ -232,21 +233,26 @@ function echo_save_template( $arr_profiles, $errors )
       $form->print_end();
 }//echo_save_template
 
+// return arr( errors, replace_name|null ) : replace_name is set to name of entry to replace if name was missing
 function check_save_template( $arr_profiles, $name, $replace )
 {
    $errors = array();
 
    $type = (int)@$_REQUEST['type'];
    if( !ProfileTemplate::is_valid_type($type) )
-      $errors[] = T_('Invalid type for template to save#tmpl');
+      $errors[] = T_('Invalid type for template to save!#tmpl');
 
    $datalen = strlen(@$_REQUEST['data']);
    if( $datalen > MAX_PROFILE_TEMPLATES_DATA )
-      $errors[] = sprintf( T_('Data to store for template exceeds limit of %s bytes (by %s bytes).#tmpl'),
+      $errors[] = sprintf( T_('Data to store for template exceeds limit of %s bytes (by %s bytes)!#tmpl'),
          MAX_PROFILE_TEMPLATES_DATA, $datalen - MAX_PROFILE_TEMPLATES_DATA );
 
+   $miss_name = false;
    if( (string)$name == '' )
-      $errors[] = T_('Missing name for template#tmpl');
+   {
+      $errors[] = T_('Missing name for template!#tmpl');
+      $miss_name = true;
+   }
 
    if( !is_null($arr_profiles) )
    {
@@ -257,17 +263,18 @@ function check_save_template( $arr_profiles, $name, $replace )
             continue;
          if( strcasecmp($prof->Name, $name) == 0 )
          {
-            $errors[] = T_('Name of template must be unique#tmpl');
+            $errors[] = T_('Name of template must be unique!#tmpl');
             break;
          }
       }
 
       // check template-count
       if( count($arr_profiles) >= MAX_PROFILE_TEMPLATES && $replace <= 0 )
-         $errors[] = T_('Max. limit of templates is reached. You have to replace an existing entry.#tmpl');
+         $errors[] = T_('Max. limit of templates is reached. You have to replace an existing entry!#tmpl');
    }
 
    // check that replace-entry exists and is of user
+   $replace_miss_name = null;
    if( $replace > 0 )
    {
       $can_replace = false;
@@ -276,14 +283,18 @@ function check_save_template( $arr_profiles, $name, $replace )
          if( $prof->id == $replace )
          {
             $can_replace = true;
+            if( $miss_name )
+               $replace_miss_name = $prof->Name;
             break;
          }
       }
       if( !$can_replace )
          $errors[] = T_('Replace selection is faulty, because the entry to replace does not exist for this user.#tmpl');
    }
+   if( $miss_name && !is_null($replace_miss_name) )
+      $errors[] = T_('Missing name has been taken from template to be replaced.#tmpl');
 
-   return $errors;
+   return array( $errors, $replace_miss_name );
 }//check_save_template
 
 // insert or update profile
