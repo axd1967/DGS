@@ -2478,6 +2478,154 @@ class GameSetup
 
 
 
+define('GSC_VIEW_INVITE', -1); // invite/dispute
+
+/**
+ * \brief Class to check values of input-fields for invitation/dispute and new-game.
+ */
+class GameSetupChecker
+{
+   var $view; //GSETVIEW_... for new-game, GSC_VIEW_INVITE for invite/dispute
+   var $errors;
+
+   function GameSetupChecker( $view )
+   {
+      $this->view = (int)$view;
+      $this->errors = array();
+   }
+
+   function has_errors()
+   {
+      return count($this->errors);
+   }
+
+   function get_errors()
+   {
+      return $this->errors;
+   }
+
+   function check_komi()
+   {
+      // komi-check only for: invite, simple/expert new-game
+      if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_SIMPLE && $this->view != GSETVIEW_EXPERT )
+         return;
+
+      $komi = trim(@$_REQUEST['komi_m']);
+      if( (string)$komi == '' || !is_numeric($komi) )
+         $this->errors[] = sprintf( T_('Invalid value for komi [%s].'), $komi );
+
+      $komi = (float)$komi;
+
+      if( abs($komi) > MAX_KOMI_RANGE )
+         $this->errors[] = ErrorCode::get_error_text('komi_range');
+      if( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
+         $this->errors[] = ErrorCode::get_error_text('komi_bad_fraction');
+   }//check_komi
+
+   function check_time()
+   {
+      static $check_fields = array( 'timevalue', // maintime
+            'byotimevalue_jap', 'byoperiods_jap', // JAP
+            'byotimevalue_can', 'byoperiods_can', // CAN
+            'byotimevalue_fis', // FIS
+         );
+
+      $ferrors = array();
+      foreach( $check_fields as $field )
+      {
+         $val = trim(@$_REQUEST[$field]);
+         if( (string)$val == '' || !is_numeric($val) || (int)$val != $val || $val < 0 )
+            $ferrors[] = $val;
+      }
+      if( count($ferrors) )
+         $this->errors[] = sprintf(T_('Invalid time values [%s], must be integer and >= 0.'), implode('][', $ferrors));
+
+      $byoyomitype = @$_REQUEST['byoyomitype'];
+      $timevalue = (int)@$_REQUEST['timevalue'];
+      $timeunit = @$_REQUEST['timeunit'];
+
+      $byotimevalue_jap = (int)@$_REQUEST['byotimevalue_jap'];
+      $timeunit_jap = @$_REQUEST['timeunit_jap'];
+      $byoperiods_jap = (int)@$_REQUEST['byoperiods_jap'];
+
+      $byotimevalue_can = (int)@$_REQUEST['byotimevalue_can'];
+      $timeunit_can = @$_REQUEST['timeunit_can'];
+      $byoperiods_can = (int)@$_REQUEST['byoperiods_can'];
+
+      $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
+      $timeunit_fis = @$_REQUEST['timeunit_fis'];
+
+      list($hours, $byohours, $byoperiods) =
+         interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
+                                    $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+                                    $byotimevalue_can, $timeunit_can, $byoperiods_can,
+                                    $byotimevalue_fis, $timeunit_fis);
+
+      if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
+         $this->errors[] = ErrorCode::get_error_text('time_limit_too_small');
+   }//check_time
+
+   function check_adjust_komi()
+   {
+      // adj-komi-check only for: expert new-game
+      if( $this->view != GSETVIEW_EXPERT )
+         return;
+
+      $adj_komi = @$_REQUEST['adj_komi'];
+      if( (string)$adj_komi == '' || !is_numeric($adj_komi) )
+         $this->errors[] = sprintf( T_('Invalid value for komi-adjustment [%s].'), $adj_komi );
+
+      if( abs($adj_komi) > MAX_KOMI_RANGE )
+         $this->errors[] = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_range');
+      if( floor(2 * $adj_komi) != 2 * $adj_komi ) // check for x.0|x.5
+         $this->errors[] = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_bad_fraction');
+   }//check_adjust_komi
+
+   function check_min_rated_games()
+   {
+      // min-rated-games only for: expert/fair-komi new-game
+      if( $this->view != GSETVIEW_EXPERT && $this->view != GSETVIEW_FAIRKOMI )
+         return;
+
+      $min_rgames = @$_REQUEST['min_rated_games'];
+      if( (string)$min_rgames == '' || !is_numeric($min_rgames) || (int)$min_rgames != $min_rgames || $min_rgames < 0 )
+         $this->errors[] = sprintf( T_('Invalid value for min. rated games [%s].'), $min_rated_games );
+
+      $min_rgames = (int)$min_rgames;
+      if( $min_rgames > 999 )
+         $this->errors[] = sprintf( T_('Value for min. rated games is out of range.'), $min_rgames );
+   }//check_min_rated_games
+
+   function check_game_players()
+   {
+      // game-players only for: MPG new-game
+      if( $this->view != GSETVIEW_MPGAME )
+         return;
+
+      $game_players = @$_REQUEST['game_players'];
+      $game_type = MultiPlayerGame::determine_game_type($game_players);
+      if( is_null($game_type) )
+         $this->errors[] = sprintf( T_('Invalid value for game-players [%s].'), $game_players );
+   }//check_game_players
+
+
+   // ------------ static functions ----------------------------
+
+   function check_fields( $view )
+   {
+      $gsc = new GameSetupChecker( $view );
+      $gsc->check_komi();
+      $gsc->check_time();
+      $gsc->check_adjust_komi();
+      $gsc->check_min_rated_games();
+      $gsc->check_game_players();
+      return $gsc;
+   }//check_fields
+
+} //end 'GameSetupChecker'
+
+
+
 /**
  * \brief Class to pre-seed form-fields for invites and game-setup for rematch and templates.
  */

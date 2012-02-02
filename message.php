@@ -146,7 +146,13 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
    $maxGamesCheck = new MaxGamesCheck();
    $dgs_message = new DgsMessage();
-   if( $handle_msg_action )
+   $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE );
+   if( $gsc->has_errors() )
+   {
+      $preview = true;
+      $errors = $gsc->get_errors();
+   }
+   elseif( $handle_msg_action )
    {
       ta_begin();
       {//HOT-section to handle message
