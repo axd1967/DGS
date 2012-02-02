@@ -2504,6 +2504,16 @@ class GameSetupChecker
       return $this->errors;
    }
 
+   function add_error( $error )
+   {
+      $this->errors[] = $error;
+   }
+
+   function add_default_values_info()
+   {
+      $this->errors[] = T_('Invalid values have been replaced with default-values!');
+   }
+
    function check_komi()
    {
       // komi-check only for: invite, simple/expert new-game
@@ -2529,9 +2539,13 @@ class GameSetupChecker
             'byotimevalue_can', 'byoperiods_can', // CAN
             'byotimevalue_fis', // FIS
          );
+      static $check_fields_simple = array( 'timevalue', // maintime
+            'byotimevalue_fis', // FIS
+         );
 
+      $arr_check_fields = ( $this->view == GSETVIEW_SIMPLE ) ? $check_fields_simple : $check_fields;
       $ferrors = array();
-      foreach( $check_fields as $field )
+      foreach( $arr_check_fields as $field )
       {
          $val = trim(@$_REQUEST[$field]);
          if( (string)$val == '' || !is_numeric($val) || (int)$val != $val || $val < 0 )

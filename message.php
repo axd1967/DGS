@@ -149,8 +149,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE );
    if( $gsc->has_errors() )
    {
-      $preview = true;
+      $gsc->add_default_values_info();
       $errors = $gsc->get_errors();
+      $preview = true;
    }
    elseif( $handle_msg_action )
    {
