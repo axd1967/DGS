@@ -1188,7 +1188,7 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
 
    if( $MustBeRated == 'Y')
    {
-      // +/-50 reverse the inflation from add_to_waitingroom.php
+      // +/-50 reverse the inflation from new-game handle_add_game()-func
       $r1 = echo_rating( $RatingMin + 50, false, 0, false, $short );
       $r2 = echo_rating( $RatingMax - 50, false, 0, false, $short );
       if( $r1 == $r2 )

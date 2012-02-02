@@ -234,7 +234,7 @@ class TournamentRules
    /*! \brief Converts this TournamentRules-object to hashmap to be used as game-row to create game. */
    function convertTournamentRules_to_GameRow()
    {
-      // NOTE: keep "sync'ed" with add_to_waitingroom.php
+      // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
       $grow = array();
       $grow['double_gid'] = 0;
@@ -268,7 +268,7 @@ class TournamentRules
     */
    function convertTournamentRules_to_EditForm( &$vars )
    {
-      // NOTE: keep "sync'ed" with add_to_waitingroom.php
+      // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
       $vars['_tr_notes'] = $this->Notes;
 
@@ -323,7 +323,7 @@ class TournamentRules
    /*! \brief Converts and sets (parsed) form-values in this TournamentRules-object. */
    function convertEditForm_to_TournamentRules( $vars, &$errors )
    {
-      // NOTE: keep "sync'ed" with add_to_waitingroom.php
+      // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
       $cat_handicap_type = @$vars['cat_htype'];
       $color_m = @$vars['color_m'];
