@@ -211,12 +211,14 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Added optional waiting-room restriction to avoid same opponent joining too many games:
            Challenger has to wait some days, can be restricted by number of games per game-offer,
            or restricted on total number of started games with same opponent
+         * Show input-errors instead of throwing error "destroying" all other inputs
 
       * <home message.php?mode=Invite>Invitation</home>:
          * Show number of already started games with opponent on receiving invitation & dispute
          * Show probable color / handicap / komi for conventional & proper handicap-type on Preview
          * Show differences in disputed game-settings between players
          * Reduced size of message text boxes for invitations
+         * Show input-errors instead of throwing error "destroying" all other inputs
 
       * <home templates.php>Templates</home>:
          * Added page to show template-list and manage saving of templates for

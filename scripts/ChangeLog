@@ -19,6 +19,30 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-02-03 juga
+
+   * include/game_functions.php (GameSetupChecker.add_error,
+       ~.add_default_values_info, ~.check_time),
+     new_game.php (add_new_game_form, handle_add_game),
+     add_to_waitingroom.php [REMOVED],
+     message.php:
+   - new-game: perform checks on input-text-fields
+     - show errors instead of throwing error-code with all form-values gone
+     - refactored 'add_to_waitingroom.php' into 'new_game.php'
+       to allow "preview" to show errors
+     - bugfix: for simple new-game-view only check Fischer-time fields
+   - invite/new-game: on form-check-error add info, that invalid values
+     have been replaced with default-values
+
+2012-02-02 juga
+
+   * include/game_functions.php (class GameSetupChecker, ~.has_error, ~.get_errors,
+       ~.check_komi, ~.check_time, ~.check_adjust_komi, ~.check_min_rated_games,
+       ~.check_game_players, ~.check_fields),
+     message.php:
+   - invite/dispute: perform checks on input-text-fields,
+     show errors instead of throwing error-code with all form-values gone
+
 2012-01-31 juga
 
    * include/game_functions.php (ProfileTemplate.fill_invite_with_new_game,
