@@ -70,6 +70,7 @@ ChangeLog
        ProfileTemplate.encode, ~.fill, ~.new_template_game_setup_newgame, ~.decode;
        parse_waiting_room_rating_range, append_form_add_waiting_room_game),
      include/message_functions.php (game_settings_form),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
      specs/db/table-Profiles.txt,
      add_to_waitingroom.php, new_game.php (add_new_game_form),
      people.php, templates.php:
@@ -84,6 +85,10 @@ ChangeLog
    - bugfix: decoding game-setup with negative value for ratings<0
    - bugfix: filling new-game ratings with echo_rating() for correct rating-formatting
    - bugfix: reading numGames for new-game page from URL
+-----------
+# added image for new-game
+copy /images/newgame.gif
+-----------
 
 2012-01-30 juga
 

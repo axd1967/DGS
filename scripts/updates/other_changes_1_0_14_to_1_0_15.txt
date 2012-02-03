@@ -236,3 +236,7 @@ copy /images/tbne.gif
 copy /images/note.gif
 copy /images/shape.gif
 
+-----------
+# added image for new-game
+copy /images/newgame.gif
+
