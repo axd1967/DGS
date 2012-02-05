@@ -168,11 +168,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          $CategoryHandiType = (string)$gid['cat_htype'];
       if( isset($gid['color_m']) )
          $Color_m = $gid['color_m'];
-      $FairKomiHanditype = ( isset($gid['fk_htype']) ) ? $gid['fk_htype'] : $Color_m;
+
       if( $CategoryHandiType === CAT_HTYPE_MANUAL )
          $Handitype = $Color_m;
       elseif( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI )
-         $Handitype = $FairKomiHanditype;
+         $Handitype = ( isset($gid['fk_htype']) ) ? $gid['fk_htype'] : DEFAULT_HTYPE_FAIRKOMI;
       else
          $Handitype = $CategoryHandiType;
 
@@ -318,7 +318,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    // Draw game-settings form
 
-   $mform->add_hidden( 'viewmode', $viewmode );
+   $mform->add_hidden('view', $viewmode);
+   $mform->add_hidden('gsc', 1); // signal for game-setup-checker
 
    // shape-game
    if( $is_fstyle_tourney )
@@ -850,6 +851,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
             break;
 
          case HTYPE_AUCTION_SECRET:
+         case HTYPE_AUCTION_OPEN:
             $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( CAT_HTYPE_FAIR_KOMI, $my_id,
                @$game_row['GameSetup'], $game_row['ID'] );
             break;
