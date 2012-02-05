@@ -172,7 +172,7 @@ require_once( "include/contacts.php" );
          break;
 
       case HTYPE_AUCTION_SECRET:
-      //case HTYPE_AUCTION_OPEN:
+      case HTYPE_AUCTION_OPEN:
       //case HTYPE_YOU_KOMI_I_COLOR:
       //case HTYPE_I_KOMI_YOU_COLOR:
          $i_am_black = false; // waiting-room-offerer is black for fair-komi

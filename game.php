@@ -23,7 +23,8 @@ if( @$_REQUEST['nextgame']
       || @$_REQUEST['cancel']
       || @$_REQUEST['nextskip']
       || @$_REQUEST['nextaddtime']
-      || @$_REQUEST['komi_save'] )
+      || @$_REQUEST['komi_save']
+      || @$_REQUEST['fk_start'] )
 {
 //confirm use $_REQUEST: gid, move, action, coord, stonestring
    include_once( "confirm.php");
@@ -732,7 +733,6 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    echo "\n<HR>";
    draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
-   echo "<HR>\n";
 
 
 
@@ -1361,7 +1361,7 @@ function draw_fairkomi_negotiation( $my_id, &$form, $grow, $game_setup )
    $show_bid[0] = $fk->get_view_komibid( $my_id, $black_id, $form, $req_komibid );
    $show_bid[1] = $fk->get_view_komibid( $my_id, $white_id, $form, $req_komibid );
    $errors = ( isset($_REQUEST['komibid']) )
-      ? FairKomiNegotiation::check_komibid($game_setup, $req_komibid)
+      ? $fk->check_komibid($req_komibid, $my_id)
       : array();
 
    section('fairkomi', T_('Komi negotiation for Fair Komi') );
@@ -1376,7 +1376,7 @@ function draw_fairkomi_negotiation( $my_id, &$form, $grow, $game_setup )
             'DESCRIPTION', T_('Errors'),
             'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
       $form->add_empty_row();
-      echo $form->create_form_string();
+      echo "<hr>\n", $form->create_form_string();
    }
 
    $fk->echo_fairkomi_table( $form, $user, $show_bid, $my_id );

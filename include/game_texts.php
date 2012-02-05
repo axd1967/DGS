@@ -82,8 +82,8 @@ class GameTexts
    function get_fair_komi_types( $handicap_type=null )
    {
       $arr = array(
+            HTYPE_AUCTION_OPEN   => T_('Open Auction Komi#fairkomi'),
             HTYPE_AUCTION_SECRET => T_('Secret Auction Komi#fairkomi'),
-            //HTYPE_OPEN_AUCTION   => T_('Open Auction Komi#fairkomi'), //TODO
             //HTYPE_YOU_KOMI_I_COLOR => T_('You choose Komi, I choose Color#fairkomi'), //TODO
             //HTYPE_I_KOMI_YOU_COLOR => T_('I choose Komi, You choose Color#fairkomi'), //TODO
          );
@@ -97,8 +97,8 @@ class GameTexts
    function get_fair_komi_color_note( $handicap_type )
    {
       $arr = array(
+            HTYPE_AUCTION_OPEN   => T_('Color determined by higher open bid on komi#fk_color'),
             HTYPE_AUCTION_SECRET => T_('Color determined by higher secret bid on komi#fk_color'),
-            //HTYPE_OPEN_AUCTION   => T_('Color determined by higher open bid on komi#fk_color'), //TODO
             //HTYPE_YOU_KOMI_I_COLOR => T_('One player chooses Komi, Opponent chooses Color#fk_color'), //TODO
             //HTYPE_I_KOMI_YOU_COLOR => T_('One player chooses Komi, Opponent chooses Color#fk_color'), //TODO
          );

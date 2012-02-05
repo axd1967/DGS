@@ -41,6 +41,7 @@ require_once( 'include/classlib_game.php' );
 
      nextaddtime&add_days=&reset_byoyomi=    : adds time (after submit on game-page)
      komi_save&komibid=                      : save komi-bid on fair-komi-negotiation
+     fk_start                                : start game on fair-komi-negotiation
 
      a=delete           : execute deletion of game
      a=domove&c=&s=     : execute move
@@ -119,8 +120,9 @@ require_once( 'include/classlib_game.php' );
    if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
 
-   if( @$_REQUEST['komi_save'] )
-      do_komi_save( $game_row );
+   $fk_start_game = (bool)@$_REQUEST['fk_start'];
+   if( @$_REQUEST['komi_save'] || $fk_start_game )
+      do_komi_save( $game_row, $my_id, $fk_start_game );
    elseif( $Status == GAME_STATUS_KOMI && $action != 'delete' )
       error('invalid_action', "confirm.check.status.fairkomi($gid,$action)");
 
@@ -550,15 +552,10 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
 }//jump_to_next_game
 
 
-function do_komi_save( $game_row )
+function do_komi_save( $game_row, $my_id, $start_game=false )
 {
    $gid = $game_row['ID'];
    $game_setup = GameSetup::new_from_game_setup($game_row['GameSetup']);
-
-   $req_komibid = @$_REQUEST['komibid'];
-   $errors = FairKomiNegotiation::check_komibid($game_setup, $req_komibid);
-   if( count($errors) )
-      jump_to("game.php?gid=$gid".URI_AMP."komibid=".urlencode($req_komibid));
 
    // checks
    $Status = $game_row['Status'];
@@ -568,12 +565,24 @@ function do_komi_save( $game_row )
    if( $is_fairkomi && $Status != GAME_STATUS_KOMI )
       error('internal_error', "confirm.check.fairkomi.bad_status($gid,$Status,{$game_setup->Handicaptype})");
 
-   // process komi-save
+   // check + process komi-save
+   $req_komibid = @$_REQUEST['komibid'];
    $fk = new FairKomiNegotiation($game_setup, $game_row);
+   if( $start_game )
+   {
+      if( !$fk->allow_start_game($my_id) )
+         error('invalid_action', "confirm.check.start_game($gid,$Status,{$game_setup->Handicaptype})");
+      $errors = array();
+   }
+   else
+      $errors = $fk->check_komibid($req_komibid, $my_id);
+   if( count($errors) )
+      jump_to("game.php?gid=$gid".URI_AMP."komibid=".urlencode($req_komibid));
+
 
    ta_begin();
    {//HOT-section to process komi-bid-saving (and starting-game)
-      $fk_result = $fk->save_komi( $game_row, $req_komibid );
+      $fk_result = $fk->save_komi( $game_row, $req_komibid, $start_game );
    }
    ta_end();
 

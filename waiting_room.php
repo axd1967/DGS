@@ -54,6 +54,7 @@ require_once( 'include/classlib_userconfig.php' );
       HTYPE_BLACK  => T_('Color Black'),
       HTYPE_WHITE  => T_('Color White'),
       HTYPEMP_MANUAL => T_('Manual'),
+      HTYPE_AUCTION_OPEN => T_('Open Auction'),
       HTYPE_AUCTION_SECRET => T_('Secret Auction'),
    );
 
