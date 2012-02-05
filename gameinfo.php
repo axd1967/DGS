@@ -187,9 +187,7 @@ function build_rating_diff( $rating_diff )
             . ( $is_admin ? " (<span class=\"DebugInfo\">$game_status</span>)" : '')
       );
    if( $is_fairkomi )
-      $itable->add_sinfo(
-            T_('Fair Komi Type#fairkomi'),
-            $fk_htype_text );
+      $itable->add_sinfo( T_('Fair Komi Type#fairkomi'), $fk_htype_text );
    if( $game_finished )
    {
       $admResult = ( $grow['X_Flags'] & GAMEFLAGS_ADMIN_RESULT )
