@@ -85,9 +85,15 @@ require_once 'include/utilities.php';
             "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
 
    if( $handle_add_game )
-      $errors = handle_add_game( $my_id, $viewmode );
+   {
+      $gsc = handle_add_game( $my_id, $viewmode );
+      $errors = $gsc->get_errors();
+   }
    else
+   {
+      $gsc = NULL;
       $errors = array();
+   }
 
 
    // handle shape-game (passing-on for new-games)
@@ -122,7 +128,7 @@ require_once 'include/utilities.php';
          $need_redraw = true;
       }
 
-      add_new_game_form( 'addgame', $viewmode, $iamrated, $need_redraw ); //==> ID='addgameForm'
+      add_new_game_form( 'addgame', $viewmode, $iamrated, $need_redraw, $gsc ); //==> ID='addgameForm'
    }
    else
       echo $maxGamesCheck->get_error_text();
@@ -142,12 +148,12 @@ require_once 'include/utilities.php';
 }//main
 
 
-function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw )
+function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw, $gsc )
 {
    $addgame_form = new Form( $form_id, 'new_game.php', FORM_POST );
 
    if( $need_redraw )
-      game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated, 'redraw', $_REQUEST );
+      game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated, 'redraw', $_REQUEST, NULL, $gsc );
    else
       game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated);
 
@@ -162,6 +168,7 @@ function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw )
 
 
 
+// return GameSetupChecker
 function handle_add_game( $my_id, $viewmode )
 {
    global $player_row, $NOW;
@@ -170,7 +177,7 @@ function handle_add_game( $my_id, $viewmode )
    if( $gsc->has_errors() )
    {
       $gsc->add_default_values_info();
-      return $gsc->get_errors();
+      return $gsc;
    }
 
    $my_rating = $player_row['Rating2'];

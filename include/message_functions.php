@@ -72,14 +72,16 @@ function init_standard_folders()
  *     GSETVIEW_EXPERT = advanced view with all possible settings (no multi-player-stuff); auto for tourney
  *     GSETVIEW_FAIRKOMI = fair-komi view with restricted settings (even, no handicap, no adjustments, normal type)
  *     GSETVIEW_MPGAME = view with settings allowed for multi-player-game; auto for MP-game-type
+ * \param $my_ID user-id for invite/dispute, then $gid is game-id;
+ *     my_ID='redraw' for invite/dispute/tourney and $gid then is the $_POST[] of the form asking preview
+ * \param $gid if null, shape + snapshot args are read from $_REQUEST (normally used for Invite and NewGame)
  * \param $map_ratings:
  *     if set, contain map with keys (rating1, rating2) ->
  *     then add probable game-settings for conventional/proper-handicap-type
- * \param $my_ID user-id for invite/dispute, then $gid is game-id;
- *        my_ID='redraw' for invite/dispute/tourney and $gid then is the $_POST[] of the form asking preview
- * \param $gid if null, shape + snapshot args are read from $_REQUEST (normally used for Invite and NewGame)
+ * \param $gsc GameSetupChecker-object containing error-fields to highlight; or NULL
  */
-function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $gid=NULL, $map_ratings=NULL)
+function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $gid=NULL,
+      $map_ratings=NULL, $gsc=NULL )
 {
    if( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
       $formstyle = GSET_MSG_INVITE;
@@ -87,6 +89,9 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $viewmode = GSETVIEW_SIMPLE;
    if( $viewmode == GSETVIEW_MPGAME && $formstyle != GSET_WAITINGROOM )
       $viewmode = GSETVIEW_SIMPLE;
+
+   if( is_null($gsc) )
+      $gsc = new GameSetupChecker( $viewmode );
 
    $is_fstyle_tourney = ( $formstyle == GSET_TOURNAMENT_LADDER || $formstyle == GSET_TOURNAMENT_ROUNDROBIN );
    $is_fstyle_invite = ( $formstyle == GSET_MSG_INVITE || $formstyle == GSET_MSG_DISPUTE );
@@ -429,7 +434,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXT', sptext(T_('Handicap'),1),
          'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
          'TEXT', sptext(T_('Komi'),1),
-         'TEXTINPUT', 'komi_m', 5, 5, $Komi_m, ));
+         'TEXTINPUTX', 'komi_m', 5, 5, $Komi_m, $gsc->get_class_error_field('komi_m'), ));
    }//manual HType
 
 
@@ -496,7 +501,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row( array(
             'DESCRIPTION', T_('Komi'),
             'TEXT', sptext(T_('Adjust by#komi')),
-            'TEXTINPUT', 'adj_komi', 5, 5, $AdjustKomi,
+            'TEXTINPUTX', 'adj_komi', 5, 5, $AdjustKomi, $gsc->get_class_error_field('adj_komi'),
             'TEXT', sptext(T_('Jigo mode'), 1),
             'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(/*fairkomi*/false), $JigoMode, false,
          ));
@@ -514,7 +519,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
       $mform->add_row( array(
             'DESCRIPTION', T_('Game Players'),
-            'TEXTINPUT', 'game_players', 6, 5, $GamePlayers,
+            'TEXTINPUTX', 'game_players', 6, 5, $GamePlayers, $gsc->get_class_error_field('game_players'),
             'TEXT', MINI_SPACING.T_('e.g. 2:2 (Rengo), 3 (Zen-Go)'), ));
    }
 
@@ -528,7 +533,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    $mform->add_row( array(
          'DESCRIPTION', T_('Main time'),
-         'TEXTINPUT', 'timevalue', 5, 5, $Maintime,
+         'TEXTINPUTX', 'timevalue', 5, 5, $Maintime, $gsc->get_class_error_field('timevalue'),
          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
    $show_only_fischer_time = ( $formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_SIMPLE );
@@ -538,20 +543,20 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'DESCRIPTION', T_('Japanese byoyomi'),
             //'CELL', 1, 'nowrap',
             'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
-            'TEXTINPUT', 'byotimevalue_jap', 5, 5, $Byotime_jap,
+            'TEXTINPUTX', 'byotimevalue_jap', 5, 5, $Byotime_jap, $gsc->get_class_error_field('byotimevalue_jap'),
             'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
             'TEXT', sptext(T_('with')),
-            'TEXTINPUT', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
+            'TEXTINPUTX', 'byoperiods_jap', 5, 5, $Byoperiods_jap, $gsc->get_class_error_field('byoperiods_jap'),
             'TEXT', sptext(T_('extra periods')),
          ));
 
       $mform->add_row( array(
             'DESCRIPTION', T_('Canadian byoyomi'),
             'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
-            'TEXTINPUT', 'byotimevalue_can', 5, 5, $Byotime_can,
+            'TEXTINPUTX', 'byotimevalue_can', 5, 5, $Byotime_can, $gsc->get_class_error_field('byotimevalue_can'),
             'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
             'TEXT', sptext(T_('for')),
-            'TEXTINPUT', 'byoperiods_can', 5, 5, $Byoperiods_can,
+            'TEXTINPUTX', 'byoperiods_can', 5, 5, $Byoperiods_can, $gsc->get_class_error_field('byoperiods_can'),
             'TEXT', sptext(T_('stones')),
          ));
    }
@@ -565,7 +570,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       array_push( $row_fischer,
          'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype );
    array_push( $row_fischer,
-         'TEXTINPUT', 'byotimevalue_fis', 5, 5, $Byotime_fis,
+         'TEXTINPUTX', 'byotimevalue_fis', 5, 5, $Byotime_fis, $gsc->get_class_error_field('byotimevalue_fis'),
          'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
          'TEXT', sptext(T_('extra per move')) );
    $mform->add_row( $row_fischer );
@@ -601,7 +606,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
    {
       // read init-vals from URL for rematch or profile-template
-      append_form_add_waiting_room_game( $mform, $viewmode, ( $my_ID === 'redraw' ) );
+      append_form_add_waiting_room_game( $mform, $viewmode, ( $my_ID === 'redraw' ), $gsc );
    }
 
    return $allowed;

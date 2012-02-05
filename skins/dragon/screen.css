@@ -1574,6 +1574,10 @@ form#msgSearchForm tr.SelectFolders table.CheckboxArray td {
    vertical-align: middle;
 }
 
+/* GameSetup-error */
+input.GSError {
+   background-color: lightgreen;
+}
 
 
 /* ************************* */

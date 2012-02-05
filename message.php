@@ -147,7 +147,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    $maxGamesCheck = new MaxGamesCheck();
    $dgs_message = new DgsMessage();
 
-   $gsc = ( @$_REQUEST['gsc'] ) ? $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE ) : null;
+   $gsc = ( @$_REQUEST['gsc'] ) ? $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE ) : NULL;
    if( !is_null($gsc) && $gsc->has_errors() )
    {
       $gsc->add_default_values_info();
@@ -458,7 +458,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
                             null, null, null, false, $rx_term);
 
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings, $gsc);
          else
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, $my_id, $Game_ID, $map_ratings);
 
@@ -503,7 +503,7 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
          echo $maxGamesCheck->get_warn_text();
 
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_REQUEST, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_REQUEST, $map_ratings, $gsc);
          else
             game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, null, null, $map_ratings);
 

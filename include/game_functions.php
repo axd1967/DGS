@@ -2554,11 +2554,13 @@ class GameSetupChecker
 {
    var $view; //GSETVIEW_... for new-game, GSC_VIEW_INVITE for invite/dispute
    var $errors;
+   var $error_fields; // field => 1
 
    function GameSetupChecker( $view )
    {
       $this->view = (int)$view;
       $this->errors = array();
+      $this->error_fields = array();
    }
 
    function has_errors()
@@ -2581,22 +2583,36 @@ class GameSetupChecker
       $this->errors[] = T_('Invalid values have been replaced with default-values!');
    }
 
+   function is_error_field( $field )
+   {
+      return @$this->error_fields[$field];
+   }
+
+   function get_class_error_field( $field )
+   {
+      return ($this->is_error_field($field)) ? 'class="GSError"' : '';
+   }
+
    function check_komi()
    {
       // komi-check only for: invite, simple/expert new-game
       if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_SIMPLE && $this->view != GSETVIEW_EXPERT )
          return;
 
+      $has_err = false;
       $komi = trim(@$_REQUEST['komi_m']);
       if( (string)$komi == '' || !is_numeric($komi) )
-         $this->errors[] = sprintf( T_('Invalid value for komi [%s].'), $komi );
+         $this->errors[] = $has_err = sprintf( T_('Invalid value for komi [%s].'), $komi );
 
       $komi = (float)$komi;
 
       if( abs($komi) > MAX_KOMI_RANGE )
-         $this->errors[] = ErrorCode::get_error_text('komi_range');
+         $this->errors[] = $has_err = ErrorCode::get_error_text('komi_range');
       if( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
-         $this->errors[] = ErrorCode::get_error_text('komi_bad_fraction');
+         $this->errors[] = $has_err = ErrorCode::get_error_text('komi_bad_fraction');
+
+      if( $has_err )
+         $this->error_fields['komi_m'] = 1;
    }//check_komi
 
    function check_time()
@@ -2610,13 +2626,17 @@ class GameSetupChecker
             'byotimevalue_fis', // FIS
          );
 
+      $has_err = false;
       $arr_check_fields = ( $this->view == GSETVIEW_SIMPLE ) ? $check_fields_simple : $check_fields;
       $ferrors = array();
       foreach( $arr_check_fields as $field )
       {
          $val = trim(@$_REQUEST[$field]);
          if( (string)$val == '' || !is_numeric($val) || (int)$val != $val || $val < 0 )
+         {
             $ferrors[] = $val;
+            $this->error_fields[$field] = $has_err = 1;
+         }
       }
       if( count($ferrors) )
          $this->errors[] = sprintf(T_('Invalid time values [%s], must be integer and >= 0.'), implode('][', $ferrors));
@@ -2643,7 +2663,14 @@ class GameSetupChecker
                                     $byotimevalue_fis, $timeunit_fis);
 
       if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
+      {
          $this->errors[] = ErrorCode::get_error_text('time_limit_too_small');
+         if( !$has_err )
+         {
+            foreach( $arr_check_fields as $err_field )
+               $this->error_fields[$err_field] = 1;
+         }
+      }
    }//check_time
 
    function check_adjust_komi()
@@ -2652,14 +2679,18 @@ class GameSetupChecker
       if( $this->view != GSETVIEW_EXPERT )
          return;
 
+      $has_err = false;
       $adj_komi = @$_REQUEST['adj_komi'];
       if( (string)$adj_komi == '' || !is_numeric($adj_komi) )
-         $this->errors[] = sprintf( T_('Invalid value for komi-adjustment [%s].'), $adj_komi );
+         $this->errors[] = $has_err = sprintf( T_('Invalid value for komi-adjustment [%s].'), $adj_komi );
 
       if( abs($adj_komi) > MAX_KOMI_RANGE )
-         $this->errors[] = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_range');
+         $this->errors[] = $has_err = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_range');
       if( floor(2 * $adj_komi) != 2 * $adj_komi ) // check for x.0|x.5
-         $this->errors[] = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_bad_fraction');
+         $this->errors[] = $has_err = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_bad_fraction');
+
+      if( $has_err )
+         $this->error_fields['adj_komi'] = 1;
    }//check_adjust_komi
 
    function check_min_rated_games()
@@ -2671,12 +2702,17 @@ class GameSetupChecker
       $min_rgames = @$_REQUEST['min_rated_games'];
       if( (string)$min_rgames == '' )
          return;
+
+      $has_err = false;
       if( !is_numeric($min_rgames) || (int)$min_rgames != $min_rgames || $min_rgames < 0 )
-         $this->errors[] = sprintf( T_('Invalid value for min. rated games [%s].'), $min_rgames );
+         $this->errors[] = $has_err = sprintf( T_('Invalid value for min. rated games [%s].'), $min_rgames );
 
       $min_rgames = (int)$min_rgames;
       if( $min_rgames > 999 )
-         $this->errors[] = sprintf( T_('Value for min. rated games is out of range.'), $min_rgames );
+         $this->errors[] = $has_err = sprintf( T_('Value for min. rated games is out of range.'), $min_rgames );
+
+      if( $has_err )
+         $this->error_fields['min_rated_games'] = 1;
    }//check_min_rated_games
 
    function check_game_players()
@@ -2685,10 +2721,14 @@ class GameSetupChecker
       if( $this->view != GSETVIEW_MPGAME )
          return;
 
+      $has_err = false;
       $game_players = @$_REQUEST['game_players'];
       $game_type = MultiPlayerGame::determine_game_type($game_players);
       if( is_null($game_type) )
-         $this->errors[] = sprintf( T_('Invalid value for game-players [%s].'), $game_players );
+         $this->errors[] = $has_err = sprintf( T_('Invalid value for game-players [%s].'), $game_players );
+
+      if( $has_err )
+         $this->error_fields['game_players'] = 1;
    }//check_game_players
 
 
@@ -3439,10 +3479,12 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false, $arg_rati
 
 // add form-elements required for new-game for waiting-room
 // INPUT: must_be_rated, rating1, rating2, min_rated_games, comment
-function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false )
+function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false, $gsc=null )
 {
    // note: multi-player-game requires rated game-players (RatingStatus != NONE)
    $rating_array = getRatingArray();
+   if( is_null($gsc) )
+      $gsc = new GameSetupChecker( $viewmode );
 
    $rating_min = '30 kyu';
    $rating_max = '9 dan';
@@ -3478,9 +3520,12 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
                            'SELECTBOX', 'rating2', 1, $rating_array, $rating_max, false ) );
 
    if( $viewmode != GSETVIEW_SIMPLE )
-      $mform->add_row( array( 'DESCRIPTION', T_('Min. rated finished games'),
-                              'TEXTINPUT', 'min_rated_games', 5, 5, $min_rated_games,
-                              'TEXT', MINI_SPACING . T_('(optional)'), ));
+   {
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Min. rated finished games'),
+            'TEXTINPUTX', 'min_rated_games', 5, 5, $min_rated_games, $gsc->get_class_error_field('min_rated_games'),
+            'TEXT', MINI_SPACING . T_('(optional)'), ));
+   }
 
    if( $viewmode == GSETVIEW_EXPERT || $viewmode == GSETVIEW_FAIRKOMI )
    {
