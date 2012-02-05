@@ -473,6 +473,7 @@ class ErrorCode
             // the following text has been added at 20-Sep-2011 to give more info how to get a new password.
             // (happened a lot, that people didn't have or give an email, so there was no way to contact them).
             . "<br><br>\n"
+            . "<table id=\"ErrorNote\"><tr><td>\n" // format-left
             . T_('If you have forgotten your password we can email a new one.')
             . "<br>\n"
             . T_('The new password will be randomly generated, but you can of course change it later from the edit profile page.')
@@ -487,7 +488,9 @@ class ErrorCode
             . T_("Please log in as guest-user and use the Support-forum to get help (provide your login-user-id and your email).")
             . "<br>\n"
             . T_('for more details on that see FAQ:')
-            . sprintf(' <a href="%s">%s</a>', $base_path.'faq.php?read=t&cat=12#Entry234', T_('I forgot my password. What can I do?'));
+            . sprintf(' <a href="%s">%s</a>', $base_path.'faq.php?read=t&cat=12#Entry234', T_('I forgot my password. What can I do?')
+            . "\n</td></tr></table>\n"
+            );
 
          $arr['wrong_rank_type'] =
             T_("Unknown rank type");

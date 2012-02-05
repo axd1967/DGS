@@ -378,6 +378,10 @@ span.AdminLink img {
    vertical-align: middle;
 }
 
+table#ErrorNote tr td {
+   text-align: left;
+}
+
 
 /* ************************* */
 /* main page skeleton */
