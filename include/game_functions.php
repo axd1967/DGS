@@ -87,10 +87,11 @@ define('HTYPE_DOUBLE',  'double'); // manual, color double (=black and white)
 define('HTYPE_BLACK',   'black'); // manual, color black
 define('HTYPE_WHITE',   'white'); // manual, color white
 define('HTYPE_AUCTION_SECRET', 'auko_sec'); // fair-komi: secret auction komi
-//define('HTYPE_AUCTION_OPEN', 'auko_opn'); // fair-komi: open auction komi
+define('HTYPE_AUCTION_OPEN',   'auko_opn'); // fair-komi: open auction komi
 //define('HTYPE_YOU_KOMI_I_COLOR', 'div_ykic'); // fair-komi: You cut (choose komi), I choose (color)
 //define('HTYPE_I_KOMI_YOU_COLOR', 'div_ikyc'); // fair-komi: I cut (choose komi), You choose (color)
 define('HTYPEMP_MANUAL', 'manual'); // manual, only used for multi-player-game in waiting-room
+define('DEFAULT_HTYPE_FAIRKOMI', HTYPE_AUCTION_OPEN);
 define('CHECK_HTYPES_FAIRKOMI', 'auko_sec|auko_opn|div_ykic|div_ikyc');
 
 // handicap-types for invitations, stored in Games.ToMove_ID, must be <0
@@ -100,6 +101,7 @@ define('INVITE_HANDI_NIGIRI', -3);
 define('INVITE_HANDI_DOUBLE', -4);
 define('INVITE_HANDI_FIXCOL', -5);
 define('INVITE_HANDI_AUCTION_SECRET', -6);
+define('INVITE_HANDI_AUCTION_OPEN', -7);
 
 // handicap-type categories
 define('CAT_HTYPE_CONV', HTYPE_CONV); // conventional handicap-type
@@ -124,7 +126,7 @@ $MAP_GAME_SETUP = array(
    HTYPE_BLACK    => 'T5',
    HTYPE_WHITE    => 'T6',
    HTYPE_AUCTION_SECRET    => 'T7',
-   //HTYPE_AUCTION_OPEN      => 'T8',
+   HTYPE_AUCTION_OPEN      => 'T8',
    //HTYPE_YOU_KOMI_I_COLOR  => 'T9',
    //HTYPE_I_KOMI_YOU_COLOR  => 'T10',
 
@@ -136,7 +138,7 @@ $MAP_GAME_SETUP = array(
    'T5'  => HTYPE_BLACK,
    'T6'  => HTYPE_WHITE,
    'T7'  => HTYPE_AUCTION_SECRET,
-   //'T8'  => HTYPE_AUCTION_OPEN,
+   'T8'  => HTYPE_AUCTION_OPEN,
    //'T9'  => HTYPE_YOU_KOMI_I_COLOR,
    //'T10' => HTYPE_I_KOMI_YOU_COLOR,
 
@@ -1291,9 +1293,13 @@ class FairKomiNegotiation
       return !is_null($this->game_setup->Komi) && !is_null($this->game_setup->OppKomi);
    }
 
-   function get_komibid( $uid )
+   function get_komibid( $uid, $opponent=false )
    {
-      return ( $uid == $this->game_setup->uid )
+      $mine = ( $uid == $this->game_setup->uid );
+      if( $opponent )
+         $mine = !$mine;
+
+      return ( $mine )
          ? $this->game_setup->Komi
          : $this->game_setup->OppKomi;
    }
@@ -1316,7 +1322,7 @@ class FairKomiNegotiation
          return $this->game_setup->uid;
       elseif( $this->game_setup->Komi < $this->game_setup->OppKomi )
          return ( $this->game_setup->uid == $this->black_id ) ? $this->white_id : $this->black_id;
-      else // nigiri
+      else // nigiri on identical komi-bids
       {
          mt_srand ((double) microtime() * 1000000);
          return ( mt_rand(0,1) ) ? $this->black_id : $this->white_id;
@@ -1349,7 +1355,7 @@ class FairKomiNegotiation
          if( $is_negotiation && $this->tomove_id == $player_id )
             $result .= MED_SPACING . image( $base_path.'images/prev.gif', T_('Player to move'), null, 'class=InTextImage' );
       }
-      else // viewer is player and to-move -> show input-box
+      else // edit: viewer is player and to-move -> show input-box
       {
          $curr_bid = ( is_null($komibid) )
             ? sprintf( '(%s)', T_('No bid yet#fairkomi') )
@@ -1367,7 +1373,8 @@ class FairKomiNegotiation
    {
       $htype = $this->game_setup->Handicaptype;
 
-      $form_actions = ($my_id == $this->tomove_id) ? $this->build_form_actions( $form ) : '';
+      $arr_actions = ($my_id == $this->tomove_id) ? $this->build_form_actions($form, $my_id) : null;
+      $form_actions = (is_null($arr_actions)) ? '' : implode(span('BigSpace'), $arr_actions);
 
       echo "<table id=\"fairkomiTable\" class=\"Infos\">",
          "<tr><td class=Caption colspan=2>",
@@ -1381,13 +1388,20 @@ class FairKomiNegotiation
          span('Center', $form_actions), "<br><br>\n";
    }//echo_fairkomi_table
 
-   function build_form_actions( $form )
+   function build_form_actions( $form, $my_id )
    {
       $htype = $this->game_setup->Handicaptype;
-      if( $htype == HTYPE_AUCTION_SECRET )
-         $out = $form->print_insert_submit_button('komi_save', T_('Save Komi Bid') );
-      else
-         $out = '';
+      $actions = array();
+
+      if( $htype == HTYPE_AUCTION_SECRET || $htype == HTYPE_AUCTION_OPEN )
+         $out[] = $form->print_insert_submit_button('komi_save', T_('Save Komi Bid') );
+
+      if( $htype == HTYPE_AUCTION_OPEN )
+      {
+         $out[] = $form->print_insert_submit_buttonx('fk_start', T_('Start Game#fairkomi'),
+            ( $this->allow_start_game($my_id) ? '' : 'disabled=1' ) );
+      }
+
       return $out;
    }//build_form_actions
 
@@ -1405,36 +1419,119 @@ class FairKomiNegotiation
             T_('The player with the highest bid takes Black and is giving that number of komi to White.#fairkomi'),
             T_('If the komi-bids are equal, player color is determined by Nigiri.#fairkomi'), );
       }
+      elseif( $htype == HTYPE_AUCTION_OPEN )
+      {
+         $notes[] = T_('Players openly give their komi-bids.#fairkomi');
+         $notes[] = T_('Komi-bids are shown to the other player.#fairkomi');
+         $notes[] = array(
+            T_('Komi-bids are given in turn till one player starts the game:#fairkomi'),
+            T_('Each komi-bid must be higher than the last bid of the opponent.#fairkomi'),
+            T_('The player with the highest bid takes Black and is giving that number of komi to White.#fairkomi'), );
+      }
 
       return $notes;
    }//build_notes
 
+
+   /*! \brief Returns error-list checking komi-bid for fair-komi; empty on success. */
+   function check_komibid( $komibid, $my_id )
+   {
+      $komibid = trim($komibid);
+
+      $errors = array();
+      if( strlen($komibid) == 0 )
+         $errors[] = T_('Missing komi-bid#fairkomi');
+      elseif( !is_numeric($komibid) )
+         $errors[] = T_('Komi-bid must be a numeric value#fairkomi');
+      else
+      {
+         $htype = $this->game_setup->Handicaptype;
+         $jigomode = $this->game_setup->JigoMode;
+
+         if( floor(2 * $komibid) != 2 * $komibid ) // check for x.0|x.5
+            $errors[] = ErrorCode::get_error_text('komi_bad_fraction');
+
+         $is_fractional = floor(2 * abs($komibid)) & 1;
+         if( $jigomode == JIGOMODE_ALLOW_JIGO && $is_fractional )
+            $errors[] = T_('Jigo is enforced, so komi-bid must not be fractional#fairkomi');
+         elseif( $jigomode == JIGOMODE_NO_JIGO && !$is_fractional )
+            $errors[] = T_('Jigo is forbidden, so komi-bid must be fractional#fairkomi');
+
+         if( $htype == HTYPE_AUCTION_OPEN )
+         {
+            // komi-bid must be increasing
+            $opp_komibid = $this->get_komibid($my_id, /*opp*/true);
+            if( !is_null($opp_komibid) && $komibid <= $opp_komibid )
+               $errors[] = T_('Your komi-bid must be higher than that of the opponent.#fairkomi');
+         }
+      }
+
+      return $errors;
+   }//check_komibid
+
+   /*! \brief Returns true if game can be started (with "start game" button). */
+   function allow_start_game( $my_id )
+   {
+      $htype = $this->game_setup->Handicaptype;
+      $allow_start = false;
+
+      if( $htype == HTYPE_AUCTION_OPEN )
+      {
+         // start-game allowed, if there is a komi-bid from opponent to accept
+         $opp_komibid = $this->get_komibid($my_id, /*opp*/true);
+         if( !is_null($opp_komibid) )
+            $allow_start = true;
+      }
+
+      return $allow_start;
+   }//allow_start_game
 
    /*!
     * \brief Saves and process komi-bid dependent on handi-type.
     * \return 0=saved-komi, 1=saved+started-game; otherwise text-error-code
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function save_komi( $game_row, $komibid )
+   function save_komi( $game_row, $komibid, $is_start_game=false )
    {
       $to_move = ( $this->tomove_id == $this->black_id ) ? BLACK : WHITE;
       $next_to_move = BLACK + WHITE - $to_move;
       $next_tomove_id = ( $this->tomove_id == $this->black_id ) ? $this->white_id : $this->black_id;
       $my_id = $this->tomove_id;
+      $opp_id = ( $this->black_id == $my_id ) ? $this->white_id : $this->black_id;
 
       list( $hours, $upd_game ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
       $upd_game->upd_num('ToMove_ID', $next_tomove_id );
 
       // eventually determine komi/colors + start-game
       $start_game_new_black = 0;
-      if( $this->game_setup->Handicaptype == HTYPE_AUCTION_SECRET )
+      $htype = $this->game_setup->Handicaptype;
+      if( $htype == HTYPE_AUCTION_SECRET )
       {
+         if( $is_start_game ) // shouldn't happen
+            error('invalid_args', "FKN.save_komi.check.auct_secret.start({$this->gid},$htype,$my_id)");
+
          // save komi-bid for player to-move
          $this->set_komibid( $this->tomove_id, $komibid );
          $upd_game->upd_txt('GameSetup', $this->game_setup->encode());
 
          if( $this->has_both_komibids() )
             $start_game_new_black = $this->get_uid_highest_bid();
+      }
+      elseif( $htype == HTYPE_AUCTION_OPEN )
+      {
+         if( $is_start_game )
+         {
+            if( !$this->allow_start_game($my_id) ) // shouldn't happen
+               error('invalid_args', "FKN.save_komi.check.auct_open.start({$this->gid},$htype,$my_id)");
+
+            $start_game_new_black = $opp_id; // accept higher komi-bid of opponent (opp=Black, me=White)
+         }
+         else
+         {
+            // save komi-bid for player to-move
+            $this->set_komibid( $this->tomove_id, $komibid );
+            $upd_game->upd_txt('GameSetup', $this->game_setup->encode());
+         }
       }
 
       // first update clock-stuff, next to-move-id
@@ -1489,8 +1586,6 @@ class FairKomiNegotiation
          error('internal_error', "$dbgmsg.check.status({$this->game_status})");
       if( $new_black_id != $this->black_id && $new_black_id != $this->white_id )
          error('wrong_players', "$dbgmsg.check.players");
-      if( $this->black_id != $this->game_setup->uid )
-         error('wrong_players', "$dbgmsg.check.gs_uid({$this->game_setup->uid})");
 
       $new_white_id = ( $new_black_id == $this->black_id ) ? $this->white_id : $this->black_id;
 
@@ -1539,36 +1634,8 @@ class FairKomiNegotiation
          "UPDATE Games SET " . $upd_game->get_query() . " WHERE ID=$gid AND Status='{$this->game_status}' LIMIT 1" );
    }//start_fairkomi_game
 
-
    // ------------ static functions ----------------------------
 
-   /*! \brief Returns error-list checking komi-bid for fair-komi; empty on success. */
-   function check_komibid( $game_setup, $komibid )
-   {
-      $jigomode = $game_setup->JigoMode;
-      $komibid = trim($komibid);
-
-      $errors = array();
-      if( strlen($komibid) == 0 )
-         $errors[] = T_('Missing komi-bid#fairkomi');
-      elseif( !is_numeric($komibid) )
-         $errors[] = T_('Komi-bid must be a numeric value#fairkomi');
-      else
-      {
-         if( floor(2 * $komibid) != 2 * $komibid ) // check for x.0|x.5
-            $errors[] = ErrorCode::get_error_text('komi_bad_fraction');
-
-         $is_fractional = floor(2 * abs($komibid)) & 1;
-         if( $jigomode == JIGOMODE_ALLOW_JIGO && $is_fractional )
-            $errors[] = T_('Jigo is enforced, so komi-bid must not be fractional#fairkomi');
-         elseif( $jigomode == JIGOMODE_NO_JIGO && !$is_fractional )
-            $errors[] = T_('Jigo is forbidden, so komi-bid must be fractional#fairkomi');
-
-         //TODO must be increasing for open-auction
-      }
-
-      return $errors;
-   }//check_komibid
 
 } // end 'FairKomiNegotiation'
 
@@ -2459,7 +2526,7 @@ class GameSetup
 
    function create_opponent_game_setup( $game_setup, $opp_id )
    {
-      $opp_gs = clone $game_setup;
+      $opp_gs = clone $game_setup; //PHP5 clone
       $opp_gs->init_opponent_handicaptype( $opp_id );
       return $opp_gs;
    }//create_opponent_game_setup
@@ -2602,8 +2669,10 @@ class GameSetupChecker
          return;
 
       $min_rgames = @$_REQUEST['min_rated_games'];
-      if( (string)$min_rgames == '' || !is_numeric($min_rgames) || (int)$min_rgames != $min_rgames || $min_rgames < 0 )
-         $this->errors[] = sprintf( T_('Invalid value for min. rated games [%s].'), $min_rated_games );
+      if( (string)$min_rgames == '' )
+         return;
+      if( !is_numeric($min_rgames) || (int)$min_rgames != $min_rgames || $min_rgames < 0 )
+         $this->errors[] = sprintf( T_('Invalid value for min. rated games [%s].'), $min_rgames );
 
       $min_rgames = (int)$min_rgames;
       if( $min_rgames > 999 )
@@ -2685,7 +2754,7 @@ class GameSetupBuilder
       $this->build_url_cat_htype_manual( $url, $cat_htype, $this->game_setup->Handicaptype );
       $this->build_url_handi_komi_rated( $url );
 
-      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : HTYPE_AUCTION_SECRET;
+      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : DEFAULT_HTYPE_FAIRKOMI;
       $url['jigo_mode'] = $this->game_setup->JigoMode;
 
       if( !$this->is_template )
@@ -2725,7 +2794,7 @@ class GameSetupBuilder
       $this->build_url_cat_htype_manual( $url, $cat_htype, $this->game_setup->Handicaptype );
       $this->build_url_handi_komi_rated( $url );
 
-      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : HTYPE_AUCTION_SECRET;
+      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : DEFAULT_HTYPE_FAIRKOMI;
       $url['adj_komi'] = $this->game_setup->AdjustKomi;
       $url['jigo_mode'] = $this->game_setup->JigoMode;
       $url['adj_handicap'] = $this->game_setup->AdjustHandicap;
@@ -3232,6 +3301,7 @@ function get_category_handicaptype( $handitype )
          HTYPE_BLACK    => CAT_HTYPE_MANUAL,
          HTYPE_WHITE    => CAT_HTYPE_MANUAL,
          HTYPE_AUCTION_SECRET => CAT_HTYPE_FAIR_KOMI,
+         HTYPE_AUCTION_OPEN   => CAT_HTYPE_FAIR_KOMI,
       );
    return @$ARR_HTYPES[$handitype];
 }
@@ -3247,6 +3317,7 @@ function get_invite_handicaptype( $handitype )
          HTYPE_BLACK    => INVITE_HANDI_FIXCOL,
          HTYPE_WHITE    => INVITE_HANDI_FIXCOL,
          HTYPE_AUCTION_SECRET => INVITE_HANDI_AUCTION_SECRET,
+         HTYPE_AUCTION_OPEN   => INVITE_HANDI_AUCTION_OPEN,
       );
    return @$ARR_INVITE_HTYPES[$handitype];
 }
@@ -3261,6 +3332,7 @@ function get_handicaptype_for_invite( $inv_handitype, $is_black_col=null )
          INVITE_HANDI_DOUBLE  => HTYPE_DOUBLE,
          //INVITE_HANDI_FIXCOL  => '', // calculated mapping (see below)
          INVITE_HANDI_AUCTION_SECRET => HTYPE_AUCTION_SECRET,
+         INVITE_HANDI_AUCTION_OPEN   => HTYPE_AUCTION_OPEN,
       );
 
    if( $inv_handitype != INVITE_HANDI_FIXCOL )
