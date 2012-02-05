@@ -146,8 +146,9 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
 
    $maxGamesCheck = new MaxGamesCheck();
    $dgs_message = new DgsMessage();
-   $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE );
-   if( $gsc->has_errors() )
+
+   $gsc = ( @$_REQUEST['gsc'] ) ? $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE ) : null;
+   if( !is_null($gsc) && $gsc->has_errors() )
    {
       $gsc->add_default_values_info();
       $errors = $gsc->get_errors();
@@ -234,8 +235,10 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
             else
                $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
          }
-         else if( $msg_type == MSGTYPE_DISPUTED )
+         elseif( $msg_type == MSGTYPE_DISPUTED )
             $submode = ( @$Game_mid ) ? 'InviteDisputed' : 'AlreadyDeclined';
+         elseif( $msg_type == MSGTYPE_NORMAL && @$Game_mid )
+            $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
       }
    }// $mode == 'ShowMessage' || $mode == 'Dispute'
 
