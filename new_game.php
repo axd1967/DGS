@@ -119,6 +119,7 @@ require_once 'include/utilities.php';
          echo "<br>\n<table><tr>",
             buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
             "</tr></table>";
+         $need_redraw = true;
       }
 
       add_new_game_form( 'addgame', $viewmode, $iamrated, $need_redraw ); //==> ID='addgameForm'
@@ -163,7 +164,7 @@ function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw )
 
 function handle_add_game( $my_id, $viewmode )
 {
-   global $player_row;
+   global $player_row, $NOW;
 
    $gsc = GameSetupChecker::check_fields( $viewmode );
    if( $gsc->has_errors() )
