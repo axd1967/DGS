@@ -35,8 +35,9 @@ function make_invite_game( &$player_row, &$opponent_row, $disputegid )
 
    $my_gs = make_invite_game_setup( $player_row, $opponent_row );
    $my_gs_old = $opp_gs = null;
+   $is_dispute = ( $disputegid > 0 );
 
-   if( $disputegid > 0 ) // dispute
+   if( $is_dispute ) // dispute
    {
       // Check if dispute game exists
       $grow = mysql_single_fetch( "make_game.make_invite_game.dispute($disputegid)",
@@ -88,6 +89,8 @@ function make_invite_game( &$player_row, &$opponent_row, $disputegid )
 
 
    $upd_game = new UpdateQuery('Games');
+   if( !$is_dispute )
+      $upd_game->upd_txt('Status', GAME_STATUS_INVITED);
    $upd_game->upd_num('Black_ID', $Black_ID);
    $upd_game->upd_num('White_ID', $White_ID);
    $upd_game->upd_num('ToMove_ID', $tomove); // handicap-type
@@ -110,7 +113,7 @@ function make_invite_game( &$player_row, &$opponent_row, $disputegid )
    $upd_game->upd_txt('GameSetup', $game_setup_encoded );
 
    $upd_game_query = $upd_game->get_query();
-   if( $disputegid > 0 )
+   if( $is_dispute )
       $query = "UPDATE Games SET $upd_game_query WHERE ID=$disputegid LIMIT 1";
    else
       $query = "INSERT INTO Games SET $upd_game_query";
@@ -177,6 +180,7 @@ function make_invite_game_setup( $my_urow, $opp_urow )
             error('no_initial_rating', "make_invite_game_setup.check.urat({$gs->Handicaptype},$iamrated,$opprated)");
          //break; running through
       case HTYPE_AUCTION_SECRET: //further computing for conv/proper, or negotiating on fair-komi
+      case HTYPE_AUCTION_OPEN:
          $gs->Handicap = $gs->Komi = 0;
          break;
 
@@ -354,8 +358,9 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
 
       // fair-komi handicap-types, start fair-komi-negotiation
       case HTYPE_AUCTION_SECRET:
+      case HTYPE_AUCTION_OPEN:
          if( is_null($my_gs) )
-            error('internal_error', "$dbgmsg.check.game_setup");
+            error('internal_error', "$dbgmsg.check.game_setup($handicaptype)");
          $my_gs->Komi = $my_gs->OppKomi = NULL;
          $handicap = $komi = 0;
          $i_am_black = $my_col_black;
