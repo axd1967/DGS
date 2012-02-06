@@ -197,6 +197,9 @@ Copyright (C) 2001-2012  Erik Ouchterlony
             * <home new_game.php?view=2>Multi-player view</home>: game-settings to start multi-player-game of game-type Team-Go & Zen-Go
 
          * Added Fair-Komi options in <home new_game.php?view=3>Fair-Komi view</home>:
+            * added Auction-Komi with open komi-bidding:
+               * game is started by one player accepting opponents last komi-bid
+               * higher bidder gets Black, komi-bid are given in turn
             * added Auction-Komi with secret komi-bidding:
                * game is started after both players gave one komi-bid
                * higher bidder gets Black, or Nigiri on equal bids
@@ -218,7 +221,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Show probable color / handicap / komi for conventional & proper handicap-type on Preview
          * Show differences in disputed game-settings between players
          * Reduced size of message text boxes for invitations
-         * Show input-errors instead of throwing error "destroying" all other inputs
+         * Show input-errors instead of throwing error "destroying" all other inputs, highlight error-fields
 
       * <home templates.php>Templates</home>:
          * Added page to show template-list and manage saving of templates for
