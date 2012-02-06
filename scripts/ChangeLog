@@ -19,6 +19,52 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-02-05 juga
+
+   * include/game_functions.php (append_form_add_waiting_room_game;
+       class GameSetupChecker, ~.is_error_field, ~.get_class_error_field, ~.check_komi,
+       ~.check_time, ~.check_adjust_komi, ~.check_min_rated_games, ~.check_game_players),
+     include/message_functions.php (game_settings_form),
+     skins/dragon/screen.css,
+     new_game.php (add_new_game_form, handle_add_game),
+     message.php:
+   - highlight input-text-fields for invite & new-game if value contains error,
+     checked by GameSetupChecker for fields: komi_m, adj_komi, game_players,
+     min_rated_games, time-fields (timevalue, byotimevalue_jap/can/fis, byoperiods_jap/can)
+
+   * include/game_functions.php (get_category_handicaptype, get_invite_handicaptype,
+       get_handicaptype_for_invite;
+       FairKomiNegotiation.get_komibid, ~.echo_fairkomi_table, ~.build_form_actions,
+         ~.build_notes, ~.check_komibid, ~.allow_start_game, ~.save_komi, ~.start_fairkomi_game;
+       GameSetupChecker.check_min_rated_games;
+       GameSetupBuilder.fill_invite_from_game_setup, ~.fill_new_game_from_game_setup),
+     include/make_game.php (make_invite_game, make_invite_game_setup, accept_invite_game),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/game_texts.php (GameTexts.get_fair_komi_types, ~.get_fair_komi_color_note),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     confirm.php (do_komi_save), game.php (draw_fairkomi_negotiation),
+     join_waitingroom_game.php, waiting_room.php:
+   - added fair-komi handling for open-auction-komi for invite & new-game
+     - added submit-button for fair-komi dialog game-page to accept last komi-bid starting the game
+     - for open-auction-komi ask players in turn for komi-bids till one accepts by starting the game
+   - defined default fair-komi handicap-type
+   - bugfix: wrong var for game-setup-checker on min-rated-games, check only if non-empty
+   - bugfix: corrected URL-var for viewmode of new-game page -> 'view'
+
+   * include/message_functions.php (game_settings_form),
+     message.php:
+   - bugfix: check game-setup form-fields only if form with game-settings submitted;
+     added hidden-field 'gsc' to indicate that
+   - bugfix: derive already accepted/declined message also if msg-type is NORMAL
+
+   * new_game.php (handle_add_game):
+   - bugfix: preserve former input-fields by using redraw-mode if errors found
+   - bugfix of previous refactoring: missed global var $NOW
+
+   * include/error_codes.php (ErrorCode.init),
+     skins/dragon/screen.css:
+   - format forgotten-password error-note as left-aligned block
+
 2012-02-03 juga
 
    * include/game_functions.php (GameSetupChecker.add_error,
