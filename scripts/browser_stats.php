@@ -142,7 +142,8 @@ function echo_browsers(&$Browsers)
 
                      array('Apple' => array('(apple|iphone|ipad|mac)',0),
                            'iPhone' => array('iPhone;',0),
-                           'iPad' => array('iPad(.touch)?;',0),
+                           'iPad' => array('iPad;',0),
+                           'iPod' => array('iPod(.touch)?;',0),
                            'Mac' => array('(MacBookPro|iMac)',0)),
 
                      array('AntFresco' => array('antfresco',0)),
