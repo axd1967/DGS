@@ -61,7 +61,7 @@ require_once 'include/rank_converter.php';
                || abs($newrating - $oldrating) > 0.005 )
                || $player_row['RatingStatus'] == RATING_NONE )
       {
-         update_player_rating( $my_id, $new_rating, $upd_players );
+         update_player_rating( $my_id, $newrating, $upd_players );
          $message = T_('Rank & rating updated!');
       }
       else
