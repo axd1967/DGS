@@ -19,6 +19,46 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-02-18 juga
+
+   * include/classlib_userconfig.php (class ConfigBoard, ~.get_board_flags,
+       ~.set_board_flags, ~.update_all, ~.fill_player_row, ~.load_config_board),
+     include/board.php (class Board, ~.load_from_db, ~.mark_last_captures,
+       ~.draw_last_captures_box, ~.set_style, ~.draw_board),
+     include/std_functions.php ($cookie_pref_rows),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql,
+     specs/db/table-Players.txt,
+     change_profile.php,
+     edit_profile.php,
+     game.php:
+   - added board-config to mark and print last-move-captures
+     - also useful as ko-indicator
+     - stored in ConfigBoard.BoardFlags
+     - on game-page added last-move-capture info-box below capture-box
+-----------
+-- added board-flags for marking last-capture
+ALTER TABLE ConfigBoard
+   ADD BoardFlags tinyint unsigned NOT NULL default 0 AFTER Woodcolor ;
+-----------
+
+   * include/message_functions.php (message_info_table),
+     message.php (handle_change_folder):
+   - added following of message-folder-move also for single-message-view
+     - if follow-checkbox enabled, moving to target-folder
+     - default is to stay in same folder
+
+   * include/game_functions.php (GameRematch.add_rematch_links), site_map.php:
+   - adjusted bottom-link for rematch: copy new game -> copy as new game
+
+2012-02-13 juga
+
+   * scripts/browser_stats.php:
+   - added ipod-family
+
+   * edit_rating.php:
+   - bugfix: var-typo, used wrong var
+
 2012-02-05 juga
 
    * include/game_functions.php (append_form_add_waiting_room_game;
