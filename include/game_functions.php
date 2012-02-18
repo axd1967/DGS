@@ -3253,7 +3253,7 @@ class GameRematch
       if( $allow_invite )
          $arr_menu[T_('Rematch#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_INVITE .URI_AMP."gid=$gid";
       if( $allow_newgame )
-         $arr_menu[T_('Copy new game#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_NEWGAME .URI_AMP."gid=$gid";
+         $arr_menu[T_('Copy as new game#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_NEWGAME .URI_AMP."gid=$gid";
    }//add_rematch_links
 
 } //end 'GameRematch'
