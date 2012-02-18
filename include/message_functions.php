@@ -740,13 +740,16 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
          if( $delayed_move )
             echo T_('Move to folder when replying');
          else
-         {
             echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
-            echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
-            if( $folder_nr > FOLDER_ALL_RECEIVED )
-               echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;
-         }
-         echo $form->print_insert_hidden_input('foldermove_mid', $mid) ;
+
+         echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
+         if( $folder_nr > FOLDER_ALL_RECEIVED )
+            echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;
+
+         $follow = (bool)@$_REQUEST['follow']; // follow into target folder?
+         echo "<br>\n",
+            $form->print_insert_checkbox('follow', '1', T_('Follow moving'), $follow ),
+            $form->print_insert_hidden_input('foldermove_mid', $mid);
       }
       echo "\n</td></tr>\n";
    }
@@ -1340,6 +1343,7 @@ function change_folders_for_marked_messages($uid, $folders)
    return change_folders($uid, $folders, $message_ids, $new_folder, @$_GET['current_folder']);
 }
 
+// return >0 success, 0 = no messages to move
 function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false)
 {
    if( count($message_ids) <= 0 )

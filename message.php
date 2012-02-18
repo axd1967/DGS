@@ -723,9 +723,11 @@ function handle_change_folder( $my_id, $folders, $new_folder, $msg_type )
 {
    $foldermove_mid = (int)get_request_arg('foldermove_mid');
    $current_folder = (int)get_request_arg('current_folder');
+   $follow = (bool)get_request_arg('follow');
    $need_reply = ( $msg_type == MSGTYPE_INVITATION );
 
-   if( change_folders($my_id, $folders, array($foldermove_mid), $new_folder, $current_folder, $need_reply) <= 0 )
+   $move_ok = ( change_folders($my_id, $folders, array($foldermove_mid), $new_folder, $current_folder, $need_reply) > 0 );
+   if( !$move_ok || !$follow )
       $new_folder = ( $current_folder ) ? $current_folder : FOLDER_ALL_RECEIVED;
 
    $page = "";
