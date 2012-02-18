@@ -163,7 +163,7 @@ $cookie_pref_rows = array(
        // NOTE: place also all prefs from ConfigBoard-table in players_row,
        //       but manage with ConfigBoard-class; see is_logged_in()
        // NOTE: also add in ConfigBoard::load_config_board()
-       'Stonesize', 'Woodcolor', 'Boardcoords',
+       'Stonesize', 'Woodcolor', 'BoardFlags', 'Boardcoords',
        'MoveNumbers', 'MoveModulo',
        'NotesSmallHeight', 'NotesSmallWidth', 'NotesSmallMode',
        'NotesLargeHeight', 'NotesLargeWidth', 'NotesLargeMode',

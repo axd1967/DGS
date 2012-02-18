@@ -65,6 +65,7 @@ require_once 'include/db/bulletin.php';
    $reset_bulletin_count = ( (int)@$player_row['Skipbulletin'] != $skipbulletin );
 
    $woodcolor = (int)@$_GET['woodcolor'];
+   $board_flags = ( @$_GET['bfl_mark_lc'] ? BOARDFLAG_MARK_LAST_CAPTURE : 0 );
    $boardcoords = ( @$_GET['coordsleft'] ? COORD_LEFT : 0 )
                 | ( @$_GET['coordsup'] ? COORD_UP : 0 )
                 | ( @$_GET['coordsright'] ? COORD_RIGHT : 0 )
@@ -124,6 +125,7 @@ require_once 'include/db/bulletin.php';
       $cookie_prefs['UserFlags'] = $userflags;
       $cookie_prefs['Stonesize'] = (int)@$_GET['stonesize'];
       $cookie_prefs['Woodcolor'] = (int)@$_GET['woodcolor'];
+      $cookie_prefs['BoardFlags'] = $board_flags;
       $cookie_prefs['Boardcoords'] = $boardcoords;
       $cookie_prefs['MoveNumbers'] = $movenumbers;
       $cookie_prefs['MoveModulo'] = $movemodulo;
@@ -153,6 +155,7 @@ require_once 'include/db/bulletin.php';
 
       $cfg_board->set_stone_size( (int)@$_GET['stonesize'] );
       $cfg_board->set_wood_color( (int)@$_GET['woodcolor'] );
+      $cfg_board->set_board_flags( $board_flags );
       $cfg_board->set_board_coords( $boardcoords );
       $cfg_board->set_move_numbers( $movenumbers );
       $cfg_board->set_move_modulo( $movemodulo );

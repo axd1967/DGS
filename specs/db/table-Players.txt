@@ -105,6 +105,7 @@ Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |   
 | User_ID          | int(11)                                     | NO   | PRI | NULL    |       |
 | Stonesize        | tinyint(3) unsigned                         | NO   |     | 25      |       |
 | Woodcolor        | tinyint(3) unsigned                         | NO   |     | 1       |       |
+| BoardFlags       | tinyint(3) unsigned                         | NO   |     | 0       |       |
 | Boardcoords      | smallint(5) unsigned                        | NO   |     | 31      |       |
 | MoveNumbers      | smallint(5) unsigned                        | NO   |     | 0       |       |
 | MoveModulo       | smallint(5) unsigned                        | NO   |     | 0       |       |

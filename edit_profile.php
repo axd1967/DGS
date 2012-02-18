@@ -297,6 +297,21 @@ require_once( 'include/gui_bulletin.php' );
             'CHECKBOX', 'coordsrevnum', 1, sptext(T_('Reverse numbering'),2),
                   ($boardcoords & COORD_REVERSE_MOVENUM),
          ));
+
+      $board_flags = $cfg_board->get_board_flags();
+      $profile_form->add_row( array(
+            'TAB',
+            'CHECKBOX', 'bfl_mark_lc', 1, sptext(T_('Mark Last Move Capture'),2),
+                  ($board_flags & BOARDFLAG_MARK_LAST_CAPTURE),
+         ));
+   }
+   else
+   {
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Move marker'),
+            'CHECKBOX', 'bfl_mark_lc', 1, sptext(T_('Mark Last Move Capture'),2),
+                  ($board_flags & BOARDFLAG_MARK_LAST_CAPTURE),
+         ));
    }
 
 

@@ -47,6 +47,9 @@ require_once( 'include/classlib_bitset.php' );
 define('CFGBOARD_NOTES_SMALL', 'Small');
 define('CFGBOARD_NOTES_LARGE', 'Large');
 
+// Board-Flags
+define('BOARDFLAG_MARK_LAST_CAPTURE', 0x01);
+
 // Boardcoords
 define('COORD_LEFT',    0x001); // short coordinates left from board
 define('COORD_UP',      0x002);
@@ -65,6 +68,7 @@ class ConfigBoard
    var $user_id;
    var $stone_size;
    var $wood_color;
+   var $board_flags;
    var $board_coords;
    var $move_numbers;
    var $move_modulo;
@@ -74,7 +78,7 @@ class ConfigBoard
    var $notes_cutoff;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function ConfigBoard( $user_id, $stone_size=25, $wood_color=1, $boardcoords=31,
+   function ConfigBoard( $user_id, $stone_size=25, $wood_color=1, $board_flags=0, $boardcoords=31,
                          $move_numbers=0, $move_modulo=0,
                          $notes_small_height=25, $notes_small_width=30, $notes_small_mode='RIGHT',
                          $notes_large_height=25, $notes_large_width=30, $notes_large_mode='RIGHT',
@@ -89,6 +93,7 @@ class ConfigBoard
 
       $this->set_stone_size( (int)$stone_size );
       $this->set_wood_color( (int)$wood_color );
+      $this->set_board_flags( (int)$board_flags );
       $this->set_board_coords( (int)$boardcoords );
       $this->set_move_numbers( (int)$move_numbers );
       $this->set_move_modulo( (int)$move_modulo );
@@ -132,6 +137,16 @@ class ConfigBoard
          $this->wood_color = (int)$wood_color;
       else
          $this->wood_color = 1;
+   }
+
+   function get_board_flags()
+   {
+      return $this->board_flags;
+   }
+
+   function set_board_flags( $board_flags )
+   {
+      $this->board_flags = (int)$board_flags;
    }
 
    function get_board_coords()
@@ -230,6 +245,7 @@ class ConfigBoard
       $update_query = 'UPDATE ConfigBoard SET'
          . '  Stonesize=' . $this->stone_size
          . ', Woodcolor=' . $this->wood_color
+         . ', BoardFlags=' . $this->board_flags
          . ', Boardcoords=' . $this->board_coords
          . ', MoveNumbers=' . $this->move_numbers
          . ', MoveModulo=' . $this->move_modulo
@@ -252,6 +268,7 @@ class ConfigBoard
       global $player_row;
       $player_row['Stonesize'] = $this->stone_size;
       $player_row['Woodcolor'] = $this->wood_color;
+      $player_row['BoardFlags'] = $this->board_flags;
       $player_row['Boardcoords'] = $this->board_coords;
       $player_row['MoveNumbers'] = $this->move_numbers;
       $player_row['MoveModulo'] = $this->move_modulo;
@@ -288,6 +305,7 @@ class ConfigBoard
             $uid,
             @$src_row['Stonesize'],
             @$src_row['Woodcolor'],
+            @$src_row['BoardFlags'],
             @$src_row['Boardcoords'],
             @$src_row['MoveNumbers'],
             @$src_row['MoveModulo'],

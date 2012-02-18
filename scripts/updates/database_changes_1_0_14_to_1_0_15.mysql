@@ -2379,3 +2379,8 @@ ALTER TABLE Profiles
    MODIFY Name varchar(60) NOT NULL default '' ;
 
 
+-- added board-flags for marking last-capture
+ALTER TABLE ConfigBoard
+   ADD BoardFlags tinyint unsigned NOT NULL default 0 AFTER Woodcolor ;
+
+

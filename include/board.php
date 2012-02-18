@@ -27,11 +27,11 @@ if( !defined('EDGE_SIZE') )
 
 class Board
 {
-
    var $gid;
    var $size;
    var $max_moves;
    var $coord_borders;
+   var $board_flags;
    var $stone_size;
    var $woodcolor;
 
@@ -40,6 +40,8 @@ class Board
    var $marks; //array: [$sgf_coord] => $mark
    var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY,$mark)
    var $js_moves; //array($MoveNr,$Stone,$PosX,$PosY) to build moves for JS-game-editor
+   var $moves_captures; //array: [$MoveNr] => array(sgfcoord-prisoners, ...)
+   var $last_captures; //array: [sgfcoord] => 1 (if pos should be marked)
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    var $movemrkx, $movemrky, $movecol, $movemsg;
@@ -57,6 +59,7 @@ class Board
       $this->max_moves = $max_moves;
 
       $this->coord_borders = -1;
+      $this->board_flags = 0;
       $this->stone_size = 25;
       $this->woodcolor = 1;
 
@@ -65,6 +68,8 @@ class Board
       $this->marks = NULL;
       $this->captures = NULL;
       $this->js_moves = array();
+      $this->moves_captures = NULL;
+      $this->last_captures = array();
 
       $this->movemrkx = $this->movemrky = -1;
       $this->movecol = DAME;
@@ -93,6 +98,7 @@ class Board
       $this->movemsg = '';
       $this->infos = array();
       $this->js_moves = array();
+      $this->moves_captures = array();
 
       $gid = $game_row['ID'];
       if( $gid <= 0 )
@@ -186,6 +192,9 @@ class Board
             }
             continue;
          }
+
+         if( $Stone == NONE && $PosX >= 0 ) // prisoners
+            $this->moves_captures[$MoveNr][] = number2sgf_coords( $PosX, $PosY, $this->size );
 
          if( $Stone <= WHITE ) //including NONE (prisoners)
          {
@@ -326,7 +335,6 @@ class Board
       }
    }// move_marks
 
-
    function draw_captures_box( $caption)
    {
       if( !is_array($this->captures) )
@@ -389,6 +397,44 @@ class Board
    } //draw_captures_box
 
 
+   function mark_last_captures( $move )
+   {
+      $this->last_captures = array();
+      if( is_array($this->moves_captures) && isset($this->moves_captures[$move]) )
+      {
+         foreach( $this->moves_captures[$move] as $sgfc )
+            $this->last_captures[$sgfc] = 1;
+      }
+      return count($this->last_captures);
+   }//mark_last_captures
+
+   function draw_last_captures_box( $caption )
+   {
+      if( !is_array($this->last_captures) )
+         return false;
+      $cnt_captures = count($this->last_captures);
+
+      $arr = array();
+      foreach( $this->last_captures as $sgfc => $val )
+      {
+         list( $x, $y ) = sgf2number_coords( $sgfc, $this->size );
+         $arr[] = number2board_coords( $x, $y, $this->size );
+      }
+      if( $cnt_captures == 0 )
+         $arr[] = NO_VALUE;
+
+      $capture_str = wordwrap( implode(', ', $arr), 20, "<br>\n", false );
+      echo "<table class=Captures>\n",
+         "<tr>\n<th>$caption</th>\n </tr>\n",
+         "<tr><td>",
+            sprintf('#%d: %s', $cnt_captures, $capture_str),
+         "</td></tr>\n",
+         "</table>\n";
+
+      return true;
+   }//draw_last_captures_box
+
+
    function set_style( $cfg_board )
    {
       $board_coords = $cfg_board->get_board_coords();
@@ -397,6 +443,7 @@ class Board
       else
          $this->coord_borders = -1;
 
+      $this->board_flags = $cfg_board->get_board_flags();
       $this->stone_size = $cfg_board->get_stone_size();
       $this->woodcolor = $cfg_board->get_wood_color();
    }
@@ -485,6 +532,7 @@ class Board
 
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
+      $mark_last_capture = ($this->board_flags & BOARDFLAG_MARK_LAST_CAPTURE );
 
       $smooth_edge = ( ($this->coord_borders & SMOOTH_EDGE) && ($this->woodcolor < 10) );
 
@@ -701,15 +749,14 @@ class Board
                $sgfc = number2sgf_coords($colnr, $this->size-$rownr, $this->size);
                $mrk = '';
                $numover = false;
-               if( is_array($this->marks) )
+               if( is_array($this->marks) && $sgfc && @$this->marks[$sgfc] )
                {
-                  if( $sgfc && @$this->marks[$sgfc] )
-                  {
-                     $mrk = $this->marks[$sgfc];
-                     if( is_numeric($mrk) && $this->coord_borders & NUMBER_OVER )
-                        $numover = true;
-                  }
+                  $mrk = $this->marks[$sgfc];
+                  if( is_numeric($mrk) && $this->coord_borders & NUMBER_OVER )
+                     $numover = true;
                }
+               if( !$mrk && $sgfc && $mark_last_capture && @$this->last_captures[$sgfc] )
+                  $mrk = 'x';
 
                $img_id = '';
                if( !$marked )

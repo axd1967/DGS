@@ -623,6 +623,12 @@ $GLOBALS['ThePage'] = new Page('Game');
          echo "<br>\n";
       }
    }
+   if( $cfg_board->get_board_flags() & BOARDFLAG_MARK_LAST_CAPTURE )
+   {
+      $TheBoard->mark_last_captures( $move );
+      $TheBoard->draw_last_captures_box( T_('Last Move Capture') );
+      echo "<br>\n";
+   }
    GameScore::draw_score_box( $game_score, $score_mode );
    echo "</td><td>";
 

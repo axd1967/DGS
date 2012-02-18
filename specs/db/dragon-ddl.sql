@@ -3,14 +3,15 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 05, 2011 at 11:24 PM
+-- Generation Time: Feb 18, 2012 at 10:26 PM
 -- Server version: 5.0.51
--- PHP Version: 5.2.4-2ubuntu5.17
+-- PHP Version: 5.2.4-2ubuntu5.23
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 --
 -- NOTE: Database-name can be named whatever you like!
+--
 --
 -- Database: `dragon`
 --
@@ -123,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `ConfigBoard` (
   `User_ID` int(11) NOT NULL,
   `Stonesize` tinyint(3) unsigned NOT NULL default '25',
   `Woodcolor` tinyint(3) unsigned NOT NULL default '1',
+  `BoardFlags` tinyint(3) unsigned NOT NULL default '0',
   `Boardcoords` smallint(5) unsigned NOT NULL default '31',
   `MoveNumbers` smallint(5) unsigned NOT NULL default '0',
   `MoveModulo` smallint(5) unsigned NOT NULL default '0',
@@ -1282,6 +1284,32 @@ CREATE TABLE IF NOT EXISTS `TranslationLanguages` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `TranslationPages`
+--
+
+CREATE TABLE IF NOT EXISTS `TranslationPages` (
+  `Page` varchar(64) NOT NULL,
+  `Group_ID` int(11) NOT NULL,
+  PRIMARY KEY  (`Page`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `TranslationTexts`
+--
+
+CREATE TABLE IF NOT EXISTS `TranslationTexts` (
+  `ID` int(11) NOT NULL auto_increment,
+  `Text` text NOT NULL,
+  `Ref_ID` int(11) NOT NULL default '0',
+  `Translatable` enum('Y','N','Done','Changed') NOT NULL default 'Y',
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Translationlog`
 --
 
@@ -1300,18 +1328,6 @@ CREATE TABLE IF NOT EXISTS `Translationlog` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `TranslationPages`
---
-
-CREATE TABLE IF NOT EXISTS `TranslationPages` (
-  `Page` varchar(64) NOT NULL,
-  `Group_ID` int(11) NOT NULL,
-  PRIMARY KEY  (`Page`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Translations`
 --
 
@@ -1322,20 +1338,6 @@ CREATE TABLE IF NOT EXISTS `Translations` (
   `Translated` enum('Y','N') NOT NULL default 'N',
   PRIMARY KEY  (`Language_ID`,`Original_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `TranslationTexts`
---
-
-CREATE TABLE IF NOT EXISTS `TranslationTexts` (
-  `ID` int(11) NOT NULL auto_increment,
-  `Text` text NOT NULL,
-  `Ref_ID` int(11) NOT NULL default '0',
-  `Translatable` enum('Y','N','Done','Changed') NOT NULL default 'Y',
-  PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
