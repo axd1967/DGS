@@ -19,6 +19,46 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-04 juga
+
+   * include/game_functions.php (GameHelper.load_game_row;
+       class FairKomiNegotiation, ~.read_from_game_row, ~.get_komibid, ~.is_choose_color,
+         ~.get_view_komibid, ~.echo_fairkomi_table, ~.get_htype_user_handles,
+         ~.build_form_actions, ~.build_notes, ~.check_komibid, ~.allow_start_game,
+         ~.check_komibid, ~.start_fairkomi_game;
+       GameSetup.format_handicap_type, ~.parse_jigo_mode_from_game_setup, ~.build_invitation_diffs,
+         ~.swap_htype_black_white;
+       is_htype_divide_choose, get_category_handicaptype, get_invite_handicaptype,
+       get_handicaptype_for_invite),
+     include/make_game.php (make_invite_game, make_invite_game_setup, accept_invite_game, create_game),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/game_texts.php (GameTexts.get_fair_komi_types),
+     include/error_codes.php (ErrorCode.init),
+     specs/db/table-Games.txt, skins/dragon/screen.css,
+     confirm.php (do_komi_save),
+     game.php (draw_game_info),
+     gameinfo.php, join_waitingroom_game.php,
+     message.php (echo_dispute_diffs),
+     waiting_room.php (determine_color):
+   - added fair-komi handling for divide&choose for invite & new-game
+     - one player chooses komi, the other chooses color;
+       order of komi-first can be specified by handicap-type
+     - adjusted game-settings-form, game-info, fair-komi-negotiation dialog,
+       invite/dispute form, dispute-diff-info
+     - accept one komi-bid, then color-choice which is starting the game
+     - use special formatting of fair-komi divide&choose handicap-type
+       including player-handle which choose komi/color respectively
+     - added check on fair-komi-negotiation divide&choose type to check
+       if komi-saving or color-choosing is correct
+   - refactored loading game-row into GameHelper::load_game_row()
+
+   * include/std_functions.php (send_message):
+   - bugfix for send_message(): set bulk-message-flag not for system-messages
+
+   * scripts/data_export.php:
+   - added new tables: Shape, TournamentNews, TournamentResult; corrected table-typo
+
 2012-02-18 juga
 
    * include/classlib_userconfig.php (class ConfigBoard, ~.get_board_flags,
@@ -27,15 +67,13 @@ ChangeLog
        ~.draw_last_captures_box, ~.set_style, ~.draw_board),
      include/std_functions.php ($cookie_pref_rows),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
-     specs/db/dragon-ddl.sql,
-     specs/db/table-Players.txt,
-     change_profile.php,
-     edit_profile.php,
-     game.php:
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     change_profile.php, edit_profile.php, game.php:
    - added board-config to mark and print last-move-captures
      - also useful as ko-indicator
      - stored in ConfigBoard.BoardFlags
      - on game-page added last-move-capture info-box below capture-box
+     - enabling with option "Mark Last Move Capture" in user-profile
 -----------
 -- added board-flags for marking last-capture
 ALTER TABLE ConfigBoard
