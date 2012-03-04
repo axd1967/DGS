@@ -1814,7 +1814,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
    if( $stop )
       $bad = 1;
    return $before ;
-}
+}//parse_tags_safe
 
 // returns true, if given text contains some marked-terms
 // (originated from regex-matching added in parse_tags_safe)
