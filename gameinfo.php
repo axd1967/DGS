@@ -89,7 +89,8 @@ function build_rating_diff( $rating_diff )
       'Games.Flags+0 AS X_Flags',
       'UNIX_TIMESTAMP(Starttime) AS X_Starttime',
       'UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged',
-      "IF(Games.Rated='N','N','Y') AS X_Rated"
+      "IF(Games.Rated='N','N','Y') AS X_Rated",
+      'BP.Handle AS Blackhandle', 'WP.Handle AS Whitehandle' //for FairKomiNegotiation.get_htype_user_handles()
       );
    $qsql->add_part( SQLP_FROM,
       'Games',
@@ -225,8 +226,14 @@ function build_rating_diff( $rating_diff )
       $komibid_black = $komibid_white = '';
    if( $is_fairkomi_negotiation )
    {
-      $icon_col_b = $icon_col_w = image( $base_path.'17/y.gif', $fk_htype_text,
-         GameTexts::get_fair_komi_color_note($Handitype), $color_class );
+      if( is_htype_divide_choose($Handitype) )
+      {
+         $uhandles = $fk->get_htype_user_handles();
+         $color_note = GameTexts::get_fair_komi_types( $Handitype, null, $uhandles[0], $uhandles[1] );
+      }
+      else
+         $color_note = $fk_htype_text;
+      $icon_col_b = $icon_col_w = image( $base_path.'17/y.gif', $color_note, NULL, $color_class );
    }
    else
    {
@@ -337,10 +344,9 @@ function build_rating_diff( $rating_diff )
    }
 
    $movefmt = T_('%s\'s turn#fairkomi_user');
-   if( $to_move == BLACK )
-      $player_to_move = $icon_col_b . ' ' . ( $is_fairkomi ? sprintf($movefmt, $grow['Black_Handle']) : T_('Black to move') );
-   else
-      $player_to_move = $icon_col_w . ' ' . ( $is_fairkomi ? sprintf($movefmt, $grow['White_Handle']) : T_('White to move') );
+   $player_to_move = ( $to_move == BLACK )
+      ? $icon_col_b . ' ' . ( $is_fairkomi ? sprintf($movefmt, $grow['Black_Handle']) : T_('Black to move') )
+      : $icon_col_w . ' ' . ( $is_fairkomi ? sprintf($movefmt, $grow['White_Handle']) : T_('White to move') );
 
    $timefmt = TIMEFMT_SHORT | TIMEFMT_ZERO;
    $itable = new Table_info('time');

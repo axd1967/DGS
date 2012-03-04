@@ -47,15 +47,17 @@ require_once( 'include/classlib_userconfig.php' );
 
    //short descriptions for table
    $handi_array = array(
-      HTYPE_CONV   => T_('Conventional'),
-      HTYPE_PROPER => T_('Proper'),
-      HTYPE_NIGIRI => T_('Nigiri'),
-      HTYPE_DOUBLE => T_('Double game'),
-      HTYPE_BLACK  => T_('Color Black'),
-      HTYPE_WHITE  => T_('Color White'),
-      HTYPEMP_MANUAL => T_('Manual'),
-      HTYPE_AUCTION_OPEN => T_('Open Auction'),
-      HTYPE_AUCTION_SECRET => T_('Secret Auction'),
+      HTYPE_CONV   => T_('Conventional#wr_htype'),
+      HTYPE_PROPER => T_('Proper#wr_htype'),
+      HTYPE_NIGIRI => T_('Nigiri#wr_htype'),
+      HTYPE_DOUBLE => T_('Double game#wr_htype'),
+      HTYPE_BLACK  => T_('Color Black#wr_htype'),
+      HTYPE_WHITE  => T_('Color White#wr_htype'),
+      HTYPEMP_MANUAL => T_('Manual#wr_htype'),
+      HTYPE_AUCTION_OPEN => T_('Open Auction#wr_htype'),
+      HTYPE_AUCTION_SECRET => T_('Secret Auction#wr_htype'),
+      HTYPE_YOU_KOMI_I_COLOR => T_('You cut, I choose#wr_htype'),
+      HTYPE_I_KOMI_YOU_COLOR => T_('I cut, you choose#wr_htype'),
    );
 
    // config for handicap-filter
@@ -65,8 +67,8 @@ require_once( 'include/classlib_userconfig.php' );
       T_('Proper')         => "Handicaptype='proper'",
       T_('Nigiri')         => "Handicaptype='nigiri'",
       T_('Double')         => "Handicaptype='double'",
-      T_('Fix color')      => "Handicaptype IN ('double','black','white')",
       T_('Manual')         => "Handicaptype IN ('nigiri','double','black','white')",
+      T_('Fix Color')      => "Handicaptype IN ('double','black','white')",
       T_('Fair Komi')      => "Handicaptype IN ('auko_sec','auko_opn','div_ykic','div_ikyc')",
    );
 
@@ -381,7 +383,8 @@ require_once( 'include/classlib_userconfig.php' );
             $wrow_strings[16] = build_usertype_text($other_type, ARG_USERTYPE_NO_TEXT, true, '');
          if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
          {
-            $colstr = determine_color( $GameType, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack );
+            $colstr = determine_color( $GameType, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack,
+               $player_row['Handle'], $other_handle );
 
             if( !$is_my_game && $GameType == GAMETYPE_GO && !$is_fairkomi )
             {
@@ -508,7 +511,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
    }
 }//add_old_game_form
 
-function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack )
+function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack, $my_handle, $opp_handle )
 {
    global $base_path;
 
@@ -534,11 +537,10 @@ function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_
    }
    elseif( $CategoryHanditype == CAT_HTYPE_FAIR_KOMI )
    {
-      $color_note = GameTexts::get_fair_komi_color_note($Handicaptype);
-      if( $color_note )
-         $colstr = image( $base_path.'17/y.gif', GameTexts::get_fair_komi_types($Handicaptype), $color_note );
-      else
-         error('internal_error', "wroom.determine_color.bad_htype($Handicaptype,$CategoryHanditype,$is_my_game,$iamblack)");
+      $col_note = ( $is_my_game )
+         ? GameTexts::get_fair_komi_types( $Handicaptype, NULL, $my_handle, /*opp*/NULL )
+         : GameTexts::get_fair_komi_types( $Handicaptype, NULL, $opp_handle, $my_handle );
+      $colstr = image( $base_path.'17/y.gif', $col_note, NULL );
    }
    elseif( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
    {

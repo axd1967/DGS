@@ -60,17 +60,7 @@ require_once( 'include/classlib_game.php' );
       error('not_logged_in');
    $my_id = $player_row['ID'];
 
-   $game_row = mysql_single_fetch( "confirm.find_game($gid)",
-                 "SELECT Games.*, " .
-                 "Games.Flags+0 AS GameFlags, " . //used by check_move
-                 "black.ClockUsed AS X_BlackClock, " .
-                 "white.ClockUsed AS X_WhiteClock, " .
-                 "black.OnVacation AS Blackonvacation, " .
-                 "white.OnVacation AS Whiteonvacation " .
-                 "FROM (Games, Players AS black, Players AS white) " .
-                 "WHERE Games.ID=$gid AND black.ID=Black_ID AND white.ID=White_ID" )
-      or error('unknown_game', "confirm.find_game2($gid)");
-
+   $game_row = GameHelper::load_game_row( 'confirm.find_game', $gid );
    extract($game_row);
 
    if( @$_REQUEST['nextskip'] )
@@ -572,7 +562,10 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
    {
       if( !$fk->allow_start_game($my_id) )
          error('invalid_action', "confirm.check.start_game($gid,$Status,{$game_setup->Handicaptype})");
-      $errors = array();
+
+      $errors = ( is_htype_divide_choose($fk->game_setup->Handicaptype) )
+         ? $fk->check_komibid($req_komibid, $my_id)
+         : array();
    }
    else
       $errors = $fk->check_komibid($req_komibid, $my_id);

@@ -31,7 +31,6 @@ require_once( "include/contacts.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
       error('not_logged_in');
 
@@ -173,9 +172,11 @@ require_once( "include/contacts.php" );
 
       case HTYPE_AUCTION_SECRET:
       case HTYPE_AUCTION_OPEN:
-      //case HTYPE_YOU_KOMI_I_COLOR:
-      //case HTYPE_I_KOMI_YOU_COLOR:
-         $i_am_black = false; // waiting-room-offerer is black for fair-komi
+      case HTYPE_I_KOMI_YOU_COLOR:
+         $i_am_black = false; // waiting-room-OFFERER is black for fair-komi (giving komi first)
+         break;
+      case HTYPE_YOU_KOMI_I_COLOR:
+         $i_am_black = true; // waiting-room-JOINER is black for fair-komi (give komi first)
          break;
 
       default: //always available even if waiting room or unrated

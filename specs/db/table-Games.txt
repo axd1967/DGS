@@ -104,6 +104,8 @@ Description:
       - value < 0 : keeps handicap-type, see consts 'INVITE_HANDI_...' in 'include/message_functions.php'
       - for value INVITE_HANDI_FIXCOL the handicaptype HTYPE_BLACK/WHITE is calculated
         by matching the current Black_ID with the logged-in user
+      - for value INVITE_HANDI_DIV_CHOOSE the handicaptype HTYPE_YOU_KOMI_I_COLOR/I_KOMI_YOU_COLOR is calculated
+        by matching the current logged-in user as pivot-user in the Games.GameSetup-field taking that handicap-type
       - for available handicap-types and more details,
         see Waitingroom.Handicaptype in 'specs/db/table-Waitingroom.txt'
 

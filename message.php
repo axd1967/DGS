@@ -152,7 +152,6 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    {
       $gsc->add_default_values_info();
       $errors = $gsc->get_errors();
-      $preview = true;
    }
    elseif( $handle_msg_action )
    {
@@ -164,6 +163,8 @@ define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
    }
    else
       $errors = array();
+   if( count($errors) )
+      $preview = true;
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
@@ -922,7 +923,7 @@ function read_mpgame_request()
 // show diffs in game-settings for invitation-dispute between players
 function echo_dispute_diffs( $my_gs, $opp_gs, $my_handle, $opp_handle, &$msg_form  )
 {
-   $arr_diffs = GameSetup::build_invitation_diffs( $my_gs, $opp_gs );
+   $arr_diffs = GameSetup::build_invitation_diffs( $my_gs, $opp_gs, $my_handle, $opp_handle );
    if( count($arr_diffs) )
    {
       array_unshift( $arr_diffs, array( T_('Game settings by#inv_diff'),

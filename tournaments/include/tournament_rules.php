@@ -349,6 +349,8 @@ class TournamentRules
          case HTYPE_DOUBLE:
          case HTYPE_AUCTION_SECRET:
          case HTYPE_AUCTION_OPEN:
+         case HTYPE_YOU_KOMI_I_COLOR:
+         case HTYPE_I_KOMI_YOU_COLOR:
             // not supported for tournaments -> fallback to default NIGIRI
 
          default: //always available even if waiting room or unrated

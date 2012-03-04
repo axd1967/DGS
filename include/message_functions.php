@@ -260,14 +260,20 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $Handicap_m = $game_row['Handicap'];
       $Komi_m = $game_row['Komi'];
 
-      //ToMove_ID holds handitype since INVITATION
+      // ToMove_ID holds handitype since INVITATION
+      list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_ID, @$game_row['GameSetup'], $gid );
+      $curr_tomove = (int)$game_row['ToMove_ID'];
+      $my_htype = $my_gs->Handicaptype;
+      if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
+         $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+
       $my_col_black = ( $black_id == $my_ID );
-      $Handitype = get_handicaptype_for_invite( (int)$game_row['ToMove_ID'], $my_col_black );
+      $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_col_black, $my_htype );
       if( !$Handitype )
          $Handitype = HTYPE_NIGIRI; //default
       $CategoryHandiType = get_category_handicaptype( $Handitype );
       $Color_m = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $Handitype : HTYPE_NIGIRI;
-      $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $game_row['GameSetup'], $gid );
+      $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $my_gs, $gid );
 
       $MaintimeUnit = 'hours';
       $Maintime = $game_row['Maintime'];
@@ -842,8 +848,14 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
       $my_color_black = ($myColor == BLACK);
       $calculated = false;
 
-      //ToMove_ID holds handitype since INVITATION
-      $Handitype = get_handicaptype_for_invite( (int)$game_row['ToMove_ID'], $my_color_black );
+      // ToMove_ID holds handitype since INVITATION
+      list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $game_row['ID'] );
+      $curr_tomove = (int)$game_row['ToMove_ID'];
+      $my_htype = $my_gs->Handicaptype;
+      if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
+         $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+
+      $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_color_black, $my_htype );
       switch( (string)$Handitype )
       {
          case HTYPE_CONV:
@@ -860,8 +872,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
 
          case HTYPE_AUCTION_SECRET:
          case HTYPE_AUCTION_OPEN:
-            $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( CAT_HTYPE_FAIR_KOMI, $my_id,
-               @$game_row['GameSetup'], $game_row['ID'] );
+         case HTYPE_YOU_KOMI_I_COLOR:
+         case HTYPE_I_KOMI_YOU_COLOR:
+            $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( CAT_HTYPE_FAIR_KOMI, $my_id, $my_gs, $game_row['ID'] );
             break;
 
          default: //shouldn't happen
@@ -897,7 +910,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    {
       $itable->add_scaption(T_('Opponent info'));
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
-      $itable->add_sinfo( T_('Already started games'), (int)@$game_row['X_TotalCount'] );
+      $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
 
       $itable->add_scaption(T_('Game info'));
    }
@@ -915,6 +928,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    $itable->add_sinfo( T_('Size'), $Size );
 
    $color_class = 'class=InTextImage';
+   $color_note = '';
    switch( (string)$CategoryHandiType )
    {
       case CAT_HTYPE_CONV: // Conventional handicap
@@ -992,7 +1006,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
             }
          }
 
-         $itable->add_sinfo( T_('Type'), sprintf( T_('%s (Manual setting)'), $subtype ) );
+         $itable->add_sinfo( T_('Type'), sprintf( '%s [%s]', $subtype, T_('Manual setting#htype') ) );
          $itable->add_sinfo( T_('Colors'), $colortxt );
          $itable->add_sinfo( T_('Handicap'), $Handicap );
          $itable->add_sinfo( T_('Komi'), (float)$Komi );
@@ -1001,7 +1015,34 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
 
       case CAT_HTYPE_FAIR_KOMI: // Fair Komi
       {
-         $itable->add_sinfo( T_('Type'), sprintf( T_('%s (Fair Komi)'), GameTexts::get_fair_komi_types($Handitype) ) );
+         if( $tablestyle == GSET_WAITINGROOM )
+         {
+            $color_note = ( $is_my_game )
+               ? GameTexts::get_fair_komi_types( $Handitype, NULL, $player_row['Handle'], /*opp*/NULL )
+               : GameTexts::get_fair_komi_types( $Handitype, NULL, $other_handle, $player_row['Handle'] );
+         }
+         elseif( $tablestyle == GSET_MSG_INVITE && is_htype_divide_choose($Handitype) ) // invite|dispute Div&Choose
+         {
+            // parse htype/init/opp-handles from game-setup for game on INVITED or KOMI|STARTED status
+            $fk_gid = (int)@$game_row['Game_ID'];
+            list( $init_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $fk_gid );
+            if( is_null($init_gs) )
+               error('invite_bad_gamesetup', "game_info_table.fk_inv($tablestyle,$my_id,$fk_gid)");
+
+            $fk_htype = $init_gs->Handicaptype;
+            if( $game_row['Status'] == GAME_STATUS_INVITED )
+            {
+               $curr_tomove = (int)$game_row['ToMove_ID'];
+               if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($fk_htype) )
+                  $fk_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+            }
+
+            $color_note = GameTexts::get_fair_komi_types( $fk_htype, null, $player_row['Handle'], $other_handle );
+         }
+         else
+            $color_note = GameTexts::get_fair_komi_types($Handitype);
+
+         $itable->add_sinfo( T_('Type'), sprintf( '%s [%s]', $color_note, T_('Fair Komi#htype') ) );
          break;
       }//case CAT_HTYPE_FAIR_KOMI
    }//switch $CategoryHandiType
@@ -1114,11 +1155,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
          if( $Handitype == HTYPE_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
          elseif( $is_fairkomi )
-         {
-            $color_note = GameTexts::get_fair_komi_color_note($Handitype);
-            $colortxt = image( $base_path.'17/y.gif', GameTexts::get_fair_komi_types($Handitype), null, $color_class )
-               . MED_SPACING . $color_note;
-         }
+            $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
          elseif( $Handitype == HTYPE_NIGIRI || $is_nigiri )
             $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class);
          else

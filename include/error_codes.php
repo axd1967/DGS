@@ -181,6 +181,9 @@ class ErrorCode
          $arr['game_delete_invitation'] =
             T_("Delete game failed. This is problably not a problem.");
 
+         $arr['invite_bad_gamesetup'] =
+            T_("Sorry, missing game-setup for invitation. Please contact support.");
+
          $arr['max_games'] =
             T_("Sorry, your limit on started games has exceeded.");
 

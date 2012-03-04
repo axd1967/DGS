@@ -98,27 +98,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
 
 
-   $query= "SELECT Games.*, " .
-           "Games.Flags+0 AS GameFlags, " . //used by check_move
-           "black.Name AS Blackname, " .
-           "black.Handle AS Blackhandle, " .
-           "black.OnVacation AS Black_OnVacation, " .
-           "black.ClockUsed AS Black_ClockUsed, " .
-           "black.Rank AS Blackrank, " .
-           "black.Rating2 AS Blackrating, " .
-           "black.RatingStatus AS Blackratingstatus, " .
-           "white.Name AS Whitename, " .
-           "white.Handle AS Whitehandle, " .
-           "white.OnVacation AS White_OnVacation, " .
-           "white.ClockUsed AS White_ClockUsed, " .
-           "white.Rank AS Whiterank, " .
-           "white.Rating2 AS Whiterating, " .
-           "white.RatingStatus AS Whiteratingstatus " .
-           "FROM (Games, Players AS black, Players AS white) " .
-           "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID LIMIT 1";
-   if( !($game_row=mysql_single_fetch( "game.findgame($gid)", $query)) )
-      error('unknown_game', "game.findgame2($gid)");
-
+   $game_row = GameHelper::load_game_row( 'game.findgame', $gid, /*addf*/true );
    extract($game_row);
    $is_shape = ($ShapeID > 0);
 
@@ -1044,7 +1024,7 @@ function draw_message_box( &$message, $stay_on_board )
 function draw_add_time( $game_row, $colorToMove )
 {
    $info = GameAddTime::make_add_time_info( $game_row, $colorToMove );
-   $tabindex=10; //TODO: fix this start value
+   $tabindex=10; // NOTE: fix this start value !?
 
    echo '
     <a name="addtime"></a>
@@ -1106,8 +1086,15 @@ function draw_game_info( &$game_row, $game_setup, $board, $tourney )
       $komi = NO_VALUE;
 
       $Handitype = $game_setup->Handicaptype;
-      $icon_col_b = $icon_col_w = image( $base_path.'17/y.gif', GameTexts::get_fair_komi_types($Handitype),
-         GameTexts::get_fair_komi_color_note($Handitype), $color_class );
+      if( is_htype_divide_choose($Handitype) )
+      {
+         $fk = new FairKomiNegotiation( $game_setup, $game_row );
+         $uhandles = $fk->get_htype_user_handles();
+         $color_note = GameTexts::get_fair_komi_types( $Handitype, null, $uhandles[0], $uhandles[1] );
+      }
+      else
+         $color_note = GameTexts::get_fair_komi_types( $Handitype );
+      $icon_col_b = $icon_col_w = image( $base_path.'17/y.gif', $color_note, NULL, $color_class );
    }
    else
    {

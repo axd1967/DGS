@@ -79,31 +79,55 @@ class GameTexts
          return MINI_SPACING . span('GameTypeFairKomi', '(' . T_('Fair Komi#fairkomi') . ')');
    }
 
-   function get_fair_komi_types( $handicap_type=null )
+   function get_fair_komi_types( $handicap_type=null, $with_note=false, $my_handle=null, $opp_handle=null )
    {
       $arr = array(
             HTYPE_AUCTION_OPEN   => T_('Open Auction Komi#fairkomi'),
             HTYPE_AUCTION_SECRET => T_('Secret Auction Komi#fairkomi'),
-            //HTYPE_YOU_KOMI_I_COLOR => T_('You choose Komi, I choose Color#fairkomi'), //TODO
-            //HTYPE_I_KOMI_YOU_COLOR => T_('I choose Komi, You choose Color#fairkomi'), //TODO
+            HTYPE_YOU_KOMI_I_COLOR => T_('You choose Komi, I choose Color#fairkomi'),
+            HTYPE_I_KOMI_YOU_COLOR => T_('I choose Komi, You choose Color#fairkomi'),
+         );
+      $arr2 = array(
+            HTYPE_YOU_KOMI_I_COLOR => T_('Divide & Choose#fairkomi'),
+            HTYPE_I_KOMI_YOU_COLOR => T_('Divide & Choose#fairkomi'),
          );
 
       if( is_null($handicap_type) )
          return $arr;
-      else
-         return (isset($arr[$handicap_type])) ? $arr[$handicap_type] : '';
-   }//get_fair_komi_types
+      elseif( !isset($arr[$handicap_type]) )
+         return '';
+      elseif( is_null($my_handle) || $handicap_type == HTYPE_AUCTION_OPEN || $handicap_type == HTYPE_AUCTION_SECRET )
+      {
+         if( $with_note )
+         {
+            if( $handicap_type == HTYPE_AUCTION_OPEN )
+               $note = T_('Color determined by higher OPEN bid on komi#fk_color');
+            elseif( $handicap_type == HTYPE_AUCTION_SECRET )
+               $note = T_('Color determined by higher SECRET bid on komi#fk_color');
+         }
+         else
+            $note = '';
 
-   function get_fair_komi_color_note( $handicap_type )
-   {
-      $arr = array(
-            HTYPE_AUCTION_OPEN   => T_('Color determined by higher open bid on komi#fk_color'),
-            HTYPE_AUCTION_SECRET => T_('Color determined by higher secret bid on komi#fk_color'),
-            //HTYPE_YOU_KOMI_I_COLOR => T_('One player chooses Komi, Opponent chooses Color#fk_color'), //TODO
-            //HTYPE_I_KOMI_YOU_COLOR => T_('One player chooses Komi, Opponent chooses Color#fk_color'), //TODO
-         );
-      return (isset($arr[$handicap_type])) ? $arr[$handicap_type] : '';
-   }//get_fair_komi_color_note
+         $result = ( isset($arr2[$handicap_type]) ) ? $arr2[$handicap_type] : $arr[$handicap_type];
+         return $result . ($note != '' ? " ($note)" : '');
+      }
+      elseif( $handicap_type == HTYPE_YOU_KOMI_I_COLOR )
+      {
+         if( is_null($opp_handle) )
+            return sprintf( T_('You choose Komi, I (%s) choose Color#fairkomi'), $my_handle );
+         else
+            return sprintf( T_('You (%s) choose Komi, I (%s) choose Color#fairkomi'), $opp_handle, $my_handle );
+      }
+      elseif( $handicap_type == HTYPE_I_KOMI_YOU_COLOR )
+      {
+         if( is_null($opp_handle) )
+            return sprintf( T_('I (%s) choose Komi, You choose Color#fairkomi'), $my_handle );
+         else
+            return sprintf( T_('I (%s) choose Komi, You (%s) choose Color#fairkomi'), $my_handle, $opp_handle );
+      }
+      else
+         error('invalid_args', "GameTexts::get_fair_komi_types($handicap_type,$my_handle,$opp_handle)");
+   }//get_fair_komi_types
 
    function get_jigo_modes( $fair_komi=false, $jigo_mode=null )
    {

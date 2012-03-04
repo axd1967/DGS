@@ -2475,7 +2475,7 @@ table#fairkomiTable {
 }
 table#fairkomiTable td.Caption {
    text-align: center;
-   padding: 0.5em 0 0.5em 0;
+   padding: 0.5em;
 }
 table#fairkomiTable td.Caption span.Caption {
    font-weight: bold;
