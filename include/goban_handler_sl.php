@@ -70,9 +70,9 @@ define('SL_HOSTBASE', "http://senseis.xmp.net/?");
   *        M            EX        cross
   *        a..z         a..z      letters on empty intersection
   *
-  *        *            T*        black-territory (DGS-only)
-  *        ~            T~        white-territory (DGS-only)
-  *        ?            T?        neutral-undecided-territory (DGS-only)
+  *        A            TA        black-territory
+  *        V            TV        white-territory
+  *        ~            T~        neutral-undecided-territory (DGS-only)
   *        =            T=        dame-territory (DGS-only)
   *
   *   stone with numbers
@@ -96,8 +96,9 @@ define('SL_HOSTBASE', "http://senseis.xmp.net/?");
   *   - Ex07: automatic setting of hoshi-points
   *   - Ex08: no big support for some irregular boards with edge-magic (allowed by SL1-syntax)
   *   - Ex09: arrows and lines are not supported, inline-images are not supported
-  *   - Ex10: extended markers: * = black-territory, ~ = white-territory, ? = neutral-territory, '=' = dame
-  *   - Ex11: extended marker-text: T* T~ T? T=  for territory-markers (Ex10)
+  *   - Ex10: extended markers: A = black-territory, V = white-territory, ~ = neutral-territory, '=' = dame
+  *   - Ex11: extended marker-text: TA TV T? T=  for territory-markers (Ex10)
+  *   - Ex12: SL-chars '*' and '?' are not supported on DGS (as they don't contribute so much for diagrams)
   */
 class GobanHandlerSL1
 {
@@ -447,11 +448,11 @@ class GobanHandlerSL1
          elseif( $item == 'M' ) // cross = mark
             $this->goban->setMarker( $x, $y, GOBM_CROSS, $item );
          // Ex10: DGS-only board-markers ------
-         elseif( $item == '*' ) // black territory (black filled box)
+         elseif( $item == 'A' ) // black territory (black filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_B, $item );
-         elseif( $item == '~' ) // white territory (white filled box)
+         elseif( $item == 'V' ) // white territory (white filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_W, $item );
-         elseif( $item == '?' ) // neutral territory (green filled box)
+         elseif( $item == '~' ) // neutral territory (green filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_NEUTRAL, $item );
          elseif( $item == '=' ) // dame territory (red filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_DAME, $item );
@@ -479,7 +480,7 @@ class GobanHandlerSL1
       $this->ypos++;
 
       return true;
-   } //parse_line
+   }//parse_line
 
    /*!
     * \brief Replacing SL-text with DGS-tags if possible.
@@ -492,12 +493,12 @@ class GobanHandlerSL1
     *    BT WT    => <image board/b|wt.gif>
     *    BX WX    => <image board/b|wx.gif>
     *    EC ES ET EX => <image board/c|s|t|x.gif>
-    *    T* T~ T? T= => <image board/hb|hw|hg|hd.gif>  (DGS-only)
+    *    TA TV T~ T= => <image board/hb|hw|hg|hd.gif>  (DGS-only)
     *    !XYZ     => "XYZ" (=escaping XYZ)
     */
    function parse_SL_text( $text )
    {
-      static $map_territory = array( '*' => 'hb', '~' => 'hw', '?' => 'hg', '=' => 'hd' ); // Ex11: map "T..."
+      static $map_territory = array( 'A' => 'hb', 'V' => 'hw', '~' => 'hg', '=' => 'hd' ); // Ex11: map "T..."
       return preg_replace(
          array(
             "/(?<!\!)\[([^\]]+)\]/", // [topic]
@@ -505,7 +506,7 @@ class GobanHandlerSL1
             "/\b(?<!!)(B|W)(\d\d?|100)\b/e", // B|W1.100
             "/\b(?<!!)(B|W)([CSTX])\b/e", // (B|W)(C|S|T|X)
             "/\b(?<!!)E([CSTX])\b/e", // E(C|S|T|X)
-            "/\b(?<!!)T([\\\*~?=])/e", // Ex11: T(*|~|?|=)
+            "/\b(?<!!)T([AV~=])/e", // Ex11: T(A|V|~|=)
             "/!(\S)/", // !XYZ
          ), array(
             "<".SL_HOSTBASE."\\1 |\\1>", // [topic]
@@ -513,7 +514,7 @@ class GobanHandlerSL1
             "\"<image board/\" . strtolower('\\1') . \"\\2.gif>\"", // B|W1.100
             "\"<image board/\" . strtolower('\\1') . strtolower('\\2') . \".gif>\"", // (B|W)(C|S|T|X)
             "\"<image board/\" . strtolower('\\1') . \".gif>\"", // E(C|S|T|X)
-            "\"<image board/{\$map_territory['\\1']}.gif>\"", // Ex11: T(*|~|?|=)
+            "\"<image board/{\$map_territory['\\1']}.gif>\"", // Ex11: T(A|V|~|=)
             "\\1", // !XYZ
          ), $text );
    }//parse_SL_text
@@ -598,11 +599,11 @@ class GobanHandlerSL1
             GOBM_CROSS | GOBS_BLACK    => 'Z',
             GOBM_CROSS | GOBS_WHITE    => 'P',
             GOBM_CROSS                 => 'M',
-            GOBM_TERR_B | GOBS_WHITE   => '*', //TODO
-            GOBM_TERR_W | GOBS_BLACK   => '~', //TODO
-            GOBM_TERR_B                => '*',
-            GOBM_TERR_W                => '~',
-            GOBM_TERR_NEUTRAL          => '?',
+            //GOBM_TERR_B | GOBS_WHITE   => '?', // white-terr on B-stone
+            //GOBM_TERR_W | GOBS_BLACK   => '?', // black-terr on W-stone
+            GOBM_TERR_B                => 'A',
+            GOBM_TERR_W                => 'V',
+            GOBM_TERR_NEUTRAL          => '~',
             GOBM_TERR_DAME             => '=',
          );
       $result = array();

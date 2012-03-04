@@ -253,8 +253,8 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
          T_('<tt>Z P - BX WX</tt> : black|white stone with cross#gobedit'),
          T_('<tt>C S T M - EC ES ET EM</tt> : circle square triangle cross#gobedit'),
          T_('<tt>a..z - a..z</tt> : letters on empty intersection#gobedit'),
-         T_('<tt>* ~ - T* T~</tt> : black|white-territory#gobedit'),
-         T_('<tt>? = - T? T=</tt> : neutral-undecided-territory, dame-territory#gobedit'),
+         T_('<tt>A V - TA TV</tt> : black|white-territory#gobedit'),
+         T_('<tt>~ = - T~ T=</tt> : neutral-undecided-territory, dame-territory#gobedit'),
       );
    $notes[] = array( T_('BOARD-format for specialties:#gobedit'),
          T_('<tt>$$ [ref|link]</tt> : add link to <tt>ref</tt>-label on board, e.g. <tt>$$ [a|NadareJoseki]</tt><br>'
