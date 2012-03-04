@@ -1294,7 +1294,7 @@ function send_message( $debugmsg, $text='', $subject=''
       }
    }
 
-   $msg_flags = ($reccnt > 1) ? MSGFLAG_BULK : 0;
+   $msg_flags = ($from_id > 0 && $reccnt > 1) ? MSGFLAG_BULK : 0;
 
 
    ta_begin();
