@@ -70,6 +70,8 @@ class GameScore
    var $scoring_info;
    /*! \brief calculated score (may be independently set from $this->mode). */
    var $score;
+   /*! \brief BoardStatus-object (if set), used for scoring with quick-suite. */
+   var $board_status;
 
 
    /*!
@@ -89,6 +91,7 @@ class GameScore
       $this->dame = 0;
       $this->scoring_info = null;
       $this->score = null;
+      $this->board_status = null;
    }
 
    /*! \brief Returns prisoners for given color GSCOL_WHITE|BLACK. */
@@ -188,6 +191,16 @@ class GameScore
    function get_scoring_info()
    {
       return $this->scoring_info;
+   }
+
+   function set_board_status( $bs )
+   {
+      $this->board_status = $bs;
+   }
+
+   function get_board_status()
+   {
+      return $this->board_status;
    }
 
 
@@ -351,14 +364,16 @@ class GameScore
          . "  mode={$this->mode}"
          . ", handicap={$this->handicap}"
          . ", komi={$this->komi}"
-         . ", stones=[ B=" . $this->stones[GSCOL_BLACK] . ", W=" . $this->stones[GSCOL_WHITE] . " ]"
-         . ", dead_stones=[ B=" . $this->dead_stones[GSCOL_BLACK] . ", W=" . $this->dead_stones[GSCOL_WHITE] . " ]"
-         . ", territory=[ B=" . $this->territory[GSCOL_BLACK] . ", W=" . $this->territory[GSCOL_WHITE] . " ]"
-         . ", prisoners=[ B=" . $this->prisoners[GSCOL_BLACK] . ", W=" . $this->prisoners[GSCOL_WHITE] . " ]"
+         . ", stones=[B" . $this->stones[GSCOL_BLACK] . ",W" . $this->stones[GSCOL_WHITE] . "]"
+         . ", dead_stones=[B" . $this->dead_stones[GSCOL_BLACK] . ",W" . $this->dead_stones[GSCOL_WHITE] . "]"
+         . ", territory=[B" . $this->territory[GSCOL_BLACK] . ",W" . $this->territory[GSCOL_WHITE] . "]"
+         . ", prisoners=[B" . $this->prisoners[GSCOL_BLACK] . ",W" . $this->prisoners[GSCOL_WHITE] . "]"
          . ", dame={$this->dame}"
-         . ", scores=[ B=" . $this->scores[GSCOL_BLACK] . ", W=" . $this->scores[GSCOL_WHITE] . " ]"
+         . ", score=[{$this->score}]"
          . ", score.territory=" . $this->calculate_score(GSMODE_TERRITORY_SCORING, false)
          . ", score.area=" . $this->calculate_score(GSMODE_AREA_SCORING, false)
+         . ", scoring_info=[ " . print_r($this->scoring_info, false) . " ]"
+         . ", board_status=[ " . print_r($this->board_status, false) . " ]"
          ;
    }
 
@@ -427,6 +442,40 @@ class GameScore
    } //draw_score_box
 
 } //end 'GameScore'
+
+
+
+ /*!
+  * \class BoardStatus
+  * \brief Container class to store SGF-coordinates of black/white-territory/dead-stones/alive-stones, neutral & dame.
+  */
+class BoardStatus
+{
+   /* \brief Map storing list of board-coordinates for different mark-types: arr[marktype] = [ coord, ... ] */
+   var $arr; // keys: DAME, MARKED_DAME(=NEUTRAL), BLACK/WHITE, BLACK/WHITE_DEAD, BLACK/WHITE_TERRITORY
+
+   function BoardStatus()
+   {
+      $this->arr = array();
+      foreach( array( DAME, MARKED_DAME, BLACK, WHITE, BLACK_DEAD, WHITE_DEAD, BLACK_TERRITORY, WHITE_TERRITORY ) as $key )
+         $this->arr[$key] = array();
+   }
+
+   function add_coord( $key, $coord )
+   {
+      if( !isset($this->arr[$key]) )
+         error('invalid_args', "BoardStatus.add_coord($key,$coord)");
+      $this->arr[$key][] = $coord;
+   }
+
+   function get_coords( $key )
+   {
+      if( !isset($this->arr[$key]) )
+         error('invalid_args', "BoardStatus.get_coords($key)");
+      return implode( array_unique( $this->arr[$key] ), '' ); // SGF-format
+   }
+
+} //end 'BoardStatus'
 
 
 

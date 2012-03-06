@@ -1223,10 +1223,11 @@ class Board
 
    /*!
     * \brief Calculates game-score-data.
+    * \param $with_board_status enriches GameScore-object with board-status (used for quick-scoring)
     * \return if $with_coords is false, return null; otherwise returns
     *         [ territory-array, prisoners-array ] with [ coords => SGF-prop, ...] for SGF-download
     */
-   function fill_game_score( &$game_score, $with_coords=false )
+   function fill_game_score( &$game_score, $with_coords=false, $with_board_status=false )
    {
       // mark territory
       for( $x=0; $x<$this->size; $x++)
@@ -1245,6 +1246,15 @@ class Board
          WHITE => 0, WHITE_DEAD => 0, WHITE_TERRITORY => 0,
       );
 
+      if( $with_board_status )
+      {
+         $counts[MARKED_DAME] = 0; // =neutral, only for board-status
+         $bs = new BoardStatus();
+         $game_score->set_board_status( $bs );
+      }
+      else
+         $bs = null;
+
       $territory = array();
       $prisoners = array();
 
@@ -1252,14 +1262,20 @@ class Board
       {
          for( $y=0; $y<$this->size; $y++)
          {
+            if( $bs || $with_coords )
+               $coord = chr($x + ord('a')) . chr($y + ord('a'));
+
             # 0=NONE, 1=BLACK, 2=WHITE, 4=DAME, 5=BLACK_TERRITORY, 6=WHITE_TERRITORY, 9=BLACK_DEAD, 10=WHITE_DEAD
             $mark = ( @$this->array[$x][$y] & ~FLAG_NOCLICK );
             if( isset($counts[$mark]) )
+            {
                $counts[$mark]++;
+               if( $bs )
+                  $bs->add_coord( $mark, $coord );
+            }
 
             if( $with_coords )
             {
-               $coord = chr($x + ord('a')) . chr($y + ord('a'));
                switch( (int)$mark )
                {
                   case WHITE_DEAD:

@@ -41,14 +41,27 @@ function sgf2number_coords($coord, $Size)
    return array($x, $y);
 }
 
+function sgf2board_coords($coord, $Size)
+{
+   if( !is_string($coord) || strlen($coord)!=2 )
+      return '';
+
+   $x = ord($coord[0]) - ord('a');
+   $y = ord($coord[1]) - ord('a');
+   if( !($x<$Size && $y<$Size && $x>=0 && $y>=0) )
+      return '';
+
+   $col = chr( $x + ($x>=8?1:0) + ord('a') );
+   return  $col . ($Size - $y);
+}
+
 function number2board_coords($x, $y, $Size)
 {
    if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
      return NULL;
 
-  $col = chr( $x + ($x>=8?1:0) + ord('a') );
-
-  return  $col . ($Size - $y);
+   $col = chr( $x + ($x>=8?1:0) + ord('a') );
+   return  $col . ($Size - $y);
 }
 
 function board2number_coords($coord, $Size)

@@ -49,7 +49,7 @@ define('GAMECMD_MOVE',   'move');
 define('GAMECMD_RESIGN', 'resign');
 define('GAMECMD_STATUS_SCORE', 'status_score');
 define('GAMECMD_SCORE',  'score');
-define('GAME_COMMANDS', 'delete|set_handicap|move|resign|status_score|score');
+define('GAME_COMMANDS', 'delete|set_handicap|move|resign|status_score');
 
 // cmd => action
 define('GAMEACT_PASS', 'pass');
@@ -102,11 +102,10 @@ class QuickHandlerGame extends QuickHandler
    {
       $this->gid = (int)get_request_arg(GAMEOPT_GID);
       $this->move_id = (int)get_request_arg(GAMEOPT_MOVEID);
-      $this->message = get_request_arg(GAMEOPT_MESSAGE);
-      $this->url_moves = get_request_arg(GAMEOPT_MOVES);
+      $this->message = trim( get_request_arg(GAMEOPT_MESSAGE) );
+      $this->url_moves = strtolower( trim( get_request_arg(GAMEOPT_MOVES) ) );
    }
 
-   //TODO TODO TODO add status_score-command !!!
    function prepare()
    {
       $uid = (int) @$this->my_id;
@@ -122,40 +121,21 @@ class QuickHandlerGame extends QuickHandler
          error('unknown_game', "QuickHandlerGame.check({$this->gid})");
       $gid = $this->gid;
 
-      // check move(s) + context (move-id)
-      QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
-      if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_STATUS_SCORE | $cmd == GAMECMD_SCORE )
-      {
-         //TODO why url_moves name (URL ??)
-         if( is_null($this->url_moves) )
-         {
-            //TODO how can this->moves be an array ?? ... 1st need prepareMoves()-func
-            if( !is_array($this->moves) )
-               error('invalid_args', "QuickHandlerGame::checkArgMandatory.miss_arg($dbgmsg,".GAMEOPT_MOVES.")");
-         }
-         else
-         {
-            if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE )
-               QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVES, $this->url_moves );
-         }
-      }
-
-
       // prepare command: del, resign; set_handi, move, score
 
-      $this->game_row = mysql_single_fetch( "QuickHandlerGame.prepare.find_game($gid)",
-                 "SELECT Games.*, " .
-                 "Games.Flags+0 AS GameFlags, " . //used by check_move
-                 "black.ClockUsed AS X_BlackClock, " .
-                 "white.ClockUsed AS X_WhiteClock, " .
-                 "black.OnVacation AS Blackonvacation, " .
-                 "white.OnVacation AS Whiteonvacation " .
-                 "FROM (Games, Players AS black, Players AS white) " .
-                 "WHERE Games.ID=$gid AND black.ID=Black_ID AND white.ID=White_ID" )
-            or error('unknown_game', "QuickHandlerGame.prepare.find_game2($gid)");
+      $this->game_row = GameHelper::load_game_row( "QuickHandlerGame.prepare.find_game", $gid );
       extract($this->game_row);
 
-      if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_SCORE )
+      // check move(s) + context (move-id)
+      if( $cmd == GAMECMD_DELETE || $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_RESIGN || $cmd == GAMECMD_SCORE )
+      {
+         QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
+         if( $this->move_id <= 0 )
+            error('move_problem', "QuickHandlerGame.prepare.check.bad.move_id($gid,$cmd)");
+      }
+      if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE )
+         QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVES, $this->url_moves );
+      if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_STATUS_SCORE || $cmd == GAMECMD_SCORE )
          $this->prepareMoves();
       if( $this->is_pass_move && $cmd != GAMECMD_MOVE )
          error('move_problem', "QuickHandlerGame.prepare.check.pass_move($gid,$cmd)");
@@ -180,13 +160,11 @@ class QuickHandlerGame extends QuickHandler
 
       if( $uid != $Black_ID && $uid != $White_ID )
          error('not_game_player', "QuickHandlerGame.prepare.check.not_your_game($gid,$uid)");
-      if( !($cmd == GAMECMD_DELETE || $cmd == GAMECMD_RESIGN) ) // allow delete|resign even if not-to-move
-      {
-         if( $uid != $ToMove_ID )
-            error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID,$uid)");
-      }
 
-      if( (int)$this->move_id != $Moves )
+      // allow delete|resign|score-status even if not-to-move
+      if( $uid != $ToMove_ID && !($cmd == GAMECMD_DELETE || $cmd == GAMECMD_RESIGN || $cmd == GAMECMD_STATUS_SCORE) )
+         error('not_your_turn', "QuickHandlerGame.prepare.check.move_user($gid,$ToMove_ID,$uid)");
+      if( (int)$this->move_id != $Moves && $cmd != GAMECMD_STATUS_SCORE )
          error('already_played', "QuickHandlerGame.prepare.check.move_id.move_id($gid,{$this->move_id},$Moves)");
 
 
@@ -227,12 +205,13 @@ class QuickHandlerGame extends QuickHandler
                error('invalid_args', "QuickHandlerGame.prepare.check.move_count($gid,$cmd)");
          }
       }
-      elseif( $cmd == GAMECMD_SCORE )
+      elseif( $cmd == GAMECMD_STATUS_SCORE || $cmd == GAMECMD_SCORE )
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "QuickHandlerGame.prepare.check.status($gid,$cmd,$Status)");
       }
 
+      // load board with moves
       $this->TheBoard = new Board();
       $no_marked_dead = ( $this->action == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
       if( !$this->TheBoard->load_from_db( $this->game_row, 0, $no_marked_dead) )
@@ -243,10 +222,13 @@ class QuickHandlerGame extends QuickHandler
    function process()
    {
       $cmd = $this->quick_object->cmd;
-      $this->process_cmd_play(); //TODO later split into separate commands for clarity
+      if( $cmd == GAMECMD_STATUS_SCORE )
+         $this->process_cmd_status_score();
+      else
+         $this->process_cmd_play();
    }
 
-   function process_cmd()
+   function process_cmd_play()
    {
       static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
       global $player_row, $NOW;
@@ -513,7 +495,6 @@ class QuickHandlerGame extends QuickHandler
                error('mysql_insert_move', "QuickHandlerGame.process.insert_movemessage2($gid,$action})");
          }
 
-         $do_delete = false;
          if( $game_finished )
          {
             $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid,
@@ -524,6 +505,8 @@ class QuickHandlerGame extends QuickHandler
             $game_finalizer->skip_game_query();
             $game_finalizer->finish_game( "QuickHandlerGame.process", $do_delete, null, $score, $message_raw );
          }
+         else
+            $do_delete = false;
 
          // Notify opponent about move
          if( !$do_delete )
@@ -537,7 +520,38 @@ class QuickHandlerGame extends QuickHandler
             " WHERE ID={$this->my_id} LIMIT 1" );
       }
       ta_end();
-   }//process_cmd
+   }//process_cmd_play
+
+   function process_cmd_status_score()
+   {
+      global $Handicap, $Komi, $White_Prisoners, $Black_Prisoners; // needed because globally used in check_remove() :-(
+      $gid = $this->gid;
+      extract($this->game_row);
+
+      //TODO handle toggle/abs-dead mode for scoring
+
+      // NOTE: stonestring is the list of toggled points
+      $stonestring = '';
+      $game_score = check_remove( $this->TheBoard, getRulesetScoring($Ruleset),
+         /*coord*/false, /*exp-global*/true, /*board-status*/true ); //adjusted globals: $stonestring
+      $score = $game_score->calculate_score();
+
+      $this->addResultKey( 'ruleset', strtoupper($Ruleset) );
+      $this->addResultKey( 'score', score2text($score, false, false, true) );
+
+      // board-status
+      $fmt = 'board';
+      $bs = $game_score->get_board_status();
+      $this->addResultKey( 'dame', QuickHandlerGame::convert_coords( $bs->get_coords(DAME), $fmt, $Size ) );
+      $this->addResultKey( 'neutral', QuickHandlerGame::convert_coords( $bs->get_coords(MARKED_DAME), $fmt, $Size ) );
+      $this->addResultKey( 'white_stones', QuickHandlerGame::convert_coords( $bs->get_coords(WHITE), $fmt, $Size ) );
+      $this->addResultKey( 'black_stones', QuickHandlerGame::convert_coords( $bs->get_coords(BLACK), $fmt, $Size ) );
+      $this->addResultKey( 'white_dead', QuickHandlerGame::convert_coords( $bs->get_coords(WHITE_DEAD), $fmt, $Size ) );
+      $this->addResultKey( 'black_dead', QuickHandlerGame::convert_coords( $bs->get_coords(BLACK_DEAD), $fmt, $Size ) );
+      $this->addResultKey( 'white_territory', QuickHandlerGame::convert_coords( $bs->get_coords(WHITE_TERRITORY), $fmt, $Size ) );
+      $this->addResultKey( 'black_territory', QuickHandlerGame::convert_coords( $bs->get_coords(BLACK_TERRITORY), $fmt, $Size ) );
+   }//process_cmd_status_score
+
 
    /*! \brief Checks syntax and splits moves into array this->moves removing double coords, or detect pass-move. */
    function prepareMoves()
@@ -559,8 +573,7 @@ class QuickHandlerGame extends QuickHandler
       $is_label_format = preg_match("/\\d/", $this->url_moves); // label | sgf format
 
       $arr_double = array(); // check for doublettes
-      //TODO handle sgf-coords w/o comma-sep
-      $arr_coords = explode(',', $this->url_moves);
+      $arr_coords = QuickHandlerGame::parse_coords( $this->url_moves );
       foreach( $arr_coords as $coord )
       {
          $xy_arr = ($is_label_format) ? board2number_coords($coord, $size) : sgf2number_coords($coord, $size);
@@ -572,6 +585,44 @@ class QuickHandlerGame extends QuickHandler
          $arr_double[$coord] = 1;
       }
    }//prepareMoves
+
+
+   // ---------- static funcs ----------------------
+
+   /*! \brief Converts string of SGF-coords (without comma) into other coordinate-format. */
+   function convert_coords( $coord_str, $fmt, $size )
+   {
+      if( $fmt == 'sgf' )
+         return $coord_str;
+      elseif( $fmt == 'board' )
+      {
+         $out = array();
+         for( $i=0; $i < strlen($coord_str); $i+=2 )
+            $out[] = sgf2board_coords( substr($coord_str, $i, 2 ), $size );
+         return implode(',', $out);
+      }
+      else // fmt= separator
+      {
+         $out = array();
+         for( $i=0; $i < strlen($coord_str); $i+=2 )
+            $out[] = substr($coord_str, $i, 2);
+         return implode($fmt, $out);
+      }
+   }//convert_coords
+
+   /*! \brief Returns array of coordinate-strings (supported formats: sgf, sgf-comma, board). */
+   function parse_coords( $move_str )
+   {
+      if( strpos($move_str, ',') === false )
+         return explode(',', $move_str);
+      else
+      {
+         $out = array();
+         for( $i=0; $i < strlen($move_str); $i += 2 )
+            $out[] = substr($move_str, $i, 2);
+         return $out;
+      }
+   }
 
 } // end of 'QuickHandlerGame'
 

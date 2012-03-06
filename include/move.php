@@ -146,14 +146,16 @@ function check_handicap( &$board, $coord=false)
 
 
 // returns GameScore-object
-// NOTE: adjusted globals by check_remove(): $stonestring; only if export_globals=true
 // param $scoring_mode GSMODE_TERRITORY_SCORING | GSMODE_AREA_SCORING
-function check_remove( &$board, $scoring_mode, $coord=false, $export_globals=true )
+// NOTE: adjusted globals by check_remove(): $stonestring; only if export_globals=true
+// NOTE: need global $Handicap, $Komi, $White_Prisoners, $Black_Prisoners
+function check_remove( &$board, $scoring_mode, $coord=false, $export_globals=true, $with_board_status=false )
 {
+   global $stonestring, $Handicap, $Komi, $White_Prisoners, $Black_Prisoners;
+
    $Size= $board->size;
    $array= &$board->array;
 
-   global $stonestring;
    if( $export_globals && !@$stonestring ) $stonestring = '';
    $stonestring_loc = ( @$stonestring ) ? $stonestring : '';
 
@@ -221,12 +223,11 @@ function check_remove( &$board, $scoring_mode, $coord=false, $export_globals=tru
    if( $export_globals )
       $stonestring = $stonestring_loc;
 
-   global $Handicap, $Komi, $White_Prisoners, $Black_Prisoners;
    $game_score = new GameScore( $scoring_mode, $Handicap, $Komi );
-   $game_score->set_prisoners_all( $Black_Prisoners,  $White_Prisoners );
-   $board->fill_game_score( $game_score );
+   $game_score->set_prisoners_all( $Black_Prisoners, $White_Prisoners );
+   $board->fill_game_score( $game_score, /*coords*/false, $with_board_status );
 
    return $game_score;
-} //check_remove
+}//check_remove
 
 ?>
