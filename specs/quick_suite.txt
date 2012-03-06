@@ -174,7 +174,8 @@ and an error-code, there can be an optional 'error_msg' element:
    }
 
 The version-info includes the current DGS_VERSION and the QUICK_VERSION defined in
-"include/globals.php". The QUICK_VERSION is increased with every release.
+"include/globals.php". The QUICK_VERSION is increased with every release that changed
+some semantics or signature of the quick-interface.
 
 An empty 'error_code' indicates a successful operation, i.e. no errors have occured:
 
@@ -290,7 +291,7 @@ Example for JSON-style:
 
 #-------- (3) Objects ---------------------------------------------------------
 
-The currently supported DGS "objects" are:
+The DGS "objects" currently supported are:
 
    a) "game"    - playing a started game, game-info
    b) "user"    - user-info
@@ -330,7 +331,7 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>
+   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>&fmt=<FORMAT>
 
    quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&lstyle=<LIST_STYLE>&uid=<USER_ID>
 
@@ -353,7 +354,7 @@ Options:
 
    <MOVES> = move | moves | "pass"
       - move = single move-coordinate in specified mode-format
-      - moves = list of coordinates in specified mode-format
+      - moves = list of coordinates in specified mode-format (see below)
 
       - there are two mode-formats:
           - moves are given in SGF-coordinates (lower letters), e.g. "bc",
@@ -378,6 +379,11 @@ Options:
    <VIEW> = view for game-list
 
    <WITH> = optional with-option to deep-load recursive data (see commands)
+
+   <FORMAT> = output-format for coordinates (default is "sgf"):
+      - "sgf"   : SGF-format without separator, e.g. "bcefnj"
+      - ","     : SGF-format with comma-separator, e.g. "bc,ef,nj"
+      - "board" : board-coordindates with comma-separator, e.g. "b17,e14,o10"
 
    <LIST_STYLE> = see list-style in section (2d)
 
@@ -404,8 +410,9 @@ Commands:
             "id" : "123456", # game-id
             "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted
             "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
+            "shape_id" : "0", # shape-id > 0 if game was started as shape-game
             "status" : "PLAY", # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
-            "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages)
+            "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
             "score" : "", # score for finished game only (same format as for status_score-command above)
 
             "rated" : "1", # 0=unrated, 1=rated
@@ -556,28 +563,30 @@ Commands:
    "status_score" : verify final game-score
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates that 'state' should be "switched"
-      - optional opts: MESSAGE -> will be ignored
+      - optional opts: MESSAGE (will be ignored), FORMAT
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAME], [E-GAMEMOVE]
          - invalid_action : bad game-status for scoring step (only SCORE|SCORE2)
-         - invalid_switch : if state of coordindate can not be switched
+         - invalid_switch : if state of coordinate can not be switched
          - illegal_position : invalid coordinates used for stones to switch state
 
       - Result (JSON) =
          {
+            "ruleset" : "CHINESE",           # game-ruleset
             "score" : "0" | "W+7" | "B+2.5", # 0=jigo
-            "board_status" : {
-               "dame"            : "...", # coords*
-               "neutral"         : "...", # coords* (switchable)
-               "white_stones"    : "bc,...", # coords*
-               "black_stones"    : "aa,...", # coords*
-               "white_dead"      : "...", # coords*
-               "black_dead"      : "...", # coords*
-               "white_territory" : "...", # coords*
-               "black_territory" : "...", # coords*
-            }
+
+            # format of coordinates depends on FMT-parameter
+            "dame"            : "...", # coords*
+            "neutral"         : "...", # coords* (switchable)
+            "white_stones"    : "bc...", # coords*
+            "black_stones"    : "aa...", # coords*
+            "white_dead"      : "...", # coords*
+            "black_dead"      : "...", # coords*
+            "white_territory" : "...", # coords*
+            "black_territory" : "...", # coords*
          }
+
 
    "score" : assess dead/alive-status of stones, submitting score
       - required opts: GAME_ID, MOVE_ID, MOVES
@@ -717,6 +726,7 @@ Commands:
             "vacation_on" : "2d 7h",   # on-vacation ("" = not-on vac.)
             "register_date" : "YYYY-MM-DD",     # register-date
             "last_access" : "YYYY-MM-DD hh:mm:ss", # date of last access (website; in users time-zone; can be empty)
+            "last_quick_access" : "YYYY-MM-DD hh:mm:ss", # date of last access (quick-suite; in users time-zone; can be empty)
             "last_move" : "YYYY-MM-DD hh:mm:ss",   # date of last move (in users time-zone; can be empty)
             "rating_status" : "RATED",         # NONE | INIT | RATED
             "rating" : "5k (+46%)",            # DGS rating | ""
@@ -728,6 +738,7 @@ Commands:
             "games_rated" : "10",    # number of (finished) rated games
             "games_won" : "8",       # number of (finished rated) won games
             "games_lost" : "2",      # number of (finished rated) lost games
+            "games_mpg" : "0",       # number of started multi-player-games
          }
 
       - Result Values:
@@ -1711,4 +1722,7 @@ but are not necessarily going to be implemented (soon or at all).
 
 * Prio(?): add more handlers for remaining DGS objects and operations
 
+* game-obj:
+   - handle game-players >2, handle MPG
+   - handle fair-komi
 
