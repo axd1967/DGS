@@ -115,6 +115,7 @@ class QuickHandlerUser extends QuickHandler
          TimeFormat::echo_onvacation( @$urow['OnVacation'], TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT, '' ) );
       $this->addResultKey( 'register_date', QuickHandler::formatDate(@$urow['X_Registerdate'], /*long*/false) );
       $this->addResultKey( 'last_access', QuickHandler::formatDate(@$urow['X_Lastaccess']) );
+      $this->addResultKey( 'last_quick_access', QuickHandler::formatDate(@$urow['X_LastQuickAccess']) );
       $this->addResultKey( 'last_move', QuickHandler::formatDate(@$urow['X_LastMove']) );
       $this->addResultKey( 'rating_status', strtoupper($this->user->RatingStatus) );
       $this->addResultKey( 'rating', echo_rating($this->user->Rating, 1, 0, true, 1) );
@@ -126,6 +127,7 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'games_rated', (int)$this->user->GamesRated );
       $this->addResultKey( 'games_won', (int)$this->user->urow['Won'] );
       $this->addResultKey( 'games_lost', (int)$this->user->urow['Lost'] );
+      $this->addResultKey( 'games_mpg', (int)$this->user->urow['GamesMPG'] );
    }//process
 
 
