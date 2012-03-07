@@ -40,6 +40,7 @@ define('GAMEOPT_GID',     'gid');
 define('GAMEOPT_MOVEID',  'move_id');
 define('GAMEOPT_MOVES',   'move');
 define('GAMEOPT_MESSAGE', 'msg');
+define('GAMEOPT_FORMAT',  'fmt');
 
 define('GAMEOPTVAL_MOVE_PASS', 'pass');
 
@@ -540,7 +541,7 @@ class QuickHandlerGame extends QuickHandler
       $this->addResultKey( 'score', score2text($score, false, false, true) );
 
       // board-status
-      $fmt = 'board';
+      $fmt = get_request_arg(GAMEOPT_FORMAT, 'sgf');
       $bs = $game_score->get_board_status();
       $this->addResultKey( 'dame', QuickHandlerGame::convert_coords( $bs->get_coords(DAME), $fmt, $Size ) );
       $this->addResultKey( 'neutral', QuickHandlerGame::convert_coords( $bs->get_coords(MARKED_DAME), $fmt, $Size ) );

@@ -385,6 +385,9 @@ Options:
       - ","     : SGF-format with comma-separator, e.g. "bc,ef,nj"
       - "board" : board-coordindates with comma-separator, e.g. "b17,e14,o10"
 
+      - NOTE about lengths of output for different formats:
+            sgf-format < ','-format < board-format, e.g. 900 < 1250 < 1450 bytes
+
    <LIST_STYLE> = see list-style in section (2d)
 
    <USER_ID> = integer | 'mine'
