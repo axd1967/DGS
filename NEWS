@@ -406,13 +406,14 @@ Copyright (C) 2001-2012  Erik Ouchterlony
             * Show board, markup, board-title, board-text (right side or below)
             * Show links on board-markup, SL-links, extended by DGS-links "[1|dgs:docs.php]", open in new window
          * Additions &amp; Exceptions of SL1-syntax:
-            * Extended syntax by territory-markers: * (<image board/hb.gif>), ~ (<image board/hw.gif>), ? (<image board/hg.gif>), = (<image board/hd.gif>)
-            * Extended syntax by territory-images in text: T* T~ T? T=
+            * Extended syntax by territory-markers: A (<image board/hb.gif>), V (<image board/hw.gif>), ~ (<image board/hg.gif>), = (<image board/hd.gif>)
+            * Extended syntax by territory-images in text: TA TV T~ T=
             * Lines can start with white-spaces, line-prefix '$$' can be omitted
             * Auto-set hoshi-points if there are perpendicular edges and no manually set hoshi-markers
             * Easier coordinate-usage using "++"  "+-"  "-+"
             * Links of "#anchor" refer to DGS local page
             * Not-supported are arrows and lines "{AR|LN ...}" and some irregular boards with edge-magic
+            * Not-supported are '*' and '?'
          * Use player-settings for stone-size, wood-color, boards smooth-edge
 
       * &lt;http://url.net |link text> : enhanced link markup with optional text,

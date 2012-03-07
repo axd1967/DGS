@@ -19,7 +19,37 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-07 juga
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare,
+       ~.process_cmd_play, ~.process_cmd_status_score, ~.prepareMoves, ~.convert_coords, ~.parse_coords),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info, ~.convertGameFlags),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/classlib_game.php (class GameScore, ~.set_board_status, ~.get_board_status;
+       class BoardStatus, ~.add_coord, ~.get_coords),
+     include/board.php (Board.fill_game_score),
+     include/coords.php (sgf2board_coords),
+     include/move.php (check_remove),
+     specs/quick_suite.txt:
+   - quick-suite game-obj: added status_score-command
+     - in game-scoring phase returning: resultset, game-score, board-status
+       with coordinates-list of black/white stones/territory/dead-stones, dame and neutral points
+     - allow status_score-command only on game-status SCORE|SCORE2
+     - allow status_score-command also if not-your-turn and without move-id
+     - added output-format for coordinates of status_score-command
+     - parse also SGF-coordinate-list without comma-separators
+     - flatten board-status-structure in main-result
+   - quick-suite game-obj info-command:
+     added shape_id, ADMRESULT-flag, added last_quick_access, games_mpg
+
 2012-03-04 juga
+
+   * include/goban_handler_sl.php (class GobanHandlerSL1, ~.parse_line, ~.parse_SL_text, ~.write_goban),
+     goban_editor.php:
+   - <igoban>-tag: replaced '* ~ ?' with 'A V ~'
+     - use SL-syntax 'A' (black-territory), 'V' (white-territory) instead of '*' (in use on SL) and '~'
+     - use SL-unused '~' (neutral-territory), '=' (dame)
+     - SL-syntax '*' and '?' are not supported
 
    * include/game_functions.php (GameHelper.load_game_row;
        class FairKomiNegotiation, ~.read_from_game_row, ~.get_komibid, ~.is_choose_color,
