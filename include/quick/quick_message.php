@@ -188,8 +188,8 @@ class QuickHandlerMessage extends QuickHandler
          $calc_komi = 6.5; // TODO probably/fix komi
 
          $this->addResultKey( 'game_settings', array(
-               'opp_started_games' => $opp_started_games,
-
+               'game_type' => GAMETYPE_GO,
+               'game_players' => '1:1',
                'handicap_type' => $my_htype,
                'shape_id' => (int)$row['ShapeID'],
 
@@ -208,6 +208,7 @@ class QuickHandlerMessage extends QuickHandler
                'time_byo' => $row['Byotime'],
                'time_periods' => $row['Byoperiods'],
 
+               'opp_started_games' => $opp_started_games,
                'calc_type' => $calc_type,
                'calc_color' => $calc_color,
                'calc_handicap' => $calc_handicap,
