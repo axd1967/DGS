@@ -224,6 +224,7 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Send message to user'), "message.php?mode=NewMessage", false);
             item(T_('Add/edit contact'), "edit_contact.php", false, true);
          } $item_level--;
+         item(T_('Show my rating position'), "users.php?showpos=1", true);
          item(T_('Show my opponents'), "opponents.php", true, true);
          { $item_level++;
             item(T_('Show game statistics for two players'), "opponents.php", false, true);
