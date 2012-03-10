@@ -76,14 +76,21 @@ class QuickHandlerUser extends QuickHandler
 
    function prepare()
    {
+      global $player_row;
+
       // see specs/quick_suite.txt (3b)
       $dbgmsg = "QuickHandlerUser.prepare({$this->uid},{$this->handle})";
       $this->checkCommand( $dbgmsg, USER_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
       // check uid | user
-      if( (string)$this->uid == '' && (string)$this->handle == '' )
-         error('invalid_args', "$dbgmsg.miss_user");
+      if( ($this->uid == 0 || (string)$this->uid == '') && (string)$this->handle == '' )
+      {
+         // use logged-in user as default
+         $this->uid = (int)@$player_row['ID'];
+         if( $this->uid <= 0 )
+            error('invalid_args', "$dbgmsg.miss_user");
+      }
       if( (string)$this->uid != '' && is_numeric($this->uid) && $this->uid > 0 )
          $this->user = User::load_user( $this->uid );
       elseif( (string)$this->handle != '' )
