@@ -100,11 +100,11 @@ class QuickHandlerMessage extends QuickHandler
       if( $cmd == MESSAGECMD_INFO )
       {
          /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
-         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->oid, /*full*/false );
+         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->oid, /*full*/true );
 
          if( $this->is_with_option(QWITH_USER_ID) )
             $this->user_rows = User::load_quick_userinfo( array(
-               $my_id, (int)$this->msg_row['other_ID'] ));
+               $my_id, (int)$this->msg_row['other_id'] ));
 
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
       }
@@ -135,10 +135,11 @@ class QuickHandlerMessage extends QuickHandler
          case 'N': $uid_from = $other_uid; $uid_to = $my_id; break;
          default:  $uid_from = $uid_to = 0; break;
       }
+      $gid = (int)$row['Game_ID'];
 
       $this->addResultKey( 'id', (int)$row['ID'] );
-      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows) );
-      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows) );
+      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows) ); // TODO add rating/rating_elo
+      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows) ); // TODO add rating/rating_elo
       $this->addResultKey( 'type', strtoupper($row['Type']) );
       $this->addResultKey( 'flags', QuickHandlerMessage::convertMessageFlags($row['Flags']) );
       $this->addResultKey( 'folder',
@@ -149,10 +150,70 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'level', (int)$row['Level'] );
       $this->addResultKey( 'message_prev', (int)$row['ReplyTo'] );
       $this->addResultKey( 'message_hasnext', ($row['X_Flow'] & FLOW_ANSWERED) ? 1 : 0 );
+      //TODO what if Folder_nr = Reply-folder !?
       $this->addResultKey( 'needs_reply', ($row['Folder_nr'] == FOLDER_NEW && $row['Type'] == MSGTYPE_INVITATION) ? 1 : 0 );
-      $this->addResultKey( 'game_id', (int)$row['Game_ID'] );
+      $this->addResultKey( 'game_id', $gid );
       $this->addResultKey( 'subject', $row['Subject'] );
       $this->addResultKey( 'text', $row['Text'] );
+
+      //TODO mark as "read" (like GUI)
+      //TODO handle FOLDER given (moving to given folder except for invitation)
+
+      //TODO move into sub-method
+      if( $row['Type'] == MSGTYPE_INVITATION )
+      {
+         // ToMove_ID holds handitype since INVITATION
+         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
+         $curr_tomove = (int)$row['ToMove_ID'];
+         $my_htype = $my_gs->Handicaptype;
+         if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
+            $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+
+         $my_col_black = ( $row['Black_ID'] == $my_id );
+         $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_col_black, $my_htype );
+         if( !$Handitype )
+            $Handitype = HTYPE_NIGIRI; //default
+         $cat_htype = get_category_handicaptype( $Handitype );
+         $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
+
+         $time_limit = TimeFormat::echo_time_limit(
+               $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
+               TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
+
+         $opp_started_games = 0; //TODO
+
+         $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+         $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
+         $calc_handicap = 3; // TODO probable/fix handicap
+         $calc_komi = 6.5; // TODO probably/fix komi
+
+         $this->addResultKey( 'game_settings', array(
+               'opp_started_games' => $opp_started_games,
+
+               'handicap_type' => $my_htype,
+               'shape_id' => (int)$row['ShapeID'],
+
+               'rated' => ( ($row['Rated'] == 'N') ? 0 : 1 ),
+               'ruleset' => strtoupper($row['Ruleset']),
+               'size' => (int)$row['Size'],
+               'komi' => (float)$row['Komi'],
+               'jigo_mode' => $jigo_mode,
+               'handicap' =>  (int)$row['Handicap'],
+               'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
+
+               'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
+               'time_mode' => strtoupper($row['Byotype']),
+               'time_limit' => $time_limit,
+               'time_main' => $row['Maintime'],
+               'time_byo' => $row['Byotime'],
+               'time_periods' => $row['Byoperiods'],
+
+               'calc_type' => $calc_type,
+               'calc_color' => $calc_color,
+               'calc_handicap' => $calc_handicap,
+               'calc_komi' => $calc_komi,
+            ));
+      }
    }//process_cmd_info
 
    function load_folder( $uid, $folder_id )
