@@ -479,20 +479,27 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added URL-arg 'mpg' for multi-player-game to disable showing player-name in all nodes
 
 ## * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
+##    * see 'specs/quick_suite.txt' on DGS source repository for full specs
 ##    * Added game-handler to
 ##       * retrieve information about game, with nested user-objects
 ##       * retrieve own private notes of game
-##       * retrieve list of games with views: status, running, finished, observing, observed
+##       * retrieve list of games with views: status, running, finished, observing, observed, MPG
 ##       * play game including scoring-steps
 ##       * delete game
 ##    * Added user-handler to
-##       * retrieve public information about user
+##       * retrieve public information about given user or logged-in user
 ##    * Added message-handler to
-##       * retrieve information about private message, with nested user-/folder-objects
+##       * retrieve information about private message, with nested user-/folder-objects,
+##         including game-settings for invitation
 ##    * Added folder-handler to
 ##       * retrieve information about message-folders
 ##    * Added contact-handler to
 ##       * retrieve information about own contacts
+##    * Added waitingroom-handler to
+##       * retrieve information about waiting-room game-offers
+##    * Added bulletin-handler to
+##       * retrieve list of unread bulletins
+##       * mark bulletins as read
 
    * <home_ quick_status.php?version=2>Quick Status</home> (new version):
       * Added URL-args:
@@ -532,8 +539,10 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Shown in user info, waiting room, on users and opponents page
       * Show icon (<image online.gif>) for users being "online" (i.e. last access time within 10 mins ago)
         on pages <home users.php>Users</home>, <home opponents.php>Opponents</home> and <home list_contacts.php>Contacts</home>
+      * Added register-date of players (also on opponents-page)
       * Used button-image for ID-column for users and opponents page
       * Show ELO-value of DGS-rating as hover-text over user-rating if linked to rating-graph
+      * <home users.php?showpos=1>Show players absolute position</home> in the user-list ordered by rating
 
       * <home opponents.php>Opponents page</home>:
          * Added column (<image table.gif>) with link to games with current opponent for finished or running games

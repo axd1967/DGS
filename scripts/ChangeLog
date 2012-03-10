@@ -19,6 +19,76 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-11 juga
+
+   * include/db/waitingroom.php (class Waitingroom, ~.to_string, ~.persist, ~.insert,
+       ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_waitingroom),
+     include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_info),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/quick/quick_handler.php (QuickHandler.build_obj_user):
+   - implemented waitingroom-handler with command:
+     - "info" to retrieve info about single waitingroom-entry (unfinished)
+   - added default-values for fields: game_type, game_players
+   - changed field-pos of 'opp_started_games'
+
+   * include/error_codes.php (ErrorCode.init):
+   - added error 'unknown_entry' as general-error for quick-suite
+
+   * specs/quick_suite.txt:
+   - extended specs for:
+     - (3a) user-object "info"-command: check for logged-in user as fallback
+     - (3b) game-object "info"-command: added jigo-mode
+     - (3c) message-object: added specs for invitations, send-message, folder-commands, list-messages
+     - (3f) wroom-object: added specs for waiting-room: list, info, join, new_game
+     - (3g) bulletin-object: added specs for bulletins: list, mark_read
+     - extend user-data with rating/rating_elo-fields
+   - added TODOs
+
+2012-03-10 juga
+
+   * include/db/bulletin.php (Bulletin.mark_bulletin_as_read):
+   - bugfix: allow bulletin read-marking also on archived bulletins
+
+   * include/quick/quick_bulletin.php (class QuickHandlerBulletin, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_list, ~.process_cmd_mark_read, ~.convertBulletinFlags):
+   - implemented bulletin-handler with commands:
+     - "list" to get list of unread bulletins
+     - "mark_read" to mark bulletins as read
+
+   * include/quick/quick_handler.php (QuickHandler.build_obj_user):
+   - quick-suite: add userinfo rating/rating_elo-fields if Rating2-field available in data-source
+
+   * opponents.php, users.php:
+   - from wishlist: added register-date to users- and opponents-list with filter
+
+   * users.php (users_show_pos_extend_table_form),
+     site_map.php, skins/dragon/screen.css:
+   - from wishlist: show players absolute position in the user-list ordered by rating
+
+   * include/table_columns.php (Table.set_from_row, ~.set_sort):
+   - added set-methods for from-row and explicit table-sort
+
+   * include/std_functions.php (who_is_logged):
+   - bugfix: passing quick-suite-arg as login-options to is_logged_in()-func
+
+   * include/quick/quick_bulletin.php (class QuickHandlerBulletin, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_list),
+     include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_list),
+     include/quick/quick_handler.php (QuickHandler.build_obj_user),
+     include/quick/quick_suite.php (QuickSuite.getQuickHandler):
+   - added skeleton for bulletin and waitingroom quick-handler
+
+   * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info):
+   - message quick-handler: added game-settings of invitational message for "info"-command
+
+   * include/quick/quick_user.php (QuickHandlerUser.prepare):
+   - user quick-handler: use logged-in user if no user specified
+
+   * site_map.php:
+   - added new-FK-game, templates
+
 2012-03-07 juga
 
    * include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare,
