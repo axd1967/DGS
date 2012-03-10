@@ -1646,6 +1646,16 @@ form#contactForm table.EditOptions {
 
 
 /* ------------------------- */
+/* users pages */
+/* ------------------------- */
+
+table tr.ShowPosUser td {
+   background: #bbddff;
+   font-weight: bold;
+}
+
+
+/* ------------------------- */
 /* opponents pages */
 /* ------------------------- */
 

@@ -51,6 +51,11 @@ require_once( 'include/classlib_userpicture.php' );
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
    if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
+   $show_pos = (int)get_request_arg('showpos'); // 1=find-initial-pos, 2=browse-on-found-pos
+   $has_rating = ( $player_row['RatingStatus'] != RATING_NONE );
+   if( !$has_rating )
+      $show_pos = 0;
+
    // config for usertype-filter
    $query_usertype = 'Type>0 AND (Type & %d)';
    $usertypes_array = array(
@@ -70,6 +75,8 @@ require_once( 'include/classlib_userpicture.php' );
    $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
+   if( $has_rating )
+      $utable->set_extend_table_form_function( 'users_show_pos_extend_table_form' ); //func
 
    // table filters
    $ufilter->add_filter( 1, 'Numeric', 'P.ID', true);
@@ -148,7 +155,16 @@ require_once( 'include/classlib_userpicture.php' );
    $utable->add_tablehead(14, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
    $utable->add_tablehead(15, T_('Last move#header'), 'Date', 0, 'LastMove-');
 
-   $utable->set_default_sort( 1); //on ID
+   if( $show_pos )
+   {
+      $utable->set_sort( 5 ); // enforce rating-sort for showing players absolute pos
+      $rp = new RequestParameters( null, false );
+      $rp->add_entry('showpos', 2);
+      $utable->add_external_parameters( $rp, false );
+   }
+   else
+      $utable->set_default_sort( 1); //on ID
+
    $order = $utable->current_order_string();
    $limit = $utable->current_limit_string();
 
@@ -169,7 +185,35 @@ require_once( 'include/classlib_userpicture.php' );
 
    $query_ufilter = $utable->get_query(); // clause-parts for filter
    $qsql->merge( $query_ufilter );
-   $query = $qsql->get_select() . "$order$limit";
+
+   // find absolute player-position in (filtered) users-list
+   $show_pivot = ( $show_pos == 2 );
+   if( $show_pos == 1 )
+   {
+      $my_rating = $player_row['Rating2'];
+      $qsql_upos = $qsql->duplicate();
+      $qsql_upos->clear_parts( SQLP_FIELDS );
+      $qsql_upos->add_part( SQLP_FIELDS, "COUNT(*) AS X_RatingPos" );
+      $qsql_upos->add_part( SQLP_WHERE, "P.Rating2 > $my_rating" );
+      $row_upos = mysql_single_fetch( 'users.find_upos', $qsql_upos->get_select() . $order );
+      if( $row_upos )
+      {
+         $upos = (int)$row_upos['X_RatingPos'];
+         $max_rows = $player_row['TableMaxRows'];
+         $offset = ( $upos <= $max_rows ) ? 0 : $upos - floor($max_rows/2);
+         $utable->set_from_row( $offset );
+         $limit = $utable->current_limit_string();
+         $show_pivot = true;
+      }
+   }
+   if( $show_pivot )
+   {
+      // order pivot-user at top of users with same rating
+      $qsql->add_part( SQLP_FIELDS, "(P.ID=$uid) AS X_PivotOrder" );
+      $order .= ", X_PivotOrder DESC";
+   }
+
+   $query = $qsql->get_select() . $order . $limit;
 
    $result = db_query( 'users.find_data', $query );
    $show_rows = $utable->compute_show_rows(mysql_num_rows($result));
@@ -262,6 +306,8 @@ require_once( 'include/classlib_userpicture.php' );
          $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
       }
 
+      if( $show_pivot && ($ID == $uid ) ) // mine
+         $urow_strings['extra_class'] = 'ShowPosUser';
       $utable->add_row( $urow_strings );
    }
    mysql_free_result($result);
@@ -274,4 +320,12 @@ require_once( 'include/classlib_userpicture.php' );
 
    end_page(@$menu_array);
 }
+
+
+// callback-func for users-list Table-form adding form-elements below table
+function users_show_pos_extend_table_form( &$table, &$form )
+{
+   return $form->print_insert_checkbox('showpos', '1', T_('Show position'), @$_REQUEST['showpos'] );
+}
+
 ?>
