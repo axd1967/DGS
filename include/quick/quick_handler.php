@@ -166,6 +166,8 @@ class QuickHandler
       {
          $userinfo['handle'] = @$user_rows[$uid]['Handle'];
          $userinfo['name'] = @$user_rows[$uid]['Name'];
+         if( isset($user_rows[$uid]['Country']) )
+            $userinfo['country'] = $user_rows[$uid]['Country'];
          if( isset($user_rows[$uid]['Rating2']) )
          {
             $rating = @$user_rows[$uid]['Rating2'];

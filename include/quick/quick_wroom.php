@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once 'include/quick/quick_handler.php';
+require_once 'include/db/waitingroom.php';
+require_once 'include/time_functions.php';
 
 
  /*!
@@ -28,7 +30,9 @@ require_once 'include/quick/quick_handler.php';
   */
 
 // see specs/quick_suite.txt (3f)
-define('WROOM_COMMANDS', 'list');
+define('WROOMCMD_JOIN', 'join'); //TODO impl
+define('WROOMCMD_NEW_GAME', 'new_game'); //TODO impl
+define('WROOM_COMMANDS', 'info');
 
 
  /*!
@@ -38,9 +42,15 @@ define('WROOM_COMMANDS', 'list');
   */
 class QuickHandlerWaitingroom extends QuickHandler
 {
+   var $wroom_id;
+   var $wroom;
+
    function QuickHandlerWaitingroom( $quick_object )
    {
       parent::QuickHandler( $quick_object );
+
+      $this->wroom_id = 0;
+      $this->wroom = null;
    }
 
 
@@ -53,6 +63,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 
    function parseURL()
    {
+      $this->wroom_id = (int)get_request_arg('wrid');
    }
 
    function prepare()
@@ -67,9 +78,15 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       // prepare command: list
 
-      if( $cmd == QCMD_LIST )
+      if( $cmd == QCMD_INFO )
       {
-         //TODO
+         // check id
+         if( (string)$this->wroom_id == '' || !is_numeric($this->wroom_id) || $this->wroom_id <= 0 )
+            error('invalid_args', "$dbgmsg.bad_wrid");
+
+         $this->wroom = Waitingroom::load_waitingroom( $this->wroom_id, $this->is_with_option(QWITH_USER_ID) );
+         if( is_null($this->wroom) )
+            error('unknown_entry', "$dbgmsg.load_wroom({$this->wroom_id})");
       }
 
       // check for invalid-action
@@ -80,17 +97,58 @@ class QuickHandlerWaitingroom extends QuickHandler
    function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == QCMD_LIST )
-         $this->process_cmd_list();
+      if( $cmd == QCMD_INFO )
+         $this->process_cmd_info();
    }
 
-   function process_cmd_list()
+   function process_cmd_info()
    {
-      $out = array();
-      //TODO
+      $wr = $this->wroom;
+      $user_rows = array( $wr->uid => $wr->User->urow );
+      $time_limit = TimeFormat::echo_time_limit(
+            $wr->Maintime, $wr->Byotype, $wr->Byotime, $wr->Byoperiods,
+            TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
 
-      $this->add_list( QOBJ_WROOM, $out );
-   }//process_cmd_list
+      $this->addResultKey('id', $wr->ID );
+      $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows) );
+      $this->addResultKey('created_at', QuickHandler::formatDate($wr->Created) );
+      $this->addResultKey('count_offers', $wr->CountOffers );
+      $this->addResultKey('comment', $wr->Comment );
+
+      // game-settings
+      $this->addResultKey('game_type', $wr->GameType );
+      $this->addResultKey('game_players', $wr->GamePlayers );
+      $this->addResultKey('handicap_type', strtolower($wr->Handicaptype) );
+      $this->addResultKey('shape_id', $wr->ShapeID );
+
+      $this->addResultKey('rated', ( $wr->Rated ) ? 1 : 0 );
+      $this->addResultKey('ruleset', strtoupper($wr->Ruleset) );
+      $this->addResultKey('size', $wr->Size );
+      $this->addResultKey('komi', $wr->Komi );
+      $this->addResultKey('jigo_mode', strtoupper($wr->JigoMode) );
+      $this->addResultKey('handicap', $wr->Handicap );
+      $this->addResultKey('handicap_mode', ( $wr->StdHandicap ) ? 'STD' : 'FREE' );
+
+      $this->addResultKey('adjust_komi', $wr->AdjKomi );
+      $this->addResultKey('adjust_handicap', $wr->AdjHandicap );
+      $this->addResultKey('min_handicap', $wr->MinHandicap );
+      $this->addResultKey('max_handicap', $wr->MaxHandicap );
+
+      $this->addResultKey('time_weekend_clock', ( $wr->WeekendClock ) ? 1 : 0 );
+      $this->addResultKey('time_mode', strtoupper($wr->Byotype) );
+      $this->addResultKey('time_limit', $time_limit );
+      $this->addResultKey('time_main', $wr->Maintime );
+      $this->addResultKey('time_byo', $wr->Byotime );
+      $this->addResultKey('time_periods', $wr->Byoperiods );
+
+      //TODO TODO
+      $this->addResultKey('opp_started_games', 0 ); //TODO also add for wroom
+      $this->addResultKey('calc_type', 0 );
+      $this->addResultKey('calc_color', 0 );
+      $this->addResultKey('calc_handicap', 0 );
+      $this->addResultKey('calc_komi', 0 );
+      $this->addResultKey('restrictions', '' );
+   }//process_cmd_info
 
 
    // ------------ static functions ----------------------------
