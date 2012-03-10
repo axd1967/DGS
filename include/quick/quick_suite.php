@@ -25,6 +25,8 @@ require_once 'include/quick/quick_user.php';
 require_once 'include/quick/quick_message.php';
 require_once 'include/quick/quick_folder.php';
 require_once 'include/quick/quick_contact.php';
+require_once 'include/quick/quick_wroom.php';
+require_once 'include/quick/quick_bulletin.php';
 
  /*!
   * \file quick_suite.php
@@ -58,8 +60,10 @@ class QuickSuite
          'QuickHandlerMessage',     // message: info
          'QuickHandlerUser',        // user: info
          'QuickHandlerGameInfo',    // game: info | get_notes
+         'QuickHandlerWaitingroom', // wroom: list | info | new_game
          'QuickHandlerFolder',      // folder: list
          'QuickHandlerContact',     // contact: list
+         'QuickHandlerBulletin',    // bulletin: list | mark_read
       );
 
       if( is_null($obj) )

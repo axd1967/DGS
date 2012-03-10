@@ -32,6 +32,8 @@ define('QOBJ_USER', 'user');
 define('QOBJ_MESSAGE', 'message');
 define('QOBJ_FOLDER', 'folder');
 define('QOBJ_CONTACT', 'contact');
+define('QOBJ_WROOM', 'wroom');
+define('QOBJ_BULLETIN', 'bulletin');
 
 // general quick-commands
 define('QCMD_INFO', 'info');  // get info about single object
@@ -159,7 +161,7 @@ class QuickHandler
    function build_obj_user( $uid, $user_rows=null, $always=false )
    {
       $userinfo = array( 'id' => $uid );
-      if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_rows) && is_array($user_rows[$uid]) )
+      if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_rows) && is_array(@$user_rows[$uid]) )
       {
          $userinfo['handle'] = $user_rows[$uid]['Handle'];
          $userinfo['name'] = $user_rows[$uid]['Name'];
