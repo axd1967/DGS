@@ -630,7 +630,7 @@ class Bulletin
       {//HOT-section to mark bulletin as read
          db_query( "Bulletin::mark_bulletin_as_read($bid,$uid)",
             "INSERT IGNORE BulletinRead (bid,uid) " .
-            "SELECT ID, $uid FROM Bulletin WHERE ID=$bid AND Status='".BULLETIN_STATUS_SHOW."' LIMIT 1" );
+            "SELECT ID, $uid FROM Bulletin WHERE ID=$bid AND Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."') LIMIT 1" );
 
          if( mysql_affected_rows() > 0 )
          {
