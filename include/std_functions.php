@@ -2355,14 +2355,15 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
 
 function who_is_logged( &$player_row, $quick_suite=false )
 {
+   global $main_path;
+   $login_opts = LOGIN_DEFAULT_OPTS | ( $quick_suite ? LOGIN_QUICK_SUITE : 0 );
    $handle = safe_getcookie('handle');
    $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
-   global $main_path;
 
    // because of include_all_translate_groups() must be called from main dir
    chdir( $main_path);
-   $player_id = is_logged_in($handle, $sessioncode, $player_row, $quick_suite);
+   $player_id = is_logged_in($handle, $sessioncode, $player_row, $login_opts );
    chdir( $curdir);
    return $player_id;
 }
