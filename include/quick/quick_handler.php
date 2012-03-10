@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once 'include/error_functions.php';
+require_once 'include/rating.php';
 
  /*!
   * \file quick_handler.php
@@ -163,8 +164,14 @@ class QuickHandler
       $userinfo = array( 'id' => $uid );
       if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_rows) && is_array(@$user_rows[$uid]) )
       {
-         $userinfo['handle'] = $user_rows[$uid]['Handle'];
-         $userinfo['name'] = $user_rows[$uid]['Name'];
+         $userinfo['handle'] = @$user_rows[$uid]['Handle'];
+         $userinfo['name'] = @$user_rows[$uid]['Name'];
+         if( isset($user_rows[$uid]['Rating2']) )
+         {
+            $rating = @$user_rows[$uid]['Rating2'];
+            $userinfo['rating'] = echo_rating($rating, /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1 );
+            $userinfo['rating_elo'] = $rating;
+         }
       }
       return $userinfo;
    }
