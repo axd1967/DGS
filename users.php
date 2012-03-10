@@ -110,6 +110,8 @@ require_once( 'include/classlib_userpicture.php' );
          array( FC_SIZE => 4 ));
    $ufilter->add_filter(18, 'Selection', $usertypes_array, true );
    $ufilter->add_filter(19, 'Boolean', "P.UserPicture", true );
+   $ufilter->add_filter(22, 'RelativeDate', 'P.Registerdate', true,
+         array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ) );
    $f_active =& $ufilter->get_filter(13);
 
    $ufilter->init(); // parse current value from _GET
@@ -152,6 +154,7 @@ require_once( 'include/classlib_userpicture.php' );
    $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
    $utable->add_tablehead(20, new TableHead( T_('User online#header'),
       'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
+   $utable->add_tablehead(22, T_('Registered#header'), 'Date', 0, 'Registerdate+');
    $utable->add_tablehead(14, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
    $utable->add_tablehead(15, T_('Last move#header'), 'Date', 0, 'LastMove-');
 
@@ -177,7 +180,8 @@ require_once( 'include/classlib_userpicture.php' );
       //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
       'UNIX_TIMESTAMP(P.Lastaccess) AS LastaccessU',
-      'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU' );
+      'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
+      'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
    $qsql->add_part( SQLP_FROM, 'Players AS P' );
 
    if( $observe_gid )
@@ -277,25 +281,13 @@ require_once( 'include/classlib_userpicture.php' );
       if( $utable->Is_Column_Displayed[11] )
          $urow_strings[11] = $row['Lost'];
       if( $utable->Is_Column_Displayed[12] )
-      {
-         $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
-         $urow_strings[12] = $percent;
-      }
+         $urow_strings[12] = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
       if( $utable->Is_Column_Displayed[13] )
-      {
-         $activity = activity_string( $row['ActivityLevel']);
-         $urow_strings[13] = $activity;
-      }
+         $urow_strings[13] = activity_string( $row['ActivityLevel']);
       if( $utable->Is_Column_Displayed[14] )
-      {
-         $lastaccess = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
-         $urow_strings[14] = $lastaccess;
-      }
+         $urow_strings[14] = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
       if( $utable->Is_Column_Displayed[15] )
-      {
-         $lastmove = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
-         $urow_strings[15] = $lastmove;
-      }
+         $urow_strings[15] = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
       if( $utable->Is_Column_Displayed[18] )
          $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
       if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
@@ -305,6 +297,8 @@ require_once( 'include/classlib_userpicture.php' );
          $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
          $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
       }
+      if( $utable->Is_Column_Displayed[22] )
+         $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
 
       if( $show_pivot && ($ID == $uid ) ) // mine
          $urow_strings['extra_class'] = 'ShowPosUser';
