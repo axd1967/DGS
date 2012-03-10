@@ -613,6 +613,9 @@ class ErrorCode
          $arr['mismatch_snapshot'] =
             T_("Mismatching shape or snapshot found.");
 
+         $arr['unknown_entry'] =
+            T_("Sorry, I can't find that entry.");
+
          $arr['miss_snapshot_size'] =
             T_("Missing size for shape-game snapshot.");
 
