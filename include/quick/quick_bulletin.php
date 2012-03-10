@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once 'include/quick/quick_handler.php';
+require_once 'include/std_classes.php';
+require_once 'include/db/bulletin.php';
 
 
  /*!
@@ -28,7 +30,8 @@ require_once 'include/quick/quick_handler.php';
   */
 
 // see specs/quick_suite.txt (3g)
-define('BULLETIN_COMMANDS', 'list');
+define('BULLETINCMD_MARK_READ', 'mark_read');
+define('BULLETIN_COMMANDS', 'list|mark_read');
 
 
  /*!
@@ -38,9 +41,15 @@ define('BULLETIN_COMMANDS', 'list');
   */
 class QuickHandlerBulletin extends QuickHandler
 {
+   var $bulletin_iterator;
+   var $mark_bulletins;
+
    function QuickHandlerBulletin( $quick_object )
    {
       parent::QuickHandler( $quick_object );
+
+      $this->bulletin_iterator = null;
+      $this->mark_bulletins = null;
    }
 
 
@@ -53,6 +62,7 @@ class QuickHandlerBulletin extends QuickHandler
 
    function parseURL()
    {
+      $this->mark_bulletins = array_unique( explode(',', get_request_arg('bid')) );
    }
 
    function prepare()
@@ -69,11 +79,25 @@ class QuickHandlerBulletin extends QuickHandler
 
       if( $cmd == QCMD_LIST )
       {
-         //TODO
+         $iterator = new ListIterator( $dbgmsg.'.list',
+               new QuerySQL( SQLP_WHERE, 'BR.bid IS NULL' ), // unread-bulletins
+               'ORDER BY PublishTime DESC' );
+         $iterator->addQuerySQLMerge(
+            Bulletin::build_view_query_sql( /*adm*/false, /*cnt*/false, /*type*/'', /*chk*/false ) );
+         $this->bulletin_iterator = Bulletin::load_bulletins( $iterator );
+      }
+      elseif( $cmd == BULLETINCMD_MARK_READ )
+      {
+         if( !is_array($this->mark_bulletins) || count($this->mark_bulletins) == 0 )
+            error('invalid_args', "$dbgmsg.check.miss_bid");
+         foreach( $this->mark_bulletins as $bid )
+         {
+            if( !is_numeric($bid) || $bid <= 0 )
+               error('invalid_args', "$dbgmsg.check.invalid_bid($bid)");
+         }
       }
 
       // check for invalid-action
-
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -82,18 +106,60 @@ class QuickHandlerBulletin extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_LIST )
          $this->process_cmd_list();
+      elseif( $cmd == BULLETINCMD_MARK_READ )
+         $this->process_cmd_mark_read();
    }
 
    function process_cmd_list()
    {
       $out = array();
-      //TODO
+
+      while( list(,$arr_item) = $this->bulletin_iterator->getListIterator() )
+      {
+         list( $bulletin, $orow ) = $arr_item;
+         $out[] = array(
+               'id' => $bulletin->ID,
+               'target_type' => strtoupper($bulletin->TargetType),
+               'status' => strtoupper($bulletin->Status),
+               'category' => strtoupper($bulletin->Category),
+               'flags' => QuickHandlerBulletin::convertBulletinFlags($bulletin->Flags),
+               'time_published' => QuickHandler::formatDate(@$bulletin->PublishTime),
+               'time_expires' => QuickHandler::formatDate(@$bulletin->ExpireTime),
+               'time_updated' => QuickHandler::formatDate(@$bulletin->Lastchanged),
+               'author' => $this->build_obj_user($bulletin->uid, $orow, 'BP'),
+               'tournament_id' => $bulletin->tid,
+               'game_id' => $bulletin->gid,
+               'hits' => (int)$bulletin->CountReads,
+               'subject' => $bulletin->Subject,
+               'text' => $bulletin->Text,
+               'read' => ( @$orow['BR_Read'] ? 1 : 0),
+            );
+      }
 
       $this->add_list( QOBJ_BULLETIN, $out );
    }//process_cmd_list
 
+   function process_cmd_mark_read()
+   {
+      if( is_array($this->mark_bulletins) )
+      {
+         foreach( $this->mark_bulletins as $bid )
+            Bulletin::mark_bulletin_as_read( $bid );
+      }
+   }//process_cmd_mark_read
+
 
    // ------------ static functions ----------------------------
+
+   function convertBulletinFlags( $flags )
+   {
+      $out = array();
+      if( $flags & BULLETIN_FLAG_ADMIN_CREATED )
+         $out[] = 'ADM_CREATED';
+      if( $flags & BULLETIN_FLAG_USER_EDIT )
+         $out[] = 'USER_EDIT';
+      return implode(',', $out);
+   }
 
 } // end of 'QuickHandlerBulletin'
 
