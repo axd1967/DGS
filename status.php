@@ -432,7 +432,7 @@ function load_games_to_move( $uid, &$gtable )
 }//load_games_to_move
 
 // callback-func for games-status Table-form adding form-elements below table
-function status_games_extend_table_form( &$gtable, &$form )
+function status_games_extend_table_form( &$table, &$form )
 {
    global $player_row;
 
