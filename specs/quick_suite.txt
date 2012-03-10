@@ -40,11 +40,13 @@ Topics:
       d. List Response
 
    3. Objects
-      a. "game"    - playing a started game
-      b. "user"    - user info
-      c. "message" - message info
-      d. "folder"  - message-folders
-      e. "contact" - contacts
+      a. "game"     - playing a started game
+      b. "user"     - user info
+      c. "message"  - message info, invitations
+      d. "folder"   - message-folders
+      e. "contact"  - contacts
+      f. "wroom"    - game-offers via waiting-room
+      g. "bulletin" - bulletins
 
    4. Supporting Tools
       - [SGF] SGF-download "sgf.php"
@@ -75,6 +77,11 @@ Issues to specify:
    - charsets, see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
    - json-option also accepting JSON as input-arguments !?
    - refactor error-codes, see section (5) !?
+   - handle DGS-tags in texts (on client side) ?
+
+   - fair-komi negotiation for game-status KOMI
+   - setup for multi-player-game
+   - user-vacation
 
 
 #-------- (1) Introduction ----------------------------------------------------
@@ -84,12 +91,13 @@ It accepts generic-formatted input and results in a JSON-formatted output.
 
 DGS "objects" represent different sections of the server:
 
-   - user         : users, player, profile
-   - contact      : contacts
-   - game-offer   : waitingroom, invitation
    - game         : playing game, game-info
-   - message      : private messages
+   - user         : users, player, profile
+   - message      : private messages, invitation, disputes
    - folder       : folders for private messages
+   - contact      : contacts
+   - wroom        : waitingroom, new-game
+   - bulletin     : bulletins
    - forum        : forums, threads, posts
    - help         : FAQ
 
@@ -423,6 +431,7 @@ Commands:
             "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
             "size" : "19", # board-size
             "komi" : "6.5", # komi
+            "jigo_mode" : "KEEP_KOMI", # only relevant for fair-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
             "handicap" : "0", # handicap-stones
             "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
 
@@ -493,13 +502,14 @@ Commands:
          - 'finished'  : ask for finished games for logged-in user (uid=mine)
          - 'observing' : ask for games observed by logged-in user  (uid=mine)
          - 'observed'  : ask for all observed games
+         - 'mpg'       : ask for multi-player-games
 
       - USER_ID-option:
          - empty | 0 = default, for most views the default-USER_ID is 'mine'
          - 'mine'    = use logged-in user-id
          - integer   = use other user-id (can be logged-in user-id)
 
-         - NOTE: not all value allowed for all views
+         - NOTE: not all values allowed for all views
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for game-players
@@ -511,11 +521,18 @@ Commands:
          - only fields are listed here, check semantics on section (3a), see "info"-command
 
          * VIEW = 'status'
-           id, tournament_id, game_type, status, time_lastmove, move_id, move_color,
-           black|white_user (nested object according to WITH-option),
-           black|white_gameinfo.remtime
+           game_id, tournament_id, game_status, game_prio, move_id,
+           game_type, ruleset, size, handicap, komi, rated,
+           moves, move_color, time_lastmove, time_remaining,
+           opp_uid, opp_handle, opp_name, opp_rating, opp_lastaccess
 
          * VIEW = 'running' | 'finished' | 'observing' | 'observed':
+           - TODO: not defined ATM -> see 'status'
+           - TODO:
+             black|white_user (nested object according to WITH-option),
+             black|white_gameinfo.remtime
+
+         * VIEW = 'mpg':
            - TODO: not defined ATM -> see 'status'
 
 
@@ -709,15 +726,18 @@ Options:
 Commands:
 
    "info" : returns public user-info
-      - required opts: USER_ID|HANDLE
+      - optional opts: USER_ID|HANDLE
+         - if USER_ID and HANDLE is omitted, the ID of the logged-in user is used per default.
+           This can be used to check if and which user is logged-in.
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
+         - not_logged_in : returned if not logged-in;
+           omit USER_ID|HANDLE to check it still logged-in (and which user)
          - invalid_args : bad parameters (missing user-id)
          - unknown_user : unknown user-id specified
 
       - Result (JSON) =
-
          {
             "id" : 1,                  # USER_ID
             "handle" : "guest",        # USER_HANDLE
@@ -767,16 +787,24 @@ Purpose:
 
    The quick-suite for the message-object allows to
 
-      - retrieve private message;
+      - retrieve private message, send new message, reply to message;
+        corresponding pages: "message.php"
+
+      - move message to other folder, delete message, list/search messages;
+        corresponding pages: "message.php", "list_messages.php", "search_messages.php"
+
+      - accept game-invitation message, decline game-invitation message;
         corresponding pages: "message.php"
 
 Request:
 
-   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&oid=<OTHER_UID>&with=<WITH>
+   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&oid=<OTHER_UID>&msg=<MESSAGE>&pmid=<PARENT_MSG_ID>&folder=<FOLDER>&with=<WITH>
+
+   quick_do.php?obj=message&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
 
 Options:
 
-   <COMMAND> = "info"
+   <COMMAND> = "info" | "send_msg" | "move_msg" | "delete_msg" | "accept_inv" | "decline_inv" | "list"
 
    <MESSAGE_ID> = integer
       - message-id referencing private DGS-message to perform message-operation on
@@ -785,6 +813,17 @@ Options:
       - user-id for bulk-message, optional for non-bulk-message
       - 0 = default-value, for bulk-message use first recipient
 
+   <MESSAGE> = message
+      - message-text for message-operation
+
+   <PARENT_MSG_ID> = integer
+      - parent message-id, required for replies
+
+   <FOLDER> = integer
+      - target folder
+
+   <LIST_STYLE> = see list-style in section (2d)
+
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
 
@@ -792,15 +831,17 @@ Commands:
 
    "info" : returns private message
       - required opts: MESSAGE_ID
-      - optional opts: OTHER_UID (for bulk-message), WITH
+      - optional opts: OTHER_UID (for bulk-message), FOLDER, WITH
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
          - 'folder'  : additionally return folder-data (name + color_bg + color_fg) for message
 
       - Important Notes:
-         * message-type INVITATION & DISPUTED currently not supported by quick-suite,
+         * message-type DISPUTED currently not supported by quick-suite,
            because that needs game-settings as well => ignore them
+         * using "info"-command will automatically mark message as read (like GUI on message-read),
+           can be overwritten with target-FOLDER for non-invitation-messages (e.g. reply-folder)
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -808,7 +849,6 @@ Commands:
          - unknown_message : unknown message-id specified
 
       - Result (JSON) = // also see specs/db/table-Messages.txt
-
          {
             "id" : 1,          # message-id
             "user_from" : {
@@ -816,16 +856,20 @@ Commands:
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
+               "rating" : "5k (+46%)",            # DGS rating | ""
+               "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
             },
             "user_to" : {
                "id" : 222,          # user-id of receiver
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "user2",  # USER_HANDLE
                "name" : "name2",    # user name
+               "rating" : "5k (+46%)",            # DGS rating | ""
+               "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
             },
             "type" : "NORMAL", # message-type (see specs/db/):
                                # types = NORMAL | INVITATION | DISPUTED | RESULT
-                               # not supported by quick-suite: INVITATION | DISPUTED
+                               # not supported by quick-suite yet: | DISPUTED
             "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
             "folder" : {
                "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
@@ -844,7 +888,126 @@ Commands:
             "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
             "subject" : "boo",  # subject of message
             "text" : "haha",    # content of message
+
+            # additional fields set, if message is of type INVITATION
+            "game_settings" : {
+               "game_type" : "GO",       # always 'GO' for invitations
+               "game_players" : "1:1",   # always '1:1' for invitations
+               "handicap_type" : "conv", # see HTYPE_... in 'include/game_functions.php':
+                                         # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
+               "shape_id" : 0, # shape-id > 0 if game was started as shape-game
+
+               "rated" : 1, # 0=unrated, 1=rated
+               "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
+               "size" : 19, # board-size
+               "komi" : 6.5, # komi
+               "jigo_mode" : "KEEP_KOMI", # only relevant for fair-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
+               "handicap" : 0, # handicap-stones
+               "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
+
+               "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
+               "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
+               "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
+                                                  # see section (6a) "TimeLimit-Formats"
+               "time_main" : 210,  # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
+               "time_byo" : 225,   # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
+               "time_periods" : 8, # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
+
+               "opp_started_games" : 0, # number of games already started with opponent
+               "calc_type" : 1, # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+               "calc_color" : "black", # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
+               "calc_handicap" : 3, # probable/fix handicap
+               "calc_komi" : 6.5, # probably/fix komi
+            },
          }
+
+   "send_msg" : sends/answer message
+      - required opts: OTHER_UID, MESSAGE
+      - optional opts: PARENT_MSG_ID (only for replies)
+
+      - TODO TODO
+         - implicit folder-move on reply/send ?
+      - Errors: TODO TODO
+
+   "move_msg" : moves message(s) into target folder
+      - required opts: MESSAGE_ID, FOLDER
+      - TODO TODO
+         - bulk ?
+      - Errors: TODO TODO
+
+   "delete_msg" : deletes message(s)
+      - required opts: MESSAGE_ID
+      - TODO TODO
+         - move to destroy-folder (trashcan + destroy in one step)
+         - bulk ?
+      - Errors: TODO TODO
+
+   "accept_inv" : accepts game-invitation
+      - required opts: MESSAGE_ID
+      - optional opts: MESSAGE, FOLDER
+
+      - TODO TODO
+         - implicit folder-move ?
+
+      - Errors: TODO TODO
+
+   "decline_inv" : declines game-invitation
+      - required opts: MESSAGE_ID
+      - optional opts: MESSAGE, FOLDER
+
+      - TODO TODO
+         - implicit folder-move ?
+      - Errors: TODO TODO
+
+   "list" : retrieve list of messages
+      - required opts: -
+      - optional opts: LSTYLE, WITH, FILTERS
+
+      - TODO TODO
+         - FILTERS-args:
+           - filter.type = INVITATION (match values from "info")
+           - filter.folder = 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ...
+           - filter.need_reply = 0|1|all=empty
+         - WITH-options ? -> only msg-id (no texts, maybe subject included, text only in single-mode)
+
+      - Result (JSON) =
+         {
+            "list_object" : "message",  # list of object-types
+            "list_size" : 5,           # list-size total
+            "list_offset" : 0,         # start offset of list-part (for paging)
+            "list_limit" : 0,          # number of entries per page
+            "list_order" : "",         # order of list (field-names, comma-separated), ""=no-order
+            "list_result" : [          # array with found objects matching list-search
+               {
+                  "id" : 1,          # message-id
+                  "user_from" : {
+                     "id" : 111,          # user-id of sender, 0=server-message
+                     # the following fields only if WITH-option contain 'user_id'
+                     "handle" : "user1",  # USER_HANDLE
+                     "name" : "name1",    # user name
+                  },
+                  "user_to" : {
+                     "id" : 222,          # user-id of receiver
+                     # the following fields only if WITH-option contain 'user_id'
+                     "handle" : "user2",  # USER_HANDLE
+                     "name" : "name2",    # user name
+                  },
+                  "type" : "NORMAL", # message-type (see "info"-command)
+                  "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
+                  "folder_id" : 2,   # folder.id (see "info"-command)
+                  "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
+                  "thread" : 0,       # message-id of first message in a message-thread, 0=system-message
+                  "level" : 0,        # thread-level of message-thread (starting at 0)
+                  "message_prev" : 0, # message-id of message that has been replied to
+                  "message_hasnext" : 1, # 0=no-answer for current message, 1=there are answer(s) to this message
+                  "needs_reply" : 1,  # 1=message-needs-reply, 0=normal message
+                  "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
+                  "subject" : "boo",  # subject of message
+               },
+               ...
+            ]
+         }
+
 
 
 Examples for message-commands:
@@ -981,6 +1144,235 @@ Examples for contact-commands:
 
    # retrieve all contacts
    quick_do.php?obj=contact&cmd=list
+
+
+#-------- (3f) Objects - "wroom" ----------------------------------------------
+
+Purpose:
+
+   The quick-suite for the wroom-object allows to
+
+      - retrieve game-offers from waiting-room;
+        corresponding pages: "waiting_room.php"
+
+      - create new game-offers in waiting-room;
+        corresponding pages: "new_game.php"
+
+Request:
+
+   quick_do.php?obj=wroom&cmd=<COMMAND>&wrid=<WROOM_ID>
+
+   quick_do.php?obj=wroom&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
+
+Options:
+
+   <COMMAND> = "list" | "info" | "join" | "new_game"
+
+   <WROOM_ID> = id of waiting-room-entry
+
+   <WITH> = optional with-option to deep-load recursive data (see commands)
+
+   <LIST_STYLE> = see list-style in section (2d)
+
+Commands:
+
+   "list" : returns list of game-offers from waiting-room
+
+      - Errors: TODO TODO
+
+      - Result (JSON) = // also see specs/db/table-Waitingroom.txt
+
+         {
+            "list_object" : "wroom",
+            "list_size" : 3,
+            "list_offset" : 0,
+            "list_limit" : 0,
+            "list_order" : "", # TODO order of list + direction '+|-' (field-names, comma-separated), ""=standard-order
+            "list_result" : [
+               {
+                  "id" : 123, # waiting-room-id
+                  # TODO TODO more fields
+               },
+               ...
+            ]
+         }
+
+   "info" : returns information on single game-offer from waiting-room
+      - required opts: WROOM_ID
+      - optional opts: WITH
+
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+      - Result (JSON) = // also see specs/db/table-Waitingroom.txt
+         {
+            "id" : 1,          # waitingroom-id
+            "user" : {
+               "id" : 111,          # user-id of sender, 0=server-message
+               # the following fields only if WITH-option contain 'user_id'
+               "handle" : "user1",  # USER_HANDLE
+               "name" : "name1",    # user name
+               "country" : "xe",    # country-code
+               "rating" : "5k (+46%)",            # DGS rating | ""
+               "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
+            },
+            "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of waitingroom-entry
+            "count_offers" : 3, # remaining number of offers with same characteristics
+            "comment" : "fast game", # comment for game-offer
+
+            # game_settings
+            "game_type" : "GO",       # game-type: GO,TEAM_GO,ZEN_GO
+            "game_players" : "1:1",   # multi-player-game setup: "N:M", or empty for game-type=GO
+            "handicap_type" : "conv", # see HTYPE_... in 'include/game_functions.php':
+                                      # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
+            "shape_id" : 0, # shape-id > 0 if game was started as shape-game
+
+            "rated" : 1, # 0=unrated, 1=rated
+            "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
+            "size" : 19, # board-size
+            "komi" : 6.5, # komi
+            "jigo_mode" : "KEEP_KOMI", # jigo-mode for adjusting-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
+            "handicap" : 0, # handicap-stones
+            "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
+
+            "adjust_komi" : 0.0,    # komi-adjustment
+            "adjust_handicap" : -2, # handicap-adjustment
+            "min_handicap" : 0,     # min. number of handicap-stones
+            "max_handicap" : 21,    # min. number of handicap-stones
+
+            "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
+            "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
+            "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
+                                               # see section (6a) "TimeLimit-Formats"
+            "time_main" : 210,  # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
+            "time_byo" : 225,   # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
+            "time_periods" : 8, # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
+
+            "opp_started_games" : 0, # number of games already started with opponent
+            "calc_type" : 1, # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+            "calc_color" : "black", # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
+            "calc_handicap" : 3, # probable/fix handicap
+            "calc_komi" : 6.5, # probably/fix komi
+            "restrictions" : "", # empty = no restrictions (offer can be joined); non-empty = info-string with restrictions
+         }
+
+   "join" : joins game-offer from waiting-room
+      - required opts: WROOM_ID
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+   "new_game" : create new game-offer in waiting-room
+      - TODO TODO
+         - only one "view" (combining simple/expert/fair-komi/mpg in one)
+
+
+Examples for wroom-commands:
+
+   # login setting cookie in HTTP-header storing: handle, sessioncode
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # retrieve all waiting-room-entries
+   quick_do.php?obj=wroom&cmd=list
+
+   # retrieve info about single waiting-room-entry
+   quick_do.php?obj=wroom&cmd=info&wrid=123&with=user_id
+
+   # joins waiting-room game
+   quick_do.php?obj=wroom&cmd=join&wrid=123
+
+
+#-------- (3g) Objects - "bulletin" -------------------------------------------
+
+Purpose:
+
+   The quick-suite for the bulletin-object allows to
+
+      - retrieve bulletins, mark bulletin as read;
+        corresponding pages: "list_bulletins.php"
+
+Request:
+
+   quick_do.php?obj=bulletin&cmd=<COMMAND>&bid=<BULLETIN_ID>
+
+   quick_do.php?obj=bulletin&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
+
+Options:
+
+   <COMMAND> = "list" | "mark_read"
+
+   <BULLETIN_ID> = list of comma-separated bulletin-ids
+
+   <WITH> = optional with-option to deep-load recursive data (see commands)
+
+   <LIST_STYLE> = see list-style in section (2d)
+
+Commands:
+
+   "list" : returns list of unread bulletins
+      - optional opts: WITH
+
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name) for author
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+      - Result (JSON) = // also see specs/db/table-Bulletin.txt
+         {
+            "list_object" : "bulletin",
+            "list_size" : 2,
+            "list_offset" : 0,
+            "list_limit" : 0,
+            "list_order" : "", # TODO order of list + direction '+|-' (field-names, comma-separated), ""=standard-order
+            "list_result" : [
+               {
+                  "id" : 123, # bulletin-id
+                  "target_type" : "ALL",  # target-type: ALL,TD,TP,UL,MPG
+                  "status" : "SHOW",      # status: NEW,PENDING,REJECTED,SHOW,ARCHIVE,DELETE
+                  "category" : "ADM_MSG", # category: MAINT,ADM_MSG,TOURNEY,TNEWS,FEATURE,PRIV_MSG,AD
+                  "flags" : "",           # flags (comma-separated): ADM_CREATED, USER_EDIT
+                  "time_published" : "YYYY-MM-DD hh:mm:ss", # publish-time
+                  "time_expires" : "YYYY-MM-DD hh:mm:ss",   # expire-time
+                  "time_updated" : "YYYY-MM-DD hh:mm:ss",   # last-changed-time
+                  "author" : {
+                     "id" : 111,          # user-id of author
+                     # the following fields only if WITH-option contain 'user_id'
+                     "handle" : "user1",  # USER_HANDLE
+                     "name" : "Name1",    # user name
+                  },
+                  "tournament_id" : 0,    # tournament-id
+                  "game_id" : 0,          # game-id
+                  "hits" : 3,             # view-count
+                  "subject" : "title",
+                  "text" : "text",
+                  "read" : 0,             # 0=unread, 1=read
+               },
+               ...
+            ]
+         }
+
+   "mark_read" : mark bulletin(s) as read
+      - required opts: BULLETIN_ID
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+
+Examples for bulletin-commands:
+
+   # login setting cookie in HTTP-header storing: handle, sessioncode
+   login.php?quick_mode=1&userid=user&passwd=userpassword
+
+   # retrieve unread bulletins
+   quick_do.php?obj=bulletin&cmd=list&with=user_id
+
+   # mark unread bulletin(s)
+   quick_do.php?obj=bulletin&cmd=mark_read&bid=7,11
+
 
 
 #-------- (4) Supporting Tools ------------------------------------------------
@@ -1550,6 +1942,7 @@ Errors:
       - server_down : server in maintenance-mode
       - invalid_command : invalid command for quick-suite
       - invalid_args : missing or invalid arguments given
+      - unknown_entry : entry identified by id could not be found
       - mysql_query_failed : database query failed
       - mail_failure : sending mail for notification failed (e.g. for quota-exceeded)
 
