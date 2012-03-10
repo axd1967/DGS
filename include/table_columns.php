@@ -294,6 +294,12 @@ class Table
       $this->Rows_Per_Page = (is_nulL($rows)) ? $this->FoundRows : $rows;
    }
 
+   /*! \brief Overwrites standard from-rows offset for this table. */
+   function set_from_row( $from_row )
+   {
+      $this->From_Row = (int)$from_row;
+   }
+
    /*! \brief if false, rows-selection is not shown (table using static number of maxrows); default is true. */
    function use_show_rows( $use=true )
    {
@@ -403,7 +409,29 @@ class Table
       }
 
       $this->Sort = $s;
-   } //set_default_sort
+   }//set_default_sort
+
+   /*!
+    * \brief Overwrites table-sort (only one can be called: set_default_sort or set_sort).
+    * \see for params see set_default_sort()-func
+    */
+   function set_sort( /* {$sort1 {,$sort2 [,...]}} */ )
+   {
+      if( $this->Head_closed )
+         error('assert', "Table.set_sort.closed({$this->Head_closed})");
+      $this->Head_closed = 1;
+
+      $s = array();
+      for( $i=0; $i < func_num_args(); $i++ )
+      {
+         $sd = func_get_arg($i);
+         if( is_string($sd) )
+            error('assert', "Table.set_sort.old_way($sd)");
+         if( $sd = (int)$sd )
+            $s[abs($sd)] = $sd;
+      }
+      $this->Sort = $s;
+   }//set_sort
 
    /*! \brief Returns 1=true, if column is displayed; 0=false otherwise. */
    function is_column_displayed( $nr )
