@@ -70,7 +70,7 @@ class QuickObject
    {
       $this->obj = $obj;
       $this->cmd = $cmd;
-      $this->initResult( false );
+      $this->initResult( true );
    }
 
    function getResult()
@@ -166,14 +166,15 @@ class QuickHandler
       {
          $userinfo['handle'] = @$user_rows[$uid]['Handle'];
          $userinfo['name'] = @$user_rows[$uid]['Name'];
-         if( isset($user_rows[$uid]['Country']) )
-            $userinfo['country'] = $user_rows[$uid]['Country'];
+         $userinfo['country'] = @$user_rows[$uid]['Country'];
          if( isset($user_rows[$uid]['Rating2']) )
          {
             $rating = @$user_rows[$uid]['Rating2'];
             $userinfo['rating'] = echo_rating($rating, /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1 );
             $userinfo['rating_elo'] = $rating;
          }
+         else
+            $userinfo['rating'] = $userinfo['rating_elo'] = '';
       }
       return $userinfo;
    }
