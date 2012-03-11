@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once 'include/quick/quick_handler.php';
 require_once 'include/db/waitingroom.php';
 require_once 'include/time_functions.php';
+require_once 'include/game_functions.php';
 
 
  /*!
@@ -108,6 +109,7 @@ class QuickHandlerWaitingroom extends QuickHandler
       $time_limit = TimeFormat::echo_time_limit(
             $wr->Maintime, $wr->Byotype, $wr->Byotime, $wr->Byoperiods,
             TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
+      $opp_started_games = GameHelper::count_started_games( $this->my_id, $wr->uid );
 
       $this->addResultKey('id', $wr->ID );
       $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows) );
@@ -141,8 +143,8 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->addResultKey('time_byo', $wr->Byotime );
       $this->addResultKey('time_periods', $wr->Byoperiods );
 
+      $this->addResultKey('opp_started_games', $opp_started_games ); //TODO also add for wroom
       //TODO TODO
-      $this->addResultKey('opp_started_games', 0 ); //TODO also add for wroom
       $this->addResultKey('calc_type', 0 );
       $this->addResultKey('calc_color', 0 );
       $this->addResultKey('calc_handicap', 0 );

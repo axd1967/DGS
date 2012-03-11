@@ -1149,6 +1149,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
          $adj_komi_str = ( $infoKomi != $infoKomi_old ) ? sprintf( T_('adjusted from %.1f'), $infoKomi_old ) : '';
       }
 
+      if( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
+         $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
+
       if( $calculated || $adj_handi_str || $adj_komi_str || $is_fairkomi )
       {
          // determine color

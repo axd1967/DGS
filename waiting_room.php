@@ -463,13 +463,16 @@ require_once( 'include/classlib_userconfig.php' );
 function add_old_game_form( $form_id, $game_row, $iamrated )
 {
    global $player_row, $maxGamesCheck;
+   $my_id = $player_row['ID'];
+   $opp_id = $game_row['other_id'];
+   $is_my_game = ($opp_id == $my_id);
+   $gid = (int)$game_row['gid'];
+
 
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 
+   $game_row['X_TotalCount'] = ($is_my_game) ? 0 : GameHelper::count_started_games( $my_id, $opp_id );
    game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated, $game_form );
-
-   $is_my_game = ($game_row['other_id'] == $player_row['ID']);
-   $gid = (int)$game_row['gid'];
 
    if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
       $can_join_mpg = !GamePlayer::exists_game_player( $gid, (int)$player_row['ID'] );
