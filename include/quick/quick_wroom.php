@@ -120,6 +120,12 @@ class QuickHandlerWaitingroom extends QuickHandler
             TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
       $opp_started_games = GameHelper::count_started_games( $this->my_id, $wr->uid );
 
+      $restrictions = ''; //TODO TODO
+      $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+      $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
+      $calc_handicap = 3; // TODO probable/fix handicap
+      $calc_komi = 6.5; // TODO probably/fix komi
+
       $this->addResultKey('id', $wr->ID );
       $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows) );
       $this->addResultKey('created_at', QuickHandler::formatDate($wr->Created) );
@@ -152,13 +158,12 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->addResultKey('time_byo', $wr->Byotime );
       $this->addResultKey('time_periods', $wr->Byoperiods );
 
-      $this->addResultKey('opp_started_games', $opp_started_games ); //TODO also add for wroom
-      //TODO TODO
-      $this->addResultKey('calc_type', 0 );
-      $this->addResultKey('calc_color', 0 );
-      $this->addResultKey('calc_handicap', 0 );
-      $this->addResultKey('calc_komi', 0 );
-      $this->addResultKey('restrictions', '' );
+      $this->addResultKey('restrictions', $restrictions );
+      $this->addResultKey('opp_started_games', $opp_started_games );
+      $this->addResultKey('calc_type', $calc_type );
+      $this->addResultKey('calc_color', $calc_color );
+      $this->addResultKey('calc_handicap', $calc_handicap );
+      $this->addResultKey('calc_komi', $calc_komi );
    }//process_cmd_info
 
 
