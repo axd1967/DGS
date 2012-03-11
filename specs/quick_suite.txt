@@ -210,6 +210,10 @@ The response may contain additional object- and command-specific return-values.
       "output3": [ 1, 2, 3, "ape", "bear" ]        # array-value
    }
 
+IMPORTANT NOTE:
+   Important to note is, that you shouldn't expect a particular order of keys
+   in the response or its nested return objects.
+
 
 #-------- (2d) List Reponse ---------------------------------------------------
 
@@ -301,11 +305,13 @@ Example for JSON-style:
 
 The DGS "objects" currently supported are:
 
-   a) "game"    - playing a started game, game-info
-   b) "user"    - user-info
-   c) "message" - message-info
-   d) "folder"  - message-folders
-   e) "contact" - contacts
+   a) "game"     - playing a started game, game-info
+   b) "user"     - user-info
+   c) "message"  - message-info, invitations
+   d) "folder"   - message-folders
+   e) "contact"  - contacts
+   f) "wroom"    - waiting-room
+   g) "bulletin" - bulletins
 
 Notes:
    - "corresponding pages" = pages of web-interface to perform similar operations
@@ -341,6 +347,7 @@ Request:
 
    quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>&fmt=<FORMAT>
 
+   # list
    quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&lstyle=<LIST_STYLE>&uid=<USER_ID>
 
 Options:
@@ -421,7 +428,6 @@ Commands:
             "id" : "123456", # game-id
             "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted
             "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
-            "shape_id" : "0", # shape-id > 0 if game was started as shape-game
             "status" : "PLAY", # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
             "score" : "", # score for finished game only (same format as for status_score-command above)
@@ -435,12 +441,15 @@ Commands:
             "handicap" : "0", # handicap-stones
             "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
 
+            "shape_id" : "0", # shape-id > 0 if game was started as shape-game
+            "shape_snapshot" : "", # shape-snapshot
+
             "time_started" : "YYYY-MM-DD hh:mm:ss", # game started time
             "time_lastmove" : "YYYY-MM-DD hh:mm:ss", # last-moved (also game-end-time if finished)
             "time_weekend_clock" : "1", # 1=time-running on weekend, 0=otherwise
             "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
             "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
-                                               # see section (6a) "TimeLimit-Formats"
+                                               # see section (6b) "TimeLimit-Formats"
 
             "move_id" : "75", # move-id, required as context for playing via game-quick-suite
             "move_color" : "B", # B=black-to-move, W=white-to-move
@@ -494,7 +503,7 @@ Commands:
 
    "list" : retrieve list of games
       - required opts: VIEW
-      - optional opts: USER_ID, LSTYLE, WITH
+      - optional opts: USER_ID, LIST_STYLE, WITH
 
       - VIEW-option:
          - 'status'    : ask for running games where to move in for given USER_ID
@@ -708,7 +717,7 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=user&cmd=<COMMAND>&uid|user=<USER_ID|HANDLE>
+   quick_do.php?obj=user&cmd=<COMMAND>&uid=<USER_ID>&user=<USER_HANDLE>
 
 Options:
 
@@ -721,12 +730,13 @@ Options:
           e.g. http://www.dragongoserver.net/userinfo.php?uid=1
         - USER_HANDLE is the unique user-id (handle),
           e.g. http://www.dragongoserver.net/userinfo.php?user=guest
+      - only one argument for <USER_ID> or <USER_HANDLE> can be used
 
 
 Commands:
 
    "info" : returns public user-info
-      - optional opts: USER_ID|HANDLE
+      - optional opts: USER_ID|USER_HANDLE
          - if USER_ID and HANDLE is omitted, the ID of the logged-in user is used per default.
            This can be used to check if and which user is logged-in.
 
@@ -747,13 +757,13 @@ Commands:
             "picture" : "",            # picture-filename, e.g. http://localhost/dev/userpic/5318.png?t=YYYYMMDDhhmmss
             "vacation_left" : "25",    # vacation days left
             "vacation_on" : "2d 7h",   # on-vacation ("" = not-on vac.)
-            "register_date" : "YYYY-MM-DD",     # register-date
+            "register_date" : "YYYY-MM-DD",        # register-date
             "last_access" : "YYYY-MM-DD hh:mm:ss", # date of last access (website; in users time-zone; can be empty)
             "last_quick_access" : "YYYY-MM-DD hh:mm:ss", # date of last access (quick-suite; in users time-zone; can be empty)
             "last_move" : "YYYY-MM-DD hh:mm:ss",   # date of last move (in users time-zone; can be empty)
             "rating_status" : "RATED",         # NONE | INIT | RATED
-            "rating" : "5k (+46%)",            # DGS rating | ""
-            "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
+            "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
+            "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
             "rank" : "5k EGF",                 # user rank-info (contains HTML)
             "open_match" : "ask later",        # user open-for-match-info (contains HTML)
             "games_running" : "5",   # number of running games
@@ -769,7 +779,7 @@ Commands:
          - rating_status:
             - NONE = has no rating
             - INIT = has rating but no rated game yet
-            - RATED = played rated game (has a rating)
+            - RATED = started/played rated game (has a rating)
 
 
 Examples for user-commands:
@@ -800,6 +810,7 @@ Request:
 
    quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&oid=<OTHER_UID>&msg=<MESSAGE>&pmid=<PARENT_MSG_ID>&folder=<FOLDER>&with=<WITH>
 
+   # list
    quick_do.php?obj=message&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
 
 Options:
@@ -856,16 +867,16 @@ Commands:
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
-               "rating" : "5k (+46%)",            # DGS rating | ""
-               "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
+               "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
+               "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
             },
             "user_to" : {
                "id" : 222,          # user-id of receiver
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "user2",  # USER_HANDLE
                "name" : "name2",    # user name
-               "rating" : "5k (+46%)",            # DGS rating | ""
-               "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
+               "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
+               "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
             },
             "type" : "NORMAL", # message-type (see specs/db/):
                                # types = NORMAL | INVITATION | DISPUTED | RESULT
@@ -908,7 +919,7 @@ Commands:
                "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
                "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
                "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
-                                                  # see section (6a) "TimeLimit-Formats"
+                                                  # see section (6b) "TimeLimit-Formats"
                "time_main" : 210,  # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
                "time_byo" : 225,   # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
                "time_periods" : 8, # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
@@ -961,7 +972,7 @@ Commands:
 
    "list" : retrieve list of messages
       - required opts: -
-      - optional opts: LSTYLE, WITH, FILTERS
+      - optional opts: LIST_STYLE, WITH, FILTERS
 
       - TODO TODO
          - FILTERS-args:
@@ -1035,14 +1046,21 @@ Request:
 
    quick_do.php?obj=folder&cmd=<COMMAND>
 
+   # list
+   quick_do.php?obj=folder&cmd=list&lstyle=<LIST_STYLE>
+
 Options:
 
    <COMMAND> = "list"
+
+   <LIST_STYLE> = see list-style in section (2d)
 
 
 Commands:
 
    "list" : returns list of message-folders in natural order
+      - required opts: -
+      - optional opts: LIST_STYLE
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -1091,19 +1109,26 @@ Request:
 
    quick_do.php?obj=contact&cmd=<COMMAND>
 
+   # list
+   quick_do.php?obj=contact&cmd=list&lstyle=<LIST_STYLE>
+
 Options:
 
    <COMMAND> = "list"
 
+   <LIST_STYLE> = see list-style in section (2d)
+
+
 Commands:
 
    "list" : returns list of contacts
+      - required opts: -
+      - optional opts: LIST_STYLE
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
 
-      - Result (JSON) = // also see specs/db/table-Messages.txt
-
+      - Result (JSON) =
          {
             "list_object" : "contact",
             "list_size" : 3,
@@ -1155,6 +1180,9 @@ Purpose:
       - retrieve game-offers from waiting-room;
         corresponding pages: "waiting_room.php"
 
+      - join & delete game-offers from waiting-room;
+        corresponding pages: "join_waitingroom_game.php"
+
       - create new game-offers in waiting-room;
         corresponding pages: "new_game.php"
 
@@ -1174,11 +1202,15 @@ Options:
 
    <LIST_STYLE> = see list-style in section (2d)
 
+
 Commands:
 
-   "list" : returns list of game-offers from waiting-room
+   "list" : returns list of suitable game-offers from waiting-room
+      - required opts: VIEW
+      - optional opts: USER_ID, LIST_STYLE, WITH
 
-      - Errors: TODO TODO
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
 
       - Result (JSON) = // also see specs/db/table-Waitingroom.txt
 
@@ -1216,47 +1248,48 @@ Commands:
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
                "country" : "xe",    # country-code
-               "rating" : "5k (+46%)",            # DGS rating | ""
-               "rating_elo" : "1643.88952636719", # DGS elo-rating | ""
+               "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
+               "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
             },
             "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of waitingroom-entry
-            "count_offers" : 3, # remaining number of offers with same characteristics
+            "count_offers" : 3,      # remaining number of offers with same characteristics
             "comment" : "fast game", # comment for game-offer
 
             # game_settings
-            "game_type" : "GO",       # game-type: GO,TEAM_GO,ZEN_GO
-            "game_players" : "1:1",   # multi-player-game setup: "N:M", or empty for game-type=GO
-            "handicap_type" : "conv", # see HTYPE_... in 'include/game_functions.php':
-                                      # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
-            "shape_id" : 0, # shape-id > 0 if game was started as shape-game
+            "game_type" : "GO",        # game-type: GO,TEAM_GO,ZEN_GO
+            "game_players" : "1:1",    # multi-player-game setup: "N:M", or empty for game-type=GO
+            "handicap_type" : "conv",  # see HTYPE_... in 'include/game_functions.php':
+                                       # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
+            "shape_id" : 0,            # shape-id > 0 if game was started as shape-game
+            "shape_snapshot" : "",     # shape-snapshot
 
-            "rated" : 1, # 0=unrated, 1=rated
-            "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
-            "size" : 19, # board-size
-            "komi" : 6.5, # komi
+            "rated" : 1,               # 0=unrated, 1=rated
+            "ruleset" : "JAPANESE",    # ruleset: JAPANESE | CHINESE
+            "size" : 19,               # board-size
+            "komi" : 6.5,              # komi
             "jigo_mode" : "KEEP_KOMI", # jigo-mode for adjusting-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
-            "handicap" : 0, # handicap-stones
-            "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
+            "handicap" : 0,            # handicap-stones
+            "handicap_mode" : "FREE",  # STD=standard-handicap, FREE=free-handicap
 
-            "adjust_komi" : 0.0,    # komi-adjustment
-            "adjust_handicap" : -2, # handicap-adjustment
-            "min_handicap" : 0,     # min. number of handicap-stones
-            "max_handicap" : 21,    # min. number of handicap-stones
+            "adjust_komi" : 0.0,       # komi-adjustment
+            "adjust_handicap" : -2,    # handicap-adjustment
+            "min_handicap" : 0,        # min. number of handicap-stones
+            "max_handicap" : 21,       # min. number of handicap-stones
 
-            "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
-            "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
+            "time_weekend_clock" : 1,  # 1=time-running on weekend, 0=otherwise
+            "time_mode" : "CAN",       # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
             "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
-                                               # see section (6a) "TimeLimit-Formats"
-            "time_main" : 210,  # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
-            "time_byo" : 225,   # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
-            "time_periods" : 8, # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
+                                               # see section (6b) "TimeLimit-Formats"
+            "time_main" : 210,         # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
+            "time_byo" : 225,          # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
+            "time_periods" : 8,        # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
 
-            "opp_started_games" : 0, # number of games already started with opponent
-            "calc_type" : 1, # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
-            "calc_color" : "black", # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
-            "calc_handicap" : 3, # probable/fix handicap
-            "calc_komi" : 6.5, # probably/fix komi
-            "restrictions" : "", # empty = no restrictions (offer can be joined); non-empty = info-string with restrictions
+            "restrictions" : "",       # empty = no restrictions (offer can be joined); non-empty = info-string with restrictions
+            "opp_started_games" : 0,   # number of games already started with opponent
+            "calc_type" : 1,           # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+            "calc_color" : "black",    # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
+            "calc_handicap" : 3,       # probable/fix handicap
+            "calc_komi" : 6.5,         # probably/fix komi
          }
 
    "delete" : deletes own game-offer from waiting-room
@@ -1299,6 +1332,9 @@ Examples for wroom-commands:
    # retrieve info about single waiting-room-entry
    quick_do.php?obj=wroom&cmd=info&wrid=123&with=user_id
 
+   # deletes waiting-room game
+   quick_do.php?obj=wroom&cmd=delete&wrid=123
+
    # joins waiting-room game
    quick_do.php?obj=wroom&cmd=join&wrid=123
 
@@ -1316,6 +1352,7 @@ Request:
 
    quick_do.php?obj=bulletin&cmd=<COMMAND>&bid=<BULLETIN_ID>
 
+   # list
    quick_do.php?obj=bulletin&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
 
 Options:
@@ -1328,10 +1365,11 @@ Options:
 
    <LIST_STYLE> = see list-style in section (2d)
 
+
 Commands:
 
    "list" : returns list of unread bulletins
-      - optional opts: WITH
+      - optional opts: LIST_STYLE, WITH
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for author
