@@ -129,11 +129,7 @@ class QuickHandlerGame extends QuickHandler
 
       // check move(s) + context (move-id)
       if( $cmd == GAMECMD_DELETE || $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_RESIGN || $cmd == GAMECMD_SCORE )
-      {
          QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
-         if( $this->move_id <= 0 )
-            error('move_problem', "QuickHandlerGame.prepare.check.bad.move_id($gid,$cmd)");
-      }
       if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE )
          QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVES, $this->url_moves );
       if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_STATUS_SCORE || $cmd == GAMECMD_SCORE )
@@ -246,7 +242,7 @@ class QuickHandlerGame extends QuickHandler
 
       $mp_query = '';
       $is_mpgame = ($GameType != GAMETYPE_GO);
-      if( $is_mpgame && ($cmd == GAMECMD_MOVE || $cmd == GAMECMD_SET_HANDICAP) )
+      if( $is_mpgame && ($cmd == GAMECMD_MOVE || $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_SCORE) )
       {
          list( $group_color, $group_order, $gpmove_color )
             = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -331,6 +327,7 @@ class QuickHandlerGame extends QuickHandler
                if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
             }
             check_move( $this->TheBoard, $this->moves[0], $this->to_move);
+            //TODO TODO need to declare globals ????
             //adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
             //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 
