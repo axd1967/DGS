@@ -223,6 +223,8 @@ class Waitingroom
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS WRP ON WRP.ID=WR.uid' );
       }
+      if( $wroom_id > 0 )
+         $qsql->add_part( SQLP_WHERE, "WR.ID=$wroom_id" );
       return $qsql;
    }
 
