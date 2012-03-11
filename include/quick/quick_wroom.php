@@ -21,6 +21,7 @@ require_once 'include/quick/quick_handler.php';
 require_once 'include/db/waitingroom.php';
 require_once 'include/time_functions.php';
 require_once 'include/game_functions.php';
+require_once 'include/wroom_control.php';
 
 
  /*!
@@ -31,9 +32,10 @@ require_once 'include/game_functions.php';
   */
 
 // see specs/quick_suite.txt (3f)
-define('WROOMCMD_JOIN', 'join'); //TODO impl
+define('WROOMCMD_DELETE', 'delete');
+define('WROOMCMD_JOIN', 'join');
 define('WROOMCMD_NEW_GAME', 'new_game'); //TODO impl
-define('WROOM_COMMANDS', 'info');
+define('WROOM_COMMANDS', 'info|delete|join');
 
 
  /*!
@@ -77,14 +79,17 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->checkCommand( $dbgmsg, WROOM_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
-      // prepare command: list
+      // prepare command: list, info, delete, join
 
-      if( $cmd == QCMD_INFO )
+      if( $cmd == QCMD_INFO || $cmd == WROOMCMD_DELETE || $cmd == WROOMCMD_JOIN )
       {
          // check id
          if( (string)$this->wroom_id == '' || !is_numeric($this->wroom_id) || $this->wroom_id <= 0 )
             error('invalid_args', "$dbgmsg.bad_wrid");
+      }
 
+      if( $cmd == QCMD_INFO )
+      {
          $this->wroom = Waitingroom::load_waitingroom( $this->wroom_id, $this->is_with_option(QWITH_USER_ID) );
          if( is_null($this->wroom) )
             error('unknown_entry', "$dbgmsg.load_wroom({$this->wroom_id})");
@@ -100,6 +105,10 @@ class QuickHandlerWaitingroom extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
          $this->process_cmd_info();
+      elseif( $cmd == WROOMCMD_DELETE )
+         WaitingroomControl::delete_waitingroom_game( $this->wroom_id );
+      elseif( $cmd == WROOMCMD_JOIN )
+         WaitingroomControl::join_waitingroom_game( $this->wroom_id );
    }
 
    function process_cmd_info()

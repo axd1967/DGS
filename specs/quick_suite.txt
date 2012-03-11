@@ -876,7 +876,7 @@ Commands:
                # the following fields only if WITH-option contain 'folder'
                "name" : "New",          # folder-name (lang-dependent)
                "system" : 1,            # 1=system-folder, 0=user-folder
-               "color_bg" : "F7F5E3FF", # folder background-color (incl. alpha-channel) in hex-format
+               "color_bg" : "F7F5E399", # folder background-color (incl. alpha-channel) in hex-format
                "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
             },
             "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
@@ -1060,7 +1060,7 @@ Commands:
                   "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
                   "name" : "New",          # folder-name (lang-dependent)
                   "system" : 1,            # 1=system-folder, 0=user-folder
-                  "color_bg" : "F7F5E3FF", # folder background-color (incl. alpha-channel) in hex-format
+                  "color_bg" : "F7F5E399", # folder background-color (incl. alpha-channel) in hex-format
                   "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
                   "on_status" : 1,         # 1=shown on status-page, 0=folder-content only shown in message-list
                },
@@ -1166,7 +1166,7 @@ Request:
 
 Options:
 
-   <COMMAND> = "list" | "info" | "join" | "new_game"
+   <COMMAND> = "list" | "info" | "delete" | "join" | "new_game"
 
    <WROOM_ID> = id of waiting-room-entry
 
@@ -1259,11 +1259,29 @@ Commands:
             "restrictions" : "", # empty = no restrictions (offer can be joined); non-empty = info-string with restrictions
          }
 
+   "delete" : deletes own game-offer from waiting-room
+      - required opts: WROOM_ID
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+         - waitingroom_game_not_found : unknown waiting-room entry
+         - waitingroom_delete_not_own : unauthorised delete, you can only delete your own waiting-room entries
+
    "join" : joins game-offer from waiting-room
       - required opts: WROOM_ID
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
+         - not_allowed_for_guest : guests are not allowed to join
+         - waitingroom_game_not_found : unknown waiting-room entry
+         - max_games : joining user has already too many started games running
+         - max_games_opp : the user from the game-offer has already too many started games running
+         - waitingroom_own_game : you can not join your own waiting-room game-offer
+         - waitingroom_not_in_rating_range : your rating is not within the requested range of the game-offer
+         - waitingroom_not_enough_rated_fin_games : you have not finished enough rated games
+         - waitingroom_not_same_opponent : waiting-room restriction on joining by same-opponent is violated
+         - no_initial_rating : handicap-type of game-offer requires a rating
+         - internal_error : inconsistency found in game-offer -> contact admin
 
    "new_game" : create new game-offer in waiting-room
       - TODO TODO
