@@ -136,7 +136,6 @@ class QuickHandlerGameInfo extends QuickHandler
       $this->addResultKey( 'id', (int)$row['ID'] );
       $this->addResultKey( 'double_id', (int)$row['DoubleGame_ID'] );
       $this->addResultKey( 'tournament_id', (int)$row['tid'] );
-      $this->addResultKey( 'shape_id', (int)$row['ShapeID'] );
       $this->addResultKey( 'status', strtoupper($row['Status']) );
       $this->addResultKey( 'flags', QuickHandlerGameInfo::convertGameFlags($row['X_Flags']) );
       $this->addResultKey( 'score', ( $row['Status'] == GAME_STATUS_FINISHED )
@@ -149,6 +148,9 @@ class QuickHandlerGameInfo extends QuickHandler
       $this->addResultKey( 'komi', (float)$row['Komi'] );
       $this->addResultKey( 'handicap', (int)$row['Handicap'] );
       $this->addResultKey( 'handicap_mode', ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' );
+
+      $this->addResultKey( 'shape_id', (int)$row['ShapeID'] );
+      $this->addResultKey( 'shape_snapshot', $row['ShapeSnapshot'] );
 
       $this->addResultKey( 'time_started', QuickHandler::formatDate(@$row['X_Starttime']) );
       $this->addResultKey( 'time_lastmove', QuickHandler::formatDate(@$row['X_Lastchanged']) );

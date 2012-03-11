@@ -192,6 +192,7 @@ class QuickHandlerMessage extends QuickHandler
                'game_players' => '1:1',
                'handicap_type' => $my_htype,
                'shape_id' => (int)$row['ShapeID'],
+               'shape_snapshot' => $row['ShapeSnapshot'],
 
                'rated' => ( ($row['Rated'] == 'N') ? 0 : 1 ),
                'ruleset' => strtoupper($row['Ruleset']),
