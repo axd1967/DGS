@@ -382,6 +382,10 @@ table#ErrorNote tr td {
    text-align: left;
 }
 
+span.Smaller {
+   font-size: smaller;
+}
+
 
 /* ************************* */
 /* main page skeleton */

@@ -113,6 +113,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $rat_link = $fin_link.URI_AMP.'rated=1'.REQF_URL.'rated'; //Rated=yes
    $won_link = $rat_link.URI_AMP.'won=1'.REQF_URL.'rated,won'; //Won?=Won
    $los_link = $rat_link.URI_AMP.'won=2'.REQF_URL.'rated,won'; //Won?=Lost
+   $fin_link_timeout = $fin_link.URI_AMP.'fsf10r=4'.URI_AMP.'won=2'.URI_AMP.'sf_req=10,won'; //lost by timeout
 
 
    // get player clock
@@ -199,7 +200,8 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       }
 
       $itable2->add_sinfo( anchor( $run_link, T_('Running games')),  $row['Running'] );
-      $itable2->add_sinfo( anchor( $fin_link, T_('Finished games')), $row['Finished'] );
+      $itable2->add_sinfo( anchor( $fin_link, T_('Finished games')), $row['Finished'] . MED_SPACING . '/ '
+         . span('Smaller', sprintf( '(%s)', anchor( $fin_link_timeout, T_('Games lost by timeout')))) );
       $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
