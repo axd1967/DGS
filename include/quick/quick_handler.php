@@ -139,6 +139,11 @@ class QuickHandler
       $this->quick_object->result[$key] = $value;
    }
 
+   function setError( $error_code )
+   {
+      $this->quick_object->result['error'] = $error_code;
+   }
+
    /*! \brief Returns true if specified with-option value has been specified. */
    function is_with_option( $with )
    {

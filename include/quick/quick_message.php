@@ -32,11 +32,14 @@ require_once 'include/classlib_user.php';
 
 // see specs/quick_suite.txt (3c)
 // mid=<MESSAGE_ID>
-define('MESSAGEOPT_MID',  'mid');
-define('MESSAGEOPT_OID',  'oid');
+define('MESSAGEOPT_MID', 'mid');
+define('MESSAGEOPT_OTHER_UID', 'ouid');
+define('MESSAGEOPT_OTHER_HANDLE', 'ouser');
+define('MESSAGEOPT_FOLDER', 'folder');
+define('MESSAGEOPT_PARENT_MID', 'pmid');
 
-define('MESSAGECMD_INFO', 'info');
-define('MESSAGE_COMMANDS', 'info');
+define('MESSAGECMD_SEND_MSG', 'send_msg');
+define('MESSAGE_COMMANDS', 'info|send_msg');
 
 
  /*!
@@ -48,20 +51,24 @@ class QuickHandlerMessage extends QuickHandler
 {
    var $mid;
    var $oid; // for bulk-msg
+   var $folder_id;
 
    var $msg_row;
    var $user_rows;
-   var $folder;
+   var $folder; //arr
+   var $folders; //arr
 
    function QuickHandlerMessage( $quick_object )
    {
       parent::QuickHandler( $quick_object );
       $this->mid = 0;
-      $this->oid = 0;
+      $this->other_uid = 0;
+      $this->folder_id = 0;
 
       $this->msg_row = null;
       $this->user_rows = null;
       $this->folder = null;
+      $this->folders = null;
    }
 
 
@@ -75,7 +82,9 @@ class QuickHandlerMessage extends QuickHandler
    function parseURL()
    {
       $this->mid = (int)get_request_arg(MESSAGEOPT_MID);
-      $this->oid = (int)get_request_arg(MESSAGEOPT_OID);
+      $this->other_uid = (int)get_request_arg(MESSAGEOPT_OTHER_UID);
+      $this->other_handle = trim(get_request_arg(MESSAGEOPT_OTHER_HANDLE));
+      $this->folder_id = (int)get_request_arg(MESSAGEOPT_FOLDER);
    }
 
    function prepare()
@@ -89,24 +98,42 @@ class QuickHandlerMessage extends QuickHandler
       $cmd = $this->quick_object->cmd;
 
       // check mid
-      if( (string)$this->mid == '' || !is_numeric($this->mid) || $this->mid <= 0 )
+      if( !is_numeric($this->mid) || $this->mid < 0 )
          error('invalid_args', "$dbgmsg.bad_message");
-      if( (string)$this->oid != '' && !is_numeric($this->oid) )
-         error('invalid_args', "$dbgmsg.bad_uid.oid");
+      if( !is_numeric($this->other_uid) || $this->other_uid < 0 )
+         error('invalid_args', "$dbgmsg.bad_uid.oid({$this->other_uid})");
+      if( !is_numeric($this->folder_id) || $this->folder_id < FOLDER_ALL_RECEIVED )
+         error('invalid_args', "$dbgmsg.bad_folder({$this->folder_id})");
       $mid = $this->mid;
 
       // prepare command: info
 
-      if( $cmd == MESSAGECMD_INFO )
+      if( $cmd == QCMD_INFO )
       {
+         if( $mid == 0 )
+            error('invalid_args', "$dbgmsg.bad_message.miss_mid");
+
          /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
-         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->oid, /*full*/true );
+         $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->other_uid, /*full*/true );
 
          if( $this->is_with_option(QWITH_USER_ID) )
             $this->user_rows = User::load_quick_userinfo( array(
                $my_id, (int)$this->msg_row['other_id'] ));
 
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
+      }
+      elseif( $cmd == MESSAGECMD_SEND_MSG )
+      {
+         if( $this->other_uid > 0 && (string)$this->other_handle == '' )
+            $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
+         if( $this->other_uid == 0 && (string)$this->other_handle == '' )
+            error('receiver_not_found', "$dbgmsg.miss_recipient");
+
+         $this->init_folders( $this->my_id );
+         if( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
+            error('folder_not_found', "$dbgmsg.bad_folder({$this->folder_id})");
+
+         //TODO check if prev-mid for reply is one from sender/recipients
       }
 
       // check for invalid-action
@@ -117,8 +144,10 @@ class QuickHandlerMessage extends QuickHandler
    function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == MESSAGECMD_INFO )
+      if( $cmd == QCMD_INFO )
          $this->process_cmd_info();
+      elseif( $cmd == MESSAGECMD_SEND_MSG )
+         $this->process_cmd_send_msg();
    }
 
    function process_cmd_info()
@@ -218,6 +247,39 @@ class QuickHandlerMessage extends QuickHandler
       }
    }//process_cmd_info
 
+   function process_cmd_send_msg()
+   {
+      $msg_control = new MessageControl( $this->folders, /*allow-bulk*/false );
+      $input = array(
+            'senderid'     => $this->my_id,
+            'folder'       => $this->folder_id,
+            'reply'        => $this->mid,
+            'mpgid'        => 0,
+            'subject'      => trim(@$_REQUEST['subj']),
+            'message'      => trim(@$_REQUEST['msg']),
+            'gid'          => 0,
+            'send_accept'  => false,
+            'send_decline' => false,
+            'disputegid'   => 0,
+         );
+      $result = $msg_control->handle_send_message( $this->other_handle, MSGTYPE_NORMAL, $input );
+      if( is_array($result) && count($result) )
+      {
+         $this->setError('invalid_action');
+         $error_texts = $result;
+      }
+      else
+         $error_texts = array();
+
+      $this->addResultKey('error_texts', $error_texts);
+   }//process_cmd_send_msg
+
+   function init_folders( $uid )
+   {
+      init_standard_folders();
+      $this->folders = get_folders( $uid );
+   }
+
    function load_folder( $uid, $folder_id )
    {
       if( !$this->is_with_option(QWITH_FOLDER) )
@@ -248,6 +310,14 @@ class QuickHandlerMessage extends QuickHandler
       if( $flags & MSGFLAG_BULK )
          $out[] = 'BULK';
       return implode(',', $out);
+   }
+
+   function load_user_handle( $dbgmsg, $uid )
+   {
+      $arr = User::load_quick_userinfo( array( $uid ) );
+      if( count($arr) == 0 || !isset($arr[$uid]) )
+         error('receiver_not_found', "$dbgmsg.miss_recipient($uid)");
+      return $arr[$uid]['Handle'];
    }
 
 } // end of 'QuickHandlerMessage'

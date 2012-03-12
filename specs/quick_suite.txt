@@ -808,7 +808,7 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&oid=<OTHER_UID>&msg=<MESSAGE>&pmid=<PARENT_MSG_ID>&folder=<FOLDER>&with=<WITH>
+   quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&ouid=<OTHER_UID>&ouser=<OTHER_HANDLE>&subj=<SUBJECT>&msg=<MESSAGE>&folder=<FOLDER>&with=<WITH>
 
    # list
    quick_do.php?obj=message&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
@@ -819,16 +819,23 @@ Options:
 
    <MESSAGE_ID> = integer
       - message-id referencing private DGS-message to perform message-operation on
+      - message-id to reply to for "send_msg"-command
 
    <OTHER_UID> = integer
-      - user-id for bulk-message, optional for non-bulk-message
-      - 0 = default-value, for bulk-message use first recipient
+   <OTHER_HANDLE> = string
+      - OTHER_UID : specific user-id for bulk-message to identify unique entry
 
-   <MESSAGE> = message
+      - OTHER_UID|OTHER_HANDLE : recipient of message:
+        - OTHER_UID is the unique user-id (uid),
+          e.g. http://www.dragongoserver.net/userinfo.php?uid=1
+        - OTHER_HANDLE is the unique user-id (handle),
+          e.g. http://www.dragongoserver.net/userinfo.php?user=guest
+      - only one argument for <OTHER_UID> or <OTHER_HANDLE> can be used for sending message
+
+   <SUBJECT> = title of message
+
+   <MESSAGE> = text-body of message
       - message-text for message-operation
-
-   <PARENT_MSG_ID> = integer
-      - parent message-id, required for replies
 
    <FOLDER> = integer
       - target folder
@@ -933,12 +940,26 @@ Commands:
          }
 
    "send_msg" : sends/answer message
-      - required opts: OTHER_UID, MESSAGE
-      - optional opts: PARENT_MSG_ID (only for replies)
+      - required opts: OTHER_UID|OTHER_HANDLE, SUBJECT, MESSAGE
+      - optional opts: MESSAGE_ID (for replies), FOLDER (target-folder)
+         - MESSAGE_ID : message-id to reply to with sending-message
+         - FOLDER : target-folder of replied-to message for sending-user
 
-      - TODO TODO
-         - implicit folder-move on reply/send ?
-      - Errors: TODO TODO
+      - Notes:
+         - NOT SUPPORTED: sending invites for multi-player-games, sending bulk-message
+         - if FOLDER is omitted, behave like GUI moving replied-message into MAIN-folder
+         - message to send will be moved into SENT-folder for sending-user
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG]
+         - invalid_action : failure on checking to send a message, detailed error-texts found in "error_texts"-field
+
+      - Result (JSON) =
+         {
+            "error_texts" : [          # empty array, if no "error" returned; otherwise list of error-texts
+               "err1", "err2", ...     # free error-texts
+            ],
+         }
 
    "move_msg" : moves message(s) into target folder
       - required opts: MESSAGE_ID, FOLDER
@@ -951,7 +972,9 @@ Commands:
       - TODO TODO
          - move to destroy-folder (trashcan + destroy in one step)
          - bulk ?
+
       - Errors: TODO TODO
+            game_delete_invitation : error on game-deletion detected, nothing found to be deleted
 
    "accept_inv" : accepts game-invitation
       - required opts: MESSAGE_ID
@@ -1030,7 +1053,7 @@ Examples for message-commands:
    quick_do.php?obj=message&cmd=info&mid=1234567
 
    # retrieve bulk-message for certain recipient
-   quick_do.php?obj=message&cmd=info&mid=1234567&oid=2
+   quick_do.php?obj=message&cmd=info&mid=1234567&ouid=2
 
 
 #-------- (3d) Objects - "folder" ---------------------------------------------
@@ -2002,6 +2025,27 @@ Errors:
       - mysql_query_failed : database query failed
       - mail_failure : sending mail for notification failed (e.g. for quota-exceeded)
 
+   * [E-GAMECREATE] Game Creation Errors:
+      - unknown_ruleset : unknown ruleset (known: JAPANESE, CHINESE)
+      - handicap_range : invalid handicap specified
+      - komi_range : invalid komi specified
+      - invalid_snapshot : snapshot for shape-game is invalid
+      - invalid_snapshot_char : invalid character to represent shape-snapshot used
+      - mismatch_snapshot : shape-game inconsistency with snapshot detected
+      - no_initial_rating : player needs rating for required handicap-type
+      - time_limit_too_small : given time is too small
+
+      - illegal_position : illegal position detected on loading game-board
+      - unknown_game : game-data can not be found
+      - invited_to_unknown_game : game invited to is unknown to system
+      - game_already_accepted : game has already been accepted, probable race-condition
+      - wrong_dispute_game : players do not match with dispute-game
+      - wrong_players : players do not match with game-request
+      - mysql_start_game : database-error on starting game
+      - mysql_data_corruption : data is corrupted -> contact admin
+      - feature_disabled : feature (probably tournament) is disabled
+      - internal_error : data is inconsistent -> contact admin
+
    * [E-GAME] Game Errors:
       - unknown_game : invalid game
       - game_not_started : game has not started yet (still in invitation-mode)
@@ -2023,6 +2067,11 @@ Errors:
       - opponent_not_found : database corrupt regarding game-opponent -> contact admin
       - receiver_not_found : message-receiver for notify could not be found -> contact admin
       - mysql_insert_message : database query to insert message for notify failed
+
+   * [E-MSG] Message Move Errors:
+      - receiver_not_found : given recipient(s) can not be found
+      - folder_not_found : specified folder is unknown for current user
+      - bulkmessage_self : bulk-messages can not be sent to oneself
 
 
 #-------- (6) Formats ---------------------------------------------------------

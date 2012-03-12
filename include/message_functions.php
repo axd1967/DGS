@@ -29,6 +29,7 @@ require_once 'include/utilities.php';
 require_once 'include/error_codes.php';
 require_once 'include/classlib_game.php';
 require_once 'include/shape_control.php';
+require_once 'include/make_game.php';
 
 
 // game-settings form-/table-style defs
@@ -40,6 +41,9 @@ define('GSET_MSG_DISPUTE', 'dispute');
 define('CHECK_GSET', 'waitingroom|tournament_ladder|tournament_roundrobin|invite|dispute');
 
 define('FOLDER_COLS_MODULO', 8); //number of columns of "tab" layouts
+
+define('MAX_MSG_RECEIVERS', 16); // oriented at max. for multi-player-game
+
 
 
 function init_standard_folders()
@@ -1855,7 +1859,7 @@ function message_list_query($my_id, $folderstring='all', $order=' ORDER BY me.mi
    $result = db_query( 'message_list_query', $query );
 
    return array( $result, $qsql );
-}
+}//message_list_query
 
 
 
@@ -2063,5 +2067,269 @@ class MessageListBuilder
    }//message_build_user_string
 
 } // end of 'MessageListBuilder'
+
+
+
+ /*!
+  * \class MessageControl
+  *
+  * \brief Controller-Class to handle message-stuff.
+  */
+class MessageControl
+{
+   var $folders;
+   var $allow_bulk;
+   var $mpg_type;
+   var $mpg_gid;
+   var $mpg_col;
+   var $arr_mpg_users;
+
+   var $dgs_message;
+   var $maxGamesCheck;
+
+   function MessageControl( $folders, $allow_bulk, $mpg_type=0, $mpg_gid=0, $mpg_col='', $arr_mpg_users=null )
+   {
+      $this->folders = $folders;
+      $this->allow_bulk = $allow_bulk;
+      $this->mpg_type = (int)$mpg_type;
+      $this->mpg_gid = (int)$mpg_gid;
+      $this->mpg_col = $mpg_col;
+      $this->arr_mpg_users = $arr_mpg_users;
+
+      $this->dgs_message = new DgsMessage();
+      $this->max_games_check = new MaxGamesCheck();
+   }
+
+   // return: false=success, otherwise failure returning array of errors
+   function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )
+   {
+      global $player_row;
+      static $cache = array();
+      $my_id = (int)@$player_row['ID'];
+      $is_bulk_admin = MessageControl::is_bulk_admin();
+
+      $to_handles = strtolower( str_replace(',', ' ', trim($to_handles)) );
+      $arr_to = array_unique( preg_split( "/\s+/", $to_handles, null, PREG_SPLIT_NO_EMPTY ) );
+      $cnt_to = count($arr_to);
+      sort($arr_to);
+      $to_handles = implode(' ', $arr_to); // lower-case
+      $dgs_msg->clear_errors();
+
+      if( !isset($cache[$to_handles]) ) // need lower-case for check
+      {
+         $cache[$to_handles] = 1; // handle(s) checked
+
+         if( $cnt_to < 1 )
+            return $dgs_msg->add_error( T_('Missing message receiver') );
+         elseif( $cnt_to > MAX_MSG_RECEIVERS )
+            return $dgs_msg->add_error( sprintf( T_('Too much receivers (max. %s)'), MAX_MSG_RECEIVERS ) );
+         else // single | multi
+         {
+            if( $cnt_to > 1 && $msg_type == MSGTYPE_INVITATION )
+               return $dgs_msg->add_error( T_('Only one receiver for invitation allowed!') );
+
+            $sender_uid = $my_id; // sender
+            list( $arr_receivers, $errors ) =
+               DgsMessage::load_message_receivers( $msg_type, $invitation_step, $arr_to );
+            $dgs_msg->add_errors( $errors );
+
+            if( $this->mpg_type > 0 && $this->mpg_gid > 0 && is_null($this->arr_mpg_users) )
+               $this->arr_mpg_users = GamePlayer::load_users_for_mpgame(
+                  $this->mpg_gid, $this->mpg_col, /*skip-myself*/true, $tmp_arr );
+
+            $arr_handles = array();
+            foreach( $arr_receivers as $handle => $user_row )
+            {
+               $uid = $user_row['ID'];
+               if( $uid == $sender_uid && $cnt_to > 1 )
+                  $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_self') );
+
+               $dgs_msg->add_recipient( $user_row );
+               $arr_handles[] = $user_row['Handle']; // original case
+
+               // MPG-message only allows MPG-players as recipients
+               if( $this->mpg_type > 0 && $this->mpg_gid > 0 )
+               {
+                  $is_mpg_player = ( is_array($this->arr_mpg_users) )
+                     ? isset($this->arr_mpg_users[$uid])
+                     : GamePlayer::exists_game_player($this->mpg_gid, $uid); // fallback-check
+                  if( !$is_mpg_player )
+                     $dgs_msg->add_error(
+                        sprintf( T_('User [%s] is no participant of multi-player-game.'), $user_row['Handle'] ));
+               }
+            }
+            $to_handles = implode(' ', $arr_handles); // reset original case
+
+            // bulk-message only allowed for MPG|admin as sender
+            if( $dgs_msg->count_recipients() > 1 )
+            {
+               $check_flags = ( $this->mpg_type == MPGMSG_INVITE ) ? GPFLAG_MASTER : 0;
+               if( !$is_bulk_admin && !( $this->mpg_type > 0 && GamePlayer::exists_game_player($this->mpg_gid, $sender_uid, $check_flags) ) )
+                  $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_forbidden') );
+            }
+         }
+      }
+
+      return ( $dgs_msg->count_errors() > 0 );
+   }//read_message_receivers
+
+   /*!
+    * \brief Checks and if no error occured performs message-actions.
+    * \param $arg_to single or multi-receivers
+    * \param $input map with input from URL with the following keys:
+    *    # see also 'message.php' (URL-input-args)
+    *    'senderid' = uid sending message
+    *    'folder' = target-folder-id
+    *    'reply' = message-id to reply to
+    *    'mpgid' = game-id for MP-game
+    *    'subject' = message-title
+    *    'message' = message-textbody
+    *    'send_accept' = true for invitation-accept
+    *    'send_decline' = true for invitation-decline
+    *    'gid' = game-id of invitation
+    *    'disputegid' = if set, game-id for dispute
+    * \return 0=success for sending simple message;
+    *         msg_gid (>0) = success for sending bulk-mpg-message;
+    *         otherwise array with error-texts on check-failure
+    */
+   function handle_send_message( $arg_to, $msg_type, $input )
+   {
+      global $player_row;
+
+      $my_id = (int)@$player_row['ID'];
+      if( $my_id <= GUESTS_ID_MAX )
+         return array( ErrorCode::get_error_text('not_allowed_for_guest') );
+
+      $new_folder = (int)@$input['folder'];
+
+      $sender_id = (int)@$input['senderid'];
+      if( $sender_id > 0 && $my_id != $sender_id )
+         return array( ErrorCode::get_error_text('user_mismatch') );
+
+      $prev_mid = max( 0, (int)@$input['reply']); //ID of message replied.
+      $accepttype = (bool)@$input['send_accept'];
+      $declinetype = (bool)@$input['send_decline'];
+      $disputegid = -1;
+      if( $msg_type == MSGTYPE_INVITATION )
+      {
+         $disputegid = (int)@$input['disputegid'];
+         if( $disputegid < 0 )
+            $disputegid = 0;
+      }
+      $invitation_step = $accepttype || $declinetype || ($disputegid > 0); //not needed: || ($msg_type == MSGTYPE_INVITATION)
+
+      // find receiver of the message
+      if( $this->read_message_receivers( $this->dgs_message, $msg_type, $invitation_step, $arg_to ) )
+         return $this->dgs_message->errors;
+
+      // check own/opp max-games
+      $opponent_row = $this->dgs_message->get_recipient();
+      if( ($msg_type == MSGTYPE_INVITATION) || $accepttype )
+      {
+         $chk_errors = $this->check_max_games($opponent_row);
+         if( count($chk_errors) )
+         {
+            foreach( $chk_errors as $err )
+               $this->dgs_message->add_error( $err );
+            return $this->dgs_message->errors;
+         }
+      }
+
+      $subject = trim(@$input['subject']);
+      $message = @$input['message'];
+
+      if( (string)$subject == '' )
+      {
+         $this->dgs_message->add_error( T_('Missing message subject') );
+         return $this->dgs_message->errors;
+      }
+
+      // Update database
+
+      $msg_gid = 0;
+      if( $this->dgs_message->has_recipient() ) // single-receiver
+      {
+         $opponent_ID = $opponent_row['ID'];
+
+         if( $msg_type == MSGTYPE_INVITATION )
+         {
+            $msg_gid = make_invite_game($player_row, $opponent_row, $disputegid);
+            $subject = ( $disputegid > 0 ) ? 'Game invitation dispute' : 'Game invitation';
+         }
+         else if( $accepttype )
+         {
+            $msg_gid = (int)@$input['gid'];
+            $gids = accept_invite_game( $msg_gid, $player_row, $opponent_row );
+            $msg_gid = $gids[0];
+            $subject = 'Game invitation accepted';
+         }
+         else if( $declinetype )
+         {
+            // game will be deleted
+            $msg_gid = (int)@$input['gid'];
+            if( !GameHelper::delete_invitation_game( 'send_message.decline', $msg_gid, $my_id, $opponent_ID ) )
+               exit;
+            $subject = 'Game invitation decline';
+         }
+         else if( $this->mpg_type == MPGMSG_INVITE )
+         {
+            $msg_gid = (int)@$input['mpgid'];
+         }
+
+         $to_uids = $opponent_ID;
+      }
+      else // multi-receiver (bulk)
+      {
+         if( !$this->allow_bulk )
+         {
+            $this->dgs_message->add_error( ErrorCode::get_error_text('bulkmessage_forbidden') );
+            return $this->dgs_message->errors;
+         }
+
+         $to_uids = array();
+         foreach( $this->dgs_message->recipients as $user_row )
+            $to_uids[] = (int)@$user_row['ID'];
+      }
+
+      // Send message
+
+      send_message( 'send_message', $message, $subject
+         , $to_uids, '', /*notify: $opponent_row['Notify'] == 'NONE'*/true
+         , $my_id, $msg_type, $msg_gid
+         , $prev_mid, ($disputegid > 0 ? MSGTYPE_DISPUTED : '')
+         , isset($this->folders[$new_folder]) ? $new_folder : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
+         );
+
+      return ( $this->mpg_type == MPGMSG_INVITE && $msg_gid > 0 ) ? $msg_gid : 0;
+   }//handle_send_message
+
+   // return non-null error-arr checking on OWN/opponents max-games
+   function check_max_games( $opp_row )
+   {
+      $errors = array();
+
+      if( !$this->max_games_check->allow_game_start() )
+         $errors[] = $this->max_games_check->get_error_text(false);
+
+      if( !is_null($opp_row) )
+      {
+         $oppMaxGamesCheck = new MaxGamesCheck( (int)@$opp_row['X_OppGamesCount'] );
+         if( !$oppMaxGamesCheck->allow_game_start() )
+            $errors[] = ErrorCode::get_error_text('max_games_opp');
+      }
+
+      return $errors;
+   }//check_max_games
+
+
+   // ------------ static functions ----------------------------
+
+   function is_bulk_admin()
+   {
+      global $player_row;
+      return ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME) );
+   }
+
+} // end of 'MessageControl'
 
 ?>
