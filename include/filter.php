@@ -430,6 +430,8 @@ class SearchFilter
 
       $this->HashCode = ($this->is_init) ? $this->get_saved_arg(FNAME_HASHCODE) : $this->hashcode();
 
+      $this->parse_requested_filters();
+
       // 1. parse active-set if initialized
       // 2. parse values from args-array into filters
       foreach( $arr_keys as $id )
@@ -503,8 +505,11 @@ class SearchFilter
          else // fname=0 (hide all)
             $this->setall_active(false);
       }
+   }
 
-      // parse additionally requested filter-IDs (from links for example)
+   /*! \brief parse additionally requested filter-IDs (from links for example). */
+   function parse_requested_filters()
+   {
       $freq_str = trim( (string) $this->get_arg(FNAME_REQUIRED, false) );
       if( (string)$freq_str != '' )
       {
@@ -517,9 +522,12 @@ class SearchFilter
                error('invalid_filter', "SearchFilter.add_or_del_filter($req_fid)");
 
             $this->RequiredFilters[$req_fid] = 1;
+
+            if( !$this->is_active($req_fid) ) // show requested filter
+               $this->toggle_active($req_fid);
          }
       }
-   }
+   }//parse_requested_filters
 
    /*! \brief Returns non-empty filter-id array, that are required for filtering (parsed from FNAME_REQUIRED-arg). */
    function get_required_ids()
@@ -3206,7 +3214,7 @@ class FilterScore extends Filter
             return false;
       }
       elseif( $name === $this->elem_result )
-         ; // only var set in values[elem_result]
+         ; // default-behaviour: this->values[elem_result] = $val;
       else
          error('invalid_filter', "FilterScore.parse_value.unknown_key({$this->id},$name,$val)");
 

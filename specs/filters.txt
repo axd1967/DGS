@@ -578,10 +578,10 @@ the filtered page. The required columns are "permanently" added: it's the same
 as you would add a column to the Table with GUI-control elements. The additional
 URL-arg can also contain field-ID-numbers instead of the names.
 
-Adding the table-column in this way, simplifies the the handling of the page's
+Adding the table-column in this way, simplifies the handling of the page's
 SearchProfile dramatically.
 
-This may not what the user wants to. There's only the other possibility
+This may not be what the user wants to. There's only the other possibility
 to declare a filter and its table-column in a static fashion, so the column
 is always visible.
 
