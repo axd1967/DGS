@@ -220,6 +220,8 @@ define('ENABLE_STDHANDICAP', 0x3);
 define('ENA_MOVENUMBERS', 1);
 define('MAX_MOVENUMBERS', 500);
 
+define('MAX_REJECT_TIMEOUT', 120); // days
+
 
 //-----
 // UserFlags (also stored in cookie)

@@ -180,6 +180,19 @@ require_once( 'include/gui_bulletin.php' );
          'TAB', 'CHECKBOX', 'skipbull'.BULLETIN_SKIPCAT_SPAM, 1,
             GuiBulletin::getCategoryText(BULLETIN_CAT_SPAM), !($skipbull & BULLETIN_SKIPCAT_SPAM) ));
 
+   $reject_timeout = (int)@$player_row['RejectTimeoutWin'];
+   $profile_form->add_empty_row();
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Reject win by timeout'),
+         'CHECKBOX', 'rwt_enable', 1, T_('Activate check on rated (non-tournament) game won by timeout:#rwt'),
+            ($reject_timeout >= 0), ));
+   $profile_form->add_row( array(
+         'TAB', 'TEXT', T_('The win of a game by timeout will be "rejected" (i.e. changed to unrated),<br>' .
+                           'if the loser has not moved in any game for a certain amount of time.#rwt'), ));
+   $profile_form->add_row( array(
+         'TAB', 'TEXTINPUT', 'rwt_days', 5, 3, ($reject_timeout >= 0 ? $reject_timeout : ''),
+         'TEXT', sprintf(' (0..%s) %s', MAX_REJECT_TIMEOUT, T_('days (minimum) the loser has not moved in any game#rwt')), ));
+
    //--- Followings may be browser settings ---
 
    $profile_form->add_row( array( 'SPACE' ) );

@@ -1772,10 +1772,11 @@ class GameFinalizer
    var $Black_id;
    var $White_id;
    var $Moves;
+   var $is_rated;
    var $skip_game_query;
 
    function GameFinalizer( $action_by, $my_id, $gid, $tid, $game_status, $game_type, $game_players,
-         $game_flags, $black_id, $white_id, $moves )
+         $game_flags, $black_id, $white_id, $moves, $is_rated )
    {
       $this->action_by = $action_by;
       $this->my_id = (int)$my_id;
@@ -1788,6 +1789,7 @@ class GameFinalizer
       $this->Black_ID = (int)$black_id;
       $this->White_ID = (int)$white_id;
       $this->Moves = (int)$moves;
+      $this->is_rated = (bool)$is_rated;
       $this->skip_game_query = false;
    }
 
@@ -1799,34 +1801,42 @@ class GameFinalizer
    /**
     * \brief Finishes or deletes game.
     * \param $do_delete true=delete-running-game, false=end-running-game
-    * \param $game_updquery null=build default query, SQL-Games-update-query
+    * \param $upd_game null=build default query; otherwise UpdateQuery with SQL-Games-update-query
     * \param $game_score score to end game with
     * \param $message message added in game-notify to players
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function finish_game( $dbgmsg, $do_delete, $game_updquery, $game_score, $message='' )
+   function finish_game( $dbgmsg, $do_delete, $upd_game, $game_score, $message='' )
    {
       global $NOW;
       $gid = $this->gid;
       $dbgmsg = "GameFinalizer::finish_game($gid).$dbgmsg";
 
       // update Games-entry
+      $timeout_rejected = false;
       if( !$this->skip_game_query && !$do_delete )
       {
          if( $this->action_by == ACTBY_ADMIN )
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
-         if( is_null($game_updquery) )
+         if( is_null($upd_game) )
          {
-            $game_updquery = "UPDATE Games SET Status='".GAME_STATUS_FINISHED."', " .
-               "Last_X=". GameFinalizer::convert_score_to_posx($game_score) .", " .
-               "ToMove_ID=0, " .
-               "Flags={$this->GameFlags}, " .
-               "Score=$game_score, " .
-               "Lastchanged=FROM_UNIXTIME($NOW) " .
-               "WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves={$this->Moves} LIMIT 1";
+            $upd_game = new UpdateQuery('Games');
+            $upd_game->upd_text('Status', GAME_STATUS_FINISHED );
+            $upd_game->upd_num('Last_X', GameFinalizer::convert_score_to_posx($game_score) );
+            $upd_game->upd_num('ToMove_ID', 0 );
+            $upd_game->upd_num('Flags', $this->GameFlags );
+            $upd_game->upd_num('Score', $game_score );
+            $upd_game->upd_time('Lastchanged');
          }
 
+         // make game unrated if criteria matches and opponent rejects-win-by-timeout
+         $timeout_rejected = $this->should_reject_win_by_timeout($game_score);
+         if( $timeout_rejected )
+            $upd_game->upd_text('Rated', 'N');
+
+         $game_updquery = "UPDATE Games SET " . $upd_game->get_query() .
+            " WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves={$this->Moves} LIMIT 1";
          $result = db_query( "$dbgmsg.upd_game", $game_updquery );
          if( mysql_affected_rows() != 1 )
             error('mysql_update_game', "$dbgmsg.upd_game2");
@@ -1839,7 +1849,7 @@ class GameFinalizer
 
       // send message to my opponent / all-players / observers about the result
       $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GamePlayers,
-         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $message );
+         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $timeout_rejected, $message );
 
       if( $do_delete )
       {
@@ -1871,6 +1881,49 @@ class GameFinalizer
          $game_notify->get_recipients(), '',
          /*notify*/true, /*system-msg*/0, MSGTYPE_RESULT, $gid );
    }//finish_game
+
+   /*! \brief Returns true, if opponent rejects-win-by-timout and game should be made unrated. */
+   function should_reject_win_by_timeout( $game_score )
+   {
+      global $NOW;
+
+      // must be scored by timeout, must be rated game, must be GO-type game, must not be a tournament
+      if( abs($game_score) == SCORE_TIME && $this->is_rated && $this->GameType == GAMETYPE_GO && $this->tid == 0 )
+      {
+         if( $game_score == -SCORE_TIME )
+         {
+            $uid_winner = $this->Black_ID;
+            $uid_loser  = $this->White_ID;
+         }
+         else
+         {
+            $uid_winner = $this->White_ID;
+            $uid_loser  = $this->Black_ID;
+         }
+
+         $urow_winner = mysql_single_fetch("GameFinalizer.should_reject_win_by_timeout.find_winner({$this->gid},$uid_winner)",
+               "SELECT RejectTimeoutWin FROM Players WHERE ID=$uid_winner LIMIT 1" )
+            or error('unknown_user', "GameFinalizer.should_reject_win_by_timeout.find_winner2({$this->gid},$uid_winner)");
+
+         // check if reject-timeout enabled for winner (-1 = disabled, 0 = always reject, >0 days chk on losers lastmove)
+         $winner_reject_timeout_days = (int)$urow_winner['RejectTimeoutWin'];
+         if( $winner_reject_timeout_days == 0 )
+            return true; // reject timeout
+         elseif( $winner_reject_timeout_days > 0 ) // reject-timeout must be enabled for winner
+         {
+            $urow_loser = mysql_single_fetch("GameFinalizer.should_reject_win_by_timeout.find_loser({$this->gid},$uid_loser)",
+                  "SELECT UNIX_TIMESTAMP(LastMove) AS X_LastMove FROM Players WHERE ID=$uid_loser LIMIT 1" )
+               or error('unknown_user', "GameFinalizer.should_reject_win_by_timeout.find_loser2({$this->gid},$uid_loser)");
+
+            $loser_last_moved = (int)$urow_loser['X_LastMove'];
+
+            if( $loser_last_moved <= ($NOW - $winner_reject_timeout_days * SECS_PER_DAY) )
+               return true; // reject timeout
+         }
+      }
+
+      return false; // no reject, perform normal timeout-handling
+   }//should_reject_win_by_timeout
 
 
    // ------------ static functions ----------------------------
@@ -1905,6 +1958,7 @@ class GameNotify
    var $black_id;
    var $white_id;
    var $score;
+   var $timeout_rejected;
    var $message;
 
    var $players; // [ uid => [ ID/Name/Handle => ...], ... ]
@@ -1914,7 +1968,7 @@ class GameNotify
 
    /*! \brief Constructs GameNotify also loading player-info from db. */
    function GameNotify( $gid, $uid, $game_status, $game_type, $game_players, $game_flags,
-         $black_id, $white_id, $score, $message )
+         $black_id, $white_id, $score, $timeout_rejected, $message )
    {
       $this->gid = (int)$gid;
       $this->uid = (int)$uid;
@@ -1925,6 +1979,7 @@ class GameNotify
       $this->black_id = (int)$black_id;
       $this->white_id = (int)$white_id;
       $this->score = $score;
+      $this->timeout_rejected = $timeout_rejected;
       $this->message = $message;
 
       $this->_load_players();
@@ -2030,6 +2085,8 @@ class GameNotify
       $info_text = ( $this->game_flags & GAMEFLAGS_HIDDEN_MSG )
          ? "<p><b>Info:</b> The game has hidden comments!"
          : '';
+      if( $this->timeout_rejected )
+         $info_text .= "<p><b>Info:</b> The winner rejected a win by timeout, so the game was changed to unrated!";
 
       $player_text = $this->players_text;
       if( $this->message )

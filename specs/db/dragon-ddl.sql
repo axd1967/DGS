@@ -688,6 +688,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `UserPicture` varchar(48) NOT NULL default '',
   `NextGameOrder` enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED',
   `SkipBulletin` tinyint(3) unsigned NOT NULL default '4',
+  `RejectTimeoutWin` tinyint(4) NOT NULL default '-1',
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `Handle` (`Handle`),
   KEY `Rating2` (`Rating2`),

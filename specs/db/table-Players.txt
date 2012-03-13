@@ -96,6 +96,7 @@ Zu  | Button           | tinyint(4)                                  | NO   |   
 Zu  | UserPicture      | varchar(48)                                 | NO   |     |                     |                |
 Zu  | NextGameOrder    | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   |     | LASTMOVED           |                |
 Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |     | 4                   |                |
+Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |     | -1                  |                |
 
 
 # Fields for board-related GUI-config in ConfigBoard-table (category = Gu):
@@ -170,6 +171,10 @@ Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |   
    - -1 for all joined users if setup-MP-game is started
    - no change if invite-reservation is accepted by user
 
+* RejectTimeoutWin :
+   - -1 = no rejection of win-by-timeout (default)
+   - 0 .. 127 = number of days that must pass since last-move-date of opponent
+     to enable rejecting a win-by-timeout by making the game unrated.
 
 -------------------------------------------------
 TABLE Players:

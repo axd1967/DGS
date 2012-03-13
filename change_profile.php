@@ -103,13 +103,27 @@ require_once 'include/db/bulletin.php';
       get_request_arg('tablemaxrows'),
       MAXROWS_PER_PAGE_PROFILE, MAXROWS_PER_PAGE_DEFAULT );
 
+   if( @$_REQUEST['rwt_enable'] )
+   {
+      $reject_timeout = trim(get_request_arg('rwt_days'));
+      if( !is_numeric($reject_timeout) )
+         $reject_timeout = -1;
+      elseif( $reject_timeout < 0 )
+         $reject_timeout = 0;
+      elseif( $reject_timeout > MAX_REJECT_TIMEOUT )
+         $reject_timeout = MAX_REJECT_TIMEOUT;
+   }
+   else
+      $reject_timeout = -1;
+
 
    $query = "UPDATE Players SET " .
       "Name='" . mysql_addslashes($name) . "', " .
       "Email='" . mysql_addslashes($email) . "', " .
       "Open='" . mysql_addslashes(trim(get_request_arg('open'))) . "', " .
       "SendEmail='$sendemail', " .
-      "SkipBulletin=$skipbulletin, ";
+      "SkipBulletin=$skipbulletin, " .
+      "RejectTimeoutWin=$reject_timeout, ";
    if( $reset_bulletin_count )
       $query .= "CountBulletinNew=-1, ";
 

@@ -436,7 +436,7 @@ This is why:
       if( $game_finished )
       {
          $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid, $Status, $GameType, $GamePlayers,
-            $GameFlags, $Black_ID, $White_ID, $Moves );
+            $GameFlags, $Black_ID, $White_ID, $Moves, ($game_row['Rated'] != 'N') );
 
          $do_delete = ( $action == 'delete' );
          if( $do_delete )
