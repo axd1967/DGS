@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    }
 
    $count_mpg_run = 0; // count MP-games of user
-   $show_mpg = ( $my_info || $is_admin );
+   $show_mpg = ( $my_info || $is_admin || $is_game_admin );
    if( $show_mpg )
    {
       $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
@@ -180,12 +180,17 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
       $itable2->add_sinfo( T_('Registration date'), $registerdate );
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
-      if( $is_admin )
-         $itable1->add_row( array(
-                  'rattb' => 'class="DebugInfo"',
-                  'sname' => T_('Last quick access'),
-                  'sinfo' => $lastquickaccess ));
+      $itable1->add_sinfo( T_('Last quick access'), $lastquickaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
+
+      if( $my_info || $is_admin || $is_game_admin )
+      {
+         $reject_timeout = (int)@$row['RejectTimeoutWin'];
+         $itable1->add_row( array(
+               'rattb' => (!$my_info ? 'class="DebugInfo"' : ''),
+               'sname' => T_('Reject win by timeout'),
+               'sinfo' => ( $reject_timeout < 0 ? T_('disabled#rwt') : sprintf(T_('%s days#rwt'), $reject_timeout) )));
+      }
 
       $itable1->add_sinfo( anchor( "edit_vacation.php", T_('Vacation days left') ),
          TimeFormat::echo_day(floor($row["VacationDays"])) );
