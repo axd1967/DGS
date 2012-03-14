@@ -19,7 +19,81 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-13 juga
+
+   * include/game_functions.php (class GameFinalizer, ~.finish_game, ~.should_reject_win_by_timeout;
+       class GameNotify, ~.get_text_game_result),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/std_functions.php (MAX_REJECT_TIMEOUT),
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     admin_game.php, change_profile.php, clock_tick.php, confirm.php,
+     edit_profile.php, userinfo.php:
+   - reject game-win by timeout by making the game unrated
+     - loser may be inactive for some time, or left the server;
+       so for a more stable rating, added profile-option to allow winner
+       to not boost his rating "undeserved"
+     - added permanent (non-browser-dependent) profile-option to control number of days
+       the loser has not moved to accept a "reject" of a timed-out game
+     - stored in Players.RejectTimeoutWin as -1 (disabled), 0..120 (days)
+     - added info-note in end-game-message if win "rejected"
+     - show current setting of RejectTimeoutWin on user-info-page
+       to myself or admin/game-admin
+-----------
+-- added field to control if win-by-timeout should be rejected for winner
+ALTER TABLE Players
+   ADD RejectTimeoutWin tinyint signed NOT NULL default -1 ;
+-----------
+
+   * userinfo.php:
+   - show last-quick-access to everyone
+   - show MPG-games info also to game-admin
+
+2012-03-12 juga
+
+   * userinfo.php, skins/dragon/screen.css:
+   - added link to games-list with "games lost by timeout"
+
+   * include/filter.php (SearchFilter.init, ~.add_or_del_filter, ~.parse_requested_filters):
+   - bugfix: activating requested filters if hidden
+
+   * include/quick/quick_message.php (class QuickHandlerMessage, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_send_msg, ~.init_folders, ~.load_user_handle),
+     include/quick/quick_handler.php (QuickHanlder.setError),
+     include/message_functions.php (class MessageControl, ~.read_message_receivers,
+       ~.handle_send_message, ~.check_max_games, ~.is_bulk_admin),
+     message.php (handle_send_message_selector),
+     specs/quick_suite.txt:
+   - started implementation of "send_msg"-command
+     - for quick-suite: added check if bulk-message allowed
+   - refactored sending-message (msg/invite/dispute) from 'message.php'
+     into MessageControl-class in 'include/message_functions.php'
+
 2012-03-11 juga
+
+   * include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):
+   - added field 'shape_snapshot'
+
+   * include/quick/quick_handler.php (class QuickHandler, ~.build_obj_user):
+   - return standard repsonse with fields: version, error (empty)
+   - bugfix: also set user-fields 'country/rating/rating_elo' if value is empty
+     to avoid table-list-format-error on skipped fields
+
+   * include/wroom_control.php (class WaitingroomControl, ~.join_waitingroom_game, ~.delete_waitingroom_game),
+     include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.prepare, ~.process),
+     specs/quick_suite.txt,
+     join_waitingroom_game.php:
+   - refactored join/delete-waiting-room game from 'join_waitingroom_game.php' into 'include/wroom_control.php'
+   - extended waitingroom-handler:
+     - implemented "delete" and "join" of waiting-room-game
+
+   * include/quick/quick_wroom.php (QuickHandlerWaitingroom.process_cmd_info),
+     include/message_functions.php (game_info_table),
+     waiting_room.php (add_old_game_form):
+   - show count of already-started-games on waiting-room-info (just like for invitation)
+
+   * include/db/waitingroom.php (Waitingroom.build_query_sql):
+   - bugfix: filter on waitingroom-id if given
 
    * include/db/waitingroom.php (class Waitingroom, ~.to_string, ~.persist, ~.insert,
        ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_waitingroom),
