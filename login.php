@@ -24,6 +24,8 @@ if( $quick_mode )
    $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 {
+   disable_cache();
+
    if( @$_REQUEST['logout'] )
    {
       set_login_cookie("","", true);
