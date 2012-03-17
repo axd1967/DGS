@@ -2384,3 +2384,8 @@ ALTER TABLE ConfigBoard
    ADD BoardFlags tinyint unsigned NOT NULL default 0 AFTER Woodcolor ;
 
 
+-- added field to control if win-by-timeout should be rejected for winner
+ALTER TABLE Players
+   ADD RejectTimeoutWin tinyint signed NOT NULL default -1 ;
+
+
