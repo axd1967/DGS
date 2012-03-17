@@ -58,7 +58,10 @@ if( $quick_mode )
    if( $userid == 'guest' )
       error_on_blocked_ip( 'ip_blocked_guest_login', $row );
 
-   if( !@$_REQUEST['cookie_check'] )
+   if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      error('login_denied');
+
+   if( !@$_REQUEST['cookie_check'] ) // login with user-handle + password
    {
       if( !check_password( $uhandle, $row['Password'], $row['Newpassword'], $passwd ) )
       {
@@ -80,16 +83,12 @@ if( $quick_mode )
       if( $uhandle !== $userid && strcasecmp($uhandle,$userid) == 0 )
          $uhandle = $userid; // store original user-id as db-check is case-INsensitive
       set_login_cookie( $uhandle, $code );
-      jump_to("login.php?cookie_check=1".URI_AMP."userid=".urlencode($uhandle)
-             . ( $quick_mode ? URI_AMP."quick_mode=1" : '' ) );
    }
-   //else cookie_check
-
-   if( safe_getcookie('handle') != $uhandle || safe_getcookie('sessioncode') != $code )
-      error('cookies_disabled', "login.check_cookies($uhandle)");
-
-   if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-      error('login_denied');
+   else // cookie_check (login via cookies user-handle + sessioncode)
+   {
+      if( safe_getcookie('handle') != $uhandle || safe_getcookie('sessioncode') != $code )
+         error('cookies_disabled', "login.check_cookies($uhandle)");
+   }
 
    //admin_log( 0, $userid, 'logged_in'); // activate when needed
 

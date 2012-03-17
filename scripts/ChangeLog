@@ -19,6 +19,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-17 juga
+
+   * login.php:
+   - bugfix?: after setting new session-code after password has been verified,
+     user is authenticated. Therefore removed reload of login-page with cookie-check
+     and just continue as user then IS logged-in already (no need to re-check).
+     SourceForge-server showed strange behaviour not longer returning cookies after login.
+   - check login-denied before password/cookie-check
+
 2012-03-13 juga
 
    * include/game_functions.php (class GameFinalizer, ~.finish_game, ~.should_reject_win_by_timeout;
