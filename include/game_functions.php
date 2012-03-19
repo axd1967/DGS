@@ -1290,7 +1290,7 @@ class GameHelper
       return $grow;
    }//load_game_row
 
-   function get_quick_game_action( $game_status, $handicap, $moves )
+   function get_quick_game_action( $game_status, $handicap, $moves, $fk )
    {
       if( $handicap > 0 && $moves < $handicap && $game_status == GAME_STATUS_PLAY )
          return 1; // set handicap-stones
@@ -1298,8 +1298,8 @@ class GameHelper
          return 2; // move
       elseif( $game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2 )
          return 3; // scoring
-      elseif( $game_status == GAME_STATUS_KOMI )
-         return 10; // TODO-fk TODO-quick: define action for fair-komi
+      elseif( $game_status == GAME_STATUS_KOMI && !is_null($fk) )
+         return $fk->get_quick_fair_komi_game_action();
       else
          return 0; // unsupported
    }//get_quick_game_action
@@ -1330,7 +1330,7 @@ class FairKomiNegotiation
       $this->read_from_game_row( $game_row );
    }
 
-   /*! \brief Reads fields from row: ID, Status, Black_ID, White_ID, ToMove_ID, Black/Whitehandle. */
+   /*! \brief Reads fields from row: ID, Status, Black_ID, White_ID, ToMove_ID [, Black/Whitehandle ]. */
    function read_from_game_row( $grow )
    {
       $this->gid = (int)$grow['ID'];
@@ -1405,6 +1405,26 @@ class FairKomiNegotiation
 
       return $choose_color;
    }//is_choose_color
+
+   function get_quick_fair_komi_game_action()
+   {
+      global $player_row;
+      $my_id = $player_row['ID'];
+
+      if( $this->game_status != GAME_STATUS_KOMI ) // shouldn't happen
+         error('invalid_args', "FKN.get_quick_fair_komi_game_action({$this->game_status})");
+      if( $my_id != $this->tomove_id )
+         return 13; // wait
+
+      if( $this->is_choose_color($my_id) )
+         return 12; // choose color
+
+      $komibid = $this->get_komibid($my_id);
+      if( !is_null($komibid) && $this->game_setup->Handicaptype == HTYPE_AUCTION_OPEN )
+         return 11; // bid komi or accept last komi-bid
+
+      return 10; // bid komi
+   }//get_quick_fair_komi_game_action
 
    /*! \brief Show text for komi-bid of player $player_id to viewer $viewer_uid. */
    function get_view_komibid( $viewer_uid, $player_id, $form=null, $komibid_input=null )

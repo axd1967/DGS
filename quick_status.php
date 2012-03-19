@@ -241,6 +241,7 @@ else
    $status_op = ( $version < 2 ) ? IS_RUNNING_GAME : IS_STARTED_GAME;
 
    $query = "SELECT Black_ID,White_ID,Games.ID, tid, Games.Handicap, " .
+       "Games.ToMove_ID, Games.GameSetup, " . // for fair-komi-neg.
        "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
        "Maintime, Byotype, Byotime, Byoperiods, " .
        "White_Maintime, White_Byotime, White_Byoperiods, " .
@@ -282,7 +283,8 @@ else
 
       if( $version == 2 )
       {
-         $game_action = GameHelper::get_quick_game_action( $row['Status'], $row['Handicap'], $row['Moves'] );
+         $game_action = GameHelper::get_quick_game_action( $row['Status'], $row['Handicap'], $row['Moves'],
+            new FairKomiNegotiation( GameSetup::new_from_game_setup($row['GameSetup']), $row ) );
 
          // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
          echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,%s,'%s',%s,'%s'\n",

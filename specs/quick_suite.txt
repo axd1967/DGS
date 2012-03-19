@@ -1831,7 +1831,10 @@ Response:
                            - 1 = set handicap-stones
                            - 2 = play next move (or pass or resign)
                            - 3 = do scoring
-                           - 10 = TODO TO-SPECIFY for fairkomi-negotiation
+                           - 10 = fair-komi-negotiation: enter komi-bid
+                           - 11 = fair-komi-negotiation: enter komi-bid or accept last komi-bid
+                           - 12 = fair-komi-negotiation: choose color
+                           - 13 = fair-komi-negotiation: wait (shouldn't happen for player-to-move)
                            - 0 = unknown / unsupported state
          game_status     : KOMI | PLAY | PASS | SCORE | SCORE2 = current game-status
                            - KOMI   = fair-komi negotiation

@@ -136,7 +136,9 @@ class QuickHandlerGameInfo extends QuickHandler
       $this->addResultKey( 'id', (int)$row['ID'] );
       $this->addResultKey( 'double_id', (int)$row['DoubleGame_ID'] );
       $this->addResultKey( 'tournament_id', (int)$row['tid'] );
-      $this->addResultKey( 'game_action', GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves']) );
+      $this->addResultKey( 'game_action',
+         GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves'],
+            new FairKomiNegotiation( GameSetup::new_from_game_setup($row['GameSetup']), $row ) ) );
       $this->addResultKey( 'status', strtoupper($row['Status']) );
       $this->addResultKey( 'flags', QuickHandlerGameInfo::convertGameFlags($row['X_Flags']) );
       $this->addResultKey( 'score', ( $row['Status'] == GAME_STATUS_FINISHED )
