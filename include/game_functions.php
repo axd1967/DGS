@@ -1290,6 +1290,20 @@ class GameHelper
       return $grow;
    }//load_game_row
 
+   function get_quick_game_action( $game_status, $handicap, $moves )
+   {
+      if( $handicap > 0 && $moves < $handicap && $game_status == GAME_STATUS_PLAY )
+         return 1; // set handicap-stones
+      elseif( $game_status == GAME_STATUS_PLAY || $game_status == GAME_STATUS_PASS )
+         return 2; // move
+      elseif( $game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2 )
+         return 3; // scoring
+      elseif( $game_status == GAME_STATUS_KOMI )
+         return 10; // TODO-fk TODO-quick: define action for fair-komi
+      else
+         return 0; // unsupported
+   }//get_quick_game_action
+
 } // end 'GameHelper'
 
 
