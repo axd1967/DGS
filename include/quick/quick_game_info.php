@@ -136,6 +136,7 @@ class QuickHandlerGameInfo extends QuickHandler
       $this->addResultKey( 'id', (int)$row['ID'] );
       $this->addResultKey( 'double_id', (int)$row['DoubleGame_ID'] );
       $this->addResultKey( 'tournament_id', (int)$row['tid'] );
+      $this->addResultKey( 'game_action', GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves']) );
       $this->addResultKey( 'status', strtoupper($row['Status']) );
       $this->addResultKey( 'flags', QuickHandlerGameInfo::convertGameFlags($row['X_Flags']) );
       $this->addResultKey( 'score', ( $row['Status'] == GAME_STATUS_FINISHED )
@@ -176,7 +177,7 @@ class QuickHandlerGameInfo extends QuickHandler
                /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
                TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ADDEXTRA|TIMEFMT_ZERO );
 
-         $this->addResultKey( $prefix.'_user', $this->build_obj_user($uid, $this->user_rows) );
+         $this->addResultKey( $prefix.'_user', $this->build_obj_user($uid, $this->user_rows, 'rating') );
          $this->addResultKey( $prefix.'_gameinfo', array(
             'prisoners'        => (int)$row[$icol.'_Prisoners'],
             'remtime'          => $time_remaining['text'],
