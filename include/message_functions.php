@@ -2178,14 +2178,13 @@ class MessageControl
     * \param $arg_to single or multi-receivers
     * \param $input map with input from URL with the following keys:
     *    # see also 'message.php' (URL-input-args)
+    *    'action' = send_msg | accept_inv | decline_inv
     *    'senderid' = uid sending message
     *    'folder' = target-folder-id
     *    'reply' = message-id to reply to
     *    'mpgid' = game-id for MP-game
     *    'subject' = message-title
     *    'message' = message-textbody
-    *    'send_accept' = true for invitation-accept
-    *    'send_decline' = true for invitation-decline
     *    'gid' = game-id of invitation
     *    'disputegid' = if set, game-id for dispute
     * \return 0=success for sending simple message;
@@ -2207,8 +2206,8 @@ class MessageControl
          return array( ErrorCode::get_error_text('user_mismatch') );
 
       $prev_mid = max( 0, (int)@$input['reply']); //ID of message replied.
-      $accepttype = (bool)@$input['send_accept'];
-      $declinetype = (bool)@$input['send_decline'];
+      $accepttype = ( @$input['action'] == 'accept_inv' );
+      $declinetype = ( @$input['action'] == 'decline_inv' );
       $disputegid = -1;
       if( $msg_type == MSGTYPE_INVITATION )
       {

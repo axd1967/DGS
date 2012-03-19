@@ -203,7 +203,7 @@ define('MSGBOXROWS_INVITE', 6);
       }
       $other_name = ( empty($other_name) ) ? NO_VALUE : make_html_safe($other_name);
 
-      $can_reply = ( $Sender != 'Y' && $other_id>0 && $other_handle); //exclude system messages
+      $can_reply = ( $Sender == 'N' && $other_id>0 && $other_handle);
       $to_me = ( $Sender != 'Y' ); //include system and myself messages
 
       if( $mode == 'ShowMessage' )
@@ -601,6 +601,14 @@ function handle_send_message_selector( &$msg_control, $arg_to, $msg_type )
    }
    else
    {
+      if( @$_REQUEST['send_accept'] )
+         $msg_action = 'accept_inv';
+      elseif( @$_REQUEST['send_decline'] )
+         $msg_action = 'decline_inv';
+      else
+         $msg_action = 'send_msg';
+
+      $_REQUEST['action'] = $msg_action;
       $result = $msg_control->handle_send_message( $arg_to, $msg_type, $_REQUEST );
       if( is_array($result) && count($result) )
          return $result; // errors
