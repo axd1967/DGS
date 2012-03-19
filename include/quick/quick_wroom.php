@@ -22,6 +22,7 @@ require_once 'include/db/waitingroom.php';
 require_once 'include/time_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/wroom_control.php';
+require_once 'include/message_functions.php';
 
 
  /*!
@@ -121,13 +122,16 @@ class QuickHandlerWaitingroom extends QuickHandler
       $opp_started_games = GameHelper::count_started_games( $this->my_id, $wr->uid );
 
       $restrictions = ''; //TODO TODO
+         //echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax,
+            //$MinRatedGames, $goodmaxgames, $SameOpponent, (!$suitable && @$CH_hidden), true) );
+
       $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
       $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
       $calc_handicap = 3; // TODO probable/fix handicap
       $calc_komi = 6.5; // TODO probably/fix komi
 
       $this->addResultKey('id', $wr->ID );
-      $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows) );
+      $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows, 'country,rating') );
       $this->addResultKey('created_at', QuickHandler::formatDate($wr->Created) );
       $this->addResultKey('count_offers', $wr->CountOffers );
       $this->addResultKey('comment', $wr->Comment );

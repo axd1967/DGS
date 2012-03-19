@@ -163,23 +163,31 @@ class QuickHandler
          error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,$cmd))");
    }
 
-   /*! \brief Returns map for user-object; with handle/name-fields only if WITH-option QWITH_USER_ID used. */
-   function build_obj_user( $uid, $user_rows=null, $always=false )
+   /*!
+    * \brief Returns map for user-object; with handle/name-fields only if WITH-option QWITH_USER_ID used.
+    * \param $inclkeys fieldnames to explicitly include additional fields: 'country,rating'
+    */
+   function build_obj_user( $uid, $user_rows=null, $inclkeys='', $always=false )
    {
       $userinfo = array( 'id' => $uid );
       if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_rows) && is_array(@$user_rows[$uid]) )
       {
          $userinfo['handle'] = @$user_rows[$uid]['Handle'];
          $userinfo['name'] = @$user_rows[$uid]['Name'];
-         $userinfo['country'] = @$user_rows[$uid]['Country'];
-         if( isset($user_rows[$uid]['Rating2']) )
+         if( strpos($inclkeys, 'country') !== false )
+            $userinfo['country'] = @$user_rows[$uid]['Country'];
+         if( strpos($inclkeys, 'rating') !== false )
          {
-            $rating = @$user_rows[$uid]['Rating2'];
-            $userinfo['rating'] = echo_rating($rating, /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1 );
-            $userinfo['rating_elo'] = $rating;
+            if( isset($user_rows[$uid]['Rating2']) )
+            {
+               $rating = @$user_rows[$uid]['Rating2'];
+               $userinfo['rating'] = echo_rating($rating, /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1 );
+               if( $userinfo['rating'] != '' )
+                  $userinfo['rating_elo'] = $rating;
+            }
+            else
+               $userinfo['rating'] = $userinfo['rating_elo'] = '';
          }
-         else
-            $userinfo['rating'] = $userinfo['rating_elo'] = '';
       }
       return $userinfo;
    }

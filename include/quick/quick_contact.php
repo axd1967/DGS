@@ -117,7 +117,7 @@ class QuickHandlerContact extends QuickHandler
    function build_obj_contact_user( $contact )
    {
       $urow = $contact->contact_user_row;
-      $out = $this->build_obj_user( $contact->cid, array( $contact->cid => $urow, /*always*/true ));
+      $out = $this->build_obj_user( $contact->cid, array( $contact->cid => $urow ), '', /*always*/true );
       $out['type'] = QuickHandlerUser::convertUserType($urow['Type']);
       $out['country'] = $urow['Country'];
       $out['picture'] = $urow['UserPicture'];
