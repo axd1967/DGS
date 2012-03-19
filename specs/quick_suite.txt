@@ -73,15 +73,12 @@ Topics:
 
 Issues to specify:
    - how to handle DGS-tags in text (messages/posts/etc) on client-side ?
-   - how to control paging (offset, limit, has_next)
+   - how to control paging of lists (offset, limit, has_next)
    - charsets, see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
    - json-option also accepting JSON as input-arguments !?
    - refactor error-codes, see section (5) !?
-   - handle DGS-tags in texts (on client side) ?
 
    - fair-komi negotiation for game-status KOMI
-   - setup for multi-player-game
-   - user-vacation
 
 
 #-------- (1) Introduction ----------------------------------------------------
@@ -426,8 +423,9 @@ Commands:
       - Result (JSON) =
          {
             "id" : "123456", # game-id
-            "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted
+            "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted; abs(double_id) == ref to other game-id
             "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
+            "game_action" : 2, # game-action as defined for [4.QST]
             "status" : "PLAY", # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
             "score" : "", # score for finished game only (same format as for status_score-command above)
@@ -462,6 +460,8 @@ Commands:
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "black-handle", # USER_HANDLE
                "name" : "black-name",     # user name
+               "rating" : "3k (-7%)",             # current rating
+               "rating_elo" : "1792.59326171875", # current rating ELO
             },
             "black_gameinfo" : {    # game-info of black-user
                "prisoners" : "3",                       # prisoners
@@ -477,6 +477,8 @@ Commands:
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "white-handle", # USER_HANDLE
                "name" : "white-name",     # user name
+               "rating" : "3k (-7%)",             # current rating
+               "rating_elo" : "1792.59326171875", # current rating ELO
             },
             "white_gameinfo" : {    # game-info of white-user
                "prisoners" : "3",                       # prisoners
@@ -902,7 +904,8 @@ Commands:
             "level" : 0,        # thread-level of message-thread (starting at 0)
             "message_prev" : 0, # message-id of message that has been replied to
             "message_hasnext" : 1, # 0=no-answer for current message, 1=there are answer(s) to this message
-            "needs_reply" : 1,  # 1=message-needs-reply, 0=normal message
+            "can_reply" : 1,    # 1=reply allowed, 0=reply forbidden
+            "need_reply" : 2,   # 2=message needs reply, 1=message has been replied, 0=no reply needed
             "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
             "subject" : "boo",  # subject of message
             "text" : "haha",    # content of message
@@ -939,10 +942,12 @@ Commands:
             },
          }
 
-   "send_msg" : sends/answer message
-      - required opts: OTHER_UID|OTHER_HANDLE, SUBJECT, MESSAGE
-      - optional opts: MESSAGE_ID (for replies), FOLDER (target-folder)
-         - MESSAGE_ID : message-id to reply to with sending-message
+   "send_msg" : send new message, reply to message
+      - required opts: OTHER_UID|OTHER_HANDLE (not for reply), SUBJECT
+         - for replying received message OTHER_UID|OTHER_HANDLE must NOT be used
+      - optional opts: MESSAGE_ID (for replies), FOLDER (target-folder), MESSAGE
+         - MESSAGE_ID : message-id to reply to with sending-message,
+           parameters OTHER_UID|OTHER_HANDLE must not be used for replying
          - FOLDER : target-folder of replied-to message for sending-user
 
       - Notes:
@@ -951,8 +956,17 @@ Commands:
          - message to send will be moved into SENT-folder for sending-user
 
       - Errors:
-         - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG]
+         - all errors of: [E-LOGIN], [E-GEN], [E-MSG]
          - invalid_action : failure on checking to send a message, detailed error-texts found in "error_texts"-field
+         - reply_invalid : invalid reply, because ...
+            - message can't be replied to, or no reply possible for message
+            - reply to myself is not allowed (as that doesn't show up in message-thread-view)
+            - reply only possible to NORMAL-messages, not to invitations/disputes or system-messages
+            - used OTHER_UID|OTHER_HANDLE arguments to specify message-recipient,
+              recipient must be omitted as it's determined from message-sender
+         - folder_forbidden : invalid target folder used to move replied message to
+            - folder-id must be >0
+            - NEW-folder (folder-id=2) and SENT-folder (folder-id=5) are not allowed
 
       - Result (JSON) =
          {
@@ -984,6 +998,7 @@ Commands:
          - implicit folder-move ?
 
       - Errors: TODO TODO
+         - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG]
 
    "decline_inv" : declines game-invitation
       - required opts: MESSAGE_ID
@@ -1000,7 +1015,7 @@ Commands:
       - TODO TODO
          - FILTERS-args:
            - filter.type = INVITATION (match values from "info")
-           - filter.folder = 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ...
+           - filter.folder = 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ... ???
            - filter.need_reply = 0|1|all=empty
          - WITH-options ? -> only msg-id (no texts, maybe subject included, text only in single-mode)
 
@@ -1019,12 +1034,16 @@ Commands:
                      # the following fields only if WITH-option contain 'user_id'
                      "handle" : "user1",  # USER_HANDLE
                      "name" : "name1",    # user name
+                     "rating" : "3k (-7%)",             # current rating
+                     "rating_elo" : "1792.59326171875", # current rating ELO
                   },
                   "user_to" : {
                      "id" : 222,          # user-id of receiver
                      # the following fields only if WITH-option contain 'user_id'
                      "handle" : "user2",  # USER_HANDLE
                      "name" : "name2",    # user name
+                     "rating" : "",       # current rating
+                     "rating_elo" : "",   # current rating ELO
                   },
                   "type" : "NORMAL", # message-type (see "info"-command)
                   "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
@@ -1681,8 +1700,10 @@ Purpose:
    The page "quick_status.php" is used to return some of the information
    from the corresponding status-page "status.php":
 
+      - retrieve a list of unread bulletins
+
       - retrieve a list of private messages (marked to be shown on status-page),
-        only when user logged in
+        showing messages from NEW- & REPLY-folder
 
       - retrieve a list of games the specified user is next to move in
 
@@ -1701,6 +1722,7 @@ Important Notes:
      then you only have access to your status-game.
 
      Data that requires authentication:
+     - Bulletins are not included
      - Private messages are not included
      - Multi-player game data is not included
 
@@ -1774,16 +1796,29 @@ Response:
          expire_time    : bulletin expires on expire-time (auto-read-mark)
          subject        : bulletin title
 
-      # header-line with format of message-data-line
-      "## M,message_id,'sender','subject','message_date'"
+
+      # header-line with format of message-data-line (version = 2)
+      "## M,message_id,folder_id,message_type,'sender','subject','message_date'"
 
          message_id   : message-id, e.g. http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=1595525
+         folder_id    : current folder-id of message
+                        - 2 = NEW-folder
+                        - 3 = REPLY-folder
+         message_type : message-type
+                        - NORMAL     = normal private message
+                        - INVITATION = invitation
+                        - DISPUTED   = disputed invitation
+                        - RESULT     = normal result message
          sender       : sender-name, '[Server message]' for server-messages
          subject      : message-subject
          message_date : date when message has been sent
 
+      # header-line with format of message-data-line (version < 2)
+      "## M,message_id,'sender','subject','message_date'"
+
+
       # header-line with format of game-data-line (version = 2)
-      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'"
+      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'"
 
          game_id         : game-id, e.g. http://www.dragongoserver.net/game.php?gid=317416
          opponent_handle : user-id (handle) of users opponent
@@ -1792,6 +1827,12 @@ Response:
          time_remaining  : time-remaining of player-to-move,
                            - version = 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TR] Time-remaining"
                            - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
+         game_action     : next action of player in game
+                           - 1 = set handicap-stones
+                           - 2 = play next move (or pass or resign)
+                           - 3 = do scoring
+                           - 10 = TODO TO-SPECIFY for fairkomi-negotiation
+                           - 0 = unknown / unsupported state
          game_status     : KOMI | PLAY | PASS | SCORE | SCORE2 = current game-status
                            - KOMI   = fair-komi negotiation
                            - PLAY   = normal play-mode
@@ -1819,6 +1860,7 @@ Response:
                            - version = 2: see above
                            - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
 
+
       # header-line with format of multi-player-game-data-line
       "## MPG,game_id,game_type,ruleset,size,lastchanged_date,ready_to_start"
 
@@ -1834,12 +1876,12 @@ Response:
 
       ## B,count,bulletin_id,target_type,category,'publish_time','expire_time','subject'
       B,1,17,ALL,MAINT,'2011-04-30 13:58:00','2011-05-30 13:58:00','very important subject'
-      ## M,message_id,'sender','subject','message_date'
-      M,1595525,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
-      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,shape_id,game_type,game_prio,opponent_lastaccess_date
-      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',PLAY,62,0,0,'GO',0,'2007-05-27 15:00:00'
-      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',PLAY,8,0,3,'GO',5,'2009-03-01 10:00:00'
-      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',SCORE2,285,19,0,'TEAM_GO (2:2)',-2,'2011-04-30 17:38:22'
+      ## M,message_id,folder_id,message_type,'sender','subject','message_date'
+      M,1595525,2,NORMAL,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
+      ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,opponent_lastaccess_date
+      G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',2,PLAY,62,0,0,'GO',0,'2007-05-27 15:00:00'
+      G,320121,'ejlo',B,'2009-02-01 20:41:49','C: 1d 10h (+ 3d / 5)',2,PLAY,8,0,3,'GO',5,'2009-03-01 10:00:00'
+      G,527776,'physimatic',W,'2010-10-03 18:28:52','F: 8d (+ 12h)',3,SCORE2,285,19,0,'TEAM_GO (2:2)',-2,'2011-04-30 17:38:22'
       ## MPG,game_id,game_type,ruleset,size,'lastchanged_date'
       MPG,527777,TEAM_GO(3:1),CHINESE,9,'2010-10-03 16:00:00',1
 
@@ -2068,7 +2110,8 @@ Errors:
       - receiver_not_found : message-receiver for notify could not be found -> contact admin
       - mysql_insert_message : database query to insert message for notify failed
 
-   * [E-MSG] Message Move Errors:
+   * [E-MSG] Message Errors:
+      - unknown_message : unknown message-id specified
       - receiver_not_found : given recipient(s) can not be found
       - folder_not_found : specified folder is unknown for current user
       - bulkmessage_self : bulk-messages can not be sent to oneself
@@ -2226,4 +2269,11 @@ but are not necessarily going to be implemented (soon or at all).
 * game-obj:
    - handle game-players >2, handle MPG
    - handle fair-komi
+   - setup for multi-player-game
+
+* message-obj:
+   - handle send-invitation
+
+* user-obj:
+   - user-vacation
 
