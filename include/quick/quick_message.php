@@ -124,20 +124,41 @@ class QuickHandlerMessage extends QuickHandler
       }
       elseif( $cmd == MESSAGECMD_SEND_MSG )
       {
-         if( $this->other_uid > 0 && (string)$this->other_handle == '' )
-            $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
-         if( $this->other_uid == 0 && (string)$this->other_handle == '' )
-            error('receiver_not_found', "$dbgmsg.miss_recipient");
+         if( $this->mid > 0 ) // reply
+         {
+            if( $this->other_uid != 0 || (string)$this->other_handle != '' )
+               error('reply_invalid', "$dbgmsg.implicit_recipient({$this->other_uid},{$this->other_handle})");
+         }
+         else // new message
+         {
+            if( $this->other_uid > 0 && (string)$this->other_handle == '' )
+               $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
+            if( $this->other_uid == 0 && (string)$this->other_handle == '' )
+               error('receiver_not_found', $dbgmsg);
+         }
 
          $this->init_folders( $this->my_id );
          if( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
             error('folder_not_found', "$dbgmsg.bad_folder({$this->folder_id})");
+         if( $this->folder_id == FOLDER_NEW || $this->folder_id == FOLDER_SENT )
+            error('folder_forbidden', "$dbgmsg.forbidden_target_folder({$this->folder_id})");
 
-         //TODO check if prev-mid for reply is one from sender/recipients
+         if( $this->mid > 0 ) // check reply
+         {
+            // check that user is indeed a receiver of reply-msg -> otherwise unknown-msg
+            $msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, 0, /*full*/false );
+
+            if( $msg_row['Sender'] == 'M' ) // reply to message from myself forbidden
+               error('reply_invalid', "$dbgmsg.reply_to_myself_forbidden");
+            if( $msg_row['Sender'] != 'N' || !($msg_row['other_id'] > 0) ) // can not reply
+               error('reply_invalid', "$dbgmsg.message_can_not_be_replied");
+            if( $msg_row['Type'] != MSGTYPE_NORMAL ) // only reply to NORMAL-messages
+               error('reply_invalid', "$dbgmsg.only_normal({$msg_row['Type']})");
+
+            $this->other_uid = $msg_row['other_id'];
+            $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
+         }
       }
-
-      // check for invalid-action
-
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -167,8 +188,8 @@ class QuickHandlerMessage extends QuickHandler
       $gid = (int)$row['Game_ID'];
 
       $this->addResultKey( 'id', (int)$row['ID'] );
-      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows) ); // TODO add rating/rating_elo
-      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows) ); // TODO add rating/rating_elo
+      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows, 'rating') );
+      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows, 'rating') );
       $this->addResultKey( 'type', strtoupper($row['Type']) );
       $this->addResultKey( 'flags', QuickHandlerMessage::convertMessageFlags($row['Flags']) );
       $this->addResultKey( 'folder',
@@ -179,8 +200,8 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'level', (int)$row['Level'] );
       $this->addResultKey( 'message_prev', (int)$row['ReplyTo'] );
       $this->addResultKey( 'message_hasnext', ($row['X_Flow'] & FLOW_ANSWERED) ? 1 : 0 );
-      //TODO what if Folder_nr = Reply-folder !?
-      $this->addResultKey( 'needs_reply', ($row['Folder_nr'] == FOLDER_NEW && $row['Type'] == MSGTYPE_INVITATION) ? 1 : 0 );
+      $this->addResultKey( 'can_reply', ($row['Sender'] == 'N' && $other_uid>0) ? 1 : 0 );
+      $this->addResultKey( 'need_reply', QuickHandlerMessage::convertMessageReplyStatus($row['Replied']) );
       $this->addResultKey( 'game_id', $gid );
       $this->addResultKey( 'subject', $row['Subject'] );
       $this->addResultKey( 'text', $row['Text'] );
@@ -188,7 +209,6 @@ class QuickHandlerMessage extends QuickHandler
       //TODO mark as "read" (like GUI)
       //TODO handle FOLDER given (moving to given folder except for invitation)
 
-      //TODO move into sub-method
       if( $row['Type'] == MSGTYPE_INVITATION )
       {
          // ToMove_ID holds handitype since INVITATION
@@ -208,8 +228,6 @@ class QuickHandlerMessage extends QuickHandler
          $time_limit = TimeFormat::echo_time_limit(
                $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
                TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
-
-         $opp_started_games = 0; //TODO
 
          $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
          $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
@@ -238,7 +256,7 @@ class QuickHandlerMessage extends QuickHandler
                'time_byo' => $row['Byotime'],
                'time_periods' => $row['Byoperiods'],
 
-               'opp_started_games' => $opp_started_games,
+               'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
                'calc_type' => $calc_type,
                'calc_color' => $calc_color,
                'calc_handicap' => $calc_handicap,
@@ -251,6 +269,7 @@ class QuickHandlerMessage extends QuickHandler
    {
       $msg_control = new MessageControl( $this->folders, /*allow-bulk*/false );
       $input = array(
+            'action'       => 'send_msg',
             'senderid'     => $this->my_id,
             'folder'       => $this->folder_id,
             'reply'        => $this->mid,
@@ -258,8 +277,6 @@ class QuickHandlerMessage extends QuickHandler
             'subject'      => trim(@$_REQUEST['subj']),
             'message'      => trim(@$_REQUEST['msg']),
             'gid'          => 0,
-            'send_accept'  => false,
-            'send_decline' => false,
             'disputegid'   => 0,
          );
       $result = $msg_control->handle_send_message( $this->other_handle, MSGTYPE_NORMAL, $input );
@@ -310,6 +327,16 @@ class QuickHandlerMessage extends QuickHandler
       if( $flags & MSGFLAG_BULK )
          $out[] = 'BULK';
       return implode(',', $out);
+   }
+
+   function convertMessageReplyStatus( $replied )
+   {
+      if( $replied == 'M' )
+         return 2; // need reply
+      elseif( $replied == 'Y' )
+         return 1; // has replied
+      else
+         return 0; // no reply needed
    }
 
    function load_user_handle( $dbgmsg, $uid )
