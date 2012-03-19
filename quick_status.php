@@ -135,82 +135,101 @@ else
 
    $nothing_found = true;
 
-   if( $version == 2 && $logged_in && $player_id > 0 && $player_row['CountBulletinNew'] < 0 )
-      Bulletin::update_count_bulletin_new( 'quick_status', $player_id, COUNTNEW_RECALC );
 
-   if( $version == 2 && $logged_in && $player_row['CountBulletinNew'] > 0 )
-   { // show unread bulletins
-      $iterator = new ListIterator( 'quick_status.bulletins.unread',
-         new QuerySQL( SQLP_WHERE,
-               "BR.bid IS NULL", // only unread
-               "B.Status='".BULLETIN_STATUS_SHOW."'" ),
-         'ORDER BY B.PublishTime DESC' );
-      $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
-      $iterator = Bulletin::load_bulletins( $iterator );
-
-      if( $iterator->ResultRows > 0 )
-         $nothing_found = false;
+   // Bulletins
+   if( $version == 2 && $logged_in )
+   {
+      if( $player_id > 0 && $player_row['CountBulletinNew'] < 0 )
+         Bulletin::update_count_bulletin_new( 'quick_status', $player_id, COUNTNEW_RECALC );
 
       // Bulletin-header: type=B, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
       echo "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'\n";
 
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      if( $player_row['CountBulletinNew'] > 0 ) // show unread bulletins
       {
-         list( $bulletin, $orow ) = $arr_item;
+         $iterator = new ListIterator( 'quick_status.bulletins.unread',
+            new QuerySQL( SQLP_WHERE,
+                  "BR.bid IS NULL", // only unread
+                  "B.Status='".BULLETIN_STATUS_SHOW."'" ),
+            'ORDER BY B.PublishTime DESC' );
+         $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
+         $iterator = Bulletin::load_bulletins( $iterator );
 
-         // type, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
-         echo sprintf( "B,%s,%s,%s,'%s','%s','%s'\n",
-                       $bulletin->ID, $bulletin->TargetType, $bulletin->Category,
-                       ($bulletin->PublishTime > 0) ? date(DATE_FMT_QUICK, $bulletin->PublishTime) : '',
-                       ($bulletin->ExpireTime > 0) ? date(DATE_FMT_QUICK, $bulletin->ExpireTime) : '',
-                       slashed($bulletin->Subject)
-                     );
+         if( $iterator->ResultRows > 0 )
+            $nothing_found = false;
+
+         while( list(,$arr_item) = $iterator->getListIterator() )
+         {
+            list( $bulletin, $orow ) = $arr_item;
+
+            // type, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
+            echo sprintf( "B,%s,%s,%s,'%s','%s','%s'\n",
+                          $bulletin->ID, $bulletin->TargetType, $bulletin->Category,
+                          ($bulletin->PublishTime > 0) ? date(DATE_FMT_QUICK, $bulletin->PublishTime) : '',
+                          ($bulletin->ExpireTime > 0) ? date(DATE_FMT_QUICK, $bulletin->ExpireTime) : '',
+                          slashed($bulletin->Subject)
+                        );
+         }
       }
-   } // bulletins
+   }
+   else
+      warning('bulletins list not shown');
 
 
+   // New messages?
    if( $logged_in )
    {
-      // New messages?
-
-      $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
-         "Messages.Subject, Players.Handle AS sender " .
-         "FROM (Messages, MessageCorrespondents AS me) " .
+      $query = "SELECT UNIX_TIMESTAMP(M.Time) AS date, me.mid, " .
+         "me.Folder_nr, M.Type, M.Subject, Players.Handle AS sender " .
+         "FROM (Messages AS M, MessageCorrespondents AS me) " .
          "LEFT JOIN MessageCorrespondents AS other " .
            "ON other.mid=me.mid AND other.Sender!=me.Sender " .
          "LEFT JOIN Players ON Players.ID=other.uid " .
-         "WHERE me.uid=$player_id AND me.Folder_nr=".FOLDER_NEW." " .
-                 "AND Messages.ID=me.mid " .
-                 "AND me.Sender IN('N','S') " . //exclude message to myself
-         "ORDER BY Messages.Time DESC";
+         "WHERE me.uid=$player_id AND me.Folder_nr IN (".FOLDER_NEW.",".FOLDER_REPLY.") " .
+                 "AND M.ID=me.mid " .
+                 "AND me.Sender IN ('N','S') " . //exclude message to myself
+         "ORDER BY M.Time DESC";
 
       $result = db_query( 'quick_status.find_messages', $query );
 
-      // message-header: type=M, Messages.ID, correspondent.Handle, message.Subject, message.Date
       if( $version == 2 )
       {
-         echo "## M,message_id,'sender','subject','message_date'\n";
-         $msg_fmt = "M,%s,'%s','%s','%s'\n";
+         // message-header: type=M, Messages.ID, me.Folder_nr, Messages.Type, correspondent.Handle, message.Subject, message.Date
+         echo "## M,message_id,folder_id,message_type,'sender','subject','message_date'\n";
+         $msg_fmt = "M,%s,%s,%s,'%s','%s','%s'\n";
       }
       else
+      {
+         // message-header: type=M, Messages.ID, correspondent.Handle, message.Subject, message.Date
          $msg_fmt = "'M',%s,'%s','%s','%s'\n"; // diff: M <- 'M'
+      }
 
       while( $row = mysql_fetch_assoc($result) )
       {
          $nothing_found = false;
-         if( !@$row['sender'] ) $row['sender']='[Server message]';
+         if( !@$row['sender'] )
+            $row['sender'] = '[Server message]';
 
-         // Message.ID, correspondent.Handle, message.subject, message.date
-         //N.B.: Subject is still in the correspondent's encoding.
-         echo sprintf( $msg_fmt,
-                       $row['mid'], slashed(@$row['sender']), slashed(@$row['Subject']),
-                       date($datfmt, @$row['date']) );
+         if( $version == 2 )
+         {
+            // type, msg.ID, me.Folder_nr, msg.Type, correspondent.Handle, msg.Subject, msg.Date
+            echo sprintf( $msg_fmt,
+                          $row['mid'], $row['Folder_nr'], strtoupper($row['Type']),
+                          slashed(@$row['sender']), slashed(@$row['Subject']),
+                          date($datfmt, @$row['date']) );
+         }
+         else // older-version
+         {
+            // type, msg.ID, correspondent.Handle, msg.subject, msg.date
+            //N.B.: Subject is still in the correspondent's encoding.
+            echo sprintf( $msg_fmt,
+                          $row['mid'], slashed(@$row['sender']), slashed(@$row['Subject']),
+                          date($datfmt, @$row['date']) );
+         }
       }
    }
    else
-   {
       warning('messages list not shown');
-   } //$logged_in
 
 
    // Games to play?
@@ -221,7 +240,7 @@ else
    $sql_order = NextGameOrder::get_next_game_order( $game_order, 'Games' ); // enum -> order
    $status_op = ( $version < 2 ) ? IS_RUNNING_GAME : IS_STARTED_GAME;
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, tid, " .
+   $query = "SELECT Black_ID,White_ID,Games.ID, tid, Games.Handicap, " .
        "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
        "Maintime, Byotype, Byotime, Byoperiods, " .
        "White_Maintime, White_Byotime, White_Byoperiods, " .
@@ -242,10 +261,10 @@ else
 
    $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
-   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
    if( $version == 2 )
    {
-      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'\n";
+      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'\n";
       $timefmt_flags |= TIMEFMT_ADDEXTRA;
    }
 
@@ -263,11 +282,13 @@ else
 
       if( $version == 2 )
       {
-         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
-         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,'%s',%s,'%s'\n",
+         $game_action = GameHelper::get_quick_game_action( $row['Status'], $row['Handicap'], $row['Moves'] );
+
+         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
+         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,%s,'%s',%s,'%s'\n",
                        $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
                        date($datfmt, @$row['date']), $time_remaining['text'],
-                       $game_status, $row['Moves'], $row['tid'], (int)$row['ShapeID'],
+                       $game_action, $game_status, $row['Moves'], $row['tid'], (int)$row['ShapeID'],
                        GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
                        (int)@$row['X_Priority'],
                        date($datfmt, @$row['oLastaccess'])
@@ -315,6 +336,8 @@ else
       }
       mysql_free_result($result);
    }
+   else
+      warning('MPG-games list not shown');
 
 
    if( $nothing_found )
