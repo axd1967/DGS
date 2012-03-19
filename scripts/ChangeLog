@@ -19,7 +19,47 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-19 juga
+
+   * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info,
+       ~.process_cmd_send_msg, ~.convertMessageReplyStatus),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     include/message_functions.php (MessageControl.handle_send_message),
+     include/game_functions.php (GameHelper.get_quick_game_action),
+     include/classlib_user.php (User.load_quick_userinfo),
+     include/error_codes.php (ErrorCode.init),
+     specs/quick_suite.txt,
+     message.php (handle_send_message_selector),
+     quick_status.php:
+   - adjusted message-quick-handler:
+     - added checks for "send_msg"-command on folder-id and reply-message-id,
+     - extended "info"-command with 'can_reply' & 'need_reply',
+       fill in count of started games for invitations
+     - added rating in user-info-blocks for "info"-command on message-object
+     - bugfix: forbid reply to message from myself
+   - adjusted game-info-quick-handler adding 'game_action'-field for "info"-command
+   - extended quick-status for version 2:
+     - showing bulletin-headers even if there are no bulletins
+     - included messages from REPLY-folder
+     - extended message-entry with folder-id & message-type
+     - extended game-entry with game-action
+     - adding warning if lists of bulletins & MPG-games not shown
+   - change signature of map in MessageControl.handle_send_message(,,map)
+     combining URL-arguments send_accept/send_decline into one field 'action'
+
+   * include/quick/quick_bulletin.php (QuickHandlerBulletin.process_cmd_list):
+   - bugfix: showing bulletin authors user-info
+
+   * include/quick/quick_handler.php (QuickHandler.build_obj_user),
+     include/quick/quick_contact.php (QuickHandlerContact.build_obj_contact_user),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.process_cmd_info):
+   - added include-key-filter for adding rating/country-fields in user-info-blocks
+
 2012-03-17 juga
+
+   * login.php:
+   - localized recent problem, so disabling cache on login
 
    * login.php:
    - bugfix?: after setting new session-code after password has been verified,
@@ -34,6 +74,7 @@ ChangeLog
        class GameNotify, ~.get_text_game_result),
      include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
      include/std_functions.php (MAX_REJECT_TIMEOUT),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
      admin_game.php, change_profile.php, clock_tick.php, confirm.php,
      edit_profile.php, userinfo.php:
