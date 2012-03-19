@@ -422,49 +422,49 @@ Commands:
 
       - Result (JSON) =
          {
-            "id" : "123456", # game-id
-            "double_id" : "0", # > 0 if double-game, < 0 if double-game deleted; abs(double_id) == ref to other game-id
-            "tournament_id" : "0", # tournament-id > 0 if game is part of tournament
-            "game_action" : 2, # game-action as defined for [4.QST]
-            "status" : "PLAY", # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
-            "flags" : "HIDDENMSG", # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
-            "score" : "", # score for finished game only (same format as for status_score-command above)
+            "id" : 123456,          # game-id
+            "double_id" : 0,        # > 0 if double-game, < 0 if double-game deleted; abs(double_id) == ref to other game-id
+            "tournament_id" : 0,    # tournament-id > 0 if game is part of tournament
+            "game_action" : 2,      # game-action as defined for [4.QST]
+            "status" : "PLAY",      # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
+            "flags" : "HIDDENMSG",  # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
+            "score" : "",           # score for finished game only (same format as for status_score-command above)
 
-            "rated" : "1", # 0=unrated, 1=rated
-            "game_type" : "GO", # GO | TEAM_GO(N:M) | ZEN_GO (N); N,M >= 1
+            "rated" : 1,            # 0=unrated, 1=rated
+            "game_type" : "GO",     # GO | TEAM_GO(N:M) | ZEN_GO (N); N,M >= 1
             "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
-            "size" : "19", # board-size
-            "komi" : "6.5", # komi
+            "size" : 19,            # board-size
+            "komi" : 6.5,           # komi
             "jigo_mode" : "KEEP_KOMI", # only relevant for fair-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
-            "handicap" : "0", # handicap-stones
+            "handicap" : 0,         # handicap-stones
             "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
 
-            "shape_id" : "0", # shape-id > 0 if game was started as shape-game
-            "shape_snapshot" : "", # shape-snapshot
+            "shape_id" : 0,         # shape-id > 0 if game was started as shape-game
+            "shape_snapshot" : "",  # shape-snapshot
 
-            "time_started" : "YYYY-MM-DD hh:mm:ss", # game started time
+            "time_started" : "YYYY-MM-DD hh:mm:ss",  # game started time
             "time_lastmove" : "YYYY-MM-DD hh:mm:ss", # last-moved (also game-end-time if finished)
-            "time_weekend_clock" : "1", # 1=time-running on weekend, 0=otherwise
-            "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
+            "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
+            "time_mode" : "CAN",      # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
             "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
                                                # see section (6b) "TimeLimit-Formats"
 
-            "move_id" : "75", # move-id, required as context for playing via game-quick-suite
-            "move_color" : "B", # B=black-to-move, W=white-to-move
-            "move_uid" : "111", # user-id to move next
-            "move_last" : "bc", # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring)
-            "move_ko" : "0", # 1=ko, 0=no-ko in last-move
+            "move_id" : 75,         # move-id, required as context for playing via game-quick-suite
+            "move_color" : "B",     # B=black-to-move, W=white-to-move
+            "move_uid" : 111,       # user-id to move next
+            "move_last" : "bc",     # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring)
+            "move_ko" : 0,          # 1=ko, 0=no-ko in last-move
 
             "black_user" : {        # black-user object-info
                "id" : 111,                # USER_ID
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "black-handle", # USER_HANDLE
                "name" : "black-name",     # user name
-               "rating" : "3k (-7%)",             # current rating
-               "rating_elo" : "1792.59326171875", # current rating ELO
+               "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
+               "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
             },
             "black_gameinfo" : {    # game-info of black-user
-               "prisoners" : "3",                       # prisoners
+               "prisoners" : 3,                         # prisoners
                "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status)
                "rating_start" : "3k (-7%)",             # start-rating
                "rating_start_elo" : "1792.59326171875", # start-rating ELO
@@ -477,11 +477,11 @@ Commands:
                # the following fields only if WITH-option contain 'user_id'
                "handle" : "white-handle", # USER_HANDLE
                "name" : "white-name",     # user name
-               "rating" : "3k (-7%)",             # current rating
-               "rating_elo" : "1792.59326171875", # current rating ELO
+               "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
+               "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
             },
             "white_gameinfo" : {    # game-info of white-user
-               "prisoners" : "3",                       # prisoners
+               "prisoners" : 3,                         # prisoners
                "remtime" : "C: 11h / 2 (15d / 8)",      # remaining-time (same format as for quick-status)
                "rating_start" : "3k (-7%)",             # start-rating
                "rating_end" : "3k (-7%)",               # end-rating (after game finished)
@@ -605,7 +605,7 @@ Commands:
       - Result (JSON) =
          {
             "ruleset" : "CHINESE",           # game-ruleset
-            "score" : "0" | "W+7" | "B+2.5", # 0=jigo
+            "score" : 0 | "W+7" | "B+2.5", # 0=jigo
 
             # format of coordinates depends on FMT-parameter
             "dame"            : "...", # coords*
@@ -757,7 +757,7 @@ Commands:
             "name" : "name",           # user name
             "country" : "se",          # DGS country-code, e.g. http://www.dragongoserver.net/images/flags/se.gif
             "picture" : "",            # picture-filename, e.g. http://localhost/dev/userpic/5318.png?t=YYYYMMDDhhmmss
-            "vacation_left" : "25",    # vacation days left
+            "vacation_left" : 25,      # vacation days left
             "vacation_on" : "2d 7h",   # on-vacation ("" = not-on vac.)
             "register_date" : "YYYY-MM-DD",        # register-date
             "last_access" : "YYYY-MM-DD hh:mm:ss", # date of last access (website; in users time-zone; can be empty)
@@ -768,12 +768,12 @@ Commands:
             "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
             "rank" : "5k EGF",                 # user rank-info (contains HTML)
             "open_match" : "ask later",        # user open-for-match-info (contains HTML)
-            "games_running" : "5",   # number of running games
-            "games_finished" : "50", # number of finished games
-            "games_rated" : "10",    # number of (finished) rated games
-            "games_won" : "8",       # number of (finished rated) won games
-            "games_lost" : "2",      # number of (finished rated) lost games
-            "games_mpg" : "0",       # number of started multi-player-games
+            "games_running" : 5,     # number of running games
+            "games_finished" : 50,   # number of finished games
+            "games_rated" : 10,      # number of (finished) rated games
+            "games_won" : 8,         # number of (finished rated) won games
+            "games_lost" : 2,        # number of (finished rated) lost games
+            "games_mpg" : 0,         # number of started multi-player-games
          }
 
       - Result Values:
@@ -900,45 +900,45 @@ Commands:
                "color_fg" : "000000",   # folder foreground-color (=font-color) in hex-format
             },
             "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
-            "thread" : 0,       # message-id of first message in a message-thread, 0=system-message
-            "level" : 0,        # thread-level of message-thread (starting at 0)
-            "message_prev" : 0, # message-id of message that has been replied to
-            "message_hasnext" : 1, # 0=no-answer for current message, 1=there are answer(s) to this message
-            "can_reply" : 1,    # 1=reply allowed, 0=reply forbidden
-            "need_reply" : 2,   # 2=message needs reply, 1=message has been replied, 0=no reply needed
-            "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
-            "subject" : "boo",  # subject of message
-            "text" : "haha",    # content of message
+            "thread" : 0,           # message-id of first message in a message-thread, 0=system-message
+            "level" : 0,            # thread-level of message-thread (starting at 0)
+            "message_prev" : 0,     # message-id of message that has been replied to
+            "message_hasnext" : 1,  # 0=no-answer for current message, 1=there are answer(s) to this message
+            "can_reply" : 1,        # 1=reply allowed, 0=reply forbidden
+            "need_reply" : 2,       # 2=message needs reply, 1=message has been replied, 0=no reply needed
+            "game_id" : 0,          # game-id for game-related message (e.g. invitation); game may be deleted
+            "subject" : "boo",      # subject of message
+            "text" : "haha",        # content of message
 
             # additional fields set, if message is of type INVITATION
             "game_settings" : {
-               "game_type" : "GO",       # always 'GO' for invitations
-               "game_players" : "1:1",   # always '1:1' for invitations
-               "handicap_type" : "conv", # see HTYPE_... in 'include/game_functions.php':
-                                         # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
-               "shape_id" : 0, # shape-id > 0 if game was started as shape-game
+               "game_type" : "GO",        # always 'GO' for invitations
+               "game_players" : "1:1",    # always '1:1' for invitations
+               "handicap_type" : "conv",  # see HTYPE_... in 'include/game_functions.php':
+                                          # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
+               "shape_id" : 0,            # shape-id > 0 if game was started as shape-game
 
-               "rated" : 1, # 0=unrated, 1=rated
-               "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
-               "size" : 19, # board-size
-               "komi" : 6.5, # komi
+               "rated" : 1,               # 0=unrated, 1=rated
+               "ruleset" : "JAPANESE",    # ruleset: JAPANESE | CHINESE
+               "size" : 19,               # board-size
+               "komi" : 6.5,              # komi
                "jigo_mode" : "KEEP_KOMI", # only relevant for fair-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
-               "handicap" : 0, # handicap-stones
-               "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
+               "handicap" : 0,            # handicap-stones
+               "handicap_mode" : "FREE",  # STD=standard-handicap, FREE=free-handicap
 
-               "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
-               "time_mode" : "CAN", # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
+               "time_weekend_clock" : 1,  # 1=time-running on weekend, 0=otherwise
+               "time_mode" : "CAN",       # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
                "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
                                                   # see section (6b) "TimeLimit-Formats"
-               "time_main" : 210,  # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
-               "time_byo" : 225,   # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
-               "time_periods" : 8, # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
+               "time_main" : 210,         # time-limit main-time [1 unit = 1 hour, 15 hour = 1 DGS-day]
+               "time_byo" : 225,          # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
+               "time_periods" : 8,        # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
 
-               "opp_started_games" : 0, # number of games already started with opponent
-               "calc_type" : 1, # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
-               "calc_color" : "black", # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
-               "calc_handicap" : 3, # probable/fix handicap
-               "calc_komi" : 6.5, # probably/fix komi
+               "opp_started_games" : 0,   # number of games already started with opponent
+               "calc_type" : 1,           # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+               "calc_color" : "black",    # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
+               "calc_handicap" : 3,       # probable/fix handicap
+               "calc_komi" : 6.5,         # probably/fix komi
             },
          }
 
@@ -1021,7 +1021,7 @@ Commands:
 
       - Result (JSON) =
          {
-            "list_object" : "message",  # list of object-types
+            "list_object" : "message", # list of object-types
             "list_size" : 5,           # list-size total
             "list_offset" : 0,         # start offset of list-part (for paging)
             "list_limit" : 0,          # number of entries per page
@@ -1034,28 +1034,28 @@ Commands:
                      # the following fields only if WITH-option contain 'user_id'
                      "handle" : "user1",  # USER_HANDLE
                      "name" : "name1",    # user name
-                     "rating" : "3k (-7%)",             # current rating
-                     "rating_elo" : "1792.59326171875", # current rating ELO
+                     "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
+                     "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
                   },
                   "user_to" : {
                      "id" : 222,          # user-id of receiver
                      # the following fields only if WITH-option contain 'user_id'
                      "handle" : "user2",  # USER_HANDLE
                      "name" : "name2",    # user name
-                     "rating" : "",       # current rating
-                     "rating_elo" : "",   # current rating ELO
+                     "rating" : "",       # current DGS rating | "" (=no rating)
+                     "rating_elo" : "",   # current DGS elo-rating | "" (=no rating)
                   },
-                  "type" : "NORMAL", # message-type (see "info"-command)
-                  "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
-                  "folder_id" : 2,   # folder.id (see "info"-command)
+                  "type" : "NORMAL",      # message-type (see "info"-command)
+                  "flags" : "",           # flags (comma-separated): BULK (multi-receiver bulk-message)
+                  "folder_id" : 2,        # folder.id (see "info"-command)
                   "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
-                  "thread" : 0,       # message-id of first message in a message-thread, 0=system-message
-                  "level" : 0,        # thread-level of message-thread (starting at 0)
-                  "message_prev" : 0, # message-id of message that has been replied to
-                  "message_hasnext" : 1, # 0=no-answer for current message, 1=there are answer(s) to this message
-                  "needs_reply" : 1,  # 1=message-needs-reply, 0=normal message
-                  "game_id" : 0,      # game-id for game-related message (e.g. invitation); game may be deleted
-                  "subject" : "boo",  # subject of message
+                  "thread" : 0,           # message-id of first message in a message-thread, 0=system-message
+                  "level" : 0,            # thread-level of message-thread (starting at 0)
+                  "message_prev" : 0,     # message-id of message that has been replied to
+                  "message_hasnext" : 1,  # 0=no-answer for current message, 1=there are answer(s) to this message
+                  "needs_reply" : 1,      # 1=message-needs-reply, 0=normal message
+                  "game_id" : 0,          # game-id for game-related message (e.g. invitation); game may be deleted
+                  "subject" : "boo",      # subject of message
                },
                ...
             ]
