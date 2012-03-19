@@ -372,6 +372,9 @@ class ErrorCode
          $arr['receiver_not_found'] =
             T_("Sorry, couldn't find the receiver of your message. Make sure to use the userid, not the full name.");
 
+         $arr['reply_invalid'] =
+            T_("Sorry, replying to that message is not possible.");
+
          $arr['rank_not_rating'] =
             T_("Sorry, I've problem with the rating, did you forget to specify 'kyu' or 'dan'?");
 
@@ -588,6 +591,9 @@ class ErrorCode
 
          $arr['folder_not_found'] =
             T_("Sorry, couldn't find the specified message folder.");
+
+         $arr['folder_forbidden'] =
+            T_("Sorry, this folder can not be used for this operation.");
 
          $arr['invalid_filter'] =
             T_("Sorry, there's a configuration problem with a search-filter.");
