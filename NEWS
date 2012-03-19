@@ -528,6 +528,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
             * Added column to allow client more sorting options: game-priority, opponents last-access
             * Use same next-game-order as configured on status-page, can be overwritten with URL-arg 'order'
          * Added section with multi-player-games on SETUP-status and if they are ready to start like on status-page
+         * Enhanced Messages-section, showing also messages from REPLY-folder
       * Added commented header-line with format for different data-sections:
         Bulletins, Messages, Games, Multi-Player-Games
       * DEPRECATED-Warning: Version 1 is deprecated and will be removed in some future releases
@@ -575,6 +576,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * <home index.php?logout=t>Login page</home>:
       * Show special main-menu for users not logged in and new users
       * Show basic supporting pages even if not logged in
+      * Disabled cache for login-page
 
    * <home register.php>Registration pages</home>:
       * Preserve entered input-data on check-errors for normal and IP-blocked registration
