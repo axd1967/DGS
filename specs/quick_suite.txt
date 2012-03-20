@@ -503,6 +503,7 @@ Commands:
          }
 
 
+   # NOT IMPLEMENTED: to-specify
    "list" : retrieve list of games
       - required opts: VIEW
       - optional opts: USER_ID, LIST_STYLE, WITH
@@ -568,6 +569,7 @@ Commands:
          - wrong_number_of_handicap_stone : number of set handicap stones
            do not match required handicap
 
+   # NOT fully IMPLEMENTED: test
    "move" :
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVES = move : single move to submit, move="pass" for passing move
@@ -591,6 +593,7 @@ Commands:
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAME], [E-GAMEMOVE]
 
+   # NOT fully IMPLEMENTED: to-specify (toggle-uniq), to-impl
    "status_score" : verify final game-score
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates that 'state' should be "switched"
@@ -619,6 +622,7 @@ Commands:
          }
 
 
+   # NOT fully IMPLEMENTED: to-specify (toggle-uniq), to-impl
    "score" : assess dead/alive-status of stones, submitting score
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates of which the 'state' should be "switched"
@@ -849,6 +853,7 @@ Options:
 
 Commands:
 
+   # NOT fully IMPLEMENTED: to-impl (calc-game-settings)
    "info" : returns private message
       - required opts: MESSAGE_ID
       - optional opts: OTHER_UID (for bulk-message), FOLDER, WITH
@@ -1027,6 +1032,7 @@ Commands:
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
+   # NOT fully IMPLEMENTED: to-specify (filter), to-impl
    "list" : retrieve list of messages
       - required opts: -
       - optional opts: LIST_STYLE, WITH, FILTERS
@@ -1266,6 +1272,7 @@ Options:
 
 Commands:
 
+   # NOT IMPLEMENTED: to-specify
    "list" : returns list of suitable game-offers from waiting-room
       - required opts: VIEW
       - optional opts: USER_ID, LIST_STYLE, WITH
@@ -1290,6 +1297,7 @@ Commands:
             ]
          }
 
+   # NOT fully IMPLEMENTED: to-impl (calc-game-settings)
    "info" : returns information on single game-offer from waiting-room
       - required opts: WROOM_ID
       - optional opts: WITH
@@ -1377,6 +1385,7 @@ Commands:
          - no_initial_rating : handicap-type of game-offer requires a rating
          - internal_error : inconsistency found in game-offer -> contact admin
 
+   # NOT IMPLEMENTED: to-specify
    "new_game" : create new game-offer in waiting-room
       - TODO TODO
          - only one "view" (combining simple/expert/fair-komi/mpg in one)
