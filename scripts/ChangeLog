@@ -19,7 +19,31 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-20 juga
+
+   * include/std_functions.php (start_html),
+     skins/dragon/print.css (removed):
+   - removed default print.css file, because it's not maintained anyway
+
+   * include/quick/quick_message.php (class QuickHandlerMessage, ~.parseURL, ~.prepare, ~.process,
+       ~.process_cmd_info, ~.process_cmd_move_msg, ~.process_cmd_delete_msg, ~.process_cmd_send_msg),
+     include/message_functions.php (change_folders; DgsMessage.load_message),
+     specs/db/table-Messages.txt,
+     specs/quick_suite.txt:
+   - extended message-quick-handler:
+     - implemented "move_msg"-command to change folder of messages
+     - implemented "delete_msg"-command to destroy messages without going via trashcan-folder
+     - implemented "accept_inv" and "decline_inv"-command to accept & decline invitation
+     - added "game_status"-field for deleted/accepted invitations and not showing game-data anymore
+
 2012-03-19 juga
+
+   * include/game_functions.php (GameHelper.get_quick_game_action;
+       FairKomiNegotiation.get_quick_fair_komi_game_action),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     specs/quick_suite.txt,
+     quick_status.php:
+   - implement 'game_action' for fair-komi-negotiation
 
    * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info,
        ~.process_cmd_send_msg, ~.convertMessageReplyStatus),

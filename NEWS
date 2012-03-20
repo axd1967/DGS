@@ -498,6 +498,9 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 ##       * retrieve information about private message, with nested user-/folder-objects,
 ##         including game-settings for invitation
 ##       * send message, reply to message
+##       * change message-folder
+##       * delete message
+##       * accept invitation, decline invitation
 ##    * Added folder-handler to
 ##       * retrieve information about message-folders
 ##    * Added contact-handler to
@@ -523,6 +526,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Enhanced Games-section:
             * Enhanced remaining-time with extra-time-info
             * Added columns to support new game-quick-suite with move-id, game-status
+            * Added column with next game-action for setting handicap-stones and fair-komi-negotiation
             * Added column for tournament-games with tournament-id
             * Added shape-id for shape-games
             * Added column to allow client more sorting options: game-priority, opponents last-access
