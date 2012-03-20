@@ -2179,13 +2179,13 @@ class MessageControl
     * \param $input map with input from URL with the following keys:
     *    # see also 'message.php' (URL-input-args)
     *    'action' = send_msg | accept_inv | decline_inv
-    *    'senderid' = uid sending message
-    *    'folder' = target-folder-id
-    *    'reply' = message-id to reply to
-    *    'mpgid' = game-id for MP-game
-    *    'subject' = message-title
-    *    'message' = message-textbody
-    *    'gid' = game-id of invitation
+    *    'senderid' = uid sending message (mandatory)
+    *    'folder' = target-folder-id (optional)
+    *    'reply' = message-id to reply to (mandatory for accept_inv|decline_inv)
+    *    'mpgid' = game-id for MP-game (optional)
+    *    'subject' = message-title (mandatory for send_msg)
+    *    'message' = message-textbody (optional)
+    *    'gid' = game-id of invitation (mandatory for accept_inv|decline_inv)
     *    'disputegid' = if set, game-id for dispute
     * \return 0=success for sending simple message;
     *         msg_gid (>0) = success for sending bulk-mpg-message;

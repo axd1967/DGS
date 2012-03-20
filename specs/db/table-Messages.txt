@@ -74,7 +74,9 @@ Notes about "Multiple-receiver (bulk) messages":
 * Type : message-type
    - NORMAL       : normal message between two users
    - INVITATION   : invitation message (from other users)
-   - DISPUTED     : disputed invitation (by other user)
+   - DISPUTED     : disputed invitation (by other user),
+                    sending a dispute (invitation) message creates a new invitation (type=INVITATION)
+                    and sets the replied invitation to DISPUTED-type
    - RESULT       : game-result message (from system)
 
    # obsolete types: ACCEPTED, DECLINED, DELETED (removed from sources)

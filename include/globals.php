@@ -146,8 +146,8 @@ define('FOLDER_SENT', 5);
 define('USER_FOLDERS', 6);
 
 define('MSGTYPE_NORMAL',     'NORMAL');
-define('MSGTYPE_INVITATION', 'INVITATION');
-define('MSGTYPE_DISPUTED',   'DISPUTED');
+define('MSGTYPE_INVITATION', 'INVITATION'); // invitation, new or by disputing
+define('MSGTYPE_DISPUTED',   'DISPUTED'); // former INVITATION-type message being answered with dispute
 define('MSGTYPE_RESULT',     'RESULT');
 
 // message-flags 8 bits: 0xff

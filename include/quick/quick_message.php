@@ -39,7 +39,9 @@ define('MESSAGEOPT_FOLDER', 'folder');
 define('MESSAGEOPT_PARENT_MID', 'pmid');
 
 define('MESSAGECMD_SEND_MSG', 'send_msg');
-define('MESSAGE_COMMANDS', 'info|send_msg');
+define('MESSAGECMD_ACCEPT_INVITATION', 'accept_inv');
+define('MESSAGECMD_DECLINE_INVITATION', 'decline_inv');
+define('MESSAGE_COMMANDS', 'info|send_msg|accept_inv|decline_inv');
 
 
  /*!
@@ -122,7 +124,7 @@ class QuickHandlerMessage extends QuickHandler
 
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
       }
-      elseif( $cmd == MESSAGECMD_SEND_MSG )
+      elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
       {
          if( $this->mid > 0 ) // reply
          {
@@ -131,6 +133,8 @@ class QuickHandlerMessage extends QuickHandler
          }
          else // new message
          {
+            if( $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
+               error('invalid_args', "$dbgmsg.miss_mid");
             if( $this->other_uid > 0 && (string)$this->other_handle == '' )
                $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
             if( $this->other_uid == 0 && (string)$this->other_handle == '' )
@@ -147,13 +151,23 @@ class QuickHandlerMessage extends QuickHandler
          {
             // check that user is indeed a receiver of reply-msg -> otherwise unknown-msg
             $msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, 0, /*full*/false );
+            $this->msg_row = $msg_row;
 
             if( $msg_row['Sender'] == 'M' ) // reply to message from myself forbidden
                error('reply_invalid', "$dbgmsg.reply_to_myself_forbidden");
             if( $msg_row['Sender'] != 'N' || !($msg_row['other_id'] > 0) ) // can not reply
                error('reply_invalid', "$dbgmsg.message_can_not_be_replied");
-            if( $msg_row['Type'] != MSGTYPE_NORMAL ) // only reply to NORMAL-messages
-               error('reply_invalid', "$dbgmsg.only_normal({$msg_row['Type']})");
+
+            if( $cmd == MESSAGECMD_SEND_MSG )
+            {
+               if( $msg_row['Type'] != MSGTYPE_NORMAL ) // only reply to NORMAL-messages
+                  error('reply_invalid', "$dbgmsg.only_normal({$msg_row['Type']})");
+            }
+            elseif( $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
+            {
+               if( $msg_row['Type'] != MSGTYPE_INVITATION )
+                  error('reply_invalid', "$dbgmsg.no_invitation({$msg_row['Type']})");
+            }
 
             $this->other_uid = $msg_row['other_id'];
             $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
@@ -167,7 +181,7 @@ class QuickHandlerMessage extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
          $this->process_cmd_info();
-      elseif( $cmd == MESSAGECMD_SEND_MSG )
+      elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
          $this->process_cmd_send_msg();
    }
 
@@ -265,18 +279,37 @@ class QuickHandlerMessage extends QuickHandler
       }
    }//process_cmd_info
 
+   /*! \brief send_msg | accept_inv | decline_inv */
    function process_cmd_send_msg()
    {
+      $action = 'send_msg';
+      $subject = trim(@$_REQUEST['subj']); // mandatory only for send_msg
+      $gid = 0;
+
+      $cmd = $this->quick_object->cmd;
+      if( $cmd == MESSAGECMD_ACCEPT_INVITATION )
+      {
+         $action = 'accept_inv';
+         $subject = 1; // non-empty
+         $gid = $this->msg_row['Game_ID'];
+      }
+      elseif( $cmd == MESSAGECMD_DECLINE_INVITATION )
+      {
+         $action = 'decline_inv';
+         $subject = 1; // non-empty
+         $gid = $this->msg_row['Game_ID'];
+      }
+
       $msg_control = new MessageControl( $this->folders, /*allow-bulk*/false );
       $input = array(
-            'action'       => 'send_msg',
+            'action'       => $action,
             'senderid'     => $this->my_id,
             'folder'       => $this->folder_id,
             'reply'        => $this->mid,
             'mpgid'        => 0,
-            'subject'      => trim(@$_REQUEST['subj']),
+            'subject'      => $subject,
             'message'      => trim(@$_REQUEST['msg']),
-            'gid'          => 0,
+            'gid'          => $gid,
             'disputegid'   => 0,
          );
       $result = $msg_control->handle_send_message( $this->other_handle, MSGTYPE_NORMAL, $input );

@@ -956,17 +956,7 @@ Commands:
          - message to send will be moved into SENT-folder for sending-user
 
       - Errors:
-         - all errors of: [E-LOGIN], [E-GEN], [E-MSG]
-         - invalid_action : failure on checking to send a message, detailed error-texts found in "error_texts"-field
-         - reply_invalid : invalid reply, because ...
-            - message can't be replied to, or no reply possible for message
-            - reply to myself is not allowed (as that doesn't show up in message-thread-view)
-            - reply only possible to NORMAL-messages, not to invitations/disputes or system-messages
-            - used OTHER_UID|OTHER_HANDLE arguments to specify message-recipient,
-              recipient must be omitted as it's determined from message-sender
-         - folder_forbidden : invalid target folder used to move replied message to
-            - folder-id must be >0
-            - NEW-folder (folder-id=2) and SENT-folder (folder-id=5) are not allowed
+         - all errors of: [E-LOGIN], [E-GEN], [E-MSG], [E-MSGSEND]
 
       - Result (JSON) =
          {
@@ -993,20 +983,26 @@ Commands:
    "accept_inv" : accepts game-invitation
       - required opts: MESSAGE_ID
       - optional opts: MESSAGE, FOLDER
+         - FOLDER : target-folder of replied-to message for sending-user
 
-      - TODO TODO
-         - implicit folder-move ?
+      - Notes:
+         - if FOLDER is omitted, behave like GUI moving replied-message into MAIN-folder
+         - message to send will be moved into SENT-folder for sending-user
 
-      - Errors: TODO TODO
-         - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG]
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
    "decline_inv" : declines game-invitation
       - required opts: MESSAGE_ID
       - optional opts: MESSAGE, FOLDER
+         - FOLDER : target-folder of replied-to message for sending-user
 
-      - TODO TODO
-         - implicit folder-move ?
-      - Errors: TODO TODO
+      - Notes:
+         - if FOLDER is omitted, behave like GUI moving replied-message into MAIN-folder
+         - message to send will be moved into SENT-folder for sending-user
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
    "list" : retrieve list of messages
       - required opts: -
@@ -2118,6 +2114,23 @@ Errors:
       - receiver_not_found : given recipient(s) can not be found
       - folder_not_found : specified folder is unknown for current user
       - bulkmessage_self : bulk-messages can not be sent to oneself
+
+   * [E-MSGSEND] Message Send Errors:
+      - invalid_action : failure on checking to send a message, detailed error-texts found in "error_texts"-field
+      - reply_invalid : invalid reply, because ...
+         - message can't be replied to, or no reply possible for message
+         - reply to myself is not allowed (as that doesn't show up in message-thread-view)
+         - for normal messages (can be ok for accepting/declining invitation):
+           reply only possible to NORMAL-messages, not to invitations/disputes or system-messages
+         - for accepting/declining invitation:
+           reply only possible to invitation message, not to normal messages or already disputed invitation
+         - used OTHER_UID|OTHER_HANDLE arguments to specify message-recipient,
+           recipient must be omitted as it's determined from message-sender
+      - folder_forbidden : invalid target folder used to move replied message to
+         - folder-id must be >0
+         - NEW-folder (folder-id=2) and SENT-folder (folder-id=5) are not allowed for old message to store into
+      - game_delete_invitation : error on game-deletion/decline-invitation detected,
+        nothing found to be deleted, which could mean that the invitation was already declined
 
 
 #-------- (6) Formats ---------------------------------------------------------
