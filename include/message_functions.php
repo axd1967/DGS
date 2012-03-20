@@ -1387,16 +1387,22 @@ function change_folders_for_marked_messages($uid, $folders)
    return change_folders($uid, $folders, $message_ids, $new_folder, @$_GET['current_folder']);
 }
 
-// return >0 success, 0 = no messages to move
-function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false)
+// return >0 success (messages moved), 0 = no messages to move
+// \param $need_replied false = change only messages that have been replied, true = change only message that need NO reply
+function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false, $quick_suite=false)
 {
    if( count($message_ids) <= 0 )
       return 0;
 
    if( $new_folder == FOLDER_DESTROYED )
    {
-      // destroy'ing only allowed from Trashcan-folder
-      $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";
+      if( $quick_suite )
+         $where_clause = '';
+      else
+      {
+         // destroy'ing only allowed from Trashcan-folder
+         $where_clause = "AND Folder_nr='" .FOLDER_DELETED. "' ";
+      }
    }
    else
    {
@@ -1668,7 +1674,7 @@ class DgsMessage
     */
    function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
    {
-      if( $mid <= 0 )
+      if( !is_numeric($mid) || $mid <= 0 )
          error('unknown_message', "$dbgmsg.DgsMessage::load_message.check.mid($mid)");
 
       /**

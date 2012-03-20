@@ -821,7 +821,7 @@ Options:
 
    <MESSAGE_ID> = integer
       - message-id referencing private DGS-message to perform message-operation on
-      - message-id to reply to for "send_msg"-command
+      - message-id to reply to for "send_msg/accept_inv/decline_inv"-command
 
    <OTHER_UID> = integer
    <OTHER_HANDLE> = string
@@ -911,7 +911,11 @@ Commands:
             "text" : "haha",        # content of message
 
             # additional fields set, if message is of type INVITATION
-            "game_settings" : {
+            "game_status" : "INVITED",    # game-status:
+                                          # - "INVITED" = active invitation
+                                          # - "" (empty) = invitation declined, game-info deleted
+                                          # - other-status = invitation accepted, normal game-status -> see (3a) 'status'-field for "info"-command
+            "game_settings" : {           # 'game_settings' only present, if game_status == INVITED
                "game_type" : "GO",        # always 'GO' for invitations
                "game_players" : "1:1",    # always '1:1' for invitations
                "handicap_type" : "conv",  # see HTYPE_... in 'include/game_functions.php':
@@ -973,12 +977,19 @@ Commands:
 
    "delete_msg" : deletes message(s)
       - required opts: MESSAGE_ID
-      - TODO TODO
-         - move to destroy-folder (trashcan + destroy in one step)
-         - bulk ?
+         - multiple message-ids allowed separated by comma
 
-      - Errors: TODO TODO
-            game_delete_invitation : error on game-deletion detected, nothing found to be deleted
+      - Notes:
+         - messages can not be deleted, if they need a reply
+         - messages are not really destroyed but moved into the internally used DESTROY-folder
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN], [E-MSG]
+
+      - Result (JSON) =
+         {
+            "failure_count" : 0,       # number of messages, that were not deleted (maybe need reply)
+         }
 
    "accept_inv" : accepts game-invitation
       - required opts: MESSAGE_ID

@@ -39,9 +39,10 @@ define('MESSAGEOPT_FOLDER', 'folder');
 define('MESSAGEOPT_PARENT_MID', 'pmid');
 
 define('MESSAGECMD_SEND_MSG', 'send_msg');
+define('MESSAGECMD_DELETE_MESSAGE', 'delete_msg');
 define('MESSAGECMD_ACCEPT_INVITATION', 'accept_inv');
 define('MESSAGECMD_DECLINE_INVITATION', 'decline_inv');
-define('MESSAGE_COMMANDS', 'info|send_msg|accept_inv|decline_inv');
+define('MESSAGE_COMMANDS', 'info|delete_msg|send_msg|accept_inv|decline_inv');
 
 
  /*!
@@ -59,6 +60,7 @@ class QuickHandlerMessage extends QuickHandler
    var $user_rows;
    var $folder; //arr
    var $folders; //arr
+   var $arr_msg_id;
 
    function QuickHandlerMessage( $quick_object )
    {
@@ -71,6 +73,7 @@ class QuickHandlerMessage extends QuickHandler
       $this->user_rows = null;
       $this->folder = null;
       $this->folders = null;
+      $this->arr_msg_id = null;
    }
 
 
@@ -83,7 +86,7 @@ class QuickHandlerMessage extends QuickHandler
 
    function parseURL()
    {
-      $this->mid = (int)get_request_arg(MESSAGEOPT_MID);
+      $this->mid = get_request_arg(MESSAGEOPT_MID);
       $this->other_uid = (int)get_request_arg(MESSAGEOPT_OTHER_UID);
       $this->other_handle = trim(get_request_arg(MESSAGEOPT_OTHER_HANDLE));
       $this->folder_id = (int)get_request_arg(MESSAGEOPT_FOLDER);
@@ -91,8 +94,7 @@ class QuickHandlerMessage extends QuickHandler
 
    function prepare()
    {
-      global $player_row;
-      $my_id = (int)@$player_row['ID'];
+      $my_id = $this->my_id;
 
       // see specs/quick_suite.txt (3c)
       $dbgmsg = "QuickHandlerMessage.prepare($my_id,{$this->mid})";
@@ -100,8 +102,6 @@ class QuickHandlerMessage extends QuickHandler
       $cmd = $this->quick_object->cmd;
 
       // check mid
-      if( !is_numeric($this->mid) || $this->mid < 0 )
-         error('invalid_args', "$dbgmsg.bad_message");
       if( !is_numeric($this->other_uid) || $this->other_uid < 0 )
          error('invalid_args', "$dbgmsg.bad_uid.oid({$this->other_uid})");
       if( !is_numeric($this->folder_id) || $this->folder_id < FOLDER_ALL_RECEIVED )
@@ -124,8 +124,26 @@ class QuickHandlerMessage extends QuickHandler
 
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
       }
+      elseif( $cmd == MESSAGECMD_DELETE_MESSAGE )
+      {
+         if( !preg_match("/^(\\d+)(,\\d+)*$/", $this->mid) )
+            error('invalid_args', "$dbgmsg.bad_message_id");
+
+         $this->arr_msg_id = explode(',', $this->mid);
+         foreach( $this->arr_msg_id as $msg_id )
+         {
+            $msg_row = DgsMessage::load_message( $dbgmsg, $msg_id, $my_id, 0, /*full*/false ); // msg exists and is mine
+            if( $msg_row['Replied'] == 'M' )
+               error('invalid_args', "$dbgmsg.need_reply($msg_id)");
+            if( $msg_row['Folder_nr'] == FOLDER_DESTROYED )
+               error('invalid_args', "$dbgmsg.already_destroyed($msg_id)");
+         }
+      }
       elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
       {
+         if( !is_numeric($this->mid) || $this->mid < 0 )
+            error('invalid_args', "$dbgmsg.bad_message_id");
+
          if( $this->mid > 0 ) // reply
          {
             if( $this->other_uid != 0 || (string)$this->other_handle != '' )
@@ -181,15 +199,16 @@ class QuickHandlerMessage extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
          $this->process_cmd_info();
+      elseif( $cmd == MESSAGECMD_DELETE_MESSAGE )
+         $this->process_cmd_delete_msg();
       elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
          $this->process_cmd_send_msg();
    }
 
    function process_cmd_info()
    {
-      global $player_row;
       $row = $this->msg_row;
-      $my_id = $player_row['ID'];
+      $my_id = $this->my_id;
       $other_uid = (int)$row['other_id'];
       switch( $row['Sender'] ) // also see get_message_directions()
       {
@@ -225,59 +244,74 @@ class QuickHandlerMessage extends QuickHandler
 
       if( $row['Type'] == MSGTYPE_INVITATION )
       {
-         // ToMove_ID holds handitype since INVITATION
-         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
-         $curr_tomove = (int)$row['ToMove_ID'];
-         $my_htype = $my_gs->Handicaptype;
-         if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
-            $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+         $game_status = @$row['Status'];
+         if( is_null($game_status) )
+            $game_status = '';
+         $this->addResultKey( 'game_status', $game_status );
 
-         $my_col_black = ( $row['Black_ID'] == $my_id );
-         $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_col_black, $my_htype );
-         if( !$Handitype )
-            $Handitype = HTYPE_NIGIRI; //default
-         $cat_htype = get_category_handicaptype( $Handitype );
-         $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
+         if( $game_status == GAME_STATUS_INVITED )
+         {
+            // ToMove_ID holds handitype since INVITATION
+            list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
+            $curr_tomove = (int)$row['ToMove_ID'];
+            $my_htype = $my_gs->Handicaptype;
+            if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
+               $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
 
-         $time_limit = TimeFormat::echo_time_limit(
-               $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
-               TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
+            $my_col_black = ( $row['Black_ID'] == $my_id );
+            $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_col_black, $my_htype );
+            if( !$Handitype )
+               $Handitype = HTYPE_NIGIRI; //default
+            $cat_htype = get_category_handicaptype( $Handitype );
+            $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
 
-         $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
-         $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
-         $calc_handicap = 3; // TODO probable/fix handicap
-         $calc_komi = 6.5; // TODO probably/fix komi
+            $time_limit = TimeFormat::echo_time_limit(
+                  $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
+                  TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
 
-         $this->addResultKey( 'game_settings', array(
-               'game_type' => GAMETYPE_GO,
-               'game_players' => '1:1',
-               'handicap_type' => $my_htype,
-               'shape_id' => (int)$row['ShapeID'],
-               'shape_snapshot' => $row['ShapeSnapshot'],
+            $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
+            $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
+            $calc_handicap = 3; // TODO probable/fix handicap
+            $calc_komi = 6.5; // TODO probably/fix komi
 
-               'rated' => ( ($row['Rated'] == 'N') ? 0 : 1 ),
-               'ruleset' => strtoupper($row['Ruleset']),
-               'size' => (int)$row['Size'],
-               'komi' => (float)$row['Komi'],
-               'jigo_mode' => $jigo_mode,
-               'handicap' =>  (int)$row['Handicap'],
-               'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
+            $this->addResultKey( 'game_settings', array(
+                  'game_type' => GAMETYPE_GO,
+                  'game_players' => '1:1',
+                  'handicap_type' => $my_htype,
+                  'shape_id' => (int)$row['ShapeID'],
+                  'shape_snapshot' => $row['ShapeSnapshot'],
 
-               'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
-               'time_mode' => strtoupper($row['Byotype']),
-               'time_limit' => $time_limit,
-               'time_main' => $row['Maintime'],
-               'time_byo' => $row['Byotime'],
-               'time_periods' => $row['Byoperiods'],
+                  'rated' => ( ($row['Rated'] == 'N') ? 0 : 1 ),
+                  'ruleset' => strtoupper($row['Ruleset']),
+                  'size' => (int)$row['Size'],
+                  'komi' => (float)$row['Komi'],
+                  'jigo_mode' => $jigo_mode,
+                  'handicap' =>  (int)$row['Handicap'],
+                  'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
 
-               'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
-               'calc_type' => $calc_type,
-               'calc_color' => $calc_color,
-               'calc_handicap' => $calc_handicap,
-               'calc_komi' => $calc_komi,
-            ));
+                  'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
+                  'time_mode' => strtoupper($row['Byotype']),
+                  'time_limit' => $time_limit,
+                  'time_main' => $row['Maintime'],
+                  'time_byo' => $row['Byotime'],
+                  'time_periods' => $row['Byoperiods'],
+
+                  'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
+                  'calc_type' => $calc_type,
+                  'calc_color' => $calc_color,
+                  'calc_handicap' => $calc_handicap,
+                  'calc_komi' => $calc_komi,
+               ));
+         }
       }
    }//process_cmd_info
+
+   function process_cmd_delete_msg()
+   {
+      $moved_count = change_folders( $this->my_id, /*folders*/null, $this->arr_msg_id, FOLDER_DESTROYED,
+         /*curr-fold*/false, /*need-reply*/false, /*quick*/true );
+      $this->addResultKey( 'failure_count', count($this->arr_msg_id) - $moved_count );
+   }
 
    /*! \brief send_msg | accept_inv | decline_inv */
    function process_cmd_send_msg()
