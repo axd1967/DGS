@@ -346,9 +346,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( !file_exists("{$main_path}skins/$skinname/screen.css") )
       $skinname = 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skinname/screen.css\">";
-   if( !file_exists("{$main_path}skins/$skinname/print.css") )
-      $skinname = 'dragon';
-   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
+   if( file_exists("{$main_path}skins/$skinname/print.css") )
+      echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
 
    $enable_js_game = false;
    switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
