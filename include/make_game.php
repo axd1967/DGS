@@ -501,13 +501,13 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    if( $is_fairkomi && $game_type != GAMETYPE_GO )
       error('invalid_args', "create_game.fairkomi.no_mpg($gid,$game_type,$htype)");
 
-   if( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.create_game');
    if( isset($game_info_row['tid']) ) // tournament-id
       $tid = (int)$game_info_row['tid'];
    else
       $game_info_row['tid'] = $tid = 0;
    if( $tid < 0 ) $tid = 0;
+   if( $tid && !ALLOW_TOURNAMENTS )
+      error('feature_disabled', "Tournament.create_game($tid)");
 
    $rating_black = $black_row['Rating2'];
    if( !is_numeric($rating_black) )
