@@ -39,10 +39,11 @@ define('MESSAGEOPT_FOLDER', 'folder');
 define('MESSAGEOPT_PARENT_MID', 'pmid');
 
 define('MESSAGECMD_SEND_MSG', 'send_msg');
+define('MESSAGECMD_MOVE_MESSAGE', 'move_msg');
 define('MESSAGECMD_DELETE_MESSAGE', 'delete_msg');
 define('MESSAGECMD_ACCEPT_INVITATION', 'accept_inv');
 define('MESSAGECMD_DECLINE_INVITATION', 'decline_inv');
-define('MESSAGE_COMMANDS', 'info|delete_msg|send_msg|accept_inv|decline_inv');
+define('MESSAGE_COMMANDS', 'info|move_msg|delete_msg|send_msg|accept_inv|decline_inv');
 
 
  /*!
@@ -124,10 +125,19 @@ class QuickHandlerMessage extends QuickHandler
 
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
       }
-      elseif( $cmd == MESSAGECMD_DELETE_MESSAGE )
+      elseif( $cmd == MESSAGECMD_MOVE_MESSAGE || $cmd == MESSAGECMD_DELETE_MESSAGE )
       {
          if( !preg_match("/^(\\d+)(,\\d+)*$/", $this->mid) )
             error('invalid_args', "$dbgmsg.bad_message_id");
+
+         if( $cmd == MESSAGECMD_MOVE_MESSAGE )
+         {
+            $this->init_folders( $this->my_id );
+            if( $this->folder_id == 0 )
+               error('invalid_args', "$dbgmsg.miss_folder");
+            if( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
+               error('folder_not_found', "$dbgmsg.bad_folder({$this->folder_id})");
+         }
 
          $this->arr_msg_id = explode(',', $this->mid);
          foreach( $this->arr_msg_id as $msg_id )
@@ -199,6 +209,8 @@ class QuickHandlerMessage extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
          $this->process_cmd_info();
+      elseif( $cmd == MESSAGECMD_MOVE_MESSAGE )
+         $this->process_cmd_move_msg();
       elseif( $cmd == MESSAGECMD_DELETE_MESSAGE )
          $this->process_cmd_delete_msg();
       elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
@@ -306,10 +318,19 @@ class QuickHandlerMessage extends QuickHandler
       }
    }//process_cmd_info
 
+   function process_cmd_move_msg()
+   {
+      $moved_count = change_folders( $this->my_id, $this->folders, $this->arr_msg_id, $this->folder_id,
+         /*curr-fold*/false, /*need-reply*/false, /*quick*/true );
+      $this->addResultKey( 'success_count', $moved_count );
+      $this->addResultKey( 'failure_count', count($this->arr_msg_id) - $moved_count );
+   }
+
    function process_cmd_delete_msg()
    {
       $moved_count = change_folders( $this->my_id, /*folders*/null, $this->arr_msg_id, FOLDER_DESTROYED,
          /*curr-fold*/false, /*need-reply*/false, /*quick*/true );
+      $this->addResultKey( 'success_count', $moved_count );
       $this->addResultKey( 'failure_count', count($this->arr_msg_id) - $moved_count );
    }
 

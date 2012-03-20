@@ -971,9 +971,20 @@ Commands:
 
    "move_msg" : moves message(s) into target folder
       - required opts: MESSAGE_ID, FOLDER
-      - TODO TODO
-         - bulk ?
-      - Errors: TODO TODO
+         - multiple message-ids allowed separated by comma
+
+      - Notes:
+         - messages that need reply can not be moved
+         - some target-folder may not be used to move certain type of messages to (like in REPLY/SENT-folder)
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN], [E-MSG]
+
+      - Result (JSON) =
+         {
+            "success_count" : 1,       # number of messages, that were moved successfully
+            "failure_count" : 0,       # number of messages, that were not deleted (maybe need reply)
+         }
 
    "delete_msg" : deletes message(s)
       - required opts: MESSAGE_ID
@@ -988,6 +999,7 @@ Commands:
 
       - Result (JSON) =
          {
+            "success_count" : 1,       # number of messages, that were deleted successfully
             "failure_count" : 0,       # number of messages, that were not deleted (maybe need reply)
          }
 
