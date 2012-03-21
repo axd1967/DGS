@@ -286,23 +286,23 @@ $GLOBALS['ThePage'] = new Page('Game');
             {//to fix old way Ko detect. Could be removed when no more old way games.
                if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
             }
-            check_move( $TheBoard, $coord, $to_move);
-            //adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-            //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+            $gchkmove = new GameCheckMove( $TheBoard );
+            $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
+            $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
             $game_row['Black_Prisoners'] = $Black_Prisoners;
             $game_row['White_Prisoners'] = $White_Prisoners;
 
             $stonestring = '';
-            foreach($prisoners as $tmp)
+            foreach($gchkmove->prisoners as $tmp)
             {
                list($x,$y) = $tmp;
                $stonestring .= number2sgf_coords($x, $y, $Size);
             }
 
-            if( strlen($stonestring) != $nr_prisoners*2 )
-               error('move_problem', "game.domove.check_prisoners($gid,$stonestring,$nr_prisoners)");
+            if( strlen($stonestring) != $gchkmove->nr_prisoners*2 )
+               error('move_problem', "game.domove.check_prisoners($gid,$stonestring,{$gchkmove->nr_prisoners})");
 
-            $TheBoard->set_move_mark( $colnr, $rownr);
+            $TheBoard->set_move_mark( $gchkmove->colnr, $gchkmove->rownr);
             //$coord must be kept for validation by confirm.php
             break;
          }//case 'domove'

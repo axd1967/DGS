@@ -205,35 +205,35 @@ This is why:
       {//to fix the old way Ko detect. Could be removed when no more old way games.
          if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
       }
-      check_move( $TheBoard, $coord, $to_move);
-      //ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-      //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+      $gchkmove = new GameCheckMove( $TheBoard );
+      $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
+      $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
 
       $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
       $prisoner_string = '';
-      foreach($prisoners as $tmp)
+      foreach($gchkmove->prisoners as $tmp)
       {
          list($x,$y) = $tmp;
          $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
          $prisoner_string .= number2sgf_coords($x, $y, $Size);
       }
 
-      if( strlen($prisoner_string) != $nr_prisoners*2 )
+      if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
          error('move_problem', "quick_play.domove.prisoner($gid)");
 
-      $move_query .= "($gid, $Moves, $to_move, $colnr, $rownr, $hours) ";
+      $move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
       if( $message )
          $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text='$message'";
 
       $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-          "Last_X=$colnr, " . //used with mail notifications
-          "Last_Y=$rownr, " .
-          "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
+          "Last_X={$gchkmove->colnr}, " . //used with mail notifications
+          "Last_Y={$gchkmove->rownr}, " .
+          "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
           "Status='".GAME_STATUS_PLAY."', ";
 
-      if( $nr_prisoners > 0 )
+      if( $gchkmove->nr_prisoners > 0 )
       {
          if( $to_move == BLACK )
             $game_query .= "Black_Prisoners=$Black_Prisoners, ";
@@ -241,7 +241,7 @@ This is why:
             $game_query .= "White_Prisoners=$White_Prisoners, ";
       }
 
-      if( $nr_prisoners == 1 )
+      if( $gchkmove->nr_prisoners == 1 )
          $GameFlags |= GAMEFLAGS_KO;
       else
          $GameFlags &= ~GAMEFLAGS_KO;

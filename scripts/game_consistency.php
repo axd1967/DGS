@@ -278,9 +278,6 @@ echo ">>>> Most of them needs manual fixes.";
 function check_consistency( $gid)
 {
    global $game_row;
-   //to share them with check_move()
-   global $prisoners, $nr_prisoners, $Black_Prisoners, $White_Prisoners,
-      $colnr, $rownr, $Last_Move, $GameFlags;
 
    //echo "Game $gid: ";
    $result = mysql_query("SELECT * FROM Games WHERE ID=$gid");
@@ -309,6 +306,7 @@ function check_consistency( $gid)
    $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
        or die('<BR>' . mysql_error());
 
+   $gchkmove = new GameCheckMove( $TheBoard );
    $Last_Move=''; $Last_X= $Last_Y= -1;
    $move_nr = 1; $to_move = BLACK; $GameFlags = 0;
    $Black_Prisoners = $White_Prisoners = $nr_prisoners = 0;
@@ -388,13 +386,11 @@ function check_consistency( $gid)
          $moves_White_Prisoners += $nr_prisoners;
 
       $coord = number2sgf_coords( $PosX, $PosY, $Size);
-
-//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-//here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
-      if( ($err=check_move( $TheBoard, $coord, $to_move, false)) )
+      if( ($err = $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags, false)) )
          return "Problem at move $move_nr: $err";
+      $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
 
-      if( $nr_prisoners == 1 )
+      if( $gchkmove->nr_prisoners == 1 )
          $GameFlags |= GAMEFLAGS_KO;
       else
          $GameFlags &= ~GAMEFLAGS_KO;
