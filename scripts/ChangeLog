@@ -19,6 +19,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-03-21 juga
+
+   * quick_status.php, specs/quick_suite.txt:
+   - extended quick-status games-list with number of handicap-stones,
+     so bot would know how many stones to set
+
 2012-03-20 juga
 
    * include/make_game.php (make_invite_game):

@@ -262,10 +262,10 @@ else
 
    $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
-   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
+   // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date, Handicap
    if( $version == 2 )
    {
-      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'\n";
+      echo "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date',handicap\n";
       $timefmt_flags |= TIMEFMT_ADDEXTRA;
    }
 
@@ -286,14 +286,13 @@ else
          $game_action = GameHelper::get_quick_game_action( $row['Status'], $row['Handicap'], $row['Moves'],
             new FairKomiNegotiation( GameSetup::new_from_game_setup($row['GameSetup']), $row ) );
 
-         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date
-         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,%s,'%s',%s,'%s'\n",
+         // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date, Handicap
+         echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,%s,'%s',%s,'%s',%s\n",
                        $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
                        date($datfmt, @$row['date']), $time_remaining['text'],
                        $game_action, $game_status, $row['Moves'], $row['tid'], (int)$row['ShapeID'],
                        GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
-                       (int)@$row['X_Priority'],
-                       date($datfmt, @$row['oLastaccess'])
+                       (int)@$row['X_Priority'], date($datfmt, @$row['oLastaccess']), $row['Handicap']
                      );
       }
       else // older-version

@@ -1846,7 +1846,7 @@ Response:
 
 
       # header-line with format of game-data-line (version = 2)
-      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date'"
+      "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date',handicap"
 
          game_id         : game-id, e.g. http://www.dragongoserver.net/game.php?gid=317416
          opponent_handle : user-id (handle) of users opponent
@@ -1883,6 +1883,7 @@ Response:
                            - value-range: -32768..32767
                            - 0 = not-loaded (e.g. for other user) or no prio
          opponent_lastaccess_date : date of opponents last-access-date in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
+         handicap        : number of handicap-stones
 
       # game-data-lines without header-line for status-games (version < 2)
       "'G', game_id, 'opponent_handle', player_color, 'lastmove_date', 'time_remaining'"
