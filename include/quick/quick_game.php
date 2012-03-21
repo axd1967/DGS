@@ -326,34 +326,33 @@ class QuickHandlerGame extends QuickHandler
             {//to fix the old way Ko detect. Could be removed when no more old way games.
                if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
             }
-            check_move( $this->TheBoard, $this->moves[0], $this->to_move);
-            //TODO TODO need to declare globals ????
-            //adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
-            //here, $prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
+            $gchkmove = new GameCheckMove( $this->TheBoard );
+            $gchkmove->check_move( $this->moves[0], $this->to_move, $Last_Move, $GameFlags );
+            $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
 
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
 
             $prisoner_string = '';
-            foreach($prisoners as $coord)
+            foreach($this->prisoners as $coord)
             {
                list( $x, $y ) = $coord;
                $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
                $prisoner_string .= number2sgf_coords($x, $y, $Size);
             }
 
-            if( strlen($prisoner_string) != $nr_prisoners*2
+            if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2
                   || ( $this->stonestring && $prisoner_string != $this->stonestring) )
-               error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,$nr_prisoners,$prisoner_string,{$this->stonestring})");
+               error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,{$gchkmove->nr_prisoners},$prisoner_string,{$this->stonestring})");
 
-            $move_query .= "($gid, $Moves, {$this->to_move}, $x, $y, $hours) ";
+            $move_query .= "($gid, $Moves, {$this->to_move}, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
             $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-                "Last_X=$colnr, " . //used with mail notifications
-                "Last_Y=$rownr, " .
-                "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " . //used to detect Ko
+                "Last_X={$gchkmove->colnr}, " . //used with mail notifications
+                "Last_Y={$gchkmove->rownr}, " .
+                "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
                 "Status='$next_status', ";
 
-            if( $nr_prisoners > 0 )
+            if( $gchkmove->nr_prisoners > 0 )
             {
                if( $this->to_move == BLACK )
                   $game_query .= "Black_Prisoners=$Black_Prisoners, ";
@@ -361,7 +360,7 @@ class QuickHandlerGame extends QuickHandler
                   $game_query .= "White_Prisoners=$White_Prisoners, ";
             }
 
-            if( $nr_prisoners == 1 )
+            if( $gchkmove->nr_prisoners == 1 )
                $GameFlags |= GAMEFLAGS_KO;
             else
                $GameFlags &= ~GAMEFLAGS_KO;
