@@ -56,14 +56,14 @@ class QuickSuite
       //   Order should be kept according to most frequent usage.
       static $quick_handler_list = array(
          'QuickHandlerGame',        // game: delete | set_handicap | move | resign | status_score | score
-         'QuickHandlerGameList',    // game: list
          'QuickHandlerMessage',     // message: info
+         'QuickHandlerWaitingroom', // wroom: list | info | new_game
+         'QuickHandlerBulletin',    // bulletin: list | mark_read
          'QuickHandlerUser',        // user: info
          'QuickHandlerGameInfo',    // game: info | get_notes
-         'QuickHandlerWaitingroom', // wroom: list | info | new_game
-         'QuickHandlerFolder',      // folder: list
+         'QuickHandlerGameList',    // game: list
          'QuickHandlerContact',     // contact: list
-         'QuickHandlerBulletin',    // bulletin: list | mark_read
+         'QuickHandlerFolder',      // folder: list
       );
 
       if( is_null($obj) )
