@@ -21,6 +21,14 @@ ChangeLog
 
 2012-03-21 juga
 
+   * include/game_functions.php (class GameSettingsCalculator, ~.calculate_settings),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/message_functions.php (game_info_table),
+     specs/quick_suite.txt:
+   - calculate probable game-settings for "info"-command of message-quick-handler
+   - refactored calculation of probable game-settings from 'include/message_functions.php'
+     into new GameSettingsCalculator-class in 'include/game_functions.php'
+
    * quick_status.php, specs/quick_suite.txt:
    - extended quick-status games-list with number of handicap-stones,
      so bot would know how many stones to set
