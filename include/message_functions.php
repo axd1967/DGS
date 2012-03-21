@@ -1109,75 +1109,39 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    // compute the probable game settings
    if( $haverating && $goodrating && $goodmingames && ( !$is_my_game || $tablestyle != GSET_WAITINGROOM ) )
    {
-      $is_nigiri = false; // true, if nigiri needed (because of same rating)
-      if( $CategoryHandiType == CAT_HTYPE_PROPER )
-      {
-         list($infoHandicap,$infoKomi,$info_i_am_black, $is_nigiri) =
-            suggest_proper($player_row['Rating2'], $other_rating, $Size);
-      }
-      elseif( $CategoryHandiType == CAT_HTYPE_CONV )
-      {
-         list($infoHandicap,$infoKomi,$info_i_am_black, $is_nigiri) =
-            suggest_conventional($player_row['Rating2'], $other_rating, $Size);
-      }
-      elseif( $is_fairkomi )
-      {
-         $infoHandicap = $Handicap;
-         $infoKomi = 0;
-         //$info_i_am_black unknown yet
-      }
-      else //if( $CategoryHandiType == CAT_HTYPE_MANUAL )
-      {
-         $infoHandicap = $Handicap;
-         $infoKomi = $Komi;
-         if( $tablestyle == GSET_TOURNAMENT_LADDER )
-            $info_i_am_black = (bool)$game_row['X_ChallengerIsBlack'];
-         else
-            $info_i_am_black = ($Handitype != HTYPE_BLACK); // game-offerer wants BLACK, so challenger gets WHITE
-      }
+      $game_row['Handicaptype'] = $Handitype;
+      $game_row['JigoMode'] = $JigoMode;
+      $gsc = new GameSettingsCalculator( $game_row, $player_row['Rating2'], $other_rating, $calculated,
+         ( $tablestyle == GSET_TOURNAMENT_LADDER ) );
+      $gsc->calculate_settings();
 
-      // adjust handicap
-      $infoHandicap_old = $infoHandicap;
-      $infoHandicap = adjust_handicap( $infoHandicap, $AdjHandicap, $MinHandicap, $MaxHandicap );
-      $adj_handi_str = ( $infoHandicap != $infoHandicap_old )
-         ? sprintf( T_('adjusted from %d'), $infoHandicap_old )
-         : '';
-
-      // adjust komi
-      if( $is_fairkomi )
-         $adj_komi_str = '';
-      else
-      {
-         $infoKomi_old = $infoKomi;
-         $infoKomi = adjust_komi( $infoKomi, $AdjKomi, $JigoMode );
-         $adj_komi_str = ( $infoKomi != $infoKomi_old ) ? sprintf( T_('adjusted from %.1f'), $infoKomi_old ) : '';
-      }
+      $adj_handi_str = (is_null($gsc->adjusted_handicap)) ? '' : sprintf( T_('adjusted from %d'), $gsc->adjusted_handicap);
+      $adj_komi_str = (is_null($gsc->adjusted_komi)) ? '' : sprintf( T_('adjusted from %.1f'), $gsc->adjusted_komi);
 
       if( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
          $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
 
-      if( $calculated || $adj_handi_str || $adj_komi_str || $is_fairkomi )
+      if( $gsc->calc_type == 2 || $adj_handi_str || $adj_komi_str || $is_fairkomi )
       {
          // determine color
-         if( $Handitype == HTYPE_DOUBLE )
+         if( $gsc->calc_color == GSC_COL_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
-         elseif( $is_fairkomi )
+         elseif( $gsc->calc_color == GSC_COL_FAIRKOMI )
             $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
-         elseif( $Handitype == HTYPE_NIGIRI || $is_nigiri )
+         elseif( $gsc->calc_color == GSC_COL_NIGIRI )
             $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class);
          else
-            $colortxt = get_colortext_probable( $info_i_am_black );
+            $colortxt = get_colortext_probable( ($gsc->calc_color == GSC_COL_BLACK) );
 
-         $is_calc_handitype = ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER );
-         $itable->add_scaption( ($is_calc_handitype) ? T_('Probable game settings') : T_('Game settings') );
+         $itable->add_scaption( ($gsc->calc_type == 1) ? T_('Probable game settings') : T_('Game settings') );
 
          $itable->add_sinfo( T_('Color'), $colortxt );
          $itable->add_sinfo( T_('Handicap'),
-               $infoHandicap . ($adj_handi_str ? MED_SPACING."($adj_handi_str)" : '' ) );
+               $gsc->calc_handicap . ($adj_handi_str ? MED_SPACING."($adj_handi_str)" : '' ) );
 
          $komi_text = ( $is_fairkomi )
             ? T_('negotiated by Fair Komi#fairkomi')
-            : sprintf("%.1f", $infoKomi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
+            : sprintf("%.1f", $gsc->calc_komi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
          $itable->add_sinfo( T_('Komi'), $komi_text );
 
          if( $is_fairkomi )

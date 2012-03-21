@@ -3166,6 +3166,127 @@ class GameSetupBuilder
 
 
 
+// see also specs/quick_suite.txt, section (3c) message "info"-command, calc_*-fields
+define('GSC_COL_DOUBLE', 'double');
+define('GSC_COL_FAIRKOMI', 'fairkomi');
+define('GSC_COL_NIGIRI', 'nigiri');
+define('GSC_COL_BLACK', 'black');
+define('GSC_COL_WHITE', 'white');
+
+/*! \brief Helper-class to calculate probably game-setting. */
+class GameSettingsCalculator
+{
+   var $grow;
+   var $pl_rating;
+   var $opp_rating;
+   var $is_calculated;
+   var $is_tourney;
+
+   var $calc_type; // 1=probable, 2=fix/calculated
+   var $calc_color; // double, fairkomi, nigiri, black, white
+   var $calc_handicap;
+   var $calc_komi;
+   var $adjusted_handicap; // old handicap if handicap adjusted; NULL otherwise
+   var $adjusted_komi; // old komi if komi adjusted; NULL otherwise
+
+   /*!
+    * \brief Constructs GameSettingsCalculator.
+    * \param $game_row expecting fields: Handicaptype, Size, Handicap, Komi,
+    *        AdjHandicap, MinHandicap, MaxHandicap, AdjKomi, JigoMode;
+    *        X_ChallengerIsBlack (if is_tourney)
+    * \param $is_calculated null if should be calculated here; must be given for ladder-tourney
+    */
+   function GameSettingsCalculator( $game_row, $player_rating, $opp_rating, $is_calculated=null, $is_tourney=false )
+   {
+      $this->grow = $game_row;
+      $this->pl_rating = $player_rating;
+      $this->opp_rating = $opp_rating;
+      if( is_null($is_calculated) )
+      {
+         $htype = $game_row['Handicaptype'];
+         $this->is_calculated = ( $htype == HTYPE_CONV || $htype == HTYPE_PROPER );
+      }
+      else
+         $this->is_calculated = $is_calculated;
+      $this->is_tourney = $is_tourney;
+
+      if( !isset($this->grow['MaxHandicap']) ) // set default
+         $this->grow['MaxHandicap'] = MAX_HANDICAP;
+
+      $this->calc_type = $this->calc_handicap = $this->calc_komi = 0;
+      $this->calc_color = '';
+      $this->adjusted_handicap = $this->adjusted_komi = null;
+   }
+
+   function calculate_settings()
+   {
+      $htype = $this->grow['Handicaptype'];
+      $CategoryHandiType = get_category_handicaptype($htype);
+      $is_fairkomi = ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI );
+
+      $is_nigiri = false; // true, if nigiri needed (because of same rating)
+      if( $CategoryHandiType == CAT_HTYPE_PROPER )
+      {
+         list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
+            suggest_proper($this->pl_rating, $this->opp_rating, $this->grow['Size']);
+      }
+      elseif( $CategoryHandiType == CAT_HTYPE_CONV )
+      {
+         list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
+            suggest_conventional($this->pl_rating, $this->opp_rating, $this->grow['Size']);
+      }
+      elseif( $is_fairkomi )
+      {
+         $infoHandicap = $this->grow['Handicap'];
+         $infoKomi = 0;
+         //$info_i_am_black unknown yet
+      }
+      else //if( $CategoryHandiType == CAT_HTYPE_MANUAL )
+      {
+         $infoHandicap = $this->grow['Handicap'];
+         $infoKomi = $this->grow['Komi'];
+         if( $this->is_tourney )
+            $info_i_am_black = (bool)$this->grow['X_ChallengerIsBlack'];
+         else
+            $info_i_am_black = ($htype == HTYPE_BLACK); // game-offerer wants BLACK, so challenger gets WHITE
+      }
+
+      // adjust handicap
+      $infoHandicap_old = $infoHandicap;
+      $infoHandicap = adjust_handicap( $infoHandicap, (int)@$this->grow['AdjHandicap'],
+         (int)@$this->grow['MinHandicap'], $this->grow['MaxHandicap'] );
+      $this->adjusted_handicap = ( $infoHandicap != $infoHandicap_old ) ? $infoHandicap_old : NULL;
+
+      // adjust komi
+      if( $is_fairkomi )
+         $this->adjusted_komi = NULL;
+      else
+      {
+         $infoKomi_old = $infoKomi;
+         $infoKomi = adjust_komi( $infoKomi, (float)@$this->grow['AdjKomi'], $this->grow['JigoMode'] );
+         $this->adjusted_komi = ( $infoKomi != $infoKomi_old ) ? $infoKomi_old : NULL;
+      }
+
+      // determine color
+      if( $htype == HTYPE_DOUBLE )
+         $color = GSC_COL_DOUBLE;
+      elseif( $is_fairkomi )
+         $color = GSC_COL_FAIRKOMI;
+      elseif( $htype == HTYPE_NIGIRI || $is_nigiri )
+         $color = GSC_COL_NIGIRI;
+      else
+         $color = ( $info_i_am_black ) ? GSC_COL_BLACK : GSC_COL_WHITE;
+
+      $this->calc_type = ($this->is_calculated) ? 2 : 1;
+      $this->calc_color = $color;
+      $this->calc_handicap = $infoHandicap;
+      $this->calc_komi = ( $is_fairkomi ) ? '' : $infoKomi;
+   }//calculate_settings
+
+} //end 'GameSettingsCalculator'
+
+
+
 define('MAX_PROFILE_TEMPLATES', 30);
 define('MAX_PROFILE_TEMPLATES_DATA', 10000); // max byte-len for template
 

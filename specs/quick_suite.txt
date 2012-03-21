@@ -853,7 +853,6 @@ Options:
 
 Commands:
 
-   # NOT fully IMPLEMENTED: to-impl (calc-game-settings)
    "info" : returns private message
       - required opts: MESSAGE_ID
       - optional opts: OTHER_UID (for bulk-message), FOLDER, WITH
@@ -947,7 +946,7 @@ Commands:
                "calc_type" : 1,           # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
                "calc_color" : "black",    # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
                "calc_handicap" : 3,       # probable/fix handicap
-               "calc_komi" : 6.5,         # probably/fix komi
+               "calc_komi" : 6.5,         # probably/fix komi, empty "" for fairkomi
             },
          }
 

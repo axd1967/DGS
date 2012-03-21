@@ -219,6 +219,8 @@ class QuickHandlerMessage extends QuickHandler
 
    function process_cmd_info()
    {
+      global $player_row;
+
       $row = $this->msg_row;
       $my_id = $this->my_id;
       $other_uid = (int)$row['other_id'];
@@ -281,10 +283,11 @@ class QuickHandlerMessage extends QuickHandler
                   $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
                   TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
 
-            $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
-            $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
-            $calc_handicap = 3; // TODO probable/fix handicap
-            $calc_komi = 6.5; // TODO probably/fix komi
+            // NOTE: players have a rating if an invitation exists
+            $row['Handicaptype'] = $my_htype;
+            $row['JigoMode'] = $jigo_mode;
+            $gsc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
+            $gsc->calculate_settings();
 
             $this->addResultKey( 'game_settings', array(
                   'game_type' => GAMETYPE_GO,
@@ -309,10 +312,10 @@ class QuickHandlerMessage extends QuickHandler
                   'time_periods' => $row['Byoperiods'],
 
                   'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
-                  'calc_type' => $calc_type,
-                  'calc_color' => $calc_color,
-                  'calc_handicap' => $calc_handicap,
-                  'calc_komi' => $calc_komi,
+                  'calc_type' => $gsc->calc_type,
+                  'calc_color' => $gsc->calc_color,
+                  'calc_handicap' => $gsc->calc_handicap,
+                  'calc_komi' => $gsc->calc_komi,
                ));
          }
       }
