@@ -325,7 +325,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                $patdone = 1;
             }
 
-            check_handicap( $TheBoard, $coord); //adjust $stonestring
+            $stonestring = check_handicap( $TheBoard, $stonestring, $coord); //adjust $stonestring
             if( (strlen($stonestring)/2) < $Handicap )
             {
                $validation_step = false;

@@ -283,9 +283,7 @@ This is why:
          if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==1 ) )
             error('invalid_action', "confirm.handicap.check_status($gid,$Status,$Handicap,$Moves)");
 
-         $stonestring = (string)@$_REQUEST['stonestring'];
-         check_handicap( $TheBoard); //adjust $stonestring
-
+         $stonestring = check_handicap( $TheBoard, (string)@$_REQUEST['stonestring'] );
          if( strlen( $stonestring ) != 2 * $Handicap )
             error('wrong_number_of_handicap_stone', "confirm.check.handicap($gid,$Handicap,$stonestring)");
 

@@ -22,7 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/classlib_game.php' );
 
 
-//ajusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
+//need globals: $Last_Move, $GameFlags
+//adjusted globals by check_move(): $Black_Prisoners, $White_Prisoners, $prisoners, $nr_prisoners, $colnr, $rownr;
 //$prisoners list the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
 function check_move( &$board, $coord, $to_move, $error_exit=true)
 {
@@ -107,24 +108,23 @@ function check_move( &$board, $coord, $to_move, $error_exit=true)
 }//check_move
 
 
-//place handicap stones from $stonestring
-//if $coord then add it to $stonestring
-function check_handicap( &$board, $coord=false)
+/*!
+ * \brief Places handicap stones adjusted board-array.
+ * \param $board Board-object, is modified with setting black handicap stones
+ * \param $stonestring coordinate-list of handicap-stones to place
+ * \param $coord if != false contains SGF-coord to add black-stone to stone-string
+ * \return new list of strone-string with coords of stones
+ */
+function check_handicap( &$board, $stonestring, $coord=false )
 {
    $Size= $board->size;
    $array= &$board->array;
 
-   global $stonestring;
-   if( !@$stonestring ) $stonestring = '';
-
    // add handicap stones to array
-
    $l = strlen( $stonestring );
-
    for( $i=0; $i < $l; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
          error("illegal_position",'move2');
 
@@ -134,7 +134,6 @@ function check_handicap( &$board, $coord=false)
    if( $coord )
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
-
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
          error("illegal_position",'move3');
 
@@ -142,7 +141,8 @@ function check_handicap( &$board, $coord=false)
       $stonestring .= $coord;
    }
 
-}
+   return $stonestring;
+}//check_handicap
 
 
 // returns GameScore-object
