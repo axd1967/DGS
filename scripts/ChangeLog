@@ -21,6 +21,15 @@ ChangeLog
 
 2012-03-21 juga
 
+   * include/move.php (class GameCheckMove, ~.check_move, ~.update_prisoners),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     scripts/game_consistency.php (check_consistency),
+     confirm.php, game.php, quick_play.php:
+   - refactored check_move() into GameCheckMove-class to remove implicit adjusting of GLOBALs
+   - bugfix for game-quick-handler "move"-command: wrote wrong main-Moves-entry of move
+
+2012-03-21 juga
+
    * include/move.php (check_handicap),
      confirm.php, game.php:
    - refactored check_handicap() to remove adjusting GLOBAL $stonestring
