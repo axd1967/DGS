@@ -1856,7 +1856,7 @@ class GameFinalizer
          if( is_null($upd_game) )
          {
             $upd_game = new UpdateQuery('Games');
-            $upd_game->upd_text('Status', GAME_STATUS_FINISHED );
+            $upd_game->upd_txt('Status', GAME_STATUS_FINISHED );
             $upd_game->upd_num('Last_X', GameFinalizer::convert_score_to_posx($game_score) );
             $upd_game->upd_num('ToMove_ID', 0 );
             $upd_game->upd_num('Flags', $this->GameFlags );
@@ -1867,7 +1867,7 @@ class GameFinalizer
          // make game unrated if criteria matches and opponent rejects-win-by-timeout
          $timeout_rejected = $this->should_reject_win_by_timeout($game_score);
          if( $timeout_rejected )
-            $upd_game->upd_text('Rated', 'N');
+            $upd_game->upd_txt('Rated', 'N');
 
          $game_updquery = "UPDATE Games SET " . $upd_game->get_query() .
             " WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves={$this->Moves} LIMIT 1";

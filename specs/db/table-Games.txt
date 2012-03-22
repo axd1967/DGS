@@ -200,7 +200,7 @@ Description:
    - see Waitingroom.Byotime/Byoperiods in 'specs/db/table-Waitingroom.txt'
 
 * Black_Maintime, Black_Byotime, Black_Byoperiods : current remaining time for Black player
-   - Maintime = remaining main-time,
+   - Maintime = remaining main-time in hours (15h = 1d incl. 9h sleeping-time),
      if 0 byo-yomi has started for japanese and canadian time-systems
    - Byotime = remaining time of byo-yomi-period for japanese and canadian, 0 for Fischer
    - Byoperiods =
@@ -212,6 +212,7 @@ Description:
    - current remaining time for White player
 
 * LastTicks : last-ticks (from ClockUsed) of current player, used for time-calculus
+   - TICK_FREQUENCY = 12 ticks/hour, i.e. 1 tick spans 5 min
 
 * ClockUsed : foreign key to Clock.ID, which clock to use for current player
    - can be normal clock (0-23), weekend-clock (100-123) or "vacation-clock" -1
