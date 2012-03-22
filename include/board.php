@@ -1349,7 +1349,7 @@ class Board
                }
                elseif( $new_color == $opposite_dead )
                {
-                  $this->toggle_marked_area2( $new_x, $new_y, $marked, $companion_groups);
+                  $this->toggle_marked_area( $new_x, $new_y, $marked, $companion_groups);
                }
             }
          }
