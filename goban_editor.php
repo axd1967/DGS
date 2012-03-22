@@ -103,6 +103,7 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
    elseif( @$_REQUEST['gob_flatten'] ) // flatten to stones
    {
       list( $board_text, $do_preview ) = update_igoban( $board_text, 'flatten_for_shape_game' );
+      $width = $height = max( $width, $height );
    }
    elseif( @$_REQUEST['gob_save_shape'] && $width == $height ) // save shape-game
    {
