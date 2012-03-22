@@ -49,6 +49,7 @@ class Board
    var $infos; //extra-infos collected
 
    var $dirx, $diry; //directions arrays
+   var $visited_points; // visited coords arr[x][y] set after run of has_liberty_check()-call
 
 
    // Constructor. Create a new board array and initialize it.
@@ -80,16 +81,9 @@ class Board
       $this->diry = array( 0,-1,0,1 );
    }
 
-
-   // fills $array with positions where the stones are (incl. handling of shape-game)
-   // fills $moves with moves and coordinates.
-   // keep the coords, color and message of the move $move.
-   // \param $move move-number, 0=last-move, MOVE_SETUP=S=initial-setup-for-shape-game
-   // \param $game_row need fields: ID, Size, Moves, ShapeSnapshot
-   // \param $fix_stop true = stop and return FALSE if corrupted game found
-   function load_from_db( $game_row, $move=0, $no_marked_dead=true, $load_last_message=true, $fix_stop=false )
+   function init_board()
    {
-      $this->array = NULL;
+      $this->array = array();
       $this->moves = array();
       $this->marks = array();
       $this->captures = array();
@@ -99,6 +93,18 @@ class Board
       $this->infos = array();
       $this->js_moves = array();
       $this->moves_captures = array();
+   }//init_board
+
+
+   // fills $array with positions where the stones are (incl. handling of shape-game)
+   // fills $moves with moves and coordinates.
+   // keep the coords, color and message of the move $move.
+   // \param $move move-number, 0=last-move, MOVE_SETUP=S=initial-setup-for-shape-game
+   // \param $game_row need fields: ID, Size, Moves, ShapeSnapshot
+   // \param $fix_stop true = stop and return FALSE if corrupted game found
+   function load_from_db( $game_row, $move=0, $no_marked_dead=true, $load_last_message=true, $fix_stop=false )
+   {
+      $this->init_board();
 
       $gid = $game_row['ID'];
       if( $gid <= 0 )
@@ -244,6 +250,28 @@ class Board
 
       return TRUE;
    } //load_from_db
+
+   // fills $array with positions where the stones are (incl. handling of shape-game)
+   // NOTE: only used for shape-checking, not to control board
+   function build_from_shape_snapshot( $size, $shape_snapshot )
+   {
+      $this->init_board();
+      $this->size = $size;
+
+      // parse init-board from shape-snapshot
+      if( $shape_snapshot )
+      {
+         $arr_xy = GameSnapshot::parse_stones_snapshot( $this->size, $shape_snapshot, BLACK, WHITE );
+         if( count($arr_xy) )
+         {
+            foreach( $arr_xy as $arr_setup )
+            {
+               list( $Stone, $PosX, $PosY ) = $arr_setup;
+               $this->array[$PosX][$PosY] = $Stone;
+            }
+         }
+      }
+   }//build_from_shape_snapshot
 
 
    /*!
@@ -955,6 +983,7 @@ class Board
     * \param $start_x/y board-position to check, 0..n
     * \param $prisoners if $remove is set, pass-back extended prisoners-array if group at x,y has no liberty
     * \param $remove if true, remove captured stones
+    * \note fill this.visited_points if set as an array
     */
    function has_liberty_check( $start_x, $start_y, &$prisoners, $remove )
    {
@@ -964,6 +993,9 @@ class Board
       $stack = array( $arr_xy );
       $visited = array(); // potential prisoners and marker if point already checked
       $visited[$start_x][$start_y] = $arr_xy;
+      $fill_visit = !is_null($this->visited_points);
+      if( $fill_visit )
+         $this->visited_points[$start_x][$start_y] = 1;
 
       // scanning all directions starting at start-x/y building up a stack of adjacent points to check
       while( $arr_xy = array_shift($stack) )
@@ -984,6 +1016,8 @@ class Board
                   $arr_xy = array( $new_x, $new_y );
                   $stack[] = $arr_xy;
                   $visited[$new_x][$new_y] = $arr_xy;
+                  if( $fill_visit )
+                     $this->visited_points[$new_x][$new_y] = 1;
                }
             }
          }

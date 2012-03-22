@@ -23,6 +23,7 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/globals.php';
 require_once 'include/time_functions.php';
+require_once 'include/board.php';
 
 
  /*!
@@ -810,6 +811,40 @@ class GameSnapshot
       else
          return preg_replace("/[A-Za-z0-9\\+\\/\\*@#%:]/", "", $snapshot);
    }
+
+   /*!
+    * \brief Checks for illegal stone-positions (like suicide).
+    * \return empty if no errors found; otherwise comma-separated coordinates of illegal positions
+    */
+   function check_illegal_positions( $size, $snapshot, $suicide_allowed )
+   {
+      $board = new Board( 0, $size );
+      $board->build_from_shape_snapshot( $size, $snapshot );
+      $board->visited_points = array(); // [x][y] = 1 if visited already
+
+      $arr_xy = GameSnapshot::parse_stones_snapshot( $size, $snapshot, BLACK, WHITE );
+      $arr_cnt = array( BLACK => 0, WHITE => 0 );
+      $errpos = array();
+      foreach( $arr_xy as $point )
+      {
+         list( $stone, $x, $y ) = $point;
+         $arr_cnt[$stone]++;
+
+         // check for illegal positions
+         if( !$suicide_allowed && !@$board->visited_points[$x][$y] )
+         {
+            if( !$board->has_liberty_check($x, $y, $prisoners, /*rm*/false) )
+               $errpos[] = number2board_coords($x, $y, $size);
+         }
+      }
+
+      if( $arr_cnt[BLACK] + $arr_cnt[WHITE] == 0 )
+         return T_('EMPTY-BOARD#shape');
+      if( $arr_cnt[BLACK] == $size*$size || $arr_cnt[WHITE] == $size*$size )
+         return T_('FULL-BOARD#shape');
+
+      return implode(',', $errpos);
+   }//check_illegal_positions
 
    /*!
     * \brief Parses and strictly checks extended-snapshot.

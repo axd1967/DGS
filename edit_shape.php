@@ -277,6 +277,10 @@ function parse_edit_form( &$shape )
             $errors[] = sprintf( T_('Snapshot for shape contains invalid characters [%s].#shape'), $bad_chars );
          else
             $shape->Snapshot = $new_value;
+
+         // view shape even if with error
+         if( $shape->Size > 0 && (string)($ill_coords = GameSnapshot::check_illegal_positions($shape->Size, $new_value, /*suicide*/false)) != '' )
+            $errors[] = sprintf( T_('Snapshot for shape contains illegal positions at [%s].#shape'), $ill_coords );
       }
       if( (string)$shape->Snapshot == '' )
          $errors[] = T_('Missing Snapshot#shape');
