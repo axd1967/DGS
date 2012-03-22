@@ -328,7 +328,7 @@ class QuickHandlerGame extends QuickHandler
             }
             $gchkmove = new GameCheckMove( $this->TheBoard );
             $gchkmove->check_move( $this->moves[0], $this->to_move, $Last_Move, $GameFlags );
-            $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
+            $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
 
@@ -414,7 +414,9 @@ class QuickHandlerGame extends QuickHandler
             //TODO // required opts: MOVE = moves : list of coordinates of stones marked as dead
             // NOTE: stonestring is the list of toggled points
             $stonestring = (string)@$_REQUEST['stonestring'];
-            $game_score = check_remove( $this->TheBoard, getRulesetScoring($Ruleset) ); //adjusted globals: $stonestring
+            $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset) );
+            $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
 
             $l = strlen( $stonestring );
@@ -521,7 +523,6 @@ class QuickHandlerGame extends QuickHandler
 
    function process_cmd_status_score()
    {
-      global $Handicap, $Komi, $White_Prisoners, $Black_Prisoners; // needed because globally used in check_remove() :-(
       $gid = $this->gid;
       extract($this->game_row);
 
@@ -529,8 +530,9 @@ class QuickHandlerGame extends QuickHandler
 
       // NOTE: stonestring is the list of toggled points
       $stonestring = '';
-      $game_score = check_remove( $this->TheBoard, getRulesetScoring($Ruleset),
-         /*coord*/false, /*exp-global*/true, /*board-status*/true ); //adjusted globals: $stonestring
+      $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+      $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), /*coord*/false, /*board-status*/true );
+      $gchkscore->update_stonestring( $stonestring );
       $score = $game_score->calculate_score();
 
       $this->addResultKey( 'ruleset', strtoupper($Ruleset) );

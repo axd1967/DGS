@@ -251,7 +251,9 @@ $GLOBALS['ThePage'] = new Page('Game');
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
             $score_board = clone $TheBoard;
-            $game_score = check_remove( $score_board, $score_mode, $coord); //adjusted globals: $stonestring
+            $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $game_score = $gchkscore->check_remove( $score_mode, $coord );
+            $gchkscore->update_stonestring( $stonestring );
             $game_score->calculate_score();
          }
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
@@ -260,7 +262,9 @@ $GLOBALS['ThePage'] = new Page('Game');
       elseif( $move == $Moves && ($Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2) )
       {
          $score_board = clone $TheBoard;
-         $game_score = check_remove( $score_board, $score_mode ); //adjusted globals: $stonestring
+         $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+         $game_score = $gchkscore->check_remove( $score_mode );
+         $gchkscore->update_stonestring( $stonestring );
          $score = $game_score->calculate_score();
       }
    }
@@ -288,7 +292,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             }
             $gchkmove = new GameCheckMove( $TheBoard );
             $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
-            $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
+            $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
             $game_row['Black_Prisoners'] = $Black_Prisoners;
             $game_row['White_Prisoners'] = $White_Prisoners;
 
@@ -397,7 +401,9 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
-            $game_score = check_remove( $TheBoard, $score_mode, $coord); //adjusted globals: $stonestring
+            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $game_score = $gchkscore->check_remove( $score_mode, $coord );
+            $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
 
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
@@ -418,7 +424,9 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
-            $game_score = check_remove( $TheBoard, $score_mode ); //adjusted globals: $stonestring
+            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $game_score = $gchkscore->check_remove( $score_mode );
+            $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
 
             $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';

@@ -198,7 +198,7 @@ This is why:
          }
          $gchkmove = new GameCheckMove( $TheBoard );
          $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
-         $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
+         $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
          $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
@@ -356,17 +356,19 @@ This is why:
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
-         $game_score = check_remove( $TheBoard, getRulesetScoring($Ruleset) ); //adjusted globals: $stonestring
+         $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+         $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset) );
+         $gchkscore->update_stonestring( $stonestring );
          $score = $game_score->calculate_score();
 
          $l = strlen( $stonestring );
-
-         $next_status = GAME_STATUS_SCORE2;
          if( $Status == GAME_STATUS_SCORE2 &&  $l < 2 )
          {
             $next_status = GAME_STATUS_FINISHED;
             $game_finished = true;
          }
+         else
+            $next_status = GAME_STATUS_SCORE2;
 
          $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
