@@ -388,7 +388,7 @@ function check_consistency( $gid)
       $coord = number2sgf_coords( $PosX, $PosY, $Size);
       if( ($err = $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags, false)) )
          return "Problem at move $move_nr: $err";
-      $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
+      $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
       if( $gchkmove->nr_prisoners == 1 )
          $GameFlags |= GAMEFLAGS_KO;

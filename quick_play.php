@@ -207,7 +207,7 @@ This is why:
       }
       $gchkmove = new GameCheckMove( $TheBoard );
       $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
-      $gchkmove->update_prisoners(); //adjusted globals: $Black/White_Prisoners
+      $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
       $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
