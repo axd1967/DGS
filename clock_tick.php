@@ -104,15 +104,15 @@ if( !$is_down )
 
    db_query( 'clock_tick.increase_clocks',
       "UPDATE Clock SET Ticks=Ticks+1, Lastchanged=FROM_UNIXTIME($NOW) "
-         . "WHERE $clock_modified " // game-clocks (also used below)
-         . "OR Clock.ID=204" // clock for remaining-time ordering
+         . "WHERE $clock_modified " // game-clocks
+         . "OR Clock.ID=".CLOCK_TIMELEFT // clock for remaining-time ordering
       );
 
 
 
    // Check if any game has timed out
-
-/* TODO(keep as note?) BUG in old & new version: !?
+{
+/* TODO(keep as note) BUG in old & new version:
   if maintenance spans more than a whole hour and graces the sleeping-clocks,
   the time-window has passed to detect time-outs within that hour.
   So time-outs are delayed by a full day till the games with the respective clock is checked again!
@@ -121,7 +121,7 @@ if( !$is_down )
      as there is no Clock.ID<0 any more)
   => remove Clock.Lastchanged=$NOW to match all clock-timeouts
  */
-if(1){//new //TODO cleanup old-code (if not longer needed)
+
 /*
  In a first approximation, as $has_moved==false (see time_remaining()),
   $main>$hours will just produce $main-=$hours which will never
@@ -130,6 +130,7 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
  - given IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) AS ToMove_Maintime
  - WHERE ToMove_Maintime <= $hours
  because $hours is always < $ticks/TICK_FREQUENCY (see ticks_to_hours())
+ - Clock.ticks is always > Games.LastTicks
  - given ((ticks-LastTicks) / TICK_FREQUENCY) AS Upper_Ellapsed
  - WHERE ToMove_Maintime < Upper_Ellapsed
  which is:
@@ -144,25 +145,9 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
       ." FROM Games"
       ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
       ." WHERE Clock.ID >= 0 AND" // older DGS-clones may still have clocks<0
-      ." Clock.Ticks - Games.LastTicks > ".TICK_FREQUENCY
-         ." * IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)"
+      ." IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) * ".TICK_FREQUENCY." < Clock.Ticks - Games.LastTicks "
       ." AND Status" . IS_STARTED_GAME
-      //slower: ." AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
       );
-}else{//old
-   // NOTE: This query is sometimes slow and may return more than 10000 rows!
-   $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags+0 AS X_GameFlags'
-            . ' FROM (Games, Clock)'
-            . " WHERE Clock.Lastchanged=FROM_UNIXTIME($NOW)" // FIXME: remove to match all clock-timeouts(?)
-            . ' AND Clock.ID>=0' // not VACATION_CLOCK
-            . ' AND Games.ClockUsed=Clock.ID'
-            //if both are <=0, the game will never finish by time:
-            //. ' AND ( Maintime>0 OR Byotime>0 )'
-            //slower: "AND Status" . IS_STARTED_GAME
-            . " AND Games.Status!='INVITED' AND Games.Status!='FINISHED' AND Games.Status!='SETUP'"
-            ;
-   $result = db_query( 'clock_tick.find_timeout_games', $query );
-}//new/old
 
    /* TODO: The following UPDATE should be optimized, splited in smaller chunk?
             use TEMPORARY TABLEs for generated UPDATEs ??? */
@@ -212,6 +197,8 @@ if(1){//new //TODO cleanup old-code (if not longer needed)
    }
    mysql_free_result($result);
    //unset($ticks);
+
+} // timeout-handling
 
 
    // ---------- END --------------------------------
