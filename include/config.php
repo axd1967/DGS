@@ -180,7 +180,7 @@ define('ALLOW_FEATURE_VOTE', true);
 define('ALLOW_SURVEY_VOTE', true);
 
 // Allow usage of new quick-do-suite
-define('ALLOW_QUICK_DO', false);
+define('ALLOW_QUICK_DO', true);
 
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
