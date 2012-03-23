@@ -75,6 +75,7 @@ class QuickHandlerGameList extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
+      return false; // TODO: not implemented yet
       return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAMELIST_COMMANDS, $cmd);
    }
 
