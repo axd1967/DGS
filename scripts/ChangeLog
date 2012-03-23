@@ -21,6 +21,9 @@ ChangeLog
 
 2012-03-23 juga
 
+   * include/config.php (ALLOW_QUICK_DO), NEWS:
+   - enabled quick-do-suite
+
    * include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare, ~.process_cmd_play,
        ~.process_cmd_status_score, ~.build_arr_coords, ~.parse_coords),
      include/board.php (class Board, ~.build_from_shape_snapshot, ~.toggle_marked_area, ~.toggle_xy),

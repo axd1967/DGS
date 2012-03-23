@@ -484,34 +484,35 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added URL-arg 'bulk' using different filename for bulk-download (for admin)
       * Added URL-arg 'mpg' for multi-player-game to disable showing player-name in all nodes
 
-## * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
-##    * see 'specs/quick_suite.txt' on DGS source repository for full specs
-##    * Added game-handler to
-##       * retrieve information about game, with nested user-objects
-##       * retrieve own private notes of game
-##       * retrieve list of games with views: status, running, finished, observing, observed, MPG
-##       * play game including scoring-steps
-##       * delete game
-##    * Added user-handler to
-##       * retrieve public information about given user or logged-in user
-##    * Added message-handler to
-##       * retrieve information about private message, with nested user-/folder-objects,
-##         including game-settings for invitation
-##       * send message, reply to message
-##       * change message-folder
-##       * delete message
-##       * accept invitation, decline invitation
-##    * Added folder-handler to
-##       * retrieve information about message-folders
-##    * Added contact-handler to
-##       * retrieve information about own contacts
-##    * Added waitingroom-handler to
-##       * retrieve information about waiting-room game
-##       * delete own waiting-room game
-##       * join waiting-room game
-##    * Added bulletin-handler to
-##       * retrieve list of unread bulletins
-##       * mark bulletins as read
+   * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
+      * see 'specs/quick_suite.txt' on DGS source repository for full specs
+      * Added game-handler to
+         * retrieve information about game, with nested user-objects
+         * retrieve own private notes of game
+         * retrieve list of games with views: status, running, finished, observing, observed, MPG
+         * play game (set-handicap stones, move, pass)
+         * score game
+         * delete game
+      * Added user-handler to
+         * retrieve public information about given user or logged-in user
+      * Added message-handler to
+         * retrieve information about private message, with nested user-/folder-objects,
+           including game-settings for invitation
+         * send message, reply to message
+         * change message-folder
+         * delete message
+         * accept invitation, decline invitation
+      * Added folder-handler to
+         * retrieve information about message-folders
+      * Added contact-handler to
+         * retrieve information about own contacts
+      * Added waitingroom-handler to
+         * retrieve information about waiting-room game
+         * delete own waiting-room game
+         * join waiting-room game
+      * Added bulletin-handler to
+         * retrieve list of unread bulletins
+         * mark bulletins as read
 
    * <home_ quick_status.php?version=2>Quick Status</home> (new version):
       * Added URL-args:
@@ -780,12 +781,12 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added config-switches:
          * ALLOW_FEATURE_VOTE                - enabled
          * ALLOW_JAVASCRIPT                  - enabled
+         * ALLOW_QUICK_DO                    - enabled
          * ALLOW_SQL_CALC_ROWS               - enabled
          * ALLOW_SURVEY_VOTE                 - enabled
          * ALLOW_TOURNAMENTS                 - disabled
 ##       * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
          * ALLOW_GO_DIAGRAMS                 - disabled (needs JavaScript)
-         * ALLOW_QUICK_DO                    - disabled
          * ALLOW_QUOTING                     - disabled
          * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
