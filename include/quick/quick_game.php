@@ -414,7 +414,7 @@ class QuickHandlerGame extends QuickHandler
             //TODO // required opts: MOVE = moves : list of coordinates of stones marked as dead
             // NOTE: stonestring is the list of toggled points
             $stonestring = (string)@$_REQUEST['stonestring'];
-            $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
             $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset) );
             $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
@@ -530,7 +530,7 @@ class QuickHandlerGame extends QuickHandler
 
       // NOTE: stonestring is the list of toggled points
       $stonestring = '';
-      $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+      $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
       $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), /*coord*/false, /*board-status*/true );
       $gchkscore->update_stonestring( $stonestring );
       $score = $game_score->calculate_score();

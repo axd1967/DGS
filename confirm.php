@@ -356,7 +356,7 @@ This is why:
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring'];
-         $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+         $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
          $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset) );
          $gchkscore->update_stonestring( $stonestring );
          $score = $game_score->calculate_score();

@@ -251,7 +251,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
             $score_board = clone $TheBoard;
-            $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
             $game_score = $gchkscore->check_remove( $score_mode, $coord );
             $gchkscore->update_stonestring( $stonestring );
             $game_score->calculate_score();
@@ -262,7 +262,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       elseif( $move == $Moves && ($Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2) )
       {
          $score_board = clone $TheBoard;
-         $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+         $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
          $game_score = $gchkscore->check_remove( $score_mode );
          $gchkscore->update_stonestring( $stonestring );
          $score = $game_score->calculate_score();
@@ -401,7 +401,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
-            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
             $game_score = $gchkscore->check_remove( $score_mode, $coord );
             $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
@@ -424,7 +424,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
-            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_prisoners, $White_prisoners );
+            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
             $game_score = $gchkscore->check_remove( $score_mode );
             $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
