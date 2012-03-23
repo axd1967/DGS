@@ -19,7 +19,53 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-03-21 juga
+2012-03-23 juga
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare, ~.process_cmd_play,
+       ~.process_cmd_status_score, ~.build_arr_coords, ~.parse_coords),
+     include/board.php (class Board, ~.build_from_shape_snapshot, ~.toggle_marked_area, ~.toggle_xy),
+     include/move.php (class GameCheckScore, ~.set_toggle_unique, ~.check_remove),
+     specs/quick_suite.txt:
+   - game-quick-handler:
+     - implemented "status_score"-command with toggle-modes all/uniq
+     - implemented "score"-command with agree-argument and supporting toggle-mode
+     - implemented unique-toggle-mode to avoid re-toggling of already visited stone on scoring
+     - removed stonestring-check that GUI uses for "score"-command
+     - bugfix on parsing coordinates
+
+   * include/move.php (GameCheckMove.check_move):
+   - bugfix of last refactoring: take board-reference
+
+   * include/quick/quick_game.php (QuickGameHandler.process_cmd_play, ~.process_cmd_status_score),
+     confirm.php, game.php:
+   - bugfix of last change with GameCheckScore:
+     correct var-typo Black/White_prisoners -> Black/White_Prisoners
+
+   * include/game_functions.php (GameFinalizer.finish_game),
+     specs/db/table-Games.txt, clock_tick.php:
+   - bugfix after testing reject-win-by-timeout
+   - minor cleanup (use const, remove old-code for timeout-handling, clearer SQL)
+
+2012-03-22 juga
+
+   * include/board.php (class Board, ~.init_board, load_from_db, ~.build_from_shape_snapshot,
+       ~.has_liberty_check),
+     include/classlib_game.php (GameSnapshot.check_illegal_positions),
+     edit_shape.php (parse_edit_form):
+   - check for impossible positions like empty-/full-board and suicide when saving shape-game
+
+   * goban_editor.php:
+   - bugfix: fix width + height after goban-flattening to take max-size
+
+   * include/move.php (GameCheckMove.update_prisoners;
+       class GameCheckScore, ~.check_remove, ~.update_stonestring),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play, ~.process_cmd_status_score),
+     scripts/game_consistency.php, confirm.php, game.php, quick_play.php:
+   - refactored check_remove() into GameCheckScore-class to remove implicit adjusting of GLOBALs
+   - bugfix: avoiding globals for check_move() using pass-by-reference to set former globals
+
+   * include/board.php (Board.toggle_marked_area):
+   - bugfix: toggle_marked_area() used unknown func, bug from former refactoring
 
    * include/move.php (class GameCheckMove, ~.check_move, ~.update_prisoners),
      include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
