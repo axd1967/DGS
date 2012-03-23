@@ -707,7 +707,7 @@ Examples of game-playing cycle:
 
    # scoring-phase: verify score + agree on score
    quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=5
-   quick_do.php?obj=game&cmd=score&gid=12345&move_id=5&move=
+   quick_do.php?obj=game&cmd=score&gid=12345&move_id=5&move=&agree=1
 
    # scoring-phase: resume playing (on disagreement)
    quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=5
