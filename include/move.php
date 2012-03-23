@@ -57,7 +57,7 @@ class GameCheckMove
       $this->prisoners = array();
 
       $Size = $this->board->size;
-      $array = $this->board->array;
+      $array = &$this->board->array;
 
       list($colnr,$rownr) = (is_array($coord)) ? $coord : sgf2number_coords($coord, $Size);
       $this->colnr = $colnr;
@@ -174,11 +174,11 @@ class GameCheckScore
 {
    var $board;
    var $stonestring;
-
    var $handicap;
    var $komi;
    var $black_prisoners;
    var $white_prisoners;
+   var $toggle_unique;
 
    function GameCheckScore( &$board, $stonestring, $handicap, $komi, $black_prisoners, $white_prisoners )
    {
@@ -188,14 +188,21 @@ class GameCheckScore
       $this->komi = $komi;
       $this->black_prisoners = $black_prisoners;
       $this->white_prisoners = $white_prisoners;
+      $this->toggle_unique = false;
+   }
+
+   function set_toggle_unique()
+   {
+      $this->toggle_unique = true;
    }
 
    /*!
     * \brief Checks removal of stones by toggling stones.
     * \param $scoring_mode GSMODE_TERRITORY_SCORING | GSMODE_AREA_SCORING
+    * \param $coord false to just treat stonestring; single sgf-coord or array of sgf-coords to toggle
     * \return GameScore-object
     */
-   function check_remove( $scoring_mode, $coord=false, $with_board_status=false )
+   function check_remove( $scoring_mode, $coords=false, $with_board_status=false )
    {
       $Size = $this->board->size;
       $array = &$this->board->array;
@@ -224,29 +231,36 @@ class GameCheckScore
             unset( $stonearray[$colnr][$rownr] );
       }
 
-      if( $coord )
+      if( $coords )
       {
-         list($colnr,$rownr) = sgf2number_coords($coord, $Size);
-         if( !isset($rownr) || !isset($colnr) )
-            error("illegal_position", "GCS.check_remove.move5($colnr,$rownr)");
+         if( !is_array($coords) )
+            $coords = array( $coords );
 
-         $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
-         if( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
+         $toggled = ( $this->toggle_unique ) ? array() : NULL;
+         foreach( $coords as $coord )
          {
-            if( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
-               error("illegal_position", "GCS.check_remove.move6($colnr,$rownr,$stone)");
-         }
+            list($colnr,$rownr) = sgf2number_coords($coord, $Size);
+            if( !isset($rownr) || !isset($colnr) )
+               error("illegal_position", "GCS.check_remove.move5($colnr,$rownr)");
 
-         $marked = array();
-         $this->board->toggle_marked_area( $colnr, $rownr, $marked );
+            $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
+            if( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
+            {
+               if( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
+                  error("illegal_position", "GCS.check_remove.move6($colnr,$rownr,$stone)");
+            }
 
-         foreach( $marked as $sub )
-         {
-            list($colnr,$rownr) = $sub;
-            if( !isset( $stonearray[$colnr][$rownr] ) )
-               $stonearray[$colnr][$rownr] = true;
-            else
-               unset( $stonearray[$colnr][$rownr] );
+            $marked = array();
+            $this->board->toggle_marked_area( $colnr, $rownr, $marked, $toggled );
+
+            foreach( $marked as $sub )
+            {
+               list($colnr,$rownr) = $sub;
+               if( !isset( $stonearray[$colnr][$rownr] ) )
+                  $stonearray[$colnr][$rownr] = true;
+               else
+                  unset( $stonearray[$colnr][$rownr] );
+            }
          }
       }
 
