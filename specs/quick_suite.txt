@@ -75,7 +75,6 @@ Issues to specify:
    - how to handle DGS-tags in text (messages/posts/etc) on client-side ?
    - how to control paging of lists (offset, limit, has_next)
    - charsets, see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
-   - json-option also accepting JSON as input-arguments !?
    - refactor error-codes, see section (5) !?
 
    - fair-komi negotiation for game-status KOMI
@@ -516,7 +515,7 @@ Commands:
          }
 
 
-   # NOT IMPLEMENTED: to-specify
+   # NOT IMPLEMENTED: to-specify (TODO)
    "list" : retrieve list of games
       - required opts: VIEW
       - optional opts: USER_ID, LIST_STYLE, WITH
@@ -552,13 +551,13 @@ Commands:
            opp_uid, opp_handle, opp_name, opp_rating, opp_lastaccess
 
          * VIEW = 'running' | 'finished' | 'observing' | 'observed':
-           - TODO: not defined ATM -> see 'status'
-           - TODO:
+           - not defined ATM -> see 'status'
+           - to-specify:
              black|white_user (nested object according to WITH-option),
              black|white_gameinfo.remtime
 
          * VIEW = 'mpg':
-           - TODO: not defined ATM -> see 'status'
+           - not defined ATM -> see 'status'
 
 
    "delete" : deletes specified game
@@ -1048,12 +1047,12 @@ Commands:
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
-   # NOT fully IMPLEMENTED: to-specify (filter), to-impl
+   # NOT fully IMPLEMENTED: to-specify (filter) (TODO)
    "list" : retrieve list of messages
       - required opts: -
-      - optional opts: LIST_STYLE, WITH, FILTERS
+      - optional opts: LIST_STYLE, WITH, FILTERS (TODO)
 
-      - TODO TODO
+      - to-specify (TODO): limit, offset, order, filters
          - FILTERS-args:
            - filter.type = INVITATION (match values from "info")
            - filter.folder = 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ... ???
@@ -1288,7 +1287,7 @@ Options:
 
 Commands:
 
-   # NOT IMPLEMENTED: to-specify
+   # NOT IMPLEMENTED: to-specify (TODO)
    "list" : returns list of suitable game-offers from waiting-room
       - required opts: VIEW
       - optional opts: USER_ID, LIST_STYLE, WITH
@@ -1307,7 +1306,6 @@ Commands:
             "list_result" : [
                {
                   "id" : 123, # waiting-room-id
-                  # TODO TODO more fields
                },
                ...
             ]
@@ -1401,9 +1399,10 @@ Commands:
          - no_initial_rating : handicap-type of game-offer requires a rating
          - internal_error : inconsistency found in game-offer -> contact admin
 
-   # NOT IMPLEMENTED: to-specify
+   # NOT IMPLEMENTED: to-specify (TODO)
    "new_game" : create new game-offer in waiting-room
-      - TODO TODO
+
+      - Notes:
          - only one "view" (combining simple/expert/fair-komi/mpg in one)
 
 
@@ -2331,14 +2330,24 @@ but are not necessarily going to be implemented (soon or at all).
 
 * Prio(?): add more handlers for remaining DGS objects and operations
 
+* encoding via JSON:
+   - [quick] [site] eval-step #1 (occur for WHAT?): needs UTF8-encoded data from database :( :( :( => need proper handling of UTF8 !!!!
+   - [quick] encoding JSON: http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
+
 * game-obj:
-   - handle game-players >2, handle MPG
+   - handle MPG with game-players >2, handle setup for multi-player-game
    - handle fair-komi
-   - setup for multi-player-game
+   - replace_notes, add_time, set_prio
+   - list-cmd: include shapes, all views, type=running/finished uid=all
 
 * message-obj:
-   - handle send-invitation
+   - handle send-invitation / send-dispute
 
 * user-obj:
-   - user-vacation
+   - user-vacation, picture, list-cmd
+   - [quick] user-obj: get_bio-cmd: -> { bio: [ key:val, ...], ...] }
+
+* contact-obj:
+   - replace-cmd = insert_or_update
+   - delete
 
