@@ -79,6 +79,7 @@ class Board
 
       $this->dirx = array( -1,0,1,0 );
       $this->diry = array( 0,-1,0,1 );
+      $this->visited_points = NULL;
    }
 
    function init_board()
@@ -262,13 +263,10 @@ class Board
       if( $shape_snapshot )
       {
          $arr_xy = GameSnapshot::parse_stones_snapshot( $this->size, $shape_snapshot, BLACK, WHITE );
-         if( count($arr_xy) )
+         foreach( $arr_xy as $arr_setup )
          {
-            foreach( $arr_xy as $arr_setup )
-            {
-               list( $Stone, $PosX, $PosY ) = $arr_setup;
-               $this->array[$PosX][$PosY] = $Stone;
-            }
+            list( $Stone, $PosX, $PosY ) = $arr_setup;
+            $this->array[$PosX][$PosY] = $Stone;
          }
       }
    }//build_from_shape_snapshot
@@ -1111,7 +1109,7 @@ class Board
          if( @$this->array[$x][$y] == $col )
          {
             if( !$this->has_liberty_check( $x, $y, $prisoners, true) ) // change $prisoners
-               $some = true;
+               $some = true; // can't exit before all prisoners collected
          }
       }
       return $some;
@@ -1343,8 +1341,9 @@ class Board
     * \brief Toggles marked area for scoring starting at position (x,y).
     * \param $start_x/y board-position to check, 0..n
     * \param $marked pass-back marked x/y-points
+    * \param $toggled array[x][y] with toggled points to avoid re-toggling (used for unique-toggle-mode of quick-suite)
     */
-   function toggle_marked_area( $start_x, $start_y, &$marked, $companion_groups=true )
+   function toggle_marked_area( $start_x, $start_y, &$marked, &$toggled, $companion_groups=true )
    {
       $color = @$this->array[$start_x][$start_y]; // Color of this stone
 
@@ -1363,6 +1362,10 @@ class Board
       $visited = array(); // marker if point already checked
       $visited[$start_x][$start_y] = $arr_xy;
 
+      $has_toggle = is_array($toggled);
+      if( $has_toggle )
+         Board::toggle_xy($toggled, $start_x, $start_y);
+
       // scanning all directions starting at start-x/y building up a stack of adjacent points to check
       while( $arr_xy = array_shift($stack) )
       {
@@ -1380,10 +1383,12 @@ class Board
                {
                   $stack[] = array( $new_x, $new_y, $color );
                   $visited[$new_x][$new_y] = array( $new_x, $new_y );
+                  if( $has_toggle )
+                     Board::toggle_xy($toggled, $new_x, $new_y);
                }
                elseif( $new_color == $opposite_dead )
                {
-                  $this->toggle_marked_area( $new_x, $new_y, $marked, $companion_groups);
+                  $this->toggle_marked_area( $new_x, $new_y, $marked, $toggled, $companion_groups);
                }
             }
          }
@@ -1394,12 +1399,24 @@ class Board
          foreach( $arr_y as $y => $arr_xy )
          {
             if( $color == @$this->array[$x][$y] ) {
-               $marked[] = $arr_xy;
-               @$this->array[$x][$y] ^= OFFSET_MARKED;
+               if( !$has_toggle || @$toggled[$x][$y] == 1 )
+               {
+                  $marked[] = $arr_xy;
+                  @$this->array[$x][$y] ^= OFFSET_MARKED;
+               }
             }
          }
       }
    }//toggle_marked_area
+
+   // static
+   function toggle_xy( &$arr, $x, $y )
+   {
+      if( isset($arr[$x][$y]) )
+         $arr[$x][$y]++;
+      else
+         $arr[$x][$y] = 1;
+   }
 
 
 /* [23-Jun-2011/JUG] has been replaced with new toggle_marked_area()
