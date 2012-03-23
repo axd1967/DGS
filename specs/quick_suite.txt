@@ -342,7 +342,7 @@ Purpose:
 
 Request:
 
-   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>&fmt=<FORMAT>
+   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>&fmt=<FORMAT>&toggle=<TOGGLE>&agree=<AGREE>
 
    # list
    quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&lstyle=<LIST_STYLE>&uid=<USER_ID>
@@ -399,6 +399,19 @@ Options:
 
       - NOTE about lengths of output for different formats:
             sgf-format < ','-format < board-format, e.g. 900 < 1250 < 1450 bytes
+
+   <TOGGLE> = toggle-mode for "status_score" and "score" commands
+      - "all" (default) = each given coordinate-point toggles the point-state and
+        adjacent points of the same "group" (as the GUI does it)
+      - "uniq" = given coordinate-points toggle groups in a unique fashion,
+        i.e. points are only toggled once for all togglings if they belong to the same unique group.
+
+   <AGREE> = for "score"-command: give agreement with current state of stones (dead/alive/neutral/dame) and score
+      - 1 = agree
+      - 0 = disagree (default)
+
+      - NOTE: agreement could be represented by an empty MOVES-argument, but to prevent "slip"
+        in client, it's specified explicitly by giving the AGREE-argument.
 
    <LIST_STYLE> = see list-style in section (2d)
 
@@ -569,7 +582,6 @@ Commands:
          - wrong_number_of_handicap_stone : number of set handicap stones
            do not match required handicap
 
-   # NOT fully IMPLEMENTED: test
    "move" :
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVES = move : single move to submit, move="pass" for passing move
@@ -593,11 +605,10 @@ Commands:
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAME], [E-GAMEMOVE]
 
-   # NOT fully IMPLEMENTED: to-specify (toggle-uniq), to-impl
-   "status_score" : verify final game-score
+   "status_score" : verify game-score and state of stones (dead, alive, neutral, dame)
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates that 'state' should be "switched"
-      - optional opts: MESSAGE (will be ignored), FORMAT
+      - optional opts: MESSAGE (will be ignored), FORMAT, TOGGLE
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAME], [E-GAMEMOVE]
@@ -622,15 +633,21 @@ Commands:
          }
 
 
-   # NOT fully IMPLEMENTED: to-specify (toggle-uniq), to-impl
-   "score" : assess dead/alive-status of stones, submitting score
+   "score" : disagree with dead/alive/neutral-state of stones, agree on stones-state finishing game
       - required opts: GAME_ID, MOVE_ID, MOVES
          - MOVE = coords : list of coordinates of which the 'state' should be "switched"
-      - optional opts: MESSAGE
+      - optional opts: MESSAGE, FORMAT, TOGGLE, AGREE
+
+      - Notes:
+         - to agree and finish game accepting the score, give AGREE argument
+         - to disagree with current stones-state give move-coordinates to toggle
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAME], [E-GAMEMOVE]
-         - invalid_action : bad game-status for scoring step (only SCORE|SCORE2)
+         - invalid_action :
+            - bad game-status for scoring step (only SCORE|SCORE2)
+            - on "score"-command agreement-mismatch, either agreement was expected but there are
+              toggled state of stones, or disagreement was expected but no state of stones is toggled
          - invalid_switch : if state of coordindate can not be switched
          - illegal_position : invalid coordinates used for stones to switch state
 
@@ -680,9 +697,9 @@ Examples of game-playing cycle:
 
 
    # scoring-phase: verify score & assess dead/alive-status
-   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=4
-   quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=4&move=c17,q3
-   quick_do.php?obj=game&cmd=score&gid=12345&move_id=4&move=c17,q3
+   quick_do.php?obj=game&cmd=status_score&gid=12345
+   quick_do.php?obj=game&cmd=status_score&gid=12345&toggle=uniq&move=c17,q3
+   quick_do.php?obj=game&cmd=score&gid=12345&move_id=4&toggle=uniq&move=c17,q3
 
    # scoring-phase: verify score + disagree on score
    quick_do.php?obj=game&cmd=status_score&gid=12345&move_id=5
