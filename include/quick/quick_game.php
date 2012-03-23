@@ -437,7 +437,7 @@ class QuickHandlerGame extends QuickHandler
             $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
             if( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE )
                $gchkscore->set_toggle_unique();
-            $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $this->build_arr_coords() );
+            $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $this->build_arr_coords($Size) );
             $game_score->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
 
@@ -555,7 +555,7 @@ class QuickHandlerGame extends QuickHandler
       $gid = $this->gid;
       extract($this->game_row);
 
-      $arr_coords = $this->build_arr_coords();
+      $arr_coords = $this->build_arr_coords($Size);
       $gchkscore = new GameCheckScore( $this->TheBoard, /*stonestr*/'', $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
       if( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE )
          $gchkscore->set_toggle_unique();
@@ -579,13 +579,13 @@ class QuickHandlerGame extends QuickHandler
    }//process_cmd_status_score
 
    /*! \brief Builds coordinates-array for scoring. */
-   function build_arr_coords()
+   function build_arr_coords( $size )
    {
       $arr_coords = array();
       foreach( $this->moves as $arr_xy )
       {
          list($x,$y) = $arr_xy;
-         $arr_coords[] = number2sgf_coords($x, $y, $Size);
+         $arr_coords[] = number2sgf_coords($x, $y, $size);
       }
       return $arr_coords;
    }//build_arr_coords
