@@ -1379,8 +1379,16 @@ class Table
       else
       {
          $current_page = floor( $this->From_Row / $this->Rows_Per_Page ) + 1;
-         $max_page = ($this->FoundRows < 0 )
-            ? 0 : floor( ($this->FoundRows + $this->Rows_Per_Page - 1) / $this->Rows_Per_Page );
+         if( $this->From_Row > ($current_page - 1) * $this->Rows_Per_Page )
+            $current_page++;
+         if( $this->FoundRows >= 0 )
+         {
+            $max_page = floor( ($this->FoundRows + $this->Rows_Per_Page - 1) / $this->Rows_Per_Page );
+            if( $this->From_Row > ($max_page - 1) * $this->Rows_Per_Page )
+               $max_page++;
+         }
+         else
+            $max_page = 0;
 
          $align = 'align=bottom'; //'align=middle'
          $navi_left = ''; // left from page-num
@@ -1417,7 +1425,7 @@ class Table
          $navi_left .= ' ';
          $navi_page = ( $max_page > 0 )
             ? sprintf( T_('Page %s of %s#tablenavi'), $current_page, $max_page )
-            : $current_page;
+            : sprintf( T_('Page %s#tablenavi'), $current_page );
 
          if( !$this->Last_Page ) // next-link
          {
@@ -1432,9 +1440,9 @@ class Table
 
          if( $max_page > 0 && $current_page < $max_page - 1 ) // end-link
          {
-            $last_page_row = floor( ($this->FoundRows - $this->Rows_Per_Page + 1) / $this->Rows_Per_Page) * $this->Rows_Per_Page;
+            $last_page_from_row = floor( $this->FoundRows / $this->Rows_Per_Page) * $this->Rows_Per_Page;
             $navi_right .= MINI_SPACING . anchor(
-                 $qstr . $this->Prefix . 'from_row=' . $last_page_row,
+                 $qstr . $this->Prefix . 'from_row=' . $last_page_from_row,
                  image( $base_path.'images/end.gif', '=>|', '', $align),
                  T_('last page') );
          }
