@@ -2389,3 +2389,7 @@ ALTER TABLE Players
    ADD RejectTimeoutWin tinyint signed NOT NULL default -1 ;
 
 
+-- remove old unused table for rating-changes
+DROP TABLE RatingChange ;
+
+

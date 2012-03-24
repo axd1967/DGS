@@ -762,21 +762,6 @@ CREATE TABLE IF NOT EXISTS `Profiles` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `RatingChange`
---
-
-CREATE TABLE IF NOT EXISTS `RatingChange` (
-  `ID` int(11) NOT NULL auto_increment,
-  `uid` int(11) NOT NULL,
-  `gid` int(11) NOT NULL,
-  `diff` double default NULL,
-  PRIMARY KEY  (`ID`),
-  KEY `uid` (`uid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `RatingChangeAdmin`
 --
 
