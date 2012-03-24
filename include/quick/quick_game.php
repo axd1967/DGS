@@ -250,7 +250,7 @@ class QuickHandlerGame extends QuickHandler
    function process_cmd_play()
    {
       static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
-      global $player_row, $NOW;
+      global $player_row, $NOW, $ActivityMax, $ActivityForMove;
       $cmd = $this->quick_object->cmd;
       $gid = $this->gid;
       extract($this->game_row);
@@ -334,7 +334,7 @@ class QuickHandlerGame extends QuickHandler
                 "Last_Y=$y, " .
                 "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
                 "Flags=$GameFlags, ";
-                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
+                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', " .
                 "ToMove_ID=$next_to_move_ID, ";
             break;
          }//set_handicap
@@ -354,7 +354,7 @@ class QuickHandlerGame extends QuickHandler
             $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
 
             $prisoner_string = '';
-            foreach($this->prisoners as $coord)
+            foreach($gchkmove->prisoners as $coord)
             {
                list( $x, $y ) = $coord;
                $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
@@ -387,7 +387,7 @@ class QuickHandlerGame extends QuickHandler
 
             $game_query .= "ToMove_ID=$next_to_move_ID, " .
                "Flags=$GameFlags, " .
-               "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
+               "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', ";
             break;
          }//move
 
@@ -471,7 +471,7 @@ class QuickHandlerGame extends QuickHandler
                 "Score=$score, " .
                 //"Last_Move='$Last_Move', " . //Not a move, re-use last one
                 "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
+                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', ";
 
             if( $next_status != GAME_STATUS_FINISHED )
                $game_query .= "ToMove_ID=$next_to_move_ID, ";
@@ -650,7 +650,7 @@ class QuickHandlerGame extends QuickHandler
    /*! \brief Returns array of coordinate-strings (supported formats: sgf, sgf-comma, board). */
    function parse_coords( $move_str )
    {
-      if( strpos($move_str, ',') !== false )
+      if( strpos($move_str, ',') !== false || preg_match("/\\d/", $move_str) )
          return explode(',', $move_str);
       else
       {
