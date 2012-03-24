@@ -1766,7 +1766,7 @@ class DgsMessage
                $msgtmpl = ( $type == MSGTYPE_INVITATION )
                   ? T_('Invitation rejected by user [%s] !')
                   : T_('Message rejected by user [%s] !');
-               return sprintf( $msgtmpl, $handle );
+               $errors[] = sprintf( $msgtmpl, $handle );
             }
          }
       }
