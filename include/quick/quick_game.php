@@ -333,9 +333,9 @@ class QuickHandlerGame extends QuickHandler
                 "Last_X=$x, " .
                 "Last_Y=$y, " .
                 "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
-                "Flags=$GameFlags, ";
+                "Flags=$GameFlags, " .
                 "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', " .
-                "ToMove_ID=$next_to_move_ID, ";
+                "ToMove_ID=$White_ID, ";
             break;
          }//set_handicap
 
