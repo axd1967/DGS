@@ -438,7 +438,7 @@ Commands:
             "double_id" : 0,        # > 0 if double-game, < 0 if double-game deleted; abs(double_id) == ref to other game-id
             "tournament_id" : 0,    # tournament-id > 0 if game is part of tournament
             "game_action" : 2,      # game-action as defined for [4.QST]
-            "status" : "PLAY",      # game-status: "" | KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
+            "status" : "PLAY",      # game-status: KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG",  # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
             "score" : "",           # score for finished game only (same format as for status_score-command above)
 
@@ -1829,7 +1829,7 @@ Response:
 
    The current format of data-lines in the output is:
 
-      # header-line with format of unread-bulletins
+      # header-line with format of unread-bulletins (only for version >= 2)
       "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'"
 
          bulletin_id    : bulletin-id to get info or view bulletin, e.g. "view_bulletin.php?bid=$bulletin_id"
@@ -1841,23 +1841,23 @@ Response:
 
 
       # header-line with format of message-data-line (version = 2)
-      "## M,message_id,folder_id,message_type,'sender','subject','message_date'"
+      "## M,message_id,folder_id,type,'sender','subject','date'"
 
          message_id   : message-id, e.g. http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=1595525
          folder_id    : current folder-id of message
                         - 2 = NEW-folder
                         - 3 = REPLY-folder
-         message_type : message-type
+         type         : message-type
                         - NORMAL     = normal private message
                         - INVITATION = invitation
                         - DISPUTED   = disputed invitation
                         - RESULT     = normal result message
          sender       : sender-name, '[Server message]' for server-messages
          subject      : message-subject
-         message_date : date when message has been sent
+         date         : date when message has been sent
 
-      # header-line with format of message-data-line (version < 2)
-      "## M,message_id,'sender','subject','message_date'"
+      # header-line with format of message-data-line (version < 2), though header-line not included in output
+      "## M,message_id,'sender','subject','date'"
 
 
       # header-line with format of game-data-line (version = 2)
@@ -1900,7 +1900,7 @@ Response:
          opponent_lastaccess_date : date of opponents last-access-date in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
          handicap        : number of handicap-stones
 
-      # game-data-lines without header-line for status-games (version < 2)
+      # game-data-lines without header-line for status-games (version < 2), though header-line not included in output
       "'G', game_id, 'opponent_handle', player_color, 'lastmove_date', 'time_remaining'"
 
          time_remaining  : time-remaining of player-to-move (different format to version=2),
@@ -1908,7 +1908,7 @@ Response:
                            - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
 
 
-      # header-line with format of multi-player-game-data-line
+      # header-line with format of multi-player-game-data-line (only for version >= 2)
       "## MPG,game_id,game_type,ruleset,size,lastchanged_date,ready_to_start"
 
          game_id           : see game-data
@@ -1923,7 +1923,7 @@ Response:
 
       ## B,count,bulletin_id,target_type,category,'publish_time','expire_time','subject'
       B,1,17,ALL,MAINT,'2011-04-30 13:58:00','2011-05-30 13:58:00','very important subject'
-      ## M,message_id,folder_id,message_type,'sender','subject','message_date'
+      ## M,message_id,folder_id,type,'sender','subject','date'
       M,1595525,2,NORMAL,'[Server message]','Removal from tournament #123','2010-09-19 20:53:31'
       ## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,opponent_lastaccess_date
       G,317416,'fractic',B,'2007-05-27 12:21:51','J: 83d 14h (+ 1d * 10)',2,PLAY,62,0,0,'GO',0,'2007-05-27 15:00:00'
@@ -2141,7 +2141,8 @@ Errors:
       - game_finished : game is already finished (move/operation not possible)
       - invalid_game_status : game is in wrong status to perform requested operation
       - database_corrupted : player-to-move can not be determined -> contact admin
-      - already_played : 'move_id' context for current move in game is no longer valid
+      - already_played : 'move_id' context for current move in game is no longer valid,
+        or was wrong in the 1st place
       - not_game_player : you are not a player of the game
 
    * [E-GAMEMOVE] Game Move Errors:

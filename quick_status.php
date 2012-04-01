@@ -195,7 +195,7 @@ else
       if( $version == 2 )
       {
          // message-header: type=M, Messages.ID, me.Folder_nr, Messages.Type, correspondent.Handle, message.Subject, message.Date
-         echo "## M,message_id,folder_id,message_type,'sender','subject','message_date'\n";
+         echo "## M,message_id,folder_id,type,'sender','subject','date'\n";
          $msg_fmt = "M,%s,%s,%s,'%s','%s','%s'\n";
       }
       else
