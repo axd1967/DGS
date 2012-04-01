@@ -68,7 +68,7 @@ if( $quick_mode )
       if( !check_password( $uhandle, $row['Password'], $row['Newpassword'], $passwd ) )
       {
          admin_log( 0, $userid, 'wrong_password');
-         error("wrong_password", "login.check_password($userid,$uhandle)");
+         error('wrong_password', "login.check_password($userid,$uhandle)");
       }
 
       if( !$code || @$row['Expire'] < $NOW )

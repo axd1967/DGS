@@ -1781,7 +1781,7 @@ class DgsMessage
          "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
          "WHERE mid=$mid AND uid=$uid AND Sender='$Sender' LIMIT 1" );
       if( mysql_affected_rows() != 1)
-         error("mysql_message_info", "$dbgmsg.2" );
+         error('mysql_update_message', "$dbgmsg.2" );
    }//update_message_folder
 
 }// end 'DgsMessage'

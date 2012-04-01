@@ -484,7 +484,7 @@ function do_add_time( $game_row, $my_id)
       $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id,
             time_convert_to_hours( $add_days, 'days'), $reset_byo );
       if( !is_numeric($add_hours) )
-         error('confirm_add_time', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
+         error('invalid_args', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
    }
    ta_end();
 

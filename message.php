@@ -50,7 +50,7 @@ define('MSGBOXROWS_INVITE', 6);
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
    $is_bulk_admin = ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME) );
 
 /* Actual GET calls used (to identify the ways to handle them):

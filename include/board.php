@@ -1308,8 +1308,7 @@ class Board
          return;
 
       if( $max_movenr != $Moves+1 )
-         error("mysql_data_corruption",
-            "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
+         error('database_corrupted', "board.fix_corrupted_move_table.unfixable($gid)"); // Can't handle this type of problem
 
       ta_begin();
       {//HOT-section to fix Moves-table

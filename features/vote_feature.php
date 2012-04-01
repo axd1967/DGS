@@ -73,7 +73,7 @@ require_once( "features/lib_votes.php" );
       }
    }
    if( is_null($feature) )
-      error('unknown_object', "featurevote.no_featureid($fid)");
+      error('invalid_args', "featurevote.no_featureid($fid)");
 
    // check user pre-conditions
    $user_vote_reason = Feature::allow_vote_check();

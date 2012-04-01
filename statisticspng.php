@@ -27,9 +27,8 @@ require_once( "include/graph.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
 //   if( !$logged_in )
-//      error("not_logged_in");
+//      error('not_logged_in');
 
    // define all months for (*) to have translation-texts (see use of '$TW_'):
    if(0) T_('Jan').T_('Feb').T_('Mar').T_('Apr').T_('May').T_('Jun').T_('Jul').T_('Aug').T_('Sep').T_('Oct').T_('Nov').T_('Dec');

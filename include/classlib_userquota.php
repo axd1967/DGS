@@ -90,8 +90,7 @@ class UserQuota
          . '  FeaturePoints=' . $this->feature_points
          . " WHERE uid='{$this->user_id}' LIMIT 1";
          ;
-      db_query( "UserQuota::update.update_feature_points({$this->user_id})",
-         $update_query );
+      db_query( "UserQuota::update.update_feature_points({$this->user_id})", $update_query );
    }
 
    // ------------ static functions ----------------------------
@@ -151,8 +150,7 @@ class UserQuota
          . " WHERE UQ.FeaturePointsUpdated < FROM_UNIXTIME($update_due_date)"
          .   " AND P.LastMove >= FROM_UNIXTIME($lastmoved_date)"
          ;
-      db_query( "UserQuota::increase_update_feature_points.update($NOW)",
-         $update_query );
+      db_query( "UserQuota::increase_update_feature_points.update($NOW)", $update_query );
    }
 
 } // end of 'UserQuota'

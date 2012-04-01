@@ -114,7 +114,7 @@ class Feature
    function set_status( $status )
    {
       if( !preg_match( "/^(NEW|VOTE|WORK|DONE|LIVE|NACK)$/", $status ) )
-         error('invalid_status', "feature.set_status($status)");
+         error('invalid_args', "feature.set_status($status)");
 
       $this->status = $status;
    }
@@ -123,7 +123,7 @@ class Feature
    function set_size( $size )
    {
       if( !preg_match( "/^(\\?|EPIC|XXL|XL|L|M|S)$/", $size ) )
-         error('invalid_status', "feature.set_size($size)");
+         error('invalid_args', "feature.set_size($size)");
 
       $this->size = $size;
    }
@@ -206,8 +206,7 @@ class Feature
          . ', Created=FROM_UNIXTIME(' . $this->created .')'
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
-      $result = db_query( "feature.update_feature({$this->id},{$this->subject})",
-         $update_query );
+      $result = db_query( "feature.update_feature({$this->id},{$this->subject})", $update_query );
    }
 
    /*! \brief Returns true, if delete-feature allowed (checks constraints). */
@@ -511,7 +510,7 @@ class Feature
    function load_feature( $id )
    {
       if( !is_numeric($id) )
-         error('invalid_feature', "feature::load_feature($id)");
+         error('invalid_args', "feature::load_feature.check.id($id)");
 
       $fields = implode(',', Feature::get_query_fields());
       $row = mysql_single_fetch("feature::load_feature2($id)",
@@ -602,7 +601,7 @@ class FeatureVote
    function set_points( $points )
    {
       if( !is_numeric($points) || abs($points) > FEATVOTE_MAXPOINTS )
-         error('invalid_status', "featurevote.set_points($points)");
+         error('invalid_args', "featurevote.set_points($points)");
 
       $this->points = $points;
    }
@@ -629,8 +628,7 @@ class FeatureVote
          . ', Points=' . (int)$this->points
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
-      db_query( "feature.update_vote({$this->fid},{$this->voter},{$this->points})",
-         $update_query );
+      db_query( "feature.update_vote({$this->fid},{$this->voter},{$this->points})", $update_query );
    }
 
 
@@ -762,7 +760,7 @@ class FeatureVote
    function load_featurevote( $fid, $voter )
    {
       if( !is_numeric($fid) )
-         error('invalid_feature', "featurevote::load_feature($fid,$voter)");
+         error('invalid_args', "featurevote::load_feature.check.fid($fid,$voter)");
 
       $fields = implode(',', FeatureVote::get_query_fields());
       $row = mysql_single_fetch("featurevote::load_feature2($fid,$voter)",

@@ -186,7 +186,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
 
       db_query( "post_message.insert_new_post($Thread_ID)", $query );
       if( mysql_affected_rows() != 1)
-         error("mysql_insert_post", "post_message.insert_new_post($Thread_ID)");
+         error('mysql_insert_post', "post_message.insert_new_post($Thread_ID)");
       $New_ID = mysql_insert_id();
 
       if( $is_newthread ) // U06 (New thread), also $Thread_ID = -1
@@ -196,7 +196,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
             . 'PostsInThread=' . ($moderated ? '0' : '1')
             . " WHERE ID=$New_ID LIMIT 1" );
          if( mysql_affected_rows() != 1)
-            error("mysql_insert_post", "post_message.new_thread.update_thread($New_ID)");
+            error('mysql_insert_post', "post_message.new_thread.update_thread($New_ID)");
 
          $thread = $Thread_ID = $New_ID;
       }

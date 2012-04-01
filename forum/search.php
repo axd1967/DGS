@@ -32,7 +32,7 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
    $my_id = $player_row['ID'];
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );

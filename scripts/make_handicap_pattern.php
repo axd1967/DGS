@@ -34,7 +34,7 @@ define('MAX_PATTERN_SIZE',51);
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    $player_level = (int)$player_row['admin_level'];
    if( !($player_level & ADMIN_DATABASE) )

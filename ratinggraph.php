@@ -28,7 +28,7 @@ require_once( "include/form_functions.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error("not_logged_in");
+      error('not_logged_in');
 
    get_request_user( $uid, $uhandle, true);
    if( $uhandle )
@@ -36,13 +36,13 @@ require_once( "include/form_functions.php" );
    elseif( $uid > 0 )
       $where = "ID=$uid";
    else
-      error("no_uid");
+      error('no_uid');
 
    $result = db_query( "ratinggraph.find_player($uid,$uhandle)",
       "SELECT ID,Name,Handle FROM Players WHERE $where LIMIT 1" );
 
    if( @mysql_num_rows($result) != 1 )
-      error("unknown_user", "ratinggraph.find_player2($uid,$uhandle)");
+      error('unknown_user', "ratinggraph.find_player2($uid,$uhandle)");
 
    $user_row = mysql_fetch_array($result);
 

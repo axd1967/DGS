@@ -89,7 +89,7 @@ require_once( "include/table_columns.php" );
          list($type, $uid) = explode('_', $item, 2);
          $amask = (int)@$admin_tasks[$type][0];
          if( $amask == 0 || ($uid !== 'new' && $uid <= GUESTS_ID_MAX) )
-            error('bad_data', "admin_admins.update($uid,$type,$amask)");
+            error('invalid_args', "admin_admins.update($uid,$type,$amask)");
 
          $Admin[$uid] |= $amask;
       }

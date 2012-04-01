@@ -58,7 +58,7 @@ class ClockCache
          $row = mysql_single_fetch( "$dbgmsg.load_clock_ticks.find($clock_id)",
             "SELECT Ticks FROM Clock WHERE ID=$clock_id LIMIT 1" );
          if( !$row )
-            error('mysql_clock_ticks', "$dbgmsg.load_clock_ticks.bad_clock($clock_id)");
+            error('invalid_args', "$dbgmsg.load_clock_ticks.bad_clock($clock_id)");
          else
             $this->cache_clock_ticks[$clock_id] = (int)@$row['Ticks'];
       }

@@ -258,8 +258,7 @@ class ConfigBoard
          . ', NotesCutoff=' . $this->notes_cutoff
          . " WHERE User_ID='{$this->user_id}' LIMIT 1";
          ;
-      db_query( "ConfigBoard::update_all.update({$this->user_id})",
-         $update_query );
+      db_query( "ConfigBoard::update_all.update({$this->user_id})", $update_query );
    }
 
    /*! \brief Fills current values into $player_row. */

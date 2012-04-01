@@ -353,7 +353,6 @@ function get_handicap_pattern( $size, $handicap, &$err)
    else
       $err = 'File not found';
    if( $err ) {
-      //error('handicap_pattern',"s=$size h=$handicap err=$err");
       //Simply returning the error message will allow
       //the player to manually add his handicap stones.
       $err= "Bad handicap pattern for size=$size h=$handicap err=$err";
@@ -395,7 +394,6 @@ function get_handicap_pattern( $size, $handicap, &$err)
          }
       }
    }
-   //error('handicap_pattern',"s=$size h=$handicap n=$nb");
    //See previous error comment
    $err= "Insufficient handicap pattern for size=$size h=$handicap n=$nb";
    return $stonestring;

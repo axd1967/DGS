@@ -383,7 +383,7 @@ else
    {
       if( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
          rss_auth( 'Unauthorized access forbidden!', $uhandle);
-      error("not_logged_in", "rss_status.check_login($uhandle)");
+      error('not_logged_in', "rss_status.check_login($uhandle)");
    }
 
 

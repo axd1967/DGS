@@ -142,8 +142,7 @@ require_once( "include/make_translationfiles.php" );
 
       if( $done_set )
          db_query( 'update_translation.done',
-            "UPDATE TranslationTexts SET Translatable='Done' " .
-                      "WHERE ID IN (" . substr($done_set,1) . ')' );
+            "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" . substr($done_set,1) . ')' );
    }
    ta_end();
 

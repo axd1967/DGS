@@ -130,9 +130,7 @@ function retry_admin( $msg)
       {//HOT-section to add language for translator
          $tmp = mysql_addslashes( $browsercode . LANG_CHARSET_CHAR . $charenc );
          db_query( 'admin_do_translators.add.insert',
-            "INSERT INTO TranslationLanguages SET " .
-               "Name='" . mysql_addslashes($langname) . "', " .
-               "Language='$tmp'" );
+            "INSERT INTO TranslationLanguages SET Name='" . mysql_addslashes($langname) . "', Language='$tmp'" );
 
          make_known_languages(); //must be called from main dir
 

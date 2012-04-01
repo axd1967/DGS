@@ -143,7 +143,7 @@ function check_handicap( &$board, $stonestring, $coord=false )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
-         error("illegal_position",'move2');
+         error('illegal_position','move2');
 
       $array[$colnr][$rownr] = BLACK;
    }
@@ -152,7 +152,7 @@ function check_handicap( &$board, $stonestring, $coord=false )
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
-         error("illegal_position",'move3');
+         error('illegal_position','move3');
 
       $array[$colnr][$rownr] = BLACK;
       $stonestring .= $coord;
@@ -217,7 +217,7 @@ class GameCheckScore
       {
          list($colnr,$rownr) = sgf2number_coords(substr($this->stonestring, $i, 2), $Size);
          if( !isset($rownr) || !isset($colnr) )
-            error("illegal_position", "GCS.check_remove.move4($colnr,$rownr)");
+            error('illegal_position', "GCS.check_remove.move4($colnr,$rownr)");
 
          $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
          if( $stone == BLACK || $stone == WHITE || $stone == NONE ) //NONE for MARKED_DAME
@@ -241,13 +241,13 @@ class GameCheckScore
          {
             list($colnr,$rownr) = sgf2number_coords($coord, $Size);
             if( !isset($rownr) || !isset($colnr) )
-               error("illegal_position", "GCS.check_remove.move5($colnr,$rownr)");
+               error('illegal_position', "GCS.check_remove.move5($colnr,$rownr)");
 
             $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
             if( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
             {
                if( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
-                  error("illegal_position", "GCS.check_remove.move6($colnr,$rownr,$stone)");
+                  error('illegal_position', "GCS.check_remove.move6($colnr,$rownr,$stone)");
             }
 
             $marked = array();

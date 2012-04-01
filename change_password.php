@@ -54,16 +54,16 @@ require_once( "include/std_functions.php" );
    {
       $oldpasswd = @$_POST['oldpasswd'];
       if( !check_password( $player_row["Handle"], $player_row["Password"], $player_row["Newpassword"], $oldpasswd ) )
-         error("wrong_password");
+         error('wrong_password');
 
       $passwd = @$_POST['passwd'];
       if( strlen($passwd) < 6 )
-         error("password_too_short");
+         error('password_too_short');
       if( illegal_chars( $passwd, true ) )
-         error("password_illegal_chars");
+         error('password_illegal_chars');
 
       if( $passwd != @$_POST['passwd2'] )
-         error("password_mismatch");
+         error('password_mismatch');
 
       $query = "UPDATE Players SET " .
           "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($passwd)."') " .

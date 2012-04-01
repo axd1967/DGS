@@ -302,7 +302,7 @@ else
       echo $card;
       wap_close();
       exit;
-      //error("not_logged_in", "wap_status.check_login($uhandle)");
+      //error('not_logged_in', "wap_status.check_login($uhandle)");
    }
 
 
