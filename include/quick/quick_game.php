@@ -54,7 +54,7 @@ define('GAMECMD_MOVE',   'move');
 define('GAMECMD_RESIGN', 'resign');
 define('GAMECMD_STATUS_SCORE', 'status_score');
 define('GAMECMD_SCORE',  'score');
-define('GAME_COMMANDS', 'delete|set_handicap|move|resign|status_score');
+define('GAME_COMMANDS', 'delete|set_handicap|move|resign|status_score|score');
 
 // cmd => action
 define('GAMEACT_PASS', 'pass');
