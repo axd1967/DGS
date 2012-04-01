@@ -81,6 +81,10 @@ class ErrorCode
    {
       global $ARR_GLOBALS_ERRORS, $base_path;
 
+      // NOTE: currently undefined error-codes:
+      //   assert, couldnt_open_file, database_corrupted, mysql_insert_post, mysql_update_message,
+      //   mysql_update_game, not_implemented
+
       // lazy-init of texts
       if( !isset($ARR_GLOBALS_ERRORS['TEXT']) )
       {
@@ -299,9 +303,6 @@ class ErrorCode
          $arr['not_allowed_for_guest'] =
             T_("Sorry, this is not allowed for guests, please first register a personal account");
 
-         $arr['not_empty'] =
-            T_("Sorry, you may only place stones on empty points.");
-
          $arr['ip_blocked_guest_login'] =
             T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.') .
                "<br><br>\n" .
@@ -352,7 +353,7 @@ class ErrorCode
          $arr['already_played'] =
             T_("Sorry, this turn has already been played.");
 
-         $arr['page_not_found'] =
+         $arr['page_not_found'] = // see error.php
             T_('Page not found. Please contact the server administrators and inform them of the time the ' .
                'error occurred, and anything you might have done that may have caused the error.');
             //echo '<br>('.@$_SERVER['REDIRECT_STATUS'].': '.@$_SERVER['REDIRECT_URL'].' / '.getcwd().')';
@@ -507,7 +508,7 @@ class ErrorCode
          $arr['rating_out_of_range'] =
             T_("Sorry, the initial rating must be between 30 kyu and 6 dan.");
 
-         $arr['value_not_numeric'] = // note: unused, but could be useful, so not deleted
+         $arr['value_not_numeric'] = // NOTE: unused, but could be useful, so not deleted
             T_("Sorry, you wrote a non-numeric value on a numeric field.");
 
          $arr['not_translator'] =
@@ -574,7 +575,7 @@ class ErrorCode
          $arr['tournament_director_min1'] =
             T_("Sorry, there must be at least one tournament director.");
 
-         $arr['tournament_register_not_allowed'] =
+         $arr['tournament_register_not_allowed'] = //FIXME unused?
             T_("Sorry, you are not allowed to register for this tournament.");
 
          $arr['tournament_register_edit_not_allowed'] =
