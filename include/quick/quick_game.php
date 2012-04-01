@@ -223,10 +223,11 @@ class QuickHandlerGame extends QuickHandler
 
          if( $cmd == GAMECMD_SCORE )
          {
-            if( !preg_match("/^[01]$/", $this->agree) ) // match on string (not ints for clear spec)
+            if( !preg_match("/^(|[01])$/", $this->agree) ) // empty|0|1 allowed; match on string (not ints for clear spec)
                error('invalid_args', "$dbgmsg.check.bad_agree({$this->agree})");
             if( !is_null($this->moves) && count($this->moves) > 0 && $this->agree )
                error('invalid_args', "$dbgmsg.check.agreed_but_moves({$this->url_moves})");
+            $this->agree = (int)$this->agree;
          }
       }
 
