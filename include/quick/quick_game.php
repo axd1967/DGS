@@ -439,7 +439,7 @@ class QuickHandlerGame extends QuickHandler
             if( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE )
                $gchkscore->set_toggle_unique();
             $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $this->build_arr_coords($Size) );
-            $game_score->update_stonestring( $stonestring );
+            $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
 
             $l = strlen( $stonestring );
