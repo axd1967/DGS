@@ -43,6 +43,7 @@ define('GAMEOPT_MESSAGE', 'msg');
 define('GAMEOPT_FORMAT',  'fmt');
 define('GAMEOPT_TOGGLE',  'toggle');
 define('GAMEOPT_AGREE',   'agree');
+define('QGAME_OPTIONS', 'gid|move_id|move|msg|fmt|toggle|agree');
 
 define('GAMEOPTVAL_MOVE_PASS', 'pass');
 define('GAMEOPTVAL_TOGGLE_ALL',    'all');
@@ -111,6 +112,7 @@ class QuickHandlerGame extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown(QGAME_OPTIONS);
       $this->gid = (int)get_request_arg(GAMEOPT_GID);
       $this->move_id = (int)get_request_arg(GAMEOPT_MOVEID);
       $this->message = trim( get_request_arg(GAMEOPT_MESSAGE) );
@@ -225,9 +227,10 @@ class QuickHandlerGame extends QuickHandler
          {
             if( !preg_match("/^(|[01])$/", $this->agree) ) // empty|0|1 allowed; match on string (not ints for clear spec)
                error('invalid_args', "$dbgmsg.check.bad_agree({$this->agree})");
+            $this->agree = (int)$this->agree;
+
             if( !is_null($this->moves) && count($this->moves) > 0 && $this->agree )
                error('invalid_args', "$dbgmsg.check.agreed_but_moves({$this->url_moves})");
-            $this->agree = (int)$this->agree;
          }
       }
 
@@ -438,7 +441,8 @@ class QuickHandlerGame extends QuickHandler
             $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
             if( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE )
                $gchkscore->set_toggle_unique();
-            $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $this->build_arr_coords($Size) );
+            $arr_coords = $this->build_arr_coords($Size);
+            $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $arr_coords );
             $gchkscore->update_stonestring( $stonestring );
             $score = $game_score->calculate_score();
 
