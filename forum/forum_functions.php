@@ -1305,7 +1305,7 @@ class Forum
 
    /*!
     * \brief Returns array of partial Forum-objects (only those visible to a player)
-    *        with name => id entries.
+    *        with [ id => name ] entries.
     * param forum_opts is object ForumOptions($player_row), load all forum names if omitted
     */
    function load_forum_names( $forum_opts )
@@ -1321,7 +1321,7 @@ class Forum
          if( $forum_opts && !$forum_opts->is_visible_forum( $row['Options'] ) )
             continue;
 
-         $fnames[$row['Name']] = $row['ID'];
+         $fnames[$row['ID']] = $row['Name'];
       }
       mysql_free_result($result);
       return $fnames;

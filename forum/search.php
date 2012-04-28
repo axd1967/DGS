@@ -41,11 +41,11 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
    // build forum-array for filter: ( Name => Forum_ID )
    $f_opts = new ForumOptions( $player_row );
-   $arr_fnames = Forum::load_forum_names( $f_opts ); // name => id
-   $farr_vis = array_values($arr_fnames); // IDs of visible forums
+   $arr_fnames = Forum::load_forum_names( $f_opts ); // id => name
+   $farr_vis = array_keys($arr_fnames); // IDs of visible forums
    $arr_forum = array( T_('All#forum') => '' );
-   foreach( $arr_fnames as $name => $id )
-      $arr_forum[$name] = 'Posts.Forum_ID=' . $id;
+   foreach( $arr_fnames as $id => $name )
+      $arr_forum[$name] = 'P.Forum_ID=' . $id;
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator );
    $disp_forum->links = LINKPAGE_SEARCH | LINK_SEARCH;
@@ -213,10 +213,8 @@ require_once( "include/filterlib_mysqlmatch.php" );
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
 
       // restrict query on "visible" forums (matching admin-options)
-      $qsql->add_part( SQLP_FROM,
-         'INNER JOIN Forums ON Forums.ID=P.Forum_ID' );
       $qsql->add_part( SQLP_WHERE,
-         'Forums.ID IN ('.implode(',', $farr_vis).')' );
+         'P.Forum_ID IN ('.implode(',', $farr_vis).')' );
 
       $query_filter = $ffilter->get_query(); // clause-parts for filter
       $qsql->merge($query_filter);
