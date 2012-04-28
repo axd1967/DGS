@@ -312,16 +312,17 @@ class ErrorCode
          $arr['ip_blocked_register'] =
             T_('Sorry, you are not allowed to register a new account. The IP address you are using has been blocked by the admins.');
 
-         $arr['not_logged_in'] = sprintf(
-            T_("Sorry, you have to be logged in to do that.\n" .
-               "<p></p>\n" .
-               "The reasons for this problem could be any of the following:\n" .
-               "<ul>\n" .
-               "<li> You haven't got an <a href=\"%1\$sregister.php\">account</a>, or haven't <a href=\"%1\$sindex.php\">logged in</a> yet.\n" .
-               "<li> Your cookies have expired. This happens once a month.\n" .
-               "<li> You haven't enabled cookies in your browser.\n" .
-               "</ul>"),
-            HOSTBASE );
+         $arr['not_logged_in'] =
+            T_("Sorry, you have to be logged in to do that.")
+            . "\n<br><br>\n"
+            . "<table id=\"ErrorNote\"><tr><td>\n" // format-left
+            . T_('The reasons for this problem could be any of the following:')
+            . "\n<ul>"
+            . "\n<li>" . sprintf( T_("You haven't got an <a href=\"%1\$sregister.php\">account</a>, or haven't <a href=\"%1\$sindex.php\">logged in</a> yet."), HOSTBASE )
+            . "\n<li>" . T_('Your cookies have expired. This happens once a month.')
+            . "\n<li>" . T_('You haven\'t enabled cookies in your browser.')
+            . "\n</ul>\n"
+            . "</td></tr></table>\n";
 
          $arr['login_denied'] = ''; // splitted in 2 mapped texts in error.php
          $arr['login_denied:blocked_with_reason'] =
