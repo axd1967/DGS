@@ -62,6 +62,7 @@ class QuickHandlerBulletin extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown('bid');
       $this->mark_bulletins = array_unique( explode(',', get_request_arg('bid')) );
    }
 

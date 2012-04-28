@@ -67,6 +67,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown('wrid');
       $this->wroom_id = (int)get_request_arg('wrid');
    }
 

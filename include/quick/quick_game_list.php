@@ -38,6 +38,7 @@ define('GAMELIST_COMMANDS', 'list');
 
 define('GAMELIST_OPT_VIEW', 'view');
 define('GAMELIST_OPT_UID', 'uid');
+define('QGAMELIST_OPTIONS', 'view|uid');
 
 define('GAMELIST_OPTVAL_VIEW_STATUS', 'status');
 define('GAMELIST_OPTVAL_VIEW_RUNNING', 'running');
@@ -81,6 +82,7 @@ class QuickHandlerGameList extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown(QGAMELIST_OPTIONS);
       $this->view = get_request_arg(GAMELIST_OPT_VIEW);
       $this->opt_uid = get_request_arg(GAMELIST_OPT_UID);
    }

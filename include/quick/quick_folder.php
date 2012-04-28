@@ -60,6 +60,7 @@ class QuickHandlerFolder extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown();
    }
 
    function prepare()

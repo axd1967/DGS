@@ -57,6 +57,7 @@ class QuickHandlerContact extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown();
    }
 
    function prepare()

@@ -44,6 +44,7 @@ define('QCMD_LIST', 'list');  // retrieve list of objects
 define('QOPT_WITH', 'with');  // recursive (=deep-) loading of some objects
 define('QOPT_TEST', 'test');  // output JSON in "plain/text" content-type
 define('QOPT_LIST_STYLE', 'lstyle');  // output-style for result-list: table (=default) | json
+define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with');
 
 // with-options
 define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
@@ -161,6 +162,20 @@ class QuickHandler
       $cmd = $this->quick_object->cmd;
       if( !QuickHandler::matchRegex($regex_cmds, $cmd) )
          error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,$cmd))");
+   }
+
+   /*! \brief Ensures, that no unknown arguments are used; throw error if unknown arg used. */
+   function checkArgsUnknown( $rx_opts='' )
+   {
+      $rx_chk_opts = QUICK_STD_OPTIONS;
+      if( (string)$rx_opts != '' )
+         $rx_chk_opts .= '|' . $rx_opts;
+      $regex = sprintf( "/^(%s)\$/", $rx_chk_opts );
+      foreach( $_REQUEST as $key => $val )
+      {
+         if( !isset($_COOKIE[$key]) && !preg_match($regex, $key) )
+            error('invalid_args', "QuickHandler::checkArgsUnknown.unknown_arg($key,allowed=[$rx_chk_opts])");
+      }
    }
 
    /*!

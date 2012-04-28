@@ -72,6 +72,7 @@ class QuickHandlerGameInfo extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown(GAMEINFO_OPT_GID);
       $this->gid = (int)get_request_arg(GAMEINFO_OPT_GID);
    }
 

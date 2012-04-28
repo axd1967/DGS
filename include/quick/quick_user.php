@@ -34,6 +34,7 @@ require_once 'include/rating.php';
 // uid|user=<USER_ID|HANDLE>
 define('USEROPT_UID',  'uid');
 define('USEROPT_USER', 'user');
+define('QUSER_OPTIONS', 'uid|user');
 
 define('USERCMD_INFO', 'info');
 define('USER_COMMANDS', 'info');
@@ -68,6 +69,7 @@ class QuickHandlerUser extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown(QUSER_OPTIONS);
       $this->uid = (int)get_request_arg(USEROPT_UID);
       $this->handle = get_request_arg(USEROPT_USER);
 

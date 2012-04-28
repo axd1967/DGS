@@ -37,6 +37,7 @@ define('MESSAGEOPT_OTHER_UID', 'ouid');
 define('MESSAGEOPT_OTHER_HANDLE', 'ouser');
 define('MESSAGEOPT_FOLDER', 'folder');
 define('MESSAGEOPT_PARENT_MID', 'pmid');
+define('QMESSAGE_OPTIONS', 'mid|ouid|ouser|folder|pmid');
 
 define('MESSAGECMD_SEND_MSG', 'send_msg');
 define('MESSAGECMD_MOVE_MESSAGE', 'move_msg');
@@ -87,6 +88,7 @@ class QuickHandlerMessage extends QuickHandler
 
    function parseURL()
    {
+      parent::checkArgsUnknown(QMESSAGE_OPTIONS);
       $this->mid = get_request_arg(MESSAGEOPT_MID);
       $this->other_uid = (int)get_request_arg(MESSAGEOPT_OTHER_UID);
       $this->other_handle = trim(get_request_arg(MESSAGEOPT_OTHER_HANDLE));
