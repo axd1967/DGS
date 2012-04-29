@@ -53,7 +53,7 @@ function loc_start_page( $use_cache=true )
 
    if( $use_cache )
    {
-      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60)); // 5min
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
    }
 }

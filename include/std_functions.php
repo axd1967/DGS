@@ -215,6 +215,7 @@ define('TXTOBJTYPE_LINKS', 2); // edit Links-table
 
 // b0=0x1 (standard placement), b1=0x2 (with black validation skip), b2=0x4 (all placements)
 // both b1 and b2 set is not fully handled (error if incomplete pattern)
+// NOTE: value != 0x3 may not be supported by quick-suite
 define('ENABLE_STDHANDICAP', 0x3);
 
 define('ENA_MOVENUMBERS', 1);

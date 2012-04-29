@@ -154,7 +154,7 @@ ALTER TABLE Messages
 -- DROP TABLE transl_bodies        --   6.2 MB
 
 -- [unused] cleanup unused RatingChange-table (maybe later)
--- [unused] note: referenced in 'include/rating.php#update_rating()', though not used any more
+-- [unused] note: referenced in 'include/rating.php#update_rating()', though not used any more (therefore removed since rev 1.101)
 -- DROP TABLE RatingChange         --   0.7 MB
 
 
