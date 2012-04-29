@@ -940,6 +940,7 @@ Commands:
                "game_players" : "1:1",    # always '1:1' for invitations
                "handicap_type" : "conv",  # see HTYPE_... in 'include/game_functions.php':
                                           # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
+                                          # see also section (3c) message-object "info"-command "handicap_type"-field
                "shape_id" : 0,            # shape-id > 0 if game was started as shape-game
 
                "rated" : 1,               # 0=unrated, 1=rated
@@ -1343,6 +1344,19 @@ Commands:
             "game_players" : "1:1",    # multi-player-game setup: "N:M", or empty for game-type=GO
             "handicap_type" : "conv",  # see HTYPE_... in 'include/game_functions.php':
                                        # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
+                                       #
+                                       # conv    = conventional handicap (like in GUI)
+                                       # proper  = proper handicap (like in GUI)
+                                       # nigiri  = nigiri
+                                       # double  = double-game (one as black, one as white)
+                                       # black   = game-inviter takes black
+                                       # white   = game-inviter takes white
+                                       #
+                                       # Fair-komi handicap-types:
+                                       # - auko_sec = fair-komi: secret auction komi
+                                       # - auko_opn = fair-komi: open auction komi
+                                       # - div_ykic = fair-komi: divide&choose: you choose komi, i choose color
+                                       # - div_ikyc = fair-komi: divide&choose: i choose komi, you choose color
             "shape_id" : 0,            # shape-id > 0 if game was started as shape-game
             "shape_snapshot" : "",     # shape-snapshot
 
