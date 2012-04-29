@@ -35,7 +35,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'list_surveys');
    if( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'list_surveys');
    $my_id = $player_row['ID'];

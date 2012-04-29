@@ -32,13 +32,12 @@ define('MAX_PATTERN_SIZE',51);
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'scripts.make_handicap_pattern');
 
    $player_level = (int)$player_row['admin_level'];
    if( !($player_level & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.make_handicap_pattern');
 
 
    start_html( 'handicap_pattern', 0 );

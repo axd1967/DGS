@@ -27,9 +27,8 @@ require_once( "include/form_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'edit_vacation');
 
    $my_id= $player_row['ID'];
    $days_left = floor($player_row['VacationDays']);

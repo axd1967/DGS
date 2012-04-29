@@ -32,7 +32,7 @@ require_once( "include/filter.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'list_messages');
 
    $my_id = $player_row['ID'];
 

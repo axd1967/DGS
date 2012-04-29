@@ -34,7 +34,7 @@ require_once( "include/std_functions.php" );
 
    $pswduser = get_request_arg('pswduser');
    if( strtolower($pswduser) == 'guest' )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'send_new_password.1');
 
    $result = db_query( "send_new_password.find_player($pswduser)",
       "SELECT ID, Newpassword, Email " .
@@ -44,7 +44,7 @@ require_once( "include/std_functions.php" );
 
    $row = mysql_fetch_assoc($result);
    if( $row['ID'] <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'send_new_password.2');
 
    if( !empty($row['Newpassword']) )
    {

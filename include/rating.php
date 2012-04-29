@@ -769,7 +769,7 @@ function convert_to_rating($string, $type, $no_error=false)
       if( $no_error )
          return $rating;
       error($needrank ? 'rank_not_rating' : 'rating_not_rank',
-         "convert_to_rating.check.rating($type,$string,$val,$kyu)");
+         "convert_to_rating.check.rating($type,$string,$val,$kyu,$needrank)");
    }
 
    //valid rating, so ends with a limited bound corrections, else error
@@ -783,7 +783,7 @@ function convert_to_rating($string, $type, $no_error=false)
 
    if( $no_error )
       return $rating;
-   error('rating_out_of_range');
+   error('rating_out_of_range', "convert_to_rating.error($type,$string,$val,$kyu,$needrank)");
    return NO_RATING;
 }//convert_to_rating
 

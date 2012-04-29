@@ -27,10 +27,9 @@ require_once( "include/std_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.fix_message_thread-1_0_15');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'fix_message_thread-1_0_15');
+      error('adminlevel_too_low', 'scripts.fix_message_thread-1_0_15');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

@@ -36,9 +36,9 @@ define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'old_goban_editor');
    if( !ALLOW_OLD_GOBAN_EDITOR )
-      error('feature_disabled');
+      error('feature_disabled', 'old_goban_editor');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
 

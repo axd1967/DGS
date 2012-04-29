@@ -30,7 +30,7 @@ require_once 'include/classlib_user.php';
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'game_rematch');
    $my_id = $player_row['ID'];
 
    $mode = (int) get_request_arg('mode');

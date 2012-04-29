@@ -31,12 +31,10 @@ require_once( 'include/classlib_game.php' );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.game_consistency');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.game_consistency');
 
 
    $page = $_SERVER['PHP_SELF'];

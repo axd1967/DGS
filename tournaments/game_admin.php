@@ -45,13 +45,13 @@ define('GA_RES_TIMOUT', 3);
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.game_admin');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.game_admin');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'Tournament.game_admin');
 
    $page = "game_admin.php";
 

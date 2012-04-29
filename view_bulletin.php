@@ -33,7 +33,7 @@ $GLOBALS['ThePage'] = new Page('BulletinView');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'view_bulletin');
    $my_id = $player_row['ID'];
 
    $bid = (int) @$_REQUEST['bid'];

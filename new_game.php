@@ -43,7 +43,7 @@ require_once 'include/utilities.php';
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'new_game');
    $my_id = $player_row['ID'];
 
    $arg_viewmode = @$_REQUEST['view'];
@@ -81,8 +81,7 @@ require_once 'include/utilities.php';
    if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
       $viewmode = GSETVIEW_SIMPLE;
    if( $viewmode != GSETVIEW_SIMPLE && @$player_row['RatingStatus'] == RATING_NONE )
-      error('multi_player_need_initial_rating',
-            "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
+      error('multi_player_need_initial_rating', "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
 
    if( $handle_add_game )
    {
@@ -191,7 +190,7 @@ function handle_add_game( $my_id, $viewmode )
    {
       case CAT_HTYPE_CONV:
          if( !$iamrated )
-            error('no_initial_rating');
+            error('no_initial_rating', 'new_game(conv)');
          $handicap_type = HTYPE_CONV;
          $handicap = 0; //further computing
          $komi = 0.0;
@@ -199,7 +198,7 @@ function handle_add_game( $my_id, $viewmode )
 
       case CAT_HTYPE_PROPER:
          if( !$iamrated )
-            error('no_initial_rating');
+            error('no_initial_rating', 'new_game(proper)');
          $handicap_type = HTYPE_PROPER;
          $handicap = 0; //further computing
          $komi = 0.0;
@@ -218,7 +217,7 @@ function handle_add_game( $my_id, $viewmode )
          $is_fairkomi = true;
          $handicap_type = @$_REQUEST['fk_htype'];
          if( !preg_match("/^(".CHECK_HTYPES_FAIRKOMI.")$/", $handicap_type) )
-            error('invalid_args', "new_game.handle_add_game.check.fairkomi_htype($handicap_type)");
+            error('invalid_args', "new_game.handle_add_game.check.fk_htype($handicap_type)");
          $handicap = 0;
          $komi = 0.0;
          break;
@@ -292,7 +291,7 @@ function handle_add_game( $my_id, $viewmode )
       if( $viewmode != GSETVIEW_FAIRKOMI )
          error('invalid_args', "new_game.handle_add_game.check.fairkomi.viewmode($viewmode,$game_type)");
       if( !$is_std_go )
-         error('invalid_args', "new_game.handle_add_game.check.game_type.fairkomi_no_mpg");
+         error('invalid_args', 'new_game.handle_add_game.check.game_type.fairkomi_no_mpg');
    }
 
 
@@ -328,7 +327,7 @@ function handle_add_game( $my_id, $viewmode )
                                  $byotimevalue_fis, $timeunit_fis);
 
    if( $hours<1 && ($byohours<1 || $byoyomitype == BYOTYPE_FISCHER) )
-      error('time_limit_too_small');
+      error('time_limit_too_small', "new_game.check.timelimit($hours,$byohours,$byoyomitype)");
 
 
    if( ($rated = @$_REQUEST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )

@@ -35,16 +35,16 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'admin_survey');
    if( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'admin_survey');
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'admin_survey');
 
    $is_admin = SurveyControl::is_survey_admin();
    if( !$is_admin )
-      error('adminlevel_too_low', "admin_survey");
+      error('adminlevel_too_low', 'admin_survey');
 
 /* Actual REQUEST calls used:
      ''                       : add new admin survey

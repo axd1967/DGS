@@ -42,9 +42,9 @@ define('GA_RES_TIMOUT', 3);
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'admin_game');
    if( !(@$player_row['admin_level'] & ADMIN_GAME) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_game');
    $my_id = $player_row['ID'];
 
    $page = "admin_game.php";
@@ -60,7 +60,7 @@ define('GA_RES_TIMOUT', 3);
 
    $gid = (int) @$_REQUEST['gid'];
    if( $gid <= 0 )
-      error('unknown_game'); // need gid (use link in game-info-page)
+      error('unknown_game', "admin_game($gid)"); // need gid (use link in game-info-page)
 
    if( @$_REQUEST['cancel'] )
       jump_to("$page?gid=$gid");

@@ -40,16 +40,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.register');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.register');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'Tournament.register');
 
    if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
-      error('tournament_register_denied');
+      error('tournament_register_denied', 'Tournament.register');
 
    $page = "register.php";
 

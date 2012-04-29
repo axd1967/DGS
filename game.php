@@ -83,7 +83,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    connect2mysql();
 
    if( $gid <= 0 )
-      error('unknown_game');
+      error('unknown_game', "game($gid)");
 
    $logged_in = who_is_logged( $player_row);
    if( $logged_in )

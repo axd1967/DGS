@@ -28,12 +28,10 @@ require_once( "forum/forum_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.convert_posindex');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.convert_posindex');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

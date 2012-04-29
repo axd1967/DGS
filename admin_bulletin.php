@@ -37,14 +37,14 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'admin_bulletin');
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'admin_bulletin');
 
    $is_admin = Bulletin::is_bulletin_admin();
    if( !$is_admin )
-      error('adminlevel_too_low', "admin_bulletin");
+      error('adminlevel_too_low', 'admin_bulletin');
 
 /* Actual REQUEST calls used:
      ''                       : add new admin bulletin

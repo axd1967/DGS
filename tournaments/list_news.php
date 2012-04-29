@@ -39,7 +39,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.list_news');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.list_news');
    $my_id = $player_row['ID'];

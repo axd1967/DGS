@@ -35,10 +35,9 @@ require_once( "include/filter.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'admin_show_errorlog');
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_show_errorlog');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER ); // only for adm-dev!
 
    // init
@@ -164,8 +163,8 @@ require_once( "include/filter.php" );
    $atable->echo_table();
 
    echo "<br>\n",
-      "NOTE: Log shows all error() events (e.g. db-errors, quick-suite errors, ",
-      "GUI-errors and many more).<br>\n";
+      "NOTE: Log shows all error() events (e.g. db-errors, quick-suite errors, ',
+      'GUI-errors and many more).<br>\n";
 
    end_page();
 }

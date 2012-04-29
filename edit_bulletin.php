@@ -37,10 +37,10 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'edit_bulletin');
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'edit_bulletin');
 
 /* Actual REQUEST calls used:
      n_gid=                   : add new bulletin TargetType=MPG

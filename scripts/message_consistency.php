@@ -26,12 +26,10 @@ require_once( "include/std_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.message_consistency');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.message_consistency');
 
    $uid = (int)@$_REQUEST['uid'];
 

@@ -32,12 +32,10 @@ require_once( "include/std_functions.php" );
 
    connect2mysql();
    $logged_in = who_is_logged($player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.index');
    if( !(@$player_row['admin_level'] & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER)) )
-      error('adminlevel_too_low', 'scripts-index');
+      error('adminlevel_too_low', 'scripts.index');
 
    $arr_scripts = array(
       'scripts/', array(

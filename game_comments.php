@@ -31,7 +31,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'game_comments');
    $my_id = $player_row['ID'];
 
    $gid = (int)@$_GET['gid'];
@@ -41,7 +41,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
          $gid = $result[1];
    }
    if( $gid <= 0 )
-      error('unknown_game');
+      error('unknown_game', "game_comments($gid)");
 
    $game = mysql_single_fetch( 'game_comments.find_game',
       'SELECT G.Status, G.GameType, G.GamePlayers, G.Handicap, G.Moves, G.Black_ID, G.White_ID' .

@@ -46,7 +46,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    // rating-graph can be viewed without being logged in
    // if( !$logged_in )
-   //    error('not_logged_in');
+   //    error('not_logged_in', 'ratingpng');
 
    //disable translations in graph if not latin
    if( eregi( '^iso-8859-', $encoding_used) )

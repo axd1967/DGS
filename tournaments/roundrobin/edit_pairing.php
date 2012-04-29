@@ -48,13 +48,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.roundrobin.edit_pairing');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.edit_pairing');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'Tournament.roundrobin.edit_pairing');
 
    $page = "edit_pairing.php";
 

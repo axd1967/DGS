@@ -28,12 +28,10 @@ require_once( "include/form_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.mailtest');
    if( !(@$player_row['admin_level'] & ADMIN_SUPERADMIN) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.mailtest');
 
 
    $encoding_used= get_request_arg( 'charset', 'iso-8859-1'); //iso-8859-1 UTF-8

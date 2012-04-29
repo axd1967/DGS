@@ -35,9 +35,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'admin_rating');
    if( !(@$player_row['admin_level'] & ADMIN_GAME) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_rating');
    $my_id = $player_row['ID'];
 
    $page = "admin_rating.php";

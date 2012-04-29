@@ -34,7 +34,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
    $logged_in = who_is_logged( $player_row);
 
 //   if( !$logged_in )
-//      error('not_logged_in');
+//      error('not_logged_in', 'statratingspng');
 
 
    //disable translations in graph if not latin

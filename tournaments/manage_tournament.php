@@ -36,13 +36,13 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.manage_tournament');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.manage_tournament');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'Tournament.manage_tournament');
 
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;

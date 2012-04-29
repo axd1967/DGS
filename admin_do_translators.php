@@ -70,12 +70,10 @@ function retry_admin( $msg)
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'admin_do_translators');
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_do_translators');
 
 /* Originally, the language code was a 2 letters code (like ISO 639-1).
    Because of language particularities within the same charset (like
@@ -236,7 +234,7 @@ function retry_admin( $msg)
       }
       ta_end();
 
-      error('couldnt_update_translation', "admin_do_translators.update_failed");
+      error('couldnt_update_translation', 'admin_do_translators.update_failed');
    }
    retry_admin('');
 }

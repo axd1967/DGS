@@ -36,13 +36,13 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.edit_tournament');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_tournament');
    $my_id = $player_row['ID'];
 
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'Tournament.edit_tournament');
 
 /* Actual REQUEST calls used:
      tid=               : edit existing tournament

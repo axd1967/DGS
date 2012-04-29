@@ -61,7 +61,7 @@ if( $quick_mode )
       error_on_blocked_ip( 'ip_blocked_guest_login', $row );
 
    if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-      error('login_denied');
+      error('login_denied', "login($uhandle,$userid)");
 
    if( !@$_REQUEST['cookie_check'] ) // login with user-handle + password
    {

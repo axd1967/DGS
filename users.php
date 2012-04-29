@@ -38,7 +38,7 @@ require_once( 'include/classlib_userpicture.php' );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'users');
    $uid = $player_row['ID'];
    //$user = $player_row['Handle'];
    $cfg_tblcols = ConfigTableColumns::load_config( $uid, CFGCOLS_USERS );

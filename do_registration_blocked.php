@@ -28,7 +28,7 @@ require_once( "include/register_functions.php" );
    $player_row = array( 'ID' => 0 );
 
    if( !is_blocked_ip() )
-      error('not_logged_in'); // block spammer, call only if IP-blocked
+      error('not_logged_in', 'do_registration_blocked'); // block spammer, call only if IP-blocked
 
    $errorlog_id = get_request_arg('errlog_id');
 

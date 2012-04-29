@@ -30,7 +30,7 @@ require_once 'tournaments/include/tournament_factory.php';
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.wizard');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.wizard');
 

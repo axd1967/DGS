@@ -37,9 +37,9 @@ require_once( "features/lib_votes.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'list_features');
    if( !ALLOW_FEATURE_VOTE )
-      error('feature_disabled', 'feature_vote(list_features)');
+      error('feature_disabled', 'list_features');
 
    $my_id = (int)@$player_row['ID'];
    $user_quota = UserQuota::load_user_quota($my_id);

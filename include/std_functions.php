@@ -2621,7 +2621,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       }
 /* options:
       set_login_cookie("","", true);
-      error('fever_vault'); //log record
+      error('fever_vault', "is_logged_in($uid,$handle)"); //log record
       jump_to("error.php?err=fever_vault"); //no log record
 */
    }

@@ -1010,10 +1010,9 @@ function freesql_dump( $database, $query)
    setTZ('GMT');
 
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.data_export');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.data_export');
 
    if( is_array($ARR_USERS_MAINTENANCE) && in_array( $player_row['Handle'], $ARR_USERS_MAINTENANCE ) )
       $Super_admin = true;

@@ -28,12 +28,10 @@ require_once( 'forum/forum_functions.php' );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'scripts.convert_from_old_forum');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'scripts.convert_from_old_forum');
 
    start_html('convert_from_old_forum', 0);
 

@@ -38,9 +38,9 @@ function find_category_box_text($cat)
 
    $logged_in = who_is_logged( $player_row );
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'edit_bio');
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
-      error('edit_bio_denied');
+      error('edit_bio_denied', 'edit_bio');
 
    $my_id = $player_row['ID'];
    $editorder = isset($_REQUEST['editorder']);

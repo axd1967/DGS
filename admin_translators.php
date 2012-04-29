@@ -29,12 +29,10 @@ require_once( "include/form_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'admin_translators');
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_translators');
 
 
 /*

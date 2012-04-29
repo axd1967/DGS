@@ -33,7 +33,7 @@ require_once( 'include/classlib_game.php' );
 
    $gid = (int)@$_REQUEST['gid'] ;
    if( $gid <= 0 )
-      error('unknown_game');
+      error('unknown_game', "confirm($gid)");
 
 /* Actual REQUEST calls used:  g=gid (mandatory), a=action, m=move, s=stonestring, c=coord
      cancel             : cancel previous operation (validation-step), show game-page
@@ -57,7 +57,7 @@ require_once( 'include/classlib_game.php' );
    connect2mysql();
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', "confirm($gid)");
    $my_id = $player_row['ID'];
 
    $game_row = GameHelper::load_game_row( 'confirm.find_game', $gid );

@@ -27,13 +27,12 @@ $GLOBALS['ThePage'] = new Page('Admin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'admin');
 
    $admin_level = (int)@$player_row['admin_level']; //local modifications
    if( !$admin_level )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin');
 
    start_page(/*T_*/('Admin'), true, $logged_in, $player_row);
 

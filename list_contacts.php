@@ -39,7 +39,7 @@ require_once( 'include/classlib_userpicture.php' );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'list_contacts');
    $my_id = (int)@$player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_CONTACTS );
 

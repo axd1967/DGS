@@ -31,7 +31,7 @@ require_once( 'forum/post.php' );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'forum.read');
    $my_id = $player_row['ID'];
    $cfg_pages = ConfigPages::load_config_pages($my_id);
 

@@ -31,18 +31,18 @@ require_once( "features/lib_votes.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'edit_feature');
 
    if( !ALLOW_FEATURE_VOTE )
-      error('feature_disabled', 'feature_vote(edit)');
+      error('feature_disabled', 'edit_feature');
 
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'edit_feature');
 
    $is_admin = Feature::is_admin();
    if ( !$is_admin )
-      error('feature_edit_not_allowed');
+      error('feature_edit_not_allowed', 'edit_feature');
    $is_super_admin = Feature::is_super_admin();
 
 

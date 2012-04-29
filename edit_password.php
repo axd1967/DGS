@@ -26,9 +26,8 @@ require_once( "include/form_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'edit_password');
 
 
    start_page(T_("Edit password"), true, $logged_in, $player_row );

@@ -38,13 +38,13 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.edit_director');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_director');
 
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'Tournament.edit_director');
 
 /* Actual REQUEST calls used (TD=tournament-director)
      tid=                  : add new TD for tournament

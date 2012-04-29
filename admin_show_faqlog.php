@@ -33,10 +33,9 @@ require_once( "include/table_columns.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'admin_show_faqlog');
    if( !(@$player_row['admin_level'] & (ADMIN_FAQ|ADMIN_DEVELOPER)) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_show_faqlog');
 
    // init
    $page = 'admin_show_faqlog.php';

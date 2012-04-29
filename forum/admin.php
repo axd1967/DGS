@@ -31,12 +31,10 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'forum.admin');
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER ) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'forum.admin');
 
    $fid = max(0,@$_REQUEST['id']);
 

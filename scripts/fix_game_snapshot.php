@@ -35,7 +35,7 @@ define('SEPLINE', "\n<p><hr>\n");
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'scrips.fix_game_snapshot');
 
    $page = "fix_game_snapshot.php";
 

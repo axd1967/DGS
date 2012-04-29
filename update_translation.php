@@ -24,9 +24,8 @@ require_once( "include/make_translationfiles.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'update_translation');
 
    if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
    {
@@ -38,7 +37,7 @@ require_once( "include/make_translationfiles.php" );
    {
       $translator_set = @$player_row['Translator'];
       if( !$translator_set )
-         error('not_translator');
+         error('not_translator', 'update_translation');
       $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
    }
 
@@ -56,7 +55,7 @@ require_once( "include/make_translationfiles.php" );
       $from_row = max(0,(int)@$_REQUEST['from_row']);
 
    if( !in_array( $translate_lang, $translator_array ) )
-      error('not_correct_transl_language', "update_translation.check("
+      error('not_correct_transl_language', 'update_translation.check('
          . $translate_lang.':'.$translator_set.':'.implode("*", $translator_array).')');
 
    $result = translations_query( $translate_lang, $untranslated, $group

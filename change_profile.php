@@ -31,9 +31,9 @@ require_once 'include/db/bulletin.php';
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'change_profile');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'change_profile');
    $my_id = $player_row['ID'];
 
    $name = trim(get_request_arg('name')) ;

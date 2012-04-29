@@ -66,7 +66,7 @@ class GameCheckMove
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
       {
          if( $error_exit )
-            error('illegal_position','move1');
+            error('illegal_position', "GCM.check_move({$this->board->gid})");
          else
             return 'illegal_position';
       }
@@ -84,7 +84,7 @@ class GameCheckMove
             if( !$suicide_allowed )
             {
                if( $error_exit )
-                  error('suicide');
+                  error('suicide', "GCM.check_move({$this->board->gid})");
                else
                   return 'suicide';
             }
@@ -100,7 +100,7 @@ class GameCheckMove
          if( $last_move == number2sgf_coords( $x, $y, $Size) )
          {
             if( $error_exit )
-               error('ko');
+               error('ko', "GCM.check_move({$this->board->gid})");
             else
                return 'ko';
          }
@@ -143,7 +143,7 @@ function check_handicap( &$board, $stonestring, $coord=false )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
-         error('illegal_position','move2');
+         error('illegal_position', "check_handicap.1({$board->gid},$colnr,$rownr,$stonestring)");
 
       $array[$colnr][$rownr] = BLACK;
    }
@@ -152,7 +152,7 @@ function check_handicap( &$board, $stonestring, $coord=false )
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
       if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
-         error('illegal_position','move3');
+         error('illegal_position', "check_handicap.2({$board->gid},$colnr,$rownr,$stonestring)");
 
       $array[$colnr][$rownr] = BLACK;
       $stonestring .= $coord;

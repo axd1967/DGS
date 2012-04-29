@@ -27,16 +27,15 @@ require_once( "include/std_functions.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'change_bio');
 
    $my_id = (int)@$player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'change_bio');
 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
-      error('edit_bio_denied');
+      error('edit_bio_denied', 'change_bio');
 
    $my_id = $player_row['ID'];
    $change_it = isset($_REQUEST['action']);

@@ -98,27 +98,23 @@ $info_box = '<br>When translating you should keep in mind the following things:
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'translate');
 
 
    $lang_desc = get_language_descriptions_translated( /*T_*/true);
-   if( TRANS_FULL_ADMIN
-         && (@$player_row['admin_level'] & ADMIN_TRANSLATORS))
-   {
+   if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS))
       $translator_array = array_keys( $lang_desc);
-   }
    else
    {
       $translator_set = @$player_row['Translator'];
       if( !$translator_set )
-         error('not_translator');
+         error('not_translator', 'translate');
       $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
    }
 
 
    $translate_lang = get_request_arg('translate_lang');
-   if( ALLOW_PROFIL_CHARSET
-         && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       $profil_charset = (int)(bool)@$_REQUEST['profil_charset'];
    else
       $profil_charset = 0;
@@ -153,16 +149,12 @@ $info_box = '<br>When translating you should keep in mind the following things:
 
 
    if( count( $translator_array ) > 1 )
-   {
       $lang_choice = true;
-   }
    else
    {
       $lang_choice = false;
       if( !$translate_lang && count( $translator_array ) == 1 )
-      {
          $translate_lang = $translator_array[0];
-      }
    }
 
    if( $translate_lang )

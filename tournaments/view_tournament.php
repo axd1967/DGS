@@ -47,7 +47,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'Tournament.view_tournament');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.view_tournament');
    $my_id = $player_row['ID'];

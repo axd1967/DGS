@@ -30,7 +30,7 @@ require_once 'include/wroom_control.php';
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'join_waitingroom_game');
 
 /* Actual REQUEST calls used:  id=wroom-id (mandatory)
      delete=t&gid=      : delete waiting-room game

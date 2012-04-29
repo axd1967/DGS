@@ -46,7 +46,7 @@ class WaitingroomControl
 
       $my_id = (int)@$player_row['ID'];
       if( $my_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest');
+         error('not_allowed_for_guest', "WC.join_waitingroom_game($wr_id)");
 
       if( !is_numeric($wr_id) || $wr_id <= 0 )
          error('waitingroom_game_not_found', "WC.join_waitingroom_game.bad_id($wr_id)");
@@ -93,13 +93,13 @@ class WaitingroomControl
             "SELECT ID, Name, Handle, Rating2, RatingStatus, ClockUsed, OnVacation " .
             "FROM Players WHERE ID=$opponent_ID LIMIT 1" );
       if( !$opponent_row )
-         error('waitingroom_game_not_found', "WC.join_waitingroom_game.find_players.opp($opponent_ID)");
+         error('waitingroom_game_not_found', "WC.join_waitingroom_game.find_players.opp($wr_id,$opponent_ID)");
       if( $my_id == $opponent_ID )
-         error('waitingroom_own_game');
+         error('waitingroom_own_game', "WC.join_waitingroom_game.check.opp($wr_id)");
 
       if( $game_row['MustBeRated'] == 'Y' &&
           !($player_row['Rating2'] >= $game_row['RatingMin'] && $player_row['Rating2'] <= $game_row['RatingMax']) )
-         error('waitingroom_not_in_rating_range');
+         error('waitingroom_not_in_rating_range', "WC.join_waitingroom_game.check.rating($wr_id)");
 
       if( !$game_row['goodmingames'] )
          error('waitingroom_not_enough_rated_fin_games',
@@ -130,14 +130,14 @@ class WaitingroomControl
       {
          case HTYPE_CONV:
             if( !$iamrated || !$opprated )
-               error('no_initial_rating');
+               error('no_initial_rating', "WC.join_waitingroom_game.conv($wr_id)");
             list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
                suggest_conventional( $my_rating, $opprating, $size);
             break;
 
          case HTYPE_PROPER:
             if( !$iamrated || !$opprated )
-               error('no_initial_rating');
+               error('no_initial_rating', "WC.join_waitingroom_game.proper($wr_id)");
             list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
                suggest_proper( $my_rating, $opprating, $size);
             break;

@@ -36,7 +36,7 @@ else
 
    $gid = (int)@$_REQUEST['gid'] ;
    if( $gid <= 0 )
-      error('unknown_game');
+      error('unknown_game', "quick_play($gid)");
 
 
    connect2mysql();
@@ -48,15 +48,15 @@ else
       'SELECT ID, Timezone, AdminOptions, UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode ' .
       "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
    if( @mysql_num_rows($result) != 1 )
-      error('not_logged_in', "quick_play.find_player2($uhandle)");
+      error('not_logged_in', "quick_play.find_player2($gid,$uhandle)");
 
    $player_row = mysql_fetch_assoc($result);
 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-      error('login_denied');
+      error('login_denied', 'quick_play');
 
    if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row['Expire'] < $NOW )
-      error('not_logged_in','qp2');
+      error('not_logged_in', 'quick_play.check.login');
 
    //TODO: fever vault check ??? -> migrate to quick_do-suite
    //setTZ( $player_row['Timezone']);

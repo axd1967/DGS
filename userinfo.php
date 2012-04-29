@@ -37,7 +37,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'userinfo');
 
    $my_id = $player_row['ID'];
    $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);

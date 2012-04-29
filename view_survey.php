@@ -32,7 +32,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'view_survey');
    if( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'view_survey');
    $my_id = $player_row['ID'];

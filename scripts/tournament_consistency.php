@@ -38,9 +38,9 @@ define('SEPLINE', "\n<p><hr>\n");
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'scripts.tournament_consistency');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'tournament_consistency');
+      error('adminlevel_too_low', 'scripts.tournament_consistency');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();

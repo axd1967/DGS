@@ -29,10 +29,9 @@ require_once( "include/form_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'admin_users');
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_users');
 
 /* URL-syntax for this page:
       cancel                : jump to show-user-form

@@ -27,12 +27,10 @@ require_once( "include/contacts.php" );
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'edit_contact');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'edit_contact');
 
 /* Actual REQUEST calls used:
      (no args)             : add new contact

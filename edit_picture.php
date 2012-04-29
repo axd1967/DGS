@@ -30,17 +30,16 @@ require_once( 'include/gui_functions.php' );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
-
+      error('not_logged_in', 'edit_picture');
    if( USERPIC_FOLDER == '' )
-      error('feature_disabled');
+      error('feature_disabled', 'edit_picture');
 
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest');
+      error('not_allowed_for_guest', 'edit_picture');
 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
-      error('edit_bio_denied');
+      error('edit_bio_denied', 'edit_picture');
 
 /* Actual REQUEST calls used:
      (no args)              : add/edit user picture

@@ -28,13 +28,13 @@ require_once( "include/table_columns.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in');
+      error('not_logged_in', 'admin_admins');
    $my_id = $player_row['ID'];
 
    // only SUPERADMIN can manage admins
    $player_level = (int)@$player_row['admin_level']; //local modifications
    if( !($player_level & ADMIN_SUPERADMIN) )
-      error('adminlevel_too_low');
+      error('adminlevel_too_low', 'admin_admins');
 
    $admin_tasks = array( // admin-level-id => arr( admin-bitmask, (alphabetic-order) admin-text ),
          'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),
@@ -104,7 +104,7 @@ require_once( "include/table_columns.php" );
          if( !$row )
             error('unknown_user', "admin_admin.check.user($newadmin)");
          if( $row["admin_level"] != 0 )
-            error('new_admin_already_admin');
+            error('new_admin_already_admin', 'admin_admins');
 
          $uid = $row['ID'];
          $AdminOldLevel[$uid] = 0;
