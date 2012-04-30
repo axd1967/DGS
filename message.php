@@ -116,7 +116,7 @@ define('MSGBOXROWS_INVITE', 6);
       if( !$profile_template->is_valid_new_game_template_for_invite() )
          error('invalid_profile', "message.check.profile_newg4inv($prof_tmpl_id,{$profile->Type},$mode)");
 
-      $profile_template->fill( $_REQUEST, PROFTYPE_TMPL_INVITE );
+      $profile_template->fill( $_REQUEST );
       if( $profile->Type == PROFTYPE_TMPL_NEWGAME )
          $profile_template->fill_invite_with_new_game( $_REQUEST, PROFTYPE_TMPL_INVITE );
 
