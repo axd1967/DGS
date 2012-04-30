@@ -106,8 +106,7 @@ require_once( "include/std_functions.php" );
    $query = "SELECT M.ID as mid, M.Type"
       .", me.uid as uid, me.ID as me_mcID"
       ." FROM Messages AS M"
-      ." LEFT JOIN MessageCorrespondents AS me"
-         ." ON M.ID=me.mid"
+         ." LEFT JOIN MessageCorrespondents AS me ON M.ID=me.mid"
       ." WHERE me.uid IS NULL"
       ." ORDER BY M.ID";
    $result = mysql_query( $query ) or die(mysql_error());
@@ -135,8 +134,7 @@ require_once( "include/std_functions.php" );
    $query = "SELECT me.mid as mid, M.Type"
       .", me.uid as uid, me.ID as me_mcID"
       ." FROM MessageCorrespondents AS me"
-      ." LEFT JOIN Messages AS M"
-         ." ON M.ID=me.mid"
+         ." LEFT JOIN Messages AS M ON M.ID=me.mid"
       ." WHERE M.Type IS NULL"
       ." ORDER BY me.ID";
    $result = mysql_query( $query ) or die(mysql_error());
@@ -218,8 +216,7 @@ function check_system_message( $user_id=false)
       "me.Replied AS replied, other.Replied AS other_replied, " .
       "me.Folder_nr AS folder, other.Folder_nr AS other_folder " .
       "FROM MessageCorrespondents AS me " .
-      "LEFT JOIN MessageCorrespondents AS other"
-         ." ON other.mid=me.mid AND other.Sender!='N' " .
+      "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!='N' " .
       "WHERE me.Sender='N' AND other.Sender IS NULL " .
         ( $user_id>0 ? "AND me.uid=$user_id " : "" ) .
       "ORDER BY me.uid, me.mid";
@@ -256,8 +253,7 @@ function check_result_message( $user_id=false)
       .", me.uid as uid, me.ID as me_mcID"
       .", G.Status, G.Score"
       ." FROM (Messages AS M, Games as G)"
-      ." LEFT JOIN MessageCorrespondents AS me"
-         ." ON M.ID=me.mid"
+         ." LEFT JOIN MessageCorrespondents AS me ON M.ID=me.mid"
       ." WHERE M.Type='".MSGTYPE_NORMAL."' AND M.Game_ID>0"
          ." AND M.Subject LIKE '%esult%' AND LEFT(M.Subject,3)!='RE:'"
          ." AND G.ID=M.Game_ID AND G.Status='".GAME_STATUS_FINISHED."'"

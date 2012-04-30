@@ -280,8 +280,7 @@ echo ">>>> Most of them needs manual fixes.";
 
       $query = "SELECT F.ID as FID,F.*,I.*,G.*"
         ." FROM (FAQ as F,TranslationTexts AS T)"
-        ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=F.$type"
-            ." AND I.Group_ID=$FAQ_group" //see HAVING clause
+        ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=F.$type AND I.Group_ID=$FAQ_group" //see HAVING clause
         ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
         ." WHERE F.ID>0 AND F.$type>0 AND T.ID=F.$type AND T.Text>''"
         ." HAVING G.Groupname IS NULL"

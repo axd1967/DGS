@@ -251,8 +251,7 @@ class Bulletin
             "SELECT BT.uid as ID, P.Handle, P.Name, IFNULL(C.uid,0) AS C_RejectMsg " .
             "FROM BulletinTarget AS BT " .
                "INNER JOIN Players AS P ON P.ID=BT.uid " .
-               "LEFT JOIN Contacts AS C " .
-                  "ON C.uid=BT.uid AND C.cid={$this->uid} AND (C.SystemFlags & ".CSYSFLAG_REJECT_MESSAGE.") " .
+               "LEFT JOIN Contacts AS C ON C.uid=BT.uid AND C.cid={$this->uid} AND (C.SystemFlags & ".CSYSFLAG_REJECT_MESSAGE.") " .
             "WHERE BT.bid={$this->ID} ORDER BY BT.uid" );
          while( $row = mysql_fetch_array( $result ) )
          {

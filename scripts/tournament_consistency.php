@@ -81,7 +81,8 @@ define('SEPLINE', "\n<p><hr>\n");
 
    // note: join slightly faster than using subquery: Posts where User_ID not in (select ID from Players)
    $result = db_query( 'tournament_consistency.check_authors',
-      "SELECT TP.tid, T.RegisteredTP, COUNT(*) AS X_Count FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid " .
+      "SELECT TP.tid, T.RegisteredTP, COUNT(*) AS X_Count " .
+      "FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid " .
       "WHERE TP.Status='".TP_STATUS_REGISTER."' GROUP BY TP.tid HAVING T.RegisteredTP <> X_Count" );
    $upd_arr = array();
    while( $row = mysql_fetch_array( $result ) )

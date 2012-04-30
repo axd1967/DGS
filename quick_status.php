@@ -182,9 +182,8 @@ else
       $query = "SELECT UNIX_TIMESTAMP(M.Time) AS date, me.mid, " .
          "me.Folder_nr, M.Type, M.Subject, Players.Handle AS sender " .
          "FROM (Messages AS M, MessageCorrespondents AS me) " .
-         "LEFT JOIN MessageCorrespondents AS other " .
-           "ON other.mid=me.mid AND other.Sender!=me.Sender " .
-         "LEFT JOIN Players ON Players.ID=other.uid " .
+            "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender " .
+            "LEFT JOIN Players ON Players.ID=other.uid " .
          "WHERE me.uid=$player_id AND me.Folder_nr IN (".FOLDER_NEW.",".FOLDER_REPLY.") " .
                  "AND M.ID=me.mid " .
                  "AND me.Sender IN ('N','S') " . //exclude message to myself

@@ -352,7 +352,7 @@ WHERE Date>'2008-04-10' GROUP BY Grp) AS T ORDER BY Qtime desc
 
 SELECT * FROM SlowLog WHERE Date>'2008-04-09' ORDER BY Rows_sent desc
  Query_time  Lock_time  Rows_sent  Rows_examined  Query
- 7           0          14832      340785         SELECT GAMES.*, GAMES.ID AS GID, CLOCK.TICKS AS TICKS FROM GAMES, CLOCK WHERE CL
+ 7           0          14832      340785         SELECT GAMES.*, GAMES.ID AS GID, CLOCK.TICKS AS TICKS FROM (GAMES, CLOCK) WHERE CL
 
 UPDATE SlowLog SET Grp=FLOOR(Query_time/10);
 SELECT Grp, Cnt, Qtime, Qtime/Cnt as Avg, Qtime/Cnt/10-Grp-.5 as Val FROM

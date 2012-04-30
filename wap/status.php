@@ -317,9 +317,8 @@ else
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
       "Messages.Subject, Players.Name AS sender, Players.Handle AS sendhndl " .
       "FROM (Messages, MessageCorrespondents AS me) " .
-      "LEFT JOIN MessageCorrespondents AS other " .
-        "ON other.mid=me.mid AND other.Sender!=me.Sender " .
-      "LEFT JOIN Players ON Players.ID=other.uid " .
+         "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender " .
+         "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
               "AND Messages.ID=me.mid " .
               "AND me.Sender IN('N','S') " . //exclude message to myself

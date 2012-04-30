@@ -45,8 +45,7 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
    {
       $fname = $row0['table_name'];
 
-      $r = mysql_single_fetch( 'conv_forum',
-                  "SELECT MAX(SortOrder) FROM Forums", FETCHTYPE_ROW );
+      $r = mysql_single_fetch( 'conv_forum', "SELECT MAX(SortOrder) FROM Forums", FETCHTYPE_ROW );
       $SortOrder = $r[0] + 1;
 
       mysql_query("INSERT INTO Forums SET " .

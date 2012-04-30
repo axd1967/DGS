@@ -209,9 +209,8 @@ if( !$is_down )
             "UNIX_TIMESTAMP(Messages.Time) AS date, " .
             "Players.Name AS FromName, Players.Handle AS FromHandle " .
             "FROM (Messages, MessageCorrespondents AS me) " .
-            "LEFT JOIN MessageCorrespondents AS other " .
-              "ON other.mid=me.mid AND other.Sender='Y' " .
-            "LEFT JOIN Players ON Players.ID=other.uid " .
+               "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender='Y' " .
+               "LEFT JOIN Players ON Players.ID=other.uid " .
             "WHERE me.uid=$uid AND Messages.ID=me.mid " .
               "AND me.Folder_nr IN ($folderstring) " .
               "AND me.Sender IN('N','S') " . //exclude message to myself

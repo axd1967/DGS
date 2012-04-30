@@ -681,8 +681,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          if( $load_remaining_time ) //RU
          {
             $qsql->add_part( SQLP_FIELDS, "COALESCE(Clock.Ticks,0) AS X_Ticks" );
-            $qsql->add_part( SQLP_FROM,
-               "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
+            $qsql->add_part( SQLP_FROM, "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
          }
       }
 
