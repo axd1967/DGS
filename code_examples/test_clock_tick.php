@@ -23,18 +23,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * Usage: change var $v in code to 'A' or 'B' and run it
  */
 
+chdir('..');
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 
 {
-   if( 1 ) exit; // for security: comment for local-testing only
+   exit; // NOTE: for security: comment for local-testing only
+   $v = 'A'; // NOTE: for manual test -> choose 'A' or 'B' !!
 
    connect2mysql();
 
    $start = time();
-   $lim = 1000;
-   #$lim = 100000;
-   $v = 'B';
+   $lim = 10000;
    for($i=1; $i <= $lim; $i++) {
       test($v, $i, false);
       if( $i % 100 == 0 ) {
@@ -54,24 +54,26 @@ function test( $qver, $nr, $print=true )
       $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                'black.Name as blackname, white.Name as whitename ' .
-               'FROM (Games, Clock, Players as white, Players as black) ' .
-               'WHERE Status'.IS_RUNNING_GAME .
-               'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
-               'AND Clock.ID=Games.ClockUsed ' .
-               "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
-               'AND white.ID=White_ID AND black.ID=Black_ID';
+               'FROM Games ' .
+                  'INNER JOIN Clock ON Clock.ID=Games.ClockUsed ' .
+                  'INNER JOIN Players AS white ON white.ID=Games.White_ID ' .
+                  'INNER JOIN Players AS black ON black.ID=Games.Black_ID ' .
+               "WHERE Status NOT IN ('KOMI','SETUP','INVITED','FINISHED' ) " . // all running games (using != )
+                  'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
+                  "AND Clock.Lastchanged=FROM_UNIXTIME($NOW)";
    }
    else
    {
       $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
                'black.Name as blackname, white.Name as whitename ' .
-               'FROM (Games, Clock, Players as white, Players as black) ' .
-               'WHERE Status'.IS_RUNNING_GAME .
-               'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
-               'AND Clock.ID=Games.ClockUsed ' .
-               "AND Clock.Lastchanged=FROM_UNIXTIME($NOW) " .
-               'AND white.ID=White_ID AND black.ID=Black_ID';
+               'FROM Games ' .
+                  'INNER JOIN Clock ON Clock.ID=Games.ClockUsed ' .
+                  'INNER JOIN Players AS white ON white.ID=Games.White_ID ' .
+                  'INNER JOIN Players AS black ON black.ID=Games.Black_ID ' .
+               'WHERE Status'.IS_RUNNING_GAME . // all running games (using = )
+                  'AND Games.ClockUsed >= 0 ' . // not VACATION_CLOCK
+                  "AND Clock.Lastchanged=FROM_UNIXTIME($NOW)";
    }
 
    $result = db_query( "clock_tick.find_timeout_games", $query );
