@@ -270,6 +270,7 @@ else
       if( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_assoc($result);
+         mysql_free_result($result);
 
          setTZ( $player_row['Timezone']);
 
@@ -289,7 +290,11 @@ else
          if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
             error('login_denied', "wap_status.check.user($uhandle)");
       }
-      //else error('wrong_userid', "wap_status.check.user($uhandle)");
+      else
+      {
+         //error('wrong_userid', "wap_status.check.user($uhandle)");
+         mysql_free_result($result);
+      }
    }
 
    if( !$logged_in )
@@ -316,30 +321,23 @@ else
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
       "Messages.Subject, Players.Name AS sender, Players.Handle AS sendhndl " .
-      "FROM (Messages, MessageCorrespondents AS me) " .
+      "FROM Messages " .
+         "INNER JOIN MessageCorrespondents AS me ON me.mid=Messages.ID " .
          "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender " .
          "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
-              "AND Messages.ID=me.mid " .
-              "AND me.Sender IN('N','S') " . //exclude message to myself
+         "AND me.Sender IN('N','S') " . //exclude message to myself
       "ORDER BY Messages.Time, me.mid";
 
    $resultM = db_query( 'wap3', $query );
    $countM = @mysql_num_rows($resultM);
 
 
-   // Games to play?
-   $sql_order = NextGameOrder::get_next_game_order( @$player_row['NextGameOrder'], 'Games' ); // enum -> order
+   // Games to play? -> build status-query (including next-game-order)
+   $next_game_order = @$player_row['NextGameOrder'];
+   $qsql = NextGameOrder::build_status_games_query( $my_id, IS_STARTED_GAME, $next_game_order );
 
-   $query = "SELECT UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
-       "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
-       "opponent.Name, opponent.Handle " .
-       "FROM (Games,Players AS opponent) " .
-       "WHERE ToMove_ID=$my_id AND Status" . IS_STARTED_GAME .
-         "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       $sql_order;
-
-   $resultG = db_query( 'wap4', $query );
+   $resultG = db_query( 'wap4', $qsql->get_select() );
    $countG = @mysql_num_rows($resultG);
 
 
@@ -404,14 +402,15 @@ else
 
       wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
    }
+   mysql_free_result($resultM);
 
 
    $clrs="BW"; //player's color... so color to play.
    $i= 1;
    while( $row = mysql_fetch_assoc($resultG) )
    {
-      $opponame = @$row['Name'];
-         $opponame.= " (".@$row['Handle'].")";
+      $opponame = @$row['opp_Name'];
+      $opponame.= " (".@$row['opp_Handle'].")";
 
       $gid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
@@ -419,7 +418,7 @@ else
       $hdr= "Game $i";
       $tit= "Opponent: $opponame";
       $lnk= HOSTBASE.'game.php?gid='.$gid;
-      $dat= @$row['date'];
+      $dat= @$row['X_Lastchanged'];
       $dsc= //"Game: $gid" . $wap_sep .
             //"Opponent: $opponame" . $wap_sep .
             "Color: ".$clrs{@$row['Color']} . $wap_sep .
@@ -432,6 +431,7 @@ else
 
       wap_item( $cardid, $hdr, $tit, $lnk, $dsc, $dat, $nextid, $previd);
    }
+   mysql_free_result($resultG);
 
    wap_close();
 }

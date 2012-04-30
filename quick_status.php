@@ -181,12 +181,12 @@ else
    {
       $query = "SELECT UNIX_TIMESTAMP(M.Time) AS date, me.mid, " .
          "me.Folder_nr, M.Type, M.Subject, Players.Handle AS sender " .
-         "FROM (Messages AS M, MessageCorrespondents AS me) " .
+         "FROM Messages AS M " .
+            "INNER JOIN MessageCorrespondents AS me ON me.mid=M.ID " .
             "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender " .
             "LEFT JOIN Players ON Players.ID=other.uid " .
          "WHERE me.uid=$player_id AND me.Folder_nr IN (".FOLDER_NEW.",".FOLDER_REPLY.") " .
-                 "AND M.ID=me.mid " .
-                 "AND me.Sender IN ('N','S') " . //exclude message to myself
+            "AND me.Sender IN ('N','S') " . //exclude message to myself
          "ORDER BY M.Time DESC";
 
       $result = db_query( 'quick_status.find_messages', $query );
@@ -236,28 +236,17 @@ else
    $game_order = strtoupper( trim( get_request_arg('order', @$player_row['NextGameOrder']) ));
    if( (string)$game_order == '' )
       $game_order = @$player_row['NextGameOrder'];
-   $sql_order = NextGameOrder::get_next_game_order( $game_order, 'Games' ); // enum -> order
+
+   // build status-query (including next-game-order)
    $status_op = ( $version < 2 ) ? IS_RUNNING_GAME : IS_STARTED_GAME;
+   $qsql = NextGameOrder::build_status_games_query( $player_id, $status_op, $game_order );
+   $qsql->add_part( SQLP_FIELDS,
+      "COALESCE(Clock.Ticks,0) AS X_Ticks", //always my clock because always my turn (status page)
+      "UNIX_TIMESTAMP(opp.Lastaccess) AS opp_Lastaccess" );
+   $qsql->add_part( SQLP_FROM,
+      "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
 
-   $query = "SELECT Black_ID,White_ID,Games.ID, tid, Games.Handicap, " .
-       "Games.ToMove_ID, Games.GameSetup, " . // for fair-komi-neg.
-       "UNIX_TIMESTAMP(Games.Lastchanged) as date, " .
-       "Maintime, Byotype, Byotime, Byoperiods, " .
-       "White_Maintime, White_Byotime, White_Byoperiods, " .
-       "Black_Maintime, Black_Byotime, Black_Byoperiods, " .
-       "LastTicks, COALESCE(Clock.Ticks,0) AS X_Ticks, " .
-       "Games.Moves, Games.Status, Games.GameType, Games.GamePlayers, Games.ShapeID, " .
-       ( $load_prio ? "COALESCE(GP.Priority,0) AS X_Priority, " : "0 AS X_Priority, " ) .
-       "opponent.Name AS oName, opponent.Handle AS oHandle, opponent.ID AS oId, " .
-       "UNIX_TIMESTAMP(opponent.Lastaccess) AS oLastaccess " .
-       "FROM Games " .
-         "INNER JOIN Players AS opponent ON opponent.ID=(Black_ID+White_ID-$player_id) " .
-         "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed " .
-         ( $load_prio ? "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$player_id " : '' ) .
-       "WHERE ToMove_ID=$player_id AND Status$status_op " .
-       $sql_order;
-
-   $result = db_query( 'quick_status.find_games', $query );
+   $result = db_query( 'quick_status.find_games', $qsql->get_select() );
 
    $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
@@ -287,19 +276,19 @@ else
 
          // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date, Handicap
          echo sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,%s,'%s',%s,'%s',%s\n",
-                       $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
-                       date($datfmt, @$row['date']), $time_remaining['text'],
+                       $row['ID'], slashed(@$row['opp_Handle']), $arr_colors[$player_color],
+                       date($datfmt, @$row['X_Lastchanged']), $time_remaining['text'],
                        $game_action, $game_status, $row['Moves'], $row['tid'], (int)$row['ShapeID'],
                        GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
-                       (int)@$row['X_Priority'], date($datfmt, @$row['oLastaccess']), $row['Handicap']
+                       (int)@$row['X_Priority'], date($datfmt, @$row['opp_Lastaccess']), $row['Handicap']
                      );
       }
       else // older-version
       {
          // 'type', game.ID, 'opponent.handle', 'player.color', 'Lastmove.date', 'TimeRemaining'
          echo sprintf( "'G', %d, '%s', '%s', '%s', '%s'\n",
-                       $row['ID'], slashed(@$row['oHandle']), $arr_colors[$player_color],
-                       date($datfmt, @$row['date']), $time_remaining['text'] );
+                       $row['ID'], slashed(@$row['opp_Handle']), $arr_colors[$player_color],
+                       date($datfmt, @$row['X_Lastchanged']), $time_remaining['text'] );
       }
    }
    mysql_free_result($result);

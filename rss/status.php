@@ -442,12 +442,12 @@ else
 
    $query = "SELECT UNIX_TIMESTAMP(Messages.Time) AS date, me.mid, " .
       "Messages.Subject, Players.Name AS sender, Players.Handle AS sendhndl " .
-      "FROM (Messages, MessageCorrespondents AS me) " .
+      "FROM Messages " .
+         "INNER JOIN MessageCorrespondents AS me ON me.mid=Messages.ID " .
          "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender " .
          "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$my_id AND me.Folder_nr=".FOLDER_NEW." " .
-              "AND Messages.ID=me.mid " .
-              "AND me.Sender IN('N','S') " . //exclude message to myself
+         "AND me.Sender IN('N','S') " . //exclude message to myself
       "ORDER BY Messages.Time, me.mid";
 
    $result = db_query( 'rss3', $query );
@@ -472,28 +472,21 @@ else
             T_('Subject#rss_message') . ": ".@$row['Subject'];
       rss_item( $tit, $lnk, $dsc, $dat, $cat);
    }
+   mysql_free_result($result);
 
 
-   // Games to play?
-   $sql_order = NextGameOrder::get_next_game_order( @$player_row['NextGameOrder'], 'Games' ); // enum -> order
+   // Games to play? -> build status-query (including next-game-order)
+   $next_game_order = @$player_row['NextGameOrder'];
+   $qsql = NextGameOrder::build_status_games_query( $my_id, IS_STARTED_GAME, $next_game_order );
 
-   $query = "SELECT Games.Status, UNIX_TIMESTAMP(Lastchanged) as date,Games.ID, " .
-       "Games.Moves,(White_ID=$my_id)+0 AS Color, " .
-       "Games.GameType, Games.GamePlayers, " .
-       "opponent.Name, opponent.Handle " .
-       "FROM (Games,Players AS opponent) " .
-       "WHERE ToMove_ID=$my_id AND Status" . IS_STARTED_GAME .
-         "AND opponent.ID=(Black_ID+White_ID-$my_id) " .
-       $sql_order;
-
-   $result = db_query( 'rss4', $query );
+   $result = db_query( 'rss4', $qsql->get_select() );
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      $opponame = @$row['Name'];
-      $opponame.= " (".@$row['Handle'].")";
+      $opponame = @$row['opp_Name'];
+      $opponame.= " (".@$row['opp_Handle'].")";
 
       $gid = (int)@$row['ID'];
       $move = (int)@$row['Moves'];
@@ -505,13 +498,14 @@ else
       $tit= sprintf( T_('Game of %s with %s#rss'), $game_type, $opponame );
       $lnk= HOSTBASE.'game.php?gid='.$gid;
       $mov= $lnk.URI_AMP.'move='.$move;
-      $dat= @$row['date'];
+      $dat= @$row['X_Lastchanged'];
       $dsc= T_('Game#rss') . ": $gid $rss_sep" .
             T_('Opponent') . ": $opponame $rss_sep" .
             T_('Color') . ": ".$clrs{@$row['Color']} . $rss_sep .
             T_('Move') . ": ".$move;
       rss_item( $tit, $lnk, $dsc, $dat, $cat, $mov);
    }
+   mysql_free_result($result);
 
 
    if( $nothing_found )
