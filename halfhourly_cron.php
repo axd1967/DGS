@@ -128,7 +128,6 @@ if( !$is_down )
    $result = db_query( 'halfhourly_cron.find_notifications',
             "SELECT ID as uid, Handle, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players"
             ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>''");
-            //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'");
 
 
    while( $row = mysql_fetch_assoc( $result ) )
@@ -143,7 +142,7 @@ if( !$is_down )
 
       $msg = sprintf( "A message or game move is waiting for you [ %s ] at:\n ", $Handle )
                 . mail_link('',"status.php")."\n"
-           . "(No more notifications will be send until your reconnection)\n";
+           . "(No more notifications will be sent until your reconnection)\n";
 
       // Find games
 
@@ -250,16 +249,15 @@ if( !$is_down )
    mysql_free_result($result);
 
 
-   //Setting Notify to 'DONE' stop notifications until the player's visite
+   // Setting Notify to 'DONE' stop notifications until the player's visit
    db_query( 'halfhourly_cron.update_players_notify_Done',
          "UPDATE Players SET Notify='DONE'"
-         ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)"); // LIMIT ?
-         //." WHERE SendEmail LIKE '%ON%' AND Notify='NOW'" ); // LIMIT ?
+         ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
 
+   // Setting Notify to 'NOW' for next bunch of notifications (to avoid race-conditions while processing 'NEXT')
    db_query( 'halfhourly_cron.update_players_notify_Now',
          "UPDATE Players SET Notify='NOW'"
-         ." WHERE Notify='NEXT' AND FIND_IN_SET('ON',SendEmail)"); // LIMIT ?
-         //." WHERE SendEmail LIKE '%ON%' AND Notify='NEXT'" ); // LIMIT ?
+         ." WHERE Notify='NEXT' AND FIND_IN_SET('ON',SendEmail)");
 
 
 

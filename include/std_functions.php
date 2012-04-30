@@ -2390,7 +2390,7 @@ define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
 // login-options
 define('LOGIN_QUICK_SUITE', 0x01);
 define('LOGIN_UPD_ACTIVITY', 0x02);
-define('LOGIN_RESET_NOTIFY', 0x04);
+define('LOGIN_RESET_NOTIFY', 0x04); // set Players.Notify to NONE (nothing to notify, after user checked on GUI)
 define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
 
 /**

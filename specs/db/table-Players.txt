@@ -52,7 +52,7 @@ OuA | Name             | varchar(40)                                 | NO   | MU
  u  | Email            | varchar(80)                                 | NO   |     |                     |                |
 Ou  | Rank             | varchar(40)                                 | NO   |     |                     |                |
  u  | SendEmail        | set('ON','MOVE','BOARD','MESSAGE')          | NO   |     |                     |                |
- u  | Notify           | enum('NONE','NEXT','NOW','DONE')            | NO   |     | NONE                |                |
+ S  | Notify           | enum('NONE','NEXT','NOW','DONE')            | NO   |     | NONE                |                |
  SZ | CountMsgNew      | mediumint(9)                                | NO   |     | -1                  |                |
  SZ | CountFeatNew     | smallint(6)                                 | NO   |     | -1                  |                |
  SZ | CountBulletinNew | smallint(6)                                 | NO   |     | -1                  |                |
@@ -156,6 +156,20 @@ Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |   
 
 -------------------------------------------------
 # Description of fields:
+
+* Notify : field indicating if there is something to notify
+   - if there's something to notify, user is notified dependent on SendEmail-field
+   - Values:
+     - NONE : nothing to notify; normally set if user is logging in via Web-GUI, so user can see new messages by himself
+     - NEXT : something is there to notify, e.g. new message or game-move
+     - NOW  : notify-state that is next picked up to send emails in halfhourly-cron (set to avoid race-condition in cron-script as well)
+     - DONE : stops further notifications till the players next visit; set after last notification per email
+
+* SendEmail : user-configuration controlling what notifications to sent per mail
+   - ON : if set, mail-notifications are created at all and being sent out
+   - MOVE : mail-notifications contain game-moves since last web-access
+   - BOARD : game-moves contain ASCII-board as well
+   - MESSAGE : mail-notifications contain new messages since last web-access
 
 * Running : number of running games (including MP-games)
    - MP-games in SETUP-mode are not counted with Running, see GamesMPG-field
