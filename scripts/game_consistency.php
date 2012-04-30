@@ -203,13 +203,12 @@ echo ">>>> Most of them needs manual fixes.";
 //---------
    echo "\n<hr>Ratinglog end dates check:";
 
-   $query = "SELECT Games.ID,Games.Lastchanged,B.Time as Black_Time,W.Time as White_Time"
-      . " FROM (Games,Ratinglog as B,Ratinglog as W)"
-      . " WHERE Games.Rated='Done'"
-      . " AND B.gid=Games.ID AND B.uid=Games.Black_ID"
-      . " AND W.gid=Games.ID AND W.uid=Games.White_ID"
-      . " AND (Games.Lastchanged!=B.Time OR Games.Lastchanged!=W.Time)"
-      . "$where ORDER BY Games.ID$limit";
+   $query = "SELECT Games.ID,Games.Lastchanged,B.Time as Black_Time,W.Time as White_Time " .
+      "FROM Games " .
+         "INNER JOIN Ratinglog AS B ON B.gid=Games.ID AND B.uid=Games.Black_ID " .
+         "INNER JOIN Ratinglog AS W ON W.gid=Games.ID AND W.uid=Games.White_ID " .
+      "WHERE Games.Rated='Done' AND (Games.Lastchanged!=B.Time OR Games.Lastchanged!=W.Time) $where " .
+      "ORDER BY Games.ID $limit";
 
    echo "\n<br>query: $query;\n";
    $result = mysql_query($query)

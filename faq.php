@@ -37,8 +37,8 @@ require_once( "include/form_functions.php" );
    // init vars
    $TW_ = 'T_'; // for non-const translation-texts
    $faq_url = 'faq.php?';
-   //$faqhide = "AND entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
-   $faqhide = " AND entry.Hidden='N' AND parent.Hidden='N'"; //need a viewable root
+   //$faqhide = " entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
+   $faqhide = " entry.Hidden='N' AND parent.Hidden='N' "; //need a viewable root
 
    $arr_languages = get_language_descriptions_translated();
    $lang = get_request_arg('lang', 0);
@@ -92,9 +92,11 @@ require_once( "include/form_functions.php" );
          "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-         "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
+         "FROM FAQ AS entry " .
+            "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
+            "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
             "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-         "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
+         "WHERE $faqhide " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder";
       $result = db_query( 'faq.search_entries', $query );
 
@@ -162,10 +164,11 @@ require_once( "include/form_functions.php" );
          "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-         "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
+         "FROM FAQ AS entry " .
+            "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
+            "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
             "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-         "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
-         ( $cat === 'all' ? '' : "AND (entry.ID=$cat OR entry.Parent=$cat) " ) .
+         "WHERE $faqhide " . ( $cat === 'all' ? '' : "AND (entry.ID=$cat OR entry.Parent=$cat) " ) .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder" );
 
       if( mysql_num_rows($result) > 0 )
@@ -195,9 +198,10 @@ require_once( "include/form_functions.php" );
       $result = db_query( 'faq.find_titles',
          "SELECT entry.*, Question.Text AS Q, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
-         "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
-         "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
-            "AND entry.Level<3 AND entry.Level>0 " .
+         "FROM FAQ AS entry " .
+            "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
+            "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
+         "WHERE $faqhide AND entry.Level<3 AND entry.Level>0 " .
          "ORDER BY CatOrder,entry.Level,entry.SortOrder" );
 
       if( mysql_num_rows($result) > 0 )

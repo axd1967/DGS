@@ -64,14 +64,16 @@ else
    $my_id = $player_row['ID'];
 
    $game_row = mysql_single_fetch( 'quick_play.find_game',
-         "SELECT Games.*, " .
-            "Games.Flags+0 AS GameFlags, " . //used by check_move
+         "SELECT G.*, " .
+            "G.Flags+0 AS GameFlags, " . //used by check_move
             "black.ClockUsed AS Blackclock, " .
             "white.ClockUsed AS Whiteclock, " .
             "black.OnVacation AS Blackonvacation, " .
             "white.OnVacation AS Whiteonvacation " .
-         "FROM (Games, Players AS black, Players AS white) " .
-         "WHERE Games.ID=$gid AND Black_ID=black.ID AND White_ID=white.ID"
+         'FROM Games AS G ' .
+            'INNER JOIN Players AS black ON black.ID=G.Black_ID ' .
+            'INNER JOIN Players AS white ON white.ID=G.White_ID ' .
+         "WHERE G.ID=$gid "
       );
 
    if( !$game_row )

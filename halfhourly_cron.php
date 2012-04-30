@@ -150,13 +150,14 @@ if( !$is_down )
       if( is_numeric(strpos($SendEmail, 'MOVE')) )
       {
          $query = "SELECT Games.*, " .
-             "black.Name AS Blackname, " .
-             "black.Handle AS Blackhandle, " .
-             "white.Name AS Whitename, " .
-             "white.Handle AS Whitehandle " .
-             "FROM (Games, Players AS black, Players AS white) " .
-             "WHERE ToMove_ID=$uid AND Black_ID=black.ID AND White_ID=white.ID" .
-             " AND Lastchanged >= FROM_UNIXTIME($X_Lastaccess)";
+            "black.Name AS Blackname, " .
+            "black.Handle AS Blackhandle, " .
+            "white.Name AS Whitename, " .
+            "white.Handle AS Whitehandle " .
+            "FROM Games " .
+               "INNER JOIN Players AS black ON black.ID=Games.Black_ID " .
+               "INNER JOIN Players AS white ON white.ID=Games.White_ID " .
+            "WHERE ToMove_ID=$uid AND Lastchanged >= FROM_UNIXTIME($X_Lastaccess)";
 
          $gres = db_query( 'halfhourly_cron.find_games', $query );
 
@@ -208,12 +209,13 @@ if( !$is_down )
          $query = "SELECT Messages.ID,Subject,Text, " .
             "UNIX_TIMESTAMP(Messages.Time) AS date, " .
             "Players.Name AS FromName, Players.Handle AS FromHandle " .
-            "FROM (Messages, MessageCorrespondents AS me) " .
+            "FROM Messages " .
+               "INNER JOIN MessageCorrespondents AS me ON me.mid=Messages.ID " .
                "LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender='Y' " .
                "LEFT JOIN Players ON Players.ID=other.uid " .
-            "WHERE me.uid=$uid AND Messages.ID=me.mid " .
+            "WHERE me.uid=$uid " .
               "AND me.Folder_nr IN ($folderstring) " .
-              "AND me.Sender IN('N','S') " . //exclude message to myself
+              "AND me.Sender IN ('N','S') " . //exclude message to myself
               "AND Messages.Time > FROM_UNIXTIME($X_Lastaccess) " .
             "ORDER BY Time DESC";
 

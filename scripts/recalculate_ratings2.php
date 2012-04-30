@@ -104,11 +104,13 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    $sql_have_rating = "IN ('".RATING_INIT."','".RATING_RATED."')";
    $query = "SELECT Games.ID as gid, " .
        "UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged " .
-       "FROM (Games, Players as white, Players as black) " .
-       "WHERE Status='FINISHED' AND Rated IN ('Y','Done') " . //redo Rated='Done' and do missed Rated='Y'
-       "AND white.ID=White_ID AND white.RatingStatus $sql_have_rating " .
-       "AND black.ID=Black_ID AND black.RatingStatus $sql_have_rating " .
-       "ORDER BY Lastchanged,gid $limit";
+       "FROM Games " .
+         "INNER JOIN Players as white ON white.ID=Games.White_ID " .
+         "INNER JOIN Players as black ON black.ID=Games.Black_ID " .
+       "WHERE Games.Status='FINISHED' AND Games.Rated IN ('Y','Done') " . //redo Rated='Done' and do missed Rated='Y'
+       "AND white.RatingStatus $sql_have_rating " .
+       "AND black.RatingStatus $sql_have_rating " .
+       "ORDER BY Games.Lastchanged, Games.ID $limit";
 
    $result = mysql_query( $query )
            or die("<BR>" . mysql_error() );

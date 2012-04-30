@@ -82,12 +82,13 @@ require_once( "include/std_functions.php" );
 
    echo "<hr>Lost replied:";
 
-   $query = "SELECT org.*, cor.Replied, cor.Sender, cor.ID as cid, rep.ID as rid"
-     ." FROM (Messages as rep, Messages as org, MessageCorrespondents AS cor, MessageCorrespondents AS cre)"
-     ." WHERE rep.ReplyTo=org.ID"
-     .  " AND cor.mid=org.ID AND cor.Replied!='Y' AND cor.Sender!='Y'"
-     .  " AND cre.mid=rep.ID AND cre.Sender!='N' AND cor.uid=cre.uid"
-     ." ORDER BY org.ID";
+   $query = "SELECT org.*, cor.Replied, cor.Sender, cor.ID as cid, rep.ID as rid " .
+      "FROM Messages AS rep " .
+         "INNER JOIN Messages AS org ON org.ID=rep.ReplyTo " .
+         "INNER JOIN MessageCorrespondents AS cor ON cor.mid=org.ID " .
+         "INNER JOIN MessageCorrespondents AS cre ON cre.mid=rep.ID AND cre.uid=cor.uid " .
+      "WHERE cor.Replied!='Y' AND cor.Sender!='Y' AND cre.Sender!='N' " .
+      "ORDER BY org.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -173,10 +174,10 @@ function check_myself_message( $user_id=false)
       "me.ID as me_mcID, other.ID as other_mcID, " .
       "me.Replied AS replied, other.Replied AS other_replied, " .
       "me.Folder_nr AS folder, other.Folder_nr AS other_folder " .
-      "FROM (MessageCorrespondents AS me, MessageCorrespondents AS other) " .
-      "WHERE other.mid=me.mid AND other.uid=me.uid " .
-        "AND me.Sender='N' AND other.Sender != me.Sender " .
-        ( $user_id>0 ? "AND me.uid=$user_id " : "" ) .
+      "FROM MessageCorrespondents AS me " .
+         "INNER JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.uid=me.uid AND other.Sender != me.Sender " .
+      "WHERE me.Sender='N' " .
+        ( $user_id>0 ? " AND me.uid=$user_id " : "" ) .
       "ORDER BY me.uid, me.mid";
 
    $result = mysql_query( $query ) or die(mysql_error());
@@ -252,11 +253,12 @@ function check_result_message( $user_id=false)
    $query = "SELECT M.ID as mid, M.Type, M.Game_ID as gid, M.Subject"
       .", me.uid as uid, me.ID as me_mcID"
       .", G.Status, G.Score"
-      ." FROM (Messages AS M, Games as G)"
+      ." FROM Messages AS M"
+         ." INNER JOIN Games AS G ON G.ID=M.Game_ID"
          ." LEFT JOIN MessageCorrespondents AS me ON M.ID=me.mid"
       ." WHERE M.Type='".MSGTYPE_NORMAL."' AND M.Game_ID>0"
          ." AND M.Subject LIKE '%esult%' AND LEFT(M.Subject,3)!='RE:'"
-         ." AND G.ID=M.Game_ID AND G.Status='".GAME_STATUS_FINISHED."'"
+         ." AND G.Status='".GAME_STATUS_FINISHED."'"
          .( $user_id>0 ? " AND me.uid=$user_id" : "" )
       ." ORDER BY me.uid, M.ID";
 

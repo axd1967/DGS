@@ -240,11 +240,12 @@ echo ">>>> Most of them needs manual fixes.";
 //---------
    echo "<hr>Translation texts without group:";
 
-   $query = "SELECT T.ID as TID, T.*, I.*, G.*"
-     ." FROM (TranslationTexts AS T, TranslationFoundInGroup AS I)"
-     ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
-     ." WHERE T.ID>0 AND T.Text>'' AND I.Text_ID=T.ID"
-     ." ORDER BY T.ID";
+   $query = "SELECT TT.ID AS TID, TT.*, TFIG.*, TG.* " .
+      "FROM TranslationTexts AS TT " .
+         "INNER JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=TT.ID " .
+         "LEFT JOIN TranslationGroups AS TG ON TG.ID=TFIG.Group_ID " .
+      "WHERE TT.ID>0 AND TT.Text>'' " .
+      "ORDER BY TT.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
    while( ($row = mysql_fetch_assoc( $result )) )
@@ -278,13 +279,14 @@ echo ">>>> Most of them needs manual fixes.";
    {
       echo "<br>- FAQ $type:\n";
 
-      $query = "SELECT F.ID as FID,F.*,I.*,G.*"
-        ." FROM (FAQ as F,TranslationTexts AS T)"
-        ." LEFT JOIN TranslationFoundInGroup AS I ON I.Text_ID=F.$type AND I.Group_ID=$FAQ_group" //see HAVING clause
-        ." LEFT JOIN TranslationGroups AS G ON I.Group_ID=G.ID"
-        ." WHERE F.ID>0 AND F.$type>0 AND T.ID=F.$type AND T.Text>''"
-        ." HAVING G.Groupname IS NULL"
-        ." ORDER BY F.ID";
+      $query = "SELECT FAQ.ID AS FID, FAQ.*, TFIG.*, TG.* " .
+         "FROM FAQ " .
+            "INNER JOIN TranslationTexts AS TT ON TT.ID=FAQ.$type " .
+            "LEFT JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=FAQ.$type AND TFIG.Group_ID=$FAQ_group " . //see HAVING clause
+            "LEFT JOIN TranslationGroups AS TG ON TG.ID=TFIG.Group_ID " .
+         "WHERE FAQ.ID>0 AND FAQ.$type>0 AND TT.Text>'' " .
+         "HAVING TG.Groupname IS NULL " .
+         "ORDER BY FAQ.ID";
       $result = mysql_query( $query ) or die(mysql_error());
 
       while( ($row = mysql_fetch_assoc( $result )) )

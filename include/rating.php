@@ -255,15 +255,19 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 
    $WithinPercent = 1/4;
 
-   $query = "SELECT Games.*, ".
+   $query = "SELECT G.*, ".
       "white.Rating2 as wRating, white.RatingStatus as wRatingStatus, " .
       "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
       "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
       "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
-      "FROM (Games, Players as white, Players as black) " .
-      "WHERE Games.ID=$gid AND white.ID=White_ID AND black.ID=Black_ID " .
-         ( $simul ? '' : "AND Status='".GAME_STATUS_FINISHED."' " ) .
-         ( $check_done ? "AND Rated!='Done' " : '' );
+      "FROM Games AS G " .
+         "INNER JOIN Players AS black ON black.ID=G.Black_ID " .
+         "INNER JOIN Players AS white ON white.ID=G.White_ID " .
+      "WHERE G.ID=$gid";
+   if( $simul )
+      $query .= " AND G.Status='".GAME_STATUS_FINISHED."'";
+   if( $check_done )
+      $query .= " AND G.Rated!='Done'";
 
    $result = db_query( 'update_rating2.find_game', $query );
    if( @mysql_num_rows($result) != 1 )

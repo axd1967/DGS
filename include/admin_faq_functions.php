@@ -239,8 +239,9 @@ class AdminFAQ
 
       $row = mysql_single_fetch( "$dbgmsg.find($fid)",
             "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
-            "FROM ($dbtable AS Entry, $dbtable AS Parent) " .
-            "WHERE Entry.ID=$fid AND Parent.ID=Entry.Parent LIMIT 1" )
+            "FROM $dbtable AS Entry " .
+               "INNER JOIN $dbtable AS Parent ON Parent.ID=Entry.Parent " .
+            "WHERE Entry.ID=$fid LIMIT 1" )
          or error('admin_no_such_entry', "$dbgmsg.find2($fid)");
 
       $query = "SELECT ID FROM $dbtable WHERE Level=1 AND SortOrder " .

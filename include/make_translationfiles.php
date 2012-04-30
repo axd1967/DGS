@@ -94,20 +94,19 @@ function make_include_files($language=null, $group=null) //must be called from m
 
    chdir( 'translations'); //must be called from main dir
 
-   $query = "SELECT Translations.Text, TranslationGroups.Groupname, " .
-      "TranslationLanguages.Language, TranslationTexts.Text AS Original " .
-      "FROM (Translations, TranslationTexts, TranslationLanguages, " .
-         "TranslationFoundInGroup, TranslationGroups) " .
-      "WHERE Translations.Language_ID = TranslationLanguages.ID ".
-      //"AND Translations.Text!='' " . //else a file containing only '' will not be reseted
-      "AND TranslationTexts.ID=Translations.Original_ID " .
-      "AND TranslationFoundInGroup.Text_ID=Translations.Original_ID " .
-      "AND TranslationGroups.ID=TranslationFoundInGroup.Group_ID ";
+   $query = "SELECT Translations.Text, TG.Groupname, TL.Language, TT.Text AS Original " .
+      "FROM Translations " .
+         "INNER JOIN TranslationTexts AS TT ON TT.ID=Translations.Original_ID " .
+         "INNER JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=Translations.Original_ID " .
+         "INNER JOIN TranslationGroups AS TG ON TG.ID=TFIG.Group_ID " .
+         "INNER JOIN TranslationLanguages AS TL " .
+      "WHERE Translations.Language_ID = TL.ID ";
+      //"AND Translations.Text!='' "; //else a file containing only '' will not be reseted
 
    if( !empty($group) )
-      $query .= "AND TranslationGroups.Groupname='$group' ";
+      $query .= "AND TG.Groupname='$group' ";
    if( !empty($language) )
-      $query .= "AND TranslationLanguages.Language='$language' ";
+      $query .= "AND TL.Language='$language' ";
 
    $query .= "ORDER BY Language,Groupname";
 
@@ -158,8 +157,7 @@ function make_include_files($language=null, $group=null) //must be called from m
 } //make_include_files
 
 
-function translations_query( $translate_lang, $untranslated, $group
-               , $from_row=-1, $alpha_order=false, $filter_en='')
+function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='')
 {
    /* Note: Some items appear two or more times within the untranslated set
       when from different groups. But we can't use:
@@ -182,22 +180,23 @@ function translations_query( $translate_lang, $untranslated, $group
       $limit = '';
 
    $query = "SELECT Translations.Text"
-          . ",TranslationTexts.ID AS Original_ID"
-          . ",TranslationLanguages.ID AS Language_ID"
-          . ",TranslationFoundInGroup.Group_ID"
-          . ",TranslationTexts.Text AS Original"
-          . ",TranslationTexts.Translatable"
+          . ",TT.ID AS Original_ID"
+          . ",TL.ID AS Language_ID"
+          . ",TFIG.Group_ID"
+          . ",TT.Text AS Original"
+          . ",TT.Translatable"
           . ",Translations.Translated"
-   . " FROM (TranslationTexts,TranslationLanguages,TranslationFoundInGroup,TranslationGroups)"
-      . " LEFT JOIN Translations ON Translations.Original_ID=TranslationTexts.ID AND Translations.Language_ID=TranslationLanguages.ID"
-   . " WHERE TranslationLanguages.Language='".mysql_addslashes($translate_lang)."'"
-      . " AND TranslationFoundInGroup.Group_ID=TranslationGroups.ID"
-      . " AND TranslationFoundInGroup.Text_ID=TranslationTexts.ID"
-      . " AND TranslationTexts.Text>''"
-      . " AND TranslationTexts.Translatable!='N'" ;
+   . " FROM TranslationTexts AS TT"
+      . " INNER JOIN TranslationGroups AS TG"
+      . " INNER JOIN TranslationFoundInGroup TFIG ON TFIG.Group_ID=TG.ID AND TFIG.Text_ID=TT.ID"
+      . " INNER JOIN TranslationLanguages AS TL"
+      . " LEFT JOIN Translations ON Translations.Original_ID=TT.ID AND Translations.Language_ID=TL.ID"
+   . " WHERE TL.Language='".mysql_addslashes($translate_lang)."'"
+      . " AND TT.Text>''"
+      . " AND TT.Translatable!='N'" ;
 
    if( $filter_en )
-      $query .= " AND TranslationTexts.Text LIKE '%".mysql_addslashes($filter_en)."%'";
+      $query .= " AND TT.Text LIKE '%".mysql_addslashes($filter_en)."%'";
 
    if( $untranslated )
    {
@@ -206,7 +205,7 @@ function translations_query( $translate_lang, $untranslated, $group
    }
 
    if( $group != 'allgroups' )
-      $query .= " AND TranslationGroups.Groupname='".mysql_addslashes($group)."'";
+      $query .= " AND TG.Groupname='".mysql_addslashes($group)."'";
    $query .= $order.$limit;
 
    $result = db_query( 'translations_query', $query );

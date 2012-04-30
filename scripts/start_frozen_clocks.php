@@ -65,9 +65,8 @@ echo ">>>> Should not be used now. Do not run it before a check."; end_html(); e
 
 
    $query = "SELECT Games.ID AS gid, ClockUsed, LastTicks, Clock.Ticks " .
-      "FROM (Games, Clock) " .
-      "WHERE Clock.ID=Games.ClockUsed " .
-      "AND Games.Status" . IS_STARTED_GAME .
+      "FROM Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed " .
+      "WHERE Games.Status" . IS_STARTED_GAME .
       "HAVING Clock.Ticks < LastTicks";
 
    $result = mysql_query($query);

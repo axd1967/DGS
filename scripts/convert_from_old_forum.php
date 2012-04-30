@@ -60,9 +60,11 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
       $new_forum_ID = mysql_insert_id();
 
 
-      $query = "SELECT $fname.*," . $fname . "_bodies.body FROM ($fname, " . $fname . "_bodies) " .
-         "WHERE $fname.id=" . $fname . "_bodies.id AND approved='Y' ORDER by $fname.id";
-
+      $tbl = $fname . '_bodies';
+      $query = "SELECT $fname.*, $tbl.body " .
+         "FROM $fname INNER JOIN $tbl ON $tbl.id=$fname.id " .
+         "WHERE approved='Y' " .
+         "ORDER by $fname.id";
       $result_1 = mysql_query( $query ) or die(mysql_error());
 
 

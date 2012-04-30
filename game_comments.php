@@ -46,8 +46,10 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $game = mysql_single_fetch( 'game_comments.find_game',
       'SELECT G.Status, G.GameType, G.GamePlayers, G.Handicap, G.Moves, G.Black_ID, G.White_ID' .
          ', black.Name AS Blackname, white.Name AS Whitename' .
-      ' FROM (Games AS G, Players AS black, Players AS white)' .
-      " WHERE G.ID=$gid AND G.Black_ID=black.ID AND G.White_ID=white.ID LIMIT 1" );
+      ' FROM Games AS G' .
+         ' INNER JOIN Players AS black ON black.ID=G.Black_ID ' .
+         ' INNER JOIN Players AS white ON white.ID=G.White_ID ' .
+      " WHERE G.ID=$gid LIMIT 1" );
    if( !$game )
       error('unknown_game', "game_comments.find_game($gid)");
    $gstatus = $game['Status'];

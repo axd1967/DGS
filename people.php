@@ -249,10 +249,7 @@ function get_executives( $level )
    $extra_info = $logged_in && (@$player_row['admin_level'] & ADMIN_TRANSLATORS);
 
    $result = db_query( 'people.find_translators',
-      "SELECT ID,Handle,Name,Translator" .
-      " FROM Players" .
-      " WHERE Translator>''" .
-      " ORDER BY ID" );
+      "SELECT ID,Handle,Name,Translator FROM Players WHERE Translator>'' ORDER BY ID" );
 
    $translator_list = array();
    while( $row = mysql_fetch_array( $result ) )
@@ -274,10 +271,10 @@ function get_executives( $level )
 
          if( $extra_info )
          {
-            $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date'
-               . ' FROM (Translationlog AS T,TranslationLanguages AS L)'
-               . " WHERE T.Language_ID=L.ID AND T.Player_ID=$uid AND L.Language='$language'"
-               . ' ORDER BY T.Date DESC LIMIT 1';
+            $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date ' .
+               'FROM Translationlog AS T INNER JOIN TranslationLanguages AS L ON L.ID=T.Language_ID ' .
+               "WHERE T.Player_ID=$uid AND L.Language='$language' " .
+               'ORDER BY T.Date DESC LIMIT 1';
             $tmp = mysql_single_fetch( 'people.translators.lastupdate', $query);
             $row['LastUpdate'] = $tmp ? $tmp['Date'] : 0;
          }
