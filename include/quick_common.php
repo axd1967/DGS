@@ -115,8 +115,8 @@ define('COOKIE_PREFIX', 'cookie_');
 define('UHANDLE_NAME', 'user'); //see quick_status.php and get_request_user()
 
 /*! SQL-clause-part applied for Games.Status to select all running games. */
-define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2')"); // all running-games (play-mode)
-define('IS_STARTED_GAME', " IN ('KOMI','PLAY','PASS','SCORE','SCORE2')"); // running-games + fair-komi-negotiation, also used for SameOpponent-check
+define('IS_RUNNING_GAME', " IN ('PLAY','PASS','SCORE','SCORE2') "); // all running-games (play-mode)
+define('IS_STARTED_GAME', " IN ('KOMI','PLAY','PASS','SCORE','SCORE2') "); // running-games + fair-komi-negotiation, also used for SameOpponent-check
 
 //used in daily_cron.php & others (to "mark" forum oldest unread entry)
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * SECS_PER_DAY); // [secs]
