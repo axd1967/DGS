@@ -76,7 +76,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $result = db_query( 'game_comments.messages',
       'SELECT Moves.MoveNr,Moves.Stone,MoveMessages.Text'
       .' FROM MoveMessages'
-      ." INNER JOIN Moves ON Moves.gid=$gid AND Moves.MoveNr=MoveMessages.MoveNr"
+         ." INNER JOIN Moves ON Moves.gid=$gid AND Moves.MoveNr=MoveMessages.MoveNr"
       ." WHERE MoveMessages.gid=$gid"
             .' AND Moves.PosX>='.POSX_RESIGN.' AND Moves.Stone IN ('.WHITE.','.BLACK.')'
       .' ORDER BY Moves.MoveNr' );

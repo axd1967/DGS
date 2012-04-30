@@ -93,7 +93,7 @@ require_once( "include/form_functions.php" );
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
-         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+            "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder";
       $result = db_query( 'faq.search_entries', $query );
@@ -163,7 +163,7 @@ require_once( "include/form_functions.php" );
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder " .
          "FROM (FAQ AS entry, FAQ AS parent, TranslationTexts AS Question) " .
-         "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
+            "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
          "WHERE parent.ID=entry.Parent $faqhide AND Question.ID=entry.Question " .
          ( $cat === 'all' ? '' : "AND (entry.ID=$cat OR entry.Parent=$cat) " ) .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder" );

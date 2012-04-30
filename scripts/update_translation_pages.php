@@ -226,7 +226,6 @@ function group_string( $id)
 // now, compare with the database to see which entries should be updated.
 
    $query = "SELECT * FROM TranslationPages";
-
    $result = mysql_query($query) or die(mysql_error());
 
    $n= (int)mysql_num_rows($result);

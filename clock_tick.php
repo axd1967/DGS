@@ -143,7 +143,7 @@ if( !$is_down )
    $result = db_query( 'clock_tick.find_timeout_games',
       "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags+0 AS X_GameFlags"
       ." FROM Games"
-      ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
+         ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
       ." WHERE Clock.ID >= 0 AND" // older DGS-clones may still have clocks<0
       ." IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) * ".TICK_FREQUENCY." < Clock.Ticks - Games.LastTicks "
       ." AND Status" . IS_STARTED_GAME

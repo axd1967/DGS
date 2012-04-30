@@ -519,7 +519,7 @@ $info_box = '<ul>
             . ",0 AS MatchAnswer"
            )
          . " FROM ($dbtable AS entry, $dbtable AS parent, TranslationTexts AS Question)"
-         . " LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer"
+            . " LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer"
          . " WHERE entry.Parent = parent.ID AND Question.ID=entry.Question"
          . " AND entry.Level<3 AND entry.Level>0"
          . " ORDER BY CatOrder,entry.Level,entry.SortOrder";
