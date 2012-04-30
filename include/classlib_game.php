@@ -24,6 +24,7 @@ $TranslateGroups[] = "Game";
 require_once 'include/globals.php';
 require_once 'include/time_functions.php';
 require_once 'include/board.php';
+require_once 'include/std_classes.php';
 
 
  /*!
@@ -506,6 +507,39 @@ class NextGameOrder
          4 => T_('Time remaining#nextgame'),
       );
    }
+
+   /*! \brief Builds basic QuerySQL for retrieving status-games. */
+   function build_status_games_query( $uid, $game_status_op, $next_game_order )
+   {
+      $sql_order = NextGameOrder::get_next_game_order( $next_game_order, 'Games', /*orderby*/false ); // enum -> order
+      $load_prio = ($next_game_order == NGO_PRIO);
+
+      $qsql = new QuerySQL(
+            SQLP_FIELDS,
+               'Games.*',
+               'UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged',
+               "(Games.White_ID=$uid)+0 AS Color",
+               'opp.ID AS opp_ID', 'opp.Name AS opp_Name', 'opp.Handle AS opp_Handle', 'opp.Rating2 AS opp_Rating',
+            SQLP_FROM,
+               'Games',
+               "INNER JOIN Players AS opp ON opp.ID=(Games.Black_ID+Games.White_ID-$uid)",
+            SQLP_WHERE,
+               "Games.ToMove_ID=$uid",
+               "Games.Status $game_status_op",
+            SQLP_ORDER,
+               $sql_order
+         );
+
+      if( $load_prio )
+      {
+         $qsql->add_part( SQLP_FIELDS, "COALESCE(GP.Priority,0) AS X_Priority" );
+         $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
+      }
+      else
+         $qsql->add_part( SQLP_FIELDS, '0 AS X_Priority');
+
+      return $qsql;
+   }//build_status_games_query
 
    /*!
     * \brief Maps NextGameOrder for status-games.

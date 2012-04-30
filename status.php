@@ -295,9 +295,9 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if( $show_notes )
       $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
-   $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'Name+');
-   $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'Handle+');
-   $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'Rating2-');
+   $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'opp_Name+');
+   $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'opp_Handle+');
+   $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'opp_Rating-');
    $gtable->add_tablehead( 5, T_('Color#header'), 'Image', 0, 'X_Color+');
    $gtable->add_tablehead(19, T_('GameType#header'), '', 0, 'GameType+');
    $gtable->add_tablehead(18, T_('Ruleset#header'), '', 0, 'Ruleset-');
@@ -313,7 +313,7 @@ function load_games_to_move( $uid, &$gtable )
       ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
 
-   // static order for status-games (coupled with "next game" on game-page)
+   // static order for status-games (coupled with "next game" on game-page); for table-sort-indicators
    if( $next_game_order == NGO_LASTMOVED )
       $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
    elseif( $next_game_order == NGO_MOVES )
@@ -322,33 +322,28 @@ function load_games_to_move( $uid, &$gtable )
       $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
    elseif( $next_game_order == NGO_TIMELEFT )
       $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
-   //$order = $gtable->current_order_string('ID-');
    $gtable->make_sort_images();
-   $order = NextGameOrder::get_next_game_order( $next_game_order, 'Games' ); // enum -> order
    $gtable->use_show_rows(false);
 
-
-   $query = "SELECT Games.*, UNIX_TIMESTAMP(Games.Lastchanged) AS Time"
-      .",IF(Rated='N','N','Y') AS X_Rated"
-      .",opponent.Name,opponent.Handle,opponent.Rating2 AS Rating,opponent.ID AS pid"
-      .",UNIX_TIMESTAMP(opponent.Lastaccess) AS X_OppLastaccess"
+   // build status-query (including next-game-order)
+   $qsql = NextGameOrder::build_status_games_query( $uid, IS_STARTED_GAME, $next_game_order );
+   $qsql->add_part( SQLP_FIELDS,
+      "IF(Rated='N','N','Y') AS X_Rated",
       //extra bits of X_Color are for sorting purposes
       //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-      .",IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color"
-      .",COALESCE(Clock.Ticks,0) AS X_Ticks" //always my clock because always my turn (status page)
-      .(!$load_notes ? '': ",GN.Notes AS X_Note" )
-      .($load_prio ? ",COALESCE(GP.Priority,0) AS X_Priority" : ",0 AS X_Priority")
-      ." FROM (Games,Players AS opponent)"
-      .(!$load_notes ? '': " LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" )
-      .(!$load_prio ? '': " LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" )
-      ." LEFT JOIN Clock ON Clock.ID=Games.ClockUsed"
-      ." WHERE ToMove_ID=$uid AND Status".IS_STARTED_GAME
-      ." AND opponent.ID=(Black_ID+White_ID-$uid)"
-      . $order;
+      "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color",
+      "COALESCE(Clock.Ticks,0) AS X_Ticks", //always my clock because always my turn (status page)
+      "UNIX_TIMESTAMP(opp.Lastaccess) AS opp_Lastaccess" );
+   $qsql->add_part( SQLP_FROM,
+      "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
+   if( $load_notes )
+   {
+      $qsql->add_part( SQLP_FIELDS, "GN.Notes AS X_Note" );
+      $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" );
+   }
 
-
+   $query = $qsql->get_select();
    if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
-
    $result = db_query( "status.find_games($uid)", $query );
 
    $cnt_rows = 0;
@@ -368,17 +363,17 @@ function load_games_to_move( $uid, &$gtable )
          if( $gtable->Is_Column_Displayed[2] )
             $row_arr[ 2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
          if( $gtable->Is_Column_Displayed[3] )
-            $row_arr[ 3] = "<A href=\"userinfo.php?uid=$pid\">" .
-               make_html_safe($Name) . "</a>";
+            $row_arr[ 3] = "<A href=\"userinfo.php?uid=$opp_ID\">" .
+               make_html_safe($opp_Name) . "</a>";
          if( $gtable->Is_Column_Displayed[4] )
-            $row_arr[ 4] = "<A href=\"userinfo.php?uid=$pid\">$Handle</a>";
+            $row_arr[ 4] = "<A href=\"userinfo.php?uid=$opp_ID\">$opp_Handle</a>";
          if( $load_notes && $gtable->Is_Column_Displayed[12] )
          {
             // keep the first line up to LIST_GAMENOTE_LEN chars
             $row_arr[12] = make_html_safe( strip_gamenotes($X_Note) );
          }
          if( $gtable->Is_Column_Displayed[16] )
-            $row_arr[16] = echo_rating($Rating,true,$pid);
+            $row_arr[16] = echo_rating($opp_Rating, true, $opp_ID);
          if( $gtable->Is_Column_Displayed[5] )
          {
             $colors = ( $X_Color & 2 ) ? 'w' : 'b'; //my color
@@ -395,7 +390,7 @@ function load_games_to_move( $uid, &$gtable )
          if( $gtable->Is_Column_Displayed[14] )
             $row_arr[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
          if( $gtable->Is_Column_Displayed[13] )
-            $row_arr[13] = date(DATE_FMT, $Time);
+            $row_arr[13] = date(DATE_FMT, $X_Lastchanged);
          if( $gtable->Is_Column_Displayed[10] )
          {
             $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
@@ -403,8 +398,8 @@ function load_games_to_move( $uid, &$gtable )
          }
          if( $gtable->Is_Column_Displayed[11] )
          {
-            $is_online = ($NOW - @$X_OppLastaccess) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
-            $row_arr[11] = echo_image_online( $is_online, @$X_OppLastaccess, false );
+            $is_online = ($NOW - @$opp_Lastaccess) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+            $row_arr[11] = echo_image_online( $is_online, @$opp_Lastaccess, false );
          }
          if( $gtable->Is_Column_Displayed[15] )
          {
