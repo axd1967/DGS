@@ -58,8 +58,7 @@ require_once( "include/make_translationfiles.php" );
       error('not_correct_transl_language', 'update_translation.check('
          . $translate_lang.':'.$translator_set.':'.implode("*", $translator_array).')');
 
-   $result = translations_query( $translate_lang, $untranslated, $group
-            , $from_row, $alpha_order, $filter_en)
+   $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en)
       or error('mysql_query_failed', "update_translation.translations_query($translate_lang)");
 
    $show_rows = (int)@mysql_num_rows($result);
