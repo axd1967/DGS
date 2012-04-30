@@ -79,14 +79,15 @@ function show_stats_default()
    $result = db_query( 'statistics.games.count_moves', $q1 );
 
    echo "<table border=1>\n"
-      , "<tr><th>Status</th><th>Moves</th><th>Games</th></tr>\n";
+      , "<tr><th>Status</th><th>Games</th><th>Moves</th></tr>\n";
 
+   $col_fmt = '<td class="right">%s</td>';
    while( $row = mysql_fetch_array( $result ) )
    {
       echo '<tr>'
          , "<td>{$row['Status']}</td>"
-         , "<td align=\"right\">{$row['moves']}</td>"
-         , "<td align=\"right\">{$row['count']}</td>"
+         , sprintf( $col_fmt, number_format($row['count']))
+         , sprintf( $col_fmt, number_format($row['moves']))
          , "</tr>\n";
    }
    mysql_free_result($result);
@@ -94,16 +95,18 @@ function show_stats_default()
    $row = mysql_single_fetch( 'statistics.q2', $q2 );
    if( $row )
    {
-      echo '<tr><td>Total</td><td align="right">', $row["moves"]
-         , '</td><td align="right">', $row["count"], "</td></tr>\n";
+      echo '<tr><td>Total</td>'
+         , sprintf( $col_fmt, number_format($row['count']))
+         , sprintf( $col_fmt, number_format($row['moves']))
+         , "</tr>\n";
    }
    echo "</table>\n";
 
    $row = mysql_single_fetch( 'statistics.q3', $q3 );
    if( $row )
    {
-      echo '<p>', $row["hits"], ' hits by ', $row["count"], ' players</p>';
-      echo '<p>Activity: ', round($row['activity']), "</p>\n";
+      echo '<p>', number_format($row["hits"]), ' hits by ', number_format($row["count"]), ' players</p>';
+      echo '<p>Activity: ', number_format(round($row['activity'])), "</p>\n";
    }
 
    // NOTE: only works under Linux-like systems and with safe_mode=off
