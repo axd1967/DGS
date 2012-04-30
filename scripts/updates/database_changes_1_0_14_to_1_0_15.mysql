@@ -2393,3 +2393,7 @@ ALTER TABLE Players
 DROP TABLE RatingChange ;
 
 
+-- speed-up translators-query on people-page
+ALTER TABLE Translationlog
+   ADD KEY PlayerLang (Player_ID,Language_ID) ;
+

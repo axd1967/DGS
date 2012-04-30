@@ -1308,7 +1308,8 @@ CREATE TABLE IF NOT EXISTS `Translationlog` (
   `OldTranslation` blob NOT NULL,
   `Translation` blob NOT NULL,
   `Date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `PlayerLang` (`Player_ID`,`Language_ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
