@@ -638,7 +638,7 @@ function make_dragon_tools()
 
 function end_page( $menu_array=NULL, $links_per_line=0 )
 {
-   global $page_microtime, $player_row, $base_path, $printable;
+   global $page_microtime, $player_row, $base_path, $printable, $NOW;
 
    section(); //close if any
 
@@ -664,7 +664,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
 
    global $NOW;
-   echo "\n<table id='pageFoot'>"
+   echo "\n<table id=pageFoot>"
       . "\n <tr>"
       . "\n  <td class=ServerHome><A href=\"{$base_path}index.php\">"
         . FRIENDLY_LONG_NAME."</A></td>";
@@ -675,10 +675,21 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
    if( !$printable )
    {
-      echo "<br><span class=PageLapse>"
-        . T_('Page created in') . ' <span id="pageLapse">'
-        . sprintf (' %0.2f ms', (getmicrotime() - $page_microtime)*1000)
-        . "</span></span>";
+      if( $player_row['ID'] > GUESTS_ID_MAX ) // show quota
+      {
+         $quota_cnt = $player_row['VaultCnt'];
+         $quota_time = $player_row['VaultTime'];
+         if( $quota_time <= $NOW ) // show next quota-expire
+         {
+            $quota_time = $NOW + VAULT_DELAY;
+            $quota_cnt += VAULT_CNT;
+         }
+         echo '<br>', span('PageQuota',
+            sprintf( "%s: %s / %s", T_('Quota#user'), $quota_cnt, date(DATE_FMT, $quota_time) ));
+      }
+
+      echo '<br>', span('PageLapse',
+            T_('Page created in') . sprintf(' %0.2f ms', (getmicrotime() - $page_microtime)*1000));
    }
 
    echo "</td>";
@@ -688,12 +699,12 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
       echo "\n  <td class=LoginBox>";
 
       if( @$player_row['admin_level'] && !$printable )
-         echo "<a href=\"{$base_path}admin.php\">", T_('Admin'), "</a>&nbsp;&nbsp;&nbsp;";
+         echo "<a href=\"{$base_path}admin.php\">", T_('Admin'), "</a>", SMALL_SPACING;
 
       if( @$player_row['Translator'] && !$printable )
          echo anchor( $base_path.'translate.php',
                       T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
-            , "&nbsp;&nbsp;&nbsp;";
+            , SMALL_SPACING;
 
       echo anchor( $base_path."index.php?logout=t",
                    ( @$player_row['ID'] > 0 ) ? T_('Logout') : T_('Login'),
@@ -2380,7 +2391,7 @@ function who_is_logged( &$player_row, $quick_suite=false )
  *   (nearly no way to hit VAULT_CNT* pages during VAULT_DELAY seconds)
  * Caution: VaultCnt is a SMALLINT in the database
  **/
-define('VAULT_CNT', 1000); //an account with more than x hits...
+define('VAULT_CNT', 400); //an account with more than x hits...
 define('VAULT_DELAY', 3600); //... during y seconds ...
 define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
 //two specific parameters for multi-users accounts, e.g. 'guest':
@@ -2403,8 +2414,7 @@ define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
  **/
 function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_OPTS ) //must be called from main dir
 {
-   global $hostname_jump, $NOW, $dbcnx;
-   global $ActivityForHit, $ActivityMax;
+   global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax;
    $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
 
    $player_row = array( 'ID' => 0 );
@@ -2437,14 +2447,18 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
    $result = db_query( 'is_logged_in.find_player', $query );
-
-   if( $result && @mysql_num_rows($result) == 1 )
-   {
-      $player_row = mysql_fetch_assoc($result);
-      unset($player_row['Adminlevel']);
-   }
    if( $result )
+   {
+      if( @mysql_num_rows($result) == 1 )
+      {
+         $player_row = mysql_fetch_assoc($result);
+         unset($player_row['Adminlevel']);
+      }
       mysql_free_result($result);
+   }
+
+   if( $is_quick_suite ) // NOTE: for now only for quick-suite
+      writeIpStats( ($is_quick_suite ? 'QDO' : 'WEB') );
 
    $uid = (int)@$player_row['ID'];
    if( $uid <= 0 )
@@ -2519,9 +2533,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $vaultcnt--;
          $query.= ",VaultCnt=$vaultcnt";
       }
-      //TODO: maybe exclude the multi-users accounts !?
-      elseif( $NOW < $vaulttime ) //fever too high
-      //to exclude guest, add: && $uid > GUESTS_ID_MAX
+      elseif( $NOW < $vaulttime ) //fever too high //FIXME to exclude guest, add: && $uid > GUESTS_ID_MAX
       {
          $vaultcnt= 0; //enter fever vault...
          if( $uid <= GUESTS_ID_MAX ) //multi-users accounts
