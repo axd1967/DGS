@@ -455,6 +455,10 @@ table#pageFoot .PageLapse {
    font-size: 80%;
 }
 
+table#pageFoot .PageQuota {
+   font-size: 80%;
+}
+
 table.HostedBy {
    table-layout: auto;
    border: 0px solid red;
