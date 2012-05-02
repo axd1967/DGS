@@ -121,6 +121,23 @@ function admin_log( $uid, $handle, $err)
    return $result;
 }
 
+function writeIpStats( $page )
+{
+   global $player_row, $NOW;
+
+   $ip = @$_SERVER['REMOTE_ADDR'];
+   if( !empty($ip) )
+   {
+      $uid = (int)@$player_row['ID'];
+      $sql_ip = mysql_addslashes($ip);
+      $sql_page = mysql_addslashes($page);
+
+      db_query( "writeIpStats.insert($uid,$page,$ip)",
+         "INSERT INTO IpStats (uid,Page,IP,Counter,Lastchanged) VALUES ($uid,'$sql_page','$sql_ip',1,FROM_UNIXTIME($NOW)) " .
+         "ON DUPLICATE KEY UPDATE Page=VALUES(Page), Counter=Counter+1, Lastchanged=VALUES(Lastchanged)" );
+   }
+}//writeIpStats
+
 // IMPORTANT NOTE:
 //   in general, position of db_close() must take into account,
 //   that texts may contain DGS-markup still needing db-access

@@ -297,6 +297,8 @@ else
       }
    }
 
+   writeIpStats('WAP');
+
    if( !$logged_in )
    {
       if( !$wap_opened )

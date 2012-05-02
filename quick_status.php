@@ -113,6 +113,8 @@ else
    if( !$player_row )
       error('unknown_user', "quick_status.find_player2($uid,$uhandle)");
 
+   writeIpStats('QST');
+
    //TODO: fever vault check
    if( $idmode == 'cookie' )
    {

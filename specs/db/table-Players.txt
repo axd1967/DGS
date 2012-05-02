@@ -40,7 +40,7 @@ O A | Handle           | varchar(16)                                 | NO   | UN
  S  | Sessioncode      | varchar(41)                                 | NO   |     |                     |                |
  S  | Sessionexpire    | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
 OS  | Lastaccess       | datetime                                    | NO   | MUL | 0000-00-00 00:00:00 |                |
- S  | LastQuickAccess  | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
+OS  | LastQuickAccess  | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
 OS  | LastMove         | datetime                                    | NO   |     | 0000-00-00 00:00:00 |                |
 O=  | Registerdate     | date                                        | NO   |     | NULL                |                |
  S  | Hits             | int(11)                                     | NO   |     | 0                   |                |
@@ -157,6 +157,11 @@ Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |   
 -------------------------------------------------
 # Description of fields:
 
+* Lastaccess : timestamp when user was "last on site"
+   - should not / is not set when user uses one of the RSS/WAP/quick-features
+
+* LastQuickAccess : timestamp when user last used the quick-suite
+
 * Notify : field indicating if there is something to notify
    - if there's something to notify, user is notified dependent on SendEmail-field
    - Values:
@@ -223,4 +228,35 @@ TABLE ConfigBoard:
 TABLE ConfigPages:
    ColumnsUsers int(11) signed NOT NULL default '-1', -- bit-mask representing shown columns for page 'users.php'
    ColumnsStatusGames int(11) signed NOT NULL default '-1', -- bit-mask representing shown columns for page 'status.php'
+
+
+
+###########################################################################
+## --- IpStats ---
+
+Description:
+   Table used for IP and user-id to track too-much-requests.
+
+| Field       | Type             | Null | Key | Default             | Extra |
++-------------+------------------+------+-----+---------------------+-------+
+| uid         | int(11)          | NO   | PRI | 0                   |       |
+| Page        | char(4)          | NO   | PRI |                     |       |
+| IP          | varchar(16)      | NO   | PRI | NULL                |       |
+| Counter     | int(10) unsigned | NO   |     | 0                   |       |
+| Lastchanged | datetime         | NO   |     | 0000-00-00 00:00:00 |       |
+
+# Fields:
+
+* uid : FK Players.ID
+   - can be 0, if unknown because not logged-in
+
+* Page : requested protocol/page
+   - used values: RSS, WAP, WEB, QST (quick-status), QDO (quick-do), QPL (quick-play)
+
+* IP : remove ip-address of user
+
+* Counter : counter how often uid/IP is used to connect to site
+
+* Lastchanged : date of last access with uid/IP
+
 

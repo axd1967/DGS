@@ -513,6 +513,21 @@ CREATE TABLE IF NOT EXISTS `Intro` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `IpStats`
+--
+
+CREATE TABLE `IpStats` (
+  `uid` int(11) NOT NULL default '0',
+  `Page` char(4) NOT NULL default '',
+  `IP` varchar(16) NOT NULL,
+  `Counter` int(10) unsigned NOT NULL default '0',
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`uid`,`Page`,`IP`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 |
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Links`
 --
 

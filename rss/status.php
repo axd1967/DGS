@@ -358,8 +358,7 @@ else
       }
       //else error('wrong_userid', "rss_status.check_user($uhandle)");
    }
-
-   if( $loggin_mode=='cookie' )
+   elseif( $loggin_mode=='cookie' )
    {
       // logged in?
 
@@ -378,6 +377,8 @@ else
             error('login_denied', "wap_status.check.cookie.user($uhandle)");
       }
    }
+
+   writeIpStats('RSS');
 
    if( !$logged_in )
    {
@@ -399,7 +400,6 @@ else
    $lnk= HOSTBASE.'status.php';
    $dsc= "Messages and Games for $my_name";
    rss_open( $tit, $dsc, $lnk);
-
 
    $nothing_found = true;
 

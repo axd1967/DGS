@@ -51,6 +51,7 @@ else
       error('not_logged_in', "quick_play.find_player2($gid,$uhandle)");
 
    $player_row = mysql_fetch_assoc($result);
+   writeIpStats('QPL');
 
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied', 'quick_play');

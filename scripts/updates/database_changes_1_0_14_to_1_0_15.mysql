@@ -2397,3 +2397,15 @@ DROP TABLE RatingChange ;
 ALTER TABLE Translationlog
    ADD KEY PlayerLang (Player_ID,Language_ID) ;
 
+
+-- added table for used IP and user-id to track too-much-requests
+CREATE TABLE IpStats (
+   uid int NOT NULL default 0,
+   Page char(4) NOT NULL default '',
+   IP varchar(16) NOT NULL,
+   Counter int unsigned NOT NULL default 0,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (uid,Page,IP)
+) ENGINE=MyISAM ;
+
+
