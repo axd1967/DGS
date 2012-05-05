@@ -122,6 +122,14 @@ define('IS_STARTED_GAME', " IN ('KOMI','PLAY','PASS','SCORE','SCORE2') "); // ru
 define('FORUM_SECS_NEW_END', 7 * FORUM_WEEKS_NEW_END * SECS_PER_DAY); // [secs]
 
 
+function get_utc_timeinfo( $time=0, $is_assoc=true )
+{
+   $oldTZ = setTZ('GMT');
+   $info = localtime( ($time > 0 ? $time : $GLOBALS['NOW']), $is_assoc);
+   setTZ($oldTZ);
+   return $info;
+}
+
 
 // NOTE: also calling arg_stripslashes recursively can be exploited:
 //       see http://talks.php.net/show/php-best-practices/26

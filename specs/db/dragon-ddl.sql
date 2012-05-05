@@ -621,6 +621,21 @@ CREATE TABLE IF NOT EXISTS `Moves` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `MoveStats`
+--
+
+CREATE TABLE `MoveStats` (
+  `uid` int(11) NOT NULL default '0',
+  `SlotTime` smallint(5) unsigned NOT NULL default '0',
+  `SlotWDay` tinyint(4) NOT NULL default '0',
+  `SlotWeek` tinyint(4) NOT NULL default '0',
+  `Counter` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`uid`,`SlotTime`,`SlotWDay`,`SlotWeek`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 |
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Observers`
 --
 

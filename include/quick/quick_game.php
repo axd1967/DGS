@@ -550,6 +550,8 @@ class QuickHandlerGame extends QuickHandler
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
                ",LastMove=FROM_UNIXTIME($NOW)" .
             " WHERE ID={$this->my_id} LIMIT 1" );
+
+         increaseMoveStats( $this->my_id );
       }
       ta_end();
    }//process_cmd_play

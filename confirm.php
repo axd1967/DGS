@@ -456,6 +456,8 @@ This is why:
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
             .",LastMove=FROM_UNIXTIME($NOW)"
             ." WHERE ID=$my_id LIMIT 1" );
+
+      increaseMoveStats( $my_id );
    }
    ta_end();
 

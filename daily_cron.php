@@ -201,6 +201,19 @@ if num_rows==2 {compute differences and checks}
    Bulletin::process_expired_bulletins();
 
 
+// Cleanup MoveStats
+
+   $loctime = get_utc_timeinfo(); // need UTC to equalize all users on time-slot
+   $old_week = floor( $loctime['tm_yday'] / 7 ) - 4; // keep 4 weeks
+   if( $old_week >= 0 )
+      $where_clause = "SlotWeek <= $old_week";
+   else
+      $where_clause = "SlotWeek > " . (52 + $old_week);
+
+   db_query( "daily_cron.movestats_cleanup.delete",
+      "DELETE FROM MoveStats WHERE $where_clause" );
+
+
    // ---------- END --------------------------------
 
    db_query( 'daily_cron.reset_tick',

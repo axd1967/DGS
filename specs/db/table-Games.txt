@@ -460,3 +460,33 @@ Description:
 * Lastchanged : date of last-update of shape
 
 
+
+###########################################################################
+## --- MoveStats ---
+
+Description:
+   Table to store move counts per time-slot to create moving-profile for user.
+
+| Field    | Type                  | Null | Key | Default | Extra |
++----------+-----------------------+------+-----+---------+-------+
+| uid      | int(11)               | NO   | PRI | 0       |       |
+| SlotTime | smallint(5) unsigned  | NO   | PRI | 0       |       |
+| SlotWDay | tinyint(4)            | NO   | PRI | 0       |       |
+| SlotWeek | tinyint(4)            | NO   | PRI | 0       |       |
+| Counter  | mediumint(8) unsigned | NO   |     | 0       |       |
+
+## Fields:
+
+* uid : foreign key to Players.ID
+
+* SlotTime : time-slot, hour:min of day
+   - format: hhmm, hh = hour of day (0..23), mm = minute of hour (0..59)
+   - minimum time-slot not smaller than 5min, otherwise int-types of table are not sufficient
+
+* SlotWDay : time-slot, day of week
+   - format: day of week (0..6)
+
+* SlotWeek : week of year, 0..51
+
+* Counter : number of moves per user done for a specific time-slot
+

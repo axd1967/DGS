@@ -3996,4 +3996,23 @@ function get_colortext_probable( $iamblack )
       : image( $base_path.'17/w.gif', T_('White'), null, $color_class);
 }
 
+
+define('MOVESTAT_TIMESLOT', 30); // minutes
+
+/*! \brief increase MoveStats by one for given user. */
+function increaseMoveStats( $uid )
+{
+   $loctime = get_utc_timeinfo(); // need UTC to equalize all users on time-slot
+   $time_min = floor( $loctime['tm_min'] / MOVESTAT_TIMESLOT ) * MOVESTAT_TIMESLOT;
+   $slot_time = (int)sprintf('%02d%02d', $loctime['tm_hour'], $time_min );
+   $slot_wday = $loctime['tm_wday'];
+   $slot_week = floor( $loctime['tm_yday'] / 7 );
+
+   // ignore errors on update
+   db_query( "increaseMoveStats.insert($uid)",
+      "INSERT IGNORE INTO MoveStats (uid,SlotTime,SlotWDay,SlotWeek,Counter) " .
+      "VALUES ($uid,$slot_time,$slot_wday,$slot_week,1) " .
+      "ON DUPLICATE KEY UPDATE Counter=Counter+1" );
+}//increaseMoveStats
+
 ?>
