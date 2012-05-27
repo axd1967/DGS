@@ -809,6 +809,11 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    Minor changes:
 
+   * Quota:
+      * Restricted <home rss/status.php>RSS-status</home> with minimum request interval
+      * Reduced user access quota to 500
+      * Show warning at page top if quota runs low
+
    * Forum pages:
       * Show note for guest-user on reply-textbox about writing posts
 
