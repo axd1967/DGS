@@ -174,7 +174,9 @@ and an error-code, there can be an optional 'error_msg' element:
    {
       "version": "1.0.15:13",      # DGS_VERSION:QUICK_VERSION
       "error": "error_code",
-      "error_msg": "error message"
+      "error_msg": "error message",
+      "quota_count": 497,          # remaining quota-count and quota-expire
+      "quota_expire": "2012-03-27 17:34:12"
    }
 
 The version-info includes the current DGS_VERSION and the QUICK_VERSION defined in
@@ -186,6 +188,8 @@ An empty 'error_code' indicates a successful operation, i.e. no errors have occu
    {
       "version": "1.0.15:13",
       "error": ""
+      "quota_count": 497,          # remaining quota-count and quota-expire
+      "quota_expire": "2012-03-27 17:34:12"
    }
 
 The response may contain additional object- and command-specific return-values.
@@ -193,6 +197,8 @@ The response may contain additional object- and command-specific return-values.
    {
       "version": "1.0.15:13",
       "error": "",
+      "quota_count": 497,          # remaining quota-count and quota-expire
+      "quota_expire": "2012-03-27 17:34:12"
 
       "output1": "simple text-value",              # simple scalar value
 

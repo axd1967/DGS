@@ -172,12 +172,15 @@ class DgsErrors
          {
             if( !$warn )
             {
+               $err_arr = array(
+                     'version' => QUICK_SUITE_VERSION,
+                     'error' => $err,
+                     'error_msg' => $debugmsg,
+                  );
+               quick_suite_add_quota( $err_arr );
+
                //TODO? header( 'Content-Type: application/json' );
-               echo dgs_json_encode( array(
-                  'version' => QUICK_SUITE_VERSION,
-                  'error' => $err,
-                  'error_msg' => $debugmsg,
-               ));
+               echo dgs_json_encode( $err_arr );
             }
          }
       }

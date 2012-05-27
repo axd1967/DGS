@@ -93,6 +93,7 @@ class QuickObject
             'version' => QUICK_SUITE_VERSION,
             'error' => '',
          );
+         quick_suite_add_quota( $this->result );
       }
       else
          $this->result = array();
