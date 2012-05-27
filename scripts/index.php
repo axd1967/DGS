@@ -46,6 +46,7 @@ require_once( "include/std_functions.php" );
 
          "Server admin" => 0,
             'apc_clear_cache.php'      => "Clear APC cache",
+            'clear_datastore.php'      => "Show & Clear Data-Store cache-dir",
             'sql_game_export.php'      => "Export single game as SQL (for local tests)",
             'check_block_ip.php'       => "Check syntax for IP-blocking of user",
             'data_export.php'          => "Export DDL, translation-data",
