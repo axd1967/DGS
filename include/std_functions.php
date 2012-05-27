@@ -311,7 +311,7 @@ function is_javascript_enabled()
 function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $last_modified_stamp=NULL,
                      $javascript=null )
 {
-   global $base_path, $encoding_used, $printable;
+   global $base_path, $encoding_used, $printable, $main_path;
 
    if( $no_cache )
       disable_cache($last_modified_stamp);
@@ -341,14 +341,12 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    //because of old browsers favicon.ico should always stay in the root folder
    echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"".HOSTBASE."favicon.ico\">";
 
-   global $main_path;
    if( !isset($skinname) || !$skinname )
       $skinname = 'dragon';
-   if( !file_exists("{$main_path}skins/$skinname/screen.css") )
-      $skinname = 'dragon';
-   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skinname/screen.css\">";
-   if( file_exists("{$main_path}skins/$skinname/print.css") )
-      echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skinname/print.css\">";
+   $skin_screen = ( file_exists("{$main_path}skins/$skinname/screen.css") ) ? $skinname : 'dragon';
+   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skin_screen/screen.css\">";
+   $skin_print = ( file_exists("{$main_path}skins/$skinname/print.css") ) ? $skinname : 'dragon';
+   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skin_print/print.css\">";
 
    $enable_js_game = false;
    switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
@@ -458,6 +456,20 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo "\n  <td id=\"pageBody\">\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
+   if( isset($player_row['VaultCnt']) && $player_row['VaultCnt'] <= 10 )
+   {
+      if( $player_row['VaultCnt'] > 0 )
+      {
+         $block_hours = ( (int)@$player_row['ID'] > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ) / 3600; //hours
+         sysmsg( sprintf( T_('Your access quota is running low.<br>You only got %s hits left before you get blocked for %s !!'),
+                 @$player_row['VaultCnt'], TimeFormat::echo_hour($block_hours) ),
+                 'WarnQuota');
+      }
+      else
+      {
+         sysmsg( T_('Your access quota is exceeded.'), 'WarnQuota');
+      }
+   }
 
    if( $is_down )
    {
@@ -675,17 +687,10 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
    if( !$printable )
    {
-      if( $player_row['ID'] > GUESTS_ID_MAX ) // show quota
+      if( isset($player_row['VaultCnt']) && isset($player_row['VaultTime']) )
       {
-         $quota_cnt = $player_row['VaultCnt'];
-         $quota_time = $player_row['VaultTime'];
-         if( $quota_time <= $NOW ) // show next quota-expire
-         {
-            $quota_time = $NOW + VAULT_DELAY;
-            $quota_cnt += VAULT_CNT;
-         }
          echo '<br>', span('PageQuota',
-            sprintf( "%s: %s / %s", T_('Quota#user'), $quota_cnt, date(DATE_FMT, $quota_time) ));
+            sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'], date(DATE_FMT, $player_row['VaultTime']) ));
       }
 
       echo '<br>', span('PageLapse',
@@ -1045,10 +1050,10 @@ function help($topic)
 }
 */
 
-function sysmsg($msg)
+function sysmsg($msg, $class='SysMsg')
 {
    if( isset($msg) && ($msg=trim(make_html_safe($msg,'msg'))) )
-      echo "\n<p class=SysMsg>$msg</p><hr class=SysMsg>\n";
+      echo "\n<p class=\"$class\">$msg</p><hr class=SysMsg>\n";
 }
 
 
@@ -1067,6 +1072,18 @@ function illegal_chars( $string, $punctuation=false )
       $regs = 'a-zA-Z]['.HANDLE_LEGAL_REGS; //begins with a letter
 
    return !preg_match( "/^[$regs]+\$/", $string);
+}
+
+// NOTE: all chars allowed for handle must also be usable for a filename !!!
+function is_legal_handle( $handle )
+{
+   $len = strlen($handle);
+   if( !preg_match( "/^[a-zA-Z][\\+".HANDLE_LEGAL_REGS."]+\$/", $handle) )
+      return false;
+   elseif( $len == 0 || $len > 16 )
+      return false;
+   else
+      return true;
 }
 
 function make_session_code()
@@ -2391,7 +2408,7 @@ function who_is_logged( &$player_row, $quick_suite=false )
  *   (nearly no way to hit VAULT_CNT* pages during VAULT_DELAY seconds)
  * Caution: VaultCnt is a SMALLINT in the database
  **/
-define('VAULT_CNT', 400); //an account with more than x hits...
+define('VAULT_CNT', 500); //an account with more than x hits...
 define('VAULT_DELAY', 3600); //... during y seconds ...
 define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
 //two specific parameters for multi-users accounts, e.g. 'guest':
@@ -2513,63 +2530,45 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    {
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
-      //can be translated if desired (translations have just been set):
-      $vault_fmt= T_("The activity of the account '%s' grew too high"
-                 ." and swallowed up our bandwidth and resources."
-                 ."<br>Please, correct this behaviour."
-                 ."<br>This account is blocked until %s.");
-      if( $vaultcnt <= 0 ) //inside fever vault
+      $vault_fmt= T_("The activity of the account '%s' grew too high and swallowed up our bandwidth and resources." .
+         "<br>Please, correct this behaviour.<br>This account is blocked until %s.");
+      if( $NOW >= $vaulttime ) // fever cool enough (expire-date passed -> reset quota for another period)
       {
-         if( $NOW > $vaulttime ) //time to quit the vault?
-         {
-            $vaultcnt= 1; //will be reseted next time
-            $query.= ",VaultCnt=$vaultcnt";
-         }
-         else
-            $vaultcnt= 0; //stay in fever vault...
-      }
+         $vaultcnt = ( $uid > GUESTS_ID_MAX ) ? VAULT_CNT : VAULT_CNT_X; //multi-user account?
+         $vaulttime = $NOW + VAULT_DELAY;
+         $query .= ",VaultCnt=$vaultcnt" .
+                   ",VaultTime=FROM_UNIXTIME($vaulttime)";
+      } //from here: $NOW < $vaulttime
+      else if( $vaultcnt <= 0 ) // inside fever vault?
+         $vaultcnt = 0; // stay in fever vault... quota-block in place till expire-date
       elseif( $vaultcnt > 1 ) //measuring fever
+         $query .= ",VaultCnt=" . (--$vaultcnt);
+      else //if( $vaulttime == 1 ) // quota up, but not expired (fever too high)
       {
-         $vaultcnt--;
-         $query.= ",VaultCnt=$vaultcnt";
-      }
-      elseif( $NOW < $vaulttime ) //fever too high //FIXME to exclude guest, add: && $uid > GUESTS_ID_MAX
-      {
-         $vaultcnt= 0; //enter fever vault...
-         if( $uid <= GUESTS_ID_MAX ) //multi-users accounts
-            $vaulttime= $NOW+VAULT_TIME_X;
-         else
-            $vaulttime= $NOW+VAULT_TIME; // vault exit date
-         $query.= ",VaultCnt=$vaultcnt"
-                 .",VaultTime=FROM_UNIXTIME($vaulttime)";
+         // enter fever vault... set quota-expire on block-time
+         $vaultcnt = 0;
+         $vaulttime = $NOW + ( $uid > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ); //multi-user account?
+         $query .= ",VaultCnt=$vaultcnt" .
+                   ",VaultTime=FROM_UNIXTIME($vaulttime)";
 
          err_log( $handle, 'fever_vault');
 
-         //send notifications to owner
+         // send notifications to owner
          $subject= T_('Temporary access restriction');
-         $text= 'On '.date(DATE_FMT, $NOW).":\n"
-               .sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
+         $text= 'On '.date(DATE_FMT, $NOW).":\n" . sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
 
          if( $uid > GUESTS_ID_MAX )
             $handles[]= $handle;
          if( count($handles) > 0 )
             send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );
 
-         $email= $player_row['Email'];
+         $email = $player_row['Email'];
          if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
-            send_email("fever_vault.email($handle)", $email, 0, $text
-                      , FRIENDLY_LONG_NAME.' - '.$subject);
+            send_email("fever_vault.email($handle)", $email, 0, $text, FRIENDLY_LONG_NAME.' - '.$subject);
       }
-      else //cool enough: reset counters for one period
-      {
-         if( $uid <= GUESTS_ID_MAX ) //multi-users accounts
-            $vaultcnt= VAULT_CNT_X;
-         else
-            $vaultcnt= VAULT_CNT; //less than x hits...
-         $vaulttime= $NOW+VAULT_DELAY; //... during y seconds
-         $query.= ",VaultCnt=$vaultcnt"
-                 .",VaultTime=FROM_UNIXTIME($vaulttime)";
-      }
+
+      $player_row['VaultCnt']  = $vaultcnt;
+      $player_row['VaultTime'] = $vaulttime;
    }//fever-fault check
 
    // DST-check if the player's clock need an adjustment from/to summertime
@@ -2647,8 +2646,6 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    get_cookie_prefs($player_row);
    switch_admin_status($player_row); //get default admin_status
-
-   setTZ( $player_row['Timezone']);
 
    return $uid;
 } //is_logged_in
@@ -3510,5 +3507,90 @@ function parseDate( $msg, $date_str )
    }
    return $result;
 }//parseDate
+
+/*!
+ * \brief Prevents excessive usage of scripts by writing and checking file into DATASTORE_FOLDER to keep track of last use.
+ * \param $filename filename to be stored in DATASTORE_FOLDER
+ * \param $min_interval minimum time-interval [in secs] that must lie between two calls of script;
+ *        method does nothing if <1
+ * \param $max_interval maximum time-interval [in secs] that a script should be used regardless of min-interval;
+ *        if 0 no max-check is done
+ * \param $read_content if set, return additional 3 results path_cache/header_content/body_content
+ * \return general result-format: ( allow_exec, last_call_time [, path_cache, header_content, body_content ] );
+ *         ( false, last-check-time ) if time-interval since last use was below $min_interval (last-check in secs);
+ *         ( true, 0 ) if script-execution is following min/max-interval or if check disabled with $min_interval < 1
+ * \note errors are created if DATASTORE_FOLDER is unset, directory not existing or missing permissions
+ * \note currently DST (daylight saving time) is not handled
+ */
+function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_interval=0, $read_content=false )
+{
+   global $NOW;
+
+   if( $min_interval < 1 ) // check disabled
+      return array( true, 0 );
+   if( (string)DATASTORE_FOLDER == '' )
+      error('internal_error', "enforce_min_timeinterval.miss.datastore");
+
+   $path = $_SERVER['DOCUMENT_ROOT'] . '/' . DATASTORE_FOLDER;
+   if( $subdir )
+      $path .= '/' . $subdir;
+   if( !is_dir($path) )
+   {
+      if( !mkdir($path, 0777, /*recursive*/true) )
+         error('internal_error', "enforce_min_timeinterval.miss.datastore_dir");
+   }
+
+   $file_path = "$path/$filename";
+   clearstatcache(); //FIXME since PHP5.3.0 with filename
+
+   $last_check_time = 0;
+   $header = $body = '';
+   if( file_exists($file_path) )
+   {
+      if( $max_interval > 0 || $read_content )
+      {
+         $file_data = read_from_file( $file_path, /*err-quit*/false );
+         $pos_lf = strpos($file_data, "\n");
+         if( $pos_lf === false )
+            $header = $file_data;
+         else
+         {
+            $header = substr($file_data, 0, $pos_lf );
+            $body = substr($file_data, $pos_lf + 1 );
+         }
+      }
+
+      if( $max_interval > 0 )
+      {
+         $last_ok_time = (int)$header;
+         $no_max_trigger = ( $last_ok_time <= 0 ) || ( $NOW - $last_ok_time < $max_interval );
+      }
+      else
+         $no_max_trigger = true;
+
+      if( $no_max_trigger )
+      {
+         $mtime = (int)@filemtime( $file_path );
+         if( $NOW - $mtime <= $min_interval )
+            $last_check_time = $mtime;
+      }
+   }
+
+   if( $last_check_time > 0 ) // not-ok
+   {
+      touch($file_path);
+      $result = array( false, $last_check_time );
+   }
+   else // ok
+   {
+      $header = $NOW;
+      $cnt = write_to_file( $file_path, "$header\n$body", /*err-quit*/false );
+      $result = array( ($cnt > 0), 0 );
+   }
+
+   if( $read_content )
+      array_push( $result, $file_path, $header, $body );
+   return $result;
+}//enforce_min_timeinterval
 
 ?>
