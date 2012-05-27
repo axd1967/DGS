@@ -206,6 +206,9 @@ define('ENABLE_DONATIONS', false);
 // set to 0 to disable
 define('AUTO_COMMENT_UID', 9284);
 
+// Months after which game-invitations are deleted (0=keep forever)
+define('GAME_INVITATIONS_EXPIRE_MONTHS', 0);
+
 // list with user-handles allowed to login during maintenance-mode
 // activate with $is_down var in 'include/quick_common.php'
 $ARR_USERS_MAINTENANCE = array();

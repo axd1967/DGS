@@ -2425,3 +2425,10 @@ UPDATE Players
    SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Beijing' ;
 
 
+-- delete invitations older than 3 months
+SELECT COUNT(*) FROM Games
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+DELETE FROM Games
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+
+
