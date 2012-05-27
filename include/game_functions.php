@@ -4010,7 +4010,7 @@ function increaseMoveStats( $uid )
 
    // ignore errors on update
    db_query( "increaseMoveStats.insert($uid)",
-      "INSERT IGNORE INTO MoveStats (uid,SlotTime,SlotWDay,SlotWeek,Counter) " .
+      "INSERT INTO MoveStats (uid,SlotTime,SlotWDay,SlotWeek,Counter) " .
       "VALUES ($uid,$slot_time,$slot_wday,$slot_week,1) " .
       "ON DUPLICATE KEY UPDATE Counter=Counter+1" );
 }//increaseMoveStats
