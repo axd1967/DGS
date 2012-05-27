@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 chdir("../");
 
+// NOTE: must appear before includes
 function error($err, $debugmsg=NULL)
 {
    global $uhandle;
@@ -37,8 +38,12 @@ function error($err, $debugmsg=NULL)
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
 require_once( "include/classlib_game.php" );
+require_once( "include/std_functions.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
+
+define('WAP_CHECK_MIN', 5*60 - 5); //secs
+define('WAP_CHECK_MAX', 1*3600);   //secs
 
 
 $xmltrans = array();
@@ -64,7 +69,7 @@ function wap_safe( $str)
 {
    $str = reverse_htmlentities( $str);
    global $xmltrans;
-   return strtr($str, $xmltrans);
+   return str_replace( "&lt;br/&gt;", "<br/>", strtr($str, $xmltrans) ); // restore <br>
 }
 
 
@@ -132,7 +137,7 @@ function card_close()
 }
 
 
-function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='', $nextid='', $previd='')
+function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='', $nextid='', $previd='', $link_text='' )
 {
    $str = card_open( $cardid, $head);
 
@@ -140,7 +145,11 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
       $str.= " <a accesskey=\"p\" href=\"#$previd\">[&lt;Prev]</a>";
 
    if( $link )
-      $str.= " <a accesskey=\"g\" href=\"$link\">[Go]</a>";
+   {
+      if( !$link_text )
+         $link_text = '[Go]';
+      $str.= " <a accesskey=\"g\" href=\"$link\">$link_text</a>";
+   }
    //$str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
    //$str.= "<do type=\"prev\" label=\"back\"><prev/></do>";
 
@@ -192,15 +201,6 @@ function wap_warning( $str, $title='', $link='')
 
 function wap_auth( $defid='', $defpw='')
 {
-/*
-   //if( $uhandle ) $uhandle= ' - '.$uhandle; else
-      $uhandle= '';
-
-   global $wap_opened;
-   if( !$wap_opened )
-      wap_open( 'LOGIN');
-*/
-
    $str= "<p>"
       ."user: <input name=\"userid\" size=\"10\" maxlength=\"16\" value=\"$defid\" type=\"text\"/><br/>"
       ."pass: <input name=\"passwd\" size=\"10\" maxlength=\"16\" value=\"$defpw\" type=\"password\"/><br/>"
@@ -218,11 +218,6 @@ function wap_auth( $defid='', $defpw='')
       ."</do>"
       ;
    return $str;
-
-/*
-   wap_close();
-   exit;
-*/
 }
 
 
@@ -235,7 +230,6 @@ if( $is_down )
 }
 else
 {
-
    $logged_in = false;
    $loggin_mode = '';
    if( @$_REQUEST['logout'] )
@@ -256,8 +250,40 @@ else
       }
    }
 
+   $wap_sep = "<br/>\n";
+
+
+   // check for excessive usage
+   // NOTE: Without checking DB, this can be abused to block other users. But that should be punished by an admin as abuse.
+   //       Advantage like this is to avoid DB-requests.
+   if( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
+      error('invalid_user', "wap_status.check.handle(".substr($uhandle,0,50).")");
+   list( $allow_exec, $last_call_time ) =
+      enforce_min_timeinterval( 'wap', 'wap_status-'.strtolower($uhandle), WAP_CHECK_MIN, WAP_CHECK_MAX );
 
    disable_cache();
+
+   if( !$allow_exec )
+   {
+      $wap_head = "Status of [$uhandle]";
+      $tit = "[DISABLED] $wap_head";
+      $lnk = HOSTBASE.'status.php';
+      wap_open( $tit );
+
+      $tit = sprintf( T_('%s-Status of [%s] temporarily disabled due to excessive usage!#alt'), 'WAP', $uhandle );
+      $lnk = "http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302"; // FAQ-entry on quota/responsible-user
+      $dsc = sprintf( T_('Please follow the link, read the FAQ entry and re-configure your %s configuration accordingly.#alt'), 'WAP') . $wap_sep .
+         T_('Please do it as soon as possible to reduce the stress on the server.#alt') . $wap_sep .
+         T_('Thanks in advance for your cooperation.#alt');
+      $dat = $NOW;
+      $cardid = 'U_'.$uhandle;
+      wap_item( $cardid, $wap_head, $tit, $lnk, $dsc, $dat, '', '', '[Go FAQ]');
+
+      echo card_close();
+      wap_close();
+      exit;
+   }
+
 
    connect2mysql();
 
@@ -309,7 +335,6 @@ else
       echo $card;
       wap_close();
       exit;
-      //error('not_logged_in', "wap_status.check_login($uhandle)");
    }
 
 
@@ -344,8 +369,6 @@ else
 
 
    // Display results
-
-   $wap_sep = "\n<br/>";
 
    $tit= "Status of $my_name";
    $lnk= HOSTBASE.'status.php';
