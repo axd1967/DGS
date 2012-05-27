@@ -28,7 +28,7 @@ require_once( "include/std_functions.php" );
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'scripts.fix_game_comments-1_0_15');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if( !(@$player_row['admin_level'] & (ADMIN_DATABASE|ADMIN_GAME)) )
       error('adminlevel_too_low', 'scripts.fix_game_comments-1_0_15');
 
    $page = $_SERVER['PHP_SELF'];
