@@ -144,7 +144,7 @@ class DgsErrors
    } //dump_exit
 
 
-   function add_error($err, $debugmsg=NULL, $warn=false)
+   function add_error($err, $debugmsg=NULL, $warn=false, $allow_log_error=true )
    {
       global $player_row;
       if( isset($player_row) && isset($player_row['Handle']) )
@@ -153,8 +153,8 @@ class DgsErrors
          $handle = safe_getcookie('handle');
 
       $err= trim(preg_replace( "%[\\x1-\\x20\\x80-\\xff<&>_]+%", "_", $err));
-      if( $this->log_errors && !$warn )
-         list( $err, $uri)= err_log( $handle, $err, $debugmsg);
+      if( $allow_log_error && $this->log_errors && !$warn )
+         list( $err, $uri ) = err_log( $handle, $err, $debugmsg);
       else
       {
          $uri = "error.php?err=" . urlencode($err);
@@ -164,7 +164,7 @@ class DgsErrors
       if( $this->collect_errors )
          $this->error_list[] = array($err, $debugmsg, $warn);
 
-      if( $this->print_errors || $warn  )
+      if( $this->print_errors || $warn )
       {
          if( $this->error_format == ERROR_FORMAT_TEXT )
             echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
@@ -203,19 +203,19 @@ $TheErrors = new DgsErrors();
 
 if( !function_exists('error') )
 {
-   function error($err, $debugmsg=NULL)
+   function error($err, $debugmsg=NULL, $log_error=true )
    {
       global $TheErrors;
-      return $TheErrors->add_error($err, $debugmsg);
+      return $TheErrors->add_error($err, $debugmsg, /*warn*/false, $log_error );
    }
 }
 
 if( !function_exists('warning') )
 {
-   function warning($err)
+   function warning($err, $debugmsg=NULL )
    {
       global $TheErrors;
-      return $TheErrors->add_error($err, NULL, true);
+      return $TheErrors->add_error($err, $debugmsg, /*warn*/true );
    }
 }
 
