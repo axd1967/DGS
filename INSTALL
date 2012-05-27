@@ -139,13 +139,15 @@ Find out which group your webserver is using (e.g. www-data).
   chmod 775 temp
   su -c 'chgrp www-data temp'
 
-* Create a directory to store user-pictures with write-access by the webserver.
+* Create a directory to store user-pictures with write-access for the webserver.
   You can create a sub-directory in the document-root or use an alias /userpic
   pointing to a folder to store images. Adjust USERPIC_FOLDER in the local
   config-file.
 
   NOTE: Be aware, that this is a security risk, if scripts are uploaded into
         folder. The code assure, that only images are uploaded though.
+        Still some image-formats could be "infected". This case should be
+        handled by DGS-admins.
 
   Userpic-directory should be at a place that is archived within a regular backup,
   because the pictures are not stored in the database.
@@ -156,6 +158,22 @@ Find out which group your webserver is using (e.g. www-data).
   ln -s temp/userpic .
   su -c 'chgrp www-data temp/userpic'
   su -c 'chmod g+ws temp/userpic'
+
+* Create a directory outside of the document-root with write-access for the webserver.
+  This must be configured in "include/config-local.php" with DATASTORE_FOLDER.
+  The directory can contains sensitive data, that should not be available via web-access.
+  Therefore it should either be located outside of the document-root, or otherwise
+  if located in a sub-directory in the document-root at least put a web-password on
+  it as required for the scripts-sub-dir.
+
+  If the folder is not existing and the web-user has the required rights,
+  the folder will be created by the webserver on-the-fly.
+
+  # Create the DATASTORE_FOLDER-directory (example) and sub-dirs for RSS/quick-status/WAP:
+  mkdir data-store
+  mkdir data-store/rss data-store/qst data-store/wap
+  chmod -R 775 data-store
+  su -c 'chgrp -R www-data data-store'
 
 * Eventually you need to adjust the used timezone.
   This can be done by creating a file in the dragon-root:

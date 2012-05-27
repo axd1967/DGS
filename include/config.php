@@ -97,8 +97,14 @@ define('URI_AMP','&amp;'); //see ini_get('arg_separator.output')
 // A folder where some elements can be saved which don't need a complete
 // rebuilt each time a page is called (for example, the statistics graphs)
 // Must be relative to the root folder and ended by a '/'
-// Set it to '' (empty string) to disable the cache features
+// Set it to '' (empty string) to disable the cache features.
 define('CACHE_FOLDER', 'temp/');
+
+// A folder to store non-public/sensitive data, that should be stored
+// outside of the webservers DOCUMENT_ROOT. Must end with '/'.
+// The path is always relative to the document-root.
+// IMPORTANT: also check notes in INSTALL-file!
+define('DATASTORE_FOLDER', '../data-store/');
 
 // Relative path to root-folder ended with a '/'.
 // Set it to '' (empty string) to disable user-pictures.
