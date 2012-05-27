@@ -1772,10 +1772,109 @@ Request:
 
 Important Notes:
 
-   * If you are not logged-in (to set session-cookie authenticating a user),
+   * For DGS version >= 1.0.15:
+     - You must be logged-in (to set session-cookie authenticating a user)
+     - Login is possible per cookie-login using 'login.php' or by the less safe method
+       providing user and password as URL-arguments 'userid' and 'passwd'
+     - If you are not logged-in you will receive an error 'invalid_user'
+
+   * For DGS version >= 1.0.15:
+     With version 1.0.15 the quick-status page has an additional progressive block-specific caching.
+     This is done to reduce the server-load and to enforce some form of quota
+     without the need of changing each client to react on quota-exceedings.
+
+     There also is the normal browser-caching, see also option <CACHE> below.
+     The caching describe in this note is something different from that and will only kick-in
+     when the browser does not take the data from its own cache (and the server is actually asked).
+
+     For testing purpose on test-servers, the progressive block-specific caching can be deactivated.
+     For the live-server disabling is not possible. See also option <CACHE> below.
+
+     The quick-status page should not be called more than once per minute.
+     If a client does that regardless, the following warning (with 'userid' replaced)
+     is prepending the data, that is taken from the cache:
+
+        [#Warning: excessive_usage; quick_status.returning_cached_data(userid).see_faq[http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302]]
+
+     Each block of data (bulletins, messages, status-games, multi-player-games)
+     has its own cache for a specific user and data-block, and has its own minimum
+     request-interval:
+
+         - bulletins           : 15 min
+         - messages            : 15 min
+         - status-games        :  1 min, progressive if data unchanged, max. 15 min
+         - multi-player-games  : 15 min
+
+     If a client requests quick-status before the min-request interval has passed,
+     the according block-specific data is returned from a cache if it has not yet
+     expired.
+
+     For the status-games data-block a progressive expiring is in place.
+     It starts with a waiting-time of one minute. If the client asks after one minute elapsed,
+     the status-games are loaded again (before one minute the data from the cache is taken).
+     If the newly loaded status-games show no difference to the previous data-block,
+     the waiting-time for the next interval is doubled.
+
+     In summary, the client always receives a result, but the server decides if it's taken
+     from the cache or database reflecting reality. The client is obliged to resonsibly
+     choose a suitable request-interval. And even though the minimum is one minute, do not
+     just use it because you can. Please read the following FAQ-entry before you choose:
+
+        "How should the resources provided by DGS be used responsibly?"
+        see http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302
+
+     Example of caching:
+         - B=bulletins, M=messages, G=status-games, MPG=multi-player-games
+         - B1 = data-set, B2 = data-set different from B1
+         - the request-time and data-changes are arbitrary to show the
+           progressive caching-effect for status-games and normal expire-times and quota-warnings
+
+         - 09:00:00 ask QST for 1st time -> result: B1 + M1 + G1 + MPG1
+           from database ( B1,M1,G1,MPG1 )
+           expire-time for B/M/MPG = 09:15:00, for G = 09:01:00
+
+         - 09:00:30 ask QST (request-interval too small, below 1 min)
+               -> result: [#Warning: excessive_usage...] + B1 + M1 + G1 + MPG1
+           from cache ( B1,M1,G1,MPG1 )
+           expire-time for B/M/MPG = 09:15:00, for G = 09:01:00
+
+         - 09:02:00 ask QST -> result: B1 + M1 + G2 + MPG1
+           from cache ( B1,M1,MPG1 ); from database ( G2 )
+           expire-time for B/M/MPG = 09:15:00, for G = 09:03:00  (1 min)
+
+         - 09:03:00 ask QST -> result: B1 + M1 + G2 + MPG1
+           from cache ( B1,M1,G2,MPG1 )
+           expire-time for B/M/MPG = 09:15:00, for G = 09:05:00  (doubled to 2 min because no change)
+
+         - 09:05:00 ask QST -> result: B1 + M1 + G2 + MPG1
+           from cache ( B1,M1,G2,MPG1 )
+           expire-time for B/M/MPG = 09:15:00, for G = 09:09:00  (doubled to 4 min because no change)
+
+         - 09:09:00 ask QST -> result: B1 + M1 + G2 + MPG1
+           from cache ( B1,M1,G2,MPG1 )
+           expire-time for B/M/MPG = 09:15:00, for G = 09:17:00  (doubled to 8 min because no change)
+
+         - 09:15:00 ask QST -> result: B1 + M2 + G2 + MPG1
+           from cache ( G2 ); from database ( B1,M2,MPG1 )
+           expire-time for B/M/MPG = 09:30:00, for G = 09:17:00
+
+         - 09:20:00 ask QST -> result: B1 + M2 + G3 + MPG1
+           from cache ( B1,M2,MPG1 ); from database ( G3 )
+           expire-time for B/M/MPG = 09:30:00, for G = 09:21:00  (reset to 1 min because it changed)
+
+   * For DGS version 1.0.15:
+     quick-status version=0+1 will be deprecated and (probably) removed on next major version DGS 1.0.16.
+     When a version is deprecated, the following warning is prepending the data:
+
+         [#Warning: deprecated_version; ]
+
+
+   * For DGS version <= 1.0.14:
+     If you are not logged-in (to set session-cookie authenticating a user),
      ALL dates are given in UTC-timezone in format "YYYY-MM-DD hh:mm:ss GMT" !
 
-   * If you are not logged in (no session cookies set),
+   * For DGS version <= 1.0.14:
+     If you are not logged in (no session cookies set),
      then you only have access to your status-game.
 
      Data that requires authentication:
@@ -1807,9 +1906,11 @@ Options:
         - USER_HANDLE is the unique user-id (handle),
           e.g. http://www.dragongoserver.net/userinfo.php?user=guest
 
-   <CACHE> = 0 | 1      ; default = 0
+   <CACHE> = 0 | 1 | 2      ; default = 0
       - 0 = caching enabled: +5 min expiration
       - 1 = disable caching (expire-header adjusted accordingly)
+      - 2 = disable browser-caching AND progressive block-specific caching (described above in "Important Notes")
+            NOTE: deactivation is not possible on the live-server, error 'invalid_args' is returned in this case
 
    <ORDER> = (optional) sort-order for status-games
       - '' = use default order as configured on status-page
@@ -1841,7 +1942,7 @@ Response:
       - escape-characters (single-quote, backslash) are escaped
         with a preceeding backslash, e.g. '\\' or "\'"
 
-   The current format of data-lines in the output is:
+   The current format of data-lines in the output is (different versions are referenced in braces):
 
       # header-line with format of unread-bulletins (only for version >= 2)
       "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'"
