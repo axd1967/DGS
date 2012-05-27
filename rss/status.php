@@ -32,12 +32,16 @@ define('CHARSET_MODE', 'utf'); //'iso' or 'utf'
 
 define('CACHE_MIN', 10);
 
-function error($err, $debugmsg=NULL)
+// NOTE: must appear before includes
+function error( $err, $debugmsg=NULL, $log_error=true )
 {
    global $uhandle;
 
    $title= str_replace('_',' ',$err);
-   list( $xerr, $uri)= err_log( $uhandle, $err, $debugmsg);
+   if( $log_error )
+      list($xerr, $uri) = err_log( $uhandle, $err, $debugmsg);
+   else
+      $xerr = $err;
 
    global $rss_opened;
    if( !$rss_opened )
@@ -55,8 +59,16 @@ require_once( "include/gui_bulletin.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+define('RSS_CHECK_MIN', 5*60 - 5); //secs
+define('RSS_CHECK_MAX', 1*3600);   //secs
+
 
 /* For a default layout:
+
+Basics:
+- HOW-TO make a RSS-feed: http://www.make-rss-feeds.com/
+- http://purl.org/rss/1.0/
+- http://www.mnot.net/rss/tutorial/
 
 Beginning to Style Your RSS Feed
 - http://mondaybynoon.com/2006/08/14/beginning-to-style-your-rss-feed/
@@ -67,10 +79,6 @@ Adding a CSS StyleSheet to your RSS Feed
 Some examples:
 - http://mondaybynoon.com/feed
 - http://www.tlc.ac.uk/xml/news-atom.xml
-
-Basis:
-- http://purl.org/rss/1.0/
-- http://www.mnot.net/rss/tutorial/
 */
 
 
@@ -135,12 +143,22 @@ switch( (string)CHARSET_MODE )
 
 
 // could not be called twice on the same string
-function rss_safe( $str)
+// $str : string | array( strings );  use array of strings to get line-breaks in
+function rss_safe( $str )
 {
    global $cdata_trans;
-   $str = reverse_htmlentities( $str);
-   // XML seems to not like some chars sequences (like "'$$'"), so put in CDATA
-   return '<![CDATA[' . strtr($str, $cdata_trans) . ']]>';
+
+   $arr = ( is_array($str) ) ? $str : array( $str );
+   $out = array();
+   foreach( $arr as $line )
+   {
+      $rline = reverse_htmlentities($line);
+      $out[] = strtr($rline, $cdata_trans); // replace xml-chars (including '<')
+   }
+   $out = implode("<br/>\n", $out);
+
+   // XML does not support some chars sequences (like "'$$'"), so put in CDATA
+   return '<![CDATA[' . $out . ']]>';
 }
 
 // could not be called twice on the same string
@@ -153,13 +171,16 @@ function rss_link( $lnk)
 
 function rss_date( $dat=0 )
 {
+   // NOTE: rss-date must be in format RFC 822, chapter 5.1 "date-time"
    return gmdate( 'D, d M Y H:i:s \G\M\T', ( $dat ? $dat : $GLOBALS['NOW'] ) );
 }
 
 // $tag must be valid and $str must be safe
-function rss_tag( $tag, $str)
+function rss_tag( $tag, $str, $attr='')
 {
-   return "<$tag>$str</$tag>\n";
+   if( $attr )
+      $attr = ' ' . $attr;
+   return "<$tag$attr>$str</$tag>\n";
 }
 
 
@@ -190,58 +211,46 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
    echo "<?xml version=\"1.0\" encoding=\"$encoding_used\"?>\n";
    echo "<rss version=\"2.0\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\""
         . " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-   echo "<!--
-
-If you're seeing this, you've clicked on the link
-for ".FRIENDLY_LONG_NAME." Quick RSS feed.
-This file is not meant to be read by a web
-browser directly. Instead you're meant to copy
-the URL for the file, which is:
-
-  {".HOSTBASE."}rss/status.php
-
-and paste it into your RSS reader or podcast program.
-
--->\n";
+   echo "<!-- This file is not meant to be read by a web browser but by a RSS reader. -->\n";
 
    $title = FRIENDLY_LONG_NAME.' - '.$title;
-   echo " <channel>\n"
-      . '  '.rss_tag( 'title', rss_safe( $title))
-      . '  '.rss_tag( 'link', rss_link( $html_clone))
-      . '  '.rss_tag( 'pubDate', rss_date( $last_modified_stamp))
-      . ( is_numeric( $cache_minutes)
-            ? '  '.rss_tag( 'ttl', $cache_minutes) : '')
-      . '  '.rss_tag( 'language', 'en-us')
-      . '  '.rss_tag( 'description', rss_safe( $description))
+   echo "<channel>\n"
+      . ' '.rss_tag( 'title', rss_safe( $title))
+      . ' '.rss_tag( 'link', rss_link( $html_clone))
+      . ' '.rss_tag( 'pubDate', rss_date( $last_modified_stamp))
+      . ( is_numeric( $cache_minutes) ? ' '.rss_tag( 'ttl', $cache_minutes) : '')
+      . ' '.rss_tag( 'language', 'en-us')
+      . ' '.rss_tag( 'description', rss_safe( $description))
       ;
 }
 
 
 function rss_close( )
 {
-   echo "\n </channel>\n</rss>";
+   echo "\n</channel>\n</rss>";
    ob_end_flush();
 }
 
 
+// $description : string | array( strings )
 function rss_item( $title, $link, $description='', $pubDate='', $category='', $guid='')
 {
    if( empty($description) )
       $description = $title;
-   if( empty($guid) )
+   if( !is_null($guid) && empty($guid) )
       $guid = $link;
 
    $str = "  <item>\n";
    $str.= '   '.rss_tag( 'title', rss_safe( $title));
    if( $link )
       $str.= '   '.rss_tag( 'link', rss_link( $link));
-   if( $guid )
+   if( !is_null($guid) && $guid )
       $str.= '   '.rss_tag( 'guid', rss_link( $guid));
    if( $category )
       $str.= '   '.rss_tag( 'category', rss_safe( $category));
    //if( $pubDate )
       $str.= '   '.rss_tag( 'pubDate', rss_date( $pubDate));
-   $str.= '   '.rss_tag( 'description', rss_safe( $description));
+   $str.= '   '.rss_tag( 'description', rss_safe( $description), 'xml:space="preserve"');
    $str.= "  </item>\n";
 
    echo $str;
@@ -296,6 +305,8 @@ function rss_auth( $cancel_str, $uhandle='')
 
 
 
+// ------------ MAIN -----------------
+
 if( $is_down )
 {
    rss_open( 'WARNING');
@@ -331,8 +342,40 @@ else
    }
 
 
+   // check for excessive usage
+   // NOTE: Without checking DB, this can be abusted to block other users. But that should be punished by an admin as abuse.
+   //       Advantage like this is to avoid DB-requests.
+   if( (string)$uhandle == '' )
+      error('invalid_user', "rss_status.check.miss_handle()", /*log-err*/false );
+   elseif( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
+      error('invalid_user', "rss_status.check.handle(".substr($uhandle,0,50).")");
+   list( $allow_exec, $last_call_time ) =
+      enforce_min_timeinterval( 'rss', 'rss_status-'.strtolower($uhandle), RSS_CHECK_MIN, RSS_CHECK_MAX );
+
    //disabling caches make some RSS feeders to instantaneously refresh.
    disable_cache( $NOW, $NOW + CACHE_MIN*60);
+
+   $channel_title = "RSS-Status of $uhandle";
+   $channel_description = "Bulletins, Messages and Games for $uhandle";
+   if( !$allow_exec )
+   {
+      rss_open( "[DISABLED] $channel_title", $channel_description, HOSTBASE.'status.php' );
+
+      $tit = sprintf( T_('%s-Status of [%s] temporarily disabled due to excessive usage!#alt'), 'RSS', $uhandle );
+      $lnk = "http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302"; // FAQ-entry on quota/responsible-user
+      $dsc = array(
+            sprintf( T_('Please follow the link, read the FAQ entry and re-configure your %s configuration accordingly.#alt'), 'RSS'),
+            T_('Please do it as soon as possible to reduce the stress on the server.#alt'),
+            T_('Thanks in advance for your cooperation.#alt'),
+         );
+      $dat = $NOW;
+      $cat = 'Status/Quota';
+      rss_item( $tit, $lnk, $dsc, $dat, $cat, /*guid*/null );
+
+      rss_close();
+      exit;
+   }
+
 
    connect2mysql();
 
@@ -396,9 +439,9 @@ else
    //$rss_sep = "\n<br />";
    $rss_sep = "\n - ";
 
-   $tit= "Status of $my_name";
+   $tit= $channel_title;
    $lnk= HOSTBASE.'status.php';
-   $dsc= "Messages and Games for $my_name";
+   $dsc= $channel_description;
    rss_open( $tit, $dsc, $lnk);
 
    $nothing_found = true;
