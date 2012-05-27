@@ -323,7 +323,7 @@ function get_timezone_array()
    $TZs['CET']='CET';
    $TZs['Chile/Continental']='Chile/Continental';
    $TZs['Chile/EasterIsland']='Chile/EasterIsland';
-   $TZs['China/Beijing']='China/Beijing';
+   $TZs['China/Beijing']='Asia/Shanghai'; // "China/Beijing" not in tzdata anymore -> use alias
    $TZs['China/Shanghai']='China/Shanghai';
    $TZs['CST6CDT']='CST6CDT';
    $TZs['Cuba']='Cuba';

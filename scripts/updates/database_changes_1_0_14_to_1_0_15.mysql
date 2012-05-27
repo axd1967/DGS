@@ -2420,3 +2420,8 @@ CREATE TABLE MoveStats (
 ) ENGINE=MyISAM ;
 
 
+-- use alias for removed tzdata of 'China/Beijing'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Beijing' ;
+
+
