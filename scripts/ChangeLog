@@ -19,6 +19,317 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-05-28 juga
+
+   * include/config.php (GAME_INVITATIONS_EXPIRE_MONTHS),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     daily_cron.php:
+   - delete old game-invitations after 3 months configured with server-specific setting
+
+2012-05-27 juga
+
+-----------
+-- delete invitations older than 3 months
+SELECT COUNT(*) FROM Games
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+DELETE FROM Games
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+-----------
+
+   * include/timezones.php (get_timezone_array),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - use alias 'Asia/Shanghai' for removed tzdata of 'China/Beijing'-timezone
+     as live-database does not know it anymore
+-----------
+-- use alias for removed tzdata of 'China/Beijing'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Beijing' ;
+-----------
+
+   * include/quick_common.php (quick_suite_add_quota),
+     include/error_functions.php (DgsErrors.add_error),
+     include/quick/quick_handler.php (QuickHandler.initResult),
+     specs/quick_suite.txt:
+   - added quota_count and quota_expire fields in every quick-suite response
+
+   * scripts/fix_game_snapshot.php, scripts/fix_games_timeleft.php,
+     scripts/updates/fix_game_comments-1_0_15.php:
+   - restricted authorization to use script to developer/game/database-admin
+
+   * scripts/clear_datastore.php, scripts/index.php:
+   - added script to show & clear sub-dirs of DATASTORE-folder
+
+   * quick_status.php (append_data, print_datablock, print_bulletins, print_messages,
+       print_status_games, print_mpg, write_quick_status_datastore, parse_cache_content),
+     specs/quick_suite.txt:
+   - added progressive block-specific caching for quick-status page
+     - see also "Important Notes" for 4.QST in 'specs/quick_suite.txt'
+     - enforce login to be able to store user-specific caching,
+       login possible by userid/passwd or session-cookies,
+       removed non-login mode
+     - use data-block-specific cache-expire for blocks bulletins, messages, status-games, MPGs
+     - added restriction on quick-status by enforcing minimum request interval of 1 min
+     - minimum request interval for status-games 1 min, for other blocks 15 min
+     - added progressive caching for status-games doubling waiting-time
+       up to max. 15 min if data has not changed
+     - returning block-cached data if asked more often and prepend data
+       with 'excessive_usage'-warning
+     - returning block-cached data if corresponding data-block not expired yet
+     - extended option no_cache=2 to disable progressive-caching for testing-purposes,
+       usage on live-server results in error
+   - show 'deprecated_version'-warning for version != 2
+
+   * rss/status.php (error, rss_safe, rss_tag, rss_close, rss_item),
+     wap/status.php (wap_item):
+   - adjusted quota-system for alternative interfaces (sync from stable-branch):
+     - added restriction on RSS- and WAP-status by enforcing minimum request interval of 5 min,
+       error-message returned if asked more often
+     - return error on excessive usage linking to live-DGS-FAQ about resonsible-use of DGS
+     - writing cache-files based on user-id-handle for RSS/WAP/Quick-Status, convert handle
+       to lower-case to avoid getting more quota by using different writings of user-handle case
+     - do not log invalid_user-error to Errorlog if user-handle is missing
+     - added argument to skip writing of error-log into the database
+     - bugfix: convert handle to lower-case to avoid getting more quota by using different
+       case-writing of user-handle
+     - add RSS <guid>-tag only if used
+     - fix LF-handling for RSS-/WAP-texts
+   - minor refactorings (comments, notes, layout)
+
+   * include/std_functions.php (start_html, start_page, sysmsg, is_legal_handle, VAULT_CNT,
+       is_logged_in, enforce_min_timeinterval),
+     skins/dragon/print.css:
+   - undo deletion as some users still want to print diagrams or other pages
+   - use separate skin-default for main and print CSS
+   - adjusted quota-system:
+     - show warning at page top if user-access-quota runs low (below 10 points)
+     - bugfix: do not show quota-line in bottom bar if not logged in
+     - reduced user-access-quota for web-pages from 1000 -> 400 -> 500
+     - refactored user-access-quota setting quota-expire if quota left and expire-date
+       has passed for more transparent remaining quota
+     - adjusted quota-system for alternative interfaces using cache-file in datastore-folder
+       to enforce minimum request intervals
+
+   * include/config.php (DATASTORE_FOLDER), INSTALL:
+   - added datastore-folder outside of document-root (if possible) for caching sensitive data:
+     - keep track of last RSS/WAP-status request to avoid too-many database-connections/queries
+     - progressive block-specific caching for quick-status page
+
+   * include/error_functions.php (DgsErrors.add_error; error, warning):
+   - added argument to skip writing of error-log into the database
+   - added debug-message for warnings
+
+   * scripts/analyze-weblogs/Calculate.java, scripts/analyze-weblogs/CountUrls.java,
+     scripts/analyze-weblogs/analyze-time.pl, scripts/analyze-weblogs/filter-rtime.pl,
+     scripts/analyze-weblogs/filter.pl, scripts/analyze-weblogs/parse-apache-logs.pl,
+     scripts/analyze-weblogs/README-analyze-weblogs.txt:
+   - added scripts to analyse webserver-logs, see README-file on how to use
+
+2012-05-05 juga
+
+   * include/game_functions.php (increaseMoveStats),
+     include/quick_common.php (get_utc_timeinfo),
+     include/quick/quick_game.php (QuickGameHandler.process_cmd_play),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     confirm.php, daily_cron.php, quick_play.php:
+   - write MoveStats to build move-profile of users
+     - counting moves in time-slots of 30mins
+     - cleanup move-count older than 4 weeks
+-----------
+-- create day/week-profile for moving
+CREATE TABLE MoveStats (
+   uid int NOT NULL default 0,
+   SlotTime smallint unsigned NOT NULL default 0,
+   SlotWDay tinyint NOT NULL default 0,
+   SlotWeek tinyint NOT NULL default 0,
+   Counter mediumint unsigned NOT NULL default 0,
+   PRIMARY KEY (uid,SlotTime,SlotWDay,SlotWeek)
+) ENGINE=MyISAM ;
+-----------
+
+   * statisticspng.php, statratingspng.php:
+   - rename cache-statistics graphics file adding extension
+
+2012-05-02 juga
+
+   * include/std_functions.php (end_page),
+     skins/dragon/screen.css:
+   - show current user-quota in bottom-bar
+
+   * include/std_functions.php (VAULT_CNT):
+   - decreased user-access-quota 1000 -> 400
+
+   * include/connect2mysql.php (writeIpStats),
+     include/std_functions.php (is_logged_in),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     rss/status.php, wap/status.php, quick_play.php, quick_status.php:
+   - added IpStats-table with used user-id, IP and page-type to track too-much-requests,
+     - motivation: there are >20Mio RSS-requests/month for March-2012
+     - add entry for page-types: RSS, QST (quick-status), QPL (quick-play), QDO (quick-do),
+       WEB (unused as it's protected with user-quota)
+-----------
+-- added table for used IP and user-id to track too-much-requests
+CREATE TABLE IpStats (
+   uid int NOT NULL default 0,
+   Page char(4) NOT NULL default '',
+   IP varchar(16) NOT NULL,
+   Counter int unsigned NOT NULL default 0,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (uid,Page,IP)
+) ENGINE=MyISAM ;
+-----------
+
+2012-04-30 juga
+
+   * message.php:
+   - bugfix: open send-message-template using loaded template-type
+     instead of assuming INVITE-template
+
+   * statistics.php:
+   - used thousand-group on big numbers
+   - switched columns moves/games in game-count per game-state
+
+   * include/admin_faq_functions.php, include/make_translationfiles.php,
+     include/rating.php, scripts/convert_from_old_forum.php,
+     scripts/game_consistency.php, scripts/message_consistency.php,
+     scripts/recalculate_ratings2.php, scripts/start_frozen_clocks.php,
+     scripts/translation_consistency.php, rss/status.php,
+     wap/status.php, code_examples/test_clock_tick.php,
+     admin_faq.php, faq.php, game_comments.php, halfhourly_cron.php,
+     people.php, quick_play.php, quick_status.php:
+   - cleanup: replace (A,B,C)-join with INNER-JOIN
+   - cleanup: some sql-reformatting
+
+   * include/classlib_game.php (NextGameOrder.build_status_games_query),
+     quick_status.php, status.php, rss/status.php, wap/status.php:
+   - bugfix: use same next-game-order for all status-games pages
+     status, rss-status, wap-status, quick-status
+   - bugfix: handle next-game-order using game-priority
+   - bugfix: free mysql-result as early as possible
+
+   * code_examples/test_clock_tick.php:
+   - fix: reverted latest replacing of usage of IS_RUNNING_GAME as NOT-query was under test
+
+   * include/quick_common.php:
+   - added trailing space on SQL-query-parts to avoid obvious missing space
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql:
+   - optimize: speed-up translators-query on people-page
+-----------
+-- speed-up translators-query on people-page
+ALTER TABLE Translationlog
+   ADD KEY PlayerLang (Player_ID,Language_ID) ;
+-----------
+
+   * halfhourly_cron.php, quick_status.php, show_games.php, include/admin_faq_functions.php,
+     include/make_translationfiles.php, include/db/bulletin.php, rss/status.php,
+     scripts/convert_from_old_forum.php, scripts/message_consistency.php,
+     scripts/tournament_consistency.php, scripts/translation_consistency.php,
+     scripts/experiments/analyze-slow_log.php, wap/status.php:
+   - cleanup/layout: checked for mysql5-changes:
+     - precendence of JOIN now higher than A,B,C-join
+     - checked ON-clause, which can only work on own operands and operands of left
+
+   * all *.php files (#140):
+   - added debug-message where missing on all error()-calls
+
+2012-04-28 juga
+
+   * include/quick/quick_handler.php (QuickHandler.checkArgsUnknown),
+     include/quick/quick_bulletin.php (QuickHandlerBulletin.parseURL),
+     include/quick/quick_contact.php (QuickHandlerContact.parseURL),
+     include/quick/quick_folder.php (QuickHandlerFolder.parseURL),
+     include/quick/quick_game.php (QuickHandlerGame.parseURL, ~.prepare, ~.process_cmd_play),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.parseURL),
+     include/quick/quick_game_list.php (QuickHandlerGameList.parseURL),
+     include/quick/quick_message.php (QuickHandlerMessage.parseURL),
+     include/quick/quick_user.php (QuickHandlerUser.parseURL),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.parseURL):
+   - check for unknown args
+
+   * forum/forum_functions.php (Forum.load_forum_names),
+     forum/search.php:
+   - optimize / bugfix: reverse key/value in map to get rid of join with Forums again
+     as names and options are already loaded
+
+   * include/error_codes.php (ErrorCode.init):
+   - use left-aligned format for multi-line error-text for not_logged_in-error
+
+2012-04-03 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play):
+   - bugfix game-quick-handler: fix score-command calling (unknown) method on wrong object
+
+2012-04-01 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.prepare):
+   - bugfix for game-quick-handler: fix check on allowing empty agree-argument for scoring
+
+   * admin_admins.php, admin_do_translators.php, change_password.php, confirm.php, edit_password.php,
+     login.php, message.php, message_thread.php, ratinggraph.php, ratingpng.php, show_games.php,
+     statisticspng.php, update_translation.php, features/lib_votes.php, features/vote_feature.php,
+     forum/list.php, forum/post.php, forum/read.php, forum/search.php, include/board.php,
+     include/cache_clock.php, include/classlib_userconfig.php, include/classlib_userquota.php,
+     include/message_functions.php, include/move.php, include/sgf_parser.php,
+     rss/status.php, scripts/make_handicap_pattern.php, wap/status.php:
+   - replace unknown error-codes with known ones:
+     - bad_data/confirm_add_time/invalid_status/invalid_feature/unknown_object/mysql_clock_ticks -> invalid_args
+     - mysql_data_corruption -> database_corrupted
+     - mysql_message_info -> mysql_update_message
+   - cleanup: use single-quotes for all error-codes; error("code") -> error('code')
+   - sql-layout
+
+   * include/error_codes.php (ErrorCode.init):
+   - added note about undefined error-codes
+   - removed unused error-codes: not_empty
+
+   * quick_status.php, specs/quick_suite.txt:
+   - changed header-line for messages in quick-status: message_type/message_date -> type/date
+
+   * include/quick/quick_game.php:
+   - enable "score"-command for game-quick-handler
+
+2012-03-24 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play, ~.parse_coords):
+   - bugfixes for game-quick-handler:
+     - bugfix for setting-handicap of game-quick-handler:
+       nasty double-semicolon skipping required instructions for db-update
+     - fixed parsing of single board-coordinate
+     - missed some global-var declarations
+     - missed some instance-ref to TheBoard -> $this->TheBoard
+     - used wrong ref to gchkmove for "move"-command: this.. -> gchkmove..
+
+   * include/table_columns.php (Table.make_next_prev_links):
+   - bugfixes on page-navi-info in table-headers:
+     - correct current-page and max-page for arbitrary From_Row (start-offset)
+     - correct offset for navigating to last-page
+     - changed page-text if found-rows is not used: X -> "Page X"
+
+   * include/rating.php (update_rating, update_rating_glicko),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/data_export.php,
+     specs/db/dragon-ddl.sql:
+   - removed unused and obsolete funcs:
+     - update_rating(): old rating-change, not longer used,
+       dropped corresponding RatingChange-table
+     - update_rating_glicko(): glicko-rating removed as current DGS-ratings works very well
+       and there's no proof that glicko works better.
+       Former code still available in source-repository with rev1.100
+-----------
+-- remove old unused table for rating-changes
+DROP TABLE RatingChange ;
+-----------
+
+   * include/board.php (class Board):
+   - removed OLD replaced now unused methods:
+     _old_has_liberty_check, _old_mark_territory, _old_toggle_marked_area
+
+   * include/message_functions.php (DgsMessage.load_message_receivers):
+   - bugfix: fix error-handling if message/invitation is rejected because of contact-flags
+
 2012-03-23 juga
 
    * include/config.php (ALLOW_QUICK_DO), NEWS:
