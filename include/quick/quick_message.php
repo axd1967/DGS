@@ -270,7 +270,7 @@ class QuickHandlerMessage extends QuickHandler
             // ToMove_ID holds handitype since INVITATION
             list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
             $curr_tomove = (int)$row['ToMove_ID'];
-            $my_htype = $my_gs->Handicaptype;
+            $my_htype = (is_null($my_gs)) ? get_handicaptype_for_invite($curr_tomove, null, null) : $my_gs->Handicaptype;
             if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
                $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
 

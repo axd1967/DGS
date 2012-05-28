@@ -3711,6 +3711,7 @@ function get_invite_handicaptype( $handitype )
    return @$ARR_INVITE_HTYPES[$handitype];
 }
 
+// use is_black_col = fk_htype = null to get standard htype (e.g. for transition of Games without GameSetup)
 function get_handicaptype_for_invite( $inv_handitype, $is_black_col, $fk_htype )
 {
    // invite-handicap-type -> handicap-type
