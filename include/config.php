@@ -102,7 +102,7 @@ define('CACHE_FOLDER', 'temp/');
 
 // A folder to store non-public/sensitive data, that should be stored
 // outside of the webservers DOCUMENT_ROOT. Must end with '/'.
-// The path is always relative to the document-root.
+// The path is relative to the document-root or an absolute path if starting with '/'.
 // IMPORTANT: also check notes in INSTALL-file!
 define('DATASTORE_FOLDER', '../data-store/');
 

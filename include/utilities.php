@@ -333,4 +333,10 @@ function isNumber( $value, $allow_negative=true, $allow_empty=false )
    return preg_match( "/^{$rx_sign}\d+$/", $value );
 }
 
+/*! \brief Builds relative or absolute path (path_def if absolute starting with '/' or src_path/path_def if relative). */
+function build_path_dir( $src_path, $path_def )
+{
+   return ( substr($path_def,0,1) == '/' ) ? $path_def : $src_path . '/' . $path_def;
+}
+
 ?>

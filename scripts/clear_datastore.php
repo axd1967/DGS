@@ -46,7 +46,7 @@ require_once 'include/form_functions.php';
 
    // read and print subdirs -------------------------
 
-   $path_datastore = $_SERVER['DOCUMENT_ROOT'] . '/' . DATASTORE_FOLDER;
+   $path_datastore = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER );
    $subdirs = read_subdirs( $path_datastore );
 
    echo "Choose sub-dir of datastore-folder [$path_datastore] and action to perform:<br>\n";

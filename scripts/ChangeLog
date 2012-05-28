@@ -21,6 +21,12 @@ ChangeLog
 
 2012-05-28 juga
 
+   * include/config.php (DATASTORE_FOLDER),
+     include/std_functions.php (enforce_min_timeinterval),
+     include/utilities.php (build_path_dir),
+     scripts/clear_datastore.php:
+   - allow an absolute path for DATASTORE_FOLDER as relative to DOCUMENT_ROOT may lead to the wrong place
+
    * include/message_functions.php (game_settings_form, game_info_table),
      include/game_functions.php (get_handicaptype_for_invite),
      include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):

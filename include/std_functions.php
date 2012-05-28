@@ -3531,7 +3531,7 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
    if( (string)DATASTORE_FOLDER == '' )
       error('internal_error', "enforce_min_timeinterval.miss.datastore");
 
-   $path = $_SERVER['DOCUMENT_ROOT'] . '/' . DATASTORE_FOLDER;
+   $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER );
    if( $subdir )
       $path .= '/' . $subdir;
    if( !is_dir($path) )
