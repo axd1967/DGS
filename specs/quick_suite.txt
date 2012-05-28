@@ -1774,7 +1774,7 @@ Purpose:
 
 Request:
 
-   quick_status.php?version=<VERSION>&uid|user=<USER_ID|HANDLE>&no_cache=<CACHE>&order=<ORDER>
+   quick_status.php?version=<VERSION>&userid=<USER_HANDLE>&passwd=<PASSWORD>&no_cache=<CACHE>&order=<ORDER>
 
 Important Notes:
 
@@ -1900,15 +1900,14 @@ Options:
       - 2 = quick-status format for DGS-release-version = 1.0.15
          - current specs describe this format
 
-   <USER_ID> = integer
-   <USER_HANDLE> = string
-      - If no user-id is given, the logged-in user is taken instead as default.
-        This can be overruled by specifying ANY user-id you want
-        to get a list of games for.
+   <USER_HANDLE> + <PASSWORD> = string
+      - A user login is mandatory to retrieve data via quick-status.
+      - There are two ways to login:
+        - 1. login with URL-arguments userid + passwd
+        - 2. use 'login.php' to set cookies (preferred way)
+      - If no user-id is given (per argument or cookies), an error 'invalid_user' is returned.
 
       - reference user to get status-info for
-        - USER_ID is the unique user-id (uid),
-          e.g. http://www.dragongoserver.net/userinfo.php?uid=1
         - USER_HANDLE is the unique user-id (handle),
           e.g. http://www.dragongoserver.net/userinfo.php?user=guest
 
