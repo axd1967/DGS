@@ -618,6 +618,11 @@ $GLOBALS['ThePage'] = new Page('Game');
       echo "<br>\n";
    }
    GameScore::draw_score_box( $game_score, $score_mode );
+   if( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
+   {
+      echo "<br>\nOther scoring:<br>\n";
+      GameScore::draw_score_box( $game_score, ($score_mode == GSMODE_AREA_SCORING ? GSMODE_TERRITORY_SCORING : GSMODE_AREA_SCORING) );
+   }
    echo "</td><td>";
 
    $TheBoard->movemsg= $movemsg;

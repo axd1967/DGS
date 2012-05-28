@@ -439,7 +439,7 @@ class GameScore
          sprintf( $fmtline3, 'HeaderSum', T_('Score#scoring'),
                   $score_info[GSCOL_BLACK]['score'],
                   $score_info[GSCOL_WHITE]['score'] ),
-         sprintf( $fmtline2, 'HeaderSum', T_('Difference#scoring'), $score_info['score'] ),
+         sprintf( $fmtline2, 'HeaderSum', T_('Result#scoring'), score2text($score_info['score'], false) ),
          "</table>\n";
    } //draw_score_box
 

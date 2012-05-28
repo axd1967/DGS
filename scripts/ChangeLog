@@ -21,6 +21,9 @@ ChangeLog
 
 2012-05-28 juga
 
+   * include/classlib_game.php (GameScore.draw_score_box), game.php:
+   - show area & territory scoring when on test-server
+
    * include/config.php (DATASTORE_FOLDER),
      include/std_functions.php (enforce_min_timeinterval),
      include/utilities.php (build_path_dir),
