@@ -240,3 +240,10 @@ copy /images/shape.gif
 # added image for new-game
 copy /images/newgame.gif
 
+-----------
+# see also DATASTORE_FOLDER in config.php (for your webserver you may have to use a different setup)
+cd DOCROOT/..
+mkdir data-store
+mkdir data-store/rss data-store/qst data-store/wap
+chmod -R 775 data-store
+

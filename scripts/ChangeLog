@@ -25,9 +25,6 @@ ChangeLog
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      daily_cron.php:
    - delete old game-invitations after 3 months configured with server-specific setting
-
-2012-05-27 juga
-
 -----------
 -- delete invitations older than 3 months
 SELECT COUNT(*) FROM Games
@@ -35,6 +32,8 @@ SELECT COUNT(*) FROM Games
 DELETE FROM Games
    WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
 -----------
+
+2012-05-27 juga
 
    * include/timezones.php (get_timezone_array),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
@@ -109,10 +108,18 @@ UPDATE Players
      - adjusted quota-system for alternative interfaces using cache-file in datastore-folder
        to enforce minimum request intervals
 
-   * include/config.php (DATASTORE_FOLDER), INSTALL:
+   * include/config.php (DATASTORE_FOLDER),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt, INSTALL:
    - added datastore-folder outside of document-root (if possible) for caching sensitive data:
      - keep track of last RSS/WAP-status request to avoid too-many database-connections/queries
      - progressive block-specific caching for quick-status page
+-----------
+# see also DATASTORE_FOLDER in config.php (for your webserver you may have to use a different setup)
+cd DOCROOT/..
+mkdir data-store
+mkdir data-store/rss data-store/qst data-store/wap
+chmod -R 775 data-store
+-----------
 
    * include/error_functions.php (DgsErrors.add_error; error, warning):
    - added argument to skip writing of error-log into the database
