@@ -167,7 +167,8 @@ Find out which group your webserver is using (e.g. www-data).
   it as required for the scripts-sub-dir.
 
   If the folder is not existing and the web-user has the required rights,
-  the folder will be created by the webserver on-the-fly.
+  the folder will be created by the webserver on-the-fly. But for that, the webserver
+  user must have the necessary rights in the parent directory.
 
   # Create the DATASTORE_FOLDER-directory (example) and sub-dirs for RSS/quick-status/WAP:
   mkdir data-store
