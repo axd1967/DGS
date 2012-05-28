@@ -21,6 +21,11 @@ ChangeLog
 
 2012-05-28 juga
 
+   * include/message_functions.php (game_settings_form, game_info_table),
+     include/game_functions.php (get_handicaptype_for_invite),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):
+   - bugfix: add fallback for games without GameSetup-field to determine handicap-type
+
    * include/config.php (GAME_INVITATIONS_EXPIRE_MONTHS),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      daily_cron.php:
