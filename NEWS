@@ -232,6 +232,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Show input-errors instead of throwing error "destroying" all other inputs, highlight error-fields
          * Added Fair-Komi options like for new-game
 
+         * Game-invitations older than 3 months are deleted by the server
+
       * <home templates.php>Templates</home>:
          * Added page to show template-list and manage saving of templates for
            sending message (<image send.gif>), invitation (<image invite.gif>), new-game (<image newgame.gif>)
@@ -486,6 +488,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
       * see 'specs/quick_suite.txt' on DGS source repository for full specs
+      * Added remaining quota in every response
+
       * Added game-handler to
          * retrieve information about game, with nested user-objects
          * retrieve own private notes of game
@@ -515,8 +519,10 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * mark bulletins as read
 
    * <home_ quick_status.php?version=2>Quick Status</home> (new version):
+      * Added <http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/specs/quick_suite.txt?revision=1.48&view=markup#l1786 |progressive block-specific caching>
+      * Removed non-login mode, login per cookie or userid/passwd-URL-args is mandatory now
       * Added URL-args:
-         * 'no_cache' to disable cache
+         * 'no_cache' to disable caching
          * 'version' to allow smooth client-migration, version=2 (new format)
          * 'order' to sort games, or disable sorting
       * Changed format of quick-status:
@@ -540,12 +546,14 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * DEPRECATED-Warning: Version 1 is deprecated and will be removed in some future releases
 
       * <home rss/status.php>RSS status</home>:
+         * Added minimum request-interval check returning error on excessive usage
          * Added links to all unread bulletins
          * Added game-type for status-game
          * Use same next-game-order as configured on status-page
          * Use translated texts
 
       * <home wap/status.php>WAP status</home>:
+         * Added minimum request-interval check returning error on excessive usage
          * Use same next-game-order as configured on status-page
 
    * <home users.php>Users</home>:
@@ -570,6 +578,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added JavaScript management in profile setting
       * Changed order, grouping and description of hover-options
       * Enlarged length of field 'Open for matches' to 60 chars
+      * Aliased removed timezone 'China/Beijing' with 'Asia/Shanghai'
 
       * <home edit_rating.php>Rating change</home>:
          * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
@@ -749,6 +758,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added filters for showing Errorlog
       * Added indexes on Errorlog to improve searching for problems
       * Don't write Errorlog if not needed, e.g. for some GUI-errors
+      * Added table IpStats to identify users with too many requests of alternative interfaces (enable on demand)
 
       * Added admin-option DENY_FEATURE_VOTE to forbid user to vote on features
       * Added admin-option DENY_SURVEY_VOTE to forbid user to vote on surveys
@@ -766,6 +776,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added tournament consistency script
       * Added consistency script for features and surveys
       * Added consistency script to fix game-thumbnails
+      * Added script to clear sub-directories in datastore-folder
+      * Added scripts to analyse webserver-logs
       * Removed translations from the admin pages
       * Different CSS-layout for most admin-actions & admin-links
 
@@ -813,6 +825,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Restricted <home rss/status.php>RSS-status</home> with minimum request interval
       * Reduced user access quota to 500
       * Show warning at page top if quota runs low
+      * Show quota in bottombar if logged in
 
    * Forum pages:
       * Show note for guest-user on reply-textbox about writing posts
