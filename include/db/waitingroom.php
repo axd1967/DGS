@@ -90,7 +90,7 @@ class Waitingroom
 
    /*! \brief Constructs Waitingroom-object with specified arguments. */
    function Waitingroom( $id=0, $uid=0, $user=null, $gid=0, $count_offers=0, $created=0,
-         $game_type=GAMETYPE_GO, $game_players='1:1', $ruletset=RULESET_JAPANESE, $size=19, $htype=HTYPE_NIGIRI, $komi=0,
+         $game_type=GAMETYPE_GO, $game_players='1:1', $ruleset=RULESET_JAPANESE, $size=19, $htype=HTYPE_NIGIRI, $komi=0,
          $handicap=0, $adj_komi=0, $jigo_mode=JIGOMODE_KEEP_KOMI, $adj_handicap=0, $min_handicap=0, $max_handicap=0,
          $maintime=0, $byotype=BYOTYPE_FISCHER, $byotime=0, $byoperiods=0, $weekendclock=true,
          $rated=true, $std_handicap=true, $must_be_rated=false, $rating_min=0, $rating_max=0,
@@ -103,7 +103,7 @@ class Waitingroom
       $this->Created = (int)$created;
       $this->GameType = $game_type; //TODO enum
       $this->GamePlayers = $game_players;
-      $this->Ruleset = $ruletset; //TODO enum
+      $this->Ruleset = $ruleset; //TODO enum
       $this->Size = (int)$size;
       $this->Handicaptype = $htype; //TODO enum
       $this->Komi = (float)$komi;
