@@ -2314,9 +2314,6 @@ There are three date-formats used for the quick-suite:
    - "YYYY-MM-DD hh:mm:ss"
      standard format for quick-suite for date-times
 
-   - "YYYY-MM-DD hh:mm:ss GMT"   (only for quick-status)
-     static timezone included when user not logged in and so users timezone is unknown
-
 
 #-------- (6b) TimeLimit-Formats ----------------------------------------------
 
