@@ -123,7 +123,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $MinHandicap = 0;
    $MaxHandicap = MAX_HANDICAP;
    $GamePlayers = '';
-   $Maintime = 14;
+   $Maintime = 30;
    $MaintimeUnit = 'days';
    // NOTE: take note, that '36 hours' eval to '2d + 6h' because of sleeping time
    $Byotype = BYOTYPE_FISCHER;

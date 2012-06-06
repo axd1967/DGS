@@ -179,7 +179,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * Game settings:
       * General:
          * Changed default for Standard Handicap Placement to: ON
-         * Changed default for Time settings to: Fischer time with 14d + 1d
+         * Changed default for Time settings to: Fischer time with 30d + 1d
          * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
            Now stronger player gets White color and only make Nigiri if both players have same rating
 
