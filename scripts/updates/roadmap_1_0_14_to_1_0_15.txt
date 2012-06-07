@@ -1,0 +1,91 @@
+## Server Upgrade from DGS 1.0.14 to DGS 1.0.15 on 07..10-Jun-2012
+
+# NOTE: update maintenance-status on: http://senseis.xmp.net/?DragonGoServer
+
+
+* Take Server offline. Clear cache!
+   - upload 'include/quick_common.php' with $is_down=true and adjusted $is_down_message
+   - clear cache with script: ./scripts/apc_clear_cache.php
+
+* Backup database
+   - nightly backup-run on 07-Jun-2012 01:10 AM,
+     download from http://www.dragongoserver.net/scripts/backup/latest.sql.bz2
+     copy to external storage
+
+* Backup web-site
+   - rsync from web-site and local database done by SamurajData
+
+   - Cleanup remote site
+
+   - Adjust snapshot page to include new version release: DGS-YYYYMMDD.tar.gz + images-YYYYMMDD.tar.gz; rename older entries
+   - Create snapshot without passwords and upload it to /snapshot directory
+
+* Update code (locally) from cvs
+   - set CVS-tag: release-1_0_15-20120607
+   - sync $is_down_message from live-server to local-file: include/quick_common.php
+   - prepare server-config for live-server (copy from config.php): include/config-local.php
+
+* Transfer changes to samurajdata. Clear cache!
+   - update remote site with updates
+
+* Update web-site with  ./scripts/other_changes_1_0_14_to_1_0_15.txt
+   - prepare web-site including all steps from 'INSTALL'-docfile,
+     including: CACHE_FOLDER, USERPIC_FOLDER, DATASTORE_FOLDER
+
+* Update database with  ./scripts/database_changes_1_0_13_to_1_0_14.mysql
+   - Execute all db-changes
+
+   - Export database DDL and save as specs/db/dragon-ddl.sql in CVS
+   - Check if new admins flags are still correctly set
+
+   - Cleanup old game-invitations according to server-config
+
+* Run consistency tests.
+
+   - Run 3 translation scripts from ./scripts/index.php
+      - check+translate the english '#LABEL'-entries
+      - export Translationdata
+
+   - Run some consistency tests (if needed):
+      ./scripts/player_consistency.php
+      ./scripts/translation_consistency.php
+
+   - Fix obvious detected bugs
+
+* Do final tests (see NEWS-file):
+
+     (a) Admin-scripts
+     (b) Regression: Start game, play, move, resign, delete, score
+     (c) Status-page
+     (d) Bulletins
+     (e) FAQ-Search, Intro, Links
+     (f) Game-page, Game-Info, Rematch, Timeouts
+     (g) New Game, Waitingroom, Invite, Templates
+     (h) SGF-Download
+     (i) Game-lists
+     (j) Multi-Player-Game
+     (k) Shape-games, Goban-Editor
+     (l) Quick-Suite, Quick-Status, RSS
+     (m) User-info, User-profile
+     (n) Messages
+     (o) Forum-changes, Moderators, Log
+     (p) Markup
+     (q) Features, Voting, Surveys
+     (r) Tables (performance)
+     (s) Docs, Statistics
+     (t) Fixed Bugs
+     (u) Admin (game, feature, survey, rating, bulletin)
+
+* Setup additional crons as described in 'INSTALL'-docfile
+   - tournament-feature disabled, so no new cron
+
+* Adjust FAQ and post in News-forum
+
+* Start server. Clear cache!
+   - upload 'include/quick_common.php' with $is_down=false
+
+
+-- Misc:
+
+* Make a branch later with released version: DGS-stable-20120610
+
