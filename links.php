@@ -75,7 +75,7 @@ function make_static_links( $create=false )
    $link("http://www.gogod.co.uk/", 'GoGoD database and encyclopaedia', 'A large database of professional games');
    $link("http://senseis.xmp.net/?RGGFAQ", 'Go FAQ',
          'Frequently asked questions about go for the rec.games.go newsgroup');
-   $link('http://www.intergofed.org/members.htm', 'IGF',
+   $link('http://intergofed.org/members.html', 'IGF',
          'International Go Federation. Find federations and associations in the world.');
    $link("http://go-news.blogspot.com/", 'Go News', 'World news about game of Go');
    $link('http://gosensations.com/', 'Go Sensations', 'Go News and Sensations from other Go servers');
@@ -126,7 +126,7 @@ function make_static_links( $create=false )
    $link("http://www.itsyourturn.com/", 'IYT - It\'s your turn', 'Also turn based. Has several other games.');
    $link("http://www.online-go.com/", 'OGS', 'Another turn based. Focus on organised tournament play.');
    $link("http://www.gokgs.com/", 'KGS', 'Kiseido Go Server with java interface');
-   $link("http://www.pandanet.co.jp/English/", 'IGS', 'A large server for realtime play');
+   $link('http://www.pandanet-igs.com/', 'IGS', 'A large server for realtime play');
    $link("http://senseis.xmp.net/?GoServers", 'Server list', 'A more complete list of servers');
    $linkend();
 }//make_static_links
