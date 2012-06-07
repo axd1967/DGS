@@ -28,7 +28,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 if( $is_down )
 {
-   warning($is_down_message);
+   warning('server_down', str_replace("\n", "  ", $is_down_message));
 }
 else
 {

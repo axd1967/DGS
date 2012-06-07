@@ -25,7 +25,7 @@ $TheErrors->set_mode(ERROR_MODE_QUICK_SUITE);
 
 if( $is_down )
 {
-   error('server_down', $is_down_message);
+   error('server_down', str_replace("\n", "  ", $is_down_message));
 }
 else
 {

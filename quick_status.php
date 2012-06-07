@@ -84,7 +84,7 @@ if( $is_down )
 {
    //recover_language(); //set $language_used and $encoding_used
    loc_start_page();
-   warning($is_down_message);
+   warning('server_down', str_replace("\n", "  ", $is_down_message));
    loc_end_page();
 }
 else
