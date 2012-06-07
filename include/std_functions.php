@@ -410,6 +410,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( $is_down && $logged_in )
       check_maintenance( $user_handle );
 
+   if( $logged_in )
+      error_log(sprintf("START_PAGE: U[%s] L[%s] AL[%s] ACH[%s]", @$player_row['Handle'], @$player_row['Lang'], @$_SERVER['HTTP_ACCEPT_LANGUAGE'], @$_SERVER['HTTP_ACCEPT_CHARSET']));
+
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp, $javascript );
 
    echo_dragon_top_bar( $logged_in, $user_handle );
@@ -781,6 +784,8 @@ function echo_message( $msg, $flush=true )
 /*!
  * \brief Sets $is_down if given user-handle is a maintenance-allowed user (see 'include/config-local.php'.
  * \return true, if given user is a maintenance-allowed user
+ *
+ * \note IMPORTANT: must only be called if user has been authenticated, otherwise exploit possible!
  */
 function check_maintenance( $user_handle )
 {
@@ -790,6 +795,17 @@ function check_maintenance( $user_handle )
    if( $is_down && $is_maint_user )
       $is_down = false;
    return $is_maint_user;
+}
+
+// shows maintenance page if server down
+function show_maintenance_page()
+{
+   if( @$GLOBALS['is_down'] )
+   {
+      global $player_row;
+      start_page('Server down', true, false, $player_row);
+      exit;
+   }
 }
 
 
@@ -2431,7 +2447,7 @@ define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
  **/
 function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_OPTS ) //must be called from main dir
 {
-   global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax;
+   global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax, $is_down;
    $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
 
    $player_row = array( 'ID' => 0 );
@@ -2525,8 +2541,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       }
    }
 
-   $vaultcnt= true; //no vault for anonymous or if disabled
-   if( VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
+   $vaultcnt= true; //no vault for anonymous or if disabled or if server-down
+   if( !$is_down && VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
    {
       $vaultcnt= (int)@$player_row['VaultCnt'];
       $vaulttime= @$player_row['VaultTime'];
@@ -2572,14 +2588,14 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    }//fever-fault check
 
    // DST-check if the player's clock need an adjustment from/to summertime
-   if( $player_row['ClockChanged'] != 'Y'
-         && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
-   {
+   if( $player_row['ClockChanged'] != 'Y' && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
       $query .= ",ClockChanged='Y'"; // ClockUsed is updated once a day...
-   }
+
+   if( $is_down )
+      check_maintenance( @$player_row['Handle'] ); // revoke is_down for maintenance-users
 
    // check aggregated counts
-   if( !$is_quick_suite )
+   if( !$is_down && !$is_quick_suite )
    {
       $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
       if( $count_msg_new >= 0 )
@@ -2608,8 +2624,15 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
 
    $query.= " WHERE ID=$uid LIMIT 1";
-   //$updok will be false if an error occurs and error() is set to 'no exit'
-   $updok = db_query( "is_logged_in.update_player($uid)", $query );
+   //$updok will be false if server is down, or an error occurs and error() is set to 'no exit'
+   if( $is_down )
+      $updok = false;
+   else
+   {
+      $updok = db_query( "is_logged_in.update_player($uid)", $query );
+      if( @mysql_affected_rows() != 1 )
+         $updok = false;
+   }
 
    if( !$vaultcnt ) //vault entered
    {
@@ -2638,7 +2661,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 */
    }
 
-   if( $session_expired || !$updok || @mysql_affected_rows() != 1 )
+   if( $session_expired || !$updok )
    {
       $player_row['ID'] = 0;
       return 0;
