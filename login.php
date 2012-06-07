@@ -23,6 +23,7 @@ $quick_mode = (boolean)@$_REQUEST['quick_mode'];
 if( $quick_mode )
    $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+
 {
    disable_cache();
 
@@ -70,6 +71,8 @@ if( $quick_mode )
          admin_log( 0, $userid, 'wrong_password');
          error('wrong_password', "login.check_password($userid,$uhandle)");
       }
+      if( $is_down )
+         check_maintenance( $uhandle );
 
       if( !$code || @$row['Expire'] < $NOW )
       {
