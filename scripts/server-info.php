@@ -21,11 +21,18 @@ chdir('..');
 require_once 'include/std_functions.php';
 
 {
+   connect2mysql();
+
+   $logged_in = who_is_logged($player_row);
+   if( !$logged_in )
+      error('not_logged_in', 'scripts.server_info');
+   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+      error('adminlevel_too_low', 'scripts.server_info');
+
    $cpuinfo = @file_get_contents( "/proc/cpuinfo", false );
    $meminfo = @file_get_contents( "/proc/meminfo", false );
 
-   $arr = array();
-   start_page('DGS Server Info', true, false, $arr );
+   start_page('DGS Server Info', true, $logged_in, $player_row );
 
    section('cpuinfo', 'CPU Info');
    echo "<pre>\n$cpuinfo</pre><br>\n";
