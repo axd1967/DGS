@@ -25,10 +25,15 @@ require_once( "include/connect2mysql.php" );
 // $is_down can be overriden for maintenance-allowed users (in config-local.php)
 // $is_maintenance is not changed (can be used to indicate maintenance-mode)
 global $is_down, $is_down_message, $is_maintenance; //PHP5
-$is_down = false;
-$is_down_message = "Sorry, dragon is down for maintenance at the moment,"
+$is_down = true;
+$is_down_message = "Between 07-10. June 2012 the Dragon Go Server will be down for maintenance.<br>\n"
+                 . " Clocks of running games are frozen till the server restarts.<br><br>\n"
+                 . " Status updates of the maintenance are available at: http://senseis.xmp.net/?DragonGoServer";
+                 /*
+                   "Sorry, dragon is down for maintenance at the moment,"
                  . " please return in an hour or so.<br>\n"
                  . " Don't worry: the clocks are frozen until the server restarts";
+                 */
 $is_maintenance = $is_down;
 
 
