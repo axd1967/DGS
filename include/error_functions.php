@@ -226,9 +226,9 @@ if( !function_exists('warning') )
 
 function err_log( $handle, $err, $debugmsg=NULL)
 {
-   $mysqlerror = @mysql_error();
+   global $dbcnx, $player_row, $is_down;
 
-   global $dbcnx, $player_row;
+   $mysqlerror = @mysql_error();
 
    $uri = "error.php?err=" . urlencode($err);
    if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
@@ -247,7 +247,7 @@ function err_log( $handle, $err, $debugmsg=NULL)
       $err.= ' / '. $mysqlerror;
    }
 
-   if( need_db_errorlog($err) )
+   if( !$is_down && need_db_errorlog($err) )
    {
       if( !@$dbcnx )
          connect2mysql(true);
