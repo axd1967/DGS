@@ -161,6 +161,9 @@ define('MAX_GAMESRUN', 200);
 // - must be <= MAX_GAMESRUN, no effect if MAX_GAMESRUN=0 or ALLOW_TOURNAMENTS=false
 define('MAX_GAMESRUN_TREG', 150);
 
+// TODO-area: forbid chinese-ruleset as long as implementation not fully evolved yet
+define('ALLOW_RULESET_CHINESE', false);
+
 // Allow usage of tournaments
 define('ALLOW_TOURNAMENTS', true);
 define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.

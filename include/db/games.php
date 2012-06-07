@@ -191,6 +191,8 @@ class Games
    {
       if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "Games.setRuleset($ruleset)");
+      if( !ALLOW_RULESET_CHINESE && $ruleset == RULESET_CHINESE )
+         error('feature_disabled', "Games.setRuleset($ruleset)");
       $this->Ruleset = $ruleset;
    }
 

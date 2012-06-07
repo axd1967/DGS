@@ -309,6 +309,9 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }
    } //collecting datas
 
+   if( !ALLOW_RULESET_CHINESE && $Ruleset == RULESET_CHINESE )
+      error('feature_disabled', "game_settings_form.disabled.ruleset($Ruleset)");
+
    // handle shape-game implicit settings (ShapeID unset if invalid shape used)
    if( $ShapeID > 0 )
    {
@@ -367,8 +370,13 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row( array( 'SPACE' ) );
    }
 
-   $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
-                           'SELECTBOX', 'ruleset', 1, getRulesetText(), $Ruleset, false ) );
+   if( ALLOW_RULESET_CHINESE )
+   {
+      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
+                              'SELECTBOX', 'ruleset', 1, getRulesetText(), $Ruleset, false ) );
+   }
+   else
+      $mform->add_hidden('ruleset', RULESET_JAPANESE);
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'DESCRIPTION', T_('Board size'),

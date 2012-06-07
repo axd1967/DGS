@@ -3078,7 +3078,7 @@ class GameSetupBuilder
          $url['snapshot'] = $this->game->ShapeSnapshot;
       }
 
-      $url['ruleset'] = $this->game->Ruleset;
+      $url['ruleset'] = (ALLOW_RULESET_CHINESE) ? $this->game->Ruleset : RULESET_JAPANESE;
       $url['size'] = $this->game->Size;
       $url['stdhandicap'] = bool_YN( $this->game->StdHandicap );
 
