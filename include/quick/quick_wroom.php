@@ -163,12 +163,12 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->addResultKey('time_byo', $wr->Byotime );
       $this->addResultKey('time_periods', $wr->Byoperiods );
 
-      $this->addResultKey('restrictions', $restrictions );
+      //TODO $this->addResultKey('restrictions', $restrictions );
       $this->addResultKey('opp_started_games', $opp_started_games );
-      $this->addResultKey('calc_type', $calc_type );
-      $this->addResultKey('calc_color', $calc_color );
-      $this->addResultKey('calc_handicap', $calc_handicap );
-      $this->addResultKey('calc_komi', $calc_komi );
+      //TODO $this->addResultKey('calc_type', $calc_type );
+      //TODO $this->addResultKey('calc_color', $calc_color );
+      //TODO $this->addResultKey('calc_handicap', $calc_handicap );
+      //TODO $this->addResultKey('calc_komi', $calc_komi );
    }//process_cmd_info
 
 
