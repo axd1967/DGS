@@ -36,6 +36,9 @@ define('FETCHTYPE_ARRAY', 'array');
 define('FETCHTYPE_ASSOC', 'assoc');
 define('FETCHTYPE_ROW',   'row');
 
+global $dbcnx; //PHP5
+$dbcnx = 0;
+
 
 //At least needed when connect2mysql.php is used alone (as in quick_status.php):
 function jump_to($uri, $absolute=false)
@@ -111,6 +114,9 @@ else
 
 function admin_log( $uid, $handle, $err)
 {
+   if( @$GLOBALS['is_down'] )
+      return true;
+
    $uid = (int)$uid;
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
    $query = "INSERT INTO Adminlog SET uid='$uid'"
@@ -126,7 +132,7 @@ function writeIpStats( $page )
    global $player_row, $NOW;
 
    $ip = @$_SERVER['REMOTE_ADDR'];
-   if( !empty($ip) )
+   if( !@$GLOBALS['is_down'] && !empty($ip) )
    {
       $uid = (int)@$player_row['ID'];
       $sql_ip = mysql_addslashes($ip);
@@ -251,6 +257,16 @@ function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
    //echo $debugmsg.'.db_query='.$query.'<br>';
    if( DBG_QUERY ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
    //for debug: $result = ( preg_match( "/^(insert|update|delete)/i", $query )) ? 1 : mysql_query($query);
+   if( @$GLOBALS['is_down'] )
+   {
+      $chk_pos = stripos($query, 'SELECT'); // SELECTs allowed if server down, but no write-queries
+      if( $chk_pos === false || $chk_pos > 3 ) // query with SELECT may start with "(.." or some spaces
+      {
+         error('server_down', "db_query.check.no_select(): $debugmsg");
+         return false;
+      }
+   }
+
    $result = mysql_query($query);
    if( $result )
       return $result;
