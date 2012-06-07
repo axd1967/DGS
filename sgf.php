@@ -38,6 +38,12 @@ $quick_mode = (boolean)@$_REQUEST['quick_mode'];
 if( $quick_mode )
    $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+
+if( $is_down )
+{
+   error('server_down');
+}
+else
 {
    // see the Expires header below and 'no_cache'-URL-arg
    //disable_cache( $NOW, $NOW+5*60);
@@ -139,6 +145,6 @@ if( $quick_mode )
 
    // output SGF
    $sgf->build_sgf( $filename, $owned_comments );
-}
+}//main
 
 ?>
