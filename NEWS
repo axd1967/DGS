@@ -3,8 +3,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
 %TOC%
 
-#release DGS_1_0_15 [2012-???-??] - DGS 1.0.15  (Game types & settings, Users, Forum, Voting)
-## #release DGS_1_0_15 [2012-???-??] - DGS 1.0.15  (Tournaments, Game types & settings, Users, Forum, Voting)
+## #release DGS_1_0_16 [2012-???-??] - DGS 1.0.16  (Tournaments)
+#release DGS_1_0_15 [2012-Jun-08] - DGS 1.0.15  (Game types & settings, Users, Forum, Voting)
 
    New features and Major changes:
 
@@ -154,12 +154,12 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Preview game message (access-key [w]=Preview)
       * Show last-move capture in left info-box and mark (<image board/ex.gif>) on board
          * enable with option "Mark Last Move Capture" in user-profile
-         * useful as ko-indicator (last-capture exactly one stone)
+         * useful as ko-indicator (if last-capture is exactly one stone)
       * Show scoring information in scoring step and for finished games
       * Show and notify if there are hidden game comments (<image game_comment.gif>) for a finished game
       * Show hint to close all boundaries before passing
-      * Show hint about area-scoring before passing to take odd dame
-      * Show tournament info for tournament-game
+      * Show hint about area-scoring before passing to avoid odd dame
+##      * Show tournament info for tournament-game
       * Show multi-player-game info
 
    * Game info page (new):
@@ -173,13 +173,13 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Show full time info of game for each player:
          * Full remaining time including extra-time
          * Clock status (stopped/running) with reason why
-      * Show tournament info for tournament-game
+##      * Show tournament info for tournament-game
       * Show fair-komi info with komi-bids, color-choice, player's turn
 
    * Game settings:
       * General:
-         * Changed default for Standard Handicap Placement to: ON
          * Changed default for Time settings to: Fischer time with 30d + 1d
+         * Changed default for Standard Handicap Placement to: ON
          * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
            Now stronger player gets White color and only make Nigiri if both players have same rating
 
@@ -191,7 +191,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Simplified filter for "suitable" waiting games, added notes
          * Additionally show "(FH)" (=free handicap) in Settings-column, if standard-placement is not used
          * Differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
-         * Removed reply-box when joining waiting-room-game
+         * Removed reply-box when joining waiting-room-game (greetings have to be on first move now)
          * Enhanced notify about joined waiting-room game with list of started game(s)
 
       * <home new_game.php>New Game</home>:
@@ -213,7 +213,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
                * Options: "You choose Komi, I choose Color"  and  "I choose Komi, You choose Color"
             * Not supported for multi-player-games or tournaments
 
-         * Added Ruleset option for Japanese rules (default) and Chinese rules (disabled for now)
+##         * Added Ruleset option for Japanese rules (default) and Chinese rules (disabled for now)
          * Added adjustment and min/max-limitation of handicap stones
          * Added adjustment of komi by value and jigo mode (allow or reject Jigo)
          * Added (optional) minimum number of rated finished games
@@ -255,7 +255,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added column for all game-lists with:
          * icon linked to game-info page (<image info.gif>) with showing thumbnail of game on mouse-hovering
          * icon linked to shape-info for shape-game (<image shape.gif>)
-         * icon linked to Tournament-games (<image tourney.gif>)
+##         * icon linked to Tournament-games (<image tourney.gif>)
       * Added searchable column with indicator if there are hidden game comments for my finished games
       * Show fair-komi info on game-type for all game-lists (games-list, status, RSS/WAP/Quick-status)
       * Show Weekendclock for all view-modes
@@ -282,7 +282,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
       * Added new page with message-thread for a message,
         Show or hide all message-texts within message-thread,
-        Destroyed messages are shown too (with folder '---')
+        Destroyed messages are shown too (as folder '---')
       * Show linked icon to message-thread (<image thread.gif>) for single message and on pages with message-lists
       * Show linked icon to initial message in thread (<image msg_first.gif>) on reply message
 
@@ -297,7 +297,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * Searching capabilities:
       * Added <home faq.php>Search on FAQ</home>
       * Added customizable search-profile for most pages with table-filters:
-         * users, opponents, waiting room, search messages, contacts, feature-votes, tournaments
+         * users, opponents, waiting room, search messages, contacts, feature-votes
+##         * users, opponents, waiting room, search messages, contacts, feature-votes, tournaments
          * observers of a game, my/all observed games
          * all/my/other finished and running games
       * Added absolute timeunit-choice for most date-filters
@@ -323,8 +324,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Remaining Time
       * Added column with:
          * icon linked to game-info page (<image info.gif>) with showing thumbnail of game on mouse-hovering
-         * icon linked to Tournament-games (<image tourney.gif>)
-      * Added "My tournaments" bottom-menu-link
+##         * icon linked to Tournament-games (<image tourney.gif>)
+##      * Added "My tournaments" bottom-menu-link
       * Added "Notes" column on games list with leading part of private game notes (deactivated by default)
       * Show my multi-player-games in setup-mode
 
@@ -389,7 +390,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
         Create and edit board with <home goban_editor.php>Goban Editor</home>
       * Added Shape Viewer showing comparison of loaded shape-id and/or shape-pattern used in shape-game
       * Added handling of shape-games for invite, dispute, new-game, waiting-room, multi-player-game,
-        tournaments, game-lists, game-page, quick-suite, SGF-download
+        game-lists, game-page, quick-suite, SGF-download
+##        tournaments, game-lists, game-page, quick-suite, SGF-download
       * Start invitation or new shape-game from view-shape-page
          * Shape-games imply game-settings: board-size, free handicap placement, unrated game
          * Add Black pass-move, if no handicap used and White starts first
@@ -426,7 +428,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * &lt;http://url.net |link text> : enhanced link markup with optional text,
         Link text must not contain a single quote "'" -> use "&amp;apos;" instead
       * &lt;strike><strike>text</strike></strike> : strike out text
-      * &lt;tourney id> : showing link to corresponding tournament page
+##      * &lt;tourney id> : showing link to corresponding tournament page
       * &lt;survey id> : showing link to survey with status & title
       * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
         (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
@@ -535,7 +537,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
             * Added columns to support new game-quick-suite with move-id, game-status
             * Added column with next game-action for setting handicap-stones and fair-komi-negotiation
             * Added column with handicap-stones so bot knows how many to set
-            * Added column for tournament-games with tournament-id
+##            * Added column for tournament-games with tournament-id
             * Added shape-id for shape-games
             * Added column to allow client more sorting options: game-priority, opponents last-access
             * Use same next-game-order as configured on status-page, can be overwritten with URL-arg 'order'
@@ -578,7 +580,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added JavaScript management in profile setting
       * Changed order, grouping and description of hover-options
       * Enlarged length of field 'Open for matches' to 60 chars
-      * Aliased removed timezone 'China/Beijing' with 'Asia/Shanghai'
+      * Aliased timezone 'China/Beijing' with 'Asia/Shanghai'
 
       * <home edit_rating.php>Rating change</home>:
          * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
@@ -606,9 +608,11 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added tooltips for submit buttons
 
    * Table Lists:
-      * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
+      * Can show row-number, e.g. on <home users.php>users page</home>
+##      * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
       * Added full page-navigation (experimental) with pages- & entries-info for pages (if enabled):
-        Status games, Waiting room, Tournaments, Tournament participants, Users, Opponents, Games, Observed games, Votes, Features
+        Status games, Waiting room, Users, Opponents, Games, Observed games, Votes, Features
+##        Status games, Waiting room, Tournaments, Tournament participants, Users, Opponents, Games, Observed games, Votes, Features
       * Changed some default sort-directions
       * Used clearer header names
 
@@ -723,8 +727,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * Changes for Admins:
       * Added GAME_ADMIN-role to change game-settings
-      * Added TOURNAMENT_ADMIN-role to fix problems with tournaments,
-        Show indicator in top-bar as reminder
+##      * Added TOURNAMENT_ADMIN-role to fix problems with tournaments,
+##        Show indicator in top-bar as reminder
       * Added FEATURE_ADMIN-role to manage features to vote on
       * Added SURVEY_ADMIN-role to manage surveys to vote on
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
