@@ -86,6 +86,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       error('unknown_game', "game($gid)");
 
    $logged_in = who_is_logged( $player_row);
+   show_maintenance_page();
    if( $logged_in )
    {
       $my_id = $player_row['ID'];
