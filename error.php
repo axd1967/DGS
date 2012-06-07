@@ -25,12 +25,13 @@ require_once( "include/error_codes.php" );
 
 
 {
-   connect2mysql(true);
+   if( !$is_down )
+      connect2mysql(true);
 
    $BlockReason = '';
    $userid = '???';
    $is_admin = false;
-   if( $dbcnx )
+   if( !$is_down && $dbcnx )
    {
       $tmp= $TheErrors->set_mode(ERROR_MODE_COLLECT);
       //may call error() again:
@@ -128,7 +129,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    }
 
    end_page();
-}
+}//main
 
 
 // special handling for error-codes
