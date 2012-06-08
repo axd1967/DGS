@@ -1402,7 +1402,7 @@ function send_message( $debugmsg, $text='', $subject=''
       {
          $ids = implode( ',', $receivers_folder_new );
          db_query( "$debugmsg.count_msg_new([$ids])",
-            "UPDATE Players SET CountMsgNew=CountMsgNew+1 WHERE ID IN ($ids) LIMIT $cnt_fnew" );
+            "UPDATE Players SET CountMsgNew=CountMsgNew+1 WHERE ID IN ($ids) AND CountMsgNew>=0 LIMIT $cnt_fnew" );
       }
 
       //records the last message of the invitation/dispute sequence
