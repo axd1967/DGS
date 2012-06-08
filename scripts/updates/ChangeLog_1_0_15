@@ -1,5 +1,1017 @@
 [...]
 
+2012-05-28 juga
+
+   * include/classlib_game.php (GameScore.draw_score_box), game.php:
+   - show area & territory scoring when on test-server
+
+   * include/config.php (DATASTORE_FOLDER),
+     include/std_functions.php (enforce_min_timeinterval),
+     include/utilities.php (build_path_dir),
+     scripts/clear_datastore.php:
+   - allow an absolute path for DATASTORE_FOLDER as relative to DOCUMENT_ROOT may lead to the wrong place
+
+   * include/message_functions.php (game_settings_form, game_info_table),
+     include/game_functions.php (get_handicaptype_for_invite),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):
+   - bugfix: add fallback for games without GameSetup-field to determine handicap-type
+
+   * include/config.php (GAME_INVITATIONS_EXPIRE_MONTHS),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     daily_cron.php:
+   - delete old game-invitations after 3 months configured with server-specific setting
+-----------
+-- delete invitations older than 3 months
+SELECT COUNT(*) FROM Games
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+DELETE FROM Games
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+-----------
+
+2012-05-27 juga
+
+   * include/timezones.php (get_timezone_array),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - use alias 'Asia/Shanghai' for removed tzdata of 'China/Beijing'-timezone
+     as live-database does not know it anymore
+-----------
+-- use alias for removed tzdata of 'China/Beijing'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Beijing' ;
+-----------
+
+   * include/quick_common.php (quick_suite_add_quota),
+     include/error_functions.php (DgsErrors.add_error),
+     include/quick/quick_handler.php (QuickHandler.initResult),
+     specs/quick_suite.txt:
+   - added quota_count and quota_expire fields in every quick-suite response
+
+   * scripts/fix_game_snapshot.php, scripts/fix_games_timeleft.php,
+     scripts/updates/fix_game_comments-1_0_15.php:
+   - restricted authorization to use script to developer/game/database-admin
+
+   * scripts/clear_datastore.php, scripts/index.php:
+   - added script to show & clear sub-dirs of DATASTORE-folder
+
+   * quick_status.php (append_data, print_datablock, print_bulletins, print_messages,
+       print_status_games, print_mpg, write_quick_status_datastore, parse_cache_content),
+     specs/quick_suite.txt:
+   - added progressive block-specific caching for quick-status page
+     - see also "Important Notes" for 4.QST in 'specs/quick_suite.txt'
+     - enforce login to be able to store user-specific caching,
+       login possible by userid/passwd or session-cookies,
+       removed non-login mode
+     - use data-block-specific cache-expire for blocks bulletins, messages, status-games, MPGs
+     - added restriction on quick-status by enforcing minimum request interval of 1 min
+     - minimum request interval for status-games 1 min, for other blocks 15 min
+     - added progressive caching for status-games doubling waiting-time
+       up to max. 15 min if data has not changed
+     - returning block-cached data if asked more often and prepend data
+       with 'excessive_usage'-warning
+     - returning block-cached data if corresponding data-block not expired yet
+     - extended option no_cache=2 to disable progressive-caching for testing-purposes,
+       usage on live-server results in error
+   - show 'deprecated_version'-warning for version != 2
+
+   * rss/status.php (error, rss_safe, rss_tag, rss_close, rss_item),
+     wap/status.php (wap_item):
+   - adjusted quota-system for alternative interfaces (sync from stable-branch):
+     - added restriction on RSS- and WAP-status by enforcing minimum request interval of 5 min,
+       error-message returned if asked more often
+     - return error on excessive usage linking to live-DGS-FAQ about resonsible-use of DGS
+     - writing cache-files based on user-id-handle for RSS/WAP/Quick-Status, convert handle
+       to lower-case to avoid getting more quota by using different writings of user-handle case
+     - do not log invalid_user-error to Errorlog if user-handle is missing
+     - added argument to skip writing of error-log into the database
+     - bugfix: convert handle to lower-case to avoid getting more quota by using different
+       case-writing of user-handle
+     - add RSS <guid>-tag only if used
+     - fix LF-handling for RSS-/WAP-texts
+   - minor refactorings (comments, notes, layout)
+
+   * include/std_functions.php (start_html, start_page, sysmsg, is_legal_handle, VAULT_CNT,
+       is_logged_in, enforce_min_timeinterval),
+     skins/dragon/print.css:
+   - undo deletion as some users still want to print diagrams or other pages
+   - use separate skin-default for main and print CSS
+   - adjusted quota-system:
+     - show warning at page top if user-access-quota runs low (below 10 points)
+     - bugfix: do not show quota-line in bottom bar if not logged in
+     - reduced user-access-quota for web-pages from 1000 -> 400 -> 500
+     - refactored user-access-quota setting quota-expire if quota left and expire-date
+       has passed for more transparent remaining quota
+     - adjusted quota-system for alternative interfaces using cache-file in datastore-folder
+       to enforce minimum request intervals
+
+   * include/config.php (DATASTORE_FOLDER),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt, INSTALL:
+   - added datastore-folder outside of document-root (if possible) for caching sensitive data:
+     - keep track of last RSS/WAP-status request to avoid too-many database-connections/queries
+     - progressive block-specific caching for quick-status page
+-----------
+# see also DATASTORE_FOLDER in config.php (for your webserver you may have to use a different setup)
+cd DOCROOT/..
+mkdir data-store
+mkdir data-store/rss data-store/qst data-store/wap
+chmod -R 775 data-store
+-----------
+
+   * include/error_functions.php (DgsErrors.add_error; error, warning):
+   - added argument to skip writing of error-log into the database
+   - added debug-message for warnings
+
+   * scripts/analyze-weblogs/Calculate.java, scripts/analyze-weblogs/CountUrls.java,
+     scripts/analyze-weblogs/analyze-time.pl, scripts/analyze-weblogs/filter-rtime.pl,
+     scripts/analyze-weblogs/filter.pl, scripts/analyze-weblogs/parse-apache-logs.pl,
+     scripts/analyze-weblogs/README-analyze-weblogs.txt:
+   - added scripts to analyse webserver-logs, see README-file on how to use
+
+2012-05-05 juga
+
+   * include/game_functions.php (increaseMoveStats),
+     include/quick_common.php (get_utc_timeinfo),
+     include/quick/quick_game.php (QuickGameHandler.process_cmd_play),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     confirm.php, daily_cron.php, quick_play.php:
+   - write MoveStats to build move-profile of users
+     - counting moves in time-slots of 30mins
+     - cleanup move-count older than 4 weeks
+-----------
+-- create day/week-profile for moving
+CREATE TABLE MoveStats (
+   uid int NOT NULL default 0,
+   SlotTime smallint unsigned NOT NULL default 0,
+   SlotWDay tinyint NOT NULL default 0,
+   SlotWeek tinyint NOT NULL default 0,
+   Counter mediumint unsigned NOT NULL default 0,
+   PRIMARY KEY (uid,SlotTime,SlotWDay,SlotWeek)
+) ENGINE=MyISAM ;
+-----------
+
+   * statisticspng.php, statratingspng.php:
+   - rename cache-statistics graphics file adding extension
+
+2012-05-02 juga
+
+   * include/std_functions.php (end_page),
+     skins/dragon/screen.css:
+   - show current user-quota in bottom-bar
+
+   * include/std_functions.php (VAULT_CNT):
+   - decreased user-access-quota 1000 -> 400
+
+   * include/connect2mysql.php (writeIpStats),
+     include/std_functions.php (is_logged_in),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     rss/status.php, wap/status.php, quick_play.php, quick_status.php:
+   - added IpStats-table with used user-id, IP and page-type to track too-much-requests,
+     - motivation: there are >20Mio RSS-requests/month for March-2012
+     - add entry for page-types: RSS, QST (quick-status), QPL (quick-play), QDO (quick-do),
+       WEB (unused as it's protected with user-quota)
+-----------
+-- added table for used IP and user-id to track too-much-requests
+CREATE TABLE IpStats (
+   uid int NOT NULL default 0,
+   Page char(4) NOT NULL default '',
+   IP varchar(16) NOT NULL,
+   Counter int unsigned NOT NULL default 0,
+   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+   PRIMARY KEY (uid,Page,IP)
+) ENGINE=MyISAM ;
+-----------
+
+2012-04-30 juga
+
+   * message.php:
+   - bugfix: open send-message-template using loaded template-type
+     instead of assuming INVITE-template
+
+   * statistics.php:
+   - used thousand-group on big numbers
+   - switched columns moves/games in game-count per game-state
+
+   * include/admin_faq_functions.php, include/make_translationfiles.php,
+     include/rating.php, scripts/convert_from_old_forum.php,
+     scripts/game_consistency.php, scripts/message_consistency.php,
+     scripts/recalculate_ratings2.php, scripts/start_frozen_clocks.php,
+     scripts/translation_consistency.php, rss/status.php,
+     wap/status.php, code_examples/test_clock_tick.php,
+     admin_faq.php, faq.php, game_comments.php, halfhourly_cron.php,
+     people.php, quick_play.php, quick_status.php:
+   - cleanup: replace (A,B,C)-join with INNER-JOIN
+   - cleanup: some sql-reformatting
+
+   * include/classlib_game.php (NextGameOrder.build_status_games_query),
+     quick_status.php, status.php, rss/status.php, wap/status.php:
+   - bugfix: use same next-game-order for all status-games pages
+     status, rss-status, wap-status, quick-status
+   - bugfix: handle next-game-order using game-priority
+   - bugfix: free mysql-result as early as possible
+
+   * code_examples/test_clock_tick.php:
+   - fix: reverted latest replacing of usage of IS_RUNNING_GAME as NOT-query was under test
+
+   * include/quick_common.php:
+   - added trailing space on SQL-query-parts to avoid obvious missing space
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql:
+   - optimize: speed-up translators-query on people-page
+-----------
+-- speed-up translators-query on people-page
+ALTER TABLE Translationlog
+   ADD KEY PlayerLang (Player_ID,Language_ID) ;
+-----------
+
+   * halfhourly_cron.php, quick_status.php, show_games.php, include/admin_faq_functions.php,
+     include/make_translationfiles.php, include/db/bulletin.php, rss/status.php,
+     scripts/convert_from_old_forum.php, scripts/message_consistency.php,
+     scripts/tournament_consistency.php, scripts/translation_consistency.php,
+     scripts/experiments/analyze-slow_log.php, wap/status.php:
+   - cleanup/layout: checked for mysql5-changes:
+     - precendence of JOIN now higher than A,B,C-join
+     - checked ON-clause, which can only work on own operands and operands of left
+
+   * all *.php files (#140):
+   - added debug-message where missing on all error()-calls
+
+2012-04-28 juga
+
+   * include/quick/quick_handler.php (QuickHandler.checkArgsUnknown),
+     include/quick/quick_bulletin.php (QuickHandlerBulletin.parseURL),
+     include/quick/quick_contact.php (QuickHandlerContact.parseURL),
+     include/quick/quick_folder.php (QuickHandlerFolder.parseURL),
+     include/quick/quick_game.php (QuickHandlerGame.parseURL, ~.prepare, ~.process_cmd_play),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.parseURL),
+     include/quick/quick_game_list.php (QuickHandlerGameList.parseURL),
+     include/quick/quick_message.php (QuickHandlerMessage.parseURL),
+     include/quick/quick_user.php (QuickHandlerUser.parseURL),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.parseURL):
+   - check for unknown args
+
+   * forum/forum_functions.php (Forum.load_forum_names),
+     forum/search.php:
+   - optimize / bugfix: reverse key/value in map to get rid of join with Forums again
+     as names and options are already loaded
+
+   * include/error_codes.php (ErrorCode.init):
+   - use left-aligned format for multi-line error-text for not_logged_in-error
+
+2012-04-03 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play):
+   - bugfix game-quick-handler: fix score-command calling (unknown) method on wrong object
+
+2012-04-01 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.prepare):
+   - bugfix for game-quick-handler: fix check on allowing empty agree-argument for scoring
+
+   * admin_admins.php, admin_do_translators.php, change_password.php, confirm.php, edit_password.php,
+     login.php, message.php, message_thread.php, ratinggraph.php, ratingpng.php, show_games.php,
+     statisticspng.php, update_translation.php, features/lib_votes.php, features/vote_feature.php,
+     forum/list.php, forum/post.php, forum/read.php, forum/search.php, include/board.php,
+     include/cache_clock.php, include/classlib_userconfig.php, include/classlib_userquota.php,
+     include/message_functions.php, include/move.php, include/sgf_parser.php,
+     rss/status.php, scripts/make_handicap_pattern.php, wap/status.php:
+   - replace unknown error-codes with known ones:
+     - bad_data/confirm_add_time/invalid_status/invalid_feature/unknown_object/mysql_clock_ticks -> invalid_args
+     - mysql_data_corruption -> database_corrupted
+     - mysql_message_info -> mysql_update_message
+   - cleanup: use single-quotes for all error-codes; error("code") -> error('code')
+   - sql-layout
+
+   * include/error_codes.php (ErrorCode.init):
+   - added note about undefined error-codes
+   - removed unused error-codes: not_empty
+
+   * quick_status.php, specs/quick_suite.txt:
+   - changed header-line for messages in quick-status: message_type/message_date -> type/date
+
+   * include/quick/quick_game.php:
+   - enable "score"-command for game-quick-handler
+
+2012-03-24 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play, ~.parse_coords):
+   - bugfixes for game-quick-handler:
+     - bugfix for setting-handicap of game-quick-handler:
+       nasty double-semicolon skipping required instructions for db-update
+     - fixed parsing of single board-coordinate
+     - missed some global-var declarations
+     - missed some instance-ref to TheBoard -> $this->TheBoard
+     - used wrong ref to gchkmove for "move"-command: this.. -> gchkmove..
+
+   * include/table_columns.php (Table.make_next_prev_links):
+   - bugfixes on page-navi-info in table-headers:
+     - correct current-page and max-page for arbitrary From_Row (start-offset)
+     - correct offset for navigating to last-page
+     - changed page-text if found-rows is not used: X -> "Page X"
+
+   * include/rating.php (update_rating, update_rating_glicko),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/data_export.php,
+     specs/db/dragon-ddl.sql:
+   - removed unused and obsolete funcs:
+     - update_rating(): old rating-change, not longer used,
+       dropped corresponding RatingChange-table
+     - update_rating_glicko(): glicko-rating removed as current DGS-ratings works very well
+       and there's no proof that glicko works better.
+       Former code still available in source-repository with rev1.100
+-----------
+-- remove old unused table for rating-changes
+DROP TABLE RatingChange ;
+-----------
+
+   * include/board.php (class Board):
+   - removed OLD replaced now unused methods:
+     _old_has_liberty_check, _old_mark_territory, _old_toggle_marked_area
+
+   * include/message_functions.php (DgsMessage.load_message_receivers):
+   - bugfix: fix error-handling if message/invitation is rejected because of contact-flags
+
+2012-03-23 juga
+
+   * include/config.php (ALLOW_QUICK_DO), NEWS:
+   - enabled quick-do-suite
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare, ~.process_cmd_play,
+       ~.process_cmd_status_score, ~.build_arr_coords, ~.parse_coords),
+     include/board.php (class Board, ~.build_from_shape_snapshot, ~.toggle_marked_area, ~.toggle_xy),
+     include/move.php (class GameCheckScore, ~.set_toggle_unique, ~.check_remove),
+     specs/quick_suite.txt:
+   - game-quick-handler:
+     - implemented "status_score"-command with toggle-modes all/uniq
+     - implemented "score"-command with agree-argument and supporting toggle-mode
+     - implemented unique-toggle-mode to avoid re-toggling of already visited stone on scoring
+     - removed stonestring-check that GUI uses for "score"-command
+     - bugfix on parsing coordinates
+
+   * include/move.php (GameCheckMove.check_move):
+   - bugfix of last refactoring: take board-reference
+
+   * include/quick/quick_game.php (QuickGameHandler.process_cmd_play, ~.process_cmd_status_score),
+     confirm.php, game.php:
+   - bugfix of last change with GameCheckScore:
+     correct var-typo Black/White_prisoners -> Black/White_Prisoners
+
+   * include/game_functions.php (GameFinalizer.finish_game),
+     specs/db/table-Games.txt, clock_tick.php:
+   - bugfix after testing reject-win-by-timeout
+   - minor cleanup (use const, remove old-code for timeout-handling, clearer SQL)
+
+2012-03-22 juga
+
+   * include/board.php (class Board, ~.init_board, load_from_db, ~.build_from_shape_snapshot,
+       ~.has_liberty_check),
+     include/classlib_game.php (GameSnapshot.check_illegal_positions),
+     edit_shape.php (parse_edit_form):
+   - check for impossible positions like empty-/full-board and suicide when saving shape-game
+
+   * goban_editor.php:
+   - bugfix: fix width + height after goban-flattening to take max-size
+
+   * include/move.php (GameCheckMove.update_prisoners;
+       class GameCheckScore, ~.check_remove, ~.update_stonestring),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play, ~.process_cmd_status_score),
+     scripts/game_consistency.php, confirm.php, game.php, quick_play.php:
+   - refactored check_remove() into GameCheckScore-class to remove implicit adjusting of GLOBALs
+   - bugfix: avoiding globals for check_move() using pass-by-reference to set former globals
+
+   * include/board.php (Board.toggle_marked_area):
+   - bugfix: toggle_marked_area() used unknown func, bug from former refactoring
+
+   * include/move.php (class GameCheckMove, ~.check_move, ~.update_prisoners),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     scripts/game_consistency.php (check_consistency),
+     confirm.php, game.php, quick_play.php:
+   - refactored check_move() into GameCheckMove-class to remove implicit adjusting of GLOBALs
+   - bugfix for game-quick-handler "move"-command: wrote wrong main-Moves-entry of move
+
+2012-03-21 juga
+
+   * include/move.php (check_handicap),
+     confirm.php, game.php:
+   - refactored check_handicap() to remove adjusting GLOBAL $stonestring
+
+   * scripts/updates/ChangeLog_1_0_13,
+     scripts/updates/ChangeLog_1_0_14,
+     scripts/updates/ChangeLog_1_0_15,
+     ChangeLog:
+   - splitted ChangeLog into different files on major releases
+   - splitted away part of future 1.0.15 release for shorter CVS-diffs
+
+   * include/game_functions.php (class GameSettingsCalculator, ~.calculate_settings),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/message_functions.php (game_info_table),
+     specs/quick_suite.txt:
+   - calculate probable game-settings for "info"-command of message-quick-handler
+   - refactored calculation of probable game-settings from 'include/message_functions.php'
+     into new GameSettingsCalculator-class in 'include/game_functions.php'
+
+   * quick_status.php, specs/quick_suite.txt:
+   - extended quick-status games-list with number of handicap-stones,
+     so bot would know how many stones to set
+
+2012-03-20 juga
+
+   * include/make_game.php (make_invite_game):
+   - bugfix: wrong check on tournament-feature, need to check if given tid >0
+
+   * include/std_functions.php (start_html),
+     skins/dragon/print.css (removed):
+   - removed default print.css file, because it's not maintained anyway
+
+   * include/quick/quick_message.php (class QuickHandlerMessage, ~.parseURL, ~.prepare, ~.process,
+       ~.process_cmd_info, ~.process_cmd_move_msg, ~.process_cmd_delete_msg, ~.process_cmd_send_msg),
+     include/message_functions.php (change_folders; DgsMessage.load_message),
+     specs/db/table-Messages.txt,
+     specs/quick_suite.txt:
+   - extended message-quick-handler:
+     - implemented "move_msg"-command to change folder of messages
+     - implemented "delete_msg"-command to destroy messages without going via trashcan-folder
+     - implemented "accept_inv" and "decline_inv"-command to accept & decline invitation
+     - added "game_status"-field for deleted/accepted invitations and not showing game-data anymore
+
+2012-03-19 juga
+
+   * include/game_functions.php (GameHelper.get_quick_game_action;
+       FairKomiNegotiation.get_quick_fair_komi_game_action),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     specs/quick_suite.txt,
+     quick_status.php:
+   - implement 'game_action' for fair-komi-negotiation
+
+   * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info,
+       ~.process_cmd_send_msg, ~.convertMessageReplyStatus),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     include/message_functions.php (MessageControl.handle_send_message),
+     include/game_functions.php (GameHelper.get_quick_game_action),
+     include/classlib_user.php (User.load_quick_userinfo),
+     include/error_codes.php (ErrorCode.init),
+     specs/quick_suite.txt,
+     message.php (handle_send_message_selector),
+     quick_status.php:
+   - adjusted message-quick-handler:
+     - added checks for "send_msg"-command on folder-id and reply-message-id,
+     - extended "info"-command with 'can_reply' & 'need_reply',
+       fill in count of started games for invitations
+     - added rating in user-info-blocks for "info"-command on message-object
+     - bugfix: forbid reply to message from myself
+   - adjusted game-info-quick-handler adding 'game_action'-field for "info"-command
+   - extended quick-status for version 2:
+     - showing bulletin-headers even if there are no bulletins
+     - included messages from REPLY-folder
+     - extended message-entry with folder-id & message-type
+     - extended game-entry with game-action
+     - adding warning if lists of bulletins & MPG-games not shown
+   - change signature of map in MessageControl.handle_send_message(,,map)
+     combining URL-arguments send_accept/send_decline into one field 'action'
+
+   * include/quick/quick_bulletin.php (QuickHandlerBulletin.process_cmd_list):
+   - bugfix: showing bulletin authors user-info
+
+   * include/quick/quick_handler.php (QuickHandler.build_obj_user),
+     include/quick/quick_contact.php (QuickHandlerContact.build_obj_contact_user),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.process_cmd_info):
+   - added include-key-filter for adding rating/country-fields in user-info-blocks
+
+2012-03-17 juga
+
+   * login.php:
+   - localized recent problem, so disabling cache on login
+
+   * login.php:
+   - bugfix?: after setting new session-code after password has been verified,
+     user is authenticated. Therefore removed reload of login-page with cookie-check
+     and just continue as user then IS logged-in already (no need to re-check).
+     SourceForge-server showed strange behaviour not longer returning cookies after login.
+   - check login-denied before password/cookie-check
+
+2012-03-13 juga
+
+   * include/game_functions.php (class GameFinalizer, ~.finish_game, ~.should_reject_win_by_timeout;
+       class GameNotify, ~.get_text_game_result),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/std_functions.php (MAX_REJECT_TIMEOUT),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     admin_game.php, change_profile.php, clock_tick.php, confirm.php,
+     edit_profile.php, userinfo.php:
+   - reject game-win by timeout by making the game unrated
+     - loser may be inactive for some time, or left the server;
+       so for a more stable rating, added profile-option to allow winner
+       to not boost his rating "undeserved"
+     - added permanent (non-browser-dependent) profile-option to control number of days
+       the loser has not moved to accept a "reject" of a timed-out game
+     - stored in Players.RejectTimeoutWin as -1 (disabled), 0..120 (days)
+     - added info-note in end-game-message if win "rejected"
+     - show current setting of RejectTimeoutWin on user-info-page
+       to myself or admin/game-admin
+-----------
+-- added field to control if win-by-timeout should be rejected for winner
+ALTER TABLE Players
+   ADD RejectTimeoutWin tinyint signed NOT NULL default -1 ;
+-----------
+
+   * userinfo.php:
+   - show last-quick-access to everyone
+   - show MPG-games info also to game-admin
+
+2012-03-12 juga
+
+   * userinfo.php, skins/dragon/screen.css:
+   - added link to games-list with "games lost by timeout"
+
+   * include/filter.php (SearchFilter.init, ~.add_or_del_filter, ~.parse_requested_filters):
+   - bugfix: activating requested filters if hidden
+
+   * include/quick/quick_message.php (class QuickHandlerMessage, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_send_msg, ~.init_folders, ~.load_user_handle),
+     include/quick/quick_handler.php (QuickHanlder.setError),
+     include/message_functions.php (class MessageControl, ~.read_message_receivers,
+       ~.handle_send_message, ~.check_max_games, ~.is_bulk_admin),
+     message.php (handle_send_message_selector),
+     specs/quick_suite.txt:
+   - started implementation of "send_msg"-command
+     - for quick-suite: added check if bulk-message allowed
+   - refactored sending-message (msg/invite/dispute) from 'message.php'
+     into MessageControl-class in 'include/message_functions.php'
+
+2012-03-11 juga
+
+   * include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):
+   - added field 'shape_snapshot'
+
+   * include/quick/quick_handler.php (class QuickHandler, ~.build_obj_user):
+   - return standard repsonse with fields: version, error (empty)
+   - bugfix: also set user-fields 'country/rating/rating_elo' if value is empty
+     to avoid table-list-format-error on skipped fields
+
+   * include/wroom_control.php (class WaitingroomControl, ~.join_waitingroom_game, ~.delete_waitingroom_game),
+     include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.prepare, ~.process),
+     specs/quick_suite.txt,
+     join_waitingroom_game.php:
+   - refactored join/delete-waiting-room game from 'join_waitingroom_game.php' into 'include/wroom_control.php'
+   - extended waitingroom-handler:
+     - implemented "delete" and "join" of waiting-room-game
+
+   * include/quick/quick_wroom.php (QuickHandlerWaitingroom.process_cmd_info),
+     include/message_functions.php (game_info_table),
+     waiting_room.php (add_old_game_form):
+   - show count of already-started-games on waiting-room-info (just like for invitation)
+
+   * include/db/waitingroom.php (Waitingroom.build_query_sql):
+   - bugfix: filter on waitingroom-id if given
+
+   * include/db/waitingroom.php (class Waitingroom, ~.to_string, ~.persist, ~.insert,
+       ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_waitingroom),
+     include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_info),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/quick/quick_handler.php (QuickHandler.build_obj_user):
+   - implemented waitingroom-handler with command:
+     - "info" to retrieve info about single waitingroom-entry (unfinished)
+   - added default-values for fields: game_type, game_players
+   - changed field-pos of 'opp_started_games'
+
+   * include/error_codes.php (ErrorCode.init):
+   - added error 'unknown_entry' as general-error for quick-suite
+
+   * specs/quick_suite.txt:
+   - extended specs for:
+     - (3a) user-object "info"-command: check for logged-in user as fallback
+     - (3b) game-object "info"-command: added jigo-mode
+     - (3c) message-object: added specs for invitations, send-message, folder-commands, list-messages
+     - (3f) wroom-object: added specs for waiting-room: list, info, join, new_game
+     - (3g) bulletin-object: added specs for bulletins: list, mark_read
+     - extend user-data with rating/rating_elo-fields
+   - added TODOs
+
+2012-03-10 juga
+
+   * include/db/bulletin.php (Bulletin.mark_bulletin_as_read):
+   - bugfix: allow bulletin read-marking also on archived bulletins
+
+   * include/quick/quick_bulletin.php (class QuickHandlerBulletin, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_list, ~.process_cmd_mark_read, ~.convertBulletinFlags):
+   - implemented bulletin-handler with commands:
+     - "list" to get list of unread bulletins
+     - "mark_read" to mark bulletins as read
+
+   * include/quick/quick_handler.php (QuickHandler.build_obj_user):
+   - quick-suite: add userinfo rating/rating_elo-fields if Rating2-field available in data-source
+
+   * opponents.php, users.php:
+   - from wishlist: added register-date to users- and opponents-list with filter
+
+   * users.php (users_show_pos_extend_table_form),
+     site_map.php, skins/dragon/screen.css:
+   - from wishlist: show players absolute position in the user-list ordered by rating
+
+   * include/table_columns.php (Table.set_from_row, ~.set_sort):
+   - added set-methods for from-row and explicit table-sort
+
+   * include/std_functions.php (who_is_logged):
+   - bugfix: passing quick-suite-arg as login-options to is_logged_in()-func
+
+   * include/quick/quick_bulletin.php (class QuickHandlerBulletin, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_list),
+     include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process, ~.process_cmd_list),
+     include/quick/quick_handler.php (QuickHandler.build_obj_user),
+     include/quick/quick_suite.php (QuickSuite.getQuickHandler):
+   - added skeleton for bulletin and waitingroom quick-handler
+
+   * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info):
+   - message quick-handler: added game-settings of invitational message for "info"-command
+
+   * include/quick/quick_user.php (QuickHandlerUser.prepare):
+   - user quick-handler: use logged-in user if no user specified
+
+   * site_map.php:
+   - added new-FK-game, templates
+
+2012-03-07 juga
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.parseURL, ~.prepare,
+       ~.process_cmd_play, ~.process_cmd_status_score, ~.prepareMoves, ~.convert_coords, ~.parse_coords),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info, ~.convertGameFlags),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/classlib_game.php (class GameScore, ~.set_board_status, ~.get_board_status;
+       class BoardStatus, ~.add_coord, ~.get_coords),
+     include/board.php (Board.fill_game_score),
+     include/coords.php (sgf2board_coords),
+     include/move.php (check_remove),
+     specs/quick_suite.txt:
+   - quick-suite game-obj: added status_score-command
+     - in game-scoring phase returning: resultset, game-score, board-status
+       with coordinates-list of black/white stones/territory/dead-stones, dame and neutral points
+     - allow status_score-command only on game-status SCORE|SCORE2
+     - allow status_score-command also if not-your-turn and without move-id
+     - added output-format for coordinates of status_score-command
+     - parse also SGF-coordinate-list without comma-separators
+     - flatten board-status-structure in main-result
+   - quick-suite game-obj info-command:
+     added shape_id, ADMRESULT-flag, added last_quick_access, games_mpg
+
+2012-03-04 juga
+
+   * include/goban_handler_sl.php (class GobanHandlerSL1, ~.parse_line, ~.parse_SL_text, ~.write_goban),
+     goban_editor.php:
+   - <igoban>-tag: replaced '* ~ ?' with 'A V ~'
+     - use SL-syntax 'A' (black-territory), 'V' (white-territory) instead of '*' (in use on SL) and '~'
+     - use SL-unused '~' (neutral-territory), '=' (dame)
+     - SL-syntax '*' and '?' are not supported
+
+   * include/game_functions.php (GameHelper.load_game_row;
+       class FairKomiNegotiation, ~.read_from_game_row, ~.get_komibid, ~.is_choose_color,
+         ~.get_view_komibid, ~.echo_fairkomi_table, ~.get_htype_user_handles,
+         ~.build_form_actions, ~.build_notes, ~.check_komibid, ~.allow_start_game,
+         ~.check_komibid, ~.start_fairkomi_game;
+       GameSetup.format_handicap_type, ~.parse_jigo_mode_from_game_setup, ~.build_invitation_diffs,
+         ~.swap_htype_black_white;
+       is_htype_divide_choose, get_category_handicaptype, get_invite_handicaptype,
+       get_handicaptype_for_invite),
+     include/make_game.php (make_invite_game, make_invite_game_setup, accept_invite_game, create_game),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/game_texts.php (GameTexts.get_fair_komi_types),
+     include/error_codes.php (ErrorCode.init),
+     specs/db/table-Games.txt, skins/dragon/screen.css,
+     confirm.php (do_komi_save),
+     game.php (draw_game_info),
+     gameinfo.php, join_waitingroom_game.php,
+     message.php (echo_dispute_diffs),
+     waiting_room.php (determine_color):
+   - added fair-komi handling for divide&choose for invite & new-game
+     - one player chooses komi, the other chooses color;
+       order of komi-first can be specified by handicap-type
+     - adjusted game-settings-form, game-info, fair-komi-negotiation dialog,
+       invite/dispute form, dispute-diff-info
+     - accept one komi-bid, then color-choice which is starting the game
+     - use special formatting of fair-komi divide&choose handicap-type
+       including player-handle which choose komi/color respectively
+     - added check on fair-komi-negotiation divide&choose type to check
+       if komi-saving or color-choosing is correct
+   - refactored loading game-row into GameHelper::load_game_row()
+
+   * include/std_functions.php (send_message):
+   - bugfix for send_message(): set bulk-message-flag not for system-messages
+
+   * scripts/data_export.php:
+   - added new tables: Shape, TournamentNews, TournamentResult; corrected table-typo
+
+2012-02-18 juga
+
+   * include/classlib_userconfig.php (class ConfigBoard, ~.get_board_flags,
+       ~.set_board_flags, ~.update_all, ~.fill_player_row, ~.load_config_board),
+     include/board.php (class Board, ~.load_from_db, ~.mark_last_captures,
+       ~.draw_last_captures_box, ~.set_style, ~.draw_board),
+     include/std_functions.php ($cookie_pref_rows),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     change_profile.php, edit_profile.php, game.php:
+   - added board-config to mark and print last-move-captures
+     - also useful as ko-indicator
+     - stored in ConfigBoard.BoardFlags
+     - on game-page added last-move-capture info-box below capture-box
+     - enabling with option "Mark Last Move Capture" in user-profile
+-----------
+-- added board-flags for marking last-capture
+ALTER TABLE ConfigBoard
+   ADD BoardFlags tinyint unsigned NOT NULL default 0 AFTER Woodcolor ;
+-----------
+
+   * include/message_functions.php (message_info_table),
+     message.php (handle_change_folder):
+   - added following of message-folder-move also for single-message-view
+     - if follow-checkbox enabled, moving to target-folder
+     - default is to stay in same folder
+
+   * include/game_functions.php (GameRematch.add_rematch_links), site_map.php:
+   - adjusted bottom-link for rematch: copy new game -> copy as new game
+
+2012-02-13 juga
+
+   * scripts/browser_stats.php:
+   - added ipod-family
+
+   * edit_rating.php:
+   - bugfix: var-typo, used wrong var
+
+2012-02-05 juga
+
+   * include/game_functions.php (append_form_add_waiting_room_game;
+       class GameSetupChecker, ~.is_error_field, ~.get_class_error_field, ~.check_komi,
+       ~.check_time, ~.check_adjust_komi, ~.check_min_rated_games, ~.check_game_players),
+     include/message_functions.php (game_settings_form),
+     skins/dragon/screen.css,
+     new_game.php (add_new_game_form, handle_add_game),
+     message.php:
+   - highlight input-text-fields for invite & new-game if value contains error,
+     checked by GameSetupChecker for fields: komi_m, adj_komi, game_players,
+     min_rated_games, time-fields (timevalue, byotimevalue_jap/can/fis, byoperiods_jap/can)
+
+   * include/game_functions.php (get_category_handicaptype, get_invite_handicaptype,
+       get_handicaptype_for_invite;
+       FairKomiNegotiation.get_komibid, ~.echo_fairkomi_table, ~.build_form_actions,
+         ~.build_notes, ~.check_komibid, ~.allow_start_game, ~.save_komi, ~.start_fairkomi_game;
+       GameSetupChecker.check_min_rated_games;
+       GameSetupBuilder.fill_invite_from_game_setup, ~.fill_new_game_from_game_setup),
+     include/make_game.php (make_invite_game, make_invite_game_setup, accept_invite_game),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/game_texts.php (GameTexts.get_fair_komi_types, ~.get_fair_komi_color_note),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     confirm.php (do_komi_save), game.php (draw_fairkomi_negotiation),
+     join_waitingroom_game.php, waiting_room.php:
+   - added fair-komi handling for open-auction-komi for invite & new-game
+     - added submit-button for fair-komi dialog game-page to accept last komi-bid starting the game
+     - for open-auction-komi ask players in turn for komi-bids till one accepts by starting the game
+   - defined default fair-komi handicap-type
+   - bugfix: wrong var for game-setup-checker on min-rated-games, check only if non-empty
+   - bugfix: corrected URL-var for viewmode of new-game page -> 'view'
+
+   * include/message_functions.php (game_settings_form),
+     message.php:
+   - bugfix: check game-setup form-fields only if form with game-settings submitted;
+     added hidden-field 'gsc' to indicate that
+   - bugfix: derive already accepted/declined message also if msg-type is NORMAL
+
+   * new_game.php (handle_add_game):
+   - bugfix: preserve former input-fields by using redraw-mode if errors found
+   - bugfix of previous refactoring: missed global var $NOW
+
+   * include/error_codes.php (ErrorCode.init),
+     skins/dragon/screen.css:
+   - format forgotten-password error-note as left-aligned block
+
+2012-02-03 juga
+
+   * include/game_functions.php (GameSetupChecker.add_error,
+       ~.add_default_values_info, ~.check_time),
+     new_game.php (add_new_game_form, handle_add_game),
+     add_to_waitingroom.php [REMOVED],
+     message.php:
+   - new-game: perform checks on input-text-fields
+     - show errors instead of throwing error-code with all form-values gone
+     - refactored 'add_to_waitingroom.php' into 'new_game.php'
+       to allow "preview" to show errors
+     - bugfix: for simple new-game-view only check Fischer-time fields
+   - invite/new-game: on form-check-error add info, that invalid values
+     have been replaced with default-values
+
+2012-02-02 juga
+
+   * include/game_functions.php (class GameSetupChecker, ~.has_error, ~.get_errors,
+       ~.check_komi, ~.check_time, ~.check_adjust_komi, ~.check_min_rated_games,
+       ~.check_game_players, ~.check_fields),
+     message.php:
+   - invite/dispute: perform checks on input-text-fields,
+     show errors instead of throwing error-code with all form-values gone
+
+2012-01-31 juga
+
+   * include/game_functions.php (ProfileTemplate.fill_invite_with_new_game,
+       ~.is_valid_new_game_template_for_invite, ~.is_valid_template_raw_check),
+     templates.php (echo_list_templates), message.php:
+   - templates: load new-game-templates also for invite, except for MP-game
+
+   * include/game_functions.php (ProfileTemplate.fill, ~.fill_new_game_with_invite),
+     new_game.php, templates.php:
+   - templates: load invite-templates also for new-game views
+
+   * templates.php (check_save_template, echo_save_template):
+   - save-template: if name is missing, auto-fill name-field
+     with name of entry to be replaced
+
+   * include/game_functions.php (MAX_PROFILE_TEMPLATES):
+   - increased limit of max-profile-templates: 20 -> 30
+
+   * include/game_functions.php (ProfileTemplate.decode):
+   - profile-template decoding: parse syntax-unspecific: eat next group and
+     parse it independently of type; shape must be last b/c snapshot can contain spaces
+
+   * include/game_functions.php (class GameSetup, ~.set_defaults, ~.encode, ~.to_string,
+         ~.encode_profile_template, ~.new_from_game_setup, ~.fill_new_game_from_game_setup;
+       ProfileTemplate.encode, ~.fill, ~.new_template_game_setup_newgame, ~.decode;
+       parse_waiting_room_rating_range, append_form_add_waiting_room_game),
+     include/message_functions.php (game_settings_form),
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/table-Profiles.txt,
+     add_to_waitingroom.php, new_game.php (add_new_game_form),
+     people.php, templates.php:
+   - added save-template for new-game views redirecting to templates-page to save
+     - added save-template button
+     - added template-encoding and decoding for new-game form-settings,
+       using game-setup-encoding + extra-encoding for new-game-related data + message-encoding
+     - new-game: allow loading new-game template on all views even
+       if saved from different view using bottom-links to other new-game views
+     - new-game: re-organized bottom-links, added link to template-list
+     - templates: added icon (plus-sign) for adding new-game
+   - bugfix: decoding game-setup with negative value for ratings<0
+   - bugfix: filling new-game ratings with echo_rating() for correct rating-formatting
+   - bugfix: reading numGames for new-game page from URL
+-----------
+# added image for new-game
+copy /images/newgame.gif
+-----------
+
+2012-01-30 juga
+
+   * include/game_functions.php (GameSetup.encode_profile_template;
+       class GameSetupBuilder, ~.fill_invite_from_game, ~.fill_invite_from_game_setup,
+         ~.fill_new_game_from_game, ~.fill_new_game_from_game_setup, ~.build_url_game_basics,
+         ~.build_url_time, ~.build_url_cat_htype_manual, ~.build_url_handi_komi_rated,
+         ~.build_url_invite_to;
+       class ProfileTemplate, ~.encode, ~.fill, ~.fill_message, ~.to_string,
+         ~.new_template_game_setup_invite, ~.decode, ~.eat_line, ~.get_template_type_text,
+         ~.new_default_profile, ~.is_valid_type, ~.known_template_types),
+     include/classlib_profile.php (PROFTYPE_TMPL_INVITE, PROFTYPE_TMPL_NEWGAME),
+     include/make_game.php (make_invite_template_game_setup),
+     specs/db/table-Profiles.txt, skins/dragon/screen.css,
+     templates.php (echo_list_templates, check_save_template, check_delete_template),
+     message.php (handle_save_template),
+     game_rematch.php:
+   - added save-template for invite-message redirecting to templates-page to save
+     - merged different templates-types into one template-list
+     - added checks on saving template: max. payload of 10kB
+     - added template-encoding and decoding for invite-message
+       using game-setup-encoding + extra-encoding for shape-id & shape-snapshot + message-encoding
+     - refactored build-url-funcs from 'game_rematch.php' into class GameSetupBuilder
+       in 'include/game_functions.php' to be used for template-loading as well
+     - refactored: game-setup-templates splitted into profile-types PROFTYPE_TMPL_INVITE/NEWGAME
+
+2012-01-29 juga
+
+   * include/classlib_profile.php (class Profile.*, ~.load_profiles;
+       SearchProfile.has_profile, ~.save_profile),
+     include/game_functions.php (class ProfileTemplate, ~.encode, ~.build_profile,
+       ~.build_url_message, ~.new_template_send_message, ~.decode, ~.add_menu_link,
+       ~.get_template_type_text, ~.new_default_profile),
+     include/error_codes.php (ErrorCode.init),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Profiles.txt,
+     specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css,
+     templates.php (echo_list_templates, echo_save_template, check_save_template,
+       save_template, check_delete_template, echo_delete_template),
+     message.php (handle_save_template),
+     site_map.php:
+   - added feature to save templates for send-message & game-setup:
+     - added page to manage templates
+     - show list of templates for send-message & game-setup
+     - templates stored as profile-types PROFTYPE_TMPL_SENDMSG & PROFTYPE_TMPL_GAMESETUP
+     - forward user-id for loading template to be used in combination after selecting recipient user
+     - added checks on saving template: mandatory unique name, max. entries of templates (20)
+     - added deletion of templates
+     - extended Profiles.Name: 40 -> 60 chars
+   - message-page:
+     - added save-template button for sending-message,
+       redirecting to templates-page via form-GET-method,
+       which also restricts length of template (browser-specific)
+     - load template for send-message given via 'tmpl'-arg in URL
+     - added bottom-link to templates-list
+   - refactored Profile-stuff:
+     - refactored Profile-class: renamed attributes into camel-case names
+     - renamed func: Profile.update_profile() -> Profile.save_profile()
+     - refactored SQL for save-profile using UpdateQuery-class
+     - auto-update Lastchanged-field on save-profile
+     - adjusted load_profiles() to accept array-type and return templates in different order than profile-std-order
+-----------
+-- extended Profiles.Name
+ALTER TABLE Profiles
+   MODIFY Name varchar(60) NOT NULL default '' ;
+-----------
+
+   * include/gui_functions.php (span):
+   - added empty-default on span-value
+
+2012-01-25 juga
+
+   * include/shape_control.php (ShapeControl.getFlagsText),
+     include/db/shape.php (SHAPE_FLAG_PUBLIC),
+     specs/db/table-Games.txt,
+     edit_shape.php (parse_edit_form), list_shapes.php, site_map.php:
+   - added public-flag for shape, default OFF on new shape
+   - shape-list:
+     - default view shows only public shapes
+     - added bottom-link showing all-shapes including public
+     - added bottom-link showing only my shapes (public and private)
+
+   * include/error_codes.php (ErrorCode.init):
+   - sync'ed changes from stable-branch by adding more text for error-code 'wrong_password'
+     explaining what to do when forgotten password as many users wanted another a new one,
+     but didn't know how to do it (support-forum giving email and user-id)
+
+   * include/std_functions.php (send_message):
+   - added HOT-section within send_message() where user shouldn't interrupt
+
+   * confirm.php:
+   - bugfix: allow deletion of game in fair-komi-negotiation
+
+   * message.php:
+   - bugfix for recent cleanup: set correct message-type to decide upon for submode
+
+2012-01-22 juga
+
+   * all files:
+   - adjusted Copyright on every file to: 2001-2012
+
+   * include/globals.php (MSGTYPE_...), include/quick/quick_message.php,
+     scripts/message_consistency.php,
+     tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder.php,
+     tournaments/edit_participant.php, tournaments/ladder/challenge.php,
+     admin_game.php, join_waitingroom_game.php, message.php (handle_send_message),
+     search_messages.php:
+   - use consts for MSGTYPEs & GAME-status
+   - minor changes (rename vars, replace global, cleanup, debug-output, comments, layout)
+
+   * quick_play.php:
+   - better safety-checks/error-codes on checking game-status
+
+   * include/make_game.php (make_invite_game, accept_invite_game, create_game,
+       make_standard_placement_of_handicap_stones),
+     include/game_functions.php (GameHelper.update_players_start_game),
+     join_waitingroom_game.php:
+   - refactor SQL-update for updating player-stats on game-start
+     using UpdateQuery-class in GameHelper
+   - better safety-checks/error-codes for invitation-games
+   - minor changes (rename vars, replace global, cleanup, debug-output, comments, layout)
+
+   * include/message_functions.php (game_settings_form, game_info_table; DgsMessage.load_message):
+   - optimize: simplify SQL-query for dispute-check removing Players-join
+   - better safety-checks/error-codes for invitation-games
+   - use consts for MSGTYPEs
+   - minor fixes/changes (defaults, vars, typo, comments)
+
+   * include/std_functions.php (verify_email):
+   - commented on unused email-chars on verify_email-func
+   - use consts for MSGTYPEs
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - fix db-changes for game-invitations
+
+   * specs/db/table-Games.txt, specs/db/table-Messages.txt:
+   - adjusted docs for Game- and Message-related tables/fields
+
+2012-01-16 juga
+
+   * include/rating.php (update_player_rating), edit_rating.php:
+   - refactor SQL-update for rating-update using UpdateQuery-class
+
+2011-11-09 juga
+
+   * status.php (load_games_to_move):
+   - show number of games-to-move in page-title for browser-tabs
+
+   * links.php:
+   - removed broken links, replaced 'Go News'
+
 2011-09-12 juga
 
    * include/game_functions.php (append_form_add_waiting_room_game;
