@@ -21,6 +21,12 @@ ChangeLog
 
 2012-06-08 juga
 
+   * scripts/obsolete/*.php, scripts/obsolete/README.txt:
+   - found some old scripts on live-server, probably obsolete
+
+   * include/std_functions.php (send_message):
+   - bugfix: increase CountMsgNew only if >=0
+
    * NEWS:
    - prepare release-notes for DGS 1.0.15
      - extended & corrected texts
