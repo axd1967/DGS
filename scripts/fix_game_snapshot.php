@@ -162,8 +162,8 @@ function fix_single_game( $gid )
 
    if( $game->Snapshot != $new_snapshot )
    {
-      $game->Snapshot = $new_snapshot;
-      $game->update();
+      db_query( "fix_game_snapshost.fix_single_game.upd_game_snapshot($gid)",
+            "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid LIMIT 1" );
       echo "<br><span class=ErrorMsg>Updated game-snapshot!!</span><br>\n\n";
    }
    else
@@ -172,6 +172,8 @@ function fix_single_game( $gid )
 
 function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sleep )
 {
+   global $ENUM_GAMES_STATUS;
+
    $qsql = new QuerySQL(
       SQLP_FIELDS, 'G.ID', 'G.Status', 'G.Size', 'G.Moves', 'G.ShapeSnapshot',
       SQLP_FROM,   'Games AS G',
@@ -201,6 +203,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
    _echo( sprintf( "<br>Found %d games to fix ...<br>\n", $count_rows ) );
 
    $cnt = $cnt_err = $lasterr_gid = 0;
+   $error_gids = array();
    while( $game_row = mysql_fetch_assoc($result) )
    {
       $cnt++;
@@ -214,7 +217,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
          $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 
          db_query( "fix_game_snapshost.bulkfix.upd_game_snapshot($gid)",
-            "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid AND Snapshot='' LIMIT 1" );
+            "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid LIMIT 1" );
          _echo( sprintf( "Game #%s -> fixed %d. of %d<br>\n", $gid, $cnt, $count_rows ) );
 
          if( $sleep > 0 )
@@ -222,6 +225,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       }
       else
       {
+         $error_gids[] = $gid;
          $cnt_err++;
          $lasterr_gid = $gid;
       }
@@ -229,8 +233,11 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
    mysql_free_result($result);
 
    if( $cnt_err > 0 )
+   {
       echo sprintf( "<br><span class=ErrorMsg>Found %d errors: last game-id with error = %d</span><br>\n",
-         $cnt_err, $lasterr_gid );
+                    $cnt_err, $lasterr_gid ),
+         sprintf( "<br><span class=ErrorMsg>Game-IDs with errors: [ %s ]</span><br>\n", implode(' ', $error_gids));
+   }
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - Bulk-Fix Done.";
