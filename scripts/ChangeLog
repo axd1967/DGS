@@ -19,6 +19,71 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-06-10 juga
+
+   * include/time_functions.php (get_clock_ticks, time_left_ticksdate),
+     include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/game_functions.php (GameHelper.update_clock;
+       FairKomiNegotiation.save_komi, ~.start_fairkomi_game),
+     include/make_game.php (accept_invite_game, create_game),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     tournaments/game_admin.php (draw_add_time),
+     confirm.php, game.php, quick_play.php:
+   - added debug-location for reading clock-ticks
+
+   * game.php:
+   - show "other scoring" on devel-server only if game in SCORE-/FINISHED-phase
+
+   * gameinfo.php:
+   - removed extra-space for double-game
+
+   * quick_play.php:
+   - fix bug: missed X_Black/WhiteClock, so replaced loading with GameHelper::load_game_row()
+   - fix bug: missed declaration of $message_query
+
+   * include/make_game.php (accept_invite_game, create_game):
+   - fix bug: missed GameSetup on creating double-game when accepting game-invitation
+
+   * scripts/game_consistency.php:
+   - fix bug: corrected table-alias usage for unknown column
+
+   * include/db/games.php (Games, ~.insert, ~.update, ~.new_from_row):
+   - fix bug: Games.Starttime/Lastchanged are not the typical db-entity
+     Created/Lastchanged fields, but start-time after setup & last-moved-date respectively,
+     therefore remove auto-setting of Starttime & Lastchanged field in insert() & update()
+   - fix bug: used db-entity standard datetime-field prefix -> X_Starttime/X_Lastchanged
+
+   * include/db/waitingroom.php (Waitingroom.insert, update):
+   - fix bug: removed non-existing Lastchanged-field
+
+   * scripts/game_consistency.php:
+   - commented out & added TODO for wrong datetime-handling for consistency-check
+     of Starttime>Lastchanged
+
+   * snapshot.php:
+   - updated snapshot-page for release 1.0.15
+   - commented out current CVS-version as that version is often not stable
+
+   * scripts/updates/roadmap_1_0_14_to_1_0_15.txt:
+   - added mysqldump-command to export translation-data
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     scripts/updates/ChangeLog_1_0_15,
+     specs/db/dragon-ddl.sql:
+   - sync'ed changes from LIVE-update from 10-Jun-2012
+   - sync'ed DDL from LIVE-database
+   - fix missing db-update: TournamentLadderProps.ChallengeRangeAbsolute signed
+
+   * include/quick_common.php:
+   - disabled server-down with $is_down=false for LIVE-update
+
+   * scripts/fix_game_snapshot.php (fix_single_game, bulk_fix_missing_game_snapshots):
+   - fix bug: Games-obj-update() destroyed Starttime/LastChanged-field
+   - fix bug: allow single fix also if snapshot not set
+   - fix bug: declare global-var for processing ALL games
+   - collect game-ids, that coulnd't be processed
+
 2012-06-08 juga
 
    * scripts/obsolete/*.php, scripts/obsolete/README.txt:
