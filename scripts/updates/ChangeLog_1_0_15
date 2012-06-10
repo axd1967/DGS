@@ -19,13 +19,14 @@
    * include/config.php (GAME_INVITATIONS_EXPIRE_MONTHS),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      daily_cron.php:
-   - delete old game-invitations after 3 months configured with server-specific setting
+   - delete old game-invitations after X months configured with server-specific setting
+   - prepared for live-update to 6 months, defaults to 0 in server-config
 -----------
--- delete invitations older than 3 months
+-- delete invitations older than 6 months
 SELECT COUNT(*) FROM Games
-   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 6 MONTH ;
 DELETE FROM Games
-   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 6 MONTH ;
 -----------
 
 2012-05-27 juga
@@ -322,7 +323,7 @@ ALTER TABLE Translationlog
        Former code still available in source-repository with rev1.100
 -----------
 -- remove old unused table for rating-changes
-DROP TABLE RatingChange ;
+DROP TABLE IF EXISTS RatingChange ;
 -----------
 
    * include/board.php (class Board):
@@ -2389,7 +2390,7 @@ CREATE TABLE SurveyOption (
   UserCount mediumint unsigned NOT NULL default 0,
   Score int NOT NULL default 0,
   Title varchar(255) NOT NULL,
-  Text text NOT NULL default '',
+  Text text NOT NULL,
   PRIMARY KEY (ID),
   UNIQUE KEY sidTag (sid,Tag)
 ) ENGINE=MyISAM ;
@@ -2918,7 +2919,7 @@ CREATE TABLE Bulletin (
   tid int NOT NULL default 0,
   AdminNote varchar(255) NOT NULL default '',
   Subject varchar(255) NOT NULL,
-  Text text NOT NULL default '',
+  Text text NOT NULL,
   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY (ID),
   KEY Status (Status)
@@ -3079,7 +3080,7 @@ CREATE TABLE TournamentNews (
   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
   ChangedBy varchar(54) NOT NULL default '',
   Subject varchar(255) NOT NULL,
-  Text text NOT NULL default '',
+  Text text NOT NULL,
   PRIMARY KEY  (ID),
   KEY tidPublished (tid,Published),
   KEY Status (Status)
@@ -7136,7 +7137,7 @@ CREATE TABLE TournamentLadderProps (
    tid int(11) NOT NULL,
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
    ChangedBy varchar(54) NOT NULL default '',
-   ChallengeRangeAbsolute smallint unsigned NOT NULL DEFAULT '0',
+   ChallengeRangeAbsolute smallint NOT NULL DEFAULT '0',
    PRIMARY KEY (tid)
 ) ENGINE=MyISAM;
 -----------
