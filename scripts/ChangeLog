@@ -33,7 +33,7 @@ ChangeLog
      include/make_game.php (accept_invite_game, create_game),
      include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
      tournaments/game_admin.php (draw_add_time),
-     confirm.php, game.php, quick_play.php:
+     confirm.php, game.php, gameinfo.php, quick_play.php:
    - added debug-location for reading clock-ticks
 
    * game.php:

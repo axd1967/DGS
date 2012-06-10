@@ -325,7 +325,7 @@ function build_rating_diff( $rating_diff )
    if( $grow['Maintime'] > 0 || $grow['Byotime'] > 0 )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $hours = ticks_to_hours("gameinfo($gid)", get_clock_ticks($grow['ClockUsed']) - $grow['LastTicks']);
+      $hours = ticks_to_hours( get_clock_ticks("gameinfo($gid)", $grow['ClockUsed']) - $grow['LastTicks']);
 
       if( $to_move == BLACK )
       {
