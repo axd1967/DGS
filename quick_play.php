@@ -64,22 +64,7 @@ else
 
    $my_id = $player_row['ID'];
 
-   $game_row = mysql_single_fetch( 'quick_play.find_game',
-         "SELECT G.*, " .
-            "G.Flags+0 AS GameFlags, " . //used by check_move
-            "black.ClockUsed AS Blackclock, " .
-            "white.ClockUsed AS Whiteclock, " .
-            "black.OnVacation AS Blackonvacation, " .
-            "white.OnVacation AS Whiteonvacation " .
-         'FROM Games AS G ' .
-            'INNER JOIN Players AS black ON black.ID=G.Black_ID ' .
-            'INNER JOIN Players AS white ON white.ID=G.White_ID ' .
-         "WHERE G.ID=$gid "
-      );
-
-   if( !$game_row )
-      error('unknown_game', "quick_play.find_game($gid)");
-
+   $game_row = GameHelper::load_game_row( 'quick_play.find_game', $gid );
    $Last_X = $Last_Y = -1;
    extract($game_row);
 
@@ -146,7 +131,7 @@ else
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
 
    // update clock
-   list( $hours, $upd_clock ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
+   list( $hours, $upd_clock ) = GameHelper::update_clock( "quick_play($gid)", $game_row, $to_move, $next_to_move );
    $time_query = $upd_clock->get_query(false, true);
 
    $TheBoard = new Board( );
@@ -195,6 +180,7 @@ This is why:
 - this modification is always done in first place and checked before continuation
 *********************** */
    $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
+   $message_query = '';
    $Moves++;
 
 
