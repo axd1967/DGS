@@ -98,7 +98,8 @@ CREATE TABLE MovesNew (
    Stone tinyint unsigned NOT NULL default '0',
    PosX tinyint NOT NULL,
    PosY tinyint NOT NULL,
-   Hours smallint unsigned NOT NULL
+   Hours smallint unsigned NOT NULL,
+   PRIMARY KEY (ID)
 ) ENGINE=MyISAM ;
 
 -- Copy all data into new structure of Moves-table (part 2/5)
@@ -107,7 +108,6 @@ INSERT INTO MovesNew (ID,gid,MoveNr,Stone,PosX,PosY,Hours)
 
 -- Create indexes for new Moves-table (part 3/5)
 ALTER TABLE MovesNew
-   ADD PRIMARY KEY (ID),
    ADD INDEX gid (gid,MoveNr) ;
 
 -- Replace old with new Moves-table (part 4/5)
@@ -381,8 +381,6 @@ ALTER TABLE Translations
 -- [field-size] COL Waitingroom.Byoperiods : int -> tinyint
 -- [field-size] COL Waitingroom.Ratingmin : double -> float
 -- [field-size] COL Waitingroom.Ratingmax : double -> float
--- [field-size] COL Waitingroom.MinHandicap : tinyint -> tinyint unsigned
--- [field-size] COL Waitingroom.MaxHandicap : tinyint -> tinyint unsigned
 -- [no-def] Waitingroom.uid int(11) NOT NULL default '0' -> no default [ok]
 ALTER TABLE Waitingroom
    MODIFY nrGames tinyint unsigned NOT NULL default '1',
@@ -393,8 +391,6 @@ ALTER TABLE Waitingroom
    MODIFY Byoperiods tinyint NOT NULL default '0',
    MODIFY Ratingmin float NOT NULL default '-9999',
    MODIFY Ratingmax float NOT NULL default '-9999',
-   MODIFY MinHandicap tinyint unsigned NOT NULL default '0',
-   MODIFY MaxHandicap tinyint unsigned NOT NULL default '127',
    MODIFY uid int NOT NULL ;
 
 
@@ -482,23 +478,9 @@ ALTER TABLE `Forums`
 UPDATE Forums, Posts
    SET Forums.Updated=Posts.Time WHERE Forums.LastPost>0 AND Posts.ID=Forums.LastPost ;
 
--- add Table ForumRead for NEW-handling (replacing Forumreads-table)
-CREATE TABLE ForumRead (
-   User_ID int(11) NOT NULL default '0',
-   Forum_ID int(11) NOT NULL default '0',
-   Thread_ID int(11) NOT NULL default '0',
-   Post_ID int(11) NOT NULL default '0',
-   NewCount int(11) NOT NULL default '-1',
-   Time datetime NOT NULL default '0000-00-00 00:00:00',
-   UNIQUE KEY FR_Uniq (Thread_ID,Post_ID,Forum_ID,User_ID),
-   KEY Time (Time)
-) ENGINE=MyISAM ;
+DELETE FROM Forumreads
+   WHERE Thread_ID=0 ;
 
--- migrate Forumreads- to ForumRead-table
-DELETE FROM Forumreads WHERE Thread_ID=0 ;
-INSERT INTO ForumRead (User_ID,Forum_ID,Thread_ID,Post_ID,NewCount,Time)
-   SELECT FR.User_ID,P.Forum_ID,FR.Thread_ID,-1,-1,FR.Time
-      FROM Forumreads as FR INNER JOIN Posts as P ON P.ID=FR.Thread_ID ;
 
 -- configure forum-GUI for user, manage hidden forum-config for user
 ALTER TABLE `Players`
@@ -534,8 +516,8 @@ CREATE TABLE Profiles (
 -- game-handicap adjustment & min/max-limits
 ALTER TABLE `Waitingroom`
    ADD `AdjHandicap` tinyint signed NOT NULL default '0' AFTER `Handicaptype`,
-   ADD `MinHandicap` tinyint signed NOT NULL default '0' AFTER `AdjHandicap`,
-   ADD `MaxHandicap` tinyint signed NOT NULL default '127' AFTER `MinHandicap` ;
+   ADD `MinHandicap` tinyint unsigned NOT NULL default '0' AFTER `AdjHandicap`,
+   ADD `MaxHandicap` tinyint unsigned NOT NULL default '127' AFTER `MinHandicap` ;
 
 
 -- user-type characteristics: bot, teacher, pro, etc.
@@ -1005,11 +987,6 @@ ALTER TABLE Forums
 -- [field-size] COL Posts.Forum_ID : int -> smallint (foreign-key of Forums.ID)
 ALTER TABLE Posts
    MODIFY Forum_ID smallint NOT NULL default '0' ;
--- [field-size] COL ForumRead.Forum_ID : int -> smallint (foreign-key of Forums.ID)
--- [no-def] ForumRead.User_ID int(11) NOT NULL default '0' -> no default [ok]
-ALTER TABLE ForumRead
-   MODIFY Forum_ID smallint NOT NULL default '0',
-   MODIFY User_ID int NOT NULL ;
 
 -- [field-size] COL Games.Size : int -> tinyint unsigned
 -- [field-size] COL Games.Handicap : int -> tinyint unsigned
@@ -1122,7 +1099,6 @@ ANALYZE TABLE MessageCorrespondents ;
 ANALYZE TABLE Messages ;
 ANALYZE TABLE MoveMessages ;
 ANALYZE TABLE Moves ;
-ANALYZE TABLE Observers ;
 ANALYZE TABLE Observers ;
 ANALYZE TABLE Players ;
 ANALYZE TABLE Posts ;
@@ -1424,9 +1400,6 @@ ALTER TABLE Forumreads
 ALTER TABLE Forumreads
    ADD HasNew tinyint NOT NULL DEFAULT '0' ;
 
--- discard unused table after backport-migration to former Forumreads-table
-DROP TABLE ForumRead ;
-
 -- removed unused field for (first-trial) aggregated global-forum NEW-flag
 ALTER TABLE Players
    DROP COLUMN CountForumNew ;
@@ -1518,7 +1491,7 @@ CREATE TABLE TournamentLadderProps (
    tid int(11) NOT NULL,
    Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
    ChangedBy varchar(54) NOT NULL default '',
-   ChallengeRangeAbsolute smallint unsigned NOT NULL DEFAULT '0',
+   ChallengeRangeAbsolute smallint NOT NULL DEFAULT '0',
    PRIMARY KEY (tid)
 ) ENGINE=MyISAM;
 
@@ -1974,7 +1947,7 @@ CREATE TABLE GamePlayers (
 -- * 1. count (ca. 270.000 rows - 15s)
 SELECT COUNT(*) FROM Messages AS M WHERE M.Subject like 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 ;
 # not all of these are invitation-msgs, some are also replies to invitations
--- * 2. fix
+-- * 2. fix (repeat till change-count is 0)
 UPDATE Messages AS M, Messages AS MSRC
    SET M.Game_ID=MSRC.Game_ID
    WHERE M.ReplyTo=MSRC.ID AND M.Subject LIKE 'Game invitation%' AND M.ReplyTo>0 AND M.Game_ID=0 AND MSRC.Game_ID>0 ;
@@ -2095,7 +2068,7 @@ CREATE TABLE TournamentNews (
   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
   ChangedBy varchar(54) NOT NULL default '',
   Subject varchar(255) NOT NULL,
-  Text text NOT NULL default '',
+  Text text NOT NULL,
   PRIMARY KEY  (ID),
   KEY tidPublished (tid,Published),
   KEY Status (Status)
@@ -2126,9 +2099,10 @@ CREATE TABLE Bulletin (
   tid int NOT NULL default 0,
   AdminNote varchar(255) NOT NULL default '',
   Subject varchar(255) NOT NULL,
-  Text text NOT NULL default '',
+  Text text NOT NULL,
   Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY (ID)
+  PRIMARY KEY (ID),
+  KEY Status (Status)
 ) ENGINE=MyISAM ;
 
 
@@ -2232,7 +2206,7 @@ CREATE TABLE SurveyOption (
   UserCount mediumint unsigned NOT NULL default 0,
   Score int NOT NULL default 0,
   Title varchar(255) NOT NULL,
-  Text text NOT NULL default '',
+  Text text NOT NULL,
   PRIMARY KEY (ID),
   UNIQUE KEY sidTag (sid,Tag)
 ) ENGINE=MyISAM ;
@@ -2390,7 +2364,7 @@ ALTER TABLE Players
 
 
 -- remove old unused table for rating-changes
-DROP TABLE RatingChange ;
+DROP TABLE IF EXISTS RatingChange ;
 
 
 -- speed-up translators-query on people-page
@@ -2425,10 +2399,10 @@ UPDATE Players
    SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Beijing' ;
 
 
--- delete invitations older than 3 months
+-- delete invitations older than 6 months
 SELECT COUNT(*) FROM Games
-   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 6 MONTH ;
 DELETE FROM Games
-   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 3 MONTH ;
+   WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 6 MONTH ;
 
 

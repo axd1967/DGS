@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 2.11.3deb1ubuntu1.3
+-- version 2.11.1
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 18, 2012 at 10:26 PM
--- Server version: 5.0.51
--- PHP Version: 5.2.4-2ubuntu5.23
+-- Generation Time: Jun 10, 2012 at 12:59 PM
+-- Server version: 5.0.95
+-- PHP Version: 5.1.6
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `Bulletin` (
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`),
   KEY `Status` (`Status`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS `Feature` (
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`),
   KEY `Status` (`Status`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -354,7 +354,8 @@ CREATE TABLE IF NOT EXISTS `Forums` (
   `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
   `ThreadsInForum` mediumint(8) unsigned NOT NULL default '0',
   `PostsInForum` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `SortOrder` (`SortOrder`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -373,7 +374,7 @@ CREATE TABLE IF NOT EXISTS `GamePlayers` (
   PRIMARY KEY  (`ID`),
   KEY `gidGroup` (`gid`,`GroupColor`,`GroupOrder`),
   KEY `uid` (`uid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -440,9 +441,9 @@ CREATE TABLE IF NOT EXISTS `Games` (
   KEY `White_ID` (`White_ID`),
   KEY `Handicap` (`Handicap`),
   KEY `Moves` (`Moves`),
-  KEY `Flags` (`Flags`),
+  KEY `tid` (`tid`),
   KEY `Score` (`Score`),
-  KEY `tid` (`tid`)
+  KEY `Flags` (`Flags`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -490,7 +491,7 @@ CREATE TABLE IF NOT EXISTS `GoDiagrams` (
   `Data` text NOT NULL,
   `SGF` text NOT NULL,
   PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -508,7 +509,7 @@ CREATE TABLE IF NOT EXISTS `Intro` (
   `Hidden` enum('N','Y') NOT NULL default 'N',
   `Reference` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -516,14 +517,14 @@ CREATE TABLE IF NOT EXISTS `Intro` (
 -- Table structure for table `IpStats`
 --
 
-CREATE TABLE `IpStats` (
+CREATE TABLE IF NOT EXISTS `IpStats` (
   `uid` int(11) NOT NULL default '0',
   `Page` char(4) NOT NULL default '',
   `IP` varchar(16) NOT NULL,
   `Counter` int(10) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`uid`,`Page`,`IP`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 |
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -598,6 +599,21 @@ CREATE TABLE IF NOT EXISTS `MoveMessages` (
   `MoveNr` smallint(5) unsigned NOT NULL default '0',
   `Text` text NOT NULL,
   PRIMARY KEY  (`gid`,`MoveNr`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `MoveStats`
+--
+
+CREATE TABLE IF NOT EXISTS `MoveStats` (
+  `uid` int(11) NOT NULL default '0',
+  `SlotTime` smallint(5) unsigned NOT NULL default '0',
+  `SlotWDay` tinyint(4) NOT NULL default '0',
+  `SlotWeek` tinyint(4) NOT NULL default '0',
+  `Counter` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`uid`,`SlotTime`,`SlotWDay`,`SlotWeek`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -617,21 +633,6 @@ CREATE TABLE IF NOT EXISTS `Moves` (
   PRIMARY KEY  (`ID`),
   KEY `gid` (`gid`,`MoveNr`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `MoveStats`
---
-
-CREATE TABLE `MoveStats` (
-  `uid` int(11) NOT NULL default '0',
-  `SlotTime` smallint(5) unsigned NOT NULL default '0',
-  `SlotWDay` tinyint(4) NOT NULL default '0',
-  `SlotWeek` tinyint(4) NOT NULL default '0',
-  `Counter` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`uid`,`SlotTime`,`SlotWDay`,`SlotWeek`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 |
 
 -- --------------------------------------------------------
 
@@ -729,6 +730,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   KEY `Adminlevel` (`Adminlevel`),
   KEY `AdminOptions` (`AdminOptions`),
   KEY `Type` (`Type`),
+  KEY `CountFeatNew` (`CountFeatNew`),
   KEY `OnVacation` (`OnVacation`),
   KEY `VacationDays` (`VacationDays`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
@@ -787,7 +789,7 @@ CREATE TABLE IF NOT EXISTS `Profiles` (
   `Text` blob NOT NULL,
   PRIMARY KEY  (`ID`),
   KEY `UserType` (`User_ID`,`Type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -804,7 +806,7 @@ CREATE TABLE IF NOT EXISTS `RatingChangeAdmin` (
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),
   KEY `Created` (`Created`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -845,7 +847,7 @@ CREATE TABLE IF NOT EXISTS `Shape` (
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `Name` (`Name`),
   KEY `uid` (`uid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -890,7 +892,7 @@ CREATE TABLE IF NOT EXISTS `Survey` (
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),
   KEY `Status` (`Status`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -909,7 +911,7 @@ CREATE TABLE IF NOT EXISTS `SurveyOption` (
   `Text` text NOT NULL,
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `sidTag` (`sid`,`Tag`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -964,7 +966,7 @@ CREATE TABLE IF NOT EXISTS `Tournament` (
   PRIMARY KEY  (`ID`),
   KEY `Status` (`Status`),
   KEY `StartTime` (`StartTime`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1026,7 +1028,7 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   KEY `gid` (`gid`),
   KEY `Status_Ticks` (`Status`,`TicksDue`),
   KEY `tidRoundPool` (`tid`,`Round_ID`,`Pool`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1104,7 +1106,7 @@ CREATE TABLE IF NOT EXISTS `TournamentNews` (
   PRIMARY KEY  (`ID`),
   KEY `tidPublished` (`tid`,`Published`),
   KEY `Status` (`Status`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1134,7 +1136,7 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),
   KEY `tid_status` (`tid`,`Status`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1153,7 +1155,7 @@ CREATE TABLE IF NOT EXISTS `TournamentPool` (
   KEY `tidRoundPool` (`tid`,`Round`,`Pool`),
   KEY `uid` (`uid`),
   KEY `Rank` (`Rank`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1199,7 +1201,7 @@ CREATE TABLE IF NOT EXISTS `TournamentResult` (
   PRIMARY KEY  (`ID`),
   KEY `tidRank` (`tid`,`Rank`),
   KEY `uid` (`uid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1221,7 +1223,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRound` (
   `ChangedBy` varchar(54) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `tidRound` (`tid`,`Round`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -1258,7 +1260,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRules` (
   PRIMARY KEY  (`ID`),
   KEY `tid` (`tid`),
   KEY `Size` (`Size`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
