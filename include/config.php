@@ -165,7 +165,7 @@ define('MAX_GAMESRUN_TREG', 150);
 define('ALLOW_RULESET_CHINESE', false);
 
 // Allow usage of tournaments
-define('ALLOW_TOURNAMENTS', true);
+define('ALLOW_TOURNAMENTS', false);
 define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.
 
 // Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
