@@ -93,7 +93,7 @@ require_once( "include/classlib_game.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       $gid = $row['ID'];
-      $timeout_date = make_timeout_date( $row );
+      $timeout_date = make_timeout_date_from_gamerow( $row );
       if( $row['TimeOutDate'] != $timeout_date )
          update_games_timeoutdate( $gid, $timeout_date );
    }
@@ -123,7 +123,7 @@ function update_games_timeoutdate( $gid, $timeout_date )
    dbg_query($update_query);
 }
 
-function make_timeout_date( $grow )
+function make_timeout_date_from_gamerow( $grow )
 {
    $to_move = ($grow['Black_ID'] == $grow['ToMove_ID']) ? BLACK : WHITE;
    return NextGameOrder::make_timeout_date( $grow, $to_move, $grow['LastTicks'] );
