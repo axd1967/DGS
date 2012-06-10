@@ -236,7 +236,7 @@ echo ">>>> Most of them needs manual fixes.";
 //---------
    echo "\n<hr>Games Priority check:";
 
-   $query = "SELECT GP.gid, IFNULL(Games.ID,0) AS X_MissGame, Games.Status "
+   $query = "SELECT GP.gid, IFNULL(G.ID,0) AS X_MissGame, Games.Status "
       . "FROM GamesPriority AS GP "
          . "LEFT JOIN Games AS G ON G.ID=GP.gid "
       . "$where ORDER BY GP.gid$limit";
