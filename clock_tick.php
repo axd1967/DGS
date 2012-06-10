@@ -52,6 +52,43 @@ if( !$is_down )
 
    // ---------- BEGIN ------------------------------
 
+// Handle game timeouts
+
+   if( !$clocks_stopped )
+      handle_game_timeouts();
+
+
+
+   // ---------- END --------------------------------
+
+   db_query( 'clock_tick.reset_tick',
+         "UPDATE Clock SET Ticks=0 WHERE ID=201 LIMIT 1" );
+
+   if( !$chained )
+      $TheErrors->dump_exit('clock_tick');
+
+}//$is_down
+//end main
+
+
+// build a range SQL-query-part for the field $n
+// from $s to $e on a 24 clocks basis with the offset $o
+function clkrng( $n, $s, $e, $o=0)
+{
+   if( $s>23 ) $s-= 24;
+   if( $e>23 ) $e-= 24;
+   if( $s>$e )
+      return clkrng($n,0,$e,$o)." OR ".clkrng($n,$s,23,$o);
+   $s+= $o; $e+= $o;
+   if( $s==$e )
+      return "$n=$s";
+   return "($n BETWEEN $s AND $e)"; // ($n>=$s AND $n<=$e)
+}//clkrng
+
+function handle_game_timeouts()
+{
+   global $NOW;
+
    // $NOW is time in UTC
    $hour = gmdate('G', $NOW);
    $day_of_week = gmdate('w', $NOW);
@@ -83,20 +120,6 @@ if( !$is_down )
     *  GMT-2  20       [02,11[   04            Y
     */
 
-   // build a range SQL-query-part for the field $n
-   // from $s to $e on a 24 clocks basis with the offset $o
-   function clkrng( $n, $s, $e, $o=0)
-   {
-      if( $s>23 ) $s-= 24;
-      if( $e>23 ) $e-= 24;
-      if( $s>$e )
-         return clkrng($n,0,$e,$o)." OR ".clkrng($n,$s,23,$o);
-      $s+= $o; $e+= $o;
-      if( $s==$e )
-         return "$n=$s";
-      return "($n BETWEEN $s AND $e)"; // ($n>=$s AND $n<=$e)
-   }
-
    $clock_modified = clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN);
    if( $day_of_week > 0 && $day_of_week < 6 )
       $clock_modified.= " OR ".
@@ -109,37 +132,37 @@ if( !$is_down )
       );
 
 
-
    // Check if any game has timed out
-{
-/* TODO(keep as note) BUG in old & new version:
-  if maintenance spans more than a whole hour and graces the sleeping-clocks,
-  the time-window has passed to detect time-outs within that hour.
-  So time-outs are delayed by a full day till the games with the respective clock is checked again!
 
-  => keep Clock.ID>=0 (as safety for clones; else join with Games would be empty anyway
-     as there is no Clock.ID<0 any more)
-  => remove Clock.Lastchanged=$NOW to match all clock-timeouts
- */
+   /* TODO(keep as note) BUG in old & new version:
+     if maintenance spans more than a whole hour and graces the sleeping-clocks,
+     the time-window has passed to detect time-outs within that hour.
+     So time-outs are delayed by a full day till the games with the respective clock is checked again!
 
-/*
- In a first approximation, as $has_moved==false (see time_remaining()),
-  $main>$hours will just produce $main-=$hours which will never
-  activate $time_is_up and so, will produce nothing here...
- So the "find_timeout_games" query may be restricted with:
- - given IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) AS ToMove_Maintime
- - WHERE ToMove_Maintime <= $hours
- because $hours is always < $ticks/TICK_FREQUENCY (see ticks_to_hours())
- - Clock.ticks is always > Games.LastTicks
- - given ((ticks-LastTicks) / TICK_FREQUENCY) AS Upper_Ellapsed
- - WHERE ToMove_Maintime < Upper_Ellapsed
- which is:
- - WHERE IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)
-      < ((Clock.Ticks-Games.LastTicks) / TICK_FREQUENCY)
+     => keep Clock.ID>=0 (as safety for clones; else join with Games would be empty anyway
+        as there is no Clock.ID<0 any more)
+     => remove Clock.Lastchanged=$NOW to match all clock-timeouts
+    */
 
- During a test, this lowered the number of returned rows from 10,960 to 675.
- This is a table scan, but indeed reduces the number of affected rows.
-*/
+   /*
+    In a first approximation, as $has_moved==false (see time_remaining()),
+     $main>$hours will just produce $main-=$hours which will never
+     activate $time_is_up and so, will produce nothing here...
+    So the "find_timeout_games" query may be restricted with:
+    - given IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime) AS ToMove_Maintime
+    - WHERE ToMove_Maintime <= $hours
+    because $hours is always < $ticks/TICK_FREQUENCY (see ticks_to_hours())
+    - Clock.ticks is always > Games.LastTicks
+    - given ((ticks-LastTicks) / TICK_FREQUENCY) AS Upper_Ellapsed
+    - WHERE ToMove_Maintime < Upper_Ellapsed
+    which is:
+    - WHERE IF(ToMove_ID=Black_ID, Black_Maintime, White_Maintime)
+         < ((Clock.Ticks-Games.LastTicks) / TICK_FREQUENCY)
+
+    During a test, this lowered the number of returned rows from 10,960 to 675.
+    This is a table scan, but indeed reduces the number of affected rows.
+   */
+
    $result = db_query( 'clock_tick.find_timeout_games',
       "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags+0 AS X_GameFlags"
       ." FROM Games"
@@ -196,18 +219,7 @@ if( !$is_down )
       }//time-out
    }
    mysql_free_result($result);
-   //unset($ticks);
 
-} // timeout-handling
+}//handle_game_timeouts
 
-
-   // ---------- END --------------------------------
-
-   db_query( 'clock_tick.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=201 LIMIT 1" );
-
-   if( !$chained )
-      $TheErrors->dump_exit('clock_tick');
-
-}//$is_down
 ?>

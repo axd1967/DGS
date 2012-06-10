@@ -21,6 +21,11 @@ ChangeLog
 
 2012-06-10 juga
 
+   * include/quick_common.php ($clocks_stopped),
+     clock_tick.php (clkrng, handle_game_timeouts):
+   - added switch $clocks_stopped to stop clocks in 'include/quick_common.php'
+     to have a safety-net after some major upgrade
+
    * include/time_functions.php (get_clock_ticks, time_left_ticksdate),
      include/classlib_game.php (NextGameOrder.make_timeout_date),
      include/game_functions.php (GameHelper.update_clock;

@@ -36,6 +36,8 @@ $is_down_message = "Between 07-10. June 2012 the Dragon Go Server will be down f
                  */
 $is_maintenance = $is_down;
 
+$clocks_stopped = true; //e.g. shortly after maintenance for safety
+
 
 // chained crons, see 'cron_chained.php'
 global $chained; //PHP5
