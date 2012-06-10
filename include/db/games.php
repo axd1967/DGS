@@ -64,8 +64,8 @@ class Games
    var $ID;
    var $tid;
    var $ShapeID;
-   var $Starttime;
-   var $Lastchanged;
+   var $Starttime; // not the typical entity-created, but start-time of game (after setup)
+   var $Lastchanged; // not the typical entity-lastchanged, but "LastMoved"
    var $mid;
    var $DoubleGame_ID;
    var $Black_ID;
@@ -227,8 +227,6 @@ class Games
 
    function insert()
    {
-      $this->Starttime = $this->Lastchanged = $GLOBALS['NOW'];
-
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Games.insert(%s)" );
       if( $result )
@@ -236,11 +234,8 @@ class Games
       return $result;
    }
 
-   function update( $upd_lastchanged=true )
+   function update()
    {
-      if( $upd_lastchanged )
-         $this->Lastchanged = $GLOBALS['NOW'];
-
       $entityData = $this->fillEntityData();
       return $entityData->update( "Games.update(%s)" );
    }
@@ -356,8 +351,8 @@ class Games
             @$row['ID'],
             @$row['tid'],
             @$row['ShapeID'],
-            @$row['Starttime'],
-            @$row['Lastchanged'],
+            @$row['X_Starttime'],
+            @$row['X_Lastchanged'],
             @$row['mid'],
             @$row['DoubleGame_ID'],
             @$row['Black_ID'],
