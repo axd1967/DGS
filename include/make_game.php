@@ -404,7 +404,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       {
          // provide a link between the two paired "double" games
          $game_row['double_gid'] = $gid;
-         $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row, $game_setup);
+         $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row, $my_gs);
 
          db_query( "$dbg.update_double2",
             "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
@@ -593,7 +593,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
          $clock_used = $clock_used_black;
       }
    }
-   $last_ticks = get_clock_ticks( $clock_used, /*refresh-cache*/false );
+   $last_ticks = get_clock_ticks( 'create_game', $clock_used, /*refresh-cache*/false );
 
    $game_info_row['X_BlackClock'] = $black_row['ClockUsed']; // no weekendclock-offset or vacation-clock
    $game_info_row['X_WhiteClock'] = $white_row['ClockUsed'];
