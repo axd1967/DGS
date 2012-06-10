@@ -143,10 +143,10 @@ function is_nighttime_clock( $clock_id, $timestamp=null )
    return !is_hour_clock_run( $clock_id, $timestamp );
 }
 
-function get_clock_ticks( $clock_used, $refresh_cache=true )
+function get_clock_ticks( $dbgmsg, $clock_used, $refresh_cache=true )
 {
    global $CACHE_CLOCK;
-   return $CACHE_CLOCK->load_clock_ticks( 'time_functions.get_clock_ticks', $clock_used, $refresh_cache );
+   return $CACHE_CLOCK->load_clock_ticks( $dbgmsg.'.get_clock_ticks', $clock_used, $refresh_cache );
 }
 
 function ticks_to_hours($ticks)
@@ -388,7 +388,7 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
 function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
 {
    if( $curr_ticks < 0 )
-      $curr_ticks = get_clock_ticks( CLOCK_TIMELEFT, /*refresh-cache*/false );
+      $curr_ticks = get_clock_ticks( 'time_left_ticksdate', CLOCK_TIMELEFT, /*refresh-cache*/false );
 
    $ticks_date = $curr_ticks + round( $hours_left * TICK_FREQUENCY );
    return $ticks_date;

@@ -1204,7 +1204,7 @@ class GameHelper
     *        White_Byoperiods, White_Byotime, White_Maintime, Whiteonvacation, X_WhiteClock
     * \return array( hours, UpdateQuery )
     */
-   function update_clock( $grow, $to_move, $next_to_move, $do_ticks=true )
+   function update_clock( $dbgmsg, $grow, $to_move, $next_to_move, $do_ticks=true )
    {
       $upd_query = new UpdateQuery('Games');
       $hours = 0;
@@ -1214,7 +1214,7 @@ class GameHelper
          {
             // LastTicks may handle -(time spend) at the moment of the start of vacations
             // time since start of move in the reference of the ClockUsed by the game
-            $hours = ticks_to_hours(get_clock_ticks($grow['ClockUsed']) - $grow['LastTicks']);
+            $hours = ticks_to_hours(get_clock_ticks($dbgmsg.'.GH.update_clock', $grow['ClockUsed']) - $grow['LastTicks']);
 
             if( $to_move == BLACK )
             {
@@ -1246,7 +1246,7 @@ class GameHelper
                $next_clockused += WEEKEND_CLOCK_OFFSET;
          }
 
-         $next_lastticks = get_clock_ticks($next_clockused);
+         $next_lastticks = get_clock_ticks($dbgmsg.'.GH.update_clock2', $next_clockused);
          $timeout_date = NextGameOrder::make_timeout_date( $grow, $next_to_move, $next_lastticks );
 
          $upd_query->upd_num('LastTicks', $next_lastticks);
@@ -1276,7 +1276,7 @@ class GameHelper
             "SELECT G.*, " .
             "G.Flags+0 AS GameFlags, " . //used by check_move
             $addfields_query .
-            "black.ClockUsed AS X_BlackClock, " .
+            "black.ClockUsed AS X_BlackClock, " . // X_*Clock for GameHelper::update_clock()
             "white.ClockUsed AS X_WhiteClock, " .
             "black.OnVacation AS Blackonvacation, " .
             "white.OnVacation AS Whiteonvacation," .
@@ -1637,7 +1637,7 @@ class FairKomiNegotiation
       $my_id = $this->tomove_id;
       $opp_id = ( $this->black_id == $my_id ) ? $this->white_id : $this->black_id;
 
-      list( $hours, $upd_game ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
+      list( $hours, $upd_game ) = GameHelper::update_clock( "FKN.save_komi({$this->gid})", $game_row, $to_move, $next_to_move );
       $upd_game->upd_num('ToMove_ID', $next_tomove_id );
 
       // eventually determine komi/colors + start-game
@@ -1777,7 +1777,7 @@ class FairKomiNegotiation
 
          $to_move = ( $new_black_id == $next_tomove_id ) ? BLACK : WHITE;
          $next_to_move = BLACK + WHITE - $to_move;
-         list( $hours, $upd_clock ) = GameHelper::update_clock( $grow, $to_move, $next_to_move, /*ticks*/false );
+         list( $hours, $upd_clock ) = GameHelper::update_clock( "FKN.start_fkg($gid)", $grow, $to_move, $next_to_move, /*ticks*/false );
          $upd_game->merge( $upd_clock );
       }
 

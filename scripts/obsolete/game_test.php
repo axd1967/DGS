@@ -101,7 +101,7 @@ if( !$action )
 
 if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
 {
-  $ticks = get_clock_ticks($ClockUsed) - $LastTicks;
+  $ticks = get_clock_ticks('game_test', $ClockUsed) - $LastTicks;
 
   if( $to_move == BLACK )
     {

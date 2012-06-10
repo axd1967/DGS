@@ -673,7 +673,7 @@ class NextGameOrder
       }
       $tl_clockused = $grow["X_{$pfx}Clock"]; // ignore vacation and weekends
 
-      $tl_clockused_ticks = get_clock_ticks( $tl_clockused, /*refresh-cache*/false );
+      $tl_clockused_ticks = get_clock_ticks( 'NGO.make_timeout_date', $tl_clockused, /*refresh-cache*/false );
       $elapsed_hours = ticks_to_hours( $tl_clockused_ticks - $lastticks);
       time_remaining($elapsed_hours, $tl_Maintime, $tl_Byotime, $tl_Byoperiods,
          $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);

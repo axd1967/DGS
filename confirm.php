@@ -126,7 +126,7 @@ require_once( 'include/classlib_game.php' );
 
 
    // update clock
-   list( $hours, $upd_clock ) = GameHelper::update_clock( $game_row, $to_move, $next_to_move );
+   list( $hours, $upd_clock ) = GameHelper::update_clock( "confirm($gid)", $game_row, $to_move, $next_to_move );
    $time_query = $upd_clock->get_query(false, true);
 
    $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'domove' );

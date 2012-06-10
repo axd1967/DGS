@@ -263,7 +263,7 @@ class QuickHandlerGame extends QuickHandler
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
 
       // update clock
-      list( $hours, $upd_clock ) = GameHelper::update_clock( $this->game_row, $this->to_move, $next_to_move );
+      list( $hours, $upd_clock ) = GameHelper::update_clock( "QHGame.play($gid)", $this->game_row, $this->to_move, $next_to_move );
       $time_query = $upd_clock->get_query(false, true);
 
       $mp_query = '';
