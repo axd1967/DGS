@@ -36,7 +36,7 @@ $GLOBALS['ThePage'] = new Page('Docs');
       //T_('The latest version of the source code, directly from the cvs'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-201206.tar.gz', 'DragonGoServer-stable-201206.tar.gz',
-      sprintf( T_('The code this server is running (version %s'), '1.0.15'));
+      sprintf( T_('The code this server is running (version %s)'), '1.0.15'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-200812.tar.gz', 'DragonGoServer-stable-200812.tar.gz',
       sprintf( T_('The previous version %s'), '1.0.14'));
