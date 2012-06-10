@@ -1,0 +1,5 @@
+
+-----------
+# added cron-entry for tournaments (see INSTALL-file)
+7,22,37,52 * * * *   wget -q -O - http://your.url/tournaments/cron_tournaments.php
+
