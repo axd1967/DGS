@@ -171,6 +171,7 @@ echo ">>>> Most of them needs manual fixes.";
 
 
 //---------
+   /* TODO fix UNIX-time-handling for Starttime + Lastchanged :
    echo "\n<hr>Games start dates check:";
 
    $query = "SELECT ID,Starttime,Lastchanged"
@@ -198,6 +199,7 @@ echo ">>>> Most of them needs manual fixes.";
       dbg_query("UPDATE Games SET Starttime=$date WHERE ID=$GID LIMIT 1");
    }
    mysql_free_result($result);
+   */
 
 
 //---------
