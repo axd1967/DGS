@@ -149,8 +149,6 @@ class Waitingroom
 
    function insert()
    {
-      $this->Lastchanged = $GLOBALS['NOW'];
-
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Waitingroom.insert(%s)" );
       if( $result )
@@ -160,8 +158,6 @@ class Waitingroom
 
    function update()
    {
-      $this->Lastchanged = $GLOBALS['NOW'];
-
       $entityData = $this->fillEntityData();
       return $entityData->update( "Waitingroom.update(%s)" );
    }
@@ -238,7 +234,7 @@ class Waitingroom
             User::new_from_row( $row, 'WRP_', true ), // from Players WRP
             @$row['gid'],
             @$row['nrGames'],
-            @$row['X_Time'], //created
+            @$row['X_Time'], //Created
             @$row['GameType'],
             @$row['GamePlayers'],
             @$row['Ruleset'],
