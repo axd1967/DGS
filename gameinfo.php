@@ -163,8 +163,7 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo(
             T_('Double Game ID'),
             ($dbl_gid > 0)
-               ? anchor( "{$base_path}game.php?gid=$dbl_gid", "#$dbl_gid" )
-                     .SMALL_SPACING. echo_image_gameinfo($dbl_gid)
+               ? anchor( "{$base_path}game.php?gid=$dbl_gid", "#$dbl_gid" ) . echo_image_gameinfo($dbl_gid, true)
                : '#'.abs($dbl_gid). sprintf(' (%s)', T_('deleted#dblgame') )
          );
    }
@@ -326,7 +325,7 @@ function build_rating_diff( $rating_diff )
    if( $grow['Maintime'] > 0 || $grow['Byotime'] > 0 )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $hours = ticks_to_hours(get_clock_ticks($grow['ClockUsed']) - $grow['LastTicks']);
+      $hours = ticks_to_hours("gameinfo($gid)", get_clock_ticks($grow['ClockUsed']) - $grow['LastTicks']);
 
       if( $to_move == BLACK )
       {
