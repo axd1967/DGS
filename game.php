@@ -212,7 +212,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    if( $Status != GAME_STATUS_FINISHED && ($Maintime > 0 || $Byotime > 0) )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $hours = ticks_to_hours(get_clock_ticks($ClockUsed) - $LastTicks);
+      $hours = ticks_to_hours(get_clock_ticks("game($gid,$action)", $ClockUsed) - $LastTicks);
 
       if( $to_move == BLACK )
       {
@@ -621,7 +621,8 @@ $GLOBALS['ThePage'] = new Page('Game');
    GameScore::draw_score_box( $game_score, $score_mode );
    if( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
    {
-      echo "<br>\nOther scoring:<br>\n";
+      if( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
+         echo "<br>\nOther scoring:<br>\n";
       GameScore::draw_score_box( $game_score, ($score_mode == GSMODE_AREA_SCORING ? GSMODE_TERRITORY_SCORING : GSMODE_AREA_SCORING) );
    }
    echo "</td><td>";
