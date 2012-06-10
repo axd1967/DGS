@@ -44,7 +44,8 @@
 
    - Run 3 translation scripts from ./scripts/index.php
       - check+translate the english '#LABEL'-entries
-      - export Translationdata
+      - export Translationdata with:
+        mysqldump -q -e -C -v -n -t -h DBHOST -u DBUSER -p DATABASE TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations | gzip -c > Translationdata.mysql.gz
 
    - Run some consistency tests (if needed):
       ./scripts/player_consistency.php
