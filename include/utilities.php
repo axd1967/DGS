@@ -204,7 +204,7 @@ function basic_safe( $str )
 {
    return str_replace(
          array( '<', '>', '"', "'" ),
-         array( '&lt;', '&gt;', '&quot;', '&apos;' ),
+         array( '&lt;', '&gt;', '&quot;', '&#39;' ), // &#39; == &apos; is no HTML-standard (not supported by all browsers)
          $str );
 }
 
