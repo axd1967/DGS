@@ -138,6 +138,8 @@ require_once( 'include/gui_functions.php' );
    $pform->echo_string();
 
    $notes = array();
+   $notes[] = T_('Please ensure that the uploaded picture is free from copyright issues!<br>It will be removed otherwise.');
+   $notes[] = null;
    $notes[] = sprintf( T_('Limits on uploaded image-file: max. %s x %s pixels and max. %s KB'),
       USERPIC_MAX_X, USERPIC_MAX_Y, ROUND(10*USERPIC_MAXSIZE_UPLOAD/1024)/10 );
    $notes[] = T_('Supported image formats: JPEG, GIF, PNG');
