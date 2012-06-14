@@ -1228,7 +1228,7 @@ class Table
          $subclass = ' Warning';
       else
          $subclass = '';
-      $class = trim( @$thead['attbs']['class'] . $subclass );
+      $class = trim( preg_replace("/\\bButton\\b/", '', @$thead['attbs']['class'] . $subclass ) );
       if( $class )
          $class= " class=\"$class\"";
       $result = "\n  <td$class><div>";
