@@ -126,7 +126,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added optional expire-time handling for bulletins
 
       * Added Bulletin-Editor to edit admin-created user-bulletins and to create bulletins by
-         * Tournament Directors for Tournament News on tournament-management pages
+##         * Tournament Directors for Tournament News on tournament-management pages
          * Players of multi-player-game for game-related message on game-players-page
 
 ## * <home game_editor.php>Game-editor</home>:
@@ -232,7 +232,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Show input-errors instead of throwing error "destroying" all other inputs, highlight error-fields
          * Added Fair-Komi options like for new-game
 
-         * Game-invitations older than 3 months are deleted by the server
+         * Game-invitations older than 6 months are deleted by the server
 
       * <home templates.php>Templates</home>:
          * Added page to show template-list and manage saving of templates for
@@ -444,7 +444,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * Games:
       * Added option in <home edit_profile.php>user-profile</home> to configure to reject game-win by timeout
-      * Added restriction on max. running/started games per player and for tournament-registration
+##      * Added restriction on max. running/started games per player and for tournament-registration
+      * Added restriction on max. running/started games per player
          * Show warning or error if about to exceed limit on starting new games
       * Enhanced remaining-time format with extra-time-info in
          * full form for game-page, game-info and <home_ quick_status.php>quick-status</home>
@@ -495,7 +496,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added game-handler to
          * retrieve information about game, with nested user-objects
          * retrieve own private notes of game
-         * retrieve list of games with views: status, running, finished, observing, observed, MPG
+##         * retrieve list of games with views: status, running, finished, observing, observed, MPG
          * play game (set-handicap stones, move, pass)
          * score game
          * delete game
@@ -537,7 +538,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
             * Added columns to support new game-quick-suite with move-id, game-status
             * Added column with next game-action for setting handicap-stones and fair-komi-negotiation
             * Added column with handicap-stones so bot knows how many to set
-##            * Added column for tournament-games with tournament-id
+            * Added column for tournament-games with tournament-id
             * Added shape-id for shape-games
             * Added column to allow client more sorting options: game-priority, opponents last-access
             * Use same next-game-order as configured on status-page, can be overwritten with URL-arg 'order'
@@ -737,7 +738,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Admins (developer/forum/game) can send multi-receiver bulk-message
       * Developer-admin is implicit admin for surveys, FAQ, forum
 
-      * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
+##      * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
+      * Added admin-game-page to administrate game (incl. multi-player-game):
          * Finish game by setting game-result, Change game rated-status, Delete running & finished game
          * Notify players about game-end and game-deletion
          * Setting game-result-flag for the game
@@ -766,8 +768,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
       * Added admin-option DENY_FEATURE_VOTE to forbid user to vote on features
       * Added admin-option DENY_SURVEY_VOTE to forbid user to vote on surveys
-      * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
-      * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
+##      * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
+##      * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
       * Added admin-options DENY_FORUM_NO_POST/MOD_POST to replace MayPostOnForum, shown on administrated-users page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
 
@@ -777,7 +779,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added script to print CPU & Memory Info of server
       * Added email-check for password-admins with privacy policy note
       * Added forum consistency script
-      * Added tournament consistency script
+##      * Added tournament consistency script
       * Added consistency script for features and surveys
       * Added consistency script to fix game-thumbnails
       * Added script to clear sub-directories in datastore-folder
@@ -800,14 +802,15 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * ALLOW_QUICK_DO                    - enabled
          * ALLOW_SQL_CALC_ROWS               - enabled
          * ALLOW_SURVEY_VOTE                 - enabled
-         * ALLOW_TOURNAMENTS                 - disabled
+##         * ALLOW_TOURNAMENTS                 - disabled
 ##       * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
          * ALLOW_GO_DIAGRAMS                 - disabled (needs JavaScript)
          * ALLOW_QUOTING                     - disabled
-         * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
-         * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
+##         * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
+##         * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
          * ENABLE_DONATIONS                  - disabled
 ##       * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
+##      * Added restriction on max. running games per player (200) and for tournament-registration (150)
       * Added restriction on max. running games per player (200) and for tournament-registration (150)
       * Default password encryption (SHA1 now)
       * Added database-connect retry
