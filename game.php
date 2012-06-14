@@ -41,6 +41,7 @@ require_once( "include/form_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( 'include/classlib_game.php' );
+require_once( 'include/classlib_user.php' );
 require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
@@ -1211,14 +1212,17 @@ function draw_game_info( &$game_row, $game_setup, $board, $tourney )
 
       if( $game_row['Moves'] > 0 && $mpg_uid > 0 )
       {
+         $mpg_userarr = User::load_quick_userinfo( array( $mpg_uid ) );
+         $mpg_urow = $mpg_userarr[$mpg_uid];
+
          echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
             "<dl class=BoardInfos><dd>",
                T_('Last move by:'), SMALL_SPACING,
                   ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
                   MINI_SPACING,
-                  user_reference( REF_LINK, 1, '', $mpg_uid ),
+                  user_reference( REF_LINK, 1, '', $mpg_urow ),
                   SMALL_SPACING,
-                  echo_rating( @$player_row['Rating2'], true, $player_row['ID'] ),
+                  echo_rating( @$mpg_urow['Rating2'], true, $mpg_uid ),
             "</dd></dl>\n",
             "</td></tr>\n";
       }
