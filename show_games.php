@@ -766,17 +766,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          "<br><br>\n";
    }
 
-   // hover-texts for colors-column
-   // (don't add 'w' and 'b', or else need to show in status.php too)
-   $arr_titles_colors = array( // %s=user-handle
-      'w_w' => T_('[%s] has White, White to move#hover'),
-      'w_b' => T_('[%s] has White, Black to move#hover'),
-      'b_w' => T_('[%s] has Black, White to move#hover'),
-      'b_b' => T_('[%s] has Black, Black to move#hover'),
-      'b'   => T_('Black to move#hover'),
-      'w'   => T_('White to move#hover'),
-   );
-
+   $arr_titles_colors = get_color_titles();
    while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
    {
       $oppRating = $blackRating = $whiteRating = NULL;
@@ -860,25 +850,28 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $colors = '';
             if( $is_mp_game )
             {
-               if( !($X_Color & 0x20) )
+               if( !($X_Color & 0x20) ) // no bad ToMove_ID
                   $colors = ( $X_Color & 0x1 ) ? 'w' : 'b'; //to move color
                $hover_title = @$arr_titles_colors[$colors];
             }
+            elseif( $Status == GAME_STATUS_KOMI )
+            {
+               $colors = 'y'; // fair-komi negotiation (colors not set yet)
+               $hover_title = sprintf( @$arr_titles_colors[$colors], $oppHandle );
+            }
             else
             {
-               if( $X_Color & 0x2 ) //my color
-                  $colors = 'w';
-               else
-                  $colors = 'b';
+               $colors = ( $X_Color & 0x2 ) ? 'w' : 'b'; // $2 = W is MY color
+               $opp_colors = ( $X_Color & 0x2 ) ? 'b' : 'w';
                if( !($X_Color & 0x20) )
-               {
-                  if( $X_Color & 0x1 ) //to move color
-                     $colors.= '_w';
-                  else
-                     $colors.= '_b';
-               }
-               $hover_title = ( isset($arr_titles_colors[$colors]) )
-                  ? sprintf( $arr_titles_colors[$colors], $oppHandle ) : '';
+                  $tomove_col = ( $X_Color & 0x1 ) ? '_w' : '_b';
+               else
+                  $tomove_col = '';
+               $colors .= $tomove_col;
+               $opp_colors .= $tomove_col;
+
+               $hover_title = ( isset($arr_titles_colors[$opp_colors]) )
+                  ? sprintf( $arr_titles_colors[$opp_colors], $oppHandle ) : '';
             }
             $grow_strings[5] = ( (string)$colors != '' )
                ? image( $base_path."17/$colors.gif", $colors, $hover_title )

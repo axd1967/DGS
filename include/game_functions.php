@@ -3997,6 +3997,20 @@ function get_colortext_probable( $iamblack )
       : image( $base_path.'17/w.gif', T_('White'), null, $color_class);
 }
 
+// hover-texts for colors-column
+function get_color_titles()
+{
+   return array( // %s=user-handle
+      'w_w' => T_('[%s] has White, White to move#hover'),
+      'w_b' => T_('[%s] has White, Black to move#hover'),
+      'b_w' => T_('[%s] has Black, White to move#hover'),
+      'b_b' => T_('[%s] has Black, Black to move#hover'),
+      'b'   => T_('Black to move#hover'),
+      'w'   => T_('White to move#hover'),
+      'y'   => T_('Fair Komi Negotiation: [%s] next#fairkomi'),
+   );
+}
+
 
 define('MOVESTAT_TIMESLOT', 30); // minutes
 

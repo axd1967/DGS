@@ -274,7 +274,7 @@ if( $player_row['GamesMPG'] > 0 )
 
 function load_games_to_move( $uid, &$gtable )
 {
-   global $player_row, $NOW, $DEBUG_SQL;
+   global $player_row, $NOW, $DEBUG_SQL, $base_path;
 
    $next_game_order = $player_row['NextGameOrder'];
    $gtable->add_or_del_column();
@@ -349,6 +349,7 @@ function load_games_to_move( $uid, &$gtable )
    $cnt_rows = 0;
    if( @mysql_num_rows($result) > 0 )
    {
+      $arr_titles_colors = get_color_titles();
       $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //func
 
       while( $row = mysql_fetch_assoc( $result ) )
@@ -376,8 +377,17 @@ function load_games_to_move( $uid, &$gtable )
             $row_arr[16] = echo_rating($opp_Rating, true, $opp_ID);
          if( $gtable->Is_Column_Displayed[5] )
          {
-            $colors = ( $X_Color & 2 ) ? 'w' : 'b'; //my color
-            $row_arr[ 5] = "<img src=\"17/$colors.gif\" alt=\"$colors\">";
+            if( $Status == GAME_STATUS_KOMI )
+            {
+               $colors = 'y';
+               $hover_title = sprintf( T_('Fair Komi Negotiation#fairkomi'), $player_row['Handle'] );
+            }
+            else
+            {
+               $colors = ( $X_Color & 2 ) ? 'w' : 'b'; //my color
+               $hover_title = @$arr_titles_colors[$colors];
+            }
+            $row_arr[ 5] = image( $base_path."17/$colors.gif", $colors, $hover_title );
          }
          if( $gtable->Is_Column_Displayed[6] )
             $row_arr[ 6] = $Size;
