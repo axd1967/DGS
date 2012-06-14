@@ -3150,7 +3150,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
    {
      $query = 'SELECT Name, Handle ' .
               'FROM Players ' .
-              "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='$player_ref' " .
+              "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='".mysql_addslashes($player_ref)."' " .
               'LIMIT 1' ;
      if( $row=mysql_single_fetch( 'user_reference', $query ) )
      {
