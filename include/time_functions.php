@@ -529,10 +529,11 @@ class TimeFormat
    function echo_onvacation( $days, $fmtflags=0, $zero_value=NO_VALUE )
    {
       $hours = round($days*24);
-      $str = TimeFormat::_echo_time( $hours, 24, $fmtflags, $zero_value );
       if( !($fmtflags & TIMEFMT_QUICK) && ( $hours > 0 || ($fmtflags & TIMEFMT_ZERO) ) )
-         $str .= ' ' . ( ($fmtflags & TIMEFMT_ENGL) ? 'left' : T_('left#2') ); //FIXME: -> engl -> '%s left' (wait for transl-label)
-
+         $fmt = ($fmtflags & TIMEFMT_ENGL) ? '%s left' : T_('%s left#vacation');
+      else
+         $fmt = '%s';
+      $str = sprintf( $fmt, TimeFormat::_echo_time( $hours, 24, $fmtflags, $zero_value ) );
       return TimeFormat::_replace_space($str,$fmtflags);
    }
 
