@@ -171,7 +171,7 @@ require_once( "include/make_translationfiles.php" );
  * \param $contents content of php-file to scan for translation-texts.
  *        Expects, that PHP-comments are removed from $contents.
  *        if not, comments are searched for translation-texts as well.
- * \return array of [ translation-text, errmsg|0, found-pos ) ]
+ * \return array of [ ( translation-text, errmsg|0, found-pos ) ]
  */
 function find_translation_texts( $contents )
 {

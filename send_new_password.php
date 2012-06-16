@@ -24,6 +24,8 @@ require_once( "include/std_functions.php" );
 
 
 {
+   // NOTE: used by normal users AND admins from pages: forgot.php AND admin_password.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
