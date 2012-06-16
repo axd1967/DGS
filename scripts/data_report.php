@@ -39,6 +39,8 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'scripts.data_report');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'scripts.data_report');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.data_report');
 

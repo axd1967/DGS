@@ -34,6 +34,8 @@ require_once 'include/rating.php';
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'scripts.recalculate_ratings2');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'scripts.recalculate_ratings2');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.recalculate_ratings2');
 

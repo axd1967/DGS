@@ -29,6 +29,8 @@ require_once( "include/make_translationfiles.php" );
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'scripts.generate_translation_texts');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'scripts.generate_translation_texts');
    if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       error('adminlevel_too_low', 'scripts.generate_translation_texts');
 

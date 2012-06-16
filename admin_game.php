@@ -43,9 +43,11 @@ define('GA_RES_TIMOUT', 3);
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'admin_game');
+   $my_id = $player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'admin_game');
    if( !(@$player_row['admin_level'] & ADMIN_GAME) )
       error('adminlevel_too_low', 'admin_game');
-   $my_id = $player_row['ID'];
 
    $page = "admin_game.php";
 

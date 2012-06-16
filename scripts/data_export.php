@@ -1013,6 +1013,8 @@ function freesql_dump( $database, $query)
 
    if( !$logged_in )
       error('not_logged_in', 'scripts.data_export');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'scripts.data_export');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.data_export');
 

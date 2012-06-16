@@ -21,11 +21,15 @@ require_once( "include/std_functions.php" );
 require_once( "include/make_translationfiles.php" );
 
 {
+   // NOTE: used by page: translate.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'update_translation');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'update_translation');
 
    if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
    {

@@ -34,6 +34,8 @@ require_once( "include/table_columns.php" );
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'admin_show_users');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'admin_show_users');
    if( !(@$player_row['admin_level'] & ADMINGROUP_EXECUTIVE) )
       error('adminlevel_too_low', 'admin_show_users');
    $edit_user = (@$player_row['admin_level'] & ADMIN_DEVELOPER);

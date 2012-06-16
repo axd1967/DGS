@@ -30,6 +30,8 @@ require_once( "include/table_columns.php" );
    if( !$logged_in )
       error('not_logged_in', 'admin_admins');
    $my_id = $player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'admin_admins');
 
    // only SUPERADMIN can manage admins
    $player_level = (int)@$player_row['admin_level']; //local modifications

@@ -36,6 +36,8 @@ define('SEPLINE', "\n<p><hr>\n");
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'scrips.fix_game_snapshot');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'scripts.fix_game_snapshot');
    if( !(@$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_GAME|ADMIN_DATABASE)) )
       error('adminlevel_too_low', 'scripts.fix_game_snapshot');
 

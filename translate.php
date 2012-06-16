@@ -94,11 +94,15 @@ $info_box = '<br>When translating you should keep in mind the following things:
 </ul>';
 
 {
+   // NOTE: using page: update_translation.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'translate');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'translate');
 
 
    $lang_desc = get_language_descriptions_translated( /*T_*/true);

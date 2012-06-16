@@ -106,9 +106,11 @@ $info_box = '<ul>
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'admin_faq');
+   $my_id = $player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'admin_faq');
    if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
       error('adminlevel_too_low', 'admin_faq');
-   $my_id = $player_row['ID'];
 
    $fid = max(0,@$_REQUEST['id']);
    $sql_term = get_request_arg('qterm', '');

@@ -31,6 +31,8 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'forum.admin');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'forum.admin');
    if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER ) )
       error('adminlevel_too_low', 'forum.admin');
 

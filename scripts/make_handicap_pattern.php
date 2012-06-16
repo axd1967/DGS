@@ -35,6 +35,9 @@ define('MAX_PATTERN_SIZE',51);
    if( !$logged_in )
       error('not_logged_in', 'scripts.make_handicap_pattern');
 
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'scripts.make_handicap_pattern');
+
    $player_level = (int)$player_row['admin_level'];
    if( !($player_level & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.make_handicap_pattern');

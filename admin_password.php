@@ -28,6 +28,8 @@ require_once( "include/form_functions.php" );
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'admin_password');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'admin_password');
    if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
       error('adminlevel_too_low', 'admin_password');
 
