@@ -179,6 +179,8 @@ require_once( "features/lib_votes.php" );
    echo "<h3 class=Header>$title</h3>\n",
       FeatureVote::getFeaturePointsText( $user_quota->feature_points ),
       "<br><br>\n";
+   if( !is_null($user_vote_reason) )
+      echo span('ErrorMsg', $user_vote_reason), "<br><br>\n";
 
    $fform->echo_string();
 
