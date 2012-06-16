@@ -29,6 +29,8 @@ require_once( 'include/classlib_game.php' );
 
 
 {
+   // NOTE: used by page: game.php
+
    disable_cache();
 
    $gid = (int)@$_REQUEST['gid'] ;
@@ -59,6 +61,8 @@ require_once( 'include/classlib_game.php' );
    if( !$logged_in )
       error('not_logged_in', "confirm($gid)");
    $my_id = $player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'confirm');
 
    $game_row = GameHelper::load_game_row( 'confirm.find_game', $gid );
    extract($game_row);

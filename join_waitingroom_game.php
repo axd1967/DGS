@@ -24,6 +24,8 @@ require_once 'include/wroom_control.php';
 
 
 {
+   // NOTE: used by page: waiting_room.php
+
    disable_cache();
 
    connect2mysql();
@@ -31,6 +33,8 @@ require_once 'include/wroom_control.php';
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('not_logged_in', 'join_waitingroom_game');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'join_waitingroom_game');
 
 /* Actual REQUEST calls used:  id=wroom-id (mandatory)
      delete=t&gid=      : delete waiting-room game
