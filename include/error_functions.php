@@ -292,6 +292,7 @@ function need_db_errorlog( $errcode )
          'multi_player_no_users' => 1,
          'mysql_connect_failed' => 1,
          'name_not_given' => 1,
+         'not_allowed_for_guest' => 1,
          'optlock_clash' => 1,
          'password_illegal_chars' => 1,
          'password_mismatch' => 1,
