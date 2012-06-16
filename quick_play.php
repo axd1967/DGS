@@ -268,6 +268,7 @@ This is why:
       // Increase moves and activity
       db_query( "quick_play.update_player($gid,$my_id)",
          "UPDATE Players SET Moves=Moves+1"
+            .",LastQuickAccess=FROM_UNIXTIME($NOW)"
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
             .",LastMove=FROM_UNIXTIME($NOW)"
          ." WHERE ID=$my_id LIMIT 1" );
