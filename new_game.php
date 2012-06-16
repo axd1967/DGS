@@ -172,6 +172,9 @@ function handle_add_game( $my_id, $viewmode )
 {
    global $player_row, $NOW;
 
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'new_game.handle_add_game');
+
    $gsc = GameSetupChecker::check_fields( $viewmode );
    if( $gsc->has_errors() )
    {

@@ -24,19 +24,21 @@ require_once( "include/std_functions.php" );
 
 
 {
-   // NOTE: used by normal users AND admins from pages: forgot.php AND admin_password.php
+   // NOTE: used by pages: forgot.php + admin_password.php
 
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
    $my_id = @$player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'send_new_password.1');
 
    if( isset($_POST['goback']) )
       jump_to("index.php");
 
    $pswduser = get_request_arg('pswduser');
    if( strtolower($pswduser) == 'guest' )
-      error('not_allowed_for_guest', 'send_new_password.1');
+      error('not_allowed_for_guest', 'send_new_password.2');
 
    $result = db_query( "send_new_password.find_player($pswduser)",
       "SELECT ID, Newpassword, Email " .
@@ -46,7 +48,7 @@ require_once( "include/std_functions.php" );
 
    $row = mysql_fetch_assoc($result);
    if( $row['ID'] <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest', 'send_new_password.2');
+      error('not_allowed_for_guest', 'send_new_password.3');
 
    if( !empty($row['Newpassword']) )
    {

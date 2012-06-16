@@ -40,6 +40,7 @@ define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
    if( !ALLOW_OLD_GOBAN_EDITOR )
       error('feature_disabled', 'old_goban_editor');
    $my_id = $player_row['ID'];
+   $is_guest = ( $my_id <= GUESTS_ID_MAX );
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
 /* Actual REQUEST calls used:
@@ -102,6 +103,9 @@ EOF_GOBAN;
    $goban_preview_old = '';
    if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && @$_REQUEST['gob_old'] )
    {
+      if( $is_guest ) // view ok, edit forbidden
+         error('not_allowed_for_guest', 'old_goban_editor');
+
       // create new entries for <goban> (without ID) in GoDiagrams-table
       // and replace <goban> tag with <goban id=#>
       $GoDiagrams = create_godiagrams($goban_text, $cfg_board);
@@ -133,6 +137,9 @@ EOF_GOBAN;
    // save goban with values from edit-form
    if( @$_REQUEST['gob_save'] && !@$_REQUEST['gob_preview'] && is_null($errorlist) )
    {
+      if( $is_guest ) // view ok, edit forbidden
+         error('not_allowed_for_guest', 'old_goban_editor');
+
       // TODO insert or update
       if( !is_null($GoDiagrams) )
       {

@@ -36,6 +36,7 @@ require_once 'tournaments/include/tournament_factory.php';
 
    // create allowed?
    $my_id = $player_row['ID'];
+   $is_guest = ( $my_id <= GUESTS_ID_MAX );
    $is_admin = TournamentUtils::isAdmin();
    $create_tourney = TournamentUtils::check_create_tournament('Tournament.wizard');
 
@@ -51,6 +52,9 @@ require_once 'tournaments/include/tournament_factory.php';
    // save tournament-object with values from edit-form
    if( @$_REQUEST['t_save'] && !is_null($ttype) )
    {
+      if( $is_guest ) // view ok, edit forbidden
+         error('not_allowed_for_guest', 'Tournament.wizard');
+
       // check if user is allowed to create tournament
       if( $ttype->need_admin_create_tourney && !$is_admin )
          error('tournament_create_not_allowed', "Tournament.wizard.create.non_admin($my_id,$type)");

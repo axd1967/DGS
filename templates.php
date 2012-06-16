@@ -51,6 +51,7 @@ define('FACT_CANCEL', 'cancel');
    $page = "templates.php";
 
    $my_id = $player_row['ID'];
+   $is_guest = ( $my_id <= GUESTS_ID_MAX );
    $cmd = get_request_arg('cmd', CMD_LIST);
 
    $arg_to = trim( get_request_arg('to') );
@@ -70,6 +71,8 @@ define('FACT_CANCEL', 'cancel');
    }
 
    $is_save = @$_REQUEST[FACT_SAVE];
+   if( $is_guest && ($is_save || $cmd) )
+      error('not_allowed_for_guest', 'templates.save_cmd');
 
    $errors = NULL;
    $auto_name = @$_REQUEST['name'];

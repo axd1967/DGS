@@ -30,23 +30,26 @@ require_once( "include/form_functions.php" );
    if( !$logged_in )
       error('not_logged_in', 'edit_vacation');
 
-   $my_id= $player_row['ID'];
+   $my_id = $player_row['ID'];
+   $is_guest = ( $my_id <= GUESTS_ID_MAX );
    $days_left = floor($player_row['VacationDays']);
    $floor_onvacation = floor($player_row['OnVacation']);
    $minimum_days = $vacation_min_days - $floor_onvacation;
 
-   $str = '';
+   $infomsg = '';
 
    if( $player_row['OnVacation'] > 0 ) //already on vacation
    {
       $vacationdiff = round(@$_POST['vacationdiff']);
       if( $minimum_days > $days_left || ( $minimum_days == $days_left && $minimum_days == 0 ) )
       {
-         $str .= T_("Sorry, you can't change the vacation length at the moment.");
+         $infomsg .= T_("Sorry, you can't change the vacation length at the moment.");
       }
-      else if( isset($_POST['change_vacation']) &&
-            $vacationdiff >= $minimum_days && $vacationdiff <= $days_left )
+      else if( isset($_POST['change_vacation']) && $vacationdiff >= $minimum_days && $vacationdiff <= $days_left )
       {
+         if( $is_guest ) // view ok, edit forbidden
+            error('not_allowed_for_guest', 'edit_vacation');
+
          if( $vacationdiff == 0 )
             jump_to("status.php");
 
@@ -87,11 +90,13 @@ require_once( "include/form_functions.php" );
       $vacationlength = round(@$_POST['vacationlength']);
       if( $days_left < $vacation_min_days )
       {
-         $str .= sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
+         $infomsg .= sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
-      elseif( isset($_POST['start_vacation'])
-            && $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
+      elseif( isset($_POST['start_vacation']) && $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
       {
+         if( $is_guest ) // view ok, edit forbidden
+            error('not_allowed_for_guest', 'edit_vacation');
+
          ta_begin();
          {//HOT-section to start vacation (for player and his games)
             // LastTicks will handle -(time spent) at the moment of the start of vacations
@@ -137,7 +142,8 @@ require_once( "include/form_functions.php" );
 
    start_page(T_('Vacation'), true, $logged_in, $player_row );
 
-   echo $str;
+   if( $infomsg )
+      echo "<br>\n", $infomsg;
    if( isset($vacation_form) )
       echo $vacation_form->get_form_string(1);
 

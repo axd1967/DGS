@@ -101,6 +101,8 @@ define('KEY_GROUP_ORDER', 'gpo');
    $cmd = get_request_arg('cmd');
    if( get_request_arg(FACT_CANCEL) )
       jump_to("game_players.php?gid=$gid");
+   if( $cmd && ($my_id <= GUESTS_ID_MAX) )
+      error('not_allowed_for_guest', 'game_players.cmd');
 
 
    // load data

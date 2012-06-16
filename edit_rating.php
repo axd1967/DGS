@@ -43,8 +43,11 @@ require_once 'include/rank_converter.php';
 */
 
    // save changes
-   if( !$is_guest && @$_REQUEST['save'] )
+   if( @$_REQUEST['save'] )
    {
+      if( $is_guest ) // view ok, edit forbidden
+         error('not_allowed_for_guest', 'edit_rating');
+
       // update RankInfo
       $upd_players = new UpdateQuery('Players');
       $upd_players->upd_txt('Rank', trim(get_request_arg('rank')) );
