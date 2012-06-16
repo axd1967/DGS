@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// translations removed for this page: $TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
@@ -59,25 +59,25 @@ $GLOBALS['ThePage'] = new Page('Admin');
                         '', $admin_level & (ADMIN_SURVEY|ADMIN_DEVELOPER));
    add_link_page_link('forum/admin.php', /*T_*/('Admin Forums'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('admin_users.php', T_('Edit User Attributes'),
+   add_link_page_link('admin_users.php', /*T_*/('Edit User Attributes'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('admin_admins.php', T_('Edit Admin Staff'),
+   add_link_page_link('admin_admins.php', /*T_*/('Edit Admin Staff'),
                      '', $admin_level & ADMIN_SUPERADMIN);
    //add_link_page_link('admin_requests.php', /*T_*///('Handle User Requests'), '', false);
 
    echo "<br><br>\n";
 
-   add_link_page_link('admin_show_faqlog.php', T_('Show FAQ Log'),
+   add_link_page_link('admin_show_faqlog.php', /*T_*/('Show FAQ Log'),
                      '', $admin_level & (ADMIN_FAQ|ADMIN_DEVELOPER));
-   add_link_page_link('forum/admin_show_forumlog.php', T_('Show Forum Log'),
+   add_link_page_link('forum/admin_show_forumlog.php', /*T_*/('Show Forum Log'),
                      '', $admin_level & (ADMIN_FORUM|ADMIN_DEVELOPER));
-   add_link_page_link('admin_show_users.php', T_('Show Administrated Users'),
+   add_link_page_link('admin_show_users.php', /*T_*/('Show Administrated Users'),
                      '', $admin_level & ADMINGROUP_EXECUTIVE);
-   add_link_page_link('admin_show_errorlog.php', T_('Show Error Log'),
+   add_link_page_link('admin_show_errorlog.php', /*T_*/('Show Error Log'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('admin_show_adminlog.php', T_('Show Admin Log'),
+   add_link_page_link('admin_show_adminlog.php', /*T_*/('Show Admin Log'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   add_link_page_link('scripts/index.php', T_('Show Admin Scripts'),
+   add_link_page_link('scripts/index.php', /*T_*/('Show Admin Scripts'),
                      '', $admin_level & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER));
 
    add_link_page_link();

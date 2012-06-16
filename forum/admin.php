@@ -17,9 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// translations removed for this page: $TranslateGroups[] = "Forum";
-// may be changed to:
-// translations removed for this page: $TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 chdir('..');
 require_once( "forum/forum_functions.php" );
@@ -43,10 +41,10 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
    $abspage = 'forum/'.$page;
 
    $ARR_FORUMOPTS = array( // maskval => [ argname, bit-text, label, descr ]
-      FORUMOPT_MODERATED   => array( 'moderated', 'MODERATED', T_('Moderated'), T_('all posts need moderation') ),
-      FORUMOPT_READ_ONLY   => array( 'readonly',  'READ_ONLY', T_('Read-Only'), T_('only forum moderators can write posts') ),
-      FORUMOPT_GROUP_ADMIN => array( 'fgr_admin', 'FGR_ADMIN', '', T_('ADMIN - mark as admin-forum') ),
-      FORUMOPT_GROUP_DEV   => array( 'fgr_dev',   'FGR_DEV',   '', T_('DEV - mark as development-forum') ),
+      FORUMOPT_MODERATED   => array( 'moderated', 'MODERATED', /*T_*/('Moderated'), /*T_*/('all posts need moderation') ),
+      FORUMOPT_READ_ONLY   => array( 'readonly',  'READ_ONLY', /*T_*/('Read-Only'), /*T_*/('only forum moderators can write posts') ),
+      FORUMOPT_GROUP_ADMIN => array( 'fgr_admin', 'FGR_ADMIN', '', /*T_*/('ADMIN - mark as admin-forum') ),
+      FORUMOPT_GROUP_DEV   => array( 'fgr_dev',   'FGR_DEV',   '', /*T_*/('DEV - mark as development-forum') ),
    );
 
    // ***********        Move entry       ****************

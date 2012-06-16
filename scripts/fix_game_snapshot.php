@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 chdir('..');
 require_once( "include/std_functions.php" );
@@ -54,7 +54,7 @@ define('SEPLINE', "\n<p><hr>\n");
    if( $limit < 0 ) $limit = 0;
 
 
-   $title = T_('Fix Games Snapshot');
+   $title = /*T_*/('Fix Games Snapshot');
    start_page( $title, true, $logged_in, $player_row );
 
    echo "<h3 class=Header>$title</h3>\n";
@@ -62,7 +62,7 @@ define('SEPLINE', "\n<p><hr>\n");
    show_form();
 
 
-   section( 'result', T_('Result') );
+   section( 'result', /*T_*/('Result') );
 
    if( @$_REQUEST['fix_single'] ) // single-fix + show game-snapshot
       fix_single_game( $gid );
@@ -77,7 +77,7 @@ define('SEPLINE', "\n<p><hr>\n");
    }
 
 
-   $menu_array = array( T_('Fix game snapshot') => "scripts/$page" );
+   $menu_array = array( /*T_*/('Fix game snapshot') => "scripts/$page" );
    end_page(@$menu_array);
 }//main
 
@@ -88,42 +88,42 @@ function show_form()
 
    $gcform = new Form('gcform', $page, FORM_GET, true);
    $arr_status = array(
-         ''  => T_('All games'),
-         'F' => T_('Finished games only'),
-         'R' => T_('Running games only'),
+         ''  => /*T_*/('All games'),
+         'F' => /*T_*/('Finished games only'),
+         'R' => /*T_*/('Running games only'),
       );
    $gcform->add_row( array(
-         'DESCRIPTION', T_('Game Status'),
+         'DESCRIPTION', /*T_*/('Game Status'),
          'SELECTBOX',   'status', 1, $arr_status, get_request_arg('status'), false,
       ));
    $gcform->add_row( array(
-         'DESCRIPTION', T_('Player (uid)'),
+         'DESCRIPTION', /*T_*/('Player (uid)'),
          'TEXTINPUT',   'uid', 8, -1, get_request_arg('uid'),
       ));
    $gcform->add_row( array(
-         'DESCRIPTION', T_('Start Game-ID'),
+         'DESCRIPTION', /*T_*/('Start Game-ID'),
          'TEXTINPUT',   'startgid', 8, -1, get_request_arg('startgid'),
       ));
    $gcform->add_row( array(
-         'DESCRIPTION', T_('Limit'),
+         'DESCRIPTION', /*T_*/('Limit'),
          'TEXTINPUT',   'limit', 8, -1, $limit,
       ));
    $gcform->add_row( array(
-         'DESCRIPTION', T_('Sleep (secs)'),
+         'DESCRIPTION', /*T_*/('Sleep (secs)'),
          'TEXTINPUT',   'sleep', 8, -1, $sleep,
       ));
    $gcform->add_row( array(
          'TAB', 'CELL', 1, '',
-         'SUBMITBUTTON', 'fix_bulk', T_('Bulk-Fix Missing Game Snapshots'),
+         'SUBMITBUTTON', 'fix_bulk', /*T_*/('Bulk-Fix Missing Game Snapshots'),
       ));
 
    $gcform->add_empty_row();
    $gcform->add_row( array( 'HR' ));
 
    $gcform->add_row( array(
-         'DESCRIPTION', T_('Game ID'),
+         'DESCRIPTION', /*T_*/('Game ID'),
          'TEXTINPUT',   'gid', 10, 10, $gid,
-         'SUBMITBUTTON', 'fix_single', T_('Fix Single Game Snapshot'),
+         'SUBMITBUTTON', 'fix_single', /*T_*/('Fix Single Game Snapshot'),
       ));
 
    $gcform->echo_string(1);

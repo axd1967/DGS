@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// translations removed for this page: $TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
@@ -90,7 +90,7 @@ require_once( "include/form_functions.php" );
 
 
    $menu_array = array();
-   $menu_array[T_('New password')] = "admin_password.php";
+   $menu_array[/*T_*/('New password')] = "admin_password.php";
 
    end_page(@$menu_array);
 }

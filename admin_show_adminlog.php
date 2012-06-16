@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * needs ADMIN_DEVELOPER rights
  */
 
-$TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
@@ -41,22 +41,22 @@ require_once( "include/table_columns.php" );
    // init
    $page = 'admin_show_adminlog.php';
 
-   start_page(T_('Show Admin Log'), true, $logged_in, $player_row);
+   start_page(/*T_*/('Show Admin Log'), true, $logged_in, $player_row);
 
-   section( 'adminlog', T_('Admin log') );
+   section( 'adminlog', /*T_*/('Admin log') );
 
    $atable = new Table( 'adminlog', $page, '' );
    $atable->add_or_del_column();
    $limit = $atable->current_limit_string();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead( 1, T_('ID#header'), 'ID');
-   $atable->add_tablehead( 2, T_('Admin#header'), 'User');
-   $atable->add_tablehead( 3, T_('User#header'), 'User');
-   $atable->add_tablehead( 4, T_('Time#header'), 'Date');
-   $atable->add_tablehead( 5, T_('Message#header'));
+   $atable->add_tablehead( 1, /*T_*/('ID#header'), 'ID');
+   $atable->add_tablehead( 2, /*T_*/('Admin#header'), 'User');
+   $atable->add_tablehead( 3, /*T_*/('User#header'), 'User');
+   $atable->add_tablehead( 4, /*T_*/('Time#header'), 'Date');
+   $atable->add_tablehead( 5, /*T_*/('Message#header'));
    if( $show_ip )
-      $atable->add_tablehead( 6, T_('IP#header'));
+      $atable->add_tablehead( 6, /*T_*/('IP#header'));
 
    $result = db_query( 'admin_show_adminlog.find_data',
          'SELECT AL.*, ' .

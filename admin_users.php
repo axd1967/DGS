@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* PURPOSE: Edit user attributes except admin-related fields, needs ADMIN_DEVELOPER rights */
 
-$TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
@@ -78,24 +78,24 @@ require_once( "include/form_functions.php" );
       . implode(',', $attributes_show);
 
    $arr_mask_type = array( // bitmask for Type: maskval => [ fieldname, opt-text, descr ]
-      USERTYPE_PRO      => array( 'fl_utype1', 'PRO',       T_('Professional') ),
-      USERTYPE_TEACHER  => array( 'fl_utype2', 'TEACHER',   T_('Teacher') ),
-      USERTYPE_ROBOT    => array( 'fl_utype3', 'ROBOT',     T_('Robot') ),
-      //USERTYPE_TEAM     => array( 'fl_utype4', 'TEAM',      T_('Team') ),
+      USERTYPE_PRO      => array( 'fl_utype1', 'PRO',       /*T_*/('Professional') ),
+      USERTYPE_TEACHER  => array( 'fl_utype2', 'TEACHER',   /*T_*/('Teacher') ),
+      USERTYPE_ROBOT    => array( 'fl_utype3', 'ROBOT',     /*T_*/('Robot') ),
+      //USERTYPE_TEAM     => array( 'fl_utype4', 'TEAM',      /*T_*/('Team') ),
    );
    $arr_mask_admopts = array( // bitmask for AdminOptions: maskval => [ fieldname, opt-text, descr ]
-      //ADMOPT_BYPASS_IP_BLOCK  => array( 'fl_admopt1', 'BYPASS_IP_BLOCK', T_('Bypass IP-Block') ),
-      ADMOPT_DENY_LOGIN             => array( 'fl_admopt2', 'DENY_LOGIN',     T_('Deny login') ),
-      ADMOPT_DENY_EDIT_BIO          => array( 'fl_admopt3', 'DENY_EDIT_BIO',  T_('Deny edit bio and user picture') ),
-      ADMOPT_DENY_FEATURE_VOTE      => array( 'fl_admopt4', 'DENY_FEAT_VOTE', T_('Deny feature-vote') ),
-      ADMOPT_DENY_SURVEY_VOTE       => array( 'fl_admopt5', 'DENY_SVEY_VOTE', T_('Deny survey-vote') ),
-      ADMOPT_DENY_TOURNEY_CREATE    => array( 'fl_admopt6', 'DENY_TNEY_CREATE', T_('Deny tournament creation') ),
-      ADMOPT_DENY_TOURNEY_REGISTER  => array( 'fl_admopt7', 'DENY_TNEY_REG',  T_('Deny tournament registration') ),
-      ADMOPT_HIDE_BIO               => array( 'fl_admopt8', 'HIDE_BIO',       T_('Hide bio and user picture') ),
-      ADMOPT_FGROUP_ADMIN           => array( 'fl_admopt09', 'FGR_ADMIN',     T_('View ADMIN-forums') ),
-      ADMOPT_FGROUP_DEV             => array( 'fl_admopt10', 'FGR_DEV',       T_('View DEV-forums') ),
-      ADMOPT_FORUM_NO_POST          => array( 'fl_admopt11', 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
-      ADMOPT_FORUM_MOD_POST         => array( 'fl_admopt12', 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
+      //ADMOPT_BYPASS_IP_BLOCK  => array( 'fl_admopt1', 'BYPASS_IP_BLOCK', /*T_*/('Bypass IP-Block') ),
+      ADMOPT_DENY_LOGIN             => array( 'fl_admopt2', 'DENY_LOGIN',     /*T_*/('Deny login') ),
+      ADMOPT_DENY_EDIT_BIO          => array( 'fl_admopt3', 'DENY_EDIT_BIO',  /*T_*/('Deny edit bio and user picture') ),
+      ADMOPT_DENY_FEATURE_VOTE      => array( 'fl_admopt4', 'DENY_FEAT_VOTE', /*T_*/('Deny feature-vote') ),
+      ADMOPT_DENY_SURVEY_VOTE       => array( 'fl_admopt5', 'DENY_SVEY_VOTE', /*T_*/('Deny survey-vote') ),
+      ADMOPT_DENY_TOURNEY_CREATE    => array( 'fl_admopt6', 'DENY_TNEY_CREATE', /*T_*/('Deny tournament creation') ),
+      ADMOPT_DENY_TOURNEY_REGISTER  => array( 'fl_admopt7', 'DENY_TNEY_REG',  /*T_*/('Deny tournament registration') ),
+      ADMOPT_HIDE_BIO               => array( 'fl_admopt8', 'HIDE_BIO',       /*T_*/('Hide bio and user picture') ),
+      ADMOPT_FGROUP_ADMIN           => array( 'fl_admopt09', 'FGR_ADMIN',     /*T_*/('View ADMIN-forums') ),
+      ADMOPT_FGROUP_DEV             => array( 'fl_admopt10', 'FGR_DEV',       /*T_*/('View DEV-forums') ),
+      ADMOPT_FORUM_NO_POST          => array( 'fl_admopt11', 'FORUM_NO_POST', /*T_*/('Deny new & edit of forum posts') ),
+      ADMOPT_FORUM_MOD_POST         => array( 'fl_admopt12', 'FORUM_MOD_POST', /*T_*/('Moderate all new & edited forum posts') ),
    );
 
    // set field-values to change
@@ -145,11 +145,11 @@ require_once( "include/form_functions.php" );
    }
 
 
-   start_page(T_('Edit user admin'), true, $logged_in, $player_row);
+   start_page(/*T_*/('Edit user admin'), true, $logged_in, $player_row);
 
    $uform = new Form( 'adminuserform', 'admin_users.php', FORM_GET );
    $uform->add_row( array(
-      'HEADER', T_('Modify user attributes') ));
+      'HEADER', /*T_*/('Modify user attributes') ));
 
    if( (@$_REQUEST['show_user'] || (string)$user != '' ) && is_array($urow) )
    {
@@ -271,9 +271,9 @@ require_once( "include/form_functions.php" );
    $uform->echo_string();
 
    $menu_array = array();
-   $menu_array[T_('Show Administrated Users')] = 'admin_show_users.php';
+   $menu_array[/*T_*/('Show Administrated Users')] = 'admin_show_users.php';
    if( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_DATABASE) )
-      $menu_array[T_('Check Block-IP config')] = 'scripts/check_block_ip.php';
+      $menu_array[/*T_*/('Check Block-IP config')] = 'scripts/check_block_ip.php';
 
    end_page(@$menu_array);
 }

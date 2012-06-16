@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 chdir('..');
 require_once( "include/std_functions.php" );
@@ -46,20 +46,20 @@ require_once( "forum/forum_functions.php" );
    $flfilter->add_filter( 3, 'RelativeDate', 'FL.Time', true,
       array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => 60 ));
    $flfilter->add_filter( 4, 'Selection',
-      array( T_('All#filter')           => '',
-             T_('New thread#filter')    => "Action LIKE 'new\\_%".FORUMLOGACT_SUFFIX_NEW_THREAD."'",
-             T_('New post#filter')      => "Action LIKE 'new\\_%'",
-             T_('Edit post#filter')     => "Action LIKE 'edit\\_%'",
-             T_('Moderate post#filter') => "Action IN ('"
+      array( /*T_*/('All#filter')           => '',
+             /*T_*/('New thread#filter')    => "Action LIKE 'new\\_%".FORUMLOGACT_SUFFIX_NEW_THREAD."'",
+             /*T_*/('New post#filter')      => "Action LIKE 'new\\_%'",
+             /*T_*/('Edit post#filter')     => "Action LIKE 'edit\\_%'",
+             /*T_*/('Moderate post#filter') => "Action IN ('"
                   . FORUMLOGACT_APPROVE_POST
                   . "','". FORUMLOGACT_REJECT_POST
                   . "','". FORUMLOGACT_SHOW_POST
                   . "','". FORUMLOGACT_HIDE_POST
                   . "')",
-             T_('Hide post#filter')     => sprintf( "Action='%s'", FORUMLOGACT_HIDE_POST ),
-             T_('Show post#filter')     => sprintf( "Action='%s'", FORUMLOGACT_SHOW_POST ),
-             T_('Approve post#filter')  => sprintf( "Action='%s'", FORUMLOGACT_APPROVE_POST ),
-             T_('Reject post#filter')   => sprintf( "Action='%s'", FORUMLOGACT_REJECT_POST ),
+             /*T_*/('Hide post#filter')     => sprintf( "Action='%s'", FORUMLOGACT_HIDE_POST ),
+             /*T_*/('Show post#filter')     => sprintf( "Action='%s'", FORUMLOGACT_SHOW_POST ),
+             /*T_*/('Approve post#filter')  => sprintf( "Action='%s'", FORUMLOGACT_APPROVE_POST ),
+             /*T_*/('Reject post#filter')   => sprintf( "Action='%s'", FORUMLOGACT_REJECT_POST ),
       ), true );
    if( $show_ip )
       $flfilter->add_filter( 5, 'Text', 'FL.IP', true,
@@ -71,13 +71,13 @@ require_once( "forum/forum_functions.php" );
    $fltable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $fltable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'FL.ID-');
-   $fltable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'P.Handle+');
-   $fltable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'FL.Time-');
-   $fltable->add_tablehead( 4, T_('Action#header'));
+   $fltable->add_tablehead( 1, /*T_*/('ID#header'), 'ID', TABLE_NO_HIDE, 'FL.ID-');
+   $fltable->add_tablehead( 2, /*T_*/('Userid#header'), 'User', 0, 'P.Handle+');
+   $fltable->add_tablehead( 3, /*T_*/('Time#header'), 'Date', 0, 'FL.Time-');
+   $fltable->add_tablehead( 4, /*T_*/('Action#header'));
    if( $show_ip )
-      $fltable->add_tablehead( 5, T_('IP#header'));
-   $fltable->add_tablehead( 6, T_('Show Thread/Post#header'), '', TABLE_NO_HIDE);
+      $fltable->add_tablehead( 5, /*T_*/('IP#header'));
+   $fltable->add_tablehead( 6, /*T_*/('Show Thread/Post#header'), '', TABLE_NO_HIDE);
 
    $fltable->set_default_sort( 1); // on ID
    $order = $fltable->current_order_string();
@@ -105,7 +105,7 @@ require_once( "forum/forum_functions.php" );
    $show_rows = $fltable->compute_show_rows(mysql_num_rows($result));
    $fltable->set_found_rows( mysql_found_rows('show_forumlog.found_rows') );
 
-   $title = T_('Forum log');
+   $title = /*T_*/('Forum log');
    start_page( $title, true, $logged_in, $player_row );
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_flfilter->get_select()) ."<br>";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
@@ -129,7 +129,7 @@ require_once( "forum/forum_functions.php" );
       {
          $post_status = ForumPost::get_approved_text( $row['Approved'] );
          $flrow_str[6] = "<A HREF=\"read.php?thread=".@$row['Thread_ID'].URI_AMP."moderator=y#".@$row['Post_ID']."\">"
-            . sprintf( T_('Show T%s/P%s'), @$row['Thread_ID'], @$row['Post_ID'] ) . "</A>"
+            . sprintf( /*T_*/('Show T%s/P%s'), @$row['Thread_ID'], @$row['Post_ID'] ) . "</A>"
             . " ($post_status)";
       }
 
@@ -141,10 +141,10 @@ require_once( "forum/forum_functions.php" );
    // end of table
 
    $notes = array();
-   $notes[] = T_('Log shows all user forum post events and all moderating actions by forum moderators.');
-   $notes[] = T_('Index available on database-fields: ID, Userid, Time, Action.');
-   $notes[] = T_('Post status: (S) = post shown, (H) = post hidden, (M) = post needs moderation');
-   echo_notes( 'forumlog', T_('Forumlog notes'), $notes );
+   $notes[] = /*T_*/('Log shows all user forum post events and all moderating actions by forum moderators.');
+   $notes[] = /*T_*/('Index available on database-fields: ID, Userid, Time, Action.');
+   $notes[] = /*T_*/('Post status: (S) = post shown, (H) = post hidden, (M) = post needs moderation');
+   echo_notes( 'forumlog', /*T_*/('Forumlog notes'), $notes );
 
    end_page();
 }

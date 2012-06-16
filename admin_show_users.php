@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * needs ADMINGROUP_EXECUTIVE rights
  */
 
-$TranslateGroups[] = "Admin";
+// translations remove for admin page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
 require_once( "include/table_columns.php" );
@@ -42,48 +42,48 @@ require_once( "include/table_columns.php" );
    $page = 'admin_show_users.php';
 
    $ARR_ADMLEVELS = array( // maskval => [ bit-text, descr ]
-      ADMIN_SUPERADMIN     => array( 'SUPERADMIN',       T_('Can manage admins (add, edit, delete)') ),
-      ADMIN_DATABASE       => array( 'DATABASE',         T_('Can execute special server scripts') ),
-      ADMIN_DEVELOPER      => array( 'DEVELOPER',        T_('Can see more admin info, manage forums, edit user attributes') ),
-      ADMIN_PASSWORD       => array( 'PASSWORD',         T_('Can create and send new passwords') ),
-      ADMIN_TOURNAMENT     => array( 'TOURNAMENT',       T_('Can administrate tournaments') ),
-      ADMIN_FORUM          => array( 'MODERATOR',        T_('Can moderate forum (approve, reject, show, hide posts)') ),
-      ADMIN_FAQ            => array( 'FAQ_EDITOR',       T_('Can edit FAQ & Introduction & Links') ),
-      ADMIN_FEATURE        => array( 'FEATURE',          T_('Can administrate feature-voting') ),
-      ADMIN_SKINNER        => array( 'SKINNER',          T_('Can choose CSS-skin (experimental)') ),
-      ADMIN_SURVEY         => array( 'SURVEY',           T_('Can administrate survey-voting') ),
-      ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       T_('Can translate texts') ),
+      ADMIN_SUPERADMIN     => array( 'SUPERADMIN',       /*T_*/('Can manage admins (add, edit, delete)') ),
+      ADMIN_DATABASE       => array( 'DATABASE',         /*T_*/('Can execute special server scripts') ),
+      ADMIN_DEVELOPER      => array( 'DEVELOPER',        /*T_*/('Can see more admin info, manage forums, edit user attributes') ),
+      ADMIN_PASSWORD       => array( 'PASSWORD',         /*T_*/('Can create and send new passwords') ),
+      ADMIN_TOURNAMENT     => array( 'TOURNAMENT',       /*T_*/('Can administrate tournaments') ),
+      ADMIN_FORUM          => array( 'MODERATOR',        /*T_*/('Can moderate forum (approve, reject, show, hide posts)') ),
+      ADMIN_FAQ            => array( 'FAQ_EDITOR',       /*T_*/('Can edit FAQ & Introduction & Links') ),
+      ADMIN_FEATURE        => array( 'FEATURE',          /*T_*/('Can administrate feature-voting') ),
+      ADMIN_SKINNER        => array( 'SKINNER',          /*T_*/('Can choose CSS-skin (experimental)') ),
+      ADMIN_SURVEY         => array( 'SURVEY',           /*T_*/('Can administrate survey-voting') ),
+      ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       /*T_*/('Can translate texts') ),
    );
 
    $ARR_ADMOPTS = array( // maskval => [ bit-text, descr ]
-      //ADMOPT_BYPASS_IP_BLOCK  => array( 'BYPASS_IP_BLOCK', T_('Bypass IP-Block to allow login for accidentally blocked user') ),
-      ADMOPT_DENY_LOGIN             => array( 'DENY_LOGIN',    T_('Deny login (user can not use site)') ),
-      ADMOPT_DENY_EDIT_BIO          => array( 'DENY_EDIT_BIO', T_('Deny edit bio and user picture (user can not edit bio or user picture)') ),
-      ADMOPT_DENY_FEATURE_VOTE      => array( 'DENY_FEAT_VOTE', T_('Deny feature-voting (user can not vote on features)') ),
-      ADMOPT_DENY_SURVEY_VOTE       => array( 'DENY_SVEY_VOTE', T_('Deny survey-voting (user can not vote on surveys)') ),
-      ADMOPT_DENY_TOURNEY_CREATE    => array( 'DENY_TNEY_CREATE', T_('Deny create tournament (user can not create new tournaments)') ),
-      ADMOPT_DENY_TOURNEY_REGISTER  => array( 'DENY_TNEY_REG', T_('Deny tournament registration (user can not register to any new tournament)') ),
-      ADMOPT_HIDE_BIO               => array( 'HIDE_BIO',      T_('Hide bio and picture (users bio and picture is hidden)') ),
-      ADMOPT_FGROUP_ADMIN           => array( 'FGR_ADMIN',     T_('View ADMIN-forums (which are normally hidden)') ),
-      ADMOPT_FGROUP_DEV             => array( 'FGR_DEV',       T_('View DEV-forums (which are normally hidden)') ),
-      ADMOPT_FORUM_NO_POST          => array( 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
-      ADMOPT_FORUM_MOD_POST         => array( 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
+      //ADMOPT_BYPASS_IP_BLOCK  => array( 'BYPASS_IP_BLOCK', /*T_*/('Bypass IP-Block to allow login for accidentally blocked user') ),
+      ADMOPT_DENY_LOGIN             => array( 'DENY_LOGIN',    /*T_*/('Deny login (user can not use site)') ),
+      ADMOPT_DENY_EDIT_BIO          => array( 'DENY_EDIT_BIO', /*T_*/('Deny edit bio and user picture (user can not edit bio or user picture)') ),
+      ADMOPT_DENY_FEATURE_VOTE      => array( 'DENY_FEAT_VOTE', /*T_*/('Deny feature-voting (user can not vote on features)') ),
+      ADMOPT_DENY_SURVEY_VOTE       => array( 'DENY_SVEY_VOTE', /*T_*/('Deny survey-voting (user can not vote on surveys)') ),
+      ADMOPT_DENY_TOURNEY_CREATE    => array( 'DENY_TNEY_CREATE', /*T_*/('Deny create tournament (user can not create new tournaments)') ),
+      ADMOPT_DENY_TOURNEY_REGISTER  => array( 'DENY_TNEY_REG', /*T_*/('Deny tournament registration (user can not register to any new tournament)') ),
+      ADMOPT_HIDE_BIO               => array( 'HIDE_BIO',      /*T_*/('Hide bio and picture (users bio and picture is hidden)') ),
+      ADMOPT_FGROUP_ADMIN           => array( 'FGR_ADMIN',     /*T_*/('View ADMIN-forums (which are normally hidden)') ),
+      ADMOPT_FGROUP_DEV             => array( 'FGR_DEV',       /*T_*/('View DEV-forums (which are normally hidden)') ),
+      ADMOPT_FORUM_NO_POST          => array( 'FORUM_NO_POST', /*T_*/('Deny new & edit of forum posts') ),
+      ADMOPT_FORUM_MOD_POST         => array( 'FORUM_MOD_POST', /*T_*/('Moderate all new & edited forum posts') ),
    );
 
    // fields to load
    $query_fields = 'ID,Handle,Name, Adminlevel,AdminOptions,AdminNote, ' .
       'UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess';
 
-   start_page(T_('Show user admin'), true, $logged_in, $player_row);
+   start_page(/*T_*/('Show user admin'), true, $logged_in, $player_row);
 
    //---------------
-   section( 'adminuser', T_('Admin users') );
+   section( 'adminuser', /*T_*/('Admin users') );
    $table = create_table( $edit_user, $page, true, 'admin_show_users.find_admins',
       "SELECT $query_fields FROM Players WHERE Adminlevel<>0 AND ID > ".GUESTS_ID_MAX." ORDER BY ID" );
    $table->echo_table();
 
    //---------------
-   section( 'adminuser', T_('Administrated users') );
+   section( 'adminuser', /*T_*/('Administrated users') );
    $table = create_table( $edit_user, $page, false, 'admin_show_users.find_administrated',
       "SELECT $query_fields FROM Players WHERE Adminlevel=0 AND AdminOptions>0 AND ID > ".GUESTS_ID_MAX." ORDER BY ID" );
    $table->echo_table();
@@ -96,11 +96,11 @@ require_once( "include/table_columns.php" );
    $aform->add_row( array( 'SPACE' ));
    $aform->add_row( array(
       'CELL', 2, '',
-      'SUBMITBUTTON', 'refresh', T_('Refresh') ));
+      'SUBMITBUTTON', 'refresh', /*T_*/('Refresh') ));
    $aform->add_row( array( 'SPACE' ));
 
    $aform->set_area(2);
-   $aform->set_layout( FLAYOUT_AREACONF, 2, array( 'title' => T_('Legend for admin levels') ));
+   $aform->set_layout( FLAYOUT_AREACONF, 2, array( 'title' => /*T_*/('Legend for admin levels') ));
    foreach( $ARR_ADMLEVELS as $maskval => $arr )
    {
       $aform->add_row( array(
@@ -110,7 +110,7 @@ require_once( "include/table_columns.php" );
    $aform->add_row( array( 'SPACE' ));
 
    $aform->set_area(3);
-   $aform->set_layout( FLAYOUT_AREACONF, 3, array( 'title' => T_('Legend for admin options') ));
+   $aform->set_layout( FLAYOUT_AREACONF, 3, array( 'title' => /*T_*/('Legend for admin options') ));
    foreach( $ARR_ADMOPTS as $maskval => $arr )
    {
       $aform->add_row( array(
@@ -122,7 +122,7 @@ require_once( "include/table_columns.php" );
 
    $menu_array = array();
    if( $edit_user )
-      $menu_array[T_('Edit User Attributes')] = 'admin_users.php';
+      $menu_array[/*T_*/('Edit User Attributes')] = 'admin_users.php';
 
    end_page(@$menu_array);
 }
@@ -134,12 +134,12 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
 
    $atable = new Table( 'adminusers', $page, '', '', TABLE_NO_SIZE );
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead( 1, T_('User#header'), 'User');
-   $atable->add_tablehead( 2, T_('Last access#header'), 'Date');
+   $atable->add_tablehead( 1, /*T_*/('User#header'), 'User');
+   $atable->add_tablehead( 2, /*T_*/('Last access#header'), 'Date');
    if( $with_adminlevel )
-      $atable->add_tablehead( 3, T_('Admin level#header'));
-   $atable->add_tablehead( 4, T_('Admin options#header'));
-   $atable->add_tablehead( 5, T_('Admin note#header'));
+      $atable->add_tablehead( 3, /*T_*/('Admin level#header'));
+   $atable->add_tablehead( 4, /*T_*/('Admin options#header'));
+   $atable->add_tablehead( 5, /*T_*/('Admin note#header'));
 
    $result = db_query( $query_msg, $query );
 
@@ -153,7 +153,7 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
          {
             $edit_link = anchor( 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode(@$row['Handle']),
                image( 'images/edit.gif', 'E'),
-               T_('Edit User Attributes'), 'class=ButIcon') . '&nbsp;';
+               /*T_*/('Edit User Attributes'), 'class=ButIcon') . '&nbsp;';
          }
          $arow_str[1] = $edit_link . user_reference( REF_LINK, 1, '', $row );
       }
