@@ -34,6 +34,8 @@ function find_category_box_text($cat)
 
 
 {
+   // NOTE: using page: change_bio.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row );

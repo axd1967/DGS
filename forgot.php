@@ -24,6 +24,8 @@ require_once( "include/form_functions.php" );
 require_once( "include/error_codes.php" );
 
 {
+   // NOTE: using page: send_new_password.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);

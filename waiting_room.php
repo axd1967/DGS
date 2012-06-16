@@ -36,6 +36,8 @@ require_once( "include/classlib_profile.php" );
 require_once( 'include/classlib_userconfig.php' );
 
 {
+   // NOTE: using page: join_waitingroom_game.php
+
    #$DEBUG_SQL = true;
    connect2mysql();
 

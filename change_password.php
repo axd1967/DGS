@@ -23,6 +23,8 @@ require_once( "include/std_functions.php" );
 
 
 {
+   // NOTE: used by page: edit_password.php
+
    disable_cache();
 
    connect2mysql();

@@ -23,6 +23,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 
 {
+   // NOTE: using page: change_password.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);

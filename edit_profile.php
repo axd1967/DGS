@@ -33,6 +33,8 @@ require_once( 'include/gui_bulletin.php' );
 // {HOSTBASE}edit_profile.php?language=en
 
 {
+   // NOTE: using page: change_profile.php
+
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);

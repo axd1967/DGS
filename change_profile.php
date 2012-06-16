@@ -25,6 +25,8 @@ require_once 'include/countries.php';
 require_once 'include/db/bulletin.php';
 
 {
+   // NOTE: used by page: edit_profile.php
+
    disable_cache();
 
    connect2mysql();

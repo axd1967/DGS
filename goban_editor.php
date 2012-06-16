@@ -37,6 +37,8 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
 
 
 {
+   // NOTE: using page: edit_shape.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
