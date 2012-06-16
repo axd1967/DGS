@@ -68,7 +68,11 @@ $GLOBALS['ThePage'] = new Page('Game');
      a=pass             : pass-move -> confirm-page on submit
      a=remove           : multiple input step, dead-stone-marking in scoring-mode
      a=resign           : show resign dialog -> confirm-page on submit
+
+     toggleobserve=y|n  : toggle observing game
 */
+   // NOTE: using page: confirm.php
+   // NOTE: allowed for guest-user: toggle-observe
 
    $gid = (int)get_alt_arg( 'gid', 'g');
    $action = (string)get_alt_arg( 'action', 'a');
@@ -98,6 +102,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $my_id = 0;
       $cfg_board = new ConfigBoard($my_id); // use defaults
    }
+   $is_guest = ( $my_id <= GUESTS_ID_MAX );
 
 
    $game_row = GameHelper::load_game_row( 'game.findgame', $gid, /*addf*/true );
@@ -244,7 +249,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $extra_infos = array();
    $game_score = null;
 
-   if( $just_looking ) //no process except 'movechange'
+   if( $just_looking || $is_guest ) //no process except 'movechange'
    {
       $validation_step = false;
       $may_play = false;
@@ -549,6 +554,9 @@ $GLOBALS['ThePage'] = new Page('Game');
       }
       if( $savenotes )
       {
+         if( $is_guest )
+            error('not_allowed_for_guest', 'game.save_notes');
+
          // note: GamesNotes needs PRIMARY KEY (gid,player):
          db_query( 'game.replace_gamenote',
                  "REPLACE INTO GamesNotes (gid,uid,Hidden,Notes)"
