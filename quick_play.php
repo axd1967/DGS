@@ -53,6 +53,8 @@ else
    $player_row = mysql_fetch_assoc($result);
    writeIpStats('QPL');
 
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'quick_play');
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied', 'quick_play');
 

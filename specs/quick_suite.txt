@@ -2233,6 +2233,7 @@ Errors:
       - unknown_entry : entry identified by id could not be found
       - mysql_query_failed : database query failed
       - mail_failure : sending mail for notification failed (e.g. for quota-exceeded)
+      - not_allowed_for_guest : guests are not allowed to use some of quick-suite pages
 
    * [E-GAMECREATE] Game Creation Errors:
       - unknown_ruleset : unknown ruleset (known: JAPANESE, CHINESE)

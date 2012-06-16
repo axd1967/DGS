@@ -37,6 +37,8 @@ else
       error('not_logged_in', 'quick_do.logged_in');
    if( !ALLOW_QUICK_DO )
       error('feature_disabled', 'quick_do');
+   if( $player_row['ID'] <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'quick_do');
 
    // call quick-handler
    $quick_handler = QuickSuite::getQuickHandler();
