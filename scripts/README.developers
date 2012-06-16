@@ -26,6 +26,27 @@ General instructions for developers:
    On the other hand, the column, variable and alias names seem to be well
    handled in a case sensitive way under the MS Windows systems.
 
+----------------- PHP: Guest-User
+
+   When adding new pages, take handling of the guest-user (uid <= GUESTS_ID_MAX)
+   into account. It's not necessary, that ALL write-operations are forbidden,
+   but carefully think what a guest can do and must not do. Best is to check
+   a bit around in the current code, how it's handled for other pages:
+
+      - game.php : viewing ok, toggle-observe ok (though write-op)
+      - admin-pages : forbidden
+      - interaction with regular users : forbidden
+
+   If in doubt, forbid the guest-user explicitly for the whole page;
+   for example see: edit_picture.php
+
+   Keep in mind, that the guest-user is used by different users,
+   so some dirty words could also be seen by others and damage the
+   reputation of the server.
+
+   So for example, the game-toggle-observing is allowed, because no "harm"
+   can be done to other users.
+
 
 ----------------- DGS clones:
 
