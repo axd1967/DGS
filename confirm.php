@@ -41,6 +41,8 @@ require_once( 'include/classlib_game.php' );
      cancel             : cancel previous operation (validation-step), show game-page
      nextskip           : jump to next-game in line
 
+     nextgame           : submit-move + jump to next game
+     nextstatus         : submit-move + jump to status afterwards
      nextaddtime&add_days=&reset_byoyomi=    : adds time (after submit on game-page)
      komi_save&komibid=                      : save komi-bid on fair-komi-negotiation
      fk_start                                : start game on fair-komi-negotiation
@@ -91,7 +93,6 @@ require_once( 'include/classlib_game.php' );
    if( $Moves < $Handicap && $action == 'domove' )
       error('invalid_action', "confirm.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
 
-   $stay_on_board = @$_REQUEST['stay'];
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
    $is_mpgame = ( $GameType != GAMETYPE_GO );
 
@@ -443,8 +444,6 @@ This is why:
             $GameFlags, $Black_ID, $White_ID, $Moves, ($game_row['Rated'] != 'N') );
 
          $do_delete = ( $action == 'delete' );
-         if( $do_delete )
-            $stay_on_board = false; // no game to stay on
 
          $game_finalizer->skip_game_query();
          $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw );
@@ -469,9 +468,9 @@ This is why:
 
    // Jump somewhere
 
-   if( @$_REQUEST['nextstatus'] )
+   if( /*submit-move*/@$_REQUEST['nextstatus'] )
       jump_to("status.php");
-   elseif( @$_REQUEST['nextgame'] && !$stay_on_board )
+   elseif( /*submit-move*/@$_REQUEST['nextgame'] )
       jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
 
    jump_to("game.php?gid=$gid");

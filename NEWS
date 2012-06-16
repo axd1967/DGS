@@ -461,9 +461,6 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * Added player, that deleted game in game-deletion-message
 
    * Game page:
-      * Added way to stay on board after submitting move,
-        Removed submit-move-button returning to status page,
-        Changed move-submit-button: 'Submit and go to next game' -> 'Submit move'
       * Show icons when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
       * Replaced 'OnVacation'-text by vacation-icon
       * Show SGF-move-number near view-moves list

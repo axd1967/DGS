@@ -98,7 +98,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $cfg_board = ConfigBoard::load_config_board($my_id);
    }
    else
-   {// for quick-suite
+   {// for quick-suite //TODO still needed ?
       $my_id = 0;
       $cfg_board = new ConfigBoard($my_id); // use defaults
    }
@@ -686,8 +686,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          draw_add_time( $game_row, $to_move );
       else
       {
-         $stay_on_board = ($action != 'delete');
-         draw_message_box( $message, $stay_on_board );
+         draw_message_box( $message );
 
          if( $preview )
          {
@@ -1008,29 +1007,26 @@ function get_final_score_move( $move )
    return ( $PosX == POSX_SCORE ) ? $move - 1 : $move;
 }
 
-function draw_message_box( &$message, $stay_on_board )
+function draw_message_box( &$message )
 {
-   $tabindex=1;
-   $to_status_str = T_('Submit and go to status');
-   $stay_checked = (get_request_arg('stay')) ? ' checked' : '';
+   $tabindex = 1;
 
    echo name_anchor('msgbox'),
       '<TABLE class=MessageForm>',
       '<TR class=Message>',
       '<TD class=Rubric>', T_('Message'), ':</TD>',
-      '<TD colspan="2"><textarea name="message" tabindex="', ($tabindex++), '" cols="60" rows="8">',
+      '<TD colspan="2"><textarea name="message" tabindex="', ($tabindex++), '" cols="70" rows="8">',
          textarea_safe($message), '</textarea></TD>',
       '</TR>',
       '<TR class=Submit>',
       '<TD></TD>',
       '<TD>',
          '<input type="submit" name="nextgame" tabindex="', ($tabindex++),
-            '" value="', T_('Submit move'), // Submit and go to next game
+            '" value="', T_('Submit and go to next game'),
             '" accesskey="', ACCKEY_ACT_EXECUTE, '" title="[&amp;', ACCKEY_ACT_EXECUTE, ']">',
-         //'<input type="submit" name="nextstatus" tabindex="', ($tabindex++), '" value="', $to_status_str, '">',
-         ( $stay_on_board
-            ? '<input type="checkbox" name="stay" tabindex="'.($tabindex++).' value="1"'.$stay_checked.'>' . T_('Stay on board')
-            : '' ),
+         '<input type="submit" name="nextstatus" tabindex="', ($tabindex++),
+            '" value="', T_("Submit and go to status"), '">',
+
          SMALL_SPACING,
          '<input type="submit" name="preview" tabindex="', ($tabindex++),
             '" value="', T_('Preview'),
