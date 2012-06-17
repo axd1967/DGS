@@ -105,7 +105,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
       error('not_allowed_for_guest', 'translate');
 
 
-   $lang_desc = get_language_descriptions_translated( /*T_*/true);
+   $lang_desc = get_language_descriptions_translated(true);
    if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS))
       $translator_array = array_keys( $lang_desc);
    else
@@ -219,8 +219,8 @@ $info_box = '<br>When translating you should keep in mind the following things:
 
    $tabindex= 1;
 
-   start_page(/*T_*/('Translate'), true, $logged_in, $player_row);
-   $str = /*T_*/('Read this before translating');
+   start_page(T_('Translate'), true, $logged_in, $player_row);
+   $str = T_('Read this before translating');
    if( (bool)@$_REQUEST['infos'] )
    {
       echo "<h3 class=Header>$str:</h3>\n"
@@ -244,7 +244,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
       $translate_form = new Form( 'translate', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array(
                   'CELL', $nbcol, '', //set $nbcol for the table
-                  'HEADER', /*T_*/('Translate the following strings') ) );
+                  'HEADER', T_('Translate the following strings') ) );
 
       $translate_form->add_row( array(
                   'CELL', $nbcol, '',
@@ -258,7 +258,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
          if( $table_links )
             $table_links.= '&nbsp;|&nbsp;';
          $table_links.= anchor( make_url($page, $tmp),
-               /*T_*/('Prev Page'), '', array( 'accesskey' => ACCKEY_ACT_PREV ));
+               T_('Prev Page'), '', array( 'accesskey' => ACCKEY_ACT_PREV ));
       }
       if( !$no_pages && $show_rows > TRANS_ROW_PER_PAGE )
       {
@@ -267,7 +267,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
          if( $table_links )
             $table_links.= '&nbsp;|&nbsp;';
          $table_links.= anchor( make_url($page, $tmp),
-               /*T_*/('Next Page'), '', array( 'accesskey' => ACCKEY_ACT_NEXT ));
+               T_('Next Page'), '', array( 'accesskey' => ACCKEY_ACT_NEXT ));
       }
 
       if( $table_links )
@@ -333,7 +333,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
                   . " cols=\"$hsize\" rows=\"$vsize\">"
                   . $translation."</textarea>",
                'BR', 'CHECKBOX', "same$oid", 'Y',
-                        /*T_*/('untranslated'), $row['Text'] === '',
+                        T_('untranslated'), $row['Text'] === '',
             );
          /*
             Unchanged box is useful when, for instance, a FAQ entry receive
@@ -343,7 +343,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
          if( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
                   'TEXT', '&nbsp;&nbsp;',
-                  'CHECKBOX', "unch$oid", 'Y', /*T_*/('unchanged'), false
+                  'CHECKBOX', "unch$oid", 'Y', T_('unchanged'), false
                );
 
          // allow some space on the right
@@ -384,7 +384,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
                'HIDDEN', 'filter_en', $filter_en,
                'HIDDEN', 'from_row', $from_row,
                'SUBMITBUTTONX', 'apply_changes',
-                  /*T_*/('Apply translation changes to Dragon'),
+                  T_('Apply translation changes to Dragon'),
                   array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
             ));
       }
@@ -396,26 +396,26 @@ $info_box = '<br>When translating you should keep in mind the following things:
       $nbcol = 1;
       $groupchoice_form = new Form( 'selectgroup', $page, FORM_POST );
       $groupchoice_form->add_row( array(
-            'HEADER', /*T_*/('Groups'),
+            'HEADER', T_('Groups'),
          )); //$nbcol
 
       if( TRANSL_ALLOW_FILTER )
          $groupchoice_form->add_row( array(
                'CELL', $nbcol, '',
-               'TEXT', /*T_*/('English filter (_:any char, %:any number of chars, \:escape)&nbsp;'),
+               'TEXT', T_('English filter (_:any char, %:any number of chars, \:escape)&nbsp;'),
                'TEXTINPUT', 'filter_en', 20, 80, $filter_en,
             ));
       $groupchoice_form->add_row( array(
-//         'DESCRIPTION', /*T_*/('Change to group'),
+//         'DESCRIPTION', T_('Change to group'),
             'CELL', $nbcol, '',
             'SELECTBOX', 'group', 1, $translation_groups, $group, false,
             'HIDDEN', 'translate_lang', $translate_lang,
             'HIDDEN', 'profil_charset', $profil_charset,
             'HIDDEN', 'from_row', 0,
-            'SUBMITBUTTONX', 'just_group', /*T_*/('Just change group'),
+            'SUBMITBUTTONX', 'just_group', T_('Just change group'),
                array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-            'CHECKBOX', 'untranslated', 1, /*T_*/('untranslated'), $untranslated,
-            'CHECKBOX', 'alpha_order', 1, /*T_*/('alpha order'), $alpha_order,
+            'CHECKBOX', 'untranslated', 1, T_('untranslated'), $untranslated,
+            'CHECKBOX', 'alpha_order', 1, T_('alpha order'), $alpha_order,
          ));
 
       $groupchoice_form->echo_string($tabindex);
@@ -427,7 +427,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
       $nbcol = 1;
       $langchoice_form = new Form( 'selectlang', $page, FORM_POST );
       $langchoice_form->add_row( array(
-            'HEADER', /*T_*/('Select language to translate to') )); //$nbcol
+            'HEADER', T_('Select language to translate to') )); //$nbcol
 
       $vals = array();
       foreach( $lang_desc as $lang => $langname )
@@ -448,7 +448,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
             'HIDDEN', 'alpha_order', $alpha_order,
             'HIDDEN', 'filter_en', $filter_en,
             'HIDDEN', 'from_row', 0,
-            'SUBMITBUTTON', 'cl', /*T_*/('Select'),
+            'SUBMITBUTTON', 'cl', T_('Select'),
          ));
 
       if( ALLOW_PROFIL_CHARSET
@@ -456,7 +456,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
       {
          $langchoice_form->add_row( array( 'ROW', 'DebugInfo',
                'CELL', $nbcol, '',
-               'CHECKBOX', 'profil_charset', 1, /*T_*/('use profile encoding'), $profil_charset,
+               'CHECKBOX', 'profil_charset', 1, T_('use profile encoding'), $profil_charset,
             ));
       }
 

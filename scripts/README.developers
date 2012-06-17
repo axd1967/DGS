@@ -210,6 +210,13 @@ General instructions for developers:
    PHP file containing T_() translations. As a start point, have a
    look at the README.translations file in the scripts folder.
 
+   Thumb of rule is, that admin-related pages do not have translated
+   texts. Though T_(..) can and should be used, the admin pages
+   lack the line (or have commented it out) to set $TranslateGroups[].
+   Because of that no translation-texts are created for admin-pages,
+   but something like T_('something#suffix') can still be used,
+   if later someone want to enable translations for admin-pages.
+
    When adding a new string, try to first find if a similar one
    already existing in the database.
 
@@ -225,10 +232,10 @@ General instructions for developers:
                          that it's a potential text to translate or once it
                          was one and will be again in the future.
 
-   Maybe this is not the best way to do translations but it is hard
-   to modify it. An advantage is, that it does not need much database-
-   access, but only sometimes to export all translated texts into
-   the "cache"-directory 'translations'.
+   Maybe this is not the best way to do translations but it works quite
+   well, and is hard to modify. A big advantage is, that it does not need
+   much database-access, but only sometimes to export all translated texts
+   into the "cache"-directory 'translations'.
 
 
 ----------------- PHP, Using translations in libraries/classes:

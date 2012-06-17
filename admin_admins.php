@@ -39,18 +39,18 @@ require_once( "include/table_columns.php" );
       error('adminlevel_too_low', 'admin_admins');
 
    $admin_tasks = array( // admin-level-id => arr( admin-bitmask, (alphabetic-order) admin-text ),
-         'ADMIN'  => array( ADMIN_SUPERADMIN, /*T_*/('Admins')),
-         'Dbase'  => array( ADMIN_DATABASE, /*T_*/('Database')),
-         'Devel'  => array( ADMIN_DEVELOPER, /*T_*/('Developer')),
-         'FAQ'    => array( ADMIN_FAQ, /*T_*/('FAQ')),
-         'Feat'   => array( ADMIN_FEATURE, /*T_*/('Feature')),
-         'Forum'  => array( ADMIN_FORUM, /*T_*/('Forum')),
-         'Game'   => array( ADMIN_GAME, /*T_*/('Game')),
-         'Passwd' => array( ADMIN_PASSWORD, /*T_*/('Password')),
-         'Skin'   => array( ADMIN_SKINNER, /*T_*/('Skin')),
-         'Survey' => array( ADMIN_SURVEY, /*T_*/('Survey')),
-         'TRNEY'  => array( ADMIN_TOURNAMENT, /*T_*/('Tournament')),
-         'TRANS'  => array( ADMIN_TRANSLATORS, /*T_*/('Translators')),
+         'ADMIN'  => array( ADMIN_SUPERADMIN, T_('Admins')),
+         'Dbase'  => array( ADMIN_DATABASE, T_('Database')),
+         'Devel'  => array( ADMIN_DEVELOPER, T_('Developer')),
+         'FAQ'    => array( ADMIN_FAQ, T_('FAQ')),
+         'Feat'   => array( ADMIN_FEATURE, T_('Feature')),
+         'Forum'  => array( ADMIN_FORUM, T_('Forum')),
+         'Game'   => array( ADMIN_GAME, T_('Game')),
+         'Passwd' => array( ADMIN_PASSWORD, T_('Password')),
+         'Skin'   => array( ADMIN_SKINNER, T_('Skin')),
+         'Survey' => array( ADMIN_SURVEY, T_('Survey')),
+         'TRNEY'  => array( ADMIN_TOURNAMENT, T_('Tournament')),
+         'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
       );
    if( !ALLOW_FEATURE_VOTE )
       unset($admin_tasks['Feat']);
@@ -144,8 +144,8 @@ require_once( "include/table_columns.php" );
    $atable = new Table( 'admin', '', '', '', TABLE_NO_SIZE );
 
 
-   start_page(/*T_*/("Admin").' - './*T_*/('Edit Admin Staff'), true, $logged_in, $player_row );
-   echo "<h3 class=Header>" . /*T_*/('Admins') . "</h3>\n";
+   start_page(T_("Admin").' - '.T_('Edit Admin Staff'), true, $logged_in, $player_row );
+   echo "<h3 class=Header>" . T_('Admins') . "</h3>\n";
 
 
    $marked_form = new Form('admin','admin_admins.php', FORM_POST, true, 'FormTable');
@@ -153,9 +153,9 @@ require_once( "include/table_columns.php" );
    $marked_form->set_tabindex(1);
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead(1, /*T_*/('ID'), 'ID');
-   $atable->add_tablehead(2, /*T_*/('Userid'), 'User');
-   $atable->add_tablehead(3, /*T_*/('Name'), 'User');
+   $atable->add_tablehead(1, T_('ID'), 'ID');
+   $atable->add_tablehead(2, T_('Userid'), 'User');
+   $atable->add_tablehead(3, T_('Name'), 'User');
 
    $col = 4;
    foreach( $admin_tasks as $aid => $tmp )
@@ -186,7 +186,7 @@ require_once( "include/table_columns.php" );
          $uid = 'new';
          $arow_strings[1]= array(
             'attbs' => array( 'colspan' => $col, 'class'=>'nowrap'),
-            'text' => /*T_*/('New admin') . ": "
+            'text' => T_('New admin') . ": "
                . '<input type="text" name="newadmin" value="" size="16" maxlength="16">',
             );
          $level = 0;
@@ -215,8 +215,8 @@ require_once( "include/table_columns.php" );
    $atable->echo_table();
 
    echo $marked_form->print_insert_submit_buttonx( 'update',
-            /*T_*/('Update changes'), array( 'accesskey' => ACCKEY_ACT_EXECUTE )),
-        $marked_form->print_insert_submit_button( 'refresh', /*T_*/('Refresh')),
+            T_('Update changes'), array( 'accesskey' => ACCKEY_ACT_EXECUTE )),
+        $marked_form->print_insert_submit_button( 'refresh', T_('Refresh')),
         $marked_form->print_end();
 
    end_page();

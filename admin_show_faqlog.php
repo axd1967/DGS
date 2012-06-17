@@ -42,21 +42,21 @@ require_once( "include/table_columns.php" );
    // init
    $page = 'admin_show_faqlog.php';
 
-   start_page(/*T_*/('Show FAQ Log'), true, $logged_in, $player_row);
+   start_page(T_('Show FAQ Log'), true, $logged_in, $player_row);
 
-   section( 'faqlog', /*T_*/('FAQ Log') );
+   section( 'faqlog', T_('FAQ Log') );
 
    $atable = new Table( 'faqlog', $page, '' );
    $atable->add_or_del_column();
    $limit = $atable->current_limit_string();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead( 1, /*T_*/('ID#header'), 'ID');
-   $atable->add_tablehead( 2, /*T_*/('User#header'), 'User');
-   $atable->add_tablehead( 3, /*T_*/('Time#header'), 'User');
-   $atable->add_tablehead( 4, /*T_*/('FAQ ID#header'), 'ID');
-   $atable->add_tablehead( 5, /*T_*/('Question & Reference#header'));
-   $atable->add_tablehead( 6, /*T_*/('Answer#header'));
+   $atable->add_tablehead( 1, T_('ID#header'), 'ID');
+   $atable->add_tablehead( 2, T_('User#header'), 'User');
+   $atable->add_tablehead( 3, T_('Time#header'), 'User');
+   $atable->add_tablehead( 4, T_('FAQ ID#header'), 'ID');
+   $atable->add_tablehead( 5, T_('Question & Reference#header'));
+   $atable->add_tablehead( 6, T_('Answer#header'));
 
    $result = db_query( 'admin_show_errorlog.find_data',
          'SELECT FL.*, FAQ.Level, ' .
@@ -82,7 +82,7 @@ require_once( "include/table_columns.php" );
       {
          $typechar = (@$row['Level'] == 1) ? 'c' : 'e';
          $edit_link = 'admin_faq.php?edit=1'.URI_AMP.'type='.$typechar.URI_AMP.'id='.@$row['FAQID'];
-         $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( /*T_*/('Edit(%s)#faq'), @$row['FAQID']) . '</a>';
+         $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['FAQID']) . '</a>';
       }
       if( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = make_html_safe( @$row['Question'], 'cell' )
@@ -99,9 +99,9 @@ require_once( "include/table_columns.php" );
       "NOTE: Log shows changed FAQ-entries with user, time and new text.<br>\n";
 
    $menu_array = array(
-      /*T_*/'Edit FAQ' => "admin_faq.php",
-      /*T_*/'Edit Introduction' => "admin_faq.php?ot=".TXTOBJTYPE_INTRO,
-      /*T_*/'Edit Links' => "admin_faq.php?ot=".TXTOBJTYPE_LINKS,
+      T_('Edit FAQ') => "admin_faq.php",
+      T_('Edit Introduction') => "admin_faq.php?ot=".TXTOBJTYPE_INTRO,
+      T_('Edit Links') => "admin_faq.php?ot=".TXTOBJTYPE_LINKS,
       );
 
    end_page(@$menu_array);

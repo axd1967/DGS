@@ -21,6 +21,14 @@ ChangeLog
 
 2012-06-17 juga
 
+### ----- release-1_0_15-20120608 -----
+   * admin.php, admin_admins.php, admin_faq.php, admin_game.php, admin_password.php,
+     admin_rating.php, admin_show_adminlog.php, admin_show_errorlog.php, admin_show_faqlog.php,
+     admin_show_users.php, admin_translators.php, admin_users.php, translate.php,
+     forum/admin.php, forum/admin_show_forumlog.php,
+     scripts/fix_game_snapshot.php, scripts/README.developers:
+   - reverted translations for admin-pages to strip-off '#'-suffix in texts
+
    * include/classlib_game.php (NextGameOrder.persist_game_priority),
      include/game_functions.php (GameHelper.delete_running_game; GameFinalizer.finish_game),
      include/message_functions.php (update_count_message_new),
@@ -173,7 +181,6 @@ UPDATE Players
      so it doesn't show "&apos;" as apostroph, so replaced with "&#39;"
 
 
-### ----- release-1_0_15-20120608 -----
 2012-06-10 juga
 
    * include/quick_common.php ($clocks_stopped),

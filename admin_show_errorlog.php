@@ -62,16 +62,16 @@ require_once( "include/filter.php" );
    $atable->add_or_del_column();
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $atable->add_tablehead( 1, /*T_*/('ID#header'), 'ID', TABLE_NO_HIDE, 'EL.ID-');
-   $atable->add_tablehead( 9, /*T_*/('uid#header'), 'ID');
-   $atable->add_tablehead( 2, /*T_*/('User#header'), 'User');
-   $atable->add_tablehead( 3, /*T_*/('Time#header'), 'Date', 0, 'EL.Date-');
-   $atable->add_tablehead( 4, /*T_*/('Message#header'));
-   $atable->add_tablehead( 8, /*T_*/('Request#header'));
-   $atable->add_tablehead( 5, /*T_*/('DB error#header'));
-   $atable->add_tablehead( 6, /*T_*/('Debug info#header'));
+   $atable->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'EL.ID-');
+   $atable->add_tablehead( 9, T_('uid#header'), 'ID');
+   $atable->add_tablehead( 2, T_('User#header'), 'User');
+   $atable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'EL.Date-');
+   $atable->add_tablehead( 4, T_('Message#header'));
+   $atable->add_tablehead( 8, T_('Request#header'));
+   $atable->add_tablehead( 5, T_('DB error#header'));
+   $atable->add_tablehead( 6, T_('Debug info#header'));
    if( $show_ip )
-      $atable->add_tablehead( 7, /*T_*/('IP#header'));
+      $atable->add_tablehead( 7, T_('IP#header'));
    $tbl_colcnt = $atable->get_column_count();
 
    $atable->set_default_sort( 1); // on ID
@@ -123,9 +123,9 @@ require_once( "include/filter.php" );
             $arow_str[8] = @$row['Request'];
          else
          {
-            $arow_str[8] = '(' . /*T_*/('see next line') . ')';
+            $arow_str[8] = '(' . T_('see next line') . ')';
             $dbginfo .= sprintf( '<u>%s:</u> <span class="DebugText">%s</span>',
-               /*T_*/('Request info'), @$row['Request'] );
+               T_('Request info'), @$row['Request'] );
          }
       }
       if( $atable->Is_Column_Displayed[5] )
@@ -136,9 +136,9 @@ require_once( "include/filter.php" );
             $arow_str[6] = wordwrap(@$row['Debug'], 40, "<br>\n", true);
          else
          {
-            $arow_str[6] = '(' . /*T_*/('see next line') . ')';
+            $arow_str[6] = '(' . T_('see next line') . ')';
             $dbginfo = sprintf( '<u>%s:</u> <span class="DebugText">%s</span>',
-               /*T_*/('Debug info'), wordwrap(@$row['Debug'], 120, "<br>\n", true) );
+               T_('Debug info'), wordwrap(@$row['Debug'], 120, "<br>\n", true) );
          }
       }
       if( $show_ip && $atable->Is_Column_Displayed[7] )
@@ -157,8 +157,8 @@ require_once( "include/filter.php" );
    mysql_free_result($result);
 
 
-   start_page(/*T_*/('Show Error Log'), true, $logged_in, $player_row);
-   section( 'errorlog', /*T_*/('Error Log') );
+   start_page(T_('Show Error Log'), true, $logged_in, $player_row);
+   section( 'errorlog', T_('Error Log') );
    if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_elfilter->get_select()) ."<br>";
    if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 

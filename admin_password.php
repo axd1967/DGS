@@ -45,22 +45,22 @@ require_once( "include/form_functions.php" );
    }
 
 
-   start_page(/*T_*/('Admin').' - './*T_*/('Send password'), true, $logged_in, $player_row );
+   start_page(T_('Admin').' - '.T_('Send password'), true, $logged_in, $player_row );
 
    $passwd_form = new Form( 'adminnewpasswdform', "send_new_password.php", FORM_POST );
 
-   $passwd_form->add_row( array( 'HEADER', /*T_*/('New Password') ) );
+   $passwd_form->add_row( array( 'HEADER', T_('New Password') ) );
 
-   $passwd_form->add_row( array( 'DESCRIPTION', /*T_*/('Userid'),
+   $passwd_form->add_row( array( 'DESCRIPTION', T_('Userid'),
                                  'TEXTINPUT', 'pswduser', 16, 16, $user, ));
-   $passwd_form->add_row( array( 'DESCRIPTION', /*T_*/('Email'),
+   $passwd_form->add_row( array( 'DESCRIPTION', T_('Email'),
                                  'TEXTINPUT', 'email', 32, 80, '',
-                                 'TEXT', /*T_*/('to replace the user\'s one'), ));
+                                 'TEXT', T_('to replace the user\'s one'), ));
    $passwd_form->add_row( array( 'TAB', 'CELL', 1, 'align=left',
                                  'CHECKBOX', 'overnew', 1,
-                                     /*T_*/('overwrite the current new password process'), 0, ));
+                                     T_('overwrite the current new password process'), 0, ));
    $passwd_form->add_row( array( 'TAB', 'CELL', 1, 'align=left',
-                                 'SUBMITBUTTON', 'action', /*T_*/('Send password'),
+                                 'SUBMITBUTTON', 'action', T_('Send password'),
                                ) );
    $passwd_form->echo_string(1);
 
@@ -69,30 +69,30 @@ require_once( "include/form_functions.php" );
 
    $email_form = new Form( 'adminemailform', "admin_password.php", FORM_GET );
 
-   $email_form->add_row( array( 'HEADER', /*T_*/('User information') ) );
+   $email_form->add_row( array( 'HEADER', T_('User information') ) );
 
    $email_form->add_row( array(
          'CELL', 2, '',
-         'TEXT', sprintf(/*T_*/('Please keep in mind, that the email is protected by the %s'),
-                         anchor( $base_path."policy.php", /*T_*/('DGS Privacy Policy'))), ));
+         'TEXT', sprintf(T_('Please keep in mind, that the email is protected by the %s'),
+                         anchor( $base_path."policy.php", T_('DGS Privacy Policy'))), ));
    $email_form->add_empty_row();
 
    $email_form->add_row( array(
-         'DESCRIPTION', /*T_*/('Userid'),
+         'DESCRIPTION', T_('Userid'),
          'TEXTINPUT', 'pswduser', 16, 16, $user,
          'TEXT', SMALL_SPACING,
-         'SUBMITBUTTON', 'show_email', /*T_*/('Show email'), ));
+         'SUBMITBUTTON', 'show_email', T_('Show email'), ));
    if( @$_REQUEST['show_email'] || !is_null($user_email) )
    {
       $email_form->add_row( array(
-            'DESCRIPTION', /*T_*/('Email'),
+            'DESCRIPTION', T_('Email'),
             'TEXT', ( is_null($user_email) ? NO_VALUE : $user_email ), ));
    }
    $email_form->echo_string();
 
 
    $menu_array = array();
-   $menu_array[/*T_*/('New password')] = "admin_password.php";
+   $menu_array[T_('New password')] = "admin_password.php";
 
    end_page(@$menu_array);
 }

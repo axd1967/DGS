@@ -252,8 +252,8 @@ $info_box = '<ul>
 
       if( count($errors) )
       {
-         $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Errors'),
-                                     'TEXT', buildErrorListString(/*T_*/('There are some errors'), $errors) ));
+         $edit_form->add_row( array( 'DESCRIPTION', T_('Errors'),
+                                     'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
          $edit_form->add_empty_row();
       }
 
@@ -401,8 +401,8 @@ $info_box = '<ul>
 
       if( count($errors) )
       {
-         $edit_form->add_row( array( 'DESCRIPTION', /*T_*/('Errors'),
-                                     'TEXT', buildErrorListString(/*T_*/('There are some errors'), $errors) ));
+         $edit_form->add_row( array( 'DESCRIPTION', T_('Errors'),
+                                     'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
          $edit_form->add_empty_row();
       }
 
@@ -652,8 +652,8 @@ $info_box = '<ul>
 
 
    $menu_array = array(
-      /*T_*/('Refresh') => $page,
-      /*T_*/('Show FAQ Log') => "admin_show_faqlog.php",
+      T_('Refresh') => $page,
+      T_('Show FAQ Log') => "admin_show_faqlog.php",
    );
 
    end_page(@$menu_array);
@@ -670,7 +670,7 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
          section('IntroPreview', $question );
       else
       {
-         section('IntroPreview', /*T_*/('Preview') );
+         section('IntroPreview', T_('Preview') );
          echo "<dl><dt>$question</dt>\n<dd>$answer</dd></dl>\n";
       }
    }
