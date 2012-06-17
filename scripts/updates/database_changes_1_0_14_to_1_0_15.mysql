@@ -1882,8 +1882,6 @@ ALTER TABLE TournamentParticipant
 -- added Players.LastQuickAccess for quick-suite usage
 ALTER TABLE Players
    ADD LastQuickAccess datetime NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER Lastaccess ;
-UPDATE Players
-   SET LastQuickAccess = Registerdate ;
 
 
 -- [field-size] COL TournamentProperties.UserMinRating : double -> float -> smallint
@@ -2404,5 +2402,12 @@ SELECT COUNT(*) FROM Games
    WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 6 MONTH ;
 DELETE FROM Games
    WHERE Status='INVITED' AND Lastchanged <= NOW() - INTERVAL 6 MONTH ;
+
+
+-- fix Players.LastQuickAccess if LastMove > Lastaccess
+SELECT ID, Handle,Lastaccess, LastMove, TIMEDIFF(Lastaccess,LastMove) AS TDiff, TIME_TO_SEC(timediff(Lastaccess,LastMove)) AS TSec
+   FROM Players WHERE LastMove >0 HAVING TSec < 0 ;
+UPDATE Players
+   SET LastQuickAccess = LastMove WHERE LastMove >0 AND TIME_TO_SEC(TIMEDIFF(Lastaccess,LastMove)) < 0 ;
 
 
