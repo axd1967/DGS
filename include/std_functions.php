@@ -1439,6 +1439,12 @@ function send_message( $debugmsg, $text='', $subject=''
          if( count($ids) > 0 )
             notify( $debugmsg, $ids );
       }
+
+      // clear QST-cache for sender & receivers
+      $clear_uids = array_keys($receivers);
+      if( $from_id > GUESTS_ID_MAX )
+         $clear_uids[] = $from_id;
+      clear_cache_quick_status( $clear_uids, QST_CACHE_MSG );
    }
    ta_end();
 
@@ -3615,5 +3621,35 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
       array_push( $result, $file_path, $header, $body );
    return $result;
 }//enforce_min_timeinterval
+
+// $cache_key : QST_CACHE_...
+function clear_cache_quick_status( $arr_uids, $cache_key )
+{
+   if( (string)DATASTORE_FOLDER == '' )
+      return;
+
+   if( !is_array($arr_uids) )
+      $arr_uids = array( $arr_uids );
+   $arr_uids = array_unique($arr_uids);
+
+   $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . '/qst/quick_status-';
+   clearstatcache(); //FIXME since PHP5.3.0 with filename
+
+   foreach( $arr_uids as $uid )
+   {
+      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+         continue;
+
+      $file_path = $path . $uid;
+      if( file_exists($file_path) )
+      {
+         $mtime = (int)@filemtime( $file_path );
+         if( $GLOBALS['NOW'] - $mtime > SECS_PER_HOUR ) // delete if older than 1h
+            @unlink($file_path);
+         else
+            @file_put_contents($file_path, "CLEAR $cache_key\n", FILE_APPEND); // block-specific-clearing
+      }
+   }
+}//clear_cache_quick_status
 
 ?>

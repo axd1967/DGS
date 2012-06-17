@@ -1025,12 +1025,12 @@ class GameHelper
             db_query( "GameHelper::delete_running_game.del_wroom($gid)",
                "DELETE FROM Waitingroom WHERE gid=$gid LIMIT 1" );
 
+         $Black_ID = (int)@$grow['Black_ID'];
+         $White_ID = (int)@$grow['White_ID'];
          if( $upd_players )
          {
             if( $grow['GameType'] == GAMETYPE_GO )
             {
-               $Black_ID = (int)@$grow['Black_ID'];
-               $White_ID = (int)@$grow['White_ID'];
                db_query( "GameHelper::delete_running_game.upd_players($gid,$Black_ID,$White_ID)",
                   "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
             }
@@ -1039,6 +1039,8 @@ class GameHelper
          }
 
          GameHelper::_delete_base_game_tables( $gid );
+
+         clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
       }
       ta_end();
 
@@ -1914,6 +1916,8 @@ class GameFinalizer
       send_message( "$dbgmsg.msg", $Text, $Subject,
          $game_notify->get_recipients(), '',
          /*notify*/true, /*system-msg*/0, MSGTYPE_RESULT, $gid );
+
+      clear_cache_quick_status( array( $this->Black_ID, $this->White_ID ), QST_CACHE_GAMES );
    }//finish_game
 
    /*! \brief Returns true, if opponent rejects-win-by-timout and game should be made unrated. */

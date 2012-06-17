@@ -182,4 +182,11 @@ define('CSYSFLAG_REJECT_MESSAGE', 0x0002); // don't accept message from contact
 define('CSYSFLAG_REJECT_INVITE',  0x0004); // don't accept invitation from contact
 define('CSYSFLAG_WR_HIDE_GAMES',  0x0008); // hide games of user in waiting-room (e.g. paid games)
 
+// ---------- Quick-suite stuff -----------------------------------
+
+define('QST_CACHE_BULLETIN', 'B');
+define('QST_CACHE_MSG',      'M');
+define('QST_CACHE_GAMES',    'G');
+define('QST_CACHE_MPG',      'MPG');
+
 ?>

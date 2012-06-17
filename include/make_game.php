@@ -720,6 +720,9 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
       }
    }
 
+   if( $tomove > GUESTS_ID_MAX ) // safety-check
+      clear_cache_quick_status( $tomove, QST_CACHE_GAMES );
+
    return $gid;
 } //create_game
 

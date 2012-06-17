@@ -102,7 +102,8 @@ define('GA_RES_TIMOUT', 3);
          ta_begin();
          {//HOT-section to finish game
             admin_log( $my_id, $player_row['Handle'], "End game #$gid with result=[{$game->Score}][$score_text]" );
-            $game_finalizer->finish_game( "admin_game", /*del*/false, null, $game->Score,
+
+            $game_finalizer->finish_game( "admin_game", /*del*/false, null, $game->Score, // +clears QST-cache
                trim(get_request_arg('resmsg')) );
          }
          ta_end();
@@ -135,7 +136,7 @@ define('GA_RES_TIMOUT', 3);
             if( $game->Status == GAME_STATUS_FINISHED )
                $del_result = GameHelper::delete_finished_unrated_game($gid);
             else
-               $del_result = GameHelper::delete_running_game($gid);
+               $del_result = GameHelper::delete_running_game($gid); // +clears QST-cache
 
             if( $del_result )
             {

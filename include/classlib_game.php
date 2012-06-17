@@ -635,6 +635,8 @@ class NextGameOrder
             "INSERT INTO GamesPriority (gid,uid,Priority) VALUES ($gid,$uid,$new_prio) " .
             "ON DUPLICATE KEY UPDATE Priority=VALUES(Priority)" );
       }
+
+      clear_cache_quick_status( $uid, QST_CACHE_GAMES );
    }//persist_game_priority
 
    /*! \brief Deletes all GamesPriority-table-entries for given game-id. */

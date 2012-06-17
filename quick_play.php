@@ -273,6 +273,8 @@ This is why:
             .",LastMove=FROM_UNIXTIME($NOW)"
          ." WHERE ID=$my_id LIMIT 1" );
 
+      clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
+
       increaseMoveStats( $my_id );
    }
    ta_end();

@@ -446,7 +446,7 @@ This is why:
          $do_delete = ( $action == 'delete' );
 
          $game_finalizer->skip_game_query();
-         $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw );
+         $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw ); // +clears QST-cache
       }
 
       // Notify opponent about move
@@ -459,6 +459,9 @@ This is why:
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
             .",LastMove=FROM_UNIXTIME($NOW)"
             ." WHERE ID=$my_id LIMIT 1" );
+
+      if( !$game_finished )
+         clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
 
       increaseMoveStats( $my_id );
    }
@@ -581,6 +584,9 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
    ta_begin();
    {//HOT-section to process komi-bid-saving (and starting-game)
       $fk_result = $fk->save_komi( $game_row, $req_komibid, $start_game );
+
+      if( $fk_result == 0 || $fk_result == 1 )
+         clear_cache_quick_status( array( $game_row['Black_ID'], $game_row['White_ID'] ), QST_CACHE_GAMES );
    }
    ta_end();
 

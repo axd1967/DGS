@@ -982,6 +982,9 @@ function accept_invite( $gid, $uid )
                   "<user $uid>", "<game $gid>" ),
          'Invitation for multi-player-game accepted',
          $master_uid, '', /*notify*/true );
+
+      // 4. clear QST-cache
+      clear_cache_quick_status( array( $master_uid, $uid ), QST_CACHE_MPG );
    }
    ta_end();
 
@@ -1027,6 +1030,9 @@ function delete_joined_player( $gid, $uid )
                   "<user $master_uid>", "<game $gid>" ),
          'Player of multi-player-game removed',
          $uid, '', /*notify*/true );
+
+      // 4. clear QST-cache
+      clear_cache_quick_status( $master_uid, QST_CACHE_MPG );
    }
    ta_end();
 
@@ -1424,7 +1430,7 @@ function build_arr_group_color_texts( $arr_group_colors )
 
 function start_multi_player_game( $grow, $upd_game_players )
 {
-   global $arr_game_players;
+   global $arr_game_players, $arr_users;
    $gid = $grow['ID'];
    $handicap = $grow['Handicap'];
    $game_type = $grow['GameType'];
@@ -1454,6 +1460,8 @@ function start_multi_player_game( $grow, $upd_game_players )
    {//HOT-section for starting multi-player-game
       create_game($black_row, $white_row, $gdata, null, $gid );
       MultiPlayerGame::update_players_start_mpgame( $gid ); // Players.Running++
+
+      clear_cache_quick_status( array_keys($arr_users), QST_CACHE_MPG );
    }
    ta_end();
 

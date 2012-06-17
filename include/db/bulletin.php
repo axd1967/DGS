@@ -631,7 +631,7 @@ class Bulletin
             "INSERT IGNORE BulletinRead (bid,uid) " .
             "SELECT ID, $uid FROM Bulletin WHERE ID=$bid AND Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."') LIMIT 1" );
 
-         if( mysql_affected_rows() > 0 )
+         if( mysql_affected_rows() > 0 ) // increase read-counter
          {
             $bulletin = Bulletin::load_bulletin( $bid, /*with_player*/false );
             if( !is_null($bulletin) )
@@ -643,6 +643,8 @@ class Bulletin
                   "UPDATE Bulletin SET CountReads=CountReads+1 WHERE ID=$bid LIMIT 1" );
             }
          }
+
+         clear_cache_quick_status( $uid, QST_CACHE_BULLETIN );
       }
       ta_end();
    }//mark_bulletin_as_read

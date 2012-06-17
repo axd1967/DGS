@@ -1447,6 +1447,8 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
          $player_row['CountMsgNew'] = $count_new;
       db_query( "$dbgmsg.recalc",
          "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
+
+      clear_cache_quick_status( $uid, QST_CACHE_MSG );
    }
 }//update_count_message_new
 

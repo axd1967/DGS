@@ -535,7 +535,7 @@ class QuickHandlerGame extends QuickHandler
             $do_delete = ( $this->action == GAMECMD_DELETE );
 
             $game_finalizer->skip_game_query();
-            $game_finalizer->finish_game( "QuickHandlerGame.process", $do_delete, null, $score, $message_raw );
+            $game_finalizer->finish_game( "QuickHandlerGame.process", $do_delete, null, $score, $message_raw ); // +clears QST-cache
          }
          else
             $do_delete = false;
@@ -550,6 +550,9 @@ class QuickHandlerGame extends QuickHandler
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
                ",LastMove=FROM_UNIXTIME($NOW)" .
             " WHERE ID={$this->my_id} LIMIT 1" );
+
+         if( !$game_finished )
+            clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
 
          increaseMoveStats( $this->my_id );
       }
