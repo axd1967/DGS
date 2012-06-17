@@ -19,6 +19,161 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-06-17 juga
+
+   * include/classlib_game.php (NextGameOrder.persist_game_priority),
+     include/game_functions.php (GameHelper.delete_running_game; GameFinalizer.finish_game),
+     include/message_functions.php (update_count_message_new),
+     include/std_functions.php (send_message, clear_cache_quick_status),
+     include/db/bulletin.php (Bulletin.mark_bulletin_as_read),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/globals.php (QST_CACHE_...),
+     include/make_game.php (create_game),
+     game_players.php (accept_invite, reject_invite, start_multi_player_game),
+     clock_tick.php (handle_game_timeouts),
+     confirm.php (do_komi_save),
+     admin_game.php, quick_play.php:
+   - clear QST-cache (quick-status) on some writing-operations for:
+     - operations are covered by all interfaces: web-site, quick-play and quick-do-suite
+     - appending "CLEAR block" (block = B/M/G/MPG) to existing QST-cache-file will invalidate
+       block-specific cache-portion and reload the specific block when quick-status is used
+
+     - "CLEAR G" for status-games on:
+       - start a game by joining waiting-room-game or accepting invitation or started MP-game
+       - finish a running game by user or timeout
+       - delete a running game by user or admin
+       - move in a running game (play, resign, delete, pass, score)
+       - save change during fair-komi negotation
+       - changing the game-priority for ordering status-games
+     - "CLEAR M" for private-messages on:
+       - new message of single and bulk type for sender and receivers
+       - read message (moving it away from NEW-folder)
+       - move message into different folder
+     - "CLEAR B" for bulletins on:
+       - mark bulletin as read
+     - "CLEAR MPG" for multi-player-games on:
+       - accept or reject invitation
+       - start MP-game
+
+   * quick_status.php (append_data, print_bulletins, print_messages, print_status_games,
+       print_mpg, parse_cache_content),
+     specs/quick_suite.txt:
+   - clear QST-cache (quick-status) on some writing-operations:
+     - changed cache-filename for quick-status using Players.ID instead of Handle for easier clearing of cache,
+     - execute authentication & authorisation before accessing cache-file to ensure correct user-id for script
+     - invalidate block-specific cache if "CLEAR block"-instruction found in user-specific QST-cache-file
+     - appending "CLEAR block" (block = B/M/G/MPG) to existing QST-cache-file will invalidate block-specific
+       cache-portion and reload the specific block when quick-status is used
+     - 'excessive_usage'-warning is only given if cache-portions are not invalidated and quick-status called
+       again before 1 minute passed since last usage, in which case the full cache-data is returned
+     - writing IpStats-table with page-key 'QSTC' for request that returns only cached data,
+       'QST' if data is loaded
+     - clear datablocks before loading new block-specific data
+   - minor cleanup: renamed CACHE_* const to QST_CACHE_* for global-use, moved local funcs to bottom
+-----------
+# delete existing QST-cache-files: execute 'scripts/clear_datastore.php?subdir=qst&del=1'
+-----------
+
+   * game_players.php (build_game_settings):
+   - overlooked texts for translation
+-----------
+# recreate translations with translation-scripts
+-----------
+
+   * forum/forum_functions.php (ForumPost.build_query_sql), forum/search.php:
+   - fix bug: fixed forum-posts ordered by modification-date using MAX(Posts.Time,Posts.Lastedited),
+     former order by Posts.Lastchanged was only date of threads
+
+2012-06-16 juga
+
+   * quick_play.php, scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - set Players.LastQuickAccess if submitting move with quick-play-page
+-----------
+-- fix Players.LastQuickAccess if LastMove > Lastaccess
+SELECT ID, Handle,Lastaccess, LastMove, TIMEDIFF(Lastaccess,LastMove) AS TDiff, TIME_TO_SEC(timediff(Lastaccess,LastMove)) AS TSec
+   FROM Players WHERE LastMove >0 HAVING TSec < 0 ;
+UPDATE Players
+   SET LastQuickAccess = LastMove WHERE LastMove >0 AND TIME_TO_SEC(TIMEDIFF(Lastaccess,LastMove)) < 0 ;
+-----------
+
+   * game.php (draw_message_box), confirm.php, NEWS:
+   - restored old way for game-submit-move to next-game / to status-page, removed stay-on-board option
+   - widened game move-message-box: 60 -> 70
+
+   * features/vote_feature.php:
+   - show reason for user if and why voting is not possible
+
+   * admin_admins.php, admin_do_translators.php, admin_faq.php, admin_game.php, admin_password.php,
+     admin_rating.php, admin_show_adminlog.php, admin_show_errorlog.php, admin_show_faqlog.php,
+     admin_show_users.php, admin_translators.php, admin_users.php, translate.php, update_translation.php,
+     forum/admin.php, forum/admin_show_forumlog.php, scripts/check_block_ip.php,
+     scripts/clear_datastore.php, scripts/convert_from_old_forum.php, scripts/convert_posindex.php,
+     scripts/data_export.php, scripts/data_report.php, scripts/fix_game_snapshot.php,
+     scripts/fix_games_timeleft.php, scripts/forum_consistency.php, scripts/game_consistency.php,
+     scripts/generate_translation_texts.php, scripts/index.php, scripts/mailtest.php,
+     scripts/make_handicap_pattern.php, scripts/message_consistency.php, scripts/player_consistency.php,
+     scripts/recalculate_ratings2.php, scripts/server-info.php, scripts/start_frozen_clocks.php,
+     scripts/tournament_consistency.php, scripts/translation_consistency.php, scripts/update_translation_pages.php,
+     scripts/voting_consistency.php, scripts/obsolete/lang_edit.php,
+     scripts/updates/fix_game_comments-1_0_15.php, scripts/updates/fix_message_thread-1_0_15.php:
+   - forbid guest-user to use admin-pages by adding additional guest-check
+
+   * include/error_functions.php (need_db_errorlog), specs/quick_suite.txt,
+     confirm.php, edit_folders.php, edit_rating.php, edit_vacation.php, game.php, game_players.php,
+     join_waitingroom_game.php, new_game.php, old_goban_editor.php, quick_do.php, quick_play.php,
+     send_new_password.php, templates.php, tournaments/wizard.php, scripts/README.developers:
+   - don't create ErrorLog-entry if guest-user is not allowed to execute operation
+   - forbid write-operations by guest-user with 'not_allowed_for_guest'-error
+   - forbid usage of some quick-suite-pages by guest-user
+
+   * admin.php, admin_game.php, admin_password.php, admin_rating.php, admin_show_adminlog.php,
+     admin_show_errorlog.php, admin_show_faqlog.php, admin_show_users.php, admin_users.php,
+     forum/admin.php, forum/admin_show_forumlog.php,
+     include/db/ratingchangeadmin.php,
+     scripts/fix_game_snapshot.php:
+   - removed/commented-out translations for admin-pages
+-----------
+# recreate translations with translation-scripts
+-----------
+
+2012-06-10 juga
+
+   * NEWS:
+   - comment out some (disabled) tournament-related features
+   - correct game-invitation cleanup: 3 -> 6 months
+
+   * edit_picture.php:
+   - added copyright-note for uploading user-picture
+
+   * game.php:
+   - fix bug: showed correct user-rating for MP-game on game-page who last-moved
+     in players-info-table, was showing rating of logged-in user
+
+   * include/game_functions.php (get_color_titles),
+     status.php (load_games_to_move),
+     show_games.php:
+   - added hover-text on color-images for status-games
+   - use nigiri-image for status-games in fair-komi-negotiation
+   - fix bug: hover-text about player-to-move of colors-image on my running-games was wrong
+   - fix bug: use nigiri-image for games in fair-komi-negotiation
+
+   * include/std_functions.php (user_reference):
+   - user-ref: escape user-id/handle in sql
+
+   * include/table_columns.php (Table.make_table_filter):
+   - fix bug: removed "Button"-class on <td>-element with table-filter,
+     showed button-image-part in some browsers
+
+   * include/time_functions.php (echo_onvacation):
+   - fix bug: corrected original text to allow repositioning of words
+     in translation of "%s left"-text, e.g. required in Russian language
+
+   * include/utilities.php (basic_safe):
+   - fix bug: some browsers (IE) follow the HTML-standard,
+     so it doesn't show "&apos;" as apostroph, so replaced with "&#39;"
+
+
+### ----- release-1_0_15-20120608 -----
 2012-06-10 juga
 
    * include/quick_common.php ($clocks_stopped),

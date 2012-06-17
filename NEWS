@@ -519,7 +519,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * mark bulletins as read
 
    * <home_ quick_status.php?version=2>Quick Status</home> (new version):
-      * Added <http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/specs/quick_suite.txt?revision=1.48&view=markup#l1786 |progressive block-specific caching>
+      * Added <http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/specs/quick_suite.txt?revision=1.52&view=markup#l1786 |progressive block-specific caching with invalidation>
       * Removed non-login mode, login per cookie or userid/passwd-URL-args is mandatory now
       * Added URL-args:
          * 'no_cache' to disable caching
@@ -665,6 +665,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * fixed "missing" new posts while replying (forum-read data corrected)
    * fixed missing game-reference for accepted & declined invitation-messages
    * fixed notification-only-mails by adding user-handle as account-id
+   * fixed forum search order by modification-date
 
 
    Code improvements:
