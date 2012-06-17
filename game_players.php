@@ -331,7 +331,7 @@ function build_game_settings( $grow )
          sprintf( "%s, %s\n",
                TimeFormat::echo_time_limit( $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
                      TIMEFMT_SHORT|TIMEFMT_HTMLSPC|TIMEFMT_ADDTYPE ),
-               ( $grow['WeekendClock'] == 'Y' ? 'Clock running on weekend' : 'Clock stopped on weekend' )
+               ( $grow['WeekendClock'] == 'Y' ? T_('Clock running on weekend') : T_('Clock stopped on weekend') )
          ));
 
    if( count($arr_ratings) )
