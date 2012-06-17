@@ -26,59 +26,17 @@ require_once( "include/db/bulletin.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
-define('CACHE_BULLETIN', 'B');
-define('CACHE_MSG', 'M');
-define('CACHE_GAMES', 'G');
-define('CACHE_MPG', 'MPG');
-
 define('MIN_REQ_IVAL_GAMES', 1); // min. request-interval [mins] for status-games
 define('DEFAULT_MIN_REQ_IVAL', 15); // default min. request-interval [mins]
 
 define('QST_CHECK_MIN', 1*60 - 5); //secs
 define('QST_CHECK_MAX', DEFAULT_MIN_REQ_IVAL*60); //secs
 
-
-
 //force $language_used and $encoding_used
 //see also recover_language() for regular recovery of $encoding_used
 $encoding_used = 'utf-8'; //LANG_DEF_CHARSET;
 $language_used = 'en'.LANG_CHARSET_CHAR.$encoding_used; //lowercase
 
-function slashed($string)
-{
-   return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
-}
-
-
-function loc_start_page( $use_cache=true )
-{
-   global $encoding_used, $NOW;
-   ob_start('ob_gzhandler');
-
-   header('Content-Type: text/plain;charset='.$encoding_used);
-   // this one open the text/plain in the browser by default
-   // this one exist and put a costume of binary on the text
-   //header( 'Content-type: application/octet-stream' );
-
-   //header( "Content-Disposition: inline; filename=\"$filename\"" );
-   //header( "Content-Disposition: attachment; filename=\"$filename\"" );
-   header( "Content-Description: PHP Generated Data" );
-
-   if( $use_cache )
-   {
-      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60)); // 5min
-      header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
-   }
-}
-
-function loc_end_page()
-{
-   ob_end_flush();
-}
-
-
-
-// --------------------- MAIN ---------------------------
 
 if( $is_down )
 {
@@ -109,45 +67,6 @@ else
    }
 
 
-   // check for excessive usage
-   // NOTE: Without checking DB, this can be abused to block other users. But that should be punished by an admin as abuse.
-   //       Advantage like this is to avoid DB-requests.
-   if( (string)$uhandle == '' )
-      error('invalid_user', "quick_status.check.miss_handle()", /*log-err*/false );
-   elseif( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
-      error('invalid_user', "quick_status.check.handle(".substr($uhandle,0,50).")");
-   list( $allow_exec, $last_call_time, $path_cache, $content_header, $content_body ) =
-      enforce_min_timeinterval( 'qst', 'quick_status-'.strtolower($uhandle), QST_CHECK_MIN, QST_CHECK_MAX, /*read-cont*/true );
-
-   if( !$allow_exec )
-   {
-      warning('excessive_usage',
-         "quick_status.returning_cached_data($uhandle)" .
-         ".see_faq[http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302]");
-   }
-
-   // block-specific caching-info
-   $datablocks  = array(); // CACHE_... key => rows-string
-   $load_data   = array(); // CACHE_... key => true (=data has to be loaded), false (=take from cache)
-   $expire_time = array(); // CACHE_... key => expire-time when to reload data
-   $expire_min  = array(); // CACHE_... key => minutes used to calculate current expire-time
-   $crc32       = array(); // CACHE_... key => crc32() of last printed data
-   $ARR_CACHEKEYS = array( CACHE_BULLETIN, CACHE_MSG, CACHE_GAMES, CACHE_MPG );
-   foreach( $ARR_CACHEKEYS as $block )
-   {
-      $datablocks[$block] = '';
-      $load_data[$block] = true;
-      $crc32[$block] = 0;
-
-      $min = ($block == CACHE_GAMES) ? MIN_REQ_IVAL_GAMES : DEFAULT_MIN_REQ_IVAL;
-      $expire_min[$block] = $min;
-      $expire_time[$block] = $NOW + 60 * $min;
-   }
-
-   if( $no_cache != 2 )
-      parse_cache_content( $content_body );
-
-
    // authenticate + authorisation
 
    connect2mysql();
@@ -170,11 +89,48 @@ else
          error('not_logged_in', "quick_status.expired($uhandle)");
    }
 
-   writeIpStats('QST');
+
+   // check for excessive usage, handle progressive block-specific caching
+
+   $player_id = @$player_row['ID'];
+   list( $allow_exec, $last_call_time, $path_cache, $content_header, $content_body ) =
+      enforce_min_timeinterval( 'qst', "quick_status-$player_id", QST_CHECK_MIN, QST_CHECK_MAX, /*read-cont*/true );
+
+   // block-specific caching-info
+   $datablocks  = array(); // QST_CACHE_... key => rows-string
+   $load_data   = array(); // QST_CACHE_... key => true (=data has to be loaded), false (=take from cache)
+   $expire_time = array(); // QST_CACHE_... key => expire-time when to reload data
+   $expire_min  = array(); // QST_CACHE_... key => minutes used to calculate current expire-time
+   $crc32       = array(); // QST_CACHE_... key => crc32() of last printed data
+   $ARR_CACHEKEYS = array( QST_CACHE_BULLETIN, QST_CACHE_MSG, QST_CACHE_GAMES, QST_CACHE_MPG );
+   foreach( $ARR_CACHEKEYS as $block )
+   {
+      $datablocks[$block] = '';
+      $load_data[$block] = true;
+      $crc32[$block] = 0;
+
+      $min = ($block == QST_CACHE_GAMES) ? MIN_REQ_IVAL_GAMES : DEFAULT_MIN_REQ_IVAL;
+      $expire_min[$block] = $min;
+      $expire_time[$block] = $NOW + 60 * $min;
+   }
+
+   if( $no_cache != 2 )
+      $clear_cache = parse_cache_content( $content_body );
+   else
+      $clear_cache = true;
+
+   if( !$allow_exec && !$clear_cache )
+   {
+      warning('excessive_usage',
+         "quick_status.returning_cached_data($uhandle)" .
+         ".see_faq[http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302]");
+      writeIpStats('QSTC'); // cached
+   }
+   else
+      writeIpStats('QST');
 
    setTZ( $player_row['Timezone'] );
 
-   $player_id = @$player_row['ID'];
    if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied', "quick_status($player_id)");
 
@@ -188,28 +144,28 @@ else
 
    if( $version == 2 )
    {
-      if( $load_data[CACHE_BULLETIN] )
+      if( $load_data[QST_CACHE_BULLETIN] )
          print_bulletins( $player_row );
       else
-         print_datablock(CACHE_BULLETIN);
+         print_datablock(QST_CACHE_BULLETIN);
    }
 
-   if( $load_data[CACHE_MSG] )
+   if( $load_data[QST_CACHE_MSG] )
       print_messages( $version, $player_id );
    else
-      print_datablock(CACHE_MSG);
+      print_datablock(QST_CACHE_MSG);
 
-   if( $load_data[CACHE_GAMES] )
+   if( $load_data[QST_CACHE_GAMES] )
       print_status_games( $version, $player_row );
    else
-      print_datablock(CACHE_GAMES);
+      print_datablock(QST_CACHE_GAMES);
 
    if( $version == 2 )
    {
-      if( $load_data[CACHE_MPG] )
+      if( $load_data[QST_CACHE_MPG] )
          print_mpg( $player_row );
       else
-         print_datablock(CACHE_MPG);
+         print_datablock(QST_CACHE_MPG);
    }
 
 
@@ -222,10 +178,14 @@ else
    loc_end_page();
 }//main
 
-function append_data( $block, $line )
+
+function append_data( $block, $line=null )
 {
    global $datablocks;
-   $datablocks[$block] .= $line;
+   if( is_null($line) )
+      $datablocks[$block] = ''; // init
+   else
+      $datablocks[$block] .= $line;
    echo $line;
 }
 
@@ -239,16 +199,19 @@ function print_datablock( $block )
    }
 }
 
+
 function print_bulletins( $player_row )
 {
    global $nothing_found, $expire_time, $expire_min;
+
+   append_data(QST_CACHE_BULLETIN); //clear block
 
    $player_id = @$player_row['ID'];
    if( $player_id > 0 && $player_row['CountBulletinNew'] < 0 )
       Bulletin::update_count_bulletin_new( 'quick_status', $player_id, COUNTNEW_RECALC );
 
    // Bulletin-header: type=B, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
-   append_data(CACHE_BULLETIN,
+   append_data(QST_CACHE_BULLETIN,
       "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'\n" );
 
    if( $player_row['CountBulletinNew'] > 0 ) // show unread bulletins
@@ -269,7 +232,7 @@ function print_bulletins( $player_row )
          list( $bulletin, $orow ) = $arr_item;
 
          // type, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
-         append_data(CACHE_BULLETIN,
+         append_data(QST_CACHE_BULLETIN,
               sprintf( "B,%s,%s,%s,'%s','%s','%s'\n",
                        $bulletin->ID, $bulletin->TargetType, $bulletin->Category,
                        ($bulletin->PublishTime > 0) ? date(DATE_FMT_QUICK, $bulletin->PublishTime) : '',
@@ -279,12 +242,14 @@ function print_bulletins( $player_row )
       }
    }
 
-   $expire_time[CACHE_BULLETIN] = $GLOBALS['NOW'] + $expire_min[CACHE_BULLETIN] * 60;
+   $expire_time[QST_CACHE_BULLETIN] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_BULLETIN] * 60;
 }//print_bulletins
 
 function print_messages( $version, $player_id )
 {
    global $nothing_found, $expire_time, $expire_min;
+
+   append_data(QST_CACHE_MSG); //clear block
 
    $query = "SELECT UNIX_TIMESTAMP(M.Time) AS date, me.mid, " .
       "me.Folder_nr, M.Type, M.Subject, Players.Handle AS sender " .
@@ -301,7 +266,7 @@ function print_messages( $version, $player_id )
    if( $version == 2 )
    {
       // message-header: type=M, Messages.ID, me.Folder_nr, Messages.Type, correspondent.Handle, message.Subject, message.Date
-      append_data(CACHE_MSG,
+      append_data(QST_CACHE_MSG,
          "## M,message_id,folder_id,type,'sender','subject','date'\n" );
       $msg_fmt = "M,%s,%s,%s,'%s','%s','%s'\n";
    }
@@ -320,7 +285,7 @@ function print_messages( $version, $player_id )
       if( $version == 2 )
       {
          // type, msg.ID, me.Folder_nr, msg.Type, correspondent.Handle, msg.Subject, msg.Date
-         append_data(CACHE_MSG,
+         append_data(QST_CACHE_MSG,
               sprintf( $msg_fmt,
                        $row['mid'], $row['Folder_nr'], strtoupper($row['Type']),
                        slashed(@$row['sender']), slashed(@$row['Subject']),
@@ -330,19 +295,21 @@ function print_messages( $version, $player_id )
       {
          // type, msg.ID, correspondent.Handle, msg.subject, msg.date
          //N.B.: Subject is still in the correspondent's encoding.
-         append_data(CACHE_MSG,
+         append_data(QST_CACHE_MSG,
               sprintf( $msg_fmt,
                        $row['mid'], slashed(@$row['sender']), slashed(@$row['Subject']),
                        date(DATE_FMT_QUICK, @$row['date']) ));
       }
    }
 
-   $expire_time[CACHE_MSG] = $GLOBALS['NOW'] + $expire_min[CACHE_MSG]  * 60;
+   $expire_time[QST_CACHE_MSG] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_MSG]  * 60;
 }//print_messages
 
 function print_status_games( $version, $player_row )
 {
    global $datablocks, $nothing_found, $expire_time, $expire_min, $crc32;
+
+   append_data(QST_CACHE_GAMES); //clear block
 
    $player_id = @$player_row['ID'];
    $load_prio = ( $player_id > 0 );
@@ -366,7 +333,7 @@ function print_status_games( $version, $player_row )
    // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date, Handicap
    if( $version == 2 )
    {
-      append_data(CACHE_GAMES,
+      append_data(QST_CACHE_GAMES,
            "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date',handicap\n" );
       $timefmt_flags |= TIMEFMT_ADDEXTRA;
    }
@@ -391,7 +358,7 @@ function print_status_games( $version, $player_row )
             new FairKomiNegotiation( GameSetup::new_from_game_setup($row['GameSetup']), $row ) );
 
          // type, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date, Handicap
-         append_data(CACHE_GAMES,
+         append_data(QST_CACHE_GAMES,
               sprintf( "G,%s,'%s',%s,'%s','%s',%s,%s,%s,%s,%s,'%s',%s,'%s',%s\n",
                        $row['ID'], slashed(@$row['opp_Handle']), $arr_colors[$player_color],
                        date(DATE_FMT_QUICK, @$row['X_Lastchanged']), $time_remaining['text'],
@@ -403,7 +370,7 @@ function print_status_games( $version, $player_row )
       else // older-version
       {
          // 'type', game.ID, 'opponent.handle', 'player.color', 'Lastmove.date', 'TimeRemaining'
-         append_data(CACHE_GAMES,
+         append_data(QST_CACHE_GAMES,
               sprintf( "'G', %d, '%s', '%s', '%s', '%s'\n",
                        $row['ID'], slashed(@$row['opp_Handle']), $arr_colors[$player_color],
                        date(DATE_FMT_QUICK, @$row['X_Lastchanged']), $time_remaining['text'] ));
@@ -413,21 +380,23 @@ function print_status_games( $version, $player_row )
 
    // progressive caching
    $new_crc = crc32($crc_val);
-   if( $crc32[CACHE_GAMES] == 0 || $crc32[CACHE_GAMES] != $new_crc ) // changed data
+   if( $crc32[QST_CACHE_GAMES] == 0 || $crc32[QST_CACHE_GAMES] != $new_crc ) // changed data
    {
-      $crc32[CACHE_GAMES] = $new_crc;
+      $crc32[QST_CACHE_GAMES] = $new_crc;
       $exp_min = MIN_REQ_IVAL_GAMES;
    }
    else // same data -> double waiting-time
-      $exp_min = min( 2 * $expire_min[CACHE_GAMES], DEFAULT_MIN_REQ_IVAL );
+      $exp_min = min( 2 * $expire_min[QST_CACHE_GAMES], DEFAULT_MIN_REQ_IVAL );
 
-   $expire_min[CACHE_GAMES] = $exp_min;
-   $expire_time[CACHE_GAMES] = $GLOBALS['NOW'] + $exp_min * 60;
+   $expire_min[QST_CACHE_GAMES] = $exp_min;
+   $expire_time[QST_CACHE_GAMES] = $GLOBALS['NOW'] + $exp_min * 60;
 }//print_status_games
 
 function print_mpg( $player_row )
 {
    global $nothing_found, $expire_time, $expire_min;
+
+   append_data(QST_CACHE_MPG); //clear block
 
    if( $player_row['GamesMPG'] > 0 )
    {
@@ -441,7 +410,7 @@ function print_mpg( $player_row )
       $result = db_query( "quick_status.find_mp_games($player_id)", $query );
 
       // MP-game-header: type=MPG, game.ID, game_type, Ruleset, Size, Lastchanged, ReadyToStart
-      append_data(CACHE_MPG,
+      append_data(QST_CACHE_MPG,
          "## MPG,game_id,game_type,ruleset,size,'lastchanged_date',ready_to_start\n" );
 
       while( $row = mysql_fetch_assoc($result) )
@@ -451,7 +420,7 @@ function print_mpg( $player_row )
          $cnt_players = MultiPlayerGame::determine_player_count($row['GamePlayers']);
 
          // type, game.ID, game_type, Ruleset, Size, Lastchanged, ReadyToStart
-         append_data(CACHE_MPG,
+         append_data(QST_CACHE_MPG,
               sprintf( "MPG,%s,%s,%s,%s,'%s',%s\n",
                        $row['ID'],
                        GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
@@ -462,7 +431,7 @@ function print_mpg( $player_row )
       mysql_free_result($result);
    }
 
-   $expire_time[CACHE_MPG] = $GLOBALS['NOW'] + $expire_min[CACHE_MPG] * 60;
+   $expire_time[QST_CACHE_MPG] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_MPG] * 60;
 }//print_mpg
 
 
@@ -482,6 +451,7 @@ function write_quick_status_datastore( $path, $header )
    return $cnt;
 }//write_quick_status_datastore
 
+// returns true, if some block-cache has to be cleared
 function parse_cache_content( $content )
 {
    global $version, $datablocks, $load_data, $expire_time, $expire_min, $crc32, $NOW;
@@ -503,6 +473,48 @@ function parse_cache_content( $content )
          $load_data[$block] = false; // take from cache
       }
    }
+
+   // handle clear-cache commands, appended by write-operations on objects: B, M, G MPG (see QST_CACHE_...)
+   $clear_cache = false;
+   while( preg_match("/^CLEAR (\S+)\n+(.*?)$/s", $pcont, $matches) )
+   {
+      list( $tmp, $block, $rem_pcnt ) = $matches;
+      $pcont = $rem_pcnt;
+      $load_data[$block] = true; // clear cache for block
+      $clear_cache = true;
+   }
+   return $clear_cache;
 }//parse_cache_content
+
+function slashed($string)
+{
+   return str_replace( array( '\\', '\''), array( '\\\\', '\\\''), $string );
+}
+
+function loc_start_page( $use_cache=true )
+{
+   global $encoding_used, $NOW;
+   ob_start('ob_gzhandler');
+
+   header('Content-Type: text/plain;charset='.$encoding_used);
+   // this one open the text/plain in the browser by default
+   // this one exist and put a costume of binary on the text
+   //header( 'Content-type: application/octet-stream' );
+
+   //header( "Content-Disposition: inline; filename=\"$filename\"" );
+   //header( "Content-Disposition: attachment; filename=\"$filename\"" );
+   header( "Content-Description: PHP Generated Data" );
+
+   if( $use_cache )
+   {
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60)); // 5min
+      header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
+   }
+}//loc_start_page
+
+function loc_end_page()
+{
+   ob_end_flush();
+}
 
 ?>

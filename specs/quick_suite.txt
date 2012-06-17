@@ -1791,14 +1791,45 @@ Important Notes:
 
      There also is the normal browser-caching, see also option <CACHE> below.
      The caching describe in this note is something different from that and will only kick-in
-     when the browser does not take the data from its own cache (and the server is actually asked).
+     when the browser does not take the data from its own cache (and the server is asked).
 
      For testing purpose on test-servers, the progressive block-specific caching can be deactivated.
      For the live-server disabling is not possible. See also option <CACHE> below.
 
-     The quick-status page should not be called more than once per minute.
-     If a client does that regardless, the following warning (with 'userid' replaced)
-     is prepending the data, that is taken from the cache:
+     The following "writing-operations" will invalidate the QST-cache for the respective users:
+
+         * Operations are covered by all interfaces: web-site, quick-play and quick-do-suite
+
+         * status-games block is invalidated on (for web-site, quick-play and quick-do-suite):
+            - start a game by joining waiting-room-game or accepting invitation or started MP-game
+            - finish a running game by user or timeout
+            - delete a running game by user or admin
+            - move in a running game (play, resign, delete, pass, score)
+            - save change during fair-komi negotation
+            - changing the game-priority for ordering status-games
+
+         * private-messages block is invalidated on:
+            - new message of single and bulk type for sender and receivers
+            - read message (moving it away from NEW-folder)
+            - move message into different folder
+
+         * bulletins block is invalidated on:
+            - mark bulletin as read
+
+         * multi-player-games block is invalidated on:
+            - accept or reject invitation
+            - start MP-game
+
+     [INTERNAL NOTE:
+         The invalidation is done by appending a "CLEAR <block>" to an existing cache-file.
+         The values for "<block>" are B=bulletin, G=games, M=messages, MPG=MP-games.
+         See also QST_CACHE_.. consts.
+     ]
+
+     It is recommended, that the quick-status page should not be called more than once per minute.
+     If a client does that regardless AND no specific block in the cache was invalidated,
+     the following warning (with 'userid' replaced) is prepending the data, indicating that the
+     data is taken from the cache:
 
         [#Warning: excessive_usage; quick_status.returning_cached_data(userid).see_faq[http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302]]
 
