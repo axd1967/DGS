@@ -1797,6 +1797,7 @@ class ForumPost
          'UNIX_TIMESTAMP(P.Time) AS X_Time',
          'UNIX_TIMESTAMP(P.Lastchanged) AS X_Lastchanged',
          'UNIX_TIMESTAMP(P.Lastedited) AS X_Lastedited',
+         'IF(P.Time>P.Lastedited,P.Time,P.Lastedited) as X_MaxEdit', // for order-by modication-date
          'PAuthor.Name AS Author_Name',
          'PAuthor.Handle AS Author_Handle',
          'PAuthor.Rating2 AS Author_Rating',

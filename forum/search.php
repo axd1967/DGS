@@ -86,8 +86,8 @@ require_once( "include/filterlib_mysqlmatch.php" );
       0 => 'Score DESC, Time DESC',
       1 => 'Time DESC',
       2 => 'Time ASC',
-      3 => 'P.Lastchanged DESC',
-      4 => 'P.Lastchanged ASC',
+      3 => 'X_MaxEdit DESC',
+      4 => 'X_MaxEdit ASC',
    );
    if( !is_numeric($order) || $order < 0 || $order >= count($arr_order) )
       $order = 0;
