@@ -40,6 +40,7 @@ define('MINI_SPACING',  '&nbsp;');
 define('MED_SPACING',   '&nbsp;&nbsp;');
 define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 define('SEP_SPACING',   SMALL_SPACING.'|'.SMALL_SPACING);
+define('DASH_SPACING',  SMALL_SPACING.'-'.SMALL_SPACING);
 define('SEP_MEDSPACING',   MED_SPACING.'|'.MED_SPACING);
 
 define('COUNTNEW_RECALC', 'recalc');

@@ -1380,6 +1380,12 @@ class ForumThread
       return (isset($this->posts[$pid])) ? $this->posts[$pid] : NULL;
    }
 
+   /*! \brief Returns thread-hits or 0 if thread has no posts. */
+   function get_thread_hits()
+   {
+      return (is_null($this->thread_post)) ? 0 : $this->thread_post->count_hits;
+   }
+
 
    /*!
     * \brief Loads and adds posts (to posts-arr): query fields and FROM set,

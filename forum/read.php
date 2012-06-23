@@ -164,9 +164,6 @@ require_once( 'forum/post.php' );
          $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
          T_('Show overview#threadoverview') );
    }
-   $headline2 = array(
-      $headtitle2 => "colspan={$disp_forum->cols}"
-   );
 
 
    // load thread/post-data
@@ -237,6 +234,10 @@ require_once( 'forum/post.php' );
    }
 
    // headline2 = no thread tree-overview
+   $headtitle2 .= DASH_SPACING . '(' . sprintf(T_('%s hits#fthread'), $fthread->get_thread_hits()) . ')';
+   $headline2 = array(
+      $headtitle2 => "colspan={$disp_forum->cols}"
+   );
    $disp_forum->headline = ( $show_overview ) ? $headline1 : $headline2;
    $disp_forum->forum_start_table('Read');
 
