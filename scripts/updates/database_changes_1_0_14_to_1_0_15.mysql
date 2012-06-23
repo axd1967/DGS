@@ -2411,3 +2411,8 @@ UPDATE Players
    SET LastQuickAccess = LastMove WHERE LastMove >0 AND LastQuickAccess < LastMove AND TIME_TO_SEC(TIMEDIFF(Lastaccess,LastMove)) < 0 ;
 
 
+-- rename users with spaces in Handle: 1. find them, 2. contact them, 3. rename Handle via user-admin-page
+SELECT ID, Handle, Email, Lastaccess, Running, LastMove
+   FROM Players WHERE Handle LIKE '% %' ORDER BY Lastaccess ;
+
+
