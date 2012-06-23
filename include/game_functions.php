@@ -569,6 +569,8 @@ class MultiPlayerGame
 
       MultiPlayerGame::change_player_mpg_count( "$dbgmsg.init_multi_player_game", $gid, $uid, 1 );
       MultiPlayerGame::change_joined_players( $dbgmsg, $gid, 1 );
+
+      clear_cache_quick_status( $uid, QST_CACHE_MPG );
    }
 
    /*!
@@ -588,7 +590,19 @@ class MultiPlayerGame
 
       MultiPlayerGame::change_player_mpg_count( "$dbgmsg.join_waitingroom_game", $gid, $uid, 1 );
       MultiPlayerGame::change_joined_players( $dbgmsg, $gid, 1 );
+
+      $master_uid = MultiPlayerGame::load_master_uid( "$dbgmsg.join_wrgame", $gid );
+      if( $master_uid > 0 )
+         clear_cache_quick_status( $master_uid, QST_CACHE_MPG );
    }//join_waitingroom_game
+
+   /*! \brief Returns master-uid for given game-id; or else 0 if nothing found. */
+   function load_master_uid( $dbgmsg, $gid )
+   {
+      $grow = mysql_single_fetch( "$dbgmsg.load_master_uid($gid)",
+            "SELECT ToMove_ID from Games WHERE ID=$gid LIMIT 1");
+      return ( $grow ) ? (int)@$grow['ToMove_ID'] : 0;
+   }//load_master_uid
 
    /*! \brief Changes number of joined players of MP-game (store in Games.Moves). */
    function change_joined_players( $dbgmsg, $gid, $diff )
