@@ -293,11 +293,29 @@ function cmp_int( $a, $b )
       return 1;
 }
 
-/*! \brief Cuts string after $len chars, append $hardcut if set and str-len > $len. */
-function cut_str( $str, $len, $hardcut='...' )
+/*!
+ * \brief Cuts string after $len chars, append $hardcut if set and str-len > $len.
+ * \param $handle_entities keeps HTML-entities intact if true; strings like '&quot;' may end up cut if false
+ */
+function cut_str( $str, $len, $handle_entities=true, $hardcut='...' )
 {
-   return substr($str, 0, $len) . ($hardcut && strlen($str) > $len ? $hardcut : '' );
-}
+   $s = substr($str, 0, $len);
+
+   if( $handle_entities )
+   {
+      $pos = strrpos($s, '&');
+      if( $pos !== false && preg_match("/(\\&(#\\d+|[a-z]+);)/i", substr($str,$pos), $matches) )
+      {
+         if( $pos + strlen($matches[1]) > $len )
+            $s = substr($s, 0, $pos) . $matches[1];
+      }
+   }
+
+   if( $hardcut && strlen($str) > $len )
+      $s .= $hardcut;
+
+   return $s;
+}//cut_str
 
 /**
  * [Rod] I've noticed that we can't know what is the encoding used at input time

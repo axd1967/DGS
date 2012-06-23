@@ -891,7 +891,7 @@ class DisplayForum
          if( $hidden && !$post->is_thread_post() && !$show_hidden_post )
             continue;
 
-         $subj_part = cut_str( $post->subject, 40, ' ...' );
+         $subj_part = cut_str( $post->subject, 40 );
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
          $newstr = ( !$hidden && !$post->is_read ) ? $this->get_new_string(NEWMODE_OVERVIEW) : '';
          $modstr = ( $hidden && ( $post->is_thread_post() || $this->is_moderator || $is_my_post ) )
@@ -1748,7 +1748,7 @@ class ForumPost
          . "#hits=[{$this->count_hits}], "
          . "last_post_id=[{$this->last_post_id}], "
          . "subject=[{$this->subject}], "
-         . 'text..=[' . cut_str($this->text, 30, '..], ')
+         . 'text..=[' . cut_str($this->text, 30, false, '..], ')
          . 'author={' . ( is_null($this->author) ? 'null' : $this->author->to_string() ) . '}, '
          . "parent_id=[{$this->parent_id}], "
          . "answer#=[{$this->answer_num}], "
