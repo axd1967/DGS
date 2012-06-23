@@ -171,6 +171,7 @@ function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw, $gsc )
 function handle_add_game( $my_id, $viewmode )
 {
    global $player_row, $NOW;
+   $is_save_tmpl = (@$_REQUEST['save_template'] );
 
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'new_game.handle_add_game');
@@ -349,12 +350,13 @@ function handle_add_game( $my_id, $viewmode )
    if( ($weekendclock = @$_REQUEST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
+   $adj_rating = !$is_save_tmpl;
    if( $is_std_go )
-      list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range();
+      list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range( /*mpg*/false, $adj_rating );
    else
    {
       // enforce defaults for template-saving
-      list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range( /*mpg*/true, '30 kyu', '9 dan' );
+      list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range( /*mpg*/true, $adj_rating, '30 kyu', '9 dan' );
    }
 
    $min_rated_games = limit( (int)@$_REQUEST['min_rated_games'], 0, 999, 0 ); // 3-chars max.
@@ -395,7 +397,7 @@ function handle_add_game( $my_id, $viewmode )
 
 
    // handle save-template
-   if( @$_REQUEST['save_template'] )
+   if( $is_save_tmpl )
    {
       // convert form-values into GameSetup to save as template
       $gs = new GameSetup( 0 );

@@ -3828,10 +3828,11 @@ function get_gamesettings_viewmode( $viewmode )
    return @$ARR[$viewmode];
 }
 
+// param $adjust true = adjust by +-50, use false when saving template to keep orig-values
 // return arr( $must_be_rated, $rating1, $rating2 ) ready for db-insert
 // note: multi-player-game requires rated game-players (RatingStatus != NONE),
 //       see also append_form_add_waiting_room_game()-func
-function parse_waiting_room_rating_range( $is_multi_player_game=false, $arg_rating1=null, $arg_rating2=null )
+function parse_waiting_room_rating_range( $is_multi_player_game=false, $adjust=true, $arg_rating1=null, $arg_rating2=null )
 {
    if( !$is_multi_player_game && get_request_arg('must_be_rated') != 'Y' )
    {
@@ -3853,8 +3854,11 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false, $arg_rati
       if( $rating2 < $rating1 )
          swap( $rating1, $rating2 );
 
-      $rating1 -= 50;
-      $rating2 += 50;
+      if( $adjust )
+      {
+         $rating1 -= 50;
+         $rating2 += 50;
+      }
    }
 
    return array( $MustBeRated, $rating1, $rating2 );
@@ -3874,12 +3878,16 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
    if( $read_args ) // read init-vals from URL (for rematch / profile-template)
    {
       $must_be_rated = ( @$_REQUEST['mb_rated'] == 'Y' );
-      $url_rat_min = (isset($_REQUEST['rat1'])) ? (int) $_REQUEST['rat1'] : OUT_OF_RATING;
-      $url_rat_max = (isset($_REQUEST['rat2'])) ? (int) $_REQUEST['rat2'] : OUT_OF_RATING;
-      if( $url_rat_min < OUT_OF_RATING )
+      if( isset($_REQUEST['rat1']) )
+      {
+         $url_rat_min = limit( (int) $_REQUEST['rat1'], MIN_RATING, RATING_9DAN, MIN_RATING );
          $rating_min = echo_rating( $url_rat_min, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
-      if( $url_rat_max < OUT_OF_RATING )
+      }
+      if( isset($_REQUEST['rat2']) )
+      {
+         $url_rat_max = limit( (int) $_REQUEST['rat2'], MIN_RATING, RATING_9DAN, RATING_9DAN );
          $rating_max = echo_rating( $url_rat_max, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
+      }
       $min_rated_games = (int) @$_REQUEST['min_rg'];
       $same_opponent = (int) @$_REQUEST['same_opp'];
       $comment = trim(@$_REQUEST['comment']);
