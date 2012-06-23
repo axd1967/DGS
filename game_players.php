@@ -139,7 +139,7 @@ define('KEY_GROUP_ORDER', 'gpo');
          }
          elseif( $cmd == CMD_INVITE ) // invitation
          {
-            $to_handle = get_request_arg('to');
+            $to_handle = trim(get_request_arg('to'));
             list( $errors, $to_uid, $to_handle ) = check_invite( $to_handle );
             if( $is_save && count($errors) == 0 )
                add_invitation_mpgame( $gid, $to_uid );
@@ -1205,7 +1205,10 @@ function check_invite( $invite_handle )
 
    $errors = array();
    if( (string)$invite_handle == '' ) // nothing to check
+   {
+      $errors[] = ErrorCode::get_error_text('unknown_user');
       return array( $errors, 0, $invite_handle );
+   }
 
    // load user
    $invite_user = User::load_user_by_handle( $invite_handle );
