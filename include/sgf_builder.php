@@ -155,6 +155,7 @@ class SgfBuilder
    var $dead_stone_prop;
    var $points;
    var $next_color;
+   var $last_prop;
 
    var $prop_type; // root | setup | force_node | move
 
@@ -208,6 +209,7 @@ class SgfBuilder
       $this->dead_stone_prop = '';
       $this->points = array();
       $this->next_color = 'B';
+      $this->last_prop = '';
 
       $this->prop_type = 'root';
 
@@ -215,12 +217,14 @@ class SgfBuilder
       $this->SGF = '';
    }
 
-   function echo_sgf( $sgf_text )
+   function echo_sgf( $sgf_text, $last_prop=0 )
    {
       if( $this->use_buffer )
          $this->SGF .= $sgf_text;
       else
          echo $sgf_text;
+      if( $last_prop )
+         $this->last_prop = $last_prop;
    }
 
    function sgf_echo_prop( $prop )
@@ -244,17 +248,24 @@ class SgfBuilder
       }
       else
          $this->echo_sgf( $prop );
-   }
+      $this->last_prop = $prop;
+   }//sgf_echo_prop
 
    function sgf_echo_comment( $comment, $check_empty=true )
    {
       $comment = trim($comment);
-      if( $check_empty && (string)$comment == '' )
-         return false;
+      if( (string)$comment == '' )
+      {
+         if( $check_empty )
+            return false;
+         elseif( $this->last_prop == 'C' )
+            return false;
+      }
       $this->echo_sgf( "\nC[" .
          str_replace( "]","\\]",
             str_replace("\\","\\\\", reverse_htmlentities($comment) ))
          . "]" );
+      $this->last_prop = 'C';
       return true;
    }
 
@@ -294,7 +305,7 @@ class SgfBuilder
       }
 
       return true;
-   }
+   }//sgf_echo_point
 
 
    function load_game_info()
@@ -579,14 +590,16 @@ class SgfBuilder
 
       $this->echo_sgf(
          "\nSZ[$Size]" .
-         "\nKM[$Komi]" );
+         "\nKM[$Komi]",
+         /*lastprop*/'KM' );
 
       if( $Handicap > 0 && $this->use_HA )
-         $this->echo_sgf( "\nHA[$Handicap]" );
+         $this->echo_sgf( "\nHA[$Handicap]", /*lastprop*/'HA' );
 
       if( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
-         $this->echo_sgf( "\nRE[" . SgfBuilder::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]" );
+         $this->echo_sgf( "\nRE[" . SgfBuilder::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]",
+            /*lastprop*/'RE' );
       }
    }//build_sgf_start
 
@@ -802,7 +815,7 @@ class SgfBuilder
                      $this->next_color = SgfBuilder::switch_move_color( $color );
 
                      if( $this->sgf_score_highlight & 1 )
-                        $this->echo_sgf( "N[$color SCORE]" );
+                        $this->echo_sgf( "N[$color SCORE]", /*lastprop*/'N' );
 
                      if( $this->sgf_score_highlight & 2 )
                         $this->node_com .= "\n$color SCORE";
@@ -818,7 +831,7 @@ class SgfBuilder
                         $this->echo_sgf( "[]" ); //do not use [tt]
 
                         if( $this->sgf_pass_highlight & 1 )
-                           $this->echo_sgf( "N[$color PASS]" );
+                           $this->echo_sgf( "N[$color PASS]", /*lastprop*/'N' );
 
                         if( $this->sgf_pass_highlight & 2 )
                            $this->node_com .= "\n$color PASS";
@@ -853,7 +866,7 @@ class SgfBuilder
       $this->echo_sgf( "[]" ); // add 3rd pass
 
       if( $this->include_node_name )
-         $this->echo_sgf( "N[RESULT]" ); //Node start
+         $this->echo_sgf( "N[RESULT]", /*lastprop*/'N' ); //Node start
       $this->prop_type = '';
 
       // highlighting result in last comments:
@@ -899,7 +912,7 @@ class SgfBuilder
          $this->node_com .= "\n\nNotes - $player_txt:\n" . $notes ;
       }
 
-      $this->sgf_echo_comment( $this->node_com, false ); // no empty-check
+      $this->sgf_echo_comment( $this->node_com );
       $this->node_com = '';
 
       $this->echo_sgf( "\n)\n" );
