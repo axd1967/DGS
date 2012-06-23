@@ -488,27 +488,51 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $html_mode = ( $Status == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
 
+   // determine mpg_uid (user of current/selected move + move-color) for last-move & comment-info
+   if( $is_mp_game )
+   {
+      list( $group_color, $group_order, $move_color ) =
+         MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $move, $Handicap, -1 );
+      $mpg_uid = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
+   }
+   else
+      $mpg_uid = $move_color = 0;
+
+   $opponent_ID = 0;
    if( $my_game || $my_mpgame )
    {
-      if( $my_id == $Black_ID )
+      if( $is_mp_game )
       {
-         $my_color = 'B';
-         $opponent_ID = $White_ID;
-         $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
+         if( $my_id == $mpg_uid ) // last-move-user of selected move
+            $movemsg = make_html_safe($movemsg, 'gameh');
+         else
+         {
+            if( !$my_mpgame )
+               $movemsg = game_tag_filter($movemsg);
+            $movemsg = make_html_safe($movemsg, $html_mode);
+         }
       }
-      elseif( $my_id == $White_ID )
+      else // std-game
       {
-         $my_color = 'W';
-         $opponent_ID = $Black_ID;
-         $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
-      }
-      else
-      {
-         $opponent_ID = 0;
-         if( !$my_mpgame )
+         if( $my_id == $Black_ID )
+         {
+            $my_color = 'B';
+            $opponent_ID = $White_ID;
+            $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
+         }
+         elseif( $my_id == $White_ID )
+         {
+            $my_color = 'W';
+            $opponent_ID = $Black_ID;
+            $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
+         }
+         else
+         {
             $movemsg = game_tag_filter($movemsg);
-         $movemsg = make_html_safe($movemsg, $html_mode);
+            $movemsg = make_html_safe($movemsg, $html_mode);
+         }
       }
+
 
       $cfgsize_notes = $cfg_board->get_cfgsize_notes( $Size );
       $notesheight = $cfg_board->get_notes_height( $cfgsize_notes );
@@ -565,8 +589,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    else // !$my_game
    {
-      $opponent_ID= 0;
-      $movemsg = game_tag_filter( $movemsg);
+      $movemsg = game_tag_filter($movemsg);
       $movemsg = make_html_safe($movemsg, $html_mode );
       $show_notes = false;
       $noteshide = 'Y';
@@ -1200,12 +1223,7 @@ function draw_game_info( &$game_row, $game_setup, $board, $tourney )
    //multi-player-game rows
    if( $game_row['GameType'] != GAMETYPE_GO )
    {
-      global $move, $player_row;
-
-      list( $group_color, $group_order, $move_color ) =
-         MultiPlayerGame::calc_game_player_for_move(
-            $game_row['GamePlayers'], $move, $game_row['Handicap'], -1 );
-      $mpg_uid = GamePlayer::load_uid_for_move( $game_row['ID'], $group_color, $group_order );
+      global $mpg_uid, $move_color;
 
       echo "<tr id=\"gameRules\">\n"
          , '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n"
