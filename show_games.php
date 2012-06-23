@@ -990,9 +990,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    if( $is_other ) //RU+FU (other)
    {
       if( !$running )
-         $menu_array[T_('Users running games')] = $page."uid=$uid".URI_AMP.$row_str;
+         $menu_array[T_('User\'s running games')] = $page."uid=$uid".URI_AMP.$row_str;
       if( !$finished )
-         $menu_array[T_('Users finished games')] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
+         $menu_array[T_('User\'s finished games')] = $page."uid=$uid".URI_AMP."finished=1".URI_AMP.$row_str;
    }
 
    if( $is_mine || $need_my_games ) //RU+FU (mine)
