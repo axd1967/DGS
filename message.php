@@ -568,6 +568,8 @@ define('MSGBOXROWS_INVITE', 6);
    echo "\n</center>\n";
 
    $menu_array = array();
+   if( preg_match("/^(InviteDisputed|ShowInvite|ShowMyInvite|Invite|Dispute)$/", $submode) )
+      $menu_array[T_('Shapes#shape')] = 'list_shapes.php';
    ProfileTemplate::add_menu_link( $menu_array, $arg_to );
 
    end_page(@$menu_array);
