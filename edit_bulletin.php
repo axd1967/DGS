@@ -207,8 +207,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform->add_row( array(
          'DESCRIPTION', T_('Expire Time'),
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE ) .
-                                  ', ' . T_('can be empty#bulletin_expire')), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));
@@ -330,14 +329,7 @@ function parse_edit_form( &$bulletin )
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
       {
-         $mindays = 7;
-         $maxdays = 100;
-         if( ($parsed_value < $GLOBALS['NOW'] + $mindays * SECS_PER_DAY )
-               || ($parsed_value > $GLOBALS['NOW'] + $maxdays * SECS_PER_DAY ) )
-         {
-            $errors[] = sprintf( T_('Expire-time must be within %s days.'), "[$mindays..$maxdays]" );
-         }
-         else
+         if( GuiBulletin::check_expiretime( $bulletin, $parsed_value, $errors ) )
          {
             $bulletin->ExpireTime = $parsed_value;
             $vars['expire_time'] = formatDate($bulletin->ExpireTime);
@@ -347,7 +339,7 @@ function parse_edit_form( &$bulletin )
          $errors[] = $parsed_value;
 
       $new_value = trim($vars['subject']);
-      if( strlen($new_value) < 8 )
+      if( strlen($new_value) < 4 )
          $errors[] = T_('Bulletin subject missing or too short');
       else
          $bulletin->Subject = $new_value;

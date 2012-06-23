@@ -186,6 +186,11 @@ class Bulletin
       $this->TargetType = $target_type;
    }
 
+   function is_user_bulletin()
+   {
+      return ($this->Flags & BULLETIN_FLAG_USER_EDIT);
+   }
+
    /*! \brief Inserts or updates Bulletin-entry in database. */
    function persist()
    {

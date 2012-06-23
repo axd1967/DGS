@@ -210,5 +210,21 @@ class GuiBulletin
          "</div>\n";
    }//build_view_bulletin
 
+   function check_expiretime( $bulletin, $parsed_expiretime, &$errors )
+   {
+      static $mindays = 7, $maxdays = 100;
+
+      if( $bulletin->is_user_bulletin() ) {
+         if( ($parsed_expiretime < $GLOBALS['NOW'] + $mindays * SECS_PER_DAY )
+               || ($parsed_expiretime > $GLOBALS['NOW'] + $maxdays * SECS_PER_DAY ) )
+         {
+            $errors[] = sprintf( T_('Expire-time must be within %s days.'), "[$mindays..$maxdays]" );
+            return false;
+         }
+      }
+
+      return true;
+   }//check_expiretime
+
 } // end of 'GuiBulletin'
 ?>

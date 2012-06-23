@@ -25,8 +25,9 @@ Permission-Matrix for writing bulletins:
    to whom (TargetType) ?
 
    - NOTES:
-     - normal user can NOT create bulletin, but Admin must create and assign it
-       to the author setting USER_EDIT-flag. Then user can update it!
+     - normal user can NOT create bulletin (except PRIV_MSG for MP-games),
+       but Admin must create and assign it to the author setting USER_EDIT-flag.
+       Then user can update it!
 
    - Category = MAINT : server maintenance announcements
      - create allowed by Admin; Target: ALL, UL, MPG
