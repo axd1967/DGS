@@ -2063,9 +2063,11 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
                      $tmp.ALLOWED_LT."/span".ALLOWED_GT, $msg);
          }
          else // hide hidden sgf comments
+         {
             $msg = trim(preg_replace(
                   '%'.ALLOWED_LT.'h(idden)? *'.ALLOWED_GT.'(.*?)'.ALLOWED_LT.'/h(idden)? *'.ALLOWED_GT.'%is',
                   '', $msg));
+         }
 
 
          $msg = preg_replace('%'.ALLOWED_LT.'(c(omment)?) *'.ALLOWED_GT.'%i',
