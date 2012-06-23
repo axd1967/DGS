@@ -663,7 +663,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $qsql->add_part( SQLP_FIELDS,
             'oppRlog.RatingDiff AS oppRatingDiff' );
          $qsql->add_part( SQLP_FROM,
-            "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=Games.ID AND oppRlog.uid=$uid" );
+            "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=Games.ID AND oppRlog.uid=Games.White_ID+Games.Black_ID-$uid" );
          $qsql->add_part( SQLP_WHERE, "Games.Status='".GAME_STATUS_FINISHED."'" );
 
          if( $load_user_ratingdiff && !$mp_game ) // opp is always user for MP-game
@@ -671,7 +671,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $qsql->add_part( SQLP_FIELDS,
                'userRlog.RatingDiff AS userRatingDiff' );
             $qsql->add_part( SQLP_FROM,
-               "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=Games.ID AND userRlog.uid=Games.White_ID+Games.Black_ID-$uid" );
+               "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=Games.ID AND userRlog.uid=$uid" );
          }
       }
       else if( $running ) //RU ?UNION
@@ -901,16 +901,14 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             if( $gtable->Is_Column_Displayed[25] )
             {
                if( isset($oppRatingDiff) )
-                  $grow_strings[25] = ( $oppRatingDiff > 0 ? '+' : '' )
-                     . sprintf( "%0.2f", $oppRatingDiff / 100 );
+                  $grow_strings[25] = ( $oppRatingDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $oppRatingDiff / 100 );
             }
             if( $gtable->Is_Column_Displayed[37] )
                $grow_strings[37] = echo_rating($userEndRating,true,$userID);
             if( $gtable->Is_Column_Displayed[38] )
             {
                if( isset($userRatingDiff) )
-                  $grow_strings[38] = ( $userRatingDiff > 0 ? '+' : '' )
-                     . sprintf( "%0.2f", $userRatingDiff / 100 );
+                  $grow_strings[38] = ( $userRatingDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $userRatingDiff / 100 );
             }
 
             if( $gtable->Is_Column_Displayed[41] && ($X_GameFlags & GAMEFLAGS_HIDDEN_MSG) )
