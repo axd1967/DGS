@@ -129,11 +129,11 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( "7d left", TimeFormat::echo_onvacation( 7, TIMEFMT_ENGL | TIMEFMT_SHORT ));
       $this->assertEquals( "7d&nbsp;left", TimeFormat::echo_onvacation( 7, TIMEFMT_ENGL | TIMEFMT_SHORT | TIMEFMT_HTMLSPC ));
       $this->assertEquals( "7 days left", TimeFormat::echo_onvacation( 7, TIMEFMT_ENGL ));
-      $this->assertEquals( "7 Tage uebrig", TimeFormat::echo_onvacation( 7, 0 ));
+      $this->assertEquals( "7 Tage left", TimeFormat::echo_onvacation( 7, 0 ));
       $this->assertEquals( "3d 12h left", TimeFormat::echo_onvacation( 3.5, TIMEFMT_ENGL | TIMEFMT_SHORT ));
       $this->assertEquals( "12h left", TimeFormat::echo_onvacation( 0.5, TIMEFMT_ENGL | TIMEFMT_SHORT ));
-      $this->assertEquals( "3 Tage und 12 Stunden uebrig", TimeFormat::echo_onvacation( 3.5, 0 ));
-      $this->assertEquals( "1 Tag uebrig", TimeFormat::echo_onvacation( 1, 0 ));
+      $this->assertEquals( "3 Tage und 12 Stunden left", TimeFormat::echo_onvacation( 3.5, 0 ));
+      $this->assertEquals( "1 Tag left", TimeFormat::echo_onvacation( 1, 0 ));
       $this->assertEquals( NO_VALUE, TimeFormat::echo_onvacation( 0, TIMEFMT_ENGL | TIMEFMT_SHORT ));
       $this->assertEquals( "abc", TimeFormat::echo_onvacation( 0, TIMEFMT_ENGL | TIMEFMT_SHORT, "abc" ));
       $this->assertEquals( "0 hours left", TimeFormat::echo_onvacation( 0, TIMEFMT_ENGL | TIMEFMT_ZERO ));
