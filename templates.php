@@ -82,7 +82,7 @@ define('FACT_CANCEL', 'cancel');
       $replace = (int)@$_REQUEST['replace'];
       list( $errors, $replace_name ) = check_save_template( $arr_profiles, $name, $replace );
       if( !is_null($replace_name) )
-         $auto_name = $replace_name;
+         $name = $auto_name = $replace_name;
 
       if( count($errors) == 0 ) // save
       {
@@ -257,12 +257,7 @@ function check_save_template( $arr_profiles, $name, $replace )
       $errors[] = sprintf( T_('Data to store for template exceeds limit of %s bytes (by %s bytes)!#tmpl'),
          MAX_PROFILE_TEMPLATES_DATA, $datalen - MAX_PROFILE_TEMPLATES_DATA );
 
-   $miss_name = false;
-   if( (string)$name == '' )
-   {
-      $errors[] = T_('Missing name for template!#tmpl');
-      $miss_name = true;
-   }
+   $miss_name = ( (string)$name == '' );
 
    if( !is_null($arr_profiles) )
    {
@@ -301,8 +296,9 @@ function check_save_template( $arr_profiles, $name, $replace )
       if( !$can_replace )
          $errors[] = T_('Replace selection is faulty, because the entry to replace does not exist for this user.#tmpl');
    }
-   if( $miss_name && !is_null($replace_miss_name) )
-      $errors[] = T_('Missing name has been taken from template to be replaced.#tmpl');
+
+   if( $miss_name && is_null($replace_miss_name) )
+      $errors[] = T_('Missing name for template!#tmpl');
 
    return array( $errors, $replace_miss_name );
 }//check_save_template
