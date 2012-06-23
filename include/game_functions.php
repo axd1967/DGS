@@ -3666,6 +3666,9 @@ function adjust_handicap( $handicap, $adj_handicap, $min_handicap=0, $max_handic
    elseif( $handicap > $max_handicap )
       $handicap = $max_handicap;
 
+   if( $handicap == 1 )
+      $handicap = 0;
+
    return (int)$handicap;
 }
 
