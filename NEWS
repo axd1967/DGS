@@ -123,7 +123,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added link to <home list_bulletins.php?read=2&no_adm=1>Bulletins</home> in main-menu
       * Added bulletin-counter in main-menu with link to <home list_bulletins.php?text=1&view=1&no_adm=1>Unread Bulletins</home>
       * Added preferences in <home edit_profile.php>user-profile</home> for showing general bulletin categories
-      * Added optional expire-time handling for bulletins
+      * Added expire-time handling for bulletins (optional for admin-bulletins)
 
       * Added Bulletin-Editor to edit admin-created user-bulletins and to create bulletins by
 ##         * Tournament Directors for Tournament News on tournament-management pages
@@ -370,6 +370,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
             * previous parent post (<image f_prevparent.png>) and next parent post (<image f_nextparent.png>)
          * Fixed viewing of "missing" new posts while replying
          * Added Refresh-link in forum-bars to reload thread posts view
+         * Added thread hits in header line
          * Added short-version of rating for post-author
          * Mark Dragon executives with admin-icon (<image admin.gif>)
 

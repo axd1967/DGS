@@ -19,6 +19,78 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-06-23 juga
+
+   * message.php:
+   - added Shapes-link on SendMsg-page for invitation-related messages
+
+   * forum/forum_functions.php (DisplayForum.draw_overview, ~.to_string),
+     include/utilities.php (cut_str):
+   - fix bug: do not cut HTML-entities in two
+
+   * include/globals.php (DASH_SPACING),
+     forum/forum_functions.php (ForumThread.get_thread_hits),
+     forum/read.php:
+   - show thread-hits on thread-posts-view
+
+   * include/game_functions.php (adjust_handicap):
+   - fix bug for adjusting handicap: replace handicap of 1 stone with 0 stones
+
+   * templates.php (check_save_template):
+   - when replacing existing template the name is taken from the existing template
+     if not given to rename
+
+   * include/game_functions.php (parse_waiting_room_rating_range, append_form_add_waiting_room_game),
+     new_game.php (handle_add_game):
+   - fix bug saving new-game-template with required rating-range:
+     - restricting min/max-rating when saving as and reading from template
+     - don't adjust min/max-rating by half a rank when saving as template
+-----------
+# fix existing Profiles (Type=29) by rounding to 100-value for min/max-rating limits
+-----------
+
+   * include/sgf_builder.php (class SgfBuilder, ~.echo_sgf, ~.sgf_echo_prop, ~.sgf_echo_comment,
+       ~.build_sgf_start, ~.build_sgf_moves, ~.build_sgf_result, ~.build_sgf_end):
+   - fix bug: omit double empty comment-property C[]
+
+   * include/gui_bulletin.php (GuiBulletin.check_expiretime),
+     include/db/bulletin.php (Bulletin.is_user_bulletin),
+     admin_bulletin.php (parse_edit_form),
+     edit_bulletin.php (parse_edit_form),
+     specs/db/table-Bulletins.txt:
+   - fix bug: expire-time for admin-bulletin is optional, but mandatory for user-bulletin
+   - reduced min. subject-length: 8 -> 4
+
+   * show_games.php:
+   - fix bug for user's finished games:
+     opponent- and user-rating-diff were switched using the wrong SQL
+
+   * game.php (draw_game_info):
+   - fix bug for MP-game:
+     - show hidden-comments to player of a particular move with move-message
+     - hide hidden-comments to others
+
+   * game_players.php (check_invite):
+   - fix bug for MP-game: handle as error when empty user-handle is used for invitation
+
+   * include/game_functions.php (MultiPlayerGame.init_multi_player_game,
+       ~.join_waitingroom_game, ~.load_master_uid):
+   - clear QST-cache (quick-status) for MP-games on writing-operations:
+     start MP-game, join MP-game
+
+   * show_games.php:
+   - typo in bottom-links: Users -> User's
+-----------
+# recreate translations with translation-scripts
+-----------
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+-----------
+-- rename users with spaces in Handle: 1. find them, 2. contact them, 3. rename Handle via user-admin-page
+SELECT ID, Handle, Email, Lastaccess, Running, LastMove
+   FROM Players WHERE Handle LIKE '% %' ORDER BY Lastaccess ;
+-----------
+
 2012-06-17 juga
 
 ### ----- release-1_0_15-20120608 -----
