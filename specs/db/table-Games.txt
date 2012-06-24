@@ -109,6 +109,9 @@ Description:
       - for available handicap-types and more details,
         see Waitingroom.Handicaptype in 'specs/db/table-Waitingroom.txt'
 
+      - value > 0 : OBSOLETE, positive value was indicator for FIX-color handicap-type
+        (was always identical to Black_ID, but it could have been any positive value)
+
    - for game on KOMI-status:
       - the player who must do the next bidding/choice for negotiating fair-komi
       - the JigoMode to be able to start a fair-komi after negotiation is saved
