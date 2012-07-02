@@ -338,13 +338,13 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       case HTYPE_CONV:
          if( !$iamrated || !$opprated )
             error('no_initial_rating', "$dbgmsg.check.conv_H.rating");
-         list( $handicap, $komi, $i_am_black ) = suggest_conventional( $my_rating, $opprating, $size);
+         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_conventional( $my_rating, $opprating, $size);
          break;
 
       case HTYPE_PROPER:
          if( !$iamrated || !$opprated )
             error('no_initial_rating', "$dbgmsg.check.prop.rating");
-         list( $handicap, $komi, $i_am_black ) = suggest_proper( $my_rating, $opprating, $size);
+         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_proper( $my_rating, $opprating, $size);
          break;
 
       // manual handicap-types

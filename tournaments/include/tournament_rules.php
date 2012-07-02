@@ -602,12 +602,12 @@ class TournamentRules
       switch( (string)$this->Handicaptype )
       {
          case TRULE_HANDITYPE_CONV:
-            list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black ) =
+            list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black, $is_nigiri ) =
                suggest_conventional( $ch_rating, $df_rating, $this->Size );
             break;
 
          case TRULE_HANDITYPE_PROPER:
-            list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black ) =
+            list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black, $is_nigiri ) =
                suggest_proper( $ch_rating, $df_rating, $this->Size );
             break;
 

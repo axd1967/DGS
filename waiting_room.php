@@ -306,6 +306,7 @@ require_once( 'include/classlib_userconfig.php' );
          $infoHandi = $Handicap;
          $infoKomi  = $Komi;
          $iamblack = '';
+         $info_nigiri = false;
          if( $iamrated && !$is_my_game && !$is_fairkomi ) // conv/proper/manual
          {
             $other_is_rated = ( $other_ratingstatus != RATING_NONE
@@ -313,10 +314,10 @@ require_once( 'include/classlib_userconfig.php' );
             if( $other_is_rated )
             {
                if( $Handicaptype == HTYPE_CONV )
-                  list( $infoHandi, $infoKomi, $iamblack ) =
+                  list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
                      suggest_conventional( @$player_row['Rating2'], $other_rating, $Size );
                elseif( $Handicaptype == HTYPE_PROPER )
-                  list( $infoHandi, $infoKomi, $iamblack ) =
+                  list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
                      suggest_proper( @$player_row['Rating2'], $other_rating, $Size );
             }
          }
@@ -386,7 +387,7 @@ require_once( 'include/classlib_userconfig.php' );
          if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
          {
             $colstr = determine_color( $GameType, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack,
-               $player_row['Handle'], $other_handle );
+               $info_nigiri, $player_row['Handle'], $other_handle );
 
             if( !$is_my_game && $GameType == GAMETYPE_GO && !$is_fairkomi )
             {
@@ -516,13 +517,13 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
    }
 }//add_old_game_form
 
-function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack, $my_handle, $opp_handle )
+function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack, $is_nigiri, $my_handle, $opp_handle )
 {
    global $base_path;
 
    if( $game_type != GAMETYPE_GO ) //MPG
       $colstr = image( $base_path.'17/y.gif', T_('Manual#color'), T_('Color set by game-master for multi-player-game#color') );
-   elseif( $Handicaptype == HTYPE_NIGIRI )
+   elseif( $Handicaptype == HTYPE_NIGIRI || $is_nigiri )
       $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color') );
    elseif( $Handicaptype == HTYPE_DOUBLE )
       $colstr = image( $base_path.'17/w_b.gif', T_('B+W#color'), T_('You play Black and White#color') );

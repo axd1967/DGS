@@ -1136,10 +1136,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
             $colortxt = build_image_double_game( true, $color_class );
          elseif( $gsc->calc_color == GSC_COL_FAIRKOMI )
             $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
-         elseif( $gsc->calc_color == GSC_COL_NIGIRI )
-            $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class);
          else
-            $colortxt = get_colortext_probable( ($gsc->calc_color == GSC_COL_BLACK) );
+            $colortxt = get_colortext_probable( ($gsc->calc_color == GSC_COL_BLACK), ($gsc->calc_color == GSC_COL_NIGIRI) );
 
          $itable->add_scaption( ($gsc->calc_type == 1) ? T_('Probable game settings') : T_('Game settings') );
 

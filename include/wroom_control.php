@@ -131,14 +131,14 @@ class WaitingroomControl
          case HTYPE_CONV:
             if( !$iamrated || !$opprated )
                error('no_initial_rating', "WC.join_waitingroom_game.conv($wr_id)");
-            list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
+            list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
                suggest_conventional( $my_rating, $opprating, $size);
             break;
 
          case HTYPE_PROPER:
             if( !$iamrated || !$opprated )
                error('no_initial_rating', "WC.join_waitingroom_game.proper($wr_id)");
-            list($game_row['Handicap'],$game_row['Komi'],$i_am_black ) =
+            list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
                suggest_proper( $my_rating, $opprating, $size);
             break;
 
