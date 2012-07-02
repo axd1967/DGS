@@ -212,7 +212,7 @@ function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
    if( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
 
    return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
-}
+}//suggest_proper
 
 // (handi,komi,iamblack,is_nigiri) = suggest_conventional(my_rating, $opp_rating, size)
 // NOTE: iamblack/is_nigiri is <>''
@@ -222,21 +222,24 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
 
    // Handicap value is about proportional to number of moves
    $H *= handicapfactor( $size);
-
    $handicap = round($H);
-   if( $handicap == 1 ) $handicap = 0;
 
-   $komi = ( $handicap == 0 ) ? STONE_VALUE / 2.0 : 0.5;
-
-   // NOTE: nigiri was used on handicap==0, but now manual-setup should be used for that
-   $is_nigiri = ( $rating_B == $rating_W );
-   if( $is_nigiri )
-      $iamblack = mt_rand(0,1); // nigiri on same rating
-   else
+   if( $handicap == 0 ) // even-game
+   {
+      $komi = STONE_VALUE / 2.0;
+      $is_nigiri = true;
+      $iamblack = mt_rand(0,1); // nigiri on even-game
+   }
+   else // handicap-game
+   {
+      if( $handicap == 1 ) $handicap = 0;
+      $komi = 0.5;
+      $is_nigiri = false;
       $iamblack = ( $rating_B > $rating_W );
+   }
 
    return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
-}
+}//suggest_conventional
 
 
 //
