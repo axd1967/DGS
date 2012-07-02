@@ -2137,14 +2137,18 @@ class GameNotify
       $info_text = ( $this->game_flags & GAMEFLAGS_HIDDEN_MSG )
          ? "<p><b>Info:</b> The game has hidden comments!"
          : '';
+      $obs_info_text = $info_text;
+
       if( $this->timeout_rejected )
          $info_text .= "<p><b>Info:</b> The winner rejected a win by timeout, so the game was changed to unrated!";
 
       $player_text = $this->players_text;
-      if( $this->message )
-         $player_text .= "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message;
+      $msg_text = ( $this->message ) ? "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message : '';
 
-      return array( $subject, $text.$info_text.$player_text, $text.$player_text );
+      return array( $subject,
+                    $text . $info_text . $this->players_text . $msg_text, // text for players
+                    $text . $obs_info_text . $this->players_text, // text for observers
+            );
    }//get_text_game_result
 
    /*!
@@ -4008,22 +4012,25 @@ function build_arr_handicap_stones()
 
 function build_suggestion_shortinfo( $suggest_result, $mpgame=false )
 {
-   list( $handi, $komi, $iamblack ) = $suggest_result;
-   $info = sprintf(
-      ($mpgame)
-         ? T_('... your Color is probably %1$s with Handicap %2$s, Komi %3$.1f')
-         : T_('... your Color would be %1$s with Handicap %2$s, Komi %3$.1f'),
-      get_colortext_probable( $iamblack ), $handi, $komi );
+   list( $handi, $komi, $iamblack, $is_nigiri ) = $suggest_result;
+   $fmt = ($mpgame)
+      ? T_('... your Color is probably %1$s with Handicap %2$s, Komi %3$.1f')
+      : T_('... your Color would be %1$s with Handicap %2$s, Komi %3$.1f');
+   $info = sprintf( $fmt, get_colortext_probable($iamblack, $is_nigiri), $handi, $komi );
    return $info;
 }
 
-function get_colortext_probable( $iamblack )
+function get_colortext_probable( $iamblack, $is_nigiri )
 {
+   static $color_class = 'class="InTextStone"';
    global $base_path;
-   $color_class = 'class="InTextStone"';
-   return ( $iamblack )
-      ? image( $base_path.'17/b.gif', T_('Black'), null, $color_class)
-      : image( $base_path.'17/w.gif', T_('White'), null, $color_class);
+
+   if( $is_nigiri )
+      return image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color'), $color_class );
+   elseif( $iamblack )
+      return image( $base_path.'17/b.gif', T_('Black'), null, $color_class);
+   else
+      return image( $base_path.'17/w.gif', T_('White'), null, $color_class);
 }
 
 // hover-texts for colors-column
