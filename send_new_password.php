@@ -30,8 +30,6 @@ require_once( "include/std_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
    $my_id = @$player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest', 'send_new_password.1');
 
    if( isset($_POST['goback']) )
       jump_to("index.php");
