@@ -19,6 +19,41 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_0_15-20120608 -----
+2012-07-02 juga
+
+   * send_new_password.phpA:
+   - fix bug: must allow sending-password for not-logged-in users
+
+   * include/make_game.php (accept_invite_game),
+     include/message_functions.php (game_info_table),
+     include/wroom_control.php (WaitingroomControl.join_waitingroom_game),
+     tournaments/include/tournament_rules.php (TournamentRules.prepare_create_game_row),
+     waiting_room.php (determine_color):
+   - fix bug: show nigiri-color-icon for even-game with conventional-handicap-setting
+
+   * include/game_functions.php (GameNotify.get_text_game_result;
+       build_suggestion_shortinfo, get_colortext_probable):
+   - fix bug: do not send players final private message in game-end-message to observers,
+     but include if there are hidden comments
+   - fix bug: show nigiri-color-icon for even-game with conventional-handicap-setting
+
+   * include/rating.php (suggest_conventional):
+   - fix bug: revert handicap and komi calculations for conventional-handicap game-setting
+     by using nigiri on even game with rating-diff < 0.5 instead of only on exactly same rating
+     and correcting handicap-stone from 1 to 0 only for handicap-games
+
+   * include/connect2mysql.php (writeIpStats),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql:
+   - added creation-date for cleanup of IpStats-table
+-----------
+-- add creation-date for cleanup
+ALTER TABLE IpStats
+   ADD Created datetime NOT NULL default '0000-00-00 00:00:00' AFTER Counter,
+   ADD KEY Created (Created) ;
+-----------
+
 2012-06-23 juga
 
    * message.php:
@@ -93,7 +128,6 @@ SELECT ID, Handle, Email, Lastaccess, Running, LastMove
 
 2012-06-17 juga
 
-### ----- release-1_0_15-20120608 -----
    * admin.php, admin_admins.php, admin_faq.php, admin_game.php, admin_password.php,
      admin_rating.php, admin_show_adminlog.php, admin_show_errorlog.php, admin_show_faqlog.php,
      admin_show_users.php, admin_translators.php, admin_users.php, translate.php,
