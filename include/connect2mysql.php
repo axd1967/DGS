@@ -139,8 +139,9 @@ function writeIpStats( $page )
       $sql_page = mysql_addslashes($page);
 
       db_query( "writeIpStats.insert($uid,$page,$ip)",
-         "INSERT INTO IpStats (uid,Page,IP,Counter,Lastchanged) VALUES ($uid,'$sql_page','$sql_ip',1,FROM_UNIXTIME($NOW)) " .
-         "ON DUPLICATE KEY UPDATE Page=VALUES(Page), Counter=Counter+1, Lastchanged=VALUES(Lastchanged)" );
+         "INSERT INTO IpStats (uid,Page,IP,Counter,Created,Lastchanged) " .
+         "VALUES ($uid,'$sql_page','$sql_ip',1,FROM_UNIXTIME($NOW),FROM_UNIXTIME($NOW)) " .
+         "ON DUPLICATE KEY UPDATE Counter=Counter+1, Lastchanged=VALUES(Lastchanged)" );
    }
 }//writeIpStats
 

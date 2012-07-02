@@ -2416,3 +2416,9 @@ SELECT ID, Handle, Email, Lastaccess, Running, LastMove
    FROM Players WHERE Handle LIKE '% %' ORDER BY Lastaccess ;
 
 
+-- add creation-date for cleanup
+ALTER TABLE IpStats
+   ADD Created datetime NOT NULL default '0000-00-00 00:00:00' AFTER Counter,
+   ADD KEY Created (Created) ;
+
+

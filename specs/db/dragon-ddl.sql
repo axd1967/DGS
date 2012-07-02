@@ -522,8 +522,10 @@ CREATE TABLE IF NOT EXISTS `IpStats` (
   `Page` char(4) NOT NULL default '',
   `IP` varchar(16) NOT NULL,
   `Counter` int(10) unsigned NOT NULL default '0',
+  `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (`uid`,`Page`,`IP`)
+  PRIMARY KEY  (`uid`,`Page`,`IP`),
+  KEY `Created` (`Created`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
