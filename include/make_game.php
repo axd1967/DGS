@@ -644,6 +644,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    $upd_game->upd_txt('WeekendClock',  $game_info_row['WeekendClock']);
    $upd_game->upd_txt('StdHandicap', $stdhandicap);
    $upd_game->upd_txt('Rated', $game_info_row['Rated']);
+   $upd_game->upd_txt('Snapshot', GameSnapshot::init_game_snapshot());
    $upd_game->upd_txt('ShapeSnapshot', $shape_snapshot);
    $upd_game->upd_txt('GameSetup', $game_setup_encoded);
    if( $shape_id > 0 )

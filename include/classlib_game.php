@@ -701,6 +701,12 @@ static $BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
   */
 class GameSnapshot
 {
+   /*! \brief Returns empty board used to init started game. */
+   function init_game_snapshot()
+   {
+      return 'A';
+   }
+
    /*!
     * \brief Returns base64-encoded snapshot of game-positions with B/W- and dead-stones (without color).
     * \param $stone_reader interface with method $stone_reader->read_stone_value(x,y,$with_dead) with x/y=0..size-1
