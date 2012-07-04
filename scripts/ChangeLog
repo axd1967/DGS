@@ -20,6 +20,42 @@ ChangeLog
 ------------------------------------------------------------------
 
 ### ----- release-1_0_15-20120608 -----
+2012-07-04 juga
+
+   * include/message_functions.php (game_settings_form, game_info_table),
+     include/make_game.php (accept_invite_game),
+     message.php:
+   - fix bug: use opponents jigo-mode for view/dispute of invitation with fair-komi sent to me,
+     but using my jigo-mode viewing invitation sent by me
+
+   * game_rematch.php:
+   - fix bug: Correct handicap-type if stored GameSetup is not from logged-in user
+     for player or non-player, in which case the fix-color and divide&choose fair-komi
+     needed compensation
+
+   * include/game_functions.php (GameSetup.get_htype_swapped, ~.determine_handicaptype;
+       get_handicaptype_for_invite),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/make_game.php (make_invite_game, accept_invite_game),
+     include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - fix bug: wrong color chosen on accepting game-invitation and shown for viewing-invitation
+     and on dispute, had to take swapped handicap-type of opponennts choice
+   - fix bug: handle non-migrated old game-invitations with fix-color-setting stored with Games.ToMove_ID>0,
+     then determine color from Games.Black/White_ID
+   - write Games.Starttime to indicate start of invitation
+-----------
+-- fix Starttime for invitations
+UPDATE Games
+   SET Starttime=Lastchanged WHERE Status='INVITED' AND Starttime=0 ;
+-----------
+
+2012-07-03 juga
+
+   * include/classlib_game.php (GameSnapshot.init_game_snapshot),
+     include/make_game.php (create_game):
+   - set Games.SnapShot also for empty boards
+
 2012-07-02 juga
 
    * send_new_password.phpA:
