@@ -311,20 +311,22 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
    $my_col_black = ( $my_id == $game_row['Black_ID'] );
    $handicaptype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, $invite_handitype, $my_col_black );
    $cat_htype = get_category_handicaptype($handicaptype);
+   $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $opp_gs, $gid );
 
-   // handle game-setup
-   if( is_null($my_gs) ) // shouldn't happen -> use defaults
+   if( is_null($my_gs) ) // shouldn't happen (but could for older games) -> use defaults
    {
       $my_gs = new GameSetup( $my_id );
-      $my_gs->Handicaptype = $handicaptype; // needed for create_game() if $my_gs == null
       if( $cat_htype == CAT_HTYPE_MANUAL )
       {
          $my_gs->Handicap = (int)$game_row['Handicap'];
          $my_gs->Komi = (float)$game_row['Komi'];
       }
    }
-   else
-      $my_gs->Handicaptype = $handicaptype; // store swapped opponents htype choice, which is the accepted htype
+
+   // store swapped opponents htype choice, which is the accepted htype.
+   // values needed for create_game() if $my_gs == null
+   $my_gs->Handicaptype = $handicaptype;
+   $my_gs->JigoMode = $game_row['JigoMode'] = $jigo_mode;
 
    // prepare final game-settings
 
@@ -547,7 +549,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    // set reference to other double-game
    $double_gid = (int)@$game_info_row['double_gid'];
 
-   // adjust komi (AdjKomi/JigoMode may be unset)
+   // adjust komi (AdjKomi/JigoMode may be unset); called but irrelevant for fair-komi
    $komi = adjust_komi( (float)$game_info_row['Komi'],
       (float)@$game_info_row['AdjKomi'],
       (string)@$game_info_row['JigoMode'] );

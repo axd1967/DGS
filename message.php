@@ -232,12 +232,12 @@ define('MSGBOXROWS_INVITE', 6);
          if( $msg_type == MSGTYPE_INVITATION )
          {
             if( $Status == GAME_STATUS_INVITED && ($Replied != 'Y') )
-               $submode = ( $to_me ) ? 'ShowInvite' : 'ShowMyInvite';
+               $submode = ( $to_me ) ? 'ShowInvite' : 'ShowMyInvite'; // message is active invitation
             else
                $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
          }
          elseif( $msg_type == MSGTYPE_DISPUTED )
-            $submode = ( @$Game_mid ) ? 'InviteDisputed' : 'AlreadyDeclined';
+            $submode = ( @$Game_mid ) ? 'InviteDisputed' : 'AlreadyDeclined'; // message is disputed or dispute-declined invitation
          elseif( $msg_type == MSGTYPE_NORMAL && @$Game_mid )
             $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
       }
@@ -411,7 +411,8 @@ define('MSGBOXROWS_INVITE', 6);
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
-         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated );
+         $use_opp_data = ($submode == 'ShowInvite'); // invitation or dispute sent to me
+         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated, $use_opp_data );
 
          // show dispute-diffs to opponent game-settings
          list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );

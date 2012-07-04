@@ -270,7 +270,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$game_row['ToMove_ID'], $my_color_black );
       $CategoryHandiType = get_category_handicaptype( $Handitype );
       $Color_m = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $Handitype : HTYPE_NIGIRI;
-      $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $my_gs, $gid );
+      $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $opp_gs, $gid );
 
       $MaintimeUnit = 'hours';
       $Maintime = $game_row['Maintime'];
@@ -776,8 +776,11 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
  *     GSET_WAITINGROOM = for waiting_room.php
  *     GSET_TOURNAMENT_LADDER = for ladder-tournament challenge
  *     GSET_TOURNAMENT_ROUNDROBIN = for round-robin-tournament
+ * \param $use_src_opp mandatory for GSET_MSG_INVITE|DISPUTE (can be null otherwise) used to get jigo-mode from correct game-setup:
+ *        true  = use opponents game-setup (invitation or dispute to me),
+ *        false = use my game-setup (inv/dispute from me)
  */
-function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
+function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_src_opp=null )
 {
    global $base_path;
 
@@ -848,6 +851,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    }
    else // invite|dispute
    {
+      if( is_null($use_src_opp) )
+         error('invalid_args', "msg_func.game_info_table.miss_srcopp($tablestyle)");
+
       $tablestyle = GSET_MSG_INVITE;
       $Color = HTYPE_NIGIRI; //default
       $my_color_black = ($myColor == BLACK); // myColor derived from Games.Black/White_ID
@@ -875,7 +881,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
          case HTYPE_AUCTION_OPEN:
          case HTYPE_YOU_KOMI_I_COLOR:
          case HTYPE_I_KOMI_YOU_COLOR:
-            $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( CAT_HTYPE_FAIR_KOMI, $my_id, $my_gs, $game_row['ID'] );
+            $chk_gs = ( $use_src_opp ) ? $opp_gs : $my_gs;
+            $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( CAT_HTYPE_FAIR_KOMI, $my_id, $chk_gs, $game_row['ID'] );
             break;
 
          default: //shouldn't happen
