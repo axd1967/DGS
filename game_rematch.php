@@ -72,6 +72,11 @@ require_once 'include/classlib_user.php';
       }
       else // use game-setup
       {
+         // Correct handicap-type if $my_id does not match user-id of stored GameSetup for player or non-player
+         // then compensating fix-color and divide&choose fair-komi.
+         if( $game_setup->uid != $my_id )
+            $game_setup->Handicaptype = GameSetup::swap_htype_black_white( $game_setup->Handicaptype );
+
          $gs_builder = new GameSetupBuilder( $my_id, $game_setup, $game );
          if( $mode == REMATCH_NEWGAME )
             $gs_builder->fill_new_game_from_game_setup( $url );
