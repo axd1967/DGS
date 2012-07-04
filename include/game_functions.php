@@ -2513,6 +2513,11 @@ class GameSetup
       return $result;
    }//to_string
 
+   function get_htype_swapped()
+   {
+      return GameSetup::swap_htype_black_white( $this->Handicaptype );
+   }
+
    function format_handicap_type( $handicaptype=null, $pivot_handle, $opp_handle )
    {
       if( is_null($handicaptype) )
@@ -2780,6 +2785,23 @@ class GameSetup
       else
          return $handicaptype;
    }//swap_htype_black_white
+
+   /*!
+    * \brief Returns handicap-type for game-invitations.
+    * \return non-null handicap-type (or else throw error what's missing/wrong)
+    */
+   function determine_handicaptype( $my_gs, $opp_gs, $tomove_id, $my_col_black )
+   {
+      if( !is_null($opp_gs) ) // opponents swapped htype choice has precedence
+         $my_htype = $opp_gs->get_htype_swapped();
+      elseif( !is_null($my_gs) ) // if opp-game-setup not set -> use my own choice
+         $my_htype = $my_gs->Handicaptype;
+      else // otherwise determine htype from Games.ToMove_ID (could also be old non-migrated game-invitation)
+         $my_htype = null;
+
+      $htype = get_handicaptype_for_invite( $tomove_id, $my_col_black, $my_htype );
+      return $htype;
+   }//determine_handicaptype
 
 } //end 'GameSetup'
 
@@ -3737,6 +3759,7 @@ function get_invite_handicaptype( $handitype )
 }
 
 // use is_black_col = fk_htype = null to get standard htype (e.g. for transition of Games without GameSetup)
+// NOTE: if $inv_handitype >0 for old game-invitations, $fk_htype can be null
 function get_handicaptype_for_invite( $inv_handitype, $is_black_col, $fk_htype )
 {
    // invite-handicap-type -> handicap-type
@@ -3755,6 +3778,14 @@ function get_handicaptype_for_invite( $inv_handitype, $is_black_col, $fk_htype )
          INVITE_HANDI_DIV_CHOOSE => 1, // calculated (from GameSetup)
       );
 
+   // handle OLD game-invitations with ToMove_ID > 0 (fix-color), see ToMove_ID in 'specs/db/table-Games.txt'
+   if( $inv_handitype > 0 )
+   {
+      if( is_null($is_black_col) )
+         error('invalid_args', "get_handicaptype_for_invite.check.is_black_col_null($inv_handitype,$fk_htype)");
+      return ( $is_black_col ) ? HTYPE_BLACK : HTYPE_WHITE;
+   }
+
    $arr_calc = @$ARR_HTYPES_CALC[$inv_handitype];
    if( $arr_calc )
    {
@@ -3769,8 +3800,12 @@ function get_handicaptype_for_invite( $inv_handitype, $is_black_col, $fk_htype )
       else
          return ($is_black_col) ? $arr_calc[0] : $arr_calc[1];
    }
-   else
-      return @$ARR_HTYPES[$inv_handitype];
+
+   $htype = @$ARR_HTYPES[$inv_handitype];
+   if( !$htype )
+      error('invalid_args', "get_handicaptype_for_invite.check.bad_htype($inv_handitype,$is_black_col,$fk_htype)");
+
+   return $htype;
 }//get_handicaptype_for_invite
 
 function build_image_double_game( $with_sep=false, $class='' )

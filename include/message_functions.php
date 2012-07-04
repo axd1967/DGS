@@ -264,17 +264,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $Handicap_m = $game_row['Handicap'];
       $Komi_m = $game_row['Komi'];
 
-      // ToMove_ID holds handitype since INVITATION
+      // ToMove_ID holds handitype for game on INVITATION-status
       list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_ID, @$game_row['GameSetup'], $gid );
-      $curr_tomove = (int)$game_row['ToMove_ID'];
-      $my_htype = (is_null($my_gs)) ? get_handicaptype_for_invite($curr_tomove, null, null) : $my_gs->Handicaptype;
-      if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
-         $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
-
-      $my_col_black = ( $black_id == $my_ID );
-      $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_col_black, $my_htype );
-      if( !$Handitype )
-         $Handitype = HTYPE_NIGIRI; //default
+      $my_color_black = ( $black_id == $my_ID );
+      $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$game_row['ToMove_ID'], $my_color_black );
       $CategoryHandiType = get_category_handicaptype( $Handitype );
       $Color_m = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $Handitype : HTYPE_NIGIRI;
       $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $my_gs, $gid );
@@ -818,7 +811,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    }
 
    $my_id = $player_row['ID'];
-   $is_my_game = ( $game_row['other_id'] == $my_id );
+   $is_my_game = ( $game_row['other_id'] == $my_id ); // used for waiting-room-checks only
 
    if( $tablestyle == GSET_WAITINGROOM )
    {
@@ -857,17 +850,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
    {
       $tablestyle = GSET_MSG_INVITE;
       $Color = HTYPE_NIGIRI; //default
-      $my_color_black = ($myColor == BLACK);
+      $my_color_black = ($myColor == BLACK); // myColor derived from Games.Black/White_ID
       $calculated = false;
 
-      // ToMove_ID holds handitype since INVITATION
+      // ToMove_ID holds handitype for game on INVITATION-status
       list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $game_row['ID'] );
-      $curr_tomove = (int)$game_row['ToMove_ID'];
-      $my_htype = (is_null($my_gs)) ? get_handicaptype_for_invite($curr_tomove, null, null) : $my_gs->Handicaptype;
-      if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
-         $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+      $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$game_row['ToMove_ID'], $my_color_black );
 
-      $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_color_black, $my_htype );
       switch( (string)$Handitype )
       {
          case HTYPE_CONV:
@@ -981,7 +970,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
             // determine user-white/black
             // NOTE: my-color (for waiting-room color is switched above in this case)
             //       so use same choices for waitingroom/invite/dispute
-            if( $is_my_game )
+            if( $tablestyle == GSET_WAITINGROOM && $is_my_game )
             {
                $subtype = ( $Color == HTYPE_BLACK ) ? T_('Color Black') : T_('Color White');
                $colortxt =
@@ -990,17 +979,17 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated )
                      : image( $base_path.'17/w.gif', T_('White'), null, $color_class) )
                   . MINI_SPACING . user_reference( 0, 1, '', $player_row );
             }
-            else
+            else // for wroom & invitation
             {
                if( $Color == HTYPE_BLACK )
                {
-                  $subtype = T_('Color White');
+                  $subtype = ($tablestyle == GSET_MSG_INVITE) ? T_('Color Black') : T_('Color White');
                   $user_w = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
                   $user_b = $player_row;
                }
                else //HTYPE_WHITE
                {
-                  $subtype = T_('Color Black');
+                  $subtype = ($tablestyle == GSET_MSG_INVITE) ? T_('Color White') : T_('Color Black');
                   $user_w = $player_row;
                   $user_b = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
                }

@@ -2422,3 +2422,8 @@ ALTER TABLE IpStats
    ADD KEY Created (Created) ;
 
 
+-- fix Starttime for invitations
+UPDATE Games
+   SET Starttime=Lastchanged WHERE Status='INVITED' AND Starttime=0 ;
+
+

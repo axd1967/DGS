@@ -89,7 +89,10 @@ function make_invite_game( &$player_row, &$opponent_row, $disputegid )
 
    $upd_game = new UpdateQuery('Games');
    if( !$is_dispute )
+   {
       $upd_game->upd_txt('Status', GAME_STATUS_INVITED);
+      $upd_game->upd_time('Starttime');
+   }
    $upd_game->upd_num('Black_ID', $Black_ID);
    $upd_game->upd_num('White_ID', $White_ID);
    $upd_game->upd_num('ToMove_ID', $tomove); // handicap-type
@@ -303,23 +306,25 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
 
 
    // NOTE: ToMove_ID holds handitype (of INVITATION) for game on INVITED-status
+   list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $gid );
    $invite_handitype = (int)$game_row['ToMove_ID'];
    $my_col_black = ( $my_id == $game_row['Black_ID'] );
-   list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $game_row['GameSetup'], $gid );
-   $handicaptype = get_handicaptype_for_invite( $invite_handitype, $my_col_black, $my_gs->Handicaptype );
+   $handicaptype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, $invite_handitype, $my_col_black );
    $cat_htype = get_category_handicaptype($handicaptype);
 
    // handle game-setup
    if( is_null($my_gs) ) // shouldn't happen -> use defaults
    {
       $my_gs = new GameSetup( $my_id );
-      $my_gs->Handicaptype = $handicaptype;
+      $my_gs->Handicaptype = $handicaptype; // needed for create_game() if $my_gs == null
       if( $cat_htype == CAT_HTYPE_MANUAL )
       {
          $my_gs->Handicap = (int)$game_row['Handicap'];
          $my_gs->Komi = (float)$game_row['Komi'];
       }
    }
+   else
+      $my_gs->Handicaptype = $handicaptype; // store swapped opponents htype choice, which is the accepted htype
 
    // prepare final game-settings
 
@@ -353,10 +358,10 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
          $i_am_black = true;
          break;
       case HTYPE_BLACK:
-         $i_am_black = $my_col_black;
+         $i_am_black = true;
          break;
       case HTYPE_WHITE:
-         $i_am_black = !$my_col_black;
+         $i_am_black = false;
          break;
 
       // fair-komi handicap-types, start fair-komi-negotiation
@@ -365,10 +370,11 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       case HTYPE_YOU_KOMI_I_COLOR:
       case HTYPE_I_KOMI_YOU_COLOR:
          if( is_null($my_gs) )
-            error('internal_error', "$dbgmsg.check.game_setup($handicaptype)");
+            error('internal_error', "$dbgmsg.check.game_setup.miss_gs($handicaptype)");
          $my_gs->Komi = $my_gs->OppKomi = NULL;
          $handicap = $komi = 0;
 
+         // for div&choose-FK: komi-giver comes first, so that player must take BLACK
          if( $handicaptype == HTYPE_YOU_KOMI_I_COLOR )
             $i_am_black = false;
          elseif( $handicaptype == HTYPE_I_KOMI_YOU_COLOR )
@@ -429,7 +435,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
  *        StdHandicap, Maintime, Byotype, Byotime, Byoperiods, WeekendClock;
  *        field 'double_gid' can be set to write reference to twin double-game,
  *        field 'tid' = tournament-id
- * \param $game_setup GameSetup-object
+ * \param $game_setup GameSetup-object; can be null for MP-games
  *
  * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
  */

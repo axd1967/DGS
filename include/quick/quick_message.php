@@ -267,17 +267,11 @@ class QuickHandlerMessage extends QuickHandler
 
          if( $game_status == GAME_STATUS_INVITED )
          {
-            // ToMove_ID holds handitype since INVITATION
+            // ToMove_ID holds handitype for game on INVITATION-status
             list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
-            $curr_tomove = (int)$row['ToMove_ID'];
-            $my_htype = (is_null($my_gs)) ? get_handicaptype_for_invite($curr_tomove, null, null) : $my_gs->Handicaptype;
-            if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($my_htype) )
-               $my_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
+            $my_color_black = ( $row['Black_ID'] == $my_id );
+            $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$row['ToMove_ID'], $my_color_black );
 
-            $my_col_black = ( $row['Black_ID'] == $my_id );
-            $Handitype = get_handicaptype_for_invite( $curr_tomove, $my_col_black, $my_htype );
-            if( !$Handitype )
-               $Handitype = HTYPE_NIGIRI; //default
             $cat_htype = get_category_handicaptype( $Handitype );
             $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
 
@@ -286,7 +280,7 @@ class QuickHandlerMessage extends QuickHandler
                   TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
 
             // NOTE: players have a rating if an invitation exists
-            $row['Handicaptype'] = $my_htype;
+            $row['Handicaptype'] = $Handitype;
             $row['JigoMode'] = $jigo_mode;
             $gsc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
             $gsc->calculate_settings();
@@ -294,7 +288,7 @@ class QuickHandlerMessage extends QuickHandler
             $this->addResultKey( 'game_settings', array(
                   'game_type' => GAMETYPE_GO,
                   'game_players' => '1:1',
-                  'handicap_type' => $my_htype,
+                  'handicap_type' => $Handitype,
                   'shape_id' => (int)$row['ShapeID'],
                   'shape_snapshot' => $row['ShapeSnapshot'],
 
