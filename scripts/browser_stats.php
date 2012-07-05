@@ -97,7 +97,7 @@ function echo_browsers(&$Browsers)
 
    echo '<pre>';
 
-   $result = mysql_query("SELECT COUNT(*) AS Count, Browser FROM Players " .
+   $result = mysql_query("SELECT SQL_SMALL_RESULT COUNT(*) AS Count, Browser FROM Players " .
                          "WHERE Browser IS NOT NULL AND Browser!='' AND Activity>$ActivityForHit/10 " .
                          "GROUP BY Browser")
       or die(mysql_error());

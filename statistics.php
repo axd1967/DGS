@@ -72,7 +72,7 @@ function show_stats_default()
 {
    global $ActivityForHit, $player_row, $NOW;
 
-   $q1 = "SELECT Status,SUM(Moves) AS moves, COUNT(*) AS count FROM Games GROUP BY Status";
+   $q1 = "SELECT SQL_SMALL_RESULT Status,SUM(Moves) AS moves, COUNT(*) AS count FROM Games GROUP BY Status";
    $q2 = "SELECT SUM(Moves) AS moves, COUNT(*) AS count FROM Games";
    $q3 = "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players";
 
@@ -150,7 +150,7 @@ function show_stats_user_countries()
 
 
    $result = db_query( 'statistics.users.count_countries',
-      "SELECT Country, COUNT(*) AS X_Count " .
+      "SELECT SQL_SMALL_RESULT Country, COUNT(*) AS X_Count " .
       "FROM Players " .
       ( $weeks > 0 ? "WHERE Lastaccess>=FROM_UNIXTIME($last_access) " : '' ) .
       "GROUP BY Country " .

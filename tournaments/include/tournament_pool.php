@@ -253,7 +253,7 @@ class TournamentPool
          $where_rank = ( $rank == TPOOLRK_NO_RANK ) ? "AND Rank <= $rank" : "AND Rank > $rank";
       else
          $where_rank = '';
-      $query = sprintf( "SELECT Pool, COUNT(*) AS X_Count FROM TournamentPool "
+      $query = sprintf( "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool "
          . "WHERE tid=%s AND Round=%s $where_rank GROUP BY Pool", (int)$tid, (int)$round );
       $result = db_query( "TournamentPool::count_tournament_pool_users($tid,$round,$rank)", $query );
 
@@ -283,7 +283,7 @@ class TournamentPool
    /*! \brief Returns expected sum of games for all pools for given tournament and round. */
    function count_tournament_pool_games( $tid, $round )
    {
-      $query = sprintf( "SELECT Pool, COUNT(*) AS X_Count FROM TournamentPool "
+      $query = sprintf( "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool "
          . "WHERE tid=%s AND Round=%s GROUP BY Pool", (int)$tid, (int)$round );
       $result = db_query( "TournamentPool::count_tournament_pool_games($tid,$round)", $query );
 

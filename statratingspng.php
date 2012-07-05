@@ -218,7 +218,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          case 0:
             $name = $T_('Active users');
             $query =
-               "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
+               "SELECT SQL_SMALL_RESULT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
                . " FROM Players WHERE Rating2>=".MIN_RATING." AND Activity>$ActiveLevel1"
                . " GROUP BY p_rank ORDER BY p_rank" ;
             $color = array( 255,   0,   0);
@@ -227,7 +227,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          case 1:
             $name = $T_('Users');
             $query =
-               "SELECT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
+               "SELECT SQL_SMALL_RESULT ROUND(Rating2/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
                . " FROM Players WHERE Rating2>=".MIN_RATING
                . " GROUP BY p_rank ORDER BY p_rank" ;
             $color = array( 255,   0, 200);
@@ -241,7 +241,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
              * see also $cnt = (int)... below
              */
             $query =
-               "SELECT ROUND(Rating/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
+               "SELECT SQL_SMALL_RESULT ROUND(Rating/100)-(".MIN_RANK.") as p_rank,COUNT(*) as cnt"
                . " FROM Ratinglog WHERE Rating>=".MIN_RATING
                . " GROUP BY p_rank ORDER BY p_rank" ;
             $color = array(   0, 180, 200);

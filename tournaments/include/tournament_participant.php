@@ -287,7 +287,7 @@ class TournamentParticipant
    {
       $query_status = (is_null($status)) ? '' : " AND Status='".mysql_addslashes($status)."'";
       $result = db_query( "TournamentParticipant.count_tournament_participants($tid,$status)",
-            "SELECT Status, COUNT(*) AS X_Count FROM TournamentParticipant "
+            "SELECT SQL_SMALL_RESULT Status, COUNT(*) AS X_Count FROM TournamentParticipant "
             . "WHERE tid='$tid' $query_status GROUP BY Status" );
 
       $out = array();
