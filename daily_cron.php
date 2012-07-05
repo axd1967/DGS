@@ -196,9 +196,11 @@ if num_rows==2 {compute differences and checks}
    UserQuota::increase_update_feature_points();
 
 
+
 // Expire Bulletins
 
    Bulletin::process_expired_bulletins();
+
 
 
 // Cleanup MoveStats
@@ -214,6 +216,7 @@ if num_rows==2 {compute differences and checks}
       "DELETE FROM MoveStats WHERE $where_clause" );
 
 
+
 // Cleanup old invitations
 
    if( (int)GAME_INVITATIONS_EXPIRE_MONTHS > 0 )
@@ -222,6 +225,7 @@ if num_rows==2 {compute differences and checks}
          "DELETE FROM Games WHERE Status='".GAME_STATUS_INVITED."' AND " .
             "Lastchanged <= NOW() - INTERVAL ".GAME_INVITATIONS_EXPIRE_MONTHS." MONTH LIMIT 100" );
    }
+
 
 
    // ---------- END --------------------------------
