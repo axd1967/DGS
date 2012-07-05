@@ -18,79 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-require_once( "include/std_functions.php" );
-require_once( "include/board.php" );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/mail_functions.php';
+require_once 'include/board.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
-
-if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
-{
-   //HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
-   $local_reverse_htmlentities_table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
-   $local_reverse_htmlentities_table = array_flip($local_reverse_htmlentities_table);
-
-   function html_entity_decode($str, $quote_style=ENT_COMPAT, $charset='ISO-8859-1')
-   {
-      global $local_reverse_htmlentities_table;
-      return strtr($str, $local_reverse_htmlentities_table);
-   }
-}
-
-function mail_link( $nam, $lnk)
-{
-   $nam = trim($nam);
-   $lnk = trim($lnk);
-   if( $lnk )
-   {
-      if( strcspn($lnk,":?#") == strcspn($lnk,"?#")
-          && !is_numeric(strpos($lnk,'//'))
-          && strtolower(substr($lnk,0,4)) != "www."
-        )
-      {
-         //make it absolute to this server
-         while( substr($lnk,0,3) == '../' )
-            $lnk = substr($lnk,3);
-         $lnk = HOSTBASE.$lnk;
-      }
-      $nam = ($nam) ? "$nam ($lnk)" : $lnk;
-   }
-   if( !$nam )
-      return '';
-   $nam = trim( str_replace("\\\"","\"", $nam) );
-   return "[ $nam ]";
-}
-
-//to be used as preg_exp. see also make_html_safe()
-$tmp = '[\\x1-\\x20]*=[\\x1-\\x20]*(\"|\'|)([^>\\x1-\\x20]*?)';
-$strip_html_table = array(
-    "%&nbsp;%si" => " ",
-    "%<A([\\x1-\\x20]+((href$tmp\\4)|(\w+$tmp\\7)|(\w+)))*[\\x1-\\x20]*>(.*?)</A>%sie"
-       => "mail_link('\\10','\\5')",
-    "%</?(UL|BR)[\\x1-\\x20]*/?\>%si"
-       => "\n",
-    "%</CENTER[\\x1-\\x20]*/?\>\n?%si"
-       => "\n",
-    "%\n?<CENTER[\\x1-\\x20]*/?\>%si"
-       => "\n",
-    "%</?P[\\x1-\\x20]*/?\>%si"
-       => "\n\n",
-    "%[\\x1-\\x20]*<LI[\\x1-\\x20]*/?\>[\\x1-\\x20]*%si"
-       => "\n - ",
-   );
-function mail_strip_html( $str)
-{
-   global $strip_html_table;
-
-   //keep replaced tags
-   $str = strip_tags( $str, '<a><br><p><center><ul><ol><li><goban>');
-   $str = preg_replace( array_keys($strip_html_table), array_values($strip_html_table), $str);
-   //remove remainding tags
-   $str = strip_tags( $str, '<goban>');
-   $str = html_entity_decode( $str, ENT_QUOTES, 'iso-8859-1');
-   return $str;
-}
-
-
 
 if( !$is_down )
 {
@@ -105,38 +38,72 @@ if( !$is_down )
    // Check that updates are not too frequent
 
    $row = mysql_single_fetch( 'halfhourly_cron.check_frequency',
-      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
-      ." FROM Clock WHERE ID=202 LIMIT 1" );
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff, Ticks " .
+      "FROM Clock " .
+      "WHERE ID=".CLOCK_CRON_HALFHOUR." LIMIT 1" );
    if( !$row )
-      $TheErrors->dump_exit('halfhourly_cron');
+      $TheErrors->dump_exit('halfhourly_cron.find_clock');
    if( $row['timediff'] < $half_diff )
-      $TheErrors->dump_exit('halfhourly_cron');
+      $TheErrors->dump_exit('halfhourly_cron.timediff');
+
+   // check for concurrent-runs as script may run longer than 30mins
+   $clock_ticks = (int)@$row['Ticks'];
+   if( $clock_ticks > 0 )
+   {
+      db_query( "halfhourly_cron.inc_ticks($clock_ticks)",
+            "UPDATE Clock SET Ticks=Ticks+1 WHERE ID=".CLOCK_CRON_HALFHOUR." AND Ticks=$clock_ticks LIMIT 1" )
+         or $TheErrors->dump_exit("halfhourly_cron.inc_ticks2($clock_ticks)");
+
+      if( EMAIL_ADMINS )
+      {
+         send_email("halfhourly_cron.concurrent_run($clock_ticks)", EMAIL_ADMINS, 0,
+            sprintf("Detected concurrent runs (Ticks=%s) of the halfhourly-cron-script running on [%s].\n" .
+                    "Please check and correct if neccessary!", $clock_ticks, HOSTBASE),
+            sprintf('[%s] CHECK halfhourly_cron.php on [%s] (%s)', FRIENDLY_SHORT_NAME, HOSTBASE, $clock_ticks ) );
+      }
+      $TheErrors->dump_exit("halfhourly_cron.concurrent_run($clock_ticks)");
+   }//concurrent-run-check
 
    db_query( 'halfhourly_cron.set_lastchanged',
-         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=202 LIMIT 1" )
-      or $TheErrors->dump_exit('halfhourly_cron');
+         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_HALFHOUR." AND Ticks=0 LIMIT 1" )
+      or $TheErrors->dump_exit('halfhourly_cron.lock.1');
+   if( mysql_affected_rows() != 1 )
+      $TheErrors->dump_exit('halfhourly_cron.lock.2');
 
 
    // ---------- BEGIN ------------------------------
-
-   $this_ticks_per_day = 2*24;
 
 // Send notifications
 // Email notification if the SendEmail 'ON' flag is set
 // more infos if other SendEmail flags are set
 
+   // Setting Notify to 'NOW' for next bunch of notifications (to avoid race-conditions while directly processing 'NEXT')
+   db_query( 'halfhourly_cron.update_players_notify_now',
+         "UPDATE Players SET Notify='NOW' " .
+         "WHERE Notify='NEXT' AND FIND_IN_SET('ON',SendEmail)");
+
+
+   // pre-load all users to notify (to free db-result as soon as possible as main-loop can take quite a while)
    $result = db_query( 'halfhourly_cron.find_notifications',
-            "SELECT ID as uid, Handle, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players"
-            ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>''");
+         "SELECT ID AS uid, Handle, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
+         "FROM Players " .
+         "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>''");
+   $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser" );
+   while( $row = mysql_fetch_array( $result ) )
+      $nfyuser_iterator->addItem( null, $row );
+   mysql_free_result($result);
 
-
-   while( $row = mysql_fetch_assoc( $result ) )
+   // loop over users to notify
+   while( list(, $arr_item) = $nfyuser_iterator->getListIterator() )
    {
+      $row = $arr_item[1];
       extract($row);
-      $Email= trim($Email);
-      if( !$Email || !verify_email( false, $Email) )
+
+      // check for valid email
+      $Email = trim($Email);
+      if( !$Email || !verify_email(false, $Email) )
       {
-         //error('bad_mail_address', "halfhourly_cron=$Email");
+         //error('bad_mail_address', "halfhourly_cron.check.email($uid,$Email)");
          continue;
       }
 
@@ -146,7 +113,7 @@ if( !$is_down )
 
       // Find games
 
-      if( is_numeric(strpos($SendEmail, 'MOVE')) )
+      if( strpos($SendEmail, 'MOVE') !== false ) // game: move + optional board
       {
          $query = "SELECT Games.*, " .
             "black.Name AS Blackname, " .
@@ -157,52 +124,61 @@ if( !$is_down )
                "INNER JOIN Players AS black ON black.ID=Games.Black_ID " .
                "INNER JOIN Players AS white ON white.ID=Games.White_ID " .
             "WHERE ToMove_ID=$uid AND Lastchanged >= FROM_UNIXTIME($X_Lastaccess)";
+         $gres = db_query( "halfhourly_cron.find_games($uid)", $query );
 
-         $gres = db_query( 'halfhourly_cron.find_games', $query );
-
+         // pre-load all games of user to notify (to free db-result as soon as possible)
          if( @mysql_num_rows($gres) > 0 )
+         {
+            $games_iterator = new ListIterator( "halfhourly_cron.find_games($uid)" );
+            while( $row = mysql_fetch_array( $gres ) )
+               $games_iterator->addItem( null, $row );
+         }
+         mysql_free_result($gres);
+
+         // loop over games of user
+         if( $games_iterator->getItemCount() > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  Games:\n";
 
-            while( $game_row = mysql_fetch_array( $gres ) )
+            while( list(, $arr_item) = $games_iterator->getListIterator() )
             {
-
-               $TheBoard = new Board();
+               $game_row = $arr_item[1];
                $gid = @$game_row['ID'];
-               if( !$TheBoard->load_from_db( $game_row) )
-                  error('internal_error', "halfhourly_cron.game.load_from_db($gid)");
-               $movemsg= $TheBoard->movemsg;
 
                $msg .= str_pad('', 47, '-') . "\n";
                $msg .= "Game ID: ".mail_link($gid, 'game.php?gid='.$gid) . "\n";
-               $msg .= "Black: ".mail_strip_html(
-                        $game_row['Blackname'].' ('.$game_row['Blackhandle'].')')."\n";
-               $msg .= "White: ".mail_strip_html(
-                        $game_row['Whitename'].' ('.$game_row['Whitehandle'].')')."\n";
+               $msg .= "Black: ".mail_strip_html("{$game_row['Blackname']} ({$game_row['Blackhandle']})")."\n";
+               $msg .= "White: ".mail_strip_html("{$game_row['Whitename']} ({$game_row['Whitehandle']})")."\n";
+
                $tmp = number2board_coords($game_row['Last_X'], $game_row['Last_Y'], $game_row['Size']);
-               if( empty($tmp) ) $tmp = 'lead to '.$game_row['Status'].' step';
+               if( empty($tmp) )
+                  $tmp = 'lead to '.$game_row['Status'].' step';
                $msg .= 'Move '.$game_row['Moves'].": $tmp\n";
 
-               if( is_numeric(strpos($SendEmail, 'BOARD')) )
+               if( strpos($SendEmail, 'BOARD') !== false )
                {
-                  //remove all sgf tags
+                  $TheBoard = new Board();
+                  if( !$TheBoard->load_from_db($game_row, 0, /*dead*/true, /*lastmsg*/true, /*fixstop*/true) )
+                     error('internal_error', "halfhourly_cron.game.load_from_db($gid,$uid)");
+
+                  // remove all tags
                   $movemsg = trim(preg_replace(
                      "'(<c(omment)? *>(.*?)</c(omment)? *>)".
-                     "|(<h(idden)? *>(.*?)</h(idden)? *>)'is"
-                     , '', $movemsg));
-                  $movemsg = mail_strip_html( $movemsg);
-                  $msg .= $TheBoard->draw_ascii_board( $movemsg);
+                     "|(<h(idden)? *>(.*?)</h(idden)? *>)'is",
+                     '', $TheBoard->movemsg ));
+                  $movemsg = mail_strip_html($movemsg);
+                  $msg .= $TheBoard->draw_ascii_board($movemsg) . "\n";
                }
-               unset($TheBoard);
             }
          }
-         mysql_free_result($gres); unset($game_row);
-      }
+         unset($TheBoard);
+         unset($game_row);
+      }//games of user
 
 
       // Find new messages
 
-      if( is_numeric(strpos($SendEmail, 'MESSAGE')) )
+      if( strpos($SendEmail, 'MESSAGE') !== false )
       {
          $folderstring = FOLDER_NEW;
          $query = "SELECT Messages.ID,Subject,Text, " .
@@ -218,18 +194,15 @@ if( !$is_down )
               "AND Messages.Time > FROM_UNIXTIME($X_Lastaccess) " .
             "ORDER BY Time DESC";
 
-         $res3 = db_query( 'halfhourly_cron.find_new_messages', $query );
+         $res3 = db_query( "halfhourly_cron.find_new_messages($uid)", $query );
          if( @mysql_num_rows($res3) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
-
-               if($msg_row['FromName'] && $msg_row['FromHandle'])
-                  $From= mail_strip_html(
-                     $msg_row['FromName'].' ('.$msg_row['FromHandle'].')');
-               else
-                  $From= 'Server message';
+               $From = ( $msg_row['FromName'] && $msg_row['FromHandle'] )
+                  ? mail_strip_html("{$msg_row['FromName']} ({$msg_row['FromHandle']})")
+                  : 'Server message';
 
                $msg .= str_pad('', 47, '-') . "\n" .
                    "Message: ".mail_link('','message.php?mid='.$msg_row['ID']) . "\n" .
@@ -238,26 +211,20 @@ if( !$is_down )
                    "Subject: ".mail_strip_html($msg_row['Subject']) . "\n\n" .
                    wordwrap(mail_strip_html($msg_row['Text']),47) . "\n";
             }
+            unset($msg_row);
          }
-         mysql_free_result($res3); unset($msg_row);
-      }
+         mysql_free_result($res3);
+      }//messages of user
 
       $msg .= str_pad('', 47, '-');
 
       send_email('halfhourly_cron', $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg);
    } //notifications found
-   mysql_free_result($result);
-
 
    // Setting Notify to 'DONE' stop notifications until the player's visit
    db_query( 'halfhourly_cron.update_players_notify_Done',
          "UPDATE Players SET Notify='DONE'"
          ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
-
-   // Setting Notify to 'NOW' for next bunch of notifications (to avoid race-conditions while processing 'NEXT')
-   db_query( 'halfhourly_cron.update_players_notify_Now',
-         "UPDATE Players SET Notify='NOW'"
-         ." WHERE Notify='NEXT' AND FIND_IN_SET('ON',SendEmail)");
 
 
 
@@ -272,9 +239,11 @@ if( !$is_down )
       "UPDATE Players SET Activity=FLOOR($factor*Activity) WHERE Activity>0" );
 
 
+
 // Check end of vacations and reset associated game clocks
 
    $max_vacations = 365.24/12; //1 month [days]
+   $this_ticks_per_day = 2*24;
 
    $result = db_query( 'halfhourly_cron.onvacation',
       "SELECT ID, ClockUsed FROM Players " .
@@ -299,7 +268,7 @@ if( !$is_down )
          ." AND Games.ClockUsed<0" // VACATION_CLOCK
          );
    }
-   mysql_free_result($result); //unset($prow);
+   mysql_free_result($result);
 
 
 
@@ -316,10 +285,11 @@ if( !$is_down )
       . " WHERE VacationDays<$max_vacations" );
 
 
+
    // ---------- END --------------------------------
 
    db_query( 'halfhourly_cron.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=202 LIMIT 1" );
+         "UPDATE Clock SET Ticks=0 WHERE ID=".CLOCK_CRON_HALFHOUR." LIMIT 1" );
 
    if( !$chained )
       $TheErrors->dump_exit('halfhourly_cron');
