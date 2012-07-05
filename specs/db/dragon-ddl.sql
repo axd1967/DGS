@@ -734,7 +734,8 @@ CREATE TABLE IF NOT EXISTS `Players` (
   KEY `Type` (`Type`),
   KEY `CountFeatNew` (`CountFeatNew`),
   KEY `OnVacation` (`OnVacation`),
-  KEY `VacationDays` (`VacationDays`)
+  KEY `VacationDays` (`VacationDays`),
+  KEY `Notify` (`Notify`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
