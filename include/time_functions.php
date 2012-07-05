@@ -152,7 +152,7 @@ function get_clock_ticks( $dbgmsg, $clock_used, $refresh_cache=true )
 function ticks_to_hours($ticks)
 {
    //returns the greatest integer within [0 , $ticks/TICK_FREQUENCY[
-   return ( $ticks > TICK_FREQUENCY ? floor(($ticks-1) / TICK_FREQUENCY) : 0 );
+   return ( $ticks > TICK_FREQUENCY ) ? floor(($ticks-1) / TICK_FREQUENCY) : 0;
 }
 
 function time_remaining( $hours, &$main, &$byotime, &$byoper,
