@@ -40,14 +40,14 @@ if( !$is_down )
 
    $row = mysql_single_fetch( 'daily_cron.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
-      ." FROM Clock WHERE ID=203 LIMIT 1" );
+      ." FROM Clock WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" );
    if( !$row )
       $TheErrors->dump_exit('daily_cron');
    if( $row['timediff'] < $daily_diff )
       $TheErrors->dump_exit('daily_cron');
 
    db_query( 'daily_cron.set_lastchanged',
-         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=203 LIMIT 1" )
+         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" )
       or $TheErrors->dump_exit('daily_cron');
 
    // ---------- BEGIN ------------------------------
@@ -231,7 +231,7 @@ if num_rows==2 {compute differences and checks}
    // ---------- END --------------------------------
 
    db_query( 'daily_cron.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=203 LIMIT 1" );
+         "UPDATE Clock SET Ticks=0 WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" );
 
    if( !$chained )
       $TheErrors->dump_exit('daily_cron');

@@ -39,14 +39,14 @@ if( !$is_down )
 
    $row = mysql_single_fetch( 'clock_tick.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
-      ." FROM Clock WHERE ID=201 LIMIT 1" );
+      ." FROM Clock WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" );
    if( !$row )
       $TheErrors->dump_exit('clock_tick');
    if( $row['timediff'] < $tick_diff )
       $TheErrors->dump_exit('clock_tick');
 
    db_query( 'clock_tick.set_lastchanged',
-         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=201 LIMIT 1" )
+         "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" )
       or $TheErrors->dump_exit('clock_tick');
 
 
@@ -62,7 +62,7 @@ if( !$is_down )
    // ---------- END --------------------------------
 
    db_query( 'clock_tick.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=201 LIMIT 1" );
+         "UPDATE Clock SET Ticks=0 WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" );
 
    if( !$chained )
       $TheErrors->dump_exit('clock_tick');
