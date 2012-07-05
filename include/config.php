@@ -35,6 +35,9 @@ define('SUB_PATH', '/');
 // From address for notification emails
 define('EMAIL_FROM', 'noreply@localhost');
 
+// comma-separated list with email-addresses of admins to inform about internal server-problems
+define('EMAIL_ADMINS', 'root@localhost');
+
 
 // These four are used to connect to mysql, with a command corresponding to
 // mysql -u$MYSQLUSER -p$MYSQLPASSWORD -h$MYSQLHOST -D$DB_NAME
