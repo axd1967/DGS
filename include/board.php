@@ -1290,6 +1290,7 @@ class Board
 
    // If move update was interupted between two mysql queries, there may
    // be extra entries in the Moves and MoveMessages tables.
+   // \internal
    function fix_corrupted_move_table( $gid)
    {
       $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",

@@ -53,7 +53,7 @@ require_once 'include/db/bulletin.php';
    if( !empty($email) && $emailnotify >= 1 )
    {
       $sendemail = 'ON';
-      if( $emailnotify >= 2 )
+      if( $emailnotify >= 2 ) // BOARD also includes moves+message
       {
          $sendemail .= ',MOVE,MESSAGE';
          if( $emailnotify >= 3 )

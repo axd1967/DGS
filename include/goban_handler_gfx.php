@@ -154,7 +154,7 @@ class GobanHandlerGfxBoard
    /*!
     * \brief (interface) Transforms given Goban-object into DGS go-board using single images.
     * \param $skeleton if true create only skeleton (used for JavaScript-based game-editor)
-    * \note keep in sync with Board::draw_board(), though this implementation has some specialities!
+    * \note keep in sync with Board->draw_board(), though this implementation has some specialities!
     */
    function write_goban( $goban, $skeleton=false )
    {
