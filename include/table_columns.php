@@ -1634,7 +1634,7 @@ class Table
     */
    function register_filter( &$searchfilter, $config = null )
    {
-      $this->Filters = $searchfilter;
+      $this->Filters = &$searchfilter;
       $this->UseFilters = true;
       if( is_array($config) )
       {
