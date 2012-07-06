@@ -64,7 +64,7 @@ class TournamentCache
       $this->cache_tournament = array();
       $this->cache_tdirector = array();
       $this->cache_tl_props = array();
-      $this->cache_clock = new ClockCache();
+      $this->cache_clock = ClockCache::get_clock_cache();
       $this->lock_tourney = null;
    }
 
@@ -127,7 +127,7 @@ class TournamentCache
 
    function load_clock_ticks( $dbgmsg, $clock_id )
    {
-      return $this->cache_clock->load_clock_ticks( $dbgmsg, $clock_id, /*refresh*/false );
+      return $this->cache_clock->load_clock_ticks( $dbgmsg, $clock_id, /*use-cache*/true );
    }
 
    function is_tournament_locked()

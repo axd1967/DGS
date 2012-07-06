@@ -46,14 +46,14 @@ class ClockCache
       $this->cache_clock_ticks = array();
    }
 
-   function load_clock_ticks( $dbgmsg, $clock_id, $refresh_cache=false )
+   function load_clock_ticks( $dbgmsg, $clock_id, $use_cache=true )
    {
       if( !is_numeric($clock_id) || $clock_id > MAX_CLOCK )
          error('invalid_args', "$dbgmsg.load_clock_ticks.check($clock_id)");
       if( $clock_id < 0 ) // VACATION_CLOCK
          return 0; // On vacation
 
-      if( $refresh_cache || !isset($this->cache_clock_ticks[$clock_id]) )
+      if( !$use_cache || !isset($this->cache_clock_ticks[$clock_id]) )
       {
          $row = mysql_single_fetch( "$dbgmsg.load_clock_ticks.find($clock_id)",
             "SELECT Ticks FROM Clock WHERE ID=$clock_id LIMIT 1" );
@@ -64,6 +64,16 @@ class ClockCache
       }
       $ticks = (int)@$this->cache_clock_ticks[$clock_id];
       return $ticks;
+   }
+
+
+   // ------------ static functions ----------------------------
+
+   /*! \brief Returns singleton of clock-cache. */
+   function get_clock_cache()
+   {
+      global $CACHE_CLOCK;
+      return $CACHE_CLOCK;
    }
 
 } // end of 'ClockCache'

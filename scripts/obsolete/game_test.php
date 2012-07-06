@@ -20,7 +20,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 exit; ## for safety, as it's not clear if this (old) scripts still works
 
-header ("Cache-Control: no-cache, must-revalidate, max_age=0"); 
+header ("Cache-Control: no-cache, must-revalidate, max_age=0");
 
 global $time;
 
@@ -40,7 +40,7 @@ $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
 
 $result = mysql_query( "SELECT Games.*, " .
-                       "Games.Flags+0 AS flags, " . 
+                       "Games.Flags+0 AS flags, " .
                        "black.Name AS Blackname, " .
                        "black.Handle AS Blackhandle, " .
                        "black.Rank AS Blackrank, " .
@@ -77,7 +77,7 @@ if( $Black_ID == $ToMove_ID )
 else if( $White_ID == $ToMove_ID )
     $to_move = WHITE;
 else if( isset($to_move) )
-{       
+{
   echo $to_move;
     header("Location: error.php?err=database_corrupted");
     exit;
@@ -101,7 +101,7 @@ if( !$action )
 
 if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
 {
-  $ticks = get_clock_ticks('game_test', $ClockUsed) - $LastTicks;
+  $ticks = get_clock_ticks('game_test', $ClockUsed, /*cache*/false) - $LastTicks;
 
   if( $to_move == BLACK )
     {
@@ -117,10 +117,10 @@ if( $Status != 'FINISHED' and ($Maintime > 0 or $Byotime > 0) )
 
 
 
-$no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or 
+$no_marked_dead = ( $Status == 'PLAY' or $Status == 'PASS' or
                     $action == 'choose_move' or $action == 'move' );
 
-list($lastx,$lasty) = 
+list($lastx,$lasty) =
 make_array( $gid, $array, $msg, $Moves, $move, $moves_result, $marked_dead, $no_marked_dead );
 
 $enable_message = true;
@@ -151,7 +151,7 @@ switch( $action )
          $colnr = ord($coord)-ord('a');
          $rownr = ord($coord[1])-ord('a');
 
-         if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 
+         if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0
          or $array[$colnr][$rownr] >= 1 )
              {
                  header("Location: error.php?err=illegal_position");
@@ -163,17 +163,17 @@ switch( $action )
 
          $prisoners = array();
          check_prisoners($colnr,$rownr, 3-$to_move, $Size, $array, $prisoners);
-         
-         
+
+
          $nr_prisoners = count($prisoners);
-         
+
          if( $to_move == BLACK )
              $Black_Prisoners += $nr_prisoners;
          else
              $White_Prisoners += $nr_prisoners;
 
          // Check for ko
-                  
+
          if( $nr_prisoners == 1 and $flags & KO )
              {
                  list($dummy, list($x,$y)) = each($prisoners);
@@ -186,9 +186,9 @@ switch( $action )
              }
 
          // Check for suicide
-         
+
          $suicide_allowed = false;
-         
+
          if( !has_liberty_check($colnr, $rownr, $Size, $array, $prisoners, $suicide_allowed) )
              {
                  if(!$suicide_allowed)
@@ -197,10 +197,10 @@ switch( $action )
                          exit;
                      }
              }
-         
+
 
          // Ok, all tests passed.
-         
+
          $Moves++;
          $Last_X = $colnr;
          $Last_Y = $rownr;
@@ -218,15 +218,15 @@ switch( $action )
          if( !$stonestring ) $stonestring = "1";
 
          // add killed stones to array
-         
+
          $l = strlen( $stonestring );
 
          for( $i=1; $i < $l; $i += 2 )
              {
                  $colnr = ord($stonestring[$i])-ord('a');
                  $rownr = ord($stonestring[$i+1])-ord('a');
-                 
-                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or 
+
+                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or
                      $array[$colnr][$rownr] )
                      {
                          header("Location: error.php?err=illegal_position");
@@ -241,7 +241,7 @@ switch( $action )
                  $colnr = ord($coord)-ord('a');
                  $rownr = ord($coord[1])-ord('a');
 
-                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or 
+                 if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 or
                      $array[$colnr][$rownr] )
                      {
                          header("Location: error.php?err=illegal_position");
@@ -304,14 +304,14 @@ switch( $action )
          if( !$stonestring ) $stonestring = "1";
 
          // add killed stones to array
-         
+
          $l = strlen( $stonestring );
 
          for( $i=1; $i < $l; $i += 2 )
              {
                  $colnr = ord($stonestring[$i])-ord('a');
                  $rownr = ord($stonestring[$i+1])-ord('a');
-                 
+
                  if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
                      {
                          header("Location: error.php?err=illegal_position");
@@ -330,14 +330,14 @@ switch( $action )
                  $rownr = ord($coord[1])-ord('a');
 
                  $stone = $array[$colnr][$rownr];
-                 if(( $stone != BLACK and $stone != WHITE and 
+                 if(( $stone != BLACK and $stone != WHITE and
                       $stone != BLACK_DEAD and $stone != WHITE_DEAD ) or
                     $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
                      {
                          header("Location: error.php?err=illegal_position");
                          exit;
                      }
-                 
+
                  $prisoners = array();
                  remove_dead( $colnr, $rownr, $array, $prisoners );
 
@@ -363,7 +363,7 @@ switch( $action )
          if( !$stonestring ) $stonestring = "1";
 
          // add killed stones to array
-         
+
          $l = strlen( $stonestring );
          $index = array();
 
@@ -371,7 +371,7 @@ switch( $action )
              {
                  $colnr = ord($stonestring[$i])-ord('a');
                  $rownr = ord($stonestring[$i+1])-ord('a');
-                 
+
                  if( $rownr >= $Size or $rownr < 0 or $colnr >= $Size or $colnr < 0 )
                      {
                          header("Location: error.php?err=illegal_position");
@@ -388,7 +388,7 @@ switch( $action )
                  else if( $stone == BLACK_DEAD or $stone == WHITE_DEAD )
                      $array[$colnr][$rownr] = $stone - 6;
              }
-         
+
          $prisoners = array();
          while( list($x, $sub) = each($index) )
              {
@@ -401,7 +401,7 @@ switch( $action )
          $score = create_territories_and_score( $Size, $array );
          $score += $White_Prisoners - $Black_Prisoners + $Komi;
 
-         $extra_message = "<font color=\"blue\">Score: " . 
+         $extra_message = "<font color=\"blue\">Score: " .
               score2text($score, true) . "</font>";
      }
      break;
@@ -421,7 +421,7 @@ if( $enable_message ) $may_play = false;
 if( !$logged_in or ( $player_row["ID"] != $Black_ID and $player_row["ID"] != $White_ID ) )
      unset( $msg );
 
-draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y, 
+draw_board($Size, $array, $may_play, $gid, $Last_X, $Last_Y,
            $player_row["Stonesize"], $player_row["Boardfontsize"], $msg, $stonestring, $handi );
 
 
@@ -436,14 +436,14 @@ if( $enable_message )
     <TABLE align="center">
      <TR>
         <TD align=right>Message:</TD>
-        <TD align=left>  
+        <TD align=left>
           <textarea name="message" cols="50" rows="8" wrap="virtual"></textarea></TD>
       </TR>
       <input type="hidden" name="gid" value="<?php echo $gid; ?>">
       <input type="hidden" name="action" value="<?php echo $action; ?>">
-<?php 
-if( $action == 'move' ) 
-    { 
+<?php
+if( $action == 'move' )
+    {
         echo "
       <input type=\"hidden\" name=\"prisoners\" value=\"" . urlencode(serialize($prisoners)) . "\">
       <input type=\"hidden\" name=\"colnr\" value=\"$colnr\">
@@ -459,7 +459,7 @@ else if( $action == 'done' )
 else if( $action == 'handicap' )
     {
         echo "<input type=\"hidden\" name=\"stonestring\" value=\"" . $stonestring . "\">\n";
-    } 
+    }
 
 ?>
       <TR><TD></TD>
@@ -469,7 +469,7 @@ else if( $action == 'handicap' )
 
       <TR><TD></TD>
         <TD align=right><input type=submit name="next" value="Go back"></TD></TR>
-  
+
     </TABLE>
   </CENTER>
 </FORM>
@@ -492,12 +492,12 @@ else if( $action == 'handicap' )
           <td>Rank:</td>
           <td><?php echo( $Whiterank ); ?></td>
           <td><?php echo( $Blackrank ); ?></td>
-          
+
         </tr><tr>
           <td>Prisoners:</td>
           <td><?php echo( $White_Prisoners );?></td>
           <td><?php echo( $Black_Prisoners );?></td>
-          
+
         </tr><tr>
           <td></td><td>Komi: <?php echo( $Komi );?></td>
           <td>Handicap: <?php echo( $Handicap );?></td>
@@ -518,23 +518,23 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
 
       </tr><tr>
           <td>Byoyomi:</td>
-          <td> 
+          <td>
 <?php echo_time( $White_Byotime );
-      if( $White_Byotime > 0 ) echo '(' . $White_Byoperiods . ')'; 
+      if( $White_Byotime > 0 ) echo '(' . $White_Byoperiods . ')';
 ?></td>
-          <td> 
+          <td>
 <?php echo_time( $Black_Byotime );
-      if( $Black_Byotime > 0 ) echo '(' . $Black_Byoperiods . ')'; 
+      if( $Black_Byotime > 0 ) echo '(' . $Black_Byoperiods . ')';
 ?></td>
         </tr>
 
 
-<?php                                                        
+<?php
     }
 ?>
       </tr><tr>
-            <td>Time limit:</td><td colspan=2> 
-<?php 
+            <td>Time limit:</td><td colspan=2>
+<?php
     echo_time( $Maintime );
       if( $Byotime <= 0 )
           echo ' without byoyomi';
@@ -547,7 +547,7 @@ if( $Black_Byotime > 0 or $White_Byotime > 0 )
       else
           {
               echo ' + ';
-              echo_time($Byotime); 
+              echo_time($Byotime);
               echo '/' . $Byoperiods .  ($Byotype == 'JAP' ? '&nbsp;periods&nbsp;Japanese' : '&nbsp;stones&nbsp;Canadian') . '&nbsp;byoyomi';
           }
 ?></td>
@@ -600,7 +600,7 @@ while( $row = mysql_fetch_array($moves_result) )
         $c = 'S';
     else if( $row["PosX"] == -3 )
         $c = 'R';
-        
+
     else
         {
             $col = chr($row["PosX"]+ord('a'));
@@ -625,14 +625,14 @@ while( $row = mysql_fetch_array($moves_result) )
 ?><td><a class="w" href=game.php?gid=<?php echo $t;?></A></td>
 <?php
       }
-    $i++;    
+    $i++;
 }
 ?>
 </tr></table>
 <?php
 }
 
-if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or 
+if( $action == 'remove' or $action == 'choose_move' or $action == 'just_looking' or
     $action == 'handicap' )
 {
 echo '
@@ -670,8 +670,8 @@ echo "
       </tr>
     </table>
 ";
-end_page(false); 
+end_page(false);
 }
 else
-end_page(); 
+end_page();
 ?>
