@@ -20,6 +20,92 @@ ChangeLog
 ------------------------------------------------------------------
 
 ### ----- release-1_0_15-20120608 -----
+2012-07-06 juga
+
+   * include/game_functions.php (class GameAddTime, ~.add_time_opponent;
+       GameHelper.update_clock, ~.load_game_row),
+     include/time_functions.php (get_clock_ticks, time_left_ticksdate, timeleft_days_to_ticks),
+     include/cache_clock.php (ClockCache.load_clock_ticks, ~.get_clock_cache),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.load_clock_ticks),
+     include/classlib_game.php (NextGameOrder.make_timeout_date),
+     include/make_game.php (create_game),
+     scripts/fix_games_timeleft.php (dbg_query, update_games_timeoutdate),
+     scripts/obsolete/game_test.php,
+     specs/db/table-Games.txt,
+     tournaments/game_admin.php (draw_add_time),
+     edit_vacation.php:
+   - fix bugs: overworked handling of Games.TimeOutDate for sorting status-games by time-remaining
+     - TimeOutDate is changed if player starts or changes the length of vacation:
+       - if player is on vacation, the remaining-time changes as well,
+         because the TimeOutDate is an absolute date.
+       - if user starts vacation, the TimeOutDate of all games-to-move for that user is extended
+         by the number of ticks representing the length of vacation-days.
+       - if user changes the length of vacation, the TimeOutDate of all the games-to-move
+         for that user is adjusted by the respective number of ticks.
+       - if the vacation of a user ends, the TimeOutDate is not changed,
+         because the additional time (gained by vacation) is consumed.
+     - TimeOutDate is not changed if player changes night-time or timezone, because current game-clocks
+     - stopped weekend-clocks are not handled for TimeOutDate, see field-doc in 'specs/db/table-Games.txt'
+     - fixed adjusting TimeOutDate on adding-time to game by opponent
+     - fixed handling of Games.ClockUsed < 0 (vacation) and relative Games.LastTicks for that case
+
+   - fix-games-timeleft-script: show value-diff for changed Games.TimeOutDate-field
+   - fix bug: needed ref-args in constructor of GameAddTime for access on passed-in var-ref $game_row
+   - cleanup: simplified and sync'ed code to determine game-clock/last-ticks/time-out-date
+   - cleanup: replaced game-row vars (Black/White)onvacation -> Black|White_OnVacation
+
+   - optimized clock-tick-loading
+     - changing default to USE cache now to avoid same clock is loaded multiple-times within same session
+     - added method to get singleton of clock-cache
+
+   * include/table_columns.php (Table.register_filter):
+   - fix bug: needed ref-args
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql:
+   - optimization: speed up forum-search on specific user
+-----------
+-- speed up forum-search on specific user
+ALTER TABLE Posts
+   ADD KEY User_ID (User_ID);
+-----------
+
+   * list_contacts.php, NEWS:
+   - added table-navigation for contact-list
+
+2012-07-05 juga
+
+   * tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_users,
+       ~.count_tournament_pool_games),
+     tournaments/include/tournament_participant.php (TournamentParticipant.count_tournament_participants),
+     statistics.php (show_stats_default, show_stats_user_countries),
+     statratingspng.php (get_ratings_data),
+     scripts/browser_stats.php:
+   - optimized GROUP-BY select-queries by using SQL_SMALL_RESULT indicating small resultset
+
+   * include/mail_functions.php (html_entity_decode, mail_link, mail_strip_html),
+     include/config.php (EMAIL_ADMINS),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, halfhourly_cron.php, NEWS:
+   - fix bug: avoid concurrent start of halfhourly-cron-script alerting admin per mail
+     with new EMAIL_ADMINS-config to check problem
+   - optimized mail-notifications:
+     - speed up sending mail-notifications by adding index on Players.Notify-field
+     - directly send notifications for users with Players.Notify='NEXT'
+     - pre-load users to notify and their games to release db-resultset as soon as possible
+       because loop can take quite some time
+     - load game-board only if needed and not for any move-notify, that is only if user actually
+       wants BOARD-notifications including last game-message
+     - minor: avoid board-move-fix when board is loaded
+   - added LF after game-board in message
+   - refactored mail-funcs from 'halfhourly_cron.php' into 'include/mail_functions.php'
+   - minor change (used consts, detailed error-labels, strpos-checks, if-to-ternary-op, string-formatting)
+-----------
+-- speed up sending mail-notifications in halfhourly-cron-script
+ALTER TABLE Players
+   ADD KEY Notify (Notify) ;
+-----------
+
 2012-07-04 juga
 
    * include/message_functions.php (game_settings_form, game_info_table),
