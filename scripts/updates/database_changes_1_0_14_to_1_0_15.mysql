@@ -2431,3 +2431,8 @@ ALTER TABLE Players
    ADD KEY Notify (Notify) ;
 
 
+-- speed up forum-search on specific user
+ALTER TABLE Posts
+   ADD KEY User_ID (User_ID);
+
+

@@ -772,6 +772,7 @@ CREATE TABLE IF NOT EXISTS `Posts` (
   KEY `Parent_ID` (`Parent_ID`),
   KEY `Time` (`Time`),
   KEY `Approved` (`Approved`),
+  KEY `User_ID` (`User_ID`),
   FULLTEXT KEY `Subject` (`Subject`,`Text`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
