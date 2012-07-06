@@ -121,17 +121,14 @@ define('GA_RES_TIMOUT', 3);
             error('assert', "Tournament.game_admin.addtime.check.opp($tid,$gid,$color)");
          $add_days  = (int) @$vars['add_days'];
          $reset_byo = (bool) @$vars['reset_byoyomi'];
+         $add_days_hours = time_convert_to_hours($add_days, 'days');
 
          $game_data = $game->fillEntityData();
          $game_row = $game_data->make_row();
-         // fill clock-used for NextGameOrder::make_timeout_date()
-         $game_row['X_BlackClock'] = $user_black->urow['ClockUsed'];
-         $game_row['X_WhiteClock'] = $user_white->urow['ClockUsed'];
 
          ta_begin();
          {//HOT-section to add time
-            $add_hours = GameAddTime::add_time_opponent( $game_row, $opp,
-                  time_convert_to_hours($add_days, 'days'), $reset_byo, /*by_td*/$my_id );
+            $add_hours = GameAddTime::add_time_opponent( $game_row, $opp, $add_days_hours, $reset_byo, /*by_td*/$my_id );
          }
          ta_end();
 
@@ -423,7 +420,7 @@ function draw_add_time( $tgame, $game, $allow_add_time )
    global $page, $vars;
    $game_data = $game->fillEntityData();
    $game_row = $game_data->make_row();
-   $game_row['X_Ticks'] = get_clock_ticks( 'tg_gadm.draw_add_time', $game->ClockUsed, /*refresh_cache*/false );
+   $game_row['X_Ticks'] = get_clock_ticks( 'tg_gadm.draw_add_time', $game->ClockUsed );
 
    $opp = calc_opponent( $game, @$vars['color'] );
    $allow_edit = (is_null($opp))
