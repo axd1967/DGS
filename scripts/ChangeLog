@@ -22,6 +22,9 @@ ChangeLog
 ### ----- release-1_0_15-20120608 -----
 2012-07-06 juga
 
+   * include/quick_common.php ($clocks_stopped):
+   - re-enabled stopped clocks
+
    * include/game_functions.php (class GameAddTime, ~.add_time_opponent;
        GameHelper.update_clock, ~.load_game_row),
      include/time_functions.php (get_clock_ticks, time_left_ticksdate, timeleft_days_to_ticks),
