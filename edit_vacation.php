@@ -53,12 +53,25 @@ require_once( "include/form_functions.php" );
          if( $vacationdiff == 0 )
             jump_to("status.php");
 
-         db_query( 'edit_vacation.change_vacation',
-            "UPDATE Players SET VacationDays=VacationDays-($vacationdiff)"
-                  . ", OnVacation=OnVacation+($vacationdiff)"
-                  . ", UseVacation=UseVacation+($vacationdiff)"
-                  . " WHERE ID=$my_id"
-                     . " AND VacationDays >= ($vacationdiff) LIMIT 1" );
+         $upd_timeout_ticks = timeleft_days_to_ticks($vacationdiff);
+
+         ta_begin();
+         {//HOT-section to change vacation-length (for player and his games)
+            db_query( 'edit_vacation.change_vacation.update_games',
+               "UPDATE Games "
+                  . " SET Games.TimeOutDate=Games.TimeOutDate+($upd_timeout_ticks)"
+                  . " WHERE Games.Status" . IS_STARTED_GAME
+                  . " AND Games.ToMove_ID=$my_id"
+                  . ' AND Games.ClockUsed<0' // VACATION_CLOCK
+               );
+
+            db_query( 'edit_vacation.change_vacation',
+               "UPDATE Players SET VacationDays=VacationDays-($vacationdiff)"
+                     . ", OnVacation=OnVacation+($vacationdiff)"
+                     . ", UseVacation=UseVacation+($vacationdiff)"
+                     . " WHERE ID=$my_id AND VacationDays >= ($vacationdiff) LIMIT 1" );
+         }
+         ta_end();
 
          $msg = urlencode(T_('Vacation length changed!'));
          jump_to("status.php?sysmsg=$msg");
@@ -97,6 +110,8 @@ require_once( "include/form_functions.php" );
          if( $is_guest ) // view ok, edit forbidden
             error('not_allowed_for_guest', 'edit_vacation');
 
+         $add_timeout_ticks = timeleft_days_to_ticks($vacationlength);
+
          ta_begin();
          {//HOT-section to start vacation (for player and his games)
             // LastTicks will handle -(time spent) at the moment of the start of vacations
@@ -105,6 +120,7 @@ require_once( "include/form_functions.php" );
                "UPDATE Games INNER JOIN Clock ON Clock.ID=Games.ClockUsed"
                   . " SET Games.ClockUsed=" .VACATION_CLOCK
                      . ", Games.LastTicks=Games.LastTicks-Clock.Ticks"
+                     . ", Games.TimeOutDate=Games.TimeOutDate+$add_timeout_ticks"
                   . " WHERE Games.Status" . IS_STARTED_GAME
                   . " AND Games.ToMove_ID=$my_id"
                   . ' AND Games.ClockUsed>=0' // not VACATION_CLOCK
@@ -136,7 +152,6 @@ require_once( "include/form_functions.php" );
                'DESCRIPTION', T_('Choose vacation length'),
                'SELECTBOX', 'vacationlength', 1, $days, $vacation_min_days, false,
                'SUBMITBUTTON', 'start_vacation', T_('Start vacation') ) );
-
       }
    }
 

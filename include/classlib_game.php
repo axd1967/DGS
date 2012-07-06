@@ -651,13 +651,20 @@ class NextGameOrder
     * \note used for status-games-ordering on remaining-time
     * \note ignores vacation and weekends
     *
-    * \param $grow Games-table-row to read time-settings for game, expected fields: Maintime, Byotype,
-    *              Byotime, Byoperiods, (White|Black)_(Maintime|Byotime|Byoperiods), X_(White|Black)Clock
+    * \param $grow Games-table-row to read time-settings for game, expected fields:
+    *              Maintime, Byotype, Byotime, Byoperiods,
+    *              (White|Black)_(Maintime|Byotime|Byoperiods),
+    *              (White|Black)_OnVacation
+    * \param $game_clock_used if >=0 then $game_ticks are ticks relative to this clock,
+    *        otherwise $game_ticks are the elapsed-ticks
+    * \param $game_ticks absolute or relative game-ticks (see $game_clock_used); if <=0 then no game-clock-check done
     * \param $to_move BLACK | WHITE
     * \param $is_new_game if true get time-settings from $grow without prefix
     * \return "absolute" date (in ticks) aligned to Clock[ID=CLOCK_TIMELEFT]
+    *
+    * \see for full specs and pitfalls, see 'TimeOutDate/ClockUsed/LastTicks'-field in 'specs/db/table-Games.txt'
     */
-   function make_timeout_date( $grow, $to_move, $lastticks, $is_new_game=false )
+   function make_timeout_date( $grow, $to_move, $game_clock_used, $game_ticks, $is_new_game=false )
    {
       // determine time-stuff for time-left-calculus
       $pfx = ($to_move == BLACK) ? 'Black' : 'White';
@@ -673,15 +680,27 @@ class NextGameOrder
          $tl_Byotime    = $grow["{$pfx}_Byotime"];
          $tl_Byoperiods = $grow["{$pfx}_Byoperiods"];
       }
-      $tl_clockused = $grow["X_{$pfx}Clock"]; // ignore vacation and weekends
 
-      $tl_clockused_ticks = get_clock_ticks( 'NGO.make_timeout_date', $tl_clockused, /*refresh-cache*/false );
-      $elapsed_hours = ticks_to_hours( $tl_clockused_ticks - $lastticks);
+      // calculate elapsed ticks
+      if( $game_ticks <= 0 || $game_clock_used < 0 ) // relative ticks (for new-game or if on-vacation)
+         $elapsed_ticks = abs($game_ticks);
+      else // absolute ticks (of game-clock), no vacation clock
+      {
+         $game_clock_ticks = get_clock_ticks( 'NGO.make_timeout_date', $game_clock_used );
+         $elapsed_ticks = $game_clock_ticks - $game_ticks;
+      }
+
+      $elapsed_hours = ticks_to_hours( $elapsed_ticks );
       time_remaining($elapsed_hours, $tl_Maintime, $tl_Byotime, $tl_Byoperiods,
          $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'], false);
 
       $hours_left = time_remaining_value( $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
             $tl_Maintime, $tl_Byotime, $tl_Byoperiods );
+
+      $tl_vac_days = (float)@$grow["{$pfx}_OnVacation"];
+      if( $tl_vac_days > 0 ) // handle remaining vacation
+         $hours_left += round( 24 * $tl_vac_days );
+
       $timeout_date = time_left_ticksdate( $hours_left );
 
       return $timeout_date;

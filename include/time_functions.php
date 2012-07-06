@@ -143,15 +143,15 @@ function is_nighttime_clock( $clock_id, $timestamp=null )
    return !is_hour_clock_run( $clock_id, $timestamp );
 }
 
-function get_clock_ticks( $dbgmsg, $clock_used, $refresh_cache=true )
+function get_clock_ticks( $dbgmsg, $clock_used, $use_cache=true )
 {
    global $CACHE_CLOCK;
-   return $CACHE_CLOCK->load_clock_ticks( $dbgmsg.'.get_clock_ticks', $clock_used, $refresh_cache );
+   return $CACHE_CLOCK->load_clock_ticks( $dbgmsg.'.get_clock_ticks', $clock_used, $use_cache );
 }
 
 function ticks_to_hours($ticks)
 {
-   //returns the greatest integer within [0 , $ticks/TICK_FREQUENCY[
+   //returns the greatest non-negative integer within [0 , $ticks/TICK_FREQUENCY[
    return ( $ticks > TICK_FREQUENCY ) ? floor(($ticks-1) / TICK_FREQUENCY) : 0;
 }
 
@@ -371,27 +371,23 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
 /*!
  * \brief Returns "absolute" time in ticks aligned with Clock[ID=CLOCK_TIMELEFT].
  * \param $hours_left hours_left is not precise but following the calculus of time_remaining_value()
- * \note
- * - used for time-remaining ordering
- * - Weekend-handling is NOT implemented, because:
- *   Weekend-handling would have a flaw, which after outages for which the clock are not "ticking"
- *   (like maintenance) would need that admins have to recalculate the Games.TimeOutDate.
- *   The weekend-handling would need to use the current time to compensate all weekends during
- *   the time left. This weekend-compensation would make it unsynchronized with
- *   the Clock-aligned TimeOutDate.
  *
- *   => Admins can run fix_games_timeleft-script for games without weekend-clock
- *   to fix Games.TimeOutDate after longer outages.
- *   However, the TimeOutDate is "corrected" on the players next-move, so it can be
- *   accepted to skip the fix-step after maintenance if not taking too long.
+ * \note used for time-remaining ordering, weekend-clocks not supported
+ * \see for full specs and pitfalls, see 'TimeOutDate/ClockUsed/LastTicks'-field in 'specs/db/table-Games.txt'
  */
 function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
 {
    if( $curr_ticks < 0 )
-      $curr_ticks = get_clock_ticks( 'time_left_ticksdate', CLOCK_TIMELEFT, /*refresh-cache*/false );
+      $curr_ticks = get_clock_ticks( 'time_left_ticksdate', CLOCK_TIMELEFT );
 
    $ticks_date = $curr_ticks + round( $hours_left * TICK_FREQUENCY );
    return $ticks_date;
+}
+
+// convert full days to ticks
+function timeleft_days_to_ticks( $days )
+{
+   return 24 * $days * TICK_FREQUENCY;
 }
 
 

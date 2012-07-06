@@ -214,14 +214,73 @@ Description:
 * White_Maintime, White_Byotime, White_Byoperiods :
    - current remaining time for White player
 
-* LastTicks : last-ticks (from ClockUsed) of current player, used for time-calculus
-   - TICK_FREQUENCY = 12 ticks/hour, i.e. 1 tick spans 5 min
+* LastTicks : last-ticks used for time-calculus
+   - NOTE: TICK_FREQUENCY = 12 ticks/hour, i.e. 1 tick spans 5 min
+
+   - if Games.ClockUsed >= 0, then the player-to-move is NOT on vacation and
+     LastTicks are the copied from the player-to-move's Clock.Ticks (for Players.ClockUsed),
+     when a player moved:
+
+         T (= elapsed ticks since last move) := Clock[ID=Games.ClockUsed].Ticks - Games.LastTicks
+
+     Value T is used to calculate hours since last move (see 'ticks_to_hours(..)'),
+     then to check if the remaining time of the player-to-move is enough or the time is up.
+
+   - if Games.ClockUsed < 0, then the player-to-move is on vacation and
+     LastTicks is < 0 containing the time spent (in negative ticks) being independent from any clock.
+     This is done by substracting the value of Clock.Ticks of the current game-clock.
+
+     When the vacation ends, the value of LastTicks is corrected by adding the absolute
+     value of Clock.Ticks of the current game-clock (=Players.ClockUsed of player-to-move
+     corrected for weekend-clock if required).
 
 * ClockUsed : foreign key to Clock.ID, which clock to use for current player
-   - can be normal clock (0-23), weekend-clock (100-123) or "vacation-clock" -1
+   - normal clock (0-23)
+   - normal weekend-clock (100-123)
+   - "vacation-clock" (-1), or
+     weekend-vacation-clock (-101), obsolete but can still appear and is not wrong
+     NOTE: therefore check for vacation-clock with "clock_id < 0".
 
-* TimeOutDate : absolute "date" expressed in ticks aligned to Clock.ID=204,
+* TimeOutDate : absolute "date" expressed in ticks aligned to the timeleft-clock (Clock.ID=204)
    - used for remaining-time ordering for status-games
+   - only valid for player-to-move
+
+   - value is changed if player starts or changes the length of the vacation:
+     - If player is on vacation, the remaining-time changes as well,
+       because the TimeOutDate is an absolute date.
+     - If user starts vacation, the TimeOutDate of all games-to-move for that user is extended
+       by the number of ticks representing the length of vacation-days.
+     - If user changes the length of vacation, the TimeOutDate of all the games-to-move
+       for that user is adjusted by the respective number of ticks.
+     - If the vacation of a user ends, the TimeOutDate is not changed,
+       because the additional time (gained by vacation) is consumed.
+
+   - value is not changed if player changes night-time or timezone, because current game-clocks
+     are not changed. Only on the next move it influences the game-time, but then also TimeOutDate
+     is correctly calculated with the changed Players.ClockUsed.
+
+   - Weekend-handling is NOT implemented, because:
+     Weekend-handling would have a flaw, which after outages for which the clock are not "ticking"
+     (like maintenance) would need that admins have to recalculate the Games.TimeOutDate.
+     The weekend-handling would need to use the current time to compensate all weekends during
+     the time left. This weekend-compensation would make it unsynchronized with
+     the Clock-aligned TimeOutDate.
+
+     Also the weekend-clock (and normal clocks) are 15-hour days, while the timeleft-clock resembles a 24-hour day.
+     And additionally the night-time would need to be taken into account when calculating for the time gained
+     by the respective weekends.
+
+     => Admins can run fix_games_timeleft-script for all games to fix Games.TimeOutDate after longer outages.
+     However, the TimeOutDate is "corrected" on the players next-move, so it can be
+     accepted to skip the fix-step after maintenance if not taking too long.
+
+     CONCLUSION:
+     Games with weekend-clock stopped is not handled, because it would be complex to correctly
+     calculate the time-diff.
+
+     So in effect the TimeOutDate is not accurate for games with clock-stopped-on-weekends,
+     but not (completely) wrong as the player has the weekend-time as additional time-left
+     for those games.
 
 * Rated : game-setting
    - game is rated if field-value != 'N' ('Y', 'Done'), non-rated otherwise ('N')
