@@ -67,7 +67,7 @@ require_once( 'include/classlib_userpicture.php' );
    $scfilter = new SearchFilter( 's', $search_profile );
    $cfilter = new SearchFilter( '', $search_profile );
    //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
-   $ctable = new Table( 'contact', $page, $cfg_tblcols, 'contact' );
+   $ctable = new Table( 'contact', $page, $cfg_tblcols, 'contact', TABLE_ROWS_NAVI );
    $ctable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
@@ -172,8 +172,8 @@ require_once( 'include/classlib_userpicture.php' );
    $query = $qsql->get_select() . "$order$limit";
 
    $result = db_query( 'list_contacts.find_data', $query );
-
    $show_rows = $ctable->compute_show_rows(mysql_num_rows($result));
+   $ctable->set_found_rows( mysql_found_rows('list_contacts.found_rows') );
 
 
    $title = T_('Contact list');
