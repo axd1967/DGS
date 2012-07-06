@@ -218,7 +218,8 @@ $GLOBALS['ThePage'] = new Page('Game');
    if( $Status != GAME_STATUS_FINISHED && ($Maintime > 0 || $Byotime > 0) )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
-      $hours = ticks_to_hours(get_clock_ticks("game($gid,$action)", $ClockUsed) - $LastTicks);
+      $clock_ticks = get_clock_ticks( "game($gid,$action)", $ClockUsed );
+      $hours = ticks_to_hours( $clock_ticks - $LastTicks);
 
       if( $to_move == BLACK )
       {
@@ -1030,7 +1031,7 @@ function get_final_score_move( $move )
    return ( $PosX == POSX_SCORE ) ? $move - 1 : $move;
 }
 
-function draw_message_box( &$message )
+function draw_message_box( $message )
 {
    $tabindex = 1;
 
@@ -1113,7 +1114,7 @@ function draw_add_time( $game_row, $colorToMove )
       </TABLE>';
 } //draw_add_time
 
-function draw_game_info( &$game_row, $game_setup, $board, $tourney )
+function draw_game_info( $game_row, $game_setup, $board, $tourney )
 {
    global $base_path;
 

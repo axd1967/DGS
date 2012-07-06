@@ -486,11 +486,11 @@ function do_add_time( $game_row, $my_id)
    $gid = $game_row['ID'];
    $add_days  = (int) @$_REQUEST['add_days'];
    $reset_byo = (bool) @$_REQUEST['reset_byoyomi'];
+   $add_days_hours = time_convert_to_hours($add_days, 'days');
 
    ta_begin();
    {//HOT-section to add time
-      $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id,
-            time_convert_to_hours( $add_days, 'days'), $reset_byo );
+      $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id, $add_days_hours, $reset_byo );
       if( !is_numeric($add_hours) )
          error('invalid_args', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
    }
