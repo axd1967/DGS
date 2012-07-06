@@ -189,7 +189,7 @@ class GameAddTime
    {
       $this->uid = (int)$uid;
       $this->td_uid = ( (int)$td_uid > GUESTS_ID_MAX ) ? (int)$td_uid : 0;
-      $this->game_row = $game_row;
+      $this->game_row = &$game_row;
       $this->game_query = '';
    }
 
@@ -283,7 +283,7 @@ class GameAddTime
       }
       elseif( $reset_byo == 1 ) // full byo-yomi reset
       {
-         if( $this->game_row["{$oppcolor}_Maintime"] <= 0  )
+         if( $this->game_row["{$oppcolor}_Maintime"] <= 0 )
          {
             $new_byotime = $this->game_row['Byotime'];
             $new_byoper  = $this->game_row['Byoperiods'];
@@ -371,11 +371,11 @@ class GameAddTime
     * \param $game_row pre-loaded game_row to add time for
     *        or numeric game-id to load the game from database.
     *
-    *        Need the following fields set in game_row, and also the fields needed
-    *        for NextGameOrder::make_timeout_date():
+    *        Need the following fields set in game_row,
+    *        and the fields needed for NextGameOrder::make_timeout_date():
     *           ID, tid, Status, Maintime, Byotype, Byotime, Byoperiods, ToMove_ID,
-    *           LastTicks, Moves, (Black/White)_ID/_Maintime/_Byotime/_Byoperiods,
-    *           X_(White|Black)Clock (from Players.Clock)
+    *           LastTicks, Moves, ClockUsed,
+    *           (Black|White)_(ID|OnVacation|Maintime|Byotime|Byoperiods)
     *
     * \param $uid user giving time to his opponent
     * \param $add_hours amount of hours to add to maintime of opponent,
@@ -398,12 +398,11 @@ class GameAddTime
       if( !is_numeric($add_hours) || ($add_hours == 0 && !$reset_byo) ) // error or nothing to do
          return $add_hours;
 
-      // handle Games.TimeOutDate
+      // handle Games.TimeOutDate if opponent-to-move
       if( $game_row['ToMove_ID'] != $uid )
       {
-         $stoneToMove = ( $game_row['ToMove_ID'] == $game_row['Black_ID'] ) ? BLACK : WHITE;
-         $timeout_date = NextGameOrder::make_timeout_date(
-               $game_row, $stoneToMove, $game_row['LastTicks'] );
+         $col_to_move = ( $game_row['ToMove_ID'] == $game_row['Black_ID'] ) ? BLACK : WHITE;
+         $timeout_date = NextGameOrder::make_timeout_date( $game_row, $col_to_move, $game_row['ClockUsed'], $game_row['LastTicks'] );
 
          $game_addtime->game_query .= ",TimeOutDate=$timeout_date";
          $game_row['TimeOutDate'] = $timeout_date;
@@ -1216,8 +1215,8 @@ class GameHelper
     * \brief Updates clock-values for game.
     * \param $grow game-row with mandatory fields:
     *        Maintime, Byotime, ClockUsed, LastTicks, WeekendClock,
-    *        Black_Byoperiods, Black_Byotime, Black_Maintime, Blackonvacation, X_BlackClock,
-    *        White_Byoperiods, White_Byotime, White_Maintime, Whiteonvacation, X_WhiteClock
+    *        Black_Byoperiods, Black_Byotime, Black_Maintime, Black_OnVacation, X_BlackClock,
+    *        White_Byoperiods, White_Byotime, White_Maintime, White_OnVacation, X_WhiteClock
     * \return array( hours, UpdateQuery )
     */
    function update_clock( $dbgmsg, $grow, $to_move, $next_to_move, $do_ticks=true )
@@ -1230,7 +1229,8 @@ class GameHelper
          {
             // LastTicks may handle -(time spend) at the moment of the start of vacations
             // time since start of move in the reference of the ClockUsed by the game
-            $hours = ticks_to_hours(get_clock_ticks($dbgmsg.'.GH.update_clock', $grow['ClockUsed']) - $grow['LastTicks']);
+            $clock_ticks = get_clock_ticks( $dbgmsg.'.GH.update_clock', $grow['ClockUsed'] );
+            $hours = ticks_to_hours( $clock_ticks - $grow['LastTicks'] );
 
             if( $to_move == BLACK )
             {
@@ -1241,7 +1241,7 @@ class GameHelper
                $upd_query->upd_num('Black_Byotime', $grow['Black_Byotime']);
                $upd_query->upd_num('Black_Byoperiods', $grow['Black_Byoperiods']);
             }
-            else
+            else // WHITE
             {
                time_remaining( $hours,
                   $grow['White_Maintime'], $grow['White_Byotime'], $grow['White_Byoperiods'],
@@ -1252,18 +1252,15 @@ class GameHelper
             }
          }//do_ticks
 
-         $next_onvacation = ( $next_to_move == BLACK ) ? $grow['Blackonvacation'] : $grow['Whiteonvacation'];
-         if( $next_onvacation > 0 ) // next-player on vacation
-            $next_clockused = VACATION_CLOCK; //and LastTicks=0, see below
+         // determine clock-used, last-ticks, timeout-date
+         $pfx = ( $next_to_move == BLACK ) ? 'Black' : 'White';
+         if( $grow["{$pfx}_OnVacation"] > 0 ) // next-player on vacation
+            $next_clockused = VACATION_CLOCK; //and LastTicks=0
          else
-         {
-            $next_clockused = ( $next_to_move == BLACK ? $grow['X_BlackClock'] : $grow['X_WhiteClock'] );
-            if( $grow['WeekendClock'] != 'Y' )
-               $next_clockused += WEEKEND_CLOCK_OFFSET;
-         }
+            $next_clockused = $grow["X_{$pfx}Clock"] + ( $grow['WeekendClock'] != 'Y' ? WEEKEND_CLOCK_OFFSET : 0 );
+         $next_lastticks = get_clock_ticks( $dbgmsg.'.GH.update_clock2', $next_clockused );
 
-         $next_lastticks = get_clock_ticks($dbgmsg.'.GH.update_clock2', $next_clockused);
-         $timeout_date = NextGameOrder::make_timeout_date( $grow, $next_to_move, $next_lastticks );
+         $timeout_date = NextGameOrder::make_timeout_date( $grow, $next_to_move, $next_clockused, $next_lastticks );
 
          $upd_query->upd_num('LastTicks', $next_lastticks);
          $upd_query->upd_num('ClockUsed', $next_clockused);
@@ -1276,13 +1273,11 @@ class GameHelper
    {
       $addfields_query = ( $add_fields )
          ? "black.Name AS Blackname, " .
-           "black.OnVacation AS Black_OnVacation, " .
            "black.ClockUsed AS Black_ClockUsed, " .
            "black.Rank AS Blackrank, " .
            "black.Rating2 AS Blackrating, " .
            "black.RatingStatus AS Blackratingstatus, " .
            "white.Name AS Whitename, " .
-           "white.OnVacation AS White_OnVacation, " .
            "white.ClockUsed AS White_ClockUsed, " .
            "white.Rank AS Whiterank, " .
            "white.Rating2 AS Whiterating, " .
@@ -1294,8 +1289,8 @@ class GameHelper
             $addfields_query .
             "black.ClockUsed AS X_BlackClock, " . // X_*Clock for GameHelper::update_clock()
             "white.ClockUsed AS X_WhiteClock, " .
-            "black.OnVacation AS Blackonvacation, " .
-            "white.OnVacation AS Whiteonvacation," .
+            "black.OnVacation AS Black_OnVacation, " .
+            "white.OnVacation AS White_OnVacation," .
             "black.Handle AS Blackhandle, " .
             "white.Handle AS Whitehandle " .
             "FROM Games AS G " .
@@ -1793,7 +1788,8 @@ class FairKomiNegotiation
 
          $to_move = ( $new_black_id == $next_tomove_id ) ? BLACK : WHITE;
          $next_to_move = BLACK + WHITE - $to_move;
-         list( $hours, $upd_clock ) = GameHelper::update_clock( "FKN.start_fkg($gid)", $grow, $to_move, $next_to_move, /*ticks*/false );
+         list( $hours, $upd_clock ) = // NOTE: clock-ticks already updated (so $ticks=false)
+            GameHelper::update_clock( "FKN.start_fkg($gid)", $grow, $to_move, $next_to_move, /*ticks*/false );
          $upd_game->merge( $upd_clock );
       }
 

@@ -535,14 +535,6 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
 
-   $weekend_clock_offset = ( $game_info_row['WeekendClock'] != 'Y' ) ? WEEKEND_CLOCK_OFFSET : 0;
-   $clock_used_black = ( $black_row['OnVacation'] > 0 )
-      ? VACATION_CLOCK
-      : $black_row['ClockUsed'] + $weekend_clock_offset;
-   $clock_used_white = ( $white_row['OnVacation'] > 0 )
-      ? VACATION_CLOCK
-      : $white_row['ClockUsed'] + $weekend_clock_offset;
-
    $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
    $game_info_row['Rated'] = ( $rated ) ? 'Y' : 'N';
 
@@ -575,10 +567,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
 
    if( $skip_handicap_validation ) // std-handicap-placement
    {
-      //$moves = $moves;
-      $tomove = $white_row['ID'];
       $col_to_move = WHITE;
-      $clock_used = $clock_used_white;
+      //$moves = $moves;
    }
    else // no-handicap OR free-handicap-placement
    {
@@ -587,25 +577,29 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
 
       if( $shape_id > 0 && !$shape_black_first && $handicap == 0 )
       {
+         $col_to_move = WHITE;
          $shape_need_pass = true;
          $moves = 1;
-         $tomove = $white_row['ID'];
-         $col_to_move = WHITE;
-         $clock_used = $clock_used_white;
       }
       else
       {
-         $moves = 0;
-         $tomove = $black_id;
          $col_to_move = BLACK;
-         $clock_used = $clock_used_black;
+         $moves = 0;
       }
    }
-   $last_ticks = get_clock_ticks( 'create_game', $clock_used, /*refresh-cache*/false );
+   $next_urow = ( $col_to_move == BLACK ) ? $black_row : $white_row;
+   $tomove = $next_urow['ID'];
 
-   $game_info_row['X_BlackClock'] = $black_row['ClockUsed']; // no weekendclock-offset or vacation-clock
-   $game_info_row['X_WhiteClock'] = $white_row['ClockUsed'];
-   $timeout_date = NextGameOrder::make_timeout_date( $game_info_row, $col_to_move, $last_ticks, true/*new-game*/ );
+   // determine clock-used, last-ticks, timeout-date
+   if( $next_urow['OnVacation'] > 0 ) // next-player on vacation
+      $clock_used = VACATION_CLOCK; //and LastTicks=0
+   else
+      $clock_used = $next_urow['ClockUsed'] + ( $game_info_row['WeekendClock'] != 'Y' ? WEEKEND_CLOCK_OFFSET : 0 );
+   $last_ticks = get_clock_ticks( 'create_game', $clock_used );
+
+   $game_info_row['Black_OnVacation'] = $black_row['OnVacation'];
+   $game_info_row['White_OnVacation'] = $white_row['OnVacation'];
+   $timeout_date = NextGameOrder::make_timeout_date( $game_info_row, $col_to_move, $clock_used, 0, true/*new-game*/ );
 
    // setup fair-komi-game, determine game-status
    if( $is_fairkomi )
