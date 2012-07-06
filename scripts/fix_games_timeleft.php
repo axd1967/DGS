@@ -45,9 +45,9 @@ require_once( "include/classlib_game.php" );
    $do_it = @$_REQUEST['do_it'];
    if( $do_it )
    {
-      function dbg_query($s) {
+      function dbg_query($s, $msg='') {
         if( !mysql_query( $s) )
-           die("<BR>$s;<BR>" . mysql_error() );
+           die("<BR>$s;<BR>" . ($msg ? "; -- $msg" : '') . mysql_error() );
       }
       _echo(
          "<p>*** Fixes Games.TimeOutDate ***"
@@ -56,7 +56,7 @@ require_once( "include/classlib_game.php" );
    }
    else
    {
-      function dbg_query($s) { _echo( "<BR>$s; "); }
+      function dbg_query($s, $msg='') { _echo( "<BR>$s" . ($msg ? "; -- $msg" : '')); }
       $tmp = array_merge($page_args,array('do_it' => 1));
       _echo(
          "<p>(just show needed queries)"
@@ -71,8 +71,8 @@ require_once( "include/classlib_game.php" );
    $qsql = new QuerySQL(
          SQLP_FIELDS,
             "G.*",
-            "black.ClockUsed AS X_BlackClock",
-            "white.ClockUsed AS X_WhiteClock",
+            "black.OnVacation AS Black_OnVacation",
+            "white.OnVacation AS White_OnVacation",
          SQLP_FROM,
             "Games AS G",
             "INNER JOIN Players AS black ON black.ID=G.Black_ID",
@@ -81,7 +81,6 @@ require_once( "include/classlib_game.php" );
             "Status ".IS_STARTED_GAME
       );
    //$qsql->add_part( SQLP_WHERE, "TimeOutDate=0" ); // unset games
-   //$qsql->add_part( SQLP_WHERE, "WeekendClock='N'" ); // games with no clock running on weekend
 
    $query = $qsql->get_select();
    //_echo($query);
@@ -95,9 +94,12 @@ require_once( "include/classlib_game.php" );
    while( $row = mysql_fetch_assoc($result) )
    {
       $gid = $row['ID'];
-      $timeout_date = make_timeout_date_from_gamerow( $row );
+
+      $to_move = ($row['Black_ID'] == $row['ToMove_ID']) ? BLACK : WHITE;
+      $timeout_date = NextGameOrder::make_timeout_date( $row, $to_move, $row['ClockUsed'], $row['LastTicks'] );
+
       if( $row['TimeOutDate'] != $timeout_date )
-         update_games_timeoutdate( $gid, $timeout_date );
+         update_games_timeoutdate( $gid, $timeout_date, $row['TimeOutDate'] );
    }
    mysql_free_result($result);
 
@@ -116,19 +118,13 @@ function _echo($msg)
    flush();
 }
 
-function update_games_timeoutdate( $gid, $timeout_date )
+function update_games_timeoutdate( $gid, $timeout_date, $curr_timeout_date )
 {
    global $games_cnt, $curr_cnt;
    if( ($curr_cnt++ % 50) == 0 )
       _echo( "<br><br>... $curr_cnt of $games_cnt updated ...\n" );
    $update_query = "UPDATE Games SET TimeOutDate=$timeout_date WHERE ID='$gid' LIMIT 1";
-   dbg_query($update_query);
-}
-
-function make_timeout_date_from_gamerow( $grow )
-{
-   $to_move = ($grow['Black_ID'] == $grow['ToMove_ID']) ? BLACK : WHITE;
-   return NextGameOrder::make_timeout_date( $grow, $to_move, $grow['LastTicks'] );
+   dbg_query($update_query, "$curr_timeout_date -> $timeout_date");
 }
 
 ?>
