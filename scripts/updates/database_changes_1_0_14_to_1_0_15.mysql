@@ -2426,6 +2426,7 @@ ALTER TABLE IpStats
 UPDATE Games
    SET Starttime=Lastchanged WHERE Status='INVITED' AND Starttime=0 ;
 
+
 -- speed up sending mail-notifications in halfhourly-cron-script
 ALTER TABLE Players
    ADD KEY Notify (Notify) ;
@@ -2434,5 +2435,12 @@ ALTER TABLE Players
 -- speed up forum-search on specific user
 ALTER TABLE Posts
    ADD KEY User_ID (User_ID);
+
+
+-- cleanup invalid emails (no '@' found or containing space)
+SELECT Handle, Lastaccess, Email
+   FROM Players WHERE Email>'' AND (Email LIKE '% %' OR NOT Email LIKE '%@%') ;
+UPDATE Players
+   SET Email='' WHERE Email>'' AND (Email LIKE '% %' OR NOT Email LIKE '%@%') ;
 
 
