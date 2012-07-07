@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
+<!-- see specs, chapter 1.5.3: http://learn.adobe.com/wiki/download/attachments/64389123/CrossDomain_PolicyFile_Specification.pdf?version=1 -->
+<cross-domain-policy>
+   <site-control permitted-cross-domain-policies="none"/>
+</cross-domain-policy>
