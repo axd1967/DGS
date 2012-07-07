@@ -145,7 +145,7 @@ function show_stats_user_countries()
 
    $userstatsmenu = array();
    $userstatsmenu[T_('All users')] = $page_user;
-   $userstatsmenu[T_('Users online within 8 weeks')] = $page_user.URI_AMP."w=8";
+   $userstatsmenu[sprintf( T_('Users online within %s weeks'), 8) ] = $page_user.URI_AMP."w=8";
    make_menu( $userstatsmenu, false );
 
 
