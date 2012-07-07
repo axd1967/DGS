@@ -79,11 +79,13 @@ require_once( "include/std_functions.php" );
    if( empty($row['Email']) )
       error('no_email', "send_new_password.miss_email($my_id,$pswduser)");
 
+   $Email = trim($row['Email']);
+   verify_invalid_email('send_new_password', $Email, /*err-die*/true );
+
 
 // Now generate new password:
 
    $newpasswd = generate_random_password();
-   $Email = trim($row['Email']);
    $msg =
 "You (or possibly someone else) has requested a new password\n" .
 " for the account: $pswduser\n" . //the handle of the requesting account
@@ -95,6 +97,7 @@ Both the old and the new password will also be valid until
 
 ' . HOSTBASE;
 
+
 // Save password in database
 
    ta_begin();
@@ -102,12 +105,10 @@ Both the old and the new password will also be valid until
       admin_log( @$player_row['ID'], @$player_row['Handle'],
          "send a new password to $pswduser at $Email.");
 
-      $result = db_query( "send_new_password.update($pswduser)",
+      db_query( "send_new_password.update($pswduser)",
             "UPDATE Players " .
             "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
             "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
-
-      verify_email( 'send_new_password', $Email);
 
       send_email("send_new_password Uid:$pswduser Text:$msg", $Email, 0, $msg);
    }
