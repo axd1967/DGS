@@ -1141,10 +1141,10 @@ function generate_random_password()
  *       don't tell the users the email address they entered is invalid
  *       but just force them to enter something different.
  *
- * \return true if email is valid; otherwise an error('bad_mail_address')
- *       is called (if debugmsg given) or else error-code is returned instead
+ * \return false if email is valid; otherwise an error('bad_mail_address') is thrown (if debugmsg given),
+ *       or else an error-code is returned instead.
  */
-function verify_email( $debugmsg, $email, $die_on_error=true )
+function verify_invalid_email( $debugmsg, $email, $die_on_error=true )
 {
    // Syntax email-address:
    // - RFC 5322 - 3.2.3 : see http://tools.ietf.org/html/rfc5322#section-3.2.3
@@ -1153,21 +1153,16 @@ function verify_email( $debugmsg, $email, $die_on_error=true )
    //   though some systems/organizations do not support all of these.
    //   DGS using only ...
    // - RFC 2822 - 3.4.1 : Addr-spec specification, see http: //www.faqs.org/rfcs/rfc2822
-   //   $regexp = "^[a-z0-9]+([_.-][a-z0-9]+)*@([a-z0-9]+([.-][a-z0-9]+)*)+\\.[a-z]{2,6}$";
-   $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[a-z]{2,6})\$/i";
+   $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[-a-z0-9]{2,63})\$/i";
    $res= preg_match($regexp, $email);
    if( !$res ) // invalid email
    {
-      if( $die_on_error )
-      {
-         if( $is_string($debugmsg) )
-            error('bad_mail_address', "verify_email.$debugmsg($email)");
-      }
-      else
-         return 'bad_mail_address';
+      if( $die_on_error && is_string($debugmsg) )
+         error('bad_mail_address', "verify_invalid_email.$debugmsg($email)"); // can fall-through if errors collected
+      return 'bad_mail_address';
    }
-   return true;
-}
+   return false; // no-error
+}//verify_invalid_email
 
 
 // format-option for send_email()
@@ -1175,6 +1170,8 @@ define('EMAILFMT_SKIP_WORDWRAP', 0x01); // skipping word-wrapping
 
 /**
  * \brief Sends email to one or multiple recipients.
+ * \param $debugmsg if false, method will not die-on-error but return false instead;
+ *        otherwise error('mail_failure') is called on mail-error
  * \param $email may be:
  *     - user@example.com
  *     - user.com, anotheruser@example.com
@@ -1186,6 +1183,7 @@ define('EMAILFMT_SKIP_WORDWRAP', 0x01); // skipping word-wrapping
  * \param $headers default => 'From: '.EMAIL_FROM;
  * \param $params optional command-line paramenters for mail-command (may differ);
  *     none per default
+ * \return true on success sending mail, false otherwise
  **/
 function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
 {
@@ -1433,7 +1431,7 @@ function send_message( $debugmsg, $text='', $subject=''
          $ids= array();
          foreach( $receivers as $uid => $row )
          {
-            if( $row['Notify'] == 'NONE' && is_numeric(strpos($row['SendEmail'], 'ON')) )
+            if( $row['Notify'] == 'NONE' && ( strpos($row['SendEmail'], 'ON') !== false ) )
                $ids[]= $uid; // optimize: notify only eligible
          }
          if( count($ids) > 0 )
@@ -1467,8 +1465,10 @@ function notify( $debugmsg, $ids, $type='')
       $query = array_merge( $query, explode(',', $cnt));
    $ids = array();
    foreach( $query as $cnt )
+   {
       if( ($cnt=(int)$cnt) > GUESTS_ID_MAX ) //exclude guest
          $ids[$cnt] = $cnt; //unique
+   }
 
    $cnt= count($ids);
    if( $cnt <= 0 )
@@ -2587,7 +2587,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
             send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );
 
          $email = $player_row['Email'];
-         if( $uid > GUESTS_ID_MAX && verify_email( false, $email) )
+         if( $uid > GUESTS_ID_MAX && !verify_invalid_email(false, $email) )
             send_email("fever_vault.email($handle)", $email, 0, $text, FRIENDLY_LONG_NAME.' - '.$subject);
       }
 

@@ -134,9 +134,8 @@ class UserRegistration
    {
       if( (string)$this->email != '' )
       {
-         $errorcode = verify_email( "UserReg.check_email({$this->uhandle})",
-            $this->email, $this->die_on_error );
-         if( $errorcode !== true )
+         $errorcode = verify_invalid_email( "UserReg.check_email({$this->uhandle})", $this->email, $this->die_on_error );
+         if( $errorcode )
             $this->_error($errorcode, "UserReg.check_email2({$this->uhandle})");
       }
    }

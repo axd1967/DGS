@@ -95,7 +95,7 @@ require_once( "include/form_functions.php" );
       $err = 0;
       foreach( explode( ',', $Email) as $addr )
       {
-         if( !verify_email( false, $addr) )
+         if( verify_invalid_email(false, $addr) )
          {
             echo "<br>bad mail address: ".textarea_safe($addr)."<br>";
             $err = 1;
@@ -114,8 +114,7 @@ require_once( "include/form_functions.php" );
              "Subject: ".strip_tags( $Subject, '') . "\n\n" .
              strip_tags( $Text, '') . "\n";
 
-         $res= send_email( false, $Email, 0, $msg
-                     , FRIENDLY_LONG_NAME.' mail test', $headers);
+         $res = send_email( false, $Email, 0, $msg, FRIENDLY_LONG_NAME.' mail test', $headers );
          if( !$res )
          {
             echo "<br>mail() function failed.<br>";

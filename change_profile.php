@@ -44,7 +44,7 @@ require_once 'include/db/bulletin.php';
 
    $email = trim(get_request_arg('email'));
    if( $email )
-      verify_email( 'change_profile', $email);
+      verify_invalid_email('change_profile', $email, /*err-die*/true );
 
    $cfg_board = ConfigBoard::load_config_board( $player_row['ID'] );
 
