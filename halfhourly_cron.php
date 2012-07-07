@@ -102,11 +102,8 @@ if( !$is_down )
 
       // check for valid email
       $Email = trim($Email);
-      if( !$Email || !verify_email(false, $Email) )
-      {
-         //error('bad_mail_address', "halfhourly_cron.check.email($uid,$Email)");
+      if( !$Email || verify_invalid_email("halfhourly_cron($uid)", $Email, /*err-die-collect-errors*/true) )
          continue;
-      }
 
       $msg = sprintf( "A message or game move is waiting for you [ %s ] at:\n ", $Handle )
                 . mail_link('',"status.php")."\n"
@@ -219,13 +216,21 @@ if( !$is_down )
 
       $msg .= str_pad('', 47, '-');
 
-      send_email('halfhourly_cron', $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg);
+
+      // do not stop on mail-failure
+      if( send_email(/*no-die*/false, $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg) )
+      {
+         // if loop fails, everyone would be notified again on next start -> so mark user as notified till player's next visit
+         db_query( "halfhourly_cron.update_players_notify_Done($uid)",
+            "UPDATE Players SET Notify='DONE' " .
+            "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
+      }
    } //notifications found
 
-   // Setting Notify to 'DONE' stop notifications until the player's visit
+   // Setting Notify to 'DONE' stop notifications until the player's next visit (also for users with failed notifications)
    db_query( 'halfhourly_cron.update_players_notify_Done',
-         "UPDATE Players SET Notify='DONE'"
-         ." WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
+      "UPDATE Players SET Notify='DONE' " .
+      "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
 
 
 
