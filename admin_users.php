@@ -61,19 +61,16 @@ require_once( "include/form_functions.php" );
       'VaultCnt'        => 'int*',
       'VaultTime'       => 'time*',
       'VacationDays'    => 'int*',
-      'OnVacation'      => 'int*',
-      'UseVacation'     => 'int*',
       'AdminOptions'    => 'mask',
       'AdminNote'       => 'text:60,100',
       'BlockReason'     => 'textarea:60,6',
    );
 
    $attributes_show = array( // fieldname, ...
-      'Registerdate', 'Lastaccess', 'LastMove', 'Activity',
-      'Lang',
-      'Email', 'IP', 'Browser',
-      'Sessionexpire',
-      'SendEmail', 'Notify',
+      'Sessionexpire', 'Browser', 'IP', 'Lang',
+      'Email', 'SendEmail', 'Notify', 'UserFlags',
+      'Registerdate', 'Lastaccess', 'LastQuickAccess', 'LastMove',
+      'OnVacation', 'UseVacation', 'Activity', 'Hits',
    );
    $user_fields =
         implode(',', array_keys($attributes_edit)) . ','
@@ -159,7 +156,7 @@ require_once( "include/form_functions.php" );
          'HIDDEN', 'user', $user,
          'HIDDEN', 'uid',  @$urow['ID'],
          'DESCRIPTION', 'NOTE',
-         'TEXT',        'Update overwrites attributes(*) that may have changed while editing!' ));
+         'TEXT',        'Update overwrites attributes(*) that may have changed by the system while editing!' ));
       $uform->add_row( array( 'SPACE' ));
    }
    else
@@ -264,9 +261,14 @@ require_once( "include/form_functions.php" );
       // read-only fields
       foreach( $attributes_show as $field )
       {
+         $fval = @$urow[$field];
+         if( $field == 'UserFlags' )
+         {
+            $fval = sprintf( 'JavaScript=%s', ( $fval & USERFLAG_JAVASCRIPT_ENABLED ) ? 'ON' : 'OFF' );
+         }
          $uform->add_row( array(
             'DESCRIPTION', $field,
-            'TEXT',        @$urow[$field] ));
+            'TEXT', $fval ));
       }
    }
 
@@ -278,7 +280,8 @@ require_once( "include/form_functions.php" );
       $menu_array[T_('Check Block-IP config')] = 'scripts/check_block_ip.php';
 
    end_page(@$menu_array);
-}
+}//main
+
 
 /*
  * \brief Updates specified user.
@@ -314,12 +317,6 @@ function update_user( $uid, $user, $fv )
 
    if( !preg_match( "/^(\d+|\d+\.\d+)$/", $fv['VacationDays'] ) || (double)$fv['VacationDays'] >= 31.0 )
       return 'Bad syntax for VacationDays-field (must be positive real number below 31 days)';
-
-   if( !preg_match( "/^(\d+|\d+\.\d+)$/", $fv['OnVacation'] ) || (double)$fv['OnVacation'] >= 31.0 )
-      return 'Bad syntax for OnVacation-field (must be positive real number below 31 days)';
-
-   if( !preg_match( "/^(\d+)$/", $fv['UseVacation'] ) || (int)$fv['UseVacation'] >= 31 )
-      return 'Bad syntax for UseVacation-field (must be positive real number below 31 days)';
 
    global $arr_mask_type;
    $bitmaskall = 0;
