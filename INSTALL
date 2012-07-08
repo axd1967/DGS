@@ -19,6 +19,8 @@ Last versions used by Dragon Live Server:
 
 
 
+#--------------------------------------------------------------------
+
 1) Download sources and images:
 
 Either from cvs:
@@ -62,6 +64,8 @@ and expects it to be in the document-root.
 
 
 
+#--------------------------------------------------------------------
+
 2) Make a mysql database and a mysql user to access the database:
 
 mysql> CREATE DATABASE dragondb;
@@ -69,6 +73,8 @@ mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLE
 
 
 
+
+#--------------------------------------------------------------------
 
 3) Create mysql tables:
 
@@ -115,20 +121,26 @@ Then, this user will be able to manage the other admins in the Admin-menu.
 
 
 
+#--------------------------------------------------------------------
+
 4) Adjust config of software and adjust file permissions:
+
+NOTE: order of the following items is not strict. You may need to re-edit the
+      local-config for some of the items.
+
 
 * Copy config-template and adjust for local configuration and
   adjust 'include/config-local.php' to your environment
   and needed set of DGS-features.
 
-> cp include/config.php include/config-local.php
+  > cp include/config.php include/config-local.php
 
 * Edit permissions for include/config-local.php and directory translations/:
 
-Find out which group your webserver is using (e.g. www-data).
-> su -c 'chgrp www-data include/config-local.php translations'
-> chmod 640 include/config-local.php
-> chmod 775 translations/
+  Find out which group your webserver is using (e.g. www-data).
+  > su -c 'chgrp www-data include/config-local.php translations'
+  > chmod 640 include/config-local.php
+  > chmod 775 translations/
 
 * If wanted, create a CACHE_FOLDER (from include/config-local.php) with
   the proper user/groups and rights, so that your web-server
@@ -209,43 +221,45 @@ Find out which group your webserver is using (e.g. www-data).
 
 * PHP config:
 
-By now, Dragon works with these PHP directives:
- allow_call_time_pass_reference = Off ;Unused
- allow_url_fopen = Off ;Unused
- always_populate_raw_post_data = Off ;Unused
- arg_separator.input = &
- arg_separator.output = "&amp;" ;or = "&"
- asp_tags = Off ;Unused
- default_charset = ;set to empty or commented
- default_mimetype = "text/html"
- error_reporting = E_ALL
- file_uploads = On ;else the pattern upload will be disabled
- gpc_order = GPC
- implicit_flush = Off ;Unused
- magic_quotes_gpc = Off ;Don't care
- magic_quotes_runtime = Off
- magic_quotes_sybase = Off
- max_execution_time = 30 ;except for some rebuilding scripts with large databases
- memory_limit = 8M
- output_buffering = Off
- post_max_size = 8M ;greater than upload_max_filesize if used
- precision = 14
- register_argc_argv = Off ;Unused
- register_globals = Off ;Don't care
- safe_mode = Off ;else safe_mode_allowed_env_vars= must allow putenv() to modify 'TZ'
-;set sendmail_* options to your needs
- short_open_tag = Off ;Unused
- track_vars = On ;always enabled as of PHP 4.0.3
- upload_max_filesize = 2M ;if used
- variables_order = EGPCS ;or empty
-[MySQL]
- mysql.allow_persistent = Off ;Unused
- mysql.default_host = ;Unused
- mysql.default_user = ;Unused
- mysql.default_password = ;Unused
- mysql.max_links = -1 ;Unused
- mysql.trace_mode = Off  ; needed for FOUND_ROWS() to work, see config.php ALLOW_SQL_CALC_ROWS
+  IMPORTANT NOTE: safe_mode should be OFF!
 
+  By now, Dragon works with these PHP directives:
+
+     allow_call_time_pass_reference = Off ;Unused
+     allow_url_fopen = Off ;Unused
+     always_populate_raw_post_data = Off ;Unused
+     arg_separator.input = &
+     arg_separator.output = "&amp;" ;or = "&"
+     asp_tags = Off ;Unused
+     default_charset = ;set to empty or commented
+     default_mimetype = "text/html"
+     error_reporting = E_ALL
+     file_uploads = On ;else the pattern upload will be disabled
+     gpc_order = GPC
+     implicit_flush = Off ;Unused
+     magic_quotes_gpc = Off ;Don't care
+     magic_quotes_runtime = Off
+     magic_quotes_sybase = Off
+     max_execution_time = 30 ;except for some rebuilding scripts with large databases
+     memory_limit = 8M
+     output_buffering = Off
+     post_max_size = 8M ;greater than upload_max_filesize if used
+     precision = 14
+     register_argc_argv = Off ;Unused
+     register_globals = Off ;Don't care
+     safe_mode = Off ;else safe_mode_allowed_env_vars= must allow putenv() to modify 'TZ'
+    ;set sendmail_* options to your needs
+     short_open_tag = Off ;Unused
+     track_vars = On ;always enabled as of PHP 4.0.3
+     upload_max_filesize = 2M ;if used
+     variables_order = EGPCS ;or empty
+    [MySQL]
+     mysql.allow_persistent = Off ;Unused
+     mysql.default_host = ;Unused
+     mysql.default_user = ;Unused
+     mysql.default_password = ;Unused
+     mysql.max_links = -1 ;Unused
+     mysql.trace_mode = Off  ; needed for FOUND_ROWS() to work, see config.php ALLOW_SQL_CALC_ROWS
 
 
 * OPTIONAL: for using FreeType-font drawing rating graphs:
@@ -257,6 +271,8 @@ Check and adjust defines in 'include/graph.php':
 
 
 
+
+#--------------------------------------------------------------------
 
 5) Add some cron jobs. These should preferrably be run on a remote machine, so that the
    clock is not running when the network is down.
@@ -275,6 +291,8 @@ Check and adjust defines in 'include/graph.php':
 
 
 
+#--------------------------------------------------------------------
+
 6) Protect the scripts/ folder from outside access:
    The scripts/ folder contains sensible tools reserved to the developers
    or the admins team.
@@ -284,6 +302,8 @@ Check and adjust defines in 'include/graph.php':
 
 
 
+
+#--------------------------------------------------------------------
 
 7) If you have problems you can ask for help in Support forum
    at dragon <http://www.dragongoserver.net>
