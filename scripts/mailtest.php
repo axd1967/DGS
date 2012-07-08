@@ -95,6 +95,7 @@ require_once( "include/form_functions.php" );
       $err = 0;
       foreach( explode( ',', $Email) as $addr )
       {
+         $addr = trim($addr);
          if( verify_invalid_email(false, $addr) )
          {
             echo "<br>bad mail address: ".textarea_safe($addr)."<br>";
