@@ -2407,10 +2407,10 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    return 0; //not found
 } //get_request_user
 
-function who_is_logged( &$player_row, $quick_suite=false )
+function who_is_logged( &$player_row, $quick_suite=false, $skip_update=false )
 {
    global $main_path;
-   $login_opts = LOGIN_DEFAULT_OPTS | ( $quick_suite ? LOGIN_QUICK_SUITE : 0 );
+   $login_opts = LOGIN_DEFAULT_OPTS | ( $quick_suite ? LOGIN_QUICK_SUITE : 0 ) | ( $skip_update ? LOGIN_SKIP_UPDATE : 0 );
    $handle = safe_getcookie('handle');
    $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
@@ -2443,6 +2443,7 @@ define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
 define('LOGIN_QUICK_SUITE', 0x01);
 define('LOGIN_UPD_ACTIVITY', 0x02);
 define('LOGIN_RESET_NOTIFY', 0x04); // set Players.Notify to NONE (nothing to notify, after user checked on GUI)
+define('LOGIN_SKIP_UPDATE',  0x08); // skips update & other checks for Players-table or main-menu; for error-page (to not decrease quota)
 define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
 
 /**
@@ -2457,6 +2458,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 {
    global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax, $is_down;
    $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
+   $skip_update = ($login_opts & LOGIN_SKIP_UPDATE);
 
    $player_row = array( 'ID' => 0 );
 
@@ -2498,7 +2500,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       mysql_free_result($result);
    }
 
-   if( $is_quick_suite ) // NOTE: for now only for quick-suite
+   if( !$skip_update && $is_quick_suite ) // NOTE: for now only for quick-suite
       writeIpStats( ($is_quick_suite ? 'QDO' : 'WEB') );
 
    $uid = (int)@$player_row['ID'];
@@ -2522,13 +2524,13 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    $upd->upd_raw('Hits', 'Hits+1' );
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   if( !$is_quick_suite && $ip && $player_row['IP'] !== $ip )
+   if( !$skip_update && !$is_quick_suite && $ip && $player_row['IP'] !== $ip )
    {
       $upd->upd_txt('IP', $ip );
       $player_row['IP'] = $ip;
    }
 
-   if( !$session_expired )
+   if( !$skip_update && !$session_expired )
    {
       if( $login_opts & LOGIN_UPD_ACTIVITY )
          $upd->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForHit+Activity)" );
@@ -2551,7 +2553,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    }
 
    $vaultcnt= true; //no vault for anonymous or if disabled or if server-down
-   if( !$is_down && VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
+   if( !$is_down && !$skip_update && VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
    {
       $vaultcnt = (int)@$player_row['VaultCnt'];
       $vaulttime = @$player_row['X_VaultTime'];
@@ -2597,15 +2599,18 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       $player_row['X_VaultTime'] = $vaulttime;
    }//fever-fault check
 
-   // DST-check if the player's clock need an adjustment from/to summertime
-   if( $player_row['ClockChanged'] != 'Y' && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
-      $upd->upd_bool('ClockChanged', true ); // ClockUsed is updated once a day...
+   if( !$skip_update )
+   {
+      // DST-check if the player's clock need an adjustment from/to summertime
+      if( $player_row['ClockChanged'] != 'Y' && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
+         $upd->upd_bool('ClockChanged', true ); // ClockUsed is updated once a day...
+   }
 
    if( $is_down )
       check_maintenance( @$player_row['Handle'] ); // revoke is_down for maintenance-users
 
    // check aggregated counts
-   if( !$is_down && !$is_quick_suite )
+   if( !$is_down && !$is_quick_suite && !$skip_update )
    {
       $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
       if( $count_msg_new >= 0 )
@@ -2633,8 +2638,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    }
 
 
-   //$updok will be false if server is down, or an error occurs and error() is set to 'no exit'
-   if( $is_down )
+   // $updok will be false if server is down, or skip-update-option is enabled, or an error occurs and error() is set to 'no exit'
+   if( $is_down || $skip_update )
       $updok = false;
    else
    {
@@ -2671,7 +2676,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 */
    }
 
-   if( $session_expired || !$updok )
+   if( $session_expired || ( !$skip_update && !$updok ) )
    {
       $player_row['ID'] = 0;
       return 0;
