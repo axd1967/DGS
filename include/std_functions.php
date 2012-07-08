@@ -2518,32 +2518,33 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    $session_expired= ( $player_row['Sessioncode'] != $scode || $player_row['Expire'] < $NOW );
 
-   $query = "UPDATE Players SET Hits=Hits+1";
+   $upd = new UpdateQuery('Players');
+   $upd->upd_raw('Hits', 'Hits+1' );
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
    if( !$is_quick_suite && $ip && $player_row['IP'] !== $ip )
    {
-      $query.= ",IP='$ip'";
+      $upd->upd_txt('IP', $ip );
       $player_row['IP'] = $ip;
    }
 
    if( !$session_expired )
    {
       if( $login_opts & LOGIN_UPD_ACTIVITY )
-         $query .= ",Activity=LEAST($ActivityMax,$ActivityForHit+Activity)";
+         $upd->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForHit+Activity)" );
       if( $login_opts & LOGIN_RESET_NOTIFY )
-         $query .= ",Notify='NONE'";
+         $upd->upd_txt('Notify', 'NONE' );
 
       if( $is_quick_suite )
-         $query .= ",LastQuickAccess=FROM_UNIXTIME($NOW)";
+         $upd->upd_time('LastQuickAccess');
       else
       {
-         $query .= ",Lastaccess=FROM_UNIXTIME($NOW)";
+         $upd->upd_time('Lastaccess');
 
          $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
          if( $player_row['Browser'] !== $browser )
          {
-            $query.= ",Browser='".mysql_addslashes($browser)."'";
+            $upd->upd_txt('Browser', $browser );
             $player_row['Browser'] = $browser;
          }
       }
@@ -2560,20 +2561,20 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       {
          $vaultcnt = ( $uid > GUESTS_ID_MAX ) ? VAULT_CNT : VAULT_CNT_X; //multi-user account?
          $vaulttime = $NOW + VAULT_DELAY;
-         $query .= ",VaultCnt=$vaultcnt" .
-                   ",VaultTime=FROM_UNIXTIME($vaulttime)";
+         $upd->upd_num('VaultCnt', $vaultcnt );
+         $upd->upd_time('VaultTime', $vaulttime );
       } //from here: $NOW < $vaulttime
       else if( $vaultcnt <= 0 ) // inside fever vault?
          $vaultcnt = 0; // stay in fever vault... quota-block in place till expire-date
       elseif( $vaultcnt > 1 ) //measuring fever
-         $query .= ",VaultCnt=" . (--$vaultcnt);
+         $upd->upd_num('VaultCnt', (--$vaultcnt) );
       else //if( $vaulttime == 1 ) // quota up, but not expired (fever too high)
       {
          // enter fever vault... set quota-expire on block-time
          $vaultcnt = 0;
          $vaulttime = $NOW + ( $uid > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ); //multi-user account?
-         $query .= ",VaultCnt=$vaultcnt" .
-                   ",VaultTime=FROM_UNIXTIME($vaulttime)";
+         $upd->upd_num('VaultCnt', $vaultcnt );
+         $upd->upd_time('VaultTime', $vaulttime );
 
          err_log( $handle, 'fever_vault');
 
@@ -2598,7 +2599,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    // DST-check if the player's clock need an adjustment from/to summertime
    if( $player_row['ClockChanged'] != 'Y' && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
-      $query .= ",ClockChanged='Y'"; // ClockUsed is updated once a day...
+      $upd->upd_bool('ClockChanged', true ); // ClockUsed is updated once a day...
 
    if( $is_down )
       check_maintenance( @$player_row['Handle'] ); // revoke is_down for maintenance-users
@@ -2609,8 +2610,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
       if( $count_msg_new >= 0 )
       {
+         $upd->upd_num('CountMsgNew', $count_msg_new );
          $player_row['CountMsgNew'] = $count_msg_new;
-         $query .= ",CountMsgNew=$count_msg_new";
       }
 
       if( ALLOW_FEATURE_VOTE )
@@ -2618,27 +2619,27 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $count_feat_new = count_feature_new( $uid, $player_row['CountFeatNew'] );
          if( $count_msg_new >= 0 )
          {
+            $upd->upd_num('CountFeatNew', $count_feat_new );
             $player_row['CountFeatNew'] = $count_feat_new;
-            $query .= ",CountFeatNew=$count_feat_new";
          }
       }
 
       $count_bulletin_new = Bulletin::count_bulletin_new( $player_row['CountBulletinNew'] );
       if( $count_bulletin_new >= 0 )
       {
+         $upd->upd_num('CountBulletinNew', $count_bulletin_new );
          $player_row['CountBulletinNew'] = $count_bulletin_new;
-         $query .= ",CountBulletinNew=$count_bulletin_new";
       }
    }
 
 
-   $query.= " WHERE ID=$uid LIMIT 1";
    //$updok will be false if server is down, or an error occurs and error() is set to 'no exit'
    if( $is_down )
       $updok = false;
    else
    {
-      $updok = db_query( "is_logged_in.update_player($uid)", $query );
+      $updok = db_query( "is_logged_in.update_player($uid)",
+         "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$uid LIMIT 1" );
       if( @mysql_affected_rows() != 1 )
          $updok = false;
    }
