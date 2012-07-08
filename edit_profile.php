@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( 'include/error_codes.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/timezones.php" );
 require_once( "include/countries.php" );
@@ -32,9 +33,9 @@ require_once( 'include/gui_bulletin.php' );
 // {HOSTBASE}edit_profile.php?language=C
 // {HOSTBASE}edit_profile.php?language=en
 
-{
-   // NOTE: using page: change_profile.php
 
+{
+   disable_cache();
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);
@@ -43,29 +44,16 @@ require_once( 'include/gui_bulletin.php' );
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
-   $button_nr = (int)$player_row['Button'];
-   if( !is_numeric($button_nr) || $button_nr < BUTTON_TEXT || $button_nr > $button_max  )
-      $button_nr = 0;
-
-   $notify_msg = array(
-         0 => T_('Off'),
-         1 => T_('Notify only'),
-         2 => T_('Moves and messages'),
-         3 => T_('Full board and messages'),
-      );
-
-   $menu_directions = array(
-         'VERTICAL'   => sptext(T_('Vertical'),2),
-         'HORIZONTAL' => sptext(T_('Horizontal')),
-      );
+/* Actual REQUEST calls used:
+     save                  : save profile
+*/
 
 
-   $nightstart = array();
-   for($i=0; $i<24; $i++)
-      $nightstart[$i] = sprintf('%02d-%02d',$i,($i+NIGHT_LEN)%24);
+   // ----- init globals ---------------------------------
 
-   $stonesizes = array_value_to_key_and_value(
-      array( 5, 7, 9, 11, 13, 17, 21, 25, 29, 35, 42, 50 ) );
+   include_once( 'skins/known_skins.php' );
+   $arr_timezones = get_timezone_array();
+   $stonesizes = array_value_to_key_and_value( array( 5, 7, 9, 11, 13, 17, 21, 25, 29, 35, 42, 50 ) );
 
    $woodcolors = array();
    for($i=1; $i<16; $i++ )
@@ -80,6 +68,42 @@ require_once( 'include/gui_bulletin.php' );
          $woodcolors[$i] = sptext($tmp,2);
    }
 
+   $notescutoffs = array();
+   for( $i=5; $i<26; $i++ ) $notescutoffs[$i] = $i;
+
+   $notesheights = array();
+   for( $i=5; $i<26; $i++ ) $notesheights[$i] = $i;
+
+   $noteswidths = array();
+   for( $i=15; $i<105; $i+=5 ) $noteswidths[$i] = $i;
+
+
+   // ----- actions (check & save) -----------------------
+
+   // read defaults for vars, and parse & check posted values
+   list( $vars, $errors ) = parse_edit_form( $cfg_board );
+
+   if( @$_REQUEST['save'] && count($errors) == 0 )
+      handle_save_profile( $cfg_board, $vars );
+
+
+   // ----- init form-data -------------------------------
+
+   $notify_msg = array(
+         0 => T_('Off'),
+         1 => T_('Notify only'),
+         2 => T_('Moves and messages'),
+         3 => T_('Full board and messages'),
+      );
+
+   $menu_directions = array(
+         'VERTICAL'   => sptext(T_('Vertical'),2),
+         'HORIZONTAL' => sptext(T_('Horizontal')),
+      );
+
+   $nightstart = array();
+   for( $i=0; $i<24; $i++ ) $nightstart[$i] = sprintf('%02d-%02d',$i,($i+NIGHT_LEN)%24);
+
    $countries = getCountryText();
    asort($countries);
    array_unshift($countries, '');
@@ -91,82 +115,67 @@ require_once( 'include/gui_bulletin.php' );
       $langs['N'] = /**T_**/('Native texts'); // pseudo-language, that shows original texts
    $langs['C'] = T_('Use browser settings');
 
-   $notesheights = array();
-   for($i=5; $i<26; $i++ )
-      $notesheights[$i] = $i;
-
-   $noteswidths = array();
-   for($i=15; $i<105; $i+=5 )
-      $noteswidths[$i] = $i;
-
    $notesmodes = array('RIGHT' => sptext(T_('Right'),2),
                        'BELOW' => sptext(T_('Below'),2));
-
-   $notescutoffs = array();
-   for($i=5; $i<26; $i++ )
-      $notescutoffs[$i] = $i;
-
-   include_once( 'skins/known_skins.php' );
-//   $known_skins = array('dragon' => 'Dragon Go Server original');
 
    $tablemaxrows = build_maxrows_array(0, MAXROWS_PER_PAGE_PROFILE); // array( 10 => 10, ...)
 
 
-//------------
+   // ----- start-page -------------------------
 
    start_page(T_("Edit profile"), true, $logged_in, $player_row );
 
-   $profile_form = new Form( 'profileform', 'change_profile.php', FORM_GET );
+   $profile_form = new Form( 'profileform', 'edit_profile.php', FORM_GET );
 
 
    $profile_form->add_row( array( 'HEADER', T_('Personal settings') ) );
 
+   if( count($errors) )
+   {
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Error'),
+            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
+      $profile_form->add_empty_row();
+   }
+
    $profile_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                                  'TEXT', $player_row["Handle"] ) );
+                                  'TEXT', $player_row['Handle'] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                                  'TEXTINPUT', 'name', 32, 40, $player_row["Name"] ) );
+                                  'TEXTINPUT', 'name', 32, 40, $vars['name'] ) );
    $profile_form->add_row( array( 'DESCRIPTION', T_('Open for matches?'),
-                                  'TEXTINPUT', 'open', 32, 60, $player_row["Open"] ) );
+                                  'TEXTINPUT', 'open', 32, 60, $vars['open'] ) );
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Country'),
-         'SELECTBOX', 'country', 1, $countries, $player_row["Country"], false ));
+         'SELECTBOX', 'country', 1, $countries, $vars['country'], false ));
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Language'),
-         'SELECTBOX', 'language', 1, array_reverse($langs), $player_row['Lang'], false ) );
+         'SELECTBOX', 'language', 1, array_reverse($langs), $vars['language'], false ) );
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Timezone'),
-         'SELECTBOX', 'timezone', 1, get_timezone_array(), $player_row['Timezone'], false ) );
+         'SELECTBOX', 'timezone', 1, $arr_timezones, $vars['timezone'], false ) );
    if( NIGHT_LEN % 24 )
       $profile_form->add_row( array(
             'DESCRIPTION', T_('Nighttime'),
-            'SELECTBOX', 'nightstart', 1, $nightstart, $player_row['Nightstart'], false ) );
+            'SELECTBOX', 'nightstart', 1, $nightstart, (int)$vars['night_start'], false ) );
    else
-      $profile_form->add_row( array( 'HIDDEN', 'nightstart', $player_row['Nightstart'] ) );
-
-   if( strpos($player_row["SendEmail"], 'BOARD') !== false )
-      $notify_msg_idx = 3;
-   elseif( strpos($player_row["SendEmail"], 'MOVE') !== false )
-      $notify_msg_idx = 2;
-   elseif( strpos($player_row["SendEmail"], 'ON') !== false )
-      $notify_msg_idx = 1;
-   else
-      $notify_msg_idx = 0;
+      $profile_form->add_row( array( 'HIDDEN', 'nightstart', (int)$vars['night_start'] ) );
 
    $profile_form->add_empty_row();
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Email notifications'),
-         'SELECTBOX', 'emailnotify', 1, $notify_msg, $notify_msg_idx, false ) );
+         'SELECTBOX', 'emailnotify', 1, $notify_msg, (int)$vars['gui:email_notify'], false ) );
    $row = array(
          'DESCRIPTION', T_('Email'),
-         'TEXTINPUT', 'email', 32, 80, $player_row['Email'] );
-   if( !trim($player_row['Email']) )
+         'TEXTINPUT', 'email', 32, 80, $vars['email'] );
+   if( !$vars['email'] )
       array_push( $row,
             'TEXT', span('FormWarning', T_('Must be filled to receive a new password or a notification')) );
-   $profile_form->add_row( $row);
+   $profile_form->add_row($row);
 
-   $skipbull = (int)@$player_row['SkipBulletin'];
+
+   $skipbull = (int)$vars['skip_bulletin'];
    $profile_form->add_empty_row();
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Show Bulletin Categories'),
@@ -182,7 +191,7 @@ require_once( 'include/gui_bulletin.php' );
          'TAB', 'CHECKBOX', 'skipbull'.BULLETIN_SKIPCAT_SPAM, 1,
             GuiBulletin::getCategoryText(BULLETIN_CAT_SPAM), !($skipbull & BULLETIN_SKIPCAT_SPAM) ));
 
-   $reject_timeout = (int)@$player_row['RejectTimeoutWin'];
+   $reject_timeout = (int)@$vars['reject_timeout'];
    $profile_form->add_empty_row();
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Reject win by timeout'),
@@ -195,6 +204,7 @@ require_once( 'include/gui_bulletin.php' );
          'TAB', 'TEXTINPUT', 'rwt_days', 5, 3, ($reject_timeout >= 0 ? $reject_timeout : ''),
          'TEXT', sprintf(' (0..%s) %s', MAX_REJECT_TIMEOUT, T_('days (minimum) the loser has not moved in any game#rwt')), ));
 
+
    //--- Followings may be browser settings ---
 
    $profile_form->add_row( array( 'SPACE' ) );
@@ -205,13 +215,13 @@ require_once( 'include/gui_bulletin.php' );
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Table max rows'),
-         'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows, $player_row['TableMaxRows'], false,
+         'SELECTBOX', 'tablemaxrows', 1, $tablemaxrows, (int)$vars['table_maxrows'], false,
          'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
       ));
 
    if( ALLOW_JAVASCRIPT )
    {
-      $userflags = (int)$player_row['UserFlags'];
+      $userflags = (int)$vars['user_flags'];
       $profile_form->add_row( array(
             'DESCRIPTION', T_('Enable JavaScript'),
             'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
@@ -222,18 +232,19 @@ require_once( 'include/gui_bulletin.php' );
    {
       $profile_form->add_row( array(
             'DESCRIPTION', T_('Skin'),
-            'SELECTBOX', 'skinname', 1, $known_skins, $player_row['SkinName'], false ) );
+            'SELECTBOX', 'skinname', 1, $known_skins, $vars['skin_name'], false ) );
    }
    else
-      $profile_form->add_row( array( 'HIDDEN', 'skinname', 'dragon'));
+      $profile_form->add_row( array( 'HIDDEN', 'skinname', /*default*/'dragon'));
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Menu direction'),
-         'RADIOBUTTONS', 'menudir', $menu_directions, $player_row["MenuDirection"] ) );
+         'RADIOBUTTONS', 'menudir', $menu_directions, $vars['menu_direction'] ) );
 
 
+   $button_nr = (int)$vars['button'];
    $button_code  = "\n<table class=\"EditProfilButtons\"><tr>";
-   for( $i=0; $i<=$button_max; $i++ )
+   for( $i=0; $i < BUTTON_MAX; $i++ )
    {
       if( $i % 4 == 0 )
       {
@@ -261,13 +272,13 @@ require_once( 'include/gui_bulletin.php' );
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Stone size'),
-         'SELECTBOX', 'stonesize', 1, $stonesizes, $cfg_board->get_stone_size(), false ) );
+         'SELECTBOX', 'stonesize', 1, $stonesizes, (int)$vars['stone_size'], false ) );
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Wood color'),
-         'RADIOBUTTONS', 'woodcolor', $woodcolors, $cfg_board->get_wood_color() ) );
+         'RADIOBUTTONS', 'woodcolor', $woodcolors, (int)$vars['wood_color'] ) );
 
-   $boardcoords = $cfg_board->get_board_coords();
+   $boardcoords = (int)$vars['board_coords'];
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Smooth board edge'),
@@ -276,68 +287,61 @@ require_once( 'include/gui_bulletin.php' );
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Coordinate sides'),
-         'CHECKBOX', 'coordsleft', 1, sptext(T_('Left'),2), ($boardcoords & COORD_LEFT),
-         'CHECKBOX', 'coordsup', 1, sptext(T_('Up'),2), ($boardcoords & COORD_UP),
+         'CHECKBOX', 'coordsleft',  1, sptext(T_('Left'),2),  ($boardcoords & COORD_LEFT),
+         'CHECKBOX', 'coordsup',    1, sptext(T_('Up'),2),    ($boardcoords & COORD_UP),
          'CHECKBOX', 'coordsright', 1, sptext(T_('Right'),2), ($boardcoords & COORD_RIGHT),
-         'CHECKBOX', 'coordsdown', 1, sptext(T_('Down'),2), ($boardcoords & COORD_DOWN),
+         'CHECKBOX', 'coordsdown',  1, sptext(T_('Down'),2),  ($boardcoords & COORD_DOWN),
       ));
 
    $row = array(
          'TAB',
-         'CHECKBOX', 'coordsover', 1, sptext(T_('Hover (show coordinates)'),2),
-               ($boardcoords & COORD_OVER),
+         'CHECKBOX', 'coordsover', 1, sptext(T_('Hover (show coordinates)'),2), ($boardcoords & COORD_OVER),
       );
    if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+   {
       array_push( $row,
-         'CHECKBOX', 'coordssgfover', 1, sprintf( '<span class="AdminOption">%s</span>',
-                  sptext(T_('SGF Hover (show SGF coordinates)'))),
+         'CHECKBOX', 'coordssgfover', 1,
+               sprintf( '<span class="AdminOption">%s</span>', sptext(T_('SGF Hover (show SGF coordinates)'))),
                ($boardcoords & COORD_SGFOVER) );
+   }
    $profile_form->add_row( $row);
 
+   $board_flags = (int)$vars['board_flags'];
    if( ENA_MOVENUMBERS )
    {
       $profile_form->add_row( array(
             'DESCRIPTION', T_('Move numbering'),
-            'TEXTINPUT', 'movenumbers', 4, 4, $cfg_board->get_move_numbers(),
-            'CHECKBOX', 'movemodulo', 100, sptext(T_('Don\'t use numbers above 100'),2),
-                        ( ($cfg_board->get_move_modulo() > 0) ? 1 :0),
-            'CHECKBOX', 'numbersover', 1, sptext(T_('Show numbers only on Hover')),
-                  ($boardcoords & NUMBER_OVER),
+            'TEXTINPUT', 'movenumbers', 4, 4, (int)$vars['move_numbers'],
+            'CHECKBOX', 'movemodulo', 100, sptext(T_('Don\'t use numbers above 100'),2), (bool)$vars['move_modulo'],
+            'CHECKBOX', 'numbersover', 1, sptext(T_('Show numbers only on Hover')), ($boardcoords & NUMBER_OVER),
          ));
 
       $profile_form->add_row( array(
             'TAB',
-            'CHECKBOX', 'coordsrelnum', 1, sptext(T_('Relative numbering'),2),
-                  ($boardcoords & COORD_RELATIVE_MOVENUM),
-            'CHECKBOX', 'coordsrevnum', 1, sptext(T_('Reverse numbering'),2),
-                  ($boardcoords & COORD_REVERSE_MOVENUM),
+            'CHECKBOX', 'coordsrelnum', 1, sptext(T_('Relative numbering'),2), ($boardcoords & COORD_RELATIVE_MOVENUM),
+            'CHECKBOX', 'coordsrevnum', 1, sptext(T_('Reverse numbering'),2),  ($boardcoords & COORD_REVERSE_MOVENUM),
          ));
 
-      $board_flags = $cfg_board->get_board_flags();
       $profile_form->add_row( array(
             'TAB',
-            'CHECKBOX', 'bfl_mark_lc', 1, sptext(T_('Mark Last Move Capture'),2),
-                  ($board_flags & BOARDFLAG_MARK_LAST_CAPTURE),
+            'CHECKBOX', 'bfl_mark_lc', 1, sptext(T_('Mark Last Move Capture'),2), ($board_flags & BOARDFLAG_MARK_LAST_CAPTURE),
          ));
    }
    else
    {
       $profile_form->add_row( array(
             'DESCRIPTION', T_('Move marker'),
-            'CHECKBOX', 'bfl_mark_lc', 1, sptext(T_('Mark Last Move Capture'),2),
-                  ($board_flags & BOARDFLAG_MARK_LAST_CAPTURE),
+            'CHECKBOX', 'bfl_mark_lc', 1, sptext(T_('Mark Last Move Capture'),2), ($board_flags & BOARDFLAG_MARK_LAST_CAPTURE),
          ));
    }
 
 
    $profile_form->add_row( array( 'HEADER', T_('Private game notes') ) );
 
-   foreach( array( 'Small', 'Large') as $typ )
+   foreach( array( 'small', 'large') as $ltyp )
    {
-      $ltyp = strtolower($typ) ;
       if( $ltyp == 'small' )
       {
-         $cfg_type = CFGBOARD_NOTES_SMALL;
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_('Small boards') . ':</b>',
                'TAB',
@@ -345,19 +349,19 @@ require_once( 'include/gui_bulletin.php' );
       }
       else
       {
-         $cfg_type = CFGBOARD_NOTES_LARGE;
          $profile_form->add_row( array(
                'TEXT', '<b>' . T_("Large boards from") . ':</b>',
-               'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, $cfg_board->get_notes_cutoff(), false,
+               'TD', 'SELECTBOX', 'notescutoff', 1, $notescutoffs, (int)$vars['notes_cutoff'], false,
             ));
       }
 
-      $notesmode = $cfg_board->get_notes_mode( $cfg_type );
-      $noteshide = substr( $notesmode, -3) == 'OFF';
+      $notesmode = $vars['notes_mode_'.$ltyp];
+      $noteshide = ( substr( $notesmode, -3) == 'OFF' );
       if( $noteshide )
          $notesmode = substr( $notesmode, 0, -3);
       if( $notesmode != 'BELOW' )
          $notesmode = 'RIGHT';
+
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Position'),
                'RADIOBUTTONS', "notes{$ltyp}mode", $notesmodes, $notesmode,
@@ -368,9 +372,9 @@ require_once( 'include/gui_bulletin.php' );
       $profile_form->add_row( array(
                'DESCRIPTION', T_('Size'),
                'TEXT', sptext(T_('Height')),
-               'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, $cfg_board->get_notes_height($cfg_type), false,
+               'SELECTBOX', "notes{$ltyp}height", 1, $notesheights, (int)$vars['notes_height_'.$ltyp], false,
                'TEXT', sptext(T_('Width'),1),
-               'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, $cfg_board->get_notes_width($cfg_type), false,
+               'SELECTBOX', "notes{$ltyp}width", 1, $noteswidths, (int)$vars['notes_width_'.$ltyp], false,
             ));
    }
 
@@ -389,7 +393,7 @@ require_once( 'include/gui_bulletin.php' );
    $profile_form->add_empty_row();
 
    $profile_form->add_row( array(
-         'SUBMITBUTTONX', 'action', T_('Change profile'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ), ));
+         'SUBMITBUTTONX', 'save', T_('Change profile'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ), ));
    $profile_form->add_empty_row();
 
    $profile_form->echo_string(1);
@@ -404,5 +408,379 @@ require_once( 'include/gui_bulletin.php' );
    $menu_array[T_('Edit message folders')] = 'edit_folders.php';
 
    end_page(@$menu_array);
-}
+}//main
+
+
+
+// return ( vars, error-list ) with $vars containing default or changed profile-values
+function parse_edit_form( &$cfg_board )
+{
+   global $player_row, $arr_timezones, $known_skins, $stonesizes, $woodcolors, $notesheights, $notescutoffs, $noteswidths;
+
+   // set defaults
+   $vars = array(
+      'name'               => $player_row['Name'],
+      'open'               => $player_row['Open'],
+      'country'            => $player_row['Country'],
+      'language'           => $player_row['Lang'],
+      'timezone'           => $player_row['Timezone'],
+      'night_start'        => (int)$player_row['Nightstart'],
+      'db:clock_changed'   => false,
+      'gui:email_notify'   => 0,
+      'send_email'         => $player_row['SendEmail'], // db-value
+      'email'              => $player_row['Email'],
+      'skip_bulletin'      => (int)$player_row['SkipBulletin'],
+      'reject_timeout'     => (int)$player_row['RejectTimeoutWin'],
+      // appearance
+      'table_maxrows'      => (int)$player_row['TableMaxRows'],
+      'user_flags'         => (int)$player_row['UserFlags'],
+      'skin_name'          => $player_row['SkinName'],
+      'menu_direction'     => $player_row['MenuDirection'],
+      'button'             => $player_row['Button'],
+      // board graphics
+      'stone_size'         => $cfg_board->get_stone_size(),
+      'wood_color'         => $cfg_board->get_wood_color(),
+      'board_coords'       => $cfg_board->get_board_coords(),
+      'move_numbers'       => $cfg_board->get_move_numbers(),
+      'move_modulo'        => $cfg_board->get_move_modulo(),
+      'board_flags'        => $cfg_board->get_board_flags(),
+      // game notes
+      'notes_cutoff'       => $cfg_board->get_notes_cutoff(),
+      'notes_mode_small'   => $cfg_board->get_notes_mode( CFGBOARD_NOTES_SMALL ),
+      'notes_mode_large'   => $cfg_board->get_notes_mode( CFGBOARD_NOTES_LARGE ),
+      'notes_height_small' => $cfg_board->get_notes_height( CFGBOARD_NOTES_SMALL ),
+      'notes_height_large' => $cfg_board->get_notes_height( CFGBOARD_NOTES_LARGE ),
+      'notes_width_small'  => $cfg_board->get_notes_width( CFGBOARD_NOTES_SMALL ),
+      'notes_width_large'  => $cfg_board->get_notes_width( CFGBOARD_NOTES_LARGE ),
+   );
+
+   // parse mail-notification for GUI
+   $send_email = $player_row['SendEmail'];
+   if( strpos($send_email, 'BOARD') !== false )
+      $notify_msg_idx = 3;
+   elseif( strpos($send_email, 'MOVE') !== false )
+      $notify_msg_idx = 2;
+   elseif( strpos($send_email, 'ON') !== false )
+      $notify_msg_idx = 1;
+   else
+      $notify_msg_idx = 0;
+   $vars['gui:email_notify'] = $notify_msg_idx;
+
+
+   // parse URL-vars from form-submit
+   $errors = array();
+   if( @$_REQUEST['save'] )
+   {
+      $name = trim(get_request_arg('name')) ;
+      if( strlen($name) < 1 )
+         $errors[] = ErrorCode::get_error_text('name_not_given');
+      else
+         $vars['name'] = $name;
+
+      $vars['open'] = trim(get_request_arg('open'));
+
+      $country = trim(get_request_arg('country')) ;
+      if( empty($country) )
+         $vars['country'] = '';
+      elseif( getCountryText($country) )
+         $vars['country'] = $country;
+
+      /* Because $_REQUEST['language'] is chosen prior $player_row['Lang']
+         by include_translate_group(), this page use it for its translations
+         (see the sysmsg displayed in the next page)
+         This allow sysmsg to be translated in the right *future* language ...
+         ... and some debug with a temporary page translation via the URL.
+      */
+      $language = trim(get_request_arg('language'));
+      if( $language === 'C'
+            || ( $language === 'N' && @$player_row['Translator'] )
+            || ( $language !== $player_row['Lang'] && language_exists($language) ) )
+      {
+         $vars['language'] = $language;
+      }
+
+      $timezone = get_request_arg('timezone');
+      if( !isset($arr_timezones[$timezone]) )
+         $errors[] = sprintf( T_('Invalid timezone [%s] selected#profile'), $timezone );
+      else
+         $vars['timezone'] = $timezone;
+
+      $nightstart = mod( (int)@$_REQUEST['nightstart'], 24);
+      if( $nightstart != $player_row['Nightstart'] || $timezone != $player_row['Timezone'] )
+      {
+         $vars['db:clock_changed'] = true;
+         // ClockUsed is updated only once a day to prevent eternal night...
+         // setTZ( $timezone); //for get_clock_used()
+         // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
+      }
+      $vars['nightstart'] = $nightstart;
+
+      $email = trim(get_request_arg('email'));
+      if( $email )
+      {
+         $email_error = verify_invalid_email(false, $email, /*err-die*/false );
+         if( $email_error )
+            $errors[] = ErrorCode::get_error_text($email_error);
+      }
+      $vars['email'] = $email;
+
+      $emailnotify = (int)@$_REQUEST['emailnotify'];
+      if( $emailnotify < 0 )
+         $emailnotify = 0;
+      elseif( $emailnotify > 3 )
+         $emailnotify = 3;
+      if( !empty($email) && $emailnotify >= 1 )
+      {
+         $sendemail = 'ON';
+         if( $emailnotify >= 2 ) // BOARD also includes moves+message
+         {
+            $sendemail .= ',MOVE,MESSAGE';
+            if( $emailnotify >= 3 )
+               $sendemail .= ',BOARD';
+         }
+      }
+      else
+         $sendemail = '';
+      $vars['gui:email_notify'] = $emailnotify;
+      $vars['send_email'] = $sendemail;
+
+      $skipbulletin = 0;
+      foreach( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_FEATURE, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
+         $skipbulletin |= ( !@$_REQUEST['skipbull'.$mask] ? $mask : 0 );
+      $vars['skip_bulletin'] = $skipbulletin;
+
+      if( @$_REQUEST['rwt_enable'] )
+      {
+         $reject_timeout = trim(get_request_arg('rwt_days'));
+         if( !is_numeric($reject_timeout) )
+         {
+            $errors[] = sprintf( T_('Corrected invalid days [%s] for reject win by timeout.#profile'), $reject_timeout);
+            $reject_timeout = -1;
+         }
+         elseif( $reject_timeout < 0 )
+            $reject_timeout = 0;
+         elseif( $reject_timeout > MAX_REJECT_TIMEOUT )
+         {
+            $errors[] = sprintf( T_('Corrected days [%s] (too large) for reject win by timeout.#profile'), $reject_timeout);
+            $reject_timeout = MAX_REJECT_TIMEOUT;
+         }
+      }
+      else
+         $reject_timeout = -1;
+      $vars['reject_timeout'] = $reject_timeout;
+
+
+      // parse appearance prefs ---------------------------------------
+
+      $vars['table_maxrows'] = get_maxrows(
+         get_request_arg('tablemaxrows'),
+         MAXROWS_PER_PAGE_PROFILE, MAXROWS_PER_PAGE_DEFAULT );
+
+      $user_flags = $vars['user_flags']; // preserve other user-flags
+      if( ALLOW_JAVASCRIPT )
+      {
+         if( @$_REQUEST['jsenable'] )
+            $user_flags |= USERFLAG_JAVASCRIPT_ENABLED;
+         else
+            $user_flags &= ~USERFLAG_JAVASCRIPT_ENABLED;
+      }
+      $vars['user_flags'] = $user_flags;
+
+
+      $skin_name = get_request_arg('skinname', 'dragon');
+      if( !isset($known_skins[$skin_name]) )
+         $errors[] = sprintf( T_('Unknown skin [%s] selected#profile'), $skin_name );
+      $vars['skin_name'] = $skin_name;
+
+      $vars['menu_direction'] = ( @$_REQUEST['menudir'] == 'HORIZONTAL' ) ? 'HORIZONTAL' : 'VERTICAL';
+
+      $button_nr = (int)@$_REQUEST['button'];
+      if( !is_valid_button($button_nr) )
+         $button_nr = 0;
+      $vars['button'] = $button_nr;
+
+
+      // parse board prefs --------------------------------------------
+
+      $stone_size = (int)@$_REQUEST['stonesize'];
+      if( !isset($stonesizes[$stone_size]) )
+      {
+         $errors[] = sprintf( T_('Invalid stone size [%s] selected (corrected to default).#profile'), $stone_size );
+         $stone_size = 25;
+      }
+      $vars['stone_size'] = $stone_size;
+
+      $wood_color = (int)@$_REQUEST['woodcolor'];
+      if( !isset($woodcolors[$wood_color]) )
+      {
+         $errors[] = T_('Invalid wood color selected (corrected to default).#profile');
+         $wood_color = 1;
+      }
+      $vars['wood_color'] = $wood_color;
+
+      $vars['board_coords'] =
+             ( @$_REQUEST['coordsleft']  ? COORD_LEFT : 0 )
+           | ( @$_REQUEST['coordsup']    ? COORD_UP : 0 )
+           | ( @$_REQUEST['coordsright'] ? COORD_RIGHT : 0 )
+           | ( @$_REQUEST['coordsdown']  ? COORD_DOWN : 0 )
+           | ( @$_REQUEST['coordsover']    ? COORD_OVER : 0 )
+           | ( @$_REQUEST['coordssgfover'] ? COORD_SGFOVER : 0 )
+           | ( @$_REQUEST['numbersover']   ? NUMBER_OVER : 0 )
+           | ( ( @$_REQUEST['smoothedge'] && ($wood_color < 10) ) ? SMOOTH_EDGE : 0 )
+           | ( @$_REQUEST['coordsrelnum'] ? COORD_RELATIVE_MOVENUM : 0 )
+           | ( @$_REQUEST['coordsrevnum'] ? COORD_REVERSE_MOVENUM : 0 )
+           ;
+
+      $movenumbers = (int)@$_REQUEST['movenumbers'];
+      if( $movenumbers < 0 || $movenumbers > 500 )
+         $errors[] = sprintf( T_('Invalid value [%s] for move-numbering used (allowed range is %s..%s).#profile'),
+            $movenumbers, 0, 500 );
+      $vars['move_numbers'] = $movenumbers;
+
+      $vars['move_modulo'] = ( (int)@$_REQUEST['movemodulo'] ) ? 100 : 0;
+
+      $vars['board_flags'] = ( @$_REQUEST['bfl_mark_lc'] ? BOARDFLAG_MARK_LAST_CAPTURE : 0 );
+
+
+      // parse private game notes -------------------------------------
+
+      $notes_cutoff = (int)@$_REQUEST['notescutoff'];
+      if( !isset($notescutoffs[$notes_cutoff]) )
+      {
+         $errors[] = T_('Invalid notes cut-off size selected to separate "small" from "large" boards (corrected to default).#profile');
+         $notes_cutoff = 13;
+      }
+      $vars['notes_cutoff'] = $notes_cutoff;
+
+      foreach( array( 'small', 'large') as $ltyp )
+      {
+         $mode = strtoupper(@$_REQUEST["notes{$ltyp}mode"]);
+         if( $mode != 'BELOW' )
+            $mode = 'RIGHT';
+         if( @$_REQUEST["notes{$ltyp}hide"] )
+            $mode .= 'OFF';
+         $vars['notes_mode_'.$ltyp] = $mode;
+
+         $height = (int)@$_REQUEST["notes{$ltyp}height"];
+         if( !isset($notesheights[$height]) )
+         {
+            $errors[] = ($ltyp == 'small')
+                ? T_('Invalid notes-height for small boards selected (corrected to default).#profile')
+                : T_('Invalid notes-height for large boards selected (corrected to default).#profile');
+            $height = 25;
+         }
+         $vars['notes_height_'.$ltyp] = $height;
+
+         $width = (int)@$_REQUEST["notes{$ltyp}width"];
+         if( !isset($noteswidths[$width]) )
+         {
+            $errors[] = ($ltyp == 'small')
+                ? T_('Invalid notes-width for small boards selected (corrected to default).#profile')
+                : T_('Invalid notes-width for large boards selected (corrected to default).#profile');
+            $width = 40;
+         }
+         $vars['notes_width_'.$ltyp]  = $width;
+      }
+   }//is_save
+
+   return array( $vars, $errors );
+}//parse_edit_form
+
+
+// save profile-data $nval into database and jumps to user-info-page
+function handle_save_profile( &$cfg_board, $nval )
+{
+   global $player_row;
+
+   $my_id = $player_row['ID'];
+   if( $my_id <= GUESTS_ID_MAX )
+      error('not_allowed_for_guest', 'edit_profile.handle_save_profile');
+
+   $upd = new UpdateQuery('Players');
+   $upd->upd_txt('Name', $nval['name'] );
+   $upd->upd_txt('Open', $nval['open'] );
+   $upd->upd_txt('Country', $nval['country'] );
+   $upd->upd_txt('Lang', $nval['language'] );
+   $upd->upd_txt('Timezone', $nval['timezone'] );
+   $upd->upd_num('Nightstart', (int)$nval['night_start'] );
+   if( $nval['db:clock_changed'] )
+      $upd->upd_bool('ClockChanged', true );
+   $upd->upd_txt('SendEmail', $nval['send_email'] );
+   $upd->upd_txt('Email', $nval['email'] );
+   $upd->upd_num('SkipBulletin', (int)$nval['skip_bulletin'] );
+   if( (int)@$player_row['Skipbulletin'] != $nval['skip_bulletin'] ) // reset bulletin-count
+      $upd->upd_num('CountBulletinNew', -1 );
+   $upd->upd_num('RejectTimeoutWin', (int)$nval['reject_timeout'] );
+
+   if( @$_REQUEST['locally'] == 1 ) // only set in browser
+   {
+      // adjust $cookie_pref_rows too
+      $cookie_prefs['TableMaxRows'] = (int)$nval['table_maxrows'];
+      $cookie_prefs['UserFlags'] = (int)$nval['user_flags'];
+      $cookie_prefs['SkinName'] = $nval['skin_name'];
+      $cookie_prefs['MenuDirection'] = $nval['menu_direction'];
+      $cookie_prefs['Button'] = (int)$nval['button'];
+
+      // board-prefs
+      $cookie_prefs['Stonesize']   = (int)$nval['stone_size'];
+      $cookie_prefs['Woodcolor']   = (int)$nval['wood_color'];
+      $cookie_prefs['BoardFlags']  = (int)$nval['board_flags'];
+      $cookie_prefs['Boardcoords'] = (int)$nval['board_coords'];
+      $cookie_prefs['MoveNumbers'] = (int)$nval['move_numbers'];
+      $cookie_prefs['MoveModulo']  = (int)$nval['move_modulo'];
+      $cookie_prefs['NotesCutoff']      = (int)$nval['notes_cutoff'];
+      $cookie_prefs['NotesSmallMode']   = $nval['notes_mode_small'];
+      $cookie_prefs['NotesSmallHeight'] = (int)$nval['notes_height_small'];
+      $cookie_prefs['NotesSmallWidth']  = (int)$nval['notes_width_small'];
+      $cookie_prefs['NotesLargeMode']   = $nval['notes_mode_large'];
+      $cookie_prefs['NotesLargeHeight'] = (int)$nval['notes_height_large'];
+      $cookie_prefs['NotesLargeWidth']  = (int)$nval['notes_width_large'];
+
+      set_cookie_prefs($player_row);
+      $save_config_board = false;
+   }
+   else // save into db
+   {
+      $upd->upd_num('TableMaxRows', (int)$nval['table_maxrows'] );
+      $upd->upd_num('UserFlags', (int)$nval['user_flags'] );
+      $upd->upd_txt('SkinName', $nval['skin_name'] );
+      $upd->upd_txt('MenuDirection', $nval['menu_direction'] );
+      $upd->upd_num('Button', (int)$nval['button'] );
+
+      // board-prefs
+      $cfg_board->set_stone_size(   (int)$nval['stone_size'] );
+      $cfg_board->set_wood_color(   (int)$nval['wood_color'] );
+      $cfg_board->set_board_flags(  (int)$nval['board_flags'] );
+      $cfg_board->set_board_coords( (int)$nval['board_coords'] );
+      $cfg_board->set_move_numbers( (int)$nval['move_numbers'] );
+      $cfg_board->set_move_modulo(  (int)$nval['move_modulo'] );
+      $cfg_board->set_notes_cutoff( (int)$nval['notes_cutoff'] );
+      $cfg_board->set_notes_mode(   CFGBOARD_NOTES_SMALL, $nval['notes_mode_small'] );
+      $cfg_board->set_notes_height( CFGBOARD_NOTES_SMALL, (int)$nval['notes_height_small'] );
+      $cfg_board->set_notes_width(  CFGBOARD_NOTES_SMALL, (int)$nval['notes_width_small'] );
+      $cfg_board->set_notes_mode(   CFGBOARD_NOTES_LARGE, $nval['notes_mode_large'] );
+      $cfg_board->set_notes_height( CFGBOARD_NOTES_LARGE, (int)$nval['notes_height_large'] );
+      $cfg_board->set_notes_width(  CFGBOARD_NOTES_LARGE, (int)$nval['notes_width_large'] );
+
+      set_cookie_prefs($player_row, true);
+      $save_config_board = true;
+   }
+
+
+   ta_begin();
+   {//HOT-section to update players profile
+      // table (Players)
+      $upd_players_query = "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$my_id LIMIT 1";
+      db_query( "edit_profile.handle_save_profile($my_id)", $upd_players_query );
+
+      // table (ConfigBoard)
+      if( $save_config_board )
+         $cfg_board->update_all();
+   }
+   ta_end();
+
+   $msg = urlencode(T_('Profile updated!'));
+   jump_to("userinfo.php?uid=$my_id".URI_AMP."sysmsg=$msg");
+}//handle_save_profile
+
 ?>

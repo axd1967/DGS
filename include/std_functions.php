@@ -140,14 +140,14 @@ define('MENU_MULTI_SEP', ' / ');
 
 define('BUTTON_WIDTH', 96);
 
-global $button_max, $buttonfiles, $buttoncolors, $woodbgcolors; //PHP5
-$button_max = 11;
+global $buttonfiles, $buttoncolors, $woodbgcolors; //PHP5
 $buttonfiles = array('button0.gif','button1.gif','button2.gif','button3.gif',
                      'button4.gif','button5.gif','button6.gif','button7.gif',
                      'button8.png','button9.png','button10.png','button10.png');
 $buttoncolors = array('white','white','white','white',
                       '#990000','white','white','white',
                       'white','white','white','black');
+define('BUTTON_MAX', count($buttonfiles));
 
 $woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
 
@@ -2480,7 +2480,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
           .",Adminlevel+0 AS admin_level"
-          .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'')
+          .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'') //TODO use X_VaultTime instead
           .',UNIX_TIMESTAMP(LastMove) AS X_LastMove'
           .',UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess'
           .',UNIX_TIMESTAMP(LastQuickAccess) AS X_LastQuickAccess'

@@ -53,12 +53,17 @@ function warning_cell_attb( $title='', $return_array=false )
    return $result;
 }
 
+function is_valid_button( $button_nr )
+{
+   return is_numeric($button_nr) && ($button_nr >= BUTTON_TEXT) && ($button_nr < BUTTON_MAX);
+}
+
 /*! \brief Return the global style part of a table with buttons. */
 function button_style( $button_nr=0 )
 {
-   global $base_path, $button_max, $buttoncolors, $buttonfiles;
+   global $base_path, $buttoncolors, $buttonfiles;
 
-   if( !is_numeric($button_nr) || $button_nr < BUTTON_TEXT || $button_nr > $button_max  )
+   if( !is_valid_button($button_nr) )
       $button_nr = 0;
 
    if( $button_nr == BUTTON_TEXT )
